@@ -3,6 +3,11 @@ variable "cluster_name" {
   default = "piazza"
 }
 
+variable "namespace" {
+  type = string
+  default = "watchman"
+}
+
 
 variable "node_pool" {
   type = string

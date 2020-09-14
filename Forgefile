@@ -1,0 +1,7 @@
+REPO watchman
+
+RECIPE forge/recipe/watchman-gcp.yaml
+DB forge/ops/database.yaml
+
+TF terraform/gcp
+HELM charts/watchman

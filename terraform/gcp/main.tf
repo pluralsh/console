@@ -23,14 +23,8 @@ provider "kubernetes" {
   token = data.google_client_config.current.access_token
 }
 
-resource "null_resource" "node_pool" {
-  triggers = {
-    node_pool = var.node_pool
-  }
-}
-
 resource "google_service_account" "watchman" {
-  account_id = "forge-watchman"
+  account_id = "watchman-admin"
   display_name = "Service account for watchman"
 }
 
@@ -69,7 +63,7 @@ resource "google_project_iam_member" "watchman_storage_admin" {
 resource "kubernetes_secret" "watchman" {
   metadata {
     name = "watchman-credentials"
-    namespace = var.bootstrap_namespace
+    namespace = var.namespace
   }
   data = {
     "gcp.json" = base64decode(google_service_account_key.watchman.private_key)
