@@ -1,0 +1,72 @@
+version: v1.0
+name: watchman
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+blocks:
+- name: test
+  dependencies: []
+  task:
+    secrets:
+    - name: gcp-test
+    jobs:
+    - name: Test
+      commands:
+      - checkout
+      - echo $GOOGLE_APPLICATION_CREDENTIALS > key.json
+      - export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/key.json"
+      - sem-version elixir 1.9.0
+      - make testup
+      - mix local.hex --force
+      - mix local.rebar --force
+
+      - cache restore mix-deps2-$SEMAPHORE_GIT_BRANCH-$(checksum mix.lock),mix-deps2-$SEMAPHORE_GIT_BRANCH,mix-deps2-master
+      - cache restore mix-build2-$SEMAPHORE_GIT_BRANCH-$(checksum mix.lock),mix-build2-$SEMAPHORE_GIT_BRANCH,mix-build2-master
+
+      - mix deps.get
+      - mix test
+
+      - cache store mix-deps2-$SEMAPHORE_GIT_BRANCH-$(checksum mix.lock) deps
+      - cache store mix-build2-$SEMAPHORE_GIT_BRANCH-$(checksum mix.lock) _build
+      - cache store mix-deps2-$SEMAPHORE_GIT_BRANCH deps
+      - cache store mix-build2-$SEMAPHORE_GIT_BRANCH _build
+- name: build
+  dependencies: ['test']
+  skip:
+    when: "branch != 'master'"
+  task:
+    secrets:
+    - name: GCP
+    - name: gcp-test
+    - name: forge
+    prologue:
+      commands:
+      # Authenticate using the file injected from the secret
+      - gcloud auth activate-service-account --key-file=.secrets/gcp-piazzaapp.json
+      # Don't forget -q to silence confirmation prompts
+      - gcloud auth configure-docker -q
+      - docker login -u mguarino46@gmail.com -p $FORGE_ACCESS_TOKEN dkr.piazza.app
+      - checkout
+    jobs:
+    - name: "Build watchman"
+      commands:
+      - make build
+      - make push
+# - name: deploy
+#   dependencies: ['build']
+#   skip:
+#     when: "branch != 'master'"
+#   task:
+#     secrets:
+#     - name: forge
+#     prologue:
+#       commands:
+#       - checkout
+#       - wget -O forge.cmd https://storage.googleapis.com/forge-assets/uploads/artifacts/c3e93e69-7bb3-4d7b-a3e7-01b93abf10b4/forge?v=63751273416
+#       - chmod +x ./forge.cmd
+#     jobs:
+#     - name: "Deploy with watchman"
+#       commands:
+#       - export GIT_COMMIT_MESSAGE=$(git log -1 --pretty=%B | cat | head -n 1)
+#       - ./forge.cmd webhook watchman "${GIT_COMMIT_MESSAGE}" --secret "${FORGE_WEBHOOK_SECRET}" --url https://watchman.piazza.app/v1/webhook
