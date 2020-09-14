@@ -13,10 +13,6 @@ ARG APP_VSN
 ARG MIX_ENV=prod
 # Set this to true if this release is not a Phoenix app
 ARG SKIP_PHOENIX=false
-# If you are using an umbrella project, you can change this
-# argument to the directory the Phoenix app is in so that the assets
-# can be built
-ARG PHOENIX_SUBDIR=.
 
 ENV SKIP_PHOENIX=${SKIP_PHOENIX} \
     APP_NAME=${APP_NAME} \
@@ -41,12 +37,13 @@ RUN apk update && \
 COPY . .
 
 RUN mix do deps.get, compile
+RUN ls -al
 
 # This step builds assets for the Phoenix app (if there is one)
 # If you aren't building a Phoenix app, pass `--build-arg SKIP_PHOENIX=true`
 # This is mostly here for demonstration purposes
 RUN if [ ! "$SKIP_PHOENIX" = "true" ]; then \
-  cd ${PHOENIX_SUBDIR}/assets && \
+  cd assets && \
   yarn install && \
   yarn run build; \
 fi
@@ -64,9 +61,10 @@ FROM golang:alpine AS cmd
 RUN apk update && apk add --no-cache git
 
 WORKDIR $GOPATH/src/mypackage/myapp/
-COPY cmd/ .
+COPY cmd .
 RUN ls -al
 RUN go build -o /go/bin/forge
+RUN /go/bin/forge --help
 
 FROM alpine:3 as helm
 

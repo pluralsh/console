@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: dkr.piazza.app/bootstrap/watchman
+  repository: dkr.piazza.app/watchman/watchman
   tag: '0.1.0'
   pullPolicy: Always
 
