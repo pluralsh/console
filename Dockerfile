@@ -56,15 +56,7 @@ RUN \
   tar -xzf ${APP_NAME}.tar.gz && \
   rm ${APP_NAME}.tar.gz
 
-FROM golang:alpine AS cmd
-
-RUN apk update && apk add --no-cache git
-
-WORKDIR $GOPATH/src/mypackage/myapp/
-COPY cmd .
-RUN ls -al
-RUN go build -o /go/bin/forge
-RUN /go/bin/forge --help
+FROM dkr.piazza.app/forge/forge-cli:0.1.0 as cmd
 
 FROM alpine:3 as helm
 

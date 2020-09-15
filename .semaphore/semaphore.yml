@@ -48,16 +48,15 @@ blocks:
       # Don't forget -q to silence confirmation prompts
       - gcloud auth configure-docker -q
       - docker login -u mguarino46@gmail.com -p $FORGE_ACCESS_TOKEN dkr.piazza.app
-      - chmod 0600 ~/.ssh/id_rsa_semaphore
-      - ssh-add ~/.ssh/id_rsa_semaphore
+      # - chmod 0600 ~/.ssh/id_rsa_semaphore
+      # - ssh-add ~/.ssh/id_rsa_semaphore
       - checkout
-      - |
-        cd .. && git clone git@github.com:michaeljguarino/forge && \
-        pwd && ls -al forge && cd -
+      # - |
+      #   cd .. && git clone git@github.com:michaeljguarino/forge && \
+      #   pwd && ls -al forge && cd -
     jobs:
     - name: "Build watchman"
       commands:
-      - cp -r ../forge/cmd cmd
       - make build
       - make push
 - name: deploy
