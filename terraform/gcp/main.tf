@@ -60,6 +60,12 @@ resource "google_project_iam_member" "watchman_storage_admin" {
   ]
 }
 
+resource "kubernetes_namespace" "watchman" {
+  metadata {
+    name = var.namespace
+  }
+}
+
 resource "kubernetes_secret" "watchman" {
   metadata {
     name = "watchman-credentials"
@@ -68,4 +74,8 @@ resource "kubernetes_secret" "watchman" {
   data = {
     "gcp.json" = base64decode(google_service_account_key.watchman.private_key)
   }
+
+  depends_on = [
+    kubernetes_namespace.watchman
+  ]
 }

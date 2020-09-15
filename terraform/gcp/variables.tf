@@ -18,14 +18,6 @@ EOF
 }
 
 
-variable "bootstrap_namespace" {
-  type = string
-  description = <<EOF
-Namespace to use
-EOF
-}
-
-
 variable "gcp_location" {
   type = string
   default = "us-east1-b"

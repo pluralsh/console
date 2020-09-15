@@ -8,6 +8,7 @@ ingress:
 grafana_dns: {{ dedupe .Values "grafana_dns" (cat "watchman-grafana." .Values.dns_domain) }}
 
 secrets:
+  jwt: {{ dedupe . "watchman.secrets.jwt" (randAlphaNum 20) }}
   admin_name: {{ .Values.admin_name }}
   admin_email: {{ .Values.admin_email }}
   admin_password: {{ dedupe . "watchman.secrets.admin_password" (randAlphaNum 20) }}
