@@ -7,7 +7,7 @@ defmodule Watchman.Deployer do
 
   @poll_interval 10_000
 
-  defmodule State, do: defstruct [:storage]
+  defmodule State, do: defstruct [:storage, :ref, :pid]
 
   def start_link(storage) do
     GenServer.start_link(__MODULE__, [storage], name: __MODULE__)
@@ -24,6 +24,10 @@ defmodule Watchman.Deployer do
 
   def wake(), do: GenServer.call(__MODULE__, :poll)
 
+  def cancel(), do: GenServer.call(__MODULE__, :cancel)
+
+  def state(), do: GenServer.call(__MODULE__, :state)
+
   def update(repo, content), do: GenServer.call(__MODULE__, {:update, repo, content})
 
   def handle_call(:poll, _, %State{} = state) do
@@ -35,20 +39,31 @@ defmodule Watchman.Deployer do
     {:reply, update(storage, repo, content), state}
   end
 
+  def handle_call(:cancel, _, %State{pid: nil} = state), do: {:reply, :ok, state}
+  def handle_info(:cancel, _, %State{pid: pid} = state) when is_pid(pid) do
+    Process.exit(pid, :kill)
+    {:reply, :ok, state}
+  end
+
+  def handle_call(:state, _, state), do: {:reply, state, state}
+
   def handle_info(:init, %State{storage: storage} = state) do
     storage.init()
     {:noreply, state}
   end
 
-  def handle_info(:poll, %State{storage: storage} = state) do
+  def handle_info(:poll, %State{storage: storage, ref: nil} = state) do
     Logger.info "Checking for pending builds"
     case Builds.poll() do
       nil -> {:noreply, state}
       %Build{} = build ->
-        perform(storage, build) |> log()
-        {:noreply, state}
+        {pid, ref} = perform(storage, build)
+        {:noreply, %{state | ref: ref, pid: pid}}
     end
   end
+
+  def handle_info({:DOWN, ref, :process, _, _}, %State{ref: ref} = state),
+    do: {:noreply, %{state | ref: nil, pid: nil}}
 
   def handle_info(_, state), do: {:noreply, state}
 
@@ -79,18 +94,19 @@ defmodule Watchman.Deployer do
   end
 
   defp with_build(%Build{} = build, fun) when is_function(fun) do
-    Command.set_build(build)
-    with {:ok, _} <- Builds.running(build),
-         {:ok, _} <- fun.() do
-      Builds.succeed(build)
-    else
-      _ -> Builds.fail(build)
-    end
+    pid = spawn(fn ->
+      Command.set_build(build)
+      with {:ok, _} <- Builds.running(build),
+          {:ok, _} <- fun.() do
+        Builds.succeed(build)
+      else
+        _ -> Builds.fail(build)
+      end
+    end)
+    ref = Process.monitor(pid)
+    {pid, ref}
   end
 
   defp commit_message(nil, repo), do: "watchman deployment for #{repo}"
   defp commit_message(message, repo), do: "watchman deployment for #{repo} -- #{message}"
-
-  defp log({:error, error}), do: Logger.info "Failed to deploy, error: #{inspect(error)}"
-  defp log(_), do: :ok
 end

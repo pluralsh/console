@@ -13,6 +13,6 @@ end
 
 defimpl Watchman.PubSub.Recurse, for: Watchman.PubSub.BuildFailed do
   def process(%{item: _}) do
-    GenServer.stop(Watchman.Deployer, :shutdown)
+    Watchman.Deployer.cancel()
   end
 end

@@ -38,6 +38,10 @@ defmodule Watchman.DeployerTest do
       refetched = refetch(build)
       assert refetched.status == :successful
       assert refetched.completed_at
+
+      state = Watchman.Deployer.state()
+      refute state.pid
+      refute state.ref
     end
 
     test "It can handle bounce deploys" do
