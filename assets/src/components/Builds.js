@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react'
 import { useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { BUILDS_Q, CREATE_BUILD, BUILD_SUB } from './graphql/builds'
-import { Loading, Button, Scroller, Modal, ModalHeader } from 'forge-core'
+import { Loading, Button, Scroller, ModalHeader } from 'forge-core'
 import { Box, Text, FormField, TextInput, Select, Layer } from 'grommet'
 import moment from 'moment'
 import { mergeEdges } from './graphql/utils'
@@ -20,7 +20,7 @@ function BuildStatusInner({background, text, icon}) {
       round='xsmall'
       background={background}>
       {icon && <Box width='50px'>{icon}</Box>}
-      <Text size='small' color='white'>{text}</Text>
+      <Text size='small'>{text}</Text>
     </Box>
   )
 }
@@ -32,7 +32,12 @@ function BuildStatus({status}) {
     case Status.CANCELLED:
       return <BuildStatusInner background='light-6' text='cancelled' />
     case Status.RUNNING:
-      return <BuildStatusInner icon={<BeatLoader size={5} margin={2} color='white' />} background='progress' text='running' />
+      return (
+        <BuildStatusInner
+          icon={<BeatLoader size={5} margin={2} color='white' />}
+          background='progress'
+          text='running' />
+      )
     case Status.FAILED:
       return <BuildStatusInner background='error' text='failed' />
     case Status.SUCCESSFUL:

@@ -13,7 +13,6 @@ end
 
 defimpl Watchman.PubSub.Recurse, for: Watchman.PubSub.BuildDeleted do
   def process(%{item: item}) do
-    IO.inspect(item)
     Watchman.Deployer.cancel()
   end
 end

@@ -47,10 +47,7 @@ defmodule Watchman.Deployer do
     {:reply, update(storage, repo, content), state}
   end
 
-  def handle_call(:cancel, _, %State{pid: nil} = state) do
-    Logger.info "no build to cancel"
-    {:reply, :ok, state}
-  end
+  def handle_call(:cancel, _, %State{pid: nil} = state), do: {:reply, :ok, state}
   def handle_call(:cancel, _, %State{pid: pid} = state) when is_pid(pid) do
     Logger.info "Cancelling build with proc: #{inspect(pid)}"
     Process.exit(pid, :kill)

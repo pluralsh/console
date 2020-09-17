@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { Box, Text, FormField, TextInput, Layer } from 'grommet'
 import { useQuery, useMutation } from 'react-apollo'
-import { Scroller, Button, Modal, ModalHeader, Copyable } from 'forge-core'
+import { Scroller, Button, ModalHeader, Copyable } from 'forge-core'
 import { USERS_Q, INVITE_USER } from './graphql/users'
 import { Avatar } from './EditUser'
 import { BreadcrumbsContext } from './Breadcrumbs'

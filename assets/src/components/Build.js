@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext, useRef } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
-import { ScrollableContainer, Modal, ModalHeader, Button, Loading } from 'forge-core'
+import { ModalHeader, Button, Loading } from 'forge-core'
 import { Box, Text, Layer } from 'grommet'
 import Line from 'react-lazylog/build/Line'
 import { ansiparse } from './utils/ansi'
@@ -16,7 +16,13 @@ import { BuildStatus } from './types'
 
  const HEADER_PADDING = {horizontal: 'medium', vertical: 'small'}
 
-function TimerInner({insertedAt, completedAt, status}) {
+function Timer({insertedAt, completedAt, status}) {
+  const [tick, setTick] = useState(0)
+  useEffect(() => {
+    if (completedAt) return
+    setTimeout(() => setTick(tick + 1), 1000)
+  }, [completedAt, tick, setTick])
+
   const end = completedAt ? moment(completedAt) : moment()
   const begin = moment(insertedAt)
   const fromBeginning = (dt) =>  moment.duration(dt.diff(begin))
@@ -26,20 +32,6 @@ function TimerInner({insertedAt, completedAt, status}) {
       {status}{moment.utc(duration.as('milliseconds')).format('HH:mm:ss')}
     </pre>
   )
-}
-
-function Timer({insertedAt, completedAt, status}) {
-  const [tick, setTick] = useState(0)
-  useEffect(() => {
-    if (completedAt) return
-    setTimeout(() => setTick(tick + 1), 1000)
-  }, [completedAt, tick, setTick])
-
-  return <TimerInner
-    tick={tick}
-    insertedAt={insertedAt}
-    completedAt={completedAt}
-    status={status} />
 }
 
 function buildStyles(status) {
@@ -54,6 +46,8 @@ function buildStyles(status) {
       return {color: 'error', label: 'Failed, '}
     case BuildStatus.SUCCESSFUL:
       return {color: 'success', label: 'Passed, '}
+    default:
+      return {}
   }
 }
 
@@ -191,21 +185,14 @@ function Command({command}) {
   useEffect(() => ref && ref.current && ref.current.scrollIntoView(), [ref])
 
   return (
-    <Box ref={ref}>
-      <Box
-        direction='row'
-        gap='small'
-        elevation='small'
-        pad={{vertical: 'xxsmall', horizontal: 'medium'}}
-        align='center'
-        background='console'>
+    <Box flex={false} ref={ref}>
+      <Box direction='row' gap='small' pad={{vertical: 'xxsmall', horizontal: 'medium'}}
+        align='center' background='console'>
         <Box fill='horizontal' direction='row' gap='small' align='center'>
           <pre>==> {command.command}</pre>
           <ExitStatus exitCode={command.exitCode} />
         </Box>
-        <Timer
-          insertedAt={command.insertedAt}
-          completedAt={command.completedAt} />
+        <Timer insertedAt={command.insertedAt} completedAt={command.completedAt} />
       </Box>
       <Log text={stdout} follow />
     </Box>
@@ -251,12 +238,8 @@ export default function Build() {
   if (!data || loading) return <Loading />
   const {commands: {edges}, ...build} = data.build
   return (
-    <>
-      <Box
-        flex={false}
-        direction='row'
-        align='center'
-        border='bottom'>
+    <Box fill>
+      <Box flex={false} direction='row' align='center' border='bottom'>
         <Box fill='horizontal' pad={HEADER_PADDING}>
           <Text size='small' weight='bold'>{build.repository}</Text>
           <Text size='small' color='dark-3'>{build.message}</Text>
@@ -265,11 +248,9 @@ export default function Build() {
         <Rebuild build={build} />
         <Cancel build={build} />
       </Box>
-      <div style={{height: 'calc(100vh-100px)', overflow: 'auto', backgroundColor: '#222222', paddingBottom: '19px'}}>
-        <ScrollableContainer>
-          {edges.map(({node}) => <Command key={node.id} command={node} />)}
-        </ScrollableContainer>
-      </div>
-    </>
+      <Box style={{overflow: 'auto'}} background='console' fill pad={{bottom: 'small'}}>
+        {edges.map(({node}) => <Command key={node.id} command={node} />)}
+      </Box>
+    </Box>
   )
 }
