@@ -10,6 +10,7 @@ defmodule Watchman.GraphQl.Schema do
     value :running
     value :successful
     value :failed
+    value :cancelled
   end
 
   enum :build_type do

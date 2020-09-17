@@ -12,6 +12,7 @@ import { Checkmark, StatusCritical } from 'grommet-icons'
 import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import './build.css'
+import { BuildStatus } from './types'
 
  const HEADER_PADDING = {horizontal: 'medium', vertical: 'small'}
 
@@ -41,16 +42,30 @@ function Timer({insertedAt, completedAt, status}) {
     status={status} />
 }
 
+function buildStyles(status) {
+  switch (status) {
+    case BuildStatus.QUEUED:
+      return {color: 'status-unknown', label: null}
+    case BuildStatus.RUNNING:
+      return {color: 'progress', label: null}
+    case BuildStatus.CANCELLED:
+      return {color: 'light-6', label: 'Cancelled, '}
+    case BuildStatus.FAILED:
+      return {color: 'error', label: 'Failed, '}
+    case BuildStatus.SUCCESSFUL:
+      return {color: 'success', label: 'Passed, '}
+  }
+}
+
 function BuildTimer({insertedAt, completedAt, status}) {
-  const background = status === "SUCCESSFUL" ? 'success' : (status === 'FAILED' ? 'error' : 'progress')
-  const statusLabel = status === 'SUCCESSFUL' ? 'Passed, ' : (status === 'FAILED' ? 'Failed, ' : null)
+  const {color, label} = buildStyles(status)
   return (
     <Box flex={false} pad={HEADER_PADDING} border='left' height='65px' justify='center' align='center'>
-      <Box flex={false} pad='xsmall' background={background}>
+      <Box flex={false} pad='xsmall' background={color}>
         <Timer
           insertedAt={insertedAt}
           completedAt={completedAt}
-          status={statusLabel} />
+          status={label} />
       </Box>
     </Box>
   )

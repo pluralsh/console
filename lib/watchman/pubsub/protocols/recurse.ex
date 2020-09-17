@@ -11,8 +11,9 @@ defimpl Watchman.PubSub.Recurse, for: Any do
   def process(_), do: :ok
 end
 
-defimpl Watchman.PubSub.Recurse, for: Watchman.PubSub.BuildFailed do
-  def process(%{item: _}) do
+defimpl Watchman.PubSub.Recurse, for: Watchman.PubSub.BuildDeleted do
+  def process(%{item: item}) do
+    IO.inspect(item)
     Watchman.Deployer.cancel()
   end
 end
