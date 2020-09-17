@@ -7,13 +7,21 @@ defmodule Watchman.Deployer do
 
   @poll_interval 10_000
 
-  defmodule State, do: defstruct [:storage, :ref, :pid]
+  @via {:via, Horde.Registry, {Watchman.Registry, __MODULE__}}
+
+  defmodule State, do: defstruct [:storage, :ref, :pid, :build]
 
   def start_link(storage) do
-    GenServer.start_link(__MODULE__, [storage], name: __MODULE__)
+    case GenServer.start_link(__MODULE__, storage, name: @via) do
+      {:ok, pid} -> {:ok, pid}
+      {:error, {:already_started, _}} ->
+        Logger.info "Already started a deployer in-cluster"
+        :ignore
+    end
   end
 
-  def init([storage]) do
+  def init(storage) do
+    Process.flag(:trap_exit, true)
     if Watchman.conf(:initialize) do
       send self(), :init
       :timer.send_interval @poll_interval, :poll
@@ -22,13 +30,13 @@ defmodule Watchman.Deployer do
     {:ok, %State{storage: storage}}
   end
 
-  def wake(), do: GenServer.call(__MODULE__, :poll)
+  def wake(), do: GenServer.call(@via, :poll)
 
-  def cancel(), do: GenServer.call(__MODULE__, :cancel)
+  def cancel(), do: GenServer.call(@via, :cancel)
 
-  def state(), do: GenServer.call(__MODULE__, :state)
+  def state(), do: GenServer.call(@via, :state)
 
-  def update(repo, content), do: GenServer.call(__MODULE__, {:update, repo, content})
+  def update(repo, content), do: GenServer.call(@via, {:update, repo, content})
 
   def handle_call(:poll, _, %State{} = state) do
     send self(), :poll
@@ -40,7 +48,7 @@ defmodule Watchman.Deployer do
   end
 
   def handle_call(:cancel, _, %State{pid: nil} = state), do: {:reply, :ok, state}
-  def handle_info(:cancel, _, %State{pid: pid} = state) when is_pid(pid) do
+  def handle_call(:cancel, _, %State{pid: pid} = state) when is_pid(pid) do
     Process.exit(pid, :kill)
     {:reply, :ok, state}
   end
@@ -58,14 +66,22 @@ defmodule Watchman.Deployer do
       nil -> {:noreply, state}
       %Build{} = build ->
         {pid, ref} = perform(storage, build)
-        {:noreply, %{state | ref: ref, pid: pid}}
+        {:noreply, %{state | ref: ref, pid: pid, build: build}}
     end
   end
 
-  def handle_info({:DOWN, ref, :process, _, _}, %State{ref: ref} = state),
-    do: {:noreply, %{state | ref: nil, pid: nil}}
+  def handle_info({:DOWN, ref, :process, _, _}, %State{ref: ref, build: build} = state) do
+    Builds.cancel(build)
+    {:noreply, %{state | ref: nil, pid: nil, build: nil}}
+  end
 
   def handle_info(_, state), do: {:noreply, state}
+
+  def terminate(_, %State{pid: pid, build: %Build{} = build}) when is_pid(pid) do
+    Process.exit(pid, :kill)
+    Builds.cancel(build)
+  end
+  def terminate(_, _), do: :ok
 
   defp perform(storage, %Build{repository: repo, type: :bounce} = build) do
     with_build(build, fn ->

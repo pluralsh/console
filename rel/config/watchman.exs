@@ -7,6 +7,20 @@ config :piazza_core,
 config :botanist,
   ecto_repo: Watchman.Repo
 
+config :libcluster,
+  topologies: [
+    watchman: [
+      strategy: Cluster.Strategy.Kubernetes,
+      config: [
+        mode: :ip,
+        kubernetes_node_basename: "watchman",
+        kubernetes_selector: "app=watchman",
+        kubernetes_namespace: get_env("NAMESPACE"),
+        polling_interval: 10_000
+      ]
+    ]
+  ]
+
 config :watchman, Watchman.Guardian,
   issuer: "watchman",
   secret_key: get_env("JWT_SECRET")

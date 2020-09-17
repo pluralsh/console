@@ -1,0 +1,4 @@
+target: deployment/watchman
+command: /opt/app/bin/watchman
+args:
+- remote_console

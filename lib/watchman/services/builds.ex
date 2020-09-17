@@ -6,6 +6,8 @@ defmodule Watchman.Services.Builds do
 
   def get!(id), do: Repo.get!(Build, id)
 
+  def get(id), do: Repo.get(Build, id)
+
   def create(attrs) do
     start_transaction()
     |> add_operation(:build, fn _ ->
@@ -26,9 +28,20 @@ defmodule Watchman.Services.Builds do
     |> when_ok(&broadcast(&1, :create))
   end
 
+  def cancel(%Build{id: id}) do
+    start_transaction()
+    |> add_operation(:build, fn _ -> {:ok, get(id)} end)
+    |> add_operation(:update, fn
+      %{build: %{status: :running} = build} ->
+        modify_status(build, :cancelled)
+      %{build: build} -> {:ok, build}
+    end)
+    |> execute(extract: :update)
+  end
+
   def cancel(build_id) do
     get!(build_id)
-    |> modify_status(:failed)
+    |> modify_status(:cancelled)
     |> notify(:delete)
   end
 

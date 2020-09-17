@@ -31,9 +31,25 @@ defmodule Watchman.Services.BuildsTest do
 
       {:ok, cancelled} = Builds.cancel(build.id)
 
-      assert cancelled.status == :failed
+      assert cancelled.status == :cancelled
 
       assert_receive {:event, %PubSub.BuildDeleted{item: ^cancelled}}
+    end
+
+    test "if passed a build struct, it will cancel if in running state" do
+      build = insert(:build, status: :running)
+
+      {:ok, cancelled} = Builds.cancel(build)
+
+      assert cancelled.status == :cancelled
+    end
+
+    test "if passed a struct, it will ignore if not running" do
+      build = insert(:build, status: :successful)
+
+      {:ok, cancelled} = Builds.cancel(build)
+
+      assert cancelled.status == :successful
     end
   end
 

@@ -37,6 +37,8 @@ defmodule Watchman.MixProject do
       {:ecto, "~> 3.4.3", override: true},
       {:ex_machina, "~> 2.3", only: :test},
       {:distillery, "~> 2.1"},
+      {:libcluster, "~> 3.2"},
+      {:horde, "~> 0.8"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix, "~> 1.4.9"},
       {:phoenix_pubsub, "~> 1.1"},
