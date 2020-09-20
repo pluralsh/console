@@ -11,7 +11,7 @@ defmodule Watchman.GraphQl.ForgeQueriesTest do
       })
       installations = [%{id: "id", repository: %{id: "id2", name: "repo", description: "desc"}}]
 
-      expect(Mojito, :post, fn _, _, ^body ->
+      expect(Mojito, :post, fn _, _, ^body, _ ->
         {:ok, %{body: Jason.encode!(%{data: %{installations: as_connection(installations)}})}}
       end)
 

@@ -11,7 +11,8 @@ defmodule Watchman.Forge.Client do
     Mojito.post(url(), [{"authorization", "Bearer #{token}"} | @headers], Jason.encode!(%{
       query: query,
       variables: variables
-    }))
+    }), [pool: false])
+    |> IO.inspect()
     |> decode(type_spec)
   end
 
