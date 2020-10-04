@@ -26,7 +26,7 @@ defmodule WatchmanWeb.GraphQl.BuildSubscriptionTest do
 
       assert_reply(ref, :ok, %{subscriptionId: _})
 
-      {:ok, build} = Builds.create(%{repository: "repo"})
+      {:ok, build} = Builds.create(%{repository: "repo"}, insert(:user))
       assert_push("subscription:data", %{result: %{data: %{"buildDelta" => delta}}})
       assert delta["delta"] == "CREATE"
       assert delta["payload"]["id"] == build.id

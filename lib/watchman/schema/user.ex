@@ -4,8 +4,9 @@ defmodule Watchman.Schema.User do
   @email_re ~r/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-\.]+\.[a-zA-Z]{2,}$/
 
   schema "watchman_users" do
-    field :name, :string
-    field :email, :string
+    field :name,          :string
+    field :email,         :string
+    field :bot_name,      :string
     field :password_hash, :string
     field :password,      :string, virtual: true
     field :jwt,           :string, virtual: true
@@ -24,6 +25,7 @@ defmodule Watchman.Schema.User do
     model
     |> cast(attrs, @valid)
     |> unique_constraint(:email)
+    |> unique_constraint(:bot_name)
     |> validate_length(:password, min: 10)
     |> validate_length(:email, max: 255)
     |> validate_format(:email, @email_re)

@@ -87,6 +87,18 @@ defmodule Watchman.GraphQl.Schema do
       resolve &Build.list_commands/2
     end
 
+    field :creator, :user, resolve: dataloader(User)
+    field :changelogs, list_of(:changelog), resolve: dataloader(Build)
+
+    timestamps()
+  end
+
+  object :changelog do
+    field :id,      non_null(:id)
+    field :repo,    non_null(:string)
+    field :tool,    non_null(:string)
+    field :content, non_null(:string)
+
     timestamps()
   end
 

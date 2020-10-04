@@ -19,8 +19,8 @@ defmodule Watchman.DeployerTest do
       |> expect(:push, fn -> echo.(:git_push) end)
 
       expect(Forge, :build, & echo.({:build, &1}))
+      |> expect(:diff, & echo.({:diff, &1}))
       |> expect(:deploy, & echo.({:deploy, &1}))
-
 
       repo = "forge"
       build = insert(:build, repository: repo)
@@ -28,6 +28,7 @@ defmodule Watchman.DeployerTest do
 
       assert_receive :git_init
       assert_receive {:build, ^repo}
+      assert_receive {:diff, ^repo}
       assert_receive {:deploy, ^repo}
       assert_receive :git_push
 

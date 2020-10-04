@@ -6,7 +6,8 @@ defmodule Watchman.Factory do
     %Schema.Build{
       repository: sequence(:repo, &"repo-#{&1}"),
       status: :queued,
-      type: :deploy
+      type: :deploy,
+      creator: build(:user)
     }
   end
 
@@ -36,6 +37,14 @@ defmodule Watchman.Factory do
     %Schema.Invite{
       email: sequence(:invite, &"someone-#{&1}@example.com"),
       secure_id: sequence(:invite, &"secure-#{&1}")
+    }
+  end
+
+  def changelog_factory do
+    %Schema.Changelog{
+      repo: "repo",
+      tool: sequence(:changelog, & "tool-#{&1}"),
+      build: build(:build)
     }
   end
 end

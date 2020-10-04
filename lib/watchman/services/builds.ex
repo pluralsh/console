@@ -2,16 +2,16 @@ defmodule Watchman.Services.Builds do
   use Watchman.Services.Base
   alias Watchman.PubSub
   alias Watchman.Forge.Repositories
-  alias Watchman.Schema.{Build, Command}
+  alias Watchman.Schema.{Build, Command, User, Changelog}
 
   def get!(id), do: Repo.get!(Build, id)
 
   def get(id), do: Repo.get(Build, id)
 
-  def create(attrs) do
+  def create(attrs, %User{id: id}) do
     start_transaction()
     |> add_operation(:build, fn _ ->
-      %Build{type: :deploy, status: :queued}
+      %Build{type: :deploy, status: :queued, creator_id: id}
       |> Build.changeset(attrs)
       |> Repo.insert()
     end)
@@ -74,13 +74,52 @@ defmodule Watchman.Services.Builds do
     do: modify_status(build, :running)
 
   def succeed(build) do
-    modify_status(build, :successful)
+    start_transaction()
+    |> add_operation(:build, fn _ ->
+      modify_status(build, :successful)
+    end)
+    |> add_changelogs()
+    |> execute(extract: :build)
     |> notify(:succeed)
   end
 
   def fail(build) do
-    modify_status(build, :failed)
+    start_transaction()
+    |> add_operation(:build, fn _ ->
+      modify_status(build, :failed)
+    end)
+    |> add_changelogs()
+    |> execute(extract: :build)
     |> notify(:failed)
+  end
+
+  defp add_changelogs(transaction) do
+    diff_folder = Watchman.workspace() |>  Path.join("diffs")
+    with {:ok, [_ | _] = subfolders} <- File.ls(diff_folder) do
+      subfolders
+      |> Enum.map(& {&1, Path.join(diff_folder, &1) |> File.ls()})
+      |> Enum.flat_map(fn
+        {repo, {:ok, contents}} -> Enum.map(contents, & {repo, &1})
+        _ -> []
+      end)
+      |> Enum.reduce(transaction, fn {repo, diff_file}, transaction ->
+        add_operation(transaction, diff_file, fn %{build: %{id: id}} ->
+          add_changelog(repo, Path.join([diff_folder, repo, diff_file]), id)
+        end)
+      end)
+    else
+      _ -> transaction
+    end
+  end
+
+  defp add_changelog(repo, diff, build_id) do
+    %Changelog{build_id: build_id}
+    |> Changelog.changeset(%{
+      repo: repo,
+      tool: Path.basename(diff),
+      content: File.read!(diff)
+    })
+    |> Repo.insert()
   end
 
   defp modify_status(build, state) do

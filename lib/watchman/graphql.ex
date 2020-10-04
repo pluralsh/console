@@ -8,7 +8,8 @@ defmodule Watchman.GraphQl do
   import_types Watchman.GraphQl.Schema
 
   @sources [
-    Build
+    Build,
+    User,
   ]
 
   def context(ctx) do

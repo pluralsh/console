@@ -24,8 +24,9 @@ defmodule Watchman.GraphQl.BuildQueriesTest do
 
   describe "build" do
     test "It can sideload commands for a build" do
-      build = insert(:build)
-      commands = for i <- 1..3,
+      build      = insert(:build)
+      changelogs = insert_list(3, :changelog, build: build)
+      commands   = for i <- 1..3,
         do: insert(:command, build: build, inserted_at: Timex.now() |> Timex.shift(days: -i))
       expected = commands |> Enum.map(& &1.id) |> Enum.reverse()
 
@@ -33,6 +34,12 @@ defmodule Watchman.GraphQl.BuildQueriesTest do
         query Build($id: ID!) {
           build(id: $id) {
             id
+            creator {
+              id
+            }
+            changelogs {
+              id
+            }
             commands(first: 10) {
               edges {
                 node {
@@ -45,6 +52,8 @@ defmodule Watchman.GraphQl.BuildQueriesTest do
       """, %{"id" => build.id}, %{current_user: insert(:user)})
 
       assert found["id"] == build.id
+      assert found["creator"]["id"] == build.creator_id
+      assert ids_equal(found["changelogs"], changelogs)
       assert from_connection(found["commands"]) |> Enum.map(& &1["id"]) == expected
     end
   end

@@ -4,6 +4,7 @@ defmodule WatchmanWeb.WebhookControllerTest do
 
   describe "#webhook/2" do
     test "it'll succeed if the signature is valid", %{conn: conn} do
+      insert(:user, bot_name: "watchman")
       path   = Routes.webhook_path(conn, :webhook)
       secret = Watchman.conf(:webhook_secret)
       body   = Jason.encode!(%{repository: "forge", message: "Some message"})
@@ -43,6 +44,7 @@ defmodule WatchmanWeb.WebhookControllerTest do
 
   describe "#piazza/2" do
     test "it'll succeed if the signature is valid", %{conn: conn} do
+      insert(:user, bot_name: "watchman")
       path   = Routes.webhook_path(conn, :piazza)
       secret = Watchman.conf(:piazza_secret)
       body   = Jason.encode!(%{text: "/watchman deploy forge"})

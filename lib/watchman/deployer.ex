@@ -96,6 +96,7 @@ defmodule Watchman.Deployer do
     with_build(build, fn ->
       with {:ok, _} <- storage.init(),
            {:ok, _} <- Forge.build(repo),
+           {:ok, _} <- Forge.diff(repo),
            {:ok, _} <- Forge.deploy(repo),
            {:ok, _} <- storage.revise(commit_message(message, repo)),
         do: storage.push()

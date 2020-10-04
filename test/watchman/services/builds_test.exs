@@ -71,6 +71,12 @@ defmodule Watchman.Services.BuildsTest do
 
       assert succeed.status == :successful
       assert_receive {:event, %PubSub.BuildSucceeded{item: ^succeed}}
+
+      %{changelogs: [changelog]} = Watchman.Repo.preload(succeed, [:changelogs])
+
+      assert changelog.repo    == "forge"
+      assert changelog.tool    == "helm"
+      assert changelog.content == "test"
     end
   end
 

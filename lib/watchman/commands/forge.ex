@@ -11,6 +11,8 @@ defmodule Watchman.Commands.Forge do
 
   def deploy(repo), do: forge("deploy", [repo])
 
+  def diff(repo), do: forge("diff", [repo])
+
   def bounce(repo), do: forge("bounce", [repo])
 
   def forge(command, args), do: cmd("forge", [command | args], workspace())

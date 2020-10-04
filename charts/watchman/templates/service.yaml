@@ -5,10 +5,6 @@ metadata:
   labels:
     app: watchman
 {{ include "watchman.labels" . | indent 4 }}
-  annotations:
-    traefik.ingress.kubernetes.io/affinity: "true"
-    cloud.google.com/neg: '{"ingress": true}'
-    beta.cloud.google.com/backend-config: '{"ports": {"http": "watchman-backendconfig"}}'
 spec:
   type: NodePort
   ports:

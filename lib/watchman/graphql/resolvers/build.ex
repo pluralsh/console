@@ -1,9 +1,10 @@
 defmodule Watchman.GraphQl.Resolvers.Build do
   use Watchman.GraphQl.Resolvers.Base, model: Watchman.Schema.Build
-  alias Watchman.Schema.Command
+  alias Watchman.Schema.{Command, Changelog}
   alias Watchman.Services.Builds
 
   def query(Command, _), do: Command.ordered()
+  def query(Changelog, _), do: Changelog
   def query(_, _), do: Build
 
   def resolve_build(%{id: id}, _), do: {:ok, Builds.get!(id)}
@@ -19,8 +20,8 @@ defmodule Watchman.GraphQl.Resolvers.Build do
     |> paginate(args)
   end
 
-  def create_build(%{attributes: attrs}, _),
-    do: Builds.create(attrs)
+  def create_build(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Builds.create(attrs, user)
 
   def cancel_build(%{id: id}, _),
     do: Builds.cancel(id)
