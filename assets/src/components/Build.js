@@ -17,6 +17,7 @@ import { Avatar } from './EditUser'
 import { groupBy } from 'lodash'
 import { TabHeader, TabSelector } from './utils/TabSelector'
 import Ansi from "ansi-to-react"
+import { AnsiText } from './utils/AnsiText'
 
  const HEADER_PADDING = {horizontal: 'medium'}
 
@@ -259,11 +260,7 @@ function Changelog({build: {changelogs}}) {
         ))}
       </Box>
       <Box style={{overflow: 'auto'}} height='100%' fill='horizontals' background='console' pad='small'>
-        {selected && (
-          <Ansi>
-            {selected.content}
-          </Ansi>
-        )}
+        {selected && (<AnsiText text={selected.content} />)}
       </Box>
     </Box>
   )
