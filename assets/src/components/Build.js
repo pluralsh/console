@@ -14,8 +14,11 @@ import { BreadcrumbsContext } from './Breadcrumbs'
 import './build.css'
 import { BuildStatus } from './types'
 import { Avatar } from './EditUser'
+import { groupBy } from 'lodash'
+import { TabHeader, TabSelector } from './utils/TabSelector'
+import Ansi from "ansi-to-react"
 
- const HEADER_PADDING = {horizontal: 'medium', vertical: 'small'}
+ const HEADER_PADDING = {horizontal: 'medium'}
 
 function Timer({insertedAt, completedAt, status}) {
   const [tick, setTick] = useState(0)
@@ -55,7 +58,7 @@ function buildStyles(status) {
 function BuildTimer({insertedAt, completedAt, status}) {
   const {color, label} = buildStyles(status)
   return (
-    <Box flex={false} pad={HEADER_PADDING} border='left' height='65px' justify='center' align='center'>
+    <Box flex={false} pad={HEADER_PADDING} border='left' fill='vertical' justify='center' align='center'>
       <Box flex={false} pad='xsmall' background={color}>
         <Timer
           insertedAt={insertedAt}
@@ -81,7 +84,7 @@ function Rebuild({build: {repository, message, type}}) {
       hoverIndicator='light-3'
       onClick={() => setOpen(true)}
       border='left'
-      height='65px'
+      fill='vertical'
       justify='center'
       align='center'>
       <Text size='small'>restart</Text>
@@ -111,7 +114,7 @@ function Cancel({build: {id}}) {
       hoverIndicator='light-3'
       onClick={() => setOpen(true)}
       border='left'
-      height='65px'
+      fill='vertical'
       justify='center'
       align='center'>
       <Text size='small'>cancel</Text>
@@ -217,8 +220,58 @@ function updateQuery(prev, {subscriptionData: {data}}) {
   }}
 }
 
+function Commands({edges}) {
+  return (
+    <Box style={{overflow: 'auto'}} background='console' fill pad={{bottom: 'small'}}>
+      {edges.map(({node}) => <Command key={node.id} command={node} />)}
+    </Box>
+  )
+}
+
+function ChangeChoice({text, onClick, enabled}) {
+  return (
+    <TabSelector enabled={enabled} onClick={onClick}>
+      <Text size='small' weight={500}>{text}</Text>
+    </TabSelector>
+  )
+}
+
+const SIDEBAR_WIDTH = '120px'
+
+function Changelog({build: {changelogs}}) {
+  const {repo: initialRepo, tool: initialTool} = changelogs.length > 0 ? changelogs[0] : {}
+  const [repo, setRepo] = useState(initialRepo)
+  const [tool, setTool] = useState(initialTool)
+  const grouped = groupBy(changelogs,  ({repo}) => repo)
+  const tools = grouped[repo] || []
+  const selected = tools.find(({tool: t}) => t === tool)
+
+  return (
+    <Box fill direction='row'>
+      <Box flex={false} width={SIDEBAR_WIDTH} height='100%' border='right'>
+        {Object.keys(grouped).map((r) => (
+          <ChangeChoice key={r} text={r} enabled={repo === r} onClick={() => setRepo(r)} />
+        ))}
+      </Box>
+      <Box flex={false} width={SIDEBAR_WIDTH} height='100%' border='right'>
+        {tools.map(({tool: t}) => (
+          <ChangeChoice key={t} text={t} enabled={tool === t} onClick={() => setTool(t)} />
+        ))}
+      </Box>
+      <Box style={{overflow: 'auto'}} height='100%' fill='horizontals' background='console' pad='small'>
+        {selected && (
+          <Ansi>
+            {selected.content}
+          </Ansi>
+        )}
+      </Box>
+    </Box>
+  )
+}
+
 export default function Build() {
   const {buildId} = useParams()
+  const [tab, setTab] = useState('progress')
   const {data, loading, subscribeToMore} = useQuery(BUILD_Q, {variables: {buildId}})
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
 
@@ -238,17 +291,28 @@ export default function Build() {
 
   if (!data || loading) return <Loading />
   const {commands: {edges}, creator, ...build} = data.build
+  const hasChanges = build.changelogs && build.changelogs.length > 0
+
   return (
     <Box fill>
       <Box flex={false} direction='row' align='center' border='bottom'>
-        <Box fill='horizontal' pad={HEADER_PADDING} align='center'>
+        <Box direction='row' fill='horizontal' align='center'>
           <Box fill='horizontal'>
-            <Text size='small' weight='bold'>{build.repository}</Text>
-            <Text size='small' color='dark-3'>{build.message}</Text>
+            <Box direction='row' gap='small' pad={{left: 'small', vertical: 'small'}}>
+              <Text size='small' weight='bold'>{build.repository}</Text>
+              <Text size='small' color='dark-3'>{build.message}</Text>
+            </Box>
+            <Box direction='row'>
+              <TabHeader text='progress' onClick={() => setTab('progress')} selected={tab === 'progress'} />
+              {hasChanges && (
+                <TabHeader text='changelog' onClick={() => setTab('changelog')} selected={tab === 'changelog'} />
+              )}
+            </Box>
           </Box>
           {creator && (
-            <Box flex={false}>
-              <Avatar me={creator} size='50px' />
+            <Box flex={false} pad={{right: 'medium'}} direction='row' gap='xsmall' align='center'>
+              <Avatar me={creator} size='40px' />
+              <Text size='small' weight={500}>{creator.name}</Text>
             </Box>
           )}
         </Box>
@@ -256,9 +320,8 @@ export default function Build() {
         <Rebuild build={build} />
         <Cancel build={build} />
       </Box>
-      <Box style={{overflow: 'auto'}} background='console' fill pad={{bottom: 'small'}}>
-        {edges.map(({node}) => <Command key={node.id} command={node} />)}
-      </Box>
+      {tab === 'progress' && <Commands edges={edges} />}
+      {tab === 'changelog' && <Changelog build={build} />}
     </Box>
   )
 }

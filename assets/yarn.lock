@@ -2166,6 +2166,11 @@ alphanum-sort@^1.0.0:
   resolved "https://registry.yarnpkg.com/alphanum-sort/-/alphanum-sort-1.0.2.tgz#97a1119649b211ad33691d9f9f486a8ec9fbe0a3"
   integrity sha1-l6ERlkmyEa0zaR2fn0hqjsn74KM=
 
+anser@^1.4.1:
+  version "1.4.10"
+  resolved "https://registry.yarnpkg.com/anser/-/anser-1.4.10.tgz#befa3eddf282684bd03b63dcda3927aef8c2e35b"
+  integrity sha512-hCv9AqTQ8ycjpSd3upOJd7vFwW1JaoYQ7tpham03GJ1ca8/65rqn0RpaWpItOAd6ylW9wAw6luXYPJIyPFVOww==
+
 ansi-colors@^3.0.0:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-3.2.4.tgz#e3a3da4bfbae6c86a9c285625de124a234026fbf"
@@ -2227,6 +2232,14 @@ ansi-styles@^4.0.0, ansi-styles@^4.1.0:
   dependencies:
     "@types/color-name" "^1.1.1"
     color-convert "^2.0.1"
+
+ansi-to-react@^6.0.8:
+  version "6.0.8"
+  resolved "https://registry.yarnpkg.com/ansi-to-react/-/ansi-to-react-6.0.8.tgz#67e98a42b6bc74097e075797a23abf5c67427808"
+  integrity sha512-2M/0xTxmTERFx/hx8wZa7W1HDebadvnZSK/V6OWrILVjP+wCZfONpRolXt8ii0x7TqoiY1BhUFcaVlpSyD5JvQ==
+  dependencies:
+    anser "^1.4.1"
+    escape-carriage "^1.3.0"
 
 anymatch@^1.3.0:
   version "1.3.2"
@@ -4557,6 +4570,11 @@ es6-symbol@^3.1.1, es6-symbol@~3.1.3:
   dependencies:
     d "^1.0.1"
     ext "^1.1.2"
+
+escape-carriage@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/escape-carriage/-/escape-carriage-1.3.0.tgz#71006b2d4da8cb6828686addafcb094239c742f3"
+  integrity sha512-ATWi5MD8QlAGQOeMgI8zTp671BG8aKvAC0M7yenlxU4CRLGO/sKthxVUyjiOFKjHdIo+6dZZUNFgHFeVEaKfGQ==
 
 escape-html@~1.0.3:
   version "1.0.3"
@@ -7368,6 +7386,11 @@ lodash@^4.17.11, lodash@^4.17.13, lodash@^4.17.14, lodash@^4.17.19, lodash@^4.17
   version "4.17.19"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.19.tgz#e48ddedbe30b3321783c5b4301fbd353bc1e4a4b"
   integrity sha512-JNvd8XER9GQX0v2qJgsaN/mzFCNA5BRe/j8JN9d+tWyGLSodKQHKFicdwNYzWwI3wjRnaKPsGj1XkBjx/F96DQ==
+
+lodash@^4.17.20:
+  version "4.17.20"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
+  integrity sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==
 
 loglevel@^1.6.6:
   version "1.6.6"

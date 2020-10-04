@@ -99,6 +99,9 @@ export const BUILD_SUB = gql`
       delta
       payload {
         ...BuildFragment
+        changelogs {
+          ...ChangelogFragment
+        }
       }
     }
   }
