@@ -49,7 +49,7 @@ function BuildStatus({status}) {
 
 export const BUILD_PADDING = {horizontal: 'medium'}
 
-function Build({build: {id, repository, status, insertedAt, message}}) {
+function Build({build: {id, repository, status, insertedAt, message, creator}}) {
   let history = useHistory()
   return (
     <Box pad={BUILD_PADDING}>
@@ -58,7 +58,7 @@ function Build({build: {id, repository, status, insertedAt, message}}) {
         onClick={() => history.push(`/build/${id}`)}>
         <Box fill='horizontal'>
           <Text size='small' weight='bold'>{repository}</Text>
-          <Text size='small' color='dark-6'>{moment(insertedAt).fromNow()} {message && `-- ${message}`}</Text>
+          <Text size='small' color='dark-6'>{moment(insertedAt).fromNow()} -- {creator && creator.name} {message && `-- ${message}`}</Text>
         </Box>
         <BuildStatus status={status} />
       </Box>
@@ -76,7 +76,7 @@ function BuildForm({setOpen}) {
   const {data} = useQuery(INSTALLATION_Q, {
     onCompleted: ({installations: {edges}}) => {
       setAttributes({...attributes, repository: edges[0].node.repository.name})
-    }
+    },
   })
   if (!data) return <Loading />
   const {edges} = data.installations
@@ -143,8 +143,13 @@ function applyDelta({builds: {edges, ...rest}, ...prev}, {delta, payload}) {
   }
 }
 
+const POLL_INTERVAL = 1000 * 60 * 2
+
 export default function Builds() {
-  const {data, loading, subscribeToMore, fetchMore} = useQuery(BUILDS_Q, {fetchPolicy: 'cache-and-network'})
+  const {data, loading, subscribeToMore, fetchMore} = useQuery(BUILDS_Q, {
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL
+  })
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
   useEffect(() => setBreadcrumbs([{text: 'builds', url: '/'}]), [])
   useEffect(() => subscribeToMore({

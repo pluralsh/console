@@ -13,6 +13,7 @@ import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import './build.css'
 import { BuildStatus } from './types'
+import { Avatar } from './EditUser'
 
  const HEADER_PADDING = {horizontal: 'medium', vertical: 'small'}
 
@@ -236,13 +237,20 @@ export default function Build() {
   }, [buildId, subscribeToMore])
 
   if (!data || loading) return <Loading />
-  const {commands: {edges}, ...build} = data.build
+  const {commands: {edges}, creator, ...build} = data.build
   return (
     <Box fill>
       <Box flex={false} direction='row' align='center' border='bottom'>
-        <Box fill='horizontal' pad={HEADER_PADDING}>
-          <Text size='small' weight='bold'>{build.repository}</Text>
-          <Text size='small' color='dark-3'>{build.message}</Text>
+        <Box fill='horizontal' pad={HEADER_PADDING} align='center'>
+          <Box fill='horizontal'>
+            <Text size='small' weight='bold'>{build.repository}</Text>
+            <Text size='small' color='dark-3'>{build.message}</Text>
+          </Box>
+          {creator && (
+            <Box flex={false}>
+              <Avatar me={creator} size='50px' />
+            </Box>
+          )}
         </Box>
         <BuildTimer insertedAt={build.insertedAt} completedAt={build.completedAt} status={build.status} />
         <Rebuild build={build} />

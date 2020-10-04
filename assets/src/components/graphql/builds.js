@@ -1,4 +1,5 @@
 import { gql } from 'apollo-boost'
+import { UserFragment } from './users';
 
 export const BuildFragment = gql`
   fragment BuildFragment on Build {
@@ -9,7 +10,11 @@ export const BuildFragment = gql`
     message
     insertedAt
     completedAt
+    creator {
+      ...UserFragment
+    }
   }
+  ${UserFragment}
 `;
 
 export const CommandFragment = gql`
@@ -22,6 +27,15 @@ export const CommandFragment = gql`
     insertedAt
   }
 `;
+
+export const ChangelogFragment = gql`
+  fragment ChangelogFragment on Changelog {
+    id
+    repo
+    tool
+    content
+  }
+`
 
 export const BUILDS_Q = gql`
   query Builds($cursor: String) {
@@ -51,10 +65,14 @@ export const BUILD_Q = gql`
           }
         }
       }
+      changelogs {
+        ...ChangelogFragment
+      }
     }
   }
   ${BuildFragment}
   ${CommandFragment}
+  ${ChangelogFragment}
 `;
 
 export const CREATE_BUILD = gql`
