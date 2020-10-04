@@ -121,7 +121,8 @@ ENV REPLACE_OS_VARS=true \
 
 WORKDIR /opt/app
 
-RUN helm plugin install https://github.com/chartmuseum/helm-push
+RUN helm plugin install https://github.com/chartmuseum/helm-push && \
+    helm plugin install https://github.com/databus23/helm-diff
 RUN mkdir -p /root/.ssh
 RUN chmod 0700 /root/.ssh
 RUN mkdir -p /root/.forge
