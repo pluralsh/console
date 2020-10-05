@@ -119,7 +119,7 @@ defmodule Watchman.Services.Builds do
       tool: Path.basename(diff),
       content: File.read!(diff)
     })
-    |> Repo.insert()
+    |> Repo.insert(on_conflict: :replace_all, conflict_target: [:build_id, :repo, :tool])
   end
 
   defp modify_status(build, state) do

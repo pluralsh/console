@@ -50,7 +50,7 @@ defmodule Watchman.Deployer do
   def handle_call(:cancel, _, %State{pid: nil} = state), do: {:reply, :ok, state}
   def handle_call(:cancel, _, %State{pid: pid} = state) when is_pid(pid) do
     Logger.info "Cancelling build with proc: #{inspect(pid)}"
-    Process.exit(pid, :kill)
+    GenServer.stop(pid, {:shutdown, :cancel})
     {:reply, :ok, state}
   end
 
@@ -73,34 +73,26 @@ defmodule Watchman.Deployer do
 
   def handle_info({:DOWN, ref, :process, _, _}, %State{ref: ref, build: build} = state) do
     Logger.info("tearing down build #{build.id}, proc: #{inspect(state.pid)}")
-    Builds.cancel(build)
     {:noreply, %{state | ref: nil, pid: nil, build: nil}}
   end
 
   def handle_info(_, state), do: {:noreply, state}
 
-  def terminate(_, %State{pid: pid, build: %Build{} = build}) when is_pid(pid) do
-    Process.exit(pid, :kill)
-    Builds.cancel(build)
-  end
   def terminate(_, _), do: :ok
 
   defp perform(storage, %Build{repository: repo, type: :bounce} = build) do
-    with_build(build, fn ->
-      with {:ok, _} <- storage.init(),
-        do: Forge.bounce(repo)
-    end)
+    with_build(build, [{storage, :init, []}, {Forge, :bounce, [repo]}])
   end
 
   defp perform(storage, %Build{repository: repo, message: message} = build) do
-    with_build(build, fn ->
-      with {:ok, _} <- storage.init(),
-           {:ok, _} <- Forge.build(repo),
-           {:ok, _} <- Forge.diff(repo),
-           {:ok, _} <- Forge.deploy(repo),
-           {:ok, _} <- storage.revise(commit_message(message, repo)),
-        do: storage.push()
-    end)
+    with_build(build, [
+      {storage, :init, []},
+      {Forge, :build, [repo]},
+      {Forge, :diff, [repo]},
+      {Forge, :deploy, [repo]},
+      {storage, :revise, [commit_message(message, repo)]},
+      {storage, :push, []}
+    ])
   end
 
   defp update(storage, repo, content) do
@@ -112,16 +104,9 @@ defmodule Watchman.Deployer do
       do: {:ok, res}
   end
 
-  defp with_build(%Build{} = build, fun) when is_function(fun) do
-    pid = spawn(fn ->
-      Command.set_build(build)
-      with {:ok, _} <- Builds.running(build),
-          {:ok, _} <- fun.() do
-        Builds.succeed(build)
-      else
-        _ -> Builds.fail(build)
-      end
-    end)
+  defp with_build(%Build{} = build, operations) do
+    {:ok, pid} = Watchman.Runner.start_link(build, operations)
+    Swarm.join(:builds, pid)
     ref = Process.monitor(pid)
     {pid, ref}
   end
