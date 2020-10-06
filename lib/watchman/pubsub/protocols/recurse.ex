@@ -12,7 +12,13 @@ defimpl Watchman.PubSub.Recurse, for: Any do
 end
 
 defimpl Watchman.PubSub.Recurse, for: Watchman.PubSub.BuildDeleted do
-  def process(%{item: item}) do
+  def process(%{item: _}) do
     Watchman.Deployer.cancel()
+  end
+end
+
+defimpl Watchman.PubSub.Recurse, for: Watchman.PubSub.BuildApproved do
+  def process(%{item: _}) do
+    Watchman.Runner.kick()
   end
 end

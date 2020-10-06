@@ -9,6 +9,10 @@ defmodule Watchman.Runner do
     GenServer.start_link(__MODULE__, {build, operations})
   end
 
+  def kick(), do: Swarm.publish(:builds, :kick)
+
+  def register(pid), do: Swarm.join(:builds, pid)
+
   def init({build, operations}) do
     Process.flag(:trap_exit, true)
     Command.set_build(build)
@@ -16,9 +20,12 @@ defmodule Watchman.Runner do
     {:ok, %State{build: build, operations: operations}}
   end
 
-  def handle_info(:kick, %State{operations: ops} = state) do
+  def handle_info(:kick, %State{operations: ops, build: build} = state) do
     case execute_stack(ops) do
       {:ok, _} -> {:stop, {:shutdown, :succeed}, state}
+      {:approval, rest} ->
+          {:ok, build} = Builds.pending(build)
+          {:noreply, %{state | operations: rest, build: build}}
       _ -> {:stop, {:shutdown, :fail}, state}
     end
   end

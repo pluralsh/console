@@ -1,22 +1,12 @@
 defmodule Watchman.GraphQl.Schema do
   use Watchman.GraphQl.Schema.Base
+  alias Watchman.Schema
   alias Watchman.GraphQl.Resolvers.{Build, Forge, User}
   import_types Absinthe.Plug.Types
 
   ## ENUMS
-
-  enum :status do
-    value :queued
-    value :running
-    value :successful
-    value :failed
-    value :cancelled
-  end
-
-  enum :build_type do
-    value :deploy
-    value :bounce
-  end
+  ecto_enum :status, Schema.Build.Status
+  ecto_enum :build_type, Schema.Build.Type
 
   enum :webhook_health do
     value :healthy
@@ -87,7 +77,8 @@ defmodule Watchman.GraphQl.Schema do
       resolve &Build.list_commands/2
     end
 
-    field :creator, :user, resolve: dataloader(User)
+    field :creator,  :user, resolve: dataloader(User)
+    field :approver, :user, resolve: dataloader(User)
     field :changelogs, list_of(:changelog), resolve: dataloader(Build)
 
     timestamps()

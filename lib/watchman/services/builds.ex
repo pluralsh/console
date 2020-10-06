@@ -73,6 +73,27 @@ defmodule Watchman.Services.Builds do
   def running(build),
     do: modify_status(build, :running)
 
+  def pending(build) do
+    start_transaction()
+    |> add_operation(:build, fn _ ->
+      modify_status(build, :pending)
+    end)
+    |> add_changelogs()
+    |> execute(extract: :build)
+    |> notify(:pending)
+  end
+
+  def approve(build_id, %User{id: user_id}) do
+    get!(build_id)
+    |> Build.changeset(%{
+      approver_id: user_id,
+      status: :running
+    })
+    |> Repo.update()
+    |> when_ok(&broadcast(&1, :update))
+    |> notify(:approve)
+  end
+
   def succeed(build) do
     start_transaction()
     |> add_operation(:build, fn _ ->
@@ -142,6 +163,10 @@ defmodule Watchman.Services.Builds do
     do: handle_notify(PubSub.BuildSucceeded, build)
   defp notify({:ok, %Build{} = build}, :failed),
     do: handle_notify(PubSub.BuildFailed, build)
+  defp notify({:ok, %Build{} = build}, :pending),
+    do: handle_notify(PubSub.BuildPending, build)
+  defp notify({:ok, %Build{} = build}, :approve),
+    do: handle_notify(PubSub.BuildApproved, build)
   defp notify({:ok, %Build{} = build}, :delete),
     do: handle_notify(PubSub.BuildDeleted, build)
   defp notify(error, _), do: error

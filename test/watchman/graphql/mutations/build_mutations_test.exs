@@ -40,4 +40,27 @@ defmodule Watchman.GraphQl.BuildMutationsTest do
       assert cancelled["id"] == build.id
     end
   end
+
+  describe "approveBuild" do
+    test "It can approve a pending build" do
+      build = insert(:build, status: :pending)
+      user  = insert(:user)
+
+      {:ok, %{data: %{"approveBuild" => approved}}} = run_query("""
+        mutation Approve($id: ID!) {
+          approveBuild(id: $id) {
+            id
+            status
+            approver {
+              id
+            }
+          }
+        }
+      """, %{"id" => build.id}, %{current_user: user})
+
+      assert approved["id"] == build.id
+      assert approved["status"] == "RUNNING"
+      assert approved["approver"]["id"] == user.id
+    end
+  end
 end

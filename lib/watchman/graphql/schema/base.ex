@@ -36,4 +36,19 @@ defmodule Watchman.GraphQl.Schema.Base do
       end
     end
   end
+
+  defmacro ecto_enum(name, module) do
+    module = Macro.expand(module, __CALLER__)
+    values = module.__enum_map__()
+             |> Enum.map(fn {key, _} ->
+                quote do
+                  value unquote(key)
+                end
+             end)
+    quote do
+      enum unquote(name) do
+        unquote(values)
+      end
+    end
+  end
 end

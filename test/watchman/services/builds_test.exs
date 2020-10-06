@@ -91,4 +91,32 @@ defmodule Watchman.Services.BuildsTest do
       assert completed.stdout == "some output"
     end
   end
+
+  describe "approve" do
+    test "builds can be approved" do
+      build = insert(:build, status: :pending)
+      user  = insert(:user)
+
+      {:ok, approved} = Builds.approve(build.id, user)
+
+      assert approved.status == :running
+      assert approved.approver_id == user.id
+    end
+  end
+
+  describe "pending" do
+    test "builds can be marked pending" do
+      build = insert(:build, status: :running)
+
+      {:ok, pending} = Builds.pending(build)
+
+      assert pending.status == :pending
+
+      %{changelogs: [changelog]} = Watchman.Repo.preload(pending, [:changelogs])
+
+      assert changelog.repo    == "forge"
+      assert changelog.tool    == "helm"
+      assert changelog.content == "test"
+    end
+  end
 end

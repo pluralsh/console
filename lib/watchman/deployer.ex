@@ -84,11 +84,23 @@ defmodule Watchman.Deployer do
     with_build(build, [{storage, :init, []}, {Forge, :bounce, [repo]}])
   end
 
-  defp perform(storage, %Build{repository: repo, message: message} = build) do
+  defp perform(storage, %Build{type: :deploy, repository: repo, message: message} = build) do
     with_build(build, [
       {storage, :init, []},
       {Forge, :build, [repo]},
       {Forge, :diff, [repo]},
+      {Forge, :deploy, [repo]},
+      {storage, :revise, [commit_message(message, repo)]},
+      {storage, :push, []}
+    ])
+  end
+
+  defp perform(storage, %Build{type: :approval, repository: repo, message: message} = build) do
+    with_build(build, [
+      {storage, :init, []},
+      {Forge, :build, [repo]},
+      {Forge, :diff, [repo]},
+      :approval,
       {Forge, :deploy, [repo]},
       {storage, :revise, [commit_message(message, repo)]},
       {storage, :push, []}
@@ -106,7 +118,8 @@ defmodule Watchman.Deployer do
 
   defp with_build(%Build{} = build, operations) do
     {:ok, pid} = Watchman.Runner.start_link(build, operations)
-    Swarm.join(:builds, pid)
+    Swarm.register_name(build.id, pid)
+    Watchman.Runner.register(pid)
     ref = Process.monitor(pid)
     {pid, ref}
   end

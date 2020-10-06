@@ -4,8 +4,8 @@ defmodule Watchman.Schema.Build do
 
   @expiry 1
 
-  defenum Type, deploy: 0, bounce: 1
-  defenum Status, queued: 0, running: 1, successful: 2, failed: 3, cancelled: 4
+  defenum Type, deploy: 0, bounce: 1, approval: 2
+  defenum Status, queued: 0, running: 1, successful: 2, failed: 3, cancelled: 4, pending: 5
 
   schema "builds" do
     field :repository,   :string
@@ -17,7 +17,8 @@ defmodule Watchman.Schema.Build do
     has_many :commands, Command
     has_many :changelogs, Changelog
 
-    belongs_to :creator, User
+    belongs_to :creator,  User
+    belongs_to :approver, User
 
     timestamps()
   end
@@ -43,7 +44,7 @@ defmodule Watchman.Schema.Build do
     from(b in query, where: b.inserted_at <= ^expiry)
   end
 
-  @valid ~w(repository type status completed_at message)a
+  @valid ~w(repository type status completed_at approver_id message)a
 
   def changeset(schema, attrs \\ %{}) do
     schema
