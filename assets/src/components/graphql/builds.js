@@ -13,6 +13,9 @@ export const BuildFragment = gql`
     creator {
       ...UserFragment
     }
+    approver {
+      ...UserFragment
+    }
   }
   ${UserFragment}
 `;
@@ -92,6 +95,15 @@ export const CANCEL_BUILD = gql`
   }
   ${BuildFragment}
 `;
+
+export const APPROVE_BUILD = gql`
+  mutation ApproveBuild($id: ID!) {
+    approveBuild(id: $id) {
+      ...BuildFragment
+    }
+  }
+  ${BuildFragment}
+`
 
 export const BUILD_SUB = gql`
   subscription BuildSub($buildId: String) {

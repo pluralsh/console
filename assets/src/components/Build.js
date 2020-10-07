@@ -5,18 +5,17 @@ import { ModalHeader, Button, Loading } from 'forge-core'
 import { Box, Text, Layer } from 'grommet'
 import Line from 'react-lazylog/build/Line'
 import { ansiparse } from './utils/ansi'
-import { BUILD_Q, COMMAND_SUB, BUILD_SUB, CREATE_BUILD, CANCEL_BUILD } from './graphql/builds'
+import { BUILD_Q, COMMAND_SUB, BUILD_SUB, CREATE_BUILD, CANCEL_BUILD, APPROVE_BUILD } from './graphql/builds'
 import { mergeEdges } from './graphql/utils'
 import moment from 'moment'
 import { Checkmark, StatusCritical } from 'grommet-icons'
 import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import './build.css'
-import { BuildStatus } from './types'
+import { BuildStatus, BuildTypes } from './types'
 import { Avatar } from './EditUser'
 import { groupBy } from 'lodash'
 import { TabHeader, TabSelector } from './utils/TabSelector'
-import Ansi from "ansi-to-react"
 import { AnsiText } from './utils/AnsiText'
 
  const HEADER_PADDING = {horizontal: 'medium'}
@@ -51,6 +50,8 @@ function buildStyles(status) {
       return {color: 'error', label: 'Failed, '}
     case BuildStatus.SUCCESSFUL:
       return {color: 'success', label: 'Passed, '}
+    case BuildStatus.PENDING:
+      return {color: 'status-warning', label: 'Pending Approval '}
     default:
       return {}
   }
@@ -59,13 +60,21 @@ function buildStyles(status) {
 function BuildTimer({insertedAt, completedAt, status}) {
   const {color, label} = buildStyles(status)
   return (
-    <Box flex={false} pad={HEADER_PADDING} border='left' fill='vertical' justify='center' align='center'>
+    <OptionContainer>
       <Box flex={false} pad='xsmall' background={color}>
         <Timer
           insertedAt={insertedAt}
           completedAt={completedAt}
           status={label} />
       </Box>
+    </OptionContainer>
+  )
+}
+
+function OptionContainer({children, ...props}) {
+  return (
+    <Box flex={false} pad={HEADER_PADDING} border='left' fill='vertical' justify='center' align='center' {...props}>
+      {children}
     </Box>
   )
 }
@@ -80,16 +89,9 @@ function Rebuild({build: {repository, message, type}}) {
 
   return (
     <>
-    <Box
-      pad={HEADER_PADDING}
-      hoverIndicator='light-3'
-      onClick={() => setOpen(true)}
-      border='left'
-      fill='vertical'
-      justify='center'
-      align='center'>
+    <OptionContainer hoverIndicator='light-3' onClick={() => setOpen(true)}>
       <Text size='small'>restart</Text>
-    </Box>
+    </OptionContainer>
     {open && (
       <Layer modal>
         <Box width='40vw'>
@@ -110,16 +112,9 @@ function Cancel({build: {id}}) {
 
   return (
     <>
-    <Box
-      pad={HEADER_PADDING}
-      hoverIndicator='light-3'
-      onClick={() => setOpen(true)}
-      border='left'
-      fill='vertical'
-      justify='center'
-      align='center'>
+    <OptionContainer hoverIndicator='light-3' onClick={() => setOpen(true)}>
       <Text size='small'>cancel</Text>
-    </Box>
+    </OptionContainer>
     {open && (
       <Layer modal>
         <Box width='40vw'>
@@ -237,6 +232,25 @@ function ChangeChoice({text, onClick, enabled}) {
   )
 }
 
+function Approval({build}) {
+  const [mutation, {loading}] = useMutation(APPROVE_BUILD, {variables: {id: build.id}})
+  if (build.approver) {
+    return (
+      <OptionContainer>
+        <Text size='small'>approved by: {build.approver.name}</Text>
+      </OptionContainer>
+    )
+  }
+
+  if (build.status !== BuildStatus.PENDING) return null
+
+  return (
+    <OptionContainer>
+      <Button label='approve' loading={loading} onClick={mutation} />
+    </OptionContainer>
+  )
+}
+
 const SIDEBAR_WIDTH = '120px'
 
 function Changelog({build: {changelogs}}) {
@@ -289,6 +303,7 @@ export default function Build() {
   if (!data || loading) return <Loading />
   const {commands: {edges}, creator, ...build} = data.build
   const hasChanges = build.changelogs && build.changelogs.length > 0
+  const isPending = build.status === BuildTypes.PENDING
 
   return (
     <Box fill>
@@ -313,6 +328,7 @@ export default function Build() {
             </Box>
           )}
         </Box>
+        <Approval build={build} />
         <BuildTimer insertedAt={build.insertedAt} completedAt={build.completedAt} status={build.status} />
         <Rebuild build={build} />
         <Cancel build={build} />

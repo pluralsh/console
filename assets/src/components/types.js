@@ -3,5 +3,12 @@ export const BuildStatus = {
   CANCELLED: 'CANCELLED',
   FAILED: 'FAILED',
   QUEUED: 'QUEUED',
-  RUNNING: 'RUNNING'
+  RUNNING: 'RUNNING',
+  PENDING: 'PENDING'
+}
+
+export const BuildTypes = {
+  BOUNCE: 'BOUNCE',
+  DEPLOY: 'DEPLOY',
+  APPROVAL: 'APPROVAL'
 }

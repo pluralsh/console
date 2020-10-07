@@ -9,7 +9,7 @@ import { mergeEdges } from './graphql/utils'
 import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { INSTALLATION_Q } from './graphql/forge'
-import { BuildStatus as Status } from './types'
+import { BuildStatus as Status, BuildTypes } from './types'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -42,6 +42,8 @@ function BuildStatus({status}) {
       return <BuildStatusInner background='error' text='failed' />
     case Status.SUCCESSFUL:
       return <BuildStatusInner background='success' text='successful' />
+    case Status.PENDING:
+      return <BuildStatusInner background='status-warning' text='pending approval' />
     default:
       return null
   }
@@ -97,7 +99,7 @@ function BuildForm({setOpen}) {
       </FormField>
       <FormField label='type'>
         <Select
-          options={[{display: 'deploy', type: 'DEPLOY'}, {display: 'bounce', type: 'BOUNCE'}]}
+          options={Object.keys(BuildTypes).map((type) => ({type, display: type.toLowerCase()}))}
           value={attributes.type}
           labelKey='display'
           valueKey={{key: 'type', reduce: true}}

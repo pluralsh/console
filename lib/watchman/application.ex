@@ -51,6 +51,7 @@ defmodule Watchman.Application do
 
   defp start_deployer() do
     # Horde.DynamicSupervisor.wait_for_quorum(@horde, 30_000)
+    :timer.sleep(4_000 + :rand.uniform(2_000))
     Horde.DynamicSupervisor.start_child(@horde, {Watchman.Deployer, determine_storage()})
   end
 

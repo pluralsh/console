@@ -12,7 +12,7 @@ import "ace-builds/src-noconflict/mode-yaml"
 import "ace-builds/src-noconflict/theme-terminal"
 import { chunk } from '../utils/array'
 
-export function EditConfiguration({repository: {name, configuration, icon, description}}) {
+export function EditConfiguration({repository: {name, configuration, icon}}) {
   const [config, setConfig] = useState(configuration)
   const [mutation, {loading}] = useMutation(UPDATE_CONFIGURATION, {
     variables: {repository: name, content: config},
@@ -22,16 +22,13 @@ export function EditConfiguration({repository: {name, configuration, icon, descr
         ...edge,
         node: {...edge.node, repository: {...edge.node.repository, configuration}}
       })
-
       cache.writeQuery({
         query: CONFIGURATIONS_Q,
-        data: {
-          ...prev, installations: {
-            ...installations, edges: installations.edges.map((edge) => (
-              edge.node.repository.name === name ? updateEdge(edge) : edge
-            ))
-          }
-        }
+        data: {...prev, installations: {
+          ...installations, edges: installations.edges.map((edge) => (
+            edge.node.repository.name === name ? updateEdge(edge) : edge
+          ))
+        }}
       })
     }
   })
