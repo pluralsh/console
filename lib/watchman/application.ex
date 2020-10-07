@@ -25,9 +25,9 @@ defmodule Watchman.Application do
          members: :auto
        ]
       },
+      Watchman.Bootstrapper,
       Watchman.Grafana.Token,
       {Absinthe.Subscription, [WatchmanWeb.Endpoint]},
-      deployer_bootstrap()
     ] ++ consumers() ++ [
       Piazza.GracefulShutdown
     ]
@@ -40,23 +40,6 @@ defmodule Watchman.Application do
     WatchmanWeb.Endpoint.config_change(changed, removed)
     :ok
   end
-
-  defp deployer_bootstrap() do
-    %{
-      id: Watchman.DeployerBootstrap,
-      restart: :transient,
-      start: {Task, :start_link, [&start_deployer/0]}
-    }
-  end
-
-  defp start_deployer() do
-    # Horde.DynamicSupervisor.wait_for_quorum(@horde, 30_000)
-    :timer.sleep(4_000 + :rand.uniform(2_000))
-    Horde.DynamicSupervisor.start_child(@horde, {Watchman.Deployer, determine_storage()})
-  end
-
-  # only support git for now
-  defp determine_storage(), do: Watchman.Storage.Git
 
   defp consumers(), do: Watchman.conf(:consumers) || []
 end
