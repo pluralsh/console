@@ -88,7 +88,7 @@ defmodule Watchman.GraphQl.Schema do
     field :id,      non_null(:id)
     field :repo,    non_null(:string)
     field :tool,    non_null(:string)
-    field :content, non_null(:string)
+    field :content, :string
 
     timestamps()
   end
