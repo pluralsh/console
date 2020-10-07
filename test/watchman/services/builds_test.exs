@@ -101,6 +101,8 @@ defmodule Watchman.Services.BuildsTest do
 
       assert approved.status == :running
       assert approved.approver_id == user.id
+
+      assert_receive {:event, %PubSub.BuildApproved{item: ^approved}}
     end
   end
 

@@ -21,6 +21,7 @@ defmodule Watchman.Runner do
   end
 
   def handle_info(:kick, %State{operations: ops, build: build} = state) do
+    {:ok, build} = Builds.running(build)
     case execute_stack(ops) do
       {:ok, _} -> {:stop, {:shutdown, :succeed}, state}
       {:approval, rest} ->
@@ -29,6 +30,7 @@ defmodule Watchman.Runner do
       _ -> {:stop, {:shutdown, :fail}, state}
     end
   end
+  def handle_info(_, state), do: {:noreply, state}
 
   def terminate({:shutdown, :succeed}, %{build: build}), do: Builds.succeed(build)
   def terminate({:shutdown, :fail}, %{build: build}), do: Builds.fail(build)

@@ -118,6 +118,7 @@ export const BUILD_SUB = gql`
     }
   }
   ${BuildFragment}
+  ${ChangelogFragment}
 `;
 
 export const COMMAND_SUB = gql`

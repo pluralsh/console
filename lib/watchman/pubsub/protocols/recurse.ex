@@ -18,7 +18,10 @@ defimpl Watchman.PubSub.Recurse, for: Watchman.PubSub.BuildDeleted do
 end
 
 defimpl Watchman.PubSub.Recurse, for: Watchman.PubSub.BuildApproved do
+  require Logger
   def process(%{item: _}) do
+    Logger.info "kicking any active runners"
+    Swarm.members(:builds) |> IO.inspect()
     Watchman.Runner.kick()
   end
 end

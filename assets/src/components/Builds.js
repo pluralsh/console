@@ -145,7 +145,7 @@ function applyDelta({builds: {edges, ...rest}, ...prev}, {delta, payload}) {
   }
 }
 
-const POLL_INTERVAL = 1000 * 60 * 2
+const POLL_INTERVAL = 1000 * 10
 
 export default function Builds() {
   const {data, loading, subscribeToMore, fetchMore} = useQuery(BUILDS_Q, {

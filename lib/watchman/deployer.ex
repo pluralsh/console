@@ -118,7 +118,7 @@ defmodule Watchman.Deployer do
 
   defp with_build(%Build{} = build, operations) do
     {:ok, pid} = Watchman.Runner.start_link(build, operations)
-    Swarm.register_name(build.id, pid)
+    Swarm.register_name(build.id, pid) |> IO.inspect()
     Watchman.Runner.register(pid)
     ref = Process.monitor(pid)
     {pid, ref}
