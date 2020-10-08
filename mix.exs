@@ -65,10 +65,11 @@ defmodule Watchman.MixProject do
       {:poison, "~> 3.1"},
       {:mojito, "~> 0.3.0"},
       {:reverse_proxy_plug, "~> 1.2.1"},
-      {:kazan, "~> 0.11"},
+      {:kazan, "~> 0.11", github: "obmarg/kazan"},
       {:comeonin, "~> 5.1.2"},
       {:argon2_elixir, "~> 2.0"},
       {:guardian, "~> 1.2.1"},
+      {:httpoison, "~> 1.7"},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
       {:mimic, "~> 1.1", only: :test}
     ]

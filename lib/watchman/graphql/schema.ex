@@ -119,20 +119,42 @@ defmodule Watchman.GraphQl.Schema do
   end
 
   object :repository do
-    field :id, non_null(:id)
-    field :name, non_null(:string)
-    field :description, :string
-    field :icon, :string
-    field :dashboards, list_of(:dashboard)
+    field :id,            non_null(:id)
+    field :name,          non_null(:string)
+    field :description,   :string
+    field :icon,          :string
     field :configuration, :string, resolve: &Forge.resolve_configuration/3
-    field :grafana_dns, :string, resolve: fn _, _, _ ->
+    field :grafana_dns,   :string, resolve: fn _, _, _ ->
       {:ok, Watchman.conf(:grafana_dns)}
     end
   end
 
   object :dashboard do
-    field :name, non_null(:string)
-    field :uid,  non_null(:string)
+    field :id,   non_null(:string), resolve: fn %{metadata: %{name: n}}, _, _ -> {:ok, n} end
+    field :spec, non_null(:dashboard_spec)
+  end
+
+  object :dashboard_spec do
+    field :name,        :string
+    field :description, :string
+    field :timeslices,  list_of(:string)
+    field :labels,      list_of(:dashboard_label)
+    field :queries,     list_of(:dashboard_query)
+  end
+
+  object :dashboard_label do
+    field :name,   non_null(:string)
+    field :values, list_of(:string)
+  end
+
+  object :dashboard_query do
+    field :name,    non_null(:string)
+    field :queries, list_of(:dashboard_metric)
+  end
+
+  object :dashboard_metric do
+    field :legend, non_null(:string)
+    field :query,  :string
   end
 
   object :configuration do

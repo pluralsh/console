@@ -1,22 +1,11 @@
 import { gql } from 'apollo-boost'
 
-export const DashboardFragment = gql`
-  fragment DashboardFragment on Dashboard {
-    name
-    uid
-  }
-`;
-
 export const RepositoryFragment = gql`
   fragment RepositoryFragment on Repository {
     id
     name
     description
-    dashboards {
-      ...DashboardFragment
-    }
   }
-  ${DashboardFragment}
 `;
 
 export const InstallationFragment = gql`

@@ -2,7 +2,7 @@ defmodule Watchman.GraphQl do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
   import Watchman.GraphQl.Helpers
-  alias Watchman.GraphQl.Resolvers.{Build, Forge, Webhook, User}
+  alias Watchman.GraphQl.Resolvers.{Build, Forge, Webhook, User, Dashboard}
   alias Watchman.Middleware.Authenticated
 
   import_types Watchman.GraphQl.Schema
@@ -70,6 +70,21 @@ defmodule Watchman.GraphQl do
       middleware Authenticated
 
       resolve &Webhook.list_webhooks/2
+    end
+
+    field :dashboards, list_of(:dashboard) do
+      middleware Authenticated
+      arg :repo, non_null(:string)
+
+      resolve &Dashboard.resolve_dashboards/2
+    end
+
+    field :dashboard, :dashboard do
+      middleware Authenticated
+      arg :repo, non_null(:string)
+      arg :name, non_null(:string)
+
+      resolve &Dashboard.resolve_dashboard/2
     end
   end
 

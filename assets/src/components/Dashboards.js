@@ -10,6 +10,11 @@ import { BUILD_PADDING } from './Builds'
 import { CONFIGURATIONS_Q } from './graphql/forge'
 import { Next } from 'grommet-icons'
 import { chunk } from '../utils/array'
+import { DASHBOARDS_Q } from './graphql/dashboards'
+import yaml from 'js-yaml'
+import AceEditor from "react-ace"
+import "ace-builds/src-noconflict/mode-yaml"
+import "ace-builds/src-noconflict/theme-terminal"
 
 function grafanaHost() {
   const [_, ...rest] = apiHost().split(".")
@@ -32,9 +37,16 @@ function logUrl(grafana, name) {
   return `https://${grafana}/explore?orgId=1&left=${encodeURI(JSON.stringify(query))}`
 }
 
-function ViewDashboards({repository: {icon, name, dashboards, grafanaDns}}) {
-  const [current, setCurrent] = useState(dashboards.length > 0?  dashboards[0].name : null)
-  const currentDash = dashboards.find(({name}) => name === current)
+function ViewDashboards({repository: {icon, name}}) {
+  const [current, setCurrent] = useState(null)
+  const {data} = useQuery(DASHBOARDS_Q, {variables: {repo: name}, fetchPolicy: 'cache-and-network'})
+  useEffect(() => {
+    if (data && data.dashboards.length > 0) {
+      setCurrent(data.dashboards[0])
+    }
+  }, [data])
+  if (!data) return <Loading />
+
   return (
     <Box height='calc(100vh - 45px)'>
       <Box gap='small'>
@@ -48,30 +60,34 @@ function ViewDashboards({repository: {icon, name, dashboards, grafanaDns}}) {
             {icon && <img alt='' src={icon} height='40px' width='40px' />}
             <Box gap='xxsmall'>
               <Text weight='bold' size='small'>{name} dashboards</Text>
-              <Box direction='row' align='center' gap='xsmall'>
-                <Anchor href={logUrl(grafanaDns, name)} target="_blank">view logs</Anchor>
-                <Next size='10px' />
-              </Box>
             </Box>
           </Box>
-          {dashboards.length > 0 && (
+          {data.dashboards.length > 0 && (
             <Select
-              options={dashboards.map(({name}) => name)}
+              options={data.dashboards}
               value={current}
-              onChange={({option}) => setCurrent(option)} />
+              labelKey={({spec: {name}}) => name}
+              onChange={({value}) => setCurrent(value)} />
           )}
         </Box>
       </Box>
       <Box height='calc(100vh - 105px)'>
-        {dashboards.length <= 0 ? (
+        {data.dashboards.length <= 0 ? (
           <Box pad='medium'>
             <Text>No dashboards for this repository, contact the publisher to fix this</Text>
-          </Box>) : (
-          <iframe
-            title={currentDash.name}
-            style={{display: 'block', height: 'calc(100vh - 105px', width: '100%'}}
-            frameBorder='0'
-            src={`${GRAFANA_URL}/d/${currentDash.uid}?orgId=1&refresh=5s&kiosk`} />
+          </Box>
+        ) : (
+          <AceEditor
+            mode='yaml'
+            theme='terminal'
+            height='calc(100vh - 105px)'
+            width='100%'
+            name={name}
+            value={current ? yaml.safeDump(current) : ''}
+            showGutter
+            showPrintMargin
+            highlightActiveLine
+            editorProps={{ $blockScrolling: true }} />
         )}
       </Box>
     </Box>
