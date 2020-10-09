@@ -81,8 +81,11 @@ defmodule Watchman.GraphQl do
 
     field :dashboard, :dashboard do
       middleware Authenticated
-      arg :repo, non_null(:string)
-      arg :name, non_null(:string)
+      arg :repo,   non_null(:string)
+      arg :name,   non_null(:string)
+      arg :step,   :string
+      arg :offset, :integer
+      arg :labels, list_of(:label_input)
 
       resolve &Dashboard.resolve_dashboard/2
     end

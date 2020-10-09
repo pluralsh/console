@@ -39,6 +39,11 @@ defmodule Watchman.GraphQl.Schema do
     field :email, :string
   end
 
+  input_object :label_input do
+    field :name,  :string
+    field :value, :string
+  end
+
   ## OBJECTS
 
   object :user do

@@ -30,7 +30,8 @@ defmodule Prometheus.Client do
 
   def extract_labels(query, label) do
     with {:ok, %Response{data: %Data{result: results}}} <- query(query, @offset, "5m", %{}) do
-      Enum.map(results, fn %Result{metric: metrics} -> Map.get(metrics, label) end)
+      results
+      |> Enum.map(fn %Result{metric: metrics} -> Map.get(metrics, label) end)
       |> Enum.uniq()
     else
       _ -> []
@@ -38,7 +39,7 @@ defmodule Prometheus.Client do
   end
 
   defp variable_subst(value, variables) do
-    Enum.reduce(variables, value, fn {key, value}, str ->
+    Enum.reduce(variables, value, fn %{name: key, value: value}, str ->
       String.replace(str, "$#{key}", value)
     end)
   end

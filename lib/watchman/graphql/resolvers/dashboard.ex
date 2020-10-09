@@ -2,14 +2,17 @@ defmodule Watchman.GraphQl.Resolvers.Dashboard do
   alias Watchman.Kube.{Client, Dashboard}
   alias Prometheus.Client, as: PrometheusClient
 
+  @default_offset 30 * 60
+
   def resolve_dashboards(%{repo: name}, _) do
     with {:ok, %{items: items}} <- Client.list_dashboards(name),
       do: {:ok, items}
   end
 
-  def resolve_dashboard(%{repo: name, name: id}, _) do
-    with {:ok, dash} <- Client.get_dashboard(name, id),
-      do: {:ok, hydrate(dash)}
+  def resolve_dashboard(%{repo: name, name: id} = args, _) do
+    with {:ok, dash} <- Client.get_dashboard(name, id) do
+      {:ok, hydrate(dash, Map.get(args, :labels, []), Map.get(args, :offset, @default_offset))}
+    end
   end
 
   def hydrate(%Dashboard{
@@ -17,7 +20,7 @@ defmodule Watchman.GraphQl.Resolvers.Dashboard do
       labels: labels,
       graphs: graphs,
     } = spec
-  } = dashboard, variables \\ %{}, start \\ 30 * 60, step \\ "1m") do
+  } = dashboard, variables \\ [], start \\ 30 * 60, step \\ "1m") do
     [labels, graphs] =
       [
         Task.async(fn -> hydrate_labels(labels) end),
