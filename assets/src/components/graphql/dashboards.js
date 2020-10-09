@@ -10,7 +10,7 @@ export const DashboardFragment = gql`
       labels {
         name
       }
-      queries {
+      graphs {
         queries {
           query
           legend

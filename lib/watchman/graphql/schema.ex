@@ -139,7 +139,7 @@ defmodule Watchman.GraphQl.Schema do
     field :description, :string
     field :timeslices,  list_of(:string)
     field :labels,      list_of(:dashboard_label)
-    field :queries,     list_of(:dashboard_query)
+    field :graphs,      list_of(:dashboard_graph)
   end
 
   object :dashboard_label do
@@ -147,7 +147,7 @@ defmodule Watchman.GraphQl.Schema do
     field :values, list_of(:string)
   end
 
-  object :dashboard_query do
+  object :dashboard_graph do
     field :name,    non_null(:string)
     field :queries, list_of(:dashboard_metric)
   end

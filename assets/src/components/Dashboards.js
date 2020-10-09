@@ -1,41 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from 'react-apollo'
-import { Box, Text, Select, Anchor } from 'grommet'
+import { Box, Text, Select } from 'grommet'
 import { Scroller, Loading } from 'forge-core'
 import { RepositoryChoice } from './Configuration'
 import { BreadcrumbsContext } from './Breadcrumbs'
-import { apiHost, secure } from '../helpers/hostname'
 import { BUILD_PADDING } from './Builds'
 import { CONFIGURATIONS_Q } from './graphql/forge'
-import { Next } from 'grommet-icons'
 import { chunk } from '../utils/array'
 import { DASHBOARDS_Q } from './graphql/dashboards'
-import yaml from 'js-yaml'
-import AceEditor from "react-ace"
-import "ace-builds/src-noconflict/mode-yaml"
-import "ace-builds/src-noconflict/theme-terminal"
-
-function grafanaHost() {
-  const [_, ...rest] = apiHost().split(".")
-  return `watchman-grafana.${rest.join('.')}`
-}
-
-const PROTOCOL = secure() ? 'https' : 'http'
-const GRAFANA_URL = `${PROTOCOL}://${grafanaHost()}`
-
-function logUrl(grafana, name) {
-  const query = [
-    "now-1h",
-    "now",
-    "Loki",
-    {"expr": `{namespace="${name}"}`},
-    {"mode":"Logs"},
-    {"ui":[true,true,true,"none"]}
-  ]
-
-  return `https://${grafana}/explore?orgId=1&left=${encodeURI(JSON.stringify(query))}`
-}
+import Dashboard from './Dashboard'
 
 function ViewDashboards({repository: {icon, name}}) {
   const [current, setCurrent] = useState(null)
@@ -76,19 +50,7 @@ function ViewDashboards({repository: {icon, name}}) {
           <Box pad='medium'>
             <Text>No dashboards for this repository, contact the publisher to fix this</Text>
           </Box>
-        ) : (
-          <AceEditor
-            mode='yaml'
-            theme='terminal'
-            height='calc(100vh - 105px)'
-            width='100%'
-            name={name}
-            value={current ? yaml.safeDump(current) : ''}
-            showGutter
-            showPrintMargin
-            highlightActiveLine
-            editorProps={{ $blockScrolling: true }} />
-        )}
+        ) : (current && <Dashboard repo={name} name={current.id} />)}
       </Box>
     </Box>
   )

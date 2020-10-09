@@ -20,7 +20,7 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
                 name
                 values
               }
-              queries {
+              graphs {
                 queries {
                   query
                   legend
@@ -37,7 +37,7 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
       assert found["spec"]["timeslices"] == ["10m"]
       assert found["spec"]["description"] == "description"
       assert found["spec"]["labels"] == [%{"name" => "label", "values" => ["value"]}]
-      assert found["spec"]["queries"] == [
+      assert found["spec"]["graphs"] == [
         %{
           "name" => "queries",
           "queries" => [%{"query" => "some-query", "legend" => "legend"}]
@@ -62,7 +62,7 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
                 name
                 values
               }
-              queries {
+              graphs {
                 queries {
                   query
                   legend
@@ -79,7 +79,7 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
       assert found["spec"]["timeslices"] == ["10m"]
       assert found["spec"]["description"] == "description"
       assert found["spec"]["labels"] == [%{"name" => "label", "values" => ["value"]}]
-      assert found["spec"]["queries"] == [
+      assert found["spec"]["graphs"] == [
         %{
           "name" => "queries",
           "queries" => [%{"query" => "some-query", "legend" => "legend"}]
@@ -98,8 +98,8 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
         description: "description",
         timeslices: ["10m"],
         labels: [%Dashboard.Label{name: "label", values: ["value"]}],
-        queries: [
-          %Dashboard.Queries{
+        graphs: [
+          %Dashboard.Graph{
             name: "queries",
             queries: [
               %Dashboard.Query{

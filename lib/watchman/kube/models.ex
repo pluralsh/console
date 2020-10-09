@@ -10,7 +10,7 @@ defmodule Watchman.Kube.Dashboard do
     end
   end
 
-  defmodule Queries do
+  defmodule Graph do
     use Kazan.Model
 
     defmodel "Query", "forgelabs.sh", "v1alpha1" do
@@ -47,7 +47,7 @@ defmodule Watchman.Kube.Dashboard do
       property :default_time, "defaultTime", :string
       property :timeslices,   "timeslices",  {:array, :string}
       property :labels,       "labels",      {:array, Watchman.Kube.Dashboard.Label}
-      property :queries,      "queries",     {:array, Watchman.Kube.Dashboard.Queries}
+      property :graphs,       "graphs",     {:array, Watchman.Kube.Dashboard.Graph}
     end
   end
 
