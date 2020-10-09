@@ -26,8 +26,10 @@ defmodule Prometheus.Client do
     |> IO.inspect()
   end
 
+  @offset 60 * 60
+
   def extract_labels(query, label) do
-    with {:ok, %Response{data: %Data{result: results}}} <- query(query, 60 * 60, "5m", %{}) do
+    with {:ok, %Response{data: %Data{result: results}}} <- query(query, @offset, "5m", %{}) do
       Enum.map(results, fn %Result{metric: metrics} -> Map.get(metrics, label) end)
       |> Enum.uniq()
     else
