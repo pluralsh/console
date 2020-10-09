@@ -6,12 +6,14 @@ defmodule Prometheus.Client do
 
   def query(query, start, step, variables) do
     query = variable_subst(query, variables)
+    now = Timex.now()
+    start = Timex.shift(now, seconds: -start)
     HTTPoison.post(
       Path.join(host(), "/api/v1/query_range"),
       {:form, [
         {"query", query},
-        {"end", "now"},
-        {"start", start},
+        {"end", DateTime.to_iso8601(now)},
+        {"start", DateTime.to_iso8601(start)},
         {"step", step}
       ]},
       @headers
@@ -25,7 +27,7 @@ defmodule Prometheus.Client do
   end
 
   def extract_labels(query, label) do
-    with {:ok, %Response{data: %Data{result: results}}} <- query(query, "now-1h", "5m", %{}) do
+    with {:ok, %Response{data: %Data{result: results}}} <- query(query, 60 * 60, "5m", %{}) do
       Enum.map(results, fn %Result{metric: metrics} -> Map.get(metrics, label) end)
       |> Enum.uniq()
     else

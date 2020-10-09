@@ -9,11 +9,16 @@ export const DashboardFragment = gql`
       timeslices
       labels {
         name
+        values
       }
       graphs {
         queries {
           query
           legend
+          results {
+            timestamp
+            value
+          }
         }
         name
       }

@@ -9,7 +9,7 @@ defmodule Watchman.GraphQl.Resolvers.Dashboard do
 
   def resolve_dashboard(%{repo: name, name: id}, _) do
     with {:ok, dash} <- Client.get_dashboard(name, id),
-      do: {:ok, hydrate(dash)} |> IO.inspect()
+      do: {:ok, hydrate(dash)}
   end
 
   def hydrate(%Dashboard{
@@ -17,9 +17,12 @@ defmodule Watchman.GraphQl.Resolvers.Dashboard do
       labels: labels,
       graphs: graphs,
     } = spec
-  } = dashboard, variables \\ %{}, start \\ "now-30m", step \\ "1m") do
+  } = dashboard, variables \\ %{}, start \\ 30 * 60, step \\ "1m") do
     [labels, graphs] =
-      [Task.async(fn -> hydrate_labels(labels) end), Task.async(fn -> hydrate_graphs(graphs, variables, start, step) end)]
+      [
+        Task.async(fn -> hydrate_labels(labels) end),
+        Task.async(fn -> hydrate_graphs(graphs, variables, start, step) end)
+      ]
       |> Enum.map(&Task.await/1)
     put_in(dashboard.spec, %{spec | labels: labels, graphs: graphs})
   end

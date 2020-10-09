@@ -45,13 +45,13 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
   describe "dashboard" do
     test "it can fetch a dashboard for a repo" do
       expect(Kazan, :run, fn _ -> {:ok, dashboard()} end)
-      expect(HTTPoison, :post, fn _, {:form, [{"query", "label-q"}, _, _, _]}, _ ->
-        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [%{metric: %{other: "l"}}]}})}}
-      end)
-      expect(HTTPoison, :post, fn _, {:form, [{"query", "some-query"}, _, _, _]}, _ ->
-        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
-          %{values: [[1, "1"]]}
-        ]}})}}
+      expect(HTTPoison, :post, 2, fn
+        _, {:form, [{"query", "label-q"}, _, _, _]}, _ ->
+          {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [%{metric: %{other: "l"}}]}})}}
+        _, {:form, [{"query", "some-query"}, _, _, _]}, _ ->
+          {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+            %{values: [[1, "1"]]}
+          ]}})}}
       end)
 
       {:ok, %{data: %{"dashboard" => found}}} = run_query("""
