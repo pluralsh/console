@@ -47,7 +47,7 @@ defmodule Watchman.Kube.Dashboard do
       property :default_time, "defaultTime", :string
       property :timeslices,   "timeslices",  {:array, :string}
       property :labels,       "labels",      {:array, Watchman.Kube.Dashboard.Label}
-      property :graphs,       "graphs",     {:array, Watchman.Kube.Dashboard.Graph}
+      property :graphs,       "graphs",      {:array, Watchman.Kube.Dashboard.Graph}
     end
   end
 

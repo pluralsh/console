@@ -1,8 +1,9 @@
 defmodule Watchman.GraphQl.DashboardQueriesTest do
-  use Watchman.DataCase, async: true
+  use Watchman.DataCase, async: false
   alias Watchman.{Kube.Dashboard, Kube}
   use Mimic
 
+  setup :set_mimic_global
 
   describe "dashboards" do
     test "it can list dashboards for a repo" do
@@ -16,10 +17,6 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
               name
               description
               timeslices
-              labels {
-                name
-                values
-              }
               graphs {
                 queries {
                   query
@@ -36,7 +33,6 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
       assert found["spec"]["name"] == "dashboard"
       assert found["spec"]["timeslices"] == ["10m"]
       assert found["spec"]["description"] == "description"
-      assert found["spec"]["labels"] == [%{"name" => "label", "values" => ["value"]}]
       assert found["spec"]["graphs"] == [
         %{
           "name" => "queries",
@@ -49,6 +45,14 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
   describe "dashboard" do
     test "it can fetch a dashboard for a repo" do
       expect(Kazan, :run, fn _ -> {:ok, dashboard()} end)
+      expect(HTTPoison, :post, fn _, {:form, [{"query", "label-q"}, _, _, _]}, _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [%{metric: %{other: "l"}}]}})}}
+      end)
+      expect(HTTPoison, :post, fn _, {:form, [{"query", "some-query"}, _, _, _]}, _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+          %{values: [[1, "1"]]}
+        ]}})}}
+      end)
 
       {:ok, %{data: %{"dashboard" => found}}} = run_query("""
         query Dashboards($repo: String!, $name: String!) {
@@ -66,6 +70,10 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
                 queries {
                   query
                   legend
+                  results {
+                    timestamp
+                    value
+                  }
                 }
                 name
               }
@@ -78,11 +86,16 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
       assert found["spec"]["name"] == "dashboard"
       assert found["spec"]["timeslices"] == ["10m"]
       assert found["spec"]["description"] == "description"
-      assert found["spec"]["labels"] == [%{"name" => "label", "values" => ["value"]}]
+      assert found["spec"]["labels"] == [
+        %{"name" => "label", "values" => ["value"]},
+        %{"name" => "other", "values" => ["l"]}
+      ]
       assert found["spec"]["graphs"] == [
         %{
           "name" => "queries",
-          "queries" => [%{"query" => "some-query", "legend" => "legend"}]
+          "queries" => [
+            %{"query" => "some-query", "legend" => "legend", "results" => [%{"timestamp" => 1000, "value" => "1"}]}
+          ]
         }
       ]
     end
@@ -97,7 +110,10 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
         name: "dashboard",
         description: "description",
         timeslices: ["10m"],
-        labels: [%Dashboard.Label{name: "label", values: ["value"]}],
+        labels: [
+          %Dashboard.Label{name: "label", values: ["value"]},
+          %Dashboard.Label{name: "other", query: %{query: "label-q", label: "other"}}
+        ],
         graphs: [
           %Dashboard.Graph{
             name: "queries",

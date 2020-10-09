@@ -7,6 +7,7 @@ Mimic.copy(Watchman.Commands.Command)
 Mimic.copy(Watchman.Forge.Repositories)
 Mimic.copy(Mojito)
 Mimic.copy(Kazan)
+Mimic.copy(HTTPoison)
 
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Watchman.Repo, :manual)

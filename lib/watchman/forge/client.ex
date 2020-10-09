@@ -12,7 +12,6 @@ defmodule Watchman.Forge.Client do
       query: query,
       variables: variables
     }), [pool: false])
-    |> IO.inspect()
     |> decode(type_spec)
   end
 

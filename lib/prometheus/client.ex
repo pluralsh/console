@@ -21,6 +21,16 @@ defmodule Prometheus.Client do
         Poison.decode(body, as: %Response{data: %Data{result: [%Result{}]}})
       error -> error
     end
+    |> IO.inspect()
+  end
+
+  def extract_labels(query, label) do
+    with {:ok, %Response{data: %Data{result: results}}} <- query(query, "now-1h", "5m", %{}) do
+      Enum.map(results, fn %Result{metric: metrics} -> Map.get(metrics, label) end)
+      |> Enum.uniq()
+    else
+      _ -> []
+    end
   end
 
   defp variable_subst(value, variables) do

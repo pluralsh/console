@@ -155,6 +155,12 @@ defmodule Watchman.GraphQl.Schema do
   object :dashboard_metric do
     field :legend, non_null(:string)
     field :query,  :string
+    field :results, list_of(:metric_result)
+  end
+
+  object :metric_result do
+    field :timestamp, :integer, resolve: fn %{timestamp: ts}, _, _ -> {:ok, ceil(ts * 1000)} end
+    field :value,     :string
   end
 
   object :configuration do

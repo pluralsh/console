@@ -22,3 +22,6 @@ config :watchman, Watchman.Cron,
     {"@daily", {Watchman.Cron.Jobs, :prune_builds, []}},
     {"@daily", {Watchman.Cron.Jobs, :prune_invites, []}}
   ]
+
+config :watchman,
+  prometheus: "http://bootstrap-prometheus-server.bootstrap"
