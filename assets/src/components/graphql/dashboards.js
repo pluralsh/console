@@ -32,6 +32,7 @@ export const DASHBOARDS_Q = gql`
       id
       spec {
         name
+        description
       }
     }
   }

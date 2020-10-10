@@ -12,12 +12,11 @@ function DashboardGraph({graph}) {
       {id: legend, data: results.map(({timestamp, value}) => ({x: timestamp, y: parseFloat(value)}))}
     ))
   ), [graph])
-  console.log(data)
 
   return (
     <Box width='50%' pad='small' border='backgroundDark' background='white' height='300px'>
       <Box direction='row' align='center' justify='center'>
-        <Text size='small'>{graph.name}</Text>
+        <Text size='small' weight='bold'>{graph.name}</Text>
       </Box>
       <Box fill>
         <Graph data={data} />
@@ -54,7 +53,7 @@ export default function Dashboard({repo, name}) {
 
   if (!data) return <Loading />
   const {dashboard} = data
-  console.log(dashboard)
+
   return (
     <Box fill background='backgroundColor' style={{overflow: 'auto'}}>
       <Box direction='row' pad='small' gap='small' justify='end' align='center'>
@@ -65,7 +64,7 @@ export default function Dashboard({repo, name}) {
       <Box fill pad={{horizontal: 'small', bottom: 'small'}}>
         {chunk(dashboard.spec.graphs, 2).map((chunk, ind) => (
           <Box key={ind} direction='row' gap='small' margin={{vertical: 'small'}}>
-            {chunk.map((graph) => <DashboardGraph graph={graph} />)}
+            {chunk.map((graph) => <DashboardGraph key={graph.name} graph={graph} />)}
           </Box>
         ))}
       </Box>

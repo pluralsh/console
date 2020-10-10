@@ -32,9 +32,13 @@ function ViewDashboards({repository: {icon, name}}) {
           height='60px'>
           <Box direction='row' fill='horizontal' gap='small' align='center'>
             {icon && <img alt='' src={icon} height='40px' width='40px' />}
-            <Box gap='xxsmall'>
+            {!current && (<Box gap='xxsmall'>
               <Text weight='bold' size='small'>{name} dashboards</Text>
-            </Box>
+            </Box>)}
+            {current && (<Box>
+              <Text weight='bold' size='small'>{current.spec.name}</Text>
+              <Text size='small' color='dark-3'>{current.spec.description}</Text>
+            </Box>)}
           </Box>
           {data.dashboards.length > 0 && (
             <Select
