@@ -94,7 +94,7 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
         %{
           "name" => "queries",
           "queries" => [
-            %{"query" => "some-query", "legend" => "legend", "results" => [%{"timestamp" => 1000, "value" => "1"}]}
+            %{"query" => "some-query", "legend" => "legend", "results" => [%{"timestamp" => 1, "value" => "1"}]}
           ]
         }
       ]

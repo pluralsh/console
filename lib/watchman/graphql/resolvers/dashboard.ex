@@ -56,7 +56,6 @@ defmodule Watchman.GraphQl.Resolvers.Dashboard do
     |> Task.async_stream(fn %Dashboard.Query{query: q} = query ->
       with {:ok, %{data: %{result: [%{values: values} | _]}}} <- PrometheusClient.query(q, start, now, step, variables) do
         values
-        |> IO.inspect()
         |> Enum.map(fn [ts, value] -> %{timestamp: ts, value: value} end)
         |> add_results(query)
       else

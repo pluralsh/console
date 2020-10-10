@@ -14,10 +14,13 @@ export function Graph({data, yFormat}) {
         margin={{ top: 50, right: 110, bottom: 75, left: 70 }}
         areaOpacity={.5}
         useMesh
+        enablePoints={false}
+        animate={false}
         xScale={{type: 'point'}}
-        yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: true, reverse: false }}
+        yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false, reverse: false }}
         colors={{scheme: 'category10'}}
         yFormat={yFormat}
+        xFormat={dateFormat}
         enableGridX={false}
         axisLeft={{
           orient: 'left',
@@ -32,13 +35,11 @@ export function Graph({data, yFormat}) {
           orient: 'bottom',
           tickSize: 5,
           tickPadding: 5,
+          format: dateFormat,
           tickRotation: 45,
           legendOffset: 36,
           legendPosition: 'middle'
         }}
-        pointSize={5}
-        pointBorderWidth={2}
-        pointBorderColor={{ theme: 'background' }}
         pointLabel="y"
         pointLabelYOffset={-15}
         legends={[

@@ -164,7 +164,7 @@ defmodule Watchman.GraphQl.Schema do
   end
 
   object :metric_result do
-    field :timestamp, :integer, resolve: fn %{timestamp: ts}, _, _ -> {:ok, ceil(ts * 1000)} end
+    field :timestamp, :integer, resolve: fn %{timestamp: ts}, _, _ -> {:ok, ceil(ts)} end
     field :value,     :string
   end
 

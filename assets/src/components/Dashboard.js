@@ -4,15 +4,15 @@ import { Loading } from 'forge-core'
 import { DASHBOARD_Q } from './graphql/dashboards'
 import { Box, Text } from 'grommet'
 import { chunk } from 'lodash'
-import { dateFormat, Graph } from './utils/Graph'
+import { Graph } from './utils/Graph'
 
 function DashboardGraph({graph}) {
-  console.log(graph)
   const data = useMemo(() => (
-    graph.queries.map(({name, results}) => (
-      {id: name, data: results.map(({timestamp, value}) => ({x: timestamp, y: parseFloat(value)}))}
+    graph.queries.map(({legend, results}) => (
+      {id: legend, data: results.map(({timestamp, value}) => ({x: timestamp, y: parseFloat(value)}))}
     ))
   ), [graph])
+  console.log(data)
 
   return (
     <Box width='50%' pad='small' border='backgroundDark' background='white' height='300px'>
