@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useQuery } from 'react-apollo'
 import { Loading } from 'forge-core'
 import { DASHBOARD_Q } from './graphql/dashboards'
-import { Box, Text } from 'grommet'
+import { Box, Select, Text } from 'grommet'
 import { chunk } from 'lodash'
 import { Graph } from './utils/Graph'
 
@@ -26,27 +26,49 @@ function DashboardGraph({graph}) {
   )
 }
 
+function LabelSelect({label, onSelect}) {
+  const [value, setValue] = useState(label.values[0])
+
+  return (
+    <Select
+      options={label.values}
+      value={value}
+      onChange={({value}) => {
+        setValue(value)
+        onSelect(value)
+      }} />
+  )
+}
+
 export default function Dashboard({repo, name}) {
   const [labelMap, setLabelMap] = useState(null)
   const labels = useMemo(() => Object.entries(labelMap || {}).map(([name, value]) =>  ({name, value})), [labelMap])
-  const {data} = useQuery(DASHBOARD_Q, {variables: {repo, name, labels}, pollInterval: 1000 * 30})
+  const {data} = useQuery(DASHBOARD_Q, {variables: {repo, name, labels}, pollInterval: 1000 * 30, fetchPolicy: 'no-cache'})
   useEffect(() => {
     if (!labelMap && data && data.dashboard) {
       const map = data.dashboard.spec.labels.reduce((acc, {name, values}) => ({...acc, [name]: values[0]}), {})
       setLabelMap(map)
     }
   }, [data, labelMap, setLabelMap])
+  const setLabel = useCallback((label, value) => setLabelMap({...labelMap, [label]: value}), [labelMap, setLabelMap])
 
   if (!data) return <Loading />
   const {dashboard} = data
   console.log(dashboard)
   return (
     <Box fill background='backgroundColor' style={{overflow: 'auto'}}>
-      {chunk(dashboard.spec.graphs, 2).map((chunk, ind) => (
-        <Box key={ind} direction='row' gap='small' margin={{vertical: 'small'}}>
-          {chunk.map((graph) => <DashboardGraph graph={graph} />)}
-        </Box>
-      ))}
+      <Box direction='row' pad='small' gap='small' justify='end' align='center'>
+        {data.dashboard.spec.labels.filter(({values}) => values.length > 0).map((label) => (
+          <LabelSelect label={label} onSelect={(value) => setLabel(label.name, value)} />
+        ))}
+      </Box>
+      <Box fill pad={{horizontal: 'small', bottom: 'small'}}>
+        {chunk(dashboard.spec.graphs, 2).map((chunk, ind) => (
+          <Box key={ind} direction='row' gap='small' margin={{vertical: 'small'}}>
+            {chunk.map((graph) => <DashboardGraph graph={graph} />)}
+          </Box>
+        ))}
+      </Box>
     </Box>
   )
 }

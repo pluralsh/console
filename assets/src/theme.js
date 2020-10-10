@@ -72,6 +72,7 @@ export const DEFAULT_THEME = {
     }
   },
   select: {
+    icons: {color: 'brand'},
     options: {
       text: {size: 'small'}
     }
