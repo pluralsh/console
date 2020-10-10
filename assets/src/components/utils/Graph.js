@@ -1,27 +1,40 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { ResponsiveLine } from '@nivo/line'
 import moment from 'moment'
+import { last } from 'lodash'
+import { ThemeContext } from 'grommet'
+import { normalizeColor } from 'grommet/utils'
 
 export function dateFormat(date) {
-  return moment.unix(date).format('MM/DD h:mm:ss a')
+  return moment(date).format('MM/DD h:mm:ss a')
 }
 
 export function Graph({data, yFormat}) {
+  const theme = useContext(ThemeContext)
+  console.log(data)
+  const hasData = !!data[0].data[0]
   return (
     <ResponsiveLine
+        theme={{
+          textColor: 'white',
+          tooltip: {container: {color: '#13141a'}},
+          legends: {text: {fill: 'white'}},
+          axis: {legend: {text: {fill: 'white'}}},
+          grid: {line: {stroke: normalizeColor('dark-2', theme)}},
+        }}
         data={data}
         curve='catmullRom'
         margin={{ top: 50, right: 110, bottom: 75, left: 70 }}
         areaOpacity={.5}
         useMesh
+        lineWidth='2px'
         enablePoints={false}
         animate={false}
-        xScale={{type: 'point'}}
+        xScale={{type: 'time', format: 'native'}}
         yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false, reverse: false }}
         colors={{scheme: 'category10'}}
         yFormat={yFormat}
         xFormat={dateFormat}
-        enableGridX={false}
         axisLeft={{
           orient: 'left',
           tickSize: 5,
@@ -32,13 +45,12 @@ export function Graph({data, yFormat}) {
           legendPosition: 'top'
         }}
         axisBottom={{
+          format: '%H:%M',
+          tickValues: 'every 5 minutes',
           orient: 'bottom',
-          tickSize: 5,
-          tickPadding: 5,
-          format: dateFormat,
-          tickRotation: 45,
-          legendOffset: 36,
-          legendPosition: 'middle'
+          legendPosition: 'middle',
+          legend: hasData ? `${dateFormat(data[0].data[0].x)} to ${dateFormat(last(data[0].data).x)}` : null,
+          legendOffset: 46,
         }}
         pointLabel="y"
         pointLabelYOffset={-15}
@@ -57,6 +69,7 @@ export function Graph({data, yFormat}) {
               symbolSize: 12,
               symbolShape: 'circle',
               symbolBorderColor: 'rgba(0, 0, 0, .5)',
+              itemTextColor: 'white',
               effects: [
                   {
                       on: 'hover',

@@ -9,12 +9,12 @@ import { Graph } from './utils/Graph'
 function DashboardGraph({graph}) {
   const data = useMemo(() => (
     graph.queries.map(({legend, results}) => (
-      {id: legend, data: results.map(({timestamp, value}) => ({x: timestamp, y: parseFloat(value)}))}
+      {id: legend, data: results.map(({timestamp, value}) => ({x: new Date(timestamp * 1000), y: parseFloat(value)}))}
     ))
   ), [graph])
 
   return (
-    <Box width='50%' pad='small' border='backgroundDark' background='white' height='300px'>
+    <Box className='dashboard' round='xsmall' width='50%' pad='small' background='cardDetail' height='300px'>
       <Box direction='row' align='center' justify='center'>
         <Text size='small' weight='bold'>{graph.name}</Text>
       </Box>
