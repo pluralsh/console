@@ -4,10 +4,8 @@ defmodule Prometheus.Client do
 
   def host(), do: Application.get_env(:watchman, :prometheus)
 
-  def query(query, start, step, variables) do
+  def query(query, start, now, step, variables) do
     query = variable_subst(query, variables)
-    now = Timex.now()
-    start = Timex.shift(now, seconds: -start)
     HTTPoison.post(
       Path.join(host(), "/api/v1/query_range"),
       {:form, [
@@ -29,7 +27,9 @@ defmodule Prometheus.Client do
   @offset 60 * 60
 
   def extract_labels(query, label) do
-    with {:ok, %Response{data: %Data{result: results}}} <- query(query, @offset, "5m", %{}) do
+    now = Timex.now()
+    start = Timex.shift(now, seconds: -@offset)
+    with {:ok, %Response{data: %Data{result: results}}} <- query(query, start, now, "5m", %{}) do
       results
       |> Enum.map(fn %Result{metric: metrics} -> Map.get(metrics, label) end)
       |> Enum.uniq()

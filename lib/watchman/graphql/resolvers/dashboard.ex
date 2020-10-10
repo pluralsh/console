@@ -10,8 +10,10 @@ defmodule Watchman.GraphQl.Resolvers.Dashboard do
   end
 
   def resolve_dashboard(%{repo: name, name: id} = args, _) do
+    now = Timex.now()
+    start = Timex.shift(now, seconds: -Map.get(args, :offset, @default_offset))
     with {:ok, dash} <- Client.get_dashboard(name, id) do
-      {:ok, hydrate(dash, Map.get(args, :labels, []), Map.get(args, :offset, @default_offset))}
+      {:ok, hydrate(dash, Map.get(args, :labels, []), start, now)}
     end
   end
 
@@ -20,11 +22,11 @@ defmodule Watchman.GraphQl.Resolvers.Dashboard do
       labels: labels,
       graphs: graphs,
     } = spec
-  } = dashboard, variables \\ [], start \\ 30 * 60, step \\ "1m") do
+  } = dashboard, variables, start, now, step \\ "1m") do
     [labels, graphs] =
       [
         Task.async(fn -> hydrate_labels(labels) end),
-        Task.async(fn -> hydrate_graphs(graphs, variables, start, step) end)
+        Task.async(fn -> hydrate_graphs(graphs, variables, start, now, step) end)
       ]
       |> Enum.map(&Task.await/1)
     put_in(dashboard.spec, %{spec | labels: labels, graphs: graphs})
@@ -41,18 +43,18 @@ defmodule Watchman.GraphQl.Resolvers.Dashboard do
     |> Enum.map(fn {:ok, res} -> res end)
   end
 
-  defp hydrate_graphs(graphs, variables, start, step) do
+  defp hydrate_graphs(graphs, variables, start, now, step) do
     graphs
     |> Task.async_stream(fn %Dashboard.Graph{queries: queries} = graph ->
-      %{graph | queries: hydrate_queries(queries, variables, start, step)}
+      %{graph | queries: hydrate_queries(queries, variables, start, now, step)}
     end, max_concurrency: 5)
     |> Enum.map(fn {:ok, res} -> res end)
   end
 
-  defp hydrate_queries(queries, variables, start, step) do
+  defp hydrate_queries(queries, variables, start, now, step) do
     queries
     |> Task.async_stream(fn %Dashboard.Query{query: q} = query ->
-      with {:ok, %{data: %{result: [%{values: values} | _]}}} <- PrometheusClient.query(q, start, step, variables) do
+      with {:ok, %{data: %{result: [%{values: values} | _]}}} <- PrometheusClient.query(q, start, now, step, variables) do
         values
         |> IO.inspect()
         |> Enum.map(fn [ts, value] -> %{timestamp: ts, value: value} end)

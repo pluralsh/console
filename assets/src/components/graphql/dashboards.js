@@ -38,8 +38,8 @@ export const DASHBOARDS_Q = gql`
 `
 
 export const DASHBOARD_Q = gql`
-  query Dashboard($repo: String!, $name: String!) {
-    dashboard(repo: $repo, name: $name) {
+  query Dashboard($repo: String!, $name: String!, $labels: [LabelInput]) {
+    dashboard(repo: $repo, name: $name, labels: $labels) {
       ...DashboardFragment
     }
   }
