@@ -27,12 +27,12 @@ export function Graph({data, yFormat}) {
         margin={{ top: 50, right: 110, bottom: 75, left: 70 }}
         areaOpacity={.5}
         useMesh
-        lineWidth='2px'
+        lineWidth='3px'
         enablePoints={false}
         animate={false}
         xScale={{type: 'time', format: 'native'}}
         yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false, reverse: false }}
-        colors={{scheme: 'category10'}}
+        colors={{scheme: 'paired'}}
         yFormat={yFormat}
         xFormat={dateFormat}
         axisLeft={{
