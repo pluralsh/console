@@ -5,6 +5,7 @@ defmodule Watchman.Application do
 
   def start(_type, _args) do
     topologies = Application.get_env(:libcluster, :topologies)
+    WatchmanWeb.Plugs.MetricsExporter.setup()
 
     children = [
       Watchman.PubSub.Broadcaster,

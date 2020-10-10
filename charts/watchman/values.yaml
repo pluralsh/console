@@ -46,6 +46,8 @@ tolerations: []
 affinity: {}
 
 postgresql:
+  metrics:
+    enabled: true
   postgresqlUsername: watchman
   postgresqlDatabase: watchman
   nameOverride: watchman

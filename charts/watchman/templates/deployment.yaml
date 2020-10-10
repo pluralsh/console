@@ -16,6 +16,9 @@ spec:
         app.kubernetes.io/name: watchman
         app.kubernetes.io/instance: {{ .Release.Name }}
       annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: {{ .Values.service.port | quote }}
         checksum/config: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
     spec:
       serviceAccountName: watchman

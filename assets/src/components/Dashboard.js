@@ -27,15 +27,13 @@ function DashboardGraph({graph}) {
 
 function LabelSelect({label, onSelect}) {
   const [value, setValue] = useState(label.values[0])
+  useEffect(() => onSelect(value), [value])
 
   return (
     <Select
       options={label.values}
       value={value}
-      onChange={({value}) => {
-        setValue(value)
-        onSelect(value)
-      }} />
+      onChange={({value}) => setValue(value)} />
   )
 }
 
@@ -58,7 +56,7 @@ export default function Dashboard({repo, name}) {
     <Box fill background='backgroundColor' style={{overflow: 'auto'}}>
       <Box direction='row' pad='small' gap='small' justify='end' align='center'>
         {data.dashboard.spec.labels.filter(({values}) => values.length > 0).map((label) => (
-          <LabelSelect label={label} onSelect={(value) => setLabel(label.name, value)} />
+          <LabelSelect key={`${label.name}:${name}:${repo}`} label={label} onSelect={(value) => setLabel(label.name, value)} />
         ))}
       </Box>
       <Box fill pad={{horizontal: 'small', bottom: 'small'}}>

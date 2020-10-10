@@ -68,6 +68,8 @@ defmodule Watchman.MixProject do
       {:kazan, "~> 0.11", github: "obmarg/kazan"},
       {:comeonin, "~> 5.1.2"},
       {:argon2_elixir, "~> 2.0"},
+      {:prometheus_ex, "~> 3.0"},
+      {:prometheus_plugs, "~> 1.1.1"},
       {:guardian, "~> 1.2.1"},
       {:httpoison, "~> 1.7"},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
