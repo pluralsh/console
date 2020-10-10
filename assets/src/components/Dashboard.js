@@ -63,7 +63,7 @@ export default function Dashboard({repo, name}) {
       </Box>
       <Box fill pad={{horizontal: 'small', bottom: 'small'}}>
         {chunk(dashboard.spec.graphs, 2).map((chunk, ind) => (
-          <Box key={ind} direction='row' gap='small' margin={{vertical: 'small'}}>
+          <Box flex={false} key={ind} direction='row' gap='small' margin={{vertical: 'small'}}>
             {chunk.map((graph) => <DashboardGraph key={graph.name} graph={graph} />)}
           </Box>
         ))}
