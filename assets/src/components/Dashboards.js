@@ -10,6 +10,15 @@ import { CONFIGURATIONS_Q } from './graphql/forge'
 import { chunk } from '../utils/array'
 import { DASHBOARDS_Q } from './graphql/dashboards'
 import Dashboard from './Dashboard'
+import Logs from './Logs'
+
+export function DashboardHeader({name, label}) {
+  return (
+    <Box gap='xxsmall'>
+      <Text weight='bold' size='small'>{name} {label}</Text>
+    </Box>
+  )
+}
 
 function ViewDashboards({repository: {name}, setModifier, setSelect}) {
   const [current, setCurrent] = useState(null)
@@ -30,7 +39,7 @@ function ViewDashboards({repository: {name}, setModifier, setSelect}) {
     setModifier(current ? (<Box>
         <Text weight='bold' size='small'>{current.spec.name}</Text>
         <Text size='small' color='dark-3'>{current.spec.description}</Text>
-      </Box>) : (<Box gap='xxsmall'><Text weight='bold' size='small'>{name} dashboards</Text></Box>))
+      </Box>) : (<DashboardHeader name={name} label='dashboards' />))
   }, [current])
   if (!data) return <Loading />
 
@@ -74,7 +83,7 @@ function Observability({repository}) {
           <ViewDashboards repository={repository} setModifier={setModifier} setSelect={setSelect} />
         </TabContent>
         <TabContent name='logs'>
-          <ViewDashboards repository={repository} setModifier={setModifier} setSelect={setSelect} />
+          <Logs repository={repository} setModifier={setModifier} />
         </TabContent>
       </Tabs>
     </Box>

@@ -16,7 +16,7 @@ defmodule Watchman.GraphQl.Resolvers.Observability do
     now    = Timex.now()
     start  = args[:start] || nano_ts(now)
     end_ts = args[:end] || (start - (@default_offset * 1000 * 1000))
-    Observability.get_logs(query, start, end_ts, limit)
+    Observability.get_logs(query, end_ts, start, limit)
   end
 
   defp nano_ts(ts), do: Timex.to_unix(ts) * 1000 * 1000

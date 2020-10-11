@@ -12,6 +12,7 @@ defmodule Loki.Client do
     |> case do
       {:ok, %{body: body, status_code: 200}} ->
         {:ok, body
+              |> IO.inspect()
               |> Poison.decode(as: %Response{data: %Data{result: [%Result{}]}})
               |> convert()}
       error ->

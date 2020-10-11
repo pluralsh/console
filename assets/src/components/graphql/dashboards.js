@@ -29,7 +29,7 @@ export const DashboardFragment = gql`
 
 export const LogStreamFragment = gql`
   fragment LogStreamFragment on LogStream {
-    streams
+    stream
     values {
       timestamp
       value
@@ -60,7 +60,7 @@ export const DASHBOARD_Q = gql`
 
 export const LOGS_Q = gql`
   query Logs($query: String!, $start: Int) {
-    logs(query: $query, start: $start, limit: 200) {
+    logs(query: $query, start: $start, limit: 50) {
       ...LogStreamFragment
     }
   }
