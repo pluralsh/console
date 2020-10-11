@@ -121,8 +121,8 @@ defmodule Watchman.GraphQl.ObservabilityQueriesTest do
     test "it can fetch logs for a loki query" do
       expect(HTTPoison, :get, fn _ ->
         {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
-            %{stream: %{"var" => "val"}, values: [[1, "hello"]]},
-            %{stream: %{"var" => "val2"}, values: [[1, "world"]]}
+            %{stream: %{"var" => "val"}, values: [["1", "hello"]]},
+            %{stream: %{"var" => "val2"}, values: [["1", "world"]]}
           ]}}
         )}}
       end)
@@ -140,10 +140,10 @@ defmodule Watchman.GraphQl.ObservabilityQueriesTest do
       """, %{"query" => ~s({namespace="watchman"}), "limit" => 100}, %{current_user: insert(:user)})
 
       assert first["stream"]["var"] == "val"
-      assert first["values"] == [%{"timestamp" => 1000, "value" => "hello"}]
+      assert first["values"] == [%{"timestamp" => 1, "value" => "hello"}]
 
       assert second["stream"]["var"] == "val2"
-      assert second["values"] == [%{"timestamp" => 1000, "value" => "world"}]
+      assert second["values"] == [%{"timestamp" => 1, "value" => "world"}]
     end
   end
 

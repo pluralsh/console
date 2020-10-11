@@ -7,7 +7,7 @@ import { LOGS_Q } from './graphql/dashboards'
 import { AnsiText } from './utils/AnsiText'
 import moment from 'moment'
 
-const POLL_INTERVAL = 30 * 1000
+const POLL_INTERVAL = 10 * 1000
 
 // ghostbusters!
 function* crossStreams(streams) {
@@ -30,9 +30,11 @@ function LogContent({logs}) {
   const lines = useMemo(() => [...crossStreams(logs)], [logs])
 
   return lines.map(({line: {value, timestamp}}) => (
-    <Box direction='row' gap='small' height='19px' hoverIndicator='#444' onClick={() => null}>
-      <Text size='small' weight={500}>{moment(new Date(Math.round(timestamp / 1000))).format()}</Text>
-      <AnsiText text={value} />
+    <Box flex={false} direction='row' gap='small' hoverIndicator='#444' onClick={() => null}>
+      <Box flex={false}>
+        <Text size='small' weight={500}>{moment(new Date(Math.round(timestamp / (1000 * 1000)))).format()}</Text>
+      </Box>
+      <AnsiText text={value.trim()} />
     </Box>
   ))
 }

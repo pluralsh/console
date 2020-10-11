@@ -12,7 +12,6 @@ defmodule Loki.Client do
     |> case do
       {:ok, %{body: body, status_code: 200}} ->
         {:ok, body
-              |> IO.inspect()
               |> Poison.decode(as: %Response{data: %Data{result: [%Result{}]}})
               |> convert()}
       error ->
@@ -22,7 +21,7 @@ defmodule Loki.Client do
 
   defp convert({:ok, %Response{data: %Data{result: results}} = resp}) when is_list(results) do
     results = Enum.map(results, fn %{values: values} = result ->
-      %{result | values: Enum.map(values, fn [ts, v] -> %Value{timestamp: ceil(ts * 1000), value: v} end)}
+      %{result | values: Enum.map(values, fn [ts, v] -> %Value{timestamp: String.to_integer(ts), value: v} end)}
     end)
     put_in(resp.data.result, results)
   end

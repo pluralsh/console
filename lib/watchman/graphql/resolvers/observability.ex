@@ -1,6 +1,7 @@
 defmodule Watchman.GraphQl.Resolvers.Observability do
   alias Watchman.Services.Observability
   @default_offset 30 * 60
+  @nano 1_000_000
 
   def resolve_dashboards(%{repo: name}, _), do: Observability.get_dashboards(name)
 
@@ -14,10 +15,10 @@ defmodule Watchman.GraphQl.Resolvers.Observability do
 
   def resolve_logs(%{query: query, limit: limit} = args, _) do
     now    = Timex.now()
-    start  = args[:start] || nano_ts(now)
-    end_ts = args[:end] || (start - (@default_offset * 1000 * 1000))
+    start  = (args[:start] || ts(now)) / @nano
+    end_ts = (args[:end] || ((start - @default_offset) * @nano)) / @nano
     Observability.get_logs(query, end_ts, start, limit)
   end
 
-  defp nano_ts(ts), do: Timex.to_unix(ts) * 1000 * 1000
+  defp ts(ts), do: Timex.to_unix(ts) * @nano
 end
