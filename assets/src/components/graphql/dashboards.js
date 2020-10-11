@@ -27,6 +27,16 @@ export const DashboardFragment = gql`
   }
 `;
 
+export const LogStreamFragment = gql`
+  fragment LogStreamFragment on LogStream {
+    streams
+    values {
+      timestamp
+      value
+    }
+  }
+`;
+
 export const DASHBOARDS_Q = gql`
   query Dashboards($repo: String!) {
     dashboards(repo: $repo) {
@@ -47,3 +57,12 @@ export const DASHBOARD_Q = gql`
   }
   ${DashboardFragment}
 `
+
+export const LOGS_Q = gql`
+  query Logs($query: String!, $start: Int) {
+    logs(query: $query, start: $start, limit: 200) {
+      ...LogStreamFragment
+    }
+  }
+  ${LogStreamFragment}
+`;
