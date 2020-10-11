@@ -9,7 +9,7 @@ export function dateFormat(date) {
   return moment(date).format('MM/DD h:mm:ss a')
 }
 
-export function Graph({data, yFormat}) {
+export function Graph({data, yFormat, tick}) {
   const theme = useContext(ThemeContext)
   console.log(data)
   const hasData = !!data[0].data[0]
@@ -32,7 +32,7 @@ export function Graph({data, yFormat}) {
         animate={false}
         xScale={{type: 'time', format: 'native'}}
         yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false, reverse: false }}
-        colors={{scheme: 'paired'}}
+        colors={{scheme: 'nivo'}}
         yFormat={yFormat}
         xFormat={dateFormat}
         axisLeft={{
@@ -46,7 +46,7 @@ export function Graph({data, yFormat}) {
         }}
         axisBottom={{
           format: '%H:%M',
-          tickValues: 'every 5 minutes',
+          tickValues: tick || 'every 5 minutes',
           orient: 'bottom',
           legendPosition: 'middle',
           legend: hasData ? `${dateFormat(data[0].data[0].x)} to ${dateFormat(last(data[0].data).x)}` : null,
