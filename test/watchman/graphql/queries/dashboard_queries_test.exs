@@ -37,6 +37,10 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
         %{
           "name" => "queries",
           "queries" => [%{"query" => "some-query", "legend" => "legend"}]
+        },
+        %{
+          "name" => "formatted",
+          "queries" => [%{"query" => "formatted-query", "legend" => nil}]
         }
       ]
     end
@@ -45,12 +49,17 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
   describe "dashboard" do
     test "it can fetch a dashboard for a repo" do
       expect(Kazan, :run, fn _ -> {:ok, dashboard()} end)
-      expect(HTTPoison, :post, 2, fn
+      expect(HTTPoison, :post, 3, fn
         _, {:form, [{"query", "label-q"}, _, _, _]}, _ ->
           {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [%{metric: %{other: "l"}}]}})}}
         _, {:form, [{"query", "some-query"}, _, _, _]}, _ ->
           {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
             %{values: [[1, "1"]]}
+          ]}})}}
+        _, {:form, [{"query", "formatted-query"}, _, _, _]}, _ ->
+          {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+            %{metric: %{"var" => "val"}, values: [[1, "1"]]},
+            %{metric: %{"var" => "val2"}, values: [[1, "1"]]}
           ]}})}}
       end)
 
@@ -96,6 +105,13 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
           "queries" => [
             %{"query" => "some-query", "legend" => "legend", "results" => [%{"timestamp" => 1, "value" => "1"}]}
           ]
+        },
+        %{
+          "name" => "formatted",
+          "queries" => [
+            %{"query" => "formatted-query", "legend" => "legend-val", "results" => [%{"timestamp" => 1, "value" => "1"}]},
+            %{"query" => "formatted-query", "legend" => "legend-val2", "results" => [%{"timestamp" => 1, "value" => "1"}]}
+          ]
         }
       ]
     end
@@ -121,6 +137,15 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
               %Dashboard.Query{
                 query: "some-query",
                 legend: "legend"
+              }
+            ]
+          },
+          %Dashboard.Graph{
+            name: "formatted",
+            queries: [
+              %Dashboard.Query{
+                query: "formatted-query",
+                legend_format: "legend-$var"
               }
             ]
           }
