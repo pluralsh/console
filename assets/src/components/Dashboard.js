@@ -65,6 +65,7 @@ function RangePicker({duration, setDuration}) {
 }
 
 function DashboardGraph({graph, tick}) {
+  console.log(graph)
   const data = useMemo(() => (
     graph.queries.map(({legend, results}) => (
       {id: legend, data: results.map(({timestamp, value}) => ({x: new Date(timestamp * 1000), y: parseFloat(value)}))}
@@ -77,7 +78,7 @@ function DashboardGraph({graph, tick}) {
         <Text size='small' weight='bold'>{graph.name}</Text>
       </Box>
       <Box fill>
-        <Graph data={data} tick={tick} />
+        <Graph data={data} yFormat={(v) => format(v, graph.format)} tick={tick} />
       </Box>
     </Box>
   )
