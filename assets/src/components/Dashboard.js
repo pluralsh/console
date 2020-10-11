@@ -23,7 +23,7 @@ function format(value, format) {
     case 'bytes':
       return filesize(value)
     case 'percent':
-      return `${value}%`
+      return `${Math.round(value * 10000) / 100}%`
     default:
       return value
   }
