@@ -5,8 +5,10 @@ defmodule Watchman.Kube.Dashboard do
     use Kazan.Model
 
     defmodel "Query", "forgelabs.sh", "v1alpha1" do
-      property :query,  "query",  :string
-      property :legend, "legend", :string
+      property :query,         "query",  :string
+      property :legend,        "legend", :string
+      property :format,        "format", :string
+      property :legend_format, "legendFormat", :string
     end
   end
 
