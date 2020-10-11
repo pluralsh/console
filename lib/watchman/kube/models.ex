@@ -7,7 +7,6 @@ defmodule Watchman.Kube.Dashboard do
     defmodel "Query", "forgelabs.sh", "v1alpha1" do
       property :query,         "query",  :string
       property :legend,        "legend", :string
-      property :format,        "format", :string
       property :legend_format, "legendFormat", :string
     end
   end
@@ -18,6 +17,7 @@ defmodule Watchman.Kube.Dashboard do
     defmodel "Query", "forgelabs.sh", "v1alpha1" do
       property :queries, "queries", {:array, Watchman.Kube.Dashboard.Query}
       property :name,    "name",    :string
+      property :format,  "format",  :string
     end
   end
 

@@ -155,11 +155,11 @@ defmodule Watchman.GraphQl.Schema do
   object :dashboard_graph do
     field :name,    non_null(:string)
     field :queries, list_of(:dashboard_metric)
+    field :format,  :string
   end
 
   object :dashboard_metric do
     field :legend, non_null(:string)
-    field :format, :string
     field :query,  :string
     field :results, list_of(:metric_result)
   end

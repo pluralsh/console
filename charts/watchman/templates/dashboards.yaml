@@ -24,16 +24,13 @@ spec:
   - queries:
     - query: avg(erlang_vm_memory_bytes_total{app_kubernetes_io_name="$service", kind="processes"})
       legend: process memory
-      format: bytes
     - query: avg(erlang_vm_memory_system_bytes_total{app_kubernetes_io_name="$service", usage="binary"})
       legend: binary heap memory
-      format: bytes
     - query: avg(erlang_vm_memory_system_bytes_total{app_kubernetes_io_name="$service", usage="code"})
       legend: code memory
-      format: bytes
     - query: avg(erlang_vm_memory_system_bytes_total{app_kubernetes_io_name="$service", usage="ets"})
       legend: ets memory
-      format: bytes
+    format: bytes
     name: VM memory
 ---
 apiVersion: forgelabs.sh/v1alpha1
@@ -72,10 +69,9 @@ spec:
   - queries:
     - query: avg(rate(process_resident_memory_bytes{instance="$instance"}[5m]))
       legend: resident mem
-      format: bytes
     - query: avg(rate(process_virtual_memory_bytes{instance="$instance"}[5m]))
       legend: process mem
-      format: bytes
+    format: bytes
     name: Memory utilization
   - queries:
     - query: process_open_fds{instance="$instance"}

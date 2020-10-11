@@ -5,6 +5,7 @@ import { DASHBOARD_Q } from './graphql/dashboards'
 import { Box, Select, Text } from 'grommet'
 import { chunk } from 'lodash'
 import { Graph } from './utils/Graph'
+import filesize from 'filesize'
 
 const HOUR = 60 * 60
 const DAY = 24 * HOUR
@@ -16,6 +17,17 @@ const DURATIONS = [
   {offset: DAY, step: '10m', label: '1d', tick: 'every 2 hours'},
   {offset: 7 * DAY, step: '1h', label: '7d', tick: 'every 12 hours'},
 ]
+
+function format(value, format) {
+  switch (format) {
+    case 'bytes':
+      return filesize(value)
+    case 'percent':
+      return `${value}%`
+    default:
+      return value
+  }
+}
 
 function RangeOption({duration, current, setDuration, first, last}) {
   const selected = duration === current

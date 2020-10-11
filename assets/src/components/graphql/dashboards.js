@@ -15,6 +15,7 @@ export const DashboardFragment = gql`
         queries {
           query
           legend
+          format
           results {
             timestamp
             value
