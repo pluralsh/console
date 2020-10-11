@@ -24,4 +24,5 @@ config :watchman, Watchman.Cron,
   ]
 
 config :watchman,
-  prometheus: "http://bootstrap-prometheus-server.bootstrap"
+  prometheus: "http://bootstrap-prometheus-server.bootstrap",
+  loki: "http://bootstrap-loki.bootstrap"

@@ -1,4 +1,4 @@
-defmodule Watchman.GraphQl.DashboardQueriesTest do
+defmodule Watchman.GraphQl.ObservabilityQueriesTest do
   use Watchman.DataCase, async: false
   alias Watchman.{Kube.Dashboard, Kube}
   use Mimic
@@ -114,6 +114,36 @@ defmodule Watchman.GraphQl.DashboardQueriesTest do
           ]
         }
       ]
+    end
+  end
+
+  describe "logs" do
+    test "it can fetch logs for a loki query" do
+      expect(HTTPoison, :get, fn _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+            %{stream: %{"var" => "val"}, values: [[1, "hello"]]},
+            %{stream: %{"var" => "val2"}, values: [[1, "world"]]}
+          ]}}
+        )}}
+      end)
+
+      {:ok, %{data: %{"logs" => [first, second]}}} = run_query("""
+        query Logs($query: String!, $limit: Int!) {
+          logs(query: $query, limit: $limit) {
+            stream
+            values {
+              timestamp
+              value
+            }
+          }
+        }
+      """, %{"query" => ~s({namespace="watchman"}), "limit" => 100}, %{current_user: insert(:user)})
+
+      assert first["stream"]["var"] == "val"
+      assert first["values"] == [%{"timestamp" => 1000, "value" => "hello"}]
+
+      assert second["stream"]["var"] == "val2"
+      assert second["values"] == [%{"timestamp" => 1000, "value" => "world"}]
     end
   end
 

@@ -3,6 +3,7 @@ defmodule Watchman.GraphQl.Schema do
   alias Watchman.Schema
   alias Watchman.GraphQl.Resolvers.{Build, Forge, User}
   import_types Absinthe.Plug.Types
+  import_types Watchman.GraphQl.CustomTypes
 
   ## ENUMS
   ecto_enum :status, Schema.Build.Status
@@ -171,6 +172,11 @@ defmodule Watchman.GraphQl.Schema do
 
   object :configuration do
     field :configuration, non_null(:string)
+  end
+
+  object :log_stream do
+    field :stream, :map
+    field :values, list_of(:metric_result)
   end
 
   delta :build

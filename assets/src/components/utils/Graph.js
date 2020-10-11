@@ -28,7 +28,7 @@ export function Graph({data, yFormat, tick}) {
         margin={{ top: 50, right: 110, bottom: 75, left: 70 }}
         areaOpacity={.5}
         useMesh
-        lineWidth='3px'
+        lineWidth='2px'
         enablePoints={false}
         animate={false}
         xScale={{type: 'time', format: 'native'}}

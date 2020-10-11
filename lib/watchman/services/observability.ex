@@ -1,20 +1,18 @@
-defmodule Watchman.GraphQl.Resolvers.Dashboard do
+defmodule Watchman.Services.Observability do
   alias Watchman.Kube.{Client, Dashboard}
   alias Prometheus.Client, as: PrometheusClient
+  alias Loki.Client, as: LokiClient
 
-  @default_offset 30 * 60
-
-  def resolve_dashboards(%{repo: name}, _) do
+  def get_dashboards(name) do
     with {:ok, %{items: items}} <- Client.list_dashboards(name),
       do: {:ok, items}
   end
 
-  def resolve_dashboard(%{repo: name, name: id} = args, _) do
-    now = Timex.now()
-    start = Timex.shift(now, seconds: -Map.get(args, :offset, @default_offset))
-    with {:ok, dash} <- Client.get_dashboard(name, id) do
-      {:ok, hydrate(dash, Map.get(args, :labels, []), start, now)}
-    end
+  def get_dashboard(name, id), do: Client.get_dashboard(name, id)
+
+  def get_logs(q, start, stop, limit) do
+    with {:ok, %{data: %{result: results}}} <- LokiClient.query(q, start, stop, limit),
+      do: {:ok, results}
   end
 
   def hydrate(%Dashboard{

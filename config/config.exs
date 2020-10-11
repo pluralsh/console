@@ -23,6 +23,7 @@ config :watchman, WatchmanWeb.Endpoint,
 
 config :watchman,
   prometheus: "prometheus",
+  loki: "loki",
   git_user_name: "forge",
   git_user_email: "forge@piazzaapp.com",
   forge_url: "https://forge.piazza.app/gql",

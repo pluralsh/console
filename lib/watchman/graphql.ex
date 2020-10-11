@@ -2,7 +2,7 @@ defmodule Watchman.GraphQl do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
   import Watchman.GraphQl.Helpers
-  alias Watchman.GraphQl.Resolvers.{Build, Forge, Webhook, User, Dashboard}
+  alias Watchman.GraphQl.Resolvers.{Build, Forge, Webhook, User, Observability}
   alias Watchman.Middleware.Authenticated
 
   import_types Watchman.GraphQl.Schema
@@ -76,7 +76,7 @@ defmodule Watchman.GraphQl do
       middleware Authenticated
       arg :repo, non_null(:string)
 
-      resolve &Dashboard.resolve_dashboards/2
+      resolve &Observability.resolve_dashboards/2
     end
 
     field :dashboard, :dashboard do
@@ -87,7 +87,17 @@ defmodule Watchman.GraphQl do
       arg :offset, :integer
       arg :labels, list_of(:label_input)
 
-      resolve &Dashboard.resolve_dashboard/2
+      resolve &Observability.resolve_dashboard/2
+    end
+
+    field :logs, list_of(:log_stream) do
+      middleware Authenticated
+      arg :query, non_null(:string)
+      arg :start, :integer
+      arg :end,   :integer
+      arg :limit, non_null(:integer)
+
+      resolve &Observability.resolve_logs/2
     end
   end
 
