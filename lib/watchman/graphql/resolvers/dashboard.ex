@@ -83,7 +83,7 @@ defmodule Watchman.GraphQl.Resolvers.Dashboard do
         |> Map.put(:legend, substitute(legend, metric))
       end)
     else
-      _ -> [add_results([], query)]
+      _ -> [add_results([], %{query | legend: legend})]
     end
   end
 

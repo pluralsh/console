@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { ResponsiveLine } from '@nivo/line'
 import moment from 'moment'
 import { last } from 'lodash'
-import { ThemeContext } from 'grommet'
+import { ThemeContext, Text } from 'grommet'
 import { normalizeColor } from 'grommet/utils'
 
 export function dateFormat(date) {
@@ -11,7 +11,8 @@ export function dateFormat(date) {
 
 export function Graph({data, yFormat, tick}) {
   const theme = useContext(ThemeContext)
-  console.log(data)
+  if (data.length === 0) return <Text size='small'>no data</Text>
+
   const hasData = !!data[0].data[0]
   return (
     <ResponsiveLine
