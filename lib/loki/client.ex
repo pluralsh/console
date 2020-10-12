@@ -4,7 +4,7 @@ defmodule Loki.Client do
   def host(), do: Application.get_env(:watchman, :loki)
 
   def query(query, start_ts, end_ts, limit) do
-    query = URI.encode_query(%{"query" => query, "start" => start_ts, "end" => end_ts, "limit" => limit}) |> IO.inspect()
+    query = URI.encode_query(%{"query" => query, "start" => start_ts, "end" => end_ts, "limit" => limit})
 
     host()
     |> Path.join("/loki/api/v1/query_range?#{query}")

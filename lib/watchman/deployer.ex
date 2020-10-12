@@ -23,7 +23,6 @@ defmodule Watchman.Deployer do
   def init(storage) do
     Process.flag(:trap_exit, true)
     if Watchman.conf(:initialize) do
-      send self(), :init
       :timer.send_interval @poll_interval, :poll
     end
 
@@ -55,11 +54,6 @@ defmodule Watchman.Deployer do
   end
 
   def handle_call(:state, _, state), do: {:reply, state, state}
-
-  def handle_info(:init, %State{storage: storage} = state) do
-    storage.init()
-    {:noreply, state}
-  end
 
   def handle_info(:poll, %State{storage: storage, ref: nil} = state) do
     Logger.info "Checking for pending builds"
