@@ -14,11 +14,13 @@ function Installation({installation, setCurrentInstallation, current: {id}}) {
       direction='row' align='center' gap='small' pad='small' round='xsmall' focusIndicator={false}
       onClick={() => setCurrentInstallation(installation)} hoverIndicator='light-3'>
       {icon && <img alt='' src={icon} width='40px' height='40px' />}
-      <Box>
+      <Box fill='horizontal'>
         <Text size='small' weight={500}>{name}</Text>
         <Text size='small'>{description}</Text>
       </Box>
-      {id === installation.id ? <Checkmark size='18px' color='brand' /> : null}
+      <Box pad='small' flex={false}>
+        {id === installation.id ? <Checkmark size='18px' color='brand' /> : null}
+      </Box>
     </Box>
   )
 }

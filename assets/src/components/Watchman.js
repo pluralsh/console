@@ -29,7 +29,7 @@ export default function Watchman() {
           <Box height='100vh' width='100%'>
             <Box flex={false} direction='row' align='center' background='backgroundDark' height='45px'>
               <Breadcrumbs />
-              <Box direction='row' fill justify='end' pad={{horizontal: 'small'}}>
+              <Box direction='row' fill justify='end' pad={{horizontal: 'medium'}}>
                 <Installations />
               </Box>
             </Box>

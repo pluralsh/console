@@ -1,10 +1,12 @@
 import React, { useState, useRef, useContext } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
 import { Deploy, Network, Configure, BarChart, Group, TextAlignFull } from 'grommet-icons'
-import { Box, Text, Drop } from 'grommet'
+import { Box, Text } from 'grommet'
 import { LoginContext } from './Login'
 import { Avatar } from './EditUser'
 import { InstallationContext } from './Installations'
+import { Tooltip } from './utils/Tooltip'
+import './sidebar.css'
 
 const SIDEBAR_ROW_HEIGHT = '50px'
 const APP_ICON = `${process.env.PUBLIC_URL}/watchman.png`
@@ -13,30 +15,30 @@ function SidebarIcon({icon, text, selected, path}) {
   const dropRef = useRef()
   let history = useHistory()
   const [hover, setHover] = useState(false)
+
   return (
     <>
     <Box
       ref={dropRef}
       focusIndicator={false}
+      className={'sidebar-icon' + (selected ? ' selected' : '')}
       align='center'
       justify='center'
-      pad='small'
-      gap='small'
+      margin='xsmall'
+      round='xsmall'
       height={SIDEBAR_ROW_HEIGHT}
+      hoverIndicator='sidebarHover'
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onClick={() => history.push(path)}
-      background={(hover || selected) ? 'sidebarHover' : null}
-      border={selected ? {side: 'left', color: 'focus', size: '3px'} : null}
+      background={selected ? 'black' : null}
       direction='row'>
       {icon}
     </Box>
-    {hover && (
-      <Drop target={dropRef.current} plain align={{left: 'right'}}>
-        <Box background='sidebarHover' pad='small' height={SIDEBAR_ROW_HEIGHT} align='center' justify='center'>
-          <Text size='small' style={{fontWeight: 500}}>{text}</Text>
-        </Box>
-      </Drop>
+    {hover  && (
+      <Tooltip pad='small' round='xsmall' justify='center' target={dropRef} side='right' align={{left: 'right'}}>
+        <Text size='small' weight={500}>{text}</Text>
+      </Tooltip>
     )}
     </>
   )
