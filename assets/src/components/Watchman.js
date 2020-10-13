@@ -11,26 +11,52 @@ import Dashboards from './Dashboards'
 import { EnsureLogin } from './Login'
 import EditUser from './EditUser'
 import Users from './Users'
+import { Installations, InstallationsProvider } from './Installations'
+import { LogViewer } from './Logs'
+import RepositorySelector from './RepositorySelector'
 
 const SIDEBAR_WIDTH = '70px'
 
 export default function Watchman() {
   return (
     <EnsureLogin>
+      <InstallationsProvider>
       <BreadcrumbProvider>
         <Box direction='row' width='100vw' height='100vh'>
           <Box width={SIDEBAR_WIDTH}>
             <Sidebar />
           </Box>
           <Box height='100vh' width='100%'>
-            <Breadcrumbs />
+            <Box flex={false} direction='row' align='center' background='backgroundDark' height='45px'>
+              <Breadcrumbs />
+              <Box direction='row' fill justify='end' pad={{horizontal: 'small'}}>
+                <Installations />
+              </Box>
+            </Box>
             <Switch>
               <Route path='/config/:repo' component={Configuration} />
-              <Route path='/config' component={Configuration} />
+              <Route path='/config' render={() => (
+                <RepositorySelector
+                  prefix='config'
+                  title='Configuration'
+                  description='edit configuration for your installed repos' />
+              )} />
+              <Route path='/logs/:repo' component={LogViewer} />
+              <Route path='/logs' render={() => (
+                <RepositorySelector
+                  prefix='logs'
+                  title='Logs'
+                  description='aggregated logstreams for your repos' />
+              )} />
               <Route path='/build/:buildId' component={Build} />
               <Route path='/webhooks' component={Webhooks} />
               <Route path='/dashboards/:repo' component={Dashboards} />
-              <Route path='/dashboards' component={Dashboards} />
+              <Route path='/dashboards' render={() => (
+                <RepositorySelector
+                  prefix='dashboards'
+                  title='Dashboards'
+                  description='view monitoring dashboards for installed repos' />
+              )} />
               <Route path='/me/edit' component={EditUser} />
               <Route path='/users' component={Users} />
               <Route path='/' component={Builds} />
@@ -38,6 +64,7 @@ export default function Watchman() {
           </Box>
         </Box>
       </BreadcrumbProvider>
+      </InstallationsProvider>
     </EnsureLogin>
   )
 }

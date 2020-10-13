@@ -120,7 +120,10 @@ export default function Dashboard({repo, name}) {
     <Box fill background='backgroundColor' style={{overflow: 'auto'}}>
       <Box direction='row' pad='small' gap='small' justify='end' align='center'>
         {data.dashboard.spec.labels.filter(({values}) => values.length > 0).map((label) => (
-          <LabelSelect key={`${label.name}:${name}:${repo}`} label={label} onSelect={(value) => setLabel(label.name, value)} />
+          <LabelSelect
+            key={`${label.name}:${name}:${repo}`}
+            label={label}
+            onSelect={(value) => setLabel(label.name, value)} />
         ))}
         <RangePicker duration={duration} setDuration={setDuration} />
       </Box>

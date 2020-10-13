@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { CONFIGURATIONS_Q, UPDATE_CONFIGURATION } from './graphql/forge'
-import { Loading, Button, Scroller } from 'forge-core'
+import { Loading, Button } from 'forge-core'
 import { Box, Text } from 'grommet'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { BUILD_PADDING } from './Builds'
@@ -10,7 +10,8 @@ import { FormNext } from 'grommet-icons'
 import AceEditor from "react-ace"
 import "ace-builds/src-noconflict/mode-yaml"
 import "ace-builds/src-noconflict/theme-terminal"
-import { chunk } from '../utils/array'
+import RepositorySelector from './RepositorySelector'
+import { InstallationContext, useEnsureCurrent } from './Installations'
 
 export function EditConfiguration({repository: {name, configuration, icon}}) {
   const [config, setConfig] = useState(configuration)
@@ -98,13 +99,22 @@ export function RepositoryChoice({config: {name, icon, description}, link}) {
 export default function Configuration() {
   const {repo} = useParams()
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
+  const {setOnChange} = useContext(InstallationContext)
+  let history = useHistory()
   const {data} = useQuery(CONFIGURATIONS_Q, {fetchPolicy: 'cache-and-network'})
   useEffect(() => {
-    const additional = repo ? [{text: repo, url: `/config/${repo}`}] : []
-    setBreadcrumbs([{text: 'configuration', url: '/config'}, ...additional])
+    setBreadcrumbs([
+      {text: 'configuration', url: '/config'},
+      {text: repo, url: `/config/${repo}`}
+    ])
   }, [repo])
+  useEffect(() => {
+    setOnChange({func: ({repository: {name}}) => history.push(`/dashboards/${name}`)})
+  }, [])
+  useEnsureCurrent(repo)
 
   if (!data) return <Loading />
+
   const {edges} = data.installations
   const selected = edges.find(({node: {repository: {name}}}) => name === repo)
   if (repo && selected) {
@@ -112,31 +122,9 @@ export default function Configuration() {
   }
 
   return (
-    <Box height='calc(100vh - 45px)'>
-      <Box gap='small' background='backgroundColor'>
-        <Box
-          pad={{vertical: 'small', ...BUILD_PADDING}} direction='row' align='center' height='60px'>
-          <Box fill='horizontal' pad={{horizontal: 'small'}}>
-            <Text weight='bold' size='small'>Configuration</Text>
-            <Text size='small' color='dark-6'>edit configuration for your installed repos</Text>
-          </Box>
-        </Box>
-      </Box>
-      <Box height='calc(100vh - 105px)' background='backgroundColor' pad='small'>
-        <Scroller
-          id='configuration'
-          style={{height: '100%', overflow: 'auto'}}
-          edges={[...chunk(edges, 2)]}
-          mapper={(chunk) => (
-            <Box direction='row' height='100px' gap='small' margin={{bottom: 'small'}}>
-               {chunk.map(({node: {repository}}) => (
-                  <RepositoryChoice
-                    key={repository.id}
-                    link={`/config/${repository.name}`}
-                    config={repository} />))}
-            </Box>
-          )} />
-      </Box>
-    </Box>
+    <RepositorySelector
+      title='Configuration'
+      description='edit configuration for your installed repos'
+      prefix='config' />
   )
 }

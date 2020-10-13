@@ -1,9 +1,10 @@
 import React, { useState, useRef, useContext } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
-import { Deploy, Network, Configure, BarChart, Group } from 'grommet-icons'
+import { Deploy, Network, Configure, BarChart, Group, TextAlignFull } from 'grommet-icons'
 import { Box, Text, Drop } from 'grommet'
 import { LoginContext } from './Login'
 import { Avatar } from './EditUser'
+import { InstallationContext } from './Installations'
 
 const SIDEBAR_ROW_HEIGHT = '50px'
 const APP_ICON = `${process.env.PUBLIC_URL}/watchman.png`
@@ -57,17 +58,22 @@ const ICON_HEIGHT = '20px'
 
 const OPTIONS = [
   {text: 'Builds', icon: <Deploy size={ICON_HEIGHT} />, path: '/'},
-  {text: 'Configuration', icon: <Configure size={ICON_HEIGHT} />, path: '/config' },
-  {text: 'Observability', icon: <BarChart size={ICON_HEIGHT} />, path: '/dashboards'},
+  {text: 'Configuration', icon: <Configure size={ICON_HEIGHT} />, path: '/config/{repo}' },
+  {text: 'Dashboards', icon: <BarChart size={ICON_HEIGHT} />, path: '/dashboards/{repo}'},
+  {text: 'Logs', icon: <TextAlignFull size={ICON_HEIGHT} />, path: '/logs/{repo}'},
   {text: "Users", icon: <Group size={ICON_HEIGHT} />, path: '/users'},
   {text: 'Webhooks', icon: <Network size={ICON_HEIGHT} />, path: '/webhooks'},
 ]
 
 const IMAGE_HEIGHT='35px'
 
+const replace = (path, name) => path.replace('{repo}', name)
+
 export default function Sidebar() {
   const loc = useLocation()
-  const active = OPTIONS.findIndex(({path}) => path === loc.pathname)
+  const {currentInstallation} = useContext(InstallationContext)
+  const name = currentInstallation && currentInstallation.repository.name
+  const active = OPTIONS.findIndex(({path}) => replace(path, name) === loc.pathname)
 
   return (
     <Box background='sidebar' height='100vh'>
@@ -76,7 +82,12 @@ export default function Sidebar() {
       </Box>
       <Box fill='vertical'>
       {OPTIONS.map(({text, icon, path}, ind) => (
-        <SidebarIcon key={ind} icon={icon} path={path} text={text} selected={ind === active} />
+        <SidebarIcon
+          key={ind}
+          icon={icon}
+          path={replace(path, name)}
+          text={text}
+          selected={ind === active} />
       ))}
       </Box>
       <Box height='70px' flex={false}>

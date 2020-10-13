@@ -30,8 +30,7 @@ export function Breadcrumbs() {
       background='backgroundDark'
       direction='row'
       gap='xsmall'
-      pad={{horizontal: 'medium', vertical: 'small'}}
-      border='bottom'>
+      pad={{horizontal: 'medium', vertical: 'small'}}>
       {children}
     </Box>
   )

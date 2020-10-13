@@ -5,6 +5,7 @@ export const RepositoryFragment = gql`
     id
     name
     description
+    icon
   }
 `;
 
@@ -48,8 +49,6 @@ export const CONFIGURATIONS_Q = gql`
           repository {
             ...RepositoryFragment
             configuration
-            icon
-            description
             grafanaDns
           }
         }

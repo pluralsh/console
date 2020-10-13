@@ -6,6 +6,10 @@ import { DashboardHeader } from './Dashboards'
 import { LOGS_Q } from './graphql/dashboards'
 import moment from 'moment'
 import { Close } from 'grommet-icons'
+import { BreadcrumbsContext } from './Breadcrumbs'
+import { useHistory, useParams } from 'react-router'
+import { BUILD_PADDING } from './Builds'
+import { InstallationContext, useEnsureCurrent } from './Installations'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -114,13 +118,12 @@ function LogContent({logs}) {
   return lines.map(({line, level, stream}) => <LogLine stream={stream} line={line} level={level} />)
 }
 
-export default function Logs({repository: {name}, setModifier}) {
+export default function Logs({repository: {name}}) {
   const [flyout, setFlyout] = useState(null)
   const {data} = useQuery(LOGS_Q, {
     variables: {query: `{namespace="${name}"}`},
     pollInterval: POLL_INTERVAL
   })
-  useEffect(() => setModifier(<DashboardHeader name={name} label='logs' />), [])
 
   return (
     <FlyoutContext.Provider value={{setFlyout}}>
@@ -131,5 +134,39 @@ export default function Logs({repository: {name}, setModifier}) {
         {flyout}
       </Box>
     </FlyoutContext.Provider>
+  )
+}
+
+export function LogViewer() {
+  const {repo} = useParams()
+  const {setBreadcrumbs} = useContext(BreadcrumbsContext)
+  const {setOnChange, currentInstallation} = useContext(InstallationContext)
+  const repository = currentInstallation.repository
+  let history = useHistory()
+  useEffect(() => {
+    setBreadcrumbs([
+      {text: 'logs', url: '/logs'},
+      {text: repository.name, url: `/logs/${repository.name}`}
+    ])
+  }, [repository])
+  useEffect(() => {
+    setOnChange({func: ({repository: {name}}) => history.push(`/logs/${name}`)})
+  }, [])
+  useEnsureCurrent(repo)
+
+  return (
+    <Box fill>
+      <Box gap='small' flex={false}>
+        <Box
+          pad={{vertical: 'small', ...BUILD_PADDING}}
+          direction='row' align='center' height='60px'>
+          <Box direction='row' fill='horizontal' gap='small' align='center'>
+            {repository.icon && <img alt='' src={repository.icon} height='40px' width='40px' />}
+            <DashboardHeader name={repository.name} label='dashboards' />
+          </Box>
+        </Box>
+      </Box>
+      <Logs repository={repository} />
+    </Box>
   )
 }
