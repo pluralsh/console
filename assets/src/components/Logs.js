@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react'
-import { Box, Text } from 'grommet'
+import { Box, Stack, Text } from 'grommet'
 import { useQuery } from 'react-apollo'
 import TinyQueue from 'tinyqueue'
 import { DashboardHeader } from './Dashboards'
@@ -49,9 +49,8 @@ function borderColor(lvl) {
 
 // ghostbusters!
 function* crossStreams(streams) {
-  let q = new TinyQueue([], ({head: {timestamp: left}}, {head: {timestamp: right}}) => left - right)
+  let q = new TinyQueue([], ({head: {timestamp: left}}, {head: {timestamp: right}}) => right - left)
   for (const stream of streams) {
-    console.log(stream)
     if (!stream.values[0]) continue
     q.push({head: stream.values[0], stream, ind: 0})
   }
@@ -98,7 +97,7 @@ function LogInfo({stream, stamp}) {
       </Box>
       <Box fill pad='small' style={{fontFamily: 'monospace'}}>
         {[['timestamp', ts(stamp)], ...Object.entries(stream)].map(([key, value]) => (
-          <Box direction='row' fill='horizontal' gap='small' flex={false}>
+          <Box key={key} direction='row' fill='horizontal' gap='small' flex={false}>
             <Box flex={false} width='50%'>
               <Text size='small' weight='bold' truncate>{key}</Text>
             </Box>
@@ -114,23 +113,41 @@ function LogInfo({stream, stamp}) {
 
 function LogContent({logs}) {
   const lines = useMemo(() => [...crossStreams(logs)], [logs])
-  console.log(lines)
-  return lines.map(({line, level, stream}) => <LogLine stream={stream} line={line} level={level} />)
+  return lines.map(({line, level, stream}, ind) => <LogLine key={ind} stream={stream} line={line} level={level} />)
+}
+
+function ScrollIndicator({live}) {
+  if (live) {
+    return (
+      <Box direction='row' gap='xsmall' background='sidebar' align='center'
+           margin={{left: 'small', bottom: 'small'}}
+           round='xsmall' pad={{horizontal: 'small', vertical: '2px'}}>
+        <Box round='full' background='status-ok' height='12px' width='12px' />
+        <Text size='small' weight={500}>Live</Text>
+      </Box>
+    )
+  }
+
+  return null
 }
 
 export default function Logs({repository: {name}}) {
   const [flyout, setFlyout] = useState(null)
+  const [live, setLive] = useState(true)
   const {data} = useQuery(LOGS_Q, {
     variables: {query: `{namespace="${name}"}`},
-    pollInterval: POLL_INTERVAL
+    pollInterval: live ? POLL_INTERVAL : null
   })
 
   return (
     <FlyoutContext.Provider value={{setFlyout}}>
       <Box direction='row' fill background='console' gap='small'>
-        <Box fill style={{overflow: 'auto'}} pad={{top: 'small', horizontal: 'small'}}>
-          {data && <LogContent logs={data.logs} />}
-        </Box>
+        <Stack fill anchor='bottom-left'>
+          <Box fill style={{overflow: 'auto'}} pad={{top: 'small', horizontal: 'small'}}>
+            {data && <LogContent logs={data.logs} />}
+          </Box>
+          <ScrollIndicator live={live} />
+        </Stack>
         {flyout}
       </Box>
     </FlyoutContext.Provider>
