@@ -93,8 +93,8 @@ defmodule Watchman.GraphQl do
     field :logs, list_of(:log_stream) do
       middleware Authenticated
       arg :query, non_null(:string)
-      arg :start, :integer
-      arg :end,   :integer
+      arg :start, :long
+      arg :end,   :long
       arg :limit, non_null(:integer)
 
       resolve &Observability.resolve_logs/2
@@ -103,7 +103,7 @@ defmodule Watchman.GraphQl do
 
   mutation do
     field :sign_in, :user do
-      arg :email, non_null(:string)
+      arg :email,    non_null(:string)
       arg :password, non_null(:string)
 
       resolve safe_resolver(&User.signin_user/2)

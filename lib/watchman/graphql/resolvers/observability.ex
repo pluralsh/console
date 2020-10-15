@@ -1,7 +1,7 @@
 defmodule Watchman.GraphQl.Resolvers.Observability do
   alias Watchman.Services.Observability
   @default_offset 30 * 60
-  @nano 1_000_000
+  @nano 1_000_000_000
 
   def resolve_dashboards(%{repo: name}, _), do: Observability.get_dashboards(name)
 
