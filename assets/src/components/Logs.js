@@ -70,7 +70,7 @@ const ts = (timestamp) => moment(new Date(Math.round(timestamp / (1000 * 1000)))
 function Placeholder() {
   return (
     <Box height='20px' flex={false} style={{fontFamily: 'monospace'}}>
-      <Text size='small'>{'-'.repeat(20 + Math.ceil(Math.random() * 40))}</Text>
+      <Box height='16px' width={`${40 + Math.ceil(Math.random() * 40)}%`} background='#444' />
     </Box>
   )
 }
