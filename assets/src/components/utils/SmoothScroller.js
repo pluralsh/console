@@ -72,9 +72,11 @@ const buildItemData = memoize((setSize, mapper, isItemLoaded, items, parentRef, 
 
 export default function SmoothScroller({
   hasNextPage, placeholder, loading, items, loadNextPage, mapper,
-  listRef, setListRef, handleScroll, refreshKey, ...props
+  listRef, setListRef, setLoader, handleScroll, refreshKey, ...props
 }) {
   const sizeMap = useRef({});
+  const mounted = useRef(false)
+  const loader  = useRef()
   const setSize = useCallback((index, size) => {
     sizeMap.current = { ...sizeMap.current, [index]: size };
     listRef && listRef.resetAfterIndex(index, true)
@@ -82,11 +84,20 @@ export default function SmoothScroller({
   const getSize = useCallback(index => sizeMap.current[index] || 50, [sizeMap]);
   const count = items.length
   const itemCount = hasNextPage ? count + 7 : count;
-  const loadMoreItems = loading ? () => {} : loadNextPage;
+  const loadMoreItems = loading ? () => { console.log('what'); return {} } : loadNextPage;
   const isItemLoaded = useCallback(index => !hasNextPage || index < count, [hasNextPage, count])
+
+  useEffect(() => {
+    if (loader.current && mounted.current) {
+      loader.current.resetloadMoreItemsCache()
+    }
+    mounted.current = true
+    loader.current && setLoader(loader.current)
+  }, [refreshKey, mounted, loader, setLoader])
 
   return (
     <InfiniteLoader
+      ref={loader}
       isItemLoaded={isItemLoaded}
       itemCount={itemCount}
       loadMoreItems={loadMoreItems}

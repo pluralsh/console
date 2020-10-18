@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useMemo, useState, useCallback } from 'react'
-import { Box, Stack, Text } from 'grommet'
+import { Box, Stack, Text, TextInput } from 'grommet'
 import { useQuery } from 'react-apollo'
 import TinyQueue from 'tinyqueue'
 import { DashboardHeader } from './Dashboards'
 import { LOGS_Q } from './graphql/dashboards'
 import moment from 'moment'
-import { Close, Up } from 'grommet-icons'
+import { Close, Search, Up } from 'grommet-icons'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { useHistory, useParams } from 'react-router'
 import { BUILD_PADDING } from './Builds'
@@ -120,7 +120,7 @@ function LogInfo({stream, stamp}) {
   )
 }
 
-function LogContent({listRef, setListRef, logs, name, loading, fetchMore, onScroll}) {
+function LogContent({listRef, setListRef, logs, name, loading, fetchMore, onScroll, search, setLoader}) {
   const [done, setDone] = useState(false)
   const end = useMemo(() => last(logs), [logs])
   const lines = useMemo(() => [...crossStreams(logs)], [logs])
@@ -135,7 +135,8 @@ function LogContent({listRef, setListRef, logs, name, loading, fetchMore, onScro
     <SmoothScroller
       listRef={listRef}
       setListRef={setListRef}
-      refreshKey={name}
+      setLoader={setLoader}
+      refreshKey={`${name}:${search}`}
       items={lines}
       mapper={({line, level, stream}) => <LogLine stream={stream} line={line} level={level} />}
       handleScroll={onScroll}
@@ -177,18 +178,21 @@ function ScrollIndicator({live, returnToTop}) {
   )
 }
 
-export default function Logs({repository: {name}}) {
+export default function Logs({repository: {name}, search}) {
   const [flyout, setFlyout] = useState(null)
   const [listRef, setListRef] = useState(null)
   const [live, setLive] = useState(true)
+  const [loader, setLoader] = useState(null)
+  const searchQuery = search.length > 0 ? ` |~ "${search}"` : ''
   const {data, loading, fetchMore, refetch} = useQuery(LOGS_Q, {
-    variables: {query: `{namespace="${name}"}`},
+    variables: {query: `{namespace="${name}"}${searchQuery}`},
     pollInterval: live ? POLL_INTERVAL : 0
   })
   const returnToTop = useCallback(() => {
     setLive(true)
     refetch().then(() => listRef.scrollToItem(0))
-  }, [setLive, listRef])
+    loader.resetloadMoreItemsCache()
+  }, [setLive, listRef, loader])
 
   return (
     <FlyoutContext.Provider value={{setFlyout}}>
@@ -201,6 +205,8 @@ export default function Logs({repository: {name}}) {
                 setListRef={setListRef}
                 name={name}
                 logs={data.logs}
+                setLoader={setLoader}
+                search={search}
                 loading={loading}
                 fetchMore={fetchMore}
                 onScroll={(arg) => setLive(!arg)} />
@@ -214,8 +220,15 @@ export default function Logs({repository: {name}}) {
   )
 }
 
+const animation = {
+  outline: 'none',
+  transition: 'width 0.75s cubic-bezier(0.000, 0.795, 0.000, 1.000)'
+};
+
 export function LogViewer() {
   const {repo} = useParams()
+  const [search, setSearch] = useState('')
+  const [expanded, setExpanded] = useState(false)
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
   const {setOnChange, currentInstallation} = useContext(InstallationContext)
   const repository = currentInstallation.repository
@@ -234,16 +247,28 @@ export function LogViewer() {
   return (
     <Box fill>
       <Box gap='small' flex={false}>
-        <Box
-          pad={{vertical: 'small', ...BUILD_PADDING}}
-          direction='row' align='center' height='60px'>
+        <Box pad={{vertical: 'small', ...BUILD_PADDING}} gap='medium'
+             direction='row' fill='horizontal' align='center' height='60px'>
           <Box direction='row' fill='horizontal' gap='small' align='center'>
             {repository.icon && <img alt='' src={repository.icon} height='40px' width='40px' />}
             <DashboardHeader name={repository.name} label='log streams' />
           </Box>
+          <Box flex={false} style={animation} width={expanded ? '50%' : '200px'}
+               direction='row' align='center' border={expanded ? {side: 'bottom', color: 'brand'} : 'bottom'}
+               onClick={() => setExpanded(true)} focusIndicator={false}>
+            <Search size='20px' />
+            <TextInput
+              plain
+              onBlur={() => setExpanded(false)}
+              size='small'
+              style={animation}
+              value={search}
+              onChange={({target: {value}}) => setSearch(value)}
+              placeholder='this is for searching' />
+          </Box>
         </Box>
       </Box>
-      <Logs repository={repository} />
+      <Logs repository={repository} search={search} />
     </Box>
   )
 }
