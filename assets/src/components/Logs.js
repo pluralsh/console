@@ -274,34 +274,34 @@ export function LogViewer() {
 
   return (
     <LabelContext.Provider value={{addLabel, removeLabel, labels: labelList}}>
-    <Box fill>
-      <Box gap='small' flex={false}>
-        <Box pad={{vertical: 'small', ...BUILD_PADDING}} gap='medium'
-             direction='row' fill='horizontal' align='center' height='80px'>
-          <Box direction='row' fill='horizontal' gap='small' align='center'>
-            {repository.icon && <img alt='' src={repository.icon} height='40px' width='40px' />}
-            <Box gap='xsmall'>
-              <DashboardHeader name={repository.name} label='log streams' />
-              {labelList.length > 0 && <LogLabels labels={labelList} />}
+      <Box fill>
+        <Box gap='small' flex={false}>
+          <Box pad={{vertical: 'small', ...BUILD_PADDING}} gap='medium'
+              direction='row' fill='horizontal' align='center' height='80px'>
+            <Box direction='row' fill='horizontal' gap='small' align='center'>
+              {repository.icon && <img alt='' src={repository.icon} height='40px' width='40px' />}
+              <Box gap='xsmall'>
+                <DashboardHeader name={repository.name} label='log streams' />
+                {labelList.length > 0 && <LogLabels labels={labelList} />}
+              </Box>
+            </Box>
+            <Box flex={false} style={animation} width={expanded ? '50%' : '200px'}
+                direction='row' align='center' border={expanded ? {side: 'bottom', color: 'brand'} : 'bottom'}
+                onClick={() => setExpanded(true)} focusIndicator={false} justify='end'>
+              <Search size='20px' />
+              <TextInput
+                plain
+                onBlur={() => setExpanded(false)}
+                size='small'
+                style={animation}
+                value={search}
+                onChange={({target: {value}}) => setSearch(value)}
+                placeholder='this is for searching' />
             </Box>
           </Box>
-          <Box flex={false} style={animation} width={expanded ? '50%' : '200px'}
-              direction='row' align='center' border={expanded ? {side: 'bottom', color: 'brand'} : 'bottom'}
-              onClick={() => setExpanded(true)} focusIndicator={false} justify='end'>
-            <Search size='20px' />
-            <TextInput
-              plain
-              onBlur={() => setExpanded(false)}
-              size='small'
-              style={animation}
-              value={search}
-              onChange={({target: {value}}) => setSearch(value)}
-              placeholder='this is for searching' />
-          </Box>
         </Box>
+        <Logs repository={repository} search={search} />
       </Box>
-      <Logs repository={repository} search={search} />
-    </Box>
     </LabelContext.Provider>
   )
 }

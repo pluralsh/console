@@ -1,11 +1,12 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: watchman
   labels:
 {{ include "watchman.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  serviceName: watchman-nodes
   selector:
     matchLabels:
       app.kubernetes.io/name: watchman
@@ -47,6 +48,12 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
+        - name: REPLICAS
+          value: {{ .Values.replicaCount | quote }}
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: GRAFANA_DNS
           value: {{ .Values.grafana_dns }}
         - name: POSTGRES_PASSWORD

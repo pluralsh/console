@@ -7,17 +7,18 @@ config :piazza_core,
 config :botanist,
   ecto_repo: Watchman.Repo
 
+replicas = get_env("REPLICAS", "1") |> String.to_integer()
+nodes = Enum.map(0..(replicas - 1), & :"watchman@watchman-#{&1}")
+
+config :watchman,
+  replicas: replicas,
+  nodes: nodes
+
 config :libcluster,
   topologies: [
     watchman: [
-      strategy: Cluster.Strategy.Kubernetes,
-      config: [
-        mode: :ip,
-        kubernetes_node_basename: "watchman",
-        kubernetes_selector: "app=watchman",
-        kubernetes_namespace: get_env("NAMESPACE"),
-        polling_interval: 10_000
-      ]
+      strategy: Cluster.Strategy.Epmd,
+      config: [hosts: nodes]
     ]
   ]
 
