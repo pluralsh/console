@@ -24,6 +24,7 @@ const Level = {
 }
 
 const FlyoutContext = React.createContext({})
+const LabelContext = React.createContext({})
 
 function determineLevel(line) {
   if (/fatal/i.test(line)) return Level.FATAL
@@ -93,6 +94,7 @@ function LogLine({line: {timestamp, value}, stream, level}) {
 
 function LogInfo({stream, stamp}) {
   const {setFlyout} = useContext(FlyoutContext)
+  const {addLabel} = useContext(LabelContext)
   return (
     <Box flex={false} width='30%' fill='vertical' style={{overflow: 'auto'}} border={{side: 'left'}}>
       <Box background='#444' direction='row' pad={{horizontal: 'small', vertical: 'xsmall'}}
@@ -106,7 +108,8 @@ function LogInfo({stream, stamp}) {
       </Box>
       <Box fill pad='small' style={{fontFamily: 'monospace'}}>
         {[['timestamp', ts(stamp)], ...Object.entries(stream)].map(([key, value]) => (
-          <Box key={key} direction='row' fill='horizontal' gap='small' flex={false}>
+          <Box key={key} direction='row' fill='horizontal' gap='small' flex={false}
+               onClick={() => addLabel(key, value)} hoverIndicator='#444'>
             <Box flex={false} width='50%'>
               <Text size='small' weight='bold' truncate>{key}</Text>
             </Box>
@@ -179,13 +182,17 @@ function ScrollIndicator({live, returnToTop}) {
 }
 
 export default function Logs({repository: {name}, search}) {
+  const {labels} = useContext(LabelContext)
   const [flyout, setFlyout] = useState(null)
   const [listRef, setListRef] = useState(null)
   const [live, setLive] = useState(true)
   const [loader, setLoader] = useState(null)
   const searchQuery = search.length > 0 ? ` |~ "${search}"` : ''
+  const labelQuery = useMemo(() => (
+    [...labels, {name: 'namespace', value: name}].map(({name, value}) => `${name}="${value}"`).join(',')
+  ), [labels, name])
   const {data, loading, fetchMore, refetch} = useQuery(LOGS_Q, {
-    variables: {query: `{namespace="${name}"}${searchQuery}`},
+    variables: {query: `{${labelQuery}}${searchQuery}`},
     pollInterval: live ? POLL_INTERVAL : 0
   })
   const returnToTop = useCallback(() => {
@@ -206,7 +213,7 @@ export default function Logs({repository: {name}, search}) {
                 name={name}
                 logs={data.logs}
                 setLoader={setLoader}
-                search={search}
+                search={`${searchQuery}:${labelQuery}`}
                 loading={loading}
                 fetchMore={fetchMore}
                 onScroll={(arg) => setLive(!arg)} />
@@ -225,11 +232,27 @@ const animation = {
   transition: 'width 0.75s cubic-bezier(0.000, 0.795, 0.000, 1.000)'
 };
 
+function LogLabels({labels}) {
+  const {removeLabel} = useContext(LabelContext)
+  return (
+    <Box direction='row' gap='xsmall' align='center'>
+      {labels.map(({name}) => (
+        <Box style={{maxWidth: '75px'}} direction='row' round='xsmall' pad={{horizontal: '7px', vertical: '2px'}}
+             align='center' background='light-3' hoverIndicator='light-6' onClick={() => removeLabel(name)}>
+          <Text size='small' truncate>{name}</Text>
+        </Box>
+      ))}
+    </Box>
+  )
+}
+
 export function LogViewer() {
   const {repo} = useParams()
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = useState(false)
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
+  const [labels, setLabels] = useState({})
+  const labelList = Object.entries(labels).map(([name, value]) => ({name, value}))
   const {setOnChange, currentInstallation} = useContext(InstallationContext)
   const repository = currentInstallation.repository
   let history = useHistory()
@@ -243,19 +266,28 @@ export function LogViewer() {
     setOnChange({func: ({repository: {name}}) => history.push(`/logs/${name}`)})
   }, [])
   useEnsureCurrent(repo)
+  const addLabel = useCallback((name, value) => setLabels({...labels, [name]: value}), [labels, setLabels])
+  const removeLabel = useCallback((name) => {
+    const {[name]: _val, ...rest} = labels
+    setLabels(rest)
+  }, [labels, setLabels])
 
   return (
+    <LabelContext.Provider value={{addLabel, removeLabel, labels: labelList}}>
     <Box fill>
       <Box gap='small' flex={false}>
         <Box pad={{vertical: 'small', ...BUILD_PADDING}} gap='medium'
-             direction='row' fill='horizontal' align='center' height='60px'>
+             direction='row' fill='horizontal' align='center' height='80px'>
           <Box direction='row' fill='horizontal' gap='small' align='center'>
             {repository.icon && <img alt='' src={repository.icon} height='40px' width='40px' />}
-            <DashboardHeader name={repository.name} label='log streams' />
+            <Box gap='xsmall'>
+              <DashboardHeader name={repository.name} label='log streams' />
+              {labelList.length > 0 && <LogLabels labels={labelList} />}
+            </Box>
           </Box>
           <Box flex={false} style={animation} width={expanded ? '50%' : '200px'}
-               direction='row' align='center' border={expanded ? {side: 'bottom', color: 'brand'} : 'bottom'}
-               onClick={() => setExpanded(true)} focusIndicator={false}>
+              direction='row' align='center' border={expanded ? {side: 'bottom', color: 'brand'} : 'bottom'}
+              onClick={() => setExpanded(true)} focusIndicator={false} justify='end'>
             <Search size='20px' />
             <TextInput
               plain
@@ -270,5 +302,6 @@ export function LogViewer() {
       </Box>
       <Logs repository={repository} search={search} />
     </Box>
+    </LabelContext.Provider>
   )
 }
