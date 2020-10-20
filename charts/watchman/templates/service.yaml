@@ -19,3 +19,26 @@ spec:
   selector:
     app.kubernetes.io/name: watchman
     app.kubernetes.io/instance: {{ .Release.Name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: watchman-headless
+  labels:
+    app: watchman-headless
+{{ include "watchman.labels" . | indent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - port: 4369
+    targetPort: epmd
+    protocol: TCP
+    name: epmd
+  - port: {{ .Values.service.port }}
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app.kubernetes.io/name: watchman
+    app.kubernetes.io/instance: {{ .Release.Name }}

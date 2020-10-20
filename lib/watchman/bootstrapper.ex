@@ -18,6 +18,13 @@ defmodule Watchman.Bootstrapper do
     {:ok, %State{storage: determine_storage()}}
   end
 
+  def servers() do
+    [node() | Node.list()]
+    |> Enum.map(& {:deploy, &1})
+  end
+
+  def me(), do: {:deploy, node()}
+
   def start_deployer(storage) do
     result = Horde.DynamicSupervisor.start_child(Watchman.Horde.Supervisor, {Watchman.Deployer, storage})
     Logger.info "testing deployer restart, result: #{result}"

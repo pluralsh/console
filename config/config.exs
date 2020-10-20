@@ -47,4 +47,6 @@ config :libcluster, :topologies, []
 
 config :kazan, :server, :in_cluster
 
+config :ra, data_dir: Path.join([Path.dirname(__DIR__), "priv", "data"]) |> String.to_charlist()
+
 import_config "#{Mix.env()}.exs"

@@ -1,6 +1,9 @@
 import Config
 import System, only: [get_env: 1, get_env: 2]
 
+config :ra,
+  data_dir: '/data/ra'
+
 config :piazza_core,
   repos: [Watchman.Repo]
 
@@ -8,7 +11,7 @@ config :botanist,
   ecto_repo: Watchman.Repo
 
 replicas = get_env("REPLICAS", "1") |> String.to_integer()
-nodes = Enum.map(0..(replicas - 1), & :"watchman@watchman-#{&1}")
+nodes = Enum.map(0..(replicas - 1), & :"watchman@watchman-#{&1}.#{get_env("NAMESPACE")}.svc.cluster.local")
 
 config :watchman,
   replicas: replicas,

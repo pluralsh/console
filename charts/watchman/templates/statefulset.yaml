@@ -6,7 +6,7 @@ metadata:
 {{ include "watchman.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
-  serviceName: watchman-nodes
+  serviceName: watchman-headless
   selector:
     matchLabels:
       app.kubernetes.io/name: watchman
@@ -70,6 +70,8 @@ spec:
           mountPath: "/root/.forge"
         - name: watchman-creds
           mountPath: "/root/.creds"
+        - name: watchman
+          mountPath: /data/ra
         ports:
         - name: http
           containerPort: {{ .Values.service.port }}
@@ -110,3 +112,11 @@ spec:
       - name: watchman-creds
         secret:
           secretName: watchman-credentials
+  volumeClaimTemplates:
+  - metadata:
+      name: watchman
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi

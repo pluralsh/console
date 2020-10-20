@@ -2,12 +2,12 @@ artifact: {}
 terraform:
   terraform/gcp: h1:pv32ekD1iatEbmWzZd2r/tFFlaZL29WuW/+FGvrs2T0=
 helm:
-  charts/watchman: h1:Yb2B3UfYI59fx+7cwRoV5IZtkFhbIKUMc1Q6ajJKLUE=
+  charts/watchman: h1:Oi5rIsUx1Gd3U5cjQWbdgn63DCg53OyfT3LYDHg/TsY=
 recipe:
   forge/recipe/watchman-gcp.yaml: 9cd37df9dc8ff34c2456b631355f0c18a8ec9ee62b20804400a7e1b674000754
 integration: {}
 shell:
-  forge/ops/shell.yaml: 9264aa8b48be4e5ed3701d8a8ba336ef34fbc8fe3abea16af4896fece735032b
+  forge/ops/shell.yaml: d082417a10a03e6558bf3407a06ac9e1b7f77f469b01e0bec6f5b6044ff14330
 database:
   forge/ops/database.yaml: 30095b5994b93512cd478eeba19274e98ff69a0357d15f5f18e1e0584658b0b5
 crd: {}

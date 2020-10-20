@@ -72,6 +72,7 @@ defmodule Watchman.MixProject do
       {:prometheus_plugs, "~> 1.1.1"},
       {:guardian, "~> 1.2.1"},
       {:httpoison, "~> 1.7"},
+      {:ra, "~> 1.1.6"},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
       {:mimic, "~> 1.1", only: :test}
     ]
