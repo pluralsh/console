@@ -11,7 +11,7 @@ config :botanist,
   ecto_repo: Watchman.Repo
 
 replicas = get_env("REPLICAS", "1") |> String.to_integer()
-nodes = Enum.map(0..(replicas - 1), & :"watchman@watchman-#{&1}.#{get_env("NAMESPACE")}.svc.cluster.local")
+nodes = Enum.map(0..(replicas - 1), & :"watchman@watchman-#{&1}.watchman-headless.#{get_env("NAMESPACE")}.svc.cluster.local")
 
 config :watchman,
   replicas: replicas,

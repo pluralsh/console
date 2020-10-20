@@ -3,7 +3,7 @@
 ## http://erlang.org/doc/man/erl.html
 
 ## Name of the node
--name <%= release_name %>@${POD_NAME}.${NAMESPACE}.svc.cluster.local
+-name <%= release_name %>@${POD_NAME}.watchman-headless.${NAMESPACE}.svc.cluster.local
 
 ## Cookie for distributed erlang
 -setcookie ${ERLANG_COOKIE}

@@ -7,7 +7,7 @@ recipe:
   forge/recipe/watchman-gcp.yaml: 9cd37df9dc8ff34c2456b631355f0c18a8ec9ee62b20804400a7e1b674000754
 integration: {}
 shell:
-  forge/ops/shell.yaml: d082417a10a03e6558bf3407a06ac9e1b7f77f469b01e0bec6f5b6044ff14330
+  forge/ops/shell.yaml: f8064237b131eb8b6a7a299185746508e4f08a137d8b3d093e994aa21d8c5f1f
 database:
   forge/ops/database.yaml: 30095b5994b93512cd478eeba19274e98ff69a0357d15f5f18e1e0584658b0b5
 crd: {}

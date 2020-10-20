@@ -1,4 +1,4 @@
 target: statefulset/watchman
-command: /bin/bash
-entrypoint: /bin/bash
-args: []
+command: /opt/app/bin/watchman
+args:
+- remote_console
