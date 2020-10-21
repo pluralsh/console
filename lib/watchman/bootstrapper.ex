@@ -14,6 +14,7 @@ defmodule Watchman.Bootstrapper do
     if Watchman.conf(:initialize) do
       send self(), :init
     end
+    send self(), :cluster
     poll()
     {:ok, %State{storage: determine_storage()}}
   end
@@ -27,13 +28,19 @@ defmodule Watchman.Bootstrapper do
 
   def start_deployer(storage) do
     result = Horde.DynamicSupervisor.start_child(Watchman.Horde.Supervisor, {Watchman.Deployer, storage})
-    Logger.info "testing deployer restart, result: #{result}"
+    Logger.info "testing deployer restart, result: #{inspect(result)}"
   end
 
   defp determine_storage(), do: Watchman.Storage.Git
 
   def handle_info(:init, %State{storage: storage} = state) do
     storage.init()
+    {:noreply, state}
+  end
+
+  def handle_info(:cluster, %State{storage: storage} = state) do
+    Watchman.Cluster.start_cluster()
+    Watchman.Cluster.call({:boot, storage})
     {:noreply, state}
   end
 

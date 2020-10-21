@@ -11,6 +11,10 @@ defmodule Watchman.Deployer do
 
   defmodule State, do: defstruct [:storage, :ref, :pid, :build]
 
+  def start(storage) do
+    GenServer.start(__MODULE__, storage)
+  end
+
   def start_link(storage) do
     case GenServer.start_link(__MODULE__, storage, name: @via) do
       {:ok, pid} -> {:ok, pid}
@@ -25,6 +29,7 @@ defmodule Watchman.Deployer do
     if Watchman.conf(:initialize) do
       :timer.send_interval @poll_interval, :poll
     end
+    Logger.info "Starting deployer"
 
     {:ok, %State{storage: storage}}
   end

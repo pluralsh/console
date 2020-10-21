@@ -49,4 +49,8 @@ config :kazan, :server, :in_cluster
 
 config :ra, data_dir: Path.join([Path.dirname(__DIR__), "priv", "data"]) |> String.to_charlist()
 
+config :watchman,
+  replicas: 1,
+  nodes: []
+
 import_config "#{Mix.env()}.exs"
