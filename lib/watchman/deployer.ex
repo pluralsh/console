@@ -34,13 +34,18 @@ defmodule Watchman.Deployer do
     {:ok, %State{storage: storage}}
   end
 
-  def wake(), do: GenServer.call(@via, :poll)
+  def pid() do
+    {:ok, pid, _} = Watchman.Cluster.call(:fetch)
+    pid
+  end
 
-  def cancel(), do: GenServer.call(@via, :cancel)
+  def wake(), do: GenServer.call(pid(), :poll)
 
-  def state(), do: GenServer.call(@via, :state)
+  def cancel(), do: GenServer.call(pid(), :cancel)
 
-  def update(repo, content), do: GenServer.call(@via, {:update, repo, content})
+  def state(), do: GenServer.call(pid(), :state)
+
+  def update(repo, content), do: GenServer.call(pid(), {:update, repo, content})
 
   def handle_call(:poll, _, %State{} = state) do
     send self(), :poll
