@@ -31,12 +31,13 @@ defmodule Watchman.Cluster do
   def init(state), do: state
 
   @impl :ra_machine
-  def apply(_, {:lock, pid}, %{lock: nil, pid: nil} = state),
-    do: {%{state | lock: pid}, :ok, []}
+  def apply(_, {:lock, ref}, %{lock: nil, pid: nil} = state),
+    do: {%{state | lock: ref}, :ok, []}
 
-  def apply(_, {:lock, _}, %{lock: pid} = state) when is_pid(pid), do: {state, :locked, []}
+  def apply(_, {:lock, _}, state),
+    do: {state, :locked, []}
 
-  def apply(_, {:unlock, pid}, %{lock: pid} = state),
+  def apply(_, {:unlock, ref}, %{lock: ref} = state),
     do: {%{state | lock: nil}, :ok, []}
 
   def apply(_, {:unlock, _}, state),
@@ -47,12 +48,11 @@ defmodule Watchman.Cluster do
     {%{state | pid: pid}, :ok, [{:monitor, :process, pid}]}
   end
 
-  def apply(_, {:down, pid, _}, %{pid: pid} = state) do
+  def apply(_, {:down, _, _}, state) do
+    Logger.info "attempting to restart deployer #{node()}"
     Watchman.Bootstrapper.kick()
     {%{state | pid: nil}, :ok, []}
   end
-
-  def apply(_, {:down, _, _}, state), do: {state, :ok, []}
 
   def apply(_, :fetch, %{pid: pid} = state), do: {state, pid, []}
 
@@ -75,6 +75,11 @@ defmodule Watchman.Cluster do
 
   def save(pid) do
     call({:save, pid})
+    |> result()
+  end
+
+  def down() do
+    call({:down, :ignore, :ignore})
     |> result()
   end
 

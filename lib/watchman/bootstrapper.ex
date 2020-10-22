@@ -2,7 +2,7 @@ defmodule Watchman.Bootstrapper do
   use GenServer
   require Logger
 
-  defmodule State, do: defstruct [:storage]
+  defmodule State, do: defstruct [:storage, :ref]
 
   def start_link(opts \\ :ok) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
@@ -15,7 +15,7 @@ defmodule Watchman.Bootstrapper do
     end
     send self(), :cluster
     send self(), :start
-    {:ok, %State{storage: determine_storage()}}
+    {:ok, %State{storage: determine_storage(), ref: make_ref()}}
   end
 
   def kick(), do: GenServer.cast(__MODULE__, :start)
@@ -26,24 +26,26 @@ defmodule Watchman.Bootstrapper do
   end
 
   def handle_info(:cluster, state) do
-    :ok = Watchman.Cluster.start_cluster()
+    case Watchman.Cluster.start_cluster() do
+      :ok -> :ok
+      {:error, {:shutdown, {:failed_to_start_child, :deploy, {:already_started, _}}}} -> :ok
+    end
     {:noreply, state}
   end
 
-  def handle_info(:start, %State{storage: storage} = state) do
-    start_if_not_present(storage)
+  def handle_info(:start, %State{storage: storage, ref: ref} = state) do
+    start_if_not_present(storage, ref)
     {:noreply, state}
   end
 
   def handle_info(_, state), do: {:noreply, state}
 
-  def handle_cast(:start, %State{storage: storage} = state) do
-    start_if_not_present(storage)
+  def handle_cast(:start, %State{storage: storage, ref: ref} = state) do
+    start_if_not_present(storage, ref)
     {:noreply, state}
   end
 
-  defp start_if_not_present(storage) do
-    me = self()
+  defp start_if_not_present(storage, me) do
     with :ok <- Watchman.Cluster.lock(me),
          {:ok, pid} = start_deployer(storage),
          :ok <- Watchman.Cluster.save(pid),
@@ -51,7 +53,9 @@ defmodule Watchman.Bootstrapper do
       do: send self(), :finish
   end
 
-  def terminate(_, _), do: :ok
+  def terminate(_, _) do
+    Logger.info "terminating bootstrapper"
+  end
 
   defp start_deployer(storage), do: Watchman.Deployer.start_link(storage)
 
