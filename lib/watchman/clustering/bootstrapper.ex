@@ -29,14 +29,8 @@ defmodule Watchman.Bootstrapper do
       :ok -> :ok
       {:error, {:shutdown, {:failed_to_start_child, :deploy, {:already_started, _}}}} -> :ok
     end
-    Watchman.Elector.kick()
     {:noreply, state}
   end
 
   def handle_info(_, state), do: {:noreply, state}
-
-  def terminate(_, _) do
-    Logger.info "sleeping to flush all changes"
-    Process.sleep(5000)
-  end
 end

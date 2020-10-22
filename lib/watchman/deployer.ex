@@ -7,14 +7,14 @@ defmodule Watchman.Deployer do
 
   @poll_interval 10_000
 
-  defmodule State, do: defstruct [:storage, :ref, :pid, :build]
+  defmodule State, do: defstruct [:storage, :ref, :pid, :build, :id]
 
   def start(storage) do
     GenServer.start(__MODULE__, storage)
   end
 
-  def start_link(storage) do
-    GenServer.start_link(__MODULE__, storage)
+  def start_link(_opts \\ :ok) do
+    GenServer.start_link(__MODULE__, Watchman.storage(), name: __MODULE__)
   end
 
   def init(storage) do
@@ -24,21 +24,16 @@ defmodule Watchman.Deployer do
     end
     Logger.info "Starting deployer"
 
-    {:ok, %State{storage: storage}}
+    {:ok, %State{storage: storage, id: make_ref()}}
   end
 
-  def pid() do
-    {:ok, pid, _} = Watchman.Cluster.call(:fetch)
-    pid
-  end
+  def wake(), do: GenServer.call(__MODULE__, :poll)
 
-  def wake(), do: GenServer.call(pid(), :poll)
+  def cancel(), do: GenServer.call(__MODULE__, :cancel)
 
-  def cancel(), do: GenServer.call(pid(), :cancel)
+  def state(), do: GenServer.call(__MODULE__, :state)
 
-  def state(), do: GenServer.call(pid(), :state)
-
-  def update(repo, content), do: GenServer.call(pid(), {:update, repo, content})
+  def update(repo, content), do: GenServer.call(__MODULE__, {:update, repo, content})
 
   def handle_call(:poll, _, %State{} = state) do
     send self(), :poll
@@ -50,26 +45,31 @@ defmodule Watchman.Deployer do
   end
 
   def handle_call(:cancel, _, %State{pid: nil} = state), do: {:reply, :ok, state}
-  def handle_call(:cancel, _, %State{pid: pid} = state) when is_pid(pid) do
+  def handle_call(:cancel, _, %State{pid: pid, id: id} = state) when is_pid(pid) do
     Logger.info "Cancelling build with proc: #{inspect(pid)}"
     GenServer.stop(pid, {:shutdown, :cancel})
+    Watchman.Cluster.unlock(id)
     {:reply, :ok, state}
   end
 
   def handle_call(:state, _, state), do: {:reply, state, state}
 
-  def handle_info(:poll, %State{storage: storage, ref: nil} = state) do
-    Logger.info "Checking for pending builds, pid: #{inspect(self())}, node: #{node()}"
-    case Builds.poll() do
-      nil -> {:noreply, state}
-      %Build{} = build ->
-        {pid, ref} = perform(storage, build)
-        {:noreply, %{state | ref: ref, pid: pid, build: build}}
+  def handle_info(:poll, %State{storage: storage, id: id} = state) do
+    with :ok <- Watchman.Cluster.lock(id),
+         _ <- Logger.info("Checking for pending builds, pid: #{inspect(self())}, node: #{node()}"),
+         %Build{} = build <- Builds.poll() do
+      {pid, ref} = perform(storage, build)
+      {:noreply, %{state | ref: ref, pid: pid, build: build}}
+    else
+      _ ->
+        Watchman.Cluster.unlock(id)
+        {:noreply, state}
     end
   end
 
-  def handle_info({:DOWN, ref, :process, _, _}, %State{ref: ref, build: build} = state) do
+  def handle_info({:DOWN, ref, :process, _, _}, %State{ref: ref, build: build, id: id} = state) do
     Logger.info("tearing down build #{build.id}, proc: #{inspect(state.pid)}")
+    Watchman.Cluster.unlock(id)
     {:noreply, %{state | ref: nil, pid: nil, build: nil}}
   end
 

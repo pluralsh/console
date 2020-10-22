@@ -27,7 +27,7 @@ defmodule Watchman.Application do
        ]
       },
       Watchman.Bootstrapper,
-      Watchman.Elector,
+      Watchman.Deployer,
       Watchman.Grafana.Token,
       {Absinthe.Subscription, [WatchmanWeb.Endpoint]},
     ] ++ consumers() ++ [

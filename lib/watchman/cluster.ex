@@ -5,7 +5,7 @@ defmodule Watchman.Cluster do
   @cluster :watchman
   @timeout 10_000
 
-  defmodule State, do: defstruct [:pid, :lock, :node]
+  defmodule State, do: defstruct [:lock, :timeout]
 
   def servers(), do: Enum.map(nodes(), & {:deploy, &1})
 
@@ -30,46 +30,33 @@ defmodule Watchman.Cluster do
   @impl :ra_machine
   def init(state), do: state
 
-  @impl :ra_machine
-  def apply(_, {:lock, ref}, %{lock: nil, pid: nil} = state),
-    do: {%{state | lock: ref}, :ok, []}
+  def now(), do: :os.system_time(:millisecond)
+  def timeout(), do: :os.system_time(:millisecond) + 1000 * 60 * 2
 
-  def apply(_, {:lock, _}, state),
-    do: {state, :locked, []}
+  @impl :ra_machine
+  def apply(_, {:lock, ref}, %{lock: nil} = state) do
+    {%{state | lock: ref, timeout: timeout()}, :ok, []}
+  end
+
+  def apply(_, {:lock, ref}, %{lock: ref} = state),
+    do: {state, :ok, []}
+
+  def apply(_, {:lock, ref}, %{timeout: out} = state) do
+    case now() > out do
+      true -> {%{state | lock: ref, timeout: timeout()}, :ok, []}
+      false ->  {state, :locked, []}
+    end
+  end
 
   def apply(_, {:unlock, ref}, %{lock: ref} = state),
-    do: {%{state | lock: nil}, :ok, []}
+    do: {%{state | lock: nil, timeout: nil}, :ok, []}
 
   def apply(_, {:unlock, _}, state),
     do: {state, :error, []}
 
-  def apply(_, {:save, pid, node}, state) do
-    Logger.info "deployer is now set to: #{inspect(pid)}"
-    {%{state | pid: pid}, :ok, [{:monitor, :process, pid}, {:monitor, :node, node}]}
-  end
-
-  def apply(_, {:nodedown, node}, %{node: node} = state) do
-    Logger.info "node down, restarting"
-    Watchman.Elector.kick()
-    {%{state | pid: nil, node: nil, lock: nil}, :ok, [{:demonitor, :node, node}]}
-  end
-
-  def apply(_, {:down, pid, _}, state) do
-    Logger.info "attempting to restart deployer #{node()}"
-    Watchman.Elector.kick()
-    {%{state | pid: nil, node: nil, lock: nil}, :ok, []}
-  end
-
-  def apply(_, :fetch, %{pid: pid} = state), do: {state, pid, []}
-
   def apply(_, _, state), do: {state, :ok, []}
 
   def call(msg), do: :ra.process_command(me(), msg)
-
-  def fetch() do
-    call(:fetch)
-    |> result()
-  end
 
   def lock(pid) do
     call({:lock, pid})
@@ -78,16 +65,6 @@ defmodule Watchman.Cluster do
 
   def unlock(pid) do
     call({:unlock, pid})
-    |> result()
-  end
-
-  def save(pid, node) do
-    call({:save, pid, node})
-    |> result()
-  end
-
-  def down() do
-    call({:down, :ignore, :ignore})
     |> result()
   end
 
