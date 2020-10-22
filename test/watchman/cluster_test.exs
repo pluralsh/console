@@ -3,7 +3,7 @@ defmodule Watchman.Commands.ClusterTest do
 
   describe "#apply/0" do
     test "It will maintain a single global process" do
-      boot = Process.whereis(Watchman.Bootstrapper)
+      boot = Process.whereis(Watchman.Elector)
       :erlang.trace(boot, true, [:receive, :send])
 
       {:ok, pid, _} = Watchman.Cluster.call(:fetch)

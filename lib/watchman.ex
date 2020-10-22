@@ -12,4 +12,6 @@ defmodule Watchman do
     :crypto.hash(:sha, body)
     |> Base.url_encode64()
   end
+
+  def storage, do: Watchman.Storage.Git
 end

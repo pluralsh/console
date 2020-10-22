@@ -5,7 +5,7 @@ defmodule Watchman.Cluster do
   @cluster :watchman
   @timeout 10_000
 
-  defmodule State, do: defstruct [:pid, :lock]
+  defmodule State, do: defstruct [:pid, :lock, :node]
 
   def servers(), do: Enum.map(nodes(), & {:deploy, &1})
 
@@ -43,18 +43,26 @@ defmodule Watchman.Cluster do
   def apply(_, {:unlock, _}, state),
     do: {state, :error, []}
 
-  def apply(_, {:save, pid}, state) do
+  def apply(_, {:save, pid, node}, state) do
     Logger.info "deployer is now set to: #{inspect(pid)}"
-    {%{state | pid: pid}, :ok, [{:monitor, :process, pid}]}
+    {%{state | pid: pid}, :ok, [{:monitor, :process, pid}, {:monitor, :node, node}]}
   end
 
-  def apply(_, {:down, _, _}, state) do
+  def apply(_, {:nodedown, node}, %{node: node} = state) do
+    Logger.info "node down, restarting"
+    Watchman.Elector.kick()
+    {%{state | pid: nil, node: nil, lock: nil}, :ok, [{:demonitor, :node, node}]}
+  end
+
+  def apply(_, {:down, pid, _}, state) do
     Logger.info "attempting to restart deployer #{node()}"
-    Watchman.Bootstrapper.kick()
-    {%{state | pid: nil}, :ok, []}
+    Watchman.Elector.kick()
+    {%{state | pid: nil, node: nil, lock: nil}, :ok, []}
   end
 
   def apply(_, :fetch, %{pid: pid} = state), do: {state, pid, []}
+
+  def apply(_, _, state), do: {state, :ok, []}
 
   def call(msg), do: :ra.process_command(me(), msg)
 
@@ -73,8 +81,8 @@ defmodule Watchman.Cluster do
     |> result()
   end
 
-  def save(pid) do
-    call({:save, pid})
+  def save(pid, node) do
+    call({:save, pid, node})
     |> result()
   end
 
