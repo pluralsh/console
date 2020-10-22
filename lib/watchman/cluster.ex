@@ -27,7 +27,7 @@ defmodule Watchman.Cluster do
 
   def call(msg), do: :ra.process_command(me(), msg)
 
-  defp start_deployer(storage), do: Watchman.Deployer.start(storage)
+  defp start_deployer(storage), do: Watchman.Deployer.start_link(storage)
 
   def start_cluster() do
     Logger.info "starting raft on #{node()}"

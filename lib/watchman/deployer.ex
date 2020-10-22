@@ -16,12 +16,7 @@ defmodule Watchman.Deployer do
   end
 
   def start_link(storage) do
-    case GenServer.start_link(__MODULE__, storage, name: @via) do
-      {:ok, pid} -> {:ok, pid}
-      {:error, {:already_started, _}} ->
-        Logger.info "Already started a deployer in-cluster"
-        :ignore
-    end
+    GenServer.start_link(__MODULE__, storage)
   end
 
   def init(storage) do
@@ -66,7 +61,7 @@ defmodule Watchman.Deployer do
   def handle_call(:state, _, state), do: {:reply, state, state}
 
   def handle_info(:poll, %State{storage: storage, ref: nil} = state) do
-    Logger.info "Checking for pending builds"
+    Logger.info "Checking for pending builds, pid: #{inspect(self())}, node: #{node()}"
     case Builds.poll() do
       nil -> {:noreply, state}
       %Build{} = build ->
