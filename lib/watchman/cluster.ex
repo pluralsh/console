@@ -11,23 +11,30 @@ defmodule Watchman.Cluster do
   def init(state), do: state
 
   @impl :ra_machine
-  def apply(_, {:boot, storage}, %{pid: nil} = state) do
-    {:ok, pid} = start_deployer(storage)
-    {%{state | pid: pid, storage: storage}, pid, [{:monitor, :process, pid}]}
+  def apply(_, {:save, pid}, %{pid: nil} = state) do
+    {%{state | pid: pid}, pid, [{:monitor, :process, pid}]}
   end
 
-  def apply(_, {:boot, _}, %{pid: pid} = state), do: {state, {:already_started, pid}, []}
+  def apply(_, {:save, pid}, %{pid: curr} = state) when is_pid(curr) do
+    Logger.info "trying to save #{inspect(pid)} but already using #{inspect(curr)}"
+    Process.exit(pid, :kill)
+    {state, pid, [{:monitor, :process, pid}]}
+  end
 
-  def apply(_, {:down, _, _}, %{storage: storage} = state) do
-    {:ok, pid} = start_deployer(storage)
-    {%{state | pid: pid}, :ok, [{:monitor, :process, pid}]}
+
+  def apply(_, {:down, pid, _}, %{pid: pid} = state) do
+    boot = Process.whereis(Watchman.Bootstrapper)
+    {%{state | pid: nil}, :ok, [{:send, boot, :cluster}]}
+  end
+
+  def apply(_, {:down, _, _} = msg, state) do
+    IO.inspect(msg)
+    {state, :ok, []}
   end
 
   def apply(_, :fetch, %{pid: pid} = state), do: {state, pid, []}
 
   def call(msg), do: :ra.process_command(me(), msg)
-
-  defp start_deployer(storage), do: Watchman.Deployer.start_link(storage)
 
   def start_cluster() do
     Logger.info "starting raft on #{node()}"

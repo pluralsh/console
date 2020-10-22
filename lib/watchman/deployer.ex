@@ -7,8 +7,6 @@ defmodule Watchman.Deployer do
 
   @poll_interval 10_000
 
-  @via {:via, Horde.Registry, {Watchman.Registry, __MODULE__}}
-
   defmodule State, do: defstruct [:storage, :ref, :pid, :build]
 
   def start(storage) do

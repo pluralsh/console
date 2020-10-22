@@ -23,9 +23,14 @@ defmodule Watchman.Bootstrapper do
 
   def handle_info(:cluster, %State{storage: storage} = state) do
     Watchman.Cluster.start_cluster()
-    Watchman.Cluster.call({:boot, storage})
+    |> IO.inspect()
+    with {:ok, nil, _} <- Watchman.Cluster.call(:fetch),
+         {:ok, pid} <- start_deployer(storage),
+      do: Watchman.Cluster.call({:save, pid})
     {:noreply, state}
   end
+
+  defp start_deployer(storage), do: Watchman.Deployer.start_link(storage)
 
   defp determine_storage, do: Watchman.Storage.Git
 end
