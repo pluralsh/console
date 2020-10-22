@@ -9,26 +9,49 @@ defmodule Watchman.Bootstrapper do
   end
 
   def init(_) do
+    Process.flag(:trap_exit, true)
     if Watchman.conf(:initialize) do
       send self(), :init
     end
     send self(), :cluster
+    send self(), :start
     {:ok, %State{storage: determine_storage()}}
   end
+
+  def kick(), do: GenServer.cast(__MODULE__, :start)
 
   def handle_info(:init, %State{storage: storage} = state) do
     storage.init()
     {:noreply, state}
   end
 
-  def handle_info(:cluster, %State{storage: storage} = state) do
-    Watchman.Cluster.start_cluster()
-    |> IO.inspect()
-    with {:ok, nil, _} <- Watchman.Cluster.call(:fetch),
-         {:ok, pid} <- start_deployer(storage),
-      do: Watchman.Cluster.call({:save, pid})
+  def handle_info(:cluster, state) do
+    :ok = Watchman.Cluster.start_cluster()
     {:noreply, state}
   end
+
+  def handle_info(:start, %State{storage: storage} = state) do
+    start_if_not_present(storage)
+    {:noreply, state}
+  end
+
+  def handle_info(_, state), do: {:noreply, state}
+
+  def handle_cast(:start, %State{storage: storage} = state) do
+    start_if_not_present(storage)
+    {:noreply, state}
+  end
+
+  defp start_if_not_present(storage) do
+    me = self()
+    with :ok <- Watchman.Cluster.lock(me),
+         {:ok, pid} = start_deployer(storage),
+         :ok <- Watchman.Cluster.save(pid),
+         :ok <- Watchman.Cluster.unlock(me),
+      do: send self(), :finish
+  end
+
+  def terminate(_, _), do: :ok
 
   defp start_deployer(storage), do: Watchman.Deployer.start_link(storage)
 

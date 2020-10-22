@@ -5,36 +5,13 @@ defmodule Watchman.Cluster do
   @cluster :watchman
   @timeout 10_000
 
-  defmodule State, do: defstruct [:pid, :storage]
+  defmodule State, do: defstruct [:pid, :lock]
 
-  @impl :ra_machine
-  def init(state), do: state
+  def servers(), do: Enum.map(nodes(), & {:deploy, &1})
 
-  @impl :ra_machine
-  def apply(_, {:save, pid}, %{pid: nil} = state) do
-    {%{state | pid: pid}, pid, [{:monitor, :process, pid}]}
-  end
+  def nodes(), do: Enum.uniq([node() | Watchman.conf(:nodes)])
 
-  def apply(_, {:save, pid}, %{pid: curr} = state) when is_pid(curr) do
-    Logger.info "trying to save #{inspect(pid)} but already using #{inspect(curr)}"
-    Process.exit(pid, :kill)
-    {state, pid, [{:monitor, :process, pid}]}
-  end
-
-
-  def apply(_, {:down, pid, _}, %{pid: pid} = state) do
-    boot = Process.whereis(Watchman.Bootstrapper)
-    {%{state | pid: nil}, :ok, [{:send, boot, :cluster}]}
-  end
-
-  def apply(_, {:down, _, _} = msg, state) do
-    IO.inspect(msg)
-    {state, :ok, []}
-  end
-
-  def apply(_, :fetch, %{pid: pid} = state), do: {state, pid, []}
-
-  def call(msg), do: :ra.process_command(me(), msg)
+  def me(), do: {:deploy, node()}
 
   def start_cluster() do
     Logger.info "starting raft on #{node()}"
@@ -50,16 +27,64 @@ defmodule Watchman.Cluster do
     |> maybe_reelect()
   end
 
+  @impl :ra_machine
+  def init(state), do: state
+
+  @impl :ra_machine
+  def apply(_, {:lock, pid}, %{lock: nil, pid: nil} = state),
+    do: {%{state | lock: pid}, :ok, []}
+
+  def apply(_, {:lock, _}, %{lock: pid} = state) when is_pid(pid), do: {state, :locked, []}
+
+  def apply(_, {:unlock, pid}, %{lock: pid} = state),
+    do: {%{state | lock: nil}, :ok, []}
+
+  def apply(_, {:unlock, _}, state),
+    do: {state, :error, []}
+
+  def apply(_, {:save, pid}, state) do
+    Logger.info "deployer is now set to: #{inspect(pid)}"
+    {%{state | pid: pid}, :ok, [{:monitor, :process, pid}]}
+  end
+
+  def apply(_, {:down, pid, _}, %{pid: pid} = state) do
+    Watchman.Bootstrapper.kick()
+    {%{state | pid: nil}, :ok, []}
+  end
+
+  def apply(_, {:down, _, _}, state), do: {state, :ok, []}
+
+  def apply(_, :fetch, %{pid: pid} = state), do: {state, pid, []}
+
+  def call(msg), do: :ra.process_command(me(), msg)
+
+  def fetch() do
+    call(:fetch)
+    |> result()
+  end
+
+  def lock(pid) do
+    call({:lock, pid})
+    |> result()
+  end
+
+  def unlock(pid) do
+    call({:unlock, pid})
+    |> result()
+  end
+
+  def save(pid) do
+    call({:save, pid})
+    |> result()
+  end
+
+  defp result({:ok, res, _}), do: res
+  defp result(err), do: err
+
   defp maybe_reelect(:ok) do
     :ra.trigger_election(me())
     with {:ok, _, _} <- :ra.members(me(), @timeout),
       do: :ok
   end
   defp maybe_reelect(res), do: res
-
-  def servers(), do: Enum.map(nodes(), & {:deploy, &1})
-
-  def nodes(), do: Enum.uniq([node() | Watchman.conf(:nodes)])
-
-  def me(), do: {:deploy, node()}
 end
