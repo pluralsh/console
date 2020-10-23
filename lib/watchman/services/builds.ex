@@ -37,12 +37,14 @@ defmodule Watchman.Services.Builds do
       %{build: build} -> {:ok, build}
     end)
     |> execute(extract: :update)
+    |> when_ok(&broadcast(&1, :update))
   end
 
   def cancel(build_id) do
     get!(build_id)
     |> modify_status(:cancelled)
     |> notify(:delete)
+    |> when_ok(&broadcast(&1, :update))
   end
 
   def create_command(attrs, %Build{id: id}) do

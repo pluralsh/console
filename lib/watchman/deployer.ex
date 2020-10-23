@@ -6,6 +6,7 @@ defmodule Watchman.Deployer do
   require Logger
 
   @poll_interval 10_000
+  @group :deployer
 
   defmodule State, do: defstruct [:storage, :ref, :pid, :build, :id]
 
@@ -23,6 +24,8 @@ defmodule Watchman.Deployer do
       :timer.send_interval @poll_interval, :poll
     end
     Logger.info "Starting deployer"
+    :pg2.create(@group)
+    :pg2.join(@group, self())
 
     {:ok, %State{storage: storage, id: make_ref()}}
   end
@@ -54,6 +57,11 @@ defmodule Watchman.Deployer do
 
   def handle_call(:state, _, state), do: {:reply, state, state}
 
+  def handle_cast(:sync, %State{storage: storage} = state) do
+    storage.init()
+    {:noreply, state}
+  end
+
   def handle_info(:poll, %State{storage: storage, id: id} = state) do
     with :ok <- Watchman.Cluster.lock(id),
          _ <- Logger.info("Checking for pending builds, pid: #{inspect(self())}, node: #{node()}"),
@@ -74,6 +82,7 @@ defmodule Watchman.Deployer do
   def handle_info({:DOWN, ref, :process, _, _}, %State{ref: ref, build: build, id: id} = state) do
     Logger.info("tearing down build #{build.id}, proc: #{inspect(state.pid)}")
     Watchman.Cluster.unlock(id)
+    broadcast()
     {:noreply, %{state | ref: nil, pid: nil, build: nil}}
   end
 
@@ -114,6 +123,7 @@ defmodule Watchman.Deployer do
          {:ok, res} <- Watchman.Services.Forge.update_configuration(repo, content),
          {:ok, _} <- storage.revise("updated configuration for #{repo}"),
          {:ok, _} <- storage.push(),
+         _ <- broadcast(),
       do: {:ok, res}
   end
 
@@ -123,6 +133,12 @@ defmodule Watchman.Deployer do
     Watchman.Runner.register(pid)
     ref = Process.monitor(pid)
     {pid, ref}
+  end
+
+  def broadcast() do
+    :pg2.get_members(@group)
+    |> Enum.filter(& &1 != self())
+    |> GenServer.cast(:sync)
   end
 
   defp commit_message(nil, repo), do: "watchman deployment for #{repo}"

@@ -2,10 +2,15 @@ import { Box, Text } from 'grommet'
 import React, { useState } from 'react'
 
 export function TabHeader({text, selected, onClick}) {
+  const [hover, setHover] = useState(false)
   return (
     <Box pad={{vertical: 'xsmall', horizontal: 'small'}}
-         onClick={onClick} focusIndicator={false} hoverIndicator='light-2'>
-      <Text size='small' weight={500} color={selected ? null : 'dark-3'}>{text}</Text>
+         onMouseEnter={() => setHover(true)}
+         onMouseLeave={() => setHover(false)}
+         border={selected ? {side: 'bottom', color: 'brand', size: '2px'} : (hover ? {side: 'bottom', color: 'dark-6', size: '2px'} : null)}
+         onClick={onClick}
+         focusIndicator={false}>
+      <Text size='small' weight={500} color={selected || hover ? null : 'dark-3'}>{text}</Text>
     </Box>
   )
 }

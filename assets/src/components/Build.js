@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useRef } from 'react'
+import React, { useEffect, useState, useContext, useRef, useCallback } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { ModalHeader, Button, Loading } from 'forge-core'
@@ -8,7 +8,7 @@ import { ansiparse } from './utils/ansi'
 import { BUILD_Q, COMMAND_SUB, BUILD_SUB, CREATE_BUILD, CANCEL_BUILD, APPROVE_BUILD } from './graphql/builds'
 import { mergeEdges } from './graphql/utils'
 import moment from 'moment'
-import { Checkmark, StatusCritical } from 'grommet-icons'
+import { Checkmark, Down, Next, StatusCritical } from 'grommet-icons'
 import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import './build.css'
@@ -252,7 +252,35 @@ function Approval({build}) {
   )
 }
 
-const SIDEBAR_WIDTH = '120px'
+const SIDEBAR_WIDTH = '150px'
+
+function ChangelogRepo({repo, current, setRepo, tools, tool, setTool}) {
+  const [open, setOpen] = useState(repo === current)
+  const select = useCallback(() => {
+    setRepo(repo)
+    setOpen(!open)
+  }, [repo, setRepo, open, setOpen])
+
+  return (
+    <>
+    <Box direction='row' align='center' pad='small' hoverIndicator='light-3' onClick={select} focusIndicator={false}>
+      <Box fill='horizontal'>
+        <Text size='small' weight={500}>{repo}</Text>
+      </Box>
+      <Box flex={false}>
+        {open ? <Down size='small' /> : <Next size='small' />}
+      </Box>
+    </Box>
+    {open && (
+      <Box animation='slideDown'>
+        {tools.map(({tool: t}) => (
+          <ChangeChoice key={t} text={t} enabled={tool === t} onClick={() => setTool(t)} />
+        ))}
+      </Box>
+    )}
+    </>
+  )
+}
 
 function Changelog({build: {changelogs}}) {
   const {repo: initialRepo, tool: initialTool} = changelogs.length > 0 ? changelogs[0] : {}
@@ -265,13 +293,8 @@ function Changelog({build: {changelogs}}) {
   return (
     <Box fill direction='row'>
       <Box flex={false} width={SIDEBAR_WIDTH} height='100%' border='right'>
-        {Object.keys(grouped).map((r) => (
-          <ChangeChoice key={r} text={r} enabled={repo === r} onClick={() => setRepo(r)} />
-        ))}
-      </Box>
-      <Box flex={false} width={SIDEBAR_WIDTH} height='100%' border='right'>
-        {tools.map(({tool: t}) => (
-          <ChangeChoice key={t} text={t} enabled={tool === t} onClick={() => setTool(t)} />
+        {Object.entries(grouped).map(([r, tools]) => (
+          <ChangelogRepo repo={r} current={repo} tools={tools} tool={tool} setRepo={setRepo} setTool={setTool} />
         ))}
       </Box>
       <Box style={{overflow: 'auto'}} height='100%' fill='horizontals' background='console' pad='small'>
