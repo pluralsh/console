@@ -80,6 +80,7 @@ defmodule Watchman.Services.Builds do
     end)
     |> add_changelogs()
     |> execute(extract: :build)
+    |> when_ok(&broadcast(&1, :update))
     |> notify(:pending)
   end
 
@@ -101,6 +102,7 @@ defmodule Watchman.Services.Builds do
     end)
     |> add_changelogs()
     |> execute(extract: :build)
+    |> when_ok(&broadcast(&1, :update))
     |> notify(:succeed)
   end
 
@@ -111,6 +113,7 @@ defmodule Watchman.Services.Builds do
     end)
     |> add_changelogs()
     |> execute(extract: :build)
+    |> when_ok(&broadcast(&1, :update))
     |> notify(:failed)
   end
 
@@ -144,10 +147,9 @@ defmodule Watchman.Services.Builds do
   end
 
   defp modify_status(build, state) do
-    build
+    cleaned(build)
     |> Build.changeset(add_completion(%{status: state}, state))
     |> Repo.update()
-    |> when_ok(&broadcast(&1, :update))
   end
 
   defp add_completion(attrs, state) when state in [:successful, :failed],
@@ -162,13 +164,13 @@ defmodule Watchman.Services.Builds do
   defp cleaned(build), do: %{build | changelogs: %Ecto.Association.NotLoaded{}}
 
   defp notify({:ok, %Build{} = build}, :succeed),
-    do: handle_notify(PubSub.BuildSucceeded, cleaned(build))
+    do: handle_notify(PubSub.BuildSucceeded, build)
   defp notify({:ok, %Build{} = build}, :failed),
-    do: handle_notify(PubSub.BuildFailed, cleaned(build))
+    do: handle_notify(PubSub.BuildFailed, build)
   defp notify({:ok, %Build{} = build}, :pending),
-    do: handle_notify(PubSub.BuildPending, cleaned(build))
+    do: handle_notify(PubSub.BuildPending, build)
   defp notify({:ok, %Build{} = build}, :approve),
-    do: handle_notify(PubSub.BuildApproved, cleaned(build))
+    do: handle_notify(PubSub.BuildApproved, build)
   defp notify({:ok, %Build{} = build}, :delete),
     do: handle_notify(PubSub.BuildDeleted, build)
   defp notify(error, _), do: error
