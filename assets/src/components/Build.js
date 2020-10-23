@@ -304,7 +304,6 @@ export default function Build() {
   if (!data || loading) return <Loading />
   const {commands: {edges}, creator, ...build} = data.build
   const hasChanges = build.changelogs && build.changelogs.length > 0
-  const isPending = build.status === BuildTypes.PENDING
 
   return (
     <Box fill>

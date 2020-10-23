@@ -159,14 +159,16 @@ defmodule Watchman.Services.Builds do
     {:ok, build}
   end
 
+  defp cleaned(build), do: %{build | changelogs: %Ecto.Association.NotLoaded{}}
+
   defp notify({:ok, %Build{} = build}, :succeed),
-    do: handle_notify(PubSub.BuildSucceeded, build)
+    do: handle_notify(PubSub.BuildSucceeded, cleaned(build))
   defp notify({:ok, %Build{} = build}, :failed),
-    do: handle_notify(PubSub.BuildFailed, build)
+    do: handle_notify(PubSub.BuildFailed, cleaned(build))
   defp notify({:ok, %Build{} = build}, :pending),
-    do: handle_notify(PubSub.BuildPending, build)
+    do: handle_notify(PubSub.BuildPending, cleaned(build))
   defp notify({:ok, %Build{} = build}, :approve),
-    do: handle_notify(PubSub.BuildApproved, build)
+    do: handle_notify(PubSub.BuildApproved, cleaned(build))
   defp notify({:ok, %Build{} = build}, :delete),
     do: handle_notify(PubSub.BuildDeleted, build)
   defp notify(error, _), do: error
