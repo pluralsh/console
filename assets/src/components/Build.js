@@ -173,7 +173,7 @@ function Log({text}) {
   const lines = text.match(/[^\r\n]+/g)
   const last = lines.length
   return (
-    <div class='log'>
+    <div className='log'>
       {lines.map((line, ind) => <LogLine key={ind} line={line} number={ind + 1} last={last} />)}
     </div>
   )
@@ -201,6 +201,7 @@ function Command({command}) {
 
 function updateQuery(prev, {subscriptionData: {data}}) {
   if (!data) return prev
+  console.log(data)
   if (data.buildDelta) {
     return {...prev, build: {...prev, ...data.buildDelta.payload}}
   }

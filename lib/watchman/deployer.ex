@@ -61,7 +61,11 @@ defmodule Watchman.Deployer do
       {pid, ref} = perform(storage, build)
       {:noreply, %{state | ref: ref, pid: pid, build: build}}
     else
+      :locked ->
+        Logger.info "deployer is locked"
+        {:noreply, state}
       _ ->
+        Logger.info "No build found"
         Watchman.Cluster.unlock(id)
         {:noreply, state}
     end

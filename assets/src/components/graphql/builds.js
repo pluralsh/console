@@ -106,7 +106,7 @@ export const APPROVE_BUILD = gql`
 `
 
 export const BUILD_SUB = gql`
-  subscription BuildSub($buildId: String) {
+  subscription BuildSub($buildId: ID) {
     buildDelta(buildId: $buildId) {
       delta
       payload {
