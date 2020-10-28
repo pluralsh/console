@@ -35,7 +35,7 @@ defmodule Watchman.Kube.Application do
     alias Watchman.Kube.Application
 
     defmodel "ApplicationSpec", "app.k8s.io", "v1beta1" do
-      property :component_kinds, "componentKinds", {:array, Application.ComponentKind}
+      property :components, "componentKinds", {:array, Application.ComponentKind}
       property :descriptor, "descriptor", Application.Descriptor
     end
   end

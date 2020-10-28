@@ -20,4 +20,25 @@ defmodule Watchman.Kube.Client do
     }
     |> Kazan.run()
   end
+
+  def get_application(name) do
+    %Kazan.Request{
+      method: "get",
+      path: "/apis/app.k8s.io/v1beta1/namespaces/#{name}/applications/#{name}",
+      query_params: %{},
+      response_model: Kube.Application
+    }
+    |> Kazan.run()
+  end
+
+  def list_applications() do
+    %Kazan.Request{
+      method: "get",
+      path: "/apis/app.k8s.io/v1beta1/applications",
+      query_params: %{},
+      response_model: Kube.ApplicationList
+    }
+    |> Kazan.run()
+    |> IO.inspect()
+  end
 end

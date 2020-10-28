@@ -58,10 +58,51 @@ export const CONFIGURATIONS_Q = gql`
   ${RepositoryFragment}
 `;
 
+export const ApplicationFragment = gql`
+  fragment ApplicationFragment on Application {
+    name
+    spec {
+      descriptor {
+        type
+        icons
+        description
+        version
+      }
+      components {
+        group
+        kind
+      }
+    }
+    status {
+      components {
+        kind
+        name
+        status
+      }
+      conditions {
+        message
+        reason
+        status
+        type
+      }
+      componentsReady
+    }
+  }
+`
+
 export const UPDATE_CONFIGURATION = gql`
   mutation UpdateConfiguration($repository: String!, $content: String!) {
     updateConfiguration(repository: $repository, content: $content) {
       configuration
     }
   }
+`;
+
+export const APPLICATIONS_Q = gql`
+  query {
+    applications {
+      ...ApplicationFragment
+    }
+  }
+  ${ApplicationFragment}
 `;

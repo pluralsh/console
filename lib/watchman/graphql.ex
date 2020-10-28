@@ -99,6 +99,12 @@ defmodule Watchman.GraphQl do
 
       resolve &Observability.resolve_logs/2
     end
+
+    field :applications, list_of(:application) do
+      middleware Authenticated
+
+      resolve &Forge.list_applications/2
+    end
   end
 
   mutation do

@@ -2,11 +2,19 @@ defmodule Watchman.GraphQl.Resolvers.Forge do
   alias Watchman.Forge.Repositories
   alias Watchman.Forge.{Connection, PageInfo}
   alias Watchman.Services.Forge
+  alias Watchman.Kube.Client
 
   def list_installations(args, _) do
     Repositories.list_installations(args[:first], args[:after])
     |> clean_up_connection()
   end
+
+  def list_applications(_, _) do
+    with {:ok, %{items: items}} <- Client.list_applications(),
+      do: {:ok, items}
+  end
+
+  def resolve_application(%{name: name}, _), do: Client.get_application(name)
 
   def resolve_configuration(%{name: name}, _, _) do
     Forge.values_file(name)

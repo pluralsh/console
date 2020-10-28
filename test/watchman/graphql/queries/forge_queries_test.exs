@@ -2,6 +2,7 @@ defmodule Watchman.GraphQl.ForgeQueriesTest do
   use Watchman.DataCase, async: true
   use Mimic
   alias Watchman.Forge.Queries
+  alias Watchman.Kube.{Application, ApplicationList}
 
   describe "installations" do
     test "It will fetch your installations from forge" do
@@ -46,10 +47,43 @@ defmodule Watchman.GraphQl.ForgeQueriesTest do
     end
   end
 
+  describe "applications" do
+    test "it can fetch all applications" do
+      expect(Kazan, :run, fn _ ->
+        {:ok, %ApplicationList{items: [application("app")]}}
+      end)
+
+      {:ok, %{data: %{"applications" => [app]}}} = run_query("""
+        query {
+          applications {
+            name
+            spec { descriptor { type } }
+          }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert app["name"] == "app"
+      assert app["spec"]["descriptor"]["type"] == "app"
+    end
+  end
+
   defp as_connection(nodes) do
     %{
       pageInfo: %{hasNextPage: true, endCursor: "something"},
       edges: Enum.map(nodes, & %{node: &1})
+    }
+  end
+
+  defp application(name) do
+    %Application{
+      metadata: %{
+        name: name
+      },
+      spec: %Application.Spec{
+        descriptor: %Application.Descriptor{
+          type: name
+        }
+      }
     }
   end
 end

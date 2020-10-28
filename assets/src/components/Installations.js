@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useContext, useState, useCallback } from 'rea
 import { Checkmark } from 'grommet-icons'
 import { Loading } from 'forge-core'
 import { useQuery } from 'react-apollo'
-import { INSTALLATION_Q } from './graphql/forge'
+import { APPLICATIONS_Q, INSTALLATION_Q } from './graphql/forge'
 
 export const InstallationContext = React.createContext({})
 
@@ -69,10 +69,12 @@ export function InstallationsProvider({children}) {
   const [currentInstallation, setCurrentInstallation] = useState(null)
   const [{func: onChange}, setOnChange] = useState({func: () => null})
   const {data, fetchMore} = useQuery(INSTALLATION_Q)
+  const {data: apps} = useQuery(APPLICATIONS_Q)
   const wrappedSetInstallation = useCallback((installation) => {
     setCurrentInstallation(installation)
     installation && onChange(installation)
   }, [onChange, setCurrentInstallation])
+  console.log(apps)
 
   useEffect(() => {
     if (!currentInstallation && data && data.installations) {

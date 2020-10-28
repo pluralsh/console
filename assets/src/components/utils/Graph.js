@@ -10,7 +10,6 @@ export function dateFormat(date) {
 }
 
 function SliceTooltip({point: {serieColor, serieId, data}}) {
-
   return (
     <Box flex={false} background='white' pad={{vertical: 'xsmall', horizontal: 'small'}}
          background='white'direction='row' gap='xsmall' align='center'>
