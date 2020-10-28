@@ -106,3 +106,13 @@ export const APPLICATIONS_Q = gql`
   }
   ${ApplicationFragment}
 `;
+
+export const APPLICATION_Q = gql`
+  query App($name: String!) {
+    application(name: $name) {
+      configuration
+      ...ApplicationFragment
+    }
+  }
+  ${ApplicationFragment}
+`

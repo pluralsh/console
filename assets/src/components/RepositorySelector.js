@@ -1,16 +1,15 @@
 import React, { useContext, useEffect } from 'react'
 import { Box, Text } from 'grommet'
-import { Scroller, Loading } from 'forge-core'
+import { Scroller } from 'forge-core'
 import { FormNext } from 'grommet-icons'
 import { useHistory } from 'react-router'
 import { chunk } from '../utils/array'
 import { BUILD_PADDING } from './Builds'
 import { BreadcrumbsContext } from './Breadcrumbs'
-import { useQuery } from 'react-apollo'
-import { CONFIGURATIONS_Q } from './graphql/forge'
-import { InstallationContext } from './Installations'
+import { ApplicationIcon, hasIcon, InstallationContext } from './Installations'
 
-export function RepositoryChoice({config: {name, icon, description}, link}) {
+export function RepositoryChoice({application, link}) {
+  console.log(application)
   return (
     <Box
       onClick={link}
@@ -23,10 +22,10 @@ export function RepositoryChoice({config: {name, icon, description}, link}) {
       round='xsmall'
       pad='medium'>
       <Box direction='row' fill='horizontal' gap='small' align='center'>
-        {icon && <img alt='' src={icon} height='40px' width='40px' />}
+        {hasIcon(application) && <ApplicationIcon application={application} size='40px' />}
         <Box>
-          <Text size='small' style={{fontWeight: 500}}>{name}</Text>
-          <Text size='small' color='dark-6'>{description}</Text>
+          <Text size='small' style={{fontWeight: 500}}>{application.name}</Text>
+          <Text size='small' color='dark-6'>{application.spec.descriptor.description}</Text>
         </Box>
       </Box>
       <Box flex={false}>
@@ -38,19 +37,16 @@ export function RepositoryChoice({config: {name, icon, description}, link}) {
 
 export default function RepositorySelector({title, description, prefix}) {
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
-  const {setOnChange, setCurrentInstallation} = useContext(InstallationContext)
+  const {setOnChange, applications, setCurrentApplication} = useContext(InstallationContext)
   let history = useHistory()
-  const {data} = useQuery(CONFIGURATIONS_Q, {fetchPolicy: 'cache-and-network'})
   useEffect(() => {
     setBreadcrumbs([{text: title.toLowerCase(), url: `/${prefix}`}])
   }, [])
   useEffect(() => {
-    setOnChange({func: ({repository: {name}}) => history.push(`/${prefix}/${name}`)})
+    setOnChange({func: ({name}) => history.push(`/${prefix}/${name}`)})
   }, [prefix])
 
-  if (!data) return <Loading />
-
-  const {edges} = data.installations
+  console.log(applications)
 
   return (
     <Box height='calc(100vh - 45px)'>
@@ -67,14 +63,14 @@ export default function RepositorySelector({title, description, prefix}) {
         <Scroller
           id={prefix}
           style={{height: '100%', overflow: 'auto'}}
-          edges={[...chunk(edges, 2)]}
+          edges={[...chunk(applications, 2)]}
           mapper={(chunk) => (
             <Box direction='row' height='100px' gap='small' margin={{bottom: 'small'}}>
-               {chunk.map(({node}) => (
+               {chunk.map((application) => (
                   <RepositoryChoice
-                    key={node.id}
-                    link={() => setCurrentInstallation(node)}
-                    config={node.repository} />))}
+                    key={application.name}
+                    link={() => setCurrentApplication(application)}
+                    application={application} />))}
             </Box>
           )} />
       </Box>

@@ -72,13 +72,13 @@ defmodule Watchman.GraphQl.ForgeQueriesTest do
       expect(Kazan, :run, fn _ -> {:ok, application("app")} end)
 
       {:ok, %{data: %{"application" => app}}} = run_query("""
-        query {
-          application(name: "app") {
+        query App($name: String!) {
+          application(name: $name) {
             name
             spec { descriptor { type } }
           }
         }
-      """, %{}, %{current_user: insert(:user)})
+      """, %{"name" => "app"}, %{current_user: insert(:user)})
 
       assert app["name"] == "app"
       assert app["spec"]["descriptor"]["type"] == "app"

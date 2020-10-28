@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
-import { CONFIGURATIONS_Q, UPDATE_CONFIGURATION } from './graphql/forge'
+import { APPLICATION_Q, CONFIGURATIONS_Q, UPDATE_CONFIGURATION } from './graphql/forge'
 import { Loading, Button } from 'forge-core'
 import { Box, Text } from 'grommet'
 import { BreadcrumbsContext } from './Breadcrumbs'
@@ -10,10 +10,9 @@ import { FormNext } from 'grommet-icons'
 import AceEditor from "react-ace"
 import "ace-builds/src-noconflict/mode-yaml"
 import "ace-builds/src-noconflict/theme-terminal"
-import RepositorySelector from './RepositorySelector'
-import { InstallationContext, useEnsureCurrent } from './Installations'
+import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from './Installations'
 
-export function EditConfiguration({repository: {name, configuration, icon}}) {
+export function EditConfiguration({application: {name, configuration, ...application}}) {
   const [config, setConfig] = useState(configuration)
   const [mutation, {loading}] = useMutation(UPDATE_CONFIGURATION, {
     variables: {repository: name, content: config},
@@ -44,7 +43,7 @@ export function EditConfiguration({repository: {name, configuration, icon}}) {
           background='backgroundColor'
           height='60px'>
           <Box direction='row' fill='horizontal' gap='small' align='center'>
-            {icon && <img alt='' src={icon} height='40px' width='40px' />}
+            {hasIcon(application) && <ApplicationIcon application={application} />}
             <Text weight='bold' size='small'>Edit {name}</Text>
           </Box>
           <Box flex={false}>
@@ -101,7 +100,10 @@ export default function Configuration() {
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
   const {setOnChange} = useContext(InstallationContext)
   let history = useHistory()
-  const {data} = useQuery(CONFIGURATIONS_Q, {fetchPolicy: 'cache-and-network'})
+  const {data} = useQuery(APPLICATION_Q, {
+    variables: {name: repo},
+    fetchPolicy: 'cache-and-network'
+  })
   useEffect(() => {
     setBreadcrumbs([
       {text: 'configuration', url: '/config'},
@@ -115,16 +117,5 @@ export default function Configuration() {
 
   if (!data) return <Loading />
 
-  const {edges} = data.installations
-  const selected = edges.find(({node: {repository: {name}}}) => name === repo)
-  if (repo && selected) {
-    return <EditConfiguration repository={selected.node.repository} />
-  }
-
-  return (
-    <RepositorySelector
-      title='Configuration'
-      description='edit configuration for your installed repos'
-      prefix='config' />
-  )
+  return <EditConfiguration application={data.application} />
 }

@@ -29,7 +29,7 @@ export function ApplicationIcon({application: {spec: {descriptor: {icons}}}, siz
   return <img alt='' src={icons[0]} width={size || '25px'} height={size || '25px'} />
 }
 
-export const hasIcon = ({spec: {descriptor: icons}}) => icons.length > 0
+export const hasIcon = ({spec: {descriptor: {icons}}}) => icons.length > 0
 
 export function Installations() {
   const ref = useRef()
