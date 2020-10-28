@@ -1,7 +1,7 @@
 defmodule Watchman.Services.Builds do
   use Watchman.Services.Base
   alias Watchman.PubSub
-  alias Watchman.Forge.Repositories
+  alias Watchman.Kube.{Client, Application}
   alias Watchman.Schema.{Build, Command, User, Changelog}
 
   def get!(id), do: Repo.get!(Build, id)
@@ -16,10 +16,8 @@ defmodule Watchman.Services.Builds do
       |> Repo.insert()
     end)
     |> add_operation(:valid, fn %{build: %{repository: repo} = build} ->
-      with {:ok, %{edges: edges}} <- Repositories.list_installations(100, nil),
-           true <- Enum.any?(edges, fn %{node: %{repository: %{name: name}}} -> name == repo end) do
-        {:ok, build}
-      else
+      case Client.get_application(repo) do
+        {:ok, %Application{}} -> {:ok, build}
         _ -> {:error, :invalid_repository}
       end
     end)

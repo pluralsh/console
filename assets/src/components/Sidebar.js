@@ -73,8 +73,8 @@ const replace = (path, name) => path.replace('{repo}', name)
 
 export default function Sidebar() {
   const loc = useLocation()
-  const {currentInstallation} = useContext(InstallationContext)
-  const name = currentInstallation && currentInstallation.repository.name
+  const {currentApplication} = useContext(InstallationContext)
+  const name = currentApplication && currentApplication.name
   const active = OPTIONS.findIndex(({path}) => replace(path, name) === loc.pathname)
 
   return (

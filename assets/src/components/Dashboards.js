@@ -7,7 +7,7 @@ import { BreadcrumbsContext } from './Breadcrumbs'
 import { BUILD_PADDING } from './Builds'
 import { DASHBOARDS_Q } from './graphql/dashboards'
 import Dashboard from './Dashboard'
-import { InstallationContext, useEnsureCurrent } from './Installations'
+import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from './Installations'
 
 
 export function DashboardHeader({name, label}) {
@@ -30,17 +30,16 @@ function IndividualHeader({current}) {
 export default function Dashboards() {
   const {repo} = useParams()
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
-  const {setOnChange, currentInstallation} = useContext(InstallationContext)
-  const repository = currentInstallation.repository
+  const {setOnChange, currentApplication} = useContext(InstallationContext)
   let history = useHistory()
   useEffect(() => {
     setBreadcrumbs([
       {text: 'dashboards', url: '/dashboards'},
-      {text: repository.name, url: `/dashboards/${repository.name}`}
+      {text: currentApplication.name, url: `/dashboards/${currentApplication.name}`}
     ])
-  }, [repository])
+  }, [currentApplication])
   useEffect(() => {
-    setOnChange({func: ({repository: {name}}) => {
+    setOnChange({func: ({name}) => {
       history.push(`/dashboards/${name}`)
     }})
   }, [])
@@ -48,14 +47,14 @@ export default function Dashboards() {
 
   const [current, setCurrent] = useState(null)
   const {data} = useQuery(DASHBOARDS_Q, {
-    variables: {repo: repository.name},
+    variables: {repo: currentApplication.name},
     fetchPolicy: 'cache-and-network'
   })
   useEffect(() => {
     if (data && data.dashboards.length > 0) {
       setCurrent(data.dashboards[0])
     }
-  }, [data, repository])
+  }, [data, currentApplication])
 
   if (!data) return <Loading />
 
@@ -66,9 +65,9 @@ export default function Dashboards() {
           pad={{vertical: 'small', ...BUILD_PADDING}}
           direction='row' align='center' height='60px'>
           <Box direction='row' fill='horizontal' gap='small' align='center'>
-            {repository.icon && <img alt='' src={repository.icon} height='40px' width='40px' />}
+            {hasIcon(currentApplication) && <ApplicationIcon application={currentApplication} size='40px' />}
             {current ? <IndividualHeader current={current} /> :
-              <DashboardHeader name={repository.name} label='dashboards' />}
+              <DashboardHeader name={currentApplication.name} label='dashboards' />}
           </Box>
           {current && (
             <Select
@@ -81,7 +80,7 @@ export default function Dashboards() {
       </Box>
       <Box fill>
         {data.dashboards.length > 0 ? (
-          current ? <Dashboard repo={repository.name} name={current.id} /> : <Loading />
+          current ? <Dashboard repo={currentApplication.name} name={current.id} /> : <Loading />
         ) : <Text size='small'>No dashboards for this repository, contact the developer to fix this</Text>
         }
       </Box>

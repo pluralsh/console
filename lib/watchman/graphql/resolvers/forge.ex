@@ -16,6 +16,8 @@ defmodule Watchman.GraphQl.Resolvers.Forge do
 
   def resolve_application(%{name: name}, _), do: Client.get_application(name)
 
+  def resolve_configuration(%{metadata: %{name: name}}, first, second),
+    do: resolve_configuration(%{name: name}, first, second)
   def resolve_configuration(%{name: name}, _, _) do
     Forge.values_file(name)
     |> case do

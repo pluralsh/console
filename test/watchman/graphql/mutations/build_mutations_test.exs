@@ -5,9 +5,7 @@ defmodule Watchman.GraphQl.BuildMutationsTest do
   describe "createBuild" do
     test "It can create a new build" do
       expect(Watchman.Deployer, :wake, fn -> :ok end)
-      expect(Watchman.Forge.Repositories, :list_installations, fn _, _ ->
-        {:ok, %{edges: [%{node: %{repository: %{name: "forge"}}}]}}
-      end)
+      expect(Kazan, :run, fn _ -> {:ok, %Watchman.Kube.Application{metadata: %{name: "forge"}}} end)
 
       {:ok, %{data: %{"createBuild" => build}}} = run_query("""
         mutation {

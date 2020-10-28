@@ -9,7 +9,7 @@ import { Close, Search, Up } from 'grommet-icons'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { useHistory, useParams } from 'react-router'
 import { BUILD_PADDING } from './Builds'
-import { InstallationContext, useEnsureCurrent } from './Installations'
+import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from './Installations'
 import SmoothScroller from './utils/SmoothScroller'
 import { last } from 'lodash'
 
@@ -181,7 +181,7 @@ function ScrollIndicator({live, returnToTop}) {
   )
 }
 
-export default function Logs({repository: {name}, search}) {
+export default function Logs({application: {name}, search}) {
   const {labels} = useContext(LabelContext)
   const [flyout, setFlyout] = useState(null)
   const [listRef, setListRef] = useState(null)
@@ -253,17 +253,16 @@ export function LogViewer() {
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
   const [labels, setLabels] = useState({})
   const labelList = Object.entries(labels).map(([name, value]) => ({name, value}))
-  const {setOnChange, currentInstallation} = useContext(InstallationContext)
-  const repository = currentInstallation.repository
+  const {setOnChange, currentApplication: app} = useContext(InstallationContext)
   let history = useHistory()
   useEffect(() => {
     setBreadcrumbs([
       {text: 'logs', url: '/logs'},
-      {text: repository.name, url: `/logs/${repository.name}`}
+      {text: app.name, url: `/logs/${app.name}`}
     ])
-  }, [repository])
+  }, [app])
   useEffect(() => {
-    setOnChange({func: ({repository: {name}}) => history.push(`/logs/${name}`)})
+    setOnChange({func: ({name}) => history.push(`/logs/${name}`)})
   }, [])
   useEnsureCurrent(repo)
   const addLabel = useCallback((name, value) => setLabels({...labels, [name]: value}), [labels, setLabels])
@@ -279,9 +278,9 @@ export function LogViewer() {
           <Box pad={{vertical: 'small', ...BUILD_PADDING}} gap='medium'
               direction='row' fill='horizontal' align='center' height='80px'>
             <Box direction='row' fill='horizontal' gap='small' align='center'>
-              {repository.icon && <img alt='' src={repository.icon} height='40px' width='40px' />}
+              {hasIcon(app) && <ApplicationIcon application={app} size='40px' />}
               <Box gap='xsmall'>
-                <DashboardHeader name={repository.name} label='log streams' />
+                <DashboardHeader name={app.name} label='log streams' />
                 {labelList.length > 0 && <LogLabels labels={labelList} />}
               </Box>
             </Box>
@@ -300,7 +299,7 @@ export function LogViewer() {
             </Box>
           </Box>
         </Box>
-        <Logs repository={repository} search={search} />
+        <Logs application={app} search={search} />
       </Box>
     </LabelContext.Provider>
   )

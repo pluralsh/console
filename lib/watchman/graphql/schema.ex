@@ -183,6 +183,8 @@ defmodule Watchman.GraphQl.Schema do
     field :name,   non_null(:string), resolve: fn %{metadata: %{name: name}}, _, _ -> {:ok, name} end
     field :spec,   non_null(:application_spec)
     field :status, non_null(:application_status)
+
+    field :configuration, :string, resolve: &Forge.resolve_configuration/3
   end
 
   object :application_spec do

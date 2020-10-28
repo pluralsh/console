@@ -7,46 +7,52 @@ import { APPLICATIONS_Q, INSTALLATION_Q } from './graphql/forge'
 
 export const InstallationContext = React.createContext({})
 
-function Installation({installation, setCurrentInstallation, current: {id}}) {
-  const {repository: {name, icon, description}} = installation
+function Installation({application, setCurrentApplication, current: {name}}) {
+  const {name: appname, spec: {descriptor}} = application
   return (
     <Box
       direction='row' align='center' gap='small' pad='small' round='xsmall' focusIndicator={false}
-      onClick={() => setCurrentInstallation(installation)} hoverIndicator='light-3'>
-      {icon && <img alt='' src={icon} width='40px' height='40px' />}
+      onClick={() => setCurrentApplication(application)} hoverIndicator='light-3'>
+      {descriptor.icons.length > 0 && <ApplicationIcon application={application} size='40px' />}
       <Box fill='horizontal'>
-        <Text size='small' weight={500}>{name}</Text>
-        <Text size='small'>{description}</Text>
+        <Text size='small' weight={500}>{appname}</Text>
+        <Text size='small'>{descriptor.description}</Text>
       </Box>
       <Box pad='small' flex={false}>
-        {id === installation.id ? <Checkmark size='18px' color='brand' /> : null}
+        {name === appname ? <Checkmark size='18px' color='brand' /> : null}
       </Box>
     </Box>
   )
 }
 
+export function ApplicationIcon({application: {spec: {descriptor: {icons}}}, size}) {
+  return <img alt='' src={icons[0]} width={size || '25px'} height={size || '25px'} />
+}
+
+export const hasIcon = ({spec: {descriptor: icons}}) => icons.length > 0
+
 export function Installations() {
   const ref = useRef()
   const [open, setOpen] = useState(false)
-  const {installations, currentInstallation, setCurrentInstallation} = useContext(InstallationContext)
-  if (!currentInstallation) return null
-  const {repository: {name, icon}} = currentInstallation
+  const {applications, currentApplication, setCurrentApplication} = useContext(InstallationContext)
+  if (!currentApplication) return null
+  const {name, spec: {descriptor}} = currentApplication
   return (
     <>
     <Box flex={false} ref={ref} direction='row' gap='xsmall' align='center' hoverIndicator='sidebarHover'
          onClick={() => setOpen(true)}>
-      {icon && <img alt='' src={icon} width='25px' height='25px' />}
+      {descriptor.icons.length > 0 && <ApplicationIcon application={currentApplication} />}
       <Text size='small' weight={500}>{name}</Text>
     </Box>
     {open && (
       <Drop target={ref.current} align={{top: 'bottom'}} onClickOutside={() => setOpen(false)}>
         <Box width='400px' pad='xsmall'>
-          {installations.map(({node: installation}) => (
+          {applications.map((application) => (
             <Installation
-              key={installation.id}
-              installation={installation}
-              current={currentInstallation}
-              setCurrentInstallation={setCurrentInstallation} />
+              key={application.name}
+              application={application}
+              current={currentApplication}
+              setCurrentApplication={setCurrentApplication} />
           ))}
         </Box>
       </Drop>
@@ -56,33 +62,31 @@ export function Installations() {
 }
 
 export function useEnsureCurrent(repo) {
-  const {installations, currentInstallation, setCurrentUnsafe} = useContext(InstallationContext)
+  const {applications, currentApplication, setCurrentUnsafe} = useContext(InstallationContext)
   useEffect(() => {
-    const desired = installations.find(({node: {repository: {name}}}) => name === repo)
-    if (desired && currentInstallation.id !== desired.node.id) {
-      setCurrentUnsafe(desired.node)
+    const desired = applications.find(({name}) => name === repo)
+    if (desired && currentApplication.name !== desired.name) {
+      setCurrentUnsafe(desired)
     }
-  }, [repo, installations, currentInstallation])
+  }, [repo, applications, currentApplication])
 }
 
 export function InstallationsProvider({children}) {
-  const [currentInstallation, setCurrentInstallation] = useState(null)
+  const [currentApplication, setCurrentApplication] = useState(null)
   const [{func: onChange}, setOnChange] = useState({func: () => null})
-  const {data, fetchMore} = useQuery(INSTALLATION_Q)
-  const {data: apps} = useQuery(APPLICATIONS_Q)
-  const wrappedSetInstallation = useCallback((installation) => {
-    setCurrentInstallation(installation)
-    installation && onChange(installation)
-  }, [onChange, setCurrentInstallation])
-  console.log(apps)
+  const {data} = useQuery(APPLICATIONS_Q)
+  const wrapped = useCallback((application) => {
+    setCurrentApplication(application)
+    application && onChange(application)
+  }, [onChange, setCurrentApplication])
 
   useEffect(() => {
-    if (!currentInstallation && data && data.installations) {
-      setCurrentInstallation(data.installations.edges[0].node)
+    if (!currentApplication && data && data.applications) {
+      setCurrentApplication(data.applications[0])
     }
-  }, [data, currentInstallation, setCurrentInstallation])
+  }, [data, currentApplication, setCurrentApplication])
 
-  if (!currentInstallation) {
+  if (!currentApplication) {
     return (
       <Box width='100vw' height='100vh'>
         <Loading />
@@ -93,11 +97,10 @@ export function InstallationsProvider({children}) {
   return (
     <InstallationContext.Provider
       value={{
-        currentInstallation,
-        setCurrentInstallation: wrappedSetInstallation,
-        setCurrentUnsafe: setCurrentInstallation,
-        installations: data && data.installations.edges,
-        fetchMore,
+        currentApplication,
+        setCurrentApplication: wrapped,
+        setCurrentUnsafe: setCurrentApplication,
+        applications: data && data.applications,
         onChange,
         setOnChange
       }}

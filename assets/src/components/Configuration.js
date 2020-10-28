@@ -109,7 +109,7 @@ export default function Configuration() {
     ])
   }, [repo])
   useEffect(() => {
-    setOnChange({func: ({repository: {name}}) => history.push(`/dashboards/${name}`)})
+    setOnChange({func: ({name}) => history.push(`/dashboards/${name}`)})
   }, [])
   useEnsureCurrent(repo)
 
