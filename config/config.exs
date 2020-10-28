@@ -53,4 +53,6 @@ config :watchman,
   replicas: 1,
   nodes: []
 
+config :porcelain, driver: Porcelain.Driver.Basic
+
 import_config "#{Mix.env()}.exs"

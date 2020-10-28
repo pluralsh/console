@@ -25,7 +25,7 @@ defmodule Watchman.Bootstrapper do
   end
 
   def handle_info(:cluster, state) do
-    case Watchman.Cluster.start_cluster() do
+    case Watchman.Cluster.start_cluster() |> IO.inspect() do
       :ok -> :ok
       {:error, {:shutdown, {:failed_to_start_child, :deploy, {:already_started, _}}}} -> :ok
     end

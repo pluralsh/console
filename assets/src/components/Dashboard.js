@@ -53,7 +53,7 @@ function RangePicker({duration, setDuration}) {
       <Box direction='row' round='xsmall'>
         {DURATIONS.map((dur, ind) => (
           <RangeOption
-            key={dur}
+            key={ind}
             duration={dur}
             current={duration}
             first={ind === 0}
