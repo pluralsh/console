@@ -67,6 +67,24 @@ defmodule Watchman.GraphQl.ForgeQueriesTest do
     end
   end
 
+  describe "application" do
+    test "it can fetch an application by name" do
+      expect(Kazan, :run, fn _ -> {:ok, application("app")} end)
+
+      {:ok, %{data: %{"application" => app}}} = run_query("""
+        query {
+          application(name: "app") {
+            name
+            spec { descriptor { type } }
+          }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert app["name"] == "app"
+      assert app["spec"]["descriptor"]["type"] == "app"
+    end
+  end
+
   defp as_connection(nodes) do
     %{
       pageInfo: %{hasNextPage: true, endCursor: "something"},

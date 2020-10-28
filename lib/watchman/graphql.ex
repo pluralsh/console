@@ -105,6 +105,13 @@ defmodule Watchman.GraphQl do
 
       resolve &Forge.list_applications/2
     end
+
+    field :application, :application do
+      middleware Authenticated
+      arg :name, non_null(:string)
+
+      resolve &Forge.resolve_application/2
+    end
   end
 
   mutation do
