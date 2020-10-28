@@ -12,6 +12,7 @@ defmodule Watchman.Schema.Build do
     field :type,         Type
     field :status,       Status
     field :message,      :string
+    field :sha,          :string
     field :completed_at, :utc_datetime_usec
 
     has_many :commands, Command
@@ -44,7 +45,7 @@ defmodule Watchman.Schema.Build do
     from(b in query, where: b.inserted_at <= ^expiry)
   end
 
-  @valid ~w(repository type status completed_at approver_id message)a
+  @valid ~w(repository type status completed_at approver_id message sha)a
 
   def changeset(schema, attrs \\ %{}) do
     schema

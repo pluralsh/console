@@ -34,6 +34,8 @@ defmodule Watchman.Storage.Git do
       do: git("commit", ["-m", msg])
   end
 
+  def revision(), do: git("rev-parse", ["HEAD"])
+
   def git(cmd, args \\ []),
     do: cmd("git", [cmd | args], workspace())
 end

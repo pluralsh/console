@@ -96,12 +96,20 @@ defmodule Watchman.Services.Builds do
   end
 
   def succeed(build) do
+    storage = Watchman.storage()
     start_transaction()
     |> add_operation(:build, fn _ ->
       modify_status(build, :successful)
     end)
     |> add_changelogs()
-    |> execute(extract: :build)
+    |> add_operation(:sha, fn %{build: build} ->
+      with {:ok, sha} <- storage.revision() do
+        build
+        |> Build.changeset(%{sha: sha})
+        |> Repo.update()
+      end
+    end)
+    |> execute(extract: :sha)
     |> when_ok(&broadcast(&1, :update))
     |> notify(:succeed)
   end

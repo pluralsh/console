@@ -39,6 +39,5 @@ defmodule Watchman.Kube.Client do
       response_model: Kube.ApplicationList
     }
     |> Kazan.run()
-    |> IO.inspect()
   end
 end

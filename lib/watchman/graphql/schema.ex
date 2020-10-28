@@ -78,6 +78,7 @@ defmodule Watchman.GraphQl.Schema do
     field :status,       non_null(:status)
     field :message,      :string
     field :completed_at, :datetime
+    field :sha,          :string
 
     connection field :commands, node_type: :command do
       resolve &Build.list_commands/2

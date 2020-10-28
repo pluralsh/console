@@ -1,6 +1,6 @@
 defmodule WatchmanWeb.GraphQl.BuildSubscriptionTest do
   use WatchmanWeb.ChannelCase, async: false
-  alias Watchman.Services.Builds
+  alias Watchman.{Services.Builds, Storage.Git}
   use Mimic
 
   describe "buildDelta" do
@@ -35,6 +35,7 @@ defmodule WatchmanWeb.GraphQl.BuildSubscriptionTest do
       user = insert(:user)
       {:ok, socket} = establish_socket(user)
       build = insert(:build)
+      expect(Git, :revision, fn -> {:ok, "sha"} end)
 
       ref = push_doc(socket, """
         subscription {

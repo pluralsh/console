@@ -1,7 +1,8 @@
 defmodule Watchman.Services.BuildsTest do
   use Watchman.DataCase, async: true
+  use Mimic
   alias Watchman.Services.Builds
-  alias Watchman.PubSub
+  alias Watchman.{PubSub, Storage.Git}
 
   describe "Command implements Collectable" do
     test "A command can accumulate a string stream" do
@@ -67,9 +68,13 @@ defmodule Watchman.Services.BuildsTest do
   describe "succeed/1" do
     test "Succeded builds broadcast" do
       build = insert(:build)
+      expect(Git, :revision, fn -> {:ok, "1234"} end)
+
       {:ok, succeed} = Builds.succeed(build)
 
       assert succeed.status == :successful
+      assert succeed.sha == "1234"
+
       assert_receive {:event, %PubSub.BuildSucceeded{item: ^succeed}}
 
       %{changelogs: [changelog]} = Watchman.Repo.preload(succeed, [:changelogs])

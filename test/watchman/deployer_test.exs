@@ -17,6 +17,7 @@ defmodule Watchman.DeployerTest do
       expect(Git, :init, fn -> echo.(:git_init) end)
       |> expect(:revise, & echo.({:commit, &1}))
       |> expect(:push, fn -> echo.(:git_push) end)
+      |> expect(:revision, fn -> {:ok, "sha"} end)
 
       expect(Forge, :build, & echo.({:build, &1}))
       |> expect(:diff, & echo.({:diff, &1}))
@@ -39,6 +40,7 @@ defmodule Watchman.DeployerTest do
       refetched = refetch(build)
       assert refetched.status == :successful
       assert refetched.completed_at
+      assert refetched.sha == "sha"
 
       state = Watchman.Deployer.state()
       refute state.pid
@@ -54,6 +56,7 @@ defmodule Watchman.DeployerTest do
       end
 
       expect(Git, :init, fn -> echo.(:git_init) end)
+      |> expect(:revision, fn -> {:ok, "sha"} end)
       expect(Forge, :bounce, fn repo -> echo.({:bounce, repo}) end)
 
       :ok = Watchman.Deployer.wake()
