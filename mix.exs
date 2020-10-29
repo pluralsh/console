@@ -65,7 +65,7 @@ defmodule Watchman.MixProject do
       {:poison, "~> 3.1"},
       {:mojito, "~> 0.3.0"},
       {:reverse_proxy_plug, "~> 1.2.1"},
-      {:kazan, "~> 0.11", github: "obmarg/kazan"},
+      {:kazan, "~> 0.11", github: "michaeljguarino/kazan"},
       {:comeonin, "~> 5.1.2"},
       {:argon2_elixir, "~> 2.0"},
       {:prometheus_ex, "~> 3.0"},

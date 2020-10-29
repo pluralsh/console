@@ -195,6 +195,10 @@ defmodule Watchman.GraphQl do
 
       config fn %{build_id: build_id}, _ -> {:ok, topic: "commands:#{build_id}"} end
     end
+
+    field :application_delta, :application_delta do
+      config fn _, _ -> {:ok, topic: "applications"} end
+    end
   end
 
   def safe_resolver(fun) do

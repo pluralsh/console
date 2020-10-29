@@ -229,6 +229,7 @@ defmodule Watchman.GraphQl.Schema do
 
   delta :build
   delta :command
+  delta :application
 
   connection node_type: :build
   connection node_type: :command

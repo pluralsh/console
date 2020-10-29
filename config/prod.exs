@@ -23,6 +23,10 @@ config :watchman, Watchman.Cron,
     {"@daily", {Watchman.Cron.Jobs, :prune_invites, []}}
   ]
 
+config :watchman, :watchers, [
+  applications: Watchman.Watchers.Application
+]
+
 config :watchman,
   prometheus: "http://bootstrap-prometheus-server.bootstrap",
   loki: "http://bootstrap-loki.bootstrap:3100"

@@ -13,6 +13,7 @@ defmodule Watchman.Application do
       Watchman.Forge.Config,
       Watchman.Cron,
       {Cluster.Supervisor, [topologies, [name: Watchman.ClusterSupervisor]]},
+      Watchman.Watchers,
       Watchman.Bootstrapper,
       Watchman.Deployer,
       Watchman.Grafana.Token,

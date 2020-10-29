@@ -54,7 +54,8 @@ config :ra,
 
 config :watchman,
   replicas: 1,
-  nodes: []
+  nodes: [],
+  watchers: []
 
 config :porcelain, driver: Porcelain.Driver.Basic
 
