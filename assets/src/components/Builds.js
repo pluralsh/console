@@ -8,8 +8,8 @@ import moment from 'moment'
 import { mergeEdges } from './graphql/utils'
 import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
-import { INSTALLATION_Q } from './graphql/forge'
 import { BuildStatus as Status, BuildTypes } from './types'
+import { InstallationContext } from './Installations'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -51,8 +51,15 @@ function BuildStatus({status}) {
 
 export const BUILD_PADDING = {horizontal: 'medium'}
 
-function Build({build: {id, repository, status, insertedAt, message, creator}}) {
+function Build({build: {id, repository, status, insertedAt, message, creator, sha}}) {
   let history = useHistory()
+  const footer = [
+    moment(insertedAt).fromNow(),
+    creator && creator.name,
+    message,
+    sha
+  ].filter((e) => !!e).join(' -- ')
+
   return (
     <Box pad={BUILD_PADDING}>
       <Box pad='small' margin={{top: 'small'}} direction='row' background='cardDetailLight'
@@ -60,7 +67,7 @@ function Build({build: {id, repository, status, insertedAt, message, creator}}) 
         onClick={() => history.push(`/build/${id}`)}>
         <Box fill='horizontal'>
           <Text size='small' weight='bold'>{repository}</Text>
-          <Text size='small' color='dark-6'>{moment(insertedAt).fromNow()} -- {creator && creator.name} {message && `-- ${message}`}</Text>
+          <Text size='small' color='dark-6'>{footer}</Text>
         </Box>
         <BuildStatus status={status} />
       </Box>
@@ -69,25 +76,19 @@ function Build({build: {id, repository, status, insertedAt, message, creator}}) 
 }
 
 function BuildForm({setOpen}) {
-  const [attributes, setAttributes] = useState({repository: '', type: 'DEPLOY', message: "manual test"})
+  const {applications} = useContext(InstallationContext)
+  const [attributes, setAttributes] = useState({repository: applications[0].name, type: 'DEPLOY', message: "manual test"})
   const [mutation, {loading}] = useMutation(CREATE_BUILD, {
     variables: {attributes},
     fetchPolicy: 'no-cache',
     onCompleted: () => setOpen(false)
   })
-  const {data} = useQuery(INSTALLATION_Q, {
-    onCompleted: ({installations: {edges}}) => {
-      setAttributes({...attributes, repository: edges[0].node.repository.name})
-    },
-  })
-  if (!data) return <Loading />
-  const {edges} = data.installations
 
   return (
     <Box gap='small' pad='medium'>
       <FormField label='repository'>
         <Select
-          options={edges.map(({node: {repository: {name}}}) => name)}
+          options={applications.map(({name}) => name)}
           value={attributes.repository}
           onChange={({value}) => setAttributes({...attributes, repository: value})} />
       </FormField>

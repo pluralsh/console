@@ -6,6 +6,7 @@ export const BuildFragment = gql`
     id
     repository
     type
+    sha
     status
     message
     insertedAt

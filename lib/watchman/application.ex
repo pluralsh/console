@@ -1,8 +1,6 @@
 defmodule Watchman.Application do
   use Application
 
-  @horde Watchman.Horde.Supervisor
-
   def start(_type, _args) do
     topologies = Application.get_env(:libcluster, :topologies)
     WatchmanWeb.Plugs.MetricsExporter.setup()
@@ -15,17 +13,6 @@ defmodule Watchman.Application do
       Watchman.Forge.Config,
       Watchman.Cron,
       {Cluster.Supervisor, [topologies, [name: Watchman.ClusterSupervisor]]},
-      {Horde.Registry, name: Watchman.Registry, keys: :unique, members: :auto},
-      {Horde.DynamicSupervisor,
-       [
-         name: @horde,
-         strategy: :one_for_one,
-         max_restarts: 100_000,
-         shutdown: 3000,
-         max_seconds: 1,
-         members: :auto
-       ]
-      },
       Watchman.Bootstrapper,
       Watchman.Deployer,
       Watchman.Grafana.Token,

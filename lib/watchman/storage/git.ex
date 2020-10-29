@@ -34,7 +34,12 @@ defmodule Watchman.Storage.Git do
       do: git("commit", ["-m", msg])
   end
 
-  def revision(), do: git("rev-parse", ["HEAD"])
+  def revision() do
+    case System.cmd("git", ["rev-parse", "HEAD"], cd: workspace()) do
+      {sha, 0} -> {:ok, sha}
+      {result, _} -> {:error, result}
+    end
+  end
 
   def git(cmd, args \\ []),
     do: cmd("git", [cmd | args], workspace())

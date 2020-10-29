@@ -47,7 +47,10 @@ config :libcluster, :topologies, []
 
 config :kazan, :server, :in_cluster
 
-config :ra, data_dir: Path.join([Path.dirname(__DIR__), "priv", "data"]) |> String.to_charlist()
+config :ra,
+  data_dir: Path.join([Path.dirname(__DIR__), "priv", "data"]) |> String.to_charlist(),
+  wal_max_entries: 2000, # we don't need a ton here
+  wal_max_size_bytes: 100_000
 
 config :watchman,
   replicas: 1,
