@@ -14,6 +14,7 @@ import Users from './Users'
 import { Installations, InstallationsProvider } from './Installations'
 import { LogViewer } from './Logs'
 import RepositorySelector from './RepositorySelector'
+import Application from './Application'
 
 const SIDEBAR_WIDTH = '70px'
 
@@ -47,6 +48,13 @@ export default function Watchman() {
                   prefix='logs'
                   title='Logs'
                   description='aggregated logstreams for your repos' />
+              )} />
+              <Route path='/components/:repo' component={Application} />
+              <Route path='/components' render={() => (
+                <RepositorySelector
+                  prefix='components'
+                  title='Components'
+                  description='details for all your applications' />
               )} />
               <Route path='/build/:buildId' component={Build} />
               <Route path='/webhooks' component={Webhooks} />

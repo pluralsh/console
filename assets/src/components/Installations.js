@@ -3,7 +3,8 @@ import React, { useEffect, useRef, useContext, useState, useCallback } from 'rea
 import { Checkmark } from 'grommet-icons'
 import { Loading } from 'forge-core'
 import { useQuery } from 'react-apollo'
-import { APPLICATIONS_Q, INSTALLATION_Q } from './graphql/forge'
+import { APPLICATIONS_Q } from './graphql/forge'
+import { ApplicationReadyIcon } from './Application'
 
 export const InstallationContext = React.createContext({})
 
@@ -13,6 +14,7 @@ function Installation({application, setCurrentApplication, current: {name}}) {
     <Box
       direction='row' align='center' gap='small' pad='small' round='xsmall' focusIndicator={false}
       onClick={() => setCurrentApplication(application)} hoverIndicator='light-3'>
+      <ApplicationReadyIcon application={application} size='20px' showIcon />
       {descriptor.icons.length > 0 && <ApplicationIcon application={application} size='40px' />}
       <Box fill='horizontal'>
         <Text size='small' weight={500}>{appname}</Text>
@@ -39,10 +41,11 @@ export function Installations() {
   const {name, spec: {descriptor}} = currentApplication
   return (
     <>
-    <Box flex={false} ref={ref} direction='row' gap='xsmall' align='center' hoverIndicator='sidebarHover'
+    <Box flex={false} ref={ref} direction='row' gap='small' align='center' hoverIndicator='sidebarHover'
          onClick={() => setOpen(true)}>
       {descriptor.icons.length > 0 && <ApplicationIcon application={currentApplication} />}
       <Text size='small' weight={500}>{name}</Text>
+      <ApplicationReadyIcon application={currentApplication} size='20px' showIcon />
     </Box>
     {open && (
       <Drop target={ref.current} align={{top: 'bottom'}} onClickOutside={() => setOpen(false)}>

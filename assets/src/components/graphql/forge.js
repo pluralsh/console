@@ -75,6 +75,7 @@ export const ApplicationFragment = gql`
     }
     status {
       components {
+        group
         kind
         name
         status
