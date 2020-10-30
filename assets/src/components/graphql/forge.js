@@ -117,3 +117,15 @@ export const APPLICATION_Q = gql`
   }
   ${ApplicationFragment}
 `
+
+export const APPLICATION_SUB = gql`
+  subscription {
+    applicationDelta {
+      delta
+      payload {
+        ...ApplicationFragment
+      }
+    }
+  }
+  ${ApplicationFragment}
+`;

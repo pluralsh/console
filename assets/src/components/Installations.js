@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useContext, useState, useCallback } from 'rea
 import { Checkmark } from 'grommet-icons'
 import { Loading } from 'forge-core'
 import { useQuery } from 'react-apollo'
-import { APPLICATIONS_Q } from './graphql/forge'
+import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/forge'
 import { ApplicationReadyIcon } from './Application'
 
 export const InstallationContext = React.createContext({})
@@ -74,10 +74,21 @@ export function useEnsureCurrent(repo) {
   }, [repo, applications, currentApplication])
 }
 
+function applyDelta(prev, {delta, payload}) {
+  switch (delta) {
+    case "CREATE":
+      return {...prev, applications: [...prev.applications, payload]}
+    case "DELETE":
+      return {...prev, applications: prev.applications.filter(({name}) => name !== payload.name)}
+    default:
+      return {...prev, applications: prev.applications.map((app) => app.name === payload.name ? payload : app)}
+  }
+}
+
 export function InstallationsProvider({children}) {
   const [currentApplication, setCurrentApplication] = useState(null)
   const [{func: onChange}, setOnChange] = useState({func: () => null})
-  const {data} = useQuery(APPLICATIONS_Q)
+  const {data, subscribeToMore} = useQuery(APPLICATIONS_Q)
   const wrapped = useCallback((application) => {
     setCurrentApplication(application)
     application && onChange(application)
@@ -88,6 +99,11 @@ export function InstallationsProvider({children}) {
       setCurrentApplication(data.applications[0])
     }
   }, [data, currentApplication, setCurrentApplication])
+  useEffect(() => subscribeToMore({
+    document: APPLICATION_SUB,
+    updateQuery: (prev, {subscriptionData: {data}}) => {
+      return data ? applyDelta(prev, data.applicationDelta) : prev
+  }}), [])
 
   if (!currentApplication) {
     return (
@@ -96,11 +112,12 @@ export function InstallationsProvider({children}) {
       </Box>
     )
   }
+  const current = currentApplication && data && data.applications.find(({name}) => name === currentApplication.name)
 
   return (
     <InstallationContext.Provider
       value={{
-        currentApplication,
+        currentApplication: current,
         setCurrentApplication: wrapped,
         setCurrentUnsafe: setCurrentApplication,
         applications: data && data.applications,
