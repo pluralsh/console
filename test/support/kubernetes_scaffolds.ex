@@ -1,0 +1,66 @@
+defmodule Watchman.KubernetesScaffolds do
+  alias Kazan.Apis.Core.V1, as: Core
+  alias Kazan.Apis.Apps.V1, as: Apps
+  alias Kazan.Apis.Extensions.V1beta1, as: Extensions
+  alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector}
+
+  def stateful_set(namespace, name) do
+    %Apps.StatefulSet{
+      metadata: %{name: name, namespace: namespace},
+      status: %Apps.StatefulSetStatus{
+        current_replicas: 3,
+        replicas: 3
+      },
+      spec: %Apps.StatefulSetSpec{
+        replicas: 3,
+        service_name: name,
+        selector: %LabelSelector{match_labels: %{"label" => "value"}}
+      }
+    }
+  end
+
+  def deployment(namespace, name) do
+    %Apps.Deployment{
+      metadata: %{name: name, namespace: namespace},
+      status: %Apps.DeploymentStatus{
+        available_replicas: 3,
+        replicas: 3,
+        ready_replicas: 3
+      },
+      spec: %Apps.DeploymentSpec{
+        replicas: 3,
+        selector: %LabelSelector{match_labels: %{"label" => "value"}}
+      }
+    }
+  end
+
+  def service(namespace, name) do
+    %Core.Service{
+      metadata: %{name: name, namespace: namespace},
+      status: %Core.ServiceStatus{load_balancer: %{ingress: [%{ip: "1.2.3.4"}]}},
+      spec: %Core.ServiceSpec{
+        selector: %{"label" => "value"},
+        load_balancer_ip: "1.2.3.4",
+        cluster_ip: "1.2.3.4",
+        type: "LoadBalancer",
+        ports: [%Core.ServicePort{name: "example", protocol: "TCP", port: 8080, target_port: 8080}]
+      }
+    }
+  end
+
+  def ingress(namespace, name) do
+    %Extensions.Ingress{
+      metadata: %{name: name, namespace: namespace},
+      status: %Extensions.IngressStatus{load_balancer: %{ingress: [%{ip: "1.2.3.4"}]}},
+      spec: %Extensions.IngressSpec{
+        tls: [%Extensions.IngressTLS{hosts: ["example.com"]}],
+        rules: [%Extensions.IngressRule{
+          host: "example.com",
+          http: %Extensions.HTTPIngressRuleValue{
+            paths: [%Extensions.HTTPIngressPath{path: "*"}]
+          }
+        }]
+      }
+    }
+  end
+end

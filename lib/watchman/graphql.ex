@@ -5,7 +5,10 @@ defmodule Watchman.GraphQl do
   alias Watchman.GraphQl.Resolvers.{Build, Forge, Webhook, User, Observability}
   alias Watchman.Middleware.Authenticated
 
+  import_types Absinthe.Type.Custom
+  import_types Watchman.GraphQl.Schema.Base
   import_types Watchman.GraphQl.Schema
+  import_types Watchman.GraphQl.Kubernetes
 
   @sources [
     Build,
@@ -112,6 +115,8 @@ defmodule Watchman.GraphQl do
 
       resolve &Forge.resolve_application/2
     end
+
+    import_fields :kubernetes_queries
   end
 
   mutation do

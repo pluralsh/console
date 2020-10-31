@@ -1,22 +1,23 @@
 defmodule Watchman.GraphQl.Schema.Base do
+  use Absinthe.Schema.Notation
+
+  enum :delta do
+    value :create
+    value :update
+    value :delete
+  end
+
+  enum :direction do
+    value :before
+    value :after
+  end
+
   defmacro __using__(_) do
     quote do
       use Absinthe.Schema.Notation
       use Absinthe.Relay.Schema.Notation, :modern
       import Absinthe.Resolution.Helpers
       import Watchman.GraphQl.Schema.Base
-      import_types Absinthe.Type.Custom
-
-      enum :delta do
-        value :create
-        value :update
-        value :delete
-      end
-
-      enum :direction do
-        value :before
-        value :after
-      end
     end
   end
 
