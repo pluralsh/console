@@ -47,4 +47,12 @@ defmodule Watchman.Factory do
       build: build(:build)
     }
   end
+
+  def lock_factory do
+    %Schema.Lock{
+      holder: Ecto.UUID.generate(),
+      name: "dummy",
+      expires_at: Timex.now() |> Timex.shift(minutes: 20)
+    }
+  end
 end

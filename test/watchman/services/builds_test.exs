@@ -126,4 +126,28 @@ defmodule Watchman.Services.BuildsTest do
       assert changelog.content == "test"
     end
   end
+
+  describe "lock" do
+    test "it can create a lock if none exists, then prevent further creation" do
+      holder = Ecto.UUID.generate()
+      {:ok, _} = Builds.lock("test", holder)
+      {:error, :locked} = Builds.lock("test", Ecto.UUID.generate())
+    end
+  end
+
+  describe "unlock" do
+    test "a lock holder can unlock a lock" do
+      holder = Ecto.UUID.generate()
+      {:ok, lock} = Builds.lock("test", holder)
+      {:ok, _} = Builds.unlock("test", holder)
+
+      refute refetch(lock)
+    end
+
+    test "non lock holders cannot unlock a lock" do
+      holder = Ecto.UUID.generate()
+      {:ok, _} = Builds.lock("test", holder)
+      {:error, :locked} = Builds.unlock("test", Ecto.UUID.generate())
+    end
+  end
 end

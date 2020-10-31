@@ -7,6 +7,7 @@ import { BUILD_PADDING } from './Builds'
 import { normalizeColor } from 'grommet/utils'
 import { chunk } from '../utils/array'
 import { Checkmark, StatusCritical, Update } from 'grommet-icons'
+import Icon from './kubernetes/Icon'
 
 const Readiness = {
   Ready: 'Ready',
@@ -56,8 +57,8 @@ function Component({component: {group, kind, name, status}, width}) {
     <Box width={width} direction='row' gap='small' align='center' background='backgroundLight'
          pad='small' round='xsmall' hoverIndicator='backgroundDark'>
       <ReadyIcon readiness={status} size='10px' />
-      <Text size='small'>{group || 'v1'}/{kind.toLowerCase()}</Text>
-      <Text size='small'>~></Text>
+      <Icon kind={kind} />
+      <Text size='small' color='dark-6'>{group || 'v1'}/{kind.toLowerCase()}</Text>
       <Text size='small'>{name}</Text>
     </Box>
   )

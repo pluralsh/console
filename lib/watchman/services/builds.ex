@@ -2,11 +2,41 @@ defmodule Watchman.Services.Builds do
   use Watchman.Services.Base
   alias Watchman.PubSub
   alias Watchman.Kube.{Client, Application}
-  alias Watchman.Schema.{Build, Command, User, Changelog}
+  alias Watchman.Schema.{Build, Command, User, Changelog, Lock}
 
   def get!(id), do: Repo.get!(Build, id)
 
   def get(id), do: Repo.get(Build, id)
+
+  def lock(name, id) do
+    start_transaction()
+    |> add_operation(:lock, fn _ ->
+      Lock.active()
+      |> Repo.get_by(name: name)
+      |> case do
+        nil -> {:ok, nil}
+        _ -> {:error, :locked}
+      end
+    end)
+    |> add_operation(:create, fn _ ->
+      %Lock{name: name, holder: id}
+      |> Lock.changeset(%{expires_at: Timex.now() |> Timex.shift(minutes: 30)})
+      |> Repo.insert(on_conflict: :replace_all, conflict_target: [:name])
+    end)
+    |> execute(extract: :create)
+  end
+
+  def unlock(name, id) do
+    start_transaction()
+    |> add_operation(:lock, fn _ ->
+      case Repo.get_by(Lock, name: name, holder: id) do
+        %Lock{} = lock -> {:ok, lock}
+        _ -> {:error, :locked}
+      end
+    end)
+    |> add_operation(:delete, fn %{lock: lock} -> Repo.delete(lock) end)
+    |> execute(extract: :delete)
+  end
 
   def create(attrs, %User{id: id}) do
     start_transaction()

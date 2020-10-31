@@ -70,8 +70,6 @@ spec:
           mountPath: "/root/.forge"
         - name: watchman-creds
           mountPath: "/root/.creds"
-        - name: watchman
-          mountPath: /data/ra
         ports:
         - name: http
           containerPort: {{ .Values.service.port }}
@@ -112,11 +110,3 @@ spec:
       - name: watchman-creds
         secret:
           secretName: watchman-credentials
-  volumeClaimTemplates:
-  - metadata:
-      name: watchman
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 5Gi

@@ -13,7 +13,7 @@ defmodule Watchman.Bootstrapper do
     if Watchman.conf(:initialize) do
       send self(), :init
     end
-    send self(), :cluster
+    # send self(), :cluster
     {:ok, %State{storage: Watchman.storage(), ref: make_ref()}}
   end
 
@@ -24,13 +24,13 @@ defmodule Watchman.Bootstrapper do
     {:noreply, state}
   end
 
-  def handle_info(:cluster, state) do
-    case Watchman.Cluster.start_cluster() |> IO.inspect() do
-      :ok -> :ok
-      {:error, {:shutdown, {:failed_to_start_child, :deploy, {:already_started, _}}}} -> :ok
-    end
-    {:noreply, state}
-  end
+  # def handle_info(:cluster, state) do
+  #   case Watchman.Cluster.start_cluster() |> IO.inspect() do
+  #     :ok -> :ok
+  #     {:error, {:shutdown, {:failed_to_start_child, :deploy, {:already_started, _}}}} -> :ok
+  #   end
+  #   {:noreply, state}
+  # end
 
   def handle_info(_, state), do: {:noreply, state}
 end
