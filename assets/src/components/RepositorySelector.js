@@ -9,7 +9,6 @@ import { BreadcrumbsContext } from './Breadcrumbs'
 import { ApplicationIcon, hasIcon, InstallationContext } from './Installations'
 
 export function RepositoryChoice({application, link}) {
-  console.log(application)
   return (
     <Box
       onClick={link}
@@ -45,8 +44,6 @@ export default function RepositorySelector({title, description, prefix}) {
   useEffect(() => {
     setOnChange({func: ({name}) => history.push(`/${prefix}/${name}`)})
   }, [prefix])
-
-  console.log(applications)
 
   return (
     <Box height='calc(100vh - 45px)'>

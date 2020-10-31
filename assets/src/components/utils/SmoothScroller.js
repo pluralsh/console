@@ -84,7 +84,7 @@ export default function SmoothScroller({
   const getSize = useCallback(index => sizeMap.current[index] || 50, [sizeMap]);
   const count = items.length
   const itemCount = hasNextPage ? count + 7 : count;
-  const loadMoreItems = loading ? () => { console.log('what'); return {} } : loadNextPage;
+  const loadMoreItems = loading ? () => {} : loadNextPage;
   const isItemLoaded = useCallback(index => !hasNextPage || index < count, [hasNextPage, count])
 
   useEffect(() => {

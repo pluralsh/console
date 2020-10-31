@@ -201,7 +201,6 @@ function Command({command}) {
 
 function updateQuery(prev, {subscriptionData: {data}}) {
   if (!data) return prev
-  console.log(data)
   if (data.buildDelta) {
     return {...prev, build: {...prev, ...data.buildDelta.payload}}
   }

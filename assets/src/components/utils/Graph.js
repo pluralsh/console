@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useMemo, useState } from 'react'
 import { ResponsiveLine } from '@nivo/line'
 import moment from 'moment'
 import { last } from 'lodash'
@@ -25,9 +25,16 @@ function SliceTooltip({point: {serieColor, serieId, data}}) {
 
 export function Graph({data, yFormat, tick}) {
   const theme = useContext(ThemeContext)
-  if (data.length === 0) return <Text size='small'>no data</Text>
+  const [selected, setSelected] = useState(null)
+  const graph = useMemo(() => {
+    if (data.find(({id}) => id === selected)) {
+      return data.filter(({id}) => id === selected)
+    }
+    return data
+  }, [data, selected])
+  if (graph.length === 0) return <Text size='small'>no data</Text>
 
-  const hasData = !!data[0].data[0]
+  const hasData = !!graph[0].data[0]
   return (
     <ResponsiveLine
         theme={{
@@ -38,12 +45,12 @@ export function Graph({data, yFormat, tick}) {
           axis: {legend: {text: {fill: 'white'}}},
           grid: {line: {stroke: normalizeColor('dark-2', theme)}},
         }}
-        data={data}
+        data={graph}
         curve='catmullRom'
         margin={{top: 50, right: 110, bottom: 75, left: 70}}
         areaOpacity={.5}
         useMesh
-        lineWidth='2px'
+        lineWidth={2}
         enablePoints={false}
         // enableSlices='x'
         animate={false}
@@ -60,7 +67,7 @@ export function Graph({data, yFormat, tick}) {
           tickPadding: 5,
           tickRotation: 0,
           legendOffset: -50,
-          legendPosition: 'top'
+          legendPosition: 'start'
         }}
         axisBottom={{
           format: '%H:%M',
@@ -75,6 +82,7 @@ export function Graph({data, yFormat, tick}) {
         legends={[
           {
               anchor: 'bottom-right',
+              onClick: ({id}) => selected ? setSelected(null) : setSelected(id),
               direction: 'column',
               justify: false,
               translateX: 100,

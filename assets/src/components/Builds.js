@@ -158,7 +158,6 @@ export default function Builds() {
   useEffect(() => subscribeToMore({
     document: BUILD_SUB,
     updateQuery: (prev, {subscriptionData: {data}}) => {
-      console.log(data)
       return data ? applyDelta(prev, data.buildDelta) : prev
   }}), [])
 
