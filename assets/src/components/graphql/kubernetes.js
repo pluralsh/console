@@ -11,16 +11,12 @@ export const MetadataFragment = gql`
 export const PodFragment = gql`
   fragment PodFragment on Pod {
     metadata { ...MetadataFragment }
-    status {
-      phase
-      podIp
-      reason
-    }
+    status { phase podIp reason }
     spec {
       serviceAccountName
       containers {
         image
-        port
+        ports { containerPort protocol }
         resources {
           limits { cpu memory }
           requests { cpu memory }

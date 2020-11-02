@@ -9,6 +9,7 @@ defmodule Watchman.GraphQl.Kubernetes do
     field :name, non_null(:string)
   end
 
+  defp make_labels(nil), do: []
   defp make_labels(map), do: Enum.map(map, fn {key, value} -> %{name: key, value: value} end)
 
   object :label_pair do

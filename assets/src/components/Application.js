@@ -9,7 +9,7 @@ import { chunk } from '../utils/array'
 import { Checkmark, StatusCritical, Update } from 'grommet-icons'
 import Icon from './kubernetes/Icon'
 
-const Readiness = {
+export const Readiness = {
   Ready: 'Ready',
   InProgress: 'InProgress',
   Failed: 'Failed'

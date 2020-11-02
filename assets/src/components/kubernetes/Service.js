@@ -6,13 +6,14 @@ import { SERVICE_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
 import { useParams } from 'react-router'
 import { POLL_INTERVAL } from './constants'
+import { PodList } from './Pod'
 
 function Status({status: {loadBalancer}}) {
   if (!loadBalancer) return null
   if (!loadBalancer.ingress || loadBalancer.ingress.length === 0) return null
 
   return (
-    <Box pad='small' gap='xsmall'>
+    <Box flex={false} pad='small' gap='xsmall'>
       <Box>
         <Text size='small'>Status</Text>
       </Box>
@@ -41,7 +42,7 @@ function PortRow({port: {name, protocol, port, targetPort}}) {
 
 function Spec({spec: {clusterIp, type, ports}}) {
   return (
-    <Box pad='small' gap='xsmall'>
+    <Box flex={false} pad='small' gap='xsmall'>
       <Box>
         <Text size='small'>Spec</Text>
       </Box>
@@ -72,6 +73,7 @@ export default function Service() {
       <Metadata metadata={service.metadata} />
       <Status status={service.status} />
       <Spec spec={service.spec} />
+      <PodList pods={service.pods} />
     </Box>
   )
 }

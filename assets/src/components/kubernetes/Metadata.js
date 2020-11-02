@@ -26,7 +26,7 @@ function MetadataTag({name, value}) {
 
 export function Metadata({metadata: {name, labels, annotations}}) {
   return (
-    <Box pad='small'>
+    <Box flex={false} pad='small'>
       <Box>
         <Text size='small'>Metadata</Text>
       </Box>

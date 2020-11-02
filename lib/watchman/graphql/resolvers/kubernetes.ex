@@ -36,7 +36,7 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
     Core.list_namespaced_pod!(namespace, label_selector: construct_label_selector(label_selector))
     |> Kazan.run()
     |> case do
-      {:ok, %{items: pods}} -> {:ok, pods}
+      {:ok, %{items: pods}} -> {:ok, IO.inspect(pods)}
       error -> error
     end
   end

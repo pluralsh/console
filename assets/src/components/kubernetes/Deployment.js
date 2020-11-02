@@ -6,10 +6,11 @@ import { DEPLOYMENT_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
 import { useParams } from 'react-router'
 import { POLL_INTERVAL } from './constants'
+import { PodList } from './Pod'
 
 function Status({status: {availableReplicas, replicas, unavailableReplicas}}) {
   return (
-    <Box pad='small' gap='xsmall'>
+    <Box flex={false} pad='small' gap='xsmall'>
       <Box>
         <Text size='small'>Status</Text>
       </Box>
@@ -28,7 +29,7 @@ function Status({status: {availableReplicas, replicas, unavailableReplicas}}) {
 
 function Spec({spec: {strategy}}) {
   return (
-    <Box pad='small' gap='xsmall'>
+    <Box flex={false} pad='small' gap='xsmall'>
       <Box>
         <Text size='small'>Spec</Text>
       </Box>
@@ -51,6 +52,7 @@ export default function Deployment() {
       <Metadata metadata={deployment.metadata} />
       <Status status={deployment.status} />
       <Spec spec={deployment.spec} />
+      <PodList pods={deployment.pods} />
     </Box>
   )
 }
