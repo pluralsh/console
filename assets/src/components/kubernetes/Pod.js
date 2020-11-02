@@ -53,6 +53,7 @@ export function PodHeader() {
       <HeaderItem width='15%' text='status' />
       <HeaderItem width='10%' text='memory' />
       <HeaderItem width='10%' text='cpu' />
+      <HeaderItem width='45%' text='image' />
     </Box>
   )
 }
@@ -64,12 +65,12 @@ export function PodList({pods}) {
         <Text size='small' weight={500}>Pods</Text>
       </Box>
       <PodHeader />
-      {pods.map((pod, ind) => <Pod key={ind} pod={pod} />)}
+      {pods.map((pod, ind) => <PodRow key={ind} pod={pod} />)}
     </Box>
   )
 }
 
-export default function Pod({pod: {metadata: {name}, status, spec}}) {
+export function PodRow({pod: {metadata: {name}, status, spec}}) {
   return (
     <Box flex={false} fill='horizontal' direction='row' align='center'>
       <Box flex={false} width='15%'>
@@ -81,8 +82,11 @@ export default function Pod({pod: {metadata: {name}, status, spec}}) {
       <Box flex={false} width='10%'>
         <PodResources container={spec.containers[0]} dimension='memory' />
       </Box>
-      <Box flex={false} width='15%'>
+      <Box flex={false} width='10%'>
         <PodResources container={spec.containers[0]} dimension='cpu' />
+      </Box>
+      <Box flex={false} width='45%'>
+        <Text size='small' truncate>{spec.containers.map(({image}) => image).join(', ')}</Text>
       </Box>
     </Box>
   )

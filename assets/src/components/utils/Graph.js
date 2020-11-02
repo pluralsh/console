@@ -56,7 +56,7 @@ export function Graph({data, yFormat, tick}) {
         animate={false}
         xScale={{type: 'time', format: 'native'}}
         yScale={{type: 'linear', min: 'auto', max: 'auto', stacked: false, reverse: false}}
-        colors={{scheme: 'nivo'}}
+        colors={{scheme: 'set2'}}
         yFormat={yFormat}
         xFormat={dateFormat}
         tooltip={SliceTooltip}
