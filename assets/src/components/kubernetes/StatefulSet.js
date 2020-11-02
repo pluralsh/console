@@ -50,7 +50,7 @@ export default function StatefulSet() {
 
   const {statefulSet} = data
   return (
-    <Box fill gap='small'>
+    <Box fill>
       <Metadata metadata={statefulSet.metadata} />
       <Status status={statefulSet.status} />
       <Spec spec={statefulSet.spec} />

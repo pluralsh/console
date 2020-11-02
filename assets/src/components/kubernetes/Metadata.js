@@ -27,7 +27,7 @@ function MetadataTag({name, value}) {
 export function Metadata({metadata: {name, labels, annotations}}) {
   return (
     <Box pad='small'>
-      <Box margin={{bottom: 'small'}}>
+      <Box>
         <Text size='small'>Metadata</Text>
       </Box>
       <MetadataRow name='name'>

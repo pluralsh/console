@@ -68,7 +68,7 @@ export default function Service() {
 
   const {service} = data
   return (
-    <Box fill gap='small'>
+    <Box fill>
       <Metadata metadata={service.metadata} />
       <Status status={service.status} />
       <Spec spec={service.spec} />
