@@ -89,7 +89,7 @@ export const ServiceFragment = gql`
 `
 
 export const IngressFragment = gql`
-  fragment IngressFragment on Service {
+  fragment IngressFragment on Ingress {
     metadata { ...MetadataFragment }
     status {
       loadBalancer {

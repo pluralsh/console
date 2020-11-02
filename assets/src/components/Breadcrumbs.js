@@ -8,8 +8,17 @@ export const BreadcrumbsContext = React.createContext({
   setBreadcrumbs: () => null
 })
 
-export function Breadcrumbs() {
+
+function CrumbLink({crumb: {url, text, disable}}) {
   let history = useHistory()
+  if (disable) return <Text key={url} size='small' color='dark-6'>{text}</Text>
+
+  return (
+    <Anchor key={url} size='small' onClick={() => history.push(url)}>{text}</Anchor>
+  )
+}
+
+export function Breadcrumbs() {
   const {breadcrumbs} = useContext(BreadcrumbsContext)
 
   if (breadcrumbs.length === 0) return null
@@ -17,7 +26,7 @@ export function Breadcrumbs() {
   const children = Array.from(lookahead(breadcrumbs, (crumb, next) => {
     if (next.url) {
       return [
-        <Anchor key={crumb.url} size='small' onClick={() => history.push(crumb.url)}>{crumb.text}</Anchor>,
+        <CrumbLink crumb={crumb} />,
         <Text key={crumb.url + 'next'} size='small'>/</Text>
       ]
     }

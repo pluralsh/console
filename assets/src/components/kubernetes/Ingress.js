@@ -33,7 +33,7 @@ function IngressPath({rule: {host, http: {paths}}}) {
         {(paths || []).map(({path, backend: {serviceName, servicePort}}, ind) => (
           <Box key={ind} fill='horizontal' direction='row' align='center'>
             <Box width='30%'>
-              <Text size='small'>{path}</Text>
+              <Text size='small'>{path || '*'}</Text>
             </Box>
             <Box fill='horizontal'>
               <Text size='small'>{serviceName}:{servicePort}</Text>
@@ -51,7 +51,22 @@ function Spec({spec: {rules}}) {
       <Box>
         <Text size='small'>Spec</Text>
       </Box>
-      {rules.map((rule, ind) => <IngressPath key={ind} rule={rule} />)}
+      <MetadataRow name='routes'>
+        <Box flex={false} fill='horizontal'>
+          <Box direction='row' gap='small'>
+            <Box flex={false} width='20%'>
+              <Text size='small' weight={500}>host</Text>
+            </Box>
+            <Box flex={false} width='17%'>
+              <Text size='small' weight={500}>path</Text>
+            </Box>
+            <Box flex={false} fill='horizontal'>
+              <Text size='small' weight={500}>backend</Text>
+            </Box>
+          </Box>
+          {rules.map((rule, ind) => <IngressPath key={ind} rule={rule} />)}
+        </Box>
+      </MetadataRow>
     </Box>
   )
 }
@@ -62,12 +77,12 @@ export default function Ingress() {
 
   if (!data) return <Loading />
 
-  const {service} = data
+  const {ingress} = data
   return (
     <Box fill gap='small'>
-      <Metadata metadata={service.metadata} />
-      <Status status={service.status} />
-      <Spec spec={service.spec} />
+      <Metadata metadata={ingress.metadata} />
+      <Status status={ingress.status} />
+      <Spec spec={ingress.spec} />
     </Box>
   )
 }

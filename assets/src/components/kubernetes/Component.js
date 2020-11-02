@@ -35,7 +35,7 @@ export default function Component() {
     setBreadcrumbs([
       {text: 'components', url: '/components'},
       {text: currentApplication.name, url: `/components/${currentApplication.name}`},
-      {text: kind.toLowerCase(), url: `/components/${currentApplication.name}/${kind}/${name}`},
+      {text: kind.toLowerCase(), url: `/components/${currentApplication.name}/${kind}/${name}`, disable: true},
       {text: name, url: `/components/${currentApplication.name}/${kind}/${name}`}
     ])
   }, [currentApplication])
