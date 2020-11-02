@@ -37,6 +37,6 @@ defmodule Watchman.GraphQl.Kubernetes.Service do
     field :name,        :string
     field :protocol,    :string
     field :port,        :integer
-    field :target_port, :integer
+    field :target_port, :string
   end
 end

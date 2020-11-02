@@ -53,9 +53,13 @@ export function ReadyIcon({size, readiness, showIcon}) {
 }
 
 function Component({component: {group, kind, name, status}, width}) {
+  const {repo} = useParams()
+  let history = useHistory()
+
   return (
     <Box width={width} direction='row' gap='small' align='center' background='backgroundLight'
-         pad='small' round='xsmall' hoverIndicator='backgroundDark'>
+         pad='small' round='xsmall' hoverIndicator='backgroundDark'
+         onClick={() => history.push(`/components/${repo}/${kind.toLowerCase()}/${name}`)}>
       <ReadyIcon readiness={status} size='10px' />
       <Icon kind={kind} />
       <Text size='small' color='dark-6'>{group || 'v1'}/{kind.toLowerCase()}</Text>

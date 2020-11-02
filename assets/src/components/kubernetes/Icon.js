@@ -4,14 +4,14 @@ import { Resources, Services, ShareOption, VirtualMachine } from 'grommet-icons'
 const ICON_SIZE = '14px'
 
 export default function Icon({kind, size}) {
-  switch (kind) {
-    case "Service":
+  switch (kind.toLowerCase()) {
+    case "service":
       return <Services size={size || ICON_SIZE} />
-    case "Deployment":
+    case "deployment":
       return <Resources size={size || ICON_SIZE} />
-    case "StatefulSet":
+    case "statefulset":
       return <VirtualMachine size={size || ICON_SIZE} />
-    case "Ingress":
+    case "ingress":
       return <ShareOption size={size || ICON_SIZE} />
     default:
       return null

@@ -15,6 +15,7 @@ import { Installations, InstallationsProvider } from './Installations'
 import { LogViewer } from './Logs'
 import RepositorySelector from './RepositorySelector'
 import Application from './Application'
+import Component from './kubernetes/Component'
 
 const SIDEBAR_WIDTH = '70px'
 
@@ -49,6 +50,7 @@ export default function Watchman() {
                   title='Logs'
                   description='aggregated logstreams for your repos' />
               )} />
+              <Route path='/components/:repo/:kind/:name' component={Component} />
               <Route path='/components/:repo' component={Application} />
               <Route path='/components' render={() => (
                 <RepositorySelector
