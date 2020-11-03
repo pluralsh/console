@@ -28,8 +28,9 @@ export function PodPhase({phase, message}) {
 }
 
 export function PodResources({container: {resources: {limits, requests}}, dimension}) {
-  if (!limits && !requests)
+  if (!limits && !requests) {
     return <Text size='small'>n/a</Text>
+  }
 
   return (
     <Box direction='row'>
@@ -48,7 +49,7 @@ function HeaderItem({width, text}) {
 
 export function PodHeader() {
   return (
-    <Box flex={false} fill='horizontal' direction='row'>
+    <Box flex={false} fill='horizontal' direction='row' border='bottom' pad={{vertical: 'xsmall'}}>
       <HeaderItem width='15%' text='name' />
       <HeaderItem width='15%' text='status' />
       <HeaderItem width='10%' text='memory' />
@@ -61,9 +62,6 @@ export function PodHeader() {
 export function PodList({pods}) {
   return (
     <Box fill pad='small' style={{overflow: 'auto'}}>
-      <Box margin={{bottom: 'small'}}>
-        <Text size='small' weight={500}>Pods</Text>
-      </Box>
       <PodHeader />
       {pods.map((pod, ind) => <PodRow key={ind} pod={pod} />)}
     </Box>
@@ -72,7 +70,7 @@ export function PodList({pods}) {
 
 export function PodRow({pod: {metadata: {name}, status, spec}}) {
   return (
-    <Box flex={false} fill='horizontal' direction='row' align='center'>
+    <Box flex={false} fill='horizontal' direction='row' align='center' border='bottom' pad={{vertical: 'xsmall'}}>
       <Box flex={false} width='15%'>
         <Text size='small' truncate>{name}</Text>
       </Box>
