@@ -67,7 +67,7 @@ defmodule Watchman.GraphQl.Kubernetes do
   end
 
   object :kubernetes_mutations do
-    field :delete_pod, :result_status do
+    field :delete_pod, :pod do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)

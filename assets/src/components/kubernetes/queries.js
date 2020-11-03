@@ -1,5 +1,5 @@
 import { gql } from 'apollo-boost'
-import { DeploymentFragment, IngressFragment, PodFragment, ServiceFragment, StatefulSetFragment } from '../graphql/kubernetes';
+import { DeploymentFragment, IngressFragment, PodFragment, ResultStatus, ServiceFragment, StatefulSetFragment } from '../graphql/kubernetes';
 
 export const SERVICE_Q = gql`
   query Service($name: String!, $namespace: String!) {
@@ -38,5 +38,14 @@ export const STATEFUL_SET_Q = gql`
     }
   }
   ${StatefulSetFragment}
+  ${PodFragment}
+`;
+
+export const DELETE_POD = gql`
+  mutation DeletePod($name: String!, $namespace: String!) {
+    deletePod(name: $name, namespace: $namespace) {
+      ...PodFragment
+    }
+  }
   ${PodFragment}
 `;

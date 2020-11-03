@@ -45,7 +45,7 @@ function Spec({spec: {serviceName}}) {
 
 export default function StatefulSet() {
   const {name, repo} = useParams()
-  const {data} = useQuery(STATEFUL_SET_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
+  const {data, refetch} = useQuery(STATEFUL_SET_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
 
   if (!data) return <Loading />
 
@@ -55,7 +55,7 @@ export default function StatefulSet() {
       <Metadata metadata={statefulSet.metadata} />
       <Status status={statefulSet.status} />
       <Spec spec={statefulSet.spec} />
-      <PodList pods={statefulSet.pods} />
+      <PodList pods={statefulSet.pods} refetch={refetch} namespace={repo} />
     </Box>
   )
 }

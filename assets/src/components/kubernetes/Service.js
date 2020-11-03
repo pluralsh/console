@@ -63,7 +63,7 @@ function Spec({spec: {clusterIp, type, ports}}) {
 
 export default function Service() {
   const {name, repo} = useParams()
-  const {data} = useQuery(SERVICE_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
+  const {data, refetch} = useQuery(SERVICE_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
 
   if (!data) return <Loading />
 
@@ -73,7 +73,7 @@ export default function Service() {
       <Metadata metadata={service.metadata} />
       <Status status={service.status} />
       <Spec spec={service.spec} />
-      <PodList pods={service.pods} />
+      <PodList pods={service.pods} refetch={refetch} namespace={repo} />
     </Box>
   )
 }

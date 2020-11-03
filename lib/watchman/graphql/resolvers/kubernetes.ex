@@ -33,9 +33,14 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
   end
 
   def delete_pod(%{namespace: namespace, name: name}, _) do
-    %Kazan.Models.Apimachinery.Meta.V1.DeleteOptions{}
-    |> Core.delete_namespaced_pod!(namespace, name)
+    %Kazan.Request{
+      method: "delete",
+      path: "/api/v1/namespaces/#{namespace}/pods/#{name}",
+      query_params: %{},
+      response_model: Core.Pod
+    }
     |> Kazan.run()
+    |> IO.inspect()
   end
 
   def list_pods(%{namespace: namespace}, label_selector) do

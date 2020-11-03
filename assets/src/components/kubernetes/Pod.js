@@ -2,6 +2,9 @@ import React from 'react'
 import { Box, Text } from 'grommet'
 import { Readiness, ReadyIcon } from '../Application'
 import { rest } from 'lodash'
+import { useMutation } from 'react-apollo'
+import { DELETE_POD } from './queries'
+import { Trash } from 'grommet-icons'
 
 function phaseToReadiness(phase) {
   switch (phase) {
@@ -50,51 +53,72 @@ function HeaderItem({width, text}) {
 
 export function PodHeader() {
   return (
-    <Box flex={false} fill='horizontal' direction='row' border='bottom' pad={{vertical: 'xsmall'}}>
+    <Box flex={false} fill='horizontal' direction='row' border='bottom' pad={{vertical: 'xsmall'}} gap='xsmall'>
       <HeaderItem width='10%' text='name' />
-      <HeaderItem width='15%' text='status' />
-      <HeaderItem width='10%' text='restarts' />
-      <HeaderItem width='10%' text='host ip' />
-      <HeaderItem width='10%' text='memory' />
-      <HeaderItem width='10%' text='cpu' />
+      <HeaderItem width='10%' text='status' />
+      <HeaderItem width='7%' text='pod ip' />
+      <HeaderItem width='15%' text='node name' />
+      <HeaderItem width='5%' text='memory' />
+      <HeaderItem width='5%' text='cpu' />
+      <HeaderItem width='4%' text='restarts' />
       <HeaderItem width='45%' text='image' />
     </Box>
   )
 }
 
-export function PodList({pods}) {
+export function PodList({pods, namespace, refetch}) {
   return (
     <Box fill pad='small' style={{overflow: 'auto'}}>
       <PodHeader />
-      {pods.map((pod, ind) => <PodRow key={ind} pod={pod} />)}
+      {pods.map((pod, ind) => <PodRow key={ind} pod={pod} namespace={namespace} refetch={refetch} />)}
     </Box>
   )
 }
 
-export function PodRow({pod: {metadata: {name}, status, spec}}) {
+export function DeletePod({name, namespace, refetch}) {
+  const [mutation, {loading}] = useMutation(DELETE_POD, {
+    variables: {name, namespace},
+    onCompleted: refetch
+  })
+
+  return (
+    <Box flex={false} pad='small' round='xsmall' align='center' justify='center'
+         onClick={loading ? null : mutation} hoverIndicator='backgroundDark'>
+      <Trash color={loading ? 'dark-6' : 'error'} size='small' />
+    </Box>
+  )
+}
+
+export function PodRow({pod: {metadata: {name}, status, spec}, namespace, refetch}) {
   const restarts = status.containerStatuses.reduce((count, {restartCount}) => count + (restartCount || 0), 0)
   return (
-    <Box flex={false} fill='horizontal' direction='row' align='center' border='bottom' pad={{vertical: 'xsmall'}}>
+    <Box flex={false} fill='horizontal' direction='row' align='center' border='bottom' pad={{vertical: 'xsmall'}} gap='xsmall'>
       <Box flex={false} width='10%'>
         <Text size='small' truncate>{name}</Text>
       </Box>
-      <Box flex={false} width='15%'>
+      <Box flex={false} width='10%'>
         <PodPhase phase={status.phase} message={status.message} />
       </Box>
-      <Box flex={false} width='10%'>
-        <Text size='small'>{restarts}</Text>
+      <Box flex={false} width='7%'>
+        <Text size='small'>{status.podIp}</Text>
       </Box>
-      <Box flex={false} width='10%'>
-        <Text size='small'>{status.hostIp}</Text>
+      <Box flex={false} width='15%'>
+        <Text size='small' truncate>{spec.nodeName}</Text>
       </Box>
-      <Box flex={false} width='10%'>
+      <Box flex={false} width='5%'>
         <PodResources container={spec.containers[0]} dimension='memory' />
       </Box>
-      <Box flex={false} width='10%'>
+      <Box flex={false} width='5%'>
         <PodResources container={spec.containers[0]} dimension='cpu' />
       </Box>
-      <Box flex={false} width='45%'>
-        <Text size='small' truncate>{spec.containers.map(({image}) => image).join(', ')}</Text>
+      <Box flex={false} width='4%'>
+        <Text size='small'>{restarts}</Text>
+      </Box>
+      <Box fill='horizontal' direction='row' gap='small' justify='end' align='center' pad={{right: 'xsmall'}}>
+        <Box fill='horizontal'>
+          <Text size='small' truncate>{spec.containers.map(({image}) => image).join(', ')}</Text>
+        </Box>
+        <DeletePod name={name} namespace={namespace} refetch={refetch} />
       </Box>
     </Box>
   )

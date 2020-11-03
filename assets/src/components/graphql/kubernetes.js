@@ -8,16 +8,25 @@ export const MetadataFragment = gql`
   }
 `
 
+export const ResultStatus = gql`
+  fragment ResultStatus on ResultStatus {
+    message
+    reason
+    status
+  }
+`;
+
 export const PodFragment = gql`
   fragment PodFragment on Pod {
     metadata { ...MetadataFragment }
     status {
       phase
-      hostIp
+      podIp
       reason
       containerStatuses { restartCount }
     }
     spec {
+      nodeName
       serviceAccountName
       containers {
         image

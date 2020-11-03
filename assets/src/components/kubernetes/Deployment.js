@@ -42,7 +42,7 @@ function Spec({spec: {strategy}}) {
 
 export default function Deployment() {
   const {name, repo} = useParams()
-  const {data} = useQuery(DEPLOYMENT_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
+  const {data, refetch} = useQuery(DEPLOYMENT_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
 
   if (!data) return <Loading />
 
@@ -52,7 +52,7 @@ export default function Deployment() {
       <Metadata metadata={deployment.metadata} />
       <Status status={deployment.status} />
       <Spec spec={deployment.spec} />
-      <PodList pods={deployment.pods} />
+      <PodList pods={deployment.pods} refetch={refetch} namespace={repo} />
     </Box>
   )
 }

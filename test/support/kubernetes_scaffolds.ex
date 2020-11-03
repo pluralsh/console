@@ -70,4 +70,12 @@ defmodule Watchman.KubernetesScaffolds do
       status: "Success"
     }
   end
+
+  def pod(name) do
+    %Core.Pod{
+      metadata: %{name: name},
+      status: %Core.PodStatus{pod_ip: "1.2.3.4"},
+      spec: %Core.PodSpec{node_name: "some-node"}
+    }
+  end
 end
