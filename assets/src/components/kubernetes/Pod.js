@@ -1,6 +1,7 @@
 import React from 'react'
 import { Box, Text } from 'grommet'
 import { Readiness, ReadyIcon } from '../Application'
+import { rest } from 'lodash'
 
 function phaseToReadiness(phase) {
   switch (phase) {
@@ -50,8 +51,10 @@ function HeaderItem({width, text}) {
 export function PodHeader() {
   return (
     <Box flex={false} fill='horizontal' direction='row' border='bottom' pad={{vertical: 'xsmall'}}>
-      <HeaderItem width='15%' text='name' />
+      <HeaderItem width='10%' text='name' />
       <HeaderItem width='15%' text='status' />
+      <HeaderItem width='10%' text='restarts' />
+      <HeaderItem width='10%' text='host ip' />
       <HeaderItem width='10%' text='memory' />
       <HeaderItem width='10%' text='cpu' />
       <HeaderItem width='45%' text='image' />
@@ -69,13 +72,20 @@ export function PodList({pods}) {
 }
 
 export function PodRow({pod: {metadata: {name}, status, spec}}) {
+  const restarts = status.containerStatuses.reduce((count, {restartCount}) => count + (restartCount || 0), 0)
   return (
     <Box flex={false} fill='horizontal' direction='row' align='center' border='bottom' pad={{vertical: 'xsmall'}}>
-      <Box flex={false} width='15%'>
+      <Box flex={false} width='10%'>
         <Text size='small' truncate>{name}</Text>
       </Box>
       <Box flex={false} width='15%'>
         <PodPhase phase={status.phase} message={status.message} />
+      </Box>
+      <Box flex={false} width='10%'>
+        <Text size='small'>{restarts}</Text>
+      </Box>
+      <Box flex={false} width='10%'>
+        <Text size='small'>{status.hostIp}</Text>
       </Box>
       <Box flex={false} width='10%'>
         <PodResources container={spec.containers[0]} dimension='memory' />
