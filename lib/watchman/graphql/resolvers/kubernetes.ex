@@ -32,6 +32,12 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
     |> Kazan.run()
   end
 
+  def delete_pod(%{namespace: namespace, name: name}, _) do
+    %Kazan.Models.Apimachinery.Meta.V1.DeleteOptions{}
+    |> Core.delete_namespaced_pod!(namespace, name)
+    |> Kazan.run()
+  end
+
   def list_pods(%{namespace: namespace}, label_selector) do
     Core.list_namespaced_pod!(namespace, label_selector: construct_label_selector(label_selector))
     |> Kazan.run()

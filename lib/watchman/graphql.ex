@@ -184,6 +184,8 @@ defmodule Watchman.GraphQl do
 
       resolve safe_resolver(&Forge.update_configuration/2)
     end
+
+    import_fields :kubernetes_mutations
   end
 
   subscription do

@@ -63,4 +63,11 @@ defmodule Watchman.KubernetesScaffolds do
       }
     }
   end
+
+  def status() do
+    %Kazan.Models.Apimachinery.Meta.V1.Status{
+      message: "succeeded",
+      status: "Success"
+    }
+  end
 end

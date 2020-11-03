@@ -9,6 +9,12 @@ defmodule Watchman.GraphQl.Kubernetes do
     field :name, non_null(:string)
   end
 
+  object :result_status do
+    field :message, :string
+    field :reason,  :string
+    field :status,  :string
+  end
+
   defp make_labels(nil), do: []
   defp make_labels(map), do: Enum.map(map, fn {key, value} -> %{name: key, value: value} end)
 
@@ -57,6 +63,16 @@ defmodule Watchman.GraphQl.Kubernetes do
       arg :name,      non_null(:string)
 
       resolve &Kubernetes.resolve_ingress/2
+    end
+  end
+
+  object :kubernetes_mutations do
+    field :delete_pod, :result_status do
+      middleware Authenticated
+      arg :namespace, non_null(:string)
+      arg :name,      non_null(:string)
+
+      resolve &Kubernetes.delete_pod/2
     end
   end
 end
