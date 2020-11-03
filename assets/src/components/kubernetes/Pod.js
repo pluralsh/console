@@ -1,10 +1,10 @@
-import React from 'react'
-import { Box, Text } from 'grommet'
+import React, { useState } from 'react'
+import { Box, Layer, Text } from 'grommet'
 import { Readiness, ReadyIcon } from '../Application'
-import { rest } from 'lodash'
+import { findLastKey, rest } from 'lodash'
 import { useMutation } from 'react-apollo'
 import { DELETE_POD } from './queries'
-import { Trash } from 'grommet-icons'
+import { Close, Trash } from 'grommet-icons'
 
 function phaseToReadiness(phase) {
   switch (phase) {
@@ -76,16 +76,33 @@ export function PodList({pods, namespace, refetch}) {
 }
 
 export function DeletePod({name, namespace, refetch}) {
-  const [mutation, {loading}] = useMutation(DELETE_POD, {
+  const [open, setOpen] = useState(true)
+  const [mutation, {loading, data}] = useMutation(DELETE_POD, {
     variables: {name, namespace},
     onCompleted: refetch
   })
 
   return (
+    <>
     <Box flex={false} pad='small' round='xsmall' align='center' justify='center'
          onClick={loading ? null : mutation} hoverIndicator='backgroundDark'>
       <Trash color={loading ? 'dark-6' : 'error'} size='small' />
     </Box>
+    {data && open && (
+      <Layer modal>
+        <Box width='30vw' pad='small'>
+          <Box direction='row' justify='end'>
+            <Box flex={false} pad='xsmall' round='xsmall' hoverIndicator='light-3' onClick={() => setOpen(false)}>
+              <Close size='small' />
+            </Box>
+          </Box>
+          <Box pad='small'>
+            <Text size='small'>pod {name} is deleted, it should recycle shortly</Text>
+          </Box>
+        </Box>
+      </Layer>
+    )}
+    </>
   )
 }
 

@@ -40,7 +40,6 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
       response_model: Core.Pod
     }
     |> Kazan.run()
-    |> IO.inspect()
   end
 
   def list_pods(%{namespace: namespace}, label_selector) do
