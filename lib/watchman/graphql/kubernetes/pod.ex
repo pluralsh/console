@@ -8,10 +8,15 @@ defmodule Watchman.GraphQl.Kubernetes.Pod do
   end
 
   object :pod_status do
-    field :message, :string
-    field :phase,   :string
-    field :pod_ip,  :string
-    field :reason,  :string
+    field :message,            :string
+    field :phase,              :string
+    field :host_ip,             :string
+    field :reason,             :string
+    field :container_statuses, list_of(:container_status)
+  end
+
+  object :container_status do
+    field :restart_count, :integer
   end
 
   object :pod_spec do
