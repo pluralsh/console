@@ -85,7 +85,7 @@ export function DeletePod({name, namespace, refetch}) {
   return (
     <>
     <Box flex={false} pad='small' round='xsmall' align='center' justify='center'
-         onClick={loading ? null : mutation} hoverIndicator='backgroundDark'>
+         onClick={loading ? null : mutation} hoverIndicator='backgroundDark' focusIndicator={false}>
       <Trash color={loading ? 'dark-6' : 'error'} size='small' />
     </Box>
     {data && open && (

@@ -32,6 +32,20 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
     |> Kazan.run()
   end
 
+  def list_nodes(_, _) do
+    Core.list_node!()
+    |> Kazan.run()
+    |> case do
+      {:ok, %{items: nodes}} -> {:ok, nodes}
+      error -> error
+    end
+  end
+
+  def resolve_node(%{name: name}, _) do
+    Core.read_node!(name)
+    |> Kazan.run()
+  end
+
   def delete_pod(%{namespace: namespace, name: name}, _) do
     %Kazan.Request{
       method: "delete",
@@ -44,6 +58,15 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
 
   def list_pods(%{namespace: namespace}, label_selector) do
     Core.list_namespaced_pod!(namespace, label_selector: construct_label_selector(label_selector))
+    |> Kazan.run()
+    |> case do
+      {:ok, %{items: pods}} -> {:ok, pods}
+      error -> error
+    end
+  end
+
+  def list_pods_for_node(%{metadata: %{name:  name}}) do
+    Core.list_pod_for_all_namespaces!(field_selector: "spec.nodeName=#{name}")
     |> Kazan.run()
     |> case do
       {:ok, %{items: pods}} -> {:ok, pods}

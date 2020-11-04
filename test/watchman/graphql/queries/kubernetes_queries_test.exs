@@ -111,4 +111,56 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
       assert ingress["spec"]["rules"] == [%{"host" => "example.com", "http" => %{"paths" => [%{"path" => "*"}]}}]
     end
   end
+
+  describe "nodes" do
+    test "it can list nodes for a cluster" do
+      expect(Kazan, :run, fn _ -> {:ok, %{items: [kube_node()]}} end)
+
+      {:ok, %{data: %{"nodes" => [node]}}} = run_query("""
+        query {
+          nodes {
+            metadata { name }
+            status {
+              allocatable { cpu memory }
+              capacity { cpu memory }
+            }
+            spec { providerId }
+          }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert node["metadata"]["name"]
+      assert node["status"]["allocatable"]["cpu"]
+      assert node["status"]["allocatable"]["memory"]
+      assert node["status"]["capacity"]["cpu"]
+      assert node["status"]["capacity"]["memory"]
+      assert node["spec"]["providerId"]
+    end
+  end
+
+  describe "node" do
+    test "it can resolve a node in the cluster" do
+      expect(Kazan, :run, fn _ -> {:ok, kube_node()} end)
+
+      {:ok, %{data: %{"node" => node}}} = run_query("""
+        query Node($name: String!) {
+          node(name: $name) {
+            metadata { name }
+            status {
+              allocatable { cpu memory }
+              capacity { cpu memory }
+            }
+            spec { providerId }
+          }
+        }
+      """, %{"name" => "node"}, %{current_user: insert(:user)})
+
+      assert node["metadata"]["name"]
+      assert node["status"]["allocatable"]["cpu"]
+      assert node["status"]["allocatable"]["memory"]
+      assert node["status"]["capacity"]["cpu"]
+      assert node["status"]["capacity"]["memory"]
+      assert node["spec"]["providerId"]
+    end
+  end
 end

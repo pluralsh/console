@@ -42,9 +42,4 @@ defmodule Watchman.GraphQl.Kubernetes.Pod do
     field :limits,   :resource_spec
     field :requests, :resource_spec
   end
-
-  object :resource_spec do
-    field :cpu,    :string, resolve: fn resources, _, _ -> {:ok, resources["cpu"]} end
-    field :memory, :string, resolve: fn resources, _, _ -> {:ok, resources["memory"]} end
-  end
 end

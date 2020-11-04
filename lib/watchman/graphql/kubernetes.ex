@@ -23,12 +23,18 @@ defmodule Watchman.GraphQl.Kubernetes do
     field :value, :string
   end
 
+  object :resource_spec do
+    field :cpu,    :string, resolve: fn resources, _, _ -> {:ok, resources["cpu"]} end
+    field :memory, :string, resolve: fn resources, _, _ -> {:ok, resources["memory"]} end
+  end
+
   import_types Watchman.GraphQl.Kubernetes.Application
   import_types Watchman.GraphQl.Kubernetes.Pod
   import_types Watchman.GraphQl.Kubernetes.Deployment
   import_types Watchman.GraphQl.Kubernetes.StatefulSet
   import_types Watchman.GraphQl.Kubernetes.Service
   import_types Watchman.GraphQl.Kubernetes.Ingress
+  import_types Watchman.GraphQl.Kubernetes.Node
 
   delta :application
 
@@ -63,6 +69,19 @@ defmodule Watchman.GraphQl.Kubernetes do
       arg :name,      non_null(:string)
 
       resolve &Kubernetes.resolve_ingress/2
+    end
+
+    field :nodes, list_of(:node) do
+      middleware Authenticated
+
+      resolve &Kubernetes.list_nodes/2
+    end
+
+    field :node, :node do
+      middleware Authenticated
+      arg :name, non_null(:string)
+
+      resolve &Kubernetes.resolve_node/2
     end
   end
 

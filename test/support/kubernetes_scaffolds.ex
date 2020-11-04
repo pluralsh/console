@@ -78,4 +78,18 @@ defmodule Watchman.KubernetesScaffolds do
       spec: %Core.PodSpec{node_name: "some-node"}
     }
   end
+
+  def kube_node() do
+    %Core.Node{
+      metadata: %{name: "some-node"},
+      status: %Core.NodeStatus{
+        allocatable: %{"cpu" => "2", "memory" => "6Gi"},
+        capacity: %{"cpu" => "2", "memory" => "6Gi"}
+      },
+      spec: %Core.NodeSpec{
+        provider_id: "provider-id",
+        unschedulable: false
+      }
+    }
+  end
 end
