@@ -68,7 +68,7 @@ export function PodHeader() {
 
 export function PodList({pods, namespace, refetch}) {
   return (
-    <Box fill pad='small' style={{overflow: 'auto'}}>
+    <Box fill pad='small'>
       <PodHeader />
       {pods.map((pod, ind) => <PodRow key={ind} pod={pod} namespace={namespace} refetch={refetch} />)}
     </Box>

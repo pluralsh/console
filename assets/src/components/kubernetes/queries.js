@@ -61,7 +61,7 @@ export const NODES_Q = gql`
 
 export const NODE_Q = gql`
   query Node($name: String!) {
-    node {
+    node(name: $name) {
       ...NodeFragment
       pods { ...PodFragment }
     }

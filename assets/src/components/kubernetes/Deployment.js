@@ -48,7 +48,7 @@ export default function Deployment() {
 
   const {deployment} = data
   return (
-    <Box fill>
+    <Box fill style={{overflow: 'auto'}}>
       <Metadata metadata={deployment.metadata} />
       <Status status={deployment.status} />
       <Spec spec={deployment.spec} />

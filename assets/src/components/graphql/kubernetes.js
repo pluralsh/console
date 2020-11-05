@@ -129,6 +129,7 @@ export const NodeFragment = gql`
       phase
       allocatable { cpu memory }
       capacity { cpu memory }
+      conditions { type status message }
     }
     spec {
       podCidr

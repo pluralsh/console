@@ -69,7 +69,7 @@ export default function Service() {
 
   const {service} = data
   return (
-    <Box fill>
+    <Box fill style={{overflow: 'auto'}}>
       <Metadata metadata={service.metadata} />
       <Status status={service.status} />
       <Spec spec={service.spec} />

@@ -79,7 +79,7 @@ export default function Ingress() {
 
   const {ingress} = data
   return (
-    <Box fill>
+    <Box fill style={{overflow: 'auto'}}>
       <Metadata metadata={ingress.metadata} />
       <Status status={ingress.status} />
       <Spec spec={ingress.spec} />
