@@ -1,5 +1,5 @@
 import { gql } from 'apollo-boost'
-import { DeploymentFragment, IngressFragment, PodFragment, ResultStatus, ServiceFragment, StatefulSetFragment } from '../graphql/kubernetes';
+import { DeploymentFragment, IngressFragment, NodeFragment, PodFragment, ResultStatus, ServiceFragment, StatefulSetFragment } from '../graphql/kubernetes';
 
 export const SERVICE_Q = gql`
   query Service($name: String!, $namespace: String!) {
@@ -49,3 +49,23 @@ export const DELETE_POD = gql`
   }
   ${PodFragment}
 `;
+
+export const NODES_Q = gql`
+  query {
+    nodes {
+      ...NodeFragment
+    }
+  }
+  ${NodeFragment}
+`
+
+export const NODE_Q = gql`
+  query Node($name: String!) {
+    node {
+      ...NodeFragment
+      pods { ...PodFragment }
+    }
+  }
+  ${NodeFragment}
+  ${PodFragment}
+`

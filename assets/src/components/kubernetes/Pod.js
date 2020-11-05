@@ -43,7 +43,7 @@ export function PodResources({container: {resources: {limits, requests}}, dimens
   )
 }
 
-function HeaderItem({width, text}) {
+export function HeaderItem({width, text}) {
   return (
     <Box flex={false} width={width}>
       <Text size='small' weight={500}>{text}</Text>

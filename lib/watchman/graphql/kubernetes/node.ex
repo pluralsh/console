@@ -15,6 +15,14 @@ defmodule Watchman.GraphQl.Kubernetes.Node do
     field :allocatable, :resource_spec
     field :capacity,    :resource_spec
     field :phase,       :string
+    field :conditions,  list_of(:node_condition)
+  end
+
+  object :node_condition do
+    field :message, :string
+    field :reason,  :string
+    field :status,  :string
+    field :type,    :string
   end
 
   object :node_spec do

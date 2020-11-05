@@ -121,3 +121,19 @@ export const IngressFragment = gql`
   }
   ${MetadataFragment}
 `
+
+export const NodeFragment = gql`
+  fragment NodeFragment on Node {
+    metadata { ...MetadataFragment }
+    status {
+      phase
+      allocatable { cpu memory }
+      capacity { cpu memory }
+    }
+    spec {
+      podCidr
+      providerId
+    }
+  }
+  ${MetadataFragment}
+`;

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useContext } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
-import { Deploy, Network, Configure, BarChart, Group, TextAlignFull, Cubes } from 'grommet-icons'
+import { Deploy, Network, Configure, BarChart, Group, TextAlignFull, Cubes, ServerCluster } from 'grommet-icons'
 import { Box, Text } from 'grommet'
 import { LoginContext } from './Login'
 import { Avatar } from './EditUser'
@@ -61,6 +61,7 @@ const ICON_HEIGHT = '20px'
 const OPTIONS = [
   {text: 'Builds', icon: <Deploy size={ICON_HEIGHT} />, path: '/'},
   {text: 'Components', icon: <Cubes size={ICON_HEIGHT} />, path: '/components/{repo}'},
+  {text: 'Nodes', icon: <ServerCluster size={ICON_HEIGHT} />, path: '/nodes'},
   {text: 'Configuration', icon: <Configure size={ICON_HEIGHT} />, path: '/config/{repo}' },
   {text: 'Dashboards', icon: <BarChart size={ICON_HEIGHT} />, path: '/dashboards/{repo}'},
   {text: 'Logs', icon: <TextAlignFull size={ICON_HEIGHT} />, path: '/logs/{repo}'},
