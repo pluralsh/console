@@ -3,7 +3,7 @@ import { Box, Layer, Text } from 'grommet'
 import { Readiness, ReadyIcon } from '../Application'
 import { useMutation } from 'react-apollo'
 import { DELETE_POD } from './queries'
-import { Close, Trash } from 'grommet-icons'
+import { Close, Cube, Trash } from 'grommet-icons'
 import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
 import filesize from 'filesize'
 
@@ -133,7 +133,8 @@ export function PodRow({pod: {metadata: {name}, status, spec}, namespace, refetc
   const restarts = status.containerStatuses.reduce((count, {restartCount}) => count + (restartCount || 0), 0)
   return (
     <Box flex={false} fill='horizontal' direction='row' align='center' border='bottom' pad={{vertical: 'xsmall'}} gap='xsmall'>
-      <Box flex={false} width='10%'>
+      <Box flex={false} width='10%' direction='row' align='center' gap='xsmall'>
+        <Cube size='small' />
         <Text size='small' truncate>{name}</Text>
       </Box>
       <Box flex={false} width='10%'>

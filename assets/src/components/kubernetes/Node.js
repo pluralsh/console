@@ -34,7 +34,8 @@ function NodeRow({node}) {
   return (
     <Box direction='row' align='center' border='bottom' hoverIndicator='backgroundDark'
          onClick={() => hist.push(`/nodes/${node.metadata.name}`)} pad='small'>
-      <Box flex={false} width='20%'>
+      <Box flex={false} width='20%' direction='row' align='center' gap='xsmall'>
+        <ServerCluster size='small' />
         <Text size='small'>{node.metadata.name}</Text>
       </Box>
       <Box flex={false} width='10%' direction='row' gap='xsmall' align='center'>
