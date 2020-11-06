@@ -3,22 +3,25 @@ import { Loading } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { POLL_INTERVAL } from './constants'
 import { NODES_Q, NODE_Q } from './queries'
-import { HeaderItem, PodList } from './Pod'
+import { HeaderItem, PodList, podResources } from './Pod'
 import { Box, Text } from 'grommet'
 import { useHistory, useParams } from 'react-router'
-import { Metadata, MetadataRow } from './Metadata'
+import { mapify, Metadata, MetadataRow } from './Metadata'
 import { ServerCluster } from 'grommet-icons'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import { Readiness, ReadyIcon } from '../Application'
-
+import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
+import filesize from 'filesize'
 
 function NodeRowHeader() {
   return (
     <Box direction='row' align='center' border='bottom' pad='small'>
       <HeaderItem width='20%' text='name' />
       <HeaderItem width='10%' text='status' />
-      <HeaderItem width='20%' text='cpu usage' />
-      <HeaderItem width='20%' text='memory usage' />
+      <HeaderItem width='10%' text='region' />
+      <HeaderItem width='10%' text='zone' />
+      <HeaderItem width='10%' text='cpu' />
+      <HeaderItem width='10%' text='memory' />
       <HeaderItem width='30%' text='pod cidr' />
     </Box>
   )
@@ -26,21 +29,29 @@ function NodeRowHeader() {
 
 function NodeRow({node}) {
   let hist = useHistory()
-  const ready = node.status.conditions.find(({type}) => type === 'Ready')
+  const labels = mapify(node.metadata.labels)
+  const readiness = nodeReadiness(node.status)
   return (
     <Box direction='row' align='center' border='bottom' hoverIndicator='backgroundDark'
          onClick={() => hist.push(`/nodes/${node.metadata.name}`)} pad='small'>
       <Box flex={false} width='20%'>
         <Text size='small'>{node.metadata.name}</Text>
       </Box>
-      <Box flex={false} width='10%'>
+      <Box flex={false} width='10%' direction='row' gap='xsmall' align='center'>
+        <ReadyIcon readiness={readiness} />
         <Text size='small'>{nodeReadiness(node.status) === Readiness.Ready ? 'Ready' : 'Pending'}</Text>
       </Box>
-      <Box flex={false} width='20%'>
-        <Text size='small'>{node.status.allocatable.cpu} / {node.status.capacity.cpu}</Text>
+      <Box flex={false} width='10%'>
+        <Text size='small'>{labels['failure-domain.beta.kubernetes.io/region']}</Text>
       </Box>
-      <Box flex={false} width='20%'>
-        <Text size='small'>{node.status.allocatable.memory} / {node.status.capacity.memory}</Text>
+      <Box flex={false} width='10%'>
+        <Text size='small'>{labels['failure-domain.beta.kubernetes.io/zone']}</Text>
+      </Box>
+      <Box flex={false} width='10%'>
+        <Text size='small'>{cpuParser(node.status.capacity.cpu)}</Text>
+      </Box>
+      <Box flex={false} width='10%'>
+        <Text size='small'>{filesize(memoryParser(node.status.capacity.memory))}</Text>
       </Box>
       <Box flex={false} width='30%'>
         <Text size='small'>{node.spec.podCidr}</Text>
@@ -49,17 +60,19 @@ function NodeRow({node}) {
   )
 }
 
-function NodeStatus({status: {allocatable, capacity}}) {
+function NodeStatus({status: {capacity}, pods}) {
+  const containers = pods.filter(({status: {phase}}) => phase !== 'Succeeded').map(({spec: {containers}}) => containers).flat()
+  const {cpu, memory} = podResources(containers, 'requests')
   return (
     <Box flex={false} pad='small' gap='xsmall'>
       <Box>
         <Text size='small'>Status</Text>
       </Box>
-      <MetadataRow name='cpu available'>
-        <Text size='small'>{allocatable.cpu} / {capacity.cpu}</Text>
+      <MetadataRow name='cpu'>
+        <Text size='small'>{cpuParser(capacity.cpu)} ({cpu} used)</Text>
       </MetadataRow>
-      <MetadataRow name='memory available'>
-        <Text size='small'>{allocatable.memory} / {capacity.memory}</Text>
+      <MetadataRow name='memory'>
+        <Text size='small'>{filesize(memoryParser(capacity.memory))} ({filesize(memory)} used)</Text>
       </MetadataRow>
     </Box>
   )
@@ -67,7 +80,7 @@ function NodeStatus({status: {allocatable, capacity}}) {
 
 function nodeReadiness(status) {
   const ready = status.conditions.find(({type}) => type === 'Ready')
-  if (ready.status == 'True') return Readiness.Ready
+  if (ready.status === 'True') return Readiness.Ready
   return Readiness.InProgress
 }
 
@@ -93,7 +106,7 @@ export function Node() {
         <ReadyIcon readiness={nodeReadiness(node.status)} size='20px' showIcon />
       </Box>
       <Metadata metadata={node.metadata} />
-      <NodeStatus status={node.status} />
+      <NodeStatus status={node.status} pods={node.pods} />
       <PodList pods={node.pods} refetch={refetch} />
     </Box>
   )
@@ -113,7 +126,7 @@ export function Nodes() {
   return (
     <Box style={{overflow: 'auto'}} fill background='backgroundColor' pad='small' gap='small'>
       <Box pad={{horizontal: 'small'}}>
-        <Text size='small' weight={500}>Nodes</Text>
+        <Text size='small' weight={500}>Worker Nodes</Text>
       </Box>
       <Box fill style={{overflow: 'auto'}}>
         <NodeRowHeader />

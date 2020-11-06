@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { Box, Layer, Text } from 'grommet'
 import { Readiness, ReadyIcon } from '../Application'
-import { findLastKey, rest } from 'lodash'
 import { useMutation } from 'react-apollo'
 import { DELETE_POD } from './queries'
 import { Close, Trash } from 'grommet-icons'
+import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
+import filesize from 'filesize'
 
 function phaseToReadiness(phase) {
   switch (phase) {
@@ -31,15 +32,37 @@ export function PodPhase({phase, message}) {
   )
 }
 
-export function PodResources({container: {resources: {limits, requests}}, dimension}) {
-  if (!limits && !requests) {
-    return <Text size='small'>n/a</Text>
+export function podResources(containers, type) {
+  let memory = undefined
+  let cpu = undefined
+  for (const {resources} of containers) {
+    const resourceSpec = resources[type]
+    if (!resourceSpec) continue
+    if (resourceSpec.cpu) {
+      cpu = (cpu || 0) + cpuParser(resourceSpec.cpu)
+    }
+    if (resourceSpec.memory) {
+      memory = (memory || 0) + memoryParser(resourceSpec.memory)
+    }
+  }
+  return {cpu: cpu === undefined ? cpu : Math.ceil(100 * cpu) / 100, memory}
+}
+
+export function PodResources({containers, dimension}) {
+  const {cpu: cpuReq, memory: memReq} = podResources(containers, 'requests')
+  const {cpu: cpuLim, memory: memLim} = podResources(containers, 'limits')
+  if (dimension === 'memory') {
+    return (
+      <Box direction='row'>
+        <Text size='small'>{memReq === undefined ? '--' : filesize(memReq)} / {memLim === undefined ? '--' : filesize(memLim)}</Text>
+      </Box>
+    )
   }
 
   return (
     <Box direction='row'>
-      <Text size='small'>{(requests || {})[dimension] || '--'} / {(limits || {})[dimension] || '--'}</Text>
-    </Box>
+        <Text size='small'>{cpuReq === undefined ? '--' : cpuReq} / {cpuLim === undefined ? '--' : cpuLim}</Text>
+      </Box>
   )
 }
 
@@ -57,9 +80,9 @@ export function PodHeader() {
       <HeaderItem width='10%' text='name' />
       <HeaderItem width='10%' text='status' />
       <HeaderItem width='7%' text='pod ip' />
-      <HeaderItem width='15%' text='node name' />
-      <HeaderItem width='5%' text='memory' />
-      <HeaderItem width='5%' text='cpu' />
+      <HeaderItem width='10%' text='node name' />
+      <HeaderItem width='7%' text='memory' />
+      <HeaderItem width='7%' text='cpu' />
       <HeaderItem width='4%' text='restarts' />
       <HeaderItem width='45%' text='image' />
     </Box>
@@ -119,14 +142,14 @@ export function PodRow({pod: {metadata: {name}, status, spec}, namespace, refetc
       <Box flex={false} width='7%'>
         <Text size='small'>{status.podIp}</Text>
       </Box>
-      <Box flex={false} width='15%'>
+      <Box flex={false} width='10%'>
         <Text size='small' truncate>{spec.nodeName}</Text>
       </Box>
-      <Box flex={false} width='5%'>
-        <PodResources container={spec.containers[0]} dimension='memory' />
+      <Box flex={false} width='7%'>
+        <PodResources containers={spec.containers} dimension='memory' />
       </Box>
-      <Box flex={false} width='5%'>
-        <PodResources container={spec.containers[0]} dimension='cpu' />
+      <Box flex={false} width='7%'>
+        <PodResources containers={spec.containers} dimension='cpu' />
       </Box>
       <Box flex={false} width='4%'>
         <Text size='small'>{restarts}</Text>

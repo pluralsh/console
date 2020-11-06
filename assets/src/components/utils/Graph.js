@@ -12,7 +12,7 @@ export function dateFormat(date) {
 function SliceTooltip({point: {serieColor, serieId, data}}) {
   return (
     <Box flex={false} background='white' pad={{vertical: 'xsmall', horizontal: 'small'}}
-         background='white'direction='row' gap='xsmall' align='center'>
+         direction='row' gap='xsmall' align='center'>
       <Box width='10px' height='10px' background={serieColor} />
       <Text size='small' weight={500}>{serieId}</Text>
       <Text size='small'>~> x:</Text>

@@ -1,15 +1,14 @@
 import React, { useContext, useEffect } from 'react'
-import { Box, Text } from 'grommet'
+import { Box } from 'grommet'
 import { useHistory, useParams } from 'react-router'
 import { BreadcrumbsContext } from '../Breadcrumbs'
-import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from '../Installations'
+import { InstallationContext, useEnsureCurrent } from '../Installations'
 import Service from './Service'
 import ComponentName from './ComponentName'
 import Deployment from './Deployment'
 import Ingress from './Ingress'
 import StatefulSet from './StatefulSet'
 import { BUILD_PADDING } from '../Builds'
-import { ApplicationReadyIcon } from '../Application'
 
 function ComponentContent({namespace, kind, name}) {
   switch (kind.toLowerCase()) {

@@ -9,7 +9,7 @@ export default function ComponentName() {
   const {kind, name} = useParams()
   const {currentApplication} = useContext(InstallationContext)
   if (!currentApplication) return  null
-  const component = currentApplication.status.components.find((c) => c.kind.toLowerCase() === kind.toLowerCase() && c.name == name)
+  const component = currentApplication.status.components.find((c) => c.kind.toLowerCase() === kind.toLowerCase() && c.name === name)
   if (!component) return null
 
   return (

@@ -1,6 +1,8 @@
 import React from 'react'
 import { Box, Text } from 'grommet'
 
+export const mapify = (tags) => tags.reduce((acc, {name, value}) => ({...acc, [name]: value}), {})
+
 export function MetadataRow({name, children}) {
   return (
     <Box flex={false} style={{maxHeight: '100px'}} border='bottom' direction='row'
