@@ -1,5 +1,6 @@
 defmodule Watchman.GraphQl.Kubernetes.Deployment do
   use Watchman.GraphQl.Schema.Base
+  import Watchman.GraphQl.Kubernetes.Base
   alias Watchman.GraphQl.Resolvers.Kubernetes
 
   object :deployment do
@@ -11,6 +12,8 @@ defmodule Watchman.GraphQl.Kubernetes.Deployment do
       %{metadata: metadata, spec: %{selector: selector}}, _, _ ->
         Kubernetes.list_pods(metadata, selector)
     end
+
+    field :raw, non_null(:string), resolve: fn model, _, _ -> encode(model) end
   end
 
   object :deployment_status do

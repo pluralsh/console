@@ -1,10 +1,13 @@
 defmodule Watchman.GraphQl.Kubernetes.Pod do
   use Watchman.GraphQl.Schema.Base
+  import Watchman.GraphQl.Kubernetes.Base
 
   object :pod do
     field :status,   non_null(:pod_status)
     field :spec,     non_null(:pod_spec)
     field :metadata, non_null(:metadata)
+
+    field :raw, non_null(:string), resolve: fn model, _, _ -> encode(model) end
   end
 
   object :pod_status do
