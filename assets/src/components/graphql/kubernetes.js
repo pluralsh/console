@@ -37,6 +37,7 @@ export const PodFragment = gql`
         }
       }
     }
+    raw
   }
   ${MetadataFragment}
 `;
@@ -55,6 +56,7 @@ export const DeploymentFragment = gql`
         type
       }
     }
+    raw
   }
   ${MetadataFragment}
 `;
@@ -72,6 +74,7 @@ export const StatefulSetFragment = gql`
       replicas
       serviceName
     }
+    raw
   }
   ${MetadataFragment}
 `;
@@ -94,6 +97,7 @@ export const ServiceFragment = gql`
         targetPort
       }
     }
+    raw
   }
   ${MetadataFragment}
 `
@@ -118,6 +122,7 @@ export const IngressFragment = gql`
         }
       }
     }
+    raw
   }
   ${MetadataFragment}
 `

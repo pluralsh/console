@@ -1,12 +1,13 @@
 import React from 'react'
 import { Box, Text } from 'grommet'
-import { Loading } from 'forge-core'
+import { Loading, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { DEPLOYMENT_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
 import { useParams } from 'react-router'
 import { POLL_INTERVAL } from './constants'
 import { PodList } from './Pod'
+import { RawContent } from './Component'
 
 function Status({status: {availableReplicas, replicas, unavailableReplicas}}) {
   return (
@@ -49,10 +50,25 @@ export default function Deployment() {
   const {deployment} = data
   return (
     <Box fill style={{overflow: 'auto'}}>
-      <Metadata metadata={deployment.metadata} />
-      <Status status={deployment.status} />
-      <Spec spec={deployment.spec} />
-      <PodList pods={deployment.pods} refetch={refetch} namespace={repo} />
+      <Tabs defaultTab='info' border='dark-3'>
+        <TabHeader>
+          <TabHeaderItem name='info'>
+            <Text size='small' weight={500}>info</Text>
+          </TabHeaderItem>
+          <TabHeaderItem name='raw'>
+            <Text size='small' weight={500}>raw</Text>
+          </TabHeaderItem>
+        </TabHeader>
+        <TabContent name='info'>
+          <Metadata metadata={deployment.metadata} />
+          <Status status={deployment.status} />
+          <Spec spec={deployment.spec} />
+          <PodList pods={deployment.pods} refetch={refetch} namespace={repo} />
+        </TabContent>
+        <TabContent name='raw'>
+          <RawContent raw={deployment.raw} />
+        </TabContent>
+      </Tabs>
     </Box>
   )
 }

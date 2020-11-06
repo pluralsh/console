@@ -9,6 +9,8 @@ import Deployment from './Deployment'
 import Ingress from './Ingress'
 import StatefulSet from './StatefulSet'
 import { BUILD_PADDING } from '../Builds'
+import Highlight from 'react-highlight.js'
+import yaml from 'yaml'
 
 function ComponentContent({namespace, kind, name}) {
   switch (kind.toLowerCase()) {
@@ -23,6 +25,18 @@ function ComponentContent({namespace, kind, name}) {
     default:
       return null
   }
+}
+
+export function RawContent({raw}) {
+  const obj = JSON.parse(raw)
+  console.log(yaml.stringify(obj))
+  return (
+    <Box flex={false} pad='small'>
+      <Highlight language='yaml'>
+        {yaml.stringify(obj)}
+      </Highlight>
+    </Box>
+  )
 }
 
 export default function Component() {

@@ -37,6 +37,7 @@
     "react-collapsible": "^2.7.0",
     "react-copy-to-clipboard": "^5.0.2",
     "react-dom": "^16.13.1",
+    "react-highlight.js": "^1.0.7",
     "react-lazylog": "^4.5.1",
     "react-live-clock": "^4.0.3",
     "react-router": "^5.1.2",
@@ -48,7 +49,8 @@
     "react-window-infinite-loader": "^1.0.5",
     "styled-components": "^5.0.1",
     "tinyqueue": "^2.0.3",
-    "universal-cookie": "^4.0.3"
+    "universal-cookie": "^4.0.3",
+    "yaml": "^1.10.0"
   },
   "scripts": {
     "start": "HTTPS=true react-scripts start",

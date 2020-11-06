@@ -1,11 +1,12 @@
 import React from 'react'
 import { Box, Text } from 'grommet'
-import { Loading } from 'forge-core'
+import { Loading, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { INGRESS_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
 import { useParams } from 'react-router'
 import { POLL_INTERVAL } from './constants'
+import { RawContent } from './Component'
 
 function Status({status: {loadBalancer}}) {
   if (!loadBalancer) return null
@@ -80,9 +81,24 @@ export default function Ingress() {
   const {ingress} = data
   return (
     <Box fill style={{overflow: 'auto'}}>
-      <Metadata metadata={ingress.metadata} />
-      <Status status={ingress.status} />
-      <Spec spec={ingress.spec} />
+      <Tabs defaultTab='info' border='dark-3'>
+        <TabHeader>
+          <TabHeaderItem name='info'>
+            <Text size='small' weight={500}>info</Text>
+          </TabHeaderItem>
+          <TabHeaderItem name='raw'>
+            <Text size='small' weight={500}>raw</Text>
+          </TabHeaderItem>
+        </TabHeader>
+        <TabContent name='info'>
+          <Metadata metadata={ingress.metadata} />
+          <Status status={ingress.status} />
+          <Spec spec={ingress.spec} />
+        </TabContent>
+        <TabContent name='raw'>
+          <RawContent raw={ingress.raw} />
+        </TabContent>
+      </Tabs>
     </Box>
   )
 }
