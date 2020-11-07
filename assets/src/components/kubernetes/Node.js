@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react'
-import { Loading } from 'forge-core'
+import { Loading, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { POLL_INTERVAL } from './constants'
 import { NODES_Q, NODE_Q } from './queries'
@@ -12,6 +12,7 @@ import { BreadcrumbsContext } from '../Breadcrumbs'
 import { Readiness, ReadyIcon } from '../Application'
 import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
 import filesize from 'filesize'
+import { Events } from './Event'
 
 function NodeRowHeader() {
   return (
@@ -96,9 +97,24 @@ export function Node() {
         <Text size='small' weight='bold'>{node.metadata.name}</Text>
         <ReadyIcon readiness={nodeReadiness(node.status)} size='20px' showIcon />
       </Box>
-      <Metadata metadata={node.metadata} />
-      <NodeStatus status={node.status} pods={node.pods} />
-      <PodList pods={node.pods} refetch={refetch} />
+      <Tabs defaultTab='info' border='dark-3'>
+        <TabHeader>
+          <TabHeaderItem name='info'>
+            <Text size='small' weight={500}>info</Text>
+          </TabHeaderItem>
+          <TabHeaderItem name='events'>
+            <Text size='small' weight={500}>events</Text>
+          </TabHeaderItem>
+        </TabHeader>
+        <TabContent name='info'>
+          <Metadata metadata={node.metadata} />
+          <NodeStatus status={node.status} pods={node.pods} />
+          <PodList pods={node.pods} refetch={refetch} />
+        </TabContent>
+        <TabContent name='events'>
+          <Events events={node.events} />
+        </TabContent>
+      </Tabs>
     </Box>
   )
 }

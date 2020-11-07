@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Tab, Text } from 'grommet'
+import { Box, Text } from 'grommet'
 import { Loading, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { STATEFUL_SET_Q } from './queries'
