@@ -28,6 +28,7 @@ defmodule Watchman.GraphQl.Kubernetes do
     field :memory, :string, resolve: fn resources, _, _ -> {:ok, resources["memory"]} end
   end
 
+  import_types Watchman.GraphQl.Kubernetes.Event
   import_types Watchman.GraphQl.Kubernetes.Application
   import_types Watchman.GraphQl.Kubernetes.Pod
   import_types Watchman.GraphQl.Kubernetes.Deployment

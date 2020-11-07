@@ -62,6 +62,11 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
     |> Kazan.run()
   end
 
+  def list_events(%{metadata: %{uid: uid, namespace: namespace}}) do
+    Core.list_namespaced_event!(namespace, field_selector: "involvedObject.uid=#{uid}")
+    |> Kazan.run()
+  end
+
   def list_pods(%{namespace: namespace}, label_selector) do
     Core.list_namespaced_pod!(namespace, label_selector: construct_label_selector(label_selector))
     |> Kazan.run()

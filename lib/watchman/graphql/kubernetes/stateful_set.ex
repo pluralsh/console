@@ -13,7 +13,8 @@ defmodule Watchman.GraphQl.Kubernetes.StatefulSet do
         Kubernetes.list_pods(metadata, selector)
     end
 
-    field :raw, non_null(:string), resolve: fn model, _, _ -> encode(model) end
+    field :raw,    non_null(:string), resolve: fn model, _, _ -> encode(model) end
+    field :events, list_of(:event), resolve: fn model, _, _ -> Kubernetes.list_events(model) end
   end
 
   object :stateful_set_status do

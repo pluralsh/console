@@ -1,13 +1,15 @@
 defmodule Watchman.GraphQl.Kubernetes.Ingress do
   use Watchman.GraphQl.Schema.Base
   import Watchman.GraphQl.Kubernetes.Base
+  alias Watchman.GraphQl.Resolvers.Kubernetes
 
   object :ingress do
     field :metadata, non_null(:metadata)
     field :status,   non_null(:service_status)
     field :spec,     non_null(:ingress_spec)
 
-    field :raw, non_null(:string), resolve: fn model, _, _ -> encode(model) end
+    field :raw,    non_null(:string), resolve: fn model, _, _ -> encode(model) end
+    field :events, list_of(:event), resolve: fn model, _, _ -> Kubernetes.list_events(model) end
   end
 
   object :ingress_spec do

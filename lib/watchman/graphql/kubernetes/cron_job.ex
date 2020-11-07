@@ -1,13 +1,15 @@
 defmodule Watchman.GraphQl.Kubernetes.CronJob do
   use Watchman.GraphQl.Schema.Base
   import Watchman.GraphQl.Kubernetes.Base
+  alias Watchman.GraphQl.Resolvers.Kubernetes
 
   object :cron_job do
     field :metadata, non_null(:metadata)
     field :status,   non_null(:cron_status)
     field :spec,     non_null(:cron_spec)
 
-    field :raw, non_null(:string), resolve: fn model, _, _ -> encode(model) end
+    field :raw,    non_null(:string), resolve: fn model, _, _ -> encode(model) end
+    field :events, list_of(:event), resolve: fn model, _, _ -> Kubernetes.list_events(model) end
   end
 
   object :cron_status do
