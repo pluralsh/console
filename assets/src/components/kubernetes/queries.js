@@ -1,15 +1,17 @@
 import { gql } from 'apollo-boost'
-import { CronJobFragment, DeploymentFragment, IngressFragment, NodeFragment, PodFragment, ResultStatus, ServiceFragment, StatefulSetFragment } from '../graphql/kubernetes';
+import { CronJobFragment, DeploymentFragment, EventFragment, IngressFragment, NodeFragment, PodFragment, ServiceFragment, StatefulSetFragment } from '../graphql/kubernetes';
 
 export const SERVICE_Q = gql`
   query Service($name: String!, $namespace: String!) {
     service(name: $name, namespace: $namespace) {
       ...ServiceFragment
       pods { ...PodFragment }
+      events { ...EventFragment }
     }
   }
   ${ServiceFragment}
   ${PodFragment}
+  ${EventFragment}
 `;
 
 export const DEPLOYMENT_Q = gql`
@@ -17,17 +19,23 @@ export const DEPLOYMENT_Q = gql`
     deployment(name: $name, namespace: $namespace) {
       ...DeploymentFragment
       pods { ...PodFragment }
+      events { ...EventFragment }
     }
   }
   ${DeploymentFragment}
   ${PodFragment}
+  ${EventFragment}
 `;
 
 export const INGRESS_Q = gql`
   query Ingress($name: String!, $namespace: String!) {
-    ingress(name: $name, namespace: $namespace) { ...IngressFragment }
+    ingress(name: $name, namespace: $namespace) {
+      ...IngressFragment
+      events { ...EventFragment }
+    }
   }
   ${IngressFragment}
+  ${EventFragment}
 `;
 
 export const STATEFUL_SET_Q = gql`
@@ -35,10 +43,12 @@ export const STATEFUL_SET_Q = gql`
     statefulSet(name: $name, namespace: $namespace) {
       ...StatefulSetFragment
       pods { ...PodFragment }
+      events { ...EventFragment }
     }
   }
   ${StatefulSetFragment}
   ${PodFragment}
+  ${EventFragment}
 `;
 
 export const DELETE_POD = gql`
@@ -64,17 +74,21 @@ export const NODE_Q = gql`
     node(name: $name) {
       ...NodeFragment
       pods { ...PodFragment }
+      events { ...EventFragment }
     }
   }
   ${NodeFragment}
   ${PodFragment}
+  ${EventFragment}
 `
 
 export const CRON_JOB_Q = gql`
   query Cron($name: String!, $namespace: String!) {
     cronJob(name: $name, namespace: $namespace) {
       ...CronJobFragment
+      events { ...EventFragment }
     }
   }
   ${CronJobFragment}
+  ${EventFragment}
 `;

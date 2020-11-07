@@ -7,6 +7,7 @@ import { Metadata, MetadataRow } from './Metadata'
 import { useParams } from 'react-router'
 import { POLL_INTERVAL } from './constants'
 import { RawContent } from './Component'
+import { Events } from './Event'
 
 function Status({status: {loadBalancer}}) {
   if (!loadBalancer) return null
@@ -86,6 +87,9 @@ export default function Ingress() {
           <TabHeaderItem name='info'>
             <Text size='small' weight={500}>info</Text>
           </TabHeaderItem>
+          <TabHeaderItem name='events'>
+            <Text size='small' weight={500}>events</Text>
+          </TabHeaderItem>
           <TabHeaderItem name='raw'>
             <Text size='small' weight={500}>raw</Text>
           </TabHeaderItem>
@@ -94,6 +98,9 @@ export default function Ingress() {
           <Metadata metadata={ingress.metadata} />
           <Status status={ingress.status} />
           <Spec spec={ingress.spec} />
+        </TabContent>
+        <TabContent name='events'>
+          <Events events={ingress.events} />
         </TabContent>
         <TabContent name='raw'>
           <RawContent raw={ingress.raw} />

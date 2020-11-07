@@ -8,6 +8,7 @@ import { useParams } from 'react-router'
 import { POLL_INTERVAL } from './constants'
 import { PodList } from './Pod'
 import { RawContent } from './Component'
+import { Events } from './Event'
 
 function Status({status: {availableReplicas, replicas, unavailableReplicas}}) {
   return (
@@ -55,6 +56,9 @@ export default function Deployment() {
           <TabHeaderItem name='info'>
             <Text size='small' weight={500}>info</Text>
           </TabHeaderItem>
+          <TabHeaderItem name='events'>
+            <Text size='small' weight={500}>events</Text>
+          </TabHeaderItem>
           <TabHeaderItem name='raw'>
             <Text size='small' weight={500}>raw</Text>
           </TabHeaderItem>
@@ -64,6 +68,9 @@ export default function Deployment() {
           <Status status={deployment.status} />
           <Spec spec={deployment.spec} />
           <PodList pods={deployment.pods} refetch={refetch} namespace={repo} />
+        </TabContent>
+        <TabContent name='events'>
+          <Events events={deployment.events} />
         </TabContent>
         <TabContent name='raw'>
           <RawContent raw={deployment.raw} />

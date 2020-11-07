@@ -7,6 +7,7 @@ import { useParams } from 'react-router'
 import { POLL_INTERVAL } from './constants'
 import { RawContent } from './Component'
 import { CRON_JOB_Q } from './queries'
+import { Events } from './Event'
 
 function Status({status}) {
   return (
@@ -54,6 +55,9 @@ export default function CronJob() {
           <TabHeaderItem name='info'>
             <Text size='small' weight={500}>info</Text>
           </TabHeaderItem>
+          <TabHeaderItem name='events'>
+            <Text size='small' weight={500}>events</Text>
+          </TabHeaderItem>
           <TabHeaderItem name='raw'>
             <Text size='small' weight={500}>raw</Text>
           </TabHeaderItem>
@@ -62,6 +66,9 @@ export default function CronJob() {
           <Metadata metadata={cronJob.metadata} />
           <Status status={cronJob.status} />
           <Spec spec={cronJob.spec} />
+        </TabContent>
+        <TabContent name='events'>
+          <Events events={cronJob.events} />
         </TabContent>
         <TabContent name='raw'>
           <RawContent raw={cronJob.raw} />

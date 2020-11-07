@@ -8,6 +8,16 @@ export const MetadataFragment = gql`
   }
 `
 
+export const EventFragment = gql`
+  fragment EventFragment on Event {
+    action
+    lastTimestamp
+    count
+    message
+    type
+  }
+`;
+
 export const ResultStatus = gql`
   fragment ResultStatus on ResultStatus {
     message

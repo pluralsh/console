@@ -3,7 +3,7 @@ import { Loading } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { POLL_INTERVAL } from './constants'
 import { NODES_Q, NODE_Q } from './queries'
-import { HeaderItem, PodList, podResources } from './Pod'
+import { HeaderItem, PodList, podResources, RowItem } from './Pod'
 import { Box, Text } from 'grommet'
 import { useHistory, useParams } from 'react-router'
 import { mapify, Metadata, MetadataRow } from './Metadata'
@@ -42,21 +42,11 @@ function NodeRow({node}) {
         <ReadyIcon readiness={readiness} />
         <Text size='small'>{nodeReadiness(node.status) === Readiness.Ready ? 'Ready' : 'Pending'}</Text>
       </Box>
-      <Box flex={false} width='10%'>
-        <Text size='small'>{labels['failure-domain.beta.kubernetes.io/region']}</Text>
-      </Box>
-      <Box flex={false} width='10%'>
-        <Text size='small'>{labels['failure-domain.beta.kubernetes.io/zone']}</Text>
-      </Box>
-      <Box flex={false} width='10%'>
-        <Text size='small'>{cpuParser(node.status.capacity.cpu)}</Text>
-      </Box>
-      <Box flex={false} width='10%'>
-        <Text size='small'>{filesize(memoryParser(node.status.capacity.memory))}</Text>
-      </Box>
-      <Box flex={false} width='30%'>
-        <Text size='small'>{node.spec.podCidr}</Text>
-      </Box>
+      <RowItem width='10%' text={labels['failure-domain.beta.kubernetes.io/region']} />
+      <RowItem width='10%' text={labels['failure-domain.beta.kubernetes.io/zone']} />
+      <RowItem width='10%' text={cpuParser(node.status.capacity.cpu)} />
+      <RowItem width='10%' text={filesize(memoryParser(node.status.capacity.memory))} />
+      <RowItem width='30%' text={node.spec.podCidr} />
     </Box>
   )
 }

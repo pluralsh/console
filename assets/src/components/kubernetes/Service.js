@@ -8,6 +8,7 @@ import { useParams } from 'react-router'
 import { POLL_INTERVAL } from './constants'
 import { PodList } from './Pod'
 import { RawContent } from './Component'
+import { Events } from './Event'
 
 function Status({status: {loadBalancer}}) {
   if (!loadBalancer) return null
@@ -76,6 +77,9 @@ export default function Service() {
           <TabHeaderItem name='info'>
             <Text size='small' weight={500}>info</Text>
           </TabHeaderItem>
+          <TabHeaderItem name='events'>
+            <Text size='small' weight={500}>events</Text>
+          </TabHeaderItem>
           <TabHeaderItem name='raw'>
             <Text size='small' weight={500}>raw</Text>
           </TabHeaderItem>
@@ -85,6 +89,9 @@ export default function Service() {
           <Status status={service.status} />
           <Spec spec={service.spec} />
           <PodList pods={service.pods} refetch={refetch} namespace={repo} />
+        </TabContent>
+        <TabContent name='events'>
+          <Events events={service.events} />
         </TabContent>
         <TabContent name='raw'>
           <RawContent raw={service.raw} />

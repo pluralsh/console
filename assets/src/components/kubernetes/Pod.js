@@ -74,6 +74,14 @@ export function HeaderItem({width, text}) {
   )
 }
 
+export function RowItem({width, text, truncate}) {
+  return (
+    <Box flex={false} width={width}>
+      <Text size='small' truncate={!!truncate}>{text}</Text>
+    </Box>
+  )
+}
+
 export function PodHeader() {
   return (
     <Box flex={false} fill='horizontal' direction='row' border='bottom' pad={{vertical: 'xsmall'}} gap='xsmall'>
@@ -140,21 +148,15 @@ export function PodRow({pod: {metadata: {name}, status, spec}, namespace, refetc
       <Box flex={false} width='10%'>
         <PodPhase phase={status.phase} message={status.message} />
       </Box>
-      <Box flex={false} width='7%'>
-        <Text size='small'>{status.podIp}</Text>
-      </Box>
-      <Box flex={false} width='10%'>
-        <Text size='small' truncate>{spec.nodeName}</Text>
-      </Box>
+      <RowItem width='7%' text={status.podIp} />
+      <RowItem width='10%' text={spec.nodeName} truncate />
       <Box flex={false} width='7%'>
         <PodResources containers={spec.containers} dimension='memory' />
       </Box>
       <Box flex={false} width='7%'>
         <PodResources containers={spec.containers} dimension='cpu' />
       </Box>
-      <Box flex={false} width='4%'>
-        <Text size='small'>{restarts}</Text>
-      </Box>
+      <RowItem width='4%' text={restarts} />
       <Box fill='horizontal' direction='row' gap='small' justify='end' align='center' pad={{right: 'xsmall'}}>
         <Box fill='horizontal'>
           <Text size='small' truncate>{spec.containers.map(({image}) => image).join(', ')}</Text>

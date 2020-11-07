@@ -8,6 +8,7 @@ import { useParams } from 'react-router'
 import { POLL_INTERVAL } from './constants'
 import { PodList } from './Pod'
 import { RawContent } from './Component'
+import { Events } from './Event'
 
 function Status({status: {currentReplicas, updatedReplicas, readyReplicas, replicas}}) {
   return (
@@ -58,6 +59,9 @@ export default function StatefulSet() {
           <TabHeaderItem name='info'>
             <Text size='small' weight={500}>info</Text>
           </TabHeaderItem>
+          <TabHeaderItem name='events'>
+            <Text size='small' weight={500}>events</Text>
+          </TabHeaderItem>
           <TabHeaderItem name='raw'>
             <Text size='small' weight={500}>raw</Text>
           </TabHeaderItem>
@@ -67,6 +71,9 @@ export default function StatefulSet() {
           <Status status={statefulSet.status} />
           <Spec spec={statefulSet.spec} />
           <PodList pods={statefulSet.pods} refetch={refetch} namespace={repo} />
+        </TabContent>
+        <TabContent name='events'>
+          <Events events={statefulSet.events} />
         </TabContent>
         <TabContent name='raw'>
           <RawContent raw={statefulSet.raw} />
