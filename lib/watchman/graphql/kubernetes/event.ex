@@ -7,6 +7,7 @@ defmodule Watchman.GraphQl.Kubernetes.Event do
     field :event_time,     :string
     field :last_timestamp, :string
     field :message,        :string
+    field :reason,         :string
     field :type,           :string
   end
 end
