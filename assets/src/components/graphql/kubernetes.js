@@ -14,6 +14,7 @@ export const EventFragment = gql`
     lastTimestamp
     count
     message
+    reason
     type
   }
 `;

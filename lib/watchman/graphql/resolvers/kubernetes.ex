@@ -65,7 +65,15 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
   def list_events(%{metadata: %{uid: uid, namespace: namespace}}) do
     Core.list_namespaced_event!(namespace, field_selector: "involvedObject.uid=#{uid}")
     |> Kazan.run()
-    |> IO.inspect()
+    |> case do
+      {:ok, %{items: events}} -> {:ok, events}
+      error -> error
+    end
+  end
+
+  def list_all_events(%{metadata: %{uid: uid}}) do
+    Core.list_event_for_all_namespaces!(field_selector: "involvedObject.uid=#{uid}")
+    |> Kazan.run()
     |> case do
       {:ok, %{items: events}} -> {:ok, events}
       error -> error

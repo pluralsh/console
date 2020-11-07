@@ -19,6 +19,7 @@ function EventHeader() {
   return (
     <Box direction='row' align='center' gap='xsmall'>
       <HeaderItem width='10%' text='type' />
+      <HeaderItem width='10%' text='reason' />
       <HeaderItem width='40%' text='message' />
       <HeaderItem width='15%' text='count' />
       <HeaderItem width='20%' text='last seen' />
@@ -33,6 +34,7 @@ function EventRow({event}) {
         <EventIcon type={event.type} />
         <Text size='small'>{event.type}</Text>
       </Box>
+      <RowItem width='10%' text={event.reason} />
       <RowItem width='40%' text={event.message} />
       <RowItem width='15%' text={event.count} />
       <RowItem width='20%' text={event.lastTimestamp} />

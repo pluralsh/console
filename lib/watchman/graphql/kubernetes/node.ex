@@ -10,7 +10,7 @@ defmodule Watchman.GraphQl.Kubernetes.Node do
       node, _, _ -> Kubernetes.list_pods_for_node(node)
     end
 
-    field :events, list_of(:event), resolve: fn model, _, _ -> Kubernetes.list_events(model) end
+    field :events, list_of(:event), resolve: fn model, _, _ -> Kubernetes.list_all_events(model) end
   end
 
   object :node_status do
