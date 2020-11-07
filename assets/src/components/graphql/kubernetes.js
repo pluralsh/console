@@ -143,3 +143,17 @@ export const NodeFragment = gql`
   }
   ${MetadataFragment}
 `;
+
+export const CronJobFragment = gql`
+  fragment CronJobFragment on CronJob {
+    metadata { ...MetadataFragment }
+    status { lastScheduleTime }
+    spec {
+      schedule
+      suspend
+      concurrencyPolicy
+    }
+    raw
+  }
+  ${MetadataFragment}
+`;

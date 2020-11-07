@@ -1,5 +1,5 @@
 import { gql } from 'apollo-boost'
-import { DeploymentFragment, IngressFragment, NodeFragment, PodFragment, ResultStatus, ServiceFragment, StatefulSetFragment } from '../graphql/kubernetes';
+import { CronJobFragment, DeploymentFragment, IngressFragment, NodeFragment, PodFragment, ResultStatus, ServiceFragment, StatefulSetFragment } from '../graphql/kubernetes';
 
 export const SERVICE_Q = gql`
   query Service($name: String!, $namespace: String!) {
@@ -69,3 +69,12 @@ export const NODE_Q = gql`
   ${NodeFragment}
   ${PodFragment}
 `
+
+export const CRON_JOB_Q = gql`
+  query Cron($name: String!, $namespace: String!) {
+    cronJob(name: $name, namespace: $namespace) {
+      ...CronJobFragment
+    }
+  }
+  ${CronJobFragment}
+`;

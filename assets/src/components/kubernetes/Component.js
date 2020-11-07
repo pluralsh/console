@@ -11,6 +11,7 @@ import StatefulSet from './StatefulSet'
 import { BUILD_PADDING } from '../Builds'
 import Highlight from 'react-highlight.js'
 import yaml from 'yaml'
+import CronJob from './CronJob'
 
 function ComponentContent({namespace, kind, name}) {
   switch (kind.toLowerCase()) {
@@ -22,6 +23,8 @@ function ComponentContent({namespace, kind, name}) {
       return <Ingress namespace={namespace} kind={kind} name={name} />
     case "statefulset":
       return <StatefulSet namespace={namespace} kind={kind} name={name} />
+    case "cronjob":
+      return <CronJob namespace={namespace} kind={kind} name={name} />
     default:
       return null
   }

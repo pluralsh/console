@@ -1,5 +1,5 @@
 import React from 'react'
-import { Resources, Services, ShareOption, VirtualMachine } from 'grommet-icons'
+import { Clock, Resources, Services, ShareOption, VirtualMachine } from 'grommet-icons'
 
 const ICON_SIZE = '14px'
 
@@ -13,6 +13,8 @@ export default function Icon({kind, size}) {
       return <VirtualMachine size={size || ICON_SIZE} />
     case "ingress":
       return <ShareOption size={size || ICON_SIZE} />
+    case "cronjob":
+      return <Clock size={size || ICON_SIZE} />
     default:
       return null
   }
