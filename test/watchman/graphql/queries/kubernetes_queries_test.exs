@@ -163,4 +163,26 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
       assert node["spec"]["providerId"]
     end
   end
+
+  describe "cronJob" do
+    test "it can read a cron job" do
+      expect(Kazan, :run, fn _ -> {:ok, cron("cron")} end)
+
+      {:ok, %{data: %{"cronJob" => cron}}} = run_query("""
+        query Cron($name: String!) {
+          cronJob(name: $name, namespace: $name) {
+            metadata { name }
+            status { lastScheduleTime }
+            spec { schedule suspend concurrencyPolicy }
+          }
+        }
+      """, %{"name" => "cron"}, %{current_user: insert(:user)})
+
+      assert cron["metadata"]["name"] == "cron"
+      assert cron["status"]["lastScheduleTime"]
+      assert cron["spec"]["schedule"] == "* * * * *"
+      refute cron["spec"]["suspend"]
+      assert cron["spec"]["concurrencyPolicy"] == "Forbid"
+    end
+  end
 end

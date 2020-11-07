@@ -2,6 +2,7 @@ defmodule Watchman.KubernetesScaffolds do
   alias Kazan.Apis.Core.V1, as: Core
   alias Kazan.Apis.Apps.V1, as: Apps
   alias Kazan.Apis.Extensions.V1beta1, as: Extensions
+  alias Kazan.Apis.Batch.V1beta1, as: Batch
   alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector}
 
   def stateful_set(namespace, name) do
@@ -89,6 +90,18 @@ defmodule Watchman.KubernetesScaffolds do
       spec: %Core.NodeSpec{
         provider_id: "provider-id",
         unschedulable: false
+      }
+    }
+  end
+
+  def cron(name) do
+    %Batch.CronJob{
+      metadata: %{name: name, namespace: name},
+      status: %Batch.CronJobStatus{last_schedule_time: "time"},
+      spec: %Batch.CronJobSpec{
+        concurrency_policy: "Forbid",
+        schedule: "* * * * *",
+        suspend: false
       }
     }
   end
