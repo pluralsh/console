@@ -21,6 +21,15 @@ function phaseToReadiness(phase) {
   }
 }
 
+function statusToReadiness({phase, containerStatuses}) {
+  if (phase === "Succeeded") return Readiness.Ready
+  if (phase === "Failed") return Readiness.Failed
+  if (phase === "Pending") return Readiness.InProgress
+  const unready = containerStatuses.filter(({ready}) => !ready)
+  if (unready.length === 0) return Readiness.Ready
+  return Readiness.InProgress
+}
+
 export function PodPhase({phase, message}) {
   const readiness = phaseToReadiness(phase)
   return (
@@ -86,14 +95,13 @@ export function PodHeader() {
   return (
     <Box flex={false} fill='horizontal' direction='row' border='bottom' pad={{vertical: 'xsmall'}} gap='xsmall'>
       <HeaderItem width='10%' text='name' />
-      <HeaderItem width='10%' text='status' />
-      <HeaderItem width='10%' text='ready' />
+      <HeaderItem width='20%' text='ready' />
       <HeaderItem width='7%' text='pod ip' />
       <HeaderItem width='10%' text='node name' />
       <HeaderItem width='7%' text='memory' />
       <HeaderItem width='7%' text='cpu' />
       <HeaderItem width='4%' text='restarts' />
-      <HeaderItem width='35%' text='image' />
+      <HeaderItem width='45%' text='image' />
     </Box>
   )
 }
@@ -147,14 +155,14 @@ function PodState({name, state: {running, terminated, waiting}}) {
   if (waiting) return <Text size='small'>{name} is waiting</Text>
 
   return (
-    <Text size='small'>{name} exited with code {terminated.exitCode} -- {terminated.message}</Text>
+    <Text size='small'>{name} exited with code {terminated.exitCode}: {terminated.message}</Text>
   )
 }
 
 function PodReadiness({status: {containerStatuses}}) {
   const unready = containerStatuses.filter(({ready}) => !ready)
   if (unready.length === 0) return (
-    <Text size='small'>Ready</Text>
+    <Text size='small'>running</Text>
   )
 
   return (
@@ -176,10 +184,8 @@ export function PodRow({pod: {metadata: {name}, status, spec}, namespace, refetc
         <Cube size='small' />
         <Text size='small' truncate>{name}</Text>
       </Box>
-      <Box flex={false} width='10%'>
-        <PodPhase phase={status.phase} message={status.message} />
-      </Box>
-      <Box flex={false} width='10%'>
+      <Box flex={false} width='10%' direction='row' align='center' gap='xsmall'>
+        <ReadyIcon readiness={statusToReadiness(status)} />
         <PodReadiness status={status} />
       </Box>
       <RowItem width='7%' text={status.podIp} />
