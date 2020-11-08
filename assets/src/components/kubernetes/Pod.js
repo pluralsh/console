@@ -1,11 +1,18 @@
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Box, Layer, Text } from 'grommet'
+import { Loading, Tabs, TabHeader, TabHeaderItem, TabContent } from 'forge-core'
 import { Readiness, ReadyIcon } from '../Application'
-import { useMutation } from 'react-apollo'
-import { DELETE_POD } from './queries'
+import { useMutation, useQuery } from 'react-apollo'
+import { DELETE_POD, POD_Q } from './queries'
 import { Close, Cube, Trash } from 'grommet-icons'
 import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
 import filesize from 'filesize'
+import { useHistory, useParams } from 'react-router'
+import Icon from './Icon'
+import { POLL_INTERVAL } from './constants'
+import { Metadata, MetadataRow } from './Metadata'
+import { RawContent } from './Component'
+import { BreadcrumbsContext } from '../Breadcrumbs'
 
 function phaseToReadiness(phase) {
   switch (phase) {
@@ -28,6 +35,12 @@ function statusToReadiness({phase, containerStatuses}) {
   const unready = containerStatuses.filter(({ready}) => !ready)
   if (unready.length === 0) return Readiness.Ready
   return Readiness.InProgress
+}
+
+function containerReadiness({ready, state: {terminated}}) {
+  if (ready) return Readiness.Ready
+  if (!terminated) return Readiness.InProgress
+  return Readiness.Failed
 }
 
 export function PodPhase({phase, message}) {
@@ -70,8 +83,8 @@ export function PodResources({containers, dimension}) {
 
   return (
     <Box direction='row'>
-        <Text size='small'>{cpuReq === undefined ? '--' : cpuReq} / {cpuLim === undefined ? '--' : cpuLim}</Text>
-      </Box>
+      <Text size='small'>{cpuReq === undefined ? '--' : cpuReq} / {cpuLim === undefined ? '--' : cpuLim}</Text>
+    </Box>
   )
 }
 
@@ -176,10 +189,13 @@ function PodReadiness({status: {containerStatuses}}) {
   )
 }
 
-export function PodRow({pod: {metadata: {name}, status, spec}, namespace, refetch}) {
+export function PodRow({pod: {metadata: {name, namespace}, status, spec}, refetch}) {
+  let history = useHistory()
   const restarts = status.containerStatuses.reduce((count, {restartCount}) => count + (restartCount || 0), 0)
   return (
-    <Box flex={false} fill='horizontal' direction='row' align='center' border='bottom' pad={{vertical: 'xsmall'}} gap='xsmall'>
+    <Box flex={false} fill='horizontal' direction='row' align='center' hoverIndicator='backgroundDark'
+          border='bottom' pad={{vertical: 'xsmall'}} gap='xsmall' focusIndicator={false}
+          onClick={() => history.push(`/pods/${namespace}/${name}`)}>
       <Box flex={false} width='10%' direction='row' align='center' gap='xsmall'>
         <Cube size='small' />
         <Text size='small' truncate>{name}</Text>
@@ -202,6 +218,205 @@ export function PodRow({pod: {metadata: {name}, status, spec}, namespace, refetc
           <Text size='small' truncate>{spec.containers.map(({image}) => image).join(', ')}</Text>
         </Box>
         <DeletePod name={name} namespace={namespace} refetch={refetch} />
+      </Box>
+    </Box>
+  )
+}
+
+function Status({status}) {
+  return (
+    <Box flex={false} pad='small' gap='xsmall'>
+      <Box>
+        <Text size='small'>Status</Text>
+      </Box>
+      <MetadataRow name='ip'>
+        <Text size='small'>{status.podIp}</Text>
+      </MetadataRow>
+      <MetadataRow name='phase'>
+        <Text size='small'>{status.phase}</Text>
+      </MetadataRow>
+      <MetadataRow name='readiness'>
+        <PodReadiness status={status} />
+      </MetadataRow>
+    </Box>
+  )
+}
+
+function Spec({spec}) {
+  return (
+    <Box flex={false} pad='small' gap='xsmall'>
+      <Box>
+        <Text size='small'>Spec</Text>
+      </Box>
+      <MetadataRow name='node'>
+        <Text size='small'>{spec.nodeName}</Text>
+      </MetadataRow>
+      <MetadataRow name='service account'>
+        <Text size='small'>{spec.serviceAccountName || 'default'}</Text>
+      </MetadataRow>
+    </Box>
+  )
+}
+
+function resource({requests, limits}, dim) {
+  const request = (requests && requests[dim]) || 'n/a'
+  const limit = (limits && limits[dim]) || 'n/a'
+  return {request, limit}
+}
+
+function Resource({resources, dim}) {
+  const {request, limit} = resource(resources, dim)
+  return (
+    <Box direction='row' gap='xsmall'>
+      <Text size='small' weight={500}>requests:</Text>
+      <Text size='small'>{request}</Text>
+      <Text size='small' weight={500}>limits:</Text>
+      <Text size='small'>{limit}</Text>
+    </Box>
+  )
+}
+
+function ContainerState({status: {state: {terminated, running, waiting}}}) {
+  return (
+    <Box flex={false}>
+      <Box>
+        <Text size='small'>Runtime State</Text>
+      </Box>
+      <Box flex={false}>
+        {running && (
+          <Box flex={false}>
+            <MetadataRow name='state'>
+              <Text size='small'>running</Text>
+            </MetadataRow>
+            <MetadataRow name='started at'>
+              <Text size='small'>{running.startedAt}</Text>
+            </MetadataRow>
+          </Box>
+        )}
+        {terminated && (
+          <Box flex={false}>
+            <MetadataRow name='state'>
+              <Text size='small'>terminated</Text>
+            </MetadataRow>
+            <MetadataRow name='exit code'>
+              <Text size='small'>{terminated.exitCode}</Text>
+            </MetadataRow>
+            <MetadataRow name='message'>
+              <Text size='small'>{terminated.message}</Text>
+            </MetadataRow>
+            <MetadataRow name='reason'>
+              <Text size='small'>{terminated.reason}</Text>
+            </MetadataRow>
+          </Box>
+        )}
+        {waiting && (
+          <Box flex={false}>
+            <MetadataRow name='state'>
+              <Text size='small'>waiting</Text>
+            </MetadataRow>
+            <MetadataRow name='message'>
+              <Text size='small'>{waiting.message}</Text>
+            </MetadataRow>
+            <MetadataRow name='reason'>
+              <Text size='small'>{waiting.reason}</Text>
+            </MetadataRow>
+          </Box>
+        )}
+      </Box>
+    </Box>
+  )
+}
+
+function Container({container, containerStatus}) {
+  const readiness = containerReadiness(containerStatus)
+  return (
+    <Box flex={false} gap='small' pad='small'>
+      <Box flex={false}>
+        <MetadataRow name='image'>
+          <Text size='small'>{container.image}</Text>
+        </MetadataRow>
+        <MetadataRow name='readiness'>
+          <Box direction='row' gap='xsmall' align='center'>
+            <ReadyIcon readiness={readiness} />
+            <Text size='small'>{readiness}</Text>
+          </Box>
+        </MetadataRow>
+        <MetadataRow name='cpu'>
+          <Resource resources={container.resources} dim='cpu' />
+        </MetadataRow>
+        <MetadataRow name='memory'>
+          <Resource resources={container.resources} dim='memory' />
+        </MetadataRow>
+        <MetadataRow name='ports'>
+          <Box flex={false}>
+            {container.ports.map(({containerPort, protocol}) => (
+              <Text key={containerPort} size='small'>{protocol} {containerPort}</Text>
+            ))}
+          </Box>
+        </MetadataRow>
+      </Box>
+      <ContainerState status={containerStatus} />
+    </Box>
+  )
+}
+
+export function Pod() {
+  const {name, namespace} = useParams()
+  const {setBreadcrumbs} = useContext(BreadcrumbsContext)
+  const {data} = useQuery(POD_Q, {variables: {name, namespace}, pollInterval: POLL_INTERVAL})
+  useEffect(() => {
+    setBreadcrumbs([
+      {text: 'pods', url: '/pods', disable: true},
+      {text: namespace, url: namespace, disable: true},
+      {text: name, url: name, disable: true}
+    ])
+  }, [])
+
+  if (!data) return <Loading />
+
+  const {pod} = data
+  const containerStatus = pod.status.containerStatuses.reduce((acc, container) => ({...acc, [container.name]: container}), {})
+  const containers = pod.spec.containers
+  console.log(containers)
+  return (
+    <Box fill background='backgroundColor'>
+      <Box flex={false} direction='row' gap='small' align='center' margin={{left: 'small', vertical: 'small'}} pad={{horizontal: 'medium'}}>
+        <Icon kind='pod' size='15px' />
+        <Text size='medium' weight={500}>pod/{name}</Text>
+        <ReadyIcon readiness={statusToReadiness(pod.status)} size='20px' showIcon />
+      </Box>
+      <Box fill style={{overflow: 'auto'}} pad={{horizontal: 'medium'}} gap='xsmall'>
+        <Tabs defaultTab='info' border='dark-3'>
+          <TabHeader>
+            <TabHeaderItem name='info'>
+              <Text size='small' weight={500}>info</Text>
+            </TabHeaderItem>
+            {containers.map(({name}) => (
+              <TabHeaderItem key={name} name={`container:${name}`}>
+                <Box direction='row' gap='xsmall' align='center'>
+                  <ReadyIcon readiness={containerReadiness(containerStatus[name])} />
+                  <Text size='small' weight={500}>container: {name}</Text>
+                </Box>
+              </TabHeaderItem>
+            ))}
+            <TabHeaderItem name='raw'>
+              <Text size='small' weight={500}>raw</Text>
+            </TabHeaderItem>
+          </TabHeader>
+          <TabContent name='info'>
+            <Metadata metadata={pod.metadata} />
+            <Status status={pod.status} />
+            <Spec spec={pod.spec} />
+          </TabContent>
+          {containers.map((container) => (
+            <TabContent key={container.name} name={`container:${container.name}`}>
+              <Container container={container} containerStatus={containerStatus[container.name]} />
+            </TabContent>
+          ))}
+          <TabContent name='raw'>
+            <RawContent raw={pod.raw} />
+          </TabContent>
+        </Tabs>
       </Box>
     </Box>
   )

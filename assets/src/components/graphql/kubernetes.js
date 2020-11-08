@@ -58,6 +58,7 @@ export const PodFragment = gql`
       nodeName
       serviceAccountName
       containers {
+        name
         image
         ports { containerPort protocol }
         resources {

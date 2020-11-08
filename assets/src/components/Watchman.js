@@ -17,6 +17,7 @@ import RepositorySelector from './RepositorySelector'
 import Application from './Application'
 import Component from './kubernetes/Component'
 import { Node, Nodes } from './kubernetes/Node'
+import { Pod } from './kubernetes/Pod'
 
 const SIDEBAR_WIDTH = '70px'
 
@@ -51,6 +52,7 @@ export default function Watchman() {
                   title='Logs'
                   description='aggregated logstreams for your repos' />
               )} />
+              <Route path='/pods/:namespace/:name' component={Pod} />
               <Route path='/nodes/:name' component={Node} />
               <Route path='/nodes' component={Nodes} />
               <Route path='/components/:repo/:kind/:name' component={Component} />

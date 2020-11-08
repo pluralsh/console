@@ -92,3 +92,12 @@ export const CRON_JOB_Q = gql`
   ${CronJobFragment}
   ${EventFragment}
 `;
+
+export const POD_Q = gql`
+  query Pod($name: String!, $namespace: String!) {
+    pod(name: $name, namespace: $namespace) {
+      ...PodFragment
+    }
+  }
+  ${PodFragment}
+`;

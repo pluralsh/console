@@ -69,6 +69,7 @@ defmodule Watchman.GraphQl.Kubernetes.Pod do
 
   object :container do
     field :image,     :string
+    field :name,      :string
     field :ports,     list_of(:port)
     field :resources, :resources
   end
