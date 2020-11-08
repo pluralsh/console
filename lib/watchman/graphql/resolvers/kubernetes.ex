@@ -47,6 +47,11 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
     end
   end
 
+  def resolve_pod(%{namespace: ns, name: name}, _) do
+    Core.read_namespaced_pod!(ns, name)
+    |> Kazan.run()
+  end
+
   def resolve_node(%{name: name}, _) do
     Core.read_node!(name)
     |> Kazan.run()

@@ -185,4 +185,24 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
       assert cron["spec"]["concurrencyPolicy"] == "Forbid"
     end
   end
+
+  describe "pod" do
+    test "it can query an individual pod" do
+      expect(Kazan, :run, fn _ -> {:ok, pod("name")} end)
+
+      {:ok, %{data: %{"pod" => pod}}} = run_query("""
+        query Pod($name: String!) {
+          pod(name: $name, namespace: $name) {
+            metadata { name }
+            status { podIp }
+            spec { nodeName }
+          }
+        }
+      """, %{"name" => "name"}, %{current_user: insert(:user)})
+
+      assert pod["metadata"]["name"] == "name"
+      assert pod["status"]["podIp"]
+      assert pod["spec"]["nodeName"]
+    end
+  end
 end

@@ -34,7 +34,9 @@ export const PodFragment = gql`
       phase
       podIp
       reason
-      containerStatuses { restartCount }
+      containerStatuses {
+        restartCount
+      }
     }
     spec {
       nodeName

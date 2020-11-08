@@ -16,11 +16,49 @@ defmodule Watchman.GraphQl.Kubernetes.Pod do
     field :host_ip,            :string
     field :pod_ip,             :string
     field :reason,             :string
+    field :conditions,         list_of(:pod_condition)
     field :container_statuses, list_of(:container_status)
+    field :init_container_statuses, list_of(:container_status)
+  end
+
+  object :pod_condition do
+    field :last_probe_time, :string
+    field :last_transition_time, :string
+    field :message, :string
+    field :reason,  :string
+    field :status,  :string
+    field :type,    :string
   end
 
   object :container_status do
     field :restart_count, :integer
+    field :ready,         :boolean
+    field :name,          :string
+    field :image,         :string
+    field :state,         :container_state
+  end
+
+  object :container_state do
+    field :running,    :running_state
+    field :terminated, :terminated_state
+    field :waiting,    :waiting_state
+  end
+
+  object :running_state do
+    field :started_at, :string
+  end
+
+  object :terminated_state do
+    field :exit_code,   :integer
+    field :finished_at, :string
+    field :started_at,  :string
+    field :message,     :string
+    field :reason,      :string
+  end
+
+  object :waiting_state do
+    field :message, :string
+    field :reason,  :string
   end
 
   object :pod_spec do

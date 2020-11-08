@@ -4,9 +4,10 @@ defmodule Watchman.GraphQl.Kubernetes do
   alias Watchman.Middleware.Authenticated
 
   object :metadata do
-    field :labels, list_of(:label_pair), resolve: fn %{labels: labels}, _, _ -> {:ok, make_labels(labels)} end
+    field :labels,      list_of(:label_pair), resolve: fn %{labels: labels}, _, _ -> {:ok, make_labels(labels)} end
     field :annotations, list_of(:label_pair), resolve: fn %{annotations: labels}, _, _ -> {:ok, make_labels(labels)} end
-    field :name, non_null(:string)
+    field :name,        non_null(:string)
+    field :namespace,   non_null(:string)
   end
 
   object :result_status do
@@ -92,6 +93,14 @@ defmodule Watchman.GraphQl.Kubernetes do
       arg :name, non_null(:string)
 
       resolve &Kubernetes.resolve_cron_job/2
+    end
+
+    field :pod, :pod do
+      middleware Authenticated
+      arg :namespace, non_null(:string)
+      arg :name, non_null(:string)
+
+      resolve &Kubernetes.resolve_pod/2
     end
   end
 
