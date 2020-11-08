@@ -95,13 +95,13 @@ export function PodHeader() {
   return (
     <Box flex={false} fill='horizontal' direction='row' border='bottom' pad={{vertical: 'xsmall'}} gap='xsmall'>
       <HeaderItem width='10%' text='name' />
-      <HeaderItem width='20%' text='ready' />
+      <HeaderItem width='15%' text='status' />
       <HeaderItem width='7%' text='pod ip' />
       <HeaderItem width='10%' text='node name' />
       <HeaderItem width='7%' text='memory' />
       <HeaderItem width='7%' text='cpu' />
       <HeaderItem width='4%' text='restarts' />
-      <HeaderItem width='45%' text='image' />
+      <HeaderItem width='50%' text='image' />
     </Box>
   )
 }
@@ -184,7 +184,7 @@ export function PodRow({pod: {metadata: {name}, status, spec}, namespace, refetc
         <Cube size='small' />
         <Text size='small' truncate>{name}</Text>
       </Box>
-      <Box flex={false} width='10%' direction='row' align='center' gap='xsmall'>
+      <Box flex={false} width='15%' direction='row' align='center' gap='xsmall'>
         <ReadyIcon readiness={statusToReadiness(status)} />
         <PodReadiness status={status} />
       </Box>
