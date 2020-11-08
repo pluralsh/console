@@ -235,11 +235,12 @@ const animation = {
 function LogLabels({labels}) {
   const {removeLabel} = useContext(LabelContext)
   return (
-    <Box direction='row' gap='xsmall' align='center'>
-      {labels.map(({name}) => (
-        <Box style={{maxWidth: '75px'}} direction='row' round='xsmall' pad={{horizontal: '7px', vertical: '2px'}}
+    <Box flex={false} style={{overflow: 'auto'}} fill direction='row' gap='xsmall' align='center' wrap>
+      {labels.map(({name, value}) => (
+        <Box gap='xsmall' direction='row' round='xsmall' pad={{horizontal: '7px', vertical: '2px'}} focusIndicator={false}
              align='center' background='light-3' hoverIndicator='light-6' onClick={() => removeLabel(name)}>
-          <Text size='small' truncate>{name}</Text>
+          <Text size='small' weight={500} truncate>{name}:</Text>
+          <Text size='small' truncate>{value}</Text>
         </Box>
       ))}
     </Box>
