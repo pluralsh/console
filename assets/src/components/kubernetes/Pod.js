@@ -87,19 +87,24 @@ export function PodHeader() {
     <Box flex={false} fill='horizontal' direction='row' border='bottom' pad={{vertical: 'xsmall'}} gap='xsmall'>
       <HeaderItem width='10%' text='name' />
       <HeaderItem width='10%' text='status' />
+      <HeaderItem width='10%' text='ready' />
       <HeaderItem width='7%' text='pod ip' />
       <HeaderItem width='10%' text='node name' />
       <HeaderItem width='7%' text='memory' />
       <HeaderItem width='7%' text='cpu' />
       <HeaderItem width='4%' text='restarts' />
-      <HeaderItem width='45%' text='image' />
+      <HeaderItem width='35%' text='image' />
     </Box>
   )
 }
 
 export function PodList({pods, namespace, refetch}) {
+  console.log(pods)
   return (
-    <Box fill pad='small'>
+    <Box flex={false} pad='small'>
+      <Box pad={{vertical: 'small'}}>
+        <Text size='small'>Pods</Text>
+      </Box>
       <PodHeader />
       {pods.map((pod, ind) => <PodRow key={ind} pod={pod} namespace={namespace} refetch={refetch} />)}
     </Box>
@@ -137,6 +142,32 @@ export function DeletePod({name, namespace, refetch}) {
   )
 }
 
+function PodState({name, state: {running, terminated, waiting}}) {
+  if (running) return <Text size='small'>{name} is running</Text>
+  if (waiting) return <Text size='small'>{name} is waiting</Text>
+
+  return (
+    <Text size='small'>{name} exited with code {terminated.exitCode} -- {terminated.message}</Text>
+  )
+}
+
+function PodReadiness({status: {containerStatuses}}) {
+  const unready = containerStatuses.filter(({ready}) => !ready)
+  if (unready.length === 0) return (
+    <Text size='small'>Ready</Text>
+  )
+
+  return (
+    <Box direction='row' gap='xsmall'>
+      {unready.map((status, ind) => (
+        <Box key={ind} align='center' direction='row' gap='xsmall'>
+          <PodState {...status} />
+        </Box>
+      ))}
+    </Box>
+  )
+}
+
 export function PodRow({pod: {metadata: {name}, status, spec}, namespace, refetch}) {
   const restarts = status.containerStatuses.reduce((count, {restartCount}) => count + (restartCount || 0), 0)
   return (
@@ -147,6 +178,9 @@ export function PodRow({pod: {metadata: {name}, status, spec}, namespace, refetc
       </Box>
       <Box flex={false} width='10%'>
         <PodPhase phase={status.phase} message={status.message} />
+      </Box>
+      <Box flex={false} width='10%'>
+        <PodReadiness status={status} />
       </Box>
       <RowItem width='7%' text={status.podIp} />
       <RowItem width='10%' text={spec.nodeName} truncate />

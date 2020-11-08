@@ -3,6 +3,7 @@ import { gql } from 'apollo-boost'
 export const MetadataFragment = gql`
   fragment MetadataFragment on Metadata {
     name
+    namespace
     labels { name value }
     annotations { name value }
   }
@@ -36,6 +37,21 @@ export const PodFragment = gql`
       reason
       containerStatuses {
         restartCount
+        ready
+        name
+        state {
+          running { startedAt }
+          terminated { exitCode message reason }
+          waiting { message reason }
+        }
+      }
+      conditions {
+        lastProbeTime
+        lastTransitionTime
+        message
+        reason
+        status
+        type
       }
     }
     spec {

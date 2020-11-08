@@ -26,7 +26,7 @@ function MetadataTag({name, value}) {
   )
 }
 
-export function Metadata({metadata: {name, labels, annotations}}) {
+export function Metadata({metadata: {name, namespace, labels, annotations}}) {
   return (
     <Box flex={false} pad='small'>
       <Box>
@@ -34,6 +34,9 @@ export function Metadata({metadata: {name, labels, annotations}}) {
       </Box>
       <MetadataRow name='name'>
         <Text size='small'>{name}</Text>
+      </MetadataRow>
+      <MetadataRow name='namespace'>
+        <Text size='small'>{namespace}</Text>
       </MetadataRow>
       <MetadataRow name='labels'>
         {labels.map(({name, value}) => <MetadataTag key={name} name={name} value={value} />)}

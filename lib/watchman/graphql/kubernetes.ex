@@ -7,7 +7,7 @@ defmodule Watchman.GraphQl.Kubernetes do
     field :labels,      list_of(:label_pair), resolve: fn %{labels: labels}, _, _ -> {:ok, make_labels(labels)} end
     field :annotations, list_of(:label_pair), resolve: fn %{annotations: labels}, _, _ -> {:ok, make_labels(labels)} end
     field :name,        non_null(:string)
-    field :namespace,   non_null(:string)
+    field :namespace,   :string
   end
 
   object :result_status do
