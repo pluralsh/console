@@ -15,6 +15,11 @@ defmodule Watchman.Services.Observability do
       do: {:ok, results}
   end
 
+  def get_metric(q, start, stop, step) do
+    with {:ok, %{data: %{result: results}}} <- PrometheusClient.query(q, start, stop, step, %{}),
+      do: {:ok, results}
+  end
+
   def hydrate(%Dashboard{
     spec: %Dashboard.Spec{
       labels: labels,

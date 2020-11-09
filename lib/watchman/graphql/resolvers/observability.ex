@@ -20,5 +20,12 @@ defmodule Watchman.GraphQl.Resolvers.Observability do
     Observability.get_logs(query, end_ts, start, limit)
   end
 
+  def resolve_metric(%{query: query} = args, _) do
+    now   = Timex.now()
+    end_t = Timex.shift(now, seconds: -Map.get(args, :offset, @default_offset))
+    step  = args[:step] || "5m"
+    Observability.get_metric(query, now, end_t, step)
+  end
+
   defp ts(ts), do: Timex.to_unix(ts) * @nano
 end

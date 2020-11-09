@@ -2,13 +2,14 @@ defmodule Watchman.GraphQl do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
   import Watchman.GraphQl.Helpers
-  alias Watchman.GraphQl.Resolvers.{Build, Forge, Webhook, User, Observability}
+  alias Watchman.GraphQl.Resolvers.{Build, Forge, Webhook, User}
   alias Watchman.Middleware.Authenticated
 
   import_types Absinthe.Type.Custom
   import_types Watchman.GraphQl.Schema.Base
   import_types Watchman.GraphQl.Schema
   import_types Watchman.GraphQl.Kubernetes
+  import_types Watchman.GraphQl.Observability
 
   @sources [
     Build,
@@ -75,34 +76,6 @@ defmodule Watchman.GraphQl do
       resolve &Webhook.list_webhooks/2
     end
 
-    field :dashboards, list_of(:dashboard) do
-      middleware Authenticated
-      arg :repo, non_null(:string)
-
-      resolve &Observability.resolve_dashboards/2
-    end
-
-    field :dashboard, :dashboard do
-      middleware Authenticated
-      arg :repo,   non_null(:string)
-      arg :name,   non_null(:string)
-      arg :step,   :string
-      arg :offset, :integer
-      arg :labels, list_of(:label_input)
-
-      resolve &Observability.resolve_dashboard/2
-    end
-
-    field :logs, list_of(:log_stream) do
-      middleware Authenticated
-      arg :query, non_null(:string)
-      arg :start, :long
-      arg :end,   :long
-      arg :limit, non_null(:integer)
-
-      resolve &Observability.resolve_logs/2
-    end
-
     field :applications, list_of(:application) do
       middleware Authenticated
 
@@ -116,6 +89,7 @@ defmodule Watchman.GraphQl do
       resolve &Forge.resolve_application/2
     end
 
+    import_fields :observability_queries
     import_fields :kubernetes_queries
   end
 

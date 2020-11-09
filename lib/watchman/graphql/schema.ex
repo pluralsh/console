@@ -39,12 +39,6 @@ defmodule Watchman.GraphQl.Schema do
   input_object :invite_attributes do
     field :email, :string
   end
-
-  input_object :label_input do
-    field :name,  :string
-    field :value, :string
-  end
-
   ## OBJECTS
 
   object :user do
@@ -136,48 +130,9 @@ defmodule Watchman.GraphQl.Schema do
     end
   end
 
-  object :dashboard do
-    field :id,   non_null(:string), resolve: fn %{metadata: %{name: n}}, _, _ -> {:ok, n} end
-    field :spec, non_null(:dashboard_spec)
-  end
-
-  object :dashboard_spec do
-    field :name,        :string
-    field :description, :string
-    field :timeslices,  list_of(:string)
-    field :labels,      list_of(:dashboard_label)
-    field :graphs,      list_of(:dashboard_graph)
-  end
-
-  object :dashboard_label do
-    field :name,   non_null(:string)
-    field :values, list_of(:string)
-  end
-
-  object :dashboard_graph do
-    field :name,    non_null(:string)
-    field :queries, list_of(:dashboard_metric)
-    field :format,  :string
-  end
-
-  object :dashboard_metric do
-    field :legend, :string
-    field :query,  :string
-    field :results, list_of(:metric_result)
-  end
-
-  object :metric_result do
-    field :timestamp, :integer, resolve: fn %{timestamp: ts}, _, _ -> {:ok, ceil(ts)} end
-    field :value,     :string
-  end
 
   object :configuration do
     field :configuration, non_null(:string)
-  end
-
-  object :log_stream do
-    field :stream, :map
-    field :values, list_of(:metric_result)
   end
 
   delta :build

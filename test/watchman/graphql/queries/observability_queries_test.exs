@@ -147,6 +147,29 @@ defmodule Watchman.GraphQl.ObservabilityQueriesTest do
     end
   end
 
+  describe "metric" do
+    test "it can fetch metrics from prometheus" do
+      expect(HTTPoison, :post, fn _, _, _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+          %{values: [[1, "1"]]}
+        ]}})}}
+      end)
+
+      {:ok, %{data: %{"metric" => [metric]}}} = run_query("""
+        query Metric($q: String!) {
+          metric(query: $q) {
+            values {
+              timestamp
+              value
+            }
+          }
+        }
+      """, %{"q" => "something"}, %{current_user: insert(:user)})
+
+      assert metric["values"] == [%{"timestamp" => 1, "value" => "1"}]
+    end
+  end
+
   def dashboard() do
     %Dashboard{
       metadata: %{
