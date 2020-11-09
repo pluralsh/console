@@ -168,7 +168,7 @@ function PodState({name, state: {running, terminated, waiting}}) {
   if (waiting) return <Text size='small'>{name} is waiting</Text>
 
   return (
-    <Text size='small'>{name} exited with code {terminated.exitCode}: {terminated.message}</Text>
+    <Text size='small'>{name} exited with code {terminated.exitCode}</Text>
   )
 }
 
@@ -225,19 +225,26 @@ export function PodRow({pod: {metadata: {name, namespace}, status, spec}, refetc
 
 function Status({status}) {
   return (
-    <Box flex={false} pad='small' gap='xsmall'>
+    <Box flex={false} pad='small' >
       <Box>
         <Text size='small'>Status</Text>
       </Box>
-      <MetadataRow name='ip'>
-        <Text size='small'>{status.podIp}</Text>
-      </MetadataRow>
-      <MetadataRow name='phase'>
-        <Text size='small'>{status.phase}</Text>
-      </MetadataRow>
-      <MetadataRow name='readiness'>
-        <PodReadiness status={status} />
-      </MetadataRow>
+      <Box flex={false} direction='row' gap='small'>
+        <Box flex={false} width='40%' gap='xsmall'>
+          <MetadataRow name='ip'>
+            <Text size='small'>{status.podIp}</Text>
+          </MetadataRow>
+          <MetadataRow name='phase'>
+            <Text size='small'>{status.phase}</Text>
+          </MetadataRow>
+          <MetadataRow name='readiness'>
+            <PodReadiness status={status} />
+          </MetadataRow>
+        </Box>
+        <Box width='60%'>
+          <PodConditions conditions={status.conditions} />
+        </Box>
+      </Box>
     </Box>
   )
 }
@@ -327,6 +334,31 @@ function ContainerState({status: {state: {terminated, running, waiting}}}) {
   )
 }
 
+function PodConditions({conditions}) {
+  return (
+    <Box flex={false} pad='small'>
+      <Box direction='row' gap='xsmall' align='center'>
+        <HeaderItem width='20%' text='timestamp' />
+        <HeaderItem width='20%' text='type' />
+        <HeaderItem width='10%' text='status' />
+        <HeaderItem width='15%' text='reason' />
+        <HeaderItem width='35%' text='message' />
+      </Box>
+      <Box flex={false}>
+        {conditions.map((condition, ind) => (
+          <Box key={ind} direction='row' gap='xsmall' align='center'>
+            <RowItem width='20%' text={condition.lastTransitionTime} />
+            <RowItem width='20%' text={condition.type} />
+            <RowItem width='10%' text={condition.status} />
+            <RowItem width='15%' text={condition.reason} />
+            <RowItem width='35%' text={condition.message} />
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  )
+}
+
 function Container({container, containerStatus}) {
   const readiness = containerReadiness(containerStatus)
   return (
@@ -338,7 +370,7 @@ function Container({container, containerStatus}) {
         <MetadataRow name='readiness'>
           <Box direction='row' gap='xsmall' align='center'>
             <ReadyIcon readiness={readiness} />
-            <Text size='small'>{readiness}</Text>
+            <Text size='small'>{readiness === Readiness.Ready ? 'Running' : (readiness === Readiness.Failed ? 'Stopped' : 'Pending')}</Text>
           </Box>
         </MetadataRow>
         <MetadataRow name='cpu'>
@@ -349,7 +381,7 @@ function Container({container, containerStatus}) {
         </MetadataRow>
         <MetadataRow name='ports'>
           <Box flex={false}>
-            {container.ports.map(({containerPort, protocol}) => (
+            {(container.ports || []).map(({containerPort, protocol}) => (
               <Text key={containerPort} size='small'>{protocol} {containerPort}</Text>
             ))}
           </Box>
