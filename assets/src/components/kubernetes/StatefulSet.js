@@ -9,6 +9,7 @@ import { POLL_INTERVAL } from './constants'
 import { PodList } from './Pod'
 import { RawContent } from './Component'
 import { Events } from './Event'
+import { Metric } from './Metrics'
 
 function Status({status: {currentReplicas, updatedReplicas, readyReplicas, replicas}}) {
   return (
@@ -59,6 +60,9 @@ export default function StatefulSet() {
           <TabHeaderItem name='info'>
             <Text size='small' weight={500}>info</Text>
           </TabHeaderItem>
+          <TabHeaderItem name='metrics'>
+            <Text size='small' weight={500}>metrics</Text>
+          </TabHeaderItem>
           <TabHeaderItem name='events'>
             <Text size='small' weight={500}>events</Text>
           </TabHeaderItem>
@@ -71,6 +75,9 @@ export default function StatefulSet() {
           <Status status={statefulSet.status} />
           <Spec spec={statefulSet.spec} />
           <PodList pods={statefulSet.pods} refetch={refetch} namespace={repo} />
+        </TabContent>
+        <TabContent name='metrics'>
+          <Metric name={name} namespace={repo} />
         </TabContent>
         <TabContent name='events'>
           <Events events={statefulSet.events} />

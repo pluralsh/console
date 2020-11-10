@@ -9,6 +9,7 @@ import { POLL_INTERVAL } from './constants'
 import { PodList } from './Pod'
 import { RawContent } from './Component'
 import { Events } from './Event'
+import { Metric } from './Metrics'
 
 function Status({status: {availableReplicas, replicas, unavailableReplicas}}) {
   return (
@@ -56,6 +57,9 @@ export default function Deployment() {
           <TabHeaderItem name='info'>
             <Text size='small' weight={500}>info</Text>
           </TabHeaderItem>
+          <TabHeaderItem name='metrics'>
+            <Text size='small' weight={500}>metrics</Text>
+          </TabHeaderItem>
           <TabHeaderItem name='events'>
             <Text size='small' weight={500}>events</Text>
           </TabHeaderItem>
@@ -68,6 +72,9 @@ export default function Deployment() {
           <Status status={deployment.status} />
           <Spec spec={deployment.spec} />
           <PodList pods={deployment.pods} refetch={refetch} namespace={repo} />
+        </TabContent>
+        <TabContent name='metrics'>
+          <Metric namespace={repo} name={name} />
         </TabContent>
         <TabContent name='events'>
           <Events events={deployment.events} />

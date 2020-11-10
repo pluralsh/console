@@ -37,6 +37,16 @@ export const LogStreamFragment = gql`
   }
 `;
 
+export const MetricResponseFragment = gql`
+  fragment MetricResponseFragment on MetricResponse {
+    metric
+    values {
+      timestamp
+      value
+    }
+  }
+`;
+
 export const DASHBOARDS_Q = gql`
   query Dashboards($repo: String!) {
     dashboards(repo: $repo) {

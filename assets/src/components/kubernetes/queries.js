@@ -1,4 +1,5 @@
 import { gql } from 'apollo-boost'
+import { MetricResponseFragment } from '../graphql/dashboards';
 import { CronJobFragment, DeploymentFragment, EventFragment, IngressFragment, NodeFragment, PodFragment, ServiceFragment, StatefulSetFragment } from '../graphql/kubernetes';
 
 export const SERVICE_Q = gql`
@@ -100,4 +101,12 @@ export const POD_Q = gql`
     }
   }
   ${PodFragment}
+`;
+
+export const USAGE_Q = gql`
+  query Usage($cpuQuery: String!, $memQuery: String!) {
+    cpu: metric(query: $cpuQuery) { ...MetricResponseFragment }
+    mem: metric(query: $memQuery) { ...MetricResponseFragment }
+  }
+  ${MetricResponseFragment}
 `;
