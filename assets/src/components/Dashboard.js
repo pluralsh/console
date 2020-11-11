@@ -4,7 +4,7 @@ import { Loading } from 'forge-core'
 import { DASHBOARD_Q } from './graphql/dashboards'
 import { Box, Select, Text } from 'grommet'
 import { chunk } from 'lodash'
-import { Graph } from './utils/Graph'
+import { Graph, GraphHeader } from './utils/Graph'
 import filesize from 'filesize'
 
 const HOUR = 60 * 60
@@ -73,9 +73,7 @@ function DashboardGraph({graph, tick}) {
 
   return (
     <Box className='dashboard' round='xsmall' width='50%' pad='small' background='cardDetail' height='300px'>
-      <Box direction='row' align='center' justify='center'>
-        <Text size='small' weight='bold'>{graph.name}</Text>
-      </Box>
+      <GraphHeader text={graph.name} />
       <Box fill>
         <Graph data={data} yFormat={(v) => format(v, graph.format)} tick={tick} />
       </Box>

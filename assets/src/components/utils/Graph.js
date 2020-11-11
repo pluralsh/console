@@ -9,6 +9,14 @@ export function dateFormat(date) {
   return moment(date).format('MM/DD h:mm:ss a')
 }
 
+export function GraphHeader({text}) {
+  return (
+    <Box direction='row' align='center' justify='center'>
+      <Text size='small' weight='bold'>{text}</Text>
+    </Box>
+  )
+}
+
 function SliceTooltip({point: {serieColor, serieId, data}}) {
   return (
     <Box flex={false} background='white' pad={{vertical: 'xsmall', horizontal: 'small'}}

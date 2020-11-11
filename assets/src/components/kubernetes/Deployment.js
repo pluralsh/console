@@ -74,7 +74,7 @@ export default function Deployment() {
           <PodList pods={deployment.pods} refetch={refetch} namespace={repo} />
         </TabContent>
         <TabContent name='metrics'>
-          <Metric namespace={repo} name={name} />
+          <Metric namespace={repo} name={name} regex='-[a-z0-9]+-[a-z0-9]+' />
         </TabContent>
         <TabContent name='events'>
           <Events events={deployment.events} />

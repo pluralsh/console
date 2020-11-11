@@ -77,7 +77,7 @@ export default function StatefulSet() {
           <PodList pods={statefulSet.pods} refetch={refetch} namespace={repo} />
         </TabContent>
         <TabContent name='metrics'>
-          <Metric name={name} namespace={repo} />
+          <Metric name={name} namespace={repo} regex='-[0-9]+' />
         </TabContent>
         <TabContent name='events'>
           <Events events={statefulSet.events} />
