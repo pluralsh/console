@@ -9,20 +9,18 @@ import { POLL_INTERVAL } from './constants'
 import { PodList } from './Pod'
 import { RawContent } from './Component'
 import { Events } from './Event'
+import { Container } from './utils'
 
 function Status({status: {loadBalancer}}) {
   if (!loadBalancer) return null
   if (!loadBalancer.ingress || loadBalancer.ingress.length === 0) return null
 
   return (
-    <Box flex={false} pad='small' gap='xsmall'>
-      <Box>
-        <Text size='small'>Status</Text>
-      </Box>
+    <Container header='Status'>
       <MetadataRow name='ip'>
         <Text size='small'>{loadBalancer.ingress[0].ip}</Text>
       </MetadataRow>
-    </Box>
+    </Container>
   )
 }
 
@@ -44,22 +42,19 @@ function PortRow({port: {name, protocol, port, targetPort}}) {
 
 function Spec({spec: {clusterIp, type, ports}}) {
   return (
-    <Box flex={false} pad='small' gap='xsmall'>
-      <Box>
-        <Text size='small'>Spec</Text>
-      </Box>
+    <Container header='Spec'>
       <MetadataRow name='Cluster Ip'>
         <Text size='small'>{clusterIp}</Text>
       </MetadataRow>
       <MetadataRow name='Type'>
         <Text size='small'>{type}</Text>
       </MetadataRow>
-      <MetadataRow name='Ports'>
+      <MetadataRow name='Ports' final>
         <Box flex={false} fill='horizontal'>
           {ports.map((port) => <PortRow key={port.name} port={port} />)}
         </Box>
       </MetadataRow>
-    </Box>
+    </Container>
   )
 }
 

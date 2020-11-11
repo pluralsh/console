@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Box, Text } from 'grommet'
 import { Loading, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
@@ -10,40 +10,38 @@ import { PodList } from './Pod'
 import { RawContent } from './Component'
 import { Events } from './Event'
 import { Metric } from './Metrics'
+import { Container } from './utils'
+import { DURATIONS, RangePicker } from '../Dashboard'
 
 function Status({status: {availableReplicas, replicas, unavailableReplicas}}) {
   return (
-    <Box flex={false} pad='small' gap='xsmall'>
-      <Box>
-        <Text size='small'>Status</Text>
-      </Box>
+    <Container header='Status'>
       <MetadataRow name='replicas'>
         <Text size='small'>{replicas}</Text>
       </MetadataRow>
       <MetadataRow name='available'>
         <Text size='small'>{availableReplicas}</Text>
       </MetadataRow>
-      <MetadataRow name='unavailable'>
+      <MetadataRow name='unavailable' final>
         <Text size='small'>{unavailableReplicas}</Text>
       </MetadataRow>
-    </Box>
+    </Container>
   )
 }
 
 function Spec({spec: {strategy}}) {
   return (
-    <Box flex={false} pad='small' gap='xsmall'>
-      <Box>
-        <Text size='small'>Spec</Text>
-      </Box>
-      <MetadataRow name='strategy'>
+    <Container header='Spec'>
+      <MetadataRow name='strategy' final>
         <Text size='small'>{strategy.type}</Text>
       </MetadataRow>
-    </Box>
+    </Container>
   )
 }
 
 export default function Deployment() {
+  const [tab, setTab] = useState('info')
+  const [duration, setDuration] = useState(DURATIONS[0])
   const {name, repo} = useParams()
   const {data, refetch} = useQuery(DEPLOYMENT_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
 
@@ -52,7 +50,8 @@ export default function Deployment() {
   const {deployment} = data
   return (
     <Box fill style={{overflow: 'auto'}}>
-      <Tabs defaultTab='info' border='dark-3'>
+      <Tabs defaultTab='info' border='dark-3' onTabChange={setTab}
+            headerEnd={tab === 'metrics' ? <RangePicker duration={duration} setDuration={setDuration} /> : null}>
         <TabHeader>
           <TabHeaderItem name='info'>
             <Text size='small' weight={500}>info</Text>
@@ -74,7 +73,7 @@ export default function Deployment() {
           <PodList pods={deployment.pods} refetch={refetch} namespace={repo} />
         </TabContent>
         <TabContent name='metrics'>
-          <Metric namespace={repo} name={name} regex='-[a-z0-9]+-[a-z0-9]+' />
+          <Metric namespace={repo} name={name} regex='-[a-z0-9]+-[a-z0-9]+' duration={duration} />
         </TabContent>
         <TabContent name='events'>
           <Events events={deployment.events} />

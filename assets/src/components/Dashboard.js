@@ -10,11 +10,11 @@ import filesize from 'filesize'
 const HOUR = 60 * 60
 const DAY = 24 * HOUR
 
-const DURATIONS = [
-  {offset: HOUR, step: '1m', label: '1h', tick: 'every 10 minutes'},
-  {offset: 2 * HOUR, step: '2m', label: '2h', tick: 'every 20 minutes'},
-  {offset: 6 * HOUR, step: '5m', label: '6h', tick: 'every 30 minutes'},
-  {offset: DAY, step: '10m', label: '1d', tick: 'every 2 hours'},
+export const DURATIONS = [
+  {offset: HOUR, step: '2m', label: '1h', tick: 'every 10 minutes'},
+  {offset: 2 * HOUR, step: '4m', label: '2h', tick: 'every 20 minutes'},
+  {offset: 6 * HOUR, step: '10m', label: '6h', tick: 'every 30 minutes'},
+  {offset: DAY, step: '20m', label: '1d', tick: 'every 2 hours'},
   {offset: 7 * DAY, step: '1h', label: '7d', tick: 'every 12 hours'},
 ]
 
@@ -46,10 +46,10 @@ function RangeOption({duration, current, setDuration, first, last}) {
   )
 }
 
-function RangePicker({duration, setDuration}) {
+export function RangePicker({duration, setDuration}) {
   const count = DURATIONS.length
   return (
-    <Box margin='small' round='xsmall' background='cardDetail'>
+    <Box round='xsmall' background='cardDetail'>
       <Box direction='row' round='xsmall'>
         {DURATIONS.map((dur, ind) => (
           <RangeOption

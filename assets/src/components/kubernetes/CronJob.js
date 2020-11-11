@@ -8,36 +8,31 @@ import { POLL_INTERVAL } from './constants'
 import { RawContent } from './Component'
 import { CRON_JOB_Q } from './queries'
 import { Events } from './Event'
+import { Container } from './utils'
 
 function Status({status}) {
   return (
-    <Box flex={false} pad='small' gap='xsmall'>
-      <Box>
-        <Text size='small'>Status</Text>
-      </Box>
-      <MetadataRow name='last scheduled'>
+    <Container header='Status'>
+      <MetadataRow name='last scheduled' final>
         <Text size='small'>{status.lastScheduleTime}</Text>
       </MetadataRow>
-    </Box>
+    </Container>
   )
 }
 
 function Spec({spec}) {
   return (
-    <Box flex={false} pad='small' gap='xsmall'>
-      <Box>
-        <Text size='small'>Spec</Text>
-      </Box>
+    <Container header='Spec'>
       <MetadataRow name='schedule'>
         <Text size='small'>{spec.schedule}</Text>
       </MetadataRow>
       <MetadataRow name='concurrency'>
         <Text size='small'>{spec.concurrencyPolicy}</Text>
       </MetadataRow>
-      <MetadataRow name='suspend?'>
+      <MetadataRow name='suspend?' final>
         <Text size='small'>{spec.suspend ? 'yes' : 'no'}</Text>
       </MetadataRow>
-    </Box>
+    </Container>
   )
 }
 

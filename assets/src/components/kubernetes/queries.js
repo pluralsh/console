@@ -104,9 +104,11 @@ export const POD_Q = gql`
 `;
 
 export const USAGE_Q = gql`
-  query Usage($cpuQuery: String!, $memQuery: String!) {
-    cpu: metric(query: $cpuQuery) { ...MetricResponseFragment }
-    mem: metric(query: $memQuery) { ...MetricResponseFragment }
+  query Usage($cpu: String!, $mem: String!, $podCpu: String!, $podMem: String!, $step: String!, $offset: Int!) {
+    cpu: metric(query: $cpu, offset: $offset, step: $step) { ...MetricResponseFragment }
+    mem: metric(query: $mem, offset: $offset, step: $step) { ...MetricResponseFragment }
+    podCpu: metric(query: $podCpu, offset: $offset, step: $step) { ...MetricResponseFragment }
+    podMem: metric(query: $podMem, offset: $offset, step: $step) { ...MetricResponseFragment }
   }
   ${MetricResponseFragment}
 `;

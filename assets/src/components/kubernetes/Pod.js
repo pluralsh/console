@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { Box, Layer, Text } from 'grommet'
 import { Loading, Tabs, TabHeader, TabHeaderItem, TabContent } from 'forge-core'
 import { Readiness, ReadyIcon } from '../Application'
@@ -13,6 +13,7 @@ import { POLL_INTERVAL } from './constants'
 import { Metadata, MetadataRow } from './Metadata'
 import { RawContent } from './Component'
 import { BreadcrumbsContext } from '../Breadcrumbs'
+import { Container as Con } from './utils'
 
 function phaseToReadiness(phase) {
   switch (phase) {
@@ -138,11 +139,16 @@ export function DeletePod({name, namespace, refetch}) {
     variables: {name, namespace},
     onCompleted: refetch
   })
+  const doDelete = useCallback((e) => {
+    e.stopPropagation()
+    e.preventDefault()
+    mutation()
+  }, [mutation])
 
   return (
     <>
     <Box flex={false} pad='small' round='xsmall' align='center' justify='center'
-         onClick={loading ? null : mutation} hoverIndicator='backgroundDark' focusIndicator={false}>
+         onClick={loading ? null : doDelete} hoverIndicator='backgroundDark' focusIndicator={false}>
       <Trash color={loading ? 'dark-6' : 'error'} size='small' />
     </Box>
     {data && open && (
@@ -225,10 +231,7 @@ export function PodRow({pod: {metadata: {name, namespace}, status, spec}, refetc
 
 function Status({status}) {
   return (
-    <Box flex={false} pad='small' >
-      <Box>
-        <Text size='small'>Status</Text>
-      </Box>
+    <Con header='Status'>
       <Box flex={false} direction='row' gap='small'>
         <Box flex={false} width='40%' gap='xsmall'>
           <MetadataRow name='ip'>
@@ -237,7 +240,7 @@ function Status({status}) {
           <MetadataRow name='phase'>
             <Text size='small'>{status.phase}</Text>
           </MetadataRow>
-          <MetadataRow name='readiness'>
+          <MetadataRow name='readiness' final>
             <PodReadiness status={status} />
           </MetadataRow>
         </Box>
@@ -245,23 +248,20 @@ function Status({status}) {
           <PodConditions conditions={status.conditions} />
         </Box>
       </Box>
-    </Box>
+    </Con>
   )
 }
 
 function Spec({spec}) {
   return (
-    <Box flex={false} pad='small' gap='xsmall'>
-      <Box>
-        <Text size='small'>Spec</Text>
-      </Box>
+    <Con header='Spec'>
       <MetadataRow name='node'>
         <Text size='small'>{spec.nodeName}</Text>
       </MetadataRow>
-      <MetadataRow name='service account'>
+      <MetadataRow name='service account' final>
         <Text size='small'>{spec.serviceAccountName || 'default'}</Text>
       </MetadataRow>
-    </Box>
+    </Con>
   )
 }
 

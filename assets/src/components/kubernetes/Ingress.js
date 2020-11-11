@@ -8,20 +8,18 @@ import { useParams } from 'react-router'
 import { POLL_INTERVAL } from './constants'
 import { RawContent } from './Component'
 import { Events } from './Event'
+import { Container } from './utils'
 
 function Status({status: {loadBalancer}}) {
   if (!loadBalancer) return null
   if (!loadBalancer.ingress || loadBalancer.ingress.length === 0) return null
 
   return (
-    <Box pad='small' gap='xsmall'>
-      <Box>
-        <Text size='small'>Status</Text>
-      </Box>
-      <MetadataRow name='ip'>
+    <Container header='Status'>
+      <MetadataRow name='ip' final>
         <Text size='small'>{loadBalancer.ingress[0].ip}</Text>
       </MetadataRow>
-    </Box>
+    </Container>
   )
 }
 
@@ -49,10 +47,7 @@ function IngressPath({rule: {host, http: {paths}}}) {
 
 function Spec({spec: {rules}}) {
   return (
-    <Box pad='small' gap='xsmall'>
-      <Box>
-        <Text size='small'>Spec</Text>
-      </Box>
+    <Container header='Spec'>
       <MetadataRow name='routes'>
         <Box flex={false} fill='horizontal'>
           <Box direction='row' gap='small'>
@@ -69,7 +64,7 @@ function Spec({spec: {rules}}) {
           {rules.map((rule, ind) => <IngressPath key={ind} rule={rule} />)}
         </Box>
       </MetadataRow>
-    </Box>
+    </Container>
   )
 }
 

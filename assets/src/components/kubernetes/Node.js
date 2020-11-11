@@ -13,6 +13,7 @@ import { Readiness, ReadyIcon } from '../Application'
 import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
 import filesize from 'filesize'
 import { Events } from './Event'
+import { Container } from './utils'
 
 function NodeRowHeader() {
   return (
@@ -56,17 +57,14 @@ function NodeStatus({status: {capacity}, pods}) {
   const containers = pods.filter(({status: {phase}}) => phase !== 'Succeeded').map(({spec: {containers}}) => containers).flat()
   const {cpu, memory} = podResources(containers, 'requests')
   return (
-    <Box flex={false} pad='small' gap='xsmall'>
-      <Box>
-        <Text size='small'>Status</Text>
-      </Box>
+    <Container header='Status'>
       <MetadataRow name='cpu'>
         <Text size='small'>{cpuParser(capacity.cpu)} ({cpu} used)</Text>
       </MetadataRow>
-      <MetadataRow name='memory'>
+      <MetadataRow name='memory' final>
         <Text size='small'>{filesize(memoryParser(capacity.memory))} ({filesize(memory)} used)</Text>
       </MetadataRow>
-    </Box>
+    </Container>
   )
 }
 

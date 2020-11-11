@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Box, Text } from 'grommet'
 import { Loading, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
@@ -10,13 +10,12 @@ import { PodList } from './Pod'
 import { RawContent } from './Component'
 import { Events } from './Event'
 import { Metric } from './Metrics'
+import { Container } from './utils'
+import { DURATIONS, RangePicker } from '../Dashboard'
 
 function Status({status: {currentReplicas, updatedReplicas, readyReplicas, replicas}}) {
   return (
-    <Box flex={false} pad='small' gap='xsmall'>
-      <Box>
-        <Text size='small'>Status</Text>
-      </Box>
+    <Container header='Status'>
       <MetadataRow name='replicas'>
         <Text size='small'>{replicas}</Text>
       </MetadataRow>
@@ -29,24 +28,23 @@ function Status({status: {currentReplicas, updatedReplicas, readyReplicas, repli
       <MetadataRow name='ready replicas'>
         <Text size='small'>{readyReplicas}</Text>
       </MetadataRow>
-    </Box>
+    </Container>
   )
 }
 
 function Spec({spec: {serviceName}}) {
   return (
-    <Box flex={false} pad='small' gap='xsmall'>
-      <Box>
-        <Text size='small'>Spec</Text>
-      </Box>
+    <Container header='Spec'>
       <MetadataRow name='service'>
         <Text size='small'>{serviceName}</Text>
       </MetadataRow>
-    </Box>
+    </Container>
   )
 }
 
 export default function StatefulSet() {
+  const [tab, setTab] = useState('info')
+  const [duration, setDuration] = useState(DURATIONS[0])
   const {name, repo} = useParams()
   const {data, refetch} = useQuery(STATEFUL_SET_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
 
@@ -55,7 +53,8 @@ export default function StatefulSet() {
   const {statefulSet} = data
   return (
     <Box fill style={{overflow: 'auto'}}>
-      <Tabs defaultTab='info' border='dark-3'>
+      <Tabs defaultTab='info' border='dark-3' onTabChange={setTab}
+            headerEnd={tab === 'metrics' ? <RangePicker duration={duration} setDuration={setDuration} /> : null}>
         <TabHeader>
           <TabHeaderItem name='info'>
             <Text size='small' weight={500}>info</Text>
@@ -77,7 +76,7 @@ export default function StatefulSet() {
           <PodList pods={statefulSet.pods} refetch={refetch} namespace={repo} />
         </TabContent>
         <TabContent name='metrics'>
-          <Metric name={name} namespace={repo} regex='-[0-9]+' />
+          <Metric name={name} namespace={repo} regex='-[0-9]+' duration={duration} />
         </TabContent>
         <TabContent name='events'>
           <Events events={statefulSet.events} />

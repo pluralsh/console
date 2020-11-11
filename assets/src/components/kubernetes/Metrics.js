@@ -9,7 +9,7 @@ import { Box } from 'grommet'
 
 const convertVals = (values) => values.map(({timestamp, value}) => ({x: new Date(timestamp * 1000), y: parseFloat(value)}))
 
-function Graphs({data: {cpu: [cpu], mem: [mem]}}) {
+function Graphs({cpu: [cpu], mem: [mem], tick}) {
   const {cpuValues, memValues} = useMemo(() => {
     const cpuValues = convertVals(cpu.values)
     const memValues = convertVals(mem.values)
@@ -21,20 +21,20 @@ function Graphs({data: {cpu: [cpu], mem: [mem]}}) {
       <Box width='50%' height='300px' background='backgroundLight' round='xsmall' pad='small'>
         <GraphHeader text='Overall CPU Usage' />
         <Box fill>
-          <Graph data={[{id: 'cpu', data: cpuValues}]} />
+          <Graph data={[{id: 'cpu', data: cpuValues}]} tick={tick} />
         </Box>
       </Box>
       <Box width='50%' height='300px' background='backgroundLight' round='xsmall' pad='small'>
         <GraphHeader text='Overall Memory Usage' />
         <Box fill>
-          <Graph data={[{id: 'memory', data: memValues}]} yFormat={filesize} />
+          <Graph data={[{id: 'memory', data: memValues}]} yFormat={filesize} tick={tick} />
         </Box>
       </Box>
     </Box>
   )
 }
 
-function PodGraphs({data: {cpu, mem}}) {
+function PodGraphs({cpu, mem, tick}) {
   const {cpuGraph, memGraph} = useMemo(() => {
     const cpuGraph = cpu.map(({metric: {pod}, values}) => ({id: pod, data: convertVals(values)}))
     const memGraph = mem.map(({metric: {pod}, values}) => ({id: pod, data: convertVals(values)}))
@@ -46,40 +46,39 @@ function PodGraphs({data: {cpu, mem}}) {
       <Box width='50%' height='300px' background='backgroundLight' round='xsmall' pad='small'>
         <GraphHeader text='Pod CPU Usage' />
         <Box fill>
-          <Graph data={cpuGraph} />
+          <Graph data={cpuGraph} tick={tick} />
         </Box>
       </Box>
       <Box width='50%' height='300px' background='backgroundLight' round='xsmall' pad='small'>
         <Box fill>
           <GraphHeader text='Pod Memory Usage' />
-          <Graph data={memGraph} yFormat={filesize} />
+          <Graph data={memGraph} yFormat={filesize} tick={tick} />
         </Box>
       </Box>
     </Box>
   )
 }
 
-export function Metric({name, namespace, regex}) {
+export function Metric({name, namespace, regex, duration: {step, offset, tick}}) {
   const {data} = useQuery(USAGE_Q, {
     variables: {
-      cpuQuery: `sum(container_cpu_usage_seconds_total{namespace="${namespace}",pod=~"${name}${regex}"})`,
-      memQuery: `sum(container_memory_working_set_bytes{namespace="${namespace}",pod=~"${name}${regex}"})`,
-    },
-    pollInterval: POLL_INTERVAL
-  })
-  const {data: podData} = useQuery(USAGE_Q, {
-    variables: {
-      cpuQuery: `avg(container_cpu_usage_seconds_total{namespace="${namespace}",pod=~"${name}${regex}"}) by (pod)`,
-      memQuery: `avg(container_memory_working_set_bytes{namespace="${namespace}",pod=~"${name}${regex}"}) by (pod)`,
+      cpu: `sum(rate(container_cpu_usage_seconds_total{namespace="${namespace}",pod=~"${name}${regex}"}[5m]))`,
+      mem: `sum(container_memory_working_set_bytes{namespace="${namespace}",pod=~"${name}${regex}"})`,
+      podCpu: `sum(rate(container_cpu_usage_seconds_total{namespace="${namespace}",pod=~"${name}${regex}"}[5m])) by (pod)`,
+      podMem: `sum(container_memory_working_set_bytes{namespace="${namespace}",pod=~"${name}${regex}"}) by (pod)`,
+      step,
+      offset
     },
     pollInterval: POLL_INTERVAL
   })
 
-  if (!data || !podData) return <Loading />
+  if (!data) return <Loading />
+
+  const {cpu, mem, podCpu, podMem} = data
   return (
     <Box fill style={{overflow: 'auto'}} pad='medium' gap='small'>
-      <Graphs data={data} />
-      <PodGraphs data={podData} />
+      <Graphs cpu={cpu} mem={mem} tick={tick} />
+      <PodGraphs cpu={podCpu} mem={podMem} tick={tick} />
     </Box>
   )
 }
