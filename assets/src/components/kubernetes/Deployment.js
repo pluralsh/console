@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import { Box, Text } from 'grommet'
+import { Anchor, Box, Text } from 'grommet'
 import { Loading, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { DEPLOYMENT_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
-import { useParams } from 'react-router'
+import { useHistory, useParams } from 'react-router'
 import { POLL_INTERVAL } from './constants'
 import { PodList } from './Pod'
 import { RawContent } from './Component'
@@ -12,8 +12,10 @@ import { Events } from './Event'
 import { Metric } from './Metrics'
 import { Container } from './utils'
 import { DURATIONS, RangePicker } from '../Dashboard'
+import { asQuery } from '../utils/query'
 
-function Status({status: {availableReplicas, replicas, unavailableReplicas}}) {
+function Status({status: {availableReplicas, replicas, unavailableReplicas}, metadata: {name, namespace}}) {
+  let history = useHistory()
   return (
     <Container header='Status'>
       <MetadataRow name='replicas'>
@@ -22,8 +24,13 @@ function Status({status: {availableReplicas, replicas, unavailableReplicas}}) {
       <MetadataRow name='available'>
         <Text size='small'>{availableReplicas}</Text>
       </MetadataRow>
-      <MetadataRow name='unavailable' final>
+      <MetadataRow name='unavailable'>
         <Text size='small'>{unavailableReplicas}</Text>
+      </MetadataRow>
+      <MetadataRow name='logs' final>
+        <Anchor size='small' onClick={() => history.push(`/logs/${namespace}?${asQuery({job: `${namespace}/${name}`})}`)}>
+          view logs
+        </Anchor>
       </MetadataRow>
     </Container>
   )
@@ -68,7 +75,7 @@ export default function Deployment() {
         </TabHeader>
         <TabContent name='info'>
           <Metadata metadata={deployment.metadata} />
-          <Status status={deployment.status} />
+          <Status status={deployment.status} metadata={deployment.metadata} />
           <Spec spec={deployment.spec} />
           <PodList pods={deployment.pods} refetch={refetch} namespace={repo} />
         </TabContent>

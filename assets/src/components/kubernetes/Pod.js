@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
-import { Box, Layer, Text } from 'grommet'
+import { Anchor, Box, Layer, Text } from 'grommet'
 import { Loading, Tabs, TabHeader, TabHeaderItem, TabContent } from 'forge-core'
 import { Readiness, ReadyIcon } from '../Application'
 import { useMutation, useQuery } from 'react-apollo'
@@ -14,6 +14,7 @@ import { Metadata, MetadataRow } from './Metadata'
 import { RawContent } from './Component'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import { Container as Con } from './utils'
+import { asQuery } from '../utils/query'
 
 function phaseToReadiness(phase) {
   switch (phase) {
@@ -229,7 +230,9 @@ export function PodRow({pod: {metadata: {name, namespace}, status, spec}, refetc
   )
 }
 
-function Status({status}) {
+function Status({status, metadata: {namespace, name}}) {
+  let history = useHistory()
+  const query = asQuery({pod: namespace})
   return (
     <Con header='Status'>
       <Box flex={false} direction='row' gap='small'>
@@ -240,8 +243,11 @@ function Status({status}) {
           <MetadataRow name='phase'>
             <Text size='small'>{status.phase}</Text>
           </MetadataRow>
-          <MetadataRow name='readiness' final>
+          <MetadataRow name='readiness'>
             <PodReadiness status={status} />
+          </MetadataRow>
+          <MetadataRow name='logs'>
+            <Anchor size='small' onClick={() => history.push(`/logs/${name}?${query}`)}>view logs</Anchor>
           </MetadataRow>
         </Box>
         <Box width='60%'>
@@ -437,7 +443,7 @@ export function Pod() {
           </TabHeader>
           <TabContent name='info'>
             <Metadata metadata={pod.metadata} />
-            <Status status={pod.status} />
+            <Status status={pod.status} metadata={pod.metadata} />
             <Spec spec={pod.spec} />
           </TabContent>
           {containers.map((container) => (

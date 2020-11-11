@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import { Box, Text } from 'grommet'
+import { Anchor, Box, Text } from 'grommet'
 import { Loading, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { STATEFUL_SET_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
-import { useParams } from 'react-router'
+import { useHistory, useParams } from 'react-router'
 import { POLL_INTERVAL } from './constants'
 import { PodList } from './Pod'
 import { RawContent } from './Component'
@@ -12,8 +12,10 @@ import { Events } from './Event'
 import { Metric } from './Metrics'
 import { Container } from './utils'
 import { DURATIONS, RangePicker } from '../Dashboard'
+import { asQuery } from '../utils/query'
 
-function Status({status: {currentReplicas, updatedReplicas, readyReplicas, replicas}}) {
+function Status({status: {currentReplicas, updatedReplicas, readyReplicas, replicas}, metadata: {name, namespace}}) {
+  let history = useHistory()
   return (
     <Container header='Status'>
       <MetadataRow name='replicas'>
@@ -27,6 +29,11 @@ function Status({status: {currentReplicas, updatedReplicas, readyReplicas, repli
       </MetadataRow>
       <MetadataRow name='ready replicas'>
         <Text size='small'>{readyReplicas}</Text>
+      </MetadataRow>
+      <MetadataRow name='logs' final>
+        <Anchor size='small' onClick={() => history.push(`/logs/${namespace}?${asQuery({job: `${namespace}/${name}`})}`)}>
+          view logs
+        </Anchor>
       </MetadataRow>
     </Container>
   )
@@ -71,7 +78,7 @@ export default function StatefulSet() {
         </TabHeader>
         <TabContent name='info'>
           <Metadata metadata={statefulSet.metadata} />
-          <Status status={statefulSet.status} />
+          <Status status={statefulSet.status} metadata={statefulSet.metadata} />
           <Spec spec={statefulSet.spec} />
           <PodList pods={statefulSet.pods} refetch={refetch} namespace={repo} />
         </TabContent>

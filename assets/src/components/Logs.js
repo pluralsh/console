@@ -12,6 +12,7 @@ import { BUILD_PADDING } from './Builds'
 import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from './Installations'
 import SmoothScroller from './utils/SmoothScroller'
 import { last } from 'lodash'
+import { toMap, useQueryParams } from './utils/query'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -249,10 +250,11 @@ function LogLabels({labels}) {
 
 export function LogViewer() {
   const {repo} = useParams()
+  const query = useQueryParams()
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = useState(false)
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
-  const [labels, setLabels] = useState({})
+  const [labels, setLabels] = useState(toMap(query))
   const labelList = Object.entries(labels).map(([name, value]) => ({name, value}))
   const {setOnChange, currentApplication: app} = useContext(InstallationContext)
   let history = useHistory()
