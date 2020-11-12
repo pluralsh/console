@@ -7,7 +7,7 @@ defmodule Watchman.GraphQl.Kubernetes.Application do
     field :spec,   non_null(:application_spec)
     field :status, non_null(:application_status)
 
-    field :configuration, :string, resolve: &Forge.resolve_configuration/3
+    field :configuration, :configuration, resolve: &Forge.resolve_configuration/3
   end
 
   object :application_spec do

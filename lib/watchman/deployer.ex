@@ -37,15 +37,15 @@ defmodule Watchman.Deployer do
 
   def state(), do: GenServer.call(__MODULE__, :state)
 
-  def update(repo, content), do: GenServer.call(__MODULE__, {:update, repo, content})
+  def update(repo, content, tool), do: GenServer.call(__MODULE__, {:update, repo, content, tool})
 
   def handle_call(:poll, _, %State{} = state) do
     send self(), :poll
     {:reply, :ok, state}
   end
 
-  def handle_call({:update, repo, content}, _, %State{storage: storage} = state) do
-    {:reply, update(storage, repo, content), state}
+  def handle_call({:update, repo, content, tool}, _, %State{storage: storage} = state) do
+    {:reply, update(storage, repo, content, tool), state}
   end
 
   def handle_call(:cancel, _, %State{pid: nil} = state), do: {:reply, :ok, state}
@@ -118,11 +118,11 @@ defmodule Watchman.Deployer do
     ])
   end
 
-  defp update(storage, repo, content) do
+  defp update(storage, repo, content, tool) do
     Command.set_build(nil)
     with {:ok, _} <- storage.init(),
-         {:ok, res} <- Watchman.Services.Forge.update_configuration(repo, content),
-         {:ok, _} <- storage.revise("updated configuration for #{repo}"),
+         {:ok, res} <- Watchman.Services.Forge.update_configuration(repo, content, tool),
+         {:ok, _} <- storage.revise("updated configuration for #{tool} #{repo}"),
          {:ok, _} <- storage.push(),
          _ <- broadcast(),
       do: {:ok, res}

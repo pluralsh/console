@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { APPLICATION_Q, CONFIGURATIONS_Q, UPDATE_CONFIGURATION } from './graphql/forge'
@@ -11,26 +11,23 @@ import AceEditor from "react-ace"
 import "ace-builds/src-noconflict/mode-yaml"
 import "ace-builds/src-noconflict/theme-terminal"
 import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from './Installations'
+import { TabHeader } from './utils/TabSelector'
 
-export function EditConfiguration({application: {name, configuration, ...application}}) {
-  const [config, setConfig] = useState(configuration)
+const ConfigType = {
+  HELM: 'HELM',
+  TERRAFORM: 'TERRAFORM'
+}
+
+export function EditConfiguration({refetch, application: {name, configuration: {helm, terraform}, ...application}}) {
+  const [type, setType] = useState(ConfigType.HELM)
+  const [config, setConfig] = useState(helm)
   const [mutation, {loading}] = useMutation(UPDATE_CONFIGURATION, {
-    variables: {repository: name, content: config},
-    update: (cache, {data: {updateConfiguration: {configuration}}}) => {
-      const {installations, prev} = cache.readQuery({query: CONFIGURATIONS_Q})
-      const updateEdge = (edge) => ({
-        ...edge,
-        node: {...edge.node, repository: {...edge.node.repository, configuration}}
-      })
-      cache.writeQuery({
-        query: CONFIGURATIONS_Q,
-        data: {...prev, installations: {
-          ...installations, edges: installations.edges.map((edge) => (
-            edge.node.repository.name === name ? updateEdge(edge) : edge
-          ))
-        }}
-      })
-    }
+    variables: {repository: name, content: config, type},
+    onCompleted: refetch
+  })
+  const swap = useCallback((type) => {
+    setConfig(type === ConfigType.HELM ? helm : terraform)
+    setType(type)
   })
 
   return (
@@ -42,9 +39,15 @@ export function EditConfiguration({application: {name, configuration, ...applica
           align='center'
           background='backgroundColor'
           height='60px'>
-          <Box direction='row' fill='horizontal' gap='small' align='center'>
-            {hasIcon(application) && <ApplicationIcon application={application} />}
-            <Text weight='bold' size='small'>Edit {name}</Text>
+          <Box fill='horizontal'>
+            <Box direction='row' fill='horizontal' gap='small' align='center'>
+              {hasIcon(application) && <ApplicationIcon application={application} />}
+              <Text weight='bold' size='small'>Edit {name}</Text>
+            </Box>
+            <Box direction='row'>
+              <TabHeader selected={type === ConfigType.HELM} text='helm' onClick={() => swap(ConfigType.HELM)} />
+              <TabHeader selected={type === ConfigType.TERRAFORM} text='terraform' onClick={() => swap(ConfigType.TERRAFORM)} />
+            </Box>
           </Box>
           <Box flex={false}>
             <Button label='Commit' onClick={mutation} loading={loading} />
@@ -52,7 +55,7 @@ export function EditConfiguration({application: {name, configuration, ...applica
         </Box>
       </Box>
       <AceEditor
-        mode='yaml'
+        mode={type === ConfigType.HELM ? 'yaml' : 'terraform'}
         theme='terminal'
         height='calc(100vh - 105px)'
         width='100%'
@@ -100,7 +103,7 @@ export default function Configuration() {
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
   const {setOnChange} = useContext(InstallationContext)
   let history = useHistory()
-  const {data} = useQuery(APPLICATION_Q, {
+  const {data, refetch} = useQuery(APPLICATION_Q, {
     variables: {name: repo},
     fetchPolicy: 'cache-and-network'
   })
@@ -117,5 +120,5 @@ export default function Configuration() {
 
   if (!data) return <Loading />
 
-  return <EditConfiguration application={data.application} />
+  return <EditConfiguration application={data.application} refetch={refetch} />
 }

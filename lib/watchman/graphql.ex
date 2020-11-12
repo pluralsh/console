@@ -152,9 +152,9 @@ defmodule Watchman.GraphQl do
 
     field :update_configuration, :configuration do
       middleware Authenticated
-
       arg :repository, non_null(:string)
-      arg :content, non_null(:string)
+      arg :content,    non_null(:string)
+      arg :tool,       :tool
 
       resolve safe_resolver(&Forge.update_configuration/2)
     end

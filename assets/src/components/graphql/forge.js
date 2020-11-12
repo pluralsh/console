@@ -92,9 +92,10 @@ export const ApplicationFragment = gql`
 `
 
 export const UPDATE_CONFIGURATION = gql`
-  mutation UpdateConfiguration($repository: String!, $content: String!) {
-    updateConfiguration(repository: $repository, content: $content) {
-      configuration
+  mutation UpdateConfiguration($repository: String!, $content: String!, $type: Tool) {
+    updateConfiguration(repository: $repository, content: $content, tool: $type) {
+      helm
+      terraform
     }
   }
 `;
@@ -111,7 +112,7 @@ export const APPLICATIONS_Q = gql`
 export const APPLICATION_Q = gql`
   query App($name: String!) {
     application(name: $name) {
-      configuration
+      configuration { helm terraform }
       ...ApplicationFragment
     }
   }

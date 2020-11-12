@@ -18,6 +18,11 @@ defmodule Watchman.GraphQl.Schema do
     value :piazza
   end
 
+  enum :tool do
+    value :helm
+    value :terraform
+  end
+
   ## INPUTS
 
   input_object :build_attributes do
@@ -124,15 +129,15 @@ defmodule Watchman.GraphQl.Schema do
     field :name,          non_null(:string)
     field :description,   :string
     field :icon,          :string
-    field :configuration, :string, resolve: &Forge.resolve_configuration/3
+    field :configuration, :configuration, resolve: &Forge.resolve_configuration/3
     field :grafana_dns,   :string, resolve: fn _, _, _ ->
       {:ok, Watchman.conf(:grafana_dns)}
     end
   end
 
-
   object :configuration do
-    field :configuration, non_null(:string)
+    field :terraform, :string
+    field :helm,      :string
   end
 
   delta :build

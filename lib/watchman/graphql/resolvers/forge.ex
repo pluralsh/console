@@ -19,16 +19,19 @@ defmodule Watchman.GraphQl.Resolvers.Forge do
   def resolve_configuration(%{metadata: %{name: name}}, first, second),
     do: resolve_configuration(%{name: name}, first, second)
   def resolve_configuration(%{name: name}, _, _) do
-    Forge.values_file(name)
-    |> case do
-      {:ok, vals} -> {:ok, vals}
-      _ -> {:ok, nil}
-    end
+    {:ok, %{
+      helm: Forge.values_file(name) |> extract_content(),
+      terraform: Forge.terraform_file(name) |> extract_content()
+    }}
   end
 
-  def update_configuration(%{repository: repo, content: content}, _) do
-    with {:ok, conf} <- Watchman.Deployer.update(repo, content) do
-      {:ok, %{configuration: conf}}
+  defp extract_content({:ok, content}), do: content
+  defp extract_content(_), do: nil
+
+  def update_configuration(%{repository: repo, content: content} = args, _) do
+    tool = args[:tool] || :helm
+    with {:ok, conf} <- Watchman.Deployer.update(repo, content, tool) do
+      {:ok, %{configuration: %{tool => conf}}}
     end
   end
 
