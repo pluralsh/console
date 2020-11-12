@@ -28,20 +28,24 @@ export function EditConfiguration({refetch, application: {name, configuration: {
   const swap = useCallback((type) => {
     setConfig(type === ConfigType.HELM ? helm : terraform)
     setType(type)
-  })
+  }, [setConfig, setType])
+  useEffect(() => {
+    setType(ConfigType.HELM)
+    setConfig(helm)
+  }, [name])
 
   return (
     <Box height='calc(100vh - 45px)'>
       <Box gap='small'>
         <Box
-          pad={{vertical: 'small', ...BUILD_PADDING}}
+          pad={{...BUILD_PADDING}}
           direction='row'
           align='center'
           background='backgroundColor'
-          height='60px'>
+          height='80px'>
           <Box fill='horizontal'>
-            <Box direction='row' fill='horizontal' gap='small' align='center'>
-              {hasIcon(application) && <ApplicationIcon application={application} />}
+            <Box direction='row' fill='horizontal' gap='small' align='center' pad={{vertical: 'xsmall'}}>
+              {hasIcon(application) && <ApplicationIcon application={application} size='30px' />}
               <Text weight='bold' size='small'>Edit {name}</Text>
             </Box>
             <Box direction='row'>
@@ -57,7 +61,7 @@ export function EditConfiguration({refetch, application: {name, configuration: {
       <AceEditor
         mode={type === ConfigType.HELM ? 'yaml' : 'terraform'}
         theme='terminal'
-        height='calc(100vh - 105px)'
+        height='calc(100vh - 125px)'
         width='100%'
         name={name}
         value={config}
@@ -114,7 +118,7 @@ export default function Configuration() {
     ])
   }, [repo])
   useEffect(() => {
-    setOnChange({func: ({name}) => history.push(`/dashboards/${name}`)})
+    setOnChange({func: ({name}) => history.push(`/config/${name}`)})
   }, [])
   useEnsureCurrent(repo)
 
