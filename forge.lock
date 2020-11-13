@@ -2,7 +2,7 @@ artifact: {}
 terraform:
   terraform/gcp: h1:pv32ekD1iatEbmWzZd2r/tFFlaZL29WuW/+FGvrs2T0=
 helm:
-  charts/watchman: h1:XbKIAufVS7IMuvMKpUZBid8YRlLdlxPVE/9HkcCQ9pE=
+  charts/watchman: h1:8u96PI/QTl4QpDT+0TFqJsk+OOzQkZbAsQ0q4AO6E+c=
 recipe:
   forge/recipe/watchman-gcp.yaml: 9cd37df9dc8ff34c2456b631355f0c18a8ec9ee62b20804400a7e1b674000754
 integration: {}
