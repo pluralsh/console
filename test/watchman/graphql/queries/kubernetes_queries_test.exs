@@ -205,4 +205,27 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
       assert pod["spec"]["nodeName"]
     end
   end
+
+  describe "logfilters" do
+    test "it can query logfilters" do
+      expect(Kazan, :run, fn _ -> {:ok, %{items: [logfilter("name")]}} end)
+
+      {:ok, %{data: %{"logFilters" => [filter]}}} = run_query("""
+        query LogFilter($name: String!) {
+          logFilters(namespace: $name) {
+            metadata { name }
+            spec {
+              query
+              labels { name value }
+            }
+          }
+        }
+      """, %{"name" => "name"}, %{current_user: insert(:user)})
+
+      assert filter["metadata"]["name"] == "name"
+      assert filter["spec"]["query"]
+      assert hd(filter["spec"]["labels"])["name"]
+      assert hd(filter["spec"]["labels"])["value"]
+    end
+  end
 end

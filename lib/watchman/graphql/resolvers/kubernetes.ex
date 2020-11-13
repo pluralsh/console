@@ -11,6 +11,11 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
       do: {:ok, items}
   end
 
+  def list_log_filters(%{namespace: ns}, _) do
+    with {:ok, %{items: items}} <- Client.list_log_filters(ns),
+      do: {:ok, items}
+  end
+
   def resolve_application(%{name: name}, _), do: Client.get_application(name)
 
   def resolve_service(%{namespace: ns, name: name}, _) do

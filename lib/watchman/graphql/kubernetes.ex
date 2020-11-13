@@ -38,6 +38,7 @@ defmodule Watchman.GraphQl.Kubernetes do
   import_types Watchman.GraphQl.Kubernetes.Ingress
   import_types Watchman.GraphQl.Kubernetes.Node
   import_types Watchman.GraphQl.Kubernetes.CronJob
+  import_types Watchman.GraphQl.Kubernetes.LogFilter
 
   delta :application
 
@@ -101,6 +102,13 @@ defmodule Watchman.GraphQl.Kubernetes do
       arg :name, non_null(:string)
 
       resolve &Kubernetes.resolve_pod/2
+    end
+
+    field :log_filters, list_of(:log_filter) do
+      middleware Authenticated
+      arg :namespace, non_null(:string)
+
+      resolve &Kubernetes.list_log_filters/2
     end
   end
 

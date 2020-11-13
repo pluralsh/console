@@ -140,6 +140,11 @@ defmodule Watchman.GraphQl.Schema do
     field :helm,      :string
   end
 
+  object :log_label do
+    field :name,  :string
+    field :value, :string
+  end
+
   delta :build
   delta :command
 

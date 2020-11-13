@@ -11,6 +11,16 @@ defmodule Watchman.Kube.Client do
     |> Kazan.run()
   end
 
+  def list_log_filters(namespace) do
+    %Kazan.Request{
+      method: "get",
+      path: "/apis/forgelabs.sh/v1alpha1/namespaces/#{namespace}/logfilters",
+      query_params: %{},
+      response_model: Kube.LogFilterList
+    }
+    |> Kazan.run()
+  end
+
   def get_dashboard(namespace, name) do
     %Kazan.Request{
       method: "get",

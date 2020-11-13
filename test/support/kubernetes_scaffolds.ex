@@ -4,6 +4,7 @@ defmodule Watchman.KubernetesScaffolds do
   alias Kazan.Apis.Extensions.V1beta1, as: Extensions
   alias Kazan.Apis.Batch.V1beta1, as: Batch
   alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector}
+  alias Watchman.Kube
 
   def stateful_set(namespace, name) do
     %Apps.StatefulSet{
@@ -102,6 +103,16 @@ defmodule Watchman.KubernetesScaffolds do
         concurrency_policy: "Forbid",
         schedule: "* * * * *",
         suspend: false
+      }
+    }
+  end
+
+  def logfilter(name) do
+    %Kube.LogFilter{
+      metadata: %{name: name, namespace: name},
+      spec: %Kube.LogFilter.Spec{
+        query: "query",
+        labels: [%Kube.LogFilter.Label{name: "l", value: "v"}]
       }
     }
   end
