@@ -5,7 +5,7 @@ import TinyQueue from 'tinyqueue'
 import { DashboardHeader } from './Dashboards'
 import { LOGS_Q } from './graphql/dashboards'
 import moment from 'moment'
-import { Close, Search, Up } from 'grommet-icons'
+import { Checkmark, Close, Search, Up } from 'grommet-icons'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { useHistory, useParams } from 'react-router'
 import { BUILD_PADDING } from './Builds'
@@ -13,6 +13,7 @@ import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from 
 import SmoothScroller from './utils/SmoothScroller'
 import { last } from 'lodash'
 import { toMap, useQueryParams } from './utils/query'
+import { LOG_FILTER_Q } from './graphql/forge'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -248,6 +249,58 @@ function LogLabels({labels}) {
   )
 }
 
+function selectedFilter(labels, search, spec) {
+  if ((spec.query || '') !== search) return false
+
+  for (const {name, value} of spec.labels) {
+    if (labels[name] !== value) return false
+  }
+
+  return true
+}
+
+function LogFilters({namespace, labels, search, setSearch, setLabels}) {
+  const {data} = useQuery(LOG_FILTER_Q, {variables: {namespace}})
+  const select = useCallback(({query, labels}) => {
+    if (labels) {
+      const mapified = labels.reduce((acc, {name, value}) => ({...acc, [name]: value}), {})
+      console.log(mapified)
+      setLabels(mapified)
+    }
+    setSearch(query || '')
+  }, [setSearch, setLabels])
+  const clear = useCallback(() => {
+    setSearch('')
+    setLabels({})
+  }, [setSearch, setLabels])
+  if (!data || data.logFilters.length === 0) return null
+
+  const {logFilters} = data
+  console.log(logFilters)
+  return (
+    <Box width='250px' flex={false} gap='xsmall' height='100%' style={{overflow: 'auto'}}
+         border={{side: 'right', color: '#444'}} background='console'>
+      <Box pad={{horizontal: 'small', vertical: 'xsmall'}} margin={{bottom: 'xsmall'}} background='#444'>
+        <Text size='small' weight={500}>Log Filters</Text>
+      </Box>
+      {logFilters.map(({metadata: {name}, spec}) => {
+        const selected = selectedFilter(labels, search, spec)
+        return (
+          <Box key={name} pad={{vertical: 'xsmall', horizontal: 'small'}} background='sidebar' margin={{horizontal: 'small'}}
+            onClick={selected ? clear : () => select(spec)} focusIndicator={false} hoverIndicator='backgroundLight' round='xsmall'
+            direction='row' gap='xsmall' align='center'>
+            <Box>
+              <Text size='small' weight={500}>{spec.name}</Text>
+              <Text size='small'><i>{spec.description}</i></Text>
+            </Box>
+            {selected && <Checkmark size='15px' />}
+          </Box>
+        )
+      })}
+    </Box>
+  )
+}
+
 export function LogViewer() {
   const {repo} = useParams()
   const query = useQueryParams()
@@ -303,6 +356,7 @@ export function LogViewer() {
           </Box>
         </Box>
         <Box fill direction='row'>
+          <LogFilters namespace={repo} setSearch={setSearch} setLabels={setLabels} labels={labels} search={search} />
           <Logs application={app} search={search} />
         </Box>
       </Box>

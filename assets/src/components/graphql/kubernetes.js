@@ -192,6 +192,8 @@ export const LogFilterFragment = gql`
   fragment LogFilterFragment on LogFilter {
     metadata {  ...MetadataFragment }
     spec {
+      name
+      description
       query
       labels { name value }
     }
