@@ -1,4 +1,5 @@
 import { gql } from 'apollo-boost'
+import { LogFilterFragment } from './kubernetes';
 
 export const RepositoryFragment = gql`
   fragment RepositoryFragment on Repository {
@@ -129,4 +130,13 @@ export const APPLICATION_SUB = gql`
     }
   }
   ${ApplicationFragment}
+`;
+
+export const LOG_FILTER_Q = gql`
+  query LogFilters($namespace: String!) {
+    logFilters(namespace: $namespace) {
+      ...LogFilterFragment
+    }
+  }
+  ${LogFilterFragment}
 `;

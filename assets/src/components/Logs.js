@@ -302,7 +302,9 @@ export function LogViewer() {
             </Box>
           </Box>
         </Box>
-        <Logs application={app} search={search} />
+        <Box fill direction='row'>
+          <Logs application={app} search={search} />
+        </Box>
       </Box>
     </LabelContext.Provider>
   )

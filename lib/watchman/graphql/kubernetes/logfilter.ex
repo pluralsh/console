@@ -7,7 +7,9 @@ defmodule Watchman.GraphQl.Kubernetes.LogFilter do
   end
 
   object :log_filter_spec do
-    field :query, :string
-    field :labels, list_of(:log_label)
+    field :name,        :string
+    field :description, :string
+    field :query,       :string
+    field :labels,      list_of(:log_label)
   end
 end

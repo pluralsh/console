@@ -15,6 +15,8 @@ defmodule Watchman.Kube.LogFilter do
     alias Watchman.Kube.LogFilter
 
     defmodel "LogSpec", "forgelabs.sh", "v1alpha1" do
+      property :name, "name", :string
+      property :description, "description", :string
       property :query, "query", :string
       property :labels, "labels", {:array, LogFilter.Label}
     end

@@ -5,6 +5,8 @@ metadata:
   labels:
 {{ include "watchman.labels" . | indent 4 }}
 spec:
+  name: poller status
+  description: stream of polling events for the deployer
   query: Checking for pending builds
   labels:
   - name: job

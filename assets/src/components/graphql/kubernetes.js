@@ -187,3 +187,14 @@ export const CronJobFragment = gql`
   }
   ${MetadataFragment}
 `;
+
+export const LogFilterFragment = gql`
+  fragment LogFilterFragment on LogFilter {
+    metadata {  ...MetadataFragment }
+    spec {
+      query
+      labels { name value }
+    }
+  }
+  ${MetadataFragment}
+`;
