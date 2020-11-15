@@ -37,4 +37,44 @@ defmodule Watchman.GraphQl.UserQueriesTest do
       assert found["email"] == invite.email
     end
   end
+
+  describe "groups" do
+    test "it can list groups" do
+      groups = insert_list(3, :group)
+
+      {:ok, %{data: %{"groups" => found}}} = run_query("""
+        query {
+          groups(first: 5) {
+            edges {
+              node { id }
+            }
+          }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert from_connection(found)
+             |> ids_equal(groups)
+    end
+  end
+
+
+  describe "groupMembers" do
+    test "it can list groups" do
+      group = insert(:group)
+      members = insert_list(3, :group_member, group: group)
+
+      {:ok, %{data: %{"groupMembers" => found}}} = run_query("""
+        query Members($id: ID!) {
+          groupMembers(groupId: $id, first: 5) {
+            edges {
+              node { id }
+            }
+          }
+        }
+      """, %{"id" => group.id}, %{current_user: insert(:user)})
+
+      assert from_connection(found)
+             |> ids_equal(members)
+    end
+  end
 end

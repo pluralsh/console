@@ -78,4 +78,86 @@ defmodule Watchman.GraphQl.UserMutationsTest do
       assert user["email"] == invite.email
     end
   end
+
+  describe "createGroup" do
+    test "it can create a group" do
+      {:ok, %{data: %{"createGroup" => group}}} = run_query("""
+        mutation Create($attrs: GroupAttributes!) {
+          createGroup(attributes: $attrs) { id name }
+        }
+      """, %{"attrs" => %{"name" => "group"}}, %{current_user: insert(:user)})
+
+      assert group["id"]
+      assert group["name"] == "group"
+    end
+  end
+
+  describe "updateGroup" do
+    test "it can create a group" do
+      group = insert(:group)
+      {:ok, %{data: %{"updateGroup" => update}}} = run_query("""
+        mutation Update($id: ID!, $attrs: GroupAttributes!) {
+          updateGroup(groupId: $id, attributes: $attrs) { id name }
+        }
+      """, %{"id" => group.id, "attrs" => %{"name" => "update"}}, %{current_user: insert(:user)})
+
+      assert update["id"] == group.id
+      assert update["name"] == "update"
+    end
+  end
+
+  describe "deleteGroup" do
+    test "it can create a group" do
+      group = insert(:group)
+      {:ok, %{data: %{"deleteGroup" => delete}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteGroup(groupId: $id) { id name }
+        }
+      """, %{"id" => group.id}, %{current_user: insert(:user)})
+
+      assert delete["id"] == group.id
+      refute refetch(group)
+    end
+  end
+
+  describe "createGroupMember" do
+    test "it can create a group" do
+      group = insert(:group)
+      user  = insert(:user)
+      {:ok, %{data: %{"createGroupMember" => create}}} = run_query("""
+        mutation Create($userId: ID!, $groupId: ID!) {
+          createGroupMember(groupId: $groupId, userId: $userId) {
+            id
+            user { id }
+            group { id }
+          }
+        }
+      """, %{"groupId" => group.id, "userId" => user.id}, %{current_user: insert(:user)})
+
+      assert create["id"]
+      assert create["user"]["id"] == user.id
+      assert create["group"]["id"] == group.id
+    end
+  end
+
+  describe "deleteGroupMember" do
+    test "it can create a group" do
+      %{user: user, group: group} = group_member = insert(:group_member)
+      {:ok, %{data: %{"deleteGroupMember" => delete}}} = run_query("""
+        mutation Delete($userId: ID!, $groupId: ID!) {
+          deleteGroupMember(groupId: $groupId, userId: $userId) {
+            id
+            user { id }
+            group { id }
+          }
+        }
+      """, %{"groupId" => group.id, "userId" => user.id}, %{current_user: insert(:user)})
+
+      assert delete["id"]
+      assert delete["user"]["id"] == user.id
+      assert delete["group"]["id"] == group.id
+
+      refute refetch(group_member)
+    end
+  end
 end

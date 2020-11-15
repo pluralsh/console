@@ -33,6 +33,20 @@ defmodule Watchman.Factory do
     }
   end
 
+  def group_factory do
+    %Schema.Group{
+      name: sequence(:group, &"group-#{&1}"),
+      description: "description"
+    }
+  end
+
+  def group_member_factory do
+    %Schema.GroupMember{
+      user: build(:user),
+      group: build(:group)
+    }
+  end
+
   def invite_factory do
     %Schema.Invite{
       email: sequence(:invite, &"someone-#{&1}@example.com"),

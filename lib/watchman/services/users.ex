@@ -1,15 +1,29 @@
 defmodule Watchman.Services.Users do
   use Watchman.Services.Base
-  alias Watchman.Schema.{User, Invite}
+  alias Watchman.PubSub
+  alias Watchman.Schema.{User, Invite, Group, GroupMember}
   alias Watchman.Repo
 
   @type user_resp :: {:ok, User.t} | {:error, term}
+  @type group_resp :: {:ok, Group.t} | {:error, term}
+  @type group_member_resp :: {:ok, GroupMember.t} | {:error, term}
 
   @spec get_user(binary) :: User.t | nil
   def get_user(id), do: Repo.get(User, id)
 
   @spec get_user!(binary) :: User.t
   def get_user!(id), do: Repo.get!(User, id)
+
+  @spec get_group!(binary) :: Group.t
+  def get_group!(id), do: Repo.get!(Group, id)
+
+  @spec get_group_member!(binary, binary) :: GroupMember.t
+  def get_group_member!(group_id, user_id),
+    do: Repo.get_by!(GroupMember, user_id: user_id, group_id: group_id)
+
+  @spec get_group_member(binary, binary) :: GroupMember.t
+  def get_group_member(group_id, user_id),
+    do: Repo.get_by(GroupMember, user_id: user_id, group_id: group_id)
 
   @spec get_bot!(binary) :: User.t
   def get_bot!(name), do: Repo.get_by!(User, bot_name: name)
@@ -42,6 +56,40 @@ defmodule Watchman.Services.Users do
     %User{}
     |> User.changeset(attrs)
     |> Repo.insert()
+    |> notify(:create)
+  end
+
+  @spec create_group(map) :: group_resp
+  def create_group(attrs) do
+    %Group{}
+    |> Group.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @spec delete_group(binary) :: group_resp
+  def delete_group(group_id) do
+    get_group!(group_id)
+    |> Repo.delete()
+  end
+
+  @spec update_group(map, binary) :: group_resp
+  def update_group(attrs, group_id) do
+    get_group!(group_id)
+    |> Group.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @spec create_group_member(map, binary) :: group_member_resp
+  def create_group_member(attrs, group_id) do
+    %GroupMember{group_id: group_id}
+    |> GroupMember.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @spec delete_group_member(binary, binary) :: group_member_resp
+  def delete_group_member(group_id, user_id) do
+    get_group_member!(group_id, user_id)
+    |> Repo.delete()
   end
 
   @spec create_user(map, binary | Invite.t) :: user_resp
@@ -70,4 +118,8 @@ defmodule Watchman.Services.Users do
     end
   end
   defp validate_password(_, _), do: {:error, :disabled_user}
+
+  defp notify({:ok, %User{} = user}, :create),
+    do: handle_notify(PubSub.UserCreated, user)
+  defp notify(error, _), do: error
 end

@@ -1,5 +1,6 @@
 defmodule Watchman.GraphQl.Schema.Base do
   use Absinthe.Schema.Notation
+  import Watchman.GraphQl.Helpers
 
   enum :delta do
     value :create
@@ -49,6 +50,20 @@ defmodule Watchman.GraphQl.Schema.Base do
     quote do
       enum unquote(name) do
         unquote(values)
+      end
+    end
+  end
+
+  def safe_resolver(fun) do
+    fn args, ctx ->
+      try do
+        case fun.(args, ctx) do
+          {:ok, res} -> {:ok, res}
+          {:error, %Ecto.Changeset{} = cs} -> {:error, resolve_changeset(cs)}
+          error -> error
+        end
+      rescue
+        error -> {:error, Exception.message(error)}
       end
     end
   end

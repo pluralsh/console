@@ -31,12 +31,6 @@ defmodule Watchman.GraphQl.Schema do
     field :message,    :string
   end
 
-  input_object :user_attributes do
-    field :name,     :string
-    field :email,    :string
-    field :password, :string
-  end
-
   input_object :webhook_attributes do
     field :url, non_null(:string)
   end
@@ -44,32 +38,9 @@ defmodule Watchman.GraphQl.Schema do
   input_object :invite_attributes do
     field :email, :string
   end
+
+
   ## OBJECTS
-
-  object :user do
-    field :id, non_null(:id)
-    field :name, non_null(:string)
-    field :email, non_null(:string)
-    field :deleted_at, :datetime
-
-    field :jwt, :string, resolve: fn
-      %{id: id, jwt: jwt}, _, %{context: %{current_user: %{id: id}}} -> {:ok, jwt}
-      _, _, %{context: %{current_user: %{}}} -> {:error, "you can only query your own jwt"}
-      %{jwt: jwt}, _, _ -> {:ok, jwt}
-    end
-
-    field :background_color, :string, resolve: fn
-      user, _, _ -> User.background_color(user)
-    end
-
-    timestamps()
-  end
-
-  object :invite do
-    field :secure_id, non_null(:string)
-    field :email, :string
-  end
-
   object :build do
     field :id,           non_null(:id)
     field :repository,   non_null(:string)
@@ -152,5 +123,4 @@ defmodule Watchman.GraphQl.Schema do
   connection node_type: :command
   connection node_type: :installation
   connection node_type: :webhook
-  connection node_type: :user
 end

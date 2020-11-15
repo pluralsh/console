@@ -60,4 +60,10 @@ defmodule Watchman.Services.Base do
       _error -> {:error, :internal_error}
     end
   end
+
+  def timestamped(map) do
+    map
+    |> Map.put(:inserted_at, DateTime.utc_now())
+    |> Map.put(:updated_at, DateTime.utc_now())
+  end
 end

@@ -1,5 +1,6 @@
 defmodule Watchman.Services.UsersTest do
   use Watchman.DataCase, async: true
+  alias Watchman.PubSub
   alias Watchman.Services.{Users}
 
   describe "#login_user/2" do
@@ -67,6 +68,57 @@ defmodule Watchman.Services.UsersTest do
 
       assert user.name == "Some user"
       assert user.email == "user@example.com"
+
+      assert_receive {:event, %PubSub.UserCreated{item: ^user}}
+    end
+  end
+
+  describe "#create_group/2" do
+    test "it can create a new group" do
+      {:ok, group} = Users.create_group(%{name: "group", description: "description"})
+
+      assert group.name == "group"
+      assert group.description == "description"
+    end
+  end
+
+  describe "#delete_group/2" do
+    test "it can create a new group" do
+      group = insert(:group)
+      {:ok, del} = Users.delete_group(group.id)
+
+      assert del.id == group.id
+      refute refetch(del)
+    end
+  end
+
+  describe "#update_group/2" do
+    test "it can create a new group" do
+      group = insert(:group)
+      {:ok, del} = Users.update_group(%{name: "update"}, group.id)
+
+      assert del.name == "update"
+    end
+  end
+
+  describe "#create_group_member/2" do
+    test "it can create a group member" do
+      group = insert(:group)
+      user = insert(:user)
+      {:ok, member} = Users.create_group_member(%{user_id: user.id}, group.id)
+
+      assert member.user_id == user.id
+      assert member.group_id == group.id
+    end
+  end
+
+  describe "#delete_group_member/2" do
+    test "it can delete a group member" do
+      member = insert(:group_member)
+      {:ok, del} = Users.delete_group_member(member.group_id, member.user_id)
+
+      assert del.id == member.id
+      refute refetch(del)
     end
   end
 

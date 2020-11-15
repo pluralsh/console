@@ -1,9 +1,23 @@
 defmodule Watchman.GraphQl.Resolvers.User do
   use Watchman.GraphQl.Resolvers.Base, model: Watchman.Schema.User
+  alias Watchman.Schema.{Group, GroupMember}
   alias Watchman.Services.Users
+
+  def query(Group, _), do: Group
+  def query(_, _), do: User
 
   def list_users(args, _) do
     User.ordered()
+    |> paginate(args)
+  end
+
+  def list_groups(args, _) do
+    Group.ordered()
+    |> paginate(args)
+  end
+
+  def list_group_members(%{group_id: group_id} = args, _) do
+    GroupMember.for_group(group_id)
     |> paginate(args)
   end
 
@@ -27,6 +41,21 @@ defmodule Watchman.GraphQl.Resolvers.User do
 
   def create_invite(%{attributes: attrs}, _),
     do: Users.create_invite(attrs)
+
+  def create_group(%{attributes: attrs}, _),
+    do: Users.create_group(attrs)
+
+  def delete_group(%{group_id: group_id}, _),
+    do: Users.delete_group(group_id)
+
+  def update_group(%{attributes: attrs, group_id: group_id}, _),
+    do: Users.update_group(attrs, group_id)
+
+  def create_group_member(%{group_id: group_id, user_id: user_id}, _),
+    do: Users.create_group_member(%{user_id: user_id}, group_id)
+
+  def delete_group_member(%{group_id: group_id, user_id: user_id}, _),
+    do: Users.delete_group_member(group_id, user_id)
 
   @colors ~w(#6b5b95 #d64161 #ff7b25 #103A50 #CDCCC2 #FDC401 #8E5B3C #020001 #2F415B)
 
