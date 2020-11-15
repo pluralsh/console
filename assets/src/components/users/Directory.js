@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react'
-import { Box, Text, Layer, TextInput, CheckBox, ThemeContext } from 'grommet'
+import React, { useState, useContext, useEffect } from 'react'
+import { Box, Text, Layer, TextInput, CheckBox } from 'grommet'
 import { useQuery, useMutation } from 'react-apollo'
 import { ModalHeader, Loading, Scroller } from 'forge-core'
 import { USERS_Q, GROUPS_Q, EDIT_USER } from './queries'
@@ -9,6 +9,7 @@ import { InviteForm } from './CreateInvite'
 import { useParams, useHistory } from 'react-router-dom'
 import { User, Group, Add, Search } from 'grommet-icons'
 import GroupRow from './Group'
+import { BreadcrumbsContext } from '../Breadcrumbs'
 
 function UserRow({user, next}) {
   const admin = user.roles && user.roles.admin
@@ -140,15 +141,18 @@ function CreateModal({form, header, children}) {
 }
 
 export default function Directory() {
-  const {silo: {background}} = useContext(ThemeContext)
   let {section} = useParams()
+  section = section || 'users'
   let history = useHistory()
   const setSection = (section) => history.push(`/directory/${section}`)
-  section = section || 'users'
+  const {setBreadcrumbs} = useContext(BreadcrumbsContext)
+  useEffect(() => setBreadcrumbs([
+    {text: 'directory', url: '/directory'},
+    {text: section, url: `/directory/${section}`}
+  ]), [section])
 
   return (
     <Box
-      style={background}
       height='100vh'
       pad='medium'
       direction='row'

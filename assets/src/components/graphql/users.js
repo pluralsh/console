@@ -17,6 +17,7 @@ export const InviteFragment = gql`
 
 export const GroupFragment = gql`
   fragment GroupFragment on Group {
+    id
     name
     description
     insertedAt

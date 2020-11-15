@@ -1,19 +1,19 @@
 import React, { useContext, useState } from 'react'
-import { Box, Text, ThemeContext } from 'grommet'
+import { Box, Text } from 'grommet'
 import { Logout, StatusCritical, Checkmark, User, Lock } from 'grommet-icons'
 import { Button, InputCollection, ResponsiveInput } from 'forge-core'
 import { useMutation } from 'react-apollo'
 import { EDIT_USER } from './queries'
-import { LoginContext } from './EnsureLogin'
 import Avatar from './Avatar'
 import { wipeToken } from '../../helpers/auth'
+import { LoginContext } from '../Login'
 
 const EditContext = React.createContext({})
 
 function EditAvatar({me}) {
   return (
     <>
-      <Avatar user={me} size='80px' onClick={onClick} />
+      <Avatar user={me} size='80px' />
       {/* <HiddenFileInput accept='.jpg, .jpeg, .png' multiple={false} /> */}
     </>
   )
@@ -73,7 +73,6 @@ function passwordValid(password, confirm) {
 }
 
 export default function EditUser() {
-  const {silo: {background}} = useContext(ThemeContext)
   const {me} = useContext(LoginContext)
   const [attributes, setAttributes] = useState({name: me.name, email: me.email})
   const [password, setPassword] = useState('')
@@ -85,7 +84,7 @@ export default function EditUser() {
   const color = disabled ? 'status-error' : 'status-ok'
 
   return (
-    <Box style={background} pad='medium' background='backgroundColor' fill>
+    <Box pad='medium' background='backgroundColor' fill>
       <Box fill gap='small' border={{color: 'light-3'}} background='white' pad='medium'>
         <Box direction='row' align='center' gap='medium' pad='medium'>
           <EditAvatar me={me} />

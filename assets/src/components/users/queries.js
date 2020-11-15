@@ -20,8 +20,8 @@ export const USERS_Q = gql`
 `;
 
 export const GROUPS_Q = gql`
-  query Groups($cursor: String) {
-    groups(first: 20, after: $cursor) {
+  query Groups($q: String, $cursor: String) {
+    groups(q: $q, first: 20, after: $cursor) {
       pageInfo {
         ...PageInfo
       }
@@ -72,7 +72,7 @@ export const SEARCH_GROUPS = gql`
 
 export const GROUP_MEMBERS = gql`
   query GroupMembers($cursor: String, $id: ID!) {
-    members(groupId: $id, after: $cursor, first: 20) {
+    groupMembers(groupId: $id, after: $cursor, first: 20) {
       pageInfo {
         ...PageInfo
       }

@@ -11,7 +11,7 @@ import { addGroupMember, deleteGroup } from './utils'
 function GroupMembers({group}) {
   const {data, fetchMore} = useQuery(GROUP_MEMBERS, {variables: {id: group.id}})
   if (!data) return <Loading />
-  const {members: {pageInfo, edges}} = data
+  const {groupMembers: {pageInfo, edges}} = data
 
   return (
     <Scroller
@@ -153,7 +153,7 @@ export default function GroupRow({group}) {
               body: <MemberAdd group={group} setModal={setModal} />
             })} />
           <Icon icon={Group} tooltip='members' onClick={() => setOpen(!open)} />
-          <Icon icon={Trash} tooltip='delete' onClick={mutation} iconAttrs={{color: 'notif'}} />
+          <Icon icon={Trash} tooltip='delete' onClick={mutation} iconAttrs={{color: 'error'}} />
         </Box>
       </Box>
       <Collapsible open={open} direction='vertical'>

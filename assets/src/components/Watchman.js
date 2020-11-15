@@ -9,7 +9,6 @@ import Webhooks from './Webhooks'
 import Configuration from './Configuration'
 import Dashboards from './Dashboards'
 import { EnsureLogin } from './Login'
-import EditUser from './EditUser'
 import Users from './Users'
 import { Installations, InstallationsProvider } from './Installations'
 import { LogViewer } from './Logs'
@@ -18,6 +17,8 @@ import Application from './Application'
 import Component from './kubernetes/Component'
 import { Node, Nodes } from './kubernetes/Node'
 import { Pod } from './kubernetes/Pod'
+import Directory from './users/Directory'
+import EditUser from './users/EditUser'
 
 const SIDEBAR_WIDTH = '70px'
 
@@ -45,6 +46,8 @@ export default function Watchman() {
                   title='Configuration'
                   description='edit configuration for your installed repos' />
               )} />
+              <Route path='/directory/:section' component={Directory} />
+              <Route path='/directory' component={Directory} />
               <Route path='/logs/:repo' component={LogViewer} />
               <Route path='/logs' render={() => (
                 <RepositorySelector

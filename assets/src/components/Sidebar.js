@@ -65,7 +65,7 @@ const OPTIONS = [
   {text: 'Configuration', icon: <Configure size={ICON_HEIGHT} />, path: '/config/{repo}' },
   {text: 'Dashboards', icon: <BarChart size={ICON_HEIGHT} />, path: '/dashboards/{repo}'},
   {text: 'Logs', icon: <TextAlignFull size={ICON_HEIGHT} />, path: '/logs/{repo}'},
-  {text: "Users", icon: <Group size={ICON_HEIGHT} />, path: '/users'},
+  {text: "Users", icon: <Group size={ICON_HEIGHT} />, path: '/directory'},
   {text: 'Webhooks', icon: <Network size={ICON_HEIGHT} />, path: '/webhooks'},
 ]
 
