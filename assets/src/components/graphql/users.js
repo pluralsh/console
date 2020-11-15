@@ -9,6 +9,29 @@ export const UserFragment = gql`
   }
 `;
 
+export const InviteFragment = gql`
+  fragment InviteFragment on Invite {
+    secureId
+  }
+`
+
+export const GroupFragment = gql`
+  fragment GroupFragment on Group {
+    name
+    description
+    insertedAt
+  }
+`
+
+export const GroupMemberFragment = gql`
+  fragment GroupMemberFragment on GroupMember {
+    user { ...UserFragment }
+    group { ...GroupFragment }
+  }
+  ${GroupFragment}
+  ${UserFragment}
+`;
+
 export const ME_Q = gql`
   query {
     me {
@@ -57,9 +80,10 @@ export const USERS_Q = gql`
 export const INVITE_USER = gql`
   mutation InviteUser($email: String) {
     createInvite(attributes: {email: $email}) {
-      secureId
+      ...InviteFragment
     }
   }
+  ${InviteFragment}
 `;
 
 export const INVITE_Q = gql`

@@ -9,6 +9,10 @@ defmodule Watchman.Schema.Group do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, name) do
+    from(g in query, where: like(g.name, ^"#{name}%"))
+  end
+
   def global(query \\ __MODULE__) do
     from(g in query, where: g.global)
   end

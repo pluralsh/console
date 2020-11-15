@@ -15,6 +15,12 @@ defmodule Watchman.Schema.User do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, name) do
+    from(u in query,
+      where: like(u.name, ^"#{name}%") or like(u.email, ^"#{name}%")
+    )
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :email]) do
     from(u in query, order_by: ^order)
   end

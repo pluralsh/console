@@ -20,6 +20,26 @@ defmodule Watchman.GraphQl.UserQueriesTest do
       assert from_connection(found)
              |> ids_equal(users)
     end
+
+    test "it can search for users" do
+      user = insert(:user, name: "search")
+      insert_list(2, :user)
+
+      {:ok, %{data: %{"users" => found}}} = run_query("""
+        query Search($q: String) {
+          users(q: $q, first: 5) {
+            edges {
+              node {
+                id
+              }
+            }
+          }
+        }
+      """, %{"q" => "search"}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([user])
+    end
   end
 
   describe "invite" do
@@ -54,6 +74,26 @@ defmodule Watchman.GraphQl.UserQueriesTest do
 
       assert from_connection(found)
              |> ids_equal(groups)
+    end
+
+    test "it can search for groups" do
+      group = insert(:group, name: "search")
+      insert_list(2, :group)
+
+      {:ok, %{data: %{"groups" => found}}} = run_query("""
+        query Search($q: String) {
+          groups(q: $q, first: 5) {
+            edges {
+              node {
+                id
+              }
+            }
+          }
+        }
+      """, %{"q" => "search"}, %{current_user: insert(:user)})
+
+      assert from_connection(found)
+             |> ids_equal([group])
     end
   end
 

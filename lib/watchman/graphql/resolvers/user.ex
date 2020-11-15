@@ -8,13 +8,18 @@ defmodule Watchman.GraphQl.Resolvers.User do
 
   def list_users(args, _) do
     User.ordered()
+    |> maybe_search(User, args)
     |> paginate(args)
   end
 
   def list_groups(args, _) do
     Group.ordered()
+    |> maybe_search(Group, args)
     |> paginate(args)
   end
+
+  defp maybe_search(query, mod, %{q: search}) when is_binary(search), do: mod.search(query, search)
+  defp maybe_search(query, _, _), do: query
 
   def list_group_members(%{group_id: group_id} = args, _) do
     GroupMember.for_group(group_id)

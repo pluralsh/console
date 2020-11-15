@@ -59,6 +59,7 @@ defmodule Watchman.GraphQl.Users do
   object :user_queries do
     connection field :users, node_type: :user do
       middleware Authenticated
+      arg :q, :string
 
       resolve &User.list_users/2
     end
@@ -77,6 +78,7 @@ defmodule Watchman.GraphQl.Users do
 
     connection field :groups, node_type: :group  do
       middleware Authenticated
+      arg :q, :string
 
       resolve &User.list_groups/2
     end
