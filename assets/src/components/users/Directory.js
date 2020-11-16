@@ -13,7 +13,6 @@ import { BreadcrumbsContext } from '../Breadcrumbs'
 
 function UserRow({user, next}) {
   const admin = user.roles && user.roles.admin
-  const writer = user.roles && user.roles.writer
   const [mutation] = useMutation(EDIT_USER, {variables: {id: user.id}})
 
   return (
@@ -30,11 +29,6 @@ function UserRow({user, next}) {
             checked={!!admin}
             label='admin'
             onChange={({target: {checked}}) => mutation({variables: {attributes: {roles: {admin: !!checked}}}})} />
-          <CheckBox
-            toggle
-            checked={!!writer}
-            label='writer'
-            onChange={({target: {checked}}) => mutation({variables: {attributes: {roles: {writer: !!checked}}}})} />
         </Box>
       </Box>
     </Box>

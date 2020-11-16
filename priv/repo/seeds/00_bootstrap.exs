@@ -8,6 +8,6 @@ seed do
     name: get_env("ADMIN_NAME"),
     email: get_env("ADMIN_EMAIL"),
   }
-  |> Schema.User.changeset(%{password: get_env("ADMIN_PASSWORD")})
+  |> Schema.User.changeset(%{password: get_env("ADMIN_PASSWORD"), roles: %{admin: true}})
   |> Repo.insert!()
 end
