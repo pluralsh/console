@@ -40,9 +40,10 @@ defmodule Watchman.GraphQl.Resolvers.User do
     |> with_jwt()
   end
 
-  def update_user(%{attributes: attrs}, %{context: %{current_user: user}}) do
-    Users.update_user(attrs, user)
-  end
+  def update_user(%{id: id, attributes: attrs}, %{context: %{current_user: user}})
+    when is_binary(id), do: Users.update_user(attrs, id, user)
+  def update_user(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Users.update_user(attrs, user)
 
   def create_invite(%{attributes: attrs}, _),
     do: Users.create_invite(attrs)

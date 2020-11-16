@@ -56,6 +56,22 @@ defmodule Watchman.Services.UsersTest do
 
       assert updated.password_hash
     end
+
+    test "admins can update other users" do
+      admin = insert(:user, roles: %{admin: true})
+      user  = insert(:user)
+
+      {:ok, updated} = Users.update_user(%{roles: %{admin: true}}, user.id, admin)
+
+      assert updated.id == user.id
+    end
+
+    test "nonadmins cannot update other users" do
+      actor = insert(:user)
+      user  = insert(:user)
+
+      {:error, :forbidden} = Users.update_user(%{roles: %{admin: true}}, user.id, actor)
+    end
   end
 
   describe "create_user/2" do

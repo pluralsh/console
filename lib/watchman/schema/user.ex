@@ -12,6 +12,10 @@ defmodule Watchman.Schema.User do
     field :jwt,           :string, virtual: true
     field :deleted_at,    :utc_datetime_usec
 
+    embeds_one :roles,  Roles, on_replace: :update do
+      field :admin, :boolean, default: false
+    end
+
     timestamps()
   end
 
@@ -30,6 +34,7 @@ defmodule Watchman.Schema.User do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_embed(:roles, with: &role_changeset/2)
     |> unique_constraint(:email)
     |> unique_constraint(:bot_name)
     |> validate_length(:password, min: 10)
@@ -37,6 +42,11 @@ defmodule Watchman.Schema.User do
     |> validate_format(:email, @email_re)
     |> validate_required([:email, :name])
     |> hash_password()
+  end
+
+  def role_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:admin])
   end
 
   defp hash_password(%Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset) do

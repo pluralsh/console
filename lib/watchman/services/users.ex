@@ -51,6 +51,10 @@ defmodule Watchman.Services.Users do
     |> Repo.update()
   end
 
+  def update_user(attrs, user_id, %User{roles: %User.Roles{admin: true}}),
+    do: update_user(attrs, get_user!(user_id))
+  def update_user(_, _, _), do: {:error, :forbidden}
+
   @spec create_user(map) :: user_resp
   def create_user(attrs) do
     %User{}

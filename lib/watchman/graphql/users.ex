@@ -7,6 +7,11 @@ defmodule Watchman.GraphQl.Users do
     field :name,     :string
     field :email,    :string
     field :password, :string
+    field :roles,    :user_role_attributes
+  end
+
+  input_object :user_role_attributes do
+    field :admin, :boolean
   end
 
   input_object :group_attributes do
@@ -15,10 +20,11 @@ defmodule Watchman.GraphQl.Users do
   end
 
   object :user do
-    field :id, non_null(:id)
-    field :name, non_null(:string)
-    field :email, non_null(:string)
+    field :id,         non_null(:id)
+    field :name,       non_null(:string)
+    field :email,      non_null(:string)
     field :deleted_at, :datetime
+    field :roles,      :user_roles
 
     field :jwt, :string, resolve: fn
       %{id: id, jwt: jwt}, _, %{context: %{current_user: %{id: id}}} -> {:ok, jwt}
@@ -31,6 +37,10 @@ defmodule Watchman.GraphQl.Users do
     end
 
     timestamps()
+  end
+
+  object :user_roles do
+    field :admin, :boolean
   end
 
   object :invite do
@@ -113,6 +123,7 @@ defmodule Watchman.GraphQl.Users do
     end
 
     field :update_user, :user do
+      arg :id, :id
       arg :attributes, non_null(:user_attributes)
 
       resolve safe_resolver(&User.update_user/2)
