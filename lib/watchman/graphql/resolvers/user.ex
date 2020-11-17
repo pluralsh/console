@@ -1,9 +1,11 @@
 defmodule Watchman.GraphQl.Resolvers.User do
   use Watchman.GraphQl.Resolvers.Base, model: Watchman.Schema.User
-  alias Watchman.Schema.{Group, GroupMember}
+  alias Watchman.Schema.{Group, GroupMember, Role, RoleBinding}
   alias Watchman.Services.Users
 
   def query(Group, _), do: Group
+  def query(Role, _), do: Role
+  def query(RoleBinding, _), do: RoleBinding
   def query(_, _), do: User
 
   def list_users(args, _) do
@@ -18,6 +20,11 @@ defmodule Watchman.GraphQl.Resolvers.User do
     |> paginate(args)
   end
 
+  def list_roles(args, _) do
+    Role.ordered()
+    |> paginate(args)
+  end
+
   defp maybe_search(query, mod, %{q: search}) when is_binary(search), do: mod.search(query, search)
   defp maybe_search(query, _, _), do: query
 
@@ -25,6 +32,8 @@ defmodule Watchman.GraphQl.Resolvers.User do
     GroupMember.for_group(group_id)
     |> paginate(args)
   end
+
+  def resolve_role(%{id: role_id}), do: {:ok, Users.get_role!(role_id)}
 
   def resolve_invite(%{id: secure_id}, _) do
     {:ok, Users.get_invite(secure_id)}
@@ -62,6 +71,25 @@ defmodule Watchman.GraphQl.Resolvers.User do
 
   def delete_group_member(%{group_id: group_id, user_id: user_id}, _),
     do: Users.delete_group_member(group_id, user_id)
+
+  def create_role(%{attributes: attrs}, _) do
+    with_permissions(attrs)
+    |> Users.create_role()
+  end
+
+  def update_role(%{attributes: attrs, id: id}, _) do
+    with_permissions(attrs)
+    |> Users.update_role(id)
+  end
+
+  def delete_role(%{id: id}, _), do: Users.delete_role(id)
+
+  defp with_permissions(%{permissions: perms} = attrs) when is_list(perms) do
+    perm_set = MapSet.new(perms)
+    permissions = Role.permissions() |> Enum.map(& {&1, MapSet.member?(perm_set, &1)}) |> Enum.into(%{})
+    Map.put(attrs, :permissions, permissions)
+  end
+  defp with_permissions(attrs), do: attrs
 
   @colors ~w(#6b5b95 #d64161 #ff7b25 #103A50 #CDCCC2 #FDC401 #8E5B3C #020001 #2F415B)
 

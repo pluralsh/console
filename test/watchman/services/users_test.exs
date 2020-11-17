@@ -164,4 +164,52 @@ defmodule Watchman.Services.UsersTest do
       refute enabled.deleted_at
     end
   end
+
+  describe "#create_role/1" do
+    test "it can create a role" do
+      group = insert(:group)
+      user = insert(:user)
+
+      {:ok, role} = Users.create_role(%{
+        name: "role",
+        repositories: ["*"],
+        permissions: %{read: true},
+        role_bindings: [%{user_id: user.id}, %{group_id: group.id}]
+      })
+
+      assert role.name == "role"
+      assert role.repositories == ["*"]
+
+      [first, second] = role.role_bindings
+      assert first.user_id == user.id
+      assert second.group_id == group.id
+    end
+  end
+
+  describe "#update_role/2" do
+    test "It can update a role" do
+      user  = insert(:user)
+      group = insert(:group)
+      role  = insert(:role)
+      insert(:role_binding, role: role, user: user)
+
+      {:ok, %{role_bindings: [binding]} = updated} = Users.update_role(%{
+        role_bindings: [%{group_id: group.id}]
+      }, role.id)
+
+      assert updated.id == role.id
+      assert binding.group_id == group.id
+    end
+  end
+
+  describe "#delete_role/1" do
+    test "deletes a role" do
+      role = insert(:role)
+
+      {:ok, deleted} = Users.delete_role(role.id)
+
+      assert deleted.id == role.id
+      refute refetch(deleted)
+    end
+  end
 end

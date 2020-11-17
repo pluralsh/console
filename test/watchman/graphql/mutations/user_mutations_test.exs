@@ -160,4 +160,68 @@ defmodule Watchman.GraphQl.UserMutationsTest do
       refute refetch(group_member)
     end
   end
+
+  describe "createRole" do
+    test "it can create a role" do
+      user = insert(:user)
+
+      {:ok, %{data: %{"createRole" => role}}} = run_query("""
+        mutation Create($attrs: RoleAttributes!) {
+          createRole(attributes: $attrs) {
+            name
+            permissions
+            repositories
+            roleBindings { user { id } }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => "role",
+          "permissions" => ["READ"],
+          "repositories" => ["*"],
+          "roleBindings" => [%{"userId" => user.id}]
+        }
+      }, %{current_user: user})
+
+      assert role["name"] == "role"
+      assert role["permissions"] == ["READ"]
+      assert role["repositories"] == ["*"]
+      assert hd(role["roleBindings"])["user"]["id"] == user.id
+    end
+  end
+
+  describe "updateRole" do
+    test "it can update a role" do
+      user = insert(:user)
+      role = insert(:role)
+
+      {:ok, %{data: %{"updateRole" => role}}} = run_query("""
+        mutation Update($id: ID!, $attrs: RoleAttributes!) {
+          updateRole(id: $id, attributes: $attrs) {
+            roleBindings { user { id } }
+          }
+        }
+      """, %{"id" => role.id, "attrs" => %{"roleBindings" => [%{"userId" => user.id}]}}, %{current_user: user})
+
+      assert hd(role["roleBindings"])["user"]["id"] == user.id
+    end
+  end
+
+  describe "deleteRole" do
+    test "deletes a role" do
+      user = insert(:user)
+      role = insert(:role)
+
+      {:ok, %{data: %{"deleteRole" => deleted}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteRole(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => role.id}, %{current_user: user})
+
+      assert deleted["id"] == role.id
+      refute refetch(role)
+    end
+  end
 end

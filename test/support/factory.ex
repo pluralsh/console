@@ -47,6 +47,20 @@ defmodule Watchman.Factory do
     }
   end
 
+  def role_factory do
+    %Schema.Role{
+      name: sequence(:role, &"role-#{&1}"),
+      repositories: ["*"],
+      permissions: %{read: true}
+    }
+  end
+
+  def role_binding_factory do
+    %Schema.RoleBinding{
+      role: build(:role)
+    }
+  end
+
   def invite_factory do
     %Schema.Invite{
       email: sequence(:invite, &"someone-#{&1}@example.com"),

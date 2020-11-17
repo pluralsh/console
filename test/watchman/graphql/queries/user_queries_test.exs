@@ -117,4 +117,23 @@ defmodule Watchman.GraphQl.UserQueriesTest do
              |> ids_equal(members)
     end
   end
+
+  describe "roles" do
+    test "it can list roles" do
+      roles = insert_list(3, :role)
+
+      {:ok, %{data: %{"roles" => found}}} = run_query("""
+        query {
+          roles(first: 5) {
+            edges {
+              node { id }
+            }
+          }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert from_connection(found)
+             |> ids_equal(roles)
+    end
+  end
 end

@@ -3,6 +3,8 @@ defmodule Watchman.GraphQl.Users do
   alias Watchman.GraphQl.Resolvers.User
   alias Watchman.Middleware.Authenticated
 
+  enum_from_list :permission, Watchman.Schema.Role, :permissions, []
+
   input_object :user_attributes do
     field :name,     :string
     field :email,    :string
@@ -17,6 +19,20 @@ defmodule Watchman.GraphQl.Users do
   input_object :group_attributes do
     field :name,  non_null(:string)
     field :description, :string
+  end
+
+  input_object :role_attributes do
+    field :name,  :string
+    field :description, :string
+    field :repositories, list_of(:string)
+    field :role_bindings, list_of(:binding_attributes)
+    field :permissions, list_of(:permission)
+  end
+
+  input_object :binding_attributes do
+    field :id,       :id
+    field :user_id,  :id
+    field :group_id, :id
   end
 
   object :user do
@@ -60,11 +76,33 @@ defmodule Watchman.GraphQl.Users do
     field :id, non_null(:id)
     field :user, :user, resolve: dataloader(User)
     field :group, :group, resolve: dataloader(User)
+
+    timestamps()
+  end
+
+  object :role do
+    field :id,           non_null(:id)
+    field :name,         non_null(:string)
+    field :description,  :string
+    field :repositories, list_of(:string)
+    field :permissions,  list_of(:permission), resolve: fn role, _, _ -> {:ok, Watchman.Schema.Role.permissions(role)} end
+    field :role_bindings, list_of(:role_binding), resolve: dataloader(User)
+
+    timestamps()
+  end
+
+  object :role_binding do
+    field :id,    non_null(:id)
+    field :user,  :user, resolve: dataloader(User)
+    field :group, :group, resolve: dataloader(Group)
+
+    timestamps()
   end
 
   connection node_type: :user
   connection node_type: :group
   connection node_type: :group_member
+  connection node_type: :role
 
   object :user_queries do
     connection field :users, node_type: :user do
@@ -99,6 +137,18 @@ defmodule Watchman.GraphQl.Users do
 
       resolve &User.list_group_members/2
     end
+
+    field :role, :role do
+      middleware Authenticated
+
+      resolve safe_resolver(&User.resolve_role/2)
+    end
+
+    connection field :roles, node_type: :role do
+      middleware Authenticated
+
+      resolve &User.list_roles/2
+    end
   end
 
   object :user_mutations do
@@ -123,6 +173,7 @@ defmodule Watchman.GraphQl.Users do
     end
 
     field :update_user, :user do
+      middleware Authenticated
       arg :id, :id
       arg :attributes, non_null(:user_attributes)
 
@@ -130,18 +181,21 @@ defmodule Watchman.GraphQl.Users do
     end
 
     field :create_group, :group do
+      middleware Authenticated
       arg :attributes, non_null(:group_attributes)
 
       resolve safe_resolver(&User.create_group/2)
     end
 
     field :delete_group, :group do
+      middleware Authenticated
       arg :group_id, non_null(:id)
 
       resolve safe_resolver(&User.delete_group/2)
     end
 
     field :update_group, :group do
+      middleware Authenticated
       arg :group_id, non_null(:id)
       arg :attributes, non_null(:group_attributes)
 
@@ -149,6 +203,7 @@ defmodule Watchman.GraphQl.Users do
     end
 
     field :create_group_member, :group_member do
+      middleware Authenticated
       arg :group_id, non_null(:id)
       arg :user_id, non_null(:id)
 
@@ -156,10 +211,33 @@ defmodule Watchman.GraphQl.Users do
     end
 
     field :delete_group_member, :group_member do
+      middleware Authenticated
       arg :group_id, non_null(:id)
       arg :user_id, non_null(:id)
 
       resolve safe_resolver(&User.delete_group_member/2)
+    end
+
+    field :create_role, :role do
+      middleware Authenticated
+      arg :attributes, non_null(:role_attributes)
+
+      resolve safe_resolver(&User.create_role/2)
+    end
+
+    field :update_role, :role do
+      middleware Authenticated
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:role_attributes)
+
+      resolve safe_resolver(&User.update_role/2)
+    end
+
+    field :delete_role, :role do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve safe_resolver(&User.delete_role/2)
     end
   end
 end

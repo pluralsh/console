@@ -1,11 +1,12 @@
 defmodule Watchman.Services.Users do
   use Watchman.Services.Base
   alias Watchman.PubSub
-  alias Watchman.Schema.{User, Invite, Group, GroupMember}
+  alias Watchman.Schema.{User, Invite, Group, GroupMember, Role}
   alias Watchman.Repo
 
   @type user_resp :: {:ok, User.t} | {:error, term}
   @type group_resp :: {:ok, Group.t} | {:error, term}
+  @type role_resp :: {:ok, Role.t} | {:error, term}
   @type group_member_resp :: {:ok, GroupMember.t} | {:error, term}
 
   @spec get_user(binary) :: User.t | nil
@@ -16,6 +17,9 @@ defmodule Watchman.Services.Users do
 
   @spec get_group!(binary) :: Group.t
   def get_group!(id), do: Repo.get!(Group, id)
+
+  @spec get_role!(binary) :: Role.t
+  def get_role!(id), do: Repo.get!(Role, id)
 
   @spec get_group_member!(binary, binary) :: GroupMember.t
   def get_group_member!(group_id, user_id),
@@ -61,6 +65,27 @@ defmodule Watchman.Services.Users do
     |> User.changeset(attrs)
     |> Repo.insert()
     |> notify(:create)
+  end
+
+  @spec create_role(map) :: role_resp
+  def create_role(attrs) do
+    %Role{}
+    |> Role.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @spec update_role(map, binary) :: role_resp
+  def update_role(attrs, id) do
+    get_role!(id)
+    |> Repo.preload([:role_bindings])
+    |> Role.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @spec delete_role(binary) :: role_resp
+  def delete_role(id) do
+    get_role!(id)
+    |> Repo.delete()
   end
 
   @spec create_group(map) :: group_resp
