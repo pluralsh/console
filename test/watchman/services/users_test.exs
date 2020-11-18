@@ -190,14 +190,16 @@ defmodule Watchman.Services.UsersTest do
     test "It can update a role" do
       user  = insert(:user)
       group = insert(:group)
-      role  = insert(:role)
+      role  = insert(:role, permissions: %{read: true})
       insert(:role_binding, role: role, user: user)
 
       {:ok, %{role_bindings: [binding]} = updated} = Users.update_role(%{
+        permissions: %{operate: true},
         role_bindings: [%{group_id: group.id}]
       }, role.id)
 
       assert updated.id == role.id
+      assert updated.permissions.operate
       assert binding.group_id == group.id
     end
   end

@@ -37,3 +37,14 @@ export function deleteRole(cache, role) {
     }
   })
 }
+
+export function addRole(cache, role) {
+  const {roles, ...data} = cache.readQuery({query: ROLES_Q})
+  cache.writeQuery({
+    query: ROLES_Q,
+    data: {
+      ...data,
+      roles: {...roles, edges: [{__typename: 'RoleEdge', node: role}, ...roles.edges]}
+    }
+  })
+}

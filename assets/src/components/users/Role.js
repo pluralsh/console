@@ -3,8 +3,8 @@ import { Box, CheckBox, Layer, Text } from 'grommet'
 import { ModalHeader, InputCollection, ResponsiveInput, Button, TagInput } from 'forge-core'
 import { Edit, Trash } from 'grommet-icons'
 import { Icon } from './Group'
-import { DELETE_ROLE, UPDATE_ROLE } from './queries'
-import { deleteRole } from './utils'
+import { CREATE_ROLE, DELETE_ROLE, UPDATE_ROLE } from './queries'
+import { addRole, deleteRole } from './utils'
 import { useApolloClient, useMutation } from 'react-apollo'
 import { PermissionTypes } from './types'
 import { fetchGroups, fetchUsers } from './Typeaheads'
@@ -30,7 +30,7 @@ function PermissionToggle({permission, description, attributes, setAttributes}) 
 
   return (
     <Box direction='row' gap='small' align='center'>
-      <Box fill='horizontal'>
+      <Box fill='horizontal' direction='row' gap='xsmall'>
         <Text size='small' weight={500}>{permission.toLowerCase()}</Text>
         <Text size='small'><i>{description}</i></Text>
       </Box>
@@ -49,7 +49,9 @@ function BindingInput({label, placeholder, fetcher, bindings, remove, add}) {
   const [suggestions, setSuggestions] = useState([])
   return (
     <Box direction='row' align='center' gap='small'>
-      <Text size='small' weight={500}>{label}</Text>
+      <Box flex={false} width='100px'>
+        <Text size='small' weight={500}>{label}</Text>
+      </Box>
       <TagInput
         placeholder={placeholder}
         round='xsmall'
@@ -65,7 +67,7 @@ function BindingInput({label, placeholder, fetcher, bindings, remove, add}) {
 function RoleForm({attributes, setAttributes, roleBindings, setRoleBindings}) {
   const [repositories, setRepositories] = useState(attributes.repositories.join(', '))
   return (
-    <Box pad='small'>
+    <Box pad='small' gap='small'>
       <InputCollection>
         <ResponsiveInput
           label='name'
@@ -86,17 +88,7 @@ function RoleForm({attributes, setAttributes, roleBindings, setRoleBindings}) {
             setAttributes({...attributes, repositories: value.split(',')})
           }} />
       </InputCollection>
-      <Box pad='small'>
-        {Object.entries(PermissionTypes).map(([perm, description]) => (
-          <PermissionToggle
-            key={perm}
-            permission={perm}
-            description={description}
-            attributes={attributes}
-            setAttributes={setAttributes} />
-        ))}
-      </Box>
-      <Box pad='small' gap='xsmall'>
+      <Box pad='small' gap='xsmall' border='horizontal'>
         <BindingInput
           label='user bindings'
           placeholder='search for users to add'
@@ -112,13 +104,24 @@ function RoleForm({attributes, setAttributes, roleBindings, setRoleBindings}) {
           add={(group) => setRoleBindings([...roleBindings, {group}])}
           remove={(name) => setRoleBindings(roleBindings.filter(({group}) => !group || group.name !== name))} />
       </Box>
+      <Box pad='small' round='xsmall' background='light-1' gap='xsmall'>
+        <Text size='small'>Permissions</Text>
+        {Object.entries(PermissionTypes).map(([perm, description]) => (
+          <PermissionToggle
+            key={perm}
+            permission={perm}
+            description={description}
+            attributes={attributes}
+            setAttributes={setAttributes} />
+        ))}
+      </Box>
     </Box>
   )
 }
 
 const sanitize = ({id, user, group}) => ({id, userId: user && user.id, groupId: group && group.id})
 
-function EditRole({role}) {
+function EditRole({role, setOpen}) {
   const [attributes, setAttributes] = useState({
     name: role.name,
     description: role.description,
@@ -126,8 +129,9 @@ function EditRole({role}) {
     permissions: role.permissions
   })
   const [roleBindings, setRoleBindings] = useState(role.roleBindings)
-  const [mutation, {loading}] = useState(UPDATE_ROLE, {
-    variables: {id: role.id, attributes: {...attributes, roleBindings: roleBindings.map(sanitize)}}
+  const [mutation, {loading}] = useMutation(UPDATE_ROLE, {
+    variables: {id: role.id, attributes: {...attributes, roleBindings: roleBindings.map(sanitize)}},
+    onCompleted: () => setOpen(null)
   })
 
   return (
@@ -139,6 +143,28 @@ function EditRole({role}) {
         setRoleBindings={setRoleBindings} />
       <Box direction='row' fill='horizontal' justify='end'>
         <Button label='Update' loading={loading} onClick={mutation} />
+      </Box>
+    </Box>
+  )
+}
+
+export function CreateRole() {
+  const [attributes, setAttributes] = useState({name: '', description: '', repositories: [], permissions: []})
+  const [roleBindings, setRoleBindings] = useState([])
+  const [mutation, {loading}] = useMutation(CREATE_ROLE, {variables: {
+    attributes: {...attributes, roleBindings: roleBindings.map(sanitize)},
+    update: (cache, {data: {createRole}}) => addRole(cache, createRole)
+  }})
+
+  return (
+    <Box gap='small' pad='small'>
+      <RoleForm
+        attributes={attributes}
+        setAttributes={setAttributes}
+        roleBindings={roleBindings}
+        setRoleBindings={setRoleBindings} />
+      <Box direction='row' fill='horizontal' justify='end'>
+        <Button label='Create' loading={loading} onClick={mutation} />
       </Box>
     </Box>
   )
@@ -159,7 +185,7 @@ export default function RoleRow({role}) {
         <Box flex={false} direction='row'>
           <Icon icon={Edit} tooltip='edit' onClick={() => setModal({
             text: `Edit role ${role.name}`,
-            body: <EditRole role={role} />
+            body: <EditRole role={role} setOpen={setModal} />
           })} />
           <Icon icon={Trash} tooltip='delete' onClick={mutation} iconAttrs={{color: 'error'}} />
         </Box>

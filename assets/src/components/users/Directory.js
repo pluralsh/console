@@ -10,7 +10,7 @@ import { useParams, useHistory } from 'react-router-dom'
 import { User, Group, Add, Search, Script } from 'grommet-icons'
 import GroupRow from './Group'
 import { BreadcrumbsContext } from '../Breadcrumbs'
-import RoleRow from './Role'
+import RoleRow, { CreateRole } from './Role'
 
 function UserRow({user, next}) {
   const admin = user.roles && user.roles.admin
@@ -147,14 +147,14 @@ function SectionChoice({label, icon, section, onClick, setSection}) {
   )
 }
 
-function CreateModal({form, header, children}) {
+function CreateModal({form, width, header, children}) {
   const [open, setOpen] = useState(false)
   return (
     <>
       {children(() => setOpen(true))}
       {open && (
         <Layer modal position='center' onClickOutside={() => setOpen(false)} onEsc={() => setOpen(false)}>
-          <Box width='30vw'>
+          <Box width={width || '30vw'}>
             <ModalHeader text={header} setOpen={setOpen} />
             <Box pad='small'>
               {form}
@@ -194,6 +194,14 @@ export default function Directory() {
               <Add size='8px' />
               <Group size='14px' />
             </Box>} label='Create Group' onClick={onClick} />
+          }
+        </CreateModal>
+        <CreateModal width='50vw' header='create a new role' form={<CreateRole />}>
+          {(onClick) => <SectionChoice icon={
+            <Box direction='row' align='center' gap='xxsmall'>
+              <Add size='8px' />
+              <Script size='14px' />
+            </Box>} label='Create Role' onClick={onClick} />
           }
         </CreateModal>
         <CreateModal header='Invite a user' form={<InviteForm />}>

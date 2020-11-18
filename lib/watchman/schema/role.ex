@@ -9,7 +9,7 @@ defmodule Watchman.Schema.Role do
     field :description, :string
     field :repositories, {:array, :string}
 
-    embeds_one :permissions, Permissions do
+    embeds_one :permissions, Permissions, on_replace: :update do
       boolean_fields [:read, :configure, :deploy, :operate]
     end
 

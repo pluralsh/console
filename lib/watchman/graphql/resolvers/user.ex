@@ -33,7 +33,7 @@ defmodule Watchman.GraphQl.Resolvers.User do
     |> paginate(args)
   end
 
-  def resolve_role(%{id: role_id}), do: {:ok, Users.get_role!(role_id)}
+  def resolve_role(%{id: role_id}, _), do: {:ok, Users.get_role!(role_id)}
 
   def resolve_invite(%{id: secure_id}, _) do
     {:ok, Users.get_invite(secure_id)}
