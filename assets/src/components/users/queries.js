@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost'
 import { PageInfo } from '../graphql/base';
-import { GroupFragment, GroupMemberFragment, InviteFragment, UserFragment } from '../graphql/users';
+import { GroupFragment, GroupMemberFragment, InviteFragment, RoleFragment, UserFragment } from '../graphql/users';
 
 export const USERS_Q = gql`
   query Users($q: String, $ursor: String) {
@@ -34,6 +34,19 @@ export const GROUPS_Q = gql`
   }
   ${PageInfo}
   ${GroupFragment}
+`;
+
+export const ROLES_Q = gql`
+  query Roles($cursor: String) {
+    roles(first: 20, after: $cursor) {
+      pageInfo { ...PageInfo }
+      edges {
+        node { ...RoleFragment }
+      }
+    }
+  }
+  ${PageInfo}
+  ${RoleFragment}
 `;
 
 export const SEARCH_USERS = gql`
@@ -130,6 +143,33 @@ export const DELETE_GROUP = gql`
     }
   }
   ${GroupFragment}
+`;
+
+export const CREATE_ROLE = gql`
+  mutation CreateRole($attributes: RoleAttributes!) {
+    createRole(attributes: $attributes) {
+      ...RoleFragment
+    }
+  }
+  ${RoleFragment}
+`;
+
+export const UPDATE_ROLE = gql`
+  mutation UpdateRole($id: ID!, $attributes: RoleAttributes!) {
+    updateRole(id: $id, attributes: $attributes) {
+      ...RoleFragment
+    }
+  }
+  ${RoleFragment}
+`;
+
+export const DELETE_ROLE = gql`
+  mutation DeleteRow($id: ID!) {
+    deleteRole(id: $id) {
+      ...RoleFragment
+    }
+  }
+  ${RoleFragment}
 `;
 
 export const CREATE_INVITE = gql`

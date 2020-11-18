@@ -94,7 +94,7 @@ defmodule Watchman.GraphQl.Users do
   object :role_binding do
     field :id,    non_null(:id)
     field :user,  :user, resolve: dataloader(User)
-    field :group, :group, resolve: dataloader(Group)
+    field :group, :group, resolve: dataloader(User)
 
     timestamps()
   end

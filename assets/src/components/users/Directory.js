@@ -2,14 +2,15 @@ import React, { useState, useContext, useEffect } from 'react'
 import { Box, Text, Layer, TextInput, CheckBox } from 'grommet'
 import { useQuery, useMutation } from 'react-apollo'
 import { ModalHeader, Loading, Scroller } from 'forge-core'
-import { USERS_Q, GROUPS_Q, EDIT_USER } from './queries'
+import { USERS_Q, GROUPS_Q, EDIT_USER, ROLES_Q } from './queries'
 import Avatar from './Avatar'
 import { GroupForm } from './CreateGroup'
 import { InviteForm } from './CreateInvite'
 import { useParams, useHistory } from 'react-router-dom'
-import { User, Group, Add, Search } from 'grommet-icons'
+import { User, Group, Add, Search, Script } from 'grommet-icons'
 import GroupRow from './Group'
 import { BreadcrumbsContext } from '../Breadcrumbs'
+import RoleRow from './Role'
 
 function UserRow({user, next}) {
   const admin = user.roles && user.roles.admin
@@ -98,6 +99,37 @@ function GroupsInner() {
   )
 }
 
+function RolesInner() {
+  const [q, setQ] = useState(null)
+  const {data, fetchMore} = useQuery(ROLES_Q)
+
+  if (!data) return <Loading />
+
+  const {roles: {pageInfo, edges}} = data
+
+  return (
+    <Box pad='small' gap='small'>
+      <Box direction='row' pad='small' align='center'>
+        <Box fill='horizontal'>
+          <Text weight={500}>Roles</Text>
+        </Box>
+        <TextInput
+          icon={<Search />}
+          placeholder='search for roles'
+          value={q || ''}
+          onChange={({target: {value}}) => setQ(value)} />
+      </Box>
+      <Scroller
+        id='roles'
+        style={{height: '100%', overflow: 'auto'}}
+        edges={edges}
+        mapper={({node}, next) => <RoleRow key={node.id} role={node} next={next.node} />}
+        onLoadMore={() => pageInfo.hasNextPage && fetchMore({variables: {userCursor: pageInfo.endCursor}})}
+      />
+    </Box>
+  )
+}
+
 function SectionChoice({label, icon, section, onClick, setSection}) {
   return (
     <Box
@@ -155,6 +187,7 @@ export default function Directory() {
       <Box gap='xsmall' flex={false}>
         <SectionChoice icon={<User size='14px' />} label='Users' section='users' setSection={setSection} />
         <SectionChoice icon={<Group size='14px' />} label='Groups' section='groups' setSection={setSection} />
+        <SectionChoice icon={<Script size='14px' />} label='Roles' section='roles' setSection={setSection} />
         <CreateModal header='create a new group' form={<GroupForm />}>
           {(onClick) => <SectionChoice icon={
             <Box direction='row' align='center' gap='xxsmall'>
@@ -175,6 +208,7 @@ export default function Directory() {
       <Box background='white' elevation='small' pad='small' fill>
         {section === 'users' && <UsersInner />}
         {section === 'groups' && <GroupsInner />}
+        {section === 'roles' && <RolesInner />}
       </Box>
     </Box>
   )

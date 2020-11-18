@@ -25,6 +25,28 @@ export const GroupFragment = gql`
   }
 `
 
+export const RoleBindingFragment = gql`
+  fragment RoleBindingFragment on RoleBinding {
+    id
+    user { ...UserFragment }
+    group { ...GroupFragment }
+  }
+  ${UserFragment}
+  ${GroupFragment}
+`;
+
+export const RoleFragment = gql`
+  fragment RoleFragment on Role {
+    id
+    name
+    description
+    repositories
+    permissions
+    roleBindings { ...RoleBindingFragment }
+  }
+  ${RoleBindingFragment}
+`;
+
 export const GroupMemberFragment = gql`
   fragment GroupMemberFragment on GroupMember {
     user { ...UserFragment }

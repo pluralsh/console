@@ -23,7 +23,7 @@ function GroupMembers({group}) {
   )
 }
 
-function Icon({icon, iconAttrs, tooltip, onClick}) {
+export function Icon({icon, iconAttrs, tooltip, onClick}) {
   const dropRef = useRef()
   const [open, setOpen] = useState(false)
   return (

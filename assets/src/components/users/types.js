@@ -1,8 +1,6 @@
-export const NotifTypes = {
-  COMMENT: 'COMMENT',
-  MENTION: 'MENTION',
-  UPLOAD: 'UPLOAD',
-  WELCOME: "WELCOME"
+export const PermissionTypes = {
+  READ: 'can view compoents',
+  CONFIGURE: 'can edit helm/terraform configuration',
+  DEPLOY: 'can create/approve deployments',
+  OPERATE: 'can delete pods, export logs, and other operational tasks'
 }
-
-export const NUX_KEY = 'silo-nuxed-v1'
