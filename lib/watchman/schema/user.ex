@@ -1,5 +1,6 @@
 defmodule Watchman.Schema.User do
   use Piazza.Ecto.Schema
+  alias Watchman.Schema.{RoleBinding, Group}
 
   @email_re ~r/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-\.]+\.[a-zA-Z]{2,}$/
 
@@ -15,6 +16,10 @@ defmodule Watchman.Schema.User do
     embeds_one :roles,  Roles, on_replace: :update do
       field :admin, :boolean, default: false
     end
+
+    has_many :role_bindings, RoleBinding
+    many_to_many :groups, Group, join_through: "group_members"
+    has_many :group_role_bindings, through: [:groups, :role_bindings]
 
     timestamps()
   end

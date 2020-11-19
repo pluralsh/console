@@ -1,10 +1,13 @@
 defmodule Watchman.Schema.Group do
   use Piazza.Ecto.Schema
+  alias Watchman.Schema.RoleBinding
 
   schema "groups" do
     field :name,        :string
     field :description, :string
     field :global,      :boolean
+
+    has_many :role_bindings, RoleBinding
 
     timestamps()
   end

@@ -4,6 +4,9 @@ defmodule Watchman.GraphQl.BuildMutationsTest do
 
   describe "createBuild" do
     test "It can create a new build" do
+      user = insert(:user)
+      role = insert(:role, permissions: %{deploy: true}, repositories: ["forge"])
+      insert(:role_binding, user: user, role: role)
       expect(Watchman.Deployer, :wake, fn -> :ok end)
       expect(Kazan, :run, fn _ -> {:ok, %Watchman.Kube.Application{metadata: %{name: "forge"}}} end)
 
@@ -15,7 +18,7 @@ defmodule Watchman.GraphQl.BuildMutationsTest do
             status
           }
         }
-      """, %{}, %{current_user: insert(:user)})
+      """, %{}, %{current_user: user})
 
       assert build["id"]
       assert build["type"] == "DEPLOY"

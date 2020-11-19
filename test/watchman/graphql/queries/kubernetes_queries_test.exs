@@ -5,6 +5,9 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
 
   describe "statefulSet" do
     test "it can fetch statefulsets by namespace/name" do
+      user = insert(:user)
+      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, stateful_set("namespace", "name")} end)
 
       {:ok, %{data: %{"statefulSet" => stateful}}} = run_query("""
@@ -21,7 +24,7 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
             }
           }
         }
-      """, %{}, %{current_user: insert(:user)})
+      """, %{}, %{current_user: user})
 
       assert stateful["metadata"]["name"] == "name"
       assert stateful["status"]["replicas"] == 3
@@ -32,6 +35,9 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
 
   describe "deployment" do
     test "it can fetch deployments by namespace/name" do
+      user = insert(:user)
+      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, deployment("namespace", "name")} end)
 
       {:ok, %{data: %{"deployment" => deployment}}} = run_query("""
@@ -47,7 +53,7 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
             }
           }
         }
-      """, %{}, %{current_user: insert(:user)})
+      """, %{}, %{current_user: user})
 
 
       assert deployment["metadata"]["name"] == "name"
@@ -59,6 +65,9 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
 
   describe "service" do
     test "it can fetch services by namespace/name" do
+      user = insert(:user)
+      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, service("namespace", "name")} end)
 
       {:ok, %{data: %{"service" => service}}} = run_query("""
@@ -73,7 +82,7 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
             }
           }
         }
-      """, %{}, %{current_user: insert(:user)})
+      """, %{}, %{current_user: user})
 
       assert service["metadata"]["name"] == "name"
       assert service["status"]["loadBalancer"]["ingress"] == [%{"ip" => "1.2.3.4"}]
@@ -83,6 +92,9 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
 
   describe "ingress" do
     test "it can fetch ingresses by namespace/name" do
+      user = insert(:user)
+      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, ingress("namespace", "name")} end)
 
       {:ok, %{data: %{"ingress" => ingress}}} = run_query("""
@@ -103,7 +115,7 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
             }
           }
         }
-      """, %{}, %{current_user: insert(:user)})
+      """, %{}, %{current_user: user})
 
       assert ingress["metadata"]["name"] == "name"
       assert ingress["status"]["loadBalancer"]["ingress"] == [%{"ip" => "1.2.3.4"}]
@@ -166,6 +178,9 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
 
   describe "cronJob" do
     test "it can read a cron job" do
+      user = insert(:user)
+      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, cron("cron")} end)
 
       {:ok, %{data: %{"cronJob" => cron}}} = run_query("""
@@ -176,7 +191,7 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
             spec { schedule suspend concurrencyPolicy }
           }
         }
-      """, %{"name" => "cron"}, %{current_user: insert(:user)})
+      """, %{"name" => "cron"}, %{current_user: user})
 
       assert cron["metadata"]["name"] == "cron"
       assert cron["status"]["lastScheduleTime"]
@@ -188,6 +203,9 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
 
   describe "pod" do
     test "it can query an individual pod" do
+      user = insert(:user)
+      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, pod("name")} end)
 
       {:ok, %{data: %{"pod" => pod}}} = run_query("""
@@ -198,7 +216,7 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
             spec { nodeName }
           }
         }
-      """, %{"name" => "name"}, %{current_user: insert(:user)})
+      """, %{"name" => "name"}, %{current_user: user})
 
       assert pod["metadata"]["name"] == "name"
       assert pod["status"]["podIp"]
@@ -208,6 +226,9 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
 
   describe "logfilters" do
     test "it can query logfilters" do
+      user = insert(:user)
+      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, %{items: [logfilter("name")]}} end)
 
       {:ok, %{data: %{"logFilters" => [filter]}}} = run_query("""
@@ -220,7 +241,7 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
             }
           }
         }
-      """, %{"name" => "name"}, %{current_user: insert(:user)})
+      """, %{"name" => "name"}, %{current_user: user})
 
       assert filter["metadata"]["name"] == "name"
       assert filter["spec"]["query"]

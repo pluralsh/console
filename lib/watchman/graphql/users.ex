@@ -1,7 +1,7 @@
 defmodule Watchman.GraphQl.Users do
   use Watchman.GraphQl.Schema.Base
   alias Watchman.GraphQl.Resolvers.User
-  alias Watchman.Middleware.Authenticated
+  alias Watchman.Middleware.{Authenticated, AdminRequired}
 
   enum_from_list :permission, Watchman.Schema.Role, :permissions, []
 
@@ -182,6 +182,7 @@ defmodule Watchman.GraphQl.Users do
 
     field :create_group, :group do
       middleware Authenticated
+      middleware AdminRequired
       arg :attributes, non_null(:group_attributes)
 
       resolve safe_resolver(&User.create_group/2)
@@ -189,6 +190,7 @@ defmodule Watchman.GraphQl.Users do
 
     field :delete_group, :group do
       middleware Authenticated
+      middleware AdminRequired
       arg :group_id, non_null(:id)
 
       resolve safe_resolver(&User.delete_group/2)
@@ -196,6 +198,7 @@ defmodule Watchman.GraphQl.Users do
 
     field :update_group, :group do
       middleware Authenticated
+      middleware AdminRequired
       arg :group_id, non_null(:id)
       arg :attributes, non_null(:group_attributes)
 
@@ -204,6 +207,7 @@ defmodule Watchman.GraphQl.Users do
 
     field :create_group_member, :group_member do
       middleware Authenticated
+      middleware AdminRequired
       arg :group_id, non_null(:id)
       arg :user_id, non_null(:id)
 
@@ -212,6 +216,7 @@ defmodule Watchman.GraphQl.Users do
 
     field :delete_group_member, :group_member do
       middleware Authenticated
+      middleware AdminRequired
       arg :group_id, non_null(:id)
       arg :user_id, non_null(:id)
 
@@ -220,6 +225,7 @@ defmodule Watchman.GraphQl.Users do
 
     field :create_role, :role do
       middleware Authenticated
+      middleware AdminRequired
       arg :attributes, non_null(:role_attributes)
 
       resolve safe_resolver(&User.create_role/2)
@@ -227,6 +233,7 @@ defmodule Watchman.GraphQl.Users do
 
     field :update_role, :role do
       middleware Authenticated
+      middleware AdminRequired
       arg :id, non_null(:id)
       arg :attributes, non_null(:role_attributes)
 
@@ -235,6 +242,7 @@ defmodule Watchman.GraphQl.Users do
 
     field :delete_role, :role do
       middleware Authenticated
+      middleware AdminRequired
       arg :id, non_null(:id)
 
       resolve safe_resolver(&User.delete_role/2)

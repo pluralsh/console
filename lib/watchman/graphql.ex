@@ -3,7 +3,7 @@ defmodule Watchman.GraphQl do
   use Absinthe.Relay.Schema, :modern
   import Watchman.GraphQl.Helpers
   alias Watchman.GraphQl.Resolvers.{Build, Forge, Webhook, User}
-  alias Watchman.Middleware.Authenticated
+  alias Watchman.Middleware.{Authenticated, Rbac}
 
   import_types Absinthe.Type.Custom
   import_types Watchman.GraphQl.Schema.Base
@@ -80,9 +80,9 @@ defmodule Watchman.GraphQl do
   mutation do
     field :create_build, :build do
       middleware Authenticated
-
       arg :attributes, non_null(:build_attributes)
 
+      middleware Rbac, perm: :deploy, arg: [:attributes, :repository]
       resolve safe_resolver(&Build.create_build/2)
     end
 
@@ -114,6 +114,7 @@ defmodule Watchman.GraphQl do
       arg :content,    non_null(:string)
       arg :tool,       :tool
 
+      middleware Rbac, perm: :configure, arg: :repository
       resolve safe_resolver(&Forge.update_configuration/2)
     end
 

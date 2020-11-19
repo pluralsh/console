@@ -1,7 +1,7 @@
 defmodule Watchman.GraphQl.Observability do
   use Watchman.GraphQl.Schema.Base
   alias Watchman.GraphQl.Resolvers.Observability
-  alias Watchman.Middleware.Authenticated
+  alias Watchman.Middleware.{Authenticated, Rbac}
 
   input_object :label_input do
     field :name,  :string
@@ -59,6 +59,7 @@ defmodule Watchman.GraphQl.Observability do
     field :dashboards, list_of(:dashboard) do
       middleware Authenticated
       arg :repo, non_null(:string)
+      middleware Rbac, perm: :read, arg: :repo
 
       resolve &Observability.resolve_dashboards/2
     end
@@ -70,6 +71,7 @@ defmodule Watchman.GraphQl.Observability do
       arg :step,   :string
       arg :offset, :integer
       arg :labels, list_of(:label_input)
+      middleware Rbac, perm: :read, arg: :repo
 
       resolve &Observability.resolve_dashboard/2
     end

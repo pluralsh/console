@@ -1,7 +1,7 @@
 defmodule Watchman.GraphQl.Kubernetes do
   use Watchman.GraphQl.Schema.Base
   alias Watchman.GraphQl.Resolvers.Kubernetes
-  alias Watchman.Middleware.Authenticated
+  alias Watchman.Middleware.{Authenticated, Rbac}
 
   object :metadata do
     field :labels,      list_of(:label_pair), resolve: fn %{labels: labels}, _, _ -> {:ok, make_labels(labels)} end
@@ -47,6 +47,7 @@ defmodule Watchman.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
+      middleware Rbac, perm: :read, arg: :namespace
 
       resolve &Kubernetes.resolve_service/2
     end
@@ -55,6 +56,7 @@ defmodule Watchman.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
+      middleware Rbac, perm: :read, arg: :namespace
 
       resolve &Kubernetes.resolve_deployment/2
     end
@@ -63,6 +65,7 @@ defmodule Watchman.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
+      middleware Rbac, perm: :read, arg: :namespace
 
       resolve &Kubernetes.resolve_stateful_set/2
     end
@@ -71,6 +74,7 @@ defmodule Watchman.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
+      middleware Rbac, perm: :read, arg: :namespace
 
       resolve &Kubernetes.resolve_ingress/2
     end
@@ -92,6 +96,7 @@ defmodule Watchman.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name, non_null(:string)
+      middleware Rbac, perm: :read, arg: :namespace
 
       resolve &Kubernetes.resolve_cron_job/2
     end
@@ -100,6 +105,7 @@ defmodule Watchman.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name, non_null(:string)
+      middleware Rbac, perm: :read, arg: :namespace
 
       resolve &Kubernetes.resolve_pod/2
     end
@@ -107,6 +113,7 @@ defmodule Watchman.GraphQl.Kubernetes do
     field :log_filters, list_of(:log_filter) do
       middleware Authenticated
       arg :namespace, non_null(:string)
+      middleware Rbac, perm: :read, arg: :namespace
 
       resolve &Kubernetes.list_log_filters/2
     end
@@ -117,6 +124,7 @@ defmodule Watchman.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
+      middleware Rbac, perm: :operate, arg: :namespace
 
       resolve &Kubernetes.delete_pod/2
     end

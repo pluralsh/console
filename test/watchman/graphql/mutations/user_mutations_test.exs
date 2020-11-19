@@ -81,11 +81,12 @@ defmodule Watchman.GraphQl.UserMutationsTest do
 
   describe "createGroup" do
     test "it can create a group" do
+      admin = insert(:user, roles: %{admin: true})
       {:ok, %{data: %{"createGroup" => group}}} = run_query("""
         mutation Create($attrs: GroupAttributes!) {
           createGroup(attributes: $attrs) { id name }
         }
-      """, %{"attrs" => %{"name" => "group"}}, %{current_user: insert(:user)})
+      """, %{"attrs" => %{"name" => "group"}}, %{current_user: admin})
 
       assert group["id"]
       assert group["name"] == "group"
@@ -94,12 +95,13 @@ defmodule Watchman.GraphQl.UserMutationsTest do
 
   describe "updateGroup" do
     test "it can create a group" do
+      admin = insert(:user, roles: %{admin: true})
       group = insert(:group)
       {:ok, %{data: %{"updateGroup" => update}}} = run_query("""
         mutation Update($id: ID!, $attrs: GroupAttributes!) {
           updateGroup(groupId: $id, attributes: $attrs) { id name }
         }
-      """, %{"id" => group.id, "attrs" => %{"name" => "update"}}, %{current_user: insert(:user)})
+      """, %{"id" => group.id, "attrs" => %{"name" => "update"}}, %{current_user: admin})
 
       assert update["id"] == group.id
       assert update["name"] == "update"
@@ -108,12 +110,13 @@ defmodule Watchman.GraphQl.UserMutationsTest do
 
   describe "deleteGroup" do
     test "it can create a group" do
+      admin = insert(:user, roles: %{admin: true})
       group = insert(:group)
       {:ok, %{data: %{"deleteGroup" => delete}}} = run_query("""
         mutation Delete($id: ID!) {
           deleteGroup(groupId: $id) { id name }
         }
-      """, %{"id" => group.id}, %{current_user: insert(:user)})
+      """, %{"id" => group.id}, %{current_user: admin})
 
       assert delete["id"] == group.id
       refute refetch(group)
@@ -122,6 +125,7 @@ defmodule Watchman.GraphQl.UserMutationsTest do
 
   describe "createGroupMember" do
     test "it can create a group" do
+      admin = insert(:user, roles: %{admin: true})
       group = insert(:group)
       user  = insert(:user)
       {:ok, %{data: %{"createGroupMember" => create}}} = run_query("""
@@ -132,7 +136,7 @@ defmodule Watchman.GraphQl.UserMutationsTest do
             group { id }
           }
         }
-      """, %{"groupId" => group.id, "userId" => user.id}, %{current_user: insert(:user)})
+      """, %{"groupId" => group.id, "userId" => user.id}, %{current_user: admin})
 
       assert create["id"]
       assert create["user"]["id"] == user.id
@@ -142,6 +146,7 @@ defmodule Watchman.GraphQl.UserMutationsTest do
 
   describe "deleteGroupMember" do
     test "it can create a group" do
+      admin = insert(:user, roles: %{admin: true})
       %{user: user, group: group} = group_member = insert(:group_member)
       {:ok, %{data: %{"deleteGroupMember" => delete}}} = run_query("""
         mutation Delete($userId: ID!, $groupId: ID!) {
@@ -151,7 +156,7 @@ defmodule Watchman.GraphQl.UserMutationsTest do
             group { id }
           }
         }
-      """, %{"groupId" => group.id, "userId" => user.id}, %{current_user: insert(:user)})
+      """, %{"groupId" => group.id, "userId" => user.id}, %{current_user: admin})
 
       assert delete["id"]
       assert delete["user"]["id"] == user.id
@@ -163,7 +168,7 @@ defmodule Watchman.GraphQl.UserMutationsTest do
 
   describe "createRole" do
     test "it can create a role" do
-      user = insert(:user)
+      user = insert(:user, roles: %{admin: true})
 
       {:ok, %{data: %{"createRole" => role}}} = run_query("""
         mutation Create($attrs: RoleAttributes!) {
@@ -192,7 +197,7 @@ defmodule Watchman.GraphQl.UserMutationsTest do
 
   describe "updateRole" do
     test "it can update a role" do
-      user = insert(:user)
+      user = insert(:user, roles: %{admin: true})
       role = insert(:role)
 
       {:ok, %{data: %{"updateRole" => role}}} = run_query("""
@@ -209,7 +214,7 @@ defmodule Watchman.GraphQl.UserMutationsTest do
 
   describe "deleteRole" do
     test "deletes a role" do
-      user = insert(:user)
+      user = insert(:user, roles: %{admin: true})
       role = insert(:role)
 
       {:ok, %{data: %{"deleteRole" => deleted}}} = run_query("""

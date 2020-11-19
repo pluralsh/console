@@ -35,9 +35,8 @@ defmodule Watchman.GraphQl.Resolvers.User do
 
   def resolve_role(%{id: role_id}, _), do: {:ok, Users.get_role!(role_id)}
 
-  def resolve_invite(%{id: secure_id}, _) do
-    {:ok, Users.get_invite(secure_id)}
-  end
+  def resolve_invite(%{id: secure_id}, _),
+    do: {:ok, Users.get_invite(secure_id)}
 
   def signin_user(%{email: email, password: password}, _) do
     Users.login_user(email, password)

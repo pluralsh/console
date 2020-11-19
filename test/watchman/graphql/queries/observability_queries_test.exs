@@ -7,6 +7,9 @@ defmodule Watchman.GraphQl.ObservabilityQueriesTest do
 
   describe "dashboards" do
     test "it can list dashboards for a repo" do
+      user = insert(:user)
+      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, %Kube.DashboardList{items: [dashboard()]}} end)
 
       {:ok, %{data: %{"dashboards" => [found]}}} = run_query("""
@@ -27,7 +30,7 @@ defmodule Watchman.GraphQl.ObservabilityQueriesTest do
             }
           }
         }
-      """, %{"repo" => "repo"}, %{current_user: insert(:user)})
+      """, %{"repo" => "repo"}, %{current_user: user})
 
       assert found["id"] == "dashboard"
       assert found["spec"]["name"] == "dashboard"
@@ -48,6 +51,9 @@ defmodule Watchman.GraphQl.ObservabilityQueriesTest do
 
   describe "dashboard" do
     test "it can fetch a dashboard for a repo" do
+      user = insert(:user)
+      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, dashboard()} end)
       expect(HTTPoison, :post, 3, fn
         _, {:form, [{"query", "label-q"}, _, _, _]}, _ ->
@@ -89,7 +95,7 @@ defmodule Watchman.GraphQl.ObservabilityQueriesTest do
             }
           }
         }
-      """, %{"repo" => "repo", "name" => "name"}, %{current_user: insert(:user)})
+      """, %{"repo" => "repo", "name" => "name"}, %{current_user: user})
 
       assert found["id"] == "dashboard"
       assert found["spec"]["name"] == "dashboard"

@@ -5,6 +5,9 @@ defmodule Watchman.GraphQl.KubernetesMutationsTest do
 
   describe "deletePod" do
     test "it can delete a pod" do
+      user = insert(:user)
+      role = insert(:role, permissions: %{operate: true}, repositories: ["*"])
+      insert(:role_binding, user: user, role: role)
       expect(Kazan, :run, fn _ -> {:ok, pod("name")} end)
 
       {:ok, %{data: %{"deletePod" => status}}} = run_query("""
@@ -15,7 +18,7 @@ defmodule Watchman.GraphQl.KubernetesMutationsTest do
             spec { nodeName }
           }
         }
-      """, %{"namespace" => "ns", "name" => "name"}, %{current_user: insert(:user)})
+      """, %{"namespace" => "ns", "name" => "name"}, %{current_user: user})
 
       assert status["status"]["podIp"]
       assert status["metadata"]["name"]
