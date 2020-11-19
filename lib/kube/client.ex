@@ -1,5 +1,5 @@
-defmodule Watchman.Kube.Client do
-  alias Watchman.Kube
+defmodule Kube.Client do
+  alias Kube
 
   def list_dashboards(namespace) do
     %Kazan.Request{

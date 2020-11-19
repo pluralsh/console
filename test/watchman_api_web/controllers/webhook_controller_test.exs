@@ -14,7 +14,7 @@ defmodule WatchmanWeb.WebhookControllerTest do
         send myself, :wake
       end)
 
-      expect(Kazan, :run, fn _ -> {:ok, %Watchman.Kube.Application{metadata: %{name: "forge"}}} end)
+      expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{metadata: %{name: "forge"}}} end)
 
       conn
       |> put_req_header("x-watchman-signature", "sha1=#{Watchman.hmac(secret, body)}")
@@ -53,7 +53,7 @@ defmodule WatchmanWeb.WebhookControllerTest do
         send myself, :wake
       end)
 
-      expect(Kazan, :run, fn _ -> {:ok, %Watchman.Kube.Application{metadata: %{name: "forge"}}} end)
+      expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{metadata: %{name: "forge"}}} end)
 
       conn
       |> put_req_header("x-piazza-timestamp", "bogus")

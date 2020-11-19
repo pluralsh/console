@@ -1,7 +1,7 @@
 defmodule Watchman.GraphQl.KubernetesMutationsTest do
   use Watchman.DataCase, async: true
   use Mimic
-  import Watchman.KubernetesScaffolds
+  import KubernetesScaffolds
 
   describe "deletePod" do
     test "it can delete a pod" do

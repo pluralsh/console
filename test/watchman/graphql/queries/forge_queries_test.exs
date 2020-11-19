@@ -2,7 +2,7 @@ defmodule Watchman.GraphQl.ForgeQueriesTest do
   use Watchman.DataCase, async: true
   use Mimic
   alias Watchman.Forge.Queries
-  alias Watchman.Kube.{Application, ApplicationList}
+  alias Kube.{Application, ApplicationList}
 
   describe "installations" do
     test "It will fetch your installations from forge" do

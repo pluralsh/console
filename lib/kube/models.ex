@@ -1,4 +1,4 @@
-defmodule Watchman.Kube.Dashboard do
+defmodule Kube.Dashboard do
   use Kazan.Model
 
   defmodule Query do
@@ -15,7 +15,7 @@ defmodule Watchman.Kube.Dashboard do
     use Kazan.Model
 
     defmodel "Query", "forgelabs.sh", "v1alpha1" do
-      property :queries, "queries", {:array, Watchman.Kube.Dashboard.Query}
+      property :queries, "queries", {:array, Kube.Dashboard.Query}
       property :name,    "name",    :string
       property :format,  "format",  :string
     end
@@ -25,7 +25,7 @@ defmodule Watchman.Kube.Dashboard do
     use Kazan.Model
 
     defmodel "Label", "forgelabs.sh", "v1alpha1" do
-      property :query,  "query",  Watchman.Kube.Dashboard.LabelQuery
+      property :query,  "query",  Kube.Dashboard.LabelQuery
       property :name,   "name",   :string
       property :values, "values", {:array, :string}
     end
@@ -48,8 +48,8 @@ defmodule Watchman.Kube.Dashboard do
       property :description,  "description", :string
       property :default_time, "defaultTime", :string
       property :timeslices,   "timeslices",  {:array, :string}
-      property :labels,       "labels",      {:array, Watchman.Kube.Dashboard.Label}
-      property :graphs,       "graphs",      {:array, Watchman.Kube.Dashboard.Graph}
+      property :labels,       "labels",      {:array, Kube.Dashboard.Label}
+      property :graphs,       "graphs",      {:array, Kube.Dashboard.Graph}
     end
   end
 
@@ -58,11 +58,11 @@ defmodule Watchman.Kube.Dashboard do
   end
 end
 
-defmodule Watchman.Kube.DashboardList do
+defmodule Kube.DashboardList do
   use Kazan.Model
 
   defmodellist "DashboardList",
                "forgelabs.sh",
                "v1alpha1",
-               Watchman.Kube.Dashboard
+               Kube.Dashboard
 end

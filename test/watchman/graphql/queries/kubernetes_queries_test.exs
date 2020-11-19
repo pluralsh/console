@@ -1,7 +1,7 @@
 defmodule Watchman.GraphQl.KubernetesQueriesTest do
   use Watchman.DataCase, async: true
   use Mimic
-  import Watchman.KubernetesScaffolds
+  import KubernetesScaffolds
 
   describe "statefulSet" do
     test "it can fetch statefulsets by namespace/name" do

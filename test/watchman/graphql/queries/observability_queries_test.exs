@@ -1,6 +1,6 @@
 defmodule Watchman.GraphQl.ObservabilityQueriesTest do
   use Watchman.DataCase, async: false
-  alias Watchman.{Kube.Dashboard, Kube}
+  alias Kube.Dashboard
   use Mimic
 
   setup :set_mimic_global

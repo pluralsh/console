@@ -1,5 +1,5 @@
 defmodule Watchman.Services.Observability do
-  alias Watchman.Kube.{Client, Dashboard}
+  alias Kube.{Client, Dashboard}
   alias Prometheus.Client, as: PrometheusClient
   alias Loki.Client, as: LokiClient
 

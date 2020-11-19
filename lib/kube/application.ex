@@ -1,4 +1,4 @@
-defmodule Watchman.Kube.Application do
+defmodule Kube.Application do
   use Kazan.Model
 
   defmodule ComponentKind do
@@ -20,7 +20,7 @@ defmodule Watchman.Kube.Application do
 
   defmodule Descriptor do
     use Kazan.Model
-    alias Watchman.Kube.Application
+    alias Kube.Application
 
     defmodel "Descriptor", "app.k8s.io", "v1beta1" do
       property :type, "type", :string
@@ -32,7 +32,7 @@ defmodule Watchman.Kube.Application do
 
   defmodule Spec do
     use Kazan.Model
-    alias Watchman.Kube.Application
+    alias Kube.Application
 
     defmodel "ApplicationSpec", "app.k8s.io", "v1beta1" do
       property :components, "componentKinds", {:array, Application.ComponentKind}
@@ -64,7 +64,7 @@ defmodule Watchman.Kube.Application do
 
   defmodule Status do
     use Kazan.Model
-    alias Watchman.Kube.Application
+    alias Kube.Application
 
     defmodel "ApplicationStatus", "app.k8s.io", "v1beta1" do
       property :components, "components", {:array, Application.Component}
@@ -79,11 +79,11 @@ defmodule Watchman.Kube.Application do
   end
 end
 
-defmodule Watchman.Kube.ApplicationList do
+defmodule Kube.ApplicationList do
   use Kazan.Model
 
   defmodellist "ApplicationList",
                "app,k8s.io",
                "v1beta1",
-               Watchman.Kube.Application
+               Kube.Application
 end

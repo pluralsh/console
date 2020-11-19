@@ -1,4 +1,4 @@
-defmodule Watchman.Kube.LogFilter do
+defmodule Kube.LogFilter do
   use Kazan.Model
 
   defmodule Label do
@@ -12,7 +12,7 @@ defmodule Watchman.Kube.LogFilter do
 
   defmodule Spec do
     use Kazan.Model
-    alias Watchman.Kube.LogFilter
+    alias Kube.LogFilter
 
     defmodel "LogSpec", "forgelabs.sh", "v1alpha1" do
       property :name, "name", :string
@@ -27,11 +27,11 @@ defmodule Watchman.Kube.LogFilter do
   end
 end
 
-defmodule Watchman.Kube.LogFilterList do
+defmodule Kube.LogFilterList do
   use Kazan.Model
 
   defmodellist "LogFilterList",
                "forgelabs.sh",
                "v1alpha1",
-               Watchman.Kube.LogFilter
+               Kube.LogFilter
 end

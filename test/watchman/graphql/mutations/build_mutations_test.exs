@@ -8,7 +8,7 @@ defmodule Watchman.GraphQl.BuildMutationsTest do
       role = insert(:role, permissions: %{deploy: true}, repositories: ["forge"])
       insert(:role_binding, user: user, role: role)
       expect(Watchman.Deployer, :wake, fn -> :ok end)
-      expect(Kazan, :run, fn _ -> {:ok, %Watchman.Kube.Application{metadata: %{name: "forge"}}} end)
+      expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{metadata: %{name: "forge"}}} end)
 
       {:ok, %{data: %{"createBuild" => build}}} = run_query("""
         mutation {

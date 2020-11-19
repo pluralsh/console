@@ -1,5 +1,5 @@
 defmodule Watchman.GraphQl.Resolvers.Kubernetes do
-  alias Watchman.Kube.Client
+  alias Kube.Client
   alias Kazan.Apis.Core.V1, as: Core
   alias Kazan.Apis.Apps.V1, as: Apps
   alias Kazan.Apis.Extensions.V1beta1, as: Extensions

@@ -18,7 +18,6 @@ defmodule Watchman.Application do
       Watchman.Watchers,
       Watchman.Bootstrapper,
       Watchman.Deployer,
-      Watchman.Grafana.Token,
       {Absinthe.Subscription, [WatchmanWeb.Endpoint]},
     ] ++ consumers() ++ [
       Piazza.GracefulShutdown

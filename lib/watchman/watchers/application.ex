@@ -28,7 +28,7 @@ defmodule Watchman.Watchers.Application do
       method: "get",
       path: "/apis/app.k8s.io/v1beta1/applications",
       query_params: %{},
-      response_model: Watchman.Kube.Application
+      response_model: Kube.Application
     }, send_to: self())
 
     Process.monitor(pid)

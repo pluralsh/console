@@ -2,7 +2,7 @@ defmodule Watchman.GraphQl.Resolvers.Forge do
   alias Watchman.Forge.Repositories
   alias Watchman.Forge.{Connection, PageInfo}
   alias Watchman.Services.Forge
-  alias Watchman.Kube.Client
+  alias Kube.Client
 
   def list_installations(args, _) do
     Repositories.list_installations(args[:first], args[:after])

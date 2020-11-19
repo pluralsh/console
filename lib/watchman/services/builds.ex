@@ -1,7 +1,7 @@
 defmodule Watchman.Services.Builds do
   use Watchman.Services.Base
   alias Watchman.PubSub
-  alias Watchman.Kube.{Client, Application}
+  alias Kube.{Client, Application}
   alias Watchman.Schema.{Build, Command, User, Changelog, Lock}
 
   def get!(id), do: Repo.get!(Build, id)

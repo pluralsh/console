@@ -11,10 +11,6 @@ defmodule WatchmanWeb.Router do
     plug WatchmanWeb.Plugs.Authorized
   end
 
-  pipeline :grafana do
-    plug WatchmanWeb.Plugs.GrafanaAuth
-  end
-
   get "/health", WatchmanWeb.HealthController, :health
 
   scope "/v1", WatchmanWeb do
