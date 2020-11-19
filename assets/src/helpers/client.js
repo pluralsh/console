@@ -5,6 +5,7 @@ import { onError } from 'apollo-link-error'
 import * as AbsintheSocket from "@absinthe/socket"
 import { Socket as PhoenixSocket } from "phoenix"
 import { createAbsintheSocketLink } from "@absinthe/socket-apollo-link"
+import { createPersistedQueryLink } from "apollo-link-persisted-queries"
 import { hasSubscription } from "@jumpn/utils-graphql"
 import { split } from 'apollo-link'
 import {apiHost, secure} from './hostname'
@@ -43,11 +44,12 @@ const socket = new PhoenixSocket(WS_URI, {
 const absintheSocket = AbsintheSocket.create(socket)
 
 const socketLink = createAbsintheSocketLink(absintheSocket)
+const gqlLink = createPersistedQueryLink().concat(resetToken).concat(httpLink)
 
 const splitLink = split(
   (operation) => hasSubscription(operation.query),
   socketLink,
-  authLink.concat(resetToken).concat(httpLink)
+  authLink.concat(gqlLink)
 )
 
 export const client = new ApolloClient({

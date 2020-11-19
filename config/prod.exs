@@ -3,7 +3,7 @@ use Mix.Config
 config :watchman, :initialize, true
 
 config :watchman, WatchmanWeb.Endpoint,
-  http: [port: 4000],
+  http: [port: 4000, compress: true],
   # force_ssl: [hsts: true, rewrite_on: [:x_forwarded_proto]],
   cache_static_manifest: "priv/static/cache_manifest.json",
   server: true
