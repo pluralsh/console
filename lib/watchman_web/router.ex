@@ -32,7 +32,8 @@ defmodule WatchmanWeb.Router do
     pipe_through [:auth]
 
     forward "/gql", Absinthe.Plug,
-      schema: Watchman.GraphQl
+      schema: Watchman.GraphQl,
+      document_providers: [Watchman.GraphQl.Apq, Absinthe.Plug.DocumentProvider.Default]
   end
 
   scope "/", WatchmanWeb do

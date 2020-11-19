@@ -59,4 +59,13 @@ config :watchman,
 
 config :porcelain, driver: Porcelain.Driver.Basic
 
+
+config :watchman, Watchman.PartitionedCache,
+  primary: [
+    gc_interval: :timer.seconds(3600),
+    backend: :shards,
+    partitions: 2,
+    allocated_memory: 1000 * 1000 * 500
+  ]
+
 import_config "#{Mix.env()}.exs"

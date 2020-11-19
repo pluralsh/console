@@ -72,6 +72,11 @@ defmodule Watchman.MixProject do
       {:prometheus_plugs, "~> 1.1.1"},
       {:guardian, "~> 1.2.1"},
       {:httpoison, "~> 1.7"},
+      {:nebulex, "2.0.0-rc.1"},
+      {:shards, "~> 1.0"},      #=> For using :shards as backend
+      {:decorator, "~> 1.3"},   #=> For using Caching Annotations
+      {:telemetry, "~> 0.4"},
+      {:apq, "~> 1.2"},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
       {:mimic, "~> 1.1", only: :test}
     ]

@@ -12,6 +12,8 @@ defmodule Watchman.Application do
       Watchman.Commands.Configuration,
       Watchman.Forge.Config,
       Watchman.Cron,
+      Watchman.Cache,
+      Watchman.ReplicatedCache,
       {Cluster.Supervisor, [topologies, [name: Watchman.ClusterSupervisor]]},
       Watchman.Watchers,
       Watchman.Bootstrapper,

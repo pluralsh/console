@@ -1,9 +1,11 @@
 defmodule Watchman.Services.Rbac do
   alias Watchman.Schema.{Role, User}
 
+  def preload(user),
+    do: Watchman.Repo.preload(user, [role_bindings: :role, group_role_bindings: :role])
+
   def validate(%User{} = user, repository, action) do
-    %{role_bindings: user_roles, group_role_bindings: group_roles} =
-      Watchman.Repo.preload(user, [role_bindings: :role, group_role_bindings: :role])
+    %{role_bindings: user_roles, group_role_bindings: group_roles} = preload(user)
 
     (user_roles ++ group_roles)
     |> Enum.map(& &1.role)
