@@ -60,9 +60,11 @@ export const ME_Q = gql`
   query {
     me {
       ...UserFragment
+      boundRoles { ...RoleFragment }
     }
   }
   ${UserFragment}
+  ${RoleFragment}
 `;
 
 export const SIGNIN = gql`

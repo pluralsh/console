@@ -32,7 +32,6 @@ function ComponentContent({namespace, kind, name}) {
 
 export function RawContent({raw}) {
   const obj = JSON.parse(raw)
-  console.log(yaml.stringify(obj))
   return (
     <Box flex={false} pad='small'>
       <Highlight language='yaml'>

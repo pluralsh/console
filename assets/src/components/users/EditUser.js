@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { Box, Text } from 'grommet'
+import { Anchor, Box, Layer, Text } from 'grommet'
 import { Logout, StatusCritical, Checkmark, User, Lock, Script } from 'grommet-icons'
 import { Button, InputCollection, ResponsiveInput } from 'forge-core'
 import { useMutation } from 'react-apollo'
@@ -7,6 +7,10 @@ import { EDIT_USER } from './queries'
 import Avatar from './Avatar'
 import { wipeToken } from '../../helpers/auth'
 import { LoginContext } from '../Login'
+import { RawContent } from '../kubernetes/Component'
+import yaml from 'yaml'
+import Highlight from 'react-highlight.js'
+
 
 const EditContext = React.createContext({})
 
@@ -65,17 +69,39 @@ function EditContent({edit, children}) {
   )
 }
 
+function sanitize({name, repositories, permissions, roleBindings}) {
+  return {name, repositories, permissions, roleBindings: roleBindings.map(sanitizeBinding)}
+}
+
+function sanitizeBinding({user, group}) {
+  if (user) return {user: {email: user.email}}
+  if (group) return {group: {name: group.name}}
+}
+
 function UserRoles({me}) {
+  const [role, setRole] = useState(null)
+  console.log(role)
   return (
-    <Box fill style={{overflow: 'auto'}} pad='small'>
+    <>
+    <Box fill style={{overflow: 'auto'}} pad='small' gap='xsmall'>
       {me.boundRoles.map((role) => (
-        <Box direction='row' gap='xsmall'>
-          <Text size='small' weight={500}>{role.name}</Text>
+        <Box key={role.name} direction='row' gap='xsmall'>
+          <Anchor size='small' weight={500} onClick={() => setRole(role)}>{role.name}</Anchor>
           <Text size='small'>--</Text>
           <Text size='small'><i>{role.description}</i></Text>
         </Box>
       ))}
     </Box>
+    {role && (
+      <Layer modal onClickOutside={() => setRole(null)} onEsc={() => setRole(null)}>
+        <Box width='60vw'>
+          <Highlight language='yaml'>
+            {yaml.stringify(sanitize(role))}
+          </Highlight>
+        </Box>
+      </Layer>
+    )}
+    </>
   )
 }
 
