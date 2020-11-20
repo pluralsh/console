@@ -1,14 +1,12 @@
 defmodule WatchmanWeb.GraphQl.BuildSubscriptionTest do
   use WatchmanWeb.ChannelCase, async: false
-  alias Watchman.{Services.Builds, Storage.Git}
+  alias Watchman.{PubSub.Consumers.Rtc, PubSub}
   use Mimic
 
   describe "buildDelta" do
     test "build create will broadcast deltas" do
       user = insert(:user)
       {:ok, socket} = establish_socket(user)
-      expect(Watchman.Deployer, :wake, fn -> :ok end)
-      expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{metadata: %{name: "repo"}}} end)
 
       ref = push_doc(socket, """
         subscription {
@@ -24,7 +22,10 @@ defmodule WatchmanWeb.GraphQl.BuildSubscriptionTest do
 
       assert_reply(ref, :ok, %{subscriptionId: _})
 
-      {:ok, build} = Builds.create(%{repository: "repo"}, insert(:user))
+      build = insert(:build)
+      event = %PubSub.BuildCreated{item: build}
+      Rtc.handle_event(event)
+
       assert_push("subscription:data", %{result: %{data: %{"buildDelta" => delta}}})
       assert delta["delta"] == "CREATE"
       assert delta["payload"]["id"] == build.id
@@ -34,8 +35,6 @@ defmodule WatchmanWeb.GraphQl.BuildSubscriptionTest do
     test "Build modify will send UPDATE deltas" do
       user = insert(:user)
       {:ok, socket} = establish_socket(user)
-      build = insert(:build)
-      expect(Git, :revision, fn -> {:ok, "sha"} end)
 
       ref = push_doc(socket, """
         subscription {
@@ -51,7 +50,11 @@ defmodule WatchmanWeb.GraphQl.BuildSubscriptionTest do
       """)
 
       assert_reply(ref, :ok, %{subscriptionId: _})
-      {:ok, build} = Builds.succeed(build)
+
+      build = insert(:build, status: :successful)
+      event = %PubSub.BuildSucceeded{item: build}
+      Rtc.handle_event(event)
+
       assert_push("subscription:data", %{result: %{data: %{"buildDelta" => delta}}})
       assert delta["delta"] == "UPDATE"
       assert delta["payload"]["id"] == build.id
@@ -80,7 +83,10 @@ defmodule WatchmanWeb.GraphQl.BuildSubscriptionTest do
 
       assert_reply(ref, :ok, %{subscriptionId: _})
 
-      {:ok, command} = Builds.create_command(%{command: "echo 'hello world'"}, build)
+      command = insert(:command, command: "echo 'hello world'", build: build)
+      event = %PubSub.CommandCreated{item: command}
+      Rtc.handle_event(event)
+
       assert_push("subscription:data", %{result: %{data: %{"commandDelta" => delta}}})
       assert delta["delta"] == "CREATE"
       assert delta["payload"]["id"] == command.id
@@ -89,7 +95,6 @@ defmodule WatchmanWeb.GraphQl.BuildSubscriptionTest do
 
     test "command completion sends UPDATE deltas" do
       build = insert(:build)
-      command = insert(:command, build: build)
       user = insert(:user)
       {:ok, socket} = establish_socket(user)
 
@@ -107,7 +112,10 @@ defmodule WatchmanWeb.GraphQl.BuildSubscriptionTest do
 
       assert_reply(ref, :ok, %{subscriptionId: _})
 
-      {:ok, command} = Builds.complete(command, 0)
+      command = insert(:command, exit_code: 0, build: build)
+      event = %PubSub.CommandCompleted{item: command}
+      Rtc.handle_event(event)
+
       assert_push("subscription:data", %{result: %{data: %{"commandDelta" => delta}}})
       assert delta["delta"] == "UPDATE"
       assert delta["payload"]["id"] == command.id

@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
 import { Box, Text } from 'grommet'
-import { Logout, StatusCritical, Checkmark, User, Lock } from 'grommet-icons'
+import { Logout, StatusCritical, Checkmark, User, Lock, Script } from 'grommet-icons'
 import { Button, InputCollection, ResponsiveInput } from 'forge-core'
 import { useMutation } from 'react-apollo'
 import { EDIT_USER } from './queries'
@@ -65,6 +65,20 @@ function EditContent({edit, children}) {
   )
 }
 
+function UserRoles({me}) {
+  return (
+    <Box fill style={{overflow: 'auto'}} pad='small'>
+      {me.boundRoles.map((role) => (
+        <Box direction='row' gap='xsmall'>
+          <Text size='small' weight={500}>{role.name}</Text>
+          <Text size='small'>--</Text>
+          <Text size='small'><i>{role.description}</i></Text>
+        </Box>
+      ))}
+    </Box>
+  )
+}
+
 function passwordValid(password, confirm) {
   if (password === '') return {disabled: true, reason: 'please enter a password'}
   if (password !== confirm) return {disabled: true, reason: 'passwords must match'}
@@ -107,6 +121,7 @@ export default function EditUser() {
           <Box gap='small' width='25%' pad={{horizontal: 'small', vertical: 'medium'}}>
             <EditSelect edit='User Attributes' icon={<User size='small' />} />
             <EditSelect edit='Password' icon={<Lock size='small' />} />
+            <EditSelect edit='Bound Roles' icon={<Script size='small' />} />
           </Box>
           <Box width='75%'>
             <EditContent edit='User Attributes'>
@@ -123,6 +138,9 @@ export default function EditUser() {
               <Box direction='row' justify='end'>
                 <Button loading={loading} onClick={mutation} flex={false} label='Update' />
               </Box>
+            </EditContent>
+            <EditContent edit='Bound Roles'>
+              <UserRoles me={me} />
             </EditContent>
             <EditContent edit='Password'>
               <InputCollection>

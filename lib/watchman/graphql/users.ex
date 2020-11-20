@@ -41,7 +41,7 @@ defmodule Watchman.GraphQl.Users do
     field :email,       non_null(:string)
     field :deleted_at,  :datetime
     field :roles,       :user_roles
-    field :bound_roles, list_of(:role), resolve: fn user, _, _ -> Watchman.Schema.User.roles(user) end
+    field :bound_roles, list_of(:role), resolve: fn user, _, _ -> {:ok, Watchman.Schema.User.roles(user)} end
 
     field :jwt, :string, resolve: fn
       %{id: id, jwt: jwt}, _, %{context: %{current_user: %{id: id}}} -> {:ok, jwt}

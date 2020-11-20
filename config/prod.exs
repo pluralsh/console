@@ -14,7 +14,8 @@ config :goth, json: {:system, "GCP_CREDENTIALS"}
 
 config :watchman, :consumers, [
   Watchman.PubSub.Consumers.Webhook,
-  Watchman.PubSub.Consumers.Recurse
+  Watchman.PubSub.Consumers.Recurse,
+  Watchman.PubSub.Consumers.Rtc
 ]
 
 config :watchman, Watchman.Cron,

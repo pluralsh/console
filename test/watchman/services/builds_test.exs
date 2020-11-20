@@ -14,6 +14,16 @@ defmodule Watchman.Services.BuildsTest do
     end
   end
 
+  describe "#create_build/2" do
+    test "It can create a build" do
+      user = insert(:user)
+      expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{}} end)
+      {:ok, build} = Builds.create(%{type: :deploy, repository: "repo"}, user)
+
+      assert_receive {:event, %PubSub.BuildCreated{item: ^build}}
+    end
+  end
+
   describe "create_command/2" do
     test "It will create a command record for a build" do
       build = insert(:build)
@@ -23,6 +33,8 @@ defmodule Watchman.Services.BuildsTest do
 
       assert command.command == exec
       assert command.build_id == build.id
+
+      assert_receive {:event, %PubSub.CommandCreated{item: ^command}}
     end
   end
 
@@ -94,6 +106,8 @@ defmodule Watchman.Services.BuildsTest do
       assert completed.exit_code == 0
       assert completed.completed_at
       assert completed.stdout == "some output"
+
+      assert_receive {:event, %PubSub.CommandCompleted{item: ^completed}}
     end
   end
 
