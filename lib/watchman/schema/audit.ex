@@ -1,6 +1,6 @@
 defmodule Watchman.Schema.Audit do
   use Piazza.Ecto.Schema
-  alias Watchman.Schema.{User, Build}
+  alias Watchman.Schema.{User}
 
   defenum Type,
     build: 0,
@@ -25,18 +25,24 @@ defmodule Watchman.Schema.Audit do
     field :data, Piazza.Ecto.Types.Erlang
 
     belongs_to :actor, User
-    belongs_to :build, Build
 
     timestamps()
   end
 
-  @valid ~w(actor_id build_id type action repository)a
+  def for_repo(query \\ __MODULE__, repo) do
+    from(a in query, where: a.repository == ^repo)
+  end
+
+  def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
+    from(a in query, order_by: ^order)
+  end
+
+  @valid ~w(actor_id type action repository)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:actor_id)
-    |> foreign_key_constraint(:build_id)
     |> validate_required([:type, :action, :data])
   end
 end

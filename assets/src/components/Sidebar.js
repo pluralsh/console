@@ -24,7 +24,7 @@ function SidebarIcon({icon, text, selected, path}) {
       className={'sidebar-icon' + (selected ? ' selected' : '')}
       align='center'
       justify='center'
-      margin='xsmall'
+      margin={{horizontal: 'xsmall'}}
       round='xsmall'
       height={SIDEBAR_ROW_HEIGHT}
       hoverIndicator='sidebarHover'

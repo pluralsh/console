@@ -4,7 +4,6 @@ import { Grommet } from 'grommet'
 import { DEFAULT_THEME } from './theme';
 import Watchman from './components/Watchman';
 import Login from './components/Login'
-import SignUp from './components/SignUp';
 import Invite from './components/Invite';
 
 export default function App() {

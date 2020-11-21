@@ -83,4 +83,13 @@ defmodule Watchman.Factory do
       expires_at: Timex.now() |> Timex.shift(minutes: 20)
     }
   end
+
+  def audit_factory do
+    %Schema.Audit{
+      type: :build,
+      action: :create,
+      repository: "repo",
+      actor: build(:user)
+    }
+  end
 end

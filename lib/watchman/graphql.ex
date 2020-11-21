@@ -11,6 +11,7 @@ defmodule Watchman.GraphQl do
   import_types Watchman.GraphQl.Users
   import_types Watchman.GraphQl.Kubernetes
   import_types Watchman.GraphQl.Observability
+  import_types Watchman.GraphQl.Audit
 
   @sources [
     Build,
@@ -75,6 +76,7 @@ defmodule Watchman.GraphQl do
     import_fields :user_queries
     import_fields :observability_queries
     import_fields :kubernetes_queries
+    import_fields :audit_queries
   end
 
   mutation do
