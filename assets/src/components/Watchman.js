@@ -19,6 +19,7 @@ import { Node, Nodes } from './kubernetes/Node'
 import { Pod } from './kubernetes/Pod'
 import Directory from './users/Directory'
 import EditUser from './users/EditUser'
+import { Audits } from './audits/Audits'
 
 const SIDEBAR_WIDTH = '70px'
 
@@ -58,6 +59,7 @@ export default function Watchman() {
               <Route path='/pods/:namespace/:name' component={Pod} />
               <Route path='/nodes/:name' component={Node} />
               <Route path='/nodes' component={Nodes} />
+              <Route path='/audits' component={Audits} />
               <Route path='/components/:repo/:kind/:name' component={Component} />
               <Route path='/components/:repo' component={Application} />
               <Route path='/components' render={() => (
