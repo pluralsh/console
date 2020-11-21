@@ -26,6 +26,6 @@ defmodule Watchman.GraphQl.Resolvers.Build do
   def approve_build(%{id: id}, %{context: %{current_user: user}}),
     do: Builds.approve(id, user)
 
-  def cancel_build(%{id: id}, _),
-    do: Builds.cancel(id)
+  def cancel_build(%{id: id}, %{context: %{current_user: user}}),
+    do: Builds.cancel(id, user)
 end

@@ -39,7 +39,7 @@ defmodule Watchman.Services.Builds do
     |> execute(extract: :delete)
   end
 
-  def create(attrs, %User{id: id}) do
+  def create(attrs, %User{id: id} = user) do
     start_transaction()
     |> add_operation(:build, fn _ ->
       %Build{type: :deploy, status: :queued, creator_id: id}
@@ -53,7 +53,7 @@ defmodule Watchman.Services.Builds do
       end
     end)
     |> execute(extract: :build)
-    |> notify(:create)
+    |> notify(:create, user)
     |> when_ok(&wake_deployer/1)
   end
 
@@ -68,10 +68,10 @@ defmodule Watchman.Services.Builds do
     |> execute(extract: :update)
   end
 
-  def cancel(build_id) do
+  def cancel(build_id, %User{} = user) do
     get!(build_id)
     |> modify_status(:cancelled)
-    |> notify(:delete)
+    |> notify(:cancel, user)
   end
 
   def create_command(attrs, %Build{id: id}) do
@@ -112,14 +112,14 @@ defmodule Watchman.Services.Builds do
     |> notify(:pending)
   end
 
-  def approve(build_id, %User{id: user_id}) do
+  def approve(build_id, %User{id: user_id} = user) do
     get!(build_id)
     |> Build.changeset(%{
       approver_id: user_id,
       status: :running
     })
     |> Repo.update()
-    |> notify(:approve)
+    |> notify(:approve, user)
   end
 
   def succeed(build) do
@@ -167,8 +167,14 @@ defmodule Watchman.Services.Builds do
 
   defp cleaned(build), do: %{build | changelogs: %Ecto.Association.NotLoaded{}}
 
-  defp notify({:ok, %Build{} = build}, :create),
-    do: handle_notify(PubSub.BuildCreated, build)
+  defp notify({:ok, %Build{} = build}, :create, user),
+    do: handle_notify(PubSub.BuildCreated, build, actor: user)
+  defp notify({:ok, %Build{} = build}, :approve, user),
+    do: handle_notify(PubSub.BuildApproved, build, actor: user)
+  defp notify({:ok, %Build{} = build}, :cancel, user),
+    do: handle_notify(PubSub.BuildCancelled, build, actor: user)
+  defp notify(error, _, _), do: error
+
   defp notify({:ok, %Command{} = command}, :create),
     do: handle_notify(PubSub.CommandCreated, command)
   defp notify({:ok, %Command{} = command}, :complete),
@@ -179,8 +185,7 @@ defmodule Watchman.Services.Builds do
     do: handle_notify(PubSub.BuildFailed, build)
   defp notify({:ok, %Build{} = build}, :pending),
     do: handle_notify(PubSub.BuildPending, build)
-  defp notify({:ok, %Build{} = build}, :approve),
-    do: handle_notify(PubSub.BuildApproved, build)
+
   defp notify({:ok, %Build{} = build}, :delete),
     do: handle_notify(PubSub.BuildDeleted, build)
   defp notify(error, _), do: error

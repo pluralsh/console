@@ -25,8 +25,8 @@ export function EnsureLogin({children}) {
 
 export default function Login() {
   const [form, setForm] = useState({email: '', password: ''})
-  const {data, error} = useQuery(ME_Q)
-  const [mutation, {loading}] = useMutation(SIGNIN, {
+  const {data} = useQuery(ME_Q)
+  const [mutation, {loading, error}] = useMutation(SIGNIN, {
     variables: form,
     onCompleted: ({signIn: {jwt}}) => {
       setToken(jwt)
@@ -39,8 +39,8 @@ export default function Login() {
   }
 
   return (
-    <Box direction="column" align="center" justify="center" height="100vh">
-      <Box width="60%" pad='medium' border={{color: 'light-3'}} elevation="small">
+    <Box direction="column" align="center" justify="center" height="100vh" background='backgroundColor'>
+      <Box width="60%" pad='medium' border={{color: 'light-3'}} background='white' round='xsmall'>
         <Keyboard onEnter={mutation}>
           <Box margin={{bottom: '10px'}} gap='small'>
             <Box justify='center' align='center'>

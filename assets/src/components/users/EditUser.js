@@ -7,10 +7,8 @@ import { EDIT_USER } from './queries'
 import Avatar from './Avatar'
 import { wipeToken } from '../../helpers/auth'
 import { LoginContext } from '../Login'
-import { RawContent } from '../kubernetes/Component'
 import yaml from 'yaml'
 import Highlight from 'react-highlight.js'
-
 
 const EditContext = React.createContext({})
 
@@ -80,7 +78,7 @@ function sanitizeBinding({user, group}) {
 
 function UserRoles({me}) {
   const [role, setRole] = useState(null)
-  console.log(role)
+
   return (
     <>
     <Box fill style={{overflow: 'auto'}} pad='small' gap='xsmall'>

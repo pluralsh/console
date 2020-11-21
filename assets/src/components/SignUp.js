@@ -31,8 +31,8 @@ export default function SignUp() {
   if (!data) return null
 
   return (
-    <Box align="center" justify="center" height="100vh">
-      <Box width="60%" pad='medium' border={{color: 'light-3'}} elevation="small">
+    <Box align="center" justify="center" height="100vh" background='backgroundColor'>
+      <Box width="60%" pad='medium' border={{color: 'light-3'}} round="xsmall" background='white'>
         <Keyboard onEnter={mutation}>
           <>
           <Box justify='center' align='center'>

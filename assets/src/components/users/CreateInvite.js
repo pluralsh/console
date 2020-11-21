@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 import { Button, ModalHeader, InputCollection, ResponsiveInput, Copyable } from 'forge-core'
-import { Layer, Box, Text } from 'grommet'
-import { GroupTypeahead } from './Typeaheads'
+import { Layer, Box } from 'grommet'
+// import { GroupTypeahead } from './Typeaheads'
 import { useMutation } from 'react-apollo'
 import { CREATE_INVITE } from './queries'
 import { apiHost } from '../../helpers/hostname'
 
 export function InviteForm() {
-  const [groups, setGroups] = useState([])
+  // const [groups, setGroups] = useState([])
   const [email, setEmail] = useState('')
   const [mutation, {loading, data}] = useMutation(CREATE_INVITE, {
-    variables: {attributes: {email, groupIds: groups.map(({id}) => id)}}
+    variables: {attributes: {email}}
   })
 
   const invite = data && data.createInvite
@@ -28,10 +28,10 @@ export function InviteForm() {
           placeholder='email of person to invite'
           onChange={({target: {value}}) => setEmail(value)} />
       </InputCollection>
-      <Box gap='xsmall'>
+      {/* <Box gap='xsmall'>
         <Text size='small' weight='bold'>assign to groups (optional)</Text>
         <GroupTypeahead groups={groups} setGroups={setGroups} />
-      </Box>
+      </Box> */}
       <Box direction='row' justify='end'>
         <Button label='Invite' onClick={mutation} loading={loading} />
       </Box>

@@ -232,7 +232,7 @@ export function PodRow({pod: {metadata: {name, namespace}, status, spec}, refetc
 
 function Status({status, metadata: {namespace, name}}) {
   let history = useHistory()
-  const query = asQuery({pod: namespace})
+  const query = asQuery({pod: name})
   return (
     <Con header='Status'>
       <Box flex={false} direction='row' gap='small'>
@@ -247,7 +247,7 @@ function Status({status, metadata: {namespace, name}}) {
             <PodReadiness status={status} />
           </MetadataRow>
           <MetadataRow name='logs'>
-            <Anchor size='small' onClick={() => history.push(`/logs/${name}?${query}`)}>view logs</Anchor>
+            <Anchor size='small' onClick={() => history.push(`/logs/${namespace}?${query}`)}>view logs</Anchor>
           </MetadataRow>
         </Box>
         <Box width='60%'>

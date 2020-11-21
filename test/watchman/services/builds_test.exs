@@ -38,15 +38,16 @@ defmodule Watchman.Services.BuildsTest do
     end
   end
 
-  describe "#cancel/1" do
+  describe "#cancel/2" do
     test "It will cancel a build by id and send an event" do
+      user = insert(:user)
       build = insert(:build)
 
-      {:ok, cancelled} = Builds.cancel(build.id)
+      {:ok, cancelled} = Builds.cancel(build.id, user)
 
       assert cancelled.status == :cancelled
 
-      assert_receive {:event, %PubSub.BuildDeleted{item: ^cancelled}}
+      assert_receive {:event, %PubSub.BuildCancelled{item: ^cancelled, actor: ^user}}
     end
 
     test "if passed a build struct, it will cancel if in running state" do
