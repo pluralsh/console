@@ -10,7 +10,7 @@ image:
   pullPolicy: Always
 
 imagePullSecrets:
-- name: forgecreds
+- name: forge-creds
 nameOverride: ""
 fullnameOverride: ""
 
