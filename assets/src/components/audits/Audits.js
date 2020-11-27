@@ -14,7 +14,7 @@ function Audit({audit}) {
       <RowItem width='10%' text={audit.action} />
       <RowItem width='15%' text={audit.repository} />
       <Box flex={false} direction='row' width='40%' align='center' gap='xsmall'>
-        <Avatar user={audit.actor} size='15px' />
+        <Avatar user={audit.actor} size='30px' />
         <Text size='small'>{audit.actor.email}</Text>
       </Box>
       <RowItem width='20%' text={dateFormat(audit.insertedAt)} />

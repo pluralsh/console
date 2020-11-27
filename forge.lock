@@ -1,6 +1,6 @@
 artifact: {}
 terraform:
-  terraform/gcp: h1:pv32ekD1iatEbmWzZd2r/tFFlaZL29WuW/+FGvrs2T0=
+  terraform/gcp: h1:oS+frlhhQ0I6TUufGJMwknYxhH7PZkBeQwLCfoY20VE=
 helm:
   charts/watchman: h1:SmpcBAyp5GkulP6bqUJgoV9hOgHhLdq9VJ1rAa9ROms=
 recipe:
