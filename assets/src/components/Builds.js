@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect, useContext, useCallback } from 'react'
 import { useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { BUILDS_Q, CREATE_BUILD, BUILD_SUB } from './graphql/builds'
@@ -153,6 +153,7 @@ export default function Builds() {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL
   })
+  const {setOnChange} = useContext(InstallationContext)
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
   useEffect(() => setBreadcrumbs([{text: 'builds', url: '/'}]), [])
   useEffect(() => subscribeToMore({
@@ -160,6 +161,9 @@ export default function Builds() {
     updateQuery: (prev, {subscriptionData: {data}}) => {
       return data ? applyDelta(prev, data.buildDelta) : prev
   }}), [])
+  useEffect(() => {
+    setOnChange({func: () => null})
+  }, [])
 
   if (loading && !data) return <Loading />
 
