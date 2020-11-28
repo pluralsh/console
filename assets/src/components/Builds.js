@@ -62,7 +62,7 @@ function Build({build: {id, repository, status, insertedAt, message, creator, sh
 
   return (
     <Box pad={BUILD_PADDING}>
-      <Box pad='small' margin={{top: 'small'}} direction='row' background='cardDetailLight'
+      <Box pad='small' margin={{top: 'small'}} direction='row' background='backgroundLight'
         align='center' focusIndicator={false} hoverIndicator='backgroundDark' round='xsmall'
         onClick={() => history.push(`/build/${id}`)}>
         <Box fill='horizontal'>
