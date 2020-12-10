@@ -7,6 +7,6 @@ end
 
 defmodule Watchman.ReplicatedCache do
   use Nebulex.Cache,
-    otp_app: :watchma,
+    otp_app: :watchman,
     adapter: Nebulex.Adapters.Replicated
 end
