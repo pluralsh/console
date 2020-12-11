@@ -24,7 +24,7 @@ export function RepositoryChoice({application, link}) {
         {hasIcon(application) && <ApplicationIcon application={application} size='40px' />}
         <Box>
           <Text size='small' style={{fontWeight: 500}}>{application.name}</Text>
-          <Text size='small' color='dark-6'>{application.spec.descriptor.description}</Text>
+          <Text size='small' color='dark-6'>{application.spec.descriptor.version} -- {application.spec.descriptor.description}</Text>
         </Box>
       </Box>
       <Box flex={false}>
