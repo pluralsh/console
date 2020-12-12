@@ -17,8 +17,13 @@ function Installation({application, setCurrentApplication, current: {name}}) {
       <ApplicationReadyIcon application={application} size='20px' showIcon />
       {descriptor.icons.length > 0 && <ApplicationIcon application={application} size='40px' />}
       <Box fill='horizontal'>
-        <Text size='small' weight={500}>{appname}</Text>
-        <Text size='small'>v{descriptor.version} -- {descriptor.description}</Text>
+        <Box direction='row' align='center' gap='xsmall'>
+          <Text size='small' weight={500}>{appname}</Text>
+          <Box round='xsmall' background='light-3' pad={{horizontal: '3px', vertical: '2px'}}>
+            <Text size='12px'>{descriptor.version}</Text>
+          </Box>
+        </Box>
+        <Text size='small'>{descriptor.description}</Text>
       </Box>
       <Box pad='small' flex={false}>
         {name === appname ? <Checkmark size='18px' color='brand' /> : null}
