@@ -27,5 +27,5 @@ defmodule Watchman.GraphQl.Resolvers.Observability do
     Observability.get_metric(query, start, now, step)
   end
 
-  defp ts(ts), do: Timex.to_unix(ts) * @nano
+  def ts(ts), do: Timex.to_unix(ts) * @nano
 end

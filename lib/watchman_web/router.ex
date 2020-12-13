@@ -27,6 +27,10 @@ defmodule WatchmanWeb.Router do
   scope "/" do
     pipe_through [:auth]
 
+    scope "/v1", WatchmanWeb do
+      get "/logs/:repo/download", LogController, :download
+    end
+
     forward "/gql", Absinthe.Plug,
       schema: Watchman.GraphQl,
       document_providers: [Watchman.GraphQl.Apq, Absinthe.Plug.DocumentProvider.Default]
