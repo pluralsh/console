@@ -10,7 +10,7 @@ defmodule WatchmanWeb.LogControllerTest do
         |> Map.get(:query)
         |> URI.decode_query()
         |> case do
-          %{"end" => "2"} ->
+          %{"end" => "0"} ->
             {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: []}})}}
           _ ->
             {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [

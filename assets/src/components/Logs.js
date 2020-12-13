@@ -321,11 +321,12 @@ function Downloader({query, repo}) {
   const [open,setOpen] = useState(false)
   return (
     <Box flex={false} style={animation} direction='row' justify='end' align='center' width={open ? '200px' : '40px'}>
-      <Box flex={false} pad='small' round='xsmall' hoverIndicator='light-2' onClick={() => setOpen(!open)}>
+      <Box flex={false} pad='small' round='xsmall' hoverIndicator='light-2' onClick={() => setOpen(!open)}
+           focusIndicator={false}>
         <Download size='small' />
       </Box>
       {open && DURATIONS.map(({text, value}) => (
-        <Box key={text} flex={false} pad='small' round='xsmall' hoverIndicator='light-2'
+        <Box key={text} flex={false} pad='small' round='xsmall' hoverIndicator='light-2' focusIndicator={false}
           onClick={() => download(downloadUrl(query, value, repo), `${repo}_logs.txt`)}>
           <Text size='small' weight={500}>{text}</Text>
         </Box>
