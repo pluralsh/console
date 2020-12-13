@@ -16,8 +16,8 @@ defmodule WatchmanWeb.LogControllerTest do
             {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
                 %{stream: %{"var" => "val"}, values: [["1", "hello"]]},
                 %{stream: %{"var" => "val2"}, values: [["1", "world"]]}
-              ]}}
-            )}}
+              ]}})
+            }}
         end
       end)
 

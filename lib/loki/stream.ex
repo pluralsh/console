@@ -11,7 +11,7 @@ defmodule Loki.Stream do
   end
 
   defp flatten_result(query, start_ts, end_ts) do
-    with {:ok, %Response{data: %Data{result: [_ | _] = results}}} <- Client.query(query, start_ts, end_ts, @limit),
+    with {:ok, %Response{data: %Data{result: [_ | _] = results}}} <- Client.query(query, start_ts, end_ts, @limit) |> IO.inspect(),
          [_ | _] = v <- flatten(results) do
       v
     else

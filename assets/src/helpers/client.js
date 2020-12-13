@@ -8,7 +8,7 @@ import { createAbsintheSocketLink } from "@absinthe/socket-apollo-link"
 import { createPersistedQueryLink } from "apollo-link-persisted-queries"
 import { hasSubscription } from "@jumpn/utils-graphql"
 import { split } from 'apollo-link'
-import {apiHost, secure} from './hostname'
+import { apiHost, secure } from './hostname'
 import { HttpLink } from 'apollo-boost'
 import { fetchToken, wipeToken } from './auth'
 

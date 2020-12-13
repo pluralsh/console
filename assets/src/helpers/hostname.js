@@ -8,6 +8,8 @@ export function localized(path) {
   return `${proto}//${hostname}:${port}${path}`
 }
 
+export const upstream = (path) => `https://${apiHost()}${path}`
+
 export function apiHost() {
   switch (window.location.hostname) {
     case "localhost":

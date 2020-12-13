@@ -5,7 +5,7 @@ import TinyQueue from 'tinyqueue'
 import { DashboardHeader } from './Dashboards'
 import { LOGS_Q } from './graphql/dashboards'
 import moment from 'moment'
-import { Checkmark, Close, Search, Up } from 'grommet-icons'
+import { Checkmark, Close, Download, Search, Up } from 'grommet-icons'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { useHistory, useParams } from 'react-router'
 import { BUILD_PADDING } from './Builds'
@@ -14,6 +14,9 @@ import SmoothScroller from './utils/SmoothScroller'
 import { last } from 'lodash'
 import { toMap, useQueryParams } from './utils/query'
 import { LOG_FILTER_Q } from './graphql/forge'
+import { upstream } from '../helpers/hostname'
+import fileDownload from 'js-file-download';
+import { fetchToken } from '../helpers/auth'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -24,6 +27,17 @@ const Level = {
   OTHER: 'o',
   FATAL: 'f'
 }
+
+const DURATIONS = [
+  {text: '30m', value: 30},
+  {text: '1hr', value: 60},
+  {text: '2hr', value: 120}
+]
+
+const animation = {
+  outline: 'none',
+  transition: 'width 0.75s cubic-bezier(0.000, 0.795, 0.000, 1.000)'
+};
 
 const FlyoutContext = React.createContext({})
 const LabelContext = React.createContext({})
@@ -97,6 +111,7 @@ function LogLine({line: {timestamp, value}, stream, level}) {
 function LogInfo({stream, stamp}) {
   const {setFlyout} = useContext(FlyoutContext)
   const {addLabel} = useContext(LabelContext)
+
   return (
     <Box flex={false} width='30%' fill='vertical' style={{overflow: 'auto'}} border={{side: 'left'}}>
       <Box background='#444' direction='row' pad={{horizontal: 'small', vertical: 'xsmall'}}
@@ -183,20 +198,33 @@ function ScrollIndicator({live, returnToTop}) {
   )
 }
 
-export default function Logs({application: {name}, search}) {
-  const {labels} = useContext(LabelContext)
+function downloadUrl(q, end, repo) {
+  const url = upstream(`/v1/logs/${repo}/download`)
+  const params = Object.entries({q, end})
+                  .map(kv => kv.map(encodeURIComponent).join("="))
+                  .join("&")
+  console.log(params)
+  return `${url}?${params}`
+}
+
+async function download(url, name) {
+  console.log(url)
+  const resp = await fetch(url, {headers: {'Authorization': `Bearer ${fetchToken()}`}})
+  const blob = await resp.blob()
+  fileDownload(blob, name)
+}
+
+export default function Logs({application: {name}, query}) {
   const [flyout, setFlyout] = useState(null)
   const [listRef, setListRef] = useState(null)
   const [live, setLive] = useState(true)
   const [loader, setLoader] = useState(null)
-  const searchQuery = search.length > 0 ? ` |~ "${search}"` : ''
-  const labelQuery = useMemo(() => (
-    [...labels, {name: 'namespace', value: name}].map(({name, value}) => `${name}="${value}"`).join(',')
-  ), [labels, name])
+
   const {data, loading, fetchMore, refetch} = useQuery(LOGS_Q, {
-    variables: {query: `{${labelQuery}}${searchQuery}`},
+    variables: {query},
     pollInterval: live ? POLL_INTERVAL : 0
   })
+
   const returnToTop = useCallback(() => {
     setLive(true)
     refetch().then(() => listRef.scrollToItem(0))
@@ -209,16 +237,9 @@ export default function Logs({application: {name}, search}) {
         <Stack fill anchor='bottom-left'>
           <Box fill style={{overflow: 'auto'}} pad={{top: 'small', horizontal: 'small'}}>
             {data && (
-              <LogContent
-                listRef={listRef}
-                setListRef={setListRef}
-                name={name}
-                logs={data.logs}
-                setLoader={setLoader}
-                search={`${searchQuery}:${labelQuery}`}
-                loading={loading}
-                fetchMore={fetchMore}
-                onScroll={(arg) => setLive(!arg)} />
+              <LogContent listRef={listRef} setListRef={setListRef} name={name}
+                logs={data.logs} setLoader={setLoader} search={query} loading={loading}
+                fetchMore={fetchMore} onScroll={(arg) => setLive(!arg)} />
             )}
           </Box>
           <ScrollIndicator live={live} returnToTop={returnToTop} />
@@ -228,11 +249,6 @@ export default function Logs({application: {name}, search}) {
     </FlyoutContext.Provider>
   )
 }
-
-const animation = {
-  outline: 'none',
-  transition: 'width 0.75s cubic-bezier(0.000, 0.795, 0.000, 1.000)'
-};
 
 function LogLabels({labels}) {
   const {removeLabel} = useContext(LabelContext)
@@ -276,7 +292,7 @@ function LogFilters({namespace, labels, search, setSearch, setLabels}) {
   if (!data || data.logFilters.length === 0) return null
 
   const {logFilters} = data
-  console.log(logFilters)
+
   return (
     <Box width='250px' flex={false} gap='xsmall' height='100%' style={{overflow: 'auto'}}
          border={{side: 'right', color: '#444'}} background='console'>
@@ -297,6 +313,23 @@ function LogFilters({namespace, labels, search, setSearch, setLabels}) {
           </Box>
         )
       })}
+    </Box>
+  )
+}
+
+function Downloader({query, repo}) {
+  const [open,setOpen] = useState(false)
+  return (
+    <Box flex={false} style={animation} direction='row' justify='end' align='center' width={open ? '200px' : '40px'}>
+      <Box flex={false} pad='small' round='xsmall' hoverIndicator='light-2' onClick={() => setOpen(!open)}>
+        <Download size='small' />
+      </Box>
+      {open && DURATIONS.map(({text, value}) => (
+        <Box key={text} flex={false} pad='small' round='xsmall' hoverIndicator='light-2'
+          onClick={() => download(downloadUrl(query, value, repo), `${repo}_logs.txt`)}>
+          <Text size='small' weight={500}>{text}</Text>
+        </Box>
+      ))}
     </Box>
   )
 }
@@ -326,13 +359,17 @@ export function LogViewer() {
     const {[name]: _val, ...rest} = labels
     setLabels(rest)
   }, [labels, setLabels])
+  const searchQuery = search.length > 0 ? ` |~ "${search}"` : ''
+  const labelQuery = useMemo(() => (
+    [...labelList, {name: 'namespace', value: repo}].map(({name, value}) => `${name}="${value}"`).join(',')
+  ), [labelList, repo])
+  const logQuery = `{${labelQuery}}${searchQuery}`
 
   return (
     <LabelContext.Provider value={{addLabel, removeLabel, labels: labelList}}>
       <Box fill>
         <Box gap='small' flex={false}>
-          <Box pad={{vertical: 'small', ...BUILD_PADDING}} gap='medium'
-              direction='row' fill='horizontal' align='center' height='80px'>
+          <Box pad={BUILD_PADDING} gap='medium' direction='row' fill='horizontal' align='center' height='85px'>
             <Box direction='row' fill='horizontal' gap='small' align='center'>
               {hasIcon(app) && <ApplicationIcon application={app} size='40px' />}
               <Box gap='xsmall'>
@@ -340,24 +377,22 @@ export function LogViewer() {
                 {labelList.length > 0 && <LogLabels labels={labelList} />}
               </Box>
             </Box>
-            <Box flex={false} style={animation} width={expanded ? '50%' : '200px'}
-                direction='row' align='center' border={expanded ? {side: 'bottom', color: 'brand'} : 'bottom'}
-                onClick={() => setExpanded(true)} focusIndicator={false} justify='end'>
-              <Search size='20px' />
-              <TextInput
-                plain
-                onBlur={() => setExpanded(false)}
-                size='small'
-                style={animation}
-                value={search}
-                onChange={({target: {value}}) => setSearch(value)}
-                placeholder='this is for searching' />
+            <Box flex={false} justify='end' pad={{top: 'xsmall'}} gap='xsmall' direction='row' width='50%'>
+              <Box style={animation} width={expanded ? '100%' : '200px'} direction='row'
+                  align='center' border={expanded ? {side: 'bottom', color: 'brand'} : 'bottom'}
+                  onClick={() => setExpanded(true)} focusIndicator={false} justify='end'>
+                <Search size='20px' />
+                <TextInput plain onBlur={() => setExpanded(false)} size='small'
+                  style={animation} value={search} onChange={({target: {value}}) => setSearch(value)}
+                  placeholder='this is for searching' />
+              </Box>
+              <Downloader query={logQuery} repo={repo} />
             </Box>
           </Box>
         </Box>
         <Box fill direction='row'>
           <LogFilters namespace={repo} setSearch={setSearch} setLabels={setLabels} labels={labels} search={search} />
-          <Logs application={app} search={search} />
+          <Logs application={app} query={logQuery} />
         </Box>
       </Box>
     </LabelContext.Provider>

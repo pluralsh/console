@@ -6,7 +6,7 @@ defmodule WatchmanWeb.LogController do
 
   def download(conn, %{"repo" => repo, "q" => q, "end" => e}) do
     now   = Timex.now()
-    start = Timex.shift(now, minutes: String.to_integer(e))
+    start = Timex.shift(now, minutes: -String.to_integer(e))
 
     conn =
       conn
