@@ -40,4 +40,4 @@ secrets:
   git_email: forge@piazzaapp.com
 {{ end}}
 
-license: {{ .License }}
+license: {{ .License | quote }}
