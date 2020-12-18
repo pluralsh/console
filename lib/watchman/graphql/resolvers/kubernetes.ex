@@ -4,6 +4,7 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
   alias Kazan.Apis.Apps.V1, as: Apps
   alias Kazan.Apis.Extensions.V1beta1, as: Extensions
   alias Kazan.Apis.Batch.V1beta1, as: Batch
+  alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector, LabelSelectorRequirement}
 
   def list_applications(_, _) do
@@ -40,6 +41,11 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
 
   def resolve_cron_job(%{namespace: ns, name: name}, _) do
     Batch.read_namespaced_cron_job!(ns, name)
+    |> Kazan.run()
+  end
+
+  def resolve_job(%{namespace: ns, name: name}, _) do
+    BatchV1.read_namespaced_job!(ns, name)
     |> Kazan.run()
   end
 

@@ -39,6 +39,7 @@ defmodule Watchman.GraphQl.Kubernetes do
   import_types Watchman.GraphQl.Kubernetes.Node
   import_types Watchman.GraphQl.Kubernetes.CronJob
   import_types Watchman.GraphQl.Kubernetes.LogFilter
+  import_types Watchman.GraphQl.Kubernetes.Job
 
   delta :application
 
@@ -99,6 +100,15 @@ defmodule Watchman.GraphQl.Kubernetes do
       middleware Rbac, perm: :read, arg: :namespace
 
       resolve &Kubernetes.resolve_cron_job/2
+    end
+
+    field :job, :job do
+      middleware Authenticated
+      arg :namespace, non_null(:string)
+      arg :name, non_null(:string)
+      middleware Rbac, perm: :read, arg: :namespace
+
+      resolve &Kubernetes.resolve_job/2
     end
 
     field :pod, :pod do

@@ -201,6 +201,30 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
     end
   end
 
+  describe "job" do
+    test "it can read a job" do
+      user = insert(:user)
+      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      insert(:role_binding, role: role, user: user)
+      expect(Kazan, :run, fn _ -> {:ok, job("job")} end)
+
+      {:ok, %{data: %{"job" => job}}} = run_query("""
+        query Cron($name: String!) {
+          job(name: $name, namespace: $name) {
+            metadata { name }
+            status { active }
+            spec { parallelism backoffLimit }
+          }
+        }
+      """, %{"name" => "job"}, %{current_user: user})
+
+      assert job["metadata"]["name"] == "job"
+      assert job["status"]["active"]
+      assert job["spec"]["parallelism"] == 1
+      assert job["spec"]["backoffLimit"] == 5
+    end
+  end
+
   describe "pod" do
     test "it can query an individual pod" do
       user = insert(:user)

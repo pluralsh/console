@@ -3,6 +3,7 @@ defmodule KubernetesScaffolds do
   alias Kazan.Apis.Apps.V1, as: Apps
   alias Kazan.Apis.Extensions.V1beta1, as: Extensions
   alias Kazan.Apis.Batch.V1beta1, as: Batch
+  alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector}
   alias Kube
 
@@ -103,6 +104,17 @@ defmodule KubernetesScaffolds do
         concurrency_policy: "Forbid",
         schedule: "* * * * *",
         suspend: false
+      }
+    }
+  end
+
+  def job(name) do
+    %BatchV1.Job{
+      metadata: %{name: name, namespace: name},
+      status: %BatchV1.JobStatus{active: 1},
+      spec: %BatchV1.JobSpec{
+        parallelism: 1,
+        backoff_limit: 5
       }
     }
   end
