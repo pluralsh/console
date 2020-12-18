@@ -63,7 +63,7 @@ export default function Component() {
   return (
     <Box fill background='backgroundColor'>
       <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}} direction='row' align='center' height='60px'>
-        <ComponentName />
+        <ComponentName component={{kind, name}} />
       </Box>
       <Box fill style={{overflow: 'auto'}} pad={{horizontal: 'medium'}} gap='xsmall'>
         <ComponentContent namespace={repo} kind={kind} name={name} />

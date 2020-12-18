@@ -181,16 +181,27 @@ export const CronJobFragment = gql`
   ${MetadataFragment}
 `;
 
+export const JobStatus = gql`
+  fragment JobStatus on JobStatus {
+    active
+    completionTime
+    succeeded
+    failed
+    startTime
+  }
+`;
+
 export const JobFragment = gql`
   fragment JobFragment on Job {
     metadata { ...MetadataFragment }
-    status { active completionTime succeeded failed startTime }
+    status { ...JobStatus }
     spec { backoffLimit parallelism activeDeadlineSeconds }
-    raw
     pods { ...PodFragment }
+    raw
   }
   ${MetadataFragment}
   ${PodFragment}
+  ${JobStatus}
 `;
 
 export const LogFilterFragment = gql`

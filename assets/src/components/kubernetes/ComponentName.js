@@ -10,13 +10,12 @@ export default function ComponentName() {
   const {currentApplication} = useContext(InstallationContext)
   if (!currentApplication) return  null
   const component = currentApplication.status.components.find((c) => c.kind.toLowerCase() === kind.toLowerCase() && c.name === name)
-  if (!component) return null
 
   return (
     <Box direction='row' gap='small' align='center' margin={{left: 'small'}}>
-      <Icon kind={component.kind} size='15px' />
+      <Icon kind={kind} size='15px' />
       <Text size='medium' weight={500}>{kind.toLowerCase()}/{name}</Text>
-      <ReadyIcon readiness={component.status} size='20px' showIcon />
+      {component && <ReadyIcon readiness={component.status} size='20px' showIcon />}
     </Box>
   )
 }
