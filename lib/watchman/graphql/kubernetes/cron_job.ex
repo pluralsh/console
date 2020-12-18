@@ -10,6 +10,10 @@ defmodule Watchman.GraphQl.Kubernetes.CronJob do
 
     field :raw,    non_null(:string), resolve: fn model, _, _ -> encode(model) end
     field :events, list_of(:event), resolve: fn model, _, _ -> Kubernetes.list_events(model) end
+    field :pods, list_of(:pod), resolve: fn
+      %{metadata: metadata, spec: %{job_template: %{spec: %{selector: selector}}}}, _, _ ->
+        Kubernetes.list_pods(metadata, selector)
+    end
   end
 
   object :cron_status do

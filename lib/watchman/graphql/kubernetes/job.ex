@@ -10,6 +10,10 @@ defmodule Watchman.GraphQl.Kubernetes.Job do
 
     field :raw,    non_null(:string), resolve: fn model, _, _ -> encode(model) end
     field :events, list_of(:event), resolve: fn model, _, _ -> Kubernetes.list_events(model) end
+    field :pods, list_of(:pod), resolve: fn
+      %{metadata: metadata, spec: %{selector: selector}}, _, _ ->
+        Kubernetes.list_pods(metadata, selector)
+    end
   end
 
   object :job_status do
