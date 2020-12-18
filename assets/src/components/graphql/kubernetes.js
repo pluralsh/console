@@ -166,10 +166,7 @@ export const NodeFragment = gql`
       capacity { cpu memory }
       conditions { type status message }
     }
-    spec {
-      podCidr
-      providerId
-    }
+    spec { podCidr providerId }
   }
   ${MetadataFragment}
 `;
@@ -178,11 +175,7 @@ export const CronJobFragment = gql`
   fragment CronJobFragment on CronJob {
     metadata { ...MetadataFragment }
     status { lastScheduleTime }
-    spec {
-      schedule
-      suspend
-      concurrencyPolicy
-    }
+    spec { schedule suspend concurrencyPolicy }
     raw
   }
   ${MetadataFragment}
@@ -194,8 +187,10 @@ export const JobFragment = gql`
     status { active completionTime succeeded failed startTime }
     spec { backoffLimit parallelism activeDeadlineSeconds }
     raw
+    pods { ...PodFragment }
   }
   ${MetadataFragment}
+  ${PodFragment}
 `;
 
 export const LogFilterFragment = gql`

@@ -105,6 +105,18 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
     end
   end
 
+  def list_jobs(%{namespace: namespace}) do
+    BatchV1.list_namespaced_job!(namespace)
+    |> Kazan.run()
+    |> case do
+      {:ok, %{items: jobs}} -> {:ok, jobs}
+      error -> error
+    end
+  end
+
+  def has_owner?(%{metadata: %{owner_references: [%{uid: uid} | _]}}, uid), do: true
+  def has_owner?(_, _), do: false
+
   def list_pods_for_node(%{metadata: %{name:  name}}) do
     Core.list_pod_for_all_namespaces!(field_selector: "spec.nodeName=#{name}")
     |> Kazan.run()

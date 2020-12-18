@@ -9,6 +9,7 @@ import { JOB_Q } from './queries'
 import { Container } from './utils'
 import { Events } from './Event'
 import { RawContent } from './Component'
+import { PodList } from './Pod'
 
 function Status({status}) {
   return (
@@ -50,7 +51,7 @@ function Spec({spec}) {
 
 export default function Job() {
   const {repo, name} = useParams()
-  const {data} = useQuery(JOB_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
+  const {data, refetch} = useQuery(JOB_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
 
   if (!data) return <Loading />
 
@@ -74,6 +75,7 @@ export default function Job() {
           <Metadata metadata={job.metadata} />
           <Status status={job.status} />
           <Spec spec={job.spec} />
+          <PodList pods={job.pods} refetch={refetch} namespace={repo} />
         </TabContent>
         <TabContent name='events'>
           <Events events={job.events} />

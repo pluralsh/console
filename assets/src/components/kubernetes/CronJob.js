@@ -9,6 +9,7 @@ import { RawContent } from './Component'
 import { CRON_JOB_Q } from './queries'
 import { Events } from './Event'
 import { Container } from './utils'
+import { PodList } from './Pod'
 
 function Status({status}) {
   return (

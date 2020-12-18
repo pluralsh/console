@@ -10,9 +10,10 @@ defmodule Watchman.GraphQl.Kubernetes.CronJob do
 
     field :raw,    non_null(:string), resolve: fn model, _, _ -> encode(model) end
     field :events, list_of(:event), resolve: fn model, _, _ -> Kubernetes.list_events(model) end
-    field :pods, list_of(:pod), resolve: fn
-      %{metadata: metadata, spec: %{job_template: %{spec: %{selector: selector}}}}, _, _ ->
-        Kubernetes.list_pods(metadata, selector)
+    field :jobs,   list_of(:job), resolve: fn
+      %{metadata: %{uid: uid} = meta}, _, _ ->
+        with {:ok, jobs} <- Kubernetes.list_jobs(meta),
+          do: {:ok, Enum.filter(jobs, &Kubernetes.has_owner?(&1, uid))}
     end
   end
 
