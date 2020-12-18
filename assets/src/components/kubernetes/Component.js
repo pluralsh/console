@@ -12,6 +12,7 @@ import { BUILD_PADDING } from '../Builds'
 import Highlight from 'react-highlight.js'
 import yaml from 'yaml'
 import CronJob from './CronJob'
+import Job from './Job'
 
 function ComponentContent({namespace, kind, name}) {
   switch (kind.toLowerCase()) {
@@ -25,6 +26,8 @@ function ComponentContent({namespace, kind, name}) {
       return <StatefulSet namespace={namespace} kind={kind} name={name} />
     case "cronjob":
       return <CronJob namespace={namespace} kind={kind} name={name} />
+    case 'job':
+      return <Job namespace={namespace} kind={kind} name={name} />
     default:
       return null
   }

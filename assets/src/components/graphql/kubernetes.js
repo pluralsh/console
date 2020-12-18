@@ -188,6 +188,16 @@ export const CronJobFragment = gql`
   ${MetadataFragment}
 `;
 
+export const JobFragment = gql`
+  fragment JobFragment on Job {
+    metadata { ...MetadataFragment }
+    status { active completionTime succeeded failed startTime }
+    spec { backoffLimit parallelism activeDeadlineSeconds }
+    raw
+  }
+  ${MetadataFragment}
+`;
+
 export const LogFilterFragment = gql`
   fragment LogFilterFragment on LogFilter {
     metadata {  ...MetadataFragment }

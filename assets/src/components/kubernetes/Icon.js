@@ -1,22 +1,25 @@
 import React from 'react'
-import { Clock, Cube, Resources, Services, ShareOption, VirtualMachine } from 'grommet-icons'
+import { Briefcase, Clock, Cube, Resources, Services, ShareOption, VirtualMachine } from 'grommet-icons'
 
 const ICON_SIZE = '14px'
 
 export default function Icon({kind, size}) {
+  const iconSize = size || ICON_SIZE
   switch (kind.toLowerCase()) {
     case "service":
-      return <Services size={size || ICON_SIZE} />
+      return <Services size={iconSize} />
     case "deployment":
-      return <Resources size={size || ICON_SIZE} />
+      return <Resources size={iconSize} />
     case "statefulset":
-      return <VirtualMachine size={size || ICON_SIZE} />
+      return <VirtualMachine size={iconSize} />
     case "ingress":
-      return <ShareOption size={size || ICON_SIZE} />
+      return <ShareOption size={iconSize} />
     case "cronjob":
-      return <Clock size={size || ICON_SIZE} />
+      return <Clock size={iconSize} />
     case 'pod':
-      return <Cube size={size || ICON_SIZE} />
+      return <Cube size={iconSize} />
+    case 'job':
+      return <Briefcase size={iconSize} />
     default:
       return null
   }
