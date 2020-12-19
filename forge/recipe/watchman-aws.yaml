@@ -1,0 +1,33 @@
+name: watchman-gcp
+description: Deploys watchman on an EKS cluster
+provider: AWS
+dependencies:
+- repo: bootstrap
+  name: aws-k8s
+sections:
+- name: watchman
+  items:
+  - type: TERRAFORM
+    name: aws
+    configuration: []
+  - type: HELM
+    name: watchman
+    configuration:
+    - name: watchman_dns
+      documentation: FQDN for the watchman dashboard
+      type: STRING
+    - name: dns_domain
+      documentation: domain to put watchman under
+      type: STRING
+    - name: git_user
+      documentation: user for watchman to use in git operations
+      type: STRING
+    - name: git_email
+      documentation: email for git operations by watchman
+      type: STRING
+    - name: admin_email
+      documentation: email for the initial admin user
+      type: STRING
+    - name: admin_name
+      documentation: name for the initial admin user
+      type: STRING

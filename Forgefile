@@ -1,6 +1,6 @@
 REPO watchman
 
-RECIPE forge/recipe/watchman-gcp.yaml
+RECIPE forge/recipe/*
 
 TF terraform/*
 HELM charts/watchman
