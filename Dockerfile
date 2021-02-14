@@ -91,13 +91,15 @@ COPY --from=helm /usr/local/bin/terraform /usr/local/bin/terraform
 
 RUN apk --no-cache add \
         curl \
-        python \
+        python3 \
+        py3-pip \
         py-crcmod \
         bash \
         libc6-compat \
         openssh-client \
         git \
         gnupg \
+    && ln -sf python3 /usr/bin/python \
     && curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     tar xzf google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     rm google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
