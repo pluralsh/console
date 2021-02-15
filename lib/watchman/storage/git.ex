@@ -26,7 +26,7 @@ defmodule Watchman.Storage.Git do
 
   def pull() do
     with {:ok, _} <- git("reset", ["--hard", "origin/master"]),
-      do: git("pull")
+      do: git("pull", ["--rebase"])
   end
 
   def revise(msg) do
