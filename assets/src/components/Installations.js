@@ -93,7 +93,7 @@ function applyDelta(prev, {delta, payload}) {
 export function InstallationsProvider({children}) {
   const [currentApplication, setCurrentApplication] = useState(null)
   const [{func: onChange}, setOnChange] = useState({func: () => null})
-  const {data, subscribeToMore} = useQuery(APPLICATIONS_Q)
+  const {data, subscribeToMore} = useQuery(APPLICATIONS_Q, {pollInterval: 120_000})
   const wrapped = useCallback((application) => {
     setCurrentApplication(application)
     application && onChange(application)
