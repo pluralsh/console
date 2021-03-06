@@ -80,6 +80,11 @@ defmodule Watchman.GraphQl do
   end
 
   mutation do
+    field :external_token, :string do
+      middleware Authenticated
+      resolve &Forge.resolve_external_token/2
+    end
+
     field :create_build, :build do
       middleware Authenticated
       arg :attributes, non_null(:build_attributes)

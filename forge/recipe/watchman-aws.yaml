@@ -1,4 +1,4 @@
-name: watchman-gcp
+name: watchman-aws
 description: Deploys watchman on an EKS cluster
 provider: AWS
 dependencies:

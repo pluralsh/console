@@ -5,8 +5,8 @@ terraform:
 helm:
   charts/watchman: h1:GdbIMOehhLqyq8gs/Hu5hq38cKr8wR1SlgRpEIXiXDc=
 recipe:
-  forge/recipe/watchman-aws.yaml: a19700d14dc5fcfe2e5a11816ca4a317778da502ecc9d2265aa31662ab2baa4e
-  forge/recipe/watchman-gcp.yaml: 9cd37df9dc8ff34c2456b631355f0c18a8ec9ee62b20804400a7e1b674000754
+  forge/recipe/watchman-aws.yaml: 9e2bb36fefa715a56c6b082e96cec36f37e22506c929f8f7ef3a187692724421
+  forge/recipe/watchman-gcp.yaml: e52c40d03e8f4c91deaa5a64097a74d7afe64a35bacc6bed55b6c57698a6433a
 integration: {}
 shell:
   forge/ops/shell.yaml: f8064237b131eb8b6a7a299185746508e4f08a137d8b3d093e994aa21d8c5f1f

@@ -1,8 +1,11 @@
 defmodule Watchman.GraphQl.Resolvers.Forge do
-  alias Watchman.Forge.Repositories
+  alias Watchman.Forge.{Repositories, ExternalToken}
   alias Watchman.Forge.{Connection, PageInfo}
   alias Watchman.Services.Forge
   alias Kube.Client
+
+  def resolve_external_token(_, _),
+    do: ExternalToken.fetch()
 
   def list_installations(args, _) do
     Repositories.list_installations(args[:first], args[:after])

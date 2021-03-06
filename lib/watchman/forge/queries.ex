@@ -1,4 +1,11 @@
 defmodule Watchman.Forge.Queries do
+  @page_info """
+    fragment PageInfo on PageInfo {
+      end_cursor
+      has_next_page
+    }
+  """
+
   @dashboard_fragment """
     fragment DashboardFragment on Dashboard {
       name
@@ -12,9 +19,7 @@ defmodule Watchman.Forge.Queries do
       name
       icon
       description
-      dashboards {
-        ...DashboardFragment
-      }
+      dashboards { ...DashboardFragment }
     }
     #{@dashboard_fragment}
   """
@@ -22,9 +27,7 @@ defmodule Watchman.Forge.Queries do
   @installation_fragment """
     fragment InstallationFragment on Installation {
       id
-      repository {
-        ...RepositoryFragment
-      }
+      repository { ...RepositoryFragment }
     }
     #{@repository_fragment}
   """
@@ -32,14 +35,9 @@ defmodule Watchman.Forge.Queries do
   @installation_query """
     query Installations($first: Int!, $cursor: String) {
       installations(first: $first, after: $cursor) {
-        pageInfo {
-          endCursor
-          hasNextPage
-        }
+        pageInfo { endCursor hasNextPage }
         edges {
-          node {
-            ...InstallationFragment
-          }
+          node { ...InstallationFragment }
         }
       }
     }
@@ -47,4 +45,6 @@ defmodule Watchman.Forge.Queries do
   """
 
   def installation_query(), do: @installation_query
+
+  def external_token_mutation(), do: "mutation { externalToken }"
 end

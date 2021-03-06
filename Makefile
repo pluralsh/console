@@ -5,6 +5,7 @@ APP_NAME ?= watchman
 APP_VSN ?= `cat VERSION`
 BUILD ?= `git rev-parse --short HEAD`
 DKR_HOST ?= dkr.piazza.app
+FORGE_WWW ?= ../forge/www/src
 
 help:
 	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -33,3 +34,11 @@ connectdb: ## proxies the db in kubernetes via kubectl
 
 web: ## starts a local webserver
 	cd assets && yarn start
+
+import-incidents:
+	cp $(FORGE_WWW)/components/incidents/* assets/src/components/incidents
+	cp $(FORGE_WWW)/components/utils/AlternatingBox.js assets/src/components/utils/AlternatingBox.js
+	cp $(FORGE_WWW)/components/utils/Divider.js assets/src/components/utils/Divider.js
+	cp $(FORGE_WWW)/components/utils/TypeaheadEditor.js assets/src/components/utils/TypeaheadEditor.js
+	cp $(FORGE_WWW)/components/utils/Tooltip.js assets/src/components/utils/Tooltip.js
+	cp $(FORGE_WWW)/components/utils/hooks.js assets/src/components/utils/hooks.js

@@ -1,5 +1,5 @@
 name: watchman-gcp
-description: Deploys watchman on a GKE cluster
+description: Deploys watchman on a gke cluster
 provider: GCP
 dependencies:
 - repo: bootstrap
@@ -11,7 +11,7 @@ sections:
     name: gcp
     configuration:
     - name: gcp_project_id
-      documentation: project id the gke cluster lives in
+      documentation: project where the gke cluster lives
       type: STRING
   - type: HELM
     name: watchman
