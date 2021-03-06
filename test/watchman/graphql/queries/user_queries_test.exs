@@ -1,5 +1,6 @@
 defmodule Watchman.GraphQl.UserQueriesTest do
   use Watchman.DataCase, async: true
+  use Mimic
 
   describe "users" do
     test "It can list all watchman users" do
@@ -134,6 +135,21 @@ defmodule Watchman.GraphQl.UserQueriesTest do
 
       assert from_connection(found)
              |> ids_equal(roles)
+    end
+  end
+
+  describe "externalToken" do
+    test "it can fetch an external token for the forge user" do
+      expect(Mojito, :post, fn _, _, _, _ ->
+        {:ok, %{body: Poison.encode!(%{data: %{externalToken: "external-token"}})}}
+      end)
+      user = insert(:user)
+
+      {:ok, %{data: %{"externalToken" => token}}} = run_query("""
+        query { externalToken }
+      """, %{}, %{current_user: user})
+
+      assert token == "external-token"
     end
   end
 end

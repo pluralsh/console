@@ -1,6 +1,5 @@
 defmodule Watchman.GraphQl.UserMutationsTest do
   use Watchman.DataCase, async: true
-  use Mimic
   alias Watchman.Services.Users
 
   describe "signIn" do
@@ -228,21 +227,6 @@ defmodule Watchman.GraphQl.UserMutationsTest do
 
       assert deleted["id"] == role.id
       refute refetch(role)
-    end
-  end
-
-  describe "externalToken" do
-    test "it can fetch an external token for the forge user" do
-      expect(Mojito, :post, fn _, _, _, _ ->
-        {:ok, %{body: Poison.encode!(%{data: %{externalToken: "external-token"}})}}
-      end)
-      user = insert(:user)
-
-      {:ok, %{data: %{"externalToken" => token}}} = run_query("""
-        mutation { externalToken }
-      """, %{}, %{current_user: user})
-
-      assert token == "external-token"
     end
   end
 end

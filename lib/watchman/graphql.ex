@@ -73,6 +73,11 @@ defmodule Watchman.GraphQl do
       resolve &Forge.resolve_application/2
     end
 
+    field :external_token, :string do
+      middleware Authenticated
+      resolve &Forge.resolve_external_token/2
+    end
+
     import_fields :user_queries
     import_fields :observability_queries
     import_fields :kubernetes_queries
@@ -80,11 +85,6 @@ defmodule Watchman.GraphQl do
   end
 
   mutation do
-    field :external_token, :string do
-      middleware Authenticated
-      resolve &Forge.resolve_external_token/2
-    end
-
     field :create_build, :build do
       middleware Authenticated
       arg :attributes, non_null(:build_attributes)
