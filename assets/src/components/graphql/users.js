@@ -62,6 +62,7 @@ export const ME_Q = gql`
       ...UserFragment
       boundRoles { ...RoleFragment }
     }
+    externalToken
   }
   ${UserFragment}
   ${RoleFragment}

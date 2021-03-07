@@ -1,0 +1,127 @@
+import React, { useCallback, useEffect, useState } from 'react'
+import { Box, TextInput, Text } from 'grommet'
+import { Button, SecondaryButton } from 'forge-core'
+import { Slate, Editable } from 'slate-react'
+import { useEditor } from '../utils/hooks'
+import { plainDeserialize, plainSerialize } from '../../utils/slate'
+import { SeveritySelect } from './Severity'
+import { useMutation, useQuery } from 'react-apollo'
+import { RepoIcon } from '../repos/Repositories'
+import { Checkmark } from 'grommet-icons'
+import { CREATE_INCIDENT, INCIDENTS_Q, INSTALLATIONS_Q } from './queries'
+import { appendConnection, updateCache } from '../../utils/graphql'
+import { StatusSelector } from './IncidentStatus'
+import { TagInput } from '../repos/Tags'
+
+
+export function IncidentForm({attributes, setAttributes, statusEdit}) {
+  const [editorState, setEditorState] = useState(plainDeserialize(attributes.description || ''))
+  const editor = useEditor()
+  const setDescription = useCallback((editorState) => {
+    setEditorState(editorState)
+    setAttributes({...attributes, description: plainSerialize(editorState)})
+  }, [setAttributes, attributes, setEditorState])
+
+  return (
+    <Box gap='small'>
+      <Box direction='row' gap='medium'>
+        <Box fill='horizontal' direction='row' gap='small' align='center'>
+          <Text size='small' weight='bold'>Title</Text>
+          <TextInput
+            label='title'
+            value={attributes.title}
+            placeholder='Short Incident Title'
+            onChange={({target: {value}}) => setAttributes({...attributes, title: value})} />
+          {statusEdit && (
+            <StatusSelector
+              status={attributes.status}
+              setStatus={(status) => setAttributes({...attributes, status})} />
+          )}
+        </Box>
+        <SeveritySelect 
+          severity={attributes.severity} 
+          setSeverity={(severity) => setAttributes({...attributes, severity})} />
+      </Box>
+      <Box style={{maxHeight: '80%'}} pad='small' border round='xsmall'>
+        <Slate
+          editor={editor}
+          value={editorState}
+          onChange={setDescription}>
+          <Editable placeholder='Description of the incident (markdown allowed)' />
+        </Slate>
+      </Box>
+      <TagInput
+        tags={attributes.tags || []}
+        addTag={(tag) => setAttributes({...attributes, tags: [tag, ...(attributes.tags || [])]})}
+        removeTag={(tag) => setAttributes({...attributes, tags: attributes.tags.filter((t) => t !== tag)})} />
+    </Box>
+  )
+}
+
+export function RepoOption({repo, selected, setRepository}) {
+  return (
+    <Box flex={false} direction='row' align='center' gap='small' onClick={() => setRepository(repo)}
+          hoverIndicator='light-3' pad='small' focusIndicator={false}>
+      <RepoIcon repo={repo} />
+      <Box fill='horizontal'>
+        <Text size='small' weight={500}>{repo.name}</Text>
+        <Text size='small'><i>{repo.description}</i></Text>
+      </Box>
+      {selected.id === repo.id && (
+        <Checkmark size='15px' color='brand' />
+      )}
+    </Box>
+  )
+}
+
+export function RepositorySelect({repository, setRepository}) {
+  const {data} = useQuery(INSTALLATIONS_Q, {fetchPolicy: "cache-and-network"})
+
+  useEffect(() => {
+    if (data && data.installations && !repository) {
+      const installation = data.installations.edges[0]
+      setRepository(installation && installation.node.repository)
+    }
+  }, [data, repository, setRepository])
+  if (!data || !repository) return null
+
+  return (     
+    <Box width='30%' style={{overflow: 'scroll', maxHeight: '60vh'}} flex={false}>
+      {data.installations.edges.map(({node: {repository: repo}}) => (
+        <RepoOption repo={repo} selected={repository} setRepository={setRepository} />
+      ))}
+    </Box>
+  )
+}
+
+export function CreateIncident({onCompleted}) {
+  const [repository, setRepository] = useState(null)
+  const [attributes, setAttributes] = useState({title: '', description: '', severity: 4, tags: []})
+  const [mutation, {loading}] = useMutation(CREATE_INCIDENT, {
+    variables: {
+      repositoryId: repository && repository.id, 
+      attributes:  {...attributes, tags: attributes.tags.map((t) => ({tag: t}))}
+    },
+    update: (cache, {data: { createIncident }}) => updateCache(cache, {
+      query: INCIDENTS_Q,
+      variables: {q: null},
+      update: (prev) => appendConnection(prev, createIncident, 'Incident', 'incidents')
+    }),
+    onCompleted
+  })
+
+  return (
+    <Box flex={false} border={{side: 'bottom', color: 'light-5'}}>
+      <Box animation='fadeIn' flex={false} direction='row' border={{side: 'between', color: 'light-5'}} gap='0px'>
+        <RepositorySelect repository={repository} setRepository={setRepository} />
+        <Box gap='small' pad='small' fill>
+          <IncidentForm attributes={attributes} setAttributes={setAttributes} />
+          <Box direction='row' justify='end' gap='small'>
+            <SecondaryButton label='Cancel' onClick={onCompleted} />
+            <Button loading={loading} label='Create' onClick={mutation} />
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  )
+}

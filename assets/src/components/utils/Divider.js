@@ -1,7 +1,7 @@
-import React from 'react'
-import {ThemeContext, Text} from 'grommet'
+import React, { useContext } from 'react'
+import { ThemeContext, Text } from 'grommet'
+import { normalizeColor } from 'grommet/utils'
 import styled from 'styled-components'
-import {normalizeColor} from './colors'
 
 const StyledDivider = styled.div`
 ${props => (
@@ -25,16 +25,12 @@ ${props => (
 )}
 `;
 
-function Divider(props) {
+export default function Divider({color, text}) {
+  const theme = useContext(ThemeContext)
+
   return (
-    <ThemeContext.Consumer>
-    {theme => (
-      <StyledDivider theme={theme} color={props.color}>
-        {props.text && <Text style={{fontWeight: 500}} size='small'>{props.text}</Text>}
-      </StyledDivider>
-    )}
-    </ThemeContext.Consumer>
+    <StyledDivider theme={theme} color={color}>
+      {text && <Text weight={500} size='small'>{text}</Text>}
+    </StyledDivider>
   )
 }
-
-export default Divider

@@ -17,7 +17,7 @@ export function EnsureLogin({children}) {
   if (!data) return null
 
   return (
-    <LoginContext.Provider value={{me: data.me}}>
+    <LoginContext.Provider value={{me: data.me, token: data.externalToken}}>
       {children}
     </LoginContext.Provider>
   )

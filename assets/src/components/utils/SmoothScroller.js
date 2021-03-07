@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { Box } from 'grommet'
 import InfiniteLoader from 'react-window-infinite-loader'
-import { VariableSizeList } from 'react-window'
+import { VariableSizeList } from 'react-window-reversed'
 import Autosizer from 'react-virtualized-auto-sizer'
 import memoize from 'memoize-one'
 import { CellMeasurer } from 'forge-core'
@@ -29,26 +29,25 @@ function areEqual(prevProps, nextProps) {
   );
 }
 
-const Item = ({ index, mapper, parentRef, isItemLoaded, placeholder, items, style }) => {
+const Item = ({ index, mapper, isItemLoaded, placeholder, items, setSize }) => {
   if (!isItemLoaded(index)) {
     return placeholder && placeholder(index)
   }
 
-  return mapper(items[index], items[index + 1] || {}, parentRef, style);
+  return mapper(items[index], {next: items[index + 1] || {}, prev: items[index - 1] || {}}, {setSize, index});
 };
 
-const ItemWrapper = React.memo(({data: {setSize, width, refreshKey, items, ...rest}, style, index, ...props}) => {
+const ItemWrapper = React.memo(({data: {setSize, width, refreshKey, items, isItemLoaded, placeholder, mapper}, style, index, ...props}) => {
   const [rowRef, setRowRef] = useState(null)
   const item = items[index]
+  const sizeCallback = useCallback(() => {
+    rowRef && setSize(index, rowRef.getBoundingClientRect().height)
+// eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rowRef, index])
+  
   useEffect(() => {
-    if (!rowRef) return
-    const onTimeout = () => {
-      setSize(index, rowRef.getBoundingClientRect().height)
-    }
-    onTimeout()
-    const timeouts = [10, 50, 100, 500, 1000].map((timeout) => setTimeout(onTimeout, timeout))
-    return () => timeouts.map(clearTimeout)
-  }, [rowRef, width, item, index]);
+    sizeCallback()
+  }, [sizeCallback, width, item, index])
 
   return (
     <CellMeasurer refreshKey={refreshKey} index={index} setSize={setSize}>
@@ -58,7 +57,13 @@ const ItemWrapper = React.memo(({data: {setSize, width, refreshKey, items, ...re
               registerChild(ref)
               setRowRef(ref)
           }} margin={index === 0 ? {bottom: 'small'} : null}>
-            <Item index={index} items={items} {...props} {...rest} />
+            <Item 
+              index={index}
+              items={items}
+              setSize={sizeCallback}
+              isItemLoaded={isItemLoaded}
+              placeholder={placeholder}
+              mapper={mapper} />
           </Box>
         </div>
       )}
@@ -71,12 +76,8 @@ const buildItemData = memoize((setSize, mapper, isItemLoaded, items, parentRef, 
 ))
 
 export default function SmoothScroller({
-  hasNextPage, placeholder, loading, items, loadNextPage, mapper,
-  listRef, setListRef, setLoader, handleScroll, refreshKey, ...props
-}) {
+  hasNextPage, placeholder, loading, items, loadNextPage, mapper, listRef, setListRef, handleScroll, refreshKey, ...props}) {
   const sizeMap = useRef({});
-  const mounted = useRef(false)
-  const loader  = useRef()
   const setSize = useCallback((index, size) => {
     sizeMap.current = { ...sizeMap.current, [index]: size };
     listRef && listRef.resetAfterIndex(index, true)
@@ -87,17 +88,8 @@ export default function SmoothScroller({
   const loadMoreItems = loading ? () => {} : loadNextPage;
   const isItemLoaded = useCallback(index => !hasNextPage || index < count, [hasNextPage, count])
 
-  useEffect(() => {
-    if (loader.current && mounted.current) {
-      loader.current.resetloadMoreItemsCache()
-    }
-    mounted.current = true
-    loader.current && setLoader(loader.current)
-  }, [refreshKey, mounted, loader, setLoader])
-
   return (
     <InfiniteLoader
-      ref={loader}
       isItemLoaded={isItemLoaded}
       itemCount={itemCount}
       loadMoreItems={loadMoreItems}
@@ -108,6 +100,7 @@ export default function SmoothScroller({
       <Autosizer>
       {({height, width}) => (
         <VariableSizeList
+          reversed
           height={height}
           width={width}
           itemCount={itemCount}

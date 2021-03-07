@@ -16,43 +16,46 @@ const API_HOST = apiHost()
 const GQL_URL = `${secure() ? 'https' : 'http'}://${API_HOST}/gql`
 const WS_URI  = `${secure() ? 'wss' : 'ws'}://${API_HOST}/socket`
 
-const httpLink = new HttpLink({uri: GQL_URL})
+export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
+  const httpLink = new HttpLink({uri: gqlUrl})
 
-const authLink = setContext((_, { headers }) => {
-  const token = fetchToken()
-  let authHeaders = token ? {authorization: `Bearer ${token}`} : {}
-  return {
-    headers: Object.assign(headers || {}, authHeaders)
-  }
-})
-
-const resetToken = onError(({ response, networkError }) => {
-  if (networkError && networkError.statusCode === 401) {
-    // remove cached token on 401 from the server
-    wipeToken()
-    window.location = '/login'
-  }
-});
-
-const socket = new PhoenixSocket(WS_URI, {
-  params: () => {
+  const authLink = setContext((_, { headers }) => {
     const token = fetchToken()
-    return token ? { Authorization: `Bearer ${token}`} : {}
-  }
-})
+    let authHeaders = token ? {authorization: `Bearer ${token}`} : {}
+    return {headers: {...headers, ...authHeaders}}
+  })
 
-const absintheSocket = AbsintheSocket.create(socket)
+  const resetToken = onError(({ networkError }) => {
+    if (networkError && networkError.statusCode === 401) onNetworkError()
+  });
 
-const socketLink = createAbsintheSocketLink(absintheSocket)
-const gqlLink = createPersistedQueryLink().concat(resetToken).concat(httpLink)
+  const socket = new PhoenixSocket(wsUrl, {
+    params: () => {
+      const token = fetchToken()
+      return token ? { Authorization: `Bearer ${token}`} : {}
+    }
+  })
 
-const splitLink = split(
-  (operation) => hasSubscription(operation.query),
-  socketLink,
-  authLink.concat(gqlLink)
-)
+  const absintheSocket = AbsintheSocket.create(socket)
 
-export const client = new ApolloClient({
-  link: splitLink,
-  cache: new InMemoryCache()
-})
+  const socketLink = createAbsintheSocketLink(absintheSocket)
+  const gqlLink = createPersistedQueryLink().concat(resetToken).concat(httpLink)
+
+  const splitLink = split(
+    (operation) => hasSubscription(operation.query),
+    socketLink,
+    authLink.concat(gqlLink)
+  )
+
+  return new ApolloClient({
+    link: splitLink,
+    cache: new InMemoryCache()
+  })
+}
+
+function onNetworkError() {
+  wipeToken()
+  window.location = '/login'
+}
+
+export const client = buildClient(GQL_URL, WS_URI, onNetworkError, fetchToken)

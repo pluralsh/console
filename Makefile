@@ -36,9 +36,16 @@ web: ## starts a local webserver
 	cd assets && yarn start
 
 import-incidents:
+	mv assets/src/components/incidents/queries.js queries.js
 	cp $(FORGE_WWW)/components/incidents/* assets/src/components/incidents
+	mv queries.js assets/src/components/incidents/queries.js
+	cp $(FORGE_WWW)/components/repos/Tags.js assets/src/components/repos/Tags.js
 	cp $(FORGE_WWW)/components/utils/AlternatingBox.js assets/src/components/utils/AlternatingBox.js
-	cp $(FORGE_WWW)/components/utils/Divider.js assets/src/components/utils/Divider.js
 	cp $(FORGE_WWW)/components/utils/TypeaheadEditor.js assets/src/components/utils/TypeaheadEditor.js
 	cp $(FORGE_WWW)/components/utils/Tooltip.js assets/src/components/utils/Tooltip.js
+	cp $(FORGE_WWW)/components/utils/SmoothScroller.js assets/src/components/utils/SmoothScroller.js
 	cp $(FORGE_WWW)/components/utils/hooks.js assets/src/components/utils/hooks.js
+	cp $(FORGE_WWW)/components/utils/icons.js assets/src/components/utils/icons.js
+	cp $(FORGE_WWW)/utils/date.js assets/src/utils/date.js
+	cp $(FORGE_WWW)/utils/graphql.js assets/src/utils/graphql.js
+	cp $(FORGE_WWW)/utils/slate.js assets/src/utils/slate.js

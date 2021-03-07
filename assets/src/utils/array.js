@@ -17,3 +17,15 @@ export function* chunk(array, chunkSize) {
     yield array.slice(i, i + chunkSize);
   }
 }
+
+
+export function groupBy(list, key = (i) => i.id) {
+  let grouped = {}
+  for (const item of list) {
+    const k = key(item)
+    let group = grouped[k] || []
+    group.push(item)
+    grouped[k] = group
+  }
+  return grouped
+}
