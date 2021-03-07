@@ -16,6 +16,15 @@ defmodule Watchman.GraphQl.Kubernetes do
     field :status,  :string
   end
 
+  object :cluster_info do
+    field :git_commit,  :string
+    field :git_version, :string
+    field :platform,    :string
+    field :version,     :string, resolve: fn
+      %{major: major, minor: minor}, _, _ -> {:ok, "#{major}.#{minor}"}
+    end
+  end
+
   defp make_labels(nil), do: []
   defp make_labels(map), do: Enum.map(map, fn {key, value} -> %{name: key, value: value} end)
 
@@ -51,6 +60,11 @@ defmodule Watchman.GraphQl.Kubernetes do
       middleware Rbac, perm: :read, arg: :namespace
 
       resolve &Kubernetes.resolve_service/2
+    end
+
+    field :cluster_info, :cluster_info do
+      middleware Authenticated
+      resolve &Kubernetes.cluster_info/2
     end
 
     field :deployment, :deployment do

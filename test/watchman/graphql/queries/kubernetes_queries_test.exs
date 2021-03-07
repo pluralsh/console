@@ -273,4 +273,19 @@ defmodule Watchman.GraphQl.KubernetesQueriesTest do
       assert hd(filter["spec"]["labels"])["value"]
     end
   end
+
+  describe "clusterInfo" do
+    test "it will fetch kubernetes cluster info" do
+      user = insert(:user)
+      expect(Kazan, :run, fn _ -> {:ok, version_info()} end)
+
+      {:ok, %{data: %{"clusterInfo" => info}}} = run_query("""
+        query { clusterInfo { gitCommit version platform } }
+      """, %{}, %{current_user: user})
+
+      assert info["gitCommit"]
+      assert info["version"] == "12.01"
+      assert info["platform"]
+    end
+  end
 end

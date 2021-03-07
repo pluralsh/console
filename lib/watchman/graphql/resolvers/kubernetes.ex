@@ -12,6 +12,11 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
       do: {:ok, items}
   end
 
+  def cluster_info(_, _) do
+    Kazan.Apis.Version.get_code!()
+    |> Kazan.run()
+  end
+
   def list_log_filters(%{namespace: ns}, _) do
     with {:ok, %{items: items}} <- Client.list_log_filters(ns),
       do: {:ok, items}

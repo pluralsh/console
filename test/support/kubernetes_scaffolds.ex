@@ -5,6 +5,7 @@ defmodule KubernetesScaffolds do
   alias Kazan.Apis.Batch.V1beta1, as: Batch
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector}
+  alias Kazan.Models.Apimachinery
   alias Kube
 
   def stateful_set(namespace, name) do
@@ -126,6 +127,15 @@ defmodule KubernetesScaffolds do
         query: "query",
         labels: [%Kube.LogFilter.Label{name: "l", value: "v"}]
       }
+    }
+  end
+
+  def version_info() do
+    %Apimachinery.Version.Info{
+      git_commit: "aedc1234",
+      major: "12",
+      minor: "01",
+      platform: "linux"
     }
   end
 end
