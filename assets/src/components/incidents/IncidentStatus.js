@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Box, Drop, Select, Text } from 'grommet'
 import { IncidentStatus } from './types'
+import { CurrentUserContext } from '../forge/CurrentUser'
 import { canEdit } from './Incident'
 import { Down } from 'grommet-icons'
-import { LoginContext } from '../Login'
 
 const normalize = (val) => val.replace('_', ' ')
 
@@ -55,15 +55,17 @@ export function Status({incident: {status, ...incident}, setActive}) {
   const ref = useRef()
   const [open, setOpen] = useState(false)
   const [hover, setHover] = useState(false)
+  const user = useContext(CurrentUserContext)
+  const editable = canEdit(incident, user) && setActive
   useEffect(() => setOpen(false), [status])
 
   return (
     <>
     <Box ref={ref} flex={false} round='xsmall' direction='row' gap='xsmall' align='center'
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} focusIndicator={false}
-      onClick={() => setOpen(true)}>
+      onClick={() => editable && setOpen(true)}>
       <Text size='small' weight={500} color={textColor(status)}>{normalize(status)}</Text>
-      {(hover || open) && <Down size='small' />}
+      {((hover && editable) || open) && <Down size='small' />}
     </Box>
     {open && (
       <Drop target={ref.current} onClickOutside={() => setOpen(false)} align={{top: 'bottom'}}>

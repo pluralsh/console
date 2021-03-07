@@ -63,6 +63,7 @@ export const ME_Q = gql`
       boundRoles { ...RoleFragment }
     }
     externalToken
+    clusterInfo { version platform gitCommit }
   }
   ${UserFragment}
   ${RoleFragment}

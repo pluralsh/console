@@ -7,7 +7,7 @@ import { Emoji } from 'emoji-mart'
 import { DELETE_REACTION, CREATE_REACTION } from './queries'
 import { groupBy } from '../../utils/array'
 import { Reaction as MessageReaction } from './MessageControls'
-import { LoginContext } from '../Login'
+import { CurrentUserContext } from '../forge/CurrentUser'
 
 const BOX_ATTRS={
   pad: {horizontal: 'xsmall', vertical: '3px'},
@@ -42,7 +42,7 @@ function Reaction({name, reactions, me, messageId}) {
 }
 
 export default function MessageReactions({message, setHover}) {
-  const { me } = useContext(LoginContext)
+  const me = useContext(CurrentUserContext)
   const grouped = groupBy(message.reactions, (reaction) => reaction.name)
   const sorted = Object.entries(grouped).sort(([name, reactions], [other_name, other_reactions]) => {
     const byLength = other_reactions.length - reactions.length

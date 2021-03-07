@@ -20,8 +20,8 @@ export function TagInput({addTag, removeTag, tags, round, ...rest}) {
         <Box flex style={{ minWidth: "120px" }}>
           <TextInput
             type="search"
-            placeholder='enter tags for this resource'
             plain
+            placeholder='enter tags for this resource'
             onChange={({target: {value}}) => setCurrent(value)}
             value={current}
             {...rest}

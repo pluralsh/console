@@ -4,6 +4,7 @@ import { Box, Keyboard, Text, FormField, TextInput } from 'grommet'
 import { Button } from 'forge-core'
 import { setToken, wipeToken } from '../helpers/auth'
 import { ME_Q, SIGNIN } from './graphql/users'
+import { IncidentContext } from './incidents/context'
 
 export const LoginContext = React.createContext({me: null})
 
@@ -16,10 +17,14 @@ export function EnsureLogin({children}) {
   }
   if (!data) return null
 
+  const {me, externalToken, clusterInfo: {__typename, ...clusterInformation}} = data
+
   return (
-    <LoginContext.Provider value={{me: data.me, token: data.externalToken}}>
-      {children}
-    </LoginContext.Provider>
+    <IncidentContext.Provider value={{clusterInformation}}>
+      <LoginContext.Provider value={{me, token: externalToken}}>
+        {children}
+      </LoginContext.Provider>
+    </IncidentContext.Provider>
   )
 }
 

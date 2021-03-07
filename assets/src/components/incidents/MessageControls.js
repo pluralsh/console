@@ -2,12 +2,12 @@ import React, { useCallback, useContext, useRef, useState } from 'react'
 import { Box, Drop, Text } from 'grommet'
 import { Edit, Emoji, Trash } from 'grommet-icons'
 import { TooltipContent } from 'forge-core'
+import { CurrentUserContext } from '../forge/CurrentUser'
 import { EmojiPicker } from './Emoji'
 import { useMutation } from 'react-apollo'
 import { CREATE_REACTION, DELETE_MESSAGE, INCIDENT_Q } from './queries'
 import { useParams } from 'react-router'
 import { updateCache } from '../../utils/graphql'
-import { CurrentUserContext } from '../forge/CurrentUser'
 
 const SIZE = '35px'
 const CONTROL_ATTRS = {

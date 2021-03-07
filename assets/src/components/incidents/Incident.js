@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { Button, Scroller } from 'forge-core'
-import { LoginContext } from '../Login'
+import { CurrentUserContext } from '../forge/CurrentUser'
 import { useMutation, useQuery } from 'react-apollo'
 import { useParams } from 'react-router'
 import Markdown from './Markdown'
@@ -189,6 +189,8 @@ function IncidentInner({incident, fetchMore, subscribeToMore, loading, editing, 
   const [view, setView] = useState(IncidentView.MSGS)
   const [listRef, setListRef] = useState(null)
   const [loader, setLoader] = useState(null)
+  const currentUser = useContext(CurrentUserContext)
+  const editable = canEdit(incident, currentUser)
   const [attributes, setAttributes] = useState({
     description: incident.description, 
     title: incident.title,
@@ -240,7 +242,7 @@ function IncidentInner({incident, fetchMore, subscribeToMore, loading, editing, 
               attributes={attributes}
               setAttributes={setAttributes}
               incident={incident} 
-              editable={true} 
+              editable={editable} 
               editing={editing} 
               setEditing={setEditing}
               updating={updating} 

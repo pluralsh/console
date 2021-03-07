@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Box, Drop, Select, Text } from 'grommet'
+import { CurrentUserContext } from '../forge/CurrentUser'
 import { canEdit } from './Incident'
 import { Down } from 'grommet-icons'
-import { LoginContext } from '../Login'
 
 const severityOptions = [0, 1, 2, 3, 4, 5].map((sev) => ({value: sev, label: `SEV ${sev}`}))
 
@@ -54,20 +54,22 @@ export function severityColor(severity) {
   return 'progress'
 }
 
-export function Severity({incident: {severity}, setSeverity}) {
+export function Severity({incident: {severity, ...incident}, setSeverity}) {
   const ref = useRef()
   const [open, setOpen] = useState(false)
   const [hover, setHover] = useState(false)
+  const user = useContext(CurrentUserContext)
   const color = severityColor(severity)
+  const editable = canEdit(incident, user) && setSeverity
   useEffect(() => setOpen(false), [severity])
 
   return (
     <>
     <Box ref={ref} flex={false} background={color} round='xsmall' align='center' direction='row' gap='xsmall'
-         pad={{horizontal: 'xsmall', vertical: '1px'}} onClick={() => setOpen(true)} focusIndicator={false}
+         pad={{horizontal: 'xsmall', vertical: '1px'}} onClick={() => editable && setOpen(true)} focusIndicator={false}
          onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
       <Text size='small' weight={500}>SEV {severity}</Text> 
-      {(hover || open) && <Down size='small' />}
+      {((hover && editable) || open) && <Down size='small' />}
     </Box>
     {open && (
       <Drop target={ref.current} align={{top: 'bottom'}} onClickOutside={() => setOpen(false)}>

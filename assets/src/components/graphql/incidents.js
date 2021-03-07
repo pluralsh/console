@@ -10,6 +10,14 @@ export const UserFragment = gql`
   }
 `;
 
+export const ClusterInformation = gql`
+  fragment ClusterInformation on ClusterInformation {
+    gitCommit
+    version
+    platform
+  }
+`
+
 export const RepoFragment = gql`
   fragment RepoFragment on Repository {
     id
@@ -73,12 +81,14 @@ export const IncidentFragment = gql`
     owner { ...UserFragment }
     repository { ...RepoFragment }
     subscription { ...SubscriptionFragment }
+    clusterInformation { ...ClusterInformation }
     tags { tag }
     insertedAt
   }
   ${UserFragment}
   ${RepoFragment}
   ${SubscriptionFragment}
+  ${ClusterInformation}
 `
 
 export const IncidentHistoryFragment = gql`
