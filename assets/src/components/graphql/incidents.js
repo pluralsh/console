@@ -119,6 +119,7 @@ export const IncidentMessageFragment = gql`
     creator { ...UserFragment }
     reactions { name creator { id email } }
     file { ...FileFragment }
+    entities { type user { ...UserFragment } text startIndex endIndex }
     insertedAt
   }
   ${UserFragment}

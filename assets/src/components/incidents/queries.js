@@ -2,6 +2,16 @@ import { gql } from 'apollo-boost'
 import { PageInfo } from '../graphql/base';
 import { RepoFragment, FileFragment, FollowerFragment, IncidentFragment, IncidentHistoryFragment, IncidentMessageFragment, NotificationFragment, PostmortemFragment } from '../graphql/incidents';
 
+export const SEARCH_USERS = gql`
+  query Search($incidentId: ID!, $q: String!, $cursor: String) {
+    searchUsers(incidentId: $incidentId, q: $q, after: $cursor, first: 10) {
+      pageInfo { ...PageInfo }
+      edges { node { id name email avatar backgroundColor } }
+    }
+  }
+  ${PageInfo}
+`;
+
 export const INCIDENTS_Q = gql`
   query Incidents($repositoryId: ID, $q: String, $cursor: String, $order: Order, $sort: IncidentSort, $filters: [IncidentFilter]) {
     incidents(repositoryId: $repositoryId, q: $q, after: $cursor, first: 20, order: $order, sort: $sort, filters: $filters) {

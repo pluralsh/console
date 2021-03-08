@@ -1,5 +1,6 @@
 export const EntityType = {
-  MENTION: 'MENTION'
+  MENTION: 'MENTION',
+  EMOJI: 'EMOJI'
 }
 
 export const IncidentStatus = {
@@ -39,7 +40,8 @@ export const SidebarView = {
 
 export const NotificationTypes = {
   MESSAGE: 'MESSAGE',
-  INCIDENT_UPDATE: 'INCIDENT_UPDATE'
+  INCIDENT_UPDATE: 'INCIDENT_UPDATE',
+  MENTION: 'MENTION'
 }
 
 export const Order = {
