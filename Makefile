@@ -37,9 +37,11 @@ web: ## starts a local webserver
 
 import-incidents:
 	mv assets/src/components/incidents/queries.js queries.js
+	mv assets/src/components/incidents/Presence.js Presence.js
 	cp $(FORGE_WWW)/components/incidents/* assets/src/components/incidents
 	mv queries.js assets/src/components/incidents/queries.js
-	sed -i '' -- 's/\.\/models/\.\/graphql/g' assets/src/components/incidents/*
+	mv Presence.js assets/src/components/incidents/Presence.js
+	sed -i '' -- 's/\.\.\/models/graphql/g' assets/src/components/incidents/*
 	sed -i '' -- 's/\.\/login/\.\/forge/g' assets/src/components/incidents/*
 	cp $(FORGE_WWW)/components/repos/Tags.js assets/src/components/repos/Tags.js
 	cp $(FORGE_WWW)/components/utils/AlternatingBox.js assets/src/components/utils/AlternatingBox.js
