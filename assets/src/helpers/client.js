@@ -46,11 +46,12 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
     socketLink,
     authLink.concat(gqlLink)
   )
-
-  return new ApolloClient({
+  const client = new ApolloClient({
     link: splitLink,
     cache: new InMemoryCache()
   })
+  
+  return {client, socket}
 }
 
 function onNetworkError() {
@@ -58,4 +59,5 @@ function onNetworkError() {
   window.location = '/login'
 }
 
-export const client = buildClient(GQL_URL, WS_URI, onNetworkError, fetchToken)
+const {client, socket} = buildClient(GQL_URL, WS_URI, onNetworkError, fetchToken)
+export {client, socket}

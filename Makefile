@@ -48,6 +48,7 @@ import-incidents:
 	cp $(FORGE_WWW)/components/utils/SmoothScroller.js assets/src/components/utils/SmoothScroller.js
 	cp $(FORGE_WWW)/components/utils/hooks.js assets/src/components/utils/hooks.js
 	cp $(FORGE_WWW)/components/utils/icons.js assets/src/components/utils/icons.js
+	cp $(FORGE_WWW)/components/utils/TimedCache.js assets/src/components/utils/TimedCache.js
 	cp $(FORGE_WWW)/utils/date.js assets/src/utils/date.js
 	cp $(FORGE_WWW)/utils/graphql.js assets/src/utils/graphql.js
 	cp $(FORGE_WWW)/utils/slate.js assets/src/utils/slate.js

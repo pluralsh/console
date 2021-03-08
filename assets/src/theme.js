@@ -6,7 +6,7 @@ const boxStyle = css`
 
 export const DEFAULT_COLOR_THEME = {
   brand: '#4b25c1',
-  action: '#3B1D98',
+  action: '#007a5a',
   sidebar: 'backgroundDark',
   sidebarHover: '#000000',
   sidebarActive: '#000000',
@@ -24,6 +24,7 @@ export const DEFAULT_COLOR_THEME = {
   backgroundColor: '#20222b',
   backgroundDark: '#13141a',
   backgroundLight: 'cardDarkLight',
+  presence: '#39E500'
 }
 
 export const DEFAULT_THEME = {
@@ -77,13 +78,10 @@ export const DEFAULT_THEME = {
       text: {size: 'small'}
     }
   },
+  drop: {border: { radius: '4px' } },
   global: {
     colors: DEFAULT_COLOR_THEME,
-    drop: {
-      border: {
-        radius: '2px'
-      }
-    },
+    drop: { border: { radius: '4px' } },
     font: {
       family: 'Roboto',
       size: '14px',
