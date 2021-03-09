@@ -10,7 +10,7 @@ import { BreadcrumbsContext } from './Breadcrumbs'
 import { useHistory, useParams } from 'react-router'
 import { BUILD_PADDING } from './Builds'
 import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from './Installations'
-import SmoothScroller from './utils/SmoothScroller'
+import LegacyScroller from './utils/LegacyScroller'
 import { last } from 'lodash'
 import { toMap, useQueryParams } from './utils/query'
 import { LOG_FILTER_Q } from './graphql/forge'
@@ -152,7 +152,7 @@ function LogContent({listRef, setListRef, logs, name, loading, fetchMore, onScro
   }, [end, done])
 
   return (
-    <SmoothScroller
+    <LegacyScroller
       listRef={listRef}
       setListRef={setListRef}
       setLoader={setLoader}
