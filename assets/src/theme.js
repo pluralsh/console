@@ -24,12 +24,13 @@ export const DEFAULT_COLOR_THEME = {
   backgroundColor: '#20222b',
   backgroundDark: '#13141a',
   backgroundLight: 'cardDarkLight',
-  presence: '#39E500'
+  presence: '#39E500',
+  link: '#3366BB'
 }
 
 export const DEFAULT_THEME = {
   anchor: {
-    color: {light: 'sidebar', dark: 'white'},
+    color: {light: 'link', dark: 'white'},
     hover: {
       textDecoration: 'none',
       extend: 'font-weight: 600'

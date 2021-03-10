@@ -231,3 +231,9 @@ export const INSTALLATIONS_Q = gql`
   ${PageInfo}
   ${RepoFragment}
 `;
+
+export const ZOOM_MEETING = gql`
+  mutation Zoom($attributes: ZoomMeetingAttributes!) {
+    createZoom(attributes: $attributes) { joinUrl password }
+  }
+`
