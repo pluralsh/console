@@ -23,7 +23,7 @@ defmodule Watchman.Forge.Config do
     end
   end
 
-  defp derive_config() do
+  def derive_config() do
     with nil <- System.get_env("CHARTMART_TOKEN"),
       do: config_file()
   end

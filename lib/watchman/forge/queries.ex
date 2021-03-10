@@ -44,7 +44,18 @@ defmodule Watchman.Forge.Queries do
     #{@installation_fragment}
   """
 
+  @incident_message_sub """
+    subscription {
+      incidentMessageDelta {
+        delta
+        payload { id text incident { id } }
+      }
+    }
+  """
+
   def installation_query(), do: @installation_query
 
   def external_token_mutation(), do: "mutation { externalToken }"
+
+  def incident_message_subscription(), do: @incident_message_sub
 end

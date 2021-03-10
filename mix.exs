@@ -77,6 +77,7 @@ defmodule Watchman.MixProject do
       {:decorator, "~> 1.3"},   #=> For using Caching Annotations
       {:telemetry, "~> 0.4"},
       {:apq, "~> 1.2"},
+      {:absinthe_websocket, "~> 0.2.0"},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
       {:mimic, "~> 1.1", only: :test}
     ]

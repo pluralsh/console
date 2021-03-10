@@ -21,7 +21,7 @@ defmodule Watchman.Application do
       {Absinthe.Subscription, [WatchmanWeb.Endpoint]},
     ] ++ consumers() ++ [
       Piazza.GracefulShutdown
-    ]
+    ] ++ start_subscriber()
 
     opts = [strategy: :one_for_one, name: Watchman.Supervisor]
     Supervisor.start_link(children, opts)
@@ -30,6 +30,13 @@ defmodule Watchman.Application do
   def config_change(changed, _new, removed) do
     WatchmanWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  defp start_subscriber() do
+    case Watchman.conf(:initialize) do
+      # true -> [Watchman.Forge.Subscription.supervisor()]
+      _ -> []
+    end
   end
 
   defp consumers(), do: Watchman.conf(:consumers) || []
