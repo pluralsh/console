@@ -31,6 +31,26 @@ defmodule Kube.Client do
     |> Kazan.run()
   end
 
+  def get_slashcommand(namespace, name) do
+    %Kazan.Request{
+      method: "get",
+      path: IO.inspect("/apis/forgelabs.sh/v1alpha1/namespaces/#{namespace}/slashcommands/#{name}"),
+      query_params: %{},
+      response_model: Kube.SlashCommand
+    }
+    |> Kazan.run()
+  end
+
+  def list_slashcommands() do
+    %Kazan.Request{
+      method: "get",
+      path: "/apis/forgelabs.sh/v1alpha1/slashcommands",
+      query_params: %{},
+      response_model: Kube.SlashCommandList
+    }
+    |> Kazan.run()
+  end
+
   def get_application(name) do
     %Kazan.Request{
       method: "get",
@@ -47,26 +67,6 @@ defmodule Kube.Client do
       path: "/apis/app.k8s.io/v1beta1/applications",
       query_params: %{},
       response_model: Kube.ApplicationList
-    }
-    |> Kazan.run()
-  end
-
-  def get_slashcommand(namespace, name) do
-    %Kazan.Request{
-      method: "get",
-      path: "/apis/forgelabs.sh/v1alpha1/#{namespace}/slashcommands/#{name}",
-      query_params: %{},
-      response_model: Kube.SlashCommand
-    }
-    |> Kazan.run()
-  end
-
-  def list_slashcommands() do
-    %Kazan.Request{
-      method: "get",
-      path: "/apis/forgelabs.sh/v1alpha1/slashcommands",
-      query_params: %{},
-      response_model: Kube.SlashCommandList
     }
     |> Kazan.run()
   end

@@ -7,7 +7,8 @@ defmodule Watchman.Watchers.Handlers.SlashCommandTest do
     test "It will dispatch a command when given" do
       insert(:user, bot_name: "watchman")
       expect(Kazan, :run, 2, fn
-        %{path: "/apis/forgelabs.sh" <> _} -> {:ok, %Kube.SlashCommand{spec: %{type: "deploy"}}}
+        %{path: "/apis/forgelabs.sh/v1alpha1/namespaces/repo/slashcommands/deploy"} ->
+          {:ok, %Kube.SlashCommand{spec: %{type: "deploy"}}}
         _ -> {:ok, %Kube.Application{metadata: %{name: "forge"}}}
       end)
       expect(Watchman.Deployer, :wake, fn -> :ok end)
