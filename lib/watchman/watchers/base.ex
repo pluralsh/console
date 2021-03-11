@@ -1,14 +1,15 @@
 defmodule Watchman.Watchers.Base do
   import Watchman.Services.Base
 
-  defmacro __using__(_) do
+  defmacro __using__(opts) do
+    state_keys = Keyword.get(opts, :state, [:pid])
     quote do
       use GenServer
       import Watchman.Watchers.Base
       alias Kazan.Watcher
       require Logger
 
-      defmodule State, do: defstruct [:pid]
+      defmodule State, do: defstruct unquote(state_keys)
 
       def start_link(opts \\ :ok) do
         GenServer.start_link(__MODULE__, opts)
@@ -19,6 +20,7 @@ defmodule Watchman.Watchers.Base do
         {:ok, %State{}}
       end
 
+      def handle_call(:state, _, state), do: {:reply, state, state}
       def handle_call({:swarm, :begin_handoff}, _from, state), do: {:reply, :restart, state}
 
       def handle_cast({:swarm, :end_handoff, _}, state), do: {:noreply, state}

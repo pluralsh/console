@@ -27,7 +27,7 @@ config :watchman, Watchman.Cron,
 
 config :watchman, :watchers, [
   applications: Watchman.Watchers.Application,
-  graphql: Watchman.Watchers.GraphQl
+  forge: Watchman.Watchers.Forge
 ]
 
 config :watchman,

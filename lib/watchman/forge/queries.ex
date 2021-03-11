@@ -45,10 +45,18 @@ defmodule Watchman.Forge.Queries do
   """
 
   @incident_message_sub """
-    subscription {
-      incidentMessageDelta {
+    subscription Incident($id: ID) {
+      incidentMessageDelta(incidentId: $id) {
         delta
         payload { id text incident { id } }
+      }
+    }
+  """
+
+  @create_message """
+    mutation Create($incidentId: ID!, $attributes: IncidentMessageAttributes!) {
+      createMessage(incidentId: $incidentId, attributes: $attributes) {
+        id
       }
     }
   """
@@ -58,4 +66,6 @@ defmodule Watchman.Forge.Queries do
   def external_token_mutation(), do: "mutation { externalToken }"
 
   def incident_message_subscription(), do: @incident_message_sub
+
+  def create_message_mutation(), do: @create_message
 end

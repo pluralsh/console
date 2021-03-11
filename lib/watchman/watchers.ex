@@ -15,9 +15,14 @@ defmodule Watchman.Watchers do
   def handle_info(:init, state) do
     Enum.each(@watchers, fn {name, module} ->
       Swarm.whereis_or_register_name(name, module, :start_link, [])
+      |> maybe_link()
     end)
+
     {:noreply, state}
   end
 
   def handle_info(_, state), do: {:noreply, state}
+
+  defp maybe_link({:ok, pid}) when is_pid(pid), do: Process.link(pid)
+  defp maybe_link(pass), do: pass
 end
