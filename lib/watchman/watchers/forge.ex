@@ -2,6 +2,7 @@ defmodule Watchman.Watchers.Forge do
   use Watchman.Watchers.Base, state: [:absinthe]
   alias PhoenixClient.{Socket, Channel, Message}
   alias Watchman.Forge.Queries
+  alias Watchman.Watchers.Handlers
 
   @socket_name :forge_socket
 
@@ -46,6 +47,9 @@ defmodule Watchman.Watchers.Forge do
     state
   ) do
     IO.inspect(msg)
+    |> Handlers.SlashCommand.handle()
+    |> IO.inspect()
+
     {:noreply, state}
   end
 

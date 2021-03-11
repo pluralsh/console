@@ -48,7 +48,7 @@ defmodule Watchman.Forge.Queries do
     subscription Incident($id: ID) {
       incidentMessageDelta(incidentId: $id) {
         delta
-        payload { id text incident { id } }
+        payload { id text incident { id repository { name } } }
       }
     }
   """

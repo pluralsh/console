@@ -1,0 +1,8 @@
+apiVersion: forgelabs.sh/v1alpha1
+kind: SlashCommand
+metadata:
+  name: deploy
+  labels:
+{{ include "watchman.labels" . | indent 4 }}
+spec:
+  type: deploy
