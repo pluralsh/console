@@ -39,6 +39,7 @@ export const PlanFragment = gql`
       included { dimension quantity }
       items { name dimension cost period }
     }
+    serviceLevels { minSeverity maxSeverity responseTime }
     metadata { features { name description } }
   }
 `;
@@ -77,6 +78,7 @@ export const IncidentFragment = gql`
     severity
     status
     notificationCount
+    nextResponseAt
     creator { ...UserFragment }
     owner { ...UserFragment }
     repository { ...RepoFragment }

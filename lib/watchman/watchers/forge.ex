@@ -40,16 +40,17 @@ defmodule Watchman.Watchers.Forge do
       event: "subscription:data",
       payload: %{
         "result" => %{
-          "data" => %{"incidentMessageDelta" => %{"delta" => "CREATE", "payload" => msg}}
+          "data" => %{
+            "incidentMessageDelta" => %{
+              "delta" => "CREATE", "payload" => msg
+            }
+          }
         }
       }
     },
     state
   ) do
-    IO.inspect(msg)
-    |> Handlers.SlashCommand.handle()
-    |> IO.inspect()
-
+    Handlers.SlashCommand.handle(msg)
     {:noreply, state}
   end
 
