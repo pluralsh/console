@@ -22,6 +22,7 @@ defmodule Watchman.Watchers.Base do
 
       def handle_call(:state, _, state), do: {:reply, state, state}
       def handle_call({:swarm, :begin_handoff}, _from, state), do: {:reply, :restart, state}
+      def handle_call(:ping, _, state), do: {:reply, :pong, state}
 
       def handle_cast({:swarm, :end_handoff, _}, state), do: {:noreply, state}
 

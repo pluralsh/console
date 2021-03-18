@@ -54,6 +54,12 @@ defmodule Watchman.Watchers.Forge do
     {:noreply, state}
   end
 
+  def handle_info(%Message{event: "phx_error", payload: %{reason: {:remote, :closed}}}, state) do
+    Logger.info "Remote closed, reconnecting"
+    Process.send_after(self(), :connect, 1000)
+    {:noreply, state}
+  end
+
   def handle_info(msg, state) do
     IO.inspect(msg)
     {:noreply, state}
