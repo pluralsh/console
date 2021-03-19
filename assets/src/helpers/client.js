@@ -1,6 +1,7 @@
 import { ApolloClient } from 'apollo-client'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import { setContext } from 'apollo-link-context'
+import { createLink } from "apollo-absinthe-upload-link"
 import { onError } from 'apollo-link-error'
 import * as AbsintheSocket from "@absinthe/socket"
 import { Socket as PhoenixSocket } from "phoenix"
@@ -10,6 +11,7 @@ import { hasSubscription } from "@jumpn/utils-graphql"
 import { split } from 'apollo-link'
 import { apiHost, secure } from './hostname'
 import { HttpLink } from 'apollo-boost'
+import customFetch from './uploadLink'
 import { fetchToken, wipeToken } from './auth'
 
 const API_HOST = apiHost()
@@ -17,7 +19,7 @@ const GQL_URL = `${secure() ? 'https' : 'http'}://${API_HOST}/gql`
 const WS_URI  = `${secure() ? 'wss' : 'ws'}://${API_HOST}/socket`
 
 export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
-  const httpLink = new HttpLink({uri: gqlUrl})
+  const httpLink = createLink({uri: gqlUrl, fetch: customFetch})
 
   const authLink = setContext((_, { headers }) => {
     const token = fetchToken()
