@@ -4,7 +4,7 @@ defmodule Watchman.Watchers.Forge do
   alias Watchman.Forge.Queries
   alias Watchman.Watchers.Handlers
 
-  @socket_name :forge_socket
+  @socket_name Application.get_env(:watchman, :socket)
 
   def worker() do
     token = Watchman.Forge.Config.derive_config()

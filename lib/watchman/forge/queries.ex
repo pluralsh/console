@@ -61,6 +61,12 @@ defmodule Watchman.Forge.Queries do
     }
   """
 
+  @me_query """
+    query {
+      me { id }
+    }
+  """
+
   def installation_query(), do: @installation_query
 
   def external_token_mutation(), do: "mutation { externalToken }"
@@ -68,4 +74,6 @@ defmodule Watchman.Forge.Queries do
   def incident_message_subscription(), do: @incident_message_sub
 
   def create_message_mutation(), do: @create_message
+
+  def me_query(), do: @me_query
 end

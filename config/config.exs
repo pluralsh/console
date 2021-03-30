@@ -1,7 +1,8 @@
 use Mix.Config
 
 config :watchman,
-  ecto_repos: [Watchman.Repo]
+  ecto_repos: [Watchman.Repo],
+  socket: :forge_socket
 
 
 config :piazza_core,
