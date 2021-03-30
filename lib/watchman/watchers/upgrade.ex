@@ -1,7 +1,8 @@
 defmodule Watchman.Watchers.Upgrade do
-  use Watchman.Watchers.Base, state: [:upgrades, :user_id, :target]
+  use Watchman.Watchers.Base, state: [:upgrades, :user_id, :target, :last]
   alias PhoenixClient.{Channel, Message}
   alias Watchman.Forge.Users
+  alias Watchman.Watchers.Handlers
 
   @socket_name Application.get_env(:watchman, :socket)
   @poll_interval 60 * 1000
@@ -27,15 +28,22 @@ defmodule Watchman.Watchers.Upgrade do
   end
 
   def handle_info(:next, %{upgrades: upgrades} = state) do
-    case Channel.push(upgrades, "next", %{}) do
-      {:ok, result} ->
-        IO.inspect(result)
-      _ -> :ok
+    with {:ok, %{"id" => id} = result} <- Channel.push(upgrades, "next", %{}),
+         {:ok, _} <- Handlers.Upgrade.create_build(result),
+         _ <- Channel.push(upgrades, "ack", %{"id" => id}) do
+      {:noreply, %{state | last: id}}
+    else
+      error ->
+        Logger.info "Failed to deliver upgrade: #{inspect(error)}"
+        {:noreply, state}
     end
-    {:noreply, state}
   end
 
   def handle_info(%Message{event: "more", payload: %{"target" => id}}, state) do
+    if is_nil(state.last) || id > state.last do
+      send self(), :next
+    end
+
     {:noreply, %{state | target: id}}
   end
 
