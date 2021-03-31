@@ -23,9 +23,7 @@ secrets:
   id_rsa: {{ .watchman.secrets.id_rsa | quote }}
   id_rsa_pub: {{ .watchman.secrets.id_rsa_pub | quote }}
 {{ else if .Values.watchman_dns }}
-  {{ $webhook := createWebhook .Values.watchman_dns }}
   {{ $id_rsa := readLineDefault "Enter the path to your deploy keys" (homeDir ".ssh" "id_rsa") }}
-  webhook_secret: {{ $webhook.Secret }}
   id_rsa: {{ readFile $id_rsa | quote }}
   id_rsa_pub: {{ readFile (printf "%s.pub" $id_rsa) | quote }}
 {{ end }}
@@ -33,11 +31,11 @@ secrets:
   git_user: {{ .Values.git_user }}
 {{ else }}
   git_user: forge
-{{ end}}
+{{ end }}
 {{ if hasKey .Values "git_email" }}
   git_email: {{ .Values.git_email }}
 {{ else }}
   git_email: forge@piazzaapp.com
-{{ end}}
+{{ end }}
 
 license: {{ .License | quote }}
