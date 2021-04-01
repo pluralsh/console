@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
-import { APPLICATION_Q, CONFIGURATIONS_Q, UPDATE_CONFIGURATION } from './graphql/forge'
+import { APPLICATION_Q, UPDATE_CONFIGURATION } from './graphql/forge'
 import { Loading, Button } from 'forge-core'
 import { Box, Text } from 'grommet'
 import { BreadcrumbsContext } from './Breadcrumbs'

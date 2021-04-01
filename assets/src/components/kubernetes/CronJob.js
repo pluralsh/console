@@ -9,7 +9,7 @@ import { RawContent } from './Component'
 import { CRON_JOB_Q } from './queries'
 import { Events } from './Event'
 import { Container } from './utils'
-import { HeaderItem, PodList, RowItem } from './Pod'
+import { HeaderItem, RowItem } from './Pod'
 import { Readiness, ReadyIcon } from '../Application'
 
 function Status({status}) {

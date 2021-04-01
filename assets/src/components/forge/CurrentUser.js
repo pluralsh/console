@@ -1,7 +1,6 @@
 import React from 'react'
 import { useNotificationSubscription } from '../incidents/Notifications'
 import gql from 'graphql-tag'
-import { wipeToken } from '../../helpers/auth'
 import { useQuery } from 'react-apollo'
 
 const ME_Q = gql`

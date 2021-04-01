@@ -5,6 +5,7 @@
   "dependencies": {
     "@absinthe/socket": "^0.2.1",
     "@absinthe/socket-apollo-link": "^0.2.1",
+    "@apollo/client": "^3.3.13",
     "@babel/plugin-transform-react-jsx": "^7.10.4",
     "@jumpn/utils-graphql": "^0.6.0",
     "@nivo/line": "^0.62.0",
@@ -20,6 +21,7 @@
     "apollo-link-error": "^1.1.12",
     "apollo-link-persisted-queries": "^0.2.2",
     "cpx": "^1.5.0",
+    "crypto-hash": "^1.3.0",
     "emoji-mart": "^3.0.1",
     "escape-carriage": "^1.3.0",
     "filesize": "^6.1.0",
