@@ -18,39 +18,45 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
   end
 
   def list_log_filters(%{namespace: ns}, _) do
-    with {:ok, %{items: items}} <- Client.list_log_filters(ns),
+    with {:ok, %{items: items}} <- Client.list_log_filters(Watchman.namespace(ns)),
       do: {:ok, items}
   end
 
   def resolve_application(%{name: name}, _), do: Client.get_application(name)
 
   def resolve_service(%{namespace: ns, name: name}, _) do
-    Core.read_namespaced_service!(ns, name)
+    Watchman.namespace(ns)
+    |> Core.read_namespaced_service!(name)
     |> Kazan.run()
   end
 
   def resolve_deployment(%{namespace: ns, name: name}, _) do
-    Apps.read_namespaced_deployment!(ns, name)
+    Watchman.namespace(ns)
+    |> Apps.read_namespaced_deployment!(name)
     |> Kazan.run()
   end
 
   def resolve_stateful_set(%{namespace: ns, name: name}, _) do
-    Apps.read_namespaced_stateful_set!(ns, name)
+    Watchman.namespace(ns)
+    |> Apps.read_namespaced_stateful_set!(name)
     |> Kazan.run()
   end
 
   def resolve_ingress(%{namespace: ns, name: name}, _) do
-    Extensions.read_namespaced_ingress!(ns, name)
+    Watchman.namespace(ns)
+    |> Extensions.read_namespaced_ingress!(name)
     |> Kazan.run()
   end
 
   def resolve_cron_job(%{namespace: ns, name: name}, _) do
-    Batch.read_namespaced_cron_job!(ns, name)
+    Watchman.namespace(ns)
+    |> Batch.read_namespaced_cron_job!(name)
     |> Kazan.run()
   end
 
   def resolve_job(%{namespace: ns, name: name}, _) do
-    BatchV1.read_namespaced_job!(ns, name)
+    Watchman.namespace(ns)
+    |> BatchV1.read_namespaced_job!(name)
     |> Kazan.run()
   end
 
@@ -64,7 +70,8 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
   end
 
   def resolve_pod(%{namespace: ns, name: name}, _) do
-    Core.read_namespaced_pod!(ns, name)
+    Watchman.namespace(ns)
+    |> Core.read_namespaced_pod!(name)
     |> Kazan.run()
   end
 
@@ -76,15 +83,16 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
   def delete_pod(%{namespace: namespace, name: name}, _) do
     %Kazan.Request{
       method: "delete",
-      path: "/api/v1/namespaces/#{namespace}/pods/#{name}",
+      path: "/api/v1/namespaces/#{Watchman.namespace(namespace)}/pods/#{name}",
       query_params: %{},
       response_model: Core.Pod
     }
     |> Kazan.run()
   end
 
-  def list_events(%{metadata: %{uid: uid, namespace: namespace}}) do
-    Core.list_namespaced_event!(namespace, field_selector: "involvedObject.uid=#{uid}")
+  def list_events(%{metadata: %{uid: uid, namespace: ns}}) do
+    Watchman.namespace(ns)
+    |> Core.list_namespaced_event!(field_selector: "involvedObject.uid=#{uid}")
     |> Kazan.run()
     |> case do
       {:ok, %{items: events}} -> {:ok, events}
@@ -101,8 +109,9 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
     end
   end
 
-  def list_pods(%{namespace: namespace}, label_selector) do
-    Core.list_namespaced_pod!(namespace, label_selector: construct_label_selector(label_selector))
+  def list_pods(%{namespace: ns}, label_selector) do
+    Watchman.namespace(ns)
+    |> Core.list_namespaced_pod!(label_selector: construct_label_selector(label_selector))
     |> Kazan.run()
     |> case do
       {:ok, %{items: pods}} -> {:ok, pods}
@@ -110,8 +119,9 @@ defmodule Watchman.GraphQl.Resolvers.Kubernetes do
     end
   end
 
-  def list_jobs(%{namespace: namespace}) do
-    BatchV1.list_namespaced_job!(namespace)
+  def list_jobs(%{namespace: ns}) do
+    Watchman.namespace(ns)
+    |> BatchV1.list_namespaced_job!()
     |> Kazan.run()
     |> case do
       {:ok, %{items: jobs}} -> {:ok, jobs}

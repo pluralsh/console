@@ -1,40 +1,40 @@
 defmodule Kube.Client do
   alias Kube
 
-  def list_dashboards(namespace) do
+  def list_dashboards(ns) do
     %Kazan.Request{
       method: "get",
-      path: "/apis/forgelabs.sh/v1alpha1/namespaces/#{namespace}/dashboards",
+      path: "/apis/forgelabs.sh/v1alpha1/namespaces/#{Watchman.namespace(ns)}/dashboards",
       query_params: %{},
       response_model: Kube.DashboardList
     }
     |> Kazan.run()
   end
 
-  def list_log_filters(namespace) do
+  def list_log_filters(ns) do
     %Kazan.Request{
       method: "get",
-      path: "/apis/forgelabs.sh/v1alpha1/namespaces/#{namespace}/logfilters",
+      path: "/apis/forgelabs.sh/v1alpha1/namespaces/#{Watchman.namespace(ns)}/logfilters",
       query_params: %{},
       response_model: Kube.LogFilterList
     }
     |> Kazan.run()
   end
 
-  def get_dashboard(namespace, name) do
+  def get_dashboard(ns, name) do
     %Kazan.Request{
       method: "get",
-      path: "/apis/forgelabs.sh/v1alpha1/namespaces/#{namespace}/dashboards/#{name}",
+      path: "/apis/forgelabs.sh/v1alpha1/namespaces/#{Watchman.namespace(ns)}/dashboards/#{name}",
       query_params: %{},
       response_model: Kube.Dashboard
     }
     |> Kazan.run()
   end
 
-  def get_slashcommand(namespace, name) do
+  def get_slashcommand(ns, name) do
     %Kazan.Request{
       method: "get",
-      path: IO.inspect("/apis/forgelabs.sh/v1alpha1/namespaces/#{namespace}/slashcommands/#{name}"),
+      path: IO.inspect("/apis/forgelabs.sh/v1alpha1/namespaces/#{Watchman.namespace(ns)}/slashcommands/#{name}"),
       query_params: %{},
       response_model: Kube.SlashCommand
     }
@@ -54,7 +54,7 @@ defmodule Kube.Client do
   def get_application(name) do
     %Kazan.Request{
       method: "get",
-      path: "/apis/app.k8s.io/v1beta1/namespaces/#{name}/applications/#{name}",
+      path: "/apis/app.k8s.io/v1beta1/namespaces/#{Watchman.namespace(name)}/applications/#{name}",
       query_params: %{},
       response_model: Kube.Application
     }
