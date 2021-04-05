@@ -56,8 +56,8 @@ function WebhookForm({onSubmit}) {
           edges: [{__typename: "WebhookEdge", node: createWebhook}, ...webhooks.edges]
         }}
       })
-      onSubmit && onSubmit()
-    }
+    },
+    onCompleted: onSubmit
   })
 
   return (

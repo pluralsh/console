@@ -1,7 +1,7 @@
 defmodule Watchman.Schema.Webhook do
   use Piazza.Ecto.Schema
 
-  defenum Type, piazza: 0
+  defenum Type, piazza: 0, slack: 1
   defenum Status, healthy: 0, unhealthy: 1
 
   schema "watchman_webhooks" do

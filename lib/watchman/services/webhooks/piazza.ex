@@ -1,6 +1,7 @@
 defmodule Watchman.Webhooks.Formatter.Piazza do
-  alias Watchman.Schema.Build
+  use Watchman.Webhooks.Formatter
 
+  @impl Formatter
   def format(%Build{} = build) do
     {:ok, %{structured_message: structured(build), text: text(build)}}
   end
@@ -17,15 +18,4 @@ defmodule Watchman.Webhooks.Formatter.Piazza do
 </root>
 """
   end
-
-  def text(%Build{repository: repo, status: status}),
-    do: "#{status_modifier(status)} #{repo}"
-
-  defp color(:successful), do: "green"
-  defp color(:failed), do: "red"
-
-  defp status_modifier(:successful), do: "Successfully deployed"
-  defp status_modifier(:failed), do: "Failed to deploy"
-
-  defp build_url(id), do: "https://#{Watchman.conf(:url)}/build/#{id}"
 end

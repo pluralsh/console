@@ -10,7 +10,7 @@ defmodule Watchman.Webhooks.Formatter.PiazzaTest do
 
       assert text =~ build.repository
       assert message =~ build.id
-      assert message =~ "green"
+      assert message =~ "#007a5a"
     end
 
     test "It can format unsuccessful builds" do
@@ -20,7 +20,7 @@ defmodule Watchman.Webhooks.Formatter.PiazzaTest do
 
       assert text =~ build.repository
       assert message =~ build.id
-      assert message =~ "red"
+      assert message =~ "#CC4400"
     end
   end
 end

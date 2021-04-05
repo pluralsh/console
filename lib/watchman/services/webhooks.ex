@@ -9,7 +9,7 @@ defmodule Watchman.Services.Webhooks do
   ]
 
   def create(attrs) do
-    %Webhook{type: :piazza, health: :healthy}
+    %Webhook{type: :slack, health: :healthy}
     |> Webhook.changeset(attrs)
     |> Watchman.Repo.insert()
   end
@@ -18,7 +18,7 @@ defmodule Watchman.Services.Webhooks do
     formatter = formatter(type)
 
     with {:ok, payload} <- formatter.format(build) do
-      Mojito.post(url, @headers, Jason.encode!(payload), pool: false)
+      HTTPoison.post(url, Jason.encode!(payload), @headers)
       |> mark_webhook(wh)
     end
   end
@@ -33,4 +33,5 @@ defmodule Watchman.Services.Webhooks do
   end
 
   defp formatter(:piazza), do: Formatter.Piazza
+  defp formatter(:slack), do: Formatter.Slack
 end

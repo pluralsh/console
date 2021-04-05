@@ -8,7 +8,7 @@ defmodule Watchman.Services.WebhooksTest do
       {:ok, wh} = Webhooks.create(%{url: "https://example.com"})
 
       assert wh.health == :healthy
-      assert wh.type == :piazza
+      assert wh.type == :slack
       assert wh.url == "https://example.com"
     end
   end
@@ -16,7 +16,7 @@ defmodule Watchman.Services.WebhooksTest do
   describe "#deliver" do
     test "It will post to the configured url, and mark healthy when successful" do
       %{url: url} = wh = insert(:webhook)
-      expect(Mojito, :post, fn ^url, _, _, _ -> {:ok, %{}} end)
+      expect(HTTPoison, :post, fn ^url, _, _ -> {:ok, %{}} end)
       build = insert(:build, status: :successful)
 
       {:ok, result} = Webhooks.deliver(build, wh)
@@ -26,7 +26,7 @@ defmodule Watchman.Services.WebhooksTest do
 
     test "It will post to the url, and mark unhealthy if unsuccessful" do
       %{url: url} = wh = insert(:webhook)
-      expect(Mojito, :post, fn ^url, _, _, _ -> {:error, %{}} end)
+      expect(HTTPoison, :post, fn ^url, _, _ -> {:error, %{}} end)
       build = insert(:build, status: :successful)
 
       {:ok, result} = Webhooks.deliver(build, wh)

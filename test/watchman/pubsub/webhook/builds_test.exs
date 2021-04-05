@@ -9,10 +9,10 @@ defmodule Watchman.Webhook.BuildTest do
   describe "BuildFailed" do
     test "it will send a failed webhook" do
       build = insert(:build, status: :failed)
-      %{url: url} = wh = insert(:webhook)
+      %{url: url} = wh = insert(:webhook, type: :slack)
 
       myself = self()
-      expect(Mojito, :post, fn ^url, _, payload, _ ->
+      expect(HTTPoison, :post, fn ^url, payload, _ ->
         decoded = Jason.decode!(payload)
         send myself, {:payload, decoded}
         {:ok, decoded}
@@ -23,9 +23,10 @@ defmodule Watchman.Webhook.BuildTest do
 
       assert_receive {:payload, payload}
 
-      assert payload["text"] =~ build.repository
-      assert payload["structured_message"] =~ build.id
-      assert payload["structured_message"] =~ "red"
+      %{"attachments" => [%{"blocks" => [%{
+        "type" => "section",
+        "text" => %{"type" => "mrkdwn"}
+      }]}]} = payload
 
       assert refetch(wh).health == :healthy
     end
@@ -34,10 +35,10 @@ defmodule Watchman.Webhook.BuildTest do
   describe "BuildSucceeded" do
     test "it will send a succeeded webhook" do
       build = insert(:build, status: :successful)
-      %{url: url} = wh = insert(:webhook)
+      %{url: url} = wh = insert(:webhook, type: :slack)
 
       myself = self()
-      expect(Mojito, :post, fn ^url, _, payload, _ ->
+      expect(HTTPoison, :post, fn ^url, payload, _ ->
         decoded = Jason.decode!(payload)
         send myself, {:payload, decoded}
         {:ok, decoded}
@@ -48,9 +49,10 @@ defmodule Watchman.Webhook.BuildTest do
 
       assert_receive {:payload, payload}
 
-      assert payload["text"] =~ build.repository
-      assert payload["structured_message"] =~ build.id
-      assert payload["structured_message"] =~ "green"
+      %{"attachments" => [%{"blocks" => [%{
+        "type" => "section",
+        "text" => %{"type" => "mrkdwn"}
+      }]}]} = payload
 
       assert refetch(wh).health == :healthy
     end

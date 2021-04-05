@@ -2,21 +2,15 @@ defmodule Watchman.GraphQl.Schema do
   use Watchman.GraphQl.Schema.Base
   alias Watchman.Schema
   alias Watchman.GraphQl.Resolvers.{Build, Forge, User}
+
   import_types Absinthe.Plug.Types
   import_types Watchman.GraphQl.CustomTypes
 
   ## ENUMS
   ecto_enum :status, Schema.Build.Status
   ecto_enum :build_type, Schema.Build.Type
-
-  enum :webhook_health do
-    value :healthy
-    value :unhealthy
-  end
-
-  enum :webhook_type do
-    value :piazza
-  end
+  ecto_enum :webhook_type, Schema.Webhook.Type
+  ecto_enum :webhook_health, Schema.Webhook.Status
 
   enum :tool do
     value :helm
