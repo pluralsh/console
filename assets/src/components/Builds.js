@@ -121,11 +121,9 @@ function CreateBuild() {
     <>
     <Box pad={{horizontal: 'small'}}>
       <Button
-        onClick={() => setOpen(true)}
-        round='xsmall'
-        flat
-        pad={{horizontal: 'medium', vertical: 'xsmall'}}
-        label='Create' />
+        onClick={() => setOpen(true)} label='Create' 
+        round='xsmall' background='brand' flat
+        pad={{horizontal: 'medium', vertical: 'xsmall'}} />
     </Box>
     {open && (
       <Layer modal>

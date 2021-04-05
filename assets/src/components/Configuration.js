@@ -54,7 +54,7 @@ export function EditConfiguration({refetch, application: {name, configuration: {
             </Box>
           </Box>
           <Box flex={false}>
-            <Button label='Commit' onClick={mutation} loading={loading} />
+            <Button label='Commit' onClick={mutation} background='brand' loading={loading} />
           </Box>
         </Box>
       </Box>

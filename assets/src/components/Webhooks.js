@@ -81,11 +81,9 @@ function CreateWebhook() {
     <>
       <Box pad={{horizontal: 'small'}}>
         <Button
-          onClick={() => setOpen(true)}
-          flat
-          round='xsmall'
-          pad={{horizontal: 'medium', vertical: 'xsmall'}}
-          label='Create'
+          onClick={() => setOpen(true)} label='Create'
+          flat background='brand' round='xsmall'
+          pad={{horizontal: 'medium', vertical: 'xsmall'}} 
         />
       </Box>
     {open && (
