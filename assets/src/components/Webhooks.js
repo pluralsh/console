@@ -6,6 +6,7 @@ import { Loading, Button, Scroller, ModalHeader } from 'forge-core'
 import { BUILD_PADDING } from './Builds'
 import { Box, Text, FormField, TextInput, Layer } from 'grommet'
 import { chunk } from '../utils/array'
+import { appendConnection, updateCache } from '../utils/graphql'
 
 const MAX_LEN = 60
 const trim = (url) => url.length > 10 ? `${url.slice(0, MAX_LEN)}...` : url
@@ -26,14 +27,8 @@ function WebhookHealth({health}) {
 
 function Webhook({webhook: {url, health}}) {
   return (
-    <Box
-      margin={{bottom: 'small', ...BUILD_PADDING}}
-      background='cardDetailLight'
-      width='50%'
-      pad='small'
-      align='center'
-      round='xsmall'
-      direction='row'>
+    <Box margin={{bottom: 'small'}} background='cardDetailLight'
+      width='50%' pad='small' align='center' round='xsmall' direction='row'>
       <Box fill='horizontal'>
         <Text size='small'>{trim(url)}</Text>
       </Box>
@@ -48,15 +43,10 @@ function WebhookForm({onSubmit}) {
   const [attributes, setAttributes] = useState({url: ''})
   const [mutation, {loading}] = useMutation(CREATE_WEBHOOK, {
     variables: {attributes},
-    update: (cache, {data: {createWebhook}}) => {
-      const {webhooks, ...prev} = cache.readQuery({query: WEBHOOKS_Q})
-      cache.writeQuery({
-        query: WEBHOOKS_Q,
-        data: {...prev, webhooks: {...webhooks,
-          edges: [{__typename: "WebhookEdge", node: createWebhook}, ...webhooks.edges]
-        }}
-      })
-    },
+    update: (cache, {data: {createWebhook}}) => updateCache(cache, {
+      query: WEBHOOKS_Q,
+      update: (prev) => appendConnection(prev, createWebhook, 'webhooks')
+    }),
     onCompleted: onSubmit
   })
 
@@ -122,7 +112,7 @@ export default function Webhooks() {
           </Box>
           <CreateWebhook />
         </Box>
-        <Box height='calc(100vh - 105px)' background='backgroundColor' pad={{vertical: 'small'}}>
+        <Box height='calc(100vh - 105px)' background='backgroundColor' pad={{vertical: 'small', horizontal: 'medium'}}>
           <Scroller
             id='webhooks'
             style={{height: '100%', overflow: 'auto'}}

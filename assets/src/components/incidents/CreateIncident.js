@@ -49,7 +49,7 @@ export function IncidentForm({attributes, setAttributes, statusEdit, children}) 
           editor={editor}
           value={editorState}
           onChange={setDescription}>
-          <Editable placeholder='Description of the incident (markdown allowed)' />
+          <Editable style={{minHeight: '30vh'}} placeholder='Description of the incident (markdown allowed)' />
         </Slate>
       </Box>
       <Box direction='row' gap='small' align='center'>
@@ -112,7 +112,7 @@ export function CreateIncident({onCompleted}) {
     update: (cache, {data: { createIncident }}) => updateCache(cache, {
       query: INCIDENTS_Q,
       variables: {q: null, filters, order, sort},
-      update: (prev) => appendConnection(prev, createIncident, 'Incident', 'incidents')
+      update: (prev) => appendConnection(prev, createIncident, 'incidents')
     }),
     onCompleted
   })
