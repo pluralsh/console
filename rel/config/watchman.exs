@@ -35,7 +35,7 @@ config :watchman, WatchmanWeb.Endpoint,
   url: [host: get_env("HOST"), port: 80],
   check_origin: ["//#{get_env("HOST")}", "//watchman-grafana.#{Enum.join(rest, ".")}", "//watchman"]
 
-provider = case get_env("PROVIDER") do
+provider = case get_env("PROVIDER") |> IO.inspect() do
   "google" -> :gcp
   "gcp" -> :gcp
   "aws" -> :aws

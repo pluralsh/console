@@ -9,12 +9,15 @@ defmodule Watchman.Watchers.Upgrade do
 
   def handle_info(:start, state) do
     Logger.info "starting upgrades watcher"
+    Logger.info "provider info: #{System.get_env("PROVIDER")}"
+
     {:ok, %{id: id}} = Upgrades.create_queue(%{
       git: Watchman.conf(:git_url),
       domain: Watchman.conf(:url),
       name: Watchman.conf(:cluster_name),
       provider: to_provider(Watchman.conf(:provider))
     })
+
     Process.send_after(self(), :connect, 1000)
     :timer.send_interval(@poll_interval, :next)
     {:noreply, %{state | queue_id: id}}
