@@ -10,4 +10,4 @@ providers:
 - aws
 
 description: watchman aws bootstrapping
-version: 0.1.0
+version: 0.1.1

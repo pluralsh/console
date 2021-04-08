@@ -29,7 +29,8 @@ config :watchman,
   git_user_email: "forge@piazzaapp.com",
   forge_url: "https://forge.piazza.app/gql",
   url: "https://watchman.piazzaapp.com",
-  incoming_webhook: "https://some.piazza.webhook"
+  incoming_webhook: "https://some.piazza.webhook",
+  cluster_name: "default"
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

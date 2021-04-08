@@ -3,9 +3,12 @@ postgresql:
 
 ingress:
   watchman_dns: {{ .Values.watchman_dns }}
-  grafana_dns: watchman-grafana.{{ .Values.dns_domain }}
 
-grafana_dns: {{ dedupe .Values "grafana_dns" (cat "watchman-grafana." .Values.dns_domain) }}
+provider: {{ .Provider }}
+
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Project }}:role/watchman
 
 secrets:
   jwt: {{ dedupe . "watchman.secrets.jwt" (randAlphaNum 20) }}
@@ -14,6 +17,7 @@ secrets:
   admin_password: {{ dedupe . "watchman.secrets.admin_password" (randAlphaNum 20) }}
   git_url: {{ repoUrl }}
   repo_root: {{ repoName }}
+  cluster_name: {{ .Cluster }}
   config: {{ readFile (homeDir ".forge" "config.yml") | quote }}
   key: {{ readFile (homeDir ".forge" "key") | quote }}
   known_hosts: {{ knownHosts | quote }}

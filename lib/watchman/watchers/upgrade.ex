@@ -1,7 +1,7 @@
 defmodule Watchman.Watchers.Upgrade do
-  use Watchman.Watchers.Base, state: [:upgrades, :user_id, :target, :last]
+  use Watchman.Watchers.Base, state: [:upgrades, :queue_id, :target, :last]
   alias PhoenixClient.{Channel, Message}
-  alias Watchman.Forge.Users
+  alias Watchman.Forge.Upgrades
   alias Watchman.Watchers.Handlers
 
   @socket_name Application.get_env(:watchman, :socket)
@@ -9,14 +9,24 @@ defmodule Watchman.Watchers.Upgrade do
 
   def handle_info(:start, state) do
     Logger.info "starting upgrades watcher"
-    {:ok, %{"id" => id}} = Users.me()
+    {:ok, %{id: id}} = Upgrades.create_queue(%{
+      git: Watchman.conf(:git_url),
+      domain: Watchman.conf(:url),
+      name: Watchman.conf(:cluster_name),
+      provider: to_provider(Watchman.conf(:provider))
+    })
     Process.send_after(self(), :connect, 1000)
     :timer.send_interval(@poll_interval, :next)
-    {:noreply, %{state | user_id: id}}
+    {:noreply, %{state | queue_id: id}}
   end
 
+  defp to_provider(:gcp), do: "GCP"
+  defp to_provider(:aws), do: "AWS"
+  defp to_provider(:azure), do: "AZURE"
+  defp to_provider(_), do: "CUSTOM"
+
   def handle_info(:connect, state) do
-    with {:ok, _, upgrade} <- Channel.join(@socket_name, "upgrades:#{state.user_id}") do
+    with {:ok, _, upgrade} <- Channel.join(@socket_name, "queues:#{state.queue_id}") do
       send self(), :next
       {:noreply, %{state | upgrades: upgrade}}
     else
@@ -29,7 +39,7 @@ defmodule Watchman.Watchers.Upgrade do
 
   def handle_info(:next, %{upgrades: upgrades} = state) do
     with {:ok, %{"id" => id} = result} <- Channel.push(upgrades, "next", %{}),
-         {:ok, _} <- Handlers.Upgrade.create_build(result),
+         {:ok, _} <- Handlers.Upgrade.create_build(IO.inspect(result)),
          _ <- Channel.push(upgrades, "ack", %{"id" => id}) do
       {:noreply, %{state | last: id}}
     else

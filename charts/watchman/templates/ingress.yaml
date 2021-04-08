@@ -14,16 +14,9 @@ spec:
   tls:
   - hosts:
     - {{ .Values.ingress.watchman_dns | quote }}
-    - {{ .Values.ingress.grafana_dns | quote }}
     secretName: watchman-tls
   rules:
   - host: {{ .Values.ingress.watchman_dns | quote }}
-    http:
-      paths:
-      - backend:
-          serviceName: watchman
-          servicePort: http
-  - host: {{ .Values.ingress.grafana_dns | quote }}
     http:
       paths:
       - backend:

@@ -3,26 +3,6 @@ locals {
   gcp_region         = "${local.gcp_location_parts[0]}-${local.gcp_location_parts[1]}"
 }
 
-provider "google" {
-  version = "2.5.1"
-  project = var.gcp_project_id
-  region  = local.gcp_region
-}
-
-data "google_client_config" "current" {}
-
-data "google_container_cluster" "cluster" {
-  name = var.cluster_name
-  location = var.gcp_location
-}
-
-provider "kubernetes" {
-  load_config_file = false
-  host = data.google_container_cluster.cluster.endpoint
-  cluster_ca_certificate = base64decode(data.google_container_cluster.cluster.master_auth.0.cluster_ca_certificate)
-  token = data.google_client_config.current.access_token
-}
-
 resource "google_service_account" "watchman" {
   account_id = "watchman-admin"
   display_name = "Service account for watchman"

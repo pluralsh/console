@@ -35,6 +35,14 @@ config :watchman, WatchmanWeb.Endpoint,
   url: [host: get_env("HOST"), port: 80],
   check_origin: ["//#{get_env("HOST")}", "//watchman-grafana.#{Enum.join(rest, ".")}", "//watchman"]
 
+provider = case get_env("PROVIDER") do
+  "google" -> :gcp
+  "gcp" -> :gcp
+  "aws" -> :aws
+  "azure" -> :azure
+  _ -> :bare
+end
+
 config :watchman, Watchman.Repo,
   database: "watchman",
   username: "watchman",
@@ -54,4 +62,6 @@ config :watchman,
   url: get_env("HOST"),
   incoming_webhook: get_env("PIAZZA_INCOMING_WEBHOOK"),
   grafana_dns: get_env("GRAFANA_DNS"),
-  piazza_secret: get_env("PIAZZA_WEBHOOK_SECRET")
+  piazza_secret: get_env("PIAZZA_WEBHOOK_SECRET"),
+  cluster_name: get_env("CLUSTER_NAME"),
+  provider: provider

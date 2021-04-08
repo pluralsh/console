@@ -55,15 +55,19 @@ defmodule Watchman.Forge.Queries do
 
   @create_message """
     mutation Create($incidentId: ID!, $attributes: IncidentMessageAttributes!) {
-      createMessage(incidentId: $incidentId, attributes: $attributes) {
-        id
-      }
+      createMessage(incidentId: $incidentId, attributes: $attributes) { id }
     }
   """
 
   @me_query """
     query {
       me { id }
+    }
+  """
+
+  @create_queue """
+    mutation Create($attributes: UpgradeQueueAttributes!) {
+      createQueue(attributes: $attributes) { id }
     }
   """
 
@@ -74,6 +78,8 @@ defmodule Watchman.Forge.Queries do
   def incident_message_subscription(), do: @incident_message_sub
 
   def create_message_mutation(), do: @create_message
+
+  def create_queue_mutation(), do: @create_queue
 
   def me_query(), do: @me_query
 end

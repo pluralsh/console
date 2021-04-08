@@ -21,3 +21,7 @@ end
 defmodule Watchman.Forge.Connection do
   defstruct [:edges, :pageInfo]
 end
+
+defmodule Watchman.Forge.UpgradeQueue do
+  defstruct [:id]
+end

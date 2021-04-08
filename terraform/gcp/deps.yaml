@@ -10,4 +10,4 @@ providers:
 - gcp
 
 description: watchman gcp bootstrapping
-version: 0.1.0
+version: 0.1.1

@@ -9,6 +9,9 @@ image:
   tag: '0.1.0'
   pullPolicy: Always
 
+serviceAccount:
+  annotations: {}
+
 imagePullSecrets:
 - name: forge-creds
 nameOverride: ""

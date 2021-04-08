@@ -1,9 +1,9 @@
 artifact: {}
 terraform:
-  terraform/aws: h1:sWw44M8tF0KRNp9yTIrHHOXEiMG9Se/oAWDOZHGPpFo=
-  terraform/gcp: h1:oS+frlhhQ0I6TUufGJMwknYxhH7PZkBeQwLCfoY20VE=
+  terraform/aws: h1:LbMmrSFw7HV4xGri6LKyxXXwxEynEMPasvwMVc0hKAM=
+  terraform/gcp: h1:9MX3g6wYZhOtDT6hA26q69PoZVtLlCH8bYqB5VhciK4=
 helm:
-  charts/watchman: h1:GdOwK8+XkFTQEyuM9/GgeQV5kU/NOVfFmoNBoUZT9Rw=
+  charts/watchman: h1:9JCv73mM1M0wckzgwtySTpthpApRzva1D4RSmtl7SHs=
 recipe:
   forge/recipe/watchman-aws.yaml: 9e2bb36fefa715a56c6b082e96cec36f37e22506c929f8f7ef3a187692724421
   forge/recipe/watchman-gcp.yaml: e52c40d03e8f4c91deaa5a64097a74d7afe64a35bacc6bed55b6c57698a6433a
