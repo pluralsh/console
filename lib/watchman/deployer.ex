@@ -7,7 +7,8 @@ defmodule Watchman.Deployer do
 
   @poll_interval 10_000
   @group :deployer
-  @lock "deployer"
+
+  @via {:via, :evel_name, :deployer}
 
   defmodule State, do: defstruct [:storage, :ref, :pid, :build, :id]
 
@@ -21,26 +22,31 @@ defmodule Watchman.Deployer do
 
   def init(storage) do
     Process.flag(:trap_exit, true)
-    if Watchman.conf(:initialize) do
-      :timer.send_interval @poll_interval, :poll
-    end
     Logger.info "Starting deployer"
     :pg2.create(@group)
     :pg2.join(@group, self())
 
+    case :evel_name.register_name(:deployer, self()) do
+      :yes ->
+        send(self(), :start)
+      :no ->
+        pid = :evel_name.whereis_name(:deployer)
+        Process.link(pid)
+    end
+
     {:ok, %State{storage: storage, id: Ecto.UUID.generate()}}
   end
 
-  def wake(), do: GenServer.call(__MODULE__, :poll)
+  def wake(), do: GenServer.call(@via, :poll)
 
-  def cancel(), do: GenServer.call(__MODULE__, :cancel)
+  def cancel(), do: GenServer.call(@via, :cancel)
 
-  def state(), do: GenServer.call(__MODULE__, :state)
+  def state(), do: GenServer.call(@via, :state)
 
-  def update(repo, content, tool), do: GenServer.call(__MODULE__, {:update, repo, content, tool})
+  def update(repo, content, tool), do: GenServer.call(@via, {:update, repo, content, tool})
 
   def handle_call(:poll, _, %State{} = state) do
-    send self(), :poll
+    send(self(), :poll)
     {:reply, :ok, state}
   end
 
@@ -52,7 +58,6 @@ defmodule Watchman.Deployer do
   def handle_call(:cancel, _, %State{pid: pid, id: id} = state) when is_pid(pid) do
     Logger.info "Cancelling build with proc: #{inspect(pid)}"
     GenServer.stop(pid, {:shutdown, :cancel})
-    Builds.unlock(@lock, id)
     {:reply, :ok, state}
   end
 
@@ -63,10 +68,17 @@ defmodule Watchman.Deployer do
     {:noreply, state}
   end
 
+  def handle_info(:start, state) do
+    if Watchman.conf(:initialize) do
+      :timer.send_interval @poll_interval, :poll
+    end
+
+    {:noreply, state}
+  end
+
   def handle_info(:poll, %State{storage: storage, id: id} = state) do
-    with {:ok, _} <- Builds.lock(@lock, id),
-         _ <- Logger.info("Checking for pending builds, pid: #{inspect(self())}, node: #{node()}"),
-         %Build{} = build <- Builds.poll() do
+    Logger.info "Checking for pending builds, pid: #{inspect(self())}, node: #{node()}"
+    with %Build{} = build <- Builds.poll() do
       {pid, ref} = perform(storage, build)
       {:noreply, %{state | ref: ref, pid: pid, build: build}}
     else
@@ -75,14 +87,12 @@ defmodule Watchman.Deployer do
         {:noreply, state}
       _ ->
         Logger.info "No build found"
-        Builds.unlock(@lock, id)
         {:noreply, state}
     end
   end
 
   def handle_info({:DOWN, ref, :process, _, _}, %State{ref: ref, build: build, id: id} = state) do
-    Logger.info("tearing down build #{build.id}, proc: #{inspect(state.pid)}")
-    Builds.unlock(@lock, id)
+    Logger.info "tearing down build #{build.id}, proc: #{inspect(state.pid)}"
     broadcast()
     {:noreply, %{state | ref: nil, pid: nil, build: nil}}
   end
