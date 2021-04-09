@@ -97,7 +97,7 @@ export default function Application() {
           <ApplicationReadyIcon application={currentApplication} size='20px' showIcon />
         </Box>
       </Box>
-      <Box fill style={{overflow: 'auto'}} pad={{horizontal: 'medium'}} gap='xsmall'>
+      <Box fill style={{overflow: 'auto'}} pad={{horizontal: 'medium', bottom: 'small'}} gap='xsmall'>
         {[...chunk(currentApplication.status.components, 2)].map((chunk, ind) => (
           <Box key={ind} flex={false} fill='horizontal' direction='row' gap='xsmall'>
             {chunk.map((component) => <Component width='50%' key={`${component.group}:${component.name}`} component={component} />)}
