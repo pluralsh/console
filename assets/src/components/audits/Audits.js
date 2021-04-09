@@ -6,6 +6,7 @@ import { HeaderItem, RowItem } from '../kubernetes/Pod'
 import { Box, Text } from 'grommet'
 import { dateFormat } from '../utils/Graph'
 import Avatar from '../users/Avatar'
+import { extendConnection } from '../../utils/graphql'
 
 function Audit({audit}) {
   return (
@@ -50,11 +51,7 @@ export function Audits() {
         mapper={({node}) => <Audit key={node.id} audit={node} />}
         onLoadMore={() => pageInfo.hasNextPage && fetchMore({
           variables: {cursor: pageInfo.endCursor},
-          updateQuery: (prev, {fetchMoreResult: {audits}}) => {
-            return {...prev, audits: {
-              ...prev.audits, pageInfo: audits.pageInfo, edges: [...edges, ...audits.edges]
-            }}
-          }
+          updateQuery: (prev, {fetchMoreResult: {audits}}) => extendConnection(prev, audits, 'audits')
         })} />
     </Box>
   )

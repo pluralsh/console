@@ -11,6 +11,7 @@ import { User, Group, Add, Search, Script } from 'grommet-icons'
 import GroupRow from './Group'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import RoleRow, { CreateRole } from './Role'
+import { extendConnection } from '../../utils/graphql'
 
 function UserRow({user, next}) {
   const admin = user.roles && user.roles.admin
@@ -61,7 +62,10 @@ function UsersInner() {
         style={{height: '100%', overflow: 'auto'}}
         edges={edges}
         mapper={({node}, next) => <UserRow key={node.id} user={node} next={next.node} />}
-        onLoadMore={() => pageInfo.hasNextPage && fetchMore({variables: {userCursor: pageInfo.endCursor}})}
+        onLoadMore={() => pageInfo.hasNextPage && fetchMore({
+          variables: {userCursor: pageInfo.endCursor},
+          updateQuery: (prev, {fetchMoreResult: {users}}) => extendConnection(prev, users, 'users')
+        })}
       />
     </Box>
   )
@@ -93,7 +97,10 @@ function GroupsInner() {
         style={{height: '100%', overflow: 'auto'}}
         edges={edges}
         mapper={({node}, next) => <GroupRow key={node.id} group={node} next={next.node} />}
-        onLoadMore={() => pageInfo.hasNextPage && fetchMore({variables: {userCursor: pageInfo.endCursor}})}
+        onLoadMore={() => pageInfo.hasNextPage && fetchMore({
+          variables: {userCursor: pageInfo.endCursor},
+          updateQuery: (prev, {fetchMoreResult: {groups}}) => extendConnection(prev, groups, 'groups')
+        })}
       />
     </Box>
   )
@@ -124,7 +131,10 @@ function RolesInner() {
         style={{height: '100%', overflow: 'auto'}}
         edges={edges}
         mapper={({node}, next) => <RoleRow key={node.id} role={node} next={next.node} />}
-        onLoadMore={() => pageInfo.hasNextPage && fetchMore({variables: {userCursor: pageInfo.endCursor}})}
+        onLoadMore={() => pageInfo.hasNextPage && fetchMore({
+          variables: {userCursor: pageInfo.endCursor},
+          updateQuery: (prev, {fetchMoreResult: {roles}}) => extendConnection(prev, roles, 'roles')
+        })}
       />
     </Box>
   )

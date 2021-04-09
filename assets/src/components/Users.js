@@ -5,6 +5,7 @@ import { Scroller, Button, ModalHeader, Copyable } from 'forge-core'
 import { USERS_Q, INVITE_USER } from './graphql/users'
 import { Avatar } from './EditUser'
 import { BreadcrumbsContext } from './Breadcrumbs'
+import { extendConnection } from '../utils/graphql'
 
 function User({user}) {
   return (
@@ -79,11 +80,7 @@ export default function Users() {
           mapper={({node}) => <User user={node} />}
           onLoadMore={() => pageInfo.hasNextPage && fetchMore({
             variables: {cursor: pageInfo.endCursor},
-            updateQuery: (prev, {fetchMoreResult: {users: {edges, pageInfo}}}) => {
-              return {...prev, users: {
-                ...prev.users, pageInfo, edges: [...prev.users.edges, ...edges]
-              }}
-            }
+            updateQuery: (prev, {fetchMoreResult: {users}}) => extendConnection(prev, users, 'users')
           })} />
       </Box>
     </Box>

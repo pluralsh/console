@@ -9,7 +9,7 @@ export function updateFragment(cache, {fragment, id, update, fragmentName}) {
 }
 
 export function extendConnection(prev, next, key) {
-  const {edges, pageInfo} = next[key]
+  const {edges, pageInfo} = next
   return {...prev, [key]: {
       ...prev[key], pageInfo, edges: [...prev[key].edges, ...edges]
     }
@@ -35,6 +35,10 @@ export function appendConnection(prev, next, key) {
       ...prev[key],  pageInfo, edges: [{__typename: `${next.__typename}Edge`, node: next}, ...edges]
     }
   }
+}
+
+export function removeConnection(prev, val, key) {
+  return {...prev, [key]: {...prev[key], edges: prev[key].edges.filter(({node}) => node.id !== val.id)}}
 }
 
 export function updateCache(cache, {query, variables, update, onFailure}) {

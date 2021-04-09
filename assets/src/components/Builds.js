@@ -9,7 +9,7 @@ import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { BuildStatus as Status, BuildTypes } from './types'
 import { InstallationContext } from './Installations'
-import { appendConnection, updateCache } from '../utils/graphql'
+import { appendConnection, extendConnection, updateCache } from '../utils/graphql'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -158,11 +158,7 @@ export default function Builds() {
             mapper={({node}) => <Build key={node.id} build={node} />}
             onLoadMore={() => pageInfo.hasNextPage && fetchMore({
               variables: {cursor: pageInfo.endCursor},
-              updateQuery: (prev, {fetchMoreResult: {builds}}) => {
-                return {...prev, builds: {
-                  ...prev.builds, pageInfo: builds.pageInfo, edges: [...edges, ...builds.edges]
-                }}
-              }
+              updateQuery: (prev, {fetchMoreResult: {builds}}) => extendConnection(prev, builds, 'builds')
             })} />
         </Box>
       </Box>
