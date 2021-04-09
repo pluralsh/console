@@ -5,7 +5,6 @@ import { BUILDS_Q, CREATE_BUILD, BUILD_SUB } from './graphql/builds'
 import { Loading, Button, Scroller } from 'forge-core'
 import { Box, Text } from 'grommet'
 import moment from 'moment'
-import { mergeEdges } from './graphql/utils'
 import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { BuildStatus as Status, BuildTypes } from './types'
@@ -95,6 +94,11 @@ function CreateBuild() {
   return (
     <Box flex={false} gap='small' pad={{horizontal: 'small'}} direction='row' align='center'>
       <Button 
+        onClick={() => deploy(BuildTypes.BOUNCE)} 
+        background='backgroundLight' flat
+        label='Bounce'
+        loading={loading && type === BuildTypes.BOUNCE} />
+      <Button 
         onClick={() => deploy(BuildTypes.APPROVAL)} 
         background='backgroundLight' flat
         label='Approval'
@@ -107,14 +111,7 @@ function CreateBuild() {
   )
 }
 
-function applyDelta({builds: {edges, ...rest}, ...prev}, {delta, payload}) {
-  return {
-    ...prev,
-    builds: {...rest, edges: mergeEdges(edges, delta, payload, "BuildEdge")}
-  }
-}
-
-const POLL_INTERVAL = 1000 * 10
+const POLL_INTERVAL = 1000 * 30
 
 export default function Builds() {
   const {data, loading, subscribeToMore, fetchMore} = useQuery(BUILDS_Q, {
