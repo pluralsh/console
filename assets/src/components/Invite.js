@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useParams } from 'react-router'
 import { useMutation, useQuery } from 'react-apollo'
 import { Box, Keyboard, FormField, TextInput, Text } from 'grommet'
-import { Button, InputCollection, ResponsiveInput, SecondaryButton } from 'forge-core'
+import { Button, InputCollection, ResponsiveInput, SecondaryButton, GqlError } from 'forge-core'
 import { StatusCritical, Checkmark } from 'grommet-icons'
 import { initials } from './users/Avatar'
 import { INVITE_Q, SIGNUP } from './graphql/users'
@@ -48,12 +48,13 @@ export default function Invite() {
   const [attributes, setAttributes] = useState({name: '', password: ''})
   const [confirm, setConfirm] = useState('')
   const [editPassword, setEditPassword] = useState(false)
-  const [mutation, {loading}] = useMutation(SIGNUP, {
+  const [mutation, {loading, error: signupError}] = useMutation(SIGNUP, {
     variables: {inviteId, attributes},
     onCompleted: ({signUp: {jwt}}) => {
       setToken(jwt)
       window.location = '/'
-    }
+    },
+    onError: console.log
   })
   const {data, error} = useQuery(INVITE_Q, {variables: {id: inviteId}})
 
@@ -69,6 +70,7 @@ export default function Invite() {
       <Box width="60%" pad='medium' background='white'>
         <Keyboard onEnter={editPassword && filled ? mutation : null}>
           <Box gap='small'>
+            {signupError && <GqlError header='Signup failed' error={signupError} />}
             <Box justify='center' align='center'>
               <Text weight="bold">Accept your invite</Text>
             </Box>
