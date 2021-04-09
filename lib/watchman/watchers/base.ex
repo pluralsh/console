@@ -16,7 +16,7 @@ defmodule Watchman.Watchers.Base do
       end
 
       def init(_) do
-        send self(), :start
+        send self(), :elect
         {:ok, %State{}}
       end
 
@@ -29,8 +29,24 @@ defmodule Watchman.Watchers.Base do
       def handle_cast({:swarm, :resolve_conflict, _delay}, state),
         do: {:noreply, state}
 
+      def handle_info(:elect, state) do
+        me = self()
+        {leader, cert} = :evel.elect(__MODULE__, me)
+        Logger.info "Beginning leader election for #{__MODULE__}, leader=#{inspect(leader)}, proc=#{inspect(me)}, cert=#{inspect(cert)}"
+        Process.link(cert)
+        if leader == me do
+          send me, :start
+          :timer.send_interval(5000, :ping)
+        end
+        {:noreply, state}
+      end
+
+      def handle_info(:ping, state) do
+        Logger.info "received ping for #{__MODULE__}"
+        {:noreply, state}
+      end
+
       def handle_info({:DOWN, _, :process, _, _}, state) do
-        send self(), :start
         {:noreply, state}
       end
 

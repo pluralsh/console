@@ -26,9 +26,9 @@ config :watchman, Watchman.Cron,
   ]
 
 config :watchman, :watchers, [
-  applications: Watchman.Watchers.Application,
-  forge: Watchman.Watchers.Forge,
-  upgrade: Watchman.Watchers.Upgrade
+  Watchman.Watchers.Application,
+  Watchman.Watchers.Forge,
+  Watchman.Watchers.Upgrade
 ]
 
 config :watchman,

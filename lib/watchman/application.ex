@@ -15,13 +15,13 @@ defmodule Watchman.Application do
       Watchman.Cache,
       Watchman.ReplicatedCache,
       {Cluster.Supervisor, [topologies, [name: Watchman.ClusterSupervisor]]},
-      Watchman.Watchers,
       Watchman.Bootstrapper,
       Watchman.Deployer,
       {Absinthe.Subscription, [WatchmanWeb.Endpoint]},
     ] ++ consumers() ++ [
       Piazza.GracefulShutdown
     ] ++ socket()
+      ++ Watchman.conf(:watchers)
 
     opts = [strategy: :one_for_one, name: Watchman.Supervisor]
     Supervisor.start_link(children, opts)

@@ -1,5 +1,5 @@
 defmodule Watchman do
-  def conf(key), do: Application.get_env(:watchman, key)
+  def conf(key, default \\ nil), do: Application.get_env(:watchman, key, default)
 
   def namespace(namespace) do
     case Watchman.Forge.Config.fetch_file() do
