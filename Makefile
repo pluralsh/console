@@ -35,6 +35,9 @@ connectdb: ## proxies the db in kubernetes via kubectl
 web: ## starts a local webserver
 	cd assets && yarn start
 
+yarn-add: ## adds a yarn dep
+	cd assets && yarn add $(dep)
+
 import-incidents:
 	mv assets/src/components/incidents/queries.js queries.js
 	mv assets/src/components/incidents/Presence.js Presence.js

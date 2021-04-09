@@ -132,8 +132,9 @@ defmodule Watchman.GraphQl do
   subscription do
     field :build_delta, :build_delta do
       arg :build_id, :id
+
       config fn
-        %{id: id}, _ -> {:ok, topic: "builds:#{id}"}
+        %{id: id}, _ when is_binary(id) -> {:ok, topic: "builds:#{id}"}
         _, _ -> {:ok, topic: "builds"}
       end
     end

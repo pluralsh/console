@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect, useContext, useCallback } from 'react'
 import { useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { BUILDS_Q, CREATE_BUILD, BUILD_SUB } from './graphql/builds'
-import { Loading, Button, Scroller, ModalHeader } from 'forge-core'
-import { Box, Text, FormField, TextInput, Select, Layer } from 'grommet'
+import { Loading, Button, Scroller, SecondaryButton } from 'forge-core'
+import { Box, Text, FormField, TextInput, Select } from 'grommet'
 import moment from 'moment'
 import { mergeEdges } from './graphql/utils'
 import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { BuildStatus as Status, BuildTypes } from './types'
 import { InstallationContext } from './Installations'
+import { appendConnection, updateCache } from '../utils/graphql'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -116,24 +117,36 @@ function BuildForm({setOpen}) {
 }
 
 function CreateBuild() {
-  const [open, setOpen] = useState(false)
+  const [type, setType] = useState(BuildTypes.DEPLOY)
+  const {currentApplication} = useContext(InstallationContext)
+  const baseAttrs = {repository: currentApplication.name, message: 'Deployed from watchman'}
+  const [mutation, {loading}] = useMutation(CREATE_BUILD, {
+    update: (cache, {data: {createBuild}}) => updateCache(cache, {
+      query: BUILDS_Q,
+      update: (prev) => appendConnection(prev, createBuild, 'builds')
+    })
+  })
+
+  const deploy = useCallback((type) => {
+    setType(type)
+    mutation({variables: {attributes: {type, ...baseAttrs}}})
+  }, [setType, mutation, baseAttrs])
+
   return (
-    <>
-    <Box pad={{horizontal: 'small'}}>
+    <Box flex={false} gap='small' pad={{horizontal: 'small'}} direction='row' align='center'>
+      <SecondaryButton 
+        onClick={() => deploy(BuildTypes.APPROVAL)} 
+        hoverIndicator='sidebar'
+        background='backgroundColor'
+        border={{color: 'sidebar'}}
+        elevation={null}
+        label='Approval'
+        icon={loading && type === BuildTypes.APPROVAL && <BeatLoader color='white' size={8} />} />
       <Button
-        onClick={() => setOpen(true)} label='Create' 
-        round='xsmall' background='brand' flat
-        pad={{horizontal: 'medium', vertical: 'xsmall'}} />
+        onClick={() => deploy(BuildTypes.DEPLOY)}
+        loading={loading && type === BuildTypes.DEPLOY} 
+        label='Deploy'  background='brand' flat />
     </Box>
-    {open && (
-      <Layer modal>
-        <Box width='40vw'>
-          <ModalHeader text='Create a build' setOpen={setOpen} />
-          <BuildForm setOpen={setOpen} />
-        </Box>
-      </Layer>
-    )}
-    </>
   )
 }
 
@@ -156,9 +169,10 @@ export default function Builds() {
   useEffect(() => setBreadcrumbs([{text: 'builds', url: '/'}]), [])
   useEffect(() => subscribeToMore({
     document: BUILD_SUB,
-    updateQuery: (prev, {subscriptionData: {data}}) => {
-      return data ? applyDelta(prev, data.buildDelta) : prev
+    updateQuery: (prev, {subscriptionData: {data: {delta, payload}}}) => {
+      return delta === 'CREATE' ? appendConnection(prev, payload, 'builds') : prev
   }}), [])
+
   useEffect(() => {
     setOnChange({func: () => null})
   }, [])
