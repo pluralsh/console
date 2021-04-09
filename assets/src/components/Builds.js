@@ -2,8 +2,8 @@ import React, { useState, useEffect, useContext, useCallback } from 'react'
 import { useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { BUILDS_Q, CREATE_BUILD, BUILD_SUB } from './graphql/builds'
-import { Loading, Button, Scroller, SecondaryButton } from 'forge-core'
-import { Box, Text, FormField, TextInput, Select } from 'grommet'
+import { Loading, Button, Scroller } from 'forge-core'
+import { Box, Text } from 'grommet'
 import moment from 'moment'
 import { mergeEdges } from './graphql/utils'
 import { BeatLoader } from 'react-spinners'
@@ -76,46 +76,6 @@ function Build({build: {id, repository, status, insertedAt, message, creator, sh
   )
 }
 
-function BuildForm({setOpen}) {
-  const {applications} = useContext(InstallationContext)
-  const [attributes, setAttributes] = useState({repository: applications[0].name, type: 'DEPLOY', message: "manual test"})
-  const [mutation, {loading}] = useMutation(CREATE_BUILD, {
-    variables: {attributes},
-    fetchPolicy: 'no-cache',
-    onCompleted: () => setOpen(false)
-  })
-
-  return (
-    <Box gap='small' pad='medium'>
-      <FormField label='repository'>
-        <Select
-          options={applications.map(({name}) => name)}
-          value={attributes.repository}
-          onChange={({value}) => setAttributes({...attributes, repository: value})} />
-      </FormField>
-      <FormField label='message'>
-        <TextInput
-          placeholder='manual test'
-          value={attributes.message}
-          onChange={({target: {value}}) => setAttributes({...attributes, message: value})} />
-      </FormField>
-      <FormField label='type'>
-        <Select
-          options={Object.keys(BuildTypes).map((type) => ({type, display: type.toLowerCase()}))}
-          value={attributes.type}
-          labelKey='display'
-          valueKey={{key: 'type', reduce: true}}
-          onChange={({value}) => setAttributes({...attributes, type: value})}>
-          {({display}) => <Box pad='small'><Text size='small'>{display}</Text></Box>}
-        </Select>
-      </FormField>
-      <Box direction='row' justify='end' align='center'>
-        <Button loading={loading} label='Create' round='xsmall' onClick={mutation} />
-      </Box>
-    </Box>
-  )
-}
-
 function CreateBuild() {
   const [type, setType] = useState(BuildTypes.DEPLOY)
   const {currentApplication} = useContext(InstallationContext)
@@ -134,14 +94,11 @@ function CreateBuild() {
 
   return (
     <Box flex={false} gap='small' pad={{horizontal: 'small'}} direction='row' align='center'>
-      <SecondaryButton 
+      <Button 
         onClick={() => deploy(BuildTypes.APPROVAL)} 
-        hoverIndicator='sidebar'
-        background='backgroundColor'
-        border={{color: 'sidebar'}}
-        elevation={null}
+        background='backgroundLight' flat
         label='Approval'
-        icon={loading && type === BuildTypes.APPROVAL && <BeatLoader color='white' size={8} />} />
+        loading={loading && type === BuildTypes.APPROVAL} />
       <Button
         onClick={() => deploy(BuildTypes.DEPLOY)}
         loading={loading && type === BuildTypes.DEPLOY} 

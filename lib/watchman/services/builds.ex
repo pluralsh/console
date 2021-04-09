@@ -99,8 +99,10 @@ defmodule Watchman.Services.Builds do
     |> Repo.one()
   end
 
-  def running(build),
-    do: modify_status(build, :running)
+  def running(build) do
+    modify_status(build, :running)
+    |> notify(:update)
+  end
 
   def pending(build) do
     start_transaction()
@@ -185,6 +187,8 @@ defmodule Watchman.Services.Builds do
     do: handle_notify(PubSub.BuildFailed, build)
   defp notify({:ok, %Build{} = build}, :pending),
     do: handle_notify(PubSub.BuildPending, build)
+  defp notify({:ok, %Build{} = build}, :update),
+    do: handle_notify(PubSub.BuildUpdated, build)
 
   defp notify({:ok, %Build{} = build}, :delete),
     do: handle_notify(PubSub.BuildDeleted, build)

@@ -20,7 +20,8 @@ defimpl Watchman.PubSub.Rtc, for: [
   Watchman.PubSub.BuildApproved,
   Watchman.PubSub.BuildUpdated,
   Watchman.PubSub.CommandCompleted,
-  Watchman.PubSub.BuildCancelled
+  Watchman.PubSub.BuildCancelled,
+  Watchman.PubSub.BuildUpdated,
 ] do
   def deliver(%{item: item}), do: {item, :update}
 end

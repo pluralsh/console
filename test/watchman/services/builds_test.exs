@@ -78,6 +78,17 @@ defmodule Watchman.Services.BuildsTest do
     end
   end
 
+  describe "running/1" do
+    test "Failed builds broadcast" do
+      build = insert(:build)
+
+      {:ok, failed} = Builds.running(build)
+
+      assert failed.status == :running
+      assert_receive {:event, %PubSub.BuildUpdated{item: ^failed}}
+    end
+  end
+
   describe "succeed/1" do
     test "Succeded builds broadcast" do
       build = insert(:build)
