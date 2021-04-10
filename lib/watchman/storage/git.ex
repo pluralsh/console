@@ -25,7 +25,7 @@ defmodule Watchman.Storage.Git do
   end
 
   def pull() do
-    with {:ok, _} <- git("reset", ["--hard", "origin/master"]),
+    with {:ok, _} <- git("reset", ["--hard", "origin/#{branch()}"]),
       do: git("pull", ["--rebase"])
   end
 
@@ -43,4 +43,6 @@ defmodule Watchman.Storage.Git do
 
   def git(cmd, args \\ []),
     do: cmd("git", [cmd | args], workspace())
+
+  defp branch(), do: Watchman.conf(:branch, "master")
 end

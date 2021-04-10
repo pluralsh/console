@@ -17,6 +17,7 @@ secrets:
   admin_password: {{ dedupe . "watchman.secrets.admin_password" (randAlphaNum 20) }}
   git_url: {{ repoUrl }}
   repo_root: {{ repoName }}
+  branch_name: {{ branchName }}
   cluster_name: {{ .Cluster }}
   config: {{ readFile (homeDir ".forge" "config.yml") | quote }}
   key: {{ readFile (homeDir ".forge" "key") | quote }}
