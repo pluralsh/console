@@ -10,7 +10,7 @@ data "aws_eks_cluster" "cluster" {
 
 module "assumable_role_watchman" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "2.14.0"
+  version                       = "3.14.0"
   create_role                   = true
   role_name                     = var.role_name
   provider_url                  = replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")
@@ -20,7 +20,7 @@ module "assumable_role_watchman" {
 
 resource "aws_iam_policy" "watchman" {
   name_prefix = "watchman"
-  description = "EKS cluster-autoscaler policy for cluster ${module.cluster.cluster_id}"
+  description = "policy for the plural admin console"
   policy      = data.aws_iam_policy_document.watchman.json
 }
 

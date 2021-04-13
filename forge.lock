@@ -1,16 +1,12 @@
 artifact: {}
 terraform:
-  terraform/aws: h1:LbMmrSFw7HV4xGri6LKyxXXwxEynEMPasvwMVc0hKAM=
+  terraform/aws: h1:7juzkf2BY+792xWCenLIjb02msB2ClH6v3Xa7jMoksE=
   terraform/gcp: h1:9MX3g6wYZhOtDT6hA26q69PoZVtLlCH8bYqB5VhciK4=
 helm:
-  charts/watchman: h1:TlrvCEPb1bQct4XJiXAipsBV4gmBOqp4z4tOYFu9fzQ=
+  charts/watchman: h1:EHghizwE9pzMcSQBQpaU0I6irynB59DjNCWTLpt1eDI=
 recipe:
   forge/recipe/watchman-aws.yaml: 9e2bb36fefa715a56c6b082e96cec36f37e22506c929f8f7ef3a187692724421
   forge/recipe/watchman-gcp.yaml: e52c40d03e8f4c91deaa5a64097a74d7afe64a35bacc6bed55b6c57698a6433a
 integration: {}
-shell:
-  forge/ops/shell.yaml: f8064237b131eb8b6a7a299185746508e4f08a137d8b3d093e994aa21d8c5f1f
-database:
-  forge/ops/database.yaml: 30095b5994b93512cd478eeba19274e98ff69a0357d15f5f18e1e0584658b0b5
 crd: {}
 ird: {}

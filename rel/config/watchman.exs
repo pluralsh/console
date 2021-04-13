@@ -43,6 +43,10 @@ provider = case get_env("PROVIDER") do
   _ -> :custom
 end
 
+if provider != :gcp do
+  config :goth, disabled: true
+end
+
 config :watchman, Watchman.Repo,
   database: "watchman",
   username: "watchman",
