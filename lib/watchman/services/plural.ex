@@ -1,4 +1,4 @@
-defmodule Watchman.Services.Forge do
+defmodule Watchman.Services.Plural do
   def terraform_file(repository) do
     terraform_filename(repository)
     |> File.read()

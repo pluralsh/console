@@ -1,5 +1,5 @@
-defmodule Watchman.Forge.ExternalToken do
-  use Watchman.Forge.Base
+defmodule Watchman.Plural.ExternalToken do
+  use Watchman.Plural.Base
 
   defmodule Query, do: defstruct [:externalToken]
 

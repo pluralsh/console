@@ -1,7 +1,7 @@
-defmodule Watchman.GraphQl.Resolvers.Forge do
-  alias Watchman.Forge.{Repositories, ExternalToken}
-  alias Watchman.Forge.{Connection, PageInfo}
-  alias Watchman.Services.Forge
+defmodule Watchman.GraphQl.Resolvers.Plural do
+  alias Watchman.Plural.{Repositories, ExternalToken}
+  alias Watchman.Plural.{Connection, PageInfo}
+  alias Watchman.Services.Plural
   alias Kube.Client
 
   def resolve_external_token(_, _),
@@ -23,8 +23,8 @@ defmodule Watchman.GraphQl.Resolvers.Forge do
     do: resolve_configuration(%{name: name}, first, second)
   def resolve_configuration(%{name: name}, _, _) do
     {:ok, %{
-      helm: Forge.values_file(name) |> extract_content(),
-      terraform: Forge.terraform_file(name) |> extract_content()
+      helm: Plural.values_file(name) |> extract_content(),
+      terraform: Plural.terraform_file(name) |> extract_content()
     }}
   end
 

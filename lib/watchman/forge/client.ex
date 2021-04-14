@@ -1,4 +1,4 @@
-defmodule Watchman.Forge.Client do
+defmodule Watchman.Plural.Client do
   @headers [
     {"accept", "application/json"},
     {"content-type", "application/json"}
@@ -7,7 +7,7 @@ defmodule Watchman.Forge.Client do
   defmodule Response, do: defstruct [:data, :errors]
 
   def run(query, variables, type_spec) do
-    token = Watchman.Forge.Config.fetch()
+    token = Watchman.Plural.Config.fetch()
     Mojito.post(url(), [{"authorization", "Bearer #{token}"} | @headers], Jason.encode!(%{
       query: query,
       variables: variables
@@ -23,5 +23,5 @@ defmodule Watchman.Forge.Client do
   end
   defp decode({:error, _}, _), do: {:error, "network error"}
 
-  defp url(), do: Application.get_env(:watchman, :forge_url)
+  defp url(), do: Application.get_env(:watchman, :plural_url)
 end

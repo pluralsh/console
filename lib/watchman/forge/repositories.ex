@@ -1,6 +1,6 @@
-defmodule Watchman.Forge.Repositories do
-  use Watchman.Forge.Base
-  alias Watchman.Forge.{Connection, Edge, PageInfo, Installation, Repository, Dashboard}
+defmodule Watchman.Plural.Repositories do
+  use Watchman.Plural.Base
+  alias Watchman.Plural.{Connection, Edge, PageInfo, Installation, Repository, Dashboard}
 
   defmodule Query, do: defstruct [:installations]
 

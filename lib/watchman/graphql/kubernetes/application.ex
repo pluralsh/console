@@ -1,13 +1,13 @@
 defmodule Watchman.GraphQl.Kubernetes.Application do
   use Watchman.GraphQl.Schema.Base
-  alias Watchman.GraphQl.Resolvers.Forge
+  alias Watchman.GraphQl.Resolvers.Plural
 
   object :application do
     field :name,   non_null(:string), resolve: fn %{metadata: %{name: name}}, _, _ -> {:ok, name} end
     field :spec,   non_null(:application_spec)
     field :status, non_null(:application_status)
 
-    field :configuration, :configuration, resolve: &Forge.resolve_configuration/3
+    field :configuration, :configuration, resolve: &Plural.resolve_configuration/3
   end
 
   object :application_spec do

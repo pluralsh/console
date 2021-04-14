@@ -1,9 +1,9 @@
-defmodule Watchman.Forge.Base do
+defmodule Watchman.Plural.Base do
   defmacro __using__(_) do
     quote do
-      import Watchman.Forge.Base
-      import Watchman.Forge.Queries
-      alias Watchman.Forge.Client
+      import Watchman.Plural.Base
+      import Watchman.Plural.Queries
+      alias Watchman.Plural.Client
     end
   end
 

@@ -1,6 +1,6 @@
 defmodule Watchman.DeployerTest do
   use Watchman.DataCase, async: false
-  alias Watchman.Commands.Forge
+  alias Watchman.Commands.Plural
   alias Watchman.Storage.Git
   use Mimic
 
@@ -19,11 +19,11 @@ defmodule Watchman.DeployerTest do
       |> expect(:push, fn -> echo.(:git_push) end)
       |> expect(:revision, fn -> {:ok, "sha"} end)
 
-      expect(Forge, :build, & echo.({:build, &1}))
+      expect(Plural, :build, & echo.({:build, &1}))
       |> expect(:diff, & echo.({:diff, &1}))
       |> expect(:deploy, & echo.({:deploy, &1}))
 
-      repo = "forge"
+      repo = "plural"
       build = insert(:build, repository: repo)
       :ok = Watchman.Deployer.wake()
 
@@ -57,7 +57,7 @@ defmodule Watchman.DeployerTest do
 
       expect(Git, :init, fn -> echo.(:git_init) end)
       |> expect(:revision, fn -> {:ok, "sha"} end)
-      expect(Forge, :bounce, fn repo -> echo.({:bounce, repo}) end)
+      expect(Plural, :bounce, fn repo -> echo.({:bounce, repo}) end)
 
       :ok = Watchman.Deployer.wake()
 

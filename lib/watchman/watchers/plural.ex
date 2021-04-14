@@ -1,15 +1,15 @@
-defmodule Watchman.Watchers.Forge do
+defmodule Watchman.Watchers.Plural do
   use Watchman.Watchers.Base, state: [:absinthe]
   alias PhoenixClient.{Socket, Channel, Message}
-  alias Watchman.Forge.Queries
+  alias Watchman.Plural.Queries
   alias Watchman.Watchers.Handlers
 
   @socket_name Application.get_env(:watchman, :socket)
 
   def worker() do
-    token = Watchman.Forge.Config.derive_config()
+    token = Watchman.Plural.Config.derive_config()
     socket_opts = [
-      url: "wss://forge.piazza.app/socket/websocket",
+      url: "wss://app.plural.sh/socket/websocket",
       params: %{token: token}
     ]
 

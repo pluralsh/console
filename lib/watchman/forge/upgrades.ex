@@ -1,6 +1,6 @@
-defmodule Watchman.Forge.Upgrades do
-  use Watchman.Forge.Base
-  alias Watchman.Forge.{UpgradeQueue}
+defmodule Watchman.Plural.Upgrades do
+  use Watchman.Plural.Base
+  alias Watchman.Plural.{UpgradeQueue}
 
   defmodule Mutation, do: defstruct [:createQueue]
 

@@ -1,5 +1,5 @@
-defmodule Watchman.Forge.Incidents do
-  use Watchman.Forge.Base
+defmodule Watchman.Plural.Incidents do
+  use Watchman.Plural.Base
 
   defmodule Mutation, do: defstruct [:createMessage]
 

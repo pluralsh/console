@@ -10,7 +10,7 @@ defmodule Watchman.Application do
       Watchman.Repo,
       WatchmanWeb.Endpoint,
       Watchman.Commands.Configuration,
-      Watchman.Forge.Config,
+      Watchman.Plural.Config,
       Watchman.Cron,
       Watchman.Cache,
       Watchman.ReplicatedCache,
@@ -36,7 +36,7 @@ defmodule Watchman.Application do
 
   defp socket() do
     case Watchman.conf(:initialize) do
-      true -> [Watchman.Watchers.Forge.worker()]
+      true -> [Watchman.Watchers.Plural.worker()]
       _ -> []
     end
   end

@@ -1,14 +1,14 @@
 defmodule Watchman.Storage.Git do
   import Watchman
   import Watchman.Commands.Command, only: [cmd: 2, cmd: 3]
-  alias Watchman.Commands.Forge
+  alias Watchman.Commands.Plural
 
   def init() do
     unless File.exists?(workspace()) do
       with {:ok, _} <- cmd("git", ["clone", conf(:git_url)]),
            {:ok, _} <- git("config", ["user.name", conf(:git_user_name)]),
            {:ok, _} <- git("config", ["user.email", conf(:git_user_email)]),
-        do: Forge.unlock()
+        do: Plural.unlock()
     else
       pull()
     end

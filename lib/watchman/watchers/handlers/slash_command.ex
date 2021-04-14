@@ -1,7 +1,7 @@
 defmodule Watchman.Watchers.Handlers.SlashCommand do
   alias Kube.Client
   alias Kube.SlashCommand
-  alias Watchman.Forge.Incidents
+  alias Watchman.Plural.Incidents
   alias Watchman.Services.{Users, Builds}
 
   def handle(%{"text" => "/" <> command, "incident" => %{"id" => id, "repository" => %{"name" => name}}}) do

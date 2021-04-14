@@ -1,6 +1,6 @@
-defmodule Watchman.Forge.Config do
+defmodule Watchman.Plural.Config do
   use GenServer
-  @table_name :forge_config
+  @table_name :plural_config
 
   def start_link(args \\ :ok) do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
@@ -37,8 +37,9 @@ defmodule Watchman.Forge.Config do
   end
 
   def config_file() do
-    filename = Path.join([System.user_home!(), ".forge", "config.yml"])
+    filename = Path.join([System.user_home!(), ".plural", "config.yml"])
     case YamlElixir.read_from_file(filename) do
+      {:ok, %{"kind" => "Config", "spec" => conf}} -> conf
       {:ok, conf} -> conf
       _ -> nil
     end

@@ -139,7 +139,7 @@ defmodule Watchman.GraphQl.UserQueriesTest do
   end
 
   describe "externalToken" do
-    test "it can fetch an external token for the forge user" do
+    test "it can fetch an external token for the plural user" do
       expect(Mojito, :post, fn _, _, _, _ ->
         {:ok, %{body: Poison.encode!(%{data: %{externalToken: "external-token"}})}}
       end)

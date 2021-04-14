@@ -4,7 +4,7 @@ GCP_PROJECT ?= piazzaapp
 APP_NAME ?= watchman
 APP_VSN ?= `cat VERSION`
 BUILD ?= `git rev-parse --short HEAD`
-DKR_HOST ?= dkr.piazza.app
+DKR_HOST ?= dkr.plural.sh
 FORGE_WWW ?= ../forge/www/src
 dep ?= forge-core
 

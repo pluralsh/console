@@ -1,7 +1,7 @@
 defmodule Watchman.Watchers.Upgrade do
   use Watchman.Watchers.Base, state: [:upgrades, :queue_id, :target, :last]
   alias PhoenixClient.{Channel, Message}
-  alias Watchman.Forge.Upgrades
+  alias Watchman.Plural.Upgrades
   alias Watchman.Watchers.Handlers
 
   @socket_name Application.get_env(:watchman, :socket)

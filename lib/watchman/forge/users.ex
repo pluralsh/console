@@ -1,5 +1,5 @@
-defmodule Watchman.Forge.Users do
-  use Watchman.Forge.Base
+defmodule Watchman.Plural.Users do
+  use Watchman.Plural.Base
 
   defmodule Query, do: defstruct [:me]
 

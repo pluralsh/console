@@ -56,12 +56,12 @@ RUN \
   tar -xzf ${APP_NAME}.tar.gz && \
   rm ${APP_NAME}.tar.gz
 
-FROM dkr.piazza.app/forge/forge-cli:0.1.0 as cmd
+FROM dkr.plural.sh/plural/plural-cli:0.1.0 as cmd
 
 FROM alpine:3 as helm
 
 ARG VERSION=3.3.1
-ENV TERRAFORM_VERSION=0.12.18
+ENV TERRAFORM_VERSION=0.14.8
 
 # ENV BASE_URL="https://storage.googleapis.com/kubernetes-helm"
 ENV BASE_URL="https://get.helm.sh"
@@ -85,7 +85,7 @@ ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION
 ENV PATH /google-cloud-sdk/bin:$PATH
 
 COPY --from=static-docker-source /usr/local/bin/docker /usr/local/bin/docker
-COPY --from=cmd /go/bin/forge /usr/local/bin/forge
+COPY --from=cmd /go/bin/plural /usr/local/bin/plural
 COPY --from=helm /usr/local/bin/helm /usr/local/bin/helm
 COPY --from=helm /usr/local/bin/terraform /usr/local/bin/terraform
 
@@ -127,7 +127,7 @@ RUN helm plugin install https://github.com/chartmuseum/helm-push && \
     helm plugin install https://github.com/databus23/helm-diff
 RUN mkdir -p /root/.ssh
 RUN chmod 0700 /root/.ssh
-RUN mkdir -p /root/.forge
+RUN mkdir -p /root/.plural
 RUN mkdir -p /root/.creds
 
 # add common repos to known hosts

@@ -1,6 +1,6 @@
 defmodule Watchman.Deployer do
   use GenServer
-  alias Watchman.Commands.{Forge, Command}
+  alias Watchman.Commands.{Plural, Command}
   alias Watchman.Services.Builds
   alias Watchman.Schema.Build
   require Logger
@@ -55,7 +55,7 @@ defmodule Watchman.Deployer do
   end
 
   def handle_call(:cancel, _, %State{pid: nil} = state), do: {:reply, :ok, state}
-  def handle_call(:cancel, _, %State{pid: pid, id: id} = state) when is_pid(pid) do
+  def handle_call(:cancel, _, %State{pid: pid} = state) when is_pid(pid) do
     Logger.info "Cancelling build with proc: #{inspect(pid)}"
     GenServer.stop(pid, {:shutdown, :cancel})
     {:reply, :ok, state}
@@ -76,7 +76,7 @@ defmodule Watchman.Deployer do
     {:noreply, state}
   end
 
-  def handle_info(:poll, %State{storage: storage, id: id} = state) do
+  def handle_info(:poll, %State{storage: storage} = state) do
     Logger.info "Checking for pending builds, pid: #{inspect(self())}, node: #{node()}"
     with %Build{} = build <- Builds.poll() do
       {pid, ref} = perform(storage, build)
@@ -91,7 +91,7 @@ defmodule Watchman.Deployer do
     end
   end
 
-  def handle_info({:DOWN, ref, :process, _, _}, %State{ref: ref, build: build, id: id} = state) do
+  def handle_info({:DOWN, ref, :process, _, _}, %State{ref: ref, build: build} = state) do
     Logger.info "tearing down build #{build.id}, proc: #{inspect(state.pid)}"
     broadcast()
     {:noreply, %{state | ref: nil, pid: nil, build: nil}}
@@ -102,15 +102,15 @@ defmodule Watchman.Deployer do
   def terminate(_, _), do: :ok
 
   defp perform(storage, %Build{repository: repo, type: :bounce} = build) do
-    with_build(build, [{storage, :init, []}, {Forge, :bounce, [repo]}])
+    with_build(build, [{storage, :init, []}, {Plural, :bounce, [repo]}])
   end
 
   defp perform(storage, %Build{type: :deploy, repository: repo, message: message} = build) do
     with_build(build, [
       {storage, :init, []},
-      {Forge, :build, [repo]},
-      {Forge, :diff, [repo]},
-      {Forge, :deploy, [repo]},
+      {Plural, :build, [repo]},
+      {Plural, :diff, [repo]},
+      {Plural, :deploy, [repo]},
       {storage, :revise, [commit_message(message, repo)]},
       {storage, :push, []}
     ])
@@ -119,10 +119,10 @@ defmodule Watchman.Deployer do
   defp perform(storage, %Build{type: :approval, repository: repo, message: message} = build) do
     with_build(build, [
       {storage, :init, []},
-      {Forge, :build, [repo]},
-      {Forge, :diff, [repo]},
+      {Plural, :build, [repo]},
+      {Plural, :diff, [repo]},
       :approval,
-      {Forge, :deploy, [repo]},
+      {Plural, :deploy, [repo]},
       {storage, :revise, [commit_message(message, repo)]},
       {storage, :push, []}
     ])
@@ -131,7 +131,7 @@ defmodule Watchman.Deployer do
   defp update(storage, repo, content, tool) do
     Command.set_build(nil)
     with {:ok, _} <- storage.init(),
-         {:ok, res} <- Watchman.Services.Forge.update_configuration(repo, content, tool),
+         {:ok, res} <- Watchman.Services.Plural.update_configuration(repo, content, tool),
          {:ok, _} <- storage.revise("updated configuration for #{tool} #{repo}"),
          {:ok, _} <- storage.push(),
          _ <- broadcast(),

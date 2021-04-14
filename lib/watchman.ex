@@ -2,7 +2,7 @@ defmodule Watchman do
   def conf(key, default \\ nil), do: Application.get_env(:watchman, key, default)
 
   def namespace(namespace) do
-    case Watchman.Forge.Config.fetch_file() do
+    case Watchman.Plural.Config.fetch_file() do
       %{"namespacePrefix" => pref} when is_binary(pref) -> "#{pref}#{namespace}"
       _ -> namespace
     end

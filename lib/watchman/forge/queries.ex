@@ -1,4 +1,4 @@
-defmodule Watchman.Forge.Queries do
+defmodule Watchman.Plural.Queries do
   @page_info """
     fragment PageInfo on PageInfo {
       end_cursor

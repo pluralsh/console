@@ -1,6 +1,5 @@
 REPO watchman
 
-RECIPE forge/recipe/*
-
 TF terraform/*
 HELM charts/watchman
+RECIPE forge/recipe/*

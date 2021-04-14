@@ -5,14 +5,14 @@ defmodule Watchman.GraphQl.BuildMutationsTest do
   describe "createBuild" do
     test "It can create a new build" do
       user = insert(:user)
-      role = insert(:role, permissions: %{deploy: true}, repositories: ["forge"])
+      role = insert(:role, permissions: %{deploy: true}, repositories: ["plural"])
       insert(:role_binding, user: user, role: role)
       expect(Watchman.Deployer, :wake, fn -> :ok end)
-      expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{metadata: %{name: "forge"}}} end)
+      expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{metadata: %{name: "plural"}}} end)
 
       {:ok, %{data: %{"createBuild" => build}}} = run_query("""
         mutation {
-          createBuild(attributes: {repository: "forge"}) {
+          createBuild(attributes: {repository: "plural"}) {
             id
             type
             status

@@ -1,11 +1,11 @@
-defmodule Watchman.GraphQl.ForgeQueriesTest do
+defmodule Watchman.GraphQl.PluralQueriesTest do
   use Watchman.DataCase, async: true
   use Mimic
-  alias Watchman.Forge.Queries
+  alias Watchman.Plural.Queries
   alias Kube.{Application, ApplicationList}
 
   describe "installations" do
-    test "It will fetch your installations from forge" do
+    test "It will fetch your installations from Plural" do
       body = Jason.encode!(%{
         query: Queries.installation_query(),
         variables: %{first: 5}

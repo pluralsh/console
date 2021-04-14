@@ -1,7 +1,7 @@
 defmodule Watchman.GraphQl.Schema do
   use Watchman.GraphQl.Schema.Base
   alias Watchman.Schema
-  alias Watchman.GraphQl.Resolvers.{Build, Forge, User}
+  alias Watchman.GraphQl.Resolvers.{Build, Plural, User}
 
   import_types Absinthe.Plug.Types
   import_types Watchman.GraphQl.CustomTypes
@@ -94,7 +94,7 @@ defmodule Watchman.GraphQl.Schema do
     field :name,          non_null(:string)
     field :description,   :string
     field :icon,          :string
-    field :configuration, :configuration, resolve: &Forge.resolve_configuration/3
+    field :configuration, :configuration, resolve: &Plural.resolve_configuration/3
     field :grafana_dns,   :string, resolve: fn _, _, _ ->
       {:ok, Watchman.conf(:grafana_dns)}
     end
