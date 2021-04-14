@@ -6,7 +6,7 @@ defmodule Watchman.Middleware.Rbac do
 
   @dummy "!!invalid!!"
 
-  def call(%{context: %User{roles: %{admin: true}}} = res, _), do: res
+  def call(%{context: %{current_user: %User{roles: %{admin: true}}}} = res, _), do: res
   def call(%{arguments: args, context: %{current_user: %User{} = user}} = res, opts) do
     perm = Keyword.get(opts, :perm)
     arg  = Keyword.get(opts, :arg)

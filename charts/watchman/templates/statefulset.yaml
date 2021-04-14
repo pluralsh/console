@@ -68,8 +68,10 @@ spec:
           mountPath: "/root/.ssh"
         - name: watchman-conf
           mountPath: "/root/.forge"
+        {{ if eq .Values.provider "google" }}
         - name: watchman-creds
           mountPath: "/root/.creds"
+        {{ end }}
         ports:
         - name: http
           containerPort: {{ .Values.service.port }}
@@ -107,6 +109,8 @@ spec:
       - name: watchman-conf
         secret:
           secretName: watchman-conf
+      {{ if eq .Values.provider "google" }}
       - name: watchman-creds
         secret:
           secretName: watchman-credentials
+      {{ end }}

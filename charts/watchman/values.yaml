@@ -48,6 +48,8 @@ tolerations: []
 
 affinity: {}
 
+provider: google
+
 postgresql:
   metrics:
     enabled: true
