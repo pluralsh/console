@@ -46,11 +46,12 @@ export default function Login() {
   if (!error && data && data.me) {
     window.location = '/'
   }
+  const disabled = form.password.length === 0 || form.email.length === 0
 
   return (
     <Box direction="column" align="center" justify="center" height="100vh" background='backgroundColor'>
       <Box width="60%" pad='medium' border={{color: 'light-3'}} background='white' round='xsmall'>
-        <Keyboard onEnter={mutation}>
+        <Keyboard onEnter={disabled ? null : mutation}>
           <Box margin={{bottom: '10px'}} gap='small'>
             {error && <GqlError header='Login failed' error={error} />}
             <Box justify='center' align='center'>
@@ -70,7 +71,11 @@ export default function Login() {
                 onChange={({target: {value}}) => setForm({...form, password: value})} />
             </FormField>
             <Box direction='row' align='center' justify='end'>
-              <Button label='Login' onClick={mutation} loading={loading} />
+              <Button 
+                label='Login' 
+                onClick={mutation} 
+                loading={loading} 
+                disabled={disabled} />
             </Box>
           </Box>
         </Keyboard>
