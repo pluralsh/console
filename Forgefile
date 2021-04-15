@@ -2,4 +2,4 @@ REPO watchman
 
 TF terraform/*
 HELM charts/watchman
-RECIPE forge/recipe/*
+RECIPE plural/recipe/*

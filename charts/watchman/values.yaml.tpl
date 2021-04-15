@@ -19,8 +19,8 @@ secrets:
   repo_root: {{ repoName }}
   branch_name: {{ branchName }}
   cluster_name: {{ .Cluster }}
-  config: {{ readFile (homeDir ".forge" "config.yml") | quote }}
-  key: {{ readFile (homeDir ".forge" "key") | quote }}
+  config: {{ readFile (homeDir ".plural" "config.yml") | quote }}
+  key: {{ readFile (homeDir ".plural" "key") | quote }}
   known_hosts: {{ knownHosts | quote }}
   erlang: {{ dedupe . "watchman.secrets.erlang" (randAlphaNum 14) }}
 {{ if and (hasKey . "watchman") (hasKey .watchman "secrets") }}

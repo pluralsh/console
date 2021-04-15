@@ -125,10 +125,9 @@ WORKDIR /opt/app
 
 RUN helm plugin install https://github.com/chartmuseum/helm-push && \
     helm plugin install https://github.com/databus23/helm-diff
-RUN mkdir -p /root/.ssh
-RUN chmod 0700 /root/.ssh
-RUN mkdir -p /root/.plural
-RUN mkdir -p /root/.creds
+RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh
+RUN mkdir -p /root/.plural && mkdir -p /root/.creds
+RUN ln -s /usr/local/bin/plural /usr/local/bin/forge
 
 # add common repos to known hosts
 RUN touch /root/.ssh/known_hosts

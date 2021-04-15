@@ -5,7 +5,7 @@
 replicaCount: 2
 
 image:
-  repository: dkr.piazza.app/watchman/watchman
+  repository: dkr.plural.sh/watchman/watchman
   tag: '0.1.0'
   pullPolicy: Always
 
@@ -13,7 +13,7 @@ serviceAccount:
   annotations: {}
 
 imagePullSecrets:
-- name: forge-creds
+- name: plural-creds
 nameOverride: ""
 fullnameOverride: ""
 

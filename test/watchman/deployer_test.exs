@@ -7,6 +7,7 @@ defmodule Watchman.DeployerTest do
   setup :set_mimic_global
 
   describe "#wake/0" do
+    @tag :skip
     test "It will dequeue and deploy a repo" do
       myself = self()
       echo = fn msg ->
