@@ -4,33 +4,33 @@ import { buildClient } from '../helpers/client'
 import CurrentUser from './forge/CurrentUser'
 import { LoginContext } from './Login'
 
-const FORGE_GQL = 'https://forge.piazza.app/gql'
-const FORGE_WSS = 'wss://forge.piazza.app/socket'
+const PLURAL_GQL = 'https://app.plural.sh/gql'
+const PLURAL_WSS = 'wss://app.plural.sh/socket'
 
-export const ForgeApiContext = React.createContext({})
+export const PluralApiContext = React.createContext({})
 
-export function withForgeApi(Component) {
+export function withPluralApi(Component) {
   return (props) => (
-    <ForgeApi>
+    <PluralApi>
       <Component {...props} />
-    </ForgeApi>
+    </PluralApi>
   )
 }
 
-export function ForgeApi({children}) {
+export function PluralApi({children}) {
   const {token} = useContext(LoginContext)
-  const {client, socket} = useMemo(() => buildClient(FORGE_GQL, FORGE_WSS, 
+  const {client, socket} = useMemo(() => buildClient(PLURAL_GQL, PLURAL_WSS, 
     () => { window.location = '/' },
     () => token
   ), [token])
 
   return (
-    <ForgeApiContext.Provider value={{socket}}>
+    <PluralApiContext.Provider value={{socket}}>
       <ApolloProvider client={client}>
         <CurrentUser>
           {children}
         </CurrentUser>
       </ApolloProvider>
-    </ForgeApiContext.Provider>
+    </PluralApiContext.Provider>
   )
 }

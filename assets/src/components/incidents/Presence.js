@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react'
 import TimedCache from '../utils/TimedCache'
 import { Presence } from 'phoenix'
 import { Box } from 'grommet'
-import { ForgeApiContext } from '../ForgeApi'
+import { PluralApiContext } from '../PluralApi'
 
 export const PresenceContext = React.createContext({})
 
@@ -16,7 +16,7 @@ export const PresenceIndicator = ({border, margin}) => {
 }
 
 export function PresenceProvider({incidentId, children}) {
-  const {socket} = useContext(ForgeApiContext)
+  const {socket} = useContext(PluralApiContext)
   const [channel, setChannel] = useState(null)
   const [present, setPresent] = useState({})
   const [typists, setTypists] = useState([])

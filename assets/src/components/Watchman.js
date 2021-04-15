@@ -20,7 +20,7 @@ import { Pod } from './kubernetes/Pod'
 import Directory from './users/Directory'
 import EditUser from './users/EditUser'
 import { Audits } from './audits/Audits'
-import { withForgeApi } from './ForgeApi'
+import { withPluralApi } from './PluralApi'
 import { Incidents } from './incidents/Incidents'
 import { Incident } from './incidents/Incident'
 
@@ -53,8 +53,8 @@ export default function Watchman() {
               <Route path='/directory/:section' component={Directory} />
               <Route path='/directory' component={Directory} />
               <Route path='/logs/:repo' component={LogViewer} />
-              <Route path='/incidents/:incidentId' component={withForgeApi(Incident)} />
-              <Route path='/incidents' component={withForgeApi(Incidents)} />
+              <Route path='/incidents/:incidentId' component={withPluralApi(Incident)} />
+              <Route path='/incidents' component={withPluralApi(Incidents)} />
               <Route path='/logs' render={() => (
                 <RepositorySelector
                   prefix='logs'
