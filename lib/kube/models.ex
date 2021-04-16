@@ -4,7 +4,7 @@ defmodule Kube.Dashboard do
   defmodule Query do
     use Kazan.Model
 
-    defmodel "Query", "forgelabs.sh", "v1alpha1" do
+    defmodel "Query", "platform.plural.sh", "v1alpha1" do
       property :query,         "query",  :string
       property :legend,        "legend", :string
       property :legend_format, "legendFormat", :string
@@ -14,7 +14,7 @@ defmodule Kube.Dashboard do
   defmodule Graph do
     use Kazan.Model
 
-    defmodel "Query", "forgelabs.sh", "v1alpha1" do
+    defmodel "Query", "platform.plural.sh", "v1alpha1" do
       property :queries, "queries", {:array, Kube.Dashboard.Query}
       property :name,    "name",    :string
       property :format,  "format",  :string
@@ -24,7 +24,7 @@ defmodule Kube.Dashboard do
   defmodule Label do
     use Kazan.Model
 
-    defmodel "Label", "forgelabs.sh", "v1alpha1" do
+    defmodel "Label", "platform.plural.sh", "v1alpha1" do
       property :query,  "query",  Kube.Dashboard.LabelQuery
       property :name,   "name",   :string
       property :values, "values", {:array, :string}
@@ -34,7 +34,7 @@ defmodule Kube.Dashboard do
   defmodule LabelQuery do
     use Kazan.Model
 
-    defmodel "Label", "forgelabs.sh", "v1alpha1" do
+    defmodel "Label", "platform.plural.sh", "v1alpha1" do
       property :query, "query", :string
       property :label, "label", :string
     end
@@ -43,7 +43,7 @@ defmodule Kube.Dashboard do
   defmodule Spec do
     use Kazan.Model
 
-    defmodel "DashboardSpec", "forgelabs.sh", "v1alpha1" do
+    defmodel "DashboardSpec", "platform.plural.sh", "v1alpha1" do
       property :name,         "name",        :string
       property :description,  "description", :string
       property :default_time, "defaultTime", :string
@@ -53,7 +53,7 @@ defmodule Kube.Dashboard do
     end
   end
 
-  defmodel "Dashboard", "forgelabs.sh", "v1alpha1" do
+  defmodel "Dashboard", "platform.plural.sh", "v1alpha1" do
     property :spec, "spec", Spec
   end
 end
@@ -62,7 +62,7 @@ defmodule Kube.DashboardList do
   use Kazan.Model
 
   defmodellist "DashboardList",
-               "forgelabs.sh",
+               "platform.plural.sh",
                "v1alpha1",
                Kube.Dashboard
 end
