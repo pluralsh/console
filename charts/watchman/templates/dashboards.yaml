@@ -1,4 +1,4 @@
-apiVersion: forgelabs.sh/v1alpha1
+apiVersion: platform.plural.sh/v1alpha1
 kind: Dashboard
 metadata:
   name: {{ template "watchman.fullname" $ }}-beam
@@ -40,7 +40,7 @@ spec:
     format: none
     name: runtime performance
 ---
-apiVersion: forgelabs.sh/v1alpha1
+apiVersion: platform.plural.sh/v1alpha1
 kind: Dashboard
 metadata:
   name: {{ template "watchman.fullname" $ }}-postgres

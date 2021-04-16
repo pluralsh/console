@@ -1,4 +1,4 @@
-apiVersion: forgelabs.sh/v1alpha1
+apiVersion: platform.plural.sh/v1alpha1
 kind: LogFilter
 metadata:
   name: build-polls
@@ -12,7 +12,7 @@ spec:
   - name: job
     value: watchman/watchman
 ---
-apiVersion: forgelabs.sh/v1alpha1
+apiVersion: platform.plural.sh/v1alpha1
 kind: LogFilter
 metadata:
   name: watcher-pings
