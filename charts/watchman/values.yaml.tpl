@@ -8,7 +8,7 @@ provider: {{ .Provider }}
 
 serviceAccount:
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Project }}:role/watchman
+    eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Project }}:role/{{ .Cluster }}-watchman
 
 secrets:
   jwt: {{ dedupe . "watchman.secrets.jwt" (randAlphaNum 20) }}
