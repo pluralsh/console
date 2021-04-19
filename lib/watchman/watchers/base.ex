@@ -42,7 +42,7 @@ defmodule Watchman.Watchers.Base do
       end
 
       def handle_info(:ping, state) do
-        Logger.info "received ping for #{__MODULE__} pid=#{inspect(self())}"
+        Logger.info "received ping for #{__MODULE__} pid=#{inspect(self())} node=#{node()}"
         {:noreply, state}
       end
 

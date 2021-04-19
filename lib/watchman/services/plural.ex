@@ -25,16 +25,15 @@ defmodule Watchman.Services.Plural do
   end
 
   def project_manifest() do
-    f = manifest_filename()
-
-    with {:ok, %{
-      "kind" => "ProjectManifest",
-      "metadata" => %{"name" => name},
-      "spec" => conf
-    }} <- YamlElixir.read_from_file(f) do
-      {:ok, Manifest.build(name, conf)}
-    else
-      _ -> {:error, :not_found}
+    manifest_filename()
+    |> YamlElixir.read_from_file()
+    |> case do
+      {:ok, %{
+        "kind" => "ProjectManifest",
+        "metadata" => %{"name" => name},
+        "spec" => conf
+      }} -> {:ok, Manifest.build(name, conf)}
+      _  -> {:error, :not_found}
     end
   end
 

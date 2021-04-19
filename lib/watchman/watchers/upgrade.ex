@@ -29,6 +29,7 @@ defmodule Watchman.Watchers.Upgrade do
   defp to_provider(_), do: "CUSTOM"
 
   def handle_info(:connect, state) do
+    Logger.info "Joining upgrade queue channel"
     with {:ok, _, upgrade} <- Channel.join(@socket_name, "queues:#{state.queue_id}") do
       send self(), :next
       {:noreply, %{state | upgrades: upgrade}}
