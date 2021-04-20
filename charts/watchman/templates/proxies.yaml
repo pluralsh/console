@@ -19,7 +19,7 @@ spec:
 apiVersion: platform.plural.sh/v1alpha1
 kind: Proxy
 metadata:
-  name: sh
+  name: appsh
   labels:
 {{ include "watchman.labels" . | indent 4 }}
 spec:
@@ -28,3 +28,16 @@ spec:
   shConfig:
     command: /opt/app/bin/watchman
     args: [remote_console]
+---
+apiVersion: platform.plural.sh/v1alpha1
+kind: Proxy
+metadata:
+  name: sh
+  labels:
+{{ include "watchman.labels" . | indent 4 }}
+spec:
+  type: sh
+  target: statefulset/watchman
+  shConfig:
+    command: /bin/sh
+    args: []
