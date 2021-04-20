@@ -18,13 +18,13 @@ import { Container } from './utils'
 function NodeRowHeader() {
   return (
     <Box direction='row' align='center' border='bottom' pad='small'>
-      <HeaderItem width='20%' text='name' />
+      <HeaderItem width='30%' text='name' />
       <HeaderItem width='10%' text='status' />
       <HeaderItem width='10%' text='region' />
       <HeaderItem width='10%' text='zone' />
       <HeaderItem width='10%' text='cpu' />
       <HeaderItem width='10%' text='memory' />
-      <HeaderItem width='30%' text='pod cidr' />
+      <HeaderItem width='20%' text='pod cidr' />
     </Box>
   )
 }
@@ -36,7 +36,7 @@ function NodeRow({node}) {
   return (
     <Box direction='row' align='center' border='bottom' hoverIndicator='backgroundDark'
          onClick={() => hist.push(`/nodes/${node.metadata.name}`)} pad='small'>
-      <Box flex={false} width='20%' direction='row' align='center' gap='xsmall'>
+      <Box flex={false} width='30%' direction='row' align='center' gap='xsmall'>
         <ServerCluster size='small' />
         <Text size='small'>{node.metadata.name}</Text>
       </Box>
@@ -48,7 +48,7 @@ function NodeRow({node}) {
       <RowItem width='10%' text={labels['failure-domain.beta.kubernetes.io/zone']} />
       <RowItem width='10%' text={cpuParser(node.status.capacity.cpu)} />
       <RowItem width='10%' text={filesize(memoryParser(node.status.capacity.memory))} />
-      <RowItem width='30%' text={node.spec.podCidr} />
+      <RowItem width='20%' text={node.spec.podCidr} />
     </Box>
   )
 }

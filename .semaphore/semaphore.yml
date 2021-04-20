@@ -39,7 +39,6 @@ blocks:
     secrets:
     - name: GCP
     - name: gcp-test
-    - name: forge
     - name: deploy-key
     - name: plural
     prologue:
