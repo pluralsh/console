@@ -14,6 +14,7 @@ import { appendConnection, extendConnection, updateCache } from '../utils/graphq
 function BuildStatusInner({background, text, icon}) {
   return (
     <Box
+      flex={false}
       direction='row'
       align='center'
       pad={{horizontal: 'small', vertical: 'xsmall'}}
