@@ -35,6 +35,7 @@ defmodule Watchman.Watchers.Base do
         Logger.info "Beginning leader election for #{__MODULE__}, leader=#{inspect(leader)}, proc=#{inspect(me)}, cert=#{inspect(cert)}"
         Process.link(cert)
         if leader == me do
+          Logger.info "proc=#{inspect(me)}, cert=#{inspect(cert)} Assuming leadership for #{__MODULE__}"
           send me, :start
           :timer.send_interval(5000, :ping)
         end
