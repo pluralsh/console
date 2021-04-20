@@ -6,6 +6,7 @@ import { onError } from 'apollo-link-error'
 import * as AbsintheSocket from "@absinthe/socket"
 import { Socket as PhoenixSocket } from "phoenix"
 import { createAbsintheSocketLink } from "@absinthe/socket-apollo-link"
+import { RetryLink } from "apollo-link-retry"
 // import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
 // import { sha256 } from 'crypto-hash';
 import { hasSubscription } from "@jumpn/utils-graphql"
@@ -28,8 +29,19 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   })
 
   const resetToken = onError(({ networkError }) => {
-    if (networkError && networkError.statusCode === 401) onNetworkError()
+    if (networkError && networkError.statusCode === 401) {
+      onNetworkError()
+    }
   });
+
+
+  const retryLink = new RetryLink({
+    delay: {initial: 200},
+    attempts: {
+      max: Infinity,
+      retryIf: (error) => !!error && !!fetchToken()
+    }
+  })
 
   const socket = new PhoenixSocket(wsUrl, {
     params: () => {
@@ -46,7 +58,7 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const splitLink = split(
     (operation) => hasSubscription(operation.query),
     socketLink,
-    authLink.concat(gqlLink)
+    authLink.concat(retryLink).concat(gqlLink)
   )
 
   const client = new ApolloClient({
