@@ -76,7 +76,7 @@ defmodule Watchman.Deployer do
     {:noreply, state}
   end
 
-  def handle_info(:poll, %State{storage: storage} = state) do
+  def handle_info(:poll, %State{pid: nil, storage: storage} = state) do
     Logger.info "Checking for pending builds, pid: #{inspect(self())}, node: #{node()}"
     with %Build{} = build <- Builds.poll() do
       {pid, ref} = perform(storage, build)
@@ -89,6 +89,11 @@ defmodule Watchman.Deployer do
         Logger.info "No build found"
         {:noreply, state}
     end
+  end
+
+  def handle_info(:poll, %State{pid: pid} = state) when is_pid(pid) do
+    Logger.info "Build #{inspect(pid)} already running"
+    {:noreply, state}
   end
 
   def handle_info({:DOWN, ref, :process, _, _}, %State{ref: ref, build: build} = state) do

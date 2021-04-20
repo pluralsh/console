@@ -39,5 +39,5 @@ spec:
   type: sh
   target: statefulset/watchman
   shConfig:
-    command: /bin/sh
+    command: ""
     args: []
