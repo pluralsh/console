@@ -2,7 +2,7 @@ defmodule Watchman.Watchers.Base do
   import Watchman.Services.Base
 
   defmacro __using__(opts) do
-    state_keys = Keyword.get(opts, :state, [:pid])
+    state_keys = Keyword.get(opts, :state, [:pid]) |> Enum.concat([:timer])
     quote do
       use GenServer
       import Watchman.Watchers.Base
@@ -16,6 +16,8 @@ defmodule Watchman.Watchers.Base do
       end
 
       def init(_) do
+        :pg2.create(__MODULE__)
+        :pg2.join(__MODULE__, self())
         send self(), :elect
         {:ok, %State{}}
       end
@@ -34,12 +36,30 @@ defmodule Watchman.Watchers.Base do
         {leader, cert} = :evel.elect(__MODULE__, me)
         Logger.info "Beginning leader election for #{__MODULE__}, leader=#{inspect(leader)}, proc=#{inspect(me)}, cert=#{inspect(cert)}"
         Process.link(cert)
-        if leader == me do
-          Logger.info "proc=#{inspect(me)}, cert=#{inspect(cert)} Assuming leadership for #{__MODULE__}"
-          send me, :start
-          :timer.send_interval(5000, :ping)
+        group_broadcast(__MODULE__, {:leader, leader, cert})
+        case leader == me do
+          true ->
+            Logger.info "proc=#{inspect(me)}, cert=#{inspect(cert)} Assuming leadership for #{__MODULE__}"
+            send me, :start
+            {:ok, ref} = :timer.send_interval(5000, :ping)
+            {:noreply, %{state | timer: ref}}
+          _ -> {:noreply, state}
         end
+      end
+
+      def handle_info({:leader, _, cert}, %{timer: nil} = state) do
+        Process.link(cert)
         {:noreply, state}
+      end
+
+      def handle_info({:leader, leader, cert}, %{timer: timer} = state) do
+        Process.link(cert)
+        case leader == self() do
+          true -> {:noreply, state}
+          _ ->
+            {:ok, _} = :timer.cancel(timer)
+            {:noreply, %{state | timer: nil}}
+        end
       end
 
       def handle_info(:ping, state) do
@@ -63,5 +83,11 @@ defmodule Watchman.Watchers.Base do
 
   def publish(resource, type) do
     broadcast(resource, to_delta(type))
+  end
+
+  def group_broadcast(group, msg) do
+    :pg2.get_members(group)
+    |> Enum.filter(& &1 != self())
+    |> Enum.each(&send(&1, msg))
   end
 end

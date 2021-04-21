@@ -10,7 +10,7 @@ defmodule Watchman.Deployer do
 
   @via {:via, :evel_name, :deployer}
 
-  defmodule State, do: defstruct [:storage, :ref, :pid, :build, :id]
+  defmodule State, do: defstruct [:storage, :ref, :pid, :build, :id, :timer]
 
   def start(storage) do
     GenServer.start(__MODULE__, storage)
@@ -28,9 +28,11 @@ defmodule Watchman.Deployer do
 
     case :evel_name.register_name(:deployer, self()) do
       :yes ->
+        broadcast({:leader, self()})
         send(self(), :start)
       :no ->
         pid = :evel_name.whereis_name(:deployer)
+        broadcast({:leader, pid})
         Process.link(pid)
     end
 
@@ -68,12 +70,28 @@ defmodule Watchman.Deployer do
     {:noreply, state}
   end
 
-  def handle_info(:start, state) do
-    if Watchman.conf(:initialize) do
-      :timer.send_interval @poll_interval, :poll
-    end
-
+  def handle_cast({:leader, leader}, %{timer: nil} = state) do
+    Process.link(leader)
     {:noreply, state}
+  end
+
+  def handle_cast({:leader, leader}, %{timer: timer} = state) do
+    case leader == self() do
+      true -> {:noreply, state}
+      _ ->
+        {:ok, _} = :timer.cancel(timer)
+        Process.link(leader)
+        {:noreply, %{state | timer: nil}}
+    end
+  end
+
+  def handle_info(:start, state) do
+    case Watchman.conf(:initialize) do
+      true ->
+        {:ok, ref} = :timer.send_interval(@poll_interval, :poll)
+        {:noreply, %{state | timer: ref}}
+      _ -> {:noreply, state}
+    end
   end
 
   def handle_info(:poll, %State{pid: nil, storage: storage} = state) do
@@ -151,10 +169,10 @@ defmodule Watchman.Deployer do
     {pid, ref}
   end
 
-  def broadcast() do
+  def broadcast(msg \\ :sync) do
     :pg2.get_members(@group)
     |> Enum.filter(& &1 != self())
-    |> Enum.each(&GenServer.cast(&1, :sync))
+    |> Enum.each(&GenServer.cast(&1, msg))
   end
 
   defp commit_message(nil, repo), do: "watchman deployment for #{repo}"
