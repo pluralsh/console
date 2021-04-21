@@ -19,14 +19,9 @@ defmodule Watchman.Watchers.Upgrade do
     })
 
     Process.send_after(self(), :connect, 1000)
-    :timer.send_interval(@poll_interval, :next)
-    {:noreply, %{state | queue_id: id}}
+    {:ok, ref} = :timer.send_interval(@poll_interval, :next)
+    {:noreply, %{state | queue_id: id, timer: ref}}
   end
-
-  defp to_provider(:gcp), do: "GCP"
-  defp to_provider(:aws), do: "AWS"
-  defp to_provider(:azure), do: "AZURE"
-  defp to_provider(_), do: "CUSTOM"
 
   def handle_info(:connect, state) do
     Logger.info "Joining upgrade queue channel"
@@ -67,8 +62,10 @@ defmodule Watchman.Watchers.Upgrade do
     {:noreply, state}
   end
 
-  def handle_info(msg, state) do
-    IO.inspect(msg)
-    {:noreply, state}
-  end
+  def handle_info(_, state), do: {:noreply, state}
+
+  defp to_provider(:gcp), do: "GCP"
+  defp to_provider(:aws), do: "AWS"
+  defp to_provider(:azure), do: "AZURE"
+  defp to_provider(_), do: "CUSTOM"
 end

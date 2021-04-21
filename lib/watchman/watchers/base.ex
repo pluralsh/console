@@ -23,13 +23,7 @@ defmodule Watchman.Watchers.Base do
       end
 
       def handle_call(:state, _, state), do: {:reply, state, state}
-      def handle_call({:swarm, :begin_handoff}, _from, state), do: {:reply, :restart, state}
       def handle_call(:ping, _, state), do: {:reply, :pong, state}
-
-      def handle_cast({:swarm, :end_handoff, _}, state), do: {:noreply, state}
-
-      def handle_cast({:swarm, :resolve_conflict, _delay}, state),
-        do: {:noreply, state}
 
       def handle_info(:elect, state) do
         me = self()
@@ -40,10 +34,11 @@ defmodule Watchman.Watchers.Base do
         case leader == me do
           true ->
             Logger.info "proc=#{inspect(me)}, cert=#{inspect(cert)} Assuming leadership for #{__MODULE__}"
-            send me, :start
+            send(me, :start)
             {:ok, ref} = :timer.send_interval(5000, :ping)
             {:noreply, %{state | timer: ref}}
-          _ -> {:noreply, state}
+          _ ->
+            {:noreply, state}
         end
       end
 
@@ -53,10 +48,13 @@ defmodule Watchman.Watchers.Base do
       end
 
       def handle_info({:leader, leader, cert}, %{timer: timer} = state) do
+        Logger.info "Registering leader #{inspect(leader)} on #{inspect(self())}"
         Process.link(cert)
         case leader == self() do
-          true -> {:noreply, state}
+          true ->
+            {:noreply, state}
           _ ->
+            Logger.info "Cancelling timer"
             {:ok, _} = :timer.cancel(timer)
             {:noreply, %{state | timer: nil}}
         end
@@ -69,10 +67,6 @@ defmodule Watchman.Watchers.Base do
 
       def handle_info({:DOWN, _, :process, _, _}, state) do
         {:noreply, state}
-      end
-
-      def handle_info({:swarm, :die}, state) do
-        {:stop, :shutdown, state} # would be good to record last resource version here
       end
     end
   end

@@ -10,7 +10,7 @@ defmodule Watchman.Watchers.Application do
       response_model: Kube.Application
     }, send_to: self())
 
-    Process.monitor(pid)
+    Process.link(pid)
     {:noreply, %{state | pid: pid}}
   end
 
