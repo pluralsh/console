@@ -1,6 +1,6 @@
 import Botanist
 
-alias Watchman.{Repo, Schema}
+alias Console.{Repo, Schema}
 
 seed do
   group = Repo.get_by!(Schema.Group, name: "general")

@@ -1,7 +1,7 @@
 import Botanist
 import System, only: [get_env: 1]
 
-alias Watchman.{Repo, Schema}
+alias Console.{Repo, Schema}
 
 seed do
   %Schema.User{

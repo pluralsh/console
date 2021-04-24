@@ -1,7 +1,7 @@
 defmodule Loki.Client do
   alias Loki.{Response, Data, Result, Value}
 
-  def host(), do: Application.get_env(:watchman, :loki)
+  def host(), do: Application.get_env(:console, :loki)
 
   def query(query, start_ts, end_ts, limit) do
     query = URI.encode_query(%{"query" => query, "start" => start_ts, "end" => end_ts, "limit" => limit})

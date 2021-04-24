@@ -1,4 +1,4 @@
-defmodule Watchman.TestHelpers do
+defmodule Console.TestHelpers do
   def ids_equal(found, expected) do
     found = MapSet.new(ids(found))
     expected = MapSet.new(ids(expected))
@@ -18,10 +18,10 @@ defmodule Watchman.TestHelpers do
   def id(%{"id" => id}), do: id
   def id(id) when is_binary(id), do: id
 
-  def refetch(%{__struct__: schema, id: id}), do: Watchman.Repo.get(schema, id)
+  def refetch(%{__struct__: schema, id: id}), do: Console.Repo.get(schema, id)
 
   def run_query(query, variables, context \\ %{}),
-    do: Absinthe.run(query, Watchman.GraphQl, variables: variables, context: context)
+    do: Absinthe.run(query, Console.GraphQl, variables: variables, context: context)
 
   def from_connection(%{"edges" => edges}), do: Enum.map(edges, & &1["node"])
 end

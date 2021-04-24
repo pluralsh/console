@@ -1,6 +1,6 @@
-defmodule Watchman.Factory do
-  use ExMachina.Ecto, repo: Watchman.Repo
-  alias Watchman.Schema
+defmodule Console.Factory do
+  use ExMachina.Ecto, repo: Console.Repo
+  alias Console.Schema
 
   def build_factory do
     %Schema.Build{

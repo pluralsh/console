@@ -1,4 +1,4 @@
-defmodule WatchmanWeb.ConnCase do
+defmodule ConsoleWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -15,34 +15,34 @@ defmodule WatchmanWeb.ConnCase do
 
   use ExUnit.CaseTemplate
   import Plug.Conn
-  alias Watchman.Schema.User
+  alias Console.Schema.User
 
   using do
     quote do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
-      alias WatchmanWeb.Router.Helpers, as: Routes
-      import Watchman.Factory
-      import Watchman.TestHelpers
-      import WatchmanWeb.ConnCase
+      alias ConsoleWeb.Router.Helpers, as: Routes
+      import Console.Factory
+      import Console.TestHelpers
+      import ConsoleWeb.ConnCase
 
       # The default endpoint for testing
-      @endpoint WatchmanWeb.Endpoint
+      @endpoint ConsoleWeb.Endpoint
     end
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Watchman.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Console.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Watchman.Repo, {:shared, self()})
+      Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, {:shared, self()})
     end
 
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 
   def add_auth_headers(conn, %User{} = user) do
-    {:ok, token, _} = Watchman.Guardian.encode_and_sign(user)
+    {:ok, token, _} = Console.Guardian.encode_and_sign(user)
     put_req_header(conn, "authorization", "Bearer #{token}")
   end
 end

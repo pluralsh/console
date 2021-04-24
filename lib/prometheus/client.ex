@@ -2,7 +2,7 @@ defmodule Prometheus.Client do
   alias Prometheus.{Response, Data, Result}
   @headers [{"content-type", "application/x-www-form-urlencoded"}]
 
-  def host(), do: Application.get_env(:watchman, :prometheus)
+  def host(), do: Application.get_env(:console, :prometheus)
 
   def query(query, start, end_t, step, variables) do
     query = variable_subst(query, variables)

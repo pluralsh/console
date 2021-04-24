@@ -1,8 +1,8 @@
-defmodule Watchman do
-  def conf(key, default \\ nil), do: Application.get_env(:watchman, key, default)
+defmodule Console do
+  def conf(key, default \\ nil), do: Application.get_env(:console, key, default)
 
   def namespace(namespace) do
-    case Watchman.Plural.Config.fetch_file() do
+    case Console.Plural.Config.fetch_file() do
       %{"namespacePrefix" => pref} when is_binary(pref) -> "#{pref}#{namespace}"
       _ -> namespace
     end
@@ -20,5 +20,5 @@ defmodule Watchman do
     |> Base.url_encode64()
   end
 
-  def storage, do: Watchman.Storage.Git
+  def storage, do: Console.Storage.Git
 end

@@ -1,8 +1,8 @@
 use Mix.Config
 
-config :watchman, :initialize, true
+config :console, :initialize, true
 
-config :watchman, Watchman.Repo,
+config :console, Console.Repo,
   username: "postgres",
   password: "postgres",
   database: "forge_dev",
@@ -10,7 +10,7 @@ config :watchman, Watchman.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
-config :watchman, WatchmanWeb.Endpoint,
+config :console, ConsoleWeb.Endpoint,
   http: [port: 4003],
   debug_errors: true,
   code_reloader: true,
@@ -25,7 +25,7 @@ config :watchman, WatchmanWeb.Endpoint,
 
 secrets_path = Path.expand("../secrets", __DIR__)
 
-config :watchman,
+config :console,
   workspace_root: secrets_path,
   git_url: "git@github.com:michaeljguarino/forge-installations.git",
   repo_root: "forge-installations",
@@ -33,7 +33,7 @@ config :watchman,
   webhook_secret: "webhook_secret",
   git_ssh_key: :pass
 
-config :watchman, WatchmanWeb.Endpoint,
+config :console, ConsoleWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",

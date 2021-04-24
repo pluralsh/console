@@ -1,28 +1,28 @@
 use Mix.Config
 
-config :watchman,
-  ecto_repos: [Watchman.Repo],
+config :console,
+  ecto_repos: [Console.Repo],
   socket: :forge_socket
 
 
 config :piazza_core,
-  repos: [Watchman.Repo]
+  repos: [Console.Repo]
 
 config :botanist,
-  ecto_repo: Watchman.Repo
+  ecto_repo: Console.Repo
 
 config :piazza_core,
   shutdown_delay: 60 * 1000
 
 
-config :watchman, WatchmanWeb.Endpoint,
+config :console, ConsoleWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "1rkd5+lxJbdTadyxW7qF/n1fNzKPV010PKf8SEGmUrXwMw0iAZyoyZgWEwr6nmCJ",
-  render_errors: [view: WatchmanWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: Watchman.PubSub, adapter: Phoenix.PubSub.PG2],
+  render_errors: [view: ConsoleWeb.ErrorView, accepts: ~w(html json)],
+  pubsub: [name: Console.PubSub, adapter: Phoenix.PubSub.PG2],
   server: true
 
-config :watchman,
+config :console,
   prometheus: "prometheus",
   loki: "loki",
   git_user_name: "forge",
@@ -39,11 +39,11 @@ config :logger, :console,
 
 config :phoenix, :json_library, Jason
 
-config :watchman, Watchman.Guardian,
+config :console, Console.Guardian,
   issuer: "watchman",
   secret_key: "watchman_secret"
 
-config :watchman, Watchman.Repo,
+config :console, Console.Repo,
   migration_timestamps: [type: :utc_datetime_usec]
 
 config :libcluster, :topologies, []
@@ -55,7 +55,7 @@ config :ra,
   wal_max_entries: 2000, # we don't need a ton here
   wal_max_size_bytes: 100_000
 
-config :watchman,
+config :console,
   replicas: 1,
   nodes: [],
   watchers: []
@@ -63,7 +63,7 @@ config :watchman,
 config :porcelain, driver: Porcelain.Driver.Basic
 
 
-config :watchman, Watchman.PartitionedCache,
+config :console, Console.PartitionedCache,
   primary: [
     gc_interval: :timer.seconds(3600),
     backend: :shards,

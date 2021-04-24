@@ -1,4 +1,4 @@
-defmodule Watchman.DataCase do
+defmodule Console.DataCase do
   @moduledoc """
   This module defines the setup for tests requiring
   access to the application's data layer.
@@ -16,22 +16,22 @@ defmodule Watchman.DataCase do
 
   using do
     quote do
-      alias Watchman.Repo
+      alias Console.Repo
 
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
-      import Watchman.DataCase
-      import Watchman.Factory
-      import Watchman.TestHelpers
+      import Console.DataCase
+      import Console.Factory
+      import Console.TestHelpers
     end
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Watchman.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Console.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Watchman.Repo, {:shared, self()})
+      Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, {:shared, self()})
     end
 
     :ok

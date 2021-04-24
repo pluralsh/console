@@ -1,11 +1,11 @@
-defmodule Watchman.MixProject do
+defmodule Console.MixProject do
   use Mix.Project
 
   @vsn File.read!("VERSION")
 
   def project do
     [
-      app: :watchman,
+      app: :console,
       version: @vsn,
       build_path: "_build",
       config_path: "config/config.exs",
@@ -26,7 +26,7 @@ defmodule Watchman.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      mod: {Watchman.Application, []},
+      mod: {Console.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end

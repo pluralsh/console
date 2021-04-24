@@ -1,4 +1,4 @@
-defmodule WatchmanWeb.ChannelCase do
+defmodule ConsoleWeb.ChannelCase do
   @moduledoc """
   This module defines the test case to be used by
   channel tests.
@@ -19,12 +19,12 @@ defmodule WatchmanWeb.ChannelCase do
     quote do
       # Import conveniences for testing with channels
       use Phoenix.ChannelTest
-      use Absinthe.Phoenix.SubscriptionTest, schema: Watchman.GraphQl
-      import Watchman.Factory
-      import Watchman.TestHelpers
+      use Absinthe.Phoenix.SubscriptionTest, schema: Console.GraphQl
+      import Console.Factory
+      import Console.TestHelpers
 
       # The default endpoint for testing
-      @endpoint WatchmanWeb.Endpoint
+      @endpoint ConsoleWeb.Endpoint
 
       def establish_socket(user) do
         {:ok, socket} = mk_socket(user)
@@ -32,17 +32,17 @@ defmodule WatchmanWeb.ChannelCase do
       end
 
       def mk_socket(user) do
-        {:ok, token, _} = Watchman.Guardian.encode_and_sign(user)
-        connect(WatchmanWeb.UserSocket, %{"token" => "Bearer #{token}"}, %{})
+        {:ok, token, _} = Console.Guardian.encode_and_sign(user)
+        connect(ConsoleWeb.UserSocket, %{"token" => "Bearer #{token}"}, %{})
       end
     end
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Watchman.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Console.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Watchman.Repo, {:shared, self()})
+      Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, {:shared, self()})
     end
     :ok
   end

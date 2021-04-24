@@ -54,15 +54,14 @@ end
 # when running `mix distillery.release`, the first release in the file
 # will be used by default
 
-release :watchman do
-  set version: current_version(:watchman)
+release :console do
+  set version: current_version(:console)
   set applications: [
     :runtime_tools,
-    watchman: :permanent
+    console: :permanent
   ]
   set commands: [
     migrate: "rel/commands/migrate.sh",
     drop: "rel/commands/drop.sh"
   ]
 end
-
