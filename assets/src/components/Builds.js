@@ -79,7 +79,7 @@ function Build({build: {id, repository, status, insertedAt, message, creator, sh
 function CreateBuild() {
   const [type, setType] = useState(BuildTypes.DEPLOY)
   const {currentApplication} = useContext(InstallationContext)
-  const baseAttrs = {repository: currentApplication.name, message: 'Deployed from watchman'}
+  const baseAttrs = {repository: currentApplication.name, message: 'Deployed from console'}
   const [mutation, {loading}] = useMutation(CREATE_BUILD, {
     update: (cache, {data: {createBuild}}) => updateCache(cache, {
       query: BUILDS_Q,
@@ -147,7 +147,7 @@ export default function Builds() {
           height='60px'>
           <Box fill='horizontal' pad={{horizontal: 'small'}}>
             <Text weight='bold' size='small'>Builds</Text>
-            <Text size='small' color='dark-3'>a list of historical changes managed by watchman</Text>
+            <Text size='small' color='dark-3'>a list of historical changes managed by console</Text>
           </Box>
           <CreateBuild />
         </Box>

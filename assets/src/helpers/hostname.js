@@ -13,7 +13,7 @@ export const upstream = (path) => `https://${apiHost()}${path}`
 export function apiHost() {
   switch (window.location.hostname) {
     case "localhost":
-      return "admin.plural.sh"
+      return "console.plural.sh"
     default:
       return window.location.hostname
   }

@@ -26,7 +26,7 @@ import { Incident } from './incidents/Incident'
 
 const SIDEBAR_WIDTH = '70px'
 
-export default function Watchman() {
+export default function Console() {
   return (
     <EnsureLogin>
       <InstallationsProvider>

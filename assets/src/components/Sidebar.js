@@ -9,7 +9,7 @@ import { Tooltip } from './utils/Tooltip'
 import './sidebar.css'
 
 const SIDEBAR_ROW_HEIGHT = '50px'
-const APP_ICON = `${process.env.PUBLIC_URL}/watchman.png`
+const APP_ICON = `${process.env.PUBLIC_URL}/console.png`
 
 function SidebarIcon({icon, text, selected, path}) {
   const dropRef = useRef()

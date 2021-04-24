@@ -1,6 +1,6 @@
 {
-    "name": "Watchman",
-    "short_name": "watchman",
+    "name": "Console",
+    "short_name": "console",
     "icons": [
         {
             "src": "\/android-icon-36x36.png",
