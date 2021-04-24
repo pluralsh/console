@@ -88,7 +88,11 @@ function Jobs({jobs}) {
 
 export default function CronJob() {
   const {repo, name} = useParams()
-  const {data} = useQuery(CRON_JOB_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
+  const {data} = useQuery(CRON_JOB_Q, {
+    variables: {name, namespace: repo}, 
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network'
+  })
 
   if (!data) return <Loading />
 

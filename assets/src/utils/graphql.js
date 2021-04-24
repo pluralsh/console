@@ -37,6 +37,12 @@ export function appendConnection(prev, next, key) {
   }
 }
 
+export function updateConnection(prev, next, key) {
+  const {edges} = prev[key]
+  if (edges.find(({node: {id}}) => id === next.id)) return appendConnection(prev, next, key)
+  return {...prev, [key]: {...prev[key], edges: edges.map((e) => e.node.id === next.id ? {...e, node: next} : e)}}
+}
+
 export function removeConnection(prev, val, key) {
   return {...prev, [key]: {...prev[key], edges: prev[key].edges.filter(({node}) => node.id !== val.id)}}
 }

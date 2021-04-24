@@ -107,6 +107,7 @@ export function InstallationsProvider({children}) {
   useEffect(() => subscribeToMore({
     document: APPLICATION_SUB,
     updateQuery: (prev, {subscriptionData: {data}}) => {
+      console.log(data)
       return data ? applyDelta(prev, data.applicationDelta) : prev
   }}), [])
 

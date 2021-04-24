@@ -11,7 +11,7 @@ defmodule Watchman.Webhooks.Formatter.Slack do
         blocks: [
           %{type: :section, text: %{
             type: "mrkdwn",
-            text: "[cluster=#{cluster_name}] #{emoji(status)}#{status_modifier(status)} #{repo} using watchman: <#{build_url(id)}|build logs>"
+            text: "[cluster=#{cluster_name}] #{emoji(status)}#{status_modifier(status)} #{repo} using watchman: <#{build_url(id)}|build logs>\n\n#{build.message}"
           }}
         ]
       }

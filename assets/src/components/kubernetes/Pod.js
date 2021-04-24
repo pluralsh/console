@@ -122,7 +122,6 @@ export function PodHeader() {
 }
 
 export function PodList({pods, namespace, refetch}) {
-  console.log(pods)
   return (
     <Box flex={false} pad='small'>
       <Box pad={{vertical: 'small'}}>
@@ -134,6 +133,8 @@ export function PodList({pods, namespace, refetch}) {
   )
 }
 
+const ignore = (e) => { e.stopPropagation(); e.preventDefault() }
+
 export function DeletePod({name, namespace, refetch}) {
   const [open, setOpen] = useState(true)
   const [mutation, {loading, data}] = useMutation(DELETE_POD, {
@@ -141,8 +142,7 @@ export function DeletePod({name, namespace, refetch}) {
     onCompleted: refetch
   })
   const doDelete = useCallback((e) => {
-    e.stopPropagation()
-    e.preventDefault()
+    ignore(e)
     mutation()
   }, [mutation])
 
@@ -156,7 +156,7 @@ export function DeletePod({name, namespace, refetch}) {
       <Layer modal>
         <Box width='30vw' pad='small'>
           <Box direction='row' justify='end'>
-            <Box flex={false} pad='xsmall' round='xsmall' hoverIndicator='light-3' onClick={() => setOpen(false)}>
+            <Box flex={false} pad='xsmall' round='xsmall' hoverIndicator='light-3' onClick={(e) => { ignore(e); setOpen(false) }}>
               <Close size='small' />
             </Box>
           </Box>

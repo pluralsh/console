@@ -76,7 +76,11 @@ function nodeReadiness(status) {
 
 export function Node() {
   const {name} = useParams()
-  const {data, refetch} = useQuery(NODE_Q, {variables: {name}, pollInterval: POLL_INTERVAL})
+  const {data, refetch} = useQuery(NODE_Q, {
+    variables: {name}, 
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network'
+  })
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
   useEffect(() => {
     setBreadcrumbs([

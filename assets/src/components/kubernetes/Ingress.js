@@ -70,7 +70,11 @@ function Spec({spec: {rules}}) {
 
 export default function Ingress() {
   const {name, repo} = useParams()
-  const {data} = useQuery(INGRESS_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
+  const {data} = useQuery(INGRESS_Q, {
+    variables: {name, namespace: repo}, 
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network'
+  })
 
   if (!data) return <Loading />
 

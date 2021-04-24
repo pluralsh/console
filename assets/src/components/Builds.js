@@ -9,7 +9,7 @@ import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { BuildStatus as Status, BuildTypes } from './types'
 import { InstallationContext } from './Installations'
-import { appendConnection, extendConnection, updateCache } from '../utils/graphql'
+import { appendConnection, updateConnection, extendConnection, updateCache } from '../utils/graphql'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -124,7 +124,7 @@ export default function Builds() {
   useEffect(() => setBreadcrumbs([{text: 'builds', url: '/'}]), [])
   useEffect(() => subscribeToMore({
     document: BUILD_SUB,
-    updateQuery: (prev, {subscriptionData: {data: {delta, payload}}}) => {
+    updateQuery: (prev, {subscriptionData: {data: {buildDelta: {delta, payload}}}}) => {
       return delta === 'CREATE' ? appendConnection(prev, payload, 'builds') : prev
   }}), [])
 

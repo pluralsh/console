@@ -60,7 +60,11 @@ function Spec({spec: {clusterIp, type, ports}}) {
 
 export default function Service() {
   const {name, repo} = useParams()
-  const {data, refetch} = useQuery(SERVICE_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
+  const {data, refetch} = useQuery(SERVICE_Q, {
+    variables: {name, namespace: repo}, 
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network'
+  })
 
   if (!data) return <Loading />
 

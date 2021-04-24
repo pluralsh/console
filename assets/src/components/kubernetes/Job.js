@@ -52,7 +52,11 @@ function Spec({spec}) {
 
 export default function Job() {
   const {repo, name} = useParams()
-  const {data, refetch} = useQuery(JOB_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
+  const {data, refetch} = useQuery(JOB_Q, {
+    variables: {name, namespace: repo}, 
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network'
+  })
 
   if (!data) return <Loading />
 

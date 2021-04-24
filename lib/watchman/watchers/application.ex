@@ -10,8 +10,14 @@ defmodule Watchman.Watchers.Application do
       response_model: Kube.Application
     }, send_to: self())
 
+    :timer.send_interval(5000, :watcher_ping)
     Process.link(pid)
     {:noreply, %{state | pid: pid}}
+  end
+
+  def handle_info(:watcher_ping, %{pid: pid} = state) do
+    Logger.info "Application k8s watcher alive at pid=#{inspect(pid)}"
+    {:noreply, state}
   end
 
   def handle_info(%Watcher.Event{object: app, type: type}, state) do

@@ -53,7 +53,11 @@ export default function StatefulSet() {
   const [tab, setTab] = useState('info')
   const [duration, setDuration] = useState(DURATIONS[0])
   const {name, repo} = useParams()
-  const {data, refetch} = useQuery(STATEFUL_SET_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
+  const {data, refetch} = useQuery(STATEFUL_SET_Q, {
+    variables: {name, namespace: repo}, 
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network'
+  })
 
   if (!data) return <Loading />
 

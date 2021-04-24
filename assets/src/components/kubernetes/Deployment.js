@@ -50,7 +50,11 @@ export default function Deployment() {
   const [tab, setTab] = useState('info')
   const [duration, setDuration] = useState(DURATIONS[0])
   const {name, repo} = useParams()
-  const {data, refetch} = useQuery(DEPLOYMENT_Q, {variables: {name, namespace: repo}, pollInterval: POLL_INTERVAL})
+  const {data, refetch} = useQuery(DEPLOYMENT_Q, {
+    variables: {name, namespace: repo},
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL
+  })
 
   if (!data) return <Loading />
 
