@@ -15,13 +15,22 @@ secrets:
   admin_name: {{ .Values.admin_name }}
   admin_email: {{ .Values.admin_email }}
   admin_password: {{ dedupe . "watchman.secrets.admin_password" (randAlphaNum 20) }}
+{{ if .Values.watchman_dns }}
   git_url: {{ repoUrl }}
   repo_root: {{ repoName }}
   branch_name: {{ branchName }}
-  cluster_name: {{ .Cluster }}
   config: {{ readFile (homeDir ".plural" "config.yml") | quote }}
   key: {{ readFile (homeDir ".plural" "key") | quote }}
   known_hosts: {{ knownHosts | quote }}
+{{ else }}
+  git_url: ''
+  repo_root: ''
+  branch_name: ''
+  config: ''
+  key: ''
+  known_hosts: ''
+{{ end }}
+  cluster_name: {{ .Cluster }}
   erlang: {{ dedupe . "watchman.secrets.erlang" (randAlphaNum 14) }}
 {{ if and (hasKey . "watchman") (hasKey .watchman "secrets") }}
   webhook_secret: {{ .watchman.secrets.webhook_secret }}
