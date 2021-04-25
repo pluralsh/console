@@ -10,7 +10,7 @@ defmodule Console.Webhooks.Formatter.Piazza do
     """
 <root>
   <attachment accent="#{color(status)}" direction="row" pad="small" gap="xsmall" margin="small">
-    <text>#{status_modifier(status)} #{repo} using watchman:</text>
+    <text>#{status_modifier(status)} #{repo} using console:</text>
     <link href="#{build_url(id)}">
       build logs
     </link>
