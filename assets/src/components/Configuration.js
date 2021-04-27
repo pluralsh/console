@@ -18,12 +18,12 @@ const ConfigType = {
   TERRAFORM: 'TERRAFORM'
 }
 
-export function EditConfiguration({refetch, application: {name, configuration: {helm, terraform}, ...application}}) {
+export function EditConfiguration({onCompleted, application: {name, configuration: {helm, terraform}, ...application}}) {
   const [type, setType] = useState(ConfigType.HELM)
   const [config, setConfig] = useState(helm)
   const [mutation, {loading}] = useMutation(UPDATE_CONFIGURATION, {
     variables: {repository: name, content: config, type},
-    onCompleted: refetch
+    onCompleted
   })
   const swap = useCallback((type) => {
     setConfig(type === ConfigType.HELM ? helm : terraform)
@@ -54,7 +54,7 @@ export function EditConfiguration({refetch, application: {name, configuration: {
             </Box>
           </Box>
           <Box flex={false}>
-            <Button label='Commit' onClick={mutation} background='brand' loading={loading} />
+            <Button flat label='Commit' onClick={mutation} background='brand' loading={loading} />
           </Box>
         </Box>
       </Box>
@@ -103,26 +103,34 @@ export function RepositoryChoice({config: {name, icon, description}, link}) {
 }
 
 export default function Configuration() {
+  let history = useHistory()
   const {repo} = useParams()
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
   const {setOnChange} = useContext(InstallationContext)
-  let history = useHistory()
-  const {data, refetch} = useQuery(APPLICATION_Q, {
+  const {data} = useQuery(APPLICATION_Q, {
     variables: {name: repo},
     fetchPolicy: 'cache-and-network'
   })
+  const onCompleted = useCallback(() => { history.push('/') }, [history])
+
   useEffect(() => {
     setBreadcrumbs([
       {text: 'configuration', url: '/config'},
       {text: repo, url: `/config/${repo}`}
     ])
   }, [repo])
+
   useEffect(() => {
     setOnChange({func: ({name}) => history.push(`/config/${name}`)})
   }, [])
+
   useEnsureCurrent(repo)
 
   if (!data) return <Loading />
 
-  return <EditConfiguration application={data.application} refetch={refetch} />
+  return (
+    <EditConfiguration 
+      application={data.application} 
+      onCompleted={onCompleted} />
+  )
 }
