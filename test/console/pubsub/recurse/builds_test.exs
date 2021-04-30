@@ -14,6 +14,16 @@ defmodule Console.PubSub.Recurse.BuildsTest do
     end
   end
 
+  describe "BuildCancelled" do
+    test "it will cancel build" do
+      build = insert(:build)
+      expect(Console.Deployer, :cancel, fn -> :ok end)
+
+      event = %PubSub.BuildCancelled{item: build}
+      Recurse.handle_event(event)
+    end
+  end
+
   describe "BuildApproved" do
     test "it will cancel build" do
       build = insert(:build)

@@ -11,7 +11,7 @@ defimpl Console.PubSub.Recurse, for: Any do
   def process(_), do: :ok
 end
 
-defimpl Console.PubSub.Recurse, for: Console.PubSub.BuildDeleted do
+defimpl Console.PubSub.Recurse, for: [Console.PubSub.BuildDeleted, Console.PubSub.BuildCancelled] do
   def process(%{item: _}) do
     Console.Deployer.cancel()
   end
