@@ -20,7 +20,7 @@ export default function Avatar({size, user: {backgroundColor, avatar, name}, onC
       height={size}
       onClick={onClick}
       background={!avatar ? backgroundColor : null}>
-      {!avatar && <Text>{initials(name)}</Text>}
+      {!avatar && <Text size='small'>{initials(name)}</Text>}
     </Box>
   )
 }
