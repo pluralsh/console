@@ -50,7 +50,7 @@ export default function Invite() {
   const [editPassword, setEditPassword] = useState(false)
   const [mutation, {loading, error: signupError}] = useMutation(SIGNUP, {
     variables: {inviteId, attributes},
-    onCompleted: ({signUp: {jwt}}) => {
+    onCompleted: ({signup: {jwt}}) => {
       setToken(jwt)
       window.location = '/'
     },
