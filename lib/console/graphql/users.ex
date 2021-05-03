@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Users do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.User
-  alias Console.Middleware.{Authenticated, AdminRequired}
+  alias Console.Middleware.{Authenticated, AdminRequired, AllowJwt}
 
   enum_from_list :permission, Console.Schema.Role, :permissions, []
 
@@ -44,9 +44,8 @@ defmodule Console.GraphQl.Users do
     field :bound_roles, list_of(:role), resolve: fn user, _, _ -> {:ok, Console.Schema.User.roles(user)} end
 
     field :jwt, :string, resolve: fn
-      %{id: id, jwt: jwt}, _, %{context: %{current_user: %{id: id}}} -> {:ok, jwt}
-      _, _, %{context: %{current_user: %{}}} -> {:error, "you can only query your own jwt"}
-      %{jwt: jwt}, _, _ -> {:ok, jwt}
+      %{jwt: jwt}, _, %{context: %{allow_jwt: true}} -> {:ok, jwt}
+      _, _, _ -> {:error, "forbidden"}
     end
 
     field :background_color, :string, resolve: fn
@@ -154,6 +153,7 @@ defmodule Console.GraphQl.Users do
 
   object :user_mutations do
     field :sign_in, :user do
+      middleware AllowJwt
       arg :email,    non_null(:string)
       arg :password, non_null(:string)
 
@@ -161,6 +161,7 @@ defmodule Console.GraphQl.Users do
     end
 
     field :signup, :user do
+      middleware AllowJwt
       arg :invite_id, non_null(:string)
       arg :attributes, non_null(:user_attributes)
 
