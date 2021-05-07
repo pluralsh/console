@@ -61,7 +61,7 @@ FROM dkr.plural.sh/plural/plural-cli:0.1.0 as cmd
 FROM alpine:3 as helm
 
 ARG VERSION=3.3.1
-ENV TERRAFORM_VERSION=0.14.8
+ENV TERRAFORM_VERSION=0.15.2
 
 # ENV BASE_URL="https://storage.googleapis.com/kubernetes-helm"
 ENV BASE_URL="https://get.helm.sh"
