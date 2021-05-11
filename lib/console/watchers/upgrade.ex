@@ -38,8 +38,8 @@ defmodule Console.Watchers.Upgrade do
 
   def handle_info(:next, %{upgrades: upgrades} = state) do
     with {:ok, %{"id" => id} = result} <- Channel.push(upgrades, "next", %{}),
-         {:ok, _} <- Handlers.Upgrade.create_build(IO.inspect(result)),
-         _ <- Channel.push(upgrades, "ack", %{"id" => id}) do
+         {:ok, _} <- Handlers.Upgrade.create_build(result),
+         _ <- Channel.push(upgrades, "ack", %{"id" => id}) |> IO.inspect() do
       {:noreply, %{state | last: id}}
     else
       error ->
