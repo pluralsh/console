@@ -1,5 +1,10 @@
 defmodule Console.Watchers.Upgrade do
   use Console.Watchers.Base, state: [:upgrades, :queue_id, :target, :last]
+  import Console.Services.Base, only: [
+    start_transaction: 0,
+    add_operation: 3,
+    execute: 1
+  ]
   alias PhoenixClient.{Channel, Message}
   alias Console.Plural.Upgrades
   alias Console.Watchers.Handlers
@@ -37,10 +42,16 @@ defmodule Console.Watchers.Upgrade do
   end
 
   def handle_info(:next, %{upgrades: upgrades} = state) do
-    with {:ok, %{"id" => id} = result} <- Channel.push(upgrades, "next", %{}),
-         {:ok, _} <- Handlers.Upgrade.create_build(result),
-         _ <- Channel.push(upgrades, "ack", %{"id" => id}) |> IO.inspect(label: "Ack result: ") do
-      {:noreply, %{state | last: id}}
+    with {:ok, %{"id" => id} = result} <- Channel.push(upgrades, "next", %{}) do
+      start_transaction()
+      |> add_operation(:build, fn _ -> Handlers.Upgrade.create_build(result) end)
+      |> add_operation(:ack, fn _ -> Channel.push(upgrades, "ack", %{"id" => id}) end)
+      |> execute()
+      |> IO.inspect(label: "upgrade processed")
+      |> case do
+        {:ok, _} -> {:noreply, %{state | last: id}}
+        _ -> {:noreply, state} # add some retry logic?
+      end
     else
       error ->
         Logger.info "Failed to deliver upgrade: #{inspect(error)}"
