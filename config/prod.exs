@@ -32,5 +32,5 @@ config :console, :watchers, [
 ]
 
 config :console,
-  prometheus: "http://bootstrap-prometheus-server.bootstrap",
+  prometheus: "http://bootstrap-prometheus.bootstrap:9090",
   loki: "http://bootstrap-loki.bootstrap:3100"
