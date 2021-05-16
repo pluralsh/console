@@ -26,7 +26,7 @@
     "emoji-mart": "^3.0.1",
     "escape-carriage": "^1.3.0",
     "filesize": "^6.1.0",
-    "forge-core": "^1.2.2",
+    "forge-core": "^1.2.3",
     "graphql": "^14.6.0",
     "grommet": "^2.10.0",
     "grommet-icons": "^4.5.0",
