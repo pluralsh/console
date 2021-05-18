@@ -16,6 +16,7 @@ defmodule Prometheus.Client do
       ]},
       @headers
     )
+    |> IO.inspect()
     |> case do
       {:ok, %{body: body, status_code: 200}} ->
         Poison.decode(body, as: %Response{data: %Data{result: [%Result{}]}})
@@ -38,8 +39,10 @@ defmodule Prometheus.Client do
   end
 
   defp variable_subst(value, variables) do
-    Enum.reduce(variables, value, fn %{name: key, value: value}, str ->
-      String.replace(str, "$#{key}", value)
+    Enum.reduce(variables, value, fn
+      %{name: key, value: value}, str ->
+        String.replace(str, "$#{key}", value)
+      _, str -> str
     end)
   end
 end
