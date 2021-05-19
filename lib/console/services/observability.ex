@@ -96,5 +96,7 @@ defmodule Console.Services.Observability do
     end)
   end
 
-  defp add_results(results, query), do: Map.put(query, :results, results)
+  defp add_results(results, query) do
+    Map.put(query, :results, Enum.filter(results, & &1.value != "NaN"))
+  end
 end
