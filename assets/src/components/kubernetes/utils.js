@@ -1,5 +1,6 @@
 import React from 'react'
 import { Box, Text } from 'grommet'
+import { asQuery } from '../utils/query'
 
 export function Container({header, children}) {
   return (
@@ -11,4 +12,9 @@ export function Container({header, children}) {
       {children}
     </Box>
   )
+}
+
+export function logUrl({name, namespace, labels}) {
+  const appLabel = labels.find(({name}) => name === 'app')
+  return `/logs/${namespace}?${asQuery({job: `${namespace}/${appLabel ? appLabel.value : name}`})}`
 }
