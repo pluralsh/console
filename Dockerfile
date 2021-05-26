@@ -2,7 +2,7 @@
 # This should match the version of Alpine that the `elixir:1.7.2-alpine` image uses
 ARG ALPINE_VERSION=3.8
 
-FROM elixir:1.9-alpine AS builder
+FROM gcr.io/pluralsh/elixir:1.9-alpine AS builder
 
 # The following are build arguments used to change variable parts of the image.
 # The name of your application/release (required)
@@ -58,7 +58,7 @@ RUN \
 
 FROM dkr.plural.sh/plural/plural-cli:0.1.0 as cmd
 
-FROM alpine:3 as helm
+FROM gcr.io/pluralsh/alpine:3 as helm
 
 ARG VERSION=3.3.1
 ENV TERRAFORM_VERSION=0.15.2
@@ -75,10 +75,10 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl && \
     chmod +x /usr/local/bin/helm && \
     chmod +x /usr/local/bin/terraform
 
-FROM docker:17.12.0-ce as static-docker-source
+FROM gcr.io/pluralsh/docker:17.12.0-ce as static-docker-source
 
 # From this line onwards, we're in a new image, which will be the image used in production
-FROM erlang:22-alpine
+FROM gcr.io/pluralsh/erlang:22-alpine
 
 ARG CLOUD_SDK_VERSION=273.0.0
 ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION

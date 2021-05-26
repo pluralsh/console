@@ -1,6 +1,6 @@
 .PHONY: help
 
-GCP_PROJECT ?= piazzaapp
+GCP_PROJECT ?= pluralsh
 APP_NAME ?= console
 APP_VSN ?= `cat VERSION`
 BUILD ?= `git rev-parse --short HEAD`
