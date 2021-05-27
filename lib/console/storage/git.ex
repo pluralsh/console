@@ -5,7 +5,7 @@ defmodule Console.Storage.Git do
 
   def init() do
     unless File.exists?(workspace()) do
-      with {:ok, _} <- cmd("git", ["clone", conf(:git_url)]),
+      with {:ok, _} <- cmd("git", ["clone", conf(:git_url), workspace()]),
            {:ok, _} <- git("config", ["user.name", conf(:git_user_name)]),
            {:ok, _} <- git("config", ["user.email", conf(:git_user_email)]),
         do: Plural.unlock()
@@ -19,7 +19,7 @@ defmodule Console.Storage.Git do
       {{:ok, _} = result, _} -> result
       {_, retries} when retries >= 3 -> {:error, :exhausted_retries}
       {_, retry} ->
-        with {:ok, _} <- git("pull", ["--rebase"]),
+        with {:ok, _} <- git("pull"),
           do: push(retry + 1)
     end
   end
