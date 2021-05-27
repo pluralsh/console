@@ -306,7 +306,7 @@ function Changelog({build: {changelogs}}) {
 export default function Build() {
   const {buildId} = useParams()
   const [tab, setTab] = useState('progress')
-  const {data, loading, subscribeToMore} = useQuery(BUILD_Q, {variables: {buildId}})
+  const {data, loading, subscribeToMore} = useQuery(BUILD_Q, {variables: {buildId}, fetchPolicy: 'cache-and-network'})
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
 
   useEffect(() => {

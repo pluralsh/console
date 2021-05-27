@@ -8,9 +8,22 @@ defmodule Console.Services.BuildsTest do
     test "A command can accumulate a string stream" do
       command = insert(:command)
 
-      command = ["some", "string", "stream"] |> Enum.into(command)
+      command = ["some", "string", "stream\n"] |> Enum.into(command)
 
-      assert command.stdout == "somestringstream"
+      assert command.stdout == "somestringstream\n"
+      assert refetch(command).stdout == "somestringstream\n"
+    end
+  end
+
+  describe "#poll/0" do
+    test "it will find the earliest queued build" do
+      build = insert(:build, status: :queued, inserted_at: Timex.now() |> Timex.shift(days: -1))
+      insert(:build, status: :queued)
+      insert(:build, status: :successful, inserted_at: Timex.now() |> Timex.shift(days: -5))
+
+      found = Builds.poll()
+
+      assert found.id == build.id
     end
   end
 

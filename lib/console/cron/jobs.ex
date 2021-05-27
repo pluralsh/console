@@ -1,6 +1,7 @@
 defmodule Console.Cron.Jobs do
   alias Console.Repo
   alias Console.Schema.{Build, Invite}
+  alias Console.PubSub.BuildFailed
 
   def prune_builds() do
     Build.expired()
@@ -10,5 +11,15 @@ defmodule Console.Cron.Jobs do
   def prune_invites() do
     Invite.expired()
     |> Repo.delete_all()
+  end
+
+  def fail_builds() do
+    expires = Timex.now() |> Timex.shift(minutes: -2)
+    Build.with_status(:running)
+    |> Build.pinged(expires)
+    |> Build.selected()
+    |> Repo.update_all(set: [status: :failed])
+    |> elem(1)
+    |> Enum.map(&Console.Services.Base.handle_notify(BuildFailed, &1))
   end
 end

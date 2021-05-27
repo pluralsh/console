@@ -31,4 +31,20 @@ defmodule Console.Cron.JobsTest do
         do: refute refetch(invite)
     end
   end
+
+  describe "#fail_builds/0" do
+    test "old running builds will be auto-failed" do
+      old = insert(:build, status: :running, pinged_at: Timex.now() |> Timex.shift(hours: -1))
+      new = insert(:build, status: :running, pinged_at: Timex.now())
+
+      Jobs.fail_builds()
+
+      assert refetch(old).status == :failed
+      refute refetch(new).status == :failed
+
+      assert_receive {:event, %Console.PubSub.BuildFailed{item: build}}
+
+      assert build.id == old.id
+    end
+  end
 end

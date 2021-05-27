@@ -1,9 +1,13 @@
 defmodule Console.GraphQl.Resolvers.Plural do
+  use Nebulex.Caching
   alias Console.Plural.{Repositories, ExternalToken}
   alias Console.Plural.{Connection, PageInfo}
   alias Console.Services.Plural
   alias Kube.Client
 
+  @ttl :timer.hours(24)
+
+  @decorate cacheable(cache: Console.Cache, key: :external_token, opts: [ttl: @ttl])
   def resolve_external_token(_, _),
     do: ExternalToken.fetch()
 

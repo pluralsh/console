@@ -1,6 +1,0 @@
-application: true
-dependencies:
-- type: helm
-  name: bootstrap
-  repo: bootstrap
-  version: '>= 0.5.1'

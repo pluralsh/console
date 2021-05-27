@@ -29,6 +29,9 @@ testup: ## sets up dependent services for test
 testdown: ## tear down test dependencies
 	docker-compose down
 
+migration:
+	MIX_ENV=test mix ecto.gen.migration $(name)
+
 connectdb: ## proxies the db in kubernetes via kubectl
 	@echo "run psql -U forge -h 127.0.0.1 forge to connect"
 	kubectl port-forward statefulset/watchman-postgresql 5432 -n watchman

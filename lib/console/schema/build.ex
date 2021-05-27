@@ -14,6 +14,7 @@ defmodule Console.Schema.Build do
     field :message,      :string
     field :sha,          :string
     field :completed_at, :utc_datetime_usec
+    field :pinged_at,    :utc_datetime_usec
 
     has_many :commands, Command
     has_many :changelogs, Changelog
@@ -36,13 +37,23 @@ defmodule Console.Schema.Build do
     from(b in query, limit: 1)
   end
 
-  def queued(query \\ __MODULE__) do
-    from(b in query, where: b.status == ^:queued)
+  def with_status(query \\ __MODULE__, status) do
+    from(b in query, where: b.status == ^status)
   end
+
+  def queued(query \\ __MODULE__), do: with_status(query, :queued)
 
   def expired(query \\ __MODULE__) do
     expiry = Timex.now() |> Timex.shift(days: -@expiry)
-    from(b in query, where: b.inserted_at <= ^expiry)
+    older_than(query, expiry)
+  end
+
+  def older_than(query \\ __MODULE__, time) do
+    from(b in query, where: b.inserted_at <= ^time)
+  end
+
+  def pinged(query \\ __MODULE__, time) do
+    from(b in query, where: not is_nil(b.pinged_at) and b.pinged_at <= ^time)
   end
 
   @valid ~w(repository type status completed_at approver_id message sha)a

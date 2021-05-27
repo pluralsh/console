@@ -111,7 +111,7 @@ defmodule Console.Deployer do
 
   def handle_info(:poll, %State{pid: pid} = state) when is_pid(pid) do
     Logger.info "Build #{inspect(pid)} already running"
-    {:noreply, state}
+    {:noreply, ping(state)}
   end
 
   def handle_info({:DOWN, ref, :process, _, _}, %State{ref: ref, build: build} = state) do
@@ -122,7 +122,10 @@ defmodule Console.Deployer do
 
   def handle_info(_, state), do: {:noreply, state}
 
-  def terminate(_, _), do: :ok
+  def terminate(state, reason) do
+    Logger.info "Terminating with state: #{inspect(state)} reason #{inspect(reason)}"
+    :ok
+  end
 
   defp perform(storage, %Build{repository: repo, type: :bounce} = build) do
     with_build(build, [{storage, :init, []}, {Plural, :bounce, [repo]}])
@@ -168,6 +171,14 @@ defmodule Console.Deployer do
     ref = Process.monitor(pid)
     {pid, ref}
   end
+
+  defp ping(%State{build: %Build{} = build} = state) do
+    case Builds.ping(build) do
+      {:ok, build} -> %{state | build: build}
+      _ -> state
+    end
+  end
+  defp ping(state), do: state
 
   def broadcast(msg \\ :sync) do
     :pg2.get_members(@group)

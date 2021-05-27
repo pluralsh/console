@@ -1,5 +1,0 @@
-REPO watchman
-
-TF terraform/*
-HELM charts/watchman
-RECIPE plural/recipe/*

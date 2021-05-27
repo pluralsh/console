@@ -21,14 +21,27 @@ defmodule Console.Schema.Command do
 
   defimpl Collectable, for: __MODULE__ do
     alias Console.Services.Base
+
     def into(command) do
       {command, fn
         %{stdout: stdo} = command, {:cont, line} when is_binary(line) ->
           IO.write(line)
-          Base.broadcast(%{command | stdout: safe_concat(stdo, line)}, :update)
+          maybe_persist(command, line)
+          |> Base.broadcast(:update)
         command, :done -> command
         _, :halt -> :ok
       end}
+    end
+
+    defp maybe_persist(%{stdout: stdo} = cmd, line) do
+      stdo = safe_concat(stdo, line)
+      with true <- String.contains?(line, "\n"),
+           {:ok, command} <- Ecto.Changeset.change(cmd, %{stdout: stdo})
+                             |> Console.Repo.update() do
+        command
+      else
+        _ -> %{cmd | stdout: stdo}
+      end
     end
 
     defp safe_concat(nil, line), do: line

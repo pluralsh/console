@@ -95,7 +95,7 @@ defmodule Console.Services.Builds do
   def poll() do
     Build.queued()
     |> Build.first()
-    |> Build.ordered(desc: :inserted_at)
+    |> Build.ordered(asc: :inserted_at)
     |> Repo.one()
   end
 
@@ -150,6 +150,12 @@ defmodule Console.Services.Builds do
     |> Changelogs.add_changelogs()
     |> execute(extract: :build)
     |> notify(:failed)
+  end
+
+  def ping(build) do
+    build
+    |> Ecto.Changeset.change(%{pinged_at: Timex.now()})
+    |> Core.Repo.update()
   end
 
   defp modify_status(build, state) do

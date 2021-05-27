@@ -22,7 +22,8 @@ config :console, :consumers, [
 config :console, Console.Cron,
   jobs: [
     {"@daily", {Console.Cron.Jobs, :prune_builds, []}},
-    {"@daily", {Console.Cron.Jobs, :prune_invites, []}}
+    {"@daily", {Console.Cron.Jobs, :prune_invites, []}},
+    {"*/15 * * * *", {Console.Cron.Jobs, :fail_builds, []}}
   ]
 
 config :console, :watchers, [
