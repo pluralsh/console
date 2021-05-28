@@ -26,7 +26,7 @@ defmodule Kube.Certificate do
     use Kazan.Model
 
     defmodel "CertificateSpec", "cert-manager.io", "v1" do
-      property :dns_names,   "dnsNames",   {:array, %{type: :string}}
+      property :dns_names,   "dnsNames",   {:array, :string}
       property :issuer_ref,  "issuerRef",  Kube.Certificate.IssuerRef
       property :secret_name, "secretName", :string
     end

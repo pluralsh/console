@@ -59,7 +59,7 @@ defmodule Console.MixProject do
       {:absinthe_phoenix, "~> 1.5"},
       {:dataloader, "~> 1.0.6"},
       {:cors_plug, "~> 2.0"},
-      {:timex, "~> 3.6"},
+      {:timex, "~> 3.7"},
       {:quantum, "~> 2.3"},
       {:yaml_elixir, "~> 2.4"},
       {:poison, "~> 3.1"},
