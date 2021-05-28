@@ -60,6 +60,8 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> Kazan.run()
   end
 
+  def resolve_certificate(%{namespace: ns, name: name}, _), do: Client.get_certificate(ns, name)
+
   def list_nodes(_, _) do
     Core.list_node!()
     |> Kazan.run()

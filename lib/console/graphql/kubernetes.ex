@@ -49,6 +49,7 @@ defmodule Console.GraphQl.Kubernetes do
   import_types Console.GraphQl.Kubernetes.CronJob
   import_types Console.GraphQl.Kubernetes.LogFilter
   import_types Console.GraphQl.Kubernetes.Job
+  import_types Console.GraphQl.Kubernetes.Certificate
 
   delta :application
 
@@ -123,6 +124,15 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Rbac, perm: :read, arg: :namespace
 
       resolve &Kubernetes.resolve_job/2
+    end
+
+    field :certificate, :certificate do
+      middleware Authenticated
+      arg :namespace, non_null(:string)
+      arg :name,      non_null(:string)
+      middleware Rbac, perm: :read, arg: :namespace
+
+      resolve &Kubernetes.resolve_certificate/2
     end
 
     field :pod, :pod do

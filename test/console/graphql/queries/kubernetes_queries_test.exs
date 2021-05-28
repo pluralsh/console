@@ -225,6 +225,30 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
     end
   end
 
+  describe "certificate" do
+    test "it can read a certificate crd" do
+      user = insert(:user)
+      role = insert(:role, repositories: ["*"], permissions: %{read: true})
+      insert(:role_binding, role: role, user: user)
+      expect(Kazan, :run, fn _ -> {:ok, certificate("certificate")} end)
+
+      {:ok, %{data: %{"certificate" => certificate}}} = run_query("""
+        query Cron($name: String!) {
+          certificate(name: $name, namespace: $name) {
+            metadata { name }
+            status { renewalTime }
+            spec { dnsNames secretName }
+          }
+        }
+      """, %{"name" => "certificate"}, %{current_user: user})
+
+      assert certificate["metadata"]["name"] == "certificate"
+      assert certificate["status"]["renewalTime"]
+      assert certificate["spec"]["dnsNames"] == ["some.example.com"]
+      assert certificate["spec"]["secretName"] == "example-tls"
+    end
+  end
+
   describe "pod" do
     test "it can query an individual pod" do
       user = insert(:user)

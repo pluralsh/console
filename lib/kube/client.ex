@@ -61,6 +61,16 @@ defmodule Kube.Client do
     |> Kazan.run()
   end
 
+  def get_certificate(ns, name) do
+    %Kazan.Request{
+      method: "get",
+      path: "/apis/cert-manager.io/v1/namespaces/#{ns}/certificates/#{name}",
+      query_params: %{},
+      response_model: Kube.Certificate
+    }
+    |> Kazan.run()
+  end
+
   def list_applications() do
     %Kazan.Request{
       method: "get",

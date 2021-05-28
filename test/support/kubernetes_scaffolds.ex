@@ -138,4 +138,17 @@ defmodule KubernetesScaffolds do
       platform: "linux"
     }
   end
+
+  def certificate(name) do
+    %Kube.Certificate{
+      metadata: %{name: name, namespace: name},
+      status: %Kube.Certificate.Status{
+        renewal_time: DateTime.utc_now() |> DateTime.to_iso8601()
+      },
+      spec: %Kube.Certificate.Spec{
+        dns_names: ["some.example.com"],
+        secret_name: "example-tls"
+      }
+    }
+  end
 end
