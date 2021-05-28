@@ -1,5 +1,5 @@
 import React from 'react'
-import { Briefcase, Clock, Cube, Resources, Services, ShareOption, VirtualMachine } from 'grommet-icons'
+import { Briefcase, Certificate, Clock, Cube, Resources, Services, ShareOption, VirtualMachine } from 'grommet-icons'
 
 const ICON_SIZE = '14px'
 
@@ -20,6 +20,8 @@ export default function Icon({kind, size}) {
       return <Cube size={iconSize} />
     case 'job':
       return <Briefcase size={iconSize} />
+    case "certificate":
+      return <Certificate size={iconSize} />
     default:
       return null
   }

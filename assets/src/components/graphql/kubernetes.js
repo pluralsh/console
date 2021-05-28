@@ -216,3 +216,17 @@ export const LogFilterFragment = gql`
   }
   ${MetadataFragment}
 `;
+
+export const CertificateFragment = gql`
+  fragment CertificateFragment on Certificate {
+    metadata { ...MetadataFragment }
+    status { renewalTime notBefore notAfter }
+    spec { 
+      dnsNames 
+      secretName 
+      issuerRef { group kind name }
+    }
+    raw
+  }
+  ${MetadataFragment}
+`

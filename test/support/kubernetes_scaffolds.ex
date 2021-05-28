@@ -4,7 +4,7 @@ defmodule KubernetesScaffolds do
   alias Kazan.Apis.Extensions.V1beta1, as: Extensions
   alias Kazan.Apis.Batch.V1beta1, as: Batch
   alias Kazan.Apis.Batch.V1, as: BatchV1
-  alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector}
+  alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector, ObjectMeta}
   alias Kazan.Models.Apimachinery
   alias Kube
 
@@ -141,7 +141,7 @@ defmodule KubernetesScaffolds do
 
   def certificate(name) do
     %Kube.Certificate{
-      metadata: %{name: name, namespace: name},
+      metadata: %ObjectMeta{name: name, namespace: name},
       status: %Kube.Certificate.Status{
         renewal_time: DateTime.utc_now() |> DateTime.to_iso8601()
       },

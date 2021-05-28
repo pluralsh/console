@@ -238,6 +238,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
             metadata { name }
             status { renewalTime }
             spec { dnsNames secretName }
+            raw
           }
         }
       """, %{"name" => "certificate"}, %{current_user: user})
@@ -246,6 +247,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       assert certificate["status"]["renewalTime"]
       assert certificate["spec"]["dnsNames"] == ["some.example.com"]
       assert certificate["spec"]["secretName"] == "example-tls"
+      assert certificate["raw"]
     end
   end
 

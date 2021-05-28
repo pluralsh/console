@@ -13,6 +13,7 @@ import Highlight from 'react-highlight.js'
 import yaml from 'yaml'
 import CronJob from './CronJob'
 import Job from './Job'
+import { Certificate } from './Certificate'
 
 function ComponentContent({namespace, kind, name}) {
   switch (kind.toLowerCase()) {
@@ -28,6 +29,8 @@ function ComponentContent({namespace, kind, name}) {
       return <CronJob namespace={namespace} kind={kind} name={name} />
     case 'job':
       return <Job namespace={namespace} kind={kind} name={name} />
+    case 'certificate':
+      return <Certificate namespace={namespace} kind={kind} name={name} />
     default:
       return null
   }
