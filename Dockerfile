@@ -119,19 +119,23 @@ RUN set -x && \
     kubectl version --client
 
 ENV REPLACE_OS_VARS=true \
-    APP_NAME=${APP_NAME}
+    APP_NAME=${APP_NAME} \
+    GIT_ASKPASS=/root/bin/.git-askpass \
+    SSH_ASKPASS=/root/bin/.ssh-askpass
 
 WORKDIR /opt/app
 
 RUN helm plugin install https://github.com/chartmuseum/helm-push && \
     helm plugin install https://github.com/databus23/helm-diff
 RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh
-RUN mkdir -p /root/.plural && mkdir -p /root/.creds
+RUN mkdir -p /root/.plural && mkdir -p /root/.creds && mkdir /root/bin
 RUN ln -s /usr/local/bin/plural /usr/local/bin/forge
 
 # add common repos to known hosts
 RUN touch /root/.ssh/known_hosts
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
+COPY bin /root/bin
+RUN chmod +x /root/bin/.git-askpass && chmod +x /root/bin/.ssh-askpass
 
 COPY --from=builder /opt/built .
 

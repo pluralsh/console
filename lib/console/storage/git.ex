@@ -5,7 +5,8 @@ defmodule Console.Storage.Git do
 
   def init() do
     unless File.exists?(workspace()) do
-      with {:ok, _} <- cmd("git", ["clone", conf(:git_url), workspace()]),
+      with {:ok, _} <- maybe_add_username(conf(:git_url)),
+           {:ok, _} <- cmd("git", ["clone", conf(:git_url), workspace()]),
            {:ok, _} <- git("config", ["user.name", conf(:git_user_name)]),
            {:ok, _} <- git("config", ["user.email", conf(:git_user_email)]),
         do: Plural.unlock()
@@ -13,6 +14,13 @@ defmodule Console.Storage.Git do
       pull()
     end
   end
+
+  def maybe_add_username("https://" <> _rest = git_url) do
+    url = URI.parse(git_url)
+    url = URI.to_string(%{url | path: ""})
+    cmd("git", ["config", "--global", "credential.#{url}.username", conf(:git_user_name)])
+  end
+  def maybe_add_username(_), do: {:ok, :ignore}
 
   def push(retry \\ 0) do
     case {git("push"), retry} do
