@@ -62,7 +62,6 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   def resolve_certificate(%{namespace: ns, name: name}, _) do
     Client.get_certificate(ns, name)
-    |> IO.inspect()
   end
 
   def list_nodes(_, _) do

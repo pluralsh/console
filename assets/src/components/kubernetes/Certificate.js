@@ -42,7 +42,7 @@ function Spec({spec: {secretName, dnsNames, issuerRef}}) {
         </Box>
       </MetadataRow>
       <MetadataRow name='issuer'>
-        <Text size='small'>{issuerRef.group}/{issuerRef.kind} {issuerRef.name}</Text>
+        <Text size='small'>{issuerRef.group}/{issuerRef.kind.toLowerCase()} {issuerRef.name}</Text>
       </MetadataRow>
     </Container>
   )
