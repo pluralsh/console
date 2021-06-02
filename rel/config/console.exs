@@ -54,14 +54,16 @@ config :console, Console.Repo,
   hostname: "console-postgresql",
   pool_size: 10
 
+git_url = get_env("GIT_URL")
+
 config :console,
   workspace_root: "/root",
   git_url: get_env("GIT_URL"),
   branch: get_env("BRANCH_NAME") || "master",
   repo_root: get_env("REPO_ROOT"),
   forge_config: "/ect/forge/.forge",
-  webhook_secret: get_env("WEBHOOK_SECRET"),
   git_ssh_key: {:home, ".ssh/id_rsa"},
+  webhook_secret: get_env("WEBHOOK_SECRET"),
   git_user_name: get_env("GIT_USER", "forge"),
   git_user_email: get_env("GIT_EMAIL", "forge@piazzaapp.com"),
   url: get_env("HOST"),
@@ -70,3 +72,8 @@ config :console,
   piazza_secret: get_env("PIAZZA_WEBHOOK_SECRET"),
   cluster_name: get_env("CLUSTER_NAME"),
   provider: provider
+
+if String.starts_with?(git_url, "https") do
+  config :console,
+    git_ssh_key: :pass
+end
