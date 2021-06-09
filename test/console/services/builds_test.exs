@@ -27,6 +27,16 @@ defmodule Console.Services.BuildsTest do
     end
   end
 
+  describe "#ping/1" do
+    test "it can mark the pinged at on a build" do
+      build = insert(:build)
+
+      {:ok, pinged} = Builds.ping(build)
+
+      assert pinged.pinged_at
+    end
+  end
+
   describe "#create_build/2" do
     test "It can create a build" do
       user = insert(:user)

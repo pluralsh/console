@@ -155,7 +155,7 @@ defmodule Console.Services.Builds do
   def ping(build) do
     build
     |> Ecto.Changeset.change(%{pinged_at: Timex.now()})
-    |> Core.Repo.update()
+    |> Repo.update()
   end
 
   defp modify_status(build, state) do

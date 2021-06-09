@@ -2,6 +2,7 @@ defmodule Console.Cron.Jobs do
   alias Console.Repo
   alias Console.Schema.{Build, Invite}
   alias Console.PubSub.BuildFailed
+  require Logger
 
   def prune_builds() do
     Build.expired()
@@ -14,6 +15,7 @@ defmodule Console.Cron.Jobs do
   end
 
   def fail_builds() do
+    Logger.info "Pruning unmarked failed builds"
     expires = Timex.now() |> Timex.shift(minutes: -2)
     Build.with_status(:running)
     |> Build.pinged(expires)

@@ -116,6 +116,7 @@ defmodule Console.Deployer do
 
   def handle_info({:DOWN, ref, :process, _, _}, %State{ref: ref, build: build} = state) do
     Logger.info "tearing down build #{build.id}, proc: #{inspect(state.pid)}"
+    Builds.cancel(build)
     broadcast()
     {:noreply, %{state | ref: nil, pid: nil, build: nil}}
   end

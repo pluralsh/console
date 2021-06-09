@@ -53,7 +53,7 @@ defmodule Console.Schema.Build do
   end
 
   def pinged(query \\ __MODULE__, time) do
-    from(b in query, where: not is_nil(b.pinged_at) and b.pinged_at <= ^time)
+    from(b in query, where: (not is_nil(b.pinged_at) and b.pinged_at <= ^time) or (is_nil(b.pinged_at) and b.inserted_at <= ^time))
   end
 
   @valid ~w(repository type status completed_at approver_id message sha)a
