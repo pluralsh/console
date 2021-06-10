@@ -113,6 +113,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     end
   end
 
+  def list_pods(_, nil), do: {:ok, []}
   def list_pods(%{namespace: ns}, label_selector) do
     Console.namespace(ns)
     |> Core.list_namespaced_pod!(label_selector: construct_label_selector(label_selector))
