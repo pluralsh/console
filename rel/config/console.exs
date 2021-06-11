@@ -51,7 +51,8 @@ config :console, Console.Repo,
   database: "console",
   username: "console",
   password: get_env("POSTGRES_PASSWORD"),
-  hostname: "console-postgresql",
+  hostname: get_env("DBHOST") || "console-postgresql",
+  ssl: String.to_existing_atom(get_env("DBSSL") || "false"),
   pool_size: 10
 
 git_url = get_env("GIT_URL")
