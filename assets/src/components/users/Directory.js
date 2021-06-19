@@ -7,11 +7,12 @@ import Avatar from './Avatar'
 import { GroupForm } from './CreateGroup'
 import { InviteForm } from './CreateInvite'
 import { useParams, useHistory } from 'react-router-dom'
-import { User, Group, Add, Search, Script } from 'grommet-icons'
+import { User, Group, Add, Script } from 'grommet-icons'
 import GroupRow from './Group'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import RoleRow, { CreateRole } from './Role'
 import { extendConnection } from '../../utils/graphql'
+import { SearchIcon } from './utils'
 
 function UserRow({user, next}) {
   const admin = user.roles && user.roles.admin
@@ -52,7 +53,7 @@ function UsersInner() {
           <Text weight={500}>Users</Text>
         </Box>
         <TextInput
-          icon={<Search />}
+          icon={<SearchIcon />}
           placeholder='search for users'
           value={q || ''}
           onChange={({target: {value}}) => setQ(value)} />
@@ -87,7 +88,7 @@ function GroupsInner() {
           <Text weight={500}>Groups</Text>
         </Box>
         <TextInput
-          icon={<Search />}
+          icon={<SearchIcon />}
           placeholder='search for groups'
           value={q || ''}
           onChange={({target: {value}}) => setQ(value)} />
@@ -121,7 +122,7 @@ function RolesInner() {
           <Text weight={500}>Roles</Text>
         </Box>
         <TextInput
-          icon={<Search />}
+          icon={<SearchIcon />}
           placeholder='search for roles'
           value={q || ''}
           onChange={({target: {value}}) => setQ(value)} />

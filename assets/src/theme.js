@@ -31,6 +31,8 @@ export const DEFAULT_COLOR_THEME = {
   medium: '#fd8c00',
   high: '#dc0000',
   critical: '#780000',
+  label: 'light-2',
+  'input-border': 'light-5',
 }
 
 export const DEFAULT_THEME = {
@@ -88,7 +90,7 @@ export const DEFAULT_THEME = {
   global: {
     colors: DEFAULT_COLOR_THEME,
     drop: { border: { radius: '4px' } },
-    focus: {shadow: { size: '1px' } },
+    focus: {shadow: null, border: {color: 'brand'} },
     control: {border: {radius: '2px'}},
     font: {
       family: 'Roboto',
