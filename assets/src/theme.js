@@ -31,7 +31,6 @@ export const DEFAULT_COLOR_THEME = {
   medium: '#fd8c00',
   high: '#dc0000',
   critical: '#780000',
-  border: {light: 'light-3'}
 }
 
 export const DEFAULT_THEME = {
