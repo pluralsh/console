@@ -30,7 +30,8 @@ export const DEFAULT_COLOR_THEME = {
   low: '#fdc500',
   medium: '#fd8c00',
   high: '#dc0000',
-  critical: '#780000'
+  critical: '#780000',
+  border: {light: 'light-3'}
 }
 
 export const DEFAULT_THEME = {
@@ -88,6 +89,8 @@ export const DEFAULT_THEME = {
   global: {
     colors: DEFAULT_COLOR_THEME,
     drop: { border: { radius: '4px' } },
+    focus: {shadow: { size: '1px' } },
+    control: {border: {radius: '2px'}},
     font: {
       family: 'Roboto',
       size: '14px',
