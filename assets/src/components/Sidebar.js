@@ -83,7 +83,7 @@ export default function Sidebar() {
 
   return (
     <Box background='sidebar' height='100vh'>
-      <Box flex={false} height={IMAGE_HEIGHT} justify='center' align='center' pad='small' margin={{vertical: '5px'}}>
+      <Box flex={false} height={IMAGE_HEIGHT} justify='center' align='center' pad='small' margin={{vertical: 'small'}}>
         <img height={IMAGE_HEIGHT} alt='' src={APP_ICON} />
       </Box>
       <Box fill='vertical' justify='center'>
