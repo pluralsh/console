@@ -6,22 +6,13 @@ defmodule Console.Plural.Queries do
     }
   """
 
-  @dashboard_fragment """
-    fragment DashboardFragment on Dashboard {
-      name
-      uid
-    }
-  """
-
   @repository_fragment """
     fragment RepositoryFragment on Repository {
       id
       name
       icon
       description
-      dashboards { ...DashboardFragment }
     }
-    #{@dashboard_fragment}
   """
 
   @installation_fragment """

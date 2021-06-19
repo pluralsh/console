@@ -8,8 +8,8 @@ import { InstallationContext } from './Installations'
 import { Tooltip } from './utils/Tooltip'
 import './sidebar.css'
 
-const SIDEBAR_ROW_HEIGHT = '50px'
-const APP_ICON = `${process.env.PUBLIC_URL}/console.png`
+const SIDEBAR_ICON_HEIGHT = '45px'
+const APP_ICON = `${process.env.PUBLIC_URL}/console-white.png`
 
 function SidebarIcon({icon, text, selected, path}) {
   const dropRef = useRef()
@@ -26,7 +26,7 @@ function SidebarIcon({icon, text, selected, path}) {
       justify='center'
       margin={{horizontal: 'xsmall'}}
       round='xsmall'
-      height={SIDEBAR_ROW_HEIGHT}
+      height={SIDEBAR_ICON_HEIGHT}
       hoverIndicator='sidebarHover'
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
@@ -56,7 +56,7 @@ function Me() {
   )
 }
 
-const ICON_HEIGHT = '20px'
+const ICON_HEIGHT = '18px'
 
 const OPTIONS = [
   {text: 'Builds', icon: <Deploy size={ICON_HEIGHT} />, path: '/'},
@@ -83,7 +83,7 @@ export default function Sidebar() {
 
   return (
     <Box background='sidebar' height='100vh'>
-      <Box flex={false} height={IMAGE_HEIGHT} justify='center' align='center' pad='small' margin={{top: 'small', bottom: 'medium'}}>
+      <Box flex={false} height={IMAGE_HEIGHT} justify='center' align='center' pad='small' margin={{vertical: '5px'}}>
         <img height={IMAGE_HEIGHT} alt='' src={APP_ICON} />
       </Box>
       <Box fill='vertical'>
