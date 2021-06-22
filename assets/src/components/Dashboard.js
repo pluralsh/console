@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useQuery } from 'react-apollo'
-import { Loading } from 'forge-core'
+import { Loading, Select } from 'forge-core'
 import { DASHBOARD_Q } from './graphql/dashboards'
-import { Box, Select, Text } from 'grommet'
+import { Box, Text } from 'grommet'
 import { chunk } from 'lodash'
 import { Graph, GraphHeader } from './utils/Graph'
 import filesize from 'filesize'
@@ -81,15 +81,26 @@ function DashboardGraph({graph, tick}) {
   )
 }
 
+const toSelect = (v) => ({label: v, value: v})
+
 function LabelSelect({label, onSelect}) {
   const [value, setValue] = useState(label.values[0])
   useEffect(() => onSelect(value), [value])
 
   return (
-    <Select
-      options={label.values}
-      value={value}
-      onChange={({value}) => setValue(value)} />
+    <Box width='200px'>
+      <Select
+        options={label.values.map(toSelect)}
+        value={toSelect(value)}
+        colors={{
+          'neutral0': 'cardDetail', 
+          'neutral80': '#fff', 
+          'neutral60': '#fff',
+          'primary': 'tone-medium',
+          'primary25': 'cardDetailLight'
+        }}
+        onChange={({value}) => setValue(value)} />
+    </Box>
   )
 }
 

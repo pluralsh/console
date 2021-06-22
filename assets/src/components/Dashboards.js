@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 import { useQuery } from 'react-apollo'
-import { Box, Text, Select } from 'grommet'
-import { Loading } from 'forge-core'
+import { Box, Text } from 'grommet'
+import { Loading, Select } from 'forge-core'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { BUILD_PADDING } from './Builds'
 import { DASHBOARDS_Q } from './graphql/dashboards'
@@ -70,11 +70,12 @@ export default function Dashboards() {
               <DashboardHeader name={currentApplication.name} label='dashboards' />}
           </Box>
           {current && (
-            <Select
-              options={data.dashboards}
-              value={current}
-              labelKey={({spec: {name}}) => name}
-              onChange={({value}) => setCurrent(value)} />
+            <Box flex={false} width='200px'>
+              <Select
+                options={data.dashboards.map((d) => ({value: d, label: d.spec.name}))}
+                value={{value: current, label: current.spec.name}}
+                onChange={({value}) => setCurrent(value)} />
+            </Box>
           )}
         </Box>
       </Box>

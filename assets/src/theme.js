@@ -4,25 +4,43 @@ const boxStyle = css`
   outline: none;
 `;
 
+export const PLURAL_THEME = {
+  'plural-blk': '#000b11',
+  'tone-dark': '#01131a',
+  'tone-medium':'#c9d1d3',
+  'tone-light': '#edf1f2',
+  'plrl-white': '#fff',
+  'key-dark': '#001b8c',
+  'key-light': '#0022b2',
+  'alt-dark': '#006e96',
+  'alt-light': '#0090c4',
+  'red-dark': '#ba4348',
+  'red-light': '#da4447',
+  'green-dark': '#23422b',
+  'green-light': '#35844d',
+}
+
 export const DEFAULT_COLOR_THEME = {
-  brand: '#4b25c1',
-  action: '#007a5a',
+  brand: 'key-light',
+  // action: '#007a5a',
+  action: 'key-light',
+  actionDark: 'key-dark',
   sidebar: 'backgroundDark',
   sidebarHover: '#000000',
   sidebarActive: '#000000',
   focus: '#3B1D98',
-  tagMedium: '#3B1D98',
+  tagMedium: 'key-light',
   tagLight: '#624aad',
   progress: '#007bff',
-  error: '#CC4400',
-  success: '#007a5a',
+  error: 'red-light',
+  success: 'green-light',
   console: '#222222',
   cardDark: '#20222b',
   cardDarkLight: '#363840',
   cardDetail: '#252833',
   cardDetailLight: '#363a4a',
   backgroundColor: '#20222b',
-  backgroundDark: '#13141a',
+  backgroundDark: 'plural-blk',
   backgroundLight: 'cardDarkLight',
   presence: '#39E500',
   link: '#3366BB',
@@ -33,6 +51,7 @@ export const DEFAULT_COLOR_THEME = {
   critical: '#780000',
   label: 'light-2',
   'input-border': 'light-5',
+  ...PLURAL_THEME
 }
 
 export const DEFAULT_THEME = {
