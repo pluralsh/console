@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Text, Box, Keyboard, TextInput } from 'grommet'
 import { Scroller, Tag as TagInner } from 'forge-core'
+import { extendConnection } from '../../utils/graphql'
 
 export function TagInput({addTag, removeTag, tags, round, ...rest}) {
   const [current, setCurrent] = useState("")
@@ -40,7 +41,8 @@ export function TagContainer({enabled, children, gap, pad, onClick}) {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       pad={pad || {horizontal: 'small', vertical: 'xxsmall'}}
-      hoverIndicator='light-2'
+      hoverIndicator='tone-light'
+      background={enabled ? 'tone-light' : null}
       focusIndicator={false}
       direction='row'
       align='center'
@@ -69,11 +71,7 @@ export default function Tags({tags: {pageInfo, edges}, fetchMore, tag, setTag, p
         mapper={({node}) => <Tag key={node.tag} tag={node} setTag={setTag} enabled={node.tag === tag} />}
         onLoadMore={() => pageInfo.hasNextPage && fetchMore({
           variables: {cursor: pageInfo.endCursor},
-          updateQuery: (prev, {fetchMoreResult: {tags: {edges, pageInfo}}}) => ({
-            ...prev, tags: {
-              ...prev.tags, pageInfo, edges: [...prev.tags.edges, ...edges]
-            }
-          })
+          updateQuery: (prev, {fetchMoreResult: {tags}}) => extendConnection(prev, tags, 'tags')
         })} />
     </Box>
   )

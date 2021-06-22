@@ -24,7 +24,7 @@ export function deepUpdate(prev, path, update) {
     return {...prev, [key]: update(prev[key])}
   }
 
-  return {...prev, [key]: deepUpdate(prev, path.slice(1), update)}
+  return {...prev, [key]: deepUpdate(prev[key], path.slice(1), update)}
 }
 
 export function appendConnection(prev, next, key) {
@@ -37,12 +37,6 @@ export function appendConnection(prev, next, key) {
   }
 }
 
-export function updateConnection(prev, next, key) {
-  const {edges} = prev[key]
-  if (edges.find(({node: {id}}) => id === next.id)) return appendConnection(prev, next, key)
-  return {...prev, [key]: {...prev[key], edges: edges.map((e) => e.node.id === next.id ? {...e, node: next} : e)}}
-}
-
 export function removeConnection(prev, val, key) {
   return {...prev, [key]: {...prev[key], edges: prev[key].edges.filter(({node}) => node.id !== val.id)}}
 }
@@ -50,9 +44,6 @@ export function removeConnection(prev, val, key) {
 export function updateCache(cache, {query, variables, update, onFailure}) {
   const prev = cache.readQuery({query, variables})
   cache.writeQuery({query, variables, data: update(prev)})
-  // } catch {
-  //   onFailure && onFailure()
-  // }
 }
 
 export const prune = ({__typename, ...rest}) => rest
