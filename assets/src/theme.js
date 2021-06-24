@@ -94,6 +94,10 @@ export const DEFAULT_THEME = {
       }
     }
   },
+  checkBox: {
+    size: '20px',
+    toggle: {radius: '20px', size: '40px'},
+  },
   textField: {
     extend: {
       fontWeight: 400
