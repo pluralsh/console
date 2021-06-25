@@ -74,17 +74,13 @@ export const DEFAULT_THEME = {
     border: {active: {color: 'focus'}, hover: {color: 'focus'}},
   },
   textArea: {
-    extend: {
-      fontWeight: 400
-    }
+    extend: { fontWeight: 400 }
   },
   box: {
     extend: boxStyle
   },
   textInput: {
-    extend: {
-      fontWeight: 400
-    }
+    extend: { fontWeight: 400 }
   },
   calendar: {
     day: {
