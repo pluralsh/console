@@ -32,8 +32,8 @@ function Installation({application, setCurrentApplication, current: {name}}) {
   )
 }
 
-export function ApplicationIcon({application: {spec: {descriptor: {icons}}}, size}) {
-  return <img alt='' src={icons[0]} width={size || '25px'} height={size || '25px'} />
+export function ApplicationIcon({application: {spec: {descriptor: {icons}}}, size, dark}) {
+  return <img alt='' src={(dark && icons[1]) ? icons[1] : icons[0]} width={size || '25px'} height={size || '25px'} />
 }
 
 export const hasIcon = ({spec: {descriptor: {icons}}}) => icons.length > 0
@@ -48,7 +48,7 @@ export function Installations() {
     <>
     <Box flex={false} ref={ref} direction='row' gap='small' align='center' hoverIndicator='sidebarHover'
          onClick={() => setOpen(true)}>
-      {descriptor.icons.length > 0 && <ApplicationIcon application={currentApplication} />}
+      {descriptor.icons.length > 0 && <ApplicationIcon application={currentApplication} dark />}
       <Text size='small' weight={500}>{name}</Text>
       <ApplicationReadyIcon application={currentApplication} size='20px' showIcon />
     </Box>
