@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useQuery } from 'react-apollo'
-import { Loading, Select } from 'forge-core'
+import { Select } from 'forge-core'
 import { DASHBOARD_Q } from './graphql/dashboards'
 import { Box, Text } from 'grommet'
 import { chunk } from 'lodash'
 import { Graph, GraphHeader } from './utils/Graph'
 import filesize from 'filesize'
+import { Loading } from './utils/Loading'
 
 const HOUR = 60 * 60
 const DAY = 24 * HOUR

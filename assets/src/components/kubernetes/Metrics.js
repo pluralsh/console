@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { useQuery } from 'react-apollo'
-import { Loading } from 'forge-core'
+import { Loading } from '../utils/Loading'
 import { POLL_INTERVAL } from './constants'
 import { USAGE_Q } from './queries'
 import { Graph, GraphHeader } from '../utils/Graph'

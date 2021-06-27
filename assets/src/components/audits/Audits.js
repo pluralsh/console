@@ -1,11 +1,12 @@
 import React from 'react'
 import { useQuery } from 'react-apollo'
-import { Scroller, Loading } from 'forge-core'
+import { Scroller } from 'forge-core'
 import { AUDITS_Q } from './queries'
 import { HeaderItem, RowItem } from '../kubernetes/Pod'
 import { Box, Text } from 'grommet'
 import { dateFormat } from '../utils/Graph'
 import Avatar from '../users/Avatar'
+import { Loading } from '../utils/Loading'
 import { extendConnection } from '../../utils/graphql'
 
 function Audit({audit}) {

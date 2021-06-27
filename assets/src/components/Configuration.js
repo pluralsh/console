@@ -2,7 +2,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { APPLICATION_Q, UPDATE_CONFIGURATION } from './graphql/forge'
-import { Loading, Button } from 'forge-core'
+import { Button } from 'forge-core'
 import { Box, Text } from 'grommet'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { BUILD_PADDING } from './Builds'
@@ -12,6 +12,7 @@ import "ace-builds/src-noconflict/mode-yaml"
 import "ace-builds/src-noconflict/theme-terminal"
 import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from './Installations'
 import { TabHeader } from './utils/TabSelector'
+import { Loading } from './utils/Loading'
 
 const ConfigType = {
   HELM: 'HELM',
@@ -35,7 +36,7 @@ export function EditConfiguration({onCompleted, application: {name, configuratio
   }, [name])
 
   return (
-    <Box height='calc(100vh - 45px)'>
+    <Box fill>
       <Box gap='small'>
         <Box
           pad={{...BUILD_PADDING}}

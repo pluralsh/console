@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Anchor, Box, Text } from 'grommet'
-import { Loading, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
+import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { STATEFUL_SET_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
@@ -12,6 +12,8 @@ import { Events } from './Event'
 import { Metric } from './Metrics'
 import { Container, logUrl } from './utils'
 import { DURATIONS, RangePicker } from '../Dashboard'
+import { Loading } from '../utils/Loading'
+
 
 function Status({status: {currentReplicas, updatedReplicas, readyReplicas, replicas}, metadata}) {
   let history = useHistory()

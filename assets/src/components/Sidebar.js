@@ -8,7 +8,7 @@ import { InstallationContext } from './Installations'
 import { Tooltip } from './utils/Tooltip'
 import './sidebar.css'
 
-const SIDEBAR_ICON_HEIGHT = '45px'
+const SIDEBAR_ICON_HEIGHT = '42px'
 const APP_ICON = `${process.env.PUBLIC_URL}/console-white.png`
 
 function SidebarIcon({icon, text, selected, path}) {
@@ -27,11 +27,12 @@ function SidebarIcon({icon, text, selected, path}) {
       margin={{horizontal: 'xsmall'}}
       round='xsmall'
       height={SIDEBAR_ICON_HEIGHT}
+      width={SIDEBAR_ICON_HEIGHT}
       hoverIndicator='sidebarHover'
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onClick={() => history.push(path)}
-      background={selected ? 'black' : null}
+      background={selected ? 'sidebarHover' : null}
       direction='row'>
       {icon}
     </Box>
@@ -79,14 +80,17 @@ export default function Sidebar() {
   const loc = useLocation()
   const {currentApplication} = useContext(InstallationContext)
   const name = currentApplication && currentApplication.name
-  const active = OPTIONS.findIndex(({path}) => replace(path, name) === loc.pathname)
+  const active = OPTIONS.findIndex(({path}) => {
+    if (path === '/') return loc.pathname === path
+    return loc.pathname.startsWith(replace(path, name))
+  })
 
   return (
     <Box background='sidebar' height='100vh'>
       <Box flex={false} height={IMAGE_HEIGHT} justify='center' align='center' pad='small' margin={{vertical: 'small'}}>
         <img height={IMAGE_HEIGHT} alt='' src={APP_ICON} />
       </Box>
-      <Box fill='vertical' justify='center'>
+      <Box fill='vertical' justify='center' gap='xsmall'>
       {OPTIONS.map(({text, icon, path}, ind) => (
         <SidebarIcon
           key={ind}

@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { Anchor, Box, Layer, Text } from 'grommet'
-import { Loading, Tabs, TabHeader, TabHeaderItem, TabContent } from 'forge-core'
+import { Tabs, TabHeader, TabHeaderItem, TabContent } from 'forge-core'
 import { Readiness, ReadyIcon } from '../Application'
 import { useMutation, useQuery } from 'react-apollo'
 import { DELETE_POD, POD_Q } from './queries'
@@ -14,6 +14,7 @@ import { Metadata, MetadataRow } from './Metadata'
 import { RawContent } from './Component'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import { Container as Con } from './utils'
+import { Loading } from '../utils/Loading'
 import { asQuery } from '../utils/query'
 
 function phaseToReadiness(phase) {

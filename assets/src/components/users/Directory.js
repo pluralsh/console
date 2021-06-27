@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { Box, Text, Layer, TextInput, CheckBox } from 'grommet'
 import { useQuery, useMutation } from 'react-apollo'
-import { ModalHeader, Loading, Scroller } from 'forge-core'
+import { ModalHeader, Scroller } from 'forge-core'
 import { USERS_Q, GROUPS_Q, EDIT_USER, ROLES_Q } from './queries'
 import Avatar from './Avatar'
 import { GroupForm } from './CreateGroup'
@@ -12,6 +12,7 @@ import GroupRow from './Group'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import RoleRow, { CreateRole } from './Role'
 import { extendConnection } from '../../utils/graphql'
+import { Loading } from '../utils/Loading'
 import { SearchIcon } from './utils'
 
 function UserRow({user, next}) {
@@ -142,10 +143,12 @@ function RolesInner() {
 }
 
 function SectionChoice({label, icon, section, onClick, setSection}) {
+  const {section: selected} = useParams()
   return (
     <Box
       focusIndicator={false}
-      hoverIndicator='backgroundDark'
+      hoverIndicator='sidebar'
+      background={section === selected ? 'sidebar' : null}
       direction='row'
       align='center'
       gap='small'
@@ -189,16 +192,23 @@ export default function Directory() {
   ]), [section])
 
   return (
-    <Box
-      height='100vh'
-      pad='medium'
-      direction='row'
-      gap='medium'
-      background='backgroundColor'>
+    <Box fill pad='medium' direction='row' gap='medium' background='backgroundColor'>
       <Box gap='xsmall' flex={false}>
-        <SectionChoice icon={<User size='14px' />} label='Users' section='users' setSection={setSection} />
-        <SectionChoice icon={<Group size='14px' />} label='Groups' section='groups' setSection={setSection} />
-        <SectionChoice icon={<Script size='14px' />} label='Roles' section='roles' setSection={setSection} />
+        <SectionChoice 
+          icon={<User size='14px' />} 
+          label='Users' 
+          section='users' 
+          setSection={setSection} />
+        <SectionChoice 
+          icon={<Group size='14px' />} 
+          label='Groups' 
+          section='groups' 
+          setSection={setSection} />
+        <SectionChoice 
+          icon={<Script size='14px' />} 
+          label='Roles' 
+          section='roles' 
+          setSection={setSection} />
         <CreateModal header='create a new group' form={<GroupForm />}>
           {(onClick) => <SectionChoice icon={
             <Box direction='row' align='center' gap='xxsmall'>

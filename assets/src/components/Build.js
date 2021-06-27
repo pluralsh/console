@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext, useRef, useCallback } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
-import { ModalHeader, Button, Loading } from 'forge-core'
+import { ModalHeader, Button } from 'forge-core'
 import { Box, Text, Layer } from 'grommet'
 import Line from 'react-lazylog/build/Line'
 import { ansiparse } from './utils/ansi'
@@ -17,6 +17,7 @@ import { Avatar } from './EditUser'
 import { groupBy } from 'lodash'
 import { TabHeader, TabSelector } from './utils/TabSelector'
 import { AnsiText } from './utils/AnsiText'
+import { Loading } from './utils/Loading'
 
  const HEADER_PADDING = {horizontal: 'medium'}
 

@@ -10,16 +10,8 @@ import { ApplicationIcon, hasIcon, InstallationContext } from './Installations'
 
 export function RepositoryChoice({application, link}) {
   return (
-    <Box
-      onClick={link}
-      width='50%'
-      hoverIndicator='backgroundDark'
-      background='cardDetailLight'
-      direction='row'
-      align='center'
-      justify='center'
-      round='xsmall'
-      pad='medium'>
+    <Box onClick={link} width='50%' hoverIndicator='backgroundDark' background='cardDetailLight'
+      direction='row' align='center' justify='center' round='xsmall' pad='medium'>
       <Box direction='row' fill='horizontal' gap='small' align='center'>
         {hasIcon(application) && <ApplicationIcon application={application} size='40px' dark />}
         <Box>
@@ -46,7 +38,7 @@ export default function RepositorySelector({title, description, prefix}) {
   }, [prefix])
 
   return (
-    <Box height='calc(100vh - 45px)'>
+    <Box fill>
       <Box gap='small' background='backgroundColor'>
         <Box
           pad={{vertical: 'small', ...BUILD_PADDING}} direction='row' align='center' height='60px'>

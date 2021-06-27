@@ -2,14 +2,15 @@ import React, { useState, useEffect, useContext, useCallback } from 'react'
 import { useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { BUILDS_Q, CREATE_BUILD, BUILD_SUB } from './graphql/builds'
-import { Loading, Button, Scroller } from 'forge-core'
+import { Button, Scroller } from 'forge-core'
 import { Box, Text } from 'grommet'
 import moment from 'moment'
 import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { BuildStatus as Status, BuildTypes } from './types'
 import { InstallationContext } from './Installations'
-import { appendConnection, updateConnection, extendConnection, updateCache } from '../utils/graphql'
+import { appendConnection, extendConnection, updateCache } from '../utils/graphql'
+import { Loading } from './utils/Loading'
 
 function BuildStatusInner({background, text, icon}) {
   return (

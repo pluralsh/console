@@ -2,7 +2,8 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useQuery, useMutation } from 'react-apollo'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { WEBHOOKS_Q, CREATE_WEBHOOK } from './graphql/webhooks'
-import { Loading, Button, Scroller, ModalHeader } from 'forge-core'
+import { Button, Scroller, ModalHeader } from 'forge-core'
+import { Loading } from './utils/Loading'  
 import { BUILD_PADDING } from './Builds'
 import { Box, Text, FormField, TextInput, Layer } from 'grommet'
 import { chunk } from '../utils/array'
@@ -97,7 +98,7 @@ export default function Webhooks() {
   const {edges, pageInfo} = data.webhooks
 
   return (
-    <Box height='calc(100vh - 45px)'>
+    <Box fill>
       <Box>
         <Box
           pad={{vertical: 'small', ...BUILD_PADDING}}

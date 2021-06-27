@@ -1,7 +1,7 @@
-import { Box, Drop, Text } from 'grommet'
-import React, { useEffect, useRef, useContext, useState, useCallback } from 'react'
-import { Checkmark } from 'grommet-icons'
-import { Loading } from 'forge-core'
+import React, { useEffect, useContext, useState, useCallback } from 'react'
+import { Box, Text } from 'grommet'
+import { Checkmark, Next } from 'grommet-icons'
+import { Loading } from './utils/Loading'
 import { useQuery } from 'react-apollo'
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/forge'
 import { ApplicationReadyIcon } from './Application'
@@ -38,23 +38,24 @@ export function ApplicationIcon({application: {spec: {descriptor: {icons}}}, siz
 
 export const hasIcon = ({spec: {descriptor: {icons}}}) => icons.length > 0
 
-export function Installations() {
-  const ref = useRef()
-  const [open, setOpen] = useState(false)
-  const {applications, currentApplication, setCurrentApplication} = useContext(InstallationContext)
-  if (!currentApplication) return null
-  const {name, spec: {descriptor}} = currentApplication
+export function InstallationsFlyout() {
+  const {applications, setCurrentApplication, currentApplication, open, setOpen} = useContext(InstallationContext)
+
+  if (!open) return null
+
   return (
-    <>
-    <Box flex={false} ref={ref} direction='row' gap='small' align='center' hoverIndicator='sidebarHover'
-         onClick={() => setOpen(true)}>
-      {descriptor.icons.length > 0 && <ApplicationIcon application={currentApplication} dark />}
-      <Text size='small' weight={500}>{name}</Text>
-      <ApplicationReadyIcon application={currentApplication} size='20px' showIcon />
-    </Box>
-    {open && (
-      <Drop target={ref.current} align={{top: 'bottom'}} onClickOutside={() => setOpen(false)}>
-        <Box width='400px' pad='xsmall'>
+    <Box flex={false} width='400px' fill='vertical'>
+      <Box flex={false} pad={{horizontal: 'small', vertical: 'xsmall'}} align='center'
+           direction='row' border={{side: 'bottom', color: 'light-5'}}>
+        <Box fill='horizontal'>
+          <Text size='small' weight={500}>Applications</Text>
+        </Box>
+        <Box flex={false} pad='xsmall' round='xsmall' hoverIndicator='light-3' onClick={() => setOpen(false)}>
+          <Next size='14px' />
+        </Box>
+      </Box>
+      <Box fill style={{overflow: 'auto'}}>
+        <Box flex={false}>
           {applications.map((application) => (
             <Installation
               key={application.name}
@@ -63,9 +64,23 @@ export function Installations() {
               setCurrentApplication={setCurrentApplication} />
           ))}
         </Box>
-      </Drop>
-    )}
-    </>
+      </Box>
+    </Box>
+  )
+}
+
+export function Installations() {
+  const {currentApplication, open, setOpen} = useContext(InstallationContext)
+  if (!currentApplication) return null
+  const {name, spec: {descriptor}} = currentApplication
+  return (
+    <Box flex={false} direction='row' round='xsmall' background={open ? 'sidebarHover' : null}
+         margin={{vertical: 'xsmall'}} pad={{horizontal: 'small'}} 
+         gap='small' align='center'  hoverIndicator='sidebarHover' onClick={() => setOpen(true)}>
+      {descriptor.icons.length > 0 && <ApplicationIcon application={currentApplication} dark />}
+      <Text size='small' weight={500}>{name}</Text>
+      <ApplicationReadyIcon application={currentApplication} size='20px' showIcon />
+    </Box>
   )
 }
 
@@ -91,6 +106,7 @@ function applyDelta(prev, {delta, payload}) {
 }
 
 export function InstallationsProvider({children}) {
+  const [open, setOpen] = useState(false)
   const [currentApplication, setCurrentApplication] = useState(null)
   const [{func: onChange}, setOnChange] = useState({func: () => null})
   const {data, subscribeToMore} = useQuery(APPLICATIONS_Q, {pollInterval: 120_000})
@@ -107,7 +123,6 @@ export function InstallationsProvider({children}) {
   useEffect(() => subscribeToMore({
     document: APPLICATION_SUB,
     updateQuery: (prev, {subscriptionData: {data}}) => {
-      console.log(data)
       return data ? applyDelta(prev, data.applicationDelta) : prev
   }}), [])
 
@@ -128,7 +143,9 @@ export function InstallationsProvider({children}) {
         setCurrentUnsafe: setCurrentApplication,
         applications: data && data.applications,
         onChange,
-        setOnChange
+        setOnChange,
+        open,
+        setOpen
       }}
     >
       {children}
