@@ -56,7 +56,7 @@ export default function Console() {
                   <Redirect to='/directory/users' />
                 </Route>
                 <Route path='/logs/:repo' component={LogViewer} />
-                <Route path='/incidents/:incidentId' component={withPluralApi(Incident)} />
+                <Route path='/incident/:incidentId' component={withPluralApi(Incident)} />
                 <Route path='/incidents' component={withPluralApi(Incidents)} />
                 <Route path='/logs' render={() => (
                   <RepositorySelector
