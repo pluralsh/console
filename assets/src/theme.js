@@ -114,7 +114,7 @@ export const DEFAULT_THEME = {
     focus: {shadow: null, border: {color: 'brand'} },
     control: {border: {radius: '2px'}},
     font: {
-      family: 'Roboto',
+      family: 'Monument',
       size: '14px',
       height: '20px',
     },
