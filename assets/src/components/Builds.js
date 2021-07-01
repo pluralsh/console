@@ -137,32 +137,25 @@ export default function Builds() {
 
   const {edges, pageInfo} = data.builds
   return (
-    <Box height='calc(100vh - 45px)'>
-      <Box>
-        <Box
-          pad={{vertical: 'small', ...BUILD_PADDING}}
-          direction='row'
-          align='center'
-          border='bottom'
-          background='backgroundColor'
-          height='60px'>
-          <Box fill='horizontal' pad={{horizontal: 'small'}}>
-            <Text weight='bold' size='small'>Builds</Text>
-            <Text size='small' color='dark-3'>a list of historical changes managed by console</Text>
-          </Box>
-          <CreateBuild />
+    <Box fill background='backgroundColor'>
+      <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}}
+        direction='row' align='center' height='60px'>
+        <Box fill='horizontal' pad={{horizontal: 'small'}}>
+          <Text weight='bold' size='small'>Builds</Text>
+          <Text size='small' color='dark-3'>a list of historical changes managed by console</Text>
         </Box>
-        <Box height='calc(100vh - 105px)' background='backgroundColor' pad={{bottom: 'small'}}>
-          <Scroller
-            id='builds'
-            style={{height: '100%', overflow: 'auto'}}
-            edges={edges}
-            mapper={({node}) => <Build key={node.id} build={node} />}
-            onLoadMore={() => pageInfo.hasNextPage && fetchMore({
-              variables: {cursor: pageInfo.endCursor},
-              updateQuery: (prev, {fetchMoreResult: {builds}}) => extendConnection(prev, builds, 'builds')
-            })} />
-        </Box>
+        <CreateBuild />
+      </Box>
+      <Box fill pad={{bottom: 'small'}}>
+        <Scroller
+          id='builds'
+          style={{height: '100%', overflow: 'auto'}}
+          edges={edges}
+          mapper={({node}) => <Build key={node.id} build={node} />}
+          onLoadMore={() => pageInfo.hasNextPage && fetchMore({
+            variables: {cursor: pageInfo.endCursor},
+            updateQuery: (prev, {fetchMoreResult: {builds}}) => extendConnection(prev, builds, 'builds')
+          })} />
       </Box>
     </Box>
   )

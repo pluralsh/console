@@ -13,6 +13,10 @@ defmodule Console.Schema.Command do
     timestamps()
   end
 
+  def uncompleted(query \\ __MODULE__) do
+    from(c in query, where: is_nil(c.completed_at))
+  end
+
   def for_build(query \\ __MODULE__, build_id),
     do: from(c in query, where: c.build_id == ^build_id)
 

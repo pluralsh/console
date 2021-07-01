@@ -42,4 +42,23 @@ defmodule Console.PubSub.Recurse.BuildsTest do
       assert_receive :kick
     end
   end
+
+  describe "BuildFailed" do
+    test "it will complete pending commands" do
+      build = insert(:build)
+
+      commands = insert_list(2, :command, build: build)
+      %{id: ignore} = insert(:command, build: build, completed_at: Timex.now())
+
+      event = %PubSub.BuildFailed{item: build}
+      Recurse.handle_event(event)
+
+      for %{id: id} = command <- commands do
+        assert_receive {:event, %PubSub.CommandCompleted{item: %{id: ^id}}}
+        assert refetch(command).completed_at
+      end
+
+      refute_receive {:event, %PubSub.CommandCompleted{item: %{id: ^ignore}}}
+    end
+  end
 end

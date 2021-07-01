@@ -26,6 +26,23 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.BuildApproved do
   end
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.BuildFailed do
+  require Logger
+  alias Console.Schema.Command
+  alias Console.PubSub.{Broadcaster, CommandCompleted}
+
+  def process(%{item: build}) do
+    Logger.info "cleaning up noncompleted jobs"
+
+    Command.for_build(build.id)
+    |> Command.uncompleted()
+    |> Command.selected()
+    |> Console.Repo.update_all(set: [completed_at: DateTime.utc_now(), exit_code: 1])
+    |> elem(1)
+    |> Enum.each(&Broadcaster.notify(%CommandCompleted{item: &1}))
+  end
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.UserCreated do
   alias Console.Schema.{Group, GroupMember}
 
