@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Anchor, Box, Layer, Text } from 'grommet'
 import { Logout, StatusCritical, Checkmark, User, Lock, Script } from 'grommet-icons'
 import { Button, InputCollection, ResponsiveInput } from 'forge-core'
@@ -9,6 +9,7 @@ import { wipeToken } from '../../helpers/auth'
 import { LoginContext } from '../Login'
 import yaml from 'yaml'
 import Highlight from 'react-highlight.js'
+import { SectionContentContainer, SectionPortal } from '../utils/Section'
 
 const EditContext = React.createContext({})
 
@@ -23,14 +24,13 @@ function EditAvatar({me}) {
 
 function ActionBox({onClick, text, icon}) {
   return (
-    <Box pad={{vertical: 'xsmall', horizontal: 'small'}} background='white' direction='row' round='xsmall'
-         border={{color: 'light-4', side: 'all'}} align='center'
-         justify='end' hoverIndicator='light-3' onClick={onClick}>
-      <Box fill='horizontal' align='center'>
-        <Text size='small' weight={500}>{text}</Text>
-      </Box>
-      <Box width='50px' direction='row' justify='end'>
+    <Box pad='small' direction='row'  round='xsmall' align='center' 
+         gap='small' hoverIndicator='sidebar' onClick={onClick}>
+      <Box flex={false} direction='row'>
         {icon}
+      </Box>
+      <Box fill='horizontal'>
+        <Text size='small'>{text}</Text>
       </Box>
     </Box>
   )
@@ -53,17 +53,16 @@ function EditSelect({edit, icon}) {
   )
 }
 
-function EditContent({edit, children, noHeader}) {
+function EditContent({edit, children}) {
   const {editing} = useContext(EditContext)
   if (editing !== edit) return null
 
   return (
-    <Box pad={{horizontal: 'small'}} fill>
-      {!noHeader && <Box fill='horizontal' direction='row' justify='center' margin={{bottom: 'small'}}>
-        <Text size='small' weight={500}>{edit}</Text>
-      </Box>}
-      {children}
-    </Box>
+    <SectionContentContainer header={edit}>
+      <Box fill pad='small'>
+        {children}
+      </Box>
+    </SectionContentContainer>
   )
 }
 
@@ -125,29 +124,27 @@ export default function EditUser() {
     <Box pad='small' background='backgroundColor' fill>
       <EditContext.Provider value={{editing, setEditing}}>
       <Box fill direction='row' gap='small'>
-        <Box flex={false} gap='small' width='200px' pad={{horizontal: 'small', vertical: 'medium'}}>
+        <Box flex={false} gap='small' width='250px' pad={{horizontal: 'small', vertical: 'medium'}}>
+          <Box flex={false} direction='row' gap='small' align='center'>
+            <EditAvatar me={me} />
+            <Box>
+              <Text>{attributes.name}</Text>
+              <Text size='small' color='dark-3'>{attributes.email}</Text>
+            </Box>
+          </Box>
           <EditSelect edit='User Attributes' icon={<User size='small' />} />
           <EditSelect edit='Password' icon={<Lock size='small' />} />
           <EditSelect edit='Bound Roles' icon={<Script size='small' />} />
+          <ActionBox
+            text='logout'
+            onClick={() => {
+              wipeToken()
+              window.location = '/login'
+            }}
+            icon={<Logout size='12px' />} />
         </Box>
-        <Box fill='horizontal' background='white' pad='small'>
-          <EditContent edit='User Attributes' noHeader>
-            <Box direction='row' align='center' gap='medium' pad='medium'>
-              <EditAvatar me={me} />
-              <Box flex={false}>
-                <Text>{attributes.name}</Text>
-                <Text size='small'>{attributes.email}</Text>
-              </Box>
-              <Box fill direction='row' align='center' justify='end'>
-                <ActionBox
-                  text='logout'
-                  onClick={() => {
-                    wipeToken()
-                    window.location = '/login'
-                  }}
-                  icon={<Logout size='12px' />} />
-              </Box>
-            </Box>
+        <Box fill background='white'>
+          <EditContent edit='User Attributes'>
             <InputCollection>
               <ResponsiveInput
                 value={attributes.name}
@@ -158,9 +155,9 @@ export default function EditUser() {
                 label='email'
                 onChange={({target: {value}}) => setAttributes({...attributes, email: value})} />
             </InputCollection>
-            <Box direction='row' justify='end'>
+            <SectionPortal>
               <Button loading={loading} onClick={mutation} flex={false} label='Update' />
-            </Box>
+            </SectionPortal>
           </EditContent>
           <EditContent edit='Bound Roles'>
             <UserRoles me={me} />
@@ -178,21 +175,23 @@ export default function EditUser() {
                 type='password'
                 onChange={({target: {value}}) => setConfirm(value)} />
             </InputCollection>
-            <Box direction='row' justify='end' align='center'>
-              <Box fill='horizontal' align='center' direction='row' gap='small'>
-                {disabled ?
-                  <StatusCritical size='15px' color={color} /> :
-                  <Checkmark size='15px' color={color} />}
-                <Text size='small' color={color}>
-                  {reason}
-                </Text>
+            <SectionPortal>
+              <Box flex={false} direction='row' justify='end' align='center' gap='small'>
+                <Box flex={false} align='center' direction='row' gap='small'>
+                  {disabled ?
+                    <StatusCritical size='15px' color={color} /> :
+                    <Checkmark size='15px' color={color} />}
+                  <Text size='small' color={color}>
+                    {reason}
+                  </Text>
+                </Box>
+                <Button
+                  disabled={disabled}
+                  loading={loading}
+                  onClick={mutation}
+                  label='Update' />
               </Box>
-              <Button
-                disabled={disabled}
-                loading={loading}
-                onClick={mutation}
-                label='Update' />
-            </Box>
+            </SectionPortal>
           </EditContent>
         </Box>
       </Box>
