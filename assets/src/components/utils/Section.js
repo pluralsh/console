@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useRef, useState, useEffect } from 'react'
+import React, { useContext, useMemo, useState } from 'react'
 import { Portal } from 'react-portal'
 import { Box, Text } from 'grommet'
 import { v4 as uuidv4 } from 'uuid'

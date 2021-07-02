@@ -49,12 +49,13 @@ function UsersInner() {
 
   return (
     <Box pad='small' gap='small'>
-      <Box direction='row' pad='small' align='center'>
+      <Box flex={false} direction='row' pad='small' align='center'>
         <Box fill='horizontal'>
           <Text weight={500}>Users</Text>
         </Box>
         <TextInput
           icon={<SearchIcon />}
+          reverse
           placeholder='search for users'
           value={q || ''}
           onChange={({target: {value}}) => setQ(value)} />
@@ -84,12 +85,13 @@ function GroupsInner() {
 
   return (
     <Box pad='small' gap='small'>
-      <Box direction='row' pad='small' align='center'>
+      <Box flex={false} direction='row' pad='small' align='center'>
         <Box fill='horizontal'>
           <Text weight={500}>Groups</Text>
         </Box>
         <TextInput
           icon={<SearchIcon />}
+          reverse
           placeholder='search for groups'
           value={q || ''}
           onChange={({target: {value}}) => setQ(value)} />
@@ -118,12 +120,13 @@ function RolesInner() {
 
   return (
     <Box pad='small' gap='small'>
-      <Box direction='row' pad='small' align='center'>
+      <Box flex={false} direction='row' pad='small' align='center'>
         <Box fill='horizontal'>
           <Text weight={500}>Roles</Text>
         </Box>
         <TextInput
           icon={<SearchIcon />}
+          reverse
           placeholder='search for roles'
           value={q || ''}
           onChange={({target: {value}}) => setQ(value)} />
@@ -156,7 +159,7 @@ function SectionChoice({label, icon, section, onClick, setSection}) {
       round='xsmall'
       onClick={onClick || (() => setSection(section))}>
       {icon}
-      <Text size='small' weight={500}>{label}</Text>
+      <Text size='small'>{label}</Text>
     </Box>
   )
 }
@@ -192,8 +195,8 @@ export default function Directory() {
   ]), [section])
 
   return (
-    <Box fill pad='medium' direction='row' gap='medium' background='backgroundColor'>
-      <Box gap='xsmall' flex={false}>
+    <Box fill pad='small' direction='row' gap='medium' background='backgroundColor'>
+      <Box gap='xsmall' flex={false} width='200px'>
         <SectionChoice 
           icon={<User size='14px' />} 
           label='Users' 
@@ -234,7 +237,7 @@ export default function Directory() {
           }
         </CreateModal>
       </Box>
-      <Box background='white' elevation='small' pad='small' fill>
+      <Box background='white' elevation='small' fill>
         {section === 'users' && <UsersInner />}
         {section === 'groups' && <GroupsInner />}
         {section === 'roles' && <RolesInner />}

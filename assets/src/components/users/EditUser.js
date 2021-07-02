@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Anchor, Box, Layer, Text } from 'grommet'
 import { Logout, StatusCritical, Checkmark, User, Lock, Script } from 'grommet-icons'
 import { Button, InputCollection, ResponsiveInput } from 'forge-core'
@@ -124,7 +124,7 @@ export default function EditUser() {
     <Box pad='small' background='backgroundColor' fill>
       <EditContext.Provider value={{editing, setEditing}}>
       <Box fill direction='row' gap='small'>
-        <Box flex={false} gap='small' width='250px' pad={{horizontal: 'small', vertical: 'medium'}}>
+        <Box flex={false} gap='medium' width='250px' pad={{vertical: 'medium'}}>
           <Box flex={false} direction='row' gap='small' align='center'>
             <EditAvatar me={me} />
             <Box>
@@ -132,16 +132,18 @@ export default function EditUser() {
               <Text size='small' color='dark-3'>{attributes.email}</Text>
             </Box>
           </Box>
-          <EditSelect edit='User Attributes' icon={<User size='small' />} />
-          <EditSelect edit='Password' icon={<Lock size='small' />} />
-          <EditSelect edit='Bound Roles' icon={<Script size='small' />} />
-          <ActionBox
-            text='logout'
-            onClick={() => {
-              wipeToken()
-              window.location = '/login'
-            }}
-            icon={<Logout size='12px' />} />
+          <Box gap='xsmall'>
+            <EditSelect edit='User Attributes' icon={<User size='small' />} />
+            <EditSelect edit='Password' icon={<Lock size='small' />} />
+            <EditSelect edit='Bound Roles' icon={<Script size='small' />} />
+            <ActionBox
+              text='logout'
+              onClick={() => {
+                wipeToken()
+                window.location = '/login'
+              }}
+              icon={<Logout size='12px' />} />
+          </Box>
         </Box>
         <Box fill background='white'>
           <EditContent edit='User Attributes'>
