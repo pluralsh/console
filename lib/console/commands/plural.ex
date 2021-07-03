@@ -9,9 +9,9 @@ defmodule Console.Commands.Plural do
 
   def build(repo), do: plural("build", ["--only", repo])
 
-  def deploy(repo), do: plural("deploy", [repo])
+  def deploy(_repo), do: plural("deploy", [])
 
-  def diff(repo), do: plural("diff", [repo])
+  def diff(_repo), do: plural("diff", [])
 
   def bounce(repo), do: plural("bounce", [repo])
 
