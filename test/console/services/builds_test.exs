@@ -21,9 +21,18 @@ defmodule Console.Services.BuildsTest do
       insert(:build, status: :queued)
       insert(:build, status: :successful, inserted_at: Timex.now() |> Timex.shift(days: -5))
 
-      found = Builds.poll()
+      {:ok, found} = Builds.poll(Ecto.UUID.generate())
 
       assert found.id == build.id
+    end
+
+    test "if there's a running build, it won't return" do
+      build = insert(:build, status: :queued, inserted_at: Timex.now() |> Timex.shift(days: -1))
+      insert(:build, status: :queued)
+      insert(:build, status: :successful, inserted_at: Timex.now() |> Timex.shift(days: -5))
+      insert(:build, status: :running)
+
+      {:error, _} = Builds.poll(Ecto.UUID.generate())
     end
   end
 

@@ -9,6 +9,13 @@ defmodule Console.Services.Builds do
 
   def get(id), do: Repo.get(Build, id)
 
+  def get_running() do
+    Build.with_status(:running)
+    |> Build.first()
+    |> Build.ordered(asc: :inserted_at)
+    |> Repo.one()
+  end
+
   def lock(name, id) do
     start_transaction()
     |> add_operation(:lock, fn _ ->
@@ -92,11 +99,29 @@ defmodule Console.Services.Builds do
     |> notify(:complete)
   end
 
-  def poll() do
-    Build.queued()
-    |> Build.first()
-    |> Build.ordered(asc: :inserted_at)
-    |> Repo.one()
+  def poll(id) do
+    start_transaction()
+    |> add_operation(:lock, fn _ -> lock("deployer", id) end)
+    |> add_operation(:test, fn _ ->
+      Build.with_status(:running)
+      |> Repo.exists?()
+      |> case do
+        true -> {:error, :running}
+        false -> {:ok, :none}
+      end
+    end)
+    |> add_operation(:poll, fn _ ->
+      Build.queued()
+      |> Build.first()
+      |> Build.ordered(asc: :inserted_at)
+      |> Repo.one()
+      |> case do
+        nil -> {:error, :not_found}
+        build -> {:ok, build}
+      end
+    end)
+    |> add_operation(:unlock, fn _ -> unlock("deployer", id) end)
+    |> execute(extract: :poll)
   end
 
   def running(build) do

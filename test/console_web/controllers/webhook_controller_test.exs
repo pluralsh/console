@@ -23,7 +23,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
       |> json_response(200)
 
       assert_receive :wake
-      build = Console.Services.Builds.poll()
+      {:ok, build} = Console.Services.Builds.poll(Ecto.UUID.generate())
       assert build.repository == "plural"
       assert build.message == "Some message"
     end
@@ -63,7 +63,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
       |> json_response(200)
 
       assert_receive :wake
-      build = Console.Services.Builds.poll()
+      {:ok, build} = Console.Services.Builds.poll(Ecto.UUID.generate())
       assert build.type == :deploy
       assert build.repository == "plural"
       assert build.message == "Deployed from piazza"

@@ -8,9 +8,7 @@ defmodule Console.Deployer do
   @poll_interval 10_000
   @group :deployer
 
-  @via {:via, :evel_name, :deployer}
-
-  defmodule State, do: defstruct [:storage, :ref, :pid, :build, :id, :timer]
+  defmodule State, do: defstruct [:storage, :ref, :pid, :build, :id, :timer, :leader]
 
   def start(storage) do
     GenServer.start(__MODULE__, storage)
@@ -25,27 +23,19 @@ defmodule Console.Deployer do
     Logger.info "Starting deployer"
     :pg2.create(@group)
     :pg2.join(@group, self())
-
-    case :evel_name.register_name(:deployer, self()) do
-      :yes ->
-        broadcast({:leader, self()})
-        send(self(), :start)
-      :no ->
-        pid = :evel_name.whereis_name(:deployer)
-        broadcast({:leader, pid})
-        Process.link(pid)
-    end
-
-    {:ok, %State{storage: storage, id: Ecto.UUID.generate()}}
+    {:ok, ref} = :timer.send_interval(@poll_interval, :poll)
+    {:ok, %State{storage: storage, id: Ecto.UUID.generate(), ref: ref}}
   end
 
-  def wake(), do: GenServer.call(@via, :poll)
+  def wake(), do: GenServer.call(__MODULE__, :poll)
 
-  def cancel(), do: GenServer.call(@via, :cancel)
+  def cancel(), do: GenServer.call(__MODULE__, :cancel)
 
-  def state(), do: GenServer.call(@via, :state)
+  def state(), do: GenServer.call(__MODULE__, :state)
 
-  def update(repo, content, tool), do: GenServer.call(@via, {:update, repo, content, tool})
+  def ping(), do: GenServer.call(__MODULE__, :ping)
+
+  def update(repo, content, tool), do: GenServer.call(__MODULE__, {:update, repo, content, tool})
 
   def handle_call(:poll, _, %State{} = state) do
     send(self(), :poll)
@@ -56,10 +46,12 @@ defmodule Console.Deployer do
     {:reply, update(storage, repo, content, tool), state}
   end
 
-  def handle_call(:cancel, _, %State{pid: nil} = state), do: {:reply, :ok, state}
-  def handle_call(:cancel, _, %State{pid: pid} = state) when is_pid(pid) do
-    Logger.info "Cancelling build with proc: #{inspect(pid)}"
-    GenServer.stop(pid, {:shutdown, :cancel})
+  def handle_call(:ping, _, state), do: {:reply, :pong, state}
+
+  def handle_call(:cancel, _, state) do
+    Logger.info "Attempting to cancel build"
+    with %{id: id} <- Builds.get_running(),
+      do: GenServer.stop({:via, :swarm, id}, {:shutdown, :cancel})
     {:reply, :ok, state}
   end
 
@@ -70,33 +62,9 @@ defmodule Console.Deployer do
     {:noreply, state}
   end
 
-  def handle_cast({:leader, leader}, %{timer: nil} = state) do
-    Process.link(leader)
-    {:noreply, state}
-  end
-
-  def handle_cast({:leader, leader}, %{timer: timer} = state) do
-    case leader == self() do
-      true -> {:noreply, state}
-      _ ->
-        {:ok, _} = :timer.cancel(timer)
-        Process.link(leader)
-        {:noreply, %{state | timer: nil}}
-    end
-  end
-
-  def handle_info(:start, state) do
-    case Console.conf(:initialize) do
-      true ->
-        {:ok, ref} = :timer.send_interval(@poll_interval, :poll)
-        {:noreply, %{state | timer: ref}}
-      _ -> {:noreply, state}
-    end
-  end
-
-  def handle_info(:poll, %State{pid: nil, storage: storage} = state) do
+  def handle_info(:poll, %State{pid: nil, storage: storage, id: id} = state) do
     Logger.info "Checking for pending builds, pid: #{inspect(self())}, node: #{node()}"
-    with %Build{} = build <- Builds.poll() do
+    with {:ok, %Build{} = build} <- Builds.poll(id) do
       {pid, ref} = perform(storage, build)
       {:noreply, %{state | ref: ref, pid: pid, build: build}}
     else
