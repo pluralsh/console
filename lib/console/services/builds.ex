@@ -73,6 +73,7 @@ defmodule Console.Services.Builds do
       %{build: build} -> {:ok, build}
     end)
     |> execute(extract: :update)
+    |> notify(:cancel)
   end
 
   def cancel(build_id, %User{} = user) do
@@ -219,6 +220,8 @@ defmodule Console.Services.Builds do
   defp notify({:ok, %Build{} = build}, :pending),
     do: handle_notify(PubSub.BuildPending, build)
   defp notify({:ok, %Build{} = build}, :update),
+    do: handle_notify(PubSub.BuildUpdated, build)
+  defp notify({:ok, %Build{status: :cancelled} = build}, :cancel),
     do: handle_notify(PubSub.BuildUpdated, build)
 
   defp notify({:ok, %Build{} = build}, :delete),

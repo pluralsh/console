@@ -86,6 +86,7 @@ defmodule Console.Deployer do
     Logger.info "tearing down build #{build.id}, proc: #{inspect(state.pid)}"
     Builds.cancel(build)
     broadcast()
+    send(self(), :poll)
     {:noreply, %{state | ref: nil, pid: nil, build: nil}}
   end
 
@@ -155,6 +156,6 @@ defmodule Console.Deployer do
     |> Enum.each(&GenServer.cast(&1, msg))
   end
 
-  defp commit_message(nil, repo), do: "watchman deployment for #{repo}"
-  defp commit_message(message, repo), do: "watchman deployment for #{repo} -- #{message}"
+  defp commit_message(nil, repo), do: "console deployment for #{repo}"
+  defp commit_message(message, repo), do: "console deployment for #{repo} -- #{message}"
 end
