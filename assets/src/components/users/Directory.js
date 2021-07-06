@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react'
-import { Box, Text, Layer, TextInput, CheckBox } from 'grommet'
+import { Box, Text, Layer, TextInput, CheckBox, ThemeContext } from 'grommet'
 import { useQuery, useMutation } from 'react-apollo'
 import { ModalHeader, Scroller } from 'forge-core'
 import { USERS_Q, GROUPS_Q, EDIT_USER, ROLES_Q } from './queries'
@@ -14,13 +14,17 @@ import RoleRow, { CreateRole } from './Role'
 import { extendConnection } from '../../utils/graphql'
 import { Loading } from '../utils/Loading'
 import { SearchIcon } from './utils'
+import { SectionContentContainer, SectionPortal } from '../utils/Section'
 
-function UserRow({user, next}) {
+const INPUT_WIDTH = '350px'
+
+function UserRow({user}) {
   const admin = user.roles && user.roles.admin
   const [mutation] = useMutation(EDIT_USER, {variables: {id: user.id}})
 
   return (
-    <Box pad='small' direction='row' align='center' gap='small' border={next ? {side: 'bottom'} : null}>
+    <Box pad='small' direction='row' align='center' gap='small' 
+         border={{side: 'bottom', color: 'tone-light'}}>
       <Avatar user={user} size='50px' />
       <Box flex={false}>
         <Text size='small' weight='bold' >{user.email}</Text>
@@ -48,18 +52,7 @@ function UsersInner() {
   const {users: {pageInfo, edges}} = data
 
   return (
-    <Box pad='small' gap='small'>
-      <Box flex={false} direction='row' pad='small' align='center'>
-        <Box fill='horizontal'>
-          <Text weight={500}>Users</Text>
-        </Box>
-        <TextInput
-          icon={<SearchIcon />}
-          reverse
-          placeholder='search for users'
-          value={q || ''}
-          onChange={({target: {value}}) => setQ(value)} />
-      </Box>
+    <SectionContentContainer header='Users'>
       <Scroller
         id='users'
         style={{height: '100%', overflow: 'auto'}}
@@ -70,7 +63,17 @@ function UsersInner() {
           updateQuery: (prev, {fetchMoreResult: {users}}) => extendConnection(prev, users, 'users')
         })}
       />
-    </Box>
+      <SectionPortal>
+        <Box flex={false} width={INPUT_WIDTH}>
+          <TextInput
+            icon={<SearchIcon />}
+            reverse
+            placeholder='search for users'
+            value={q || ''}
+            onChange={({target: {value}}) => setQ(value)} />
+        </Box>
+      </SectionPortal>
+    </SectionContentContainer>
   )
 }
 
@@ -84,18 +87,7 @@ function GroupsInner() {
   const {groups: {pageInfo, edges}} = data
 
   return (
-    <Box pad='small' gap='small'>
-      <Box flex={false} direction='row' pad='small' align='center'>
-        <Box fill='horizontal'>
-          <Text weight={500}>Groups</Text>
-        </Box>
-        <TextInput
-          icon={<SearchIcon />}
-          reverse
-          placeholder='search for groups'
-          value={q || ''}
-          onChange={({target: {value}}) => setQ(value)} />
-      </Box>
+    <SectionContentContainer header='Groups'>
       <Scroller
         id='groups'
         style={{height: '100%', overflow: 'auto'}}
@@ -106,7 +98,17 @@ function GroupsInner() {
           updateQuery: (prev, {fetchMoreResult: {groups}}) => extendConnection(prev, groups, 'groups')
         })}
       />
-    </Box>
+      <SectionPortal>
+        <Box flex={false} width={INPUT_WIDTH}>
+          <TextInput
+            icon={<SearchIcon />}
+            reverse
+            placeholder='search for groups'
+            value={q || ''}
+            onChange={({target: {value}}) => setQ(value)} />
+        </Box>
+      </SectionPortal>
+    </SectionContentContainer>
   )
 }
 
@@ -119,18 +121,7 @@ function RolesInner() {
   const {roles: {pageInfo, edges}} = data
 
   return (
-    <Box pad='small' gap='small'>
-      <Box flex={false} direction='row' pad='small' align='center'>
-        <Box fill='horizontal'>
-          <Text weight={500}>Roles</Text>
-        </Box>
-        <TextInput
-          icon={<SearchIcon />}
-          reverse
-          placeholder='search for roles'
-          value={q || ''}
-          onChange={({target: {value}}) => setQ(value)} />
-      </Box>
+    <SectionContentContainer header='Roles'>
       <Scroller
         id='roles'
         style={{height: '100%', overflow: 'auto'}}
@@ -141,7 +132,17 @@ function RolesInner() {
           updateQuery: (prev, {fetchMoreResult: {roles}}) => extendConnection(prev, roles, 'roles')
         })}
       />
-    </Box>
+      <SectionPortal>
+        <Box flex={false} width={INPUT_WIDTH}>
+          <TextInput
+            icon={<SearchIcon />}
+            reverse
+            placeholder='search for roles'
+            value={q || ''}
+            onChange={({target: {value}}) => setQ(value)} />
+        </Box>
+      </SectionPortal>
+    </SectionContentContainer>
   )
 }
 
@@ -195,6 +196,7 @@ export default function Directory() {
   ]), [section])
 
   return (
+    <ThemeContext.Extend value={{global: {input: {padding: '9px'}}}}>
     <Box fill pad='small' direction='row' gap='medium' background='backgroundColor'>
       <Box gap='xsmall' flex={false} width='200px'>
         <SectionChoice 
@@ -243,5 +245,6 @@ export default function Directory() {
         {section === 'roles' && <RolesInner />}
       </Box>
     </Box>
+    </ThemeContext.Extend>
   )
 }
