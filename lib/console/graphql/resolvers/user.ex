@@ -2,6 +2,7 @@ defmodule Console.GraphQl.Resolvers.User do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.User
   alias Console.Schema.{Group, GroupMember, Role, RoleBinding}
   alias Console.Services.Users
+  require Logger
 
   def query(Group, _), do: Group
   def query(Role, _), do: Role
@@ -38,9 +39,14 @@ defmodule Console.GraphQl.Resolvers.User do
   end
 
   def oauth_callback(%{code: code}, _) do
-    with {:ok, tokens} <- OpenIDConnect.fetch_tokens(:plural, %{code: code}),
+    with {:ok, tokens} <- OpenIDConnect.fetch_tokens(:plural, %{code: code}) |> IO.inspect(),
          {:ok, claims} <- OpenIDConnect.verify(:plural, tokens["id_token"]) |> IO.inspect(),
-      do: Users.bootstrap_user(claims["email"], claims["name"])
+      Users.bootstrap_user(claims["email"], claims["name"])
+    else
+      error ->
+        Logger.info("Failed to negotiate oauth callback: #{inspect(error)}")
+        {:error, :invalid_code}
+    end
   end
 
   defp maybe_search(query, mod, %{q: search}) when is_binary(search), do: mod.search(query, search)

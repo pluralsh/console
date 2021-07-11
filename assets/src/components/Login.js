@@ -7,7 +7,6 @@ import { setToken, wipeToken } from '../helpers/auth'
 import { ME_Q, SIGNIN } from './graphql/users'
 import { IncidentContext } from './incidents/context'
 import gql from 'graphql-tag'
-
 const POLL_INTERVAL = 3 * 60 * 1000
 
 const LOGIN_INFO = gql`
@@ -52,7 +51,8 @@ export default function Login() {
   })
 
   useEffect(() => {
-    if (loginData && loginData.logInfo && loginData.loginInfo.oidcUri) {
+    console.log(loginData)
+    if (loginData && loginData.loginInfo && loginData.loginInfo.oidcUri) {
       window.location = loginData.loginInfo.oidcUri
     }
   }, [loginData])

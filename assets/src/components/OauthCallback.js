@@ -17,7 +17,7 @@ const CALLBACK = gql`
 export function OAuthCallback() {
   const location = useLocation()
   let history = useHistory()
-  const {code} = qs(location.search)
+  const {code} = qs.parse(location.search)
   const [mutation, {error, loading}] = useMutation(CALLBACK, {
     variables: {code},
     onCompleted: ({data: {OAuthCallback: {jwt}}}) => {
