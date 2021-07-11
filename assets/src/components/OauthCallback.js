@@ -7,10 +7,11 @@ import { useMutation } from 'react-apollo'
 import { useHistory, useLocation } from 'react-router'
 import qs from 'query-string'
 import { setToken } from '../helpers/auth'
+import { localized } from '../helpers/hostname'
 
 const CALLBACK = gql`
-  mutation Callback($code: String!) {
-    oauthCallback(code: $code) { jwt }
+  mutation Callback($code: String!, $redirect: String) {
+    oauthCallback(code: $code, redirect: $redirect) { jwt }
   }
 `
 
@@ -19,9 +20,9 @@ export function OAuthCallback() {
   let history = useHistory()
   const {code} = qs.parse(location.search)
   const [mutation, {error, loading}] = useMutation(CALLBACK, {
-    variables: {code},
-    onCompleted: ({oauthCallback: {jwt}}) => {
-      setToken(jwt)
+    variables: {code, redirect: localized('/oauth/callback')},
+    onCompleted: (result) => {
+      setToken(result.oauthCallback.jwt)
       history.push('/')
     }
   })
