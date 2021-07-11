@@ -15,8 +15,12 @@ defmodule Console.Services.Users do
   @spec get_user!(binary) :: User.t
   def get_user!(id), do: Repo.get!(User, id)
 
+  def get_user_by_email(email), do: Repo.get_by(User, email: email)
+
   @spec get_group!(binary) :: Group.t
   def get_group!(id), do: Repo.get!(Group, id)
+
+  def get_group_by_name(name), do: Repo.get_by(Group, name: name)
 
   @spec get_role!(binary) :: Role.t
   def get_role!(id), do: Repo.get!(Role, id)
@@ -65,6 +69,19 @@ defmodule Console.Services.Users do
     |> User.changeset(attrs)
     |> Repo.insert()
     |> notify(:create)
+  end
+
+  @spec bootstrap_user(binary, binary) :: user_resp
+  def bootstrap_user(email, name) do
+    case get_user_by_email(email) do
+      %User{} = u -> {:ok, u}
+      _ ->
+        create_user(%{
+          email: email,
+          name: name,
+          password: Ecto.UUID.generate()
+        })
+    end
   end
 
   @spec create_role(map) :: role_resp

@@ -14,6 +14,9 @@ config :botanist,
 config :piazza_core,
   shutdown_delay: 60 * 1000
 
+config :console, :oidc_providers, :ignore
+config :console,
+    plural_login: false
 
 config :console, ConsoleWeb.Endpoint,
   url: [host: "localhost"],

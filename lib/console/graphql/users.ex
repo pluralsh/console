@@ -99,6 +99,10 @@ defmodule Console.GraphQl.Users do
     timestamps()
   end
 
+  object :login_info do
+    field :oidc_uri, :string
+  end
+
   connection node_type: :user
   connection node_type: :group
   connection node_type: :group_member
@@ -110,6 +114,10 @@ defmodule Console.GraphQl.Users do
       arg :q, :string
 
       resolve &User.list_users/2
+    end
+
+    field :login_info, :login_info do
+      resolve &User.login_info/2
     end
 
     field :me, :user do
@@ -166,6 +174,13 @@ defmodule Console.GraphQl.Users do
       arg :attributes, non_null(:user_attributes)
 
       resolve safe_resolver(&User.signup_user/2)
+    end
+
+    field :oauth_callback, :user do
+      middleware AllowJwt
+      arg :code, non_null(:string)
+
+      resolve safe_resolver(&User.oauth_callback/2)
     end
 
     field :create_invite, :invite do

@@ -48,6 +48,23 @@ defmodule Console.Services.UsersTest do
     end
   end
 
+  describe "#bootstrap_user/2" do
+    test "if the user doesn't exist, it will create one" do
+      {:ok, user} = Users.bootstrap_user("someone@example.com", "Some User")
+
+      assert user.name == "Some User"
+      assert user.email == "someone@example.com"
+    end
+
+    test "If the user already exists, they will be returned" do
+      user = insert(:user)
+
+      {:ok, found} = Users.bootstrap_user(user.email, user.name)
+
+      assert found.id == user.id
+    end
+  end
+
   describe "update_user/2" do
     test "It can update a user" do
       user = insert(:user)

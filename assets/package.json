@@ -38,6 +38,7 @@
     "moment": "^2.29.1",
     "moment-duration-format": "^2.3.2",
     "phoenix": "^1.5.8",
+    "query-string": "^7.0.1",
     "react": "^16.12.0",
     "react-ace": "^8.0.0",
     "react-animations": "^1.0.0",

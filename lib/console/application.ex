@@ -18,6 +18,7 @@ defmodule Console.Application do
       Console.Bootstrapper,
       Console.Deployer,
       {Absinthe.Subscription, [ConsoleWeb.Endpoint]},
+      {OpenIDConnect.Worker, Application.get_env(:console, :oidc_providers)},
     ] ++ consumers() ++ [
       Piazza.GracefulShutdown
     ] ++ socket()

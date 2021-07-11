@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { GqlError } from 'forge-core' 
 import { useQuery, useMutation } from 'react-apollo'
 import { Box, Keyboard, Text, FormField, TextInput } from 'grommet'
@@ -6,8 +6,15 @@ import { Button } from 'forge-core'
 import { setToken, wipeToken } from '../helpers/auth'
 import { ME_Q, SIGNIN } from './graphql/users'
 import { IncidentContext } from './incidents/context'
+import gql from 'graphql-tag'
 
 const POLL_INTERVAL = 3 * 60 * 1000
+
+const LOGIN_INFO = gql`
+  query {
+    loginInfo { oidcUri }
+  }
+`
 
 export const LoginContext = React.createContext({me: null})
 
@@ -34,6 +41,7 @@ export function EnsureLogin({children}) {
 export default function Login() {
   const [form, setForm] = useState({email: '', password: ''})
   const {data} = useQuery(ME_Q)
+  const {data: loginData} = useQuery(LOGIN_INFO)
   const [mutation, {loading, error}] = useMutation(SIGNIN, {
     variables: form,
     onCompleted: ({signIn: {jwt}}) => {
@@ -42,6 +50,12 @@ export default function Login() {
     },
     onError: console.log
   })
+
+  useEffect(() => {
+    if (loginData && loginData.logInfo && loginData.loginInfo.oidcUri) {
+      window.location = loginData.loginInfo.oidcUri
+    }
+  }, [loginData])
 
   if (!error && data && data.me) {
     window.location = '/'
