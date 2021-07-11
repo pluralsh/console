@@ -7,11 +7,12 @@ import { setToken, wipeToken } from '../helpers/auth'
 import { ME_Q, SIGNIN } from './graphql/users'
 import { IncidentContext } from './incidents/context'
 import gql from 'graphql-tag'
+import { localized } from '../helpers/hostname'
 const POLL_INTERVAL = 3 * 60 * 1000
 
 const LOGIN_INFO = gql`
-  query {
-    loginInfo { oidcUri }
+  query LoginInfo($redirect: String) {
+    loginInfo(redirect: $redirect) { oidcUri }
   }
 `
 
@@ -40,7 +41,7 @@ export function EnsureLogin({children}) {
 export default function Login() {
   const [form, setForm] = useState({email: '', password: ''})
   const {data} = useQuery(ME_Q)
-  const {data: loginData} = useQuery(LOGIN_INFO)
+  const {data: loginData} = useQuery(LOGIN_INFO, {variables: {redirect: localized('/oauth/callback')}})
   const [mutation, {loading, error}] = useMutation(SIGNIN, {
     variables: form,
     onCompleted: ({signIn: {jwt}}) => {
@@ -52,6 +53,7 @@ export default function Login() {
 
   useEffect(() => {
     if (loginData && loginData.loginInfo && loginData.loginInfo.oidcUri) {
+      console.log(loginData.loginInfo.oidcUri)
       window.location = loginData.loginInfo.oidcUri
     }
   }, [loginData])

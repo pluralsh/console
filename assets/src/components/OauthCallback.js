@@ -20,7 +20,7 @@ export function OAuthCallback() {
   const {code} = qs.parse(location.search)
   const [mutation, {error, loading}] = useMutation(CALLBACK, {
     variables: {code},
-    onCompleted: ({data: {oauthCallback: {jwt}}}) => {
+    onCompleted: ({oauthCallback: {jwt}}) => {
       setToken(jwt)
       history.push('/')
     }

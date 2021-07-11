@@ -180,7 +180,8 @@ defmodule Console.GraphQl.Users do
 
     field :oauth_callback, :user do
       middleware AllowJwt
-      arg :code, non_null(:string)
+      arg :code,     non_null(:string)
+      arg :redirect, :string
 
       resolve safe_resolver(&User.oauth_callback/2)
     end

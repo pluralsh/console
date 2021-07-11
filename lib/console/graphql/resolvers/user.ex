@@ -33,18 +33,21 @@ defmodule Console.GraphQl.Resolvers.User do
     end
   end
 
-  defp oidc_uri(%{redirect: uri}) when is_binary(uri),
-    do: OpenIDConnect.authorization_uri(:plural, %{state: state_token, redirect_uri: uri})
-  defp oidc_uri(_),
-    do: OpenIDConnect.authorization_uri(:plural, %{state: state_token()})
+  defp oidc_uri(args) do
+    OpenIDConnect.authorization_uri(:plural, hydrate_redirect_uri(%{state: state_token}, args))
+  end
 
   defp state_token() do
     :crypto.strong_rand_bytes(32)
     |> Base.url_encode64()
   end
 
-  def oauth_callback(%{code: code}, _) do
-    with {:ok, tokens} <- OpenIDConnect.fetch_tokens(:plural, %{code: code}) |> IO.inspect(),
+  defp hydrate_redirect_uri(params, %{redirect: uri}) when is_binary(uri),
+    do: Map.put(params, :redirect_uri, uri)
+  defp hydrate_redirect_uri(params, _), do: params
+
+  def oauth_callback(%{code: code} = args, _) do
+    with {:ok, tokens} <- OpenIDConnect.fetch_tokens(:plural, hydrate_redirect_uri(%{code: code}, args)) |> IO.inspect(),
          {:ok, claims} <- OpenIDConnect.verify(:plural, tokens["id_token"]) |> IO.inspect() do
       Users.bootstrap_user(claims["email"], claims["name"])
       |> with_jwt()
