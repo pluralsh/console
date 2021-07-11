@@ -17,6 +17,6 @@ if get_env("PLURAL_CLIENT_ID") do
       client_secret: get_env("PLURAL_CLIENT_SECRET"),
       redirect_uri: "https://#{get_env("HOST")}/oauth/callback",
       response_type: "code",
-      scope: "profile"
+      scope: "openid"
     ]
 end
