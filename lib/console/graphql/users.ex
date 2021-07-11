@@ -117,6 +117,8 @@ defmodule Console.GraphQl.Users do
     end
 
     field :login_info, :login_info do
+      arg :redirect, :string
+
       resolve &User.login_info/2
     end
 

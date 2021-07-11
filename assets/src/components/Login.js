@@ -51,7 +51,6 @@ export default function Login() {
   })
 
   useEffect(() => {
-    console.log(loginData)
     if (loginData && loginData.loginInfo && loginData.loginInfo.oidcUri) {
       window.location = loginData.loginInfo.oidcUri
     }

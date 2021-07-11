@@ -26,16 +26,21 @@ defmodule Console.GraphQl.Resolvers.User do
     |> paginate(args)
   end
 
-  def login_info(_, _) do
+  def login_info(args, _) do
     case Console.conf(:plural_login) do
-      true -> {:ok, %{oidc_uri: oidc_uri()}}
+      true -> {:ok, %{oidc_uri: oidc_uri(args)}}
       false -> {:ok, %{oidc_uri: nil}}
     end
   end
 
-  defp oidc_uri() do
-    state = :crypto.strong_rand_bytes(32) |> Base.url_encode64()
-    OpenIDConnect.authorization_uri(:plural, %{state: state})
+  defp oidc_uri(%{redirect: uri}) when is_binary(uri),
+    do: OpenIDConnect.authorization_uri(:plural, %{state: state_token, redirect_uri: uri})
+  defp oidc_uri(_),
+    do: OpenIDConnect.authorization_uri(:plural, %{state: state_token()})
+
+  defp state_token() do
+    :crypto.strong_rand_bytes(32)
+    |> Base.url_encode64()
   end
 
   def oauth_callback(%{code: code}, _) do
