@@ -70,9 +70,14 @@ defmodule Console.Services.UsersTest do
     test "If the user already exists, they will be returned" do
       user = insert(:user)
 
-      {:ok, found} = Users.bootstrap_user(%{"email" => user.email, "name" => user.name})
+      {:ok, found} = Users.bootstrap_user(%{
+        "email" => user.email,
+        "name" => user.name,
+        "profile" => "some.profile.com"
+      })
 
       assert found.id == user.id
+      assert found.profile == "some.profile.com"
     end
   end
 

@@ -5,6 +5,7 @@ export const UserFragment = gql`
     id
     name
     email
+    profile
     backgroundColor
     roles { admin }
   }
