@@ -73,11 +73,35 @@ defmodule Console.Services.Users do
 
   @spec bootstrap_user(map) :: user_resp
   def bootstrap_user(%{"email" => email} = attrs) do
-    case get_user_by_email(email) do
-      %User{} = u -> User.changeset(u, attrs) |> Repo.update()
-      _ -> create_user(attrs)
-    end
+    start_transaction()
+    |> add_operation(:user, fn _ ->
+      case get_user_by_email(email) do
+        %User{} = u -> User.changeset(u, attrs) |> Repo.update()
+        _ -> create_user(attrs)
+      end
+    end)
+    |> hydrate_groups(attrs)
+    |> execute(extract: :user)
   end
+
+  defp hydrate_groups(transaction, %{"groups" => [_ | _] = groups}) do
+    Enum.reduce(groups, transaction, fn group, trans ->
+      add_operation(trans, {:group, group}, fn _ ->
+        case get_group_by_name(group) do
+          %Group{} = group -> {:ok, group}
+          nil -> create_group(%{name: group})
+        end
+      end)
+      |> add_operation({:member, group}, fn %{user: user} = results ->
+        group = Map.get(results, {:group, group})
+        case get_group_member(group.id, user.id) do
+          %GroupMember{} = mem -> {:ok, mem}
+          nil -> create_group_member(%{user_id: user.id}, group.id)
+        end
+      end)
+    end)
+  end
+  defp hydrate_groups(transaction, _), do: transaction
 
   @spec create_role(map) :: role_resp
   def create_role(attrs) do

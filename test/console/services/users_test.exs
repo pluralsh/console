@@ -53,12 +53,18 @@ defmodule Console.Services.UsersTest do
       {:ok, user} = Users.bootstrap_user(%{
         "email" => "someone@example.com",
         "name" => "Some User",
-        "profile" => "https://some.image.com"
+        "profile" => "https://some.image.com",
+        "groups" => ["general"]
       })
 
       assert user.name == "Some User"
       assert user.email == "someone@example.com"
       assert user.profile == "https://some.image.com"
+
+      group = Users.get_group_by_name("general")
+      assert group
+
+      assert Users.get_group_member(group.id, user.id)
     end
 
     test "If the user already exists, they will be returned" do
