@@ -3,7 +3,7 @@ import { useLocation, useHistory } from 'react-router-dom'
 import { Deploy, Network, Configure, BarChart, Group, TextAlignFull, Cubes, List, Nodes, Alert } from 'grommet-icons'
 import { Box, Text } from 'grommet'
 import { LoginContext } from './Login'
-import { Avatar } from './EditUser'
+import Avatar from './users/Avatar'
 import { InstallationContext } from './Installations'
 import { Tooltip } from './utils/Tooltip'
 import './sidebar.css'
@@ -52,7 +52,7 @@ function Me() {
 
   return (
     <Box pad='small'>
-      <Avatar me={me} size='42px' onClick={() => history.push('/me/edit')} />
+      <Avatar user={me} size='42px' onClick={() => history.push('/me/edit')} />
     </Box>
   )
 }
