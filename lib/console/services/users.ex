@@ -71,16 +71,11 @@ defmodule Console.Services.Users do
     |> notify(:create)
   end
 
-  @spec bootstrap_user(binary, binary) :: user_resp
-  def bootstrap_user(email, name) do
+  @spec bootstrap_user(map) :: user_resp
+  def bootstrap_user(%{"email" => email} = attrs) do
     case get_user_by_email(email) do
-      %User{} = u -> {:ok, u}
-      _ ->
-        create_user(%{
-          email: email,
-          name: name,
-          password: Ecto.UUID.generate()
-        })
+      %User{} = u -> User.changeset(u, attrs) |> Repo.update()
+      _ -> create_user(attrs)
     end
   end
 

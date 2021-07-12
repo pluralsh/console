@@ -40,6 +40,7 @@ defmodule Console.GraphQl.Users do
     field :name,        non_null(:string)
     field :email,       non_null(:string)
     field :deleted_at,  :datetime
+    field :profile,     :string
     field :roles,       :user_roles
     field :bound_roles, list_of(:role), resolve: fn user, _, _ -> {:ok, Console.Schema.User.roles(user)} end
 

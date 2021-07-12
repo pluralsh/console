@@ -9,6 +9,7 @@ defmodule Console.Schema.User do
     field :email,         :string
     field :bot_name,      :string
     field :password_hash, :string
+    field :profile,       :string
     field :password,      :string, virtual: true
     field :jwt,           :string, virtual: true
     field :deleted_at,    :utc_datetime_usec
@@ -38,8 +39,7 @@ defmodule Console.Schema.User do
     from(u in query, order_by: ^order)
   end
 
-  @valid ~w(name email password deleted_at)a
-
+  @valid ~w(name email password deleted_at profile)a
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
