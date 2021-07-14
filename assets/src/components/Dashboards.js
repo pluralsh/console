@@ -3,12 +3,12 @@ import { useHistory, useParams } from 'react-router-dom'
 import { useQuery } from 'react-apollo'
 import { Box, Text } from 'grommet'
 import { Select } from 'forge-core'
-import { Loading } from './utils/Loading'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { BUILD_PADDING } from './Builds'
 import { DASHBOARDS_Q } from './graphql/dashboards'
 import Dashboard from './Dashboard'
 import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from './Installations'
+import { LoopingLogo } from './utils/AnimatedLogo'
 
 
 export function DashboardHeader({name, label}) {
@@ -57,7 +57,7 @@ export default function Dashboards() {
     }
   }, [data, currentApplication])
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo scale='0.75' />
 
   return (
     <Box fill>
@@ -82,7 +82,7 @@ export default function Dashboards() {
       </Box>
       <Box fill>
         {data.dashboards.length > 0 ? (
-          current ? <Dashboard repo={currentApplication.name} name={current.id} /> : <Loading />
+          current ? <Dashboard repo={currentApplication.name} name={current.id} /> : <LoopingLogo />
         ) : <Text size='small'>No dashboards for this repository, contact the developer to fix this</Text>
         }
       </Box>

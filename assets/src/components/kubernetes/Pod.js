@@ -14,8 +14,8 @@ import { Metadata, MetadataRow } from './Metadata'
 import { RawContent } from './Component'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import { Container as Con } from './utils'
-import { Loading } from '../utils/Loading'
 import { asQuery } from '../utils/query'
+import { LoopingLogo } from '../utils/AnimatedLogo'
 
 function phaseToReadiness(phase) {
   switch (phase) {
@@ -411,7 +411,7 @@ export function Pod() {
     ])
   }, [])
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo />
 
   const {pod} = data
   const containerStatus = pod.status.containerStatuses.reduce((acc, container) => ({...acc, [container.name]: container}), {})

@@ -8,19 +8,20 @@ export function initials(name) {
           .join('')
 }
 
-export default function Avatar({size, user: {backgroundColor, profile, name}, onClick, round}) {
+export default function Avatar({size, user: {backgroundColor, avatar, profile, name}, onClick, round}) {
+  const icon = profile || avatar
   return (
     <Box
       flex={false}
       round={round || 'xsmall'}
-      style={profile ? {backgroundImage: `url(${profile})`, backgroundPosition: 'center', backgroundSize: 'cover'} : null}
+      style={icon ? {backgroundImage: `url(${icon})`, backgroundPosition: 'center', backgroundSize: 'cover'} : null}
       align='center'
       justify='center'
       width={size}
       height={size}
       onClick={onClick}
-      background={!profile ? backgroundColor : null}>
-      {!profile && <Text size='small'>{initials(name)}</Text>}
+      background={!icon ? backgroundColor : null}>
+      {!icon && <Text size='small'>{initials(name)}</Text>}
     </Box>
   )
 }

@@ -6,7 +6,7 @@ import { Box, Text } from 'grommet'
 import { chunk } from 'lodash'
 import { Graph, GraphHeader } from './utils/Graph'
 import filesize from 'filesize'
-import { Loading } from './utils/Loading'
+import { LoopingLogo } from './utils/AnimatedLogo'
 
 const HOUR = 60 * 60
 const DAY = 24 * HOUR
@@ -122,7 +122,7 @@ export default function Dashboard({repo, name}) {
   }, [data, labelMap, setLabelMap])
   const setLabel = useCallback((label, value) => setLabelMap({...labelMap, [label]: value}), [labelMap, setLabelMap])
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo scale='0.75' />
   const {dashboard} = data
 
   return (

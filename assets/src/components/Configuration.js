@@ -12,7 +12,7 @@ import "ace-builds/src-noconflict/mode-yaml"
 import "ace-builds/src-noconflict/theme-terminal"
 import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from './Installations'
 import { TabHeader } from './utils/TabSelector'
-import { Loading } from './utils/Loading'
+import { LoopingLogo } from './utils/AnimatedLogo'
 
 const ConfigType = {
   HELM: 'HELM',
@@ -127,7 +127,7 @@ export default function Configuration() {
 
   useEnsureCurrent(repo)
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo scale='0.75' />
 
   return (
     <EditConfiguration 

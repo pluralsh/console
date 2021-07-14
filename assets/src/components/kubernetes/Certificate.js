@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, Text } from 'grommet'
-import { Loading, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
+import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { Metadata, MetadataRow } from './Metadata'
 import { Container } from './utils'
 import { CERTIFICATE_Q } from './queries'
@@ -9,6 +9,7 @@ import { RawContent } from './Component'
 import { POLL_INTERVAL } from './constants'
 import { useParams } from 'react-router'
 import { useQuery } from '@apollo/react-hooks'
+import { LoopingLogo } from '../utils/AnimatedLogo'
 
 function Status({status: {notBefore, notAfter, renewalTime}}) {
   return (
@@ -56,7 +57,7 @@ export function Certificate() {
     fetchPolicy: 'cache-and-network'
   })
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo />
 
   const {certificate} = data
 

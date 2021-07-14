@@ -12,9 +12,9 @@ import GroupRow from './Group'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import RoleRow, { CreateRole } from './Role'
 import { extendConnection } from '../../utils/graphql'
-import { Loading } from '../utils/Loading'
 import { SearchIcon } from './utils'
 import { SectionContentContainer, SectionPortal } from '../utils/Section'
+import { LoopingLogo } from '../utils/AnimatedLogo'
 
 const INPUT_WIDTH = '350px'
 
@@ -47,7 +47,7 @@ function UsersInner() {
   const [q, setQ] = useState(null)
   const {data, fetchMore} = useQuery(USERS_Q, {variables: {q}})
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo scale='0.75' />
 
   const {users: {pageInfo, edges}} = data
 
@@ -82,7 +82,7 @@ function GroupsInner() {
   const [q, setQ] = useState(null)
   const {data, fetchMore} = useQuery(GROUPS_Q, {variables: {q}})
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo scale='0.75' />
 
   const {groups: {pageInfo, edges}} = data
 
@@ -116,7 +116,7 @@ function RolesInner() {
   const [q, setQ] = useState(null)
   const {data, fetchMore} = useQuery(ROLES_Q)
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo scale='0.75' />
 
   const {roles: {pageInfo, edges}} = data
 

@@ -17,7 +17,7 @@ import { Avatar } from './EditUser'
 import { groupBy } from 'lodash'
 import { TabHeader, TabSelector } from './utils/TabSelector'
 import { AnsiText } from './utils/AnsiText'
-import { Loading } from './utils/Loading'
+import { LoopingLogo } from './utils/AnimatedLogo'
 
  const HEADER_PADDING = {horizontal: 'medium'}
 
@@ -324,7 +324,7 @@ export default function Build() {
     }
   }, [buildId, subscribeToMore])
 
-  if (!data || loading) return <Loading />
+  if (!data || loading) return <LoopingLogo scale='0.75' />
   const {commands: {edges}, creator, ...build} = data.build
   const hasChanges = build.changelogs && build.changelogs.length > 0
 

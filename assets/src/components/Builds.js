@@ -10,7 +10,7 @@ import { BreadcrumbsContext } from './Breadcrumbs'
 import { BuildStatus as Status, BuildTypes } from './types'
 import { InstallationContext } from './Installations'
 import { appendConnection, extendConnection, updateCache } from '../utils/graphql'
-import { Loading } from './utils/Loading'
+import { LoopingLogo } from './utils/AnimatedLogo'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -133,7 +133,7 @@ export default function Builds() {
     setOnChange({func: () => null})
   }, [])
 
-  if (loading && !data) return <Loading />
+  if (loading && !data) return <LoopingLogo scale='0.75' />
 
   const {edges, pageInfo} = data.builds
   return (

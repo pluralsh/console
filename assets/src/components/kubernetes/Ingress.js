@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box, Text } from 'grommet'
-import { Loading, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
+import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { INGRESS_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
@@ -9,6 +9,7 @@ import { POLL_INTERVAL } from './constants'
 import { RawContent } from './Component'
 import { Events } from './Event'
 import { Container } from './utils'
+import { LoopingLogo } from '../utils/AnimatedLogo'
 
 function Status({status: {loadBalancer}}) {
   if (!loadBalancer) return null
@@ -76,7 +77,7 @@ export default function Ingress() {
     fetchPolicy: 'cache-and-network'
   })
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo />
 
   const {ingress} = data
   return (

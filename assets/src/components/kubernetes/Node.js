@@ -11,10 +11,10 @@ import { ServerCluster } from 'grommet-icons'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import { Readiness, ReadyIcon } from '../Application'
 import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
-import { Loading } from '../utils/Loading'
 import filesize from 'filesize'
 import { Events } from './Event'
 import { Container } from './utils'
+import { LoopingLogo } from '../utils/AnimatedLogo'
 
 function NodeRowHeader() {
   return (
@@ -90,7 +90,7 @@ export function Node() {
     ])
   }, [])
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo />
 
   const {node} = data
   return (
@@ -131,7 +131,7 @@ export function Nodes() {
     ])
   }, [])
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo />
 
   return (
     <Box style={{overflow: 'auto'}} fill background='backgroundColor' pad='small' gap='small'>

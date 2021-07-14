@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Anchor, Box, Text } from 'grommet'
-import { Loading, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
+import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { DEPLOYMENT_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
@@ -12,6 +12,7 @@ import { Events } from './Event'
 import { Metric } from './Metrics'
 import { Container, logUrl } from './utils'
 import { DURATIONS, RangePicker } from '../Dashboard'
+import { LoopingLogo } from '../utils/AnimatedLogo'
 
 function Status({status: {availableReplicas, replicas, unavailableReplicas}, metadata}) {
   let history = useHistory()
@@ -55,7 +56,7 @@ export default function Deployment() {
     pollInterval: POLL_INTERVAL
   })
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo />
 
   const {deployment} = data
   return (

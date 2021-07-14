@@ -3,11 +3,11 @@ import { useQuery, useMutation } from 'react-apollo'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { WEBHOOKS_Q, CREATE_WEBHOOK } from './graphql/webhooks'
 import { Button, Scroller, ModalHeader } from 'forge-core'
-import { Loading } from './utils/Loading'  
 import { BUILD_PADDING } from './Builds'
 import { Box, Text, FormField, TextInput, Layer } from 'grommet'
 import { chunk } from '../utils/array'
 import { appendConnection, updateCache } from '../utils/graphql'
+import { LoopingLogo } from './utils/AnimatedLogo'
 
 const MAX_LEN = 60
 const trim = (url) => url.length > 10 ? `${url.slice(0, MAX_LEN)}...` : url
@@ -94,7 +94,7 @@ export default function Webhooks() {
   useEffect(() => setBreadcrumbs([{text: 'webhooks', url: '/webhooks'}]), [])
   const {data, fetchMore} = useQuery(WEBHOOKS_Q)
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo scale='0.75' />
   const {edges, pageInfo} = data.webhooks
 
   return (

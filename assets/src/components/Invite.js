@@ -7,6 +7,8 @@ import { StatusCritical, Checkmark } from 'grommet-icons'
 import { initials } from './users/Avatar'
 import { INVITE_Q, SIGNUP } from './graphql/users'
 import { setToken } from '../helpers/auth'
+import { LoginPortal } from './Login'
+import { LabelledInput } from './utils/LabelledInput'
 
 function InvalidInvite() {
   return (
@@ -37,8 +39,8 @@ function DummyAvatar({name, size: given}) {
 export function PasswordStatus({disabled, reason}) {
   return (
     <Box direction='row' fill='horizontal' align='center' gap='xsmall'>
-      {disabled ? <StatusCritical color='notif' size='12px' /> : <Checkmark color='status-ok' size='12px' />}
-      <Text size='small' color={disabled ? 'notif' : 'status-ok'}>{reason}</Text>
+      {disabled ? <StatusCritical color='error' size='12px' /> : <Checkmark color='status-ok' size='12px' />}
+      <Text size='small' color={disabled ? 'error' : 'status-ok'}>{reason}</Text>
     </Box>
   )
 }
@@ -66,67 +68,62 @@ export default function Invite() {
   const filled = attributes.name.length > 0
 
   return (
-    <Box align="center" justify="center" height="100vh" background='backgroundColor'>
-      <Box width="60%" pad='medium' background='white'>
-        <Keyboard onEnter={editPassword && filled ? mutation : null}>
-          <Box gap='small'>
-            {signupError && <GqlError header='Signup failed' error={signupError} />}
-            <Box justify='center' align='center'>
-              <Text weight="bold">Accept your invite</Text>
-            </Box>
-            <Box direction='row' gap='small' align='center'>
-              <DummyAvatar name={attributes.name} />
-              <Box>
-                <Text size='small' weight={500}>{attributes.name}</Text>
-                <Text size='small' color='dark-3'>{email}</Text>
-              </Box>
-            </Box>
-            {editPassword ? (
-              <Box animation={{type: 'fadeIn', duration: 500}}>
-                <InputCollection>
-                  <ResponsiveInput
-                    type='password'
-                    label='password'
-                    value={attributes.password}
-                    placeholder='battery horse fire stapler'
-                    onChange={({target: {value}}) => setAttributes({...attributes, password: value})} />
-                  <ResponsiveInput
-                    type='password'
-                    label='confirm'
-                    value={confirm}
-                    placeholder='type it again'
-                    onChange={({target: {value}}) => setConfirm(value)} />
-                </InputCollection>
-              </Box>
-            ) : (
-              <Box animation={{type: 'fadeIn', duration: 500}}>
-                <FormField label='email' disabled>
-                  <TextInput value={email} />
-                </FormField>
-                <FormField label='name'>
-                  <TextInput
-                    value={attributes.name}
-                    placeholder='John Doe'
-                    onChange={({target: {value}}) => setAttributes({...attributes, name: value})} />
-                </FormField>
-              </Box>
-            )}
-            <Box direction='row' justify='end' align='center'>
-              {editPassword && (<PasswordStatus disabled={disabled} reason={reason} />)}
-              <Box flex={false} direction='row' gap='small'>
-                {editPassword && (<SecondaryButton
-                  label='Go Back'
-                  onClick={() => setEditPassword(false)} />)}
-                <Button
-                  loading={loading}
-                  disabled={editPassword ? disabled : !filled}
-                  label={editPassword ? 'Sign up' : 'continue'}
-                  onClick={editPassword ? mutation : () => setEditPassword(true)} />
-              </Box>
+    <LoginPortal>
+      <Keyboard onEnter={editPassword && filled ? mutation : null}>
+        <Box gap='small'>
+          {signupError && <GqlError header='Signup failed' error={signupError} />}
+          <Box justify='center' align='center'>
+            <Text size="large">Accept your invite</Text>
+          </Box>
+          <Box direction='row' gap='small' align='center'>
+            <DummyAvatar name={attributes.name} />
+            <Box>
+              <Text size='small' weight={500}>{attributes.name}</Text>
+              <Text size='small' color='dark-3'>{email}</Text>
             </Box>
           </Box>
-        </Keyboard>
-      </Box>
-    </Box>
+          {editPassword ? (
+            <Box animation={{type: 'fadeIn', duration: 500}} gap='small'>
+              <LabelledInput
+                type='password'
+                label='Password'
+                width='400px'
+                value={attributes.password}
+                placeholder='battery horse fire stapler'
+                onChange={(password) => setAttributes({...attributes, password})} />
+              <LabelledInput
+                type='password'
+                label='Confirm'
+                width='400px'
+                value={confirm}
+                placeholder='type it again'
+                onChange={setConfirm} />
+            </Box>
+          ) : (
+            <Box animation={{type: 'fadeIn', duration: 500}} gap='small'>
+              <LabelledInput label='Email' value={email} />
+              <LabelledInput 
+                label='Name'
+                value={attributes.name}
+                placeholder='John Doe'
+                onChange={(name) => setAttributes({...attributes, name})} />
+            </Box>
+          )}
+          <Box direction='row' justify='end' align='center'>
+            {editPassword && (<PasswordStatus disabled={disabled} reason={reason} />)}
+            <Box flex={false} direction='row' gap='small'>
+              {editPassword && (<SecondaryButton
+                label='Go Back'
+                onClick={() => setEditPassword(false)} />)}
+              <Button
+                loading={loading}
+                disabled={editPassword ? disabled : !filled}
+                label={editPassword ? 'Sign up' : 'continue'}
+                onClick={editPassword ? mutation : () => setEditPassword(true)} />
+            </Box>
+          </Box>
+        </Box>
+      </Keyboard>
+    </LoginPortal>
   )
 }

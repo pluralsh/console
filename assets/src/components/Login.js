@@ -1,20 +1,36 @@
 import React, { useEffect, useState } from 'react'
 import { GqlError } from 'forge-core' 
 import { useQuery, useMutation } from 'react-apollo'
-import { Box, Keyboard, Text, FormField, TextInput } from 'grommet'
+import { Box, Keyboard, Text, Form } from 'grommet'
 import { Button } from 'forge-core'
 import { setToken, wipeToken } from '../helpers/auth'
 import { ME_Q, SIGNIN } from './graphql/users'
 import { IncidentContext } from './incidents/context'
 import gql from 'graphql-tag'
 import { localized } from '../helpers/hostname'
-const POLL_INTERVAL = 3 * 60 * 1000
+import { LabelledInput } from './utils/LabelledInput'
 
+const POLL_INTERVAL = 3 * 60 * 1000
+const CONSOLE_ICON = process.env.PUBLIC_URL + '/console-full.png'
+const CONSOLE_LOGO = process.env.PUBLIC_URL + '/console-logo.png'
 const LOGIN_INFO = gql`
   query LoginInfo($redirect: String) {
     loginInfo(redirect: $redirect) { oidcUri }
   }
 `
+
+export function LoginPortal({children}) {
+  return (
+    <Box height='100vh' fill='horizontal' direction='row'>
+      <Box width='40%' fill='vertical' justify='center' align='center' background='plural-blk'>
+        <img src={CONSOLE_ICON} width='300px' />
+      </Box>
+      <Box fill align='center' justify='center'>
+        {children}
+      </Box>
+    </Box>
+  )
+}
 
 export const LoginContext = React.createContext({me: null})
 
@@ -53,7 +69,6 @@ export default function Login() {
 
   useEffect(() => {
     if (loginData && loginData.loginInfo && loginData.loginInfo.oidcUri) {
-      console.log(loginData.loginInfo.oidcUri)
       window.location = loginData.loginInfo.oidcUri
     }
   }, [loginData])
@@ -64,37 +79,40 @@ export default function Login() {
   const disabled = form.password.length === 0 || form.email.length === 0
 
   return (
-    <Box direction="column" align="center" justify="center" height="100vh" background='backgroundColor'>
-      <Box width="60%" pad='medium' border={{color: 'light-3'}} background='white' round='xsmall'>
+    <LoginPortal>
+      <Box gap='medium'>
+        <Box gap='xsmall' align='center'>
+          <img src={CONSOLE_LOGO} width='45px' />
+          <Text size='large'>Welcome</Text>
+          <Text size='small' color='dark-3'>Enter your email and password to get started</Text>
+        </Box>
         <Keyboard onEnter={disabled ? null : mutation}>
-          <Box margin={{bottom: '10px'}} gap='small'>
-            {error && <GqlError header='Login failed' error={error} />}
-            <Box justify='center' align='center'>
-              <Text weight="bold">Login</Text>
-            </Box>
-            <FormField label='Email'>
-              <TextInput
+          <Form onSubmit={disabled ? null : mutation}>
+            <Box margin={{bottom: '10px'}} gap='xsmall'>
+              {error && <GqlError header='Login failed' error={error} />}
+              <LabelledInput
                 value={form.email}
-                placehoder='someone@example.com'
-                onChange={({target: {value}}) => setForm({...form, email: value})} />
-            </FormField>
-            <FormField label='Password (at least 10 chars)'>
-              <TextInput
+                placeholder='someone@example.com'
+                label='Email'
+                onChange={(email) => setForm({...form, email})} />
+              <LabelledInput
                 type='password'
                 value={form.password}
-                placehoder='a long password'
-                onChange={({target: {value}}) => setForm({...form, password: value})} />
-            </FormField>
-            <Box direction='row' align='center' justify='end'>
+                placeholder='a long password'
+                label='Password'
+                onChange={(password) => setForm({...form, password})} />
               <Button 
+                fill='horizontal'
                 label='Login' 
+                pad={{vertical: '8px'}} 
+                margin={{top: 'xsmall'}}
                 onClick={mutation} 
                 loading={loading} 
                 disabled={disabled} />
             </Box>
-          </Box>
+          </Form>
         </Keyboard>
       </Box>
-    </Box>
+    </LoginPortal>
   )
 }

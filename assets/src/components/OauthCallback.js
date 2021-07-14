@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import gql from 'graphql-tag'
-import { Loading } from './utils/Loading'
 import { Box } from 'grommet'
 import { GqlError } from 'forge-core'
 import { useMutation } from 'react-apollo'
@@ -8,6 +7,7 @@ import { useHistory, useLocation } from 'react-router'
 import qs from 'query-string'
 import { setToken } from '../helpers/auth'
 import { localized } from '../helpers/hostname'
+import { LoopingLogo } from './utils/AnimatedLogo'
 
 const CALLBACK = gql`
   mutation Callback($code: String!, $redirect: String) {
@@ -33,7 +33,7 @@ export function OAuthCallback() {
 
   return (
     <Box fill align='center' justify='center'>
-      {loading && <Loading />}
+      {loading && <LoopingLogo />}
       {error && <GqlError error={error} header='Failed to log in' />}
     </Box>
   )

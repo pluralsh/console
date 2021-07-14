@@ -1,10 +1,10 @@
 import React, { useEffect, useContext, useState, useCallback } from 'react'
 import { Box, Text } from 'grommet'
 import { Checkmark, Next } from 'grommet-icons'
-import { Loading } from './utils/Loading'
 import { useQuery } from 'react-apollo'
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/forge'
 import { ApplicationReadyIcon } from './Application'
+import { LoopingLogo } from './utils/AnimatedLogo'
 
 export const InstallationContext = React.createContext({})
 
@@ -129,7 +129,7 @@ export function InstallationsProvider({children}) {
   if (!currentApplication) {
     return (
       <Box width='100vw' height='100vh'>
-        <Loading />
+        <LoopingLogo />
       </Box>
     )
   }

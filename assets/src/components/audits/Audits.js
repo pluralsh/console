@@ -6,8 +6,8 @@ import { HeaderItem, RowItem } from '../kubernetes/Pod'
 import { Box, Text } from 'grommet'
 import { dateFormat } from '../utils/Graph'
 import Avatar from '../users/Avatar'
-import { Loading } from '../utils/Loading'
 import { extendConnection } from '../../utils/graphql'
+import { LoopingLogo } from '../utils/AnimatedLogo'
 
 function Audit({audit}) {
   return (
@@ -39,7 +39,7 @@ function AuditHeader() {
 export function Audits() {
   const {data, fetchMore} = useQuery(AUDITS_Q)
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo />
 
   const {edges, pageInfo} = data.audits
   return (

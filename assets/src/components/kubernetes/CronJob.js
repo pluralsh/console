@@ -11,6 +11,7 @@ import { Events } from './Event'
 import { Container } from './utils'
 import { HeaderItem, RowItem } from './Pod'
 import { Readiness, ReadyIcon } from '../Application'
+import { LoopingLogo } from '../utils/AnimatedLogo'
 
 function Status({status}) {
   return (
@@ -94,7 +95,7 @@ export default function CronJob() {
     fetchPolicy: 'cache-and-network'
   })
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo />
 
   const {cronJob} = data
   return (

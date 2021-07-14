@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react'
 import { useQuery } from 'react-apollo'
-import { Loading } from '../utils/Loading'
 import { POLL_INTERVAL } from './constants'
 import { USAGE_Q } from './queries'
 import { Graph, GraphHeader } from '../utils/Graph'
 import filesize from 'filesize'
 import { Box } from 'grommet'
+import { LoopingLogo } from '../utils/AnimatedLogo'
 
 const convertVals = (values) => values.map(({timestamp, value}) => ({x: new Date(timestamp * 1000), y: parseFloat(value)}))
 
@@ -72,7 +72,7 @@ export function Metric({name, namespace, regex, duration: {step, offset, tick}})
     pollInterval: POLL_INTERVAL
   })
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo />
 
   const {cpu, mem, podCpu, podMem} = data
   return (

@@ -1,7 +1,6 @@
 import React from 'react'
 import { Box, Text } from 'grommet'
 import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
-import { Loading } from '../utils/Loading'
 import { useQuery } from 'react-apollo'
 import { SERVICE_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
@@ -11,6 +10,7 @@ import { PodList } from './Pod'
 import { RawContent } from './Component'
 import { Events } from './Event'
 import { Container } from './utils'
+import { LoopingLogo } from '../utils/AnimatedLogo'
 
 function Status({status: {loadBalancer}}) {
   if (!loadBalancer) return null
@@ -67,7 +67,7 @@ export default function Service() {
     fetchPolicy: 'cache-and-network'
   })
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo />
 
   const {service} = data
   return (

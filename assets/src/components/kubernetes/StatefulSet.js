@@ -12,7 +12,7 @@ import { Events } from './Event'
 import { Metric } from './Metrics'
 import { Container, logUrl } from './utils'
 import { DURATIONS, RangePicker } from '../Dashboard'
-import { Loading } from '../utils/Loading'
+import { LoopingLogo } from '../utils/AnimatedLogo'
 
 
 function Status({status: {currentReplicas, updatedReplicas, readyReplicas, replicas}, metadata}) {
@@ -60,7 +60,7 @@ export default function StatefulSet() {
     fetchPolicy: 'cache-and-network'
   })
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo />
 
   const {statefulSet} = data
   return (

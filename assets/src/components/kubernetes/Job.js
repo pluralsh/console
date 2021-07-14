@@ -2,7 +2,7 @@ import React from 'react'
 import { Box, Text } from 'grommet'
 import { useQuery } from 'react-apollo'
 import { useParams } from 'react-router'
-import { Loading, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
+import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { POLL_INTERVAL } from './constants'
 import { Metadata, MetadataRow } from './Metadata'
 import { JOB_Q } from './queries'
@@ -10,6 +10,7 @@ import { Container } from './utils'
 import { Events } from './Event'
 import { RawContent } from './Component'
 import { PodList } from './Pod'
+import { LoopingLogo } from '../utils/AnimatedLogo'
 
 function Status({status}) {
   return (
@@ -58,7 +59,7 @@ export default function Job() {
     fetchPolicy: 'cache-and-network'
   })
 
-  if (!data) return <Loading />
+  if (!data) return <LoopingLogo />
 
   const {job} = data
 
