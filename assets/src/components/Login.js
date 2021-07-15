@@ -9,6 +9,7 @@ import { IncidentContext } from './incidents/context'
 import gql from 'graphql-tag'
 import { localized } from '../helpers/hostname'
 import { LabelledInput } from './utils/LabelledInput'
+import { useHistory } from 'react-router'
 
 const POLL_INTERVAL = 3 * 60 * 1000
 const CONSOLE_ICON = process.env.PUBLIC_URL + '/console-full.png'
@@ -54,6 +55,24 @@ export function EnsureLogin({children}) {
   )
 }
 
+function OIDCLogin({oidcUri}) {
+  return (
+    <LoginPortal>
+      <Box gap='medium'>
+        <Box gap='xsmall' align='center'>
+          <img src={CONSOLE_LOGO} width='45px' />
+          <Text size='large'>Welcome</Text>
+          <Text size='small' color='dark-3'>It looks like this instance is using plural oauth</Text>
+        </Box>
+        <Button 
+          fill='horizontal' 
+          label='Login with Plural'
+          onClick={() => { window.location = oidcUri }} />
+      </Box>
+    </LoginPortal>
+  )
+}
+
 export default function Login() {
   const [form, setForm] = useState({email: '', password: ''})
   const {data} = useQuery(ME_Q)
@@ -67,15 +86,14 @@ export default function Login() {
     onError: console.log
   })
 
-  useEffect(() => {
-    if (loginData && loginData.loginInfo && loginData.loginInfo.oidcUri) {
-      window.location = loginData.loginInfo.oidcUri
-    }
-  }, [loginData])
-
   if (!error && data && data.me) {
     window.location = '/'
   }
+
+  if (loginData && loginData.loginInfo && loginData.loginInfo.oidcUri) {
+    return <OIDCLogin oidcUri={loginData.loginInfo.oidcUri} />
+  }
+
   const disabled = form.password.length === 0 || form.email.length === 0
 
   return (
