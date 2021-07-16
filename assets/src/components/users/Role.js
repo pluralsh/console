@@ -55,6 +55,7 @@ function BindingInput({label, placeholder, fetcher, bindings, remove, add}) {
       <TagInput
         placeholder={placeholder}
         round='xsmall'
+        noborder
         suggestions={suggestions}
         value={bindings}
         onRemove={remove}
