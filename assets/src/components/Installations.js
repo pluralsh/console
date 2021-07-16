@@ -44,7 +44,7 @@ export function InstallationsFlyout() {
   if (!open) return null
 
   return (
-    <Box flex={false} width='400px' fill='vertical'>
+    <Box flex={false} width='400px' fill='vertical' border={{side: 'left', color: 'light-5'}}>
       <Box flex={false} pad={{horizontal: 'small', vertical: 'xsmall'}} align='center'
            direction='row' border={{side: 'bottom', color: 'light-5'}}>
         <Box fill='horizontal'>
