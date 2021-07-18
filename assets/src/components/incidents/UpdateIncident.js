@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box } from 'grommet'
-import { Loading, Button } from 'forge-core'
+import { Button } from 'forge-core'
 import { useMutation, useQuery } from 'react-apollo'
 import { useHistory, useParams } from 'react-router'
 import { INCIDENT_Q, UPDATE_INCIDENT } from './queries'

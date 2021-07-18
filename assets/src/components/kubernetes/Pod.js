@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { Anchor, Box, Layer, Text } from 'grommet'
-import { Tabs, TabHeader, TabHeaderItem, TabContent } from 'forge-core'
+import { Tabs, TabHeader, TabHeaderItem, TabContent, Confirm } from 'forge-core'
 import { Readiness, ReadyIcon } from '../Application'
 import { useMutation, useQuery } from 'react-apollo'
 import { DELETE_POD, POD_Q } from './queries'
@@ -137,35 +137,29 @@ export function PodList({pods, namespace, refetch}) {
 const ignore = (e) => { e.stopPropagation(); e.preventDefault() }
 
 export function DeletePod({name, namespace, refetch}) {
-  const [open, setOpen] = useState(true)
+  const [confirm, setConfirm] = useState(false)
   const [mutation, {loading, data}] = useMutation(DELETE_POD, {
     variables: {name, namespace},
-    onCompleted: refetch
+    onCompleted: () => { setConfirm(false); refetch() }
   })
-  const doDelete = useCallback((e) => {
+
+  const doConfirm = useCallback((e) => {
     ignore(e)
-    mutation()
-  }, [mutation])
+    setConfirm(true)
+  }, [setConfirm])
 
   return (
     <>
     <Box flex={false} pad='small' round='xsmall' align='center' justify='center'
-         onClick={loading ? null : doDelete} hoverIndicator='backgroundDark' focusIndicator={false}>
+         onClick={doConfirm} hoverIndicator='backgroundDark' focusIndicator={false}>
       <Trash color={loading ? 'dark-6' : 'error'} size='small' />
     </Box>
-    {data && open && (
-      <Layer modal>
-        <Box width='30vw' pad='small'>
-          <Box direction='row' justify='end'>
-            <Box flex={false} pad='xsmall' round='xsmall' hoverIndicator='light-3' onClick={(e) => { ignore(e); setOpen(false) }}>
-              <Close size='small' />
-            </Box>
-          </Box>
-          <Box pad='small'>
-            <Text size='small'>pod {name} is deleted, it should recycle shortly</Text>
-          </Box>
-        </Box>
-      </Layer>
+    {confirm && (
+      <Confirm
+        description="The pod will be replaced by it's managing controller"
+        loading={loading}
+        cancel={(e) => { ignore(e); setConfirm(false) }}
+        submit={(e) => { ignore(e); mutation() }} />
     )}
     </>
   )

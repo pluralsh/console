@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { Box, Drop, Text, TextInput, ThemeContext } from 'grommet'
-import { Loading, Scroller, Button } from 'forge-core'
+import { Scroller, Button } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { INCIDENTS_Q } from './queries'
 import { extendConnection } from '../../utils/graphql'

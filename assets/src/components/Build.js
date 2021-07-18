@@ -327,6 +327,9 @@ export default function Build() {
   if (!data || loading) return <LoopingLogo scale='0.75' />
   const {commands: {edges}, creator, ...build} = data.build
   const hasChanges = build.changelogs && build.changelogs.length > 0
+  const complete = (
+    build.status === BuildStatus.FAILED || build.status === BuildStatus.SUCCESSFUL
+  )
 
   return (
     <Box fill>
@@ -354,7 +357,7 @@ export default function Build() {
         <Approval build={build} />
         <BuildTimer insertedAt={build.insertedAt} completedAt={build.completedAt} status={build.status} />
         <Rebuild build={build} />
-        <Cancel build={build} />
+        {!complete && <Cancel build={build} />}
       </Box>
       {tab === 'progress' && <Commands edges={edges} />}
       {tab === 'changelog' && <Changelog build={build} />}
