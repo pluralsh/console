@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useCallback } from 'react'
 import { useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { BUILDS_Q, CREATE_BUILD, BUILD_SUB } from './graphql/builds'
-import { Button, Scroller } from 'forge-core'
+import { Button } from 'forge-core'
 import { Box, Text } from 'grommet'
 import moment from 'moment'
 import { BeatLoader } from 'react-spinners'
@@ -11,6 +11,7 @@ import { BuildStatus as Status, BuildTypes } from './types'
 import { InstallationContext } from './Installations'
 import { appendConnection, extendConnection, updateCache } from '../utils/graphql'
 import { LoopingLogo } from './utils/AnimatedLogo'
+import { StandardScroller } from './utils/SmoothScroller'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -115,7 +116,17 @@ function CreateBuild() {
 
 const POLL_INTERVAL = 1000 * 30
 
+function Placeholder() {
+  return (
+    <Box pad={BUILD_PADDING}>
+      <Box height='90px' color='' background='backgroundLight' 
+           margin={{top: 'small'}} round='xsmall' />
+    </Box>
+  )
+}
+
 export default function Builds() {
+  const [listRef, setListRef] = useState(null)
   const {data, loading, subscribeToMore, fetchMore} = useQuery(BUILDS_Q, {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL
@@ -147,12 +158,15 @@ export default function Builds() {
         <CreateBuild />
       </Box>
       <Box fill pad={{bottom: 'small'}}>
-        <Scroller
-          id='builds'
-          style={{height: '100%', overflow: 'auto'}}
-          edges={edges}
+        <StandardScroller
+          listRef={listRef}
+          setListRef={setListRef}
+          items={edges}
+          loading={loading}
+          placeholder={Placeholder}
+          hasNextPage={pageInfo.hasNextPage}
           mapper={({node}) => <Build key={node.id} build={node} />}
-          onLoadMore={() => pageInfo.hasNextPage && fetchMore({
+          loadNextPage={() => pageInfo.hasNextPage && fetchMore({
             variables: {cursor: pageInfo.endCursor},
             updateQuery: (prev, {fetchMoreResult: {builds}}) => extendConnection(prev, builds, 'builds')
           })} />
