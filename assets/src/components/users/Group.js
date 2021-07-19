@@ -3,7 +3,8 @@ import { Box, Text, Layer, TextInput } from 'grommet'
 import { useQuery, useMutation, useApolloClient } from 'react-apollo'
 import { GROUP_MEMBERS, CREATE_GROUP_MEMBERS, UPDATE_GROUP, DELETE_GROUP, DELETE_GROUP_MEMBER } from './queries'
 import { Group, UserAdd, Edit, Trash } from 'grommet-icons'
-import { ModalHeader, TooltipContent, Button, Scroller } from 'forge-core'
+import { ModalHeader, TooltipContent, Button } from 'forge-core'
+import { FixedScroller } from '../utils/SmoothScroller'
 import { fetchUsers } from './Typeaheads'
 import { addGroupMember, deleteGroup, SearchIcon } from './utils'
 import { extendConnection, removeConnection, updateCache } from '../../utils/graphql'
@@ -45,8 +46,20 @@ const GroupMemberRow = React.memo(({group, user, listRef}) => {
   )
 })
 
+function Placeholder() {
+  return (
+    <Box height='75px' direction='row' pad='small'>
+      <Box height='50px' width='50px' background='tone-light' />
+      <Box fill='horizontal' gap='xsmall'>
+        <Box width='200px' height='13px' background='tone-light' />
+        <Box width='400px' height='13px' background='tone-light' />
+      </Box>
+    </Box>
+  )
+}
+
 function GroupMembers({group}) {
-  const {data, fetchMore} = useQuery(GROUP_MEMBERS, {
+  const {data, loading, fetchMore} = useQuery(GROUP_MEMBERS, {
     variables: {id: group.id},
     fetchPolicy: 'cache-and-network'
   })
@@ -56,12 +69,14 @@ function GroupMembers({group}) {
 
   return (
     <Box fill>
-      <Scroller
-        id='group-members'
-        style={{height: '100%', overflow: 'auto'}}
-        edges={edges}
+      <FixedScroller
+        items={edges}
+        itemSize={75}
+        hasNextPage={pageInfo.hasNextPage}
+        loading={loading}
+        placeholder={Placeholder}
         mapper={({node}) => <GroupMemberRow key={node.user.id} user={node.user} group={group} />}
-        onLoadMore={() => pageInfo.hasNextPage && fetchMore({
+        loadNextPage={() => pageInfo.hasNextPage && fetchMore({
           variables: {cursor: pageInfo.endCursor},
           updateQuery: (prev, {fetchMoreResult: {groupMembers}}) => extendConnection(prev, groupMembers, 'groupMembers')
         })} />

@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { Box } from 'grommet'
 import InfiniteLoader from 'react-window-infinite-loader'
 import { VariableSizeList } from 'react-window-reversed'
-import { VariableSizeList as List } from 'react-window'
+import { VariableSizeList as List, FixedSizeList as FixedList } from 'react-window'
 import Autosizer from 'react-virtualized-auto-sizer'
 import memoize from 'memoize-one'
 import { CellMeasurer } from 'forge-core'
@@ -173,6 +173,53 @@ export function StandardScroller({
           {ItemWrapper}
         </List>
       )}
+      </Autosizer>
+    )}
+    </InfiniteLoader>
+  )
+}
+
+const FixedItemWrapper = React.memo(({data: {items, isItemLoaded, placeholder, mapper}, style, index}) => {
+  return (
+    <div style={style}>
+      <Item 
+        index={index} 
+        items={items} 
+        isItemLoaded={isItemLoaded} 
+        placeholder={placeholder} 
+        mapper={mapper} /> 
+    </div>
+  )
+})
+
+export function FixedScroller({hasNextPage, loading, items, loadNextPage, mapper, itemSize, placeholder}) {
+  const count = items.length
+  const itemCount = hasNextPage ? count + 7 : count;
+  const loadMoreItems = loading ? () => {} : loadNextPage;
+  const isItemLoaded = useCallback(index => !hasNextPage || index < count, [hasNextPage, count])
+  
+  return (
+    <InfiniteLoader
+      isItemLoaded={isItemLoaded}
+      itemCount={itemCount}
+      loadMoreItems={loadMoreItems}
+      minimumBatchSize={50}
+      threshold={75}
+    >
+    {({ onItemsRendered, ref }) => (
+      <Autosizer>
+      {({height, width}) => (
+        <FixedList
+          height={height}
+          width={width}
+          itemSize={itemSize}
+          itemCount={itemCount}
+          itemData={buildItemData(null, mapper, isItemLoaded, items, null, width, placeholder)}
+          onItemsRendered={onItemsRendered}
+          ref={ref}>
+          {FixedItemWrapper}
+        </FixedList>
+      )} 
       </Autosizer>
     )}
     </InfiniteLoader>
