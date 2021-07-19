@@ -89,7 +89,7 @@ export default function Application() {
     <Box fill background='backgroundColor'>
       <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}} direction='row' align='center' height='60px'>
         <Box direction='row' fill='horizontal' gap='small' align='center' margin={{bottom: 'small'}}>
-          {hasIcon(currentApplication) && <ApplicationIcon application={currentApplication} size='40px' />}
+          {hasIcon(currentApplication) && <ApplicationIcon application={currentApplication} size='40px' dark />}
           <Box>
             <Text weight='bold' size='small'>{currentApplication.name}</Text>
             <Text size='small' color='dark-6'>{currentApplication.status.componentsReady} ready; {error.message}</Text>
