@@ -2,7 +2,7 @@ defmodule Console.Schema.Build do
   use Piazza.Ecto.Schema
   alias Console.Schema.{Command, Changelog, User}
 
-  @expiry 5
+  @expiry 30
 
   defenum Type, deploy: 0, bounce: 1, approval: 2
   defenum Status, queued: 0, running: 1, successful: 2, failed: 3, cancelled: 4, pending: 5
