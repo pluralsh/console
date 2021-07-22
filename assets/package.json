@@ -76,10 +76,10 @@
     "yaml": "^1.10.0"
   },
   "scripts": {
-    "start": "HTTPS=true react-scripts start",
-    "build": "react-scripts build",
+    "start": "HTTPS=true react-app-rewired start",
+    "build": "react-app-rewired build",
     "postbuild": "cpx \"build/**\" ../priv/static --clean",
-    "test": "react-scripts test",
+    "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -97,5 +97,9 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:4003"
+  "proxy": "http://localhost:4003",
+  "devDependencies": {
+    "customize-cra": "^1.0.0",
+    "react-app-rewired": "^2.1.8"
+  }
 }
