@@ -44,11 +44,11 @@ export function EnsureLogin({children}) {
   }
   if (!data) return null
 
-  const {me, externalToken, clusterInfo: {__typename, ...clusterInformation}} = data
+  const {me, externalToken, clusterInfo: {__typename, ...clusterInformation}, configuration} = data
 
   return (
     <IncidentContext.Provider value={{clusterInformation}}>
-      <LoginContext.Provider value={{me, token: externalToken}}>
+      <LoginContext.Provider value={{me, configuration, token: externalToken}}>
         {children}
       </LoginContext.Provider>
     </IncidentContext.Provider>

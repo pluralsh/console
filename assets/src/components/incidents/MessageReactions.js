@@ -7,7 +7,7 @@ import { Emoji } from 'emoji-mart'
 import { DELETE_REACTION, CREATE_REACTION } from './queries'
 import { groupBy } from '../../utils/array'
 import { Reaction as MessageReaction } from './MessageControls'
-import { CurrentUserContext } from '../forge/CurrentUser'
+import { CurrentUserContext } from '../login/CurrentUser'
 
 const BOX_ATTRS={
   pad: {horizontal: 'xsmall', vertical: '3px'},

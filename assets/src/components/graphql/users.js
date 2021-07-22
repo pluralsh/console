@@ -65,6 +65,7 @@ export const ME_Q = gql`
     }
     externalToken
     clusterInfo { version platform gitCommit }
+    configuration { gitCommit }
   }
   ${UserFragment}
   ${RoleFragment}

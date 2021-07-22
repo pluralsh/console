@@ -23,6 +23,7 @@ import { Audits } from './audits/Audits'
 import { withPluralApi } from './PluralApi'
 import { Incidents } from './incidents/Incidents'
 import { Incident } from './incidents/Incident'
+import { AutoRefresh } from './AutoRefresh'
 
 const SIDEBAR_WIDTH = '70px'
 
@@ -32,6 +33,7 @@ export default function Console() {
       <InstallationsProvider>
       <BreadcrumbProvider>
         <Box direction='row' width='100vw' height='100vh'>
+          <AutoRefresh />
           <Box width={SIDEBAR_WIDTH}>
             <Sidebar />
           </Box>

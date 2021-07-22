@@ -24,7 +24,7 @@ import { ThemeContext } from 'styled-components'
 import { PresenceContext } from './Presence'
 import { SyncLoader } from 'react-spinners'
 import { normalizeColor } from 'grommet/utils'
-import { CurrentUserContext } from '../forge/CurrentUser'
+import { CurrentUserContext } from '../login/CurrentUser'
 
 export const MessageScrollContext = React.createContext({})
 

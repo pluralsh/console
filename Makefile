@@ -50,7 +50,6 @@ import-incidents:
 	mv queries.js assets/src/components/incidents/queries.js
 	mv Presence.js assets/src/components/incidents/Presence.js
 	sed -i '' -- 's/\.\.\/models/graphql/g' assets/src/components/incidents/*
-	sed -i '' -- 's/\.\/login/\.\/forge/g' assets/src/components/incidents/*
 	cp $(PLRL_WWW)/components/repos/Tags.js assets/src/components/repos/Tags.js
 	cp $(PLRL_WWW)/components/utils/AlternatingBox.js assets/src/components/utils/AlternatingBox.js
 	cp $(PLRL_WWW)/components/utils/TypeaheadEditor.js assets/src/components/utils/TypeaheadEditor.js

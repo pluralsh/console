@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { Button, Scroller } from 'forge-core'
-import { CurrentUserContext } from '../forge/CurrentUser'
+import { CurrentUserContext } from '../login/CurrentUser'
 import { useMutation, useQuery, useSubscription } from 'react-apollo'
 import { useParams } from 'react-router'
 import Markdown from './Markdown'

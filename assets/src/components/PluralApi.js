@@ -1,7 +1,7 @@
 import React, { useContext, useMemo } from 'react'
 import { ApolloProvider } from 'react-apollo'
 import { buildClient } from '../helpers/client'
-import CurrentUser from './forge/CurrentUser'
+import CurrentUser from './login/CurrentUser'
 import { LoginContext } from './Login'
 
 const PLURAL_GQL = 'https://app.plural.sh/gql'

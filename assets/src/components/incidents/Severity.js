@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { Box, Text } from 'grommet'
 import { Select } from 'forge-core'
-import { CurrentUserContext } from '../forge/CurrentUser'
+import { CurrentUserContext } from '../login/CurrentUser'
 import { canEdit } from './Incident'
 import { SeverityColorMap } from './types'
 import { normalizeColor } from 'grommet/utils'
