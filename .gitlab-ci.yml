@@ -43,5 +43,5 @@ build-console:
   only:
   - master
   script:
-  - make build
+  - make build GIT_COMMIT=$CI_COMMIT_SHORT_SHA
   - make push

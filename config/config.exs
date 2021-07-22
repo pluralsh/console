@@ -34,7 +34,8 @@ config :console,
   plural_url: "https://app.plural.sh/gql",
   url: "https://watchman.piazzaapp.com",
   incoming_webhook: "https://some.piazza.webhook",
-  cluster_name: "default"
+  cluster_name: "default",
+  git_commit: "abd132"
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

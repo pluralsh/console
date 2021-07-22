@@ -152,4 +152,16 @@ defmodule Console.GraphQl.UserQueriesTest do
       assert token == "external-token"
     end
   end
+
+  describe "configuration" do
+    test "it can fetch the server's configuration" do
+      {:ok, %{data: %{"configuration" => conf}}} = run_query("""
+        query {
+          configuration { gitCommit }
+        }
+      """, %{})
+
+      assert conf["gitCommit"]
+    end
+  end
 end

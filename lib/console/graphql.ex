@@ -40,6 +40,10 @@ defmodule Console.GraphQl do
       resolve &Build.list_builds/2
     end
 
+    field :configuration, :console_configuration do
+      resolve fn _, _ -> {:ok, Console.Configuration.new()} end
+    end
+
     field :build, :build do
       middleware Authenticated
 

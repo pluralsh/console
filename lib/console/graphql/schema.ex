@@ -110,6 +110,10 @@ defmodule Console.GraphQl.Schema do
     field :value, :string
   end
 
+  object :console_configuration do
+    field :git_commit, :string
+  end
+
   delta :build
   delta :command
 
