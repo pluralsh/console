@@ -90,7 +90,7 @@ defmodule Console.Services.Users do
       |> add_operation({:group, group}, fn _ ->
         case get_group_by_name(group) do
           %Group{} = group -> {:ok, group}
-          nil -> create_group(%{name: group})
+          nil -> create_group(%{name: group, description: "synced from Plural"})
         end
       end)
       |> add_operation({:member, group}, fn %{user: user} = results ->

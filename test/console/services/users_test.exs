@@ -62,7 +62,7 @@ defmodule Console.Services.UsersTest do
       assert user.profile == "https://some.image.com"
 
       group = Users.get_group_by_name("general")
-      assert group
+      assert group.description == "synced from Plural"
 
       assert Users.get_group_member(group.id, user.id)
     end
