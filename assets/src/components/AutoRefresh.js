@@ -12,11 +12,6 @@ export function AutoRefresh() {
   const [open, setOpen] = useState(true)
   const {configuration: config} = useContext(LoginContext)
   const reload = useCallback(() => {
-    if (getCommit() === 'example') {
-      setCommit(config.gitCommit)
-      return
-    }
-
     console.log('reloading')
     if (process.env.NODE_ENV === 'production') {
       const promise = serviceWorker.unregister() || Promise.resolve('done')
@@ -25,7 +20,6 @@ export function AutoRefresh() {
         window.location.reload()
       })
     } else {
-      setCommit(config.gitCommit)
       setOpen(false)
     }
   })
@@ -34,6 +28,11 @@ export function AutoRefresh() {
   const stale = getCommit() !== config.gitCommit
 
   if (!stale || !open) return null
+
+  if (getCommit() === 'example') {
+    setCommit(config.gitCommit)
+    return null
+  }
 
   return (
     <Confirm
