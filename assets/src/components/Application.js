@@ -12,7 +12,15 @@ import Icon from './kubernetes/Icon'
 export const Readiness = {
   Ready: 'Ready',
   InProgress: 'InProgress',
-  Failed: 'Failed'
+  Failed: 'Failed',
+  Complete: 'Complete',
+}
+
+export const ReadinessColor = {
+  [Readiness.Ready]: 'success',
+  [Readiness.InProgress]: 'status-warning',
+  [Readiness.Failed]: 'error',
+  [Readiness.Complete]: 'tone-medium',
 }
 
 export function appState({status: {conditions}}) {
@@ -40,6 +48,9 @@ export function ReadyIcon({size, readiness, showIcon}) {
       color = 'status-warning'
       icon = <Update size='small' />
       break
+    case Readiness.Complete:
+      color = 'tone-medium'
+      icon = <Checkmark size='small' />
     default:
       break
   }

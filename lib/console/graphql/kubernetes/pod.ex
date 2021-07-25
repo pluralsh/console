@@ -65,6 +65,7 @@ defmodule Console.GraphQl.Kubernetes.Pod do
     field :service_account_name, :string
     field :node_name, :string
     field :containers, list_of(:container)
+    field :init_containers, list_of(:container)
   end
 
   object :container do

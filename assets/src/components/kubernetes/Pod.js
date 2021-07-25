@@ -1,7 +1,7 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
-import { Anchor, Box, Text } from 'grommet'
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { Anchor, Box, Drop, Text } from 'grommet'
 import { Tabs, TabHeader, TabHeaderItem, TabContent, Confirm } from 'forge-core'
-import { Readiness, ReadyIcon } from '../Application'
+import { Readiness, ReadinessColor, ReadyIcon } from '../Application'
 import { useMutation, useQuery } from 'react-apollo'
 import { DELETE_POD, POD_Q } from './queries'
 import { Cube, Trash } from 'grommet-icons'
@@ -41,6 +41,7 @@ function statusToReadiness({phase, containerStatuses}) {
 }
 
 function containerReadiness({ready, state: {terminated}}) {
+  if (ready && terminated) return Readiness.Complete
   if (ready) return Readiness.Ready
   if (!terminated) return Readiness.InProgress
   return Readiness.Failed
@@ -110,8 +111,8 @@ export function RowItem({width, text, truncate}) {
 export function PodHeader() {
   return (
     <Box flex={false} fill='horizontal' direction='row' border='bottom' pad={{vertical: 'xsmall'}} gap='xsmall'>
-      <HeaderItem width='10%' text='name' />
-      <HeaderItem width='15%' text='status' />
+      <HeaderItem width='15%' text='name' />
+      <HeaderItem width='10%' text='status' />
       <HeaderItem width='7%' text='pod ip' />
       <HeaderItem width='10%' text='node name' />
       <HeaderItem width='7%' text='memory' />
@@ -191,6 +192,39 @@ function PodReadiness({status: {containerStatuses}}) {
   )
 }
 
+function SimpleContainerStatus({status}) {
+  const ref = useRef()
+  const [open, setOpen] = useState(false)
+  const readiness = containerReadiness(status)
+  const background = ReadinessColor[readiness]
+  return (
+    <>
+    <Box ref={ref} flex={false} width='13px' height='13px' round='xxsmall'  
+         background={background} 
+         onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)} />
+    {open && (
+      <Drop target={ref.current} align={{bottom: 'top'}} round='xsmall'>
+        <Box pad={{vertical: 'xsmall', horizontal: 'small'}} direction='row' gap='xsmall' align='center'>
+          <Box flex={false} width='12px' height='12px' background={background} round='xxsmall' />
+          <Text size='small'>{status.name}</Text>
+        </Box>
+      </Drop>
+    )}
+    </>
+  )
+}
+
+function ContainerSummary({status: {containerStatuses, initContainerStatuses}}) {
+  const allStatuses = [...(initContainerStatuses || []), ...containerStatuses]
+  return (
+    <Box direction='row' gap='xsmall' align='center'>
+      {allStatuses.map((status) => (
+        <SimpleContainerStatus key={status.name} status={status} />
+      ))}
+    </Box>
+  )
+}
+
 export function PodRow({pod: {metadata: {name, namespace}, status, spec}, refetch}) {
   let history = useHistory()
   const restarts = status.containerStatuses.reduce((count, {restartCount}) => count + (restartCount || 0), 0)
@@ -198,13 +232,12 @@ export function PodRow({pod: {metadata: {name, namespace}, status, spec}, refetc
     <Box flex={false} fill='horizontal' direction='row' align='center' hoverIndicator='backgroundDark'
           border='bottom' pad={{vertical: 'xsmall'}} gap='xsmall' focusIndicator={false}
           onClick={() => history.push(`/pods/${namespace}/${name}`)}>
-      <Box flex={false} width='10%' direction='row' align='center' gap='xsmall'>
+      <Box flex={false} width='15%' direction='row' align='center' gap='xsmall'>
         <Cube size='small' />
         <Text size='small' truncate>{name}</Text>
       </Box>
-      <Box flex={false} width='15%' direction='row' align='center' gap='xsmall'>
-        <ReadyIcon readiness={statusToReadiness(status)} />
-        <PodReadiness status={status} />
+      <Box flex={false} width='10%' direction='row' align='center' gap='xsmall'>
+        <ContainerSummary status={status} />
       </Box>
       <RowItem width='7%' text={status.podIp} />
       <RowItem width='10%' text={spec.nodeName} truncate />
@@ -409,8 +442,10 @@ export function Pod() {
 
   const {pod} = data
   const containerStatus = pod.status.containerStatuses.reduce((acc, container) => ({...acc, [container.name]: container}), {})
+  const initContainerStatus = pod.status.initContainerStatuses.reduce((acc, container) => ({...acc, [container.name]: container}), {})
   const containers = pod.spec.containers
-  console.log(containers)
+  const initContainers = pod.spec.initContainers
+  console.log(initContainers)
   return (
     <Box fill background='backgroundColor'>
       <Box flex={false} direction='row' gap='small' align='center' margin={{left: 'small', vertical: 'small'}} pad={{horizontal: 'medium'}}>
@@ -424,6 +459,14 @@ export function Pod() {
             <TabHeaderItem name='info'>
               <Text size='small' weight={500}>info</Text>
             </TabHeaderItem>
+            {initContainers.map(({name}) => (
+              <TabHeaderItem key={name} name={`init-container:${name}`}>
+                <Box direction='row' gap='xsmall' align='center'>
+                  <ReadyIcon readiness={containerReadiness(initContainerStatus[name])} />
+                  <Text size='small' weight={500}>init container: {name}</Text>
+                </Box>
+              </TabHeaderItem>
+            ))}
             {containers.map(({name}) => (
               <TabHeaderItem key={name} name={`container:${name}`}>
                 <Box direction='row' gap='xsmall' align='center'>
@@ -441,6 +484,11 @@ export function Pod() {
             <Status status={pod.status} metadata={pod.metadata} />
             <Spec spec={pod.spec} />
           </TabContent>
+          {initContainers.map((container) => (
+            <TabContent key={container.name} name={`init-container:${container.name}`}>
+              <Container container={container} containerStatus={initContainerStatus[container.name]} />
+            </TabContent>
+          ))}
           {containers.map((container) => (
             <TabContent key={container.name} name={`container:${container.name}`}>
               <Container container={container} containerStatus={containerStatus[container.name]} />

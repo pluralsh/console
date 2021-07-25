@@ -28,6 +28,31 @@ export const ResultStatus = gql`
   }
 `;
 
+export const ContainerStatus = gql`
+  fragment ContainerStatus on ContainerStatus {
+    restartCount
+    ready
+    name
+    state {
+      running { startedAt }
+      terminated { exitCode message reason }
+      waiting { message reason }
+    }
+  }
+`
+
+export const Container = gql`
+  fragment Container on Container {
+    name
+    image
+    ports { containerPort protocol }
+    resources {
+      limits { cpu memory }
+      requests { cpu memory }
+    }
+  }
+`
+
 export const PodFragment = gql`
   fragment PodFragment on Pod {
     metadata { ...MetadataFragment }
@@ -35,16 +60,8 @@ export const PodFragment = gql`
       phase
       podIp
       reason
-      containerStatuses {
-        restartCount
-        ready
-        name
-        state {
-          running { startedAt }
-          terminated { exitCode message reason }
-          waiting { message reason }
-        }
-      }
+      containerStatuses { ...ContainerStatus }
+      initContainerStatuses { ...ContainerStatus }
       conditions {
         lastProbeTime
         lastTransitionTime
@@ -57,18 +74,13 @@ export const PodFragment = gql`
     spec {
       nodeName
       serviceAccountName
-      containers {
-        name
-        image
-        ports { containerPort protocol }
-        resources {
-          limits { cpu memory }
-          requests { cpu memory }
-        }
-      }
+      containers { ...Container }
+      initContainers { ...Container }
     }
     raw
   }
+  ${Container}
+  ${ContainerStatus}
   ${MetadataFragment}
 `;
 
