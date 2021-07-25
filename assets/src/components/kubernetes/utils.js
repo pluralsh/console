@@ -2,10 +2,10 @@ import React from 'react'
 import { Box, Text } from 'grommet'
 import { asQuery } from '../utils/query'
 
-export function Container({header, children}) {
+export function Container({header, children, ...props}) {
   return (
     <Box flex={false} pad={{vertical: 'xsmall', horizontal: 'small'}} round='xsmall'
-         gap='xsmall' margin='xsmall'>
+         gap='xsmall' margin='xsmall' {...props}>
       <Box>
         <Text size='small'>{header}</Text>
       </Box>

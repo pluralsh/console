@@ -13,25 +13,35 @@ import { Metric } from './Metrics'
 import { Container, logUrl } from './utils'
 import { DURATIONS, RangePicker } from '../Dashboard'
 import { LoopingLogo } from '../utils/AnimatedLogo'
+import { Gauge } from '../utils/ProgressGauge'
 
 function Status({status: {availableReplicas, replicas, unavailableReplicas}, metadata}) {
   let history = useHistory()
   return (
     <Container header='Status'>
-      <MetadataRow name='replicas'>
-        <Text size='small'>{replicas}</Text>
-      </MetadataRow>
-      <MetadataRow name='available'>
-        <Text size='small'>{availableReplicas}</Text>
-      </MetadataRow>
-      <MetadataRow name='unavailable'>
-        <Text size='small'>{unavailableReplicas}</Text>
-      </MetadataRow>
-      <MetadataRow name='logs' final>
-        <Anchor size='small' onClick={() => history.push(logUrl(metadata))}>
-          view logs
-        </Anchor>
-      </MetadataRow>
+      <Box fill='horizontal' direction='row' gap='small' align='center'>
+        <Box fill='horizontal'>
+          <MetadataRow name='replicas'>
+            <Text size='small'>{replicas}</Text>
+          </MetadataRow>
+          <MetadataRow name='available'>
+            <Text size='small'>{availableReplicas}</Text>
+          </MetadataRow>
+          <MetadataRow name='unavailable'>
+            <Text size='small'>{unavailableReplicas}</Text>
+          </MetadataRow>
+          <MetadataRow name='logs' final>
+            <Anchor size='small' onClick={() => history.push(logUrl(metadata))}>
+              view logs
+            </Anchor>
+          </MetadataRow>
+        </Box>
+        <Box width='40%' align='center' justify='center'>
+          <Box flex={false} width='200px' height='200px'>
+            <Gauge total={replicas} current={availableReplicas} size='large' />
+          </Box>
+        </Box>
+      </Box>
     </Container>
   )
 }
