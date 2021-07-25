@@ -13,7 +13,7 @@ import { Metric } from './Metrics'
 import { Container, logUrl } from './utils'
 import { DURATIONS, RangePicker } from '../Dashboard'
 import { LoopingLogo } from '../utils/AnimatedLogo'
-import { Gauge } from '../utils/ProgressGauge'
+import { Pie } from '../utils/ProgressGauge'
 
 
 function Status({status: {currentReplicas, updatedReplicas, readyReplicas, replicas}, metadata}) {
@@ -21,6 +21,12 @@ function Status({status: {currentReplicas, updatedReplicas, readyReplicas, repli
   return (
     <Container header='Status'>
       <Box fill='horizontal' direction='row' gap='small' align='center'>
+        <Box height='200px' width='300px' align='center' justify='center'>
+          <Pie 
+            success={updatedReplicas} 
+            progress={replicas - updatedReplicas} 
+            error={0} />
+        </Box>
         <Box fill='horizontal'>
           <MetadataRow name='replicas'>
             <Text size='small'>{replicas}</Text>
@@ -39,11 +45,6 @@ function Status({status: {currentReplicas, updatedReplicas, readyReplicas, repli
               view logs
             </Anchor>
           </MetadataRow>
-        </Box>
-        <Box width='40%' align='center' justify='center'>
-          <Box flex={false} width='200px' height='200px'>
-            <Gauge total={replicas} current={updatedReplicas} size='large' />
-          </Box>
         </Box>
       </Box>
     </Container>

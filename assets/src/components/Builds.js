@@ -20,7 +20,7 @@ function BuildStatusInner({background, text, icon}) {
       direction='row'
       align='center'
       pad={{horizontal: 'small', vertical: 'xsmall'}}
-      round='xsmall'
+      round='xxsmall'
       background={background}>
       {icon && <Box width='50px'>{icon}</Box>}
       <Text size='small'>{text}</Text>

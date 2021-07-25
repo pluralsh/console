@@ -13,13 +13,19 @@ import { Metric } from './Metrics'
 import { Container, logUrl } from './utils'
 import { DURATIONS, RangePicker } from '../Dashboard'
 import { LoopingLogo } from '../utils/AnimatedLogo'
-import { Gauge } from '../utils/ProgressGauge'
+import { Gauge, Pie, Waffle } from '../utils/ProgressGauge'
 
 function Status({status: {availableReplicas, replicas, unavailableReplicas}, metadata}) {
   let history = useHistory()
   return (
     <Container header='Status'>
       <Box fill='horizontal' direction='row' gap='small' align='center'>
+        <Box height='200px' width='375px' align='center' justify='center'>
+          <Pie 
+            success={availableReplicas} 
+            progress={replicas - availableReplicas - unavailableReplicas} 
+            error={unavailableReplicas} />
+        </Box>
         <Box fill='horizontal'>
           <MetadataRow name='replicas'>
             <Text size='small'>{replicas}</Text>
@@ -35,11 +41,6 @@ function Status({status: {availableReplicas, replicas, unavailableReplicas}, met
               view logs
             </Anchor>
           </MetadataRow>
-        </Box>
-        <Box width='40%' align='center' justify='center'>
-          <Box flex={false} width='200px' height='200px'>
-            <Gauge total={replicas} current={availableReplicas} size='large' />
-          </Box>
         </Box>
       </Box>
     </Container>
