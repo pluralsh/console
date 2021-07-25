@@ -12,6 +12,14 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
       do: {:ok, items}
   end
 
+  def list_node_metrics(_, _) do
+    with {:ok, %{items: items}} <- Client.list_metrics(),
+      do: {:ok, items}
+  end
+
+  def resolve_node_metrics(%{name: name}, _),
+    do: Client.get_metrics(name)
+
   def cluster_info(_, _) do
     Kazan.Apis.Version.get_code!()
     |> Kazan.run()
@@ -139,6 +147,15 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   def list_pods_for_node(%{metadata: %{name:  name}}) do
     Core.list_pod_for_all_namespaces!(field_selector: "spec.nodeName=#{name}")
+    |> Kazan.run()
+    |> case do
+      {:ok, %{items: pods}} -> {:ok, pods}
+      error -> error
+    end
+  end
+
+  def list_all_pods(_, _) do
+    Core.list_pod_for_all_namespaces!()
     |> Kazan.run()
     |> case do
       {:ok, %{items: pods}} -> {:ok, pods}

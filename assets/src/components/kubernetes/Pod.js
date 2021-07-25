@@ -445,7 +445,7 @@ export function Pod() {
   const initContainerStatus = pod.status.initContainerStatuses.reduce((acc, container) => ({...acc, [container.name]: container}), {})
   const containers = pod.spec.containers
   const initContainers = pod.spec.initContainers
-  console.log(initContainers)
+
   return (
     <Box fill background='backgroundColor'>
       <Box flex={false} direction='row' gap='small' align='center' margin={{left: 'small', vertical: 'small'}} pad={{horizontal: 'medium'}}>

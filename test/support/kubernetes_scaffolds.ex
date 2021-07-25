@@ -151,4 +151,12 @@ defmodule KubernetesScaffolds do
       }
     }
   end
+
+  def node_metrics(name) do
+    %Kube.NodeMetric{
+      metadata: %ObjectMeta{name: name},
+      usage: %Kube.NodeMetric.Usage{cpu: "1", memory: "2M"},
+      timestamp: "13242"
+    }
+  end
 end

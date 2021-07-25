@@ -80,4 +80,24 @@ defmodule Kube.Client do
     }
     |> Kazan.run()
   end
+
+  def list_metrics() do
+    %Kazan.Request{
+      method: "get",
+      path: "/apis/metrics.k8s.io/v1beta1/nodes",
+      query_params: %{},
+      response_model: Kube.NodeMetricList
+    }
+    |> Kazan.run()
+  end
+
+  def get_metrics(node) do
+    %Kazan.Request{
+      method: "get",
+      path: "/apis/metrics.k8s.io/v1beta1/nodes/#{node}",
+      query_params: %{},
+      response_model: Kube.NodeMetric
+    }
+    |> Kazan.run()
+  end
 end

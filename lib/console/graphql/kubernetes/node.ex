@@ -32,4 +32,16 @@ defmodule Console.GraphQl.Kubernetes.Node do
     field :provider_id,   :string
     field :unschedulable, :boolean
   end
+
+  object :node_usage do
+    field :cpu,    :string
+    field :memory, :string
+  end
+
+  object :node_metric do
+    field :metadata,  non_null(:metadata)
+    field :timestamp, :string
+    field :window,    :string
+    field :usage,     :node_usage
+  end
 end

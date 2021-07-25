@@ -314,4 +314,32 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       assert info["platform"]
     end
   end
+
+  describe "nodeMetrics" do
+    test "it can list metrics" do
+      user = insert(:user)
+      expect(Kazan, :run, fn _ -> {:ok, %{items: [node_metrics("node-1")]}} end)
+
+      {:ok, %{data: %{"nodeMetrics" => [node]}}} = run_query("""
+        query { nodeMetrics { usage { cpu memory } } }
+      """, %{}, %{current_user: user})
+
+      assert node["usage"]["cpu"] == "1"
+      assert node["usage"]["memory"] == "2M"
+    end
+  end
+
+  describe "nodeMetric" do
+    test "it can fetch metrics for a node" do
+      user = insert(:user)
+      expect(Kazan, :run, fn _ -> {:ok, node_metrics("node-1")} end)
+
+      {:ok, %{data: %{"nodeMetric" => node}}} = run_query("""
+        query { nodeMetric(name: "node-1") { usage { cpu memory } } }
+      """, %{}, %{current_user: user})
+
+      assert node["usage"]["cpu"] == "1"
+      assert node["usage"]["memory"] == "2M"
+    end
+  end
 end

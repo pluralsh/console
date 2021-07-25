@@ -144,12 +144,31 @@ defmodule Console.GraphQl.Kubernetes do
       resolve &Kubernetes.resolve_pod/2
     end
 
+    field :pods, list_of(:pod) do
+      middleware Authenticated
+
+      resolve &Kubernetes.list_all_pods/2
+    end
+
     field :log_filters, list_of(:log_filter) do
       middleware Authenticated
       arg :namespace, non_null(:string)
       middleware Rbac, perm: :read, arg: :namespace
 
       resolve &Kubernetes.list_log_filters/2
+    end
+
+    field :node_metrics, list_of(:node_metric) do
+      middleware Authenticated
+
+      resolve &Kubernetes.list_node_metrics/2
+    end
+
+    field :node_metric, :node_metric do
+      middleware Authenticated
+      arg :name, non_null(:string)
+
+      resolve &Kubernetes.resolve_node_metrics/2
     end
   end
 
