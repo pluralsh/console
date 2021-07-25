@@ -21,7 +21,7 @@ function Status({status: {currentReplicas, updatedReplicas, readyReplicas, repli
   return (
     <Container header='Status'>
       <Box fill='horizontal' direction='row' gap='small' align='center'>
-        <Box height='200px' width='300px' align='center' justify='center'>
+        <Box height='200px' width='375px' align='center' justify='center'>
           <Pie 
             success={updatedReplicas} 
             progress={replicas - updatedReplicas} 

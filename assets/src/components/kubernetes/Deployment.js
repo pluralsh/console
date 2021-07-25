@@ -13,7 +13,7 @@ import { Metric } from './Metrics'
 import { Container, logUrl } from './utils'
 import { DURATIONS, RangePicker } from '../Dashboard'
 import { LoopingLogo } from '../utils/AnimatedLogo'
-import { Gauge, Pie, Waffle } from '../utils/ProgressGauge'
+import { Pie } from '../utils/ProgressGauge'
 
 function Status({status: {availableReplicas, replicas, unavailableReplicas}, metadata}) {
   let history = useHistory()

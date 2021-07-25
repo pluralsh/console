@@ -8,14 +8,14 @@ import { ResponsivePie } from '@nivo/pie'
 const data = (success, progress, error, theme) => (
   [
     {
-      id: 'success', 
-      label: 'successful', 
+      id: 'running', 
+      label: 'running', 
       value: success, 
       color: normalizeColor('success', theme),
     },
     {
-      id: 'progress', 
-      label: 'in progress', 
+      id: 'waiting', 
+      label: 'waiting', 
       value: progress, 
       color: normalizeColor('progress', theme),
     },
@@ -31,7 +31,7 @@ const data = (success, progress, error, theme) => (
 export function Pie({success, progress, error}) {
   const theme = useContext(ThemeContext)
   const dat = data(success, progress, error, theme)
-  console.log(dat)
+
   return (
     <ResponsivePie
       data={dat}
@@ -39,10 +39,9 @@ export function Pie({success, progress, error}) {
         tooltip: {container: {color: '#13141a'}},
       }}
       margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
-      innerRadius={0.5}
-      cornerRadius={3}
+      innerRadius={0.6}
       activeOuterRadiusOffset={8}
-      borderWidth={1}
+      // borderWidth={1}
       // arcLabel='label'
       borderColor={{ from: 'color', modifiers: [ [ 'darker', 0.2 ] ] }}
       arcLinkLabelsSkipAngle={10}
@@ -51,11 +50,7 @@ export function Pie({success, progress, error}) {
       arcLinkLabelsColor={{ from: 'color' }}
       arcLabelsSkipAngle={10}
       arcLabelsTextColor='white'
-      colors={({data: {color, ...rest}}) => {
-        console.log(rest)
-        console.log(color)
-        return color
-      }} 
+      colors={({data: {color}}) => color} 
     />
   )
 }
