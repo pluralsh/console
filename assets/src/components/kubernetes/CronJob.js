@@ -1,6 +1,6 @@
 import React from 'react'
 import { Anchor, Box, Text } from 'grommet'
-import { Loading, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
+import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { Metadata, MetadataRow } from './Metadata'
 import { useHistory, useParams } from 'react-router'

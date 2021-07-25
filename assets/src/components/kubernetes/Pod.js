@@ -1,10 +1,10 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react'
-import { Anchor, Box, Layer, Text } from 'grommet'
+import { Anchor, Box, Text } from 'grommet'
 import { Tabs, TabHeader, TabHeaderItem, TabContent, Confirm } from 'forge-core'
 import { Readiness, ReadyIcon } from '../Application'
 import { useMutation, useQuery } from 'react-apollo'
 import { DELETE_POD, POD_Q } from './queries'
-import { Close, Cube, Trash } from 'grommet-icons'
+import { Cube, Trash } from 'grommet-icons'
 import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
 import filesize from 'filesize'
 import { useHistory, useParams } from 'react-router'
@@ -138,7 +138,7 @@ const ignore = (e) => { e.stopPropagation(); e.preventDefault() }
 
 export function DeletePod({name, namespace, refetch}) {
   const [confirm, setConfirm] = useState(false)
-  const [mutation, {loading, data}] = useMutation(DELETE_POD, {
+  const [mutation, {loading}] = useMutation(DELETE_POD, {
     variables: {name, namespace},
     onCompleted: () => { setConfirm(false); refetch() }
   })

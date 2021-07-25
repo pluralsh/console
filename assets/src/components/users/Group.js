@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import { Box, Text, Layer, TextInput } from 'grommet'
 import { useQuery, useMutation, useApolloClient } from 'react-apollo'
 import { GROUP_MEMBERS, CREATE_GROUP_MEMBERS, UPDATE_GROUP, DELETE_GROUP, DELETE_GROUP_MEMBER } from './queries'
@@ -11,8 +11,7 @@ import { extendConnection, removeConnection, updateCache } from '../../utils/gra
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import Avatar from '../users/Avatar'
 
-const GroupMemberRow = React.memo(({group, user, listRef}) => {
-  const [ref, setRef] = useState(null)
+const GroupMemberRow = React.memo(({group, user}) => {
   const [mutation] = useMutation(DELETE_GROUP_MEMBER, {
     variables: {groupId: group.id, userId: user.id},
     update: (cache, {data: {deleteGroupMember}}) => updateCache(cache, {
@@ -21,9 +20,6 @@ const GroupMemberRow = React.memo(({group, user, listRef}) => {
       update: (prev) => removeConnection(prev, deleteGroupMember, 'groupMembers')
     })
   })
-  useEffect(() => {
-    if (ref && listRef) listRef.resetAfterIndex(0, true)
-  }, [ref, listRef])
 
   return (
     <Box flex={false} fill='horizontal' direction='row' gap='small'  border={{side: 'bottom', color: 'light-3'}} 
@@ -35,7 +31,7 @@ const GroupMemberRow = React.memo(({group, user, listRef}) => {
           <Text size='small'>{user.name}</Text>
         </Box>
       </Box>
-      <Box ref={ref} flex={false}>
+      <Box flex={false}>
         <Icon 
           icon={Trash} 
           tooltip='delete' 

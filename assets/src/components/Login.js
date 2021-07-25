@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { GqlError } from 'forge-core' 
 import { useQuery, useMutation } from 'react-apollo'
 import { Box, Keyboard, Text, Form } from 'grommet'
@@ -9,7 +9,6 @@ import { IncidentContext } from './incidents/context'
 import gql from 'graphql-tag'
 import { localized } from '../helpers/hostname'
 import { LabelledInput } from './utils/LabelledInput'
-import { useHistory } from 'react-router'
 
 const POLL_INTERVAL = 3 * 60 * 1000
 const CONSOLE_ICON = process.env.PUBLIC_URL + '/console-full.png'

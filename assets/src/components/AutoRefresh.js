@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useCallback } from 'react'
+import React, { useContext, useState, useCallback } from 'react'
 import * as serviceWorker from '../serviceWorker';
 import { LoginContext } from './Login'
 import { Confirm } from 'forge-core'
@@ -24,7 +24,6 @@ export function AutoRefresh() {
     }
   })
 
-  console.log(config.gitCommit)
   const stale = getCommit() !== config.gitCommit
 
   if (!stale || !open) return null
