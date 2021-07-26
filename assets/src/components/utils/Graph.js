@@ -59,6 +59,7 @@ export function Graph({data, yFormat, tick}) {
         areaOpacity={.5}
         useMesh
         lineWidth={2}
+        activeLineWidth={4}
         enablePoints={false}
         // enableSlices='x'
         animate={false}
@@ -79,7 +80,7 @@ export function Graph({data, yFormat, tick}) {
         }}
         axisBottom={{
           format: '%H:%M',
-          tickValues: tick || 'every 5 minutes',
+          // tickValues: tick || 'every 5 minutes',
           orient: 'bottom',
           legendPosition: 'middle',
           legend: hasData ? `${dateFormat(data[0].data[0].x)} to ${dateFormat(last(data[0].data).x)}` : null,

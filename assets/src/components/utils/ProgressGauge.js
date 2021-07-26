@@ -74,20 +74,23 @@ export function Waffle({success, progress, error}) {
   )
 }
 
-export function Gauge({current, total, size, modifier}) {
+export function Gauge({current, total, ratio, size, modifier, format: fmt}) {
   const theme = useContext(ThemeContext)
+  const format = fmt || ((x) => x)
 
   return (
     <CircularProgressbarWithChildren
       value={(current / total) * 100}
-      circleRatio={0.75}
+      circleRatio={ratio || 0.75}
       styles={buildStyles({
         rotation: 1 / 2 + 1 / 8,
-        strokeLinecap: "round",
+        strokeLinecap: "butt",
         pathColor: normalizeColor('success', theme),
-        trailColor: normalizeColor('progress', theme)
+        trailColor: normalizeColor('tone-medium', theme)
       })}>
-      <Text size={size || 'small'} color='tone-light'>{current} / {total} {modifier}</Text>
+      <Text size={size || 'small'} color='tone-light'>
+        {format(current)} / {format(total)} {modifier}
+      </Text>
     </CircularProgressbarWithChildren>
   )
 }

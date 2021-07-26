@@ -76,3 +76,12 @@ export const LOGS_Q = gql`
   }
   ${LogStreamFragment}
 `;
+
+export const METRICS_Q = gql`
+  query Metrics($query: String!, $offset: Int) {
+    metric(query: $query, offset: $offset) {
+      ...MetricResponseFragment
+    }
+  }
+  ${MetricResponseFragment}
+`

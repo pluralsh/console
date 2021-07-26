@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useMemo } from 'react'
 import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { POLL_INTERVAL } from './constants'
@@ -6,7 +6,7 @@ import { NODES_Q, NODE_Q } from './queries'
 import { HeaderItem, PodList, podResources, RowItem } from './Pod'
 import { Box, Text } from 'grommet'
 import { useHistory, useParams } from 'react-router'
-import { mapify, Metadata, MetadataRow } from './Metadata'
+import { mapify, Metadata } from './Metadata'
 import { ServerCluster } from 'grommet-icons'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import { Readiness, ReadyIcon } from '../Application'
@@ -15,6 +15,12 @@ import filesize from 'filesize'
 import { Events } from './Event'
 import { Container } from './utils'
 import { LoopingLogo } from '../utils/AnimatedLogo'
+import { METRICS_Q } from '../graphql/dashboards'
+import { Graph, GraphHeader } from '../utils/Graph'
+import { format } from '../Dashboard'
+import { ClusterMetrics as Metrics } from './constants'
+import { Gauge } from '../utils/ProgressGauge'
+import { sumBy } from 'lodash'
 
 function NodeRowHeader() {
   return (
@@ -57,17 +63,107 @@ function NodeRow({node}) {
 function NodeStatus({status: {capacity}, pods}) {
   const containers = pods.filter(({status: {phase}}) => phase !== 'Succeeded').map(({spec: {containers}}) => containers).flat()
   const {cpu, memory} = podResources(containers, 'requests')
-  return (
+  return (    
     <Container header='Status'>
-      <MetadataRow name='cpu'>
-        <Text size='small'>{cpuParser(capacity.cpu)} ({cpu} used)</Text>
-      </MetadataRow>
-      <MetadataRow name='memory' final>
-        <Text size='small'>{filesize(memoryParser(capacity.memory))} ({filesize(memory)} used)</Text>
-      </MetadataRow>
+      <Box direction='row' gap='medium' align='center'>
+        <SimpleGauge
+          current={cpu}
+          total={cpuParser(capacity.cpu)}
+          name='CPU'
+          format={format} />
+        <SimpleGauge
+          total={memoryParser(capacity.memory)}
+          current={memory}
+          name='Mem'
+          format={filesize} />
+      </Box>
     </Container>
   )
 }
+
+const round = (x) => Math.round(x * 100) / 100
+
+function SimpleGauge({current, total, name, format}) {
+  return (
+    <Box flex={false} height='200px' width='200px'>
+      <Gauge
+        current={current}
+        total={total}
+        ratio={1}
+        modifier={name}
+        format={format} />
+    </Box>
+  )
+}
+
+function MetricsGauge({metric, max, name, format}) {
+  const {data} = useQuery(METRICS_Q, {
+    variables: {query: metric, offset: 5 * 60},
+    fetchPolicy: 'network-only',
+    pollInterval: 60000
+  })
+
+  if (!data) return null
+
+  const result = round(parseFloat(data.metric[0].values[0].value))
+
+  return (<SimpleGauge current={result} total={max} name={name} format={format} />)
+}
+
+function MetricsGraph({metric, format: fmt, header, name}) {
+  const {data} = useQuery(METRICS_Q, {
+    variables: {query: metric, offset: 2 * 60 * 60}, 
+    fetchPolicy: 'network-only',
+    pollInterval: 60000
+  })
+
+  const result = useMemo(() => {
+    if (!data || !data.metric) return null
+    return [{
+      id: name, 
+      data: data.metric[0].values.map(({timestamp, value}) => (
+        {x: new Date(timestamp * 1000), y: round(parseFloat(value))}
+      ))
+    }]
+  }, [data])
+
+  if (!result) return null
+
+  console.log(result)
+
+  return (
+    <Box className='dashboard' round='xsmall' width='50%' 
+         pad='small' background='cardDetail' height='300px'>
+      <GraphHeader text={header} />
+      <Graph
+        data={result}
+        yFormat={(v) => format(v, fmt || 'percent')} />
+    </Box>
+  )
+}
+
+function ClusterMetrics({nodes}) {
+  const totalCpu = sumBy(nodes, ({status: {capacity: {cpu}}}) => cpuParser(cpu))
+  const totalMem = sumBy(nodes, ({status: {capacity: {memory}}}) => memoryParser(memory))
+
+  return (
+    <Box flex={false} direction='row' fill='horizontal' gap='small' align='center' pad='small'>
+      <MetricsGauge 
+        metric={Metrics.CPURequests} 
+        name='CPU'
+        max={totalCpu} />
+      <MetricsGauge 
+        metric={Metrics.MemoryRequests}
+        name='Mem'
+        max={totalMem}
+        format={filesize} />
+      <Box fill='horizontal' direction='row' align='center' gap='small'>
+        <MetricsGraph name='cpu' metric={Metrics.CPU} header='CPU Utilization' />
+        <MetricsGraph name='mem' metric={Metrics.Memory} header="Memory Utilization" />
+      </Box>
+    </Box>
+  )
+} 
 
 function nodeReadiness(status) {
   const ready = status.conditions.find(({type}) => type === 'Ready')
@@ -135,12 +231,15 @@ export function Nodes() {
 
   return (
     <Box style={{overflow: 'auto'}} fill background='backgroundColor' pad='small' gap='small'>
-      <Box pad={{horizontal: 'small'}}>
-        <Text size='small' weight={500}>Worker Nodes</Text>
-      </Box>
-      <Box fill style={{overflow: 'auto'}}>
-        <NodeRowHeader />
-        {data.nodes.map((node, ind) => <NodeRow key={ind} node={node} />)}
+      <Box flex={false}>
+        <ClusterMetrics nodes={data.nodes} />
+        <Box pad={{horizontal: 'small'}}>
+          <Text size='small' weight={500}>Worker Nodes</Text>
+        </Box>
+        <Box flex={false}>
+          <NodeRowHeader />
+          {data.nodes.map((node, ind) => <NodeRow key={ind} node={node} />)}
+        </Box>
       </Box>
     </Box>
   )

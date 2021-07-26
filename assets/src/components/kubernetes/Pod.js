@@ -442,9 +442,9 @@ export function Pod() {
 
   const {pod} = data
   const containerStatus = pod.status.containerStatuses.reduce((acc, container) => ({...acc, [container.name]: container}), {})
-  const initContainerStatus = pod.status.initContainerStatuses.reduce((acc, container) => ({...acc, [container.name]: container}), {})
+  const initContainerStatus = (pod.status.initContainerStatuses || []).reduce((acc, container) => ({...acc, [container.name]: container}), {})
   const containers = pod.spec.containers
-  const initContainers = pod.spec.initContainers
+  const initContainers = pod.spec.initContainers || []
 
   return (
     <Box fill background='backgroundColor'>

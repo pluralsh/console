@@ -19,7 +19,7 @@ export const DURATIONS = [
   {offset: 7 * DAY, step: '1h', label: '7d', tick: 'every 12 hours'},
 ]
 
-function format(value, format) {
+export function format(value, format) {
   switch (format) {
     case 'bytes':
       return filesize(value)
