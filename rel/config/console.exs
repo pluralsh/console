@@ -26,7 +26,7 @@ config :libcluster,
   ]
 
 config :console, Console.Guardian,
-  issuer: "console",
+  issuer: get_env("HOST"),
   secret_key: get_env("JWT_SECRET")
 
 [_ | rest] = get_env("HOST") |> String.split(".")

@@ -47,8 +47,8 @@ defmodule Console.GraphQl.Resolvers.User do
   defp hydrate_redirect_uri(params, _), do: params
 
   def oauth_callback(%{code: code} = args, _) do
-    with {:ok, tokens} <- OpenIDConnect.fetch_tokens(:plural, hydrate_redirect_uri(%{code: code}, args)) |> IO.inspect(),
-         {:ok, claims} <- OpenIDConnect.verify(:plural, tokens["id_token"]) |> IO.inspect() do
+    with {:ok, tokens} <- OpenIDConnect.fetch_tokens(:plural, hydrate_redirect_uri(%{code: code}, args)),
+         {:ok, claims} <- OpenIDConnect.verify(:plural, tokens["id_token"]) do
       Users.bootstrap_user(claims)
       |> with_jwt()
     else

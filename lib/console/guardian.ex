@@ -10,7 +10,7 @@ defmodule Console.Guardian do
   def subject_for_token(_, _), do: {:error, :invalid_argument}
 
   def resource_from_claims(%{"sub" => "user:" <> id}) do
-    case fetch_user(id) do
+    case fetch_user(id) |> IO.inspect() do
       %User{} = user -> {:ok, user}
       _ -> {:error, :not_authorized}
     end
@@ -21,6 +21,7 @@ defmodule Console.Guardian do
   def fetch_user(id) do
     Console.Repo.get(User, id)
     |> Console.Services.Rbac.preload()
+    |> IO.inspect()
   end
 
   def allow(%User{} = user), do: {true, user}

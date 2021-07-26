@@ -1,5 +1,5 @@
 defmodule ConsoleWeb.GuardianPipeline do
-  use Guardian.Plug.Pipeline, otp_app: :api,
+  use Guardian.Plug.Pipeline, otp_app: :console,
                               module: Console.Guardian,
                               error_handler: ConsoleWeb.Plug.AuthErrorHandler
 
