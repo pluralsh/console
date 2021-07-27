@@ -23,7 +23,7 @@ function BuildStatusInner({background, text, icon}) {
       round='xxsmall'
       background={background}>
       {icon && <Box width='50px'>{icon}</Box>}
-      <Text size='small'>{text}</Text>
+      <Text size='small' weight={450}>{text}</Text>
     </Box>
   )
 }
