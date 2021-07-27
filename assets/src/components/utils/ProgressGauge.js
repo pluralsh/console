@@ -83,10 +83,10 @@ export function Gauge({current, total, ratio, size, modifier, format: fmt}) {
       value={(current / total) * 100}
       circleRatio={ratio || 0.75}
       styles={buildStyles({
-        rotation: 1 / 2 + 1 / 8,
+        // rotation: 1 / 2 + 1 / 8,
         strokeLinecap: "butt",
         pathColor: normalizeColor('success', theme),
-        trailColor: normalizeColor('tone-medium', theme)
+        // trailColor: normalizeColor('tone-medium', theme)
       })}>
       <Text size={size || 'small'} color='tone-light'>
         {format(current)} / {format(total)} {modifier}
