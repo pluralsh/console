@@ -87,8 +87,8 @@ function SimpleGauge({current, total, name, format}) {
   return (
     <Box flex={false} height='200px' width='200px'>
       <Gauge
-        current={current}
-        total={total}
+        current={current || 0}
+        total={total || 0}
         ratio={1}
         modifier={name}
         format={format} />

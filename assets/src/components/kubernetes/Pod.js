@@ -35,12 +35,14 @@ function statusToReadiness({phase, containerStatuses}) {
   if (phase === "Succeeded") return Readiness.Ready
   if (phase === "Failed") return Readiness.Failed
   if (phase === "Pending") return Readiness.InProgress
-  const unready = containerStatuses.filter(({ready}) => !ready)
+  const unready = (containerStatuses || []).filter(({ready}) => !ready)
   if (unready.length === 0) return Readiness.Ready
   return Readiness.InProgress
 }
 
-function containerReadiness({ready, state: {terminated}}) {
+function containerReadiness(status) {
+  if (!status) return Readiness.InProgress
+  const {ready, state: {terminated}} = status
   if (ready && terminated) return Readiness.Complete
   if (ready) return Readiness.Ready
   if (!terminated) return Readiness.InProgress
@@ -176,7 +178,7 @@ function PodState({name, state: {running, terminated, waiting}}) {
 }
 
 function PodReadiness({status: {containerStatuses}}) {
-  const unready = containerStatuses.filter(({ready}) => !ready)
+  const unready = (containerStatuses || []).filter(({ready}) => !ready)
   if (unready.length === 0) return (
     <Text size='small'>running</Text>
   )
@@ -215,7 +217,7 @@ function SimpleContainerStatus({status}) {
 }
 
 function ContainerSummary({status: {containerStatuses, initContainerStatuses}}) {
-  const allStatuses = [...(initContainerStatuses || []), ...containerStatuses]
+  const allStatuses = [...(initContainerStatuses || []), ...(containerStatuses || [])]
   return (
     <Box direction='row' gap='xsmall' align='center'>
       {allStatuses.map((status) => (
@@ -227,7 +229,7 @@ function ContainerSummary({status: {containerStatuses, initContainerStatuses}}) 
 
 export function PodRow({pod: {metadata: {name, namespace}, status, spec}, refetch}) {
   let history = useHistory()
-  const restarts = status.containerStatuses.reduce((count, {restartCount}) => count + (restartCount || 0), 0)
+  const restarts = (status.containerStatuses || []).reduce((count, {restartCount}) => count + (restartCount || 0), 0)
   return (
     <Box flex={false} fill='horizontal' direction='row' align='center' hoverIndicator='backgroundDark'
           border='bottom' pad={{vertical: 'xsmall'}} gap='xsmall' focusIndicator={false}
@@ -317,7 +319,9 @@ function Resource({resources, dim}) {
   )
 }
 
-function ContainerState({status: {state: {terminated, running, waiting}}}) {
+function ContainerState({status}) {
+  if (!status) return null
+  const {state: {terminated, running, waiting}} = status
   return (
     <Box flex={false}>
       <Box>
@@ -441,9 +445,9 @@ export function Pod() {
   if (!data) return <LoopingLogo />
 
   const {pod} = data
-  const containerStatus = pod.status.containerStatuses.reduce((acc, container) => ({...acc, [container.name]: container}), {})
+  const containerStatus = (pod.status.containerStatuses || []).reduce((acc, container) => ({...acc, [container.name]: container}), {})
   const initContainerStatus = (pod.status.initContainerStatuses || []).reduce((acc, container) => ({...acc, [container.name]: container}), {})
-  const containers = pod.spec.containers
+  const containers = pod.spec.containers || []
   const initContainers = pod.spec.initContainers || []
 
   return (
