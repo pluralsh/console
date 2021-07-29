@@ -202,8 +202,9 @@ function SimpleContainerStatus({status}) {
   return (
     <>
     <Box ref={ref} flex={false} width='13px' height='13px' round='xxsmall'  
-         background={background} 
-         onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)} />
+         background={background}
+         onMouseEnter={() => setOpen(true)} 
+         onMouseLeave={() => setOpen(false)} />
     {open && (
       <Drop target={ref.current} align={{bottom: 'top'}} round='xsmall'>
         <Box pad={{vertical: 'xsmall', horizontal: 'small'}} direction='row' gap='xsmall' align='center'>

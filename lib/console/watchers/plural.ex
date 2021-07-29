@@ -7,9 +7,9 @@ defmodule Console.Watchers.Plural do
   @socket_name Application.get_env(:console, :socket)
 
   def worker() do
-    token = Console.Plural.Config.derive_config()
+    {token, endpoint} = plural_config()
     socket_opts = [
-      url: "wss://app.plural.sh/socket/websocket",
+      url: "wss://#{endpoint}/socket/websocket",
       params: %{token: token}
     ]
 
@@ -64,6 +64,14 @@ defmodule Console.Watchers.Plural do
     IO.inspect(msg)
     {:noreply, state}
   end
+
+  defp plural_config() do
+    config = Console.Plural.Config.config_file()
+    {config["token"], plural_endpoint(config)}
+  end
+
+  defp plural_endpoint(%{"endpoint" => e}) when byte_size(e) > 0, do: e
+  defp plural_endpoint(_), do: "app.plural.sh"
 
   defp subscribe(absinthe, query, variables \\ %{}) do
     with {:ok, %{"subscriptionId" => id}} <- Channel.push(absinthe, "doc", %{query: query, variables: variables}),

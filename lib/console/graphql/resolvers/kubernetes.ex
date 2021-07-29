@@ -13,8 +13,8 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   end
 
   def list_node_metrics(_, _) do
-    with {:ok, %{items: items}} <- Client.list_metrics(),
-      do: {:ok, items}
+    Client.list_metrics()
+    |> items_response()
   end
 
   def resolve_node_metrics(%{name: name}, _),
@@ -26,8 +26,9 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   end
 
   def list_log_filters(%{namespace: ns}, _) do
-    with {:ok, %{items: items}} <- Client.list_log_filters(Console.namespace(ns)),
-      do: {:ok, items}
+    Console.namespace(ns)
+    |> Client.list_log_filters()
+    |> items_response()
   end
 
   def resolve_application(%{name: name}, _), do: Client.get_application(name)
@@ -75,10 +76,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   def list_nodes(_, _) do
     Core.list_node!()
     |> Kazan.run()
-    |> case do
-      {:ok, %{items: nodes}} -> {:ok, nodes}
-      error -> error
-    end
+    |> items_response()
   end
 
   def resolve_pod(%{namespace: ns, name: name}, _) do
@@ -106,19 +104,13 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     Console.namespace(ns)
     |> Core.list_namespaced_event!(field_selector: "involvedObject.uid=#{uid}")
     |> Kazan.run()
-    |> case do
-      {:ok, %{items: events}} -> {:ok, events}
-      error -> error
-    end
+    |> items_response()
   end
 
   def list_all_events(%{metadata: %{uid: uid}}) do
     Core.list_event_for_all_namespaces!(field_selector: "involvedObject.uid=#{uid}")
     |> Kazan.run()
-    |> case do
-      {:ok, %{items: events}} -> {:ok, events}
-      error -> error
-    end
+    |> items_response()
   end
 
   def list_pods(_, nil), do: {:ok, []}
@@ -126,20 +118,14 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     Console.namespace(ns)
     |> Core.list_namespaced_pod!(label_selector: construct_label_selector(label_selector))
     |> Kazan.run()
-    |> case do
-      {:ok, %{items: pods}} -> {:ok, pods}
-      error -> error
-    end
+    |> items_response()
   end
 
   def list_jobs(%{namespace: ns}) do
     Console.namespace(ns)
     |> BatchV1.list_namespaced_job!()
     |> Kazan.run()
-    |> case do
-      {:ok, %{items: jobs}} -> {:ok, jobs}
-      error -> error
-    end
+    |> items_response()
   end
 
   def has_owner?(%{metadata: %{owner_references: [%{uid: uid} | _]}}, uid), do: true
@@ -148,20 +134,17 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   def list_pods_for_node(%{metadata: %{name:  name}}) do
     Core.list_pod_for_all_namespaces!(field_selector: "spec.nodeName=#{name}")
     |> Kazan.run()
-    |> case do
-      {:ok, %{items: pods}} -> {:ok, pods}
-      error -> error
-    end
+    |> items_response()
   end
 
   def list_all_pods(_, _) do
     Core.list_pod_for_all_namespaces!()
     |> Kazan.run()
-    |> case do
-      {:ok, %{items: pods}} -> {:ok, pods}
-      error -> error
-    end
+    |> items_response()
   end
+
+  defp items_response({:ok, %{items: items}}), do: {:ok, items}
+  defp items_response(err), do: err
 
   defp construct_label_selector(%LabelSelector{match_labels: labels, match_expressions: expressions}) do
     (build_labels(labels) ++ build_expressions(expressions))
