@@ -4,7 +4,7 @@ import { useQuery } from 'react-apollo'
 import { POLL_INTERVAL } from './constants'
 import { NODES_Q, NODE_Q } from './queries'
 import { HeaderItem, PodList, podResources, RowItem } from './Pod'
-import { Box, Text } from 'grommet'
+import { Box, Text, ThemeContext } from 'grommet'
 import { useHistory, useParams } from 'react-router'
 import { mapify, Metadata } from './Metadata'
 import { ServerCluster } from 'grommet-icons'
@@ -19,8 +19,9 @@ import { METRICS_Q } from '../graphql/dashboards'
 import { Graph, GraphHeader } from '../utils/Graph'
 import { format } from '../Dashboard'
 import { ClusterMetrics as Metrics } from './constants'
-import { Gauge } from '../utils/ProgressGauge'
 import { sumBy } from 'lodash'
+import { Doughnut } from 'react-chartjs-2'
+import { normalizeColor } from 'grommet/utils'
 
 function NodeRowHeader() {
   return (
@@ -70,7 +71,7 @@ function NodeStatus({status: {capacity}, pods}) {
           current={cpu}
           total={cpuParser(capacity.cpu)}
           name='CPU'
-          format={format} />
+          format={(cpu) => `${round(cpu)} vcpu`} />
         <SimpleGauge
           total={memoryParser(capacity.memory)}
           current={memory}
@@ -84,14 +85,40 @@ function NodeStatus({status: {capacity}, pods}) {
 const round = (x) => Math.round(x * 100) / 100
 
 function SimpleGauge({current, total, name, format}) {
+  const theme = useContext(ThemeContext)
+  const data = useMemo(() => {
+    const used = current || 0
+    const remaining = (total || 0) - used
+
+    return {
+      labels: [`${format(used)} used`, `${format(remaining)} available`],
+      datasets: [
+        {
+          label: name,
+          data: [used, remaining],
+          backgroundColor: [
+            normalizeColor('success', theme),
+            normalizeColor('cardDetailLight' ,theme)
+          ],
+          hoverOffset: 4,
+          borderWidth: 0,
+        },
+      ]
+    }
+  }, [current, total, format, name])
+
   return (
     <Box flex={false} height='200px' width='200px'>
-      <Gauge
-        current={current || 0}
-        total={total || 0}
-        ratio={1}
-        modifier={name}
-        format={format} />
+      <Doughnut 
+        data={data} 
+        options={{
+          cutout: '75%',
+          animation: false,
+          plugins: {
+            legend: {display: true, labels: {color: 'white'}}
+          }
+        }}
+      />
     </Box>
   )
 }
@@ -107,7 +134,13 @@ function MetricsGauge({metric, max, name, format}) {
 
   const result = round(parseFloat(data.metric[0].values[0].value))
 
-  return (<SimpleGauge current={result} total={max} name={name} format={format} />)
+  return (
+    <SimpleGauge 
+      current={result} 
+      total={max} 
+      name={name} 
+      format={format} />
+  )
 }
 
 function MetricsGraph({metric, format: fmt, header, name}) {
@@ -151,7 +184,8 @@ function ClusterMetrics({nodes}) {
       <MetricsGauge 
         metric={Metrics.CPURequests} 
         name='CPU'
-        max={totalCpu} />
+        max={totalCpu}
+        format={(v) => `${v} vcpu`} />
       <MetricsGauge 
         metric={Metrics.MemoryRequests}
         name='Mem'
