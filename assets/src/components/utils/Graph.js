@@ -54,24 +54,26 @@ export function Graph({data, yFormat, tick}) {
           grid: {line: {stroke: normalizeColor('dark-2', theme)}},
         }}
         data={graph}
-        curve='catmullRom'
+        // curve='catmullRom'
         margin={{top: 50, right: 110, bottom: 75, left: 70}}
-        areaOpacity={.5}
-        useMesh
+        areaOpacity={.4}
         lineWidth={2}
+        enableArea={true}
         activeLineWidth={4}
         enablePoints={false}
+        useMesh
         // enableSlices='x'
         animate={false}
+        enableGridX={false}
         xScale={{type: 'time', format: 'native'}}
-        yScale={{type: 'linear', min: 'auto', max: 'auto', stacked: false, reverse: false}}
-        colors={{scheme: 'set2'}}
+        yScale={{type: 'linear', min: 0, max: 'auto', stacked: true, reverse: false}}
+        colors={{scheme: 'category10'}}
         yFormat={yFormat}
         xFormat={dateFormat}
         tooltip={SliceTooltip}
         axisLeft={{
           orient: 'left',
-          tickSize: 5,
+          tickSize: 0,
           format: yFormat,
           tickPadding: 5,
           tickRotation: 0,
@@ -80,6 +82,7 @@ export function Graph({data, yFormat, tick}) {
         }}
         axisBottom={{
           format: '%H:%M',
+          tickSize: 0,
           // tickValues: tick || 'every 5 minutes',
           orient: 'bottom',
           legendPosition: 'middle',

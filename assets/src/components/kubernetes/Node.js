@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useMemo } from 'react'
 import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
-import { POLL_INTERVAL } from './constants'
-import { NODES_Q, NODE_Q } from './queries'
+import { NodeMetrics, POLL_INTERVAL } from './constants'
+import { NODES_Q, NODE_METRICS_Q, NODE_Q, CLUSTER_SATURATION } from './queries'
 import { HeaderItem, PodList, podResources, RowItem } from './Pod'
 import { Box, Text, ThemeContext } from 'grommet'
 import { useHistory, useParams } from 'react-router'
@@ -15,8 +15,7 @@ import filesize from 'filesize'
 import { Events } from './Event'
 import { Container } from './utils'
 import { LoopingLogo } from '../utils/AnimatedLogo'
-import { METRICS_Q } from '../graphql/dashboards'
-import { Graph, GraphHeader } from '../utils/Graph'
+import { Graph } from '../utils/Graph'
 import { format } from '../Dashboard'
 import { ClusterMetrics as Metrics } from './constants'
 import { sumBy } from 'lodash'
@@ -61,41 +60,59 @@ function NodeRow({node}) {
   )
 }
 
-function NodeStatus({status: {capacity}, pods}) {
-  const containers = pods.filter(({status: {phase}}) => phase !== 'Succeeded').map(({spec: {containers}}) => containers).flat()
-  const {cpu, memory} = podResources(containers, 'requests')
+const podContainers = (pods) => (
+  pods.filter(({status: {phase}}) => phase !== 'Succeeded')
+    .map(({spec: {containers}}) => containers)
+    .flat()
+)
+
+function NodeGraphs({status: {capacity}, pods, name}) {
+  const containers = podContainers(pods)
+  const requests = podResources(containers, 'requests')
+  const limits = podResources(containers, 'limits')
+
+  const localize = (metric) => metric.replaceAll("{instance}", name)
+
   return (    
-    <Container header='Status'>
-      <Box direction='row' gap='medium' align='center'>
-        <SimpleGauge
-          current={cpu}
-          total={cpuParser(capacity.cpu)}
-          name='CPU'
-          format={(cpu) => `${round(cpu)} vcpu`} />
-        <SimpleGauge
-          total={memoryParser(capacity.memory)}
-          current={memory}
-          name='Mem'
-          format={filesize} />
+    <Box flex={false} direction='row' gap='medium' align='center'>
+      <LayeredGauage
+        requests={requests.cpu}
+        limits={limits.cpu}
+        total={cpuParser(capacity.cpu)}
+        name='CPU'
+        title='CPU Reservation'
+        format={(cpu) => `${round(cpu)} vcpu`} />
+      <LayeredGauage
+        requests={requests.memory}
+        limits={limits.memory}
+        total={memoryParser(capacity.memory)}
+        name='Mem'
+        title='Memory Reservation'
+        format={filesize} />
+      <Box fill='horizontal'>
+        <SaturationGraphs 
+          cpu={localize(NodeMetrics.CPU)}
+          mem={localize(NodeMetrics.Memory)} />
       </Box>
-    </Container>
+    </Box>
   )
 }
 
 const round = (x) => Math.round(x * 100) / 100
 
-function SimpleGauge({current, total, name, format}) {
+function LayeredGauage({requests, limits, total, title, name, format}) {
   const theme = useContext(ThemeContext)
   const data = useMemo(() => {
-    const used = current || 0
-    const remaining = (total || 0) - used
+    const reqs = requests || 0
+    const lims = limits || 0
+    const tot = (total || 0)
 
     return {
-      labels: [`${format(used)} used`, `${format(remaining)} available`],
+      labels: [`${name} requests`, `${name} remaining`, `${name} limits`, `${name} remaining`],
       datasets: [
         {
-          label: name,
-          data: [used, remaining],
+          label: [`${name} requests`, `${name} available`],
+          data: [reqs, Math.max(tot - reqs, 0)],
           backgroundColor: [
             normalizeColor('success', theme),
             normalizeColor('cardDetailLight' ,theme)
@@ -103,19 +120,38 @@ function SimpleGauge({current, total, name, format}) {
           hoverOffset: 4,
           borderWidth: 0,
         },
+        {
+          label: [`${name} limits`, `${name} available`],
+          data: [lims, Math.max(tot - lims, 0)],
+          backgroundColor: [
+            normalizeColor('progress', theme),
+            normalizeColor('cardDetailLight' ,theme)
+          ],
+          hoverOffset: 4,
+          borderWidth: 0,
+        },
       ]
     }
-  }, [current, total, format, name])
+  }, [requests, limits, total, format, name])
 
   return (
     <Box flex={false} height='200px' width='200px'>
       <Doughnut 
         data={data} 
         options={{
-          cutout: '75%',
+          cutout: '70%',
           animation: false,
           plugins: {
-            legend: {display: true, labels: {color: 'white'}}
+            legend: { display: false },
+            title: {color: 'white', text: title, display: true},
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const labelIndex = (context.datasetIndex * 2) + context.dataIndex;
+                  return context.chart.data.labels[labelIndex] + ': ' + context.formattedValue;
+                }
+              }
+            }
           }
         }}
       />
@@ -123,77 +159,97 @@ function SimpleGauge({current, total, name, format}) {
   )
 }
 
-function MetricsGauge({metric, max, name, format}) {
-  const {data} = useQuery(METRICS_Q, {
-    variables: {query: metric, offset: 5 * 60},
+const datum = ({timestamp, value}) => ({x: new Date(timestamp * 1000), y: round(parseFloat(value))})
+
+function SaturationGraphs({cpu, mem}) {
+  console.log(cpu)
+  const {data} = useQuery(CLUSTER_SATURATION, {
+    variables: {cpuUtilization: cpu, memUtilization: mem, offset: 2 * 60 * 60},
     fetchPolicy: 'network-only',
-    pollInterval: 60000
-  })
-
-  if (!data) return null
-
-  const result = round(parseFloat(data.metric[0].values[0].value))
-
-  return (
-    <SimpleGauge 
-      current={result} 
-      total={max} 
-      name={name} 
-      format={format} />
-  )
-}
-
-function MetricsGraph({metric, format: fmt, header, name}) {
-  const {data} = useQuery(METRICS_Q, {
-    variables: {query: metric, offset: 2 * 60 * 60}, 
-    fetchPolicy: 'network-only',
-    pollInterval: 60000
+    pollInterval: 10000
   })
 
   const result = useMemo(() => {
-    if (!data || !data.metric) return null
-    return [{
-      id: name, 
-      data: data.metric[0].values.map(({timestamp, value}) => (
-        {x: new Date(timestamp * 1000), y: round(parseFloat(value))}
-      ))
-    }]
+    if (!data) return null
+    
+    const {cpuUtilization, memUtilization} = data
+    return ([
+      {id: 'cpu utilization', data: cpuUtilization[0].values.map(datum)},
+      {id: 'memory utilization', data: memUtilization[0].values.map(datum)}
+    ])
   }, [data])
 
   if (!result) return null
 
-  console.log(result)
-
   return (
-    <Box className='dashboard' round='xsmall' width='50%' 
-         pad='small' background='cardDetail' height='300px'>
-      <GraphHeader text={header} />
+    <Box fill='horizontal' gap='small' height='300px'>
       <Graph
         data={result}
-        yFormat={(v) => format(v, fmt || 'percent')} />
+        yFormat={(v) => format(v, 'percent')} />
+    </Box>
+  )
+}
+
+function ClusterGauges({nodes}) {
+  const totalCpu = sumBy(nodes, ({status: {capacity: {cpu}}}) => cpuParser(cpu))
+  const totalMem = sumBy(nodes, ({status: {capacity: {memory}}}) => memoryParser(memory))
+
+  const {data} = useQuery(NODE_METRICS_Q, {
+    variables: {
+      cpuRequests: Metrics.CPURequests,
+      cpuLimits: Metrics.CPULimits,
+      memRequests: Metrics.MemoryRequests,
+      memLimits: Metrics.MemoryLimits,
+      offset: 5 * 60
+    },
+    fetchPolicy: 'network-first',
+    pollInterval: 5000
+  })
+
+  const result = useMemo(() => {
+    if (!data) return null
+    const {cpuRequests, cpuLimits, memRequests, memLimits} = data
+
+    const datum = (data) => round(parseFloat(data[0].values[0].value))
+
+    return {
+      cpuRequests: datum(cpuRequests),
+      cpuLimits: datum(cpuLimits),
+      memRequests: datum(memRequests),
+      memLimits: datum(memLimits)
+    }
+  })
+
+  if (!result) return null
+
+  const {cpuRequests, cpuLimits, memRequests, memLimits} = result
+
+  return (
+    <Box flex={false} direction='row' gap='small' align='center'>
+      <LayeredGauage
+        requests={cpuRequests}
+        limits={cpuLimits}
+        total={totalCpu}
+        title='CPU Reservation'
+        name='CPU'
+        format={(v) => `${v} vcpu`} />
+      <LayeredGauage
+        requests={memRequests}
+        limits={memLimits}
+        total={totalMem}
+        title='Memory Reservation'
+        name='Mem'
+        format={filesize} />
     </Box>
   )
 }
 
 function ClusterMetrics({nodes}) {
-  const totalCpu = sumBy(nodes, ({status: {capacity: {cpu}}}) => cpuParser(cpu))
-  const totalMem = sumBy(nodes, ({status: {capacity: {memory}}}) => memoryParser(memory))
-
   return (
     <Box flex={false} direction='row' fill='horizontal' gap='small' align='center' pad='small'>
-      <MetricsGauge 
-        metric={Metrics.CPURequests} 
-        name='CPU'
-        max={totalCpu}
-        format={(v) => `${v} vcpu`} />
-      <MetricsGauge 
-        metric={Metrics.MemoryRequests}
-        name='Mem'
-        max={totalMem}
-        format={filesize} />
+      <ClusterGauges nodes={nodes} />
       <Box fill='horizontal' direction='row' align='center' gap='small'>
-        <MetricsGraph name='cpu' metric={Metrics.CPU} header='CPU Utilization' />
-        <MetricsGraph name='mem' metric={Metrics.Memory} header="Memory Utilization" />
+        <SaturationGraphs cpu={Metrics.CPU} mem={Metrics.Memory} />
       </Box>
     </Box>
   )
@@ -230,6 +286,7 @@ export function Node() {
         <Text size='small' weight='bold'>{node.metadata.name}</Text>
         <ReadyIcon readiness={nodeReadiness(node.status)} size='20px' showIcon />
       </Box>
+      <NodeGraphs status={node.status} pods={node.pods} name={name} />
       <Tabs defaultTab='info' border='dark-3'>
         <TabHeader>
           <TabHeaderItem name='info'>
@@ -241,7 +298,6 @@ export function Node() {
         </TabHeader>
         <TabContent name='info'>
           <Metadata metadata={node.metadata} />
-          <NodeStatus status={node.status} pods={node.pods} />
           <PodList pods={node.pods} refetch={refetch} />
         </TabContent>
         <TabContent name='events'>

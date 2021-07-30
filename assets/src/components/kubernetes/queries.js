@@ -63,9 +63,7 @@ export const DELETE_POD = gql`
 
 export const NODES_Q = gql`
   query {
-    nodes {
-      ...NodeFragment
-    }
+    nodes { ...NodeFragment }
   }
   ${NodeFragment}
 `
@@ -81,6 +79,24 @@ export const NODE_Q = gql`
   ${NodeFragment}
   ${PodFragment}
   ${EventFragment}
+`
+
+export const NODE_METRICS_Q = gql`
+  query Metrics($cpuRequests: String!, $cpuLimits: String!, $memRequests: String!, $memLimits: String!, $offset: Int) {
+    cpuRequests: metric(query: $cpuRequests, offset: $offset) { ...MetricResponseFragment }
+    cpuLimits: metric(query: $cpuLimits, offset: $offset) { ...MetricResponseFragment }
+    memRequests: metric(query: $memRequests, offset: $offset) { ...MetricResponseFragment }
+    memLimits: metric(query: $memLimits, offset: $offset) { ...MetricResponseFragment }
+  }
+  ${MetricResponseFragment}
+`
+
+export const CLUSTER_SATURATION = gql`
+  query Metrics($cpuUtilization: String!, $memUtilization: String!, $offset: Int) {
+    cpuUtilization: metric(query: $cpuUtilization, offset: $offset) { ...MetricResponseFragment }
+    memUtilization: metric(query: $memUtilization, offset: $offset) { ...MetricResponseFragment }
+  }
+  ${MetricResponseFragment}
 `
 
 export const CRON_JOB_Q = gql`
