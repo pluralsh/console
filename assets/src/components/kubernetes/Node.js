@@ -55,10 +55,12 @@ function UtilBar({capacity, usage, format, modifier}) {
       <Line 
         percent={percent}
         trailColor={normalizeColor('cardDetailLight', theme)}
-        strokeColor={normalizeColor(color, theme)} />
+        strokeColor={normalizeColor(color, theme)}
+        strokeWidth='2'
+        trailWidth='2' />
     </Box>
     {hover && (
-      <Drop target={ref.current} align={{bottom: 'top'}} round='xsmall'>
+      <Drop target={ref.current} plain align={{bottom: 'top'}} round='xsmall'>
         <Box direction='row' gap='xsmall' align='center' 
              background='sidebar' pad={{horizontal: 'small', vertical: 'xsmall'}}>
           <Text size='small'>{modifier}: {percent}% {format(usage)}</Text>
