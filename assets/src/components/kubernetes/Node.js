@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo } from 'react'
+import React, { useCallback, useContext, useEffect, useMemo } from 'react'
 import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { NodeMetrics, POLL_INTERVAL } from './constants'
@@ -13,7 +13,6 @@ import { Readiness, ReadyIcon } from '../Application'
 import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
 import filesize from 'filesize'
 import { Events } from './Event'
-import { Container } from './utils'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { Graph } from '../utils/Graph'
 import { format } from '../Dashboard'
@@ -68,13 +67,19 @@ const podContainers = (pods) => (
 )
 
 function NodeGraphs({status: {capacity}, pods, name}) {
-  const containers = podContainers(pods)
-  const requests = podResources(containers, 'requests')
-  const limits = podResources(containers, 'limits')
+  const {requests, limits} = useMemo(() => {
+    const containers = podContainers(pods)
+    const requests = podResources(containers, 'requests')
+    const limits = podResources(containers, 'limits')
+    return {requests, limits}
+  }, [pods])
 
-  const localize = (metric) => metric.replaceAll("{instance}", name)
+  const localize = useCallback((metric) => metric.replaceAll("{instance}", name), [name])
 
-  return (    
+  console.log(requests)
+  console.log(limits)
+  
+  return (
     <Box flex={false} direction='row' gap='medium' align='center'>
       <LayeredGauage
         requests={requests.cpu}
@@ -82,13 +87,15 @@ function NodeGraphs({status: {capacity}, pods, name}) {
         total={cpuParser(capacity.cpu)}
         name='CPU'
         title='CPU Reservation'
-        format={(cpu) => `${round(cpu)} vcpu`} />
+        stable
+        format={cpuFmt} />
       <LayeredGauage
         requests={requests.memory}
         limits={limits.memory}
         total={memoryParser(capacity.memory)}
         name='Mem'
         title='Memory Reservation'
+        stable
         format={filesize} />
       <Box fill='horizontal'>
         <SaturationGraphs 
@@ -101,7 +108,42 @@ function NodeGraphs({status: {capacity}, pods, name}) {
 
 const round = (x) => Math.round(x * 100) / 100
 
-function LayeredGauage({requests, limits, total, title, name, format}) {
+const SimpleGauge = React.memo(({value, total, title, name}) => {
+  const theme = useContext(ThemeContext)
+  const val = value || 0
+  const tot = total || 0
+
+  return (
+    <Box flex={false} height='200px' width='200px'>
+      <Doughnut 
+        data={{
+          labels: [' ' + name, ` ${name} available`],
+          datasets: [
+            {
+              label: name,
+              data: [val, Math.max(tot - val, 0)],
+              backgroundColor: [
+                normalizeColor('success', theme),
+                normalizeColor('cardDetailLight' ,theme)
+              ],
+              hoverOffset: 4,
+              borderWidth: 0,
+            }
+          ]
+        }} 
+        options={{
+          cutout: '75%',
+          plugins: {
+            legend: { display: false },
+            title: {color: 'white', text: title, display: true}
+          }
+        }}
+      />
+    </Box>
+  )
+})
+
+const LayeredGauage = React.memo(({requests, limits, total, title, name, format, stable}) => {
   const theme = useContext(ThemeContext)
   const data = useMemo(() => {
     const reqs = requests || 0
@@ -118,8 +160,9 @@ function LayeredGauage({requests, limits, total, title, name, format}) {
             normalizeColor('success', theme),
             normalizeColor('cardDetailLight' ,theme)
           ],
-          hoverOffset: 4,
+          // hoverOffset: 4,
           borderWidth: 0,
+          hoverBorderWidth: 0,
         },
         {
           label: [`${name} limits`, `${name} available`],
@@ -128,12 +171,13 @@ function LayeredGauage({requests, limits, total, title, name, format}) {
             normalizeColor('progress', theme),
             normalizeColor('cardDetailLight' ,theme)
           ],
-          hoverOffset: 4,
+          // hoverOffset: 4,
+          hoverBorderWidth: 0,
           borderWidth: 0,
         },
       ]
     }
-  }, [requests, limits, total, format, name])
+  }, [requests, limits, total, name, theme])
 
   return (
     <Box flex={false} height='200px' width='200px'>
@@ -141,15 +185,16 @@ function LayeredGauage({requests, limits, total, title, name, format}) {
         data={data} 
         options={{
           cutout: '70%',
-          animation: false,
+          animation: !stable ? {duration: 1000, easing: 'easeOutQuart'} : false,
           plugins: {
             legend: { display: false },
             title: {color: 'white', text: title, display: true},
+            datalabels: {formatter: format},
             tooltip: {
               callbacks: {
                 label: function(context) {
                   const labelIndex = (context.datasetIndex * 2) + context.dataIndex;
-                  return context.chart.data.labels[labelIndex] + ': ' + context.formattedValue;
+                  return ' ' + context.chart.data.labels[labelIndex] + ': ' + format(context.raw);
                 }
               }
             }
@@ -158,12 +203,11 @@ function LayeredGauage({requests, limits, total, title, name, format}) {
       />
     </Box>
   )
-}
+})
 
 const datum = ({timestamp, value}) => ({x: new Date(timestamp * 1000), y: round(parseFloat(value))})
 
 function SaturationGraphs({cpu, mem}) {
-  console.log(cpu)
   const {data} = useQuery(CLUSTER_SATURATION, {
     variables: {cpuUtilization: cpu, memUtilization: mem, offset: 2 * 60 * 60},
     fetchPolicy: 'network-only',
@@ -191,9 +235,12 @@ function SaturationGraphs({cpu, mem}) {
   )
 }
 
+const cpuFmt = (cpu) => `${cpu}vcpu`
+
 function ClusterGauges({nodes}) {
   const totalCpu = sumBy(nodes, ({status: {capacity: {cpu}}}) => cpuParser(cpu))
   const totalMem = sumBy(nodes, ({status: {capacity: {memory}}}) => memoryParser(memory))
+  const totalPods = sumBy(nodes, ({status: {capacity: {pods}}}) => parseInt(pods))
 
   const {data} = useQuery(NODE_METRICS_Q, {
     variables: {
@@ -201,6 +248,7 @@ function ClusterGauges({nodes}) {
       cpuLimits: Metrics.CPULimits,
       memRequests: Metrics.MemoryRequests,
       memLimits: Metrics.MemoryLimits,
+      pods: Metrics.Pods,
       offset: 5 * 60
     },
     fetchPolicy: 'network-first',
@@ -209,7 +257,7 @@ function ClusterGauges({nodes}) {
 
   const result = useMemo(() => {
     if (!data) return null
-    const {cpuRequests, cpuLimits, memRequests, memLimits} = data
+    const {cpuRequests, cpuLimits, memRequests, memLimits, pods} = data
 
     const datum = (data) => round(parseFloat(data[0].values[0].value))
 
@@ -217,13 +265,14 @@ function ClusterGauges({nodes}) {
       cpuRequests: datum(cpuRequests),
       cpuLimits: datum(cpuLimits),
       memRequests: datum(memRequests),
-      memLimits: datum(memLimits)
+      memLimits: datum(memLimits),
+      pods: datum(pods)
     }
   })
 
   if (!result) return null
 
-  const {cpuRequests, cpuLimits, memRequests, memLimits} = result
+  const {cpuRequests, cpuLimits, memRequests, memLimits, pods} = result
 
   return (
     <Box flex={false} direction='row' gap='small' align='center'>
@@ -233,7 +282,7 @@ function ClusterGauges({nodes}) {
         total={totalCpu}
         title='CPU Reservation'
         name='CPU'
-        format={(v) => `${v} vcpu`} />
+        format={cpuFmt} />
       <LayeredGauage
         requests={memRequests}
         limits={memLimits}
@@ -241,6 +290,11 @@ function ClusterGauges({nodes}) {
         title='Memory Reservation'
         name='Mem'
         format={filesize} />
+      <SimpleGauge
+        value={pods}
+        total={totalPods}
+        title='Pod Usage'
+        name='Pods' />
     </Box>
   )
 }

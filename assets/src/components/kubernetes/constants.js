@@ -11,7 +11,8 @@ export const ClusterMetrics = {
   CPURequests: 'sum(kube_pod_container_resource_requests{resource="cpu"})',
   MemoryRequests: 'sum(kube_pod_container_resource_requests{resource="memory"})',
   CPULimits: 'sum(kube_pod_container_resource_limits{resource="cpu"})',
-  MemoryLimits: 'sum(kube_pod_container_resource_limits{resource="memory"})'
+  MemoryLimits: 'sum(kube_pod_container_resource_limits{resource="memory"})',
+  Pods: 'count(kube_pod_info)',
 }
 
 export const NodeMetrics = {

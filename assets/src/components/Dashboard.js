@@ -73,7 +73,7 @@ function DashboardGraph({graph, tick}) {
   ), [graph])
 
   return (
-    <Box className='dashboard' round='xsmall' width='50%' pad='small' background='cardDetail' height='300px'>
+    <Box className='dashboard' round='xsmall' width='50%' pad='small' height='300px'>
       <GraphHeader text={graph.name} />
       <Box fill>
         <Graph data={data} yFormat={(v) => format(v, graph.format)} tick={tick} />

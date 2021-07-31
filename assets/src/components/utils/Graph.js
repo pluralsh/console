@@ -51,7 +51,7 @@ export function Graph({data, yFormat, tick}) {
           crosshair: {line: {stroke: '#efef'}},
           legends: {text: {fill: 'white'}},
           axis: {legend: {text: {fill: 'white'}}},
-          grid: {line: {stroke: normalizeColor('dark-2', theme)}},
+          grid: {line: {stroke: normalizeColor('dark-1', theme)}},
         }}
         data={graph}
         // curve='catmullRom'
@@ -64,7 +64,7 @@ export function Graph({data, yFormat, tick}) {
         useMesh
         // enableSlices='x'
         animate={false}
-        enableGridX={false}
+        // enableGridX={false}
         xScale={{type: 'time', format: 'native'}}
         yScale={{type: 'linear', min: 0, max: 'auto', stacked: true, reverse: false}}
         colors={{scheme: 'category10'}}

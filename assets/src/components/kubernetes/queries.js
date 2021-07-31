@@ -83,11 +83,12 @@ export const NODE_Q = gql`
 `
 
 export const NODE_METRICS_Q = gql`
-  query Metrics($cpuRequests: String!, $cpuLimits: String!, $memRequests: String!, $memLimits: String!, $offset: Int) {
+  query Metrics($cpuRequests: String!, $cpuLimits: String!, $memRequests: String!, $memLimits: String!, $pods: String!, $offset: Int) {
     cpuRequests: metric(query: $cpuRequests, offset: $offset) { ...MetricResponseFragment }
     cpuLimits: metric(query: $cpuLimits, offset: $offset) { ...MetricResponseFragment }
     memRequests: metric(query: $memRequests, offset: $offset) { ...MetricResponseFragment }
     memLimits: metric(query: $memLimits, offset: $offset) { ...MetricResponseFragment }
+    pods: metric(query: $pods, offset: $offset) { ...MetricResponseFragment }
   }
   ${MetricResponseFragment}
 `

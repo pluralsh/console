@@ -18,13 +18,13 @@ function Graphs({cpu: [cpu], mem: [mem], tick}) {
 
   return (
     <Box flex={false} direction='row' gap='small'>
-      <Box width='50%' height='300px' background='cardDetail' round='xsmall' pad='small'>
+      <Box width='50%' height='300px' round='xsmall' pad='small'>
         <GraphHeader text='Overall CPU Usage' />
         <Box fill>
           <Graph data={[{id: 'cpu', data: cpuValues}]} tick={tick} />
         </Box>
       </Box>
-      <Box width='50%' height='300px' background='cardDetail' round='xsmall' pad='small'>
+      <Box width='50%' height='300px' round='xsmall' pad='small'>
         <GraphHeader text='Overall Memory Usage' />
         <Box fill>
           <Graph data={[{id: 'memory', data: memValues}]} yFormat={filesize} tick={tick} />
@@ -43,13 +43,13 @@ function PodGraphs({cpu, mem, tick}) {
 
   return (
     <Box flex={false} direction='row' gap='small'>
-      <Box width='50%' height='300px' background='cardDetail' round='xsmall' pad='small'>
+      <Box width='50%' height='300px' round='xsmall' pad='small'>
         <GraphHeader text='Pod CPU Usage' />
         <Box fill>
           <Graph data={cpuGraph} tick={tick} />
         </Box>
       </Box>
-      <Box width='50%' height='300px' background='cardDetail' round='xsmall' pad='small'>
+      <Box width='50%' height='300px' round='xsmall' pad='small'>
         <Box fill>
           <GraphHeader text='Pod Memory Usage' />
           <Graph data={memGraph} yFormat={filesize} tick={tick} />
