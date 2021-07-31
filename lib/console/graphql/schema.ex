@@ -84,21 +84,7 @@ defmodule Console.GraphQl.Schema do
     timestamps()
   end
 
-  object :installation do
-    field :id, non_null(:id)
-    field :repository, :repository
-  end
 
-  object :repository do
-    field :id,            non_null(:id)
-    field :name,          non_null(:string)
-    field :description,   :string
-    field :icon,          :string
-    field :configuration, :configuration, resolve: &Plural.resolve_configuration/3
-    field :grafana_dns,   :string, resolve: fn _, _, _ ->
-      {:ok, Console.conf(:grafana_dns)}
-    end
-  end
 
   object :configuration do
     field :terraform, :string
@@ -119,6 +105,5 @@ defmodule Console.GraphQl.Schema do
 
   connection node_type: :build
   connection node_type: :command
-  connection node_type: :installation
   connection node_type: :webhook
 end

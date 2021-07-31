@@ -140,7 +140,7 @@ defmodule Console.GraphQl.UserQueriesTest do
 
   describe "externalToken" do
     test "it can fetch an external token for the plural user" do
-      expect(Mojito, :post, fn _, _, _, _ ->
+      expect(HTTPoison, :post, fn _, _, _ ->
         {:ok, %{body: Poison.encode!(%{data: %{externalToken: "external-token"}})}}
       end)
       user = insert(:user)

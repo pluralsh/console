@@ -12,6 +12,7 @@ defmodule Console.GraphQl do
   import_types Console.GraphQl.Kubernetes
   import_types Console.GraphQl.Observability
   import_types Console.GraphQl.Audit
+  import_types Console.GraphQl.Plural
 
   @sources [
     Build,
@@ -52,30 +53,12 @@ defmodule Console.GraphQl do
       resolve safe_resolver(&Build.resolve_build/2)
     end
 
-    connection field :installations, node_type: :installation do
-      middleware Authenticated
-
-      resolve &Plural.list_installations/2
-    end
-
     connection field :webhooks, node_type: :webhook do
       middleware Authenticated
 
       resolve &Webhook.list_webhooks/2
     end
 
-    field :applications, list_of(:application) do
-      middleware Authenticated
-
-      resolve &Plural.list_applications/2
-    end
-
-    field :application, :application do
-      middleware Authenticated
-      arg :name, non_null(:string)
-
-      resolve &Plural.resolve_application/2
-    end
 
     field :external_token, :string do
       middleware Authenticated
@@ -86,6 +69,7 @@ defmodule Console.GraphQl do
     import_fields :observability_queries
     import_fields :kubernetes_queries
     import_fields :audit_queries
+    import_fields :plural_queries
   end
 
   mutation do

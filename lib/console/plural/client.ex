@@ -8,10 +8,10 @@ defmodule Console.Plural.Client do
 
   def run(query, variables, type_spec) do
     token = Console.Plural.Config.fetch()
-    Mojito.post(url(), [{"authorization", "Bearer #{token}"} | @headers], Jason.encode!(%{
+    HTTPoison.post(url(), Jason.encode!(%{
       query: query,
       variables: variables
-    }), [pool: false])
+    }), [{"authorization", "Bearer #{token}"} | @headers])
     |> decode(type_spec)
   end
 

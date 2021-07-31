@@ -3,6 +3,7 @@ defmodule Console.Plural.Base do
     quote do
       import Console.Plural.Base
       import Console.Plural.Queries
+      import Console.Services.Base, only: [when_ok: 2]
       alias Console.Plural.Client
     end
   end

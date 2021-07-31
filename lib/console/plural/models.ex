@@ -10,6 +10,22 @@ defmodule Console.Plural.Repository do
   defstruct [:id, :icon, :name, :description, :dashboards]
 end
 
+defmodule Console.Plural.Recipe do
+  defstruct [:id, :name, :description, :provider, :recipeSections]
+end
+
+defmodule Console.Plural.RecipeSection do
+  defstruct [:id, :repository, :recipeItems]
+end
+
+defmodule Console.Plural.RecipeItem do
+  defstruct [:id, :configuration]
+end
+
+defmodule Console.Plural.ConfigurationItem do
+  defstruct [:name, :default, :documentation, :type, :placeholder]
+end
+
 defmodule Console.Plural.Edge do
   defstruct [:node]
 end

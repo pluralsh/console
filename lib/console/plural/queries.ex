@@ -15,6 +15,38 @@ defmodule Console.Plural.Queries do
     }
   """
 
+  @recipe_item_fragment """
+    fragment RecipeItemFragment on RecipeItem {
+      id
+      configuration {
+        name
+        type
+        default
+        placeholder
+        documentation
+      }
+    }
+  """
+
+  @recipe_section_fragment """
+    fragment RecipeSectionFragment on RecipeSection {
+      id
+      repository { ...RepositoryFragment }
+      recipeItems { ...RecipeItemFragment }
+    }
+    #{@recipe_item_fragment}
+    #{@repository_fragment}
+  """
+
+  @recipe_fragment """
+    fragment RecipeFragment on Recipe {
+      id
+      name
+      description
+      provider
+    }
+  """
+
   @installation_fragment """
     fragment InstallationFragment on Installation {
       id
@@ -62,6 +94,37 @@ defmodule Console.Plural.Queries do
     }
   """
 
+  @search_repositories """
+    query SearchRepos($query: String!) {
+      searchRepositories(query: $query, first: 10) {
+        edges { node { ...RepositoryFragment } }
+      }
+    }
+    #{@repository_fragment}
+  """
+
+  @list_recipes """
+    query Recipes($id: ID!, $cursor: String) {
+      recipes(repositoryId: $id, first: 20, after: $cursor) {
+        pageInfo { ...PageInfo }
+        edges { node { ...RecipeFragment } }
+      }
+    }
+    #{@page_info}
+    #{@recipe_fragment}
+  """
+
+  @get_recipe """
+    query Recipe($id: ID!) {
+      recipe(id: $id) {
+        ...RecipeFragment
+        recipeSections { ...RecipeSectionFragment }
+      }
+    }
+    #{@recipe_fragment}
+    #{@recipe_section_fragment}
+  """
+
   def installation_query(), do: @installation_query
 
   def external_token_mutation(), do: "mutation { externalToken }"
@@ -73,4 +136,10 @@ defmodule Console.Plural.Queries do
   def create_queue_mutation(), do: @create_queue
 
   def me_query(), do: @me_query
+
+  def search_repositories_query(), do: @search_repositories
+
+  def list_recipes_query(), do: @list_recipes
+
+  def get_recipe_query(), do: @get_recipe
 end

@@ -16,6 +16,25 @@ defmodule Console.GraphQl.Resolvers.Plural do
     |> clean_up_connection()
   end
 
+  def search_repositories(%{query: query}, _) do
+    Repositories.search_repositories(query)
+    |> clean_up_connection()
+  end
+
+  def list_recipes(args, _) do
+    Repositories.list_recipes(args[:id], args[:cursor])
+    |> clean_up_connection()
+  end
+
+  def get_recipe(%{id: id}, _) do
+    with {:ok, recipe} <- Repositories.get_recipe(id) do
+      sections = Enum.map(recipe.recipeSections, fn section ->
+        Map.put(section, :recipe_items, section.recipeItems)
+      end)
+      {:ok, Map.put(recipe, :recipe_sections, sections)}
+    end
+  end
+
   def list_applications(_, _) do
     with {:ok, %{items: items}} <- Client.list_applications(),
       do: {:ok, items}
