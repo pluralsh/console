@@ -133,8 +133,8 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
           nodes {
             metadata { name }
             status {
-              allocatable { cpu memory }
-              capacity { cpu memory }
+              allocatable
+              capacity
             }
             spec { providerId }
           }
@@ -159,8 +159,8 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
           node(name: $name) {
             metadata { name }
             status {
-              allocatable { cpu memory }
-              capacity { cpu memory }
+              allocatable
+              capacity
             }
             spec { providerId }
           }

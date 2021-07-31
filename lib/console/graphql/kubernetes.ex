@@ -34,8 +34,12 @@ defmodule Console.GraphQl.Kubernetes do
   end
 
   object :resource_spec do
-    field :cpu,    :string, resolve: fn resources, _, _ -> {:ok, resources["cpu"]} end
-    field :memory, :string, resolve: fn resources, _, _ -> {:ok, resources["memory"]} end
+    field :cpu,    :string, resolve: fn
+      resources, _, _ -> {:ok, resources["cpu"]}
+    end
+    field :memory, :string, resolve: fn
+      resources, _, _ -> {:ok, resources["memory"]}
+    end
   end
 
   import_types Console.GraphQl.Kubernetes.Event

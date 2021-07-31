@@ -174,8 +174,8 @@ export const NodeFragment = gql`
     metadata { ...MetadataFragment }
     status {
       phase
-      allocatable { cpu memory }
-      capacity { cpu memory }
+      allocatable
+      capacity
       conditions { type status message }
     }
     spec { podCidr providerId }

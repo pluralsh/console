@@ -20,8 +20,8 @@ defmodule Console.GraphQl.Kubernetes.Node do
   end
 
   object :node_status do
-    field :allocatable, :resource_spec
-    field :capacity,    :resource_spec
+    field :allocatable, :map
+    field :capacity,    :map
     field :phase,       :string
     field :conditions,  list_of(:node_condition)
   end
