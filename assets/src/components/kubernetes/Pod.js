@@ -16,6 +16,7 @@ import { BreadcrumbsContext } from '../Breadcrumbs'
 import { Container as Con } from './utils'
 import { asQuery } from '../utils/query'
 import { LoopingLogo } from '../utils/AnimatedLogo'
+import { Events } from './Event'
 
 function phaseToReadiness(phase) {
   switch (phase) {
@@ -480,6 +481,9 @@ export function Pod() {
                 </Box>
               </TabHeaderItem>
             ))}
+            <TabHeaderItem name='events'>
+              <Text size='small' weight={500}>events</Text>
+            </TabHeaderItem>
             <TabHeaderItem name='raw'>
               <Text size='small' weight={500}>raw</Text>
             </TabHeaderItem>
@@ -499,6 +503,9 @@ export function Pod() {
               <Container container={container} containerStatus={containerStatus[container.name]} />
             </TabContent>
           ))}
+          <TabContent name='events'>
+            <Events events={pod.events} />
+          </TabContent>
           <TabContent name='raw'>
             <RawContent raw={pod.raw} />
           </TabContent>

@@ -72,6 +72,7 @@ export const NODE_Q = gql`
   query Node($name: String!) {
     node(name: $name) {
       ...NodeFragment
+      raw
       pods { ...PodFragment }
       events { ...EventFragment }
     }
@@ -141,9 +142,11 @@ export const POD_Q = gql`
   query Pod($name: String!, $namespace: String!) {
     pod(name: $name, namespace: $namespace) {
       ...PodFragment
+      events { ...EventFragment }
     }
   }
   ${PodFragment}
+  ${EventFragment}
 `;
 
 export const USAGE_Q = gql`

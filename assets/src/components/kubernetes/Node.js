@@ -21,6 +21,7 @@ import { ClusterMetrics as Metrics } from './constants'
 import { sumBy } from 'lodash'
 import { Doughnut } from 'react-chartjs-2'
 import { normalizeColor } from 'grommet/utils'
+import { RawContent } from './Component'
 
 function NodeRowHeader() {
   return (
@@ -295,6 +296,9 @@ export function Node() {
           <TabHeaderItem name='events'>
             <Text size='small' weight={500}>events</Text>
           </TabHeaderItem>
+          <TabHeaderItem name='raw'>
+            <Text size='small' weight={500}>raw</Text>
+          </TabHeaderItem>
         </TabHeader>
         <TabContent name='info'>
           <Metadata metadata={node.metadata} />
@@ -302,6 +306,9 @@ export function Node() {
         </TabContent>
         <TabContent name='events'>
           <Events events={node.events} />
+        </TabContent>
+        <TabContent name='raw'>
+          <RawContent raw={node.raw} />
         </TabContent>
       </Tabs>
     </Box>

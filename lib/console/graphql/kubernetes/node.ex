@@ -1,11 +1,15 @@
 defmodule Console.GraphQl.Kubernetes.Node do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Kubernetes
+  import Console.GraphQl.Kubernetes.Base
 
   object :node do
     field :status,   non_null(:node_status)
     field :spec,     non_null(:node_spec)
     field :metadata, non_null(:metadata)
+
+    field :raw, non_null(:string), resolve: fn model, _, _ -> encode(model) end
+
     field :pods,     list_of(:pod), resolve: fn
       node, _, _ -> Kubernetes.list_pods_for_node(node)
     end
