@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Kubernetes.Pod do
   use Console.GraphQl.Schema.Base
+  alias Console.GraphQl.Resolvers.Kubernetes
   import Console.GraphQl.Kubernetes.Base
 
   object :pod do
@@ -8,6 +9,9 @@ defmodule Console.GraphQl.Kubernetes.Pod do
     field :metadata, non_null(:metadata)
 
     field :raw, non_null(:string), resolve: fn model, _, _ -> encode(model) end
+    field :events, list_of(:event), resolve: fn
+      model, _, _ -> Kubernetes.list_events(model)
+    end
   end
 
   object :pod_status do
