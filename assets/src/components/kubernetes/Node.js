@@ -1,16 +1,16 @@
-import React, { useCallback, useContext, useEffect, useMemo } from 'react'
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { NodeMetrics, POLL_INTERVAL } from './constants'
 import { NODES_Q, NODE_METRICS_Q, NODE_Q, CLUSTER_SATURATION } from './queries'
 import { HeaderItem, PodList, podResources, RowItem } from './Pod'
-import { Box, Text, ThemeContext } from 'grommet'
+import { Box, Drop, Text, ThemeContext } from 'grommet'
 import { useHistory, useParams } from 'react-router'
 import { mapify, Metadata } from './Metadata'
 import { ServerCluster } from 'grommet-icons'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import { Readiness, ReadyIcon } from '../Application'
-import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
+import { memoryParser } from 'kubernetes-resource-parser'
 import filesize from 'filesize'
 import { Events } from './Event'
 import { LoopingLogo } from '../utils/AnimatedLogo'
@@ -21,28 +21,61 @@ import { sumBy } from 'lodash'
 import { Doughnut } from 'react-chartjs-2'
 import { normalizeColor } from 'grommet/utils'
 import { RawContent } from './Component'
+import { cpuParser } from '../../utils/kubernetes'
+import { Line } from 'rc-progress'
 
 function NodeRowHeader() {
   return (
-    <Box direction='row' align='center' border='bottom' pad='small'>
+    <Box direction='row' align='center' border='bottom' pad='small' gap='small'>
       <HeaderItem width='30%' text='name' />
       <HeaderItem width='10%' text='status' />
+      <HeaderItem width='10%' text='cpu' />
+      <HeaderItem width='10%' text='memory' />
       <HeaderItem width='10%' text='region' />
       <HeaderItem width='10%' text='zone' />
       <HeaderItem width='10%' text='cpu' />
       <HeaderItem width='10%' text='memory' />
-      <HeaderItem width='20%' text='pod cidr' />
     </Box>
   )
 }
 
-function NodeRow({node}) {
+function UtilBar({capacity, usage, format, modifier}) {
+  const ref = useRef()
+  const [hover, setHover] = useState(false)
+  const theme = useContext(ThemeContext)
+  const percent = round(Math.min((usage / capacity) * 100, 100))
+  const color = percent < 50 ? 'success' : (percent < 75 ? 'status-warning' : 'error')
+  
+  return (
+    <>
+    <Box flex={false} ref={ref} fill='horizontal' 
+         height='20px' align='center' justify='center'
+         onMouseOver={() => setHover(true)} 
+         onMouseLeave={() => setHover(false)}>
+      <Line 
+        percent={percent}
+        trailColor={normalizeColor('cardDetailLight', theme)}
+        strokeColor={normalizeColor(color, theme)} />
+    </Box>
+    {hover && (
+      <Drop target={ref.current} align={{bottom: 'top'}} round='xsmall'>
+        <Box direction='row' gap='xsmall' align='center' 
+             background='sidebar' pad={{horizontal: 'small', vertical: 'xsmall'}}>
+          <Text size='small'>{modifier}: {percent}% {format(usage)}</Text>
+        </Box>
+      </Drop>
+    )}
+    </>
+  )
+}
+
+function NodeRow({node, metrics}) {
   let hist = useHistory()
   const labels = mapify(node.metadata.labels)
   const readiness = nodeReadiness(node.status)
   return (
     <Box direction='row' align='center' border='bottom' hoverIndicator='backgroundDark'
-         onClick={() => hist.push(`/nodes/${node.metadata.name}`)} pad='small'>
+         onClick={() => hist.push(`/nodes/${node.metadata.name}`)} pad='small' gap='small'>
       <Box flex={false} width='30%' direction='row' align='center' gap='xsmall'>
         <ServerCluster size='small' />
         <Text size='small'>{node.metadata.name}</Text>
@@ -51,11 +84,24 @@ function NodeRow({node}) {
         <ReadyIcon readiness={readiness} />
         <Text size='small'>{nodeReadiness(node.status) === Readiness.Ready ? 'Ready' : 'Pending'}</Text>
       </Box>
+      <Box flex={false} width='10%' direction='row' gap='xsmall' align='center'>
+        <UtilBar 
+          capacity={cpuParser(node.status.capacity.cpu)}
+          usage={metrics[node.metadata.name].cpu}
+          format={(v) => `${round(v)} cores`}
+          modifier='CPU' />
+      </Box>
+      <Box flex={false} width='10%' direction='row' gap='xsmall' align='center'>
+        <UtilBar 
+          capacity={memoryParser(node.status.capacity.memory)}
+          usage={metrics[node.metadata.name].memory}
+          format={filesize}
+          modifier="Mem" />
+      </Box>
       <RowItem width='10%' text={labels['failure-domain.beta.kubernetes.io/region']} />
       <RowItem width='10%' text={labels['failure-domain.beta.kubernetes.io/zone']} />
       <RowItem width='10%' text={cpuParser(node.status.capacity.cpu)} />
       <RowItem width='10%' text={filesize(memoryParser(node.status.capacity.memory))} />
-      <RowItem width='20%' text={node.spec.podCidr} />
     </Box>
   )
 }
@@ -378,18 +424,25 @@ export function Nodes() {
     ])
   }, [])
 
+  const metrics = useMemo(() => {
+    if (!data) return {}
+
+    return data.nodeMetrics.reduce((prev, {metadata: {name}, usage}) => ({
+      ...prev, [name]: {cpu: cpuParser(usage.cpu), memory: memoryParser(usage.memory)}
+    }), {})
+  })
+
   if (!data) return <LoopingLogo />
+
+  console.log(data.nodeMetrics)
 
   return (
     <Box style={{overflow: 'auto'}} fill background='backgroundColor' pad='small' gap='small'>
       <Box flex={false}>
         <ClusterMetrics nodes={data.nodes} />
-        <Box pad={{horizontal: 'small'}}>
-          <Text size='small' weight={500}>Worker Nodes</Text>
-        </Box>
         <Box flex={false}>
           <NodeRowHeader />
-          {data.nodes.map((node, ind) => <NodeRow key={ind} node={node} />)}
+          {data.nodes.map((node, ind) => <NodeRow key={ind} node={node} metrics={metrics} />)}
         </Box>
       </Box>
     </Box>

@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost'
 import { MetricResponseFragment } from '../graphql/dashboards';
-import { CertificateFragment, CronJobFragment, DeploymentFragment, EventFragment, IngressFragment, JobFragment, JobStatus, NodeFragment, PodFragment, ServiceFragment, StatefulSetFragment } from '../graphql/kubernetes';
+import { CertificateFragment, CronJobFragment, DeploymentFragment, EventFragment, IngressFragment, JobFragment, JobStatus, NodeFragment, NodeMetricFragment, PodFragment, ServiceFragment, StatefulSetFragment } from '../graphql/kubernetes';
 
 export const SERVICE_Q = gql`
   query Service($name: String!, $namespace: String!) {
@@ -64,8 +64,10 @@ export const DELETE_POD = gql`
 export const NODES_Q = gql`
   query {
     nodes { ...NodeFragment }
+    nodeMetrics { ...NodeMetricFragment }
   }
   ${NodeFragment}
+  ${NodeMetricFragment}
 `
 
 export const NODE_Q = gql`

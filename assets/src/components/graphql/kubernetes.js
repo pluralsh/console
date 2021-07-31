@@ -183,6 +183,15 @@ export const NodeFragment = gql`
   ${MetadataFragment}
 `;
 
+export const NodeMetricFragment = gql`
+  fragment NodeMetricFragment on NodeMetric {
+    metadata { ...MetadataFragment }
+    usage { cpu memory }
+    timestamp
+    window
+  }
+`
+
 export const CronJobFragment = gql`
   fragment CronJobFragment on CronJob {
     metadata { ...MetadataFragment }
