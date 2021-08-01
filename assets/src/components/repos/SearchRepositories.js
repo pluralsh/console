@@ -6,10 +6,11 @@ import { SEARCH_REPOS } from '../graphql/plural'
 import { MODAL_WIDTH } from './constants'
 import { SearchIcon } from '../users/utils'
 
-function RepositoryList({edges}) {
-  return edges.map(({node: repo}) => (
+export function Repository({repo, setRepo}) {
+  return (
     <Box flex={false} direction='row' align='center' gap='small' 
-         pad='small' border={{side: 'bottom', color: 'light-3'}}>
+         pad='small' border={{side: 'bottom', color: 'light-3'}}
+         onClick={setRepo && (() => setRepo(repo))} hoverIndicator='tone-light'>
       <Box height='50px' width='50px' flex={false}>
         <img src={repo.icon} alt={repo.name} height='50px' width='50px' />
       </Box>
@@ -18,10 +19,14 @@ function RepositoryList({edges}) {
         <Text size='small'><i>{repo.description}</i></Text>
       </Box>
     </Box>
-  ))
+  )
 }
 
-export function SearchRepos({setOpen}) {
+function RepositoryList({edges, setRepo}) {
+  return edges.map(({node: repo}) => (<Repository repo={repo} setRepo={setRepo} />))
+}
+
+export function SearchRepos({setOpen, setRepo}) {
   const [query, setQuery] = useState('')
   const {data} = useQuery(SEARCH_REPOS, {
     variables: {query},
@@ -33,8 +38,8 @@ export function SearchRepos({setOpen}) {
            onClickOutside={() => setOpen(false)}>
       <Box width={MODAL_WIDTH}>
         <ModalHeader text='Search for a repository' setOpen={setOpen} />
-        <Box fill pad='small' gap='small'>
-          <Box flex={false}>
+        <Box fill gap='small' style={{maxHeight: '80vh'}}>
+          <Box flex={false} pad='small'>
             <TextInput
               icon={<SearchIcon />}
               reverse
@@ -42,11 +47,14 @@ export function SearchRepos({setOpen}) {
               placeholder='search for a repo by name'
               onChange={({target: {value}}) => setQuery(value)} />
           </Box>
-          <Box flex={false} fill style={{overflow: 'auto'}}>
+          <Box fill style={{overflow: 'auto'}}>
             <Box flex={false}>
-              {data && data.repositories && (
-                <RepositoryList edges={data.repositories.edges} />
-              )}
+              {data && data.repositories && data.repositories.edges.map(({node: repo}) => (
+                <Repository 
+                  key={repo.id}
+                  repo={repo} 
+                  setRepo={setRepo} />
+              ))}
             </Box>
           </Box>
         </Box>
