@@ -1,8 +1,8 @@
 defmodule Console.Plural.Queries do
   @page_info """
     fragment PageInfo on PageInfo {
-      end_cursor
-      has_next_page
+      endCursor
+      hasNextPage
     }
   """
 

@@ -1,5 +1,6 @@
 import { gql } from 'apollo-boost'
 import { LogFilterFragment } from './kubernetes';
+import { PageInfo } from './base'
 
 export const RepositoryFragment = gql`
   fragment RepositoryFragment on Repository {
@@ -19,6 +20,60 @@ export const InstallationFragment = gql`
   }
   ${RepositoryFragment}
 `;
+
+export const RecipeFragment = gql`
+  fragment RecipeFragment on Recipe {
+    id
+    name
+    description
+    provider
+  }
+`
+
+export const RecipeSectionFragment = gql`
+  fragment RecipeSectionFragment on RecipeSection {
+    id
+    repository { ...RepositoryFragment }
+    recipeItems {
+      id
+      configuration { name default documentation type placeholder }
+    }
+  }
+  ${RepositoryFragment}
+`
+
+export const SEARCH_REPOS = gql`
+  query Search($query: String!) {
+    repositories(query: $query) {
+      pageInfo { ...PageInfo }
+      edges { node { ...RepositoryFragment } }
+    }
+  }
+  ${PageInfo}
+  ${RepositoryFragment}
+`
+
+export const RECIPES_Q = gql`
+  query Recipes($id: ID!, $cursor: String) {
+    recipes(id: $id, after: $cursor, first: 20) {
+      pageInfo { ...PageInfo }
+      edges { node { ...RecipeFragment } }
+    }
+  }
+  ${PageInfo}
+  ${RecipeFragment}
+`
+
+export const RECIPE_Q = gql`
+  query Recipe($id: ID!) {
+    recipe(id: $id) {
+      ...RecipeFragment
+      recipeSections { ...RecipeSectionFragment }
+    }
+  }
+  ${RecipeFragment}
+  ${RecipeSectionFragment}
+`
 
 export const INSTALLATION_Q = gql`
   query Installations($cursor: String) {

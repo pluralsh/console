@@ -13,7 +13,7 @@ import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from 
 import LegacyScroller from './utils/LegacyScroller'
 import { last } from 'lodash'
 import { toMap, useQueryParams } from './utils/query'
-import { LOG_FILTER_Q } from './graphql/forge'
+import { LOG_FILTER_Q } from './graphql/plural'
 import { upstream } from '../helpers/hostname'
 import fileDownload from 'js-file-download';
 import { fetchToken } from '../helpers/auth'

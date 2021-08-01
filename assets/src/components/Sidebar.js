@@ -1,17 +1,18 @@
 import React, { useState, useRef, useContext } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
-import { Deploy, Network, Configure, BarChart, Group, TextAlignFull, Cubes, List, Nodes, Alert } from 'grommet-icons'
+import { Deploy, Network, Configure, BarChart, Group, TextAlignFull, Cubes, List, Nodes, Alert, Search } from 'grommet-icons'
 import { Box, Text } from 'grommet'
 import { LoginContext } from './Login'
 import Avatar from './users/Avatar'
 import { InstallationContext } from './Installations'
 import { Tooltip } from './utils/Tooltip'
 import './sidebar.css'
+import { Installer } from './repos/Installer'
 
 const SIDEBAR_ICON_HEIGHT = '42px'
 const APP_ICON = `${process.env.PUBLIC_URL}/console-white.png`
 
-function SidebarIcon({icon, text, selected, path}) {
+function SidebarIcon({icon, text, selected, path, onClick}) {
   const dropRef = useRef()
   let history = useHistory()
   const [hover, setHover] = useState(false)
@@ -31,7 +32,7 @@ function SidebarIcon({icon, text, selected, path}) {
       hoverIndicator='sidebarHover'
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      onClick={() => history.push(path)}
+      onClick={() => onClick ? onClick() : history.push(path)}
       background={selected ? 'sidebarHover' : null}
       direction='row'>
       {icon}
@@ -77,8 +78,10 @@ const IMAGE_HEIGHT='35px'
 const replace = (path, name) => path.replace('{repo}', name)
 
 export default function Sidebar() {
+  const [open, setOpen] = useState(false)
   const loc = useLocation()
   const {currentApplication} = useContext(InstallationContext)
+
   const name = currentApplication && currentApplication.name
   const active = OPTIONS.findIndex(({path}) => {
     if (path === '/') return loc.pathname === path
@@ -86,23 +89,31 @@ export default function Sidebar() {
   })
 
   return (
+    <>
     <Box background='sidebar' height='100vh'>
       <Box flex={false} height={IMAGE_HEIGHT} justify='center' align='center' pad='small' margin={{vertical: 'small'}}>
         <img height={IMAGE_HEIGHT} alt='' src={APP_ICON} />
       </Box>
       <Box fill='vertical' justify='center' gap='xsmall' align='center'>
-      {OPTIONS.map(({text, icon, path}, ind) => (
         <SidebarIcon
-          key={ind}
-          icon={icon}
-          path={replace(path, name)}
-          text={text}
-          selected={ind === active} />
-      ))}
+          icon={<Search size={ICON_HEIGHT} />}
+          text='Search'
+          selected={open}
+          onClick={() => setOpen(true)} />
+        {OPTIONS.map(({text, icon, path}, ind) => (
+          <SidebarIcon
+            key={ind}
+            icon={icon}
+            path={replace(path, name)}
+            text={text}
+            selected={ind === active} />
+        ))}
       </Box>
       <Box height='70px' flex={false}>
         <Me />
       </Box>
     </Box>
+    {open && <Installer setOpen={setOpen} />}
+    </>
   )
 }

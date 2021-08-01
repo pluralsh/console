@@ -2,7 +2,7 @@ import React, { useEffect, useContext, useState, useCallback } from 'react'
 import { Box, Text } from 'grommet'
 import { Checkmark, Next } from 'grommet-icons'
 import { useQuery } from 'react-apollo'
-import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/forge'
+import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
 import { ApplicationReadyIcon } from './Application'
 import { LoopingLogo } from './utils/AnimatedLogo'
 
