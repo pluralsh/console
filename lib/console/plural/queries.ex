@@ -97,9 +97,11 @@ defmodule Console.Plural.Queries do
   @search_repositories """
     query SearchRepos($query: String!) {
       searchRepositories(query: $query, first: 10) {
+        pageInfo { ...PageInfo }
         edges { node { ...RepositoryFragment } }
       }
     }
+    #{@page_info}
     #{@repository_fragment}
   """
 

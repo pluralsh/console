@@ -64,10 +64,12 @@ defmodule Console.Plural.Repositories do
       %Query{installations: %Connection{
         pageInfo: %PageInfo{},
         edges: [
-          %Edge{node: %Installation{
-            repository: %Repository{dashboards: [%Dashboard{}]}
+          %Edge{
+            node: %Installation{
+              repository: %Repository{dashboards: [%Dashboard{}]}
+            }
           }
-        }]
+        ]
       }}
     )
     |> when_ok(fn %{installations: result} -> result end)
