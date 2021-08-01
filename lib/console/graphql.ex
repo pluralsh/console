@@ -115,6 +115,7 @@ defmodule Console.GraphQl do
 
     import_fields :user_mutations
     import_fields :kubernetes_mutations
+    import_fields :plural_mutations
   end
 
   subscription do

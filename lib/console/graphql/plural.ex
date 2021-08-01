@@ -46,6 +46,11 @@ defmodule Console.GraphQl.Plural do
     field :default,       :string
   end
 
+  object :repository_context do
+    field :repository, non_null(:string)
+    field :context,    :map
+  end
+
   connection node_type: :installation
   connection node_type: :repository
   connection node_type: :recipe
@@ -84,11 +89,27 @@ defmodule Console.GraphQl.Plural do
       resolve &Plural.list_recipes/2
     end
 
+    field :context, list_of(:repository_context) do
+      middleware Authenticated
+
+      resolve &Plural.resolve_context/2
+    end
+
     field :recipe, :recipe do
       middleware Authenticated
       arg :id, non_null(:id)
 
       resolve &Plural.get_recipe/2
+    end
+  end
+
+  object :plural_mutations do
+    field :install_recipe, :build do
+      middleware Authenticated
+      arg :id, non_null(:id)
+      arg :context, non_null(:map)
+
+      resolve &Plural.install_recipe/2
     end
   end
 end

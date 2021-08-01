@@ -17,6 +17,10 @@ defmodule Console.Plural.Repositories do
     defstruct [:installations, :searchRepositories, :recipes, :recipe]
   end
 
+  defmodule Mutation do
+    defstruct [:installRecipe]
+  end
+
   def search_repositories(query) do
     search_repositories_query()
     |> Client.run(
@@ -46,6 +50,7 @@ defmodule Console.Plural.Repositories do
     |> Client.run(
       prune_variables(%{id: id}),
       %Query{recipe: %Recipe{
+        repository: %Repository{},
         recipeSections: [%RecipeSection{
           repository: %Repository{},
           recipeItems: [%RecipeItem{
@@ -55,6 +60,14 @@ defmodule Console.Plural.Repositories do
       }}
     )
     |> when_ok(fn %{recipe: result} -> result end)
+  end
+
+  def install_recipe(id) do
+    install_recipe_mutation()
+    |> Client.run(
+      prune_variables(%{id: id, ctx: %{}}),
+      %Mutation{}
+    )
   end
 
   def list_installations(first, cursor) do

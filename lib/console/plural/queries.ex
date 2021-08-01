@@ -120,11 +120,21 @@ defmodule Console.Plural.Queries do
     query Recipe($id: ID!) {
       recipe(id: $id) {
         ...RecipeFragment
+        repository { ...RepositoryFragment }
         recipeSections { ...RecipeSectionFragment }
       }
     }
+    #{@repository_fragment}
     #{@recipe_fragment}
     #{@recipe_section_fragment}
+  """
+
+  @install_recipe """
+    mutation Install($id: ID!, $ctx: Map!) {
+      installRecipe(recipeId: $id, context: $ctx) {
+        id
+      }
+    }
   """
 
   def installation_query(), do: @installation_query
@@ -144,4 +154,6 @@ defmodule Console.Plural.Queries do
   def list_recipes_query(), do: @list_recipes
 
   def get_recipe_query(), do: @get_recipe
+
+  def install_recipe_mutation(), do: @install_recipe
 end

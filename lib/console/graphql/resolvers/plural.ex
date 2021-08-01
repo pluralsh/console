@@ -42,6 +42,17 @@ defmodule Console.GraphQl.Resolvers.Plural do
 
   def resolve_application(%{name: name}, _), do: Client.get_application(name)
 
+  def resolve_context(_, _) do
+    with {:ok, %{configuration: conf}} <- Console.Plural.Context.get() do
+      confs = Enum.map(conf, fn {k, map} -> %{repository: k, context: map} end)
+      {:ok, confs}
+    end
+  end
+
+  def install_recipe(%{id: id, context: context}, %{context: %{current_user: user}}) do
+    Plural.install_recipe(id, context, user)
+  end
+
   def resolve_configuration(%{metadata: %{name: name}}, first, second),
     do: resolve_configuration(%{name: name}, first, second)
   def resolve_configuration(%{name: name}, _, _) do

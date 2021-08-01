@@ -4,7 +4,12 @@ defmodule Console.GraphQl.CustomTypes do
 
   scalar :map, name: "Map" do
     serialize &mapish/1
-    parse &mapish/1
+    parse fn
+      %Blueprint.Input.String{value: value}, _ ->
+        Jason.decode(value)
+      %Blueprint.Input.Null{}, _ -> {:ok, nil}
+      _, _ -> :error
+    end
   end
 
   scalar :long, name: "Long" do
@@ -18,6 +23,7 @@ defmodule Console.GraphQl.CustomTypes do
   end
 
   defp mapish(m) when is_map(m), do: m
+  defp mapish(m) when is_binary(m), do: Jason.decode!(m)
   defp mapish(_), do: :error
 
   defp parse_int(int) do

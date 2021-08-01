@@ -7,11 +7,13 @@ defmodule Console.Commands.Plural do
       do: plural("crypto", ["unlock"])
   end
 
+  def build(), do: plural("build", [])
+
   def build(repo), do: plural("build", ["--only", repo])
 
-  def deploy(_repo), do: plural("deploy", [])
+  def deploy(_repo \\ :ignore), do: plural("deploy", [])
 
-  def diff(_repo), do: plural("diff", [])
+  def diff(_repo \\ :ignore), do: plural("diff", [])
 
   def bounce(repo), do: plural("bounce", [repo])
 

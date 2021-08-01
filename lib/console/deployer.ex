@@ -3,6 +3,7 @@ defmodule Console.Deployer do
   alias Console.Commands.{Plural, Command}
   alias Console.Services.Builds
   alias Console.Schema.Build
+  alias Console.Plural.Context
   require Logger
 
   @poll_interval 10_000
@@ -108,6 +109,18 @@ defmodule Console.Deployer do
       {Plural, :diff, [repo]},
       {Plural, :deploy, [repo]},
       {storage, :revise, [commit_message(message, repo)]},
+      {storage, :push, []}
+    ])
+  end
+
+  defp perform(storage, %Build{type: :install, context: %{"configuration" => conf, "bundle" => b}, message: message} = build) do
+    with_build(build, [
+      {storage, :init, []},
+      {Context, :merge, [conf, %Context.Bundle{repository: b["repository"], name: b["name"]}]},
+      {Plural, :build, []},
+      {Plural, :diff, []},
+      {Plural, :deploy, []},
+      {storage, :revise, [commit_message(message, b["repository"])]},
       {storage, :push, []}
     ])
   end

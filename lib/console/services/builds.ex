@@ -53,11 +53,13 @@ defmodule Console.Services.Builds do
       |> Build.changeset(attrs)
       |> Repo.insert()
     end)
-    |> add_operation(:valid, fn %{build: %{repository: repo} = build} ->
-      case Client.get_application(repo) do
-        {:ok, %Application{}} -> {:ok, build}
-        _ -> {:error, :invalid_repository}
-      end
+    |> add_operation(:valid, fn
+      %{build: %{type: :install} = build} -> {:ok, build}
+      %{build: %{repository: repo} = build} ->
+        case Client.get_application(repo) do
+          {:ok, %Application{}} -> {:ok, build}
+          _ -> {:error, :invalid_repository}
+        end
     end)
     |> execute(extract: :build)
     |> notify(:create, user)

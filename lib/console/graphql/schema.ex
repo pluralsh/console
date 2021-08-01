@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Schema do
   use Console.GraphQl.Schema.Base
   alias Console.Schema
-  alias Console.GraphQl.Resolvers.{Build, Plural, User}
+  alias Console.GraphQl.Resolvers.{Build, User}
 
   import_types Absinthe.Plug.Types
   import_types Console.GraphQl.CustomTypes

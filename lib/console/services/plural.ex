@@ -1,5 +1,7 @@
 defmodule Console.Services.Plural do
-  alias Console.Schema.Manifest
+  alias Console.Schema.{User, Manifest}
+  alias Console.Services.{Builds}
+  alias Console.Plural.Repositories
 
   def terraform_file(repository) do
     terraform_filename(repository)
@@ -15,6 +17,21 @@ defmodule Console.Services.Plural do
     with {:ok, _} <- validate(update, tool),
          :ok <- File.write(filename(repository, tool), update),
       do: {:ok, update}
+  end
+
+  def install_recipe(id, context, %User{} = user) do
+    with {:ok, recipe} <- Repositories.get_recipe(id),
+         {:ok, _} <- Repositories.install_recipe(id) do
+      Builds.create(%{
+        type: :install,
+        repository: recipe.repository.name,
+        message: "Installed bundle #{recipe.name} for repository #{recipe.repository.name}",
+        context: %{
+          configuration: context,
+          bundle: %{repository: recipe.repository.name, name: recipe.name},
+        },
+      }, user)
+    end
   end
 
   def cluster_name() do

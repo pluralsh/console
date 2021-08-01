@@ -11,7 +11,7 @@ defmodule Console.Plural.Repository do
 end
 
 defmodule Console.Plural.Recipe do
-  defstruct [:id, :name, :description, :provider, :recipeSections]
+  defstruct [:id, :name, :description, :provider, :repository, :recipeSections]
 end
 
 defmodule Console.Plural.RecipeSection do
