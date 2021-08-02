@@ -10,7 +10,8 @@ defmodule Console.Plural.Repositories do
     Recipe,
     RecipeSection,
     RecipeItem,
-    ConfigurationItem
+    ConfigurationItem,
+    Workspace
   }
 
   defmodule Query do
@@ -34,9 +35,10 @@ defmodule Console.Plural.Repositories do
   end
 
   def list_recipes(id, cursor) do
+    prov = Workspace.provider()
     list_recipes_query()
     |> Client.run(
-      prune_variables(%{id: id, cursor: cursor}),
+      prune_variables(%{id: id, cursor: cursor, provider: provider(prov)}),
       %Query{recipes: %Connection{
         pageInfo: %PageInfo{},
         edges: [%Edge{node: %Recipe{}}]
@@ -44,6 +46,10 @@ defmodule Console.Plural.Repositories do
     )
     |> when_ok(fn %{recipes: result} -> result end)
   end
+
+  defp provider(:gcp), do: "GCP"
+  defp provider(:azure), do: "AZURE"
+  defp provider(_), do: "AWS"
 
   def get_recipe(id) do
     get_recipe_query()

@@ -106,8 +106,8 @@ defmodule Console.Plural.Queries do
   """
 
   @list_recipes """
-    query Recipes($id: ID!, $cursor: String) {
-      recipes(repositoryId: $id, first: 20, after: $cursor) {
+    query Recipes($id: ID!, $cursor: String, $provider: Provider) {
+      recipes(repositoryId: $id, first: 20, after: $cursor, provider: $provider) {
         pageInfo { ...PageInfo }
         edges { node { ...RecipeFragment } }
       }

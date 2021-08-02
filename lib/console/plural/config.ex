@@ -31,6 +31,14 @@ defmodule Console.Plural.Config do
     end
   end
 
+  def endpoint() do
+    fetch_file()
+    |> plural_endpoint()
+  end
+
+  defp plural_endpoint(%{"endpoint" => e}) when byte_size(e) > 0, do: e
+  defp plural_endpoint(_), do: "app.plural.sh"
+
   def derive_config() do
     with nil <- System.get_env("CHARTMART_TOKEN"),
       do: from_config_file()

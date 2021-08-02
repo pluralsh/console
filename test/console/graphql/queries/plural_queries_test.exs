@@ -76,7 +76,7 @@ defmodule Console.GraphQl.PluralQueriesTest do
     test "it can list recipes for a repo" do
       body = Jason.encode!(%{
         query: Queries.list_recipes_query(),
-        variables: %{id: "id"}
+        variables: %{id: "id", provider: "AWS"}
       })
 
       recipes = [%{id: "id", name: "recipe", description: "a recipe"}]
