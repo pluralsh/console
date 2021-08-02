@@ -4,7 +4,7 @@ import { Close } from 'grommet-icons'
 
 export function ModalHeader({text, setOpen}) {
   return (
-    <Box flex={false} direction='row' pad='small'>
+    <Box flex={false} direction='row' pad={{horizontal: 'small', top: 'small'}}>
       <Box direction='row' fill='horizontal' align='center'>
         <Text size='16px' weight={500}>{text}</Text>
       </Box>
@@ -19,6 +19,14 @@ export function ModalHeader({text, setOpen}) {
         onClick={() => setOpen(false)}>
         <Close size='16px' />
       </Box>
+    </Box>
+  )
+}
+
+export function ModalContent({pad, children, ...props}) {
+  return (
+    <Box pad={pad || {bottom: 'small'}} {...props}>
+      {children}
     </Box>
   )
 }

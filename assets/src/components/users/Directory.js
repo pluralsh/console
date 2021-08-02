@@ -15,6 +15,7 @@ import { extendConnection } from '../../utils/graphql'
 import { SearchIcon } from './utils'
 import { SectionContentContainer, SectionPortal } from '../utils/Section'
 import { LoopingLogo } from '../utils/AnimatedLogo'
+import { ModalContent } from '../utils/Modal'
 
 const INPUT_WIDTH = '350px'
 
@@ -196,7 +197,7 @@ export default function Directory() {
   ]), [section])
 
   return (
-    <ThemeContext.Extend value={{global: {input: {padding: '9px'}}}}>
+    <ThemeContext.Extend value={{global: {input: {padding: '8px'}}}}>
     <Box fill pad='small' direction='row' gap='medium' background='backgroundColor'>
       <Box gap='xsmall' flex={false} width='200px'>
         <SectionChoice 
@@ -214,7 +215,7 @@ export default function Directory() {
           label='Roles' 
           section='roles' 
           setSection={setSection} />
-        <CreateModal header='create a new group' form={<GroupForm />}>
+        <CreateModal header='Create a new group' form={<GroupForm />}>
           {(onClick) => <SectionChoice icon={
             <Box direction='row' align='center' gap='xxsmall'>
               <Add size='8px' />
@@ -222,7 +223,7 @@ export default function Directory() {
             </Box>} label='Create Group' onClick={onClick} />
           }
         </CreateModal>
-        <CreateModal width='50vw' header='create a new role' form={<CreateRole />}>
+        <CreateModal width='50vw' header='Create a new role' form={<CreateRole />}>
           {(onClick) => <SectionChoice icon={
             <Box direction='row' align='center' gap='xxsmall'>
               <Add size='8px' />

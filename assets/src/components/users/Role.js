@@ -169,7 +169,7 @@ export function CreateRole() {
   }})
 
   return (
-    <Box gap='small' pad='small'>
+    <Box gap='small' pad={{horizontal: 'small', bottom: 'small'}}>
       <RoleForm
         attributes={attributes}
         setAttributes={setAttributes}
