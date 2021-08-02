@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useQuery } from 'react-apollo'
+import { useMutation, useQuery } from 'react-apollo'
 import { Box, CheckBox, Layer, Text, ThemeContext } from 'grommet'
 import { ModalHeader, Button, SecondaryButton } from 'forge-core'
-import { RECIPE_Q } from '../graphql/plural'
+import { INSTALL_RECIPE, RECIPE_Q } from '../graphql/plural'
 import { ConfigurationType, MODAL_WIDTH } from './constants'
 import { Repository } from './SearchRepositories'
 import { LabelledInput } from '../utils/LabelledInput'
+import { appendConnection, updateCache } from '../../utils/graphql'
+import { BUILDS_Q } from '../graphql/builds'
 
 function compileConfigurations(items) {
   let res = {}
@@ -101,13 +103,23 @@ function ConfigurationItem({config, ctx, setValue}) {
   }
 }
 
-function RecipeConfiguration({recipe}) {
+function RecipeConfiguration({recipe, context: ctx, setOpen}) {
   const sections = recipe.recipeSections
-  const [context, setContext] = useState({})
+  const [context, setContext] = useState(ctx)
   const [ind, setInd] = useState(0)
   const {repository, recipeItems} = sections[ind]
   const hasNext = sections.length > ind + 1
   const configuration = useMemo(() => compileConfigurations(recipeItems), [recipeItems])
+
+  const [mutation, {loading}] = useMutation(INSTALL_RECIPE, {
+    variables: {id: recipe.id, context: JSON.stringify(context)},
+    update: (cache, {data: {installRecipe}}) => updateCache(cache, {
+      query: BUILDS_Q,
+      update: (prev) => appendConnection(prev, installRecipe, 'builds'),
+    }),
+    onCompleted: () => setOpen(false),
+  })
+
   const setValue = useCallback((name, val) => (
     setContext({
       ...context,
@@ -116,11 +128,11 @@ function RecipeConfiguration({recipe}) {
   ), [setContext, context, repository])
 
   const next = useCallback(() => {
-    if (!hasNext) return
+    if (!hasNext) return mutation()
     setInd(ind + 1)
   }, [sections, ind, setInd, hasNext])
 
-  console.log(configuration)
+  console.log(context)
 
   return (
     <ThemeContext.Extend value={{global: {input: {padding: '9px'}}}}>
@@ -140,12 +152,17 @@ function RecipeConfiguration({recipe}) {
         <Box flex={false} direction='row' align='center' pad='small' 
              gap='small' justify='end'>
           {ind > 0 && <SecondaryButton label='Previous' onClick={() => setInd(ind - 1)} />}
-          <Button label={hasNext ? 'Continue' : 'Install'} onClick={next} />
+          <Button 
+            label={hasNext ? 'Continue' : 'Install'} 
+            loading={loading}
+            onClick={next} />
         </Box>
       </Box>
     </ThemeContext.Extend>
   )
 }
+
+const buildContext = (contexts) => contexts.reduce((acc, {repository, context}) => ({...acc, [repository]: context}), {})
 
 export function Configuration({recipe, setOpen}) {
   const {data} = useQuery(RECIPE_Q, {
@@ -159,7 +176,13 @@ export function Configuration({recipe, setOpen}) {
       <Box width={MODAL_WIDTH}>
         <ModalHeader text='Configure your installation' setOpen={setOpen} />
         <Box fill>
-          {data && <RecipeConfiguration recipe={data.recipe} />} 
+          {data && (
+            <RecipeConfiguration 
+              recipe={data.recipe} 
+              context={buildContext(data.context)} 
+              setOpen={setOpen}
+            />
+          )} 
         </Box>
       </Box>
     </Layer>

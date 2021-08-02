@@ -12,7 +12,7 @@ defmodule Console.GraphQl.PluralMutationsTest do
 
       inst_body = Jason.encode!(%{
         query: Queries.install_recipe_mutation(),
-        variables: %{id: "id", ctx: %{}}
+        variables: %{id: "id", ctx: "{}"}
       })
 
       recipe = %{

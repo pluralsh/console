@@ -1,6 +1,7 @@
 import { gql } from 'apollo-boost'
 import { LogFilterFragment } from './kubernetes';
 import { PageInfo } from './base'
+import { BuildFragment } from './builds';
 
 export const RepositoryFragment = gql`
   fragment RepositoryFragment on Repository {
@@ -70,9 +71,22 @@ export const RECIPE_Q = gql`
       ...RecipeFragment
       recipeSections { ...RecipeSectionFragment }
     }
+    context {
+      repository
+      context
+    }
   }
   ${RecipeFragment}
   ${RecipeSectionFragment}
+`
+
+export const INSTALL_RECIPE = gql`
+  mutation Install($id: ID!, $context: Map!) {
+    installRecipe(id: $id, context: $context) {
+      ...BuildFragment
+    }
+  }
+  ${BuildFragment}
 `
 
 export const INSTALLATION_Q = gql`

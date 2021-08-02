@@ -65,7 +65,7 @@ defmodule Console.Plural.Repositories do
   def install_recipe(id) do
     install_recipe_mutation()
     |> Client.run(
-      prune_variables(%{id: id, ctx: %{}}),
+      prune_variables(%{id: id, ctx: "{}"}),
       %Mutation{}
     )
   end
