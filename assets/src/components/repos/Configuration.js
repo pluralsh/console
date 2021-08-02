@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery } from 'react-apollo'
-import { Box, CheckBox, Layer, Text, ThemeContext } from 'grommet'
-import { ModalHeader, Button, SecondaryButton } from 'forge-core'
+import { Box, CheckBox, Text, ThemeContext } from 'grommet'
+import { Button, SecondaryButton } from 'forge-core'
+import { ModalHeader } from '../utils/Modal'
 import { INSTALL_RECIPE, RECIPE_Q } from '../graphql/plural'
 import { ConfigurationType, MODAL_WIDTH } from './constants'
 import { Repository } from './SearchRepositories'
@@ -169,22 +170,19 @@ export function Configuration({recipe, setOpen}) {
     variables: {id: recipe.id},
     fetchPolicy: 'cache-and-network'
   })
-  const close = useCallback(() => setOpen(false), [])
 
   return (
-    <Layer modal onEsc={close} onClickOutside={close}>
-      <Box width={MODAL_WIDTH}>
-        <ModalHeader text='Configure your installation' setOpen={setOpen} />
-        <Box fill>
-          {data && (
-            <RecipeConfiguration 
-              recipe={data.recipe} 
-              context={buildContext(data.context)} 
-              setOpen={setOpen}
-            />
-          )} 
-        </Box>
+    <Box animation='fadeIn' width={MODAL_WIDTH}>
+      <ModalHeader text='Configure your installation' setOpen={setOpen} />
+      <Box fill style={{minHeight: '150px'}}>
+        {data && (
+          <RecipeConfiguration 
+            recipe={data.recipe} 
+            context={buildContext(data.context)} 
+            setOpen={setOpen}
+          />
+        )} 
       </Box>
-    </Layer>
+    </Box>  
   )
 } 

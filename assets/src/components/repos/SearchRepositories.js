@@ -22,10 +22,6 @@ export function Repository({repo, setRepo}) {
   )
 }
 
-function RepositoryList({edges, setRepo}) {
-  return edges.map(({node: repo}) => (<Repository repo={repo} setRepo={setRepo} />))
-}
-
 export function SearchRepos({setOpen, setRepo}) {
   const [query, setQuery] = useState('')
   const {data} = useQuery(SEARCH_REPOS, {
@@ -34,31 +30,28 @@ export function SearchRepos({setOpen, setRepo}) {
   })
 
   return (
-    <Layer modal onEsc={() => setOpen(false)} 
-           onClickOutside={() => setOpen(false)}>
-      <Box width={MODAL_WIDTH}>
-        <ModalHeader text='Search for a repository' setOpen={setOpen} />
-        <Box fill gap='small' style={{maxHeight: '80vh'}}>
-          <Box flex={false} pad='small'>
-            <TextInput
-              icon={<SearchIcon />}
-              reverse
-              value={query}
-              placeholder='search for a repo by name'
-              onChange={({target: {value}}) => setQuery(value)} />
-          </Box>
-          <Box fill style={{overflow: 'auto'}}>
-            <Box flex={false}>
-              {data && data.repositories && data.repositories.edges.map(({node: repo}) => (
-                <Repository 
-                  key={repo.id}
-                  repo={repo} 
-                  setRepo={setRepo} />
-              ))}
-            </Box>
+    <Box animation='fadeIn' width={MODAL_WIDTH}>
+      <ModalHeader text='Search for a repository' setOpen={setOpen} />
+      <Box fill gap='small' style={{maxHeight: '80vh', minHeight: '300px'}}>
+        <Box flex={false} pad='small'>
+          <TextInput
+            icon={<SearchIcon />}
+            reverse
+            value={query}
+            placeholder='search for a repo by name'
+            onChange={({target: {value}}) => setQuery(value)} />
+        </Box>
+        <Box fill style={{overflow: 'auto'}}>
+          <Box flex={false}>
+            {data && data.repositories && data.repositories.edges.map(({node: repo}) => (
+              <Repository 
+                key={repo.id}
+                repo={repo} 
+                setRepo={setRepo} />
+            ))}
           </Box>
         </Box>
       </Box>
-    </Layer>
+    </Box>
   )
 }

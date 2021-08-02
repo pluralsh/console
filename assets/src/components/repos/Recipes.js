@@ -48,20 +48,17 @@ export function Recipes({repo, setOpen, setRecipe}) {
     variables: {id: repo.id},
     fetchPolicy: 'cache-and-network'
   })
-  const close = useCallback(() => setOpen(false), [setOpen])
 
   return (
-    <Layer modal onEsc={close} onClickOutside={close}>
-      <Box width={MODAL_WIDTH}>
-        <ModalHeader text='Select a bundle to install' setOpen={setOpen} />
-        <Box fill style={{overflow: 'auto', maxHeight: '80vh'}}>
-          {data && data.recipes && (
-            <RecipeGrid 
-              edges={data.recipes.edges}
-              setRecipe={setRecipe} />
-          )}
-        </Box>
+    <Box animation='fadeIn' width={MODAL_WIDTH}>
+      <ModalHeader text='Select a bundle to install' setOpen={setOpen} />
+      <Box fill justify='center' style={{overflow: 'auto', maxHeight: '80vh', minHeight: '150px'}}>
+        {data && data.recipes && (
+          <RecipeGrid 
+            edges={data.recipes.edges}
+            setRecipe={setRecipe} />
+        )}
       </Box>
-    </Layer>
+    </Box>
   )
 }
