@@ -12,7 +12,7 @@ import { Installer } from './repos/Installer'
 const SIDEBAR_ICON_HEIGHT = '42px'
 const APP_ICON = `${process.env.PUBLIC_URL}/console-white.png`
 
-function SidebarIcon({icon, text, selected, path, onClick}) {
+export function SidebarIcon({icon, text, selected, path, onClick, size}) {
   const dropRef = useRef()
   let history = useHistory()
   const [hover, setHover] = useState(false)
@@ -27,8 +27,8 @@ function SidebarIcon({icon, text, selected, path, onClick}) {
       justify='center'
       margin={{horizontal: 'xsmall'}}
       round='xsmall'
-      height={SIDEBAR_ICON_HEIGHT}
-      width={SIDEBAR_ICON_HEIGHT}
+      height={size || SIDEBAR_ICON_HEIGHT}
+      width={size || SIDEBAR_ICON_HEIGHT}
       hoverIndicator='sidebarHover'
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
@@ -78,7 +78,6 @@ const IMAGE_HEIGHT='35px'
 const replace = (path, name) => path.replace('{repo}', name)
 
 export default function Sidebar() {
-  const [open, setOpen] = useState(false)
   const loc = useLocation()
   const {currentApplication} = useContext(InstallationContext)
 
@@ -89,17 +88,11 @@ export default function Sidebar() {
   })
 
   return (
-    <>
     <Box background='sidebar' height='100vh'>
       <Box flex={false} height={IMAGE_HEIGHT} justify='center' align='center' pad='small' margin={{vertical: 'small'}}>
         <img height={IMAGE_HEIGHT} alt='' src={APP_ICON} />
       </Box>
       <Box fill='vertical' justify='center' gap='xsmall' align='center'>
-        <SidebarIcon
-          icon={<Search size={ICON_HEIGHT} />}
-          text='Search'
-          selected={open}
-          onClick={() => setOpen(true)} />
         {OPTIONS.map(({text, icon, path}, ind) => (
           <SidebarIcon
             key={ind}
@@ -113,7 +106,5 @@ export default function Sidebar() {
         <Me />
       </Box>
     </Box>
-    {open && <Installer setOpen={setOpen} />}
-    </>
   )
 }

@@ -75,7 +75,7 @@ export function Installations() {
   const {name, spec: {descriptor}} = currentApplication
   return (
     <Box flex={false} direction='row' round='xsmall' background={open ? 'sidebarHover' : null}
-         margin={{vertical: 'xsmall'}} pad={{horizontal: 'small'}} 
+         margin={{vertical: 'xsmall'}} pad={{horizontal: 'small', vertical: 'xsmall'}} 
          gap='small' align='center'  hoverIndicator='sidebarHover' onClick={() => setOpen(true)}>
       {descriptor.icons.length > 0 && <ApplicationIcon application={currentApplication} dark />}
       <Text size='small' weight={500}>{name}</Text>

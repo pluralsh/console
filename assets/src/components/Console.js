@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Switch, Route, Redirect } from 'react-router-dom'
 import { Box } from 'grommet'
-import Sidebar from './Sidebar'
+import Sidebar, { SidebarIcon } from './Sidebar'
 import Builds from './Builds'
 import Build from './Build'
 import BreadcrumbProvider, { Breadcrumbs } from './Breadcrumbs'
@@ -24,10 +24,14 @@ import { withPluralApi } from './PluralApi'
 import { Incidents } from './incidents/Incidents'
 import { Incident } from './incidents/Incident'
 import { AutoRefresh } from './AutoRefresh'
+import { Search } from 'grommet-icons'
+import { Installer } from './repos/Installer'
 
 const SIDEBAR_WIDTH = '70px'
 
 export default function Console() {
+  const [open, setOpen] = useState(false)
+
   return (
     <EnsureLogin>
       <InstallationsProvider>
@@ -40,9 +44,17 @@ export default function Console() {
           <Box height='100vh' width='100%'>
             <Box flex={false} direction='row' align='center' background='backgroundDark' height='55px'>
               <Breadcrumbs />
-              <Box direction='row' fill justify='end' pad={{horizontal: 'medium'}}>
+              <Box direction='row' fill gap='small' justify='end' 
+                   pad={{horizontal: 'medium'}} align='center'>
+                <SidebarIcon
+                  icon={<Search size='18px' />}
+                  text='Search'
+                  size='40px'
+                  selected={open}
+                  onClick={() => setOpen(true)} />
                 <Installations />
               </Box>
+              {open && <Installer setOpen={setOpen} />}
             </Box>
             <Box fill direction='row'>
               <Switch>
