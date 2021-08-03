@@ -22,10 +22,10 @@ defmodule Console.Plural.Repositories do
     defstruct [:installRecipe]
   end
 
-  def search_repositories(query) do
+  def search_repositories(query, first) do
     search_repositories_query()
     |> Client.run(
-      prune_variables(%{query: query}),
+      prune_variables(%{query: query, first: first}),
       %Query{searchRepositories: %Connection{
         pageInfo: %PageInfo{},
         edges: [%Edge{node: %Repository{}}]

@@ -45,7 +45,7 @@ export const RecipeSectionFragment = gql`
 
 export const SEARCH_REPOS = gql`
   query Search($query: String!) {
-    repositories(query: $query) {
+    repositories(query: $query, first: 20) {
       pageInfo { ...PageInfo }
       edges { node { ...RepositoryFragment } }
     }

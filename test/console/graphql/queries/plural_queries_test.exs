@@ -44,7 +44,7 @@ defmodule Console.GraphQl.PluralQueriesTest do
     test "it can search repositories" do
       body = Jason.encode!(%{
         query: Queries.search_repositories_query(),
-        variables: %{query: "query"}
+        variables: %{query: "query", first: 20}
       })
 
       repositories = [%{id: "id", name: "repo", description: "a repository"}]
