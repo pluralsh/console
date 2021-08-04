@@ -78,10 +78,12 @@ export const NODE_Q = gql`
       pods { ...PodFragment }
       events { ...EventFragment }
     }
+    nodeMetric(name: $name) { ...NodeMetricFragment }
   }
   ${NodeFragment}
   ${PodFragment}
   ${EventFragment}
+  ${NodeMetricFragment}
 `
 
 export const NODE_METRICS_Q = gql`

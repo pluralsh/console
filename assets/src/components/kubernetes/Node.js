@@ -114,22 +114,19 @@ const podContainers = (pods) => (
     .flat()
 )
 
-function NodeGraphs({status: {capacity}, pods, name}) {
+function NodeGraphs({status: {capacity}, pods, name, usage}) {
   const {requests, limits} = useMemo(() => {
     const containers = podContainers(pods)
     const requests = podResources(containers, 'requests')
     const limits = podResources(containers, 'limits')
     return {requests, limits}
   }, [pods])
-
   const localize = useCallback((metric) => metric.replaceAll("{instance}", name), [name])
-
-  console.log(requests)
-  console.log(limits)
   
   return (
     <Box flex={false} direction='row' gap='medium' align='center'>
       <LayeredGauage
+        usage={cpuParser(usage.cpu)}
         requests={requests.cpu}
         limits={limits.cpu}
         total={cpuParser(capacity.cpu)}
@@ -138,6 +135,7 @@ function NodeGraphs({status: {capacity}, pods, name}) {
         stable
         format={cpuFmt} />
       <LayeredGauage
+        usage={memoryParser(usage.memory)}
         requests={requests.memory}
         limits={limits.memory}
         total={memoryParser(capacity.memory)}
@@ -191,15 +189,16 @@ const SimpleGauge = React.memo(({value, total, title, name}) => {
   )
 })
 
-const LayeredGauage = React.memo(({requests, limits, total, title, name, format, stable}) => {
+const LayeredGauage = React.memo(({requests, limits, usage, total, title, name, format, stable}) => {
   const theme = useContext(ThemeContext)
   const data = useMemo(() => {
     const reqs = requests || 0
     const lims = limits || 0
     const tot = (total || 0)
-
+    const used = round(usage)
+  
     return {
-      labels: [`${name} requests`, `${name} remaining`, `${name} limits`, `${name} remaining`],
+      labels: [`${name} requests`, `${name} remaining`, `${name} limits`, `${name} remaining`, `${name} used`, `${name} free`],
       datasets: [
         {
           label: [`${name} requests`, `${name} available`],
@@ -216,7 +215,18 @@ const LayeredGauage = React.memo(({requests, limits, total, title, name, format,
           label: [`${name} limits`, `${name} available`],
           data: [lims, Math.max(tot - lims, 0)],
           backgroundColor: [
-            normalizeColor('progress', theme),
+            normalizeColor('blue', theme),
+            normalizeColor('cardDetailLight' ,theme)
+          ],
+          // hoverOffset: 4,
+          hoverBorderWidth: 0,
+          borderWidth: 0,
+        },
+        {
+          label: [`${name} utilized`, `${name} available`],
+          data: [used, Math.max(tot - used, 0)],
+          backgroundColor: [
+            normalizeColor('purple', theme),
             normalizeColor('cardDetailLight' ,theme)
           ],
           // hoverOffset: 4,
@@ -225,7 +235,7 @@ const LayeredGauage = React.memo(({requests, limits, total, title, name, format,
         },
       ]
     }
-  }, [requests, limits, total, name, theme])
+  }, [requests, limits, total, name, theme, usage])
 
   return (
     <Box flex={false} height='200px' width='200px'>
@@ -233,7 +243,7 @@ const LayeredGauage = React.memo(({requests, limits, total, title, name, format,
         data={data} 
         options={{
           cutout: '70%',
-          animation: !stable ? {duration: 1000, easing: 'easeOutQuart'} : false,
+          animation: false,
           plugins: {
             legend: { display: false },
             title: {color: 'white', text: title, display: true},
@@ -285,7 +295,7 @@ function SaturationGraphs({cpu, mem}) {
 
 const cpuFmt = (cpu) => `${cpu}vcpu`
 
-function ClusterGauges({nodes}) {
+function ClusterGauges({nodes, usage}) {
   const totalCpu = sumBy(nodes, ({status: {capacity: {cpu}}}) => cpuParser(cpu))
   const totalMem = sumBy(nodes, ({status: {capacity: {memory}}}) => memoryParser(memory))
   const totalPods = sumBy(nodes, ({status: {capacity: {pods}}}) => parseInt(pods))
@@ -314,17 +324,18 @@ function ClusterGauges({nodes}) {
       cpuLimits: datum(cpuLimits),
       memRequests: datum(memRequests),
       memLimits: datum(memLimits),
-      pods: datum(pods)
+      pods: datum(pods),
     }
   })
 
   if (!result) return null
 
-  const {cpuRequests, cpuLimits, memRequests, memLimits, pods} = result
+  const {cpuRequests, cpuLimits, memRequests, memLimits, pods, cpuUsage, memUsage} = result
 
   return (
     <Box flex={false} direction='row' gap='small' align='center'>
       <LayeredGauage
+        usage={usage.cpu}
         requests={cpuRequests}
         limits={cpuLimits}
         total={totalCpu}
@@ -332,6 +343,7 @@ function ClusterGauges({nodes}) {
         name='CPU'
         format={cpuFmt} />
       <LayeredGauage
+        usage={usage.mem}
         requests={memRequests}
         limits={memLimits}
         total={totalMem}
@@ -347,10 +359,10 @@ function ClusterGauges({nodes}) {
   )
 }
 
-function ClusterMetrics({nodes}) {
+function ClusterMetrics({nodes, usage}) {
   return (
     <Box flex={false} direction='row' fill='horizontal' gap='small' align='center' pad='small'>
-      <ClusterGauges nodes={nodes} />
+      <ClusterGauges nodes={nodes} usage={usage} />
       <Box fill='horizontal' direction='row' align='center' gap='small'>
         <SaturationGraphs cpu={Metrics.CPU} mem={Metrics.Memory} />
       </Box>
@@ -381,7 +393,7 @@ export function Node() {
 
   if (!data) return <LoopingLogo />
 
-  const {node} = data
+  const {node, nodeMetric} = data
   return (
     <Box fill style={{overflow: 'auto'}} background='backgroundColor' pad='small' gap='small'>
       <Box direction='row' align='center' gap='small' pad='small'>
@@ -389,7 +401,7 @@ export function Node() {
         <Text size='small' weight='bold'>{node.metadata.name}</Text>
         <ReadyIcon readiness={nodeReadiness(node.status)} size='20px' showIcon />
       </Box>
-      <NodeGraphs status={node.status} pods={node.pods} name={name} />
+      <NodeGraphs status={node.status} pods={node.pods} name={name} usage={nodeMetric.usage} />
       <Tabs defaultTab='info' border='dark-3'>
         <TabHeader>
           <TabHeaderItem name='info'>
@@ -434,6 +446,14 @@ export function Nodes() {
     }), {})
   })
 
+  const usage = useMemo(() => {
+    if (!data) return null
+
+    const cpu = sumBy(data.nodeMetrics, ({usage: {cpu}}) => cpuParser(cpu))
+    const mem = sumBy(data.nodeMetrics, ({usage: {memory}}) => memoryParser(memory))
+    return {cpu, mem}
+  })
+
   if (!data) return <LoopingLogo />
 
   console.log(data.nodeMetrics)
@@ -441,7 +461,7 @@ export function Nodes() {
   return (
     <Box style={{overflow: 'auto'}} fill background='backgroundColor' pad='small' gap='small'>
       <Box flex={false}>
-        <ClusterMetrics nodes={data.nodes} />
+        <ClusterMetrics nodes={data.nodes} usage={usage} />
         <Box flex={false}>
           <NodeRowHeader />
           {data.nodes.map((node, ind) => <NodeRow key={ind} node={node} metrics={metrics} />)}

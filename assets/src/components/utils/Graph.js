@@ -95,7 +95,7 @@ export function Graph({data, yFormat, tick}) {
         data={graph}
         // curve='catmullRom'
         margin={{top: 50, right: 110, bottom: 75, left: 70}}
-        areaOpacity={.5}
+        areaOpacity={.6}
         lineWidth={2}
         enableArea={true}
         activeLineWidth={4}
