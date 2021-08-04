@@ -31,8 +31,47 @@ function SliceTooltip({point: {serieColor, serieId, data}}) {
   )
 }
 
+const COLOR_MAP = [
+  'blue-light', 
+  'orange-light', 
+  'purple-light', 
+  'green-light', 
+  'red-light',
+
+  'blue', 
+  'orange', 
+  'purple', 
+  'green', 
+  'red',
+  
+  'blue-dark', 
+  'orange-dark', 
+  'purple-dark', 
+  'green-dark', 
+  'red-dark',
+
+  'blue-light-2', 
+  'orange-light-2', 
+  'purple-light-2', 
+  'green-light-2', 
+  'red-light-2',
+
+  'blue-dark-2', 
+  'orange-dark-2', 
+  'purple-dark-2', 
+  'green-dark-2', 
+  'red-dark-2',
+]
+
+export function useColorMap(theme) {
+  return useMemo(() => {
+    return COLOR_MAP.map((c) => normalizeColor(c, theme))
+  }, [theme])
+}
+
 export function Graph({data, yFormat, tick}) {
   const theme = useContext(ThemeContext)
+  const colorMap = useColorMap(theme)
   const [selected, setSelected] = useState(null)
   const graph = useMemo(() => {
     if (data.find(({id}) => id === selected)) {
@@ -56,7 +95,7 @@ export function Graph({data, yFormat, tick}) {
         data={graph}
         // curve='catmullRom'
         margin={{top: 50, right: 110, bottom: 75, left: 70}}
-        areaOpacity={.4}
+        areaOpacity={.5}
         lineWidth={2}
         enableArea={true}
         activeLineWidth={4}
@@ -67,7 +106,7 @@ export function Graph({data, yFormat, tick}) {
         // enableGridX={false}
         xScale={{type: 'time', format: 'native'}}
         yScale={{type: 'linear', min: 0, max: 'auto', stacked: true, reverse: false}}
-        colors={{scheme: 'category10'}}
+        colors={colorMap}
         yFormat={yFormat}
         xFormat={dateFormat}
         tooltip={SliceTooltip}
