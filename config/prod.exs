@@ -33,5 +33,5 @@ config :console, :watchers, [
 ]
 
 config :console,
-  prometheus: "http://bootstrap-prometheus.bootstrap:9090",
-  loki: "http://bootstrap-loki.bootstrap:3100"
+  prometheus: "http://monitoring-prometheus.monitoring:9090",
+  loki: "http://monitoring-loki.monitoring:3100"
