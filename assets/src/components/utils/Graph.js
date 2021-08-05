@@ -32,34 +32,34 @@ function SliceTooltip({point: {serieColor, serieId, data}}) {
 }
 
 const COLOR_MAP = [
-  'blue-light', 
-  'orange-light', 
-  'purple-light', 
-  'green-light', 
-  'red-light',
-
   'blue', 
   'orange', 
-  'purple', 
   'green', 
+  'purple', 
   'red',
+
+  'blue-light', 
+  'orange-light', 
+  'green-light', 
+  'purple-light', 
+  'red-light',
   
   'blue-dark', 
   'orange-dark', 
-  'purple-dark', 
   'green-dark', 
+  'purple-dark', 
   'red-dark',
 
   'blue-light-2', 
   'orange-light-2', 
-  'purple-light-2', 
   'green-light-2', 
+  'purple-light-2', 
   'red-light-2',
 
   'blue-dark-2', 
   'orange-dark-2', 
-  'purple-dark-2', 
   'green-dark-2', 
+  'purple-dark-2', 
   'red-dark-2',
 ]
 
