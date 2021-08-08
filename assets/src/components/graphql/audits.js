@@ -7,6 +7,11 @@ export const AuditFragment = gql`
     type
     action
     repository
+    ip
+    city
+    country
+    latitude
+    longitude
     actor { ...UserFragment }
     insertedAt
   }
