@@ -26,6 +26,8 @@ defmodule ConsoleWeb.Endpoint do
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
   plug CORSPlug
+  plug ConsoleWeb.Plugs.RemoteIp
+  plug ConsoleWeb.Plugs.AuditContext
 
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],

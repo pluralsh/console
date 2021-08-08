@@ -24,6 +24,12 @@ defmodule Console.Schema.Audit do
     field :repository, :string
     field :data, Piazza.Ecto.Types.Erlang
 
+    field :ip,        :string
+    field :country,   :string
+    field :city,      :string
+    field :latitude,  :string
+    field :longitude, :string
+
     belongs_to :actor, User
 
     timestamps()
@@ -37,7 +43,7 @@ defmodule Console.Schema.Audit do
     from(a in query, order_by: ^order)
   end
 
-  @valid ~w(actor_id type action repository)a
+  @valid ~w(actor_id type action repository ip country city latitude longitude)a
 
   def changeset(model, attrs \\ %{}) do
     model

@@ -7,10 +7,16 @@ defmodule Console.GraphQl.Audit do
   ecto_enum :audit_action, Schema.Audit.Action
 
   object :audit do
-    field :id, non_null(:id)
-    field :action, non_null(:audit_action)
-    field :type, non_null(:audit_type)
+    field :id,         non_null(:id)
+    field :action,     non_null(:audit_action)
+    field :type,       non_null(:audit_type)
     field :repository, :string
+
+    field :ip,        :string
+    field :city,      :string
+    field :country,   :string
+    field :latitude,  :string
+    field :longitude, :string
 
     field :actor, :user, resolve: dataloader(User)
 

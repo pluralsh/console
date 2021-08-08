@@ -72,12 +72,25 @@ const ItemWrapper = React.memo(({data: {setSize, width, refreshKey, items, isIte
   )
 }, areEqual)
 
+const FixedItemWrapper = React.memo(({data: {items, isItemLoaded, placeholder, mapper}, style, index}) => {
+  return (
+    <div style={style}>
+      <Item 
+        index={index} 
+        items={items} 
+        isItemLoaded={isItemLoaded} 
+        placeholder={placeholder} 
+        mapper={mapper} /> 
+    </div>
+  )
+})
+
 const buildItemData = memoize((setSize, mapper, isItemLoaded, items, parentRef, width, placeholder, refreshKey, props) => (
   {setSize, mapper, isItemLoaded, items, parentRef, width, placeholder, refreshKey, ...props}
 ))
 
 export default function SmoothScroller({
-  hasNextPage, placeholder, loading, items, loadNextPage, mapper, listRef, setListRef, handleScroll, refreshKey, ...props}) {
+  hasNextPage, placeholder, loading, items, loadNextPage, mapper, listRef, setListRef, handleScroll, refreshKey, setLoader, ...props}) {
   const sizeMap = useRef({});
   const setSize = useCallback((index, size) => {
     sizeMap.current = { ...sizeMap.current, [index]: size };
@@ -91,6 +104,7 @@ export default function SmoothScroller({
 
   return (
     <InfiniteLoader
+      ref={setLoader}
       isItemLoaded={isItemLoaded}
       itemCount={itemCount}
       loadMoreItems={loadMoreItems}
@@ -179,19 +193,6 @@ export function StandardScroller({
     </InfiniteLoader>
   )
 }
-
-const FixedItemWrapper = React.memo(({data: {items, isItemLoaded, placeholder, mapper}, style, index}) => {
-  return (
-    <div style={style}>
-      <Item 
-        index={index} 
-        items={items} 
-        isItemLoaded={isItemLoaded} 
-        placeholder={placeholder} 
-        mapper={mapper} /> 
-    </div>
-  )
-})
 
 export function FixedScroller({hasNextPage, loading, items, loadNextPage, mapper, itemSize, placeholder, setLoader}) {
   const count = items.length
