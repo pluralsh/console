@@ -20,17 +20,19 @@ const HEIGHT_PX = `${ROW_HEIGHT}px`
 
 function Audit({audit}) {
   return (
-    <Box height={HEIGHT_PX} direction='row' align='center' gap='xsmall' onClick={() => null} hoverIndicator='light-3' pad='xsmall'>
+    <Box height={HEIGHT_PX} direction='row' align='center' gap='xsmall' 
+         onClick={() => null} hoverIndicator='light-3' pad='xsmall'
+         pad={{horizontal: 'small'}}>
       <RowItem width='10%' text={audit.type} />
       <RowItem width='10%' text={audit.action} />
       <RowItem width='15%' text={audit.repository} />
-      <Box flex={false} direction='row' width='30%' align='center' gap='xsmall'>
+      <Box flex={false} direction='row' width='20%' align='center' gap='xsmall'>
         <Avatar user={audit.actor} size='30px' />
         <Text size='small'>{audit.actor.email}</Text>
       </Box>
-      <RowItem width='10%' text={dateFormat(audit.insertedAt)} />
+      <RowItem width='15%' text={dateFormat(audit.insertedAt)} />
       <RowItem width='10%' text={audit.ip} />
-      <RowItem width='10%' text={formatLocation(audit.country, audit.city)} />
+      <RowItem width='15%' text={formatLocation(audit.country, audit.city)} />
     </Box>
   )
 }
@@ -38,14 +40,15 @@ function Audit({audit}) {
 function AuditHeader() {
   return (
     <Box flex={false} height={HEIGHT_PX} direction='row' align='center' 
-         gap='xsmall' border={{side: 'bottom', color: 'light-4'}} pad='xsmall'>
+         gap='xsmall' border={{side: 'bottom', color: 'light-4'}} 
+         pad={{horizontal: 'small'}}>
       <HeaderItem width='10%' text='type' />
       <HeaderItem width='10%' text='action' />
       <HeaderItem width='15%' text='repository' />
-      <HeaderItem width='30%' text='creator' />
-      <HeaderItem width='10%' text='timestamp' />
+      <HeaderItem width='20%' text='creator' />
+      <HeaderItem width='15%' text='timestamp' />
       <HeaderItem width='10%' text='ip' />
-      <HeaderItem width='10%' text='location' />
+      <HeaderItem width='15%' text='location' />
     </Box>
   )
 }
