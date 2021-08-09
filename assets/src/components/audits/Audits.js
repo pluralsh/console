@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useQuery } from 'react-apollo'
 import { Scroller } from 'forge-core'
-import { AUDITS_Q } from './queries'
+import { AUDITS_Q, AUDIT_METRICS } from './queries'
 import { HeaderItem, RowItem } from '../kubernetes/Pod'
 import { Box, Text } from 'grommet'
 import { dateFormat } from '../utils/Graph'
@@ -9,10 +9,18 @@ import Avatar from '../users/Avatar'
 import { extendConnection } from '../../utils/graphql'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { formatLocation } from '../../utils/geo'
+import { SectionChoice, SectionContentContainer } from '../utils/Section'
+import { List, PieChart } from 'grommet-icons'
+import lookup from 'country-code-lookup'
+import { Chloropleth } from '../utils/Chloropleth'
+
+
+const ROW_HEIGHT = 40
+const HEIGHT_PX = `${ROW_HEIGHT}px`
 
 function Audit({audit}) {
   return (
-    <Box direction='row' align='center' gap='xsmall' onClick={() => null} hoverIndicator='backgroundDark' pad='xsmall'>
+    <Box height={HEIGHT_PX} direction='row' align='center' gap='xsmall' onClick={() => null} hoverIndicator='light-3' pad='xsmall'>
       <RowItem width='10%' text={audit.type} />
       <RowItem width='10%' text={audit.action} />
       <RowItem width='15%' text={audit.repository} />
@@ -29,7 +37,8 @@ function Audit({audit}) {
 
 function AuditHeader() {
   return (
-    <Box flex={false} direction='row' align='center' gap='xsmall' border='bottom' pad='xsmall'>
+    <Box flex={false} height={HEIGHT_PX} direction='row' align='center' 
+         gap='xsmall' border={{side: 'bottom', color: 'light-4'}} pad='xsmall'>
       <HeaderItem width='10%' text='type' />
       <HeaderItem width='10%' text='action' />
       <HeaderItem width='15%' text='repository' />
@@ -41,24 +50,64 @@ function AuditHeader() {
   )
 }
 
+function AuditGeo() {
+  const {data} = useQuery(AUDIT_METRICS, {fetchPolicy: 'cache-and-network'})
+
+  if (!data) return <LoopingLogo />
+
+  const metrics = data.auditMetrics.map(({country, count}) => ({
+    id: lookup.byIso(country).iso3, value: count
+  }))
+
+  return (
+    <Box fill>
+      <Chloropleth data={metrics} />
+    </Box>
+  )
+}
+
 export function Audits() {
-  const {data, fetchMore} = useQuery(AUDITS_Q)
+  const [graph, setGraph] = useState(false)
+  const {data, fetchMore} = useQuery(AUDITS_Q, {fetchPolicy: "cache-and-network"})
 
   if (!data) return <LoopingLogo />
 
   const {edges, pageInfo} = data.audits
   return (
-    <Box fill pad='small' background='backgroundColor'>
-      <AuditHeader />
-      <Scroller
-        id='builds'
-        style={{height: '100%', overflow: 'auto'}}
-        edges={edges}
-        mapper={({node}) => <Audit key={node.id} audit={node} />}
-        onLoadMore={() => pageInfo.hasNextPage && fetchMore({
-          variables: {cursor: pageInfo.endCursor},
-          updateQuery: (prev, {fetchMoreResult: {audits}}) => extendConnection(prev, audits, 'audits')
-        })} />
+    <Box direction='row' fill background='backgroundColor' pad='small'>
+      <Box flex={false} width='200px' fill='vertical' gap='small'
+           pad={{horizontal: 'small', vertical: 'medium'}}>
+        <SectionChoice
+          icon={List}
+          label='Table View'
+          onClick={() => setGraph(false)}
+          selected={!graph} />
+        <SectionChoice
+          icon={PieChart}
+          label='Graph View'
+          onClick={() => setGraph(true)}
+          selected={graph} />
+      </Box>
+      <Box fill background='plrl-white'>
+        <SectionContentContainer header={graph ? 'Geodistribution' : 'Audit Logs'}>
+          {!graph && (
+            <Box fill>
+              <AuditHeader />
+              <Scroller
+                id='builds'
+                style={{height: '100%', overflow: 'auto'}}
+                edges={edges}
+                mapper={({node}) => <Audit key={node.id} audit={node} />}
+                onLoadMore={() => pageInfo.hasNextPage && fetchMore({
+                  variables: {cursor: pageInfo.endCursor},
+                  updateQuery: (prev, {fetchMoreResult: {audits}}) => extendConnection(prev, audits, 'audits')
+                })} />
+            </Box>
+          )}
+          {graph && <AuditGeo />}
+        </SectionContentContainer>
+      </Box>
     </Box>
+    
   )
 }

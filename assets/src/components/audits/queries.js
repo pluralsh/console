@@ -14,3 +14,9 @@ export const AUDITS_Q = gql`
   ${PageInfo}
   ${AuditFragment}
 `
+
+export const AUDIT_METRICS = gql`
+  query {
+    auditMetrics { country count }
+  }
+`

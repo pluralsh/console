@@ -63,10 +63,10 @@ const COLOR_MAP = [
   'red-dark-2',
 ]
 
-export function useColorMap(theme) {
+export function useColorMap(theme, colors) {
   return useMemo(() => {
-    return COLOR_MAP.map((c) => normalizeColor(c, theme))
-  }, [theme])
+    return (colors || COLOR_MAP).map((c) => normalizeColor(c, theme))
+  }, [theme, colors])
 }
 
 export function Graph({data, yFormat, tick}) {
