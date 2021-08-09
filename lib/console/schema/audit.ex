@@ -43,6 +43,18 @@ defmodule Console.Schema.Audit do
     from(a in query, order_by: ^order)
   end
 
+  def created_after(query \\ __MODULE__, dt) do
+    from(a in query, where: a.inserted_at >= ^dt)
+  end
+
+  def aggregate(query \\ __MODULE__) do
+    from(a in query,
+      where: not is_nil(a.country),
+      group_by: a.country,
+      select: %{country: a.country, count: count(a.id)}
+    )
+  end
+
   @valid ~w(actor_id type action repository ip country city latitude longitude)a
 
   def changeset(model, attrs \\ %{}) do
