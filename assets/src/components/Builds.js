@@ -96,12 +96,12 @@ function CreateBuild() {
 
   return (
     <Box flex={false} gap='small' pad={{horizontal: 'small'}} direction='row' align='center'>
-      <Button 
+      <Button
         onClick={() => deploy(BuildTypes.BOUNCE)} 
         background='backgroundLight' flat
         label='Bounce'
         loading={loading && type === BuildTypes.BOUNCE} />
-      <Button 
+      <Button
         onClick={() => deploy(BuildTypes.APPROVAL)} 
         background='backgroundLight' flat
         label='Approval'

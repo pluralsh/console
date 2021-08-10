@@ -93,6 +93,7 @@ export const DEFAULT_THEME = {
     fontWeight: 400,
   },
   button: {
+    weight: 500,
     padding: {
       horizontal: '6px',
       vertical: '2px'
