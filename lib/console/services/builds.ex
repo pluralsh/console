@@ -28,7 +28,7 @@ defmodule Console.Services.Builds do
     end)
     |> add_operation(:create, fn _ ->
       %Lock{name: name, holder: id}
-      |> Lock.changeset(%{expires_at: Timex.now() |> Timex.shift(minutes: 30)})
+      |> Lock.changeset(%{expires_at: Timex.now() |> Timex.shift(minutes: 3)})
       |> Repo.insert(on_conflict: :replace_all, conflict_target: [:name])
     end)
     |> execute(extract: :create)
@@ -120,15 +120,21 @@ defmodule Console.Services.Builds do
       |> Repo.one()
       |> case do
         nil -> {:error, :not_found}
-        build -> {:ok, build}
+        build -> {:ok, %{build | deployer: id}}
       end
     end)
-    |> add_operation(:unlock, fn _ -> unlock("deployer", id) end)
     |> execute(extract: :poll)
   end
 
-  def running(build) do
-    modify_status(build, :running)
+  def running(%{deployer: deployer} = build) do
+    start_transaction()
+    |> add_operation(:build, fn _ ->
+      modify_status(build, :running)
+    end)
+    |> add_operation(:unlock, fn _ ->
+      unlock("deployer", deployer)
+    end)
+    |> execute(extract: :build)
     |> notify(:update)
   end
 

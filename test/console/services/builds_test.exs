@@ -21,9 +21,11 @@ defmodule Console.Services.BuildsTest do
       insert(:build, status: :queued)
       insert(:build, status: :successful, inserted_at: Timex.now() |> Timex.shift(days: -5))
 
-      {:ok, found} = Builds.poll(Ecto.UUID.generate())
+      deployer = Ecto.UUID.generate()
+      {:ok, found} = Builds.poll(deployer)
 
       assert found.id == build.id
+      assert found.deployer == deployer
     end
 
     test "if there's a running build, it won't return" do
@@ -111,12 +113,15 @@ defmodule Console.Services.BuildsTest do
   end
 
   describe "running/1" do
-    test "Failed builds broadcast" do
+    test "it will mark a build as running and unlock the deployer" do
+      dep_id = Ecto.UUID.generate()
+      lock = insert(:lock, name: "deployer", holder: dep_id)
       build = insert(:build)
 
-      {:ok, failed} = Builds.running(build)
+      {:ok, failed} = Builds.running(%{build | deployer: dep_id})
 
       assert failed.status == :running
+      refute refetch(lock)
       assert_receive {:event, %PubSub.BuildUpdated{item: ^failed}}
     end
   end

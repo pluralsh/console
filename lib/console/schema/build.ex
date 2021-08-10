@@ -16,6 +16,7 @@ defmodule Console.Schema.Build do
     field :completed_at, :utc_datetime_usec
     field :pinged_at,    :utc_datetime_usec
     field :context,      :map
+    field :deployer,     :string, virtual: true
 
     has_many :commands, Command
     has_many :changelogs, Changelog
