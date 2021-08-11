@@ -13,6 +13,7 @@ defmodule Console.GraphQl do
   import_types Console.GraphQl.Observability
   import_types Console.GraphQl.Audit
   import_types Console.GraphQl.Plural
+  import_types Console.GraphQl.Policies
 
   @sources [
     Build,
@@ -70,6 +71,7 @@ defmodule Console.GraphQl do
     import_fields :kubernetes_queries
     import_fields :audit_queries
     import_fields :plural_queries
+    import_fields :policy_queries
   end
 
   mutation do
@@ -123,6 +125,7 @@ defmodule Console.GraphQl do
     import_fields :user_mutations
     import_fields :kubernetes_mutations
     import_fields :plural_mutations
+    import_fields :policy_mutations
   end
 
   subscription do

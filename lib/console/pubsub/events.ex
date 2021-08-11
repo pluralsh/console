@@ -11,3 +11,6 @@ defmodule Console.PubSub.CommandCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.CommandCompleted, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.UserCreated, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.UpgradePolicyCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.UpgradePolicyDeleted, do: use Piazza.PubSub.Event

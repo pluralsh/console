@@ -53,16 +53,18 @@ defimpl Console.PubSub.Auditable, for: Console.PubSub.BuildCancelled do
   end
 end
 
-defimpl Console.PubSub.Auditable, for: Console.PubSub.UserCreated do
+defimpl Console.PubSub.Auditable, for: [Console.PubSub.UpgradePolicyCreated, Console.PubSub.UpgradePolicyDeleted] do
   alias Console.Schema.Audit
 
-  def audit(%{item: %{repository: repo} = build, actor: user}) do
+  def audit(%{item: policy, actor: user}) do
     %Audit{
-      type: :build,
-      action: :approve,
-      repository: repo,
-      data: build,
+      type: :policy,
+      action: action(@for),
+      data: policy,
       actor_id: user.id
     }
   end
+
+  def action(Console.PubSub.UpgradePolicyCreated), do: :create
+  def action(Console.PubSub.UpgradePolicyDeleted), do: :delete
 end

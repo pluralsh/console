@@ -92,4 +92,12 @@ defmodule Console.Factory do
       actor: build(:user)
     }
   end
+
+  def upgrade_policy_factory do
+    %Schema.UpgradePolicy{
+      type: :deploy,
+      name: sequence(:upgrade_policy, &"upg-#{&1}"),
+      target: "repo"
+    }
+  end
 end

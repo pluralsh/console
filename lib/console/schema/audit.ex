@@ -9,7 +9,8 @@ defmodule Console.Schema.Audit do
     user: 3,
     group: 4,
     role: 5,
-    group_member: 6
+    group_member: 6,
+    policy: 7
 
   defenum Action,
     create: 0,

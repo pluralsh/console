@@ -47,7 +47,6 @@ defmodule Console.Watchers.Upgrade do
       |> add_operation(:build, fn _ -> Handlers.Upgrade.create_build(result) end)
       |> add_operation(:ack, fn _ -> Channel.push(upgrades, "ack", %{"id" => id}) end)
       |> execute()
-      |> IO.inspect(label: "upgrade processed")
       |> case do
         {:ok, _} -> {:noreply, %{state | last: id}}
         _ -> {:noreply, state} # add some retry logic?
