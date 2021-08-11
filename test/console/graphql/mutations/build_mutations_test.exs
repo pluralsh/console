@@ -7,7 +7,6 @@ defmodule Console.GraphQl.BuildMutationsTest do
       user = insert(:user)
       role = insert(:role, permissions: %{deploy: true}, repositories: ["plural"])
       insert(:role_binding, user: user, role: role)
-      expect(Console.Deployer, :wake, fn -> :ok end)
       expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{metadata: %{name: "plural"}}} end)
 
       {:ok, %{data: %{"createBuild" => build}}} = run_query("""
@@ -23,6 +22,26 @@ defmodule Console.GraphQl.BuildMutationsTest do
       assert build["id"]
       assert build["type"] == "DEPLOY"
       assert build["status"] == "QUEUED"
+    end
+  end
+
+  describe "restartBuild" do
+    test "it can restart a new build" do
+      build = insert(:build)
+      user  = insert(:user, roles: %{admin: true})
+      expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{}} end)
+
+      {:ok, %{data: %{"restartBuild" => restart}}} = run_query("""
+        mutation Restart($id: ID!) {
+          restartBuild(id: $id) {
+            message
+            type
+          }
+        }
+      """, %{"id" => build.id}, %{current_user: user})
+
+      assert restart["message"] == build.message
+      assert restart["type"] == "DEPLOY"
     end
   end
 

@@ -4,6 +4,14 @@ defmodule Console.Services.Rbac do
   def preload(user),
     do: Console.Repo.preload(user, [role_bindings: :role, group_role_bindings: :role])
 
+  def allow(%User{roles: %{admin: true}}, _, _), do: :ok
+  def allow(%User{} = user, repository, action) do
+    case validate(user, repository, action) do
+      true -> :ok
+      false -> {:error, :forbidden}
+    end
+  end
+
   def validate(%User{} = user, repository, action) do
     user
     |> preload()

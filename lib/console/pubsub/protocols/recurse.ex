@@ -17,6 +17,10 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.BuildDeleted, Console.PubSu
   end
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.BuildCreated do
+  def process(_), do: Console.Deployer.wake()
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.BuildApproved do
   require Logger
   def process(%{item: _}) do

@@ -24,6 +24,16 @@ defmodule Console.PubSub.Recurse.BuildsTest do
     end
   end
 
+  describe "BuildCreated" do
+    test "it will wake the deployer" do
+      build = insert(:build)
+      expect(Console.Deployer, :wake, fn -> :ok end)
+
+      event = %PubSub.BuildCreated{item: build}
+      Recurse.handle_event(event)
+    end
+  end
+
   describe "BuildApproved" do
     test "it will cancel build" do
       build = insert(:build)

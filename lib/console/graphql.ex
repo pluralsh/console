@@ -81,6 +81,13 @@ defmodule Console.GraphQl do
       resolve safe_resolver(&Build.create_build/2)
     end
 
+    field :restart_build, :build do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve safe_resolver(&Build.restart_build/2)
+    end
+
     field :cancel_build, :build do
       middleware Authenticated
       arg :id, non_null(:id)

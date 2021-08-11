@@ -11,7 +11,6 @@ defmodule Console.Watchers.Handlers.SlashCommandTest do
           {:ok, %Kube.SlashCommand{spec: %{type: "deploy"}}}
         _ -> {:ok, %Kube.Application{metadata: %{name: "plural"}}}
       end)
-      expect(Console.Deployer, :wake, fn -> :ok end)
       expect(Console.Plural.Incidents, :create_message, fn "id", _ -> {:ok, :created} end)
 
       {:ok, {:ok, build}, :created} = SlashCommand.handle(%{

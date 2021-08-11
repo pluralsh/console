@@ -3,7 +3,7 @@ defmodule Console.Services.Builds do
   alias Console.PubSub
   alias Kube.{Client, Application}
   alias Console.Schema.{Build, Command, User, Lock}
-  alias Console.Services.Changelogs
+  alias Console.Services.{Changelogs, Rbac}
 
   def get!(id), do: Repo.get!(Build, id)
 
@@ -46,6 +46,14 @@ defmodule Console.Services.Builds do
     |> execute(extract: :delete)
   end
 
+  def restart(id, %User{} = user) do
+    build = get!(id)
+    with :ok <- Rbac.allow(user, build.repository, :deploy) do
+      Piazza.Ecto.Schema.mapify(build)
+      |> create(user)
+    end
+  end
+
   def create(attrs, %User{id: id} = user) do
     start_transaction()
     |> add_operation(:build, fn _ ->
@@ -63,7 +71,6 @@ defmodule Console.Services.Builds do
     end)
     |> execute(extract: :build)
     |> notify(:create, user)
-    |> when_ok(&wake_deployer/1)
   end
 
   def cancel(%Build{id: id}) do
@@ -201,11 +208,6 @@ defmodule Console.Services.Builds do
   defp add_completion(attrs, state) when state in [:successful, :failed],
     do: Map.put(attrs, :completed_at, Timex.now())
   defp add_completion(attrs, _), do: attrs
-
-  defp wake_deployer(build) do
-    Console.Deployer.wake()
-    {:ok, build}
-  end
 
   defp cleaned(build), do: %{build | changelogs: %Ecto.Association.NotLoaded{}}
 

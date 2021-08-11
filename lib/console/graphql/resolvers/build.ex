@@ -23,6 +23,9 @@ defmodule Console.GraphQl.Resolvers.Build do
   def create_build(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Builds.create(attrs, user)
 
+  def restart_build(%{id: id}, %{context: %{current_user: user}}),
+    do: Builds.restart(id, user)
+
   def approve_build(%{id: id}, %{context: %{current_user: user}}),
     do: Builds.approve(id, user)
 
