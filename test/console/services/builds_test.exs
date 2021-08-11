@@ -60,15 +60,16 @@ defmodule Console.Services.BuildsTest do
 
   describe "#restart/2" do
     test "it can recreate a build" do
-      build = insert(:build)
+      build = insert(:build, status: :successful)
       user  = insert(:user, roles: %{admin: true})
       expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{}} end)
 
       {:ok, restarted} = Builds.restart(build.id, user)
 
-      assert restarted.type == build.type
+      assert restarted.status  == :queued
+      assert restarted.type    == build.type
       assert restarted.message == build.message
-      refute restarted.id == build.id
+      refute restarted.id      == build.id
       assert_receive {:event, %PubSub.BuildCreated{item: ^restarted}}
     end
   end

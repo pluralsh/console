@@ -5,7 +5,7 @@ import { ModalHeader, Button } from 'forge-core'
 import { Box, Text, Layer } from 'grommet'
 import Line from 'react-lazylog/build/Line'
 import { ansiparse } from './utils/ansi'
-import { BUILD_Q, COMMAND_SUB, BUILD_SUB, CREATE_BUILD, CANCEL_BUILD, APPROVE_BUILD } from './graphql/builds'
+import { BUILD_Q, COMMAND_SUB, BUILD_SUB, CANCEL_BUILD, APPROVE_BUILD, RESTART_BUILD } from './graphql/builds'
 import { mergeEdges } from './graphql/utils'
 import moment from 'moment'
 import { Checkmark, Down, Next, StatusCritical } from 'grommet-icons'
@@ -80,12 +80,12 @@ function OptionContainer({children, ...props}) {
   )
 }
 
-function Rebuild({build: {repository, message, type}}) {
+function Rebuild({build: {id}}) {
   let history = useHistory()
   const [open, setOpen] = useState(false)
-  const [mutation, {loading}] = useMutation(CREATE_BUILD, {
-    variables: {attributes: {repository, message, type}},
-    onCompleted: ({createBuild: {id}}) => history.push(`/build/${id}`)
+  const [mutation, {loading}] = useMutation(RESTART_BUILD, {
+    variables: {id},
+    onCompleted: ({restartBuild: {id}}) => history.push(`/build/${id}`)
   })
 
   return (

@@ -50,6 +50,7 @@ defmodule Console.Services.Builds do
     build = get!(id)
     with :ok <- Rbac.allow(user, build.repository, :deploy) do
       Piazza.Ecto.Schema.mapify(build)
+      |> Map.put(:status, :queued)
       |> create(user)
     end
   end

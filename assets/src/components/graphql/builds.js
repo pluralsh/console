@@ -106,6 +106,13 @@ export const APPROVE_BUILD = gql`
   ${BuildFragment}
 `
 
+export const RESTART_BUILD = gql`
+  mutation Restart($id: ID!) {
+    restartBuild(id: $id) { ...BuildFragment }
+  }
+  ${BuildFragment}
+`;
+
 export const BUILD_SUB = gql`
   subscription BuildSub($buildId: ID) {
     buildDelta(buildId: $buildId) {
