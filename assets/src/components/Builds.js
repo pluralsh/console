@@ -12,6 +12,7 @@ import { InstallationContext } from './Installations'
 import { appendConnection, extendConnection, updateCache } from '../utils/graphql'
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { StandardScroller } from './utils/SmoothScroller'
+import { UpgradePolicies } from './builds/UpgradePolicies'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -155,6 +156,7 @@ export default function Builds() {
           <Text weight='bold' size='small'>Builds</Text>
           <Text size='small' color='dark-3'>a list of historical changes managed by console</Text>
         </Box>
+        <UpgradePolicies />
         <CreateBuild />
       </Box>
       <Box fill pad={{bottom: 'small'}}>

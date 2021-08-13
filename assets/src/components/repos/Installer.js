@@ -1,6 +1,6 @@
-import { Box, Layer } from 'grommet'
 import React, { useCallback, useState } from 'react'
 import { Configuration } from './Configuration'
+import { Layer } from 'grommet'
 import { Recipes } from './Recipes'
 import { SearchRepos } from './SearchRepositories'
 

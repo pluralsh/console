@@ -41,6 +41,17 @@ export const ChangelogFragment = gql`
   }
 `
 
+export const UpgradePolicy = gql`
+  fragment UpgradePolicy on UpgradePolicy {
+    id
+    name
+    type
+    target
+    weight
+    description
+  }
+`;
+
 export const BUILDS_Q = gql`
   query Builds($cursor: String) {
     builds(first: 15, after: $cursor) {
@@ -77,6 +88,29 @@ export const BUILD_Q = gql`
   ${BuildFragment}
   ${CommandFragment}
   ${ChangelogFragment}
+`;
+
+export const UPGRADE_POLICIES = gql`
+  query {
+    upgradePolicies { ...UpgradePolicy }
+  }
+  ${UpgradePolicy}
+`;
+
+export const CREATE_POLICY = gql`
+  mutation Create($attributes: UpgradePolicyAttributes!) {
+    createUpgradePolicy(attributes: $attributes) {
+      ...UpgradePolicy
+    }
+  }
+  ${UpgradePolicy}
+`;
+
+export const DELETE_POLICY = gql`
+  mutation Delete($id: ID!) {
+    deleteUpgradePolicy(id: $id) { ...UpgradePolicy }
+  }
+  ${UpgradePolicy}
 `;
 
 export const CREATE_BUILD = gql`
