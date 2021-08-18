@@ -1,5 +1,5 @@
 defmodule Console.GraphQl.Resolvers.Policy do
-  use Console.GraphQl.Resolvers.Base, model: Console.Schema.Policy
+  use Console.GraphQl.Resolvers.Base, model: Console.Schema.UpgradePolicy
   alias Console.Services.Policies
 
   def upgrade_policies(_, _), do: {:ok, Policies.upgrade_policies()}

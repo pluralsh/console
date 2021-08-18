@@ -37,12 +37,16 @@ defmodule Console.Services.Builds do
   def unlock(name, id) do
     start_transaction()
     |> add_operation(:lock, fn _ ->
-      case Repo.get_by(Lock, name: name, holder: id) do
-        %Lock{} = lock -> {:ok, lock}
-        _ -> {:error, :locked}
+      case Repo.get_by(Lock, name: name) do
+        %Lock{holder: ^id} = lock -> {:ok, lock}
+        %Lock{} -> {:error, :locked}
+        nil -> {:ok, :empty}
       end
     end)
-    |> add_operation(:delete, fn %{lock: lock} -> Repo.delete(lock) end)
+    |> add_operation(:delete, fn
+      %{lock: %Lock{} = lock} -> Repo.delete(lock)
+      _ -> {:ok, nil}
+    end)
     |> execute(extract: :delete)
   end
 
