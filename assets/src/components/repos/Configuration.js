@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery } from 'react-apollo'
 import { Box, CheckBox, Text, ThemeContext } from 'grommet'
-import { Button, SecondaryButton } from 'forge-core'
+import { Button, SecondaryButton, GqlError } from 'forge-core'
 import { ModalHeader } from '../utils/Modal'
 import { INSTALL_RECIPE, RECIPE_Q } from '../graphql/plural'
 import { ConfigurationType, MODAL_WIDTH } from './constants'
@@ -112,7 +112,7 @@ function RecipeConfiguration({recipe, context: ctx, setOpen}) {
   const hasNext = sections.length > ind + 1
   const configuration = useMemo(() => compileConfigurations(recipeItems), [recipeItems])
 
-  const [mutation, {loading}] = useMutation(INSTALL_RECIPE, {
+  const [mutation, {loading, error}] = useMutation(INSTALL_RECIPE, {
     variables: {id: recipe.id, context: JSON.stringify(context)},
     update: (cache, {data: {installRecipe}}) => updateCache(cache, {
       query: BUILDS_Q,
@@ -138,6 +138,7 @@ function RecipeConfiguration({recipe, context: ctx, setOpen}) {
   return (
     <ThemeContext.Extend value={{global: {input: {padding: '9px'}}}}>
       <Box fill gap='small'>
+        {error && <GqlError error={error} header='Error installing bundle' />}
         <Repository repo={repository} />
         <Box fill style={{overflow: 'auto', maxHeight: '70vh'}} pad='small'>
           <Box flex={false} gap='12px'>
