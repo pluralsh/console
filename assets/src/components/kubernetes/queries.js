@@ -61,6 +61,15 @@ export const DELETE_POD = gql`
   ${PodFragment}
 `;
 
+export const DELETE_JOB = gql`
+  mutation DeleteJob($name: String!, $namespace: String!) {
+    deleteJob(name: $name, namespace: $namespace) {
+      ...JobFragment
+    }
+  }
+  ${JobFragment}
+`;
+
 export const NODES_Q = gql`
   query {
     nodes { ...NodeFragment }

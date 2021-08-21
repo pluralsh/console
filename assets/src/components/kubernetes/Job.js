@@ -1,16 +1,52 @@
-import React from 'react'
+import React, { useState, useCallback } from 'react'
 import { Box, Text } from 'grommet'
-import { useQuery } from 'react-apollo'
+import { Trash } from 'grommet-icons'
+import { useQuery, useMutation } from 'react-apollo'
 import { useParams } from 'react-router'
-import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
+import { Tabs, TabContent, TabHeader, TabHeaderItem, Confirm } from 'forge-core'
 import { POLL_INTERVAL } from './constants'
 import { Metadata, MetadataRow } from './Metadata'
-import { JOB_Q } from './queries'
+import { JOB_Q, DELETE_JOB } from './queries'
 import { Container } from './utils'
 import { Events } from './Event'
 import { RawContent } from './Component'
-import { PodList } from './Pod'
+import { PodList, ignore } from './Pod'
 import { LoopingLogo } from '../utils/AnimatedLogo'
+
+export function DeleteIcon({onClick, loading}) {
+  return (
+    <Box flex={false} pad='small' round='xsmall' align='center' justify='center'
+         onClick={onClick} hoverIndicator='backgroundDark' focusIndicator={false}>
+      <Trash color={loading ? 'dark-6' : 'error'} size='small' />
+    </Box>
+  )
+}
+
+export function DeleteJob({name, namespace, refetch}) {
+  const [confirm, setConfirm] = useState(false)
+  const [mutation, {loading}] = useMutation(DELETE_JOB, {
+    variables: {name, namespace},
+    onCompleted: () => { setConfirm(false); refetch() }
+  })
+
+  const doConfirm = useCallback((e) => {
+    ignore(e)
+    setConfirm(true)
+  }, [setConfirm])
+
+  return (
+    <>
+    <DeleteIcon onClick={doConfirm} loading={loading} />
+    {confirm && (
+      <Confirm
+        description="The pod will be replaced by it's managing controller"
+        loading={loading}
+        cancel={(e) => { ignore(e); setConfirm(false) }}
+        submit={(e) => { ignore(e); mutation() }} />
+    )}
+    </>
+  )
+}
 
 function Status({status}) {
   return (

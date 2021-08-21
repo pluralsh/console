@@ -101,8 +101,12 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   end
 
   def delete_job(%{namespace: namespace, name: name}, _) do
-    %DeleteOptions{}
-    |> BatchV1.delete_namespaced_job!(Console.namespace(namespace), name)
+    %Kazan.Request{
+      method: "delete",
+      path: "/apis/batch/v1/namespaces/#{Console.namespace(namespace)}/jobs/#{name}",
+      query_params: %{},
+      response_model: BatchV1.Job
+    }
     |> Kazan.run()
   end
 

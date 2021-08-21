@@ -17,6 +17,7 @@ import { Container as Con } from './utils'
 import { asQuery } from '../utils/query'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { Events } from './Event'
+import { DeleteIcon } from './Job'
 
 function phaseToReadiness(phase) {
   switch (phase) {
@@ -138,7 +139,7 @@ export function PodList({pods, namespace, refetch}) {
   )
 }
 
-const ignore = (e) => { e.stopPropagation(); e.preventDefault() }
+export const ignore = (e) => { e.stopPropagation(); e.preventDefault() }
 
 export function DeletePod({name, namespace, refetch}) {
   const [confirm, setConfirm] = useState(false)
@@ -154,10 +155,7 @@ export function DeletePod({name, namespace, refetch}) {
 
   return (
     <>
-    <Box flex={false} pad='small' round='xsmall' align='center' justify='center'
-         onClick={doConfirm} hoverIndicator='backgroundDark' focusIndicator={false}>
-      <Trash color={loading ? 'dark-6' : 'error'} size='small' />
-    </Box>
+    <DeleteIcon loading={loading} onClick={doConfirm} />
     {confirm && (
       <Confirm
         description="The pod will be replaced by it's managing controller"

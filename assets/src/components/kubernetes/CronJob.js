@@ -10,6 +10,7 @@ import { CRON_JOB_Q } from './queries'
 import { Events } from './Event'
 import { Container } from './utils'
 import { HeaderItem, RowItem } from './Pod'
+import { DeleteJob } from './Job'
 import { Readiness, ReadyIcon } from '../Application'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 
@@ -42,12 +43,12 @@ function Spec({spec}) {
 function JobHeader() {
   return (
     <Box flex={false} fill='horizontal' direction='row' border='bottom' pad={{vertical: 'xsmall'}} gap='xsmall'>
-      <HeaderItem width='20%' text='name' />
+      <HeaderItem width='25%' text='name' />
       <HeaderItem width='15%' text='start time' />
       <HeaderItem width='15%' text='completion time' />
       <HeaderItem width='10%' text='active pods' />
       <HeaderItem width='10%' text='failed pods' />
-      <HeaderItem width='10%' text='succeeded pods' />
+      <HeaderItem width='25%' text='succeeded pods' />
     </Box>
   )
 }
@@ -58,11 +59,11 @@ function readiness({completionTime, failed}) {
   return Readiness.Ready
 }
 
-function JobRow({job: {metadata: {name, namespace}, status}}) {
+function JobRow({job: {metadata: {name, namespace}, status}, refetch}) {
   let hist = useHistory()
   return (
-    <Box flex={false} fill='horizontal' direction='row' gap='xsmall' pad={{vertical: 'xsmall'}}>
-      <Box flex={false} direction='row' gap='xsmall' align='center' width='20%'>
+    <Box flex={false} fill='horizontal' align='center' direction='row' gap='xsmall' pad={{vertical: 'xsmall'}}>
+      <Box flex={false} direction='row' gap='xsmall' align='center' width='25%'>
         <ReadyIcon readiness={readiness(status)} />
         <Anchor size='small' onClick={() => hist.push(`/components/${namespace}/job/${name}`)}>{name}</Anchor>
       </Box>
@@ -70,26 +71,31 @@ function JobRow({job: {metadata: {name, namespace}, status}}) {
       <RowItem width='15%' text={status.completionTime} />
       <RowItem width='10%' text={status.active} />
       <RowItem width='10%' text={status.failed} />
-      <RowItem width='10%' text={status.succeeded} />
+      <Box direction='row' gap='small' align='center' width='25%'>
+        <Text size='small'>{status.succeeded}</Text>
+        <Box fill='horizontal' direction='row' justify='end' pad={{right: 'small'}}>
+          <DeleteJob namespace={namespace} name={name} refetch={refetch} />
+        </Box>
+      </Box>
     </Box>
   )
 }
 
-function Jobs({jobs}) {
+function Jobs({jobs, refetch}) {
   return (
     <Box flex={false} pad='small'>
       <Box pad={{vertical: 'small'}}>
         <Text size='small'>Jobs</Text>
       </Box>
       <JobHeader />
-      {jobs.map((job, i) => <JobRow job={job} key={i} />)}
+      {jobs.map((job, i) => <JobRow job={job} key={i} refetch={refetch} />)}
     </Box>
   )
 }
 
 export default function CronJob() {
   const {repo, name} = useParams()
-  const {data} = useQuery(CRON_JOB_Q, {
+  const {data, refetch} = useQuery(CRON_JOB_Q, {
     variables: {name, namespace: repo}, 
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network'
@@ -116,7 +122,7 @@ export default function CronJob() {
           <Metadata metadata={cronJob.metadata} />
           <Status status={cronJob.status} />
           <Spec spec={cronJob.spec} />
-          <Jobs jobs={cronJob.jobs} />
+          <Jobs jobs={cronJob.jobs} refetch={refetch} />
         </TabContent>
         <TabContent name='events'>
           <Events events={cronJob.events} />
