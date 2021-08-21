@@ -5,7 +5,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   alias Kazan.Apis.Extensions.V1beta1, as: Extensions
   alias Kazan.Apis.Batch.V1beta1, as: Batch
   alias Kazan.Apis.Batch.V1, as: BatchV1
-  alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector, LabelSelectorRequirement}
+  alias Kazan.Models.Apimachinery.Meta.V1.{DeleteOptions, LabelSelector, LabelSelectorRequirement}
 
   def list_applications(_, _) do
     with {:ok, %{items: items}} <- Client.list_applications(),
@@ -97,6 +97,12 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
       query_params: %{},
       response_model: Core.Pod
     }
+    |> Kazan.run()
+  end
+
+  def delete_job(%{namespace: namespace, name: name}, _) do
+    %DeleteOptions{}
+    |> BatchV1.delete_namespaced_job!(Console.namespace(namespace), name)
     |> Kazan.run()
   end
 

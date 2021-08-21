@@ -19,7 +19,7 @@ defmodule Console.Watchers.Handlers.UpgradeTest do
     test "it can recognize upgrade policies" do
       bot = insert(:user, bot_name: "console")
       expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{metadata: %{name: "plural"}}} end)
-      upgrade_policy = insert(:upgrade_policy, target: "*", type: :approval)
+      insert(:upgrade_policy, target: "*", type: :approval)
       Console.Cache.delete(:upgrade_policies)
       {:ok, build} = Upgrade.create_build(%{"message" => "a message", "repository" => %{"name" => "plural"}})
 
@@ -29,8 +29,8 @@ defmodule Console.Watchers.Handlers.UpgradeTest do
     end
 
     test "it will not create on ignore policies" do
-      bot = insert(:user, bot_name: "console")
-      upgrade_policy = insert(:upgrade_policy, target: "*", type: :ignore)
+      insert(:user, bot_name: "console")
+      insert(:upgrade_policy, target: "*", type: :ignore)
       Console.Cache.delete(:upgrade_policies)
       {:ok, :ignore} = Upgrade.create_build(%{"message" => "a message", "repository" => %{"name" => "plural"}})
     end

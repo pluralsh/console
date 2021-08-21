@@ -185,5 +185,14 @@ defmodule Console.GraphQl.Kubernetes do
 
       resolve &Kubernetes.delete_pod/2
     end
+
+    field :delete_job, :job do
+      middleware Authenticated
+      arg :namespace, non_null(:string)
+      arg :name,      non_null(:string)
+      middleware Rbac, perm: :operate, arg: :namespace
+
+      resolve &Kubernetes.delete_job/2
+    end
   end
 end

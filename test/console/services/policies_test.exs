@@ -53,7 +53,7 @@ defmodule Console.Services.PoliciesTest do
 
   describe "#upgrade_type/1" do
     test "It can determine the upgrade type for a repository" do
-      policy = insert(:upgrade_policy, target: "repo", type: :approval, weight: 10)
+      insert(:upgrade_policy, target: "repo", type: :approval, weight: 10)
       insert(:upgrade_policy, target: "ignore")
       insert(:upgrade_policy, target: "repo", weight: 0)
 

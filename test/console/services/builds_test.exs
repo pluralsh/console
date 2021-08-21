@@ -29,7 +29,7 @@ defmodule Console.Services.BuildsTest do
     end
 
     test "if there's a running build, it won't return" do
-      build = insert(:build, status: :queued, inserted_at: Timex.now() |> Timex.shift(days: -1))
+      insert(:build, status: :queued, inserted_at: Timex.now() |> Timex.shift(days: -1))
       insert(:build, status: :queued)
       insert(:build, status: :successful, inserted_at: Timex.now() |> Timex.shift(days: -5))
       insert(:build, status: :running)
