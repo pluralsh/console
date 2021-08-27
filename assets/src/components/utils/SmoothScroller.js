@@ -6,37 +6,6 @@ import Autosizer from 'react-virtualized-auto-sizer'
 import memoize from 'memoize-one'
 import { CellMeasurer } from 'forge-core'
 
-function shallowDiffers(prev, next) {
-  for (let attribute in prev) {
-    if (!(attribute in next)) {
-      return true;
-    }
-  }
-  for (let attribute in next) {
-    if (prev[attribute] !== next[attribute]) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function areEqual(prevProps, nextProps) {
-  const { style: prevStyle, ...prevRest } = prevProps;
-  const { style: nextStyle, ...nextRest } = nextProps;
-
-  return (
-    !shallowDiffers(prevStyle, nextStyle) && !shallowDiffers(prevRest, nextRest)
-  );
-}
-
-const Item = ({ index, mapper, isItemLoaded, placeholder, items, setSize }) => {
-  if (!isItemLoaded(index)) {
-    return placeholder && placeholder(index)
-  }
-
-  return mapper(items[index], {next: items[index + 1] || {}, prev: items[index - 1] || {}}, {setSize, index});
-};
-
 class SmartLoader extends PureComponent {
   _listRef = null
   _lastRenderedStartIndex = -1;
@@ -108,6 +77,37 @@ class SmartLoader extends PureComponent {
     })
   }
 }
+
+function shallowDiffers(prev, next) {
+  for (let attribute in prev) {
+    if (!(attribute in next)) {
+      return true;
+    }
+  }
+  for (let attribute in next) {
+    if (prev[attribute] !== next[attribute]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function areEqual(prevProps, nextProps) {
+  const { style: prevStyle, ...prevRest } = prevProps;
+  const { style: nextStyle, ...nextRest } = nextProps;
+
+  return (
+    !shallowDiffers(prevStyle, nextStyle) && !shallowDiffers(prevRest, nextRest)
+  );
+}
+
+const Item = ({ index, mapper, isItemLoaded, placeholder, items, setSize }) => {
+  if (!isItemLoaded(index)) {
+    return placeholder && placeholder(index)
+  }
+
+  return mapper(items[index], {next: items[index + 1] || {}, prev: items[index - 1] || {}}, {setSize, index});
+};
 
 const ItemWrapper = React.memo(({data: {setSize, width, refreshKey, items, isItemLoaded, placeholder, mapper}, style, index, ...props}) => {
   const [rowRef, setRowRef] = useState(null)
