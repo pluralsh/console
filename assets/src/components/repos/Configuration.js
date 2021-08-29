@@ -4,7 +4,7 @@ import { Box, CheckBox, Text, ThemeContext } from 'grommet'
 import { Button, SecondaryButton, GqlError } from 'forge-core'
 import { ModalHeader } from '../utils/Modal'
 import { INSTALL_RECIPE, RECIPE_Q } from '../graphql/plural'
-import { ConfigurationType, MODAL_WIDTH } from './constants'
+import { ConfigurationType, MODAL_WIDTH, OperationType } from './constants'
 import { Repository } from './SearchRepositories'
 import { LabelledInput } from '../utils/LabelledInput'
 import { appendConnection, updateCache } from '../../utils/graphql'
@@ -104,6 +104,18 @@ function ConfigurationItem({config, ctx, setValue}) {
   }
 }
 
+function available(config, context) {
+  if (!config.condition) return true
+
+  const condition = config.condition
+  switch (condition.operation) {
+    case OperationType.NOT:
+      return !context[condition.field]
+  }
+
+  return true
+}
+
 function RecipeConfiguration({recipe, context: ctx, setOpen}) {
   const sections = recipe.recipeSections
   const [context, setContext] = useState(ctx)
@@ -133,8 +145,6 @@ function RecipeConfiguration({recipe, context: ctx, setOpen}) {
     setInd(ind + 1)
   }, [sections, ind, setInd, hasNext])
 
-  console.log(context)
-
   return (
     <ThemeContext.Extend value={{global: {input: {padding: '9px'}}}}>
       <Box fill gap='small'>
@@ -142,12 +152,14 @@ function RecipeConfiguration({recipe, context: ctx, setOpen}) {
         <Repository repo={repository} />
         <Box fill style={{overflow: 'auto', maxHeight: '70vh'}} pad='small'>
           <Box flex={false} gap='12px'>
-            {Object.values(configuration).map((conf) => (
-              <ConfigurationItem 
-                key={conf.name} 
-                config={conf}
-                setValue={setValue}
-                ctx={context[repository.name] || {}} />
+            {Object.values(configuration)
+              .filter((conf) => available(conf, context[repository.name] || {}))
+              .map((conf) => (
+                <ConfigurationItem 
+                  key={conf.name} 
+                  config={conf}
+                  setValue={setValue}
+                  ctx={context[repository.name] || {}} />
             ))}
           </Box>
         </Box>

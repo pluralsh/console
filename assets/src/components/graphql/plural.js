@@ -37,7 +37,14 @@ export const RecipeSectionFragment = gql`
     repository { ...RepositoryFragment }
     recipeItems {
       id
-      configuration { name default documentation type placeholder }
+      configuration { 
+        name 
+        default 
+        documentation 
+        type 
+        placeholder 
+        condition { operation field value }
+      }
     }
   }
   ${RepositoryFragment}

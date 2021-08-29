@@ -12,3 +12,7 @@ export const ConfigurationType = {
   BOOL: 'BOOL',
   INT: 'INT'
 }
+
+export const OperationType = {
+  NOT: 'NOT'
+}
