@@ -11,7 +11,8 @@ defmodule Console.Plural.Repositories do
     RecipeSection,
     RecipeItem,
     ConfigurationItem,
-    Workspace
+    Workspace,
+    Condition
   }
 
   defmodule Query do
@@ -60,7 +61,9 @@ defmodule Console.Plural.Repositories do
         recipeSections: [%RecipeSection{
           repository: %Repository{},
           recipeItems: [%RecipeItem{
-            configuration: [%ConfigurationItem{}]
+            configuration: [%ConfigurationItem{
+              condition: %Condition{}
+            }]
           }]
         }]
       }}

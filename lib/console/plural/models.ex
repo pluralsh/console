@@ -23,7 +23,11 @@ defmodule Console.Plural.RecipeItem do
 end
 
 defmodule Console.Plural.ConfigurationItem do
-  defstruct [:name, :default, :documentation, :type, :placeholder]
+  defstruct [:name, :default, :documentation, :type, :placeholder, :condition]
+end
+
+defmodule Console.Plural.Condition do
+  defstruct [:operation, :field, :value]
 end
 
 defmodule Console.Plural.Edge do

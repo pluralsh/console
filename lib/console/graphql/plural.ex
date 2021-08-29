@@ -44,6 +44,13 @@ defmodule Console.GraphQl.Plural do
     field :placeholder,   :string
     field :documentation, :string
     field :default,       :string
+    field :condition,     :configuration_condition
+  end
+
+  object :configuration_condition do
+    field :field,     :string
+    field :value,     :string
+    field :operation, :string
   end
 
   object :repository_context do

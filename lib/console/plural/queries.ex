@@ -24,6 +24,7 @@ defmodule Console.Plural.Queries do
         default
         placeholder
         documentation
+        condition { operation field value }
       }
     }
   """
