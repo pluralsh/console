@@ -16,8 +16,16 @@ defmodule Console.Services.Builds do
     |> Repo.one()
   end
 
+  def advisory_lock(val) do
+    Ecto.Adapters.SQL.query(Repo,
+      "SELECT pg_advisory_xact_lock($1)",
+      [:erlang.phash2(val)]
+    )
+  end
+
   def lock(name, id) do
     start_transaction()
+    |> add_operation(:advisor, fn _ -> advisory_lock(name) end)
     |> add_operation(:lock, fn _ ->
       Lock.active()
       |> Repo.get_by(name: name)
