@@ -118,6 +118,7 @@ function available(config, context) {
 
 function RecipeConfiguration({recipe, context: ctx, setOpen}) {
   const sections = recipe.recipeSections
+  const [oidc, setOidc] = useState(false)
   const [context, setContext] = useState(ctx)
   const [ind, setInd] = useState(0)
   const {repository, recipeItems} = sections[ind]
@@ -125,7 +126,7 @@ function RecipeConfiguration({recipe, context: ctx, setOpen}) {
   const configuration = useMemo(() => compileConfigurations(recipeItems), [recipeItems])
 
   const [mutation, {loading, error}] = useMutation(INSTALL_RECIPE, {
-    variables: {id: recipe.id, context: JSON.stringify(context)},
+    variables: {id: recipe.id, oidc, context: JSON.stringify(context)},
     update: (cache, {data: {installRecipe}}) => updateCache(cache, {
       query: BUILDS_Q,
       update: (prev) => appendConnection(prev, installRecipe, 'builds'),
@@ -165,6 +166,13 @@ function RecipeConfiguration({recipe, context: ctx, setOpen}) {
         </Box>
         <Box flex={false} direction='row' align='center' pad='small' 
              gap='small' justify='end'>
+          {!hasNext && recipe.oidcEnabled && (
+            <CheckBox
+              toggle
+              checked={oidc}
+              label={oidc ? 'oidc enabled' : 'oidc disabled'}
+              onChange={({target: {checked}}) => setOidc(checked)} />
+          )}
           {ind > 0 && <SecondaryButton label='Previous' onClick={() => setInd(ind - 1)} />}
           <Button 
             label={hasNext ? 'Continue' : 'Install'} 

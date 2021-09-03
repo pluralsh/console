@@ -28,6 +28,7 @@ export const RecipeFragment = gql`
     name
     description
     provider
+    oidcEnabled
   }
 `
 
@@ -88,8 +89,8 @@ export const RECIPE_Q = gql`
 `
 
 export const INSTALL_RECIPE = gql`
-  mutation Install($id: ID!, $context: Map!) {
-    installRecipe(id: $id, context: $context) {
+  mutation Install($id: ID!, $context: Map!, $oidc: Boolean) {
+    installRecipe(id: $id, context: $context, oidc: $oidc) {
       ...BuildFragment
     }
   }
