@@ -12,15 +12,16 @@ defmodule Console.Plural.Repositories do
     RecipeItem,
     ConfigurationItem,
     Workspace,
-    Condition
+    Condition,
+    OIDCSettings,
   }
 
   defmodule Query do
-    defstruct [:installations, :searchRepositories, :recipes, :recipe]
+    defstruct [:installations, :searchRepositories, :recipes, :recipe, :installation]
   end
 
   defmodule Mutation do
-    defstruct [:installRecipe]
+    defstruct [:installRecipe, :upsertOidcProvider]
   end
 
   def search_repositories(query, first) do
@@ -58,6 +59,7 @@ defmodule Console.Plural.Repositories do
       prune_variables(%{id: id}),
       %Query{recipe: %Recipe{
         repository: %Repository{},
+        oidcSettings: %OIDCSettings{},
         recipeSections: [%RecipeSection{
           repository: %Repository{},
           recipeItems: [%RecipeItem{
@@ -95,5 +97,17 @@ defmodule Console.Plural.Repositories do
       }}
     )
     |> when_ok(fn %{installations: result} -> result end)
+  end
+
+  def get_installation(name) do
+    get_installation_query()
+    |> Client.run(%{name: name}, %Query{installation: %Installation{}})
+    |> when_ok(fn %{installation: inst} -> inst end)
+  end
+
+  def upsert_oidc_provider(id, attrs) do
+    upsert_oidc_provider()
+    |> Client.run(%{id: id, attributes: attrs}, %Mutation{})
+    |> when_ok(fn %{upsertOidcProvider: prov} -> prov end)
   end
 end

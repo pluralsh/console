@@ -2,6 +2,10 @@ defmodule Console.Plural.Installation do
   defstruct [:id, :repository]
 end
 
+defmodule Console.Plural.User do
+  defstruct [:id, :email]
+end
+
 defmodule Console.Plural.Dashboard do
   defstruct [:name, :uid]
 end
@@ -11,7 +15,11 @@ defmodule Console.Plural.Repository do
 end
 
 defmodule Console.Plural.Recipe do
-  defstruct [:id, :name, :description, :provider, :repository, :recipeSections]
+  defstruct [:id, :name, :description, :provider, :repository, :oidcSettings, :recipeSections]
+end
+
+defmodule Console.Plural.OIDCSettings do
+  defstruct [:authMethod, :domainKey, :uriFormat]
 end
 
 defmodule Console.Plural.RecipeSection do

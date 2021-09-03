@@ -1,7 +1,7 @@
 defmodule Console.Services.Plural do
   alias Console.Schema.{User, Manifest}
   alias Console.Services.{Builds}
-  alias Console.Plural.Repositories
+  alias Console.Plural.{Repositories, Users, Recipe}
 
   def terraform_file(repository) do
     terraform_filename(repository)
@@ -19,9 +19,10 @@ defmodule Console.Services.Plural do
       do: {:ok, update}
   end
 
-  def install_recipe(id, context, %User{} = user) do
+  def install_recipe(id, context, oidc, %User{} = user) do
     with {:ok, recipe} <- Repositories.get_recipe(id),
-         {:ok, _} <- Repositories.install_recipe(id) do
+         {:ok, _} <- Repositories.install_recipe(id),
+         :ok <- configure_oidc(recipe, context, oidc) do
       Builds.create(%{
         type: :install,
         repository: recipe.repository.name,
@@ -33,6 +34,24 @@ defmodule Console.Services.Plural do
       }, user)
     end
   end
+
+  def configure_oidc(
+    %Recipe{
+      repository: %{name: name},
+      oidcSettings: %{authMethod: method, uriFormat: fmt, domainKey: key}
+    },
+    context,
+    true) do
+    with {:ok, %{id: me}} <- Users.me(),
+         {:ok, %{id: inst_id}} <- Repositories.get_installation(name),
+         {:ok, _} <- Repositories.upsert_oidc_provider(inst_id, %{
+           redirectUris: [String.replace(fmt, "{domain}", get_in(context, [name, key]))],
+           authMethod: method,
+           bindings: [%{userId: me}]
+         }),
+      do: :ok
+  end
+  def configure_oidc(_, _, _), do: :ok
 
   def cluster_name() do
     case project_manifest() do

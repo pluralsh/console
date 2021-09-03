@@ -45,6 +45,11 @@ defmodule Console.Plural.Queries do
       name
       description
       provider
+      oidcSettings {
+        domainKey
+        uriFormat
+        authMethod
+      }
     }
   """
 
@@ -68,6 +73,15 @@ defmodule Console.Plural.Queries do
     #{@installation_fragment}
   """
 
+  @get_installation_q """
+    query Installation($name: String!) {
+      installation(name: $name) {
+        ...InstallationFragment
+      }
+    }
+    #{@installation_fragment}
+  """
+
   @incident_message_sub """
     subscription Incident($id: ID) {
       incidentMessageDelta(incidentId: $id) {
@@ -85,7 +99,7 @@ defmodule Console.Plural.Queries do
 
   @me_query """
     query {
-      me { id }
+      me { id email }
     }
   """
 
@@ -138,7 +152,17 @@ defmodule Console.Plural.Queries do
     }
   """
 
+  @oidc_upsert """
+    mutation OIDC($id: ID!, $attributes: OidcProviderAttributes!) {
+      upsertOidcProvider(installationId: $id, attributes: $attributes) {
+        id
+      }
+    }
+  """
+
   def installation_query(), do: @installation_query
+
+  def get_installation_query(), do: @get_installation_q
 
   def external_token_mutation(), do: "mutation { externalToken }"
 
@@ -157,4 +181,6 @@ defmodule Console.Plural.Queries do
   def get_recipe_query(), do: @get_recipe
 
   def install_recipe_mutation(), do: @install_recipe
+
+  def upsert_oidc_provider(), do: @oidc_upsert
 end

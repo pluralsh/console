@@ -79,7 +79,7 @@ defmodule Console.GraphQl.PluralQueriesTest do
         variables: %{id: "id", provider: "AWS"}
       })
 
-      recipes = [%{id: "id", name: "recipe", description: "a recipe"}]
+      recipes = [%{id: "id", name: "recipe", description: "a recipe", oidcSettings: %{authMethod: "POST"}}]
       expect(HTTPoison, :post, fn _, ^body, _ ->
         {:ok, %{body: Jason.encode!(%{data: %{recipes: as_connection(recipes)}})}}
       end)
@@ -89,7 +89,7 @@ defmodule Console.GraphQl.PluralQueriesTest do
           recipes(id: $id, first: 20) {
             pageInfo { hasNextPage endCursor }
             edges {
-              node { id name description }
+              node { id name description oidcEnabled }
             }
           }
         }
@@ -101,6 +101,7 @@ defmodule Console.GraphQl.PluralQueriesTest do
       assert edge["node"]["id"] == "id"
       assert edge["node"]["name"] == "recipe"
       assert edge["node"]["description"] == "a recipe"
+      assert edge["node"]["oidcEnabled"]
     end
   end
 

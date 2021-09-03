@@ -1,14 +1,12 @@
 defmodule Console.Plural.Users do
   use Console.Plural.Base
+  alias Console.Plural.{User}
 
   defmodule Query, do: defstruct [:me]
 
   def me() do
     me_query()
-    |> Client.run(%{}, %Query{})
-    |> case do
-      {:ok, %Query{me: me}} -> {:ok, me}
-      error -> error
-    end
+    |> Client.run(%{}, %Query{me: %User{}})
+    |> when_ok(fn %{me: me} -> me end)
   end
 end

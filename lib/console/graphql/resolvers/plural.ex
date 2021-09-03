@@ -49,8 +49,8 @@ defmodule Console.GraphQl.Resolvers.Plural do
     end
   end
 
-  def install_recipe(%{id: id, context: context}, %{context: %{current_user: user}}) do
-    Plural.install_recipe(id, context, user)
+  def install_recipe(%{id: id, context: context} = args, %{context: %{current_user: user}}) do
+    Plural.install_recipe(id, context, !!args[:oidc], user)
   end
 
   def resolve_configuration(%{metadata: %{name: name}}, first, second),

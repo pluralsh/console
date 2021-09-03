@@ -25,6 +25,10 @@ defmodule Console.GraphQl.Plural do
     field :description,     :string
     field :provider,        :string
     field :recipe_sections, list_of(:recipe_section)
+    field :oidc_enabled,    :boolean, resolve: fn
+      %{oidcSettings: %{}}, _, _ -> {:ok, true}
+      _, _, _ -> {:ok, false}
+    end
   end
 
   object :recipe_section do
@@ -113,8 +117,9 @@ defmodule Console.GraphQl.Plural do
   object :plural_mutations do
     field :install_recipe, :build do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id,      non_null(:id)
       arg :context, non_null(:map)
+      arg :oidc,    :boolean
 
       resolve &Plural.install_recipe/2
     end
