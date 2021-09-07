@@ -64,5 +64,6 @@ defmodule Console.Schema.Build do
     schema
     |> cast(attrs, @valid)
     |> validate_required([:repository, :type, :status])
+    |> validate_length(:message, max: 10_000)
   end
 end
