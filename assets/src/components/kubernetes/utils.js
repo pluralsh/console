@@ -15,6 +15,6 @@ export function Container({header, children, ...props}) {
 }
 
 export function logUrl({name, namespace, labels}) {
-  const appLabel = labels.find(({name}) => name === 'app')
+  const appLabel = labels.find(({name}) => name === 'app' || name === 'app.kubernetes.io/name')
   return `/logs/${namespace}?${asQuery({job: `${namespace}/${appLabel ? appLabel.value : name}`})}`
 }

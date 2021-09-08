@@ -430,7 +430,7 @@ export function Node() {
 }
 
 export function Nodes() {
-  const {data} = useQuery(NODES_Q, {pollInterval: POLL_INTERVAL})
+  const {data} = useQuery(NODES_Q, {pollInterval: POLL_INTERVAL, fetchPolicy: 'cache-and-network'})
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
   useEffect(() => {
     setBreadcrumbs([

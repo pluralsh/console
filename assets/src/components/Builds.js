@@ -12,7 +12,8 @@ import { InstallationContext } from './Installations'
 import { appendConnection, extendConnection, updateCache } from '../utils/graphql'
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { StandardScroller } from './utils/SmoothScroller'
-import { UpgradePolicies } from './builds/UpgradePolicies'
+import { Icon, UpgradePolicies } from './builds/UpgradePolicies'
+import { Checkmark, Close, StatusCritical } from 'grommet-icons'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -29,12 +30,21 @@ function BuildStatusInner({background, text, icon}) {
   )
 }
 
+function IconStatus({icon, background}) {
+  return (
+    <Box round='full' pad='xsmall' align='center' justify='center' 
+         background={background}>
+      {React.createElement(icon, {size: '16px'})}
+    </Box>
+  )
+}
+
 function BuildStatus({status}) {
   switch (status) {
     case Status.QUEUED:
       return <BuildStatusInner background='status-unknown' text='queued' />
     case Status.CANCELLED:
-      return <BuildStatusInner background='light-6' text='cancelled' />
+      return <IconStatus icon={Close} background='tone-medium' />
     case Status.RUNNING:
       return (
         <BuildStatusInner
@@ -43,9 +53,9 @@ function BuildStatus({status}) {
           text='running' />
       )
     case Status.FAILED:
-      return <BuildStatusInner background='error' text='failed' />
+      return <IconStatus icon={StatusCritical} background='error' />
     case Status.SUCCESSFUL:
-      return <BuildStatusInner background='success' text='successful' />
+      return <IconStatus icon={Checkmark} background='success' />
     case Status.PENDING:
       return <BuildStatusInner background='status-warning' text='pending approval' />
     default:
