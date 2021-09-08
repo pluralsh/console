@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { BUILDS_Q, CREATE_BUILD, BUILD_SUB } from './graphql/builds'
 import { Button } from 'forge-core'
-import { Box, Text } from 'grommet'
+import { Box, Layer, Text } from 'grommet'
 import moment from 'moment'
 import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
@@ -13,7 +13,7 @@ import { appendConnection, extendConnection, updateCache } from '../utils/graphq
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { StandardScroller } from './utils/SmoothScroller'
 import { Icon, UpgradePolicies } from './builds/UpgradePolicies'
-import { Checkmark, Close, StatusCritical } from 'grommet-icons'
+import { Checkmark, Close, StatusCritical, Up } from 'grommet-icons'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -136,8 +136,25 @@ function Placeholder() {
   )
 }
 
+function ReturnToBeginning({beginning}) {
+  return (
+    <Layer position='bottom-right' modal={false} plain>
+      <Box direction='row' align='center' round='xsmall' gap='small' 
+           hoverIndicator='cardDark' background='cardDarkLight'
+           margin={{bottom: 'medium', right: 'small'}}
+           pad='small' focusIndicator={false} onClick={beginning}>
+        <Box direction='row' fill='horizontal' justify='center'>
+          <Text size='small'>go to most recent</Text>
+        </Box>
+        <Up size='15px' />
+      </Box>
+    </Layer>
+  )
+}
+
 export default function Builds() {
   const [listRef, setListRef] = useState(null)
+  const [scrolled, setScrolled] = useState(false)
   const {data, loading, subscribeToMore, fetchMore} = useQuery(BUILDS_Q, {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL
@@ -155,6 +172,10 @@ export default function Builds() {
     setOnChange({func: () => null})
   }, [])
 
+  const returnToBeginning = useCallback(() => {
+    listRef.scrollToItem(0)
+  }, [listRef])
+
   if (loading && !data) return <LoopingLogo scale='0.75' />
 
   const {edges, pageInfo} = data.builds
@@ -170,11 +191,13 @@ export default function Builds() {
         <CreateBuild />
       </Box>
       <Box fill pad={{bottom: 'small'}}>
+        {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
         <StandardScroller
           listRef={listRef}
           setListRef={setListRef}
           items={edges}
           loading={loading}
+          handleScroll={setScrolled}
           placeholder={Placeholder}
           hasNextPage={pageInfo.hasNextPage}
           mapper={({node}) => <Build key={node.id} build={node} />}
