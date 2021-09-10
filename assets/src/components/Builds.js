@@ -7,12 +7,12 @@ import { Box, Layer, Text } from 'grommet'
 import moment from 'moment'
 import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
-import { BuildStatus as Status, BuildTypes } from './types'
+import { BuildIcons, BuildStatus as Status, BuildTypes } from './types'
 import { InstallationContext } from './Installations'
 import { appendConnection, extendConnection, updateCache } from '../utils/graphql'
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { StandardScroller } from './utils/SmoothScroller'
-import { Icon, UpgradePolicies } from './builds/UpgradePolicies'
+import { UpgradePolicies } from './builds/UpgradePolicies'
 import { Checkmark, Close, StatusCritical, Up } from 'grommet-icons'
 
 function BuildStatusInner({background, text, icon}) {
@@ -35,6 +35,15 @@ function IconStatus({icon, background}) {
     <Box round='full' pad='xsmall' align='center' justify='center' 
          background={background}>
       {React.createElement(icon, {size: '16px'})}
+    </Box>
+  )
+}
+
+export function BuildIcon({build, size}) {
+  const icon = BuildIcons[build.type]
+  return (
+    <Box flex={false} pad='small'>
+      {React.createElement(icon, {size: size || '15px'})}
     </Box>
   )
 }
@@ -65,7 +74,8 @@ function BuildStatus({status}) {
 
 export const BUILD_PADDING = {horizontal: 'medium'}
 
-function Build({build: {id, repository, status, insertedAt, message, creator, sha}}) {
+function Build({build}) {
+  const {id, repository, status, insertedAt, message, creator, sha} = build
   let history = useHistory()
   const footer = [
     moment(insertedAt).fromNow(),
@@ -78,7 +88,8 @@ function Build({build: {id, repository, status, insertedAt, message, creator, sh
     <Box pad={BUILD_PADDING}>
       <Box pad='small' margin={{top: 'small'}} direction='row' background='backgroundLight'
         align='center' focusIndicator={false} hoverIndicator='backgroundDark' round='xsmall'
-        onClick={() => history.push(`/build/${id}`)}>
+        onClick={() => history.push(`/build/${id}`)} gap='small'>
+        <BuildIcon build={build} />
         <Box fill='horizontal'>
           <Text size='small' weight='bold'>{repository}</Text>
           <Text size='small' color='dark-6'>{footer}</Text>
