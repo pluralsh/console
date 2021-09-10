@@ -8,6 +8,8 @@ defmodule Console.Services.Base do
     end
   end
 
+  def ok(val), do: {:ok, val}
+
   def start_transaction(), do: Ecto.Multi.new()
 
   def add_operation(multi, name, fun) when is_function(fun) do

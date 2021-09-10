@@ -2,7 +2,7 @@ defmodule Console.GraphQl do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
   import Console.GraphQl.Helpers
-  alias Console.GraphQl.Resolvers.{Build, Plural, Webhook, User}
+  alias Console.GraphQl.Resolvers.{Build, Plural, Webhook, User, Kubecost}
   alias Console.Middleware.{Authenticated, Rbac}
 
   import_types Absinthe.Type.Custom
@@ -18,6 +18,7 @@ defmodule Console.GraphQl do
   @sources [
     Build,
     User,
+    Kubecost,
   ]
 
   def context(ctx) do

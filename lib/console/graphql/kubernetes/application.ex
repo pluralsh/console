@@ -1,13 +1,35 @@
 defmodule Console.GraphQl.Kubernetes.Application do
   use Console.GraphQl.Schema.Base
-  alias Console.GraphQl.Resolvers.Plural
+  alias Console.GraphQl.Resolvers.{Plural, Kubecost}
 
   object :application do
     field :name,   non_null(:string), resolve: fn %{metadata: %{name: name}}, _, _ -> {:ok, name} end
     field :spec,   non_null(:application_spec)
     field :status, non_null(:application_status)
 
+    field :cost, :cost_analysis, resolve: fn
+      %{metadata: %{name: name}}, _, %{context: %{loader: loader}} ->
+        loader
+        |> Dataloader.load(Kubecost, :namespace, name)
+        |> on_load(fn loader ->
+          {:ok, Dataloader.get(loader, Kubecost, :namespace, name)}
+        end)
+    end
+
     field :configuration, :configuration, resolve: &Plural.resolve_configuration/3
+  end
+
+  object :cost_analysis do
+    field :cpu_cost,               :float
+    field :cpu_efficiency,         :float
+    field :efficiency,             :float
+    field :gpu_cost,               :float
+    field :network_cost,           :float
+    field :pv_cost,                :float
+    field :ram_cost,               :float
+    field :ram_efficiency,         :float
+    field :total_cost,             :float
+    field :shared_cost,            :float
   end
 
   object :application_spec do
