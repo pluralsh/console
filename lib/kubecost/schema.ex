@@ -1,5 +1,6 @@
 defmodule Kubecost.Entry do
   defstruct [
+    :minutes,
     :cpu_cost,
     :cpu_efficiency,
     :efficiency,
@@ -14,6 +15,7 @@ defmodule Kubecost.Entry do
 
   def build(attrs) do
     %__MODULE__{
+      minutes: attrs["minutes"],
       cpu_cost: attrs["cpuCost"],
       cpu_efficiency: attrs["cpuEfficiency"],
       efficiency: attrs["efficiency"],
