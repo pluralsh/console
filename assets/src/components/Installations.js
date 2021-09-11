@@ -5,6 +5,7 @@ import { useQuery } from 'react-apollo'
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
 import { ApplicationReadyIcon } from './Application'
 import { LoopingLogo } from './utils/AnimatedLogo'
+import { CostAnalysis } from './repos/CostAnalysis'
 
 export const InstallationContext = React.createContext({})
 
@@ -69,17 +70,28 @@ export function InstallationsFlyout() {
   )
 }
 
-export function Installations() {
-  const {currentApplication, open, setOpen} = useContext(InstallationContext)
-  if (!currentApplication) return null
-  const {name, spec: {descriptor}} = currentApplication
+export function ToolbarItem({children, onClick, open}) {
   return (
     <Box flex={false} direction='row' round='xsmall' background={open ? 'sidebarHover' : null}
          margin={{vertical: 'xsmall'}} pad={{horizontal: 'small', vertical: 'xsmall'}} 
-         gap='small' align='center'  hoverIndicator='sidebarHover' onClick={() => setOpen(true)}>
-      {descriptor.icons.length > 0 && <ApplicationIcon application={currentApplication} dark />}
-      <Text size='small' weight={500}>{name}</Text>
-      <ApplicationReadyIcon application={currentApplication} size='20px' showIcon />
+         gap='small' align='center'  hoverIndicator='sidebarHover' onClick={onClick}>
+      {children}
+    </Box>
+  )
+}
+
+export function Installations() {
+  const {currentApplication, open, setOpen} = useContext(InstallationContext)
+  if (!currentApplication) return null
+  const {name, spec: {descriptor}, cost} = currentApplication
+  return (
+    <Box flex={false} direction='row' gap='xsmall' align='center'>
+      {cost && <CostAnalysis cost={cost} />}
+      <ToolbarItem onClick={() => setOpen(true)} open={open}>
+        {descriptor.icons.length > 0 && <ApplicationIcon application={currentApplication} dark />}
+        <Text size='small' weight={500}>{name}</Text>
+        <ApplicationReadyIcon application={currentApplication} size='20px' showIcon />
+      </ToolbarItem>
     </Box>
   )
 }

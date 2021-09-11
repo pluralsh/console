@@ -136,6 +136,16 @@ export const CONFIGURATIONS_Q = gql`
   ${RepositoryFragment}
 `;
 
+export const CostAnalysisFragment = gql`
+  fragment CostAnalysisFragment on CostAnalysis {
+    minutes
+    cpuCost
+    pvCost
+    ramCost
+    totalCost
+  }
+`
+
 export const ApplicationFragment = gql`
   fragment ApplicationFragment on Application {
     name
@@ -166,7 +176,9 @@ export const ApplicationFragment = gql`
       }
       componentsReady
     }
+    cost { ...CostAnalysisFragment }
   }
+  ${CostAnalysisFragment}
 `
 
 export const UPDATE_CONFIGURATION = gql`

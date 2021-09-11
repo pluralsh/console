@@ -10,6 +10,10 @@ defmodule Console.Services.Base do
 
   def ok(val), do: {:ok, val}
 
+  def should_cache?({:error, _}), do: false
+  def should_cache?(nil), do: false
+  def should_cache?(_), do: true
+
   def start_transaction(), do: Ecto.Multi.new()
 
   def add_operation(multi, name, fun) when is_function(fun) do

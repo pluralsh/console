@@ -20,7 +20,7 @@ defmodule Console.GraphQl.Kubernetes.Application do
   end
 
   object :cost_analysis do
-    field :minutes,                :integer
+    field :minutes,                :float
     field :cpu_cost,               :float
     field :cpu_efficiency,         :float
     field :efficiency,             :float

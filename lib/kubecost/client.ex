@@ -13,7 +13,7 @@ defmodule Kubecost.Client do
   end
 
   def get_aggregated_cost() do
-    url("/model/allocation", window: "month", aggregation: "namespace", accumulate: true)
+    url("/model/allocation", window: "month", aggregate: "namespace", accumulate: true)
     |> HTTPoison.get()
     |> case do
       {:ok, %{body: body, status_code: 200}} ->
