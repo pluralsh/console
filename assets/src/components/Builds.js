@@ -14,6 +14,8 @@ import { LoopingLogo } from './utils/AnimatedLogo'
 import { StandardScroller } from './utils/SmoothScroller'
 import { UpgradePolicies } from './builds/UpgradePolicies'
 import { Checkmark, Close, StatusCritical, Up } from 'grommet-icons'
+import { ThemeContext } from 'styled-components'
+import { normalizeColor } from 'grommet/utils'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -74,7 +76,10 @@ function BuildStatus({status}) {
 
 export const BUILD_PADDING = {horizontal: 'medium'}
 
+export const boxShadow = (theme) => ({boxShadow: `2px 2px 2px 1px ${normalizeColor('backgroundDark', theme)}`})
+
 function Build({build}) {
+  const theme = useContext(ThemeContext)
   const {id, repository, status, insertedAt, message, creator, sha} = build
   let history = useHistory()
   const footer = [
@@ -86,8 +91,10 @@ function Build({build}) {
 
   return (
     <Box pad={BUILD_PADDING}>
-      <Box pad='small' margin={{top: 'small'}} direction='row' background='backgroundLight'
-        align='center' focusIndicator={false} hoverIndicator='backgroundDark' round='xsmall'
+      <Box style={boxShadow(theme)}
+        pad='small' margin={{top: 'small'}} direction='row' 
+        background='backgroundLight' align='center' focusIndicator={false} 
+        hoverIndicator='backgroundDark' round='xsmall'
         onClick={() => history.push(`/build/${id}`)} gap='small'>
         <BuildIcon build={build} />
         <Box fill='horizontal'>

@@ -1,13 +1,12 @@
 import React, { useState, useRef, useContext } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
-import { Deploy, Network, Configure, BarChart, Group, TextAlignFull, Cubes, List, Nodes, Alert, Search } from 'grommet-icons'
+import { Deploy, Network, Configure, BarChart, Group, TextAlignFull, Cubes, List, Nodes, Alert } from 'grommet-icons'
 import { Box, Text } from 'grommet'
 import { LoginContext } from './Login'
 import Avatar from './users/Avatar'
 import { InstallationContext } from './Installations'
 import { Tooltip } from './utils/Tooltip'
 import './sidebar.css'
-import { Installer } from './repos/Installer'
 
 const SIDEBAR_ICON_HEIGHT = '42px'
 const APP_ICON = `${process.env.PUBLIC_URL}/console-white.png`

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Box, Layer, Text, TextInput } from 'grommet'
+import { Box, Text, TextInput } from 'grommet'
 import { ModalHeader } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { SEARCH_REPOS } from '../graphql/plural'
