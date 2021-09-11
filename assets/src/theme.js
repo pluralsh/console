@@ -52,6 +52,7 @@ export const PLURAL_THEME = {
 export const DEFAULT_COLOR_THEME = {
   brand: 'key-light',
   // action: '#007a5a',
+  cost: 'green-light',
   action: 'key-light',
   actionDark: 'key-dark',
   sidebar: 'backgroundDark',
