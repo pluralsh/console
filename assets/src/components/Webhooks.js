@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useQuery, useMutation } from 'react-apollo'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { WEBHOOKS_Q, CREATE_WEBHOOK } from './graphql/webhooks'
-import { Button, Scroller, ModalHeader } from 'forge-core'
+import { Button, Scroller, ModalHeader, Copyable } from 'forge-core'
 import { BUILD_PADDING } from './Builds'
 import { Box, Text, FormField, TextInput, Layer } from 'grommet'
 import { chunk } from '../utils/array'
@@ -31,7 +31,7 @@ function Webhook({webhook: {url, health}}) {
     <Box margin={{bottom: 'small'}} background='cardDetailLight'
       width='50%' pad='small' align='center' round='xsmall' direction='row'>
       <Box fill='horizontal'>
-        <Text size='small'>{trim(url)}</Text>
+        <Copyable text={url} pillText='Webhook url copied' />
       </Box>
       <Box flex={false}>
         <WebhookHealth health={health} />

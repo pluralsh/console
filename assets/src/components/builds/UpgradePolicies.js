@@ -18,7 +18,7 @@ export function Icon({tooltip, icon, iconProps, onClick, background, hoverIndica
 
   return (
     <>
-    <Box ref={ref} pad='small' round='xsmall' onClick={onClick}
+    <Box ref={ref} pad='small' round='xsmall' onClick={onClick} align='center' justify='center'
          onMouseEnter={() => setHover(true)}  onMouseLeave={() => setHover(false)}
          background={background} hoverIndicator={hoverIndicator || 'tone-light'}>
       {React.createElement(icon, {...{size: '15px'}, ...iconProps})}

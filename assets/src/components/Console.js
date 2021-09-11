@@ -29,6 +29,7 @@ import { Installer } from './repos/Installer'
 
 const SIDEBAR_WIDTH = '70px'
 
+
 export default function Console() {
   const [open, setOpen] = useState(false)
 
