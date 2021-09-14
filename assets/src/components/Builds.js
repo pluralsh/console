@@ -16,6 +16,7 @@ import { UpgradePolicies } from './builds/UpgradePolicies'
 import { Checkmark, Close, StatusCritical, Up } from 'grommet-icons'
 import { ThemeContext } from 'styled-components'
 import { normalizeColor } from 'grommet/utils'
+import alpha from 'color-alpha'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -76,7 +77,7 @@ function BuildStatus({status}) {
 
 export const BUILD_PADDING = {horizontal: 'medium'}
 
-export const boxShadow = (theme) => ({boxShadow: `2px 2px 2px 1px ${normalizeColor('backgroundDark', theme)}`})
+export const boxShadow = (theme) => ({boxShadow: `2px 2px 2px ${alpha(normalizeColor('backgroundDark', theme), .3)}`})
 
 function Build({build}) {
   const theme = useContext(ThemeContext)
