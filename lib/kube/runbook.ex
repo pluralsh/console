@@ -54,7 +54,7 @@ defmodule Kube.Runbook do
     defmodel "RunbookDatasource", "platform.plural.sh", "v1alpha1" do
       property :name, "name", :string
       property :type, "type", :string
-      property :promethesu, "prometheus", Prometheus
+      property :prometheus, "prometheus", Prometheus
       property :kubernetes, "kubernetes", Kubernetes
     end
   end

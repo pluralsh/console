@@ -159,4 +159,47 @@ defmodule KubernetesScaffolds do
       timestamp: "13242"
     }
   end
+
+  def runbook(name, datasources \\ []) do
+    %Kube.Runbook{
+      metadata: %ObjectMeta{name: name, namespace: name},
+      spec: %Kube.Runbook.Spec{
+        name: name,
+        datasources: datasources,
+        actions: [%Kube.Runbook.Action{
+          name: "action",
+          configuration: %Kube.Runbook.ConfigurationAction{
+            updates: [
+              %Kube.Runbook.PathUpdate{
+                path: ["some", "path"],
+                value_from: "path"
+              }
+            ]
+          }
+        }],
+        display: """
+        <root>
+          <box>
+            <text size="small">some text</text>
+          </box>
+        </root>
+        """
+      }
+    }
+  end
+
+  def runbook_datasource(type, name, opts \\ [])
+  def runbook_datasource(:prometheus, name, _) do
+    %Kube.Runbook.Datasource{
+      name: name,
+      prometheus: %Kube.Runbook.Prometheus{query: "query"},
+    }
+  end
+
+  def runbook_datasource(:kubernetes, name, opts) do
+    %Kube.Runbook.Datasource{
+      name: name,
+      kubernetes: struct(Kube.Runbook.Kubernetes, opts),
+    }
+  end
 end

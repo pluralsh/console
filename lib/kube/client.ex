@@ -100,4 +100,24 @@ defmodule Kube.Client do
     }
     |> Kazan.run()
   end
+
+  def list_runbooks(ns) do
+    %Kazan.Request{
+      method: "get",
+      path: "/apis/platform.plural.sh/v1alpha1/namespaces/#{Console.namespace(ns)}/runbooks",
+      query_params: %{},
+      response_model: Kube.RunbookList
+    }
+    |> Kazan.run()
+  end
+
+  def get_runbook(ns, name) do
+    %Kazan.Request{
+      method: "get",
+      path: "/apis/platform.plural.sh/v1alpha1/namespaces/#{Console.namespace(ns)}/runbooks/#{name}",
+      query_params: %{},
+      response_model: Kube.Runbook
+    }
+    |> Kazan.run()
+  end
 end
