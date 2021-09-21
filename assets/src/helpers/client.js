@@ -1,5 +1,5 @@
 import { ApolloClient } from 'apollo-client'
-import { InMemoryCache } from 'apollo-cache-inmemory'
+import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory'
 import { setContext } from 'apollo-link-context'
 import { createLink } from "apollo-absinthe-upload-link"
 import { onError } from 'apollo-link-error'
@@ -14,6 +14,11 @@ import { split } from 'apollo-link'
 import { apiHost, secure } from './hostname'
 import customFetch from './uploadLink'
 import { fetchToken, wipeToken } from './auth'
+import introspection from '../generated/fragments.json'
+
+const fragmentMatcher = new IntrospectionFragmentMatcher({
+  introspectionQueryResultData: introspection
+})
 
 const API_HOST = apiHost()
 const GQL_URL = `${secure() ? 'https' : 'http'}://${API_HOST}/gql`
@@ -63,7 +68,7 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
 
   const client = new ApolloClient({
     link: splitLink,
-    cache: new InMemoryCache()
+    cache: new InMemoryCache({fragmentMatcher})
   })
   
   return {client, socket}

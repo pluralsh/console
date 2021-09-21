@@ -34,7 +34,7 @@ defmodule Console.Runbooks.Display do
     end
 
     component "valueFrom" do
-      attributes ~w(datasource path)
+      attributes ~w(datasource path doc)
       parents ~w(input text)
     end
 

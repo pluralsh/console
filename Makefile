@@ -40,6 +40,9 @@ connectdb: ## proxies the db in kubernetes via kubectl
 web: ## starts a local webserver
 	cd assets && yarn start
 
+gql-codegen: ## generates introspection information for our graph
+	cd assets && yarn run graphql-codegen
+
 yarn-add: ## adds a yarn dep
 	cd assets && yarn add $(dep)
 

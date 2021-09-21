@@ -30,6 +30,8 @@ export function Runbook() {
 
   useEnsureCurrent(namespace)
 
+  console.log(data)
+
   if (!data) return <LoopingLogo />
 
   const {runbook} = data
@@ -40,7 +42,9 @@ export function Runbook() {
         <Text size='small' weight='bold'>{runbook.spec.name}</Text>
         <Text size='small'>{runbook.spec.description}</Text>
       </Box>
-      <Display root={runbook.spec.display} data={runbook.data} />
+      <Box style={{overflow: 'auto'}} fill>
+        <Display root={runbook.spec.display} data={runbook.data} />
+      </Box>
     </Box>
   )
 }

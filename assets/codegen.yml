@@ -1,0 +1,12 @@
+overwrite: true
+schema: "https://console.plural.sh/gql"
+generates:
+  src/generated/fragments.json:
+    plugins:
+      - fragment-matcher
+    config:
+      apolloClientVersion: 2
+  ./graphql.schema.json:
+    plugins:
+      - "introspection"
+

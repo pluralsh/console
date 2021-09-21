@@ -1,0 +1,18 @@
+{
+  "__schema": {
+    "types": [
+      {
+        "kind": "UNION",
+        "name": "KubernetesData",
+        "possibleTypes": [
+          {
+            "name": "Deployment"
+          },
+          {
+            "name": "StatefulSet"
+          }
+        ]
+      }
+    ]
+  }
+}

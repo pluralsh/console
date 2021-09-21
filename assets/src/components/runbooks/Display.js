@@ -4,6 +4,7 @@ import { Button, SecondaryButton } from 'forge-core'
 import { normalizeColor } from 'grommet/utils'
 import { useMutation } from '@apollo/react-hooks'
 import { EXECUTE_RUNBOOK } from './queries'
+import { Graph, GraphHeader } from '../utils/Graph'
 import { LabelledInput } from '../utils/LabelledInput'
 import jp from 'jsonpath'
 
@@ -91,56 +92,77 @@ function buttonComponent({primary, key, ...props}) {
 }
 
 function Input({attributes, children}) {
-  const {context, setContext} = useContext(DisplayContext)
-  const [value, setValue] = useState('')
+  const {context, setContext, ...rest} = useContext(DisplayContext)
+  const [value, setValue] = useState(children && children.length > 0 ? valueFrom(children[0], rest) : '')
   const onChange = useCallback((val) => {
     setValue(val)
-    setContext({...context, [attributes.name]: val})
+    setContext({...context, [attributes.name]: val === '' ? null : val})
   }, [context, setContext, setValue])
 
-  const val = children ? recurse(children)[0] : ''
-  console.log(val)
   useEffect(() => {
-    onChange(val)
-  }, [val])
+    onChange(value)
+  }, [])
 
   return (
     <LabelledInput
       {...attributes}
       value={value}
-      onChange={({target: {value}}) => onChange(value)} />
+      onChange={onChange} />
   )
 }
 
-function ValueFrom({attributes: {datasource, path}}) {
-  const {datasources} = useContext(DisplayContext)
+function valueFrom({attributes: {datasource, path}}, {datasources}) {
   const object = datasources[datasource]
+  console.log(object)
   if (!object) return null
 
   return jp.query(object, `$.${path}`)
+}
+
+function ValueFrom(props) {
+  const display = useContext(DisplayContext)
+  return valueFrom(props, display)
+}
+
+const convertVals = (values) => values.map(({timestamp, value}) => ({x: new Date(timestamp * 1000), y: parseFloat(value)}))
+
+function Timeseries({attributes: {datasource, label}}) {
+  const {datasources} = useContext(DisplayContext)
+  const metrics = useMemo(() => (
+    datasources[datasource].prometheus.map(({values}) => ({id: label, data: convertVals(values)}))
+  ), [datasources, datasource])
+  
+  return (
+    <Box height='300px' width='500px'>
+      <GraphHeader text={label} />
+      <Graph data={metrics} />
+    </Box>
+  )
 }
 
 function parse(struct, index, theme) {
   const props = {...struct, key: index, theme}
   switch (struct._type) {
     case "box":
-      return DisplayBox(props)
+      return <DisplayBox {...props} />
     case "attachment":
-      return Attachment(props)
+      return <Attachment {...props} />
     case "text":
-      return DisplayText(props)
+      return <DisplayText {...props} />
     case "markdown":
-      return DisplayMarkdown(props)
+      return <DisplayMarkdown {...props} />
     case "image":
-      return Image(props)
+      return <Image {...props} />
     case "link":
-      return Link(props)
+      return <Link {...props} />
     case "input":
-      return Input(props)
+      return <Input {...props} />
     case "button":
-      return DisplayButton(props)
+      return <DisplayButton {...props} />
     case "valueFrom":
-      return ValueFrom(props)
+      return <ValueFrom {...props} />
+    case "timeseries":
+      return <Timeseries {...props} />
     default:
       return null
   }
@@ -148,7 +170,6 @@ function parse(struct, index, theme) {
 
 export function Display({data, root: {children, attributes}}) {
   const theme = useContext(ThemeContext)
-  console.log(data)
   const datasources = useMemo(() => (
     data.reduce((acc, entry) => ({...acc, [entry.name]: entry}), {})
   ), [data])
@@ -156,7 +177,7 @@ export function Display({data, root: {children, attributes}}) {
 
   return (
     <DisplayContext.Provider value={{datasources, context, setContext}}>
-      <Box gap='xsmall' align='start' {...(attributes || {})}>
+      <Box flex={false} gap='xsmall' align='start' {...(attributes || {})}>
         {recurse(children, theme)}
       </Box>
     </DisplayContext.Provider>

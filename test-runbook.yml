@@ -19,15 +19,17 @@ spec:
             roughly correspond to 80% utilization</text>
           <timeseries datasource="memory" label="Memory Usage" />
         </box>
-        <box gap='xsmall'>
-          <input placeholder="250m" label='CPU Request' name='cpu'>
-            <valueFrom datasource="statefulset" path="spec.template.spec.containers[0].resources.requests.cpu" />
-          </input>
-          <input placeholder="1Gi" label='Memory Request' name='memory'>
-            <valueFrom datasource="statefulset" path="spec.template.spec.containers[0].resources.requests.memory" />
-          </input>
+        <box direction='row' align='center' gap='medium'>
+          <box gap='xsmall'>
+            <input placeholder="250m" label='CPU Request' name='cpu'>
+              <valueFrom datasource="statefulset" path="spec.template.spec.containers[0].resources.requests.cpu" />
+            </input>
+            <input placeholder="1Gi" label='Memory Request' name='memory'>
+              <valueFrom datasource="statefulset" path="spec.template.spec.containers[0].resources.requests.memory" />
+            </input>
+          </box>
           <box direction='row' justify='end'>
-            <button action='scale' primary='true' />
+            <button label='Scale' action='scale' primary='true' />
           </box>
         </box>
       </box>
@@ -36,11 +38,11 @@ spec:
   - name: cpu
     type: prometheus
     prometheus:
-      query: sum(rate(container_cpu_usage_seconds_total{namespace="rabbitmq",pod=~"rabbitmq-[0-9]+"}[5m]))
+      query: sum(rate(container_cpu_usage_seconds_total{namespace="rabbitmq",pod=~"rabbitmq-server-[0-9]+"}[5m]))
   - name: memory
     type: prometheus
     prometheus:
-      query: sum(container_memory_working_set_bytes{namespace="rabbitmq",pod=~"rabbitmq-[0-9]+"})
+      query: sum(container_memory_working_set_bytes{namespace="rabbitmq",pod=~"rabbitmq-server-[0-9]+"})
   - name: statefulset
     type: kubernetes
     kubernetes:
