@@ -17,6 +17,7 @@ import { Checkmark, Close, StatusCritical, Up } from 'grommet-icons'
 import { ThemeContext } from 'styled-components'
 import { normalizeColor } from 'grommet/utils'
 import alpha from 'color-alpha'
+import { RunbookList } from './runbooks/RunbookList'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -171,6 +172,8 @@ function ReturnToBeginning({beginning}) {
   )
 }
 
+export const HEADER_HEIGHT = '60px'
+
 export default function Builds() {
   const [listRef, setListRef] = useState(null)
   const [scrolled, setScrolled] = useState(false)
@@ -178,18 +181,19 @@ export default function Builds() {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL
   })
+
   const {setOnChange} = useContext(InstallationContext)
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
-  useEffect(() => setBreadcrumbs([{text: 'builds', url: '/'}]), [])
+  useEffect(() => {
+    setOnChange({func: () => null})
+    setBreadcrumbs([{text: 'builds', url: '/'}])
+  }, [])
+
   useEffect(() => subscribeToMore({
     document: BUILD_SUB,
     updateQuery: (prev, {subscriptionData: {data: {buildDelta: {delta, payload}}}}) => {
       return delta === 'CREATE' ? appendConnection(prev, payload, 'builds') : prev
   }}), [])
-
-  useEffect(() => {
-    setOnChange({func: () => null})
-  }, [])
 
   const returnToBeginning = useCallback(() => {
     listRef.scrollToItem(0)
@@ -199,31 +203,34 @@ export default function Builds() {
 
   const {edges, pageInfo} = data.builds
   return (
-    <Box fill background='backgroundColor'>
-      <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}}
-        direction='row' align='center' height='60px'>
-        <Box fill='horizontal' pad={{horizontal: 'small'}}>
-          <Text weight='bold' size='small'>Builds</Text>
-          <Text size='small' color='dark-3'>a list of historical changes managed by console</Text>
+    <Box fill direction='row' background='backgroundColor'>
+      <RunbookList width='30%' border={{side: 'right', color: 'sidebar'}} />
+      <Box fill>
+        <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}}
+          direction='row' align='center' height={HEADER_HEIGHT}>
+          <Box fill='horizontal' pad={{horizontal: 'small'}}>
+            <Text weight='bold' size='small'>Builds</Text>
+            <Text size='small' color='dark-3'>a list of historical changes managed by console</Text>
+          </Box>
+          <UpgradePolicies />
+          <CreateBuild />
         </Box>
-        <UpgradePolicies />
-        <CreateBuild />
-      </Box>
-      <Box fill pad={{bottom: 'small'}}>
-        {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
-        <StandardScroller
-          listRef={listRef}
-          setListRef={setListRef}
-          items={edges}
-          loading={loading}
-          handleScroll={setScrolled}
-          placeholder={Placeholder}
-          hasNextPage={pageInfo.hasNextPage}
-          mapper={({node}) => <Build key={node.id} build={node} />}
-          loadNextPage={() => pageInfo.hasNextPage && fetchMore({
-            variables: {cursor: pageInfo.endCursor},
-            updateQuery: (prev, {fetchMoreResult: {builds}}) => extendConnection(prev, builds, 'builds')
-          })} />
+        <Box fill pad={{bottom: 'small'}}>
+          {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
+          <StandardScroller
+            listRef={listRef}
+            setListRef={setListRef}
+            items={edges}
+            loading={loading}
+            handleScroll={setScrolled}
+            placeholder={Placeholder}
+            hasNextPage={pageInfo.hasNextPage}
+            mapper={({node}) => <Build key={node.id} build={node} />}
+            loadNextPage={() => pageInfo.hasNextPage && fetchMore({
+              variables: {cursor: pageInfo.endCursor},
+              updateQuery: (prev, {fetchMoreResult: {builds}}) => extendConnection(prev, builds, 'builds')
+            })} />
+        </Box>
       </Box>
     </Box>
   )

@@ -26,6 +26,7 @@ import { Incident } from './incidents/Incident'
 import { AutoRefresh } from './AutoRefresh'
 import { Search } from 'grommet-icons'
 import { Installer } from './repos/Installer'
+import { Runbook } from './runbooks/Runbook'
 
 const SIDEBAR_WIDTH = '70px'
 
@@ -80,6 +81,7 @@ export default function Console() {
                     description='aggregated logstreams for your repos' />
                 )} />
                 <Route path='/pods/:namespace/:name' component={Pod} />
+                <Route path='/runbooks/:namespace/:name' component={Runbook} />
                 <Route path='/nodes/:name' component={Node} />
                 <Route path='/nodes' component={Nodes} />
                 <Route path='/audits' component={Audits} />

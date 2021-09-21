@@ -27,7 +27,7 @@ defmodule Console.GraphQl.Runbooks do
     field :description, :string
 
     field :display, :map, resolve: fn
-      %{display: disp}, _, _ -> Console.Runbooks.Display.parse_xml(disp)
+      %{display: disp}, _, _ -> Console.Runbooks.Display.parse_doc(disp)
     end
 
     field :datasources, list_of(:runbook_datasource)

@@ -55,7 +55,11 @@ defmodule Console.Runbooks.Display do
   end
 
   def parse_doc(xml) do
-    with {:ok, parsed} <- Xml.from_xml(xml),
-      do: validate(parsed)
+    with {:ok, parsed} <- Xml.from_xml(xml) do
+      case validate(parsed) do
+        :pass -> {:ok, parsed}
+        {:fail, error} -> {:error, error}
+      end
+    end
   end
 end

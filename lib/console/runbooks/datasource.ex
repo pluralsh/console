@@ -29,6 +29,7 @@ defimpl Console.Runbooks.Datasource, for: Kube.Runbook.Prometheus do
     now   = Timex.now()
     start = Timex.shift(now, seconds: -30 * 60)
     Observability.get_metric(query, start, now, "1m")
+    |> IO.inspect()
   end
 end
 
@@ -36,7 +37,7 @@ defimpl Console.Runbooks.Datasource, for: Kube.Runbook.Kubernetes do
   alias Kazan.Apis.Apps.V1, as: AppsV1
 
   def fetch(%{resource: "statefulset", name: name}, %{metadata: %{namespace: namespace}}) do
-    AppsV1.read_namespaced_deployment!(namespace, name)
+    AppsV1.read_namespaced_stateful_set!(namespace, name)
     |> Kazan.run()
   end
 

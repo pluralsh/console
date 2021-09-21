@@ -41,6 +41,7 @@
     "highlight.js": "^10.6.0",
     "js-file-download": "^0.4.12",
     "js-yaml": "^3.14.0",
+    "jsonpath": "^1.1.1",
     "kubernetes-resource-parser": "^0.1.0",
     "lodash": "^4.17.20",
     "moment": "^2.29.1",

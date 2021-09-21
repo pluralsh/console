@@ -64,11 +64,11 @@ defmodule Kube.Runbook do
     alias Kube.Runbook.{Datasource, Action}
 
     defmodel "RunbookSpec", "platform.plural.sh", "v1alpha1" do
-      property :name,        "name", :string
+      property :name,        "name",        :string
       property :description, "description", :string
-      property :display,     "display", :string
-      property :datasources, "datasources", {:array, Action}
-      property :actions,     "actions", {:array, Datasource}
+      property :display,     "display",     :string
+      property :datasources, "datasources", {:array, Datasource}
+      property :actions,     "actions",     {:array, Action}
     end
   end
 
