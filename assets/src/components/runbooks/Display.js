@@ -8,7 +8,7 @@ import { Graph, GraphHeader } from '../utils/Graph'
 import { LabelledInput } from '../utils/LabelledInput'
 import jp from 'jsonpath'
 import { deepFetch } from '../../utils/graphql'
-import { useParams } from 'react-router'
+import { useHistory, useParams } from 'react-router'
 
 const DisplayContext = React.createContext({})
 
@@ -78,10 +78,16 @@ function Link({value, attributes, children, key}) {
 }
 
 function DisplayButton({attributes: {action, ...rest}}) {
+  let hist = useHistory()
   const {namespace, name} = useParams()
   const {context} = useContext(DisplayContext)
   const [mutation, {loading}] = useMutation(EXECUTE_RUNBOOK, {
-    variables: {name, namespace, input: {context: JSON.stringify(context), action}}
+    variables: {name, namespace, input: {context: JSON.stringify(context), action}},
+    onCompleted: ({executeRunbook: {redirectTo}}) => {
+      if (redirectTo) {
+        hist.push(redirectTo)
+      }
+    }
   })
 
   if (!action) return buttonComponent(rest)

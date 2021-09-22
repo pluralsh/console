@@ -17,7 +17,7 @@ import { Checkmark, Close, StatusCritical, Up } from 'grommet-icons'
 import { ThemeContext } from 'styled-components'
 import { normalizeColor } from 'grommet/utils'
 import alpha from 'color-alpha'
-import { RunbookList } from './runbooks/RunbookList'
+import { PinnedRunbooks } from './runbooks/PinnedRunbooks'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -213,7 +213,7 @@ export default function Builds() {
         <UpgradePolicies />
         <CreateBuild />
       </Box>
-      <RunbookList border={{side: 'vertical', color: 'sidebar'}} />
+      <PinnedRunbooks border={{side: 'vertical', color: 'sidebar'}} />
       <Box fill pad={{bottom: 'small'}}>
         {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
         <StandardScroller

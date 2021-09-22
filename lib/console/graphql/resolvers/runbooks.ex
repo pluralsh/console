@@ -12,6 +12,6 @@ defmodule Console.GraphQl.Resolvers.Runbooks do
     %{context: %{current_user: user}}
   ) do
     with {:ok, runbook} <- Runbooks.runbook(ns, name),
-      do: Runbooks.execute(runbook, action, ns, ctx, user),
+      do: Runbooks.execute(runbook, action, ns, ctx, user)
   end
 end
