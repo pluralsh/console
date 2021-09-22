@@ -13,7 +13,7 @@ import { appendConnection, extendConnection, updateCache } from '../utils/graphq
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { StandardScroller } from './utils/SmoothScroller'
 import { UpgradePolicies } from './builds/UpgradePolicies'
-import { Checkmark, Close, StatusCritical, Up } from 'grommet-icons'
+import { Checkmark, Close, Deploy, Refresh, StatusCritical, Up, Validate } from 'grommet-icons'
 import { ThemeContext } from 'styled-components'
 import { normalizeColor } from 'grommet/utils'
 import alpha from 'color-alpha'
@@ -36,8 +36,8 @@ function BuildStatusInner({background, text, icon}) {
 
 function IconStatus({icon, background}) {
   return (
-    <Box round='full' pad='xsmall' align='center' justify='center' 
-         background={background}>
+    <Box round='full' width='30px' height='30px' 
+         align='center' justify='center' background={background}>
       {React.createElement(icon, {size: '16px'})}
     </Box>
   )
@@ -128,16 +128,19 @@ function CreateBuild() {
   return (
     <Box flex={false} gap='small' pad={{horizontal: 'small'}} direction='row' align='center'>
       <Button
+        icon={<Refresh size='small' />}
         onClick={() => deploy(BuildTypes.BOUNCE)} 
         background='backgroundLight' flat
         label='Bounce'
         loading={loading && type === BuildTypes.BOUNCE} />
       <Button
+        icon={<Validate size='small' />}
         onClick={() => deploy(BuildTypes.APPROVAL)} 
         background='backgroundLight' flat
         label='Approval'
         loading={loading && type === BuildTypes.APPROVAL} />
       <Button
+        icon={<Deploy size='small' />}
         onClick={() => deploy(BuildTypes.DEPLOY)}
         loading={loading && type === BuildTypes.DEPLOY} 
         label='Deploy'  background='brand' flat />

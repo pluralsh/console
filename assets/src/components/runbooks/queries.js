@@ -2,8 +2,8 @@ import gql from "graphql-tag";
 import { RunbookDataFragment, RunbookFragment } from "../graphql/runbooks";
 
 export const RUNBOOKS_Q = gql`
-  query Runbooks($namespace: String!) {
-    runbooks(namespace: $namespace) {
+  query Runbooks($namespace: String!, $pinned: Boolean) {
+    runbooks(namespace: $namespace, pinned: $pinned) {
       ...RunbookFragment
     }
   }

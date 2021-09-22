@@ -30,7 +30,7 @@ function RunbookItem({runbook, namespace, width}) {
 export function PinnedRunbooks({border}) {
   const {currentApplication} = useContext(InstallationContext)
   const {data} = useQuery(RUNBOOKS_Q, {
-    variables: {namespace: currentApplication.name},
+    variables: {namespace: currentApplication.name, pinned: true},
     fetchPolicy: 'cache-and-network'
   })
 

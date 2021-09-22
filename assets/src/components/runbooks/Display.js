@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { Box, Text, Markdown, Anchor, ThemeContext } from 'grommet'
 import { Button, SecondaryButton } from 'forge-core'
 import { normalizeColor } from 'grommet/utils'
@@ -21,19 +21,19 @@ const border = ({borderSize, borderSide, border}) => (
   (borderSize || borderSide) ? {side: borderSide, color: border, size: borderSize} : border
 )
 
-function DisplayBox({children, attributes, key}) {
+function DisplayBox({children, attributes}) {
   return (
-    <Box key={key} {...(attributes || {})} border={border(attributes)}>
+    <Box {...(attributes || {})} border={border(attributes)}>
       {recurse(children)}
     </Box>
   )
 }
 
-function Attachment({children, attributes, key, theme}, i) {
+function Attachment({children, attributes, theme}, i) {
 
   const {accent, margin, ...rest} = attributes || {}
   return (
-    <Box key={key} margin={margin} border background='white'>
+    <Box margin={margin} border background='white'>
       <Box {...rest} style={{
         borderLeftStyle: 'solid',
         borderLeftWidth: '2px',
@@ -44,19 +44,18 @@ function Attachment({children, attributes, key, theme}, i) {
   )
 }
 
-function DisplayText({attributes, value, key}) {
+function DisplayText({attributes, value}) {
   const attrs = attributes || {}
   const val = attrs.value || value
   const {size, ...rest} = attrs
-  return (<Text key={key} size={size || 'small'} {...rest}>{val}</Text>)
+  return (<Text size={size || 'small'} {...rest}>{val}</Text>)
 }
 
-function DisplayMarkdown({attributes: {value, ...rest}, key}) {
+function DisplayMarkdown({attributes: {value, ...rest}}) {
   if (!value) return null
 
   return (
     <Markdown
-      key={key}
       components={{p: {props: {size: 'small', margin: {top: 'xsmall', bottom: 'xsmall'}}}}}
       {...rest}>
       {value}
@@ -64,14 +63,14 @@ function DisplayMarkdown({attributes: {value, ...rest}, key}) {
   )
 }
 
-function Image({key, attributes: {url, width, height, ...rest}}) {
-  return <img key={key} alt={url} width={width || '250px'} height={height || '250px'} {...rest} src={url} />
+function Image({attributes: {url, width, height, ...rest}}) {
+  return <img alt={url} width={width || '250px'} height={height || '250px'} {...rest} src={url} />
 }
 
-function Link({value, attributes, children, key}) {
+function Link({value, attributes, children}) {
   const val = value || attributes.value
   return (
-    <Anchor key={key} {...attributes}>
+    <Anchor {...attributes}>
       <Text size='small' {...attributes}>{val ? val :  recurse(children)}</Text>
     </Anchor>
   )
@@ -106,20 +105,19 @@ function buttonComponent({primary, key, ...props}) {
 function Input({attributes, children}) {
   const {context, setContext, ...rest} = useContext(DisplayContext)
   const [value, setValue] = useState(children && children.length > 0 ? valueFrom(children[0], rest) : '')
-  const onChange = useCallback((val) => {
-    setValue(val)
-    setContext({...context, [attributes.name]: val === '' ? null : val})
-  }, [context, setContext, setValue])
-
   useEffect(() => {
-    onChange(value)
-  }, [])
+    const name = attributes.name
+    const val = value === '' ? null : value
+    if (context[name] !== val) {
+      setContext({...context, [name]: val})
+    }
+  }, [attributes, context, setContext, value])
 
   return (
     <LabelledInput
       {...attributes}
       value={value}
-      onChange={onChange} />
+      onChange={setValue} />
   )
 }
 
