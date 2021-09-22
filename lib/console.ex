@@ -34,7 +34,7 @@ defmodule Console do
   def put_path(map, [k], value), do: Map.put(map, k, value)
   def put_path(map, [k | rest], value) do
     case map do
-      %{^k => map} -> Map.put(map, k, put_path(map, rest, value))
+      %{^k => next} -> Map.put(map, k, put_path(next, rest, value))
       _ -> Map.put(map, k, put_path(%{}, rest, value))
     end
   end
