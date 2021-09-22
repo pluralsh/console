@@ -1,6 +1,8 @@
 defmodule Console.GraphQl.Resolvers.Runbooks do
   alias Console.Services.Runbooks
 
+  def list_runbooks(%{namespace: name, pinned: true}, _),
+    do: Runbooks.list_runbooks(name, :pinned)
   def list_runbooks(%{namespace: name}, _),
     do: Runbooks.list_runbooks(name)
 

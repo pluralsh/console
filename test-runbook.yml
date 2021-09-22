@@ -3,6 +3,8 @@ kind: Runbook
 metadata:
   name: scaling
   namespace: rabbitmq
+  labels:
+    platform.plural.sh/pinned: 'true'
 spec:
   name: Vertical scaling
   description: overview of how to accurately scale your rabbitmq cluster

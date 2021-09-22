@@ -97,6 +97,7 @@ defmodule Console.GraphQl.Runbooks do
     field :runbooks, list_of(:runbook) do
       middleware Authenticated
       arg :namespace, non_null(:string)
+      arg :pinned,    :boolean
 
       resolve &Runbooks.list_runbooks/2
     end

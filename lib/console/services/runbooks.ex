@@ -10,11 +10,14 @@ defmodule Console.Services.Runbooks do
     Client.get_runbook(namespace, name)
   end
 
-  @spec list_runbooks(binary) :: {:ok, [Runbook.t]} | error
-  def list_runbooks(namespace) do
-    with {:ok, %{items: items}} <- Client.list_runbooks(namespace),
+  @spec list_runbooks(binary, atom) :: {:ok, [Runbook.t]} | error
+  def list_runbooks(namespace, maybe_pinned \\ :unpinned) do
+    with {:ok, %{items: items}} <- Client.list_runbooks(namespace, args(maybe_pinned)),
       do: {:ok, items}
   end
+
+  defp args(:pinned), do: %{labelSelector: "platform.plural.sh/pinned"}
+  defp args(_), do: %{}
 
   @spec datasources(Runbook.t) :: {:ok, [map]} | error
   def datasources(%Runbook{spec: %{datasources: sources}} = book) do
