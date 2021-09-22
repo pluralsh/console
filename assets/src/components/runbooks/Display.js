@@ -148,8 +148,10 @@ const convertVals = (values) => values.map(({timestamp, value}) => ({x: new Date
 function formatLegend(legend, properties) {
   if (!properties) return legend
 
+  const inspect = (v) => { console.log(v); return v }
+
   return Object.entries(properties)
-          .reduce((leg, [k, v]) => leg.replace(`$${k}`, v), legend)
+          .reduce((leg, [k, v]) => inspect(leg).replace(`$${k}`, v), legend)
 }
 
 const valueFormats = {
@@ -161,11 +163,11 @@ function Timeseries({attributes: {datasource, label}}) {
   const {datasources} = useContext(DisplayContext)
   const {metrics, format} = useMemo(() => {
     const {prometheus, source} = datasources[datasource]
-    const legend = source || source.prometheus.legend
-    const format = source || source.prometheus.format
-    console.log(prometheus)
-    const metrics = prometheus.map(({metrics, values}) => ({
-      id: formatLegend(legend, metrics), 
+    const legend = source && source.prometheus.legend
+    const format = source && source.prometheus.format
+    console.log(source)
+    const metrics = prometheus.map(({metric, values}) => ({
+      id: formatLegend(legend, metric), 
       data: convertVals(values)
     }))
 

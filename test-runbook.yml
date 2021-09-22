@@ -50,13 +50,13 @@ spec:
     prometheus:
       format: cpu
       legend: $pod
-      query: rate(container_cpu_usage_seconds_total{namespace="rabbitmq",pod=~"rabbitmq-server-[0-9]+"}[5m])
+      query: sum(rate(container_cpu_usage_seconds_total{namespace="rabbitmq",pod=~"rabbitmq-server-[0-9]+"}[5m])) by (pod)
   - name: memory
     type: prometheus
     prometheus:
       format: memory
       legend: $pod
-      query: container_memory_working_set_bytes{namespace="rabbitmq",pod=~"rabbitmq-server-[0-9]+"}
+      query: sum(container_memory_working_set_bytes{namespace="rabbitmq",pod=~"rabbitmq-server-[0-9]+"}) by (pod)
   - name: statefulset
     type: kubernetes
     kubernetes:
