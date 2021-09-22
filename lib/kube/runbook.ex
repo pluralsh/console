@@ -44,7 +44,9 @@ defmodule Kube.Runbook do
     use Kazan.Model
 
     defmodel "PrometheusDatasource", "platform.plural.sh", "v1alpha1" do
-      property :query, "query", :string
+      property :query,  "query",  :string
+      property :format, "format", :string
+      property :legend, "legend", :string
     end
   end
 

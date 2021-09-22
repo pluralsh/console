@@ -11,7 +11,7 @@ defmodule Console.Runbooks.Data do
     {key, data} =  inputs(data)
 
     case DataImpl.fetch(data, runbook) do
-      {:ok, res} -> %{key => res, name: name}
+      {:ok, res} -> %{key => res, name: name, source: data}
       _ -> nil
     end
   end

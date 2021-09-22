@@ -48,7 +48,9 @@ defmodule Console.GraphQl.Runbooks do
   end
 
   object :prometheus_datasource do
-    field :query, non_null(:string)
+    field :query,  non_null(:string)
+    field :format, :string
+    field :legend, :string
   end
 
   object :kubernetes_datasource do
@@ -58,6 +60,7 @@ defmodule Console.GraphQl.Runbooks do
 
   object :runbook_data do
     field :name,       non_null(:string)
+    field :source,     :runbook_datasource
     field :kubernetes, :kubernetes_data
     field :prometheus, list_of(:metric_response)
   end

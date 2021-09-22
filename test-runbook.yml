@@ -11,13 +11,13 @@ spec:
   display: |
     <root>
       <box pad='small' gap='medium' direction='row'>
-        <box gap='small'>
-          <box direction='row' gap='small' align='center'>
+        <box direction='row' align='center' gap='small'>
+          <box gap='small' align='center'>
             <timeseries datasource="cpu" label="CPU Usage" />
             <text size='small'>You should set a reservation to 
               roughly correspond to 60% utilization</text>
           </box>
-          <box direction='row' gap='small' align='center'>
+          <box gap='small' align='center'>
             <timeseries datasource="memory" label="Memory Usage" />
             <text size='small'>You should set a reservation to 
               roughly correspond to 80% utilization</text>
