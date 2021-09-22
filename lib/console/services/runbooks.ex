@@ -26,6 +26,11 @@ defmodule Console.Services.Runbooks do
   def execute(%Runbook{spec: %{actions: actions}}, action, repo, ctx, %User{} = user) do
     actor = Runbooks.Actor.build(repo, ctx, user)
     with %Runbook.Action{} = act <- Enum.find(actions, & &1.name == action),
-      do: Runbooks.Actor.enact(act, actor)
+         {:ok, _} <- Runbooks.Actor.enact(act, actor),
+      do: action_response(act)
   end
+
+  defp action_response(%Runbook.Action{redirect_to: redirect}) when is_binary(redirect),
+    do: {:ok, %{redirect_to: redirect}}
+  defp action_response(_), do: {:ok, %{}}
 end

@@ -59,6 +59,7 @@ spec:
   actions:
   - name: scale
     action: config
+    redirectTo: '/'
     configuration:
       updates:
       - path: 

@@ -203,34 +203,32 @@ export default function Builds() {
 
   const {edges, pageInfo} = data.builds
   return (
-    <Box fill direction='row' background='backgroundColor'>
-      <RunbookList width='30%' border={{side: 'right', color: 'sidebar'}} />
-      <Box fill>
-        <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}}
-          direction='row' align='center' height={HEADER_HEIGHT}>
-          <Box fill='horizontal' pad={{horizontal: 'small'}}>
-            <Text weight='bold' size='small'>Builds</Text>
-            <Text size='small' color='dark-3'>a list of historical changes managed by console</Text>
-          </Box>
-          <UpgradePolicies />
-          <CreateBuild />
+    <Box fill background='backgroundColor'>
+      <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}}
+        direction='row' align='center' height={HEADER_HEIGHT}>
+        <Box fill='horizontal' pad={{horizontal: 'small'}}>
+          <Text weight='bold' size='small'>Builds</Text>
+          <Text size='small' color='dark-3'>a list of historical changes managed by console</Text>
         </Box>
-        <Box fill pad={{bottom: 'small'}}>
-          {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
-          <StandardScroller
-            listRef={listRef}
-            setListRef={setListRef}
-            items={edges}
-            loading={loading}
-            handleScroll={setScrolled}
-            placeholder={Placeholder}
-            hasNextPage={pageInfo.hasNextPage}
-            mapper={({node}) => <Build key={node.id} build={node} />}
-            loadNextPage={() => pageInfo.hasNextPage && fetchMore({
-              variables: {cursor: pageInfo.endCursor},
-              updateQuery: (prev, {fetchMoreResult: {builds}}) => extendConnection(prev, builds, 'builds')
-            })} />
-        </Box>
+        <UpgradePolicies />
+        <CreateBuild />
+      </Box>
+      <RunbookList border={{side: 'vertical', color: 'sidebar'}} />
+      <Box fill pad={{bottom: 'small'}}>
+        {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
+        <StandardScroller
+          listRef={listRef}
+          setListRef={setListRef}
+          items={edges}
+          loading={loading}
+          handleScroll={setScrolled}
+          placeholder={Placeholder}
+          hasNextPage={pageInfo.hasNextPage}
+          mapper={({node}) => <Build key={node.id} build={node} />}
+          loadNextPage={() => pageInfo.hasNextPage && fetchMore({
+            variables: {cursor: pageInfo.endCursor},
+            updateQuery: (prev, {fetchMoreResult: {builds}}) => extendConnection(prev, builds, 'builds')
+          })} />
       </Box>
     </Box>
   )

@@ -81,6 +81,10 @@ defmodule Console.GraphQl.Runbooks do
     field :value_from, non_null(:string)
   end
 
+  object :runbook_action_response do
+    field :redirect_to, :string
+  end
+
   object :runbook_queries do
     field :runbook, :runbook do
       middleware Authenticated
@@ -99,7 +103,7 @@ defmodule Console.GraphQl.Runbooks do
   end
 
   object :runbook_mutations do
-    field :execute_runbook, :boolean do
+    field :execute_runbook, :runbook_action_response do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)

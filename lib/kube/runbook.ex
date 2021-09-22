@@ -24,8 +24,9 @@ defmodule Kube.Runbook do
     alias Kube.Runbook.ConfigurationAction
 
     defmodel "RunbookAction", "platform.plural.sh", "v1alpha1" do
-      property :name,   "name", :string
-      property :action, "action", :string
+      property :name,          "name",          :string
+      property :action,        "action",        :string
+      property :redirect_to,   "redirectTo",    :string
       property :configuration, "configuration", ConfigurationAction
     end
   end
