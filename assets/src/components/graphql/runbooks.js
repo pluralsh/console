@@ -12,9 +12,19 @@ export const RunbookFragment = gql`
   }
 `
 
+export const RunbookDatasourceFragment = gql`
+  fragment RunbookDatasourceFragment on RunbookDatasource {
+    name
+    type
+    prometheus { query format legend }
+    kubernetes { resource name }
+  }
+`
+
 export const RunbookDataFragment = gql`
   fragment RunbookDataFragment on RunbookData {
     name
+    source { ...RunbookDatasourceFragment }
     prometheus { ...MetricResponseFragment }
     kubernetes {
       __typename
@@ -22,6 +32,7 @@ export const RunbookDataFragment = gql`
       ... on Deployment { ...DeploymentFragment }
     }
   }
+  ${RunbookDatasourceFragment}
   ${MetricResponseFragment}
   ${StatefulSetFragment}
   ${DeploymentFragment}

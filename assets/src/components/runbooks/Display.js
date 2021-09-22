@@ -9,6 +9,8 @@ import { LabelledInput } from '../utils/LabelledInput'
 import jp from 'jsonpath'
 import { deepFetch } from '../../utils/graphql'
 import { useHistory, useParams } from 'react-router'
+import { cpuFormat } from '../../utils/kubernetes'
+import filesize from 'filesize'
 
 const DisplayContext = React.createContext({})
 
@@ -143,16 +145,38 @@ function ValueFrom(props) {
 
 const convertVals = (values) => values.map(({timestamp, value}) => ({x: new Date(timestamp * 1000), y: parseFloat(value)}))
 
+function formatLegend(legend, properties) {
+  if (!properties) return legend
+
+  return Object.entries(properties)
+          .reduce((leg, [k, v]) => leg.replace(`$${k}`, v), legend)
+}
+
+const valueFormats = {
+  'cpu': cpuFormat,
+  'memory': filesize
+}
+
 function Timeseries({attributes: {datasource, label}}) {
   const {datasources} = useContext(DisplayContext)
-  const metrics = useMemo(() => (
-    datasources[datasource].prometheus.map(({values}) => ({id: label, data: convertVals(values)}))
-  ), [datasources, datasource])
+  const {metrics, format} = useMemo(() => {
+    const {prometheus, source} = datasources[datasource]
+    const legend = source || source.prometheus.legend
+    const format = source || source.prometheus.format
+    console.log(prometheus)
+    const metrics = prometheus.map(({metrics, values}) => ({
+      id: formatLegend(legend, metrics), 
+      data: convertVals(values)
+    }))
+
+    return {metrics, format: valueFormats[format] || ((v) => v)}
+  }, [datasources, datasource])
+  
   
   return (
     <Box height='300px' width='500px'>
       <GraphHeader text={label} />
-      <Graph data={metrics} />
+      <Graph data={metrics} yFormat={format} />
     </Box>
   )
 }

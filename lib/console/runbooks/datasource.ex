@@ -7,11 +7,11 @@ defmodule Console.Runbooks.Data do
   alias Console.Runbooks.Datasource, as: DataImpl
   alias Kube.Runbook.{Datasource, Prometheus, Kubernetes}
 
-  def extract(%Datasource{name: name} = data, runbook) do
-    {key, data} =  inputs(data)
+  def extract(%Datasource{name: name} = datasource, runbook) do
+    {key, data} = inputs(datasource)
 
     case DataImpl.fetch(data, runbook) do
-      {:ok, res} -> %{key => res, name: name, source: data}
+      {:ok, res} -> %{key => res, name: name, source: datasource}
       _ -> nil
     end
   end
