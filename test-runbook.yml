@@ -8,24 +8,32 @@ spec:
   description: overview of how to accurately scale your rabbitmq cluster
   display: |
     <root>
-      <box pad='small' gap='small'>
-        <box direction='row' gap='small' align='center'>
-          <text size='small'>Graph of your current cpu usage, you should set a reservation to 
-            roughly correspond to 60% utilization</text>
-          <timeseries datasource="cpu" label="CPU Usage" />
+      <box pad='small' gap='medium' direction='row'>
+        <box gap='small'>
+          <box direction='row' gap='small' align='center'>
+            <timeseries datasource="cpu" label="CPU Usage" />
+            <text size='small'>You should set a reservation to 
+              roughly correspond to 60% utilization</text>
+          </box>
+          <box direction='row' gap='small' align='center'>
+            <timeseries datasource="memory" label="Memory Usage" />
+            <text size='small'>You should set a reservation to 
+              roughly correspond to 80% utilization</text>
+          </box>
         </box>
-        <box direction='row' gap='small' align='center'>
-          <text size='small'>Graph of your current memory usage, you should set a reservation to 
-            roughly correspond to 80% utilization</text>
-          <timeseries datasource="memory" label="Memory Usage" />
-        </box>
-        <box direction='row' align='center' gap='medium'>
+        <box gap='small'>
           <box gap='xsmall'>
             <input placeholder="250m" label='CPU Request' name='cpu'>
-              <valueFrom datasource="statefulset" path="spec.template.spec.containers[0].resources.requests.cpu" />
+              <valueFrom 
+                datasource="statefulset" 
+                doc="kubernetes.raw" 
+                path="spec.template.spec.containers[0].resources.requests.cpu" />
             </input>
             <input placeholder="1Gi" label='Memory Request' name='memory'>
-              <valueFrom datasource="statefulset" path="spec.template.spec.containers[0].resources.requests.memory" />
+              <valueFrom 
+                datasource="statefulset" 
+                doc="kubernetes.raw" 
+                path="spec.template.spec.containers[0].resources.requests.memory" />
             </input>
           </box>
           <box direction='row' justify='end'>

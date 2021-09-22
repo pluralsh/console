@@ -38,11 +38,11 @@ export function Runbook() {
 
   return (
     <Box fill pad='small' background='backgroundColor'>
-      <Box height={HEADER_HEIGHT}>
+      <Box height={HEADER_HEIGHT} border={{side: 'bottom', color: 'sidebar'}}>
         <Text size='small' weight='bold'>{runbook.spec.name}</Text>
         <Text size='small'>{runbook.spec.description}</Text>
       </Box>
-      <Box style={{overflow: 'auto'}} fill>
+      <Box style={{overflow: 'auto'}} pad='small' fill>
         <Display root={runbook.spec.display} data={runbook.data} />
       </Box>
     </Box>

@@ -16,6 +16,16 @@ export function extendConnection(prev, next, key) {
   }
 }
 
+export function deepFetch(map, path) {
+  if (isString(path)) return deepFetch(map, path.split('.'))
+
+  const key = path[0]
+  if (path.length === 1) return map[key]
+  if (!map[key]) return null
+
+  return deepFetch(map[key], path.slice(1))
+}
+
 export function deepUpdate(prev, path, update) {
   if (isString(path)) return deepUpdate(prev, path.split('.'), update)
 

@@ -10,7 +10,7 @@ defmodule Console.GraphQl.Resolvers.Runbooks do
   def execute_runbook(
     %{namespace: ns, name: name, input: %{action: action, context: ctx}},
     %{context: %{current_user: user}}) do
-    with {:ok, runbook} <- Runbooks.get_runbook(ns, name),
+    with {:ok, runbook} <- Runbooks.runbook(ns, name),
          {:ok, _} <- Runbooks.execute(runbook, action, ns, ctx, user),
       do: {:ok, true}
   end

@@ -7,6 +7,8 @@ import { EXECUTE_RUNBOOK } from './queries'
 import { Graph, GraphHeader } from '../utils/Graph'
 import { LabelledInput } from '../utils/LabelledInput'
 import jp from 'jsonpath'
+import { deepFetch } from '../../utils/graphql'
+import { useParams } from 'react-router'
 
 const DisplayContext = React.createContext({})
 
@@ -76,11 +78,15 @@ function Link({value, attributes, children, key}) {
 }
 
 function DisplayButton({attributes: {action, ...rest}}) {
-  const [mutation] = useMutation(EXECUTE_RUNBOOK)
+  const {namespace, name} = useParams()
+  const {context} = useContext(DisplayContext)
+  const [mutation, {loading}] = useMutation(EXECUTE_RUNBOOK, {
+    variables: {name, namespace, input: {context: JSON.stringify(context), action}}
+  })
 
   if (!action) return buttonComponent(rest)
 
-  return buttonComponent({...rest, onClick: mutation})
+  return buttonComponent({...rest, loading, onClick: mutation})
 }
 
 function buttonComponent({primary, key, ...props}) {
@@ -111,12 +117,19 @@ function Input({attributes, children}) {
   )
 }
 
-function valueFrom({attributes: {datasource, path}}, {datasources}) {
-  const object = datasources[datasource]
-  console.log(object)
+function valueFrom({attributes: {datasource, path, doc}}, {datasources}) {
+  const object = extract(datasources[datasource], doc)
   if (!object) return null
 
-  return jp.query(object, `$.${path}`)
+  const res = jp.query(object, `$.${path}`)
+  return res[0]
+}
+
+function extract(data, doc) {
+  if (!doc) return data
+
+  const raw = deepFetch(data, doc)
+  return JSON.parse(raw) 
 }
 
 function ValueFrom(props) {
