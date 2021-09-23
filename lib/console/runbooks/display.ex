@@ -54,7 +54,7 @@ defmodule Console.Runbooks.Display do
     end
 
     component "table" do
-      attributes ~w(name width height datasource)
+      attributes ~w(name width height datasource path)
       parents ~w(box)
     end
 
