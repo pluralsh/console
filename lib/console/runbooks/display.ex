@@ -52,6 +52,16 @@ defmodule Console.Runbooks.Display do
       attributes ~w(href target value color weight)
       parents ~w(text box)
     end
+
+    component "table" do
+      attributes ~w(name width height datasource)
+      parents ~w(box)
+    end
+
+    component "tableColumn" do
+      attributes ~w(path header width)
+      parents ~w(table)
+    end
   end
 
   def parse_doc(xml) do

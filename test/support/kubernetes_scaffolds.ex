@@ -202,4 +202,8 @@ defmodule KubernetesScaffolds do
       kubernetes: struct(Kube.Runbook.Kubernetes, opts),
     }
   end
+
+  def runbook_datasource(:nodes, name, _) do
+    %Kube.Runbook.Datasource{type: "nodes", name: name}
+  end
 end

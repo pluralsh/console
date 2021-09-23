@@ -10,7 +10,7 @@ defmodule Console.Services.RunbooksTest do
     test "it can fetch all datasources for a runbook" do
       runbook = runbook("runbook", [
         runbook_datasource(:prometheus, "prometheus"),
-        runbook_datasource(:kubernetes, "kube", resource: "statefulset", name: "name")
+        runbook_datasource(:kubernetes, "kube", resource: "statefulset", name: "name"),
       ])
 
       expect(HTTPoison, :post, fn _, _, _ ->
@@ -27,6 +27,17 @@ defmodule Console.Services.RunbooksTest do
 
       assert grouped["kube"].kubernetes.metadata.name == "name"
       assert length(grouped["prometheus"].prometheus) == 1
+    end
+
+    test "it can fetch nodes" do
+      runbook = runbook("runbook", [runbook_datasource(:nodes, "nodes")])
+      node = kube_node()
+
+      expect(Kazan, :run, fn _ -> {:ok, %{items: [node]}} end)
+
+      {:ok, [result]} = Runbooks.datasources(runbook)
+
+      assert result.nodes == [node]
     end
   end
 end

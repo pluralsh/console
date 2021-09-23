@@ -63,6 +63,7 @@ defmodule Console.GraphQl.Runbooks do
     field :source,     :runbook_datasource
     field :kubernetes, :kubernetes_data
     field :prometheus, list_of(:metric_response)
+    field :nodes,      list_of(:node)
   end
 
   union :kubernetes_data do

@@ -16,10 +16,24 @@ defmodule Console.Runbooks.Data do
     end
   end
 
+  def inputs(%Datasource{type: "nodes"}), do: {:nodes, :nodes}
   def inputs(%Datasource{prometheus: %Prometheus{} = prom}),
     do: {:prometheus, prom}
   def inputs(%Datasource{kubernetes: %Kubernetes{} = kube}),
     do: {:kubernetes, kube}
+end
+
+defimpl Console.Runbooks.Datasource, for: Atom do
+  alias Kazan.Apis.Core.V1
+
+  def fetch(:nodes, _) do
+    V1.list_node!()
+    |> Kazan.run()
+    |> case do
+      {:ok, %{items: items}} -> {:ok, items}
+      error -> error
+    end
+  end
 end
 
 defimpl Console.Runbooks.Datasource, for: Kube.Runbook.Prometheus do
@@ -29,7 +43,6 @@ defimpl Console.Runbooks.Datasource, for: Kube.Runbook.Prometheus do
     now   = Timex.now()
     start = Timex.shift(now, seconds: -30 * 60)
     Observability.get_metric(query, start, now, "1m")
-    |> IO.inspect()
   end
 end
 
