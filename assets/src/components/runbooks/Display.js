@@ -6,11 +6,9 @@ import { useMutation } from '@apollo/react-hooks'
 import { EXECUTE_RUNBOOK } from './queries'
 import { Graph, GraphHeader } from '../utils/Graph'
 import { LabelledInput } from '../utils/LabelledInput'
-import jp from 'jsonpath'
-import { deepFetch } from '../../utils/graphql'
 import { useHistory, useParams } from 'react-router'
-import { cpuFormat } from '../../utils/kubernetes'
-import filesize from 'filesize'
+import { HeaderItem } from '../kubernetes/Pod'
+import { extract, query, ValueFormats } from './utils'
 
 const DisplayContext = React.createContext({})
 
@@ -127,15 +125,7 @@ function valueFrom({attributes: {datasource, path, doc}}, {datasources}) {
   const object = extract(datasources[datasource], doc)
   if (!object) return null
 
-  const res = jp.query(object, `$.${path}`)
-  return res[0]
-}
-
-function extract(data, doc) {
-  if (!doc) return data
-
-  const raw = deepFetch(data, doc)
-  return JSON.parse(raw) 
+  return query(object, path)
 }
 
 function ValueFrom(props) {
@@ -148,15 +138,8 @@ const convertVals = (values) => values.map(({timestamp, value}) => ({x: new Date
 function formatLegend(legend, properties) {
   if (!properties) return legend
 
-  const inspect = (v) => { console.log(v); return v }
-
   return Object.entries(properties)
-          .reduce((leg, [k, v]) => inspect(leg).replace(`$${k}`, v), legend)
-}
-
-const valueFormats = {
-  'cpu': cpuFormat,
-  'memory': filesize
+          .reduce((leg, [k, v]) => leg.replace(`$${k}`, v), legend)
 }
 
 function Timeseries({attributes: {datasource, label}}) {
@@ -171,7 +154,7 @@ function Timeseries({attributes: {datasource, label}}) {
       data: convertVals(values)
     }))
 
-    return {metrics, format: valueFormats[format] || ((v) => v)}
+    return {metrics, format: ValueFormats[format] || ((v) => v)}
   }, [datasources, datasource])
   
   
@@ -179,6 +162,35 @@ function Timeseries({attributes: {datasource, label}}) {
     <Box height='300px' width='500px'>
       <GraphHeader text={label} />
       <Graph data={metrics} yFormat={format} />
+    </Box>
+  )
+}
+
+
+function TableRow({data, columns}) {
+  return (
+    <Box direction='row' align='center' pad='small' gap='xsmall' border={{side: 'bottom', color: 'cardDarkLight'}}>
+      {columns.map(({attributes: {header, width, path}}) => (
+        <HeaderItem key={header} text={query(data, path)} width={width} nobold truncate />
+      ))}
+    </Box>
+  )
+}
+
+function Table({attributes: {datasource, width, height, path}, children}) {
+  const {datasources} = useContext(DisplayContext)
+  const entries = path ? query(datasources[datasource], path) : datasources[datasource]
+
+  return (
+    <Box width={width} height={height}>
+      <Box direction='row' align='center' border={{side: 'bottom', color: 'cardDarkLight'}} pad='small' gap='xsmall'>
+        {children.map(({attributes: {header, width}}) => (
+          <HeaderItem key={header} text={header} width={width} />
+        ))}
+      </Box>
+      {entries.map((data, ind) => (
+        <TableRow key={`${ind}`} data={data} columns={children} />
+      ))}
     </Box>
   )
 }
@@ -206,6 +218,8 @@ function parse(struct, index, theme) {
       return <ValueFrom {...props} />
     case "timeseries":
       return <Timeseries {...props} />
+    case "table":
+      return <Table {...props} />
     default:
       return null
   }

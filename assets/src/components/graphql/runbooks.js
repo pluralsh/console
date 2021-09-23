@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost'
 import { MetricResponseFragment } from './dashboards'
-import { StatefulSetFragment, DeploymentFragment } from "./kubernetes"
+import { StatefulSetFragment, DeploymentFragment, NodeFragment } from "./kubernetes"
 
 export const RunbookFragment = gql`
   fragment RunbookFragment on Runbook {
@@ -26,6 +26,7 @@ export const RunbookDataFragment = gql`
     name
     source { ...RunbookDatasourceFragment }
     prometheus { ...MetricResponseFragment }
+    nodes { ...NodeFragment }
     kubernetes {
       __typename
       ... on StatefulSet { ...StatefulSetFragment }
@@ -36,4 +37,5 @@ export const RunbookDataFragment = gql`
   ${MetricResponseFragment}
   ${StatefulSetFragment}
   ${DeploymentFragment}
+  ${NodeFragment}
 `

@@ -9,8 +9,8 @@ spec:
   name: Vertical scaling
   description: overview of how to accurately scale your rabbitmq cluster
   display: |
-    <root>
-      <box pad='small' gap='medium' direction='row'>
+    <root gap='medium'>
+      <box pad='small' gap='medium' direction='row' align='center'>
         <box direction='row' align='center' gap='small'>
           <box gap='small' align='center'>
             <timeseries datasource="cpu" label="CPU Usage" />
@@ -43,6 +43,14 @@ spec:
           </box>
         </box>
       </box>
+      <box width='100%' gap='small'>
+        <text size='small'>Be sure to scale your rabbitmq nodes within your nodes capacities, listed here:</text>
+        <table width='100%' datasource='nodes' path='nodes'>
+          <tableColumn path='metadata.name' header='name' width='33%' />
+          <tableColumn path='status.capacity.cpu' header='cpu' width='33%' />
+          <tableColumn path='status.capacity.memory' header='memory' width='33%' />
+        </table>
+      </box>
     </root>
   datasources:
   - name: cpu
@@ -62,6 +70,8 @@ spec:
     kubernetes:
       resource: statefulset
       name: rabbitmq-server
+  - name: nodes
+    type: nodes
   actions:
   - name: scale
     action: config

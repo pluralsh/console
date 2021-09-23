@@ -96,10 +96,10 @@ export function PodResources({containers, dimension}) {
   )
 }
 
-export function HeaderItem({width, text}) {
+export function HeaderItem({width, text, nobold, truncate}) {
   return (
     <Box flex={false} width={width}>
-      <Text size='small' weight={500}>{text}</Text>
+      <Text size='small' weight={nobold ? null : 500} truncate={!!truncate}>{text}</Text>
     </Box>
   )
 }
