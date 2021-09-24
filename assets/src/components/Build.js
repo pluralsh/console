@@ -13,7 +13,7 @@ import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import './build.css'
 import { BuildStatus } from './types'
-import { Avatar } from './EditUser'
+import Avatar from './users/Avatar'
 import { groupBy } from 'lodash'
 import { TabHeader, TabSelector } from './utils/TabSelector'
 import { AnsiText } from './utils/AnsiText'
@@ -349,7 +349,7 @@ export default function Build() {
           </Box>
           {creator && (
             <Box flex={false} pad={{right: 'medium'}} direction='row' gap='xsmall' align='center'>
-              <Avatar me={creator} size='40px' />
+              <Avatar user={creator} size='40px' />
               <Text size='small' weight={500}>{creator.name}</Text>
             </Box>
           )}
