@@ -1,0 +1,1 @@
+export const POLL_INTERVAL = 30 * 1000

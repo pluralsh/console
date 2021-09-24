@@ -6,6 +6,7 @@ import { ApplicationIcon, hasIcon, InstallationContext } from '../Installations'
 import { RUNBOOKS_Q } from './queries'
 import { boxShadow, HEADER_HEIGHT } from '../Builds'
 import { useHistory } from 'react-router'
+import { POLL_INTERVAL } from './constants'
 
 function RunbookRow({runbook, namespace}) {
   let hist = useHistory()
@@ -29,7 +30,8 @@ export function Runbooks() {
   const {currentApplication} = useContext(InstallationContext)
   const {data} = useQuery(RUNBOOKS_Q, {
     variables: {namespace: currentApplication.name},
-    fetchPolicy: 'cache-and-network'
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL
   })
 
   const namespace = currentApplication.name

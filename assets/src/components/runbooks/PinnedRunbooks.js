@@ -7,6 +7,7 @@ import { boxShadow } from '../Builds'
 import { useHistory } from 'react-router'
 import { chunk } from 'lodash'
 import { Book, Pin } from 'grommet-icons'
+import { POLL_INTERVAL } from './constants'
 
 function RunbookItem({runbook, namespace, width}) {
   let hist = useHistory()
@@ -31,7 +32,8 @@ export function PinnedRunbooks({border}) {
   const {currentApplication} = useContext(InstallationContext)
   const {data} = useQuery(RUNBOOKS_Q, {
     variables: {namespace: currentApplication.name, pinned: true},
-    fetchPolicy: 'cache-and-network'
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL
   })
 
   if (!data) return null
