@@ -45,7 +45,7 @@ export function Runbooks() {
           </Box>
         </Box>
       </Box>
-      <Box fill gao='xsmall'>
+      <Box fill gap='xsmall'>
         {data && data.runbooks.map((book) => <RunbookRow key={book.name} runbook={book} namespace={namespace} />)}
       </Box>
     </Box>
