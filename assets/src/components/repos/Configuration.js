@@ -148,10 +148,10 @@ function RecipeConfiguration({recipe, context: ctx, setOpen}) {
 
   return (
     <ThemeContext.Extend value={{global: {input: {padding: '9px'}}}}>
-      <Box fill gap='small'>
+      <Box fill gap='small' pad='small'>
         {error && <GqlError error={error} header='Error installing bundle' />}
         <Repository repo={repository} />
-        <Box fill style={{overflow: 'auto', maxHeight: '70vh'}} pad='small'>
+        <Box fill style={{overflow: 'auto', maxHeight: '70vh'}}>
           <Box flex={false} gap='12px'>
             {Object.values(configuration)
               .filter((conf) => available(conf, context[repository.name] || {}))
@@ -164,8 +164,7 @@ function RecipeConfiguration({recipe, context: ctx, setOpen}) {
             ))}
           </Box>
         </Box>
-        <Box flex={false} direction='row' align='center' pad='small' 
-             gap='small' justify='end'>
+        <Box flex={false} direction='row' align='center' gap='small' justify='end'>
           {!hasNext && recipe.oidcEnabled && (
             <CheckBox
               toggle

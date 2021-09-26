@@ -92,7 +92,7 @@ export default function Sidebar() {
       <Box flex={false} height={IMAGE_HEIGHT} justify='center' align='center' pad='small' margin={{vertical: 'small'}}>
         <img height={IMAGE_HEIGHT} alt='' src={APP_ICON} />
       </Box>
-      <Box fill='vertical' gap='xsmall' pad={{top: '30px'}}>
+      <Box fill='vertical' align='center' gap='xsmall' pad={{top: '30px'}}>
         {OPTIONS.map(({text, icon, path}, ind) => (
           <SidebarIcon
             key={ind}
