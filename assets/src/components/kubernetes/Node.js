@@ -63,7 +63,7 @@ function UtilBar({capacity, usage, format, modifier}) {
       <Drop target={ref.current} plain align={{bottom: 'top'}} round='xsmall'>
         <Box direction='row' gap='xsmall' align='center' 
              background='sidebar' pad={{horizontal: 'small', vertical: 'xsmall'}}>
-          <Text size='small'>{modifier}: {percent}% {format(usage)}</Text>
+          <Text size='small'>{modifier}: {percent}% {usage ? format(usage) : ''}</Text>
         </Box>
       </Drop>
     )}
@@ -75,6 +75,7 @@ function NodeRow({node, metrics}) {
   let hist = useHistory()
   const labels = mapify(node.metadata.labels)
   const readiness = nodeReadiness(node.status)
+  const nodeMetrics = metrics[node.metadata.name]
   return (
     <Box direction='row' align='center' border='bottom' hoverIndicator='backgroundDark'
          onClick={() => hist.push(`/nodes/${node.metadata.name}`)} pad='small' gap='small'>
@@ -89,14 +90,14 @@ function NodeRow({node, metrics}) {
       <Box flex={false} width='10%' direction='row' gap='xsmall' align='center'>
         <UtilBar 
           capacity={cpuParser(node.status.capacity.cpu)}
-          usage={metrics[node.metadata.name].cpu}
+          usage={nodeMetrics && nodeMetrics.cpu}
           format={(v) => `${round(v)} cores`}
           modifier='CPU' />
       </Box>
       <Box flex={false} width='10%' direction='row' gap='xsmall' align='center'>
         <UtilBar 
           capacity={memoryParser(node.status.capacity.memory)}
-          usage={metrics[node.metadata.name].memory}
+          usage={nodeMetrics && nodeMetrics.memory}
           format={filesize}
           modifier="Mem" />
       </Box>
