@@ -180,6 +180,7 @@ const SimpleGauge = React.memo(({value, total, title, name}) => {
         }} 
         options={{
           cutout: '75%',
+          animation: false,
           plugins: {
             legend: { display: false },
             title: {color: 'white', text: title, display: true}

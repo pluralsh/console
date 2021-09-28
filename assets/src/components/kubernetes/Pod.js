@@ -18,6 +18,7 @@ import { asQuery } from '../utils/query'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { Events } from './Event'
 import { DeleteIcon } from './Job'
+import { TRUNCATE } from '../utils/truncate'
 
 function phaseToReadiness(phase) {
   switch (phase) {
@@ -242,7 +243,12 @@ export function PodRow({pod: {metadata: {name, namespace}, status, spec}, refetc
         <ContainerSummary status={status} />
       </Box>
       <RowItem width='7%' text={status.podIp} />
-      <RowItem width='10%' text={spec.nodeName} truncate />
+      <Box flex={false} width='10%'>
+        <Anchor style={TRUNCATE} size='small'  
+               onClick={(e) =>  { ignore(e); history.push(`/nodes/${spec.nodeName}`) }}>
+          {spec.nodeName}
+        </Anchor>
+      </Box>
       <Box flex={false} width='7%'>
         <PodResources containers={spec.containers} dimension='memory' />
       </Box>
