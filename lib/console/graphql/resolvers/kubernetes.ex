@@ -90,6 +90,12 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> Kazan.run()
   end
 
+  def delete_node(%{name: name}, _) do
+    with {:ok, node} <- Core.read_node!(name) |> Kazan.run(),
+         {:ok, _} <- Console.Commands.Plural.terminate(node.metadata.name),
+      do: {:ok, node}
+  end
+
   def delete_pod(%{namespace: namespace, name: name}, _) do
     %Kazan.Request{
       method: "delete",

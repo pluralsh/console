@@ -49,4 +49,22 @@ defmodule Console.GraphQl.KubernetesMutationsTest do
       assert job["spec"]["backoffLimit"] == 5
     end
   end
+
+  describe "deleteNode" do
+    test "admins can delete nodes" do
+      user = insert(:user, roles: %{admin: true})
+      expect(Kazan, :run, fn _ -> {:ok, kube_node("node-name")} end)
+      expect(Console.Commands.Plural, :terminate, fn "node-name" -> {:ok, "done"} end)
+
+      {:ok, %{data: %{"deleteNode" => del}}} = run_query("""
+        mutation Del($name: String!) {
+          deleteNode(name: $name) {
+            metadata { name }
+          }
+        }
+      """, %{"name" => "node-name"}, %{current_user: user})
+
+      assert del["metadata"]["name"] == "node-name"
+    end
+  end
 end

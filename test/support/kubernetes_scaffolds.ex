@@ -83,9 +83,9 @@ defmodule KubernetesScaffolds do
     }
   end
 
-  def kube_node() do
+  def kube_node(name \\ "some-node") do
     %Core.Node{
-      metadata: %{name: "some-node"},
+      metadata: %{name: name},
       status: %Core.NodeStatus{
         allocatable: %{"cpu" => "2", "memory" => "6Gi"},
         capacity: %{"cpu" => "2", "memory" => "6Gi"}

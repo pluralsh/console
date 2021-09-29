@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Kubernetes do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Kubernetes
-  alias Console.Middleware.{Authenticated, Rbac}
+  alias Console.Middleware.{Authenticated, AdminRequired, Rbac}
 
   object :metadata do
     field :labels,      list_of(:label_pair), resolve: fn %{labels: labels}, _, _ -> {:ok, make_labels(labels)} end
@@ -193,6 +193,14 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Rbac, perm: :operate, arg: :namespace
 
       resolve &Kubernetes.delete_job/2
+    end
+
+    field :delete_node, :node do
+      middleware Authenticated
+      middleware AdminRequired
+      arg :name, non_null(:string)
+
+      resolve &Kubernetes.delete_node/2
     end
   end
 end

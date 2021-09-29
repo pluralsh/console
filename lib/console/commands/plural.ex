@@ -17,5 +17,7 @@ defmodule Console.Commands.Plural do
 
   def bounce(repo), do: plural("bounce", [repo])
 
+  def terminate(node), do: plural("ops", ["terminate", node])
+
   def plural(command, args), do: cmd("plural", [command | args], workspace())
 end
