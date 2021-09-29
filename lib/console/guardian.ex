@@ -10,7 +10,6 @@ defmodule Console.Guardian do
   def subject_for_token(_, _), do: {:error, :invalid_argument}
 
   def resource_from_claims(%{"sub" => "user:" <> id}) do
-    IO.inspect(id)
     case fetch_user(id) do
       %User{} = user -> {:ok, user}
       _ -> {:error, :not_authorized}
