@@ -1,13 +1,13 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
-import { useQuery } from 'react-apollo'
+import { Tabs, TabContent, TabHeader, TabHeaderItem, Confirm } from 'forge-core'
+import { useQuery, useMutation } from 'react-apollo'
 import { NodeMetrics, POLL_INTERVAL } from './constants'
-import { NODES_Q, NODE_METRICS_Q, NODE_Q, CLUSTER_SATURATION } from './queries'
-import { HeaderItem, PodList, podResources, RowItem } from './Pod'
+import { NODES_Q, NODE_METRICS_Q, NODE_Q, CLUSTER_SATURATION, DELETE_NODE } from './queries'
+import { HeaderItem, ignore, PodList, podResources, RowItem } from './Pod'
 import { Box, Drop, Text, ThemeContext } from 'grommet'
 import { useHistory, useParams } from 'react-router'
 import { mapify, Metadata } from './Metadata'
-import { ServerCluster } from 'grommet-icons'
+import { ServerCluster, Trash } from 'grommet-icons'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import { Readiness, ReadyIcon } from '../Application'
 import { memoryParser } from 'kubernetes-resource-parser'
@@ -23,10 +23,11 @@ import { normalizeColor } from 'grommet/utils'
 import { RawContent } from './Component'
 import { cpuParser } from '../../utils/kubernetes'
 import { Line } from 'rc-progress'
+import { DeleteIcon } from './Job'
 
 function NodeRowHeader() {
   return (
-    <Box direction='row' align='center' border='bottom' pad='small' gap='small'>
+    <Box direction='row' align='center' border='bottom' pad='small'>
       <HeaderItem width='30%' text='name' />
       <HeaderItem width='10%' text='status' />
       <HeaderItem width='10%' text='cpu' />
@@ -71,14 +72,44 @@ function UtilBar({capacity, usage, format, modifier}) {
   )
 }
 
-function NodeRow({node, metrics}) {
+export function DeleteNode({name, refetch}) {
+  const [confirm, setConfirm] = useState(false)
+  const [mutation, {loading}] = useMutation(DELETE_NODE, {
+    variables: {name},
+    onCompleted: () => { setConfirm(false); refetch() }
+  })
+
+  const doConfirm = useCallback((e) => {
+    ignore(e)
+    setConfirm(true)
+  }, [setConfirm])
+
+  return (
+    <>
+    <Box onClick={doConfirm} pad={{horizontal: 'small'}}>
+      <Trash color={loading ? 'dark-5' : 'error'} size='small' />
+    </Box>
+    {confirm && (
+      <Confirm
+        header={`Are you sure you want to delete ${name}`}
+        description="The node will be replaced within its autoscaling group."
+        loading={loading}
+        cancel={(e) => { ignore(e); setConfirm(false) }}
+        submit={(e) => { ignore(e); mutation() }} />
+    )}
+    </>
+  )
+}
+
+function NodeRow({node, metrics, refetch}) {
   let hist = useHistory()
   const labels = mapify(node.metadata.labels)
   const readiness = nodeReadiness(node.status)
   const nodeMetrics = metrics[node.metadata.name]
+
   return (
-    <Box direction='row' align='center' border='bottom' hoverIndicator='backgroundDark'
-         onClick={() => hist.push(`/nodes/${node.metadata.name}`)} pad='small' gap='small'>
+    <Box fill='horizontal' direction='row' align='center' border='bottom' hoverIndicator='backgroundDark'
+         onClick={() => hist.push(`/nodes/${node.metadata.name}`)} pad='small'>
       <Box flex={false} width='30%' direction='row' align='center' gap='xsmall'>
         <ServerCluster size='small' />
         <Text size='small'>{node.metadata.name}</Text>
@@ -87,14 +118,14 @@ function NodeRow({node, metrics}) {
         <ReadyIcon readiness={readiness} />
         <Text size='small'>{nodeReadiness(node.status) === Readiness.Ready ? 'Ready' : 'Pending'}</Text>
       </Box>
-      <Box flex={false} width='10%' direction='row' gap='xsmall' align='center'>
+      <Box flex={false} width='10%' direction='row' gap='xsmall' align='center' pad={{horizontal: 'xsmall'}}>
         <UtilBar 
           capacity={cpuParser(node.status.capacity.cpu)}
           usage={nodeMetrics && nodeMetrics.cpu}
           format={(v) => `${round(v)} cores`}
           modifier='CPU' />
       </Box>
-      <Box flex={false} width='10%' direction='row' gap='xsmall' align='center'>
+      <Box flex={false} width='10%' direction='row' gap='xsmall' align='center' pad={{horizontal: 'xsmall'}}>
         <UtilBar 
           capacity={memoryParser(node.status.capacity.memory)}
           usage={nodeMetrics && nodeMetrics.memory}
@@ -104,7 +135,12 @@ function NodeRow({node, metrics}) {
       <RowItem width='10%' text={labels['failure-domain.beta.kubernetes.io/region']} />
       <RowItem width='10%' text={labels['failure-domain.beta.kubernetes.io/zone']} />
       <RowItem width='10%' text={cpuParser(node.status.capacity.cpu)} />
-      <RowItem width='10%' text={filesize(memoryParser(node.status.capacity.memory))} />
+      <Box width='10%' direction='row' align='center' gap='small'>
+        <Box fill='horizontal'>
+          <Text size='small'>{filesize(memoryParser(node.status.capacity.memory))}</Text>
+        </Box>
+        <DeleteNode name={node.metadata.name} refetch={refetch} />
+      </Box> 
     </Box>
   )
 }
@@ -432,8 +468,12 @@ export function Node() {
 }
 
 export function Nodes() {
-  const {data} = useQuery(NODES_Q, {pollInterval: POLL_INTERVAL, fetchPolicy: 'cache-and-network'})
+  const {data, refetch} = useQuery(NODES_Q, {
+    pollInterval: POLL_INTERVAL, 
+    fetchPolicy: 'cache-and-network'
+  })
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
+
   useEffect(() => {
     setBreadcrumbs([
       {text: 'nodes', url: '/nodes'}
@@ -458,15 +498,19 @@ export function Nodes() {
 
   if (!data) return <LoopingLogo />
 
-  console.log(data.nodeMetrics)
-
   return (
     <Box style={{overflow: 'auto'}} fill background='backgroundColor' pad='small' gap='small'>
-      <Box flex={false}>
+      <Box flex={false} fill='horizontal'>
         <ClusterMetrics nodes={data.nodes} usage={usage} />
-        <Box flex={false}>
+        <Box flex={false} fill='horizontal'>
           <NodeRowHeader />
-          {data.nodes.map((node, ind) => <NodeRow key={ind} node={node} metrics={metrics} />)}
+          {data.nodes.map((node, ind) => (
+            <NodeRow
+              key={ind}
+              node={node} 
+              metrics={metrics} 
+              refetch={refetch} />
+          ))}
         </Box>
       </Box>
     </Box>

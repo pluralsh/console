@@ -70,6 +70,15 @@ export const DELETE_JOB = gql`
   ${JobFragment}
 `;
 
+export const DELETE_NODE = gql`
+  mutation DeleteNode($name: String!) {
+    deleteNode(name: $name) {
+      ...NodeFragment
+    }
+  }
+  ${NodeFragment}
+`;
+
 export const NODES_Q = gql`
   query {
     nodes { ...NodeFragment }
