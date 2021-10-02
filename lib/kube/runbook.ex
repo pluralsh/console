@@ -75,8 +75,30 @@ defmodule Kube.Runbook do
     end
   end
 
+  defmodule AlertStatus do
+    use Kazan.Model
+
+    defmodel "RunbookAlertStatus", "platform.plural.sh", "v1alpha1" do
+      property :name,        "name",        :string
+      property :starts_at,   "startsAt",    :string
+      property :fingerprint, "fingerprint", :string
+      property :annotations, "annotations", :object
+      property :labels,      "labels",      :object
+    end
+  end
+
+  defmodule Status do
+    use Kazan.Model
+    alias Kube.Runbook.AlertStatus
+
+    defmodel "RunbookStatus", "platform.plural.sh", "v1alpha1" do
+      property :alerts, "alerts", {:array, AlertStatus}
+    end
+  end
+
   defmodel "Runbook", "platform.plural.sh", "v1alpha1" do
-    property :spec, "spec", Spec
+    property :spec,   "spec",   Spec
+    property :status, "status", Status
   end
 end
 

@@ -11,6 +11,12 @@ defmodule ConsoleWeb.WebhookController do
       do: json(conn, %{ok: true})
   end
 
+  def alertmanager(conn, params) do
+    IO.inspect(params)
+
+    json(conn, %{ok: true})
+  end
+
   def piazza(conn, %{"text" => "/console deploy " <> application}) do
     bot = Users.get_bot!("console")
     case Builds.create(%{type: :deploy, repository: application, message: "Deployed from piazza"}, bot) do

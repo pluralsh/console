@@ -2,11 +2,12 @@ import React, { useContext } from 'react'
 import { Box, Text, ThemeContext } from 'grommet'
 import { Book } from 'grommet-icons'
 import { useQuery } from '@apollo/react-hooks'
-import { ApplicationIcon, hasIcon, InstallationContext } from '../Installations'
+import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from '../Installations'
 import { RUNBOOKS_Q } from './queries'
 import { boxShadow, HEADER_HEIGHT } from '../Builds'
 import { useHistory } from 'react-router'
 import { POLL_INTERVAL } from './constants'
+import { BreadcrumbsContext } from '../Breadcrumbs'
 
 function RunbookRow({runbook, namespace}) {
   let hist = useHistory()
@@ -27,12 +28,24 @@ function RunbookRow({runbook, namespace}) {
 }
 
 export function Runbooks() {
-  const {currentApplication} = useContext(InstallationContext)
+  const {currentApplication, setOnChange} = useContext(InstallationContext)
   const {data} = useQuery(RUNBOOKS_Q, {
     variables: {namespace: currentApplication.name},
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL
   })
+
+  const {setBreadcrumbs} = useContext(BreadcrumbsContext)
+  useEffect(() => {
+    setBreadcrumbs([
+      {text: 'runbooks', url: '/runbooks'},
+      {text: currentApplication.name, url: `/runbooks/${currentApplication.name}`}
+    ])
+  }, [currentApplication])
+
+  useEffect(() => {
+    setOnChange({func: ({name}) => history.push(`/runbooks/${name}`)})
+  }, [])
 
   const namespace = currentApplication.name
 

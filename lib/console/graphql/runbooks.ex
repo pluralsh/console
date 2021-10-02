@@ -9,17 +9,29 @@ defmodule Console.GraphQl.Runbooks do
     field :context, non_null(:map)
   end
 
-
   object :runbook do
     field :name, non_null(:string), resolve: fn
       %{metadata: %{name: name}}, _, _ -> {:ok, name}
     end
 
-    field :spec, non_null(:runbook_spec)
+    field :spec,   non_null(:runbook_spec)
+    field :status, :runbook_status
 
     field :data, list_of(:runbook_data), resolve: fn
       runbook, _, _ -> Console.Services.Runbooks.datasources(runbook)
     end
+  end
+
+  object :runbook_status do
+    field :alerts, list_of(:runbook_alert_status)
+  end
+
+  object :runbook_alert_status do
+    field :name,        non_null(:string)
+    field :starts_at,   :string
+    field :fingerprint, :string
+    field :annotations, :map
+    field :labels,      :map
   end
 
   object :runbook_spec do
