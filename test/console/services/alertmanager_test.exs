@@ -10,6 +10,7 @@ defmodule Console.Services.AlertmanagerTest do
   describe "#handle_alert/1" do
     test "new alerts create incidents" do
       alert = %Alert{
+        status: :firing,
         name: "alertname",
         summary: "some summary",
         description: "some description",
@@ -46,6 +47,7 @@ defmodule Console.Services.AlertmanagerTest do
     test "it will update existing, mapped incidents" do
       mapping = insert(:alertmanager_incident, fingerprint: "print")
       alert = %Alert{
+        status: :firing,
         name: "alertname",
         summary: "some summary",
         description: "some description",
@@ -85,6 +87,7 @@ defmodule Console.Services.AlertmanagerTest do
     test "it will ignore if an existing incident is still in progress" do
       mapping = insert(:alertmanager_incident, fingerprint: "print")
       alert = %Alert{
+        status: :firing,
         name: "alertname",
         summary: "some summary",
         description: "some description",

@@ -180,8 +180,8 @@ defmodule Console.Plural.Queries do
   """
 
   @create_incident """
-    mutation CreateIncident($repo: String, $attributes: IncidentAttributes!) {
-      createIncident(repo: $repo, attributes: $attributes) {
+    mutation CreateIncident($repository: String, $attributes: IncidentAttributes!) {
+      createIncident(repository: $repository, attributes: $attributes) {
         ...IncidentFragment
       }
     }

@@ -41,11 +41,14 @@ defmodule Console.Services.Alertmanager do
     })
     |> when_ok(fn %{id: incident_id} ->
       %AlertmanagerIncident{}
-      |> AlertmanagerIncident.changeset(%{incident_id: incident_id, fingerprint: alert.fingerprint})
+      |> AlertmanagerIncident.changeset(%{
+        incident_id: incident_id,
+        fingerprint: alert.fingerprint
+      })
       |> Console.Repo.insert()
     end)
   end
-  def create_incident(_, _), do: :ok
+  defp create_incident(_, _), do: :ok
 
   def description(desc) do
     """
