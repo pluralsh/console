@@ -17,6 +17,7 @@ defmodule ConsoleWeb.WebhookController do
       Alert.build(alert)
       |> IO.inspect()
       |> Alertmanager.handle_alert()
+      |> IO.inspect()
     end)
 
     json(conn, %{ok: true})

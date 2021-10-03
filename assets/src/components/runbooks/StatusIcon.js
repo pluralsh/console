@@ -52,16 +52,15 @@ export function StatusIcon({status, size, innerSize}) {
   const healthy = alerts.length == 0
   const {icon, color} = ICON_DATA[healthy ? 'Healthy' : 'Alert']
 
-  console.log(alerts)
   return (
     <>
     <Box ref={ref} round='full' height={outer} width={outer} 
          align='center' justify='center' background={color}
-         onClick={(e) => { ignore(e); setOpen(true) }} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+         onClick={(e) => { ignore(e); !healthy && setOpen(true) }} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
          style={hover && !healthy ? null : shadow(color, theme)}>
       {React.createElement(icon, {size: `${innerSize}px`, color: 'plrl-white'})}
     </Box>
-    {open && (
+    {open && !healthy && (
       <Drop target={ref.current} align={{left: 'right'}} onClickOutside={() => setOpen(false)}>
         <Alerts alerts={alerts} />
       </Drop>
