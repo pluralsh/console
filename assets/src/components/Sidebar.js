@@ -61,7 +61,7 @@ const ICON_HEIGHT = '18px'
 
 const OPTIONS = [
   {text: 'Builds', icon: <Deploy size={ICON_HEIGHT} />, path: '/'},
-  {text: 'Runbooks', icon: <Book size={ICON_HEIGHT} />, path: '/runbooks'},
+  {text: 'Runbooks', icon: <Book size={ICON_HEIGHT} />, path: '/runbooks/{repo}'},
   {text: 'Components', icon: <Cubes size={ICON_HEIGHT} />, path: '/components/{repo}'},
   {text: 'Nodes', icon: <Nodes size={ICON_HEIGHT} />, path: '/nodes'},
   {text: 'Configuration', icon: <Configure size={ICON_HEIGHT} />, path: '/config/{repo}' },

@@ -2,14 +2,26 @@ import { gql } from 'apollo-boost'
 import { MetricResponseFragment } from './dashboards'
 import { StatefulSetFragment, DeploymentFragment, NodeFragment } from "./kubernetes"
 
+export const RunbookAlertStatus = gql`
+  fragment RunbookAlertStatus on RunbookAlertStatus {
+    name
+    startsAt
+    labels
+    annotations
+    fingerprint
+  }
+`
+
 export const RunbookFragment = gql`
   fragment RunbookFragment on Runbook {
     name
+    status { alerts { ...RunbookAlertStatus } }
     spec {
       name
       description
     }
   }
+  ${RunbookAlertStatus}
 `
 
 export const RunbookDatasourceFragment = gql`

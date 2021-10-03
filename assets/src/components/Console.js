@@ -83,7 +83,7 @@ export default function Console() {
                 )} />
                 <Route path='/pods/:namespace/:name' component={Pod} />
                 <Route path='/runbooks/:namespace/:name' component={Runbook} />
-                <Route path='/runbooks' component={Runbooks} />
+                <Route path='/runbooks/:repo' component={Runbooks} />
                 <Route path='/nodes/:name' component={Node} />
                 <Route path='/nodes' component={Nodes} />
                 <Route path='/audits' component={Audits} />

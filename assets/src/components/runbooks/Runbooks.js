@@ -1,13 +1,13 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Box, Text, ThemeContext } from 'grommet'
-import { Book } from 'grommet-icons'
 import { useQuery } from '@apollo/react-hooks'
 import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from '../Installations'
 import { RUNBOOKS_Q } from './queries'
 import { boxShadow, HEADER_HEIGHT } from '../Builds'
-import { useHistory } from 'react-router'
+import { useHistory, useParams } from 'react-router'
 import { POLL_INTERVAL } from './constants'
 import { BreadcrumbsContext } from '../Breadcrumbs'
+import { StatusIcon } from './StatusIcon'
 
 function RunbookRow({runbook, namespace}) {
   let hist = useHistory()
@@ -15,19 +15,21 @@ function RunbookRow({runbook, namespace}) {
   const {name, description} = runbook.spec
 
   return (
-    <Box style={boxShadow(theme)} pad='small' gap='xsmall' round='xsmall' 
-         background='cardDarkLight' hoverIndicator='sidebar'
+    <Box style={boxShadow(theme)} pad='small' round='xsmall'  direction='row' gap='small'
+         background='cardDarkLight' hoverIndicator='sidebar' align='center'
          onClick={() => hist.push(`/runbooks/${namespace}/${runbook.name}`)}>
-      <Box flex={false} gap='small' direction='row' align='center'>
-        <Book size='small' />
+      <StatusIcon status={runbook.status} size={30} innerSize={14} />
+      <Box fill='horizontal' gap='xsmall'>
         <Text size='small' weight={500}>{name}</Text>
+        <Text size='small' color='dark-3' truncate>{description}</Text>
       </Box>
-      <Text size='small' color='dark-3' truncate>{description}</Text>
     </Box>
   )
 }
 
 export function Runbooks() {
+  let history = useHistory()
+  const {repo} = useParams()
   const {currentApplication, setOnChange} = useContext(InstallationContext)
   const {data} = useQuery(RUNBOOKS_Q, {
     variables: {namespace: currentApplication.name},
@@ -46,6 +48,7 @@ export function Runbooks() {
   useEffect(() => {
     setOnChange({func: ({name}) => history.push(`/runbooks/${name}`)})
   }, [])
+  useEnsureCurrent(repo)
 
   const namespace = currentApplication.name
 

@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import { RunbookDataFragment, RunbookFragment } from "../graphql/runbooks";
+import { RunbookAlertStatus, RunbookDataFragment, RunbookFragment } from "../graphql/runbooks";
 
 export const RUNBOOKS_Q = gql`
   query Runbooks($namespace: String!, $pinned: Boolean) {
@@ -14,6 +14,7 @@ export const RUNBOOK_Q = gql`
   query Runbooks($namespace: String!, $name: String!) {
     runbook(namespace: $namespace, name: $name) {
       name
+      status { alerts { ...RunbookAlertStatus } }
       spec {
         name
         description
@@ -22,6 +23,7 @@ export const RUNBOOK_Q = gql`
       data { ...RunbookDataFragment }
     }
   }
+  ${RunbookAlertStatus}
   ${RunbookDataFragment}
 `
 

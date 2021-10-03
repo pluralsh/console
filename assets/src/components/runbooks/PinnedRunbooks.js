@@ -6,8 +6,9 @@ import { Box, Text, ThemeContext } from 'grommet'
 import { boxShadow } from '../Builds'
 import { useHistory } from 'react-router'
 import { chunk } from 'lodash'
-import { Book, Pin } from 'grommet-icons'
+import { Pin } from 'grommet-icons'
 import { POLL_INTERVAL } from './constants'
+import { StatusIcon } from './StatusIcon'
 
 function RunbookItem({runbook, namespace, width}) {
   let hist = useHistory()
@@ -20,7 +21,7 @@ function RunbookItem({runbook, namespace, width}) {
          pad='small' gap='small' direction='row' align='center'
          onClick={() => hist.push(`/runbooks/${namespace}/${runbook.name}`)}>
       <Box flex={false} gap='small' direction='row' align='center'>
-        <Book size='small' />
+        <StatusIcon status={runbook.status} size={20} innerSize={10} />
         <Text size='small' weight={500}>{name}</Text>
       </Box>
       <Text size='small' color='dark-3' truncate>{description}</Text>
