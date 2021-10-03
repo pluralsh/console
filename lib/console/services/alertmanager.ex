@@ -18,17 +18,20 @@ defmodule Console.Services.Alertmanager do
     end
   end
 
-  @active ~w(RESOLVED COMPLETE)
+  @resolved ~w(RESOLVED COMPLETE)
+  @active ~w(OPEN IN_PROGRESS)
 
-  defp update_incident(id, %Alert{}) do
-    case Incidents.get_incident(id) do
-      {:ok, %Incident{status: status}} when status in @active ->
+  defp update_incident(id, alert) do
+    case {alert, Incidents.get_incident(id)} do
+      {%Alert{status: :firing}, {:ok, %Incident{status: status}}} when status in @resolved ->
         Incidents.update_incident(id, %{status: "IN_PROGRESS"})
+      {%Alert{status: :resolved}, {:ok, %Incident{status: status}}} when status in @active ->
+        Incidents.update_incident(id, %{status: "RESOLVED"})
       _ -> :ok
     end
   end
 
-  defp create_incident(repo, %Alert{} = alert) do
+  defp create_incident(repo, %Alert{status: :firing} = alert) do
     Incidents.create_incident(repo, %{
       title: alert.summary,
       description: description(alert.description),
@@ -42,6 +45,7 @@ defmodule Console.Services.Alertmanager do
       |> Console.Repo.insert()
     end)
   end
+  def create_incident(_, _), do: :ok
 
   def description(desc) do
     """
