@@ -19,6 +19,13 @@ defmodule Console do
     end
   end
 
+  def from_namespace(namespace) do
+    case Console.Plural.Config.fetch_file() do
+      %{"namespacePrefix" => pref} when byte_size(pref) > 0 -> String.trim_leading(namespace, pref)
+      _ -> namespace
+    end
+  end
+
   def workspace(), do: Path.join(conf(:workspace_root), conf(:repo_root))
 
   def hmac(secret, payload) do

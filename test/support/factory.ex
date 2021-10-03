@@ -100,4 +100,8 @@ defmodule Console.Factory do
       target: "repo"
     }
   end
+
+  def alertmanager_incident_factory do
+    %Schema.AlertmanagerIncident{incident_id: Ecto.UUID.generate()}
+  end
 end

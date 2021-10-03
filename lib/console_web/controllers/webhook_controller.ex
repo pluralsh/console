@@ -1,6 +1,7 @@
 defmodule ConsoleWeb.WebhookController do
   use ConsoleWeb, :controller
-  alias Console.Services.{Builds, Users}
+  alias Alertmanager.Alert
+  alias Console.Services.{Builds, Users, Alertmanager}
 
   plug ConsoleWeb.Verifier when action == :webhook
   plug ConsoleWeb.PiazzaVerifier when action == :piazza
@@ -11,9 +12,18 @@ defmodule ConsoleWeb.WebhookController do
       do: json(conn, %{ok: true})
   end
 
-  def alertmanager(conn, params) do
-    IO.inspect(params)
+  def alertmanager(conn, %{"alerts" => alerts}) when is_list(alerts) do
+    Enum.each(alerts, fn alert ->
+      Alert.build(alert)
+      |> IO.inspect()
+      |> Alertmanager.handle_alert()
+    end)
 
+    json(conn, %{ok: true})
+  end
+
+  def alertmanager(conn, payload) do
+    IO.inspect(payload)
     json(conn, %{ok: true})
   end
 

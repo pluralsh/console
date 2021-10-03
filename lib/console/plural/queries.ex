@@ -53,6 +53,16 @@ defmodule Console.Plural.Queries do
     }
   """
 
+  @incident_fragment """
+    fragment IncidentFragment on Incident {
+      id
+      title
+      description
+      severity
+      status
+    }
+  """
+
   @installation_fragment """
     fragment InstallationFragment on Installation {
       id
@@ -160,6 +170,33 @@ defmodule Console.Plural.Queries do
     }
   """
 
+  @get_incident """
+    query Incident($id: ID!) {
+      incident(id: $id) {
+        ...IncidentFragment
+      }
+    }
+    #{@incident_fragment}
+  """
+
+  @create_incident """
+    mutation CreateIncident($repo: String, $attributes: IncidentAttributes!) {
+      createIncident(repo: $repo, attributes: $attributes) {
+        ...IncidentFragment
+      }
+    }
+    #{@incident_fragment}
+  """
+
+  @update_incident """
+    mutation UpdateIncident($id: ID!, $attributes: IncidentAttributes!) {
+      updateIncident(id: $id, attributes: $attributes) {
+        ...IncidentFragment
+      }
+    }
+    #{@incident_fragment}
+  """
+
   def installation_query(), do: @installation_query
 
   def get_installation_query(), do: @get_installation_q
@@ -183,4 +220,10 @@ defmodule Console.Plural.Queries do
   def install_recipe_mutation(), do: @install_recipe
 
   def upsert_oidc_provider(), do: @oidc_upsert
+
+  def get_incident_query(), do: @get_incident
+
+  def update_incident_mutation(), do: @update_incident
+
+  def create_incident_mutation(), do: @create_incident
 end
