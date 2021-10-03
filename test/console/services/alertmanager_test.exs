@@ -66,7 +66,11 @@ defmodule Console.Services.AlertmanagerTest do
 
       update_body = Jason.encode!(%{
         query: Queries.update_incident_mutation(),
-        variables: %{id: mapping.incident_id, attributes: %{status: "IN_PROGRESS"}}
+        variables: %{id: mapping.incident_id, attributes: %{
+          title: alert.summary,
+          description: Alertmanager.description(alert.description),
+          status: "IN_PROGRESS",
+        }}
       })
 
       expect(HTTPoison, :post, 2, fn
@@ -105,11 +109,27 @@ defmodule Console.Services.AlertmanagerTest do
         status: "IN_PROGRESS"
       }
 
-      expect(HTTPoison, :post, fn
+      update_body = Jason.encode!(%{
+        query: Queries.update_incident_mutation(),
+        variables: %{id: mapping.incident_id, attributes: %{
+          title: alert.summary,
+          description: Alertmanager.description(alert.description)
+        }}
+      })
+
+      expect(HTTPoison, :post, 2, fn
         _, ^get_body, _ -> {:ok, %{body: Jason.encode!(%{data: %{incident: incident}})}}
+        _, ^update_body, _ -> {:ok, %{
+          body: Jason.encode!(%{
+            data: %{updateIncident: Map.put(incident, :status, "IN_PROGRESS")}
+          })}
+        }
       end)
 
-      :ok = Alertmanager.handle_alert(alert)
+      {:ok, result} = Alertmanager.handle_alert(alert)
+
+      assert result.id == mapping.incident_id
+      assert result.status == "IN_PROGRESS"
     end
   end
 end

@@ -13,7 +13,10 @@ defmodule Console.Services.Alertmanager do
     repo = Console.from_namespace(ns)
 
     case get_mapping(fp) do
-      %{incident_id: id} -> update_incident(id, alert)
+      %{incident_id: id} = mapping ->
+        with :not_found <- update_incident(id, alert),
+             {:ok, _} <- Console.Repo.delete(mapping),
+          do: create_incident(repo, alert)
       _ -> create_incident(repo, alert)
     end
   end
@@ -24,21 +27,22 @@ defmodule Console.Services.Alertmanager do
   defp update_incident(id, alert) do
     case {alert, Incidents.get_incident(id)} do
       {%Alert{status: :firing}, {:ok, %Incident{status: status}}} when status in @resolved ->
-        Incidents.update_incident(id, %{status: "IN_PROGRESS"})
+        Incidents.update_incident(id, Map.merge(base_attributes(alert), %{status: "IN_PROGRESS"}))
       {%Alert{status: :resolved}, {:ok, %Incident{status: status}}} when status in @active ->
         Incidents.update_incident(id, %{status: "RESOLVED"})
+      {%Alert{status: :firing}, _} ->
+        Incidents.update_incident(id, base_attributes(alert))
+      {_, {:error, _}} -> :not_found
       _ -> :ok
     end
   end
 
   defp create_incident(repo, %Alert{status: :firing} = alert) do
-    Incidents.create_incident(repo, %{
-      title: alert.summary,
-      description: description(alert.description),
+    Incidents.create_incident(repo, Map.merge(base_attributes(alert), %{
       severity: 1,
       tags: [%{tag: "alertmanager"}, %{tag: "console"}],
       cluster_information: cluster_info()
-    })
+    }))
     |> when_ok(fn %{id: incident_id} ->
       %AlertmanagerIncident{}
       |> AlertmanagerIncident.changeset(%{
@@ -49,6 +53,13 @@ defmodule Console.Services.Alertmanager do
     end)
   end
   defp create_incident(_, _), do: :ok
+
+  defp base_attributes(alert) do
+    %{
+      title: alert.summary,
+      description: description(alert.description)
+    }
+  end
 
   def description(desc) do
     """

@@ -172,9 +172,7 @@ defmodule Console.Plural.Queries do
 
   @get_incident """
     query Incident($id: ID!) {
-      incident(id: $id) {
-        ...IncidentFragment
-      }
+      incident(id: $id) { ...IncidentFragment }
     }
     #{@incident_fragment}
   """
