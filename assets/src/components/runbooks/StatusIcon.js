@@ -4,6 +4,7 @@ import { Box, Drop, Text, ThemeContext } from 'grommet'
 import { normalizeColor } from 'grommet/utils'
 import { ignore } from '../kubernetes/Pod'
 import moment from 'moment'
+import { SEVERITY_COLORS } from './constants'
 
 function Warning({size, color}) {
   return <Text size={size} color={color}>!!</Text>
@@ -17,9 +18,12 @@ const ICON_DATA = {
 const shadow = (color, theme) => ({boxShadow: `0 0 10px ${normalizeColor(color, theme)}`})
 
 function Alert({alert, hasNext}) {
+  const sev = alert.labels.severity || 'info'
   return (
     <Box direction='row' gap='small' align='center' border={hasNext ? 'bottom' : null}>
-      <StatusWarning color='error' size='medium' />
+      <Box flex={false} background={SEVERITY_COLORS[sev]} round='1px' pad={{horizontal: 'small', vertical: 'xsmall'}}>
+        <Text size='small' color='plrl-white'>{sev}</Text>
+      </Box>
       <Box>
         <Text size='small' weight={500}>{alert.name}</Text>
         <Box direction='row' align='center' gap='xsmall'>
