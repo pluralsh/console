@@ -33,7 +33,7 @@ function AlertDetail({alert, setAlert}) {
   return (
     <Box pad='small' gap='small' background='plrl-white'>
       <Box direction='row' align='center' gap='small'>
-        <Box flex={false} pad='small' round='xsmall' hoverIndicator='tone-light' 
+        <Box flex={false} pad='xsmall' round='xsmall' hoverIndicator='tone-light' 
              onClick={(e) => { ignore(e); setAlert(null)}}>
           <Previous size='15px' color='brand' />
         </Box>
