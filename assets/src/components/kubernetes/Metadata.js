@@ -18,10 +18,10 @@ export function MetadataRow({name, children, final}) {
   )
 }
 
-function MetadataTag({name, value}) {
+export function MetadataTag({name, value, background}) {
   return (
     <Box round='xsmall' direction='row' gap='xsmall' pad={{vertical: 'xxsmall', horizontal: 'xsmall'}}
-         margin={{right: 'xsmall'}} background='backgroundLight'>
+         margin={{right: 'xsmall'}} background={background || 'backgroundLight'}>
       <Text size='small' weight={500}>{name}:</Text>
       <Text size='small'>{value}</Text>
     </Box>
