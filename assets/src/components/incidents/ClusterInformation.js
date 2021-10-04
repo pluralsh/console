@@ -32,7 +32,7 @@ function Row({name, value}) {
       <TableCell scope="row">
         <strong>{name}</strong>
       </TableCell>
-      <TableCell>{truncate(value)}</TableCell>
+      <TableCell>{truncate(value || '')}</TableCell>
     </TableRow>
   )
 }

@@ -73,12 +73,18 @@ defmodule Console.Services.Alertmanager do
   def cluster_info() do
     Kazan.Apis.Version.get_code!()
     |> Kazan.run()
-    |> when_ok(&Map.take(&1, [:git_commit, :platform, :version]))
+    |> when_ok(&build_cluster_info/1)
     |> case do
       {:ok, info} -> info
       _ -> nil
     end
   end
+
+  defp build_cluster_info(%{version: %{major: maj, minor: min}} = info) do
+    Map.take(info, [:git_commit, :platform])
+    |> Map.put(:version, "#{maj}.#{min}")
+  end
+  defp build_cluster_info(info), do: Map.take(info, [:git_commit, :platform, :version])
 
   defp cacheable?(nil), do: false
   defp cacheable?(_), do: true
