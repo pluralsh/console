@@ -11,7 +11,7 @@ defmodule Console.Commands.Plural do
 
   def build(repo), do: plural("build", ["--only", repo])
 
-  def deploy(_repo \\ :ignore), do: plural("deploy", [])
+  def deploy(_repo \\ :ignore), do: plural("deploy", ["--silence"])
 
   def diff(_repo \\ :ignore), do: plural("diff", [])
 
