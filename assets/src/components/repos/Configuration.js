@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery } from 'react-apollo'
 import { Box, CheckBox, Text, ThemeContext } from 'grommet'
 import { Button, SecondaryButton, GqlError } from 'forge-core'
@@ -9,6 +9,8 @@ import { Repository } from './SearchRepositories'
 import { LabelledInput } from '../utils/LabelledInput'
 import { appendConnection, updateCache } from '../../utils/graphql'
 import { BUILDS_Q } from '../graphql/builds'
+import { LoginContext } from '../Login'
+import { trimEnd } from 'lodash'
 
 function compileConfigurations(items) {
   let res = {}
@@ -38,6 +40,38 @@ function StringConfiguration({config: {name, default: def, placeholder, document
         value={value || ''}
         placeholder={placeholder}
         onChange={(val) => setValue(name, val)} />
+      <Text size='small' color='dark-6'><i>{documentation}</i></Text>
+    </Box>
+  )
+}
+
+function DomainConfiguration({config: {name, default: def, placeholder, documentation}, ctx, setValue}) {
+  const {configuration} = useContext(LoginContext)
+  const value = ctx[name]
+  const suffix = (configuration.manifest.network && configuration.manifest.network.subdomain) || ''
+  console.log(configuration)
+  const suffixed = useCallback((value) => {
+    return `${trimEnd(value, suffix)}${suffix}`
+  }, [value, suffix])
+  
+  useEffect(() => {
+    if (!value && def) {
+      setValue(name, def)
+    }
+  }, [name, value, def])
+
+  return (
+    <Box flex={false} gap='xsmall'>
+      <LabelledInput
+        width='100%'
+        color='dark-2'
+        weight={450}
+        label={name}
+        value={value || ''}
+        placeholder={placeholder}
+        onChange={(val) => {
+          setValue(name, suffixed(val))
+        }} />
       <Text size='small' color='dark-6'><i>{documentation}</i></Text>
     </Box>
   )
@@ -99,6 +133,8 @@ function ConfigurationItem({config, ctx, setValue}) {
       return <BoolConfiguration config={config} ctx={ctx} setValue={setValue} />
     case ConfigurationType.INT:
       return <IntConfiguration config={config} ctx={ctx} setValue={setValue} />
+    case ConfigurationType.DOMAIN:
+      return <DomainConfiguration config={config} ctx={ctx} setValue={setValue} />
     default:
       return <StringConfiguration config={config} ctx={ctx} setValue={setValue} />
   }

@@ -10,7 +10,8 @@ export const ProviderIcons = {
 export const ConfigurationType = {
   STRING: 'STRING',
   BOOL: 'BOOL',
-  INT: 'INT'
+  INT: 'INT',
+  DOMAIN: 'DOMAIN',
 }
 
 export const OperationType = {

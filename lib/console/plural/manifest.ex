@@ -12,7 +12,7 @@ defmodule Console.Plural.Manifest do
     def new(_), do: nil
   end
 
-  defp location(), do: Path.join([workspace(), "context.yaml"])
+  defp location(), do: Path.join([workspace(), "workspace.yaml"])
 
   def get() do
     location()

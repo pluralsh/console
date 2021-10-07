@@ -57,6 +57,15 @@ export const GroupMemberFragment = gql`
   ${UserFragment}
 `;
 
+export const ManifestFragment = gql`
+  fragment ManifestFragment on PluralManifest {
+    network { 
+      pluralDns 
+      subdomain 
+    }
+  }
+`;
+
 export const ME_Q = gql`
   query {
     me {
@@ -65,10 +74,14 @@ export const ME_Q = gql`
     }
     externalToken
     clusterInfo { version platform gitCommit }
-    configuration { gitCommit }
+    configuration { 
+      gitCommit 
+      manifest { ...ManifestFragment }
+    }
   }
   ${UserFragment}
   ${RoleFragment}
+  ${ManifestFragment}
 `;
 
 export const SIGNIN = gql`
