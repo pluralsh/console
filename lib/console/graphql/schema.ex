@@ -96,8 +96,20 @@ defmodule Console.GraphQl.Schema do
     field :value, :string
   end
 
+  object :plural_manifest do
+    field :network, :manifest_network
+  end
+
+  object :manifest_network do
+    field :plural_dns, :boolean
+    field :subdomain,  :string
+  end
+
   object :console_configuration do
     field :git_commit, :string
+    field :manifest,   :plural_manifest, resolve: fn
+      _, _, _ -> Console.Plural.Manifest.get()
+    end
   end
 
   delta :build

@@ -3,7 +3,7 @@ defmodule Console.Configuration do
 
   def new() do
     %__MODULE__{
-      git_commit: Console.conf(:git_commit)
+      git_commit: Console.conf(:git_commit),
     }
   end
 end
