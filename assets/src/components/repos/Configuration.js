@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery } from 'react-apollo'
-import { Box, CheckBox, Text, ThemeContext } from 'grommet'
+import { Box, CheckBox, Text, TextInput, ThemeContext } from 'grommet'
 import { Button, SecondaryButton, GqlError } from 'forge-core'
 import { ModalHeader } from '../utils/Modal'
 import { INSTALL_RECIPE, RECIPE_Q } from '../graphql/plural'
@@ -10,7 +10,8 @@ import { LabelledInput } from '../utils/LabelledInput'
 import { appendConnection, updateCache } from '../../utils/graphql'
 import { BUILDS_Q } from '../graphql/builds'
 import { LoginContext } from '../Login'
-import { trimEnd } from 'lodash'
+import { trimSuffix } from '../../utils/array'
+import { deepFetch } from '../../utils/graphql'
 
 function compileConfigurations(items) {
   let res = {}
@@ -47,31 +48,43 @@ function StringConfiguration({config: {name, default: def, placeholder, document
 
 function DomainConfiguration({config: {name, default: def, placeholder, documentation}, ctx, setValue}) {
   const {configuration} = useContext(LoginContext)
-  const value = ctx[name]
-  const suffix = (configuration.manifest.network && configuration.manifest.network.subdomain) || ''
-  console.log(configuration)
+  const suffix = useMemo(() => {
+    const subdomain = deepFetch(configuration, 'manifest.network.subdomain')
+    return subdomain ? "." + subdomain : '' 
+  }, [configuration])
+
+  const [local, setLocal] = useState(trimSuffix(ctx[name] || '', suffix))
+
   const suffixed = useCallback((value) => {
-    return `${trimEnd(value, suffix)}${suffix}`
-  }, [value, suffix])
+    return `${trimSuffix(value, suffix)}${suffix}`
+  }, [suffix])
+
+  console.log(ctx)
   
   useEffect(() => {
-    if (!value && def) {
+    if (!local && def) {
       setValue(name, def)
     }
-  }, [name, value, def])
+  }, [name, local, def])
 
   return (
     <Box flex={false} gap='xsmall'>
-      <LabelledInput
-        width='100%'
-        color='dark-2'
-        weight={450}
-        label={name}
-        value={value || ''}
-        placeholder={placeholder}
-        onChange={(val) => {
-          setValue(name, suffixed(val))
-        }} />
+      <Text size='small' weight={500}>{name}</Text>
+      <Box direction='row' align='center'>
+        <TextInput
+          weight={450}
+          value={local}
+          placeholder={placeholder}
+          onChange={({target: {value}}) => {
+            setValue(name, suffixed(value))
+            setLocal(value)
+          }} />
+        <Box style={{borderLeftStyle: 'none'}} border={{color: 'light-5'}} pad={{horizontal: 'small'}} 
+             background='tone-light' height='37px' justify='center'>
+          <Text size='small' weight={500}>{suffix}</Text>
+        </Box>
+      </Box>
+      
       <Text size='small' color='dark-6'><i>{documentation}</i></Text>
     </Box>
   )

@@ -29,3 +29,11 @@ export function groupBy(list, key = (i) => i.id) {
   }
   return grouped
 }
+
+export function trimSuffix(str, suff) {
+  if (str.endsWith(suff)) {
+    return str.slice(0, str.length - suff.length)
+  }
+
+  return str
+}
