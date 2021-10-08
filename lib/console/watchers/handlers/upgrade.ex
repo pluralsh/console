@@ -3,10 +3,8 @@ defmodule Console.Watchers.Handlers.Upgrade do
 
   def create_build(%{"message" => msg, "repository" => %{"name" => name}}) do
     bot = Users.get_bot!("console")
-    case Policies.upgrade_type(name) do
-      :ignore -> {:ok, :ignore}
-      type ->
-        Builds.create(%{message: msg, repository: name, type: type}, bot)
-    end
+    with {:ok, type} when type != :ignore <- {:ok, Policies.upgrade_type(name)},
+         {:error, :invalid_repository} <- Builds.create(%{message: msg, repository: name, type: type}, bot),
+      do: {:ok, :ignore}
   end
 end
