@@ -58,8 +58,6 @@ function DomainConfiguration({config: {name, default: def, placeholder, document
   const suffixed = useCallback((value) => {
     return `${trimSuffix(value, suffix)}${suffix}`
   }, [suffix])
-
-  console.log(ctx)
   
   useEffect(() => {
     if (!local && def) {

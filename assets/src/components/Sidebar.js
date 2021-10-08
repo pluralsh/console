@@ -1,47 +1,39 @@
-import React, { useState, useRef, useContext } from 'react'
+import React, { useContext } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
 import { Deploy, Network, Configure, BarChart, Group, TextAlignFull, Cubes, List, Nodes, Alert, Book } from 'grommet-icons'
 import { Box, Text } from 'grommet'
+import { Next, Down } from 'grommet-icons' 
 import { LoginContext } from './Login'
 import Avatar from './users/Avatar'
 import { InstallationContext } from './Installations'
-import { Tooltip } from './utils/Tooltip'
 import './sidebar.css'
+import { SubmenuContext, Submenu } from './navigation/Submenu'
+import { TOOLBAR_HEIGHT } from './Console'
 
-const SIDEBAR_ICON_HEIGHT = '42px'
-const APP_ICON = `${process.env.PUBLIC_URL}/console-white.png`
+export const SIDEBAR_ICON_HEIGHT = '42px'
+const APP_ICON = `${process.env.PUBLIC_URL}/console-full.png`
 
-export function SidebarIcon({icon, text, selected, path, onClick, size}) {
-  const dropRef = useRef()
+export function SidebarIcon({icon, text, name: sidebarName, selected, path}) {
+  const {name} = useContext(SubmenuContext)
   let history = useHistory()
-  const [hover, setHover] = useState(false)
+  const inSubmenu = name === sidebarName
+  const textColor = selected && !inSubmenu ? 'white' : 'tone-medium'
 
   return (
-    <>
-    <Box
-      ref={dropRef}
-      focusIndicator={false}
-      className={'sidebar-icon' + (selected ? ' selected' : '')}
-      align='center'
-      justify='center'
-      margin={{horizontal: 'xsmall'}}
-      round='xsmall'
-      height={size || SIDEBAR_ICON_HEIGHT}
-      width={size || SIDEBAR_ICON_HEIGHT}
-      hoverIndicator='sidebarHover'
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onClick={() => onClick ? onClick() : history.push(path)}
-      background={selected ? 'sidebarHover' : null}
-      direction='row'>
-      {icon}
+    <Box flex={false} fill='horizontal' background={(selected && !inSubmenu) ? 'sidebarHover' : null} round='xsmall'>
+      <Box focusIndicator={false} fill='horizontal' align='center' direction='row' 
+        round='xsmall' height={SIDEBAR_ICON_HEIGHT}
+        hoverIndicator='sidebarHover' onClick={!inSubmenu && selected ? null : () => history.push(path)} 
+        pad={{horizontal: 'small'}}>
+        <Box direction='row' align='center' gap='15px' fill='horizontal'>
+          {icon}
+          <Text size='small' color={textColor}>{text}</Text>
+        </Box>
+        {sidebarName && !selected && <Next size='12px' />}
+        {sidebarName && selected  && <Down size='12px' />}
+      </Box>
+      {selected && <Submenu />}
     </Box>
-    {hover  && (
-      <Tooltip pad='small' round='xsmall' justify='center' target={dropRef} side='right' align={{left: 'right'}}>
-        <Text size='small' weight={500}>{text}</Text>
-      </Tooltip>
-    )}
-    </>
   )
 }
 
@@ -51,8 +43,14 @@ function Me() {
   if (!me) return null
 
   return (
-    <Box pad='small'>
-      <Avatar user={me} size='42px' onClick={() => history.push('/me/edit')} />
+    <Box direction='row' gap='xsmall' align='center' pad='xsmall'
+         hoverIndicator='sidebarHover' round='xsmall'
+         onClick={() => history.push('/me/edit')}>
+      <Avatar user={me} size='45px' />
+      <Box>
+        <Text size='small' truncate>{me.name}</Text>
+        <Text size='small'>{me.email}</Text>
+      </Box>
     </Box>
   )
 }
@@ -69,11 +67,11 @@ const OPTIONS = [
   {text: 'Dashboards', icon: <BarChart size={ICON_HEIGHT} />, path: '/dashboards/{repo}'},
   {text: 'Logs', icon: <TextAlignFull size={ICON_HEIGHT} />, path: '/logs/{repo}'},
   {text: "Users", icon: <Group size={ICON_HEIGHT} />, path: '/directory'},
-  {text: "Audits", icon: <List size={ICON_HEIGHT} />, path: '/audits'},
+  {text: "Audits", name: 'audits', icon: <List size={ICON_HEIGHT} />, path: '/audits'},
   {text: 'Webhooks', icon: <Network size={ICON_HEIGHT} />, path: '/webhooks'},
 ]
 
-const IMAGE_HEIGHT='35px'
+const IMAGE_HEIGHT='47px'
 
 const replace = (path, name) => path.replace('{repo}', name)
 
@@ -88,21 +86,26 @@ export default function Sidebar() {
   })
 
   return (
-    <Box background='sidebar' height='100vh'>
-      <Box flex={false} height={IMAGE_HEIGHT} justify='center' align='center' pad='small' margin={{vertical: 'small'}}>
+    <Box background='sidebar' height='100vh' fill='horizontal'>
+      <Box flex={false} direction='row' align='center' pad={{horizontal: 'small'}} 
+           border={{side: 'bottom', color: 'sidebarBorder'}} height={TOOLBAR_HEIGHT}>
         <img height={IMAGE_HEIGHT} alt='' src={APP_ICON} />
       </Box>
-      <Box fill='vertical' align='center' gap='xsmall' pad={{top: '30px'}}>
-        {OPTIONS.map(({text, icon, path}, ind) => (
-          <SidebarIcon
-            key={ind}
-            icon={icon}
-            path={replace(path, name)}
-            text={text}
-            selected={ind === active} />
-        ))}
+      <Box fill align='center' border={{side: 'right', color: 'sidebarBorder'}}
+           style={{overflow: 'auto'}} pad='small'>
+        <Box flex={false} fill='horizontal' gap='3px'>
+          {OPTIONS.map(({text, icon, path, name: sbName}, ind) => (
+            <SidebarIcon
+              key={ind}
+              icon={icon}
+              path={replace(path, name)}
+              text={text}
+              name={sbName}
+              selected={ind === active} />
+          ))}
+        </Box>
       </Box>
-      <Box height='70px' flex={false}>
+      <Box pad='small' height='70px' flex={false}>
         <Me />
       </Box>
     </Box>

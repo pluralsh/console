@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { Switch, Route, Redirect } from 'react-router-dom'
-import { Box } from 'grommet'
-import Sidebar, { SidebarIcon } from './Sidebar'
+import { Box, Text } from 'grommet'
+import { useHistory } from 'react-router'
+import Sidebar, { SIDEBAR_ICON_HEIGHT } from './Sidebar'
 import Builds from './Builds'
 import Build from './Build'
 import BreadcrumbProvider, { Breadcrumbs } from './Breadcrumbs'
@@ -28,8 +29,46 @@ import { Search } from 'grommet-icons'
 import { Installer } from './repos/Installer'
 import { Runbook } from './runbooks/Runbook'
 import { Runbooks } from './runbooks/Runbooks'
+import { NavigationContext } from './navigation/Submenu'
+import { useRef } from 'react'
+import { Tooltip } from './utils/Tooltip'
 
-const SIDEBAR_WIDTH = '70px'
+export const TOOLBAR_HEIGHT = '55px'
+const SIDEBAR_WIDTH = '200px'
+
+export function Icon({icon, text, selected, path, onClick, size}) {
+  const dropRef = useRef()
+  let history = useHistory()
+  const [hover, setHover] = useState(false)
+
+  return (
+    <>
+    <Box
+      ref={dropRef}
+      focusIndicator={false}
+      className={'sidebar-icon' + (selected ? ' selected' : '')}
+      align='center'
+      justify='center'
+      margin={{horizontal: 'xsmall'}}
+      round='xsmall'
+      height={size || SIDEBAR_ICON_HEIGHT}
+      width={size || SIDEBAR_ICON_HEIGHT}
+      hoverIndicator='sidebarHover'
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onClick={() => onClick ? onClick() : history.push(path)}
+      background={selected ? 'sidebarHover' : null}
+      direction='row'>
+      {icon}
+    </Box>
+    {hover  && (
+      <Tooltip pad='small' round='xsmall' justify='center' target={dropRef} side='right' align={{left: 'right'}}>
+        <Text size='small' weight={500}>{text}</Text>
+      </Tooltip>
+    )}
+    </>
+  )
+}
 
 
 export default function Console() {
@@ -38,18 +77,20 @@ export default function Console() {
   return (
     <EnsureLogin>
       <InstallationsProvider>
+      <NavigationContext>
       <BreadcrumbProvider>
         <Box direction='row' width='100vw' height='100vh'>
           <AutoRefresh />
-          <Box width={SIDEBAR_WIDTH}>
+          <Box flex={false} width={SIDEBAR_WIDTH}>
             <Sidebar />
           </Box>
-          <Box height='100vh' width='100%'>
-            <Box flex={false} direction='row' align='center' background='backgroundDark' height='55px'>
+          <Box height='100vh' fill='horizontal'>
+            <Box flex={false} direction='row' align='center' background='backgroundDark' height={TOOLBAR_HEIGHT}
+                 border={{side: 'bottom', color: 'sidebarBorder'}}>
               <Breadcrumbs />
               <Box direction='row' fill gap='small' justify='end' 
                    pad={{horizontal: 'medium'}} align='center'>
-                <SidebarIcon
+                <Icon
                   icon={<Search size='18px' />}
                   text='Search'
                   size='40px'
@@ -86,7 +127,10 @@ export default function Console() {
                 <Route path='/runbooks/:repo' component={Runbooks} />
                 <Route path='/nodes/:name' component={Node} />
                 <Route path='/nodes' component={Nodes} />
-                <Route path='/audits' component={Audits} />
+                <Route path='/audits/:graph' component={Audits} />
+                <Route exact path='/audits'>
+                  <Redirect to='/audits/table' />
+                </Route>
                 <Route path='/components/:repo/:kind/:name' component={Component} />
                 <Route path='/components/:repo' component={Application} />
                 <Route path='/components' render={() => (
@@ -113,6 +157,7 @@ export default function Console() {
           </Box>
         </Box>
       </BreadcrumbProvider>
+      </NavigationContext>
       </InstallationsProvider>
     </EnsureLogin>
   )

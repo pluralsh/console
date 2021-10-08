@@ -13,6 +13,8 @@ import { SectionChoice, SectionContentContainer } from '../utils/Section'
 import { List, PieChart } from 'grommet-icons'
 import lookup from 'country-code-lookup'
 import { Chloropleth } from '../utils/Chloropleth'
+import { SubmenuItem, SubmenuPortal } from '../navigation/Submenu'
+import { useParams } from 'react-router'
 
 
 const ROW_HEIGHT = 40
@@ -70,30 +72,29 @@ function AuditGeo() {
 }
 
 export function Audits() {
-  const [graph, setGraph] = useState(false)
+  const {graph} = useParams()
   const {data, fetchMore} = useQuery(AUDITS_Q, {fetchPolicy: "cache-and-network"})
 
   if (!data) return <LoopingLogo />
 
   const {edges, pageInfo} = data.audits
   return (
-    <Box direction='row' fill background='backgroundColor' pad='small'>
-      <Box flex={false} width='200px' fill='vertical' gap='small'
-           pad={{horizontal: 'small', vertical: 'medium'}}>
-        <SectionChoice
-          icon={List}
+    <Box direction='row' fill background='backgroundColor'>
+      <SubmenuPortal name='audits'>
+        <SubmenuItem
+          icon={<List size='small' />}
           label='Table View'
-          onClick={() => setGraph(false)}
-          selected={!graph} />
-        <SectionChoice
-          icon={PieChart}
+          url='/audits/table'
+          selected={graph === 'table'} />
+        <SubmenuItem
+          icon={<PieChart size='small' />}
           label='Graph View'
-          onClick={() => setGraph(true)}
-          selected={graph} />
-      </Box>
+          url='/audits/graph'
+          selected={graph === 'graph'} />
+      </SubmenuPortal>
       <Box fill background='plrl-white'>
         <SectionContentContainer header={graph ? 'Geodistribution' : 'Audit Logs'}>
-          {!graph && (
+          {graph === 'table' && (
             <Box fill>
               <AuditHeader />
               <Scroller
@@ -107,7 +108,7 @@ export function Audits() {
                 })} />
             </Box>
           )}
-          {graph && <AuditGeo />}
+          {graph === 'graph' && <AuditGeo />}
         </SectionContentContainer>
       </Box>
     </Box>

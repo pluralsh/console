@@ -1,4 +1,5 @@
 import { css } from 'styled-components'
+import { alpha } from './utils/color';
 
 const boxStyle = css`
   outline: none;
@@ -58,6 +59,9 @@ export const DEFAULT_COLOR_THEME = {
   sidebar: 'backgroundDark',
   sidebarHover: 'tone-dark-3',
   sidebarActive: 'tone-dark-3',
+  backgroundColor: 'sidebarBackground',
+  sidebarBorder: alpha('#363840', .4),
+  sidebarBackground: '#0d1215',
   focus: '#3B1D98',
   tagMedium: 'key-light',
   tagLight: '#624aad',
@@ -69,7 +73,6 @@ export const DEFAULT_COLOR_THEME = {
   cardDarkLight: '#363840',
   cardDetail: '#252833',
   cardDetailLight: '#363a4a',
-  backgroundColor: '#20222b',
   backgroundDark: 'plural-blk',
   backgroundLight: 'cardDarkLight',
   presence: '#39E500',

@@ -10,6 +10,7 @@ import { LoginContext } from '../Login'
 import yaml from 'yaml'
 import Highlight from 'react-highlight.js'
 import { SectionContentContainer, SectionPortal } from '../utils/Section'
+import { SIDEBAR_ICON_HEIGHT } from '../Sidebar'
 
 const EditContext = React.createContext({})
 
@@ -40,8 +41,8 @@ function EditSelect({edit, icon}) {
   const {editing, setEditing} = useContext(EditContext)
   return (
     <Box pad='small' round='xsmall' fill='horizontal' align='center' gap='small' 
-         direction='row' hoverIndicator='sidebar' focusIndicator={false} 
-         background={edit === editing ? 'sidebar' : null}
+         direction='row' hoverIndicator='sidebarHover' focusIndicator={false} 
+         background={edit === editing ? 'sidebarHover' : null} height={SIDEBAR_ICON_HEIGHT}
          onClick={edit === editing ? null : () => setEditing(edit)}>
       <Box flex={false}>
         {icon}

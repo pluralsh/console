@@ -16,6 +16,7 @@ import { SearchIcon } from './utils'
 import { SectionContentContainer, SectionPortal } from '../utils/Section'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { ModalContent } from '../utils/Modal'
+import { SIDEBAR_ICON_HEIGHT } from '../Sidebar'
 
 const INPUT_WIDTH = '350px'
 
@@ -152,9 +153,10 @@ function SectionChoice({label, icon, section, onClick, setSection}) {
   return (
     <Box
       focusIndicator={false}
-      hoverIndicator='sidebar'
-      background={section === selected ? 'sidebar' : null}
+      hoverIndicator='sidebarHover'
+      background={section === selected ? 'sidebarHover' : null}
       direction='row'
+      height={SIDEBAR_ICON_HEIGHT}
       align='center'
       gap='small'
       pad='small'
@@ -198,8 +200,8 @@ export default function Directory() {
 
   return (
     <ThemeContext.Extend value={{global: {input: {padding: '8px'}}}}>
-    <Box fill pad='small' direction='row' gap='medium' background='backgroundColor'>
-      <Box gap='xsmall' flex={false} width='200px'>
+    <Box fill direction='row' gap='medium' background='backgroundColor'>
+      <Box pad='small' gap='xsmall' flex={false} width='200px'>
         <SectionChoice 
           icon={<User size='14px' />} 
           label='Users' 
