@@ -153,8 +153,8 @@ function SectionChoice({label, icon, section, onClick, setSection}) {
   return (
     <Box
       focusIndicator={false}
-      hoverIndicator='sidebarHover'
-      background={section === selected ? 'sidebarHover' : null}
+      hoverIndicator='#000'
+      background={section === selected ? '#000' : null}
       direction='row'
       height={SIDEBAR_ICON_HEIGHT}
       align='center'

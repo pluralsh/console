@@ -43,7 +43,7 @@ function Me() {
   if (!me) return null
 
   return (
-    <Box direction='row' gap='xsmall' align='center' pad='xsmall'
+    <Box flex={false} direction='row' gap='xsmall' align='center' pad='xsmall'
          hoverIndicator='sidebarHover' round='xsmall'
          onClick={() => history.push('/me/edit')}>
       <Avatar user={me} size='45px' />
@@ -105,7 +105,7 @@ export default function Sidebar() {
           ))}
         </Box>
       </Box>
-      <Box pad='small' height='70px' flex={false}>
+      <Box pad='small' flex={false}>
         <Me />
       </Box>
     </Box>
