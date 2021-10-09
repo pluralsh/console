@@ -9,6 +9,9 @@ defmodule Console.GraphQl.Resolvers.Runbooks do
   def resolve_runbook(%{namespace: ns, name: name}, _),
     do: Runbooks.runbook(ns, name)
 
+  def datasources(args, %{source: runbook}),
+    do: Runbooks.datasources(runbook, args[:context])
+
   def execute_runbook(
     %{namespace: ns, name: name, input: %{action: action, context: ctx}},
     %{context: %{current_user: user}}

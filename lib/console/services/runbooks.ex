@@ -20,8 +20,8 @@ defmodule Console.Services.Runbooks do
   defp args(_), do: %{}
 
   @spec datasources(Runbook.t) :: {:ok, [map]} | error
-  def datasources(%Runbook{spec: %{datasources: sources}} = book) do
-    Task.async_stream(sources, &Runbooks.Data.extract(&1, book))
+  def datasources(%Runbook{spec: %{datasources: sources}} = book, context \\ nil) do
+    Task.async_stream(sources, &Runbooks.Data.extract(&1, Map.put(book, :context, context || %{})))
     |> Console.stream_result()
   end
 

@@ -39,10 +39,10 @@ end
 defimpl Console.Runbooks.Datasource, for: Kube.Runbook.Prometheus do
   alias Console.Services.Observability
 
-  def fetch(%{query: query}, _) do
+  def fetch(%{query: query}, %{context: ctx}) do
     now   = Timex.now()
-    start = Timex.shift(now, seconds: -30 * 60)
-    Observability.get_metric(query, start, now, "1m")
+    start = Timex.shift(now, seconds: ctx[:timeseries_start] || -30 * 60)
+    Observability.get_metric(query, start, now, ctx[:timeseries_step] || "1m")
   end
 end
 

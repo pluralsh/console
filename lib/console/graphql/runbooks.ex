@@ -9,6 +9,11 @@ defmodule Console.GraphQl.Runbooks do
     field :context, non_null(:map)
   end
 
+  input_object :runbook_context do
+    field :timeseries_start,  :integer
+    field :timeseries_step,   :string
+  end
+
   object :runbook do
     field :name, non_null(:string), resolve: fn
       %{metadata: %{name: name}}, _, _ -> {:ok, name}
@@ -17,8 +22,9 @@ defmodule Console.GraphQl.Runbooks do
     field :spec,   non_null(:runbook_spec)
     field :status, :runbook_status
 
-    field :data, list_of(:runbook_data), resolve: fn
-      runbook, _, _ -> Console.Services.Runbooks.datasources(runbook)
+    field :data, list_of(:runbook_data) do
+       arg :context, :runbook_context
+       resolve &Runbooks.datasources/2
     end
   end
 
