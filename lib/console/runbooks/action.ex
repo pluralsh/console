@@ -23,7 +23,7 @@ defimpl Console.Runbooks.Action, for: Kube.Runbook.ConfigurationAction do
   alias Console.Services.Plural
   alias Console.Runbooks.Actor
   alias Console.Services.Builds
-  alias Kube.Runbook
+  alias Kube.{Runbook, StatefulSetResize}
 
   def enact(%{updates: updates, stateful_sets: ss}, %Actor{ctx: ctx, repo: repo, actor: actor}) do
     with {:ok, vals} <- Plural.values_file(repo),
@@ -47,8 +47,8 @@ defimpl Console.Runbooks.Action, for: Kube.Runbook.ConfigurationAction do
   end
 
   defp maybe_resize([statefulset | rest], repo, ctx) do
-    resize = %Kube.StatefulSetResize{
-      spec: %Kube.StatefulSetResize.Spec{
+    resize = %StatefulSetResize{
+      spec: %StatefulSetResize.Spec{
         name: statefulset.name,
         persistent_volume: statefulset.persistent_volume,
         size: ctx[statefulset.value_from]

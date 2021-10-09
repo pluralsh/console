@@ -1,5 +1,6 @@
 defmodule Kube.Client do
   alias Kube
+  alias Kazan.Models.Apimachinery.Meta.V1.{ObjectMeta}
 
   def list_dashboards(ns) do
     %Kazan.Request{
@@ -122,11 +123,7 @@ defmodule Kube.Client do
   end
 
   def create_statefulset_resize(namespace, name, %Kube.StatefulSetResize{} = resize) do
-    resize =
-      put_in(resize.metadata.name, name)
-      |> put_in(resize.metadata.namespace, namespace)
-      |> IO.inspect()
-
+    resize = %{resize | metadata: %ObjectMeta{name: name, namespace: namespace}}
     {:ok, encoded} = Kube.StatefulSetResize.encode(resize)
 
     %Kazan.Request{

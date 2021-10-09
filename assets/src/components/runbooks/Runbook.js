@@ -36,8 +36,6 @@ export function Runbook() {
 
   useEnsureCurrent(namespace)
 
-  console.log(data)
-
   if (!data) return <LoopingLogo />
 
   const {runbook} = data
