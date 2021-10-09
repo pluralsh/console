@@ -10,12 +10,23 @@ defmodule Kube.Runbook do
     end
   end
 
+  defmodule StatefulSetResize do
+    use Kazan.Model
+
+    defmodel "StatefulsetResize", "platform.plural.sh", "v1alpha1" do
+      property :name,              "name", :string
+      property :persistent_volume, "persistentVolume", :string
+      property :value_from,        "valueFrom", :string
+    end
+  end
+
   defmodule ConfigurationAction do
     use Kazan.Model
     alias Kube.Runbook.PathUpdate
 
     defmodel "ConfigurationAction", "platform.plural.sh", "v1alpha1" do
       property :updates, "updates", {:array, PathUpdate}
+      property :stateful_sets, "statefulSets", {:array, StatefulSetResize}
     end
   end
 

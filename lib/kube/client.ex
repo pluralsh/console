@@ -120,4 +120,32 @@ defmodule Kube.Client do
     }
     |> Kazan.run()
   end
+
+  def create_statefulset_resize(namespace, name, %Kube.StatefulSetResize{} = resize) do
+    resize =
+      put_in(resize.metadata.name, name)
+      |> put_in(resize.metadata.namespace, namespace)
+
+    {:ok, encoded} = Kube.StatefulSetResize.encode(resize)
+
+    %Kazan.Request{
+      method: "create",
+      path: "/apis/platform.plural.sh/v1alpha1/namespaces/#{namespace}/statefulsetresizes/#{name}",
+      query_params: %{},
+      body: Jason.encode!(encoded),
+      content_type: "application/json",
+      response_model: Kube.StatefulSetResize
+    }
+    |> Kazan.run()
+  end
+
+  def get_statefulset_resize(namespace, name) do
+    %Kazan.Request{
+      method: "create",
+      path: "/apis/platform.plural.sh/v1alpha1/namespaces/#{namespace}/statefulsetresizes/#{name}",
+      query_params: %{},
+      response_model: Kube.StatefulSetResize
+    }
+    |> Kazan.run()
+  end
 end
