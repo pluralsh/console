@@ -12605,6 +12605,11 @@ react-file-picker@^0.0.6:
   resolved "https://registry.yarnpkg.com/react-file-picker/-/react-file-picker-0.0.6.tgz#dd8fd8f0cd1ce74a42074c653f3afff7d7013690"
   integrity sha512-EnRQCEeC5YpSaCm/pbUi7zroP6lMgT7SqQTFS0ZNJXlcA8Cw2zDvEIoP/SkQ8u5Lbp+L2cyoxiy7ZBVtXk5hGw==
 
+react-foco@^1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/react-foco/-/react-foco-1.3.1.tgz#3eff140480451e5d0a6324fd4bd992c750a2c76c"
+  integrity sha512-Wyzgs3wBFKuWnIHb7SGG+ARFB74TGk8b/jKvHBKoHCcspVHQL5S9OVgnGfNk0U92QetEFL5/3kNaZBX4AFTqVw==
+
 react-highlight.js@^1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/react-highlight.js/-/react-highlight.js-1.0.7.tgz#eb88356f415ac4d3590c20a9b52c1dc7f51a4861"

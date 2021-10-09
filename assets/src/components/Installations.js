@@ -6,6 +6,7 @@ import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
 import { ApplicationReadyIcon } from './Application'
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { CostAnalysis } from './repos/CostAnalysis'
+import Foco from 'react-foco'
 
 export const InstallationContext = React.createContext({})
 
@@ -45,6 +46,7 @@ export function InstallationsFlyout() {
   if (!open) return null
 
   return (
+    <Foco onClickOutside={() => setOpen(false)}>
     <Box flex={false} width='400px' fill='vertical' border={{side: 'left', color: 'light-5'}}>
       <Box flex={false} pad={{horizontal: 'small', vertical: 'xsmall'}} align='center'
            direction='row' border={{side: 'bottom', color: 'light-5'}}>
@@ -67,6 +69,7 @@ export function InstallationsFlyout() {
         </Box>
       </Box>
     </Box>
+    </Foco>
   )
 }
 
