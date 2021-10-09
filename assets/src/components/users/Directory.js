@@ -15,7 +15,6 @@ import { extendConnection } from '../../utils/graphql'
 import { SearchIcon } from './utils'
 import { SectionContentContainer, SectionPortal } from '../utils/Section'
 import { LoopingLogo } from '../utils/AnimatedLogo'
-import { ModalContent } from '../utils/Modal'
 import { SIDEBAR_ICON_HEIGHT } from '../Sidebar'
 
 const INPUT_WIDTH = '350px'
@@ -152,15 +151,10 @@ function SectionChoice({label, icon, section, onClick, setSection}) {
   const {section: selected} = useParams()
   return (
     <Box
-      focusIndicator={false}
-      hoverIndicator='#000'
-      background={section === selected ? '#000' : null}
-      direction='row'
-      height={SIDEBAR_ICON_HEIGHT}
-      align='center'
-      gap='small'
-      pad='small'
-      round='xsmall'
+      focusIndicator={false} hoverIndicator='sidebarHover'
+      direction='row' align='center' gap='small' pad='small'
+      round='xsmall' height={SIDEBAR_ICON_HEIGHT}
+      background={section === selected ? 'sidebarHover' : null}
       onClick={onClick || (() => setSection(section))}>
       {icon}
       <Text size='small'>{label}</Text>
