@@ -148,7 +148,6 @@ function Timeseries({attributes: {datasource, label}}) {
     const {prometheus, source} = datasources[datasource]
     const legend = source && source.prometheus.legend
     const format = source && source.prometheus.format
-    console.log(source)
     const metrics = prometheus.map(({metric, values}) => ({
       id: formatLegend(legend, metric), 
       data: convertVals(values)
@@ -157,11 +156,10 @@ function Timeseries({attributes: {datasource, label}}) {
     return {metrics, format: ValueFormats[format] || ((v) => v)}
   }, [datasources, datasource])
   
-  
   return (
     <Box height='300px' width='500px'>
       <GraphHeader text={label} />
-      <Graph data={metrics} yFormat={format} />
+      <Graph data={metrics} yFormat={format} tickRotation={45} />
     </Box>
   )
 }

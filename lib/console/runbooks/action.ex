@@ -46,7 +46,7 @@ defimpl Console.Runbooks.Action, for: Kube.Runbook.ConfigurationAction do
     end)
   end
 
-  defp maybe_resize([statefulset | _], repo, ctx) do
+  defp maybe_resize([statefulset | rest], repo, ctx) do
     resize = %Kube.StatefulSetResize{
       spec: %Kube.StatefulSetResize.Spec{
         name: statefulset.name,
@@ -59,9 +59,10 @@ defimpl Console.Runbooks.Action, for: Kube.Runbook.ConfigurationAction do
     name = "resize-#{statefulset.name}-#{statefulset.persistent_volume}"
 
     with {:ok, _} <- Kube.Client.create_statefulset_resize(namespace, name, resize),
-      do: poll_resize(namespace, name)
+         :ok <- poll_resize(namespace, name),
+      do: maybe_resize(rest, repo, ctx)
   end
-  defp maybe_resize(_, _, _), do: nil
+  defp maybe_resize(_, _, _), do: :ok
 
   defp poll_resize(namespace, name, attempts \\ 0)
   defp poll_resize(_, _, attempts) when attempts >= 3,

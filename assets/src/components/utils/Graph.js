@@ -69,7 +69,7 @@ export function useColorMap(theme, colors) {
   }, [theme, colors])
 }
 
-export function Graph({data, yFormat, tick}) {
+export function Graph({data, yFormat, tickRotation}) {
   const theme = useContext(ThemeContext)
   const colorMap = useColorMap(theme)
   const [selected, setSelected] = useState(null)
@@ -124,6 +124,7 @@ export function Graph({data, yFormat, tick}) {
           tickSize: 0,
           // tickValues: tick || 'every 5 minutes',
           orient: 'bottom',
+          tickRotation: tickRotation,
           legendPosition: 'middle',
           legend: hasData ? `${dateFormat(data[0].data[0].x)} to ${dateFormat(last(data[0].data).x)}` : null,
           legendOffset: 46,

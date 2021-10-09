@@ -11,7 +11,7 @@ export const RUNBOOKS_Q = gql`
 `;
 
 export const RUNBOOK_Q = gql`
-  query Runbooks($namespace: String!, $name: String!) {
+  query Runbooks($namespace: String!, $name: String!, $context: RunbookContext) {
     runbook(namespace: $namespace, name: $name) {
       name
       status { alerts { ...RunbookAlertStatus } }
@@ -20,7 +20,7 @@ export const RUNBOOK_Q = gql`
         description
         display
       }
-      data { ...RunbookDataFragment }
+      data(context: $context) { ...RunbookDataFragment }
     }
   }
   ${RunbookAlertStatus}
