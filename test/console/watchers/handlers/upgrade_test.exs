@@ -28,6 +28,14 @@ defmodule Console.Watchers.Handlers.UpgradeTest do
       assert build.type == :approval
     end
 
+    test "it will ignore if no application is present" do
+      bot = insert(:user, bot_name: "console")
+      expect(Kazan, :run, fn _ -> {:error, :not_found} end)
+      insert(:upgrade_policy, target: "*", type: :approval)
+      Console.Cache.delete(:upgrade_policies)
+      {:ok, :ignore} = Upgrade.create_build(%{"message" => "a message", "repository" => %{"name" => "plural"}})
+    end
+
     test "it will not create on ignore policies" do
       insert(:user, bot_name: "console")
       insert(:upgrade_policy, target: "*", type: :ignore)
