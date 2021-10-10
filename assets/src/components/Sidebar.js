@@ -20,10 +20,10 @@ export function SidebarIcon({icon, text, name: sidebarName, selected, path}) {
   const textColor = selected && !inSubmenu ? 'white' : 'light-5'
 
   return (
-    <Box flex={false} fill='horizontal' background={(selected && !inSubmenu) ? 'sidebarHover' : null} round='xsmall'>
+    <Box flex={false} fill='horizontal' background={(selected && !inSubmenu) ? 'sidebarHover' : null}>
       <Box focusIndicator={false} fill='horizontal' align='center' direction='row' 
-        round='xsmall' height={SIDEBAR_ICON_HEIGHT}
-        hoverIndicator='sidebarHover' onClick={!inSubmenu && selected ? null : () => history.push(path)} 
+        height={SIDEBAR_ICON_HEIGHT} hoverIndicator='sidebarHover' 
+        onClick={!inSubmenu && selected ? null : () => history.push(path)} 
         pad={{horizontal: 'small'}}>
         <Box direction='row' align='center' gap='15px' fill='horizontal'>
           {icon}
@@ -55,7 +55,7 @@ function Me() {
   )
 }
 
-const ICON_HEIGHT = '18px'
+const ICON_HEIGHT = '15px'
 
 const OPTIONS = [
   {text: 'Builds', icon: <Deploy size={ICON_HEIGHT} />, path: '/'},
@@ -92,8 +92,8 @@ export default function Sidebar() {
         <img height={IMAGE_HEIGHT} alt='' src={APP_ICON} />
       </Box>
       <Box fill align='center' border={{side: 'right', color: 'sidebarBorder'}}
-           style={{overflow: 'auto'}} pad='small'>
-        <Box flex={false} fill='horizontal' gap='3px'>
+           style={{overflow: 'auto'}}>
+        <Box flex={false} fill='horizontal'>
           {OPTIONS.map(({text, icon, path, name: sbName}, ind) => (
             <SidebarIcon
               key={ind}
