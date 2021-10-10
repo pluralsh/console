@@ -96,7 +96,7 @@ function LogLine({line: {timestamp, value}, stream, level}) {
   const {setFlyout} = useContext(FlyoutContext)
   return (
     <Box border={{side: 'left', color: borderColor(level), size: '3px'}} flex={false} style={{fontFamily: 'monospace'}}
-         direction='row' gap='small' hoverIndicator='#444' onClick={() => setFlyout(<LogInfo stamp={timestamp} stream={stream} />)}
+         direction='row' gap='small' hoverIndicator='card' onClick={() => setFlyout(<LogInfo stamp={timestamp} stream={stream} />)}
          pad={{horizontal: 'xsmall'}} margin={{bottom: '1px'}}>
       <Box flex={false}>
         <Text size='small' weight={500}>{ts(timestamp)}</Text>
@@ -114,7 +114,7 @@ function LogInfo({stream, stamp}) {
 
   return (
     <Box flex={false} width='30%' fill='vertical' style={{overflow: 'auto'}} border={{side: 'left'}}>
-      <Box background='#444' direction='row' pad={{horizontal: 'small', vertical: 'xsmall'}}
+      <Box background='card' direction='row' pad={{horizontal: 'small', vertical: 'xsmall'}}
            align='center'>
         <Box fill='horizontal'>
           <Text size='small' weight='bold'>Log Info</Text>
@@ -123,10 +123,11 @@ function LogInfo({stream, stamp}) {
           <Close size='small' />
         </Box>
       </Box>
-      <Box fill pad='small' style={{fontFamily: 'monospace'}}>
+      <Box fill style={{fontFamily: 'monospace'}}>
         {[['timestamp', ts(stamp)], ...Object.entries(stream)].map(([key, value]) => (
           <Box key={key} direction='row' fill='horizontal' gap='small' flex={false}
-               onClick={() => addLabel(key, value)} hoverIndicator='#444'>
+               onClick={() => addLabel(key, value)} hoverIndicator='card'
+               pad={{horizontal: 'small', vertical: 'xsmall'}}>
             <Box flex={false} width='50%'>
               <Text size='small' weight='bold' truncate>{key}</Text>
             </Box>
@@ -233,7 +234,7 @@ export default function Logs({application: {name}, query}) {
 
   return (
     <FlyoutContext.Provider value={{setFlyout}}>
-      <Box direction='row' fill background='console' gap='small'>
+      <Box direction='row' fill background='backgroundColor' gap='small'>
         <Stack fill anchor='bottom-left'>
           <Box fill style={{overflow: 'auto'}} pad={{top: 'small', horizontal: 'small'}}>
             {data && (

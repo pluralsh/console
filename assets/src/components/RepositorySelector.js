@@ -7,11 +7,11 @@ import { chunk } from '../utils/array'
 import { BUILD_PADDING } from './Builds'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { ApplicationIcon, hasIcon, InstallationContext } from './Installations'
+import { Container } from './utils/Container'
 
 export function RepositoryChoice({application, link}) {
   return (
-    <Box onClick={link} width='50%' hoverIndicator='backgroundDark' background='cardDetailLight'
-      direction='row' align='center' justify='center' round='xsmall' pad='medium'>
+    <Container onClick={link} width='50%'>
       <Box direction='row' fill='horizontal' gap='small' align='center'>
         {hasIcon(application) && <ApplicationIcon application={application} size='40px' dark />}
         <Box>
@@ -22,7 +22,7 @@ export function RepositoryChoice({application, link}) {
       <Box flex={false}>
         <FormNext size='25px' />
       </Box>
-    </Box>
+    </Container>
   )
 }
 

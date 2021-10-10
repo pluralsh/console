@@ -2,7 +2,8 @@ import React, { useEffect, useState, useContext, useRef, useCallback } from 'rea
 import { useParams, useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { ModalHeader, Button } from 'forge-core'
-import { Box, Text, Layer } from 'grommet'
+import { Box, Text, Layer, ThemeContext } from 'grommet'
+import { normalizeColor } from 'grommet/utils'
 import Line from 'react-lazylog/build/Line'
 import { ansiparse } from './utils/ansi'
 import { BUILD_Q, COMMAND_SUB, BUILD_SUB, CANCEL_BUILD, APPROVE_BUILD, RESTART_BUILD } from './graphql/builds'
@@ -155,47 +156,60 @@ function ExitStatus({exitCode}) {
   )
 }
 
-function LogLine({line, number}) {
+function LogLine({line, number, follow}) {
+  const theme = useContext(ThemeContext)
+  const mounted = useRef()
   const lineRef = useRef()
   useEffect(() => {
-    lineRef && lineRef.current && lineRef.current.scrollIntoView(true)
-  }, [lineRef, line])
+    !mounted.current && follow && lineRef && lineRef.current && lineRef.current.scrollIntoView(true)
+    mounted.current = true
+  }, [follow, lineRef, line])
 
   return (
-    <div ref={lineRef}>
-      <Line data={ansiparse(line)} number={number} rowHeight={19} />
-    </div>
+    <Box flex={false} ref={lineRef} direction='row' align='center' height='20px' 
+         style={{color: normalizeColor('light-4', theme), cursor: 'default'}} gap='medium'
+         onClick={() => null} hoverIndicator='card' pad={{left: '55px'}}>
+      <pre style={{color: normalizeColor('dark-5', theme)}}>{number}</pre>
+      <AnsiText text={line} />
+    </Box>
   )
 }
 
-function Log({text}) {
+function Log({text, follow}) {
   if (!text) return null
 
   const lines = text.match(/[^\r\n]+/g)
   const last = lines.length
   return (
-    <div className='log'>
-      {lines.map((line, ind) => <LogLine key={ind} line={line} number={ind + 1} last={last} />)}
-    </div>
+    <Box flex={false} style={{overflow: 'auto'}} fill='horizontal'>
+      {lines.map((line, ind) => (
+        <LogLine 
+          key={ind} 
+          line={line} 
+          number={ind + 1} 
+          follow={follow}
+          last={last} />))}
+    </Box>
   )
 }
 
-function Command({command}) {
+function Command({command, follow}) {
   const ref = useRef()
   const stdout = command.stdout
-  useEffect(() => ref && ref.current && ref.current.scrollIntoView(), [ref])
+  useEffect(() => {
+    ref && ref.current && follow && ref.current.scrollIntoView()
+  }, [follow, ref])
 
   return (
     <Box flex={false} ref={ref}>
-      <Box direction='row' gap='small' pad={{vertical: 'xxsmall', horizontal: 'medium'}}
-        align='center' background='console'>
+      <Box direction='row' gap='small' pad={{vertical: 'xxsmall', horizontal: 'medium'}} align='center'>
         <Box fill='horizontal' direction='row' gap='small' align='center'>
           <pre>==> {command.command}</pre>
           <ExitStatus exitCode={command.exitCode} />
         </Box>
         <Timer insertedAt={command.insertedAt} completedAt={command.completedAt} />
       </Box>
-      <Log text={stdout} follow />
+      <Log text={stdout} follow={follow} />
     </Box>
   )
 }
@@ -218,9 +232,12 @@ function updateQuery(prev, {subscriptionData: {data}}) {
 }
 
 function Commands({edges}) {
+  const len = edges.length
   return (
-    <Box style={{overflow: 'auto'}} background='console' fill pad={{bottom: 'small'}}>
-      {edges.map(({node}) => <Command key={node.id} command={node} />)}
+    <Box style={{overflow: 'auto'}} background='backgroundColor' fill pad={{bottom: 'small'}}>
+      {edges.map(({node}, ind) => (
+        <Command key={node.id} command={node} follow={ind === len - 1} />
+      ))}
     </Box>
   )
 }
@@ -294,10 +311,17 @@ function Changelog({build: {changelogs}}) {
     <Box fill direction='row'>
       <Box flex={false} width={SIDEBAR_WIDTH} height='100%' border='right'>
         {Object.entries(grouped).map(([r, tools]) => (
-          <ChangelogRepo repo={r} current={repo} tools={tools} tool={tool} setRepo={setRepo} setTool={setTool} />
+          <ChangelogRepo 
+            repo={r} 
+            current={repo} 
+            tools={tools} 
+            tool={tool} 
+            setRepo={setRepo} 
+            setTool={setTool} />
         ))}
       </Box>
-      <Box style={{overflow: 'auto'}} height='100%' fill='horizontals' background='console' pad='small'>
+      <Box style={{overflow: 'auto'}} height='100%' 
+           fill='horizontal' background='backgroundColor' pad='small'>
         {selected && (<AnsiText text={selected.content} />)}
       </Box>
     </Box>
@@ -333,7 +357,7 @@ export default function Build() {
 
   return (
     <Box fill>
-      <Box flex={false} direction='row' align='center' border='bottom'>
+      <Box flex={false} direction='row' align='center' border={{side: 'bottom', color: 'light-5'}}>
         <Box direction='row' fill='horizontal' align='center'>
           <Box fill='horizontal'>
             <Box direction='row' gap='small' pad={{left: 'small', vertical: 'small'}}>
