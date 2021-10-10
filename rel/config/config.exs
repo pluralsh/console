@@ -23,3 +23,5 @@ if get_env("PLURAL_CLIENT_ID") do
       scope: "openid"
     ]
 end
+
+config :elixir, :ansi_enabled, true
