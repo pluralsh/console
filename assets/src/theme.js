@@ -57,6 +57,7 @@ export const DEFAULT_COLOR_THEME = {
   cost: 'green-light',
   action: 'key-light',
   card: '#222732',
+  hover: {dark: 'cardHover', light: 'tone-light'},
   cardHover: shadeColor('#222732', -5),
   actionDark: 'key-dark',
   sidebar: 'backgroundDark',

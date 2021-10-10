@@ -13,19 +13,18 @@ export const InstallationContext = React.createContext({})
 function Installation({application, setCurrentApplication, current: {name}}) {
   const {name: appname, spec: {descriptor}} = application
   return (
-    <Box
-      direction='row' align='center' gap='small' pad='small' round='xsmall' focusIndicator={false}
-      onClick={() => setCurrentApplication(application)} hoverIndicator='light-3'>
-      <ApplicationReadyIcon application={application} size='20px' showIcon />
+    <Box direction='row' align='center' gap='small' pad='small' focusIndicator={false}
+         onClick={() => setCurrentApplication(application)} hoverIndicator='hover'>
+      <ApplicationReadyIcon application={application} size='20px' showIcon dark />
       {descriptor.icons.length > 0 && <ApplicationIcon application={application} size='40px' />}
       <Box fill='horizontal'>
         <Box direction='row' align='center' gap='xsmall'>
           <Text size='small' weight={500}>{appname}</Text>
-          <Box round='xsmall' background='light-3' pad={{horizontal: '3px', vertical: '2px'}}>
+          <Box round='xsmall' background='card' pad={{horizontal: '3px', vertical: '2px'}}>
             <Text size='12px'>{descriptor.version}</Text>
           </Box>
         </Box>
-        <Text size='small'>{descriptor.description}</Text>
+        <Text size='small' color='dark-3'>{descriptor.description}</Text>
       </Box>
       <Box pad='small' flex={false}>
         {name === appname ? <Checkmark size='18px' color='brand' /> : null}
@@ -47,13 +46,13 @@ export function InstallationsFlyout() {
 
   return (
     <Foco onClickOutside={() => setOpen(false)}>
-    <Box flex={false} width='400px' fill='vertical' border={{side: 'left', color: 'light-5'}}>
-      <Box flex={false} pad={{horizontal: 'small', vertical: 'xsmall'}} align='center'
-           direction='row' border={{side: 'bottom', color: 'light-5'}}>
+    <Box flex={false} width='400px' fill='vertical' border={{side: 'left', color: 'card'}} background='backgroundColor'>
+      <Box flex={false} pad={{horizontal: 'small', vertical: 'xsmall'}} align='center' direction='row' border={{side: 'bottom'}}>
         <Box fill='horizontal'>
           <Text size='small' weight={500}>Applications</Text>
         </Box>
-        <Box flex={false} pad='xsmall' round='xsmall' hoverIndicator='light-3' onClick={() => setOpen(false)}>
+        <Box flex={false} pad='xsmall' round='xsmall' hoverIndicator='hover' 
+             onClick={() => setOpen(false)}>
           <Next size='14px' />
         </Box>
       </Box>
