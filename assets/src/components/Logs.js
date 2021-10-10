@@ -267,7 +267,7 @@ function LogLabels({labels}) {
     <Box flex={false} style={{overflow: 'auto'}} fill direction='row' gap='xsmall' align='center' wrap>
       {labels.map(({name, value}) => (
         <Box gap='xsmall' direction='row' round='xsmall' pad={{horizontal: '7px', vertical: '2px'}} focusIndicator={false}
-             align='center' background='light-3' hoverIndicator='light-6' onClick={() => removeLabel(name)}>
+             align='center' background='card' hoverIndicator='cardHover' onClick={() => removeLabel(name)}>
           <Text size='small' weight={500} truncate>{name}:</Text>
           <Text size='small' truncate>{value}</Text>
         </Box>
