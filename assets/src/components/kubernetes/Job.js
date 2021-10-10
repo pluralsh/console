@@ -101,7 +101,7 @@ export default function Job() {
 
   return (
     <Box fill style={{overflow: 'auto'}}>
-      <Tabs defaultTab='info' border='dark-3'>
+      <Tabs defaultTab='info'>
         <TabHeader>
           <TabHeaderItem name='info'>
             <Text size='small' weight={500}>info</Text>

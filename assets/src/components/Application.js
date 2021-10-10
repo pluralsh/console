@@ -3,11 +3,12 @@ import { Box, Text, ThemeContext } from 'grommet'
 import { useHistory, useParams } from 'react-router'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from './Installations'
-import { boxShadow, BUILD_PADDING } from './Builds'
+import { BUILD_PADDING } from './Builds'
 import { normalizeColor } from 'grommet/utils'
 import { chunk } from '../utils/array'
 import { Checkmark, StatusCritical, Update } from 'grommet-icons'
 import Icon from './kubernetes/Icon'
+import { Container } from './utils/Container'
 
 export const Readiness = {
   Ready: 'Ready',
@@ -64,20 +65,16 @@ export function ReadyIcon({size, readiness, showIcon}) {
 }
 
 function Component({component: {group, kind, name, status}, width}) {
-  const theme = useContext(ThemeContext)
   const {repo} = useParams()
   let history = useHistory()
 
   return (
-    <Box style={boxShadow(theme)} width={width} direction='row' 
-         gap='small' align='center' background='backgroundLight'
-         pad='small' round='xsmall' hoverIndicator='backgroundDark'
-         onClick={() => history.push(`/components/${repo}/${kind.toLowerCase()}/${name}`)}>
+    <Container width={width} onClick={() => history.push(`/components/${repo}/${kind.toLowerCase()}/${name}`)}>
       <ReadyIcon readiness={status} size='10px' />
       <Icon kind={kind} />
       <Text size='small' color='dark-6'>{group || 'v1'}/{kind.toLowerCase()}</Text>
       <Text size='small'>{name}</Text>
-    </Box>
+    </Container>
   )
 }
 

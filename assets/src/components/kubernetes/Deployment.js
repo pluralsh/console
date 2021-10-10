@@ -72,7 +72,7 @@ export default function Deployment() {
   const {deployment} = data
   return (
     <Box fill style={{overflow: 'auto'}}>
-      <Tabs defaultTab='info' border='dark-3' onTabChange={setTab}
+      <Tabs defaultTab='info' onTabChange={setTab}
             headerEnd={tab === 'metrics' ? <RangePicker duration={duration} setDuration={setDuration} /> : null}>
         <TabHeader>
           <TabHeaderItem name='info'>

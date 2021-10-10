@@ -58,11 +58,12 @@ function AlertDetail({alert, setAlert}) {
   )
 }
 
-function Alert({alert, hasNext, setAlert}) {
+function Alert({alert, setAlert}) {
   const sev = alert.labels.severity || 'info'
+
   return (
-    <Box direction='row' gap='small' align='center' pad='small' border={hasNext ? 'bottom' : null}
-         onClick={(e) => { ignore(e); setAlert(alert) }} hoverIndicator='tone-light' round='xsmall'>
+    <Box direction='row' gap='small' align='center' pad='small' round='xsmall'
+         onClick={(e) => { ignore(e); setAlert(alert) }} hoverIndicator='tone-light'>
       <SeverityNub sev={sev} />
       <Box>
         <Text size='small' weight={500}>{alert.name}</Text>

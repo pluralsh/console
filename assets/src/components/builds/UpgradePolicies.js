@@ -159,7 +159,7 @@ export function UpgradePolicies() {
       <Icon 
         icon={SettingsOption}
         tooltip='upgrade settings'
-        hoverIndicator='backgroundLight'
+        hoverIndicator='card'
         onClick={() => setModal({
           header: 'Upgrade Policies',
           content: <Policies />

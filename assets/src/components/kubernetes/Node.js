@@ -23,7 +23,6 @@ import { normalizeColor } from 'grommet/utils'
 import { RawContent } from './Component'
 import { cpuParser } from '../../utils/kubernetes'
 import { Line } from 'rc-progress'
-import { DeleteIcon } from './Job'
 
 function NodeRowHeader() {
   return (
@@ -440,7 +439,7 @@ export function Node() {
         <ReadyIcon readiness={nodeReadiness(node.status)} size='20px' showIcon />
       </Box>
       <NodeGraphs status={node.status} pods={node.pods} name={name} usage={nodeMetric.usage} />
-      <Tabs defaultTab='info' border='dark-3'>
+      <Tabs defaultTab='info'>
         <TabHeader>
           <TabHeaderItem name='info'>
             <Text size='small' weight={500}>info</Text>

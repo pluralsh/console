@@ -3,27 +3,25 @@ import { Box, Text, ThemeContext } from 'grommet'
 import { useQuery } from '@apollo/react-hooks'
 import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from '../Installations'
 import { RUNBOOKS_Q } from './queries'
-import { boxShadow, HEADER_HEIGHT } from '../Builds'
+import { HEADER_HEIGHT } from '../Builds'
 import { useHistory, useParams } from 'react-router'
 import { POLL_INTERVAL } from './constants'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import { StatusIcon } from './StatusIcon'
+import { Container } from '../utils/Container'
 
 function RunbookRow({runbook, namespace}) {
   let hist = useHistory()
-  const theme = useContext(ThemeContext)
   const {name, description} = runbook.spec
 
   return (
-    <Box style={boxShadow(theme)} pad='small' round='xsmall'  direction='row' gap='small'
-         background='cardDarkLight' hoverIndicator='sidebar' align='center'
-         onClick={() => hist.push(`/runbooks/${namespace}/${runbook.name}`)}>
+    <Container onClick={() => hist.push(`/runbooks/${namespace}/${runbook.name}`)}>
       <StatusIcon status={runbook.status} size={30} innerSize={14} />
       <Box fill='horizontal' gap='xsmall'>
         <Text size='small' weight={500}>{name}</Text>
         <Text size='small' color='dark-3' truncate>{description}</Text>
       </Box>
-    </Box>
+    </Container>
   )
 }
 

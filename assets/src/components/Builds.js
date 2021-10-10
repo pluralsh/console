@@ -14,10 +14,8 @@ import { LoopingLogo } from './utils/AnimatedLogo'
 import { StandardScroller } from './utils/SmoothScroller'
 import { UpgradePolicies } from './builds/UpgradePolicies'
 import { Checkmark, Close, Deploy, Refresh, StatusCritical, Up, Validate } from 'grommet-icons'
-import { ThemeContext } from 'styled-components'
-import { normalizeColor } from 'grommet/utils'
-import alpha from 'color-alpha'
 import { PinnedRunbooks } from './runbooks/PinnedRunbooks'
+import { Container } from './utils/Container'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -78,10 +76,7 @@ function BuildStatus({status}) {
 
 export const BUILD_PADDING = {horizontal: 'medium'}
 
-export const boxShadow = (theme) => ({boxShadow: `2px 2px 2px ${alpha(normalizeColor('backgroundDark', theme), .3)}`})
-
 function Build({build}) {
-  const theme = useContext(ThemeContext)
   const {id, repository, status, insertedAt, message, creator, sha} = build
   let history = useHistory()
   const footer = [
@@ -93,18 +88,14 @@ function Build({build}) {
 
   return (
     <Box pad={BUILD_PADDING}>
-      <Box style={boxShadow(theme)}
-        pad='small' margin={{top: 'small'}} direction='row' 
-        background='backgroundLight' align='center' focusIndicator={false} 
-        hoverIndicator='backgroundDark' round='xsmall'
-        onClick={() => history.push(`/build/${id}`)} gap='small'>
+      <Container onClick={() => history.push(`/build/${id}`)} margin={{bottom: 'small'}}>
         <BuildIcon build={build} />
         <Box fill='horizontal'>
           <Text size='small' weight='bold'>{repository}</Text>
           <Text size='small' color='dark-6'>{footer}</Text>
         </Box>
         <BuildStatus status={status} />
-      </Box>
+      </Container>
     </Box>
   )
 }
@@ -130,13 +121,13 @@ function CreateBuild() {
       <Button
         icon={<Refresh size='small' />}
         onClick={() => deploy(BuildTypes.BOUNCE)} 
-        background='backgroundLight' flat
+        background='card' flat
         label='Bounce'
         loading={loading && type === BuildTypes.BOUNCE} />
       <Button
         icon={<Validate size='small' />}
         onClick={() => deploy(BuildTypes.APPROVAL)} 
-        background='backgroundLight' flat
+        background='card' flat
         label='Approval'
         loading={loading && type === BuildTypes.APPROVAL} />
       <Button
@@ -153,7 +144,7 @@ const POLL_INTERVAL = 1000 * 30
 function Placeholder() {
   return (
     <Box pad={BUILD_PADDING}>
-      <Box height='90px' color='' background='backgroundLight' 
+      <Box height='90px' color='' background='card' 
            margin={{top: 'small'}} round='xsmall' />
     </Box>
   )
@@ -163,7 +154,7 @@ function ReturnToBeginning({beginning}) {
   return (
     <Layer position='bottom-right' modal={false} plain>
       <Box direction='row' align='center' round='xsmall' gap='small' 
-           hoverIndicator='cardDark' background='cardDarkLight'
+           hoverIndicator='cardHover' background='card'
            margin={{bottom: 'medium', right: 'small'}}
            pad='small' focusIndicator={false} onClick={beginning}>
         <Box direction='row' fill='horizontal' justify='center'>

@@ -2,30 +2,26 @@ import React, { useContext } from 'react'
 import { useQuery } from '@apollo/react-hooks'
 import { InstallationContext } from '../Installations'
 import { RUNBOOKS_Q } from './queries'
-import { Box, Text, ThemeContext } from 'grommet'
-import { boxShadow } from '../Builds'
+import { Box, Text } from 'grommet'
 import { useHistory } from 'react-router'
 import { chunk } from 'lodash'
 import { Pin } from 'grommet-icons'
 import { POLL_INTERVAL } from './constants'
 import { StatusIcon } from './StatusIcon'
+import { Container } from '../utils/Container'
 
 function RunbookItem({runbook, namespace, width}) {
   let hist = useHistory()
-  const theme = useContext(ThemeContext)
   const {name, description} = runbook.spec
 
   return (
-    <Box style={boxShadow(theme)} width={width || '30%'} round='xsmall' 
-         background='cardDarkLight' hoverIndicator='sidebar'
-         pad='small' gap='small' direction='row' align='center'
-         onClick={() => hist.push(`/runbooks/${namespace}/${runbook.name}`)}>
+    <Container width={width || '30%'} onClick={() => hist.push(`/runbooks/${namespace}/${runbook.name}`)}>
       <Box flex={false} gap='small' direction='row' align='center'>
         <StatusIcon status={runbook.status} size={20} innerSize={10} />
         <Text size='small' weight={500}>{name}</Text>
       </Box>
       <Text size='small' color='dark-3' truncate>{description}</Text>
-    </Box>
+    </Container>
   )
 }
 

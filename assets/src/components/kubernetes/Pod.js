@@ -464,7 +464,7 @@ export function Pod() {
         <ReadyIcon readiness={statusToReadiness(pod.status)} size='20px' showIcon />
       </Box>
       <Box fill style={{overflow: 'auto'}} pad={{horizontal: 'medium'}} gap='xsmall'>
-        <Tabs defaultTab='info' border='dark-3'>
+        <Tabs defaultTab='info'>
           <TabHeader>
             <TabHeaderItem name='info'>
               <Text size='small' weight={500}>info</Text>
