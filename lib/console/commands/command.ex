@@ -9,7 +9,7 @@ defmodule Console.Commands.Command do
 
   def cmd(exec, args, dir \\ conf(:workspace_root)) do
     with {:ok, collectible} <- make_command(exec, args),
-         {output, exit_code} <- System.cmd("sh",  ["-c", "#{exec} #{Enum.join(args, " ")}"], into: collectible, cd: dir, stderr_to_stdout: true),
+         {output, exit_code} <- System.cmd(exec, args, into: collectible, cd: dir, stderr_to_stdout: true),
       do: complete(output, exit_code)
   end
 
