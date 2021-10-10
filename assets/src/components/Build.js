@@ -351,7 +351,7 @@ export default function Build() {
     }
   }, [buildId, subscribeToMore])
 
-  if (!data || loading) return <LoopingLogo scale='0.75' />
+  if (!data || loading) return <LoopingLogo scale='0.75' dark />
   const {commands: {edges}, creator, ...build} = data.build
   const hasChanges = build.changelogs && build.changelogs.length > 0
   const complete = (

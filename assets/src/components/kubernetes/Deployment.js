@@ -67,7 +67,7 @@ export default function Deployment() {
     pollInterval: POLL_INTERVAL
   })
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoopingLogo dark />
 
   const {deployment} = data
   return (

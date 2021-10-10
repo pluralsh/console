@@ -144,7 +144,7 @@ export function InstallationsProvider({children}) {
   if (!currentApplication) {
     return (
       <Box width='100vw' height='100vh'>
-        <LoopingLogo />
+        <LoopingLogo dark />
       </Box>
     )
   }

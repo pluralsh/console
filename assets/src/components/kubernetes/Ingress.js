@@ -77,7 +77,7 @@ export default function Ingress() {
     fetchPolicy: 'cache-and-network'
   })
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoopingLogo dark />
 
   const {ingress} = data
   return (

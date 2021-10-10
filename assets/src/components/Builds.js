@@ -193,7 +193,7 @@ export default function Builds() {
     listRef.scrollToItem(0)
   }, [listRef])
 
-  if (loading && !data) return <LoopingLogo scale='0.75' />
+  if (loading && !data) return <LoopingLogo scale='0.75' dark />
 
   const {edges, pageInfo} = data.builds
   return (

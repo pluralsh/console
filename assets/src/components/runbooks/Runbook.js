@@ -57,7 +57,7 @@ export function Runbook() {
 
   useEnsureCurrent(namespace)
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoopingLogo dark />
 
   const {runbook} = data
 

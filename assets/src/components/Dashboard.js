@@ -115,7 +115,7 @@ export default function Dashboard({repo, name}) {
   }, [data, labelMap, setLabelMap])
   const setLabel = useCallback((label, value) => setLabelMap({...labelMap, [label]: value}), [labelMap, setLabelMap])
 
-  if (!data) return <LoopingLogo scale='0.75' />
+  if (!data) return <LoopingLogo scale='0.75' dark />
   const {dashboard} = data
 
   return (

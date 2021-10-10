@@ -448,7 +448,7 @@ export function Pod() {
     ])
   }, [])
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoopingLogo dark />
 
   const {pod} = data
   const containerStatus = (pod.status.containerStatuses || []).reduce((acc, container) => ({...acc, [container.name]: container}), {})

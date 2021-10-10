@@ -67,7 +67,7 @@ export default function Service() {
     fetchPolicy: 'cache-and-network'
   })
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoopingLogo dark />
 
   const {service} = data
   return (

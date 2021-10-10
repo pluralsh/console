@@ -55,7 +55,7 @@ export default function Dashboards() {
     }
   }, [data, currentApplication])
 
-  if (!data) return <LoopingLogo scale='0.75' />
+  if (!data) return <LoopingLogo scale='0.75' dark />
 
   return (
     <Box fill background='backgroundColor'>
@@ -78,7 +78,7 @@ export default function Dashboards() {
       </Box>
       <Box fill>
         {data.dashboards.length > 0 ? (
-          current ? <Dashboard repo={currentApplication.name} name={current.id} /> : <LoopingLogo />
+          current ? <Dashboard repo={currentApplication.name} name={current.id} /> : <LoopingLogo dark />
         ) : <Text size='small'>No dashboards for this repository, contact the developer to fix this</Text>
         }
       </Box>

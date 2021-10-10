@@ -127,7 +127,7 @@ export default function Configuration() {
 
   useEnsureCurrent(repo)
 
-  if (!data) return <LoopingLogo scale='0.75' />
+  if (!data) return <LoopingLogo scale='0.75' dark />
 
   return (
     <EditConfiguration 

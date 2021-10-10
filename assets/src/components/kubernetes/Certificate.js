@@ -57,7 +57,7 @@ export function Certificate() {
     fetchPolicy: 'cache-and-network'
   })
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoopingLogo dark />
 
   const {certificate} = data
 

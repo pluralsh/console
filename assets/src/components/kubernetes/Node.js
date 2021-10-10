@@ -429,7 +429,7 @@ export function Node() {
     ])
   }, [])
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoopingLogo dark />
 
   const {node, nodeMetric} = data
   return (
@@ -496,7 +496,7 @@ export function Nodes() {
     return {cpu, mem}
   })
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoopingLogo dark />
 
   return (
     <Box style={{overflow: 'auto'}} fill background='backgroundColor' 

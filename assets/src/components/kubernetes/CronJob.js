@@ -101,7 +101,7 @@ export default function CronJob() {
     fetchPolicy: 'cache-and-network'
   })
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoopingLogo dark />
 
   const {cronJob} = data
   return (

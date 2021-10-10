@@ -58,7 +58,7 @@ function AuditHeader() {
 function AuditGeo() {
   const {data} = useQuery(AUDIT_METRICS, {fetchPolicy: 'cache-and-network'})
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoopingLogo dark />
 
   const metrics = data.auditMetrics.map(({country, count}) => ({
     id: lookup.byIso(country).iso3, value: count
@@ -75,7 +75,7 @@ export function Audits() {
   const {graph} = useParams()
   const {data, fetchMore} = useQuery(AUDITS_Q, {fetchPolicy: "cache-and-network"})
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoopingLogo dark />
 
   const {edges, pageInfo} = data.audits
   return (

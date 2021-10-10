@@ -95,7 +95,7 @@ export default function Job() {
     fetchPolicy: 'cache-and-network'
   })
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoopingLogo dark />
 
   const {job} = data
 

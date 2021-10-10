@@ -71,7 +71,7 @@ export default function StatefulSet() {
     fetchPolicy: 'cache-and-network'
   })
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoopingLogo dark />
 
   const {statefulSet} = data
   return (

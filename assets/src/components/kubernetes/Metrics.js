@@ -72,7 +72,7 @@ export function Metric({name, namespace, regex, duration: {step, offset, tick}})
     pollInterval: POLL_INTERVAL
   })
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoopingLogo dark />
 
   const {cpu, mem, podCpu, podMem} = data
   return (

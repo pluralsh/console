@@ -94,7 +94,7 @@ export default function Webhooks() {
   useEffect(() => setBreadcrumbs([{text: 'webhooks', url: '/webhooks'}]), [])
   const {data, fetchMore} = useQuery(WEBHOOKS_Q)
 
-  if (!data) return <LoopingLogo scale='0.75' />
+  if (!data) return <LoopingLogo scale='0.75' dark />
   const {edges, pageInfo} = data.webhooks
 
   return (
