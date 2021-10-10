@@ -96,16 +96,15 @@ export default function Application() {
   const {error} = appState(currentApplication)
 
   return (
-    <Box fill background='backgroundColor'>
-      <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}} direction='row' align='center' height='60px'>
-        <Box direction='row' fill='horizontal' gap='small' align='center' margin={{bottom: 'small'}}>
-          {hasIcon(currentApplication) && <ApplicationIcon application={currentApplication} size='40px' dark />}
-          <Box>
-            <Text weight='bold' size='small'>{currentApplication.name}</Text>
-            <Text size='small' color='dark-6'>{currentApplication.status.componentsReady} ready; {error.message}</Text>
-          </Box>
-          <ApplicationReadyIcon application={currentApplication} size='20px' showIcon />
+    <Box fill background='backgroundColor' gap='small'>
+      <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}} direction='row' 
+           align='center' border={{side: 'bottom'}} gap='small'>
+        {hasIcon(currentApplication) && <ApplicationIcon application={currentApplication} size='40px' dark />}
+        <Box>
+          <Text weight='bold' size='small'>{currentApplication.name}</Text>
+          <Text size='small' color='dark-6'>{currentApplication.status.componentsReady} ready; {error.message}</Text>
         </Box>
+        <ApplicationReadyIcon application={currentApplication} size='20px' showIcon />
       </Box>
       <Box fill style={{overflow: 'auto'}} pad={{horizontal: 'medium', bottom: 'small'}} gap='xsmall'>
         {[...chunk(currentApplication.status.components, 2)].map((chunk, ind) => (
