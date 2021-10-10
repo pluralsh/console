@@ -5,7 +5,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   alias Kazan.Apis.Extensions.V1beta1, as: Extensions
   alias Kazan.Apis.Batch.V1beta1, as: Batch
   alias Kazan.Apis.Batch.V1, as: BatchV1
-  alias Kazan.Models.Apimachinery.Meta.V1.{DeleteOptions, LabelSelector, LabelSelectorRequirement}
+  alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector, LabelSelectorRequirement}
 
   def list_applications(_, _) do
     with {:ok, %{items: items}} <- Client.list_applications(),

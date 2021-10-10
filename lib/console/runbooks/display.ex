@@ -19,7 +19,7 @@ defmodule Console.Runbooks.Display do
     end
 
     component "button" do
-      attributes ~w(primary label href target action)
+      attributes ~w(primary label href target action headline)
       parents ~w(box)
     end
 

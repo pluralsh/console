@@ -5,8 +5,8 @@ defmodule Console.Watchers.Handlers.SlashCommand do
   alias Console.Services.{Users, Builds}
 
   def handle(%{"text" => "/" <> command, "incident" => %{"id" => id, "repository" => %{"name" => name}}}) do
-    with {:ok, command, args} <- extract_details(command),
-         {:ok, slash_command} <- Client.get_slashcommand(name, command) |> IO.inspect(),
+    with {:ok, command, _args} <- extract_details(command),
+         {:ok, slash_command} <- Client.get_slashcommand(name, command),
          result <- dispatch(slash_command, name),
          {:ok, msg} <- Incidents.create_message(id, "I just executed command #{command} in cluster"),
       do: {:ok, result, msg}

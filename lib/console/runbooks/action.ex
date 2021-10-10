@@ -42,7 +42,10 @@ defimpl Console.Runbooks.Action, for: Kube.Runbook.ConfigurationAction do
 
   defp make_updates(updates, values, map) do
     Enum.reduce(updates, values, fn %Runbook.PathUpdate{path: path, value_from: from}, acc ->
-      Console.put_path(acc, path, map[from])
+      case map[from] do
+        nil -> acc
+        val -> Console.put_path(acc, path, val)
+      end
     end)
   end
 
@@ -58,9 +61,14 @@ defimpl Console.Runbooks.Action, for: Kube.Runbook.ConfigurationAction do
     namespace = Console.namespace(repo)
     name = "resize-#{statefulset.name}-#{statefulset.persistent_volume}"
 
-    with {:ok, _} <- Kube.Client.create_statefulset_resize(namespace, name, resize),
-         :ok <- poll_resize(namespace, name),
-      do: maybe_resize(rest, repo, ctx)
+    with {:val, val} when not is_nil(val) <- {:val, ctx[statefulset.value_from]},
+         {:ok, _} <- Kube.Client.create_statefulset_resize(namespace, name, resize),
+         :ok <- poll_resize(namespace, name) do
+      maybe_resize(rest, repo, ctx)
+    else
+      {:val, _} -> {:error, "#{statefulset.value_from} not set"}
+      error -> error
+    end
   end
   defp maybe_resize(_, _, _), do: :ok
 

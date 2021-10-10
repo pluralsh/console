@@ -95,14 +95,17 @@ function Placeholder() {
 function LogLine({line: {timestamp, value}, stream, level}) {
   const {setFlyout} = useContext(FlyoutContext)
   return (
-    <Box border={{side: 'left', color: borderColor(level), size: '3px'}} flex={false} style={{fontFamily: 'monospace'}}
-         direction='row' gap='small' hoverIndicator='card' onClick={() => setFlyout(<LogInfo stamp={timestamp} stream={stream} />)}
-         pad={{horizontal: 'xsmall'}} margin={{bottom: '1px'}}>
-      <Box flex={false}>
-        <Text size='small' weight={500}>{ts(timestamp)}</Text>
-      </Box>
-      <Box fill='horizontal'>
-        <Text size='small'>{value}</Text>
+    <Box flex={false} pad={{left: 'small'}} hoverIndicator='card'
+         onClick={() => setFlyout(<LogInfo stamp={timestamp} stream={stream} />)}>
+      <Box border={{side: 'left', color: borderColor(level), size: '3px'}} 
+          style={{fontFamily: 'monospace'}} direction='row' gap='small'
+          pad={{horizontal: 'xsmall'}} margin={{bottom: '1px'}}>
+        <Box flex={false}>
+          <Text size='small' weight={500}>{ts(timestamp)}</Text>
+        </Box>
+        <Box fill='horizontal'>
+          <Text size='small'>{value}</Text>
+        </Box>
       </Box>
     </Box>
   )
@@ -236,11 +239,18 @@ export default function Logs({application: {name}, query}) {
     <FlyoutContext.Provider value={{setFlyout}}>
       <Box direction='row' fill background='backgroundColor' gap='small'>
         <Stack fill anchor='bottom-left'>
-          <Box fill style={{overflow: 'auto'}} pad={{top: 'small', horizontal: 'small'}}>
+          <Box fill pad={{vertical: 'xsmall'}}>
             {data && (
-              <LogContent listRef={listRef} setListRef={setListRef} name={name}
-                logs={data.logs} setLoader={setLoader} search={query} loading={loading}
-                fetchMore={fetchMore} onScroll={(arg) => setLive(!arg)} />
+              <LogContent 
+                listRef={listRef} 
+                setListRef={setListRef} 
+                name={name}
+                logs={data.logs} 
+                setLoader={setLoader} 
+                search={query} 
+                loading={loading}
+                fetchMore={fetchMore} 
+                onScroll={(arg) => setLive(!arg)} />
             )}
           </Box>
           <ScrollIndicator live={live} returnToTop={returnToTop} />
@@ -346,6 +356,7 @@ export function LogViewer() {
   const labelList = Object.entries(labels).map(([name, value]) => ({name, value}))
   const {setOnChange, currentApplication: app} = useContext(InstallationContext)
   let history = useHistory()
+
   useEffect(() => {
     setBreadcrumbs([
       {text: 'logs', url: '/logs'},
@@ -356,11 +367,13 @@ export function LogViewer() {
     setOnChange({func: ({name}) => history.push(`/logs/${name}`)})
   }, [])
   useEnsureCurrent(repo)
+
   const addLabel = useCallback((name, value) => setLabels({...labels, [name]: value}), [labels, setLabels])
   const removeLabel = useCallback((name) => {
     const {[name]: _val, ...rest} = labels
     setLabels(rest)
   }, [labels, setLabels])
+
   const searchQuery = search.length > 0 ? ` |~ "${search}"` : ''
   const labelQuery = useMemo(() => (
     [...labelList, {name: 'namespace', value: repo}].map(({name, value}) => `${name}="${value}"`).join(',')
