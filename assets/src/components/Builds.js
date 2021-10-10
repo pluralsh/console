@@ -207,7 +207,7 @@ export default function Builds() {
         <UpgradePolicies />
         <CreateBuild />
       </Box>
-      <PinnedRunbooks border={{side: 'vertical', color: 'sidebar'}} />
+      <PinnedRunbooks />
       <Box fill pad={{bottom: 'small'}}>
         {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
         <StandardScroller

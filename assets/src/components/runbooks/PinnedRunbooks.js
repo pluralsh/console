@@ -41,7 +41,8 @@ export function PinnedRunbooks({border}) {
 
   return (
     <Box flex={false} style={{overflow: 'auto', maxHeight: '25%'}} fill='horizontal' 
-         pad={{horizontal: 'medium', vertical: 'small'}} gap='xsmall' border={border}>
+         pad={{horizontal: 'medium', vertical: 'small'}} gap='xsmall' 
+         border={border || {side: 'bottom'}} margin={{bottom: 'small'}}>
       <Box direction='row' gap='xsmall' align='center'>
         <Pin size='small' />
         <Text size='small'>pinned runbooks</Text>
