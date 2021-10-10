@@ -59,7 +59,7 @@ export const DEFAULT_COLOR_THEME = {
   cardHover: shadeColor('#222732', -5),
   actionDark: 'key-dark',
   sidebar: 'backgroundDark',
-  sidebarHover: 'tone-dark-3',
+  sidebarHover: shadeColor('#222732', 2),
   sidebarActive: 'tone-dark-3',
   backgroundColor: 'sidebarBackground',
   sidebarBorder: alpha('#363840', .4),

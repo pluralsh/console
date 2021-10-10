@@ -17,7 +17,7 @@ export function SidebarIcon({icon, text, name: sidebarName, selected, path}) {
   const {name} = useContext(SubmenuContext)
   let history = useHistory()
   const inSubmenu = name === sidebarName
-  const textColor = selected && !inSubmenu ? 'white' : 'tone-medium'
+  const textColor = selected && !inSubmenu ? 'white' : 'light-5'
 
   return (
     <Box flex={false} fill='horizontal' background={(selected && !inSubmenu) ? 'sidebarHover' : null} round='xsmall'>
