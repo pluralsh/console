@@ -70,7 +70,7 @@ export function Runbook() {
         </Box>
         <Box fill='horizontal'>
           <Text size='small' weight='bold'>{runbook.spec.name}</Text>
-          <Text size='small'>{runbook.spec.description}</Text>
+          <Text size='small' color='dark-3'>{runbook.spec.description}</Text>
         </Box>
         <Box flex={false}>
           <RangePicker duration={duration} setDuration={setDuration} />

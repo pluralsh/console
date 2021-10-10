@@ -41,7 +41,7 @@ export function SectionContentContainer({header, children}) {
     <SectionContext.Provider value={{id, ref}}>
       <Box fill>
         <Box flex={false} direction='row' pad='small' height='45px'  
-             border={{side: 'bottom', color: 'light-5'}} align='center'>
+             border={{side: 'bottom'}} align='center'>
           <Box fill='horizontal'>
             <Text size='small' weight={500}>{header}</Text>
           </Box>

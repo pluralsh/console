@@ -1,14 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { useHistory, useParams } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import { useQuery } from 'react-apollo'
 import { Box, Text } from 'grommet'
-import { Select } from 'forge-core'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { BUILD_PADDING } from './Builds'
 import { DASHBOARDS_Q } from './graphql/dashboards'
 import Dashboard from './Dashboard'
 import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from './Installations'
 import { LoopingLogo } from './utils/AnimatedLogo'
+import { DarkSelect } from './utils/Select'
 
 
 export function DashboardHeader({name, label}) {
@@ -29,7 +29,6 @@ function IndividualHeader({current}) {
 }
 
 export default function Dashboards() {
-  const {repo} = useParams()
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
   const {setOnChange, currentApplication} = useContext(InstallationContext)
   let history = useHistory()
@@ -44,7 +43,6 @@ export default function Dashboards() {
       history.push(`/dashboards/${name}`)
     }})
   }, [])
-  useEnsureCurrent(repo)
 
   const [current, setCurrent] = useState(null)
   const {data} = useQuery(DASHBOARDS_Q, {
@@ -60,11 +58,9 @@ export default function Dashboards() {
   if (!data) return <LoopingLogo scale='0.75' />
 
   return (
-    <Box fill>
-      <Box gap='small' flex={false}>
-        <Box
-          pad={{vertical: 'small', ...BUILD_PADDING}}
-          direction='row' align='center' height='60px'>
+    <Box fill background='backgroundColor'>
+      <Box gap='small' flex={false} border={{side: 'bottom'}}>
+        <Box pad={{vertical: 'small', ...BUILD_PADDING}} direction='row' align='center' height='60px'>
           <Box direction='row' fill='horizontal' gap='small' align='center'>
             {hasIcon(currentApplication) && <ApplicationIcon application={currentApplication} size='40px' />}
             {current ? <IndividualHeader current={current} /> :
@@ -72,7 +68,7 @@ export default function Dashboards() {
           </Box>
           {current && (
             <Box flex={false} width='200px'>
-              <Select
+              <DarkSelect
                 options={data.dashboards.map((d) => ({value: d, label: d.spec.name}))}
                 value={{value: current, label: current.spec.name}}
                 onChange={({value}) => setCurrent(value)} />

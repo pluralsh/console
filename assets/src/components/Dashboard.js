@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useQuery } from 'react-apollo'
-import { Select } from 'forge-core'
 import { DASHBOARD_Q } from './graphql/dashboards'
 import { Box, Text } from 'grommet'
 import { chunk } from 'lodash'
 import { Graph, GraphHeader } from './utils/Graph'
 import filesize from 'filesize'
 import { LoopingLogo } from './utils/AnimatedLogo'
+import { DarkSelect } from './utils/Select'
 
 const HOUR = 60 * 60
 const DAY = 24 * HOUR
@@ -39,8 +39,8 @@ function RangeOption({duration, current, setDuration, first, last}) {
       align='center'
       justify='center'
       focusIndicator={false}
-      background={selected ? 'cardDarkLight' : null}
-      hoverIndicator='cardDarkLight'
+      background={selected ? 'cardHover' : null}
+      hoverIndicator='cardHover'
       onClick={() => setDuration(duration)}>
       <Text size='small' weight={selected ? 'bold' : null}>{duration.label}</Text>
     </Box>
@@ -50,8 +50,8 @@ function RangeOption({duration, current, setDuration, first, last}) {
 export function RangePicker({duration, setDuration}) {
   const count = DURATIONS.length
   return (
-    <Box round='xsmall' background='cardDetail'>
-      <Box direction='row' round='xsmall'>
+    <Box round='xsmall' background='card' border={{color: 'cardHover'}}>
+      <Box direction='row' round='xsmall' gap='0px' border={{side: 'between', color: 'cardHover'}}>
         {DURATIONS.map((dur, ind) => (
           <RangeOption
             key={ind}
@@ -90,16 +90,9 @@ function LabelSelect({label, onSelect}) {
 
   return (
     <Box width='200px'>
-      <Select
+      <DarkSelect
         options={label.values.map(toSelect)}
         value={toSelect(value)}
-        colors={{
-          'neutral0': 'cardDetail', 
-          'neutral80': '#fff', 
-          'neutral60': '#fff',
-          'primary': 'tone-medium',
-          'primary25': 'cardDetailLight'
-        }}
         onChange={({value}) => setValue(value)} />
     </Box>
   )

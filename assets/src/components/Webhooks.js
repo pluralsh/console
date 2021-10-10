@@ -98,22 +98,17 @@ export default function Webhooks() {
   const {edges, pageInfo} = data.webhooks
 
   return (
-    <Box fill>
+    <Box fill background='backgroundColor'>
       <Box>
-        <Box
-          pad={{vertical: 'small', ...BUILD_PADDING}}
-          direction='row'
-          align='center'
-          border='bottom'
-          background='backgroundColor'
-          height='60px'>
+        <Box pad={{vertical: 'small', ...BUILD_PADDING}} height='60px'
+            direction='row' align='center' border={{side: 'bottom'}}>
           <Box fill='horizontal' pad={{horizontal: 'small'}}>
             <Text weight='bold' size='small'>Webhooks</Text>
             <Text size='small' color='dark-3'>will notify other tools of build success/failure</Text>
           </Box>
           <CreateWebhook />
         </Box>
-        <Box height='calc(100vh - 105px)' background='backgroundColor' pad={{vertical: 'small', horizontal: 'medium'}}>
+        <Box height='calc(100vh - 105px)' pad={{vertical: 'small', horizontal: 'medium'}}>
           <Scroller
             id='webhooks'
             style={{height: '100%', overflow: 'auto'}}

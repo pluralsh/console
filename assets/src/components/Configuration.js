@@ -46,7 +46,7 @@ export function EditConfiguration({onCompleted, application: {name, configuratio
           height='80px'>
           <Box fill='horizontal'>
             <Box direction='row' fill='horizontal' gap='small' align='center' pad={{vertical: 'xsmall'}}>
-              {hasIcon(application) && <ApplicationIcon application={application} size='30px' />}
+              {hasIcon(application) && <ApplicationIcon application={application} size='30px' dark />}
               <Text weight='bold' size='small'>Edit {name}</Text>
             </Box>
             <Box direction='row'>

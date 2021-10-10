@@ -20,7 +20,8 @@ export function SidebarIcon({icon, text, name: sidebarName, selected, path}) {
   const textColor = selected && !inSubmenu ? 'white' : 'light-5'
 
   return (
-    <Box flex={false} fill='horizontal' background={(selected && !inSubmenu) ? 'sidebarHover' : null}>
+    <Box flex={false} fill='horizontal' 
+         background={(selected && !inSubmenu) ? 'sidebarHover' : null}>
       <Box focusIndicator={false} fill='horizontal' align='center' direction='row' 
         height={SIDEBAR_ICON_HEIGHT} hoverIndicator='sidebarHover' 
         onClick={!inSubmenu && selected ? null : () => history.push(path)} 

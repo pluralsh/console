@@ -75,7 +75,8 @@ function BuildTimer({insertedAt, completedAt, status}) {
 
 function OptionContainer({children, ...props}) {
   return (
-    <Box flex={false} pad={HEADER_PADDING} border='left' fill='vertical' justify='center' align='center' {...props}>
+    <Box flex={false} pad={HEADER_PADDING} border='left' fill='vertical' 
+         justify='center' align='center' {...props}>
       {children}
     </Box>
   )
@@ -91,7 +92,7 @@ function Rebuild({build: {id}}) {
 
   return (
     <>
-    <OptionContainer hoverIndicator='light-3' onClick={() => setOpen(true)}>
+    <OptionContainer hoverIndicator='card' onClick={() => setOpen(true)}>
       <Text size='small'>restart</Text>
     </OptionContainer>
     {open && (
@@ -114,7 +115,7 @@ function Cancel({build: {id}}) {
 
   return (
     <>
-    <OptionContainer hoverIndicator='light-3' onClick={() => setOpen(true)}>
+    <OptionContainer hoverIndicator='card' onClick={() => setOpen(true)}>
       <Text size='small'>cancel</Text>
     </OptionContainer>
     {open && (
@@ -246,7 +247,7 @@ function Commands({edges}) {
 
 function ChangeChoice({text, onClick, enabled}) {
   return (
-    <TabSelector enabled={enabled} onClick={onClick}>
+    <TabSelector hoverIndicator='card' enabled={enabled} onClick={onClick}>
       <Text size='small' weight={500}>{text}</Text>
     </TabSelector>
   )
@@ -282,7 +283,7 @@ function ChangelogRepo({repo, current, setRepo, tools, tool, setTool}) {
 
   return (
     <>
-    <Box direction='row' align='center' pad='small' hoverIndicator='light-3' onClick={select} focusIndicator={false}>
+    <Box direction='row' align='center' pad='small' hoverIndicator='card' onClick={select} focusIndicator={false}>
       <Box fill='horizontal'>
         <Text size='small' weight={500}>{repo}</Text>
       </Box>
@@ -358,8 +359,8 @@ export default function Build() {
   )
 
   return (
-    <Box fill>
-      <Box flex={false} direction='row' align='center' border={{side: 'bottom', color: 'light-5'}}>
+    <Box fill background='backgroundColor'>
+      <Box flex={false} direction='row' align='center' border={{side: 'bottom'}}>
         <Box direction='row' fill='horizontal' align='center'>
           <Box fill='horizontal'>
             <Box direction='row' gap='small' pad={{left: 'small', vertical: 'small'}}>

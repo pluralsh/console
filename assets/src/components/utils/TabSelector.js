@@ -15,7 +15,7 @@ export function TabHeader({text, selected, onClick}) {
   )
 }
 
-export function TabSelector({enabled, children, gap, pad, onClick}) {
+export function TabSelector({enabled, children, gap, pad, hoverIndicator, onClick}) {
   const [hover, setHover] = useState(false)
   const border = (hover || enabled) ? {side: 'right', color: 'focus', size: '2px'} : null
   return (
@@ -23,7 +23,7 @@ export function TabSelector({enabled, children, gap, pad, onClick}) {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       pad={pad || {horizontal: 'small', vertical: 'xxsmall'}}
-      hoverIndicator='light-2'
+      hoverIndicator={hoverIndicator || 'light-2'}
       focusIndicator={false}
       direction='row'
       align='center'

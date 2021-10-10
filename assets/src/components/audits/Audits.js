@@ -23,7 +23,7 @@ const HEIGHT_PX = `${ROW_HEIGHT}px`
 function Audit({audit}) {
   return (
     <Box height={HEIGHT_PX} direction='row' align='center' gap='xsmall' 
-         onClick={() => null} hoverIndicator='light-3' pad='xsmall'
+         onClick={() => null} hoverIndicator='cardHover' pad='xsmall'
          pad={{horizontal: 'small'}}>
       <RowItem width='10%' text={audit.type} />
       <RowItem width='10%' text={audit.action} />
@@ -42,7 +42,7 @@ function Audit({audit}) {
 function AuditHeader() {
   return (
     <Box flex={false} height={HEIGHT_PX} direction='row' align='center' 
-         gap='xsmall' border={{side: 'bottom', color: 'light-4'}} 
+         gap='xsmall' border={{side: 'bottom'}} 
          pad={{horizontal: 'small'}}>
       <HeaderItem width='10%' text='type' />
       <HeaderItem width='10%' text='action' />
@@ -92,8 +92,8 @@ export function Audits() {
           url='/audits/graph'
           selected={graph === 'graph'} />
       </SubmenuPortal>
-      <Box fill background='plrl-white'>
-        <SectionContentContainer header={graph ? 'Geodistribution' : 'Audit Logs'}>
+      <Box fill>
+        <SectionContentContainer header={graph === 'graph' ? 'Geodistribution' : 'Audit Logs'}>
           {graph === 'table' && (
             <Box fill>
               <AuditHeader />

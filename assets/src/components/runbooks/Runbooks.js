@@ -57,7 +57,7 @@ export function Runbooks() {
           {hasIcon(currentApplication) && <ApplicationIcon application={currentApplication} size='40px' dark />}
           <Box>
             <Text weight='bold' size='small'>{currentApplication.name}</Text>
-            <Text size='small'>a collection of runbooks to help operate this application</Text>
+            <Text size='small' color='dark-3'>a collection of runbooks to help operate this application</Text>
           </Box>
         </Box>
       </Box>

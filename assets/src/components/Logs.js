@@ -382,8 +382,8 @@ export function LogViewer() {
 
   return (
     <LabelContext.Provider value={{addLabel, removeLabel, labels: labelList}}>
-      <Box fill>
-        <Box gap='small' flex={false}>
+      <Box fill background='backgroundColor'>
+        <Box gap='small' flex={false} border={{side: 'bottom'}}>
           <Box pad={BUILD_PADDING} gap='medium' direction='row' fill='horizontal' align='center' height='85px'>
             <Box direction='row' fill='horizontal' gap='small' align='center'>
               {hasIcon(app) && <ApplicationIcon application={app} size='40px' />}
