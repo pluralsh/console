@@ -8,6 +8,7 @@ import { Box, Text, FormField, TextInput, Layer } from 'grommet'
 import { chunk } from '../utils/array'
 import { appendConnection, updateCache } from '../utils/graphql'
 import { LoopingLogo } from './utils/AnimatedLogo'
+import { Container } from './utils/Container'
 
 const MAX_LEN = 60
 const trim = (url) => url.length > 10 ? `${url.slice(0, MAX_LEN)}...` : url
@@ -28,15 +29,14 @@ function WebhookHealth({health}) {
 
 function Webhook({webhook: {url, health}}) {
   return (
-    <Box margin={{bottom: 'small'}} background='cardDetailLight'
-      width='50%' pad='small' align='center' round='xsmall' direction='row'>
+    <Container width='50%'>
       <Box fill='horizontal'>
         <Copyable text={url} pillText='Webhook url copied' />
       </Box>
       <Box flex={false}>
         <WebhookHealth health={health} />
       </Box>
-    </Box>
+    </Container>
   )
 }
 
