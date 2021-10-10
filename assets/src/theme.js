@@ -70,7 +70,7 @@ export const DEFAULT_COLOR_THEME = {
   progress: '#007bff',
   error: 'red',
   success: 'green',
-  border: 'card',
+  border: {dark: 'card', light: 'light-6'},
   console: '#222222',
   cardDark: '#20222b',
   cardDarkLight: '#363840',

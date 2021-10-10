@@ -9,6 +9,7 @@ import { LabelledInput } from '../utils/LabelledInput'
 import { useHistory, useParams } from 'react-router'
 import { HeaderItem } from '../kubernetes/Pod'
 import { extract, query, ValueFormats } from './utils'
+import { ActionPortal } from './Runbook'
 
 const DisplayContext = React.createContext({})
 
@@ -76,7 +77,7 @@ function Link({value, attributes, children}) {
   )
 }
 
-function DisplayButton({attributes: {action, ...rest}}) {
+function DisplayButton({attributes: {action, headline, ...rest}}) {
   let hist = useHistory()
   const {namespace, name} = useParams()
   const {context} = useContext(DisplayContext)
@@ -90,6 +91,14 @@ function DisplayButton({attributes: {action, ...rest}}) {
   })
 
   if (!action) return buttonComponent(rest)
+
+  if (headline) {
+    return (
+      <ActionPortal>
+        {buttonComponent({...rest, loading, onClick: mutation})}
+      </ActionPortal>
+    )
+  }
 
   return buttonComponent({...rest, loading, onClick: mutation})
 }

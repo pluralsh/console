@@ -199,7 +199,7 @@ export default function Builds() {
   return (
     <Box fill background='backgroundColor'>
       <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}}
-        direction='row' align='center' height={HEADER_HEIGHT}>
+        direction='row' align='center' height={HEADER_HEIGHT} border={{side: 'bottom'}}>
         <Box fill='horizontal'>
           <Text weight='bold' size='small'>Builds</Text>
           <Text size='small' color='dark-3'>a list of historical changes managed by console</Text>

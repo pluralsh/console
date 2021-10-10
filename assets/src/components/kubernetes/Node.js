@@ -322,7 +322,7 @@ function SaturationGraphs({cpu, mem}) {
   if (!result) return null
 
   return (
-    <Box fill='horizontal' gap='small' height='300px'>
+    <Box fill='horizontal' gap='small' height='250px'>
       <Graph
         data={result}
         yFormat={(v) => format(v, 'percent')} />
@@ -398,11 +398,12 @@ function ClusterGauges({nodes, usage}) {
 
 function ClusterMetrics({nodes, usage}) {
   return (
-    <Box flex={false} direction='row' fill='horizontal' gap='small' align='center' pad='small'>
+    <Box flex={false} direction='row' fill='horizontal' gap='small' 
+         align='center' pad='small'>
       <ClusterGauges nodes={nodes} usage={usage} />
-      <Box fill='horizontal' direction='row' align='center' gap='small'>
-        <SaturationGraphs cpu={Metrics.CPU} mem={Metrics.Memory} />
-      </Box>
+      <SaturationGraphs cpu={Metrics.CPU} mem={Metrics.Memory} />
+      {/* <Box fill='horizontal' direction='row' align='center' gap='small'>
+      </Box> */}
     </Box>
   )
 } 
@@ -498,7 +499,8 @@ export function Nodes() {
   if (!data) return <LoopingLogo />
 
   return (
-    <Box style={{overflow: 'auto'}} fill background='backgroundColor' pad='small' gap='small'>
+    <Box style={{overflow: 'auto'}} fill background='backgroundColor' 
+         pad='small' gap='small'>
       <Box flex={false} fill='horizontal'>
         <ClusterMetrics nodes={data.nodes} usage={usage} />
         <Box flex={false} fill='horizontal'>

@@ -1,6 +1,6 @@
 import React, { useContext, useMemo, useState } from 'react'
 import { Portal } from 'react-portal'
-import { Box, Text } from 'grommet'
+import { Box, Text, ThemeContext } from 'grommet'
 import { v4 as uuidv4 } from 'uuid'
 
 export const SectionContext = React.createContext({})

@@ -51,9 +51,9 @@ export function Runbooks() {
   const namespace = currentApplication.name
 
   return (
-    <Box fill pad='small' background='backgroundColor'>
-      <Box flex={false} direction='row' align='center' height={HEADER_HEIGHT}>
-        <Box direction='row' fill='horizontal' gap='small' align='center' margin={{bottom: 'small'}}>
+    <Box fill background='backgroundColor'>
+      <Box flex={false} pad='small' direction='row' align='center' border={{side: 'bottom'}}>
+        <Box direction='row' fill='horizontal' gap='small' align='center'>
           {hasIcon(currentApplication) && <ApplicationIcon application={currentApplication} size='40px' dark />}
           <Box>
             <Text weight='bold' size='small'>{currentApplication.name}</Text>
@@ -61,7 +61,7 @@ export function Runbooks() {
           </Box>
         </Box>
       </Box>
-      <Box fill gap='xsmall'>
+      <Box fill gap='xsmall' pad='small'>
         {data && data.runbooks.map((book) => <RunbookRow key={book.name} runbook={book} namespace={namespace} />)}
       </Box>
     </Box>

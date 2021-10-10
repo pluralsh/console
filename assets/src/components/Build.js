@@ -165,6 +165,8 @@ function LogLine({line, number, follow}) {
     mounted.current = true
   }, [follow, lineRef, line])
 
+  console.log(line)
+
   return (
     <Box flex={false} ref={lineRef} direction='row' align='center' height='20px' 
          style={{color: normalizeColor('light-4', theme), cursor: 'default'}} gap='medium'

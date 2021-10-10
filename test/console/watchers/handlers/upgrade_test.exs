@@ -29,7 +29,7 @@ defmodule Console.Watchers.Handlers.UpgradeTest do
     end
 
     test "it will ignore if no application is present" do
-      bot = insert(:user, bot_name: "console")
+      insert(:user, bot_name: "console")
       expect(Kazan, :run, fn _ -> {:error, :not_found} end)
       insert(:upgrade_policy, target: "*", type: :approval)
       Console.Cache.delete(:upgrade_policies)
