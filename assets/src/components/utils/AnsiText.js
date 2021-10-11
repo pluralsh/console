@@ -3,8 +3,8 @@ import Anser from 'anser'
 import { escapeCarriageReturn } from 'escape-carriage'
 import { Box } from 'grommet'
 
-function textStyle({bg, fg, decoration}) {
-
+function textStyle({bg, fg, decoration, ...rest}) {
+  console.log(rest)
   return {
     backgroundColor: bg && `rgb(${bg})`, 
     fontWeight: decoration === 'bold' ? 'bold' : null, 
@@ -13,6 +13,7 @@ function textStyle({bg, fg, decoration}) {
 }
 
 export function AnsiLine({line}) {
+  console.log(line)
   const blocks = useMemo(() => Anser.ansiToJson(escapeCarriageReturn(line), {json: true, remove_empty: true}), [line])
 
   return blocks.map((json, i) => (

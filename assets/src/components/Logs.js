@@ -17,6 +17,7 @@ import { LOG_FILTER_Q } from './graphql/plural'
 import { upstream } from '../helpers/hostname'
 import fileDownload from 'js-file-download';
 import { fetchToken } from '../helpers/auth'
+import { AnsiLine } from './utils/AnsiText'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -103,8 +104,8 @@ function LogLine({line: {timestamp, value}, stream, level}) {
         <Box flex={false}>
           <Text size='small' weight={500}>{ts(timestamp)}</Text>
         </Box>
-        <Box fill='horizontal'>
-          <Text size='small'>{value}</Text>
+        <Box fill='horizontal' direction='row'>
+          <AnsiLine line={value} />
         </Box>
       </Box>
     </Box>
@@ -305,25 +306,31 @@ function LogFilters({namespace, labels, search, setSearch, setLabels}) {
   const {logFilters} = data
 
   return (
-    <Box width='250px' flex={false} gap='xsmall' height='100%' style={{overflow: 'auto'}}
-         border={{side: 'right', color: '#444'}} background='console'>
-      <Box pad={{horizontal: 'small', vertical: 'xsmall'}} margin={{bottom: 'xsmall'}} background='#444'>
+    <Box width='250px' flex={false} height='100%' 
+         border={{side: 'right', color: '#444'}}>
+      <Box pad={{horizontal: 'small', vertical: 'xsmall'}} margin={{bottom: 'xsmall'}} background='card'>
         <Text size='small' weight={500}>Log Filters</Text>
       </Box>
-      {logFilters.map(({metadata: {name}, spec}) => {
-        const selected = selectedFilter(labels, search, spec)
-        return (
-          <Box key={name} pad={{vertical: 'xsmall', horizontal: 'small'}} background='sidebar' margin={{horizontal: 'small'}}
-            onClick={selected ? clear : () => select(spec)} focusIndicator={false} hoverIndicator='backgroundLight' round='xsmall'
-            direction='row' gap='xsmall' align='center'>
-            <Box>
-              <Text size='small' weight={500}>{spec.name}</Text>
-              <Text size='small'><i>{spec.description}</i></Text>
-            </Box>
-            {selected && <Checkmark size='15px' />}
-          </Box>
-        )
-      })}
+      <Box fill style={{overflow: 'auto'}} gap='xsmall' pad='small'>
+        <Box flex={false} gap='xsmall'>
+          {logFilters.map(({metadata: {name}, spec}) => {
+            const selected = selectedFilter(labels, search, spec)
+            return (
+              <Box key={name} pad={{vertical: 'xsmall', horizontal: 'small'}} 
+                  background='card' hoverIndicator='cardHover'
+                  onClick={selected ? clear : () => select(spec)} 
+                  focusIndicator={false}  round='xsmall'
+                  direction='row' gap='xsmall' align='center'>
+                <Box>
+                  <Text size='small' weight={500}>{spec.name}</Text>
+                  <Text size='small' color='dark-3'>{spec.description}</Text>
+                </Box>
+                {selected && <Checkmark size='15px' />}
+              </Box>
+            )
+          })}
+        </Box>
+      </Box>
     </Box>
   )
 }
@@ -386,7 +393,7 @@ export function LogViewer() {
         <Box gap='small' flex={false} border={{side: 'bottom'}}>
           <Box pad={BUILD_PADDING} gap='medium' direction='row' fill='horizontal' align='center' height='85px'>
             <Box direction='row' fill='horizontal' gap='small' align='center'>
-              {hasIcon(app) && <ApplicationIcon application={app} size='40px' />}
+              {hasIcon(app) && <ApplicationIcon application={app} size='40px' dark />}
               <Box gap='xsmall'>
                 <DashboardHeader name={app.name} label='log streams' />
                 {labelList.length > 0 && <LogLabels labels={labelList} />}

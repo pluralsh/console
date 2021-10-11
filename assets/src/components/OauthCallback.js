@@ -31,7 +31,7 @@ export function OAuthCallback() {
   }, [code])
 
   return (
-    <Box fill align='center' justify='center'>
+    <Box height='100vh' width='100vw' align='center' justify='center'>
       {loading && <LoopingLogo />}
       {error && <GqlError error={error} header='Failed to log in' />}
     </Box>

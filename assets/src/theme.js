@@ -67,7 +67,6 @@ export const DEFAULT_COLOR_THEME = {
   backgroundColor: 'sidebarBackground',
   sidebarBorder: alpha('#363840', .4),
   sidebarBackground: '#0d1215',
-  focus: '#3B1D98',
   tagMedium: 'key-light',
   tagLight: '#624aad',
   progress: '#007bff',
