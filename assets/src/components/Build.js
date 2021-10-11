@@ -283,7 +283,8 @@ function ChangelogRepo({repo, current, setRepo, tools, tool, setTool}) {
 
   return (
     <>
-    <Box direction='row' align='center' pad='small' hoverIndicator='card' onClick={select} focusIndicator={false}>
+    <Box direction='row' align='center' pad='small' hoverIndicator='card' 
+         border={{side: 'bottom'}} onClick={select} focusIndicator={false}>
       <Box fill='horizontal'>
         <Text size='small' weight={500}>{repo}</Text>
       </Box>
