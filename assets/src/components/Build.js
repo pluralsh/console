@@ -17,7 +17,7 @@ import { BuildStatus } from './types'
 import Avatar from './users/Avatar'
 import { groupBy } from 'lodash'
 import { TabHeader, TabSelector } from './utils/TabSelector'
-import { AnsiText } from './utils/AnsiText'
+import { AnsiLine, AnsiText } from './utils/AnsiText'
 import { LoopingLogo } from './utils/AnimatedLogo'
 
  const HEADER_PADDING = {horizontal: 'medium'}
@@ -166,14 +166,12 @@ function LogLine({line, number, follow}) {
     mounted.current = true
   }, [follow, lineRef, line])
 
-  console.log(line)
-
   return (
     <Box flex={false} ref={lineRef} direction='row' align='center' height='20px' 
          style={{color: normalizeColor('light-4', theme), cursor: 'default'}} gap='medium'
          onClick={() => null} hoverIndicator='card' pad={{left: '55px'}}>
       <pre style={{color: normalizeColor('dark-5', theme)}}>{number}</pre>
-      <AnsiText text={line} />
+      <AnsiLine line={line} />
     </Box>
   )
 }
@@ -325,12 +323,7 @@ function Changelog({build: {changelogs}}) {
         ))}
       </Box>
       <Box style={{overflow: 'auto'}} fill background='backgroundColor' pad='small'>
-        {selected && selected.content.split(/\r?\n/).map((line, ind) => (
-            <Box key={`${ind}`} flex={false} height='20px' direction='row'>
-              <AnsiText text={line} />
-            </Box>
-          )
-        )}
+        {selected && <AnsiText text={selected.content} />}
       </Box>
     </Box>
   )

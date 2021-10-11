@@ -6,7 +6,7 @@ import { BreadcrumbsContext } from './Breadcrumbs'
 import { BUILD_PADDING } from './Builds'
 import { DASHBOARDS_Q } from './graphql/dashboards'
 import Dashboard from './Dashboard'
-import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from './Installations'
+import { ApplicationIcon, hasIcon, InstallationContext } from './Installations'
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { DarkSelect } from './utils/Select'
 
