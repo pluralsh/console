@@ -324,9 +324,13 @@ function Changelog({build: {changelogs}}) {
             setTool={setTool} />
         ))}
       </Box>
-      <Box style={{overflow: 'auto'}} height='100%' 
-           fill='horizontal' background='backgroundColor' pad='small'>
-        {selected && (<AnsiText text={selected.content} />)}
+      <Box style={{overflow: 'auto'}} fill background='backgroundColor' pad='small'>
+        {selected && selected.content.split(/\r?\n/).map((line, ind) => (
+            <Box key={`${ind}`} flex={false} height='20px' direction='row'>
+              <AnsiText text={line} />
+            </Box>
+          )
+        )}
       </Box>
     </Box>
   )

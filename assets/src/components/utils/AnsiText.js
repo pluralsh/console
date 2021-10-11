@@ -14,7 +14,7 @@ function textStyle({bg, fg, decoration, ...rest}) {
 export function AnsiText({text}) {
   const blocks = useMemo(() => Anser.ansiToJson(escapeCarriageReturn(text), {json: true, remove_empty: true}), [text])
 
-  return blocks.filter(({content}) => content.replace(/\s/g, '').length).map((json, i) => (
+  return blocks.map((json, i) => (
     <pre key={i} style={textStyle(json)}>
       {json.content}
     </pre>
