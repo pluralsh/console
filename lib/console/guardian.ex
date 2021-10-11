@@ -12,10 +12,10 @@ defmodule Console.Guardian do
   def resource_from_claims(%{"sub" => "user:" <> id}) do
     case fetch_user(id) do
       %User{} = user -> {:ok, user}
-      _ -> {:error, :not_authorized}
+      _ -> {:error, :not_found}
     end
   end
-  def resource_from_claims(_claims), do: {:error, :not_authorized}
+  def resource_from_claims(_claims), do: {:error, :invalid_token}
 
   @decorate cacheable(cache: Console.Cache, key: {:login, id}, opts: [ttl: @ttl], match: &allow/1)
   def fetch_user(id) do
