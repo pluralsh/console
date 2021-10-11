@@ -16,7 +16,7 @@ function Installation({application, setCurrentApplication, current: {name}}) {
     <Box direction='row' align='center' gap='small' pad='small' focusIndicator={false}
          onClick={() => setCurrentApplication(application)} hoverIndicator='hover'>
       <ApplicationReadyIcon application={application} size='20px' showIcon dark />
-      {descriptor.icons.length > 0 && <ApplicationIcon application={application} size='40px' />}
+      {descriptor.icons.length > 0 && <ApplicationIcon application={application} size='40px' dark />}
       <Box fill='horizontal'>
         <Box direction='row' align='center' gap='xsmall'>
           <Text size='small' weight={500}>{appname}</Text>
