@@ -1,10 +1,10 @@
 defmodule Console.Guardian do
   use Guardian, otp_app: :console
-  use Nebulex.Caching
   require Logger
   alias Console.Schema.User
+  # use Nebulex.Caching
 
-  @ttl Nebulex.Time.expiry_time(15, :minute)
+  # @ttl Nebulex.Time.expiry_time(15, :minute)
 
   def subject_for_token(%User{id: id}, _claims),
     do: {:ok, "user:#{id}"}
@@ -22,12 +22,12 @@ defmodule Console.Guardian do
   end
   def resource_from_claims(_claims), do: {:error, :invalid_token}
 
-  @decorate cacheable(cache: Console.Cache, key: {:login, id}, opts: [ttl: @ttl], match: &allow/1)
+  # @decorate cacheable(cache: Console.Cache, key: {:login, id}, opts: [ttl: @ttl], match: &allow/1)
   def fetch_user(id) do
     Console.Repo.get(User, id)
     |> Console.Services.Rbac.preload()
   end
 
-  def allow(%User{} = user), do: {true, user}
+  def allow(%User{} = user), do: true
   def allow(_), do: false
 end

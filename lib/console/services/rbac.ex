@@ -1,8 +1,9 @@
 defmodule Console.Services.Rbac do
   alias Console.Schema.{Role, User}
 
-  def preload(user),
-    do: Console.Repo.preload(user, [role_bindings: :role, group_role_bindings: :role])
+  def preload(user) do
+    Console.Repo.preload(user, [role_bindings: :role, group_role_bindings: :role])
+  end
 
   def allow(%User{roles: %{admin: true}}, _, _), do: :ok
   def allow(%User{} = user, repository, action) do

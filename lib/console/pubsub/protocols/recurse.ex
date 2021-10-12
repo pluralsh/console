@@ -51,8 +51,12 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.UserCreated do
   alias Console.Schema.{Group, GroupMember}
 
   def process(%{item: %{id: user_id}}) do
-    groups = Group.global() |> Console.Repo.all()
-    data = Enum.map(groups, &Console.Services.Base.timestamped(%{group_id: &1.id, user_id: user_id}))
+    groups = Group.global()
+             |> Console.Repo.all()
+    data = Enum.map(groups, &Console.Services.Base.timestamped(%{
+      group_id: &1.id,
+      user_id: user_id
+    }))
     Console.Repo.insert_all(GroupMember, data)
   end
 end
