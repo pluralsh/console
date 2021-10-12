@@ -15,7 +15,9 @@ defmodule Console.Guardian do
       %User{} = user ->
         Logger.info "user #{user.email} logged in"
         {:ok, user}
-      _ -> {:error, :not_found}
+      res ->
+        Logger.info "got unexpected fetch_user result #{inspect(res)}"
+        {:error, :not_found}
     end
   end
   def resource_from_claims(_claims), do: {:error, :invalid_token}
