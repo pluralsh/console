@@ -1,6 +1,7 @@
 defmodule Console.Guardian do
   use Guardian, otp_app: :console
   use Nebulex.Caching
+  require Logger
   alias Console.Schema.User
 
   @ttl Nebulex.Time.expiry_time(15, :minute)
@@ -11,7 +12,9 @@ defmodule Console.Guardian do
 
   def resource_from_claims(%{"sub" => "user:" <> id}) do
     case fetch_user(id) do
-      %User{} = user -> {:ok, user}
+      %User{} = user ->
+        Logger.info "user #{user.email} logged in"
+        {:ok, user}
       _ -> {:error, :not_found}
     end
   end
