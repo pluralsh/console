@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery } from 'react-apollo'
-import { Box, CheckBox, Text, TextInput, ThemeContext } from 'grommet'
+import { Box, Text, TextInput, ThemeContext } from 'grommet'
 import { Button, SecondaryButton, GqlError } from 'forge-core'
 import { ModalHeader } from '../utils/Modal'
 import { INSTALL_RECIPE, RECIPE_Q } from '../graphql/plural'
@@ -12,6 +12,7 @@ import { BUILDS_Q } from '../graphql/builds'
 import { LoginContext } from '../Login'
 import { trimSuffix } from '../../utils/array'
 import { deepFetch } from '../../utils/graphql'
+import Toggle from 'react-toggle'
 
 function compileConfigurations(items) {
   let res = {}
@@ -130,11 +131,12 @@ function BoolConfiguration({config: {name, default: def}, ctx, setValue}) {
   }, [value, def])
 
   return (
-    <CheckBox 
-      toggle 
-      label={name}
-      checked={value}
-      onChange={({target: {checked}}) => setValue(name, checked)} />
+    <Box flex={false} direction='row' align='center' gap='xsmall'>
+      <Toggle
+        checked={value}
+        onChange={({target: {checked}}) => setValue(name, checked)} />
+      <Text size='small'>{name}</Text>
+    </Box>
   )
 }
 
@@ -213,11 +215,12 @@ function RecipeConfiguration({recipe, context: ctx, setOpen}) {
         </Box>
         <Box flex={false} direction='row' align='center' gap='small' justify='end'>
           {!hasNext && recipe.oidcEnabled && (
-            <CheckBox
-              toggle
-              checked={oidc}
-              label={oidc ? 'oidc enabled' : 'oidc disabled'}
-              onChange={({target: {checked}}) => setOidc(checked)} />
+            <Box flex={false} direction='row' align='center' gap='xsmall'>
+              <Toggle
+                checked={oidc}
+                onChange={({target: {checked}}) => setOidc(checked)} />
+              <Text size='small'>{oidc ? 'oidc enabled' : 'oidc disabled'}</Text>
+            </Box>
           )}
           {ind > 0 && <SecondaryButton label='Previous' onClick={() => setInd(ind - 1)} />}
           <Button 

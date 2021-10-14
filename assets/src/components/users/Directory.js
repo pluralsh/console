@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react'
-import { Box, Text, Layer, TextInput, CheckBox, ThemeContext } from 'grommet'
+import { Box, Text, Layer, TextInput, ThemeContext } from 'grommet'
 import { useQuery, useMutation } from 'react-apollo'
 import { ModalHeader, Scroller } from 'forge-core'
 import { USERS_Q, GROUPS_Q, EDIT_USER, ROLES_Q } from './queries'
@@ -16,6 +16,7 @@ import { SearchIcon } from './utils'
 import { SectionContentContainer, SectionPortal } from '../utils/Section'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { SIDEBAR_ICON_HEIGHT } from '../Sidebar'
+import Toggle from 'react-toggle'
 
 const INPUT_WIDTH = '350px'
 
@@ -32,12 +33,11 @@ function UserRow({user}) {
         <Text size='small'>{user.name}</Text>
       </Box>
       <Box fill='horizontal' direction='row' align='center' justify='end'>
-        <Box gap='xsmall'>
-          <CheckBox
-            toggle
+        <Box flex={false} direction='row' align='center' gap='xsmall'>
+          <Toggle
             checked={!!admin}
-            label='admin'
             onChange={({target: {checked}}) => mutation({variables: {attributes: {roles: {admin: !!checked}}}})} />
+          <Text size='small'>admin</Text>
         </Box>
       </Box>
     </Box>

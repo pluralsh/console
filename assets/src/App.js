@@ -6,6 +6,7 @@ import Console from './components/Console';
 import Login from './components/Login'
 import Invite from './components/Invite';
 import { OAuthCallback } from './components/OauthCallback';
+import "react-toggle/style.css"
 
 export default function App() {
   return (
