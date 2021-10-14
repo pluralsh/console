@@ -25,7 +25,7 @@ function EditAvatar({me}) {
 
 function ActionBox({onClick, text, icon}) {
   return (
-    <Box pad='small' direction='row'  round='xsmall' align='center' 
+    <Box pad='small' direction='row'  round='3px' align='center' 
          gap='small' hoverIndicator='sidebarHover' onClick={onClick}>
       <Box flex={false} direction='row'>
         {icon}
@@ -40,7 +40,7 @@ function ActionBox({onClick, text, icon}) {
 function EditSelect({edit, icon}) {
   const {editing, setEditing} = useContext(EditContext)
   return (
-    <Box pad='small' round='xsmall' fill='horizontal' align='center' gap='small' 
+    <Box pad='small' round='3px' fill='horizontal' align='center' gap='small' 
          direction='row' hoverIndicator='sidebarHover' focusIndicator={false} 
          background={edit === editing ? 'sidebarHover' : null} height={SIDEBAR_ICON_HEIGHT}
          onClick={edit === editing ? null : () => setEditing(edit)}>

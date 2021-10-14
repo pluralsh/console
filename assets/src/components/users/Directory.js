@@ -153,7 +153,7 @@ function SectionChoice({label, icon, section, onClick, setSection}) {
     <Box
       focusIndicator={false} hoverIndicator='sidebarHover'
       direction='row' align='center' gap='small' pad='small'
-      round='xsmall' height={SIDEBAR_ICON_HEIGHT}
+      round='3px' height={SIDEBAR_ICON_HEIGHT}
       background={section === selected ? 'sidebarHover' : null}
       onClick={onClick || (() => setSection(section))}>
       {icon}
