@@ -9,7 +9,7 @@ export function Container({onClick, gap, children, ...rest}) {
   const theme = useContext(ThemeContext)
 
   return (
-    <Box style={boxShadow(theme)} pad='small' direction='row' round='xsmall'
+    <Box style={boxShadow(theme)} pad='small' direction='row' round='3px'
         background='card' align='center' focusIndicator={false} 
         hoverIndicator='cardHover' 
         onClick={onClick} gap={gap || 'small'} {...rest}>
