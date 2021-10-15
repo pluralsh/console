@@ -24,7 +24,7 @@ defmodule Console.Runbooks.Display do
     end
 
     component "input" do
-      attributes ~w(placeholder name label)
+      attributes ~w(placeholder name label datatype)
       parents ~w(box)
     end
 

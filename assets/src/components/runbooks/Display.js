@@ -111,6 +111,16 @@ function buttonComponent({primary, key, ...props}) {
   return <SecondaryButton key={key} round='xsmall' {...props} />
 }
 
+function convertType(val, type) {
+  if (!type) return val
+
+  if (type === 'int') return parseInt(val)
+  if (type === 'float') return parseFloat(val)
+  if (type === 'bool') return val === 'true'
+
+  return val
+}
+
 function Input({attributes, children}) {
   const {context, setContext, ...rest} = useContext(DisplayContext)
   const [value, setValue] = useState(children && children.length > 0 ? valueFrom(children[0], rest) : '')
@@ -118,7 +128,7 @@ function Input({attributes, children}) {
     const name = attributes.name
     const val = value === '' ? null : value
     if (context[name] !== val) {
-      setContext({...context, [name]: val})
+      setContext({...context, [name]: convertType(val, attributes.datatype)})
     }
   }, [attributes, context, setContext, value])
 
