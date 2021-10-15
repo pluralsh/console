@@ -68,6 +68,8 @@ defmodule Console.GraphQl.RunbookQueriesTest do
         ]}})}}
       end)
 
+      executions = insert_list(3, :runbook_execution, name: "runbook", namespace: "runbook")
+
       {:ok, %{data: %{"runbook" => found}}} = run_query("""
         query Runbook($name: String!, $namespace: String!) {
           runbook(name: $name, namespace: $namespace) {
@@ -77,6 +79,15 @@ defmodule Console.GraphQl.RunbookQueriesTest do
               name
               prometheus { values { timestamp value } }
             }
+
+            executions(first: 5) {
+              edges {
+                node {
+                  id
+                  user { id }
+                }
+              }
+            }
           }
         }
       """, %{"name" => "name", "namespace" => "name"}, %{current_user: insert(:user)})
@@ -84,6 +95,12 @@ defmodule Console.GraphQl.RunbookQueriesTest do
       assert found["name"] == "runbook"
       assert found["spec"]["display"]["_type"] == "root"
       assert is_list(found["spec"]["display"]["children"])
+
+      assert from_connection(found["executions"])
+             |> ids_equal(executions)
+      assert from_connection(found["executions"])
+             |> Enum.map(& &1["user"])
+             |> ids_equal(Enum.map(executions, & &1.user))
 
       [result] = found["data"]
 

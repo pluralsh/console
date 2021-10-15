@@ -104,4 +104,13 @@ defmodule Console.Factory do
   def alertmanager_incident_factory do
     %Schema.AlertmanagerIncident{incident_id: Ecto.UUID.generate()}
   end
+
+  def runbook_execution_factory do
+    %Schema.RunbookExecution{
+      name: "runbook",
+      namespace: "namespace",
+      context: %{dummy: "value"},
+      user: build(:user)
+    }
+  end
 end

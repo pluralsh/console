@@ -1,6 +1,7 @@
 defmodule Console.Services.Runbooks do
+  use Console.Services.Base
   alias Kube.{Runbook, Client}
-  alias Console.Schema.User
+  alias Console.Schema.{User, RunbookExecution}
   alias Console.Runbooks
 
   @type error :: {:error, term}
@@ -26,11 +27,23 @@ defmodule Console.Services.Runbooks do
   end
 
   @spec execute(Runbook.t, binary, binary, map, User.t) :: {:ok | :error, term}
-  def execute(%Runbook{spec: %{actions: actions}}, action, repo, ctx, %User{} = user) do
+  def execute(%Runbook{spec: %{actions: actions}} = book, action, repo, ctx, %User{} = user) do
     actor = Runbooks.Actor.build(repo, ctx, user)
-    with %Runbook.Action{} = act <- Enum.find(actions, & &1.name == action),
-         {:ok, _} <- Runbooks.Actor.enact(act, actor),
-      do: action_response(act)
+    with %Runbook.Action{} = act <- Enum.find(actions, & &1.name == action) do
+      start_transaction()
+      |> add_operation(:enact, fn _ -> Runbooks.Actor.enact(act, actor) end)
+      |> add_operation(:record, fn _ ->
+        %RunbookExecution{user_id: user.id}
+        |> RunbookExecution.changeset(%{
+          name: book.metadata.name,
+          namespace: book.metadata.namespace,
+          context: ctx
+        })
+        |> Console.Repo.insert()
+      end)
+      |> add_operation(:resp, fn _ -> action_response(act) end)
+      |> execute(extract: :resp)
+    end
   end
 
   defp action_response(%Runbook.Action{redirect_to: redirect}) when is_binary(redirect),

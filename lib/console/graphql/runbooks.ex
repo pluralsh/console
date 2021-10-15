@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Runbooks do
   use Console.GraphQl.Schema.Base
   alias Console.Middleware.{Authenticated}
-  alias Console.GraphQl.Resolvers.Runbooks
+  alias Console.GraphQl.Resolvers.{Runbooks, User}
   alias Kazan.Apis.Apps.V1, as: AppsV1
 
   input_object :runbook_action_input do
@@ -26,6 +26,20 @@ defmodule Console.GraphQl.Runbooks do
        arg :context, :runbook_context
        resolve &Runbooks.datasources/2
     end
+
+    connection field :executions, node_type: :runbook_execution do
+      resolve &Runbooks.list_executions/2
+    end
+  end
+
+  object :runbook_execution do
+    field :id,        non_null(:id)
+    field :name,      non_null(:string)
+    field :namespace, non_null(:string)
+    field :context,   non_null(:map)
+    field :user,      :user, resolve: dataloader(User)
+
+    timestamps()
   end
 
   object :runbook_status do
@@ -106,6 +120,8 @@ defmodule Console.GraphQl.Runbooks do
   object :runbook_action_response do
     field :redirect_to, :string
   end
+
+  connection node_type: :runbook_execution
 
   object :runbook_queries do
     field :runbook, :runbook do
