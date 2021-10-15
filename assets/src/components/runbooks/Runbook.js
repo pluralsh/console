@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useQuery } from '@apollo/react-hooks'
 import { useParams } from 'react-router'
 import { BreadcrumbsContext } from '../Breadcrumbs'
-import { HEADER_HEIGHT } from '../Builds'
+import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { Display } from './Display'
 import { RUNBOOK_Q } from './queries'
@@ -11,6 +11,7 @@ import { Box, Text } from 'grommet'
 import { StatusIcon } from './StatusIcon'
 import { Portal } from 'react-portal'
 import { DURATIONS, RangePicker } from '../Dashboard'
+import { RunbookExecutions } from './RunbookExecutions'
 
 const POLL_INTERVAL = 30 * 1000
 
@@ -39,7 +40,7 @@ export function Runbook() {
   const {namespace, name} = useParams()
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
   const [ref, setRef] = useState(null)
-  const {data} = useQuery(RUNBOOK_Q, {
+  const {data, loading, fetchMore} = useQuery(RUNBOOK_Q, {
     variables: {
       namespace, name, 
       context: {timeseriesStart: -duration.offset, timeseriesStep: duration.step}},
@@ -63,8 +64,8 @@ export function Runbook() {
 
   return (
     <ActionContext.Provider value={{ref, setRef}}>
-    <Box fill  background='backgroundColor' gap='small'>
-      <Box pad='small' border={{side: 'bottom'}} direction='row' gap='small' align='center'>
+    <Box fill  background='backgroundColor'>
+      <Box pad='small' direction='row' gap='small' align='center'>
         <Box flex={false}>
           <StatusIcon status={runbook.status} size={35} innerSize={20} />
         </Box>
@@ -77,8 +78,28 @@ export function Runbook() {
         </Box>
         <ActionContainer />
       </Box>
-      <Box style={{overflow: 'auto'}} pad='small' fill>
-        <Display root={runbook.spec.display} data={runbook.data} />
+      <Box fill>
+        <Tabs defaultTab='runbook'>
+          <TabHeader>
+            <TabHeaderItem name='runbook'>
+              <Text size='small' weight={500}>runbook</Text>
+            </TabHeaderItem>
+            <TabHeaderItem name='executions'>
+              <Text size='small' weight={500}>executions</Text>
+            </TabHeaderItem>
+          </TabHeader>
+          <TabContent name='runbook'>
+            <Box style={{overflow: 'auto'}} pad='small' fill>
+              <Display root={runbook.spec.display} data={runbook.data} />
+            </Box>
+          </TabContent>
+          <TabContent name='executions'>
+            <RunbookExecutions
+              runbook={runbook} 
+              loading={loading} 
+              fetchMore={fetchMore} />
+          </TabContent>
+        </Tabs>
       </Box>
     </Box>
     </ActionContext.Provider>

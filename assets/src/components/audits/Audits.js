@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useQuery } from 'react-apollo'
 import { Scroller } from 'forge-core'
 import { AUDITS_Q, AUDIT_METRICS } from './queries'
@@ -9,7 +9,7 @@ import Avatar from '../users/Avatar'
 import { extendConnection } from '../../utils/graphql'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { formatLocation } from '../../utils/geo'
-import { SectionChoice, SectionContentContainer } from '../utils/Section'
+import { SectionContentContainer } from '../utils/Section'
 import { List, PieChart } from 'grommet-icons'
 import lookup from 'country-code-lookup'
 import { Chloropleth } from '../utils/Chloropleth'
@@ -20,6 +20,15 @@ import { useParams } from 'react-router'
 const ROW_HEIGHT = 40
 const HEIGHT_PX = `${ROW_HEIGHT}px`
 
+export function AvatarCell({user, width}) {
+  return (
+    <Box flex={false} direction='row' width={width} align='center' gap='xsmall'>
+      <Avatar user={user} size='30px' />
+      <Text size='small'>{user.email}</Text>
+    </Box>
+  )
+}
+
 function Audit({audit}) {
   return (
     <Box height={HEIGHT_PX} direction='row' align='center' gap='xsmall' 
@@ -28,10 +37,7 @@ function Audit({audit}) {
       <RowItem width='10%' text={audit.type} />
       <RowItem width='10%' text={audit.action} />
       <RowItem width='15%' text={audit.repository} />
-      <Box flex={false} direction='row' width='20%' align='center' gap='xsmall'>
-        <Avatar user={audit.actor} size='30px' />
-        <Text size='small'>{audit.actor.email}</Text>
-      </Box>
+      <AvatarCell user={audit.actor} width='20%' />
       <RowItem width='15%' text={dateFormat(audit.insertedAt)} />
       <RowItem width='10%' text={audit.ip} />
       <RowItem width='15%' text={formatLocation(audit.country, audit.city)} />
