@@ -127,15 +127,16 @@ function Input({attributes, children}) {
   useEffect(() => {
     const name = attributes.name
     const val = value === '' ? null : value
-    if (context[name] !== val) {
-      setContext({...context, [name]: convertType(val, attributes.datatype)})
+    const converted = convertType(val, attributes.datatype)
+    if (context[name] !== converted) {
+      setContext({...context, [name]: converted})
     }
   }, [attributes, context, setContext, value])
 
   return (
     <LabelledInput
       {...attributes}
-      value={value}
+      value={`${value}`}
       onChange={setValue} />
   )
 }
