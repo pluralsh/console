@@ -5,7 +5,6 @@ import { RUNBOOKS_Q } from './queries'
 import { Box, Text } from 'grommet'
 import { useHistory } from 'react-router'
 import { chunk } from 'lodash'
-import { Pin } from 'grommet-icons'
 import { POLL_INTERVAL } from './constants'
 import { StatusIcon } from './StatusIcon'
 import { Container } from '../utils/Container'
@@ -43,10 +42,10 @@ export function PinnedRunbooks({border}) {
     <Box flex={false} style={{overflow: 'auto', maxHeight: '25%'}} fill='horizontal' 
          pad={{horizontal: 'medium', vertical: 'small'}} gap='xsmall' 
          border={border || {side: 'bottom'}} margin={{bottom: 'small'}}>
-      <Box direction='row' gap='xsmall' align='center'>
+      {/* <Box direction='row' gap='xsmall' align='center'>
         <Pin size='small' />
         <Text size='small'>pinned runbooks</Text>
-      </Box>
+      </Box> */}
       <Box flex={false} gap='xsmall'>
         {chunk(runbooks, 3).map((books, ind) => (
           <Box key={`${ind}`} direction='row' gap='small' align='center'>

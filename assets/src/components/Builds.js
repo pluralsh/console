@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useCallback } from 'react'
 import { useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { BUILDS_Q, CREATE_BUILD, BUILD_SUB } from './graphql/builds'
-import { Button } from 'forge-core'
+import { Button, Builds as BuildI } from 'forge-core'
 import { Box, Layer, Text } from 'grommet'
 import moment from 'moment'
 import { BeatLoader } from 'react-spinners'
@@ -13,7 +13,7 @@ import { appendConnection, extendConnection, updateCache } from '../utils/graphq
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { StandardScroller } from './utils/SmoothScroller'
 import { UpgradePolicies } from './builds/UpgradePolicies'
-import { Checkmark, Close, Deploy, Refresh, StatusCritical, Up, Validate } from 'grommet-icons'
+import { Checkmark, Close, Refresh, StatusCritical, Up, Validate } from 'grommet-icons'
 import { PinnedRunbooks } from './runbooks/PinnedRunbooks'
 import { Container } from './utils/Container'
 
@@ -131,7 +131,7 @@ function CreateBuild() {
         label='Approval'
         loading={loading && type === BuildTypes.APPROVAL} />
       <Button
-        icon={<Deploy size='small' />}
+        icon={<BuildI size='small' />}
         onClick={() => deploy(BuildTypes.DEPLOY)}
         loading={loading && type === BuildTypes.DEPLOY} 
         label='Deploy'  background='brand' flat />

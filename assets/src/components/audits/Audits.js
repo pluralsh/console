@@ -10,7 +10,7 @@ import { extendConnection } from '../../utils/graphql'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { formatLocation } from '../../utils/geo'
 import { SectionContentContainer } from '../utils/Section'
-import { List, PieChart } from 'grommet-icons'
+import { ListView, GraphView } from 'forge-core'
 import lookup from 'country-code-lookup'
 import { Chloropleth } from '../utils/Chloropleth'
 import { SubmenuItem, SubmenuPortal } from '../navigation/Submenu'
@@ -88,12 +88,12 @@ export function Audits() {
     <Box direction='row' fill background='backgroundColor'>
       <SubmenuPortal name='audits'>
         <SubmenuItem
-          icon={<List size='small' />}
+          icon={<ListView size='small' />}
           label='Table View'
           url='/audits/table'
           selected={graph === 'table'} />
         <SubmenuItem
-          icon={<PieChart size='small' />}
+          icon={<GraphView size='small' />}
           label='Graph View'
           url='/audits/graph'
           selected={graph === 'graph'} />

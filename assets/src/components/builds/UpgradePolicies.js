@@ -1,5 +1,6 @@
 import React, { useCallback, useContext, useRef, useState } from 'react'
 import { SettingsOption, Trash } from 'grommet-icons'
+import { Configuration } from 'forge-core'
 import { LabelledInput } from '../utils/LabelledInput'
 import { useMutation, useQuery } from 'react-apollo'
 import { CREATE_POLICY, DELETE_POLICY, UPGRADE_POLICIES } from '../graphql/builds'
@@ -149,7 +150,6 @@ export function PolicyForm() {
 }
 
 export function UpgradePolicies() {
-  const ref = useRef()
   const [modal, setModal] = useState(null)
   const close = useCallback(() => setModal(null), [setModal])
 
@@ -157,7 +157,7 @@ export function UpgradePolicies() {
     <PolicyContext.Provider value={{modal, setModal, close}}>
       <>
       <Icon 
-        icon={SettingsOption}
+        icon={Configuration}
         tooltip='upgrade settings'
         hoverIndicator='card'
         onClick={() => setModal({

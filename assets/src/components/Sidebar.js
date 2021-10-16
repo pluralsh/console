@@ -1,6 +1,7 @@
 import React, { useContext } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
-import { Deploy, Network, Configure, BarChart, Group, TextAlignFull, Cubes, List, Nodes, Alert, Book } from 'grommet-icons'
+import { Book } from 'grommet-icons'
+import { Builds, Components, Nodes, Configuration, Incidents, Dashboard, Logs, Webhooks, Audits, Group } from 'forge-core'
 import { Box, Text } from 'grommet'
 import { Next, Down } from 'grommet-icons' 
 import { LoginContext } from './Login'
@@ -72,17 +73,17 @@ function Me() {
 
 
 const OPTIONS = [
-  {text: 'Builds', icon: Deploy, path: '/'},
+  {text: 'Builds', icon: Builds, path: '/'},
   {text: 'Runbooks', icon: Book, path: '/runbooks/{repo}'},
-  {text: 'Components', icon: Cubes, path: '/components/{repo}'},
+  {text: 'Components', icon: Components, path: '/components/{repo}'},
   {text: 'Nodes', icon: Nodes, path: '/nodes'},
-  {text: 'Configuration', icon: Configure, path: '/config/{repo}' },
-  {text: 'Incidents', icon: Alert, path: '/incidents'},
-  {text: 'Dashboards', icon: BarChart, path: '/dashboards/{repo}'},
-  {text: 'Logs', icon: TextAlignFull, path: '/logs/{repo}'},
+  {text: 'Configuration', icon: Configuration, path: '/config/{repo}' },
+  {text: 'Incidents', icon: Incidents, path: '/incidents'},
+  {text: 'Dashboards', icon: Dashboard, path: '/dashboards/{repo}'},
+  {text: 'Logs', icon: Logs, path: '/logs/{repo}'},
   {text: "Users", icon: Group, path: '/directory'},
-  {text: "Audits", name: 'audits', icon: List, path: '/audits'},
-  {text: 'Webhooks', icon: Network, path: '/webhooks'},
+  {text: "Audits", name: 'audits', icon: Audits, path: '/audits'},
+  {text: 'Webhooks', icon: Webhooks, path: '/webhooks'},
 ]
 
 const IMAGE_HEIGHT='47px'
