@@ -2,7 +2,7 @@
 # This should match the version of Alpine that the `elixir:1.7.2-alpine` image uses
 ARG ALPINE_VERSION=3.8
 
-FROM gcr.io/pluralsh/elixir:1.9-alpine AS builder
+FROM gcr.io/pluralsh/elixir:1.9-alpine-old AS builder
 
 # The following are build arguments used to change variable parts of the image.
 # The name of your application/release (required)
@@ -67,7 +67,7 @@ ENV TERRAFORM_VERSION=0.15.2
 ENV BASE_URL="https://get.helm.sh"
 ENV TAR_FILE="helm-v${VERSION}-linux-amd64.tar.gz"
 
-RUN apk add --update --no-cache curl ca-certificates unzip wget openssl && \
+RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-base && \
     curl -L ${BASE_URL}/${TAR_FILE} | tar xvz && \
     mv linux-amd64/helm /usr/local/bin/helm && \
     wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
@@ -91,22 +91,14 @@ COPY --from=helm /usr/local/bin/terraform /usr/local/bin/terraform
 
 RUN apk --no-cache add \
         curl \
-        python3 \
-        py3-pip \
-        py-crcmod \
+        # python3 \
+        # py3-pip \
+        # py-crcmod \
         bash \
         libc6-compat \
         openssh-client \
         git \
-        gnupg \
-    && ln -sf python3 /usr/bin/python \
-    && curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
-    tar xzf google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
-    rm google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
-    gcloud config set core/disable_usage_reporting true && \
-    gcloud config set component_manager/disable_update_check true && \
-    gcloud config set metrics/environment github_docker_image && \
-    gcloud --version
+        gnupg
 
 # The name of your application/release (required)
 ARG APP_NAME
