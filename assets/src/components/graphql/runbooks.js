@@ -20,6 +20,7 @@ export const RunbookExecutionFragment = gql`
     namespace
     context
     user { ...UserFragment }
+    insertedAt
   }
   ${UserFragment}
 `;
