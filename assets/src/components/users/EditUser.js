@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react'
 import { Anchor, Box, Layer, Text } from 'grommet'
-import { Logout, StatusCritical, Checkmark, User, Lock, Script } from 'grommet-icons'
-import { Button, InputCollection, ResponsiveInput } from 'forge-core'
+import { StatusCritical, Checkmark } from 'grommet-icons'
+import { Button, InputCollection, ResponsiveInput, EditField, Password, Roles, Logout } from 'forge-core'
 import { useMutation } from 'react-apollo'
 import { EDIT_USER } from './queries'
 import Avatar from './Avatar'
@@ -134,9 +134,9 @@ export default function EditUser() {
             </Box>
           </Box>
           <Box gap='xsmall'>
-            <EditSelect edit='User Attributes' icon={<User size='small' />} />
-            <EditSelect edit='Password' icon={<Lock size='small' />} />
-            <EditSelect edit='Bound Roles' icon={<Script size='small' />} />
+            <EditSelect edit='User Attributes' icon={<EditField size='small' />} />
+            <EditSelect edit='Password' icon={<Password size='small' />} />
+            <EditSelect edit='Bound Roles' icon={<Roles size='small' />} />
             <ActionBox
               text='logout'
               onClick={() => {

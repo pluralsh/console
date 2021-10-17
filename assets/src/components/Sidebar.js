@@ -1,17 +1,19 @@
 import React, { useContext } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
-import { Book } from 'grommet-icons'
+import { Book, Previous, Menu } from 'grommet-icons'
 import { Builds, Components, Nodes, Configuration, Incidents, Dashboard, Logs, Webhooks, Audits, Group } from 'forge-core'
-import { Box, Text } from 'grommet'
+import { Box, Text, Drop } from 'grommet'
 import { Next, Down } from 'grommet-icons' 
 import { LoginContext } from './Login'
 import Avatar from './users/Avatar'
 import { InstallationContext } from './Installations'
 import './sidebar.css'
 import { SubmenuContext, Submenu } from './navigation/Submenu'
-import { TOOLBAR_HEIGHT } from './Console'
+import { SIDEBAR_WIDTH } from './Console'
 import styled from 'styled-components'
 import { normalizeColor } from 'grommet/utils'
+import { useRef } from 'react'
+import { useState } from 'react'
 
 const hoverable = styled.div`
   &:hover span {
@@ -25,7 +27,7 @@ const hoverable = styled.div`
 `
 
 export const SIDEBAR_ICON_HEIGHT = '42px'
-const APP_ICON = `${process.env.PUBLIC_URL}/console-full.png`
+const SMALL_WIDTH = '60px'
 const ICON_HEIGHT = '15px'
 
 export function SidebarIcon({icon, text, name: sidebarName, selected, path}) {
@@ -53,20 +55,49 @@ export function SidebarIcon({icon, text, name: sidebarName, selected, path}) {
   )
 }
 
-function Me() {
+function CompressedIcon({icon, text, selected, path}) {
+  const ref = useRef()
+  const [hover, setHover] = useState(false)
+  let history = useHistory()
+
+  return (
+    <>
+      <Box ref={ref} focusIndicator={false} align='center' justify='center' direction='row' 
+        height={SIDEBAR_ICON_HEIGHT} width={SIDEBAR_ICON_HEIGHT} hoverIndicator='sidebarHover' 
+        background={selected ? 'sidebarHover' : null} margin={{top: 'xsmall'}}
+        onClick={selected ? null : () => history.push(path)} 
+        round='3px'
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}>
+        {React.createElement(icon, {color: 'white', size: ICON_HEIGHT})}
+      </Box>
+      {hover && (
+        <Drop plain target={ref.current} align={{left: "right"}}>
+          <Box round='3px' background='sidebar' pad='small'>
+            <Text size='small' weight={500}>{text}</Text>
+          </Box>
+        </Drop>
+      )}
+    </>
+  )  
+}
+
+function Me({expanded}) {
   let history = useHistory()
   const {me} = useContext(LoginContext)
   if (!me) return null
 
   return (
     <Box flex={false} direction='row' gap='xsmall' align='center' pad='xsmall'
-         hoverIndicator='sidebarHover' round='xsmall'
+         hoverIndicator='sidebarHover' round='3px' justify={expanded ? null : 'center'}
          onClick={() => history.push('/me/edit')}>
-      <Avatar user={me} size='45px' />
-      <Box>
-        <Text size='small' color='light-5' truncate>{me.name}</Text>
-        <Text size='small'>{me.email}</Text>
-      </Box>
+      <Avatar user={me} size={expanded ? '45px' : '40px'} />
+      {expanded && (
+        <Box>
+          <Text size='small' color='light-5' truncate>{me.name}</Text>
+          <Text size='small'>{me.email}</Text>
+        </Box>
+      )}
     </Box>
   )
 }
@@ -86,11 +117,33 @@ const OPTIONS = [
   {text: 'Webhooks', icon: Webhooks, path: '/webhooks'},
 ]
 
-const IMAGE_HEIGHT='47px'
-
 const replace = (path, name) => path.replace('{repo}', name)
 
+const animation = {
+  transition: 'width 0.75s cubic-bezier(0.000, 0.795, 0.000, 1.000)'
+}
+
+function Collapse({setExpanded}) {
+  return (
+    <Box direction='row' fill='horizontal' align='center' gap='xsmall' round='3px'
+          pad='xsmall' hoverIndicator='sidebarHover' onClick={() => setExpanded(false)}>
+      <Previous size='15px' />
+      <Text size='small'>Collapse</Text>
+    </Box>
+  )
+}
+
+function Expand({setExpanded}) {
+  return (
+    <Box pad='xsmall' align='center' justify='center' hoverIndicator='sidebarHover'
+         onClick={() => setExpanded(true)} round='3px'>
+      <Menu size='15px' />
+    </Box>
+  )
+}
+
 export default function Sidebar() {
+  const [expanded, setExpanded] = useState(false)
   const loc = useLocation()
   const {currentApplication} = useContext(InstallationContext)
 
@@ -99,29 +152,36 @@ export default function Sidebar() {
     if (path === '/') return loc.pathname === path
     return loc.pathname.startsWith(replace(path, name))
   })
+  const isExpanded = expanded || (active >= 0 && !!OPTIONS[active].name)
 
   return (
-    <Box background='sidebar' height='100vh' fill='horizontal'>
-      <Box flex={false} direction='row' align='center' pad={{horizontal: 'small'}} 
-           border={{side: 'bottom', color: 'sidebarBorder'}} height={TOOLBAR_HEIGHT}>
-        <img height={IMAGE_HEIGHT} alt='' src={APP_ICON} />
-      </Box>
+    <Box flex={false} background='sidebar' fill='vertical' style={animation} 
+         width={isExpanded ? SIDEBAR_WIDTH : SMALL_WIDTH}>
       <Box fill align='center' border={{side: 'right', color: 'sidebarBorder'}}
            style={{overflow: 'auto'}}>
-        <Box flex={false} fill='horizontal'>
+        <Box flex={false} fill='horizontal' align='center'>
           {OPTIONS.map(({text, icon, path, name: sbName}, ind) => (
-            <SidebarIcon
-              key={ind}
-              icon={icon}
-              path={replace(path, name)}
-              text={text}
-              name={sbName}
-              selected={ind === active} />
+            isExpanded ? <SidebarIcon
+                          key={ind}
+                          icon={icon}
+                          path={replace(path, name)}
+                          text={text}
+                          name={sbName}
+                          selected={ind === active} /> :
+              <CompressedIcon 
+                key={ind}
+                icon={icon}
+                path={replace(path, name)}
+                text={text}
+                name={sbName}
+                selected={ind === active} />
           ))}
         </Box>
       </Box>
-      <Box pad='small' flex={false}>
-        <Me />
+      <Box pad='xsmall' flex={false} gap='xsmall' margin={{bottom: 'small'}}>
+        <Me expanded={isExpanded} />
+        {isExpanded && <Collapse setExpanded={setExpanded} />}
+        {!isExpanded && <Expand setExpanded={setExpanded} />}
       </Box>
     </Box>
   )

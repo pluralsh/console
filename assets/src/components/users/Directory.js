@@ -1,13 +1,13 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { Box, Text, Layer, TextInput, ThemeContext } from 'grommet'
 import { useQuery, useMutation } from 'react-apollo'
-import { ModalHeader, Scroller } from 'forge-core'
+import { ModalHeader, Scroller, User, Group, AddUser, AddGroup, Roles, CreateRole as CreateRoleI } from 'forge-core'
 import { USERS_Q, GROUPS_Q, EDIT_USER, ROLES_Q } from './queries'
 import Avatar from './Avatar'
 import { GroupForm } from './CreateGroup'
 import { InviteForm } from './CreateInvite'
 import { useParams, useHistory } from 'react-router-dom'
-import { User, Group, Add, Script } from 'grommet-icons'
+import { Add, Script } from 'grommet-icons'
 import GroupRow from './Group'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import RoleRow, { CreateRole } from './Role'
@@ -207,33 +207,31 @@ export default function Directory() {
           section='groups' 
           setSection={setSection} />
         <SectionChoice 
-          icon={<Script size='14px' />} 
+          icon={<Roles size='14px' />} 
           label='Roles' 
           section='roles' 
           setSection={setSection} />
         <CreateModal header='Create a new group' form={<GroupForm />}>
-          {(onClick) => <SectionChoice icon={
-            <Box direction='row' align='center' gap='xxsmall'>
-              <Add size='8px' />
-              <Group size='14px' />
-            </Box>} label='Create Group' onClick={onClick} />
-          }
+          {(onClick) => (
+            <SectionChoice 
+              icon={<AddGroup size='14px' />} 
+              label='Create Group' onClick={onClick} />
+          )}
         </CreateModal>
         <CreateModal width='50vw' header='Create a new role' form={<CreateRole />}>
-          {(onClick) => <SectionChoice icon={
-            <Box direction='row' align='center' gap='xxsmall'>
-              <Add size='8px' />
-              <Script size='14px' />
-            </Box>} label='Create Role' onClick={onClick} />
-          }
+          {(onClick) => (
+            <SectionChoice 
+              icon={<CreateRoleI size='14px' />} 
+              label='Create Role' 
+              onClick={onClick} />
+          )}
         </CreateModal>
         <CreateModal header='Invite a user' form={<InviteForm />}>
-          {(onClick) => <SectionChoice icon={
-            <Box direction='row' align='center' gap='xxsmall'>
-              <Add size='8px' />
-              <User size='14px' />
-            </Box>} label='Invite User' onClick={onClick} />
-          }
+          {(onClick) => (
+            <SectionChoice 
+              icon={<AddUser size='14px' />} 
+              label='Invite User' onClick={onClick} />
+          )}
         </CreateModal>
       </Box>
       <Box background='white' elevation='small' fill>

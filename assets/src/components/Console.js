@@ -34,7 +34,9 @@ import { useRef } from 'react'
 import { Tooltip } from './utils/Tooltip'
 
 export const TOOLBAR_HEIGHT = '55px'
-const SIDEBAR_WIDTH = '200px'
+export const SIDEBAR_WIDTH = '200px'
+const IMAGE_HEIGHT='47px'
+const APP_ICON = `${process.env.PUBLIC_URL}/console-full.png`
 
 export function Icon({icon, text, selected, path, onClick, size}) {
   const dropRef = useRef()
@@ -79,27 +81,29 @@ export default function Console() {
       <InstallationsProvider>
       <NavigationContext>
       <BreadcrumbProvider>
-        <Box direction='row' width='100vw' height='100vh'>
+        <Box width='100vw' height='100vh'>
           <AutoRefresh />
-          <Box flex={false} width={SIDEBAR_WIDTH}>
-            <Sidebar />
-          </Box>
-          <Box height='100vh' fill='horizontal'>
-            <Box flex={false} direction='row' align='center' background='backgroundDark' height={TOOLBAR_HEIGHT}
+          <Box flex={false} direction='row' align='center' background='backgroundDark' height={TOOLBAR_HEIGHT}
                  border={{side: 'bottom', color: 'sidebarBorder'}}>
-              <Breadcrumbs />
-              <Box direction='row' fill gap='small' justify='end' 
-                   pad={{horizontal: 'medium'}} align='center'>
-                <Icon
-                  icon={<Explore size='18px' />}
-                  text='Search'
-                  size='40px'
-                  selected={open}
-                  onClick={() => setOpen(true)} />
-                <Installations />
-              </Box>
-              {open && <Installer setOpen={setOpen} />}
+            <Box flex={false} direction='row' align='center' 
+                  pad={{horizontal: 'small'}}>
+              <img height={IMAGE_HEIGHT} alt='' src={APP_ICON} />
             </Box>
+            <Breadcrumbs />
+            <Box direction='row' fill gap='small' justify='end' 
+                  pad={{horizontal: 'medium'}} align='center'>
+              <Icon
+                icon={<Explore size='18px' />}
+                text='Search'
+                size='40px'
+                selected={open}
+                onClick={() => setOpen(true)} />
+              <Installations />
+            </Box>
+            {open && <Installer setOpen={setOpen} />}
+          </Box>
+          <Box fill direction='row'>
+            <Sidebar />
             <Box fill direction='row'>
               <Switch>
                 <Route path='/config/:repo' component={Configuration} />
