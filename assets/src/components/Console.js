@@ -35,7 +35,6 @@ import { Tooltip } from './utils/Tooltip'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
-const IMAGE_HEIGHT='47px'
 const APP_ICON = `${process.env.PUBLIC_URL}/console-full.png`
 
 export function Icon({icon, text, selected, path, onClick, size}) {
@@ -85,9 +84,8 @@ export default function Console() {
           <AutoRefresh />
           <Box flex={false} direction='row' align='center' background='backgroundDark' height={TOOLBAR_HEIGHT}
                  border={{side: 'bottom', color: 'sidebarBorder'}}>
-            <Box flex={false} direction='row' align='center' 
-                  pad={{horizontal: 'small'}}>
-              <img height={IMAGE_HEIGHT} alt='' src={APP_ICON} />
+            <Box flex={false} direction='row' align='center'>
+              <img height='50px' alt='' src={APP_ICON} />
             </Box>
             <Breadcrumbs />
             <Box direction='row' fill gap='small' justify='end' 
