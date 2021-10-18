@@ -91,7 +91,7 @@ function Me({expanded}) {
     <Box flex={false} direction='row' gap='xsmall' align='center' pad='xsmall'
          hoverIndicator='sidebarHover' round='3px' justify={expanded ? null : 'center'}
          onClick={() => history.push('/me/edit')}>
-      <Avatar user={me} size={expanded ? '45px' : '40px'} />
+      <Avatar user={me} size={expanded ? '45px' : '35px'} />
       {expanded && (
         <Box>
           <Text size='small' color='light-5' truncate>{me.name}</Text>

@@ -79,12 +79,6 @@ export const BUILD_PADDING = {horizontal: 'medium'}
 function Build({build}) {
   const {id, repository, status, insertedAt, message, creator, sha} = build
   let history = useHistory()
-  const footer = [
-    moment(insertedAt).fromNow(),
-    creator && creator.name,
-    message,
-    sha
-  ].filter((e) => !!e).join(' -- ')
 
   return (
     <Box pad={BUILD_PADDING}>
@@ -92,9 +86,21 @@ function Build({build}) {
         <BuildIcon build={build} />
         <Box fill='horizontal'>
           <Text size='small' weight='bold'>{repository}</Text>
-          <Text size='small' color='dark-6'>{footer}</Text>
+          <Box direction='row' align='center' gap='xsmall'>
+            <Box flex={false}>
+              <Text size='small' color='dark-6'>{moment(insertedAt).fromNow()} -- {creator && creator.name} --</Text>
+            </Box>
+            <Box style={{maxWidth: '100%'}}>
+              <Text size='small' color='dark-6' truncate>{message}</Text>
+            </Box>
+            <Box flex={false}>
+              <Text size='small' color='dark-6'>-- {sha}</Text>
+            </Box>
+          </Box>
         </Box>
-        <BuildStatus status={status} />
+        <Box margin={{left: 'small'}}>
+          <BuildStatus status={status} />
+        </Box>
       </Container>
     </Box>
   )
