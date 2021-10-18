@@ -1,5 +1,6 @@
 import React, { useContext, useRef, useState } from 'react'
-import { Checkmark, Previous } from 'grommet-icons'
+import { Previous } from 'grommet-icons'
+import { Check } from 'forge-core'
 import { Box, Drop, Text, ThemeContext } from 'grommet'
 import { normalizeColor } from 'grommet/utils'
 import { ignore } from '../kubernetes/Pod'
@@ -12,7 +13,7 @@ function Warning({size, color}) {
 }
 
 const ICON_DATA = {
-  Healthy: {icon: Checkmark, color: 'success'},
+  Healthy: {icon: Check, color: 'success'},
   Alert: {icon: Warning, color: 'orange'},
 }
 

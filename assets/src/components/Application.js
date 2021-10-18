@@ -1,5 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 import { Box, Text, ThemeContext } from 'grommet'
+import { Check, Reload } from 'forge-core'
 import { useHistory, useParams } from 'react-router'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from './Installations'
@@ -43,15 +44,15 @@ export function ReadyIcon({size, readiness, showIcon}) {
   switch (readiness) {
     case Readiness.Ready:
       color = 'success'
-      icon = <Checkmark size='small' />
+      icon = <Check size='small' />
       break
     case Readiness.InProgress:
       color = 'status-warning'
-      icon = <Update size='small' />
+      icon = <Reload size='small' color='white' />
       break
     case Readiness.Complete:
       color = 'tone-medium'
-      icon = <Checkmark size='small' />
+      icon = <Check size='small' />
     default:
       break
   }

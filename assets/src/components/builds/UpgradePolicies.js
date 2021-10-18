@@ -1,11 +1,10 @@
 import React, { useCallback, useContext, useRef, useState } from 'react'
-import { SettingsOption, Trash } from 'grommet-icons'
 import { Configuration } from 'forge-core'
 import { LabelledInput } from '../utils/LabelledInput'
 import { useMutation, useQuery } from 'react-apollo'
 import { CREATE_POLICY, DELETE_POLICY, UPGRADE_POLICIES } from '../graphql/builds'
 import { UpgradePolicyType } from './types'
-import { Select, Button, ModalHeader } from 'forge-core'
+import { Select, Button, ModalHeader, Trash } from 'forge-core'
 import { Box, Drop, Layer, Text } from 'grommet'
 import { updateCache } from '../../utils/graphql'
 

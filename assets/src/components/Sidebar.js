@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
-import { Book, Previous, Menu } from 'grommet-icons'
-import { Builds, Components, Nodes, Configuration, Incidents, Dashboard, Logs, Webhooks, Audits, Group } from 'forge-core'
+import { Previous, Menu } from 'grommet-icons'
+import { Builds, Components, Nodes, Configuration, Incidents, Dashboard, Logs, Webhooks, Audits, Group, Runbook } from 'forge-core'
 import { Box, Text, Drop } from 'grommet'
 import { Next, Down } from 'grommet-icons' 
 import { LoginContext } from './Login'
@@ -12,7 +12,6 @@ import { SubmenuContext, Submenu } from './navigation/Submenu'
 import { SIDEBAR_WIDTH } from './Console'
 import styled from 'styled-components'
 import { normalizeColor } from 'grommet/utils'
-import { useRef } from 'react'
 import { useState } from 'react'
 
 const hoverable = styled.div`
@@ -106,7 +105,7 @@ function Me({expanded}) {
 
 const OPTIONS = [
   {text: 'Builds', icon: Builds, path: '/'},
-  {text: 'Runbooks', icon: Book, path: '/runbooks/{repo}'},
+  {text: 'Runbooks', icon: Runbook, path: '/runbooks/{repo}'},
   {text: 'Components', icon: Components, path: '/components/{repo}'},
   {text: 'Nodes', icon: Nodes, path: '/nodes'},
   {text: 'Configuration', icon: Configuration, path: '/config/{repo}' },

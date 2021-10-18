@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useCallback } from 'react'
 import { useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { BUILDS_Q, CREATE_BUILD, BUILD_SUB } from './graphql/builds'
-import { Button, Builds as BuildI } from 'forge-core'
+import { Button, Builds as BuildI, Reload, Check } from 'forge-core'
 import { Box, Layer, Text } from 'grommet'
 import moment from 'moment'
 import { BeatLoader } from 'react-spinners'
@@ -13,7 +13,7 @@ import { appendConnection, extendConnection, updateCache } from '../utils/graphq
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { StandardScroller } from './utils/SmoothScroller'
 import { UpgradePolicies } from './builds/UpgradePolicies'
-import { Checkmark, Close, Refresh, StatusCritical, Up, Validate } from 'grommet-icons'
+import { Close, StatusCritical, Up } from 'grommet-icons'
 import { PinnedRunbooks } from './runbooks/PinnedRunbooks'
 import { Container } from './utils/Container'
 
@@ -66,7 +66,7 @@ function BuildStatus({status}) {
     case Status.FAILED:
       return <IconStatus icon={StatusCritical} background='error' />
     case Status.SUCCESSFUL:
-      return <IconStatus icon={Checkmark} background='success' />
+      return <IconStatus icon={Check} background='success' />
     case Status.PENDING:
       return <BuildStatusInner background='status-warning' text='pending approval' />
     default:
@@ -119,13 +119,13 @@ function CreateBuild() {
   return (
     <Box flex={false} gap='small' pad={{horizontal: 'small'}} direction='row' align='center'>
       <Button
-        icon={<Refresh size='small' />}
+        icon={<Reload size='small' />}
         onClick={() => deploy(BuildTypes.BOUNCE)} 
         background='card' flat
         label='Bounce'
         loading={loading && type === BuildTypes.BOUNCE} />
       <Button
-        icon={<Validate size='small' />}
+        icon={<Check size='small' />}
         onClick={() => deploy(BuildTypes.APPROVAL)} 
         background='card' flat
         label='Approval'
