@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useCallback } from 'react'
 import { useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { BUILDS_Q, CREATE_BUILD, BUILD_SUB } from './graphql/builds'
-import { Button, Builds as BuildI, Reload, Check } from 'forge-core'
+import { Button, Reload, Check, Deploy } from 'forge-core'
 import { Box, Layer, Text } from 'grommet'
 import moment from 'moment'
 import { BeatLoader } from 'react-spinners'
@@ -44,7 +44,7 @@ function IconStatus({icon, background}) {
 export function BuildIcon({build, size}) {
   const icon = BuildIcons[build.type]
   return (
-    <Box flex={false} pad='small'>
+    <Box flex={false} pad='small' background='cardDark'>
       {React.createElement(icon, {size: size || '15px'})}
     </Box>
   )
@@ -137,7 +137,7 @@ function CreateBuild() {
         label='Approval'
         loading={loading && type === BuildTypes.APPROVAL} />
       <Button
-        icon={<BuildI size='small' />}
+        icon={<Deploy size='small' />}
         onClick={() => deploy(BuildTypes.DEPLOY)}
         loading={loading && type === BuildTypes.DEPLOY} 
         label='Deploy'  background='brand' flat />
@@ -204,8 +204,8 @@ export default function Builds() {
   const {edges, pageInfo} = data.builds
   return (
     <Box fill background='backgroundColor'>
-      <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}}
-        direction='row' align='center' height={HEADER_HEIGHT} border={{side: 'bottom'}}>
+      <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}} direction='row' 
+           align='center' height={HEADER_HEIGHT} border={{side: 'bottom'}}>
         <Box fill='horizontal'>
           <Text weight='bold' size='small'>Builds</Text>
           <Text size='small' color='dark-3'>a list of historical changes managed by console</Text>

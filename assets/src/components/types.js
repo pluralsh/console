@@ -1,5 +1,4 @@
-import { Install } from "grommet-icons"
-import { Builds, Reload, Check } from 'forge-core'
+import { Reload, Check, Deploy, Install } from 'forge-core'
 
 export const BuildStatus = {
   SUCCESSFUL: 'SUCCESSFUL',
@@ -19,7 +18,7 @@ export const BuildTypes = {
 
 export const BuildIcons = {
   BOUNCE: Reload,
-  DEPLOY: Builds,
+  DEPLOY: Deploy,
   APPROVAL: Check,
   INSTALL: Install,
 }

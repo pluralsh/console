@@ -14,7 +14,8 @@ import { useParams } from 'react-router'
 import { appendConnection, updateCache } from '../../utils/graphql'
 import { AttachmentContext } from './AttachmentProvider'
 import { Control } from './MessageControls'
-import { Attachment, Close, Emoji } from 'grommet-icons'
+import { Attachment } from 'grommet-icons'
+import { Emoji, Close } from 'forge-core'
 import fs from 'filesize'
 import { emojiIndex, NimbleEmoji } from 'emoji-mart'
 import { EntityType } from './types'
@@ -266,8 +267,6 @@ export function MessageInput() {
   const submit = useCallback(() => {
     if (disable) return
     const entities = [...extractEntities(editorState)]
-    console.log(entities)
-    console.log(attachment)
     const file = attachment ? {blob: attachment} : null
     mutation({variables: {attributes: {text: plainSerialize(editorState), file, entities}}})
     Transforms.select(editor, SlateEditor.start(editor, []))

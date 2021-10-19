@@ -62,5 +62,4 @@ import-incidents:
 	cp $(PLRL_WWW)/components/utils/icons.js assets/src/components/utils/icons.js
 	cp $(PLRL_WWW)/components/utils/TimedCache.js assets/src/components/utils/TimedCache.js
 	cp $(PLRL_WWW)/utils/date.js assets/src/utils/date.js
-	cp $(PLRL_WWW)/utils/graphql.js assets/src/utils/graphql.js
 	cp $(PLRL_WWW)/utils/slate.js assets/src/utils/slate.js

@@ -24,7 +24,7 @@ function Header() {
   )
 }
 
-const truncate = (str) => str.length > 20 ? `${str.substring(0, 17)}...` : str
+const truncate = (str) => str && str.length > 20 ? `${str.substring(0, 17)}...` : str
 
 function Row({name, value}) {
   return (
@@ -32,7 +32,7 @@ function Row({name, value}) {
       <TableCell scope="row">
         <strong>{name}</strong>
       </TableCell>
-      <TableCell>{truncate(value || '')}</TableCell>
+      <TableCell>{truncate(value)}</TableCell>
     </TableRow>
   )
 }
