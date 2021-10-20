@@ -27,6 +27,9 @@ push: ## push to gcr
 deploy: ## deploy artifacts to plural
 	cd plural && plural apply
 
+bump-version: ## bumps the image version of this chart
+	plural utils image-bump plural/helm/console --tag $(APP_VSN) --path "image.tag"
+
 testup: ## sets up dependent services for test
 	docker-compose up -d
 
