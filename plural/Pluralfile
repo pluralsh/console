@@ -1,0 +1,7 @@
+REPO console
+ATTRIBUTES Plural repository.yaml
+
+TF terraform/*
+HELM helm/*
+RECIPE plural/recipe/*
+TAG plural/tags/**/*

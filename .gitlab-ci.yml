@@ -14,6 +14,7 @@ variables:
 stages:
 - test
 - push
+- deploy
 
 build:
   stage: test
@@ -45,3 +46,14 @@ build-console:
   script:
   - make build GIT_COMMIT=$CI_COMMIT_SHORT_SHA
   - make push
+
+deploy:
+  stage: deploy
+  only:
+  - master
+  image: gcr.io/pluralsh/plrl-base:0.1.4
+  before_script:
+  - cat /root/configure.sh
+  - source /root/configure.sh
+  script:
+  - make deploy

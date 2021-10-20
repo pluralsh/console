@@ -24,6 +24,9 @@ push: ## push to gcr
 	docker push gcr.io/$(GCP_PROJECT)/$(APP_NAME):$(APP_VSN)
 	docker push $(DKR_HOST)/console/$(APP_NAME):$(APP_VSN)
 
+deploy: ## deploy artifacts to plural
+	cd plural && plural apply
+
 testup: ## sets up dependent services for test
 	docker-compose up -d
 
