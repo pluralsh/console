@@ -5,7 +5,8 @@ import TinyQueue from 'tinyqueue'
 import { DashboardHeader } from './Dashboards'
 import { LOGS_Q } from './graphql/dashboards'
 import moment from 'moment'
-import { Checkmark, Close, Download, Search, Up } from 'grommet-icons'
+import { Up } from 'grommet-icons'
+import { Check as Checkmark, Close, Download, Explore as Search } from 'forge-core'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { useHistory, useParams } from 'react-router'
 import { BUILD_PADDING } from './Builds'
@@ -123,7 +124,7 @@ function LogInfo({stream, stamp}) {
         <Box fill='horizontal'>
           <Text size='small' weight='bold'>Log Info</Text>
         </Box>
-        <Box flex={false} pad='xsmall' round='xsmall' onClick={() => setFlyout(null)} hoverIndicator='console'>
+        <Box flex={false} pad='xsmall' round='xsmall' onClick={() => setFlyout(null)} hoverIndicator='cardHover'>
           <Close size='small' />
         </Box>
       </Box>
@@ -339,12 +340,12 @@ function Downloader({query, repo}) {
   const [open,setOpen] = useState(false)
   return (
     <Box flex={false} style={animation} direction='row' justify='end' align='center' width={open ? '200px' : '40px'}>
-      <Box flex={false} pad='small' round='xsmall' hoverIndicator='light-2' onClick={() => setOpen(!open)}
+      <Box flex={false} pad='small' round='xsmall' hoverIndicator='card' onClick={() => setOpen(!open)}
            focusIndicator={false}>
         <Download size='small' />
       </Box>
       {open && DURATIONS.map(({text, value}) => (
-        <Box key={text} flex={false} pad='small' round='xsmall' hoverIndicator='light-2' focusIndicator={false}
+        <Box key={text} flex={false} pad='small' round='xsmall' hoverIndicator='card' focusIndicator={false}
           onClick={() => download(downloadUrl(query, value, repo), `${repo}_logs.txt`)}>
           <Text size='small' weight={500}>{text}</Text>
         </Box>
