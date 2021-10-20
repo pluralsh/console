@@ -214,7 +214,7 @@ export default function Builds() {
         <CreateBuild />
       </Box>
       <PinnedRunbooks />
-      <Box fill pad={{bottom: 'small'}}>
+      <Box fill pad={{vertical: 'small'}}>
         {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
         <StandardScroller
           listRef={listRef}
