@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState, useCallback } from 'react'
-import { Box, Text } from 'grommet'
+import { Box, Text, ThemeContext } from 'grommet'
 import { Checkmark, Next } from 'grommet-icons'
 import { useQuery } from 'react-apollo'
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
@@ -33,7 +33,8 @@ function Installation({application, setCurrentApplication, current: {name}}) {
   )
 }
 
-export function ApplicationIcon({application: {spec: {descriptor: {icons}}}, size, dark}) {
+export function ApplicationIcon({application: {spec: {descriptor: {icons}}}, size}) {
+  const {dark} = useContext(ThemeContext)
   return <img alt='' src={(dark && icons[1]) ? icons[1] : icons[0]} width={size || '25px'} height={size || '25px'} />
 }
 
