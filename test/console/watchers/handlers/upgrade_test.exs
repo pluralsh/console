@@ -16,6 +16,22 @@ defmodule Console.Watchers.Handlers.UpgradeTest do
       assert build.type == :deploy
     end
 
+    test "it will respect passed upgrade type" do
+      bot = insert(:user, bot_name: "console")
+      Console.Cache.delete(:upgrade_policies)
+      expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{metadata: %{name: "plural"}}} end)
+
+      {:ok, build} = Upgrade.create_build(%{
+        "message" => "a message",
+        "repository" => %{"name" => "plural"},
+        "type" => "bounce"
+      })
+
+      assert build.creator_id == bot.id
+      assert build.repository == "plural"
+      assert build.type == :bounce
+    end
+
     test "it can recognize upgrade policies" do
       bot = insert(:user, bot_name: "console")
       expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{metadata: %{name: "plural"}}} end)

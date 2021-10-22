@@ -28,15 +28,20 @@ defmodule Console.Services.Policies do
   end
   def delete_upgrade_policy(_, _), do: {:error, :forbidden}
 
-  def upgrade_type(repository) do
+  def upgrade_type(repository, type \\ :deploy) do
     upgrade_policies()
     |> Enum.filter(&matches?(repository, &1.target))
     |> Enum.max_by(& &1.weight, fn -> nil end)
     |> case do
       %UpgradePolicy{type: type} -> type
-      _ -> :deploy
+      _ -> resolve_type(type)
     end
   end
+
+  defp resolve_type(type) when type in ~w(deploy bounce approval)a, do: type
+  defp resolve_type(type) when type in ~w(deploy bounce approval),
+    do: String.to_existing_atom(type)
+  defp resolve_type(_), do: :deploy
 
   def matches?(repository, target) do
     Regex.compile!("^#{String.replace(target, "*", ".*")}$")
