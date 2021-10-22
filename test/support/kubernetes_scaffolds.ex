@@ -206,4 +206,14 @@ defmodule KubernetesScaffolds do
   def runbook_datasource(:nodes, name, _) do
     %Kube.Runbook.Datasource{type: "nodes", name: name}
   end
+
+  def license(name) do
+    %Kube.License{
+      metadata: %{name: name, namespace: name},
+      status: %Kube.License.Status{
+        free: true,
+        features: [%Kube.License.Feature{name: "feature", description: "description"}]
+      }
+    }
+  end
 end

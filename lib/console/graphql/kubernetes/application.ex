@@ -1,6 +1,6 @@
 defmodule Console.GraphQl.Kubernetes.Application do
   use Console.GraphQl.Schema.Base
-  alias Console.GraphQl.Resolvers.{Plural, Kubecost}
+  alias Console.GraphQl.Resolvers.{Plural, Kubecost, License}
 
   object :application do
     field :name,   non_null(:string), resolve: fn %{metadata: %{name: name}}, _, _ -> {:ok, name} end
@@ -8,11 +8,20 @@ defmodule Console.GraphQl.Kubernetes.Application do
     field :status, non_null(:application_status)
 
     field :cost, :cost_analysis, resolve: fn
-      %{metadata: %{name: name}}, _, %{context: %{loader: loader}} ->
+      %{metadata: %{namespace: name}}, _, %{context: %{loader: loader}} ->
         loader
         |> Dataloader.load(Kubecost, :namespace, name)
         |> on_load(fn loader ->
           {:ok, Dataloader.get(loader, Kubecost, :namespace, name)}
+        end)
+    end
+
+    field :license, :license, resolve: fn
+      %{metadata: %{name: name}}, _, %{context: %{loader: loader}} ->
+        loader
+        |> Dataloader.load(License, :name, name)
+        |> on_load(fn loader ->
+          {:ok, Dataloader.get(loader, License, :name, name)}
         end)
     end
 

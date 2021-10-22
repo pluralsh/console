@@ -16,6 +16,11 @@ defmodule Console.GraphQl.Kubernetes do
     field :status,  :string
   end
 
+  object :secret_key_selector do
+    field :name, non_null(:string)
+    field :key,  :string
+  end
+
   object :cluster_info do
     field :git_commit,  :string
     field :git_version, :string
@@ -43,6 +48,7 @@ defmodule Console.GraphQl.Kubernetes do
   end
 
   import_types Console.GraphQl.Kubernetes.Event
+  import_types Console.GraphQl.Kubernetes.License
   import_types Console.GraphQl.Kubernetes.Application
   import_types Console.GraphQl.Kubernetes.Pod
   import_types Console.GraphQl.Kubernetes.Deployment

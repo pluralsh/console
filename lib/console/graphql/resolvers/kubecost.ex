@@ -5,7 +5,7 @@ defmodule Console.GraphQl.Resolvers.Kubecost do
 
   def query(_, apps) do
     query_results = find_cost_data()
-    Map.new(IO.inspect(apps), fn app ->
+    Map.new(apps, fn app ->
       {app, query_results[app]}
     end)
   end

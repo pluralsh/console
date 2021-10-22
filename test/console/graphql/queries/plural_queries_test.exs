@@ -1,6 +1,7 @@
 defmodule Console.GraphQl.PluralQueriesTest do
   use Console.DataCase, async: true
   use Mimic
+  import KubernetesScaffolds
   alias Console.Plural.Queries
   alias Kube.{Application, ApplicationList}
 
@@ -198,6 +199,30 @@ defmodule Console.GraphQl.PluralQueriesTest do
       assert app["cost"]["cpuCost"]
       assert app["cost"]["ramCost"]
     end
+
+    test "it can sideload license data" do
+      expect(Kazan, :run, 2, fn
+        %{path: "/apis/platform.plural.sh" <> _} ->
+          {:ok, %Kube.LicenseList{items: [license("redis")]}}
+        _ ->
+          {:ok, %ApplicationList{items: [application("redis")]}}
+      end)
+
+
+      {:ok, %{data: %{"applications" => [app]}}} = run_query("""
+        query {
+          applications {
+            name
+            spec { descriptor { type } }
+            license { status { free } }
+          }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert app["name"] == "redis"
+      assert app["spec"]["descriptor"]["type"] == "redis"
+      assert app["license"]["status"]["free"]
+    end
   end
 
   describe "application" do
@@ -227,9 +252,7 @@ defmodule Console.GraphQl.PluralQueriesTest do
 
   defp application(name) do
     %Application{
-      metadata: %{
-        name: name
-      },
+      metadata: %{name: name, namespace: name},
       spec: %Application.Spec{
         descriptor: %Application.Descriptor{
           type: name

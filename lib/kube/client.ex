@@ -52,6 +52,16 @@ defmodule Kube.Client do
     |> Kazan.run()
   end
 
+  def list_licenses() do
+    %Kazan.Request{
+      method: "get",
+      path: "/apis/platform.plural.sh/v1alpha1/licenses",
+      query_params: %{},
+      response_model: Kube.LicenseList
+    }
+    |> Kazan.run()
+  end
+
   def get_application(name) do
     %Kazan.Request{
       method: "get",
