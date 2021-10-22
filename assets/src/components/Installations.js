@@ -86,10 +86,10 @@ export function ToolbarItem({children, onClick, open}) {
 export function Installations() {
   const {currentApplication, open, setOpen} = useContext(InstallationContext)
   if (!currentApplication) return null
-  const {name, spec: {descriptor}, cost} = currentApplication
+  const {name, spec: {descriptor}, cost, license} = currentApplication
   return (
     <Box flex={false} direction='row' gap='xsmall' align='center'>
-      {cost && <CostAnalysis cost={cost} />}
+      {(cost || license) && <CostAnalysis license={license} cost={cost} />}
       <ToolbarItem onClick={() => setOpen(true)} open={open}>
         {descriptor.icons.length > 0 && <ApplicationIcon application={currentApplication} dark />}
         <Text size='small' weight={500}>{name}</Text>

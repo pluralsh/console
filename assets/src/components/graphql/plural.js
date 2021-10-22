@@ -146,6 +146,18 @@ export const CostAnalysisFragment = gql`
   }
 `
 
+export const LicenseFragment = gql`
+  fragment LicenseFragment on License {
+    metadata { name }
+    status { 
+      free
+      features { name description }
+      limits
+      plan
+    }
+  }
+`
+
 export const ApplicationFragment = gql`
   fragment ApplicationFragment on Application {
     name
@@ -194,9 +206,11 @@ export const APPLICATIONS_Q = gql`
   query {
     applications {
       ...ApplicationFragment
+      license { ...LicenseFragment }
     }
   }
   ${ApplicationFragment}
+  ${LicenseFragment}
 `;
 
 export const APPLICATION_Q = gql`
