@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { Tabs, TabContent, TabHeader, TabHeaderItem, Confirm, Trash } from 'forge-core'
+import { Tabs, TabContent, TabHeader, TabHeaderItem, Confirm, Trash, Node as NodeI } from 'forge-core'
 import { useQuery, useMutation } from 'react-apollo'
 import { NodeMetrics, POLL_INTERVAL } from './constants'
 import { NODES_Q, NODE_METRICS_Q, NODE_Q, CLUSTER_SATURATION, DELETE_NODE } from './queries'
@@ -110,7 +110,7 @@ function NodeRow({node, metrics, refetch}) {
     <Box fill='horizontal' direction='row' align='center' border='bottom' hoverIndicator='backgroundDark'
          onClick={() => hist.push(`/nodes/${node.metadata.name}`)} pad='small'>
       <Box flex={false} width='30%' direction='row' align='center' gap='xsmall'>
-        <ServerCluster size='small' />
+        <NodeI size='small' />
         <Text size='small'>{node.metadata.name}</Text>
       </Box>
       <Box flex={false} width='10%' direction='row' gap='xsmall' align='center'>

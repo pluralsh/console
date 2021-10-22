@@ -15,7 +15,7 @@ export default function Avatar({size, user: {backgroundColor, avatar, profile, n
   return (
     <Box
       flex={false}
-      round={round || 'xsmall'}
+      round={round || '3px'}
       style={icon ? {backgroundImage: `url(${icon})`, backgroundPosition: 'center', backgroundSize: 'cover'} : null}
       align='center'
       justify='center'
