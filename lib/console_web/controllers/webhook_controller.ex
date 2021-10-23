@@ -15,9 +15,7 @@ defmodule ConsoleWeb.WebhookController do
   def alertmanager(conn, %{"alerts" => alerts}) when is_list(alerts) do
     Enum.each(alerts, fn alert ->
       Alert.build(alert)
-      |> IO.inspect()
       |> Alertmanager.handle_alert()
-      |> IO.inspect()
     end)
 
     json(conn, %{ok: true})

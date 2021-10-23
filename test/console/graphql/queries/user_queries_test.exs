@@ -164,4 +164,21 @@ defmodule Console.GraphQl.UserQueriesTest do
       assert conf["gitCommit"]
     end
   end
+
+  describe "notifications" do
+    test "it will list notifications for this instance" do
+      notifs = insert_list(3, :notification)
+
+      {:ok, %{data: %{"notifications" => found}}} = run_query("""
+        query {
+          notifications(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert from_connection(found)
+             |> ids_equal(notifs)
+    end
+  end
 end

@@ -1,6 +1,6 @@
 defmodule Console.GraphQl.Resolvers.User do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.User
-  alias Console.Schema.{Group, GroupMember, Role, RoleBinding}
+  alias Console.Schema.{Group, GroupMember, Role, RoleBinding, Notification}
   alias Console.Services.Users
   require Logger
 
@@ -23,6 +23,11 @@ defmodule Console.GraphQl.Resolvers.User do
 
   def list_roles(args, _) do
     Role.ordered()
+    |> paginate(args)
+  end
+
+  def list_notifications(args, _) do
+    Notification.ordered()
     |> paginate(args)
   end
 

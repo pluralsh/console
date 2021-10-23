@@ -104,10 +104,24 @@ defmodule Console.GraphQl.Users do
     field :oidc_uri, :string
   end
 
+  object :notification do
+    field :id,          non_null(:id)
+    field :title,       non_null(:string)
+    field :description, :string
+    field :fingerprint, non_null(:string)
+    field :labels,      :map
+    field :annotations, :map
+    field :repository,  non_null(:string)
+    field :seen_at,     :datetime
+
+    timestamps()
+  end
+
   connection node_type: :user
   connection node_type: :group
   connection node_type: :group_member
   connection node_type: :role
+  connection node_type: :notification
 
   object :user_queries do
     connection field :users, node_type: :user do
@@ -159,6 +173,12 @@ defmodule Console.GraphQl.Users do
       middleware Authenticated
 
       resolve &User.list_roles/2
+    end
+
+    connection field :notifications, node_type: :notification do
+      middleware Authenticated
+
+      resolve &User.list_notifications/2
     end
   end
 

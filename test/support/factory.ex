@@ -113,4 +113,16 @@ defmodule Console.Factory do
       user: build(:user)
     }
   end
+
+  def notification_factory do
+    %Schema.Notification{
+      title: "title",
+      description: "description",
+      repository: "repository",
+      fingerprint: sequence(:notification, & "notif-#{&1}"),
+      annotations: %{},
+      labels: %{},
+      seen_at: Timex.now()
+    }
+  end
 end

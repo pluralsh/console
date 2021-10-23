@@ -5,6 +5,7 @@ defmodule Console.Services.AlertmanagerTest do
 
   alias Alertmanager.Alert
   alias Console.Services.Alertmanager
+  alias Console.Alertmanager.Incidents
   alias Console.Plural.Queries
 
   describe "#handle_alert/1" do
@@ -15,7 +16,7 @@ defmodule Console.Services.AlertmanagerTest do
         summary: "some summary",
         description: "some description",
         fingerprint: "adsfsfasd",
-        labels: %{"namespace" => "repo"}
+        labels: %{"namespace" => "repo", "severity" => "critical"}
       }
 
       version = version_info()
@@ -25,7 +26,7 @@ defmodule Console.Services.AlertmanagerTest do
         query: Queries.create_incident_mutation(),
         variables: %{repository: "repo", attributes: %{
           title: alert.summary,
-          description: Alertmanager.description(alert.description),
+          description: Incidents.description(alert.description),
           severity: 1,
           tags: [%{tag: "alertmanager"}, %{tag: "console"}],
           cluster_information: Map.take(version, [:git_commit, :platform, :version])
@@ -38,10 +39,14 @@ defmodule Console.Services.AlertmanagerTest do
           {:ok, %{body: Jason.encode!(%{data: %{createIncident: %{id: id}}})}}
       end)
 
-      {:ok, mapping} = Alertmanager.handle_alert(alert)
+      %{incident: mapping, notification: notif} = Alertmanager.handle_alert(alert)
 
       assert mapping.fingerprint == alert.fingerprint
       assert mapping.incident_id == id
+
+      assert notif.title == alert.summary
+      assert notif.fingerprint == alert.fingerprint
+      assert notif.seen_at
     end
 
     test "it will update existing, mapped incidents" do
@@ -52,7 +57,7 @@ defmodule Console.Services.AlertmanagerTest do
         summary: "some summary",
         description: "some description",
         fingerprint: "print",
-        labels: %{"namespace" => "repo"}
+        labels: %{"namespace" => "repo", "severity" => "critical"}
       }
 
       get_body = Jason.encode!(%{
@@ -68,7 +73,7 @@ defmodule Console.Services.AlertmanagerTest do
         query: Queries.update_incident_mutation(),
         variables: %{id: mapping.incident_id, attributes: %{
           title: alert.summary,
-          description: Alertmanager.description(alert.description),
+          description: Incidents.description(alert.description),
           status: "IN_PROGRESS",
         }}
       })
@@ -82,7 +87,7 @@ defmodule Console.Services.AlertmanagerTest do
         }
       end)
 
-      {:ok, result} = Alertmanager.handle_alert(alert)
+      %{incident: result} = Alertmanager.handle_alert(alert)
 
       assert result.id == mapping.incident_id
       assert result.status == "IN_PROGRESS"
@@ -96,7 +101,7 @@ defmodule Console.Services.AlertmanagerTest do
         summary: "some summary",
         description: "some description",
         fingerprint: "print",
-        labels: %{"namespace" => "repo"}
+        labels: %{"namespace" => "repo", "severity" => "critical"}
       }
 
       get_body = Jason.encode!(%{
@@ -113,7 +118,7 @@ defmodule Console.Services.AlertmanagerTest do
         query: Queries.update_incident_mutation(),
         variables: %{id: mapping.incident_id, attributes: %{
           title: alert.summary,
-          description: Alertmanager.description(alert.description)
+          description: Incidents.description(alert.description)
         }}
       })
 
@@ -126,7 +131,7 @@ defmodule Console.Services.AlertmanagerTest do
         }
       end)
 
-      {:ok, result} = Alertmanager.handle_alert(alert)
+      %{incident: result} = Alertmanager.handle_alert(alert)
 
       assert result.id == mapping.incident_id
       assert result.status == "IN_PROGRESS"
