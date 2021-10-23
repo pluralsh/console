@@ -40,10 +40,11 @@ export function Runbook() {
   const {namespace, name} = useParams()
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
   const [ref, setRef] = useState(null)
-  const {data, loading, fetchMore} = useQuery(RUNBOOK_Q, {
+  const {data, loading, fetchMore, refetch} = useQuery(RUNBOOK_Q, {
     variables: {
       namespace, name, 
-      context: {timeseriesStart: -duration.offset, timeseriesStep: duration.step}},
+      context: {timeseriesStart: -duration.offset, timeseriesStep: duration.step}
+    },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL
   })
@@ -79,7 +80,7 @@ export function Runbook() {
         <ActionContainer />
       </Box>
       <Box fill>
-        <Tabs defaultTab='runbook'>
+        <Tabs defaultTab='runbook' onTabChange={() => refetch()}>
           <TabHeader>
             <TabHeaderItem name='runbook'>
               <Text size='small' weight={500}>runbook</Text>
