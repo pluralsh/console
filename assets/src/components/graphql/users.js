@@ -1,4 +1,5 @@
 import { gql } from 'apollo-boost'
+import { PageInfo } from './base';
 
 export const UserFragment = gql`
   fragment UserFragment on User {
@@ -63,6 +64,18 @@ export const ManifestFragment = gql`
       pluralDns 
       subdomain 
     }
+  }
+`;
+
+export const NotificationFragment = gql`
+  fragment NotificationFragment on Notification {
+    id
+    title
+    description
+    repository
+    labels
+    annotations
+    seenAt
   }
 `;
 
@@ -146,3 +159,14 @@ export const SIGNUP = gql`
   }
   ${UserFragment}
 `;
+
+export const NOTIFICATIONS_Q = gql`
+  query Notifs($cursor: String) {
+    notifications(after: $cursor, first: 50) {
+      pageInfo { ...PageInfo }
+      edges { node { ...NotificationFragment } }
+    }
+  }
+  ${PageInfo}
+  ${NotificationFragment}
+`

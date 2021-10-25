@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Switch, Route, Redirect } from 'react-router-dom'
 import { Box, Text } from 'grommet'
 import { useHistory } from 'react-router'
@@ -11,7 +11,7 @@ import Configuration from './Configuration'
 import Dashboards from './Dashboards'
 import { EnsureLogin } from './Login'
 import Users from './Users'
-import { Installations, InstallationsFlyout, InstallationsProvider } from './Installations'
+import { Installations, InstallationsProvider } from './Installations'
 import { LogViewer } from './Logs'
 import RepositorySelector from './RepositorySelector'
 import Application from './Application'
@@ -32,6 +32,10 @@ import { Runbooks } from './runbooks/Runbooks'
 import { NavigationContext } from './navigation/Submenu'
 import { useRef } from 'react'
 import { Tooltip } from './utils/Tooltip'
+import { Portal } from 'react-portal'
+import Foco from 'react-foco'
+import { Next } from 'grommet-icons'
+import { Notifications } from './users/Notifications'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -71,12 +75,70 @@ export function Icon({icon, text, selected, path, onClick, size}) {
   )
 }
 
+const FlyoutContext = React.createContext({})
+
+function FlyoutProvider({children}) {
+  const [ref, setRef] = useState(false)
+
+  return (
+    <FlyoutContext.Provider value={{ref, setRef}}>
+      {children}
+    </FlyoutContext.Provider>
+  )
+}
+
+function FlyoutGutter() {
+  const {setRef} = useContext(FlyoutContext)
+
+  return (
+    <Box 
+      height='100%' 
+      background='backgroundColor' 
+      ref={setRef} 
+      flex={false}
+      style={{overflow: 'auto'}} />
+  )
+}
+
+function FocoComponent({children, ...props}) {
+  return (
+    <Box {...props} fill='vertical' flex={false}>
+      {children}
+    </Box>
+  )
+}
+
+export function FlyoutContainer({header, close, children}) {
+  const {ref} = useContext(FlyoutContext)
+
+  return (
+    <Portal node={ref}>
+      <Foco onClickOutside={close} component={FocoComponent}>
+        <Box flex={false} width='400px' fill='vertical'  background='backgroundColor' 
+             border={{side: 'left'}}>
+          <Box flex={false} pad={{horizontal: 'small', vertical: 'xsmall'}} align='center' direction='row' border={{side: 'bottom'}}>
+            <Box fill='horizontal'>
+              <Text size='small' weight={500}>{header}</Text>
+            </Box>
+            <Box flex={false} pad='xsmall' round='xsmall' hoverIndicator='hover' onClick={close}>
+              <Next size='14px' />
+            </Box>
+          </Box>
+          <Box fill style={{overflow: 'auto'}} background='backgroundColor'>
+            {children}
+          </Box>
+        </Box>
+      </Foco>
+    </Portal>
+  )
+}
 
 export default function Console() {
   const [open, setOpen] = useState(false)
 
   return (
     <EnsureLogin>
+      <FlyoutProvider>
       <InstallationsProvider>
       <NavigationContext>
       <BreadcrumbProvider>
@@ -88,7 +150,7 @@ export default function Console() {
               <img height='50px' alt='' src={APP_ICON} />
             </Box>
             <Breadcrumbs />
-            <Box direction='row' fill gap='small' justify='end' 
+            <Box direction='row' fill gap='xsmall' justify='end' 
                   pad={{horizontal: 'medium'}} align='center'>
               <Icon
                 icon={<Explore size='18px' />}
@@ -96,6 +158,7 @@ export default function Console() {
                 size='40px'
                 selected={open}
                 onClick={() => setOpen(true)} />
+              <Notifications />
               <Installations />
             </Box>
             {open && <Installer setOpen={setOpen} />}
@@ -154,13 +217,14 @@ export default function Console() {
                 <Route path='/users' component={Users} />
                 <Route path='/' component={Builds} />
               </Switch>
-              <InstallationsFlyout />
+              <FlyoutGutter />
             </Box>
           </Box>
         </Box>
       </BreadcrumbProvider>
       </NavigationContext>
       </InstallationsProvider>
+      </FlyoutProvider>
     </EnsureLogin>
   )
 }

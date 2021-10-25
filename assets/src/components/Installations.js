@@ -1,12 +1,12 @@
 import React, { useEffect, useContext, useState, useCallback } from 'react'
 import { Box, Text, ThemeContext } from 'grommet'
-import { Checkmark, Next } from 'grommet-icons'
+import { Checkmark } from 'grommet-icons'
 import { useQuery } from 'react-apollo'
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
 import { ApplicationReadyIcon } from './Application'
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { CostAnalysis } from './repos/CostAnalysis'
-import Foco from 'react-foco'
+import { FlyoutContainer } from './Console'
 
 export const InstallationContext = React.createContext({})
 
@@ -41,35 +41,20 @@ export function ApplicationIcon({application: {spec: {descriptor: {icons}}}, siz
 export const hasIcon = ({spec: {descriptor: {icons}}}) => icons.length > 0
 
 export function InstallationsFlyout() {
-  const {applications, setCurrentApplication, currentApplication, open, setOpen} = useContext(InstallationContext)
-
-  if (!open) return null
+  const {applications, setCurrentApplication, currentApplication, setOpen} = useContext(InstallationContext)
 
   return (
-    <Foco onClickOutside={() => setOpen(false)}>
-    <Box flex={false} width='400px' fill='vertical' border={{side: 'left', color: 'card'}} background='backgroundColor'>
-      <Box flex={false} pad={{horizontal: 'small', vertical: 'xsmall'}} align='center' direction='row' border={{side: 'bottom'}}>
-        <Box fill='horizontal'>
-          <Text size='small' weight={500}>Applications</Text>
-        </Box>
-        <Box flex={false} pad='xsmall' round='xsmall' hoverIndicator='hover' 
-             onClick={() => setOpen(false)}>
-          <Next size='14px' />
-        </Box>
+    <FlyoutContainer header='Applications' close={() => setOpen(false)}>
+      <Box flex={false}>
+        {applications.map((application) => (
+          <Installation
+            key={application.name}
+            application={application}
+            current={currentApplication}
+            setCurrentApplication={setCurrentApplication} />
+        ))}
       </Box>
-      <Box fill style={{overflow: 'auto'}}>
-        <Box flex={false}>
-          {applications.map((application) => (
-            <Installation
-              key={application.name}
-              application={application}
-              current={currentApplication}
-              setCurrentApplication={setCurrentApplication} />
-          ))}
-        </Box>
-      </Box>
-    </Box>
-    </Foco>
+    </FlyoutContainer>
   )
 }
 
@@ -87,7 +72,9 @@ export function Installations() {
   const {currentApplication, open, setOpen} = useContext(InstallationContext)
   if (!currentApplication) return null
   const {name, spec: {descriptor}, cost, license} = currentApplication
+
   return (
+    <>
     <Box flex={false} direction='row' gap='xsmall' align='center'>
       {(cost || license) && <CostAnalysis license={license} cost={cost} />}
       <ToolbarItem onClick={() => setOpen(true)} open={open}>
@@ -96,6 +83,8 @@ export function Installations() {
         <ApplicationReadyIcon application={currentApplication} size='20px' showIcon />
       </ToolbarItem>
     </Box>
+    {open && <InstallationsFlyout />}
+    </>
   )
 }
 
