@@ -2,13 +2,13 @@ import React, { useCallback, useContext, useMemo, useState } from 'react'
 import { Notification } from 'forge-core'
 import { Box, Stack, Text } from 'grommet'
 import { FlyoutContainer } from '../Console'
-import { useMutation, useQuery } from '@apollo/react-hooks'
+import { useApolloClient, useMutation, useQuery, useSubscription } from '@apollo/react-hooks'
 import { ME_Q, NOTIFICATIONS_Q } from '../graphql/users'
 import { StandardScroller } from '../utils/SmoothScroller'
 import { extendConnection, updateCache } from '../../utils/graphql'
 import { ApplicationIcon, InstallationContext } from '../Installations'
 import { SeverityNub } from '../runbooks/StatusIcon'
-import { MARK_READ } from './queries'
+import { MARK_READ, NOTIFS_SUB } from './queries'
 import { LoginContext } from '../Login'
 
 const SIZE = '35px'
@@ -70,6 +70,7 @@ function NotificationList() {
 }
 
 export function Notifications() {
+  const client = useApolloClient()
   const [open, setOpen] = useState(false)
   const {me} = useContext(LoginContext) 
   const [mutation] = useMutation(MARK_READ, {
@@ -83,6 +84,17 @@ export function Notifications() {
     setOpen(false)
   }, [mutation, setOpen])
 
+  useSubscription(NOTIFS_SUB, {
+    onSubscriptionData: () => {
+      updateCache(client, {
+        query: ME_Q,
+        update: ({me, ...rest}) => ({...rest, me: {...me, unreadNotifications: me.unreadNotifications + 1}})
+      })
+    }
+  })
+
+  const notifsLabel = me.unreadNotifications > 100 ? '!!' : me.unreadNotifications
+
   return (
     <>
     <Stack anchor='top-right'>
@@ -94,7 +106,7 @@ export function Notifications() {
       {me.unreadNotifications > 0 && (
         <Box flex={false} width='14px' height='14px' background='error' round='full'
              align='center' justify='center' margin={{top: '-5px'}}>
-          <Text size='10px'>{me.unreadNotifications}</Text>
+          <Text size='10px'>{notifsLabel}</Text>
         </Box>
       )}
     </Stack>

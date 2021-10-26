@@ -128,7 +128,7 @@ function Input({attributes, children}) {
     const name = attributes.name
     const val = value === '' ? null : value
     const converted = convertType(val, attributes.datatype)
-    if (context[name] !== converted) {
+    if (context[name] !== converted && converted) {
       setContext({...context, [name]: converted})
     }
   }, [attributes, context, setContext, value])

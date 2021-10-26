@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost'
 import { PageInfo } from '../graphql/base';
-import { GroupFragment, GroupMemberFragment, InviteFragment, RoleFragment, UserFragment } from '../graphql/users';
+import { GroupFragment, GroupMemberFragment, InviteFragment, NotificationFragment, RoleFragment, UserFragment } from '../graphql/users';
 
 export const USERS_Q = gql`
   query Users($q: String, $ursor: String) {
@@ -198,3 +198,10 @@ export const MARK_READ = gql`
   }
   ${UserFragment}
 `;
+
+export const NOTIFS_SUB = gql`
+  subscription {
+    notificationDelta { delta payload { ...NotificationFragment } }
+  }
+  ${NotificationFragment}
+`
