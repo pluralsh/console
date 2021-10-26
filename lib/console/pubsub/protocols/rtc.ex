@@ -25,6 +25,10 @@ defimpl Console.PubSub.Rtc, for: [
   def deliver(%{item: item}), do: {item, :update}
 end
 
-defimpl Console.PubSub.Rtc, for: [Console.PubSub.BuildCreated, Console.PubSub.CommandCreated] do
+defimpl Console.PubSub.Rtc, for: [
+    Console.PubSub.BuildCreated,
+    Console.PubSub.CommandCreated,
+    Console.PubSub.NotificationCreated
+] do
   def deliver(%{item: item}), do: {item, :create}
 end

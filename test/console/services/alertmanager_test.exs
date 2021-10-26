@@ -4,6 +4,7 @@ defmodule Console.Services.AlertmanagerTest do
   import KubernetesScaffolds
 
   alias Alertmanager.Alert
+  alias Console.PubSub
   alias Console.Services.Alertmanager
   alias Console.Alertmanager.Incidents
   alias Console.Plural.Queries
@@ -48,6 +49,10 @@ defmodule Console.Services.AlertmanagerTest do
       assert notif.fingerprint == alert.fingerprint
       assert notif.seen_at
       assert notif.severity == :critical
+
+      assert_receive {:event, %PubSub.NotificationCreated{item: found}}
+
+      assert found.id == notif.id
     end
 
     test "it will update existing, mapped incidents" do

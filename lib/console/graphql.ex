@@ -152,6 +152,8 @@ defmodule Console.GraphQl do
     field :application_delta, :application_delta do
       config fn _, _ -> {:ok, topic: "applications"} end
     end
+
+    import_fields :user_subscriptions
   end
 
   def safe_resolver(fun) do

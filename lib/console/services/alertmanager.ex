@@ -1,5 +1,6 @@
 defmodule Console.Services.Alertmanager do
   use Console.Services.Base
+  alias Console.PubSub
   alias Console.Schema.{AlertmanagerIncident, Notification}
   alias Alertmanager.Alert
 
@@ -22,4 +23,26 @@ defmodule Console.Services.Alertmanager do
       end
     end)
   end
+
+  def create_notification(repo, %Alert{fingerprint: fp} = alert) do
+    case get_notification(fp) do
+      %Notification{} = notif -> notif
+      nil -> %Notification{fingerprint: fp}
+    end
+    |> Notification.changeset(%{
+      title: alert.summary,
+      description: "[[#{alert.status}]] #{alert.description || ""}",
+      labels: alert.labels,
+      annotations: alert.annotations,
+      repository: repo,
+      severity: Map.get(alert.labels || %{}, "severity", :none),
+      seen_at: Timex.now()
+    })
+    |> Console.Repo.insert_or_update()
+    |> notify(:create)
+  end
+
+  defp notify({:ok, %Notification{} = notif}, :create),
+    do: handle_notify(PubSub.NotificationCreated, notif)
+  defp notify(pass, _), do: pass
 end

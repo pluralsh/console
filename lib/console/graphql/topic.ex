@@ -14,3 +14,7 @@ end
 defimpl Console.GraphQl.Topic, for: Kube.Application do
   def infer(_, _), do: [application_delta: "applications"]
 end
+
+defimpl Console.GraphQl.Topic, for: Console.Schema.Notification do
+  def infer(_, _), do: [notification_delta: "notifications"]
+end

@@ -134,6 +134,8 @@ defmodule Console.GraphQl.Users do
   connection node_type: :role
   connection node_type: :notification
 
+  delta :notification
+
   object :user_queries do
     connection field :users, node_type: :user do
       middleware Authenticated
@@ -306,6 +308,12 @@ defmodule Console.GraphQl.Users do
       arg :id, non_null(:id)
 
       resolve safe_resolver(&User.delete_role/2)
+    end
+  end
+
+  object :user_subscriptions do
+    field :notification_delta, :notification_delta do
+      config fn _, _ -> {:ok, topic: "notifications"} end
     end
   end
 end
