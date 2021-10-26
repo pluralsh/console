@@ -1,14 +1,15 @@
 import React, { useCallback, useContext, useMemo, useState } from 'react'
 import { Notification } from 'forge-core'
-import { Box, Text } from 'grommet'
+import { Box, Stack, Text } from 'grommet'
 import { FlyoutContainer } from '../Console'
 import { useMutation, useQuery } from '@apollo/react-hooks'
-import { NOTIFICATIONS_Q } from '../graphql/users'
+import { ME_Q, NOTIFICATIONS_Q } from '../graphql/users'
 import { StandardScroller } from '../utils/SmoothScroller'
-import { extendConnection } from '../../utils/graphql'
+import { extendConnection, updateCache } from '../../utils/graphql'
 import { ApplicationIcon, InstallationContext } from '../Installations'
 import { SeverityNub } from '../runbooks/StatusIcon'
 import { MARK_READ } from './queries'
+import { LoginContext } from '../Login'
 
 const SIZE = '35px'
 
@@ -70,7 +71,13 @@ function NotificationList() {
 
 export function Notifications() {
   const [open, setOpen] = useState(false)
-  const [mutation] = useMutation(MARK_READ)
+  const {me} = useContext(LoginContext) 
+  const [mutation] = useMutation(MARK_READ, {
+    update: (cache) => updateCache(cache, {
+      query: ME_Q,
+      update: ({me, ...rest}) => ({...rest, me: {...me, unreadNotifications: 0}})
+    })
+  })
   const doClose = useCallback(() => {
     mutation()
     setOpen(false)
@@ -78,10 +85,19 @@ export function Notifications() {
 
   return (
     <>
-    <Box width={SIZE} height={SIZE} round='full' background='backgroundColor'
-         hoverIndicator='sidebarHover' onClick={() => setOpen(true)} align='center' justify='center'>
-      <Notification size='18px' />
-    </Box>
+    <Stack anchor='top-right'>
+      <Box flex={false} width={SIZE} height={SIZE} round='full' 
+           background='backgroundColor' align='center' justify='center'
+          hoverIndicator='sidebarHover' onClick={() => setOpen(true)}>
+        <Notification size='18px' />
+      </Box>
+      {me.unreadNotifications > 0 && (
+        <Box flex={false} width='14px' height='14px' background='error' round='full'
+             align='center' justify='center' margin={{top: '-5px'}}>
+          <Text size='10px'>{me.unreadNotifications}</Text>
+        </Box>
+      )}
+    </Stack>
     {open && (
       <FlyoutContainer width='500px' header='Notifications' close={doClose}>
         <NotificationList />
