@@ -13,7 +13,6 @@ function textStyle({bg, fg, decoration, ...rest}) {
 }
 
 export function AnsiLine({line}) {
-  console.log(line)
   const blocks = useMemo(() => Anser.ansiToJson(escapeCarriageReturn(line), {json: true, remove_empty: true}), [line])
 
   return blocks.map((json, i) => (
@@ -24,6 +23,8 @@ export function AnsiLine({line}) {
 }
 
 export const AnsiText = React.memo(({text}) => {
+  if (!text) return null
+
   return text.split(/\r?\n/).map((line, ind) => (
     <Box key={`${ind}`} flex={false} height='20px' direction='row'>
       <AnsiLine line={line} />
