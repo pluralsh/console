@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from 'react'
+import React, { useCallback, useContext, useMemo, useState } from 'react'
 import { Notification } from 'forge-core'
 import { Box, Text } from 'grommet'
 import { FlyoutContainer } from '../Console'
@@ -6,22 +6,26 @@ import { useQuery } from '@apollo/react-hooks'
 import { NOTIFICATIONS_Q } from '../graphql/users'
 import { StandardScroller } from '../utils/SmoothScroller'
 import { extendConnection } from '../../utils/graphql'
-import { InstallationContext } from '../Installations'
+import { ApplicationIcon, InstallationContext } from '../Installations'
 
 const SIZE = '35px'
 
 function NotificationRow({notif}) {
   const {applications, setCurrentApplication} = useContext(InstallationContext)
+  const app = useMemo(() => applications.find(({name}) => name === notif.repository), [applications, notif])
   const setCurrent = useCallback(() => {
-   const app = applications.find(({name}) => name === notif.repository)
    if (app) setCurrentApplication(app) 
-  }, [notif, applications, setCurrentApplication])
+  }, [app, setCurrentApplication])
 
   return (
-    <Box flex={false} pad='small' gap='xsmall' hoverIndicator='card' 
-         border='bottom' onClick={setCurrent}>
-      <Text size='small' weight={500}>{notif.title}</Text>
-      <Text size='small' color='dark-3'>{notif.description}</Text>
+    <Box flex={false} pad='small' gap='xsmall' border='bottom'
+         hoverIndicator='card' direction='row' align='center' 
+         onClick={setCurrent}>
+      <Box fill='horizontal'>
+        <Text size='small' weight={500}>{notif.title}</Text>
+        <Text size='small' color='dark-3'>{notif.description}</Text>
+      </Box>
+      <ApplicationIcon application={app} />
     </Box>
   )
 }

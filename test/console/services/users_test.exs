@@ -247,4 +247,15 @@ defmodule Console.Services.UsersTest do
       refute refetch(deleted)
     end
   end
+
+  describe "#mark_read/1" do
+    test "it will set a users read timestamp" do
+      user = insert(:user)
+
+      {:ok, updated} = Users.mark_read(user)
+
+      assert updated.id == user.id
+      assert updated.read_timestamp
+    end
+  end
 end

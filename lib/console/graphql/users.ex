@@ -4,6 +4,7 @@ defmodule Console.GraphQl.Users do
   alias Console.Middleware.{Authenticated, AdminRequired, AllowJwt}
 
   enum_from_list :permission, Console.Schema.Role, :permissions, []
+  ecto_enum :severity, Console.Schema.Notification.Severity
 
   input_object :user_attributes do
     field :name,     :string
@@ -36,13 +37,14 @@ defmodule Console.GraphQl.Users do
   end
 
   object :user do
-    field :id,          non_null(:id)
-    field :name,        non_null(:string)
-    field :email,       non_null(:string)
-    field :deleted_at,  :datetime
-    field :profile,     :string
-    field :roles,       :user_roles
-    field :bound_roles, list_of(:role), resolve: fn user, _, _ -> {:ok, Console.Schema.User.roles(user)} end
+    field :id,             non_null(:id)
+    field :name,           non_null(:string)
+    field :email,          non_null(:string)
+    field :deleted_at,     :datetime
+    field :profile,        :string
+    field :roles,          :user_roles
+    field :bound_roles,    list_of(:role), resolve: fn user, _, _ -> {:ok, Console.Schema.User.roles(user)} end
+    field :read_timestamp, :datetime
 
     field :jwt, :string, resolve: fn
       %{jwt: jwt}, _, %{context: %{allow_jwt: true}} -> {:ok, jwt}
@@ -113,6 +115,7 @@ defmodule Console.GraphQl.Users do
     field :annotations, :map
     field :repository,  non_null(:string)
     field :seen_at,     :datetime
+    field :severity,    :severity
 
     timestamps()
   end
@@ -191,6 +194,12 @@ defmodule Console.GraphQl.Users do
       resolve safe_resolver(&User.signin_user/2)
     end
 
+    field :read_notifications, :user do
+      middleware Authenticated
+
+      resolve safe_resolver(&User.read_notifications/2)
+    end
+
     field :signup, :user do
       middleware AllowJwt
       arg :invite_id, non_null(:string)
@@ -208,6 +217,7 @@ defmodule Console.GraphQl.Users do
     end
 
     field :create_invite, :invite do
+      middleware Authenticated
       arg :attributes, non_null(:invite_attributes)
 
       resolve safe_resolver(&User.create_invite/2)

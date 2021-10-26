@@ -20,6 +20,7 @@ defmodule Console.Alertmanager.Notification do
       labels: alert.labels,
       annotations: alert.annotations,
       repository: repo,
+      severity: Map.get(alert.labels || %{}, "severity", :none),
       seen_at: Timex.now()
     })
     |> Console.Repo.insert_or_update()

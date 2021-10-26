@@ -180,5 +180,22 @@ defmodule Console.GraphQl.UserQueriesTest do
       assert from_connection(found)
              |> ids_equal(notifs)
     end
+
+    test "it will filter read notifications" do
+      user = insert(:user, read_timestamp: Timex.now() |> Timex.shift(minutes: -2))
+      insert(:notification, updated_at: Timex.now() |> Timex.shift(minutes: -4))
+      notifs = insert_list(3, :notification, updated_at: Timex.now())
+
+      {:ok, %{data: %{"notifications" => found}}} = run_query("""
+        query {
+          notifications(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(notifs)
+    end
   end
 end

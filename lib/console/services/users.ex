@@ -177,6 +177,12 @@ defmodule Console.Services.Users do
     |> validate_password(password)
   end
 
+  @spec mark_read(User.t) :: user_resp
+  def mark_read(%User{} = user) do
+    Ecto.Changeset.change(user, %{read_timestamp: Timex.now()})
+    |> Repo.update()
+  end
+
   defp validate_password(%User{deleted_at: nil} = user, pwd) do
     case Argon2.check_pass(user, pwd) do
       {:ok, user} -> {:ok, user}

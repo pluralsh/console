@@ -51,7 +51,7 @@ defmodule Console.GraphQl.UserMutationsTest do
             email
           }
         }
-      """, %{"email" => "someone@example.com"})
+      """, %{"email" => "someone@example.com"}, %{current_user: insert(:user)})
 
       assert invite["secureId"]
       assert invite["email"] == "someone@example.com"
@@ -227,6 +227,22 @@ defmodule Console.GraphQl.UserMutationsTest do
 
       assert deleted["id"] == role.id
       refute refetch(role)
+    end
+  end
+
+  describe "readNotifications" do
+    test "it can set a read timestamp" do
+      user = insert(:user)
+
+      {:ok, %{data: %{"readNotifications" => read}}} = run_query("""
+        mutation {
+          readNotifications {
+            readTimestamp
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert read["readTimestamp"]
     end
   end
 end

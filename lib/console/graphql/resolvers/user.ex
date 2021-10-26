@@ -26,8 +26,9 @@ defmodule Console.GraphQl.Resolvers.User do
     |> paginate(args)
   end
 
-  def list_notifications(args, _) do
+  def list_notifications(args, %{context: %{current_user: user}}) do
     Notification.ordered()
+    |> Notification.unread(user)
     |> paginate(args)
   end
 
@@ -70,6 +71,9 @@ defmodule Console.GraphQl.Resolvers.User do
     GroupMember.for_group(group_id)
     |> paginate(args)
   end
+
+  def read_notifications(_, %{context: %{current_user: user}}),
+    do: Users.mark_read(user)
 
   def resolve_role(%{id: role_id}, _), do: {:ok, Users.get_role!(role_id)}
 
