@@ -189,3 +189,12 @@ export const CREATE_INVITE = gql`
   }
   ${InviteFragment}
 `;
+
+export const MARK_READ = gql`
+  mutation {
+    readNotifications {
+      ...UserFragment
+    }
+  }
+  ${UserFragment}
+`;

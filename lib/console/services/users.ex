@@ -1,7 +1,7 @@
 defmodule Console.Services.Users do
   use Console.Services.Base
   alias Console.PubSub
-  alias Console.Schema.{User, Invite, Group, GroupMember, Role}
+  alias Console.Schema.{User, Invite, Group, GroupMember, Role, Notification}
   alias Console.Repo
 
   @type user_resp :: {:ok, User.t} | {:error, term}
@@ -44,6 +44,12 @@ defmodule Console.Services.Users do
 
   @spec get_invite!(binary) :: Invite.t
   def get_invite!(secure_id), do: Repo.get_by!(Invite, secure_id: secure_id)
+
+  @spec unread_notifications(User.t) :: integer
+  def unread_notifications(%User{} = user) do
+    Notification.unread(user)
+    |> Console.Repo.aggregate(:count)
+  end
 
   @spec create_invite(map) :: {:ok, Invite.t} | {:error, term}
   def create_invite(attrs) do

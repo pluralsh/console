@@ -19,9 +19,9 @@ const ICON_DATA = {
 
 const shadow = (color, theme) => ({boxShadow: `0 0 10px ${normalizeColor(color, theme)}`})
 
-function SeverityNub({sev}) {
+export function SeverityNub({sev}) {
   return (
-    <Box flex={false} background={SEVERITY_COLORS[sev]} round='1px' pad={{horizontal: 'small', vertical: 'xsmall'}}>
+    <Box flex={false} background={SEVERITY_COLORS[sev] || 'tone-medium'} round='1px' pad={{horizontal: 'small', vertical: 'xsmall'}}>
       <Text size='small' color='plrl-white'>{sev}</Text>
     </Box>
   )

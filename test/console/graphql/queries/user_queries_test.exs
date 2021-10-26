@@ -43,6 +43,22 @@ defmodule Console.GraphQl.UserQueriesTest do
     end
   end
 
+  describe "me" do
+    test "it can query unread notifications" do
+      me = insert(:user, read_timestamp: Timex.now() |> Timex.shift(minutes: -1))
+      insert_list(3, :notification)
+      insert(:notification, updated_at: Timex.now() |> Timex.shift(minutes: -5))
+
+      {:ok, %{data: %{"me" => found}}} = run_query("""
+        query {
+          me { unreadNotifications }
+        }
+      """, %{}, %{current_user: me})
+
+      assert found["unreadNotifications"] == 3
+    end
+  end
+
   describe "invite" do
     test "It can fetch an invite by secure id" do
       invite = insert(:invite, secure_id: "secure")
@@ -196,6 +212,23 @@ defmodule Console.GraphQl.UserQueriesTest do
 
       assert from_connection(found)
              |> ids_equal(notifs)
+    end
+
+    test "it will not filter read if all: true is passed" do
+      user = insert(:user, read_timestamp: Timex.now() |> Timex.shift(minutes: -2))
+      read = insert(:notification, updated_at: Timex.now() |> Timex.shift(minutes: -4))
+      notifs = insert_list(3, :notification, updated_at: Timex.now())
+
+      {:ok, %{data: %{"notifications" => found}}} = run_query("""
+        query {
+          notifications(all: true, first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([read | notifs])
     end
   end
 end

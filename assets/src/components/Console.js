@@ -108,13 +108,13 @@ function FocoComponent({children, ...props}) {
   )
 }
 
-export function FlyoutContainer({header, close, children}) {
+export function FlyoutContainer({width, header, close, children}) {
   const {ref} = useContext(FlyoutContext)
 
   return (
     <Portal node={ref}>
       <Foco onClickOutside={close} component={FocoComponent}>
-        <Box flex={false} width='400px' fill='vertical'  background='backgroundColor' 
+        <Box flex={false} width={width || '400px'} fill='vertical'  background='backgroundColor' 
              border={{side: 'left'}}>
           <Box flex={false} pad={{horizontal: 'small', vertical: 'xsmall'}} align='center' direction='row' border={{side: 'bottom'}}>
             <Box fill='horizontal'>

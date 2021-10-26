@@ -43,12 +43,20 @@ defmodule Console.GraphQl.Users do
     field :deleted_at,     :datetime
     field :profile,        :string
     field :roles,          :user_roles
-    field :bound_roles,    list_of(:role), resolve: fn user, _, _ -> {:ok, Console.Schema.User.roles(user)} end
     field :read_timestamp, :datetime
+    field :bound_roles,    list_of(:role), resolve: fn user, _, _ ->
+      {:ok, Console.Schema.User.roles(user)}
+    end
 
     field :jwt, :string, resolve: fn
       %{jwt: jwt}, _, %{context: %{allow_jwt: true}} -> {:ok, jwt}
       _, _, _ -> {:error, "forbidden"}
+    end
+
+    field :unread_notifications, :integer, resolve: fn
+      %{id: uid} = user, _, %{context: %{current_user: %{id: uid}}} ->
+        {:ok, Console.Services.Users.unread_notifications(user)}
+      _, _, _ -> {:error, "you can only query unread notifications for yourself"}
     end
 
     field :background_color, :string, resolve: fn
@@ -180,6 +188,7 @@ defmodule Console.GraphQl.Users do
 
     connection field :notifications, node_type: :notification do
       middleware Authenticated
+      arg :all, :boolean
 
       resolve &User.list_notifications/2
     end

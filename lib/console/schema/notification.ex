@@ -16,6 +16,7 @@ defmodule Console.Schema.Notification do
     timestamps()
   end
 
+  def unread(query \\ __MODULE__, user)
   def unread(query, %{read_timestamp: nil}), do: query
   def unread(query, %{read_timestamp: ts}) do
     from(n in query, where: coalesce(n.updated_at, n.inserted_at) > ^ts)

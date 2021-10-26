@@ -8,6 +8,7 @@ export const UserFragment = gql`
     email
     profile
     backgroundColor
+    readTimestamp
     roles { admin }
   }
 `;
@@ -73,6 +74,7 @@ export const NotificationFragment = gql`
     title
     description
     repository
+    severity
     labels
     annotations
     seenAt

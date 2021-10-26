@@ -28,9 +28,12 @@ defmodule Console.GraphQl.Resolvers.User do
 
   def list_notifications(args, %{context: %{current_user: user}}) do
     Notification.ordered()
-    |> Notification.unread(user)
+    |> filter_unread(args, user)
     |> paginate(args)
   end
+
+  defp filter_unread(query, %{all: true}, _), do: query
+  defp filter_unread(query, _, user), do: Notification.unread(query, user)
 
   def login_info(args, _) do
     case Console.conf(:plural_login) do
