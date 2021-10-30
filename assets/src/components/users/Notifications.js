@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useMemo, useState } from 'react'
-import { Notification } from 'forge-core'
+import { Notification, Eye } from 'forge-core'
 import { Box, Stack, Text } from 'grommet'
 import { FlyoutContainer } from '../Console'
 import { useApolloClient, useMutation, useQuery, useSubscription } from '@apollo/react-hooks'
@@ -43,9 +43,10 @@ function Placeholder() {
   )
 }
 
-function NotificationList() {
+function NotificationList({all}) {
   const [listRef, setListRef] = useState(null)
   const {data, loading, fetchMore} = useQuery(NOTIFICATIONS_Q, {
+    variables: {all},
     fetchPolicy: 'cache-and-network'
   })
 
@@ -69,9 +70,18 @@ function NotificationList() {
   )
 }
 
+function FilterAll({all, setAll}) {
+  return (
+    <Box flex={false} pad='xsmall' round='3px' hoverIndicator='card' onClick={() => setAll(!all)}>
+      <Eye size='14px' />
+    </Box>
+  )
+}
+
 export function Notifications() {
   const client = useApolloClient()
   const [open, setOpen] = useState(false)
+  const [all, setAll] = useState(false)
   const {me} = useContext(LoginContext) 
   const [mutation] = useMutation(MARK_READ, {
     update: (cache) => updateCache(cache, {
@@ -111,8 +121,10 @@ export function Notifications() {
       )}
     </Stack>
     {open && (
-      <FlyoutContainer width='500px' header='Notifications' close={doClose}>
-        <NotificationList />
+      <FlyoutContainer 
+          width='500px' header='Notifications' close={doClose} 
+          modifier={<FilterAll all={all} setAll={setAll} />}>
+        <NotificationList all={all} />
       </FlyoutContainer>
     )}
     </>

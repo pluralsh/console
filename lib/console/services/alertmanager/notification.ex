@@ -1,7 +1,6 @@
 defmodule Console.Alertmanager.Notification do
   use Console.Services.Base
   alias Console.Services.Alertmanager, as: Svc
-  alias Console.Schema.Notification
   alias Alertmanager.Alert
 
   def name(), do: :notification

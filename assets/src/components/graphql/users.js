@@ -164,8 +164,8 @@ export const SIGNUP = gql`
 `;
 
 export const NOTIFICATIONS_Q = gql`
-  query Notifs($cursor: String) {
-    notifications(after: $cursor, first: 50) {
+  query Notifs($all: Boolean, $cursor: String) {
+    notifications(all: $all, after: $cursor, first: 50) {
       pageInfo { ...PageInfo }
       edges { node { ...NotificationFragment } }
     }

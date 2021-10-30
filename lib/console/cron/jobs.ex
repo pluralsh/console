@@ -1,6 +1,6 @@
 defmodule Console.Cron.Jobs do
   alias Console.Repo
-  alias Console.Schema.{Build, Invite}
+  alias Console.Schema.{Build, Invite, Notification}
   alias Console.PubSub.BuildFailed
   require Logger
 
@@ -11,6 +11,11 @@ defmodule Console.Cron.Jobs do
 
   def prune_invites() do
     Invite.expired()
+    |> Repo.delete_all()
+  end
+
+  def prune_notifications() do
+    Notification.expired()
     |> Repo.delete_all()
   end
 

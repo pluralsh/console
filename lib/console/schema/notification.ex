@@ -16,6 +16,11 @@ defmodule Console.Schema.Notification do
     timestamps()
   end
 
+  def expired(query \\ __MODULE__) do
+    expired = DateTime.utc_now() |> Timex.shift(days: -30)
+    from(i in query, where: i.inserted_at < ^expired)
+  end
+
   def unread(query \\ __MODULE__, user)
   def unread(query, %{read_timestamp: nil}), do: query
   def unread(query, %{read_timestamp: ts}) do

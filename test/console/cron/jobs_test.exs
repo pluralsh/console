@@ -32,6 +32,21 @@ defmodule Console.Cron.JobsTest do
     end
   end
 
+  describe "#prune_notifications/0" do
+    test "it will delete old notifications" do
+      keep = insert_list(3, :notification)
+      expire = insert_list(3, :notification, inserted_at: Timex.now() |> Timex.shift(days: -40))
+
+      {_, _} = Jobs.prune_notifications()
+
+      for notif <- keep,
+        do: assert refetch(notif)
+
+      for notif <- expire,
+        do: refute refetch(notif)
+    end
+  end
+
   describe "#fail_builds/0" do
     test "old running builds will be auto-failed" do
       old = insert(:build, status: :running, pinged_at: Timex.now() |> Timex.shift(hours: -1))
