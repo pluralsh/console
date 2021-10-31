@@ -156,7 +156,7 @@ function Placeholder() {
   )
 }
 
-function ReturnToBeginning({beginning}) {
+export function ReturnToBeginning({beginning}) {
   return (
     <Layer position='bottom-right' modal={false} plain>
       <Box direction='row' align='center' round='xsmall' gap='small' 

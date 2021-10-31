@@ -1,6 +1,5 @@
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 import { useQuery } from 'react-apollo'
-import { Scroller } from 'forge-core'
 import { AUDITS_Q, AUDIT_METRICS } from './queries'
 import { HeaderItem, RowItem } from '../kubernetes/Pod'
 import { Box, Text } from 'grommet'
@@ -15,6 +14,8 @@ import lookup from 'country-code-lookup'
 import { Chloropleth } from '../utils/Chloropleth'
 import { SubmenuItem, SubmenuPortal } from '../navigation/Submenu'
 import { useParams } from 'react-router'
+import { StandardScroller } from '../utils/SmoothScroller'
+import { ReturnToBeginning } from '../Builds'
 
 
 const ROW_HEIGHT = 40
@@ -77,13 +78,23 @@ function AuditGeo() {
   )
 }
 
+function Placeholder() {
+  return <Box flex={false} fill='horizontal' height={HEIGHT_PX} />
+}
+
 export function Audits() {
+  const [listRef, setListRef] = useState(null)
+  const [scrolled, setScrolled] = useState(null)
   const {graph} = useParams()
-  const {data, fetchMore} = useQuery(AUDITS_Q, {fetchPolicy: "cache-and-network"})
+  const {data, loading, fetchMore} = useQuery(AUDITS_Q, {fetchPolicy: "cache-and-network"})
+  const returnToBeginning = useCallback(() => {
+    listRef.scrollToItem(0)
+  }, [listRef])
 
   if (!data) return <LoopingLogo dark />
 
   const {edges, pageInfo} = data.audits
+
   return (
     <Box direction='row' fill background='backgroundColor'>
       <SubmenuPortal name='audits'>
@@ -99,16 +110,21 @@ export function Audits() {
           selected={graph === 'graph'} />
       </SubmenuPortal>
       <Box fill>
+        {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
         <SectionContentContainer header={graph === 'graph' ? 'Geodistribution' : 'Audit Logs'}>
           {graph === 'table' && (
             <Box fill>
               <AuditHeader />
-              <Scroller
-                id='builds'
-                style={{height: '100%', overflow: 'auto'}}
-                edges={edges}
+              <StandardScroller
+                listRef={listRef}
+                setListRef={setListRef}
+                items={edges}
+                loading={loading}
+                handleScroll={setScrolled}
+                placeholder={Placeholder}
+                hasNextPage={pageInfo.hasNextPage}
                 mapper={({node}) => <Audit key={node.id} audit={node} />}
-                onLoadMore={() => pageInfo.hasNextPage && fetchMore({
+                loadNextPage={() => pageInfo.hasNextPage && fetchMore({
                   variables: {cursor: pageInfo.endCursor},
                   updateQuery: (prev, {fetchMoreResult: {audits}}) => extendConnection(prev, audits, 'audits')
                 })} />
