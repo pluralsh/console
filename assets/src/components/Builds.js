@@ -34,7 +34,7 @@ function BuildStatusInner({background, text, icon}) {
 
 function IconStatus({icon, background}) {
   return (
-    <Box round='full' width='30px' height='30px' 
+    <Box flex={false} round='full' width='30px' height='30px' 
          align='center' justify='center' background={background}>
       {React.createElement(icon, {size: '16px'})}
     </Box>

@@ -7395,10 +7395,10 @@ forever-agent@~0.6.1:
   resolved "https://registry.yarnpkg.com/forever-agent/-/forever-agent-0.6.1.tgz#fbc71f0c41adeb37f96c577ad1ed42d8fdacca91"
   integrity sha1-+8cfDEGt6zf5bFd60e1C2P2sypE=
 
-forge-core@^1.3.21:
-  version "1.3.21"
-  resolved "https://registry.yarnpkg.com/forge-core/-/forge-core-1.3.21.tgz#106fb051f7cc114112a1e60d6fdbd688fa63903a"
-  integrity sha512-ogQnyd00bEAP2MbUVMYen8+2I8P0pUdSbL2Kz4UAbVP0NE1XXiflTLQ3kEdn5vqCVOr39fdyDr9PtiBN5YbCIg==
+forge-core@^1.3.24:
+  version "1.3.24"
+  resolved "https://registry.yarnpkg.com/forge-core/-/forge-core-1.3.24.tgz#5994ff9fac65b8eab55cd6fb1fdb94a41e2e7d30"
+  integrity sha512-OHRSwlDTZX0Shm3RIGKLn4Gx+ZETdd4ZnrMUxD5f3ipqZDr2YweRq0gv1jb9LVr5yemf4o3dJ9mItskx36L6Ag==
   dependencies:
     "@babel/plugin-proposal-class-properties" "^7.10.4"
     babel-plugin-module-resolver "^4.0.0"

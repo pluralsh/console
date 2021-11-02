@@ -1,6 +1,6 @@
 import React from 'react'
-import { Briefcase, Clock, Cube, ShareOption } from 'grommet-icons'
-import { Certificate, Service, StatefulSet, Deployment } from 'forge-core'
+import { Cube } from 'grommet-icons'
+import { Certificate, Service, StatefulSet, Deployment, Job, ChronJob, Ingress } from 'forge-core'
 
 const ICON_SIZE = '14px'
 
@@ -14,13 +14,13 @@ export default function Icon({kind, size}) {
     case "statefulset":
       return <StatefulSet size={iconSize} />
     case "ingress":
-      return <ShareOption size={iconSize} />
+      return <Ingress size={iconSize} />
     case "cronjob":
-      return <Clock size={iconSize} />
+      return <ChronJob size={iconSize} />
     case 'pod':
       return <Cube size={iconSize} />
     case 'job':
-      return <Briefcase size={iconSize} />
+      return <Job size={iconSize} />
     case "certificate":
       return <Certificate size={iconSize} />
     default:
