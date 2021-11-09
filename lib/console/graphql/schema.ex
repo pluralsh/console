@@ -97,7 +97,8 @@ defmodule Console.GraphQl.Schema do
   end
 
   object :plural_manifest do
-    field :network, :manifest_network
+    field :network,       :manifest_network
+    field :bucket_prefix, :string
   end
 
   object :manifest_network do

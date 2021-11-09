@@ -1,7 +1,7 @@
 defmodule Console.Plural.Manifest do
   import Console
 
-  defstruct [:network]
+  defstruct [:network, :bucket_prefix]
 
   defmodule Network do
     defstruct [:plural_dns, :subdomain]
@@ -19,7 +19,10 @@ defmodule Console.Plural.Manifest do
     |> YamlElixir.read_from_file()
     |> case do
       {:ok, %{"spec" => spec}} ->
-        {:ok, %__MODULE__{network: Network.new(spec["network"])}}
+        {:ok, %__MODULE__{
+          network: Network.new(spec["network"]),
+          bucket_prefix: spec["bucketPrefix"],
+        }}
       _ -> {:error, :not_found}
     end
   end
