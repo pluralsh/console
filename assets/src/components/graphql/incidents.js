@@ -99,6 +99,7 @@ export const IncidentHistoryFragment = gql`
     action
     changes { key prev next }
     actor { ...UserFragment }
+    insertedAt
   }
   ${UserFragment}
 `
