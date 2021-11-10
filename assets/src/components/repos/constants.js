@@ -12,6 +12,7 @@ export const ConfigurationType = {
   BOOL: 'BOOL',
   INT: 'INT',
   DOMAIN: 'DOMAIN',
+  BUCKET: 'BUCKET',
 }
 
 export const OperationType = {

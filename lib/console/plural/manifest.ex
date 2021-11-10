@@ -1,7 +1,7 @@
 defmodule Console.Plural.Manifest do
   import Console
 
-  defstruct [:network, :bucket_prefix]
+  defstruct [:network, :bucket_prefix, :cluster]
 
   defmodule Network do
     defstruct [:plural_dns, :subdomain]
@@ -22,6 +22,7 @@ defmodule Console.Plural.Manifest do
         {:ok, %__MODULE__{
           network: Network.new(spec["network"]),
           bucket_prefix: spec["bucketPrefix"],
+          cluster: spec["cluster"],
         }}
       _ -> {:error, :not_found}
     end

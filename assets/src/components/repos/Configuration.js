@@ -47,6 +47,55 @@ function StringConfiguration({config: {name, default: def, placeholder, document
   )
 }
 
+function BucketConfiguration({config: {name, default: def, placeholder, documentation}, ctx, setValue}) {
+  const {configuration} = useContext(LoginContext)
+  const {prefix, cluster} = useMemo(() => {
+    const prefix = deepFetch(configuration, 'manifest.bucketPrefix')
+    const cluster = deepFetch(configuration, 'manifest.cluster')
+    if (prefix && prefix !== '') {
+      return {prefix, cluster}
+    }
+  
+    return {}
+  }, [configuration])
+
+  const format = useCallback((val) => {
+    if (prefix) return `${prefix}-${cluster}-${val}`
+    return val
+  }, [prefix, cluster])
+
+  const trim = useCallback((val) => val.replace(`${prefix}-${cluster}-`, ''), [prefix, cluster])
+
+  const [local, setLocal] = useState(trim(ctx[name] || ''))
+  
+  useEffect(() => {
+    if (!local && def) {
+      setValue(name, def)
+    }
+  }, [name, local, def])
+
+  return (
+    <Box flex={false} gap='xsmall'>
+      <Text size='small' weight={500}>{name}</Text>
+      <Box direction='row' align='center'>
+        <Box flex={false} style={{borderRightStyle: 'none'}} border={{color: 'light-5'}} pad={{horizontal: 'small'}} 
+             background='tone-light' height='37px' justify='center'>
+          <Text size='small' weight={500}>{prefix}-{cluster}-</Text>
+        </Box>
+        <TextInput
+          weight={450}
+          value={local}
+          placeholder={placeholder}
+          onChange={({target: {value}}) => {
+            setValue(name, format(value))
+            setLocal(value)
+          }} />
+      </Box>
+      <Text size='small' color='dark-6'><i>{documentation}</i></Text>
+    </Box>
+  )
+}
+
 function DomainConfiguration({config: {name, default: def, placeholder, documentation}, ctx, setValue}) {
   const {configuration} = useContext(LoginContext)
   const suffix = useMemo(() => {
@@ -148,6 +197,8 @@ function ConfigurationItem({config, ctx, setValue}) {
       return <IntConfiguration config={config} ctx={ctx} setValue={setValue} />
     case ConfigurationType.DOMAIN:
       return <DomainConfiguration config={config} ctx={ctx} setValue={setValue} />
+    case ConfigurationType.BUCKET:
+      return <BucketConfiguration config={config} ctx={ctx} setValue={setValue} />
     default:
       return <StringConfiguration config={config} ctx={ctx} setValue={setValue} />
   }

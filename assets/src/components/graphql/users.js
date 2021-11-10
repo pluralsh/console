@@ -62,9 +62,11 @@ export const GroupMemberFragment = gql`
 export const ManifestFragment = gql`
   fragment ManifestFragment on PluralManifest {
     network { 
-      pluralDns 
-      subdomain 
+      pluralDns
+      subdomain
     }
+    cluster
+    bucketPrefix
   }
 `;
 
