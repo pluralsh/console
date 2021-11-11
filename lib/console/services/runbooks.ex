@@ -1,7 +1,8 @@
 defmodule Console.Services.Runbooks do
   use Console.Services.Base
-  alias Kube.{Runbook, Client}
+  alias Kube.{Runbook, Client, ConfigurationOverlay}
   alias Console.Schema.{User, RunbookExecution}
+  alias Console.Services.Plural
   alias Console.Runbooks
 
   @type error :: {:error, term}
@@ -44,6 +45,30 @@ defmodule Console.Services.Runbooks do
       |> add_operation(:resp, fn _ -> action_response(act) end)
       |> execute(extract: :resp)
     end
+  end
+
+  def execute_overlay(repo, ctx, actor) do
+    with {:ok, vals} <- Plural.values_file(repo),
+         {:ok, map} <- YamlElixir.read_from_string(vals),
+         {:ok, %{items: overlays}} <- Kube.Client.list_configuration_overlays(repo),
+         map <- make_updates(overlays, map, ctx),
+         {:ok, doc} <- Ymlr.document(map),
+         _ <- Console.Deployer.update(repo, String.trim_leading(doc, "---\n"), :helm) do
+      Builds.create(%{
+        type: :deploy,
+        repository: repo,
+        message: "updated configuration"
+      }, actor)
+    end
+  end
+
+  defp make_updates(overlays, values, map) do
+    Enum.reduce(overlays, values, fn %ConfigurationOverlay{spec: %ConfigurationOverlay.Spec{path: path, name: from}}, acc ->
+      case map[from] do
+        nil -> acc
+        val -> Console.put_path(acc, path, val)
+      end
+    end)
   end
 
   defp action_response(%Runbook.Action{redirect_to: redirect}) when is_binary(redirect),

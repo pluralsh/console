@@ -22,6 +22,16 @@ defmodule Kube.Client do
     |> Kazan.run()
   end
 
+  def list_configuration_overlays(ns) do
+    %Kazan.Request{
+      method: "get",
+      path: "/apis/platform.plural.sh/v1alpha1/namespaces/#{Console.namespace(ns)}/configurationoverlays",
+      query_params: %{},
+      response_model: Kube.ConfigurationOverlayList
+    }
+    |> Kazan.run()
+  end
+
   def get_dashboard(ns, name) do
     %Kazan.Request{
       method: "get",

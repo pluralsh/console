@@ -342,4 +342,21 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       assert node["usage"]["memory"] == "2M"
     end
   end
+
+  describe "configurationOverlays" do
+    test "it can fetch the overlays for a namespace" do
+      user = insert(:user)
+      expect(Kazan, :run, fn _ -> {:ok, %{items: [configuration_overlay("name", name: "config")]}} end)
+
+      {:ok, %{data: %{"configurationOverlays" => [overlay]}}} = run_query("""
+        query Overlays($ns: String!) {
+          configurationOverlays(namespace: $ns) {
+            spec { name }
+          }
+        }
+      """, %{"ns" => "name"}, %{current_user: user})
+
+      assert overlay["spec"]["name"] == "config"
+    end
+  end
 end

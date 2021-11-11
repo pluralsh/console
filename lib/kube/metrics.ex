@@ -5,15 +5,15 @@ defmodule Kube.NodeMetric do
     use Kazan.Model
 
     defmodel "Usage", "metrics.k8s.io", "v1beta1" do
-      property :cpu,    "cpu", :string
+      property :cpu,    "cpu",    :string
       property :memory, "memory", :string
     end
   end
 
   defmodel "NodeMetric", "metrics.k8s.io", "v1beta1" do
     property :timestamp, "timestamp", :string
-    property :window, "window",       :string
-    property :usage, "usage",         Usage
+    property :window,    "window",    :string
+    property :usage,     "usage",     Usage
   end
 end
 

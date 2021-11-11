@@ -216,4 +216,11 @@ defmodule KubernetesScaffolds do
       }
     }
   end
+
+  def configuration_overlay(name, opts \\ []) do
+    %Kube.ConfigurationOverlay{
+      metadata: %{name: name, namespace: name},
+      spec: struct(Kube.ConfigurationOverlay.Spec, opts),
+    }
+  end
 end

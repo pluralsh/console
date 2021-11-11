@@ -60,6 +60,7 @@ defmodule Console.GraphQl.Kubernetes do
   import_types Console.GraphQl.Kubernetes.LogFilter
   import_types Console.GraphQl.Kubernetes.Job
   import_types Console.GraphQl.Kubernetes.Certificate
+  import_types Console.GraphQl.Kubernetes.ConfigurationOverlay
 
   delta :application
 
@@ -180,6 +181,13 @@ defmodule Console.GraphQl.Kubernetes do
 
       resolve &Kubernetes.resolve_node_metrics/2
     end
+
+    field :configuration_overlays, list_of(:configuration_overlay) do
+      middleware Authenticated
+      arg :namespace, non_null(:string)
+
+      resolve &Kubernetes.list_configuration_overlays/2
+    end
   end
 
   object :kubernetes_mutations do
@@ -207,6 +215,15 @@ defmodule Console.GraphQl.Kubernetes do
       arg :name, non_null(:string)
 
       resolve &Kubernetes.delete_node/2
+    end
+
+    field :overlay_configuration, :build do
+      middleware Authenticated
+      middleware Rbac, perm: :operate, arg: :namespace
+      arg :namespace, non_null(:string)
+      arg :context,   non_null(:map)
+
+      resolve &Kubernetes.execute_overlay/2
     end
   end
 end

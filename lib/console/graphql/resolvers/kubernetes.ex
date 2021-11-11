@@ -26,10 +26,17 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   end
 
   def list_log_filters(%{namespace: ns}, _) do
-    Console.namespace(ns)
-    |> Client.list_log_filters()
+    Client.list_log_filters(ns)
     |> items_response()
   end
+
+  def list_configuration_overlays(%{namespace: ns}, _) do
+    Client.list_configuration_overlays(ns)
+    |> items_response()
+  end
+
+  def execute_overlay(%{namespace: ns, context: ctx}, %{context: %{current_user: user}}),
+    do: Console.Services.Runbooks.execute_overlay(ns, ctx, user)
 
   def resolve_application(%{name: name}, _), do: Client.get_application(name)
 
