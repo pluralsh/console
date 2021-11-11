@@ -63,10 +63,13 @@ defmodule Console.Services.Runbooks do
   end
 
   defp make_updates(overlays, values, map) do
-    Enum.reduce(overlays, values, fn %ConfigurationOverlay{spec: %ConfigurationOverlay.Spec{path: path, name: from}}, acc ->
+    Enum.reduce(overlays, values, fn %ConfigurationOverlay{spec: %ConfigurationOverlay.Spec{updates: updates, name: from}}, acc ->
       case map[from] do
         nil -> acc
-        val -> Console.put_path(acc, path, val)
+        val ->
+          Enum.reduce(updates, fn %ConfigurationOverlay.OverlayUpdate{path: path}, acc ->
+            Console.put_path(acc, path, val)
+          end)
       end
     end)
   end
