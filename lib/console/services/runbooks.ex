@@ -2,7 +2,7 @@ defmodule Console.Services.Runbooks do
   use Console.Services.Base
   alias Kube.{Runbook, Client, ConfigurationOverlay}
   alias Console.Schema.{User, RunbookExecution}
-  alias Console.Services.Plural
+  alias Console.Services.{Plural, Builds}
   alias Console.Runbooks
 
   @type error :: {:error, term}
@@ -64,7 +64,7 @@ defmodule Console.Services.Runbooks do
 
   defp make_updates(overlays, values, map) do
     Enum.reduce(overlays, values, fn %ConfigurationOverlay{spec: %ConfigurationOverlay.Spec{updates: updates, name: from}}, acc ->
-      case Map.get(values, from, :ignore) do
+      case Map.get(map, from, :ignore) do
         :ignore -> acc
         val ->
           Enum.reduce(updates, acc, fn %ConfigurationOverlay.OverlayUpdate{path: path}, acc ->

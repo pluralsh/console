@@ -33,7 +33,7 @@ defmodule Console.Storage.Git do
   end
 
   def pull() do
-    with {:ok, _} <- git("reset", ["--hard", "origin/#{branch()}"]),
+    with {:ok, _} <- reset(),
       do: git("pull", ["--rebase"])
   end
 
@@ -48,6 +48,8 @@ defmodule Console.Storage.Git do
       {result, _} -> {:error, result}
     end
   end
+
+  def reset(), do: git("reset", ["--hard", "origin/#{branch()}"])
 
   def git(cmd, args \\ []),
     do: cmd("git", [cmd | args], workspace())

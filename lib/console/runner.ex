@@ -3,31 +3,33 @@ defmodule Console.Runner do
   alias Console.Commands.{Command}
   alias Console.Services.Builds
 
-  defmodule State, do: defstruct [:build, :operations]
+  defmodule State, do: defstruct [:build, :operations, :storage]
 
-  def start_link(build, operations) do
-    GenServer.start_link(__MODULE__, {build, operations})
+  def start_link(build, operations, storage) do
+    GenServer.start_link(__MODULE__, {build, operations, storage})
   end
 
   def kick(), do: Swarm.publish(:builds, :kick)
 
   def register(pid), do: Swarm.join(:builds, pid)
 
-  def init({build, operations}) do
+  def init({build, operations, storage}) do
     Process.flag(:trap_exit, true)
     Command.set_build(build)
     send self(), :kick
-    {:ok, %State{build: build, operations: operations}}
+    {:ok, %State{build: build, operations: operations, storage: storage}}
   end
 
-  def handle_info(:kick, %State{operations: ops, build: build} = state) do
+  def handle_info(:kick, %State{operations: ops, build: build, storage: storage} = state) do
     {:ok, build} = Builds.running(build)
     case execute_stack(ops) do
       {:ok, _} -> {:stop, {:shutdown, :succeed}, state}
       {:approval, rest} ->
           {:ok, build} = Builds.pending(build)
           {:noreply, %{state | operations: rest, build: build}}
-      _ -> {:stop, {:shutdown, :fail}, state}
+      _ ->
+        storage.reset()
+        {:stop, {:shutdown, :fail}, state}
     end
   end
   def handle_info(_, state), do: {:noreply, state}

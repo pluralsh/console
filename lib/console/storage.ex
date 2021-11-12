@@ -1,12 +1,17 @@
 defmodule Console.Storage do
 
-  @callback init() :: :ok | {:error, term}
+  @type result :: :ok | {:error, term}
 
-  @callback pull() :: :ok | {:error, term}
 
-  @callback push() :: :ok | {:error, term}
+  @callback init() :: result
 
-  @callback revise(binary) :: :ok | {:error, term}
+  @callback pull() :: result
+
+  @callback push() :: result
+
+  @callback reset() :: result
+
+  @callback revise(binary) :: result
 
   @callback revision() :: {:ok, binary} | {:error, term}
 end

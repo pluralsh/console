@@ -99,7 +99,7 @@ defmodule Console.Deployer do
   end
 
   defp perform(storage, %Build{repository: repo, type: :bounce} = build) do
-    with_build(build, [{storage, :init, []}, {Plural, :bounce, [repo]}])
+    with_build(build, [{storage, :init, []}, {Plural, :bounce, [repo]}], storage)
   end
 
   defp perform(storage, %Build{type: :deploy, repository: repo, message: message} = build) do
@@ -110,7 +110,7 @@ defmodule Console.Deployer do
       {Plural, :deploy, [repo]},
       {storage, :revise, [commit_message(message, repo)]},
       {storage, :push, []}
-    ])
+    ], storage)
   end
 
   defp perform(storage, %Build{type: :install, context: %{"configuration" => conf, "bundle" => b}, message: message} = build) do
@@ -121,7 +121,7 @@ defmodule Console.Deployer do
       {Plural, :install, []},
       {storage, :revise, [commit_message(message, b["repository"])]},
       {storage, :push, []}
-    ])
+    ], storage)
   end
 
   defp perform(storage, %Build{type: :approval, repository: repo, message: message} = build) do
@@ -133,7 +133,7 @@ defmodule Console.Deployer do
       {Plural, :deploy, [repo]},
       {storage, :revise, [commit_message(message, repo)]},
       {storage, :push, []}
-    ])
+    ], storage)
   end
 
   defp update(storage, repo, content, tool) do
@@ -146,8 +146,8 @@ defmodule Console.Deployer do
       do: {:ok, res}
   end
 
-  defp with_build(%Build{} = build, operations) do
-    {:ok, pid} = Console.Runner.start_link(build, operations)
+  defp with_build(%Build{} = build, operations, storage) do
+    {:ok, pid} = Console.Runner.start_link(build, operations, storage)
     Swarm.register_name(build.id, pid)
     Console.Runner.register(pid)
     ref = Process.monitor(pid)
