@@ -1,15 +1,16 @@
 import React, { useContext, useEffect } from 'react'
 import { Box, Text, ThemeContext } from 'grommet'
-import { Check, Reload } from 'forge-core'
+import { Check } from 'forge-core'
 import { useHistory, useParams } from 'react-router'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { ApplicationIcon, hasIcon, InstallationContext, useEnsureCurrent } from './Installations'
 import { BUILD_PADDING } from './Builds'
 import { normalizeColor } from 'grommet/utils'
 import { chunk } from '../utils/array'
-import { Checkmark, StatusCritical, Update } from 'grommet-icons'
+import { StatusCritical } from 'grommet-icons'
 import Icon from './kubernetes/Icon'
 import { Container } from './utils/Container'
+import { PulseLoader } from 'react-spinners'
 
 export const Readiness = {
   Ready: 'Ready',
@@ -47,8 +48,9 @@ export function ReadyIcon({size, readiness, showIcon}) {
       icon = <Check size='small' />
       break
     case Readiness.InProgress:
-      color = 'status-warning'
-      icon = <Reload size='small' color='white' />
+      color = 'orange-dark'
+      // icon = <Check size='small' />
+      icon = <PulseLoader size={2} margin={0} color='#fff' />
       break
     case Readiness.Complete:
       color = 'tone-medium'
@@ -58,8 +60,14 @@ export function ReadyIcon({size, readiness, showIcon}) {
   }
 
   return (
-    <Box flex={false} width={size || '10px'} height={size || '10px'} round='full' align='center' justify='center'
-         background={color} style={{boxShadow: `0 0 10px ${normalizeColor(color, theme)}`}}>
+    <Box flex={false}
+         width={size || '20px'} 
+         height={size || '20px'} 
+         round='full' 
+         align='center'
+         justify='center'
+         background={color}
+         style={{boxShadow: `0 0 10px ${normalizeColor(color, theme)}`}}>
       {showIcon && icon}
     </Box>
   )
