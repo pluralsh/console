@@ -1,5 +1,5 @@
 import { gql } from 'apollo-boost'
-import { LogFilterFragment } from './kubernetes';
+import { ConfigurationOverlayFragment, LogFilterFragment } from './kubernetes';
 import { PageInfo } from './base'
 import { BuildFragment } from './builds';
 
@@ -219,8 +219,12 @@ export const APPLICATION_Q = gql`
       configuration { helm terraform }
       ...ApplicationFragment
     }
+    configurationOverlays(namespace: $name) {
+      ...ConfigurationOverlayFragment
+    }
   }
   ${ApplicationFragment}
+  ${ConfigurationOverlayFragment}
 `
 
 export const APPLICATION_SUB = gql`

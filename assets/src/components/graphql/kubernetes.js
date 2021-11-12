@@ -251,3 +251,14 @@ export const CertificateFragment = gql`
   }
   ${MetadataFragment}
 `
+
+export const ConfigurationOverlayFragment = gql`
+  fragment ConfigurationOverlayFragment on ConfigurationOverlay {
+    metadata { ...MetadataFragment }
+    spec {
+      name
+      documentation
+    }
+  }
+  ${MetadataFragment}
+`
