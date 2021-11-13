@@ -258,6 +258,8 @@ export const ConfigurationOverlayFragment = gql`
     spec {
       name
       documentation
+      inputType
+      inputValues
     }
   }
   ${MetadataFragment}

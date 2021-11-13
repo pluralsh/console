@@ -16,6 +16,7 @@ import { LoopingLogo } from './utils/AnimatedLogo'
 import gql from 'graphql-tag'
 import { BuildFragment } from './graphql/builds'
 import { LabelledInput } from './utils/LabelledInput'
+import { convertType } from './runbooks/Display'
 
 const ConfigType = {
   HELM: 'HELM',
@@ -30,18 +31,22 @@ const EXECUTE_OVERLAY = gql`
   ${BuildFragment}
 `;
 
-function OverlayInput({overlay, ctx, setCtx}) {
-  const name = overlay.spec.name
-  const setValue = useCallback((val) => setCtx({...ctx, [overlay.spec.name]: val}), [overlay, ctx, setCtx])
+function OverlayInput({overlay: {spec}, ctx, setCtx}) {
+  const name = spec.name
+  console.log(spec)
+  const setValue = useCallback((val) => {
+    setCtx({...ctx, [name]: convertType(val, spec.inputType)})
+  }, [name, spec, ctx, setCtx])
+  console.log(ctx)
 
   return (
     <Box gap='xsmall'>
       <LabelledInput
         name={name}
         label={name}
-        value={ctx[name] || ''}
+        value={`${ctx[name] || ''}`}
         onChange={setValue} />
-      <Text size='small' color='dark-3'><i>{overlay.spec.documentation}</i></Text>
+      <Text size='small' color='dark-3'><i>{spec.documentation}</i></Text>
     </Box>
   )
 }

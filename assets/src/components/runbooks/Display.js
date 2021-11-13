@@ -111,7 +111,7 @@ function buttonComponent({primary, key, ...props}) {
   return <SecondaryButton key={key} round='xsmall' {...props} />
 }
 
-function convertType(val, type) {
+export function convertType(val, type) {
   if (!type) return val
 
   if (type === 'int') return parseInt(val)
