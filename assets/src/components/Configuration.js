@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { APPLICATION_Q, UPDATE_CONFIGURATION } from './graphql/plural'
@@ -17,6 +17,8 @@ import gql from 'graphql-tag'
 import { BuildFragment } from './graphql/builds'
 import { LabelledInput } from './utils/LabelledInput'
 import { convertType } from './runbooks/Display'
+import { DarkSelect } from './utils/Select'
+import { chunk } from 'lodash'
 
 const ConfigType = {
   HELM: 'HELM',
@@ -33,19 +35,27 @@ const EXECUTE_OVERLAY = gql`
 
 function OverlayInput({overlay: {spec}, ctx, setCtx}) {
   const name = spec.name
-  console.log(spec)
   const setValue = useCallback((val) => {
     setCtx({...ctx, [name]: convertType(val, spec.inputType)})
   }, [name, spec, ctx, setCtx])
-  console.log(ctx)
+
+  const values = useMemo(() => spec.inputValues?.map((v) => ({label: v, value: v})), [spec])
 
   return (
     <Box gap='xsmall'>
-      <LabelledInput
-        name={name}
-        label={name}
-        value={`${ctx[name] || ''}`}
-        onChange={setValue} />
+      {spec.inputType === 'enum' && (
+        <DarkSelect
+          options={values}
+          value={values.find(({value}) => value === ctx[name])}
+          onChange={({value}) => setValue(value)} />
+      )}
+      {spec.inputType !== 'enum' && (
+        <LabelledInput
+          name={name}
+          label={name}
+          value={`${ctx[name] || ''}`}
+          onChange={setValue} />
+      )}
       <Text size='small' color='dark-3'><i>{spec.documentation}</i></Text>
     </Box>
   )
@@ -53,9 +63,18 @@ function OverlayInput({overlay: {spec}, ctx, setCtx}) {
 
 function OverlayEdit({overlays, ctx, setCtx}) {
   return (
-    <Box flex={false} style={{overflow: 'auto'}} fill pad='medium' gap='xsmall'>
-      {overlays.map((overlay) => (
-        <OverlayInput overlay={overlay} ctx={ctx} setCtx={setCtx} />
+    <Box flex={false} style={{overflow: 'auto'}} fill pad='medium' gap='medium'>
+      {chunk(overlays, 2).map((chunk, ind) => (
+        <Box key={`${ind}`} direction='row' align='center' gap='medium'>
+          {chunk.map((overlay) => (
+            <Box key={overlay.metadata.name}  width='50%'>
+              <OverlayInput 
+                overlay={overlay} 
+                ctx={ctx} 
+                setCtx={setCtx} />
+            </Box>
+          ))}
+        </Box>
       ))}
     </Box>
   )
