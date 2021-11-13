@@ -114,7 +114,7 @@ function NodeRow({node, metrics, refetch}) {
         <Text size='small'>{node.metadata.name}</Text>
       </Box>
       <Box flex={false} width='10%' direction='row' gap='xsmall' align='center'>
-        <ReadyIcon readiness={readiness} />
+        <ReadyIcon size='12px' readiness={readiness} />
         <Text size='small'>{nodeReadiness(node.status) === Readiness.Ready ? 'Ready' : 'Pending'}</Text>
       </Box>
       <Box flex={false} width='10%' direction='row' gap='xsmall' align='center' pad={{horizontal: 'xsmall'}}>
