@@ -260,6 +260,7 @@ export const ConfigurationOverlayFragment = gql`
       documentation
       inputType
       inputValues
+      updates { path }
     }
   }
   ${MetadataFragment}

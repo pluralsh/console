@@ -19,6 +19,8 @@ import { LabelledInput } from './utils/LabelledInput'
 import { convertType } from './runbooks/Display'
 import { DarkSelect } from './utils/Select'
 import { chunk } from 'lodash'
+import yaml from 'js-yaml'
+import { deepFetch } from '../utils/graphql'
 
 const ConfigType = {
   HELM: 'HELM',
@@ -58,11 +60,19 @@ const INPUT_COMPONENTS = {
   enum: SelectInput
 }
 
-function OverlayInput({overlay, ctx, setCtx}) {
+function OverlayInput({overlay, ctx, setCtx, values}) {
   const name = overlay.spec.name
   const setValue = useCallback((val) => {
     setCtx({...ctx, [name]: convertType(val, overlay.spec.inputType)})
   }, [name, overlay.spec, ctx, setCtx])
+
+  useEffect(() => {
+    const update = overlay.spec.updates[0].path
+    const val = deepFetch(values, update)
+    if (val) {
+      setValue(val)
+    }
+  }, [])
 
   const component = INPUT_COMPONENTS[overlay.spec.inputType] || BaseInput
 
@@ -74,7 +84,9 @@ function OverlayInput({overlay, ctx, setCtx}) {
   )
 }
 
-function OverlayEdit({overlays, ctx, setCtx}) {
+function OverlayEdit({overlays, ctx, setCtx, helm}) {
+  const values = useMemo(() => yaml.load(helm), [helm])
+
   return (
     <Box flex={false} style={{overflow: 'auto'}} fill pad='medium' gap='medium'>
       {chunk(overlays, 2).map((chunk, ind) => (
@@ -83,6 +95,7 @@ function OverlayEdit({overlays, ctx, setCtx}) {
             <Box key={overlay.metadata.name}  width='50%'>
               <OverlayInput 
                 overlay={overlay} 
+                values={values}
                 ctx={ctx} 
                 setCtx={setCtx} />
             </Box>

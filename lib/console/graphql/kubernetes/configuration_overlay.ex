@@ -13,7 +13,7 @@ defmodule Console.GraphQl.Kubernetes.ConfigurationOverlay do
   object :configuration_overlay_spec do
     field :name,          :string
     field :documentation, :string
-    field :path,          list_of(:overlay_update)
+    field :updates,       list_of(:overlay_update)
     field :input_type,    :string
     field :input_values,  list_of(:string)
   end
