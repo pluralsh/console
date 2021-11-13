@@ -14,5 +14,7 @@ defmodule Console.GraphQl.Kubernetes.ConfigurationOverlay do
     field :name,          :string
     field :documentation, :string
     field :path,          list_of(:overlay_update)
+    field :input_type,    :string
+    field :input_values,  list_of(:string)
   end
 end

@@ -16,6 +16,8 @@ defmodule Kube.ConfigurationOverlay do
       property :name,          "name",          :string
       property :documentation, "documentation", :string
       property :updates,       "updates",       {:array, Kube.ConfigurationOverlay.OverlayUpdate}
+      property :input_type,    "inputType",     :string
+      property :input_values,  "inputValues",   {:array, :string}
     end
   end
 
