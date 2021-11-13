@@ -163,7 +163,8 @@ export function EditConfiguration({onCompleted, overlays, application: {name, co
         <OverlayEdit 
           overlays={overlays}
           ctx={ctx}
-          setCtx={setCtx} />
+          setCtx={setCtx}
+          helm={helm} />
       )}
       {type !== ConfigType.OVERLAY && (
         <AceEditor
