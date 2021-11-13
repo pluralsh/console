@@ -33,30 +33,43 @@ const EXECUTE_OVERLAY = gql`
   ${BuildFragment}
 `;
 
-function OverlayInput({overlay: {spec}, ctx, setCtx}) {
-  const name = spec.name
-  const setValue = useCallback((val) => {
-    setCtx({...ctx, [name]: convertType(val, spec.inputType)})
-  }, [name, spec, ctx, setCtx])
+function BaseInput({overlay: {spec}, value, setValue}) {
+  return (
+    <LabelledInput
+      name={spec.name}
+      label={spec.name}
+      value={`${value || ''}`}
+      onChange={setValue} />
+  )
+}
 
+function SelectInput({overlay: {spec}, value, setValue}) {
   const values = useMemo(() => spec.inputValues?.map((v) => ({label: v, value: v})), [spec])
 
   return (
+    <DarkSelect
+      options={values}
+      value={values.find(({val}) => val === value)}
+      onChange={({value}) => setValue(value)} />
+  )
+}
+
+const INPUT_COMPONENTS = {
+  enum: SelectInput
+}
+
+function OverlayInput({overlay, ctx, setCtx}) {
+  const name = overlay.spec.name
+  const setValue = useCallback((val) => {
+    setCtx({...ctx, [name]: convertType(val, overlay.spec.inputType)})
+  }, [name, overlay.spec, ctx, setCtx])
+
+  const component = INPUT_COMPONENTS[overlay.spec.inputType] || BaseInput
+
+  return (
     <Box gap='xsmall'>
-      {spec.inputType === 'enum' && (
-        <DarkSelect
-          options={values}
-          value={values.find(({value}) => value === ctx[name])}
-          onChange={({value}) => setValue(value)} />
-      )}
-      {spec.inputType !== 'enum' && (
-        <LabelledInput
-          name={name}
-          label={name}
-          value={`${ctx[name] || ''}`}
-          onChange={setValue} />
-      )}
-      <Text size='small' color='dark-3'><i>{spec.documentation}</i></Text>
+      {React.createElement(component, {overlay, setValue, value: ctx[name]})}
+      <Text size='small' color='dark-3'><i>{overlay.spec.documentation}</i></Text>
     </Box>
   )
 }
