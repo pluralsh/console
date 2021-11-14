@@ -38,11 +38,34 @@ sections:
           - name: admin_name
             documentation: name for the initial admin user
             type: STRING
+          - name: repo_url
+            documentation: the url to the remote git repo
+            type: FUNCTION
+            functionName: repoUrl
           - name: access_token
             documentation: github/gitlab access token to use for http git authentication
             type: STRING
             condition:
               operation: PREFIX
-              field: 
-          - name: pk
+              field: repo_url
+              value: https
+          - name: private_key
             documentation: path to the private key to use for git authentication
+            type: FILE
+            default: ~/.ssh/id_rsa
+            condition:
+              operation: NOT
+              field: access_token
+          - name: public_key
+            documentation: path to the public key to use for git authentication
+            type: FILE
+            default: ~/.ssh/id_rsa.pub
+            condition:
+              operation: NOT
+              field: access_token
+          - name: passphrase
+            documentation: passphrase to use for encrypted private keys (leave empty if not applicable)
+            type: STRING
+            condition:
+              operation: NOT
+              field: access_token

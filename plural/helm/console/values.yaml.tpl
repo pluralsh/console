@@ -26,23 +26,6 @@ serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Project }}:role/{{ .Cluster }}-console
 
-{{ $norsa := eq (dig "console" "secrets" "id_rsa" "default" .) "default" }}
-{{ $notoken := eq (dig "console" "secrets" "git_access_token" "default" .) "default" }}
-{{ $conf := dict }}
-{{ if .Values.console_dns }}
-  {{ $url := repoUrl }}
-  {{ if all $notoken (hasPrefix "https" $url) }}
-    {{ $token := readLine "Enter your git access token" }}
-    {{ $_ := set $conf "git_access_token" $token }}
-  {{ else if and $norsa (not (hasPrefix "https" $url)) }}
-    {{ $id_rsa := readLineDefault "Enter the path to your deploy keys" (homeDir ".ssh" "id_rsa") }}
-    {{ $pass := readLine "Enter ssh passphrase (just press enter if none)" }}
-    {{ $_ := set $conf "id_rsa" (readFile $id_rsa) }}
-    {{ $_ := set $conf "id_rsa_pub" (readFile (printf "%s.pub" $id_rsa)) }}
-    {{ $_ := set $conf "ssh_passphrase" $pass }}
-  {{ end }}
-{{ end }}
-
 secrets:
   jwt: {{ dedupe . "console.secrets.jwt" (randAlphaNum 20) }}
   admin_name: {{ .Values.admin_name }}
@@ -72,31 +55,12 @@ secrets:
 {{ end }}
   cluster_name: {{ .Cluster }}
   erlang: {{ dedupe . "console.secrets.erlang" (randAlphaNum 14) }}
-{{ if not $norsa }}
-  id_rsa: {{ .console.secrets.id_rsa | quote }}
-  id_rsa_pub: {{ .console.secrets.id_rsa_pub | quote }}
-  {{ if .console.secrets.ssh_passphrase }}
-  ssh_passphrase: {{ .console.secrets.ssh_passphrase | quote }}
-  {{ end }}
-{{ end}}
-{{ if not $notoken }}
-  git_access_token: {{ .console.secrets.git_access_token | quote }}
-{{ end }}
-{{ if and .Values.console_dns $conf }}
-{{ range $key, $value := $conf }}
-  {{ $key }}: {{ $value | quote }}
-{{ end }}
-{{ end }}
-{{ if hasKey .Values "git_user" }}
-  git_user: {{ .Values.git_user }}
-{{ else }}
-  git_user: console
-{{ end }}
-{{ if hasKey .Values "git_email" }}
-  git_email: {{ .Values.git_email }}
-{{ else }}
-  git_email: console@plural.sh
-{{ end }}
+  id_rsa: {{ ternary .Values.private_key (dedupe . "console.secrets.id_rsa" "") (hasKey .Values "private_key") | quote }}
+  id_rsa_pub: {{ ternary .Values.public_key (dedupe . "console.secrets.id_rsa_pub" "") (hasKey .Values "public_key") | quote }}
+  ssh_passphrase: {{ ternary .Values.passphrase (dedupe . "console.secrets.ssh_passphrase" "") (hasKey .Values "passphrase") | quote }}
+  git_access_token: {{ ternary .Values.access_token (dedupe . "console.secrets.git_access_token" "") (hasKey .Values "git_access_token") | quote }}
+  git_user: {{ default "console" .Values.git_user }}
+  git_email: {{ default "console@plural.sh" .Values.git_email }}
 {{ if .OIDC }}
   plural_client_id: {{ .OIDC.ClientId }}
   plural_client_secret: {{ .OIDC.ClientSecret }}
