@@ -3,6 +3,11 @@ defmodule Console.GraphQl.Observability do
   alias Console.GraphQl.Resolvers.Observability
   alias Console.Middleware.{Authenticated, Rbac}
 
+  enum :autoscaling_target do
+    value :statefulset
+    value :deployment
+  end
+
   input_object :label_input do
     field :name,  :string
     field :value, :string
@@ -93,6 +98,15 @@ defmodule Console.GraphQl.Observability do
       arg :limit, non_null(:integer)
 
       resolve &Observability.resolve_logs/2
+    end
+
+    field :scaling_recommendation, :vertical_pod_autoscaler do
+      middleware Authenticated
+      arg :kind,      non_null(:autoscaling_target)
+      arg :namespace, non_null(:string)
+      arg :name,      non_null(:string)
+
+      resolve &Observability.resolve_scaling_recommendation/2
     end
   end
 end

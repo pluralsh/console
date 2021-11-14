@@ -1,7 +1,8 @@
 defmodule Console.Services.Observability do
-  alias Kube.{Client, Dashboard}
+  alias Kube.{Client, Dashboard, VerticalPodAutoscaler}
   alias Prometheus.Client, as: PrometheusClient
   alias Loki.Client, as: LokiClient
+  alias Kazan.Apis.Autoscaling.V1.CrossVersionObjectReference
 
   def get_dashboards(name) do
     with {:ok, %{items: items}} <- Client.list_dashboards(name),
@@ -19,6 +20,30 @@ defmodule Console.Services.Observability do
     with {:ok, %{data: %{result: results}}} <- PrometheusClient.query(q, start, stop, step, %{}),
       do: {:ok, results}
   end
+
+  def get_scaling_recommendation(kind, namespace, name) do
+    vpa_name = vpa_name(kind, namespace, name)
+    case Client.get_vertical_pod_autoscaler(namespace, vpa_name) do
+      {:ok, result} -> {:ok, result}
+      _ -> Client.create_vertical_pod_autoscaler(namespace, vpa_name, vpa_template(kind, namespace, name))
+    end
+  end
+
+  defp vpa_template(kind, namespace, name) do
+    %VerticalPodAutoscaler{
+      spec: %VerticalPodAutoscaler.Spec{
+        update_policy: %VerticalPodAutoscaler.UpdatePolicy{update_mode: "Off"},
+        target_ref: %CrossVersionObjectReference{
+          api_version: "apps/v1",
+          kind: to_string(kind),
+          name: name
+        }
+      }
+    }
+  end
+
+  defp vpa_name(:statefulset, namespace, name), do: "ss-#{namespace}-#{name}"
+  defp vpa_name(:deployment, namespace, name), do: "dep-#{namespace}-#{name}"
 
   def hydrate(%Dashboard{
     spec: %Dashboard.Spec{

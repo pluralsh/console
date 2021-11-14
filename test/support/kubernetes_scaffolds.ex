@@ -223,4 +223,14 @@ defmodule KubernetesScaffolds do
       spec: struct(Kube.ConfigurationOverlay.Spec, opts),
     }
   end
+
+  def vertical_pod_autoscaler(name) do
+    %Kube.VerticalPodAutoscaler{
+      metadata: %{name: name, namespace: name},
+      spec: %Kube.VerticalPodAutoscaler.Spec{
+        target_ref: %{kind: :statefulset, name: "name", api_version: "core/v1"},
+        update_policy: %{update_mode: "Off"}
+      }
+    }
+  end
 end

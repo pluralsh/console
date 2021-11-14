@@ -5,6 +5,9 @@ defmodule Console.GraphQl.Resolvers.Observability do
 
   def resolve_dashboards(%{repo: name}, _), do: Observability.get_dashboards(name)
 
+  def resolve_scaling_recommendation(%{namespace: ns, name: name, kind: kind}, _),
+    do: Observability.get_scaling_recommendation(kind, ns, name)
+
   def resolve_dashboard(%{repo: name, name: id} = args, _) do
     now = Timex.now()
     start = Timex.shift(now, seconds: -Map.get(args, :offset, @default_offset))

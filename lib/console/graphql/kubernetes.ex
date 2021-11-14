@@ -61,6 +61,7 @@ defmodule Console.GraphQl.Kubernetes do
   import_types Console.GraphQl.Kubernetes.Job
   import_types Console.GraphQl.Kubernetes.Certificate
   import_types Console.GraphQl.Kubernetes.ConfigurationOverlay
+  import_types Console.GraphQl.Kubernetes.VerticalPodAutoscaler
 
   delta :application
 

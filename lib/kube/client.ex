@@ -166,4 +166,39 @@ defmodule Kube.Client do
     }
     |> Kazan.run()
   end
+
+  def get_vertical_pod_autoscaler(namespace, name) do
+    %Kazan.Request{
+      method: "get",
+      path: "/apis/autoscaling.k8s.io/v1/namespaces/#{Console.namespace(namespace)}/verticalpodautoscalers/#{name}",
+      query_params: %{},
+      response_model: Kube.VerticalPodAutoscaler
+    }
+    |> Kazan.run()
+  end
+
+  def list_vertical_pod_autoscalers(namespace) do
+    %Kazan.Request{
+      method: "get",
+      path: "/apis/autoscaling.k8s.io/v1/namespaces/#{Console.namespace(namespace)}/verticalpodautoscalers",
+      query_params: %{},
+      response_model: Kube.VerticalPodAutoscaler
+    }
+    |> Kazan.run()
+  end
+
+  def create_vertical_pod_autoscaler(namespace, name, %Kube.VerticalPodAutoscaler{} = vpa) do
+    resize = %{vpa | metadata: %ObjectMeta{name: name, namespace: namespace}}
+    {:ok, encoded} = Kube.VerticalPodAutoscaler.encode(vpa)
+
+    %Kazan.Request{
+      method: "post",
+      path: "/apis/autoscaling.k8s.io/v1/namespaces/#{namespace}/verticalpodautoscalers/#{name}",
+      query_params: %{},
+      body: Jason.encode!(encoded),
+      content_type: "application/json",
+      response_model: Kube.VerticalPodAutoscaler
+    }
+    |> Kazan.run()
+  end
 end

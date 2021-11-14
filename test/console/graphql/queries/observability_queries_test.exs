@@ -2,6 +2,7 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
   use Console.DataCase, async: false
   alias Kube.Dashboard
   use Mimic
+  import KubernetesScaffolds
 
   setup :set_mimic_global
 
@@ -173,6 +174,25 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       """, %{"q" => "something"}, %{current_user: insert(:user)})
 
       assert metric["values"] == [%{"timestamp" => 1, "value" => "1"}]
+    end
+  end
+
+  describe "scalingRecommendation" do
+    test "it can fetch a vpa to provide recommendations" do
+      user = insert(:user)
+      expect(Kazan, :run, fn _ -> {:ok, vertical_pod_autoscaler("name")} end)
+
+      {:ok, %{data: %{"scalingRecommendation" => found}}} = run_query("""
+        query {
+          scalingRecommendation(kind: STATEFULSET, name: "name", namespace: "namespace") {
+            metadata { name namespace }
+            spec { updatePolicy { updateMode } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert found["metadata"]["name"] == "name"
+      assert found["spec"]["updatePolicy"]["updateMode"] == "Off"
     end
   end
 
