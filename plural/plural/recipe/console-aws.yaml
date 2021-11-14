@@ -38,3 +38,11 @@ sections:
           - name: admin_name
             documentation: name for the initial admin user
             type: STRING
+          - name: access_token
+            documentation: github/gitlab access token to use for http git authentication
+            type: STRING
+            condition:
+              operation: PREFIX
+              field: 
+          - name: pk
+            documentation: path to the private key to use for git authentication

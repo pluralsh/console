@@ -413,7 +413,7 @@ function Container({container, containerStatus}) {
         </MetadataRow>
         <MetadataRow name='readiness'>
           <Box direction='row' gap='xsmall' align='center'>
-            <ReadyIcon readiness={readiness} />
+            <ReadyIcon size='10px' readiness={readiness} />
             <Text size='small'>{readiness === Readiness.Ready ? 'Running' : (readiness === Readiness.Failed ? 'Stopped' : 'Pending')}</Text>
           </Box>
         </MetadataRow>
@@ -472,15 +472,15 @@ export function Pod() {
             {initContainers.map(({name}) => (
               <TabHeaderItem key={name} name={`init-container:${name}`}>
                 <Box direction='row' gap='xsmall' align='center'>
-                  <ReadyIcon readiness={containerReadiness(initContainerStatus[name])} />
-                  <Text size='small' weight={500}>init container: {name}</Text>
+                  <ReadyIcon size='12px' readiness={containerReadiness(initContainerStatus[name])} />
+                  <Text size='small' weight={500}>init: {name}</Text>
                 </Box>
               </TabHeaderItem>
             ))}
             {containers.map(({name}) => (
               <TabHeaderItem key={name} name={`container:${name}`}>
                 <Box direction='row' gap='xsmall' align='center'>
-                  <ReadyIcon readiness={containerReadiness(containerStatus[name])} />
+                  <ReadyIcon size='12px' readiness={containerReadiness(containerStatus[name])} />
                   <Text size='small' weight={500}>container: {name}</Text>
                 </Box>
               </TabHeaderItem>
