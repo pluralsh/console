@@ -38,5 +38,7 @@ defmodule Console.Schema.Notification do
     |> cast(attrs, @valid)
     |> unique_constraint(:fingerprint)
     |> validate_required([:title, :description, :repository, :seen_at, :fingerprint])
+    |> validate_length(:title, max: 1000)
+    |> validate_length(:description, max: 10_000)
   end
 end
