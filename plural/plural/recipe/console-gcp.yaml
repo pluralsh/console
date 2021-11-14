@@ -1,5 +1,5 @@
 name: console-gcp
-description: Deploys console on a gke cluster
+description: Deploys console on a GKE cluster
 provider: GCP
 oidcSettings:
   uriFormat: https://{domain}/oauth/callback

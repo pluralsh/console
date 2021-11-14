@@ -1,5 +1,5 @@
 name: console-azure
-description: Deploys console on an EKS cluster
+description: Deploys console on an AKS cluster
 provider: AZURE
 oidcSettings:
   uriFormat: https://{domain}/oauth/callback

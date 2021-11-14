@@ -1,5 +1,5 @@
 name: console-aws
-description: Deploys console on a bootstrapped EKS cluster
+description: Deploys console on an EKS cluster
 provider: AWS
 oidcSettings:
   uriFormat: https://{domain}/oauth/callback
