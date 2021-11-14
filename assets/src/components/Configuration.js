@@ -69,10 +69,8 @@ function OverlayInput({overlay, ctx, setCtx, values}) {
   useEffect(() => {
     const update = overlay.spec.updates[0].path
     const val = deepFetch(values, update)
-    if (val) {
-      setValue(val)
-    }
-  }, [])
+    if (val && !ctx[name]) { setValue(val) }
+  }, [ctx])
 
   const component = INPUT_COMPONENTS[overlay.spec.inputType] || BaseInput
 
@@ -88,20 +86,22 @@ function OverlayEdit({overlays, ctx, setCtx, helm}) {
   const values = useMemo(() => yaml.load(helm), [helm])
 
   return (
-    <Box flex={false} style={{overflow: 'auto'}} fill pad='medium' gap='medium'>
-      {chunk(overlays, 2).map((chunk, ind) => (
-        <Box key={`${ind}`} direction='row' align='center' gap='medium'>
-          {chunk.map((overlay) => (
-            <Box key={overlay.metadata.name}  width='50%'>
-              <OverlayInput 
-                overlay={overlay} 
-                values={values}
-                ctx={ctx} 
-                setCtx={setCtx} />
-            </Box>
-          ))}
-        </Box>
-      ))}
+    <Box style={{overflow: 'auto'}} fill>
+      <Box flex={false} pad='medium' gap='medium'>
+        {chunk(overlays, 2).map((chunk, ind) => (
+          <Box key={`${ind}`} direction='row' align='center' gap='medium'>
+            {chunk.map((overlay) => (
+              <Box key={overlay.metadata.name}  width='50%'>
+                <OverlayInput 
+                  overlay={overlay} 
+                  values={values}
+                  ctx={ctx} 
+                  setCtx={setCtx} />
+              </Box>
+            ))}
+          </Box>
+        ))}
+      </Box>
     </Box>
   )
 }
@@ -237,8 +237,6 @@ export default function Configuration() {
   useEnsureCurrent(repo)
 
   if (!data) return <LoopingLogo scale='0.75' dark />
-
-  console.log(data)
 
   return (
     <EditConfiguration 
