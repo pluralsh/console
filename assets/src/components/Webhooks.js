@@ -6,11 +6,14 @@ import { Button, Scroller, ModalHeader, Copyable } from 'forge-core'
 import { BUILD_PADDING } from './Builds'
 import { Box, Text, FormField, TextInput, Layer } from 'grommet'
 import { chunk } from '../utils/array'
-import { appendConnection, updateCache } from '../utils/graphql'
+import { appendConnection, extendConnection, updateCache } from '../utils/graphql'
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { Container } from './utils/Container'
+import { SectionContentContainer, SectionPortal } from './utils/Section'
+import SmoothScroller from './utils/SmoothScroller'
+import { HeaderItem } from './kubernetes/Pod'
 
-const MAX_LEN = 60
+const MAX_LEN = 100
 const trim = (url) => url.length > 10 ? `${url.slice(0, MAX_LEN)}...` : url
 
 function WebhookHealth({health}) {
@@ -86,6 +89,63 @@ function CreateWebhook() {
       </Layer>
     )}
     </>
+  )
+}
+
+const HEIGHT_PX = `45px`
+const HEALTH_WIDTH = '100px'
+
+function WebhookRow({hook: {url, health}}) {
+  return (
+    <Box flex={false} height={HEIGHT_PX} direction='row' align='center' 
+         border={{side: 'bottom'}} pad='small'>
+      <Box fill='horizontal'>
+        <Copyable text={url} pillText='Webhook url copied' />
+      </Box>
+      <Box width={HEALTH_WIDTH} flex={false}>
+        <WebhookHealth health={health} />
+      </Box>
+    </Box>
+  )
+}
+
+function WebhooksHeader() {
+  return (
+    <Box flex={false} height={HEIGHT_PX} direction='row' align='center' 
+        gap='xsmall' border={{side: 'bottom'}} 
+        pad={{horizontal: 'small'}}>
+      <HeaderItem width='calc(100% - 80px)' text='Url' />
+      <HeaderItem width={HEALTH_WIDTH} text='Health' />
+    </Box>
+  )
+}
+
+export function WebhookManagement() {
+  const [listRef, setListRef] = useState(null)
+  const {data, loading, fetchMore} = useQuery(WEBHOOKS_Q)
+  if (!data) return <LoopingLogo scale='0.75' />
+  const {edges, pageInfo} = data.webhooks
+  
+  return (
+    <SectionContentContainer header='Webhooks'>
+      <WebhooksHeader />
+      <Box fill>
+        <SmoothScroller
+          listRef={listRef}
+          setListRef={setListRef}
+          items={edges}
+          mapper={({node}) => <WebhookRow hook={node} />}
+          loading={loading}
+          loadNextPage={() => pageInfo.hasNextPage && fetchMore({
+            variables: {cursor: pageInfo.endCursor},
+            updateQuery: (prev, {fetchMoreResult: {webhooks}}) => extendConnection(prev, webhooks, 'webhooks')
+          })}
+          hasNextPage={pageInfo.hasNextPage} />
+      </Box>
+      <SectionPortal>
+        <CreateWebhook />
+      </SectionPortal>
+    </SectionContentContainer>
   )
 }
 

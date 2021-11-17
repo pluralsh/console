@@ -63,12 +63,24 @@ defmodule Console.Plural.Queries do
     }
   """
 
+  @oidc_provider_fragment """
+    fragment OIDCProviderFragment on OidcProvider {
+      redirectUris
+      bindings {
+        user { id name email }
+        group { id name }
+      }
+    }
+  """
+
   @installation_fragment """
     fragment InstallationFragment on Installation {
       id
       repository { ...RepositoryFragment }
+      oidcProvider { ...OIDCProviderFragment }
     }
     #{@repository_fragment}
+    #{@oidc_provider_fragment}
   """
 
   @installation_query """

@@ -14,6 +14,7 @@ defmodule Console.Plural.Repositories do
     Workspace,
     Condition,
     OIDCSettings,
+    OIDCProvider
   }
 
   defmodule Query do
@@ -101,7 +102,9 @@ defmodule Console.Plural.Repositories do
 
   def get_installation(name) do
     get_installation_query()
-    |> Client.run(%{name: name}, %Query{installation: %Installation{}})
+    |> Client.run(%{name: name}, %Query{installation: %Installation{
+      oidcProvider: OIDCProvider.spec()
+    }})
     |> when_ok(fn %{installation: inst} -> inst end)
   end
 

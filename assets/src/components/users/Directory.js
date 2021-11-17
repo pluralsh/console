@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { Box, Text, Layer, TextInput, ThemeContext } from 'grommet'
 import { useQuery, useMutation } from 'react-apollo'
-import { ModalHeader, Scroller, User, Group, AddUser, AddGroup, Roles, CreateRole as CreateRoleI } from 'forge-core'
+import { ModalHeader, Scroller, User, Group, AddUser, AddGroup, Webhooks, Roles, CreateRole as CreateRoleI } from 'forge-core'
 import { USERS_Q, GROUPS_Q, EDIT_USER, ROLES_Q } from './queries'
 import Avatar from './Avatar'
 import { GroupForm } from './CreateGroup'
@@ -16,6 +16,7 @@ import { SectionContentContainer, SectionPortal } from '../utils/Section'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { SIDEBAR_ICON_HEIGHT } from '../Sidebar'
 import Toggle from 'react-toggle'
+import { WebhookManagement } from '../Webhooks'
 
 const INPUT_WIDTH = '350px'
 
@@ -210,6 +211,11 @@ export default function Directory() {
           label='Roles' 
           section='roles' 
           setSection={setSection} />
+        <SectionChoice
+          icon={<Webhooks size='14px' />}
+          label='Webhooks'
+          section='webhooks'
+          setSection={setSection} />
         <CreateModal header='Create a new group' form={<GroupForm />}>
           {(onClick) => (
             <SectionChoice 
@@ -237,6 +243,7 @@ export default function Directory() {
         {section === 'users' && <UsersInner />}
         {section === 'groups' && <GroupsInner />}
         {section === 'roles' && <RolesInner />}
+        {section === 'webhooks' && <WebhookManagement />}
       </Box>
     </Box>
     </ThemeContext.Extend>

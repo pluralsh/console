@@ -1,7 +1,7 @@
 defmodule Console.Services.Plural do
   alias Console.Schema.{User, Manifest}
   alias Console.Services.{Builds}
-  alias Console.Plural.{Repositories, Users, Recipe}
+  alias Console.Plural.{Repositories, Users, Recipe, Installation, OIDCProvider}
 
   def terraform_file(repository) do
     terraform_filename(repository)
@@ -43,15 +43,27 @@ defmodule Console.Services.Plural do
     context,
     true) do
     with {:ok, %{id: me}} <- Users.me(),
-         {:ok, %{id: inst_id}} <- Repositories.get_installation(name),
-         {:ok, _} <- Repositories.upsert_oidc_provider(inst_id, %{
+         {:ok, %{id: inst_id} = installation} <- Repositories.get_installation(name),
+         {:ok, _} <- Repositories.upsert_oidc_provider(inst_id, merge_provider(%{
            redirectUris: [String.replace(fmt, "{domain}", get_in(context, [name, key]))],
            authMethod: method,
            bindings: [%{userId: me}]
-         }),
+         }, installation)),
       do: :ok
   end
   def configure_oidc(_, _, _), do: :ok
+
+  defp merge_provider(attrs, %Installation{oidcProvider: %OIDCProvider{redirectUris: uris, bindings: bindings}}) do
+    bindings = Enum.map(bindings, fn
+      %{user: %{id: id}} -> %{userId: id}
+      %{group: %{id: id}} -> %{groupId: id}
+    end)
+
+    attrs
+    |> Map.put(:redirectUris, Enum.uniq(attrs.redirectUris ++ uris))
+    |> Map.put(:bindings, Enum.uniq(bindings ++ attrs.bindings))
+  end
+  defp merge_provider(attrs, _), do: attrs
 
   def cluster_name() do
     case project_manifest() do

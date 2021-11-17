@@ -1,9 +1,13 @@
 defmodule Console.Plural.Installation do
-  defstruct [:id, :repository]
+  defstruct [:id, :repository, :oidcProvider]
 end
 
 defmodule Console.Plural.User do
   defstruct [:id, :email]
+end
+
+defmodule Console.Plural.Group do
+  defstruct [:id, :name]
 end
 
 defmodule Console.Plural.Dashboard do
@@ -20,6 +24,31 @@ end
 
 defmodule Console.Plural.OIDCSettings do
   defstruct [:authMethod, :domainKey, :uriFormat]
+end
+
+defmodule Console.Plural.ProviderBinding do
+  alias Console.Plural.{User, Group}
+
+  defstruct [:user, :group]
+
+  def spec() do
+    %__MODULE__{
+      user: %User{},
+      group: %Group{}
+    }
+  end
+end
+
+defmodule Console.Plural.OIDCProvider do
+  alias Console.Plural.{ProviderBinding}
+
+  defstruct [:redirectUris, :bindings]
+
+  def spec() do
+    %__MODULE__{
+      bindings: [ProviderBinding.spec()]
+    }
+  end
 end
 
 defmodule Console.Plural.RecipeSection do
@@ -53,7 +82,6 @@ end
 defmodule Console.Plural.UpgradeQueue do
   defstruct [:id]
 end
-
 
 defmodule Console.Plural.Incident do
   defstruct [:id, :title, :description, :severity, :status]

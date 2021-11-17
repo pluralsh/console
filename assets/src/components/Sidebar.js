@@ -112,9 +112,9 @@ const OPTIONS = [
   {text: 'Incidents', icon: Incidents, path: '/incidents'},
   {text: 'Dashboards', icon: Dashboard, path: '/dashboards/{repo}'},
   {text: 'Logs', icon: Logs, path: '/logs/{repo}'},
-  {text: "Users", icon: Group, path: '/directory'},
+  {text: "Account", icon: Group, path: '/directory'},
   {text: "Audits", name: 'audits', icon: Audits, path: '/audits'},
-  {text: 'Webhooks', icon: Webhooks, path: '/webhooks'},
+  // {text: 'Webhooks', icon: Webhooks, path: '/webhooks'},
 ]
 
 const replace = (path, name) => path.replace('{repo}', name)
