@@ -45,7 +45,7 @@ defmodule Kube.Client do
   def get_slashcommand(ns, name) do
     %Kazan.Request{
       method: "get",
-      path: IO.inspect("/apis/platform.plural.sh/v1alpha1/namespaces/#{Console.namespace(ns)}/slashcommands/#{name}"),
+      path: "/apis/platform.plural.sh/v1alpha1/namespaces/#{Console.namespace(ns)}/slashcommands/#{name}",
       query_params: %{},
       response_model: Kube.SlashCommand
     }

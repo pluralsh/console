@@ -25,7 +25,7 @@ import { withPluralApi } from './PluralApi'
 import { Incidents } from './incidents/Incidents'
 import { Incident } from './incidents/Incident'
 import { AutoRefresh } from './AutoRefresh'
-import { Explore } from 'forge-core'
+import { Install } from 'forge-core'
 import { Installer } from './repos/Installer'
 import { Runbook } from './runbooks/Runbook'
 import { Runbooks } from './runbooks/Runbooks'
@@ -155,8 +155,8 @@ export default function Console() {
             <Box direction='row' fill gap='xsmall' justify='end' 
                   pad={{horizontal: 'medium'}} align='center'>
               <Icon
-                icon={<Explore size='18px' />}
-                text='Search'
+                icon={<Install size='18px' />}
+                text='Install'
                 size='40px'
                 selected={open}
                 onClick={() => setOpen(true)} />
