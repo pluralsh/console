@@ -43,7 +43,7 @@ export function ScalingRecommender({kind, name, namespace}) {
     pollInterval: POLL_INTERVAL
   })
 
-  const recommendations = data?.status?.recommendations
+  const recommendations = data?.status?.recommendation?.containerRecommendations
 
   return (
     <Box fill='horizontal' style={{minHeight: '250px', overflow: 'auto'}}>

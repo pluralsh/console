@@ -23,10 +23,14 @@ defmodule Console.GraphQl.Kubernetes.VerticalPodAutoscaler do
   end
 
   object :vertical_pod_autoscaler_status do
-    field :recommendations, list_of(:pod_scaling_recommendation)
+    field :recommendation, :recommendation
   end
 
-  object :pod_scaling_recommendation do
+  object :recommendation do
+    field :container_recommendations, list_of(:container_recommendation)
+  end
+
+  object :container_recommendation do
     field :name,            :string
     field :target,          :resources
     field :lower_bound,     :resources

@@ -275,11 +275,13 @@ export const VerticalPodAutoscalerFragment = gql`
   fragment VerticalPodAutoscalerFragment on VerticalPodAutoscaler {
     metadata { ...MetadataFragment }
     status {
-      recommendations {
-        name
-        lowerBound { ...ResourcesFragment }
-        upperBound { ...ResourcesFragment }
-        uncappedTarget { ...ResourcesFragment }
+      recommendation {
+        containerRecommendations {
+          name
+          lowerBound { ...ResourcesFragment }
+          upperBound { ...ResourcesFragment }
+          uncappedTarget { ...ResourcesFragment }
+        }
       }
     }
   }
