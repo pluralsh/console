@@ -100,7 +100,6 @@ defmodule Console.Services.Observability do
     end
   end
 
-
   defp format_query(%{query: q, legend_format: legend} = query, start, now, step, variables) do
     with {:ok, %{data: %{result: results}}} <- PrometheusClient.query(q, start, now, step, variables) do
       results

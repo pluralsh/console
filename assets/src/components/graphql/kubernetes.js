@@ -41,16 +41,21 @@ export const ContainerStatus = gql`
   }
 `
 
+export const ResourcesFragment = gql`
+  fragment ResourcesFragment on Resources {
+    limits { cpu memory }
+    requests { cpu memory }
+  }
+`
+
 export const Container = gql`
   fragment Container on Container {
     name
     image
     ports { containerPort protocol }
-    resources {
-      limits { cpu memory }
-      requests { cpu memory }
-    }
+    resources { ...ResourcesFragment }
   }
+  ${ResourcesFragment}
 `
 
 export const PodFragment = gql`
@@ -264,4 +269,20 @@ export const ConfigurationOverlayFragment = gql`
     }
   }
   ${MetadataFragment}
+`
+
+export const VerticalPodAutoscalerFragment = gql`
+  fragment VerticalPodAutoscalerFragment on VerticalPodAutoscaler {
+    metadata { ...MetadataFragment }
+    status {
+      recommendations {
+        name
+        lowerBound { ...ResourcesFragment }
+        upperBound { ...ResourcesFragment }
+        uncappedTarget { ...ResourcesFragment }
+      }
+    }
+  }
+  ${MetadataFragment}
+  ${ResourcesFragment}
 `

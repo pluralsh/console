@@ -189,7 +189,7 @@ defmodule Kube.Client do
 
   def create_vertical_pod_autoscaler(namespace, name, %Kube.VerticalPodAutoscaler{} = vpa) do
     resize = %{vpa | metadata: %ObjectMeta{name: name, namespace: namespace}}
-    {:ok, encoded} = Kube.VerticalPodAutoscaler.encode(vpa)
+    {:ok, encoded} = Kube.VerticalPodAutoscaler.encode(resize)
 
     %Kazan.Request{
       method: "post",

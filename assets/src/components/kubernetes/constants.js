@@ -5,6 +5,11 @@ export const EventType = {
   Warning: "Warning"
 }
 
+export const ScalingTypes = {
+  DEPLOYMENT: 'DEPLOYMENT',
+  STATEFULSET: 'STATEFULSET'
+}
+
 export const ClusterMetrics = {
   CPU: 'sum (rate (container_cpu_usage_seconds_total{id="/"}[5m])) / sum (machine_cpu_cores)',
   Memory: 'sum (container_memory_working_set_bytes{id="/"}) / sum (machine_memory_bytes)',

@@ -5,7 +5,7 @@ import { useQuery } from 'react-apollo'
 import { DEPLOYMENT_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
 import { useHistory, useParams } from 'react-router'
-import { POLL_INTERVAL } from './constants'
+import { POLL_INTERVAL, ScalingTypes } from './constants'
 import { PodList } from './Pod'
 import { RawContent } from './Component'
 import { Events } from './Event'
@@ -14,6 +14,7 @@ import { Container, logUrl } from './utils'
 import { DURATIONS, RangePicker } from '../Dashboard'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { Pie } from '../utils/ProgressGauge'
+import { ScalingRecommenderModal } from './ScalingRecommender'
 
 function Status({status: {availableReplicas, replicas, unavailableReplicas}, metadata}) {
   let history = useHistory()
@@ -73,7 +74,8 @@ export default function Deployment() {
   return (
     <Box fill style={{overflow: 'auto'}}>
       <Tabs defaultTab='info' onTabChange={setTab}
-            headerEnd={tab === 'metrics' ? <RangePicker duration={duration} setDuration={setDuration} /> : null}>
+            headerEnd={tab === 'metrics' ? <RangePicker duration={duration} setDuration={setDuration} /> : 
+                                           <ScalingRecommenderModal kind={ScalingTypes.DEPLOYMENT} name={name} namespace={repo} />}>
         <TabHeader>
           <TabHeaderItem name='info'>
             <Text size='small' weight={500}>info</Text>

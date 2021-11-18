@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost'
 import { MetricResponseFragment } from '../graphql/dashboards';
-import { CertificateFragment, CronJobFragment, DeploymentFragment, EventFragment, IngressFragment, JobFragment, JobStatus, NodeFragment, NodeMetricFragment, PodFragment, ServiceFragment, StatefulSetFragment } from '../graphql/kubernetes';
+import { CertificateFragment, CronJobFragment, DeploymentFragment, EventFragment, IngressFragment, JobFragment, JobStatus, NodeFragment, NodeMetricFragment, PodFragment, ServiceFragment, StatefulSetFragment, VerticalPodAutoscalerFragment } from '../graphql/kubernetes';
 
 export const SERVICE_Q = gql`
   query Service($name: String!, $namespace: String!) {
@@ -181,3 +181,12 @@ export const USAGE_Q = gql`
   }
   ${MetricResponseFragment}
 `;
+
+export const SCALING_RECOMMENDATION = gql`
+  query Scaling($name: String!, $namespace: String!, $kind: AutoscalingTarget!) {
+    scalingRecommendation(name: $name, namespace: $namespace, kind: $kind) {
+      ...VerticalPodAutoscalerFragment
+    }
+  }
+  ${VerticalPodAutoscalerFragment}
+`
