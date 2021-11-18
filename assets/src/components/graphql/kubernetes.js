@@ -277,7 +277,7 @@ export const VerticalPodAutoscalerFragment = gql`
     status {
       recommendation {
         containerRecommendations {
-          name
+          containerName
           lowerBound { ...ResourcesFragment }
           upperBound { ...ResourcesFragment }
           uncappedTarget { ...ResourcesFragment }

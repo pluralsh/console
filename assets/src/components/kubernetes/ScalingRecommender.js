@@ -20,15 +20,15 @@ function ScalingRecommendations({recommendations}) {
           ))}
         </TabHeader>
         {recommendations.map((recommendation) => (
-          <TabContent key={recommendation.name} name={recommendation.name}>
+          <TabContent key={recommendation.containerName} name={recommendation.containerName}>
             <MetadataRow name='lower bound'>
-              <Text size='small'>cpu: {recommendation.lowerBound?.requests?.cpu}, mem: {recommendation.lowerBound?.requests?.memory}</Text>
+              <Text size='small'>cpu: {recommendation.lowerBound?.cpu}, mem: {recommendation.lowerBound?.memory}</Text>
             </MetadataRow>
             <MetadataRow name='upper bound'>
-              <Text size='small'>cpu: {recommendation.upperBound?.requests?.cpu}, mem: {recommendation.upperBound?.requests?.memory}</Text>
+              <Text size='small'>cpu: {recommendation.upperBound?.cpu}, mem: {recommendation.upperBound?.memory}</Text>
             </MetadataRow>
-            <MetadataRow name='uncapped target'>
-              <Text size='small'>cpu: {recommendation.uncappedTarget?.requests?.cpu}, mem: {recommendation.uncappedTarget?.requests?.memory}</Text>
+            <MetadataRow name='target'>
+              <Text size='small'>cpu: {recommendation.uncappedTarget?.cpu}, mem: {recommendation.uncappedTarget?.memory}</Text>
             </MetadataRow>
           </TabContent>
         ))}

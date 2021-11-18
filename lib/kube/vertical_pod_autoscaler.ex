@@ -9,16 +9,26 @@ defmodule Kube.VerticalPodAutoscaler do
     end
   end
 
+  defmodule ContainerResources do
+    use Kazan.Model
+
+    defmodel "ContainerResources", "autoscaling.k8s.io", "v1" do
+      property :cpu,    "cpu",    :string
+      property :memory, "memory", :string
+    end
+  end
+
   defmodule ContainerRecommendation do
     use Kazan.Model
-    alias Kazan.Apis.Core.V1.ResourceRequirements, as: Resources
+    alias Kube.VerticalPodAutoscaler.{ContainerResources}
 
     defmodel "RecommendedContainerResources", "autoscaling.k8s.io", "v1" do
-      property :name,            "name",           :string
-      property :target,          "target",         Resources
-      property :lower_bound,     "lowerBound",     Resources
-      property :upper_bound,     "upperBound",     Resources
-      property :uncapped_target, "uncappedTarget", Resources
+      property :name,            "containerName",  :string
+      property :containerName,   "containerName",  :string
+      property :target,          "target",         ContainerResources
+      property :lower_bound,     "lowerBound",     ContainerResources
+      property :upper_bound,     "upperBound",     ContainerResources
+      property :uncapped_target, "uncappedTarget", ContainerResources
     end
   end
 
