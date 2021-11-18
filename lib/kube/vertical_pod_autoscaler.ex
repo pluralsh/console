@@ -24,7 +24,7 @@ defmodule Kube.VerticalPodAutoscaler do
 
     defmodel "RecommendedContainerResources", "autoscaling.k8s.io", "v1" do
       property :name,            "containerName",  :string
-      property :containerName,   "containerName",  :string
+      property :container_name,  "containerName",  :string
       property :target,          "target",         ContainerResources
       property :lower_bound,     "lowerBound",     ContainerResources
       property :upper_bound,     "upperBound",     ContainerResources

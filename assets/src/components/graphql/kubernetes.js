@@ -271,6 +271,13 @@ export const ConfigurationOverlayFragment = gql`
   ${MetadataFragment}
 `
 
+export const ContainerResourcesFragment = gql`
+  fragment ContainerResourcesFragment on ContainerResources {
+    cpu
+    memory
+  }
+`
+
 export const VerticalPodAutoscalerFragment = gql`
   fragment VerticalPodAutoscalerFragment on VerticalPodAutoscaler {
     metadata { ...MetadataFragment }
@@ -278,13 +285,13 @@ export const VerticalPodAutoscalerFragment = gql`
       recommendation {
         containerRecommendations {
           containerName
-          lowerBound { ...ResourcesFragment }
-          upperBound { ...ResourcesFragment }
-          uncappedTarget { ...ResourcesFragment }
+          lowerBound { ...ContainerResourcesFragment }
+          upperBound { ...ContainerResourcesFragment }
+          uncappedTarget { ...ContainerResourcesFragment }
         }
       }
     }
   }
   ${MetadataFragment}
-  ${ResourcesFragment}
+  ${ContainerResourcesFragment}
 `

@@ -37,7 +37,7 @@ defmodule Console.GraphQl.Kubernetes.VerticalPodAutoscaler do
 
   object :container_recommendation do
     field :name,            :string
-    field :containerName,   :string
+    field :container_name,  :string
     field :target,          :container_resources
     field :lower_bound,     :container_resources
     field :upper_bound,     :container_resources
