@@ -162,7 +162,12 @@ export function EditConfiguration({onCompleted, overlays, application: {name, co
       </Box>
       {type === ConfigType.OVERLAY && (
         <OverlayEdit 
-          overlays={overlays.filter(({metadata: {labels}}) => !labels[COMPONENT_LABEL])}
+          overlays={
+            overlays.map(({metadata, ...rest}) => {
+              const labels = metadata.labels.reduce((acc, {name, value}) => ({...acc, [name]: value}), {})
+              return {...rest, metadata: {...metadata, labels}}
+            }).filter(({metadata: {labels}}) => !labels[COMPONENT_LABEL])
+          }
           ctx={ctx}
           setCtx={setCtx}
           helm={helm} />
