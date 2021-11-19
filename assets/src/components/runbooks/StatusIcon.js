@@ -105,7 +105,7 @@ export function StatusIcon({status, size, innerSize}) {
   const [open, setOpen] = useState(false)
   const outer = `${size}px`
   const alerts = status ? status.alerts : []
-  const healthy = alerts.length == 0
+  const healthy = alerts.length === 0
   const {icon, color} = ICON_DATA[healthy ? 'Healthy' : 'Alert']
 
   return (

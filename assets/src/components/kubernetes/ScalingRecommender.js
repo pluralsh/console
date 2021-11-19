@@ -1,11 +1,13 @@
 import React, { useCallback, useState } from 'react'
 import { Tabs, TabHeader, TabHeaderItem, TabContent, Button, ModalHeader } from 'forge-core'
-import { useQuery } from '@apollo/react-hooks'
-import { SCALING_RECOMMENDATION } from './queries'
+import { useMutation, useQuery } from '@apollo/react-hooks'
+import { CONFIGURATION_OVERLAYS, SCALING_RECOMMENDATION } from './queries'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { MetadataRow } from './Metadata'
 import { Box, Layer, Text } from 'grommet'
 import filesize from 'filesize'
+import { COMPONENT_LABEL, KIND_LABEL, RESOURCE_LABEL } from './constants'
+import { EXECUTE_OVERLAY, OverlayInput } from '../Configuration'
 
 const POLL_INTERVAL = 10000
 
@@ -29,10 +31,29 @@ function Recommendation({rec: {cpu, memory}}) {
   )
 }
 
-function ScalingRecommendations({recommendations}) {
+function ScalingRecommendations({recommendations, namespace, kind, name, setOpen}) {
+  const [tab, setTab] = useState(recommendations[0].containerName)
+  const [exec, setExec] = useState(false)
+  const {data: overlayData} = useQuery(CONFIGURATION_OVERLAYS, {variables: {namespace}})
+  
+  const overlays = overlayData?.configurationOverlays?.map(({metadata, ...rest}) => {
+    const labels = metadata.labels.reduce((acc, {name, value}) => ({...acc, [name]: value}), {})
+    return {...rest, metadata: {...metadata, labels}}
+  }).filter(({metadata: {labels}}) => (
+    labels[COMPONENT_LABEL] === name && labels[KIND_LABEL] === kind.toLowerCase()
+  ))
+
+  if (exec) return (
+    <ScalingEdit 
+      rec={recommendations.find(({containerName}) => containerName === tab).uncappedTarget}
+      namespace={namespace} 
+      overlays={overlays} 
+      setOpen={setOpen} />
+  )
+
   return (
     <Box flex={false} pad='small'>
-      <Tabs defaultTab={recommendations[0].containerName}>
+      <Tabs defaultTab={recommendations[0].containerName} onTabChange={setTab}>
         <TabHeader>
           {recommendations.map(({containerName}) => (
             <TabHeaderItem key={containerName} name={containerName}>
@@ -53,6 +74,11 @@ function ScalingRecommendations({recommendations}) {
                 <Recommendation rec={recommendation.uncappedTarget} />
               </MetadataRow>
             </Box>
+            {overlays && overlays.length > 0 && (
+              <Box direction='row' justify='end'>
+                <Button label='Apply' onClick={() => setExec(true)} />
+              </Box>
+            )}
           </TabContent>
         ))}
       </Tabs>
@@ -60,20 +86,47 @@ function ScalingRecommendations({recommendations}) {
   )
 }
 
-export function ScalingRecommender({kind, name, namespace}) {
+export function ScalingEdit({namespace, rec: {cpu, memory}, overlays, setOpen}) {
+  const byResource = overlays.reduce((acc, overlay) => (
+    {...acc, [overlay.metadata.labels[RESOURCE_LABEL]]: overlay}
+  ), {})
+
+  const [ctx, setCtx] = useState({
+    [byResource['cpu'].spec.name]: cpu,
+    [byResource['memory'].spec.name]: memory
+  })
+  const [mutation, {loading}] = useMutation(EXECUTE_OVERLAY, {
+    variables: {name: namespace, ctx: JSON.stringify(ctx)},
+    onCompleted: () => setOpen(false)
+  })
+
+  return (
+    <Box fill pad='medium' gap='small'>
+      <OverlayInput overlay={byResource['cpu']} ctx={ctx} setCtx={setCtx} values={{}} />
+      <OverlayInput overlay={byResource['memory']} ctx={ctx} setCtx={setCtx} values={{}} />
+      <Box direction='row' justify='end'>
+        <Button label='Update' loading={loading} onClick={mutation} />
+      </Box>
+    </Box>
+  )
+}
+
+export function ScalingRecommender({kind, name, namespace, setOpen}) {
   const {data} = useQuery(SCALING_RECOMMENDATION, {
     variables: {kind, name, namespace},
     pollInterval: POLL_INTERVAL
   })
 
-  console.log(data)
-
   const recommendations = data?.scalingRecommendation?.status?.recommendation?.containerRecommendations
-  console.log(recommendations)
 
   return (
-    <Box fill='horizontal' style={{minHeight: '250px', overflow: 'auto'}}>
-      {recommendations ? <ScalingRecommendations recommendations={recommendations} /> : 
+    <Box fill='horizontal' style={{minHeight: '250px', overflow: 'auto'}} gap='small'>
+      {recommendations ? <ScalingRecommendations 
+                            name={name}
+                            kind={kind}
+                            recommendations={recommendations} 
+                            namespace={namespace} 
+                            setOpen={setOpen} /> : 
                          <LoopingLogo />}
     </Box>
   )
@@ -90,7 +143,7 @@ export function ScalingRecommenderModal({kind, name, namespace}) {
       <Layer onClickOutside={close} onEsc={close}>
         <Box width='50vw'>
           <ModalHeader text='Recommendations' setOpen={setOpen} />
-          <ScalingRecommender kind={kind} name={name} namespace={namespace} />
+          <ScalingRecommender kind={kind} name={name} namespace={namespace} setOpen={setOpen} />
         </Box>
       </Layer>
     )}

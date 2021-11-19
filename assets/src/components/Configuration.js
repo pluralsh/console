@@ -21,6 +21,7 @@ import { DarkSelect } from './utils/Select'
 import { chunk } from 'lodash'
 import yaml from 'js-yaml'
 import { deepFetch } from '../utils/graphql'
+import { COMPONENT_LABEL } from './kubernetes/constants'
 
 const ConfigType = {
   HELM: 'HELM',
@@ -28,7 +29,7 @@ const ConfigType = {
   OVERLAY: 'OVERLAY',
 }
 
-const EXECUTE_OVERLAY = gql`
+export const EXECUTE_OVERLAY = gql`
   mutation Execute($name: String!, $ctx: Map!) {
     overlayConfiguration(namespace: $name, context: $ctx) { ...BuildFragment }
   }
@@ -60,7 +61,7 @@ const INPUT_COMPONENTS = {
   enum: SelectInput
 }
 
-function OverlayInput({overlay, ctx, setCtx, values}) {
+export function OverlayInput({overlay, ctx, setCtx, values}) {
   const name = overlay.spec.name
   const setValue = useCallback((val) => {
     setCtx({...ctx, [name]: convertType(val, overlay.spec.inputType)})
@@ -161,7 +162,7 @@ export function EditConfiguration({onCompleted, overlays, application: {name, co
       </Box>
       {type === ConfigType.OVERLAY && (
         <OverlayEdit 
-          overlays={overlays}
+          overlays={overlays.filter(({metadata: {labels}}) => !labels[COMPONENT_LABEL])}
           ctx={ctx}
           setCtx={setCtx}
           helm={helm} />
