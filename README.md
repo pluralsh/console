@@ -1,21 +1,44 @@
-# Watchman
+# Plural Console
 
-**TODO: Add description**
+![Console](assets/public/console-lockup-dark.png)
 
-## Installation
+The Plural Console is the administrative hub of the plural platform.  It has a number of key features:
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `watchman` to your list of dependencies in `mix.exs`:
+* Reception of over-the-air application updates
+* Configurable, application-targeted observability
+  - dashboards
+  - logging
+* Common incident management, including zoom integration and slash commands
+* Interactive Runbooks
 
-```elixir
-def deps do
-  [
-    {:watchman, "~> 0.1.0"}
-  ]
-end
+We strive to make it powerful enough to make you feel like any application you deploy using Plural has an operational profile comparable to a managed service, even without being one.
+
+## Development
+
+Console's server side is written in elixir, and exposes a graphql api. The frontend is in react, all code lives in this single repo and common development tasks can be done using the Makefile at the root of the repo.
+
+
+### Developing Web
+To begin developing the web app, install npm & yarn, then run:
+
+```sh
+cd assets && yarn start && cd -
+make web
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/watchman](https://hexdocs.pm/watchman).
+### Developing Server
+To make changes to the server codebase, you'll want to install elixir on your machine.  For mac desktops, we do this via asdf, which can be done simply at the root of the repo like so:
+
+```sh
+asdf install
+```
+
+Once elixir is available, all server dependencies are managed via docker-compose, and tests can be run via `mix`, like so:
+
+```sh
+make testup
+mix test
+```
+
+
 
