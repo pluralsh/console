@@ -14,16 +14,6 @@ import { trimSuffix } from '../../utils/array'
 import { deepFetch } from '../../utils/graphql'
 import Toggle from 'react-toggle'
 
-function compileConfigurations(items) {
-  let res = {}
-  for (const item of items) {
-    for (const config of item.configuration) {
-      res[config.name] = config
-    }
-  }
-  return res
-}
-
 function StringConfiguration({config: {name, default: def, placeholder, documentation}, ctx, setValue}) {
   const value = ctx[name]
   useEffect(() => {
@@ -221,9 +211,11 @@ function RecipeConfiguration({recipe, context: ctx, setOpen}) {
   const [oidc, setOidc] = useState(false)
   const [context, setContext] = useState(ctx)
   const [ind, setInd] = useState(0)
-  const {repository, recipeItems} = sections[ind]
+  const {repository} = sections[ind]
   const hasNext = sections.length > ind + 1
-  const configuration = useMemo(() => compileConfigurations(recipeItems), [recipeItems])
+  const configuration = useMemo(() => sections[ind].configuration.reduce((acc, conf) => (
+    {...acc, [conf.name]: conf}
+  ), {}), [sections, ind])
 
   const [mutation, {loading, error}] = useMutation(INSTALL_RECIPE, {
     variables: {id: recipe.id, oidc, context: JSON.stringify(context)},

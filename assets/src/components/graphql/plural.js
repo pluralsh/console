@@ -32,22 +32,28 @@ export const RecipeFragment = gql`
   }
 `
 
+export const ConfigurationItemFragment = gql`
+  fragment ConfigurationItemFragment on ConfigurationItem {
+    name 
+    default 
+    documentation 
+    type 
+    placeholder 
+    condition { operation field value }
+  }
+`;
+
 export const RecipeSectionFragment = gql`
   fragment RecipeSectionFragment on RecipeSection {
     id
     repository { ...RepositoryFragment }
+    configuration { ...ConfigurationItemFragment }
     recipeItems {
       id
-      configuration { 
-        name 
-        default 
-        documentation 
-        type 
-        placeholder 
-        condition { operation field value }
-      }
+      configuration { ...ConfigurationItemFragment }
     }
   }
+  ${ConfigurationItemFragment}
   ${RepositoryFragment}
 `
 

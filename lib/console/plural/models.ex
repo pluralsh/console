@@ -51,30 +51,11 @@ defmodule Console.Plural.OIDCProvider do
   end
 end
 
-defmodule Console.Plural.RecipeSection do
-  alias Console.Plural.{ConfigurationItem, RecipeItem, Repository}
-  defstruct [:id, :repository, :recipeItems]
 
-  def spec() do
-    %__MODULE__{
-      repository: %Repository{}
-      configuration: [ConfigurationItem.spec()],
-      recipe_items: [RecipeItem.spec()]
-    }
-  end
+defmodule Console.Plural.Condition do
+  defstruct [:operation, :field, :value]
 end
 
-defmodule Console.Plural.RecipeItem do
-  alias Console.Plural.ConfigurationItem
-
-  defstruct [:id, :configuration]
-
-  def spec() do
-    %__MODULE__{
-      configuration: [ConfigurationItem.spec()]
-    }
-  end
-end
 
 defmodule Console.Plural.ConfigurationItem do
   defstruct [:name, :default, :documentation, :type, :placeholder, :condition]
@@ -86,8 +67,31 @@ defmodule Console.Plural.ConfigurationItem do
   end
 end
 
-defmodule Console.Plural.Condition do
-  defstruct [:operation, :field, :value]
+defmodule Console.Plural.RecipeItem do
+  alias Console.Plural.ConfigurationItem
+
+  defstruct [:id, :configuration]
+
+  def spec() do
+    %__MODULE__{
+      configuration: [ConfigurationItem.spec()],
+    }
+  end
+end
+
+
+defmodule Console.Plural.RecipeSection do
+  alias Console.Plural.{ConfigurationItem, RecipeItem, Repository}
+
+  defstruct [:id, :repository, :recipeItems, :configuration]
+
+  def spec() do
+    %__MODULE__{
+      repository: %Repository{},
+      configuration: [ConfigurationItem.spec()],
+      recipeItems: [RecipeItem.spec()],
+    }
+  end
 end
 
 defmodule Console.Plural.Edge do

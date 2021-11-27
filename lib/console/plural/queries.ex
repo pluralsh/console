@@ -16,7 +16,7 @@ defmodule Console.Plural.Queries do
   """
 
   @configuration_fragment """
-    fragment RecipeConfigurationFragemnt on RecipeConfiguration {
+    fragment RecipeConfigurationFragment on RecipeConfiguration {
       name
       type
       default
