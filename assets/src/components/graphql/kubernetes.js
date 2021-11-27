@@ -262,6 +262,8 @@ export const ConfigurationOverlayFragment = gql`
     metadata { ...MetadataFragment }
     spec {
       name
+      folder
+      subfolder
       documentation
       inputType
       inputValues

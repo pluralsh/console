@@ -22,6 +22,7 @@ import { chunk } from 'lodash'
 import yaml from 'js-yaml'
 import { deepFetch } from '../utils/graphql'
 import { COMPONENT_LABEL } from './kubernetes/constants'
+import { SidebarTab } from './utils/SidebarTab'
 
 const ConfigType = {
   HELM: 'HELM',
@@ -83,25 +84,55 @@ export function OverlayInput({overlay, ctx, setCtx, values}) {
   )
 }
 
+function organizeOverlays(overlays) {
+  console.log(overlays)
+  return overlays.reduce((acc, overlay) => {
+    const folder = overlay.spec.folder || 'general'
+    const sf = overlay.spec.subfolder || 'all'
+    const subfolders = acc[folder] || {}
+    subfolders[sf] = [overlay, ...(subfolders[sf] || [])]
+    acc[folder] = subfolders
+    return acc
+  }, {})
+}
+
 function OverlayEdit({overlays, ctx, setCtx, helm}) {
   const values = useMemo(() => yaml.load(helm), [helm])
+  const folders = useMemo(() => organizeOverlays(overlays), [overlays])
+  const [folder, setFolder] = useState(Object.keys(folders)[0])
+  const [subfolder, setSubfolder] = useState(Object.keys(folders[folder])[0])
 
   return (
-    <Box style={{overflow: 'auto'}} fill>
-      <Box flex={false} pad='medium' gap='medium'>
-        {chunk(overlays, 2).map((chunk, ind) => (
-          <Box key={`${ind}`} direction='row' align='center' gap='medium'>
-            {chunk.map((overlay) => (
-              <Box key={overlay.metadata.name}  width='50%'>
-                <OverlayInput 
-                  overlay={overlay} 
-                  values={values}
-                  ctx={ctx} 
-                  setCtx={setCtx} />
-              </Box>
-            ))}
-          </Box>
-        ))}
+    <Box direction='row' fill>
+      <Box flex={false} fill='vertical' style={{overflow: 'auto'}} border={{side: 'right'}}>
+        <Box flex={false}>
+          {Object.keys(folders).map((f) => (
+            <SidebarTab 
+              tab={folder}
+              subtab={subfolder}
+              setTab={setFolder}
+              setSubTab={setSubfolder}
+              name={f}
+              subnames={Object.keys(folders[f])} />
+          ))}
+        </Box>
+      </Box>
+      <Box style={{overflow: 'auto'}} fill>
+        <Box flex={false} pad='medium' gap='medium'>
+          {chunk(folders[folder][subfolder], 2).map((chunk, ind) => (
+            <Box key={`${ind}`} direction='row' align='center' gap='medium'>
+              {chunk.map((overlay) => (
+                <Box key={overlay.metadata.name}  width='50%'>
+                  <OverlayInput 
+                    overlay={overlay} 
+                    values={values}
+                    ctx={ctx} 
+                    setCtx={setCtx} />
+                </Box>
+              ))}
+            </Box>
+          ))}
+        </Box>
       </Box>
     </Box>
   )
