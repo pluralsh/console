@@ -9,10 +9,7 @@ defmodule Console.Plural.Repositories do
     Dashboard,
     Recipe,
     RecipeSection,
-    RecipeItem,
-    ConfigurationItem,
     Workspace,
-    Condition,
     OIDCSettings,
     OIDCProvider
   }
@@ -61,14 +58,7 @@ defmodule Console.Plural.Repositories do
       %Query{recipe: %Recipe{
         repository: %Repository{},
         oidcSettings: %OIDCSettings{},
-        recipeSections: [%RecipeSection{
-          repository: %Repository{},
-          recipeItems: [%RecipeItem{
-            configuration: [%ConfigurationItem{
-              condition: %Condition{}
-            }]
-          }]
-        }]
+        recipeSections: [RecipeSection.spec()]
       }}
     )
     |> when_ok(fn %{recipe: result} -> result end)

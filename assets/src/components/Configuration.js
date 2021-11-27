@@ -85,7 +85,6 @@ export function OverlayInput({overlay, ctx, setCtx, values}) {
 }
 
 function organizeOverlays(overlays) {
-  console.log(overlays)
   return overlays.reduce((acc, overlay) => {
     const folder = overlay.spec.folder || 'general'
     const sf = overlay.spec.subfolder || 'all'
@@ -100,11 +99,22 @@ function OverlayEdit({overlays, ctx, setCtx, helm}) {
   const values = useMemo(() => yaml.load(helm), [helm])
   const folders = useMemo(() => organizeOverlays(overlays), [overlays])
   const [folder, setFolder] = useState(Object.keys(folders)[0])
-  const [subfolder, setSubfolder] = useState(Object.keys(folders[folder])[0])
+  const [subfolder, setSubfolder] = useState(Object.keys(folders[folder] || ['all'])[0])
+
+  useEffect(() => {
+    if (!folders[folder]) {
+      const f = Object.keys(folders)[0]
+      setFolder(f)
+      setSubfolder(Object.keys(folders[f] || ['all'])[0])
+    }
+  }, [folders])
+
+  if (!folders[folder]) return null
 
   return (
     <Box direction='row' fill>
-      <Box flex={false} fill='vertical' style={{overflow: 'auto'}} border={{side: 'right'}}>
+      <Box flex={false} fill='vertical' style={{overflow: 'auto', minWidth: '150px'}} 
+           border={{side: 'right'}}>
         <Box flex={false}>
           {Object.keys(folders).map((f) => (
             <SidebarTab 
@@ -123,10 +133,10 @@ function OverlayEdit({overlays, ctx, setCtx, helm}) {
             <Box key={`${ind}`} direction='row' align='center' gap='medium'>
               {chunk.map((overlay) => (
                 <Box key={overlay.metadata.name}  width='50%'>
-                  <OverlayInput 
-                    overlay={overlay} 
+                  <OverlayInput
+                    overlay={overlay}
                     values={values}
-                    ctx={ctx} 
+                    ctx={ctx}
                     setCtx={setCtx} />
                 </Box>
               ))}

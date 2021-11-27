@@ -15,18 +15,23 @@ defmodule Console.Plural.Queries do
     }
   """
 
+  @configuration_fragment """
+    fragment RecipeConfigurationFragemnt on RecipeConfiguration {
+      name
+      type
+      default
+      placeholder
+      documentation
+      condition { operation field value }
+    }
+  """
+
   @recipe_item_fragment """
     fragment RecipeItemFragment on RecipeItem {
       id
-      configuration {
-        name
-        type
-        default
-        placeholder
-        documentation
-        condition { operation field value }
-      }
+      configuration { ...RecipeConfigurationFragment }
     }
+    #{@configuration_fragment}
   """
 
   @recipe_section_fragment """
@@ -34,6 +39,7 @@ defmodule Console.Plural.Queries do
       id
       repository { ...RepositoryFragment }
       recipeItems { ...RecipeItemFragment }
+      configuration { ...RecipeConfigurationFragment }
     }
     #{@recipe_item_fragment}
     #{@repository_fragment}

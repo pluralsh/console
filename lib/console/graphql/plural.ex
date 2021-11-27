@@ -32,9 +32,10 @@ defmodule Console.GraphQl.Plural do
   end
 
   object :recipe_section do
-    field :id,           non_null(:id)
-    field :repository,   :repository
-    field :recipe_items, list_of(:recipe_item)
+    field :id,            non_null(:id)
+    field :repository,    :repository
+    field :recipe_items,  list_of(:recipe_item)
+    field :configuration, list_of(:configuration_item)
   end
 
   object :recipe_item do

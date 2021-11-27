@@ -7,16 +7,17 @@ import { normalizeColor } from 'grommet/utils'
 import { BUILD_Q, COMMAND_SUB, BUILD_SUB, CANCEL_BUILD, APPROVE_BUILD, RESTART_BUILD } from './graphql/builds'
 import { mergeEdges } from './graphql/utils'
 import moment from 'moment'
-import { Checkmark, Down, Next, StatusCritical } from 'grommet-icons'
+import { Checkmark, StatusCritical } from 'grommet-icons'
 import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import './build.css'
 import { BuildStatus } from './types'
 import Avatar from './users/Avatar'
 import { groupBy } from 'lodash'
-import { TabHeader, TabSelector } from './utils/TabSelector'
+import { TabHeader } from './utils/TabSelector'
 import { AnsiLine, AnsiText } from './utils/AnsiText'
 import { LoopingLogo } from './utils/AnimatedLogo'
+import { SidebarTab } from './utils/SidebarTab'
 
  const HEADER_PADDING = {horizontal: 'medium'}
 
@@ -241,14 +242,6 @@ function Commands({edges}) {
   )
 }
 
-function ChangeChoice({text, onClick, enabled}) {
-  return (
-    <TabSelector hoverIndicator='card' enabled={enabled} onClick={onClick}>
-      <Text size='small' weight={500}>{text}</Text>
-    </TabSelector>
-  )
-}
-
 function Approval({build}) {
   const [mutation, {loading}] = useMutation(APPROVE_BUILD, {variables: {id: build.id}})
   if (build.approver) {
@@ -271,31 +264,14 @@ function Approval({build}) {
 const SIDEBAR_WIDTH = '150px'
 
 function ChangelogRepo({repo, current, setRepo, tools, tool, setTool}) {
-  const [open, setOpen] = useState(repo === current)
-  const select = useCallback(() => {
-    setRepo(repo)
-    setOpen(!open)
-  }, [repo, setRepo, open, setOpen])
-
   return (
-    <>
-    <Box direction='row' align='center' pad='small' hoverIndicator='card' 
-         border={{side: 'bottom'}} onClick={select} focusIndicator={false}>
-      <Box fill='horizontal'>
-        <Text size='small' weight={500}>{repo}</Text>
-      </Box>
-      <Box flex={false}>
-        {open ? <Down size='small' /> : <Next size='small' />}
-      </Box>
-    </Box>
-    {open && (
-      <Box animation='slideDown'>
-        {tools.map(({tool: t}) => (
-          <ChangeChoice key={t} text={t} enabled={tool === t} onClick={() => setTool(t)} />
-        ))}
-      </Box>
-    )}
-    </>
+    <SidebarTab
+      tab={current}
+      subtab={tool}
+      setTab={setRepo}
+      setSubtab={setTool}
+      name={repo}
+      subnames={tools.map(({tool: t}) => t)} />
   )
 }
 
