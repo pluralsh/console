@@ -14,6 +14,8 @@ defmodule Kube.ConfigurationOverlay do
 
     defmodel "ConfigurationOverlaySpec", "platform.plural.sh", "v1alpha1" do
       property :name,          "name",          :string
+      property :folder,        "folder",        :string
+      property :subfolder,     "subfolder",     :string
       property :documentation, "documentation", :string
       property :updates,       "updates",       {:array, Kube.ConfigurationOverlay.OverlayUpdate}
       property :input_type,    "inputType",     :string
