@@ -21,6 +21,11 @@ spec:
     name: postgres
     repo: postgres
     version: '>= 0.1.6'
+  - type: helm
+    name: minio
+    repo: minio
+    version: '>= 0.1.41'
+    optional: true
   - type: terraform
     name: aws
     repo: console
