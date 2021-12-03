@@ -25,6 +25,7 @@ defmodule Console.Deployer do
     :pg2.create(@group)
     :pg2.join(@group, self())
     {:ok, ref} = :timer.send_interval(@poll_interval, :poll)
+    send self(), :init
     {:ok, %State{storage: storage, id: Ecto.UUID.generate(), ref: ref}}
   end
 
@@ -60,6 +61,10 @@ defmodule Console.Deployer do
 
   def handle_cast(:sync, %State{storage: storage} = state) do
     storage.init()
+    {:noreply, state}
+  end
+
+  def handle_info(:init, %State{storage: storage} = state) do
     {:noreply, state}
   end
 

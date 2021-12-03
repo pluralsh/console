@@ -1,14 +1,15 @@
 import React, { useState } from 'react'
-import { GqlError } from 'forge-core' 
+import { Alert, GqlError } from 'forge-core' 
 import { useQuery, useMutation } from 'react-apollo'
 import { Box, Keyboard, Text, Form } from 'grommet'
 import { Button } from 'forge-core'
-import { setToken, wipeToken } from '../helpers/auth'
+import { fetchToken, setToken, wipeToken } from '../helpers/auth'
 import { ME_Q, SIGNIN } from './graphql/users'
 import { IncidentContext } from './incidents/context'
 import gql from 'graphql-tag'
 import { localized } from '../helpers/hostname'
 import { LabelledInput } from './utils/LabelledInput'
+import { useEffect } from 'react'
 
 const POLL_INTERVAL = 3 * 60 * 1000
 const CONSOLE_ICON = process.env.PUBLIC_URL + '/console-full.png'
@@ -32,14 +33,36 @@ export function LoginPortal({children}) {
   )
 }
 
+function LoginError({error}) {
+  useEffect(() => {
+    const to = setTimeout(() => {
+      wipeToken()
+      window.location = '/login'
+    }, 2000)
+
+    return () => clearTimeout(to)
+  }, [])
+
+  if (!fetchToken()) {
+    window.location = '/login'
+    return null
+  }
+
+  return (
+    <Box height='100vh' fill align='center' justify='center'>
+      <Alert error={error} header='You are no longer logged in' />
+    </Box>
+  )
+}
+
 export const LoginContext = React.createContext({me: null})
 
 export function EnsureLogin({children}) {
   const {data, error} = useQuery(ME_Q, {pollInterval: POLL_INTERVAL})
 
   if (error) {
-    wipeToken()
-    window.location = '/login'
+    console.log(error)
+    return <LoginError error={error} />
   }
   if (!data) return null
 

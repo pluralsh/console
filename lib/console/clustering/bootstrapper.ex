@@ -20,7 +20,7 @@ defmodule Console.Bootstrapper do
   def kick(), do: GenServer.cast(__MODULE__, :start)
 
   def handle_info(:init, %State{storage: storage} = state) do
-    storage.init()
+    {:ok, _} = storage.init()
     {:noreply, state}
   end
 

@@ -58,6 +58,7 @@ defmodule Console.GraphQl.Resolvers.User do
   def oauth_callback(%{code: code} = args, _) do
     with {:ok, tokens} <- OpenIDConnect.fetch_tokens(:plural, hydrate_redirect_uri(%{code: code}, args)),
          {:ok, claims} <- OpenIDConnect.verify(:plural, tokens["id_token"]) do
+      Logger.info "found claims #{inspect(claims)}"
       Users.bootstrap_user(claims)
       |> with_jwt()
     else

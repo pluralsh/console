@@ -35,6 +35,7 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
 
   const resetToken = onError(({ networkError }) => {
     if (networkError && networkError.statusCode === 401) {
+      console.log(networkError)
       onNetworkError()
     }
   });
