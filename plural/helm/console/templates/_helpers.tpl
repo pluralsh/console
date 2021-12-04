@@ -44,6 +44,10 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
+{{- define "console.migration-name" -}}
+console-migration-{{ .Release.Revision }}
+{{- end -}}
+
 {{- define "console.env" -}}
 - name: HOST
   value: {{ .Values.ingress.console_dns }}

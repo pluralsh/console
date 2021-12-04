@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: console-migration-{{ randAlphaNum 4 | lower }}
+  name: {{ include "console.migration-name" . }}
 spec:
   template:
     spec:

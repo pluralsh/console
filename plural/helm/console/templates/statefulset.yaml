@@ -31,6 +31,13 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       terminationGracePeriodSeconds: {{ .Values.shutdownDelay }}
+      initContainers:
+      - name: wait-for-migration
+        image: gcr.io/pluralsh/groundnuty/k8s-wait-for:v1.3
+        imagePullPolicy: Always
+        args:
+        - job
+        - {{ include "console.migration-name" . }}
       containers:
       - name: console
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
