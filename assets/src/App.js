@@ -7,6 +7,7 @@ import Login from './components/Login'
 import Invite from './components/Invite';
 import { OAuthCallback } from './components/OauthCallback';
 import "react-toggle/style.css"
+import 'react-pulse-dot/dist/index.css'
 
 export default function App() {
   return (

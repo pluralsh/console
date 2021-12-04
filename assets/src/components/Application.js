@@ -10,7 +10,7 @@ import { chunk } from '../utils/array'
 import { StatusCritical } from 'grommet-icons'
 import Icon from './kubernetes/Icon'
 import { Container } from './utils/Container'
-import { PulseLoader } from 'react-spinners'
+import PulseDot from 'react-pulse-dot'
 
 export const Readiness = {
   Ready: 'Ready',
@@ -49,9 +49,11 @@ export function ReadyIcon({size, readiness, showIcon}) {
       break
     case Readiness.InProgress:
       color = 'orange-dark'
-      // icon = <Check size='small' />
-      icon = <PulseLoader size={2} margin={0} color='#fff' />
-      break
+      return (
+        <PulseDot 
+          color={normalizeColor('orange-dark', theme)} 
+          style={{fontSize: size || '20px'}} />
+      )
     case Readiness.Complete:
       color = 'tone-medium'
       icon = <Check size='small' />
