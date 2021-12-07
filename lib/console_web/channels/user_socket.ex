@@ -3,6 +3,8 @@ defmodule ConsoleWeb.UserSocket do
   use Absinthe.Phoenix.Socket,
     schema: Console.GraphQl
 
+  channel "pod:*", ConsoleWeb.ShellChannel
+
   def connect(params, socket) do
     case build_context(params) do
       {:ok, context} ->

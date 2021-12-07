@@ -13,6 +13,28 @@ serviceAccount:
   create: true
   annotations: {}
 
+configOverlays:
+- name: console-cpu
+  labels:
+    platform.plural.sh/component: console
+    platform.plural.sh/kind: statefulset
+    platform.plural.sh/resource: cpu
+  spec:
+    name: Console CPU
+    documentation: cpu requests for console statefulset
+    updates:
+    - path: ['console', 'resources', 'requests', 'cpu']
+- name: console-mem
+  labels:
+    platform.plural.sh/component: console
+    platform.plural.sh/kind: statefulset
+    platform.plural.sh/resource: memory
+  spec:
+    name: Console Memory
+    documentation: memory requests for console statefulset
+    updates:
+    - path: ['console', 'resources', 'requests', 'memory']
+
 imagePullSecrets:
 - name: plural-creds
 nameOverride: ""

@@ -10,6 +10,8 @@ Mimic.copy(Mojito)
 Mimic.copy(Kazan)
 Mimic.copy(HTTPoison)
 Mimic.copy(Kazan.Watcher)
+Mimic.copy(Porcelain)
+Mimic.copy(Porcelain.Process)
 
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)
