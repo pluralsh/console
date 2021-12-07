@@ -21,14 +21,13 @@ export function OAuthCallback() {
   const [mutation, {error, loading}] = useMutation(CALLBACK, {
     variables: {code, redirect: localized('/oauth/callback')},
     onCompleted: (result) => {
+      console.log(result)
       setToken(result.oauthCallback.jwt)
       window.location.href = '/'
     }
   })
 
-  useEffect(() => {
-    mutation()
-  }, [code])
+  useEffect(() => { mutation() }, [code])
 
   return (
     <Box height='100vh' width='100vw' align='center' justify='center'>
