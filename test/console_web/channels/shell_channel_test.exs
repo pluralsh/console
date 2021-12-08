@@ -16,9 +16,13 @@ defmodule ConsoleWeb.ShellChannelTest do
 
       expect(Porcelain.Process, :send_input, fn _, "echo 'hello world'" ->
         send socket.channel_pid, {self(), :data, :out, "blah"}
+        "blah"
       end)
 
-      push(socket, "command", %{"cmd" => "echo 'hello world'"})
+      ref = push(socket, "command", %{"cmd" => "echo 'hello world'"})
+      assert_reply ref, :ok, result
+
+      assert result.stdout == "blah"
 
       assert_push "stdo", %{message: "blah"}
     end

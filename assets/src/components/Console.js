@@ -36,6 +36,7 @@ import { Portal } from 'react-portal'
 import Foco from 'react-foco'
 import { Next } from 'grommet-icons'
 import { Notifications } from './users/Notifications'
+import { PodShell } from './terminal/PodShell'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -217,6 +218,7 @@ export default function Console() {
                 )} />
                 <Route path='/me/edit' component={EditUser} />
                 <Route path='/users' component={Users} />
+                <Route path='/shell/pod/:namespace/:name/:container' component={PodShell} />
                 <Route path='/' component={Builds} />
               </Switch>
               <FlyoutGutter />

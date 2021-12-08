@@ -4,7 +4,7 @@ import { Tabs, TabHeader, TabHeaderItem, TabContent, Confirm } from 'forge-core'
 import { Readiness, ReadinessColor, ReadyIcon } from '../Application'
 import { useMutation, useQuery } from 'react-apollo'
 import { DELETE_POD, POD_Q } from './queries'
-import { Cube } from 'grommet-icons'
+import { Cube, Terminal } from 'grommet-icons'
 import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
 import filesize from 'filesize'
 import { useHistory, useParams } from 'react-router'
@@ -436,6 +436,25 @@ function Container({container, containerStatus}) {
   )
 }
 
+function ContainerTabHeader({namespace, pod, container, containerStatus}) {
+  let history = useHistory()
+  const readiness = containerReadiness(containerStatus[container])
+  return (
+    <TabHeaderItem key={container} name={`container:${container}`}>
+      <Box direction='row' gap='xsmall' align='center'>
+        <ReadyIcon size='12px' readiness={readiness} />
+        <Text size='small' weight={500}>container: {container}</Text>
+        {Readiness.Ready === readiness && (
+          <Box pad='xsmall' round='xsmall' align='center' justify='center'
+               hoverIndicator='card' onClick={() => history.push(`/shell/pod/${namespace}/${pod}/${container}`)}>
+            <Terminal size='12px' />
+          </Box>
+        )}
+      </Box>
+    </TabHeaderItem>
+  )
+}
+
 export function Pod() {
   const {name, namespace} = useParams()
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
@@ -477,13 +496,12 @@ export function Pod() {
                 </Box>
               </TabHeaderItem>
             ))}
-            {containers.map(({name}) => (
-              <TabHeaderItem key={name} name={`container:${name}`}>
-                <Box direction='row' gap='xsmall' align='center'>
-                  <ReadyIcon size='12px' readiness={containerReadiness(containerStatus[name])} />
-                  <Text size='small' weight={500}>container: {name}</Text>
-                </Box>
-              </TabHeaderItem>
+            {containers.map(({name: container}) => (
+              <ContainerTabHeader 
+                namespace={namespace}
+                pod={name}
+                container={container} 
+                containerStatus={containerStatus} />
             ))}
             <TabHeaderItem name='events'>
               <Text size='small' weight={500}>events</Text>

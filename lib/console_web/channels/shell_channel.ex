@@ -8,7 +8,7 @@ defmodule ConsoleWeb.ShellChannel do
 
   def handle_info({:connect_pod, [namespace, name, container]}, socket) do
     args = ["exec", name, "-it", "-c", container, "-n", namespace, "--", "/bin/sh"]
-    process = Porcelain.spawn("kubectl", args, in: :receive, out: {:send, self()})
+    process = Porcelain.spawn("kubectl", args, in: :receive)
 
     {:noreply, socket
           |> assign(:namespace, namespace)
@@ -26,7 +26,7 @@ defmodule ConsoleWeb.ShellChannel do
   def handle_info({_, :result, _}, socket), do: {:stop, {:shutdown, :finiahed}, socket}
 
   def handle_in("command", %{"cmd" => cmd}, socket) do
-    Porcelain.Process.send_input(socket.assigns.proc, cmd)
-    {:noreply, socket}
+    result = Porcelain.Process.send_input(socket.assigns.proc, cmd) |> IO.inspect()
+    {:reply, {:ok, %{stdout: IO.iodata_to_binary(result)}}, socket}
   end
 end
