@@ -6,8 +6,8 @@ defmodule ConsoleWeb.ShellChannelTest do
     test "users can connect to pods and send commands" do
       user = insert(:user)
 
-      args = ["exec", "n", "-it", "-c", "c", "-n", "ns", "--", "/bin/sh"]
-      expect(Porcelain, :spawn, fn "kubectl", ^args, _ ->
+      cmd = Enum.join(["kubectl", "exec", "n", "-it", "-c", "c", "-n", "ns", "--", "/bin/sh"], " ")
+      expect(Porcelain, :spawn_shell, fn ^cmd, _ ->
         %Porcelain.Process{}
       end)
 
@@ -20,9 +20,7 @@ defmodule ConsoleWeb.ShellChannelTest do
       end)
 
       ref = push(socket, "command", %{"cmd" => "echo 'hello world'"})
-      assert_reply ref, :ok, result
-
-      assert result.stdout == "blah"
+      assert_reply ref, :ok, _
 
       assert_push "stdo", %{message: "blah"}
     end
