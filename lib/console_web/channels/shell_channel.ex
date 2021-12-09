@@ -1,6 +1,7 @@
 defmodule ConsoleWeb.ShellChannel do
   use ConsoleWeb, :channel
   alias Console.Kubernetes.PodExec
+  alias Console.Services.Rbac
 
   def join("pod:" <> address, _, socket) do
     send(self(), {:connect_pod, String.split(address, ":")})
@@ -9,7 +10,8 @@ defmodule ConsoleWeb.ShellChannel do
 
   def handle_info({:connect_pod, [namespace, name, container]}, socket) do
     url = PodExec.exec_url(namespace, name, container)
-    with {:ok, pid} <- PodExec.start_link(url, self()) do
+    with :ok <- Rbac.allow(socket.assigns.user, namespace, :operate),
+         {:ok, pid} <- PodExec.start_link(url, self()) do
       {:noreply, socket
                  |> assign(:namespace, namespace)
                  |> assign(:name, name)

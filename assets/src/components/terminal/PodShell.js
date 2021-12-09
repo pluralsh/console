@@ -18,7 +18,8 @@ export function PodShell() {
 
   return (
     <Shell 
+      title={`pod / ${name} / ${container}`}
       room={`pod:${namespace}:${name}:${container}`} 
-      header={`Shelling into pod ${name}:${container}...`} />
+      header={`connecting to pod ${name}...`} />
   )
 }

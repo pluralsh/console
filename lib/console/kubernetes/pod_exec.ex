@@ -13,7 +13,7 @@ defmodule Console.Kubernetes.PodExec do
       stderr: "true"
     })
 
-    "/api/v1/namespaces/#{ns}/pods/#{name}/exec?#{args}"
+    "/api/v1/namespaces/#{Console.namespace(ns)}/pods/#{name}/exec?#{args}"
   end
 
   def start_link(path, pid, %{url: "https://" <> url, ca_cert: cert, auth: auth}) do
