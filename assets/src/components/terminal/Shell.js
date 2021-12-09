@@ -15,13 +15,11 @@ export function Shell({room, header}) {
     if (!xterm.current?.terminal) return
     fitAddon.fit()
     xterm.current.terminal.write(header + "\r\n")
-    console.log(socket)
     const chan = socket.channel(room)
     chan.on("stdo", ({message}) => xterm.current?.terminal?.write(message))
-    console.log(chan)
     chan.join()
     setChannel(chan)
-    return chan.leave
+    return () => chan.leave()
   }, [room, xterm, fitAddon])
 
   return (
@@ -33,8 +31,6 @@ export function Shell({room, header}) {
         options={{theme: Dracula}}
         onData={(text) => (
           channel.push("command", {cmd: text})
-            .receive("ok", console.log)
-            .receive("error", console.log)
         )} />
     </Box>
   )
