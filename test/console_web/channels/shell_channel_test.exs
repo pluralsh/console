@@ -1,28 +1,39 @@
 defmodule ConsoleWeb.ShellChannelTest do
   use ConsoleWeb.ChannelCase, async: false
   use Mimic
+  alias Console.Kubernetes.PodExec
 
-  # describe "ShellChannel" do
-  #   # test "users can connect to pods and send commands" do
-  #   #   user = insert(:user)
+  describe "ShellChannel" do
+    test "users can connect to pods and send commands" do
+      user = insert(:user)
+      role = insert(:role, repositories: ["*"], permissions: %{operate: true})
+      insert(:role_binding, role: role, user: user)
 
-  #   #   cmd = Enum.join(["kubectl", "exec", "n", "-it", "-c", "c", "-n", "ns", "--", "/bin/sh"], " ")
-  #   #   expect(Porcelain, :spawn_shell, fn ^cmd, _ ->
-  #   #     %Porcelain.Process{}
-  #   #   end)
+      url = PodExec.exec_url("ns", "n", "c")
 
-  #   #   {:ok, socket} = mk_socket(user)
-  #   #   {:ok, _, socket} = subscribe_and_join(socket, "pod:ns:n:c", %{})
+      expect(PodExec, :start_link, fn ^url, _ -> {:ok, :pid} end)
 
-  #   #   expect(Porcelain.Process, :send_input, fn _, "echo 'hello world'" ->
-  #   #     send socket.channel_pid, {self(), :data, :out, "blah"}
-  #   #     "blah"
-  #   #   end)
+      expect(PodExec, :command, fn :pid, cmd ->
+        send self(), {:stdo, cmd}
+      end)
 
-  #   #   ref = push(socket, "command", %{"cmd" => "echo 'hello world'"})
-  #   #   assert_reply ref, :ok, _
+      {:ok, socket} = mk_socket(user)
+      {:ok, _, socket} = subscribe_and_join(socket, "pod:ns:n:c", %{})
 
-  #   #   assert_push "stdo", %{message: "blah"}
-  #   # end
-  # end
+      ref = push(socket, "command", %{"cmd" => "echo 'hello world'"})
+      assert_reply ref, :ok, _
+      assert_push "stdo", %{message: "echo 'hello world'"}
+    end
+
+    test "those without access cannot shell into pods" do
+      user = insert(:user)
+
+      pid = spawn fn ->
+        {:ok, socket} = mk_socket(user)
+        {:ok, _, _} = subscribe_and_join(socket, "pod:ns:n:c", %{})
+      end
+      Process.monitor(pid)
+      assert_receive {:DOWN, _, _, _, {:shutdown, :failed_exec}}
+    end
+  end
 end

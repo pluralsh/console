@@ -2,6 +2,7 @@ defmodule ConsoleWeb.ShellChannel do
   use ConsoleWeb, :channel
   alias Console.Kubernetes.PodExec
   alias Console.Services.Rbac
+  require Logger
 
   def join("pod:" <> address, _, socket) do
     send(self(), {:connect_pod, String.split(address, ":")})
@@ -19,6 +20,7 @@ defmodule ConsoleWeb.ShellChannel do
                  |> assign(:wss_pid, pid)}
     else
       err ->
+        Logger.info "failed to exec pod with #{inspect(err)}"
         {:stop, {:shutdown, :failed_exec}, socket}
     end
   end

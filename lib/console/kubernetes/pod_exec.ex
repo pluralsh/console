@@ -42,13 +42,6 @@ defmodule Console.Kubernetes.PodExec do
     WebSockex.send_frame(client, {:binary, <<4>> <> resize})
   end
 
-  defp ensure_return(message) do
-    case String.ends_with?(message, "\n") do
-      true -> message
-      false -> "#{message}\r\n"
-    end
-  end
-
   defp deliver_frame(<<1, frame::binary>>, pid),
     do: send_frame(pid, frame)
   defp deliver_frame(<<2, frame::binary>>, pid),
