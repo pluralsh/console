@@ -18,9 +18,9 @@ function ThemeColors({theme}) {
 
 function ThemeOption({name, theme}) {
   return (
-    <Box flex={false} direction='row' gap='small' align='center'>
+    <Box flex={false} direction='row' gap='small' align='center' pad='xsmall'>
       <ThemeColors theme={theme} />
-      <Text size='small'>{name}</Text>
+      <Text size='small' weight={500}>{name}</Text>
     </Box>
   )
 }
@@ -37,8 +37,8 @@ export function ThemeSelector({theme, setTheme}) {
   const [value, setValue] = useState(theme)
   const currentTheme = normalizedThemes[theme]
   const save = useCallback(() => {
-    setTheme(value)
     saveTheme(value)
+    window.location.reload()
   }, [value, setTheme])
 
   return (
