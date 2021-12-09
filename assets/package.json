@@ -89,6 +89,8 @@
     "tinyqueue": "^2.0.3",
     "universal-cookie": "^4.0.3",
     "uuid": "^8.3.2",
+    "xterm-for-react": "^1.0.4",
+    "xterm-theme": "^1.1.0",
     "yaml": "^1.10.0"
   },
   "scripts": {

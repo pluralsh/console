@@ -1,5 +1,6 @@
 defmodule ConsoleWeb.ShellChannel do
   use ConsoleWeb, :channel
+  alias Console.Kubernetes.PodExec
 
   def join("pod:" <> address, _, socket) do
     send(self(), {:connect_pod, String.split(address, ":")})
@@ -7,28 +8,27 @@ defmodule ConsoleWeb.ShellChannel do
   end
 
   def handle_info({:connect_pod, [namespace, name, container]}, socket) do
-    args = ["kubectl", "exec", name, "-it", "-c", container, "-n", namespace, "--", "/bin/sh"]
-    process =
-      Enum.join(args, " ")
-      |> Porcelain.spawn_shell(in: :receive, out: {:send, self()})
-
-    {:noreply, socket
-          |> assign(:namespace, namespace)
-          |> assign(:name, name)
-          |> assign(:container, container)
-          |> assign(:proc, process)}
+    url = PodExec.exec_url(namespace, name, container)
+    with {:ok, pid} <- PodExec.start_link(url, self()) do
+      {:noreply, socket
+                 |> assign(:namespace, namespace)
+                 |> assign(:name, name)
+                 |> assign(:container, container)
+                 |> assign(:wss_pid, pid)}
+    else
+      err ->
+        {:stop, {:shutdown, :failed_exec}, socket}
+    end
   end
   def handle_info({:connect_pod, _}, socket), do: {:stop, {:shutdown, :invalid_room}, socket}
 
-  def handle_info({_, :data, :out, data}, socket) do
-    push(socket, "stdo", %{message: IO.iodata_to_binary(data)})
+  def handle_info({:stdo, data}, socket) do
+    push(socket, "stdo", %{message: data})
     {:noreply, socket}
   end
 
-  def handle_info({_, :result, _}, socket), do: {:stop, {:shutdown, :finiahed}, socket}
-
   def handle_in("command", %{"cmd" => cmd}, socket) do
-    Porcelain.Process.send_input(socket.assigns.proc, fmt_cmd(cmd))
+    PodExec.command(socket.assigns.wss_pid, fmt_cmd(cmd))
     {:reply, :ok, socket}
   end
 

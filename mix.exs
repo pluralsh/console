@@ -83,6 +83,7 @@ defmodule Console.MixProject do
       {:ymlr, "~> 2.0"},
       {:remote_ip, "~> 0.2.0"},
       {:erlsom, "~> 1.4"},
+      {:websockex, "~> 0.4"},
       {:phoenix_client, "~> 0.11", git: "https://github.com/michaeljguarino/phoenix_client.git", branch: "mguarino/channel-listen"},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
       {:mimic, "~> 1.1", only: :test}
