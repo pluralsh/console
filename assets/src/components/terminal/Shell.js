@@ -8,7 +8,7 @@ import './shell.css'
 import { normalizedThemes, savedTheme } from './themes'
 import { ThemeSelector } from './ThemeSelector'
 
-export function Shell({title, room, header}) {
+export function Shell({title, room, header, children}) {
   const xterm = useRef(null)
   const [channel, setChannel] = useState(null)
   const fitAddon = useMemo(() => new FitAddon(), [])
@@ -25,6 +25,7 @@ export function Shell({title, room, header}) {
     return () => chan.leave()
   }, [room, xterm, fitAddon])
 
+  const themeStruct = normalizedThemes[theme]
   return (
     <Box fill background='backgroundColor'>
       <Box flex={false} pad='small' direction='row' align='center'>
@@ -33,15 +34,18 @@ export function Shell({title, room, header}) {
         </Box>
         <ThemeSelector theme={theme} setTheme={setTheme} />
       </Box>
-      <Box fill pad={{horizontal: 'small', bottom: 'small'}} border>
-        <XTerm 
-          className='terminal'
-          ref={xterm}
-          addons={[fitAddon]}
-          options={{theme: normalizedThemes[theme]}}
-          onData={(text) => (
-            channel.push("command", {cmd: text})
-          )} />
+      <Box fill border direction='row'>
+        {children}
+        <Box fill pad='small' background={themeStruct.background}>
+          <XTerm 
+            className='terminal'
+            ref={xterm}
+            addons={[fitAddon]}
+            options={{theme: themeStruct}}
+            onData={(text) => (
+              channel.push("command", {cmd: text})
+            )} />
+        </Box>
       </Box>
     </Box>
   )
