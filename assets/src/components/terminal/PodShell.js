@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from 'react'
 import { useParams } from 'react-router'
 import { BreadcrumbsContext } from '../Breadcrumbs'
+import { useEnsureCurrent } from '../Installations'
 import { Shell } from './Shell'
 
 export function PodShell() {
@@ -9,12 +10,13 @@ export function PodShell() {
 
   useEffect(() => {
     setBreadcrumbs([
-      {text: 'pods', url: `/components/${namespace}`},
+      {text: 'pods', url: `/components/${namespace}`, disable: true},
       {text: namespace, url: `/components/${namespace}`},
       {text: name, url: `/pods/${namespace}/${name}`},
       {text: container, url: `/shell/pod/${namespace}/${name}/${container}`}
     ])
   }, [namespace, name, container])
+  useEnsureCurrent(namespace)
 
   return (
     <Shell 
