@@ -3,10 +3,10 @@ defmodule Console.Kubernetes.PodExec do
 
   defmodule State, do: defstruct [:pid]
 
-  def exec_url(ns, name, container) do
+  def exec_url(ns, name, container, opts \\ []) do
     args = URI.encode_query(%{
       container: container,
-      command: "/bin/sh",
+      command: opts[:command] || "/bin/sh",
       tty: "true",
       stdin: "true",
       stdout: "true",

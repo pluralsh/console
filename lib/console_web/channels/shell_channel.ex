@@ -4,13 +4,13 @@ defmodule ConsoleWeb.ShellChannel do
   alias Console.Services.Rbac
   require Logger
 
-  def join("pod:" <> address, _, socket) do
-    send(self(), {:connect_pod, String.split(address, ":")})
+  def join("pod:" <> address, params, socket) do
+    send(self(), {:connect_pod, String.split(address, ":"), params})
     {:ok, socket}
   end
 
-  def handle_info({:connect_pod, [namespace, name, container]}, socket) do
-    url = PodExec.exec_url(namespace, name, container)
+  def handle_info({:connect_pod, [namespace, name, container], params}, socket) do
+    url = PodExec.exec_url(namespace, name, container, command_opts(params))
     with :ok <- Rbac.allow(socket.assigns.user, namespace, :operate),
          {:ok, pid} <- PodExec.start_link(url, self()) do
       {:noreply, socket
@@ -35,6 +35,9 @@ defmodule ConsoleWeb.ShellChannel do
     PodExec.command(socket.assigns.wss_pid, fmt_cmd(cmd))
     {:reply, :ok, socket}
   end
+
+  defp command_opts(%{"command" => c}), do: [command: c]
+  defp command_opts(_), do: []
 
   defp fmt_cmd(cmd) when is_binary(cmd), do: cmd
   defp fmt_cmd(cmd) when is_list(cmd), do: Enum.join(cmd, " ")
