@@ -1,16 +1,19 @@
-import React, { useContext, useState } from 'react'
+import React, { useCallback, useContext, useState } from 'react'
 import { Anchor, Box, Layer, Text } from 'grommet'
 import { StatusCritical, Checkmark } from 'grommet-icons'
-import { Button, InputCollection, ResponsiveInput, EditField, Password, Roles, Logout } from 'forge-core'
+import { Button, InputCollection, ResponsiveInput, EditField, Password, Roles, 
+          Logout, Copyable, Credentials } from 'forge-core'
 import { useMutation } from 'react-apollo'
 import { EDIT_USER } from './queries'
 import Avatar from './Avatar'
-import { wipeToken } from '../../helpers/auth'
+import { fetchToken, wipeToken } from '../../helpers/auth'
 import { LoginContext } from '../Login'
 import yaml from 'yaml'
 import Highlight from 'react-highlight.js'
 import { SectionContentContainer, SectionPortal } from '../utils/Section'
 import { SIDEBAR_ICON_HEIGHT } from '../Sidebar'
+import { ModalHeader } from '../utils/Modal'
+import { localized } from '../../helpers/hostname'
 
 const EditContext = React.createContext({})
 
@@ -103,6 +106,29 @@ function UserRoles({me}) {
   )
 }
 
+function AllowAccess({setOpen}) {
+  const jwt = fetchToken()
+  const url = localized('/access')
+  const close = useCallback(() => setOpen(false), [setOpen])
+
+  return (
+    <Layer modal onEsc={close} onClickOutside={close}>
+      <Box width='50vw'>
+        <ModalHeader text='Grant Access' setOpen={close} />
+        <Box pad='medium' gap='xsmall'>
+          <Box direction='row' gap='xsmall'>
+            <Text size='small'>1. Copy the current login token: </Text>
+            <Copyable text={jwt} pillText='Secret copied' />
+          </Box>
+          <Text size='small'>2. Navigate to 
+            <Anchor href={url} target='_blank'>{url}</Anchor> and paste the 
+            jwt above to gain access</Text>
+        </Box>
+      </Box>
+    </Layer>
+  )
+}
+
 function passwordValid(password, confirm) {
   if (password === '') return {disabled: true, reason: 'please enter a password'}
   if (password !== confirm) return {disabled: true, reason: 'passwords must match'}
@@ -111,6 +137,7 @@ function passwordValid(password, confirm) {
 }
 
 export default function EditUser() {
+  const [open, setOpen] = useState(false)
   const {me} = useContext(LoginContext)
   const [attributes, setAttributes] = useState({name: me.name, email: me.email})
   const [password, setPassword] = useState('')
@@ -123,6 +150,7 @@ export default function EditUser() {
 
   return (
     <Box pad='small' background='backgroundColor' fill>
+      {open && <AllowAccess setOpen={setOpen} />}
       <EditContext.Provider value={{editing, setEditing}}>
       <Box fill direction='row' gap='small'>
         <Box flex={false} gap='medium' width='250px' pad={{vertical: 'medium'}}>
@@ -137,6 +165,10 @@ export default function EditUser() {
             <EditSelect edit='User Attributes' icon={<EditField size='small' />} />
             <EditSelect edit='Password' icon={<Password size='small' />} />
             <EditSelect edit='Bound Roles' icon={<Roles size='small' />} />
+            <ActionBox
+              text='Grant Access'
+              onClick={() => setOpen(true)}
+              icon={<Credentials size='small' />} />
             <ActionBox
               text='logout'
               onClick={() => {

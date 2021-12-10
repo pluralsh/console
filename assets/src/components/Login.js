@@ -57,6 +57,33 @@ function LoginError({error}) {
 
 export const LoginContext = React.createContext({me: null})
 
+export function GrantAccess() {
+  const [jwt, setJwt] = useState('')
+  return (
+    <LoginPortal>
+      <Box gap='small'>
+        <Box gap='xsmall' align='center'>
+          <img src={CONSOLE_LOGO} width='45px' />
+          <Text size='large'>Welcome</Text>
+          <Text size='small' color='dark-3'>Enter the login token given to you to gain access</Text>
+        </Box>
+        <LabelledInput
+          value={jwt}
+          width='100%'
+          label='Login Token'
+          onChange={setJwt} />
+        <Button 
+          fill='horizontal'
+          label='Get Access' 
+          pad={{vertical: '8px'}} 
+          margin={{top: 'xsmall'}}
+          onClick={() => { setToken(jwt); window.location = '/' }}
+          disabled={jwt === ''} />
+      </Box>
+    </LoginPortal>
+  )
+}
+
 export function EnsureLogin({children}) {
   const {data, error} = useQuery(ME_Q, {pollInterval: POLL_INTERVAL})
 
