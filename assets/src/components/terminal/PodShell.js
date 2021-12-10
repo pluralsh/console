@@ -46,7 +46,7 @@ export function PodShell() {
 
   return (
     <Shell 
-      title={`pod / ${name} / ${container}`}
+      title={`kubectl exec ${name} -it -n ${namespace} -c ${container} -- /bin/sh`}
       room={`pod:${namespace}:${name}:${container}`} 
       header={`connecting to pod ${name}...`}>
       <ContainerSidebar 

@@ -116,13 +116,17 @@ function AllowAccess({setOpen}) {
       <Box width='50vw'>
         <ModalHeader text='Grant Access' setOpen={close} />
         <Box pad='medium' gap='xsmall'>
-          <Box direction='row' gap='xsmall'>
+          <Box direction='row' gap='xsmall' align='center'>
             <Text size='small'>1. Copy the current login token: </Text>
-            <Copyable text={jwt} pillText='Secret copied' />
+            <Box round='xsmall' background='tone-light' pad='xsmall'>
+              <Copyable text={jwt} pillText='Secret copied' />
+            </Box>
           </Box>
-          <Text size='small'>2. Navigate to 
+          <Box direction='row' gap='xsmall'>
+            <Text size='small'>2. Navigate to</Text>
             <Anchor href={url} target='_blank'>{url}</Anchor> and paste the 
-            jwt above to gain access</Text>
+            <Text size='small'>jwt above to gain access</Text>
+          </Box>
         </Box>
       </Box>
     </Layer>

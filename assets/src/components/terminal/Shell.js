@@ -12,7 +12,7 @@ export function Shell({title, room, header, children}) {
   const xterm = useRef(null)
   const [channel, setChannel] = useState(null)
   const fitAddon = useMemo(() => new FitAddon(), [])
-  const [theme, setTheme] = useState(savedTheme() || 'argonaut')
+  const [theme, setTheme] = useState(savedTheme() || 'chalk')
 
   useEffect(() => {
     if (!xterm.current?.terminal) return
