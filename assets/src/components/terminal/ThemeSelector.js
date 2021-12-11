@@ -33,13 +33,13 @@ const filterThemes = (value) => {
     ))
 }
 
-export function ThemeSelector({theme, setTheme}) {
+export function ThemeSelector({theme}) {
   const [value, setValue] = useState(theme)
   const currentTheme = normalizedThemes[theme]
   const save = useCallback(() => {
     saveTheme(value)
     window.location.reload()
-  }, [value, setTheme])
+  }, [value])
 
   return (
     <Box flex={false} direction='row' gap='small' align='center'>
