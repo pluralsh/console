@@ -10,7 +10,7 @@ import { chunk } from '../utils/array'
 import { StatusCritical } from 'grommet-icons'
 import Icon from './kubernetes/Icon'
 import { Container } from './utils/Container'
-import PulseDot from 'react-pulse-dot'
+import { PulsyDiv } from './utils/animations'
 
 export const Readiness = {
   Ready: 'Ready',
@@ -42,6 +42,7 @@ export function ReadyIcon({size, readiness, showIcon}) {
   const theme = useContext(ThemeContext)
   let color = 'error'
   let icon = <StatusCritical size='small' />
+  let anim = null
   switch (readiness) {
     case Readiness.Ready:
       color = 'success'
@@ -49,11 +50,8 @@ export function ReadyIcon({size, readiness, showIcon}) {
       break
     case Readiness.InProgress:
       color = 'orange-dark'
-      return (
-        <PulseDot 
-          color={normalizeColor('orange-dark', theme)} 
-          style={{fontSize: size || '20px'}} />
-      )
+      anim = PulsyDiv
+      icon = null
     case Readiness.Complete:
       color = 'tone-medium'
       icon = <Check size='small' />
@@ -63,6 +61,7 @@ export function ReadyIcon({size, readiness, showIcon}) {
 
   return (
     <Box flex={false}
+         as={anim}
          width={size || '20px'} 
          height={size || '20px'} 
          round='full' 
