@@ -13,7 +13,7 @@ import { POLL_INTERVAL } from './constants'
 import { Metadata, MetadataRow } from './Metadata'
 import { RawContent } from './Component'
 import { BreadcrumbsContext } from '../Breadcrumbs'
-import { Container as Con } from './utils'
+import { Container as Con, LogLink } from './utils'
 import { asQuery } from '../utils/query'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { Events } from './Event'
@@ -283,7 +283,7 @@ function Status({status, metadata: {namespace, name}}) {
             <PodReadiness status={status} />
           </MetadataRow>
           <MetadataRow name='logs'>
-            <Anchor size='small' onClick={() => history.push(`/logs/${namespace}?${query}`)}>view logs</Anchor>
+            <LogLink url={`/logs/${namespace}?${query}`} />
           </MetadataRow>
         </Box>
         <Box width='60%'>

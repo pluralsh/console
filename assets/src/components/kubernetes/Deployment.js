@@ -10,7 +10,7 @@ import { PodList } from './Pod'
 import { RawContent } from './Component'
 import { Events } from './Event'
 import { Metric } from './Metrics'
-import { Container, logUrl } from './utils'
+import { Container, LogLink, logUrl } from './utils'
 import { DURATIONS, RangePicker } from '../Dashboard'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { Pie } from '../utils/ProgressGauge'
@@ -38,9 +38,7 @@ function Status({status: {availableReplicas, replicas, unavailableReplicas}, met
             <Text size='small'>{unavailableReplicas}</Text>
           </MetadataRow>
           <MetadataRow name='logs' final>
-            <Anchor size='small' onClick={() => history.push(logUrl(metadata))}>
-              view logs
-            </Anchor>
+            <LogLink url={logUrl(metadata)} />
           </MetadataRow>
         </Box>
       </Box>

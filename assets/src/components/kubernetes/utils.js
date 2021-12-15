@@ -1,6 +1,8 @@
 import React from 'react'
-import { Box, Text } from 'grommet'
+import { Anchor, Box, Text } from 'grommet'
 import { asQuery } from '../utils/query'
+import { useHistory } from 'react-router'
+import { Logs } from 'forge-core'
 
 export function Container({header, children, ...props}) {
   return (
@@ -10,6 +12,17 @@ export function Container({header, children, ...props}) {
         <Text size='small'>{header}</Text>
       </Box>
       {children}
+    </Box>
+  )
+}
+
+export function LogLink({url}) {
+  let history = useHistory()
+
+  return (
+    <Box direction='row' align='center' gap='xsmall'>
+      <Logs size='small' />
+      <Anchor size='small' onClick={() => history.push(url)}>view logs</Anchor>
     </Box>
   )
 }

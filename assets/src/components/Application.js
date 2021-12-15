@@ -52,6 +52,7 @@ export function ReadyIcon({size, readiness, showIcon}) {
       color = 'orange-dark'
       anim = PulsyDiv
       icon = null
+      break
     case Readiness.Complete:
       color = 'tone-medium'
       icon = <Check size='small' />
