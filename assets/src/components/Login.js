@@ -38,20 +38,15 @@ function LoginError({error}) {
     const to = setTimeout(() => {
       wipeToken()
       window.location = '/login'
-    }, 2000)
-
+    }, 5000)
+  
     return () => clearTimeout(to)
   }, [])
 
-  if (!fetchToken()) {
-    window.location = '/login'
-    return null
-  }
-
   return (
-    <Box height='100vh' fill align='center' justify='center'>
-      <Alert error={error} header='You are no longer logged in' />
-    </Box>
+    <LoginPortal>
+      <GqlError error={error} header='You cannot access the plural console yet' />
+    </LoginPortal>
   )
 }
 
@@ -87,10 +82,12 @@ export function GrantAccess() {
 export function EnsureLogin({children}) {
   const {data, error} = useQuery(ME_Q, {pollInterval: POLL_INTERVAL})
 
+
   if (error) {
     console.log(error)
     return <LoginError error={error} />
   }
+
   if (!data) return null
 
   const {me, externalToken, clusterInfo: {__typename, ...clusterInformation}, configuration} = data
