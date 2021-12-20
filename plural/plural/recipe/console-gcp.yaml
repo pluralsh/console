@@ -60,6 +60,7 @@ sections:
   - name: passphrase
     documentation: passphrase to use for encrypted private keys (leave empty if not applicable)
     type: STRING
+    optional: true
     condition:
       operation: NOT
       field: access_token
