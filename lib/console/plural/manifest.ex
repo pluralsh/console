@@ -6,8 +6,11 @@ defmodule Console.Plural.Manifest do
   defmodule Network do
     defstruct [:plural_dns, :subdomain]
 
-    def new(%{"pluralDns" => dns, "subdomain" => sub}) do
-      %__MODULE__{plural_dns: dns, subdomain: sub}
+    def new(map) when is_map(map) do
+      %__MODULE__{
+        plural_dns: map["pluraldns"] || map["pluralDns"],
+        subdomain: map["subdomain"]
+      }
     end
     def new(_), do: nil
   end
