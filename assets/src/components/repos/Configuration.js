@@ -56,13 +56,13 @@ function BucketConfiguration({config: {name, default: def, placeholder, document
 
   const trim = useCallback((val) => val.replace(`${prefix}-${cluster}-`, ''), [prefix, cluster])
 
-  const [local, setLocal] = useState(trim(ctx[name] || ''))
+  const [local, setLocal] = useState(trim(ctx[name] || def))
   
   useEffect(() => {
-    if (!local && def) {
-      setValue(name, def)
+    if (ctx[name] || def) {
+      setValue(name, format(ctx[name] || def))
     }
-  }, [name, local, def])
+  }, [name, def])
 
   return (
     <Box flex={false} gap='xsmall'>
@@ -206,11 +206,26 @@ function available(config, context) {
   return true
 }
 
+function findIndex(ind, context, sections) {
+  let nextInd = ind
+  while (nextInd < sections.length - 1) {
+    const ctx = context[sections[nextInd].repository.name]
+    if (!ctx && sections[nextInd].configuration.length > 0) break
+    const canConfigure = sections[nextInd].configuration.some((conf) => {
+      return !ctx[conf.name] && available(conf, ctx)
+    })
+    if (canConfigure) break
+    nextInd++
+  }
+
+  return nextInd
+}
+
 function RecipeConfiguration({recipe, context: ctx, setOpen}) {
   const sections = recipe.recipeSections
   const [oidc, setOidc] = useState(false)
   const [context, setContext] = useState(ctx)
-  const [ind, setInd] = useState(0)
+  const [ind, setInd] = useState(findIndex(0, ctx, sections))
   const {repository} = sections[ind]
   const hasNext = sections.length > ind + 1
   const configuration = useMemo(() => sections[ind].configuration.reduce((acc, conf) => (
@@ -235,7 +250,8 @@ function RecipeConfiguration({recipe, context: ctx, setOpen}) {
 
   const next = useCallback(() => {
     if (!hasNext) return mutation()
-    setInd(ind + 1)
+    let nextInd = findIndex(ind + 1, context, sections)
+    setInd(nextInd)
   }, [ind, setInd, hasNext, mutation])
 
   return (

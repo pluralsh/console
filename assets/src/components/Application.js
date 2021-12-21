@@ -43,6 +43,7 @@ export function ReadyIcon({size, readiness, showIcon}) {
   let color = 'error'
   let icon = <StatusCritical size='small' />
   let anim = null
+  let defaultSize = '20px'
   switch (readiness) {
     case Readiness.Ready:
       color = 'success'
@@ -52,6 +53,7 @@ export function ReadyIcon({size, readiness, showIcon}) {
       color = 'orange-dark'
       anim = PulsyDiv
       icon = null
+      defaultSize = '18px'
       break
     case Readiness.Complete:
       color = 'tone-medium'
@@ -63,8 +65,8 @@ export function ReadyIcon({size, readiness, showIcon}) {
   return (
     <Box flex={false}
          as={anim}
-         width={size || '20px'} 
-         height={size || '20px'} 
+         width={size || defaultSize} 
+         height={size || defaultSize} 
          round='full' 
          align='center'
          justify='center'
