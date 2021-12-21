@@ -15,7 +15,7 @@ function Installation({application, setCurrentApplication, current: {name}}) {
   return (
     <Box direction='row' align='center' gap='small' pad='small' focusIndicator={false}
          onClick={() => setCurrentApplication(application)} hoverIndicator='hover'>
-      <ApplicationReadyIcon application={application} size='20px' showIcon dark />
+      <ApplicationReadyIcon application={application} showIcon dark />
       {descriptor.icons.length > 0 && <ApplicationIcon application={application} size='40px' dark />}
       <Box fill='horizontal'>
         <Box direction='row' align='center' gap='xsmall'>
@@ -80,7 +80,7 @@ export function Installations() {
       <ToolbarItem onClick={() => setOpen(true)} open={open}>
         {descriptor.icons.length > 0 && <ApplicationIcon application={currentApplication} dark />}
         <Text size='small' weight={500}>{name}</Text>
-        <ApplicationReadyIcon application={currentApplication} size='20px' showIcon />
+        <ApplicationReadyIcon application={currentApplication} showIcon />
       </ToolbarItem>
     </Box>
     {open && <InstallationsFlyout />}

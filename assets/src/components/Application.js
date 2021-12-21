@@ -53,7 +53,7 @@ export function ReadyIcon({size, readiness, showIcon}) {
       color = 'orange-dark'
       anim = PulsyDiv
       icon = null
-      defaultSize = '18px'
+      defaultSize = '16px'
       break
     case Readiness.Complete:
       color = 'tone-medium'
@@ -117,7 +117,7 @@ export default function Application() {
           <Text weight='bold' size='small'>{currentApplication.name}</Text>
           <Text size='small' color='dark-6'>{currentApplication.status.componentsReady} ready; {error.message}</Text>
         </Box>
-        <ApplicationReadyIcon application={currentApplication} size='20px' showIcon />
+        <ApplicationReadyIcon application={currentApplication} showIcon />
       </Box>
       <Box fill style={{overflow: 'auto'}} pad={{horizontal: 'medium', bottom: 'small'}} gap='xsmall'>
         {[...chunk(currentApplication.status.components, 2)].map((chunk, ind) => (

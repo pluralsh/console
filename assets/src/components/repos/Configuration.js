@@ -117,12 +117,11 @@ function DomainConfiguration({config: {name, default: def, placeholder, document
             setValue(name, suffixed(value))
             setLocal(value)
           }} />
-        <Box style={{borderLeftStyle: 'none'}} border={{color: 'light-5'}} pad={{horizontal: 'small'}} 
-             background='tone-light' height='37px' justify='center'>
+        <Box flex={false} style={{borderLeftStyle: 'none'}} border={{color: 'light-5'}} 
+             pad={{horizontal: 'small'}} background='tone-light' height='37px' justify='center'>
           <Text size='small' weight={500}>{suffix}</Text>
         </Box>
       </Box>
-      
       <Text size='small' color='dark-6'><i>{documentation}</i></Text>
     </Box>
   )
