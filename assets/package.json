@@ -44,7 +44,7 @@
     "js-yaml": "^3.14.0",
     "jsonpath": "^1.1.1",
     "kubernetes-resource-parser": "^0.1.0",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "moment-duration-format": "^2.3.2",
     "phoenix": "^1.5.8",
