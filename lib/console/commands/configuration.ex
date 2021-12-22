@@ -13,12 +13,15 @@ defmodule Console.Commands.Configuration do
 
   defp register_ssh_keys() do
     with ssh_key when is_binary(ssh_key) <- mkpath(conf(:git_ssh_key)),
-      do: cmd("ssh-add", [ssh_key])
+      do: ssh_add(ssh_key)
   end
 
-  defp cmd(command, args) do
-    case System.cmd(command, args, env: [{"DISPLAY", ""}, {"SSH_ASKPASS", "/root/bin/.ssh-askpass"}]) do
-      {out, 0} -> {:ok, out}
+  defp ssh_add(key) do
+    Logger.info "executed ssh-add"
+    case System.cmd("ssh-add", [key], env: [{"SSH_ASKPASS_REQUIRE", "force"}]) do
+      {out, 0} ->
+        Logger.info out
+        {:ok, out}
       {out, _} ->
         Logger.error out
         {:error, out}

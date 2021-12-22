@@ -129,7 +129,9 @@ RUN ln -s /usr/local/bin/plural /usr/local/bin/forge
 RUN touch /root/.ssh/known_hosts
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 COPY bin /root/bin
-RUN chmod +x /root/bin/.git-askpass && chmod +x /root/bin/.ssh-askpass
+RUN chmod +x /root/bin/.git-askpass && \ 
+      chmod +x /root/bin/.ssh-askpass && \
+      chmod +x /root/bin/ssh-add
 
 COPY --from=builder /opt/built .
 

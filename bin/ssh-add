@@ -1,0 +1,6 @@
+#!/bih/sh
+export DISPLAY=1
+export SSH_ASKPASS=/root/bin/.ssh-askpass
+export SSH_ASKPASS_REQUIRE=force
+echo "Adding ssh key at $1"
+ssh-add $1 < /dev/null
