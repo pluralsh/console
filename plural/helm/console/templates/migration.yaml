@@ -9,6 +9,11 @@ spec:
       imagePullSecrets:
       {{- toYaml . | nindent 6 }}
       {{- end }}
+      initContainers:
+      - name: wait-for-pg
+        image: gcr.io/pluralsh/busybox:latest
+        imagePullPolicy: IfNotPresent
+        command: [ "/bin/sh", "-c", "until nc -zv plural-console 5432 -w1; do echo 'waiting for db'; sleep 1; done" ]
       containers:
       - name: migrator
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
