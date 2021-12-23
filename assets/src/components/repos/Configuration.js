@@ -14,7 +14,7 @@ import { trimSuffix } from '../../utils/array'
 import { deepFetch } from '../../utils/graphql'
 import Toggle from 'react-toggle'
 
-function StringConfiguration({config: {name, default: def, placeholder, documentation}, ctx, setValue}) {
+function StringConfiguration({config: {name, default: def, placeholder, documentation}, type, ctx, setValue}) {
   const value = ctx[name]
   useEffect(() => {
     if (!value && def) {
@@ -29,6 +29,7 @@ function StringConfiguration({config: {name, default: def, placeholder, document
         color='dark-2'
         weight={450}
         label={name}
+        type={type}
         value={value || ''}
         placeholder={placeholder}
         onChange={(val) => setValue(name, val)} />
@@ -36,6 +37,14 @@ function StringConfiguration({config: {name, default: def, placeholder, document
     </Box>
   )
 }
+
+const PasswordConfiguration = ({config, ctx,setValue}) => (
+  <StringConfiguration 
+    config={config} 
+    ctx={ctx} 
+    setValue={setValue} 
+    type='password' />
+)
 
 function BucketConfiguration({config: {name, default: def, placeholder, documentation}, ctx, setValue}) {
   const {configuration} = useContext(LoginContext)
@@ -188,6 +197,8 @@ function ConfigurationItem({config, ctx, setValue}) {
       return <DomainConfiguration config={config} ctx={ctx} setValue={setValue} />
     case ConfigurationType.BUCKET:
       return <BucketConfiguration config={config} ctx={ctx} setValue={setValue} />
+    case ConfigurationType.PASSWORD:
+      return <PasswordConfiguration config={config} ctx={ctx} setValue={setValue} />
     default:
       return <StringConfiguration config={config} ctx={ctx} setValue={setValue} />
   }

@@ -59,7 +59,7 @@ sections:
       field: access_token
   - name: passphrase
     documentation: passphrase to use for encrypted private keys (leave empty if not applicable)
-    type: STRING
+    type: PASSWORD
     optional: true
     condition:
       operation: NOT

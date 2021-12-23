@@ -13,6 +13,7 @@ export const ConfigurationType = {
   INT: 'INT',
   DOMAIN: 'DOMAIN',
   BUCKET: 'BUCKET',
+  PASSWORD: 'PASSWORD',
 }
 
 export const OperationType = {
