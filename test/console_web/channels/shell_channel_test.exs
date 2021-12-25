@@ -19,12 +19,20 @@ defmodule ConsoleWeb.ShellChannelTest do
         send self(), {:stdo, cmd}
       end)
 
+      expect(PodExec, :resize, fn :pid, 1, 2 ->
+        send self(), {:stdo, "resized"}
+      end)
+
       {:ok, socket} = mk_socket(user)
       {:ok, _, socket} = subscribe_and_join(socket, "pod:ns:n:c", %{})
 
       ref = push(socket, "command", %{"cmd" => "echo 'hello world'"})
       assert_reply ref, :ok, _
       assert_push "stdo", %{message: "echo 'hello world'"}
+
+      ref = push(socket, "resize", %{"width" => 1, "height" => 2})
+      assert_reply ref, :ok, _
+      assert_push "stdo", %{message: "resized"}
     end
 
     test "users can connect to pods with user-provided commands" do

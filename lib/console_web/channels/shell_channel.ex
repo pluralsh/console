@@ -36,6 +36,13 @@ defmodule ConsoleWeb.ShellChannel do
     {:reply, :ok, socket}
   end
 
+  def handle_in("resize", %{"width" => w, "height" => h}, socket) do
+    PodExec.resize(socket.assigns.wss_pid, w, h)
+    |> IO.inspect()
+
+    {:reply, :ok, socket}
+  end
+
   defp command_opts(%{"command" => c}), do: [command: c]
   defp command_opts(_), do: []
 
