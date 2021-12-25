@@ -269,7 +269,7 @@ function ChangelogRepo({repo, current, setRepo, tools, tool, setTool}) {
       tab={current}
       subtab={tool}
       setTab={setRepo}
-      setSubtab={setTool}
+      setSubTab={setTool}
       name={repo}
       subnames={tools.map(({tool: t}) => t)} />
   )

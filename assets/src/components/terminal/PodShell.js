@@ -20,7 +20,7 @@ function ContainerSidebar({containers, container, namespace, name}) {
   return (
     <Box border={{side: 'right'}} fill='vertical' width='150px'>
       {containers.map(({name}) => (
-        <TabSelector hoverIndicator='card' enabled={name === container} onClick={() => onClick(name)}>
+        <TabSelector key={name} hoverIndicator='card' enabled={name === container} onClick={() => onClick(name)}>
           <Text size='small' weight={500}>{name}</Text>
         </TabSelector>
       ))}

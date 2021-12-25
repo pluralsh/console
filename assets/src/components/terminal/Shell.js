@@ -15,9 +15,6 @@ export function Shell({room, header, children: [title, sidebar], command}) {
   const themeStruct = normalizedThemes[theme]
 
   useEffect(() => {
-    if (!xterm.current?.terminal) return
-    fitAddon.fit()
-    xterm.current.terminal.write("\r\n" + header + "\r\n\r\n")
     const params = command ? {command} : {}
     const chan = socket.channel(room, params)
     chan.onError(console.log)
@@ -25,7 +22,16 @@ export function Shell({room, header, children: [title, sidebar], command}) {
     chan.join()
     setChannel(chan)
     return () => chan.leave()
-  }, [room, xterm, fitAddon, command])
+  }, [room, command])
+
+  useEffect(() => {
+    if (!xterm.current?.terminal) return
+    fitAddon.fit()
+    const {cols, rows} = fitAddon.proposeDimensions()
+    channel.push('resize', {width: cols, height: rows})
+  }, [xterm.current, fitAddon])
+
+  if (!channel) return <Box fill background='backgroundColor' />
 
   return (
     <Box fill background='backgroundColor'>
@@ -41,6 +47,10 @@ export function Shell({room, header, children: [title, sidebar], command}) {
             ref={xterm}
             addons={[fitAddon]}
             options={{theme: themeStruct}}
+            onResize={({cols, rows}) => {
+              console.log({cols, rows})
+              channel && channel.push('resize', {width: cols, height: rows})
+            }}
             onData={(text) => channel.push("command", {cmd: text})} />
         </Box>
       </Box>
