@@ -165,6 +165,7 @@ defmodule Console.Plural.Queries do
         ...RecipeFragment
         repository { ...RepositoryFragment }
         recipeSections { ...RecipeSectionFragment }
+        recipeDependencies { ...RecipeFragment }
       }
     }
     #{@repository_fragment}

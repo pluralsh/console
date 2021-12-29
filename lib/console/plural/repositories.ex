@@ -8,9 +8,7 @@ defmodule Console.Plural.Repositories do
     Repository,
     Dashboard,
     Recipe,
-    RecipeSection,
     Workspace,
-    OIDCSettings,
     OIDCProvider
   }
 
@@ -55,11 +53,7 @@ defmodule Console.Plural.Repositories do
     get_recipe_query()
     |> Client.run(
       prune_variables(%{id: id}),
-      %Query{recipe: %Recipe{
-        repository: %Repository{},
-        oidcSettings: %OIDCSettings{},
-        recipeSections: [RecipeSection.spec()]
-      }}
+      %Query{recipe: Recipe.spec()}
     )
     |> when_ok(fn %{recipe: result} -> result end)
   end

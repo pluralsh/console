@@ -22,7 +22,8 @@ defmodule Console.Services.Plural do
   def install_recipe(id, context, oidc, %User{} = user) do
     with {:ok, recipe} <- Repositories.get_recipe(id),
          {:ok, _} <- Repositories.install_recipe(id),
-         :ok <- configure_oidc(recipe, context, oidc) do
+         :ok <- configure_oidc(recipe, context, oidc),
+         :ok <- oidc_dependencies(recipe.recipeDependencies, context, oidc) do
       Builds.create(%{
         type: :install,
         repository: recipe.repository.name,
@@ -52,6 +53,14 @@ defmodule Console.Services.Plural do
       do: :ok
   end
   def configure_oidc(_, _, _), do: :ok
+
+  def oidc_dependencies([recipe | rest], context, true) do
+    case configure_oidc(recipe, context, true) do
+      :ok -> oidc_dependencies(rest, context, true)
+      err -> err
+    end
+  end
+  def oidc_dependencies(_, _, _), do: :ok
 
   defp merge_provider(attrs, %Installation{oidcProvider: %OIDCProvider{redirectUris: uris, bindings: bindings}}) do
     bindings = Enum.map(bindings, fn

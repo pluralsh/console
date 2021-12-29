@@ -18,10 +18,6 @@ defmodule Console.Plural.Repository do
   defstruct [:id, :icon, :name, :description, :dashboards]
 end
 
-defmodule Console.Plural.Recipe do
-  defstruct [:id, :name, :description, :provider, :repository, :oidcSettings, :recipeSections]
-end
-
 defmodule Console.Plural.OIDCSettings do
   defstruct [:authMethod, :domainKey, :uriFormat]
 end
@@ -90,6 +86,35 @@ defmodule Console.Plural.RecipeSection do
       repository: %Repository{},
       configuration: [ConfigurationItem.spec()],
       recipeItems: [RecipeItem.spec()],
+    }
+  end
+end
+
+
+defmodule Console.Plural.Recipe do
+  alias Console.Plural.{Repository, OIDCSettings, RecipeSection}
+  defstruct [
+    :id,
+    :name,
+    :description,
+    :provider,
+    :repository,
+    :oidcSettings,
+    :recipeSections,
+    :recipeDependencies
+  ]
+
+  def spec() do
+    %__MODULE__{
+      repository: %Repository{},
+      oidcSettings: %OIDCSettings{},
+      recipeSections: [RecipeSection.spec()],
+      recipeDependencies: [
+        %__MODULE__{
+          oidcSettings: %OIDCSettings{},
+          repository: %Repository{}
+        }
+      ]
     }
   end
 end
