@@ -27,6 +27,8 @@ defmodule Console.GraphQl.Plural do
     field :recipe_sections, list_of(:recipe_section)
     field :oidc_enabled,    :boolean, resolve: fn
       %{oidcSettings: %{}}, _, _ -> {:ok, true}
+      %{recipeDependencies: [_ | _] = deps}, _, _ ->
+        {:ok, Enum.any?(deps, &is_map(&1.oidcSettings))}
       _, _, _ -> {:ok, false}
     end
   end

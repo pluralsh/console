@@ -172,6 +172,59 @@ defmodule Console.GraphQl.PluralQueriesTest do
       assert hd(item["configuration"])["documentation"] == "some documentation"
       assert hd(item["configuration"])["type"] == "STRING"
     end
+
+    test "it will set oidc enabled correctly" do
+      body = Jason.encode!(%{
+        query: Queries.get_recipe_query(),
+        variables: %{id: "id"}
+      })
+
+      recipe = %{
+        id: "id",
+        name: "name",
+        description: "description",
+        recipeDependencies: [
+          %{
+            id: "id2",
+            name: "recipe 2",
+            repository: %{name: "repo"},
+            oidcSettings: %{urlFormat: "https://example.com"}
+          }
+        ],
+        recipeSections: [
+          %{
+            id: "id2",
+            repository: %{id: "id3"},
+            recipeItems: [
+              %{
+                id: "id4",
+                configuration: [%{name: "name", documentation: "some documentation", type: "STRING"}]
+              }
+            ]
+          }
+        ]
+      }
+
+      expect(HTTPoison, :post, fn _, ^body, _ ->
+        {:ok, %{body: Jason.encode!(%{data: %{recipe: recipe}})}}
+      end)
+
+      {:ok, %{data: %{"recipe" => found}}} = run_query("""
+        query Recipe($id: ID!) {
+          recipe(id: $id) {
+            id
+            name
+            description
+            oidcEnabled
+          }
+        }
+      """, %{"id" => "id"}, %{current_user: insert(:user)})
+
+      assert found["id"] == "id"
+      assert found["name"] == "name"
+      assert found["description"] == "description"
+      assert found["oidcEnabled"]
+    end
   end
 
   describe "applications" do
