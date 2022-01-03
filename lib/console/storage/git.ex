@@ -51,7 +51,7 @@ defmodule Console.Storage.Git do
 
   def reset() do
     with {:ok, _} <- git("reset", ["--hard", "origin/#{branch()}"]),
-      do: git("clean", "-f")
+      do: git("clean", ["-f"])
   end
 
   def git(cmd, args \\ []),
