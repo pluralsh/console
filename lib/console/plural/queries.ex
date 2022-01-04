@@ -55,6 +55,7 @@ defmodule Console.Plural.Queries do
         domainKey
         uriFormat
         authMethod
+        subdomain
       }
     }
   """

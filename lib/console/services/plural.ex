@@ -39,7 +39,7 @@ defmodule Console.Services.Plural do
   def configure_oidc(
     %Recipe{
       repository: %{name: name},
-      oidcSettings: %{authMethod: method, uriFormat: fmt, domainKey: key} = oidc_settings
+      oidcSettings: %{authMethod: method} = oidc_settings
     },
     context,
     true) do

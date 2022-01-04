@@ -134,5 +134,76 @@ defmodule Console.Services.PluralTest do
       }
       assert build.creator_id == user.id
     end
+
+    test "a user can enable oidc with subdomain configuration" do
+      get_body = Jason.encode!(%{
+        query: Queries.get_recipe_query(),
+        variables: %{id: "id"}
+      })
+
+      inst_body = Jason.encode!(%{
+        query: Queries.install_recipe_mutation(),
+        variables: %{id: "id", ctx: "{}"}
+      })
+
+      me_body = Jason.encode!(%{
+        query: Queries.me_query(),
+        variables: %{}
+      })
+
+      get_inst_body = Jason.encode!(%{
+        query: Queries.get_installation_query(),
+        variables: %{name: "repo"}
+      })
+
+      oidc_body = Jason.encode!(%{
+        query: Queries.upsert_oidc_provider(),
+        variables: %{id: "instid", attributes: %{
+          redirectUris: ["https://domain.com/oauth"],
+          bindings: [%{userId: "me"}],
+          authMethod: "POST"
+        }}
+      })
+
+      recipe = %{
+        id: "id",
+        name: "name",
+        description: "description",
+        oidcSettings: %{authMethod: "POST", uriFormat: "https://{subdomain}/oauth", subdomain: true},
+        repository: %{id: "id2", name: "repo"}
+      }
+
+      expect(HTTPoison, :post, 5, fn
+        _, ^get_body, _ ->
+          {:ok, %{body: Jason.encode!(%{data: %{recipe: recipe}})}}
+        _, ^me_body, _ -> {:ok, %{body: Jason.encode!(%{data: %{me: %{id: "me"}}})}}
+        _, ^get_inst_body, _ ->
+          {:ok, %{body: Jason.encode!(%{data: %{installation: %{id: "instid"}}})}}
+        _, ^oidc_body, _ ->
+          {:ok, %{body: Jason.encode!(%{data: %{upsertOidcProvider: %{id: "id"}}})}}
+        _, ^inst_body, _ ->
+          {:ok, %{body: Jason.encode!(%{data: %{installRecipe: [%{id: "huh"}]}})}}
+      end)
+
+      expect(Manifest, :get, fn ->
+        {:ok, %Manifest{network: %Manifest.Network{subdomain: "domain.com"}}}
+      end)
+
+      user = insert(:user)
+      {:ok, build} = Plural.install_recipe(
+        "id",
+        %{"repo" => %{"example" => "key"}},
+        true,
+        user
+      )
+
+      assert build.type == :install
+      assert build.message == "Installed bundle name for repository repo"
+      assert build.context == %{
+        configuration: %{"repo" => %{"example" => "key"}},
+        bundle: %{repository: "repo", name: "name"}
+      }
+      assert build.creator_id == user.id
+    end
   end
 end

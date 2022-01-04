@@ -19,7 +19,7 @@ defmodule Console.Plural.Repository do
 end
 
 defmodule Console.Plural.OIDCSettings do
-  defstruct [:authMethod, :domainKey, :uriFormat]
+  defstruct [:authMethod, :domainKey, :uriFormat, :subdomain]
 end
 
 defmodule Console.Plural.ProviderBinding do
