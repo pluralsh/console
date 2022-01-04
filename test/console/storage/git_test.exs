@@ -23,6 +23,26 @@ defmodule Console.Storage.GitTest do
     end
   end
 
+  describe "#reset/0" do
+    test "it will reset and clean a repo" do
+      me = self()
+
+      echo = fn val ->
+        send me, val
+        {:ok, val}
+      end
+      expect(Command, :cmd, 2, fn
+        "git", ["reset", "--hard", "origin/master"], _ -> echo.(:reset)
+        "git", ["clean", "-f"], _ -> echo.(:clean)
+      end)
+
+      {:ok, _} = Git.reset()
+
+      assert_receive :reset
+      assert_receive :clean
+    end
+  end
+
   describe "#init/0" do
     @tag :skip
     test "It will clone a repository" do
