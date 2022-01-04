@@ -17,10 +17,10 @@ import Toggle from 'react-toggle'
 function StringConfiguration({config: {name, default: def, placeholder, documentation}, type, ctx, setValue}) {
   const value = ctx[name]
   useEffect(() => {
-    if (!value && def) {
+    if (!ctx[name] && def) {
       setValue(name, def)
     }
-  }, [name, value, def])
+  }, [ctx, value, def])
 
   return (
     <Box flex={false} gap='xsmall'>
@@ -68,10 +68,10 @@ function BucketConfiguration({config: {name, default: def, placeholder, document
   const [local, setLocal] = useState(trim(ctx[name] || def))
   
   useEffect(() => {
-    if (ctx[name] || def) {
+    if (!ctx[name] && def) {
       setValue(name, format(ctx[name] || def))
     }
-  }, [name, def])
+  }, [ctx, name, def])
 
   return (
     <Box flex={false} gap='xsmall'>
@@ -109,10 +109,10 @@ function DomainConfiguration({config: {name, default: def, placeholder, document
   }, [suffix])
   
   useEffect(() => {
-    if (!local && def) {
+    if (!ctx[name] && def) {
       setValue(name, def)
     }
-  }, [name, local, def])
+  }, [name, ctx, def])
 
   return (
     <Box flex={false} gap='xsmall'>
@@ -140,10 +140,10 @@ function IntConfiguration({config: {name, default: def, placeholder, documentati
   const value = ctx[name]
   const [err, setErr] = useState(null)
   useEffect(() => {
-    if (!value && def) {
+    if (!ctx[name] && def) {
       setValue(name, def)
     }
-  }, [name, value, def])
+  }, [name, ctx, def])
 
   return (
     <Box flex={false} gap='xsmall'>
@@ -172,10 +172,10 @@ function IntConfiguration({config: {name, default: def, placeholder, documentati
 function BoolConfiguration({config: {name, default: def}, ctx, setValue}) {
   const value = ctx[name]
   useEffect(() => {
-    if (!value && def) {
-      setValue(def)
+    if (!ctx[name] && def) {
+      setValue(name, def)
     }
-  }, [value, def])
+  }, [ctx, def])
 
   return (
     <Box flex={false} direction='row' align='center' gap='xsmall'>
@@ -264,10 +264,16 @@ function RecipeConfiguration({recipe, context: ctx, setOpen}) {
     setInd(nextInd)
   }, [ind, setInd, hasNext, mutation])
 
+  console.log(context)
+
   return (
     <ThemeContext.Extend value={{global: {input: {padding: '9px'}}}}>
       <Box fill gap='small' pad='small'>
-        {error && <GqlError error={error} header='Error installing bundle' />}
+        {error && (
+          <Box pad='small'>
+            <GqlError error={error} header='Error installing bundle' />
+          </Box>
+        )}
         <Repository repo={repository} />
         <Box fill style={{overflow: 'auto', maxHeight: '70vh'}}>
           <Box flex={false} gap='12px'>
