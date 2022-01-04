@@ -1,7 +1,7 @@
 defmodule Console.Services.Plural do
   alias Console.Schema.{User, Manifest}
   alias Console.Services.{Builds}
-  alias Console.Plural.{Repositories, Users, Recipe, Installation, OIDCProvider}
+  alias Console.Plural.{Repositories, Users, Recipe, Installation, OIDCProvider, Manifest}
 
   def terraform_file(repository) do
     terraform_filename(repository)
@@ -39,20 +39,34 @@ defmodule Console.Services.Plural do
   def configure_oidc(
     %Recipe{
       repository: %{name: name},
-      oidcSettings: %{authMethod: method, uriFormat: fmt, domainKey: key}
+      oidcSettings: %{authMethod: method, uriFormat: fmt, domainKey: key} = oidc_settings
     },
     context,
     true) do
     with {:ok, %{id: me}} <- Users.me(),
          {:ok, %{id: inst_id} = installation} <- Repositories.get_installation(name),
+         {:ok, url} <- format_url(oidc_settings, context[name]),
          {:ok, _} <- Repositories.upsert_oidc_provider(inst_id, merge_provider(%{
-           redirectUris: [String.replace(fmt, "{domain}", get_in(context, [name, key]))],
+           redirectUris: [url],
            authMethod: method,
            bindings: [%{userId: me}]
          }, installation)),
       do: :ok
   end
   def configure_oidc(_, _, _), do: :ok
+
+  def format_url(%{uriFormat: uri} = oidc_settings, ctx) do
+    with {:ok, manifest} <- Manifest.get() do
+      uri = format_oidc(:domain, uri, oidc_settings, ctx)
+      {:ok, format_oidc(:subdomain, uri, oidc_settings, manifest)}
+    end
+  end
+
+  defp format_oidc(:domain, uri, %{domainKey: key}, ctx) when is_binary(key),
+    do: String.replace(uri, "{domain}", get_in(ctx, [key]))
+  defp format_oidc(:subdomain, uri, %{subdomain: true}, %Manifest{network: %Manifest.Network{subdomain: sub}}),
+    do: String.replace(uri, "{subdomain}", sub)
+  defp format_oidc(_, uri, _, _), do: uri
 
   def oidc_dependencies([recipe | rest], context, true) do
     case configure_oidc(recipe, context, true) do

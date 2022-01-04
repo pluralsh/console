@@ -18,7 +18,7 @@ defmodule Console.Plural.Client do
   end
 
   defp decode({:ok, %{body: body}}, type_spec) do
-    case Poison.decode!(body, as: %Response{data: type_spec}) do
+    case Poison.decode!(body, as: %Response{data: type_spec}) |> IO.inspect do
       %Response{errors: [_ | _] = errors} ->
         {:error, Enum.map(errors, & &1["message"])}
       %Response{data: data} when not is_nil(data) -> {:ok, data}

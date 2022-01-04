@@ -2,7 +2,7 @@ defmodule Console.Services.PluralTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.Services.Plural
-  alias Console.Plural.Queries
+  alias Console.Plural.{Queries, Manifest}
 
   describe "update_configuration/2" do
     @tag :skip
@@ -112,6 +112,10 @@ defmodule Console.Services.PluralTest do
           {:ok, %{body: Jason.encode!(%{data: %{upsertOidcProvider: %{id: "id"}}})}}
         _, ^inst_body, _ ->
           {:ok, %{body: Jason.encode!(%{data: %{installRecipe: [%{id: "huh"}]}})}}
+      end)
+
+      expect(Manifest, :get, fn ->
+        {:ok, %Manifest{network: %Manifest.Network{subdomain: "some.domain.co"}}}
       end)
 
       user = insert(:user)
