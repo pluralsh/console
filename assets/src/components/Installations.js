@@ -6,7 +6,7 @@ import { useQuery } from 'react-apollo'
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
 import { ApplicationReadyIcon } from './Application'
 import { LoopingLogo } from './utils/AnimatedLogo'
-import { CostAnalysis } from './repos/CostAnalysis'
+import { CostAnalysis, CostBreakdown } from './repos/CostAnalysis'
 import { FlyoutContainer, Icon } from './Console'
 import { ModalHeader } from './utils/Modal'
 import { chunk } from 'lodash'
@@ -86,7 +86,7 @@ function ApplicationLink({link: {url, description}, width}) {
 
 function ApplicationDetail({close}) {
   const {currentApplication} = useContext(InstallationContext)
-  const {name, spec: {descriptor}} = currentApplication
+  const {name, spec: {descriptor}, cost, license} = currentApplication
 
   return (
     <Layer modal onEsc={close} onClickOutside={close}>
@@ -105,6 +105,12 @@ function ApplicationDetail({close}) {
               <Text size='small' color='dark-3'>{descriptor.description}</Text>
             </Box>
           </Box>
+          {(cost || license) && (
+            <>
+            <Divider text='cost breakdown' />
+            <CostBreakdown cost={cost} license={license} />
+            </>
+          )}
           {descriptor.links && (
             <>
             <Divider text='application links' />
@@ -127,7 +133,7 @@ export function Installations() {
   const [modal, setModal] = useState(false)
   const {currentApplication, open, setOpen} = useContext(InstallationContext)
   if (!currentApplication) return null
-  const {name, spec: {descriptor}, cost, license} = currentApplication
+  const {name, spec: {descriptor}} = currentApplication
 
   return (
     <>
@@ -139,7 +145,6 @@ export function Installations() {
         selected={modal}
         align={{top: 'bottom'}}
         onClick={() => setModal(true)} />
-      {(cost || license) && <CostAnalysis license={license} cost={cost} />}
       <ToolbarItem onClick={() => setOpen(true)} open={open}>
         {descriptor.icons.length > 0 && <ApplicationIcon application={currentApplication} dark />}
         <Text size='small' weight={500}>{name}</Text>

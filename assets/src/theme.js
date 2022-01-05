@@ -55,7 +55,7 @@ export const DEFAULT_COLOR_THEME = {
   brand: {light: 'key-light', dark: 'key-light'},
   focus: {light: 'key-light', dark: 'key-light'},
   // action: '#007a5a',
-  cost: 'green-light',
+  cost: 'green',
   action: 'key-light',
   card: '#222732',
   hover: {dark: 'cardHover', light: 'tone-light'},

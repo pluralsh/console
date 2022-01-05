@@ -33,7 +33,7 @@ function KubernetesCost({cost, scalar}) {
         <CostItem name='storage cost' amount={scale(cost.pvCost, scalar)} />
         <CostItem name='miscellaneous costs' amount={scale(miscCost, scalar)} />
       </Box>
-      <Box direction='row' justify='end'>
+      <Box direction='row' justify='end' pad={{vertical: 'small'}}>
         <Box flex={false} width={COST_WIDTH} align='end'>
           <Text size='small' color='cost'>$ {scale(cost.totalCost, scalar)}</Text>
         </Box>
@@ -77,49 +77,43 @@ function PluralCost({license}) {
           {plural.features.map((feature) => <PlanFeature key={feature.name} feature={feature} />)}
         </Box>
       )}
-
       {plural.limits && <PlanLimits limits={license.limits} />}
     </Box>
   )
 }
 
-function CostBreakdown({cost, license, setOpen, scalar}) {
-  const close = useCallback(() => setOpen(false), [setOpen])
-  
+export function CostBreakdown({cost, license}) {
+  const scalar = cost ? Math.max(MINUTES_MONTH / cost.minutes, 1) : 1
+
   return (
-    <Layer modal onClickOutside={close} onEsc={close}>
-      <Box width='40vw'>
-        <ModalHeader text='Cost Breakdown' setOpen={setOpen} />
-        <Box fill pad='medium' gap='xsmall'>
-          <Tabs defaultTab={cost ? 'k8s' : 'plural'}>
-            <TabHeader>
-              <TabHeaderItem name='plural'>
-                <Text size='small' weight={500}>Plural</Text>
-              </TabHeaderItem>
-              {cost && (
-                <TabHeaderItem name='k8s'>
-                  <Text size='small' weight={500}>Kubernetes</Text>
-                </TabHeaderItem>
-              )}
-            </TabHeader>
-            <TabContent name='plural'>
-              {license && <PluralCost license={license} />}
-            </TabContent>
-            {cost && (
-              <TabContent name='k8s'>
-                <KubernetesCost cost={cost} scalar={scalar} />
-              </TabContent>
-            )}
-          </Tabs>
-        </Box>
-      </Box>
-    </Layer>
+    <Box gap='xsmall'>
+      <Tabs defaultTab={cost ? 'k8s' : 'plural'}>
+        <TabHeader>
+          <TabHeaderItem name='plural'>
+            <Text size='small' weight={500}>Plural</Text>
+          </TabHeaderItem>
+          {cost && (
+            <TabHeaderItem name='k8s'>
+              <Text size='small' weight={500}>Kubernetes</Text>
+            </TabHeaderItem>
+          )}
+        </TabHeader>
+        <TabContent name='plural'>
+          {license && <PluralCost license={license} />}
+        </TabContent>
+        {cost && (
+          <TabContent name='k8s'>
+            <KubernetesCost cost={cost} scalar={scalar} />
+          </TabContent>
+        )}
+      </Tabs>
+    </Box>
   )
 }
 
 export function CostAnalysis({cost, license}) {
   const [open, setOpen] = useState(false)
-  const scalar = cost ? Math.max(MINUTES_MONTH / cost.minutes, 1) : 1
+  const close = useCallback(() => setOpen(false), [setOpen])
   
   return (
     <>
@@ -127,11 +121,12 @@ export function CostAnalysis({cost, license}) {
       <Text size='small' weight={500}>Cost Breakdown</Text>
     </ToolbarItem>
     {open && (
-      <CostBreakdown 
-        license={license} 
-        cost={cost} 
-        scalar={scalar} 
-        setOpen={setOpen} />
+      <Layer modal onClickOutside={close} onEsc={close}>
+        <Box width='40vw'>
+          <ModalHeader text='Cost Breakdown' setOpen={setOpen} />
+          <CostBreakdown  license={license} cost={cost} />
+        </Box>
+      </Layer>
     )}
     </>
   )
