@@ -3,16 +3,41 @@ defmodule Console.Plural.Context do
 
   defstruct [:configuration, :bundles, :smtp]
 
+  defmodule Smtp do
+    defstruct [:username, :password, :server, :port, :sender]
+
+    def new(%{} = map) do
+      %__MODULE__{
+        username: map["username"],
+        password: map["password"],
+        server: map["server"],
+        port: map["port"],
+        sender: map["sender"],
+      }
+    end
+    def new(_), do: nil
+
+    def to_map(%__MODULE__{} = smtp), do: Map.from_struct(smtp)
+    def to_map(v), do: v
+  end
+
   defmodule Bundle, do: defstruct [:repository, :name]
 
   defp location(), do: Path.join([workspace(), "context.yaml"])
+
+  def new(%{"configuration" => config} = spec) do
+    %__MODULE__{
+      configuration: config,
+      smtp: Smtp.new(spec["smtp"]),
+      bundles: bundles(spec)
+    }
+  end
 
   def get() do
     location()
     |> YamlElixir.read_from_file()
     |> case do
-      {:ok, %{"spec" => %{"configuration" => config} = spec}} ->
-        {:ok, %__MODULE__{configuration: config, bundles: bundles(spec)}}
+      {:ok, %{"spec" => spec}} -> {:ok, new(spec)}
       _ -> {:error, :not_found}
     end
   end
@@ -31,7 +56,7 @@ defmodule Console.Plural.Context do
       spec: %{
         bundles: Enum.map(bundles, &Map.from_struct/1),
         configuration: conf,
-        smtp: smtp
+        smtp: Smtp.to_map(smtp)
       }
     }
 

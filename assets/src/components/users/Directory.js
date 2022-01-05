@@ -1,7 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { Box, Text, Layer, TextInput, ThemeContext } from 'grommet'
 import { useQuery, useMutation } from 'react-apollo'
-import { ModalHeader, Scroller, User, Group, AddUser, AddGroup, Webhooks, Roles, CreateRole as CreateRoleI } from 'forge-core'
+import { ModalHeader, Scroller, User, Group, AddUser, AddGroup, Button,
+         Webhooks, Roles, CreateRole as CreateRoleI, Messages, InputCollection, ResponsiveInput } from 'forge-core'
 import { USERS_Q, GROUPS_Q, EDIT_USER, ROLES_Q } from './queries'
 import Avatar from './Avatar'
 import { GroupForm } from './CreateGroup'
@@ -17,8 +18,69 @@ import { LoopingLogo } from '../utils/AnimatedLogo'
 import { SIDEBAR_ICON_HEIGHT } from '../Sidebar'
 import Toggle from 'react-toggle'
 import { WebhookManagement } from '../Webhooks'
+import { SMTP_Q, UPDATE_SMTP } from '../graphql/plural'
+import { LoginContext } from '../Login'
 
 const INPUT_WIDTH = '350px'
+
+const clean = (smtp) => {
+  const {__typename, ...vals} = smtp || {}
+  return vals
+}
+
+function SmtpSettingsInner({smtp}) {
+  const [form, setForm] = useState(clean(smtp))
+  const [mutation, {loading}] = useMutation(UPDATE_SMTP, {
+    variables: {smtp: form},
+  })
+
+  return (
+    <SectionContentContainer header='SMTP Configuration'>
+      <Box pad='small'>
+        <InputCollection>
+          <ResponsiveInput
+            value={form.server || ''}
+            placeholder='smtp.sendrid.net'
+            label='server'
+            onChange={({target: {value}}) => setForm({...form, server: value})} />
+          <ResponsiveInput
+            value={form.port || ''}
+            placeholder='587'
+            label='port'
+            onChange={({target: {value}}) => setForm({...form, port: parseInt(value)})} />
+          <ResponsiveInput
+            value={form.sender || ''}
+            placeholder='from address for outgoing emails'
+            label='sender'
+            onChange={({target: {value}}) => setForm({...form, sender: value})} />
+          <ResponsiveInput
+            value={form.username || ''}
+            placeholder='username for smtp authentication'
+            label='username'
+            onChange={({target: {value}}) => setForm({...form, username: value})} />
+          <ResponsiveInput
+            value={form.password || ''}
+            type='password'
+            placeholder='password for smtp authentication'
+            label='password'
+            onChange={({target: {value}}) => setForm({...form, password: value})} />
+        </InputCollection>
+      </Box>
+      <SectionPortal>
+        <Button loading={loading} onClick={mutation} flex={false} label='Update' />
+      </SectionPortal>
+    </SectionContentContainer>
+  )
+}
+
+function SmtpSettings() {
+  const {data} = useQuery(SMTP_Q)
+  console.log(data)
+  
+  if (!data) return null
+
+  return <SmtpSettingsInner smtp={data.smtp} />
+}
 
 function UserRow({user}) {
   const admin = user.roles && user.roles.admin
@@ -183,6 +245,7 @@ function CreateModal({form, width, header, children}) {
 
 export default function Directory() {
   let {section} = useParams()
+  const {me} = useContext(LoginContext) 
   section = section || 'users'
   let history = useHistory()
   const setSection = (section) => history.push(`/directory/${section}`)
@@ -211,6 +274,13 @@ export default function Directory() {
           label='Roles' 
           section='roles' 
           setSection={setSection} />
+        {me.roles.admin && (
+          <SectionChoice
+            icon={<Messages size='14px' />}
+            label='Email Settings'
+            section='smtp'
+            setSection={setSection} />
+        )}
         <SectionChoice
           icon={<Webhooks size='14px' />}
           label='Webhooks'
@@ -244,6 +314,7 @@ export default function Directory() {
         {section === 'groups' && <GroupsInner />}
         {section === 'roles' && <RolesInner />}
         {section === 'webhooks' && <WebhookManagement />}
+        {section === 'smtp' && <SmtpSettings />}
       </Box>
     </Box>
     </ThemeContext.Extend>

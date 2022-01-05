@@ -12,6 +12,16 @@ export const RepositoryFragment = gql`
   }
 `;
 
+export const SmtpFragment = gql`
+  fragment SmtpFragment on Smtp {
+    server
+    port
+    sender
+    username
+    password
+  }
+`
+
 export const InstallationFragment = gql`
   fragment InstallationFragment on Installation {
     id
@@ -251,3 +261,17 @@ export const LOG_FILTER_Q = gql`
   }
   ${LogFilterFragment}
 `;
+
+export const SMTP_Q = gql`
+  query {
+    smtp { ...SmtpFragment }
+  }
+  ${SmtpFragment}
+`
+
+export const UPDATE_SMTP = gql`
+  mutation UpdateSmtp($smtp: SmtpInput!) {
+    updateSmtp(smtp: $smtp) { ...SmtpFragment }
+  }
+  ${SmtpFragment}
+`
