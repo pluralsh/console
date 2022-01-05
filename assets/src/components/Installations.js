@@ -84,46 +84,54 @@ function ApplicationLink({link: {url, description}, width}) {
   )
 }
 
-function ApplicationDetail({close}) {
+export function ApplicationDetails() {
   const {currentApplication} = useContext(InstallationContext)
   const {name, spec: {descriptor}, cost, license} = currentApplication
 
   return (
-    <Layer modal onEsc={close} onClickOutside={close}>
-      <Box width='50vw'>
-        <ModalHeader text={`${name} details`} setOpen={close} />
-        <Box pad='medium'>
-          <Box direction='row' gap='small' align='center'>
-            {descriptor.icons.length > 0 && <ApplicationIcon size='30px' application={currentApplication} />}
-            <Box fill='horizontal'>
-              <Box direction='row' align='center' gap='xsmall'>
-                <Text size='small' weight={500}>{name}</Text>
-                <Box round='xsmall' background='tone-light' pad={{horizontal: '3px', vertical: '2px'}}>
-                  <Text size='12px'>{descriptor.version}</Text>
-                </Box>
-              </Box>
-              <Text size='small' color='dark-3'>{descriptor.description}</Text>
+    <Box fill pad='medium'>
+      <Box direction='row' gap='small' align='center'>
+        {descriptor.icons.length > 0 && <ApplicationIcon size='30px' application={currentApplication} />}
+        <Box fill='horizontal'>
+          <Box direction='row' align='center' gap='xsmall'>
+            <Text size='small' weight={500}>{name}</Text>
+            <Box round='xsmall' background='tone-light' pad={{horizontal: '3px', vertical: '2px'}}>
+              <Text size='12px'>{descriptor.version}</Text>
             </Box>
           </Box>
-          {(cost || license) && (
-            <>
-            <Divider text='cost breakdown' />
-            <CostBreakdown cost={cost} license={license} />
-            </>
-          )}
-          {descriptor.links && (
-            <>
-            <Divider text='application links' />
-            <Box gap='small'>
-              {chunk(descriptor.links, 3).map((chunk) => (
-                <Box direction='row' gap='small'>
-                  {chunk.map((link) => <ApplicationLink link={link} key={link.url} />)}
-                </Box>
-              ))}
-            </Box>
-            </>
-          )}
+          <Text size='small' color='dark-3'>{descriptor.description}</Text>
         </Box>
+      </Box>
+      {(cost || license) && (
+        <>
+        <Divider text='cost breakdown' />
+        <CostBreakdown cost={cost} license={license} />
+        </>
+      )}
+      {descriptor.links && (
+        <>
+        <Divider text='application links' />
+        <Box gap='small'>
+          {chunk(descriptor.links, 3).map((chunk) => (
+            <Box direction='row' gap='small'>
+              {chunk.map((link) => <ApplicationLink link={link} key={link.url} />)}
+            </Box>
+          ))}
+        </Box>
+        </>
+      )}
+    </Box>
+  )
+}
+
+function ApplicationDetail({close}) {
+  const {currentApplication} = useContext(InstallationContext)
+
+  return (
+    <Layer modal onEsc={close} onClickOutside={close}>
+      <Box width='50vw'>
+        <ModalHeader text={`${currentApplication.name} details`} setOpen={close} />
+        <ApplicationDetails />
       </Box>
     </Layer>
   )

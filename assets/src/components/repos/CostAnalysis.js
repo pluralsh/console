@@ -1,46 +1,56 @@
-import React, { useCallback, useState } from 'react'
-import { Box, Layer, Text } from 'grommet'
-import { ModalHeader, Tabs, TabContent, TabHeader, TabHeaderItem, Check } from 'forge-core'
+import React, { useCallback, useMemo, useState } from 'react'
+import { Box, Layer, Stack, Text } from 'grommet'
+import { ModalHeader, Check } from 'forge-core'
 import { ToolbarItem } from '../Installations'
+import { ResponsiveRadar } from '@nivo/radar'
+import { COLOR_MAP } from '../utils/Graph'
 
 const MINUTES_MONTH = 60 * 24 * 30
 
-const COST_WIDTH = '75px'
-
 const scale = (amount, scalar) => Math.round(amount * scalar * 100) / 100
 
-function CostItem({name, amount}) {
-  return (
-    <Box direction='row' gap='xsmall' align='center'>
-      <Box fill='horizontal'>
-        <Text size='small' weight={500}>{name}</Text>
-      </Box>
-      <Box flex={false} width={COST_WIDTH} align='end'>
-        <Text size='small'>{amount}</Text>
-      </Box>
-    </Box>
-  )
+function SliceTooltip(props) {
+  console.log(props)
+  return null
 }
 
-function KubernetesCost({cost, scalar}) {
-  const miscCost = cost.totalCost - (cost.cpuCost + cost.ramCost + cost.pvCost)
+function CostRadar({cost, scalar}) {
+  const data = useMemo(() => {
+    const miscCost = cost.totalCost - (cost.cpuCost + cost.ramCost + cost.pvCost)
+    return [
+      {dim: 'cpu', cost: scale(cost.cpuCost, scalar)},
+      {dim: 'memory', cost: scale(cost.ramCost, scalar)},
+      {dim: 'storage', cost: scale(cost.pvCost, scalar)},
+      {dim: 'miscellaneous', cost: scale(miscCost, scalar)}
+    ]
+  }, [cost, scalar])
 
   return (
-    <Box fill pad='small'>
-      <Box gap='small' border={{side: 'bottom'}} pad={{bottom: 'xsmall'}}>
-        <CostItem name='cpu cost' amount={scale(cost.cpuCost, scalar)} />
-        <CostItem name='memory cost' amount={scale(cost.ramCost, scalar)} />
-        <CostItem name='storage cost' amount={scale(cost.pvCost, scalar)} />
-        <CostItem name='miscellaneous costs' amount={scale(miscCost, scalar)} />
-      </Box>
-      <Box direction='row' justify='end' pad={{vertical: 'small'}}>
-        <Box flex={false} width={COST_WIDTH} align='end'>
-          <Text size='small' color='cost'>$ {scale(cost.totalCost, scalar)}</Text>
+    <Box height='250px' pad='small'>
+      <Stack anchor='top-left' pad='small' >
+        <Box height='250px'>
+          <ResponsiveRadar
+            data={data}
+            keys={['cost']}
+            indexBy="dim"
+            valueFormat={val => `$${Number(val).toLocaleString('en-US', {minimumFractionDigits: 2})}`}
+            margin={{ top: 50, right: 50, bottom: 50, left: 50 }}
+            borderColor={{ from: 'color' }}
+            dotBorderWidth={2}
+            fillOpacity={.7}
+            gridLevels={3}
+            isInteractive={true}
+            dotSize={3}
+            dotBorderWidth={2}
+            tooltipFormat={val => `$${Number(val).toLocaleString('en-US', {minimumFractionDigits: 2})}`}
+            colors={COLOR_MAP} />
         </Box>
-      </Box>
+        <Text size='small' weight={500}>Kubernetes Cost</Text>
+      </Stack>
     </Box>
   )
 }
+
 
 function PlanFeature({feature: {name, description}}) {
   return (
@@ -70,7 +80,8 @@ function PlanLimits({limits}) {
 function PluralCost({license}) {
   const {status: plural} = license  
   return (
-    <Box fill pad='small' gap='small'>
+    <Box pad='small' gap='small'>
+      <Text size='small' weight={500}>Plural Cost</Text>
       <Text size='small' weight={500}>{plural.plan || 'Free'} Plan</Text>
       {plural.features && (
         <Box gap='xsmall'>
@@ -86,27 +97,9 @@ export function CostBreakdown({cost, license}) {
   const scalar = cost ? Math.max(MINUTES_MONTH / cost.minutes, 1) : 1
 
   return (
-    <Box gap='xsmall'>
-      <Tabs defaultTab={cost ? 'k8s' : 'plural'}>
-        <TabHeader>
-          <TabHeaderItem name='plural'>
-            <Text size='small' weight={500}>Plural</Text>
-          </TabHeaderItem>
-          {cost && (
-            <TabHeaderItem name='k8s'>
-              <Text size='small' weight={500}>Kubernetes</Text>
-            </TabHeaderItem>
-          )}
-        </TabHeader>
-        <TabContent name='plural'>
-          {license && <PluralCost license={license} />}
-        </TabContent>
-        {cost && (
-          <TabContent name='k8s'>
-            <KubernetesCost cost={cost} scalar={scalar} />
-          </TabContent>
-        )}
-      </Tabs>
+    <Box gap='xsmall' direction='row' border='between'>
+      {license && <Box width='30%'><PluralCost license={license} /></Box>}
+      {cost && <Box width='70%'><CostRadar cost={cost} scalar={scalar} /></Box>}
     </Box>
   )
 }

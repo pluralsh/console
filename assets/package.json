@@ -12,6 +12,7 @@
     "@nivo/geo": "^0.73.0",
     "@nivo/line": "^0.73.0",
     "@nivo/pie": "^0.73.0",
+    "@nivo/radar": "0.73.0",
     "@nivo/tooltip": "^0.73.0",
     "@nivo/waffle": "^0.73.0",
     "@testing-library/jest-dom": "^4.2.4",

@@ -31,7 +31,7 @@ function SliceTooltip({point: {serieColor, serieId, data}}) {
   )
 }
 
-const COLOR_MAP = [
+export const COLOR_MAP = [
   'blue', 
   'orange', 
   'green', 
