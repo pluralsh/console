@@ -1,3 +1,9 @@
+global:
+  application:
+    links:
+    - description: console web ui
+      url: {{ .Values.console_dns }}
+
 ingress:
   console_dns: {{ .Values.console_dns }}
 

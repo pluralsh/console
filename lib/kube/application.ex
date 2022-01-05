@@ -18,6 +18,16 @@ defmodule Kube.Application do
     end
   end
 
+  defmodule InfoItem do
+    use Kazan.Model
+
+    defmodel "Descriptor", "app.k8s.io", "v1beta1" do
+      property :type,  "type",   :string
+      property :name,  "name",   :string
+      property :value, "value",  :string
+    end
+  end
+
   defmodule Descriptor do
     use Kazan.Model
     alias Kube.Application
@@ -27,6 +37,16 @@ defmodule Kube.Application do
       property :version, "version", :string
       property :description, "description", :string
       property :icons, "icons", {:array, Application.Icon}
+      property :links,  "links", {:array, Application.Link}
+    end
+  end
+
+  defmodule Link do
+    use Kazan.Model
+
+    defmodel "Link", "app.k8s.io", "v1beta1" do
+      property :url,         "url", :string
+      property :description, "description", :string
     end
   end
 
@@ -37,6 +57,7 @@ defmodule Kube.Application do
     defmodel "ApplicationSpec", "app.k8s.io", "v1beta1" do
       property :components, "componentKinds", {:array, Application.ComponentKind}
       property :descriptor, "descriptor", Application.Descriptor
+      property :info, "info", {:array, Application.InfoItem}
     end
   end
 
