@@ -53,6 +53,8 @@ defmodule Console.GraphQl.Resolvers.Plural do
     Plural.install_recipe(id, context, !!args[:oidc], user)
   end
 
+  def update_smtp(%{smtp: smtp}, _), do: Plural.update_smtp(smtp)
+
   def resolve_configuration(%{metadata: %{name: name}}, first, second),
     do: resolve_configuration(%{name: name}, first, second)
   def resolve_configuration(%{name: name}, _, _) do

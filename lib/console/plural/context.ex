@@ -1,7 +1,7 @@
 defmodule Console.Plural.Context do
   import Console
 
-  defstruct [:configuration, :bundles]
+  defstruct [:configuration, :bundles, :smtp]
 
   defmodule Bundle, do: defstruct [:repository, :name]
 
@@ -24,13 +24,14 @@ defmodule Console.Plural.Context do
     end
   end
 
-  def write(%__MODULE__{bundles: bundles, configuration: conf} = context) do
+  def write(%__MODULE__{bundles: bundles, configuration: conf, smtp: smtp} = context) do
     sanitized = %{
       apiVersion: "plural.sh/v1alpha1",
       kind: "Context",
       spec: %{
         bundles: Enum.map(bundles, &Map.from_struct/1),
-        configuration: conf
+        configuration: conf,
+        smtp: smtp
       }
     }
 

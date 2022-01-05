@@ -1,7 +1,23 @@
 defmodule Console.GraphQl.Plural do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Plural
-  alias Console.Middleware.Authenticated
+  alias Console.Middleware.{Authenticated, AdminRequired}
+
+  input_object :smtp_input do
+    field :server,   :string
+    field :port,     :integer
+    field :password, :string
+    field :sender,   :string
+    field :username, :string
+  end
+
+  object :smtp do
+    field :server,   :string
+    field :port,     :integer
+    field :password, :string
+    field :sender,   :string
+    field :username, :string
+  end
 
   object :installation do
     field :id, non_null(:id)
@@ -115,6 +131,16 @@ defmodule Console.GraphQl.Plural do
 
       resolve &Plural.get_recipe/2
     end
+
+    field :smtp, :smtp do
+      middleware Authenticated
+      middleware AdminRequired
+
+      resolve fn _, _ ->
+        with {:ok, context} <- Console.Plural.Context.get(),
+          do: {:ok, context.smtp}
+      end
+    end
   end
 
   object :plural_mutations do
@@ -125,6 +151,14 @@ defmodule Console.GraphQl.Plural do
       arg :oidc,    :boolean
 
       resolve &Plural.install_recipe/2
+    end
+
+    field :update_smtp, :smtp do
+      middleware Authenticated
+      middleware AdminRequired
+      arg :smtp, non_null(:smtp_input)
+
+      resolve &Plural.update_smtp/2
     end
   end
 end

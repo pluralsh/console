@@ -1,7 +1,7 @@
 defmodule Console.Services.Plural do
   alias Console.Schema.{User, Manifest}
   alias Console.Services.{Builds}
-  alias Console.Plural.{Repositories, Users, Recipe, Installation, OIDCProvider, Manifest}
+  alias Console.Plural.{Repositories, Users, Recipe, Installation, OIDCProvider, Manifest, Context}
 
   def terraform_file(repository) do
     terraform_filename(repository)
@@ -17,6 +17,17 @@ defmodule Console.Services.Plural do
     with {:ok, _} <- validate(update, tool),
          :ok <- File.write(filename(repository, tool), update),
       do: {:ok, update}
+  end
+
+  def update_smtp(smtp) do
+    Console.Deployer.exec(fn storage ->
+      with {:ok, _} <- storage.reset(),
+           {:ok, context} <- Context.get(),
+           {:ok, update} <- Context.write(%{context | smtp: smtp}),
+           {:ok, _} <- storage.revise("update workspace smtp configuration"),
+           {:ok, _} <- storage.push(),
+        do: {:ok, smtp}
+    end)
   end
 
   def install_recipe(id, context, oidc, %User{} = user) do

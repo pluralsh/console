@@ -1,8 +1,11 @@
 defmodule Console.Services.PluralTest do
-  use Console.DataCase, async: true
+  use Console.DataCase, async: false
   use Mimic
   alias Console.Services.Plural
-  alias Console.Plural.{Queries, Manifest}
+  alias Console.Plural.{Queries, Manifest, Context}
+  alias Console.Commands.Command
+
+  setup :set_mimic_global
 
   describe "update_configuration/2" do
     @tag :skip
@@ -204,6 +207,39 @@ defmodule Console.Services.PluralTest do
         bundle: %{repository: "repo", name: "name"}
       }
       assert build.creator_id == user.id
+    end
+  end
+
+  describe "#update_smtp/1" do
+    test "it can update the smtp section of a wkspace's context" do
+      context = %Context{
+        bundles: [],
+        configuration: %{"repo" => %{"value" => 1}}
+      }
+
+      expect(Context, :get, fn -> {:ok, context} end)
+      expect(Context, :write, fn %Context{smtp: %{service: "smtp.service.com"}} = ctx -> {:ok, ctx} end)
+
+      me = self()
+      echo = fn val ->
+        send me, val
+        {:ok, val}
+      end
+      expect(Command, :cmd, 5, fn
+        "git", ["reset", "--hard", "origin/master"], _ -> echo.(:reset)
+        "git", ["clean", "-f"], _ -> echo.(:clean)
+        "git", ["add", "."], _ -> echo.(:add)
+        "git", ["commit", "-m", _], _ -> echo.(:commit)
+        "git", ["push"], _ -> echo.(:push)
+      end)
+
+      {:ok, _} = Plural.update_smtp(%{service: "smtp.service.com"})
+
+      assert_receive :reset
+      assert_receive :clean
+      assert_receive :add
+      assert_receive :commit
+      assert_receive :push
     end
   end
 end

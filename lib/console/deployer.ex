@@ -39,6 +39,8 @@ defmodule Console.Deployer do
 
   def update(repo, content, tool), do: GenServer.call(__MODULE__, {:update, repo, content, tool})
 
+  def exec(fun), do: GenServer.call(__MODULE__, {:exec, fun})
+
   def handle_call(:poll, _, %State{} = state) do
     send(self(), :poll)
     {:reply, :ok, state}
@@ -47,6 +49,9 @@ defmodule Console.Deployer do
   def handle_call({:update, repo, content, tool}, _, %State{storage: storage} = state) do
     {:reply, update(storage, repo, content, tool), state}
   end
+
+  def handle_call({:exec, fun}, _, state) when is_function(fun),
+    do: {:reply, fun.(state.storage), state}
 
   def handle_call(:ping, _, state), do: {:reply, :pong, state}
 
