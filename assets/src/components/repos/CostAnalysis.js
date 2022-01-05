@@ -4,15 +4,13 @@ import { ModalHeader, Check } from 'forge-core'
 import { ToolbarItem } from '../Installations'
 import { ResponsiveRadar } from '@nivo/radar'
 import { COLOR_MAP } from '../utils/Graph'
+import { sum } from 'lodash'
 
 const MINUTES_MONTH = 60 * 24 * 30
 
-const scale = (amount, scalar) => Math.round(amount * scalar * 100) / 100
+const round = (v) => Math.round(v * 100) / 100
 
-function SliceTooltip(props) {
-  console.log(props)
-  return null
-}
+const scale = (amount, scalar) => round(amount * scalar)
 
 function CostRadar({cost, scalar}) {
   const data = useMemo(() => {
@@ -24,6 +22,8 @@ function CostRadar({cost, scalar}) {
       {dim: 'miscellaneous', cost: scale(miscCost, scalar)}
     ]
   }, [cost, scalar])
+
+  const total = round(sum(data.map(({cost}) => cost)))
 
   return (
     <Box height='250px' pad='small'>
@@ -45,7 +45,10 @@ function CostRadar({cost, scalar}) {
             tooltipFormat={val => `$${Number(val).toLocaleString('en-US', {minimumFractionDigits: 2})}`}
             colors={COLOR_MAP} />
         </Box>
-        <Text size='small' weight={500}>Kubernetes Cost</Text>
+        <Box direction='row' gap='xsmall' align='center'>
+          <Text size='small' weight={500}>Kubernetes Cost</Text>
+          <Text size='small' color='cost'>${total}</Text>
+        </Box>
       </Stack>
     </Box>
   )

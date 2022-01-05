@@ -6,7 +6,7 @@ import { useQuery } from 'react-apollo'
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
 import { ApplicationReadyIcon } from './Application'
 import { LoopingLogo } from './utils/AnimatedLogo'
-import { CostAnalysis, CostBreakdown } from './repos/CostAnalysis'
+import { CostBreakdown } from './repos/CostAnalysis'
 import { FlyoutContainer, Icon } from './Console'
 import { ModalHeader } from './utils/Modal'
 import { chunk } from 'lodash'
@@ -91,7 +91,7 @@ export function ApplicationDetails() {
   return (
     <Box fill pad='medium'>
       <Box direction='row' gap='small' align='center'>
-        {descriptor.icons.length > 0 && <ApplicationIcon size='30px' application={currentApplication} />}
+        {descriptor.icons.length > 0 && <ApplicationIcon size='40px' application={currentApplication} />}
         <Box fill='horizontal'>
           <Box direction='row' align='center' gap='xsmall'>
             <Text size='small' weight={500}>{name}</Text>
