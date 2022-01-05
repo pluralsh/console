@@ -173,11 +173,9 @@ export const ApplicationFragment = gql`
         icons
         description
         version
+        links { description url }
       }
-      components {
-        group
-        kind
-      }
+      components { group kind }
     }
     status {
       components {

@@ -42,7 +42,7 @@ export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
 const APP_ICON = `${process.env.PUBLIC_URL}/console-full.png`
 
-export function Icon({icon, text, selected, path, onClick, size}) {
+export function Icon({icon, text, selected, path, onClick, size, align}) {
   const dropRef = useRef()
   let history = useHistory()
   const [hover, setHover] = useState(false)
@@ -68,7 +68,7 @@ export function Icon({icon, text, selected, path, onClick, size}) {
       {icon}
     </Box>
     {hover  && (
-      <Tooltip pad='small' round='xsmall' justify='center' target={dropRef} side='right' align={{left: 'right'}}>
+      <Tooltip pad='small' round='xsmall' justify='center' target={dropRef} side='right' align={align || {left: 'right'}}>
         <Text size='small' weight={500}>{text}</Text>
       </Tooltip>
     )}
@@ -160,6 +160,7 @@ export default function Console() {
                 text='Install'
                 size='40px'
                 selected={open}
+                align={{top: 'bottom'}}
                 onClick={() => setOpen(true)} />
               <Notifications />
               <Installations />

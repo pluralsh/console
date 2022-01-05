@@ -1,12 +1,15 @@
 import React, { useEffect, useContext, useState, useCallback } from 'react'
-import { Box, Text, ThemeContext } from 'grommet'
-import { Checkmark } from 'grommet-icons'
+import { Box, Text, ThemeContext, Layer, Anchor } from 'grommet'
+import { Checkmark, CircleInformation } from 'grommet-icons'
+import { Links, Divider } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
 import { ApplicationReadyIcon } from './Application'
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { CostAnalysis } from './repos/CostAnalysis'
-import { FlyoutContainer } from './Console'
+import { FlyoutContainer, Icon } from './Console'
+import { ModalHeader } from './utils/Modal'
+import { chunk } from 'lodash'
 
 export const InstallationContext = React.createContext({})
 
@@ -68,7 +71,60 @@ export function ToolbarItem({children, onClick, open}) {
   )
 }
 
+function ApplicationLink({link: {url, description}, width}) {
+  return (
+    <Box direction='row' align='center' round='xsmall' 
+         background='tone-light' gap='small' pad='small' width={width || '33%'}>
+      <Links size='15px' />
+      <Box>
+        <Anchor target='_blank' size='small' href={`https://${url}`}>{url}</Anchor>
+        <Text size='small' color='dark-3'>{description}</Text>
+      </Box>
+    </Box>
+  )
+}
+
+function ApplicationDetail({close}) {
+  const {currentApplication} = useContext(InstallationContext)
+  const {name, spec: {descriptor}} = currentApplication
+
+  return (
+    <Layer modal onEsc={close} onClickOutside={close}>
+      <Box width='50vw'>
+        <ModalHeader text={`${name} details`} setOpen={close} />
+        <Box pad='medium'>
+          <Box direction='row' gap='small' align='center'>
+            {descriptor.icons.length > 0 && <ApplicationIcon size='30px' application={currentApplication} />}
+            <Box fill='horizontal'>
+              <Box direction='row' align='center' gap='xsmall'>
+                <Text size='small' weight={500}>{name}</Text>
+                <Box round='xsmall' background='tone-light' pad={{horizontal: '3px', vertical: '2px'}}>
+                  <Text size='12px'>{descriptor.version}</Text>
+                </Box>
+              </Box>
+              <Text size='small' color='dark-3'>{descriptor.description}</Text>
+            </Box>
+          </Box>
+          {descriptor.links && (
+            <>
+            <Divider text='application links' />
+            <Box gap='small'>
+              {chunk(descriptor.links, 3).map((chunk) => (
+                <Box direction='row' gap='small'>
+                  {chunk.map((link) => <ApplicationLink link={link} key={link.url} />)}
+                </Box>
+              ))}
+            </Box>
+            </>
+          )}
+        </Box>
+      </Box>
+    </Layer>
+  )
+}
+
 export function Installations() {
+  const [modal, setModal] = useState(false)
   const {currentApplication, open, setOpen} = useContext(InstallationContext)
   if (!currentApplication) return null
   const {name, spec: {descriptor}, cost, license} = currentApplication
@@ -76,6 +132,13 @@ export function Installations() {
   return (
     <>
     <Box flex={false} direction='row' gap='xsmall' align='center'>
+      <Icon
+        icon={<CircleInformation size='18px' />}
+        text='Application Details'
+        size='40px'
+        selected={modal}
+        align={{top: 'bottom'}}
+        onClick={() => setModal(true)} />
       {(cost || license) && <CostAnalysis license={license} cost={cost} />}
       <ToolbarItem onClick={() => setOpen(true)} open={open}>
         {descriptor.icons.length > 0 && <ApplicationIcon application={currentApplication} dark />}
@@ -83,6 +146,7 @@ export function Installations() {
         <ApplicationReadyIcon application={currentApplication} showIcon />
       </ToolbarItem>
     </Box>
+    {modal && <ApplicationDetail close={() => setModal(false)} />}
     {open && <InstallationsFlyout />}
     </>
   )

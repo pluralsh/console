@@ -22,6 +22,7 @@ function BuildStatusInner({background, text, icon}) {
     <Box
       flex={false}
       direction='row'
+      justify='center'
       align='center'
       pad={{horizontal: 'small', vertical: 'xsmall'}}
       round='xxsmall'
