@@ -60,7 +60,7 @@ FROM dkr.plural.sh/plural/plural-cli:0.1.1 as cmd
 
 FROM gcr.io/pluralsh/alpine:3 as helm
 
-ARG VERSION=3.3.1
+ARG VERSION=3.7.0
 ENV TERRAFORM_VERSION=0.15.2
 
 # ENV BASE_URL="https://storage.googleapis.com/kubernetes-helm"
@@ -120,7 +120,7 @@ ENV REPLACE_OS_VARS=true \
 WORKDIR /opt/app
 
 RUN helm plugin install https://github.com/chartmuseum/helm-push && \
-    helm plugin install https://github.com/databus23/helm-diff
+    helm plugin install https://github.com/databus23/helm-diff --version 3.1.3
 RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh
 RUN mkdir -p /root/.plural && mkdir -p /root/.creds && mkdir /root/bin
 RUN ln -s /usr/local/bin/plural /usr/local/bin/forge
