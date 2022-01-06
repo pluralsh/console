@@ -17,7 +17,7 @@ export const SmtpFragment = gql`
     server
     port
     sender
-    username
+    user
     password
   }
 `

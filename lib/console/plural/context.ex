@@ -4,11 +4,11 @@ defmodule Console.Plural.Context do
   defstruct [:configuration, :bundles, :smtp]
 
   defmodule Smtp do
-    defstruct [:username, :password, :server, :port, :sender]
+    defstruct [:user, :password, :server, :port, :sender]
 
     def new(%{} = map) do
       %__MODULE__{
-        username: map["username"],
+        user: map["user"],
         password: map["password"],
         server: map["server"],
         port: map["port"],

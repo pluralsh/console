@@ -8,7 +8,7 @@ defmodule Console.GraphQl.Plural do
     field :port,     :integer
     field :password, :string
     field :sender,   :string
-    field :username, :string
+    field :user,     :string
   end
 
   object :smtp do
@@ -16,7 +16,7 @@ defmodule Console.GraphQl.Plural do
     field :port,     :integer
     field :password, :string
     field :sender,   :string
-    field :username, :string
+    field :user,     :string
   end
 
   object :installation do

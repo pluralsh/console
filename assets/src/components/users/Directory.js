@@ -54,10 +54,10 @@ function SmtpSettingsInner({smtp}) {
             label='sender'
             onChange={({target: {value}}) => setForm({...form, sender: value})} />
           <ResponsiveInput
-            value={form.username || ''}
+            value={form.user || ''}
             placeholder='username for smtp authentication'
-            label='username'
-            onChange={({target: {value}}) => setForm({...form, username: value})} />
+            label='user'
+            onChange={({target: {value}}) => setForm({...form, user: value})} />
           <ResponsiveInput
             value={form.password || ''}
             type='password'

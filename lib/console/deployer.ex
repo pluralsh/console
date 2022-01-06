@@ -50,8 +50,11 @@ defmodule Console.Deployer do
     {:reply, update(storage, repo, content, tool), state}
   end
 
-  def handle_call({:exec, fun}, _, state) when is_function(fun),
-    do: {:reply, fun.(state.storage), state}
+  def handle_call({:exec, fun}, _, state) when is_function(fun) do
+    res = fun.(state.storage)
+    broadcast()
+    {:reply, res, state}
+  end
 
   def handle_call(:ping, _, state), do: {:reply, :pong, state}
 
