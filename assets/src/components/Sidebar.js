@@ -54,7 +54,7 @@ export function SidebarIcon({icon, text, name: sidebarName, selected, path}) {
   )
 }
 
-function CompressedIcon({icon, text, selected, path}) {
+function CompressedIcon({icon, text, selected, path, git}) {
   const [ref, setRef] = useState(null)
   const [hover, setHover] = useState(false)
   let history = useHistory()
@@ -108,7 +108,7 @@ const OPTIONS = [
   {text: 'Runbooks', icon: Runbook, path: '/runbooks/{repo}'},
   {text: 'Components', icon: Components, path: '/components/{repo}'},
   {text: 'Nodes', icon: Nodes, path: '/nodes'},
-  {text: 'Configuration', icon: Configuration, path: '/config/{repo}' },
+  {text: 'Configuration', icon: Configuration, path: '/config/{repo}', git: true},
   {text: 'Incidents', icon: Incidents, path: '/incidents'},
   {text: 'Dashboards', icon: Dashboard, path: '/dashboards/{repo}'},
   {text: 'Logs', icon: Logs, path: '/logs/{repo}'},
@@ -146,6 +146,7 @@ export default function Sidebar() {
   const [expanded, setExpanded] = useState(false)
   const loc = useLocation()
   const {currentApplication} = useContext(InstallationContext)
+  const {configuration: conf} = useContext(LoginContext)
 
   const name = currentApplication && currentApplication.name
   const active = OPTIONS.findIndex(({path}) => {
@@ -160,8 +161,9 @@ export default function Sidebar() {
       <Box fill align='center' border={{side: 'right', color: 'sidebarBorder'}}
            style={{overflow: 'auto'}}>
         <Box flex={false} fill='horizontal' align='center'>
-          {OPTIONS.map(({text, icon, path, name: sbName}, ind) => (
-            isExpanded ? <SidebarIcon
+          {OPTIONS.map(({text, icon, path, name: sbName, git}, ind) => {
+            if (git && !conf.gitStatus.cloned) return null 
+            return isExpanded ? <SidebarIcon
                           key={ind}
                           icon={icon}
                           path={replace(path, name)}
@@ -175,7 +177,7 @@ export default function Sidebar() {
                 text={text}
                 name={sbName}
                 selected={ind === active} />
-          ))}
+          })}
         </Box>
       </Box>
       <Box pad='xsmall' flex={false} gap='xsmall' margin={{bottom: 'small'}}>

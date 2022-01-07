@@ -245,7 +245,7 @@ function CreateModal({form, width, header, children}) {
 
 export default function Directory() {
   let {section} = useParams()
-  const {me} = useContext(LoginContext) 
+  const {me, configuration: conf} = useContext(LoginContext) 
   section = section || 'users'
   let history = useHistory()
   const setSection = (section) => history.push(`/directory/${section}`)
@@ -314,7 +314,7 @@ export default function Directory() {
         {section === 'groups' && <GroupsInner />}
         {section === 'roles' && <RolesInner />}
         {section === 'webhooks' && <WebhookManagement />}
-        {section === 'smtp' && <SmtpSettings />}
+        {section === 'smtp' && conf.gitStatus.cloned && <SmtpSettings />}
       </Box>
     </Box>
     </ThemeContext.Extend>

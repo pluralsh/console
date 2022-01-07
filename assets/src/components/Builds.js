@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useCallback } from 'react'
 import { useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { BUILDS_Q, CREATE_BUILD, BUILD_SUB } from './graphql/builds'
-import { Button, Reload, Check, Deploy } from 'forge-core'
+import { Button, Reload, Check, Deploy, GqlError } from 'forge-core'
 import { Box, Layer, Text } from 'grommet'
 import moment from 'moment'
 import { BeatLoader } from 'react-spinners'
@@ -16,6 +16,8 @@ import { UpgradePolicies } from './builds/UpgradePolicies'
 import { Close, StatusCritical, Up } from 'grommet-icons'
 import { PinnedRunbooks } from './runbooks/PinnedRunbooks'
 import { Container } from './utils/Container'
+import { ModalHeader } from './utils/Modal'
+import { ErrorModal } from './utils/ErrorModal'
 
 function BuildStatusInner({background, text, icon}) {
   return (
@@ -111,7 +113,7 @@ function CreateBuild() {
   const [type, setType] = useState(BuildTypes.DEPLOY)
   const {currentApplication} = useContext(InstallationContext)
   const baseAttrs = {repository: currentApplication.name, message: 'Deployed from console'}
-  const [mutation, {loading}] = useMutation(CREATE_BUILD, {
+  const [mutation, {loading, error}] = useMutation(CREATE_BUILD, {
     update: (cache, {data: {createBuild}}) => updateCache(cache, {
       query: BUILDS_Q,
       update: (prev) => appendConnection(prev, createBuild, 'builds')
@@ -124,6 +126,13 @@ function CreateBuild() {
   }, [setType, mutation, baseAttrs])
 
   return (
+    <>
+    {error && (
+      <ErrorModal 
+        error={error}
+        modalHeader={`Failed to ${type.toLocaleLowerCase}} build`}
+        header='This deployment action was not permitted' />
+    )}
     <Box flex={false} gap='small' pad={{horizontal: 'small'}} direction='row' align='center'>
       <Button
         icon={<Reload size='small' />}
@@ -143,6 +152,7 @@ function CreateBuild() {
         loading={loading && type === BuildTypes.DEPLOY} 
         label='Deploy'  background='brand' flat />
     </Box>
+    </>
   )
 }
 

@@ -10,6 +10,7 @@ import { useHistory, useParams } from 'react-router'
 import { HeaderItem } from '../kubernetes/Pod'
 import { extract, query, ValueFormats } from './utils'
 import { ActionPortal } from './Runbook'
+import { ErrorModal } from '../utils/ErrorModal'
 
 const DisplayContext = React.createContext({})
 
@@ -81,7 +82,7 @@ function DisplayButton({attributes: {action, headline, ...rest}}) {
   let hist = useHistory()
   const {namespace, name} = useParams()
   const {context} = useContext(DisplayContext)
-  const [mutation, {loading}] = useMutation(EXECUTE_RUNBOOK, {
+  const [mutation, {loading, error}] = useMutation(EXECUTE_RUNBOOK, {
     variables: {name, namespace, input: {context: JSON.stringify(context), action}},
     onCompleted: ({executeRunbook: {redirectTo}}) => {
       if (redirectTo) {
@@ -95,12 +96,30 @@ function DisplayButton({attributes: {action, headline, ...rest}}) {
   if (headline) {
     return (
       <ActionPortal>
+        <>
+        {error && (
+          <ErrorModal 
+            error={error} 
+            modalHeader='Error executing runbook'
+            header='GraphQl Error' />
+        )}
         {buttonComponent({...rest, loading, onClick: mutation})}
+        </>
       </ActionPortal>
     )
   }
 
-  return buttonComponent({...rest, loading, onClick: mutation})
+  return (
+    <>
+    {error && (
+      <ErrorModal 
+        error={error} 
+        modalHeader='Error executing runbook'
+        header='GraphQl Error' />
+    )}
+    {buttonComponent({...rest, loading, onClick: mutation})}
+    </>
+  )
 }
 
 function buttonComponent({primary, key, ...props}) {
