@@ -26,7 +26,7 @@ function GitStatus({setOpen}) {
           <Divider text='Output' />
           <Box pad='small' background='tone-light'>
             <pre>
-              {config.output || 'some stdout junk'}
+              {config.gitStatus.output || 'no output captured'}
             </pre>
           </Box>
           <Box pad='small' direction='row' justify='end' align='center' gap='xsmall'>

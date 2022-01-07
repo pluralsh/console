@@ -10,5 +10,13 @@ defmodule Console.Commands.TeeTest do
 
       assert Tee.output(res) == "onetwothree"
     end
+
+    test "it works when passed into System.cmd" do
+      tee = Tee.new()
+
+      {out, _} = System.cmd("echo", ["hello world"], into: tee)
+
+      assert Tee.output(out) == "hello world\n"
+    end
   end
 end
