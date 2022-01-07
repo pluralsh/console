@@ -256,15 +256,13 @@ function RecipeConfiguration({recipe, context: ctx, setOpen}) {
       ...context,
       [repository.name]: {...(context[repository.name] || {}), [name]: val}
     })
-  ), [setContext, context, repository])
+  ), [setContext, context, repository, ind])
 
   const next = useCallback(() => {
     if (!hasNext) return mutation()
     let nextInd = findIndex(ind + 1, context, sections)
     setInd(nextInd)
   }, [ind, setInd, hasNext, mutation])
-
-  console.log(context)
 
   return (
     <ThemeContext.Extend value={{global: {input: {padding: '9px'}}}}>
@@ -281,7 +279,7 @@ function RecipeConfiguration({recipe, context: ctx, setOpen}) {
               .filter((conf) => available(conf, context[repository.name] || {}))
               .map((conf) => (
                 <ConfigurationItem
-                  key={conf.name}
+                  key={`${repository.name}-${conf.name}`}
                   config={conf}
                   setValue={setValue}
                   ctx={context[repository.name] || {}} />
