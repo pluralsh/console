@@ -3,7 +3,7 @@ defmodule Console.GraphQl do
   use Absinthe.Relay.Schema, :modern
   import Console.GraphQl.Helpers
   alias Console.GraphQl.Resolvers.{Build, Plural, Webhook, User, Kubecost, License}
-  alias Console.Middleware.{Authenticated, Rbac}
+  alias Console.Middleware.{Authenticated, Rbac, RequiresGit}
 
   import_types Absinthe.Type.Custom
   import_types Console.GraphQl.Schema.Base
@@ -81,6 +81,7 @@ defmodule Console.GraphQl do
   mutation do
     field :create_build, :build do
       middleware Authenticated
+      middleware RequiresGit
       arg :attributes, non_null(:build_attributes)
 
       middleware Rbac, perm: :deploy, arg: [:attributes, :repository]
@@ -89,6 +90,7 @@ defmodule Console.GraphQl do
 
     field :restart_build, :build do
       middleware Authenticated
+      middleware RequiresGit
       arg :id, non_null(:id)
 
       resolve safe_resolver(&Build.restart_build/2)
@@ -96,6 +98,7 @@ defmodule Console.GraphQl do
 
     field :cancel_build, :build do
       middleware Authenticated
+      middleware RequiresGit
       arg :id, non_null(:id)
 
       resolve safe_resolver(&Build.cancel_build/2)
@@ -103,6 +106,7 @@ defmodule Console.GraphQl do
 
     field :approve_build, :build do
       middleware Authenticated
+      middleware RequiresGit
       arg :id, non_null(:id)
 
       resolve safe_resolver(&Build.approve_build/2)
@@ -118,6 +122,7 @@ defmodule Console.GraphQl do
 
     field :update_configuration, :configuration do
       middleware Authenticated
+      middleware RequiresGit
       arg :repository, non_null(:string)
       arg :content,    non_null(:string)
       arg :tool,       :tool

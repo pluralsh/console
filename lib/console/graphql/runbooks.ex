@@ -144,6 +144,7 @@ defmodule Console.GraphQl.Runbooks do
   object :runbook_mutations do
     field :execute_runbook, :runbook_action_response do
       middleware Authenticated
+      middleware RequiresGit
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
       arg :input,     non_null(:runbook_action_input)

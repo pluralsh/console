@@ -42,7 +42,8 @@ defmodule Console.Watchers.Upgrade do
   end
 
   def handle_info(:next, %{upgrades: upgrades} = state) do
-    with {:ok, %{"id" => id} = result} <- Channel.push(upgrades, "next", %{}) do
+    with {:ok, %{"id" => id} = result} <- Channel.push(upgrades, "next", %{}),
+         true <- Console.Bootstrapper.git_enabled?() do
       start_transaction()
       |> add_operation(:build, fn _ -> Handlers.Upgrade.create_build(result) end)
       |> add_operation(:ack, fn _ -> Channel.push(upgrades, "ack", %{"id" => id}) end)

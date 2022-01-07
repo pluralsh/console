@@ -84,8 +84,6 @@ defmodule Console.GraphQl.Schema do
     timestamps()
   end
 
-
-
   object :configuration do
     field :terraform, :string
     field :helm,      :string
@@ -107,10 +105,19 @@ defmodule Console.GraphQl.Schema do
     field :subdomain,  :string
   end
 
+  object :git_status do
+    field :cloned, :boolean
+    field :output, :string
+  end
+
   object :console_configuration do
     field :git_commit, :string
     field :manifest,   :plural_manifest, resolve: fn
       _, _, _ -> Console.Plural.Manifest.get()
+    end
+
+    field :git_status, :git_status, resolve: fn
+      _, _, _ -> {:ok, Console.Bootstrapper.status()}
     end
   end
 

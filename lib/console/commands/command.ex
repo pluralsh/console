@@ -1,6 +1,7 @@
 defmodule Console.Commands.Command do
   import Console
   alias Console.Services.Builds
+  alias Console.Commands.Tee
   alias Console.Schema.{Build, Command}
 
   @build_key :console_build
@@ -17,6 +18,7 @@ defmodule Console.Commands.Command do
     case Process.get(@build_key) do
       %Build{} = build ->
         Builds.create_command(%{command: "#{exec} #{Enum.join(args, " ")}"}, build)
+      %Tee{} = tee -> {:ok, tee}
       _ -> {:ok, IO.stream(:stdio, :line)}
     end
   end

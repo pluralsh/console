@@ -72,7 +72,7 @@ defmodule Console.Deployer do
     {:noreply, state}
   end
 
-  def handle_info(:init, %State{storage: storage} = state) do
+  def handle_info(:init, %State{} = state) do
     {:noreply, state}
   end
 
