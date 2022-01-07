@@ -70,7 +70,7 @@ export const DEFAULT_COLOR_THEME = {
   tagMedium: 'key-light',
   tagLight: '#624aad',
   progress: '#007bff',
-  error: 'red',
+  error: 'red-dark',
   success: 'green',
   border: {dark: 'card', light: 'light-6'},
   console: '#222222',

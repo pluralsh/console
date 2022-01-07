@@ -95,6 +95,7 @@ export const ME_Q = gql`
     configuration { 
       gitCommit 
       manifest { ...ManifestFragment }
+      gitStatus { cloned output }
     }
   }
   ${UserFragment}
