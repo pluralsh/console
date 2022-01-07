@@ -115,7 +115,7 @@ defmodule Console.GraphQl.Schema do
     field :manifest,   :plural_manifest, resolve: fn
       _, _, _ ->
         case Console.Plural.Manifest.get() do
-          {:ok, man} = res -> res
+          {:ok, _} = res -> res
           _ -> {:ok, %{}}
         end
     end

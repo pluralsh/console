@@ -26,6 +26,9 @@ defmodule Console.Deployer do
     :pg2.join(@group, self())
     {:ok, ref} = :timer.send_interval(@poll_interval, :poll)
     send self(), :init
+    if Console.conf(:initialize) do
+      :timer.send_interval(:timer.minutes(2), :sync)
+    end
     {:ok, %State{storage: storage, id: Ecto.UUID.generate(), ref: ref}}
   end
 
@@ -68,9 +71,12 @@ defmodule Console.Deployer do
   def handle_call(:state, _, state), do: {:reply, state, state}
 
   def handle_cast(:sync, %State{storage: storage} = state) do
+    Logger.info "Resyncing git state"
     storage.init()
     {:noreply, state}
   end
+
+  def handle_info(:sync, state), do: handle_cast(:sync, state)
 
   def handle_info(:init, %State{} = state) do
     {:noreply, state}

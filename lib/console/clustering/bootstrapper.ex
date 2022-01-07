@@ -39,7 +39,6 @@ defmodule Console.Bootstrapper do
     case storage.init() do
       {:ok, _} -> {:noreply, %{state | cloned: true, output: ""}}
       {:error, out} ->
-        IO.inspect(out)
         {:noreply, %{state | cloned: false, output: Tee.output(out)}}
     end
   end
