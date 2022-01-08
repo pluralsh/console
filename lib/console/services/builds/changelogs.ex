@@ -12,7 +12,7 @@ defmodule Console.Services.Changelogs do
         _ -> []
       end)
       |> Enum.reduce(transaction, fn {repo, diff_file}, transaction ->
-        add_operation(transaction, diff_file, fn %{build: %{id: id}} ->
+        add_operation(transaction, {repo, diff_file}, fn %{build: %{id: id}} ->
           add_changelog(repo, Path.join([diff_folder, repo, diff_file]), id)
         end)
       end)

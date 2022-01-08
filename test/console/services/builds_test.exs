@@ -154,11 +154,14 @@ defmodule Console.Services.BuildsTest do
 
       assert_receive {:event, %PubSub.BuildSucceeded{item: ^succeed}}
 
-      %{changelogs: [changelog]} = Console.Repo.preload(succeed, [:changelogs])
+      %{changelogs: logs} = Console.Repo.preload(succeed, [:changelogs])
+      by_name = Enum.into(logs, %{}, fn %{repo: r} = l -> {r, l} end)
 
-      assert changelog.repo    == "forge"
-      assert changelog.tool    == "helm"
-      assert changelog.content == "test"
+      assert length(logs) == 2
+      assert by_name["forge"].tool        == "helm"
+      assert by_name["forge"].content     == "test"
+      assert by_name["bootstrap"].tool    == "helm"
+      assert by_name["bootstrap"].content == "test2"
     end
   end
 
@@ -198,11 +201,7 @@ defmodule Console.Services.BuildsTest do
 
       assert pending.status == :pending
 
-      %{changelogs: [changelog]} = Console.Repo.preload(pending, [:changelogs])
-
-      assert changelog.repo    == "forge"
-      assert changelog.tool    == "helm"
-      assert changelog.content == "test"
+      %{changelogs: [_, _]} = Console.Repo.preload(pending, [:changelogs])
     end
   end
 
