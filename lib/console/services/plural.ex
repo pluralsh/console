@@ -23,7 +23,7 @@ defmodule Console.Services.Plural do
     Console.Deployer.exec(fn storage ->
       with {:ok, _} <- storage.reset(),
            {:ok, context} <- Context.get(),
-           {:ok, update} <- Context.write(%{context | smtp: smtp}),
+           {:ok, _} <- Context.write(%{context | smtp: smtp}),
            {:ok, _} <- storage.revise("update workspace smtp configuration"),
            {:ok, _} <- storage.push(),
         do: {:ok, smtp}
@@ -100,24 +100,13 @@ defmodule Console.Services.Plural do
   defp merge_provider(attrs, _), do: attrs
 
   def cluster_name() do
-    case project_manifest() do
+    case Manifest.get() do
       {:ok, %Manifest{cluster: cluster}} -> cluster
       _ -> ""
     end
   end
 
-  def project_manifest() do
-    manifest_filename()
-    |> YamlElixir.read_from_file()
-    |> case do
-      {:ok, %{
-        "kind" => "ProjectManifest",
-        "metadata" => %{"name" => name},
-        "spec" => conf
-      }} -> {:ok, Manifest.build(name, conf)}
-      _  -> {:error, :not_found}
-    end
-  end
+  def project_manifest(), do: Manifest.get()
 
   def filename(repo, :helm), do: vals_filename(repo)
   def filename(repo, :terraform), do: terraform_filename(repo)
@@ -132,7 +121,4 @@ defmodule Console.Services.Plural do
   defp terraform_filename(repository) do
     Path.join([Console.workspace(), repository, "terraform", "main.tf"])
   end
-
-  defp manifest_filename(),
-    do: Path.join([Console.workspace(), "workspace.yaml"])
 end
