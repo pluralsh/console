@@ -70,6 +70,7 @@ defmodule Console.Deployer do
 
   def handle_call(:state, _, state), do: {:reply, state, state}
 
+  def handle_cast(:sync, %State{ref: ref} = state) when not is_nil(ref), do: {:noreply, state}
   def handle_cast(:sync, %State{storage: storage} = state) do
     Logger.info "Resyncing git state"
     storage.init()
