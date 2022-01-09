@@ -68,7 +68,8 @@ export function Icon({icon, text, selected, path, onClick, size, align}) {
       {icon}
     </Box>
     {hover  && (
-      <Tooltip pad='small' round='xsmall' justify='center' target={dropRef} side='right' align={align || {left: 'right'}}>
+      <Tooltip pad='small' round='xsmall' justify='center' background='sidebarHover' 
+               target={dropRef} side='right' align={align || {left: 'right'}} margin='xsmall'>
         <Text size='small' weight={500}>{text}</Text>
       </Tooltip>
     )}

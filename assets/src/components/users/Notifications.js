@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useState } from 'react'
+import React, { useCallback, useContext, useMemo, useState, useRef } from 'react'
 import { Notification, Eye } from 'forge-core'
 import { Box, Stack, Text } from 'grommet'
 import { FlyoutContainer } from '../Console'
@@ -10,6 +10,7 @@ import { ApplicationIcon, InstallationContext } from '../Installations'
 import { SeverityNub } from '../runbooks/StatusIcon'
 import { MARK_READ, NOTIFS_SUB } from './queries'
 import { LoginContext } from '../Login'
+import { Tooltip } from '../utils/Tooltip'
 
 const SIZE = '35px'
 
@@ -79,8 +80,10 @@ function FilterAll({all, setAll}) {
 }
 
 export function Notifications() {
+  const dropRef = useRef()
   const client = useApolloClient()
   const [open, setOpen] = useState(false)
+  const [hover, setHover] = useState(false)
   const [all, setAll] = useState(false)
   const {me} = useContext(LoginContext) 
   const [mutation] = useMutation(MARK_READ, {
@@ -108,9 +111,10 @@ export function Notifications() {
   return (
     <>
     <Stack anchor='top-right'>
-      <Box flex={false} width={SIZE} height={SIZE} round='full' 
+      <Box ref={dropRef} flex={false} width={SIZE} height={SIZE} round='full' 
            background='backgroundColor' align='center' justify='center'
-          hoverIndicator='sidebarHover' onClick={() => setOpen(true)}>
+           onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+           hoverIndicator='sidebarHover' onClick={() => setOpen(true)}>
         <Notification size='18px' />
       </Box>
       {me.unreadNotifications > 0 && (
@@ -120,6 +124,12 @@ export function Notifications() {
         </Box>
       )}
     </Stack>
+    {hover  && (
+      <Tooltip pad='small' round='xsmall' justify='center' background='sidebarHover' 
+               target={dropRef} side='right' align={{top: 'bottom'}} margin='xsmall'>
+        <Text size='small' weight={500}>Notifications</Text>
+      </Tooltip>
+    )}
     {open && (
       <FlyoutContainer 
           width='500px' header='Notifications' close={doClose} 
