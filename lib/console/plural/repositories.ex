@@ -47,6 +47,7 @@ defmodule Console.Plural.Repositories do
 
   defp provider(:gcp), do: "GCP"
   defp provider(:azure), do: "AZURE"
+  defp provider(:equinix), do: "EQUINIX"
   defp provider(_), do: "AWS"
 
   def get_recipe(id) do

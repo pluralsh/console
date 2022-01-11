@@ -27,6 +27,7 @@ defmodule Console.Plural.Workspace do
       {:ok, %{provider: "google"}} -> :gcp
       {:ok, %{provider: "aws"}} -> :aws
       {:ok, %{provider: "azure"}} -> :azure
+      {:ok, %{provider: "equinix"}} -> :equinix
       _ -> :baremetal
     end
   end
