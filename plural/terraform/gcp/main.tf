@@ -10,6 +10,7 @@ resource "kubernetes_namespace" "console" {
     labels = {
       "app.kubernetes.io/managed-by" = "plural"
       "app.plural.sh/name" = "console"
+      "platform.plural.sh/sync-target" = "pg"
     }
   }
 }

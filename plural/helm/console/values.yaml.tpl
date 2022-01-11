@@ -9,10 +9,6 @@ ingress:
 
 provider: {{ .Provider }}
 
-{{ if eq .Provider "google" }}
-postgresNamespace: {{ namespace "postgres" }}
-{{ end }}
-
 {{ if eq .Provider "azure" }}
 podLabels:
   aadpodidbinding: console
