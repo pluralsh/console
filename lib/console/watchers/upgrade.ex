@@ -78,5 +78,6 @@ defmodule Console.Watchers.Upgrade do
   defp to_provider(:gcp), do: "GCP"
   defp to_provider(:aws), do: "AWS"
   defp to_provider(:azure), do: "AZURE"
+  defp to_provider(:equinix), do: "EQUINIX"
   defp to_provider(_), do: "CUSTOM"
 end

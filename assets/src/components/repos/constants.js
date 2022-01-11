@@ -5,6 +5,7 @@ export const ProviderIcons = {
   GCP: process.env.PUBLIC_URL + '/gcp.png',
   AWS: process.env.PUBLIC_URL + '/aws.png',
   AZURE: process.env.PUBLIC_URL + '/azure.png',
+  EQUINIX: process.env.PUBLIC_URL + '/equinix-metal.png',
 }
 
 export const ConfigurationType = {

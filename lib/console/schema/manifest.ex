@@ -1,7 +1,7 @@
 defmodule Console.Schema.Manifest do
   use Piazza.Ecto.Schema
 
-  defenum Provider, aws: 0, gcp: 1, azure: 2
+  defenum Provider, aws: 0, gcp: 1, azure: 2, equinix: 3
 
   embedded_schema do
     field :name,     :string
