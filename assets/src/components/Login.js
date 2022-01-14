@@ -38,7 +38,7 @@ function LoginError({error}) {
     const to = setTimeout(() => {
       wipeToken()
       window.location = '/login'
-    }, 5000)
+    }, 2000)
   
     return () => clearTimeout(to)
   }, [])
