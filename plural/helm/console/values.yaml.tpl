@@ -50,14 +50,12 @@ secrets:
 {{ else }}
   key: {{ readFile (homeDir ".plural" "key") | quote }}
 {{ end }}
-  known_hosts: {{ knownHosts | quote }}
 {{ else }}
   git_url: ''
   repo_root: ''
   branch_name: ''
   config: ''
   key: ''
-  known_hosts: ''
 {{ end }}
   cluster_name: {{ .Cluster }}
   erlang: {{ dedupe . "console.secrets.erlang" (randAlphaNum 14) }}

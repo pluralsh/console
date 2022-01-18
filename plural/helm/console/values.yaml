@@ -6,7 +6,7 @@ replicaCount: 2
 
 image:
   repository: dkr.plural.sh/console/console
-  tag: '0.1.6' ## PLRL-REPLACE[  tag: '%s']
+  tag: '0.1.7' ## PLRL-REPLACE[  tag: '%s']
   pullPolicy: Always
 
 serviceAccount:
