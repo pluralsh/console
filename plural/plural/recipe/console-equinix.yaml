@@ -1,0 +1,71 @@
+name: console-equinix
+description: Deploys console on an Equinix Kubernetes cluster
+provider: EQUINIX
+oidcSettings:
+  uriFormat: https://{domain}/oauth/callback
+  authMethod: POST
+  domainKey: console_dns
+dependencies:
+  - repo: bootstrap
+    name: equinix-kubernetes
+  - repo: monitoring
+    name: monitoring-equinix
+  - repo: ingress-nginx
+    name: ingress-nginx-equinix
+  - repo: postgres
+    name: equinix-postgres
+sections:
+- name: console
+  configuration:
+  - name: console_dns
+    documentation: Fully Qualified Domain Name for the console dashboard, eg console.topleveldomain.com if topleveldomain.com is the hostname you inputed above.
+    type: DOMAIN
+  - name: git_user
+    documentation: git username for console to use in git operations, eg your github username
+    type: STRING
+  - name: git_email
+    documentation: email for git operations by console
+    type: STRING
+  - name: admin_email
+    documentation: email for the initial admin user
+    type: STRING
+  - name: admin_name
+    documentation: name for the initial admin user
+    type: STRING
+  - name: repo_url
+    documentation: the url to the remote git repo
+    type: FUNCTION
+    functionName: repoUrl
+  - name: access_token
+    documentation: github/gitlab access token to use for http git authentication
+    type: STRING
+    condition:
+      operation: PREFIX
+      field: repo_url
+      value: https
+  - name: private_key
+    documentation: path to the private key to use for git authentication
+    type: FILE
+    default: ~/.ssh/id_rsa
+    condition:
+      operation: NOT
+      field: access_token
+  - name: public_key
+    documentation: path to the public key to use for git authentication
+    type: FILE
+    default: ~/.ssh/id_rsa.pub
+    condition:
+      operation: NOT
+      field: access_token
+  - name: passphrase
+    documentation: passphrase to use for encrypted private keys (leave empty if not applicable)
+    type: PASSWORD
+    optional: true
+    condition:
+      operation: NOT
+      field: access_token
+  items:
+  - type: TERRAFORM
+    name: equinix
+  - type: HELM
+    name: console
