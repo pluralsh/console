@@ -1,8 +1,9 @@
 import React, { useContext, useState, useCallback } from 'react'
 import * as serviceWorker from '../serviceWorker';
 import { LoginContext } from './Login'
-import { Confirm, ModalHeader, Alert, AlertStatus, Divider, Button } from 'forge-core'
+import { ModalHeader, Alert, AlertStatus, Divider, Button, Download } from 'forge-core'
 import { Anchor, Box, Layer, Text } from 'grommet';
+import { Icon } from './Console'
 
 const COMMIT_KEY = 'git-commit'
 const DOC_LINK = 'https://docs.plural.sh/getting-started/admin-console#2.-setup-for-git-authentication'
@@ -43,7 +44,6 @@ function GitStatus({setOpen}) {
 }
 
 export function AutoRefresh() {
-  const [open, setOpen] = useState(true)
   const [git, setGit] = useState(true)
   const {configuration: config} = useContext(LoginContext)
   const reload = useCallback(() => {
@@ -56,7 +56,7 @@ export function AutoRefresh() {
       })
     } else {
       setCommit(config.gitCommit)
-      setOpen(false)
+      window.location.reload()
     }
   })
 
@@ -71,14 +71,15 @@ export function AutoRefresh() {
     return <GitStatus setOpen={setGit} />
   }
 
-  if (!stale || !open) return null
+  if (!stale) return null
 
   return (
-    <Confirm
-      submit={reload}
-      cancel={() => setOpen(false)}
-      header='New version available'
-      label='Refresh'
-      description="It looks like there's a new version of plural available to use" />
+    <Box margin={{horizontal: 'xxsmall'}}>
+      <Icon
+        icon={<Download size='15px' color='orange' />}
+        onClick={reload}
+        text='New Update Available'
+        align={{top: 'bottom'}} />
+    </Box>
   )
 }

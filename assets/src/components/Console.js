@@ -11,7 +11,7 @@ import Configuration from './Configuration'
 import Dashboards from './Dashboards'
 import { EnsureLogin } from './Login'
 import Users from './Users'
-import { ApplicationDetails, Installations, InstallationsProvider } from './Installations'
+import { Installations, InstallationsProvider } from './Installations'
 import { LogViewer } from './Logs'
 import RepositorySelector from './RepositorySelector'
 import Application from './Application'
@@ -24,7 +24,6 @@ import { Audits } from './audits/Audits'
 import { withPluralApi } from './PluralApi'
 import { Incidents } from './incidents/Incidents'
 import { Incident } from './incidents/Incident'
-import { AutoRefresh } from './AutoRefresh'
 import { Install } from 'forge-core'
 import { Installer } from './repos/Installer'
 import { Runbook } from './runbooks/Runbook'
@@ -37,6 +36,7 @@ import Foco from 'react-foco'
 import { Next } from 'grommet-icons'
 import { Notifications } from './users/Notifications'
 import { PodShell } from './terminal/PodShell'
+import { AutoRefresh } from './AutoRefresh'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -147,7 +147,6 @@ export default function Console() {
       <NavigationContext>
       <BreadcrumbProvider>
         <Box width='100vw' height='100vh'>
-          <AutoRefresh />
           <Box flex={false} direction='row' align='center' background='backgroundDark' height={TOOLBAR_HEIGHT}
                  border={{side: 'bottom', color: 'sidebarBorder'}}>
             <Box flex={false} direction='row' align='center'>
@@ -156,6 +155,7 @@ export default function Console() {
             <Breadcrumbs />
             <Box direction='row' fill gap='xsmall' justify='end' 
                   pad={{horizontal: 'medium'}} align='center'>
+              <AutoRefresh />
               <Icon
                 icon={<Install size='18px' />}
                 text='Install'
