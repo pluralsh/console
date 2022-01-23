@@ -37,6 +37,7 @@ import { Next } from 'grommet-icons'
 import { Notifications } from './users/Notifications'
 import { PodShell } from './terminal/PodShell'
 import { AutoRefresh } from './AutoRefresh'
+import { SocialLinks } from './Socials'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -156,6 +157,7 @@ export default function Console() {
             <Box direction='row' fill gap='xsmall' justify='end' 
                   pad={{horizontal: 'medium'}} align='center'>
               <AutoRefresh />
+              <SocialLinks />
               <Icon
                 icon={<Install size='18px' />}
                 text='Install'
