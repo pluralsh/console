@@ -157,9 +157,8 @@ export default function Sidebar() {
 
   return (
     <Box flex={false} background='sidebar' fill='vertical' style={animation} 
-         width={isExpanded ? SIDEBAR_WIDTH : SMALL_WIDTH}>
-      <Box fill align='center' border={{side: 'right', color: 'sidebarBorder'}}
-           style={{overflow: 'auto'}}>
+         width={isExpanded ? SIDEBAR_WIDTH : SMALL_WIDTH} border={{side: 'right', color: 'sidebarBorder'}}>
+      <Box fill align='center' style={{overflow: 'auto'}}>
         <Box flex={false} fill='horizontal' align='center'>
           {OPTIONS.map(({text, icon, path, name: sbName, git}, ind) => {
             if (git && !conf.gitStatus.cloned) return null 
