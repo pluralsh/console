@@ -65,7 +65,7 @@ function BucketConfiguration({config: {name, default: def, placeholder, document
 
   const trim = useCallback((val) => val.replace(`${prefix}-${cluster}-`, ''), [prefix, cluster])
 
-  const [local, setLocal] = useState(trim(ctx[name] || def))
+  const [local, setLocal] = useState(trim(ctx[name] || def || ''))
   
   useEffect(() => {
     if (!ctx[name] && def) {
