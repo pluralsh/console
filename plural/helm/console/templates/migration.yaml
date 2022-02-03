@@ -2,6 +2,9 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "console.migration-name" . }}
+  labels:
+    platform.plural.sh/ignore: 'true'
+    {{ include "console.labels" . | nindent 4 }}
 spec:
   template:
     spec:
