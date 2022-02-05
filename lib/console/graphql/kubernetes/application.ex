@@ -49,7 +49,7 @@ defmodule Console.GraphQl.Kubernetes.Application do
   end
 
   object :application_link do
-    field :url, non_null(:string)
+    field :url,         :string
     field :description, :string
   end
 
