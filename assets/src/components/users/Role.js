@@ -130,7 +130,7 @@ function RoleForm({attributes, setAttributes, roleBindings, setRoleBindings}) {
   )
 }
 
-const sanitize = ({id, user, group}) => ({id, userId: user && user.id, groupId: group && group.id})
+export const sanitize = ({id, user, group}) => ({id, userId: user && user.id, groupId: group && group.id})
 
 function EditRole({role, setOpen}) {
   const [attributes, setAttributes] = useState({

@@ -28,7 +28,7 @@ export function fetchGroups(client, query, setSuggestions) {
 }
 
 
-function userSuggestion(user) {
+export function userSuggestion(user) {
   return (
     <Box direction='row' align='center' gap='small' pad='xsmall'>
       <Avatar size='30px' user={user} />
@@ -40,7 +40,7 @@ function userSuggestion(user) {
   )
 }
 
-function groupSuggestion(group) {
+export function groupSuggestion(group) {
   return (
     <Box direction='row' gap='small' align='center' pad='small'>
       <Text size='small' weight={500}>{group.name}</Text>

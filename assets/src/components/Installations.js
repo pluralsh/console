@@ -10,6 +10,7 @@ import { CostBreakdown } from './repos/CostAnalysis'
 import { FlyoutContainer, Icon } from './Console'
 import { ModalHeader } from './utils/Modal'
 import { chunk } from 'lodash'
+import { OIDCProvider } from './oidc/OIDCProvider'
 
 export const InstallationContext = React.createContext({})
 
@@ -120,6 +121,7 @@ export function ApplicationDetails() {
         </Box>
         </>
       )}
+      <OIDCProvider name={name} />
     </Box>
   )
 }

@@ -1,6 +1,6 @@
 defmodule Console.GraphQl.Runbooks do
   use Console.GraphQl.Schema.Base
-  alias Console.Middleware.{Authenticated, RequiresGit}
+  alias Console.Middleware.{Authenticated, RequiresGit, Rbac}
   alias Console.GraphQl.Resolvers.{Runbooks, User}
   alias Kazan.Apis.Apps.V1, as: AppsV1
 
@@ -145,6 +145,8 @@ defmodule Console.GraphQl.Runbooks do
     field :execute_runbook, :runbook_action_response do
       middleware Authenticated
       middleware RequiresGit
+      middleware Rbac, perm: :operate, arg: [:namespace]
+
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
       arg :input,     non_null(:runbook_action_input)
