@@ -9,9 +9,10 @@ import { fetchGroups, fetchUsers } from './typeaheads'
 
 
 function OIDCUpdate({id, provider}) {
+  const {authMethod, redirectUris} = provider
   const [bindings, setBindings] = useState(provider.bindings)
   const [mutation, {loading, error}] = useMutation(UPDATE_PROVIDER, {
-    variables: {id, attributes: {bindings: bindings.map(sanitize)}}
+    variables: {id, attributes: {authMethod, redirectUris, bindings: bindings.map(sanitize)}}
   })
 
   return (
