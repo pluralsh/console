@@ -1,4 +1,4 @@
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: console
@@ -22,6 +22,10 @@ spec:
   - host: {{ .Values.ingress.console_dns | quote }}
     http:
       paths:
-      - backend:
-          serviceName: console
-          servicePort: http
+      - path: /
+        pathType: Prefix
+        backend:
+          service: 
+            name: console
+            port: 
+              name: http
