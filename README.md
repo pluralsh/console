@@ -37,8 +37,25 @@ Once elixir is available, all server dependencies are managed via docker-compose
 
 ```sh
 make testup
+mix local.hex
+mix deps.get
 mix test
 ```
 
+### Troubleshooting
+#### Installing Erlang 
+If `asdf install` fails with `cannot find required auxiliary files: install-sh config.guess config.sub` then run:
 
+```sh
+brew install autoconf@2.69 && \
+brew link --overwrite autoconf@2.69 && \
+autoconf -V
+```
 
+For Mac Machines, if unable to download Erlang via `asdf` then run:
+
+```sh
+brew install erlang@23
+cp -r /opt/homebrew/opt/erlang@23/lib/erlang ~/.asdf/installs/erlang/23.1.5
+asdf reshim erlang 23.1.5
+```
