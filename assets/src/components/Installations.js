@@ -92,7 +92,7 @@ export function ApplicationDetails() {
   const hasCost = cost || license
 
   return (
-    <Box fill pad='medium'>
+    <Box fill pad='medium' gap='small'>
       <Box direction='row' gap='small' align='center'>
         {descriptor.icons.length > 0 && <ApplicationIcon size='40px' application={currentApplication} />}
         <Box fill='horizontal'>
