@@ -100,7 +100,7 @@ export function CostBreakdown({cost, license}) {
   const scalar = cost ? Math.max(MINUTES_MONTH / cost.minutes, 1) : 1
 
   return (
-    <Box gap='xsmall' direction='row' border='between'>
+    <Box gap='xsmall' direction='row' border='between' pad='small'> 
       {license && <Box width='30%'><PluralCost license={license} /></Box>}
       {cost && <Box width='70%'><CostRadar cost={cost} scalar={scalar} /></Box>}
     </Box>

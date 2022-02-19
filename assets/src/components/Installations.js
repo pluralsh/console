@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState, useCallback } from 'react'
 import { Box, Text, ThemeContext, Layer, Anchor } from 'grommet'
 import { Checkmark, CircleInformation } from 'grommet-icons'
-import { Links, Divider } from 'forge-core'
+import { Links, Divider, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
 import { ApplicationReadyIcon } from './Application'
@@ -88,6 +88,8 @@ function ApplicationLink({link: {url, description}, width}) {
 export function ApplicationDetails() {
   const {currentApplication} = useContext(InstallationContext)
   const {name, spec: {descriptor}, cost, license} = currentApplication
+  const hasLinks = descriptor.links
+  const hasCost = cost || license
 
   return (
     <Box fill pad='medium'>
@@ -103,25 +105,42 @@ export function ApplicationDetails() {
           <Text size='small' color='dark-3'>{descriptor.description}</Text>
         </Box>
       </Box>
-      {(cost || license) && (
-        <>
-        <Divider text='cost breakdown' />
-        <CostBreakdown cost={cost} license={license} />
-        </>
-      )}
-      {descriptor.links && (
-        <>
-        <Divider text='application links' />
-        <Box gap='small'>
-          {chunk(descriptor.links, 3).map((chunk) => (
-            <Box direction='row' gap='small'>
-              {chunk.map((link) => <ApplicationLink link={link} key={link.url} />)}
+      <Tabs defaultTab={hasLinks ? 'links' : (hasCost ? 'cost' : 'oidc')}>
+        <TabHeader>
+          {hasLinks && (
+            <TabHeaderItem name='links'>
+              <Text size='small' weight={500}>Application Links</Text>
+            </TabHeaderItem>
+          )}
+          {hasCost && (
+            <TabHeaderItem name='cost'>
+              <Text size='small' weight={500}>Cost Analysis</Text>
+            </TabHeaderItem>
+          )}
+          <TabHeaderItem name='oidc'>
+            <Text size='small' weight={500}>OpenID Connect</Text>
+          </TabHeaderItem>
+        </TabHeader>
+        {hasLinks && (
+          <TabContent name='links'>
+            <Box gap='small' pad='small'>
+              {chunk(descriptor.links, 3).map((chunk) => (
+                <Box direction='row' gap='small'>
+                  {chunk.map((link) => <ApplicationLink link={link} key={link.url} />)}
+                </Box>
+              ))}
             </Box>
-          ))}
-        </Box>
-        </>
-      )}
-      <OIDCProvider name={name} />
+          </TabContent>
+        )}
+        {hasCost && (
+          <TabContent name='cost'>
+            <CostBreakdown cost={cost} license={license} />
+          </TabContent>
+        )}
+        <TabContent name='oidc'>
+          <OIDCProvider name={name} />
+        </TabContent>
+      </Tabs>
     </Box>
   )
 }

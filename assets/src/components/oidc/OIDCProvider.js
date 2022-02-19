@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { withPluralApi } from '../PluralApi'
-import { Divider, GqlError, Button } from 'forge-core'
+import { GqlError, Button } from 'forge-core'
 import { useQuery, useMutation } from '@apollo/react-hooks'
 import { INSTALLATION, UPDATE_PROVIDER } from './queries'
-import { Box } from 'grommet'
+import { Box, Text } from 'grommet'
 import { BindingInput, sanitize } from '../users/Role'
 import { fetchGroups, fetchUsers } from './typeaheads'
 
@@ -16,7 +16,7 @@ function OIDCUpdate({id, provider}) {
   })
 
   return (
-    <Box flex={false} gap='xsmall'>
+    <Box flex={false} gap='xsmall' pad='small'>
        {error && <GqlError error={error} header='Could not update provider' />}
       <BindingInput
         type='user'
@@ -35,8 +35,16 @@ function OIDCUpdate({id, provider}) {
         add={(group) => setBindings([...bindings, {group}])}
         remove={(name) => setBindings(bindings.filter(({group}) => !group || group.name !== name))} />
       <Box direction='row' justify='end' align='center'>
-        <Button label='Update OIDC Provider' loading={loading} onClick={mutation} />
+        <Button label='Update' loading={loading} onClick={mutation} />
       </Box>
+    </Box>
+  )
+}
+
+function NoOIDCProvider() {
+  return (
+    <Box fill align='center' justify='center'>
+      <Text size='small' weight={500}>No OIDC Provider configured</Text>
     </Box>
   )
 }
@@ -48,14 +56,9 @@ function OIDCProviderInner({name}) {
 
   const {installation: {id, oidcProvider}} = data
 
-  if (!oidcProvider) return null
+  if (!oidcProvider) return <NoOIDCProvider />
 
-  return (
-    <>
-    <Divider text='OIDC Provider' />
-    <OIDCUpdate id={id} provider={oidcProvider} />
-    </>
-  )
+  return <OIDCUpdate id={id} provider={oidcProvider} />
 }
 
 export const OIDCProvider = withPluralApi(OIDCProviderInner)
