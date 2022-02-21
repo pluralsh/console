@@ -52,13 +52,18 @@ defmodule Console.Plural.Condition do
   defstruct [:operation, :field, :value]
 end
 
+defmodule Console.Plural.Validation do
+  defstruct [:type, :regex, :message]
+end
 
 defmodule Console.Plural.ConfigurationItem do
-  defstruct [:name, :default, :documentation, :type, :placeholder, :condition]
+  alias Console.Plural.{Condition, Validation}
+  defstruct [:name, :default, :documentation, :type, :placeholder, :condition, :validation]
 
   def spec() do
     %__MODULE__{
-      condition: %Console.Plural.Condition{}
+      condition: %Condition{},
+      validation: %Validation{},
     }
   end
 end

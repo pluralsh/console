@@ -68,6 +68,13 @@ defmodule Console.GraphQl.Plural do
     field :documentation, :string
     field :default,       :string
     field :condition,     :configuration_condition
+    field :validation,    :configuration_validation
+  end
+
+  object :configuration_validation do
+    field :type,    :string
+    field :regex,   :string
+    field :message, :string
   end
 
   object :configuration_condition do

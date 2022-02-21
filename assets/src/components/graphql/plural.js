@@ -50,6 +50,7 @@ export const ConfigurationItemFragment = gql`
     type 
     placeholder 
     condition { operation field value }
+    validation { type regex message }
   }
 `;
 

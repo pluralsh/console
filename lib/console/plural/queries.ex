@@ -23,6 +23,7 @@ defmodule Console.Plural.Queries do
       placeholder
       documentation
       condition { operation field value }
+      validation { type regex message }
     }
   """
 

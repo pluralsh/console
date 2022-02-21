@@ -13,8 +13,17 @@ import { LoginContext } from '../Login'
 import { trimSuffix } from '../../utils/array'
 import { deepFetch } from '../../utils/graphql'
 import Toggle from 'react-toggle'
+import { validateRegex } from './validation'
 
-function StringConfiguration({config: {name, default: def, placeholder, documentation}, type, ctx, setValue}) {
+function ValidationMessage({message}) {
+  return (
+    <Box direction='row' align='center' gap='xsmall'>
+      <Text size='small' color='error'>{message}</Text> 
+    </Box>
+  )
+}
+
+function StringConfiguration({config: {name, default: def, placeholder, documentation, validation}, type, ctx, setValue}) {
   const value = ctx[name]
   useEffect(() => {
     if (!ctx[name] && def) {
@@ -22,8 +31,11 @@ function StringConfiguration({config: {name, default: def, placeholder, document
     }
   }, [ctx, value, def])
 
+  const msg = validation && validateRegex(value, validation)
+
   return (
     <Box flex={false} gap='xsmall'>
+      {msg && <ValidationMessage message={msg} />}
       <LabelledInput
         width='100%'
         color='dark-2'
