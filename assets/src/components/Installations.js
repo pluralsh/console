@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState, useCallback } from 'react'
-import { Box, Text, ThemeContext, Layer, Anchor } from 'grommet'
+import { Box, Text, ThemeContext, Layer, Anchor, TextInput } from 'grommet'
 import { Checkmark, CircleInformation } from 'grommet-icons'
-import { Links, Divider, Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
+import { Links, Divider, Tabs, TabContent, TabHeader, TabHeaderItem, Explore as Search } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
 import { ApplicationReadyIcon } from './Application'
@@ -46,11 +46,22 @@ export const hasIcon = ({spec: {descriptor: {icons}}}) => icons.length > 0
 
 export function InstallationsFlyout() {
   const {applications, setCurrentApplication, currentApplication, setOpen} = useContext(InstallationContext)
+  const [q, setQ] = useState(null)
 
   return (
     <FlyoutContainer header='Applications' close={() => setOpen(false)}>
       <Box flex={false}>
-        {applications.map((application) => (
+        <Box fill='horizontal'>
+          <TextInput 
+            plain
+            icon={<Search size='15px' />}
+            value={q || ''}
+            placeholder='search for an application'
+            onChange={({target: {value}}) => setQ(value)} />
+        </Box>
+        {applications
+        .filter((application) => !q || application.name.startsWith(q))
+        .map((application) => (
           <Installation
             key={application.name}
             application={application}
