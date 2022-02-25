@@ -213,6 +213,7 @@ export function InstallationsProvider({children}) {
   const [{func: onChange}, setOnChange] = useState({func: () => null})
   const {data, subscribeToMore} = useQuery(APPLICATIONS_Q, {pollInterval: 120_000})
   const wrapped = useCallback((application) => {
+    sessionStorage.setItem('currentApplication', application.name)
     setCurrentApplication(application)
     application && onChange(application)
   }, [onChange, setCurrentApplication])
@@ -235,7 +236,8 @@ export function InstallationsProvider({children}) {
       </Box>
     )
   }
-  const current = currentApplication && data && data.applications.find(({name}) => name === currentApplication.name)
+  const lastSessionApplication = data && data.applications.find(({name}) => name === sessionStorage.getItem('currentApplication'))
+  const current = lastSessionApplication ? lastSessionApplication : currentApplication && data && data.applications.find(({name}) => name === currentApplication.name)
 
   return (
     <InstallationContext.Provider
