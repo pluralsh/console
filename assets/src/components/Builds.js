@@ -2,8 +2,8 @@ import React, { useState, useEffect, useContext, useCallback } from 'react'
 import { useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { BUILDS_Q, CREATE_BUILD, BUILD_SUB } from './graphql/builds'
-import { Button, Reload, Check, Deploy, GqlError } from 'forge-core'
-import { Box, Layer, Text } from 'grommet'
+import { Button, Reload, Check, Deploy } from 'forge-core'
+import { Box, Layer, Text, Stack } from 'grommet'
 import moment from 'moment'
 import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
@@ -16,7 +16,6 @@ import { UpgradePolicies } from './builds/UpgradePolicies'
 import { Close, StatusCritical, Up } from 'grommet-icons'
 import { PinnedRunbooks } from './runbooks/PinnedRunbooks'
 import { Container } from './utils/Container'
-import { ModalHeader } from './utils/Modal'
 import { ErrorModal } from './utils/ErrorModal'
 
 function BuildStatusInner({background, text, icon}) {
@@ -169,17 +168,15 @@ function Placeholder() {
 
 export function ReturnToBeginning({beginning}) {
   return (
-    <Layer position='bottom-right' modal={false} plain>
-      <Box direction='row' align='center' round='xsmall' gap='small' 
-           hoverIndicator='cardHover' background='card'
-           margin={{bottom: 'medium', right: 'small'}}
-           pad='small' focusIndicator={false} onClick={beginning}>
-        <Box direction='row' fill='horizontal' justify='center'>
-          <Text size='small'>go to most recent</Text>
-        </Box>
-        <Up size='15px' />
+    <Box direction='row' align='center' round='xsmall' gap='small' 
+          hoverIndicator='cardHover' background='card'
+          margin={{bottom: 'medium', horizontal: 'small'}}
+          pad='small' focusIndicator={false} onClick={beginning}>
+      <Box direction='row' fill='horizontal' justify='center'>
+        <Text size='small'>go to most recent</Text>
       </Box>
-    </Layer>
+      <Up size='15px' />
+    </Box>
   )
 }
 
@@ -225,22 +222,24 @@ export default function Builds() {
         <CreateBuild />
       </Box>
       <PinnedRunbooks />
-      <Box fill pad={{vertical: 'small'}}>
+      <Stack fill anchor='bottom-left'>
+        <Box fill pad={{vertical: 'small'}}>
+          <StandardScroller
+            listRef={listRef}
+            setListRef={setListRef}
+            items={edges}
+            loading={loading}
+            handleScroll={setScrolled}
+            placeholder={Placeholder}
+            hasNextPage={pageInfo.hasNextPage}
+            mapper={({node}) => <Build key={node.id} build={node} />}
+            loadNextPage={() => pageInfo.hasNextPage && fetchMore({
+              variables: {cursor: pageInfo.endCursor},
+              updateQuery: (prev, {fetchMoreResult: {builds}}) => extendConnection(prev, builds, 'builds')
+            })} />
+        </Box>
         {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
-        <StandardScroller
-          listRef={listRef}
-          setListRef={setListRef}
-          items={edges}
-          loading={loading}
-          handleScroll={setScrolled}
-          placeholder={Placeholder}
-          hasNextPage={pageInfo.hasNextPage}
-          mapper={({node}) => <Build key={node.id} build={node} />}
-          loadNextPage={() => pageInfo.hasNextPage && fetchMore({
-            variables: {cursor: pageInfo.endCursor},
-            updateQuery: (prev, {fetchMoreResult: {builds}}) => extendConnection(prev, builds, 'builds')
-          })} />
-      </Box>
+      </Stack>
     </Box>
   )
 }

@@ -1,15 +1,16 @@
-import React, { useState } from 'react'
-import { Alert, GqlError } from 'forge-core' 
+import React, { useState, useEffect } from 'react'
+import { GqlError } from 'forge-core' 
 import { useQuery, useMutation } from 'react-apollo'
 import { Box, Keyboard, Text, Form } from 'grommet'
 import { Button } from 'forge-core'
-import { fetchToken, setToken, wipeToken } from '../helpers/auth'
+import { setToken, wipeToken } from '../helpers/auth'
 import { ME_Q, SIGNIN } from './graphql/users'
 import { IncidentContext } from './incidents/context'
 import gql from 'graphql-tag'
 import { localized } from '../helpers/hostname'
 import { LabelledInput } from './utils/LabelledInput'
-import { useEffect } from 'react'
+import { useIntercom } from 'react-use-intercom'
+import { useLocation } from 'react-router'
 
 const POLL_INTERVAL = 3 * 60 * 1000
 const CONSOLE_ICON = process.env.PUBLIC_URL + '/console-full.png'
@@ -80,8 +81,17 @@ export function GrantAccess() {
 }
 
 export function EnsureLogin({children}) {
+  const location = useLocation()
   const {data, error} = useQuery(ME_Q, {pollInterval: POLL_INTERVAL})
+  const {boot, update} = useIntercom()
 
+  useEffect(() => {
+    if (data && data.me) boot({email: data.me.email, name: data.me.name})
+  }, [data])
+
+  useEffect(() => {
+    if (data && data.me) update()
+  }, [data, location])
 
   if (error) {
     console.log(error)

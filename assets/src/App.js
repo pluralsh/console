@@ -8,9 +8,13 @@ import Invite from './components/Invite';
 import { OAuthCallback } from './components/OauthCallback';
 import "react-toggle/style.css"
 import 'react-pulse-dot/dist/index.css'
+import { IntercomProvider } from 'react-use-intercom'
+
+const INTERCOM_APP_ID = 'p127zb9y'
 
 export default function App() {
   return (
+    <IntercomProvider appId={INTERCOM_APP_ID}>
     <Grommet theme={DEFAULT_THEME}>
       <Switch>
         <Route path='/login' component={Login} />
@@ -20,5 +24,6 @@ export default function App() {
         <Route path='/' component={Console} />
       </Switch>
     </Grommet>
+    </IntercomProvider>
   );
 }
