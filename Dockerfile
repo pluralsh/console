@@ -131,7 +131,7 @@ RUN chmod +x /root/bin/.git-askpass && \
       chmod +x /root/bin/.ssh-askpass && \
       chmod +x /root/bin/ssh-add
 
-ENV GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+ENV GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet"
 
 COPY --from=builder /opt/built .
 
