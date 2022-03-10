@@ -14,6 +14,25 @@ dependencies:
   name: ingress-nginx-gcp
 - repo: postgres
   name: gcp-postgres
+tests:
+- name: git access
+  type: GIT
+  args:
+  - name: username
+    repo: console
+    key: git_user
+  - name: password
+    repo: console
+    key: access_token
+  - name: private_key
+    repo: console
+    key: private_key
+  - name: passphrase
+    repo: console
+    key: passphrase
+  - name: url
+    repo: console
+    key: repo_url
 sections:
 - name: console
   configuration:
