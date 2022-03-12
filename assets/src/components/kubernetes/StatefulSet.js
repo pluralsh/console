@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
-import { Anchor, Box, Text } from 'grommet'
+import React, { useEffect, useState } from 'react'
+import { Box, Text } from 'grommet'
 import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { STATEFUL_SET_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
-import { useHistory, useParams } from 'react-router'
+import { useParams } from 'react-router'
 import { POLL_INTERVAL, ScalingTypes } from './constants'
 import { PodList } from './Pod'
 import { RawContent } from './Component'
@@ -15,10 +15,10 @@ import { DURATIONS, RangePicker } from '../Dashboard'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { Pie } from '../utils/ProgressGauge'
 import { ScalingRecommenderModal } from './ScalingRecommender'
+import { useIntercom } from 'react-use-intercom'
 
 
 function Status({status: {currentReplicas, updatedReplicas, readyReplicas, replicas}, metadata}) {
-  let history = useHistory()
   return (
     <Container header='Status'>
       <Box fill='horizontal' direction='row' gap='small' align='center'>
@@ -69,6 +69,12 @@ export default function StatefulSet() {
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network'
   })
+
+  const {update} = useIntercom()
+  useEffect(() => {
+    update({hideDefaultLauncher: true})
+    return () => update({hideDefaultLauncher: false})
+  }, [])
 
   if (!data) return <LoopingLogo dark />
 

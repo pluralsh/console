@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Anchor, Box, Text } from 'grommet'
+import React, { useEffect, useState } from 'react'
+import { Box, Text } from 'grommet'
 import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { DEPLOYMENT_Q } from './queries'
@@ -15,6 +15,7 @@ import { DURATIONS, RangePicker } from '../Dashboard'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { Pie } from '../utils/ProgressGauge'
 import { ScalingRecommenderModal } from './ScalingRecommender'
+import { useIntercom } from 'react-use-intercom'
 
 function Status({status: {availableReplicas, replicas, unavailableReplicas}, metadata}) {
   let history = useHistory()
@@ -65,6 +66,13 @@ export default function Deployment() {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL
   })
+
+  const {update} = useIntercom()
+
+  useEffect(() => {
+    update({hideDefaultLauncher: true})
+    return () => update({hideDefaultLauncher: false})
+  }, [])
 
   if (!data) return <LoopingLogo dark />
 
