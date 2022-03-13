@@ -45,7 +45,7 @@ defmodule Console.Plural.Context do
   def merge(ctx, bundle) do
     with {:ok, %{configuration: config, bundles: bundles} = context} <- get() do
       updated = DeepMerge.deep_merge(config, ctx)
-      write(%{context | configuration: updated, bundles: [bundle | bundles]})
+      write(%{context | configuration: updated, bundles: Enum.uniq([bundle | bundles])})
     end
   end
 
