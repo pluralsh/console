@@ -2,7 +2,7 @@
 # This should match the version of Alpine that the `elixir:1.7.2-alpine` image uses
 ARG ALPINE_VERSION=3.8
 
-FROM gcr.io/pluralsh/elixir:1.9-alpine-old AS builder
+FROM bitwalker/alpine-elixir:1.11.4 AS builder
 
 # The following are build arguments used to change variable parts of the image.
 # The name of your application/release (required)
@@ -78,7 +78,7 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
 FROM gcr.io/pluralsh/docker:17.12.0-ce as static-docker-source
 
 # From this line onwards, we're in a new image, which will be the image used in production
-FROM gcr.io/pluralsh/erlang:22-alpine
+FROM erlang:23-alpine
 
 ARG CLOUD_SDK_VERSION=273.0.0
 ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION
@@ -119,7 +119,7 @@ ENV REPLACE_OS_VARS=true \
 
 WORKDIR /opt/app
 
-RUN helm plugin install https://github.com/chartmuseum/helm-push && \
+RUN helm plugin install https://github.com/pluralsh/helm-push && \
     helm plugin install https://github.com/databus23/helm-diff --version 3.1.3
 RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh
 RUN mkdir -p /root/.plural && mkdir -p /root/.creds && mkdir /root/bin
