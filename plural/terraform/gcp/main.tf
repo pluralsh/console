@@ -1,8 +1,3 @@
-locals {
-  gcp_location_parts = split("-", var.gcp_location)
-  gcp_region         = "${local.gcp_location_parts[0]}-${local.gcp_location_parts[1]}"
-}
-
 resource "kubernetes_namespace" "console" {
   metadata {
     name = var.namespace

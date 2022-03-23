@@ -16,16 +16,6 @@ The node pool of the cluster you've bootstrapped
 EOF
 }
 
-
-variable "gcp_location" {
-  type = string
-  default = "us-east1-b"
-  description = <<EOF
-The region you wish to deploy to
-EOF
-}
-
-
 variable "project_id" {
   type = string
   description = <<EOF
