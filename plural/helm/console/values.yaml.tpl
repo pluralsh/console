@@ -6,6 +6,10 @@ global:
 
 ingress:
   console_dns: {{ .Values.console_dns }}
+  {{- if eq .Provider "kind" }}
+  annotations:
+    external-dns.alpha.kubernetes.io/target: "127.0.0.1"
+{{- end }}
 
 provider: {{ .Provider }}
 

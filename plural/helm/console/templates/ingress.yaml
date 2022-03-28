@@ -4,14 +4,10 @@ metadata:
   name: console
   labels:
 {{ include "console.labels" . | indent 4 }}
+  {{- with .Values.ingress.annotations }}
   annotations:
-    kubernetes.io/tls-acme: "true"
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/affinity: cookie
-    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
-    nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
-    nginx.ingress.kubernetes.io/proxy-send-timeout: '3600'
-    nginx.ingress.kubernetes.io/session-cookie-path: /socket
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   ingressClassName: nginx
   tls:
