@@ -4,8 +4,16 @@ global:
     - description: console web ui
       url: {{ .Values.console_dns }}
 
+{{- if eq .Provider "kind" }}
+replicaCount: 1
+{{- end }}
+
 ingress:
   console_dns: {{ .Values.console_dns }}
+  {{- if eq .Provider "kind" }}
+  annotations:
+    external-dns.alpha.kubernetes.io/target: "127.0.0.1"
+  {{- end }}
 
 provider: {{ .Provider }}
 
