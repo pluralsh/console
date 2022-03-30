@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { BUILDS_Q, CREATE_BUILD, BUILD_SUB } from './graphql/builds'
 import { Button, Reload, Check, Deploy } from 'forge-core'
-import { Box, Layer, Text, Stack } from 'grommet'
+import { Box, Text, Stack } from 'grommet'
 import moment from 'moment'
 import { BeatLoader } from 'react-spinners'
 import { BreadcrumbsContext } from './Breadcrumbs'
@@ -36,7 +36,7 @@ function BuildStatusInner({background, text, icon}) {
 
 function IconStatus({icon, background}) {
   return (
-    <Box flex={false} round='full' width='30px' height='30px' 
+    <Box flex={false} round='full' width='30px' height='30px'
          align='center' justify='center' background={background}>
       {React.createElement(icon, {size: '16px'})}
     </Box>
@@ -127,7 +127,7 @@ function CreateBuild() {
   return (
     <>
     {error && (
-      <ErrorModal 
+      <ErrorModal
         error={error}
         modalHeader={`Failed to ${type.toLocaleLowerCase}} build`}
         header='This deployment action was not permitted' />
@@ -135,20 +135,20 @@ function CreateBuild() {
     <Box flex={false} gap='small' pad={{horizontal: 'small'}} direction='row' align='center'>
       <Button
         icon={<Reload size='small' />}
-        onClick={() => deploy(BuildTypes.BOUNCE)} 
+        onClick={() => deploy(BuildTypes.BOUNCE)}
         background='card' flat
         label='Bounce'
         loading={loading && type === BuildTypes.BOUNCE} />
       <Button
         icon={<Check size='small' />}
-        onClick={() => deploy(BuildTypes.APPROVAL)} 
+        onClick={() => deploy(BuildTypes.APPROVAL)}
         background='card' flat
         label='Approval'
         loading={loading && type === BuildTypes.APPROVAL} />
       <Button
         icon={<Deploy size='small' />}
         onClick={() => deploy(BuildTypes.DEPLOY)}
-        loading={loading && type === BuildTypes.DEPLOY} 
+        loading={loading && type === BuildTypes.DEPLOY}
         label='Deploy'  background='brand' flat />
     </Box>
     </>
@@ -160,7 +160,7 @@ const POLL_INTERVAL = 1000 * 30
 function Placeholder() {
   return (
     <Box pad={BUILD_PADDING}>
-      <Box height='90px' color='' background='card' 
+      <Box height='90px' color='' background='card'
            margin={{top: 'small'}} round='xsmall' />
     </Box>
   )
@@ -168,7 +168,7 @@ function Placeholder() {
 
 export function ReturnToBeginning({beginning}) {
   return (
-    <Box direction='row' align='center' round='xsmall' gap='small' 
+    <Box direction='row' align='center' round='xsmall' gap='small'
           hoverIndicator='cardHover' background='card'
           margin={{bottom: 'medium', horizontal: 'small'}}
           pad='small' focusIndicator={false} onClick={beginning}>
@@ -212,7 +212,7 @@ export default function Builds() {
   const {edges, pageInfo} = data.builds
   return (
     <Box fill background='backgroundColor'>
-      <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}} direction='row' 
+      <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}} direction='row'
            align='center' height={HEADER_HEIGHT} border={{side: 'bottom'}}>
         <Box fill='horizontal'>
           <Text weight='bold' size='small'>Builds</Text>

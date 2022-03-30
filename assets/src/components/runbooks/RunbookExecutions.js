@@ -1,7 +1,7 @@
 import { Box } from 'grommet'
 import moment from 'moment'
 import React, { useState } from 'react'
-import { deepUpdate, extendConnection } from '../../utils/graphql'
+import { extendConnection } from '../../utils/graphql'
 import { AvatarCell } from '../audits/Audits'
 import { HeaderItem } from '../kubernetes/Pod'
 import { StandardScroller } from '../utils/SmoothScroller'
@@ -58,6 +58,6 @@ export function RunbookExecutions({runbook, loading, fetchMore}) {
           })} />
       </Box>
     </Box>
-    
+
   )
 }

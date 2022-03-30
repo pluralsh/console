@@ -45,14 +45,14 @@ function UtilBar({capacity, usage, format, modifier}) {
   const theme = useContext(ThemeContext)
   const percent = round(Math.min((usage / capacity) * 100, 100))
   const color = percent < 50 ? 'success' : (percent < 75 ? 'status-warning' : 'error')
-  
+
   return (
     <>
-    <Box flex={false} ref={ref} fill='horizontal' 
+    <Box flex={false} ref={ref} fill='horizontal'
          height='20px' align='center' justify='center'
-         onMouseOver={() => setHover(true)} 
+         onMouseOver={() => setHover(true)}
          onMouseLeave={() => setHover(false)}>
-      <Line 
+      <Line
         percent={percent}
         trailColor={normalizeColor('cardDetailLight', theme)}
         strokeColor={normalizeColor(color, theme)}
@@ -61,7 +61,7 @@ function UtilBar({capacity, usage, format, modifier}) {
     </Box>
     {hover && (
       <Drop target={ref.current} plain align={{bottom: 'top'}} round='xsmall'>
-        <Box direction='row' gap='xsmall' align='center' 
+        <Box direction='row' gap='xsmall' align='center'
              background='sidebar' pad={{horizontal: 'small', vertical: 'xsmall'}}>
           <Text size='small'>{modifier}: {percent}% {usage ? format(usage) : ''}</Text>
         </Box>
@@ -118,14 +118,14 @@ function NodeRow({node, metrics, refetch}) {
         <Text size='small'>{nodeReadiness(node.status) === Readiness.Ready ? 'Ready' : 'Pending'}</Text>
       </Box>
       <Box flex={false} width='10%' direction='row' gap='xsmall' align='center' pad={{horizontal: 'xsmall'}}>
-        <UtilBar 
+        <UtilBar
           capacity={cpuParser(node.status.capacity.cpu)}
           usage={nodeMetrics && nodeMetrics.cpu}
           format={(v) => `${round(v)} cores`}
           modifier='CPU' />
       </Box>
       <Box flex={false} width='10%' direction='row' gap='xsmall' align='center' pad={{horizontal: 'xsmall'}}>
-        <UtilBar 
+        <UtilBar
           capacity={memoryParser(node.status.capacity.memory)}
           usage={nodeMetrics && nodeMetrics.memory}
           format={filesize}
@@ -139,7 +139,7 @@ function NodeRow({node, metrics, refetch}) {
           <Text size='small'>{filesize(memoryParser(node.status.capacity.memory))}</Text>
         </Box>
         <DeleteNode name={node.metadata.name} refetch={refetch} />
-      </Box> 
+      </Box>
     </Box>
   )
 }
@@ -158,7 +158,7 @@ function NodeGraphs({status: {capacity}, pods, name, usage}) {
     return {requests, limits}
   }, [pods])
   const localize = useCallback((metric) => metric.replaceAll("{instance}", name), [name])
-  
+
   return (
     <Box flex={false} direction='row' gap='medium' align='center'>
       <LayeredGauage
@@ -180,7 +180,7 @@ function NodeGraphs({status: {capacity}, pods, name, usage}) {
         stable
         format={filesize} />
       <Box fill='horizontal'>
-        <SaturationGraphs 
+        <SaturationGraphs
           cpu={localize(NodeMetrics.CPU)}
           mem={localize(NodeMetrics.Memory)} />
       </Box>
@@ -197,7 +197,7 @@ const SimpleGauge = React.memo(({value, total, title, name}) => {
 
   return (
     <Box flex={false} height='200px' width='200px'>
-      <Doughnut 
+      <Doughnut
         data={{
           labels: [' ' + name, ` ${name} available`],
           datasets: [
@@ -212,7 +212,7 @@ const SimpleGauge = React.memo(({value, total, title, name}) => {
               borderWidth: 0,
             }
           ]
-        }} 
+        }}
         options={{
           cutout: '75%',
           animation: false,
@@ -233,7 +233,7 @@ const LayeredGauage = React.memo(({requests, limits, usage, total, title, name, 
     const lims = limits || 0
     const tot = (total || 0)
     const used = round(usage)
-  
+
     return {
       labels: [`${name} requests`, `${name} remaining`, `${name} limits`, `${name} remaining`, `${name} used`, `${name} free`],
       datasets: [
@@ -276,8 +276,8 @@ const LayeredGauage = React.memo(({requests, limits, usage, total, title, name, 
 
   return (
     <Box flex={false} height='200px' width='200px'>
-      <Doughnut 
-        data={data} 
+      <Doughnut
+        data={data}
         options={{
           cutout: '70%',
           animation: false,
@@ -311,7 +311,7 @@ function SaturationGraphs({cpu, mem}) {
 
   const result = useMemo(() => {
     if (!data) return null
-    
+
     const {cpuUtilization, memUtilization} = data
     return ([
       {id: 'cpu utilization', data: cpuUtilization[0].values.map(datum)},
@@ -367,7 +367,7 @@ function ClusterGauges({nodes, usage}) {
 
   if (!result) return null
 
-  const {cpuRequests, cpuLimits, memRequests, memLimits, pods, cpuUsage, memUsage} = result
+  const {cpuRequests, cpuLimits, memRequests, memLimits, pods} = result
 
   return (
     <Box flex={false} direction='row' gap='small' align='center'>
@@ -398,7 +398,7 @@ function ClusterGauges({nodes, usage}) {
 
 function ClusterMetrics({nodes, usage}) {
   return (
-    <Box flex={false} direction='row' fill='horizontal' gap='small' 
+    <Box flex={false} direction='row' fill='horizontal' gap='small'
          align='center' pad='small'>
       <ClusterGauges nodes={nodes} usage={usage} />
       <SaturationGraphs cpu={Metrics.CPU} mem={Metrics.Memory} />
@@ -406,7 +406,7 @@ function ClusterMetrics({nodes, usage}) {
       </Box> */}
     </Box>
   )
-} 
+}
 
 function nodeReadiness(status) {
   const ready = status.conditions.find(({type}) => type === 'Ready')
@@ -417,7 +417,7 @@ function nodeReadiness(status) {
 export function Node() {
   const {name} = useParams()
   const {data, refetch} = useQuery(NODE_Q, {
-    variables: {name}, 
+    variables: {name},
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network'
   })
@@ -469,7 +469,7 @@ export function Node() {
 
 export function Nodes() {
   const {data, refetch} = useQuery(NODES_Q, {
-    pollInterval: POLL_INTERVAL, 
+    pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network'
   })
   const {setBreadcrumbs} = useContext(BreadcrumbsContext)
@@ -499,7 +499,7 @@ export function Nodes() {
   if (!data) return <LoopingLogo dark />
 
   return (
-    <Box style={{overflow: 'auto'}} fill background='backgroundColor' 
+    <Box style={{overflow: 'auto'}} fill background='backgroundColor'
          pad='small' gap='small'>
       <Box flex={false} fill='horizontal'>
         <ClusterMetrics nodes={data.nodes} usage={usage} />
@@ -508,8 +508,8 @@ export function Nodes() {
           {data.nodes.map((node, ind) => (
             <NodeRow
               key={ind}
-              node={node} 
-              metrics={metrics} 
+              node={node}
+              metrics={metrics}
               refetch={refetch} />
           ))}
         </Box>

@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState, useCallback } from 'react'
 import { Box, Text, ThemeContext, Layer, Anchor, TextInput } from 'grommet'
 import { Checkmark, CircleInformation } from 'grommet-icons'
-import { Links, Divider, Tabs, TabContent, TabHeader, TabHeaderItem, Explore as Search } from 'forge-core'
+import { Links, Tabs, TabContent, TabHeader, TabHeaderItem, Explore as Search } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
 import { ApplicationReadyIcon } from './Application'
@@ -52,7 +52,7 @@ export function InstallationsFlyout() {
     <FlyoutContainer header='Applications' close={() => setOpen(false)}>
       <Box flex={false}>
         <Box fill='horizontal'>
-          <TextInput 
+          <TextInput
             plain
             icon={<Search size='15px' />}
             value={q || ''}
@@ -76,7 +76,7 @@ export function InstallationsFlyout() {
 export function ToolbarItem({children, onClick, open}) {
   return (
     <Box flex={false} direction='row' round='xsmall' background={open ? 'sidebarHover' : null}
-         margin={{vertical: 'xsmall'}} pad={{horizontal: 'small', vertical: 'xsmall'}} 
+         margin={{vertical: 'xsmall'}} pad={{horizontal: 'small', vertical: 'xsmall'}}
          gap='small' align='center'  hoverIndicator='sidebarHover' onClick={onClick}>
       {children}
     </Box>
@@ -85,7 +85,7 @@ export function ToolbarItem({children, onClick, open}) {
 
 function ApplicationLink({link: {url, description}, width}) {
   return (
-    <Box direction='row' align='center' round='xsmall' 
+    <Box direction='row' align='center' round='xsmall'
          background='tone-light' gap='small' pad='small' width={width || '33%'}>
       <Links size='15px' />
       <Box>

@@ -41,7 +41,6 @@ function CostRadar({cost, scalar}) {
             gridLevels={3}
             isInteractive={true}
             dotSize={3}
-            dotBorderWidth={2}
             tooltipFormat={val => `$${Number(val).toLocaleString('en-US', {minimumFractionDigits: 2})}`}
             colors={COLOR_MAP} />
         </Box>
@@ -81,7 +80,7 @@ function PlanLimits({limits}) {
 }
 
 function PluralCost({license}) {
-  const {status: plural} = license  
+  const {status: plural} = license
   return (
     <Box pad='small' gap='small'>
       <Text size='small' weight={500}>Plural Cost</Text>
@@ -100,7 +99,7 @@ export function CostBreakdown({cost, license}) {
   const scalar = cost ? Math.max(MINUTES_MONTH / cost.minutes, 1) : 1
 
   return (
-    <Box gap='xsmall' direction='row' border='between' pad='small'> 
+    <Box gap='xsmall' direction='row' border='between' pad='small'>
       {license && <Box width='30%'><PluralCost license={license} /></Box>}
       {cost && <Box width='70%'><CostRadar cost={cost} scalar={scalar} /></Box>}
     </Box>
@@ -110,7 +109,7 @@ export function CostBreakdown({cost, license}) {
 export function CostAnalysis({cost, license}) {
   const [open, setOpen] = useState(false)
   const close = useCallback(() => setOpen(false), [setOpen])
-  
+
   return (
     <>
     <ToolbarItem open={open} onClick={() => setOpen(true)}>
