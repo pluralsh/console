@@ -45,9 +45,6 @@ sections:
   - name: git_email
     documentation: email for git operations by console
     type: STRING
-  - name: admin_email
-    documentation: email for the initial admin user
-    type: STRING
   - name: admin_name
     documentation: name for the initial admin user
     type: STRING

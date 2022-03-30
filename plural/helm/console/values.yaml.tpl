@@ -43,7 +43,7 @@ serviceAccount:
 secrets:
   jwt: {{ dedupe . "console.secrets.jwt" (randAlphaNum 20) }}
   admin_name: {{ .Values.admin_name }}
-  admin_email: {{ .Values.admin_email }}
+  admin_email: {{ dedupe . "console.secrets.admin_email" .Config.Email }}
   admin_password: {{ dedupe . "console.secrets.admin_password" (randAlphaNum 20) }}
 {{ if .Values.console_dns }}
   git_url: {{ dedupe . "console.secrets.git_url" repoUrl }}
