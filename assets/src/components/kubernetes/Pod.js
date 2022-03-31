@@ -201,9 +201,9 @@ function SimpleContainerStatus({status}) {
   const background = ReadinessColor[readiness]
   return (
     <>
-    <Box ref={ref} flex={false} width='13px' height='13px' round='xxsmall'  
+    <Box ref={ref} flex={false} width='13px' height='13px' round='xxsmall'
          background={background}
-         onMouseEnter={() => setOpen(true)} 
+         onMouseEnter={() => setOpen(true)}
          onMouseLeave={() => setOpen(false)} />
     {open && (
       <Drop target={ref.current} align={{bottom: 'top'}} round='xsmall'>
@@ -244,7 +244,7 @@ export function PodRow({pod: {metadata: {name, namespace}, status, spec}, refetc
       </Box>
       <RowItem width='7%' text={status.podIp} />
       <Box flex={false} width='10%'>
-        <Anchor style={TRUNCATE} size='small'  
+        <Anchor style={TRUNCATE} size='small'
                onClick={(e) =>  { ignore(e); history.push(`/nodes/${spec.nodeName}`) }}>
           {spec.nodeName}
         </Anchor>
@@ -267,7 +267,6 @@ export function PodRow({pod: {metadata: {name, namespace}, status, spec}, refetc
 }
 
 function Status({status, metadata: {namespace, name}}) {
-  let history = useHistory()
   const query = asQuery({pod: name})
   return (
     <Con header='Status'>
@@ -497,10 +496,10 @@ export function Pod() {
               </TabHeaderItem>
             ))}
             {containers.map(({name: container}) => (
-              <ContainerTabHeader 
+              <ContainerTabHeader
                 namespace={namespace}
                 pod={name}
-                container={container} 
+                container={container}
                 containerStatus={containerStatus} />
             ))}
             <TabHeaderItem name='events'>

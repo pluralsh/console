@@ -32,8 +32,8 @@ export function AvatarCell({user, width}) {
 
 function Audit({audit}) {
   return (
-    <Box height={HEIGHT_PX} direction='row' align='center' gap='xsmall' 
-         onClick={() => null} hoverIndicator='cardHover' pad='xsmall'
+    <Box height={HEIGHT_PX} direction='row' align='center' gap='xsmall'
+         onClick={() => null} hoverIndicator='cardHover'
          pad={{horizontal: 'small'}}>
       <RowItem width='10%' text={audit.type} />
       <RowItem width='10%' text={audit.action} />
@@ -48,8 +48,8 @@ function Audit({audit}) {
 
 function AuditHeader() {
   return (
-    <Box flex={false} height={HEIGHT_PX} direction='row' align='center' 
-         gap='xsmall' border={{side: 'bottom'}} 
+    <Box flex={false} height={HEIGHT_PX} direction='row' align='center'
+         gap='xsmall' border={{side: 'bottom'}}
          pad={{horizontal: 'small'}}>
       <HeaderItem width='10%' text='type' />
       <HeaderItem width='10%' text='action' />
@@ -134,6 +134,6 @@ export function Audits() {
         </SectionContentContainer>
       </Box>
     </Box>
-    
+
   )
 }

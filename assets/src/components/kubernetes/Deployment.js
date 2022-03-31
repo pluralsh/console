@@ -4,7 +4,7 @@ import { Tabs, TabContent, TabHeader, TabHeaderItem } from 'forge-core'
 import { useQuery } from 'react-apollo'
 import { DEPLOYMENT_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
-import { useHistory, useParams } from 'react-router'
+import { useParams } from 'react-router'
 import { POLL_INTERVAL, ScalingTypes } from './constants'
 import { PodList } from './Pod'
 import { RawContent } from './Component'
@@ -18,14 +18,13 @@ import { ScalingRecommenderModal } from './ScalingRecommender'
 import { useIntercom } from 'react-use-intercom'
 
 function Status({status: {availableReplicas, replicas, unavailableReplicas}, metadata}) {
-  let history = useHistory()
   return (
     <Container header='Status'>
       <Box fill='horizontal' direction='row' gap='small' align='center'>
         <Box height='200px' width='375px' align='center' justify='center'>
-          <Pie 
-            success={availableReplicas} 
-            progress={replicas - availableReplicas - unavailableReplicas} 
+          <Pie
+            success={availableReplicas}
+            progress={replicas - availableReplicas - unavailableReplicas}
             error={unavailableReplicas} />
         </Box>
         <Box fill='horizontal'>
@@ -80,7 +79,7 @@ export default function Deployment() {
   return (
     <Box fill style={{overflow: 'auto'}}>
       <Tabs defaultTab='info' onTabChange={setTab}
-            headerEnd={tab === 'metrics' ? <RangePicker duration={duration} setDuration={setDuration} /> : 
+            headerEnd={tab === 'metrics' ? <RangePicker duration={duration} setDuration={setDuration} /> :
                                            <ScalingRecommenderModal kind={ScalingTypes.DEPLOYMENT} name={name} namespace={repo} />}>
         <TabHeader>
           <TabHeaderItem name='info'>

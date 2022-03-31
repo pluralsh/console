@@ -24,7 +24,7 @@ function ActionContainer() {
 }
 
 export function ActionPortal({children, name}) {
-  const {ref, setName} = useContext(ActionContext)
+  const {ref} = useContext(ActionContext)
 
   return (
     <Portal node={ref}>
@@ -42,7 +42,7 @@ export function Runbook() {
   const [ref, setRef] = useState(null)
   const {data, loading, fetchMore, refetch} = useQuery(RUNBOOK_Q, {
     variables: {
-      namespace, name, 
+      namespace, name,
       context: {timeseriesStart: -duration.offset, timeseriesStep: duration.step}
     },
     fetchPolicy: 'cache-and-network',
@@ -96,8 +96,8 @@ export function Runbook() {
           </TabContent>
           <TabContent name='executions'>
             <RunbookExecutions
-              runbook={runbook} 
-              loading={loading} 
+              runbook={runbook}
+              loading={loading}
               fetchMore={fetchMore} />
           </TabContent>
         </Tabs>

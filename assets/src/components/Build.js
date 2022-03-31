@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useRef, useCallback } from 'react'
+import React, { useEffect, useState, useContext, useRef } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { useQuery, useMutation } from 'react-apollo'
 import { ModalHeader, Button } from 'forge-core'
@@ -74,7 +74,7 @@ function BuildTimer({insertedAt, completedAt, status}) {
 
 function OptionContainer({children, ...props}) {
   return (
-    <Box flex={false} pad={HEADER_PADDING} border='left' fill='vertical' 
+    <Box flex={false} pad={HEADER_PADDING} border='left' fill='vertical'
          justify='center' align='center' {...props}>
       {children}
     </Box>
@@ -166,7 +166,7 @@ function LogLine({line, number, follow}) {
   }, [follow, lineRef, line])
 
   return (
-    <Box flex={false} ref={lineRef} direction='row' align='center' height='20px' 
+    <Box flex={false} ref={lineRef} direction='row' align='center' height='20px'
          style={{color: normalizeColor('light-4', theme), cursor: 'default'}} gap='medium'
          onClick={() => null} hoverIndicator='card' pad={{left: '55px'}}>
       <pre style={{color: normalizeColor('dark-5', theme)}}>{number}</pre>
@@ -183,10 +183,10 @@ function Log({text, follow}) {
   return (
     <Box flex={false} style={{overflow: 'auto'}} fill='horizontal'>
       {lines.map((line, ind) => (
-        <LogLine 
-          key={ind} 
-          line={line} 
-          number={ind + 1} 
+        <LogLine
+          key={ind}
+          line={line}
+          number={ind + 1}
           follow={follow}
           last={last} />))}
     </Box>
@@ -287,12 +287,12 @@ function Changelog({build: {changelogs}}) {
     <Box fill direction='row'>
       <Box flex={false} width={SIDEBAR_WIDTH} height='100%' border='right'>
         {Object.entries(grouped).map(([r, tools]) => (
-          <ChangelogRepo 
-            repo={r} 
-            current={repo} 
-            tools={tools} 
-            tool={tool} 
-            setRepo={setRepo} 
+          <ChangelogRepo
+            repo={r}
+            current={repo}
+            tools={tools}
+            tool={tool}
+            setRepo={setRepo}
             setTool={setTool} />
         ))}
       </Box>

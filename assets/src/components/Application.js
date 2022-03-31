@@ -58,6 +58,7 @@ export function ReadyIcon({size, readiness, showIcon}) {
     case Readiness.Complete:
       color = 'tone-medium'
       icon = <Check size='small' />
+      break
     default:
       break
   }
@@ -65,9 +66,9 @@ export function ReadyIcon({size, readiness, showIcon}) {
   return (
     <Box flex={false}
          as={anim}
-         width={size || defaultSize} 
-         height={size || defaultSize} 
-         round='full' 
+         width={size || defaultSize}
+         height={size || defaultSize}
+         round='full'
          align='center'
          justify='center'
          background={color}
@@ -110,7 +111,7 @@ export default function Application() {
 
   return (
     <Box fill background='backgroundColor' gap='small'>
-      <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}} direction='row' 
+      <Box flex={false} pad={{vertical: 'small', ...BUILD_PADDING}} direction='row'
            align='center' border={{side: 'bottom'}} gap='small'>
         {hasIcon(currentApplication) && <ApplicationIcon application={currentApplication} size='40px' dark />}
         <Box>
