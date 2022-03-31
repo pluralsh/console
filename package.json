@@ -27,8 +27,9 @@
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",
     "grommet": "^2.21.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
+    "prop-types": "^15.8.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "react-scripts": "5.0.0",
     "styled-components": "^5.3.5",
     "web-vitals": "^2.1.4"
