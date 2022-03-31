@@ -10,7 +10,6 @@ export default {
   argTypes: {
     backgroundColor: { control: 'color' },
   },
-  decorators: [GrommetDecorator],
 }
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
@@ -34,18 +33,28 @@ export const Primary = Template.bind({})
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 Primary.args = {
   primary: true,
-  label: 'Primary',
+  label: 'Click me',
 }
 
 export const Secondary = Template.bind({})
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 Secondary.args = {
   secondary: true,
-  label: 'Secondary',
+  label: 'Click me',
 }
 
-export const Default = Template.bind({})
+export const PrimarySmall = Template.bind({})
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
-Default.args = {
-  label: 'Default',
+PrimarySmall.args = {
+  primary: true,
+  label: 'Click me',
+  size: 'small',
+}
+
+export const SecondarySmall = Template.bind({})
+// More on args: https://storybook.js.org/docs/react/writing-stories/args
+SecondarySmall.args = {
+  secondary: true,
+  label: 'Click me',
+  size: 'small',
 }

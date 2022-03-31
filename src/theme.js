@@ -9,6 +9,10 @@ const theme = {
         light: '#0639FF',
         dark: '#0639FF',
       },
+      'brand-light': {
+        light: '#3A62FF',
+        dark: '#3A62FF',
+      },
       background: {
         light: '#FFFFFF',
         dark: '#111525',
@@ -232,17 +236,62 @@ const theme = {
     },
   },
   button: {
-    border: {
-      width: '2px',
-      radius: '4px',
-    },
     padding: {
       vertical: '4px',
       horizontal: '22px',
     },
-    secondary: {
+    default: {
+      color: 'text-strong',
+      font: {
+        weight: 'bold',
+      },
+      padding: {
+        vertical: '8px',
+        horizontal: '24px',
+      },
       border: {
+        width: '0px',
+        radius: '4px',
+        color: 'transparent',
+      },
+    },
+    primary: {
+      background: 'brand',
+      color: 'text-strong',
+      font: {
+        weight: 'bold',
+      },
+      padding: {
+        vertical: '8px',
+        horizontal: '24px',
+      },
+      border: {
+        width: '0px',
+        radius: '4px',
+        color: 'transparent',
+      },
+    },
+    secondary: {
+      color: 'text-strong',
+      font: {
+        weight: 'bold',
+      },
+      padding: {
+        vertical: '8px',
+        horizontal: '24px',
+      },
+      border: {
+        width: '2px',
+        radius: '4px',
         color: 'border',
+      },
+    },
+    hover: {
+      primary: {
+        background: 'brand-light',
+      },
+      secondary: {
+        background: 'background-contrast',
       },
     },
   },
