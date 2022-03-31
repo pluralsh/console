@@ -15,18 +15,37 @@ export default {
 
 // More on component templates: https://storybook.js.org/docs/react/writing-stories/introduction#using-args
 function Template(args) {
-  return <Button {...args} />
+  return (
+    <div>
+      <div>
+        <Button {...args} />
+      </div>
+      <div style={{ marginTop: '1rem' }}>
+        <Button
+          disabled
+          {...args}
+        />
+      </div>
+    </div>
+  )
 }
 
 export const Primary = Template.bind({})
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 Primary.args = {
   primary: true,
-  label: 'Click me!',
+  label: 'Primary',
+}
+
+export const Secondary = Template.bind({})
+// More on args: https://storybook.js.org/docs/react/writing-stories/args
+Secondary.args = {
+  secondary: true,
+  label: 'Secondary',
 }
 
 export const Default = Template.bind({})
 // More on args: https://storybook.js.org/docs/react/writing-stories/args
 Default.args = {
-  label: 'Click me!',
+  label: 'Default',
 }

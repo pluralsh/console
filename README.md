@@ -1,1 +1,5 @@
-# Plural's Design System
+# Plural's design system
+
+## License
+
+MIT
