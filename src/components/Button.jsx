@@ -5,7 +5,9 @@ import { Button as GrommetButton } from 'grommet'
 /**
  * Primary UI component for user interaction
  */
-export const Button = GrommetButton
+const Button = GrommetButton
 
 Button.propTypes = GrommetButton.propTypes
 Button.defaultProps = GrommetButton.defaultProps
+
+export default Button
