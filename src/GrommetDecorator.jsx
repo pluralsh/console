@@ -1,4 +1,4 @@
-import { Box, Grommet } from 'grommet'
+import { Grommet } from 'grommet'
 
 import theme from './theme'
 
