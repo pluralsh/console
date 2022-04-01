@@ -1,4 +1,5 @@
 import Sidebar from './Sidebar'
+import ScrollIcon from './icons/ScrollIcon'
 
 export default {
   title: 'Sidebar',
@@ -19,35 +20,35 @@ Default.args = {
   items: [
     {
       name: 'Explore',
-      icon: null,
+      Icon: ScrollIcon,
     },
     {
       name: 'Installed',
-      icon: null,
+      Icon: ScrollIcon,
     },
     {
       name: 'Users',
-      icon: null,
+      Icon: ScrollIcon,
     },
     {
       name: 'Accounts',
-      icon: null,
+      Icon: ScrollIcon,
     },
     {
       name: 'Upgrades',
-      icon: null,
+      Icon: ScrollIcon,
     },
     {
       name: 'Incidents',
-      icon: null,
+      Icon: ScrollIcon,
     },
     {
       name: 'Integrations',
-      icon: null,
+      Icon: ScrollIcon,
     },
     {
       name: 'Audits',
-      icon: null,
+      Icon: ScrollIcon,
     },
   ],
   activeItemName: 'Explore',
