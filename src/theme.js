@@ -1,4 +1,3 @@
-import { Box } from 'grommet'
 import { normalizeColor } from 'grommet/utils'
 import { css } from 'styled-components'
 
