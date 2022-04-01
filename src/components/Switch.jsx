@@ -23,7 +23,7 @@ const Handle = styled.div`
   height: 14px;
   border-radius: 50%;
   background-color: #fff;
-  transition: all 150ms linear;
+  transition: all 150ms ease;
 `
 
 function Switch({ checked, onChange, ...props }) {
