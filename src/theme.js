@@ -555,10 +555,12 @@ const theme = {
     },
   },
   radioButton: {
-    size: '24px',
-    check: {
-      radius: '4px',
-    },
+    size: '20px',
+    // check: {
+    //   background: {
+    //     color: '#fff',
+    //   },
+    // },
   },
   text: {
     xsmall: {
