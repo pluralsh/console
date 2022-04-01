@@ -1,3 +1,6 @@
+import { css } from 'styled-components'
+import { normalizeColor } from 'grommet/utils'
+
 const theme = {
   name: 'Pluralsh',
   rounding: 4,
@@ -92,8 +95,8 @@ const theme = {
       },
       'background-light!': '',
       focus: {
-        light: '#0190C2',
-        dark: '#0190C2',
+        light: 'brand',
+        dark: 'brand',
       },
       'graph-0': {
         light: 'accent-blue',
@@ -141,6 +144,12 @@ const theme = {
     selected: {
       background: 'selected-background',
       color: 'selected-text',
+    },
+    focus: {
+      shadow: null,
+      border: {
+        color: 'border',
+      },
     },
     borderSize: {
       xsmall: '1px',
@@ -198,6 +207,12 @@ const theme = {
     input: {
       padding: '12px',
       weight: 600,
+      extend: css`
+        color: ${({ theme }) => normalizeColor(theme.global.colors['text-weak'], theme)};
+        &:focus {
+          color: ${({ theme }) => normalizeColor(theme.global.colors['text-strong'], theme)};
+        }
+      `,
     },
     spacing: '24px',
     size: {

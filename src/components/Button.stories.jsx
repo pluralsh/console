@@ -1,5 +1,3 @@
-import GrommetDecorator from '../GrommetDecorator'
-
 import Button from './Button'
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
@@ -58,3 +56,11 @@ SecondarySmall.args = {
   label: 'Click me',
   size: 'small',
 }
+
+// export const Realistic = Template.bind({})
+// // More on args: https://storybook.js.org/docs/react/writing-stories/args
+// Realistic.args = {
+//   primary: true,
+//   label: 'Continue',
+//   size: 'small',
+// }
