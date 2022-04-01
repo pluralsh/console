@@ -1,2 +1,6 @@
 export { default as Button } from './components/Button'
+export { default as FormField } from './components/FormField'
+export { default as RadioButton } from './components/RadioButton'
+export { default as Switch } from './components/Switch'
+export { default as TextInput } from './components/TextInput'
 export { default as theme } from './theme'
