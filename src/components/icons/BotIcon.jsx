@@ -56,5 +56,4 @@ export default createIcon(({ size, color, ...props }) => (
       </clipPath>
     </defs>
   </svg>
-
 ))

@@ -5,9 +5,6 @@ import RadioButton from './RadioButton'
 export default {
   title: 'RadioButton',
   component: RadioButton,
-  argTypes: {
-    backgroundColor: { control: 'color' },
-  },
 }
 
 function Template(args) {

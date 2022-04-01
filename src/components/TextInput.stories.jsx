@@ -5,9 +5,6 @@ import TextInput from './TextInput'
 export default {
   title: 'TextInput',
   component: TextInput,
-  argTypes: {
-    backgroundColor: { control: 'color' },
-  },
 }
 
 function Template(args) {

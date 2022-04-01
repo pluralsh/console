@@ -4,6 +4,10 @@ import PersonIcon from './PersonIcon'
 import ScrollIcon from './ScrollIcon'
 import BotIcon from './BotIcon'
 import BrowserIcon from './BrowserIcon'
+import BundleIcon from './BundleIcon'
+import CertificateIcon from './CertificateIcon'
+import CheckIcon from './CheckIcon'
+import ChecklistIcon from './ChecklistIcon'
 
 const icons = {
   MarketIcon,
@@ -12,14 +16,15 @@ const icons = {
   ScrollIcon,
   BotIcon,
   BrowserIcon,
+  BundleIcon,
+  CertificateIcon,
+  CheckIcon,
+  ChecklistIcon,
 }
 
 export default {
   title: 'Icons',
   component: MarketIcon,
-  argTypes: {
-    backgroundColor: { control: 'color' },
-  },
 }
 
 function Template(args) {
