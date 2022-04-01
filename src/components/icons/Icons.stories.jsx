@@ -34,7 +34,13 @@ function Template(args) {
       {Object.entries(icons).map(([name, Icon]) => (
         <div
           key={name}
-          style={{ marginBottom: '0.5rem', marginRight: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+          style={{
+            marginBottom: '0.5rem',
+            marginRight: '0.5rem',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
         >
           <span style={{ marginBottom: '0.25rem', fontSize: '0.5rem' }}>
             {name}
