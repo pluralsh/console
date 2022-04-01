@@ -27,3 +27,9 @@ export const ComplexName = Template.bind({})
 ComplexName.args = {
   name: 'Edgard Alan Poe',
 }
+
+export const Image = Template.bind({})
+
+Image.args = {
+  imageUrl: 'https://avatars.githubusercontent.com/u/4154003?v=4',
+}
