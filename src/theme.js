@@ -1,5 +1,6 @@
-import { css } from 'styled-components'
+import { Box } from 'grommet'
 import { normalizeColor } from 'grommet/utils'
+import { css } from 'styled-components'
 
 const theme = {
   name: 'Pluralsh',
@@ -594,17 +595,7 @@ const theme = {
   },
   scale: 1,
   formField: {
-    border: {
-      color: 'border',
-      error: {
-        color: {
-          dark: 'white',
-          light: 'status-critical',
-        },
-      },
-      position: 'inner',
-      side: 'all',
-    },
+    border: null,
     content: {
       pad: 'small',
     },
@@ -637,9 +628,18 @@ const theme = {
       },
     },
     label: {
+      requiredIndicator: (
+        <span
+          title="required"
+          aria-label="required"
+          style={{ marginLeft: 4 }}
+        >
+          *
+        </span>
+      ),
       margin: {
         vertical: 'xsmall',
-        horizontal: 'small',
+        horizontal: 'none',
       },
     },
     margin: {
