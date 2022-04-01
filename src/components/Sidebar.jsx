@@ -9,14 +9,19 @@ const Container = styled(Box)`
 `
 
 const Item = styled(Box)`
+  width: 100%;
   height: 40px;
   border-radius: 4px;
   padding-left: 12px;
   color: ${({ active, theme }) => normalizeColor(active ? 'text-strong' : 'text-xweak', theme)};
   background-color: ${(({ active, theme }) => normalizeColor(active ? 'background-light' : 'transparent', theme))};
-  font-weight: ${({ active }) => active ? 'bold' : 'inherit'};
+  font-weight: ${({ active }) => active ? 600 : 400};
   cursor: pointer;
-  transition: all 150ms ease;
+  transition: all 333ms linear;
+
+  & * {
+    transition: all 333ms linear;
+  }
 `
 
 const ItemLabel = styled(Text)`
