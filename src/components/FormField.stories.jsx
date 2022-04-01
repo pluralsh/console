@@ -6,9 +6,6 @@ import TextInput from './TextInput'
 export default {
   title: 'FormField',
   component: FormField,
-  argTypes: {
-    backgroundColor: { control: 'color' },
-  },
 }
 
 function Template(args) {
