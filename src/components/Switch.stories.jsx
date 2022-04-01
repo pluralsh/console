@@ -5,9 +5,6 @@ import Switch from './Switch'
 export default {
   title: 'Switch',
   component: Switch,
-  argTypes: {
-    backgroundColor: { control: 'color' },
-  },
 }
 
 function Template(args) {
