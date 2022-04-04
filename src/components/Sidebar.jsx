@@ -82,21 +82,7 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
   const [childrenHeights, setChildrenHeights] = useState({})
   const itemsWithChildren = items.filter(({ items }) => Array.isArray(items) && items.length > 0)
 
-  const activeId = useMemo(() => {
-    const activeItem = items.find(({ url }) => url === activeUrl)
-
-    if (activeItem) return activeItem.url || activeItem.name
-
-    const activeParentItem = itemsWithChildren.find(({ items }) => items.find(({ url }) => url === activeUrl))
-
-    if (collapsed && activeParentItem) return activeParentItem.url || activeParentItem.name
-
-    const activeChildItem = activeParentItem.items.find(({ url }) => url === activeUrl)
-
-    if (activeChildItem) return activeChildItem.url || activeChildItem.name
-
-    return activeUrl
-  }, [items, itemsWithChildren, activeUrl, collapsed])
+  const activeId = getActiveId()
 
   useEffect(() => {
     const nextChildrenHeights = {}
@@ -131,6 +117,22 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
     else {
       setDeployedIds([...deployedIds, id])
     }
+  }
+
+  function getActiveId() {
+    const activeItem = items.find(({ url }) => url === activeUrl)
+
+    if (activeItem) return activeItem.url || activeItem.name
+
+    const activeParentItem = itemsWithChildren.find(({ items }) => items.find(({ url }) => url === activeUrl))
+
+    if (collapsed && activeParentItem) return activeParentItem.url || activeParentItem.name
+
+    const activeChildItem = activeParentItem.items.find(({ url }) => url === activeUrl)
+
+    if (activeChildItem) return activeChildItem.url || activeChildItem.name
+
+    return activeUrl
   }
 
   function renderItems(items, marginLeft = 0) {
