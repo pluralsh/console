@@ -4,6 +4,8 @@
   "description": "Pluralsh Design System",
   "main": "src/index.js",
   "scripts": {
+    "start": "npm run storybook",
+    "start:watch": "npm run storybook",
     "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public"
   },
@@ -32,15 +34,15 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
-    "@storybook/addon-actions": "^6.4.19",
-    "@storybook/addon-essentials": "^6.4.19",
-    "@storybook/addon-interactions": "^6.4.19",
-    "@storybook/addon-links": "^6.4.19",
-    "@storybook/builder-webpack5": "^6.4.19",
-    "@storybook/manager-webpack5": "^6.4.19",
-    "@storybook/node-logger": "^6.4.19",
+    "@storybook/addon-actions": "^6.4.20",
+    "@storybook/addon-essentials": "^6.4.20",
+    "@storybook/addon-interactions": "^6.4.20",
+    "@storybook/addon-links": "^6.4.20",
+    "@storybook/builder-webpack5": "^6.4.20",
+    "@storybook/manager-webpack5": "^6.4.20",
+    "@storybook/node-logger": "^6.4.20",
     "@storybook/preset-create-react-app": "^4.1.0",
-    "@storybook/react": "^6.4.19",
+    "@storybook/react": "^6.4.20",
     "@storybook/testing-library": "^0.0.9",
     "eslint": "^8.12.0",
     "eslint-config-pluralsh": "^1.1.0",
