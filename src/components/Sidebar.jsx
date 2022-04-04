@@ -1,7 +1,9 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { Box, Text } from 'grommet'
 import styled from 'styled-components'
 import { normalizeColor } from 'grommet/utils'
+
+import usePrevious from '../hooks/usePrevious'
 
 import Avatar from './Avatar'
 import CollapseIcon from './icons/CollapseIcon'
@@ -75,31 +77,59 @@ const ChildrenContainer = styled(Box)`
 
 function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
   const [collapsed, setCollapsed] = useState(false)
-  const [deployedItems, setDeployedItems] = useState(activeUrl ? [activeUrl] : [])
+  const [deployedIds, setDeployedIds] = useState(activeUrl ? [activeUrl] : [])
+  const [deployedIdsBeforeCollapse, setDeployedIdsBeforeCollapse] = useState(deployedIds)
   const [childrenHeights, setChildrenHeights] = useState({})
+  const itemsWithChildren = items.filter(({ items }) => Array.isArray(items) && items.length > 0)
+
+  const activeId = useMemo(() => {
+    const activeItem = items.find(({ url }) => url === activeUrl)
+
+    if (activeItem) return activeItem.url || activeItem.name
+
+    const activeParentItem = itemsWithChildren.find(({ items }) => items.find(({ url }) => url === activeUrl))
+
+    if (collapsed && activeParentItem) return activeParentItem.url || activeParentItem.name
+
+    const activeChildItem = activeParentItem.items.find(({ url }) => url === activeUrl)
+
+    if (activeChildItem) return activeChildItem.url || activeChildItem.name
+
+    return activeUrl
+  }, [items, itemsWithChildren, activeUrl, collapsed])
 
   useEffect(() => {
     const nextChildrenHeights = {}
 
-    items
-      .filter(({ items }) => Array.isArray(items) && items.length > 0)
-      .forEach(({ url, name }) => {
-        const id = url || name
-        const element = document.getElementById(`sidebar-children-${id}`)
-        const div = element.firstElementChild
+    itemsWithChildren.forEach(({ url, name }) => {
+      const id = url || name
+      const element = document.getElementById(`sidebar-children-${id}`)
+      const div = element.firstElementChild
 
-        nextChildrenHeights[id] = div.clientHeight
-      })
+      nextChildrenHeights[id] = div.clientHeight
+    })
 
     setChildrenHeights(nextChildrenHeights)
-  }, [items])
+  }, [itemsWithChildren])
 
-  function handleDeployItem(id) {
-    if (deployedItems.includes(id)) {
-      setDeployedItems(deployedItems.filter(item => item !== id))
+  function toggleCollapsed() {
+    setCollapsed(!collapsed)
+
+    if (!collapsed) {
+      setDeployedIdsBeforeCollapse(deployedIds)
+      setDeployedIds([])
     }
     else {
-      setDeployedItems([...deployedItems, id])
+      setDeployedIds(deployedIdsBeforeCollapse)
+    }
+  }
+
+  function handleDeployItem(id) {
+    if (deployedIds.includes(id)) {
+      setDeployedIds(deployedIds.filter(x => x !== id))
+    }
+    else {
+      setDeployedIds([...deployedIds, id])
     }
   }
 
@@ -111,8 +141,8 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
       return (
         <Fragment key={id}>
           <Item
-            id={activeUrl === id ? 'active-item' : ''}
-            active={activeUrl === id}
+            id={activeId === id ? 'active-item' : ''}
+            active={activeId === id}
             direction="row"
             align="center"
             width="full"
@@ -126,7 +156,7 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
           >
             <Icon
               size={14}
-              color={activeUrl === id ? 'text-strong' : 'text-xweak'}
+              color={activeId === id ? 'text-strong' : 'text-xweak'}
             />
             <TransitionText
               collapsed={collapsed}
@@ -140,7 +170,7 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
                 <Box flex="grow" />
                 <DeployIconContainer
                   collapsed={collapsed}
-                  deployed={deployedItems.includes(id)}
+                  deployed={deployedIds.includes(id)}
                   align="center"
                   justify="center"
                   flex={{ shrink: 0 }}
@@ -157,8 +187,8 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
           {hasChildren && (
             <ChildrenContainer
               id={`sidebar-children-${id}`}
-              deployed={deployedItems.includes(id)}
-              height={`${deployedItems.includes(id) ? childrenHeights[id] || 0 : 0}px`}
+              deployed={deployedIds.includes(id)}
+              height={`${deployedIds.includes(id) ? childrenHeights[id] || 0 : 0}px`}
               overflow="hidden"
             >
               <div>
@@ -199,7 +229,7 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
           justify="center"
           width="24px"
           height="24px"
-          onClick={() => setCollapsed(x => !x)}
+          onClick={toggleCollapsed}
           flex={{ shrink: 0 }}
         >
           <CollapseIcon
