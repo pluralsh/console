@@ -214,7 +214,15 @@ const theme = {
         }
       `,
     },
-    spacing: '24px',
+    spacing: {
+      xxsmall: '8px',
+      xsmall: '12px',
+      small: '16px',
+      medium: '24px',
+      large: '32px',
+      xlarge: '48px',
+      xxlarge: '64px',
+    },
     size: {
       xxsmall: '48px',
       xsmall: '96px',

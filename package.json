@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@storybook/addon-actions": "^6.4.20",
+    "@storybook/addon-docs": "^6.4.20",
     "@storybook/addon-essentials": "^6.4.20",
     "@storybook/addon-interactions": "^6.4.20",
     "@storybook/addon-links": "^6.4.20",

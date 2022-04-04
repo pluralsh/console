@@ -1,3 +1,4 @@
+import CollapseIcon from './CollapseIcon'
 import MarketIcon from './MarketIcon'
 import PeopleIcon from './PeopleIcon'
 import PersonIcon from './PersonIcon'
@@ -10,6 +11,7 @@ import CheckIcon from './CheckIcon'
 import ChecklistIcon from './ChecklistIcon'
 
 const icons = {
+  CollapseIcon,
   MarketIcon,
   PeopleIcon,
   PersonIcon,

@@ -47,6 +47,7 @@ function Avatar({ name, imageUrl, ...props }) {
       background={imageUrl ? 'transparent' : 'accent-blue'}
       justify="center"
       align="center"
+      flex={{ shrink: 0 }}
       {...props}
     >
       {imageUrl ? renderImage() : renderName()}

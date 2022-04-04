@@ -52,4 +52,8 @@ Default.args = {
     },
   ],
   activeItemName: 'Explore',
+  user: {
+    name: 'Jane Smith',
+    email: 'jane.smith@plural.sh',
+  },
 }
