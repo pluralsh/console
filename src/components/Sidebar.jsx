@@ -7,16 +7,12 @@ import Avatar from './Avatar'
 import CollapseIcon from './icons/CollapseIcon'
 
 const Container = styled(Box)`
-  transition: width 150ms ease;
+  transition: width 300ms ease;
 `
 
 const Item = styled(Box)`
-  width: 100%;
-  height: 40px;
-  border-radius: 4px;
-  padding-left: 12px;
-  color: ${({ theme }) => normalizeColor('text-xweak', theme)};
   cursor: pointer;
+  transition: all 150ms linear;
 
   #sidebar-items:not(:focus-within):not(:hover) > &#active-item,
   &:hover {
@@ -25,19 +21,26 @@ const Item = styled(Box)`
     font-weight: 600;
   }
 
-  transition: all 150ms linear;
-
   & * {
     transition: all 150ms linear;
   }
-`
 
-const ItemLabel = styled(Text)`
-  margin-left: 16px;
+  & > svg {
+    flex-shrink: 0;
+  }
 `
 
 const CollapseIconContainer = styled(Box)`
   cursor: pointer;
+  transition: all 300ms ease;
+  transform: ${({ collapsed }) => collapsed ? 'rotate(180deg)' : 'rotate(0deg)'};
+`
+
+const TransitionText = styled(Text)`
+  display: block;
+  opacity: ${({ collapsed }) => collapsed ? 0 : 1};
+  visibility: ${({ collapsed }) => collapsed ? 'hidden' : 'visible'};
+  transition: opacity ${({ collapsed }) => collapsed ? 200 : 500}ms ease, visibility 200ms linear;
 `
 
 function Sidebar({ items, activeItemName, user }) {
@@ -62,14 +65,24 @@ function Sidebar({ items, activeItemName, user }) {
             key={name}
             direction="row"
             align="center"
+            width="full"
+            height="40px"
+            round="4px"
+            pad={{ left: 'small' }}
+            color="text-xweak"
+            overflow="hidden"
           >
             <Icon
               size={14}
               color={activeItemName === name ? 'text-strong' : 'text-xweak'}
             />
-            <ItemLabel size="small">
+            <TransitionText
+              collapsed={collapsed}
+              size="small"
+              margin={{ left: '16px' }}
+            >
               {name}
-            </ItemLabel>
+            </TransitionText>
           </Item>
         ))}
       </div>
@@ -77,27 +90,32 @@ function Sidebar({ items, activeItemName, user }) {
       <Box
         direction="row"
         align="center"
+        overflow="hidden"
       >
         <CollapseIconContainer
+          collapsed={collapsed}
           background="background-light"
           round="full"
           align="center"
           justify="center"
           width="24px"
           height="24px"
+          onClick={() => setCollapsed(x => !x)}
+          flex={{ shrink: 0 }}
         >
           <CollapseIcon
             color="text-xweak"
             size={6}
           />
         </CollapseIconContainer>
-        <Text
+        <TransitionText
+          collapsed={collapsed}
           size="small"
           color="text-xweak"
           margin={{ left: '16px' }}
         >
           Collapse
-        </Text>
+        </TransitionText>
       </Box>
       <Box
         direction="row"
@@ -109,22 +127,22 @@ function Sidebar({ items, activeItemName, user }) {
           imageUrl={user.imageUrl}
         />
         <Box pad={{ left: '8px' }}>
-          <Text
+          <TransitionText
+            collapsed={collapsed}
             truncate
-            as="div"
             weight="bold"
             color="text-xweak"
           >
             {user.name}
-          </Text>
-          <Text
+          </TransitionText>
+          <TransitionText
+            collapsed={collapsed}
             truncate
-            as="div"
             size="small"
             color="text-xweak"
           >
             {user.email}
-          </Text>
+          </TransitionText>
         </Box>
       </Box>
     </Container>
