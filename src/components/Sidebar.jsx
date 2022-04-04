@@ -87,7 +87,10 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
 
   useEffect(() => {
     const bottomRect = sidebarBottomRef.current.getBoundingClientRect()
+    console.log(bottomRect)
     const parentRect = sidebarBottomRef.current.parentElement.getBoundingClientRect()
+    console.log(parentRect)
+    console.log(parentRect.height - bottomRect.height - 24 - 16)
     setSidebarcontentMaxHeight(`${parentRect.height - bottomRect.height - 24 - 16}px`)
   }, [])
 
@@ -227,11 +230,12 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
       }}
       pad="24px 0px 16px 16px"
       flex={{ grow: 0, shrink: 0 }}
+      overflow="hidden"
     >
       <Box
         overflow="scroll"
         flex="grow"
-        style={{ maxHeight: sidebarContentMaxHeight }}
+        style={{ maxHeight: sidebarContentMaxHeight, height: sidebarContentMaxHeight }}
       >
         <Box
           id="sidebar-items"
