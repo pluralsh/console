@@ -20,6 +20,7 @@ const Item = styled(Box)`
   }
 
   #sidebar-items:not(:hover) > &#active-item,
+  #sidebar-items:not(:hover) > * > * > &#active-item,
   &:hover {
     color: ${({ theme }) => normalizeColor('text-strong', theme)};
     background-color: ${({ theme }) => normalizeColor('background-light', theme)};
@@ -72,9 +73,9 @@ const ChildrenContainer = styled(Box)`
   }
 `
 
-function Sidebar({ items, activeItemName, user, onItemClick = () => null }) {
+function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
   const [collapsed, setCollapsed] = useState(false)
-  const [deployedItems, setDeployedItems] = useState(activeItemName ? [activeItemName] : [])
+  const [deployedItems, setDeployedItems] = useState(activeUrl ? [activeUrl] : [])
   const [childrenHeights, setChildrenHeights] = useState({})
 
   useEffect(() => {
@@ -82,90 +83,92 @@ function Sidebar({ items, activeItemName, user, onItemClick = () => null }) {
 
     items
       .filter(({ items }) => Array.isArray(items) && items.length > 0)
-      .forEach(({ name }) => {
-        const element = document.getElementById(`sidebar-children-${name}`)
+      .forEach(({ url, name }) => {
+        const id = url || name
+        const element = document.getElementById(`sidebar-children-${id}`)
         const div = element.firstElementChild
 
-        nextChildrenHeights[name] = div.clientHeight
+        nextChildrenHeights[id] = div.clientHeight
       })
 
     setChildrenHeights(nextChildrenHeights)
   }, [items])
 
-  function handleDeployItem(name) {
-    if (deployedItems.includes(name)) {
-      setDeployedItems(deployedItems.filter(item => item !== name))
+  function handleDeployItem(id) {
+    if (deployedItems.includes(id)) {
+      setDeployedItems(deployedItems.filter(item => item !== id))
     }
     else {
-      setDeployedItems([...deployedItems, name])
+      setDeployedItems([...deployedItems, id])
     }
   }
 
   function renderItems(items, marginLeft = 0) {
-    return (
-      <>
-        {items.map(({ name, Icon, items }) => (
-          <Fragment key={name}>
-            <Item
-              id={activeItemName === name ? 'active-item' : ''}
-              active={activeItemName === name}
-              direction="row"
-              align="center"
-              width="full"
-              height="40px"
-              round="4px"
-              margin={{ left: `${marginLeft}px` }}
-              pad={{ left: '12px' }}
-              color="text-xweak"
-              overflow="hidden"
-              onClick={() => handleDeployItem(name) || onItemClick(name)}
+    return items.map(({ name, url, Icon, items }) => {
+      const id = url || name
+      const hasChildren = Array.isArray(items) && items.length > 0
+
+      return (
+        <Fragment key={id}>
+          <Item
+            id={activeUrl === id ? 'active-item' : ''}
+            active={activeUrl === id}
+            direction="row"
+            align="center"
+            width="full"
+            height="40px"
+            round="4px"
+            margin={{ left: `${marginLeft}px` }}
+            pad={{ left: '12px' }}
+            color="text-xweak"
+            overflow="hidden"
+            onClick={() => hasChildren && handleDeployItem(id) || onItemClick(id)}
+          >
+            <Icon
+              size={14}
+              color={activeUrl === id ? 'text-strong' : 'text-xweak'}
+            />
+            <TransitionText
+              collapsed={collapsed}
+              size="small"
+              margin={{ left: '16px' }}
             >
-              <Icon
-                size={14}
-                color={activeItemName === name ? 'text-strong' : 'text-xweak'}
-              />
-              <TransitionText
-                collapsed={collapsed}
-                size="small"
-                margin={{ left: '16px' }}
-              >
-                {name}
-              </TransitionText>
-              {Array.isArray(items) && items.length > 0 && (
-                <>
-                  <Box flex="grow" />
-                  <DeployIconContainer
-                    collapsed={collapsed}
-                    deployed={deployedItems.includes(name)}
-                    align="center"
-                    justify="center"
-                    flex={{ shrink: 0 }}
-                  >
-                    <CollapseIcon
-                      color="text-xweak"
-                      size={6}
-                    />
-                  </DeployIconContainer>
-                  <Box width="16px" />
-                </>
-              )}
-            </Item>
-            {Array.isArray(items) && items.length > 0 && (
-              <ChildrenContainer
-                id={`sidebar-children-${name}`}
-                deployed={deployedItems.includes(name)}
-                height={`${deployedItems.includes(name) ? childrenHeights[name] || 0 : 0}px`}
-                overflow="hidden"
-              >
-                <div>
-                  {renderItems(items, marginLeft + 6)}
-                </div>
-              </ChildrenContainer>
+              {name}
+            </TransitionText>
+            {hasChildren && (
+              <>
+                <Box flex="grow" />
+                <DeployIconContainer
+                  collapsed={collapsed}
+                  deployed={deployedItems.includes(id)}
+                  align="center"
+                  justify="center"
+                  flex={{ shrink: 0 }}
+                >
+                  <CollapseIcon
+                    color="text-xweak"
+                    size={6}
+                  />
+                </DeployIconContainer>
+                <Box width="16px" />
+              </>
             )}
-          </Fragment>
-        ))}
-      </>
-    )
+          </Item>
+          {hasChildren && (
+            <ChildrenContainer
+              id={`sidebar-children-${id}`}
+              deployed={deployedItems.includes(id)}
+              height={`${deployedItems.includes(id) ? childrenHeights[id] || 0 : 0}px`}
+              overflow="hidden"
+            >
+              <div>
+                {renderItems(items, marginLeft + 6)}
+              </div>
+            </ChildrenContainer>
+          )}
+        </Fragment>
+      )
+    })
   }
 
   return (
