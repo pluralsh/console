@@ -86,12 +86,13 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
   const activeId = getActiveId()
 
   useEffect(() => {
-    const bottomRect = sidebarBottomRef.current.getBoundingClientRect()
-    console.log(bottomRect)
-    const parentRect = sidebarBottomRef.current.parentElement.getBoundingClientRect()
-    console.log(parentRect)
-    console.log(parentRect.height - bottomRect.height - 24 - 16)
-    setSidebarcontentMaxHeight(`${parentRect.height - bottomRect.height - 24 - 16}px`)
+    setContentHeight()
+
+    window.addEventListener('resize', setContentHeight)
+
+    return () => {
+      window.removeEventListener('resize', setContentHeight)
+    }
   }, [])
 
   useEffect(() => {
@@ -109,6 +110,13 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
 
     setChildrenHeights(nextChildrenHeights)
   }, [items])
+
+  function setContentHeight() {
+    const bottomRect = sidebarBottomRef.current.getBoundingClientRect()
+    const parentRect = sidebarBottomRef.current.parentElement.getBoundingClientRect()
+
+    setSidebarcontentMaxHeight(`${parentRect.height - bottomRect.height - 24 - 16}px`)
+  }
 
   function toggleCollapsed() {
     setCollapsed(!collapsed)
@@ -230,7 +238,7 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
       }}
       pad="24px 0px 16px 16px"
       flex={{ grow: 0, shrink: 0 }}
-      overflow="hidden"
+      overflow="scroll"
     >
       <Box
         overflow="scroll"
