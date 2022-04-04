@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Box, Text } from 'grommet'
 import styled from 'styled-components'
 import { normalizeColor } from 'grommet/utils'
@@ -45,16 +45,52 @@ const TransitionText = styled(Text)`
   display: block;
   opacity: ${({ collapsed }) => collapsed ? 0 : 1};
   visibility: ${({ collapsed }) => collapsed ? 'hidden' : 'visible'};
-  transition: opacity ${({ collapsed }) => collapsed ? 200 : 500}ms ease, visibility 200ms linear;
+  transition: opacity ${({ collapsed }) => collapsed ? 200 : 500}ms ease ${({ collapsed }) => collapsed ? 0 : 50}ms, visibility 200ms linear;
 `
 
 const TransitionTextNoSelect = styled(TransitionText)`
   user-select: none;
 `
 
+const DeployIconContainer = styled(Box)`
+  cursor: pointer;
+  transition: all 300ms ease;
+  transform: ${({ deployed }) => deployed ? 'rotate(0deg)' : 'rotate(180deg)'};
+  opacity: ${({ collapsed }) => collapsed ? 0 : 1};
+  visibility: ${({ collapsed }) => collapsed ? 'hidden' : 'visible'};
+  transition: opacity ${({ collapsed }) => collapsed ? 200 : 500}ms ease ${({ collapsed }) => collapsed ? 0 : 100}ms, visibility 200ms linear, transform 300ms ease;
+`
+
+const ChildrenContainer = styled(Box)`
+  transition: height 300ms ease;
+
+  & > * {
+    transform: ${({ deployed }) => deployed ? 'translate(0px, 0px)' : 'translate(-4px, -4px)'};
+    opacity: ${({ deployed }) => deployed ? 1 : 0};
+    visibility: ${({ deployed }) => deployed ? 'visible' : 'hidden'};
+    transition: opacity ${({ deployed }) => deployed ? 500 : 200}ms ease ${({ deployed }) => deployed ? 0 : 0}ms, visibility 200ms linear, transform 300ms ease;
+  }
+`
+
 function Sidebar({ items, activeItemName, user, onItemClick = () => null }) {
   const [collapsed, setCollapsed] = useState(false)
   const [deployedItems, setDeployedItems] = useState(activeItemName ? [activeItemName] : [])
+  const [childrenHeights, setChildrenHeights] = useState({})
+
+  useEffect(() => {
+    const nextChildrenHeights = {}
+
+    items
+      .filter(({ items }) => Array.isArray(items) && items.length > 0)
+      .forEach(({ name }) => {
+        const element = document.getElementById(`sidebar-children-${name}`)
+        const div = element.firstElementChild
+
+        nextChildrenHeights[name] = div.clientHeight
+      })
+
+    setChildrenHeights(nextChildrenHeights)
+  }, [items])
 
   function handleDeployItem(name) {
     if (deployedItems.includes(name)) {
@@ -63,6 +99,73 @@ function Sidebar({ items, activeItemName, user, onItemClick = () => null }) {
     else {
       setDeployedItems([...deployedItems, name])
     }
+  }
+
+  function renderItems(items, marginLeft = 0) {
+    return (
+      <>
+        {items.map(({ name, Icon, items }) => (
+          <Fragment key={name}>
+            <Item
+              id={activeItemName === name ? 'active-item' : ''}
+              active={activeItemName === name}
+              direction="row"
+              align="center"
+              width="full"
+              height="40px"
+              round="4px"
+              margin={{ left: `${marginLeft}px` }}
+              pad={{ left: '12px' }}
+              color="text-xweak"
+              overflow="hidden"
+              onClick={() => handleDeployItem(name) || onItemClick(name)}
+            >
+              <Icon
+                size={14}
+                color={activeItemName === name ? 'text-strong' : 'text-xweak'}
+              />
+              <TransitionText
+                collapsed={collapsed}
+                size="small"
+                margin={{ left: '16px' }}
+              >
+                {name}
+              </TransitionText>
+              {Array.isArray(items) && items.length > 0 && (
+                <>
+                  <Box flex="grow" />
+                  <DeployIconContainer
+                    collapsed={collapsed}
+                    deployed={deployedItems.includes(name)}
+                    align="center"
+                    justify="center"
+                    flex={{ shrink: 0 }}
+                  >
+                    <CollapseIcon
+                      color="text-xweak"
+                      size={6}
+                    />
+                  </DeployIconContainer>
+                  <Box width="16px" />
+                </>
+              )}
+            </Item>
+            {Array.isArray(items) && items.length > 0 && (
+              <ChildrenContainer
+                id={`sidebar-children-${name}`}
+                deployed={deployedItems.includes(name)}
+                height={`${deployedItems.includes(name) ? childrenHeights[name] || 0 : 0}px`}
+                overflow="hidden"
+              >
+                <div>
+                  {renderItems(items, marginLeft + 6)}
+                </div>
+              </ChildrenContainer>
+            )}
+          </Fragment>
+        ))}
+      </>
+    )
   }
 
   return (
@@ -77,51 +180,7 @@ function Sidebar({ items, activeItemName, user, onItemClick = () => null }) {
       pad="24px 16px 16px 16px"
     >
       <div id="sidebar-items">
-        {items.map(({ name, Icon, items }) => (
-          <Item
-            id={activeItemName === name ? 'active-item' : ''}
-            active={activeItemName === name}
-            key={name}
-            direction="row"
-            align="center"
-            width="full"
-            height="40px"
-            round="4px"
-            pad={{ left: 'small' }}
-            color="text-xweak"
-            overflow="hidden"
-            onClick={() => handleDeployItem(name) || onItemClick(name)}
-          >
-            <Icon
-              size={14}
-              color={activeItemName === name ? 'text-strong' : 'text-xweak'}
-            />
-            <TransitionText
-              collapsed={collapsed}
-              size="small"
-              margin={{ left: '16px' }}
-            >
-              {name}
-            </TransitionText>
-            {!!items && items.length > 0 && (
-              <>
-                <Box flex="grow" />
-                <CollapseIconContainer
-                  collapsed={!deployedItems.includes(name)}
-                  align="center"
-                  justify="center"
-                  flex={{ shrink: 0 }}
-                >
-                  <CollapseIcon
-                    color="text-xweak"
-                    size={6}
-                  />
-                </CollapseIconContainer>
-                <Box width="16px" />
-              </>
-            )}
-          </Item>
-        ))}
+        {renderItems(items)}
       </div>
       <Box flex="grow" />
       <Box
