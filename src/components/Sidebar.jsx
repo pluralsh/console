@@ -1,9 +1,7 @@
-import { Fragment, useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { Box, Text } from 'grommet'
 import styled from 'styled-components'
 import { normalizeColor } from 'grommet/utils'
-
-import usePrevious from '../hooks/usePrevious'
 
 import Avatar from './Avatar'
 import CollapseIcon from './icons/CollapseIcon'
@@ -39,6 +37,8 @@ const Item = styled(Box)`
 `
 
 const CollapseIconContainer = styled(Box)`
+  min-width: 24px;
+  min-height: 24px;
   cursor: pointer;
   transition: all 300ms ease;
   transform: ${({ collapsed }) => collapsed ? 'rotate(180deg)' : 'rotate(0deg)'};
@@ -76,18 +76,27 @@ const ChildrenContainer = styled(Box)`
 `
 
 function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
+  const sidebarBottomRef = useRef()
   const [collapsed, setCollapsed] = useState(false)
   const [deployedIds, setDeployedIds] = useState(activeUrl ? [activeUrl] : [])
   const [deployedIdsBeforeCollapse, setDeployedIdsBeforeCollapse] = useState(deployedIds)
   const [childrenHeights, setChildrenHeights] = useState({})
-  const itemsWithChildren = items.filter(({ items }) => Array.isArray(items) && items.length > 0)
+  const [sidebarContentMaxHeight, setSidebarcontentMaxHeight] = useState('100%')
 
   const activeId = getActiveId()
 
   useEffect(() => {
+    const bottomRect = sidebarBottomRef.current.getBoundingClientRect()
+    const parentRect = sidebarBottomRef.current.parentElement.getBoundingClientRect()
+    setSidebarcontentMaxHeight(`${parentRect.height - bottomRect.height - 24 - 16}px`)
+  }, [])
+
+  useEffect(() => {
     const nextChildrenHeights = {}
 
-    itemsWithChildren.forEach(({ url, name }) => {
+    items
+    .filter(({ items }) => Array.isArray(items) && items.length > 0)
+    .forEach(({ url, name }) => {
       const id = url || name
       const element = document.getElementById(`sidebar-children-${id}`)
       const div = element.firstElementChild
@@ -96,7 +105,7 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
     })
 
     setChildrenHeights(nextChildrenHeights)
-  }, [itemsWithChildren])
+  }, [items])
 
   function toggleCollapsed() {
     setCollapsed(!collapsed)
@@ -124,7 +133,9 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
 
     if (activeItem) return activeItem.url || activeItem.name
 
-    const activeParentItem = itemsWithChildren.find(({ items }) => items.find(({ url }) => url === activeUrl))
+    const activeParentItem = items
+    .filter(({ items }) => Array.isArray(items) && items.length > 0)
+    .find(({ items }) => items.find(({ url }) => url === activeUrl))
 
     if (collapsed && activeParentItem) return activeParentItem.url || activeParentItem.name
 
@@ -147,7 +158,7 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
             active={activeId === id}
             direction="row"
             align="center"
-            width="full"
+            width={`calc(100% - ${marginLeft}px)`}
             height="40px"
             round="4px"
             margin={{ left: `${marginLeft}px` }}
@@ -155,6 +166,7 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
             color="text-xweak"
             overflow="hidden"
             onClick={() => hasChildren && handleDeployItem(id) || onItemClick(id)}
+            flex={{ shrink: 0 }}
           >
             <Icon
               size={14}
@@ -192,6 +204,7 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
               deployed={deployedIds.includes(id)}
               height={`${deployedIds.includes(id) ? childrenHeights[id] || 0 : 0}px`}
               overflow="hidden"
+              flex={{ shrink: 0 }}
             >
               <div>
                 {renderItems(items, marginLeft + 6)}
@@ -212,69 +225,83 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
         size: 'small',
         side: 'right',
       }}
-      pad="24px 16px 16px 16px"
+      pad="24px 0px 16px 16px"
+      flex={{ grow: 0, shrink: 0 }}
     >
-      <div id="sidebar-items">
-        {renderItems(items)}
-      </div>
-      <Box flex="grow" />
       <Box
-        direction="row"
-        align="center"
-        overflow="hidden"
+        overflow="scroll"
+        flex="grow"
+        style={{ maxHeight: sidebarContentMaxHeight }}
       >
-        <CollapseIconContainer
-          collapsed={collapsed}
-          background="background-light"
-          round="full"
-          align="center"
-          justify="center"
-          width="24px"
-          height="24px"
-          onClick={toggleCollapsed}
-          flex={{ shrink: 0 }}
+        <Box
+          id="sidebar-items"
+          pad={{ right: '16px' }}
         >
-          <CollapseIcon
-            color="text-xweak"
-            size={6}
-          />
-        </CollapseIconContainer>
-        <TransitionTextNoSelect
-          collapsed={collapsed}
-          size="small"
-          color="text-xweak"
-          margin={{ left: '16px' }}
-        >
-          Collapse
-        </TransitionTextNoSelect>
+          {renderItems(items)}
+        </Box>
       </Box>
       <Box
-        direction="row"
-        align="center"
-        margin={{ top: '16px' }}
+        ref={sidebarBottomRef}
+        flex={{ grow: 0, shrink: 0 }}
       >
-        <Avatar
-          name={user.name}
-          imageUrl={user.imageUrl}
-        />
-        <Box pad={{ left: '8px' }}>
-          <TransitionText
+        <Box
+          direction="row"
+          align="center"
+          overflow="hidden"
+          margin={{ top: '16px' }}
+        >
+          <CollapseIconContainer
             collapsed={collapsed}
-            truncate
-            weight="bold"
+            background="background-light"
+            round="full"
+            align="center"
+            justify="center"
+            width="24px"
+            height="24px"
+            onClick={toggleCollapsed}
+          >
+            <CollapseIcon
+              color="text-xweak"
+              size={6}
+            />
+          </CollapseIconContainer>
+          <TransitionTextNoSelect
+            collapsed={collapsed}
             size="small"
             color="text-xweak"
+            margin={{ left: '16px' }}
           >
-            {user.name}
-          </TransitionText>
-          <TransitionText
-            collapsed={collapsed}
-            truncate
-            size="xsmall"
-            color="text-xweak"
-          >
-            {user.email}
-          </TransitionText>
+            Collapse
+          </TransitionTextNoSelect>
+        </Box>
+        <Box
+          direction="row"
+          align="center"
+          margin={{ top: '16px' }}
+        >
+          <Avatar
+            name={user.name}
+            imageUrl={user.imageUrl}
+          />
+          <Box pad={{ left: '8px' }}>
+            <TransitionText
+              collapsed={collapsed}
+              truncate
+              weight="bold"
+              size="small"
+              color="text-xweak"
+            >
+              {user.name}
+            </TransitionText>
+            <TransitionText
+              collapsed={collapsed}
+              truncate
+              size="xsmall"
+              color="text-xweak"
+            >
+              {user.email}
+            </TransitionText>
+          </Box>
         </Box>
       </Box>
     </Container>
