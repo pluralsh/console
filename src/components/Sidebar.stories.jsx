@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 import Sidebar from './Sidebar'
 import ScrollIcon from './icons/ScrollIcon'
 
@@ -7,9 +9,14 @@ export default {
 }
 
 function Template(args) {
+  const { items, activeItemName: initialActiveItemName } = args
+  const [activeItemName, setActiveItemName] = useState(initialActiveItemName || items[0].name)
+
   return (
     <Sidebar
       {...args}
+      activeItemName={activeItemName}
+      onItemClick={setActiveItemName}
     />
   )
 }
@@ -29,10 +36,54 @@ Default.args = {
     {
       name: 'Users',
       Icon: ScrollIcon,
+      items: [
+        {
+          name: 'User Attributes',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Password',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Installations',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Access Tokens',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Public Keys',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Eab Credentials',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Logout',
+          Icon: ScrollIcon,
+        },
+      ],
     },
     {
       name: 'Accounts',
       Icon: ScrollIcon,
+      items: [
+        {
+          name: 'Accounts',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Accounts',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Accounts',
+          Icon: ScrollIcon,
+        },
+      ],
     },
     {
       name: 'Upgrades',
@@ -41,6 +92,64 @@ Default.args = {
     {
       name: 'Incidents',
       Icon: ScrollIcon,
+      items: [
+        {
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        },
+      ],
     },
     {
       name: 'Integrations',
@@ -49,6 +158,68 @@ Default.args = {
     {
       name: 'Audits',
       Icon: ScrollIcon,
+      items: [
+        {
+          name: 'Audits',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Audits',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Audits',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Audits',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Audits',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Audits',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Audits',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Audits',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Audits',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Audits',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Audits',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Audits',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Audits',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Audits',
+          Icon: ScrollIcon,
+        },
+        {
+          name: 'Audits',
+          Icon: ScrollIcon,
+        },
+      ],
     },
   ],
   activeItemName: 'Explore',

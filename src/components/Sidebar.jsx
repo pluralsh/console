@@ -14,7 +14,11 @@ const Item = styled(Box)`
   cursor: pointer;
   transition: all 150ms linear;
 
-  #sidebar-items:not(:focus-within):not(:hover) > &#active-item,
+  &#active-item {
+    font-weight: 600;
+  }
+
+  #sidebar-items:not(:hover) > &#active-item,
   &:hover {
     color: ${({ theme }) => normalizeColor('text-strong', theme)};
     background-color: ${({ theme }) => normalizeColor('background-light', theme)};
@@ -43,12 +47,14 @@ const TransitionText = styled(Text)`
   transition: opacity ${({ collapsed }) => collapsed ? 200 : 500}ms ease, visibility 200ms linear;
 `
 
-function Sidebar({ items, activeItemName, user }) {
+function Sidebar({ items, activeItemName, user, onItemClick = () => null }) {
   const [collapsed, setCollapsed] = useState(false)
+
+  console.log(onItemClick)
 
   return (
     <Container
-      width={`${collapsed ? 72 : 208}px`}
+      width={`${collapsed ? 74 : 208}px`}
       background="background-front"
       border={{
         color: 'border',
@@ -71,6 +77,7 @@ function Sidebar({ items, activeItemName, user }) {
             pad={{ left: 'small' }}
             color="text-xweak"
             overflow="hidden"
+            onClick={() => onItemClick(name)}
           >
             <Icon
               size={14}
@@ -131,6 +138,7 @@ function Sidebar({ items, activeItemName, user }) {
             collapsed={collapsed}
             truncate
             weight="bold"
+            size="small"
             color="text-xweak"
           >
             {user.name}
@@ -138,7 +146,7 @@ function Sidebar({ items, activeItemName, user }) {
           <TransitionText
             collapsed={collapsed}
             truncate
-            size="small"
+            size="xsmall"
             color="text-xweak"
           >
             {user.email}
