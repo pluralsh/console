@@ -13,6 +13,7 @@ const Container = styled(Box)`
 const Item = styled(Box)`
   cursor: pointer;
   transition: all 150ms linear;
+  user-select: none;
 
   &#active-item {
     font-weight: 600;
@@ -47,10 +48,22 @@ const TransitionText = styled(Text)`
   transition: opacity ${({ collapsed }) => collapsed ? 200 : 500}ms ease, visibility 200ms linear;
 `
 
+const TransitionTextNoSelect = styled(TransitionText)`
+  user-select: none;
+`
+
 function Sidebar({ items, activeItemName, user, onItemClick = () => null }) {
   const [collapsed, setCollapsed] = useState(false)
+  const [deployedItems, setDeployedItems] = useState(activeItemName ? [activeItemName] : [])
 
-  console.log(onItemClick)
+  function handleDeployItem(name) {
+    if (deployedItems.includes(name)) {
+      setDeployedItems(deployedItems.filter(item => item !== name))
+    }
+    else {
+      setDeployedItems([...deployedItems, name])
+    }
+  }
 
   return (
     <Container
@@ -64,7 +77,7 @@ function Sidebar({ items, activeItemName, user, onItemClick = () => null }) {
       pad="24px 16px 16px 16px"
     >
       <div id="sidebar-items">
-        {items.map(({ name, Icon }) => (
+        {items.map(({ name, Icon, items }) => (
           <Item
             id={activeItemName === name ? 'active-item' : ''}
             active={activeItemName === name}
@@ -77,7 +90,7 @@ function Sidebar({ items, activeItemName, user, onItemClick = () => null }) {
             pad={{ left: 'small' }}
             color="text-xweak"
             overflow="hidden"
-            onClick={() => onItemClick(name)}
+            onClick={() => handleDeployItem(name) || onItemClick(name)}
           >
             <Icon
               size={14}
@@ -90,6 +103,23 @@ function Sidebar({ items, activeItemName, user, onItemClick = () => null }) {
             >
               {name}
             </TransitionText>
+            {!!items && items.length > 0 && (
+              <>
+                <Box flex="grow" />
+                <CollapseIconContainer
+                  collapsed={!deployedItems.includes(name)}
+                  align="center"
+                  justify="center"
+                  flex={{ shrink: 0 }}
+                >
+                  <CollapseIcon
+                    color="text-xweak"
+                    size={6}
+                  />
+                </CollapseIconContainer>
+                <Box width="16px" />
+              </>
+            )}
           </Item>
         ))}
       </div>
@@ -115,14 +145,14 @@ function Sidebar({ items, activeItemName, user, onItemClick = () => null }) {
             size={6}
           />
         </CollapseIconContainer>
-        <TransitionText
+        <TransitionTextNoSelect
           collapsed={collapsed}
           size="small"
           color="text-xweak"
           margin={{ left: '16px' }}
         >
           Collapse
-        </TransitionText>
+        </TransitionTextNoSelect>
       </Box>
       <Box
         direction="row"
