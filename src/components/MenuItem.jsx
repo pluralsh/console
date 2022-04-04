@@ -14,7 +14,7 @@ const Item = styled(Box)`
 function MenuItem(props) {
   return (
     <Item
-      pad="medium"
+      pad={{ vertical: '12px', horizontal: '16px' }}
       {...props}
     />
   )
