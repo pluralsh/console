@@ -10,6 +10,16 @@ const Container = styled(Box)`
   transition: width 300ms ease;
 `
 
+const ContentContainer = styled(Box)`
+
+`
+// Possible enhancement:
+// -ms-overflow-style: none;  // IE 10+
+// scrollbar-width: none;  // Firefox
+// &::-webkit-scrollbar {
+//   display: none;  // Safari and Chrome
+// }
+
 const Item = styled(Box)`
   cursor: pointer;
   transition: all 150ms linear;
@@ -238,10 +248,9 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
       }}
       pad="24px 0px 16px 16px"
       flex={{ grow: 0, shrink: 0 }}
-      overflow="scroll"
     >
-      <Box
-        overflow="scroll"
+      <ContentContainer
+        overflow={{ vertical: 'auto' }}
         flex="grow"
         style={{ maxHeight: sidebarContentMaxHeight, height: sidebarContentMaxHeight }}
       >
@@ -251,7 +260,7 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
         >
           {renderItems(items)}
         </Box>
-      </Box>
+      </ContentContainer>
       <Box
         ref={sidebarBottomRef}
         flex={{ grow: 0, shrink: 0 }}
