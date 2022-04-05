@@ -169,7 +169,7 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
             active={activeId === id}
             direction="row"
             align="center"
-            width={`calc(100% - ${marginLeft}px)`}
+            width="full"
             height="40px"
             round="4px"
             margin={{ left: `${marginLeft}px` }}
