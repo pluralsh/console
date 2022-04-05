@@ -3,13 +3,19 @@ import createIcon from './createIcon'
 export default createIcon(({ size, color, ...props }) => (
   <svg
     width={size}
+    height={size}
     viewBox="0 0 16 16"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     {...props}
   >
     <path
-      d="M2 7.09998V9.29998"
+      d="M0 12.4H7.2"
+      stroke={color}
+      strokeMiterlimit="10"
+    />
+    <path
+      d="M3.59961 16V8.80005"
       stroke={color}
       strokeMiterlimit="10"
     />
@@ -19,12 +25,12 @@ export default createIcon(({ size, color, ...props }) => (
       strokeMiterlimit="10"
     />
     <path
-      d="M0.5 12.7V10C0.5 9.60005 0.8 9.30005 1.2 9.30005H16"
+      d="M8 9.30005H16"
       stroke={color}
       strokeMiterlimit="10"
     />
     <path
-      d="M15.5 12V14.7C15.5 15.1 15.2 15.4 14.8 15.4H0"
+      d="M15.5 12V14.7C15.5 15.1 15.2 15.4 14.8 15.4H8"
       stroke={color}
       strokeMiterlimit="10"
     />
@@ -42,4 +48,3 @@ export default createIcon(({ size, color, ...props }) => (
     />
   </svg>
 ))
-

@@ -9,27 +9,31 @@ export default createIcon(({ size, color, ...props }) => (
     {...props}
   >
     <path
-      d="M1.2002 15.5H9.8002C11.2002 15.5 12.3002 14.4 12.3002 13V2.69995"
+      d="M16 0H0.5V3.6H16V0Z"
+      fill={color}
+    />
+    <path
+      d="M16 12.3H1.4C0.9 12.3 0.5 12.7 0.5 13.2V16"
       stroke={color}
       strokeMiterlimit="10"
     />
     <path
-      d="M14.8002 0.5H6.2002C4.8002 0.5 3.7002 1.6 3.7002 3V13.3"
+      d="M16 7.69995H1.4C0.9 7.69995 0.5 8.09995 0.5 8.59995V10.3"
       stroke={color}
       strokeMiterlimit="10"
     />
     <path
-      d="M6 4.59998H10"
+      d="M12.7002 0V16"
       stroke={color}
       strokeMiterlimit="10"
     />
     <path
-      d="M6 7.80005H8.7"
+      d="M6.2002 0V16"
       stroke={color}
       strokeMiterlimit="10"
     />
     <path
-      d="M6 11H10"
+      d="M0.5 0V5.7"
       stroke={color}
       strokeMiterlimit="10"
     />

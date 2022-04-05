@@ -1,7 +1,7 @@
-import MarketIcon from './MarketIcon'
-import PeopleIcon from './PeopleIcon'
-import PersonIcon from './PersonIcon'
-import ScrollIcon from './ScrollIcon'
+import MarketPlusIcon from './MarketPlusIcon'
+import PeoplePlusIcon from './PeoplePlusIcon'
+import PersonPlusIcon from './PersonPlusIcon'
+import ScrollPlusIcon from './ScrollPlusIcon'
 import BotIcon from './BotIcon'
 import BrowserIcon from './BrowserIcon'
 import BundleIcon from './BundleIcon'
@@ -49,12 +49,46 @@ import ListIcon from './ListIcon'
 import LogoutIcon from './LogoutIcon'
 import LogsIcon from './LogsIcon'
 import MagnifyingGlassIcon from './MagnifyingGlassIcon'
+import MarketIcon from './MarketIcon'
+import MessagesIcon from './MessagesIcon'
+import NetworkInIcon from './NetworkInIcon'
+import NetworkInterfaceIcon from './NetworkInterfaceIcon'
+import OAuthIcon from './OAuthIcon'
+import OwnerIcon from './OwnerIcon'
+import PackageIcon from './PackageIcon'
+import PadlockIcon from './PadlockIcon'
+import PaperclipIcon from './PaperclipIcon'
+import PencilIcon from './PencilIcon'
+import PeopleIcon from './PeopleIcon'
+import PersonIcon from './PersonIcon'
+import PlanIcon from './PlanIcon'
+import PushPinIcon from './PushPinIcon'
+import ReloadIcon from './ReloadIcon'
+import RocketIcon from './RocketIcon'
+import RunBookIcon from './RunBookIcon'
+import ScrollIcon from './ScrollIcon'
+import SendMessageIcon from './SendMessageIcon'
+import ServersIcon from './ServersIcon'
+import ShipIcon from './ShipIcon'
+import SirenIcon from './SirenIcon'
+import SortAscIcon from './SortAscIcon'
+import SortDescIcon from './SortDescIcon'
+import StatusIpIcon from './StatusIpIcon'
+import StatusOkIcon from './StatusOkIcon'
+import SuitcaseIcon from './SuitcaseIcon'
+import TableIcon from './TableIcon'
+import TagIcon from './TagIcon'
+import TashCanIcon from './TashCanIcon'
+import UpdatesIcon from './UpdatesIcon'
+import VolumesIcon from './VolumesIcon'
+import WebhooksIcon from './WebhooksIcon'
+import CloseIcon from './CloseIcon'
 
 const icons = {
-  MarketIcon,
-  PeopleIcon,
-  PersonIcon,
-  ScrollIcon,
+  MarketPlusIcon,
+  PeoplePlusIcon,
+  PersonPlusIcon,
+  ScrollPlusIcon,
   BotIcon,
   BrowserIcon,
   BundleIcon,
@@ -102,11 +136,45 @@ const icons = {
   LogoutIcon,
   LogsIcon,
   MagnifyingGlassIcon,
+  MarketIcon,
+  MessagesIcon,
+  NetworkInIcon,
+  NetworkInterfaceIcon,
+  OAuthIcon,
+  OwnerIcon,
+  PackageIcon,
+  PadlockIcon,
+  PaperclipIcon,
+  PencilIcon,
+  PeopleIcon,
+  PersonIcon,
+  PlanIcon,
+  PushPinIcon,
+  ReloadIcon,
+  RocketIcon,
+  RunBookIcon,
+  ScrollIcon,
+  SendMessageIcon,
+  ServersIcon,
+  ShipIcon,
+  SirenIcon,
+  SortAscIcon,
+  SortDescIcon,
+  StatusIpIcon,
+  StatusOkIcon,
+  SuitcaseIcon,
+  TableIcon,
+  TagIcon,
+  TashCanIcon,
+  UpdatesIcon,
+  VolumesIcon,
+  WebhooksIcon,
+  CloseIcon,
 }
 
 export default {
   title: 'Icons',
-  component: MarketIcon,
+  component: MarketPlusIcon,
 }
 
 function Template(args) {
