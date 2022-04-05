@@ -28,6 +28,27 @@ import EyeIcon from './EyeIcon'
 import FileIcon from './FileIcon'
 import FiltersIcon from './FiltersIcon'
 import FingerPrintIcon from './FingerPrintIcon'
+import FolderIcon from './FolderIcon'
+import GearTrainIcon from './GearTrainIcon'
+import GitHubIcon from './GitHubIcon'
+import GlobeIcon from './GlobeIcon'
+import GraphIcon from './GraphIcon'
+import HamburgerMenuIcon from './HamburgerMenuIcon'
+import HistoryIcon from './HistoryIcon'
+import IdIcon from './IdIcon'
+import InstallIcon from './InstallIcon'
+import InstalledIcon from './InstalledIcon'
+import InvoicesIcon from './InvoicesIcon'
+import KeyPairIcon from './KeyPairIcon'
+import KeyIcon from './KeyIcon'
+import LifePreserverIcon from './LifePreserverIcon'
+import LightingIcon from './LightingIcon'
+import LinkoutIcon from './LinkoutIcon'
+import LinksIcon from './LinksIcon'
+import ListIcon from './ListIcon'
+import LogoutIcon from './LogoutIcon'
+import LogsIcon from './LogsIcon'
+import MagnifyingGlassIcon from './MagnifyingGlassIcon'
 
 const icons = {
   MarketIcon,
@@ -60,6 +81,27 @@ const icons = {
   FileIcon,
   FiltersIcon,
   FingerPrintIcon,
+  FolderIcon,
+  GearTrainIcon,
+  GitHubIcon,
+  GlobeIcon,
+  GraphIcon,
+  HamburgerMenuIcon,
+  HistoryIcon,
+  IdIcon,
+  InstallIcon,
+  InstalledIcon,
+  InvoicesIcon,
+  KeyPairIcon,
+  KeyIcon,
+  LifePreserverIcon,
+  LightingIcon,
+  LinkoutIcon,
+  LinksIcon,
+  ListIcon,
+  LogoutIcon,
+  LogsIcon,
+  MagnifyingGlassIcon,
 }
 
 export default {
@@ -85,10 +127,11 @@ function Template(args) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
+            width: 32 + 16,
           }}
         >
           <span style={{ marginBottom: '0.25rem', fontSize: '0.5rem' }}>
-            {name}
+            {name.replace('Icon', '')}
           </span>
           <Icon {...args} />
         </div>

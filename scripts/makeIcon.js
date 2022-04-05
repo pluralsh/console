@@ -21,12 +21,18 @@ async function main() {
     lines.shift()
     const name = lines.shift()
 
-    console.log('Processing', name)
+    console.log(`${name}Icon`)
 
     const svg = lines.join('\n')
     const fileContent = makeFile(svg)
 
     const results = await eslint.lintText(fileContent)
+
+    if (!results[0].output) {
+      console.log(results[0])
+
+      throw new Error('No output')
+    }
 
     const result = results[0].output
       .replace('width="16"', 'width={size}')
