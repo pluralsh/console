@@ -11,7 +11,7 @@ function Tag({ children, ...props }) {
   return (
     <Wrapper
       background="background-light"
-      pad={{ horizontal: 'medium' }}
+      pad={{ horizontal: '8px' }}
       align="center"
       justify="center"
       {...props}
