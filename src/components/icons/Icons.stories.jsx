@@ -8,6 +8,26 @@ import BundleIcon from './BundleIcon'
 import CertificateIcon from './CertificateIcon'
 import CheckIcon from './CheckIcon'
 import ChecklistIcon from './ChecklistIcon'
+import ChronjobIcon from './ChronjobIcon'
+import ClusterIcon from './ClusterIcon'
+import ComponentsIcon from './ComponentsIcon'
+import ComputerNodeIcon from './ComputerNodeIcon'
+import CopyIcon from './CopyIcon'
+import CraneIcon from './CraneIcon'
+import CreditCardIcon from './CreditCardIcon'
+import DashboardIcon from './DashboardIcon'
+import DeploymentIcon from './DeploymentIcon'
+import DockerTagIcon from './DockerTagIcon'
+import DomainsIcon from './DomainsIcon'
+import DownloadIcon from './DownloadIcon'
+import EditIcon from './EditIcon'
+import EmojiHoverIcon from './EmojiHoverIcon'
+import EmojiIcon from './EmojiIcon'
+import ErrorIcon from './ErrorIcon'
+import EyeIcon from './EyeIcon'
+import FileIcon from './FileIcon'
+import FiltersIcon from './FiltersIcon'
+import FingerPrintIcon from './FingerPrintIcon'
 
 const icons = {
   MarketIcon,
@@ -20,6 +40,26 @@ const icons = {
   CertificateIcon,
   CheckIcon,
   ChecklistIcon,
+  ChronjobIcon,
+  ClusterIcon,
+  ComponentsIcon,
+  ComputerNodeIcon,
+  CopyIcon,
+  CraneIcon,
+  CreditCardIcon,
+  DashboardIcon,
+  DeploymentIcon,
+  DockerTagIcon,
+  DomainsIcon,
+  DownloadIcon,
+  EditIcon,
+  EmojiHoverIcon,
+  EmojiIcon,
+  ErrorIcon,
+  EyeIcon,
+  FileIcon,
+  FiltersIcon,
+  FingerPrintIcon,
 }
 
 export default {
@@ -30,7 +70,12 @@ export default {
 function Template(args) {
 
   return (
-    <div style={{ display: 'flex' }}>
+    <div style={{
+      display: 'flex',
+      flexWrap: 'wrap',
+      maxWidth: '100%',
+    }}
+    >
       {Object.entries(icons).map(([name, Icon]) => (
         <div
           key={name}
