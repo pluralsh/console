@@ -1,0 +1,46 @@
+const fs = require('fs')
+const path = require('path')
+
+const { ESLint } = require('eslint')
+
+const makeFile = svg => `import createIcon from './createIcon'
+
+export default createIcon(({ size, color, ...props }) => (
+  ${svg}))
+
+`
+
+async function main() {
+  const inputPath = path.resolve(__dirname, './input.txt')
+  const rawInput = fs.readFileSync(inputPath, 'utf8')
+  const inputArray = rawInput.split('@@@')
+  const eslint = new ESLint({ fix: true, baseConfig: { extends: 'pluralsh' } })
+
+  for (const input of inputArray) {
+    const lines = input.split('\n')
+    lines.shift()
+    const name = lines.shift()
+
+    console.log('Processing', name)
+
+    const svg = lines.join('\n')
+    const fileContent = makeFile(svg)
+
+    const results = await eslint.lintText(fileContent)
+
+    const result = results[0].output
+      .replace('width="16"', 'width={size}')
+      .replace('height="16"\n    ', '')
+      .replace('"\n  >', '"\n    {...props}\n  >')
+      .replace(/stroke="white"/g, 'stroke={color}')
+      .replace(/fill="white"/g, 'fill={color}')
+
+    const outputPath = path.resolve(__dirname, `../src/components/icons/${name}Icon.jsx`)
+
+    fs.writeFileSync(outputPath, result, 'utf8')
+  }
+
+  console.log('Done!')
+}
+
+main()
