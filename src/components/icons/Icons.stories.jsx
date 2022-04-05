@@ -1,3 +1,4 @@
+import CollapseIcon from './CollapseIcon'
 import MarketPlusIcon from './MarketPlusIcon'
 import PeoplePlusIcon from './PeoplePlusIcon'
 import PersonPlusIcon from './PersonPlusIcon'
@@ -85,6 +86,7 @@ import WebhooksIcon from './WebhooksIcon'
 import CloseIcon from './CloseIcon'
 
 const icons = {
+  CollapseIcon,
   MarketPlusIcon,
   PeoplePlusIcon,
   PersonPlusIcon,
