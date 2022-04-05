@@ -3,10 +3,13 @@ import { Box, Text } from 'grommet'
 import styled from 'styled-components'
 
 const Wrapper = styled(Box)`
+  min-width: 44px;
   width: 44px;
+  min-height: 44px;
   height: 44px;
   border-radius: 2px;
   overflow: hidden;
+  user-select: none;
 `
 
 const Img = styled.img`
@@ -47,6 +50,7 @@ function Avatar({ name, imageUrl, ...props }) {
       background={imageUrl ? 'transparent' : 'accent-blue'}
       justify="center"
       align="center"
+      flex={{ shrink: 0 }}
       {...props}
     >
       {imageUrl ? renderImage() : renderName()}
