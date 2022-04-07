@@ -337,13 +337,23 @@ const theme = {
     },
   },
   checkBox: {
-    size: '24px',
+    size: '20px',
+    color: 'white',
     toggle: {
       radius: '4px',
       size: '48px',
     },
     check: {
       radius: '4px',
+      thickness: '2px',
+    },
+    hover: {
+      border: {
+        color: 'brand',
+      },
+    },
+    border: {
+      width: '1px',
     },
   },
   clock: {
