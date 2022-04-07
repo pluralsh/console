@@ -345,12 +345,15 @@ const theme = {
     },
     check: {
       radius: '4px',
-      thickness: '1px',
+      thickness: '2px',
     },
     hover: {
       border: {
         color: 'brand',
       },
+    },
+    border: {
+      width: '1px',
     },
   },
   clock: {
