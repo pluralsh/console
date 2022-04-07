@@ -1,13 +1,19 @@
 {
   "name": "pluralsh-design-system",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Pluralsh Design System",
-  "main": "src/index.js",
+  "main": "dist/main.js",
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "start": "npm run storybook",
     "start:watch": "npm run storybook",
     "storybook": "start-storybook -p 6006 -s public",
-    "build-storybook": "build-storybook -s public"
+    "build-storybook": "build-storybook -s public",
+    "clean": "rimraf storybook-static dist node_modules package-lock.json && npm i",
+    "build": "webpack",
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "browserslist": {
     "production": [
@@ -22,18 +28,12 @@
     ]
   },
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.3",
-    "@testing-library/react": "^12.1.4",
-    "@testing-library/user-event": "^13.5.0",
-    "grommet": "^2.21.0",
-    "prop-types": "^15.8.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-scripts": "5.0.0",
-    "styled-components": "^5.3.5",
-    "web-vitals": "^2.1.4"
+    "prop-types": "^15.8.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.17.9",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-react": "^7.16.7",
     "@storybook/addon-actions": "^6.4.20",
     "@storybook/addon-docs": "^6.4.20",
     "@storybook/addon-essentials": "^6.4.20",
@@ -45,8 +45,18 @@
     "@storybook/preset-create-react-app": "^4.1.0",
     "@storybook/react": "^6.4.20",
     "@storybook/testing-library": "^0.0.9",
+    "babel-loader": "^8.2.4",
     "eslint": "^8.12.0",
     "eslint-config-pluralsh": "^1.1.0",
-    "webpack": "^5.70.0"
+    "react-scripts": "5.0.0",
+    "rimraf": "^3.0.2",
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2"
+  },
+  "peerDependencies": {
+    "grommet": "^2.0.0",
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0",
+    "styled-components": "^5.0.0"
   }
 }
