@@ -9,17 +9,6 @@ import CollapseIcon from './icons/CollapseIcon'
 const Container = styled(Box)`
   transition: width 300ms ease;
 `
-
-const ContentContainer = styled(Box)`
-
-`
-// Possible enhancement:
-// -ms-overflow-style: none;  // IE 10+
-// scrollbar-width: none;  // Firefox
-// &::-webkit-scrollbar {
-//   display: none;  // Safari and Chrome
-// }
-
 const Item = styled(Box)`
   cursor: pointer;
   transition: all 150ms linear;
@@ -32,7 +21,6 @@ const Item = styled(Box)`
   #sidebar-items:not(:hover) > &#active-item,
   #sidebar-items:not(:hover) > * > * > &#active-item,
   &:hover {
-    color: ${({ theme }) => normalizeColor('text-strong', theme)};
     background-color: ${({ theme }) => normalizeColor('background-light', theme)};
     font-weight: 600;
   }
@@ -184,14 +172,14 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
             round="4px"
             margin={{ left: `${marginLeft}px` }}
             pad={{ left: '12px' }}
-            color="text-xweak"
+            color="text-strong"
             overflow="hidden"
             onClick={() => hasChildren && handleDeployItem(id) || onItemClick(id)}
             flex={{ shrink: 0 }}
           >
             <Icon
               size={14}
-              color={activeId === id ? 'text-strong' : 'text-xweak'}
+              color="text-strong"
             />
             <TransitionText
               collapsed={collapsed}
@@ -249,7 +237,7 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
       pad="24px 0px 16px 16px"
       flex={{ grow: 0, shrink: 0 }}
     >
-      <ContentContainer
+      <Box
         overflow={{ vertical: 'auto' }}
         flex="grow"
         style={{ maxHeight: sidebarContentMaxHeight, height: sidebarContentMaxHeight }}
@@ -260,7 +248,7 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
         >
           {renderItems(items)}
         </Box>
-      </ContentContainer>
+      </Box>
       <Box
         ref={sidebarBottomRef}
         flex={{ grow: 0, shrink: 0 }}
