@@ -298,7 +298,7 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
               truncate
               weight="bold"
               size="small"
-              color="text-xweak"
+              color="text-strong"
             >
               {user.name}
             </TransitionText>
