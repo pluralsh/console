@@ -9,7 +9,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  ingressClassName: nginx
+  ingressClassName: {{ .Values.ingress.ingressClass }}
   tls:
   - hosts:
     - {{ .Values.ingress.console_dns | quote }}
