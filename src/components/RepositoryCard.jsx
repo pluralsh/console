@@ -19,6 +19,14 @@ const Logo = styled.img`
   background-color: ${({ theme }) => normalizeColor(theme.global.colors['background-light'], theme)}
 `
 
+const LogoLarge = styled.img`
+  width: 128px;
+  height: 128px;
+  border-radius: 4px;
+  object-fit: cover;
+  background-color: ${({ theme }) => normalizeColor(theme.global.colors['background-light'], theme)}
+`
+
 export default function RepositoryCard({
   featured,
   installed,
@@ -30,13 +38,64 @@ export default function RepositoryCard({
   ...props
 }) {
 
+  function renderInstalled() {
+    return installed && (
+      <Box
+        direction="row"
+        align="center"
+      >
+        <Text weight="bold">
+          Installed
+        </Text>
+        <CheckOutlineIcon
+          color="status-ok"
+          style={{ marginLeft: '6px' }}
+        />
+      </Box>
+    )
+  }
   function renderFeatured() {
-    return null
+    return (
+      <Container
+        direction="row"
+        align="start"
+        {...props}
+      >
+        <LogoLarge
+          src={imageUrl}
+          alt="Logo"
+        />
+        <Box margin={{ left: '16px' }}>
+          <Box
+            direction="row"
+            align="center"
+            justify="between"
+          >
+            <Text
+              weight="bold"
+              size="large"
+            >
+              {title}
+            </Text>
+            {renderInstalled()}
+          </Box>
+          <Text color="text-xweak">
+            {subtitle}
+          </Text>
+          <Text
+            color="text-strong"
+            margin={{ top: '16px' }}
+          >
+            {children}
+          </Text>
+        </Box>
+      </Container>
+    )
   }
 
   function renderRegular() {
     return (
-      <Container>
+      <Container {...props}>
         <Box
           direction="row"
           align="center"
@@ -46,20 +105,7 @@ export default function RepositoryCard({
             src={imageUrl}
             alt="Logo"
           />
-          {installed && (
-            <Box
-              direction="row"
-              align="center"
-            >
-              <Text weight="bold">
-                Installed
-              </Text>
-              <CheckOutlineIcon
-                color="status-ok"
-                style={{ marginLeft: '6px' }}
-              />
-            </Box>
-          )}
+          {renderInstalled()}
         </Box>
         <Text
           weight="bold"
