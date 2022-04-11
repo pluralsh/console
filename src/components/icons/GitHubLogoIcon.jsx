@@ -7,7 +7,6 @@ export default createIcon(({ size, color, ...props }) => (
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
     {...props}
   >
     <rect
@@ -39,4 +38,3 @@ export default createIcon(({ size, color, ...props }) => (
     </defs>
   </svg>
 ))
-
