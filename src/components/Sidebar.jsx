@@ -148,7 +148,7 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
 
     if (collapsed && activeParentItem) return activeParentItem.url || activeParentItem.name
 
-    const activeChildItem = activeParentItem.items.find(({ url }) => url === activeUrl)
+    const activeChildItem = (activeParentItem.items || []).find(({ url }) => url === activeUrl)
 
     if (activeChildItem) return activeChildItem.url || activeChildItem.name
 
