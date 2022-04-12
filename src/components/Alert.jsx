@@ -9,9 +9,9 @@ import ErrorIcon from './icons/ErrorIcon'
 import CloseIcon from './icons/CloseIcon'
 
 const severityToBackgroundColor = {
-  success: 'status-ok-dark',
-  warning: 'status-warning-dark',
-  error: 'status-critical-dark',
+  success: 'status-ok-transparent',
+  warning: 'status-warning-transparent',
+  error: 'status-critical-transparent',
   info: 'background-light',
 }
 
