@@ -66,12 +66,14 @@ function Alert({ severity, children, title, onClose, ...props }) {
         color={color}
       />
       <Box margin={{ left: '24px' }}>
-        <Text
-          weight="bold"
-          margin={{ bottom: '16px' }}
-        >
-          {title}
-        </Text>
+        {!!title && (
+          <Text
+            weight="bold"
+            margin={{ bottom: children ? '16px' : '0' }}
+          >
+            {title}
+          </Text>
+        )}
         <Text>
           {children}
         </Text>
