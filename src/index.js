@@ -89,6 +89,7 @@ export { default as TwitterIcon } from './components/icons/TwitterIcon'
 export { default as DiscordIcon } from './components/icons/DiscordIcon'
 export { default as GitHubLogoIcon } from './components/icons/GitHubLogoIcon'
 // Components
+export { default as Alert } from './components/Alert'
 export { default as Avatar } from './components/Avatar'
 export { default as Button } from './components/Button'
 export { default as CheckBox } from './components/CheckBox'
