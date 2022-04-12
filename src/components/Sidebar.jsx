@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Box, Text } from 'grommet'
 import styled from 'styled-components'
 import { normalizeColor } from 'grommet/utils'
@@ -9,9 +10,15 @@ import CollapseIcon from './icons/CollapseIcon'
 const Container = styled(Box)`
   transition: width 300ms ease;
 `
+
+const StyledLink = styled(Link)`
+  text-decoration: none;
+`
+
 const Item = styled(Box)`
+  color: ${({ theme }) => normalizeColor('text-strong', theme)};
   cursor: pointer;
-  transition: all 150ms linear;
+  transition: background-color 150ms linear;
   user-select: none;
 
   &#active-item {
@@ -25,21 +32,9 @@ const Item = styled(Box)`
     font-weight: 600;
   }
 
-  & * {
-    transition: all 150ms linear;
-  }
-
   & > svg {
     flex-shrink: 0;
   }
-`
-
-const CollapseIconContainer = styled(Box)`
-  min-width: 24px;
-  min-height: 24px;
-  cursor: pointer;
-  transition: all 300ms ease;
-  transform: ${({ collapsed }) => collapsed ? 'rotate(180deg)' : 'rotate(0deg)'};
 `
 
 const TransitionText = styled(Text)`
@@ -51,6 +46,14 @@ const TransitionText = styled(Text)`
 
 const TransitionTextNoSelect = styled(TransitionText)`
   user-select: none;
+`
+
+const CollapseIconContainer = styled(Box)`
+  min-width: 24px;
+  min-height: 24px;
+  cursor: pointer;
+  transition: all 300ms ease;
+  transform: ${({ collapsed }) => collapsed ? 'rotate(180deg)' : 'rotate(0deg)'};
 `
 
 const DeployIconContainer = styled(Box)`
@@ -146,6 +149,8 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
     .filter(({ items }) => Array.isArray(items) && items.length > 0)
     .find(({ items }) => items.find(({ url }) => url === activeUrl))
 
+    if (!activeParentItem) return activeUrl
+
     if (collapsed && activeParentItem) return activeParentItem.url || activeParentItem.name
 
     const activeChildItem = activeParentItem.items.find(({ url }) => url === activeUrl)
@@ -160,53 +165,57 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
       const id = url || name
       const hasChildren = Array.isArray(items) && items.length > 0
 
+      const item = (
+        <Item
+          id={activeId === id ? 'active-item' : ''}
+          active={activeId === id}
+          direction="row"
+          align="center"
+          width="full"
+          height="40px"
+          round="4px"
+          margin={{ left: `${marginLeft}px` }}
+          pad={{ left: '12px' }}
+          color="text-strong"
+          overflow="hidden"
+          onClick={() => hasChildren && handleDeployItem(id) || onItemClick(id)}
+          flex={{ shrink: 0 }}
+        >
+          <Icon
+            size={14}
+            color="text-strong"
+          />
+          <TransitionText
+            collapsed={collapsed}
+            size="small"
+            margin={{ left: '16px' }}
+          >
+            {name}
+          </TransitionText>
+          {hasChildren && (
+            <>
+              <Box flex="grow" />
+              <DeployIconContainer
+                collapsed={collapsed}
+                deployed={deployedIds.includes(id)}
+                align="center"
+                justify="center"
+                flex={{ shrink: 0 }}
+              >
+                <CollapseIcon
+                  color="text-xweak"
+                  size={6}
+                />
+              </DeployIconContainer>
+              <Box width="16px" />
+            </>
+          )}
+        </Item>
+      )
+
       return (
         <Fragment key={id}>
-          <Item
-            id={activeId === id ? 'active-item' : ''}
-            active={activeId === id}
-            direction="row"
-            align="center"
-            width="full"
-            height="40px"
-            round="4px"
-            margin={{ left: `${marginLeft}px` }}
-            pad={{ left: '12px' }}
-            color="text-strong"
-            overflow="hidden"
-            onClick={() => hasChildren && handleDeployItem(id) || onItemClick(id)}
-            flex={{ shrink: 0 }}
-          >
-            <Icon
-              size={14}
-              color="text-strong"
-            />
-            <TransitionText
-              collapsed={collapsed}
-              size="small"
-              margin={{ left: '16px' }}
-            >
-              {name}
-            </TransitionText>
-            {hasChildren && (
-              <>
-                <Box flex="grow" />
-                <DeployIconContainer
-                  collapsed={collapsed}
-                  deployed={deployedIds.includes(id)}
-                  align="center"
-                  justify="center"
-                  flex={{ shrink: 0 }}
-                >
-                  <CollapseIcon
-                    color="text-xweak"
-                    size={6}
-                  />
-                </DeployIconContainer>
-                <Box width="16px" />
-              </>
-            )}
-          </Item>
+          {url ? wrapLink(item, url) : item}
           {hasChildren && (
             <ChildrenContainer
               id={`sidebar-children-${id}`}
@@ -223,6 +232,14 @@ function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
         </Fragment>
       )
     })
+  }
+
+  function wrapLink(node, url) {
+    return (
+      <StyledLink to={url}>
+        {node}
+      </StyledLink>
+    )
   }
 
   return (

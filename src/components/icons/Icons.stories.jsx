@@ -84,6 +84,9 @@ import UpdatesIcon from './UpdatesIcon'
 import VolumesIcon from './VolumesIcon'
 import WebhooksIcon from './WebhooksIcon'
 import CloseIcon from './CloseIcon'
+import TwitterIcon from './TwitterIcon'
+import DiscordIcon from './DiscordIcon'
+import GitHubLogoIcon from './GitHubLogoIcon'
 
 const icons = {
   CollapseIcon,
@@ -172,6 +175,9 @@ const icons = {
   VolumesIcon,
   WebhooksIcon,
   CloseIcon,
+  TwitterIcon,
+  DiscordIcon,
+  GitHubLogoIcon,
 }
 
 export default {
