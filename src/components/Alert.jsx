@@ -43,7 +43,7 @@ const CloseContainer = styled(Box)`
   cursor: pointer;
 `
 
-function Alert({ severity, children, title, onClose, ...props }) {
+function Alert({ severity, children, title, onClose }) {
   const Icon = severityToIcon[severity] || StatusOkIcon
   const color = severityToColor[severity] || 'brand'
 
