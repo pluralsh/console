@@ -3,9 +3,6 @@ import Avatar from './Avatar'
 export default {
   title: 'Avatar',
   component: Avatar,
-  argTypes: {
-    backgroundColor: { control: 'color' },
-  },
 }
 
 function Template(args) {
