@@ -18,3 +18,13 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PLURALSH_DESIGN }}'
           channelId: live
           projectId: pluralsh-design
+  publish_minor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: npm i && npm run build
+      # Note: include tests here
+      - run: npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm version minor && npm publish
