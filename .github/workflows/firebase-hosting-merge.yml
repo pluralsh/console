@@ -22,10 +22,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - run: git config --global user.email "dherault@gmail.com" && git config --global user.name "David Hérault"
       - run: npm i
       # Note: include tests here
       - run: npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       # The prepublishOnly script will run the build
-      - run: npm version minor --no-git-tag-version && npm publish
+      - run: npm version minor && npm publish
