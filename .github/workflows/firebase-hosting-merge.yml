@@ -22,9 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: npm i && npm run build
+      - run: npm i
       # Note: include tests here
       - run: npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: npm version minor && npm publish
+      # The prepublishOnly script will run the build
+      - run: npm version minor --no-git-tag-version && npm publish
