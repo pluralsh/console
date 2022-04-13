@@ -73,13 +73,25 @@ const theme = {
         light: '#E03E43',
         dark: '#E03E43',
       },
+      'status-critical-transparent': {
+        light: '#E03E4366',
+        dark: '#E03E4366',
+      },
       'status-warning': {
         light: '#EF931D',
         dark: '#EF931D',
       },
+      'status-warning-transparent': {
+        light: '#EF931D66',
+        dark: '#EF931D66',
+      },
       'status-ok': {
         light: '#07E5A7',
         dark: '#07E5A7',
+      },
+      'status-ok-transparent': {
+        light: '#07E5A766',
+        dark: '#07E5A766',
       },
       'status-unknown': {
         light: '#CCCCCC',

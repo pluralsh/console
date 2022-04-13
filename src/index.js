@@ -90,6 +90,7 @@ export { default as UpdatesIcon } from './components/icons/UpdatesIcon'
 export { default as VolumesIcon } from './components/icons/VolumesIcon'
 export { default as WebhooksIcon } from './components/icons/WebhooksIcon'
 // Components
+export { default as Alert } from './components/Alert'
 export { default as Avatar } from './components/Avatar'
 export { default as Button } from './components/Button'
 export { default as CheckBox } from './components/CheckBox'
