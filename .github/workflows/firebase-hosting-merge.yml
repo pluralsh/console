@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: git config --global user.email "dherault@gmail.com" && git config --global user.name "David Hérault"
-      - run: npm i
+      - run: npm ci
       # Note: include tests here
       - run: npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
         env:
