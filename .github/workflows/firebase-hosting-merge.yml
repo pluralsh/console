@@ -30,3 +30,5 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       # The prepublishOnly script will run the build
       - run: npm version minor && npm publish
+      # npm version creates a tag and a commit, let's push it
+      - run: git push
