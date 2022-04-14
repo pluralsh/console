@@ -17,7 +17,4 @@ function Menu(props) {
   )
 }
 
-Menu.propTypes = Box.propTypes
-Menu.defaultProps = Box.defaultProps
-
 export default Menu

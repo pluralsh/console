@@ -1,9 +1,8 @@
 import { Box, Text } from 'grommet'
-import PropTypes from 'prop-types'
 
 import Avatar from './Avatar'
 
-export default function UserCard({ user, ...props }) {
+export default function UserCard({ user = {}, ...props }) {
 
   return (
     <Box
@@ -34,15 +33,4 @@ export default function UserCard({ user, ...props }) {
       </Box>
     </Box>
   )
-}
-
-UserCard.propTypes = {
-  user: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    imageUrl: PropTypes.string,
-    email: PropTypes.string,
-  }).isRequired,
-}
-
-UserCard.defaultProps = {
 }

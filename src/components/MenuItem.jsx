@@ -20,7 +20,4 @@ function MenuItem(props) {
   )
 }
 
-MenuItem.propTypes = Box.propTypes
-MenuItem.defaultProps = Box.defaultProps
-
 export default MenuItem

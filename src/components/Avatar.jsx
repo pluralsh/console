@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import { Box, Text } from 'grommet'
 import styled from 'styled-components'
 
@@ -24,7 +23,7 @@ function extractInitials(name) {
   return words.map(word => word[0]).filter((_, i, a) => i === 0 || i === a.length - 1).join('').toUpperCase()
 }
 
-function Avatar({ name, imageUrl, ...props }) {
+function Avatar({ name = '', imageUrl = '', ...props }) {
   function renderName() {
     return (
       <Text weight="bold">
@@ -53,16 +52,6 @@ function Avatar({ name, imageUrl, ...props }) {
       {imageUrl ? renderImage() : renderName()}
     </Wrapper>
   )
-}
-
-Avatar.propTypes = {
-  name: PropTypes.string,
-  imageUrl: PropTypes.string,
-}
-
-Avatar.defaultProps = {
-  name: '',
-  imageUrl: '',
 }
 
 export default Avatar

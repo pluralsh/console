@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import { Box, Text } from 'grommet'
 import { normalizeColor } from 'grommet/utils'
 import styled from 'styled-components'
@@ -43,7 +42,7 @@ const CloseContainer = styled(Box)`
   cursor: pointer;
 `
 
-function Alert({ severity, children, title, onClose }) {
+function Alert({ children, severity = 'info', title = '', onClose = () => {} }) {
   const Icon = severityToIcon[severity] || StatusOkIcon
   const color = severityToColor[severity] || 'brand'
 
@@ -80,18 +79,6 @@ function Alert({ severity, children, title, onClose }) {
       </Box>
     </Container>
   )
-}
-
-Alert.propTypes = {
-  severity: PropTypes.oneOf(['success', 'warning', 'error', 'info']),
-  title: PropTypes.string,
-  onClose: PropTypes.func,
-}
-
-Alert.defaultProps = {
-  severity: 'info',
-  title: '',
-  onClose: null,
 }
 
 export default Alert

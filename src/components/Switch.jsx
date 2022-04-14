@@ -26,7 +26,7 @@ const Handle = styled.div`
   transition: all 150ms ease;
 `
 
-function Switch({ checked, onChange, ...props }) {
+function Switch({ checked = false, onChange = () => {}, ...props }) {
   return (
     <Wrapper {...props}>
       <Inner

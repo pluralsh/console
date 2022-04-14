@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { FormField as GrommetFormField, Text } from 'grommet'
 import styled from 'styled-components'
-import PropTypes from 'prop-types'
 
 const Wrapper = styled.div`
   position: relative;
@@ -13,7 +12,7 @@ const Caption = styled(Text)`
   right: 0;
 `
 
-export default function FormField({ label, caption, style, className, valid, error, ...props }) {
+export default function FormField({ style, className, label = '', caption = '', valid = false, error = false, ...props }) {
   const labelRef = useRef()
   const [captionMaxWidth, setCaptionMaxWidth] = useState('auto')
 
@@ -46,18 +45,4 @@ export default function FormField({ label, caption, style, className, valid, err
       />
     </Wrapper>
   )
-}
-
-FormField.propTypes = {
-  label: PropTypes.string,
-  caption: PropTypes.string,
-  valid: PropTypes.bool,
-  error: PropTypes.bool,
-}
-
-FormField.defaultProps = {
-  label: '',
-  caption: '',
-  valid: false,
-  error: false,
 }
