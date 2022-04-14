@@ -1,4 +1,5 @@
 import { Box, Text } from 'grommet'
+
 import CheckOutlineIcon from './icons/CheckOutlineIcon'
 
 function InstalledLabel({ label = 'Installed' }) {
