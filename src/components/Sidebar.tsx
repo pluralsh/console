@@ -48,7 +48,6 @@ const propTypes = {
     email: PropTypes.string,
     imageUrl: PropTypes.string,
   }),
-  onItemClick: PropTypes.func,
 }
 
 const Container = styled(Box)`
@@ -66,6 +65,7 @@ const Item = styled(Box)`
   user-select: none;
 
   &#active-item {
+    background-color: ${({ theme }) => normalizeColor('background-light', theme)};
     font-weight: 600;
   }
 
