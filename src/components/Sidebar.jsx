@@ -76,7 +76,12 @@ const ChildrenContainer = styled(Box)`
   }
 `
 
-function Sidebar({ items, activeUrl, user, onItemClick = () => null }) {
+function Sidebar({
+  items = [],
+  activeUrl = '',
+  user = {},
+  onItemClick = () => null,
+}) {
   const sidebarBottomRef = useRef()
   const [collapsed, setCollapsed] = useState(false)
   const [deployedIds, setDeployedIds] = useState(activeUrl ? [activeUrl] : [])

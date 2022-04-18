@@ -1,6 +1,5 @@
 import { Box, Text } from 'grommet'
 import { normalizeColor } from 'grommet/utils'
-import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
 import InstalledLabel from './InstalledLabel'
@@ -28,12 +27,11 @@ const LogoLarge = styled.img`
 `
 
 export default function RepositoryCard({
-  featured,
-  installed,
-  title,
-  subtitle,
-  imageUrl,
-  onClick,
+  featured = false,
+  installed = false,
+  title = '',
+  subtitle = '',
+  imageUrl = '',
   children,
   ...props
 }) {
@@ -116,23 +114,4 @@ export default function RepositoryCard({
   }
 
   return featured ? renderFeatured() : renderRegular()
-}
-
-RepositoryCard.propTypes = {
-  ...Box.propTypes,
-  featured: PropTypes.bool,
-  installed: PropTypes.bool,
-  title: PropTypes.string.isRequired,
-  subtitle: PropTypes.string.isRequired,
-  imageUrl: PropTypes.string.isRequired,
-  onClick: PropTypes.func,
-}
-
-RepositoryCard.defaultProps = {
-  featured: false,
-  installed: false,
-  title: '',
-  subtitle: '',
-  imageUrl: '',
-  onClick: () => null,
 }

@@ -23,7 +23,4 @@ function Tag({ children, ...props }) {
   )
 }
 
-Tag.propTypes = Box.propTypes
-Tag.defaultProps = Box.defaultProps
-
 export default Tag

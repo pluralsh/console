@@ -1,5 +1,4 @@
 import { Box, Text } from 'grommet'
-import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
 import CloseIcon from './icons/CloseIcon'
@@ -16,7 +15,7 @@ const IconContainer = styled.span`
   cursor: pointer;
 `
 
-export default function Token({ children, onClose, ...props }) {
+export default function Token({ children, onClose = () => {}, ...props }) {
 
   return (
     <Container
@@ -37,13 +36,4 @@ export default function Token({ children, onClose, ...props }) {
       </IconContainer>
     </Container>
   )
-}
-
-Token.propTypes = {
-  children: PropTypes.node.isRequired,
-  onClose: PropTypes.func,
-}
-
-Token.defaultProps = {
-  onClose: () => null,
 }

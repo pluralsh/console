@@ -104,6 +104,7 @@ export { default as Switch } from './components/Switch'
 export { default as Tag } from './components/Tag'
 export { default as TextInput } from './components/TextInput'
 export { default as Token } from './components/Token'
+export { default as UserCard } from './components/UserCard'
 // Hooks
 export { default as usePrevious } from './hooks/usePrevious'
 // Theme

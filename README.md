@@ -17,6 +17,14 @@ return (
 )
 ```
 
+## Development
+
+`npm i && npm start`
+
+## Contributing
+
+Yes, thank you!
+
 ## License
 
 MIT
