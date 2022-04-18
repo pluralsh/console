@@ -220,7 +220,6 @@ function Sidebar({
           id={activeId === id ? 'active-item' : ''}
           direction="row"
           align="center"
-          width="full"
           height="40px"
           round="4px"
           margin={{ left: `${marginLeft}px` }}
