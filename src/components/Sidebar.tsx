@@ -22,7 +22,6 @@ type SidebarProps = {
   items: SidebarItem[]
   activeUrl?: string
   user: UserType
-  onItemClick?: (url: string) => void
 }
 
 type CollapsedProps = {
@@ -125,7 +124,6 @@ function Sidebar({
   items = [],
   activeUrl = '',
   user = {},
-  onItemClick = () => null,
 }: SidebarProps) {
   const sidebarBottomRef = useRef()
   const [collapsed, setCollapsed] = useState(false)
@@ -213,7 +211,7 @@ function Sidebar({
   }
 
   function renderItems(items: SidebarItem[], marginLeft = 0) {
-    return items.map(({ name, url, Icon, items }) => {
+    return items.map(({ name, url, Icon, items, onClick = () => {} }) => {
       const id = url || name
       const hasChildren = Array.isArray(items) && items.length > 0
 
@@ -229,7 +227,7 @@ function Sidebar({
           pad={{ left: '12px' }}
           color="text-strong"
           overflow="hidden"
-          onClick={() => hasChildren ? handleDeployItem(id) : onItemClick(id)}
+          onClick={() => hasChildren ? handleDeployItem(id) : onClick()}
           flex={{ shrink: 0 }}
         >
           {Icon ? (
