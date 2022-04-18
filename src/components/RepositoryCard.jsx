@@ -3,7 +3,7 @@ import { normalizeColor } from 'grommet/utils'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
-import CheckOutlineIcon from './icons/CheckOutlineIcon'
+import InstalledLabel from './InstalledLabel'
 
 const Container = styled(Box)`
   padding: 16px;
@@ -38,22 +38,6 @@ export default function RepositoryCard({
   ...props
 }) {
 
-  function renderInstalled() {
-    return installed && (
-      <Box
-        direction="row"
-        align="center"
-      >
-        <Text weight="bold">
-          Installed
-        </Text>
-        <CheckOutlineIcon
-          color="status-ok"
-          style={{ marginLeft: '6px' }}
-        />
-      </Box>
-    )
-  }
   function renderFeatured() {
     return (
       <Container
@@ -77,7 +61,9 @@ export default function RepositoryCard({
             >
               {title}
             </Text>
-            {renderInstalled()}
+            {installed && (
+              <InstalledLabel />
+            )}
           </Box>
           <Text color="text-xweak">
             {subtitle}
@@ -105,7 +91,9 @@ export default function RepositoryCard({
             src={imageUrl}
             alt="Logo"
           />
-          {renderInstalled()}
+          {installed && (
+            <InstalledLabel />
+          )}
         </Box>
         <Text
           weight="bold"
