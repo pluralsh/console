@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Box, BoxExtendedProps, Text, TextExtendedProps } from 'grommet'
 import styled from 'styled-components'
 import { normalizeColor } from 'grommet/utils'
+import PropTypes from 'prop-types'
 
 import { IconProps, UserType } from '../types'
 
@@ -13,6 +14,7 @@ type SidebarItem = {
   name?: string
   url?: string
   Icon?: ComponentType<IconProps>
+  onClick?: () => any
   items?: SidebarItem[]
 }
 
@@ -29,6 +31,25 @@ type CollapsedProps = {
 
 type DeployedProps = {
   deployed: boolean
+}
+
+const propTypes = {
+  items: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string,
+      url: PropTypes.string,
+      Icon: PropTypes.elementType,
+      onClick: PropTypes.func,
+      items: PropTypes.array,
+    })
+  ),
+  activeUrl: PropTypes.string,
+  user: PropTypes.shape({
+    name: PropTypes.string,
+    email: PropTypes.string,
+    imageUrl: PropTypes.string,
+  }),
+  onItemClick: PropTypes.func,
 }
 
 const Container = styled(Box)`
@@ -367,5 +388,7 @@ function Sidebar({
     </Container>
   )
 }
+
+Sidebar.propTypes = propTypes
 
 export default Sidebar
