@@ -10,7 +10,7 @@ const Container = styled(Box)`
   overflow: hidden;
 `
 
-function Menu(props: BoxExtendedProps) {
+function Menu(props: MenuProps) {
   return (
     <Container
       direction="column"

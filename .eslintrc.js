@@ -1,5 +1,9 @@
 module.exports = {
-  extends: 'pluralsh',
+  extends: [
+    'pluralsh',
+    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended',
+  ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     parser: '@babel/eslint-parser',
@@ -31,5 +35,7 @@ module.exports = {
     'import/prefer-default-export': 'off',
     'import/no-extraneous-dependencies': 'off',
     'react/require-default-props': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-empty-function': 'off',
   },
 }

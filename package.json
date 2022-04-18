@@ -12,6 +12,7 @@
     "start:watch": "npm run storybook",
     "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public",
+    "lint": "eslint src --ext ts,tsx,js,jsx",
     "clean": "rimraf storybook-static dist node_modules package-lock.json && npm i",
     "build": "npx tsc",
     "prepublishOnly": "npm run clean && npm run build"
