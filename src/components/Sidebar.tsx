@@ -269,7 +269,7 @@ function Sidebar({
 
       return (
         <Fragment key={id}>
-          {url ? wrapLink(item, url) : item}
+          {url && !deployedIds.includes(id) ? wrapLink(item, url) : item}
           {hasChildren && (
             <ChildrenContainer
               id={`sidebar-children-${id}`}
