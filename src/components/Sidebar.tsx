@@ -241,6 +241,7 @@ function Sidebar({
             <span style={{ width: 14 }} />
           )}
           <TransitionText
+            truncate
             collapsed={collapsed}
             size="small"
             margin={{ left: '16px' }}

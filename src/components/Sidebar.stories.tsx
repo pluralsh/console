@@ -79,6 +79,11 @@ Default.args = {
           Icon: ScrollIcon,
           url: generateUrl(),
         },
+        {
+          name: 'Log back as some long long long name',
+          Icon: ScrollIcon,
+          url: generateUrl(),
+        },
       ],
     },
     {
