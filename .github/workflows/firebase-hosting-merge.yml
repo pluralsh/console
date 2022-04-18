@@ -31,4 +31,4 @@ jobs:
       # The prepublishOnly script will run the build
       - run: npm version minor && npm publish
       # npm version creates a tag and a commit, let's push it
-      - run: git push
+      - run: git pull && git push
