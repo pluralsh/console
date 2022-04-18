@@ -280,7 +280,7 @@ function Sidebar({
               flex={{ shrink: 0 }}
             >
               <div>
-                {renderItems(items, marginLeft + 6)}
+                {renderItems(items, marginLeft + 12)}
               </div>
             </ChildrenContainer>
           )}
