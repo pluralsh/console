@@ -35,6 +35,7 @@ module.exports = {
     'import/prefer-default-export': 'off',
     'import/no-extraneous-dependencies': 'off',
     'react/require-default-props': 'off',
+    'react/forbid-prop-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-empty-function': 'off',
   },

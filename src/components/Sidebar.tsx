@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Box, BoxExtendedProps, Text, TextExtendedProps } from 'grommet'
 import styled from 'styled-components'
 import { normalizeColor } from 'grommet/utils'
+import PropTypes from 'prop-types'
 
 import { IconProps, UserType } from '../types'
 
@@ -13,6 +14,7 @@ type SidebarItem = {
   name?: string
   url?: string
   Icon?: ComponentType<IconProps>
+  onClick?: () => any
   items?: SidebarItem[]
 }
 
@@ -20,7 +22,6 @@ type SidebarProps = {
   items: SidebarItem[]
   activeUrl?: string
   user: UserType
-  onItemClick?: (url: string) => void
 }
 
 type CollapsedProps = {
@@ -29,6 +30,24 @@ type CollapsedProps = {
 
 type DeployedProps = {
   deployed: boolean
+}
+
+const propTypes = {
+  items: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string,
+      url: PropTypes.string,
+      Icon: PropTypes.elementType,
+      onClick: PropTypes.func,
+      items: PropTypes.array,
+    })
+  ),
+  activeUrl: PropTypes.string,
+  user: PropTypes.shape({
+    name: PropTypes.string,
+    email: PropTypes.string,
+    imageUrl: PropTypes.string,
+  }),
 }
 
 const Container = styled(Box)`
@@ -46,6 +65,7 @@ const Item = styled(Box)`
   user-select: none;
 
   &#active-item {
+    background-color: ${({ theme }) => normalizeColor('background-light', theme)};
     font-weight: 600;
   }
 
@@ -104,7 +124,6 @@ function Sidebar({
   items = [],
   activeUrl = '',
   user = {},
-  onItemClick = () => null,
 }: SidebarProps) {
   const sidebarBottomRef = useRef()
   const [collapsed, setCollapsed] = useState(false)
@@ -192,7 +211,7 @@ function Sidebar({
   }
 
   function renderItems(items: SidebarItem[], marginLeft = 0) {
-    return items.map(({ name, url, Icon, items }) => {
+    return items.map(({ name, url, Icon, items, onClick = () => {} }) => {
       const id = url || name
       const hasChildren = Array.isArray(items) && items.length > 0
 
@@ -208,14 +227,19 @@ function Sidebar({
           pad={{ left: '12px' }}
           color="text-strong"
           overflow="hidden"
-          onClick={() => hasChildren ? handleDeployItem(id) : onItemClick(id)}
+          onClick={() => hasChildren ? handleDeployItem(id) : onClick()}
           flex={{ shrink: 0 }}
         >
-          <Icon
-            size={14}
-            color="text-strong"
-          />
+          {Icon ? (
+            <Icon
+              size={14}
+              color="text-strong"
+            />
+          ) : (
+            <span style={{ width: 14 }} />
+          )}
           <TransitionText
+            truncate
             collapsed={collapsed}
             size="small"
             margin={{ left: '16px' }}
@@ -245,7 +269,7 @@ function Sidebar({
 
       return (
         <Fragment key={id}>
-          {url ? wrapLink(item, url) : item}
+          {url && !deployedIds.includes(id) ? wrapLink(item, url) : item}
           {hasChildren && (
             <ChildrenContainer
               id={`sidebar-children-${id}`}
@@ -255,7 +279,7 @@ function Sidebar({
               flex={{ shrink: 0 }}
             >
               <div>
-                {renderItems(items, marginLeft + 6)}
+                {renderItems(items, marginLeft + 12)}
               </div>
             </ChildrenContainer>
           )}
@@ -363,5 +387,7 @@ function Sidebar({
     </Container>
   )
 }
+
+Sidebar.propTypes = propTypes
 
 export default Sidebar
