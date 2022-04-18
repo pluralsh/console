@@ -211,10 +211,14 @@ function Sidebar({
           onClick={() => hasChildren ? handleDeployItem(id) : onItemClick(id)}
           flex={{ shrink: 0 }}
         >
-          <Icon
-            size={14}
-            color="text-strong"
-          />
+          {Icon ? (
+            <Icon
+              size={14}
+              color="text-strong"
+            />
+          ) : (
+            <span style={{ width: 14 }} />
+          )}
           <TransitionText
             collapsed={collapsed}
             size="small"
