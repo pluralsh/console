@@ -1,6 +1,6 @@
 {
   "name": "pluralsh-design-system",
-  "version": "1.9.0",
+  "version": "1.11.0",
   "description": "Pluralsh Design System",
   "main": "dist/index.js",
   "files": [
@@ -13,8 +13,8 @@
     "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public",
     "lint": "eslint src --ext ts,tsx,js,jsx",
-    "clean": "rimraf storybook-static dist node_modules package-lock.json && npm i",
-    "build": "npx tsc",
+    "clean": "rimraf storybook-static dist",
+    "build": "npx tsc --declaration",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "browserslist": {
