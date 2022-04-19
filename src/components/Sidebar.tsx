@@ -127,12 +127,12 @@ function Sidebar({
 }: SidebarProps) {
   const sidebarBottomRef = useRef()
   const [collapsed, setCollapsed] = useState(false)
-  const [deployedIds, setDeployedIds] = useState(activeUrl ? [activeUrl] : [])
+  const [deployedIds, setDeployedIds] = useState(activeUrl ? [getIdForUrl(items, activeUrl)] : [])
   const [deployedIdsBeforeCollapse, setDeployedIdsBeforeCollapse] = useState(deployedIds)
   const [childrenHeights, setChildrenHeights] = useState({})
   const [sidebarContentMaxHeight, setSidebarcontentMaxHeight] = useState('100%')
 
-  const activeId = getActiveId()
+  const activeId = getIdForUrl(items, activeUrl)
 
   useEffect(() => {
     setContentHeight()
@@ -149,8 +149,8 @@ function Sidebar({
 
     items
     .filter(({ items }) => Array.isArray(items) && items.length > 0)
-    .forEach(({ url, name }) => {
-      const id = url || name
+    .forEach(item => {
+      const id = getId(item)
       const element = document.getElementById(`sidebar-children-${id}`)
       const div = element.firstElementChild
 
@@ -190,34 +190,41 @@ function Sidebar({
     }
   }
 
-  function getActiveId() {
-    const activeItem = items.find(({ url }) => url === activeUrl)
+  function getIdForUrl(items: SidebarItem[], url: string): string | null {
+    for (const item of items) {
+      if (item.url === url) return getId(item)
 
-    if (activeItem) return activeItem.url || activeItem.name
+      if (Array.isArray(item.items) && item.items.length > 0) {
+        const id = getIdForUrl(item.items, url)
 
-    const activeParentItem = items
-    .filter(({ items }) => Array.isArray(items) && items.length > 0)
-    .find(({ items }) => items.find(({ url }) => url === activeUrl))
+        if (id) return id
+      }
+    }
 
-    if (!activeParentItem) return activeUrl
+    return null
+  }
 
-    if (collapsed && activeParentItem) return activeParentItem.url || activeParentItem.name
+  function isDeployedWithActiveChild(item: SidebarItem) {
+    return activeId && item && Array.isArray(item.items) && item.items.some(x => getId(x) === activeId)
+  }
 
-    const activeChildItem = activeParentItem.items.find(({ url }) => url === activeUrl)
+  function isTopLevelActive(item: SidebarItem) {
+    return items.some(x => x === item) && isDeployedWithActiveChild(item)
+  }
 
-    if (activeChildItem) return activeChildItem.url || activeChildItem.name
-
-    return activeUrl
+  function getId(item: SidebarItem) {
+    return `${item.url}___@@@___${item.name}`
   }
 
   function renderItems(items: SidebarItem[], marginLeft = 0) {
-    return items.map(({ name, url, Icon, items, onClick = () => {} }) => {
-      const id = url || name
+    return items.map(item => {
+      const id = getId(item)
+      const { name, url, Icon, items, onClick = () => {} } = item
       const hasChildren = Array.isArray(items) && items.length > 0
 
-      const item = (
+      const itemNode = (
         <Item
-          id={activeId === id ? 'active-item' : ''}
+          id={(collapsed && isTopLevelActive(item)) || activeId === id ? 'active-item' : ''}
           direction="row"
           align="center"
           height="40px"
@@ -268,7 +275,7 @@ function Sidebar({
 
       return (
         <Fragment key={id}>
-          {url && !deployedIds.includes(id) ? wrapLink(item, url) : item}
+          {url && !isDeployedWithActiveChild(item) ? wrapLink(itemNode, url) : itemNode}
           {hasChildren && (
             <ChildrenContainer
               id={`sidebar-children-${id}`}
