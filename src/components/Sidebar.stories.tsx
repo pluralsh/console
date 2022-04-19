@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { Box } from 'grommet'
 
 import Sidebar from './Sidebar'
 import ScrollIcon from './icons/ScrollIcon'
@@ -9,275 +10,240 @@ export default {
 }
 
 function Template(args: any) {
-  const { items } = args
-  const [activeUrl, setActiveUrl] = useState(items[0].url)
+  const [activeUrl, setActiveUrl] = useState('/')
+
+  function createItem(item: any) {
+    const url = `/${item.name + Math.random()}`
+
+    return {
+      url,
+      onClick: () => setActiveUrl(url),
+      ...item,
+    }
+  }
+
+  const items = useMemo(() => [
+    createItem({
+      name: 'Explore',
+      Icon: ScrollIcon,
+      url: '/',
+    }),
+    createItem({
+      name: 'Installed',
+      Icon: ScrollIcon,
+    }),
+    createItem({
+      name: 'Users',
+      Icon: ScrollIcon,
+      items: [
+        createItem({
+          name: 'User Attributes',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Password',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Installations',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Access Tokens',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Public Keys',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Eab Credentials',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Logout',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Log back as some long long long name',
+          Icon: ScrollIcon,
+        }),
+      ],
+    }),
+    createItem({
+      name: 'Accounts',
+      Icon: ScrollIcon,
+      items: [
+        createItem({
+          name: 'Accounts',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Accounts',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Accounts',
+          Icon: ScrollIcon,
+        }),
+      ],
+    }),
+    createItem({
+      name: 'Upgrades',
+      Icon: ScrollIcon,
+    }),
+    createItem({
+      name: 'Incidents',
+      Icon: ScrollIcon,
+      items: [
+        createItem({
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Incidents',
+          Icon: ScrollIcon,
+        }),
+      ],
+    }),
+    createItem({
+      name: 'Integrations',
+      Icon: ScrollIcon,
+    }),
+    createItem({
+      name: 'Audits',
+      Icon: ScrollIcon,
+      items: [
+        createItem({
+          name: 'Audits',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Audits',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Audits',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Audits',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Audits',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Audits',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Audits',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Audits',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Audits',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Audits',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Audits',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Audits',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Audits',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Audits',
+          Icon: ScrollIcon,
+        }),
+        createItem({
+          name: 'Audits',
+          Icon: ScrollIcon,
+        }),
+      ],
+    }),
+  ], [])
 
   return (
-    <Sidebar
-      {...args}
-      activeUrl={activeUrl}
-      onItemClick={setActiveUrl}
-    />
+    <Box direction="row">
+      <Sidebar
+        {...args}
+        items={items}
+        activeUrl={activeUrl}
+        onItemClick={setActiveUrl}
+      />
+      <Box pad="large">
+        {activeUrl}
+      </Box>
+    </Box>
   )
-}
-
-function generateUrl() {
-  return `/${Math.random()}`
 }
 
 export const Default = Template.bind({})
 
 Default.args = {
-  items: [
-    {
-      name: 'Explore',
-      Icon: ScrollIcon,
-      url: generateUrl(),
-    },
-    {
-      name: 'Installed',
-      Icon: ScrollIcon,
-      url: generateUrl(),
-    },
-    {
-      name: 'Users',
-      Icon: ScrollIcon,
-      url: generateUrl(),
-      items: [
-        {
-          name: 'User Attributes',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Password',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Installations',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Access Tokens',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Public Keys',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Eab Credentials',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Logout',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Log back as some long long long name',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-      ],
-    },
-    {
-      name: 'Accounts',
-      Icon: ScrollIcon,
-      url: generateUrl(),
-      items: [
-        {
-          name: 'Accounts',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Accounts',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Accounts',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-      ],
-    },
-    {
-      name: 'Upgrades',
-      Icon: ScrollIcon,
-      url: generateUrl(),
-    },
-    {
-      name: 'Incidents',
-      Icon: ScrollIcon,
-      url: generateUrl(),
-      items: [
-        {
-          name: 'Incidents',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Incidents',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Incidents',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Incidents',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Incidents',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Incidents',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Incidents',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Incidents',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Incidents',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Incidents',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Incidents',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Incidents',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Incidents',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Incidents',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-      ],
-    },
-    {
-      name: 'Integrations',
-      Icon: ScrollIcon,
-      url: generateUrl(),
-    },
-    {
-      name: 'Audits',
-      Icon: ScrollIcon,
-      url: generateUrl(),
-      items: [
-        {
-          name: 'Audits',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Audits',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Audits',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Audits',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Audits',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Audits',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Audits',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Audits',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Audits',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Audits',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Audits',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Audits',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Audits',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Audits',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-        {
-          name: 'Audits',
-          Icon: ScrollIcon,
-          url: generateUrl(),
-        },
-      ],
-    },
-  ],
   user: {
     name: 'Jane Smith',
     email: 'jane.smith@plural.sh',
