@@ -30,3 +30,10 @@ export const Image = Template.bind({})
 Image.args = {
   imageUrl: 'https://avatars.githubusercontent.com/u/4154003?v=4',
 }
+
+export const Small = Template.bind({})
+
+Small.args = {
+  name: 'Jane Smith',
+  size: 32,
+}
