@@ -27,6 +27,7 @@ function Template(args: any) {
       name: 'Explore',
       Icon: ScrollIcon,
       url: '/',
+      matchedUrl: /\/explore\S*/i,
     }),
     createItem({
       name: 'Installed',
@@ -236,6 +237,20 @@ function Template(args: any) {
       />
       <Box pad="large">
         {activeUrl}
+        <button
+          type="button"
+          style={{ marginTop: '1rem' }}
+          onClick={() => setActiveUrl('/explore')}
+        >
+          Go to /explore
+        </button>
+        <button
+          type="button"
+          style={{ marginTop: '1rem' }}
+          onClick={() => setActiveUrl('/explore/public')}
+        >
+          Go to /explore/public
+        </button>
       </Box>
     </Box>
   )
