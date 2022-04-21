@@ -1,6 +1,7 @@
 defmodule Console.PubSub.Recurse.BuildsTest do
-  use Console.DataCase, async: true
+  use Console.DataCase, async: false
   use Mimic
+  import KubernetesScaffolds
   alias Console.PubSub
   alias Console.PubSub.Consumers.Recurse
 
@@ -55,11 +56,18 @@ defmodule Console.PubSub.Recurse.BuildsTest do
 
   describe "BuildFailed" do
     test "it will complete pending commands" do
-      build = insert(:build)
+      build = insert(:build, status: :failed)
 
       commands = insert_list(2, :command, build: build)
       %{id: ignore} = insert(:command, build: build, completed_at: Timex.now())
 
+      expect(Kazan, :run, fn _ -> {:ok, version_info()} end)
+      expect(HTTPoison, :post, fn
+        _, _, _ ->
+          {:ok, %{body: Jason.encode!(%{data: %{createIncident: %{id: "id"}}})}}
+      end)
+
+      Console.Cache.delete(:cluster_info)
       event = %PubSub.BuildFailed{item: build}
       Recurse.handle_event(event)
 

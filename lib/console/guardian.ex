@@ -28,6 +28,6 @@ defmodule Console.Guardian do
     |> Console.Services.Rbac.preload()
   end
 
-  def allow(%User{} = user), do: true
+  def allow(%User{}), do: true
   def allow(_), do: false
 end

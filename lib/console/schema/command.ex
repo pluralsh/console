@@ -28,7 +28,7 @@ defmodule Console.Schema.Command do
 
     def into(command) do
       {command, fn
-        %{stdout: stdo} = command, {:cont, line} when is_binary(line) ->
+        %{stdout: _} = command, {:cont, line} when is_binary(line) ->
           IO.write(line)
           maybe_persist(command, line)
           |> Base.broadcast(:update)
