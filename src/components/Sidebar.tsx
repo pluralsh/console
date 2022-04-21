@@ -16,6 +16,7 @@ type SidebarItem = {
   Icon?: ComponentType<IconProps>
   onClick?: () => any
   items?: SidebarItem[]
+  matchedUrl?: RegExp
 }
 
 type SidebarProps = {
@@ -192,7 +193,7 @@ function Sidebar({
 
   function getIdForUrl(items: SidebarItem[], url: string): string | null {
     for (const item of items) {
-      if (item.url === url) return getId(item)
+      if (item.url === url || (item.matchedUrl instanceof RegExp && item.matchedUrl.test(url))) return getId(item)
 
       if (Array.isArray(item.items) && item.items.length > 0) {
         const id = getIdForUrl(item.items, url)
