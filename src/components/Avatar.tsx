@@ -1,22 +1,25 @@
-import { Box, Text } from 'grommet'
+import { ComponentType } from 'react'
+import { Box, BoxExtendedProps, Text } from 'grommet'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 
-type AvatarProps = {
+type AvatarProps = BoxExtendedProps & {
   name?: string
   imageUrl?: string
+  size?: number
 }
 
 const propTypes = {
   name: PropTypes.string,
   imageUrl: PropTypes.string,
+  size: PropTypes.number,
 }
 
-const Wrapper = styled(Box)`
-  min-width: 44px;
-  width: 44px;
-  min-height: 44px;
-  height: 44px;
+const Wrapper = styled<ComponentType<AvatarProps>>(Box)`
+  min-width: ${({ size }) => size}px;
+  width: ${({ size }) => size}px;
+  min-height: ${({ size }) => size}px;
+  height: ${({ size }) => size}px;
   border-radius: 2px;
   overflow: hidden;
   user-select: none;
@@ -34,7 +37,7 @@ function extractInitials(name: string) {
   return words.map(word => word[0]).filter((_, i, a) => i === 0 || i === a.length - 1).join('').toUpperCase()
 }
 
-function Avatar({ name = '', imageUrl = '', ...props }: AvatarProps) {
+function Avatar({ name = '', imageUrl = '', size = 44, ...props }: AvatarProps) {
   function renderName() {
     return (
       <Text weight="bold">
@@ -54,6 +57,7 @@ function Avatar({ name = '', imageUrl = '', ...props }: AvatarProps) {
 
   return (
     <Wrapper
+      size={size}
       background={imageUrl ? 'transparent' : 'accent-blue'}
       justify="center"
       align="center"
