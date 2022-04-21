@@ -4,6 +4,7 @@ defmodule Console.Services.Builds do
   alias Kube.{Client, Application}
   alias Console.Schema.{Build, Command, User, Lock}
   alias Console.Services.{Changelogs, Rbac}
+  alias Console.Plural.Incidents
 
   def get!(id), do: Repo.get!(Build, id)
 
@@ -210,6 +211,31 @@ defmodule Console.Services.Builds do
     build
     |> Ecto.Changeset.change(%{pinged_at: Timex.now()})
     |> Repo.update()
+  end
+
+  def failed_incident(%Build{status: :failed, repository: repo} = build) do
+    %{commands: commands} = Console.Repo.preload(build, [:commands])
+
+    commands
+    |> Enum.sort_by(& &1.completed_at, DateTime)
+    |> Enum.find(& &1.exit_code != 0)
+    |> case do
+      %{stdout: stdo} ->
+        Incidents.create_incident(repo, %{
+          title: "Failed build for #{repo}",
+          description: """
+          Failed command output:
+
+          ```
+          #{stdo}
+          ```
+          """,
+          severity: 2,
+          tags: [%{tag: "builds"}, %{tag: "console"}],
+          cluster_information: Console.Alertmanager.Incidents.cluster_info()
+        })
+      _ -> :ok
+    end
   end
 
   defp modify_status(build, state) do

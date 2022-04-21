@@ -43,7 +43,7 @@ defmodule Console.GraphQl.Resolvers.User do
   end
 
   defp oidc_uri(args) do
-    OpenIDConnect.authorization_uri(:plural, hydrate_redirect_uri(%{state: state_token}, args))
+    OpenIDConnect.authorization_uri(:plural, hydrate_redirect_uri(%{state: state_token()}, args))
   end
 
   defp state_token() do

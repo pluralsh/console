@@ -44,6 +44,8 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.BuildFailed do
     |> Console.Repo.update_all(set: [completed_at: DateTime.utc_now(), exit_code: 1])
     |> elem(1)
     |> Enum.each(&Broadcaster.notify(%CommandCompleted{item: &1}))
+
+    Console.Services.Builds.failed_incident(build)
   end
 end
 
