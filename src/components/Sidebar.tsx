@@ -183,12 +183,7 @@ function Sidebar({
   }
 
   function handleDeployItem(id: string) {
-    if (deployedIds.includes(id)) {
-      setDeployedIds(deployedIds.filter(x => x !== id))
-    }
-    else {
-      setDeployedIds([...deployedIds, id])
-    }
+    setDeployedIds(deployedIds.includes(id) ? [] : [id])
   }
 
   function getIdForUrl(items: SidebarItem[], url: string): string | null {
@@ -305,7 +300,7 @@ function Sidebar({
 
   return (
     <Container
-      width={`${collapsed ? 74 : 208}px`}
+      width={`${collapsed ? 74 : 256 - 32}px`}
       background="background-front"
       border={{
         color: 'border',
