@@ -128,8 +128,8 @@ function Sidebar({
 }: SidebarProps) {
   const sidebarBottomRef = useRef()
   const [collapsed, setCollapsed] = useState(false)
-  const [deployedIds, setDeployedIds] = useState(activeUrl ? [getIdForUrl(items, activeUrl)] : [])
-  const [deployedIdsBeforeCollapse, setDeployedIdsBeforeCollapse] = useState(deployedIds)
+  const [deployedId, setDeployedId] = useState(activeUrl ? getIdForUrl(items, activeUrl) : null)
+  const [deployedIdBeforeCollapse, setDeployedIdBeforeCollapse] = useState(deployedId)
   const [childrenHeights, setChildrenHeights] = useState({})
   const [sidebarContentMaxHeight, setSidebarcontentMaxHeight] = useState('100%')
 
@@ -174,16 +174,16 @@ function Sidebar({
     setCollapsed(!collapsed)
 
     if (!collapsed) {
-      setDeployedIdsBeforeCollapse(deployedIds)
-      setDeployedIds([])
+      setDeployedIdBeforeCollapse(deployedId)
+      setDeployedId(null)
     }
     else {
-      setDeployedIds(deployedIdsBeforeCollapse)
+      setDeployedId(deployedIdBeforeCollapse)
     }
   }
 
   function handleDeployItem(id: string) {
-    setDeployedIds(deployedIds.includes(id) ? [] : [id])
+    setDeployedId(deployedId === id ? null : id)
   }
 
   function getIdForUrl(items: SidebarItem[], url: string): string | null {
@@ -253,7 +253,7 @@ function Sidebar({
               <Box flex="grow" />
               <DeployIconContainer
                 collapsed={collapsed}
-                deployed={deployedIds.includes(id)}
+                deployed={deployedId.includes(id)}
                 align="center"
                 justify="center"
                 flex={{ shrink: 0 }}
@@ -275,8 +275,8 @@ function Sidebar({
           {hasChildren && (
             <ChildrenContainer
               id={`sidebar-children-${id}`}
-              deployed={deployedIds.includes(id)}
-              height={`${deployedIds.includes(id) ? childrenHeights[id] || 0 : 0}px`}
+              deployed={deployedId.includes(id)}
+              height={`${deployedId.includes(id) ? childrenHeights[id] || 0 : 0}px`}
               overflow="hidden"
               flex={{ shrink: 0 }}
             >
