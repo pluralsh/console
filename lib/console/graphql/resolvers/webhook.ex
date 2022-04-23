@@ -10,4 +10,7 @@ defmodule Console.GraphQl.Resolvers.Webhook do
 
   def create_webhook(%{attributes: attrs}, _),
     do: Webhooks.create(attrs)
+
+  def delete_webhook(%{id: id}, _),
+    do: Webhooks.delete(id)
 end

@@ -9,8 +9,6 @@ defmodule Console.GraphQl.Schema do
   ## ENUMS
   ecto_enum :status, Schema.Build.Status
   ecto_enum :build_type, Schema.Build.Type
-  ecto_enum :webhook_type, Schema.Webhook.Type
-  ecto_enum :webhook_health, Schema.Webhook.Status
 
   enum :tool do
     value :helm
@@ -25,14 +23,9 @@ defmodule Console.GraphQl.Schema do
     field :message,    :string
   end
 
-  input_object :webhook_attributes do
-    field :url, non_null(:string)
-  end
-
   input_object :invite_attributes do
     field :email, :string
   end
-
 
   ## OBJECTS
   object :build do
@@ -71,15 +64,6 @@ defmodule Console.GraphQl.Schema do
     field :stdout,       :string
     field :completed_at, :datetime
     field :build,        :build, resolve: dataloader(Build)
-
-    timestamps()
-  end
-
-  object :webhook do
-    field :id,      non_null(:id)
-    field :url,     non_null(:string)
-    field :health,  non_null(:webhook_health)
-    field :type,    non_null(:webhook_type)
 
     timestamps()
   end
@@ -130,5 +114,4 @@ defmodule Console.GraphQl.Schema do
 
   connection node_type: :build
   connection node_type: :command
-  connection node_type: :webhook
 end

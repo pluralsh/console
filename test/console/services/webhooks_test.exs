@@ -13,6 +13,17 @@ defmodule Console.Services.WebhooksTest do
     end
   end
 
+  describe "#delete" do
+    test "it can delete a webhook" do
+      hook = insert(:webhook)
+
+      {:ok, del} = Webhooks.delete(hook.id)
+
+      assert del.id == hook.id
+      refute refetch(hook)
+    end
+  end
+
   describe "#deliver" do
     test "It will post to the configured url, and mark healthy when successful" do
       %{url: url} = wh = insert(:webhook)

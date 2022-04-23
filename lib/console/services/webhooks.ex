@@ -8,6 +8,8 @@ defmodule Console.Services.Webhooks do
     {"accept", "application/json"}
   ]
 
+  def get_webhook(id), do: Console.Repo.get(Webhook, id)
+
   def create(attrs) do
     %Webhook{type: :slack, health: :healthy}
     |> Webhook.changeset(attrs)
@@ -21,6 +23,11 @@ defmodule Console.Services.Webhooks do
       HTTPoison.post(url, Jason.encode!(payload), @headers)
       |> mark_webhook(wh)
     end
+  end
+
+  def delete(id) do
+    get_webhook(id)
+    |> Console.Repo.delete()
   end
 
   defp mark_webhook({:ok, _}, wh), do: set_health(wh, :healthy)

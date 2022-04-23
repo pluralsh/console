@@ -15,6 +15,7 @@ defmodule Console.GraphQl do
   import_types Console.GraphQl.Plural
   import_types Console.GraphQl.Policies
   import_types Console.GraphQl.Runbooks
+  import_types Console.GraphQl.Webhooks
 
   @sources [
     Build,
@@ -57,12 +58,6 @@ defmodule Console.GraphQl do
       resolve safe_resolver(&Build.resolve_build/2)
     end
 
-    connection field :webhooks, node_type: :webhook do
-      middleware Authenticated
-
-      resolve &Webhook.list_webhooks/2
-    end
-
 
     field :external_token, :string do
       middleware Authenticated
@@ -76,6 +71,7 @@ defmodule Console.GraphQl do
     import_fields :plural_queries
     import_fields :policy_queries
     import_fields :runbook_queries
+    import_fields :webhook_queries
   end
 
   mutation do
@@ -112,14 +108,6 @@ defmodule Console.GraphQl do
       resolve safe_resolver(&Build.approve_build/2)
     end
 
-    field :create_webhook, :webhook do
-      middleware Authenticated
-
-      arg :attributes, non_null(:webhook_attributes)
-
-      resolve safe_resolver(&Webhook.create_webhook/2)
-    end
-
     field :update_configuration, :configuration do
       middleware Authenticated
       middleware RequiresGit
@@ -136,6 +124,7 @@ defmodule Console.GraphQl do
     import_fields :plural_mutations
     import_fields :policy_mutations
     import_fields :runbook_mutations
+    import_fields :webhook_mutations
   end
 
   subscription do
