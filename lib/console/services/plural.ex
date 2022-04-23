@@ -2,6 +2,20 @@ defmodule Console.Services.Plural do
   alias Console.Schema.{User, Manifest}
   alias Console.Services.{Builds}
   alias Console.Plural.{Repositories, Users, Recipe, Installation, OIDCProvider, Manifest, Context}
+  alias Kube.Application
+  use Nebulex.Caching
+
+  @decorate cacheable(cache: Console.Cache, key: {:app, name}, opts: [ttl: @ttl], match: &allow/1)
+  def application(name) do
+    Kube.Client.get_application(name)
+  end
+
+  def app_icon(%Application{spec: %Application.Spec{descriptor: %{icons: [%{src: src} | _]}}}),
+    do: src
+  def app_icon(_), do: nil
+
+  defp allow({:ok, _}), do: true
+  defp allow(_), do: false
 
   def terraform_file(repository) do
     terraform_filename(repository)

@@ -102,6 +102,17 @@ defmodule Kube.Client do
     |> Kazan.run()
   end
 
+  def get_application(name) do
+    ns = Console.namespace(name)
+    %Kazan.Request{
+      method: "get",
+      path: "/apis/app.k8s.io/v1beta1/namespaces/#{ns}/applications/#{name}",
+      query_params: %{},
+      response_model: Kube.Application
+    }
+    |> Kazan.run()
+  end
+
   def list_metrics() do
     %Kazan.Request{
       method: "get",
