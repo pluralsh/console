@@ -57,7 +57,7 @@ const CloseContainer = styled(Box)`
   cursor: pointer;
 `
 
-function Alert({ children, severity = 'info', title = '', onClose = () => {}, ...props }: AlertProps) {
+function Alert({ children, severity = 'info', title = '', onClose, ...props }: AlertProps) {
   const Icon = severityToIcon[severity] || StatusOkIcon
   const color = severityToColor[severity] || 'brand'
 
@@ -76,10 +76,12 @@ function Alert({ children, severity = 'info', title = '', onClose = () => {}, ..
           />
         </CloseContainer>
       )}
-      <Icon
-        size={24}
-        color={color}
-      />
+      <div style={{ flexShrink: 0 }}>
+        <Icon
+          size={24}
+          color={color}
+        />
+      </div>
       <Box margin={{ left: '24px' }}>
         {!!title && (
           <Text
