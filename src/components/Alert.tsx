@@ -61,8 +61,6 @@ function Alert({ children, severity = 'info', title = '', onClose, ...props }: A
   const Icon = severityToIcon[severity] || StatusOkIcon
   const color = severityToColor[severity] || 'brand'
 
-  console.log('onClose', onClose)
-
   return (
     <Container
       severity={severity}
