@@ -1,4 +1,4 @@
-import { ComponentType, Fragment, ReactNode, useEffect, useRef, useState } from 'react'
+import { ComponentType, Fragment, MouseEvent, ReactNode, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Box, BoxExtendedProps, Text, TextExtendedProps } from 'grommet'
 import styled from 'styled-components'
@@ -14,7 +14,7 @@ type SidebarItem = {
   name?: string
   url?: string
   Icon?: ComponentType<IconProps>
-  onClick?: () => any
+  onClick?: (event: MouseEvent) => any
   items?: SidebarItem[]
   matchedUrl?: RegExp
 }
@@ -204,8 +204,12 @@ function Sidebar({
     return activeId && item && Array.isArray(item.items) && item.items.some(x => getId(x) === activeId)
   }
 
+  function isTopLevelItem(item: SidebarItem) {
+    return items.some(x => x === item)
+  }
+
   function isTopLevelActive(item: SidebarItem) {
-    return items.some(x => x === item) && isDeployedWithActiveChild(item)
+    return isTopLevelItem(item) && isDeployedWithActiveChild(item)
   }
 
   function getId(item: SidebarItem) {
@@ -215,7 +219,7 @@ function Sidebar({
   function renderItems(items: SidebarItem[], marginLeft = 0) {
     return items.map(item => {
       const id = getId(item)
-      const { name, url, Icon, items, onClick = () => {} } = item
+      const { name, url, Icon, items, onClick } = item
       const hasChildren = Array.isArray(items) && items.length > 0
 
       const itemNode = (
@@ -229,7 +233,10 @@ function Sidebar({
           pad={{ left: '12px' }}
           color="text-strong"
           overflow="hidden"
-          onClick={() => hasChildren ? handleDeployItem(id) : onClick()}
+          onClick={(event: MouseEvent) => {
+            if (hasChildren || isTopLevelItem(item)) handleDeployItem(id)
+            if (typeof onClick === 'function') onClick(event)
+          }}
           flex={{ shrink: 0 }}
         >
           {Icon ? (
@@ -253,7 +260,7 @@ function Sidebar({
               <Box flex="grow" />
               <DeployIconContainer
                 collapsed={collapsed}
-                deployed={deployedId.includes(id)}
+                deployed={deployedId === id}
                 align="center"
                 justify="center"
                 flex={{ shrink: 0 }}
@@ -275,8 +282,8 @@ function Sidebar({
           {hasChildren && (
             <ChildrenContainer
               id={`sidebar-children-${id}`}
-              deployed={deployedId.includes(id)}
-              height={`${deployedId.includes(id) ? childrenHeights[id] || 0 : 0}px`}
+              deployed={deployedId === id}
+              height={`${deployedId === id ? childrenHeights[id] || 0 : 0}px`}
               overflow="hidden"
               flex={{ shrink: 0 }}
             >
