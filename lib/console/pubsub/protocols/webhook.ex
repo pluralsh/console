@@ -16,3 +16,10 @@ defimpl Console.PubSub.Webhook, for: [Console.PubSub.BuildSucceeded, Console.Pub
   def deliver(%{item: build}),
     do: {:ok, {build, Webhook.ordered()}}
 end
+
+defimpl Console.PubSub.Webhook, for: [Console.PubSub.NotificationCreated] do
+  alias Console.Schema.Webhook
+
+  def deliver(%{item: notif}),
+    do: {:ok, {notif, Webhook.ordered()}}
+end
