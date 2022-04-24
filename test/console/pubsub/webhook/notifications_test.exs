@@ -20,7 +20,7 @@ defmodule Console.Webhook.NotificationTest do
       end)
 
       expect(Kazan, :run, fn _ ->
-        {:ok, %Application{spec: %Application.Spec{descriptor: %{links: [%{url: "img"}]}}}}
+        {:ok, %Application{spec: %Application.Spec{descriptor: %Application.Descriptor{icons: [%Application.Icon{src: "img"}]}}}}
       end)
 
       event = %PubSub.NotificationCreated{item: notif}
@@ -31,7 +31,7 @@ defmodule Console.Webhook.NotificationTest do
       assert refetch(wh).health == :healthy
 
       assert first["text"]
-      assert first["accessory"]
+      assert first["accessory"]["image_url"]
 
       assert second["text"]
 

@@ -19,7 +19,7 @@ defmodule Console.Webhooks.Formatter.Slack do
   end
 
   def format(%Notification{title: title, description: desc, repository: repo, severity: sev, annotations: anns, labels: labels}) do
-    app = Plural.application(repo)
+    {:ok, app} = Plural.application(repo)
     cluster_name = Plural.cluster_name()
     {:ok, %{
       blocks: [
