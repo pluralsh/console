@@ -143,4 +143,19 @@ defmodule Console.Services.AlertmanagerTest do
       assert result.status == "IN_PROGRESS"
     end
   end
+
+  describe "#create_notification/2" do
+    test "it will ignore alertmanagers test alert" do
+      alert = %Alert{
+        status: :firing,
+        name: "alertname",
+        summary: "An alert that should always be firing to certify that Alertmanager is working properly.",
+        description: "some description",
+        fingerprint: "adsfsfasd",
+        labels: %{"namespace" => "repo", "severity" => "critical", "alertname" => "Watchdog"}
+      }
+
+      :ok = Alertmanager.create_notification("fp", alert)
+    end
+  end
 end

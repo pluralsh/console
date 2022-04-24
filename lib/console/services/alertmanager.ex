@@ -14,6 +14,7 @@ defmodule Console.Services.Alertmanager do
 
   def get_mapping(fingerprint), do: Console.Repo.get_by(AlertmanagerIncident, fingerprint: fingerprint)
 
+  def handle_alert(%Alert{labels: %{"alertname" => "Watchdog"}}), do: :ok
   def handle_alert(%Alert{} = alert) do
     Enum.reduce_while(@sinks, %{}, fn sink, acc ->
       case sink.handle_alert(alert) do
@@ -24,6 +25,7 @@ defmodule Console.Services.Alertmanager do
     end)
   end
 
+  def create_notification(_, %Alert{labels: %{"alertname" => "Watchdog"}}), do: :ok
   def create_notification(repo, %Alert{fingerprint: fp} = alert) do
     case get_notification(fp) do
       %Notification{} = notif -> notif
