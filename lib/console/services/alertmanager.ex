@@ -49,6 +49,18 @@ defmodule Console.Services.Alertmanager do
     |> notify(:create)
   end
 
+  def test_notification() do
+    create_notification(%{
+      title: "test notification",
+      description: "a simple test notification",
+      labels: %{"test" => "label"},
+      annotations: %{"test" => "annotation"},
+      repository: "console",
+      severity: 1,
+      seen_at: Timex.now()
+    })
+  end
+
   defp notify({:ok, %Notification{} = notif}, :create),
     do: handle_notify(PubSub.NotificationCreated, notif)
   defp notify(pass, _), do: pass
