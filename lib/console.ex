@@ -1,6 +1,12 @@
 defmodule Console do
   def conf(key, default \\ nil), do: Application.get_env(:console, key, default)
 
+  def rand_str(size \\ 32) do
+    :crypto.strong_rand_bytes(size)
+    |> Base.url_encode64()
+    |> String.replace("/", "")
+  end
+
   def stream_result(enum) do
     Enum.reduce_while(enum, [], fn
       {:ok, val}, acc -> {:cont, [val | acc]}

@@ -42,6 +42,13 @@ defmodule Console.Services.Alertmanager do
     |> notify(:create)
   end
 
+  def create_notification(attrs) do
+    %Notification{fingerprint: Console.rand_str()}
+    |> Notification.changeset(attrs)
+    |> Console.Repo.insert()
+    |> notify(:create)
+  end
+
   defp notify({:ok, %Notification{} = notif}, :create),
     do: handle_notify(PubSub.NotificationCreated, notif)
   defp notify(pass, _), do: pass
