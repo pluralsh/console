@@ -23,11 +23,11 @@ defmodule Console.Webhooks.Formatter.Slack do
     cluster_name = Plural.cluster_name()
     {:ok, %{
       blocks: [
+        section(text: mrkdwn(text: "New Notification in cluster #{cluster_name} for #{repo}")),
         section(
-          text: mrkdwn(text: "New Notification in cluster: #{cluster_name} for #{repo}\n*#{title}*"),
+          text: mrkdwn(text: "*#{title}*\n#{desc}"),
           accessory: image(image_url: Plural.app_icon(app), alt_text: repo)
         ),
-        section(text: mrkdwn(text: desc)),
         section(fields: [
           mrkdwn(text: "*Severity*\n#{sev}"),
           mrkdwn(text: "*Annotations*\n#{format_pairs(anns)}"),

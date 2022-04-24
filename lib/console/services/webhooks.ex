@@ -21,7 +21,6 @@ defmodule Console.Services.Webhooks do
 
     with {:ok, payload} <- formatter.format(build) do
       HTTPoison.post(url, Jason.encode!(payload), @headers)
-      |> IO.inspect()
       |> mark_webhook(wh)
     end
   end

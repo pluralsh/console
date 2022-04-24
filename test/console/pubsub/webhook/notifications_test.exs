@@ -31,7 +31,7 @@ defmodule Console.Webhook.NotificationTest do
       assert refetch(wh).health == :healthy
 
       assert first["text"]
-      assert first["accessory"]["image_url"]
+      assert second["accessory"]["image_url"]
 
       assert second["text"]
 
