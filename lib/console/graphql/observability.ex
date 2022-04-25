@@ -66,7 +66,7 @@ defmodule Console.GraphQl.Observability do
       arg :repo, non_null(:string)
       middleware Rbac, perm: :read, arg: :repo
 
-      resolve &Observability.resolve_dashboards/2
+      safe_resolve &Observability.resolve_dashboards/2
     end
 
     field :dashboard, :dashboard do
@@ -78,7 +78,7 @@ defmodule Console.GraphQl.Observability do
       arg :labels, list_of(:label_input)
       middleware Rbac, perm: :read, arg: :repo
 
-      resolve &Observability.resolve_dashboard/2
+      safe_resolve &Observability.resolve_dashboard/2
     end
 
     field :metric, list_of(:metric_response) do
@@ -87,7 +87,7 @@ defmodule Console.GraphQl.Observability do
       arg :offset, :integer
       arg :step,   :string
 
-      resolve &Observability.resolve_metric/2
+      safe_resolve &Observability.resolve_metric/2
     end
 
     field :logs, list_of(:log_stream) do
@@ -97,7 +97,7 @@ defmodule Console.GraphQl.Observability do
       arg :end,   :long
       arg :limit, non_null(:integer)
 
-      resolve &Observability.resolve_logs/2
+      safe_resolve &Observability.resolve_logs/2
     end
 
     field :scaling_recommendation, :vertical_pod_autoscaler do
@@ -106,7 +106,7 @@ defmodule Console.GraphQl.Observability do
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
 
-      resolve &Observability.resolve_scaling_recommendation/2
+      safe_resolve &Observability.resolve_scaling_recommendation/2
     end
   end
 end

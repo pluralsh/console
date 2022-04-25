@@ -72,12 +72,12 @@ defmodule Console.GraphQl.Kubernetes do
       arg :name,      non_null(:string)
       middleware Rbac, perm: :read, arg: :namespace
 
-      resolve &Kubernetes.resolve_service/2
+      safe_resolve &Kubernetes.resolve_service/2
     end
 
     field :cluster_info, :cluster_info do
       middleware Authenticated
-      resolve &Kubernetes.cluster_info/2
+      safe_resolve &Kubernetes.cluster_info/2
     end
 
     field :deployment, :deployment do
@@ -86,7 +86,7 @@ defmodule Console.GraphQl.Kubernetes do
       arg :name,      non_null(:string)
       middleware Rbac, perm: :read, arg: :namespace
 
-      resolve &Kubernetes.resolve_deployment/2
+      safe_resolve &Kubernetes.resolve_deployment/2
     end
 
     field :stateful_set, :stateful_set do
@@ -95,7 +95,7 @@ defmodule Console.GraphQl.Kubernetes do
       arg :name,      non_null(:string)
       middleware Rbac, perm: :read, arg: :namespace
 
-      resolve &Kubernetes.resolve_stateful_set/2
+      safe_resolve &Kubernetes.resolve_stateful_set/2
     end
 
     field :ingress, :ingress do
@@ -104,20 +104,20 @@ defmodule Console.GraphQl.Kubernetes do
       arg :name,      non_null(:string)
       middleware Rbac, perm: :read, arg: :namespace
 
-      resolve &Kubernetes.resolve_ingress/2
+      safe_resolve &Kubernetes.resolve_ingress/2
     end
 
     field :nodes, list_of(:node) do
       middleware Authenticated
 
-      resolve &Kubernetes.list_nodes/2
+      safe_resolve &Kubernetes.list_nodes/2
     end
 
     field :node, :node do
       middleware Authenticated
       arg :name, non_null(:string)
 
-      resolve &Kubernetes.resolve_node/2
+      safe_resolve &Kubernetes.resolve_node/2
     end
 
     field :cron_job, :cron_job do
@@ -126,7 +126,7 @@ defmodule Console.GraphQl.Kubernetes do
       arg :name, non_null(:string)
       middleware Rbac, perm: :read, arg: :namespace
 
-      resolve &Kubernetes.resolve_cron_job/2
+      safe_resolve &Kubernetes.resolve_cron_job/2
     end
 
     field :job, :job do
@@ -135,7 +135,7 @@ defmodule Console.GraphQl.Kubernetes do
       arg :name, non_null(:string)
       middleware Rbac, perm: :read, arg: :namespace
 
-      resolve &Kubernetes.resolve_job/2
+      safe_resolve &Kubernetes.resolve_job/2
     end
 
     field :certificate, :certificate do
@@ -144,7 +144,7 @@ defmodule Console.GraphQl.Kubernetes do
       arg :name,      non_null(:string)
       middleware Rbac, perm: :read, arg: :namespace
 
-      resolve &Kubernetes.resolve_certificate/2
+      safe_resolve &Kubernetes.resolve_certificate/2
     end
 
     field :pod, :pod do
@@ -153,13 +153,13 @@ defmodule Console.GraphQl.Kubernetes do
       arg :name, non_null(:string)
       middleware Rbac, perm: :read, arg: :namespace
 
-      resolve &Kubernetes.resolve_pod/2
+      safe_resolve &Kubernetes.resolve_pod/2
     end
 
     field :pods, list_of(:pod) do
       middleware Authenticated
 
-      resolve &Kubernetes.list_all_pods/2
+      safe_resolve &Kubernetes.list_all_pods/2
     end
 
     field :log_filters, list_of(:log_filter) do
@@ -167,27 +167,27 @@ defmodule Console.GraphQl.Kubernetes do
       arg :namespace, non_null(:string)
       middleware Rbac, perm: :read, arg: :namespace
 
-      resolve &Kubernetes.list_log_filters/2
+      safe_resolve &Kubernetes.list_log_filters/2
     end
 
     field :node_metrics, list_of(:node_metric) do
       middleware Authenticated
 
-      resolve &Kubernetes.list_node_metrics/2
+      safe_resolve &Kubernetes.list_node_metrics/2
     end
 
     field :node_metric, :node_metric do
       middleware Authenticated
       arg :name, non_null(:string)
 
-      resolve &Kubernetes.resolve_node_metrics/2
+      safe_resolve &Kubernetes.resolve_node_metrics/2
     end
 
     field :configuration_overlays, list_of(:configuration_overlay) do
       middleware Authenticated
       arg :namespace, non_null(:string)
 
-      resolve &Kubernetes.list_configuration_overlays/2
+      safe_resolve &Kubernetes.list_configuration_overlays/2
     end
   end
 
@@ -198,7 +198,7 @@ defmodule Console.GraphQl.Kubernetes do
       arg :name,      non_null(:string)
       middleware Rbac, perm: :operate, arg: :namespace
 
-      resolve &Kubernetes.delete_pod/2
+      safe_resolve &Kubernetes.delete_pod/2
     end
 
     field :delete_job, :job do
@@ -207,7 +207,7 @@ defmodule Console.GraphQl.Kubernetes do
       arg :name,      non_null(:string)
       middleware Rbac, perm: :operate, arg: :namespace
 
-      resolve &Kubernetes.delete_job/2
+      safe_resolve &Kubernetes.delete_job/2
     end
 
     field :delete_node, :node do
@@ -215,7 +215,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware AdminRequired
       arg :name, non_null(:string)
 
-      resolve &Kubernetes.delete_node/2
+      safe_resolve &Kubernetes.delete_node/2
     end
 
     field :overlay_configuration, :build do
@@ -224,7 +224,7 @@ defmodule Console.GraphQl.Kubernetes do
       arg :namespace, non_null(:string)
       arg :context,   non_null(:map)
 
-      resolve &Kubernetes.execute_overlay/2
+      safe_resolve &Kubernetes.execute_overlay/2
     end
   end
 end

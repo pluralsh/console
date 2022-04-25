@@ -155,6 +155,7 @@ defmodule Console.GraphQl do
       try do
         case fun.(args, ctx) do
           {:ok, res} -> {:ok, res}
+          {:error, {:http_error, _, %{"message" => msg}}} -> {:error, msg}
           {:error, %Ecto.Changeset{} = cs} -> {:error, resolve_changeset(cs)}
           error -> error
         end
