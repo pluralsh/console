@@ -5,6 +5,7 @@ export const WebhookFragment = gql`
     id
     url
     health
+    insertedAt
   }
 `;
 
@@ -33,3 +34,12 @@ export const CREATE_WEBHOOK = gql`
   }
   ${WebhookFragment}
 `;
+
+export const DELETE_WEBHOOK = gql`
+  mutation DeleteWebhook($id: ID!) {
+    deleteWebhook(id: $id) {
+      ...WebhookFragment
+    }
+  }
+  ${WebhookFragment}
+`

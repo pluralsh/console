@@ -1,17 +1,19 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useQuery, useMutation } from 'react-apollo'
 import { BreadcrumbsContext } from './Breadcrumbs'
-import { WEBHOOKS_Q, CREATE_WEBHOOK } from './graphql/webhooks'
-import { Button, Scroller, ModalHeader, Copyable } from 'forge-core'
+import { WEBHOOKS_Q, CREATE_WEBHOOK, DELETE_WEBHOOK } from './graphql/webhooks'
+import { Button, Scroller, ModalHeader, Copyable, Trash, Confirm } from 'forge-core'
 import { BUILD_PADDING } from './Builds'
 import { Box, Text, FormField, TextInput, Layer } from 'grommet'
 import { chunk } from '../utils/array'
-import { appendConnection, extendConnection, updateCache } from '../utils/graphql'
+import { appendConnection, extendConnection, removeConnection, updateCache } from '../utils/graphql'
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { Container } from './utils/Container'
 import { SectionContentContainer, SectionPortal } from './utils/Section'
 import SmoothScroller from './utils/SmoothScroller'
 import { HeaderItem } from './kubernetes/Pod'
+import { Icon } from './users/Group'
+import moment from 'moment'
 
 // const MAX_LEN = 100
 // const trim = (url) => url.length > 10 ? `${url.slice(0, MAX_LEN)}...` : url
@@ -36,7 +38,7 @@ function Webhook({webhook: {url, health}}) {
       <Box fill='horizontal'>
         <Copyable text={url} pillText='Webhook url copied' />
       </Box>
-      <Box flex={false}>
+      <Box flex={false} gap='xsmall' direction='row' align='center'>
         <WebhookHealth health={health} />
       </Box>
     </Container>
@@ -58,7 +60,7 @@ function WebhookForm({onSubmit}) {
     <Box pad='medium' gap='small'>
       <FormField label='url'>
         <TextInput
-          placeholder='https://my.piazza.instance/incoming_webhooks/id'
+          placeholder='https://hooks.slack.com/services/...'
           value={attributes.url}
           onChange={({target: {value}}) => setAttributes({...attributes, url: value})} />
       </FormField>
@@ -93,28 +95,58 @@ function CreateWebhook() {
 }
 
 const HEIGHT_PX = `45px`
-const HEALTH_WIDTH = '100px'
+const HEALTH_WIDTH = '150px'
 
-function WebhookRow({hook: {url, health}}) {
+function WebhookRow({hook: {id, url, health, insertedAt}}) {
+  const [confirm, setConfirm] = useState(false)
+  const [mutation, {loading}] = useMutation(DELETE_WEBHOOK, {
+    variables: {id},
+    update: (cache, {data: {deleteWebhook}}) => updateCache(cache, {
+      query: WEBHOOKS_Q,
+      update: (prev) => removeConnection(prev, deleteWebhook, 'webhooks')
+    }),
+    onCompleted: () => setConfirm(false)
+  })
+
   return (
+    <>
     <Box flex={false} height={HEIGHT_PX} direction='row' align='center'
-         border={{side: 'bottom'}} pad='small'>
-      <Box fill='horizontal'>
-        <Copyable text={url} pillText='Webhook url copied' />
+         border={{side: 'bottom'}} pad='small' gap='small'>
+      <Box fill='horizontal' gap='small' align='center' direction='row'>
+        <Box width='70%' flex={false}>
+          <Copyable text={url} pillText='Webhook url copied' />
+        </Box>
+        <HeaderItem text={moment(insertedAt).format('lll')} width='30%' nobold />
       </Box>
-      <Box width={HEALTH_WIDTH} flex={false}>
+      <Box width={HEALTH_WIDTH} flex={false} direction='row' align='center' gap='small'>
         <WebhookHealth health={health} />
+        <Icon
+          icon={Trash}
+          onClick={() => setConfirm(true)}
+          iconAttrs={{color: 'error'}}
+          tooltip='Delete' />
       </Box>
     </Box>
+    {confirm && (
+      <Confirm
+        description="This will permanently delete this webhook"
+        loading={loading}
+        cancel={() => setConfirm(false)}
+        submit={mutation} />
+    )}
+    </>
   )
 }
 
 function WebhooksHeader() {
   return (
     <Box flex={false} height={HEIGHT_PX} direction='row' align='center'
-        gap='xsmall' border={{side: 'bottom'}}
+        gap='small' border={{side: 'bottom'}}
         pad={{horizontal: 'small'}}>
-      <HeaderItem width='calc(100% - 80px)' text='Url' />
+      <Box fill='horizontal' direction='row' align='center' gap='small'>
+        <HeaderItem width='70%' text='Url' />
+        <HeaderItem width='30%' text='Created On' />
+      </Box>
       <HeaderItem width={HEALTH_WIDTH} text='Health' />
     </Box>
   )
