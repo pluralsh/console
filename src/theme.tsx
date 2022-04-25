@@ -69,4 +69,10 @@ export default mergeTheme(defaultTheme, {
       ],
     ]),
   },
+  Checkbox: {
+    defaultProps: {
+      width: 16,
+      height: 16,
+    },
+  },
 })

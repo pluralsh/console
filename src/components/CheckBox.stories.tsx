@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import { Div, P } from 'honorable'
 
-import CheckBox from './CheckBox'
+import Checkbox from './Checkbox'
 
 export default {
-  title: 'CheckBox',
-  component: CheckBox,
+  title: 'Checkbox',
+  component: Checkbox,
 }
 
 function Template(args: any) {
@@ -12,22 +13,29 @@ function Template(args: any) {
 
   return (
     <>
-      <div>
-        <CheckBox
+      <Div xflex="x4">
+        <Checkbox
           {...args}
-          label="Implement design system"
           checked={checked[0]}
           onChange={event => setChecked(checked => [event.target.checked, checked[1]])}
         />
-      </div>
-      <div style={{ marginTop: '0.5rem' }}>
-        <CheckBox
+        <P ml={0.5}>
+          Implement design system
+        </P>
+      </Div>
+      <Div
+        xflex="x4"
+        mt={0.5}
+      >
+        <Checkbox
           {...args}
-          label="Party hard"
           checked={checked[1]}
           onChange={event => setChecked(checked => [checked[0], event.target.checked])}
         />
-      </div>
+        <P ml={0.5}>
+          Party hard
+        </P>
+      </Div>
     </>
   )
 }
