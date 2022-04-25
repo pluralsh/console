@@ -214,7 +214,6 @@ const theme = {
       medium: {
         value: 1536,
       },
-      large: {},
     },
     edgeSize: {
       none: '0px',
@@ -262,10 +261,15 @@ const theme = {
         radius: '4px',
       },
     },
+    large: {},
     drop: {
+      background: 'background-contrast',
       border: {
         radius: '4px',
       },
+      extend: css`
+        box-shadow: 0px 0px 4px 4px rgba(0, 0, 0, 0.2);
+      `,
     },
   },
   chart: {},
@@ -681,6 +685,9 @@ const theme = {
       bottom: 'small',
     },
     round: '4px',
+  },
+  select: {
+    background: 'background-front',
   },
 } as ThemeType
 
