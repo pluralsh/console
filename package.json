@@ -30,7 +30,7 @@
     ]
   },
   "dependencies": {
-    "honorable": "^0.41.0",
+    "honorable": "^0.42.0",
     "honorable-theme-default": "^0.25.0",
     "prop-types": "^15.8.1"
   },
