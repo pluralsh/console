@@ -28,9 +28,9 @@ const severityToColor = {
 }
 
 const severityToBackgroundColor = {
-  success: 'transparencify(success, 60)',
-  warning: 'transparencify(warning, 60)',
-  error: 'transparencify(error, 60)',
+  success: 'transparency(success, 60)',
+  warning: 'transparency(warning, 60)',
+  error: 'transparency(error, 60)',
   info: 'background-light',
 }
 
