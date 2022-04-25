@@ -51,4 +51,23 @@ export default mergeTheme(defaultTheme, {
       light: '#058E4B',
     },
   },
+  // @ts-ignore
+  Button: {
+    customProps: new Map([
+      [
+        ({ secondary }: any) => secondary,
+        {
+          backgroundColor: 'transparent',
+          color: 'primary',
+          '&:hover': {
+            backgroundColor: 'primary',
+            color: 'white',
+          },
+          '&:active': {
+            backgroundColor: 'darken(primary, 10)',
+          },
+        },
+      ],
+    ]),
+  },
 })
