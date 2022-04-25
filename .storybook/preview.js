@@ -1,4 +1,4 @@
-import GrommetDecorator from '../src/GrommetDecorator'
+import ThemeDecorator from '../src/ThemeDecorator'
 
 export const parameters = {
   layout: 'fullscreen',
@@ -11,4 +11,4 @@ export const parameters = {
   },
 }
 
-export const decorators = [GrommetDecorator]
+export const decorators = [ThemeDecorator]

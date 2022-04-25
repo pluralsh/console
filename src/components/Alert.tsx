@@ -1,7 +1,5 @@
-import { FC, PropsWithChildren } from 'react'
-import { Box, BoxExtendedProps, Text } from 'grommet'
-import { normalizeColor } from 'grommet/utils'
-import styled from 'styled-components'
+import { PropsWithChildren } from 'react'
+import { Div, Icon, P, useTheme } from 'honorable'
 import PropTypes from 'prop-types'
 
 import StatusIpIcon from './icons/StatusIpIcon'
@@ -9,7 +7,7 @@ import StatusOkIcon from './icons/StatusOkIcon'
 import ErrorIcon from './icons/ErrorIcon'
 import CloseIcon from './icons/CloseIcon'
 
-type AlertProps = BoxExtendedProps & PropsWithChildren<{
+type AlertProps = typeof Div & PropsWithChildren<{
   severity?: 'success' | 'warning' | 'error' | 'info'
   title?: string
   onClose?: () => void
@@ -22,10 +20,17 @@ const propTypes = {
   onClose: PropTypes.func,
 }
 
+const severityToColor = {
+  success: 'success',
+  warning: 'warning',
+  error: 'error',
+  info: 'primary',
+}
+
 const severityToBackgroundColor = {
-  success: 'status-ok-transparent',
-  warning: 'status-warning-transparent',
-  error: 'status-critical-transparent',
+  success: 'transparencify(success, 60)',
+  warning: 'transparencify(warning, 60)',
+  error: 'transparencify(error, 60)',
   info: 'background-light',
 }
 
@@ -36,66 +41,58 @@ const severityToIcon = {
   info: StatusOkIcon,
 }
 
-const severityToColor = {
-  success: 'status-ok',
-  warning: 'status-warning',
-  error: 'status-critical',
-  info: 'brand',
-}
-
-const Container = styled<FC<AlertProps>>(Box)`
-  position: relative;
-  padding: 16px 24px;
-  border-radius: 4px;
-  background-color: ${({ theme, severity }) => normalizeColor(severityToBackgroundColor[severity] || 'background-light', theme)};
-`
-
-const CloseContainer = styled(Box)`
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  cursor: pointer;
-`
-
 function Alert({ children, severity = 'info', title = '', onClose, ...props }: AlertProps) {
-  const Icon = severityToIcon[severity] || StatusOkIcon
-  const color = severityToColor[severity] || 'brand'
+  const theme = useTheme()
+  const AlertIcon = severityToIcon[severity] || StatusOkIcon
+  const color = severityToColor[severity] || 'primary'
 
   return (
-    <Container
-      severity={severity}
-      direction="row"
-      align="center"
+    <Div
+      position="relative"
+      py={1}
+      px={2}
+      backgroundColor={severityToBackgroundColor[severity]}
+      borderRadius={4}
+      xflex="x4"
       {...props}
     >
       {typeof onClose === 'function' && (
-        <CloseContainer onClick={onClose}>
+        <Div
+          onClick={onClose}
+          position="absolute"
+          top={16}
+          right={16}
+          cursor="pointer"
+        >
           <CloseIcon
-            color="white"
+            color={theme.utils.resolveColor('text') as string}
             size={12}
           />
-        </CloseContainer>
+        </Div>
       )}
-      <div style={{ flexShrink: 0 }}>
-        <Icon
+      <Icon
+        flexShrink={0}
+        color={color}
+      >
+        <AlertIcon
           size={24}
-          color={color}
+          color={theme.utils.resolveColor(color) as string}
         />
-      </div>
-      <Box margin={{ left: '24px' }}>
+      </Icon>
+      <Div ml={2}>
         {!!title && (
-          <Text
-            weight="bold"
-            margin={{ bottom: children ? '16px' : '0' }}
+          <P
+            fontWeight="bold"
+            mb={children ? 1 : 0}
           >
             {title}
-          </Text>
+          </P>
         )}
-        <Text>
+        <P>
           {children}
-        </Text>
-      </Box>
-    </Container>
+        </P>
+      </Div>
+    </Div>
   )
 }
 
