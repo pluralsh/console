@@ -1,9 +1,9 @@
-import { Box, Text } from 'grommet'
+import { Div, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 import CheckOutlineIcon from './icons/CheckOutlineIcon'
 
-type InstalledLabelProps = {
+type InstalledLabelProps = typeof Div & {
   label?: string
 }
 
@@ -11,20 +11,20 @@ const propTypes = {
   label: PropTypes.string,
 }
 
-function InstalledLabel({ label = 'Installed' }: InstalledLabelProps) {
+function InstalledLabel({ label = 'Installed', ...props }: InstalledLabelProps) {
   return (
-    <Box
-      direction="row"
-      align="center"
+    <Div
+      xflex="x4"
+      {...props}
     >
-      <Text weight="bold">
+      <P fontWeight="bold">
         {label}
-      </Text>
+      </P>
       <CheckOutlineIcon
-        color="status-ok"
-        style={{ marginLeft: '6px' }}
+        color="success"
+        ml={0.333}
       />
-    </Box>
+    </Div>
   )
 }
 
