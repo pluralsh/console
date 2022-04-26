@@ -15,7 +15,8 @@ function Template(args: any) {
       <Switch
         {...args}
         checked={checked}
-        onChange={setChecked}
+        // @ts-ignore
+        onChange={event => setChecked(event.target.checked)}
       />
     </div>
   )
