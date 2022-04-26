@@ -1,24 +1,22 @@
 import { useState } from 'react'
 
-import TextInput from './TextInput'
+import Input from './Input'
 
 export default {
-  title: 'TextInput',
-  component: TextInput,
+  title: 'Input',
+  component: Input,
 }
 
 function Template(args: any) {
   const [value, setValue] = useState('')
 
   return (
-    <div>
-      <TextInput
-        {...args}
-        value={value}
-        onChange={(event: any) => setValue(event.target.value)}
-        style={{ width: 256 + 64 }}
-      />
-    </div>
+    <Input
+      {...args}
+      value={value}
+      onChange={(event: any) => setValue(event.target.value)}
+      style={{ width: 256 + 64 }}
+    />
   )
 }
 

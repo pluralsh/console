@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import FormField from './FormField'
-import TextInput from './TextInput'
+import Input from './Input'
 
 export default {
   title: 'FormField',
@@ -13,19 +13,18 @@ function Template(args: any) {
   const { valid, error } = args
 
   return (
-    <div>
-      <FormField
-        {...args}
-        style={{ width: 256 + 64 }}
-      >
-        <TextInput
-          valid={valid}
-          error={error}
-          value={value}
-          onChange={(event: any) => setValue(event.target.value)}
-        />
-      </FormField>
-    </div>
+    <FormField
+      {...args}
+      style={{ width: 256 + 64 }}
+    >
+      <Input
+        valid={valid}
+        error={error}
+        // @ts-ignore
+        value={value}
+        onChange={(event: any) => setValue(event.target.value)}
+      />
+    </FormField>
   )
 }
 
