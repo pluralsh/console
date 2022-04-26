@@ -108,5 +108,4 @@ export { default as UserCard } from './components/UserCard'
 // Hooks
 export { default as usePrevious } from './hooks/usePrevious'
 // Theme
-export { default as themeGrommet } from './theme-grommet'
 export { default as theme } from './theme'

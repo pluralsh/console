@@ -55,6 +55,10 @@ export default mergeTheme(defaultTheme, {
       light: '#058E4B',
     },
   },
+  html: {
+    fontSize: 14,
+    fontFamily: 'Monument',
+  },
   global: {
     // @ts-ignore
     customProps: new Map([
@@ -103,7 +107,7 @@ export default mergeTheme(defaultTheme, {
       [
         ({ size }: any) => size === 'small',
         {
-          fontSize: '0.85rem',
+          fontSize: '0.90rem',
         },
       ],
       [
