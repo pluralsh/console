@@ -23,7 +23,10 @@ function extractInitials(name: string) {
 function Avatar({ name = '', imageUrl = '', size = 44, ...props }: AvatarProps) {
   function renderName() {
     return (
-      <P fontWeight="bold">
+      <P
+        size="large"
+        fontWeight="bold"
+      >
         {extractInitials(name || '?')}
       </P>
     )
