@@ -51,6 +51,19 @@ export default mergeTheme(defaultTheme, {
       light: '#058E4B',
     },
   },
+  global: {
+    // @ts-ignore
+    customProps: new Map([
+      [
+        ({ hoverIndicator }: any) => hoverIndicator,
+        ({ hoverIndicator }: any) => ({
+          '&:hover': {
+            backgroundColor: hoverIndicator,
+          },
+        }),
+      ],
+    ]),
+  },
   Button: {
     customProps: new Map([
       [

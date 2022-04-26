@@ -42,7 +42,6 @@ const severityToIcon = {
 }
 
 function Alert({ children, severity = 'info', title = '', onClose, ...props }: AlertProps) {
-  const theme = useTheme()
   const AlertIcon = severityToIcon[severity] || StatusOkIcon
   const color = severityToColor[severity] || 'primary'
 
@@ -65,20 +64,16 @@ function Alert({ children, severity = 'info', title = '', onClose, ...props }: A
           cursor="pointer"
         >
           <CloseIcon
-            color={theme.utils.resolveColor('text') as string}
+            color="text"
             size={12}
           />
         </Div>
       )}
-      <Icon
-        flexShrink={0}
+      <AlertIcon
+        size={24}
         color={color}
-      >
-        <AlertIcon
-          size={24}
-          color={theme.utils.resolveColor(color) as string}
-        />
-      </Icon>
+        flexShrink={0}
+      />
       <Div ml={2}>
         {!!title && (
           <P

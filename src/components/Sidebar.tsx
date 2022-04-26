@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { normalizeColor } from 'grommet/utils'
 import PropTypes from 'prop-types'
 
-import { IconProps, UserType } from '../types'
+import { UserType } from '../types'
 
 import Avatar from './Avatar'
 import CollapseIcon from './icons/CollapseIcon'
@@ -13,7 +13,7 @@ import CollapseIcon from './icons/CollapseIcon'
 type SidebarItem = {
   name?: string
   url?: string
-  Icon?: ComponentType<IconProps>
+  Icon?: ComponentType<any>
   onClick?: (event: MouseEvent) => any
   items?: SidebarItem[]
   matchedUrl?: RegExp
