@@ -75,4 +75,22 @@ export default mergeTheme(defaultTheme, {
       height: 16,
     },
   },
+  P: {
+    customProps: new Map([
+      [
+        ({ size }: any) => size === 'small',
+        {
+          fontSize: '0.75rem',
+        },
+      ],
+      [
+        ({ truncate }: any) => truncate,
+        {
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        },
+      ],
+    ]),
+  },
 })
