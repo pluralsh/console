@@ -1,21 +1,16 @@
-import { Box, BoxExtendedProps } from 'grommet'
-import styled from 'styled-components'
+import { Div } from 'honorable'
 
-type MenuProps = BoxExtendedProps
+type MenuProps = typeof Div
 
 const propTypes = {}
 
-const Container = styled(Box)`
-  border-radius: 4px;
-  overflow: hidden;
-`
-
 function Menu(props: MenuProps) {
   return (
-    <Container
-      direction="column"
-      justify="stretch"
-      background="background-contrast"
+    <Div
+      flex="y2s"
+      borderRadius={4}
+      overflow="hidden"
+      backgroundColor="background-contrast"
       {...props}
     />
   )
