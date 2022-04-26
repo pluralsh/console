@@ -30,8 +30,6 @@
     ]
   },
   "dependencies": {
-    "honorable": "0.44.0",
-    "honorable-theme-default": "^0.26.0",
     "prop-types": "^15.8.1"
   },
   "devDependencies": {
@@ -61,7 +59,8 @@
     "typescript": "^4.6.3"
   },
   "peerDependencies": {
-    "grommet": "^2.0.0",
+    "honorable": "^0.44.0",
+    "honorable-theme-default": "^0.26.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "styled-components": "^5.0.0"
