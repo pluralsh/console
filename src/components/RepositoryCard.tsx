@@ -1,12 +1,10 @@
 import { PropsWithChildren } from 'react'
-import { Box, Text } from 'grommet'
-import { normalizeColor } from 'grommet/utils'
-import styled from 'styled-components'
+import { Div, Img, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 import InstalledLabel from './InstalledLabel'
 
-type RepositoryCardProps = PropsWithChildren<{
+type RepositoryCardProps = typeof Div & PropsWithChildren<{
   featured?: boolean
   installed?: boolean
   title?: string
@@ -22,112 +20,97 @@ const propTypes = {
   imageUrl: PropTypes.string,
 }
 
-const Container = styled(Box)`
-  padding: 16px;
-  border-radius: 4px;
-  background-color: ${({ theme }) => normalizeColor(theme.global.colors['background-contrast'], theme)};
-`
-
-const Logo = styled.img`
-  width: 64px;
-  height: 64px;
-  border-radius: 4px;
-  object-fit: cover;
-  background-color: ${({ theme }) => normalizeColor(theme.global.colors['background-light'], theme)}
-`
-
-const LogoLarge = styled.img`
-  width: 128px;
-  height: 128px;
-  border-radius: 4px;
-  object-fit: cover;
-  background-color: ${({ theme }) => normalizeColor(theme.global.colors['background-light'], theme)}
-`
-
 function RepositoryCard({
   featured = false,
   installed = false,
-  title = '',
-  subtitle = '',
-  imageUrl = '',
+  title,
+  subtitle,
+  imageUrl,
   children,
   ...props
 }: RepositoryCardProps) {
 
   function renderFeatured() {
     return (
-      <Container
-        direction="row"
-        align="start"
+      <Div
+        p={1}
+        borderRadius={4}
+        backgroundColor="background-contrast"
+        xflex="x1"
         {...props}
       >
-        <LogoLarge
+        <Img
           src={imageUrl}
           alt="Logo"
+          width={128}
+          borderRadius={4}
+          objectFit="cover"
+          backgroundColor="background-light"
         />
-        <Box margin={{ left: '16px' }}>
-          <Box
-            direction="row"
-            align="center"
-            justify="between"
-          >
-            <Text
-              weight="bold"
+        <Div ml={1}>
+          <Div xflex="x5b">
+            <P
               size="large"
+              fontWeight="bold"
             >
               {title}
-            </Text>
+            </P>
             {installed && (
               <InstalledLabel />
             )}
-          </Box>
-          <Text color="text-xweak">
+          </Div>
+          <P color="text-xweak">
             {subtitle}
-          </Text>
-          <Text
+          </P>
+          <P
+            mt={1}
             color="text-strong"
-            margin={{ top: '16px' }}
           >
             {children}
-          </Text>
-        </Box>
-      </Container>
+          </P>
+        </Div>
+      </Div>
     )
   }
 
   function renderRegular() {
     return (
-      <Container {...props}>
-        <Box
-          direction="row"
-          align="center"
-          justify="between"
-        >
-          <Logo
+      <Div
+        p={1}
+        borderRadius={4}
+        backgroundColor="background-contrast"
+        {...props}
+      >
+        <Div xflex="x5b">
+          <Img
             src={imageUrl}
             alt="Logo"
+            width={64}
+            borderRadius={4}
+            objectFit="cover"
+            backgroundColor="background-light"
           />
           {installed && (
             <InstalledLabel />
           )}
-        </Box>
-        <Text
-          weight="bold"
+        </Div>
+        <P
+          mt={1}
+          fontWeight="bold"
           size="large"
-          margin={{ top: '16px' }}
         >
           {title}
-        </Text>
-        <Text color="text-xweak">
+        </P>
+        <P color="text-xweak">
           {subtitle}
-        </Text>
-        <Text
+        </P>
+        <P
+          mt={1}
           color="text-strong"
-          margin={{ top: '16px' }}
         >
           {children}
-        </Text>
-      </Container>
+        </P>
+      </Div>
     )
   }
 

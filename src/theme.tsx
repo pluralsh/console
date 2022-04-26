@@ -31,6 +31,10 @@ export default mergeTheme(defaultTheme, {
       light: '#444444',
       dark: '#CCCCCC',
     },
+    'text-xweak': {
+      light: '#666666',
+      dark: '#999999',
+    },
     border: {
       light: '#CCCCCC',
       dark: '#303340',
@@ -94,6 +98,12 @@ export default mergeTheme(defaultTheme, {
         ({ size }: any) => size === 'small',
         {
           fontSize: '0.75rem',
+        },
+      ],
+      [
+        ({ size }: any) => size === 'large',
+        {
+          fontSize: '1.25rem',
         },
       ],
       [
