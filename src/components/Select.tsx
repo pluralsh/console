@@ -1,25 +1,24 @@
 import { ReactNode } from 'react'
-import { Select as GrommetSelect, SelectExtendedProps } from 'grommet'
+import { Select as HonorableSelect } from 'honorable'
 
 import MenuItem from './MenuItem'
 
-type SelectProps = SelectExtendedProps & {
+type SelectProps = typeof Select & {
   items: Array<{ label: ReactNode, value: any }>
 }
 
 function Select({ items, ...props }: SelectProps) {
   return (
-    <GrommetSelect
+    <HonorableSelect
+      backgroundColor="background-contrast"
       {...props}
-      onChange={({ option }) => props.onChange(option.value)}
-      options={items}
     >
-      {option => (
-        <MenuItem key={option.value}>
-          {option.label}
+      {items.map(({ value, label }) => (
+        <MenuItem key={value}>
+          {label}
         </MenuItem>
-      )}
-    </GrommetSelect>
+      ))}
+    </HonorableSelect>
   )
 }
 export default Select

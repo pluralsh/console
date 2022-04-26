@@ -1,6 +1,10 @@
+import { ReactNode } from 'react'
+
 import { Div } from 'honorable'
 
-type MenuItemProps = typeof Div
+type MenuItemProps = typeof Div & {
+  children: ReactNode
+}
 
 const propTypes = {}
 
