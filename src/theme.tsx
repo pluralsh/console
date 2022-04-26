@@ -95,15 +95,21 @@ export default mergeTheme(defaultTheme, {
   P: {
     customProps: new Map([
       [
-        ({ size }: any) => size === 'small',
-        {
-          fontSize: '0.75rem',
-        },
-      ],
-      [
         ({ size }: any) => size === 'large',
         {
           fontSize: '1.25rem',
+        },
+      ],
+      [
+        ({ size }: any) => size === 'small',
+        {
+          fontSize: '0.85rem',
+        },
+      ],
+      [
+        ({ size }: any) => size === 'xsmall',
+        {
+          fontSize: '0.70rem',
         },
       ],
       [
