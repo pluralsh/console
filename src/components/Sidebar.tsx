@@ -1,8 +1,8 @@
+// @ts-nocheck
 import { ComponentType, Fragment, MouseEvent, ReactNode, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Box, BoxExtendedProps, Text, TextExtendedProps } from 'grommet'
-import styled from 'styled-components'
-import { normalizeColor } from 'grommet/utils'
+import styled from '@emotion/styled'
+import { Div, P, useTheme } from 'honorable'
 import PropTypes from 'prop-types'
 
 import { UserType } from '../types'
@@ -25,14 +25,6 @@ type SidebarProps = {
   user: UserType
 }
 
-type CollapsedProps = {
-  collapsed: boolean
-}
-
-type DeployedProps = {
-  deployed: boolean
-}
-
 const propTypes = {
   items: PropTypes.arrayOf(
     PropTypes.shape({
@@ -51,29 +43,25 @@ const propTypes = {
   }),
 }
 
-const Container = styled(Box)`
-  transition: width 300ms ease;
-`
-
 const StyledLink = styled(Link)`
   text-decoration: none;
 `
 
-const Item = styled(Box)`
-  color: ${({ theme }) => normalizeColor('text-strong', theme)};
+const Item = styled(Div)`
+  color: ${({ theme }) => theme.utils.resolveColor('text-strong')};
   cursor: pointer;
   transition: background-color 150ms linear;
   user-select: none;
 
   &#active-item {
-    background-color: ${({ theme }) => normalizeColor('background-light', theme)};
+    background-color: ${({ theme }) => theme.utils.resolveColor('background-light')};
     font-weight: 600;
   }
 
   #sidebar-items:not(:hover) > &#active-item,
   #sidebar-items:not(:hover) > * > * > &#active-item,
   &:hover {
-    background-color: ${({ theme }) => normalizeColor('background-light', theme)};
+    background-color: ${({ theme }) => theme.utils.resolveColor('background-light')};
     font-weight: 600;
   }
 
@@ -82,37 +70,19 @@ const Item = styled(Box)`
   }
 `
 
-const TransitionText = styled<ComponentType<CollapsedProps & TextExtendedProps>>(Text)`
-  display: block;
-  opacity: ${({ collapsed }) => collapsed ? 0 : 1};
-  visibility: ${({ collapsed }) => collapsed ? 'hidden' : 'visible'};
-  transition: opacity ${({ collapsed }) => collapsed ? 200 : 500}ms ease ${({ collapsed }) => collapsed ? 0 : 50}ms, visibility 200ms linear;
-`
+function TransitionText({ collapsed, ...props }: any) {
+  return (
+    <P
+      display="block"
+      opacity={collapsed ? 0 : 1}
+      visibility={collapsed ? 'hidden' : 'visible'}
+      transition={`${collapsed ? 200 : 500}ms ease ${collapsed ? 0 : 50}ms, visibility 200ms linear`}
+      {...props}
+    />
+  )
+}
 
-const TransitionTextNoSelect = styled(TransitionText)`
-  user-select: none;
-`
-
-const CollapseIconContainer = styled<ComponentType<CollapsedProps & BoxExtendedProps>>(Box)`
-  min-width: 24px;
-  min-height: 24px;
-  cursor: pointer;
-  transition: all 300ms ease;
-  transform: ${({ collapsed }) => collapsed ? 'rotate(180deg)' : 'rotate(0deg)'};
-`
-
-const DeployIconContainer = styled<ComponentType<CollapsedProps & DeployedProps & BoxExtendedProps>>(Box)`
-  cursor: pointer;
-  transition: all 300ms ease;
-  transform: ${({ deployed }) => deployed ? 'rotate(0deg)' : 'rotate(180deg)'};
-  opacity: ${({ collapsed }) => collapsed ? 0 : 1};
-  visibility: ${({ collapsed }) => collapsed ? 'hidden' : 'visible'};
-  transition: opacity ${({ collapsed }) => collapsed ? 200 : 500}ms ease ${({ collapsed }) => collapsed ? 0 : 100}ms, visibility 200ms linear, transform 300ms ease;
-`
-
-const ChildrenContainer = styled<ComponentType<DeployedProps & BoxExtendedProps>>(Box)`
-  transition: height 300ms ease;
-
+const ChildrenContainer = styled(Div)`
   & > * {
     transform: ${({ deployed }) => deployed ? 'translate(0px, 0px)' : 'translate(-4px, -4px)'};
     opacity: ${({ deployed }) => deployed ? 1 : 0};
@@ -126,6 +96,7 @@ function Sidebar({
   activeUrl = '',
   user = {},
 }: SidebarProps) {
+  const theme = useTheme()
   const sidebarBottomRef = useRef()
   const [collapsed, setCollapsed] = useState(false)
   const [deployedId, setDeployedId] = useState(activeUrl ? getIdForUrl(items, activeUrl) : null)
@@ -224,20 +195,20 @@ function Sidebar({
 
       const itemNode = (
         <Item
+          theme={theme}
           id={(collapsed && isTopLevelActive(item)) || activeId === id ? 'active-item' : ''}
-          direction="row"
-          align="center"
-          height="40px"
-          round="4px"
-          margin={{ left: `${marginLeft}px` }}
-          pad={{ left: '12px' }}
+          xflex="x4"
+          height={40}
+          borderRadius={4}
+          ml={`${marginLeft}px`}
+          pl="12px"
           color="text-strong"
           overflow="hidden"
           onClick={(event: MouseEvent) => {
             if (hasChildren || isTopLevelItem(item)) handleDeployItem(id)
             if (typeof onClick === 'function') onClick(event)
           }}
-          flex={{ shrink: 0 }}
+          flexShrink={0}
         >
           {Icon ? (
             <Icon
@@ -257,20 +228,22 @@ function Sidebar({
           </TransitionText>
           {hasChildren && (
             <>
-              <Box flex="grow" />
-              <DeployIconContainer
-                collapsed={collapsed}
-                deployed={deployedId === id}
-                align="center"
-                justify="center"
-                flex={{ shrink: 0 }}
+              <Div flex="grow" />
+              <Div
+                cursor="pointer"
+                transform={`rotate(${deployedId === id ? 0 : 180}deg)`}
+                opacity={collapsed ? 0 : 1}
+                visibility={collapsed ? 'hidden' : 'visible'}
+                transition={`opacity ${collapsed ? 200 : 500}ms ease ${collapsed ? 0 : 100}ms, visibility 200ms linear, transform 300ms ease`}
+                xflex="x5"
+                flexShrink={0}
               >
                 <CollapseIcon
                   color="text-xweak"
                   size={6}
                 />
-              </DeployIconContainer>
-              <Box width="16px" />
+              </Div>
+              <Div width="16px" />
             </>
           )}
         </Item>
@@ -283,9 +256,10 @@ function Sidebar({
             <ChildrenContainer
               id={`sidebar-children-${id}`}
               deployed={deployedId === id}
-              height={`${deployedId === id ? childrenHeights[id] || 0 : 0}px`}
+              height={deployedId === id ? childrenHeights[id] || 0 : 0}
               overflow="hidden"
-              flex={{ shrink: 0 }}
+              transition="height 300ms ease"
+              flexShrink={0}
             >
               <div>
                 {renderItems(items, marginLeft + 12)}
@@ -306,73 +280,78 @@ function Sidebar({
   }
 
   return (
-    <Container
-      width={`${collapsed ? 74 : 256 - 32}px`}
-      background="background-front"
-      border={{
-        color: 'border',
-        size: 'small',
-        side: 'right',
-      }}
-      pad="24px 0px 16px 16px"
-      flex={{ grow: 0, shrink: 0 }}
+    <Div
+      transition="width 300ms ease"
+      width={collapsed ? 74 : 256 - 32}
+      height="100%"
+      backgroundColor="background-front"
+      borderRight="1px solid border"
+      pt={1.5}
+      pr={1}
+      pb={1}
+      flexGrow={0}
+      flexShrink={0}
     >
-      <Box
-        overflow={{ vertical: 'auto' }}
-        flex="grow"
-        style={{ maxHeight: sidebarContentMaxHeight, height: sidebarContentMaxHeight }}
+      <Div
+        overflowY="auto"
+        flexGrow={1}
+        height={sidebarContentMaxHeight}
+        maxHeight={sidebarContentMaxHeight}
       >
-        <Box
+        <Div
           id="sidebar-items"
-          pad={{ right: '16px' }}
+          pr={1}
         >
           {renderItems(items)}
-        </Box>
-      </Box>
-      <Box
+        </Div>
+      </Div>
+      <Div
         ref={sidebarBottomRef}
-        flex={{ grow: 0, shrink: 0 }}
+        flexGrow={0}
+        flexShrink={0}
       >
-        <Box
-          direction="row"
-          align="center"
+        <Div
+          mt={1}
+          xflex="x4"
           overflow="hidden"
-          margin={{ top: '16px' }}
         >
-          <CollapseIconContainer
-            collapsed={collapsed}
-            background="background-light"
-            round="full"
-            align="center"
-            justify="center"
-            width="24px"
-            height="24px"
+          <Div
+            xflex="x5"
+            width={24}
+            height={24}
+            minWidth={24}
+            minHeight={24}
+            cursor="pointer"
+            transition="all 300ms ease"
+            transform={collapsed ? 'rotate(180deg)' : 'rotate(0deg)'}
+            backgroundColor="background-light"
+            borderRadius={1000}
             onClick={toggleCollapsed}
           >
             <CollapseIcon
               color="text-xweak"
               size={6}
             />
-          </CollapseIconContainer>
-          <TransitionTextNoSelect
+          </Div>
+          <TransitionText
             collapsed={collapsed}
+            ml={1}
+            userSelect="none"
             size="small"
             color="text-xweak"
-            margin={{ left: '16px' }}
           >
             Collapse
-          </TransitionTextNoSelect>
-        </Box>
-        <Box
-          direction="row"
-          align="center"
-          margin={{ top: '16px' }}
+          </TransitionText>
+        </Div>
+        <Div
+          mt={1}
+          xflex="x4"
         >
           <Avatar
             name={user.name}
             imageUrl={user.imageUrl}
           />
-          <Box pad={{ left: '8px' }}>
+          <Div pl={0.5}>
             <TransitionText
               collapsed={collapsed}
               truncate
@@ -390,10 +369,10 @@ function Sidebar({
             >
               {user.email}
             </TransitionText>
-          </Box>
-        </Box>
-      </Box>
-    </Container>
+          </Div>
+        </Div>
+      </Div>
+    </Div>
   )
 }
 
