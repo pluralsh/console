@@ -1,5 +1,7 @@
 # Plural's design system
 
+[Documentation](https://pluralsh-design.web.app)
+
 ## Installation
 
 `npm i -S pluralsh-design-system`
