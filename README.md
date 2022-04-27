@@ -7,13 +7,16 @@
 ## Usage
 
 ```jsx
-Import { Button } from 'pluralsh-design-system'
+Import { Alert } from 'pluralsh-design-system'
 
 // ...
 return (
-  <Button>
-    Click me
-  </Button>
+  <Alert
+    severy="success"
+    title="Wouhou!"
+  >
+    YYou installed pluralsh-design-system correcly
+  </Alert>
 )
 ```
 
