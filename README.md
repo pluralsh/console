@@ -15,7 +15,7 @@ return (
     severy="success"
     title="Wouhou!"
   >
-    YYou installed pluralsh-design-system correcly
+    You installed pluralsh-design-system correcly
   </Alert>
 )
 ```
