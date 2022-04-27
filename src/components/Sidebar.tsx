@@ -7,7 +7,6 @@ import PropTypes from 'prop-types'
 
 import { UserType } from '../types'
 
-import Avatar from './Avatar'
 import CollapseIcon from './icons/CollapseIcon'
 
 type SidebarItem = DivProps & {
@@ -91,7 +90,6 @@ const ChildrenContainer = styled(Div)`
 function Sidebar({
   items = [],
   activeUrl = '',
-  user = {},
   ...props
 }: SidebarProps) {
   const theme = useTheme()
