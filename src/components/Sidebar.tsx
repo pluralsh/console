@@ -48,12 +48,8 @@ const StyledLink = styled(Link)`
 `
 
 const Item = styled(Div)`
-  color: ${({ theme }) => theme.utils.resolveColor('text-strong')};
-  cursor: pointer;
-  transition: background-color 150ms linear;
-  user-select: none;
-
   &#active-item {
+    color: ${({ theme }) => theme.utils.resolveColor('text-strong')};
     background-color: ${({ theme }) => theme.utils.resolveColor('background-light')};
     font-weight: 600;
   }
@@ -61,6 +57,7 @@ const Item = styled(Div)`
   #sidebar-items:not(:hover) > &#active-item,
   #sidebar-items:not(:hover) > * > * > &#active-item,
   &:hover {
+    color: ${({ theme }) => theme.utils.resolveColor('text-strong')};
     background-color: ${({ theme }) => theme.utils.resolveColor('background-light')};
     font-weight: 600;
   }
@@ -76,7 +73,7 @@ function TransitionText({ collapsed, ...props }: any) {
       display="block"
       opacity={collapsed ? 0 : 1}
       visibility={collapsed ? 'hidden' : 'visible'}
-      transition={`${collapsed ? 200 : 500}ms ease ${collapsed ? 0 : 50}ms, visibility 200ms linear`}
+      transition={`background-color ${collapsed ? 200 : 500}ms ease ${collapsed ? 0 : 50}ms, visibility 200ms linear`}
       {...props}
     />
   )
@@ -139,7 +136,7 @@ function Sidebar({
     const bottomRect = current.getBoundingClientRect()
     const parentRect = current.parentElement.getBoundingClientRect()
 
-    setSidebarcontentMaxHeight(`${parentRect.height - bottomRect.height - 24 - 16}px`)
+    setSidebarcontentMaxHeight(`${parentRect.height - bottomRect.height - 32 - 16}px`)
   }
 
   function toggleCollapsed() {
@@ -193,18 +190,23 @@ function Sidebar({
       const id = getId(item)
       const { name, url, Icon, items, onClick } = item
       const hasChildren = Array.isArray(items) && items.length > 0
+      const isActive = (collapsed && isTopLevelActive(item)) || activeId === id
 
       const itemNode = (
         <Item
           theme={theme}
-          id={(collapsed && isTopLevelActive(item)) || activeId === id ? 'active-item' : ''}
+          id={isActive ? 'active-item' : ''}
           xflex="x4"
+          mb={0.25}
           height={40}
           borderRadius={4}
           ml={`${marginLeft}px`}
           pl="12px"
-          color="text-strong"
           overflow="hidden"
+          cursor="pointer"
+          color={isActive ? 'text-strong' : 'text-weak'}
+          transition="background-color 150ms linear"
+          userSelect="none"
           onClick={(event: MouseEvent) => {
             if (hasChildren || isTopLevelItem(item)) handleDeployItem(id)
             if (typeof onClick === 'function') onClick(event)
@@ -214,7 +216,7 @@ function Sidebar({
           {Icon ? (
             <Icon
               size={14}
-              color="text-strong"
+              color={isActive ? 'text-strong' : 'text-weak'}
             />
           ) : (
             <span style={{ width: 14 }} />
@@ -223,13 +225,13 @@ function Sidebar({
             truncate
             collapsed={collapsed}
             body2
-            margin={{ left: '16px' }}
+            ml={1}
           >
             {name}
           </TransitionText>
           {hasChildren && (
             <>
-              <Div flex="grow" />
+              <Div flexGrow={1} />
               <Div
                 cursor="pointer"
                 transform={`rotate(${deployedId === id ? 0 : 180}deg)`}
@@ -285,11 +287,8 @@ function Sidebar({
       transition="width 300ms ease"
       width={collapsed ? 74 : 256 - 32}
       height="100%"
-      backgroundColor="background"
       borderRight="1px solid border"
-      pt={1.5}
-      pr={1}
-      pb={1}
+      p={1}
       flexGrow={0}
       flexShrink={0}
       {...props}
@@ -300,10 +299,7 @@ function Sidebar({
         height={sidebarContentMaxHeight}
         maxHeight={sidebarContentMaxHeight}
       >
-        <Div
-          id="sidebar-items"
-          pr={1}
-        >
+        <Div id="sidebar-items">
           {renderItems(items)}
         </Div>
       </Div>
