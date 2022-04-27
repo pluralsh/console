@@ -310,7 +310,7 @@ function Sidebar({
       >
         <Div
           mt={1}
-          ml="calc((44px - 24px) / 2)"
+          ml={0.5}
           xflex="x4"
           overflow="hidden"
           cursor="pointer"
@@ -342,34 +342,6 @@ function Sidebar({
           >
             Collapse
           </TransitionText>
-        </Div>
-        <Div
-          mt={1}
-          xflex="x4"
-        >
-          <Avatar
-            name={user.name}
-            imageUrl={user.imageUrl}
-          />
-          <Div pl={0.5}>
-            <TransitionText
-              collapsed={collapsed}
-              truncate
-              weight="bold"
-              body2
-              color="text-strong"
-            >
-              {user.name}
-            </TransitionText>
-            <TransitionText
-              collapsed={collapsed}
-              truncate
-              body3
-              color="text-xweak"
-            >
-              {user.email}
-            </TransitionText>
-          </Div>
         </Div>
       </Div>
     </Div>
