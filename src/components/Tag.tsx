@@ -1,29 +1,24 @@
-import { Box, BoxExtendedProps, Text } from 'grommet'
-import styled from 'styled-components'
+import { Div, DivProps, P } from 'honorable'
 
-type TagProps = BoxExtendedProps
+type TagProps = DivProps
 
 const propTypes = {}
 
-const Wrapper = styled(Box)`
-  display: inline-flex;
-  height: 28px;
-  border-radius: 14px;
-`
-
 function Tag({ children, ...props }: TagProps) {
   return (
-    <Wrapper
-      background="background-light"
-      pad={{ horizontal: '8px' }}
-      align="center"
-      justify="center"
+    <Div
+      py={0.25}
+      px={0.5}
+      xflex="x4"
+      display="inline-block"
+      backgroundColor="background-middle"
+      borderRadius={1000}
       {...props}
     >
-      <Text size="small">
+      <P body3>
         {children}
-      </Text>
-    </Wrapper>
+      </P>
+    </Div>
   )
 }
 

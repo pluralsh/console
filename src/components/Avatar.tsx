@@ -1,9 +1,7 @@
-import { ComponentType } from 'react'
-import { Box, BoxExtendedProps, Text } from 'grommet'
-import styled from 'styled-components'
+import { Div, DivProps, Img, P } from 'honorable'
 import PropTypes from 'prop-types'
 
-type AvatarProps = BoxExtendedProps & {
+type AvatarProps = DivProps & {
   name?: string
   imageUrl?: string
   size?: number
@@ -15,21 +13,6 @@ const propTypes = {
   size: PropTypes.number,
 }
 
-const Wrapper = styled<ComponentType<AvatarProps>>(Box)`
-  min-width: ${({ size }) => size}px;
-  width: ${({ size }) => size}px;
-  min-height: ${({ size }) => size}px;
-  height: ${({ size }) => size}px;
-  border-radius: 2px;
-  overflow: hidden;
-  user-select: none;
-`
-
-const Img = styled.img`
-  width: 100%;
-  height: 100%;
-`
-
 function extractInitials(name: string) {
   const words = name.split(' ')
 
@@ -40,15 +23,20 @@ function extractInitials(name: string) {
 function Avatar({ name = '', imageUrl = '', size = 44, ...props }: AvatarProps) {
   function renderName() {
     return (
-      <Text weight="bold">
+      <P
+        body0
+        fontWeight="bold"
+      >
         {extractInitials(name || '?')}
-      </Text>
+      </P>
     )
   }
 
   function renderImage() {
     return (
       <Img
+        width="100%"
+        height="100%"
         src={imageUrl}
         alt={name}
       />
@@ -56,16 +44,19 @@ function Avatar({ name = '', imageUrl = '', size = 44, ...props }: AvatarProps) 
   }
 
   return (
-    <Wrapper
-      size={size}
-      background={imageUrl ? 'transparent' : 'accent-blue'}
-      justify="center"
-      align="center"
-      flex={{ shrink: 0 }}
+    <Div
+      backgroundColor={imageUrl ? 'transparent' : 'accent-blue'}
+      xflex="x5"
+      flexShrink={0}
+      width={size}
+      height={size}
+      borderRadius={4}
+      overflow="hidden"
+      userSelect="none"
       {...props}
     >
       {imageUrl ? renderImage() : renderName()}
-    </Wrapper>
+    </Div>
   )
 }
 

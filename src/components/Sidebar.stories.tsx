@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Box } from 'grommet'
+import { Div } from 'honorable'
 
 import Sidebar from './Sidebar'
 import ScrollIcon from './icons/ScrollIcon'
@@ -228,14 +228,20 @@ function Template(args: any) {
   ], [])
 
   return (
-    <Box direction="row">
+    <Div
+      xflex="x4s"
+      height="100%"
+    >
       <Sidebar
         {...args}
         items={items}
         activeUrl={activeUrl}
         onItemClick={setActiveUrl}
       />
-      <Box pad="large">
+      <Div
+        p={2}
+        xflex="y1"
+      >
         {activeUrl}
         <button
           type="button"
@@ -251,8 +257,8 @@ function Template(args: any) {
         >
           Go to /explore/public
         </button>
-      </Box>
-    </Box>
+      </Div>
+    </Div>
   )
 }
 

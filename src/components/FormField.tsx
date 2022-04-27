@@ -1,66 +1,63 @@
 import { PropsWithChildren, useEffect, useRef, useState } from 'react'
-import { FormField as GrommetFormField, Text } from 'grommet'
-import styled from 'styled-components'
+import { Div, DivProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
-type FormFieldProps = PropsWithChildren<{
+type FormFieldProps = DivProps & PropsWithChildren<{
   label?: string
   caption?: string
   valid?: boolean
   error?: boolean
+  required?: boolean
 }>
 
 const propTypes = {
-  children: PropTypes.node,
   label: PropTypes.string,
   caption: PropTypes.string,
   valid: PropTypes.bool,
   error: PropTypes.bool,
+  required: PropTypes.bool,
 }
 
-const Wrapper = styled.div`
-  position: relative;
-`
-
-const Caption = styled(Text)`
-  position: absolute;
-  top: 8px;
-  right: 0;
-`
-
-function FormField({ children, label = '', caption = '', valid = false, error = false, ...props }: FormFieldProps) {
-  const labelRef = useRef()
+function FormField({ children, label, caption, valid, error, required, ...props }: FormFieldProps) {
+  const labelRef = useRef<HTMLParagraphElement>()
   const [captionMaxWidth, setCaptionMaxWidth] = useState('auto')
 
   useEffect(() => {
-    const { width } = (labelRef.current as any).getBoundingClientRect()
+    if (!labelRef.current) return
 
+    const { width } = labelRef.current.getBoundingClientRect()
+
+    console.log('width', width)
     setCaptionMaxWidth(`calc(100% - ${width + 8}px)`)
   }, [])
 
   return (
-    <Wrapper {...props}>
-      <Caption
+    <Div
+      position="relative"
+      {...props}
+    >
+      <P
         truncate
-        color={error ? 'status-critical' : valid ? 'brand' : 'text-weak'}
-        size="small"
-        style={{ maxWidth: captionMaxWidth }}
+        body2
+        position="absolute"
+        top={2}
+        right={0}
+        maxWidth={captionMaxWidth}
+        color={error ? 'error' : valid ? 'primary' : 'text-weak'}
       >
         {caption}
-      </Caption>
-      <GrommetFormField
-        label={(
-          <Text
-            ref={labelRef}
-            weight="bold"
-          >
-            {label}
-          </Text>
-        )}
+      </P>
+      <P
+        ref={labelRef}
+        fontWeight="bold"
+        display="inline"
       >
+        {label}{required ? '*' : ''}
+      </P>
+      <Div mt={label || caption ? 0.5 : 0}>
         {children}
-      </GrommetFormField>
-    </Wrapper>
+      </Div>
+    </Div>
   )
 }
 

@@ -1,11 +1,11 @@
-import { Box, BoxExtendedProps, Text } from 'grommet'
+import { Div, DivProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 import { UserType } from '../types'
 
 import Avatar from './Avatar'
 
-type UserCardProps = BoxExtendedProps & {
+type UserCardProps = DivProps & {
   user?: UserType
 }
 
@@ -19,33 +19,32 @@ const propTypes = {
 
 function UserCard({ user = {}, ...props }: UserCardProps) {
   return (
-    <Box
-      direction="row"
-      align="center"
+    <Div
+      xflex="x4"
       {...props}
     >
       <Avatar
         name={user.name}
         imageUrl={user.imageUrl}
       />
-      <Box pad={{ left: '8px' }}>
-        <Text
+      <Div pl={0.5}>
+        <P
           truncate
-          weight="bold"
-          size="small"
+          fontWeight="bold"
           color="text-strong"
         >
           {user.name}
-        </Text>
-        <Text
+        </P>
+        <P
           truncate
-          size="xsmall"
+          body2
+          mt={0.25}
           color="text-xweak"
         >
           {user.email}
-        </Text>
-      </Box>
-    </Box>
+        </P>
+      </Div>
+    </Div>
   )
 }
 

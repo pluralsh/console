@@ -1,18 +1,15 @@
-import { PropsWithChildren } from 'react'
-import { Box, Text } from 'grommet'
-import { normalizeColor } from 'grommet/utils'
-import styled from 'styled-components'
+import { Div, DivProps, Img, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 import InstalledLabel from './InstalledLabel'
 
-type RepositoryCardProps = PropsWithChildren<{
+type RepositoryCardProps = DivProps & {
   featured?: boolean
   installed?: boolean
   title?: string
   subtitle?: string
   imageUrl?: string
-}>
+}
 
 const propTypes = {
   featured: PropTypes.bool,
@@ -22,112 +19,100 @@ const propTypes = {
   imageUrl: PropTypes.string,
 }
 
-const Container = styled(Box)`
-  padding: 16px;
-  border-radius: 4px;
-  background-color: ${({ theme }) => normalizeColor(theme.global.colors['background-contrast'], theme)};
-`
-
-const Logo = styled.img`
-  width: 64px;
-  height: 64px;
-  border-radius: 4px;
-  object-fit: cover;
-  background-color: ${({ theme }) => normalizeColor(theme.global.colors['background-light'], theme)}
-`
-
-const LogoLarge = styled.img`
-  width: 128px;
-  height: 128px;
-  border-radius: 4px;
-  object-fit: cover;
-  background-color: ${({ theme }) => normalizeColor(theme.global.colors['background-light'], theme)}
-`
-
 function RepositoryCard({
   featured = false,
   installed = false,
-  title = '',
-  subtitle = '',
-  imageUrl = '',
+  title,
+  subtitle,
+  imageUrl,
   children,
   ...props
 }: RepositoryCardProps) {
 
+  function renderContent() {
+    return (
+      <>
+        <P
+          body2
+          color="text-xweak"
+        >
+          {subtitle}
+        </P>
+        <P
+          mt={1}
+          color="text-strong"
+        >
+          {children}
+        </P>
+      </>
+    )
+  }
+
   function renderFeatured() {
     return (
-      <Container
-        direction="row"
-        align="start"
+      <Div
+        p={1}
+        borderRadius={4}
+        backgroundColor="background-middle"
+        xflex="x1"
         {...props}
       >
-        <LogoLarge
+        <Img
           src={imageUrl}
           alt="Logo"
+          width={128}
+          borderRadius={4}
+          objectFit="cover"
+          backgroundColor="background-light"
         />
-        <Box margin={{ left: '16px' }}>
-          <Box
-            direction="row"
-            align="center"
-            justify="between"
-          >
-            <Text
-              weight="bold"
-              size="large"
+        <Div ml={1}>
+          <Div xflex="x5b">
+            <P
+              body0
+              fontWeight="bold"
             >
               {title}
-            </Text>
+            </P>
             {installed && (
               <InstalledLabel />
             )}
-          </Box>
-          <Text color="text-xweak">
-            {subtitle}
-          </Text>
-          <Text
-            color="text-strong"
-            margin={{ top: '16px' }}
-          >
-            {children}
-          </Text>
-        </Box>
-      </Container>
+          </Div>
+          {renderContent()}
+        </Div>
+      </Div>
     )
   }
 
   function renderRegular() {
     return (
-      <Container {...props}>
-        <Box
-          direction="row"
-          align="center"
-          justify="between"
-        >
-          <Logo
+      <Div
+        p={1}
+        borderRadius={4}
+        backgroundColor="background-middle"
+        {...props}
+      >
+        <Div xflex="x5b">
+          <Img
             src={imageUrl}
             alt="Logo"
+            width={64}
+            borderRadius={4}
+            objectFit="cover"
+            backgroundColor="background-light"
           />
           {installed && (
             <InstalledLabel />
           )}
-        </Box>
-        <Text
-          weight="bold"
-          size="large"
-          margin={{ top: '16px' }}
+        </Div>
+        <P
+          mt={1}
+          fontWeight="bold"
+          body0
         >
           {title}
-        </Text>
-        <Text color="text-xweak">
-          {subtitle}
-        </Text>
-        <Text
-          color="text-strong"
-          margin={{ top: '16px' }}
-        >
-          {children}
-        </Text>
-      </Container>
+        </P>
+        {renderContent()}
+      </Div>
     )
   }
 

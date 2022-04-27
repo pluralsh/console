@@ -242,5 +242,5 @@ Small.args = {
 export const Color = Template.bind({})
 
 Color.args = {
-  color: 'brand',
+  color: 'primary',
 }
