@@ -1,8 +1,8 @@
 import { PropsWithChildren, useEffect, useRef, useState } from 'react'
-import { Div, P } from 'honorable'
+import { Div, DivProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
-type FormFieldProps = typeof Div & PropsWithChildren<{
+type FormFieldProps = DivProps & PropsWithChildren<{
   label?: string
   caption?: string
   valid?: boolean

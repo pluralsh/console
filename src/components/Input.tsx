@@ -1,7 +1,7 @@
-import { Input as HonorableInput } from 'honorable'
+import { Input as HonorableInput, InputProps as HonorableInputProps } from 'honorable'
 import PropTypes from 'prop-types'
 
-type InputProps = typeof HonorableInput & {
+type InputProps = HonorableInputProps & {
   valid?: boolean
   error?: boolean
 }

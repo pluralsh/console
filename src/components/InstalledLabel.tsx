@@ -1,9 +1,9 @@
-import { Div, P } from 'honorable'
+import { Div, DivProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 import CheckOutlineIcon from './icons/CheckOutlineIcon'
 
-type InstalledLabelProps = typeof Div & {
+type InstalledLabelProps = DivProps & {
   label?: string
 }
 

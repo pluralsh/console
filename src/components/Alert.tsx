@@ -1,5 +1,5 @@
 import { PropsWithChildren } from 'react'
-import { Div, Icon, P, useTheme } from 'honorable'
+import { Div, DivProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 import StatusIpIcon from './icons/StatusIpIcon'
@@ -7,7 +7,7 @@ import StatusOkIcon from './icons/StatusOkIcon'
 import ErrorIcon from './icons/ErrorIcon'
 import CloseIcon from './icons/CloseIcon'
 
-type AlertProps = typeof Div & PropsWithChildren<{
+type AlertProps = DivProps & PropsWithChildren<{
   severity?: 'success' | 'warning' | 'error' | 'info'
   title?: string
   onClose?: () => void

@@ -1,16 +1,15 @@
-import { PropsWithChildren } from 'react'
-import { Div, Img, P } from 'honorable'
+import { Div, DivProps, Img, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 import InstalledLabel from './InstalledLabel'
 
-type RepositoryCardProps = typeof Div & PropsWithChildren<{
+type RepositoryCardProps = DivProps & {
   featured?: boolean
   installed?: boolean
   title?: string
   subtitle?: string
   imageUrl?: string
-}>
+}
 
 const propTypes = {
   featured: PropTypes.bool,

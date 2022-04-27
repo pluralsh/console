@@ -1,11 +1,11 @@
-import { Div, P } from 'honorable'
+import { Div, DivProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 import { UserType } from '../types'
 
 import Avatar from './Avatar'
 
-type UserCardProps = typeof Div & {
+type UserCardProps = DivProps & {
   user?: UserType
 }
 

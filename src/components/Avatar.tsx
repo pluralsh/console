@@ -1,7 +1,7 @@
-import { Div, Img, P } from 'honorable'
+import { Div, DivProps, Img, P } from 'honorable'
 import PropTypes from 'prop-types'
 
-type AvatarProps = typeof Div & {
+type AvatarProps = DivProps & {
   name?: string
   imageUrl?: string
   size?: number

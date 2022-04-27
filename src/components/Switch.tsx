@@ -1,9 +1,9 @@
-import { Switch as HonorableSwitch } from 'honorable'
+import { Switch as HonorableSwitch, SwitchProps as HonorableSwitchProps } from 'honorable'
 
 import CheckIcon from './icons/CheckIcon'
 import CloseIcon from './icons/CloseIcon'
 
-type SwitchProps = typeof Switch
+type SwitchProps = HonorableSwitchProps
 
 const propTypes = {}
 

@@ -1,6 +1,7 @@
 import { mergeTheme } from 'honorable'
 import defaultTheme from 'honorable-theme-default'
 
+// @ts-ignore
 export default mergeTheme(defaultTheme, {
   name: 'plural',
   mode: 'dark',

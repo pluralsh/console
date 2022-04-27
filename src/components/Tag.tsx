@@ -1,7 +1,6 @@
-import { PropsWithChildren } from 'react'
-import { Div, P } from 'honorable'
+import { Div, DivProps, P } from 'honorable'
 
-type TagProps = PropsWithChildren<typeof Div>
+type TagProps = DivProps
 
 const propTypes = {}
 

@@ -2,7 +2,7 @@
 import { ComponentType, Fragment, MouseEvent, ReactNode, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled from '@emotion/styled'
-import { Div, P, useTheme } from 'honorable'
+import { Div, DivProps, P, useTheme } from 'honorable'
 import PropTypes from 'prop-types'
 
 import { UserType } from '../types'
@@ -10,7 +10,7 @@ import { UserType } from '../types'
 import Avatar from './Avatar'
 import CollapseIcon from './icons/CollapseIcon'
 
-type SidebarItem = {
+type SidebarItem = DivProps & {
   name?: string
   url?: string
   Icon?: ComponentType<any>
@@ -95,6 +95,7 @@ function Sidebar({
   items = [],
   activeUrl = '',
   user = {},
+  ...props
 }: SidebarProps) {
   const theme = useTheme()
   const sidebarBottomRef = useRef()
@@ -291,6 +292,7 @@ function Sidebar({
       pb={1}
       flexGrow={0}
       flexShrink={0}
+      {...props}
     >
       <Div
         overflowY="auto"

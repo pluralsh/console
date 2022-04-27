@@ -59,7 +59,7 @@
     "typescript": "^4.6.3"
   },
   "peerDependencies": {
-    "honorable": "^0.44.0",
+    "honorable": "^0.46.0",
     "honorable-theme-default": "^0.26.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",

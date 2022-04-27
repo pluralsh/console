@@ -1,6 +1,6 @@
-import { Div } from 'honorable'
+import { Div, DivProps } from 'honorable'
 
-type MenuProps = typeof Div
+type MenuProps = DivProps
 
 const propTypes = {}
 

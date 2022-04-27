@@ -1,9 +1,9 @@
 import { ReactNode } from 'react'
-import { Select as HonorableSelect } from 'honorable'
+import { Select as HonorableSelect, SelectProps as HonorableSelectProps } from 'honorable'
 
 import MenuItem from './MenuItem'
 
-type SelectProps = typeof Select & {
+type SelectProps = HonorableSelectProps & {
   items: Array<{ label: ReactNode, value: any }>
 }
 

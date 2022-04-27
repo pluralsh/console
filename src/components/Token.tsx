@@ -1,19 +1,17 @@
-import { PropsWithChildren } from 'react'
-import { Div, P, Span } from 'honorable'
+import { Div, DivProps, P, Span } from 'honorable'
 import PropTypes from 'prop-types'
 
 import CloseIcon from './icons/CloseIcon'
 
-type TokenProps = typeof Div & PropsWithChildren<{
+type TokenProps = DivProps & {
   onClose?: () => void
-}>
+}
 
 const propTypes = {
   onClose: PropTypes.func,
 }
 
 function Token({ children, onClose = () => {}, ...props }: TokenProps) {
-
   return (
     <Div
       px={0.5}
