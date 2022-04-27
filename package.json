@@ -59,10 +59,11 @@
     "typescript": "^4.6.3"
   },
   "peerDependencies": {
-    "honorable": "^0.46.0",
-    "honorable-theme-default": "^0.26.0",
+    "honorable": ">=0.48.0",
+    "honorable-theme-default": ">=0.26.0",
+    "@emotion/react": "*",
+    "@emotion/styled": "*",
     "react": "^16.0.0",
-    "react-dom": "^16.0.0",
-    "styled-components": "^5.0.0"
+    "react-dom": "^16.0.0"
   }
 }
