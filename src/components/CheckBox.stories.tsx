@@ -1,7 +1,5 @@
 import { useState } from 'react'
-import { Div, P } from 'honorable'
-
-import Checkbox from './Checkbox'
+import { Checkbox, Div, P } from 'honorable'
 
 export default {
   title: 'Checkbox',

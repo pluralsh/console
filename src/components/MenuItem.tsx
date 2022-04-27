@@ -8,6 +8,7 @@ type MenuItemProps = typeof Div & {
 
 const propTypes = {}
 
+// TODO use honorable's MenuItem
 function MenuItem(props: MenuItemProps) {
   return (
     <Div
