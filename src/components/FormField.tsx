@@ -38,9 +38,9 @@ function FormField({ children, label, caption, valid, error, required, ...props 
     >
       <P
         truncate
-        size="small"
+        body2
         position="absolute"
-        top={0}
+        top={2}
         right={0}
         maxWidth={captionMaxWidth}
         color={error ? 'error' : valid ? 'primary' : 'text-weak'}

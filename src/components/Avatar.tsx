@@ -24,7 +24,7 @@ function Avatar({ name = '', imageUrl = '', size = 44, ...props }: AvatarProps) 
   function renderName() {
     return (
       <P
-        size="large"
+        body0
         fontWeight="bold"
       >
         {extractInitials(name || '?')}

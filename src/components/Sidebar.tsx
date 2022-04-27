@@ -222,7 +222,7 @@ function Sidebar({
           <TransitionText
             truncate
             collapsed={collapsed}
-            size="small"
+            body2
             margin={{ left: '16px' }}
           >
             {name}
@@ -285,7 +285,7 @@ function Sidebar({
       transition="width 300ms ease"
       width={collapsed ? 74 : 256 - 32}
       height="100%"
-      backgroundColor="background-front"
+      backgroundColor="background"
       borderRight="1px solid border"
       pt={1.5}
       pr={1}
@@ -339,7 +339,7 @@ function Sidebar({
             collapsed={collapsed}
             ml={1}
             userSelect="none"
-            size="small"
+            body2
             color="text-xweak"
           >
             Collapse
@@ -358,7 +358,7 @@ function Sidebar({
               collapsed={collapsed}
               truncate
               weight="bold"
-              size="small"
+              body2
               color="text-strong"
             >
               {user.name}
@@ -366,7 +366,7 @@ function Sidebar({
             <TransitionText
               collapsed={collapsed}
               truncate
-              size="xsmall"
+              body3
               color="text-xweak"
             >
               {user.email}

@@ -37,7 +37,7 @@ function UserCard({ user = {}, ...props }: UserCardProps) {
         </P>
         <P
           truncate
-          size="small"
+          body2
           mt={0.25}
           color="text-xweak"
         >

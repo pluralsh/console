@@ -1,27 +1,25 @@
 import { mergeTheme } from 'honorable'
 import defaultTheme from 'honorable-theme-default'
 
+console.log('defaultTheme', defaultTheme)
 // @ts-ignore
 export default mergeTheme(defaultTheme, {
   name: 'plural',
   mode: 'dark',
   colors: {
     primary: '#0639FF',
+    secondary: '#222534',
     background: {
       light: 'white',
       dark: '#111525',
     },
-    'background-back': {
+    'background-middle': {
       light: '#EEEEEE',
-      dark: '#111525',
-    },
-    'background-front': {
-      light: 'white',
-      dark: '#181B29',
-    },
-    'background-contrast': {
-      light: '#11111111',
       dark: '#222534',
+    },
+    'background-top': {
+      light: 'white',
+      dark: '#323643',
     },
     // text has already been declared by the default theme
     'text-strong': {
@@ -40,9 +38,13 @@ export default mergeTheme(defaultTheme, {
       light: '#CCCCCC',
       dark: '#303340',
     },
-    error: '#E03E43',
-    warning: '#EF931D',
     success: '#07E5A7',
+    warning: '#EF931D',
+    error: '#E03E43',
+    'background-success': '#07E5A733',
+    'background-warning': '#EF931D66',
+    'background-error': '#E03E4366',
+    'background-info': '#0190C266',
     'accent-blue': {
       dark: '#0190C2',
       light: '#0190C2',
@@ -57,7 +59,7 @@ export default mergeTheme(defaultTheme, {
     },
   },
   html: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: 'Monument',
   },
   global: {
@@ -78,14 +80,16 @@ export default mergeTheme(defaultTheme, {
       [
         ({ secondary }: any) => secondary,
         {
-          backgroundColor: 'transparent',
-          color: 'primary',
+          backgroundColor: 'secondary',
+          color: 'white',
+          borderColor: 'secondary',
           '&:hover': {
-            backgroundColor: 'primary',
-            color: 'white',
+            backgroundColor: 'darken(secondary, 2)',
+            borderColor: 'darken(secondary, 2)',
           },
           '&:active': {
-            backgroundColor: 'darken(primary, 10)',
+            backgroundColor: 'darken(secondary, 5)',
+            borderColor: 'darken(secondary, 5)',
           },
         },
       ],
@@ -97,24 +101,49 @@ export default mergeTheme(defaultTheme, {
       height: 16,
     },
   },
+  Menu: {
+    defaultProps: {
+      backgroundColor: 'background-middle',
+    },
+  },
+  MenuItem: {
+    partProps: {
+      Inner: {
+        defaultProps: {
+          border: 'none',
+        },
+        customProps: new Map([
+          [
+            ({ active }: any) => active,
+            {
+              backgroundColor: 'background-top',
+              color: 'white',
+              border: 'none',
+            },
+          ],
+        ]),
+      },
+    },
+  },
   P: {
     customProps: new Map([
       [
-        ({ size }: any) => size === 'large',
+        ({ body0 }: any) => body0,
         {
-          fontSize: '1.25rem',
+          fontSize: 18,
+        },
+      ],
+      // body1 is just regular fontSize
+      [
+        ({ body2 }: any) => body2,
+        {
+          fontSize: 14,
         },
       ],
       [
-        ({ size }: any) => size === 'small',
+        ({ body3 }: any) => body3,
         {
-          fontSize: '0.90rem',
-        },
-      ],
-      [
-        ({ size }: any) => size === 'xsmall',
-        {
-          fontSize: '0.70rem',
+          fontSize: 12,
         },
       ],
       [

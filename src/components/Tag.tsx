@@ -7,14 +7,15 @@ const propTypes = {}
 function Tag({ children, ...props }: TagProps) {
   return (
     <Div
+      py={0.25}
       px={0.5}
       xflex="x4"
       display="inline-block"
-      backgroundColor="background-light"
+      backgroundColor="background-middle"
       borderRadius={1000}
       {...props}
     >
-      <P size="small">
+      <P body3>
         {children}
       </P>
     </Div>

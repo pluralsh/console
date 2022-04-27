@@ -1,4 +1,3 @@
-import { PropsWithChildren } from 'react'
 import { Div, DivProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
@@ -7,11 +6,11 @@ import StatusOkIcon from './icons/StatusOkIcon'
 import ErrorIcon from './icons/ErrorIcon'
 import CloseIcon from './icons/CloseIcon'
 
-type AlertProps = DivProps & PropsWithChildren<{
+type AlertProps = DivProps & {
   severity?: 'success' | 'warning' | 'error' | 'info'
   title?: string
   onClose?: () => void
-}>
+}
 
 const propTypes = {
   children: PropTypes.node,
@@ -28,10 +27,10 @@ const severityToColor = {
 }
 
 const severityToBackgroundColor = {
-  success: 'transparency(success, 60)',
-  warning: 'transparency(warning, 60)',
-  error: 'transparency(error, 60)',
-  info: 'background-light',
+  success: 'background-success',
+  warning: 'background-warning',
+  error: 'background-error',
+  info: 'background-info',
 }
 
 const severityToIcon = {
@@ -83,7 +82,7 @@ function Alert({ children, severity = 'info', title = '', onClose, ...props }: A
             {title}
           </P>
         )}
-        <P>
+        <P body2>
           {children}
         </P>
       </Div>

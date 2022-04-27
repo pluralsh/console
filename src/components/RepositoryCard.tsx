@@ -29,12 +29,31 @@ function RepositoryCard({
   ...props
 }: RepositoryCardProps) {
 
+  function renderContent() {
+    return (
+      <>
+        <P
+          body2
+          color="text-xweak"
+        >
+          {subtitle}
+        </P>
+        <P
+          mt={1}
+          color="text-strong"
+        >
+          {children}
+        </P>
+      </>
+    )
+  }
+
   function renderFeatured() {
     return (
       <Div
         p={1}
         borderRadius={4}
-        backgroundColor="background-contrast"
+        backgroundColor="background-middle"
         xflex="x1"
         {...props}
       >
@@ -49,7 +68,7 @@ function RepositoryCard({
         <Div ml={1}>
           <Div xflex="x5b">
             <P
-              size="large"
+              body0
               fontWeight="bold"
             >
               {title}
@@ -58,15 +77,7 @@ function RepositoryCard({
               <InstalledLabel />
             )}
           </Div>
-          <P color="text-xweak">
-            {subtitle}
-          </P>
-          <P
-            mt={1}
-            color="text-strong"
-          >
-            {children}
-          </P>
+          {renderContent()}
         </Div>
       </Div>
     )
@@ -77,7 +88,7 @@ function RepositoryCard({
       <Div
         p={1}
         borderRadius={4}
-        backgroundColor="background-contrast"
+        backgroundColor="background-middle"
         {...props}
       >
         <Div xflex="x5b">
@@ -96,19 +107,11 @@ function RepositoryCard({
         <P
           mt={1}
           fontWeight="bold"
-          size="large"
+          body0
         >
           {title}
         </P>
-        <P color="text-xweak">
-          {subtitle}
-        </P>
-        <P
-          mt={1}
-          color="text-strong"
-        >
-          {children}
-        </P>
+        {renderContent()}
       </Div>
     )
   }

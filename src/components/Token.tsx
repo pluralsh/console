@@ -14,25 +14,27 @@ const propTypes = {
 function Token({ children, onClose = () => {}, ...props }: TokenProps) {
   return (
     <Div
-      px={0.5}
-      xflex="x4"
+      pl={0.5}
+      xflex="x4s"
       display="inline-flex"
       minHeight={28}
       borderRadius={4}
-      backgroundColor="background-light"
+      backgroundColor="background-middle"
+      overflow="hidden"
       {...props}
     >
-      <P size="small">
+      <P
+        body2
+        xflex="x4"
+      >
         {children}
       </P>
       <Span
-        p={0.5}
+        px={0.5}
         ml={0.5}
-        mr={-0.333}
         xflex="x5"
-        borderRadius={1000}
         cursor="pointer"
-        hoverIndicator="background-contrast"
+        hoverIndicator="background-top"
         onClick={onClose}
       >
         <CloseIcon size={8} />
