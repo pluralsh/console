@@ -310,8 +310,11 @@ function Sidebar({
       >
         <Div
           mt={1}
+          ml="calc((44px - 24px) / 2)"
           xflex="x4"
           overflow="hidden"
+          cursor="pointer"
+          onClick={toggleCollapsed}
         >
           <Div
             xflex="x5"
@@ -319,12 +322,11 @@ function Sidebar({
             height={24}
             minWidth={24}
             minHeight={24}
-            cursor="pointer"
             transition="all 300ms ease"
             transform={collapsed ? 'rotate(180deg)' : 'rotate(0deg)'}
             backgroundColor="background-light"
             borderRadius={1000}
-            onClick={toggleCollapsed}
+
           >
             <CollapseIcon
               color="text-xweak"
