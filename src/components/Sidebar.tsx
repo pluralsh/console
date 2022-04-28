@@ -72,7 +72,7 @@ function TransitionText({ collapsed, ...props }: any) {
       display="block"
       opacity={collapsed ? 0 : 1}
       visibility={collapsed ? 'hidden' : 'visible'}
-      transition={`background-color ${collapsed ? 200 : 500}ms ease ${collapsed ? 0 : 50}ms, visibility 200ms linear`}
+      transition={`opacity ${collapsed ? 200 : 500}ms ease, background-color ${collapsed ? 200 : 500}ms ease ${collapsed ? 0 : 50}ms, visibility 200ms linear`}
       {...props}
     />
   )
