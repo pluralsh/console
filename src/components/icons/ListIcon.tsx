@@ -1,13 +1,12 @@
 import createIcon from './createIcon'
 
-export default createIcon(({ size, color, ...props }) => (
+export default createIcon(({ size, color }) => (
   <svg
     width={size}
     viewBox="0 0 16 16"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    {...props}
-  >
+      >
     <g clipPath="url(#clip0_519_437)">
       <path
         d="M5.7002 1.59998H16.0002"
@@ -48,4 +47,3 @@ export default createIcon(({ size, color, ...props }) => (
     </defs>
   </svg>
 ))
-

@@ -1,13 +1,12 @@
 import createIcon from './createIcon'
 
-export default createIcon(({ size, color, ...props }) => (
+export default createIcon(({ size, color }) => (
   <svg
     width={size}
     viewBox="0 0 16 16"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    {...props}
-  >
+      >
     <path
       d="M0.7 0C0.3 0 0 0.3 0 0.7V3.5H15.3C15.7 3.5 16 3.2 16 2.8V0H0.7ZM2.2 2.8C1.6 2.8 1.2 2.4 1.2 1.8C1.2 1.2 1.6 0.8 2.2 0.8C2.8 0.8 3.2 1.2 3.2 1.8C3.2 2.3 2.8 2.8 2.2 2.8ZM12.5 2.4H6V1.1H12.5V2.4Z"
       fill={color}
@@ -22,4 +21,3 @@ export default createIcon(({ size, color, ...props }) => (
     />
   </svg>
 ))
-
