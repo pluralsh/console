@@ -10,7 +10,6 @@ const propTypes = {}
 function Switch(props: SwitchProps) {
   return (
     <HonorableSwitch
-      // @ts-ignore
       backgroundColor={props.checked ? 'success' : 'error'}
       uncheckedBackground={(
         <CloseIcon

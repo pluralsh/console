@@ -1,6 +1,6 @@
-import { Icon as HonorableIcon, useTheme } from 'honorable'
+import { Icon as HonorableIcon, IconProps as HonorableIconProps, useTheme } from 'honorable'
 
-export type IconProps = typeof HonorableIcon & {
+export type IconProps = HonorableIconProps & {
   size?: number
   color?: string
 }
@@ -12,9 +12,7 @@ function createIcon(render: (props: IconProps) => JSX.Element) {
 
     return (
       <HonorableIcon {...props}>
-        {// @ts-ignore
-          render({ size, color: workingColor, ...props })
-        }
+        {render({ size, color: workingColor, ...props })}
       </HonorableIcon>
     )
   }
