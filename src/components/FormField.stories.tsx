@@ -20,7 +20,6 @@ function Template(args: any) {
       <Input
         valid={valid}
         error={error}
-        // @ts-ignore
         value={value}
         onChange={(event: any) => setValue(event.target.value)}
       />

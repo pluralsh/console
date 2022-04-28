@@ -1,20 +1,19 @@
-import { Icon as HonorableIcon, useTheme } from 'honorable'
+import { ReactNode } from 'react'
+import { Icon as HonorableIcon, IconProps as HonorableIconProps, useTheme } from 'honorable'
 
-export type IconProps = typeof HonorableIcon & {
+export type IconProps = HonorableIconProps & {
   size?: number
   color?: string
 }
 
-function createIcon(render: (props: IconProps) => JSX.Element) {
+function createIcon(render: (props: IconProps) => ReactNode) {
   function Icon({ size = 16, color = 'white', ...props }) {
     const theme = useTheme()
     const workingColor = theme.utils.resolveColor(color) as string
 
     return (
       <HonorableIcon {...props}>
-        {// @ts-ignore
-          render({ size, color: workingColor, ...props })
-        }
+        {render({ size, color: workingColor })}
       </HonorableIcon>
     )
   }
