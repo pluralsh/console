@@ -6,7 +6,7 @@ export default createIcon(({ size, color }) => (
     viewBox="0 0 16 16"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-      >
+  >
     <path
       d="M0 13.5H14.6C15.1 13.5 15.5 13.1 15.5 12.6V3.80005"
       stroke={color}

@@ -6,7 +6,7 @@ export default createIcon(({ size, color }) => (
     viewBox="0 0 16 16"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-      >
+  >
     <g clipPath="url(#clip0_519_497)">
       <path
         d="M15.5001 1.30005L14.9001 5.40005C14.7001 6.40005 14.1001 7.30005 13.2001 7.80005L10.7001 9.10005L9.6001 9.60005"
