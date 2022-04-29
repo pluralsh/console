@@ -1,11 +1,6 @@
 import { Div, DivProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
-import StatusIpIcon from './icons/StatusIpIcon'
-import StatusOkIcon from './icons/StatusOkIcon'
-import ErrorIcon from './icons/ErrorIcon'
-import CloseIcon from './icons/CloseIcon'
-
 type AlertProps = DivProps & {
   text?: string
 }
