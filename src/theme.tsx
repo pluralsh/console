@@ -56,102 +56,83 @@ export default mergeTheme(defaultTheme, {
       light: '#058E4B',
     },
   },
-  html: {
-    fontSize: 16,
-    fontFamily: 'Monument',
-  },
-  global: {
+  html: [
+    {
+      fontSize: 16,
+      fontFamily: 'Monument',
+    },
+  ],
+  global: [
     // @ts-ignore
-    customProps: new Map([
-      [
-        ({ hoverIndicator }: any) => hoverIndicator,
-        ({ hoverIndicator }: any) => ({
-          '&:hover': {
-            backgroundColor: hoverIndicator,
-          },
-        }),
-      ],
-    ]),
-  },
+    ({ hoverIndicator }: any) => hoverIndicator && {
+      '&:hover': {
+        backgroundColor: hoverIndicator,
+      },
+    },
+  ],
   Button: {
-    customProps: new Map([
-      [
-        ({ secondary }: any) => secondary,
-        {
-          backgroundColor: 'secondary',
-          color: 'white',
-          borderColor: 'secondary',
-          '&:hover': {
-            backgroundColor: 'darken(secondary, 2)',
-            borderColor: 'darken(secondary, 2)',
-          },
-          '&:active': {
-            backgroundColor: 'darken(secondary, 5)',
-            borderColor: 'darken(secondary, 5)',
-          },
+    defaultProps: [
+      ({ secondary }: any) => secondary && {
+        backgroundColor: 'secondary',
+        color: 'white',
+        borderColor: 'secondary',
+        '&:hover': {
+          backgroundColor: 'darken(secondary, 2)',
+          borderColor: 'darken(secondary, 2)',
         },
-      ],
-    ]),
+        '&:active': {
+          backgroundColor: 'darken(secondary, 5)',
+          borderColor: 'darken(secondary, 5)',
+        },
+      },
+    ],
   },
   Checkbox: {
-    defaultProps: {
-      width: 16,
-      height: 16,
-    },
+    defaultProps: [
+      {
+        width: 16,
+        height: 16,
+      },
+    ],
   },
   Menu: {
-    defaultProps: {
-      backgroundColor: 'background-middle',
-    },
+    defaultProps: [
+      {
+        backgroundColor: 'background-middle',
+      },
+    ],
   },
   MenuItem: {
     partProps: {
-      Inner: {
-        defaultProps: {
+      Inner: [
+        {
           border: 'none',
         },
-        customProps: new Map([
-          [
-            ({ active }: any) => active,
-            {
-              backgroundColor: 'background-top',
-              color: 'white',
-              border: 'none',
-            },
-          ],
-        ]),
-      },
+        ({ active }: any) => active && {
+          backgroundColor: 'background-top',
+          color: 'white',
+          border: 'none',
+        },
+      ],
     },
   },
   P: {
-    customProps: new Map([
-      [
-        ({ body0 }: any) => body0,
-        {
-          fontSize: 18,
-        },
-      ],
+    defaultProps: [
+      ({ body0 }: any) => body0 && {
+        fontSize: 18,
+      },
       // body1 is just regular fontSize
-      [
-        ({ body2 }: any) => body2,
-        {
-          fontSize: 14,
-        },
-      ],
-      [
-        ({ body3 }: any) => body3,
-        {
-          fontSize: 12,
-        },
-      ],
-      [
-        ({ truncate }: any) => truncate,
-        {
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        },
-      ],
-    ]),
+      ({ body2 }: any) => body2 && {
+        fontSize: 14,
+      },
+      ({ body3 }: any) => body3 && {
+        fontSize: 12,
+      },
+      ({ truncate }: any) => truncate && {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      },
+    ],
   },
 })
