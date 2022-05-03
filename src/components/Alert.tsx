@@ -76,6 +76,7 @@ function Alert({ children, severity = 'info', title = '', onClose, ...props }: A
       <Div ml={2}>
         {!!title && (
           <P
+            body1
             fontWeight="bold"
             mb={children ? 1 : 0}
           >

@@ -24,11 +24,11 @@ export default mergeTheme(defaultTheme, {
       light: '#000000',
       dark: 'white',
     },
-    'text-weak': {
+    'text-light': {
       light: '#444444',
       dark: '#CCCCCC',
     },
-    'text-xweak': {
+    'text-xlight': {
       light: '#666666',
       dark: '#999999',
     },

@@ -34,11 +34,12 @@ function RepositoryCard({
       <>
         <P
           body2
-          color="text-xweak"
+          color="text-xlight"
         >
           {subtitle}
         </P>
         <P
+          body1
           mt={1}
           color="text-strong"
         >

@@ -202,7 +202,7 @@ function Sidebar({
           pl="12px"
           overflow="hidden"
           cursor="pointer"
-          color={isActive ? 'text-strong' : 'text-weak'}
+          color={isActive ? 'text-strong' : 'text-light'}
           transition="background-color 150ms linear"
           userSelect="none"
           onClick={(event: MouseEvent) => {
@@ -214,7 +214,7 @@ function Sidebar({
           {Icon ? (
             <Icon
               size={14}
-              color={isActive ? 'text-strong' : 'text-weak'}
+              color={isActive ? 'text-strong' : 'text-light'}
             />
           ) : (
             <span style={{ width: 14 }} />
@@ -240,7 +240,7 @@ function Sidebar({
                 flexShrink={0}
               >
                 <CollapseIcon
-                  color="text-xweak"
+                  color="text-xlight"
                   size={6}
                 />
               </Div>
@@ -327,7 +327,7 @@ function Sidebar({
 
           >
             <CollapseIcon
-              color="text-xweak"
+              color="text-xlight"
               size={6}
             />
           </Div>
@@ -336,7 +336,7 @@ function Sidebar({
             ml={1}
             userSelect="none"
             body2
-            color="text-xweak"
+            color="text-xlight"
           >
             Collapse
           </TransitionText>

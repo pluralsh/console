@@ -39,7 +39,7 @@ function UserCard({ user = {}, ...props }: UserCardProps) {
           truncate
           body2
           mt={0.25}
-          color="text-xweak"
+          color="text-xlight"
         >
           {user.email}
         </P>
