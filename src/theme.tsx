@@ -70,6 +70,17 @@ export default mergeTheme(defaultTheme, {
       },
     },
   ],
+  A: {
+    defaultProps: [
+      {
+        color: 'text',
+        // @ts-ignore
+        '&:visited, &:hover, &:active': {
+          color: 'text',
+        },
+      },
+    ],
+  },
   Button: {
     defaultProps: [
       ({ secondary }: any) => secondary && {
