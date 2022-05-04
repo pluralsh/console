@@ -24,11 +24,11 @@ export default mergeTheme(defaultTheme, {
       light: '#000000',
       dark: 'white',
     },
-    'text-weak': {
+    'text-light': {
       light: '#444444',
       dark: '#CCCCCC',
     },
-    'text-xweak': {
+    'text-xlight': {
       light: '#666666',
       dark: '#999999',
     },
@@ -58,7 +58,7 @@ export default mergeTheme(defaultTheme, {
   },
   html: [
     {
-      fontSize: 16,
+      fontSize: 14,
       fontFamily: 'Monument',
     },
   ],
@@ -121,7 +121,9 @@ export default mergeTheme(defaultTheme, {
       ({ body0 }: any) => body0 && {
         fontSize: 18,
       },
-      // body1 is just regular fontSize
+      ({ body1 }: any) => body1 && {
+        fontSize: 16,
+      },
       ({ body2 }: any) => body2 && {
         fontSize: 14,
       },

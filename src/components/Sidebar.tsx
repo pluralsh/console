@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ComponentType, Fragment, MouseEvent, ReactNode, useEffect, useRef, useState } from 'react'
+import { ComponentType, Fragment, MouseEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled from '@emotion/styled'
 import { Div, DivProps, P, useTheme } from 'honorable'
@@ -48,16 +48,16 @@ const StyledLink = styled(Link)`
 
 const Item = styled(Div)`
   &#active-item {
-    color: ${({ theme }) => theme.utils.resolveColor('text-strong')};
-    background-color: ${({ theme }) => theme.utils.resolveColor('background-light')};
+    color: ${({ theme }) => theme.utils.resolveColorString('text-strong')};
+    background-color: ${({ theme }) => theme.utils.resolveColorString('background-light')};
     font-weight: 600;
   }
 
   #sidebar-items:not(:hover) > &#active-item,
   #sidebar-items:not(:hover) > * > * > &#active-item,
   &:hover {
-    color: ${({ theme }) => theme.utils.resolveColor('text-strong')};
-    background-color: ${({ theme }) => theme.utils.resolveColor('background-light')};
+    color: ${({ theme }) => theme.utils.resolveColorString('text-strong')};
+    background-color: ${({ theme }) => theme.utils.resolveColorString('background-light')};
     font-weight: 600;
   }
 
@@ -92,15 +92,43 @@ function Sidebar({
   activeUrl = '',
   ...props
 }: SidebarProps) {
+  const activeItem = getItemForUrl(items, activeUrl)
+  const activeId = getId(activeItem)
   const theme = useTheme()
   const sidebarBottomRef = useRef()
-  const [collapsed, setCollapsed] = useState(false)
-  const [deployedId, setDeployedId] = useState(activeUrl ? getIdForUrl(items, activeUrl) : null)
+  const [collapsed, setCollapsed] = useState((activeItem?.items || []).length === 0)
+  const [deployedId, setDeployedId] = useState(activeUrl ? activeId : null)
   const [deployedIdBeforeCollapse, setDeployedIdBeforeCollapse] = useState(deployedId)
   const [childrenHeights, setChildrenHeights] = useState({})
   const [sidebarContentMaxHeight, setSidebarcontentMaxHeight] = useState('100%')
 
-  const activeId = getIdForUrl(items, activeUrl)
+  console.log('deployedId', deployedId)
+
+  const handleCollapse = useCallback((collapsed: boolean, deploy = true) => {
+    console.log('collapsed', collapsed)
+
+    setCollapsed(collapsed)
+
+    if (deploy) {
+      if (collapsed) {
+        setDeployedIdBeforeCollapse(deployedId)
+        setDeployedId(null)
+      }
+      else {
+        setDeployedId(deployedIdBeforeCollapse)
+      }
+    }
+  }, [deployedId, deployedIdBeforeCollapse])
+
+  const handleDeployItem = useCallback((item: SidebarItem, deploy = true) => {
+    const id = getId(item)
+    const isTopLevel = items.some(x => x === item)
+    const hasChildren = (item.items || []).length > 0
+
+    if (deploy) setDeployedId(!hasChildren || deployedId === id ? null : id)
+
+    handleCollapse(isTopLevel && !hasChildren, false)
+  }, [items, deployedId, handleCollapse])
 
   useEffect(() => {
     setContentHeight()
@@ -128,6 +156,12 @@ function Sidebar({
     setChildrenHeights(nextChildrenHeights)
   }, [items])
 
+  useEffect(() => {
+    console.log('effect')
+    handleDeployItem(activeItem, false)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeUrl])
+
   function setContentHeight() {
     const current = sidebarBottomRef.current as any
 
@@ -137,30 +171,14 @@ function Sidebar({
     setSidebarcontentMaxHeight(`${parentRect.height - bottomRect.height - 32 - 16}px`)
   }
 
-  function toggleCollapsed() {
-    setCollapsed(!collapsed)
-
-    if (!collapsed) {
-      setDeployedIdBeforeCollapse(deployedId)
-      setDeployedId(null)
-    }
-    else {
-      setDeployedId(deployedIdBeforeCollapse)
-    }
-  }
-
-  function handleDeployItem(id: string) {
-    setDeployedId(deployedId === id ? null : id)
-  }
-
-  function getIdForUrl(items: SidebarItem[], url: string): string | null {
+  function getItemForUrl(items: SidebarItem[], url: string): string | null {
     for (const item of items) {
-      if (item.url === url || (item.matchedUrl instanceof RegExp && item.matchedUrl.test(url))) return getId(item)
+      if (item.url === url || (item.matchedUrl instanceof RegExp && item.matchedUrl.test(url))) return item
 
-      if (Array.isArray(item.items) && item.items.length > 0) {
-        const id = getIdForUrl(item.items, url)
+      if (Array.isArray(item.items)) {
+        const found = getItemForUrl(item.items, url)
 
-        if (id) return id
+        if (found) return found
       }
     }
 
@@ -180,6 +198,8 @@ function Sidebar({
   }
 
   function getId(item: SidebarItem) {
+    if (!item) return null
+
     return `${item.url}___@@@___${item.name}`
   }
 
@@ -202,11 +222,11 @@ function Sidebar({
           pl="12px"
           overflow="hidden"
           cursor="pointer"
-          color={isActive ? 'text-strong' : 'text-weak'}
+          color={isActive ? 'text-strong' : 'text-light'}
           transition="background-color 150ms linear"
           userSelect="none"
           onClick={(event: MouseEvent) => {
-            if (hasChildren || isTopLevelItem(item)) handleDeployItem(id)
+            if ((hasChildren || isTopLevelItem(item)) && deployedId !== id) handleDeployItem(item)
             if (typeof onClick === 'function') onClick(event)
           }}
           flexShrink={0}
@@ -214,7 +234,7 @@ function Sidebar({
           {Icon ? (
             <Icon
               size={14}
-              color={isActive ? 'text-strong' : 'text-weak'}
+              color={isActive ? 'text-strong' : 'text-light'}
             />
           ) : (
             <span style={{ width: 14 }} />
@@ -240,7 +260,7 @@ function Sidebar({
                 flexShrink={0}
               >
                 <CollapseIcon
-                  color="text-xweak"
+                  color="text-xlight"
                   size={6}
                 />
               </Div>
@@ -312,7 +332,7 @@ function Sidebar({
           xflex="x4"
           overflow="hidden"
           cursor="pointer"
-          onClick={toggleCollapsed}
+          onClick={() => handleCollapse(!collapsed)}
         >
           <Div
             xflex="x5"
@@ -327,7 +347,7 @@ function Sidebar({
 
           >
             <CollapseIcon
-              color="text-xweak"
+              color="text-xlight"
               size={6}
             />
           </Div>
@@ -336,7 +356,7 @@ function Sidebar({
             ml={1}
             userSelect="none"
             body2
-            color="text-xweak"
+            color="text-xlight"
           >
             Collapse
           </TransitionText>

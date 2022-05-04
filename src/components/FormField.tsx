@@ -43,7 +43,7 @@ function FormField({ children, label, caption, valid, error, required, ...props 
         top={2}
         right={0}
         maxWidth={captionMaxWidth}
-        color={error ? 'error' : valid ? 'primary' : 'text-weak'}
+        color={error ? 'error' : valid ? 'primary' : 'text-light'}
       >
         {caption}
       </P>
