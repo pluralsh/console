@@ -48,16 +48,16 @@ const StyledLink = styled(Link)`
 
 const Item = styled(Div)`
   &#active-item {
-    color: ${({ theme }) => theme.utils.resolveColor('text-strong')};
-    background-color: ${({ theme }) => theme.utils.resolveColor('background-light')};
+    color: ${({ theme }) => theme.utils.resolveColorString('text-strong')};
+    background-color: ${({ theme }) => theme.utils.resolveColorString('background-light')};
     font-weight: 600;
   }
 
   #sidebar-items:not(:hover) > &#active-item,
   #sidebar-items:not(:hover) > * > * > &#active-item,
   &:hover {
-    color: ${({ theme }) => theme.utils.resolveColor('text-strong')};
-    background-color: ${({ theme }) => theme.utils.resolveColor('background-light')};
+    color: ${({ theme }) => theme.utils.resolveColorString('text-strong')};
+    background-color: ${({ theme }) => theme.utils.resolveColorString('background-light')};
     font-weight: 600;
   }
 
