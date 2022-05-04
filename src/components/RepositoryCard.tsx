@@ -66,7 +66,10 @@ function RepositoryCard({
           borderRadius={4}
           objectFit="cover"
         />
-        <Div ml={1}>
+        <Div
+          ml={1}
+          flexGrow={1}
+        >
           <Div xflex="x5b">
             <P
               body0
@@ -93,7 +96,7 @@ function RepositoryCard({
         backgroundColor="background-middle"
         {...props}
       >
-        <Div xflex="x5b">
+        <Div xflex="x2b">
           <Img
             src={imageUrl}
             alt="Logo"
