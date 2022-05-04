@@ -9,7 +9,7 @@ export type IconProps = HonorableIconProps & {
 function createIcon(render: (props: IconProps) => ReactNode) {
   function Icon({ size = 16, color = 'white', ...props }) {
     const theme = useTheme()
-    const workingColor = theme.utils.resolveColor(color) as string
+    const workingColor = theme.utils.resolveColorString(color)
 
     return (
       <HonorableIcon {...props}>

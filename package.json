@@ -59,8 +59,8 @@
     "typescript": "^4.6.4"
   },
   "peerDependencies": {
-    "honorable": ">=0.61.0",
-    "honorable-theme-default": ">=0.34.0",
+    "honorable": ">=0.68.0",
+    "honorable-theme-default": ">=0.39.0",
     "@emotion/react": "*",
     "@emotion/styled": "*",
     "react": ">=16.0.0",
