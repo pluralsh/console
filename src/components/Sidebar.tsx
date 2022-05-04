@@ -117,6 +117,8 @@ function Sidebar({
   }, [deployedId, deployedIdBeforeCollapse])
 
   const handleDeployItem = useCallback((item: SidebarItem, deploy = true) => {
+    if (!item) return
+
     const id = getId(item)
     const isTopLevel = items.some(x => x === item)
     const hasChildren = (item.items || []).length > 0
