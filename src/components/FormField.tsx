@@ -27,7 +27,6 @@ function FormField({ children, label, caption, valid, error, required, ...props 
 
     const { width } = labelRef.current.getBoundingClientRect()
 
-    console.log('width', width)
     setCaptionMaxWidth(`calc(100% - ${width + 8}px)`)
   }, [])
 

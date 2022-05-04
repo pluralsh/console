@@ -10,8 +10,6 @@ export default {
 function Template({ items, initialValue, ...props }: any) {
   const [value, setValue] = useState(initialValue || null)
 
-  console.log('value', value)
-
   return (
     <Select
       {...props}

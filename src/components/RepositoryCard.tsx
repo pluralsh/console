@@ -53,20 +53,23 @@ function RepositoryCard({
     return (
       <Div
         p={1}
-        borderRadius={4}
-        backgroundColor="background-middle"
         xflex="x1"
+        borderRadius={4}
+        border="1px solid border"
+        backgroundColor="background-middle"
         {...props}
       >
         <Img
           src={imageUrl}
           alt="Logo"
-          width={128}
+          width={128 - 32}
           borderRadius={4}
           objectFit="cover"
-          backgroundColor="background-light"
         />
-        <Div ml={1}>
+        <Div
+          ml={1}
+          flexGrow={1}
+        >
           <Div xflex="x5b">
             <P
               body0
@@ -89,17 +92,17 @@ function RepositoryCard({
       <Div
         p={1}
         borderRadius={4}
+        border="1px solid border"
         backgroundColor="background-middle"
         {...props}
       >
-        <Div xflex="x5b">
+        <Div xflex="x2b">
           <Img
             src={imageUrl}
             alt="Logo"
             width={64}
             borderRadius={4}
             objectFit="cover"
-            backgroundColor="background-light"
           />
           {installed && (
             <InstalledLabel />

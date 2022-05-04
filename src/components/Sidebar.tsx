@@ -102,11 +102,7 @@ function Sidebar({
   const [childrenHeights, setChildrenHeights] = useState({})
   const [sidebarContentMaxHeight, setSidebarcontentMaxHeight] = useState('100%')
 
-  console.log('deployedId', deployedId)
-
   const handleCollapse = useCallback((collapsed: boolean, deploy = true) => {
-    console.log('collapsed', collapsed)
-
     setCollapsed(collapsed)
 
     if (deploy) {
@@ -157,7 +153,6 @@ function Sidebar({
   }, [items])
 
   useEffect(() => {
-    console.log('effect')
     handleDeployItem(activeItem, false)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeUrl])
