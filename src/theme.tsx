@@ -95,6 +95,18 @@ export default mergeTheme(defaultTheme, {
       },
     ],
   },
+  DropdownButton: {
+    partProps: {
+      Button: {
+        Children: [
+          ({ install }: any) => install && {
+            fontSize: 16,
+            fontWeight: 600,
+          },
+        ],
+      },
+    },
+  },
   Menu: {
     defaultProps: [
       {
