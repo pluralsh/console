@@ -1,7 +1,7 @@
-import { Div, DivProps, Img, P } from 'honorable'
+import { Flex, FlexProps, Img, P } from 'honorable'
 import PropTypes from 'prop-types'
 
-type AvatarProps = DivProps & {
+type AvatarProps = FlexProps & {
   name?: string
   imageUrl?: string
   size?: number
@@ -25,7 +25,7 @@ function Avatar({ name = '', imageUrl = '', size = 44, ...props }: AvatarProps) 
     return (
       <P
         body0
-        fontWeight="bold"
+        fontWeight={500}
       >
         {extractInitials(name || '?')}
       </P>
@@ -44,9 +44,10 @@ function Avatar({ name = '', imageUrl = '', size = 44, ...props }: AvatarProps) 
   }
 
   return (
-    <Div
+    <Flex
+      align="center"
+      justify="center"
       backgroundColor={imageUrl ? 'transparent' : 'accent-blue'}
-      xflex="x5"
       flexShrink={0}
       width={size}
       height={size}
@@ -56,7 +57,7 @@ function Avatar({ name = '', imageUrl = '', size = 44, ...props }: AvatarProps) 
       {...props}
     >
       {imageUrl ? renderImage() : renderName()}
-    </Div>
+    </Flex>
   )
 }
 

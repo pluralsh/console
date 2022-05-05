@@ -1,9 +1,9 @@
-import { Div, DivProps, P } from 'honorable'
+import { Flex, FlexProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 import CheckOutlineIcon from './icons/CheckOutlineIcon'
 
-type InstalledLabelProps = DivProps & {
+type InstalledLabelProps = FlexProps & {
   label?: string
 }
 
@@ -13,8 +13,8 @@ const propTypes = {
 
 function InstalledLabel({ label = 'Installed', ...props }: InstalledLabelProps) {
   return (
-    <Div
-      xflex="x4"
+    <Flex
+      align="center"
       {...props}
     >
       <P fontWeight="bold">
@@ -24,7 +24,7 @@ function InstalledLabel({ label = 'Installed', ...props }: InstalledLabelProps) 
         color="success"
         ml={0.333}
       />
-    </Div>
+    </Flex>
   )
 }
 

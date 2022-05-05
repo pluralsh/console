@@ -1,4 +1,4 @@
-import { Div, DivProps, P } from 'honorable'
+import { Div, DivProps, Flex, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 import StatusIpIcon from './icons/StatusIpIcon'
@@ -45,13 +45,13 @@ function Alert({ children, severity = 'info', title = '', onClose, ...props }: A
   const color = severityToColor[severity] || 'primary'
 
   return (
-    <Div
+    <Flex
+      align="center"
       position="relative"
       py={1}
       px={2}
       backgroundColor={severityToBackgroundColor[severity]}
       borderRadius={4}
-      xflex="x4"
       {...props}
     >
       {typeof onClose === 'function' && (
@@ -87,7 +87,7 @@ function Alert({ children, severity = 'info', title = '', onClose, ...props }: A
           {children}
         </P>
       </Div>
-    </Div>
+    </Flex>
   )
 }
 

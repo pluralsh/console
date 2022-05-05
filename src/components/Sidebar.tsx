@@ -2,7 +2,7 @@
 import { ComponentType, Fragment, MouseEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled from '@emotion/styled'
-import { Div, DivProps, P, useTheme } from 'honorable'
+import { Div, DivProps, Flex, P, useTheme } from 'honorable'
 import PropTypes from 'prop-types'
 
 import { UserType } from '../types'
@@ -46,7 +46,7 @@ const StyledLink = styled(Link)`
   text-decoration: none;
 `
 
-const Item = styled(Div)`
+const Item = styled(Flex)`
   &#active-item {
     color: ${({ theme }) => theme.utils.resolveColorString('text-strong')};
     background-color: ${({ theme }) => theme.utils.resolveColorString('background-light')};
@@ -211,7 +211,7 @@ function Sidebar({
         <Item
           theme={theme}
           id={isActive ? 'active-item' : ''}
-          xflex="x4"
+          align="center"
           mb={0.25}
           height={40}
           borderRadius={4}
@@ -247,20 +247,21 @@ function Sidebar({
           {hasChildren && (
             <>
               <Div flexGrow={1} />
-              <Div
+              <Flex
+                align="center"
+                justify="center"
                 cursor="pointer"
                 transform={`rotate(${deployedId === id ? 0 : 180}deg)`}
                 opacity={collapsed ? 0 : 1}
                 visibility={collapsed ? 'hidden' : 'visible'}
                 transition={`opacity ${collapsed ? 200 : 500}ms ease ${collapsed ? 0 : 100}ms, visibility 200ms linear, transform 300ms ease`}
-                xflex="x5"
                 flexShrink={0}
               >
                 <CollapseIcon
                   color="text-xlight"
                   size={6}
                 />
-              </Div>
+              </Flex>
               <Div width="16px" />
             </>
           )}
@@ -323,16 +324,17 @@ function Sidebar({
         flexGrow={0}
         flexShrink={0}
       >
-        <Div
+        <Flex
           mt={1}
           ml={0.5}
-          xflex="x4"
+          align="center"
           overflow="hidden"
           cursor="pointer"
           onClick={() => handleCollapse(!collapsed)}
         >
-          <Div
-            xflex="x5"
+          <Flex
+            align="center"
+            justify="center"
             width={24}
             height={24}
             minWidth={24}
@@ -347,7 +349,7 @@ function Sidebar({
               color="text-xlight"
               size={6}
             />
-          </Div>
+          </Flex>
           <TransitionText
             collapsed={collapsed}
             ml={1}
@@ -357,7 +359,7 @@ function Sidebar({
           >
             Collapse
           </TransitionText>
-        </Div>
+        </Flex>
       </Div>
     </Div>
   )

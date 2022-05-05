@@ -1,11 +1,11 @@
-import { Div, DivProps, P } from 'honorable'
+import { Div, Flex, FlexProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 import { UserType } from '../types'
 
 import Avatar from './Avatar'
 
-type UserCardProps = DivProps & {
+type UserCardProps = FlexProps & {
   user?: UserType
 }
 
@@ -19,8 +19,8 @@ const propTypes = {
 
 function UserCard({ user = {}, ...props }: UserCardProps) {
   return (
-    <Div
-      xflex="x4"
+    <Flex
+      align="center"
       {...props}
     >
       <Avatar
@@ -44,7 +44,7 @@ function UserCard({ user = {}, ...props }: UserCardProps) {
           {user.email}
         </P>
       </Div>
-    </Div>
+    </Flex>
   )
 }
 

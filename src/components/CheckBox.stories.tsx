@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Checkbox, Div, P } from 'honorable'
+import { Checkbox, Flex, P } from 'honorable'
 
 export default {
   title: 'Checkbox',
@@ -11,7 +11,7 @@ function Template(args: any) {
 
   return (
     <>
-      <Div xflex="x4">
+      <Flex align="center">
         <Checkbox
           {...args}
           checked={checked[0]}
@@ -21,9 +21,9 @@ function Template(args: any) {
         <P ml={0.5}>
           Implement design system
         </P>
-      </Div>
-      <Div
-        xflex="x4"
+      </Flex>
+      <Flex
+        align="center"
         mt={0.5}
       >
         <Checkbox
@@ -35,7 +35,7 @@ function Template(args: any) {
         <P ml={0.5}>
           Party hard
         </P>
-      </Div>
+      </Flex>
     </>
   )
 }
