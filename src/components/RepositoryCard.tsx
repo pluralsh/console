@@ -1,4 +1,4 @@
-import { Div, DivProps, Img, P } from 'honorable'
+import { Div, DivProps, Flex, Img, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 import InstalledLabel from './InstalledLabel'
@@ -51,9 +51,10 @@ function RepositoryCard({
 
   function renderFeatured() {
     return (
-      <Div
+      <Flex
         p={1}
-        xflex="x1"
+        justify="flex-start"
+        align="flex-start"
         borderRadius={4}
         border="1px solid border"
         backgroundColor="background-middle"
@@ -70,7 +71,10 @@ function RepositoryCard({
           ml={1}
           flexGrow={1}
         >
-          <Div xflex="x5b">
+          <Flex
+            align="center"
+            justify="space-between"
+          >
             <P
               body0
               fontWeight="bold"
@@ -80,10 +84,10 @@ function RepositoryCard({
             {installed && (
               <InstalledLabel />
             )}
-          </Div>
+          </Flex>
           {renderContent()}
         </Div>
-      </Div>
+      </Flex>
     )
   }
 
@@ -96,7 +100,10 @@ function RepositoryCard({
         backgroundColor="background-middle"
         {...props}
       >
-        <Div xflex="x2b">
+        <Flex
+          align="flex-start"
+          justify="space-between"
+        >
           <Img
             src={imageUrl}
             alt="Logo"
@@ -107,7 +114,7 @@ function RepositoryCard({
           {installed && (
             <InstalledLabel />
           )}
-        </Div>
+        </Flex>
         <P
           mt={1}
           fontWeight="bold"

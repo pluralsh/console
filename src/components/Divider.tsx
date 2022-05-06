@@ -1,7 +1,7 @@
-import { Div, DivProps, P } from 'honorable'
+import { Div, Flex, FlexProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
-type AlertProps = DivProps & {
+type AlertProps = FlexProps & {
   text?: string
 }
 
@@ -11,8 +11,8 @@ const propTypes = {
 
 function Divider({ text = 'or', ...props }: AlertProps) {
   return (
-    <Div
-      xflex="x4"
+    <Flex
+      align="center"
       {...props}
     >
       <Div
@@ -33,7 +33,7 @@ function Divider({ text = 'or', ...props }: AlertProps) {
         height={1}
         backgroundColor="text-light"
       />
-    </Div>
+    </Flex>
   )
 }
 

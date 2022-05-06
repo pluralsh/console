@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Div } from 'honorable'
+import { Flex } from 'honorable'
 
 import Sidebar from './Sidebar'
 import ScrollIcon from './icons/ScrollIcon'
@@ -228,8 +228,8 @@ function Template(args: any) {
   ], [])
 
   return (
-    <Div
-      xflex="x4s"
+    <Flex
+      align="flex-start"
       height="100%"
     >
       <Sidebar
@@ -238,9 +238,9 @@ function Template(args: any) {
         activeUrl={activeUrl}
         onItemClick={setActiveUrl}
       />
-      <Div
+      <Flex
         p={2}
-        xflex="y1"
+        direction="column"
       >
         {activeUrl}
         <button
@@ -257,8 +257,8 @@ function Template(args: any) {
         >
           Go to /explore/public
         </button>
-      </Div>
-    </Div>
+      </Flex>
+    </Flex>
   )
 }
 

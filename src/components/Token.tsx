@@ -1,9 +1,9 @@
-import { Div, DivProps, P, Span } from 'honorable'
+import { Flex, FlexProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 import CloseIcon from './icons/CloseIcon'
 
-type TokenProps = DivProps & {
+type TokenProps = FlexProps & {
   onClose?: () => void
 }
 
@@ -13,9 +13,8 @@ const propTypes = {
 
 function Token({ children, onClose = () => {}, ...props }: TokenProps) {
   return (
-    <Div
+    <Flex
       pl={0.5}
-      xflex="x4s"
       display="inline-flex"
       minHeight={28}
       borderRadius={4}
@@ -29,17 +28,18 @@ function Token({ children, onClose = () => {}, ...props }: TokenProps) {
       >
         {children}
       </P>
-      <Span
+      <Flex
         px={0.5}
         ml={0.5}
-        xflex="x5"
+        align="center"
+        justify="center"
         cursor="pointer"
         hoverIndicator="background-top"
         onClick={onClose}
       >
         <CloseIcon size={8} />
-      </Span>
-    </Div>
+      </Flex>
+    </Flex>
   )
 }
 

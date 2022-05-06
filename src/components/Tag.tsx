@@ -1,15 +1,15 @@
-import { Div, DivProps, P } from 'honorable'
+import { Flex, FlexProps, P } from 'honorable'
 
-type TagProps = DivProps
+type TagProps = FlexProps
 
 const propTypes = {}
 
 function Tag({ children, ...props }: TagProps) {
   return (
-    <Div
+    <Flex
       py={0.25}
       px={0.5}
-      xflex="x4"
+      align="center"
       display="inline-block"
       backgroundColor="background-middle"
       borderRadius={1000}
@@ -18,7 +18,7 @@ function Tag({ children, ...props }: TagProps) {
       <P body3>
         {children}
       </P>
-    </Div>
+    </Flex>
   )
 }
 
