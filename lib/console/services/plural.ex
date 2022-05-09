@@ -70,9 +70,9 @@ defmodule Console.Services.Plural do
     true) do
     with {:ok, %{id: me}} <- Users.me(),
          {:ok, %{id: inst_id} = installation} <- Repositories.get_installation(name),
-         {:ok, url} <- format_url(oidc_settings, context[name]),
+         {:ok, manifest} <- Manifest.get(),
          {:ok, _} <- Repositories.upsert_oidc_provider(inst_id, merge_provider(%{
-           redirectUris: [url],
+           redirectUris: format_urls(oidc_settings, context[name], manifest),
            authMethod: method,
            bindings: [%{userId: me}]
          }, installation)),
@@ -80,11 +80,14 @@ defmodule Console.Services.Plural do
   end
   def configure_oidc(_, _, _), do: :ok
 
-  def format_url(%{uriFormat: uri} = oidc_settings, ctx) do
-    with {:ok, manifest} <- Manifest.get() do
-      uri = format_oidc(:domain, uri, oidc_settings, ctx)
-      {:ok, format_oidc(:subdomain, uri, oidc_settings, manifest)}
-    end
+  defp format_urls(%{uriFormats: [_ | _] = uris} = settings, ctx, man),
+    do: Enum.map(uris, &format_url(&1, settings, ctx, man))
+  defp format_urls(%{uriFormat: uri} = settings, ctx, man),
+    do: [format_url(uri, settings, ctx, man)]
+
+  defp format_url(uri, oidc_settings, ctx, manifest) do
+    uri = format_oidc(:domain, uri, oidc_settings, ctx)
+    format_oidc(:subdomain, uri, oidc_settings, manifest)
   end
 
   defp format_oidc(:domain, uri, %{domainKey: key}, ctx) when is_binary(key),

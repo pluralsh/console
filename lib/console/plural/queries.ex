@@ -55,6 +55,7 @@ defmodule Console.Plural.Queries do
       oidcSettings {
         domainKey
         uriFormat
+        uriFormats
         authMethod
         subdomain
       }
