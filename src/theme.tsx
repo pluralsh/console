@@ -63,7 +63,6 @@ export default mergeTheme(defaultTheme, {
     },
   ],
   global: [
-    // @ts-ignore
     ({ hoverIndicator }: any) => hoverIndicator && {
       '&:hover': {
         backgroundColor: hoverIndicator,
@@ -71,10 +70,9 @@ export default mergeTheme(defaultTheme, {
     },
   ],
   A: {
-    defaultProps: [
+    defaultStyles: [
       {
         color: 'text',
-        // @ts-ignore
         '&:visited, &:hover, &:active': {
           color: 'text',
         },
@@ -82,7 +80,7 @@ export default mergeTheme(defaultTheme, {
     ],
   },
   Button: {
-    defaultProps: [
+    defaultStyles: [
       ({ secondary }: any) => secondary && {
         backgroundColor: 'secondary',
         color: 'white',
@@ -99,7 +97,7 @@ export default mergeTheme(defaultTheme, {
     ],
   },
   Checkbox: {
-    defaultProps: [
+    defaultStyles: [
       {
         width: 16,
         height: 16,
@@ -107,7 +105,7 @@ export default mergeTheme(defaultTheme, {
     ],
   },
   DropdownButton: {
-    partProps: {
+    partStyles: {
       Button: {
         Children: [
           ({ install }: any) => install && {
@@ -119,14 +117,14 @@ export default mergeTheme(defaultTheme, {
     },
   },
   Menu: {
-    defaultProps: [
+    defaultStyles: [
       {
         backgroundColor: 'background-middle',
       },
     ],
   },
   MenuItem: {
-    partProps: {
+    partStyles: {
       Inner: [
         {
           border: 'none',
@@ -140,7 +138,7 @@ export default mergeTheme(defaultTheme, {
     },
   },
   P: {
-    defaultProps: [
+    defaultStyles: [
       ({ body0 }: any) => body0 && {
         fontSize: 18,
       },
