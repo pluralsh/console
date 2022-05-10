@@ -154,4 +154,16 @@ export default mergeTheme(defaultTheme, {
       },
     ],
   },
+  Tooltip: {
+    Root: [
+      {
+        backgroundColor: 'background-top',
+      },
+    ],
+    Arrow: [
+      {
+        backgroundColor: 'background-top',
+      },
+    ],
+  },
 })
