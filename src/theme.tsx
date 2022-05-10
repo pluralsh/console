@@ -70,7 +70,7 @@ export default mergeTheme(defaultTheme, {
     },
   ],
   A: {
-    defaultStyles: [
+    Root: [
       {
         color: 'text',
         '&:visited, &:hover, &:active': {
@@ -80,7 +80,7 @@ export default mergeTheme(defaultTheme, {
     ],
   },
   Button: {
-    defaultStyles: [
+    Root: [
       ({ secondary }: any) => secondary && {
         backgroundColor: 'secondary',
         color: 'white',
@@ -97,7 +97,7 @@ export default mergeTheme(defaultTheme, {
     ],
   },
   Checkbox: {
-    defaultStyles: [
+    Root: [
       {
         width: 16,
         height: 16,
@@ -105,40 +105,36 @@ export default mergeTheme(defaultTheme, {
     ],
   },
   DropdownButton: {
-    partStyles: {
-      Button: {
-        Children: [
-          ({ install }: any) => install && {
-            fontSize: 16,
-            fontWeight: 600,
-          },
-        ],
-      },
+    Button: {
+      Children: [
+        ({ install }: any) => install && {
+          fontSize: 16,
+          fontWeight: 600,
+        },
+      ],
     },
   },
   Menu: {
-    defaultStyles: [
+    Root: [
       {
         backgroundColor: 'background-middle',
       },
     ],
   },
   MenuItem: {
-    partStyles: {
-      Inner: [
-        {
-          border: 'none',
-        },
-        ({ active }: any) => active && {
-          backgroundColor: 'background-top',
-          color: 'white',
-          border: 'none',
-        },
-      ],
-    },
+    Inner: [
+      {
+        border: 'none',
+      },
+      ({ active }: any) => active && {
+        backgroundColor: 'background-top',
+        color: 'white',
+        border: 'none',
+      },
+    ],
   },
   P: {
-    defaultStyles: [
+    Root: [
       ({ body0 }: any) => body0 && {
         fontSize: 18,
       },

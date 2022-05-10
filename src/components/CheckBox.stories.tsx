@@ -15,7 +15,6 @@ function Template(args: any) {
         <Checkbox
           {...args}
           checked={checked[0]}
-          // @ts-ignore
           onChange={event => setChecked(checked => [event.target.checked, checked[1]])}
         />
         <P ml={0.5}>
@@ -29,7 +28,6 @@ function Template(args: any) {
         <Checkbox
           {...args}
           checked={checked[1]}
-          // @ts-ignore
           onChange={event => setChecked(checked => [checked[0], event.target.checked])}
         />
         <P ml={0.5}>
