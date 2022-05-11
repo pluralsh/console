@@ -15,4 +15,4 @@
 <!--- If you're unsure about any of these, don't hesitate to ask in our Discord. -->
 
 - [ ] My change requires a change to the documentation and I have updated the documentation accordingly.
-- [ ] I have added tests to cover my changes.
+- [ ] I have added tests to cover my changes
