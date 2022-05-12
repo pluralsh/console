@@ -1,3 +1,4 @@
+import { Ref, forwardRef } from 'react'
 import { Input as HonorableInput, InputProps as HonorableInputProps } from 'honorable'
 import PropTypes from 'prop-types'
 
@@ -11,7 +12,7 @@ const propTypes = {
   error: PropTypes.bool,
 }
 
-function Input({ valid = false, error = false, ...props }: InputProps) {
+function InputRef({ valid = false, error = false, ...props }: InputProps, ref: Ref<any>) {
   const style = {
     width: '100%',
     borderColor: error ? 'red' : valid ? 'primary' : 'border',
@@ -22,11 +23,14 @@ function Input({ valid = false, error = false, ...props }: InputProps) {
 
   return (
     <HonorableInput
+      ref={ref}
       {...style}
       {...props}
     />
   )
 }
+
+const Input = forwardRef(InputRef)
 
 Input.propTypes = propTypes
 

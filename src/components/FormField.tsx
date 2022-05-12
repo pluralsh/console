@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect, useRef, useState } from 'react'
+import { PropsWithChildren, Ref, forwardRef, useEffect, useRef, useState } from 'react'
 import { Div, DivProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
@@ -18,7 +18,7 @@ const propTypes = {
   required: PropTypes.bool,
 }
 
-function FormField({ children, label, caption, valid, error, required, ...props }: FormFieldProps) {
+function FormFieldRef({ children, label, caption, valid, error, required, ...props }: FormFieldProps, ref: Ref<any>) {
   const labelRef = useRef<HTMLParagraphElement>()
   const [captionMaxWidth, setCaptionMaxWidth] = useState('auto')
 
@@ -32,6 +32,7 @@ function FormField({ children, label, caption, valid, error, required, ...props 
 
   return (
     <Div
+      ref={ref}
       position="relative"
       {...props}
     >
@@ -59,6 +60,8 @@ function FormField({ children, label, caption, valid, error, required, ...props 
     </Div>
   )
 }
+
+const FormField = forwardRef(FormFieldRef)
 
 FormField.propTypes = propTypes
 

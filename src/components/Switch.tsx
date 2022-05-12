@@ -1,3 +1,4 @@
+import { Ref, forwardRef } from 'react'
 import { Switch as HonorableSwitch, SwitchProps as HonorableSwitchProps } from 'honorable'
 
 import CheckIcon from './icons/CheckIcon'
@@ -7,9 +8,10 @@ type SwitchProps = HonorableSwitchProps
 
 const propTypes = {}
 
-function Switch(props: SwitchProps) {
+function SwitchRef(props: SwitchProps, ref: Ref<any>) {
   return (
     <HonorableSwitch
+      ref={ref}
       backgroundColor={props.checked ? 'success' : 'error'}
       uncheckedBackground={(
         <CloseIcon
@@ -27,6 +29,8 @@ function Switch(props: SwitchProps) {
     />
   )
 }
+
+const Switch = forwardRef(SwitchRef)
 
 Switch.propTypes = propTypes
 

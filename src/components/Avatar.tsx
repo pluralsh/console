@@ -1,3 +1,4 @@
+import { Ref, forwardRef } from 'react'
 import { Flex, FlexProps, Img, P } from 'honorable'
 import PropTypes from 'prop-types'
 
@@ -20,7 +21,7 @@ function extractInitials(name: string) {
   return words.map(word => word[0]).filter((_, i, a) => i === 0 || i === a.length - 1).join('').toUpperCase()
 }
 
-function Avatar({ name = '', imageUrl = '', size = 44, ...props }: AvatarProps) {
+function AvatarRef({ name = '', imageUrl = '', size = 44, ...props }: AvatarProps, ref: Ref<any>) {
   function renderName() {
     return (
       <P
@@ -45,6 +46,7 @@ function Avatar({ name = '', imageUrl = '', size = 44, ...props }: AvatarProps) 
 
   return (
     <Flex
+      ref={ref}
       align="center"
       justify="center"
       backgroundColor={imageUrl ? 'transparent' : 'accent-blue'}
@@ -60,6 +62,8 @@ function Avatar({ name = '', imageUrl = '', size = 44, ...props }: AvatarProps) 
     </Flex>
   )
 }
+
+const Avatar = forwardRef(AvatarRef)
 
 Avatar.propTypes = propTypes
 

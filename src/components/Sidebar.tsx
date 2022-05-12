@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ComponentType, Fragment, MouseEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { ComponentType, Fragment, MouseEvent, ReactNode, Ref, forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled from '@emotion/styled'
 import { Div, DivProps, Flex, P, useTheme } from 'honorable'
@@ -87,11 +87,13 @@ const ChildrenContainer = styled(Div)`
   }
 `
 
-function Sidebar({
+function SidebarRef({
   items = [],
   activeUrl = '',
   ...props
-}: SidebarProps) {
+}: SidebarProps,
+ref: Ref<any>
+) {
   const activeItem = getItemForUrl(items, activeUrl)
   const activeId = getId(activeItem)
   const theme = useTheme()
@@ -300,6 +302,7 @@ function Sidebar({
 
   return (
     <Div
+      ref={ref}
       transition="width 300ms ease"
       width={collapsed ? 74 : 256 - 32}
       height="100%"
@@ -364,6 +367,8 @@ function Sidebar({
     </Div>
   )
 }
+
+const Sidebar = forwardRef(SidebarRef)
 
 Sidebar.propTypes = propTypes
 

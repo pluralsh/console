@@ -1,3 +1,4 @@
+import { Ref, forwardRef } from 'react'
 import { Div, DivProps, Flex, P } from 'honorable'
 import PropTypes from 'prop-types'
 
@@ -7,7 +8,7 @@ import ErrorIcon from './icons/ErrorIcon'
 import CloseIcon from './icons/CloseIcon'
 
 type AlertProps = DivProps & {
-  severity?: 'success' | 'warning' | 'error' | 'info'
+  severity?: 'success' | 'warning' | 'error' | 'info' | string
   title?: string
   onClose?: () => void
 }
@@ -40,12 +41,13 @@ const severityToIcon = {
   info: StatusOkIcon,
 }
 
-function Alert({ children, severity = 'info', title = '', onClose, ...props }: AlertProps) {
+function AlertRef({ children, severity = 'info', title = '', onClose, ...props }: AlertProps, ref: Ref<any>) {
   const AlertIcon = severityToIcon[severity] || StatusOkIcon
   const color = severityToColor[severity] || 'primary'
 
   return (
     <Flex
+      ref={ref}
       align="center"
       position="relative"
       py={1}
@@ -72,6 +74,7 @@ function Alert({ children, severity = 'info', title = '', onClose, ...props }: A
         size={24}
         color={color}
         flexShrink={0}
+
       />
       <Div ml={2}>
         {!!title && (
@@ -90,6 +93,8 @@ function Alert({ children, severity = 'info', title = '', onClose, ...props }: A
     </Flex>
   )
 }
+
+const Alert = forwardRef(AlertRef)
 
 Alert.propTypes = propTypes
 
