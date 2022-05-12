@@ -1,13 +1,24 @@
-import { ReactNode } from 'react'
+import { ReactNode, Ref, forwardRef } from 'react'
 import { Select as HonorableSelect, SelectProps as HonorableSelectProps, MenuItem } from 'honorable'
+import PropTypes from 'prop-types'
 
 type SelectProps = HonorableSelectProps & {
   items: Array<{ label: ReactNode, value: any }>
 }
 
-function Select({ items, ...props }: SelectProps) {
+const propTypes = {
+  items: PropTypes.arrayOf(
+    PropTypes.shape({
+      label: PropTypes.node.isRequired,
+      value: PropTypes.any.isRequired,
+    }).isRequired
+  ).isRequired,
+}
+
+function SelectRef({ items, ...props }: SelectProps, ref: Ref<any>) {
   return (
     <HonorableSelect
+      ref={ref}
       {...props}
     >
       {items.map(({ value, label }) => (
@@ -18,4 +29,10 @@ function Select({ items, ...props }: SelectProps) {
     </HonorableSelect>
   )
 }
+
+const Select = forwardRef(SelectRef)
+
+// @ts-ignore
+Select.propTypes = propTypes
+
 export default Select

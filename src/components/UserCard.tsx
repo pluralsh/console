@@ -1,3 +1,4 @@
+import { Ref, forwardRef } from 'react'
 import { Div, Flex, FlexProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
@@ -17,9 +18,10 @@ const propTypes = {
   }),
 }
 
-function UserCard({ user = {}, ...props }: UserCardProps) {
+function UserCardRef({ user = {}, ...props }: UserCardProps, ref: Ref<any>) {
   return (
     <Flex
+      ref={ref}
       align="center"
       {...props}
     >
@@ -47,6 +49,8 @@ function UserCard({ user = {}, ...props }: UserCardProps) {
     </Flex>
   )
 }
+
+const UserCard = forwardRef(UserCardRef)
 
 UserCard.propTypes = propTypes
 

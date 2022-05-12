@@ -1,3 +1,4 @@
+import { Ref, forwardRef } from 'react'
 import { Flex, FlexProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
@@ -11,9 +12,10 @@ const propTypes = {
   onClose: PropTypes.func,
 }
 
-function Token({ children, onClose = () => {}, ...props }: TokenProps) {
+function TokenRef({ children, onClose = () => {}, ...props }: TokenProps, ref: Ref<any>) {
   return (
     <Flex
+      ref={ref}
       pl={0.5}
       display="inline-flex"
       minHeight={28}
@@ -42,6 +44,8 @@ function Token({ children, onClose = () => {}, ...props }: TokenProps) {
     </Flex>
   )
 }
+
+const Token = forwardRef(TokenRef)
 
 Token.propTypes = propTypes
 

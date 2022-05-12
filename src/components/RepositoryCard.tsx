@@ -1,5 +1,6 @@
 import { Div, DivProps, Flex, Img, P } from 'honorable'
 import PropTypes from 'prop-types'
+import { Ref, forwardRef } from 'react'
 
 import InstalledLabel from './InstalledLabel'
 
@@ -19,7 +20,7 @@ const propTypes = {
   imageUrl: PropTypes.string,
 }
 
-function RepositoryCard({
+function RepositoryCardRef({
   featured = false,
   installed = false,
   title,
@@ -27,7 +28,9 @@ function RepositoryCard({
   imageUrl,
   children,
   ...props
-}: RepositoryCardProps) {
+}: RepositoryCardProps,
+ref: Ref<any>
+) {
 
   function renderContent() {
     return (
@@ -52,6 +55,7 @@ function RepositoryCard({
   function renderFeatured() {
     return (
       <Flex
+        ref={ref}
         p={1}
         justify="flex-start"
         align="flex-start"
@@ -94,6 +98,7 @@ function RepositoryCard({
   function renderRegular() {
     return (
       <Div
+        ref={ref}
         p={1}
         borderRadius={4}
         border="1px solid border"
@@ -129,6 +134,8 @@ function RepositoryCard({
 
   return featured ? renderFeatured() : renderRegular()
 }
+
+const RepositoryCard = forwardRef(RepositoryCardRef)
 
 RepositoryCard.propTypes = propTypes
 

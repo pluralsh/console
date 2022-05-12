@@ -1,3 +1,4 @@
+import { Ref, forwardRef } from 'react'
 import { Div, Flex, FlexProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
@@ -9,9 +10,10 @@ const propTypes = {
   text: PropTypes.string,
 }
 
-function Divider({ text = 'or', ...props }: AlertProps) {
+function DividerRef({ text = 'or', ...props }: AlertProps, ref: Ref<any>) {
   return (
     <Flex
+      ref={ref}
       align="center"
       {...props}
     >
@@ -36,6 +38,8 @@ function Divider({ text = 'or', ...props }: AlertProps) {
     </Flex>
   )
 }
+
+const Divider = forwardRef(DividerRef)
 
 Divider.propTypes = propTypes
 
