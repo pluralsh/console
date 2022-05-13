@@ -1,5 +1,5 @@
 import { Ref, forwardRef } from 'react'
-import { Input as HonorableInput, InputProps as HonorableInputProps } from 'honorable'
+import { ExtendTheme, Input as HonorableInput, InputProps as HonorableInputProps } from 'honorable'
 import PropTypes from 'prop-types'
 
 type InputProps = HonorableInputProps & {
@@ -13,20 +13,27 @@ const propTypes = {
 }
 
 function InputRef({ valid = false, error = false, ...props }: InputProps, ref: Ref<any>) {
-  const style = {
-    width: '100%',
-    borderColor: error ? 'red' : valid ? 'primary' : 'border',
-    '&:focus': {
-      borderColor: error ? 'red' : valid ? 'primary' : 'border',
+  const extendedTheme = {
+    Input: {
+      Root: [
+        {
+          width: '100%',
+          borderColor: error ? 'red' : valid ? 'primary' : 'border',
+          '&:focus': {
+            borderColor: error ? 'red' : valid ? 'primary' : 'border',
+          },
+        },
+      ],
     },
   }
 
   return (
-    <HonorableInput
-      ref={ref}
-      {...style}
-      {...props}
-    />
+    <ExtendTheme theme={extendedTheme}>
+      <HonorableInput
+        ref={ref}
+        {...props}
+      />
+    </ExtendTheme>
   )
 }
 
