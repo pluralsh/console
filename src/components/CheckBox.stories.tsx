@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Checkbox, Flex, P } from 'honorable'
+import { Checkbox, Div } from 'honorable'
 
 export default {
   title: 'Checkbox',
@@ -10,31 +10,23 @@ function Template(args: any) {
   const [checked, setChecked] = useState([true, true])
 
   return (
-    <>
-      <Flex align="center">
-        <Checkbox
-          {...args}
-          checked={checked[0]}
-          onChange={event => setChecked(checked => [event.target.checked, checked[1]])}
-        />
-        <P ml={0.5}>
-          Implement design system
-        </P>
-      </Flex>
-      <Flex
-        align="center"
-        mt={0.5}
+    <Div>
+      <Checkbox
+        {...args}
+        checked={checked[0]}
+        onChange={event => setChecked(checked => [event.target.checked, checked[1]])}
       >
-        <Checkbox
-          {...args}
-          checked={checked[1]}
-          onChange={event => setChecked(checked => [checked[0], event.target.checked])}
-        />
-        <P ml={0.5}>
-          Party hard
-        </P>
-      </Flex>
-    </>
+        Implement design system
+      </Checkbox>
+      <Checkbox
+        mt={0.5}
+        {...args}
+        checked={checked[1]}
+        onChange={event => setChecked(checked => [checked[0], event.target.checked])}
+      >
+        Party hard
+      </Checkbox>
+    </Div>
   )
 }
 

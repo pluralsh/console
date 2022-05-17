@@ -97,7 +97,7 @@ export default mergeTheme(defaultTheme, {
     ],
   },
   Checkbox: {
-    Root: [
+    Control: [
       {
         width: 16,
         height: 16,
