@@ -9,7 +9,8 @@ defmodule Console.Storage.Git do
            {:ok, _} <- cmd("git", ["clone", conf(:git_url), workspace()]),
            {:ok, _} <- git("config", ["user.name", conf(:git_user_name)]),
            {:ok, _} <- git("config", ["user.email", conf(:git_user_email)]),
-        do: Plural.unlock()
+           {:ok, _} <- Plural.unlock(),
+        do: git("checkout", [branch()])
     else
       pull()
     end

@@ -70,6 +70,7 @@ defmodule Console.Storage.GitTest do
       assert_receive {:git, ["clone" | _]}
       assert_receive {:git, ["config", "user.name" | _]}
       assert_receive {:git, ["config", "user.email" | _]}
+      assert_receive {:git, ["checkout", "master"]}
       assert_receive :unlock
     end
   end
