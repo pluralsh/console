@@ -57,17 +57,17 @@ defmodule Console.Storage.GitTest do
       myself = self()
       echo = fn val ->
         send myself, val
-        :ok
+        {:ok, %{}}
       end
-      git_fn = fn "git", args, _ -> echo.({:git, args}) end
 
-      expect(Command, :cmd, git_fn)
-      |> expect(:cmd, fn "git", args -> git_fn.("git", args, "rest") end)
+      expect(Command, :cmd, 6, fn "git", args, _ -> echo.({:git, args}) end)
       expect(Plural, :unlock, fn -> echo.(:unlock) end)
 
-      :ok = Git.init()
+      {:ok, _} = Git.init()
 
-      assert_receive {:git, ["clone" | _]}
+      assert_receive {:git, ["reset", "--hard", "origin/master"]}
+      assert_receive {:git, ["clean", "-f"]}
+      assert_receive {:git, ["pull", "--rebase"]}
       assert_receive {:git, ["config", "user.name" | _]}
       assert_receive {:git, ["config", "user.email" | _]}
       assert_receive {:git, ["checkout", "master"]}
