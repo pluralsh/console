@@ -42,7 +42,7 @@ import InvoicesIcon from './icons/InvoicesIcon'
 import KeyIcon from './icons/KeyIcon'
 import KeyPairIcon from './icons/KeyPairIcon'
 import LifePreserverIcon from './icons/LifePreserverIcon'
-import LightingIcon from './icons/LightingIcon'
+import LightningIcon from './icons/LightningIcon'
 import LinkoutIcon from './icons/LinkoutIcon'
 import LinksIcon from './icons/LinksIcon'
 import ListIcon from './icons/ListIcon'
@@ -133,7 +133,7 @@ const icons = {
   KeyIcon,
   KeyPairIcon,
   LifePreserverIcon,
-  LightingIcon,
+  LightningIcon,
   LinkoutIcon,
   LinksIcon,
   ListIcon,

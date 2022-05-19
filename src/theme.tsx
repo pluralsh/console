@@ -80,15 +80,20 @@ export default mergeTheme(defaultTheme, {
   name: 'plural',
   mode: 'dark',
   colors: {
+    blue,
+    grey,
+    success,
+    warning,
+    error,
     primary: '#293EFF',
     secondary: '#222534',
     background: {
       light: 'white',
-      dark: '#171A21',
+      dark: 'grey.900',
     },
     'background-light': {
       light: '#F5F5F5',
-      dark: '#2A2E37',
+      dark: 'grey.800',
     },
     'background-middle': {
       light: '#EEEEEE',
@@ -99,41 +104,30 @@ export default mergeTheme(defaultTheme, {
       dark: '#323643',
     },
     // text has already been declared by the default theme
+    text: {
+      light: 'black',
+      dark: 'grey.50',
+    },
     'text-strong': {
       light: '#000000',
       dark: 'white',
     },
     'text-light': {
       light: '#444444',
-      dark: '#C4CAD4',
+      dark: 'grey.200',
     },
     'text-xlight': {
       light: '#666666',
-      dark: '#999999',
+      dark: 'grey.300',
     },
     border: {
       light: '#CCCCCC',
       dark: '#303340',
     },
-    success: '#07E5A7',
-    warning: '#EF931D',
-    error: '#E03E43',
     'background-success': '#07E5A733',
     'background-warning': '#EF931D66',
     'background-error': '#E03E4366',
     'background-info': '#0190C266',
-    'accent-blue': {
-      dark: '#0190C2',
-      light: '#0190C2',
-    },
-    'accent-purple': {
-      dark: '#9510A1',
-      light: '#9510A1',
-    },
-    'accent-green': {
-      dark: '#058E4B',
-      light: '#058E4B',
-    },
   },
   html: [
     {
