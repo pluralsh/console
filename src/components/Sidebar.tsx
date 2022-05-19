@@ -215,6 +215,7 @@ ref: Ref<any>
           id={isActive ? 'active-item' : ''}
           align="center"
           mb={0.25}
+          mr={1}
           height={40}
           borderRadius={4}
           ml={`${marginLeft}px`}
@@ -307,7 +308,8 @@ ref: Ref<any>
       width={collapsed ? 74 : 256 - 32}
       height="100%"
       borderRight="1px solid border"
-      p={1}
+      py={1}
+      pl={1}
       flexGrow={0}
       flexShrink={0}
       {...props}
