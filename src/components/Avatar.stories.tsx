@@ -1,4 +1,4 @@
-import Avatar from './Avatar'
+import { Avatar } from 'honorable'
 
 export default {
   title: 'Avatar',
@@ -28,7 +28,7 @@ ComplexName.args = {
 export const Image = Template.bind({})
 
 Image.args = {
-  imageUrl: 'https://avatars.githubusercontent.com/u/4154003?v=4',
+  src: 'https://avatars.githubusercontent.com/u/4154003?v=4',
 }
 
 export const Small = Template.bind({})

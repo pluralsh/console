@@ -91,7 +91,6 @@ export { default as VolumesIcon } from './components/icons/VolumesIcon'
 export { default as WebhooksIcon } from './components/icons/WebhooksIcon'
 // Components
 export { default as Alert } from './components/Alert'
-export { default as Avatar } from './components/Avatar'
 export { default as Divider } from './components/Divider'
 export { default as FormField } from './components/FormField'
 export { default as Input } from './components/Input'

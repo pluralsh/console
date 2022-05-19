@@ -1,10 +1,8 @@
 import { Ref, forwardRef } from 'react'
-import { Div, Flex, FlexProps, P } from 'honorable'
+import { Avatar, Div, Flex, FlexProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 import { UserType } from '../types'
-
-import Avatar from './Avatar'
 
 type UserCardProps = FlexProps & {
   user?: UserType
@@ -27,7 +25,7 @@ function UserCardRef({ user = {}, ...props }: UserCardProps, ref: Ref<any>) {
     >
       <Avatar
         name={user.name}
-        imageUrl={user.imageUrl}
+        src={user.imageUrl}
       />
       <Div pl={0.5}>
         <P

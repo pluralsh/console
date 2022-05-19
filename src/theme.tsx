@@ -5,7 +5,7 @@ export default mergeTheme(defaultTheme, {
   name: 'plural',
   mode: 'dark',
   colors: {
-    primary: '#0639FF',
+    primary: '#293EFF',
     secondary: '#222534',
     background: {
       light: 'white',
@@ -59,7 +59,7 @@ export default mergeTheme(defaultTheme, {
   html: [
     {
       fontSize: 14,
-      fontFamily: 'Monument',
+      fontFamily: 'Inter',
     },
   ],
   global: [
@@ -76,6 +76,15 @@ export default mergeTheme(defaultTheme, {
         '&:visited, &:hover, &:active': {
           color: 'text',
         },
+      },
+    ],
+  },
+  Avatar: {
+    Root: [
+      {
+        backgroundColor: 'primary',
+        borderRadius: 4,
+        fontWeight: 400,
       },
     ],
   },
@@ -113,6 +122,48 @@ export default mergeTheme(defaultTheme, {
         },
       ],
     },
+  },
+  H1: {
+    Root: [
+      {
+        fontFamily: 'Monument',
+      },
+    ],
+  },
+  H2: {
+    Root: [
+      {
+        fontFamily: 'Monument',
+      },
+    ],
+  },
+  H3: {
+    Root: [
+      {
+        fontFamily: 'Monument',
+      },
+    ],
+  },
+  H4: {
+    Root: [
+      {
+        fontFamily: 'Monument',
+      },
+    ],
+  },
+  H5: {
+    Root: [
+      {
+        fontFamily: 'Monument',
+      },
+    ],
+  },
+  H6: {
+    Root: [
+      {
+        fontFamily: 'Monument',
+      },
+    ],
   },
   Menu: {
     Root: [
