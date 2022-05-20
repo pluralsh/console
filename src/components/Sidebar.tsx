@@ -146,17 +146,19 @@ ref: Ref<any>
     return null
   }, [items])
 
-  const handleCollapse = useCallback((nextCollapsed: boolean) => {
+  const handleCollapse = useCallback((nextCollapsed: boolean, deploy = true) => {
     if (nextCollapsed === collapsed) return
 
     setCollapsed(nextCollapsed)
 
-    if (nextCollapsed) {
-      setDeployedIdBeforeCollapse(deployedId)
-      setDeployedId(null)
-    }
-    else {
-      setDeployedId(deployedIdBeforeCollapse)
+    if (deploy) {
+      if (nextCollapsed) {
+        setDeployedIdBeforeCollapse(deployedId)
+        setDeployedId(null)
+      }
+      else {
+        setDeployedId(deployedIdBeforeCollapse)
+      }
     }
   }, [collapsed, deployedId, deployedIdBeforeCollapse])
 
@@ -173,7 +175,8 @@ ref: Ref<any>
     const isTopLevel = items.some(x => x === item)
     const hasChildren = (item.items || []).length > 0
 
-    handleCollapse(isTopLevel && !hasChildren)
+    handleCollapse(isTopLevel && !hasChildren, false)
+    setDeployedIdBeforeCollapse(null)
   }, [items, deployedId, handleCollapse, getTopLevelItem])
 
   useEffect(() => {
@@ -266,7 +269,7 @@ ref: Ref<any>
           color={isActive ? 'text-strong' : 'text-light'}
           transition="background-color 150ms linear"
           onClick={(event: MouseEvent) => {
-            if ((hasChildren || isTopLevelItem(item)) && deployedId !== id) handleDeployItem(item)
+            handleDeployItem(item)
             if (typeof onClick === 'function') onClick(event)
           }}
           flexShrink={0}
