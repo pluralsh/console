@@ -40,6 +40,7 @@ function Template(args: any) {
         createItem({
           name: 'User Attributes',
           Icon: ScrollIcon,
+          url: '/user-attributes',
         }),
         createItem({
           name: 'Password',
@@ -257,6 +258,13 @@ function Template(args: any) {
         >
           Go to /explore/public
         </button>
+        <button
+          type="button"
+          style={{ marginTop: '1rem' }}
+          onClick={() => setActiveUrl('/user-attributes')}
+        >
+          Go to /user-attributes
+        </button>
       </Flex>
     </Flex>
   )
@@ -265,8 +273,17 @@ function Template(args: any) {
 export const Default = Template.bind({})
 
 Default.args = {
-  user: {
-    name: 'Jane Smith',
-    email: 'jane.smith@plural.sh',
-  },
+  userName: 'Jane Smith',
+  userOrganization: 'Plural',
+  onUserClick: () => window.alert('User clicked'),
+  onNotificationsClick: () => window.alert('Notifications clicked'),
+  onUpdateClick: () => window.alert('Update clicked'),
+  notificationsCount: 8,
+  hasUpdate: true,
+}
+
+export const NoOrganization = Template.bind({})
+
+NoOrganization.args = {
+  userName: 'Jane Smith',
 }

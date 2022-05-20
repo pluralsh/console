@@ -1,3 +1,4 @@
+import ArrowTopRightIcon from './icons/ArrowTopRightIcon'
 import BotIcon from './icons/BotIcon'
 import BrowserIcon from './icons/BrowserIcon'
 import BundleIcon from './icons/BundleIcon'
@@ -42,7 +43,7 @@ import InvoicesIcon from './icons/InvoicesIcon'
 import KeyIcon from './icons/KeyIcon'
 import KeyPairIcon from './icons/KeyPairIcon'
 import LifePreserverIcon from './icons/LifePreserverIcon'
-import LightingIcon from './icons/LightingIcon'
+import LightningIcon from './icons/LightningIcon'
 import LinkoutIcon from './icons/LinkoutIcon'
 import LinksIcon from './icons/LinksIcon'
 import ListIcon from './icons/ListIcon'
@@ -89,6 +90,7 @@ import VolumesIcon from './icons/VolumesIcon'
 import WebhooksIcon from './icons/WebhooksIcon'
 
 const icons = {
+  ArrowTopRightIcon,
   BotIcon,
   BrowserIcon,
   BundleIcon,
@@ -133,7 +135,7 @@ const icons = {
   KeyIcon,
   KeyPairIcon,
   LifePreserverIcon,
-  LightingIcon,
+  LightningIcon,
   LinkoutIcon,
   LinksIcon,
   ListIcon,
