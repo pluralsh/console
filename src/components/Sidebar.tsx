@@ -5,6 +5,8 @@ import { A, Avatar, Div, DivProps, Flex, HonorableTheme, Img, P, useForkedRef, u
 import PropTypes from 'prop-types'
 
 import CollapseIcon from './icons/CollapseIcon'
+import LightningIcon from './icons/LightningIcon'
+import DownloadIcon from './icons/DownloadIcon'
 import LifePreserverIcon from './icons/LifePreserverIcon'
 import ArrowTopRightIcon from './icons/ArrowTopRightIcon'
 import HamburgerMenuIcon from './icons/HamburgerMenuIcon'
@@ -20,13 +22,17 @@ type SidebarItem = DivProps & {
 }
 
 type SidebarProps = {
-  items: SidebarItem[]
   activeUrl?: string
+  hasUpdate?: boolean
+  items: SidebarItem[]
+  notificationsCount?: number
+  onNotificationsClick?: (event: MouseEvent) => void
+  onUpdateClick?: (event: MouseEvent) => void
+  onUserClick?: (event: MouseEvent) => void
+  supportUrl?: string
   userImageUrl?: string
   userName?: string
   userOrganization?: string
-  supportUrl?: string
-  onUserClick?: (event: MouseEvent) => void
 }
 
 const propTypes = {
@@ -40,11 +46,15 @@ const propTypes = {
     })
   ),
   activeUrl: PropTypes.string,
+  hasUpdate: PropTypes.bool,
+  notificationsCount: PropTypes.number,
+  onNotificationsClick: PropTypes.func,
+  onUpdateClick: PropTypes.func,
+  onUserClick: PropTypes.func,
+  supportUrl: PropTypes.string,
   userImageUrl: PropTypes.string,
   userName: PropTypes.string,
   userOrganization: PropTypes.string,
-  supportUrl: PropTypes.string,
-  onUserClick: PropTypes.func,
 }
 
 const StyledLink = styled(Link)`
@@ -96,13 +106,17 @@ const ChildrenContainer = styled(Div)`
 `
 
 function SidebarRef({
-  items = [],
   activeUrl = '',
+  hasUpdate = false,
+  items = [],
+  notificationsCount = 0,
+  onNotificationsClick = () => {},
+  onUpdateClick = () => {},
+  onUserClick = () => {},
+  supportUrl,
   userImageUrl,
   userName,
   userOrganization,
-  supportUrl,
-  onUserClick = () => {},
   ...props
 }: SidebarProps,
 ref: Ref<any>
@@ -194,7 +208,7 @@ ref: Ref<any>
   }, [activeUrl])
 
   function setContentHeight() {
-    setSidebarcontentMaxHeight(`${sidebarRef.current.offsetHeight - sidebarBottomRef.current.offsetHeight - sidebarTopRef.current.offsetHeight - 16 - 2}px`)
+    setSidebarcontentMaxHeight(`${sidebarRef.current.offsetHeight - sidebarBottomRef.current.offsetHeight - sidebarTopRef.current.offsetHeight}px`)
   }
 
   function getItemForUrl(items: SidebarItem[], url: string): SidebarItem {
@@ -251,7 +265,6 @@ ref: Ref<any>
           cursor="pointer"
           color={isActive ? 'text-strong' : 'text-light'}
           transition="background-color 150ms linear"
-          userSelect="none"
           onClick={(event: MouseEvent) => {
             if ((hasChildren || isTopLevelItem(item)) && deployedId !== id) handleDeployItem(item)
             if (typeof onClick === 'function') onClick(event)
@@ -341,31 +354,111 @@ ref: Ref<any>
       borderRight="1px solid border"
       flexGrow={0}
       flexShrink={0}
+      userSelect="none"
       {...props}
     >
-      <Flex
-        ref={sidebarTopRef}
-        py={1}
-        pl={1.5}
-        flexShrink={0}
-        align="center"
-        borderBottom="1px solid border"
-      >
-        <Img
-          src="/plural-logo-white.svg"
-          width={24}
-        />
-        <TransitionText
-          ml={0.75}
-          mb="-4px"
-          collapsed={collapsed}
-        >
-          <Img
-            src="/plural-logotype-white.svg"
-            height={20}
-          />
-        </TransitionText>
-      </Flex>
+      <Div ref={sidebarTopRef}>
+        <Link to="/">
+          <Flex
+            py={1}
+            pl={1.5}
+            flexShrink={0}
+            align="center"
+            borderBottom="1px solid border"
+          >
+            <Img
+              src="/plural-logo-white.svg"
+              width={24}
+            />
+            <TransitionText
+              ml={0.75}
+              mb="-4px"
+              collapsed={collapsed}
+            >
+              <Img
+                src="/plural-logotype-white.svg"
+                height={20}
+              />
+            </TransitionText>
+          </Flex>
+        </Link>
+        <Hoverer>
+          {(hovered: boolean) => (
+            <Flex
+              py={1}
+              pl={1.5}
+              flexShrink={0}
+              align="center"
+              borderBottom={hasUpdate ? 'none' : '1px solid border'}
+              cursor="pointer"
+              onClick={onNotificationsClick}
+            >
+              <Div
+                position="relative"
+                flexShrink={0}
+                mb={-0.25}
+              >
+                <LightningIcon
+                  width={16}
+                  color={hovered ? 'warning.100' : 'warning.200'}
+                />
+                {notificationsCount > 0 && (
+                  <Div
+                    position="absolute"
+                    top={-8}
+                    right={-8}
+                    backgroundColor="error"
+                    width={12}
+                    height={12}
+                    borderRadius="50%"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    fontSize={10}
+                  >
+                    {notificationsCount}
+                  </Div>
+                )}
+              </Div>
+              <TransitionText
+                ml={1}
+                collapsed={collapsed}
+                color={hovered ? 'warning.100' : 'warning.200'}
+              >
+                Notifications
+              </TransitionText>
+            </Flex>
+          )}
+        </Hoverer>
+        {!!hasUpdate && (
+          <Hoverer>
+            {(hovered: boolean) => (
+              <Flex
+                py={1}
+                pl={1.5}
+                mt={-0.25}
+                flexShrink={0}
+                align="center"
+                borderBottom="1px solid border"
+                cursor="pointer"
+                onClick={onUpdateClick}
+              >
+                <DownloadIcon
+                  width={16}
+                  color={hovered ? 'warning.100' : 'warning.200'}
+                />
+                <TransitionText
+                  ml={1}
+                  collapsed={collapsed}
+                  color={hovered ? 'warning.100' : 'warning.200'}
+                >
+                  Update
+                </TransitionText>
+              </Flex>
+            )}
+          </Hoverer>
+        )}
+      </Div>
       <Div
         py={0.5}
         pl={1}
@@ -392,10 +485,8 @@ ref: Ref<any>
       </Div>
       <Div
         ref={sidebarBottomRef}
-        mt={1}
         flexGrow={0}
         flexShrink={0}
-        userSelect="none"
       >
         <Hoverer>
           {(hovered: boolean) => (
@@ -420,7 +511,7 @@ ref: Ref<any>
                 />
                 <TransitionText
                   collapsed={collapsed}
-                  ml={1.25}
+                  ml={1.75}
                   body2
                   flexGrow={1}
                   color={hovered ? 'text-strong' : 'text-xlight'}
@@ -461,7 +552,7 @@ ref: Ref<any>
               />
               <TransitionText
                 collapsed={collapsed}
-                ml={1.25}
+                ml={1.75}
                 body2
                 color={hovered ? 'text-strong' : 'text-xlight'}
               >
@@ -470,7 +561,6 @@ ref: Ref<any>
             </Flex>
           )}
         </Hoverer>
-
         <Flex
           py={1}
           pl={1}
@@ -484,7 +574,7 @@ ref: Ref<any>
             flexShrink={0}
           />
           <Div
-            ml={0.5}
+            ml={1}
             flexShrink={0}
           >
             <TransitionText

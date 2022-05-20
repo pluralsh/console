@@ -276,6 +276,10 @@ Default.args = {
   userName: 'Jane Smith',
   userOrganization: 'Plural',
   onUserClick: () => window.alert('User clicked'),
+  onNotificationsClick: () => window.alert('Notifications clicked'),
+  onUpdateClick: () => window.alert('Update clicked'),
+  notificationsCount: 8,
+  hasUpdate: true,
 }
 
 export const NoOrganization = Template.bind({})
