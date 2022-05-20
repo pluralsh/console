@@ -374,6 +374,17 @@ ref: Ref<any>
         overflowY="auto"
         height={sidebarContentMaxHeight}
         maxHeight={sidebarContentMaxHeight}
+        {...{
+          '&::-webkit-scrollbar': {
+            backgroundColor: 'background',
+            width: 8,
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'text-xlight',
+            borderRadius: 2,
+            display: collapsed ? 'none' : null,
+          },
+        }}
       >
         <Div id="sidebar-items">
           {renderItems(items)}
