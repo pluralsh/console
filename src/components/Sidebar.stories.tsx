@@ -265,8 +265,13 @@ function Template(args: any) {
 export const Default = Template.bind({})
 
 Default.args = {
-  user: {
-    name: 'Jane Smith',
-    email: 'jane.smith@plural.sh',
-  },
+  userName: 'Jane Smith',
+  userOrganization: 'Plural',
+  onUserClick: () => window.alert('User clicked'),
+}
+
+export const NoOrganization = Template.bind({})
+
+NoOrganization.args = {
+  userName: 'Jane Smith',
 }

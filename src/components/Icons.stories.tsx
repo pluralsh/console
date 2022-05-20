@@ -1,3 +1,4 @@
+import ArrowTopRightIcon from './icons/ArrowTopRightIcon'
 import BotIcon from './icons/BotIcon'
 import BrowserIcon from './icons/BrowserIcon'
 import BundleIcon from './icons/BundleIcon'
@@ -89,6 +90,7 @@ import VolumesIcon from './icons/VolumesIcon'
 import WebhooksIcon from './icons/WebhooksIcon'
 
 const icons = {
+  ArrowTopRightIcon,
   BotIcon,
   BrowserIcon,
   BundleIcon,

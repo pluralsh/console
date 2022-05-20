@@ -1,13 +1,14 @@
-// @ts-nocheck
 import { ComponentType, Fragment, MouseEvent, ReactNode, Ref, forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled from '@emotion/styled'
-import { Div, DivProps, Flex, P, useTheme } from 'honorable'
+import { A, Avatar, Div, DivProps, Flex, HonorableTheme, Img, P, useForkedRef, useTheme } from 'honorable'
 import PropTypes from 'prop-types'
 
-import { UserType } from '../types'
-
 import CollapseIcon from './icons/CollapseIcon'
+import LifePreserverIcon from './icons/LifePreserverIcon'
+import ArrowTopRightIcon from './icons/ArrowTopRightIcon'
+import HamburgerMenuIcon from './icons/HamburgerMenuIcon'
+import HamburgerMenuCollapseIcon from './icons/HamburgerMenuCollapseIcon'
 
 type SidebarItem = DivProps & {
   name?: string
@@ -21,7 +22,11 @@ type SidebarItem = DivProps & {
 type SidebarProps = {
   items: SidebarItem[]
   activeUrl?: string
-  user: UserType
+  userImageUrl?: string
+  userName?: string
+  userOrganization?: string
+  supportUrl?: string
+  onUserClick?: (event: MouseEvent) => void
 }
 
 const propTypes = {
@@ -29,17 +34,17 @@ const propTypes = {
     PropTypes.shape({
       name: PropTypes.string,
       url: PropTypes.string,
-      Icon: PropTypes.elementType,
+      Icon: PropTypes.any,
       onClick: PropTypes.func,
       items: PropTypes.array,
     })
   ),
   activeUrl: PropTypes.string,
-  user: PropTypes.shape({
-    name: PropTypes.string,
-    email: PropTypes.string,
-    imageUrl: PropTypes.string,
-  }),
+  userImageUrl: PropTypes.string,
+  userName: PropTypes.string,
+  userOrganization: PropTypes.string,
+  supportUrl: PropTypes.string,
+  onUserClick: PropTypes.func,
 }
 
 const StyledLink = styled(Link)`
@@ -48,21 +53,24 @@ const StyledLink = styled(Link)`
 
 const Item = styled(Flex)`
   &#active-item {
-    color: ${({ theme }) => theme.utils.resolveColorString('text-strong')};
-    background-color: ${({ theme }) => theme.utils.resolveColorString('background-light')};
+    color: ${({ theme }) => (theme as HonorableTheme).utils.resolveColorString('text-strong')};
+    background-color: ${({ theme }) => (theme as HonorableTheme).utils.resolveColorString('background-light')};
     font-weight: 600;
   }
 
   #sidebar-items:not(:hover) > &#active-item,
   #sidebar-items:not(:hover) > * > * > &#active-item,
   &:hover {
-    color: ${({ theme }) => theme.utils.resolveColorString('text-strong')};
-    background-color: ${({ theme }) => theme.utils.resolveColorString('background-light')};
-    font-weight: 600;
+    color: ${({ theme }) => (theme as HonorableTheme).utils.resolveColorString('text-strong')};
+    background-color: ${({ theme }) => (theme as HonorableTheme).utils.resolveColorString('background-light')};
   }
 
-  & > svg {
+  & svg {
     flex-shrink: 0;
+  }
+
+  &:hover * {
+    stroke: white;
   }
 `
 
@@ -72,7 +80,7 @@ function TransitionText({ collapsed, ...props }: any) {
       display="block"
       opacity={collapsed ? 0 : 1}
       visibility={collapsed ? 'hidden' : 'visible'}
-      transition={`opacity ${collapsed ? 200 : 500}ms ease, background-color ${collapsed ? 200 : 500}ms ease ${collapsed ? 0 : 50}ms, visibility 200ms linear`}
+      transition={`opacity ${collapsed ? 200 : 500}ms ease, background-color ${collapsed ? 200 : 500}ms ease ${collapsed ? 0 : 50}ms, visibility 200ms linear, color 150ms linear`}
       {...props}
     />
   )
@@ -90,6 +98,11 @@ const ChildrenContainer = styled(Div)`
 function SidebarRef({
   items = [],
   activeUrl = '',
+  userImageUrl,
+  userName,
+  userOrganization,
+  supportUrl,
+  onUserClick = () => {},
   ...props
 }: SidebarProps,
 ref: Ref<any>
@@ -97,7 +110,10 @@ ref: Ref<any>
   const activeItem = getItemForUrl(items, activeUrl)
   const activeId = getId(activeItem)
   const theme = useTheme()
-  const sidebarBottomRef = useRef()
+  const sidebarRef = useRef<HTMLDivElement>()
+  const sidebarTopRef = useRef<HTMLDivElement>()
+  const sidebarBottomRef = useRef<HTMLDivElement>()
+  const forkedRef = useForkedRef(ref, sidebarRef)
   const [collapsed, setCollapsed] = useState((activeItem?.items || []).length === 0)
   const [deployedId, setDeployedId] = useState(activeUrl ? activeId : null)
   const [deployedIdBeforeCollapse, setDeployedIdBeforeCollapse] = useState(deployedId)
@@ -162,15 +178,10 @@ ref: Ref<any>
   }, [activeUrl])
 
   function setContentHeight() {
-    const current = sidebarBottomRef.current as any
-
-    const bottomRect = current.getBoundingClientRect()
-    const parentRect = current.parentElement.getBoundingClientRect()
-
-    setSidebarcontentMaxHeight(`${parentRect.height - bottomRect.height - 32 - 16}px`)
+    setSidebarcontentMaxHeight(`${sidebarRef.current.offsetHeight - sidebarBottomRef.current.offsetHeight - sidebarTopRef.current.offsetHeight - 16 - 2}px`)
   }
 
-  function getItemForUrl(items: SidebarItem[], url: string): string | null {
+  function getItemForUrl(items: SidebarItem[], url: string): SidebarItem {
     for (const item of items) {
       if (item.url === url || (item.matchedUrl instanceof RegExp && item.matchedUrl.test(url))) return item
 
@@ -301,24 +312,53 @@ ref: Ref<any>
     )
   }
 
+  const MenuIcon = collapsed ? HamburgerMenuIcon : HamburgerMenuCollapseIcon
+
   return (
     <Div
-      ref={ref}
+      ref={forkedRef}
       transition="width 300ms ease"
       width={collapsed ? 74 : 256 - 32}
       height="100%"
+      maxHeight="100%"
+      overflow="hidden"
       borderRight="1px solid border"
-      py={1}
-      pl={1}
       flexGrow={0}
       flexShrink={0}
       {...props}
     >
+      <Flex
+        ref={sidebarTopRef}
+        py={1}
+        pl={1.5}
+        flexShrink={0}
+        align="center"
+        borderBottom="1px solid border"
+      >
+        <Img
+          src="/plural-logo-white.svg"
+          width={24}
+        />
+        <TransitionText
+          ml={0.75}
+          mb="-4px"
+          collapsed={collapsed}
+        >
+          <Img
+            src="/plural-logotype-white.svg"
+            height={20}
+          />
+        </TransitionText>
+      </Flex>
       <Div
-        overflowY="auto"
+        py={0.5}
+        pl={1}
         flexGrow={1}
+        flexShrink={1}
+        overflowY="auto"
         height={sidebarContentMaxHeight}
         maxHeight={sidebarContentMaxHeight}
+        borderBottom="1px solid border"
       >
         <Div id="sidebar-items">
           {renderItems(items)}
@@ -326,44 +366,121 @@ ref: Ref<any>
       </Div>
       <Div
         ref={sidebarBottomRef}
+        mt={1}
         flexGrow={0}
         flexShrink={0}
+        userSelect="none"
       >
-        <Flex
-          mt={1}
-          ml={0.5}
-          align="center"
-          overflow="hidden"
-          cursor="pointer"
-          onClick={() => handleCollapse(!collapsed)}
-        >
-          <Flex
-            align="center"
-            justify="center"
-            width={24}
-            height={24}
-            minWidth={24}
-            minHeight={24}
-            transition="all 300ms ease"
-            transform={collapsed ? 'rotate(180deg)' : 'rotate(0deg)'}
-            backgroundColor="background-light"
-            borderRadius={1000}
+        <Hoverer>
+          {(hovered: boolean) => (
+            <A
+              href={supportUrl}
+              target="_blank"
+              borderBottom="1px solid border"
+              display="block"
+              _hover={{ textDecoration: 'none' }}
+            >
+              <Flex
+                py={1}
+                pl={1.75}
+                align="center"
+                overflow="hidden"
+                cursor="pointer"
+              >
+                <LifePreserverIcon
+                  size={16}
+                  flexShrink={0}
+                  color={hovered ? 'text-strong' : 'text-xlight'}
+                />
+                <TransitionText
+                  collapsed={collapsed}
+                  ml={1.25}
+                  body2
+                  flexGrow={1}
+                  color={hovered ? 'text-strong' : 'text-xlight'}
+                >
+                  Support
+                </TransitionText>
+                <TransitionText
+                  collapsed={collapsed}
+                  ml={1}
+                  mr={1}
+                  flexShrink={0}
+                  mb={-0.25}
+                >
+                  <ArrowTopRightIcon
+                    size={22}
+                    color={hovered ? 'text-strong' : 'text-xlight'}
+                  />
+                </TransitionText>
+              </Flex>
+            </A>
+          )}
+        </Hoverer>
+        <Hoverer>
+          {(hovered: boolean) => (
+            <Flex
+              py={1}
+              pl={1.75}
+              align="center"
+              overflow="hidden"
+              cursor="pointer"
+              borderBottom="1px solid border"
+              onClick={() => handleCollapse(!collapsed)}
+            >
+              <MenuIcon
+                size={16}
+                flexShrink={0}
+                color={hovered ? 'text-strong' : 'text-xlight'}
+              />
+              <TransitionText
+                collapsed={collapsed}
+                ml={1.25}
+                body2
+                color={hovered ? 'text-strong' : 'text-xlight'}
+              >
+                Collapse
+              </TransitionText>
+            </Flex>
+          )}
+        </Hoverer>
 
+        <Flex
+          py={1}
+          pl={1}
+          align="center"
+          cursor="pointer"
+          onClick={onUserClick}
+        >
+          <Avatar
+            src={userImageUrl}
+            name={userName}
+            flexShrink={0}
+          />
+          <Div
+            ml={0.5}
+            flexShrink={0}
           >
-            <CollapseIcon
-              color="text-xlight"
-              size={6}
-            />
-          </Flex>
-          <TransitionText
-            collapsed={collapsed}
-            ml={1}
-            userSelect="none"
-            body2
-            color="text-xlight"
-          >
-            Collapse
-          </TransitionText>
+            <TransitionText
+              collapsed={collapsed}
+              color="text-strong"
+              fontWeight={500}
+              wordBreak="keep-all"
+            >
+              {userName}
+            </TransitionText>
+            {userOrganization && (
+              <TransitionText
+                mt={0.25}
+                body3
+                collapsed={collapsed}
+                color="text-xlight"
+                wordBreak="keep-all"
+              >
+                {userOrganization}
+              </TransitionText>
+            )}
+          </Div>
         </Flex>
       </Div>
     </Div>
@@ -375,3 +492,18 @@ const Sidebar = forwardRef(SidebarRef)
 Sidebar.propTypes = propTypes
 
 export default Sidebar
+
+function Hoverer({ children }: any) {
+  const rootRef = useRef<HTMLDivElement>()
+  const [hovered, setHovered] = useState(false)
+
+  return (
+    <Div
+      ref={rootRef}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {children(hovered)}
+    </Div>
+  )
+}

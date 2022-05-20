@@ -22,6 +22,7 @@ function createIcon(render: (props: IconBaseProps) => ReactNode) {
     return (
       <HonorableIcon
         ref={ref}
+        {...{ '& *': { transition: 'stroke 150ms linear, fill 150ms linear' } }}
         {...props}
       >
         {render({ size, color: workingColor })}
