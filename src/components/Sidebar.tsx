@@ -32,7 +32,7 @@ type SidebarProps = {
   supportUrl?: string
   userImageUrl?: string
   userName?: string
-  userOrganization?: string
+  userAccount?: string
 }
 
 const propTypes = {
@@ -54,7 +54,7 @@ const propTypes = {
   supportUrl: PropTypes.string,
   userImageUrl: PropTypes.string,
   userName: PropTypes.string,
-  userOrganization: PropTypes.string,
+  userAccount: PropTypes.string,
 }
 
 const StyledLink = styled(Link)`
@@ -116,7 +116,7 @@ function SidebarRef({
   supportUrl,
   userImageUrl,
   userName,
-  userOrganization,
+  userAccount,
   ...props
 }: SidebarProps,
 ref: Ref<any>
@@ -588,7 +588,7 @@ ref: Ref<any>
             >
               {userName}
             </TransitionText>
-            {userOrganization && (
+            {userAccount && (
               <TransitionText
                 mt={0.25}
                 body3
@@ -596,7 +596,7 @@ ref: Ref<any>
                 color="text-xlight"
                 wordBreak="keep-all"
               >
-                {userOrganization}
+                {userAccount}
               </TransitionText>
             )}
           </Div>
