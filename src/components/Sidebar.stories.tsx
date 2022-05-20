@@ -40,6 +40,7 @@ function Template(args: any) {
         createItem({
           name: 'User Attributes',
           Icon: ScrollIcon,
+          url: '/user-attributes',
         }),
         createItem({
           name: 'Password',
@@ -256,6 +257,13 @@ function Template(args: any) {
           onClick={() => setActiveUrl('/explore/public')}
         >
           Go to /explore/public
+        </button>
+        <button
+          type="button"
+          style={{ marginTop: '1rem' }}
+          onClick={() => setActiveUrl('/user-attributes')}
+        >
+          Go to /user-attributes
         </button>
       </Flex>
     </Flex>

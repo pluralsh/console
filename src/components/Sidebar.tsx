@@ -120,31 +120,47 @@ ref: Ref<any>
   const [childrenHeights, setChildrenHeights] = useState({})
   const [sidebarContentMaxHeight, setSidebarcontentMaxHeight] = useState('100%')
 
-  const handleCollapse = useCallback((collapsed: boolean, deploy = true) => {
-    setCollapsed(collapsed)
+  const getTopLevelItem = useCallback((item: SidebarItem) => {
+    if (!item) return null
 
-    if (deploy) {
-      if (collapsed) {
-        setDeployedIdBeforeCollapse(deployedId)
-        setDeployedId(null)
-      }
-      else {
-        setDeployedId(deployedIdBeforeCollapse)
-      }
+    if (items.some(x => x === item)) return item
+
+    const parent = items.find(x => Array.isArray(x.items) && x.items.some(y => y === item))
+
+    if (parent) return parent
+
+    return null
+  }, [items])
+
+  const handleCollapse = useCallback((nextCollapsed: boolean) => {
+    if (nextCollapsed === collapsed) return
+
+    setCollapsed(nextCollapsed)
+
+    if (nextCollapsed) {
+      setDeployedIdBeforeCollapse(deployedId)
+      setDeployedId(null)
     }
-  }, [deployedId, deployedIdBeforeCollapse])
+    else {
+      setDeployedId(deployedIdBeforeCollapse)
+    }
+  }, [collapsed, deployedId, deployedIdBeforeCollapse])
 
-  const handleDeployItem = useCallback((item: SidebarItem, deploy = true) => {
+  const handleDeployItem = useCallback((item: SidebarItem) => {
     if (!item) return
 
-    const id = getId(item)
+    const parentOrItem = getTopLevelItem(item)
+    const id = getId(parentOrItem)
+
+    if (id === deployedId) return
+
+    setDeployedId(id)
+
     const isTopLevel = items.some(x => x === item)
     const hasChildren = (item.items || []).length > 0
 
-    if (deploy) setDeployedId(!hasChildren || deployedId === id ? null : id)
-
-    handleCollapse(isTopLevel && !hasChildren, false)
-  }, [items, deployedId, handleCollapse])
+    handleCollapse(isTopLevel && !hasChildren)
+  }, [items, deployedId, handleCollapse, getTopLevelItem])
 
   useEffect(() => {
     setContentHeight()
@@ -173,7 +189,7 @@ ref: Ref<any>
   }, [items])
 
   useEffect(() => {
-    handleDeployItem(activeItem, false)
+    handleDeployItem(activeItem)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeUrl])
 
@@ -358,7 +374,6 @@ ref: Ref<any>
         overflowY="auto"
         height={sidebarContentMaxHeight}
         maxHeight={sidebarContentMaxHeight}
-        borderBottom="1px solid border"
       >
         <Div id="sidebar-items">
           {renderItems(items)}
