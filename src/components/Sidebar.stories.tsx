@@ -274,7 +274,7 @@ export const Default = Template.bind({})
 
 Default.args = {
   userName: 'Jane Smith',
-  userOrganization: 'Plural',
+  userAccount: 'Plural',
   onUserClick: () => window.alert('User clicked'),
   onNotificationsClick: () => window.alert('Notifications clicked'),
   onUpdateClick: () => window.alert('Update clicked'),
