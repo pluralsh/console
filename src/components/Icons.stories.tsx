@@ -34,6 +34,7 @@ import GitHubIcon from './icons/GitHubIcon'
 import GitHubLogoIcon from './icons/GitHubLogoIcon'
 import GlobeIcon from './icons/GlobeIcon'
 import GraphIcon from './icons/GraphIcon'
+import HamburgerMenuCollapseIcon from './icons/HamburgerMenuCollapseIcon'
 import HamburgerMenuIcon from './icons/HamburgerMenuIcon'
 import HistoryIcon from './icons/HistoryIcon'
 import IdIcon from './icons/IdIcon'
@@ -126,6 +127,7 @@ const icons = {
   GitHubLogoIcon,
   GlobeIcon,
   GraphIcon,
+  HamburgerMenuCollapseIcon,
   HamburgerMenuIcon,
   HistoryIcon,
   IdIcon,
