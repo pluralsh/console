@@ -11,6 +11,8 @@ import { localized } from '../helpers/hostname'
 import { LabelledInput } from './utils/LabelledInput'
 import { useIntercom } from 'react-use-intercom'
 import { useLocation } from 'react-router'
+import { LoopingLogo } from './utils/AnimatedLogo'
+
 
 const POLL_INTERVAL = 3 * 60 * 1000
 const CONSOLE_ICON = process.env.PUBLIC_URL + '/console-full.png'
@@ -44,9 +46,11 @@ function LoginError({error}) {
     return () => clearTimeout(to)
   }, [])
 
+  console.log(error)
+
   return (
     <LoginPortal>
-      <GqlError error={error} header='You cannot access the plural console yet' />
+      <LoopingLogo />
     </LoginPortal>
   )
 }
