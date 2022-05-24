@@ -16,6 +16,7 @@ const grey = {
   100: '#DEE2E8',
   50: '#E9ECF0',
 }
+
 const blue = {
   950: '#00041A',
   900: '#000933',
@@ -31,6 +32,7 @@ const blue = {
   100: '#C2D8FF',
   50: '#F0F5FF',
 }
+
 const green = {
   950: '#001409',
   900: '#00240F',
@@ -45,6 +47,7 @@ const green = {
   100: '#D7FEE7',
   50: '#F5FFF9',
 }
+
 const yellow = {
   950: '#241700',
   900: '#3D2700',
@@ -59,6 +62,7 @@ const yellow = {
   100: '#FFF2C2',
   50: '#FFFCF0',
 }
+
 const red = {
   950: '#140000',
   900: '#240100',
@@ -72,6 +76,11 @@ const red = {
   200: '#FDB1A5',
   100: '#FFD8D1',
   50: '#FFF7F5',
+}
+
+const borderRadiuses = {
+  normal: 3,
+  large: 6,
 }
 
 export default mergeTheme(defaultTheme, {
@@ -103,6 +112,7 @@ export default mergeTheme(defaultTheme, {
     'action-link-inactive': 'gray.200',
     'action-link-active': 'gray.50',
     'action-link-inline': 'blue.200',
+    'action-input-hover': 'transparency(grey.50, 7)',
     // Border,
     border: 'grey.800',
     'border-input': 'grey.700',
@@ -133,6 +143,14 @@ export default mergeTheme(defaultTheme, {
     },
   ],
   global: [
+    ({ borderRadius }: any) => ({
+      borderRadius: borderRadiuses[borderRadius] || borderRadius,
+    }),
+    ({ font }: any) => font === 'action' && {
+      fontFamily: 'Monument',
+      letterSpacing: 1,
+      fontWeight: 500,
+    },
     ({ hoverIndicator }: any) => hoverIndicator && {
       '&:hover': {
         backgroundColor: hoverIndicator,
@@ -161,7 +179,11 @@ export default mergeTheme(defaultTheme, {
   Button: {
     Root: [
       {
+        display: 'flex',
+        font: 'action',
+        borderRadius: 'normal',
         backgroundColor: 'action-primary',
+        padding: '12px 24px',
         ':hover': {
           backgroundColor: 'action-primary-hover',
         },
@@ -169,19 +191,16 @@ export default mergeTheme(defaultTheme, {
           backgroundColor: 'action-primary',
         },
       },
-      // ({ secondary }: any) => secondary && {
-      //   backgroundColor: 'secondary',
-      //   color: 'white',
-      //   borderColor: 'secondary',
-      //   '&:hover': {
-      //     backgroundColor: 'darken(secondary, 2)',
-      //     borderColor: 'darken(secondary, 2)',
-      //   },
-      //   '&:active': {
-      //     backgroundColor: 'darken(secondary, 5)',
-      //     borderColor: 'darken(secondary, 5)',
-      //   },
-      // },
+    ],
+    StartIcon: [
+      {
+        margin: '0 16px 0 0',
+      },
+    ],
+    EndIcon: [
+      {
+        margin: '0 0 0 16px',
+      },
     ],
   },
   Checkbox: {

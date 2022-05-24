@@ -1,5 +1,7 @@
 import { Button } from 'honorable'
 
+import DownloadIcon from './icons/DownloadIcon'
+
 export default {
   title: 'Button',
   component: Button,
@@ -7,16 +9,23 @@ export default {
 
 function Template(args: any) {
   return (
-    <Button {...args} />
+    <>
+      <Button {...args} />
+      <Button
+        mt={1}
+        startIcon={<DownloadIcon />}
+        endIcon={<DownloadIcon />}
+        {...args}
+      />
+    </>
   )
 }
 
 export const Primary = Template.bind({})
 
 Primary.args = {
-  primary: true,
   disabled: false,
-  children: 'Click me',
+  children: 'Primary Button',
 }
 
 export const Secondary = Template.bind({})
@@ -24,15 +33,14 @@ export const Secondary = Template.bind({})
 Secondary.args = {
   secondary: true,
   disabled: false,
-  children: 'Click me',
+  children: 'Secondary Button',
 }
 
 export const PrimarySmall = Template.bind({})
 
 PrimarySmall.args = {
-  primary: true,
   disabled: false,
-  children: 'Click me',
+  children: 'Primary Button',
   size: 'small',
 }
 
@@ -41,14 +49,13 @@ export const SecondarySmall = Template.bind({})
 SecondarySmall.args = {
   secondary: true,
   disabled: false,
-  children: 'Click me',
+  children: 'Secondary Button',
   size: 'small',
 }
 
 export const Disabled = Template.bind({})
 
 Disabled.args = {
-  primary: true,
   disabled: true,
-  children: 'Click me',
+  children: 'Primary Button',
 }

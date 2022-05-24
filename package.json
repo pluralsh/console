@@ -63,7 +63,7 @@
     "@emotion/react": "*",
     "@emotion/styled": "*",
     "honorable": ">=0.96.0",
-    "honorable-theme-default": ">=0.49.0",
+    "honorable-theme-default": ">=0.50.0",
     "react": ">=16.0.0",
     "react-dom": ">=16.0.0"
   }
