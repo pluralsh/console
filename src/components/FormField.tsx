@@ -1,62 +1,68 @@
-import { PropsWithChildren, Ref, forwardRef, useEffect, useRef, useState } from 'react'
-import { Div, DivProps, P } from 'honorable'
+import { PropsWithChildren, ReactNode, Ref, forwardRef, useEffect, useRef, useState } from 'react'
+import { Div, DivProps, Flex, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 type FormFieldProps = DivProps & PropsWithChildren<{
-  label?: string
-  caption?: string
+  label?: ReactNode
+  caption?: ReactNode
+  hint?: ReactNode
   valid?: boolean
   error?: boolean
   required?: boolean
 }>
 
 const propTypes = {
-  label: PropTypes.string,
-  caption: PropTypes.string,
+  label: PropTypes.node,
+  caption: PropTypes.node,
+  hint: PropTypes.node,
   valid: PropTypes.bool,
   error: PropTypes.bool,
   required: PropTypes.bool,
 }
 
-function FormFieldRef({ children, label, caption, valid, error, required, ...props }: FormFieldProps, ref: Ref<any>) {
-  const labelRef = useRef<HTMLParagraphElement>()
-  const [captionMaxWidth, setCaptionMaxWidth] = useState('auto')
-
-  useEffect(() => {
-    if (!labelRef.current) return
-
-    const { width } = labelRef.current.getBoundingClientRect()
-
-    setCaptionMaxWidth(`calc(100% - ${width + 8}px)`)
-  }, [])
-
+function FormFieldRef({
+  children,
+  label,
+  caption,
+  hint,
+  valid,
+  error,
+  required,
+  ...props
+}: FormFieldProps,
+ref: Ref<any>
+) {
   return (
     <Div
       ref={ref}
-      position="relative"
+      width={256}
       {...props}
     >
-      <P
-        truncate
-        body2
-        position="absolute"
-        top={2}
-        right={0}
-        maxWidth={captionMaxWidth}
-        color={error ? 'error' : valid ? 'primary' : 'text-light'}
+      <Flex align="center">
+        <P
+          fontWeight="bold"
+          flexShrink={0}
+        >
+          {label}{required ? '*' : ''}
+        </P>
+        <Div flexGrow={1} />
+        <P
+          ml={0.5}
+          caption
+          truncate
+          flexShrink={1}
+          color="text-light"
+        >
+          {caption}
+        </P>
+      </Flex>
+      <Div
+        mt={label || caption ? 0.5 : 0}
+        mb={hint ? 0.5 : 0}
       >
-        {caption}
-      </P>
-      <P
-        ref={labelRef}
-        fontWeight="bold"
-        display="inline"
-      >
-        {label}{required ? '*' : ''}
-      </P>
-      <Div mt={label || caption ? 0.5 : 0}>
         {children}
       </Div>
+      {hint}
     </Div>
   )
 }

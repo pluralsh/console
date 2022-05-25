@@ -176,7 +176,7 @@ export default mergeTheme(defaultTheme, {
       fontSize: 14,
       lineHeight: '20px',
     },
-    ({ body3 }: any) => body3 && {
+    ({ caption }: any) => caption && {
       fontSize: 12,
       lineHeight: '16px',
     },
@@ -372,13 +372,19 @@ export default mergeTheme(defaultTheme, {
         width: 256,
         border: '1px solid border-input',
         borderRadius: 'normal',
-        padding: '7px 16px',
+        padding: '3px 16px',
       }),
       ({ valid }: any) => valid && {
         borderColor: 'border-outline',
       },
       ({ error }: any) => error && {
         borderColor: 'border-error',
+      },
+      ({ large }: any) => large && {
+        padding: '7px 16px',
+      },
+      ({ small }: any) => small && {
+        padding: '0px 16px',
       },
     ],
     // This duplication is wrong
@@ -387,10 +393,17 @@ export default mergeTheme(defaultTheme, {
       ({ focused }: any) => ({
         color: focused ? 'text' : 'text-light',
       }),
+      ({ small }: any) => small && {
+        caption: true,
+        padding: '7px 0',
+      },
     ],
     StartIcon: [
       {
         marginRight: 8,
+      },
+      ({ small }: any) => small && {
+        marginTop: 6.5,
       },
     ],
     EndIcon: [
