@@ -1,4 +1,4 @@
-import { Checkbox } from 'honorable'
+import Checkbox from './Checkbox'
 
 export default {
   title: 'Checkbox',
@@ -23,6 +23,10 @@ function Template(args: any) {
 }
 
 export const Default = Template.bind({})
-
 Default.args = {
+}
+
+export const Small = Template.bind({})
+Small.args = {
+  small: true,
 }

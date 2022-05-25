@@ -156,6 +156,23 @@ export default mergeTheme(defaultTheme, {
         backgroundColor: hoverIndicator,
       },
     },
+    ({ body0 }: any) => body0 && {
+      fontSize: 18,
+    },
+    ({ body1 }: any) => body1 && {
+      fontSize: 16,
+    },
+    ({ body2 }: any) => body2 && {
+      fontSize: 14,
+    },
+    ({ body3 }: any) => body3 && {
+      fontSize: 12,
+    },
+    ({ truncate }: any) => truncate && {
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    },
   ],
   A: {
     Root: [
@@ -204,26 +221,6 @@ export default mergeTheme(defaultTheme, {
     ],
   },
   Checkbox: {
-    DefaultProps: [
-      {
-        icon: (
-          <svg
-            width={12}
-            viewBox="0 0 11 8"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M10 1L4 7L1 4"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        ),
-      },
-    ],
     Root: [
       ({ checked }: any) => ({
         color: checked ? 'text' : 'action-link-inactive',
@@ -245,6 +242,10 @@ export default mergeTheme(defaultTheme, {
         width: 24,
         height: 24,
         borderRadius: 'normal',
+      },
+      ({ small }: any) => small && {
+        width: 16,
+        height: 16,
       },
     ],
   },
@@ -315,27 +316,6 @@ export default mergeTheme(defaultTheme, {
       ({ active }: any) => active && {
         backgroundColor: 'fill-two-selected',
         border: 'none',
-      },
-    ],
-  },
-  P: {
-    Root: [
-      ({ body0 }: any) => body0 && {
-        fontSize: 18,
-      },
-      ({ body1 }: any) => body1 && {
-        fontSize: 16,
-      },
-      ({ body2 }: any) => body2 && {
-        fontSize: 14,
-      },
-      ({ body3 }: any) => body3 && {
-        fontSize: 12,
-      },
-      ({ truncate }: any) => truncate && {
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
       },
     ],
   },
