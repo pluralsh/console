@@ -340,7 +340,7 @@ export default mergeTheme(defaultTheme, {
         width: 24,
         height: 24,
         borderRadius: '50%',
-        '& > svg': {
+        '& *': {
           fill: 'action-primary',
         },
       },

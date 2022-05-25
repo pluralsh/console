@@ -1,11 +1,11 @@
 import { Radio as HonorableRadio } from 'honorable'
 
-function Radio(props: object) {
+function Radio(props: any) {
   return (
     <HonorableRadio
       iconChecked={(
         <svg
-          width="74%" // Not 75% to fix alignment in flex
+          width={props.small ? '71%' : '74%'} // Not 75% to fix alignment in flex
           viewBox="0 0 16 16"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

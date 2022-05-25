@@ -1,6 +1,6 @@
 import { Checkbox as HonorableCheckbox } from 'honorable'
 
-function Checkbox(props: object) {
+function Checkbox(props: any) {
   return (
     <HonorableCheckbox
       icon={(
