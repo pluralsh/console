@@ -483,10 +483,6 @@ export default mergeTheme(defaultTheme, {
           boxShadow: 'none',
         },
       },
-      // ({ small }: any) => small && {
-      //   width: 16,
-      //   height: 16,
-      // },
     ],
     Handle: [
       ({ checked }: any) => ({
