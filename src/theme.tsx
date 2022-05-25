@@ -112,7 +112,7 @@ export default mergeTheme(defaultTheme, {
     'action-link-inactive': 'grey.200',
     'action-link-active': 'grey.50',
     'action-link-inline': 'blue.200',
-    'action-input-hover': 'transparency(grey.50, 93)',
+    'action-input-hover': 'transparency(grey.50, 96)',
     // Border,
     border: 'grey.800',
     'border-input': 'grey.700',
