@@ -6,11 +6,11 @@ export default {
 }
 
 const items = [
+  'Ratatouille',
   'Pizza',
+  'Sushi',
   'Couscous',
   'Dim Sum',
-  'Ratatoulle',
-  'Sushi',
 ]
 
 function Template(args: any) {

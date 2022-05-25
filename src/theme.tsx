@@ -158,15 +158,19 @@ export default mergeTheme(defaultTheme, {
     },
     ({ body0 }: any) => body0 && {
       fontSize: 18,
+      lineHeight: '28px',
     },
     ({ body1 }: any) => body1 && {
       fontSize: 16,
+      lineHeight: '24px',
     },
     ({ body2 }: any) => body2 && {
       fontSize: 14,
+      lineHeight: '20px',
     },
     ({ body3 }: any) => body3 && {
       fontSize: 12,
+      lineHeight: '16px',
     },
     ({ truncate }: any) => truncate && {
       whiteSpace: 'nowrap',
@@ -301,6 +305,8 @@ export default mergeTheme(defaultTheme, {
   },
   DropdownButton: {
     Button: {
+      // Might be broken by honorable breaking change
+      // TODO fix it
       Children: [
         ({ install }: any) => install && {
           fontSize: 16,
@@ -354,18 +360,24 @@ export default mergeTheme(defaultTheme, {
   Menu: {
     Root: [
       {
-        backgroundColor: 'fill-two',
+        backgroundColor: 'fill-one',
+        elevation: 0,
+        padding: '4px 0',
       },
     ],
   },
   MenuItem: {
-    Inner: [
+    Children: [
       {
-        border: 'none',
+        padding: '8px 16px',
+        borderTop: '1px solid border',
+        '&:last-of-type': {
+          borderBottom: '1px solid border',
+        },
       },
       ({ active }: any) => active && {
-        backgroundColor: 'fill-two-selected',
-        border: 'none',
+        backgroundColor: 'fill-one-hover',
+        borderColor: 'fill-one-hover',
       },
     ],
   },
