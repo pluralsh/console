@@ -1,3 +1,5 @@
+export { Avatar, Switch } from 'honorable'
+
 // Icons
 export { default as ArrowTopRightIcon } from './components/icons/ArrowTopRightIcon'
 export { default as BotIcon } from './components/icons/BotIcon'
