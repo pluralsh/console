@@ -285,7 +285,7 @@ export default mergeTheme(defaultTheme, {
         ':hover': {
           color: 'text',
           '> span': {
-            backgroundColor: checked ? 'action-primary' : 'action-input-hover',
+            backgroundColor: checked ? 'action-primary-hover' : 'action-input-hover',
             border: `1px solid ${checked ? 'text' : 'text-xlight'}`,
           },
         },
@@ -388,11 +388,17 @@ export default mergeTheme(defaultTheme, {
         '> span': {
           border: `1px solid ${checked ? 'text' : 'border-input'}`,
         },
+        '& *': {
+          fill: 'action-primary',
+        },
         ':hover': {
           color: 'text',
           '> span': {
             backgroundColor: 'action-input-hover',
             border: `1px solid ${checked ? 'text' : 'text-xlight'}`,
+          },
+          '& *': {
+            fill: 'action-primary-hover',
           },
         },
       }),
@@ -402,9 +408,6 @@ export default mergeTheme(defaultTheme, {
         width: 24,
         height: 24,
         borderRadius: '50%',
-        '& *': {
-          fill: 'action-primary',
-        },
       },
       ({ small }: any) => small && {
         width: 16,
@@ -423,7 +426,7 @@ export default mergeTheme(defaultTheme, {
         ':hover': {
           color: 'text',
           '> div:first-of-type': {
-            backgroundColor: checked ? 'action-primary' : 'action-input-hover',
+            backgroundColor: checked ? 'action-primary-hover' : 'action-input-hover',
             border: `1px solid ${checked ? 'text' : 'text-xlight'}`,
           },
         },
@@ -434,6 +437,9 @@ export default mergeTheme(defaultTheme, {
         width: 42,
         height: 24,
         borderRadius: 12,
+        '&:hover': {
+          boxShadow: 'none',
+        },
       },
       // ({ small }: any) => small && {
       //   width: 16,
