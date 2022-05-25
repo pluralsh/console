@@ -15,7 +15,7 @@ const propTypes = {
 }
 
 function createIcon(render: (props: IconBaseProps) => ReactNode) {
-  function IconRef({ size = 16, color = 'white', ...props }: IconProps, ref: Ref<any>) {
+  function IconRef({ size = 16, color = 'currentColor', ...props }: IconProps, ref: Ref<any>) {
     const theme = useTheme()
     const workingColor = theme.utils.resolveColorString(color)
 

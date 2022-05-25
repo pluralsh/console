@@ -108,7 +108,7 @@ export default mergeTheme(defaultTheme, {
     // Action,
     'action-primary': 'blue.400',
     'action-primary-hover': 'blue.350',
-    'action-primary-disabled': 'blue.750',
+    'action-primary-disabled': 'blue.700',
     'action-link-inactive': 'grey.200',
     'action-link-active': 'grey.50',
     'action-link-inline': 'blue.200',
@@ -198,25 +198,75 @@ export default mergeTheme(defaultTheme, {
       {
         display: 'flex',
         font: 'action',
+        lineHeight: '24px',
         borderRadius: 'normal',
         backgroundColor: 'action-primary',
-        padding: '12px 24px',
+        padding: '8px 16px',
         ':hover': {
           backgroundColor: 'action-primary-hover',
         },
         ':active': {
           backgroundColor: 'action-primary',
         },
+        ':disabled': {
+          color: 'text-disabled',
+          backgroundColor: 'action-primary-disabled',
+        },
+      },
+      ({ secondary }: any) => secondary && {
+        border: '1px solid border-input',
+        backgroundColor: 'fill-zero',
+        ':hover': {
+          backgroundColor: 'action-input-hover',
+        },
+        ':active': {
+          backgroundColor: 'fill-zero',
+        },
+        ':disabled': {
+          backgroundColor: 'fill-zero',
+        },
+      },
+      ({ tertiary }: any) => tertiary && {
+        backgroundColor: 'fill-zero',
+        ':hover': {
+          backgroundColor: 'action-input-hover',
+        },
+        ':active': {
+          backgroundColor: 'fill-zero',
+        },
+        ':disabled': {
+          backgroundColor: 'fill-zero',
+        },
+      },
+      ({ large }: any) => large && {
+        padding: '12px 24px',
+        fontSize: 16,
+      },
+      ({ small }: any) => small && {
+        padding: '4px 12px',
+        fontSize: 12,
       },
     ],
     StartIcon: [
       {
+        margin: '0 12px 0 0',
+      },
+      ({ large }: any) => large && {
         margin: '0 16px 0 0',
+      },
+      ({ small }: any) => small && {
+        margin: '0 12px 0 0',
       },
     ],
     EndIcon: [
       {
+        margin: '0 0 0 12px',
+      },
+      ({ large }: any) => large && {
         margin: '0 0 0 16px',
+      },
+      ({ small }: any) => small && {
+        margin: '0 0 0 12px',
       },
     ],
   },
