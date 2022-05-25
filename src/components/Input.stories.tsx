@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { Flex, Input } from 'honorable'
 
-import Input from './Input'
+import MagnifyingGlassIcon from './icons/MagnifyingGlassIcon'
+import CaretDownIcon from './icons/CaretDownIcon'
 
 export default {
   title: 'Input',
@@ -8,15 +9,22 @@ export default {
 }
 
 function Template(args: any) {
-  const [value, setValue] = useState('')
-
   return (
-    <Input
-      {...args}
-      value={value}
-      onChange={(event: any) => setValue(event.target.value)}
-      style={{ width: 256 + 64 }}
-    />
+    <Flex direction="column">
+      <Input {...args} />
+      <Input
+        mt={1}
+        startIcon={<MagnifyingGlassIcon />}
+        endIcon={(
+          <CaretDownIcon
+            size={10}
+            mt={0.333}
+            mx="3px"
+          />
+        )}
+        {...args}
+      />
+    </Flex>
   )
 }
 

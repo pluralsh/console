@@ -1,7 +1,8 @@
 import { useState } from 'react'
 
+import { Input } from 'honorable'
+
 import FormField from './FormField'
-import Input from './Input'
 
 export default {
   title: 'FormField',

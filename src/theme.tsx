@@ -118,6 +118,7 @@ export default mergeTheme(defaultTheme, {
     'border-input': 'grey.700',
     'border-fill-two': 'grey.750',
     'border-disabled': 'grey.700',
+    'border-outline': 'blue.300',
     'border-primary': 'blue.400',
     'border-success': 'green.500',
     'border-warning': 'yellow.400',
@@ -135,13 +136,20 @@ export default mergeTheme(defaultTheme, {
     'icon-warning': 'yellow.400',
     'icon-error': 'red.400',
   },
-  html: [
-    {
-      fontSize: 14,
-      fontFamily: 'Inter',
-      backgroundColor: 'fill-zero',
-    },
-  ],
+  stylesheet: {
+    html: [
+      {
+        fontSize: 14,
+        fontFamily: 'Inter',
+        backgroundColor: 'fill-zero',
+      },
+    ],
+    '::placeholder': [
+      {
+        color: 'text-xlight',
+      },
+    ],
+  },
   global: [
     ({ borderRadius }: any) => ({
       borderRadius: borderRadiuses[borderRadius] || borderRadius,
@@ -354,6 +362,40 @@ export default mergeTheme(defaultTheme, {
     Root: [
       {
         fontFamily: 'Monument',
+      },
+    ],
+  },
+  Input: {
+    Root: [
+      ({ focused }: any) => ({
+        color: focused ? 'text' : 'text-light',
+        width: 256,
+        border: '1px solid border-input',
+        borderRadius: 'normal',
+        padding: '7px 16px',
+      }),
+      ({ valid }: any) => valid && {
+        borderColor: 'border-outline',
+      },
+      ({ error }: any) => error && {
+        borderColor: 'border-error',
+      },
+    ],
+    // This duplication is wrong
+    // TODO update honorable to remove this
+    InputBase: [
+      ({ focused }: any) => ({
+        color: focused ? 'text' : 'text-light',
+      }),
+    ],
+    StartIcon: [
+      {
+        marginRight: 8,
+      },
+    ],
+    EndIcon: [
+      {
+        marginLeft: 12,
       },
     ],
   },
