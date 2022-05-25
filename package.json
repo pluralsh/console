@@ -33,9 +33,9 @@
     "prop-types": "^15.8.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.18.0",
-    "@babel/eslint-parser": "^7.17.0",
-    "@babel/preset-env": "^7.18.0",
+    "@babel/core": "^7.18.2",
+    "@babel/eslint-parser": "^7.18.2",
+    "@babel/preset-env": "^7.18.2",
     "@babel/preset-react": "^7.17.12",
     "@storybook/addon-actions": "^6.5.5",
     "@storybook/addon-docs": "^6.5.5",
@@ -62,8 +62,8 @@
   "peerDependencies": {
     "@emotion/react": "*",
     "@emotion/styled": "*",
-    "honorable": ">=0.102.0",
-    "honorable-theme-default": ">=0.52.0",
+    "honorable": ">=0.103.0",
+    "honorable-theme-default": ">=0.53.0",
     "react": ">=16.0.0",
     "react-dom": ">=16.0.0"
   }
