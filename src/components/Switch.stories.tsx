@@ -1,6 +1,4 @@
-import { useState } from 'react'
-
-import Switch from './Switch'
+import { Switch } from 'honorable'
 
 export default {
   title: 'Switch',
@@ -8,20 +6,13 @@ export default {
 }
 
 function Template(args: any) {
-  const [checked, setChecked] = useState(false)
-
   return (
-    <div>
-      <Switch
-        {...args}
-        checked={checked}
-        onChange={event => setChecked(event.target.checked)}
-      />
-    </div>
+    <Switch {...args} />
   )
 }
 
 export const Default = Template.bind({})
 
 Default.args = {
+  children: 'Email notifications',
 }

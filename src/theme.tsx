@@ -350,6 +350,44 @@ export default mergeTheme(defaultTheme, {
       },
     ],
   },
+  Switch: {
+    Root: [
+      ({ checked }: any) => ({
+        color: checked ? 'text' : 'action-link-inactive',
+        '> div:first-of-type': {
+          backgroundColor: checked ? 'action-primary' : 'transparent',
+          border: `1px solid ${checked ? 'text' : 'border-input'}`,
+        },
+        ':hover': {
+          color: 'text',
+          '> div:first-of-type': {
+            backgroundColor: checked ? 'action-primary' : 'action-input-hover',
+            border: `1px solid ${checked ? 'text' : 'text-xlight'}`,
+          },
+        },
+      }),
+    ],
+    Control: [
+      {
+        width: 42,
+        height: 24,
+        borderRadius: 12,
+      },
+      // ({ small }: any) => small && {
+      //   width: 16,
+      //   height: 16,
+      // },
+    ],
+    Handle: [
+      ({ checked }: any) => ({
+        width: 16,
+        height: 16,
+        borderRadius: '50%',
+        top: 3,
+        left: checked ? 'calc(100% - 16px - 3px)' : 3,
+      }),
+    ],
+  },
   Tooltip: {
     Root: [
       {
