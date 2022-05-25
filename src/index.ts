@@ -1,4 +1,4 @@
-export { Avatar, Switch } from 'honorable'
+export { Avatar, Button, Switch } from 'honorable'
 
 // Icons
 export { default as ArrowTopRightIcon } from './components/icons/ArrowTopRightIcon'
