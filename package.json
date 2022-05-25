@@ -62,7 +62,7 @@
   "peerDependencies": {
     "@emotion/react": "*",
     "@emotion/styled": "*",
-    "honorable": ">=0.99.0",
+    "honorable": ">=0.100.0",
     "honorable-theme-default": ">=0.51.0",
     "react": ">=16.0.0",
     "react-dom": ">=16.0.0"

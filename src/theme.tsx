@@ -319,6 +319,37 @@ export default mergeTheme(defaultTheme, {
       },
     ],
   },
+  Radio: {
+    Root: [
+      ({ checked }: any) => ({
+        color: checked ? 'text' : 'action-link-inactive',
+        '> span': {
+          border: `1px solid ${checked ? 'text' : 'border-input'}`,
+        },
+        ':hover': {
+          color: 'text',
+          '> span': {
+            backgroundColor: 'action-input-hover',
+            border: `1px solid ${checked ? 'text' : 'text-xlight'}`,
+          },
+        },
+      }),
+    ],
+    Control: [
+      {
+        width: 24,
+        height: 24,
+        borderRadius: '50%',
+        '& > svg': {
+          fill: 'action-primary',
+        },
+      },
+      ({ small }: any) => small && {
+        width: 16,
+        height: 16,
+      },
+    ],
+  },
   Tooltip: {
     Root: [
       {
