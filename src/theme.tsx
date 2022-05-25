@@ -225,8 +225,7 @@ export default mergeTheme(defaultTheme, {
       },
     ],
     Root: [
-      //  @ts-ignore
-      ({ checked }: any) => console.log(checked) || ({
+      ({ checked }: any) => ({
         color: checked ? 'text' : 'action-link-inactive',
         '> span': {
           backgroundColor: checked ? 'action-primary' : 'transparent',
