@@ -109,10 +109,10 @@ export default mergeTheme(defaultTheme, {
     'action-primary': 'blue.400',
     'action-primary-hover': 'blue.350',
     'action-primary-disabled': 'blue.750',
-    'action-link-inactive': 'gray.200',
-    'action-link-active': 'gray.50',
+    'action-link-inactive': 'grey.200',
+    'action-link-active': 'grey.50',
     'action-link-inline': 'blue.200',
-    'action-input-hover': 'transparency(grey.50, 7)',
+    'action-input-hover': 'transparency(grey.50, 93)',
     // Border,
     border: 'grey.800',
     'border-input': 'grey.700',
@@ -204,10 +204,48 @@ export default mergeTheme(defaultTheme, {
     ],
   },
   Checkbox: {
+    DefaultProps: [
+      {
+        icon: (
+          <svg
+            width={12}
+            viewBox="0 0 11 8"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M10 1L4 7L1 4"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        ),
+      },
+    ],
+    Root: [
+      //  @ts-ignore
+      ({ checked }: any) => console.log(checked) || ({
+        color: checked ? 'text' : 'action-link-inactive',
+        '> span': {
+          backgroundColor: checked ? 'action-primary' : 'transparent',
+          border: `1px solid ${checked ? 'text' : 'border-input'}`,
+        },
+        ':hover': {
+          color: 'text',
+          '> span': {
+            backgroundColor: checked ? 'action-primary' : 'action-input-hover',
+            border: `1px solid ${checked ? 'text' : 'text-xlight'}`,
+          },
+        },
+      }),
+    ],
     Control: [
       {
-        width: 16,
-        height: 16,
+        width: 24,
+        height: 24,
+        borderRadius: 'normal',
       },
     ],
   },
