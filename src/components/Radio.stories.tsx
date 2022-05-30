@@ -1,23 +1,23 @@
-import Checkbox from './Checkbox'
+import Radio from './Radio'
 
 export default {
-  title: 'Checkbox',
-  component: Checkbox,
+  title: 'Radio',
+  component: Radio,
 }
 
 function Template(args: any) {
   return (
     <>
-      <Checkbox {...args}>
+      <Radio {...args}>
         Implement design system
-      </Checkbox>
-      <Checkbox
+      </Radio>
+      <Radio
         mt={0.5}
         defaultChecked
         {...args}
       >
         Party hard
-      </Checkbox>
+      </Radio>
     </>
   )
 }

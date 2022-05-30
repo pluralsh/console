@@ -1,26 +1,12 @@
 import { mergeTheme } from 'honorable'
 import defaultTheme from 'honorable-theme-default'
 
-const blue = {
-  950: '#00041A',
-  900: '#000933',
-  850: '#000B4D',
-  800: '#000E66',
-  700: '#001299',
-  600: '#0011CC',
-  500: '#151DF9',
-  400: '#293EFF',
-  300: '#5C77FF',
-  200: '#8FB4FF',
-  100: '#C2D8FF',
-  50: '#F0F5FF',
-}
-
 const grey = {
   950: '#0E1015',
   900: '#171A21',
   850: '#1E2229',
   800: '#2A2E37',
+  750: '#363B45',
   700: '#434956',
   600: '#555C68',
   500: '#757D8A',
@@ -31,7 +17,23 @@ const grey = {
   50: '#E9ECF0',
 }
 
-const success = {
+const blue = {
+  950: '#00041A',
+  900: '#000933',
+  850: '#000B4D',
+  800: '#000E66',
+  700: '#001299',
+  600: '#0011CC',
+  500: '#151DF9',
+  400: '#293EFF',
+  350: '#3853FF',
+  300: '#5C77FF',
+  200: '#8FB4FF',
+  100: '#C2D8FF',
+  50: '#F0F5FF',
+}
+
+const green = {
   950: '#001409',
   900: '#00240F',
   850: '#023C1A',
@@ -40,13 +42,13 @@ const success = {
   600: '#0BB151',
   500: '#17E86E',
   400: '#42F08B',
-  300: '#A5F8C8',
+  300: '#71F4A8',
   200: '#A5F8C8',
   100: '#D7FEE7',
   50: '#F5FFF9',
 }
 
-const warning = {
+const yellow = {
   950: '#241700',
   900: '#3D2700',
   850: '#573B00',
@@ -61,7 +63,7 @@ const warning = {
   50: '#FFFCF0',
 }
 
-const error = {
+const red = {
   950: '#140000',
   900: '#240100',
   850: '#3D0100',
@@ -76,70 +78,112 @@ const error = {
   50: '#FFF7F5',
 }
 
+const borderRadiuses = {
+  normal: 3,
+  large: 6,
+}
+
 export default mergeTheme(defaultTheme, {
   name: 'plural',
   mode: 'dark',
   colors: {
+    // Base palette,
     blue,
     grey,
-    success,
-    warning,
-    error,
-    primary: '#293EFF',
-    secondary: '#222534',
-    background: {
-      light: 'white',
-      dark: 'grey.900',
-    },
-    'background-light': {
-      light: '#F5F5F5',
-      dark: 'grey.800',
-    },
-    'background-middle': {
-      light: '#EEEEEE',
-      dark: '#222534',
-    },
-    'background-top': {
-      light: 'white',
-      dark: '#323643',
-    },
-    // text has already been declared by the default theme
-    text: {
-      light: 'black',
-      dark: 'grey.50',
-    },
-    'text-strong': {
-      light: '#000000',
-      dark: 'white',
-    },
-    'text-light': {
-      light: '#444444',
-      dark: 'grey.200',
-    },
-    'text-xlight': {
-      light: '#666666',
-      dark: 'grey.300',
-    },
-    border: {
-      light: '#CCCCCC',
-      dark: '#303340',
-    },
-    'background-success': '#07E5A733',
-    'background-warning': '#EF931D66',
-    'background-error': '#E03E4366',
-    'background-info': '#0190C266',
+    green,
+    yellow,
+    red,
+    // Semantic colors,
+    // Fill,
+    'fill-zero': 'grey.900',
+    'fill-zero-hover': 'grey.850',
+    'fill-zero-selected': 'grey.800',
+    'fill-one': 'grey.850',
+    'fill-one-hover': 'grey.800',
+    'fill-one-selected': 'grey.750',
+    'fill-two': 'grey.800',
+    'fill-two-hover': 'grey.750',
+    'fill-two-selected': 'grey.700',
+    'fill-three': 'grey.750',
+    // Action,
+    'action-primary': 'blue.400',
+    'action-primary-hover': 'blue.350',
+    'action-primary-disabled': 'blue.700',
+    'action-link-inactive': 'grey.200',
+    'action-link-active': 'grey.50',
+    'action-link-inline': 'blue.200',
+    'action-input-hover': 'transparency(grey.50, 96)',
+    // Border,
+    border: 'grey.800',
+    'border-input': 'grey.700',
+    'border-fill-two': 'grey.750',
+    'border-disabled': 'grey.700',
+    'border-outline': 'blue.300',
+    'border-primary': 'blue.400',
+    'border-success': 'green.500',
+    'border-warning': 'yellow.400',
+    'border-error': 'red.400',
+    // Content,
+    text: 'grey.50',
+    'text-light': 'grey.200',
+    'text-xlight': 'grey.400',
+    'text-disabled': 'grey.700',
+    'text-success': 'green.200',
+    'text-warning': 'yellow.200',
+    'text-error': 'red.200',
+    // Icon,
+    'icon-success': 'green.500',
+    'icon-warning': 'yellow.400',
+    'icon-error': 'red.400',
   },
-  html: [
-    {
-      fontSize: 14,
-      fontFamily: 'Inter',
-    },
-  ],
+  stylesheet: {
+    html: [
+      {
+        fontSize: 14,
+        fontFamily: 'Inter',
+        backgroundColor: 'fill-zero',
+      },
+    ],
+    '::placeholder': [
+      {
+        color: 'text-xlight',
+      },
+    ],
+  },
   global: [
+    ({ borderRadius }: any) => ({
+      borderRadius: borderRadiuses[borderRadius] || borderRadius,
+    }),
+    ({ font }: any) => font === 'action' && {
+      fontFamily: 'Monument',
+      letterSpacing: 1,
+      fontWeight: 500,
+    },
     ({ hoverIndicator }: any) => hoverIndicator && {
       '&:hover': {
         backgroundColor: hoverIndicator,
       },
+    },
+    ({ body0 }: any) => body0 && {
+      fontSize: 18,
+      lineHeight: '28px',
+    },
+    ({ body1 }: any) => body1 && {
+      fontSize: 16,
+      lineHeight: '24px',
+    },
+    ({ body2 }: any) => body2 && {
+      fontSize: 14,
+      lineHeight: '20px',
+    },
+    ({ caption }: any) => caption && {
+      fontSize: 12,
+      lineHeight: '16px',
+    },
+    ({ truncate }: any) => truncate && {
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
     },
   ],
   A: {
@@ -155,32 +199,113 @@ export default mergeTheme(defaultTheme, {
   Avatar: {
     Root: [
       {
-        backgroundColor: 'primary',
-        borderRadius: 4,
+        backgroundColor: 'action-primary',
+        borderRadius: 4, // TODO 3 or 6
         fontWeight: 400,
       },
     ],
   },
   Button: {
     Root: [
+      {
+        display: 'flex',
+        font: 'action',
+        lineHeight: '24px',
+        borderRadius: 'normal',
+        backgroundColor: 'action-primary',
+        padding: '8px 16px',
+        ':hover': {
+          backgroundColor: 'action-primary-hover',
+        },
+        ':active': {
+          backgroundColor: 'action-primary',
+        },
+        ':disabled': {
+          color: 'text-disabled',
+          backgroundColor: 'action-primary-disabled',
+        },
+      },
       ({ secondary }: any) => secondary && {
-        backgroundColor: 'secondary',
-        color: 'white',
-        borderColor: 'secondary',
-        '&:hover': {
-          backgroundColor: 'darken(secondary, 2)',
-          borderColor: 'darken(secondary, 2)',
+        border: '1px solid border-input',
+        backgroundColor: 'fill-zero',
+        ':hover': {
+          backgroundColor: 'action-input-hover',
         },
-        '&:active': {
-          backgroundColor: 'darken(secondary, 5)',
-          borderColor: 'darken(secondary, 5)',
+        ':active': {
+          backgroundColor: 'fill-zero',
         },
+        ':disabled': {
+          backgroundColor: 'fill-zero',
+        },
+      },
+      ({ tertiary }: any) => tertiary && {
+        backgroundColor: 'fill-zero',
+        ':hover': {
+          backgroundColor: 'action-input-hover',
+        },
+        ':active': {
+          backgroundColor: 'fill-zero',
+        },
+        ':disabled': {
+          backgroundColor: 'fill-zero',
+        },
+      },
+      ({ large }: any) => large && {
+        padding: '12px 24px',
+        fontSize: 16,
+      },
+      ({ small }: any) => small && {
+        padding: '4px 12px',
+        fontSize: 12,
+      },
+    ],
+    StartIcon: [
+      {
+        margin: '0 12px 0 0',
+      },
+      ({ large }: any) => large && {
+        margin: '0 16px 0 0',
+      },
+      ({ small }: any) => small && {
+        margin: '0 12px 0 0',
+      },
+    ],
+    EndIcon: [
+      {
+        margin: '0 0 0 12px',
+      },
+      ({ large }: any) => large && {
+        margin: '0 0 0 16px',
+      },
+      ({ small }: any) => small && {
+        margin: '0 0 0 12px',
       },
     ],
   },
   Checkbox: {
+    Root: [
+      ({ checked }: any) => ({
+        color: checked ? 'text' : 'action-link-inactive',
+        '> span': {
+          backgroundColor: checked ? 'action-primary' : 'transparent',
+          border: `1px solid ${checked ? 'text' : 'border-input'}`,
+        },
+        ':hover': {
+          color: 'text',
+          '> span': {
+            backgroundColor: checked ? 'action-primary-hover' : 'action-input-hover',
+            border: `1px solid ${checked ? 'text' : 'text-xlight'}`,
+          },
+        },
+      }),
+    ],
     Control: [
       {
+        width: 24,
+        height: 24,
+        borderRadius: 'normal',
+      },
+      ({ small }: any) => small && {
         width: 16,
         height: 16,
       },
@@ -188,6 +313,8 @@ export default mergeTheme(defaultTheme, {
   },
   DropdownButton: {
     Button: {
+      // Might be broken by honorable breaking change
+      // TODO fix it
       Children: [
         ({ install }: any) => install && {
           fontSize: 16,
@@ -238,50 +365,152 @@ export default mergeTheme(defaultTheme, {
       },
     ],
   },
+  Input: {
+    Root: [
+      ({ focused }: any) => ({
+        color: focused ? 'text' : 'text-light',
+        width: 256,
+        border: '1px solid border-input',
+        borderRadius: 'normal',
+        padding: '3px 16px',
+      }),
+      ({ valid }: any) => valid && {
+        borderColor: 'border-outline',
+      },
+      ({ error }: any) => error && {
+        borderColor: 'border-error',
+      },
+      ({ large }: any) => large && {
+        padding: '7px 16px',
+      },
+      ({ small }: any) => small && {
+        padding: '0px 16px',
+      },
+    ],
+    // This duplication is wrong
+    // TODO update honorable to remove this
+    InputBase: [
+      ({ focused }: any) => ({
+        color: focused ? 'text' : 'text-light',
+      }),
+      ({ small }: any) => small && {
+        caption: true,
+        padding: '7px 0',
+      },
+    ],
+    StartIcon: [
+      {
+        marginRight: 8,
+      },
+      ({ small }: any) => small && {
+        marginTop: 6.5,
+      },
+    ],
+    EndIcon: [
+      {
+        marginLeft: 12,
+      },
+    ],
+  },
   Menu: {
     Root: [
       {
-        backgroundColor: 'background-middle',
+        backgroundColor: 'fill-one',
+        elevation: 0,
+        padding: '4px 0',
       },
     ],
   },
   MenuItem: {
-    Inner: [
+    Children: [
       {
-        border: 'none',
+        padding: '8px 16px',
+        borderTop: '1px solid border',
+        '&:last-of-type': {
+          borderBottom: '1px solid border',
+        },
       },
       ({ active }: any) => active && {
-        backgroundColor: 'background-top',
-        color: 'white',
-        border: 'none',
+        backgroundColor: 'fill-one-hover',
+        borderColor: 'fill-one-hover',
       },
     ],
   },
-  P: {
+  Radio: {
     Root: [
-      ({ body0 }: any) => body0 && {
-        fontSize: 18,
+      ({ checked }: any) => ({
+        color: checked ? 'text' : 'action-link-inactive',
+        '> span': {
+          border: `1px solid ${checked ? 'text' : 'border-input'}`,
+        },
+        '& *': {
+          fill: 'action-primary',
+        },
+        ':hover': {
+          color: 'text',
+          '> span': {
+            backgroundColor: 'action-input-hover',
+            border: `1px solid ${checked ? 'text' : 'text-xlight'}`,
+          },
+          '& *': {
+            fill: 'action-primary-hover',
+          },
+        },
+      }),
+    ],
+    Control: [
+      {
+        width: 24,
+        height: 24,
+        borderRadius: '50%',
       },
-      ({ body1 }: any) => body1 && {
-        fontSize: 16,
+      ({ small }: any) => small && {
+        width: 16,
+        height: 16,
       },
-      ({ body2 }: any) => body2 && {
-        fontSize: 14,
+    ],
+  },
+  Switch: {
+    Root: [
+      ({ checked }: any) => ({
+        color: checked ? 'text' : 'action-link-inactive',
+        '> div:first-of-type': {
+          backgroundColor: checked ? 'action-primary' : 'transparent',
+          border: `1px solid ${checked ? 'text' : 'border-input'}`,
+        },
+        ':hover': {
+          color: 'text',
+          '> div:first-of-type': {
+            backgroundColor: checked ? 'action-primary-hover' : 'action-input-hover',
+            border: `1px solid ${checked ? 'text' : 'text-xlight'}`,
+          },
+        },
+      }),
+    ],
+    Control: [
+      {
+        width: 42,
+        height: 24,
+        borderRadius: 12,
+        '&:hover': {
+          boxShadow: 'none',
+        },
       },
-      ({ body3 }: any) => body3 && {
-        fontSize: 12,
-      },
-      ({ truncate }: any) => truncate && {
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-      },
+    ],
+    Handle: [
+      ({ checked }: any) => ({
+        width: 16,
+        height: 16,
+        borderRadius: '50%',
+        top: 3,
+        left: checked ? 'calc(100% - 16px - 3px)' : 3,
+      }),
     ],
   },
   Tooltip: {
     Root: [
       {
-        backgroundColor: 'background-top',
+        backgroundColor: 'fill-',
       },
     ],
     Arrow: [

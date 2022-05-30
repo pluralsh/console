@@ -2,6 +2,7 @@ import ArrowTopRightIcon from './icons/ArrowTopRightIcon'
 import BotIcon from './icons/BotIcon'
 import BrowserIcon from './icons/BrowserIcon'
 import BundleIcon from './icons/BundleIcon'
+import CaretDownIcon from './icons/CaretDownIcon'
 import CertificateIcon from './icons/CertificateIcon'
 import CheckIcon from './icons/CheckIcon'
 import ChecklistIcon from './icons/ChecklistIcon'
@@ -95,6 +96,7 @@ const icons = {
   BotIcon,
   BrowserIcon,
   BundleIcon,
+  CaretDownIcon,
   CertificateIcon,
   CheckIcon,
   ChecklistIcon,

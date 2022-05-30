@@ -17,7 +17,7 @@ function TagRef({ children, ...props }: TagProps, ref: Ref<any>) {
       borderRadius={1000}
       {...props}
     >
-      <P body3>
+      <P caption>
         {children}
       </P>
     </Flex>

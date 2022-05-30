@@ -1,5 +1,7 @@
 import { Button } from 'honorable'
 
+import DownloadIcon from './icons/DownloadIcon'
+
 export default {
   title: 'Button',
   component: Button,
@@ -7,48 +9,66 @@ export default {
 
 function Template(args: any) {
   return (
-    <Button {...args} />
+    <>
+      <Button
+        large
+        {...args}
+      />
+      <Button
+        mt={1}
+        large
+        startIcon={<DownloadIcon />}
+        endIcon={<DownloadIcon />}
+        {...args}
+      />
+      <Button
+        mt={1}
+        {...args}
+      />
+      <Button
+        mt={1}
+        startIcon={<DownloadIcon />}
+        endIcon={<DownloadIcon />}
+        {...args}
+      />
+      <Button
+        mt={1}
+        small
+        {...args}
+      />
+      <Button
+        mt={1}
+        small
+        startIcon={<DownloadIcon />}
+        endIcon={<DownloadIcon />}
+        {...args}
+      />
+    </>
   )
 }
 
 export const Primary = Template.bind({})
 
 Primary.args = {
-  primary: true,
   disabled: false,
-  children: 'Click me',
+  loading: false,
+  children: 'Primary Button',
 }
 
 export const Secondary = Template.bind({})
 
 Secondary.args = {
+  disabled: false,
+  loading: false,
+  children: 'Secondary Button',
   secondary: true,
-  disabled: false,
-  children: 'Click me',
 }
 
-export const PrimarySmall = Template.bind({})
+export const Tertiary = Template.bind({})
 
-PrimarySmall.args = {
-  primary: true,
+Tertiary.args = {
   disabled: false,
-  children: 'Click me',
-  size: 'small',
-}
-
-export const SecondarySmall = Template.bind({})
-
-SecondarySmall.args = {
-  secondary: true,
-  disabled: false,
-  children: 'Click me',
-  size: 'small',
-}
-
-export const Disabled = Template.bind({})
-
-Disabled.args = {
-  primary: true,
-  disabled: true,
-  children: 'Click me',
+  loading: false,
+  children: 'Tertiary Button',
+  tertiary: true,
 }
