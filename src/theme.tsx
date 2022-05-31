@@ -206,6 +206,15 @@ export default mergeTheme(defaultTheme, {
       },
     ],
   },
+  Accordion: {
+    Root: [
+      ({ ghost }: any) => ghost && {
+        border: 'none',
+        elevation: 0,
+        backgroundColor: 'inherit',
+      },
+    ],
+  },
   Avatar: {
     Root: [
       {
