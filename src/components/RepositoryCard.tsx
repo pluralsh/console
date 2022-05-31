@@ -34,7 +34,7 @@ ref: Ref<any>
     <Div
       ref={ref}
       p={1}
-      borderRadius={4}
+      borderRadius="large"
       border="1px solid border"
       backgroundColor="fill-one"
       cursor="pointer"
