@@ -2,7 +2,7 @@ import Stepper from './Stepper'
 import type { StepBaseProps } from './Stepper'
 
 import BrowserIcon from './icons/BrowserIcon'
-import EyeIcon from './icons/EyeIcon'
+import CloudIcon from './icons/CloudIcon'
 import GearTrainIcon from './icons/GearTrainIcon'
 import GitHubIcon from './icons/GitHubIcon'
 
@@ -21,7 +21,7 @@ function Template(args: any) {
 
 const steps:StepBaseProps[] = [
   { stepTitle: 'Create a repository', IconComponent: GitHubIcon },
-  { stepTitle: <>Choose a&nbsp;cloud</>, IconComponent: EyeIcon },
+  { stepTitle: <>Choose a&nbsp;cloud</>, IconComponent: CloudIcon },
   { stepTitle: 'Configure repository', IconComponent: GearTrainIcon },
   { stepTitle: <>Launch the&nbsp;app</>, IconComponent: BrowserIcon },
 ]
