@@ -176,6 +176,16 @@ export default mergeTheme(defaultTheme, {
       fontSize: 14,
       lineHeight: '20px',
     },
+    ({ subtitle1 }: any) => subtitle1 && {
+      fontSize: 20,
+      lineHeight: '24px',
+      fontWeight: 500,
+    },
+    ({ subtitle2 }: any) => subtitle2 && {
+      fontSize: 18,
+      lineHeight: '24px',
+      fontWeight: 500,
+    },
     ({ caption }: any) => caption && {
       fontSize: 12,
       lineHeight: '16px',
