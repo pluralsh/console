@@ -6,23 +6,23 @@ import StatusIpIcon from './icons/StatusIpIcon'
 
 import type createIcon from './icons/createIcon'
 
-type StepProps = DivProps & {
+export type StepBaseProps = {
+    stepTitle:ReactNode,
+    IconComponent: ReturnType<typeof createIcon>,
+    iconSize?: number,
+}
+
+type StepProps = DivProps & StepBaseProps & {
   isActive:boolean,
   isComplete:boolean,
-  stepTitle:ReactNode,
-  renderIcon: (color:string) => ReactNode,
 }
 
-type StepperProps = DivProps & {
+export type StepperProps = DivProps & {
     stepIndex: number,
-    steps: [{
-        stepTitle: ReactNode
-        icon: ReturnType<typeof createIcon>,
-        iconSize: number,
-    }]
+    steps: [StepBaseProps]
 }
 
-function Step({ isActive = false, isComplete = false, stepTitle, renderIcon, ...props }:StepProps) {
+function Step({ isActive = false, isComplete = false, stepTitle, IconComponent, ...props }:StepProps) {
   const bounceEase = 'cubic-bezier(.37,1.4,.62,1)'
   const shownClassName = 'shown'
   const completeIconStyles = {
@@ -65,7 +65,7 @@ function Step({ isActive = false, isComplete = false, stepTitle, renderIcon, ...
           className={isComplete ? '' : shownClassName}
           {...completeIconStyles}
         >
-          {renderIcon(isActive ? 'action-link-active' : 'text-xlight')}
+          <IconComponent color={isActive ? 'action-link-active' : 'text-xlight'} />
         </Flex>
         <Flex
           width="100%"
@@ -132,12 +132,8 @@ export default function Stepper({ stepIndex, steps }:StepperProps) {
             isActive={stepIndex === index}
             isComplete={stepIndex > index}
             stepTitle={step.stepTitle}
-            renderIcon={(color:string) => (
-              <step.icon
-                size={step.iconSize || 24}
-                color={color}
-              />
-            )}
+            IconComponent={step.IconComponent}
+            iconSize={step.iconSize || 24}
           />
           {index < steps.length - 1 && <StepConnection isActive={stepIndex > index} />}
         </>
