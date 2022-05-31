@@ -39,8 +39,9 @@ function Step({ isActive = false, isComplete = false, stepTitle, renderIcon, ...
       
   return (
     <Div
-      width="92px"
-      flexGrow={0}
+      width="100%"
+      minWidth="68px"
+      maxWidth="100px"
       {...props}
     >
       <Div
@@ -64,7 +65,7 @@ function Step({ isActive = false, isComplete = false, stepTitle, renderIcon, ...
           className={isComplete ? '' : shownClassName}
           {...completeIconStyles}
         >
-          {renderIcon(isActive ? '#E9ECF0' : '#9096A2')}
+          {renderIcon(isActive ? 'action-link-active' : 'text-xlight')}
         </Flex>
         <Flex
           width="100%"
@@ -98,9 +99,8 @@ function Step({ isActive = false, isComplete = false, stepTitle, renderIcon, ...
 function StepConnection({ isActive = false }) {
   return (
     <Div
-      width="10px"
+      width="100%"
       flexGrow="1"
-      margin="0 -11px"
       height="1px"
       marginTop="24px"
       backgroundColor="border"
