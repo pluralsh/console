@@ -545,12 +545,12 @@ export default mergeTheme(defaultTheme, {
   Tooltip: {
     Root: [
       {
-        backgroundColor: 'fill-',
+        backgroundColor: 'fill-one',
       },
     ],
     Arrow: [
       {
-        backgroundColor: 'background-top',
+        backgroundColor: 'fill-one',
       },
     ],
   },
