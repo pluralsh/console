@@ -13,8 +13,8 @@ function TagRef({ children, ...props }: TagProps, ref: Ref<any>) {
       px={0.5}
       align="center"
       display="inline-block"
-      backgroundColor="background-middle"
-      borderRadius={1000}
+      backgroundColor="fill-one"
+      borderRadius="normal"
       {...props}
     >
       <P caption>

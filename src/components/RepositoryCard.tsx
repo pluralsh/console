@@ -2,137 +2,86 @@ import { Div, DivProps, Flex, Img, P } from 'honorable'
 import PropTypes from 'prop-types'
 import { Ref, forwardRef } from 'react'
 
-import InstalledLabel from './InstalledLabel'
+import Tag from './Tag'
 
 type RepositoryCardProps = DivProps & {
-  featured?: boolean
-  installed?: boolean
   title?: string
-  subtitle?: string
+  publisher?: string
+  description?: string
   imageUrl?: string
+  tags?: string[]
 }
 
 const propTypes = {
-  featured: PropTypes.bool,
-  installed: PropTypes.bool,
   title: PropTypes.string,
-  subtitle: PropTypes.string,
+  publisher: PropTypes.string,
+  description: PropTypes.string,
   imageUrl: PropTypes.string,
+  tags: PropTypes.arrayOf(PropTypes.string),
 }
 
 function RepositoryCardRef({
-  featured = false,
-  installed = false,
   title,
-  subtitle,
+  publisher,
+  description,
   imageUrl,
-  children,
+  tags = [],
   ...props
 }: RepositoryCardProps,
 ref: Ref<any>
 ) {
-
-  function renderContent() {
-    return (
-      <>
-        <P
-          body2
-          color="text-xlight"
-        >
-          {subtitle}
-        </P>
-        <P
-          body1
-          mt={1}
-          color="text-strong"
-        >
-          {children}
-        </P>
-      </>
-    )
-  }
-
-  function renderFeatured() {
-    return (
-      <Flex
-        ref={ref}
-        p={1}
-        justify="flex-start"
-        align="flex-start"
-        borderRadius={4}
-        border="1px solid border"
-        backgroundColor="background-middle"
-        {...props}
-      >
+  return (
+    <Div
+      ref={ref}
+      p={1}
+      borderRadius="large"
+      border="1px solid border"
+      backgroundColor="fill-one"
+      cursor="pointer"
+      _hover={{
+        backgroundColor: 'fill-one-hover',
+      }}
+      {...props}
+    >
+      <Flex>
         <Img
           src={imageUrl}
           alt="Logo"
-          width={128 - 32}
+          width={50}
+          height={50}
           borderRadius={4}
           objectFit="cover"
         />
-        <Div
-          ml={1}
-          flexGrow={1}
-        >
-          <Flex
-            align="center"
-            justify="space-between"
+        <Div ml={1}>
+          <P
+            body0
+            fontWeight="bold"
           >
-            <P
-              body0
-              fontWeight="bold"
-            >
-              {title}
-            </P>
-            {installed && (
-              <InstalledLabel />
-            )}
-          </Flex>
-          {renderContent()}
+            {title}
+          </P>
+          <P color="text-xlight">
+            {publisher}
+          </P>
         </Div>
       </Flex>
-    )
-  }
-
-  function renderRegular() {
-    return (
-      <Div
-        ref={ref}
-        p={1}
-        borderRadius={4}
-        border="1px solid border"
-        backgroundColor="background-middle"
-        {...props}
+      <P
+        mt={0.5}
+        color="text-light"
       >
-        <Flex
-          align="flex-start"
-          justify="space-between"
-        >
-          <Img
-            src={imageUrl}
-            alt="Logo"
-            width={64}
-            borderRadius={4}
-            objectFit="cover"
-          />
-          {installed && (
-            <InstalledLabel />
-          )}
-        </Flex>
-        <P
-          mt={1}
-          fontWeight="bold"
-          body0
-        >
-          {title}
-        </P>
-        {renderContent()}
+        {description}
+      </P>
+      <Div mt={0.5}>
+        {tags.map(tag => (
+          <Tag
+            mr={0.5}
+            backgroundColor="fill-two"
+          >
+            {tag}
+          </Tag>
+        ))}
       </Div>
-    )
-  }
-
-  return featured ? renderFeatured() : renderRegular()
+    </Div>
+  )
 }
 
 const RepositoryCard = forwardRef(RepositoryCardRef)
