@@ -26,42 +26,6 @@ function Dot({ active = false, ...props }: { active?: boolean } & DivProps) {
   )
 }
 
-export function TextCarousel({ children, ...props }:DivProps) {
-  return (
-    <Carousel {...props}>
-      {Children.map(children, (child: any) => (
-        <Div
-          pt="16px"
-          pb="16px"
-          mb="-8px"
-          px="16px"
-        >
-          <P
-            body2
-            color="text-light"
-            fontStyle="italic"
-            {...props}
-          >{child}
-          </P>
-        </Div>
-      )
-      )}
-    </Carousel>
-  )
-}
-
-function FlexItem(props: DivProps) {
-  return (
-    <Flex
-      width="100%"
-      flexShrink="0"
-      textAlign="center"
-      alignItems="stretch"
-      {...props}
-    />
-  )
-}
-
 const transitionProps = {
   opacity: '0',
   visibility: 'hidden',
@@ -134,7 +98,11 @@ export default function Carousel({ autoAdvanceTime = 10000, children, ...props }
         alignItems="stretch"
       >
         {Children.map(children, (child: any, i: any) => (
-          <FlexItem
+          <Flex
+            width="100%"
+            flexShrink="0"
+            textAlign="center"
+            alignItems="stretch"
             transform={`translateX(${-i * 100}%)`}
             pointerEvents={activeIndex === i ? 'auto' : 'none'}
           >
@@ -151,7 +119,7 @@ export default function Carousel({ autoAdvanceTime = 10000, children, ...props }
                 {child}
               </Flex>
             </CSSTransition>
-          </FlexItem>
+          </Flex>
         )
         )}
       </Flex>
@@ -170,5 +138,29 @@ export default function Carousel({ autoAdvanceTime = 10000, children, ...props }
         ))}
       </Flex>
     </Div>
+  )
+}
+
+export function TextCarousel({ children, ...props }:DivProps) {
+  return (
+    <Carousel {...props}>
+      {Children.map(children, (child: any) => (
+        <Div
+          pt="16px"
+          pb="16px"
+          mb="-8px"
+          px="16px"
+        >
+          <P
+            body2
+            color="text-light"
+            fontStyle="italic"
+            {...props}
+          >{child}
+          </P>
+        </Div>
+      )
+      )}
+    </Carousel>
   )
 }
