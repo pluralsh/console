@@ -1,15 +1,25 @@
-import { A, Button, ButtonProps, Div, DivProps, Flex, P, PProps } from 'honorable'
+import { Div, DivProps, Flex, P } from 'honorable'
 import { Children, useEffect, useState } from 'react'
 import { CSSTransition } from 'react-transition-group'
+import { keyframes } from '@emotion/react'
 
-export type Props = {
-  mode?: 'indeterminate' | 'determinate',
-  paused?: boolean,
-  progress?: number, 
-  complete?: boolean,
+export type CarouselProps = DivProps & {
+  autoAdvanceTime?: number
+} 
+
+const dotIn = keyframes`
+0% {
+  transform: scale(1,1)
 }
+50% {
+  transform: scale(1.15, 1.15)
+}
+100% {
+  transform: scale(1, 1)
+}
+`
 
-function Dot({ active = false, ...props }: { active?: boolean } & DivProps) {
+function Dot({ active = false, ...props }: DivProps & { active?: boolean }) {
   return (
     <Div
       padding="4px"
@@ -18,6 +28,10 @@ function Dot({ active = false, ...props }: { active?: boolean } & DivProps) {
     >
       <Div
         backgroundColor={active ? 'action-link-inline' : 'fill-two'}
+        transition="background-color 0.35s cubic-bezier(.20,.55,.80,.45)"
+        animationName={active ? dotIn : null}
+        animationDuration="0.75s"
+        animationIterationCount="1"
         width="8px"
         height="8px"
         borderRadius="4px"
@@ -67,7 +81,7 @@ const transitionProps = {
   },
 }
 
-export default function Carousel({ autoAdvanceTime = 10000, children, ...props }: {autoAdvanceTime?:number} & DivProps) {
+export default function Carousel({ autoAdvanceTime = 10000, children, ...props }: CarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   useEffect(() => {
     if (autoAdvanceTime > 0) {
@@ -141,7 +155,7 @@ export default function Carousel({ autoAdvanceTime = 10000, children, ...props }
   )
 }
 
-export function TextCarousel({ children, ...props }:DivProps) {
+export function TextCarousel({ children, ...props }: CarouselProps) {
   return (
     <Carousel {...props}>
       {Children.map(children, (child: any) => (
