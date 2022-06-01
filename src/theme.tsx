@@ -434,20 +434,27 @@ export default mergeTheme(defaultTheme, {
   Menu: {
     Root: [
       {
-        backgroundColor: 'fill-one',
         elevation: 0,
         padding: '4px 0',
+        backgroundColor: 'fill-one',
+        border: '1px solid border',
       },
     ],
   },
   MenuItem: {
+    Root: [
+      {
+        '& > div': {
+          borderTop: '1px solid border',
+        },
+        '&:first-of-type > div': {
+          borderTop: 'none',
+        },
+      },
+    ],
     Children: [
       {
         padding: '8px 16px',
-        borderTop: '1px solid border',
-        '&:last-of-type': {
-          borderBottom: '1px solid border',
-        },
       },
       ({ active }: any) => active && {
         backgroundColor: 'fill-one-hover',
