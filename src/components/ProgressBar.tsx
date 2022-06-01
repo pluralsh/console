@@ -35,7 +35,7 @@ function ProgressFill({ fillWidth, fillColor = 'blue.200', ...props }: { fillWid
 
 }
 
-export function ProgressBar1({ mode = 'indeterminate', complete = false, paused = false, progress, ...props }: Props) {
+function IndeterminateFill1({ complete, paused }:{complete: boolean, paused:boolean}) {
   const fillWidth = 50
   const animDur = 3
   const timingFunction = 'linear'
@@ -58,6 +58,56 @@ export function ProgressBar1({ mode = 'indeterminate', complete = false, paused 
   }
 
   return (
+    <>
+      <Div
+        opacity={complete ? '0' : 1}
+        transition="opacity .05s ease"
+      >
+        <ProgressFill
+          fillWidth={fillWidth}
+          {...animationProps}
+        />
+        <ProgressFill
+          fillWidth={fillWidth}
+          {...animationProps}
+          animationDelay={`${animDur / 2}s`}
+        />
+      </Div>
+      <ProgressFill
+        opacity={complete ? '1' : '0'}
+        fillWidth={100}
+        transform={complete ? 'translateX(0)' : 'translateX(-100%)'}
+        transition="transform 0.15s ease-out"
+        fillColor="border-success"
+      />
+    </>
+  )
+}
+
+export function ProgressBar1({ mode = 'indeterminate', complete = false, paused = false, progress, ...props }: Props) {
+  let fill
+  if (mode !== 'determinate') {
+    fill = (
+      <IndeterminateFill1
+        complete={complete}
+        paused={paused}
+      />
+    )
+  }
+  else {
+    fill = (
+      <Div
+        position="absolute"
+        left="0"
+        top="0"
+        bottom="0"
+        backgroundColor={progress >= 1 || complete ? 'border-success' : 'blue.200'}
+        right={`${(1 - progress) * 100}%`}
+      />
+    )
+  }
+
+  return (
     <Div
       position="relative"
       width="100%"
@@ -66,40 +116,7 @@ export function ProgressBar1({ mode = 'indeterminate', complete = false, paused 
       backgroundColor="fill-two-selected"
       overflow="hidden"
       {...props}
-    >{mode !== 'determinate' ? (
-        <>
-        <Div
-            opacity={complete ? '0' : 1}
-            transition="opacity .05s ease"
-          >
-            <ProgressFill
-            fillWidth={fillWidth}
-            {...animationProps}
-          />
-            <ProgressFill
-            fillWidth={fillWidth}
-            {...animationProps}
-            animationDelay={`${animDur / 2}s`}
-          />
-          </Div>
-        <ProgressFill
-            opacity={complete ? '1' : '0'}
-            fillWidth={100}
-            transform={complete ? 'translateX(0)' : 'translateX(-100%)'}
-            transition="transform 0.15s ease-out"
-            fillColor="border-success"
-          />
-      </>
-      ) : (
-        <Div
-          position="absolute"
-          left="0"
-          top="0"
-          bottom="0"
-          backgroundColor={progress >= 1 || complete ? 'border-success' : 'blue.200'}
-          right={`${(1 - progress) * 100}%`}
-        />
-      )}
+    >{fill}
     </Div>
   )
 }
