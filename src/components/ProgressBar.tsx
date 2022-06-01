@@ -298,3 +298,92 @@ export function ProgressBar4({ complete = false, paused = false, ...props }: Pro
     </Div>
   )
 }
+
+const keyframes5 = keyframes`
+0% {
+  transform: translateX(-65%);
+}
+
+49% {
+  transform: translateX(0);
+}
+
+98%, 100% {
+  transform: translateX(65%);
+}
+`
+
+const keyframes5inner = keyframes`
+0%{
+ transform: scaleX(0.0); 
+}
+7% {
+  transform: scaleX(0.04)
+}
+49% {
+  transform: scaleX(0.5);
+}
+91% {
+  transform: scaleX(0.04);
+}
+98%, 100% {
+  transform: scaleX(0.0);
+}
+`
+
+export function ProgressBar5({ complete = false, paused = false, ...props }: Props) {  
+  const animationProps:DivProps = {
+    animationName: keyframes5,
+    animationDuration: '2.5s',
+  }
+  if (paused) {
+    animationProps.animationPlayState = 'paused'
+  }
+
+  return (
+    <Div
+      position="relative"
+      width="100%"
+      height="6px"
+      borderRadius="6px"
+      backgroundColor="fill-two-selected"
+      overflow="hidden"
+      {...props}
+    >
+      <Div
+        opacity={complete ? '0' : 1}
+        transition="opacity .05s ease"
+      >
+        <Div
+          position="absolute"
+          width="100%"
+          height="100%"
+          animationName={animationProps.animationName}
+          animationDuration={animationProps.animationDuration}
+          animationTimingFunction="cubic-bezier(.20,.55,.80,.45)"
+          animationIterationCount="infinite"
+          _after={{
+            content: '" "',
+            position: 'absolute',
+            backgroundColor: 'blue.200',
+            left: '0',
+            top: '0',
+            bottom: '0',
+            right: '0',
+            animationName: keyframes5inner,
+            animationDuration: animationProps.animationDuration,
+            animationTimingFunction: 'cubic-bezier(.20,.55,.80,.45)',
+            animationIterationCount: 'infinite',
+          }}
+        />
+      </Div>
+      <ProgressFill
+        opacity={complete ? '1' : '0'}
+        fillWidth={100}
+        transform={complete ? 'translateX(0)' : 'translateX(-100%)'}
+        transition="transform 0.15s ease-out"
+        fillColor="border-success"
+      />
+    </Div>
+  )
+}

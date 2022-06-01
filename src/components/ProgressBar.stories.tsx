@@ -1,4 +1,4 @@
-import { ProgressBar1, ProgressBar2, ProgressBar3, ProgressBar4 } from './ProgressBar'
+import { ProgressBar1, ProgressBar2, ProgressBar3, ProgressBar4, ProgressBar5 } from './ProgressBar'
 
 export default {
   title: 'Progress Bar',
@@ -20,6 +20,9 @@ IndeterminateOpt3.args = IndeterminateOpt1.args
 
 export const IndeterminateOpt4 = ProgressBar4.bind({})
 IndeterminateOpt4.args = IndeterminateOpt1.args
+
+export const IndeterminateOpt5 = ProgressBar5.bind({})
+IndeterminateOpt5.args = IndeterminateOpt1.args
 
 export const Determinate = ProgressBar1.bind({})
 Determinate.args = {
