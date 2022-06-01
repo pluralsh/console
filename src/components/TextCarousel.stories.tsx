@@ -5,7 +5,7 @@ import Carousel, { TextCarousel } from './TextCarousel'
 export default {
   title: 'Text Carousel',
   component: Carousel,
-  argTypes: { progress: { control: { type: 'range', min: 0, max: 1, step: 0.05 } } },
+  argTypes: { autoAdvanceTime: { control: { type: 'range', min: 0, max: 30000, step: 100 } } },
 }
 
 function Template(args: any) {
@@ -23,5 +23,5 @@ function Template(args: any) {
 
 export const Default = Template.bind({})
 Default.args = {
-
+  autoAdvanceTime: 10000,
 }

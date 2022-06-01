@@ -1,5 +1,5 @@
 import { A, Button, ButtonProps, Div, DivProps, Flex, P, PProps } from 'honorable'
-import { Children, useState } from 'react'
+import { Children, useEffect, useState } from 'react'
 import { CSSTransition } from 'react-transition-group'
 
 export type Props = {
@@ -18,27 +18,9 @@ function Dot({ active = false, ...props }: { active?: boolean } & DivProps) {
     >
       <Div
         backgroundColor={active ? 'action-link-inline' : 'fill-two'}
-        // _hover={{ backgroundColor: active ? 'action-link-inline' : 'action-input-hover' }}
         width="8px"
         height="8px"
         borderRadius="4px"
-      />
-    </Div>
-  )
-}
-
-function TextCarouselItem(props:PProps) {
-  return (
-    <Div
-      pt="16px"
-      pb="8"
-      px="16px"
-    >
-      <P
-        body2
-        color="text-light"
-        fontStyle="italic"
-        {...props}
       />
     </Div>
   )
@@ -48,9 +30,20 @@ export function TextCarousel({ children, ...props }:DivProps) {
   return (
     <Carousel {...props}>
       {Children.map(children, (child: any) => (
-        <TextCarouselItem>
-          {child}
-        </TextCarouselItem>
+        <Div
+          pt="16px"
+          pb="16px"
+          mb="-8px"
+          px="16px"
+        >
+          <P
+            body2
+            color="text-light"
+            fontStyle="italic"
+            {...props}
+          >{child}
+          </P>
+        </Div>
       )
       )}
     </Carousel>
@@ -110,8 +103,24 @@ const transitionProps = {
   },
 }
 
-export default function Carousel({ children, ...props }: DivProps) {
+export default function Carousel({ autoAdvanceTime = 10000, children, ...props }: {autoAdvanceTime?:number} & DivProps) {
   const [activeIndex, setActiveIndex] = useState(0)
+  useEffect(() => {
+    if (autoAdvanceTime > 0) {
+      const timer = setTimeout(() => {
+        if (activeIndex >= Children.count(children) - 1) {
+          setActiveIndex(0)
+        }
+        else {
+          setActiveIndex(activeIndex + 1)
+        }
+      }, autoAdvanceTime)
+
+      return () => {
+        clearTimeout(timer)
+      }
+    }
+  }, [activeIndex, autoAdvanceTime, children])
 
   return (
     <Div
