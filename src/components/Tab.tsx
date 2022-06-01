@@ -25,7 +25,9 @@ function Tab({ startIcon, active, children, ...props }: TagProps) {
         align="center"
         borderBottom={`2px solid ${active ? 'border-primary' : 'transparent'}`}
         hoverIndicator="action-input-hover"
-        transition="background-color 150ms ease, border-color 150ms ease"
+        color={active ? 'text' : 'text-xlight'}
+        _hover={{ color: 'text' }}
+        transition="background-color 150ms ease, border-color 150ms ease, color 150ms ease"
       >
         {!!startIcon && (
           <Icon mr="12px">
