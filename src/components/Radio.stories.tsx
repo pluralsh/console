@@ -1,3 +1,5 @@
+import { RadioGroup } from 'honorable'
+
 import Radio from './Radio'
 
 export default {
@@ -7,18 +9,21 @@ export default {
 
 function Template(args: any) {
   return (
-    <>
-      <Radio {...args}>
+    <RadioGroup>
+      <Radio
+        value="0"
+        {...args}
+      >
         Implement design system
       </Radio>
       <Radio
-        mt={0.5}
+        value="1"
         defaultChecked
         {...args}
       >
         Party hard
       </Radio>
-    </>
+    </RadioGroup>
   )
 }
 

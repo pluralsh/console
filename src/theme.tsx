@@ -304,6 +304,7 @@ export default mergeTheme(defaultTheme, {
   Checkbox: {
     Root: [
       ({ checked }: any) => ({
+        padding: 8,
         color: checked ? 'text' : 'action-link-inactive',
         '> span': {
           backgroundColor: checked ? 'action-primary' : 'transparent',
@@ -465,6 +466,7 @@ export default mergeTheme(defaultTheme, {
   Radio: {
     Root: [
       ({ checked }: any) => ({
+        padding: 8,
         color: checked ? 'text' : 'action-link-inactive',
         '> span': {
           border: `1px solid ${checked ? 'text' : 'border-input'}`,
@@ -499,6 +501,7 @@ export default mergeTheme(defaultTheme, {
   Switch: {
     Root: [
       ({ checked }: any) => ({
+        padding: 8,
         color: checked ? 'text' : 'action-link-inactive',
         '> div:first-of-type': {
           backgroundColor: checked ? 'action-primary' : 'transparent',

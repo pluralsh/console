@@ -12,7 +12,6 @@ function Template(args: any) {
         Implement design system
       </Checkbox>
       <Checkbox
-        mt={0.5}
         defaultChecked
         {...args}
       >
