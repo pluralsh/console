@@ -3,7 +3,7 @@ import { Div, DivProps } from 'honorable'
 import { keyframes } from '@emotion/react'
 
 export type Props = {
-  mode?: 'indeterminate',
+  mode?: 'indeterminate' | 'determinate',
   paused?: boolean,
   progress?: number, 
   complete?: boolean,
@@ -27,7 +27,7 @@ function ProgressFill({ fillWidth, fillColor = 'blue.200', ...props }: { fillWid
         bottom: '0',
         right: '0',
         transform: `scaleX(${fillWidth}%)`,
-        transition: 'all 2s ease',
+        transition: 'all 0.25s ease',
       }}
       {...props}
     />
@@ -35,7 +35,7 @@ function ProgressFill({ fillWidth, fillColor = 'blue.200', ...props }: { fillWid
 
 }
 
-export function ProgressBar1({ complete = false, paused = false, ...props }: Props) {
+export function ProgressBar1({ mode = 'indeterminate', complete = false, paused = false, progress, ...props }: Props) {
   const fillWidth = 50
   const animDur = 3
   const timingFunction = 'linear'
@@ -66,24 +66,40 @@ export function ProgressBar1({ complete = false, paused = false, ...props }: Pro
       backgroundColor="fill-two-selected"
       overflow="hidden"
       {...props}
-    >
-      <ProgressFill
-        fillWidth={fillWidth}
-        {...animationProps}
-      />
-      <ProgressFill
-        fillWidth={fillWidth}
-        {...animationProps}
-        animationDelay={`${animDur / 2}s`}
-      />
-      <ProgressFill
-        opacity={complete ? '1' : '0'}
-        fillWidth={100}
-        transform={complete ? 'translateX(0)' : 'translateX(-100%)'}
-        transition="transform 0.25s ease-out"
-        fillColor="border-success"
-      />
-
+    >{mode !== 'determinate' ? (
+        <>
+        <Div
+            opacity={complete ? '0' : 1}
+            transition="opacity .05s ease"
+          >
+            <ProgressFill
+            fillWidth={fillWidth}
+            {...animationProps}
+          />
+            <ProgressFill
+            fillWidth={fillWidth}
+            {...animationProps}
+            animationDelay={`${animDur / 2}s`}
+          />
+          </Div>
+        <ProgressFill
+            opacity={complete ? '1' : '0'}
+            fillWidth={100}
+            transform={complete ? 'translateX(0)' : 'translateX(-100%)'}
+            transition="transform 0.15s ease-out"
+            fillColor="border-success"
+          />
+      </>
+      ) : (
+        <Div
+          position="absolute"
+          left="0"
+          top="0"
+          bottom="0"
+          backgroundColor={progress >= 1 || complete ? 'border-success' : 'blue.200'}
+          right={`${(1 - progress) * 100}%`}
+        />
+      )}
     </Div>
   )
 }
@@ -121,15 +137,20 @@ export function ProgressBar2({ complete = false, paused = false, ...props }: Pro
       overflow="hidden"
       {...props}
     >
-      <ProgressFill
-        fillWidth={fillWidth}
-        {...animationProps}
-      />
+      <Div
+        opacity={complete ? '0' : 1}
+        transition="opacity .05s ease"
+      >
+        <ProgressFill
+          fillWidth={fillWidth}
+          {...animationProps}
+        />
+      </Div>
       <ProgressFill
         opacity={complete ? '1' : '0'}
         fillWidth={100}
         transform={complete ? 'translateX(0)' : 'translateX(-100%)'}
-        transition="transform 0.25s ease-out"
+        transition="transform 0.15s ease-out"
         fillColor="border-success"
       />
     </Div>
@@ -169,26 +190,30 @@ export function ProgressBar3({ complete = false, paused = false, ...props }: Pro
       overflow="hidden"
       {...props}
     >
-      <ProgressFill
-        fillWidth={fillWidth}
-        {...animationProps}
-      />
-      <ProgressFill
-        fillWidth={fillWidth}
-        {...animationProps}
-        animationDelay={`${animDur * 0.333333}s`}
-      />
-      <ProgressFill
-        fillWidth={fillWidth}
-        {...animationProps}
-        animationDelay={`${animDur * 0.666666}s`}
-
-      />
+      <Div
+        opacity={complete ? '0' : 1}
+        transition="opacity .05s ease"
+      >
+        <ProgressFill
+          fillWidth={fillWidth}
+          {...animationProps}
+        />
+        <ProgressFill
+          fillWidth={fillWidth}
+          {...animationProps}
+          animationDelay={`${animDur * 0.333333}s`}
+        />
+        <ProgressFill
+          fillWidth={fillWidth}
+          {...animationProps}
+          animationDelay={`${animDur * 0.666666}s`}
+        />
+      </Div>
       <ProgressFill
         opacity={complete ? '1' : '0'}
         fillWidth={100}
         transform={complete ? 'translateX(0)' : 'translateX(-100%)'}
-        transition="transform 0.25s ease-out"
+        transition="transform 0.15s ease-out"
         fillColor="border-success"
       />
     </Div>
@@ -228,15 +253,20 @@ export function ProgressBar4({ complete = false, paused = false, ...props }: Pro
       overflow="hidden"
       {...props}
     >
-      <ProgressFill
-        fillWidth={fillWidth}
-        {...animationProps}
-      />
+      <Div
+        opacity={complete ? '0' : 1}
+        transition="opacity .05s ease"
+      >
+        <ProgressFill
+          fillWidth={fillWidth}
+          {...animationProps}
+        />
+      </Div>
       <ProgressFill
         opacity={complete ? '1' : '0'}
         fillWidth={100}
         transform={complete ? 'translateX(0)' : 'translateX(-100%)'}
-        transition="transform 0.25s ease-out"
+        transition="transform 0.15s ease-out"
         fillColor="border-success"
       />
     </Div>
