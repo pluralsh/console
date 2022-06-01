@@ -38,7 +38,6 @@ function UserCardRef({ user = {}, ...props }: UserCardProps, ref: Ref<any>) {
         <P
           truncate
           body2
-          mt={0.25}
           color="text-xlight"
         >
           {user.email}
