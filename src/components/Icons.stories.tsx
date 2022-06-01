@@ -21,10 +21,12 @@ import DiscordIcon from './icons/DiscordIcon'
 import DockerTagIcon from './icons/DockerTagIcon'
 import DomainsIcon from './icons/DomainsIcon'
 import DownloadIcon from './icons/DownloadIcon'
+import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import EditIcon from './icons/EditIcon'
 import EmojiHoverIcon from './icons/EmojiHoverIcon'
 import EmojiIcon from './icons/EmojiIcon'
 import ErrorIcon from './icons/ErrorIcon'
+import EyeClosedIcon from './icons/EyeClosedIcon'
 import EyeIcon from './icons/EyeIcon'
 import FileIcon from './icons/FileIcon'
 import FiltersIcon from './icons/FiltersIcon'
@@ -53,15 +55,18 @@ import ListIcon from './icons/ListIcon'
 import LogoutIcon from './icons/LogoutIcon'
 import LogsIcon from './icons/LogsIcon'
 import MagnifyingGlassIcon from './icons/MagnifyingGlassIcon'
+import MailIcon from './icons/MailIcon'
 import MarketIcon from './icons/MarketIcon'
 import MarketPlusIcon from './icons/MarketPlusIcon'
 import MessagesIcon from './icons/MessagesIcon'
 import NetworkInIcon from './icons/NetworkInIcon'
 import NetworkInterfaceIcon from './icons/NetworkInterfaceIcon'
+import NewMailIcon from './icons/NewMailIcon'
 import OAuthIcon from './icons/OAuthIcon'
 import OwnerIcon from './icons/OwnerIcon'
 import PackageIcon from './icons/PackageIcon'
 import PadlockIcon from './icons/PadlockIcon'
+import PadlockLockedIcon from './icons/PadlockLockedIcon'
 import PaperclipIcon from './icons/PaperclipIcon'
 import PencilIcon from './icons/PencilIcon'
 import PeopleIcon from './icons/PeopleIcon'
@@ -86,6 +91,7 @@ import StatusOkIcon from './icons/StatusOkIcon'
 import SuitcaseIcon from './icons/SuitcaseIcon'
 import TableIcon from './icons/TableIcon'
 import TagIcon from './icons/TagIcon'
+import TerminalIcon from './icons/TerminalIcon'
 import TrashCanIcon from './icons/TrashCanIcon'
 import TwitterIcon from './icons/TwitterIcon'
 import UpdatesIcon from './icons/UpdatesIcon'
@@ -116,10 +122,12 @@ const icons = {
   DockerTagIcon,
   DomainsIcon,
   DownloadIcon,
+  DropdownArrowIcon,
   EditIcon,
   EmojiHoverIcon,
   EmojiIcon,
   ErrorIcon,
+  EyeClosedIcon,
   EyeIcon,
   FileIcon,
   FiltersIcon,
@@ -148,15 +156,18 @@ const icons = {
   LogoutIcon,
   LogsIcon,
   MagnifyingGlassIcon,
+  MailIcon,
   MarketIcon,
   MarketPlusIcon,
   MessagesIcon,
   NetworkInIcon,
   NetworkInterfaceIcon,
+  NewMailIcon,
   OAuthIcon,
   OwnerIcon,
   PackageIcon,
   PadlockIcon,
+  PadlockLockedIcon,
   PaperclipIcon,
   PencilIcon,
   PeopleIcon,
@@ -181,6 +192,7 @@ const icons = {
   SuitcaseIcon,
   TableIcon,
   TagIcon,
+  TerminalIcon,
   TrashCanIcon,
   TwitterIcon,
   UpdatesIcon,
