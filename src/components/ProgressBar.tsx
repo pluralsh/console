@@ -9,6 +9,46 @@ export type Props = {
   complete?: boolean,
 }
 
+const keyframes1 = keyframes`
+0% {
+  transform: translateX(${-(50 + (50 * 0.5))}%);
+}
+
+${100 - (50 * 0.5)}%, 100% {
+  transform: translateX(${(50 + (50 * 0.5))}%);
+}
+`
+
+const keyframes2 = keyframes`
+0% {
+  transform: translateX(${-(50 + (50 * 0.5))}%);
+}
+
+100% {
+  transform: translateX(${(50 + (50 * 0.5))}%);
+}
+`
+
+const keyframes3 = keyframes`
+0% {
+  transform: translateX(${-(50 + (50 * 0.5))}%);
+}
+
+65%, 100% {
+  transform: translateX(${(50 + (50 * 0.5))}%);
+}
+`
+
+const keyframes4 = keyframes`
+0% {
+  transform: translateX(${-(50 + (100 * 0.5))}%);
+}
+
+100% {
+  transform: translateX(${(50 + (100 * 0.5))}%);
+}
+`
+
 function ProgressFill({ fillWidth, fillColor = 'blue.200', ...props }: { fillWidth:number } & DivProps) {
   return (
     <Div
@@ -39,15 +79,8 @@ function IndeterminateFill1({ complete, paused }:{complete: boolean, paused:bool
   const fillWidth = 50
   const animDur = 3
   const timingFunction = 'linear'
-  const anim = keyframes`
-  0% {
-    transform: translateX(${-(50 + (fillWidth * 0.5))}%);
-  }
+  const anim = keyframes1
 
-  ${100 - (fillWidth * 0.5)}%, 100% {
-    transform: translateX(${(50 + (fillWidth * 0.5))}%);
-  }
-`
   const animationProps:DivProps = {
     animationName: anim,
     animationDuration: `${animDur}s`,
@@ -125,15 +158,7 @@ export function ProgressBar2({ complete = false, paused = false, ...props }: Pro
   const fillWidth = 50
   const animDur = 1.75
   const timingFunction = 'cubic-bezier(.52,-0.01,.74,.99)'
-  const anim = keyframes`
-  0% {
-    transform: translateX(${-(50 + (fillWidth * 0.5))}%);
-  }
-
-  100% {
-    transform: translateX(${(50 + (fillWidth * 0.5))}%);
-  }
-`
+  const anim = keyframes2
   
   const animationProps:DivProps = {
     animationName: anim,
@@ -178,15 +203,7 @@ export function ProgressBar3({ complete = false, paused = false, ...props }: Pro
   const fillWidth = 50
   const animDur = 5
   const timingFunction = 'ease-in-out'
-  const anim = keyframes`
-  0% {
-    transform: translateX(${-(50 + (fillWidth * 0.5))}%);
-  }
-
-  65%, 100% {
-    transform: translateX(${(50 + (fillWidth * 0.5))}%);
-  }
-`
+  const anim = keyframes3
   
   const animationProps:DivProps = {
     animationName: anim,
@@ -241,15 +258,7 @@ export function ProgressBar4({ complete = false, paused = false, ...props }: Pro
   const fillWidth = 100
   const animDur = 1.75
   const timingFunction = 'cubic-bezier(.52,-0.01,.74,.99)'
-  const anim = keyframes`
-  0% {
-    transform: translateX(${-(50 + (fillWidth * 0.5))}%);
-  }
-
-  100% {
-    transform: translateX(${(50 + (fillWidth * 0.5))}%);
-  }
-`
+  const anim = keyframes4
   
   const animationProps:DivProps = {
     animationName: anim,
