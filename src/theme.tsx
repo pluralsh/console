@@ -503,12 +503,18 @@ export default mergeTheme(defaultTheme, {
         '> div:first-of-type': {
           backgroundColor: checked ? 'action-primary' : 'transparent',
           border: `1px solid ${checked ? 'text' : 'border-input'}`,
+          '> span': {
+            backgroundColor: checked ? 'action-link-active' : 'action-link-inactive',
+          },
         },
         ':hover': {
           color: 'text',
           '> div:first-of-type': {
             backgroundColor: checked ? 'action-primary-hover' : 'action-input-hover',
             border: `1px solid ${checked ? 'text' : 'border-input'}`,
+            '> span': {
+              backgroundColor: checked ? 'action-link-active' : 'action-link-active',
+            },
           },
         },
       }),
