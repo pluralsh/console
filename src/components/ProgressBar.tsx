@@ -2,31 +2,32 @@ import { Div, DivProps } from 'honorable'
 
 import { keyframes } from '@emotion/react'
 
-export type Props = DivProps & {
+export type Props = {
   mode?: 'indeterminate',
   paused?: boolean,
-  progress?: number
+  progress?: number, 
+  complete?: boolean,
 }
 
-function ProgressFill({ anim, animDur, fillWidth, ease = 'linear', ...props }: {anim:any, animDur:number} & DivProps) {
+function ProgressFill({ fillWidth, fillColor = 'blue.200', ...props }: { fillWidth:number } & DivProps) {
   return (
     <Div
-      animation={`${anim} ${animDur}s ${ease} infinite`}
       position="absolute"
       width="100%"
       height="100%"
-      transform={`translateX(${-(50 + (fillWidth * 0.5))}%)`}
-      {...{
-        '&:after': {
-          content: '" "',
-          position: 'absolute',
-          backgroundColor: 'blue.200',
-          left: '0',
-          top: '0',
-          bottom: '0',
-          right: '0',
-          transform: `scaleX(${fillWidth}%)`,
-        },
+      animationIterationCount="infinite"
+      transform={props.animationName && `translateX(${-(50 + (fillWidth * 0.5))}%)`}
+      transition="all 2s ease"
+      _after={{
+        content: '" "',
+        position: 'absolute',
+        backgroundColor: fillColor,
+        left: '0',
+        top: '0',
+        bottom: '0',
+        right: '0',
+        transform: `scaleX(${fillWidth}%)`,
+        transition: 'all 2s ease',
       }}
       {...props}
     />
@@ -34,9 +35,10 @@ function ProgressFill({ anim, animDur, fillWidth, ease = 'linear', ...props }: {
 
 }
 
-export function ProgressBar1(props: Props) {
+export function ProgressBar1({ complete = false, paused = false, ...props }: Props) {
   const fillWidth = 50
   const animDur = 3
+  const timingFunction = 'linear'
   const anim = keyframes`
   0% {
     transform: translateX(${-(50 + (fillWidth * 0.5))}%);
@@ -46,6 +48,14 @@ export function ProgressBar1(props: Props) {
     transform: translateX(${(50 + (fillWidth * 0.5))}%);
   }
 `
+  const animationProps:DivProps = {
+    animationName: anim,
+    animationDuration: `${animDur}s`,
+    animationTimingFunction: timingFunction,
+  }
+  if (paused) {
+    animationProps.animationPlayState = 'paused'
+  }
 
   return (
     <Div
@@ -59,23 +69,29 @@ export function ProgressBar1(props: Props) {
     >
       <ProgressFill
         fillWidth={fillWidth}
-        anim={anim}
-        animDur={animDur}
+        {...animationProps}
       />
       <ProgressFill
         fillWidth={fillWidth}
-        anim={anim}
-        animDur={animDur}
+        {...animationProps}
         animationDelay={`${animDur / 2}s`}
       />
+      <ProgressFill
+        opacity={complete ? '1' : '0'}
+        fillWidth={100}
+        transform={complete ? 'translateX(0)' : 'translateX(-100%)'}
+        transition="transform 0.25s ease-out"
+        fillColor="border-success"
+      />
+
     </Div>
   )
 }
 
-export function ProgressBar2({ ...props }: Props) {
-  const fillWidth = 80
-  const animDur = 2
-  const ease = 'cubic-bezier(.52,-0.01,.74,.99)'
+export function ProgressBar2({ complete = false, paused = false, ...props }: Props) {
+  const fillWidth = 50
+  const animDur = 1.75
+  const timingFunction = 'cubic-bezier(.52,-0.01,.74,.99)'
   const anim = keyframes`
   0% {
     transform: translateX(${-(50 + (fillWidth * 0.5))}%);
@@ -85,6 +101,15 @@ export function ProgressBar2({ ...props }: Props) {
     transform: translateX(${(50 + (fillWidth * 0.5))}%);
   }
 `
+  
+  const animationProps:DivProps = {
+    animationName: anim,
+    animationDuration: `${animDur}s`,
+    animationTimingFunction: timingFunction,
+  }
+  if (paused) {
+    animationProps.animationPlayState = 'paused'
+  }
 
   return (
     <Div
@@ -98,27 +123,41 @@ export function ProgressBar2({ ...props }: Props) {
     >
       <ProgressFill
         fillWidth={fillWidth}
-        anim={anim}
-        animDur={animDur}
-        ease={ease}
+        {...animationProps}
       />
-
+      <ProgressFill
+        opacity={complete ? '1' : '0'}
+        fillWidth={100}
+        transform={complete ? 'translateX(0)' : 'translateX(-100%)'}
+        transition="transform 0.25s ease-out"
+        fillColor="border-success"
+      />
     </Div>
   )
 }
 
-export function ProgressBar3({ ...props }: Props) {
+export function ProgressBar3({ complete = false, paused = false, ...props }: Props) {
   const fillWidth = 50
-  const animDur = 3
+  const animDur = 5
+  const timingFunction = 'ease-in-out'
   const anim = keyframes`
   0% {
     transform: translateX(${-(50 + (fillWidth * 0.5))}%);
   }
 
-  ${100 - (fillWidth * 0.5)}%, 100% {
+  65%, 100% {
     transform: translateX(${(50 + (fillWidth * 0.5))}%);
   }
 `
+  
+  const animationProps:DivProps = {
+    animationName: anim,
+    animationDuration: `${animDur}s`,
+    animationTimingFunction: timingFunction,
+  }
+  if (paused) {
+    animationProps.animationPlayState = 'paused'
+  }
 
   return (
     <Div
@@ -132,11 +171,74 @@ export function ProgressBar3({ ...props }: Props) {
     >
       <ProgressFill
         fillWidth={fillWidth}
-        anim={anim}
-        animDur={animDur}
+        {...animationProps}
       />
+      <ProgressFill
+        fillWidth={fillWidth}
+        {...animationProps}
+        animationDelay={`${animDur * 0.333333}s`}
+      />
+      <ProgressFill
+        fillWidth={fillWidth}
+        {...animationProps}
+        animationDelay={`${animDur * 0.666666}s`}
 
+      />
+      <ProgressFill
+        opacity={complete ? '1' : '0'}
+        fillWidth={100}
+        transform={complete ? 'translateX(0)' : 'translateX(-100%)'}
+        transition="transform 0.25s ease-out"
+        fillColor="border-success"
+      />
     </Div>
   )
 }
 
+export function ProgressBar4({ complete = false, paused = false, ...props }: Props) {
+  const fillWidth = 100
+  const animDur = 1.75
+  const timingFunction = 'cubic-bezier(.52,-0.01,.74,.99)'
+  const anim = keyframes`
+  0% {
+    transform: translateX(${-(50 + (fillWidth * 0.5))}%);
+  }
+
+  100% {
+    transform: translateX(${(50 + (fillWidth * 0.5))}%);
+  }
+`
+  
+  const animationProps:DivProps = {
+    animationName: anim,
+    animationDuration: `${animDur}s`,
+    animationTimingFunction: timingFunction,
+  }
+  if (paused) {
+    animationProps.animationPlayState = 'paused'
+  }
+
+  return (
+    <Div
+      position="relative"
+      width="100%"
+      height="6px"
+      borderRadius="6px"
+      backgroundColor="fill-two-selected"
+      overflow="hidden"
+      {...props}
+    >
+      <ProgressFill
+        fillWidth={fillWidth}
+        {...animationProps}
+      />
+      <ProgressFill
+        opacity={complete ? '1' : '0'}
+        fillWidth={100}
+        transform={complete ? 'translateX(0)' : 'translateX(-100%)'}
+        transition="transform 0.25s ease-out"
+        fillColor="border-success"
+      />
+    </Div>
+  )
+}
