@@ -7,6 +7,7 @@ export type Props = {
   paused?: boolean,
   progress?: number, 
   complete?: boolean,
+  height?: number,
 }
 
 const keyframesOuter = keyframes`
@@ -41,7 +42,12 @@ const keyframesInner = keyframes`
 }
 `
 
-function IndeterminateFill({ complete, paused }:{complete: boolean, paused:boolean}) {
+type IndeterminateFillProps = {
+  complete: boolean,
+  paused: boolean
+}
+
+function IndeterminateFill({ complete, paused }: IndeterminateFillProps) {
   const commonStyles = {
     position: 'absolute',
     width: '100%',
@@ -58,7 +64,7 @@ function IndeterminateFill({ complete, paused }:{complete: boolean, paused:boole
     <>
       {/* Animated fill */}
       <Div
-        opacity={complete ? '0' : 1}
+        opacity={complete ? 0 : 1}
         transition="opacity .05s ease"
       >
         <Div
@@ -77,7 +83,7 @@ function IndeterminateFill({ complete, paused }:{complete: boolean, paused:boole
       {/* Complete fill */}
       <Div
         {...commonStyles}
-        opacity={complete ? '1' : '0'}
+        opacity={complete ? 1 : 0}
         transform={complete ? 'translateX(0)' : 'translateX(-100%)'}
         transition="transform 0.15s ease-out"
         backgroundColor="border-success"
@@ -86,7 +92,14 @@ function IndeterminateFill({ complete, paused }:{complete: boolean, paused:boole
   )
 }
 
-export default function ProgressBar({ mode = 'indeterminate', complete = false, paused = false, progress, ...props }: Props) {
+export default function ProgressBar({
+  mode = 'indeterminate',
+  complete = false,
+  paused = false,
+  progress,
+  height = 6,
+  ...props
+}: Props) {
   let fill
   if (mode !== 'determinate') {
     fill = (
@@ -113,8 +126,8 @@ export default function ProgressBar({ mode = 'indeterminate', complete = false, 
     <Div
       position="relative"
       width="100%"
-      height="6px"
-      borderRadius="6px"
+      height={height}
+      borderRadius={height / 2}
       backgroundColor="fill-two-selected"
       overflow="hidden"
       {...props}

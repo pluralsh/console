@@ -13,8 +13,9 @@ export type StepBaseProps = {
 }
 
 type StepProps = DivProps & StepBaseProps & {
-  isActive:boolean,
-  isComplete:boolean,
+  isActive?:boolean,
+  isComplete?: boolean,
+  circleSize?: number,
 }
 
 export type StepperProps = DivProps & {
@@ -22,7 +23,18 @@ export type StepperProps = DivProps & {
     steps: [StepBaseProps]
 }
 
-function Step({ isActive = false, isComplete = false, stepTitle, IconComponent, ...props }:StepProps) {
+type StepConnectionProps = DivProps & {
+  isActive: boolean;
+}
+
+function Step({
+  isActive = false,
+  isComplete = false,
+  stepTitle,
+  IconComponent,
+  circleSize = 48,
+  ...props
+}: StepProps) {
   const bounceEase = 'cubic-bezier(.37,1.4,.62,1)'
   const shownClassName = 'shown'
   const completeIconStyles = {
@@ -46,11 +58,11 @@ function Step({ isActive = false, isComplete = false, stepTitle, IconComponent, 
     >
       <Div
         position="relative"
-        width="48px"
-        height="48px"
+        width={circleSize}
+        height={circleSize}
         marginLeft="auto"
         marginRight="auto"
-        borderRadius="1000px"
+        borderRadius={1000}
         backgroundColor="fill-one"
         border={`1px solid ${isActive ? 'grey.50' : 'grey.800'}`}
         transition="all 0.2s ease"
@@ -83,34 +95,34 @@ function Step({ isActive = false, isComplete = false, stepTitle, IconComponent, 
         </Flex>
       </Div>
       <Div
-        mt="12px"
+        body2
+        mt={0.75}
         textAlign="center"
-        fontSize="14px"
-        lineHeight="20px"
         color={isActive ? 'text' : 'text-xlight'}
         transition="all 0.2s ease"
         transitionDelay="0.1"
-      >{stepTitle}
+      >
+        {stepTitle}
       </Div>
     </Div>
   )
 }
-  
-function StepConnection({ isActive = false }) {
+
+function StepConnection({ isActive = false, ...props }: StepConnectionProps) {
   return (
     <Div
       width="100%"
       flexGrow="1"
       height="1px"
-      marginTop="24px"
       backgroundColor="border"
       position="relative"
       aria-hidden="true"
+      {...props}
     >
       <Div
         position="absolute"
-        left="0"
-        top="0"
+        left={0}
+        top={0}
         height="100%"
         backgroundColor="text"
         width={isActive ? '100%' : '0'}
@@ -120,7 +132,9 @@ function StepConnection({ isActive = false }) {
   )
 }
   
-export default function Stepper({ stepIndex, steps }:StepperProps) {
+export default function Stepper({ stepIndex, steps }: StepperProps) {
+  const circleSize = 48
+
   return (
     <Flex
       width="100%"
@@ -134,11 +148,16 @@ export default function Stepper({ stepIndex, steps }:StepperProps) {
             stepTitle={step.stepTitle}
             IconComponent={step.IconComponent}
             iconSize={step.iconSize || 24}
+            circleSize={48}
           />
-          {index < steps.length - 1 && <StepConnection isActive={stepIndex > index} />}
+          {index < steps.length - 1 && (
+            <StepConnection
+              marginTop={circleSize / 2}
+              isActive={stepIndex > index}
+            />
+          )}
         </>
       ))}
     </Flex>
   )
 }
-  
