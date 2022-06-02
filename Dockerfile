@@ -56,7 +56,7 @@ RUN \
   tar -xzf ${APP_NAME}.tar.gz && \
   rm ${APP_NAME}.tar.gz
 
-FROM dkr.plural.sh/plural/plural-cli:0.1.1 as cmd
+FROM dkr.plural.sh/plural/plural-cli:0.1.2 as cmd
 
 FROM gcr.io/pluralsh/alpine:3 as helm
 
