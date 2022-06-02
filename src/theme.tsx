@@ -208,6 +208,12 @@ export default mergeTheme(defaultTheme, {
           color: 'text',
         },
       },
+      ({ inline }: any) => inline && {
+        color: 'action-link-inline',
+        '&:visited, &:hover, &:active': {
+          color: 'action-link-inline',
+        },
+      },
     ],
   },
   Accordion: {
