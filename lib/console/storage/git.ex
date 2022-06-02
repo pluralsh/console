@@ -35,6 +35,7 @@ defmodule Console.Storage.Git do
 
   def pull() do
     with {:ok, _} <- reset(),
+         {:ok, _} <- Plural.repair(),
       do: git("pull", ["--rebase"])
   end
 

@@ -21,5 +21,7 @@ defmodule Console.Commands.Plural do
 
   def terminate(node), do: plural("ops", ["terminate", node])
 
+  def repair(), do: plural("repair", [])
+
   def plural(command, args), do: cmd("plural", [command | args], workspace())
 end
