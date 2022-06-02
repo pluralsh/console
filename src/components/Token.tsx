@@ -16,27 +16,26 @@ function TokenRef({ children, onClose = () => {}, ...props }: TokenProps, ref: R
   return (
     <Flex
       ref={ref}
-      pl={0.5}
+      py={0.25}
+      pl={0.75}
       display="inline-flex"
-      minHeight={28}
-      borderRadius={4}
-      backgroundColor="background-middle"
+      align="center"
+      minHeight={36}
+      borderRadius={18}
+      backgroundColor="fill-one"
       overflow="hidden"
       {...props}
     >
-      <P
-        body2
-        xflex="x4"
-      >
-        {children}
-      </P>
+      {children}
       <Flex
-        px={0.5}
-        ml={0.5}
+        p={0.5}
+        ml={0.25}
+        mr={0.25}
+        borderRadius="50%"
         align="center"
         justify="center"
         cursor="pointer"
-        hoverIndicator="background-top"
+        hoverIndicator="fill-one-hover"
         onClick={onClose}
       >
         <CloseIcon size={8} />

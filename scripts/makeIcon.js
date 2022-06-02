@@ -37,9 +37,9 @@ async function main() {
     const result = results[0].output
       .replace('width="16"', 'width={size}')
       .replace('height="16"\n    ', '')
-      .replace('"\n  >', '"\n    {...props}\n  >')
-      .replace(/stroke="white"/g, 'stroke={color}')
-      .replace(/fill="white"/g, 'fill={color}')
+      // .replace('"\n  >', '"\n    {...props}\n  >')
+      .replace(/stroke="#C4CAD4"/g, 'stroke={color}')
+      .replace(/fill="#C4CAD4"/g, 'fill={color}')
 
     const outputPath = path.resolve(__dirname, `../src/components/icons/${name}Icon.jsx`)
 
