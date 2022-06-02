@@ -1,4 +1,4 @@
-import { Div, DivProps, Flex, P } from 'honorable'
+import { Div, DivProps, Flex } from 'honorable'
 import { Children, useEffect, useState } from 'react'
 import { CSSTransition } from 'react-transition-group'
 import { keyframes } from '@emotion/react'
@@ -7,7 +7,7 @@ export type CarouselProps = DivProps & {
   autoAdvanceTime?: number
 } 
 
-const dotIn = keyframes`
+const dotAnimationIn = keyframes`
 0% {
   transform: scale(1,1)
 }
@@ -29,7 +29,7 @@ function Dot({ active = false, ...props }: DivProps & { active?: boolean }) {
       <Div
         backgroundColor={active ? 'action-link-inline' : 'fill-two'}
         transition="background-color 0.35s cubic-bezier(.20,.55,.80,.45)"
-        animationName={active ? dotIn : null}
+        animationName={active ? dotAnimationIn : null}
         animationDuration="0.75s"
         animationIterationCount="1"
         width="8px"
@@ -40,7 +40,7 @@ function Dot({ active = false, ...props }: DivProps & { active?: boolean }) {
   )
 }
 
-const transitionProps = {
+const transitionStyles = {
   opacity: '0',
   visibility: 'hidden',
   '&.appear, &.appear-active, &.appear-done': {
@@ -128,7 +128,7 @@ export default function Carousel({ autoAdvanceTime = 10000, children, ...props }
               <Flex 
                 className="stretched"
                 alignItems="center"
-                {...transitionProps}
+                {...transitionStyles}
               >
                 {child}
               </Flex>
@@ -152,29 +152,5 @@ export default function Carousel({ autoAdvanceTime = 10000, children, ...props }
         ))}
       </Flex>
     </Div>
-  )
-}
-
-export function TextCarousel({ children, ...props }: CarouselProps) {
-  return (
-    <Carousel {...props}>
-      {Children.map(children, (child: any) => (
-        <Div
-          pt="16px"
-          pb="16px"
-          mb="-8px"
-          px="16px"
-        >
-          <P
-            body2
-            color="text-light"
-            fontStyle="italic"
-            {...props}
-          >{child}
-          </P>
-        </Div>
-      )
-      )}
-    </Carousel>
   )
 }
