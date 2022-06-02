@@ -8,6 +8,7 @@ export default function TipCarousel({ children, ...props }: CarouselProps) {
     <Carousel {...props}>
       {Children.map(children, (child: any) => (
         <Div
+          width="100%"
           pt="16px"
           pb="16px"
           mb="-8px" 

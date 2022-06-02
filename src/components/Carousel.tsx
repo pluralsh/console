@@ -126,7 +126,7 @@ export default function Carousel({ autoAdvanceTime = 10000, children, ...props }
               timeout={2000}
             >
               <Flex 
-                className="stretched"
+                width="100%"
                 alignItems="center"
                 {...transitionStyles}
               >
