@@ -17,5 +17,5 @@ Determinate.args = {
   paused: false,
   complete: false,
   mode: 'determinate',
-  progress: 0,
+  progress: 0.25,
 }
