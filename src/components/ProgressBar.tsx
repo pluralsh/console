@@ -42,41 +42,41 @@ const keyframesInner = keyframes`
 `
 
 function IndeterminateFill({ complete, paused }:{complete: boolean, paused:boolean}) {
-  const animDur = '3s'
-  const animPlayState = paused ? 'paused' : 'running'
+  const commonStyles = {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  }
+  const commonAnimStyles = {
+    animationDuration: '3s',
+    animationTimingFunction: 'cubic-bezier(.20,.55,.80,.45)',
+    animationIterationCount: 'infinite',
+    animationPlayState: paused ? 'paused' : 'running',
+  }
 
   return (
     <>
+      {/* Animated fill */}
       <Div
         opacity={complete ? '0' : 1}
         transition="opacity .05s ease"
       >
         <Div
-          position="absolute"
-          width="100%"
-          height="100%"
+          {...commonStyles}
+          {...commonAnimStyles}
           animationName={keyframesOuter}
-          animationDuration={animDur}
-          animationTimingFunction="cubic-bezier(.20,.55,.80,.45)"
-          animationIterationCount="infinite"
-          animationPlayState={animPlayState}
           _after={{
+            ...commonStyles,
+            ...commonAnimStyles,
             content: '" "',
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
             backgroundColor: 'blue.200',
             animationName: keyframesInner,
-            animationDuration: animDur,
-            animationTimingFunction: 'cubic-bezier(.20,.55,.80,.45)',
-            animationIterationCount: 'infinite',
           }}
         />
       </Div>
+      {/* Complete fill */}
       <Div
-        position="absolute"
-        width="100%"
-        height="100%"
+        {...commonStyles}
         opacity={complete ? '1' : '0'}
         transform={complete ? 'translateX(0)' : 'translateX(-100%)'}
         transition="transform 0.15s ease-out"
