@@ -73,6 +73,7 @@ ref: Ref<any>
       <Div mt={0.5}>
         {tags.map(tag => (
           <Tag
+            key={tag}
             mr={0.5}
             backgroundColor="fill-two"
           >
