@@ -20,17 +20,16 @@ function TokenRef({ children, onClose = () => {}, ...props }: TokenProps, ref: R
       pl={0.75}
       display="inline-flex"
       align="center"
-      minHeight={36}
       borderRadius={18}
       backgroundColor="fill-one"
+      border="1px solid border"
       overflow="hidden"
       {...props}
     >
       {children}
       <Flex
         p={0.5}
-        ml={0.25}
-        mr={0.25}
+        mx={0.25}
         borderRadius="50%"
         align="center"
         justify="center"
