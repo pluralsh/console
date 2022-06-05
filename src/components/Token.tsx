@@ -1,5 +1,5 @@
 import { Ref, forwardRef } from 'react'
-import { Flex, FlexProps, P } from 'honorable'
+import { Flex, FlexProps } from 'honorable'
 import PropTypes from 'prop-types'
 
 import CloseIcon from './icons/CloseIcon'
