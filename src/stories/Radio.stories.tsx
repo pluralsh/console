@@ -1,6 +1,6 @@
 import { RadioGroup } from 'honorable'
 
-import Radio from './Radio'
+import Radio from '../components/Radio'
 
 export default {
   title: 'Radio',

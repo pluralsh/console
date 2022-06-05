@@ -1,10 +1,10 @@
-import Stepper from './Stepper'
-import type { StepBaseProps } from './Stepper'
+import Stepper from '../components/Stepper'
+import type { StepBaseProps } from '../components/Stepper'
 
-import BrowserIcon from './icons/BrowserIcon'
-import CloudIcon from './icons/CloudIcon'
-import GearTrainIcon from './icons/GearTrainIcon'
-import GitHubIcon from './icons/GitHubIcon'
+import BrowserIcon from '../components/icons/BrowserIcon'
+import CloudIcon from '../components/icons/CloudIcon'
+import GearTrainIcon from '../components/icons/GearTrainIcon'
+import GitHubIcon from '../components/icons/GitHubIcon'
 
 export default {
   title: 'Stepper',

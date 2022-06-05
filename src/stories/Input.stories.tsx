@@ -1,7 +1,7 @@
 import { Flex, Input } from 'honorable'
 
-import MagnifyingGlassIcon from './icons/MagnifyingGlassIcon'
-import CaretDownIcon from './icons/CaretDownIcon'
+import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
+import CaretDownIcon from '../components/icons/CaretDownIcon'
 
 export default {
   title: 'Input',

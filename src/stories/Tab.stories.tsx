@@ -1,9 +1,9 @@
 import { Flex } from 'honorable'
 import { useState } from 'react'
 
-import ErrorIcon from './icons/ErrorIcon'
+import ErrorIcon from '../components/icons/ErrorIcon'
 
-import Tab from './Tab'
+import Tab from '../components/Tab'
 
 export default {
   title: 'Tab',

@@ -1,4 +1,4 @@
-import Token from './Token'
+import Token from '../components/Token'
 
 export default {
   title: 'Token',

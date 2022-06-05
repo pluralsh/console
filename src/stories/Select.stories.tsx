@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import Select from './Select'
+import Select from '../components/Select'
 
 export default {
   title: 'Select',
