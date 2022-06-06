@@ -2,7 +2,7 @@ import { mergeTheme } from 'honorable'
 import defaultTheme from 'honorable-theme-default'
 
 const fontFamilies = {
-  semi: '"Monument Semi-Mono", "Inter", "Helvetica", "Arial", "sans-serif"',
+  semi: '"Monument Semi-Mono", "Monument", "Inter", "Helvetica", "Arial", "sans-serif"',
   sans: '"Inter", "Helvetica", "Arial", "sans-serif"',
 }
 
