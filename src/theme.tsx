@@ -1,6 +1,11 @@
 import { mergeTheme } from 'honorable'
 import defaultTheme from 'honorable-theme-default'
 
+const fontFamilies = {
+  semi: '"Monument Semi-Mono", "Inter", "Helvetica", "Arial", "sans-serif"',
+  sans: '"Inter", "Helvetica", "Arial", "sans-serif"',
+}
+
 const grey = {
   950: '#0E1015',
   900: '#171A21',
@@ -140,11 +145,12 @@ export default mergeTheme(defaultTheme, {
     'icon-warning': 'yellow.400',
     'icon-error': 'red.400',
   },
+
   stylesheet: {
     html: [
       {
         fontSize: 14,
-        fontFamily: 'Inter',
+        fontFamily: fontFamilies.semi,
         backgroundColor: 'fill-zero',
       },
     ],
@@ -168,36 +174,128 @@ export default mergeTheme(defaultTheme, {
         backgroundColor: hoverIndicator,
       },
     },
-    ({ body0 }: any) => body0 && {
-      fontSize: 18,
-      lineHeight: '28px',
+    ({ h1 }: any) => h1 && {
+      fontFamily: fontFamilies.semi,
+      fontSize: 72,
+      lineHeight: '110%',
+      fontWeight: 400,
+      letterSpacing: '-1px',
     },
-    ({ body1 }: any) => body1 && {
-      fontSize: 16,
-      lineHeight: '24px',
+    ({ h2 }: any) => h2 && {
+      fontFamily: fontFamilies.semi,
+      fontSize: 60,
+      lineHeight: '115%',
+      fontWeight: 500,
+      letterSpacing: '-1px',
     },
-    ({ body2 }: any) => body2 && {
-      fontSize: 14,
-      lineHeight: '20px',
+    ({ h3 }: any) => h3 && {
+      fontFamily: fontFamilies.semi,
+      fontSize: 48,
+      lineHeight: '120%',
+      fontWeight: 400,
+      letterSpacing: '-0.5px',
+    },
+    ({ h4 }: any) => h4 && {
+      fontFamily: fontFamilies.semi,
+      fontSize: 36,
+      lineHeight: '45px',
+      fontWeight: 400,
+      letterSpacing: '-0.25px',
+    },
+    ({ title1 }: any) => title1 && {
+      fontFamily: fontFamilies.semi,
+      fontSize: 30,
+      lineHeight: '40px',
+      fontWeight: 500,
+      letterSpacing: '-0.25px',
+    },
+    ({ title2 }: any) => title2 && {
+      fontFamily: fontFamilies.semi,
+      fontSize: 24,
+      lineHeight: '32px',
+      fontWeight: 500,
+      letterSpacing: '-0.25',
     },
     ({ subtitle1 }: any) => subtitle1 && {
+      fontFamily: fontFamilies.semi,
       fontSize: 20,
       lineHeight: '24px',
       fontWeight: 500,
+      letterSpacing: 0,
     },
     ({ subtitle2 }: any) => subtitle2 && {
-      fontSize: 18,
+      fontFamily: fontFamilies.semi,
+      fontSize: 20,
       lineHeight: '24px',
       fontWeight: 500,
+      letterSpacing: 0,
     },
+    ({ body1, body2, bold }: any) => ({
+      ...(body1 || body2 && {
+        fontFamily: fontFamilies.sans,
+        fontWeight: 400,
+        letterSpacing: '0.5',
+        'b&': {
+          bodyWeight: 600,
+        },
+      }),
+      ...((body1 || body2) && bold && {
+        fontWeight: 600,
+      }),
+      ...(body1 && {
+        fontSize: 16,
+        lineHeight: '24px',
+      }),
+      ...(body2 && {
+        fontSize: 14,
+        lineHeight: '20px',
+      }),
+    }),
     ({ caption }: any) => caption && {
+      fontFamily: fontFamilies.sans,
       fontSize: 12,
       lineHeight: '16px',
+      fontWeight: 400,
+      letterSpacing: '0.5px',
+    },
+    ({ badgeLabel }: any) => badgeLabel && {
+      fontFamily: fontFamilies.semi,
+      fontSize: 12,
+      lineHeight: '100%',
+      fontWeight: 700,
+      letterSpacing: '0.5px',
+    },
+    ({ buttonLarge }: any) => buttonLarge && {
+      fontFamily: fontFamilies.semi,
+      fontSize: 16,
+      lineHeight: '24px',
+      fontWeight: 500,
+      letterSpacing: '0.5px',
+    },
+    ({ buttonSmall }: any) => buttonSmall && {
+      fontFamily: fontFamilies.semi,
+      fontSize: 14,
+      lineHeight: '24px',
+      fontWeight: 500,
+      letterSpacing: '0.5px',
+    },
+    ({ overline }: any) => overline && {
+      fontFamily: fontFamilies.semi,
+      fontSize: 14,
+      lineHeight: '24px',
+      fontWeight: 400,
+      letterSpacing: '1px',
+      textTransform: 'uppercase',
     },
     ({ truncate }: any) => truncate && {
       whiteSpace: 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
+    },
+    /* Deprecated */
+    ({ body0 }: any) => body0 && {
+      fontSize: 18,
+      lineHeight: '28px',
     },
   ],
   A: {
