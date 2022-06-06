@@ -17,6 +17,7 @@ const propTypes = {
 function Tab({ startIcon, active, children, vertical, ...props }: TagProps) {
   return (
     <Div
+      font="action"
       userSelect="none"
       cursor="pointer"
       borderBottom={vertical ? null : `1px solid ${active ? 'border-primary' : 'border'}`}

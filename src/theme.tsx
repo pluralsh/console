@@ -231,7 +231,7 @@ export default mergeTheme(defaultTheme, {
       letterSpacing: 0,
     },
     ({ body1, body2, bold }: any) => ({
-      ...(body1 || body2 && {
+      ...((body1 || body2) && {
         fontFamily: fontFamilies.sans,
         fontWeight: 400,
         letterSpacing: '0.5',
@@ -439,18 +439,6 @@ export default mergeTheme(defaultTheme, {
       },
     ],
   },
-  DropdownButton: {
-    Button: {
-      // Might be broken by honorable breaking change
-      // TODO fix it
-      Children: [
-        ({ install }: any) => install && {
-          fontSize: 16,
-          fontWeight: 600,
-        },
-      ],
-    },
-  },
   H1: {
     Root: [
       {
@@ -547,6 +535,7 @@ export default mergeTheme(defaultTheme, {
         padding: '4px 0',
         backgroundColor: 'fill-one',
         border: '1px solid border',
+        borderRadius: 'normal',
       },
     ],
   },
