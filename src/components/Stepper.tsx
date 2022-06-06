@@ -27,11 +27,12 @@ type StepConnectionProps = DivProps & {
   isActive: boolean;
 }
 
-function Step({
+export function Step({
   isActive = false,
   isComplete = false,
   stepTitle,
   IconComponent,
+  iconSize = 24,
   circleSize = 48,
   ...props
 }: StepProps) {
@@ -64,7 +65,7 @@ function Step({
         marginRight="auto"
         borderRadius={1000}
         backgroundColor="fill-one"
-        border={`1px solid ${isActive ? 'grey.50' : 'grey.800'}`}
+        border="1px solid border"
         transition="all 0.2s ease"
         transitionDelay="0.1"
       >
@@ -77,7 +78,10 @@ function Step({
           className={isComplete ? '' : shownClassName}
           {...completeIconStyles}
         >
-          <IconComponent color={isActive ? 'action-link-active' : 'text-xlight'} />
+          <IconComponent
+            size={iconSize}
+            color={isActive ? 'action-link-active' : 'text-xlight'}
+          />
         </Flex>
         <Flex
           width="100%"
@@ -108,7 +112,7 @@ function Step({
   )
 }
 
-function StepConnection({ isActive = false, ...props }: StepConnectionProps) {
+export function StepConnection({ isActive = false, ...props }: StepConnectionProps) {
   return (
     <Div
       width="100%"
