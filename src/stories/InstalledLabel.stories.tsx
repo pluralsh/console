@@ -1,4 +1,4 @@
-import InstalledLabel from './InstalledLabel'
+import InstalledLabel from '../components/InstalledLabel'
 
 export default {
   title: 'InstalledLabel',

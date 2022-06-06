@@ -1,4 +1,4 @@
-import RepositoryCard from './RepositoryCard'
+import RepositoryCard from '../components/RepositoryCard'
 
 export default {
   title: 'RepositoryCard',

@@ -5,25 +5,30 @@ import PropTypes from 'prop-types'
 type TagProps = DivProps & {
   active?: boolean
   startIcon?: ReactNode
+  vertical?: boolean
 }
 
 const propTypes = {
   active: PropTypes.bool,
   startIcon: PropTypes.node,
+  vertical: PropTypes.bool,
 }
 
-function Tab({ startIcon, active, children, ...props }: TagProps) {
+function Tab({ startIcon, active, children, vertical, ...props }: TagProps) {
   return (
     <Div
+      userSelect="none"
       cursor="pointer"
-      borderBottom={`1px solid ${active ? 'border-primary' : 'border'}`}
+      borderBottom={vertical ? null : `1px solid ${active ? 'border-primary' : 'border'}`}
+      borderRight={vertical ? `1px solid ${active ? 'border-primary' : 'border'}` : null}
       {...props}
     >
       <Flex
         py={0.5}
         px={1}
         align="center"
-        borderBottom={`2px solid ${active ? 'border-primary' : 'transparent'}`}
+        borderBottom={vertical ? null : `2px solid ${active ? 'border-primary' : 'transparent'}`}
+        borderRight={vertical ? `2px solid ${active ? 'border-primary' : 'transparent'}` : null}
         hoverIndicator="action-input-hover"
         color={active ? 'text' : 'text-xlight'}
         _hover={{ color: 'text' }}

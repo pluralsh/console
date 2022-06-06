@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Div, Flex, Input, P } from 'honorable'
 
-import FormField from './FormField'
-import MagnifyingGlassIcon from './icons/MagnifyingGlassIcon'
-import CaretDownIcon from './icons/CaretDownIcon'
+import FormField from '../components/FormField'
+import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
+import CaretDownIcon from '../components/icons/CaretDownIcon'
 
 export default {
   title: 'FormField',

@@ -1,6 +1,6 @@
 import { Button } from 'honorable'
 
-import DownloadIcon from './icons/DownloadIcon'
+import DownloadIcon from '../components/icons/DownloadIcon'
 
 export default {
   title: 'Button',

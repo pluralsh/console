@@ -1,6 +1,6 @@
 import { A } from 'honorable'
 
-import TipCarousel from './TipCarousel'
+import TipCarousel from '../components/TipCarousel'
 
 export default {
   title: 'Tip Carousel',
