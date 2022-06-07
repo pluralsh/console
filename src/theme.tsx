@@ -244,7 +244,7 @@ export default mergeTheme(defaultTheme, {
       fontSize: 24,
       lineHeight: '32px',
       fontWeight: 500,
-      letterSpacing: '-0.25',
+      letterSpacing: '-0.25px',
     },
     ({ subtitle1 }: any) => subtitle1 && {
       fontFamily: fontFamilies.semi,
@@ -264,7 +264,7 @@ export default mergeTheme(defaultTheme, {
       ...((body1 || body2) && {
         fontFamily: fontFamilies.sans,
         fontWeight: 400,
-        letterSpacing: '0.5',
+        letterSpacing: '0.5px',
         'b&': {
           bodyWeight: 600,
         },
