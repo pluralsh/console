@@ -5,7 +5,7 @@ import { keyframes } from '@emotion/react'
 
 export type CarouselProps = DivProps & {
   autoAdvanceTime?: number
-} 
+}
 
 const dotAnimationIn = keyframes`
 0% {
@@ -27,7 +27,7 @@ type DotProps = DivProps & {
 function Dot({ active = false, size = 8, ...props }: DotProps) {
   return (
     <Div
-      p={0.25}
+      padding="xxsmall"
       cursor="pointer"
       {...props}
     >
@@ -39,7 +39,7 @@ function Dot({ active = false, size = 8, ...props }: DotProps) {
         animationIterationCount="1"
         width={size}
         height={size}
-        borderRadius={size / 2}
+        borderRadius="50%"
       />
     </Div>
   )
@@ -104,7 +104,7 @@ export default function Carousel({ autoAdvanceTime = 10000, children, ...props }
     <Div
       backgroundColor="fill-one"
       border="1px solid border"
-      borderRadius="normal"
+      borderRadius="medium"
       {...props}
     >
       <Flex
@@ -124,7 +124,7 @@ export default function Carousel({ autoAdvanceTime = 10000, children, ...props }
               appear
               timeout={2000}
             >
-              <Flex 
+              <Flex
                 width="100%"
                 alignItems="center"
                 {...transitionStyles}
@@ -137,8 +137,8 @@ export default function Carousel({ autoAdvanceTime = 10000, children, ...props }
         )}
       </Flex>
       <Flex
-        mt={0.5}
-        mb={1}
+        marginTop="xsmall"
+        marginBottom="medium"
         justifyContent="center"
       >
         {Children.map(children, (child: ReactElement, i: number) => (

@@ -9,9 +9,9 @@ export default function TipCarousel({ children, ...props }: CarouselProps) {
       {Children.map(children, (child: ReactElement) => (
         <Div
           width="100%"
-          pt={1}
-          pb={1}
-          px={1}
+          paddingTop="medium"
+          paddingBottom="medium"
+          paddingHorizontal="medium"
           mb={-0.5}
         >
           <P

@@ -88,8 +88,38 @@ const red = {
 }
 
 const borderRadiuses = {
-  normal: 3,
+  medium: 3,
   large: 6,
+  normal: 3, // deprecated in favor of medium
+}
+
+const spacing = {
+  xxxsmall: 2,
+  xxsmall: 4,
+  xsmall: 8,
+  small: 12,
+  medium: 16,
+  large: 24,
+  xlarge: 32,
+  xxlarge: 48,
+  xxxlarge: 64,
+  xxxxlarge: 96,
+}
+const spacers = {
+  margin: ['margin'],
+  marginTop: ['marginTop'],
+  marginRight: ['marginRight'],
+  marginBottom: ['marginBottom'],
+  marginLeft: ['marginLeft'],
+  marginHorizontal: ['marginLeft', 'marginRight'],
+  marginVertical: ['marginTop', 'marginBottom'],
+  padding: ['padding'],
+  paddingTop: ['paddingTop'],
+  paddingRight: ['paddingRight'],
+  paddingBottom: ['paddingBottom'],
+  paddingLeft: ['paddingLeft'],
+  paddingHorizontal: ['paddingLeft', 'paddingRight'],
+  paddingVertical: ['paddingTop', 'paddingBottom'],
 }
 
 export default mergeTheme(defaultTheme, {
@@ -297,6 +327,8 @@ export default mergeTheme(defaultTheme, {
       fontSize: 18,
       lineHeight: '28px',
     },
+    /* Spacing */
+    ...Object.entries(spacers).map(([key, nextKeys]) => (props: any) => props[key] && Object.fromEntries(nextKeys.map(nextKey => [nextKey, spacing[props[key]] || props[key]]))),
   ],
   A: {
     Root: [

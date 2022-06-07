@@ -15,29 +15,29 @@ function Template(args: any) {
         {...args}
       />
       <Button
-        mt={1}
+        marginTop="medium"
         large
         startIcon={<DownloadIcon />}
         endIcon={<DownloadIcon />}
         {...args}
       />
       <Button
-        mt={1}
+        marginTop="medium"
         {...args}
       />
       <Button
-        mt={1}
+        marginTop="medium"
         startIcon={<DownloadIcon />}
         endIcon={<DownloadIcon />}
         {...args}
       />
       <Button
-        mt={1}
+        marginTop="medium"
         small
         {...args}
       />
       <Button
-        mt={1}
+        marginTop="medium"
         small
         startIcon={<DownloadIcon />}
         endIcon={<DownloadIcon />}

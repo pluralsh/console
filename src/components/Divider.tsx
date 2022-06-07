@@ -23,7 +23,7 @@ function DividerRef({ text = 'or', ...props }: AlertProps, ref: Ref<any>) {
         backgroundColor="text-light"
       />
       <P
-        px={0.5}
+        paddingHorizontal="xsmall"
         flexShrink={0}
         color="text-light"
         size="small"

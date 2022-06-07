@@ -5,7 +5,7 @@ import { keyframes } from '@emotion/react'
 export type Props = {
   mode?: 'indeterminate' | 'determinate',
   paused?: boolean,
-  progress?: number, 
+  progress?: number,
   complete?: boolean,
   height?: number,
 }
@@ -26,7 +26,7 @@ const keyframesOuter = keyframes`
 
 const keyframesInner = keyframes`
 0%{
- transform: scaleX(0.0); 
+ transform: scaleX(0.0);
 }
 7% {
   transform: scaleX(0.04)
@@ -113,9 +113,9 @@ export default function ProgressBar({
     fill = (
       <Div
         position="absolute"
-        left="0"
-        top="0"
-        bottom="0"
+        left={0}
+        top={0}
+        bottom={0}
         backgroundColor={progress >= 1 || complete ? 'border-success' : 'blue.200'}
         right={`${(1 - progress) * 100}%`}
       />

@@ -27,7 +27,7 @@ function UserCardRef({ user = {}, ...props }: UserCardProps, ref: Ref<any>) {
         name={user.name}
         src={user.imageUrl}
       />
-      <Div pl={0.5}>
+      <Div paddingLeft="xsmall">
         <P
           truncate
           fontWeight="bold"

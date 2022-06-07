@@ -13,7 +13,7 @@ function Template(args: any) {
     <Flex direction="column">
       <Input {...args} />
       <Input
-        mt={1}
+        marginTop="medium"
         startIcon={<MagnifyingGlassIcon />}
         endIcon={(
           <CaretDownIcon

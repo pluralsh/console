@@ -10,7 +10,7 @@ function Template(args: any) {
     <Div xflex="y1">
       <A {...args} />
       <A
-        mt={1}
+        marginTop="medium"
         href="https://github.com"
         {...args}
       />

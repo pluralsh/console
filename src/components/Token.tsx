@@ -16,8 +16,8 @@ function TokenRef({ children, onClose = () => {}, ...props }: TokenProps, ref: R
   return (
     <Flex
       ref={ref}
-      py={0.25}
-      pl={0.75}
+      paddingVertical="xxsmall"
+      paddingLeft="small"
       display="inline-flex"
       align="center"
       borderRadius={18}
@@ -28,8 +28,8 @@ function TokenRef({ children, onClose = () => {}, ...props }: TokenProps, ref: R
     >
       {children}
       <Flex
-        p={0.5}
-        mx={0.25}
+        padding="xsmall"
+        marginHorizontal="xxsmall"
         borderRadius="50%"
         align="center"
         justify="center"

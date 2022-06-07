@@ -9,12 +9,12 @@ function TagRef({ children, ...props }: TagProps, ref: Ref<any>) {
   return (
     <Flex
       ref={ref}
-      py={0.25}
-      px={0.5}
+      paddingVertical="xxsmall"
+      paddingHorizontal="xsmall"
       align="center"
       display="inline-block"
       backgroundColor="fill-one"
-      borderRadius="normal"
+      borderRadius="medium"
       {...props}
     >
       <P caption>
