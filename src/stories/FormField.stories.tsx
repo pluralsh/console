@@ -45,7 +45,7 @@ function FullTemplate(args: any) {
           >
             Hint text
           </P>
-          <P ml={0.5}>
+          <P marginLeft="xsmall">
             {value.length} / {max}
           </P>
         </Flex>
@@ -81,11 +81,11 @@ function Template2(args: any) {
         {...args}
       />
       <FullTemplate
-        mt={1}
+        marginTop="medium"
         {...args}
       />
       <FullTemplate
-        mt={1}
+        marginTop="medium"
         small
         {...args}
       />

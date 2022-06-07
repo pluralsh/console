@@ -48,7 +48,7 @@ function Step({
       transitionDelay: '0.1s',
     },
   }
-      
+
   return (
     <Div
       width="100%"
@@ -96,7 +96,7 @@ function Step({
       </Div>
       <Div
         body2
-        mt={0.75}
+        marginTop="small"
         textAlign="center"
         color={isActive ? 'text' : 'text-xlight'}
         transition="all 0.2s ease"
@@ -112,8 +112,8 @@ function StepConnection({ isActive = false, ...props }: StepConnectionProps) {
   return (
     <Div
       width="100%"
-      flexGrow="1"
-      height="1px"
+      flexGrow={1}
+      height={1}
       backgroundColor="border"
       position="relative"
       aria-hidden="true"
@@ -125,13 +125,13 @@ function StepConnection({ isActive = false, ...props }: StepConnectionProps) {
         top={0}
         height="100%"
         backgroundColor="text"
-        width={isActive ? '100%' : '0'}
+        width={isActive ? '100%' : 0}
         transition="width 0.1s ease-out"
       />
     </Div>
   )
 }
-  
+
 export default function Stepper({ stepIndex, steps }: StepperProps) {
   const circleSize = 48
 

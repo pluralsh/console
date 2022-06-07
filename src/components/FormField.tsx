@@ -47,7 +47,7 @@ ref: Ref<any>
         </P>
         <Div flexGrow={1} />
         <P
-          ml={0.5}
+          marginLeft="xsmall"
           caption
           truncate
           flexShrink={1}
@@ -57,8 +57,8 @@ ref: Ref<any>
         </P>
       </Flex>
       <Div
-        mt={label || caption ? 0.5 : 0}
-        mb={hint ? 0.5 : 0}
+        marginTop={label || caption ? 'xsmall' : 0}
+        marginBottom={hint ? 'xsmall' : 0}
       >
         {children}
       </Div>

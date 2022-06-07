@@ -50,10 +50,10 @@ function AlertRef({ children, severity = 'info', title = '', onClose, ...props }
       ref={ref}
       align="center"
       position="relative"
-      py={1}
-      px={2}
+      paddingVertical="medium"
+      paddingHorizontal="xlarge"
       backgroundColor={severityToBackgroundColor[severity]}
-      borderRadius={4}
+      borderRadius="medium"
       {...props}
     >
       {typeof onClose === 'function' && (
@@ -75,12 +75,12 @@ function AlertRef({ children, severity = 'info', title = '', onClose, ...props }
         color={color}
         flexShrink={0}
       />
-      <Div ml={2}>
+      <Div marginLeft="xlarge">
         {!!title && (
           <P
             body1
             fontWeight="bold"
-            mb={children ? 1 : 0}
+            marginBottom={children ? 'medium' : 0}
           >
             {title}
           </P>

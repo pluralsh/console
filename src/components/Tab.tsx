@@ -25,8 +25,8 @@ function Tab({ startIcon, active, children, vertical, ...props }: TagProps) {
       {...props}
     >
       <Flex
-        py={0.5}
-        px={1}
+        paddingVertical="xsmall"
+        paddingHorizontal="medium"
         align="center"
         borderBottom={vertical ? null : `2px solid ${active ? 'border-primary' : 'transparent'}`}
         borderRight={vertical ? `2px solid ${active ? 'border-primary' : 'transparent'}` : null}
@@ -36,7 +36,7 @@ function Tab({ startIcon, active, children, vertical, ...props }: TagProps) {
         transition="background-color 150ms ease, border-color 150ms ease, color 150ms ease"
       >
         {!!startIcon && (
-          <Icon mr="12px">
+          <Icon marginRight="small">
             {startIcon}
           </Icon>
         )}

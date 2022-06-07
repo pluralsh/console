@@ -33,7 +33,7 @@ ref: Ref<any>
   return (
     <Div
       ref={ref}
-      p={1}
+      padding="medium"
       borderRadius="large"
       border="1px solid border"
       backgroundColor="fill-one"
@@ -49,7 +49,7 @@ ref: Ref<any>
           alt="Logo"
           width={50}
           height={50}
-          borderRadius={4}
+          borderRadius="medium"
           objectFit="cover"
         />
         <Div ml={1}>
@@ -65,16 +65,16 @@ ref: Ref<any>
         </Div>
       </Flex>
       <P
-        mt={0.5}
+        marginTop="xsmall"
         color="text-light"
       >
         {description}
       </P>
-      <Div mt={0.5}>
+      <Div marginTop="xsmall">
         {tags.map(tag => (
           <Tag
             key={tag}
-            mr={0.5}
+            marginRight="medium"
             backgroundColor="fill-two"
           >
             {tag}

@@ -38,7 +38,7 @@ function Template(args: any) {
           Inactive tab
         </Tab>
       </Flex>
-      <Flex mt={2}>
+      <Flex marginTop="xlarge">
         <Tab
           startIcon={<ErrorIcon />}
           active={active === 0}
@@ -105,7 +105,7 @@ function Template2(args: any) {
         </Tab>
       </Flex>
       <Flex
-        mt={2}
+        marginTop="xlarge"
         direction="column"
         width={256 - 64}
       >

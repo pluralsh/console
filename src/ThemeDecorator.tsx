@@ -7,7 +7,7 @@ function ThemeDecorator(Story: ComponentType) {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Div p={2}>
+      <Div padding="xlarge">
         <Story />
       </Div>
     </ThemeProvider>
