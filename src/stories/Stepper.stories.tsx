@@ -1,5 +1,5 @@
 import Stepper from '../components/Stepper'
-import type { StepBaseProps } from '../components/Stepper'
+import type { StepperSteps } from '../components/Stepper'
 
 import BrowserIcon from '../components/icons/BrowserIcon'
 import CloudIcon from '../components/icons/CloudIcon'
@@ -19,11 +19,11 @@ function Template(args: any) {
   )
 }
 
-const steps:StepBaseProps[] = [
-  { stepTitle: 'Create a repository', IconComponent: GitHubIcon },
-  { stepTitle: <>Choose a&nbsp;cloud</>, IconComponent: CloudIcon },
-  { stepTitle: 'Configure repository', IconComponent: GearTrainIcon },
-  { stepTitle: <>Launch the&nbsp;app</>, IconComponent: BrowserIcon },
+const steps:StepperSteps = [
+  { key: 'create-repo', stepTitle: 'Create a repository', IconComponent: GitHubIcon },
+  { key: 'choose-cloud', stepTitle: <>Choose a&nbsp;cloud</>, IconComponent: CloudIcon },
+  { key: 'configure-repo', stepTitle: 'Configure repository', IconComponent: GearTrainIcon },
+  { key: 'launch-app', stepTitle: <>Launch the&nbsp;app</>, IconComponent: BrowserIcon },
 ]
 
 export const Default = Template.bind({})

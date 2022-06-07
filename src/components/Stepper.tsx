@@ -1,4 +1,5 @@
 import { Div, DivProps, Flex } from 'honorable'
+import { Fragment } from 'react'
 
 import type { ReactNode } from 'react'
 
@@ -7,31 +8,34 @@ import StatusIpIcon from './icons/StatusIpIcon'
 import type createIcon from './icons/createIcon'
 
 export type StepBaseProps = {
-    stepTitle:ReactNode,
-    IconComponent: ReturnType<typeof createIcon>,
-    iconSize?: number,
+  stepTitle: ReactNode,
+  IconComponent: ReturnType<typeof createIcon>,
+  iconSize?: number,
 }
 
 type StepProps = DivProps & StepBaseProps & {
-  isActive?:boolean,
+  isActive?: boolean,
   isComplete?: boolean,
   circleSize?: number,
 }
 
+export type StepperSteps = (StepBaseProps & { key: string })[]
+
 export type StepperProps = DivProps & {
-    stepIndex: number,
-    steps: [StepBaseProps]
+  stepIndex: number,
+  steps: StepperSteps,
 }
 
 type StepConnectionProps = DivProps & {
   isActive: boolean;
 }
 
-function Step({
+export function Step({
   isActive = false,
   isComplete = false,
   stepTitle,
   IconComponent,
+  iconSize = 24,
   circleSize = 48,
   ...props
 }: StepProps) {
@@ -64,7 +68,7 @@ function Step({
         marginRight="auto"
         borderRadius={1000}
         backgroundColor="fill-one"
-        border={`1px solid ${isActive ? 'grey.50' : 'grey.800'}`}
+        border="1px solid border"
         transition="all 0.2s ease"
         transitionDelay="0.1"
       >
@@ -77,7 +81,10 @@ function Step({
           className={isComplete ? '' : shownClassName}
           {...completeIconStyles}
         >
-          <IconComponent color={isActive ? 'action-link-active' : 'text-xlight'} />
+          <IconComponent
+            size={iconSize}
+            color={isActive ? 'action-link-active' : 'text-xlight'}
+          />
         </Flex>
         <Flex
           width="100%"
@@ -108,7 +115,7 @@ function Step({
   )
 }
 
-function StepConnection({ isActive = false, ...props }: StepConnectionProps) {
+export function StepConnection({ isActive = false, ...props }: StepConnectionProps) {
   return (
     <Div
       width="100%"
@@ -141,7 +148,7 @@ export default function Stepper({ stepIndex, steps }: StepperProps) {
       justifyContent="space-between"
     >
       {steps.map((step, index) => (
-        <>
+        <Fragment key={step.key}>
           <Step
             isActive={stepIndex === index}
             isComplete={stepIndex > index}
@@ -156,7 +163,7 @@ export default function Stepper({ stepIndex, steps }: StepperProps) {
               isActive={stepIndex > index}
             />
           )}
-        </>
+        </Fragment>
       ))}
     </Flex>
   )
