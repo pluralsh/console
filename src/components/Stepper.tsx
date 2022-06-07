@@ -8,13 +8,13 @@ import StatusIpIcon from './icons/StatusIpIcon'
 import type createIcon from './icons/createIcon'
 
 export type StepBaseProps = {
-  stepTitle:ReactNode,
+  stepTitle: ReactNode,
   IconComponent: ReturnType<typeof createIcon>,
   iconSize?: number,
 }
 
 type StepProps = DivProps & StepBaseProps & {
-  isActive?:boolean,
+  isActive?: boolean,
   isComplete?: boolean,
   circleSize?: number,
 }
