@@ -1,4 +1,5 @@
 import { Div, DivProps, Flex } from 'honorable'
+import { Fragment } from 'react'
 
 import type { ReactNode } from 'react'
 
@@ -7,9 +8,9 @@ import StatusIpIcon from './icons/StatusIpIcon'
 import type createIcon from './icons/createIcon'
 
 export type StepBaseProps = {
-    stepTitle:ReactNode,
-    IconComponent: ReturnType<typeof createIcon>,
-    iconSize?: number,
+  stepTitle:ReactNode,
+  IconComponent: ReturnType<typeof createIcon>,
+  iconSize?: number,
 }
 
 type StepProps = DivProps & StepBaseProps & {
@@ -18,9 +19,11 @@ type StepProps = DivProps & StepBaseProps & {
   circleSize?: number,
 }
 
+export type StepperSteps = (StepBaseProps & { key: string })[]
+
 export type StepperProps = DivProps & {
-    stepIndex: number,
-    steps: [StepBaseProps]
+  stepIndex: number,
+  steps: StepperSteps,
 }
 
 type StepConnectionProps = DivProps & {
@@ -145,7 +148,7 @@ export default function Stepper({ stepIndex, steps }: StepperProps) {
       justifyContent="space-between"
     >
       {steps.map((step, index) => (
-        <>
+        <Fragment key={step.key}>
           <Step
             isActive={stepIndex === index}
             isComplete={stepIndex > index}
@@ -160,7 +163,7 @@ export default function Stepper({ stepIndex, steps }: StepperProps) {
               isActive={stepIndex > index}
             />
           )}
-        </>
+        </Fragment>
       ))}
     </Flex>
   )
