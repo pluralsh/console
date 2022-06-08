@@ -11,17 +11,21 @@ config :botanist,
   ecto_repo: Console.Repo
 
 replicas = get_env("REPLICAS", "1") |> String.to_integer()
-nodes = Enum.map(0..(replicas - 1), & :"console@console-#{&1}.console-headless.#{get_env("NAMESPACE")}.svc.cluster.local")
 
 config :console,
-  replicas: replicas,
-  nodes: nodes
+  replicas: replicas
 
 config :libcluster,
   topologies: [
-    watchman: [
-      strategy: Cluster.Strategy.Epmd,
-      config: [hosts: nodes]
+    console: [
+      strategy: Cluster.Strategy.Kubernetes,
+      config: [
+        mode: :ip,
+        kubernetes_node_basename: "console",
+        kubernetes_selector: "app.kubernetes.io/name=console",
+        kubernetes_namespace: get_env("NAMESPACE"),
+        polling_interval: 10_000
+      ]
     ]
   ]
 
