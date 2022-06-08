@@ -6,6 +6,7 @@ export default createIcon(({ size, color, ...props }) => (
     viewBox="0 0 16 16"
     width={size}
     xmlns="http://www.w3.org/2000/svg"
+    overflow="visible"
     {...props}
   >
     <path

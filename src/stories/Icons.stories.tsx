@@ -8,6 +8,7 @@ import CheckIcon from '../components/icons/CheckIcon'
 import ChecklistIcon from '../components/icons/ChecklistIcon'
 import ChronjobIcon from '../components/icons/ChronjobIcon'
 import CloseIcon from '../components/icons/CloseIcon'
+import CloudIcon from '../components/icons/CloudIcon'
 import ClusterIcon from '../components/icons/ClusterIcon'
 import CollapseIcon from '../components/icons/CollapseIcon'
 import ComponentsIcon from '../components/icons/ComponentsIcon'
@@ -109,6 +110,7 @@ const icons = {
   ChecklistIcon,
   ChronjobIcon,
   CloseIcon,
+  CloudIcon,
   ClusterIcon,
   CollapseIcon,
   ComponentsIcon,
