@@ -22,7 +22,7 @@ config :libcluster,
       config: [
         mode: :ip,
         kubernetes_node_basename: "console",
-        kubernetes_selector: "app.kubernetes.io/name=console",
+        kubernetes_selector: "app=console",
         kubernetes_namespace: get_env("NAMESPACE"),
         polling_interval: 10_000
       ]
