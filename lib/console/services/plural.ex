@@ -5,6 +5,8 @@ defmodule Console.Services.Plural do
   alias Kube.Application
   use Nebulex.Caching
 
+  @ttl Nebulex.Time.expiry_time(1, :hour)
+
   @decorate cacheable(cache: Console.Cache, key: {:app, name}, opts: [ttl: @ttl], match: &allow/1)
   def application(name) do
     Kube.Client.get_application(name)
