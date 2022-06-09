@@ -1,5 +1,10 @@
 module.exports = {
-  extends: ['pluralsh', 'plugin:@typescript-eslint/eslint-recommended', 'plugin:@typescript-eslint/recommended', 'plugin:storybook/recommended'],
+  extends: [
+    'pluralsh',
+    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:storybook/recommended',
+  ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     parser: '@babel/eslint-parser',
@@ -21,7 +26,9 @@ module.exports = {
   globals: {
     JSX: true,
   },
-  plugins: ['@typescript-eslint'],
+  plugins: [
+    '@typescript-eslint',
+  ],
   rules: {
     'import/extensions': 'off',
     'import/no-unresolved': 'off',
