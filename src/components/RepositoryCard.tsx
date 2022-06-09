@@ -31,8 +31,9 @@ function RepositoryCardRef({
 ref: Ref<any>
 ) {
   return (
-    <Div
+    <Flex
       ref={ref}
+      direction="column"
       padding="medium"
       borderRadius="large"
       border="1px solid border"
@@ -70,6 +71,7 @@ ref: Ref<any>
       >
         {description}
       </P>
+      <Div flexGrow={1} />
       <Div marginTop="xsmall">
         {tags.map(tag => (
           <Tag
@@ -81,7 +83,7 @@ ref: Ref<any>
           </Tag>
         ))}
       </Div>
-    </Div>
+    </Flex>
   )
 }
 
