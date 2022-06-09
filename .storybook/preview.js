@@ -9,6 +9,11 @@ export const parameters = {
       date: /Date$/,
     },
   },
+  options: {
+    storySort: {
+      order: ['Semantic System', '*'],
+    },
+  },
 }
 
 export const decorators = [ThemeDecorator]
