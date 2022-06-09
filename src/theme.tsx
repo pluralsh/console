@@ -93,6 +93,12 @@ const borderRadiuses = {
   normal: 3, // deprecated in favor of medium
 }
 
+const boxShadows = {
+  slight: '0px 2px 4px transparency(grey.950, 88), 0px 3px 6px transparency(grey.950, 85)',
+  moderate: '0px 3px 6px transparency(grey.950, 80), 0px 10px 20px transparency(grey.950, 70)',
+  modal: '0px 20px 50px transparency(grey.950, 40)',
+}
+
 const spacing = {
   xxxsmall: 2,
   xxsmall: 4,
@@ -105,6 +111,7 @@ const spacing = {
   xxxlarge: 64,
   xxxxlarge: 96,
 }
+
 const spacers = {
   margin: ['margin'],
   marginTop: ['marginTop'],
@@ -123,7 +130,7 @@ const spacers = {
 }
 
 export default mergeTheme(defaultTheme, {
-  name: 'plural',
+  name: 'Plural',
   mode: 'dark',
   colors: {
     // Base palette,
@@ -191,19 +198,16 @@ export default mergeTheme(defaultTheme, {
     ],
   },
   global: [
+    /* Spacing */
+    ...Object.entries(spacers).map(([key, nextKeys]) => (props: any) => props[key] && Object.fromEntries(nextKeys.map(nextKey => [nextKey, spacing[props[key]] || props[key]]))),
+    /* Border radiuses */
     ({ borderRadius }: any) => ({
       borderRadius: borderRadiuses[borderRadius] || borderRadius,
     }),
-    ({ font }: any) => font === 'action' && {
-      fontFamily: 'Monument',
-      letterSpacing: 1,
-      fontWeight: 500,
-    },
-    ({ hoverIndicator }: any) => hoverIndicator && {
-      '&:hover': {
-        backgroundColor: hoverIndicator,
-      },
-    },
+    /* Shadows */
+    ({ boxShadow }: any) => ({
+      boxShadow: boxShadows[boxShadow] || boxShadow,
+    }),
     ({ h1 }: any) => h1 && {
       fontFamily: fontFamilies.semi,
       fontSize: 72,
@@ -327,8 +331,18 @@ export default mergeTheme(defaultTheme, {
       fontSize: 18,
       lineHeight: '28px',
     },
-    /* Spacing */
-    ...Object.entries(spacers).map(([key, nextKeys]) => (props: any) => props[key] && Object.fromEntries(nextKeys.map(nextKey => [nextKey, spacing[props[key]] || props[key]]))),
+    /* Deprecated */
+    ({ font }: any) => font === 'action' && {
+      fontFamily: 'Monument',
+      letterSpacing: 1,
+      fontWeight: 500,
+    },
+    /* deprecated in favor of _hover */
+    ({ hoverIndicator }: any) => hoverIndicator && {
+      '&:hover': {
+        backgroundColor: hoverIndicator,
+      },
+    },
   ],
   A: {
     Root: [
@@ -563,11 +577,12 @@ export default mergeTheme(defaultTheme, {
   Menu: {
     Root: [
       {
-        elevation: 0,
         padding: '4px 0',
         backgroundColor: 'fill-one',
         border: '1px solid border',
         borderRadius: 'normal',
+        boxShadow: 'moderate',
+        elevation: 0, // reset from honorable-theme-default
       },
     ],
   },
