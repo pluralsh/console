@@ -9,7 +9,7 @@ import BreadcrumbProvider, { Breadcrumbs } from './Breadcrumbs'
 import Webhooks from './Webhooks'
 import Configuration from './Configuration'
 import Dashboards from './Dashboards'
-import { EnsureLogin } from './Login'
+import { EnsureLogin, LoginContext } from './Login'
 import Users from './Users'
 import { Installations, InstallationsProvider } from './Installations'
 import { LogViewer } from './Logs'
@@ -138,6 +138,21 @@ export function FlyoutContainer({width, header, close, modifier, children}) {
   )
 }
 
+function DemoBanner() {
+  const {configuration} = useContext(LoginContext)
+
+  if (!configuration.isDemoProject) return null
+
+  return (
+    <Box direction='row' fill='horizontal' pad={{vertical: 'small'}} justify='center' background='card' border={{color: 'orange',  size: '3px', side: 'top'}}>
+      <Box flex={false} direction='row' gap='xsmall' align='center'>
+        <Text size='small' color='tone-medium'>You are currently deployed on a plural demo GCP project, which will expire 6 hours after creation.  If you'd like to deploy on your own cloud, visit</Text>
+        <a href='https://docs.plural.sh/quickstart/getting-started' target="_blank" rel="noopener noreferrer">here</a>
+      </Box>
+    </Box>
+  )
+}
+
 export default function Console() {
   const [open, setOpen] = useState(false)
 
@@ -148,6 +163,7 @@ export default function Console() {
       <NavigationContext>
       <BreadcrumbProvider>
         <Box width='100vw' height='100vh'>
+          <DemoBanner />
           <Box flex={false} direction='row' align='center' background='backgroundDark' height={TOOLBAR_HEIGHT}
                  border={{side: 'bottom', color: 'sidebarBorder'}}>
             <Box flex={false} direction='row' align='center'>
