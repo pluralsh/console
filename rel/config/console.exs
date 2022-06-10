@@ -77,6 +77,7 @@ config :console,
   grafana_dns: get_env("GRAFANA_DNS"),
   piazza_secret: get_env("PIAZZA_WEBHOOK_SECRET"),
   cluster_name: get_env("CLUSTER_NAME"),
+  is_demo_project: !!get_env("IS_DEMO_PROJECT"),
   provider: provider
 
 if String.starts_with?(git_url, "https") do

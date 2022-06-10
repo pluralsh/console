@@ -82,5 +82,8 @@ secrets:
   plural_client_id: {{ .OIDC.ClientId }}
   plural_client_secret: {{ .OIDC.ClientSecret }}
 {{ end }}
+{{ if .Values.is_demo }}
+  is_demo: {{ .Values.is_demo }}
+{{ end }}
 
 license: {{ .License | quote }}
