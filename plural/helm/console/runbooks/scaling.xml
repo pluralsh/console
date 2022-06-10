@@ -16,13 +16,13 @@
       <box gap='xsmall'>
         <input placeholder="250m" label='CPU Request' name='cpu'>
           <valueFrom 
-            datasource="statefulset" 
+            datasource="deployment" 
             doc="kubernetes.raw" 
             path="spec.template.spec.containers[0].resources.requests.cpu" />
         </input>
         <input placeholder="1Gi" label='Memory Request' name='memory'>
           <valueFrom 
-            datasource="statefulset" 
+            datasource="deployment" 
             doc="kubernetes.raw" 
             path="spec.template.spec.containers[0].resources.requests.memory" />
         </input>
