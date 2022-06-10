@@ -1,4 +1,4 @@
-import { PropsWithChildren, ReactNode, Ref, forwardRef, useEffect, useRef, useState } from 'react'
+import { PropsWithChildren, ReactNode, Ref, forwardRef } from 'react'
 import { Div, DivProps, Flex, P } from 'honorable'
 import PropTypes from 'prop-types'
 
@@ -6,8 +6,6 @@ type FormFieldProps = DivProps & PropsWithChildren<{
   label?: ReactNode
   caption?: ReactNode
   hint?: ReactNode
-  valid?: boolean
-  error?: boolean
   required?: boolean
 }>
 
@@ -15,8 +13,6 @@ const propTypes = {
   label: PropTypes.node,
   caption: PropTypes.node,
   hint: PropTypes.node,
-  valid: PropTypes.bool,
-  error: PropTypes.bool,
   required: PropTypes.bool,
 }
 
@@ -25,8 +21,6 @@ function FormFieldRef({
   label,
   caption,
   hint,
-  valid,
-  error,
   required,
   ...props
 }: FormFieldProps,

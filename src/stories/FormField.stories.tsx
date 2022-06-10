@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Div, Flex, Input, P } from 'honorable'
+import { Flex, Input, P } from 'honorable'
 
 import FormField from '../components/FormField'
 import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
