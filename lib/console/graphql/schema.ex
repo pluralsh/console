@@ -95,8 +95,10 @@ defmodule Console.GraphQl.Schema do
   end
 
   object :console_configuration do
-    field :git_commit, :string
-    field :manifest,   :plural_manifest, resolve: fn
+    field :git_commit,      :string
+    field :is_demo_project, :boolean
+
+    field :manifest,        :plural_manifest, resolve: fn
       _, _, _ ->
         case Console.Plural.Manifest.get() do
           {:ok, _} = res -> res
