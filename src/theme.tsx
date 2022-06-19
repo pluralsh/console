@@ -182,7 +182,6 @@ export default mergeTheme(defaultTheme, {
     'icon-warning': 'yellow.400',
     'icon-error': 'red.400',
   },
-
   stylesheet: {
     html: [
       {
