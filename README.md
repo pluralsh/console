@@ -24,7 +24,7 @@ return (
 
 ## Development
 
-`npm i && npm start`
+`npm i && npm start` and view the storybook at http://localhost:6006
 
 ## Contributing
 
