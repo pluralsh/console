@@ -1,6 +1,7 @@
-import { PropsWithChildren, ReactNode, Ref, forwardRef, useState, useCallback } from 'react'
+import { PropsWithChildren, ReactNode, Ref, forwardRef, useCallback, useState } from 'react'
 import PropTypes from 'prop-types'
-import { InputProps, Input } from 'honorable'
+import { Input, InputProps } from 'honorable'
+
 import FormField from './FormField'
 
 export type ValidationResponse = {error: boolean, message: string} | null
@@ -17,20 +18,31 @@ const propTypes = {
   validation: PropTypes.func,
 }
 
-function ValidatedInputRef({label, hint, validation, onChange, width, ...input} : ValidatedInputProps, ref: Ref<any>) {
-    const [error, setError] = useState(null)
-    const wrappedOnChange = useCallback((e: any) => {
-        if (e.target?.value && validation) setError(validation(e.target.value))
-        if (onChange) onChange(e)
-    }, [onChange, validation])
+function ValidatedInputRef({ label, hint, validation, onChange, width, ...input } : ValidatedInputProps, ref: Ref<any>) {
+  const [error, setError] = useState(null)
+  const wrappedOnChange = useCallback((e: any) => {
+    if (e.target?.value && validation) setError(validation(e.target.value))
+    if (onChange) onChange(e)
+  }, [onChange, validation])
     
-    return (
-        <FormField label={label} hint={hint} caption={error?.message} width={width}>
-            <Input onChange={wrappedOnChange} width={width} {...input} error={error?.error} valid={error ? !error.error : null} />
-        </FormField>
-    )
+  return (
+    <FormField
+      ref={ref}
+      label={label}
+      hint={hint}
+      caption={error?.message}
+      width={width}
+    >
+      <Input
+        onChange={wrappedOnChange}
+        width={width}
+        {...input}
+        error={error?.error}
+        valid={error ? !error.error : null}
+      />
+    </FormField>
+  )
 }
-
 
 const ValidatedInput = forwardRef(ValidatedInputRef)
 
