@@ -641,6 +641,18 @@ export default mergeTheme(defaultTheme, {
       },
     ],
   },
+  Select: {
+    Root: [
+      {
+        border: '1px solid border-input',
+      },
+    ],
+    Menu: [
+      {
+        marginHorizontal: '-1px',
+      },
+    ],
+  },
   Switch: {
     Root: [
       ({ checked }: any) => ({
