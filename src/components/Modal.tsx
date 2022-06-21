@@ -17,12 +17,15 @@ function ModalRef({ children, title, onClose, ...props }: ModalProps, ref: Ref<a
     <HonorableModal
       ref={ref}
       onClose={onClose}
+      padding="large"
+      minWidth={512}
+      maxWidth={1024}
       {...props}
     >
       <Flex
         align="center"
         justify="space-between"
-        padding="medium"
+        marginBottom="large"
       >
         <P
           overline
@@ -31,11 +34,21 @@ function ModalRef({ children, title, onClose, ...props }: ModalProps, ref: Ref<a
           {title}
         </P>
         {typeof onClose === 'function' && (
-          <CloseIcon
-            size={24}
-            color="text-light"
-            onClick={onClose}
-          />
+          <Flex
+            align="center"
+            justify="center"
+            padding="small"
+            margin={-12}
+            borderRadius="50%"
+            cursor="pointer"
+            _hover={{ backgroundColor: 'fill-two-hover' }}
+          >
+            <CloseIcon
+              size={14}
+              color="text-light"
+              onClick={onClose}
+            />
+          </Flex>
         )}
       </Flex>
       {children}
