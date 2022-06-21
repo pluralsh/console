@@ -100,6 +100,7 @@ const boxShadows = {
 }
 
 const spacing = {
+  none: 0,
   xxxsmall: 2,
   xxsmall: 4,
   xsmall: 8,
@@ -198,7 +199,7 @@ export default mergeTheme(defaultTheme, {
   },
   global: [
     /* Spacing */
-    ...Object.entries(spacers).map(([key, nextKeys]) => (props: any) => props[key] && Object.fromEntries(nextKeys.map(nextKey => [nextKey, spacing[props[key]] || props[key]]))),
+    ...Object.entries(spacers).map(([key, nextKeys]) => (props: any) => props[key] !== null && typeof props[key] !== 'undefined' && Object.fromEntries(nextKeys.map(nextKey => [nextKey, spacing[props[key]] || props[key]]))),
     /* Border radiuses */
     ({ borderRadius }: any) => ({
       borderRadius: borderRadiuses[borderRadius] || borderRadius,
