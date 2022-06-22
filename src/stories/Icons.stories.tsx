@@ -2,6 +2,7 @@ import ArrowTopRightIcon from '../components/icons/ArrowTopRightIcon'
 import BotIcon from '../components/icons/BotIcon'
 import BrowserIcon from '../components/icons/BrowserIcon'
 import BundleIcon from '../components/icons/BundleIcon'
+import CameraIcon from '../components/icons/CameraIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'
 import CertificateIcon from '../components/icons/CertificateIcon'
 import CheckIcon from '../components/icons/CheckIcon'
@@ -81,6 +82,7 @@ import RocketIcon from '../components/icons/RocketIcon'
 import RunBookIcon from '../components/icons/RunBookIcon'
 import ScrollIcon from '../components/icons/ScrollIcon'
 import ScrollPlusIcon from '../components/icons/ScrollPlusIcon'
+import SearchIcon from '../components/icons/SearchIcon'
 import SendMessageIcon from '../components/icons/SendMessageIcon'
 import ServersIcon from '../components/icons/ServersIcon'
 import ShipIcon from '../components/icons/ShipIcon'
@@ -104,6 +106,7 @@ const icons = {
   BotIcon,
   BrowserIcon,
   BundleIcon,
+  CameraIcon,
   CaretDownIcon,
   CertificateIcon,
   CheckIcon,
@@ -183,6 +186,7 @@ const icons = {
   RunBookIcon,
   ScrollIcon,
   ScrollPlusIcon,
+  SearchIcon,
   SendMessageIcon,
   ServersIcon,
   ShipIcon,
