@@ -396,31 +396,40 @@ export default mergeTheme(defaultTheme, {
         ':disabled': {
           color: 'text-disabled',
           backgroundColor: 'action-primary-disabled',
+          ':hover': {
+            backgroundColor: 'action-primary-disabled',
+          },
         },
       },
       ({ secondary }: any) => secondary && {
         border: '1px solid border-input',
-        backgroundColor: 'fill-zero',
+        backgroundColor: 'transparent',
         ':hover': {
           backgroundColor: 'action-input-hover',
         },
         ':active': {
-          backgroundColor: 'fill-zero',
+          backgroundColor: 'transparent',
         },
         ':disabled': {
-          backgroundColor: 'fill-zero',
+          backgroundColor: 'transparent',
+          ':hover': {
+            backgroundColor: 'transparent',
+          },
         },
       },
       ({ tertiary }: any) => tertiary && {
-        backgroundColor: 'fill-zero',
+        backgroundColor: 'transparent',
         ':hover': {
           backgroundColor: 'action-input-hover',
         },
         ':active': {
-          backgroundColor: 'fill-zero',
+          backgroundColor: 'transparent',
         },
         ':disabled': {
-          backgroundColor: 'fill-zero',
+          backgroundColor: 'transparent',
+          ':hover': {
+            backgroundColor: 'transparent',
+          },
         },
       },
       ({ large }: any) => large && {
@@ -434,24 +443,24 @@ export default mergeTheme(defaultTheme, {
     ],
     StartIcon: [
       {
-        margin: '0 12px 0 0',
+        margin: '0 12px 0 0 !important',
       },
       ({ large }: any) => large && {
-        margin: '0 16px 0 0',
+        margin: '0 16px 0 0 !important',
       },
       ({ small }: any) => small && {
-        margin: '0 12px 0 0',
+        margin: '0 12px 0 0 !important',
       },
     ],
     EndIcon: [
       {
-        margin: '0 0 0 12px',
+        margin: '0 0 0 12px !important',
       },
       ({ large }: any) => large && {
-        margin: '0 0 0 16px',
+        margin: '0 0 0 16px !important',
       },
       ({ small }: any) => small && {
-        margin: '0 0 0 12px',
+        margin: '0 0 0 12px !important',
       },
     ],
   },
@@ -646,11 +655,6 @@ export default mergeTheme(defaultTheme, {
     Root: [
       {
         border: '1px solid border-input',
-      },
-    ],
-    Menu: [
-      {
-        marginHorizontal: '-1px',
       },
     ],
   },
