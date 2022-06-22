@@ -1,10 +1,20 @@
 import { Div, DivProps, Flex } from 'honorable'
-import { Children, ReactElement, useEffect, useState } from 'react'
+import { Children, ReactElement, Ref, forwardRef, useEffect, useState } from 'react'
 import { CSSTransition } from 'react-transition-group'
 import { keyframes } from '@emotion/react'
+import PropTypes from 'prop-types'
+
+type DotProps = DivProps & {
+  active?: boolean
+  size?: number
+}
 
 export type CarouselProps = DivProps & {
   autoAdvanceTime?: number
+}
+
+const propTypes = {
+  autoAdvanceTime: PropTypes.number,
 }
 
 const dotAnimationIn = keyframes`
@@ -18,11 +28,6 @@ const dotAnimationIn = keyframes`
   transform: scale(1)
 }
 `
-
-type DotProps = DivProps & {
-  active?: boolean
-  size?: number
-}
 
 function Dot({ active = false, size = 8, ...props }: DotProps) {
   return (
@@ -86,34 +91,34 @@ const transitionStyles = {
   },
 }
 
-export default function Carousel({ autoAdvanceTime = 10000, children, ...props }: CarouselProps) {
+function CarouselRef({ autoAdvanceTime = 10000, children, ...props }: CarouselProps, ref: Ref<any>) {
   const [activeIndex, setActiveIndex] = useState(0)
-  useEffect(() => {
-    if (autoAdvanceTime > 0) {
-      const timer = setTimeout(() => {
-        setActiveIndex(activeIndex >= Children.count(children) - 1 ? 0 : activeIndex + 1)
-      }, autoAdvanceTime)
 
-      return () => {
-        clearTimeout(timer)
-      }
+  useEffect(() => {
+    if (autoAdvanceTime <= 0) return
+
+    const timer = setTimeout(() => {
+      setActiveIndex(activeIndex >= Children.count(children) - 1 ? 0 : activeIndex + 1)
+    }, autoAdvanceTime)
+
+    return () => {
+      clearTimeout(timer)
     }
   }, [activeIndex, autoAdvanceTime, children])
 
   return (
     <Div
+      ref={ref}
       backgroundColor="fill-one"
       border="1px solid border"
       borderRadius="medium"
       {...props}
     >
-      <Flex
-        overflow="hidden"
-      >
+      <Flex overflow="hidden">
         {Children.map(children, (child: ReactElement, i: number) => (
           <Flex
             width="100%"
-            flexShrink="0"
+            flexShrink={0}
             justify="center"
             alignItems="stretch"
             transform={`translateX(${-i * 100}%)`}
@@ -141,7 +146,7 @@ export default function Carousel({ autoAdvanceTime = 10000, children, ...props }
         marginBottom="medium"
         justifyContent="center"
       >
-        {Children.map(children, (child: ReactElement, i: number) => (
+        {Children.map(children, (_child: ReactElement, i: number) => (
           <Dot
             active={activeIndex === i}
             onClick={() => {
@@ -153,3 +158,9 @@ export default function Carousel({ autoAdvanceTime = 10000, children, ...props }
     </Div>
   )
 }
+
+const Carousel = forwardRef(CarouselRef)
+
+Carousel.propTypes = propTypes
+
+export default Carousel
