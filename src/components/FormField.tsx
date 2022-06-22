@@ -1,5 +1,5 @@
 import { PropsWithChildren, ReactNode, Ref, forwardRef } from 'react'
-import { Div, DivProps, Flex, P } from 'honorable'
+import { Div, DivProps, Flex, P, Span } from 'honorable'
 import PropTypes from 'prop-types'
 
 type FormFieldProps = DivProps & PropsWithChildren<{
@@ -56,7 +56,7 @@ ref: Ref<any>
       >
         {children}
       </Div>
-      {hint}
+      {typeof hint === 'string' ? <Span color="text-light">{hint}</Span> : hint}
     </Div>
   )
 }
