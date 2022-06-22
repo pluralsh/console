@@ -46,7 +46,7 @@ function ValidatedInputRef({ label, hint, validation, onChange, width, caption, 
     >
       <Input
         onChange={wrappedOnChange}
-        width={width}
+        width="100%"
         {...input}
         error={error?.error}
         valid={error ? !error.error : null}
