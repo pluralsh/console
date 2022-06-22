@@ -543,7 +543,7 @@ export default mergeTheme(defaultTheme, {
         width: 256,
         border: '1px solid border-input',
         borderRadius: 'normal',
-        padding: '3px 16px',
+        padding: '0px 16px',
       }),
       ({ valid }: any) => valid && {
         borderColor: 'border-outline',
