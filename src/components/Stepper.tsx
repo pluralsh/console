@@ -21,7 +21,7 @@ type StepConnectionProps = DivProps & {
   isActive: boolean;
 }
 
-type StepperSteps = (StepBaseProps & { key: string })[]
+export type StepperSteps = (StepBaseProps & { key: string })[]
 
 type StepperProps = FlexProps & {
   stepIndex: number,
