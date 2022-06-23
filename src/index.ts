@@ -1,4 +1,12 @@
-export { Avatar, Button, Switch, Menu, MenuItem, Input } from 'honorable'
+export {
+  Avatar,
+  Button,
+  Input,
+  Menu,
+  MenuItem,
+  Modal,
+  Switch,
+} from 'honorable'
 
 // Icons
 export { default as ArrowTopRightIcon } from './components/icons/ArrowTopRightIcon'
@@ -111,8 +119,8 @@ export { default as Codeline } from './components/Codeline'
 export { default as Divider } from './components/Divider'
 export { default as FormField } from './components/FormField'
 export { default as InstalledLabel } from './components/InstalledLabel'
-export { default as Modal } from './components/Modal'
 export { default as ModalActions } from './components/ModalActions'
+export { default as ModalHeader } from './components/ModalHeader'
 export { default as ProgressBar } from './components/ProgressBar'
 export { default as Radio } from './components/Radio'
 export { default as RepositoryCard } from './components/RepositoryCard'
