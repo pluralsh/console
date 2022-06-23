@@ -61,6 +61,7 @@ import MailIcon from '../components/icons/MailIcon'
 import MarketIcon from '../components/icons/MarketIcon'
 import MarketPlusIcon from '../components/icons/MarketPlusIcon'
 import MessagesIcon from '../components/icons/MessagesIcon'
+import MoreIcon from '../components/icons/MoreIcon'
 import NetworkInIcon from '../components/icons/NetworkInIcon'
 import NetworkInterfaceIcon from '../components/icons/NetworkInterfaceIcon'
 import NewMailIcon from '../components/icons/NewMailIcon'
@@ -165,6 +166,7 @@ const icons = {
   MarketIcon,
   MarketPlusIcon,
   MessagesIcon,
+  MoreIcon,
   NetworkInIcon,
   NetworkInterfaceIcon,
   NewMailIcon,
