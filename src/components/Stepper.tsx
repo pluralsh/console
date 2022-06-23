@@ -1,13 +1,11 @@
-import { Div, DivProps, Flex } from 'honorable'
-import { Fragment } from 'react'
-
-import type { ReactNode } from 'react'
+import { Div, DivProps, Flex, FlexProps } from 'honorable'
+import { Fragment, ReactNode, Ref, forwardRef } from 'react'
+import PropTypes from 'prop-types'
 
 import StatusIpIcon from './icons/StatusIpIcon'
-
 import type createIcon from './icons/createIcon'
 
-export type StepBaseProps = {
+type StepBaseProps = {
   stepTitle: ReactNode,
   IconComponent: ReturnType<typeof createIcon>,
   iconSize?: number,
@@ -19,18 +17,29 @@ type StepProps = DivProps & StepBaseProps & {
   circleSize?: number,
 }
 
-export type StepperSteps = (StepBaseProps & { key: string })[]
-
-export type StepperProps = DivProps & {
-  stepIndex: number,
-  steps: StepperSteps,
-}
-
 type StepConnectionProps = DivProps & {
   isActive: boolean;
 }
 
-export function Step({
+export type StepperSteps = (StepBaseProps & { key: string })[]
+
+type StepperProps = FlexProps & {
+  stepIndex: number,
+  steps: StepperSteps,
+}
+
+const propTypes = {
+  stepIndex: PropTypes.number.isRequired,
+  steps: PropTypes.arrayOf(
+    PropTypes.shape({
+      stepTitle: PropTypes.node.isRequired,
+      IconComponent: PropTypes.func.isRequired,
+      iconSize: PropTypes.number,
+    }).isRequired
+  ).isRequired,
+}
+
+function Step({
   isActive = false,
   isComplete = false,
   stepTitle,
@@ -115,7 +124,7 @@ export function Step({
   )
 }
 
-export function StepConnection({ isActive = false, ...props }: StepConnectionProps) {
+function StepConnection({ isActive = false, ...props }: StepConnectionProps) {
   return (
     <Div
       width="100%"
@@ -139,11 +148,12 @@ export function StepConnection({ isActive = false, ...props }: StepConnectionPro
   )
 }
 
-export default function Stepper({ stepIndex, steps }: StepperProps) {
+function StepperRef({ stepIndex, steps }: StepperProps, ref: Ref<any>) {
   const circleSize = 48
 
   return (
     <Flex
+      ref={ref}
       width="100%"
       justifyContent="space-between"
     >
@@ -168,3 +178,10 @@ export default function Stepper({ stepIndex, steps }: StepperProps) {
     </Flex>
   )
 }
+
+const Stepper = forwardRef(StepperRef)
+
+// @ts-expect-error
+Stepper.propTypes = propTypes
+
+export default Stepper
