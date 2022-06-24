@@ -1,5 +1,7 @@
 import { Flex } from 'honorable'
 
+import { StatusOkIcon } from '..'
+
 import Chip from '../components/Chip'
 
 export default {
@@ -157,6 +159,50 @@ function Template() {
         </Chip>
         <Chip
           loading
+          marginLeft="medium"
+          severity="error"
+          size="large"
+        >
+          Error
+        </Chip>
+      </Flex>
+      <Flex
+        align="center"
+        marginBottom="xlarge"
+      >
+        <Chip
+          icon={<StatusOkIcon />}
+          severity="neutral"
+          size="large"
+        >
+          Neutral
+        </Chip>
+        <Chip
+          icon={<StatusOkIcon />}
+          marginLeft="medium"
+          severity="info"
+          size="large"
+        >
+          Info
+        </Chip>
+        <Chip
+          icon={<StatusOkIcon />}
+          marginLeft="medium"
+          severity="success"
+          size="large"
+        >
+          Success
+        </Chip>
+        <Chip
+          icon={<StatusOkIcon />}
+          marginLeft="medium"
+          severity="warning"
+          size="large"
+        >
+          Warning
+        </Chip>
+        <Chip
+          icon={<StatusOkIcon />}
           marginLeft="medium"
           severity="error"
           size="large"

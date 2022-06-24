@@ -1,18 +1,18 @@
-import { ReactNode, Ref, forwardRef } from 'react'
+import { ReactElement, Ref, forwardRef } from 'react'
 import { Flex, FlexProps, P, Spinner } from 'honorable'
 import PropTypes from 'prop-types'
 
 type ChipProps = FlexProps & {
   size?: 'medium' | 'large' | string
   severity?: 'neutral' | 'info' | 'success' | 'warning' | 'error' | string
-  icon?: ReactNode,
+  icon?: ReactElement,
   loading?: boolean
 }
 
 const propTypes = {
   size: PropTypes.oneOf(['medium', 'large']),
   severity: PropTypes.oneOf(['neutral', 'info', 'success', 'warning', 'error']),
-  icon: PropTypes.node,
+  icon: PropTypes.element,
   loading: PropTypes.bool,
 }
 
@@ -32,6 +32,8 @@ function ChipRef({
   icon,
   ...props
 }: ChipProps, ref: Ref<any>) {
+  const col = severityToColor[severity] || 'text-light'
+
   return (
     <Flex
       ref={ref}
@@ -46,15 +48,21 @@ function ChipRef({
     >
       {loading && (
         <Spinner
-          color={severityToColor[severity] || 'text-light'}
+          color={col}
           size={size === 'large' ? 15 : 13}
           marginRight="xsmall"
         />
       )}
-      {icon}
+      {icon && (
+        <icon.type
+          size={size === 'large' ? 15 : 13}
+          marginRight="xsmall"
+          color={col}
+        />
+      )}
       <P
         body2
-        color={severityToColor[severity] || 'text-light'}
+        color={col}
       >
         {children}
       </P>
