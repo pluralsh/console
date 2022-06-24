@@ -115,6 +115,7 @@ export { default as WebhooksIcon } from './components/icons/WebhooksIcon'
 // Components
 export { default as Alert } from './components/Alert'
 export { default as Checkbox } from './components/Checkbox'
+export { default as Chip } from './components/Chip'
 export { default as Codeline } from './components/Codeline'
 export { default as Divider } from './components/Divider'
 export { default as FormField } from './components/FormField'
