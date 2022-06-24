@@ -33,9 +33,9 @@ function ModalHeaderRef({ children, onClose, ...props }: ModalHeaderProps, ref: 
         <Flex
           align="center"
           justify="center"
-          padding="small"
+          padding="xsmall"
           margin={-12}
-          borderRadius="50%"
+          borderRadius="medium"
           cursor="pointer"
           _hover={{ backgroundColor: 'fill-two-hover' }}
           onClick={onClose}

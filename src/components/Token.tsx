@@ -20,7 +20,7 @@ function TokenRef({ children, onClose = () => {}, ...props }: TokenProps, ref: R
       paddingLeft="small"
       display="inline-flex"
       align="center"
-      borderRadius={18}
+      borderRadius="medium"
       backgroundColor="fill-one"
       border="1px solid border"
       overflow="hidden"
@@ -30,7 +30,7 @@ function TokenRef({ children, onClose = () => {}, ...props }: TokenProps, ref: R
       <Flex
         padding="xsmall"
         marginHorizontal="xxsmall"
-        borderRadius="50%"
+        borderRadius="medium"
         align="center"
         justify="center"
         cursor="pointer"
