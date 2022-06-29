@@ -2,7 +2,7 @@ import { Div, DivProps, Flex, FlexProps } from 'honorable'
 import { Fragment, ReactNode, Ref, forwardRef } from 'react'
 import PropTypes from 'prop-types'
 
-import StatusIpIcon from './icons/StatusIpIcon'
+import StatusOkIcon from './icons/StatusOkIcon'
 import type createIcon from './icons/createIcon'
 
 type StepBaseProps = {
@@ -104,7 +104,7 @@ function Step({
           className={isComplete ? shownClassName : ''}
           {...completeIconStyles}
         >
-          <StatusIpIcon
+          <StatusOkIcon
             color="#17E86E"
             size={24}
           />
