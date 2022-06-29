@@ -133,6 +133,7 @@ export { default as TipCarousel } from './components/TipCarousel'
 export { default as Token } from './components/Token'
 export { default as UserCard } from './components/UserCard'
 export { default as ValidatedInput } from './components/ValidatedInput'
+export { default as Tooltip } from './components/Tooltip'
 // Hooks
 export { default as usePrevious } from './hooks/usePrevious'
 // Theme
