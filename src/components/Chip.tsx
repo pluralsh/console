@@ -18,7 +18,7 @@ const propTypes = {
 
 const severityToColor = {
   neutral: 'text-light',
-  info: 'text-primary',
+  info: 'text-primary-accent',
   success: 'text-success',
   warning: 'text-warning',
   error: 'text-error',
