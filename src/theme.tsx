@@ -202,12 +202,19 @@ export default mergeTheme(defaultTheme, {
   global: [
     /* Spacing */
     ...Object.entries(spacers).map(([key, nextKeys]) => (props: any) => props[key] !== null && typeof props[key] !== 'undefined' && Object.fromEntries(nextKeys.map(nextKey => [nextKey, spacing[props[key]] || props[key]]))),
+    ({ gap }: any) => typeof gap !== 'undefined' && {
+      gap: spacing[gap] || gap,
+    },
+    ({ fill }: any) => fill && {
+      width: '100%',
+      height: '100%',
+    },
     /* Border radiuses */
-    ({ borderRadius }: any) => ({
+    ({ borderRadius }: any) => typeof borderRadius !== 'undefined' && ({
       borderRadius: borderRadiuses[borderRadius] || borderRadius,
     }),
     /* Shadows */
-    ({ boxShadow }: any) => ({
+    ({ boxShadow }: any) => typeof boxShadow !== 'undefined' && ({
       boxShadow: boxShadows[boxShadow] || boxShadow,
     }),
     ({ h1 }: any) => h1 && {
