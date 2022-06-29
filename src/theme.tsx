@@ -205,7 +205,7 @@ export default mergeTheme(defaultTheme, {
     ({ gap }: any) => typeof gap !== 'undefined' && {
       gap: spacing[gap] || gap,
     },
-    ({ fill }: any) => fill && {
+    ({ fill }: any) => fill === true && { // === true to prevent the `fill` css property to apply here
       width: '100%',
       height: '100%',
     },
