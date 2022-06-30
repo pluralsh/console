@@ -271,7 +271,7 @@ export default mergeTheme(defaultTheme, {
     },
     ({ subtitle2 }: any) => subtitle2 && {
       fontFamily: fontFamilies.semi,
-      fontSize: 20,
+      fontSize: 18,
       lineHeight: '24px',
       fontWeight: 500,
       letterSpacing: 0,
