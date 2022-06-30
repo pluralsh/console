@@ -745,12 +745,23 @@ export default mergeTheme(defaultTheme, {
   Tooltip: {
     Root: [
       {
-        backgroundColor: 'fill-one',
+        caption: true,
+        backgroundColor: 'fill-two',
+        paddingVertical: 'xxsmall',
+        paddingHorizontal: 'xsmall',
+        borderRadius: 'medium',
+        boxShadow: 'moderate',
+        color: 'text-light',
       },
     ],
     Arrow: [
       {
-        backgroundColor: 'fill-one',
+        backgroundColor: 'fill-two',
+        borderRadius: '1px',
+        top: '50%',
+        left: 0,
+        transformOrigin: '50% 50%',
+        transform: 'translate(calc(-50% + 1px), -50%) scaleY(0.77) rotate(45deg)',
       },
     ],
   },

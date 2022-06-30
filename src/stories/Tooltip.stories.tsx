@@ -1,4 +1,6 @@
-import { Button, Tooltip } from 'honorable'
+import { Button } from 'honorable'
+
+import Tooltip from '../components/Tooltip'
 
 export default {
   title: 'Tooltip',
@@ -8,7 +10,7 @@ export default {
 function Template(args: any) {
   return (
     <Tooltip
-      label="Yeay!"
+      label="Yeah alright!"
       {...args}
     >
       <Button>
