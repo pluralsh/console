@@ -311,6 +311,13 @@ export default mergeTheme(defaultTheme, {
       fontWeight: 700,
       letterSpacing: '0.5px',
     },
+    ({ buttonMedium }: any) => buttonMedium && {
+      fontFamily: fontFamilies.semi,
+      fontSize: 14,
+      lineHeight: '24px',
+      fontWeight: 500,
+      letterSpacing: '0.5px',
+    },
     ({ buttonLarge }: any) => buttonLarge && {
       fontFamily: fontFamilies.semi,
       fontSize: 16,
@@ -320,7 +327,7 @@ export default mergeTheme(defaultTheme, {
     },
     ({ buttonSmall }: any) => buttonSmall && {
       fontFamily: fontFamilies.semi,
-      fontSize: 14,
+      fontSize: 12,
       lineHeight: '24px',
       fontWeight: 500,
       letterSpacing: '0.5px',
@@ -393,13 +400,17 @@ export default mergeTheme(defaultTheme, {
   Button: {
     Root: [
       {
+        buttonMedium: true,
         display: 'flex',
-        font: 'action',
-        lineHeight: '24px',
         borderRadius: 'normal',
         backgroundColor: 'action-primary',
         border: '1px solid action-primary',
-        padding: '7px 16px !important',
+        paddingVertical: 'xsmall',
+        paddingHorizontal: 'medium',
+        _focusVisible: {
+          outline: 'none',
+          boxShadow: '0px 0px 0px 1.5px border-outline-focused',
+        },
         ':hover': {
           backgroundColor: 'action-primary-hover',
           border: '1px solid action-primary-hover',
@@ -459,12 +470,14 @@ export default mergeTheme(defaultTheme, {
         },
       },
       ({ large }: any) => large && {
-        padding: '11px 24px !important',
-        fontSize: 16,
+        buttonLarge: true,
+        paddingVertical: 'small',
+        paddingHorizontal: 'large',
       },
       ({ small }: any) => small && {
-        padding: '3px 12px !important',
-        fontSize: 12,
+        buttonSmall: true,
+        paddingVertical: 'xxsmall',
+        paddingHorizontal: 'small',
       },
     ],
     StartIcon: [
