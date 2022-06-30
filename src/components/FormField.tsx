@@ -1,11 +1,13 @@
 import { PropsWithChildren, ReactNode, Ref, forwardRef } from 'react'
-import { Div, DivProps, Flex, P, Span } from 'honorable'
+import { Div, DivProps, Flex, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 type FormFieldProps = DivProps & PropsWithChildren<{
   label?: ReactNode
   caption?: ReactNode
   hint?: ReactNode
+  length?: number,
+  maxLength?: number,
   required?: boolean
 }>
 
@@ -13,6 +15,8 @@ const propTypes = {
   label: PropTypes.node,
   caption: PropTypes.node,
   hint: PropTypes.node,
+  length: PropTypes.number,
+  maxLength: PropTypes.number,
   required: PropTypes.bool,
 }
 
@@ -21,6 +25,9 @@ function FormFieldRef({
   label,
   caption,
   hint,
+  error,
+  length,
+  maxLength,
   required,
   ...props
 }: FormFieldProps,
@@ -29,11 +36,11 @@ ref: Ref<any>
   return (
     <Div
       ref={ref}
-      width={256}
       {...props}
     >
       <Flex align="center">
         <P
+          body2
           fontWeight="bold"
           flexShrink={0}
         >
@@ -41,8 +48,8 @@ ref: Ref<any>
         </P>
         <Div flexGrow={1} />
         <P
-          marginLeft="xsmall"
-          caption
+          body2
+          marginLeft="medium"
           truncate
           flexShrink={1}
           color="text-light"
@@ -51,12 +58,37 @@ ref: Ref<any>
         </P>
       </Flex>
       <Div
-        marginTop={label || caption ? 'xsmall' : 0}
-        marginBottom={hint ? 'xsmall' : 0}
+        marginTop={label || caption ? 'xxsmall' : 0}
+        marginBottom={hint || maxLength ? 'xxsmall' : 0}
       >
         {children}
       </Div>
-      {typeof hint === 'string' ? <Span color="text-light">{hint}</Span> : hint}
+      <Flex
+        align="top"
+        color="text-light"
+      >
+        {typeof hint === 'string' ? (
+          <P
+            flexGrow={1}
+            caption
+            color={error ? 'text-error' : 'text-xlight'}
+          >
+            {hint}
+          </P>
+        ) : hint}
+        {typeof maxLength === 'number' && (
+          <P
+            caption
+            color="text-xlight"
+            marginLeft={hint ? 'medium' : 0}
+            whiteSpace="nowrap"
+            textAlign="right"
+            flexGrow={1}
+          >
+            {length} / {maxLength}
+          </P>
+        )}
+      </Flex>
     </Div>
   )
 }

@@ -166,7 +166,7 @@ export default mergeTheme(defaultTheme, {
     'border-input': 'grey.700',
     'border-fill-two': 'grey.750',
     'border-disabled': 'grey.700',
-    'border-outline': 'blue.300',
+    'border-outline-focused': 'blue.300',
     'border-primary': 'blue.400',
     'border-success': 'green.500',
     'border-warning': 'yellow.400',
@@ -564,48 +564,79 @@ export default mergeTheme(defaultTheme, {
   },
   Input: {
     Root: [
-      ({ focused }: any) => ({
-        color: focused ? 'text' : 'text-light',
-        width: 256,
+      {
+        display: 'flex',
+        justifyContent: 'space-between',
+        align: 'center',
+        body1: true,
+        height: 'auto',
+        width: 'auto',
+        paddingHorizontal: 'medium',
         border: '1px solid border-input',
         borderRadius: 'normal',
         padding: '0px 16px',
-      }),
+        _focusWithin: {
+          borderColor: 'border-outline-focused',
+          color: 'text',
+        },
+      },
       ({ valid }: any) => valid && {
         borderColor: 'border-outline',
       },
       ({ error }: any) => error && {
         borderColor: 'border-error',
       },
-      ({ large }: any) => large && {
-        padding: '7px 16px',
-      },
-      ({ small }: any) => small && {
-        padding: '0px 16px',
-      },
-    ],
-    // This duplication is wrong
-    // TODO update honorable to remove this
-    InputBase: [
-      ({ focused }: any) => ({
-        color: focused ? 'text' : 'text-light',
-      }),
       ({ small }: any) => small && {
         caption: true,
-        padding: '7px 0',
+      },
+      ({ disabled }: any) => disabled && {
+        backgroundColor: 'transparent',
+        color: 'text-disabled',
+        borderColor: 'border-disabled',
+      },
+    ],
+    InputBase: [
+      {
+        width: '100%',
+        flex: '1 1',
+        height: '40px',
+        lineHeight: '40px',
+        color: 'text-xlight',
+      },
+      ({ small }: any) => small && {
+        height: '32px',
+        lineHeight: '32px',
+      },
+      ({ large }: any) => large && {
+        height: '48px',
+        lineHeight: '48px',
+      },
+      ({ disabled }: any) => disabled && {
+        backgroundColor: 'transparent',
+        color: 'text-disabled',
+        _placeholder: {
+          color: 'text-disabled',
+        },
       },
     ],
     StartIcon: [
       {
-        marginRight: 8,
+        marginRight: 'xsmall',
       },
-      ({ small }: any) => small && {
-        marginTop: 6.5,
+      ({ disabled }: any) => disabled && {
+        '& *': {
+          color: 'text-disabled',
+        },
       },
     ],
     EndIcon: [
       {
-        marginLeft: 12,
+        marginLeft: 'small',
+      },
+      ({ disabled }: any) => disabled && {
+        '& *': {
+          color: 'text-disabled',
+        },
       },
     ],
   },
