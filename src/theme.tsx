@@ -765,4 +765,13 @@ export default mergeTheme(defaultTheme, {
       },
     ],
   },
+  Ul: {
+    Root: [
+      {
+        marginBlockStart: 0,
+        marginBlockEnd: 0,
+        paddingInlineStart: 24,
+      },
+    ],
+  },
 })
