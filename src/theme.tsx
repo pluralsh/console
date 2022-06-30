@@ -192,7 +192,7 @@ export default mergeTheme(defaultTheme, {
     html: [
       {
         fontSize: 14,
-        fontFamily: fontFamilies.semi,
+        fontFamily: fontFamilies.sans,
         backgroundColor: 'fill-zero',
       },
     ],
