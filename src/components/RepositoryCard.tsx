@@ -1,4 +1,4 @@
-import { Div, DivProps, Flex, Img, P } from 'honorable'
+import { Div, DivProps, Flex, H2, H3, Img, P } from 'honorable'
 import PropTypes from 'prop-types'
 import { Ref, forwardRef } from 'react'
 
@@ -44,45 +44,57 @@ ref: Ref<any>
       }}
       {...props}
     >
-      <Flex>
+      <Flex align="center">
         <Img
           src={imageUrl}
           alt="Logo"
-          width={50}
-          height={50}
+          width={56}
+          height={56}
           borderRadius="medium"
           objectFit="cover"
         />
-        <Div ml={1}>
-          <P
-            body0
-            fontWeight="bold"
+        <Div marginLeft="small">
+          <H2
+            subtitle2
+            color="text"
           >
             {title}
-          </P>
-          <P color="text-xlight">
+          </H2>
+          <H3
+            body2
+            color="text-xlight"
+          >
             {publisher}
-          </P>
+          </H3>
         </Div>
       </Flex>
-      <P
-        marginTop="xsmall"
-        color="text-light"
-      >
-        {description}
-      </P>
+      {description && (
+        <P
+          body2
+          marginTop="xsmall"
+          color="text-light"
+        >
+          {description}
+        </P>
+      )}
       <Div flexGrow={1} />
-      <Div marginTop="xsmall">
-        {tags.map(tag => (
-          <Tag
-            key={tag}
-            marginRight="medium"
-            backgroundColor="fill-two"
-          >
-            {tag}
-          </Tag>
-        ))}
-      </Div>
+      {tags && tags.length > 0 && (
+        <Flex
+          marginTop="xsmall"
+          gap="xsmall"
+          flexWrap="wrap"
+        >
+          {tags.map(tag => (
+            <Tag
+              key={tag}
+              _last={{ marginRight: 0 }}
+              backgroundColor="fill-two"
+            >
+              {tag}
+            </Tag>
+          ))}
+        </Flex>
+      )}
     </Flex>
   )
 }
