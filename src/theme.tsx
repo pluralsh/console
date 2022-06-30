@@ -398,58 +398,72 @@ export default mergeTheme(defaultTheme, {
         lineHeight: '24px',
         borderRadius: 'normal',
         backgroundColor: 'action-primary',
-        padding: '8px 16px',
+        border: '1px solid action-primary',
+        padding: '7px 16px !important',
         ':hover': {
           backgroundColor: 'action-primary-hover',
+          border: '1px solid action-primary-hover',
         },
         ':active': {
           backgroundColor: 'action-primary',
+          border: '1px solid action-primary',
         },
         ':disabled': {
           color: 'text-disabled',
           backgroundColor: 'action-primary-disabled',
+          border: '1px solid action-primary-disabled',
           ':hover': {
             backgroundColor: 'action-primary-disabled',
+            border: '1px solid action-primary-disabled',
           },
         },
       },
       ({ secondary }: any) => secondary && {
-        border: '1px solid border-input',
         backgroundColor: 'transparent',
+        border: '1px solid border-input',
         ':hover': {
           backgroundColor: 'action-input-hover',
+          border: '1px solid border-input',
         },
         ':active': {
           backgroundColor: 'transparent',
+          border: '1px solid border-input',
         },
         ':disabled': {
           backgroundColor: 'transparent',
+          border: '1px solid border-input',
           ':hover': {
             backgroundColor: 'transparent',
+            border: '1px solid border-input',
           },
         },
       },
       ({ tertiary }: any) => tertiary && {
         backgroundColor: 'transparent',
+        border: '1px solid transparent',
         ':hover': {
           backgroundColor: 'action-input-hover',
+          border: '1px solid transparent',
         },
         ':active': {
           backgroundColor: 'transparent',
+          border: '1px solid transparent',
         },
         ':disabled': {
           backgroundColor: 'transparent',
+          border: '1px solid transparent',
           ':hover': {
             backgroundColor: 'transparent',
+            border: '1px solid transparent',
           },
         },
       },
       ({ large }: any) => large && {
-        padding: '12px 24px',
+        padding: '11px 24px !important',
         fontSize: 16,
       },
       ({ small }: any) => small && {
-        padding: '4px 12px',
+        padding: '3px 12px !important',
         fontSize: 12,
       },
     ],
