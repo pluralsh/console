@@ -577,7 +577,6 @@ export default mergeTheme(defaultTheme, {
         padding: '0px 16px',
         _focusWithin: {
           borderColor: 'border-outline-focused',
-          color: 'text',
         },
       },
       ({ valid }: any) => valid && {
@@ -601,7 +600,10 @@ export default mergeTheme(defaultTheme, {
         flex: '1 1',
         height: '40px',
         lineHeight: '40px',
-        color: 'text-xlight',
+        color: 'text',
+        _placeholder: {
+          color: 'text-xlight',
+        },
       },
       ({ small }: any) => small && {
         height: '32px',
