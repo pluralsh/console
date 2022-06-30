@@ -1,4 +1,4 @@
-import { Flex, Input } from 'honorable'
+import { Div, Flex, Input } from 'honorable'
 
 import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'
@@ -10,20 +10,24 @@ export default {
 
 function Template(args: any) {
   return (
-    <Flex direction="column">
+    <Flex
+      direction="column"
+      maxWidth="400px"
+    >
       <Input {...args} />
-      <Input
-        marginTop="medium"
-        startIcon={<MagnifyingGlassIcon />}
-        endIcon={(
-          <CaretDownIcon
-            size={10}
-            mt={0.333}
-            mx="3px"
-          />
-        )}
-        {...args}
-      />
+      <Div marginTop="medium">
+        <Input
+          startIcon={<MagnifyingGlassIcon />}
+          endIcon={(
+            <CaretDownIcon
+              size={10}
+              mt={0.333}
+              mx="3px"
+            />
+          )}
+          {...args}
+        />
+      </Div>
     </Flex>
   )
 }
@@ -31,12 +35,6 @@ function Template(args: any) {
 export const Default = Template.bind({})
 
 Default.args = {
-}
-
-export const Valid = Template.bind({})
-
-Valid.args = {
-  valid: true,
 }
 
 export const Error = Template.bind({})
@@ -49,4 +47,11 @@ export const Placeholder = Template.bind({})
 
 Placeholder.args = {
   placeholder: 'A neat placeholder!',
+}
+
+export const Disabled = Template.bind({})
+
+Disabled.args = {
+  placeholder: 'Disabled placeholder',
+  disabled: true,
 }

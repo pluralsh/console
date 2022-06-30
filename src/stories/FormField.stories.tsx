@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Flex, Input, P } from 'honorable'
+import { Div, Input } from 'honorable'
 
 import FormField from '../components/FormField'
 import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
@@ -11,139 +11,166 @@ export default {
 }
 
 function Template(args: any) {
-  const { valid, error } = args
-
-  return (
-    <FormField {...args}>
-      <Input
-        valid={valid}
-        error={error}
-      />
-    </FormField>
-  )
-}
-
-const max = 160
-
-function FullTemplate(args: any) {
   const [value, setValue] = useState('')
-  const { valid, error, large, small } = args
+  const {
+    valid,
+    disabled,
+    error,
+    large,
+    small,
+    label,
+    caption,
+    maxLength,
+    hint,
+    startIcon,
+    endIcon,
+    ...restArgs
+  } = args
 
   return (
     <FormField
-      label="Label"
-      caption="Action"
-      hint={(
-        <Flex
-          caption
-          align="center"
-          color="text-light"
-        >
-          <P
-            flexGrow={1}
-            color={error ? 'icon-error' : null}
-          >
-            Hint text
-          </P>
-          <P marginLeft="xsmall">
-            {value.length} / {max}
-          </P>
-        </Flex>
-      )}
-      {...args}
+      label={label}
+      caption={caption}
+      hint={hint}
+      error={error}
+      disabled={disabled}
+      maxLength={maxLength}
+      length={value.length}
+      {...restArgs}
     >
       <Input
         value={value}
-        onChange={event => event.target.value.length <= max ? setValue(event.target.value) : null}
+        onChange={event => setValue(event.target.value.substring(0, maxLength))}
         valid={valid}
         error={error}
         large={large}
         small={small}
+        disabled={disabled}
         placeholder="Placeholder text"
-        startIcon={<MagnifyingGlassIcon />}
-        endIcon={(
-          <CaretDownIcon
-            size={10}
-            mt={0.333}
-            mx="3px"
-          />
-        )}
+        startIcon={startIcon}
+        endIcon={endIcon}
       />
     </FormField>
   )
 }
 
-function Template2(args: any) {
+function AllSizesTemplate(args: any) {
   return (
-    <>
-      <FullTemplate
+    <Div maxWidth="400px">
+      <Template
         large
         {...args}
       />
-      <FullTemplate
+      <Template
         marginTop="medium"
         {...args}
       />
-      <FullTemplate
+      <Template
         marginTop="medium"
         small
         {...args}
       />
-    </>
+    </Div>
   )
 }
 
-export const Full = Template2.bind({})
+export const Full = AllSizesTemplate.bind({})
 
 Full.args = {
-  error: false,
-  valid: false,
+  label: 'Label',
+  caption: 'Action',
+  maxLength: 120,
+  hint: 'Hint text',
+  startIcon: <MagnifyingGlassIcon />,
+  endIcon: <CaretDownIcon
+    size={10}
+    mt={0.333}
+    mx="3px"
+  />,
 }
 
-export const Default = Template.bind({})
+export const FullError = AllSizesTemplate.bind({})
+
+FullError.args = {
+  ...Full.args,
+  ...{
+    label: 'Password',
+    caption: 'At least 8 characters',
+    hint: 'Something is wrong',
+    error: true,
+  },
+}
+
+export const FullDisabled = AllSizesTemplate.bind({})
+
+FullDisabled.args = {
+  ...Full.args,
+  ...{
+    disabled: true,
+  },
+}
+
+export const Default = AllSizesTemplate.bind({})
 
 Default.args = {
 }
 
-export const Label = Template.bind({})
+export const Label = AllSizesTemplate.bind({})
 
 Label.args = {
   label: 'Email',
 }
 
-export const Required = Template.bind({})
+export const Required = AllSizesTemplate.bind({})
 
 Required.args = {
   label: 'Email',
   required: true,
 }
 
-export const Caption = Template.bind({})
+export const Caption = AllSizesTemplate.bind({})
 
 Caption.args = {
   label: 'Password',
   caption: 'At least 8 characters',
 }
 
-export const LongCaption = Template.bind({})
+export const LongCaption = AllSizesTemplate.bind({})
 
 LongCaption.args = {
-  label: 'Password',
+  label: 'Label',
   caption: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
 }
 
-export const Valid = Template.bind({})
+export const HintText = AllSizesTemplate.bind({})
 
-Valid.args = {
-  label: 'Password',
-  caption: 'At least 8 characters',
-  valid: true,
+HintText.args = {
+  label: 'Label',
+  hint: 'Some hint text',
 }
 
-export const Error = Template.bind({})
+export const MaxLength = AllSizesTemplate.bind({})
 
-Error.args = {
-  label: 'Password',
-  caption: 'At least 8 characters',
-  error: true,
+MaxLength.args = {
+  label: 'Label',
+  maxLength: 30,
 }
+
+export const ArbitraryHintContent = AllSizesTemplate.bind({})
+
+ArbitraryHintContent.args = {
+  label: 'Label',
+  hint: (
+    <Div
+      backgroundColor="fill-one"
+      padding="medium"
+      width="100%"
+      textAlign="center"
+      border="1px solid border"
+      borderRadius="medium"
+    >
+      Put whatever you want in the hint!
+    </Div>
+  ),
+}
+
