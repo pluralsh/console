@@ -405,8 +405,8 @@ export default mergeTheme(defaultTheme, {
         borderRadius: 'normal',
         backgroundColor: 'action-primary',
         border: '1px solid action-primary',
-        paddingVertical: 'xsmall',
-        paddingHorizontal: 'medium',
+        paddingVertical: spacing.xsmall - 1,
+        paddingHorizontal: spacing.medium - 1,
         _focusVisible: {
           outline: 'none',
           boxShadow: '0px 0px 0px 1.5px border-outline-focused',
@@ -492,13 +492,13 @@ export default mergeTheme(defaultTheme, {
       },
       ({ large }: any) => large && {
         buttonLarge: true,
-        paddingVertical: 'small',
-        paddingHorizontal: 'large',
+        paddingVertical: spacing.small - 1,
+        paddingHorizontal: spacing.large - 1,
       },
       ({ small }: any) => small && {
         buttonSmall: true,
-        paddingVertical: 'xxsmall',
-        paddingHorizontal: 'small',
+        paddingVertical: spacing.xxsmall - 1,
+        paddingHorizontal: spacing.small - 1,
       },
     ],
     StartIcon: [
@@ -632,20 +632,20 @@ export default mergeTheme(defaultTheme, {
       {
         width: '100%',
         flex: '1 1',
-        height: '40px',
-        lineHeight: '40px',
+        height: '38px',
+        lineHeight: '38px',
         color: 'text',
         _placeholder: {
           color: 'text-xlight',
         },
       },
       ({ small }: any) => small && {
-        height: '32px',
-        lineHeight: '32px',
+        height: '30px',
+        lineHeight: '30px',
       },
       ({ large }: any) => large && {
-        height: '48px',
-        lineHeight: '48px',
+        height: '46px',
+        lineHeight: '46px',
       },
       ({ disabled }: any) => disabled && {
         backgroundColor: 'transparent',
