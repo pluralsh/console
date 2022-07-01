@@ -274,7 +274,7 @@ export default function Directory() {
           label='Roles' 
           section='roles' 
           setSection={setSection} />
-        {me.roles.admin && (
+        {me.roles?.admin && (
           <SectionChoice
             icon={<Messages size='14px' />}
             label='Email Settings'

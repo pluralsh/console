@@ -8,7 +8,7 @@ const BOX_SIZE  = '28px'
 
 function SocialLink({icon, url}) {
   return (
-    <a href={url} target='_blank'>
+    <a href={url} target='_blank' rel='noopener noreferrer'>
     <Box width={BOX_SIZE} height={BOX_SIZE} align='center' justify='center'
          onClick={() => null} hoverIndicator='backgroundColor' round='xsmall'>
       {icon}
