@@ -72,3 +72,12 @@ Tertiary.args = {
   children: 'Tertiary Button',
   tertiary: true,
 }
+
+export const Destructive = Template.bind({})
+
+Destructive.args = {
+  disabled: false,
+  loading: false,
+  children: 'Destructive Button',
+  destructive: true,
+}

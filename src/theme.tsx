@@ -469,6 +469,27 @@ export default mergeTheme(defaultTheme, {
           },
         },
       },
+      ({ destructive }: any) => destructive && {
+        color: 'text-error',
+        backgroundColor: 'transparent',
+        border: '1px solid border-error',
+        ':hover': {
+          backgroundColor: 'action-input-hover',
+          border: '1px solid border-error',
+        },
+        ':active': {
+          backgroundColor: 'transparent',
+          border: '1px solid border-error',
+        },
+        ':disabled': {
+          backgroundColor: 'transparent',
+          border: '1px solid border-error',
+          ':hover': {
+            backgroundColor: 'transparent',
+            border: '1px solid border-error',
+          },
+        },
+      },
       ({ large }: any) => large && {
         buttonLarge: true,
         paddingVertical: 'small',
