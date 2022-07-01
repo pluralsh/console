@@ -17,7 +17,8 @@ const propTypes = {
 function Tab({ startIcon, active, children, vertical, ...props }: TagProps) {
   return (
     <Div
-      font="action"
+      buttonMedium
+      tabIndex={0}
       userSelect="none"
       cursor="pointer"
       borderBottom={vertical ? null : `1px solid ${active ? 'border-primary' : 'border'}`}
@@ -25,8 +26,9 @@ function Tab({ startIcon, active, children, vertical, ...props }: TagProps) {
       {...props}
     >
       <Flex
-        paddingVertical="xsmall"
         paddingHorizontal="medium"
+        paddingTop={vertical ? 'xsmall' : 'medium'}
+        paddingBottom="xsmall"
         align="center"
         borderBottom={vertical ? null : `2px solid ${active ? 'border-primary' : 'transparent'}`}
         borderRight={vertical ? `2px solid ${active ? 'border-primary' : 'transparent'}` : null}
