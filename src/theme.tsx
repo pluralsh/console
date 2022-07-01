@@ -483,10 +483,10 @@ export default mergeTheme(defaultTheme, {
         },
         ':disabled': {
           backgroundColor: 'transparent',
-          border: '1px solid border-error',
+          border: '1px solid border-disabled',
           ':hover': {
             backgroundColor: 'transparent',
-            border: '1px solid border-error',
+            border: '1px solid border-disabled',
           },
         },
       },
