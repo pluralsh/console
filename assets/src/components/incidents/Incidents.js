@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { Box, Drop, Text, TextInput, ThemeContext } from 'grommet'
-import { Scroller, Button, Check as Checkmark, Close, Notification, Explore as Search, User, Tag as TagIcon } from 'forge-core'
+import { Button, Check as Checkmark, Close, Notification, Explore as Search, User, Tag as TagIcon } from 'forge-core'
 import { SortAsc as Ascend, SortDesc as Descend, Filters as FiltersI } from 'forge-core'
 import { Next } from 'grommet-icons'
 import { useQuery } from 'react-apollo'
