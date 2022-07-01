@@ -311,6 +311,13 @@ export default mergeTheme(defaultTheme, {
       fontWeight: 700,
       letterSpacing: '0.5px',
     },
+    ({ buttonMedium }: any) => buttonMedium && {
+      fontFamily: fontFamilies.semi,
+      fontSize: 14,
+      lineHeight: '24px',
+      fontWeight: 500,
+      letterSpacing: '0.5px',
+    },
     ({ buttonLarge }: any) => buttonLarge && {
       fontFamily: fontFamilies.semi,
       fontSize: 16,
@@ -320,7 +327,7 @@ export default mergeTheme(defaultTheme, {
     },
     ({ buttonSmall }: any) => buttonSmall && {
       fontFamily: fontFamilies.semi,
-      fontSize: 14,
+      fontSize: 12,
       lineHeight: '24px',
       fontWeight: 500,
       letterSpacing: '0.5px',
@@ -393,13 +400,17 @@ export default mergeTheme(defaultTheme, {
   Button: {
     Root: [
       {
+        buttonMedium: true,
         display: 'flex',
-        font: 'action',
-        lineHeight: '24px',
         borderRadius: 'normal',
         backgroundColor: 'action-primary',
         border: '1px solid action-primary',
-        padding: '7px 16px !important',
+        paddingVertical: spacing.xsmall - 1,
+        paddingHorizontal: spacing.medium - 1,
+        _focusVisible: {
+          outline: 'none',
+          boxShadow: '0px 0px 0px 1.5px border-outline-focused',
+        },
         ':hover': {
           backgroundColor: 'action-primary-hover',
           border: '1px solid action-primary-hover',
@@ -458,13 +469,36 @@ export default mergeTheme(defaultTheme, {
           },
         },
       },
+      ({ destructive }: any) => destructive && {
+        color: 'text-error',
+        backgroundColor: 'transparent',
+        border: '1px solid border-error',
+        ':hover': {
+          backgroundColor: 'action-input-hover',
+          border: '1px solid border-error',
+        },
+        ':active': {
+          backgroundColor: 'transparent',
+          border: '1px solid border-error',
+        },
+        ':disabled': {
+          backgroundColor: 'transparent',
+          border: '1px solid border-disabled',
+          ':hover': {
+            backgroundColor: 'transparent',
+            border: '1px solid border-disabled',
+          },
+        },
+      },
       ({ large }: any) => large && {
-        padding: '11px 24px !important',
-        fontSize: 16,
+        buttonLarge: true,
+        paddingVertical: spacing.small - 1,
+        paddingHorizontal: spacing.large - 1,
       },
       ({ small }: any) => small && {
-        padding: '3px 12px !important',
-        fontSize: 12,
+        buttonSmall: true,
+        paddingVertical: spacing.xxsmall - 1,
+        paddingHorizontal: spacing.small - 1,
       },
     ],
     StartIcon: [
@@ -598,20 +632,20 @@ export default mergeTheme(defaultTheme, {
       {
         width: '100%',
         flex: '1 1',
-        height: '40px',
-        lineHeight: '40px',
+        height: '38px',
+        lineHeight: '38px',
         color: 'text',
         _placeholder: {
           color: 'text-xlight',
         },
       },
       ({ small }: any) => small && {
-        height: '32px',
-        lineHeight: '32px',
+        height: '30px',
+        lineHeight: '30px',
       },
       ({ large }: any) => large && {
-        height: '48px',
-        lineHeight: '48px',
+        height: '46px',
+        lineHeight: '46px',
       },
       ({ disabled }: any) => disabled && {
         backgroundColor: 'transparent',

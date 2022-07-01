@@ -1,4 +1,4 @@
-import { Button } from 'honorable'
+import { Button, H1 } from 'honorable'
 
 import DownloadIcon from '../components/icons/DownloadIcon'
 
@@ -7,7 +7,7 @@ export default {
   component: Button,
 }
 
-function Template(args: any) {
+function TemplateBase(args: any) {
   return (
     <>
       <Button
@@ -47,6 +47,30 @@ function Template(args: any) {
   )
 }
 
+function Template(args: any) {
+  return (
+    <>
+      <H1
+        subtitle2
+        marginBottom="small"
+      >Enabled
+      </H1>
+
+      <TemplateBase {...args} />
+      <H1
+        subtitle2
+        marginTop="large"
+        marginBottom="small"
+      >Disabled
+      </H1>
+      <TemplateBase
+        {...args}
+        disabled
+      />
+    </>
+  )
+}
+
 export const Primary = Template.bind({})
 
 Primary.args = {
@@ -71,4 +95,13 @@ Tertiary.args = {
   loading: false,
   children: 'Tertiary Button',
   tertiary: true,
+}
+
+export const Destructive = Template.bind({})
+
+Destructive.args = {
+  disabled: false,
+  loading: false,
+  children: 'Destructive Button',
+  destructive: true,
 }
