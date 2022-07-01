@@ -1,4 +1,4 @@
-import { Div, Flex, Input } from 'honorable'
+import { Div, ExtendTheme, Flex, Input } from 'honorable'
 
 import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'
@@ -32,6 +32,68 @@ function Template(args: any) {
   )
 }
 
+function CustomInputTemplate() {
+  return (
+    <Flex
+      direction="column"
+      maxWidth="400px"
+    >
+      <ExtendTheme
+        theme={{
+          // Theme extension to give the Input a custom end icon
+          Input: {
+            Root: [
+              {
+                paddingRight: 0,
+              },
+            ],
+            EndIcon: [
+              {
+                alignSelf: 'stretch',
+                paddingHorizontal: 'small',
+                backgroundColor: 'fill-two',
+              },
+            ],
+          },
+        }}
+      >
+        <Div>
+          <Input
+            large
+            width="100%"
+            placeholder="my-company"
+            endIcon={(<>.onplural.sh</>)}
+          />
+        </Div>
+        <Div marginTop="medium">
+          <Input
+            width="100%"
+            placeholder="my-company"
+            endIcon={(
+              <>
+                .onplural.sh
+              </>
+            )}
+          />
+        </Div>
+        <Div marginTop="medium">
+          <Input
+            small
+            width="100%"
+            placeholder="my-company"
+            endIcon={(
+              <>
+                .onplural.sh
+              </>
+            )}
+          />
+        </Div>
+
+      </ExtendTheme>
+    </Flex>
+  )
+}
+
 export const Default = Template.bind({})
 
 Default.args = {
@@ -54,4 +116,10 @@ export const Disabled = Template.bind({})
 Disabled.args = {
   placeholder: 'Disabled placeholder',
   disabled: true,
+}
+
+export const CustomInput = CustomInputTemplate.bind({})
+
+CustomInput.args = {
+  
 }
