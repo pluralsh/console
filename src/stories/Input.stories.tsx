@@ -33,7 +33,7 @@ function Template(args: any) {
   )
 }
 
-function CustomInputTemplate(props) {
+function CustomInputTemplate(props:any) {
   return (
     <Flex
       direction="column"
