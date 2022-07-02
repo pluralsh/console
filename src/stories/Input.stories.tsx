@@ -1,7 +1,8 @@
-import { Div, Flex, Input } from 'honorable'
+import { Div, ExtendTheme, Flex } from 'honorable'
 
 import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'
+import Input from '../components/Input'
 
 export default {
   title: 'Input',
@@ -32,6 +33,36 @@ function Template(args: any) {
   )
 }
 
+function CustomInputTemplate(props:any) {
+  return (
+    <Flex
+      direction="column"
+      maxWidth="400px"
+    >
+      <Div>
+        <Input
+          large
+          width="100%"
+          {...props}
+        />
+      </Div>
+      <Div marginTop="medium">
+        <Input
+          width="100%"
+          {...props}
+        />
+      </Div>
+      <Div marginTop="medium">
+        <Input
+          small
+          width="100%"
+          {...props}
+        />
+      </Div>
+    </Flex>
+  )
+}
+
 export const Default = Template.bind({})
 
 Default.args = {
@@ -54,4 +85,11 @@ export const Disabled = Template.bind({})
 Disabled.args = {
   placeholder: 'Disabled placeholder',
   disabled: true,
+}
+
+export const PrefixSuffix = CustomInputTemplate.bind({})
+
+PrefixSuffix.args = {
+  prefix: 'app.',
+  suffix: '.plural.sh',
 }

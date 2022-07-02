@@ -1,7 +1,6 @@
 export {
   Avatar,
   Button,
-  Input,
   Menu,
   MenuItem,
   Modal,
@@ -119,6 +118,7 @@ export { default as Chip } from './components/Chip'
 export { default as Codeline } from './components/Codeline'
 export { default as Divider } from './components/Divider'
 export { default as FormField } from './components/FormField'
+export { default as Input } from './components/Input'
 export { default as InstalledLabel } from './components/InstalledLabel'
 export { default as ModalActions } from './components/ModalActions'
 export { default as ModalHeader } from './components/ModalHeader'
