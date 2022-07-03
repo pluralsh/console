@@ -75,7 +75,7 @@ secrets:
   id_rsa: {{ ternary .Values.private_key (dedupe . "console.secrets.id_rsa" "") (hasKey .Values "private_key") | quote }}
   id_rsa_pub: {{ ternary .Values.public_key (dedupe . "console.secrets.id_rsa_pub" "") (hasKey .Values "public_key") | quote }}
   ssh_passphrase: {{ ternary .Values.passphrase (dedupe . "console.secrets.ssh_passphrase" "") (hasKey .Values "passphrase") | quote }}
-  git_access_token: {{ ternary .Values.access_token (dedupe . "console.secrets.git_access_token" "") (hasKey .Values "git_access_token") | quote }}
+  git_access_token: {{ ternary .Values.access_token (dedupe . "console.secrets.git_access_token" "") (hasKey .Values "access_token") | quote }}
   git_user: {{ default "console" .Values.git_user }}
   git_email: {{ default "console@plural.sh" .Values.git_email }}
 {{ if .OIDC }}

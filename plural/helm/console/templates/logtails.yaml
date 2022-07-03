@@ -6,5 +6,5 @@ metadata:
 {{ include "console.labels" . | indent 4 }}
 spec:
   limit: 50
-  target: statefulset/console
+  target: deployment/console
   follow: true
