@@ -113,6 +113,7 @@ export { default as VolumesIcon } from './components/icons/VolumesIcon'
 export { default as WebhooksIcon } from './components/icons/WebhooksIcon'
 // Components
 export { default as Alert } from './components/Alert'
+export { default as Banner } from './components/Banner'
 export { default as Checkbox } from './components/Checkbox'
 export { default as Chip } from './components/Chip'
 export { default as Codeline } from './components/Codeline'
