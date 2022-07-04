@@ -2,6 +2,38 @@
   "name": "console",
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "start": "HTTPS=true react-app-rewired start",
+    "build": "react-app-rewired build",
+    "postbuild": "cpx \"build/**\" ../priv/static --clean",
+    "test": "react-app-rewired test",
+    "lint": "eslint ./src",
+    "fix": "eslint ./src --fix",
+    "eject": "react-scripts eject",
+    "graphql-codegen": "graphql-codegen --config codegen.yml"
+  },
+  "eslintConfig": {
+    "extends": "react-app",
+    "rules": {
+      "default-case": "off",
+      "no-mixed-operators": "off",
+      "react-hooks/exhaustive-deps": "off",
+      "jsx-a11y/alt-text":  "off"
+    }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "proxy": "http://localhost:4003",
   "dependencies": {
     "@absinthe/socket": "^0.2.1",
     "@absinthe/socket-apollo-link": "^0.2.1",
@@ -97,36 +129,6 @@
     "xterm-theme": "^1.1.0",
     "yaml": "^1.10.0"
   },
-  "scripts": {
-    "start": "HTTPS=true react-app-rewired start",
-    "build": "react-app-rewired build",
-    "postbuild": "cpx \"build/**\" ../priv/static --clean",
-    "test": "react-app-rewired test",
-    "eject": "react-scripts eject",
-    "graphql-codegen": "graphql-codegen --config codegen.yml"
-  },
-  "eslintConfig": {
-    "extends": "react-app",
-    "rules": {
-      "default-case": "off",
-      "no-mixed-operators": "off",
-      "react-hooks/exhaustive-deps": "off",
-      "jsx-a11y/alt-text":  "off"
-    }
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "proxy": "http://localhost:4003",
   "devDependencies": {
     "@graphql-codegen/cli": "2.2.0",
     "@graphql-codegen/fragment-matcher": "^3.1.0",
