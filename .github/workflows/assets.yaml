@@ -2,9 +2,17 @@ name: assets-ci
 
 on:
   push:
-    branches: [ "master" ]
+    branches:
+      - "master"
+    paths:
+      - ".github/workflows/assets.yaml"
+      - "assets/**"
   pull_request:
-    branches: [ "**" ]
+    branches:
+      - "**"
+    paths:
+      - ".github/workflows/assets.yaml"
+      - "assets/**"
 jobs:
   lint:
     runs-on: ubuntu-latest
