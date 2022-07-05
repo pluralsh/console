@@ -19,9 +19,9 @@ const propTypes = {
 const severityToColor = {
   neutral: 'text-light',
   info: 'text-primary-accent',
-  success: 'text-success',
-  warning: 'text-warning',
-  error: 'text-error',
+  success: 'text-success-light',
+  warning: 'text-warning-light',
+  error: 'text-error-light',
 }
 
 function ChipRef({
