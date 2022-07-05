@@ -599,10 +599,10 @@ export default mergeTheme(defaultTheme, {
   Input: {
     Root: [
       {
+        body2: true,
         display: 'flex',
         justifyContent: 'space-between',
         align: 'center',
-        body1: true,
         height: 'auto',
         width: 'auto',
         paddingTop: 0,
