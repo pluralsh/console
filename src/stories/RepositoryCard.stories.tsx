@@ -62,6 +62,7 @@ function ListTemplate(args: any) {
         {...{
           ...args,
           ...{
+            priv: true,
             description: null,
             tags: ['tag1', 'tag2'],
           },
@@ -77,6 +78,7 @@ export const Default = Template.bind({})
 Default.args = {
   installed: true,
   title: 'Plural',
+  priv: false,
   publisher: 'Plural',
   description: 'One click deploys for data scientists and developers',
   imageUrl: '/plural-logo.png',

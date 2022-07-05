@@ -2,11 +2,14 @@ import { Div, DivProps, Flex, H2, H3, Img, P } from 'honorable'
 import PropTypes from 'prop-types'
 import { Ref, forwardRef } from 'react'
 
+import PadlockLockedIcon from './icons/PadlockLockedIcon'
+
 import Tag from './Tag'
 
 type RepositoryCardProps = DivProps & {
   title?: string
   publisher?: string
+  priv?: boolean
   description?: string
   imageUrl?: string
   tags?: string[]
@@ -15,6 +18,7 @@ type RepositoryCardProps = DivProps & {
 const propTypes = {
   title: PropTypes.string,
   publisher: PropTypes.string,
+  priv: PropTypes.bool,
   description: PropTypes.string,
   imageUrl: PropTypes.string,
   tags: PropTypes.arrayOf(PropTypes.string),
@@ -23,6 +27,7 @@ const propTypes = {
 function RepositoryCardRef({
   title,
   publisher,
+  priv,
   description,
   imageUrl,
   tags = [],
@@ -53,20 +58,34 @@ ref: Ref<any>
           borderRadius="medium"
           objectFit="cover"
         />
-        <Div marginLeft="small">
-          <H2
-            subtitle2
-            color="text"
+        <Flex
+          direction="column"
+          marginLeft="small"
+          width="100%"
+        >
+          <Flex
+            width="100%"
+            direction="row"
+            justifyContent="space-between"
           >
-            {title}
-          </H2>
+            <H2
+              subtitle2
+              color="text"
+            >
+              {title}
+
+            </H2>
+            {!!priv && (
+              <PadlockLockedIcon paddingRight="small" />
+            )}
+          </Flex>
           <H3
             body2
             color="text-xlight"
           >
             {publisher}
           </H3>
-        </Div>
+        </Flex>
       </Flex>
       {description && (
         <P
