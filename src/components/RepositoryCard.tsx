@@ -1,4 +1,4 @@
-import { Div, DivProps, Flex, H2, H3, Img, P } from 'honorable'
+import { Div, DivProps, Flex, H2, H3, Img, P, Span } from 'honorable'
 import PropTypes from 'prop-types'
 import { Ref, forwardRef } from 'react'
 
@@ -87,7 +87,7 @@ ref: Ref<any>
                   height={26}
                   marginHorizontal="xxsmall"
                 >
-                  <Div fontWeight={600}>Installed</Div>
+                  <Span fontWeight={600}>Installed</Span>
                 </Chip>
               )}
               {!!priv && (
