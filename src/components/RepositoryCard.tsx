@@ -73,23 +73,30 @@ ref: Ref<any>
             <H2
               subtitle2
               color="text"
-              height={26}
             >
               {title}
             </H2>
-            <Flex width="100%" />
-            {!!installed && (
-              <Chip
-                marginHorizontal="xxsmall"
-                severity="success"
-                icon={<StatusOkIcon />}
-              >
-                <Div fontWeight={600}>Installed</Div>
-              </Chip>
-            )}
-            {!!priv && (
-              <PadlockLockedIcon marginHorizontal="xxsmall" />
-            )}
+            <Flex
+              justifyContent="end"
+              flexGrow={1}
+            >
+              {!!installed && (
+                <Chip
+                  severity="success"
+                  icon={<StatusOkIcon />}
+                  height={26}
+                  marginHorizontal="xxsmall"
+                >
+                  <Div fontWeight={600}>Installed</Div>
+                </Chip>
+              )}
+              {!!priv && (
+                <PadlockLockedIcon
+                  height={26}
+                  marginHorizontal="xxsmall"
+                />
+              )}
+            </Flex>
           </Flex>
           <H3
             body2
