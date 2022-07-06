@@ -211,6 +211,24 @@ export default mergeTheme(defaultTheme, {
         color: 'text-xlight',
       },
     ],
+    '* ::-webkit-scrollbar-track': [
+      {
+        borderRadius: '10px',
+        backgroundColor: 'fill-one',
+      },
+    ],
+    '* ::-webkit-scrollbar': [
+      {
+        width: '6px',
+        backgroundColor: 'fill-one',
+      },
+    ],
+    '* ::-webkit-scrollbar-thumb': [
+      {
+        borderRadius: '6px',
+        backgroundColor: 'fill-two',
+      },
+    ],
   },
   global: [
     /* Spacing */
