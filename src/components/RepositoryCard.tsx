@@ -2,7 +2,10 @@ import { Div, DivProps, Flex, H2, H3, Img, P } from 'honorable'
 import PropTypes from 'prop-types'
 import { Ref, forwardRef } from 'react'
 
+import Chip from './Chip'
+
 import PadlockLockedIcon from './icons/PadlockLockedIcon'
+import StatusOkIcon from './icons/StatusOkIcon'
 
 import Tag from './Tag'
 
@@ -10,6 +13,7 @@ type RepositoryCardProps = DivProps & {
   title?: string
   publisher?: string
   priv?: boolean
+  installed?: boolean
   description?: string
   imageUrl?: string
   tags?: string[]
@@ -19,6 +23,7 @@ const propTypes = {
   title: PropTypes.string,
   publisher: PropTypes.string,
   priv: PropTypes.bool,
+  installed: PropTypes.bool,
   description: PropTypes.string,
   imageUrl: PropTypes.string,
   tags: PropTypes.arrayOf(PropTypes.string),
@@ -28,6 +33,7 @@ function RepositoryCardRef({
   title,
   publisher,
   priv,
+  installed,
   description,
   imageUrl,
   tags = [],
@@ -63,20 +69,26 @@ ref: Ref<any>
           marginLeft="small"
           width="100%"
         >
-          <Flex
-            width="100%"
-            direction="row"
-            justifyContent="space-between"
-          >
+          <Flex width="100%">
             <H2
               subtitle2
               color="text"
+              height={26}
             >
               {title}
-
             </H2>
+            <Flex width="100%" />
+            {!!installed && (
+              <Chip
+                marginHorizontal="xxsmall"
+                severity="success"
+                icon={<StatusOkIcon />}
+              >
+                <Div fontWeight={600}>Installed</Div>
+              </Chip>
+            )}
             {!!priv && (
-              <PadlockLockedIcon paddingRight="small" />
+              <PadlockLockedIcon marginHorizontal="xxsmall" />
             )}
           </Flex>
           <H3
