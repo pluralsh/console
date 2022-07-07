@@ -45,7 +45,8 @@ ref: Ref<any>
     <Flex
       ref={ref}
       direction="column"
-      padding="medium"
+      padding="large"
+      paddingTop="medium"
       borderRadius="large"
       border="1px solid border"
       backgroundColor="fill-one"
@@ -61,49 +62,52 @@ ref: Ref<any>
           alt="Logo"
           width={56}
           height={56}
+          padding={8}
           borderRadius="medium"
           objectFit="cover"
         />
         <Flex
-          direction="column"
+          direction="row"
           marginLeft="small"
           width="100%"
         >
-          <Flex width="100%">
+          <Flex direction="column">
             <H2
               subtitle2
               color="text"
             >
               {title}
             </H2>
-            <Flex
-              justifyContent="end"
-              flexGrow={1}
+            <H3
+              body2
+              color="text-xlight"
             >
-              {!!installed && (
-                <Chip
-                  severity="success"
-                  icon={<StatusOkIcon />}
-                  height={26}
-                  marginHorizontal="xxsmall"
-                >
-                  <Span fontWeight={600}>Installed</Span>
-                </Chip>
-              )}
-              {!!priv && (
-                <PadlockLockedIcon
-                  height={26}
-                  marginHorizontal="xxsmall"
-                />
-              )}
-            </Flex>
+              {publisher}
+            </H3>
           </Flex>
-          <H3
-            body2
-            color="text-xlight"
+          <Flex
+            justifyContent="end"
+            flexGrow={1}
           >
-            {publisher}
-          </H3>
+            {!!installed && ( 
+              <Chip
+                severity="success"
+                icon={<StatusOkIcon />}
+                height={26}
+                marginHorizontal="xxsmall"
+                backgroundColor="fill-two"
+                borderColor="border-fill-two"
+              >
+                <Span fontWeight={600}>Installed</Span>
+              </Chip>
+            )}
+            {!!priv && (
+              <PadlockLockedIcon
+                height={26}
+                marginHorizontal="xxsmall"
+              />
+            )}
+          </Flex>
         </Flex>
       </Flex>
       {description && (
