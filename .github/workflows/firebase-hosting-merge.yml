@@ -10,7 +10,7 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: npm ci && npm run build-storybook
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -21,7 +21,7 @@ jobs:
   publish_minor:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: git config --global user.email "dherault@gmail.com" && git config --global user.name "David Hérault"
       - run: npm ci
       # Note: include tests here
