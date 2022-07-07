@@ -8,6 +8,7 @@ export {
 } from 'honorable'
 
 // Icons
+export { default as ArrowLeftIcon } from './components/icons/ArrowLeftIcon'
 export { default as ArrowTopRightIcon } from './components/icons/ArrowTopRightIcon'
 export { default as BotIcon } from './components/icons/BotIcon'
 export { default as BrowserIcon } from './components/icons/BrowserIcon'
