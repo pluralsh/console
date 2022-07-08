@@ -122,7 +122,7 @@ ref: Ref<any>
       <Div flexGrow={1} />
       {tags && tags.length > 0 && (
         <Flex
-          marginTop="xsmall"
+          marginTop="medium"
           gap="xsmall"
           flexWrap="wrap"
         >
