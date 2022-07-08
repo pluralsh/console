@@ -1,6 +1,6 @@
 {
   "name": "pluralsh-design-system",
-  "version": "1.115.0",
+  "version": "1.116.0",
   "description": "Pluralsh Design System",
   "main": "dist/index.js",
   "files": [
