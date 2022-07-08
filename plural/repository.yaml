@@ -4,6 +4,7 @@ category: DEVOPS
 icon: plural/icons/console-logo.png
 darkIcon: plural/icons/console-white.png
 notes: plural/notes.tpl
+gitUrl: https://github.com/pluralsh/console
 oauthSettings:
   uriFormat: https://{domain}/oauth/callback
   authMethod: POST
