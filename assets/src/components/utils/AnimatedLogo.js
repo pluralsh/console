@@ -19,40 +19,40 @@ export function LoopingLogo({nofill, height, scale, dark, still}) {
   return (
     <Box background={dark ? 'backgroundColor' : 'plrl-white'} fill={!nofill} 
          height={height} align='center' justify='center'>
-      <div className={`plrl-logomark-anim anim01 ${still ? '' : 'looping'}`}>
-        <div className="plrl-logomark-outer-wrapper">
-          <div style={scaling(scale)} className="plrl-logomark-inner-wrapper">
-            <div className="plrl-logo-layer bottom-left">
-              <div className="plrl-logo-layer-mask">
-                <div className="plrl-logo-layer-mask-inner">
+      <div class={`plrl-logomark-anim anim01 ${still ? '' : 'looping'}`}>
+        <div class="plrl-logomark-outer-wrapper">
+          <div style={scaling(scale)} class="plrl-logomark-inner-wrapper">
+            <div class="plrl-logo-layer bottom-left">
+              <div class="plrl-logo-layer-mask">
+                <div class="plrl-logo-layer-mask-inner">
                   <img src={image(BOTTOM_LEFT, dark)} alt="" />
                 </div>
               </div>
             </div>
-            <div className="plrl-logo-layer bottom-right">
-              <div className="plrl-logo-layer-mask">
-                <div className="plrl-logo-layer-mask-inner">
+            <div class="plrl-logo-layer bottom-right">
+              <div class="plrl-logo-layer-mask">
+                <div class="plrl-logo-layer-mask-inner">
                   <img src={image(BOTTOM_RIGHT, dark)} alt="" />
                 </div>
               </div>
             </div>
-            <div className="plrl-logo-layer top-left">
-              <div className="plrl-logo-layer-mask">
-                <div className="plrl-logo-layer-mask-inner">
+            <div class="plrl-logo-layer top-left">
+              <div class="plrl-logo-layer-mask">
+                <div class="plrl-logo-layer-mask-inner">
                   <img src={image(TOP_LEFT, dark)} alt="" />
                 </div>
               </div>
             </div>
-            <div className="plrl-logo-layer top-right">
-              <div className="plrl-logo-layer-mask">
-                <div className="plrl-logo-layer-mask-inner">
+            <div class="plrl-logo-layer top-right">
+              <div class="plrl-logo-layer-mask">
+                <div class="plrl-logo-layer-mask-inner">
                   <img src={image(TOP_RIGHT, dark)} alt="" />
                 </div>
               </div>
             </div>
-            <div className="plrl-logo-layer dot">
-              <div className="plrl-logo-layer-mask">
-                <div className="plrl-logo-layer-mask-inner">
+            <div class="plrl-logo-layer dot">
+              <div class="plrl-logo-layer-mask">
+                <div class="plrl-logo-layer-mask-inner">
                   <img src={image(DOT, dark)} alt="" />
                 </div>
               </div>
