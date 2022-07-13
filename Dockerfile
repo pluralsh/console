@@ -2,6 +2,10 @@
 # This should match the version of Alpine that the `elixir:1.7.2-alpine` image uses
 ARG ALPINE_VERSION=3.8
 
+FROM node:16.16-alpine3.15 as node
+
+RUN yarn set version stable
+
 FROM bitwalker/alpine-elixir:1.11.4 AS builder
 
 # The following are build arguments used to change variable parts of the image.
@@ -19,6 +23,12 @@ ENV SKIP_PHOENIX=${SKIP_PHOENIX} \
     APP_VSN=${APP_VSN} \
     MIX_ENV=${MIX_ENV}
 
+COPY --from=node /usr/lib /usr/lib
+COPY --from=node /usr/local/share /usr/local/share
+COPY --from=node /usr/local/lib /usr/local/lib
+COPY --from=node /usr/local/include /usr/local/include
+COPY --from=node /usr/local/bin /usr/local/bin
+
 # By convention, /opt is typically used for applications
 WORKDIR /opt/app
 
@@ -26,7 +36,6 @@ WORKDIR /opt/app
 RUN apk update && \
   apk upgrade --no-cache && \
   apk add --no-cache \
-    nodejs \
     yarn \
     git \
     build-base && \
@@ -45,8 +54,10 @@ RUN ls -al
 RUN if [ ! "$SKIP_PHOENIX" = "true" ]; then \
   cd assets && \
   yarn install && \
-  yarn build && \
-  mv build ../priv/static; \
+  yarn run build && \
+  mkdir -p ../priv/static && \
+  mv build/* ../priv/static && \
+  rm -rf build; \
 fi
 
 RUN \
