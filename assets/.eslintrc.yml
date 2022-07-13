@@ -1,0 +1,6 @@
+extends: react-app
+rules:
+  jsx-a11y/alt-text: 'warn'
+  default-case: 'off'
+  no-mixed-operators: 'off'
+  no-unused-vars: 'error'

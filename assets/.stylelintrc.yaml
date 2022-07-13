@@ -1,0 +1,5 @@
+extends:
+  - "@pluralsh/stylelint-config"
+ignoreFiles:
+  - "**/logo-animation.css"
+  - "**/message.css"
