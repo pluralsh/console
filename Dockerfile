@@ -45,7 +45,8 @@ RUN ls -al
 RUN if [ ! "$SKIP_PHOENIX" = "true" ]; then \
   cd assets && \
   yarn install && \
-  yarn run build; \
+  yarn build && \
+  mv build ../priv/static; \
 fi
 
 RUN \

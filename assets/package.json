@@ -5,7 +5,6 @@
   "scripts": {
     "start": "HTTPS=true react-app-rewired start",
     "build": "react-app-rewired build",
-    "postbuild": "cpx \"build/**\" ../priv/static --clean",
     "test": "react-scripts test --watchAll=false",
     "lint": "yarn lint:js && yarn lint:css",
     "lint:js": "eslint ./src",
@@ -49,7 +48,6 @@
     "chart.js": "3.5.1",
     "color-alpha": "1.1.3",
     "country-code-lookup": "0.0.20",
-    "cpx": "1.5.0",
     "crypto-hash": "1.3.0",
     "emoji-mart": "3.0.1",
     "escape-carriage": "1.3.0",
