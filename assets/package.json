@@ -6,7 +6,7 @@
     "start": "HTTPS=true react-app-rewired start",
     "build": "react-app-rewired build",
     "postbuild": "cpx \"build/**\" ../priv/static --clean",
-    "test": "react-app-rewired test",
+    "test": "react-scripts test --watchAll=false",
     "lint": "yarn lint:js && yarn lint:css",
     "lint:js": "eslint ./src",
     "lint:css": "stylelint src/**/*.css",
@@ -34,9 +34,9 @@
     "@nivo/radar": "0.73.0",
     "@nivo/tooltip": "0.73.0",
     "@nivo/waffle": "0.73.0",
-    "@testing-library/jest-dom": "5.16.4",
-    "@testing-library/react": "13.3.0",
-    "@testing-library/user-event": "14.2.1",
+    "@testing-library/jest-dom": "4.2.4",
+    "@testing-library/react": "9.3.3",
+    "@testing-library/user-event": "7.1.2",
     "ace-builds": "1.7.1",
     "anser": "2.1.1",
     "ansi-to-react": "6.1.6",
@@ -136,9 +136,17 @@
     "eslint-plugin-testing-library": "3.9.2",
     "eslint-webpack-plugin": "2.5.2",
     "react-app-rewired": "2.2.1",
-    "stylelint": "^14.9.1",
-    "stylelint-config-standard": "^26.0.0",
-    "stylelint-no-unsupported-browser-features": "^5.0.3",
-    "stylelint-order": "^5.0.0"
+    "stylelint": "14.9.1",
+    "stylelint-config-standard": "26.0.0",
+    "stylelint-no-unsupported-browser-features": "5.0.3",
+    "stylelint-order": "5.0.0"
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "\\.(css)$": "identity-obj-proxy"
+    },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(forge-core|d3-hierarchy|d3-selection|xterm-for-react|react-dnd|dnd-core|@react-dnd))"
+    ]
   }
 }
