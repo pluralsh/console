@@ -7,8 +7,12 @@
     "build": "react-app-rewired build",
     "postbuild": "cpx \"build/**\" ../priv/static --clean",
     "test": "react-app-rewired test",
-    "lint": "eslint ./src",
-    "fix": "eslint ./src --fix",
+    "lint": "yarn lint:js && yarn lint:css",
+    "lint:js": "eslint ./src",
+    "lint:css": "stylelint src/**/*.css",
+    "fix": "yarn fix:js && yarn fix:css",
+    "fix:js": "eslint ./src --fix",
+    "fix:css": "stylelint src/**/*.css --fix",
     "eject": "react-scripts eject",
     "graphql-codegen": "graphql-codegen --config codegen.yml"
   },
@@ -131,6 +135,10 @@
     "eslint-plugin-react-hooks": "4.2.0",
     "eslint-plugin-testing-library": "3.9.2",
     "eslint-webpack-plugin": "2.5.2",
-    "react-app-rewired": "2.2.1"
+    "react-app-rewired": "2.2.1",
+    "stylelint": "^14.9.1",
+    "stylelint-config-standard": "^26.0.0",
+    "stylelint-no-unsupported-browser-features": "^5.0.3",
+    "stylelint-order": "^5.0.0"
   }
 }

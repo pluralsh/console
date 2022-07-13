@@ -1,4 +1,4 @@
-name: assets-ci
+name: Frontend
 
 on:
   push:
@@ -15,6 +15,7 @@ on:
       - "assets/**"
 jobs:
   lint:
+    name: "Lint"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -34,4 +35,4 @@ jobs:
         run: |
           [ ! -d "node_modules" ] && yarn install --immutable
       - shell: bash
-        run: npm run lint
+        run: yarn lint
