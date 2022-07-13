@@ -4,8 +4,6 @@ ARG ALPINE_VERSION=3.8
 
 FROM node:16.16-alpine3.15 as node
 
-RUN yarn set version stable
-
 FROM bitwalker/alpine-elixir:1.11.4 AS builder
 
 # The following are build arguments used to change variable parts of the image.
