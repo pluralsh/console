@@ -123,6 +123,7 @@
     "@graphql-codegen/typescript": "2.7.1",
     "@graphql-codegen/typescript-operations": "2.5.1",
     "@graphql-codegen/typescript-react-apollo": "3.3.1",
+    "@pluralsh/stylelint-config": "1.0.0",
     "babel-eslint": "10.1.0",
     "customize-cra": "1.0.0",
     "eslint": "7.11.0",
@@ -136,10 +137,7 @@
     "eslint-plugin-testing-library": "3.9.2",
     "eslint-webpack-plugin": "2.5.2",
     "react-app-rewired": "2.2.1",
-    "stylelint": "14.9.1",
-    "stylelint-config-standard": "26.0.0",
-    "stylelint-no-unsupported-browser-features": "5.0.3",
-    "stylelint-order": "5.0.0"
+    "stylelint": "14.9.1"
   },
   "jest": {
     "moduleNameMapper": {
