@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import { Box } from 'grommet'
 import { useHistory, useParams } from 'react-router'
 

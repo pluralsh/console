@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Box, Layer, Text, TextInput, ThemeContext } from 'grommet'
 import { useMutation, useQuery } from 'react-apollo'
 import { AddGroup, AddUser, Button, CreateRole as CreateRoleI, Group, InputCollection, Messages,

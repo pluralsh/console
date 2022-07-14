@@ -11,7 +11,7 @@ rules:
   camelcase: warn # TODO Enable it.
   no-nonoctal-decimal-escape: off # TODO Enable once it will be compatible with eslint version that we use.
   no-unused-expressions: warn # TODO Enable it.
-  no-unused-vars: warn # TODO Enable it.
+  no-unused-vars: error
   no-unsafe-optional-chaining: off # TODO Enable once it will be compatible with eslint version that we use.
 overrides:
   - files:

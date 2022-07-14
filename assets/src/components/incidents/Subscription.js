@@ -1,4 +1,3 @@
-import React from 'react'
 import { Box, Text } from 'grommet'
 import { Checkmark, Cube, Group } from 'grommet-icons'
 

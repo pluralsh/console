@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useMutation, useQuery } from 'react-apollo'
 
 import { Button, Confirm, Copyable, ModalHeader, Scroller, Trash } from 'forge-core'

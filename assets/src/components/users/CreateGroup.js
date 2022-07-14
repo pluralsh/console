@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Button, InputCollection, ModalHeader, ResponsiveInput } from 'forge-core'
 import { Box, Layer } from 'grommet'
 import { useMutation } from 'react-apollo'
@@ -45,7 +45,7 @@ export function GroupForm() {
   )
 }
 
-export default function CreateGroup({ target }) {
+export default function CreateGroup() {
   const [open, setOpen] = useState(false)
 
   return (

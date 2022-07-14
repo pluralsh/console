@@ -1,4 +1,3 @@
-import React from 'react'
 import { Box, CheckBox, Text } from 'grommet'
 
 export function NotificationPreferences({ preferences, setPreferences }) {

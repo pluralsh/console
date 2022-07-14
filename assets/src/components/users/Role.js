@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { Box, Layer, Text } from 'grommet'
 import { Button, EditField as Edit, Group, InputCollection, ModalHeader, ResponsiveInput, TagInput, Trash, User } from 'forge-core'
 

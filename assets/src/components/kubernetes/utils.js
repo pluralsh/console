@@ -1,4 +1,3 @@
-import React from 'react'
 import { Anchor, Box, Text } from 'grommet'
 
 import { useHistory } from 'react-router'

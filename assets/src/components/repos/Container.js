@@ -1,4 +1,3 @@
-import React from 'react'
 import { normalizeColor } from 'grommet/utils'
 import styled from 'styled-components'
 import { Box } from 'grommet'

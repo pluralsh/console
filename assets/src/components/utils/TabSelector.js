@@ -1,5 +1,5 @@
 import { Box, Text } from 'grommet'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 export function TabHeader({ text, selected, onClick }) {
   const [hover, setHover] = useState(false)

@@ -37,7 +37,7 @@ function ActionContainer() {
   )
 }
 
-export function ActionPortal({ children, name }) {
+export function ActionPortal({ children }) {
   const { ref } = useContext(ActionContext)
 
   return (

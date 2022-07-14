@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useRef, useState } from 'react'
+import { useCallback, useContext, useMemo, useRef, useState } from 'react'
 import { Eye, Notification } from 'forge-core'
 import { Box, Stack, Text } from 'grommet'
 

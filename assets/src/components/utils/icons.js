@@ -1,4 +1,3 @@
-import React from 'react'
 import { Blank } from 'grommet-icons'
 
 export function Send(props) {

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Box, Collapsible, Text } from 'grommet'
 
 import moment from 'moment'

@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { Anchor, Box, Drop, Text } from 'grommet'
 import { Confirm, TabContent, TabHeader, TabHeaderItem, Tabs } from 'forge-core'
 

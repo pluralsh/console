@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Box, Text } from 'grommet'
 import { Button, Expander, InputCollection, ResponsiveInput } from 'forge-core'
 

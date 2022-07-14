@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Box, Text } from 'grommet'
 import { useMutation, useQuery } from 'react-apollo'
 import { useParams } from 'react-router'

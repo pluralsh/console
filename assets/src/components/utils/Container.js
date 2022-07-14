@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import { useContext } from 'react'
 import { Box, ThemeContext } from 'grommet'
 
 import { normalizeColor } from 'grommet/utils'

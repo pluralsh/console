@@ -113,7 +113,7 @@ const Item = ({ index, mapper, isItemLoaded, placeholder, items, setSize }) => {
   return mapper(items[index], { next: items[index + 1] || {}, prev: items[index - 1] || {} }, { setSize, index })
 }
 
-const ItemWrapper = React.memo(({ data: { setSize, width, refreshKey, items, isItemLoaded, placeholder, mapper }, style, index, ...props }) => {
+const ItemWrapper = React.memo(({ data: { setSize, width, refreshKey, items, isItemLoaded, placeholder, mapper }, style, index }) => {
   const [rowRef, setRowRef] = useState(null)
   const item = items[index]
   const sizeCallback = useCallback(() => {

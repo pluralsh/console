@@ -361,7 +361,7 @@ const SimpleGauge = React.memo(({ value, total, title, name }) => {
   )
 })
 
-const LayeredGauage = React.memo(({ requests, limits, usage, total, title, name, format, stable }) => {
+const LayeredGauage = React.memo(({ requests, limits, usage, total, title, name, format }) => {
   const theme = useContext(ThemeContext)
   const data = useMemo(() => {
     const reqs = requests || 0

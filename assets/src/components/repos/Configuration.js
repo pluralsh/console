@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery } from 'react-apollo'
 import { Box, Text, TextInput, ThemeContext } from 'grommet'
 import { Button, GqlError, SecondaryButton } from 'forge-core'

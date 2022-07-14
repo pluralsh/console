@@ -1,5 +1,4 @@
-import React from 'react'
-import { Box } from 'grommet' 
+import { Box } from 'grommet'
 import './logo-animation.css'
 
 const BOTTOM_LEFT = `${process.env.PUBLIC_URL}/plural-logomark-mechanical-for-animation-{color}_bottom-left_100px.svg`

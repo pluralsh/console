@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { ProviderIcons } from './constants'
 
 export function Provider({ provider, width }) {

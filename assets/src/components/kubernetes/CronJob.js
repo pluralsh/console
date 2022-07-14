@@ -1,4 +1,3 @@
-import React from 'react'
 import { Anchor, Box, Text } from 'grommet'
 import { TabContent, TabHeader, TabHeaderItem, Tabs } from 'forge-core'
 import { useQuery } from 'react-apollo'

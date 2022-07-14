@@ -1,6 +1,6 @@
 import { Box } from 'grommet'
 import moment from 'moment'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { extendConnection } from '../../utils/graphql'
 import { AvatarCell } from '../audits/Audits'

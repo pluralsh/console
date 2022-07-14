@@ -74,7 +74,7 @@ export function SidebarIcon({ icon, text, name: sidebarName, selected, path }) {
   )
 }
 
-function CompressedIcon({ icon, text, selected, path, git }) {
+function CompressedIcon({ icon, text, selected, path }) {
   const [ref, setRef] = useState(null)
   const [hover, setHover] = useState(false)
   const history = useHistory()

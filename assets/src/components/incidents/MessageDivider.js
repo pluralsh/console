@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Divider } from 'forge-core'
 import moment from 'moment'
 

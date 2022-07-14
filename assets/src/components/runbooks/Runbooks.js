@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import { Box, Text } from 'grommet'
 import { useQuery } from '@apollo/react-hooks'
 

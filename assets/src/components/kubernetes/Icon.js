@@ -1,4 +1,3 @@
-import React from 'react'
 import { Cube } from 'grommet-icons'
 import { Certificate, ChronJob, Deployment, Ingress, Job, Service, StatefulSet } from 'forge-core'
 

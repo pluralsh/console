@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { useApolloClient } from 'react-apollo'
 
 import TypeaheadEditor from '../utils/TypeaheadEditor'

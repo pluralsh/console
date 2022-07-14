@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Box, Layer, Stack, Text } from 'grommet'
 import { Check, ModalHeader } from 'forge-core'
 

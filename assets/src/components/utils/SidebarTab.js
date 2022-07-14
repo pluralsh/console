@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Box, Collapsible, Text } from 'grommet'
 import { Down, Next } from 'grommet-icons'
 

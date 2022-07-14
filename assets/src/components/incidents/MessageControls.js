@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useRef, useState } from 'react'
+import { useCallback, useContext, useRef, useState } from 'react'
 import { Box, Drop, Text } from 'grommet'
 import { Edit, Emoji, TooltipContent, Trash } from 'forge-core'
 
@@ -95,7 +95,7 @@ export function Reaction({ message, setHover, align, width, label, ...props }) {
   )
 }
 
-function EditMsg({ message }) {
+function EditMsg() {
   return (
     <Control tooltip="edit">
       <Box

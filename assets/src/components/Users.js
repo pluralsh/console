@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Box, FormField, Layer, Text, TextInput } from 'grommet'
 import { useMutation, useQuery } from 'react-apollo'
 import { Button, Copyable, ModalHeader, Scroller } from 'forge-core'

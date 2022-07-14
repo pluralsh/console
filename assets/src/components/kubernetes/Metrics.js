@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useQuery } from 'react-apollo'
 
 import filesize from 'filesize'

@@ -42,7 +42,7 @@ function DisplayBox({ children, attributes }) {
   )
 }
 
-function Attachment({ children, attributes, theme }, i) {
+function Attachment({ children, attributes, theme }) {
 
   const { accent, margin, ...rest } = attributes || {}
 

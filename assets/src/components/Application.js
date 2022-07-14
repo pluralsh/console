@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import { Box, Text, ThemeContext } from 'grommet'
 import { Check } from 'forge-core'
 import { useHistory, useParams } from 'react-router'

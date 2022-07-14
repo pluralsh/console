@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Box, Text, TextInput } from 'grommet'
 import { ModalHeader } from 'forge-core'
 import { useQuery } from 'react-apollo'

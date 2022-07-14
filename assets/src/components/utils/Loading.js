@@ -1,4 +1,3 @@
-import React from 'react'
 import { Loading as LoadingInner } from 'forge-core'
 import { Box } from 'grommet'
 

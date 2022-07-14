@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import { useHistory, useParams } from 'react-router'
 import { Box, Text, TextInput } from 'grommet'
 import { Edit } from 'forge-core'

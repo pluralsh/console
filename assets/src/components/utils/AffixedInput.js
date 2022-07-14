@@ -1,4 +1,3 @@
-import React from 'react'
 import { Box, Text, TextInput } from 'grommet'
 
 export function SuffixedInput({ suffix, value, onChange, placeholder }) {

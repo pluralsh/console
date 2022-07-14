@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import gql from 'graphql-tag'
 import { Box } from 'grommet'
 import { GqlError } from 'forge-core'

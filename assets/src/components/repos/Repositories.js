@@ -1,4 +1,3 @@
-import React from 'react'
 import { Box } from 'grommet'
 
 const ICON_WIDTH = '50px'
