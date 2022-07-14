@@ -51,6 +51,7 @@ class SmartLoader extends PureComponent {
 
   _loadUnloadedRanges = (startIndex, stopIndex) => {
     // loadMoreRows was renamed to loadMoreItems in v1.0.3; will be removed in v2.0
+    // eslint-disable-next-line react/destructuring-assignment
     const loadMoreItems = this.props.loadMoreItems || this.props.loadMoreRows
     const promise = loadMoreItems()
     if (!promise) return
