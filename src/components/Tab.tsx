@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, Ref, forwardRef } from 'react'
 import { Div, DivProps, Flex, Icon } from 'honorable'
 import PropTypes from 'prop-types'
 
@@ -14,9 +14,10 @@ const propTypes = {
   vertical: PropTypes.bool,
 }
 
-function Tab({ startIcon, active, children, vertical, ...props }: TagProps) {
+function TabRef({ startIcon, active, children, vertical, ...props }: TagProps, ref:Ref<any>) {
   return (
     <Div
+      ref={ref}
       buttonMedium
       tabIndex={0}
       userSelect="none"
@@ -48,6 +49,8 @@ function Tab({ startIcon, active, children, vertical, ...props }: TagProps) {
   )
 }
 
-Tab.propTypes = propTypes
+TabRef.propTypes = propTypes
+
+const Tab = forwardRef(TabRef)
 
 export default Tab
