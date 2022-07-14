@@ -1,7 +1,11 @@
 extends: pluralsh
 rules:
   import/prefer-default-export: off
+  import/no-extraneous-dependencies: off # Enable it.
   react/no-unstable-nested-components: off
   react-hooks/rules-of-hooks: error
   react-hooks/exhaustive-deps: warn
-  no-unused-vars: error
+  no-nonoctal-decimal-escape: off # TODO Enable once it will be compatible with eslint version that we use.
+  no-unused-expressions: off # TODO Enable it.
+  no-unused-vars: off # TODO Enable it.
+  no-unsafe-optional-chaining: off # TODO Enable once it will be compatible with eslint version that we use.

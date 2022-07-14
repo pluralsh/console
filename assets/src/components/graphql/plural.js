@@ -1,7 +1,8 @@
 import { gql } from 'apollo-boost'
-import { ConfigurationOverlayFragment, LogFilterFragment } from './kubernetes';
+
+import { ConfigurationOverlayFragment, LogFilterFragment } from './kubernetes'
 import { PageInfo } from './base'
-import { BuildFragment } from './builds';
+import { BuildFragment } from './builds'
 
 export const RepositoryFragment = gql`
   fragment RepositoryFragment on Repository {
@@ -10,7 +11,7 @@ export const RepositoryFragment = gql`
     description
     icon
   }
-`;
+`
 
 export const SmtpFragment = gql`
   fragment SmtpFragment on Smtp {
@@ -30,7 +31,7 @@ export const InstallationFragment = gql`
     }
   }
   ${RepositoryFragment}
-`;
+`
 
 export const RecipeFragment = gql`
   fragment RecipeFragment on Recipe {
@@ -52,7 +53,7 @@ export const ConfigurationItemFragment = gql`
     condition { operation field value }
     validation { type regex message }
   }
-`;
+`
 
 export const RecipeSectionFragment = gql`
   fragment RecipeSectionFragment on RecipeSection {
@@ -129,7 +130,7 @@ export const INSTALLATION_Q = gql`
     }
   }
   ${InstallationFragment}
-`;
+`
 
 export const CONFIGURATIONS_Q = gql`
   query Installations($cursor: String) {
@@ -151,7 +152,7 @@ export const CONFIGURATIONS_Q = gql`
     }
   }
   ${RepositoryFragment}
-`;
+`
 
 export const CostAnalysisFragment = gql`
   fragment CostAnalysisFragment on CostAnalysis {
@@ -215,7 +216,7 @@ export const UPDATE_CONFIGURATION = gql`
       terraform
     }
   }
-`;
+`
 
 export const APPLICATIONS_Q = gql`
   query {
@@ -226,7 +227,7 @@ export const APPLICATIONS_Q = gql`
   }
   ${ApplicationFragment}
   ${LicenseFragment}
-`;
+`
 
 export const APPLICATION_Q = gql`
   query App($name: String!) {
@@ -252,7 +253,7 @@ export const APPLICATION_SUB = gql`
     }
   }
   ${ApplicationFragment}
-`;
+`
 
 export const LOG_FILTER_Q = gql`
   query LogFilters($namespace: String!) {
@@ -261,7 +262,7 @@ export const LOG_FILTER_Q = gql`
     }
   }
   ${LogFilterFragment}
-`;
+`
 
 export const SMTP_Q = gql`
   query {

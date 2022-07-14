@@ -1,16 +1,18 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useQuery } from 'react-apollo'
 import { Box, Text, TextInput } from 'grommet'
-import { Explore as Search, Incidents as IncidentsI } from 'forge-core'
-import { Scroller } from 'forge-core'
-import { INCIDENTS_Q, REPOS_Q } from './queries'
+import { Incidents as IncidentsI, Scroller, Explore as Search } from 'forge-core'
+
 import { extendConnection } from '../../utils/graphql'
+
+import { INCIDENTS_Q, REPOS_Q } from './queries'
+
 import { RepoOption } from './CreateIncident'
 import { FilterSelect, IncidentRow, IncidentToolbar, IncidentViewContext } from './Incidents'
 import { IncidentSort, Order } from './types'
 
-function Repositories({repository, setRepository}) {
-  const {data, fetchMore} = useQuery(REPOS_Q, {fetchPolicy: 'cache-and-network'})
+function Repositories({ repository, setRepository }) {
+  const { data, fetchMore } = useQuery(REPOS_Q, { fetchPolicy: 'cache-and-network' })
   useEffect(() => {
     if (!repository && data && data.repositories) {
       const edge = data.repositories.edges[0]
@@ -20,17 +22,24 @@ function Repositories({repository, setRepository}) {
 
   if (!data || !repository) return null
 
-  const {edges, pageInfo} = data.repositories
+  const { edges, pageInfo } = data.repositories
 
   return (
     <Scroller
-      id='repos'
-      style={{width: '100%', height: '100%', overflow: 'auto'}}
+      id="repos"
+      style={{ width: '100%', height: '100%', overflow: 'auto' }}
       edges={edges}
-      mapper={({node}) => <RepoOption key={node.id} repo={node} selected={repository} setRepository={setRepository} />}
+      mapper={({ node }) => (
+        <RepoOption
+          key={node.id}
+          repo={node}
+          selected={repository}
+          setRepository={setRepository}
+        />
+      )}
       onLoadMore={() => pageInfo.hasNextPage && fetchMore({
-        variables: {cursor: pageInfo.endCursor},
-        updateQuery: (prev, {fetchMoreResult: {repositories}}) => extendConnection(prev, repositories, 'repositories')
+        variables: { cursor: pageInfo.endCursor },
+        updateQuery: (prev, { fetchMoreResult: { repositories } }) => extendConnection(prev, repositories, 'repositories'),
       })}
     />
   )
@@ -38,52 +47,82 @@ function Repositories({repository, setRepository}) {
 
 function EmptyState() {
   return (
-    <Box fill align='center' justify='center'>
-      <Box flex={false} pad='medium' round='small' gap='xsmall'>
-        <Box fill='horizontal' align='center'>
-          <IncidentsI size='medium' />
+    <Box
+      fill
+      align="center"
+      justify="center"
+    >
+      <Box
+        flex={false}
+        pad="medium"
+        round="small"
+        gap="xsmall"
+      >
+        <Box
+          fill="horizontal"
+          align="center"
+        >
+          <IncidentsI size="medium" />
         </Box>
-        <Text size='small' weight={500}>No incidents yet...</Text>
+        <Text
+          size="small"
+          weight={500}
+        >No incidents yet...
+        </Text>
       </Box>
     </Box>
   )
 }
 
-function Incidents({repository: {id}}) {
-  const {q, setQ, sort, order, filters} = useContext(IncidentViewContext)
-  const {data, fetchMore} = useQuery(INCIDENTS_Q, {
-    variables: {repositoryId: id, q, sort, order, filters},
-    fetchPolicy: 'cache-and-network'
+function Incidents({ repository: { id } }) {
+  const { q, setQ, sort, order, filters } = useContext(IncidentViewContext)
+  const { data, fetchMore } = useQuery(INCIDENTS_Q, {
+    variables: { repositoryId: id, q, sort, order, filters },
+    fetchPolicy: 'cache-and-network',
   })
 
   if (!data) return null
 
-  const {edges, pageInfo} = data.incidents
+  const { edges, pageInfo } = data.incidents
 
   return (
     <Box fill>
-      <Box fill='horizontal' pad='small' align='center' direction='row' gap='xsmall' justify='end'>
-        <Box fill='horizontal'>
+      <Box
+        fill="horizontal"
+        pad="small"
+        align="center"
+        direction="row"
+        gap="xsmall"
+        justify="end"
+      >
+        <Box fill="horizontal">
           <TextInput 
             plain
-            icon={<Search size='15px' />}
+            icon={<Search size="15px" />}
             value={q}
-            placeholder='search for an incident'
-            onChange={({target: {value}}) => setQ(value)} />
+            placeholder="search for an incident"
+            onChange={({ target: { value } }) => setQ(value)}
+          />
         </Box>
         <FilterSelect />
       </Box>
       <IncidentToolbar />
       <Box fill>
         <Scroller
-          id='incidents'
-          style={{width: '100%', height: '100%', overflow: 'auto'}}
+          id="incidents"
+          style={{ width: '100%', height: '100%', overflow: 'auto' }}
           edges={edges}
           emptyState={<EmptyState />}
-          mapper={({node}, next) => <IncidentRow key={node.id} incident={node} next={next.node} />}
+          mapper={({ node }, next) => (
+            <IncidentRow
+              key={node.id}
+              incident={node}
+              next={next.node}
+            />
+          )}
           onLoadMore={() => pageInfo.hasNextPage && fetchMore({
-            variables: {cursor: pageInfo.endCursor},
-            updateQuery: (prev, {fetchMoreResult: {incidents}}) => extendConnection(prev, incidents, 'incidents')
+            variables: { cursor: pageInfo.endCursor },
+            updateQuery: (prev, { fetchMoreResult: { incidents } }) => extendConnection(prev, incidents, 'incidents'),
           })}
         />
       </Box>
@@ -99,15 +138,28 @@ export function Responses() {
   const [repository, setRepository] = useState(null)
   
   return (
-    <IncidentViewContext.Provider value={{q, setQ, sort, setSort, order, setOrder, filters, setFilters}}>
-    <Box direction='row' fill>
-      <Box width='30%' fill='vertical' border={{side: 'right', color: 'light-5'}}>
-        <Repositories repository={repository} setRepository={setRepository} />
+    <IncidentViewContext.Provider value={{ q, setQ, sort, setSort, order, setOrder, filters, setFilters }}>
+      <Box
+        direction="row"
+        fill
+      >
+        <Box
+          width="30%"
+          fill="vertical"
+          border={{ side: 'right', color: 'light-5' }}
+        >
+          <Repositories
+            repository={repository}
+            setRepository={setRepository}
+          />
+        </Box>
+        <Box
+          width="70%"
+          fill="vertical"
+        >
+          {repository && <Incidents repository={repository} />}
+        </Box>
       </Box>
-      <Box width='70%' fill='vertical'>
-        {repository && <Incidents repository={repository} />}
-      </Box>
-    </Box>
     </IncidentViewContext.Provider>
   )
 }

@@ -18,7 +18,7 @@ export const EventFragment = gql`
     reason
     type
   }
-`;
+`
 
 export const ResultStatus = gql`
   fragment ResultStatus on ResultStatus {
@@ -26,7 +26,7 @@ export const ResultStatus = gql`
     reason
     status
   }
-`;
+`
 
 export const ContainerStatus = gql`
   fragment ContainerStatus on ContainerStatus {
@@ -87,7 +87,7 @@ export const PodFragment = gql`
   ${Container}
   ${ContainerStatus}
   ${MetadataFragment}
-`;
+`
 
 export const DeploymentFragment = gql`
   fragment DeploymentFragment on Deployment {
@@ -106,7 +106,7 @@ export const DeploymentFragment = gql`
     raw
   }
   ${MetadataFragment}
-`;
+`
 
 export const StatefulSetFragment = gql`
   fragment StatefulSetFragment on StatefulSet {
@@ -124,7 +124,7 @@ export const StatefulSetFragment = gql`
     raw
   }
   ${MetadataFragment}
-`;
+`
 
 export const ServiceFragment = gql`
   fragment ServiceFragment on Service {
@@ -186,7 +186,7 @@ export const NodeFragment = gql`
     spec { podCidr providerId }
   }
   ${MetadataFragment}
-`;
+`
 
 export const NodeMetricFragment = gql`
   fragment NodeMetricFragment on NodeMetric {
@@ -205,7 +205,7 @@ export const CronJobFragment = gql`
     raw
   }
   ${MetadataFragment}
-`;
+`
 
 export const JobStatus = gql`
   fragment JobStatus on JobStatus {
@@ -215,7 +215,7 @@ export const JobStatus = gql`
     failed
     startTime
   }
-`;
+`
 
 export const JobFragment = gql`
   fragment JobFragment on Job {
@@ -228,7 +228,7 @@ export const JobFragment = gql`
   ${MetadataFragment}
   ${PodFragment}
   ${JobStatus}
-`;
+`
 
 export const LogFilterFragment = gql`
   fragment LogFilterFragment on LogFilter {
@@ -241,7 +241,7 @@ export const LogFilterFragment = gql`
     }
   }
   ${MetadataFragment}
-`;
+`
 
 export const CertificateFragment = gql`
   fragment CertificateFragment on Certificate {

@@ -1,5 +1,6 @@
-import { gql } from "apollo-boost";
-import { UserFragment } from "./incidents";
+import { gql } from 'apollo-boost'
+
+import { UserFragment } from './incidents'
 
 export const GroupFragment = gql`
   fragment GroupFragment on Group {
@@ -24,4 +25,4 @@ export const OIDCProvider = gql`
   }
   ${UserFragment}
   ${GroupFragment}
-`;
+`

@@ -14,17 +14,22 @@ const containerStyling = styled.div`
       border-color: ${normalizeColor('brand', props.theme)};
       box-shadow: ${props.theme.global.elevation[props.theme.dark ? 'dark' : 'light'].medium};
     }`
-  }
+}
   &:hover .modifier {
     display: flex !important;
   }
 `
 
-export function Container({children, pad, ...props}) {
+export function Container({ children, pad, ...props }) {
   return (
-    <Box as={containerStyling} pad={pad || 'medium'} round='xsmall' 
-         focusIndicator={false} {...props}>
-    {children}
+    <Box
+      as={containerStyling}
+      pad={pad || 'medium'}
+      round="xsmall" 
+      focusIndicator={false}
+      {...props}
+    >
+      {children}
     </Box>
   )
 }

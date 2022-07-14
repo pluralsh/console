@@ -1,4 +1,4 @@
-import { gql } from "apollo-boost";
+import { gql } from 'apollo-boost'
 
 export const DashboardFragment = gql`
   fragment DashboardFragment on Dashboard {
@@ -25,7 +25,7 @@ export const DashboardFragment = gql`
       }
     }
   }
-`;
+`
 
 export const LogStreamFragment = gql`
   fragment LogStreamFragment on LogStream {
@@ -35,7 +35,7 @@ export const LogStreamFragment = gql`
       value
     }
   }
-`;
+`
 
 export const MetricResponseFragment = gql`
   fragment MetricResponseFragment on MetricResponse {
@@ -45,7 +45,7 @@ export const MetricResponseFragment = gql`
       value
     }
   }
-`;
+`
 
 export const DASHBOARDS_Q = gql`
   query Dashboards($repo: String!) {
@@ -75,7 +75,7 @@ export const LOGS_Q = gql`
     }
   }
   ${LogStreamFragment}
-`;
+`
 
 export const METRICS_Q = gql`
   query Metrics($query: String!, $offset: Int) {

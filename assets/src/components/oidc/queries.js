@@ -1,8 +1,8 @@
-import { gql } from "apollo-boost";
-import { PageInfo } from "../graphql/base";
-import { UserFragment } from "../graphql/incidents";
-import { GroupFragment, OIDCProvider } from "../graphql/oauth";
+import { gql } from 'apollo-boost'
 
+import { PageInfo } from '../graphql/base'
+import { UserFragment } from '../graphql/incidents'
+import { GroupFragment, OIDCProvider } from '../graphql/oauth'
 
 export const SEARCH_USERS = gql`
   query SearchUsers($q: String, $cursor: String) {

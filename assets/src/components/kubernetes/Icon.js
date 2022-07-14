@@ -1,27 +1,27 @@
 import React from 'react'
 import { Cube } from 'grommet-icons'
-import { Certificate, Service, StatefulSet, Deployment, Job, ChronJob, Ingress } from 'forge-core'
+import { Certificate, ChronJob, Deployment, Ingress, Job, Service, StatefulSet } from 'forge-core'
 
 const ICON_SIZE = '14px'
 
-export default function Icon({kind, size}) {
+export default function Icon({ kind, size }) {
   const iconSize = size || ICON_SIZE
   switch (kind.toLowerCase()) {
-    case "service":
+    case 'service':
       return <Service size={iconSize} />
-    case "deployment":
+    case 'deployment':
       return <Deployment size={iconSize} />
-    case "statefulset":
+    case 'statefulset':
       return <StatefulSet size={iconSize} />
-    case "ingress":
+    case 'ingress':
       return <Ingress size={iconSize} />
-    case "cronjob":
+    case 'cronjob':
       return <ChronJob size={iconSize} />
     case 'pod':
       return <Cube size={iconSize} />
     case 'job':
       return <Job size={iconSize} />
-    case "certificate":
+    case 'certificate':
       return <Certificate size={iconSize} />
     default:
       return null

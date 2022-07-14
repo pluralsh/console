@@ -1,5 +1,6 @@
 import { gql } from 'apollo-boost'
-import { UserFragment } from './users';
+
+import { UserFragment } from './users'
 
 export const AuditFragment = gql`
   fragment AuditFragment on Audit {
@@ -16,4 +17,4 @@ export const AuditFragment = gql`
     insertedAt
   }
   ${UserFragment}
-`;
+`

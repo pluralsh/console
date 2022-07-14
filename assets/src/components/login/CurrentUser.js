@@ -1,7 +1,9 @@
 import React from 'react'
-import { useNotificationSubscription } from '../incidents/Notifications'
+
 import gql from 'graphql-tag'
 import { useQuery } from 'react-apollo'
+
+import { useNotificationSubscription } from '../incidents/Notifications'
 
 const ME_Q = gql`
   query {
@@ -19,8 +21,8 @@ const ME_Q = gql`
 // const POLL_INTERVAL=30000
 export const CurrentUserContext = React.createContext({})
 
-export default function CurrentUser({children}) {
-  const {loading, error, data} = useQuery(ME_Q)
+export default function CurrentUser({ children }) {
+  const { loading, error, data } = useQuery(ME_Q)
   useNotificationSubscription()
 
   if (loading) return null
@@ -28,6 +30,7 @@ export default function CurrentUser({children}) {
   if (error || !data || !data.me || !data.me.id) {
     return null
   }
+
   return (
     <CurrentUserContext.Provider value={data.me}>
       {children}

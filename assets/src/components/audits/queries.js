@@ -1,6 +1,7 @@
-import { gql } from "apollo-boost";
-import { AuditFragment } from "../graphql/audits";
-import { PageInfo } from "../graphql/base";
+import { gql } from 'apollo-boost'
+
+import { AuditFragment } from '../graphql/audits'
+import { PageInfo } from '../graphql/base'
 
 export const AUDITS_Q = gql`
   query Audits($repo: String, $cursor: String) {

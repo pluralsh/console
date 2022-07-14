@@ -1,5 +1,6 @@
 import { gql } from 'apollo-boost'
-import { UserFragment } from './users';
+
+import { UserFragment } from './users'
 
 export const BuildFragment = gql`
   fragment BuildFragment on Build {
@@ -19,7 +20,7 @@ export const BuildFragment = gql`
     }
   }
   ${UserFragment}
-`;
+`
 
 export const CommandFragment = gql`
   fragment CommandFragment on Command {
@@ -30,7 +31,7 @@ export const CommandFragment = gql`
     completedAt
     insertedAt
   }
-`;
+`
 
 export const ChangelogFragment = gql`
   fragment ChangelogFragment on Changelog {
@@ -50,7 +51,7 @@ export const UpgradePolicy = gql`
     weight
     description
   }
-`;
+`
 
 export const BUILDS_Q = gql`
   query Builds($cursor: String) {
@@ -67,7 +68,7 @@ export const BUILDS_Q = gql`
     }
   }
   ${BuildFragment}
-`;
+`
 
 export const BUILD_Q = gql`
   query Build($buildId: ID!) {
@@ -88,14 +89,14 @@ export const BUILD_Q = gql`
   ${BuildFragment}
   ${CommandFragment}
   ${ChangelogFragment}
-`;
+`
 
 export const UPGRADE_POLICIES = gql`
   query {
     upgradePolicies { ...UpgradePolicy }
   }
   ${UpgradePolicy}
-`;
+`
 
 export const CREATE_POLICY = gql`
   mutation Create($attributes: UpgradePolicyAttributes!) {
@@ -104,14 +105,14 @@ export const CREATE_POLICY = gql`
     }
   }
   ${UpgradePolicy}
-`;
+`
 
 export const DELETE_POLICY = gql`
   mutation Delete($id: ID!) {
     deleteUpgradePolicy(id: $id) { ...UpgradePolicy }
   }
   ${UpgradePolicy}
-`;
+`
 
 export const CREATE_BUILD = gql`
   mutation CreateBuild($attributes: BuildAttributes!) {
@@ -120,7 +121,7 @@ export const CREATE_BUILD = gql`
     }
   }
   ${BuildFragment}
-`;
+`
 
 export const CANCEL_BUILD = gql`
   mutation CancelBuild($id: ID!) {
@@ -129,7 +130,7 @@ export const CANCEL_BUILD = gql`
     }
   }
   ${BuildFragment}
-`;
+`
 
 export const APPROVE_BUILD = gql`
   mutation ApproveBuild($id: ID!) {
@@ -145,7 +146,7 @@ export const RESTART_BUILD = gql`
     restartBuild(id: $id) { ...BuildFragment }
   }
   ${BuildFragment}
-`;
+`
 
 export const BUILD_SUB = gql`
   subscription BuildSub($buildId: ID) {
@@ -161,7 +162,7 @@ export const BUILD_SUB = gql`
   }
   ${BuildFragment}
   ${ChangelogFragment}
-`;
+`
 
 export const COMMAND_SUB = gql`
   subscription CommandSubs($buildId: ID!) {
@@ -173,4 +174,4 @@ export const COMMAND_SUB = gql`
     }
   }
   ${CommandFragment}
-`;
+`

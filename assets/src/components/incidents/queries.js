@@ -1,6 +1,7 @@
 import { gql } from 'apollo-boost'
-import { PageInfo } from '../graphql/base';
-import { RepoFragment, FileFragment, FollowerFragment, IncidentFragment, IncidentHistoryFragment, IncidentMessageFragment, NotificationFragment, PostmortemFragment } from '../graphql/incidents';
+
+import { PageInfo } from '../graphql/base'
+import { FileFragment, FollowerFragment, IncidentFragment, IncidentHistoryFragment, IncidentMessageFragment, NotificationFragment, PostmortemFragment, RepoFragment } from '../graphql/incidents'
 
 export const SEARCH_USERS = gql`
   query Search($incidentId: ID!, $q: String!, $cursor: String) {
@@ -10,7 +11,7 @@ export const SEARCH_USERS = gql`
     }
   }
   ${PageInfo}
-`;
+`
 
 export const INCIDENTS_Q = gql`
   query Incidents($repositoryId: ID, $q: String, $cursor: String, $order: Order, $sort: IncidentSort, $filters: [IncidentFilter]) {
@@ -21,7 +22,7 @@ export const INCIDENTS_Q = gql`
   }
   ${PageInfo}
   ${IncidentFragment}
-`;
+`
 
 export const INCIDENT_Q = gql`
   query Incident($id: ID! $cursor: String, $fileCursor: String, $historyCursor: String, $followerCursor: String) {
@@ -136,14 +137,14 @@ export const FOLLOW = gql`
     }
   }
   ${FollowerFragment}
-`;
+`
 
 export const UNFOLLOW = gql`
   mutation Unfollow($id: ID!) {
     unfollowIncident(id: $id) { ...FollowerFragment }
   }
   ${FollowerFragment}
-`;
+`
 
 export const CREATE_MESSAGE = gql`
   mutation CreateMessage($incidentId: ID!, $attributes: IncidentMessageAttributes!) {
@@ -184,7 +185,7 @@ export const DELETE_REACTION = gql`
     deleteReaction(messageId: $id, name: $name) { ...IncidentMessageFragment }
   }
   ${IncidentMessageFragment}
-`;
+`
 
 export const READ_NOTIFICATIONS = gql`
   mutation Read($incidentId: ID!) {
@@ -239,7 +240,7 @@ export const INSTALLATIONS_Q = gql`
   }
   ${PageInfo}
   ${RepoFragment}
-`;
+`
 
 export const ZOOM_MEETING = gql`
   mutation Zoom($attributes: ZoomMeetingAttributes!) {

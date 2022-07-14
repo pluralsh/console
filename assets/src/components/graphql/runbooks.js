@@ -1,6 +1,7 @@
 import { gql } from 'apollo-boost'
+
 import { MetricResponseFragment } from './dashboards'
-import { StatefulSetFragment, DeploymentFragment, NodeFragment } from "./kubernetes"
+import { DeploymentFragment, NodeFragment, StatefulSetFragment } from './kubernetes'
 import { UserFragment } from './users'
  
 export const RunbookAlertStatus = gql`
@@ -23,7 +24,7 @@ export const RunbookExecutionFragment = gql`
     insertedAt
   }
   ${UserFragment}
-`;
+`
 
 export const RunbookFragment = gql`
   fragment RunbookFragment on Runbook {
