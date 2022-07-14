@@ -61,6 +61,7 @@ function Reaction({ name, reactions, me, messageId }) {
 export default function MessageReactions({ message, setHover }) {
   const me = useContext(CurrentUserContext)
   const grouped = groupBy(message.reactions, reaction => reaction.name)
+  // eslint-disable-next-line camelcase
   const sorted = Object.entries(grouped).sort(([name, reactions], [other_name, other_reactions]) => {
     const byLength = other_reactions.length - reactions.length
 
