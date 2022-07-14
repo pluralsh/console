@@ -1,4 +1,5 @@
-extends: pluralsh
+parser: "@babel/eslint-parser"
+extends: "pluralsh"
 rules:
   import/prefer-default-export: off
   import/no-extraneous-dependencies: off # Enable it.
