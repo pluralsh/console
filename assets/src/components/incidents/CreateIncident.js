@@ -146,11 +146,12 @@ export function RepositorySelect({ repository, setRepository }) {
       style={{ overflow: 'scroll', maxHeight: '60vh' }}
       flex={false}
     >
-      {data.installations.edges.map(({ node: { repository: repo } }) => (
+      {data.installations.edges.map(({ node: { repository: repo } }, i) => (
         <RepoOption
           repo={repo}
           selected={repository}
           setRepository={setRepository}
+          key={i}
         />
       ))}
     </Box>

@@ -398,7 +398,7 @@ function LogLabels({ labels }) {
       align="center"
       wrap
     >
-      {labels.map(({ name, value }) => (
+      {labels.map(({ name, value }, i) => (
         <Box
           gap="xsmall"
           direction="row"
@@ -409,6 +409,7 @@ function LogLabels({ labels }) {
           background="card"
           hoverIndicator="cardHover"
           onClick={() => removeLabel(name)}
+          key={i}
         >
           <Text
             size="small"

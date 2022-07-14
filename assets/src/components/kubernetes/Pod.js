@@ -853,12 +853,13 @@ export function Pod() {
                 </Box>
               </TabHeaderItem>
             ))}
-            {containers.map(({ name: container }) => (
+            {containers.map(({ name: container }, i) => (
               <ContainerTabHeader
                 namespace={namespace}
                 pod={name}
                 container={container}
                 containerStatus={containerStatus}
+                key={i}
               />
             ))}
             <TabHeaderItem name="events">

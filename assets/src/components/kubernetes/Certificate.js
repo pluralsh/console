@@ -44,8 +44,11 @@ function Spec({ spec: { secretName, dnsNames, issuerRef } }) {
           flex={false}
           fill="horizontal"
         >
-          {dnsNames.map(dns => (
-            <Box fill="horizontal">
+          {dnsNames.map((dns, i) => (
+            <Box
+              fill="horizontal"
+              key={i}
+            >
               <Text size="small">{dns}</Text>
             </Box>
           ))}

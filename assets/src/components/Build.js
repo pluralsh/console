@@ -418,7 +418,7 @@ function Changelog({ build: { changelogs } }) {
         height="100%"
         border="right"
       >
-        {Object.entries(grouped).map(([r, tools]) => (
+        {Object.entries(grouped).map(([r, tools], i) => (
           <ChangelogRepo
             repo={r}
             current={repo}
@@ -426,6 +426,7 @@ function Changelog({ build: { changelogs } }) {
             tool={tool}
             setRepo={setRepo}
             setTool={setTool}
+            key={i}
           />
         ))}
       </Box>

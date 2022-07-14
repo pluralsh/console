@@ -4,6 +4,7 @@ rules:
   import/prefer-default-export: off
   import/no-extraneous-dependencies: warn # TODO Enable it.
   react/destructuring-assignment: warn # TODO Enable it.
+  react/jsx-key: error
   react/jsx-no-constructed-context-values: warn # TODO Enable it.
   react/no-unstable-nested-components: off
   react-hooks/rules-of-hooks: error

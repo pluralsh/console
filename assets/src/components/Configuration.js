@@ -145,7 +145,7 @@ function OverlayEdit({ overlays, ctx, setCtx, helm }) {
         border={{ side: 'right' }}
       >
         <Box flex={false}>
-          {Object.keys(folders).map(f => (
+          {Object.keys(folders).map((f, i) => (
             <SidebarTab 
               tab={folder}
               subtab={subfolder}
@@ -153,6 +153,7 @@ function OverlayEdit({ overlays, ctx, setCtx, helm }) {
               setSubTab={setSubfolder}
               name={f}
               subnames={Object.keys(folders[f])}
+              key={i}
             />
           ))}
         </Box>

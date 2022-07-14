@@ -261,10 +261,11 @@ export function ApplicationDetails() {
               gap="small"
               pad="small"
             >
-              {chunk(descriptor.links, 3).map(chunk => (
+              {chunk(descriptor.links, 3).map((chunk, i) => (
                 <Box
                   direction="row"
                   gap="small"
+                  key={i}
                 >
                   {chunk.map(link => (
                     <ApplicationLink

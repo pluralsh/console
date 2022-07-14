@@ -101,11 +101,12 @@ function PlanLimits({ limits }) {
       gap="1px"
       border={{ side: 'between' }}
     >
-      {Object.entries(limits).map(([name, val]) => (
+      {Object.entries(limits).map(([name, val], i) => (
         <Box
           direction="row"
           align="center"
           gap="small"
+          key={i}
         >
           <Text
             size="small"
