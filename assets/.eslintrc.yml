@@ -1,6 +1,7 @@
-extends: react-app
+extends: pluralsh
 rules:
-  jsx-a11y/alt-text: 'warn'
-  default-case: 'off'
-  no-mixed-operators: 'off'
-  no-unused-vars: 'error'
+  import/prefer-default-export: off
+  react/no-unstable-nested-components: off
+  react-hooks/rules-of-hooks: error
+  react-hooks/exhaustive-deps: warn
+  no-unused-vars: error
