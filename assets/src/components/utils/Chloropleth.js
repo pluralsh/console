@@ -6,7 +6,7 @@ import { max } from 'lodash'
 
 import { normalizeColor } from 'grommet/utils'
 
-import countries from './world_countries'
+import countries from './world_countries.json'
 import { useColorMap } from './Graph'
 
 const COLOR_MAP = [

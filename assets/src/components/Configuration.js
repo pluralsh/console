@@ -16,6 +16,8 @@ import { chunk } from 'lodash'
 
 import yaml from 'js-yaml'
 
+import { deepFetch } from '../utils/graphql'
+
 import { APPLICATION_Q, UPDATE_CONFIGURATION } from './graphql/plural'
 
 import { BreadcrumbsContext } from './Breadcrumbs'
@@ -31,8 +33,6 @@ import { BuildFragment } from './graphql/builds'
 import { LabelledInput } from './utils/LabelledInput'
 import { convertType } from './runbooks/Display'
 import { DarkSelect } from './utils/Select'
-
-import { deepFetch } from '../utils/graphql'
 
 import { COMPONENT_LABEL } from './kubernetes/constants'
 import { SidebarTab } from './utils/SidebarTab'

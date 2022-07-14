@@ -2,11 +2,20 @@ parser: "@babel/eslint-parser"
 extends: "pluralsh"
 rules:
   import/prefer-default-export: off
-  import/no-extraneous-dependencies: off # Enable it.
+  import/no-extraneous-dependencies: warn # TODO Enable it.
+  react/destructuring-assignment: warn # TODO Enable it.
+  react/jsx-no-constructed-context-values: warn # TODO Enable it.
   react/no-unstable-nested-components: off
   react-hooks/rules-of-hooks: error
   react-hooks/exhaustive-deps: warn
+  camelcase: warn # TODO Enable it.
   no-nonoctal-decimal-escape: off # TODO Enable once it will be compatible with eslint version that we use.
-  no-unused-expressions: off # TODO Enable it.
-  no-unused-vars: off # TODO Enable it.
+  no-unused-expressions: warn # TODO Enable it.
+  no-unused-vars: warn # TODO Enable it.
   no-unsafe-optional-chaining: off # TODO Enable once it will be compatible with eslint version that we use.
+overrides:
+  - files:
+      - "*.test.js"
+      - "*.test.jsx"
+    env:
+      jest: true

@@ -100,7 +100,9 @@ export function useNotificationSubscription() {
           update: prev => appendConnection(prev, notification, 'notifications'),
         })
       }
-      catch { }
+      catch {
+        // Ignore.
+      }
 
       try {
         updateCache(client, {
@@ -109,7 +111,9 @@ export function useNotificationSubscription() {
           update: prev => appendConnection(prev, notification, 'notifications'),
         })
       }
-      catch { }
+      catch {
+        // Ignore.
+      }
 
       updateFragment(client, {
         id: `Incident:${id}`,

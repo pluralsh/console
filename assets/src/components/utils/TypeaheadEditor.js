@@ -29,13 +29,11 @@ export default function TypeaheadEditor({ editor, value, setValue, style, onOpen
         switch (event.key) {
           case 'ArrowDown':
             event.preventDefault()
-            const prevIndex = index >= suggestions.length - 1 ? 0 : index + 1
-            setIndex(prevIndex)
+            setIndex(index >= suggestions.length - 1 ? 0 : index + 1)
             break
           case 'ArrowUp':
             event.preventDefault()
-            const nextIndex = index <= 0 ? suggestions.length - 1 : index - 1
-            setIndex(nextIndex)
+            setIndex(index <= 0 ? suggestions.length - 1 : index - 1)
             break
           case 'Tab':
           case 'Enter':

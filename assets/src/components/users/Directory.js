@@ -23,19 +23,16 @@ import { WebhookManagement } from '../Webhooks'
 import { SMTP_Q, UPDATE_SMTP } from '../graphql/plural'
 
 import { LoginContext } from '../Login'
-import { USERS_Q, GROUPS_Q, EDIT_USER, ROLES_Q } from './queries'
+
+import { EDIT_USER, GROUPS_Q, ROLES_Q, USERS_Q } from './queries'
 import Avatar from './Avatar'
 import { GroupForm } from './CreateGroup'
 import { InviteForm } from './CreateInvite'
 import GroupRow from './Group'
 
-
 import RoleRow, { CreateRole } from './Role'
 
-
 import { SearchIcon } from './utils'
-
-
 
 const INPUT_WIDTH = '350px'
 
