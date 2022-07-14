@@ -1,7 +1,8 @@
 import { gql } from 'apollo-boost'
-import { PageInfo } from './base';
 
-export const UserFragment = gql `
+import { PageInfo } from './base'
+
+export const UserFragment = gql`
   fragment UserFragment on User {
     id
     name
@@ -11,15 +12,14 @@ export const UserFragment = gql `
     readTimestamp
     roles { admin }
   }
-`;
-
-export const InviteFragment = gql `
+`
+export const InviteFragment = gql`
   fragment InviteFragment on Invite {
     secureId
   }
 `
 
-export const GroupFragment = gql `
+export const GroupFragment = gql`
   fragment GroupFragment on Group {
     id
     name
@@ -28,7 +28,7 @@ export const GroupFragment = gql `
   }
 `
 
-export const RoleBindingFragment = gql `
+export const RoleBindingFragment = gql`
   fragment RoleBindingFragment on RoleBinding {
     id
     user { ...UserFragment }
@@ -36,9 +36,9 @@ export const RoleBindingFragment = gql `
   }
   ${UserFragment}
   ${GroupFragment}
-`;
+`
 
-export const RoleFragment = gql `
+export const RoleFragment = gql`
   fragment RoleFragment on Role {
     id
     name
@@ -48,18 +48,18 @@ export const RoleFragment = gql `
     roleBindings { ...RoleBindingFragment }
   }
   ${RoleBindingFragment}
-`;
+`
 
-export const GroupMemberFragment = gql `
+export const GroupMemberFragment = gql`
   fragment GroupMemberFragment on GroupMember {
     user { ...UserFragment }
     group { ...GroupFragment }
   }
   ${GroupFragment}
   ${UserFragment}
-`;
+`
 
-export const ManifestFragment = gql `
+export const ManifestFragment = gql`
   fragment ManifestFragment on PluralManifest {
     network { 
       pluralDns
@@ -68,9 +68,8 @@ export const ManifestFragment = gql `
     cluster
     bucketPrefix
   }
-`;
-
-export const NotificationFragment = gql `
+`
+export const NotificationFragment = gql`
   fragment NotificationFragment on Notification {
     id
     title
@@ -81,9 +80,8 @@ export const NotificationFragment = gql `
     annotations
     seenAt
   }
-`;
-
-export const ME_Q = gql `
+`
+export const ME_Q = gql`
   query {
     me {
       ...UserFragment
@@ -102,9 +100,9 @@ export const ME_Q = gql `
   ${UserFragment}
   ${RoleFragment}
   ${ManifestFragment}
-`;
+`
 
-export const SIGNIN = gql `
+export const SIGNIN = gql`
   mutation signIn($email: String!, $password: String!) {
     signIn(email: $email, password: $password) {
       ...UserFragment
@@ -112,18 +110,18 @@ export const SIGNIN = gql `
     }
   }
   ${UserFragment}
-`;
+`
 
-export const UPDATE_USER = gql `
+export const UPDATE_USER = gql`
   mutation UpdateUser($attributes: UserAttributes!) {
     updateUser(attributes: $attributes) {
       ...UserFragment
     }
   }
   ${UserFragment}
-`;
+`
 
-export const USERS_Q = gql `
+export const USERS_Q = gql`
   query Users($cursor: String) {
     users(first: 20, after: $cursor) {
       pageInfo {
@@ -138,26 +136,25 @@ export const USERS_Q = gql `
     }
   }
   ${UserFragment}
-`;
+`
 
-export const INVITE_USER = gql `
+export const INVITE_USER = gql`
   mutation InviteUser($email: String) {
     createInvite(attributes: {email: $email}) {
       ...InviteFragment
     }
   }
   ${InviteFragment}
-`;
+`
 
-export const INVITE_Q = gql `
+export const INVITE_Q = gql`
   query Invite($id: String!) {
     invite(id: $id) {
       email
     }
   }
-`;
-
-export const SIGNUP = gql `
+`
+export const SIGNUP = gql`
   mutation SignUp($inviteId: String!, $attributes: UserAttributes!) {
     signup(inviteId: $inviteId, attributes: $attributes) {
       ...UserFragment
@@ -165,9 +162,9 @@ export const SIGNUP = gql `
     }
   }
   ${UserFragment}
-`;
+`
 
-export const NOTIFICATIONS_Q = gql `
+export const NOTIFICATIONS_Q = gql`
   query Notifs($all: Boolean, $cursor: String) {
     notifications(all: $all, after: $cursor, first: 50) {
       pageInfo { ...PageInfo }

@@ -7,7 +7,7 @@ export const WebhookFragment = gql`
     health
     insertedAt
   }
-`;
+`
 
 export const WEBHOOKS_Q = gql`
   query Webhooks($cursor: String) {
@@ -24,7 +24,7 @@ export const WEBHOOKS_Q = gql`
     }
   }
   ${WebhookFragment}
-`;
+`
 
 export const CREATE_WEBHOOK = gql`
   mutation CreateWebhook($attributes: WebhookAttributes!) {
@@ -33,7 +33,7 @@ export const CREATE_WEBHOOK = gql`
     }
   }
   ${WebhookFragment}
-`;
+`
 
 export const DELETE_WEBHOOK = gql`
   mutation DeleteWebhook($id: ID!) {

@@ -1,6 +1,7 @@
 import { gql } from 'apollo-boost'
-import { PageInfo } from '../graphql/base';
-import { GroupFragment, GroupMemberFragment, InviteFragment, NotificationFragment, RoleFragment, UserFragment } from '../graphql/users';
+
+import { PageInfo } from '../graphql/base'
+import { GroupFragment, GroupMemberFragment, InviteFragment, NotificationFragment, RoleFragment, UserFragment } from '../graphql/users'
 
 export const USERS_Q = gql`
   query Users($q: String, $ursor: String) {
@@ -17,7 +18,7 @@ export const USERS_Q = gql`
   }
   ${PageInfo}
   ${UserFragment}
-`;
+`
 
 export const GROUPS_Q = gql`
   query Groups($q: String, $cursor: String) {
@@ -34,7 +35,7 @@ export const GROUPS_Q = gql`
   }
   ${PageInfo}
   ${GroupFragment}
-`;
+`
 
 export const ROLES_Q = gql`
   query Roles($cursor: String) {
@@ -47,7 +48,7 @@ export const ROLES_Q = gql`
   }
   ${PageInfo}
   ${RoleFragment}
-`;
+`
 
 export const SEARCH_USERS = gql`
   query SearchUsers($q: String, $cursor: String) {
@@ -98,7 +99,7 @@ export const GROUP_MEMBERS = gql`
   }
   ${PageInfo}
   ${GroupMemberFragment}
-`;
+`
 
 export const CREATE_GROUP_MEMBERS = gql`
   mutation CreateGroupMember($groupId: ID!, $userId: ID!) {
@@ -107,7 +108,7 @@ export const CREATE_GROUP_MEMBERS = gql`
     }
   }
   ${GroupMemberFragment}
-`;
+`
 
 export const DELETE_GROUP_MEMBER = gql`
   mutation DeleteMember($groupId: ID!, $userId: ID!) {
@@ -116,7 +117,7 @@ export const DELETE_GROUP_MEMBER = gql`
     }
   }
   ${GroupMemberFragment}
-`;
+`
 
 export const EDIT_USER = gql`
   mutation UpdateUser($id: ID, $attributes: UserAttributes!) {
@@ -125,7 +126,7 @@ export const EDIT_USER = gql`
     }
   }
   ${UserFragment}
-`;
+`
 
 export const CREATE_GROUP = gql`
   mutation CreateGroup($attributes: GroupAttributes!) {
@@ -134,7 +135,7 @@ export const CREATE_GROUP = gql`
     }
   }
   ${GroupFragment}
-`;
+`
 
 export const UPDATE_GROUP = gql`
   mutation UpdateGroup($id: ID!, $attributes: GroupAttributes!) {
@@ -143,7 +144,7 @@ export const UPDATE_GROUP = gql`
     }
   }
   ${GroupFragment}
-`;
+`
 
 export const DELETE_GROUP = gql`
   mutation DeleteGroup($id: ID!) {
@@ -152,7 +153,7 @@ export const DELETE_GROUP = gql`
     }
   }
   ${GroupFragment}
-`;
+`
 
 export const CREATE_ROLE = gql`
   mutation CreateRole($attributes: RoleAttributes!) {
@@ -161,7 +162,7 @@ export const CREATE_ROLE = gql`
     }
   }
   ${RoleFragment}
-`;
+`
 
 export const UPDATE_ROLE = gql`
   mutation UpdateRole($id: ID!, $attributes: RoleAttributes!) {
@@ -170,7 +171,7 @@ export const UPDATE_ROLE = gql`
     }
   }
   ${RoleFragment}
-`;
+`
 
 export const DELETE_ROLE = gql`
   mutation DeleteRow($id: ID!) {
@@ -179,7 +180,7 @@ export const DELETE_ROLE = gql`
     }
   }
   ${RoleFragment}
-`;
+`
 
 export const CREATE_INVITE = gql`
   mutation CreateInvite($attributes: InviteAttributes!) {
@@ -188,7 +189,7 @@ export const CREATE_INVITE = gql`
     }
   }
   ${InviteFragment}
-`;
+`
 
 export const MARK_READ = gql`
   mutation {
@@ -197,7 +198,7 @@ export const MARK_READ = gql`
     }
   }
   ${UserFragment}
-`;
+`
 
 export const NOTIFS_SUB = gql`
   subscription {

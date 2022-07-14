@@ -1,17 +1,17 @@
 export const POLL_INTERVAL = 10 * 1000
 
 export const COMPONENT_LABEL = 'platform.plural.sh/component'
-export const KIND_LABEL      = 'platform.plural.sh/kind'
-export const RESOURCE_LABEL  = 'platform.plural.sh/resource' 
+export const KIND_LABEL = 'platform.plural.sh/kind'
+export const RESOURCE_LABEL = 'platform.plural.sh/resource' 
 
 export const EventType = {
-  Normal: "Normal",
-  Warning: "Warning"
+  Normal: 'Normal',
+  Warning: 'Warning',
 }
 
 export const ScalingTypes = {
   DEPLOYMENT: 'DEPLOYMENT',
-  STATEFULSET: 'STATEFULSET'
+  STATEFULSET: 'STATEFULSET',
 }
 
 export const ClusterMetrics = {

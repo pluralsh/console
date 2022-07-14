@@ -1,42 +1,64 @@
-import React, { useState, useEffect } from 'react'
-import { GqlError } from 'forge-core' 
-import { useQuery, useMutation } from 'react-apollo'
-import { Box, Keyboard, Text, Form } from 'grommet'
-import { Button } from 'forge-core'
+import React, { useEffect, useState } from 'react'
+import { Button, GqlError } from 'forge-core' 
+import { useMutation, useQuery } from 'react-apollo'
+import { Box, Form, Keyboard, Text } from 'grommet'
+
+import gql from 'graphql-tag'
+
+import { useIntercom } from 'react-use-intercom'
+
+import { useLocation } from 'react-router'
+
 import { setToken, wipeToken } from '../helpers/auth'
+
+import { localized } from '../helpers/hostname'
+
 import { ME_Q, SIGNIN } from './graphql/users'
 import { IncidentContext } from './incidents/context'
-import gql from 'graphql-tag'
-import { localized } from '../helpers/hostname'
 import { LabelledInput } from './utils/LabelledInput'
-import { useIntercom } from 'react-use-intercom'
-import { useLocation } from 'react-router'
+
 import { LoopingLogo } from './utils/AnimatedLogo'
 
-
 const POLL_INTERVAL = 3 * 60 * 1000
-const CONSOLE_ICON = process.env.PUBLIC_URL + '/console-full.png'
-const CONSOLE_LOGO = process.env.PUBLIC_URL + '/console-logo.png'
+const CONSOLE_ICON = `${process.env.PUBLIC_URL}/console-full.png`
+const CONSOLE_LOGO = `${process.env.PUBLIC_URL}/console-logo.png`
 const LOGIN_INFO = gql`
   query LoginInfo($redirect: String) {
     loginInfo(redirect: $redirect) { oidcUri }
   }
 `
 
-export function LoginPortal({children}) {
+export function LoginPortal({ children }) {
   return (
-    <Box height='100vh' fill='horizontal' direction='row'>
-      <Box width='40%' fill='vertical' justify='center' align='center' background='plural-blk'>
-        <img src={CONSOLE_ICON} width='300px' />
+    <Box
+      height="100vh"
+      fill="horizontal"
+      direction="row"
+    >
+      <Box
+        width="40%"
+        fill="vertical"
+        justify="center"
+        align="center"
+        background="plural-blk"
+      >
+        <img
+          src={CONSOLE_ICON}
+          width="300px"
+        />
       </Box>
-      <Box fill align='center' justify='center'>
+      <Box
+        fill
+        align="center"
+        justify="center"
+      >
         {children}
       </Box>
     </Box>
   )
 }
 
-function LoginError({error}) {
+function LoginError({ error }) {
   useEffect(() => {
     const to = setTimeout(() => {
       wipeToken()
@@ -55,42 +77,57 @@ function LoginError({error}) {
   )
 }
 
-export const LoginContext = React.createContext({me: null})
+export const LoginContext = React.createContext({ me: null })
 
 export function GrantAccess() {
   const [jwt, setJwt] = useState('')
+
   return (
     <LoginPortal>
-      <Box gap='small'>
-        <Box gap='xsmall' align='center'>
-          <img src={CONSOLE_LOGO} width='45px' />
-          <Text size='large'>Welcome</Text>
-          <Text size='small' color='dark-3'>Enter the login token given to you to gain access</Text>
+      <Box gap="small">
+        <Box
+          gap="xsmall"
+          align="center"
+        >
+          <img
+            src={CONSOLE_LOGO}
+            width="45px"
+          />
+          <Text size="large">Welcome</Text>
+          <Text
+            size="small"
+            color="dark-3"
+          >Enter the login token given to you to gain access
+          </Text>
         </Box>
         <LabelledInput
           value={jwt}
-          width='100%'
-          label='Login Token'
-          onChange={setJwt} />
+          width="100%"
+          label="Login Token"
+          onChange={setJwt}
+        />
         <Button 
-          fill='horizontal'
-          label='Get Access' 
-          pad={{vertical: '8px'}} 
-          margin={{top: 'xsmall'}}
-          onClick={() => { setToken(jwt); window.location = '/' }}
-          disabled={jwt === ''} />
+          fill="horizontal"
+          label="Get Access" 
+          pad={{ vertical: '8px' }} 
+          margin={{ top: 'xsmall' }}
+          onClick={() => {
+            setToken(jwt); window.location = '/' 
+          }}
+          disabled={jwt === ''}
+        />
       </Box>
     </LoginPortal>
   )
 }
 
-export function EnsureLogin({children}) {
+export function EnsureLogin({ children }) {
   const location = useLocation()
-  const {data, error} = useQuery(ME_Q, {pollInterval: POLL_INTERVAL})
-  const {boot, update} = useIntercom()
+  const { data, error } = useQuery(ME_Q, { pollInterval: POLL_INTERVAL })
+  const { boot, update } = useIntercom()
 
   useEffect(() => {
-    if (data && data.me) boot({email: data.me.email, name: data.me.name})
+    if (data && data.me) boot({ email: data.me.email, name: data.me.name })
   }, [data])
 
   useEffect(() => {
@@ -99,51 +136,65 @@ export function EnsureLogin({children}) {
 
   if (error) {
     console.log(error)
+
     return <LoginError error={error} />
   }
 
   if (!data) return null
 
-  const {me, externalToken, clusterInfo: {__typename, ...clusterInformation}, configuration} = data
+  const { me, externalToken, clusterInfo: { __typename, ...clusterInformation }, configuration } = data
 
   return (
-    <IncidentContext.Provider value={{clusterInformation}}>
-      <LoginContext.Provider value={{me, configuration, token: externalToken}}>
+    <IncidentContext.Provider value={{ clusterInformation }}>
+      <LoginContext.Provider value={{ me, configuration, token: externalToken }}>
         {children}
       </LoginContext.Provider>
     </IncidentContext.Provider>
   )
 }
 
-function OIDCLogin({oidcUri}) {
+function OIDCLogin({ oidcUri }) {
   return (
     <LoginPortal>
-      <Box gap='medium'>
-        <Box gap='xsmall' align='center'>
-          <img src={CONSOLE_LOGO} width='45px' />
-          <Text size='large'>Welcome</Text>
-          <Text size='small' color='dark-3'>It looks like this instance is using plural oauth</Text>
+      <Box gap="medium">
+        <Box
+          gap="xsmall"
+          align="center"
+        >
+          <img
+            src={CONSOLE_LOGO}
+            width="45px"
+          />
+          <Text size="large">Welcome</Text>
+          <Text
+            size="small"
+            color="dark-3"
+          >It looks like this instance is using plural oauth
+          </Text>
         </Box>
         <Button 
-          fill='horizontal' 
-          label='Login with Plural'
-          onClick={() => { window.location = oidcUri }} />
+          fill="horizontal" 
+          label="Login with Plural"
+          onClick={() => {
+            window.location = oidcUri 
+          }}
+        />
       </Box>
     </LoginPortal>
   )
 }
 
 export default function Login() {
-  const [form, setForm] = useState({email: '', password: ''})
-  const {data} = useQuery(ME_Q)
-  const {data: loginData} = useQuery(LOGIN_INFO, {variables: {redirect: localized('/oauth/callback')}})
-  const [mutation, {loading, error}] = useMutation(SIGNIN, {
+  const [form, setForm] = useState({ email: '', password: '' })
+  const { data } = useQuery(ME_Q)
+  const { data: loginData } = useQuery(LOGIN_INFO, { variables: { redirect: localized('/oauth/callback') } })
+  const [mutation, { loading, error }] = useMutation(SIGNIN, {
     variables: form,
-    onCompleted: ({signIn: {jwt}}) => {
+    onCompleted: ({ signIn: { jwt } }) => {
       setToken(jwt)
       window.location = '/'
     },
-    onError: console.log
+    onError: console.log,
   })
 
   if (!error && data && data.me) {
@@ -158,35 +209,56 @@ export default function Login() {
 
   return (
     <LoginPortal>
-      <Box gap='medium'>
-        <Box gap='xsmall' align='center'>
-          <img src={CONSOLE_LOGO} width='45px' />
-          <Text size='large'>Welcome</Text>
-          <Text size='small' color='dark-3'>Enter your email and password to get started</Text>
+      <Box gap="medium">
+        <Box
+          gap="xsmall"
+          align="center"
+        >
+          <img
+            src={CONSOLE_LOGO}
+            width="45px"
+          />
+          <Text size="large">Welcome</Text>
+          <Text
+            size="small"
+            color="dark-3"
+          >Enter your email and password to get started
+          </Text>
         </Box>
         <Keyboard onEnter={disabled ? null : mutation}>
           <Form onSubmit={disabled ? null : mutation}>
-            <Box margin={{bottom: '10px'}} gap='xsmall'>
-              {error && <GqlError header='Login failed' error={error} />}
+            <Box
+              margin={{ bottom: '10px' }}
+              gap="xsmall"
+            >
+              {error && (
+                <GqlError
+                  header="Login failed"
+                  error={error}
+                />
+              )}
               <LabelledInput
                 value={form.email}
-                placeholder='someone@example.com'
-                label='Email'
-                onChange={(email) => setForm({...form, email})} />
+                placeholder="someone@example.com"
+                label="Email"
+                onChange={email => setForm({ ...form, email })}
+              />
               <LabelledInput
-                type='password'
+                type="password"
                 value={form.password}
-                placeholder='a long password'
-                label='Password'
-                onChange={(password) => setForm({...form, password})} />
+                placeholder="a long password"
+                label="Password"
+                onChange={password => setForm({ ...form, password })}
+              />
               <Button 
-                fill='horizontal'
-                label='Login' 
-                pad={{vertical: '8px'}} 
-                margin={{top: 'xsmall'}}
+                fill="horizontal"
+                label="Login" 
+                pad={{ vertical: '8px' }} 
+                margin={{ top: 'xsmall' }}
                 onClick={mutation} 
                 loading={loading} 
-                disabled={disabled} />
+                disabled={disabled}
+              />
             </Box>
           </Form>
         </Keyboard>

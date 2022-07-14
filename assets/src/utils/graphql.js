@@ -1,4 +1,4 @@
-import { isString } from "lodash"
+import { isString } from 'lodash'
 
 export function deepFetch(map, path) {
   if (isString(path)) return deepFetch(map, path.split('.'))
@@ -10,19 +10,21 @@ export function deepFetch(map, path) {
   return deepFetch(map[key], path.slice(1))
 }
 
-export function updateFragment(cache, {fragment, id, update, fragmentName}) {
-  const current = cache.readFragment({id, fragment, fragmentName})
+export function updateFragment(cache, { fragment, id, update, fragmentName }) {
+  const current = cache.readFragment({ id, fragment, fragmentName })
 
   if (!current) return
 
-  cache.writeFragment({id, fragment, data: update(current), fragmentName})
+  cache.writeFragment({ id, fragment, data: update(current), fragmentName })
 }
 
 export function extendConnection(prev, next, key) {
-  const {edges, pageInfo} = next
-  return {...prev, [key]: {
-      ...prev[key], pageInfo, edges: [...prev[key].edges, ...edges]
-    }
+  const { edges, pageInfo } = next
+
+  return { ...prev,
+    [key]: {
+      ...prev[key], pageInfo, edges: [...prev[key].edges, ...edges],
+    },
   }
 }
 
@@ -31,29 +33,30 @@ export function deepUpdate(prev, path, update) {
 
   const key = path[0]
   if (path.length === 1) {
-    return {...prev, [key]: update(prev[key])}
+    return { ...prev, [key]: update(prev[key]) }
   }
 
-  return {...prev, [key]: deepUpdate(prev[key], path.slice(1), update)}
+  return { ...prev, [key]: deepUpdate(prev[key], path.slice(1), update) }
 }
 
 export function appendConnection(prev, next, key) {
-  const {edges, pageInfo} = prev[key]
-  if (edges.find(({node: {id}}) => id === next.id)) return prev
+  const { edges, pageInfo } = prev[key]
+  if (edges.find(({ node: { id } }) => id === next.id)) return prev
 
-  return {...prev, [key]: {
-      ...prev[key],  pageInfo, edges: [{__typename: `${next.__typename}Edge`, node: next}, ...edges]
-    }
+  return { ...prev,
+    [key]: {
+      ...prev[key], pageInfo, edges: [{ __typename: `${next.__typename}Edge`, node: next }, ...edges],
+    },
   }
 }
 
 export function removeConnection(prev, val, key) {
-  return {...prev, [key]: {...prev[key], edges: prev[key].edges.filter(({node}) => node.id !== val.id)}}
+  return { ...prev, [key]: { ...prev[key], edges: prev[key].edges.filter(({ node }) => node.id !== val.id) } }
 }
 
-export function updateCache(cache, {query, variables, update, onFailure}) {
-  const prev = cache.readQuery({query, variables})
-  cache.writeQuery({query, variables, data: update(prev)})
+export function updateCache(cache, { query, variables, update }) {
+  const prev = cache.readQuery({ query, variables })
+  cache.writeQuery({ query, variables, data: update(prev) })
 }
 
-export const prune = ({__typename, ...rest}) => rest
+export const prune = ({ __typename, ...rest }) => rest

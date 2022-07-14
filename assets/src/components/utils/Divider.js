@@ -1,11 +1,11 @@
-import React, { useContext } from 'react'
-import { ThemeContext, Text } from 'grommet'
+import { useContext } from 'react'
+import { Text, ThemeContext } from 'grommet'
 import { normalizeColor } from 'grommet/utils'
 import styled from 'styled-components'
 
 const StyledDivider = styled.div`
 ${props => (
-  `
+    `
     display: flex;
     flex-basis: 100%;
     align-items: ${props.align || 'center'};
@@ -22,15 +22,24 @@ ${props => (
       margin: 0px ${props.textMargin || '8px'};
     }
   `
-)}
-`;
+  )}
+`
 
-export default function Divider({color, text}) {
+export default function Divider({ color, text }) {
   const theme = useContext(ThemeContext)
 
   return (
-    <StyledDivider theme={theme} color={color}>
-      {text && <Text weight={500} size='small'>{text}</Text>}
+    <StyledDivider
+      theme={theme}
+      color={color}
+    >
+      {text && (
+        <Text
+          weight={500}
+          size="small"
+        >{text}
+        </Text>
+      )}
     </StyledDivider>
   )
 }

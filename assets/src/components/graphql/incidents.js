@@ -8,7 +8,7 @@ export const UserFragment = gql`
     avatar
     backgroundColor
   }
-`;
+`
 
 export const ClusterInformation = gql`
   fragment ClusterInformation on ClusterInformation {
@@ -27,7 +27,7 @@ export const RepoFragment = gql`
     icon
     private
   }
-`;
+`
 
 export const PlanFragment = gql`
   fragment PlanFragment on Plan {
@@ -42,7 +42,7 @@ export const PlanFragment = gql`
     serviceLevels { minSeverity maxSeverity responseTime }
     metadata { features { name description } }
   }
-`;
+`
 
 export const PostmortemFragment = gql`
   fragment PostmortemFragment on Postmortem {

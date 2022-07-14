@@ -1,4 +1,4 @@
-import { Reload, Check, Deploy, Install } from 'forge-core'
+import { Check, Deploy, Install, Reload } from 'forge-core'
 
 export const BuildStatus = {
   SUCCESSFUL: 'SUCCESSFUL',
@@ -6,14 +6,14 @@ export const BuildStatus = {
   FAILED: 'FAILED',
   QUEUED: 'QUEUED',
   RUNNING: 'RUNNING',
-  PENDING: 'PENDING'
+  PENDING: 'PENDING',
 }
 
 export const BuildTypes = {
   BOUNCE: 'BOUNCE',
   DEPLOY: 'DEPLOY',
   APPROVAL: 'APPROVAL',
-  INSTALL: 'INSTALL'
+  INSTALL: 'INSTALL',
 }
 
 export const BuildIcons = {

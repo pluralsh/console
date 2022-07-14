@@ -1,6 +1,7 @@
 import { gql } from 'apollo-boost'
-import { MetricResponseFragment } from '../graphql/dashboards';
-import { CertificateFragment, ConfigurationOverlayFragment, CronJobFragment, DeploymentFragment, EventFragment, IngressFragment, JobFragment, JobStatus, NodeFragment, NodeMetricFragment, PodFragment, ServiceFragment, StatefulSetFragment, VerticalPodAutoscalerFragment } from '../graphql/kubernetes';
+
+import { MetricResponseFragment } from '../graphql/dashboards'
+import { CertificateFragment, ConfigurationOverlayFragment, CronJobFragment, DeploymentFragment, EventFragment, IngressFragment, JobFragment, JobStatus, NodeFragment, NodeMetricFragment, PodFragment, ServiceFragment, StatefulSetFragment, VerticalPodAutoscalerFragment } from '../graphql/kubernetes'
 
 export const SERVICE_Q = gql`
   query Service($name: String!, $namespace: String!) {
@@ -13,7 +14,7 @@ export const SERVICE_Q = gql`
   ${ServiceFragment}
   ${PodFragment}
   ${EventFragment}
-`;
+`
 
 export const DEPLOYMENT_Q = gql`
   query Deployment($name: String!, $namespace: String!) {
@@ -26,7 +27,7 @@ export const DEPLOYMENT_Q = gql`
   ${DeploymentFragment}
   ${PodFragment}
   ${EventFragment}
-`;
+`
 
 export const INGRESS_Q = gql`
   query Ingress($name: String!, $namespace: String!) {
@@ -37,7 +38,7 @@ export const INGRESS_Q = gql`
   }
   ${IngressFragment}
   ${EventFragment}
-`;
+`
 
 export const STATEFUL_SET_Q = gql`
   query StatefulSet($name: String!, $namespace: String!) {
@@ -50,7 +51,7 @@ export const STATEFUL_SET_Q = gql`
   ${StatefulSetFragment}
   ${PodFragment}
   ${EventFragment}
-`;
+`
 
 export const DELETE_POD = gql`
   mutation DeletePod($name: String!, $namespace: String!) {
@@ -59,7 +60,7 @@ export const DELETE_POD = gql`
     }
   }
   ${PodFragment}
-`;
+`
 
 export const DELETE_JOB = gql`
   mutation DeleteJob($name: String!, $namespace: String!) {
@@ -68,7 +69,7 @@ export const DELETE_JOB = gql`
     }
   }
   ${JobFragment}
-`;
+`
 
 export const DELETE_NODE = gql`
   mutation DeleteNode($name: String!) {
@@ -77,7 +78,7 @@ export const DELETE_NODE = gql`
     }
   }
   ${NodeFragment}
-`;
+`
 
 export const NODES_Q = gql`
   query {
@@ -137,7 +138,7 @@ export const CRON_JOB_Q = gql`
   ${CronJobFragment}
   ${EventFragment}
   ${JobStatus}
-`;
+`
 
 export const JOB_Q = gql`
   query Job($name: String!, $namespace: String!) {
@@ -148,7 +149,7 @@ export const JOB_Q = gql`
   }
   ${JobFragment}
   ${EventFragment}
-`;
+`
 
 export const CERTIFICATE_Q = gql`
   query Certificate($name: String!, $namespace: String!) {
@@ -170,7 +171,7 @@ export const POD_Q = gql`
   }
   ${PodFragment}
   ${EventFragment}
-`;
+`
 
 export const USAGE_Q = gql`
   query Usage($cpu: String!, $mem: String!, $podCpu: String!, $podMem: String!, $step: String!, $offset: Int!) {
@@ -180,7 +181,7 @@ export const USAGE_Q = gql`
     podMem: metric(query: $podMem, offset: $offset, step: $step) { ...MetricResponseFragment }
   }
   ${MetricResponseFragment}
-`;
+`
 
 export const SCALING_RECOMMENDATION = gql`
   query Scaling($name: String!, $namespace: String!, $kind: AutoscalingTarget!) {

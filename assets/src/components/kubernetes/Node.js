@@ -1,45 +1,82 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { Tabs, TabContent, TabHeader, TabHeaderItem, Confirm, Trash, Node as NodeI } from 'forge-core'
-import { useQuery, useMutation } from 'react-apollo'
-import { NodeMetrics, POLL_INTERVAL } from './constants'
-import { NODES_Q, NODE_METRICS_Q, NODE_Q, CLUSTER_SATURATION, DELETE_NODE } from './queries'
-import { HeaderItem, ignore, PodList, podResources, RowItem } from './Pod'
+import { Confirm, Node as NodeI, TabContent, TabHeader, TabHeaderItem, Tabs, Trash } from 'forge-core'
+import { useMutation, useQuery } from 'react-apollo'
+
 import { Box, Drop, Text, ThemeContext } from 'grommet'
 import { useHistory, useParams } from 'react-router'
-import { mapify, Metadata } from './Metadata'
+
 import { ServerCluster } from 'grommet-icons'
-import { BreadcrumbsContext } from '../Breadcrumbs'
-import { Readiness, ReadyIcon } from '../Application'
+
 import { memoryParser } from 'kubernetes-resource-parser'
 import filesize from 'filesize'
-import { Events } from './Event'
-import { LoopingLogo } from '../utils/AnimatedLogo'
-import { Graph } from '../utils/Graph'
-import { format } from '../Dashboard'
-import { ClusterMetrics as Metrics } from './constants'
+
 import { sumBy } from 'lodash'
 import { Doughnut } from 'react-chartjs-2'
 import { normalizeColor } from 'grommet/utils'
-import { RawContent } from './Component'
-import { cpuParser } from '../../utils/kubernetes'
+
 import { Line } from 'rc-progress'
+
+import { cpuParser } from '../../utils/kubernetes'
+import { format } from '../Dashboard'
+import { Graph } from '../utils/Graph'
+import { LoopingLogo } from '../utils/AnimatedLogo'
+import { Readiness, ReadyIcon } from '../Application'
+import { BreadcrumbsContext } from '../Breadcrumbs'
+
+import { RawContent } from './Component'
+import { ClusterMetrics as Metrics, NodeMetrics, POLL_INTERVAL } from './constants'
+
+import { Events } from './Event'
+
+import { Metadata, mapify } from './Metadata'
+import { HeaderItem, PodList, RowItem, ignore, podResources } from './Pod'
+import { CLUSTER_SATURATION, DELETE_NODE, NODES_Q, NODE_METRICS_Q, NODE_Q } from './queries'
 
 function NodeRowHeader() {
   return (
-    <Box direction='row' align='center' border='bottom' pad='small'>
-      <HeaderItem width='30%' text='name' />
-      <HeaderItem width='10%' text='status' />
-      <HeaderItem width='10%' text='cpu' />
-      <HeaderItem width='10%' text='memory' />
-      <HeaderItem width='10%' text='region' />
-      <HeaderItem width='10%' text='zone' />
-      <HeaderItem width='10%' text='cpu' />
-      <HeaderItem width='10%' text='memory' />
+    <Box
+      direction="row"
+      align="center"
+      border="bottom"
+      pad="small"
+    >
+      <HeaderItem
+        width="30%"
+        text="name"
+      />
+      <HeaderItem
+        width="10%"
+        text="status"
+      />
+      <HeaderItem
+        width="10%"
+        text="cpu"
+      />
+      <HeaderItem
+        width="10%"
+        text="memory"
+      />
+      <HeaderItem
+        width="10%"
+        text="region"
+      />
+      <HeaderItem
+        width="10%"
+        text="zone"
+      />
+      <HeaderItem
+        width="10%"
+        text="cpu"
+      />
+      <HeaderItem
+        width="10%"
+        text="memory"
+      />
     </Box>
   )
 }
 
-function UtilBar({capacity, usage, format, modifier}) {
+function UtilBar({ capacity, usage, format, modifier }) {
   const ref = useRef()
   const [hover, setHover] = useState(false)
   const theme = useContext(ThemeContext)
@@ -48,185 +85,283 @@ function UtilBar({capacity, usage, format, modifier}) {
 
   return (
     <>
-    <Box flex={false} ref={ref} fill='horizontal'
-         height='20px' align='center' justify='center'
-         onMouseOver={() => setHover(true)}
-         onMouseLeave={() => setHover(false)}>
-      <Line
-        percent={percent}
-        trailColor={normalizeColor('cardDetailLight', theme)}
-        strokeColor={normalizeColor(color, theme)}
-        strokeWidth='2'
-        trailWidth='2' />
-    </Box>
-    {hover && (
-      <Drop target={ref.current} plain align={{bottom: 'top'}} round='xsmall'>
-        <Box direction='row' gap='xsmall' align='center'
-             background='sidebar' pad={{horizontal: 'small', vertical: 'xsmall'}}>
-          <Text size='small'>{modifier}: {percent}% {usage ? format(usage) : ''}</Text>
-        </Box>
-      </Drop>
-    )}
+      <Box
+        flex={false}
+        ref={ref}
+        fill="horizontal"
+        height="20px"
+        align="center"
+        justify="center"
+        onMouseOver={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+      >
+        <Line
+          percent={percent}
+          trailColor={normalizeColor('cardDetailLight', theme)}
+          strokeColor={normalizeColor(color, theme)}
+          strokeWidth="2"
+          trailWidth="2"
+        />
+      </Box>
+      {hover && (
+        <Drop
+          target={ref.current}
+          plain
+          align={{ bottom: 'top' }}
+          round="xsmall"
+        >
+          <Box
+            direction="row"
+            gap="xsmall"
+            align="center"
+            background="sidebar"
+            pad={{ horizontal: 'small', vertical: 'xsmall' }}
+          >
+            <Text size="small">{modifier}: {percent}% {usage ? format(usage) : ''}</Text>
+          </Box>
+        </Drop>
+      )}
     </>
   )
 }
 
-export function DeleteNode({name, refetch}) {
+export function DeleteNode({ name, refetch }) {
   const [confirm, setConfirm] = useState(false)
-  const [mutation, {loading}] = useMutation(DELETE_NODE, {
-    variables: {name},
-    onCompleted: () => { setConfirm(false); refetch() }
+  const [mutation, { loading }] = useMutation(DELETE_NODE, {
+    variables: { name },
+    onCompleted: () => {
+      setConfirm(false); refetch() 
+    },
   })
 
-  const doConfirm = useCallback((e) => {
+  const doConfirm = useCallback(e => {
     ignore(e)
     setConfirm(true)
   }, [setConfirm])
 
   return (
     <>
-    <Box onClick={doConfirm} pad={{horizontal: 'small'}}>
-      <Trash color={loading ? 'dark-5' : 'error'} size='small' />
-    </Box>
-    {confirm && (
-      <Confirm
-        header={`Are you sure you want to delete ${name}`}
-        description="The node will be replaced within its autoscaling group."
-        loading={loading}
-        cancel={(e) => { ignore(e); setConfirm(false) }}
-        submit={(e) => { ignore(e); mutation() }} />
-    )}
+      <Box
+        onClick={doConfirm}
+        pad={{ horizontal: 'small' }}
+      >
+        <Trash
+          color={loading ? 'dark-5' : 'error'}
+          size="small"
+        />
+      </Box>
+      {confirm && (
+        <Confirm
+          header={`Are you sure you want to delete ${name}`}
+          description="The node will be replaced within its autoscaling group."
+          loading={loading}
+          cancel={e => {
+            ignore(e); setConfirm(false) 
+          }}
+          submit={e => {
+            ignore(e); mutation() 
+          }}
+        />
+      )}
     </>
   )
 }
 
-function NodeRow({node, metrics, refetch}) {
-  let hist = useHistory()
+function NodeRow({ node, metrics, refetch }) {
+  const hist = useHistory()
   const labels = mapify(node.metadata.labels)
   const readiness = nodeReadiness(node.status)
   const nodeMetrics = metrics[node.metadata.name]
 
   return (
-    <Box fill='horizontal' direction='row' align='center' border='bottom' hoverIndicator='backgroundDark'
-         onClick={() => hist.push(`/nodes/${node.metadata.name}`)} pad='small'>
-      <Box flex={false} width='30%' direction='row' align='center' gap='xsmall'>
-        <NodeI size='small' />
-        <Text size='small'>{node.metadata.name}</Text>
+    <Box
+      fill="horizontal"
+      direction="row"
+      align="center"
+      border="bottom"
+      hoverIndicator="backgroundDark"
+      onClick={() => hist.push(`/nodes/${node.metadata.name}`)}
+      pad="small"
+    >
+      <Box
+        flex={false}
+        width="30%"
+        direction="row"
+        align="center"
+        gap="xsmall"
+      >
+        <NodeI size="small" />
+        <Text size="small">{node.metadata.name}</Text>
       </Box>
-      <Box flex={false} width='10%' direction='row' gap='xsmall' align='center'>
-        <ReadyIcon size='12px' readiness={readiness} />
-        <Text size='small'>{nodeReadiness(node.status) === Readiness.Ready ? 'Ready' : 'Pending'}</Text>
+      <Box
+        flex={false}
+        width="10%"
+        direction="row"
+        gap="xsmall"
+        align="center"
+      >
+        <ReadyIcon
+          size="12px"
+          readiness={readiness}
+        />
+        <Text size="small">{nodeReadiness(node.status) === Readiness.Ready ? 'Ready' : 'Pending'}</Text>
       </Box>
-      <Box flex={false} width='10%' direction='row' gap='xsmall' align='center' pad={{horizontal: 'xsmall'}}>
+      <Box
+        flex={false}
+        width="10%"
+        direction="row"
+        gap="xsmall"
+        align="center"
+        pad={{ horizontal: 'xsmall' }}
+      >
         <UtilBar
           capacity={cpuParser(node.status.capacity.cpu)}
           usage={nodeMetrics && nodeMetrics.cpu}
-          format={(v) => `${round(v)} cores`}
-          modifier='CPU' />
+          format={v => `${round(v)} cores`}
+          modifier="CPU"
+        />
       </Box>
-      <Box flex={false} width='10%' direction='row' gap='xsmall' align='center' pad={{horizontal: 'xsmall'}}>
+      <Box
+        flex={false}
+        width="10%"
+        direction="row"
+        gap="xsmall"
+        align="center"
+        pad={{ horizontal: 'xsmall' }}
+      >
         <UtilBar
           capacity={memoryParser(node.status.capacity.memory)}
           usage={nodeMetrics && nodeMetrics.memory}
           format={filesize}
-          modifier="Mem" />
+          modifier="Mem"
+        />
       </Box>
-      <RowItem width='10%' text={labels['failure-domain.beta.kubernetes.io/region']} />
-      <RowItem width='10%' text={labels['failure-domain.beta.kubernetes.io/zone']} />
-      <RowItem width='10%' text={cpuParser(node.status.capacity.cpu)} />
-      <Box width='10%' direction='row' align='center' gap='small'>
-        <Box fill='horizontal'>
-          <Text size='small'>{filesize(memoryParser(node.status.capacity.memory))}</Text>
+      <RowItem
+        width="10%"
+        text={labels['failure-domain.beta.kubernetes.io/region']}
+      />
+      <RowItem
+        width="10%"
+        text={labels['failure-domain.beta.kubernetes.io/zone']}
+      />
+      <RowItem
+        width="10%"
+        text={cpuParser(node.status.capacity.cpu)}
+      />
+      <Box
+        width="10%"
+        direction="row"
+        align="center"
+        gap="small"
+      >
+        <Box fill="horizontal">
+          <Text size="small">{filesize(memoryParser(node.status.capacity.memory))}</Text>
         </Box>
-        <DeleteNode name={node.metadata.name} refetch={refetch} />
+        <DeleteNode
+          name={node.metadata.name}
+          refetch={refetch}
+        />
       </Box>
     </Box>
   )
 }
 
-const podContainers = (pods) => (
-  pods.filter(({status: {phase}}) => phase !== 'Succeeded')
-    .map(({spec: {containers}}) => containers)
+const podContainers = pods => (
+  pods.filter(({ status: { phase } }) => phase !== 'Succeeded')
+    .map(({ spec: { containers } }) => containers)
     .flat()
 )
 
-function NodeGraphs({status: {capacity}, pods, name, usage}) {
-  const {requests, limits} = useMemo(() => {
+function NodeGraphs({ status: { capacity }, pods, name, usage }) {
+  const { requests, limits } = useMemo(() => {
     const containers = podContainers(pods)
     const requests = podResources(containers, 'requests')
     const limits = podResources(containers, 'limits')
-    return {requests, limits}
+
+    return { requests, limits }
   }, [pods])
-  const localize = useCallback((metric) => metric.replaceAll("{instance}", name), [name])
+  const localize = useCallback(metric => metric.replaceAll('{instance}', name), [name])
 
   return (
-    <Box flex={false} direction='row' gap='medium' align='center'>
+    <Box
+      flex={false}
+      direction="row"
+      gap="medium"
+      align="center"
+    >
       <LayeredGauage
         usage={cpuParser(usage.cpu)}
         requests={requests.cpu}
         limits={limits.cpu}
         total={cpuParser(capacity.cpu)}
-        name='CPU'
-        title='CPU Reservation'
+        name="CPU"
+        title="CPU Reservation"
         stable
-        format={cpuFmt} />
+        format={cpuFmt}
+      />
       <LayeredGauage
         usage={memoryParser(usage.memory)}
         requests={requests.memory}
         limits={limits.memory}
         total={memoryParser(capacity.memory)}
-        name='Mem'
-        title='Memory Reservation'
+        name="Mem"
+        title="Memory Reservation"
         stable
-        format={filesize} />
-      <Box fill='horizontal'>
+        format={filesize}
+      />
+      <Box fill="horizontal">
         <SaturationGraphs
           cpu={localize(NodeMetrics.CPU)}
-          mem={localize(NodeMetrics.Memory)} />
+          mem={localize(NodeMetrics.Memory)}
+        />
       </Box>
     </Box>
   )
 }
 
-const round = (x) => Math.round(x * 100) / 100
+const round = x => Math.round(x * 100) / 100
 
-const SimpleGauge = React.memo(({value, total, title, name}) => {
+const SimpleGauge = React.memo(({ value, total, title, name }) => {
   const theme = useContext(ThemeContext)
   const val = value || 0
   const tot = total || 0
 
   return (
-    <Box flex={false} height='200px' width='200px'>
+    <Box
+      flex={false}
+      height="200px"
+      width="200px"
+    >
       <Doughnut
         data={{
-          labels: [' ' + name, ` ${name} available`],
+          labels: [` ${name}`, ` ${name} available`],
           datasets: [
             {
               label: name,
               data: [val, Math.max(tot - val, 0)],
               backgroundColor: [
                 normalizeColor('success', theme),
-                normalizeColor('cardDetailLight' ,theme)
+                normalizeColor('cardDetailLight', theme),
               ],
               hoverOffset: 4,
               borderWidth: 0,
-            }
-          ]
+            },
+          ],
         }}
         options={{
           cutout: '75%',
           animation: false,
           plugins: {
             legend: { display: false },
-            title: {color: 'white', text: title, display: true}
-          }
+            title: { color: 'white', text: title, display: true },
+          },
         }}
       />
     </Box>
   )
 })
 
-const LayeredGauage = React.memo(({requests, limits, usage, total, title, name, format, stable}) => {
+const LayeredGauage = React.memo(({ requests, limits, usage, total, title, name, format }) => {
   const theme = useContext(ThemeContext)
   const data = useMemo(() => {
     const reqs = requests || 0
@@ -242,7 +377,7 @@ const LayeredGauage = React.memo(({requests, limits, usage, total, title, name, 
           data: [reqs, Math.max(tot - reqs, 0)],
           backgroundColor: [
             normalizeColor('success', theme),
-            normalizeColor('cardDetailLight' ,theme)
+            normalizeColor('cardDetailLight', theme),
           ],
           // hoverOffset: 4,
           borderWidth: 0,
@@ -253,7 +388,7 @@ const LayeredGauage = React.memo(({requests, limits, usage, total, title, name, 
           data: [lims, Math.max(tot - lims, 0)],
           backgroundColor: [
             normalizeColor('blue', theme),
-            normalizeColor('cardDetailLight' ,theme)
+            normalizeColor('cardDetailLight', theme),
           ],
           // hoverOffset: 4,
           hoverBorderWidth: 0,
@@ -264,18 +399,22 @@ const LayeredGauage = React.memo(({requests, limits, usage, total, title, name, 
           data: [used, Math.max(tot - used, 0)],
           backgroundColor: [
             normalizeColor('purple', theme),
-            normalizeColor('cardDetailLight' ,theme)
+            normalizeColor('cardDetailLight', theme),
           ],
           // hoverOffset: 4,
           hoverBorderWidth: 0,
           borderWidth: 0,
         },
-      ]
+      ],
     }
   }, [requests, limits, total, name, theme, usage])
 
   return (
-    <Box flex={false} height='200px' width='200px'>
+    <Box
+      flex={false}
+      height="200px"
+      width="200px"
+    >
       <Doughnut
         data={data}
         options={{
@@ -283,78 +422,85 @@ const LayeredGauage = React.memo(({requests, limits, usage, total, title, name, 
           animation: false,
           plugins: {
             legend: { display: false },
-            title: {color: 'white', text: title, display: true},
-            datalabels: {formatter: format},
+            title: { color: 'white', text: title, display: true },
+            datalabels: { formatter: format },
             tooltip: {
               callbacks: {
-                label: function(context) {
-                  const labelIndex = (context.datasetIndex * 2) + context.dataIndex;
-                  return ' ' + context.chart.data.labels[labelIndex] + ': ' + format(context.raw);
-                }
-              }
-            }
-          }
+                label(context) {
+                  const labelIndex = (context.datasetIndex * 2) + context.dataIndex
+
+                  return ` ${context.chart.data.labels[labelIndex]}: ${format(context.raw)}`
+                },
+              },
+            },
+          },
         }}
       />
     </Box>
   )
 })
 
-const datum = ({timestamp, value}) => ({x: new Date(timestamp * 1000), y: round(parseFloat(value))})
+const datum = ({ timestamp, value }) => ({ x: new Date(timestamp * 1000), y: round(parseFloat(value)) })
 
-function SaturationGraphs({cpu, mem}) {
-  const {data} = useQuery(CLUSTER_SATURATION, {
-    variables: {cpuUtilization: cpu, memUtilization: mem, offset: 2 * 60 * 60},
+function SaturationGraphs({ cpu, mem }) {
+  const { data } = useQuery(CLUSTER_SATURATION, {
+    variables: { cpuUtilization: cpu, memUtilization: mem, offset: 2 * 60 * 60 },
     fetchPolicy: 'network-only',
-    pollInterval: 10000
+    pollInterval: 10000,
   })
 
   const result = useMemo(() => {
     if (!data) return null
 
-    const {cpuUtilization, memUtilization} = data
+    const { cpuUtilization, memUtilization } = data
+
     return ([
-      {id: 'cpu utilization', data: cpuUtilization[0].values.map(datum)},
-      {id: 'memory utilization', data: memUtilization[0].values.map(datum)}
+      { id: 'cpu utilization', data: cpuUtilization[0].values.map(datum) },
+      { id: 'memory utilization', data: memUtilization[0].values.map(datum) },
     ])
   }, [data])
 
   if (!result) return null
 
   return (
-    <Box fill='horizontal' gap='small' height='250px'>
+    <Box
+      fill="horizontal"
+      gap="small"
+      height="250px"
+    >
       <Graph
         data={result}
-        yFormat={(v) => format(v, 'percent')} />
+        yFormat={v => format(v, 'percent')}
+      />
     </Box>
   )
 }
 
-const cpuFmt = (cpu) => `${cpu}vcpu`
+const cpuFmt = cpu => `${cpu}vcpu`
 
-function ClusterGauges({nodes, usage}) {
-  const totalCpu = sumBy(nodes, ({status: {capacity: {cpu}}}) => cpuParser(cpu))
-  const totalMem = sumBy(nodes, ({status: {capacity: {memory}}}) => memoryParser(memory))
-  const totalPods = sumBy(nodes, ({status: {capacity: {pods}}}) => parseInt(pods))
+function ClusterGauges({ nodes, usage }) {
+  const totalCpu = sumBy(nodes, ({ status: { capacity: { cpu } } }) => cpuParser(cpu))
+  const totalMem = sumBy(nodes, ({ status: { capacity: { memory } } }) => memoryParser(memory))
+  const totalPods = sumBy(nodes, ({ status: { capacity: { pods } } }) => parseInt(pods))
 
-  const {data} = useQuery(NODE_METRICS_Q, {
+  const { data } = useQuery(NODE_METRICS_Q, {
     variables: {
       cpuRequests: Metrics.CPURequests,
       cpuLimits: Metrics.CPULimits,
       memRequests: Metrics.MemoryRequests,
       memLimits: Metrics.MemoryLimits,
       pods: Metrics.Pods,
-      offset: 5 * 60
+      offset: 5 * 60,
     },
     fetchPolicy: 'network-first',
-    pollInterval: 5000
+    pollInterval: 5000,
   })
 
   const result = useMemo(() => {
     if (!data) return null
-    const {cpuRequests, cpuLimits, memRequests, memLimits, pods} = data
+    const { cpuRequests, cpuLimits, memRequests, memLimits, pods } = data
 
-    const datum = (data) => round(parseFloat(data[0].values[0].value))
+    const datum = data => round(parseFloat(data[0].values[0].value))
 
     return {
       cpuRequests: datum(cpuRequests),
@@ -367,41 +513,61 @@ function ClusterGauges({nodes, usage}) {
 
   if (!result) return null
 
-  const {cpuRequests, cpuLimits, memRequests, memLimits, pods} = result
+  const { cpuRequests, cpuLimits, memRequests, memLimits, pods } = result
 
   return (
-    <Box flex={false} direction='row' gap='small' align='center'>
+    <Box
+      flex={false}
+      direction="row"
+      gap="small"
+      align="center"
+    >
       <LayeredGauage
         usage={usage.cpu}
         requests={cpuRequests}
         limits={cpuLimits}
         total={totalCpu}
-        title='CPU Reservation'
-        name='CPU'
-        format={cpuFmt} />
+        title="CPU Reservation"
+        name="CPU"
+        format={cpuFmt}
+      />
       <LayeredGauage
         usage={usage.mem}
         requests={memRequests}
         limits={memLimits}
         total={totalMem}
-        title='Memory Reservation'
-        name='Mem'
-        format={filesize} />
+        title="Memory Reservation"
+        name="Mem"
+        format={filesize}
+      />
       <SimpleGauge
         value={pods}
         total={totalPods}
-        title='Pod Usage'
-        name='Pods' />
+        title="Pod Usage"
+        name="Pods"
+      />
     </Box>
   )
 }
 
-function ClusterMetrics({nodes, usage}) {
+function ClusterMetrics({ nodes, usage }) {
   return (
-    <Box flex={false} direction='row' fill='horizontal' gap='small'
-         align='center' pad='small'>
-      <ClusterGauges nodes={nodes} usage={usage} />
-      <SaturationGraphs cpu={Metrics.CPU} mem={Metrics.Memory} />
+    <Box
+      flex={false}
+      direction="row"
+      fill="horizontal"
+      gap="small"
+      align="center"
+      pad="small"
+    >
+      <ClusterGauges
+        nodes={nodes}
+        usage={usage}
+      />
+      <SaturationGraphs
+        cpu={Metrics.CPU}
+        mem={Metrics.Memory}
+      />
       {/* <Box fill='horizontal' direction='row' align='center' gap='small'>
       </Box> */}
     </Box>
@@ -409,57 +575,98 @@ function ClusterMetrics({nodes, usage}) {
 }
 
 function nodeReadiness(status) {
-  const ready = status.conditions.find(({type}) => type === 'Ready')
+  const ready = status.conditions.find(({ type }) => type === 'Ready')
   if (ready.status === 'True') return Readiness.Ready
+
   return Readiness.InProgress
 }
 
 export function Node() {
-  const {name} = useParams()
-  const {data, refetch} = useQuery(NODE_Q, {
-    variables: {name},
+  const { name } = useParams()
+  const { data, refetch } = useQuery(NODE_Q, {
+    variables: { name },
     pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network'
+    fetchPolicy: 'cache-and-network',
   })
-  const {setBreadcrumbs} = useContext(BreadcrumbsContext)
+  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   useEffect(() => {
     setBreadcrumbs([
-      {text: 'nodes', url: '/nodes'},
-      {text: name, url: `/nodes/${name}`}
+      { text: 'nodes', url: '/nodes' },
+      { text: name, url: `/nodes/${name}` },
     ])
   }, [])
 
   if (!data) return <LoopingLogo dark />
 
-  const {node, nodeMetric} = data
+  const { node, nodeMetric } = data
+
   return (
-    <Box fill style={{overflow: 'auto'}} background='backgroundColor' pad='small' gap='small'>
-      <Box direction='row' align='center' gap='small' pad='small'>
-        <ServerCluster size='15px' />
-        <Text size='small' weight='bold'>{node.metadata.name}</Text>
-        <ReadyIcon readiness={nodeReadiness(node.status)} size='20px' showIcon />
+    <Box
+      fill
+      style={{ overflow: 'auto' }}
+      background="backgroundColor"
+      pad="small"
+      gap="small"
+    >
+      <Box
+        direction="row"
+        align="center"
+        gap="small"
+        pad="small"
+      >
+        <ServerCluster size="15px" />
+        <Text
+          size="small"
+          weight="bold"
+        >{node.metadata.name}
+        </Text>
+        <ReadyIcon
+          readiness={nodeReadiness(node.status)}
+          size="20px"
+          showIcon
+        />
       </Box>
-      <NodeGraphs status={node.status} pods={node.pods} name={name} usage={nodeMetric.usage} />
-      <Tabs defaultTab='info'>
+      <NodeGraphs
+        status={node.status}
+        pods={node.pods}
+        name={name}
+        usage={nodeMetric.usage}
+      />
+      <Tabs defaultTab="info">
         <TabHeader>
-          <TabHeaderItem name='info'>
-            <Text size='small' weight={500}>info</Text>
+          <TabHeaderItem name="info">
+            <Text
+              size="small"
+              weight={500}
+            >info
+            </Text>
           </TabHeaderItem>
-          <TabHeaderItem name='events'>
-            <Text size='small' weight={500}>events</Text>
+          <TabHeaderItem name="events">
+            <Text
+              size="small"
+              weight={500}
+            >events
+            </Text>
           </TabHeaderItem>
-          <TabHeaderItem name='raw'>
-            <Text size='small' weight={500}>raw</Text>
+          <TabHeaderItem name="raw">
+            <Text
+              size="small"
+              weight={500}
+            >raw
+            </Text>
           </TabHeaderItem>
         </TabHeader>
-        <TabContent name='info'>
+        <TabContent name="info">
           <Metadata metadata={node.metadata} />
-          <PodList pods={node.pods} refetch={refetch} />
+          <PodList
+            pods={node.pods}
+            refetch={refetch}
+          />
         </TabContent>
-        <TabContent name='events'>
+        <TabContent name="events">
           <Events events={node.events} />
         </TabContent>
-        <TabContent name='raw'>
+        <TabContent name="raw">
           <RawContent raw={node.raw} />
         </TabContent>
       </Tabs>
@@ -468,49 +675,65 @@ export function Node() {
 }
 
 export function Nodes() {
-  const {data, refetch} = useQuery(NODES_Q, {
+  const { data, refetch } = useQuery(NODES_Q, {
     pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network'
+    fetchPolicy: 'cache-and-network',
   })
-  const {setBreadcrumbs} = useContext(BreadcrumbsContext)
+  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
 
   useEffect(() => {
     setBreadcrumbs([
-      {text: 'nodes', url: '/nodes'}
+      { text: 'nodes', url: '/nodes' },
     ])
   }, [])
 
   const metrics = useMemo(() => {
     if (!data) return {}
 
-    return data.nodeMetrics.reduce((prev, {metadata: {name}, usage}) => ({
-      ...prev, [name]: {cpu: cpuParser(usage.cpu), memory: memoryParser(usage.memory)}
+    return data.nodeMetrics.reduce((prev, { metadata: { name }, usage }) => ({
+      ...prev, [name]: { cpu: cpuParser(usage.cpu), memory: memoryParser(usage.memory) },
     }), {})
   })
 
   const usage = useMemo(() => {
     if (!data) return null
 
-    const cpu = sumBy(data.nodeMetrics, ({usage: {cpu}}) => cpuParser(cpu))
-    const mem = sumBy(data.nodeMetrics, ({usage: {memory}}) => memoryParser(memory))
-    return {cpu, mem}
+    const cpu = sumBy(data.nodeMetrics, ({ usage: { cpu } }) => cpuParser(cpu))
+    const mem = sumBy(data.nodeMetrics, ({ usage: { memory } }) => memoryParser(memory))
+
+    return { cpu, mem }
   })
 
   if (!data) return <LoopingLogo dark />
 
   return (
-    <Box style={{overflow: 'auto'}} fill background='backgroundColor'
-         pad='small' gap='small'>
-      <Box flex={false} fill='horizontal'>
-        <ClusterMetrics nodes={data.nodes} usage={usage} />
-        <Box flex={false} fill='horizontal'>
+    <Box
+      style={{ overflow: 'auto' }}
+      fill
+      background="backgroundColor"
+      pad="small"
+      gap="small"
+    >
+      <Box
+        flex={false}
+        fill="horizontal"
+      >
+        <ClusterMetrics
+          nodes={data.nodes}
+          usage={usage}
+        />
+        <Box
+          flex={false}
+          fill="horizontal"
+        >
           <NodeRowHeader />
           {data.nodes.map((node, ind) => (
             <NodeRow
               key={ind}
               node={node}
               metrics={metrics}
-              refetch={refetch} />
+              refetch={refetch}
+            />
           ))}
         </Box>
       </Box>
