@@ -12,7 +12,6 @@
     "fix": "yarn fix:js && yarn fix:css",
     "fix:js": "eslint ./src --fix",
     "fix:css": "stylelint src/**/*.css --fix",
-    "eject": "react-scripts eject",
     "graphql-codegen": "graphql-codegen --config codegen.yml"
   },
   "engines": {
