@@ -22,9 +22,21 @@ jobs:
         working-directory: assets
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+          with:
+            node-version: 16.15.0
+            - uses: actions/cache@v3
+              env:
+                cache-name: cache-node-modules
+              with:
+                path: node_modules
+                key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+            - shell: bash
+              run: |
+                [ ! -d "node_modules" ] && yarn install --immutable
       - uses: cypress-io/github-action@v4
         with:
-          install-command: yarn --frozen-lockfile --silent
+          install: false
           start: yarn start
           wait-on: http://localhost:3000
   test:
