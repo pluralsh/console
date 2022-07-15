@@ -36,9 +36,10 @@ jobs:
           [ ! -d "node_modules" ] && yarn install --immutable
       - uses: cypress-io/github-action@v4
         with:
+          working-directory: assets
           install: false
           start: yarn start
-          wait-on: http://localhost:3000
+          wait-on: https://localhost:3000
   test:
     name: Unit test
     runs-on: ubuntu-latest
