@@ -17,9 +17,9 @@ jobs:
   e2e:
     name: End-to-end test
     runs-on: ubuntu-latest
-      defaults:
-        run:
-          working-directory: assets
+    defaults:
+      run:
+        working-directory: assets
     steps:
       - uses: actions/checkout@v3
       - uses: cypress-io/github-action@v4
