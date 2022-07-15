@@ -31,20 +31,16 @@ jobs:
         with:
           path: node_modules
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-      - shell: bash
-        run: |
-          [ ! -d "node_modules" ] && yarn install --immutable
-      - uses: cypress-io/github-action@v4
-        with:
-          working-directory: assets
-          install: false
-          start: yarn start
-          wait-on: https://localhost:3000
+      - run: |
+          [ ! -d "node_modules" ] && yarn --immutable
+      - run: |
+          yarn e2e:start
   test:
     name: Unit test
     runs-on: ubuntu-latest
     defaults:
       run:
+        shell: bash
         working-directory: assets
     steps:
       - uses: actions/checkout@v3
@@ -57,16 +53,15 @@ jobs:
         with:
           path: node_modules
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-      - shell: bash
-        run: |
+      - run: |
           [ ! -d "node_modules" ] && yarn install --immutable
-      - shell: bash
-        run: yarn test
+      - run: yarn test
   lint:
     name: Lint
     runs-on: ubuntu-latest
     defaults:
       run:
+        shell: bash
         working-directory: assets
     steps:
       - uses: actions/checkout@v3
@@ -79,8 +74,6 @@ jobs:
         with:
           path: node_modules
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-      - shell: bash
-        run: |
+      - run: |
           [ ! -d "node_modules" ] && yarn install --immutable
-      - shell: bash
-        run: yarn lint
+      - run: yarn lint
