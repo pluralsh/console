@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, GqlError } from 'forge-core' 
+import { Button, GqlError } from 'forge-core'
 import { useMutation, useQuery } from 'react-apollo'
 import { Box, Form, Keyboard, Text } from 'grommet'
 
@@ -64,7 +64,7 @@ function LoginError({ error }) {
       wipeToken()
       window.location = '/login'
     }, 2000)
-  
+
     return () => clearTimeout(to)
   }, [])
 
@@ -106,13 +106,13 @@ export function GrantAccess() {
           label="Login Token"
           onChange={setJwt}
         />
-        <Button 
+        <Button
           fill="horizontal"
-          label="Get Access" 
-          pad={{ vertical: '8px' }} 
+          label="Get Access"
+          pad={{ vertical: '8px' }}
           margin={{ top: 'xsmall' }}
           onClick={() => {
-            setToken(jwt); window.location = '/' 
+            setToken(jwt); window.location = '/'
           }}
           disabled={jwt === ''}
         />
@@ -172,11 +172,12 @@ function OIDCLogin({ oidcUri }) {
           >It looks like this instance is using plural oauth
           </Text>
         </Box>
-        <Button 
-          fill="horizontal" 
+        <Button
+          id="plrl-login"
+          fill="horizontal"
           label="Login with Plural"
           onClick={() => {
-            window.location = oidcUri 
+            window.location = oidcUri
           }}
         />
       </Box>
@@ -250,13 +251,13 @@ export default function Login() {
                 label="Password"
                 onChange={password => setForm({ ...form, password })}
               />
-              <Button 
+              <Button
                 fill="horizontal"
-                label="Login" 
-                pad={{ vertical: '8px' }} 
+                label="Login"
+                pad={{ vertical: '8px' }}
                 margin={{ top: 'xsmall' }}
-                onClick={mutation} 
-                loading={loading} 
+                onClick={mutation}
+                loading={loading}
                 disabled={disabled}
               />
             </Box>
