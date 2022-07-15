@@ -309,8 +309,8 @@ export default mergeTheme(defaultTheme, {
         fontFamily: fontFamilies.sans,
         fontWeight: 400,
         letterSpacing: '0.5px',
-        'b&': {
-          bodyWeight: 600,
+        '& b, & strong': {
+          fontWeight: 600,
         },
       }),
       ...((body1 || body2) && bold && {
