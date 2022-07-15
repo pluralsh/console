@@ -1,4 +1,4 @@
-name: assets-ci
+name: CI / Console UI
 
 on:
   push:
@@ -14,7 +14,21 @@ on:
       - ".github/workflows/assets.yaml"
       - "assets/**"
 jobs:
+  e2e:
+    name: End-to-end test
+    runs-on: ubuntu-latest
+      defaults:
+        run:
+          working-directory: assets
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cypress-io/github-action@v4
+        with:
+          install-command: yarn --frozen-lockfile --silent
+          start: yarn start
+          wait-on: http://localhost:3000
   test:
+    name: Unit test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -36,6 +50,7 @@ jobs:
       - shell: bash
         run: yarn test
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     defaults:
       run:
