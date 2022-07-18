@@ -4,7 +4,7 @@ import { Box, Layer } from 'grommet'
 // import { GroupTypeahead } from './Typeaheads'
 import { useMutation } from 'react-apollo'
 
-import { apiHost } from '../../helpers/hostname'
+import { localized } from '../../helpers/hostname'
 
 import { CREATE_INVITE } from './queries'
 
@@ -26,7 +26,7 @@ export function InviteForm() {
           round="small"
         >
           <Copyable
-            text={`https://${apiHost()}/invite/${invite.secureId}`}
+            text={localized(`/invite/${invite.secureId}`)}
             pillText="Invite link copied!"
           />
         </Box>

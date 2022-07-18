@@ -14,7 +14,6 @@ import { split } from 'apollo-link'
 
 import introspection from '../generated/fragments.json'
 
-import { apiHost, secure } from './hostname'
 import customFetch from './uploadLink'
 import { fetchToken, wipeToken } from './auth'
 
@@ -22,9 +21,8 @@ const fragmentMatcher = new IntrospectionFragmentMatcher({
   introspectionQueryResultData: introspection,
 })
 
-const API_HOST = apiHost()
-const GQL_URL = `${secure() ? 'https' : 'http'}://${API_HOST}/gql`
-const WS_URI = `${secure() ? 'wss' : 'ws'}://${API_HOST}/socket`
+const GQL_URL = '/gql'
+const WS_URI = '/socket'
 
 export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const httpLink = createLink({ uri: gqlUrl, fetch: customFetch })
@@ -74,7 +72,7 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
     link: splitLink,
     cache: new InMemoryCache({ fragmentMatcher }),
   })
-  
+
   return { client, socket }
 }
 

@@ -1,5 +1,12 @@
+import * as path from 'path';
+
 const webpackOptions = {
   resolve: { extensions: ['.ts', '.js'] },
+  alis: {
+    '@pages/*': path.resolve(__dirname, '../pages'),
+    '@config/*': path.resolve(__dirname, '../config'),
+    '@support/*': path.resolve(__dirname, '../support')
+  },
   module: {
     rules: [
       {

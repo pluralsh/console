@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "module": "ES2022",
     "target": "ES2020",
     "moduleResolution": "node",
@@ -14,7 +15,12 @@
       "ES2020",
       "dom"
     ],
-    "types": ["cypress", "node"]
+    "types": ["cypress", "node"],
+    "paths": {
+      "@pages/*": ["pages/*"],
+      "@config/*": ["config/*"],
+      "@support/*": ["support/*"]
+    }
   },
   "include": [
     "**/*.ts",

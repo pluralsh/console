@@ -13,5 +13,14 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Import commands.js using ES2015 syntax:
+import '@config/config'
 import './commands';
+
+before(() => {
+  cy.clearCookies();
+  cy.clearLocalStorage();
+  cy.on('uncaught:exception', _ => false)
+});
+
+
+
