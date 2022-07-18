@@ -7446,7 +7446,7 @@ __metadata:
     grommet: 2.10.0
     grommet-icons: 4.5.0
     highlight.js: 10.6.0
-    http-proxy-middleware: ^2.0.6
+    http-proxy-middleware: 2.0.6
     immer: 9.0.15
     js-file-download: 0.4.12
     js-yaml: 3.14.0
@@ -11867,7 +11867,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"http-proxy-middleware@npm:^2.0.6":
+"http-proxy-middleware@npm:2.0.6":
   version: 2.0.6
   resolution: "http-proxy-middleware@npm:2.0.6"
   dependencies:
