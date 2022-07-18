@@ -563,6 +563,34 @@ export default mergeTheme(defaultTheme, {
       },
     ],
   },
+  ButtonGroup: {
+    Root: [
+      {
+        border: '1px solid border',
+        borderRadius: 4,
+        '& > button': {
+          border: '1px solid transparent',
+        },
+        overflow: 'hidden',
+      },
+      ({ direction }: any) => direction === 'row' && {
+        '& > button': {
+          borderLeft: '1px solid border',
+          '&:first-of-type': {
+            borderLeft: '1px solid transparent',
+          },
+        },
+      },
+      ({ direction }: any) => direction === 'column' && {
+        '& > button': {
+          borderTop: '1px solid border',
+          '&:first-of-type': {
+            borderTop: '1px solid transparent',
+          },
+        },
+      },
+    ],
+  },
   Checkbox: {
     Root: [
       ({ checked }: any) => ({
