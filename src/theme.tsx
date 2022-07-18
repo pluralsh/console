@@ -671,6 +671,7 @@ export default mergeTheme(defaultTheme, {
         justifyContent: 'space-between',
         align: 'center',
         height: 'auto',
+        minHeight: 'auto',
         width: 'auto',
         paddingTop: 0,
         paddingBottom: 0,
