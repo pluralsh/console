@@ -144,6 +144,11 @@ const spacers = {
 export default mergeTheme(defaultTheme, {
   name: 'Plural',
   mode: 'dark',
+  breakpoints: {
+    // We'll add mobile breakpoints later
+    desktop: 1280,
+    'desktop-large': 1440,
+  },
   colors: {
     // Base palette,
     blue,
