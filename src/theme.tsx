@@ -147,7 +147,7 @@ export default mergeTheme(defaultTheme, {
   breakpoints: {
     // We'll add mobile breakpoints later
     desktop: 1280,
-    'desktop-large': 1440,
+    desktopLarge: 1440,
   },
   colors: {
     // Base palette,
