@@ -43,7 +43,9 @@ jobs:
         uses: trymbill/cypress-slack-video-upload-action@v1.3.0
         with:
           token: ${{ secrets.SLACK_CYPRESS_TOKEN }}
+          workdir: assets
           channels: cypress-artifacts
+          message-text: 'Cypress tests failed! See the uploaded videos and screenshots for more information.'
 
   test:
     name: Unit test
