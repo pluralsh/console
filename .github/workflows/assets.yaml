@@ -38,6 +38,13 @@ jobs:
           [ ! -d "node_modules" ] && yarn --immutable
       - run: |
           yarn e2e:start
+      - name: Upload Screenshots and Videos to Slack
+        if: failure()
+        uses: trymbill/cypress-slack-video-upload-action@v1.3.0
+        with:
+          token: ${{ secrets.SLACK_CYPRESS_TOKEN }}
+          channels: cypress-artifacts
+
   test:
     name: Unit test
     runs-on: ubuntu-latest
