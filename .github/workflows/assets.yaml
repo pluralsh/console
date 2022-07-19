@@ -38,6 +38,13 @@ jobs:
           [ ! -d "node_modules" ] && yarn --immutable
       - run: |
           yarn e2e:start
+      - uses: 8398a7/action-slack@v3
+        if: failure()
+        with:
+          status: ${{ job.status }}
+          fields: workflow,job,repo,commit,author,pullRequest
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CYPRESS_WEBHOOK }}
       - name: Upload Screenshots and Videos to Slack
         if: failure()
         uses: trymbill/cypress-slack-video-upload-action@v1.3.0
@@ -45,10 +52,8 @@ jobs:
           token: ${{ secrets.SLACK_CYPRESS_TOKEN }}
           workdir: assets/cypress
           channels: cypress-artifacts
-          message-text: |
+          message-text:
             Hey there, your Cypress tests have failed!
-            Repo: ${{ github.repository }}
-            Ref: ${{ github.ref_name }}
             See the attached videos and screenshots for more information.
 
   test:
