@@ -52,6 +52,7 @@ defmodule Console.Plural.Queries do
       name
       description
       provider
+      restricted
       oidcSettings {
         domainKey
         uriFormat
