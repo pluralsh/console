@@ -46,10 +46,10 @@ jobs:
           workdir: assets/cypress
           channels: cypress-artifacts
           message-text: |
-          "Hey there, your Cypress tests have failed!"
-          " - Repo: ${{ GITHUB_REPOSITORY }}"
-          " - Ref: ${{ GITHUB_REF_NAME }}"
-          "\nSee the uploaded videos and screenshots for more information."
+            Hey there, your Cypress tests have failed!
+              - Repo: ${{ GITHUB_REPOSITORY }}
+              - Ref: ${{ GITHUB_REF_NAME }}
+            \nSee the uploaded videos and screenshots for more information.
 
   test:
     name: Unit test
