@@ -18,8 +18,8 @@ jobs:
     name: End-to-end test
     runs-on: ubuntu-latest
     env:
-      CYPRESS_EMAIL: { { secrets.CYPRESS_EMAIL } }
-      CYPRESS_PASSWORD: { { secrets.CYPRESS_PASSWORD } }
+      CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL }}
+      CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
     defaults:
       run:
         working-directory: assets
