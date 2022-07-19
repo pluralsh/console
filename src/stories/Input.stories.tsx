@@ -1,4 +1,4 @@
-import { Div, ExtendTheme, Flex } from 'honorable'
+import { Div, Flex } from 'honorable'
 
 import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'

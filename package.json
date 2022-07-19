@@ -8,36 +8,24 @@
     "src/**/*"
   ],
   "scripts": {
-    "start": "npm run storybook",
-    "start:watch": "npm run storybook",
-    "storybook": "start-storybook -p 6006 -s public",
-    "build-storybook": "build-storybook -s public",
-    "lint": "eslint src --ext ts,tsx,js,jsx",
-    "clean": "rimraf storybook-static dist",
+    "start": "start-storybook -p 6006 -s public",
+    "build:storybook": "build-storybook -s public",
     "build": "npx tsc --declaration",
-    "prepublishOnly": "npm run clean && npm run build"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "clean": "rimraf storybook-static dist",
+    "lint": "eslint src --ext ts,tsx,js,jsx",
+    "fix": "eslint src --ext ts,tsx,js,jsx --fix"
   },
   "dependencies": {
-    "prop-types": "^15.8.1",
-    "resize-observer-polyfill": "^1.5.1"
+    "prop-types": "15.8.1",
+    "resize-observer-polyfill": "1.5.1"
   },
   "devDependencies": {
     "@babel/core": "7.18.9",
     "@babel/eslint-parser": "7.18.9",
     "@babel/preset-env": "7.18.9",
     "@babel/preset-react": "7.18.6",
+    "@emotion/react": "11.9.3",
+    "@emotion/styled": "11.9.3",
     "@storybook/addon-actions": "6.5.9",
     "@storybook/addon-docs": "6.5.9",
     "@storybook/addon-essentials": "6.5.9",
@@ -56,19 +44,29 @@
     "babel-loader": "8.2.5",
     "eslint": "8.20.0",
     "eslint-config-pluralsh": "3.1.0",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-jsx-a11y": "6.6.0",
+    "eslint-plugin-react": "7.30.1",
+    "eslint-plugin-react-hooks": "4.6.0",
     "eslint-plugin-storybook": "0.6.1",
+    "honorable": "0.129.0",
+    "honorable-theme-default": "0.63.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "react-router-dom": "6.3.0",
     "react-scripts": "5.0.1",
+    "react-transition-group": "4.4.2",
     "rimraf": "3.0.2",
     "typescript": "4.7.4"
   },
   "peerDependencies": {
-    "@emotion/react": "*",
-    "@emotion/styled": "*",
-    "honorable": ">=0.127.0",
-    "honorable-theme-default": ">=0.61.0",
+    "@emotion/react": ">=11.9.3",
+    "@emotion/styled": ">=11.9.3",
+    "honorable": ">=0.128.0",
+    "honorable-theme-default": ">=0.63.0",
     "react": ">=16.0.0",
     "react-dom": ">=16.0.0",
     "react-transition-group": ">=4.4.2"
-  }
+  },
+  "packageManager": "yarn@3.2.1"
 }
