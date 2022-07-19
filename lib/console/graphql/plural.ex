@@ -40,6 +40,7 @@ defmodule Console.GraphQl.Plural do
     field :name,            non_null(:string)
     field :description,     :string
     field :provider,        :string
+    field :restricted,      :boolean
     field :recipe_sections, list_of(:recipe_section)
     field :oidc_enabled,    :boolean, resolve: fn
       %{oidcSettings: %{}}, _, _ -> {:ok, true}

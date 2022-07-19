@@ -103,6 +103,7 @@ defmodule Console.Plural.Recipe do
     :name,
     :description,
     :provider,
+    :restricted,
     :repository,
     :oidcSettings,
     :recipeSections,
