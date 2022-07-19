@@ -17,6 +17,9 @@ jobs:
   e2e:
     name: End-to-end test
     runs-on: ubuntu-latest
+    env:
+      CYPRESS_EMAIL: { { secrets.CYPRESS_EMAIL } }
+      CYPRESS_PASSWORD: { { secrets.CYPRESS_PASSWORD } }
     defaults:
       run:
         working-directory: assets
@@ -33,10 +36,8 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
       - run: |
           [ ! -d "node_modules" ] && yarn --immutable
-      - run: yarn e2e:start
-        env:
-          CYPRESS_EMAIL: {{ secrets.CYPRESS_EMAIL }}
-          CYPRESS_PASSWORD: {{ secrets.CYPRESS_PASSWORD }}
+      - run: |
+          yarn e2e:start
   test:
     name: Unit test
     runs-on: ubuntu-latest
