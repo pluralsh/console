@@ -42,7 +42,7 @@ jobs:
         if: failure()
         with:
           status: ${{ job.status }}
-          fields: workflow,job,repo,commit,author,pullRequest
+          fields: workflow,repo,commit,author,pullRequest
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CYPRESS_WEBHOOK }}
       - name: Upload Screenshots and Videos to Slack
@@ -52,9 +52,7 @@ jobs:
           token: ${{ secrets.SLACK_CYPRESS_TOKEN }}
           workdir: assets/cypress
           channels: cypress-artifacts
-          message-text:
-            Hey there, your Cypress tests have failed!
-            See the attached videos and screenshots for more information.
+          message-text: "See the attached videos and screenshots for more information."
 
   test:
     name: Unit test
