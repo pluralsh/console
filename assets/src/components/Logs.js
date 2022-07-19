@@ -15,8 +15,6 @@ import { last } from 'lodash'
 
 import fileDownload from 'js-file-download'
 
-import { upstream } from '../helpers/hostname'
-
 import { fetchToken } from '../helpers/auth'
 
 import { DashboardHeader } from './Dashboards'
@@ -130,7 +128,7 @@ function LogLine({ line: { timestamp, value }, stream, level }) {
       />)}
     >
       <Box
-        border={{ side: 'left', color: borderColor(level), size: '3px' }} 
+        border={{ side: 'left', color: borderColor(level), size: '3px' }}
         style={{ fontFamily: 'monospace' }}
         direction="row"
         gap="small"
@@ -311,10 +309,10 @@ function ScrollIndicator({ live, returnToTop }) {
 }
 
 function downloadUrl(q, end, repo) {
-  const url = upstream(`/v1/logs/${repo}/download`)
+  const url = `/v1/logs/${repo}/download`
   const params = Object.entries({ q, end })
-                  .map(kv => kv.map(encodeURIComponent).join('='))
-                  .join('&')
+  .map(kv => kv.map(encodeURIComponent).join('='))
+  .join('&')
   console.log(params)
 
   return `${url}?${params}`
@@ -361,15 +359,15 @@ export default function Logs({ application: { name }, query }) {
             pad={{ vertical: 'xsmall' }}
           >
             {data && (
-              <LogContent 
-                listRef={listRef} 
-                setListRef={setListRef} 
+              <LogContent
+                listRef={listRef}
+                setListRef={setListRef}
                 name={name}
-                logs={data.logs} 
-                setLoader={setLoader} 
-                search={query} 
+                logs={data.logs}
+                setLoader={setLoader}
+                search={query}
                 loading={loading}
-                fetchMore={fetchMore} 
+                fetchMore={fetchMore}
                 onScroll={arg => setLive(!arg)}
               />
             )}
@@ -460,7 +458,7 @@ function LogFilters({ namespace, labels, search, setSearch, setLabels }) {
     <Box
       width="250px"
       flex={false}
-      height="100%" 
+      height="100%"
       border={{ side: 'right', color: '#444' }}
     >
       <Box
@@ -490,10 +488,10 @@ function LogFilters({ namespace, labels, search, setSearch, setLabels }) {
             return (
               <Box
                 key={name}
-                pad={{ vertical: 'xsmall', horizontal: 'small' }} 
+                pad={{ vertical: 'xsmall', horizontal: 'small' }}
                 background="card"
                 hoverIndicator="cardHover"
-                onClick={selected ? clear : () => select(spec)} 
+                onClick={selected ? clear : () => select(spec)}
                 focusIndicator={false}
                 round="xsmall"
                 direction="row"

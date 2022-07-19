@@ -7,6 +7,7 @@ import { useLocation } from 'react-router'
 import qs from 'query-string'
 
 import { setToken } from '../helpers/auth'
+
 import { localized } from '../helpers/hostname'
 
 import { LoopingLogo } from './utils/AnimatedLogo'
@@ -30,7 +31,7 @@ export function OAuthCallback() {
   })
 
   useEffect(() => {
-    mutation() 
+    mutation()
   }, [code])
 
   return (

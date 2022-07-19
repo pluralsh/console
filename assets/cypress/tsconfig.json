@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "module": "ES2022",
+    "target": "ES2020",
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "noImplicitReturns": true,
+    "noUnusedParameters": true,
+    "noImplicitAny": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "lib": [
+      "ES2020",
+      "dom"
+    ],
+    "types": ["cypress", "node"],
+    "paths": {
+      "@pages/*": ["pages/*"],
+      "@config/*": ["config/*"],
+      "@support/*": ["support/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "../cypress.config.ts"
+  ]
+}

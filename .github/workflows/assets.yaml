@@ -1,4 +1,4 @@
-name: assets-ci
+name: CI / Console UI
 
 on:
   push:
@@ -14,10 +14,36 @@ on:
       - ".github/workflows/assets.yaml"
       - "assets/**"
 jobs:
+  e2e:
+    name: End-to-end test
+    runs-on: ubuntu-latest
+    env:
+      CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL }}
+      CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+    defaults:
+      run:
+        working-directory: assets
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.15.0
+      - uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+      - run: |
+          [ ! -d "node_modules" ] && yarn --immutable
+      - run: |
+          yarn e2e:start
   test:
+    name: Unit test
     runs-on: ubuntu-latest
     defaults:
       run:
+        shell: bash
         working-directory: assets
     steps:
       - uses: actions/checkout@v3
@@ -30,15 +56,15 @@ jobs:
         with:
           path: node_modules
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-      - shell: bash
-        run: |
+      - run: |
           [ ! -d "node_modules" ] && yarn install --immutable
-      - shell: bash
-        run: yarn test
+      - run: yarn test
   lint:
+    name: Lint
     runs-on: ubuntu-latest
     defaults:
       run:
+        shell: bash
         working-directory: assets
     steps:
       - uses: actions/checkout@v3
@@ -51,8 +77,6 @@ jobs:
         with:
           path: node_modules
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-      - shell: bash
-        run: |
+      - run: |
           [ ! -d "node_modules" ] && yarn install --immutable
-      - shell: bash
-        run: yarn lint
+      - run: yarn lint

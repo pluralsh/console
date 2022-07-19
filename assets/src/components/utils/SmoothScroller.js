@@ -9,9 +9,9 @@ import { CellMeasurer } from 'forge-core'
 class SmartLoader extends PureComponent {
   _listRef = null
 
-  _lastRenderedStartIndex = -1;
+  _lastRenderedStartIndex = -1
 
-  _lastRenderedStopIndex = -1;
+  _lastRenderedStopIndex = -1
 
   render() {
     const { children } = this.props
@@ -32,7 +32,7 @@ class SmartLoader extends PureComponent {
     this._lastRenderedStopIndex = visibleStopIndex
 
     this._ensureRowsLoaded(visibleStartIndex, visibleStopIndex)
-  };
+  }
 
   _ensureRowsLoaded = (startIndex, stopIndex) => {
     const {
@@ -40,7 +40,7 @@ class SmartLoader extends PureComponent {
       itemCount,
       threshold = 15,
     } = this.props
-    
+
     startIndex = Math.max(0, startIndex - threshold)
     stopIndex = Math.min(itemCount - 1, stopIndex + threshold)
 
@@ -121,7 +121,7 @@ const ItemWrapper = React.memo(({ data: { setSize, width, refreshKey, items, isI
     rowRef && setSize(index, rowRef.getBoundingClientRect().height)
 // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rowRef, index])
-  
+
   useEffect(() => {
     sizeCallback()
   }, [sizeCallback, width, item, index])
@@ -142,7 +142,7 @@ const ItemWrapper = React.memo(({ data: { setSize, width, refreshKey, items, isI
             }}
             margin={index === 0 ? { bottom: 'small' } : null}
           >
-            <Item 
+            <Item
               index={index}
               items={items}
               setSize={sizeCallback}
@@ -159,13 +159,13 @@ const ItemWrapper = React.memo(({ data: { setSize, width, refreshKey, items, isI
 
 const FixedItemWrapper = React.memo(({ data: { items, isItemLoaded, placeholder, mapper }, style, index }) => (
   <div style={style}>
-    <Item 
-      index={index} 
-      items={items} 
-      isItemLoaded={isItemLoaded} 
-      placeholder={placeholder} 
+    <Item
+      index={index}
+      items={items}
+      isItemLoaded={isItemLoaded}
+      placeholder={placeholder}
       mapper={mapper}
-    /> 
+    />
   </div>
 ))
 
@@ -283,7 +283,7 @@ export function FixedScroller({ hasNextPage, loading, items, loadNextPage, mappe
   const itemCount = hasNextPage ? count + 7 : count
   const loadMoreItems = loading ? () => {} : loadNextPage
   const isItemLoaded = useCallback(index => !hasNextPage || index < count, [hasNextPage, count])
-  
+
   return (
     <SmartLoader
       ref={setLoader}
@@ -307,7 +307,7 @@ export function FixedScroller({ hasNextPage, loading, items, loadNextPage, mappe
             >
               {FixedItemWrapper}
             </FixedList>
-          )} 
+          )}
         </Autosizer>
       )}
     </SmartLoader>

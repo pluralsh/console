@@ -1,17 +1,23 @@
 import React, { useCallback, useContext, useState } from 'react'
 import { Anchor, Box, Layer, Text } from 'grommet'
 import { Checkmark, StatusCritical } from 'grommet-icons'
-import { Button, Copyable, Credentials, EditField, InputCollection, Logout, 
-  Password, ResponsiveInput, Roles } from 'forge-core'
+import {
+  Button,
+  Copyable,
+  Credentials,
+  EditField,
+  InputCollection,
+  Logout,
+  Password,
+  ResponsiveInput,
+  Roles,
+} from 'forge-core'
 import { useMutation } from 'react-apollo'
-
 import yaml from 'yaml'
-
 import Highlight from 'react-highlight.js'
 
 import { fetchToken, wipeToken } from '../../helpers/auth'
 import { LoginContext } from '../Login'
-
 import { SectionContentContainer, SectionPortal } from '../utils/Section'
 import { SIDEBAR_ICON_HEIGHT } from '../Sidebar'
 import { ModalHeader } from '../utils/Modal'
@@ -40,7 +46,7 @@ function ActionBox({ onClick, text, icon }) {
       pad="small"
       direction="row"
       round="3px"
-      align="center" 
+      align="center"
       gap="small"
       hoverIndicator="sidebarHover"
       onClick={onClick}
@@ -67,10 +73,10 @@ function EditSelect({ edit, icon }) {
       round="3px"
       fill="horizontal"
       align="center"
-      gap="small" 
+      gap="small"
       direction="row"
       hoverIndicator="sidebarHover"
-      focusIndicator={false} 
+      focusIndicator={false}
       background={edit === editing ? 'sidebarHover' : null}
       height={SIDEBAR_ICON_HEIGHT}
       onClick={edit === editing ? null : () => setEditing(edit)}
@@ -201,7 +207,7 @@ function AllowAccess({ setOpen }) {
               href={url}
               target="_blank"
             >{url}
-            </Anchor> and paste the 
+            </Anchor> and paste the
             <Text size="small">jwt above to gain access</Text>
           </Box>
         </Box>
