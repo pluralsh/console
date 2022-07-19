@@ -33,8 +33,10 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
       - run: |
           [ ! -d "node_modules" ] && yarn --immutable
-      - run: |
-          yarn e2e:start
+      - run: yarn e2e:start
+        env:
+          CYPRESS_EMAIL: {{ secrets.CYPRESS_EMAIL }}
+          CYPRESS_PASSWORD: {{ secrets.CYPRESS_PASSWORD }}
   test:
     name: Unit test
     runs-on: ubuntu-latest
