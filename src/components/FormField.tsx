@@ -1,6 +1,6 @@
-import { PropsWithChildren, ReactNode, Ref, forwardRef } from 'react'
 import { Div, DivProps, Flex, P } from 'honorable'
 import PropTypes from 'prop-types'
+import { PropsWithChildren, ReactNode, Ref, forwardRef } from 'react'
 
 type FormFieldProps = DivProps & PropsWithChildren<{
   label?: ReactNode
@@ -8,7 +8,8 @@ type FormFieldProps = DivProps & PropsWithChildren<{
   hint?: ReactNode
   length?: number,
   maxLength?: number,
-  required?: boolean
+  required?: boolean,
+  small?: boolean,
 }>
 
 const propTypes = {
@@ -18,6 +19,7 @@ const propTypes = {
   length: PropTypes.number,
   maxLength: PropTypes.number,
   required: PropTypes.bool,
+  small: PropTypes.bool,
 }
 
 function FormFieldRef({
@@ -29,6 +31,7 @@ function FormFieldRef({
   length,
   maxLength,
   required,
+  small,
   ...props
 }: FormFieldProps,
 ref: Ref<any>
@@ -38,9 +41,13 @@ ref: Ref<any>
       ref={ref}
       {...props}
     >
-      <Flex align="center">
+      <Flex
+        align="center"
+        marginBottom="xsmall"
+      >
         <P
-          body2
+          caption={small}
+          body2={!small}
           fontWeight="bold"
           flexShrink={0}
         >
@@ -48,7 +55,8 @@ ref: Ref<any>
         </P>
         <Div flexGrow={1} />
         <P
-          body2
+          caption={small}
+          body2={!small}
           marginLeft="medium"
           truncate
           flexShrink={1}
@@ -66,6 +74,7 @@ ref: Ref<any>
       <Flex
         align="top"
         color="text-light"
+        marginTop="xsmall"
       >
         {typeof hint === 'string' ? (
           <P

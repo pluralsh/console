@@ -25,7 +25,7 @@ function ListTemplate(args: any) {
       wrap="wrap"
       maxWidth="1000px"
     >
-      
+
       <RepositoryCard
         width="40%"
         flexGrow={1}
@@ -81,7 +81,7 @@ Default.args = {
   priv: false,
   publisher: 'Plural',
   description: 'One click deploys for data scientists and developers',
-  imageUrl: '/plural-logo.png',
+  imageUrl: '/logos/plural-logomark-only-black.svg',
   tags: ['Devops', 'Deployment', 'Fun', 'Turkey', 'Chickens', 'Handball', 'Cricket', 'Support'],
 }
 

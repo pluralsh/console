@@ -31,8 +31,8 @@ function TabRef({ startIcon, active, children, vertical, ...props }: TagProps, r
         paddingTop={vertical ? 'xsmall' : 'medium'}
         paddingBottom="xsmall"
         align="center"
-        borderBottom={vertical ? null : `2px solid ${active ? 'border-primary' : 'transparent'}`}
-        borderRight={vertical ? `2px solid ${active ? 'border-primary' : 'transparent'}` : null}
+        borderBottom={vertical ? null : `3px solid ${active ? 'border-primary' : 'transparent'}`}
+        borderRight={vertical ? `3px solid ${active ? 'border-primary' : 'transparent'}` : null}
         hoverIndicator="action-input-hover"
         color={active ? 'text' : 'text-xlight'}
         _hover={{ color: 'text' }}

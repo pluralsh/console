@@ -22,7 +22,7 @@ const grey = {
   500: '#747B8B',
   400: '#9095A2',
   300: '#A9AFBC',
-  200: '#D6D9E0',
+  200: '#C5C9D3',
   100: '#DFE2E7',
   50: '#EBEFF0',
 }
@@ -98,6 +98,7 @@ const boxShadows = {
   slight: '0px 2px 4px transparency(grey.950, 88), 0px 3px 6px transparency(grey.950, 85)',
   moderate: '0px 3px 6px transparency(grey.950, 80), 0px 10px 20px transparency(grey.950, 70)',
   modal: '0px 20px 50px transparency(grey.950, 40)',
+  focused: '0px 0px 0px 1.5px #8fa5ff',
 }
 
 const spacing = {
@@ -171,7 +172,7 @@ export default mergeTheme(defaultTheme, {
     // Action,
     'action-primary': 'blue.400',
     'action-primary-hover': 'blue.350',
-    'action-primary-disabled': 'blue.700',
+    'action-primary-disabled': 'grey.825',
     'action-link-inactive': 'grey.200',
     'action-link-active': 'grey.50',
     'action-link-inline': 'blue.200',
@@ -192,6 +193,7 @@ export default mergeTheme(defaultTheme, {
     'text-xlight': 'grey.400',
     'text-disabled': 'grey.700',
     'text-primary-accent': 'blue.200',
+    'text-primary-disabled': 'grey.500',
     'text-success': 'green.500',
     'text-success-light': 'green.200',
     'text-warning': 'yellow.400',
@@ -454,8 +456,11 @@ export default mergeTheme(defaultTheme, {
           backgroundColor: 'action-primary',
           border: '1px solid action-primary',
         },
+        ':focus': {
+          boxShadow: boxShadows.focused,
+        },
         ':disabled': {
-          color: 'text-disabled',
+          color: 'text-primary-disabled',
           backgroundColor: 'action-primary-disabled',
           border: '1px solid action-primary-disabled',
           ':hover': {
@@ -465,17 +470,27 @@ export default mergeTheme(defaultTheme, {
         },
       },
       ({ secondary }: any) => secondary && {
+        color: 'text-light',
         backgroundColor: 'transparent',
         border: '1px solid border-input',
         ':hover': {
+          color: 'text',
           backgroundColor: 'action-input-hover',
           border: '1px solid border-input',
         },
         ':active': {
+          color: 'text',
           backgroundColor: 'transparent',
           border: '1px solid border-input',
         },
+        ':focus': {
+          color: 'text',
+          backgroundColor: 'action-input-hover',
+          border: '1px solid border-input',
+          boxShadow: boxShadows.focused,
+        },
         ':disabled': {
+          color: 'text-disabled',
           backgroundColor: 'transparent',
           border: '1px solid border-input',
           ':hover': {
@@ -485,17 +500,26 @@ export default mergeTheme(defaultTheme, {
         },
       },
       ({ tertiary }: any) => tertiary && {
+        color: 'text-light',
         backgroundColor: 'transparent',
         border: '1px solid transparent',
         ':hover': {
+          color: 'text',
           backgroundColor: 'action-input-hover',
           border: '1px solid transparent',
         },
         ':active': {
+          color: 'text',
           backgroundColor: 'transparent',
           border: '1px solid transparent',
         },
+        ':focus': {
+          color: 'text',
+          backgroundColor: 'action-input-hover',
+          border: '1px solid transparent',
+        },
         ':disabled': {
+          color: 'text-disabled',
           backgroundColor: 'transparent',
           border: '1px solid transparent',
           ':hover': {
@@ -516,7 +540,11 @@ export default mergeTheme(defaultTheme, {
           backgroundColor: 'transparent',
           border: '1px solid border-error',
         },
+        ':focus': {
+          boxShadow: 'none',
+        },
         ':disabled': {
+          color: 'text-disabled',
           backgroundColor: 'transparent',
           border: '1px solid border-disabled',
           ':hover': {
@@ -536,8 +564,8 @@ export default mergeTheme(defaultTheme, {
         buttonSmall: true,
         paddingTop: spacing.xxsmall - 1,
         paddingBottom: spacing.xxsmall - 1,
-        paddingRight: spacing.small - 1,
-        paddingLeft: spacing.small - 1,
+        paddingRight: spacing.medium - 1,
+        paddingLeft: spacing.medium - 1,
       },
     ],
     StartIcon: [
@@ -593,19 +621,37 @@ export default mergeTheme(defaultTheme, {
   },
   Checkbox: {
     Root: [
-      ({ checked }: any) => ({
+      {
         padding: 8,
-        color: checked ? 'text' : 'action-link-inactive',
+        color: 'action-link-inactive',
         '> span': {
-          backgroundColor: checked ? 'action-primary' : 'transparent',
-          border: `1px solid ${checked ? 'text' : 'border-input'}`,
+          backgroundColor: 'transparent',
+          border: '1px solid border-input',
         },
         ':hover': {
           color: 'text',
           '> span': {
-            backgroundColor: checked ? 'action-primary-hover' : 'action-input-hover',
-            border: `1px solid ${checked ? 'text' : 'border-input'}`,
+            backgroundColor: 'action-input-hover',
+            border: '1px solid border-input',
           },
+        },
+      },
+      ({ checked }: any) => checked && ({
+        color: 'text',
+        '> span': {
+          backgroundColor: 'action-primary',
+          border: '1px solid text',
+        },
+        ':hover': {
+          '> span': {
+            backgroundColor: 'action-primary-hover',
+            border: '1px solid text',
+          },
+        },
+      }),
+      ({ small }: any) => small && ({
+        '> span': {
+          borderWidth: '.75px',
         },
       }),
     ],
@@ -749,8 +795,9 @@ export default mergeTheme(defaultTheme, {
   Menu: {
     Root: [
       {
-        padding: '4px 0',
-        backgroundColor: 'fill-one',
+        paddingTop: '4px',
+        paddingBottom: '4px',
+        backgroundColor: 'fill-two',
         border: '1px solid border',
         borderRadius: 'normal',
         boxShadow: 'moderate',
@@ -774,14 +821,15 @@ export default mergeTheme(defaultTheme, {
         padding: '8px 16px',
       },
       ({ active }: any) => active && {
-        backgroundColor: 'fill-one-hover',
-        borderColor: 'fill-one-hover',
+        backgroundColor: 'fill-two-hover',
+        borderColor: 'fill-two-hover',
       },
     ],
   },
   Modal: {
     Root: [
       {
+        maxWidth: '480px',
         backgroundColor: 'fill-one',
         border: '1px solid border',
         boxShadow: 'modal',
@@ -795,11 +843,11 @@ export default mergeTheme(defaultTheme, {
   },
   Radio: {
     Root: [
-      ({ checked }: any) => ({
+      {
         padding: 8,
-        color: checked ? 'text' : 'action-link-inactive',
+        color: 'action-link-inactive',
         '> span': {
-          border: `1px solid ${checked ? 'text' : 'border-input'}`,
+          border: '1px solid border-input',
         },
         '& *': {
           fill: 'action-primary',
@@ -808,11 +856,27 @@ export default mergeTheme(defaultTheme, {
           color: 'text',
           '> span': {
             backgroundColor: 'action-input-hover',
-            border: `1px solid ${checked ? 'text' : 'border-input'}`,
+            border: '1px solid border-input',
           },
           '& *': {
             fill: 'action-primary-hover',
           },
+        },
+      },
+      ({ checked }: any) => checked && ({
+        color: 'text',
+        '> span': {
+          border: '1px solid text',
+        },
+        ':hover': {
+          '> span': {
+            border: '1px solid text',
+          },
+        },
+      }),
+      ({ small }: any) => small && ({
+        '> span': {
+          borderWidth: '.75px',
         },
       }),
     ],
@@ -839,6 +903,7 @@ export default mergeTheme(defaultTheme, {
     Root: [
       ({ checked }: any) => ({
         padding: 8,
+        paddingLeft: 0,
         color: checked ? 'text' : 'action-link-inactive',
         '> div:first-of-type': {
           backgroundColor: checked ? 'action-primary' : 'transparent',

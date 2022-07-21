@@ -3,14 +3,14 @@ import { Flex, FlexProps, P, Spinner } from 'honorable'
 import PropTypes from 'prop-types'
 
 type ChipProps = FlexProps & {
-  size?: 'medium' | 'large' | string
+  size?: 'small' | 'medium' | 'large' | string
   severity?: 'neutral' | 'info' | 'success' | 'warning' | 'error' | string
   icon?: ReactElement,
   loading?: boolean
 }
 
 const propTypes = {
-  size: PropTypes.oneOf(['medium', 'large']),
+  size: PropTypes.oneOf(['small', 'medium', 'large']),
   severity: PropTypes.oneOf(['neutral', 'info', 'success', 'warning', 'error']),
   icon: PropTypes.element,
   loading: PropTypes.bool,
@@ -37,8 +37,8 @@ function ChipRef({
   return (
     <Flex
       ref={ref}
-      paddingVertical={size === 'large' ? 'xsmall' : 'xxxsmall'}
-      paddingHorizontal="small"
+      paddingVertical={size === 'large' ? '6px' : 'xxxsmall'}
+      paddingHorizontal={size === 'small' ? 'xsmall' : 'small'}
       align="center"
       display="inline-flex"
       backgroundColor="fill-one"
@@ -63,6 +63,9 @@ function ChipRef({
       <P
         body2
         color={col}
+        fontSize={size === 'small' ? 12 : 14}
+        fontWeight={size === 'small' ? 400 : 600}
+        lineHeight={size === 'small' ? '16px' : '20px'}
       >
         {children}
       </P>

@@ -1,4 +1,5 @@
-import { Div, DivProps, Flex, H2, H3, Img, P, Span } from 'honorable'
+import RepositoryIcon from '@src/components/RepositoryIcon'
+import { Div, DivProps, Flex, H2, H3, P, Span } from 'honorable'
 import PropTypes from 'prop-types'
 import { Ref, forwardRef } from 'react'
 
@@ -7,8 +8,6 @@ import Chip from './Chip'
 import PadlockLockedIcon from './icons/PadlockLockedIcon'
 import StatusOkIcon from './icons/StatusOkIcon'
 
-import Tag from './Tag'
-
 type RepositoryCardProps = DivProps & {
   title?: string
   publisher?: string
@@ -16,7 +15,8 @@ type RepositoryCardProps = DivProps & {
   installed?: boolean
   description?: string
   imageUrl?: string
-  tags?: string[]
+  tags?: string[],
+  size?: 'small' | 'medium' | 'large' | string
 }
 
 const propTypes = {
@@ -27,6 +27,7 @@ const propTypes = {
   description: PropTypes.string,
   imageUrl: PropTypes.string,
   tags: PropTypes.arrayOf(PropTypes.string),
+  size: PropTypes.oneOf(['small', 'medium', 'large']),
 }
 
 function RepositoryCardRef({
@@ -37,6 +38,7 @@ function RepositoryCardRef({
   description,
   imageUrl,
   tags = [],
+  size = 'medium',
   ...props
 }: RepositoryCardProps,
 ref: Ref<any>
@@ -57,14 +59,9 @@ ref: Ref<any>
       {...props}
     >
       <Flex align="center">
-        <Img
-          src={imageUrl}
-          alt="Logo"
-          width={56}
-          height={56}
-          padding={8}
-          borderRadius="medium"
-          objectFit="cover"
+        <RepositoryIcon
+          size="small"
+          url={imageUrl}
         />
         <Flex
           direction="row"
@@ -89,7 +86,7 @@ ref: Ref<any>
             justifyContent="end"
             flexGrow={1}
           >
-            {!!installed && ( 
+            {!!installed && (
               <Chip
                 severity="success"
                 icon={<StatusOkIcon />}
@@ -115,6 +112,12 @@ ref: Ref<any>
           body2
           marginTop="xsmall"
           color="text-light"
+          style={{
+            display: '-webkit-box',
+            '-webkit-line-clamp': '2',
+            '-webkit-box-orient': 'vertical',
+            overflow: 'hidden',
+          }}
         >
           {description}
         </P>
@@ -127,13 +130,14 @@ ref: Ref<any>
           flexWrap="wrap"
         >
           {tags.map(tag => (
-            <Tag
+            <Chip
+              size="small"
               key={tag}
               _last={{ marginRight: 0 }}
               backgroundColor="fill-two"
             >
               {tag}
-            </Tag>
+            </Chip>
           ))}
         </Flex>
       )}
