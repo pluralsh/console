@@ -1,7 +1,8 @@
-import RepositoryIcon from '@src/components/RepositoryIcon'
 import { Div, DivProps, Flex, H2, H3, P, Span } from 'honorable'
 import PropTypes from 'prop-types'
 import { Ref, forwardRef } from 'react'
+
+import RepositoryIcon from '../../src/components/RepositoryIcon'
 
 import Chip from './Chip'
 
