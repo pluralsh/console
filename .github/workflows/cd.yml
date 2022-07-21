@@ -12,14 +12,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16.15.0
-      - uses: actions/cache@v3
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
       - run: |
-          [ ! -d "node_modules" ] && yarn install --immutable
+          yarn install --immutable
       - run: yarn build:storybook
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -35,14 +29,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16.15.0
-      - uses: actions/cache@v3
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
       - run: |
-          [ ! -d "node_modules" ] && yarn install --immutable
+          yarn install --immutable
       - run: git config --global user.email "dherault@gmail.com" && git config --global user.name "David Hérault"
       # TODO: include tests here
       - run: npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
