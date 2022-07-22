@@ -1,7 +1,7 @@
 const { createProxyMiddleware } = require('http-proxy-middleware')
 
 const proxy = createProxyMiddleware({
-  target: process.env.BASE_URL || 'https://console.kubeflow-aws.com',
+  target: process.env.BASE_URL || 'https://console.plural.sh',
   changeOrigin: true,
   ws: true,
 })

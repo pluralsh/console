@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery } from 'react-apollo'
 import { Box, Text, TextInput, ThemeContext } from 'grommet'
-import { Button, GqlError, SecondaryButton } from 'forge-core'
+import { Alert, AlertStatus, Button, GqlError, SecondaryButton } from 'forge-core'
 
 import Toggle from 'react-toggle'
 
@@ -481,11 +481,25 @@ function RecipeConfiguration({ recipe, context: ctx, setOpen }) {
 
 const buildContext = contexts => contexts.reduce((acc, { repository, context }) => ({ ...acc, [repository]: context }), {})
 
+function RestrictedRecipe() {
+  return (
+    <Box pad="small">
+      <Alert 
+        status={AlertStatus.ERROR}
+        header="Cannot install recipe"
+        description="This recipe has been marked restricted because it requires configuration, like ssh keys, that are only able to be securely configured locally"
+      />
+    </Box>
+  )
+}
+
 export function Configuration({ recipe, setOpen }) {
   const { data } = useQuery(RECIPE_Q, {
     variables: { id: recipe.id },
     fetchPolicy: 'cache-and-network',
   })
+
+  const { restricted } = recipe
 
   return (
     <Box
@@ -500,7 +514,8 @@ export function Configuration({ recipe, setOpen }) {
         fill
         style={{ minHeight: '150px' }}
       >
-        {data && (
+        {restricted && <RestrictedRecipe />}
+        {data && !restricted && (
           <RecipeConfiguration 
             recipe={data.recipe} 
             context={buildContext(data.context)} 

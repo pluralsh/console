@@ -38,6 +38,7 @@ export const RecipeFragment = gql`
     id
     name
     description
+    restricted
     provider
     oidcEnabled
   }
