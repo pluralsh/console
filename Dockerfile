@@ -31,7 +31,7 @@ COPY --from=node /usr/local/bin /usr/local/bin
 WORKDIR /opt/app
 
 # This step installs all the build tools we'll need
-RUN apk update && \
+RUN apk update --allow-untrusted && \
   apk upgrade --no-cache && \
   apk add --no-cache \
     yarn \
