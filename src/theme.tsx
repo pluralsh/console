@@ -809,7 +809,7 @@ export default mergeTheme(defaultTheme, {
     Root: [
       {
         '& > div': {
-          borderTop: '1px solid border',
+          borderTop: '1px solid border-fill-two',
         },
         '&:first-of-type > div': {
           borderTop: 'none',

@@ -112,6 +112,7 @@ export { default as TwitterIcon } from './components/icons/TwitterIcon'
 export { default as UpdatesIcon } from './components/icons/UpdatesIcon'
 export { default as VolumesIcon } from './components/icons/VolumesIcon'
 export { default as WebhooksIcon } from './components/icons/WebhooksIcon'
+export { default as VerifiedIcon } from './components/icons/VerifiedIcon'
 // Components
 export { default as Alert } from './components/Alert'
 export { default as Banner } from './components/Banner'
