@@ -69,7 +69,9 @@ function withTooltipRef({
   )
 }
 
-function withLinkRef({ children, clickable, href = '', ...props }: SidebarItemProps, ref: Ref<any>) {
+function withLinkRef({
+  children, clickable, href = '', ...props
+}: SidebarItemProps, ref: Ref<any>) {
   if (!href) return (<> {children}</>)
 
   return (

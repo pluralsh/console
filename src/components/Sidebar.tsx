@@ -27,4 +27,5 @@ function SidebarRef({ children, ...props }: SidebarProps, ref: Ref<any>) {
 }
 
 const Sidebar = forwardRef(SidebarRef)
+
 export default Sidebar

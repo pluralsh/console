@@ -6,7 +6,7 @@ import PropTypes from 'prop-types'
 
 type ChipProps = FlexProps & {
   size?: 'small' | 'medium' | 'large' | string
-  severity?: 'neutral' | 'info' | 'success' | 'warning' | 'error' | string
+  severity?: 'neutral' | 'info' | 'success' | 'warning' | 'error' | 'critical' | string
   hue?: 'default' | 'lighter' | 'lightest' | string
   icon?: ReactElement,
   loading?: boolean
@@ -14,7 +14,7 @@ type ChipProps = FlexProps & {
 
 const propTypes = {
   size: PropTypes.oneOf(['small', 'medium', 'large']),
-  severity: PropTypes.oneOf(['neutral', 'info', 'success', 'warning', 'error']),
+  severity: PropTypes.oneOf(['neutral', 'info', 'success', 'warning', 'error', 'critical']),
   hue: PropTypes.oneOf(['default', 'lighter', 'lightest']),
   icon: PropTypes.element,
   loading: PropTypes.bool,
@@ -26,6 +26,7 @@ const severityToColor = {
   success: 'text-success-light',
   warning: 'text-warning-light',
   error: 'text-error-light',
+  critical: 'text-error',
 }
 
 const sizeToHeight: { [key in 'small' | 'medium' | 'large']: number } = {

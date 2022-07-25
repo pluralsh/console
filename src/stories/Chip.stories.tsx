@@ -7,9 +7,17 @@ import Chip from '../components/Chip'
 export default {
   title: 'Chip',
   component: Chip,
+  argTypes: {
+    hue: {
+      options: ['default', 'lighter', 'lightest'],
+      control: {
+        type: 'select',
+      },
+    },
+  },
 }
 
-function Template() {
+function Template(args: any) {
   return (
     <>
       <H1
@@ -24,6 +32,7 @@ function Template() {
         <Chip
           severity="neutral"
           size="small"
+          {...args}
         >
           Neutral
         </Chip>
@@ -31,6 +40,7 @@ function Template() {
           marginLeft="medium"
           severity="info"
           size="small"
+          {...args}
         >
           Info
         </Chip>
@@ -38,6 +48,7 @@ function Template() {
           marginLeft="medium"
           severity="success"
           size="small"
+          {...args}
         >
           Success
         </Chip>
@@ -45,6 +56,7 @@ function Template() {
           marginLeft="medium"
           severity="warning"
           size="small"
+          {...args}
         >
           Warning
         </Chip>
@@ -52,8 +64,17 @@ function Template() {
           marginLeft="medium"
           severity="error"
           size="small"
+          {...args}
         >
           Error
+        </Chip>
+        <Chip
+          marginLeft="medium"
+          severity="critical"
+          size="small"
+          {...args}
+        >
+          Critical
         </Chip>
       </Flex>
       {/* Small with loading spinner */}
@@ -65,6 +86,7 @@ function Template() {
           loading
           severity="neutral"
           size="small"
+          {...args}
         >
           Neutral
         </Chip>
@@ -73,6 +95,7 @@ function Template() {
           marginLeft="medium"
           severity="info"
           size="small"
+          {...args}
         >
           Info
         </Chip>
@@ -81,6 +104,7 @@ function Template() {
           marginLeft="medium"
           severity="success"
           size="small"
+          {...args}
         >
           Success
         </Chip>
@@ -89,6 +113,7 @@ function Template() {
           marginLeft="medium"
           severity="warning"
           size="small"
+          {...args}
         >
           Warning
         </Chip>
@@ -97,8 +122,18 @@ function Template() {
           marginLeft="medium"
           severity="error"
           size="small"
+          {...args}
         >
           Error
+        </Chip>
+        <Chip
+          loading
+          marginLeft="medium"
+          severity="critical"
+          size="small"
+          {...args}
+        >
+          Critical
         </Chip>
       </Flex>
       {/* Small with icon */}
@@ -110,6 +145,7 @@ function Template() {
           icon={<StatusOkIcon />}
           severity="neutral"
           size="small"
+          {...args}
         >
           Neutral
         </Chip>
@@ -118,6 +154,7 @@ function Template() {
           marginLeft="medium"
           severity="info"
           size="small"
+          {...args}
         >
           Info
         </Chip>
@@ -126,6 +163,7 @@ function Template() {
           marginLeft="medium"
           severity="success"
           size="small"
+          {...args}
         >
           Success
         </Chip>
@@ -134,6 +172,7 @@ function Template() {
           marginLeft="medium"
           severity="warning"
           size="small"
+          {...args}
         >
           Warning
         </Chip>
@@ -142,8 +181,18 @@ function Template() {
           marginLeft="medium"
           severity="error"
           size="small"
+          {...args}
         >
           Error
+        </Chip>
+        <Chip
+          icon={<StatusOkIcon />}
+          marginLeft="medium"
+          severity="critical"
+          size="small"
+          {...args}
+        >
+          Critical
         </Chip>
       </Flex>
 
@@ -156,32 +205,46 @@ function Template() {
         align="center"
         marginBottom="xlarge"
       >
-        <Chip severity="neutral">
+        <Chip
+          severity="neutral"
+          {...args}
+        >
           Neutral
         </Chip>
         <Chip
           marginLeft="medium"
           severity="info"
+          {...args}
         >
           Info
         </Chip>
         <Chip
           marginLeft="medium"
           severity="success"
+          {...args}
         >
           Success
         </Chip>
         <Chip
           marginLeft="medium"
           severity="warning"
+          {...args}
         >
           Warning
         </Chip>
         <Chip
           marginLeft="medium"
           severity="error"
+          {...args}
         >
           Error
+        </Chip>
+        <Chip
+          marginLeft="medium"
+          severity="critical"
+          {...args}
+        >
+          Critical
         </Chip>
       </Flex>
       {/* Medium with loading spinner */}
@@ -192,6 +255,7 @@ function Template() {
         <Chip
           loading
           severity="neutral"
+          {...args}
         >
           Neutral
         </Chip>
@@ -199,6 +263,7 @@ function Template() {
           loading
           marginLeft="medium"
           severity="info"
+          {...args}
         >
           Info
         </Chip>
@@ -206,6 +271,7 @@ function Template() {
           loading
           marginLeft="medium"
           severity="success"
+          {...args}
         >
           Success
         </Chip>
@@ -213,6 +279,7 @@ function Template() {
           loading
           marginLeft="medium"
           severity="warning"
+          {...args}
         >
           Warning
         </Chip>
@@ -220,8 +287,17 @@ function Template() {
           loading
           marginLeft="medium"
           severity="error"
+          {...args}
         >
           Error
+        </Chip>
+        <Chip
+          loading
+          marginLeft="medium"
+          severity="critical"
+          {...args}
+        >
+          Critical
         </Chip>
       </Flex>
       {/* Medium with icon */}
@@ -232,6 +308,7 @@ function Template() {
         <Chip
           icon={<StatusOkIcon />}
           severity="neutral"
+          {...args}
         >
           Neutral
         </Chip>
@@ -239,6 +316,7 @@ function Template() {
           icon={<StatusOkIcon />}
           marginLeft="medium"
           severity="info"
+          {...args}
         >
           Info
         </Chip>
@@ -246,6 +324,7 @@ function Template() {
           icon={<StatusOkIcon />}
           marginLeft="medium"
           severity="success"
+          {...args}
         >
           Success
         </Chip>
@@ -253,6 +332,7 @@ function Template() {
           icon={<StatusOkIcon />}
           marginLeft="medium"
           severity="warning"
+          {...args}
         >
           Warning
         </Chip>
@@ -260,8 +340,17 @@ function Template() {
           icon={<StatusOkIcon />}
           marginLeft="medium"
           severity="error"
+          {...args}
         >
           Error
+        </Chip>
+        <Chip
+          icon={<StatusOkIcon />}
+          marginLeft="medium"
+          severity="critical"
+          {...args}
+        >
+          Critical
         </Chip>
       </Flex>
 
@@ -277,6 +366,7 @@ function Template() {
         <Chip
           severity="neutral"
           size="large"
+          {...args}
         >
           Neutral
         </Chip>
@@ -284,6 +374,7 @@ function Template() {
           marginLeft="medium"
           severity="info"
           size="large"
+          {...args}
         >
           Info
         </Chip>
@@ -291,6 +382,7 @@ function Template() {
           marginLeft="medium"
           severity="success"
           size="large"
+          {...args}
         >
           Success
         </Chip>
@@ -298,6 +390,7 @@ function Template() {
           marginLeft="medium"
           severity="warning"
           size="large"
+          {...args}
         >
           Warning
         </Chip>
@@ -305,8 +398,17 @@ function Template() {
           marginLeft="medium"
           severity="error"
           size="large"
+          {...args}
         >
           Error
+        </Chip>
+        <Chip
+          marginLeft="medium"
+          severity="critical"
+          size="large"
+          {...args}
+        >
+          Critical
         </Chip>
       </Flex>
       {/* Large with loading spinner */}
@@ -318,6 +420,7 @@ function Template() {
           loading
           severity="neutral"
           size="large"
+          {...args}
         >
           Neutral
         </Chip>
@@ -326,6 +429,7 @@ function Template() {
           marginLeft="medium"
           severity="info"
           size="large"
+          {...args}
         >
           Info
         </Chip>
@@ -334,6 +438,7 @@ function Template() {
           marginLeft="medium"
           severity="success"
           size="large"
+          {...args}
         >
           Success
         </Chip>
@@ -342,6 +447,7 @@ function Template() {
           marginLeft="medium"
           severity="warning"
           size="large"
+          {...args}
         >
           Warning
         </Chip>
@@ -350,8 +456,18 @@ function Template() {
           marginLeft="medium"
           severity="error"
           size="large"
+          {...args}
         >
           Error
+        </Chip>
+        <Chip
+          loading
+          marginLeft="medium"
+          severity="critical"
+          size="large"
+          {...args}
+        >
+          Critical
         </Chip>
       </Flex>
       {/* Large with icon */}
@@ -363,6 +479,7 @@ function Template() {
           icon={<StatusOkIcon />}
           severity="neutral"
           size="large"
+          {...args}
         >
           Neutral
         </Chip>
@@ -371,6 +488,7 @@ function Template() {
           marginLeft="medium"
           severity="info"
           size="large"
+          {...args}
         >
           Info
         </Chip>
@@ -379,6 +497,7 @@ function Template() {
           marginLeft="medium"
           severity="success"
           size="large"
+          {...args}
         >
           Success
         </Chip>
@@ -387,6 +506,7 @@ function Template() {
           marginLeft="medium"
           severity="warning"
           size="large"
+          {...args}
         >
           Warning
         </Chip>
@@ -395,8 +515,18 @@ function Template() {
           marginLeft="medium"
           severity="error"
           size="large"
+          {...args}
         >
           Error
+        </Chip>
+        <Chip
+          icon={<StatusOkIcon />}
+          marginLeft="medium"
+          severity="critical"
+          size="large"
+          {...args}
+        >
+          Critical
         </Chip>
       </Flex>
     </>
@@ -404,5 +534,6 @@ function Template() {
 }
 
 export const Default = Template.bind({})
-
-Default.args = {}
+Default.args = {
+  hue: 'default',
+}
