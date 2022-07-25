@@ -264,11 +264,66 @@ function TemplateComplex() {
   )
 }
 
+function TemplateSubTabs() {
+  const orientation = 'horizontal'
+  const tabListProps: TabListStateProps = {
+    keyboardActivation: 'manual',
+    orientation,
+    children: Object.entries(tabs).map(([key, tab]) => (
+      <TabListItem
+        key={key}
+        width="auto"
+      >
+        {tab.label}
+      </TabListItem>
+    )),
+  }
+
+  const tabState = useTabListState(tabListProps)
+
+  return (
+    <Div>
+      <Flex flexDirection="column">
+        <TabList
+          state={tabState}
+          stateProps={tabListProps}
+          flexShrink={0}
+          marginRight={0}
+          marginBottom="xlarge"
+          width="100%"
+          tabStyle="subtab"
+        />
+        <Div>
+          <H1
+            title1
+            marginBottom="medium"
+          >
+            {tabs[tabState.selectedKey]?.label}
+          </H1>
+          <TabPanel
+            state={tabState}
+            stateProps={tabListProps}
+            paddingTop="large"
+            paddingBottom="large"
+            borderTop="1px solid border"
+            borderBottom="1px solid border"
+          >
+            {tabs[tabState.selectedKey]?.content}
+          </TabPanel>
+        </Div>
+      </Flex>
+    </Div>
+  )
+}
+
 export const Default = TemplateHorizontal.bind({})
 Default.args = {}
 
 export const Vertical = TemplateVertical.bind({})
 Vertical.args = {}
+
+export const SubTabs = TemplateSubTabs.bind({})
+SubTabs.args = {}
 
 export const AdvancedContent = TemplateComplex.bind({})
 AdvancedContent.args = {}
