@@ -113,6 +113,7 @@ export { default as UpdatesIcon } from './components/icons/UpdatesIcon'
 export { default as VolumesIcon } from './components/icons/VolumesIcon'
 export { default as WebhooksIcon } from './components/icons/WebhooksIcon'
 export { default as VerifiedIcon } from './components/icons/VerifiedIcon'
+export { default as BellIcon } from './components/icons/BellIcon'
 // Components
 export { default as Alert } from './components/Alert'
 export { default as Banner } from './components/Banner'
@@ -144,6 +145,9 @@ export { default as Token } from './components/Token'
 export { default as UserCard } from './components/UserCard'
 export { default as ValidatedInput } from './components/ValidatedInput'
 export { default as Tooltip } from './components/Tooltip'
+export { default as Sidebar } from './components/Sidebar'
+export { default as SidebarSection } from './components/SidebarSection'
+export { default as SidebarItem } from './components/SidebarItem'
 // Hooks
 export { default as usePrevious } from './hooks/usePrevious'
 // Theme
