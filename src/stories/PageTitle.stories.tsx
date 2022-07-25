@@ -1,4 +1,6 @@
-import { Button, Div, Flex, P } from 'honorable'
+import {
+  Button, Div, Flex, P,
+} from 'honorable'
 
 import PageTitle, { PageTitleProps } from '../components/PageTitle'
 

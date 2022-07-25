@@ -26,7 +26,9 @@ const severityToIcon = {
   error: ErrorIcon,
 }
 
-function BannerRef({ children, severity = 'success', onClose, ...props }: BannerProps, ref: Ref<any>) {
+function BannerRef({
+  children, severity = 'success', onClose, ...props
+}: BannerProps, ref: Ref<any>) {
   const BannerIcon = severityToIcon[severity] || severityToIcon.success
   const color = severityToColor[severity] || severityToColor.success
 

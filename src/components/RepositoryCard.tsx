@@ -1,4 +1,6 @@
-import { Div, DivProps, Flex, H1, H3, P, Span } from 'honorable'
+import {
+  Div, DivProps, Flex, H1, H3, P, Span,
+} from 'honorable'
 import PropTypes from 'prop-types'
 import { Ref, forwardRef } from 'react'
 
@@ -49,8 +51,7 @@ function RepositoryCardRef({
   size = 'small',
   ...props
 }: RepositoryCardProps,
-ref: Ref<any>
-) {
+ref: Ref<any>) {
   return (
     <Flex
       ref={ref}

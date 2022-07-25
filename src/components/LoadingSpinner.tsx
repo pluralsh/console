@@ -1,4 +1,6 @@
-import { Div, Flex, FlexProps, H1, Img, ImgProps, Span } from 'honorable'
+import {
+  Div, Flex, FlexProps, H1, Img, ImgProps, Span,
+} from 'honorable'
 import type { DivProps } from 'honorable'
 import { keyframes } from '@emotion/react'
 import styled from '@emotion/styled'
@@ -80,9 +82,9 @@ const exitStyles = {
   },
 }
 
-/* 
+/*
     A bunch of nasty calcs to get the spinner optically centered across
-    different viewport heights. Once the vh goes beyond --clampMin, the 
+    different viewport heights. Once the vh goes beyond --clampMin, the
     spinner gets shifted up proportional to vh until it reaches --clampMax.
     Units are kinda weird because calc() won't allow a value with units
     as a denominator.
@@ -146,13 +148,12 @@ function WrapperBase(props: FlexProps) {
 
 function CenteringWrapper({ children, ...props }: FlexProps) {
   const [top, setTop] = useState<number | null>(null)
-  const [windowHeight, setWindowHeight] = useState<number | null>(
-    window.innerHeight
-  )
+  const [windowHeight, setWindowHeight] = useState<number | null>(window.innerHeight)
   const ref = useRef<HTMLDivElement>()
 
   const onSizeChange = useCallback(() => {
     const nextTop = ref.current.getBoundingClientRect().top
+
     if (nextTop !== top) {
       setTop(nextTop)
     }
@@ -172,13 +173,10 @@ function CenteringWrapper({ children, ...props }: FlexProps) {
     }
   })
 
-  const wrapperHeight = useMemo(
-    () =>
-      `${
-        top === null || windowHeight === null ? '100vh' : windowHeight - top
-      }px`,
-    [top, windowHeight]
-  )
+  const wrapperHeight = useMemo(() => `${
+    top === null || windowHeight === null ? '100vh' : windowHeight - top
+  }px`,
+  [top, windowHeight])
 
   return (
     <Flex
@@ -201,122 +199,116 @@ function CenteringWrapper({ children, ...props }: FlexProps) {
   )
 }
 
-const Wrapper = forwardRef<HTMLDivElement, DivProps>(
-  ({ centered, children, ...props }, ref) => (
-    <Div
-      ref={ref}
-      {...exitStyles}
-      {...props}
-    >
-      {centered ? (
-        <CenteringWrapper>{children}</CenteringWrapper>
-      ) : (
-        <WrapperBase>{children}</WrapperBase>
-      )}
-    </Div>
-  )
-)
+const Wrapper = forwardRef<HTMLDivElement, DivProps>(({ centered, children, ...props }, ref) => (
+  <Div
+    ref={ref}
+    {...exitStyles}
+    {...props}
+  >
+    {centered ? (
+      <CenteringWrapper>{children}</CenteringWrapper>
+    ) : (
+      <WrapperBase>{children}</WrapperBase>
+    )}
+  </Div>
+))
 
-const LoadingSpinner = forwardRef<HTMLDivElement, LoadingSpinnerProps>(
-  (
-    {
-      show,
-      paused,
-      spinnerWidth = 96,
-      spinnerDelay = 200,
-      centered = false,
-      animateTransitions = true,
-      ...props
-    },
-    ref
-  ) => {
-    const [delayFinished, setDelayFinished] = useState(false)
-    const [tickCount, setTickCount] = useState(0)
+const LoadingSpinner = forwardRef<HTMLDivElement, LoadingSpinnerProps>(({
+  show,
+  paused,
+  spinnerWidth = 96,
+  spinnerDelay = 200,
+  centered = false,
+  animateTransitions = true,
+  ...props
+},
+ref) => {
+  const [delayFinished, setDelayFinished] = useState(false)
+  const [tickCount, setTickCount] = useState(0)
 
-    if (!show && delayFinished) {
-      setDelayFinished(false)
-    }
-
-    useEffect(() => {
-      if (show) {
-        const timeoutId = setTimeout(() => {
-          setDelayFinished(true)
-        }, spinnerDelay)
-
-        return () => {
-          clearTimeout(timeoutId)
-        }
-      }
-    }, [show, spinnerDelay])
-
-    useEffect(() => {
-      const interval = setTimeout(() => {
-        setTickCount(tickCount >= 4 ? 0 : tickCount + 1)
-      }, 200)
-
-      return () => clearTimeout(interval)
-    }, [tickCount])
-
-    return (
-      <CSSTransition
-        in={delayFinished && show}
-        appear
-        timeout={animateTransitions ? 400 : 0}
-        unmountOnExit
-      >
-        <Wrapper
-          ref={ref}
-          centered={centered}
-          className="wrapper"
-          {...props}
-        >
-          <Div
-            mask="url(/logos/plural-logomark-only-white.svg) 0 0 / contain no-repeat"
-            background="url(/logos/plural-logomark-only-white.svg)"
-            backgroundSize="contain"
-            overflow="hidden"
-            width={spinnerWidth}
-            height="auto"
-            position="relative"
-            {...logoEnterStyles}
-          >
-            <Img
-              display="block"
-              width="100%"
-              visibility="hidden"
-              src="/logos/plural-logomark-only-white.svg"
-            />
-            <Flex
-              flexWrap="nowrap"
-              height="100%"
-              position="absolute"
-              top="0"
-              animationName={bgKeyframes}
-              animationPlayState={paused ? 'paused' : 'running'}
-              {...commonAnimStyles}
-            >
-              <ScrollingBGImage height={spinnerWidth} />
-              <ScrollingBGImage height={spinnerWidth} />
-              <ScrollingBGImage height={spinnerWidth} />
-            </Flex>
-          </Div>
-          <H1
-            body1
-            bold
-            color="text"
-            marginTop="large"
-            textAlign="center"
-            {...textEnterStyles}
-          >
-            Loading Plural
-            <Span opacity={tickCount >= 1 ? 1 : 0}>.</Span>
-            <Span opacity={tickCount >= 2 ? 1 : 0}>.</Span>
-            <Span opacity={tickCount >= 3 ? 1 : 0}>.</Span>
-          </H1>
-        </Wrapper>
-      </CSSTransition>
-    )
+  if (!show && delayFinished) {
+    setDelayFinished(false)
   }
-)
+
+  useEffect(() => {
+    if (show) {
+      const timeoutId = setTimeout(() => {
+        setDelayFinished(true)
+      }, spinnerDelay)
+
+      return () => {
+        clearTimeout(timeoutId)
+      }
+    }
+  }, [show, spinnerDelay])
+
+  useEffect(() => {
+    const interval = setTimeout(() => {
+      setTickCount(tickCount >= 4 ? 0 : tickCount + 1)
+    }, 200)
+
+    return () => clearTimeout(interval)
+  }, [tickCount])
+
+  return (
+    <CSSTransition
+      in={delayFinished && show}
+      appear
+      timeout={animateTransitions ? 400 : 0}
+      unmountOnExit
+    >
+      <Wrapper
+        ref={ref}
+        centered={centered}
+        className="wrapper"
+        {...props}
+      >
+        <Div
+          mask="url(/logos/plural-logomark-only-white.svg) 0 0 / contain no-repeat"
+          background="url(/logos/plural-logomark-only-white.svg)"
+          backgroundSize="contain"
+          overflow="hidden"
+          width={spinnerWidth}
+          height="auto"
+          position="relative"
+          {...logoEnterStyles}
+        >
+          <Img
+            display="block"
+            width="100%"
+            visibility="hidden"
+            src="/logos/plural-logomark-only-white.svg"
+          />
+          <Flex
+            flexWrap="nowrap"
+            height="100%"
+            position="absolute"
+            top="0"
+            animationName={bgKeyframes}
+            animationPlayState={paused ? 'paused' : 'running'}
+            {...commonAnimStyles}
+          >
+            <ScrollingBGImage height={spinnerWidth} />
+            <ScrollingBGImage height={spinnerWidth} />
+            <ScrollingBGImage height={spinnerWidth} />
+          </Flex>
+        </Div>
+        <H1
+          body1
+          bold
+          color="text"
+          marginTop="large"
+          textAlign="center"
+          {...textEnterStyles}
+        >
+          Loading Plural
+          <Span opacity={tickCount >= 1 ? 1 : 0}>.</Span>
+          <Span opacity={tickCount >= 2 ? 1 : 0}>.</Span>
+          <Span opacity={tickCount >= 3 ? 1 : 0}>.</Span>
+        </H1>
+      </Wrapper>
+    </CSSTransition>
+  )
+})
 
 export default LoadingSpinner

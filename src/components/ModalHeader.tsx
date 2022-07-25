@@ -2,8 +2,6 @@ import { Ref, forwardRef } from 'react'
 import { Flex, FlexProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
-import CloseIcon from './icons/CloseIcon'
-
 type ModalHeaderProps = FlexProps & {
   title?: string
   onClose?: () => void
@@ -14,7 +12,7 @@ const propTypes = {
   onClose: PropTypes.func,
 }
 
-function ModalHeaderRef({ children, onClose, ...props }: ModalHeaderProps, ref: Ref<any>) {
+function ModalHeaderRef({ children, ...props }: ModalHeaderProps, ref: Ref<any>) {
   return (
     <Flex
       ref={ref}

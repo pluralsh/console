@@ -1,5 +1,7 @@
 import { ReactNode, Ref, forwardRef } from 'react'
-import { Div, DivProps, Flex, Icon } from 'honorable'
+import {
+  Div, DivProps, Flex, Icon,
+} from 'honorable'
 import PropTypes from 'prop-types'
 
 type TagProps = DivProps & {
@@ -14,7 +16,9 @@ const propTypes = {
   vertical: PropTypes.bool,
 }
 
-function TabRef({ startIcon, active, children, vertical, ...props }: TagProps, ref:Ref<any>) {
+function TabRef({
+  startIcon, active, children, vertical, ...props
+}: TagProps, ref:Ref<any>) {
   return (
     <Div
       ref={ref}

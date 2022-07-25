@@ -16,9 +16,9 @@ function Template() {
       onChange={(e: any) => setValue(e.target.value)}
       width="500px"
       label="input needs to be looong"
-      validation={(v: string) : ValidationResponse => v.length < 4 ? { error: true, message: 'too short' } : { error: false, message: 'long enough!' }}
+      validation={(v: string) : ValidationResponse => (v.length < 4 ? { error: true, message: 'too short' } : { error: false, message: 'long enough!' })}
     />
   )
-} 
+}
 
 export const Default = Template.bind({})

@@ -1,4 +1,6 @@
-import { Div, DivProps, Flex, FlexProps } from 'honorable'
+import {
+  Div, DivProps, Flex, FlexProps,
+} from 'honorable'
 import { AriaTabListProps } from '@react-types/tabs'
 import { Item } from '@react-stately/collections'
 import { useTab, useTabList, useTabPanel } from '@react-aria/tabs'
@@ -65,12 +67,11 @@ function TabList({
       tabStyle={tabStyle}
     />
   ))
+
   if (renderer) {
-    return renderer(
-      { ...props, ...tabListProps, ...{ children: tabChildren } },
+    return renderer({ ...props, ...tabListProps, ...{ children: tabChildren } },
       ref,
-      state
-    )
+      state)
   }
 
   return (
@@ -94,7 +95,9 @@ type TabRendererProps = {
   stateProps: TabListStateProps;
   tabStyle: TabStyle;
 };
-function TabRenderer({ item, state, stateProps, tabStyle = 'default' }: TabRendererProps) {
+function TabRenderer({
+  item, state, stateProps, tabStyle = 'default',
+}: TabRendererProps) {
   const ref = useRef(null)
   const { tabProps: props } = useTab({ key: item.key }, state, ref)
 
@@ -114,17 +117,15 @@ function TabRenderer({ item, state, stateProps, tabStyle = 'default' }: TabRende
       )
     }
 
-    return item.props.renderer(
-      {
-        ...{
-          cursor: 'pointer',
-          _focusVisible: { outline: '1px solid border-outline-focused' },
-        },
-        ...props,
+    return item.props.renderer({
+      ...{
+        cursor: 'pointer',
+        _focusVisible: { outline: '1px solid border-outline-focused' },
       },
-      ref,
-      state
-    )
+      ...props,
+    },
+    ref,
+    state)
   }
 
   return (
@@ -154,6 +155,7 @@ function TabPanel({
 }: TabPanelProps & DivProps) {
   const ref = useRef()
   const { tabPanelProps } = useTabPanel(stateProps, state, ref)
+
   if (renderer) {
     return renderer({ ...tabPanelProps, ...props }, ref, state)
   }

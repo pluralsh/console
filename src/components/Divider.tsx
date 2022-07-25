@@ -1,5 +1,7 @@
 import { Ref, forwardRef } from 'react'
-import { Div, Flex, FlexProps, P } from 'honorable'
+import {
+  Div, Flex, FlexProps, P,
+} from 'honorable'
 import PropTypes from 'prop-types'
 
 type AlertProps = FlexProps & {

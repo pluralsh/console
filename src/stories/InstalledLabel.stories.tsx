@@ -6,7 +6,6 @@ export default {
 }
 
 function Template(args: any) {
-
   return (
     <InstalledLabel
       {...args}

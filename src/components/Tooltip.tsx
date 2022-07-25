@@ -2,7 +2,6 @@ import { Ref, forwardRef } from 'react'
 import { Tooltip as TooltipBase, TooltipProps as TooltipBaseProps } from 'honorable'
 
 function TooltipRef(props: TooltipBaseProps, ref:Ref<any>) {
-
   const styles = {
     'Tooltip.Arrow': { backgroundColor: 'blue' },
   }
@@ -23,5 +22,6 @@ function TooltipRef(props: TooltipBaseProps, ref:Ref<any>) {
 }
 
 const Tooltip = forwardRef(TooltipRef)
+
 export default Tooltip
 export type TooltipProps = TooltipBaseProps

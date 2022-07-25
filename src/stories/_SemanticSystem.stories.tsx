@@ -1,4 +1,6 @@
-import { Div, Flex, Text, useTheme } from 'honorable'
+import {
+  Div, Flex, Text, useTheme,
+} from 'honorable'
 
 import Divider from '../components/Divider'
 

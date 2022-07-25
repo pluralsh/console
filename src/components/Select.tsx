@@ -7,12 +7,10 @@ type SelectProps = HonorableSelectProps & {
 }
 
 const propTypes = {
-  items: PropTypes.arrayOf(
-    PropTypes.shape({
-      label: PropTypes.node.isRequired,
-      value: PropTypes.any.isRequired,
-    }).isRequired
-  ).isRequired,
+  items: PropTypes.arrayOf(PropTypes.shape({
+    label: PropTypes.node.isRequired,
+    value: PropTypes.any.isRequired, // eslint-disable-line
+  }).isRequired).isRequired,
 }
 
 function SelectRef({ items, ...props }: SelectProps, ref: Ref<any>) {

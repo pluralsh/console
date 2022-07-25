@@ -1,5 +1,7 @@
 import { ReactElement, Ref, forwardRef } from 'react'
-import { Flex, FlexProps, P, Spinner } from 'honorable'
+import {
+  Flex, FlexProps, P, Spinner,
+} from 'honorable'
 import PropTypes from 'prop-types'
 
 type ChipProps = FlexProps & {

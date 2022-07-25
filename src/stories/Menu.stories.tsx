@@ -1,4 +1,6 @@
-import { Flex, H3, Menu, MenuItem } from 'honorable'
+import {
+  Flex, H3, Menu, MenuItem,
+} from 'honorable'
 
 import PersonIcon from '../components/icons/PersonIcon'
 

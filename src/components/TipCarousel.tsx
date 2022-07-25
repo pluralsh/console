@@ -1,4 +1,6 @@
-import { Children, ReactElement, Ref, forwardRef } from 'react'
+import {
+  Children, ReactElement, Ref, forwardRef,
+} from 'react'
 import { Div, P } from 'honorable'
 
 import Carousel, { CarouselProps } from './Carousel'
@@ -29,8 +31,7 @@ function TipCarouselRef({ children, ...props }: CarouselProps, ref: Ref<any>) {
             {child}
           </P>
         </Div>
-      )
-      )}
+      ))}
     </Carousel>
   )
 }

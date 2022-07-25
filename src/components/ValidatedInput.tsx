@@ -1,4 +1,6 @@
-import React, { PropsWithChildren, ReactNode, Ref, forwardRef, useCallback, useState } from 'react'
+import React, {
+  PropsWithChildren, ReactNode, Ref, forwardRef, useCallback, useState,
+} from 'react'
 import PropTypes from 'prop-types'
 import { Input, InputProps, Span } from 'honorable'
 
@@ -27,7 +29,9 @@ function defaultCaption({ caption, color }: CaptionProps) : React.ReactElement {
   )
 }
 
-function ValidatedInputRef({ label, hint, validation, onChange, width, caption, ...input } : ValidatedInputProps, ref: Ref<any>) {
+function ValidatedInputRef({
+  label, hint, validation, onChange, width, caption, ...input
+} : ValidatedInputProps, ref: Ref<any>) {
   const [error, setError] = useState(null)
   const wrappedOnChange = useCallback((e: any) => {
     if (e.target?.value && validation) setError(validation(e.target.value))
@@ -35,7 +39,7 @@ function ValidatedInputRef({ label, hint, validation, onChange, width, caption, 
   }, [onChange, validation])
 
   const captionComp = caption || defaultCaption
-    
+
   return (
     <FormField
       ref={ref}

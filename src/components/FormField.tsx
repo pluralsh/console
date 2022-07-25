@@ -1,6 +1,10 @@
-import { Div, DivProps, Flex, P } from 'honorable'
+import {
+  Div, DivProps, Flex, P,
+} from 'honorable'
 import PropTypes from 'prop-types'
-import { PropsWithChildren, ReactNode, Ref, forwardRef } from 'react'
+import {
+  PropsWithChildren, ReactNode, Ref, forwardRef,
+} from 'react'
 
 type FormFieldProps = DivProps & PropsWithChildren<{
   label?: ReactNode
@@ -34,8 +38,7 @@ function FormFieldRef({
   small,
   ...props
 }: FormFieldProps,
-ref: Ref<any>
-) {
+ref: Ref<any>) {
   return (
     <Div
       ref={ref}

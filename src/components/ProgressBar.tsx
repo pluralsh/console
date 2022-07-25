@@ -101,6 +101,7 @@ export default function ProgressBar({
   ...props
 }: Props) {
   let fill
+
   if (mode !== 'determinate') {
     fill = (
       <IndeterminateFill

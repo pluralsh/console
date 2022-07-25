@@ -5,7 +5,13 @@ import TipCarousel from '../components/TipCarousel'
 export default {
   title: 'TipCarousel',
   component: TipCarousel,
-  argTypes: { autoAdvanceTime: { control: { type: 'range', min: 0, max: 6000, step: 100 } } },
+  argTypes: {
+    autoAdvanceTime: {
+      control: {
+        type: 'range', min: 0, max: 6000, step: 100,
+      },
+    },
+  },
 }
 
 function Template(args: any) {

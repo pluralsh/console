@@ -1,5 +1,7 @@
 import { Ref, forwardRef } from 'react'
-import { Avatar, Div, Flex, FlexProps, P } from 'honorable'
+import {
+  Avatar, Div, Flex, FlexProps, P,
+} from 'honorable'
 import PropTypes from 'prop-types'
 
 import { UserType } from '../types'

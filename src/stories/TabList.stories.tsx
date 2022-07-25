@@ -1,4 +1,6 @@
-import { Button, Div, Flex, H1 } from 'honorable'
+import {
+  Button, Div, Flex, H1,
+} from 'honorable'
 import { Key, useState } from 'react'
 import { useTabListState } from '@react-stately/tabs'
 

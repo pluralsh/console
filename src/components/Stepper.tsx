@@ -1,5 +1,9 @@
-import { Div, DivProps, Flex, FlexProps } from 'honorable'
-import { Fragment, ReactNode, Ref, forwardRef } from 'react'
+import {
+  Div, DivProps, Flex, FlexProps,
+} from 'honorable'
+import {
+  Fragment, ReactNode, Ref, forwardRef,
+} from 'react'
 import PropTypes from 'prop-types'
 
 import StatusOkIcon from './icons/StatusOkIcon'
@@ -30,13 +34,11 @@ type StepperProps = FlexProps & {
 
 const propTypes = {
   stepIndex: PropTypes.number.isRequired,
-  steps: PropTypes.arrayOf(
-    PropTypes.shape({
-      stepTitle: PropTypes.node.isRequired,
-      IconComponent: PropTypes.func.isRequired,
-      iconSize: PropTypes.number,
-    }).isRequired
-  ).isRequired,
+  steps: PropTypes.arrayOf(PropTypes.shape({
+    stepTitle: PropTypes.node.isRequired,
+    IconComponent: PropTypes.func.isRequired,
+    iconSize: PropTypes.number,
+  }).isRequired).isRequired,
 }
 
 function Step({

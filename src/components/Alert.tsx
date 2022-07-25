@@ -1,5 +1,7 @@
 import { Ref, forwardRef } from 'react'
-import { Div, Flex, FlexProps, P } from 'honorable'
+import {
+  Div, Flex, FlexProps, P,
+} from 'honorable'
 import PropTypes from 'prop-types'
 
 import StatusIpIcon from './icons/StatusIpIcon'
@@ -41,7 +43,9 @@ const severityToIcon = {
   info: StatusOkIcon,
 }
 
-function AlertRef({ children, severity = 'info', title = '', onClose, ...props }: AlertProps, ref: Ref<any>) {
+function AlertRef({
+  children, severity = 'info', title = '', onClose, ...props
+}: AlertProps, ref: Ref<any>) {
   const AlertIcon = severityToIcon[severity] || StatusOkIcon
   const color = severityToColor[severity] || 'primary'
 

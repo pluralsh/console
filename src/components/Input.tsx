@@ -13,8 +13,11 @@ const prefixSuffixIconStyle = {
   backgroundColor: 'fill-two',
 }
 
-export default function Input({ startIcon, endIcon, suffix, prefix, ...props } : InputProps) {
+export default function Input({
+  startIcon, endIcon, suffix, prefix, ...props
+} : InputProps) {
   let themeExtension:any = {}
+
   if (suffix) {
     themeExtension = mergeTheme(themeExtension, {
       Input: {
@@ -31,7 +34,7 @@ export default function Input({ startIcon, endIcon, suffix, prefix, ...props } :
       },
     })
   }
-    
+
   return (
     <ExtendTheme theme={themeExtension}>
       <HonorableInput
