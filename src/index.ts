@@ -132,7 +132,12 @@ export { default as RepositoryCard } from './components/RepositoryCard'
 export { default as Select } from './components/Select'
 export { default as Stepper } from './components/Stepper'
 export { default as Tab } from './components/Tab'
-export { default as Tag } from './components/Tag'
+export {
+  TabList,
+  TabListItem,
+  TabListStateProps,
+  TabPanel,
+} from './components/TabList'
 export { default as TipCarousel } from './components/TipCarousel'
 export { default as Token } from './components/Token'
 export { default as UserCard } from './components/UserCard'
