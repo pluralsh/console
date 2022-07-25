@@ -139,7 +139,6 @@ export {
   TabListStateProps,
   TabPanel,
 } from './components/TabList'
-export { default as Tag } from './components/Tag'
 export { default as TipCarousel } from './components/TipCarousel'
 export { default as Token } from './components/Token'
 export { default as UserCard } from './components/UserCard'
