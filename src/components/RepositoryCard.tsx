@@ -8,6 +8,7 @@ import Chip from './Chip'
 import PadlockLockedIcon from './icons/PadlockLockedIcon'
 import VerifiedIcon from './icons/VerifiedIcon'
 import IconFrame from './IconFrame'
+import Card from './Card'
 
 type RepositoryCardProps = DivProps & {
   title?: string
@@ -53,19 +54,13 @@ function RepositoryCardRef({
 }: RepositoryCardProps,
 ref: Ref<any>) {
   return (
-    <Flex
+    <Card
       ref={ref}
-      direction="column"
+      clickable
+      flexDirection="column"
       padding="large"
-      borderRadius="large"
-      border="1px solid border"
-      backgroundColor="fill-one"
-      cursor="pointer"
       width={sizeToWidth[size]}
       maxWidth={sizeToWidth[size]}
-      _hover={{
-        backgroundColor: 'fill-one-hover',
-      }}
       {...props}
     >
       <Flex align="center">
@@ -206,7 +201,7 @@ ref: Ref<any>) {
           )}
         </>
       )}
-    </Flex>
+    </Card>
   )
 }
 

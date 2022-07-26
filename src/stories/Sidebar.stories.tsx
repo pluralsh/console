@@ -18,7 +18,7 @@ export default {
   component: Sidebar,
 }
 
-function Template(args: any) {
+function Template() {
   return (
     <Box
       width="800px"

@@ -1,16 +1,17 @@
 import { ReactElement, Ref, forwardRef } from 'react'
 import {
-  Flex, FlexProps, P, Spinner,
+  FlexProps, P, Spinner,
 } from 'honorable'
 import PropTypes from 'prop-types'
+
+import Card, { CardProps } from './Card'
 
 type ChipProps = FlexProps & {
   size?: 'small' | 'medium' | 'large' | string
   severity?: 'neutral' | 'info' | 'success' | 'warning' | 'error' | 'critical' | string
-  hue?: 'default' | 'lighter' | 'lightest' | string
   icon?: ReactElement,
   loading?: boolean
-}
+} & CardProps
 
 const propTypes = {
   size: PropTypes.oneOf(['small', 'medium', 'large']),
@@ -35,18 +36,6 @@ const sizeToHeight: { [key in 'small' | 'medium' | 'large']: number } = {
   large: 32,
 }
 
-const hueToColor: { [key in 'default' | 'lighter' | 'lightest']: string } = {
-  default: 'fill-one',
-  lighter: 'fill-two',
-  lightest: 'fill-three',
-}
-
-const hueToBorderColor: { [key in 'default' | 'lighter' | 'lightest']: string } = {
-  default: 'border',
-  lighter: 'border-fill-two',
-  lightest: 'border-input',
-}
-
 function ChipRef({
   children,
   size = 'medium',
@@ -59,16 +48,14 @@ function ChipRef({
   const col = severityToColor[severity] || 'text-light'
 
   return (
-    <Flex
+    <Card
       ref={ref}
+      cornerSize="medium"
+      hue={hue}
       paddingVertical={size === 'large' ? '6px' : 'xxxsmall'}
       paddingHorizontal={size === 'small' ? 'xsmall' : 'small'}
-      align="center"
+      alignItems="center"
       display="inline-flex"
-      backgroundColor={hueToColor[hue]}
-      borderRadius="medium"
-      border="1px solid border"
-      borderColor={hueToBorderColor[hue]}
       maxHeight={sizeToHeight[size]}
       {...props}
     >
@@ -96,7 +83,7 @@ function ChipRef({
       >
         {children}
       </P>
-    </Flex>
+    </Card>
   )
 }
 
