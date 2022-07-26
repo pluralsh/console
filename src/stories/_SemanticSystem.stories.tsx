@@ -9,7 +9,7 @@ export default {
   component: null,
 }
 
-function Template() {
+function Template({ exampleText }: { exampleText?: string }) {
   return (
     <>
       <Divider
@@ -36,7 +36,7 @@ function Template() {
         text="Typography"
         marginVertical="xxlarge"
       />
-      <Typography />
+      <Typography exampleText={exampleText} />
     </>
   )
 }
@@ -171,115 +171,122 @@ function Spacing() {
   )
 }
 
-function Typography() {
+function Typography({
+  exampleText = 'Lorem ipsum dolor sit amet',
+}: {
+  exampleText: string
+}) {
   return (
     <>
       <Text
         h1
         marginBottom="large"
       >
-        H1 - Lorem ipsum dolor sit amet
+        H1 - {exampleText}
       </Text>
       <Text
         h2
         marginBottom="large"
       >
-        H2 - Lorem ipsum dolor sit amet
+        H2 - {exampleText}
       </Text>
       <Text
         h3
         marginBottom="large"
       >
-        H3 - Lorem ipsum dolor sit amet
+        H3 - {exampleText}
       </Text>
       <Text
         h4
         marginBottom="large"
       >
-        H4 - Lorem ipsum dolor sit amet
+        H4 - {exampleText}
       </Text>
       <Text
         title1
         marginBottom="large"
       >
-        Title 1 - Lorem ipsum dolor sit amet
+        Title 1 - {exampleText}
       </Text>
       <Text
         title2
         marginBottom="large"
       >
-        Title 2 - Lorem ipsum dolor sit amet
+        Title 2 - {exampleText}
       </Text>
       <Text
         subtitle1
         marginBottom="large"
       >
-        Subtitle 1 - Lorem ipsum dolor sit amet
+        Subtitle 1 - {exampleText}
       </Text>
       <Text
         subtitle2
         marginBottom="large"
       >
-        Subtitle 2 - Lorem ipsum dolor sit amet
+        Subtitle 2 - {exampleText}
       </Text>
       <Text
         body1
         marginBottom="medium"
         bold
       >
-        Body 1 (Bold)  - Lorem ipsum dolor sit amet
+        Body 1 (Bold) - {exampleText}
       </Text>
       <Text
         body1
         marginBottom="large"
       >
-        Body 1 - Lorem ipsum dolor sit amet
+        Body 1 - {exampleText}
       </Text>
       <Text
         body2
         marginBottom="medium"
         bold
       >
-        Body 2 (Bold) - Lorem ipsum dolor sit amet
+        Body 2 (Bold) - {exampleText}
       </Text>
       <Text
         body2
         marginBottom="large"
       >
-        Body 2 - Lorem ipsum dolor sit amet
+        Body 2 - {exampleText}
       </Text>
       <Text
         caption
         marginBottom="large"
       >
-        Caption - Lorem ipsum dolor sit amet
+        Caption - {exampleText}
       </Text>
       <Text
         badge-label
         marginBottom="large"
       >
-        Badge Label - Lorem ipsum dolor sit amet
+        Badge Label - {exampleText}
       </Text>
       <Text
         button-large
         marginBottom="large"
       >
-        Large Button - Lorem ipsum dolor sit amet
+        Large Button - {exampleText}
       </Text>
       <Text
         button-small
         marginBottom="large"
       >
-        Small Button - Lorem ipsum dolor sit amet
+        Small Button - {exampleText}
       </Text>
       <Text
         overline
         marginBottom="large"
       >
-        Overline - Lorem ipsum dolor sit amet
+        Overline - {exampleText}
       </Text>
     </>
   )
 }
 
 export const SemanticSystem = Template.bind({})
+SemanticSystem.args = {
+  exampleText: 'Lorem ipsum dolor sit amet',
+}

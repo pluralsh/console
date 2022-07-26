@@ -369,10 +369,10 @@ export default mergeTheme(defaultTheme, {
     },
     ({ overline }: any) => overline && {
       fontFamily: fontFamilies.semi,
-      fontSize: 14,
-      lineHeight: '24px',
+      fontSize: 12,
+      lineHeight: '16px',
       fontWeight: 400,
-      letterSpacing: '1px',
+      letterSpacing: '1.25px',
       textTransform: 'uppercase',
     },
     ({ truncate }: any) => truncate && {
