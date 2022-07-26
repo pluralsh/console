@@ -6,6 +6,7 @@ import BundleIcon from '../components/icons/BundleIcon'
 import CameraIcon from '../components/icons/CameraIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'
 import CertificateIcon from '../components/icons/CertificateIcon'
+import CheckedShieldIcon from '../components/icons/CheckedShieldIcon'
 import CheckIcon from '../components/icons/CheckIcon'
 import ChecklistIcon from '../components/icons/ChecklistIcon'
 import ChronjobIcon from '../components/icons/ChronjobIcon'
@@ -112,6 +113,7 @@ const icons = {
   CameraIcon,
   CaretDownIcon,
   CertificateIcon,
+  CheckedShieldIcon,
   CheckIcon,
   ChecklistIcon,
   ChronjobIcon,
@@ -217,11 +219,12 @@ export default {
 
 function Template(args: any) {
   return (
-    <div style={{
-      display: 'flex',
-      flexWrap: 'wrap',
-      maxWidth: '100%',
-    }}
+    <div
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        maxWidth: '100%',
+      }}
     >
       {Object.entries(icons).map(([name, Icon]) => (
         <div
@@ -247,8 +250,7 @@ function Template(args: any) {
 }
 
 export const Default = Template.bind({})
-Default.args = {
-}
+Default.args = {}
 
 export const Xlarge = Template.bind({})
 Xlarge.args = {

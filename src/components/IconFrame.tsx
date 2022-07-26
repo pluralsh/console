@@ -97,3 +97,4 @@ const IconFrame = forwardRef(IconFrameRef)
 IconFrame.propTypes = propTypes
 
 export default IconFrame
+export { IconFrameProps }
