@@ -3,7 +3,6 @@ export {
   Button,
   Menu,
   MenuItem,
-  Modal,
   Switch,
 } from 'honorable'
 
@@ -156,6 +155,7 @@ export { default as FormTitle } from './components/FormTitle'
 export { default as Sidebar } from './components/Sidebar'
 export { default as SidebarSection } from './components/SidebarSection'
 export { default as SidebarItem } from './components/SidebarItem'
+export { default as Modal } from './components/Modal'
 // Hooks
 export { default as usePrevious } from './hooks/usePrevious'
 // Theme
