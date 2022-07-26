@@ -1,4 +1,4 @@
-import { A, Button, Flex } from 'honorable'
+import { A, Flex, H1 } from 'honorable'
 
 import Banner from '../components/Banner'
 
@@ -12,78 +12,104 @@ function Template(args: any) {
     <Flex
       direction="column"
       align="flex-start"
+      gap="medium"
     >
-      <Banner {...args}>
-        File successfully updated.
-      </Banner>
       <Banner
-        {...args}
-        marginTop="medium"
-      >
-        File successfully updated.
-        <A
-          color="action-link-inline"
-          marginLeft="medium"
-        >
-          Action
-        </A>
-      </Banner>
-      <Banner
-        {...args}
-        marginTop="medium"
-      >
-        <Flex
-          direction="column"
-          align="flex-start"
-        >
-          File successfully updated.
-          <Button
-            small
-            secondary
-            marginTop="xsmall"
+        heading="You have an error."
+        severity="error"
+        action={(
+          <A
+            href="#"
+            onClick={e => e.preventDefault()}
           >
-            Action
-          </Button>
-        </Flex>
-      </Banner>
-      <Banner
+            Fix it
+          </A>
+        )}
         {...args}
-        marginTop="medium"
-        severity="error"
-      >
-        There was an error uploading your file. Please try again.
-      </Banner>
+      />
       <Banner
+        heading="Here’s some info."
+        severity="info"
         {...args}
-        marginTop="medium"
-        severity="error"
-      >
-        There was an error uploading your file. Please try again.
-        <A
-          color="action-link-inline"
-          marginLeft="medium"
-        >
-          Action
-        </A>
-      </Banner>
+      />
       <Banner
-        {...args}
-        marginTop="medium"
-        severity="error"
-      >
-        <Flex
-          direction="column"
-          align="flex-start"
-        >
-          There was an error uploading your file. Please try again.
-          <Button
-            small
-            secondary
-            marginTop="xsmall"
+        heading="Success!"
+        severity="success"
+        action={(
+          <A
+            href="#"
+            onClick={e => e.preventDefault()}
           >
-            Action
-          </Button>
-        </Flex>
+            Next
+          </A>
+        )}
+        {...args}
+      />
+      <Banner
+        heading="You have an error"
+        severity="error"
+        {...args}
+      >
+        {
+          'Your {cluster name} had three incidents while attempting to upgrade. To fix them, visit '
+        }
+        <A
+          inline
+          href="#"
+          onClick={e => e.preventDefault()}
+        >
+          incidents
+        </A>
+        .
+      </Banner>
+      <Banner
+        heading="Here's some info"
+        severity="info"
+        {...args}
+      >
+        {
+          'Your {cluster name} had three incidents while attempting to upgrade. To fix them, visit '
+        }
+        <A
+          inline
+          href="#"
+          onClick={e => e.preventDefault()}
+        >
+          incidents
+        </A>
+        .
+      </Banner>
+      <Banner
+        heading="Success!"
+        severity="success"
+        {...args}
+      >
+        {
+          'Your {cluster name} had three incidents while attempting to upgrade. To fix them, visit '
+        }
+        <A
+          inline
+          href="#"
+          onClick={e => e.preventDefault()}
+        >
+          incidents
+        </A>
+        .
+      </Banner>
+
+      <H1
+        marginTop="medium"
+        subtitle2
+      >
+        Backwards compatibility only
+      </H1>
+      <Banner
+        {...args}
+        severity="error"
+      >
+        You really shouldn't have content here without a heading, but including
+        to make sure old usage still looks good.{' '}
+        <A color="action-link-inline">Now go do something</A>.
       </Banner>
     </Flex>
   )
@@ -91,5 +117,4 @@ function Template(args: any) {
 
 export const Default = Template.bind({})
 
-Default.args = {
-}
+Default.args = {}
