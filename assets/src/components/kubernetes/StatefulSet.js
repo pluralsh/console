@@ -40,8 +40,8 @@ function Status({ status: { currentReplicas, updatedReplicas, readyReplicas, rep
           justify="center"
         >
           <Pie 
-            success={updatedReplicas} 
-            progress={replicas - updatedReplicas} 
+            success={readyReplicas} 
+            progress={replicas - readyReplicas} 
             error={0}
           />
         </Box>
