@@ -1,13 +1,15 @@
 import ArrowLeftIcon from '../components/icons/ArrowLeftIcon'
 import ArrowTopRightIcon from '../components/icons/ArrowTopRightIcon'
+import BellIcon from '../components/icons/BellIcon'
 import BotIcon from '../components/icons/BotIcon'
 import BrowserIcon from '../components/icons/BrowserIcon'
 import BundleIcon from '../components/icons/BundleIcon'
 import CameraIcon from '../components/icons/CameraIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'
 import CertificateIcon from '../components/icons/CertificateIcon'
-import CheckedShieldIcon from '../components/icons/CheckedShieldIcon'
 import CheckIcon from '../components/icons/CheckIcon'
+import CheckOutlineIcon from '../components/icons/CheckOutlineIcon'
+import CheckedShieldIcon from '../components/icons/CheckedShieldIcon'
 import ChecklistIcon from '../components/icons/ChecklistIcon'
 import ChronjobIcon from '../components/icons/ChronjobIcon'
 import CloseIcon from '../components/icons/CloseIcon'
@@ -90,6 +92,7 @@ import SendMessageIcon from '../components/icons/SendMessageIcon'
 import ServersIcon from '../components/icons/ServersIcon'
 import ShipIcon from '../components/icons/ShipIcon'
 import SirenIcon from '../components/icons/SirenIcon'
+import SlackLogoIcon from '../components/icons/SlackLogoIcon'
 import SortAscIcon from '../components/icons/SortAscIcon'
 import SortDescIcon from '../components/icons/SortDescIcon'
 import StatusIpIcon from '../components/icons/StatusIpIcon'
@@ -101,20 +104,23 @@ import TerminalIcon from '../components/icons/TerminalIcon'
 import TrashCanIcon from '../components/icons/TrashCanIcon'
 import TwitterIcon from '../components/icons/TwitterIcon'
 import UpdatesIcon from '../components/icons/UpdatesIcon'
+import VerifiedIcon from '../components/icons/VerifiedIcon'
 import VolumesIcon from '../components/icons/VolumesIcon'
 import WebhooksIcon from '../components/icons/WebhooksIcon'
 
 const icons = {
   ArrowLeftIcon,
   ArrowTopRightIcon,
+  BellIcon,
   BotIcon,
   BrowserIcon,
   BundleIcon,
   CameraIcon,
   CaretDownIcon,
   CertificateIcon,
-  CheckedShieldIcon,
   CheckIcon,
+  CheckOutlineIcon,
+  CheckedShieldIcon,
   ChecklistIcon,
   ChronjobIcon,
   CloseIcon,
@@ -197,6 +203,7 @@ const icons = {
   ServersIcon,
   ShipIcon,
   SirenIcon,
+  SlackLogoIcon,
   SortAscIcon,
   SortDescIcon,
   StatusIpIcon,
@@ -208,6 +215,7 @@ const icons = {
   TrashCanIcon,
   TwitterIcon,
   UpdatesIcon,
+  VerifiedIcon,
   VolumesIcon,
   WebhooksIcon,
 }
