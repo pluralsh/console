@@ -67,7 +67,7 @@ function Spec({ spec: { clusterIp, type, ports } }) {
           flex={false}
           fill="horizontal"
         >
-          {ports.map(port => (
+          {(ports || []).map(port => (
             <PortRow
               key={port.name}
               port={port}
