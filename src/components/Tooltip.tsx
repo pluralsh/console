@@ -17,7 +17,7 @@ import {
   useInteractions,
   useRole,
 } from '@floating-ui/react-dom-interactions'
-import mergeRefs from 'react-merge-refs'
+import { mergeRefs } from 'react-merge-refs'
 import { Div, DivProps } from 'honorable'
 import { CSSTransition } from 'react-transition-group'
 
@@ -65,7 +65,6 @@ const Tip = styled(Div)`
   &.exit-active {
     transition: transform 0.05s ease-in, opacity 0.05s linear;
   }
-  transform-origin: ${p => p.arbitraryProp};
 `
 
 const TooltipArrow = createIcon(({ size, color }) => (
@@ -186,7 +185,6 @@ function Tooltip({
       >
         <Tip
           ref={floating}
-          className="x"
           borderRadius="medium"
           paddingVertical="xsmall"
           paddingHorizontal="small"
