@@ -1,3 +1,5 @@
+import { Flex } from 'honorable'
+
 import { Codeline } from '..'
 
 export default {
@@ -7,7 +9,17 @@ export default {
 
 function Template(args: any) {
   return (
-    <Codeline {...args} />
+    <Flex
+      direction="column"
+      gap="medium"
+    >
+      <Codeline {...args} />
+      <Codeline
+        {...args}
+        maxWidth="200px"
+      />
+
+    </Flex>
   )
 }
 

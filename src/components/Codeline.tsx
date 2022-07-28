@@ -1,5 +1,9 @@
-import { Ref, forwardRef, useState } from 'react'
+import {
+  Ref, forwardRef, useEffect, useState,
+} from 'react'
 import { Div, Flex, FlexProps } from 'honorable'
+
+import Tooltip from '../components/Tooltip'
 
 import CopyIcon from './icons/CopyIcon'
 
@@ -10,71 +14,85 @@ const propTypes = {}
 function CodelineRef({ children, ...props }: CodelineProps, ref: Ref<any>) {
   const [copied, setCopied] = useState(false)
 
+  useEffect(() => {
+    if (copied) {
+      const timeout = setTimeout(() => {
+        setCopied(false)
+      }, 1000)
+
+      return () => clearTimeout(timeout)
+    }
+  }, [copied])
+
   function handleCopy() {
     window.navigator.clipboard.writeText(children as string).then(() => {
       setCopied(true)
-
-      setTimeout(() => {
-        setCopied(false)
-      }, 1250)
     })
   }
 
   return (
     <Flex
       ref={ref}
-      border="1px solid border-fill-two"
-      backgroundColor="fill-one"
+      border="1px solid border-input"
       borderRadius="medium"
       {...props}
     >
       <Flex
         align="center"
-        paddingVertical="small"
+        paddingVertical="xsmall"
         paddingHorizontal="medium"
         overflowX="auto"
         flexGrow={1}
-        fontFamily="Monument Semi-Mono, monospace"
-        fontSize={14}
-        lineHeight="24px"
-        color="text-light"
         position="relative"
       >
         <Div
+          body2
+          fontFamily="Monument Semi-Mono, monospace"
+          color="text-light"
           flexGrow={1}
           whiteSpace="pre"
-          tabSize={4}
+          textOverflow="ellipsis"
+          overflow="hidden"
         >
           {children}
         </Div>
-        {copied && (
-          <Div
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            bottom={0}
-            backgroundColor="fill-one"
-            paddingVertical="small"
-            paddingHorizontal="medium"
-          >
-            Copied!
-          </Div>
-        )}
       </Flex>
       <Flex
-        align="center"
-        justify="center"
-        paddingVertical="small"
-        paddingHorizontal="medium"
-        backgroundColor="fill-two"
-        borderLeft="1px solid border-fill-two"
-        cursor="pointer"
-        _hover={{ backgroundColor: 'fill-two-hover' }}
-        _active={{ backgroundColor: 'fill-two-selected' }}
-        onClick={handleCopy}
+        width={38}
+        height={38}
+        alignItems="center"
+        justifyContent="center"
+        flexShrink={0}
       >
-        <CopyIcon />
+        <Tooltip
+          offset={8}
+          label="Copied!"
+          color="text-success-light"
+          placement="top"
+          displayOn="manual"
+          dismissable
+          onOpenChange={open => {
+            if (!open && copied) setCopied(false)
+          }}
+          manualOpen={copied}
+        >
+          <Flex
+            alignItems="center"
+            justifyContent="center"
+            width={32}
+            height={32}
+            cursor="pointer"
+            borderRadius="medium"
+            _hover={{ backgroundColor: 'fill-zero-hover' }}
+            _active={{ backgroundColor: 'fill-zero-selected' }}
+            onClick={handleCopy}
+          >
+            <CopyIcon
+              color="text-light"
+              {...{ '& svg': { display: 'block' } }}
+            />
+          </Flex>
+        </Tooltip>
       </Flex>
     </Flex>
   )
