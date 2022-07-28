@@ -41,7 +41,7 @@ defmodule Console.MixProject do
       {:horde, "~> 0.8"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix, "~> 1.4.9"},
-      {:openid_connect, "~> 0.2.2"},
+      {:openid_connect, "~> 0.2.2", git: "https://github.com/pluralsh/openid_connect", branch: "master"},
       {:phoenix_pubsub, "~> 1.1"},
       {:phoenix_ecto, "~>4.0"},
       {:ecto_sql, "~> 3.4.5"},
