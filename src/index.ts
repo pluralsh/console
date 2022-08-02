@@ -57,6 +57,7 @@ export { default as HamburgerMenuCollapsedIcon } from './components/icons/Hambur
 export { default as HamburgerMenuIcon } from './components/icons/HamburgerMenuIcon'
 export { default as HistoryIcon } from './components/icons/HistoryIcon'
 export { default as IdIcon } from './components/icons/IdIcon'
+export { default as InfoIcon } from './components/icons/InfoIcon'
 export { default as InstallIcon } from './components/icons/InstallIcon'
 export { default as InstalledIcon } from './components/icons/InstalledIcon'
 export { default as InvoicesIcon } from './components/icons/InvoicesIcon'
