@@ -48,6 +48,7 @@ import HamburgerMenuCollapsedIcon from '../components/icons/HamburgerMenuCollaps
 import HamburgerMenuIcon from '../components/icons/HamburgerMenuIcon'
 import HistoryIcon from '../components/icons/HistoryIcon'
 import IdIcon from '../components/icons/IdIcon'
+import InfoIcon from '../components/icons/InfoIcon'
 import InstallIcon from '../components/icons/InstallIcon'
 import InstalledIcon from '../components/icons/InstalledIcon'
 import InvoicesIcon from '../components/icons/InvoicesIcon'
@@ -159,6 +160,7 @@ const icons = {
   HamburgerMenuIcon,
   HistoryIcon,
   IdIcon,
+  InfoIcon,
   InstallIcon,
   InstalledIcon,
   InvoicesIcon,
