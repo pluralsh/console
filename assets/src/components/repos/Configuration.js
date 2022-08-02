@@ -399,6 +399,10 @@ function RecipeConfiguration({ recipe, context: ctx, setOpen }) {
     })
   ), [setContext, context, repository, ind])
 
+  useEffect(() => {
+    if (!(repository.name in context)) setContext({ ...context, [repository.name]: {} })
+  }, [setContext, repository, context])
+
   const next = useCallback(() => {
     if (!hasNext) return mutation()
     const nextInd = findIndex(ind + 1, context, sections)
