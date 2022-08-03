@@ -2,7 +2,7 @@
 
 GCP_PROJECT ?= pluralsh
 APP_NAME ?= console
-APP_VSN ?= `cat VERSION`
+APP_VSN ?= `git describe`
 BUILD ?= `git rev-parse --short HEAD`
 DKR_HOST ?= dkr.plural.sh
 PLRL_WWW ?= ../plural/www/src
@@ -14,7 +14,7 @@ help:
 
 build: ## Build the Docker image
 	docker build --build-arg APP_NAME=$(APP_NAME) \
-		--build-arg APP_VSN=$(APP_VSN) --build-arg GIT_COMMIT=$(GIT_COMMIT) \
+		--build-arg GIT_COMMIT=$(GIT_COMMIT) \
 		-t $(APP_NAME):$(APP_VSN) \
 		-t $(APP_NAME):latest \
 		-t gcr.io/$(GCP_PROJECT)/$(APP_NAME):$(APP_VSN) \
