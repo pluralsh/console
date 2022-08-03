@@ -72,6 +72,7 @@ function BuildTimer({ insertedAt, completedAt, status }) {
   return (
     <OptionContainer>
       <Box
+        id="build-status"
         flex={false}
         pad="xsmall"
         background={color}
