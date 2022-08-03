@@ -15,11 +15,11 @@ context('Tests', () => {
       aliasMutation(req, 'Callback')
     })
   })
-  describe('bounce the first installed app', () => {
-    it('log in to the console and bounce application', () => {
+  describe('deploy the first installed app', () => {
+    it('log in to the console and deploy application', () => {
       LoginPage.visit();
       LoginPage.login();
-      BuildsPage.bounce();
+      BuildsPage.deploy();
     })
   });
 })

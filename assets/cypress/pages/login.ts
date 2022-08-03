@@ -18,6 +18,7 @@ export class LoginPage extends BasePage {
     this._passwordInput().type(password);
     this._continueButton().click();
     this._allowButton().click();
+    cy.wait('@gqlBuildsQuery')
   }
 
   private static _oidcLoginButton(): Cypress.Chainable {
