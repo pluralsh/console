@@ -1,6 +1,23 @@
 name: CI
 on: pull_request
 jobs:
+  version:
+    name: Check version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.15.0
+      - uses: flood-io/is-published-on-npm@v1
+        id: check
+      - run: |
+          echo "Local version from package.json is ${{ steps.check.outputs.version }}"
+          echo "Published version from npm registry is $(npm view . version)"
+      - if: ${{ steps.check.outputs.published == 'true' }}
+        run: |
+          echo "This version is already published, update local version to be bigger than published one"
+          exit 1
   build:
     name: Build
     runs-on: ubuntu-latest

@@ -12,8 +12,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16.15.0
-      - run: |
-          yarn install --immutable
+      - run: yarn --immutable
       - run: yarn build:storybook
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -32,13 +31,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16.15.0
-      - run: |
-          yarn install --immutable
-      - run: git config --global user.email "dherault@gmail.com" && git config --global user.name "David Hérault"
-      # TODO: include tests here
-      - run: npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: yarn --immutable
       - run: yarn clean && yarn build
-      - run: npm version minor && npm publish
-      - run: git pull && git push
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
