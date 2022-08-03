@@ -1,8 +1,6 @@
-import { ReactElement, Ref, forwardRef } from 'react'
-import {
-  FlexProps, P, Spinner,
-} from 'honorable'
+import { Flex, FlexProps, Spinner } from 'honorable'
 import PropTypes from 'prop-types'
+import { ReactElement, Ref, forwardRef } from 'react'
 
 import Card, { CardProps } from './Card'
 
@@ -10,7 +8,7 @@ type ChipProps = FlexProps & {
   size?: 'small' | 'medium' | 'large' | string
   severity?: 'neutral' | 'info' | 'success' | 'warning' | 'error' | 'critical' | string
   icon?: ReactElement,
-  loading?: boolean
+  loading?: boolean,
 } & CardProps
 
 const propTypes = {
@@ -73,16 +71,17 @@ function ChipRef({
           color={col}
         />
       )}
-      <P
+      <Flex
         body2
         color={col}
         fontSize={size === 'small' ? 12 : 14}
         fontWeight={size === 'small' ? 400 : 600}
         lineHeight={size === 'small' ? '16px' : '20px'}
         height={size === 'small' ? '16px' : '20px'}
+        gap={4}
       >
         {children}
-      </P>
+      </Flex>
     </Card>
   )
 }

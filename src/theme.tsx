@@ -169,6 +169,8 @@ export default mergeTheme(defaultTheme, {
     'fill-two-hover': grey[775],
     'fill-two-selected': grey[725],
     'fill-three': grey[750],
+    'fill-three-hover': grey[725],
+    'fill-three-selected': grey[675],
     // Action,
     'action-primary': blue[400],
     'action-primary-hover': blue[350],

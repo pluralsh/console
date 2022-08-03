@@ -30,7 +30,7 @@ const hueToHoverBGColor: {
 } = {
   default: 'fill-one-hover',
   lighter: 'fill-two-hover',
-  lightest: 'fill-three',
+  lightest: 'fill-three-hover',
 }
 
 const hueToSelectedBGColor: {
@@ -38,7 +38,7 @@ const hueToSelectedBGColor: {
 } = {
   default: 'fill-one-selected',
   lighter: 'fill-two-selected',
-  lightest: 'fill-three',
+  lightest: 'fill-three-selected',
 }
 
 const cornerSizeToBorderRadius: {
