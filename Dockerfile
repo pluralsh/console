@@ -8,7 +8,7 @@ FROM bitwalker/alpine-elixir:1.11.4 AS builder
 
 # The following are build arguments used to change variable parts of the image.
 # The name of your application/release (required)
-ARG APP_NAME
+ARG APP_NAME=console
 # The environment to build with
 ARG MIX_ENV=prod
 # Set this to true if this release is not a Phoenix app
