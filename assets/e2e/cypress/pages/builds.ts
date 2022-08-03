@@ -17,13 +17,13 @@ export class BuildsPage extends BasePage {
     cy.wait('@gqlBuildQuery')
     
     // wait until the deployment is done running
-    cy.get('div > .StyledBox-sc-13pk1d4-0.eQStGi').children({ timeout: 120000 }).should('not.have.css', 'background-color', 'rgb(0, 123, 255)')
+    cy.get('[id=build-status]', { timeout: 120000 }).should('not.have.css', 'background-color', 'rgb(0, 123, 255)')
 
     // ensure the deployment hasn't failed
-    cy.get('pre').contains('Failed').should('not.exist');
+    cy.get('[id=build-status]').contains('Failed').should('not.exist');
 
     // ensure the deployment was successful
-    cy.get('pre').contains('Passed').should('exist');
+    cy.get('[id=build-status]').contains('Passed').should('exist');
   }
 
   static bounce(): void {
@@ -39,13 +39,13 @@ export class BuildsPage extends BasePage {
     cy.wait('@gqlBuildQuery')
     
     // wait until the deployment is done running
-    cy.get('div > .StyledBox-sc-13pk1d4-0.eQStGi').children({ timeout: 120000 }).should('not.have.css', 'background-color', 'rgb(0, 123, 255)')
+    cy.get('[id=build-status]', { timeout: 120000 }).should('not.have.css', 'background-color', 'rgb(0, 123, 255)')
 
     // ensure the deployment hasn't failed
-    cy.get('pre').contains('Failed').should('not.exist');
+    cy.get('[id=build-status]').contains('Failed').should('not.exist');
 
     // ensure the deployment was successful
-    cy.get('pre').contains('Passed').should('exist');
+    cy.get('[id=build-status]').contains('Passed').should('exist');
   }
 
   private static _bounceButton(): Cypress.Chainable {
