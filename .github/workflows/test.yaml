@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: docker build --build-arg GIT_COMMIT=$GITHUB_SHA
+      - run: docker build --build-arg GIT_COMMIT=$GITHUB_SHA .
   test:
     name: Test
     runs-on: ubuntu-latest
