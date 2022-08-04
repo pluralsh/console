@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - 'v*.*.*'
     paths:
       - 'assets/e2e/**'
       - '.github/workflows/publish-cypress.yaml'
