@@ -67,5 +67,6 @@ jobs:
         context: "assets/e2e/"
         file: "assets/e2e/cypress.Dockerfile"
         push: true
+        platforms: linux/amd64,linux/arm64
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
