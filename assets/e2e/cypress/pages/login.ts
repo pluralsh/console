@@ -9,7 +9,7 @@ export class LoginPage extends BasePage {
 
   static visit(): void {
     cy.visit(this._url);
-    cy.wait(30000)
+    cy.wait(120000)
   }
 
   static login(email: string = Config.EMAIL, password: string = Config.PASSWORD): void {
