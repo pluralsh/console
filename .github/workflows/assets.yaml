@@ -20,6 +20,7 @@ jobs:
     env:
       CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL }}
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+      BASE_URL: https://console.gcp.onplural.sh/
     defaults:
       run:
         working-directory: assets
@@ -42,7 +43,7 @@ jobs:
         uses: trymbill/cypress-slack-video-upload-action@v1.3.0
         with:
           token: ${{ secrets.SLACK_CYPRESS_TOKEN }}
-          workdir: assets/cypress
+          workdir: assets/e2e/cypress
           channels: cypress-artifacts
           message-text: "See the attached videos and screenshots for more information."
 

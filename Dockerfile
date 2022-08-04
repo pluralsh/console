@@ -8,9 +8,7 @@ FROM bitwalker/alpine-elixir:1.11.4 AS builder
 
 # The following are build arguments used to change variable parts of the image.
 # The name of your application/release (required)
-ARG APP_NAME
-# The version of the application we are building (required)
-ARG APP_VSN
+ARG APP_NAME=console
 # The environment to build with
 ARG MIX_ENV=prod
 # Set this to true if this release is not a Phoenix app
@@ -18,7 +16,6 @@ ARG SKIP_PHOENIX=false
 
 ENV SKIP_PHOENIX=${SKIP_PHOENIX} \
     APP_NAME=${APP_NAME} \
-    APP_VSN=${APP_VSN} \
     MIX_ENV=${MIX_ENV}
 
 COPY --from=node /usr/lib /usr/lib
@@ -43,6 +40,9 @@ RUN apk update --allow-untrusted && \
 # This copies our app source code into the build container
 COPY . .
 
+# needed so that we can get the app version from the git tag
+RUN git config --global --add safe.directory '/opt/app'
+
 RUN mix do deps.get, compile
 RUN ls -al
 
@@ -61,7 +61,7 @@ fi
 RUN \
   mkdir -p /opt/built && \
   mix distillery.release --name ${APP_NAME} && \
-  cp _build/${MIX_ENV}/rel/${APP_NAME}/releases/${APP_VSN}/${APP_NAME}.tar.gz /opt/built && \
+  cp _build/${MIX_ENV}/rel/${APP_NAME}/releases/*/${APP_NAME}.tar.gz /opt/built && \
   cd /opt/built && \
   tar -xzf ${APP_NAME}.tar.gz && \
   rm ${APP_NAME}.tar.gz
@@ -111,7 +111,7 @@ RUN apk --no-cache add \
         gnupg
 
 # The name of your application/release (required)
-ARG APP_NAME
+ARG APP_NAME=console
 ARG GIT_COMMIT
 ARG KUBECTL_VERSION='1.16.14'
 ADD https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl /usr/local/bin/kubectl

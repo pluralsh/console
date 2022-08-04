@@ -12,8 +12,8 @@
     "fix": "yarn fix:js && yarn fix:css",
     "fix:js": "eslint ./src --fix",
     "fix:css": "stylelint src/**/*.css --fix",
-    "e2e:start": "concurrently -kill-others --success first \"yarn start\" \"wait-on https://localhost:3000 && npx cypress run\"",
-    "e2e:open": "concurrently -kill-others --success first \"yarn start\" \"wait-on https://localhost:3000 && npx cypress open\"",
+    "e2e:start": "concurrently -kill-others --success first \"yarn start\" \"wait-on https://localhost:3000 && cd e2e/ && npx cypress run\"",
+    "e2e:open": "concurrently -kill-others --success first \"yarn start\" \"wait-on https://localhost:3000 && cd e2e/ && npx cypress open\"",
     "graphql-codegen": "graphql-codegen --config codegen.yml"
   },
   "engines": {
@@ -131,7 +131,7 @@
     "babel-eslint": "10.1.0",
     "concurrently": "7.2.2",
     "customize-cra": "1.0.0",
-    "cypress": "10.3.0",
+    "cypress": "10.4.0",
     "eslint": "7.11.0",
     "eslint-config-pluralsh": "3.1.0",
     "eslint-plugin-import": "2.26.0",
@@ -150,7 +150,7 @@
       "\\.(css)$": "identity-obj-proxy"
     },
     "transformIgnorePatterns": [
-      "/node_modules/(?!(forge-core|d3-hierarchy|d3-selection|xterm-for-react|react-dnd|dnd-core|@react-dnd))"
+      "/node_modules/(?!(.*))"
     ]
   }
 }

@@ -7,7 +7,7 @@ export default defineConfig({
   videoUploadOnPasses: false,
   screenshotOnRunFailure: true,
   e2e: {
-    baseUrl: 'https://localhost:3000',
+    baseUrl: process.env.CYPRESS_BASE_URL || 'https://localhost:3000',
     chromeWebSecurity: false,
     supportFile: 'cypress/support/index.ts',
     experimentalSessionAndOrigin: true,
