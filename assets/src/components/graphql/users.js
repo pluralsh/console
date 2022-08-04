@@ -82,7 +82,7 @@ export const NotificationFragment = gql`
   }
 `
 export const ME_Q = gql`
-  query {
+  query Me{
     me {
       ...UserFragment
       boundRoles { ...RoleFragment }

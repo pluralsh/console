@@ -8,24 +8,17 @@ export class LoginPage extends BasePage {
   private static readonly _passwordInputSelector = `[name='Password']`
 
   static visit(): void {
-    cy.wait(120000)
     cy.visit(this._url);
-    cy.wait(120000)
+    cy.wait('@gqlMeQuery')
   }
 
   static login(email: string = Config.EMAIL, password: string = Config.PASSWORD): void {
     this._oidcLoginButton().click();
-    cy.wait(60000)
     this._emailInput().type(email);
-    cy.wait(60000)
     this._continueButton().click();
-    cy.wait(60000)
     this._passwordInput().type(password);
-    cy.wait(60000)
     this._continueButton().click();
-    cy.wait(60000)
     this._allowButton().click();
-    cy.wait(60000)
     cy.wait('@gqlBuildsQuery')
   }
 

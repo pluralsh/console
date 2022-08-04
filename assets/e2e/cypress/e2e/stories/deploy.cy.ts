@@ -9,6 +9,7 @@ context('Tests', () => {
       // Queries
       aliasQuery(req, 'Builds')
       aliasQuery(req, 'Build')
+      aliasQuery(req, 'Me')
 
       // Mutations
       aliasMutation(req, 'CreateBuild')
