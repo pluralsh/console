@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - 'assets/e2e/**'
+      - '.github/workflows/publish-cypress.yaml'
 jobs:
   publish:
     name: Build and push Console container
