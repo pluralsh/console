@@ -1,12 +1,14 @@
 import { mergeTheme } from 'honorable'
 import defaultTheme from 'honorable-theme-default'
+import { CSSObject } from 'styled-components'
+import chroma from 'chroma-js'
 
-const fontFamilies = {
+export const fontFamilies = {
   semi: '"Monument Semi-Mono", "Monument", "Inter", "Helvetica", "Arial", "sans-serif"',
   sans: '"Inter", "Helvetica", "Arial", "sans-serif"',
 }
 
-const grey = {
+export const grey = {
   950: '#0E1015',
   900: '#171A21',
   875: '#1B1F27',
@@ -27,7 +29,7 @@ const grey = {
   50: '#EBEFF0',
 }
 
-const blue = {
+export const blue = {
   950: '#00041A',
   900: '#000933',
   850: '#000B4D',
@@ -43,7 +45,7 @@ const blue = {
   50: '#F0F5FF',
 }
 
-const green = {
+export const green = {
   950: '#001409',
   900: '#00240F',
   850: '#023C1A',
@@ -58,7 +60,7 @@ const green = {
   50: '#F5FFF9',
 }
 
-const yellow = {
+export const yellow = {
   950: '#241700',
   900: '#3D2700',
   850: '#573B00',
@@ -73,7 +75,7 @@ const yellow = {
   50: '#FFFCF0',
 }
 
-const red = {
+export const red = {
   950: '#140000',
   900: '#240100',
   850: '#3D0100',
@@ -88,20 +90,138 @@ const red = {
   50: '#FFF7F5',
 }
 
-const borderRadiuses = {
+export const semanticColors = {
+  // Fill
+  'fill-zero': grey[900],
+  'fill-zero-hover': grey[850],
+  'fill-zero-selected': grey[825],
+  'fill-one': grey[850],
+  'fill-one-hover': grey[825],
+  'fill-one-selected': grey[775],
+  'fill-two': grey[800],
+  'fill-two-hover': grey[775],
+  'fill-two-selected': grey[725],
+  'fill-three': grey[750],
+  'fill-three-hover': grey[725],
+  'fill-three-selected': grey[675],
+  // Action
+  'action-primary': blue[400],
+  'action-primary-hover': blue[350],
+  'action-primary-disabled': grey[825],
+  'action-link-inactive': grey[200],
+  'action-link-active': grey[50],
+  'action-link-inline': blue[200],
+  'action-input-hover': `${chroma(grey[50]).alpha(0.96)}`,
+  // Border
+  border: grey[800],
+  'border-input': grey[700],
+  'border-fill-two': grey[750],
+  'border-disabled': grey[700],
+  'border-outline-focused': blue[300],
+  'border-primary': blue[400],
+  'border-success': green[500],
+  'border-warning': yellow[400],
+  'border-error': red[400],
+  // Content
+  text: grey[50],
+  'text-light': grey[200],
+  'text-xlight': grey[400],
+  'text-disabled': grey[700],
+  'text-primary-accent': blue[200],
+  'text-primary-disabled': grey[500],
+  'text-success': green[500],
+  'text-success-light': green[200],
+  'text-warning': yellow[400],
+  'text-warning-light': yellow[200],
+  'text-error': red[400],
+  'text-error-light': red[200],
+  // Icon
+  'icon-success': green[500],
+  'icon-warning': yellow[400],
+  'icon-error': red[400],
+}
+
+export const borderWidths = {
+  default: 1,
+  focus: 1.5,
+}
+
+export const borderStyles = {
+  default: 'solid',
+}
+
+export const scrollBar = ({ hue = 'default' } = {}) => {
+  const trackColor
+      = hue === 'lighter' ? semanticColors['fill-three'] : semanticColors['fill-two']
+  const barColor
+      = hue === 'lighter'
+        ? semanticColors['text-xlight']
+        : semanticColors['fill-three']
+  const barWidth = 6
+  const barRadius = barWidth / 2
+
+  const style: CSSObject = {
+    scrollbarWidth: 'thin',
+    scrollbarColor: `${barColor} ${trackColor}`,
+    '&::-webkit-scrollbar-track': {
+      backgroundColor: trackColor,
+      borderRadius: `${barRadius}px`,
+    },
+    '&::-webkit-scrollbar': {
+      width: `${barWidth}px`,
+      height: `${barWidth}px`,
+      borderRadius: `${barRadius}px`,
+      backgroundColor: trackColor,
+    },
+    '&::-webkit-scrollbar-thumb': {
+      borderRadius: `${barRadius}px`,
+      backgroundColor: barColor,
+    },
+    '&::-webkit-scrollbar-corner': {
+      backgroundColor: 'transparent',
+    },
+  }
+
+  return style
+}
+
+export const borders = {
+  default: `${borderWidths.default}px ${borderStyles.default} ${semanticColors.border}`,
+  'fill-one': `${borderWidths.default}px ${borderStyles.default} ${semanticColors.border}`,
+  'fill-two': `${borderWidths.default}px ${borderStyles.default} ${semanticColors['border-fill-two']}`,
+  'fill-three': `${borderWidths.default}px ${borderStyles.default} ${semanticColors['border-input']}`,
+  input: `${borderWidths.default}px ${borderStyles.default} ${semanticColors['border-input']}`,
+}
+
+export const borderRadiuses = {
   medium: 3,
   large: 6,
   normal: 3, // deprecated in favor of medium
 }
 
-const boxShadows = {
-  slight: `0px 2px 4px transparency(${grey[900]}, 88), 0px 3px 6px transparency(${grey[900]}, 85)`,
-  moderate: `0px 3px 6px transparency(${grey[900]}, 80), 0px 10px 20px transparency(${grey[900]}, 70)`,
-  modal: `0px 20px 50px transparency(${grey[900]}, 40)`,
-  focused: '0px 0px 0px 1.5px #8fa5ff',
+export const boxShadows = {
+  slight: `0px 2px 4px ${chroma(grey[950]).alpha(0.14)}, 0px 2px 7px ${chroma(grey[950]).alpha(0.18)}`,
+  moderate: `0px 3px 6px ${chroma(grey[950]).alpha(0.2)}, 0px 10px 20px ${chroma(grey[950]).alpha(0.3)}`,
+  modal: `0px 20px 50px ${chroma(grey[950]).alpha(0.6)}`,
+  focused: `0px 0px 0px 1.5px ${semanticColors['border-outline-focused']}`,
 }
 
-const spacing = {
+const focusPartials = {
+  default: {
+    '&:focus, &:focus-visible': {
+      outline: 'none',
+      boxShadow: boxShadows.focused,
+    },
+  },
+  defaultChild: {
+    ':focus &, :focus-visible &': {
+      outline: 'none',
+      boxShadow: boxShadows.focused,
+    },
+  },
+}
+
+export const spacing = {
   'minus-xxxxlarge': -96,
   'minus-xxxlarge': -64,
   'minus-xxlarge': -48,
@@ -142,7 +262,150 @@ const spacers = {
   paddingVertical: ['paddingTop', 'paddingBottom'],
 }
 
-export default mergeTheme(defaultTheme, {
+const bodyBaseStyle = {
+  fontFamily: fontFamilies.sans,
+  fontWeight: 400,
+  letterSpacing: '0.5px',
+  '& b, & strong': {
+    fontWeight: 600,
+  },
+}
+
+function asElementTypes<T>() {
+  return function ret <Obj>(obj: { [K in keyof Obj]: T }) {
+    return obj
+  }
+}
+
+export const textPartials = asElementTypes<CSSObject>()({
+  h1: {
+    fontFamily: fontFamilies.semi,
+    fontSize: 72,
+    lineHeight: '110%',
+    fontWeight: 400,
+    letterSpacing: '-1px',
+  },
+  h2: {
+    fontFamily: fontFamilies.semi,
+    fontSize: 60,
+    lineHeight: '115%',
+    fontWeight: 500,
+    letterSpacing: '-1px',
+  },
+  h3: {
+    fontFamily: fontFamilies.semi,
+    fontSize: 48,
+    lineHeight: '120%',
+    fontWeight: 400,
+    letterSpacing: '-0.5px',
+  },
+  h4: {
+    fontFamily: fontFamilies.semi,
+    fontSize: 36,
+    lineHeight: '45px',
+    fontWeight: 400,
+    letterSpacing: '-0.25px',
+  },
+  title1: {
+    fontFamily: fontFamilies.semi,
+    fontSize: 30,
+    lineHeight: '40px',
+    fontWeight: 500,
+    letterSpacing: '-0.25px',
+  },
+  title2: {
+    fontFamily: fontFamilies.semi,
+    fontSize: 24,
+    lineHeight: '32px',
+    fontWeight: 500,
+    letterSpacing: '-0.25px',
+  },
+  subtitle1: {
+    fontFamily: fontFamilies.semi,
+    fontSize: 20,
+    lineHeight: '24px',
+    fontWeight: 500,
+    letterSpacing: 0,
+  },
+  subtitle2: {
+    fontFamily: fontFamilies.semi,
+    fontSize: 18,
+    lineHeight: '24px',
+    fontWeight: 500,
+    letterSpacing: 0,
+  },
+  body1: {
+    ...bodyBaseStyle,
+    ...{
+      fontSize: 16,
+      lineHeight: '24px',
+    },
+  },
+  body2: {
+    ...bodyBaseStyle,
+    ...{
+      fontSize: 14,
+      lineHeight: '20px',
+    },
+  },
+  bodyBold: {
+    fontWeight: 600,
+  },
+  caption: {
+    fontFamily: fontFamilies.sans,
+    fontSize: 12,
+    lineHeight: '16px',
+    fontWeight: 400,
+    letterSpacing: '0.5px',
+  },
+  badgeLabel: {
+    fontFamily: fontFamilies.sans,
+    fontSize: 12,
+    lineHeight: '100%',
+    fontWeight: 700,
+    letterSpacing: '0.5px',
+  },
+  buttonMedium: {
+    fontFamily: fontFamilies.semi,
+    fontSize: 14,
+    lineHeight: '24px',
+    fontWeight: 500,
+    letterSpacing: '0.5px',
+  },
+  buttonLarge: {
+    fontFamily: fontFamilies.semi,
+    fontSize: 16,
+    lineHeight: '24px',
+    fontWeight: 500,
+    letterSpacing: '0.5px',
+  },
+  buttonSmall: {
+    fontFamily: fontFamilies.semi,
+    fontSize: 12,
+    lineHeight: '24px',
+    fontWeight: 500,
+    letterSpacing: '0.5px',
+  },
+  overline: {
+    fontFamily: fontFamilies.semi,
+    fontSize: 12,
+    lineHeight: '16px',
+    fontWeight: 400,
+    letterSpacing: '1.25px',
+    textTransform: 'uppercase',
+  },
+  truncate: {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+  body1Bold: {},
+  body2Bold: {},
+})
+textPartials.body1Bold = { ...textPartials.body1, ...textPartials.bodyBold }
+textPartials.body2Bold = { ...textPartials.body2, ...textPartials.bodyBold }
+
+const baseTheme = {
   name: 'Plural',
   mode: 'dark',
   breakpoints: {
@@ -158,55 +421,12 @@ export default mergeTheme(defaultTheme, {
     yellow,
     red,
     // Semantic colors,
-    // Fill,
-    'fill-zero': grey[900],
-    'fill-zero-hover': grey[850],
-    'fill-zero-selected': grey[825],
-    'fill-one': grey[850],
-    'fill-one-hover': grey[825],
-    'fill-one-selected': grey[775],
-    'fill-two': grey[800],
-    'fill-two-hover': grey[775],
-    'fill-two-selected': grey[725],
-    'fill-three': grey[750],
-    'fill-three-hover': grey[725],
-    'fill-three-selected': grey[675],
-    // Action,
-    'action-primary': blue[400],
-    'action-primary-hover': blue[350],
-    'action-primary-disabled': grey[825],
-    'action-link-inactive': grey[200],
-    'action-link-active': grey[50],
-    'action-link-inline': blue[200],
-    'action-input-hover': `transparency(${grey[50]}, 96)`,
-    // Border,
-    border: grey[800],
-    'border-input': grey[700],
-    'border-fill-two': grey[750],
-    'border-disabled': grey[700],
-    'border-outline-focused': blue[300],
-    'border-primary': blue[400],
-    'border-success': green[500],
-    'border-warning': yellow[400],
-    'border-error': red[400],
-    // Content,
-    text: grey[50],
-    'text-light': grey[200],
-    'text-xlight': grey[400],
-    'text-disabled': grey[700],
-    'text-primary-accent': blue[200],
-    'text-primary-disabled': grey[500],
-    'text-success': green[500],
-    'text-success-light': green[200],
-    'text-warning': yellow[400],
-    'text-warning-light': yellow[200],
-    'text-error': red[400],
-    'text-error-light': red[200],
-    // Icon,
-    'icon-success': green[500],
-    'icon-warning': yellow[400],
-    'icon-error': red[400],
+    ...semanticColors,
   },
+}
+
+const honorableTheme = mergeTheme(defaultTheme, {
+  ...baseTheme,
   stylesheet: {
     html: [
       {
@@ -220,168 +440,52 @@ export default mergeTheme(defaultTheme, {
         color: 'text-xlight',
       },
     ],
-    '* ::-webkit-scrollbar-track': [
-      {
-        borderRadius: '10px',
-        backgroundColor: 'fill-one',
-      },
-    ],
-    '* ::-webkit-scrollbar': [
-      {
-        width: '6px',
-        backgroundColor: 'fill-one',
-      },
-    ],
-    '* ::-webkit-scrollbar-thumb': [
-      {
-        borderRadius: '6px',
-        backgroundColor: 'fill-two',
-      },
-    ],
   },
   global: [
     /* Spacing */
-    ...Object.entries(spacers).map(([key, nextKeys]) => (props: any) => props[key] !== null && typeof props[key] !== 'undefined' && Object.fromEntries(nextKeys.map(nextKey => [nextKey, spacing[props[key]] || props[key]]))),
+    ...Object.entries(spacers).map(([key, nextKeys]) => (props: any) => props[key] !== null
+          && typeof props[key] !== 'undefined'
+          && Object.fromEntries(nextKeys.map(nextKey => [
+            nextKey,
+            spacing[props[key]] || props[key],
+          ]))),
     ({ gap }: any) => typeof gap !== 'undefined' && {
       gap: spacing[gap] || gap,
     },
-    ({ fill }: any) => fill === true && { // === true to prevent the `fill` css property to apply here
+    ({ fill }: any) => fill === true && {
+        // === true to prevent the `fill` css property to apply here
       width: '100%',
       height: '100%',
     },
     /* Border radiuses */
-    ({ borderRadius }: any) => typeof borderRadius !== 'undefined' && ({
+    ({ borderRadius }: any) => typeof borderRadius !== 'undefined' && {
       borderRadius: borderRadiuses[borderRadius] || borderRadius,
-    }),
+    },
     /* Shadows */
-    ({ boxShadow }: any) => typeof boxShadow !== 'undefined' && ({
+    ({ boxShadow }: any) => typeof boxShadow !== 'undefined' && {
       boxShadow: boxShadows[boxShadow] || boxShadow,
-    }),
-    ({ h1 }: any) => h1 && {
-      fontFamily: fontFamilies.semi,
-      fontSize: 72,
-      lineHeight: '110%',
-      fontWeight: 400,
-      letterSpacing: '-1px',
     },
-    ({ h2 }: any) => h2 && {
-      fontFamily: fontFamilies.semi,
-      fontSize: 60,
-      lineHeight: '115%',
-      fontWeight: 500,
-      letterSpacing: '-1px',
-    },
-    ({ h3 }: any) => h3 && {
-      fontFamily: fontFamilies.semi,
-      fontSize: 48,
-      lineHeight: '120%',
-      fontWeight: 400,
-      letterSpacing: '-0.5px',
-    },
-    ({ h4 }: any) => h4 && {
-      fontFamily: fontFamilies.semi,
-      fontSize: 36,
-      lineHeight: '45px',
-      fontWeight: 400,
-      letterSpacing: '-0.25px',
-    },
-    ({ title1 }: any) => title1 && {
-      fontFamily: fontFamilies.semi,
-      fontSize: 30,
-      lineHeight: '40px',
-      fontWeight: 500,
-      letterSpacing: '-0.25px',
-    },
-    ({ title2 }: any) => title2 && {
-      fontFamily: fontFamilies.semi,
-      fontSize: 24,
-      lineHeight: '32px',
-      fontWeight: 500,
-      letterSpacing: '-0.25px',
-    },
-    ({ subtitle1 }: any) => subtitle1 && {
-      fontFamily: fontFamilies.semi,
-      fontSize: 20,
-      lineHeight: '24px',
-      fontWeight: 500,
-      letterSpacing: 0,
-    },
-    ({ subtitle2 }: any) => subtitle2 && {
-      fontFamily: fontFamilies.semi,
-      fontSize: 18,
-      lineHeight: '24px',
-      fontWeight: 500,
-      letterSpacing: 0,
-    },
+    ({ h1 }: any) => h1 && textPartials.h1,
+    ({ h2 }: any) => h2 && textPartials.h2,
+    ({ h3 }: any) => h3 && textPartials.h3,
+    ({ h4 }: any) => h4 && textPartials.h4,
+    ({ title1 }: any) => title1 && textPartials.title1,
+    ({ title2 }: any) => title2 && textPartials.title2,
+    ({ subtitle1 }: any) => subtitle1 && textPartials.subtitle1,
+    ({ subtitle2 }: any) => subtitle2 && textPartials.subtitle2,
     ({ body1, body2, bold }: any) => ({
-      ...((body1 || body2) && {
-        fontFamily: fontFamilies.sans,
-        fontWeight: 400,
-        letterSpacing: '0.5px',
-        '& b, & strong': {
-          fontWeight: 600,
-        },
-      }),
-      ...((body1 || body2) && bold && {
-        fontWeight: 600,
-      }),
-      ...(body1 && {
-        fontSize: 16,
-        lineHeight: '24px',
-      }),
-      ...(body2 && {
-        fontSize: 14,
-        lineHeight: '20px',
-      }),
+      ...((body1 || body2)
+        && bold && textPartials.bodyBold),
+      ...(body1 && textPartials.body1),
+      ...(body2 && textPartials.body2),
     }),
-    ({ caption }: any) => caption && {
-      fontFamily: fontFamilies.sans,
-      fontSize: 12,
-      lineHeight: '16px',
-      fontWeight: 400,
-      letterSpacing: '0.5px',
-    },
-    ({ badgeLabel }: any) => badgeLabel && {
-      fontFamily: fontFamilies.semi,
-      fontSize: 12,
-      lineHeight: '100%',
-      fontWeight: 700,
-      letterSpacing: '0.5px',
-    },
-    ({ buttonMedium }: any) => buttonMedium && {
-      fontFamily: fontFamilies.semi,
-      fontSize: 14,
-      lineHeight: '24px',
-      fontWeight: 500,
-      letterSpacing: '0.5px',
-    },
-    ({ buttonLarge }: any) => buttonLarge && {
-      fontFamily: fontFamilies.semi,
-      fontSize: 16,
-      lineHeight: '24px',
-      fontWeight: 500,
-      letterSpacing: '0.5px',
-    },
-    ({ buttonSmall }: any) => buttonSmall && {
-      fontFamily: fontFamilies.semi,
-      fontSize: 12,
-      lineHeight: '24px',
-      fontWeight: 500,
-      letterSpacing: '0.5px',
-    },
-    ({ overline }: any) => overline && {
-      fontFamily: fontFamilies.semi,
-      fontSize: 12,
-      lineHeight: '16px',
-      fontWeight: 400,
-      letterSpacing: '1.25px',
-      textTransform: 'uppercase',
-    },
-    ({ truncate }: any) => truncate && {
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-    },
+    ({ caption }: any) => caption && textPartials.caption,
+    ({ badgeLabel }: any) => badgeLabel && textPartials.badgeLabel,
+    ({ buttonMedium }: any) => buttonMedium && textPartials.buttonMedium,
+    ({ buttonLarge }: any) => buttonLarge && textPartials.buttonLarge,
+    ({ buttonSmall }: any) => buttonSmall && textPartials.buttonSmall,
+    ({ overline }: any) => overline && textPartials.overline,
+    ({ truncate }: any) => truncate && textPartials.truncate,
     /* Deprecated */
     ({ body0 }: any) => body0 && {
       fontSize: 18,
@@ -638,7 +742,7 @@ export default mergeTheme(defaultTheme, {
           },
         },
       },
-      ({ checked }: any) => checked && ({
+      ({ checked }: any) => checked && {
         color: 'text',
         '> span': {
           backgroundColor: 'action-primary',
@@ -650,12 +754,12 @@ export default mergeTheme(defaultTheme, {
             border: '1px solid text',
           },
         },
-      }),
-      ({ small }: any) => small && ({
+      },
+      ({ small }: any) => small && {
         '> span': {
           borderWidth: '.75px',
         },
-      }),
+      },
     ],
     Control: [
       {
@@ -840,10 +944,10 @@ export default mergeTheme(defaultTheme, {
         paddingBottom: 'large',
         paddingLeft: 'large',
       },
-      ({ form }: any) => form && ({
+      ({ form }: any) => form && {
         width: '608px',
         maxWidth: '608px',
-      }),
+      },
     ],
     Backdrop: [
       {
@@ -873,7 +977,7 @@ export default mergeTheme(defaultTheme, {
           },
         },
       },
-      ({ checked }: any) => checked && ({
+      ({ checked }: any) => checked && {
         color: 'text',
         '> span': {
           border: '1px solid text',
@@ -883,12 +987,12 @@ export default mergeTheme(defaultTheme, {
             border: '1px solid text',
           },
         },
-      }),
-      ({ small }: any) => small && ({
+      },
+      ({ small }: any) => small && {
         '> span': {
           borderWidth: '.75px',
         },
-      }),
+      },
     ],
     Control: [
       {
@@ -919,16 +1023,22 @@ export default mergeTheme(defaultTheme, {
           backgroundColor: checked ? 'action-primary' : 'transparent',
           border: `1px solid ${checked ? 'text' : 'border-input'}`,
           '> span': {
-            backgroundColor: checked ? 'action-link-active' : 'action-link-inactive',
+            backgroundColor: checked
+              ? 'action-link-active'
+              : 'action-link-inactive',
           },
         },
         ':hover': {
           color: 'text',
           '> div:first-of-type': {
-            backgroundColor: checked ? 'action-primary-hover' : 'action-input-hover',
+            backgroundColor: checked
+              ? 'action-primary-hover'
+              : 'action-input-hover',
             border: `1px solid ${checked ? 'text' : 'border-input'}`,
             '> span': {
-              backgroundColor: checked ? 'action-link-active' : 'action-link-active',
+              backgroundColor: checked
+                ? 'action-link-active'
+                : 'action-link-active',
             },
           },
         },
@@ -973,7 +1083,8 @@ export default mergeTheme(defaultTheme, {
         top: '50%',
         left: 0,
         transformOrigin: '50% 50%',
-        transform: 'translate(calc(-50% + 1px), -50%) scaleY(0.77) rotate(45deg)',
+        transform:
+          'translate(calc(-50% + 1px), -50%) scaleY(0.77) rotate(45deg)',
       },
     ],
   },
@@ -987,3 +1098,23 @@ export default mergeTheme(defaultTheme, {
     ],
   },
 })
+
+export default honorableTheme
+
+export const styledTheme = {
+  ...baseTheme,
+  ...{
+    spacing,
+    boxShadows,
+    borderRadiuses,
+    fontFamilies,
+    borders,
+    borderStyles,
+    borderWidths,
+    partials: {
+      text: textPartials,
+      focus: focusPartials,
+      scrollBar,
+    },
+  },
+}

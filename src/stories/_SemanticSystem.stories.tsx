@@ -1,6 +1,5 @@
-import {
-  Div, Flex, Text, useTheme,
-} from 'honorable'
+import { styledTheme } from 'src'
+import styled, { useTheme } from 'styled-components'
 
 import Divider from '../components/Divider'
 
@@ -8,6 +7,21 @@ export default {
   title: 'Semantic System',
   component: null,
 }
+
+const ItemLabel = styled.div(({ theme }) => ({
+  ...theme.partials.text.caption,
+  marginTop: theme.spacing.xxsmall,
+}))
+
+const BlockWrapper = styled.div(({ theme }) => ({
+  marginBottom: theme.spacing.large,
+}))
+
+const FilledBox = styled.div(({ theme }) => ({
+  width: '64px',
+  height: '64px',
+  backgroundColor: theme.colors['fill-one'],
+}))
 
 function Template({ exampleText }: { exampleText?: string }) {
   return (
@@ -22,6 +36,16 @@ function Template({ exampleText }: { exampleText?: string }) {
         marginVertical="xxlarge"
       />
       <Shadows />
+      <Divider
+        text="Borders"
+        marginVertical="xxlarge"
+      />
+      <BoxBorders />
+      <Divider
+        text="Scrollbars"
+        marginVertical="xxlarge"
+      />
+      <Scrollbars />
       <Divider
         text="Border radiuses"
         marginVertical="xxlarge"
@@ -41,6 +65,25 @@ function Template({ exampleText }: { exampleText?: string }) {
   )
 }
 
+const ColorBox = styled(FilledBox)<{ color: string }>(({ theme, color }) => ({
+  boxShadow: theme.boxShadows.moderate,
+  backgroundColor: theme.colors[color],
+}))
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const ColorBoxWrap = styled.div(_p => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  width: '64px',
+}))
+
+const FlexWrap = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: theme.spacing.large,
+}))
+
 function Colors() {
   const theme = useTheme()
 
@@ -53,87 +96,157 @@ function Colors() {
   delete colors.red
 
   return (
-    <Flex wrap="wrap">
-      {Object.entries(colors).map(([key, value]) => (
-        <Flex
-          direction="column"
-          align="center"
-          marginBottom="large"
-          marginRight="large"
-          width={64}
-          key={key}
-        >
-          <Div
-            width={64}
-            height={64}
-            backgroundColor={value}
-            boxShadow="moderate"
-          />
-          <Text caption>
-            {key}
-          </Text>
-        </Flex>
+    <FlexWrap>
+      {Object.entries(colors).map(([key]) => (
+        <ColorBoxWrap key={key}>
+          <ColorBox color={`${key}`} />
+          <ItemLabel>{key}</ItemLabel>
+        </ColorBoxWrap>
       ))}
-    </Flex>
+    </FlexWrap>
   )
 }
+
+const ShadowedBox = styled(FilledBox)<{ shadow: string }>(({ theme, shadow }) => ({ boxShadow: theme.boxShadows[shadow] }))
+
+const ShadowsWrap = styled(FlexWrap)(({ theme }) => ({
+  backgroundColor: theme.colors['fill-three'],
+  padding: theme.spacing.large,
+}))
 
 function Shadows() {
   return (
-    <>
-      {[
-        'slight',
-        'moderate',
-        'modal',
-      ].map(key => (
-        <Div
-          key={key}
-          marginBottom="large"
-        >
-          <Div
-            width={64}
-            height={64}
-            backgroundColor="fill-one"
-            boxShadow={key}
-          />
-          <Text
-            caption
-            marginTop="xsmall"
-          >{key}
-          </Text>
-        </Div>
+    <ShadowsWrap>
+      {['slight', 'moderate', 'modal', 'focused'].map(key => (
+        <BlockWrapper key={key}>
+          <ShadowedBox shadow={key} />
+          <ItemLabel>{key}</ItemLabel>
+        </BlockWrapper>
       ))}
+    </ShadowsWrap>
+  )
+}
+
+const RadiusedBox = styled(FilledBox)<{ radius: 'medium' | 'large' }>(({ theme, radius }) => ({
+  borderRadius: theme.borderRadiuses[radius],
+}))
+
+function BoxRadiuses() {
+  const radii: ('medium' | 'large')[] = ['medium', 'large']
+
+  return (
+    <FlexWrap>
+      {radii.map(key => (
+        <BlockWrapper key={key}>
+          <RadiusedBox radius={key} />
+          <ItemLabel>{key}</ItemLabel>
+        </BlockWrapper>
+      ))}
+    </FlexWrap>
+  )
+}
+
+const BorderedBox = styled(RadiusedBox).attrs(() => ({ radius: 'medium' }))<{
+  border?: string
+}>(({ theme, border }) => ({ border: theme.borders[border] }))
+
+function BoxBorders() {
+  const { borders } = useTheme()
+
+  return (
+    <FlexWrap>
+      {Object.keys(borders).map(key => (
+        <BlockWrapper key={key}>
+          <BorderedBox border={key} />
+          <ItemLabel>{key}</ItemLabel>
+        </BlockWrapper>
+      ))}
+    </FlexWrap>
+  )
+}
+
+const ScrollbarBox = styled(FilledBox)<{
+  scrollHue?: string
+}>(({ theme, scrollHue }) => ({
+  ...theme.partials.scrollBar({ hue: scrollHue }),
+  ...theme.partials.text.caption,
+  width: '100%',
+  height: 'auto',
+  padding: theme.spacing.medium,
+  maxWidth: '300px',
+  overflow: 'auto',
+  '&.horizontal .inner': {
+    width: '600px',
+  },
+  '&.vertical': {
+    maxHeight: '100px',
+  },
+  '&.both': {
+    maxHeight: '100px',
+    '.inner': {
+      width: '600px',
+    },
+  },
+
+}))
+
+function Scrollbars() {
+  const scrollHues = ['default', 'lighter']
+  const exampleText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+
+  return (
+    <>
+      <FlexWrap>
+        {scrollHues.map(key => (
+          <BlockWrapper key={key}>
+            <ScrollbarBox
+              className="vertical"
+              scrollHue={key}
+            >
+              <div className="inner">{exampleText}</div>
+            </ScrollbarBox>
+            <ItemLabel>vertical - {key}</ItemLabel>
+          </BlockWrapper>
+        ))}
+      </FlexWrap>
+      <FlexWrap>
+        {scrollHues.map(key => (
+          <BlockWrapper key={key}>
+            <ScrollbarBox
+              className="horizontal"
+              scrollHue={key}
+            >
+              <div className="inner">{exampleText}</div>
+            </ScrollbarBox>
+            <ItemLabel>horizontal - {key}</ItemLabel>
+          </BlockWrapper>
+        ))}
+      </FlexWrap>
+      <FlexWrap>
+        {scrollHues.map(key => (
+          <BlockWrapper key={key}>
+            <ScrollbarBox
+              className="both"
+              scrollHue={key}
+            >
+              <div className="inner">{exampleText}</div>
+            </ScrollbarBox>
+            <ItemLabel>vertical + horizontal - {key}</ItemLabel>
+          </BlockWrapper>
+        ))}
+      </FlexWrap>
     </>
   )
 }
 
-function BoxRadiuses() {
-  return (
-    <>
-      {[
-        'medium',
-        'large',
-      ].map(key => (
-        <Div
-          key={key}
-          marginBottom="large"
-        >
-          <Div
-            width={64}
-            height={64}
-            backgroundColor="fill-one"
-            borderRadius={key}
-          />
-          <Text
-            caption
-            marginTop="xsmall"
-          >{key}
-          </Text>
-        </Div>
-      ))}
-    </>
-  )
-}
+const SpacingBox = styled.div<{ space: string }>(({ theme, space }) => ({
+  borderRadius: 0,
+  backgroundColor: theme.colors['action-primary'],
+  margin: 0,
+  paddingRight: theme.spacing[space],
+  paddingTop: theme.spacing[space],
+  width: 'min-content',
+}))
 
 function Spacing() {
   return (
@@ -150,138 +263,46 @@ function Spacing() {
         'xxxlarge',
         'xxxxlarge',
       ].map(key => (
-        <Div
-          key={key}
-          marginBottom="large"
-        >
-          <Div
-            display="inline-block"
-            backgroundColor="action-primary"
-            paddingTop={key}
-            paddingRight={key}
-          />
-          <Text
-            caption
-            marginTop="xsmall"
-          >{key}
-          </Text>
-        </Div>
+        <BlockWrapper key={key}>
+          <SpacingBox space={key} />
+          <ItemLabel>{key}</ItemLabel>
+        </BlockWrapper>
       ))}
     </>
   )
 }
 
+const SemanticText = styled.div<{
+  typeStyle?: keyof typeof styledTheme.partials.text
+}>(({ theme, typeStyle }) => ({
+  ...theme.partials.text[typeStyle],
+  marginBottom: theme.spacing.large,
+}))
+
 function Typography({
-  exampleText = 'Lorem ipsum dolor sit amet',
+  exampleText: txt = 'Lorem ipsum dolor sit amet',
 }: {
   exampleText: string
 }) {
   return (
     <>
-      <Text
-        h1
-        marginBottom="large"
-      >
-        H1 - {exampleText}
-      </Text>
-      <Text
-        h2
-        marginBottom="large"
-      >
-        H2 - {exampleText}
-      </Text>
-      <Text
-        h3
-        marginBottom="large"
-      >
-        H3 - {exampleText}
-      </Text>
-      <Text
-        h4
-        marginBottom="large"
-      >
-        H4 - {exampleText}
-      </Text>
-      <Text
-        title1
-        marginBottom="large"
-      >
-        Title 1 - {exampleText}
-      </Text>
-      <Text
-        title2
-        marginBottom="large"
-      >
-        Title 2 - {exampleText}
-      </Text>
-      <Text
-        subtitle1
-        marginBottom="large"
-      >
-        Subtitle 1 - {exampleText}
-      </Text>
-      <Text
-        subtitle2
-        marginBottom="large"
-      >
-        Subtitle 2 - {exampleText}
-      </Text>
-      <Text
-        body1
-        marginBottom="medium"
-        bold
-      >
-        Body 1 (Bold) - {exampleText}
-      </Text>
-      <Text
-        body1
-        marginBottom="large"
-      >
-        Body 1 - {exampleText}
-      </Text>
-      <Text
-        body2
-        marginBottom="medium"
-        bold
-      >
-        Body 2 (Bold) - {exampleText}
-      </Text>
-      <Text
-        body2
-        marginBottom="large"
-      >
-        Body 2 - {exampleText}
-      </Text>
-      <Text
-        caption
-        marginBottom="large"
-      >
-        Caption - {exampleText}
-      </Text>
-      <Text
-        badge-label
-        marginBottom="large"
-      >
-        Badge Label - {exampleText}
-      </Text>
-      <Text
-        button-large
-        marginBottom="large"
-      >
-        Large Button - {exampleText}
-      </Text>
-      <Text
-        button-small
-        marginBottom="large"
-      >
-        Small Button - {exampleText}
-      </Text>
-      <Text
-        overline
-        marginBottom="large"
-      >
-        Overline - {exampleText}
-      </Text>
+      <SemanticText typeStyle="h1">H1 - {txt}</SemanticText>
+      <SemanticText typeStyle="h2">H2 - {txt}</SemanticText>
+      <SemanticText typeStyle="h3">H3 - {txt}</SemanticText>
+      <SemanticText typeStyle="h4">H4 - {txt}</SemanticText>
+      <SemanticText typeStyle="title1">Title 1 - {txt}</SemanticText>
+      <SemanticText typeStyle="title2">Title 2 - {txt}</SemanticText>
+      <SemanticText typeStyle="subtitle1">Subtitle 1 - {txt}</SemanticText>
+      <SemanticText typeStyle="subtitle2">Subtitle 2 - {txt}</SemanticText>
+      <SemanticText typeStyle="body1Bold">Body 1 (Bold) - {txt}</SemanticText>
+      <SemanticText typeStyle="body1">Body 1 - {txt}</SemanticText>
+      <SemanticText typeStyle="body2Bold">Body 2 (Bold) - {txt}</SemanticText>
+      <SemanticText typeStyle="body2">Body 2 - {txt}</SemanticText>
+      <SemanticText typeStyle="caption">Caption - {txt}</SemanticText>
+      <SemanticText typeStyle="badgeLabel">Badge Label - {txt}</SemanticText>
+      <SemanticText typeStyle="buttonLarge">Large Button - {txt}</SemanticText>
+      <SemanticText typeStyle="buttonSmall">Small Button - {txt}</SemanticText>
+      <SemanticText typeStyle="overline">Overline - {txt}</SemanticText>
     </>
   )
 }

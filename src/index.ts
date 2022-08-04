@@ -1,9 +1,5 @@
 export {
-  Avatar,
-  Button,
-  Menu,
-  MenuItem,
-  Switch,
+  Avatar, Button, Menu, MenuItem, Switch,
 } from 'honorable'
 
 // Icons
@@ -124,7 +120,10 @@ export { default as Card, CardProps } from './components/Card'
 export { default as Checkbox } from './components/Checkbox'
 export { default as Chip } from './components/Chip'
 export { default as Codeline } from './components/Codeline'
-export { default as ContentCard, ContentCardProps } from './components/ContentCard'
+export {
+  default as ContentCard,
+  ContentCardProps,
+} from './components/ContentCard'
 export { default as Divider } from './components/Divider'
 export { default as FormField } from './components/FormField'
 export { default as Input } from './components/Input'
@@ -165,4 +164,5 @@ export { default as Modal } from './components/Modal'
 // Hooks
 export { default as usePrevious } from './hooks/usePrevious'
 // Theme
-export { default as theme } from './theme'
+export { default as theme, styledTheme } from './theme'
+export { default as GlobalStyle } from './GlobalStyle'

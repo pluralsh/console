@@ -4,7 +4,7 @@ import {
 } from 'honorable'
 import PropTypes from 'prop-types'
 
-import styled from '@emotion/styled'
+import styled from 'styled-components'
 
 import StatusOkIcon from './icons/StatusOkIcon'
 import ErrorIcon from './icons/ErrorIcon'

@@ -3,7 +3,7 @@ import {
 } from 'honorable'
 import type { DivProps } from 'honorable'
 import { keyframes } from '@emotion/react'
-import styled from '@emotion/styled'
+import styled from 'styled-components'
 import {
   forwardRef,
   useCallback,

@@ -1,16 +1,21 @@
 import { ComponentType } from 'react'
-import { CssBaseline, Div, ThemeProvider } from 'honorable'
+import { CssBaseline, Div, ThemeProvider as HonorableThemeProvider } from 'honorable'
+import { ThemeProvider as StyledThemeProvider } from 'styled-components'
 
-import theme from './theme'
+import theme, { styledTheme } from './theme'
+import StyledCss from './GlobalStyle'
 
 function ThemeDecorator(Story: ComponentType) {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Div padding="xlarge">
-        <Story />
-      </Div>
-    </ThemeProvider>
+    <HonorableThemeProvider theme={theme}>
+      <StyledThemeProvider theme={styledTheme}>
+        <CssBaseline />
+        <StyledCss />
+        <Div padding="xlarge">
+          <Story />
+        </Div>
+      </StyledThemeProvider>
+    </HonorableThemeProvider>
   )
 }
 
