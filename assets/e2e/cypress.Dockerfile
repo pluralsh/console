@@ -5,4 +5,3 @@ COPY ./ /e2e/
 WORKDIR /e2e
 
 RUN yarn install
-
