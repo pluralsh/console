@@ -8,6 +8,7 @@ export class LoginPage extends BasePage {
   private static readonly _passwordInputSelector = `[name='Password']`
 
   static visit(): void {
+    cy.wait(120000)
     cy.visit(this._url);
     cy.wait(120000)
   }
