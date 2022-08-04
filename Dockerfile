@@ -111,7 +111,7 @@ RUN apk --no-cache add \
         gnupg
 
 # The name of your application/release (required)
-ARG APP_NAME
+ARG APP_NAME=console
 ARG GIT_COMMIT
 ARG KUBECTL_VERSION='1.16.14'
 ADD https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl /usr/local/bin/kubectl
