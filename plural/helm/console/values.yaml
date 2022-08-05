@@ -123,3 +123,31 @@ postgresql:
   postgresqlDatabase: console
   nameOverride: console
   fullnameOverride: console-postgresql
+
+test-base:
+  enabled: false
+  application: console
+  testName: console-integration
+  promoteTag: warm
+  secret:
+    CYPRESS_EMAIL: ""
+    CYPRESS_PASSWORD: ""
+    CYPRESS_BASE_URL: ""
+  steps:
+  - name: watch
+    description: it wait until the console app crd is ready
+    template:
+      container:
+        image: gcr.io/pluralsh/test-base:0.1.6
+        args: ["console"]
+  - name: cypress
+    description: runs cypress E2E tests for the console
+    template:
+      container:
+        image: davidspek/console-cypress:0.2.1 #TODO: change to proper image
+        envFrom:
+        - secretRef:
+            name: console-test-base-env
+          requests:
+            cpu: 1.8
+            memory: 7.9Gi
