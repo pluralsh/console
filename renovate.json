@@ -16,10 +16,31 @@
       "enabled": true
     },
     {
-      "description": "Disable major update k8s client-go",
-      "matchPackagePatterns": ["^k8s.io/client-go"],
-      "matchUpdateTypes": ["major"],
-      "enabled": false
+      "matchDatasources": [
+        "helm"
+      ],
+      "postUpgradeTasks": {
+        "commands": [
+          "helm dependency update {{{packageFileDir}}}"
+        ],
+        "fileFilters": [
+          "**/*.tgz"
+        ]
+      }
+    },
+    {
+      "description": "Don't require dashboard approval for console image updates",
+      "matchPackagePatterns": [
+        "^dkr.plural.sh/console/console"
+      ],
+      "dependencyDashboardApproval": false
+    },
+    {
+      "description": "Bump helm chart versions",
+      "matchManagers": [
+        "helmv3"
+      ],
+      "bumpVersion": "patch"
     }
   ],
   "separateMinorPatch": true,
