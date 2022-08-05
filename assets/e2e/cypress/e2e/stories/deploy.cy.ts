@@ -10,10 +10,16 @@ context('Tests', () => {
       aliasQuery(req, 'Builds')
       aliasQuery(req, 'Build')
       aliasQuery(req, 'Me')
+      aliasQuery(req, 'LoginInfo')
+      aliasQuery(req, 'LoginMethod')
+      aliasQuery(req, 'OIDCConsent')
 
       // Mutations
       aliasMutation(req, 'CreateBuild')
       aliasMutation(req, 'Callback')
+      aliasMutation(req, 'Login')
+      aliasMutation(req, 'AcceptLogin')
+      aliasMutation(req, 'Consent')
     })
   })
   describe('deploy the first installed app', () => {

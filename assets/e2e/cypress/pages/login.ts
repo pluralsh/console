@@ -12,12 +12,36 @@ export class LoginPage extends BasePage {
   }
 
   static login(email: string = Config.EMAIL, password: string = Config.PASSWORD): void {
+    cy.wait('@gqlLoginInfoQuery')
     this._oidcLoginButton().click();
-    this._emailInput().type(email);
-    this._continueButton().click();
-    this._passwordInput().type(password);
-    this._continueButton().click();
-    this._allowButton().click();
+    cy.origin('app.plural.sh', 
+    { args: {email, password} },
+    
+    ({ email, password }) => {
+      cy.get(`[name='Email address']`).type(email);
+      // this._emailInput().type(email);
+      cy.contains('button', 'Continue').click();
+
+      cy.wait('@gqlLoginMethodQuery')
+
+      // this._continueButton().click();
+      cy.get(`[name='Password']`).type(password);
+      // this._passwordInput().type(password);
+      cy.contains('button', 'Continue').click();
+
+      cy.wait('@gqlLoginMutation')
+
+      cy.wait('@gqlAcceptLoginMutation')
+
+      cy.wait('@gqlOIDCConsentQuery')
+
+      // this._continueButton().click();
+      cy.contains('div', 'Allow').click();
+      // this._allowButton().click();
+
+
+      cy.wait('@gqlConsentMutation')
+  })
     cy.wait('@gqlBuildsQuery')
   }
 
