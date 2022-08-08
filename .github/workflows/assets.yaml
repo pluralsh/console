@@ -23,7 +23,7 @@ jobs:
       BASE_URL: https://console.gcp.onplural.sh/
     defaults:
       run:
-        working-directory: assets
+        working-directory: assets/e2e
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3

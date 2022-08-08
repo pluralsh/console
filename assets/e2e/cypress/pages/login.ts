@@ -1,6 +1,7 @@
 import {Config} from '@config/config';
 import {BasePage} from '@pages/base';
 import {GQLInterceptor} from '../intercept/graphql';
+import {Mutations} from '../intercept/mutations';
 import {Queries} from '../intercept/queries';
 
 export class LoginPage extends BasePage {
@@ -14,11 +15,12 @@ export class LoginPage extends BasePage {
   }
 
   static login(email: string = Config.EMAIL, password: string = Config.PASSWORD): void {
-    cy.wait('@LoginInfo')
+    GQLInterceptor.wait(Queries.LoginInfo)
     this._oidcLoginButton().click();
-    cy.origin('app.plural.sh',
-      {args: {email, password}},
 
+    const args = {email, password};
+    cy.origin('app.plural.sh',
+      {args},
       ({email, password}) => {
         cy.on('uncaught:exception', () => false);
 
@@ -44,7 +46,6 @@ export class LoginPage extends BasePage {
 
         cy.wait('@Consent')
         cy.wait('@Callback')
-        cy.wait('@Builds')
       });
   }
 
