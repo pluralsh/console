@@ -1,7 +1,6 @@
 import {Config} from '@config/config';
 import {BasePage} from '@pages/base';
 import {GQLInterceptor} from '../intercept/graphql';
-import {Mutations} from '../intercept/mutations';
 import {Queries} from '../intercept/queries';
 
 export class LoginPage extends BasePage {
@@ -18,35 +17,27 @@ export class LoginPage extends BasePage {
     GQLInterceptor.wait(Queries.LoginInfo)
     this._oidcLoginButton().click();
 
-    const args = {email, password};
-    cy.origin('app.plural.sh',
-      {args},
-      ({email, password}) => {
-        cy.on('uncaught:exception', () => false);
+    cy.get(`[name='Email address']`).type(email);
+    // this._emailInput().type(email);
+    cy.contains('button', 'Continue').should('be.visible').and('be.enabled').click();
 
-        cy.get(`[name='Email address']`).type(email);
-        // this._emailInput().type(email);
-        cy.contains('button', 'Continue').should('be.visible').and('be.enabled').click();
+    cy.wait('@LoginMethod')
 
-        cy.wait('@LoginMethod')
+    // this._continueButton().click();
+    cy.get(`[name='Password']`).type(password);
+    // this._passwordInput().type(password);
+    cy.contains('button', 'Continue').should('be.visible').and('be.enabled').click();
 
-        // this._continueButton().click();
-        cy.get(`[name='Password']`).type(password);
-        // this._passwordInput().type(password);
-        cy.contains('button', 'Continue').should('be.visible').and('be.enabled').click();
+    cy.wait('@Login')
+    // cy.wait('@gqlAcceptLoginMutation')
+    cy.wait('@OIDCConsent')
 
-        cy.wait('@Login')
-        // cy.wait('@gqlAcceptLoginMutation')
-        cy.wait('@OIDCConsent')
+    // this._continueButton().click();
+    cy.contains('div', 'Allow').should('be.visible').click();
+    // this._allowButton().click();
 
-        // this._continueButton().click();
-        cy.contains('div', 'Allow').should('be.visible').click();
-        // this._allowButton().click();
-
-
-        cy.wait('@Consent')
-        cy.wait('@Callback')
-      });
+    cy.wait('@Consent')
+    cy.wait('@Callback')
   }
 
   private static _oidcLoginButton(): Cypress.Chainable {

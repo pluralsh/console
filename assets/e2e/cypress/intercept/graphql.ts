@@ -21,13 +21,24 @@ export class GQLInterceptor {
     const operation = body?.operationName
 
     if (GQLInterceptor._operations.has(operation)) {
-      console.log(operation);
       req.alias = operation;
     }
   }
 
-  static wait(op: GQLOperation, timeout?: number): void {
-    const alias = `@${op}`;
-    timeout ? cy.wait(alias, {timeout}) : cy.wait(alias)
+  static wait(op: GQLOperation, timeout?: number): void
+  static wait(op: Array<GQLOperation>, timeout?: number): void
+  static wait(op: GQLOperation | Array<GQLOperation>, timeout?: number): void {
+    const handler = (o: GQLOperation) => {
+      const alias = `@${o}`;
+      timeout ? cy.wait(alias, {timeout}) : cy.wait(alias);
+    }
+
+    if(op instanceof Array) {
+      op.forEach(handler)
+      return;
+    }
+
+
+    handler(op);
   }
 }
