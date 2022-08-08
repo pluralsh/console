@@ -20,27 +20,26 @@ export class LoginPage extends BasePage {
     ({ email, password }) => {
       cy.get(`[name='Email address']`).type(email);
       // this._emailInput().type(email);
-      cy.contains('button', 'Continue').click();
+      cy.contains('button', 'Continue').should('be.visible').and('be.enabled').click();
 
       cy.wait('@gqlLoginMethodQuery')
 
       // this._continueButton().click();
       cy.get(`[name='Password']`).type(password);
       // this._passwordInput().type(password);
-      cy.contains('button', 'Continue').click();
+      cy.contains('button', 'Continue').should('be.visible').and('be.enabled').click();
 
       cy.wait('@gqlLoginMutation')
-
-      cy.wait('@gqlAcceptLoginMutation')
-
+      // cy.wait('@gqlAcceptLoginMutation')
       cy.wait('@gqlOIDCConsentQuery')
 
       // this._continueButton().click();
-      cy.contains('div', 'Allow').click();
+      cy.contains('div', 'Allow').should('be.visible').click();
       // this._allowButton().click();
 
 
       cy.wait('@gqlConsentMutation')
+      cy.wait('@gqlCallbackMutation')
   })
     cy.wait('@gqlBuildsQuery')
   }
