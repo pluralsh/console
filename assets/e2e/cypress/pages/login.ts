@@ -1,5 +1,7 @@
 import {Config} from '@config/config';
 import {BasePage} from '@pages/base';
+import {GQLInterceptor} from '../intercept/graphql';
+import {Queries} from '../intercept/queries';
 
 export class LoginPage extends BasePage {
   private static readonly _url = '/';
@@ -12,11 +14,11 @@ export class LoginPage extends BasePage {
   }
 
   static login(email: string = Config.EMAIL, password: string = Config.PASSWORD): void {
-    cy.wait('@gqlLoginInfoQuery')
+    GQLInterceptor.wait(Queries.LoginInfo)
     this._oidcLoginButton().click();
-    cy.origin('app.plural.sh', 
+    cy.origin('app.plural.sh',
     { args: {email, password} },
-    
+
     ({ email, password }) => {
       cy.get(`[name='Email address']`).type(email);
       // this._emailInput().type(email);

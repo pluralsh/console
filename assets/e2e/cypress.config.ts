@@ -1,4 +1,6 @@
-import { defineConfig } from 'cypress';
+import webpack from '@cypress/webpack-preprocessor';
+import {defineConfig} from 'cypress';
+import {options} from './webpack.config';
 
 export default defineConfig({
   fixturesFolder: false,
@@ -7,9 +9,12 @@ export default defineConfig({
   videoUploadOnPasses: false,
   screenshotOnRunFailure: true,
   e2e: {
-    baseUrl: process.env.CYPRESS_BASE_URL || 'https://localhost:3000',
+    baseUrl: 'https://localhost:3000',
     chromeWebSecurity: false,
     supportFile: 'cypress/support/index.ts',
     experimentalSessionAndOrigin: true,
+    setupNodeEvents(on) {
+      on('file:preprocessor', webpack(options));
+    }
   },
 });

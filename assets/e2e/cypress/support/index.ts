@@ -13,8 +13,7 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-import '@config/config'
-import './commands';
+import {GQLInterceptor} from '../intercept/graphql';
 
 before(() => {
   cy.clearCookies();
@@ -22,5 +21,6 @@ before(() => {
   cy.on('uncaught:exception', _ => false)
 });
 
-
-
+beforeEach(() => {
+  GQLInterceptor.setup()
+})
