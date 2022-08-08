@@ -23,13 +23,14 @@ jobs:
       BASE_URL: https://console.gcp.onplural.sh/
     defaults:
       run:
-        working-directory: assets/e2e
+        working-directory: assets
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 16.15.0
       - run: yarn --immutable
+      - run: cd e2e && yarn --immutable
       - run: yarn e2e:start
       - uses: 8398a7/action-slack@v3
         if: failure()
