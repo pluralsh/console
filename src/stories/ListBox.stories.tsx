@@ -1,26 +1,20 @@
 import { Div, Flex } from 'honorable'
-import { Key, forwardRef, useState } from 'react'
-import styled from 'styled-components'
+import { useState } from 'react'
 
 import {
-  Button,
-  CheckIcon,
   Chip,
-  DropdownArrowIcon,
   IconFrame,
-  InfoIcon,
+  ListBox,
+  ListBoxFooter,
   ListBoxFooterPlus,
   ListBoxItem,
   ListBoxItemChipList,
   PersonIcon,
-  SearchIcon,
-  Select,
-  SelectButton,
 } from '../index'
 
 export default {
-  title: 'Select',
-  component: 'Select',
+  title: 'List Box',
+  component: ListBox,
 }
 
 const portrait = (
@@ -34,7 +28,6 @@ const smallIcon = <PersonIcon size={16} />
 
 const chipProps = {
   size: 'small',
-  hue: 'lighter',
 }
 const chips = [
   <Chip
@@ -148,48 +141,24 @@ const items = [
   },
 ]
 
-// Make sure any custom trigger button forwards ref to outermost element,
-// otherwise it'll error
-const CustomTriggerButton = styled(forwardRef<any, any>((props, ref) => (
-  <Button
-    ref={ref}
-    medium
-    primary
-    endIcon={<DropdownArrowIcon className="dropdownIcon" />}
-    {...props}
-  >
-    Click me!
-  </Button>
-)))<{ isOpen?: boolean }>(({ isOpen = false }) => ({
-  '.dropdownIcon': {
-    transform: isOpen ? 'scaleY(-1)' : 'scaleY(1)',
-    transition: 'transform 0.1s ease',
-  },
-}))
-
 function Template() {
-  const [selectedKey, setSelectedKey] = useState<Key>()
+  const [selectedKey, setSelectedKey] = useState<string>()
   const shownStep = 4
   const [shownLimit, setShownLimit] = useState<number>(shownStep)
-
-  const curItem = items.find(item => item.key === selectedKey)
-  const customLabel = curItem
-    ? `You have selected ${curItem.label}`
-    : 'Select an item please'
 
   return (
     <Flex
       flexDirection="column"
       gap="large"
-      maxWidth={512}
     >
-      <Div>
-        <Select
-          defaultOpen={false}
-          label="Pick something"
+      <Div maxWidth={512}>
+        <ListBox
           selectedKey={selectedKey}
           onSelectionChange={key => {
             setSelectedKey(key)
+          }}
+          extendStyle={{
+            width: 'max-content',
           }}
         >
           {items.slice(0, 4).map(({ key, label }) => (
@@ -197,54 +166,56 @@ function Template() {
               key={key}
               label={label}
               leftContent={smallIcon}
+              reserveSelectedIndicatorSpace
             />
           ))}
-        </Select>
+        </ListBox>
       </Div>
-
-      <Div>
-        <Select
-          label="Pick something"
+      <Div
+        display="flex"
+        flexDirection="column"
+        maxWidth={512}
+        maxHeight={200}
+        overflow="hidden"
+      >
+        <ListBox
           selectedKey={selectedKey}
           onSelectionChange={key => {
             setSelectedKey(key)
           }}
-          defaultOpen={false}
-          leftContent={<SearchIcon />}
-          rightContent={<ListBoxItemChipList chips={curItem?.chips} />}
-          dropdownFooterFixed={
-            <ListBoxFooterPlus>Create new</ListBoxFooterPlus>
-          }
+          footerFixed={(
+            <ListBoxFooter onClick={() => alert('You clicked the footer')}>
+              Fixed Footer - Default
+            </ListBoxFooter>
+          )}
         >
-          {items.map(({
-            key, label, description, chips,
-          }) => (
+          {items.map(({ key, label, description }) => (
             <ListBoxItem
               key={key}
               label={label}
               description={description}
-              rightContent={<ListBoxItemChipList chips={chips} />}
               leftContent={portrait}
             />
           ))}
-        </Select>
+        </ListBox>
       </Div>
 
-      <Div>
-        <Select
-          label="Pick something"
+      <Div
+        display="flex"
+        flexDirection="column"
+        maxWidth={512}
+        maxHeight={200}
+        overflow="hidden"
+      >
+        <ListBox
           selectedKey={selectedKey}
           onSelectionChange={key => {
             setSelectedKey(key)
           }}
-          defaultOpen={false}
-          dropdownFooterFixed={
-            <ListBoxFooterPlus>Create new</ListBoxFooterPlus>
-          }
-          triggerButton={(
-            <SelectButton leftContent={curItem ? <CheckIcon /> : <InfoIcon />}>
-              {customLabel}
-            </SelectButton>
+          footerFixed={(
+            <ListBoxFooterPlus onClick={() => alert('You clicked the footer')}>
+              Fixed Footer - Add
+            </ListBoxFooterPlus>
           )}
         >
           {items.map(({
@@ -258,38 +229,29 @@ function Template() {
               leftContent={portrait}
             />
           ))}
-        </Select>
+        </ListBox>
       </Div>
 
-      <Flex justifyContent="right">
-        <Select
-          label="Version"
+      <Div
+        display="flex"
+        flexDirection="column"
+        maxWidth={224}
+        maxHeight={200}
+        overflow="hidden"
+      >
+        <ListBox
           selectedKey={selectedKey}
-          triggerButton={<CustomTriggerButton />}
-          width={224}
-          maxHeight={197}
-          placement="right"
           onSelectionChange={key => {
             setSelectedKey(key)
           }}
-          onFooterClick={() => setShownLimit(shownLimit + shownStep)}
-          onOpenChange={open => {
-            if (!open) setShownLimit(shownStep)
-          }}
-          rightContent={
-            curItem && (
-              <ListBoxItemChipList
-                maxVisible={0}
-                showExtra
-                chips={curItem.chips}
-              />
-            )
-          }
-          dropdownFooter={
+          footer={
             shownLimit < items.length && (
               <ListBoxFooterPlus>View more</ListBoxFooterPlus>
             )
           }
+          onFooterClick={() => {
+            setShownLimit(shownLimit + shownStep)
+          }}
         >
           {items.slice(0, shownLimit).map(({ key, chips, version }) => (
             <ListBoxItem
@@ -304,8 +266,8 @@ function Template() {
               )}
             />
           ))}
-        </Select>
-      </Flex>
+        </ListBox>
+      </Div>
     </Flex>
   )
 }

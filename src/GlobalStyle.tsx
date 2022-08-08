@@ -52,22 +52,18 @@ const borderWidthsToToCSSVars = Object.fromEntries(Object.entries(borderWidths).
 ]))
 const bordersToCSSVars = Object.fromEntries(Object.entries(borders).map(([name, value]) => [`--border-${name}`, value]))
 
-const GlobalStyle = createGlobalStyle(({ theme }) => {
-  console.log('theme.colors', theme.colors)
-
-  return {
-    ':root': {
-      ...(theme.colors ? colorsToCSSVars(theme.colors) : {}),
-      ...fontsToCSSVars,
-      ...shadowsToCSSVars,
-      ...spacingToCSSVars,
-      ...radiiToCSSVars,
-      ...borderStylesCSSVars,
-      ...borderWidthsToToCSSVars,
-      ...bordersToCSSVars,
-    },
-    '*': theme.partials.scrollBar(),
-  }
-})
+const GlobalStyle = createGlobalStyle(({ theme }) => ({
+  ':root': {
+    ...(theme.colors ? colorsToCSSVars(theme.colors) : {}),
+    ...fontsToCSSVars,
+    ...shadowsToCSSVars,
+    ...spacingToCSSVars,
+    ...radiiToCSSVars,
+    ...borderStylesCSSVars,
+    ...borderWidthsToToCSSVars,
+    ...bordersToCSSVars,
+  },
+  '*': theme.partials.scrollBar(),
+}))
 
 export default GlobalStyle

@@ -87,6 +87,7 @@ export { default as PeoplePlusIcon } from './components/icons/PeoplePlusIcon'
 export { default as PersonIcon } from './components/icons/PersonIcon'
 export { default as PersonPlusIcon } from './components/icons/PersonPlusIcon'
 export { default as PlanIcon } from './components/icons/PlanIcon'
+export { default as PlusIcon } from './components/icons/PlusIcon'
 export { default as PushPinIcon } from './components/icons/PushPinIcon'
 export { default as ReloadIcon } from './components/icons/ReloadIcon'
 export { default as RocketIcon } from './components/icons/RocketIcon'
@@ -136,7 +137,6 @@ export { default as ProgressBar } from './components/ProgressBar'
 export { default as Radio } from './components/Radio'
 export { default as IconFrame } from './components/IconFrame'
 export { default as RepositoryCard } from './components/RepositoryCard'
-export { default as Select } from './components/Select'
 export { default as Stepper } from './components/Stepper'
 export {
   default as Sidecar,
@@ -166,3 +166,11 @@ export { default as usePrevious } from './hooks/usePrevious'
 // Theme
 export { default as theme, styledTheme } from './theme'
 export { default as GlobalStyle } from './GlobalStyle'
+export { ListBox } from './components/ListBox'
+export {
+  ListBoxItem,
+  ListBoxFooter,
+  ListBoxFooterPlus,
+} from './components/ListBoxItem'
+export { default as ListBoxItemChipList } from './components/ListBoxItemChipList'
+export { Select, SelectButton } from './components/Select'

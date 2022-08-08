@@ -82,6 +82,7 @@ import PeoplePlusIcon from '../components/icons/PeoplePlusIcon'
 import PersonIcon from '../components/icons/PersonIcon'
 import PersonPlusIcon from '../components/icons/PersonPlusIcon'
 import PlanIcon from '../components/icons/PlanIcon'
+import PlusIcon from '../components/icons/PlusIcon'
 import PushPinIcon from '../components/icons/PushPinIcon'
 import ReloadIcon from '../components/icons/ReloadIcon'
 import RocketIcon from '../components/icons/RocketIcon'
@@ -194,6 +195,7 @@ const icons = {
   PersonIcon,
   PersonPlusIcon,
   PlanIcon,
+  PlusIcon,
   PushPinIcon,
   ReloadIcon,
   RocketIcon,

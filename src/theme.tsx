@@ -150,13 +150,22 @@ export const borderStyles = {
   default: 'solid',
 }
 
+export const zIndexes = {
+  base: 0,
+  selectPopover: 1000,
+  tooltip: 10000,
+  modal: 100000,
+}
+
 export const scrollBar = ({ hue = 'default' } = {}) => {
   const trackColor
-      = hue === 'lighter' ? semanticColors['fill-three'] : semanticColors['fill-two']
+    = hue === 'lighter'
+      ? semanticColors['fill-three']
+      : semanticColors['fill-two']
   const barColor
-      = hue === 'lighter'
-        ? semanticColors['text-xlight']
-        : semanticColors['fill-three']
+    = hue === 'lighter'
+      ? semanticColors['text-xlight']
+      : semanticColors['fill-three']
   const barWidth = 6
   const barRadius = barWidth / 2
 
@@ -204,21 +213,6 @@ export const boxShadows = {
   moderate: `0px 3px 6px ${chroma(grey[950]).alpha(0.2)}, 0px 10px 20px ${chroma(grey[950]).alpha(0.3)}`,
   modal: `0px 20px 50px ${chroma(grey[950]).alpha(0.6)}`,
   focused: `0px 0px 0px 1.5px ${semanticColors['border-outline-focused']}`,
-}
-
-const focusPartials = {
-  default: {
-    '&:focus, &:focus-visible': {
-      outline: 'none',
-      boxShadow: boxShadows.focused,
-    },
-  },
-  defaultChild: {
-    ':focus &, :focus-visible &': {
-      outline: 'none',
-      boxShadow: boxShadows.focused,
-    },
-  },
 }
 
 export const spacing = {
@@ -272,7 +266,7 @@ const bodyBaseStyle = {
 }
 
 function asElementTypes<T>() {
-  return function ret <Obj>(obj: { [K in keyof Obj]: T }) {
+  return function ret<Obj>(obj: { [K in keyof Obj]: T }) {
     return obj
   }
 }
@@ -405,6 +399,37 @@ export const textPartials = asElementTypes<CSSObject>()({
 textPartials.body1Bold = { ...textPartials.body1, ...textPartials.bodyBold }
 textPartials.body2Bold = { ...textPartials.body2, ...textPartials.bodyBold }
 
+const resetPartials = asElementTypes<CSSObject>()({
+  button: {
+    textAlign: 'inherit',
+    background: 'none',
+    color: 'inherit',
+    border: 'none',
+    padding: 0,
+    font: 'inherit',
+    cursor: 'pointer',
+    outline: 'inherit',
+  },
+})
+
+const focusPartials = asElementTypes<CSSObject>()({
+  default: {
+    outline: 'none',
+    boxShadow: boxShadows.focused,
+  },
+  insetAbsolute: {
+    outline: 'none',
+    position: 'absolute',
+    content: "''",
+    pointerEvents: 'none',
+    top: `${borderWidths.focus}px`,
+    right: `${borderWidths.focus}px`,
+    left: `${borderWidths.focus}px`,
+    bottom: `${borderWidths.focus}px`,
+    boxShadow: boxShadows.focused,
+  },
+})
+
 const baseTheme = {
   name: 'Plural',
   mode: 'dark',
@@ -474,8 +499,7 @@ const honorableTheme = mergeTheme(defaultTheme, {
     ({ subtitle1 }: any) => subtitle1 && textPartials.subtitle1,
     ({ subtitle2 }: any) => subtitle2 && textPartials.subtitle2,
     ({ body1, body2, bold }: any) => ({
-      ...((body1 || body2)
-        && bold && textPartials.bodyBold),
+      ...((body1 || body2) && bold && textPartials.bodyBold),
       ...(body1 && textPartials.body1),
       ...(body2 && textPartials.body2),
     }),
@@ -1111,10 +1135,12 @@ export const styledTheme = {
     borders,
     borderStyles,
     borderWidths,
+    zIndexes,
     partials: {
       text: textPartials,
       focus: focusPartials,
       scrollBar,
+      reset: resetPartials,
     },
   },
 }

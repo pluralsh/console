@@ -197,7 +197,7 @@ function Tooltip({
             top: y ?? 0,
           }}
           transformOrigin={transformOrigin}
-          zIndex={1000}
+          zIndex={0}
           {...props}
           {...getFloatingProps()}
         >

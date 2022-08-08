@@ -3,11 +3,12 @@ import {
 } from 'honorable'
 import PropTypes from 'prop-types'
 import {
-  PropsWithChildren, ReactNode, Ref, forwardRef,
+  HTMLAttributes, PropsWithChildren, ReactNode, Ref, forwardRef,
 } from 'react'
 
 type FormFieldProps = DivProps & PropsWithChildren<{
   label?: ReactNode
+  labelProps?: HTMLAttributes<HTMLElement>
   caption?: ReactNode
   hint?: ReactNode
   length?: number,
@@ -29,6 +30,7 @@ const propTypes = {
 function FormFieldRef({
   children,
   label,
+  labelProps,
   caption,
   hint,
   error,
@@ -53,6 +55,7 @@ ref: Ref<any>) {
           body2={!small}
           fontWeight="bold"
           flexShrink={0}
+          {...labelProps}
         >
           {label}{required ? '*' : ''}
         </P>
