@@ -15,12 +15,13 @@
 
 import {GQLInterceptor} from '../intercept/graphql';
 
+Cypress.on('uncaught:exception', () => false);
+
 before(() => {
   cy.clearCookies();
   cy.clearLocalStorage();
-  cy.on('uncaught:exception', _ => false)
 });
 
 beforeEach(() => {
-  GQLInterceptor.setup()
+  GQLInterceptor.setup();
 })

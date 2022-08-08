@@ -1,5 +1,5 @@
 export enum Mutations {
-  CreateBuild= 'CreateBuild',
+  CreateBuild = 'CreateBuild',
   Login = 'Login',
   AcceptLogin = 'AcceptLogin',
   Consent = 'Consent',

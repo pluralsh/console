@@ -4,4 +4,4 @@ COPY ./ /e2e/
 
 WORKDIR /e2e
 
-RUN yarn install
+RUN yarn install --immutable

@@ -1,21 +1,19 @@
-import {Config} from '@config/config';
 import {BasePage} from '@pages/base';
-import { aliasQuery, aliasMutation } from '../utils/graphql-test-utils';
 
 export class BuildsPage extends BasePage {
   static deploy(): void {
     this._deployButton().click();
-    cy.wait('@gqlCreateBuildMutation') // wait for intercept 
+    cy.wait('@CreateBuild') // wait for intercept
       .then(interception => {
         // navigate to the build page for this deploy request
         console.log(interception.response)
         cy.visit('/build/'+interception.response.body.data.createBuild.id)
-        
+
       });
 
     // wait for the build page to load
-    cy.wait('@gqlBuildQuery')
-    
+    cy.wait('@Build')
+
     // wait until the deployment is done running
     cy.get('[id=build-status]', { timeout: 120000 }).should('not.have.css', 'background-color', 'rgb(0, 123, 255)')
 
@@ -28,16 +26,16 @@ export class BuildsPage extends BasePage {
 
   static bounce(): void {
     this._bounceButton().click();
-    cy.wait('@gqlCreateBuildMutation') // wait for intercept 
+    cy.wait('@CreateBuild') // wait for intercept
       .then(interception => {
         // navigate to the build page for this bounce request
         cy.visit('/build/'+interception.response.body.data.createBuild.id)
-        
+
       });
 
     // wait for the build page to load
-    cy.wait('@gqlBuildQuery')
-    
+    cy.wait('@Build')
+
     // wait until the deployment is done running
     cy.get('[id=build-status]', { timeout: 120000 }).should('not.have.css', 'background-color', 'rgb(0, 123, 255)')
 
