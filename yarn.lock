@@ -15756,6 +15756,7 @@ __metadata:
     react: ">=16.0.0"
     react-dom: ">=16.0.0"
     react-transition-group: ">=4.4.2"
+    styled-components: ">=5.3.5"
   languageName: unknown
   linkType: soft
 
