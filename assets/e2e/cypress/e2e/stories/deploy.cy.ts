@@ -1,11 +1,13 @@
 import {BuildsPage} from '@pages/builds';
 import {LoginPage} from '@pages/login';
+import {RootPage} from '@pages/root';
 
-context('Tests', () => {
+context('Deploy story', () => {
   describe('deploy the first installed app', () => {
-    it('log in to the console and deploy application', () => {
-      LoginPage.visit();
-      LoginPage.login();
+    beforeEach(() => LoginPage.login())
+
+    it('should deploy the application', () => {
+      RootPage.visit();
       BuildsPage.deploy();
     })
   });

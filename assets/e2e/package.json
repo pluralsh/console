@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "e2e:start": "npx cypress run",
+    "e2e:start": "npx cypress run --browser=chrome",
     "e2e:open": "npx cypress open"
   },
   "engines": {

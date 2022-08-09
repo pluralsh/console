@@ -1,11 +1,13 @@
 import {BuildsPage} from '@pages/builds';
 import {LoginPage} from '@pages/login';
+import {RootPage} from '@pages/root';
 
-context('Tests', () => {
+context('Bounce story', () => {
   describe('bounce the first installed app', () => {
-    it('log in to the console and bounce application', () => {
-      LoginPage.visit();
-      LoginPage.login();
+    beforeEach(() => LoginPage.login())
+
+    it('should bounce the application', () => {
+      RootPage.visit();
       BuildsPage.bounce();
     })
   });

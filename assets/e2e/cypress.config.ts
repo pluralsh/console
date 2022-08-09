@@ -4,7 +4,6 @@ import {options} from './webpack.config';
 
 export default defineConfig({
   fixturesFolder: false,
-  chromeWebSecurity: false,
   video: true,
   videoUploadOnPasses: false,
   screenshotOnRunFailure: true,

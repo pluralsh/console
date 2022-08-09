@@ -1,62 +1,52 @@
 import {Config} from '@config/config';
 import {BasePage} from '@pages/base';
+import {RootPage} from '@pages/root';
 import {GQLInterceptor} from '../intercept/graphql';
+import {Mutations} from '../intercept/mutations';
 import {Queries} from '../intercept/queries';
+import {Condition} from '../types/condition';
 
 export class LoginPage extends BasePage {
-  private static readonly _url = '/';
-  private static readonly _oidcLoginButtonSelector = '#plrl-login';
-  private static readonly _emailInputSelector = `[name='Email address']`
-  private static readonly _passwordInputSelector = `[name='Password']`
-
-  static visit(): void {
-    cy.visit(this._url);
-  }
-
   static login(email: string = Config.EMAIL, password: string = Config.PASSWORD): void {
-    GQLInterceptor.wait(Queries.LoginInfo)
-    this._oidcLoginButton().click();
+    cy.session([email, password], () => {
+      RootPage.visit();
 
-    cy.get(`[name='Email address']`).type(email);
-    // this._emailInput().type(email);
-    cy.contains('button', 'Continue').should('be.visible').and('be.enabled').click();
+      GQLInterceptor.wait(Queries.LoginInfo);
 
-    cy.wait('@LoginMethod')
+      this._oidcLoginButton.click();
+      this._emailInput.type(email);
+      this._continueButton.should(Condition.BeVisible).and(Condition.BeEnabled).click();
 
-    // this._continueButton().click();
-    cy.get(`[name='Password']`).type(password);
-    // this._passwordInput().type(password);
-    cy.contains('button', 'Continue').should('be.visible').and('be.enabled').click();
+      GQLInterceptor.wait(Queries.LoginMethod);
 
-    cy.wait('@Login')
-    // cy.wait('@gqlAcceptLoginMutation')
-    cy.wait('@OIDCConsent')
+      this._passwordInput.type(password);
+      this._continueButton.should(Condition.BeVisible).and(Condition.BeEnabled).click();
 
-    // this._continueButton().click();
-    cy.contains('div', 'Allow').should('be.visible').click();
-    // this._allowButton().click();
+      GQLInterceptor.wait([Mutations.Login, Queries.OIDCConsent]);
 
-    cy.wait('@Consent')
-    cy.wait('@Callback')
+      this._allowButton.should(Condition.BeVisible).click();
+
+      GQLInterceptor.wait([Mutations.Consent, Mutations.Callback, Queries.Builds]);
+    });
   }
 
-  private static _oidcLoginButton(): Cypress.Chainable {
-    return this._get(this._oidcLoginButtonSelector);
+  private static get _oidcLoginButton(): Cypress.Chainable {
+    return this._get('#plrl-login');
   }
 
-  private static _emailInput(): Cypress.Chainable {
-    return this._get(this._emailInputSelector);
+  private static get _emailInput(): Cypress.Chainable {
+    return this._get(`[name='Email address']`);
   }
 
-  private static _passwordInput(): Cypress.Chainable {
-    return this._get(this._passwordInputSelector);
+  private static get _passwordInput(): Cypress.Chainable {
+    return this._get(`[name='Password']`);
   }
 
-  private static _continueButton(): Cypress.Chainable {
+  private static get _continueButton(): Cypress.Chainable {
     return this._contains('button', 'Continue');
   }
 
-  private static _allowButton(): Cypress.Chainable {
+  private static get _allowButton(): Cypress.Chainable {
     return this._contains('div', 'Allow');
   }
 }

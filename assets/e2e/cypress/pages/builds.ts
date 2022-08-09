@@ -30,7 +30,6 @@ export class BuildsPage extends BasePage {
       .then(interception => {
         // navigate to the build page for this bounce request
         cy.visit('/build/'+interception.response.body.data.createBuild.id)
-
       });
 
     // wait for the build page to load
