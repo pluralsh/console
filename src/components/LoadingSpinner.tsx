@@ -19,7 +19,7 @@ import useResizeObserver from '../hooks/useResizeObserver'
 
 export type LoadingSpinnerProps = DivProps & {
   paused?: boolean;
-  show: boolean;
+  show?: boolean;
   spinnerWidth?: number;
   spinnerDelay?: number;
   centered?: boolean;
@@ -214,7 +214,7 @@ const Wrapper = forwardRef<HTMLDivElement, DivProps>(({ centered, children, ...p
 ))
 
 const LoadingSpinner = forwardRef<HTMLDivElement, LoadingSpinnerProps>(({
-  show,
+  show = true,
   paused,
   spinnerWidth = 96,
   spinnerDelay = 200,

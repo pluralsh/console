@@ -4,12 +4,12 @@ import {
 import { ReactNode, forwardRef } from 'react'
 
 export type PageTitleProps = {
-  heading: ReactNode
-  headingProps: DivProps
+  heading?: ReactNode
+  headingProps?: DivProps
 } & FlexProps
 
 const PageTitle = forwardRef<HTMLDivElement, PageTitleProps>(({
-  heading, headingProps, children, ...props
+  heading, headingProps = {}, children, ...props
 }) => (
   <Flex
     borderBottom="1px solid border"
@@ -20,12 +20,14 @@ const PageTitle = forwardRef<HTMLDivElement, PageTitleProps>(({
     justifyContent="space-between"
     {...props}
   >
-    <H1
-      title1
-      {...headingProps}
-    >
-      {heading}
-    </H1>
+    {heading && (
+      <H1
+        title1
+        {...headingProps}
+      >
+        {heading}
+      </H1>
+    )}
     {children}
   </Flex>
 ))

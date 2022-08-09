@@ -111,7 +111,7 @@ export const semanticColors = {
   'action-link-inactive': grey[200],
   'action-link-active': grey[50],
   'action-link-inline': blue[200],
-  'action-input-hover': `${chroma(grey[50]).alpha(0.96)}`,
+  'action-input-hover': `${chroma('#E9ECF0').alpha(0.04)}`,
   // Border
   border: grey[800],
   'border-input': grey[700],

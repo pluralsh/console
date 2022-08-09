@@ -21,7 +21,7 @@ import { mergeRefs } from 'react-merge-refs'
 import { Div, DivProps } from 'honorable'
 import { CSSTransition } from 'react-transition-group'
 
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import createIcon from './icons/createIcon'
 
@@ -99,6 +99,7 @@ function Tooltip({
   onOpenChange,
   ...props
 }: TooltipProps) {
+  const theme = useTheme()
   const [open, setOpen] = useState(false)
   const arrowRef = useRef()
   const isOpen
@@ -190,6 +191,7 @@ function Tooltip({
           paddingHorizontal="small"
           color="text-light"
           backgroundColor="fill-two"
+          boxShadow={theme.boxShadows.moderate}
           userSelect="none"
           style={{
             position: finalStrategy,

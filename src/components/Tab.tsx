@@ -58,9 +58,11 @@ ref: Ref<any>) {
             ? `3px solid ${active ? 'border-primary' : 'transparent'}`
             : null
         }
-        hoverIndicator="action-input-hover"
         color={active ? 'text' : 'text-xlight'}
-        _hover={{ color: 'text' }}
+        _hover={{
+          color: 'text',
+          backgroundColor: 'action-input-hover',
+        }}
         transition="background-color 150ms ease, border-color 150ms ease, color 150ms ease"
       >
         {!!startIcon && <Icon marginRight="small">{startIcon}</Icon>}
