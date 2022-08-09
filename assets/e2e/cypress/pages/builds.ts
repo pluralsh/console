@@ -1,39 +1,38 @@
+import {Mutations} from '@ctypes/mutations';
+import {Queries} from '@ctypes/queries';
+import {GQLInterceptor} from '@intercept/graphql';
+import {CreateBuildQueryResponse} from '@intercept/query/build';
 import {BasePage} from '@pages/base';
+import {RootPage} from '@pages/root';
 
 export class BuildsPage extends BasePage {
+  static visit(buildID?: string): void {
+    if(buildID) {
+      cy.visit(`/build/${buildID}`);
+      return;
+    }
+
+    RootPage.visit();
+  }
+
   static deploy(): void {
     this._deployButton().click();
-    cy.wait('@CreateBuild') // wait for intercept
-      .then(interception => {
-        // navigate to the build page for this deploy request
-        console.log(interception.response)
-        cy.visit('/build/'+interception.response.body.data.createBuild.id)
-
-      });
-
-    // wait for the build page to load
-    cy.wait('@Build')
-
-    // wait until the deployment is done running
-    cy.get('[id=build-status]', { timeout: 120000 }).should('not.have.css', 'background-color', 'rgb(0, 123, 255)')
-
-    // ensure the deployment hasn't failed
-    cy.get('[id=build-status]').contains('Failed').should('not.exist');
-
-    // ensure the deployment was successful
-    cy.get('[id=build-status]').contains('Passed').should('exist');
+    this._verifyBuildStatus();
   }
 
   static bounce(): void {
     this._bounceButton().click();
-    cy.wait('@CreateBuild') // wait for intercept
-      .then(interception => {
-        // navigate to the build page for this bounce request
-        cy.visit('/build/'+interception.response.body.data.createBuild.id)
-      });
+    this._verifyBuildStatus();
+  }
+
+  private static _verifyBuildStatus(): void {
+    GQLInterceptor.wait(Mutations.CreateBuild, () => {
+      const id = GQLInterceptor.response<CreateBuildQueryResponse>(Mutations.CreateBuild).id;
+      this.visit(id);
+    });
 
     // wait for the build page to load
-    cy.wait('@Build')
+    GQLInterceptor.wait(Queries.Build);
 
     // wait until the deployment is done running
     cy.get('[id=build-status]', { timeout: 120000 }).should('not.have.css', 'background-color', 'rgb(0, 123, 255)')

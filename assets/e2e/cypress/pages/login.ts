@@ -1,10 +1,10 @@
 import {Config} from '@config/config';
 import {BasePage} from '@pages/base';
 import {RootPage} from '@pages/root';
-import {GQLInterceptor} from '../intercept/graphql';
-import {Mutations} from '../intercept/mutations';
-import {Queries} from '../intercept/queries';
-import {Condition} from '../types/condition';
+import {Condition} from '@ctypes/condition';
+import {Mutations} from '@ctypes/mutations';
+import {Queries} from '@ctypes/queries';
+import {GQLInterceptor} from '@intercept/graphql';
 
 export class LoginPage extends BasePage {
   static login(email: string = Config.EMAIL, password: string = Config.PASSWORD): void {

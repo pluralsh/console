@@ -8,9 +8,11 @@ export const options = {
       resolve: {
         extensions: ['.ts', '.js'],
         alias: {
+          '@ctypes': path.resolve(__dirname, 'cypress/types'),
           '@pages': path.resolve(__dirname, 'cypress/pages'),
           '@config': path.resolve(__dirname, 'cypress/config'),
-          '@support': path.resolve(__dirname, 'cypress/support')
+          '@support': path.resolve(__dirname, 'cypress/support'),
+          '@intercept': path.resolve(__dirname, 'cypress/intercept')
         },
       },
       module: {

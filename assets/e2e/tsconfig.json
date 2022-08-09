@@ -17,9 +17,11 @@
     ],
     "types": ["cypress", "node"],
     "paths": {
+      "@ctypes/*": ["types/*"],
       "@pages/*": ["pages/*"],
       "@config/*": ["config/*"],
-      "@support/*": ["support/*"]
+      "@support/*": ["support/*"],
+      "@intercept/*": ["intercept/*"]
     }
   },
   "include": [
