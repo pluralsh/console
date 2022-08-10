@@ -1,6 +1,7 @@
-import webpack from '@cypress/webpack-preprocessor';
-import {defineConfig} from 'cypress';
-import {options} from './webpack.config';
+import webpack from '@cypress/webpack-preprocessor'
+import { defineConfig } from 'cypress'
+
+import { options } from './webpack.config'
 
 export default defineConfig({
   fixturesFolder: false,
@@ -13,7 +14,7 @@ export default defineConfig({
     supportFile: 'cypress/support/index.ts',
     experimentalSessionAndOrigin: true,
     setupNodeEvents(on) {
-      on('file:preprocessor', webpack(options));
-    }
+      on('file:preprocessor', webpack(options))
+    },
   },
-});
+})

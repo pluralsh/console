@@ -1,5 +1,6 @@
-import * as path from 'path';
-import {defaultOptions} from '@cypress/webpack-preprocessor';
+import * as path from 'path'
+
+import { defaultOptions } from '@cypress/webpack-preprocessor'
 
 export const options = {
   ...defaultOptions,
@@ -12,7 +13,7 @@ export const options = {
           '@pages': path.resolve(__dirname, 'cypress/pages'),
           '@config': path.resolve(__dirname, 'cypress/config'),
           '@support': path.resolve(__dirname, 'cypress/support'),
-          '@intercept': path.resolve(__dirname, 'cypress/intercept')
+          '@intercept': path.resolve(__dirname, 'cypress/intercept'),
         },
       },
       module: {
@@ -22,13 +23,13 @@ export const options = {
             use: [{
               loader: 'ts-loader',
               options: {
-                configFile: path.resolve(__dirname, 'tsconfig.json')
-              }
+                configFile: path.resolve(__dirname, 'tsconfig.json'),
+              },
             }],
             exclude: /node_modules/,
-          }
-        ]
-      }
-    }
-  }
-};
+          },
+        ],
+      },
+    },
+  },
+}

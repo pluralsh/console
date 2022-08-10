@@ -1,4 +1,4 @@
-import {GQLResponseHandler} from '@ctypes/graphql';
+import { GQLResponseHandler } from '@ctypes/graphql'
 
 interface CreateBuildResponse {
   id: string;
@@ -20,10 +20,10 @@ export class CreateBuildQueryResponse implements GQLResponseHandler {
   private _idKey = 'createBuildID'
 
   get id(): string {
-    return Cypress.env(this._idKey);
+    return Cypress.env(this._idKey)
   }
 
   handle({ createBuild }: {createBuild: CreateBuildResponse}): void {
-    Cypress.env(this._idKey, createBuild.id);
+    Cypress.env(this._idKey, createBuild.id)
   }
 }
