@@ -46,7 +46,7 @@ export class BuildsPage extends BasePage {
     GQLInterceptor.wait(Queries.Build)
 
     // ensure the deployment was successful
-    this._buildStatus(BuildStatus.Passed, 60 * Time.Second).should(Condition.Exist)
+    this._buildStatus(BuildStatus.Passed, 4 * Time.Minute).should(Condition.Exist)
   }
 
   private static _bounceButton(): Cypress.Chainable {
