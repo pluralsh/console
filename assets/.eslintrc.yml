@@ -1,7 +1,7 @@
 parser: "@babel/eslint-parser"
 extends: "pluralsh"
 ignorePatterns:
-  - "cypress/*"
+  - "e2e/*"
   - "cypress.config.ts"
 rules:
   import/prefer-default-export: off

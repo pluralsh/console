@@ -87,3 +87,12 @@ secrets:
 {{ end }}
 
 license: {{ .License | quote }}
+
+{{- if .Values.testBase.enabled }}
+test-base:
+  enabled: true
+  secret:
+    CYPRESS_EMAIL: {{ .Values.testBase.cypressEmail }}
+    CYPRESS_PASSWORD: {{ .Values.testBase.cypressPassword }}
+    CYPRESS_BASE_URL: https://{{ .Values.console_dns }}/
+{{- end }}

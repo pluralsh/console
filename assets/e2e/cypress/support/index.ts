@@ -13,14 +13,14 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-import '@config/config'
-import './commands';
+import { GQLInterceptor } from '@intercept/graphql'
+
+Cypress.on('uncaught:exception', () => false)
 
 before(() => {
-  cy.clearCookies();
-  cy.clearLocalStorage();
-  cy.on('uncaught:exception', _ => false)
-});
-
-
-
+  cy.clearCookies()
+  cy.clearLocalStorage()
+})
+beforeEach(() => {
+  GQLInterceptor.setup()
+})

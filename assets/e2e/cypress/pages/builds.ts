@@ -1,58 +1,67 @@
-import {Config} from '@config/config';
-import {BasePage} from '@pages/base';
-import { aliasQuery, aliasMutation } from '../utils/graphql-test-utils';
+import { Condition } from '@ctypes/condition'
+import { Mutations } from '@ctypes/mutations'
+import { Queries } from '@ctypes/queries'
+import { Time } from '@ctypes/time'
+import { GQLInterceptor } from '@intercept/graphql'
+import { CreateBuildQueryResponse } from '@intercept/query/build'
+import { BasePage } from '@pages/base'
+import { RootPage } from '@pages/root'
+
+enum BuildStatus {
+  Running = 'Running',
+  Failed = 'Failed',
+  Passed = 'Passed'
+}
 
 export class BuildsPage extends BasePage {
+  static visit(buildID?: string): void {
+    if (buildID) {
+      cy.visit(`/build/${buildID}`)
+
+      return
+    }
+
+    RootPage.visit()
+  }
+
   static deploy(): void {
-    this._deployButton().click();
-    cy.wait('@gqlCreateBuildMutation') // wait for intercept 
-      .then(interception => {
-        // navigate to the build page for this deploy request
-        console.log(interception.response)
-        cy.visit('/build/'+interception.response.body.data.createBuild.id)
-        
-      });
-
-    // wait for the build page to load
-    cy.wait('@gqlBuildQuery')
-    
-    // wait until the deployment is done running
-    cy.get('[id=build-status]', { timeout: 120000 }).should('not.have.css', 'background-color', 'rgb(0, 123, 255)')
-
-    // ensure the deployment hasn't failed
-    cy.get('[id=build-status]').contains('Failed').should('not.exist');
-
-    // ensure the deployment was successful
-    cy.get('[id=build-status]').contains('Passed').should('exist');
+    this._deployButton().click()
+    this._ensure()
   }
 
   static bounce(): void {
-    this._bounceButton().click();
-    cy.wait('@gqlCreateBuildMutation') // wait for intercept 
-      .then(interception => {
-        // navigate to the build page for this bounce request
-        cy.visit('/build/'+interception.response.body.data.createBuild.id)
-        
-      });
+    this._bounceButton().click()
+    this._ensure()
+  }
+
+  private static _ensure(): void {
+    GQLInterceptor.wait(Mutations.CreateBuild, () => {
+      const { id } = GQLInterceptor.response<CreateBuildQueryResponse>(Mutations.CreateBuild)
+
+      cy.wrap(id).should(Condition.NotBeEmpty)
+      this.visit(id)
+    })
 
     // wait for the build page to load
-    cy.wait('@gqlBuildQuery')
-    
-    // wait until the deployment is done running
-    cy.get('[id=build-status]', { timeout: 120000 }).should('not.have.css', 'background-color', 'rgb(0, 123, 255)')
-
-    // ensure the deployment hasn't failed
-    cy.get('[id=build-status]').contains('Failed').should('not.exist');
+    GQLInterceptor.wait(Queries.Build)
 
     // ensure the deployment was successful
-    cy.get('[id=build-status]').contains('Passed').should('exist');
+    this._buildStatus(BuildStatus.Passed, 60 * Time.Second).should(Condition.Exist)
   }
 
   private static _bounceButton(): Cypress.Chainable {
-    return this._contains('div', 'Bounce');
+    return this._contains('div', 'Bounce')
   }
 
   private static _deployButton(): Cypress.Chainable {
-    return this._contains('div', 'Deploy');
+    return this._contains('div', 'Deploy')
+  }
+
+  private static _buildStatus(status: BuildStatus | RegExp, timeout?: number): Cypress.Chainable {
+    if (status === BuildStatus.Running) {
+      status = /^\d{2}:\d{2}:\d{2}$/
+    }
+
+    return this._contains('#build-status', status, timeout ? { timeout } : undefined)
   }
 }

@@ -1,26 +1,14 @@
-import {LoginPage} from '@pages/login';
-import {BuildsPage} from '@pages/builds';
-import { aliasQuery, aliasMutation } from '../../utils/graphql-test-utils'
+import { BuildsPage } from '@pages/builds'
+import { LoginPage } from '@pages/login'
+import { RootPage } from '@pages/root'
 
-context('Tests', () => {
+context('Bounce story', () => {
+  describe('bounce the first installed app', () => {
+    beforeEach(() => LoginPage.login())
 
-  beforeEach(() => {
-    cy.intercept('POST', '/gql', (req) => {
-      // Queries
-      aliasQuery(req, 'Builds')
-      aliasQuery(req, 'Build')
-      aliasQuery(req, 'Me')
-
-      // Mutations
-      aliasMutation(req, 'CreateBuild')
-      aliasMutation(req, 'Callback')
+    it('should bounce the application', () => {
+      RootPage.visit()
+      BuildsPage.bounce()
     })
   })
-  describe('bounce the first installed app', () => {
-    it('log in to the console and bounce application', () => {
-      LoginPage.visit();
-      LoginPage.login();
-      BuildsPage.bounce();
-    })
-  });
 })
