@@ -1,7 +1,8 @@
 ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 DOCKERFILE := $(ROOT_DIRECTORY)/cypress.Dockerfile
 IMAGE_NAME := console-e2e
-IMAGE_REPOSITORY := floreks # CHANGEME
+# CHANGEME
+IMAGE_REPOSITORY := floreks
 
 .PHONY: build
 build:

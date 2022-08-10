@@ -1,10 +1,9 @@
+import {Dispatch} from '@ctypes/dispatch';
 import {GQLOperation, GQLResponseHandler} from '@ctypes/graphql';
 import {Mutations} from '@ctypes/mutations';
 import {Queries} from '@ctypes/queries';
 import {GQLResponseHandlerFactory} from '@intercept/factory';
-import {CyHttpMessages} from 'cypress/types/net-stubbing';
-
-type Callback = () => void;
+import {CyHttpMessages, Interception} from 'cypress/types/net-stubbing';
 
 export class GQLInterceptor {
   private static readonly _endpoint = '/gql';
@@ -37,10 +36,9 @@ export class GQLInterceptor {
   }
 
   static wait(op: GQLOperation, timeout?: number): void
-  static wait(op: GQLOperation, cb?: Callback): void
+  static wait(op: GQLOperation, onResponse?: Dispatch<Interception>): void
   static wait(op: Array<GQLOperation>,  timeout?: number): void
-  static wait(op: Array<GQLOperation>, cb?: Callback): void
-  static wait(op: GQLOperation | Array<GQLOperation>, timeoutOrCb?: number | Callback): void {
+  static wait(op: GQLOperation | Array<GQLOperation>, timeoutOrCb?: number | Dispatch<Interception>): void {
     const handler = (o: GQLOperation) => {
       const alias = `@${o}`;
 

@@ -1,9 +1,16 @@
+import {Condition} from '@ctypes/condition';
 import {Mutations} from '@ctypes/mutations';
 import {Queries} from '@ctypes/queries';
 import {GQLInterceptor} from '@intercept/graphql';
 import {CreateBuildQueryResponse} from '@intercept/query/build';
 import {BasePage} from '@pages/base';
 import {RootPage} from '@pages/root';
+
+enum BuildStatus {
+  Running = 'Running',
+  Failed = 'Failed',
+  Passed = 'Passed'
+}
 
 export class BuildsPage extends BasePage {
   static visit(buildID?: string): void {
@@ -17,17 +24,18 @@ export class BuildsPage extends BasePage {
 
   static deploy(): void {
     this._deployButton().click();
-    this._verifyBuildStatus();
+    this._ensure();
   }
 
   static bounce(): void {
     this._bounceButton().click();
-    this._verifyBuildStatus();
+    this._ensure();
   }
 
-  private static _verifyBuildStatus(): void {
+  private static _ensure(): void {
     GQLInterceptor.wait(Mutations.CreateBuild, () => {
       const id = GQLInterceptor.response<CreateBuildQueryResponse>(Mutations.CreateBuild).id;
+      cy.wrap(id).should(Condition.NotBeEmpty);
       this.visit(id);
     });
 
@@ -35,13 +43,13 @@ export class BuildsPage extends BasePage {
     GQLInterceptor.wait(Queries.Build);
 
     // wait until the deployment is done running
-    cy.get('[id=build-status]', { timeout: 120000 }).should('not.have.css', 'background-color', 'rgb(0, 123, 255)')
+    this._buildStatus(BuildStatus.Running).should(Condition.NotExist);
 
     // ensure the deployment hasn't failed
-    cy.get('[id=build-status]').contains('Failed').should('not.exist');
+    this._buildStatus(BuildStatus.Failed).should(Condition.NotExist);
 
     // ensure the deployment was successful
-    cy.get('[id=build-status]').contains('Passed').should('exist');
+    this._buildStatus(BuildStatus.Passed).should(Condition.Exist);
   }
 
   private static _bounceButton(): Cypress.Chainable {
@@ -50,5 +58,13 @@ export class BuildsPage extends BasePage {
 
   private static _deployButton(): Cypress.Chainable {
     return this._contains('div', 'Deploy');
+  }
+
+  private static _buildStatus(status: BuildStatus | RegExp): Cypress.Chainable {
+    if(status === BuildStatus.Running) {
+      status = /^\d{2}:\d{2}:\d{2}$/
+    }
+
+    return this._contains('#build-status', status);
   }
 }

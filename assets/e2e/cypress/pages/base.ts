@@ -5,7 +5,7 @@ export abstract class BasePage {
     return cy.get(selector, {...options, timeout: this._elementTimeout})
   }
 
-  protected static _contains(selector: string, text: string, options?: Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow>): Cypress.Chainable {
+  protected static _contains(selector: string, text: string | number | RegExp, options?: Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow>): Cypress.Chainable {
     return cy.contains(selector, text, {...options, timeout: this._elementTimeout})
   }
 }
