@@ -1,6 +1,7 @@
 import {Condition} from '@ctypes/condition';
 import {Mutations} from '@ctypes/mutations';
 import {Queries} from '@ctypes/queries';
+import {Time} from '@ctypes/time';
 import {GQLInterceptor} from '@intercept/graphql';
 import {CreateBuildQueryResponse} from '@intercept/query/build';
 import {BasePage} from '@pages/base';
@@ -43,7 +44,7 @@ export class BuildsPage extends BasePage {
     GQLInterceptor.wait(Queries.Build);
 
     // wait until the deployment is done running
-    this._buildStatus(BuildStatus.Running).should(Condition.NotExist);
+    this._buildStatus(BuildStatus.Running, 60 * Time.Second).should(Condition.NotExist);
 
     // ensure the deployment hasn't failed
     this._buildStatus(BuildStatus.Failed).should(Condition.NotExist);
@@ -60,11 +61,11 @@ export class BuildsPage extends BasePage {
     return this._contains('div', 'Deploy');
   }
 
-  private static _buildStatus(status: BuildStatus | RegExp): Cypress.Chainable {
+  private static _buildStatus(status: BuildStatus | RegExp, timeout?: number): Cypress.Chainable {
     if(status === BuildStatus.Running) {
       status = /^\d{2}:\d{2}:\d{2}$/
     }
 
-    return this._contains('#build-status', status);
+    return this._contains('#build-status', status, timeout ? {timeout} : undefined);
   }
 }
