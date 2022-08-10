@@ -144,8 +144,8 @@ test-base:
     description: runs cypress E2E tests for the console
     template:
       container:
-        args: ["--browser=chrome"]
-        image: davidspek/console-cypress:0.3.0 #TODO: change to proper image
+        args: ["--browser=chromium"]
+        image: dkr.plural.sh/console/console-cypress:v0.2.5-5-g5d88b72
         envFrom:
         - secretRef:
             name: console-test-base-env
