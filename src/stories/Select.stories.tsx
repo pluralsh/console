@@ -297,7 +297,7 @@ function Template() {
               label={version}
               rightContent={(
                 <ListBoxItemChipList
-                  maxVisible={2}
+                  maxVisible={1}
                   showExtra
                   chips={chips}
                 />
