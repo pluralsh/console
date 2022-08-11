@@ -1,5 +1,5 @@
 name: console
-description: A web application that serves as a control panel for all your Plural applications.
+description: Web based admin panel for all your Plural applications.
 category: DEVOPS
 icon: plural/icons/console-logo.png
 darkIcon: plural/icons/console-white.png
