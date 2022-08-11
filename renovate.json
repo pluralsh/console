@@ -43,6 +43,15 @@
       "bumpVersion": "patch"
     }
   ],
+  "regexManagers": [
+    {
+      "fileMatch": ["^Dockerfile$"],
+      "matchStrings": [
+        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s(?:ENV|ARG) .*?_VERSION=(?<currentValue>.*)\\s"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ],
   "labels": ["dependencies"],
   "separateMinorPatch": true,
   "dependencyDashboardApproval": true

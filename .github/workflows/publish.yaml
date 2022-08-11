@@ -49,6 +49,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Docker meta
       id: meta
       uses: docker/metadata-action@v4
@@ -94,6 +96,9 @@ jobs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        platforms: linux/amd64
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
         build-args: |
           GIT_COMMIT=$GITHUB_SHA
     - name: slack webhook
