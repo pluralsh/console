@@ -133,7 +133,7 @@ ENV REPLACE_OS_VARS=true \
 
 WORKDIR /opt/app
 
-RUN helm plugin install https://github.com/databus23/helm-diff --version 3.1.3
+RUN helm plugin install https://github.com/databus23/helm-diff --version 3.5.0
 RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh
 RUN mkdir -p /root/.plural && mkdir -p /root/.creds && mkdir /root/bin
 RUN ln -s /usr/local/bin/plural /usr/local/bin/forge
