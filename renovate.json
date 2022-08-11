@@ -43,6 +43,7 @@
       "bumpVersion": "patch"
     }
   ],
+  "labels": ["dependencies"],
   "separateMinorPatch": true,
   "dependencyDashboardApproval": true
 }
