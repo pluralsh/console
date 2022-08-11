@@ -1,5 +1,5 @@
 name: console
-description: plural admin console
+description: Web based admin panel for all your Plural applications.
 category: DEVOPS
 icon: plural/icons/console-logo.png
 darkIcon: plural/icons/console-white.png
