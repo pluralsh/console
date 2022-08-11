@@ -81,7 +81,7 @@ ENV KUBECTL_VERSION=v1.16.14
 #TODO: use TARGETARCH for Plural CLI when new release is cut
 RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-base && \
     curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz | tar xvz && \
-    mv linux-amd64/helm /usr/local/bin/helm && \
+    mv linux-${TARGETARCH}/helm /usr/local/bin/helm && \
     wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION/v/}/terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip && \
     unzip terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip -d /usr/local/bin && \
     curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_${CLI_VERSION/v/}_Linux_x86_64.tar.gz | tar xvz plural && \
