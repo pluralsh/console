@@ -68,12 +68,12 @@ RUN \
 
 FROM gcr.io/pluralsh/alpine:3 as tools
 
-ARG VERSION=3.7.0
+ARG HELM_VERSION=3.7.0
 ENV TERRAFORM_VERSION=0.15.2
 ENV CLI_VERSION=0.4.3
 
 ENV BASE_URL="https://get.helm.sh"
-ENV TAR_FILE="helm-v${VERSION}-linux-amd64.tar.gz"
+ENV TAR_FILE="helm-v${HELM_VERSION}-linux-amd64.tar.gz"
 
 RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-base && \
     curl -L ${BASE_URL}/${TAR_FILE} | tar xvz && \
