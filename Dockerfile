@@ -1,5 +1,19 @@
 FROM node:16.16-alpine3.15 as node
 
+WORKDIR /app
+
+COPY assets/package.json ./package.json
+COPY assets/yarn.lock ./yarn.lock
+COPY assets/.yarn ./.yarn
+COPY assets/.yarnrc.yml ./.yarnrc.yml
+
+RUN npm config set unsafe-perm true
+RUN yarn install
+
+COPY assets/ ./
+
+RUN yarn run build
+
 FROM bitwalker/alpine-elixir:1.11.4 AS builder
 
 # The following are build arguments used to change variable parts of the image.
@@ -14,12 +28,6 @@ ENV SKIP_PHOENIX=${SKIP_PHOENIX} \
     APP_NAME=${APP_NAME} \
     MIX_ENV=${MIX_ENV}
 
-COPY --from=node /usr/lib /usr/lib
-COPY --from=node /usr/local/share /usr/local/share
-COPY --from=node /usr/local/lib /usr/local/lib
-COPY --from=node /usr/local/include /usr/local/include
-COPY --from=node /usr/local/bin /usr/local/bin
-
 # By convention, /opt is typically used for applications
 WORKDIR /opt/app
 
@@ -27,7 +35,6 @@ WORKDIR /opt/app
 RUN apk update --allow-untrusted && \
   apk upgrade --no-cache && \
   apk add --no-cache \
-    yarn \
     git \
     build-base && \
   mix local.rebar --force && \
@@ -42,17 +49,7 @@ RUN git config --global --add safe.directory '/opt/app'
 RUN mix do deps.get, compile
 RUN ls -al
 
-# This step builds assets for the Phoenix app (if there is one)
-# If you aren't building a Phoenix app, pass `--build-arg SKIP_PHOENIX=true`
-# This is mostly here for demonstration purposes
-RUN if [ ! "$SKIP_PHOENIX" = "true" ]; then \
-  cd assets && \
-  yarn install && \
-  yarn run build && \
-  mkdir -p ../priv/static && \
-  mv build/* ../priv/static && \
-  rm -rf build; \
-fi
+COPY --from=node /app/build ./priv/static
 
 RUN \
   mkdir -p /opt/built && \
@@ -67,16 +64,16 @@ FROM alpine:3.16.2 as tools
 ARG TARGETARCH
 
 # renovate: datasource=github-releases depName=helm/helm
-ENV HELM_VERSION=v3.7.0
+ENV HELM_VERSION=v3.9.3
 
 # renovate: datasource=github-releases depName=hashicorp/terraform
-ENV TERRAFORM_VERSION=v0.15.2
+ENV TERRAFORM_VERSION=v1.2.7
 
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
-ENV CLI_VERSION=v0.4.3
+ENV CLI_VERSION=v0.4.6
 
 # renovate: datasource=github-tags depName=kubernetes/kubectl
-ENV KUBECTL_VERSION=v1.16.14
+ENV KUBECTL_VERSION=v1.24.3
 
 #TODO: use TARGETARCH for Plural CLI when new release is cut
 RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-base && \
@@ -84,7 +81,7 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
     mv linux-${TARGETARCH}/helm /usr/local/bin/helm && \
     wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION/v/}/terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip && \
     unzip terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip -d /usr/local/bin && \
-    curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_${CLI_VERSION/v/}_Linux_x86_64.tar.gz | tar xvz plural && \
+    curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_${CLI_VERSION/v/}_Linux_${TARGETARCH}.tar.gz | tar xvz plural && \
     mv plural /usr/local/bin/plural && \
     curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl && \
     mv kubectl /usr/local/bin/kubectl && \
