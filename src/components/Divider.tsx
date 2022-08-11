@@ -4,15 +4,19 @@ import {
 } from 'honorable'
 import PropTypes from 'prop-types'
 
-type AlertProps = FlexProps & {
+type DividerProps = FlexProps & {
   text?: string
+  color?: string;
+  backgroundColor?: string;
 }
 
 const propTypes = {
   text: PropTypes.string,
 }
 
-function DividerRef({ text = 'or', ...props }: AlertProps, ref: Ref<any>) {
+function DividerRef({
+  text = 'or', color = 'text-light', backgroundColor = 'text-light', ...props
+}: DividerProps, ref: Ref<any>) {
   return (
     <Flex
       ref={ref}
@@ -22,12 +26,12 @@ function DividerRef({ text = 'or', ...props }: AlertProps, ref: Ref<any>) {
       <Div
         flexGrow={1}
         height={1}
-        backgroundColor="text-light"
+        backgroundColor={backgroundColor}
       />
       <P
         paddingHorizontal="xsmall"
         flexShrink={0}
-        color="text-light"
+        color={color}
         size="small"
       >
         {text}
@@ -35,7 +39,7 @@ function DividerRef({ text = 'or', ...props }: AlertProps, ref: Ref<any>) {
       <Div
         flexGrow={1}
         height={1}
-        backgroundColor="text-light"
+        backgroundColor={backgroundColor}
       />
     </Flex>
   )
