@@ -66,14 +66,12 @@ RUN \
   tar -xzf ${APP_NAME}.tar.gz && \
   rm ${APP_NAME}.tar.gz
 
-FROM dkr.plural.sh/plural/plural-cli:0.3.12 as cmd
-
-FROM gcr.io/pluralsh/alpine:3 as helm
+FROM gcr.io/pluralsh/alpine:3 as tools
 
 ARG VERSION=3.7.0
 ENV TERRAFORM_VERSION=0.15.2
+ENV CLI_VERSION=0.4.3
 
-# ENV BASE_URL="https://storage.googleapis.com/kubernetes-helm"
 ENV BASE_URL="https://get.helm.sh"
 ENV TAR_FILE="helm-v${VERSION}-linux-amd64.tar.gz"
 
@@ -82,6 +80,9 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
     mv linux-amd64/helm /usr/local/bin/helm && \
     wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
     unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /usr/local/bin && \
+    curl -L https://github.com/pluralsh/plural-cli/releases/download/v${CLI_VERSION}/plural-cli_${CLI_VERSION}_Linux_x86_64.tar.gz | tar xvz plural && \
+    mv plural /usr/local/bin/plural && \
+    chmod +x /usr/local/bin/plural && \
     chmod +x /usr/local/bin/helm && \
     chmod +x /usr/local/bin/terraform
 
@@ -95,9 +96,9 @@ ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION
 ENV PATH /google-cloud-sdk/bin:$PATH
 
 COPY --from=static-docker-source /usr/local/bin/docker /usr/local/bin/docker
-COPY --from=cmd /go/bin/plural /usr/local/bin/plural
-COPY --from=helm /usr/local/bin/helm /usr/local/bin/helm
-COPY --from=helm /usr/local/bin/terraform /usr/local/bin/terraform
+COPY --from=tools /usr/local/bin/helm /usr/local/bin/helm
+COPY --from=tools /usr/local/bin/terraform /usr/local/bin/terraform
+COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 
 RUN apk --no-cache add \
         curl \
