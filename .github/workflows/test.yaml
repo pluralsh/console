@@ -18,6 +18,7 @@ jobs:
           context: "."
           file: "./Dockerfile"
           push: false
+          platforms: linux/amd64,linux/arm64
           build-args: GIT_COMMIT=$GITHUB_SHA
   test:
     name: Test
