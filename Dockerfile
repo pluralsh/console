@@ -1,7 +1,3 @@
-# The version of Alpine to use for the final image
-# This should match the version of Alpine that the `elixir:1.7.2-alpine` image uses
-ARG ALPINE_VERSION=3.8
-
 FROM node:16.16-alpine3.15 as node
 
 FROM bitwalker/alpine-elixir:1.11.4 AS builder
@@ -66,7 +62,9 @@ RUN \
   tar -xzf ${APP_NAME}.tar.gz && \
   rm ${APP_NAME}.tar.gz
 
-FROM gcr.io/pluralsh/alpine:3 as tools
+FROM alpine:3.16.2 as tools
+
+ARG TARGETARCH
 
 # renovate: datasource=github-releases depName=helm/helm
 ENV HELM_VERSION=v3.7.0
@@ -80,24 +78,25 @@ ENV CLI_VERSION=v0.4.3
 # renovate: datasource=github-tags depName=kubernetes/kubectl
 ENV KUBECTL_VERSION=v1.16.14
 
+#TODO: use TARGETARCH for Plural CLI when new release is cut
 RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-base && \
-    curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz | tar xvz && \
+    curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz | tar xvz && \
     mv linux-amd64/helm /usr/local/bin/helm && \
-    wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION/v/}/terraform_${TERRAFORM_VERSION/v/}_linux_amd64.zip && \
-    unzip terraform_${TERRAFORM_VERSION/v/}_linux_amd64.zip -d /usr/local/bin && \
+    wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION/v/}/terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip && \
+    unzip terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip -d /usr/local/bin && \
     curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_${CLI_VERSION/v/}_Linux_x86_64.tar.gz | tar xvz plural && \
     mv plural /usr/local/bin/plural && \
-    curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl && \
+    curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl && \
     mv kubectl /usr/local/bin/kubectl && \
     chmod +x /usr/local/bin/kubectl && \
     chmod +x /usr/local/bin/plural && \
     chmod +x /usr/local/bin/helm && \
     chmod +x /usr/local/bin/terraform
 
-FROM gcr.io/pluralsh/docker:17.12.0-ce as static-docker-source
+FROM docker:17.12.0-ce as static-docker-source
 
 # From this line onwards, we're in a new image, which will be the image used in production
-FROM erlang:23-alpine
+FROM erlang:23.3.4.16-alpine
 
 ARG CLOUD_SDK_VERSION=273.0.0
 ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION
@@ -134,9 +133,7 @@ ENV REPLACE_OS_VARS=true \
 
 WORKDIR /opt/app
 
-#TODO: remove helm-push as it shouldn't be needed anymore
-RUN helm plugin install https://github.com/pluralsh/helm-push && \
-    helm plugin install https://github.com/databus23/helm-diff --version 3.1.3
+RUN helm plugin install https://github.com/databus23/helm-diff --version 3.1.3
 RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh
 RUN mkdir -p /root/.plural && mkdir -p /root/.creds && mkdir /root/bin
 RUN ln -s /usr/local/bin/plural /usr/local/bin/forge
