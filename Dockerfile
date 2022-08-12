@@ -70,12 +70,11 @@ ENV HELM_VERSION=v3.9.3
 ENV TERRAFORM_VERSION=v1.2.7
 
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
-ENV CLI_VERSION=v0.4.6
+ENV CLI_VERSION=v0.4.9
 
 # renovate: datasource=github-tags depName=kubernetes/kubectl
 ENV KUBECTL_VERSION=v1.24.3
 
-#TODO: use TARGETARCH for Plural CLI when new release is cut
 RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-base && \
     curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz | tar xvz && \
     mv linux-${TARGETARCH}/helm /usr/local/bin/helm && \
