@@ -6,7 +6,7 @@ darkIcon: plural/icons/console-white.png
 notes: plural/notes.tpl
 gitUrl: https://github.com/pluralsh/console
 oauthSettings:
-  uriFormat: "{domain}"
+  uriFormat: "https://{domain}/oauth/callback"
   authMethod: POST
 tags:
 - tag: kubernetes
