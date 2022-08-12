@@ -16,19 +16,13 @@ function CodelineRef({ children, ...props }: CodelineProps, ref: Ref<any>) {
 
   useEffect(() => {
     if (copied) {
-      const timeout = setTimeout(() => {
-        setCopied(false)
-      }, 1000)
+      const timeout = setTimeout(() => setCopied(false), 1000)
 
       return () => clearTimeout(timeout)
     }
   }, [copied])
 
-  function handleCopy() {
-    window.navigator.clipboard.writeText(children as string).then(() => {
-      setCopied(true)
-    })
-  }
+  const handleCopy = () => window.navigator.clipboard.writeText(children as string).then(() => setCopied(true))
 
   return (
     <Flex

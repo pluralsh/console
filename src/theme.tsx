@@ -4,6 +4,7 @@ import { CSSObject } from 'styled-components'
 import chroma from 'chroma-js'
 
 export const fontFamilies = {
+  mono: '"Monument Mono", monospace',
   semi: '"Monument Semi-Mono", "Monument", "Inter", "Helvetica", "Arial", "sans-serif"',
   sans: '"Inter", "Helvetica", "Arial", "sans-serif"',
 }
