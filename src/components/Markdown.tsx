@@ -11,6 +11,7 @@ import MultilineCode from './Code'
 type MarkdownProps = {
   text: string,
   gitUrl: string,
+  mainBranch?: string,
 }
 
 const propTypes = {}
@@ -61,14 +62,14 @@ function MarkdownPreformatted({ children, ...props }: any) {
   )
 }
 
-function MarkdownImage({ src, gitUrl, ...props }: any) {
+function MarkdownImage({
+  src, gitUrl, mainBranch = 'master', ...props
+}: any) {
   // Convert local image paths to full path on github
   // Only works if primary git branch is named "master"
   if (gitUrl && src && !src.match(/^https*/)) {
-    src = `${gitUrl}/raw/master/${src}`
+    src = `${gitUrl}/raw/${mainBranch}/${src}`
   }
-
-  console.log(props)
 
   return (
     <Img
@@ -80,7 +81,7 @@ function MarkdownImage({ src, gitUrl, ...props }: any) {
   )
 }
 
-function MarkdownRef({ text, gitUrl }: MarkdownProps) {
+function MarkdownRef({ text, gitUrl, mainBranch }: MarkdownProps) {
   return useMemo(() => (
     <ReactMarkdown
       rehypePlugins={[rehypeRaw]}
@@ -176,6 +177,7 @@ function MarkdownRef({ text, gitUrl }: MarkdownProps) {
               ...props,
               ...{
                 gitUrl,
+                mainBranch,
                 style: { maxWidth: '100%' },
               },
             }}
@@ -206,7 +208,7 @@ function MarkdownRef({ text, gitUrl }: MarkdownProps) {
     >
       {text}
     </ReactMarkdown>
-  ), [gitUrl, text])
+  ), [text, gitUrl, mainBranch])
 }
 
 const Markdown = forwardRef(MarkdownRef)

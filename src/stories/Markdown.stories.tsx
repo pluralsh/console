@@ -75,6 +75,7 @@ function Template() {
       <Markdown
         text={markdown}
         gitUrl="https://github.com/pluralsh/console/"
+        mainBranch="master"
       />
     </Div>
   )
