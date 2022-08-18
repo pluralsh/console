@@ -1,20 +1,16 @@
-import {
-  ReactNode, RefObject, useRef,
-} from 'react'
+import { ReactNode, RefObject, useRef } from 'react'
 import { DismissButton, useOverlay } from '@react-aria/overlays'
 import { FocusScope } from '@react-aria/focus'
 import styled from 'styled-components'
-import { animated } from 'react-spring'
 
 type PopoverProps = {
   isOpen?: boolean
   onClose?: () => unknown
   popoverRef?: RefObject<any>
   children: ReactNode
-  animatedStyles: any
 }
 
-function Popover({ animatedStyles, ...props }: PopoverProps) {
+function Popover({ ...props }: PopoverProps) {
   const ref = useRef()
   const {
     popoverRef = ref, isOpen, onClose, children,
@@ -51,17 +47,10 @@ function Popover({ animatedStyles, ...props }: PopoverProps) {
 
   content = <FocusScope restoreFocus>{content}</FocusScope>
 
-  // Wrapping for spring animation
-  return (
-    <animated.div
-      style={{ ...animatedStyles }}
-    >
-      {content}
-    </animated.div>
-  )
+  return content
 }
 
-const PopoverStyled = styled.div<{isOpen:boolean}>(({ isOpen }) => ({
+const PopoverStyled = styled.div<{ isOpen: boolean }>(({ isOpen }) => ({
   display: 'flex',
   position: 'absolute',
   width: '100%',
@@ -72,4 +61,4 @@ const PopoverStyled = styled.div<{isOpen:boolean}>(({ isOpen }) => ({
   ...(!isOpen ? { pointerEvents: 'none' } : {}),
 }))
 
-export { Popover as SelectPopover }
+export { Popover, PopoverProps }

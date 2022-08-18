@@ -6,28 +6,19 @@ import {
   RefObject,
   cloneElement,
   forwardRef,
-  useEffect,
   useRef,
   useState,
 } from 'react'
 import { HiddenSelect, useSelect } from '@react-aria/select'
-import { useSelectState } from '@react-stately/select'
+import { SelectState, useSelectState } from '@react-stately/select'
 import { AriaSelectProps } from '@react-types/select'
 import { useButton } from '@react-aria/button'
-import { ListState } from '@react-stately/list'
-
 import styled, { useTheme } from 'styled-components'
-import { useTransition } from 'react-spring'
 
 import { ListBoxItemBaseProps } from './ListBoxItem'
-import {
-  FOOTER_KEY,
-  HEADER_KEY,
-  ListBoxUnmanaged,
-  useItemWrappedChildren,
-} from './ListBox'
-import { SelectPopover } from './SelectPopover'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
+import { PopoverListBox } from './PopoverListBox'
+import { setNextFocusedKey, useSelectComboStateProps } from './SelectComboShared'
 
 type SelectButtonProps = {
   leftContent?: ReactNode
@@ -39,7 +30,7 @@ type SelectButtonProps = {
 
 type Placement = 'left' | 'right'
 
-type SelectProps = Exclude<SelectButtonProps, 'children'> & {
+export type SelectProps = Exclude<SelectButtonProps, 'children'> & {
   children:
     | ReactElement<ListBoxItemBaseProps>
     | ReactElement<ListBoxItemBaseProps>[]
@@ -81,7 +72,7 @@ function Trigger({ buttonElt, isOpen, ...props }: TriggerProps) {
   })
 }
 
-export const SelectButtonInner = styled.div<{ isOpen: boolean }>(({ theme, isOpen }) => ({
+const SelectButtonInner = styled.div<{ isOpen: boolean }>(({ theme, isOpen }) => ({
   ...theme.partials.reset.button,
   ...theme.partials.text.body2,
   display: 'flex',
@@ -111,11 +102,7 @@ export const SelectButtonInner = styled.div<{ isOpen: boolean }>(({ theme, isOpe
     display: 'flex',
     marginLeft: theme.spacing.medium,
     alignItems: 'center',
-    ...(isOpen
-      ? {
-        transform: 'scaleY(-100%)',
-      }
-      : {}),
+    ...theme.partials.dropdown.arrowTransition({ isOpen }),
   },
   '&:focus-visible': {
     ...theme.partials.focus.default,
@@ -147,24 +134,10 @@ ref) => (
 
 const SelectInner = styled.div<{
   isOpen: boolean
-  openIsComplete: boolean
-  width: string | number
   maxHeight: string | number
   placement: Placement
-}>(({
-  theme, width, maxHeight, placement, openIsComplete,
-}) => ({
+}>(({ maxHeight, placement }) => ({
   position: 'relative',
-  '.popoverWrapper': {
-    position: 'absolute',
-    width: width || '100%',
-    ...(placement === 'right' && { right: 0, left: 'auto' }),
-    ...(!openIsComplete && {
-      clipPath: 'polygon(-100px 0, -100px 99999px, 99999px 99999px, 99999px 0)',
-    }),
-    pointerEvents: 'none',
-    zIndex: theme.zIndexes.selectPopover,
-  },
   '.popover': {
     maxHeight: maxHeight || 230,
     width: '100%',
@@ -195,75 +168,39 @@ function Select({
   maxHeight,
   ...props
 }: SelectProps) {
-  const nextFocusedKeyRef = useRef<Key>(null)
-  const stateRef = useRef<ListState<object> | null>(null)
+  const stateRef = useRef<SelectState<object> | null>(null)
   const [isOpenUncontrolled, setIsOpen] = useState(false)
-  const [openIsComplete, setOpenIsComplete] = useState(false)
-  const [isOpenWithDelay, setIsOpenWithDelay] = useState(false)
-  const temporarilyPreventClose = useRef(false)
-  const theme = useTheme()
+  const nextFocusedKeyRef = useRef<Key>(null)
 
   if (typeof isOpen !== 'boolean') {
     isOpen = isOpenUncontrolled
   }
-  useEffect(() => {
-    if (isOpen !== isOpenWithDelay) {
-      setIsOpenWithDelay(isOpen)
-    }
-    if (!isOpen && openIsComplete) {
-      setOpenIsComplete(false)
-    }
-  }, [isOpen, isOpenWithDelay, openIsComplete])
+
+  const selectStateBaseProps = useSelectComboStateProps<SelectProps>({
+    dropdownHeader,
+    dropdownFooter,
+    onFooterClick,
+    onHeaderClick,
+    onOpenChange,
+    onSelectionChange,
+    children,
+    setIsOpen,
+    stateRef,
+    nextFocusedKeyRef,
+  })
 
   const selectStateProps: AriaSelectProps<object> = {
-    onOpenChange: open => {
-      if (!open && temporarilyPreventClose.current) {
-        temporarilyPreventClose.current = false
-
-        return
-      }
-      setIsOpen(open)
-      if (onOpenChange) {
-        onOpenChange(open)
-      }
-    },
+    ...selectStateBaseProps,
     isOpen,
     defaultOpen: false,
     selectedKey,
-    onSelectionChange: newKey => {
-      if (newKey === HEADER_KEY && onHeaderClick) {
-        temporarilyPreventClose.current = true
-        onHeaderClick()
-      }
-      else if (newKey === FOOTER_KEY && onFooterClick) {
-        temporarilyPreventClose.current = true
-        onFooterClick()
-        if (stateRef.current) {
-          nextFocusedKeyRef.current
-            = stateRef?.current?.collection?.getKeyBefore(FOOTER_KEY)
-        }
-      }
-      else if (onSelectionChange) {
-        onSelectionChange(typeof newKey === 'string' ? newKey : '')
-      }
-    },
     label,
-    children: useItemWrappedChildren(children, dropdownHeader, dropdownFooter),
     ...props,
   }
 
   const state = useSelectState(selectStateProps)
 
-  stateRef.current = state
-
-  if (nextFocusedKeyRef.current) {
-    const focusedKey
-      = state.collection.getKeyAfter(nextFocusedKeyRef.current)
-      || nextFocusedKeyRef.current
-
-    state.selectionManager.setFocusedKey(focusedKey)
-    nextFocusedKeyRef.current = null
-  }
+  setNextFocusedKey({ nextFocusedKeyRef, state, stateRef })
 
   // Get props for the listbox element
   const ref = useRef()
@@ -281,34 +218,9 @@ function Select({
     </SelectButton>
   )
 
-  const transitions = useTransition(isOpenWithDelay, {
-    from: { opacity: 0, translateY: '-150px' },
-    enter: { opacity: 1, translateY: '0' },
-    leave: { opacity: 0, translateY: '-150px' },
-    onRest: () => {
-      if (state.isOpen) {
-        setOpenIsComplete(true)
-      }
-    },
-    config: isOpenWithDelay
-      ? {
-        mass: 0.6,
-        tension: 280,
-        velocity: 0.02,
-      }
-      : {
-        mass: 0.6,
-        tension: 400,
-        velocity: 0.02,
-        restVelocity: 0.1,
-      },
-  })
-
   return (
     <SelectInner
       isOpen={state.isOpen}
-      openIsComplete={openIsComplete}
-      width={width}
       maxHeight={maxHeight}
       placement={placement}
     >
@@ -324,30 +236,40 @@ function Select({
         isOpen={state.isOpen}
         {...triggerProps}
       />
-      <div className="popoverWrapper">
-        {transitions((styles, item) => item && (
-          <SelectPopover
-            isOpen={state.isOpen}
-            onClose={state.close}
-            animatedStyles={styles}
-          >
-            <ListBoxUnmanaged
-              className="listBox"
-              state={state}
-              header={dropdownHeader}
-              footer={dropdownFooter}
-              headerFixed={dropdownHeaderFixed}
-              footerFixed={dropdownFooterFixed}
-              extendStyle={{
-                boxShadow: theme.boxShadows.moderate,
-              }}
-              {...menuProps}
-            />
-          </SelectPopover>
-        ))}
-      </div>
+      <PopoverListBox
+        isOpen={state.isOpen}
+        onClose={state.close}
+        listBoxState={state}
+        listBoxProps={menuProps}
+        dropdownHeaderFixed={dropdownHeaderFixed}
+        dropdownFooterFixed={dropdownFooterFixed}
+        width={width}
+        placement={placement}
+      />
     </SelectInner>
   )
 }
 
-export { Select, SelectButton }
+export const PopoverWrapper = styled.div<{
+  isOpen: boolean
+  width: string | number
+  placement: Placement
+}>(({ theme, width, placement }) => ({
+  position: 'absolute',
+  width: width || '100%',
+  ...(placement === 'right' && { right: 0, left: 'auto' }),
+  pointerEvents: 'none',
+  zIndex: theme.zIndexes.selectPopover,
+  clipPath: 'polygon(-100px 0, -100px 99999px, 99999px 99999px, 99999px 0)',
+  '&.enter-done': {
+    clipPath: 'none',
+  },
+}))
+
+export {
+  Select,
+  SelectButton,
+  SelectButtonInner,
+  SelectInner,
+  setNextFocusedKey,
+}

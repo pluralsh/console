@@ -196,6 +196,7 @@ function Template() {
             <ListBoxItem
               key={key}
               label={label}
+              textValue={label}
               leftContent={smallIcon}
             />
           ))}
@@ -222,6 +223,7 @@ function Template() {
             <ListBoxItem
               key={key}
               label={label}
+              textValue={label}
               description={description}
               rightContent={<ListBoxItemChipList chips={chips} />}
               leftContent={portrait}
@@ -253,6 +255,7 @@ function Template() {
             <ListBoxItem
               key={key}
               label={label}
+              textValue={label}
               description={description}
               rightContent={<ListBoxItemChipList chips={chips} />}
               leftContent={portrait}
@@ -295,6 +298,7 @@ function Template() {
             <ListBoxItem
               key={key}
               label={version}
+              textValue={version}
               rightContent={(
                 <ListBoxItemChipList
                   maxVisible={1}

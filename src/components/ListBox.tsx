@@ -4,41 +4,46 @@ import {
   Key,
   ReactElement,
   ReactNode,
+  RefObject,
   cloneElement,
   useMemo,
   useRef,
 } from 'react'
-import { useListBox, useOption } from '@react-aria/listbox'
+import { AriaListBoxOptions, useListBox, useOption } from '@react-aria/listbox'
 import { ListState, useListState } from '@react-stately/list'
-import { Item } from '@react-stately/collections'
-import { useFocusRing } from '@react-aria/focus'
 import { mergeProps } from '@react-aria/utils'
 import { AriaListBoxProps } from '@react-types/listbox'
 import { mergeRefs } from 'react-merge-refs'
-
 import styled, { CSSObject, useTheme } from 'styled-components'
+
+import { Item } from '@react-stately/collections'
 
 import { Card } from '../index'
 
 export const HEADER_KEY = '$$header$$'
 export const FOOTER_KEY = '$$footer$$'
 
-type ListBoxUnmanagedProps = ComponentPropsWithRef<'div'> & {
-  state: ListState<object>
-  header?: ReactElement
-  footer?: ReactElement
-  headerFixed?: ReactNode
-  footerFixed?: ReactNode
-  extendStyle?: CSSObject
-}
+type ListBoxUnmanagedProps = AriaListBoxOptions<object> &
+  ComponentPropsWithRef<'div'> & {
+    state: ListState<object>
+    headerFixed?: ReactNode
+    footerFixed?: ReactNode
+    extendStyle?: CSSObject
+    listBoxRef?: RefObject<any>
+  }
 
-type ListBoxProps = Omit<ListBoxUnmanagedProps, 'state' | 'nextFocusedKeyRef'> & {
-  selectedKey: string
-  onSelectionChange: (key: string) => unknown
+type ListBoxProps = Omit<
+  ListBoxUnmanagedProps,
+  'state' | 'nextFocusedKeyRef' | 'onSelectionChange'
+> & {
+  selectedKey: Key
+  onSelectionChange: (key: Key) => unknown
   onHeaderClick?: () => unknown
   onFooterClick?: () => unknown
   disallowEmptySelection?: boolean
   children: ReactElement | ReactElement[]
+  header?: ReactElement
+  footer?: ReactElement
 }
 
 const ListBoxCard = styled(Card).attrs(() => ({
@@ -84,9 +89,19 @@ function useItemWrappedChildren(children: ReactElement | ReactElement[],
     }
     Children.forEach(children, child => {
       if (child) {
-        wrapped.push(<Item key={child.key}>{child}</Item>)
+        const item = (
+          <Item
+            key={child.key}
+            textValue={child?.props?.textValue || ''}
+          >
+            {child}
+          </Item>
+        )
+
+        wrapped.push(item)
       }
     })
+
     if (footer) {
       wrapped.push(<Item key={FOOTER_KEY}>{footer}</Item>)
     }
@@ -123,11 +138,12 @@ function ListBox({
       else if (newKey === FOOTER_KEY && onFooterClick) {
         onFooterClick()
         if (stateRef.current) {
-          nextFocusedKeyRef.current = stateRef?.current?.collection?.getKeyBefore(FOOTER_KEY)
+          nextFocusedKeyRef.current
+            = stateRef?.current?.collection?.getKeyBefore(FOOTER_KEY)
         }
       }
       else if (onSelectionChange) {
-        onSelectionChange(typeof newKey === 'string' ? newKey : '')
+        onSelectionChange(newKey)
       }
     },
     children: useItemWrappedChildren(children, header, footer),
@@ -160,12 +176,17 @@ function ListBoxUnmanaged({
   footerFixed,
   extendStyle,
   className,
+  listBoxRef,
   ...props
 }: ListBoxUnmanagedProps) {
   const theme = useTheme()
 
   // Get props for the listbox element
-  const ref = useRef()
+  let ref = useRef()
+
+  if (listBoxRef) {
+    ref = listBoxRef
+  }
   const { listBoxProps } = useListBox(props, state, ref)
 
   return (
@@ -201,19 +222,20 @@ function Option({ item, state }: any) {
   // Get props for the option element
   const ref = useRef()
   const {
-    optionProps, isSelected, isDisabled, labelProps, descriptionProps,
-  }
-    = useOption({ key: item.key }, state, ref)
-
-  // Determine whether we should show a keyboard
-  // focus ring for accessibility
-  const { isFocusVisible, focusProps } = useFocusRing()
-  const mergedProps = mergeProps(optionProps, focusProps, {
-    selected: isSelected,
-    disabled: isDisabled,
+    optionProps,
+    isSelected,
+    isDisabled,
     labelProps,
     descriptionProps,
-    isFocusVisible,
+    isFocused,
+  } = useOption({ key: item.key }, state, ref)
+
+  const mergedProps = mergeProps(optionProps, {
+    selected: isSelected || item?.rendered?.props?.selected,
+    disabled: isDisabled || item?.rendered?.props?.disabled,
+    focused: isFocused,
+    labelProps,
+    descriptionProps,
     ref: mergeRefs([ref, item.rendered.ref]),
   })
 

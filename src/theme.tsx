@@ -1142,6 +1142,12 @@ export const styledTheme = {
       focus: focusPartials,
       scrollBar,
       reset: resetPartials,
+      dropdown: {
+        arrowTransition: ({ isOpen = false }) => ({
+          transition: 'transform 0.1s ease',
+          transform: `scaleY(${isOpen ? -1 : 1})`,
+        }),
+      },
     },
   },
 }

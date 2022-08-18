@@ -1,19 +1,37 @@
 import { Flex, FlexProps, Spinner } from 'honorable'
 import PropTypes from 'prop-types'
 import { ReactElement, Ref, forwardRef } from 'react'
+import styled from 'styled-components'
 
 import Card, { CardProps } from './Card'
+import CloseIcon from './icons/CloseIcon'
 
 type ChipProps = FlexProps & {
   size?: 'small' | 'medium' | 'large' | string
-  severity?: 'neutral' | 'info' | 'success' | 'warning' | 'error' | 'critical' | string
-  icon?: ReactElement,
-  loading?: boolean,
+  severity?:
+    | 'neutral'
+    | 'info'
+    | 'success'
+    | 'warning'
+    | 'error'
+    | 'critical'
+    | string
+  icon?: ReactElement
+  loading?: boolean
+  closeButton?: boolean
+  clickable?: boolean
 } & CardProps
 
 const propTypes = {
   size: PropTypes.oneOf(['small', 'medium', 'large']),
-  severity: PropTypes.oneOf(['neutral', 'info', 'success', 'warning', 'error', 'critical']),
+  severity: PropTypes.oneOf([
+    'neutral',
+    'info',
+    'success',
+    'warning',
+    'error',
+    'critical',
+  ]),
   hue: PropTypes.oneOf(['default', 'lighter', 'lightest']),
   icon: PropTypes.element,
   loading: PropTypes.bool,
@@ -34,6 +52,23 @@ const sizeToHeight: { [key in 'small' | 'medium' | 'large']: number } = {
   large: 32,
 }
 
+const sizeToCloseHeight: { [key in 'small' | 'medium' | 'large']: number } = {
+  small: 8,
+  medium: 10,
+  large: 12,
+}
+
+const ChipCard = styled(Card)(({ theme }) => ({
+  '.closeIcon': {
+    color: theme.colors['text-light'],
+  },
+  '&:hover': {
+    '.closeIcon': {
+      color: theme.colors.text,
+    },
+  },
+}))
+
 function ChipRef({
   children,
   size = 'medium',
@@ -41,15 +76,19 @@ function ChipRef({
   hue = 'default',
   loading = false,
   icon,
+  closeButton,
+  clickable,
   ...props
-}: ChipProps, ref: Ref<any>) {
+}: ChipProps,
+ref: Ref<any>) {
   const col = severityToColor[severity] || 'text-light'
 
   return (
-    <Card
+    <ChipCard
       ref={ref}
       cornerSize="medium"
       hue={hue}
+      clickable={clickable}
       paddingVertical={size === 'large' ? '6px' : 'xxxsmall'}
       paddingHorizontal={size === 'small' ? 'xsmall' : 'small'}
       alignItems="center"
@@ -82,7 +121,16 @@ function ChipRef({
       >
         {children}
       </Flex>
-    </Card>
+      {closeButton && (
+        <CloseIcon
+          className="closeIcon"
+          paddingLeft="xsmall"
+          // color="text-light"
+          size={sizeToCloseHeight[size]}
+          _hover={{ color: 'blue' }}
+        />
+      )}
+    </ChipCard>
   )
 }
 

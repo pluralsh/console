@@ -1,5 +1,5 @@
 import { Div, Flex } from 'honorable'
-import { useState } from 'react'
+import { Key, useState } from 'react'
 
 import {
   Chip,
@@ -142,7 +142,7 @@ const items = [
 ]
 
 function Template() {
-  const [selectedKey, setSelectedKey] = useState<string>()
+  const [selectedKey, setSelectedKey] = useState<Key>()
   const shownStep = 4
   const [shownLimit, setShownLimit] = useState<number>(shownStep)
 

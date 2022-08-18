@@ -536,4 +536,6 @@ function Template(args: any) {
 export const Default = Template.bind({})
 Default.args = {
   hue: 'default',
+  closeButton: false,
+  clickable: false,
 }

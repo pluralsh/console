@@ -3,8 +3,8 @@ import type { InputProps as HonorableInputProps } from 'honorable'
 import type { ReactNode } from 'react'
 
 export type InputProps = HonorableInputProps & {
-    suffix?: ReactNode,
-    prefix?: ReactNode,
+  suffix?: ReactNode
+  prefix?: ReactNode
 }
 
 const prefixSuffixIconStyle = {
@@ -14,9 +14,13 @@ const prefixSuffixIconStyle = {
 }
 
 export default function Input({
-  startIcon, endIcon, suffix, prefix, ...props
-} : InputProps) {
-  let themeExtension:any = {}
+  startIcon,
+  endIcon,
+  suffix,
+  prefix,
+  ...props
+}: InputProps) {
+  let themeExtension: any = {}
 
   if (suffix) {
     themeExtension = mergeTheme(themeExtension, {

@@ -15,7 +15,7 @@ import PlusIcon from './icons/PlusIcon'
 import ChipList from './ListBoxItemChipList'
 
 type ListBoxItemBaseProps = {
-  isFocusVisible?: boolean
+  focused?: boolean
   selected?: boolean
   disabled?: boolean
   label?: ReactNode
@@ -33,7 +33,7 @@ type ListBoxItemProps = {
 } & ListBoxItemBaseProps
 
 const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(({
-  theme, isFocusVisible, disabled, selected,
+  theme, disabled, selected, focused,
 }) => ({
   display: 'flex',
   flexDirection: 'row',
@@ -54,11 +54,12 @@ const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(({
   '&:last-child': {
     borderBottom: 'none',
   },
-  ...(isFocusVisible
+  '&:focus-visible::after': {
+    ...theme.partials.focus.insetAbsolute,
+  },
+  ...(focused
     ? {
-      '&:focus::after, &:focus-visible::after': {
-        ...theme.partials.focus.insetAbsolute,
-      },
+      '&::after': { ...theme.partials.focus.insetAbsolute },
     }
     : {}),
   '.left-content': {
@@ -101,7 +102,6 @@ const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(({
 }))
 
 const ListBoxItem = forwardRef<HTMLDivElement, ListBoxItemProps>(({
-  isFocusVisible = false,
   selected,
   label,
   labelProps = {},
@@ -115,7 +115,6 @@ const ListBoxItem = forwardRef<HTMLDivElement, ListBoxItemProps>(({
 ref) => (
   <ListBoxItemInner
     ref={ref}
-    isFocusVisible={isFocusVisible}
     selected={selected}
     {...props}
   >
@@ -153,7 +152,7 @@ type ListBoxFooterProps = ComponentPropsWithRef<'div'> & {
   leftContent?: ReactNode
   rightContent?: ReactNode
 }
-const ListBoxFooterInner = styled.div(({ theme }) => ({
+const ListBoxFooterInner = styled.div<{ focused?: boolean }>(({ theme, focused = false }) => ({
   ...theme.partials.reset.button,
   display: 'flex',
   position: 'relative',
@@ -171,12 +170,17 @@ const ListBoxFooterInner = styled.div(({ theme }) => ({
   '.rightContent': {
     marginLeft: theme.spacing.small,
   },
-  '&:focus': {
+  '&:focus, &:focus-visible': {
     outline: 'none',
   },
   '&:focus-visible::after': {
     ...theme.partials.focus.insetAbsolute,
   },
+  ...(focused
+    ? {
+      '&::after': { ...theme.partials.focus.insetAbsolute },
+    }
+    : {}),
 }))
 const ListBoxFooter = forwardRef<HTMLDivElement, ListBoxFooterProps>(({
   leftContent, rightContent, children, ...props
