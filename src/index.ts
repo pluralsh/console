@@ -146,6 +146,7 @@ export {
   SidecarItem,
   SidecarButton,
 } from './components/Sidecar'
+export { default as SubTab } from './components/SubTab'
 export { default as Tab } from './components/Tab'
 export {
   TabList,
