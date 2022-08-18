@@ -41,6 +41,12 @@ function Template() {
       >
         {goCode}
       </Code>
+      <Code
+        width="400px"
+        language="js"
+      >
+        console.log('test')
+      </Code>
       <Code width="400px">
         One line
       </Code>

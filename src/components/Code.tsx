@@ -39,6 +39,7 @@ function Highlight({ language, children } : HighlightProps) {
       padding="0"
       background="none"
       fontFamily={fontFamilies.mono}
+      lineHeight="22px"
       className={(language && `language-${language}`) || 'nohighlight'}
       ref={codeRef}
     >
@@ -67,30 +68,41 @@ function CodeRef({ children, language, ...props }: CodeProps) {
     <Card
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      minHeight="90px"
       {...props}
     >
-      <Flex position="relative">
-        {hover && (
-          <Button
-            position="absolute"
-            right="24px"
-            top="24px"
-            tertiary
-            backgroundColor="fill-three"
-            _hover={{ backgroundColor: 'fill-one-hover' }}
-            startIcon={copied ? <CheckIcon /> : <CopyIcon />}
-            onClick={handleCopy}
+      <Flex direction="column">
+        {!!language && (
+          <Flex
+            paddingHorizontal="large"
+            paddingVertical="medium"
+            borderBottom="1px solid border"
+            overline
+            color="text-light"
           >
-            {copied ? 'Copied' : 'Copy'}
-          </Button>
+            {language}
+          </Flex>
         )}
         <Flex
           minHeight="90px"
           overflowX="auto"
+          position="relative"
           padding="large"
           alignItems="center"
         >
+          {hover && (
+            <Button
+              position="absolute"
+              right="24px"
+              top="24px"
+              tertiary
+              backgroundColor="fill-three"
+              _hover={{ backgroundColor: 'fill-one-hover' }}
+              startIcon={copied ? <CheckIcon /> : <CopyIcon />}
+              onClick={handleCopy}
+            >
+              {copied ? 'Copied' : 'Copy'}
+            </Button>
+          )}
           <Highlight language={language}>{children}</Highlight>
         </Flex>
       </Flex>
