@@ -13,7 +13,7 @@ export type LoopingLogoProps = ComponentPropsWithRef<'div'> & {
   scale?: number;
 }
 
-const scaling = (scale: number): { transform: string } => (scale ? { transform: `scale(${scale})` } : null)
+export const scaling = (scale: number): { transform: string } => (scale ? { transform: `scale(${scale})` } : null)
 
 const LoopingLogo = forwardRef<HTMLDivElement, LoopingLogoProps & HTMLAttributes<HTMLDivElement>>(({
   isDark = false,
