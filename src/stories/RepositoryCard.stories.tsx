@@ -1,4 +1,4 @@
-import { Flex, H3 } from 'honorable'
+import { Flex } from 'honorable'
 
 import RepositoryCard from '../components/RepositoryCard'
 
@@ -12,21 +12,19 @@ function Template(args: any) {
     <Flex
       gap={16}
       direction="column"
+      maxWidth={697}
     >
-      <H3>Small</H3>
       <RepositoryCard
         {...args}
       />
-
-      <H3>Medium</H3>
       <RepositoryCard
         size="medium"
+        mt={1}
         {...args}
       />
-
-      <H3>Large</H3>
       <RepositoryCard
         size="large"
+        mt={1}
         {...args}
       />
     </Flex>
@@ -39,7 +37,6 @@ function ListTemplate(args: any) {
       gap="small"
       direction="column"
     >
-      <H3>Small Card List</H3>
       <Flex
         gap="small"
         wrap="wrap"
@@ -65,88 +62,6 @@ function ListTemplate(args: any) {
           }}
         />
         <RepositoryCard
-          {...{
-            ...args,
-            ...{
-              priv: true,
-              description: null,
-              tags: ['tag1', 'tag2'],
-            },
-          }}
-        />
-      </Flex>
-
-      <H3>Medium Card List</H3>
-      <Flex
-        gap="small"
-        wrap="wrap"
-      >
-        <RepositoryCard
-          size="medium"
-          {...args}
-        />
-        <RepositoryCard
-          size="medium"
-          {...{
-            ...args,
-            ...{
-              description: 'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
-            },
-          }}
-        />
-        <RepositoryCard
-          size="medium"
-          {...{
-            ...args,
-            ...{
-              description: 'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
-              tags: null,
-            },
-          }}
-        />
-        <RepositoryCard
-          size="medium"
-          {...{
-            ...args,
-            ...{
-              priv: true,
-              description: null,
-              tags: ['tag1', 'tag2'],
-            },
-          }}
-        />
-      </Flex>
-
-      <H3>Large Card List</H3>
-      <Flex
-        gap="small"
-        wrap="wrap"
-      >
-        <RepositoryCard
-          size="large"
-          {...args}
-        />
-        <RepositoryCard
-          size="large"
-          {...{
-            ...args,
-            ...{
-              description: 'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
-            },
-          }}
-        />
-        <RepositoryCard
-          size="large"
-          {...{
-            ...args,
-            ...{
-              description: 'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
-              tags: null,
-            },
-          }}
-        />
-        <RepositoryCard
-          size="large"
           {...{
             ...args,
             ...{
@@ -176,4 +91,3 @@ Default.args = {
 
 export const List = ListTemplate.bind({})
 List.args = { ...Default.args }
-
