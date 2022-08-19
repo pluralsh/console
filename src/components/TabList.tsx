@@ -2,69 +2,89 @@ import {
   Div, DivProps, Flex, FlexProps,
 } from 'honorable'
 import { AriaTabListProps } from '@react-types/tabs'
-import { Item } from '@react-stately/collections'
 import { useTab, useTabList, useTabPanel } from '@react-aria/tabs'
-import { TabListState } from '@react-stately/tabs'
-import { ItemProps, Node } from '@react-types/shared'
+import { TabListState, useTabListState } from '@react-stately/tabs'
+import { Node } from '@react-types/shared'
 import {
-  ComponentPropsWithRef,
+  Children,
   HTMLAttributes,
+  Key,
+  MutableRefObject,
+  ReactElement,
+  ReactNode,
   RefObject,
+  cloneElement,
+  useImperativeHandle,
+  useMemo,
   useRef,
 } from 'react'
+import styled, { useTheme } from 'styled-components'
 
-import Tab from './Tab'
-import SubTab from './SubTab'
-
-type TabListStateProps = AriaTabListProps<object>;
+import { useItemWrappedChildren } from './ListBox'
 
 type Renderer = (
   props: HTMLAttributes<HTMLElement>,
-  ref: RefObject<any>,
+  ref: RefObject<any> | null | undefined,
+  state: TabListState<object> | null | undefined
+) => JSX.Element
+
+type TabBaseProps = {
+  key?: Key
+  ref?: MutableRefObject<any>
+  active?: boolean
+  vertical?: boolean
+  textValue?: string
+  renderer?: Renderer
+  children?: ReactNode
+}
+
+type TabListStateProps = Omit<AriaTabListProps<object>, 'children'>
+type TabStateRef = MutableRefObject<{
   state: TabListState<object>
-) => JSX.Element;
+  stateProps: AriaTabListProps<object>
+}>
 
-type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> &
-  Partial<Pick<Type, Key>>;
-
-type TabListItemProps = ComponentPropsWithRef<typeof Tab> &
-  MakeOptional<ItemProps<void>, 'children'> & {
-    renderer?: Renderer;
-  };
-
-const TabListItem = Item as (props: TabListItemProps) => JSX.Element
-
-type TabStyle = 'default' | 'subtab';
+type ChildrenType = ReactElement<TabBaseProps> | ReactElement<TabBaseProps>[]
 
 type TabListProps = {
-  state: TabListState<object>;
-  stateProps: TabListStateProps;
-  renderer?: Renderer;
-  tabStyle?: TabStyle;
-};
+  stateRef: TabStateRef
+  renderer?: Renderer
+  children?: ChildrenType
+}
 function TabList({
-  state,
+  stateRef,
   stateProps,
   renderer,
-  tabStyle,
   ...props
 }: TabListProps & FlexProps) {
-  stateProps = {
+  const wrappedChildren = useItemWrappedChildren(props.children)
+  const finalStateProps: AriaTabListProps<object> = useMemo(() => ({
     ...{
       keyboardActivation: 'manual',
       orientation: 'horizontal',
+      children: [...wrappedChildren],
     },
     ...stateProps,
-  }
+  }),
+  [stateProps, wrappedChildren])
+
+  const state = useTabListState(finalStateProps)
+
+  useImperativeHandle(stateRef,
+    () => ({
+      state,
+      stateProps: finalStateProps,
+    }),
+    [state, finalStateProps])
+
   const ref = useRef<HTMLDivElement>(null)
-  const { tabListProps } = useTabList(stateProps, state, ref)
+  const { tabListProps } = useTabList(finalStateProps, state, ref)
   const tabChildren = [...state.collection].map(item => (
     <TabRenderer
       key={item.key}
       item={item}
       state={state}
-      stateProps={stateProps}
-      tabStyle={tabStyle}
+      stateProps={finalStateProps}
     />
   ))
 
@@ -89,38 +109,47 @@ function TabList({
   )
 }
 
+const TabClone = styled(({
+  className, children, tabRef, ...props
+}) => cloneElement(Children.only(children), {
+  className: `${children.props.className} ${className}`.trim(),
+  ref: tabRef,
+  ...props,
+}))<{ vertical: boolean }>(({ theme, vertical }) => ({
+  position: 'relative',
+  '&:focus, &:focus-visible': {
+    outline: 'none',
+    zIndex: theme.zIndexes.base + 1,
+  },
+  '&:focus-visible': {
+    ...theme.partials.focus.default,
+  },
+  ...(vertical
+    ? {
+      width: '100%',
+    }
+    : {}),
+}))
+
 type TabRendererProps = {
-  item: Node<unknown>;
-  state: TabListState<object>;
-  stateProps: TabListStateProps;
-  tabStyle: TabStyle;
-};
-function TabRenderer({
-  item, state, stateProps, tabStyle = 'default',
-}: TabRendererProps) {
+  item: Node<unknown>
+  state: TabListState<object>
+  stateProps: AriaTabListProps<object>
+}
+function TabRenderer({ item, state, stateProps }: TabRendererProps) {
   const ref = useRef(null)
   const { tabProps: props } = useTab({ key: item.key }, state, ref)
-
-  const TabComponent = tabStyle === 'subtab' ? SubTab : Tab
+  const theme = useTheme()
 
   if (item.props.renderer) {
-    if (item.rendered) {
-      props.children = (
-        <TabComponent
-          active={state.selectedKey === item.key}
-          vertical={stateProps.orientation === 'vertical'}
-          width={stateProps.orientation === 'vertical' ? '100%' : 'auto'}
-          {...item.props}
-        >
-          {item.rendered}
-        </TabComponent>
-      )
-    }
-
     return item.props.renderer({
       ...{
         cursor: 'pointer',
-        _focusVisible: { outline: '1px solid border-outline-focused' },
+        _focusVisible: { ...theme.partials.focus.default },
+        position: 'relative',
+        '&:focus, &:focus-visible': {
+          zIndex: theme.zIndexes.base + 1,
+        },
       },
       ...props,
     },
@@ -129,30 +158,30 @@ function TabRenderer({
   }
 
   return (
-    <TabComponent
-      ref={ref}
+    <TabClone
+      tabRef={ref}
       {...props}
       active={state.selectedKey === item.key}
       vertical={stateProps.orientation === 'vertical'}
       {...item.props}
     >
       {item.rendered}
-    </TabComponent>
+    </TabClone>
   )
 }
 
-type TabPanelProps = {
-  state: TabListState<object>;
-  stateProps: TabListStateProps;
-  renderer?: Renderer;
-};
+type TabPanelProps = DivProps & {
+  stateRef: TabStateRef
+  renderer?: Renderer
+}
 
-function TabPanel({
-  state,
-  stateProps,
+function WrappedTabPanel({
+  stateRef: {
+    current: { state, stateProps },
+  },
   renderer,
   ...props
-}: TabPanelProps & DivProps) {
+}: TabPanelProps) {
   const ref = useRef()
   const { tabPanelProps } = useTabPanel(stateProps, state, ref)
 
@@ -162,19 +191,30 @@ function TabPanel({
 
   return (
     <Div
+      ref={ref}
       {...tabPanelProps}
       {...props}
-      ref={ref}
     />
   )
+}
+
+function TabPanel(props: TabPanelProps) {
+  if (props.stateRef.current) {
+    return <WrappedTabPanel {...props} />
+  }
+
+  if (props.renderer) {
+    return props.renderer({ ...props }, null, null)
+  }
+
+  return <Div {...props} />
 }
 
 export {
   TabList,
   TabListProps,
-  TabListItem,
-  TabListItemProps,
   TabPanel,
   TabPanelProps,
   TabListStateProps,
+  TabBaseProps,
 }

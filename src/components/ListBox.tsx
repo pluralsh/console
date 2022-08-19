@@ -77,12 +77,12 @@ const ScrollContainer = styled.div<ScrollContainerProps>(({ theme, extendStyle }
 }))
 
 function useItemWrappedChildren(children: ReactElement | ReactElement[],
-  header: ReactElement,
-  footer: ReactElement) {
+  header?: ReactElement,
+  footer?: ReactElement) {
   return useMemo(() => {
     // Children.map() prefixes the key props in an undocumented and possibly
     // unstable way, so using Children.forEach() to maintain original key values
-    const wrapped: JSX.Element[] = []
+    const wrapped: (JSX.Element)[] = []
 
     if (header) {
       wrapped.push(<Item key={HEADER_KEY}>{header}</Item>)

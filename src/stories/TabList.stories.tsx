@@ -1,15 +1,19 @@
 import {
   Button, Div, Flex, H1,
 } from 'honorable'
-import { Key, useState } from 'react'
-import { useTabListState } from '@react-stately/tabs'
+import {
+  Key, forwardRef, useRef, useState,
+} from 'react'
+import styled, { useTheme } from 'styled-components'
 
 import {
+  SubTab,
+  Tab,
+  TabBaseProps,
   TabList,
-  TabListItem,
   TabListStateProps,
   TabPanel,
-} from '../components/TabList'
+} from '../index'
 
 export default {
   title: 'Tab List',
@@ -43,50 +47,55 @@ const tabs = {
   },
 }
 
-function TemplateVertical() {
-  const orientation = 'vertical'
+function TemplateBasic(args: any) {
+  const tabStateRef = useRef()
+  const [selectedKey, setSelectedKey] = useState<Key>('1')
+  const orientation = args.orientation || 'horizontal'
   const tabListStateProps: TabListStateProps = {
     keyboardActivation: 'manual',
     orientation,
-    children: Object.entries(tabs).map(([key, tab]) => (
-      <TabListItem
-        key={key}
-        width={orientation === 'vertical' ? '100%' : 'auto'}
-      >
-        {tab.label}
-      </TabListItem>
-    )),
+    selectedKey,
+    onSelectionChange: setSelectedKey,
   }
-
-  const tabState = useTabListState(tabListStateProps)
 
   return (
     <Div>
-      <Flex flexDirection={orientation === 'vertical' ? 'row' : 'column'}>
+      <Flex
+        flexDirection={orientation === 'vertical' ? 'row' : 'column'}
+        maxWidth={800}
+      >
         <TabList
-          state={tabState}
+          stateRef={tabStateRef}
           stateProps={tabListStateProps}
           flexShrink={0}
           marginRight={orientation === 'vertical' ? 'large' : 0}
           marginBottom={orientation === 'vertical' ? 0 : 'xlarge'}
           width={orientation === 'vertical' ? '100px' : '100%'}
-        />
+        >
+          {Object.entries(tabs).map(([key, tab]) => (
+            <Tab
+              key={key}
+              textValue={tab.label}
+            >
+              {tab.label}
+            </Tab>
+          ))}
+        </TabList>
         <Div>
           <H1
             title1
             marginBottom="medium"
           >
-            {tabs[tabState.selectedKey]?.label}
+            {tabs[selectedKey]?.label}
           </H1>
           <TabPanel
-            state={tabState}
-            stateProps={tabListStateProps}
+            stateRef={tabStateRef}
             paddingTop="large"
             paddingBottom="large"
             borderTop="1px solid border"
             borderBottom="1px solid border"
           >
-            {tabs[tabState.selectedKey]?.content}
+            {tabs[selectedKey]?.content}
           </TabPanel>
         </Div>
       </Flex>
@@ -94,169 +103,161 @@ function TemplateVertical() {
   )
 }
 
-function TemplateHorizontal() {
-  const orientation = 'horizontal'
-  const tabListProps: TabListStateProps = {
-    keyboardActivation: 'manual',
-    orientation,
-    children: Object.entries(tabs).map(([key, tab]) => (
-      <TabListItem
-        key={key}
-        width="auto"
-      >
-        {tab.label}
-      </TabListItem>
-    )),
-  }
-
-  const tabState = useTabListState(tabListProps)
+const CustomLinkWrappedTab = styled(forwardRef<HTMLAnchorElement, TabBaseProps>(({
+  vertical,
+  active,
+  children,
+  textValue: _textValue,
+  renderer: _renderer,
+  ...props
+},
+ref) => {
+  const theme = useTheme()
 
   return (
-    <Div>
-      <Flex flexDirection="column">
-        <TabList
-          state={tabState}
-          stateProps={tabListProps}
-          flexShrink={0}
-          marginRight={0}
-          marginBottom="xlarge"
-          width="100%"
-        />
-        <Div>
-          <H1
-            title1
-            marginBottom="medium"
-          >
-            {tabs[tabState.selectedKey]?.label}
-          </H1>
-          <TabPanel
-            state={tabState}
-            stateProps={tabListProps}
-            paddingTop="large"
-            paddingBottom="large"
-            borderTop="1px solid border"
-            borderBottom="1px solid border"
-          >
-            {tabs[tabState.selectedKey]?.content}
-          </TabPanel>
-        </Div>
-      </Flex>
-    </Div>
+    <a
+      ref={ref}
+      target="_blank"
+      rel="noreferrer"
+      {...props}
+    >
+      <Tab
+        vertical={vertical}
+        active={active}
+        color={active ? theme.colors['text-success'] : 'red'}
+      >
+        {children}
+      </Tab>
+    </a>
   )
-}
+}))(({ active, theme }) => ({
+  display: 'block',
+  backgroundColor: active
+    ? theme.colors['fill-one']
+    : theme.colors['fill-zero'],
+  textDecoration: 'none',
+}))
+
+const MyCustomTab2 = forwardRef<any, any>(({ selectedKey, ...props }, ref) => (
+  <Flex
+    justifyContent="center"
+    alignItems="center"
+    {...props}
+    ref={ref}
+    width="100%"
+    padding="20px"
+    textAlign="center"
+    border="1px solid border-fill-two"
+  >
+    <Div
+      subtitle2
+      padding="small"
+      background={
+        selectedKey === 'bears'
+          ? 'action-primary'
+          : selectedKey === 'tigers'
+            ? 'icon-error'
+            : 'fill-two'
+      }
+    >
+      Com&shy;plete&shy;ly custom bears
+    </Div>
+  </Flex>
+))
 
 function TemplateComplex() {
-  const [selectedTabKey, setSelectedTabKey] = useState<Key>('lions')
+  const tabStateRef = useRef()
+  const [selectedKey, setSelectedKey] = useState<Key>('1')
   const orientation = 'vertical'
   const tabListStateProps: TabListStateProps = {
     keyboardActivation: 'manual',
-    selectedKey: selectedTabKey,
-    onSelectionChange: key => {
-      setSelectedTabKey(key)
-    },
     orientation,
-    children: [
-      <TabListItem
-        width="100%"
-        key="lions"
-      >
-        Lions
-      </TabListItem>,
-      <TabListItem
-        key="tigers"
-        renderer={({ children, ...props }, ref) => (
-          <Div
-            {...props}
-            ref={ref}
-            width="100%"
-            border="2px solid border-error"
-          >
-            {children}
-          </Div>
-        )}
-      >
-        Wrapped tigers
-      </TabListItem>,
-      <TabListItem
-        key="bears"
-        renderer={({ ...props }, ref, tabState) => (
-          <Flex
-            justifyContent="center"
-            alignItems="center"
-            {...props}
-            ref={ref}
-            width="100%"
-            padding="20px"
-            textAlign="center"
-            border="1px solid border-fill-two"
-          >
-            <Div
-              subtitle2
-              padding="small"
-              background={
-                tabState?.selectedKey === 'bears'
-                  ? 'action-primary'
-                  : 'fill-two'
-              }
-            >
-              Com&shy;plete&shy;ly custom bears
-            </Div>
-          </Flex>
-        )}
-      />,
-    ],
+    selectedKey,
+    onSelectionChange: setSelectedKey,
   }
-
-  const tabState = useTabListState(tabListStateProps)
 
   return (
     <Div>
       <Flex flexDirection={orientation === 'vertical' ? 'row' : 'column'}>
         <TabList
-          state={tabState}
+          stateRef={tabStateRef}
           stateProps={tabListStateProps}
           flexShrink={0}
           marginRight={orientation === 'vertical' ? 'large' : 0}
           marginBottom={orientation === 'vertical' ? 0 : 'xlarge'}
           width={orientation === 'vertical' ? '200px' : '100%'}
-          renderer={(props, ref, tabState) => (
+          renderer={(props, ref) => (
             <Div
               ref={ref}
               {...props}
               padding="10px"
               border="1px solid"
               borderColor={
-                tabState.selectedKey === 'lions'
+                selectedKey === 'lions'
                   ? 'border.primary'
-                  : tabState.selectedKey === 'tigers'
+                  : selectedKey === 'tigers'
                     ? 'border-warning'
-                    : tabState.selectedKey === 'bears'
+                    : selectedKey === 'bears'
                       ? 'border-success'
                       : 'border-error'
               }
             />
           )}
-        />
+        >
+          <CustomLinkWrappedTab
+            key="lions"
+            textValue="Lions"
+          >
+            {'<a>Lions</a>'}
+          </CustomLinkWrappedTab>
+          <Tab
+            key="tigers"
+            textValue="Tigers"
+            renderer={({ children, ...props }, ref) => (
+              <Div
+                {...props}
+                ref={ref}
+                width="100%"
+                border="2px solid border-error"
+              >
+                {children}
+              </Div>
+            )}
+          >
+            Wrapped tigers
+          </Tab>
+          <MyCustomTab2
+            key="bears"
+            textValue="something"
+            selectedKey={selectedKey}
+          />
+          <CustomLinkWrappedTab
+            key="ohmy"
+            textValue="Oh my!"
+          >
+            {'<a>Oh my!</a>'}
+          </CustomLinkWrappedTab>
+        </TabList>
+
         <Div>
           <H1
             title1
             marginBottom="medium"
           >
-            {tabs[tabState.selectedKey]?.label}
+            {tabs[selectedKey]?.label}
           </H1>
           <TabPanel
-            state={tabState}
-            stateProps={tabListStateProps}
+            stateRef={tabStateRef}
             paddingTop="large"
             paddingBottom="large"
             borderTop="1px solid border"
             borderBottom="1px solid border"
-            renderer={(props, ref, tabState) => (
+            renderer={(props, ref) => (
               <Button
                 ref={ref}
                 {...props}
               >
-                {tabs[tabState.selectedKey]?.content}
+                {tabs[selectedKey]?.content}
               </Button>
             )}
           />
@@ -267,50 +268,51 @@ function TemplateComplex() {
 }
 
 function TemplateSubTabs() {
+  const tabStateRef = useRef()
+  const [selectedKey, setSelectedKey] = useState<Key>('1')
   const orientation = 'horizontal'
-  const tabListProps: TabListStateProps = {
+  const tabListStateProps: TabListStateProps = {
     keyboardActivation: 'manual',
     orientation,
-    children: Object.entries(tabs).map(([key, tab]) => (
-      <TabListItem
-        key={key}
-        width="auto"
-      >
-        {tab.label}
-      </TabListItem>
-    )),
+    selectedKey,
+    onSelectionChange: setSelectedKey,
   }
-
-  const tabState = useTabListState(tabListProps)
 
   return (
     <Div>
       <Flex flexDirection="column">
         <TabList
-          state={tabState}
-          stateProps={tabListProps}
+          stateRef={tabStateRef}
+          stateProps={tabListStateProps}
           flexShrink={0}
           marginRight={0}
           marginBottom="xlarge"
           width="100%"
-          tabStyle="subtab"
-        />
+        >
+          {Object.entries(tabs).map(([key, tab]) => (
+            <SubTab
+              key={key}
+              textValue={tab.label}
+            >
+              {tab.label}
+            </SubTab>
+          ))}
+        </TabList>
         <Div>
           <H1
             title1
             marginBottom="medium"
           >
-            {tabs[tabState.selectedKey]?.label}
+            {tabs[selectedKey]?.label}
           </H1>
           <TabPanel
-            state={tabState}
-            stateProps={tabListProps}
+            stateRef={tabStateRef}
             paddingTop="large"
             paddingBottom="large"
             borderTop="1px solid border"
             borderBottom="1px solid border"
           >
-            {tabs[tabState.selectedKey]?.content}
+            {tabs[selectedKey]?.content}
           </TabPanel>
         </Div>
       </Flex>
@@ -318,11 +320,13 @@ function TemplateSubTabs() {
   )
 }
 
-export const Default = TemplateHorizontal.bind({})
+export const Default = TemplateBasic.bind({})
 Default.args = {}
 
-export const Vertical = TemplateVertical.bind({})
-Vertical.args = {}
+export const Vertical = TemplateBasic.bind({})
+Vertical.args = {
+  orientation: 'vertical',
+}
 
 export const SubTabs = TemplateSubTabs.bind({})
 SubTabs.args = {}

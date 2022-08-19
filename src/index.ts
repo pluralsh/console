@@ -150,9 +150,9 @@ export { default as SubTab } from './components/SubTab'
 export { default as Tab } from './components/Tab'
 export {
   TabList,
-  TabListItem,
   TabListStateProps,
   TabPanel,
+  TabBaseProps,
 } from './components/TabList'
 export { default as TipCarousel } from './components/TipCarousel'
 export { default as Token } from './components/Token'
