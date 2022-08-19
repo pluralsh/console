@@ -2,7 +2,7 @@ import {
   forwardRef, useEffect, useRef, useState,
 } from 'react'
 import {
-  Button, Flex, FlexProps, Pre,
+  Button, Div, Flex, FlexProps, Pre,
 } from 'honorable'
 import hljs from 'highlight.js'
 
@@ -36,7 +36,7 @@ function Highlight({ language, children } : HighlightProps) {
   return (
     <Pre
       margin="0"
-      padding="0"
+      padding="large"
       background="none"
       fontFamily={fontFamilies.mono}
       lineHeight="22px"
@@ -70,9 +70,13 @@ function CodeRef({ children, language, ...props }: CodeProps) {
       onMouseLeave={() => setHover(false)}
       {...props}
     >
-      <Flex direction="column">
+      <Flex
+        position="relative"
+        direction="column"
+        height="100%"
+      >
         {!!language && (
-          <Flex
+          <Div
             paddingHorizontal="large"
             paddingVertical="medium"
             borderBottom="1px solid border"
@@ -80,20 +84,19 @@ function CodeRef({ children, language, ...props }: CodeProps) {
             color="text-light"
           >
             {language}
-          </Flex>
+          </Div>
         )}
-        <Flex
+        <Div
           minHeight="90px"
-          overflowX="auto"
-          position="relative"
-          padding="large"
+          height="100%"
+          overflow="auto"
           alignItems="center"
         >
           {hover && (
             <Button
               position="absolute"
               right="24px"
-              top="24px"
+              top={language ? '73px' : '24px'}
               tertiary
               backgroundColor="fill-three"
               _hover={{ backgroundColor: 'fill-one-hover' }}
@@ -104,7 +107,7 @@ function CodeRef({ children, language, ...props }: CodeProps) {
             </Button>
           )}
           <Highlight language={language}>{children}</Highlight>
-        </Flex>
+        </Div>
       </Flex>
     </Card>
   )
