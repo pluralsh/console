@@ -97,6 +97,7 @@ import SirenIcon from '../components/icons/SirenIcon'
 import SlackLogoIcon from '../components/icons/SlackLogoIcon'
 import SortAscIcon from '../components/icons/SortAscIcon'
 import SortDescIcon from '../components/icons/SortDescIcon'
+import SprayIcon from '../components/icons/SprayIcon'
 import StatusIpIcon from '../components/icons/StatusIpIcon'
 import StatusOkIcon from '../components/icons/StatusOkIcon'
 import SuitcaseIcon from '../components/icons/SuitcaseIcon'
@@ -210,6 +211,7 @@ const icons = {
   SlackLogoIcon,
   SortAscIcon,
   SortDescIcon,
+  SprayIcon,
   StatusIpIcon,
   StatusOkIcon,
   SuitcaseIcon,
