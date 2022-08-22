@@ -16,6 +16,7 @@ function Template(args: any) {
 export const Default = Template.bind({})
 
 Default.args = {
+  text: '',
 }
 
 export const Text = Template.bind({})
