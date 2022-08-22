@@ -88,13 +88,15 @@ function useItemWrappedChildren(children: ReactElement | ReactElement[],
       wrapped.push(<Item key={HEADER_KEY}>{header}</Item>)
     }
     Children.forEach(children, child => {
+      const { textValue, ...childProps } = child?.props || {}
+
       if (child) {
         const item = (
           <Item
             key={child.key}
-            textValue={child?.props?.textValue || ''}
+            textValue={textValue || ''}
           >
-            {child}
+            {cloneElement(child, childProps)}
           </Item>
         )
 
