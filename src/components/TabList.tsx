@@ -15,8 +15,10 @@ import {
   RefObject,
   cloneElement,
   forwardRef,
+  useEffect,
   useImperativeHandle,
   useMemo,
+  useReducer,
   useRef,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -26,7 +28,7 @@ import { mergeProps, mergeRefs } from '@react-aria/utils'
 import { useItemWrappedChildren } from './ListBox'
 
 type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> &
-  Partial<Pick<Type, Key>>;
+  Partial<Pick<Type, Key>>
 
 type Renderer = (
   props: HTMLAttributes<HTMLElement>,
@@ -129,7 +131,7 @@ function TabList({
 const TabClone = styled(({
   className, children, tabRef, ...props
 }) => cloneElement(Children.only(children), {
-  className: `${children.props.className} ${className}`.trim(),
+  className: `${children.props.className || ''} ${className || ''}`.trim(),
   ref: tabRef,
   ...props,
 }))<{ vertical: boolean }>(({ theme, vertical }) => ({
@@ -151,7 +153,7 @@ const TabClone = styled(({
 const TabPanelClone = styled(({
   className, cloneAs, tabRef, ...props
 }) => cloneElement(cloneAs, {
-  className: `${cloneAs.props.className} ${className}`.trim(),
+  className: `${cloneAs.props.className || ''} ${className || ''}`.trim(),
   ref: tabRef,
   ...props,
 }))<{ vertical: boolean }>(({ theme }) => ({
@@ -240,6 +242,15 @@ function WrappedTabPanel({
 const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(({
   as, renderer, stateRef, ...props
 }, ref) => {
+  // https://reactjs.org/docs/hooks-faq.html#is-there-something-like-forceupdate
+  const [_ignored, forceUpdate] = useReducer(x => x + 1, 0)
+
+  // Force update every time stateRef changes in case stateRef.current
+  // hasn't been filled yet
+  useEffect(() => {
+    forceUpdate()
+  }, [stateRef])
+
   if (!renderer && !as) {
     as = (
       <Div
@@ -264,7 +275,14 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(({
     return renderer({ ...props }, null, null)
   }
 
-  return as
+  return (
+    <TabPanelClone
+      tabRef={mergeRefs(as.ref, ref)}
+      cloneAs={as}
+    >
+      {props.children}
+    </TabPanelClone>
+  )
 })
 
 export {
