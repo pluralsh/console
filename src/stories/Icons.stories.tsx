@@ -1,3 +1,5 @@
+import styled, { useTheme } from 'styled-components'
+
 import ArrowLeftIcon from '../components/icons/ArrowLeftIcon'
 import ArrowTopRightIcon from '../components/icons/ArrowTopRightIcon'
 import BellIcon from '../components/icons/BellIcon'
@@ -231,7 +233,32 @@ export default {
   component: MarketPlusIcon,
 }
 
-function Template(args: any) {
+const IconFrame = styled.div<{ $backgroundColor: string }>(({ theme, $backgroundColor = 'transparent' }) => ({
+  margin: theme.spacing.xxxsmall,
+  paddingTop: theme.spacing.medium,
+  paddingBottom: theme.spacing.xsmall,
+  paddingRight: theme.spacing.xsmall,
+  paddingLeft: theme.spacing.xsmall,
+  border: `1px solid ${theme.colors.border}`,
+  borderRadius: theme.borderRadiuses.medium,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+  alignItems: 'center',
+  justifyContent: 'flex-start',
+  width: theme.spacing.xxxlarge,
+  lineBreak: 'loose',
+  fontSize: '0.75rem',
+  minWidth: '8em',
+  textAlign: 'center',
+  ...theme.partials.text.caption,
+  backgroundColor: $backgroundColor,
+}))
+
+function Template({ backgroundColor, ...args }: any) {
+  const theme = useTheme()
+  const bgColor = theme.colors[backgroundColor] || backgroundColor
+
   return (
     <div
       style={{
@@ -241,47 +268,58 @@ function Template(args: any) {
       }}
     >
       {Object.entries(icons).map(([name, Icon]) => (
-        <div
+        <IconFrame
           key={name}
-          style={{
-            padding: '0.25rem',
-            marginBottom: '1.5rem',
-            marginRight: '1rem',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            width: 32 + 16,
-          }}
+          $backgroundColor={bgColor}
         >
-          <span style={{ marginBottom: '0.5rem', fontSize: '0.75rem' }}>
-            {name.replace('Icon', '')}
+          <div style={{ justifySelf: 'flex-end' }}>
+            <Icon {...args} />
+          </div>
+          <span
+            dangerouslySetInnerHTML={{
+              __html: name
+                .replace('Icon', '')
+                .replaceAll(/([a-z])([A-Z])/g, '$1&shy;$2'),
+            }}
+          >
+            {/* {name.replace('Icon', '').replaceAll(/([a-z])([A-Z])/g, '$1&shy;$2')} */}
           </span>
-          <Icon {...args} />
-        </div>
+        </IconFrame>
       ))}
     </div>
   )
 }
 
 export const Default = Template.bind({})
-Default.args = {}
+Default.args = {
+  color: 'text',
+  size: 16,
+  backgroundColor: 'transparent',
+}
 
 export const Xlarge = Template.bind({})
 Xlarge.args = {
+  color: 'text',
   size: 32,
+  backgroundColor: 'transparent',
 }
 
 export const Large = Template.bind({})
 Large.args = {
+  color: 'text',
   size: 24,
+  backgroundColor: 'transparent',
 }
 
 export const Small = Template.bind({})
 Small.args = {
+  color: 'text',
   size: 12,
+  backgroundColor: 'transparent',
 }
 
 export const Color = Template.bind({})
 Color.args = {
-  color: 'primary',
+  color: 'action-primary',
+  backgroundColor: 'transparent',
 }
