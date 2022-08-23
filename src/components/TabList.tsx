@@ -14,13 +14,19 @@ import {
   ReactNode,
   RefObject,
   cloneElement,
+  forwardRef,
   useImperativeHandle,
   useMemo,
   useRef,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 
+import { mergeProps, mergeRefs } from '@react-aria/utils'
+
 import { useItemWrappedChildren } from './ListBox'
+
+type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> &
+  Partial<Pick<Type, Key>>;
 
 type Renderer = (
   props: HTMLAttributes<HTMLElement>,
@@ -49,7 +55,7 @@ type ChildrenType = ReactElement<TabBaseProps> | ReactElement<TabBaseProps>[]
 type TabListProps = {
   stateRef: TabStateRef
   renderer?: Renderer
-  as?: ReactElement
+  as?: ReactElement & { ref?: MutableRefObject<any> }
   children?: ChildrenType
 }
 function TabList({
@@ -142,6 +148,20 @@ const TabClone = styled(({
     : {}),
 }))
 
+const TabPanelClone = styled(({
+  className, cloneAs, tabRef, ...props
+}) => cloneElement(cloneAs, {
+  className: `${cloneAs.props.className} ${className}`.trim(),
+  ref: tabRef,
+  ...props,
+}))<{ vertical: boolean }>(({ theme }) => ({
+  position: 'relative',
+  '&:focus, &:focus-visible': {
+    outline: 'none',
+    zIndex: theme.zIndexes.base + 1,
+  },
+}))
+
 type TabRendererProps = {
   item: Node<unknown>
   state: TabListState<object>
@@ -181,11 +201,13 @@ function TabRenderer({ item, state, stateProps }: TabRendererProps) {
   )
 }
 
-type TabPanelProps = DivProps & {
+type WrappedTabPanelProps = DivProps & {
   stateRef: TabStateRef
   renderer?: Renderer
-  as?: ReactElement
+  as: ReactElement & { ref?: MutableRefObject<any> }
 }
+
+type TabPanelProps = MakeOptional<WrappedTabPanelProps, 'as'>
 
 function WrappedTabPanel({
   stateRef: {
@@ -194,34 +216,39 @@ function WrappedTabPanel({
   renderer,
   as,
   ...props
-}: TabPanelProps) {
+}: WrappedTabPanelProps) {
   const ref = useRef()
   const { tabPanelProps } = useTabPanel(stateProps, state, ref)
 
-  if (as) {
-    return cloneElement(as, {
-      ...tabPanelProps,
-      ...as.props,
-      children: props.children,
-    })
+  if (renderer) {
+    return renderer(mergeProps(tabPanelProps, props), ref, state)
   }
 
-  if (renderer) {
-    return renderer({ ...tabPanelProps, ...props }, ref, state)
-  }
+  const mergedProps = mergeProps(tabPanelProps, as.props, {
+    children: props.children,
+  })
 
   return (
-    <Div
-      ref={ref}
-      {...tabPanelProps}
-      {...props}
+    <TabPanelClone
+      tabRef={mergeRefs(as.ref, ref)}
+      cloneAs={as}
+      {...mergedProps}
     />
   )
 }
 
-function TabPanel({
+const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(({
   as, renderer, stateRef, ...props
-}: TabPanelProps) {
+}, ref) => {
+  if (!renderer && !as) {
+    as = (
+      <Div
+        ref={ref}
+        {...props}
+      />
+    )
+  }
+
   if (stateRef.current) {
     return (
       <WrappedTabPanel
@@ -237,8 +264,8 @@ function TabPanel({
     return renderer({ ...props }, null, null)
   }
 
-  return <Div {...props} />
-}
+  return as
+})
 
 export {
   TabList,
