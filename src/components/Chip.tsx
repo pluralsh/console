@@ -46,12 +46,6 @@ const severityToColor = {
   critical: 'text-error',
 }
 
-const sizeToHeight: { [key in 'small' | 'medium' | 'large']: number } = {
-  small: 20,
-  medium: 24,
-  large: 32,
-}
-
 const sizeToCloseHeight: { [key in 'small' | 'medium' | 'large']: number } = {
   small: 8,
   medium: 10,
@@ -93,7 +87,6 @@ ref: Ref<any>) {
       paddingHorizontal={size === 'small' ? 'xsmall' : 'small'}
       alignItems="center"
       display="inline-flex"
-      maxHeight={sizeToHeight[size]}
       {...props}
     >
       {loading && (
@@ -116,7 +109,6 @@ ref: Ref<any>) {
         fontSize={size === 'small' ? 12 : 14}
         fontWeight={size === 'small' ? 400 : 600}
         lineHeight={size === 'small' ? '16px' : '20px'}
-        height={size === 'small' ? '16px' : '20px'}
         gap={4}
       >
         {children}
@@ -125,7 +117,6 @@ ref: Ref<any>) {
         <CloseIcon
           className="closeIcon"
           paddingLeft="xsmall"
-          // color="text-light"
           size={sizeToCloseHeight[size]}
           _hover={{ color: 'blue' }}
         />

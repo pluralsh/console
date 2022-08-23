@@ -3,6 +3,7 @@ import { Flex, H1 } from 'honorable'
 import { StatusOkIcon } from '..'
 
 import Chip from '../components/Chip'
+import Card from '../components/Card'
 
 export default {
   title: 'Chip',
@@ -529,6 +530,51 @@ function Template(args: any) {
           Critical
         </Chip>
       </Flex>
+      {/* Wrapping */}
+      <H1
+        subtitle2
+        marginBottom="small"
+      >Wrapping
+      </H1>
+      <Card
+        align="center"
+        padding="medium"
+        width="100px"
+        gap="4px"
+        wrap="wrap"
+      >
+        <Chip
+          severity="neutral"
+          size="small"
+          {...args}
+        >
+          Physical
+        </Chip>
+        <Chip
+          severity="warning"
+          size="small"
+          marginTop="4px"
+          {...args}
+        >
+          Local
+        </Chip>
+        <Chip
+          severity="error"
+          size="small"
+          marginTop="4px"
+          {...args}
+        >
+          Adjacent Network
+        </Chip>
+        <Chip
+          severity="critical"
+          size="small"
+          marginTop="4px"
+          {...args}
+        >
+          Network
+        </Chip>
+      </Card>
     </>
   )
 }
