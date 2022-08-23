@@ -110,6 +110,7 @@ ref: Ref<any>) {
         fontWeight={size === 'small' ? 400 : 600}
         lineHeight={size === 'small' ? '16px' : '20px'}
         gap={4}
+        width="min-content"
       >
         {children}
       </Flex>

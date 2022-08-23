@@ -539,7 +539,7 @@ function Template(args: any) {
       <Card
         align="center"
         padding="medium"
-        width="100px"
+        width="140px"
         gap="4px"
         wrap="wrap"
       >
