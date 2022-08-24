@@ -1,4 +1,4 @@
-import { Div, DivProps, Flex } from 'honorable'
+import { Div, DivProps } from 'honorable'
 import { forwardRef } from 'react'
 
 import { Card } from '../index'
@@ -14,13 +14,15 @@ const ContentCard = forwardRef<HTMLDivElement, ContentCardProps>(({
 }, ref) => (
   <Card
     ref={ref}
-    as={Flex}
-    justifyContent="center"
-    padding="xlarge"
+    overflowY="auto"
+    paddingHorizontal="xlarge"
     {...props}
   >
     <Div
       width="100%"
+      marginLeft="auto"
+      marginRight="auto"
+      paddingVertical="xlarge"
       maxWidth={608}
       {...innerProps}
     >
