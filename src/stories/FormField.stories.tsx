@@ -24,6 +24,9 @@ function Template(args: any) {
     hint,
     startIcon,
     endIcon,
+    multiline,
+    minRows,
+    maxRows,
     ...restArgs
   } = args
 
@@ -50,6 +53,9 @@ function Template(args: any) {
         placeholder="Placeholder text"
         startIcon={startIcon}
         endIcon={endIcon}
+        multiline={multiline}
+        minRows={minRows}
+        maxRows={maxRows}
       />
     </FormField>
   )
@@ -172,3 +178,11 @@ ArbitraryHintContent.args = {
   ),
 }
 
+export const Multiline = AllSizesTemplate.bind({})
+
+Multiline.args = {
+  label: 'Label',
+  multiline: true,
+  minRows: 3,
+  maxLength: 200,
+}

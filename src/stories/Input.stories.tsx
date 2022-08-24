@@ -93,3 +93,10 @@ PrefixSuffix.args = {
   prefix: 'app.',
   suffix: '.plural.sh',
 }
+
+export const Multiline = CustomInputTemplate.bind({})
+
+Multiline.args = {
+  multiline: true,
+  minRows: 3,
+}

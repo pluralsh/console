@@ -11,10 +11,10 @@ type FormFieldProps = DivProps & PropsWithChildren<{
   labelProps?: HTMLAttributes<HTMLElement>
   caption?: ReactNode
   hint?: ReactNode
-  length?: number,
-  maxLength?: number,
-  required?: boolean,
-  small?: boolean,
+  length?: number
+  maxLength?: number
+  required?: boolean
+  small?: boolean
 }>
 
 const propTypes = {
