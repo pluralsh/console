@@ -7,7 +7,12 @@ export default {
   component: IconFrame,
   argTypes: {
     icon: {
-      options: ['/logos/plural-logomark-only-black.svg', '/logos/plural-logomark-only-white.svg', '/logos/airflow-logo.svg', '/logos/airbyte-logo.svg'],
+      options: [
+        '/logos/plural-logomark-only-black.svg',
+        '/logos/plural-logomark-only-white.svg',
+        '/logos/airflow-logo.svg',
+        '/logos/airbyte-logo.svg',
+      ],
       control: {
         type: 'select',
         labels: {
@@ -27,144 +32,57 @@ export default {
   },
 }
 
+const sizes = [
+  { label: 'Extra Large', size: 'xlarge' },
+  { label: 'Large', size: 'large' },
+  { label: 'Medium', size: 'medium' },
+  { label: 'Small', size: 'small' },
+  { label: 'Extra Small', size: 'xsmall' },
+]
+
 function Template(args: any) {
   return (
     <Flex
       gap={16}
       direction="column"
     >
-      <H3>Extra Large</H3>
-      <Flex
-        direction="row"
-        gap={16}
-      >
-        <IconFrame
-          size="xlarge"
-          url={args.icon}
-          {...args}
-        />
+      {sizes.map(({ label, size }) => (
+        <>
+          <H3>{label}</H3>
+          <Flex
+            direction="row"
+            gap={16}
+          >
+            <IconFrame
+              size={size}
+              url={args.icon}
+              {...args}
+            />
 
-        <IconFrame
-          size="xlarge"
-          url="photo.png"
-          spacing="none"
-          {...args}
-        />
+            <IconFrame
+              size={size}
+              url="photo.png"
+              spacing="none"
+              {...args}
+            />
 
-        <IconFrame
-          size="xlarge"
-          url="user.png"
-          spacing="none"
-          {...args}
-        />
-      </Flex>
-
-      <H3>Large</H3>
-      <Flex
-        direction="row"
-        gap={16}
-      >
-        <IconFrame
-          size="large"
-          url={args.icon}
-          {...args}
-        />
-
-        <IconFrame
-          size="large"
-          url="photo.png"
-          spacing="none"
-          {...args}
-        />
-
-        <IconFrame
-          size="large"
-          url="user.png"
-          spacing="none"
-          {...args}
-        />
-      </Flex>
-
-      <H3>Medium</H3>
-      <Flex
-        direction="row"
-        gap={16}
-      >
-        <IconFrame
-          url={args.icon}
-          {...args}
-        />
-
-        <IconFrame
-          url="photo.png"
-          spacing="none"
-          {...args}
-        />
-
-        <IconFrame
-          url="user.png"
-          spacing="none"
-          {...args}
-        />
-      </Flex>
-
-      <H3>Small</H3>
-      <Flex
-        direction="row"
-        gap={16}
-      >
-        <IconFrame
-          size="small"
-          url={args.icon}
-          {...args}
-        />
-
-        <IconFrame
-          size="small"
-          url="photo.png"
-          spacing="none"
-          {...args}
-        />
-
-        <IconFrame
-          size="small"
-          url="user.png"
-          spacing="none"
-          {...args}
-        />
-      </Flex>
-
-      <H3>Extra Small</H3>
-      <Flex
-        direction="row"
-        gap={16}
-      >
-        <IconFrame
-          size="xsmall"
-          url={args.icon}
-          {...args}
-        />
-
-        <IconFrame
-          size="xsmall"
-          url="photo.png"
-          spacing="none"
-          {...args}
-        />
-
-        <IconFrame
-          size="xsmall"
-          url="user.png"
-          spacing="none"
-          {...args}
-        />
-      </Flex>
+            <IconFrame
+              size={size}
+              name={args.name || undefined}
+              initials={args.name || undefined}
+              {...args}
+            />
+          </Flex>
+        </>
+      ))}
     </Flex>
   )
 }
 
 export const Default = Template.bind({})
 Default.args = {
+  name: 'Michael J Guarino',
+  initials: '',
   icon: '/logos/plural-logomark-only-black.svg',
   hue: 'default',
   clickable: false,

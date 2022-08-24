@@ -51,6 +51,13 @@ function Template() {
         subheading="GCP"
       />
       <PageCard
+        icon={{
+          name: 'Jimmy J Unknown',
+        }}
+        heading="Jimmy J Unknown"
+      />
+
+      <PageCard
         heading="airflow-identity"
         icon={{
           url: '/logos/airflow-logo.svg',
