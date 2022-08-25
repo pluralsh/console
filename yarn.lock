@@ -11320,6 +11320,46 @@ __metadata:
   languageName: node
   linkType: hard
 
+"grommet-icons@npm:^4.7.0":
+  version: 4.7.0
+  resolution: "grommet-icons@npm:4.7.0"
+  dependencies:
+    grommet-styles: ^0.2.0
+  peerDependencies:
+    react: ">= 16.6.0"
+    react-dom: ">= 16.6.0"
+    styled-components: ">= 5.x"
+  checksum: 5fd1f15978aa4adcb43b1df33e80f9b40cd56688cb2a0270b77363fd28cb3f59ee5e8968898081d561a3c937f7138a9eca03807dbe0c983984ef3e40d828cefe
+  languageName: node
+  linkType: hard
+
+"grommet-styles@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "grommet-styles@npm:0.2.0"
+  peerDependencies:
+    react: ">= 16.4.1"
+    react-dom: ">= 16.4.1"
+    styled-components: ">= 4.X"
+  checksum: 7b29e6fd773a29a9f7b48e5b0a163e1c51b3b196891228d88a0e5b99faab4ece03b5410a97665105fe886402016a337237b956d5f46af06ec2e06e2b328a0757
+  languageName: node
+  linkType: hard
+
+"grommet@npm:2.25.1":
+  version: 2.25.1
+  resolution: "grommet@npm:2.25.1"
+  dependencies:
+    grommet-icons: ^4.7.0
+    hoist-non-react-statics: ^3.2.0
+    markdown-to-jsx: ^7.1.5
+    prop-types: ^15.8.1
+  peerDependencies:
+    react: ^16.6.1 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.6.1 || ^17.0.0 || ^18.0.0
+    styled-components: ">= 5.1"
+  checksum: 4b1cb7c685fed5af5168fcb703def60b60678bf72897b3145df6545fef66e765a42009aac95c2039938202988b4ce0af3a297a34080f88ad98d45d4b5f005b3f
+  languageName: node
+  linkType: hard
+
 "gzip-size@npm:^6.0.0":
   version: 6.0.0
   resolution: "gzip-size@npm:6.0.0"
@@ -11708,7 +11748,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hoist-non-react-statics@npm:^3.0.0, hoist-non-react-statics@npm:^3.3.0, hoist-non-react-statics@npm:^3.3.1":
+"hoist-non-react-statics@npm:^3.0.0, hoist-non-react-statics@npm:^3.2.0, hoist-non-react-statics@npm:^3.3.0, hoist-non-react-statics@npm:^3.3.1":
   version: 3.3.2
   resolution: "hoist-non-react-statics@npm:3.3.2"
   dependencies:
@@ -14215,6 +14255,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"markdown-to-jsx@npm:^7.1.5":
+  version: 7.1.7
+  resolution: "markdown-to-jsx@npm:7.1.7"
+  peerDependencies:
+    react: ">= 0.14.0"
+  checksum: b2c0ea7d0988fad0c709989b3b1b3a5600d1e80b60266f9618386f7afead4a6b5eba9ee1a3943df6a3dcb1599ea89e58467d1b17b6dd3af3c60984c60a85d06d
+  languageName: node
+  linkType: hard
+
 "md5.js@npm:^1.3.4":
   version: 1.3.5
   resolution: "md5.js@npm:1.3.5"
@@ -16126,6 +16175,7 @@ __metadata:
     eslint: 8.20.0
     eslint-plugin-storybook: 0.6.1
     fuse.js: 6.6.2
+    grommet: 2.25.1
     highlight.js: 11.6.0
     honorable: 0.135.0
     honorable-theme-default: 0.63.0

@@ -28,7 +28,7 @@ type BannerProps = FlexProps & {
   severity?: 'success' | 'error' | 'info' | string
   heading?: ReactNode
   action?: ReactNode
-  actionProps: SpanProps
+  actionProps?: SpanProps
   onClose?: () => void
 }
 
