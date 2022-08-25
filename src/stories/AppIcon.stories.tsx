@@ -1,10 +1,10 @@
 import { Flex, H3 } from 'honorable'
 
-import IconFrame from '../components/IconFrame'
+import AppIcon from '../components/AppIcon'
 
 export default {
-  title: 'IconFrame',
-  component: IconFrame,
+  title: 'AppIcon',
+  component: AppIcon,
   argTypes: {
     icon: {
       options: [
@@ -53,20 +53,20 @@ function Template(args: any) {
             direction="row"
             gap={16}
           >
-            <IconFrame
+            <AppIcon
               size={size}
               url={args.icon}
               {...args}
             />
 
-            <IconFrame
+            <AppIcon
               size={size}
               url="photo.png"
               spacing="none"
               {...args}
             />
 
-            <IconFrame
+            <AppIcon
               size={size}
               name={args.name || undefined}
               initials={args.name || undefined}

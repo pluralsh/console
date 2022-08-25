@@ -3,10 +3,10 @@ import {
 } from 'honorable'
 import { ReactNode, forwardRef } from 'react'
 
-import IconFrame, { IconFrameProps } from './IconFrame'
+import AppIcon, { AppIconProps } from './AppIcon'
 
 type PageCardProps = {
-  icon: Omit<IconFrameProps, 'size'>
+  icon: Omit<AppIconProps, 'size'>
   heading?: ReactNode
   subheading?: ReactNode
   subheadingIcon?: ReactNode
@@ -30,7 +30,7 @@ ref) => (
       alignItems="center"
       {...props}
     >
-      <IconFrame
+      <AppIcon
         size="small"
         hue="default"
         {...icon}

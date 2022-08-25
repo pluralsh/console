@@ -6,9 +6,9 @@ import styled from 'styled-components'
 import Fuse from 'fuse.js'
 
 import {
+  AppIcon,
   Chip,
   ComboBox,
-  IconFrame,
   ListBoxFooterPlus,
   ListBoxItem,
   ListBoxItemChipList,
@@ -20,7 +20,7 @@ export default {
 }
 
 const portrait = (
-  <IconFrame
+  <AppIcon
     spacing="none"
     size="xsmall"
     url="photo.png"

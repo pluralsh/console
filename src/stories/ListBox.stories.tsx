@@ -2,8 +2,8 @@ import { Div, Flex } from 'honorable'
 import { Key, useState } from 'react'
 
 import {
+  AppIcon,
   Chip,
-  IconFrame,
   ListBox,
   ListBoxFooter,
   ListBoxFooterPlus,
@@ -18,7 +18,7 @@ export default {
 }
 
 const portrait = (
-  <IconFrame
+  <AppIcon
     spacing="none"
     size="xsmall"
     url="photo.png"

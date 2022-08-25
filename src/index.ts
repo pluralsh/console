@@ -138,7 +138,7 @@ export { default as PageCard, PageCardProps } from './components/PageCard'
 export { default as PageTitle } from './components/PageTitle'
 export { default as ProgressBar } from './components/ProgressBar'
 export { default as Radio } from './components/Radio'
-export { default as IconFrame } from './components/IconFrame'
+export { default as AppIcon } from './components/AppIcon'
 export { default as RepositoryCard } from './components/RepositoryCard'
 export { default as Stepper } from './components/Stepper'
 export {

@@ -3,11 +3,11 @@ import { Key, forwardRef, useState } from 'react'
 import styled from 'styled-components'
 
 import {
+  AppIcon,
   Button,
   CheckIcon,
   Chip,
   DropdownArrowIcon,
-  IconFrame,
   InfoIcon,
   ListBoxFooterPlus,
   ListBoxItem,
@@ -24,7 +24,7 @@ export default {
 }
 
 const portrait = (
-  <IconFrame
+  <AppIcon
     spacing="none"
     size="xsmall"
     url="photo.png"

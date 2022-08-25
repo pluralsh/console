@@ -6,7 +6,7 @@ import last from 'lodash/last'
 
 import { styledTheme as theme } from '../theme'
 
-type IconFrameProps = DivProps & {
+type AppIconProps = DivProps & {
   size?: 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge' | string
   spacing?: 'none' | 'padding' | string
   hue?: 'default' | 'lighter' | 'lightest' | string
@@ -83,7 +83,7 @@ export function toInitials(name: string) {
   return initials.join('')
 }
 
-function IconFrameRef({
+function AppIconRef({
   size = 'medium',
   spacing = 'padding',
   hue = 'lighter',
@@ -94,7 +94,7 @@ function IconFrameRef({
   initials,
   onClose,
   ...props
-}: IconFrameProps,
+}: AppIconProps,
 ref: Ref<any>) {
   const boxSize = sizeToWidth[size]
   const iconSize
@@ -147,9 +147,9 @@ ref: Ref<any>) {
   )
 }
 
-const IconFrame = forwardRef(IconFrameRef)
+const AppIcon = forwardRef(AppIconRef)
 
-IconFrame.propTypes = propTypes
+AppIcon.propTypes = propTypes
 
-export default IconFrame
-export { IconFrameProps }
+export default AppIcon
+export { AppIconProps }

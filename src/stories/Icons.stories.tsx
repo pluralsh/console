@@ -233,7 +233,7 @@ export default {
   component: MarketPlusIcon,
 }
 
-const IconFrame = styled.div<{ $backgroundColor: string }>(({ theme, $backgroundColor = 'transparent' }) => ({
+const AppIcon = styled.div<{ $backgroundColor: string }>(({ theme, $backgroundColor = 'transparent' }) => ({
   margin: theme.spacing.xxxsmall,
   paddingTop: theme.spacing.medium,
   paddingBottom: theme.spacing.xsmall,
@@ -268,7 +268,7 @@ function Template({ backgroundColor, ...args }: any) {
       }}
     >
       {Object.entries(icons).map(([name, Icon]) => (
-        <IconFrame
+        <AppIcon
           key={name}
           $backgroundColor={bgColor}
         >
@@ -284,7 +284,7 @@ function Template({ backgroundColor, ...args }: any) {
           >
             {/* {name.replace('Icon', '').replaceAll(/([a-z])([A-Z])/g, '$1&shy;$2')} */}
           </span>
-        </IconFrame>
+        </AppIcon>
       ))}
     </div>
   )
