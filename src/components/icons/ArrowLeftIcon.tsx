@@ -8,19 +8,14 @@ export default createIcon(({ size, color }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path
-      d="M6.33334 3L1.09525 8L6.33334 13"
+    <g
       stroke={color}
-      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-    />
-    <path
-      d="M14.9048 8H1.33333"
-      stroke={color}
       strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    >
+      <path d="m6.33331 3-5.2381 5 5.2381 5" />
+      <path d="m14.9049 8h-13.5714" />
+    </g>
   </svg>
 ))

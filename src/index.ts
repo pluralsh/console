@@ -4,13 +4,17 @@ export {
 
 // Icons
 export { default as ArrowLeftIcon } from './components/icons/ArrowLeftIcon'
+export { default as ArrowRightIcon } from './components/icons/ArrowRightIcon'
 export { default as ArrowTopRightIcon } from './components/icons/ArrowTopRightIcon'
 export { default as BellIcon } from './components/icons/BellIcon'
 export { default as BotIcon } from './components/icons/BotIcon'
 export { default as BrowserIcon } from './components/icons/BrowserIcon'
 export { default as BundleIcon } from './components/icons/BundleIcon'
 export { default as CameraIcon } from './components/icons/CameraIcon'
+export { default as CaretUpIcon } from './components/icons/CaretUpIcon'
 export { default as CaretDownIcon } from './components/icons/CaretDownIcon'
+export { default as CaretLeftIcon } from './components/icons/CaretLeftIcon'
+export { default as CaretRightIcon } from './components/icons/CaretRightIcon'
 export { default as CertificateIcon } from './components/icons/CertificateIcon'
 export { default as CheckIcon } from './components/icons/CheckIcon'
 export { default as CheckOutlineIcon } from './components/icons/CheckOutlineIcon'
