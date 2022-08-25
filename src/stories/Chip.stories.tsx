@@ -534,47 +534,84 @@ function Template(args: any) {
       <H1
         subtitle2
         marginBottom="small"
-      >Wrapping
-      </H1>
-      <Card
-        align="center"
-        padding="medium"
-        width="140px"
-        gap="4px"
-        wrap="wrap"
       >
-        <Chip
-          severity="neutral"
-          size="small"
-          {...args}
+        Wrapping
+      </H1>
+      <Flex gap="medium">
+        <Card
+          padding="medium"
+          width="160px"
         >
-          Physical
-        </Chip>
-        <Chip
-          severity="warning"
-          size="small"
-          marginTop="4px"
-          {...args}
+          <Flex
+            gap="xsmall"
+            wrap
+          >
+            <Chip
+              severity="neutral"
+              size="small"
+              {...args}
+            >
+              Physical
+            </Chip>
+            <Chip
+              severity="warning"
+              size="small"
+            >
+              Local
+            </Chip>
+            <Chip
+              severity="error"
+              size="small"
+            >
+              Adjacent Network
+            </Chip>
+            <Chip
+              severity="critical"
+              size="small"
+            >
+              Network
+            </Chip>
+          </Flex>
+        </Card>
+        <Card
+          width="400px"
+          padding="medium"
         >
-          Local
-        </Chip>
-        <Chip
-          severity="error"
-          size="small"
-          marginTop="4px"
-          {...args}
+          <Flex
+            gap="xsmall"
+            wrap
+          >
+            <Chip size="small">dag</Chip>
+            <Chip size="small">data-pipelines</Chip>
+            <Chip size="small">data</Chip>
+            <Chip size="small">11-11-2022</Chip>
+          </Flex>
+        </Card>
+        <Card
+          width="200px"
+          padding="medium"
         >
-          Adjacent Network
-        </Chip>
-        <Chip
-          severity="critical"
-          size="small"
-          marginTop="4px"
-          {...args}
+          <Flex
+            gap="xsmall"
+            wrap
+          >
+            <Chip size="small">data pipelines</Chip>
+            <Chip size="small">data</Chip>
+          </Flex>
+        </Card>
+        <Card
+          width="120px"
+          padding="medium"
         >
-          Network
-        </Chip>
-      </Card>
+          <Flex
+            gap="xsmall"
+            wrap
+          >
+            <Chip size="small">data pipelines</Chip>
+            <Chip size="small">data</Chip>
+          </Flex>
+        </Card>
+      </Flex>
     </>
   )
 }
