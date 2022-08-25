@@ -13,7 +13,8 @@
     "build": "npx tsc --declaration",
     "clean": "rimraf storybook-static dist",
     "lint": "eslint src --ext ts,tsx,js,jsx",
-    "fix": "eslint src --ext ts,tsx,js,jsx --fix"
+    "fix": "eslint src --ext ts,tsx,js,jsx --fix",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@floating-ui/react-dom-interactions": "0.8.1",
