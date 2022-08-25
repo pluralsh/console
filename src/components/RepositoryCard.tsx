@@ -84,6 +84,7 @@ ref: Ref<any>) {
               direction="row"
               marginLeft={size === 'small' ? 'small' : 0}
               width="100%"
+              align="flex-start"
               justify="space-between"
             >
               <Flex direction="column">
@@ -132,6 +133,8 @@ ref: Ref<any>) {
                     marginLeft={8}
                     paddingHorizontal={8}
                     paddingVertical={8}
+                    backgroundColor="transparent"
+                    border="none"
                   >
                     <PadlockLockedIcon />
                   </Chip>
