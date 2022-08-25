@@ -7,11 +7,13 @@ import Tooltip from '../components/Tooltip'
 
 import CopyIcon from './icons/CopyIcon'
 
-type CodelineProps = FlexProps
+type CodelineProps = FlexProps & {
+  displayText?: string
+}
 
 const propTypes = {}
 
-function CodelineRef({ children, ...props }: CodelineProps, ref: Ref<any>) {
+function CodelineRef({ children, displayText, ...props }: CodelineProps, ref: Ref<any>) {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -48,7 +50,7 @@ function CodelineRef({ children, ...props }: CodelineProps, ref: Ref<any>) {
           textOverflow="ellipsis"
           overflow="hidden"
         >
-          {children}
+          {displayText || children}
         </Div>
       </Flex>
       <Flex

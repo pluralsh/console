@@ -15,10 +15,13 @@ function Template(args: any) {
     >
       <Codeline {...args} />
       <Codeline
+        displayText="••••••••••"
+        {...args}
+      />
+      <Codeline
         {...args}
         maxWidth="200px"
       />
-
     </Flex>
   )
 }
