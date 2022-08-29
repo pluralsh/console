@@ -24,7 +24,7 @@
     "@absinthe/socket": "0.2.1",
     "@absinthe/socket-apollo-link": "0.2.1",
     "@apollo/client": "3.3.21",
-    "@babel/plugin-transform-react-jsx": "7.18.6",
+    "@babel/plugin-transform-react-jsx": "7.18.10",
     "@jumpn/utils-graphql": "0.6.0",
     "@nivo/core": "0.73.0",
     "@nivo/geo": "0.73.0",
@@ -115,9 +115,9 @@
     "yaml": "1.10.0"
   },
   "devDependencies": {
-    "@babel/core": "7.18.6",
-    "@babel/eslint-parser": "7.18.2",
-    "@babel/preset-env": "7.18.6",
+    "@babel/core": "7.18.13",
+    "@babel/eslint-parser": "7.18.9",
+    "@babel/preset-env": "7.18.10",
     "@babel/preset-react": "7.18.6",
     "@cypress/webpack-preprocessor": "5.12.0",
     "@graphql-codegen/cli": "2.8.0",
