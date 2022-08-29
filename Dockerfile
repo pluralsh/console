@@ -72,7 +72,7 @@ ENV TERRAFORM_VERSION=v1.2.7
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
 ENV CLI_VERSION=v0.4.9
 
-# renovate: datasource=github-tags depName=kubernetes/kubectl
+# renovate: datasource=github-tags depName=kubernetes/kubernetes
 ENV KUBECTL_VERSION=v1.24.3
 
 RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-base && \
