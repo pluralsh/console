@@ -132,6 +132,7 @@ export {
   ContentCardProps,
 } from './components/ContentCard'
 export { default as Divider } from './components/Divider'
+export { default as EmptyState } from './components/EmptyState'
 export { default as FormField } from './components/FormField'
 export { default as Input } from './components/Input'
 export { default as InstalledLabel } from './components/InstalledLabel'
