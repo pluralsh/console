@@ -41,6 +41,18 @@
         "helmv3"
       ],
       "bumpVersion": "patch"
+    },
+    {
+      "matchManagers": ["npm"],
+      "addLabels": [
+        "frontend"
+      ]
+    },
+    {
+      "matchManagers": ["mix"],
+      "addLabels": [
+        "backend"
+      ]
     }
   ],
   "regexManagers": [
@@ -53,6 +65,5 @@
     }
   ],
   "labels": ["dependencies"],
-  "separateMinorPatch": true,
-  "dependencyDashboardApproval": true
+  "separateMinorPatch": true
 }
