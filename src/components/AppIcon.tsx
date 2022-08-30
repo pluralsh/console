@@ -57,7 +57,7 @@ const hueToBorderColor: {
 } = {
   default: 'border',
   lighter: 'border-fill-two',
-  lightest: 'border-input',
+  lightest: 'border-fill-three',
 }
 
 const sizeToFont: {
@@ -101,7 +101,7 @@ ref: Ref<any>) {
     = spacing === 'padding' ? sizeToIconWidth[size] : sizeToWidth[size] + 1
   const color = hueToColor[hue]
   const borderColor = hueToBorderColor[hue]
-  const hasBorder = spacing === 'padding' && url
+  const hasBorder = spacing === 'padding'
 
   return (
     <Flex
@@ -135,7 +135,6 @@ ref: Ref<any>) {
           height="100%"
           alignItems="center"
           justifyContent="center"
-          backgroundColor={theme.colors['action-primary']}
           userSelect="none"
           textTransform="uppercase"
           {...sizeToFont[size]}

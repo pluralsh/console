@@ -1,4 +1,4 @@
-import { A, Div } from 'honorable'
+import { A, Flex } from 'honorable'
 
 export default {
   title: 'A',
@@ -7,14 +7,21 @@ export default {
 
 function Template(args: any) {
   return (
-    <Div xflex="y1">
+    <Flex gap="medium">
       <A {...args} />
       <A
-        marginTop="medium"
         href="https://github.com"
         {...args}
-      />
-    </Div>
+      >
+        Github
+      </A>
+      <A
+        inline
+        {...args}
+      >
+        Inline
+      </A>
+    </Flex>
   )
 }
 

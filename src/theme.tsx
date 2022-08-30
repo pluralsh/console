@@ -25,70 +25,86 @@ export const grey = {
   500: '#747B8B',
   400: '#9095A2',
   300: '#A9AFBC',
-  200: '#C5C9D3',
+  200: '#D6D9E0',
   100: '#DFE2E7',
   50: '#EBEFF0',
 }
 
+export const purple = {
+  950: '#020318',
+  900: '#030530',
+  850: '#050848',
+  800: '#070A5F',
+  700: '#0A0F8F',
+  600: '#0D14BF',
+  500: '#111AEE',
+  400: '#4A51F2',
+  350: '#5D63F4',
+  300: '#747AF6',
+  200: '#9FA3F9',
+  100: '#CFD1FC',
+  50: '#F1F1FE',
+}
+
 export const blue = {
-  950: '#00041A',
-  900: '#000933',
-  850: '#000B4D',
-  800: '#000E66',
-  700: '#001299',
-  600: '#0011CC',
-  500: '#151DF9',
-  400: '#293EFF',
-  350: '#3853FF',
-  300: '#5C77FF',
-  200: '#8FB4FF',
-  100: '#C2D8FF',
-  50: '#F0F5FF',
+  950: '#001019',
+  900: '#002033',
+  850: '#00304D',
+  800: '#004166',
+  700: '#006199',
+  600: '#0081CC',
+  500: '#06A0F9',
+  400: '#33B4FF',
+  350: '#4DBEFF',
+  300: '#66C7FF',
+  200: '#99DAFF',
+  100: '#C2E9FF',
+  50: '#F0F9FF',
 }
 
 export const green = {
-  950: '#001409',
-  900: '#00240F',
-  850: '#023C1A',
-  800: '#045827',
-  700: '#08873D',
-  600: '#0BB151',
+  950: '#032117',
+  900: '#053827',
+  850: '#074F37',
+  800: '#0A6B4A',
+  700: '#0F996A',
+  600: '#13C386',
   500: '#17E86E',
-  400: '#42F08B',
-  300: '#71F4A8',
-  200: '#A5F8C8',
-  100: '#D7FEE7',
-  50: '#F5FFF9',
+  400: '#3CECAF',
+  300: '#6AF1C2',
+  200: '#99F5D5',
+  100: '#C7FAE8',
+  50: '#F1FEF9',
 }
 
 export const yellow = {
-  950: '#241700',
-  900: '#3D2700',
+  950: '#242000',
+  900: '#3D2F00',
   850: '#573B00',
   800: '#755200',
   700: '#A87E00',
   600: '#D6AF00',
   500: '#FFC800',
   400: '#FFD129',
-  300: '#FFE175',
-  200: '#FFE78F',
-  100: '#FFF2C2',
-  50: '#FFFCF0',
+  300: '#FFF170',
+  200: '#FFF59E',
+  100: '#FFF9C2',
+  50: '#FFFEF0',
 }
 
 export const red = {
-  950: '#140000',
-  900: '#240100',
-  850: '#3D0100',
-  800: '#5A0502',
-  700: '#800B05',
-  600: '#AE1409',
-  500: '#E82817',
-  400: '#F66555',
-  300: '#FA897A',
-  200: '#FDB1A5',
-  100: '#FFD8D1',
-  50: '#FFF7F5',
+  950: '#130205',
+  900: '#200308',
+  850: '#38060E',
+  800: '#660A19',
+  700: '#8B0E23',
+  600: '#BA1239',
+  500: '#E81748',
+  400: '#ED456A',
+  300: '#F2788D',
+  200: '#F599A8',
+  100: '#FAC7D0',
+  50: '#FFF0F2',
 }
 
 export const semanticColors = {
@@ -106,20 +122,23 @@ export const semanticColors = {
   'fill-three-hover': grey[725],
   'fill-three-selected': grey[675],
   // Action
-  'action-primary': blue[400],
-  'action-primary-hover': blue[350],
+  'action-primary': purple[400],
+  'action-primary-hover': purple[350],
   'action-primary-disabled': grey[825],
   'action-link-inactive': grey[200],
   'action-link-active': grey[50],
   'action-link-inline': blue[200],
+  'action-link-inline-hover': blue[350],
+  'action-link-inline-visited': purple[300],
   'action-input-hover': `${chroma('#E9ECF0').alpha(0.04)}`,
   // Border
   border: grey[800],
   'border-input': grey[700],
   'border-fill-two': grey[750],
+  'border-fill-three': grey[700],
   'border-disabled': grey[700],
   'border-outline-focused': blue[300],
-  'border-primary': blue[400],
+  'border-primary': purple[300],
   'border-success': green[500],
   'border-warning': yellow[400],
   'border-error': red[400],
@@ -446,6 +465,7 @@ const baseTheme = {
     green,
     yellow,
     red,
+    purple,
     // Semantic colors,
     ...semanticColors,
   },
@@ -533,14 +553,15 @@ const honorableTheme = mergeTheme(defaultTheme, {
     Root: [
       {
         color: 'text',
-        '&:visited, &:hover, &:active': {
-          color: 'text',
-        },
       },
       ({ inline }: any) => inline && {
         color: 'action-link-inline',
-        '&:visited, &:hover, &:active': {
-          color: 'action-link-inline',
+        textDecoration: 'underline',
+        '&:hover': {
+          color: 'action-link-inline-hover',
+        },
+        '&:visited, &:active': {
+          color: 'action-link-inline-visited',
         },
       },
     ],
@@ -771,12 +792,10 @@ const honorableTheme = mergeTheme(defaultTheme, {
         color: 'text',
         '> span': {
           backgroundColor: 'action-primary',
-          border: '1px solid text',
         },
         ':hover': {
           '> span': {
             backgroundColor: 'action-primary-hover',
-            border: '1px solid text',
           },
         },
       },
@@ -1046,7 +1065,7 @@ const honorableTheme = mergeTheme(defaultTheme, {
         color: checked ? 'text' : 'action-link-inactive',
         '> div:first-of-type': {
           backgroundColor: checked ? 'action-primary' : 'transparent',
-          border: `1px solid ${checked ? 'text' : 'border-input'}`,
+          border: '1px solid border-input',
           '> span': {
             backgroundColor: checked
               ? 'action-link-active'
@@ -1059,7 +1078,7 @@ const honorableTheme = mergeTheme(defaultTheme, {
             backgroundColor: checked
               ? 'action-primary-hover'
               : 'action-input-hover',
-            border: `1px solid ${checked ? 'text' : 'border-input'}`,
+            border: '1px solid border-input',
             '> span': {
               backgroundColor: checked
                 ? 'action-link-active'
