@@ -199,7 +199,7 @@ function Tooltip({
             top: y ?? 0,
           }}
           transformOrigin={transformOrigin}
-          zIndex={0}
+          zIndex={theme.zIndexes.tooltip}
           {...props}
           {...getFloatingProps()}
         >
@@ -234,3 +234,4 @@ function Tooltip({
 }
 
 export default Tooltip
+export { TooltipProps }
