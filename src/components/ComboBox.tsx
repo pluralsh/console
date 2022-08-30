@@ -361,9 +361,9 @@ function ComboBox({
 
   return (
     <ComboBoxInner
-      isOpen={state.isOpen}
-      maxHeight={maxHeight}
-      placement={placement}
+      $isOpen={state.isOpen}
+      $maxHeight={maxHeight}
+      $placement={placement}
     >
       <ComboBoxInput
         inputRef={inputRef}

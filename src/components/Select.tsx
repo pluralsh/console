@@ -72,7 +72,7 @@ function Trigger({ buttonElt, isOpen, ...props }: TriggerProps) {
   })
 }
 
-const SelectButtonInner = styled.div<{ isOpen: boolean }>(({ theme, isOpen }) => ({
+const SelectButtonInner = styled.div<{ $isOpen: boolean }>(({ theme, $isOpen: isOpen }) => ({
   ...theme.partials.reset.button,
   ...theme.partials.text.body2,
   display: 'flex',
@@ -118,7 +118,7 @@ const SelectButton = forwardRef<
 ref) => (
   <SelectButtonInner
     ref={ref}
-    isOpen={isOpen}
+    $isOpen={isOpen}
     {...props}
   >
     {leftContent && <div className="leftContent">{leftContent}</div>}
@@ -133,14 +133,15 @@ ref) => (
 ))
 
 const SelectInner = styled.div<{
-  isOpen: boolean
-  maxHeight: string | number
-  placement: Placement
-}>(({ maxHeight, placement }) => ({
+  $isOpen: boolean
+  $maxHeight: string | number
+  $placement: Placement
+  $width?: string | number
+}>(({ $maxHeight: maxHeight, $placement: placement, $width: width }) => ({
   position: 'relative',
   '.popover': {
     maxHeight: maxHeight || 230,
-    width: '100%',
+    width: width || '100%',
     ...(placement === 'right' && { right: 0, left: 'auto' }),
     pointerEvents: 'auto',
   },
@@ -220,9 +221,11 @@ function Select({
 
   return (
     <SelectInner
-      isOpen={state.isOpen}
-      maxHeight={maxHeight}
-      placement={placement}
+      className="selectInner"
+      $isOpen={state.isOpen}
+      $maxHeight={maxHeight}
+      $width={width}
+      $placement={placement}
     >
       <HiddenSelect
         state={state}
@@ -251,12 +254,11 @@ function Select({
 }
 
 export const PopoverWrapper = styled.div<{
-  isOpen: boolean
-  width: string | number
-  placement: Placement
-}>(({ theme, width, placement }) => ({
+  $isOpen: boolean
+  $placement: Placement
+}>(({ theme, $placement: placement }) => ({
   position: 'absolute',
-  width: width || '100%',
+  width: '100%',
   ...(placement === 'right' && { right: 0, left: 'auto' }),
   pointerEvents: 'none',
   zIndex: theme.zIndexes.selectPopover,

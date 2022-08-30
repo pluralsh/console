@@ -269,7 +269,7 @@ function Template() {
           label="Version"
           selectedKey={selectedKey}
           triggerButton={<CustomTriggerButton />}
-          width={224}
+          width="max-content"
           maxHeight={197}
           placement="right"
           onSelectionChange={key => {

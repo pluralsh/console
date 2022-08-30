@@ -268,6 +268,39 @@ function Template() {
           ))}
         </ListBox>
       </Div>
+
+      <Div
+        display="flex"
+        flexDirection="column"
+        maxWidth={224}
+        maxHeight={200}
+        overflow="hidden"
+      >
+        <ListBox
+          extendStyle={{ width: 'max-content' }}
+          selectedKey={null}
+          onSelectionChange={key => {
+            setSelectedKey(key)
+          }}
+        >
+          <ListBoxItem
+            key="add-user"
+            label="Add user"
+            textValue="Add user"
+          />
+          <ListBoxItem
+            key="modify-user"
+            label="Modify user"
+            textValue="Modify user"
+
+          />
+          <ListBoxItem
+            key="delete-user"
+            label="Delete user"
+            destructive
+          />
+        </ListBox>
+      </Div>
     </Flex>
   )
 }

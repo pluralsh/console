@@ -32,7 +32,7 @@ function Popover({ ...props }: PopoverProps) {
     <PopoverStyled
       key={isOpen ? 'open' : 'closed'}
       className="popover"
-      isOpen={isOpen}
+      $isOpen={isOpen}
       {...overlayProps}
       {...(isOpen && {
         ref: popoverRef,
@@ -50,7 +50,7 @@ function Popover({ ...props }: PopoverProps) {
   return content
 }
 
-const PopoverStyled = styled.div<{ isOpen: boolean }>(({ isOpen }) => ({
+const PopoverStyled = styled.div<{ $isOpen: boolean }>(({ $isOpen: isOpen }) => ({
   display: 'flex',
   position: 'absolute',
   width: '100%',
