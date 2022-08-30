@@ -53,7 +53,7 @@ ref: Ref<any>) {
         <P
           caption={small}
           body2={!small}
-          fontWeight="bold"
+          fontWeight="600"
           flexShrink={0}
           {...labelProps}
         >

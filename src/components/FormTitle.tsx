@@ -17,7 +17,7 @@ function FormTitleRef({ title, message, ...props }: FormTitleProps, ref: Ref<any
     <H3
       ref={ref}
       body1
-      bold
+      fontWeight="600"
       color="text"
       {...props}
     >

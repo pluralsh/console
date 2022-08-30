@@ -83,7 +83,7 @@ function AlertRef({
         {!!title && (
           <P
             body1
-            fontWeight="bold"
+            fontWeight="600"
             marginBottom={children ? 'medium' : 0}
           >
             {title}

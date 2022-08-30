@@ -32,7 +32,7 @@ function UserCardRef({ user = {}, ...props }: UserCardProps, ref: Ref<any>) {
       <Div paddingLeft="xsmall">
         <P
           truncate
-          fontWeight="bold"
+          fontWeight="600"
           color="text-strong"
         >
           {user.name}

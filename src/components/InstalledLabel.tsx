@@ -19,7 +19,7 @@ function InstalledLabelRef({ label = 'Installed', ...props }: InstalledLabelProp
       align="center"
       {...props}
     >
-      <P fontWeight="bold">
+      <P fontWeight="600">
         {label}
       </P>
       <CheckOutlineIcon
