@@ -1,4 +1,6 @@
-import { Button, H3, P } from 'honorable'
+import {
+  Button, H3, P,
+} from 'honorable'
 import { useState } from 'react'
 
 import {
@@ -8,6 +10,14 @@ import {
 export default {
   title: 'Modal',
   component: Modal,
+  argTypes: {
+    size: {
+      options: ['medium', 'large'],
+      control: {
+        type: 'select',
+      },
+    },
+  },
 }
 
 function Template(args: any) {
@@ -21,8 +31,8 @@ function Template(args: any) {
       </Button>
       <Modal
         open={open}
-        form={args.form}
         onClose={() => setOpen(false)}
+        {...args}
       >
         <ModalHeader>
           {args.title}
@@ -101,6 +111,7 @@ Default.args = {
   header: 'Default',
   title: 'Confirm Uninstall',
   form: false,
+  size: 'medium',
 }
 
 export const Form = Template.bind({})

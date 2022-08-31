@@ -979,7 +979,6 @@ const honorableTheme = mergeTheme(defaultTheme, {
   Modal: {
     Root: [
       {
-        maxWidth: '480px',
         backgroundColor: 'fill-one',
         border: '1px solid border',
         boxShadow: 'modal',
@@ -987,10 +986,6 @@ const honorableTheme = mergeTheme(defaultTheme, {
         paddingRight: 'large',
         paddingBottom: 'large',
         paddingLeft: 'large',
-      },
-      ({ form }: any) => form && {
-        width: '608px',
-        maxWidth: '608px',
       },
     ],
     Backdrop: [
