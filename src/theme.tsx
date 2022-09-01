@@ -413,6 +413,16 @@ export const textPartials = asElementTypes<CSSObject>()({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
+  inlineLink: {
+    color: semanticColors['action-link-inline'],
+    textDecoration: 'underline',
+    '&:hover': {
+      color: semanticColors['action-link-inline-hover'],
+    },
+    '&:visited, &:active': {
+      color: semanticColors['action-link-inline-visited'],
+    },
+  },
   body1Bold: {},
   body2Bold: {},
 })
@@ -520,9 +530,9 @@ const honorableTheme = mergeTheme(defaultTheme, {
     ({ subtitle1 }: any) => subtitle1 && textPartials.subtitle1,
     ({ subtitle2 }: any) => subtitle2 && textPartials.subtitle2,
     ({ body1, body2, bold }: any) => ({
-      ...((body1 || body2) && bold && textPartials.bodyBold),
       ...(body1 && textPartials.body1),
       ...(body2 && textPartials.body2),
+      ...((body1 || body2) && bold && textPartials.bodyBold),
     }),
     ({ caption }: any) => caption && textPartials.caption,
     ({ badgeLabel }: any) => badgeLabel && textPartials.badgeLabel,
@@ -554,16 +564,7 @@ const honorableTheme = mergeTheme(defaultTheme, {
       {
         color: 'text',
       },
-      ({ inline }: any) => inline && {
-        color: 'action-link-inline',
-        textDecoration: 'underline',
-        '&:hover': {
-          color: 'action-link-inline-hover',
-        },
-        '&:visited, &:active': {
-          color: 'action-link-inline-visited',
-        },
-      },
+      ({ inline }: any) => inline && textPartials.inlineLink,
     ],
   },
   Accordion: {
