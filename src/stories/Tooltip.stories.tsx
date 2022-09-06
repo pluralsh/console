@@ -1,6 +1,11 @@
 import {
   Button, Div, Flex, FlexProps,
 } from 'honorable'
+import { ComponentProps, useState } from 'react'
+
+import {
+  IconFrame, InfoIcon, Modal, ModalActions, ModalHeader,
+} from '..'
 
 import Tooltip from '../components/Tooltip'
 
@@ -19,18 +24,74 @@ function CornerBox(props: FlexProps) {
   )
 }
 
-function Tip(props:any) {
+function Tip({ onClick, ...props }: any) {
   return (
     <Tooltip
-      label="Here's some info for you!"
+      label="Click me to see me in a modal!"
       {...props}
     >
-      <Button>Hover me</Button>
+      <Button onClick={onClick}>Hover me</Button>
     </Tooltip>
   )
 }
 
+function ModalExample({
+  tipProps,
+  onClose,
+  ...props
+}: ComponentProps<typeof Modal> & {
+  tipProps: ComponentProps<typeof Tooltip>
+}) {
+  return (
+    <Modal
+      portal
+      onClose={onClose}
+      {...props}
+    >
+      <ModalHeader>Hover the below buttons</ModalHeader>
+      <>
+        {new Array(10).map(() => (
+          <IconFrame
+            tooltip
+            textValue="Some extra info"
+            icon={<InfoIcon />}
+            size="medium"
+          />
+        ))}
+
+        <ModalActions>
+          <Tooltip
+            {...tipProps}
+            label="I should be on top of the modal"
+          >
+            <Button
+              secondary
+              onClick={() => onClose()}
+            >
+              Cancel
+            </Button>
+          </Tooltip>
+          <Tooltip
+            {...tipProps}
+            label="I should be on top of the modal"
+          >
+            <Button
+              primary
+              marginLeft="medium"
+              onClick={() => onClose()}
+            >
+              Done
+            </Button>
+          </Tooltip>
+        </ModalActions>
+      </>
+    </Modal>
+  )
+}
+
 function Template(args: any) {
+  const [showModal, setShowModal] = useState(false)
+
   return (
     <Div margin="-32px">
       <Flex
@@ -42,13 +103,19 @@ function Template(args: any) {
           alignItems="flex-start"
           justifyContent="left"
         >
-          <Tip {...args} />
+          <Tip
+            {...args}
+            onClick={() => setShowModal(true)}
+          />
         </CornerBox>
         <CornerBox
           alignItems="flex-start"
           justifyContent="right"
         >
-          <Tip {...args} />
+          <Tip
+            {...args}
+            onClick={() => setShowModal(true)}
+          />
         </CornerBox>
       </Flex>
       <Flex
@@ -60,7 +127,10 @@ function Template(args: any) {
           alignItems="center"
           justifyContent="center"
         >
-          <Tip {...args} />
+          <Tip
+            {...args}
+            onClick={() => setShowModal(true)}
+          />
         </CornerBox>
       </Flex>
       <Flex
@@ -72,16 +142,26 @@ function Template(args: any) {
           alignItems="flex-end"
           justifyContent="left"
         >
-          <Tip {...args} />
+          <Tip
+            {...args}
+            onClick={() => setShowModal(true)}
+          />
         </CornerBox>
         <CornerBox
           alignItems="flex-end"
           justifyContent="right"
         >
-          <Tip {...args} />
+          <Tip
+            {...args}
+            onClick={() => setShowModal(true)}
+          />
         </CornerBox>
       </Flex>
-
+      <ModalExample
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        tipProps={args}
+      />
     </Div>
   )
 }

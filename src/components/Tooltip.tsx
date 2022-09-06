@@ -3,6 +3,7 @@ import {
   ReactNode, cloneElement, useMemo, useRef, useState,
 } from 'react'
 import {
+  FloatingPortal,
   Placement,
   arrow,
   autoUpdate,
@@ -20,10 +21,10 @@ import {
 import { mergeRefs } from 'react-merge-refs'
 import { Div, DivProps } from 'honorable'
 import { CSSTransition } from 'react-transition-group'
-
 import styled, { useTheme } from 'styled-components'
 
 import createIcon from './icons/createIcon'
+import WrapWithIf from './WrapWithIf'
 
 type TooltipProps = {
   label: ReactNode
@@ -35,6 +36,7 @@ type TooltipProps = {
   strategy?: 'absolute' | 'fixed'
   arrow?: boolean
   dismissable?: boolean
+  portal?: boolean
   onOpenChange?: (open: boolean) => unknown
 } & DivProps
 
@@ -96,6 +98,8 @@ function Tooltip({
   arrow: showArrow = true,
   dismissable = true,
   offset: tipOffset,
+  portal = true,
+  portalProps = {},
   onOpenChange,
   ...props
 }: TooltipProps) {
@@ -177,58 +181,70 @@ function Tooltip({
     <>
       {cloneElement(children,
         getReferenceProps({ ref: childrenRef, ...children.props }))}
-      <CSSTransition
-        in={isOpen}
-        appear
-        timeout={250}
-        mountOnEnter
-        unmountOnExit
+      <WrapWithIf
+        condition={portal}
+        wrapper={(
+          <FloatingPortal
+            id={theme.portals.default.id}
+            {...portalProps}
+          />
+        )}
       >
-        <Tip
-          ref={floating}
-          borderRadius="medium"
-          paddingVertical="xsmall"
-          paddingHorizontal="small"
-          color="text-light"
-          backgroundColor="fill-two"
-          boxShadow={theme.boxShadows.moderate}
-          userSelect="none"
-          style={{
-            position: finalStrategy,
-            left: x ?? 0,
-            top: y ?? 0,
-          }}
-          transformOrigin={transformOrigin}
-          zIndex={theme.zIndexes.tooltip}
-          {...props}
-          {...getFloatingProps()}
+        <CSSTransition
+          in={isOpen}
+          appear
+          timeout={250}
+          mountOnEnter
+          unmountOnExit
         >
-          {label}
-          {showArrow && (
-            <Div
-              ref={arrowRef}
-              style={{
-                position: 'absolute',
-                top: middlewareData?.arrow?.y || '',
-                left: middlewareData?.arrow?.x || '',
-                [staticSide]: `-${ARROW_WIDTH}px`,
-              }}
-              width={ARROW_WIDTH}
-              height={ARROW_WIDTH}
-              transform={`rotate(${arrowRotation}deg)`}
-              {...arrowProps}
-            >
-              <TooltipArrow
-                position="absolute"
-                top={0}
-                left={0}
-                size={ARROW_WIDTH}
-                color="fill-two"
-              />
-            </Div>
-          )}
-        </Tip>
-      </CSSTransition>
+          <Tip
+            ref={floating}
+            caption
+            color="text-light"
+            borderRadius="medium"
+            paddingVertical="xsmall"
+            paddingHorizontal="small"
+            backgroundColor="fill-two"
+            boxShadow={theme.boxShadows.moderate}
+            userSelect="none"
+            style={{
+              position: finalStrategy,
+              left: x ?? 0,
+              top: y ?? 0,
+            }}
+            transformOrigin={transformOrigin}
+            zIndex={theme.zIndexes.tooltip}
+            pointerEvents="none"
+            {...props}
+            {...getFloatingProps()}
+          >
+            {label}
+            {showArrow && (
+              <Div
+                ref={arrowRef}
+                style={{
+                  position: 'absolute',
+                  top: middlewareData?.arrow?.y || '',
+                  left: middlewareData?.arrow?.x || '',
+                  [staticSide]: `-${ARROW_WIDTH}px`,
+                }}
+                width={ARROW_WIDTH}
+                height={ARROW_WIDTH}
+                transform={`rotate(${arrowRotation}deg)`}
+                {...arrowProps}
+              >
+                <TooltipArrow
+                  position="absolute"
+                  top={0}
+                  left={0}
+                  size={ARROW_WIDTH}
+                  color="fill-two"
+                />
+              </Div>
+            )}
+          </Tip>
+        </CSSTransition>
+      </WrapWithIf>
     </>
   )
 }

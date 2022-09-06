@@ -39,7 +39,7 @@ type IconFrameProps = Omit<FlexProps, 'size'> & {
   icon: ReactElement
   size?: Size
   tooltip?: boolean | ReactNode
-  tooltipProps?: TooltipProps
+  tooltipProps?: Partial<TooltipProps>
 }
 
 const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(({

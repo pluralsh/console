@@ -172,9 +172,9 @@ export const borderStyles = {
 
 export const zIndexes = {
   base: 0,
-  selectPopover: 1000,
-  tooltip: 10000,
-  modal: 100000,
+  selectPopover: 500,
+  modal: 1000,
+  tooltip: 2000,
 }
 
 export const scrollBar = ({ hue = 'default' } = {}) => {
@@ -459,6 +459,12 @@ const focusPartials = asElementTypes<CSSObject>()({
     boxShadow: boxShadows.focused,
   },
 })
+
+const portals = {
+  default: {
+    id: 'honorable-portal',
+  },
+}
 
 const baseTheme = {
   name: 'Plural',
@@ -992,6 +998,7 @@ const honorableTheme = mergeTheme(defaultTheme, {
     Backdrop: [
       {
         backgroundColor: 'transparency(#171A21, 40)',
+        zIndex: zIndexes.modal,
       },
     ],
   },
@@ -1152,6 +1159,7 @@ export const styledTheme = {
     borderStyles,
     borderWidths,
     zIndexes,
+    portals,
     partials: {
       text: textPartials,
       focus: focusPartials,
