@@ -4,7 +4,8 @@ import {
 import {
   Button, Div, Flex, FlexProps, Pre,
 } from 'honorable'
-import hljs from 'highlight.js'
+import hljs from 'highlight.js/lib/core'
+import '../hljs'
 
 import styled from 'styled-components'
 
