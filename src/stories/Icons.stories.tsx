@@ -1,6 +1,8 @@
 import styled, { useTheme } from 'styled-components'
 import pick from 'lodash/pick'
 
+import { createElement } from 'react'
+
 import * as allImports from '../index'
 
 const icons = pick(allImports, [
@@ -176,13 +178,13 @@ function Template({ backgroundColor, ...args }: any) {
         maxWidth: '100%',
       }}
     >
-      {Object.entries(icons).map(([name, Icon]) => (
+      {Object.entries(icons).map(([name, icon]) => (
         <AppIcon
           key={name}
           $backgroundColor={bgColor}
         >
           <div style={{ justifySelf: 'flex-end' }}>
-            <Icon {...args} />
+            {createElement(icon as any, { ...args })}
           </div>
           <span
             dangerouslySetInnerHTML={{
