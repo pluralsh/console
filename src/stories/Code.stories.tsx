@@ -2,21 +2,7 @@ import { Flex } from 'honorable'
 
 import { Code } from '..'
 
-const goCode = `package main
-
-import "fmt"
-          
-func main() {
-  fmt.Println("Hello, 世界")
-}`
-
-const jsCode = `function reverseString(str) {
-  let newString = "";
-  for (let i = str.length - 1; i >= 0; i--) {
-      newString += str[i];
-  }
-  return newString;
-}`
+import { goCode, jsCode, tfCode } from '../constants'
 
 export default {
   title: 'Code',
@@ -30,17 +16,17 @@ function Template() {
       gap="medium"
     >
       <Code
-        language="js"
+        language="javascript"
         width="600px"
       >
         {jsCode}
       </Code>
       <Code
-        language="js"
+        language="terraform"
         width="600px"
         height="200px"
       >
-        {jsCode}
+        {tfCode}
       </Code>
       <Code
         width="600px"
