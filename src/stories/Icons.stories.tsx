@@ -4,23 +4,27 @@ import pick from 'lodash/pick'
 import * as allImports from '../index'
 
 const icons = pick(allImports, [
+  'AmazonLogoIcon',
+  'AppleLogoIcon',
   'ArrowLeftIcon',
   'ArrowRightIcon',
+  'ArrowRightLeftIcon',
   'ArrowTopRightIcon',
+  'AwsLogoIcon',
   'BellIcon',
   'BotIcon',
   'BrowserIcon',
   'BundleIcon',
   'CameraIcon',
-  'CaretUpIcon',
   'CaretDownIcon',
   'CaretLeftIcon',
   'CaretRightIcon',
+  'CaretUpIcon',
   'CertificateIcon',
-  'CheckIcon',
-  'CheckOutlineIcon',
   'CheckedShieldIcon',
+  'CheckIcon',
   'ChecklistIcon',
+  'CheckOutlineIcon',
   'ChronjobIcon',
   'CloseIcon',
   'CloudIcon',
@@ -51,16 +55,20 @@ const icons = pick(allImports, [
   'GearTrainIcon',
   'GitHubIcon',
   'GitHubLogoIcon',
+  'GitlabLogoIcon',
+  'GitLabLogoIcon',
   'GlobeIcon',
   'GraphIcon',
-  'HamburgerMenuCollapseIcon',
+  'GoogleLogoIcon',
+  'GoogleCloudLogoIcon',
   'HamburgerMenuCollapsedIcon',
+  'HamburgerMenuCollapseIcon',
   'HamburgerMenuIcon',
   'HistoryIcon',
   'IdIcon',
   'InfoIcon',
-  'InstallIcon',
   'InstalledIcon',
+  'InstallIcon',
   'InvoicesIcon',
   'KeyIcon',
   'KeyPairIcon',
@@ -116,10 +124,12 @@ const icons = pick(allImports, [
   'TerminalIcon',
   'TrashCanIcon',
   'TwitterIcon',
+  'UbuntuLogoIcon',
   'UpdatesIcon',
   'VerifiedIcon',
   'VolumesIcon',
   'WebhooksIcon',
+  'WindowsLogoIcon',
 ])
 
 export default {
@@ -151,7 +161,12 @@ const AppIcon = styled.div<{ $backgroundColor: string }>(({ theme, $backgroundCo
 
 function Template({ backgroundColor, ...args }: any) {
   const theme = useTheme()
-  const bgColor = theme.colors[backgroundColor] || backgroundColor
+  const bgColor
+    = (typeof theme.colors[backgroundColor] === 'string'
+      && theme.colors[backgroundColor])
+    || backgroundColor
+
+  console.log('bgColor', bgColor)
 
   return (
     <div
@@ -175,9 +190,7 @@ function Template({ backgroundColor, ...args }: any) {
                 .replace('Icon', '')
                 .replaceAll(/([a-z])([A-Z])/g, '$1&shy;$2'),
             }}
-          >
-            {/* {name.replace('Icon', '').replaceAll(/([a-z])([A-Z])/g, '$1&shy;$2')} */}
-          </span>
+          />
         </AppIcon>
       ))}
     </div>
@@ -188,6 +201,7 @@ export const Default = Template.bind({})
 Default.args = {
   color: 'text',
   size: 16,
+  fullColor: false,
   backgroundColor: 'transparent',
 }
 
@@ -195,6 +209,7 @@ export const Xlarge = Template.bind({})
 Xlarge.args = {
   color: 'text',
   size: 32,
+  fullColor: false,
   backgroundColor: 'transparent',
 }
 
@@ -202,6 +217,7 @@ export const Large = Template.bind({})
 Large.args = {
   color: 'text',
   size: 24,
+  fullColor: false,
   backgroundColor: 'transparent',
 }
 
@@ -209,11 +225,22 @@ export const Small = Template.bind({})
 Small.args = {
   color: 'text',
   size: 12,
+  fullColor: false,
   backgroundColor: 'transparent',
 }
 
 export const Color = Template.bind({})
 Color.args = {
   color: 'action-primary',
+  fullColor: false,
+  size: 16,
+  backgroundColor: 'transparent',
+}
+
+export const FullColor = Template.bind({})
+FullColor.args = {
+  color: 'text',
+  fullColor: true,
+  size: 32,
   backgroundColor: 'transparent',
 }
