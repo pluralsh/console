@@ -1,11 +1,7 @@
-import {
-  Button, H3, P,
-} from 'honorable'
+import { Button, H3, P } from 'honorable'
 import { useState } from 'react'
 
-import {
-  FormField, Input, Modal, ModalActions, ModalHeader,
-} from '..'
+import { FormField, Input, Modal } from '..'
 
 export default {
   title: 'Modal',
@@ -32,11 +28,25 @@ function Template(args: any) {
       <Modal
         open={open}
         onClose={() => setOpen(false)}
+        actions={args.hasActions && (
+          <>
+            <Button
+              secondary
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              primary
+              destructive={!args.form}
+              marginLeft="medium"
+            >
+              {args.form ? 'Save' : 'Uninstall'}
+            </Button>
+          </>
+        )}
         {...args}
       >
-        <ModalHeader>
-          {args.title}
-        </ModalHeader>
 
         {!args.form && (
           <>
@@ -44,21 +54,6 @@ function Template(args: any) {
             <P>If you'd also like to remove the running instance from your cluster, be sure to run
               `plural destroy` from this application's repository.
             </P>
-            <ModalActions>
-              <Button
-                secondary
-                onClick={() => setOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                destructive
-                marginLeft="medium"
-                onClick={() => setOpen(false)}
-              >
-                Uninstall
-              </Button>
-            </ModalActions>
           </>
         )}
 
@@ -84,20 +79,19 @@ function Template(args: any) {
             >
               <Input value="*" />
             </FormField>
-            <ModalActions>
-              <Button
-                secondary
-                onClick={() => setOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                primary
-                marginLeft="medium"
-              >
-                Save
-              </Button>
-            </ModalActions>
+            <P>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              Phasellus tempor, mi pulvinar vestibulum viverra, magnan ipsum
+              suscipit turpis, molestie imperdiet nisi lorem id erat.
+              Vestibulum pellentesque vel odio et consequat. Sed lacinia leo
+              sit amet velit consequat lobortis. Vivamus facilisis sagittis
+              est vel pellentesque. Sed quis ipsum ullamcorper, posuere ipsum
+              a, tincidunt tellus. Cras tortor purus, dictum sit amet facilisis
+              vitae, commodo vitae elit. Duis a diam blandit, hendrerit velit
+              non, tincidunt turpis. Ut at lectus ornare, volutpat elit
+              interdum, placerat dolor. Pellentesque et semper massa. Aliquam
+              nec nisl eu nibh fringilla vehicula. Suspendisse a purus quam.
+            </P>
           </>
         )}
       </Modal>
@@ -112,6 +106,7 @@ Default.args = {
   title: 'Confirm Uninstall',
   form: false,
   size: 'medium',
+  hasActions: true,
 }
 
 export const Form = Template.bind({})
@@ -120,4 +115,5 @@ Form.args = {
   header: 'Form',
   title: 'Access Policy',
   form: true,
+  hasActions: true,
 }

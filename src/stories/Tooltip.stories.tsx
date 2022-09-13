@@ -3,9 +3,7 @@ import {
 } from 'honorable'
 import { ComponentProps, useState } from 'react'
 
-import {
-  IconFrame, InfoIcon, Modal, ModalActions, ModalHeader,
-} from '..'
+import { IconFrame, InfoIcon, Modal } from '..'
 
 import Tooltip from '../components/Tooltip'
 
@@ -46,20 +44,9 @@ function ModalExample({
     <Modal
       portal
       onClose={onClose}
-      {...props}
-    >
-      <ModalHeader>Hover the below buttons</ModalHeader>
-      <>
-        {new Array(10).map(() => (
-          <IconFrame
-            tooltip
-            textValue="Some extra info"
-            icon={<InfoIcon />}
-            size="medium"
-          />
-        ))}
-
-        <ModalActions>
+      header="Hover the below buttons"
+      actions={(
+        <>
           <Tooltip
             {...tipProps}
             label="I should be on top of the modal"
@@ -83,7 +70,19 @@ function ModalExample({
               Done
             </Button>
           </Tooltip>
-        </ModalActions>
+        </>
+      )}
+      {...props}
+    >
+      <>
+        {new Array(10).map(() => (
+          <IconFrame
+            tooltip
+            textValue="Some extra info"
+            icon={<InfoIcon />}
+            size="medium"
+          />
+        ))}
       </>
     </Modal>
   )
