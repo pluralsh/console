@@ -1,9 +1,7 @@
 import { Div, DivProps } from 'honorable'
 import { forwardRef } from 'react'
 
-import { Card } from '../index'
-
-import { CardProps } from './Card'
+import Card, { CardProps } from './Card'
 
 export type ContentCardProps = CardProps & {
   innerProps?: DivProps

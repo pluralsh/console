@@ -18,7 +18,7 @@ import styled, { CSSObject, useTheme } from 'styled-components'
 
 import { Item } from '@react-stately/collections'
 
-import { Card } from '../index'
+import Card from './Card'
 
 export const HEADER_KEY = '$$header$$'
 export const FOOTER_KEY = '$$footer$$'
