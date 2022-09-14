@@ -10,26 +10,29 @@ import StatusOkIcon from './icons/StatusOkIcon'
 import type createIcon from './icons/createIcon'
 
 type StepBaseProps = {
-  stepTitle: ReactNode,
-  IconComponent: ReturnType<typeof createIcon>,
-  iconSize?: number,
+  stepTitle: ReactNode
+  IconComponent: ReturnType<typeof createIcon>
+  iconSize?: number
 }
 
 type StepProps = DivProps & StepBaseProps & {
-  isActive?: boolean,
-  isComplete?: boolean,
-  circleSize?: number,
+  isActive?: boolean
+  isComplete?: boolean
+  circleSize?: number
+  vertical?: boolean
 }
 
 type StepConnectionProps = DivProps & {
-  isActive: boolean;
+  isActive: boolean
+  vertical?: boolean
 }
 
 export type StepperSteps = (StepBaseProps & { key: string })[]
 
 type StepperProps = FlexProps & {
-  stepIndex: number,
-  steps: StepperSteps,
+  stepIndex: number
+  steps: StepperSteps
+  vertical?: boolean
 }
 
 const propTypes = {
@@ -48,6 +51,7 @@ function Step({
   IconComponent,
   iconSize = 24,
   circleSize = 48,
+  vertical = false,
   ...props
 }: StepProps) {
   const bounceEase = 'cubic-bezier(.37,1.4,.62,1)'
@@ -65,23 +69,26 @@ function Step({
   }
 
   return (
-    <Div
+    <Flex
       width="100%"
       minWidth="68px"
-      maxWidth="100px"
+      maxWidth={vertical ? '100%' : '100px'}
+      direction={vertical ? 'row' : 'column'}
+      align="center"
       {...props}
     >
       <Div
         position="relative"
         width={circleSize}
         height={circleSize}
-        marginLeft="auto"
-        marginRight="auto"
+        marginLeft={vertical ? 'none' : 'auto'}
+        marginRight={vertical ? 'none' : 'auto'}
         borderRadius={1000}
         backgroundColor="fill-one"
         border="1px solid border"
         transition="all 0.2s ease"
         transitionDelay="0.1"
+        flexShrink={0}
       >
         <Flex
           width="100%"
@@ -114,7 +121,8 @@ function Step({
       </Div>
       <Div
         body2
-        marginTop="small"
+        marginTop={vertical ? 'none' : 'small'}
+        marginLeft={vertical ? 'small' : 'none'}
         textAlign="center"
         color={isActive ? 'text' : 'text-xlight'}
         transition="all 0.2s ease"
@@ -122,41 +130,42 @@ function Step({
       >
         {stepTitle}
       </Div>
-    </Div>
+    </Flex>
   )
 }
 
-function StepConnection({ isActive = false, ...props }: StepConnectionProps) {
+function StepConnection({ isActive = false, vertical = false, ...props }: StepConnectionProps) {
   return (
     <Div
-      width="100%"
+      width={vertical ? 1 : '100%'}
+      height={vertical ? 30 : 1}
       flexGrow={1}
-      height={1}
       backgroundColor="border"
       position="relative"
       aria-hidden="true"
       {...props}
     >
       <Div
+        width={vertical ? 1 : isActive ? '100%' : 0}
+        height={vertical ? isActive ? 30 : 0 : '100%'}
         position="absolute"
         left={0}
         top={0}
-        height="100%"
         backgroundColor="text"
-        width={isActive ? '100%' : 0}
-        transition="width 0.1s ease-out"
+        transition="width 0.1s ease-out, height 0.1s ease-out"
       />
     </Div>
   )
 }
 
-function StepperRef({ stepIndex, steps }: StepperProps, ref: Ref<any>) {
+function StepperRef({ stepIndex, steps, vertical = false }: StepperProps, ref: Ref<any>) {
   const circleSize = 48
 
   return (
     <Flex
       ref={ref}
       width="100%"
+      direction={vertical ? 'column' : 'row'}
       justifyContent="space-between"
     >
       {steps.map((step, index) => (
@@ -168,11 +177,15 @@ function StepperRef({ stepIndex, steps }: StepperProps, ref: Ref<any>) {
             IconComponent={step.IconComponent}
             iconSize={step.iconSize || 24}
             circleSize={48}
+            vertical={vertical}
           />
           {index < steps.length - 1 && (
             <StepConnection
-              marginTop={circleSize / 2}
               isActive={stepIndex > index}
+              vertical={vertical}
+              marginTop={vertical ? 'small' : circleSize / 2}
+              marginBottom={vertical ? 'small' : 'none'}
+              marginLeft={vertical ? 'large' : 'none'}
             />
           )}
         </Fragment>

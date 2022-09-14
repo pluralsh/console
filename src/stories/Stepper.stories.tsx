@@ -19,7 +19,7 @@ function Template(args: any) {
   )
 }
 
-const steps:StepperSteps = [
+const steps: StepperSteps = [
   { key: 'create-repo', stepTitle: 'Create a repository', IconComponent: GitHubIcon },
   { key: 'choose-cloud', stepTitle: <>Choose a&nbsp;cloud</>, IconComponent: CloudIcon },
   { key: 'configure-repo', stepTitle: 'Configure repository', IconComponent: GearTrainIcon },
@@ -48,4 +48,11 @@ export const List01 = Template.bind({})
 List01.args = {
   stepIndex: 0,
   steps: steps.slice(0, 1),
+}
+
+export const Vertical = Template.bind({})
+Vertical.args = {
+  stepIndex: 1,
+  steps,
+  vertical: true,
 }
