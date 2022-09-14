@@ -7,7 +7,7 @@ import last from 'lodash/last'
 import { styledTheme as theme } from '../theme'
 
 type AppIconProps = DivProps & {
-  size?: 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge' | string
+  size?: 'xxsmall' | 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge' | string
   spacing?: 'none' | 'padding' | string
   hue?: 'default' | 'lighter' | 'lightest' | string
   clickable?: boolean
@@ -18,7 +18,7 @@ type AppIconProps = DivProps & {
 }
 
 const propTypes = {
-  size: PropTypes.oneOf(['xsmall', 'small', 'medium', 'large', 'xlarge']),
+  size: PropTypes.oneOf(['xxsmall', 'xsmall', 'small', 'medium', 'large', 'xlarge']),
   spacing: PropTypes.oneOf(['none', 'padding']),
   hue: PropTypes.oneOf(['default', 'lighter', 'lightest']),
   clickable: PropTypes.bool,
@@ -27,8 +27,9 @@ const propTypes = {
 }
 
 const sizeToWidth: {
-  [key in 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge']: number
+  [key in 'xxsmall' | 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge']: number
 } = {
+  xxsmall: 32,
   xsmall: 40,
   small: 64,
   medium: 96,
@@ -37,8 +38,9 @@ const sizeToWidth: {
 }
 
 const sizeToIconWidth: {
-  [key in 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge']: number
+  [key in 'xxsmall' | 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge']: number
 } = {
+  xxsmall: 16,
   xsmall: 24,
   small: 48,
   medium: 64,

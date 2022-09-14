@@ -154,6 +154,7 @@ export { default as ProgressBar } from './components/ProgressBar'
 export { default as Radio } from './components/Radio'
 export { default as AppIcon } from './components/AppIcon'
 export { default as RepositoryCard } from './components/RepositoryCard'
+export { default as StackCard } from './components/StackCard'
 export { default as Stepper } from './components/Stepper'
 export {
   default as Sidecar,
