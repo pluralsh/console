@@ -454,6 +454,8 @@ function SaturationGraphs({ cpu, mem }) {
 
     const { cpuUtilization, memUtilization } = data
 
+    if (!cpuUtilization[0] || !memUtilization[0]) return null
+
     return ([
       { id: 'cpu utilization', data: cpuUtilization[0].values.map(datum) },
       { id: 'memory utilization', data: memUtilization[0].values.map(datum) },
