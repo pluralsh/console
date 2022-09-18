@@ -70,3 +70,10 @@ import-incidents:
 	cp $(PLRL_WWW)/components/utils/TimedCache.js assets/src/components/utils/TimedCache.js
 	cp $(PLRL_WWW)/utils/date.js assets/src/utils/date.js
 	cp $(PLRL_WWW)/utils/slate.js assets/src/utils/slate.js
+
+release-vsn: # tags and pushes a new release
+	@read -p "Version: " tag; \
+	git checkout master; \
+	git pull --rebase; \
+	git tag -a $$tag -m "new release"; \
+	git push origin $$tag
