@@ -8,6 +8,7 @@ import Chip from './Chip'
 import PadlockLockedIcon from './icons/PadlockLockedIcon'
 import VerifiedIcon from './icons/VerifiedIcon'
 import Card from './Card'
+import RocketIcon from './icons/RocketIcon'
 
 type RepositoryCardProps = DivProps & {
   title?: string
@@ -15,6 +16,7 @@ type RepositoryCardProps = DivProps & {
   priv?: boolean
   installed?: boolean
   verified?: boolean
+  trending?: boolean
   description?: string
   imageUrl?: string
   tags?: string[],
@@ -27,6 +29,7 @@ const propTypes = {
   priv: PropTypes.bool,
   installed: PropTypes.bool,
   verified: PropTypes.bool,
+  trending: PropTypes.bool,
   description: PropTypes.string,
   imageUrl: PropTypes.string,
   tags: PropTypes.arrayOf(PropTypes.string),
@@ -39,6 +42,7 @@ function RepositoryCardRef({
   priv,
   installed,
   verified,
+  trending,
   description,
   imageUrl,
   tags = [],
@@ -46,6 +50,8 @@ function RepositoryCardRef({
   ...props
 }: RepositoryCardProps,
 ref: Ref<any>) {
+  const maxTags = trending ? 5 : 6
+
   return (
     <Card
       ref={ref}
@@ -53,7 +59,6 @@ ref: Ref<any>) {
       flexDirection="column"
       padding="large"
       width="100%"
-      // minWidth={size === 'small' ? 697 : size === 'medium' ? 777 : 801}
       {...props}
     >
       <Flex align="flex-start">
@@ -158,14 +163,28 @@ ref: Ref<any>) {
             </P>
           )}
           <Div flexGrow={1} />
-          {tags && tags.length > 0 && (
+          {(trending || tags?.length > 0) && (
             <Flex
               marginTop="medium"
               gap="xsmall"
               flexWrap="wrap"
             >
+              {!!trending && (
+                <Chip
+                  size="small"
+                  hue="lighter"
+                >
+                  <RocketIcon color="action-link-inline" />
+                  <Span
+                    color="action-link-inline"
+                    marginLeft="xxsmall"
+                  >
+                    Trending
+                  </Span>
+                </Chip>
+              )}
               {tags
-                .filter((_x, i) => i <= 5)
+                .filter((_x, i) => i < maxTags)
                 .map(tag => (
                   <Chip
                     size="small"
