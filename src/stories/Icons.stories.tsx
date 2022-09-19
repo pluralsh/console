@@ -118,6 +118,7 @@ const icons = pick(allImports, [
   'SortAscIcon',
   'SortDescIcon',
   'SprayIcon',
+  'StackIcon',
   'StatusIpIcon',
   'StatusOkIcon',
   'SuitcaseIcon',
