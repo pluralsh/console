@@ -42,6 +42,9 @@ function RepositoryChipRef({
       <Img
         src={imageUrl}
         width={24}
+        height={24}
+        objectFit="cover"
+        objectPosition="center"
         backgroundColor="fill-three"
         border="1px solid border-input"
         padding={2}
@@ -54,11 +57,11 @@ function RepositoryChipRef({
         {label}
       </P>
       <Div flexGrow={1} />
-      {checked && (
-        <CheckRoundedIcon
-          color="border-outline-focused"
-        />
-      )}
+      <CheckRoundedIcon
+        color="border-outline-focused"
+        visibility={checked ? 'visible' : 'hidden'}
+        marginLeft="medium"
+      />
     </Flex>
   )
 }

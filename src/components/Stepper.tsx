@@ -85,7 +85,7 @@ function Step({
         marginRight={vertical ? 'none' : 'auto'}
         borderRadius={1000}
         backgroundColor="fill-one"
-        border="1px solid border"
+        border={`1px solid ${isActive ? 'action-link-active' : 'border-fill-two'}`}
         transition="all 0.2s ease"
         transitionDelay="0.1"
         flexShrink={0}
@@ -127,6 +127,7 @@ function Step({
         color={isActive ? 'text' : 'text-xlight'}
         transition="all 0.2s ease"
         transitionDelay="0.1"
+        flexShrink={0}
       >
         {stepTitle}
       </Div>
