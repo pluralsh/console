@@ -152,7 +152,7 @@ export const semanticColors = {
   'text-success': green[500],
   'text-success-light': green[200],
   'text-warning': yellow[400],
-  'text-warning-light': yellow[200],
+  'text-warning-light': yellow[100],
   'text-error': red[400],
   'text-error-light': red[200],
   // Icon
