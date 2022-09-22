@@ -1,14 +1,16 @@
 import { createGlobalStyle } from 'styled-components'
 
-import {
+import { styledTheme as theme } from './theme'
+
+const {
   borderRadiuses,
+  borders,
   borderStyles,
   borderWidths,
-  borders,
   boxShadows,
   fontFamilies,
   spacing,
-} from './theme'
+} = theme
 
 const colorsToCSSVars: (colors: unknown) => any = colors => {
   function inner(colors: unknown, prefix = '') {

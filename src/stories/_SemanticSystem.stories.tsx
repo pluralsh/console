@@ -61,6 +61,11 @@ function Template({ exampleText }: { exampleText?: string }) {
         marginVertical="xxlarge"
       />
       <Typography exampleText={exampleText} />
+      <Divider
+        text="Marketing Typography"
+        marginVertical="xxlarge"
+      />
+      <MarketingTypography exampleText={exampleText} />
     </>
   )
 }
@@ -262,6 +267,7 @@ function Spacing() {
         'xxlarge',
         'xxxlarge',
         'xxxxlarge',
+        'xxxxxlarge',
       ].map(key => (
         <BlockWrapper key={key}>
           <SpacingBox space={key} />
@@ -303,6 +309,87 @@ function Typography({
       <SemanticText typeStyle="buttonLarge">Large Button - {txt}</SemanticText>
       <SemanticText typeStyle="buttonSmall">Small Button - {txt}</SemanticText>
       <SemanticText typeStyle="overline">Overline - {txt}</SemanticText>
+    </>
+  )
+}
+
+const MktgText = styled.div<{
+  typeStyle?: keyof typeof styledTheme.partials.marketingText
+}>(({ theme, typeStyle }) => ({
+  ...theme.partials.marketingText[typeStyle],
+  display: 'block',
+  marginBottom: theme.spacing.large,
+}))
+
+const MarketingInlineLink = styled.a(({ theme }) => ({
+  ...theme.partials.marketingText.inlineLink,
+}))
+
+function MarketingTypography({
+  exampleText: txt = 'Lorem ipsum dolor sit amet',
+}: {
+  exampleText: string
+}) {
+  return (
+    <>
+      <MktgText typeStyle="bigHeader">
+        Big Header (
+        <MarketingInlineLink href="#">Inline link</MarketingInlineLink>) - {txt}
+      </MktgText>
+      <MktgText typeStyle="hero1">
+        Hero 1 (<MarketingInlineLink href="#">Inline link</MarketingInlineLink>)
+        - {txt}
+      </MktgText>
+      <MktgText typeStyle="hero2">
+        Hero 2 (<MarketingInlineLink href="#">Inline link</MarketingInlineLink>)
+        - {txt}
+      </MktgText>
+      <MktgText typeStyle="title1">
+        Title 1 (<MarketingInlineLink href="#">Inline link</MarketingInlineLink>
+        ) - {txt}
+      </MktgText>
+      <MktgText typeStyle="title2">
+        Title 2 (<MarketingInlineLink href="#">Inline link</MarketingInlineLink>
+        ) - {txt}
+      </MktgText>
+      <MktgText typeStyle="subtitle1">
+        Subtitle 1 (
+        <MarketingInlineLink href="#">Inline link</MarketingInlineLink>) - {txt}
+      </MktgText>
+      <MktgText typeStyle="subtitle2">
+        Subtitle 2 (
+        <MarketingInlineLink href="#">Inline link</MarketingInlineLink>) - {txt}
+      </MktgText>
+      <MktgText typeStyle="body1Bold">
+        Body 1 (Bold) (
+        <MarketingInlineLink href="#">Inline link</MarketingInlineLink>) - {txt}
+      </MktgText>
+      <MktgText typeStyle="body1">
+        Body 1 (<MarketingInlineLink href="#">Inline link</MarketingInlineLink>)
+        - {txt}
+      </MktgText>
+      <MktgText typeStyle="body2Bold">
+        Body 2 (Bold) (
+        <MarketingInlineLink href="#">Inline link</MarketingInlineLink>) - {txt}
+      </MktgText>
+      <MktgText typeStyle="body2">
+        Body 2 (<MarketingInlineLink href="#">Inline link</MarketingInlineLink>)
+        - {txt}
+      </MktgText>
+      <MktgText typeStyle="standaloneLink">Standalone link - {txt}</MktgText>
+      <MktgText typeStyle="componentText">
+        Component text (
+        <MarketingInlineLink href="#">Inline link</MarketingInlineLink>) - {txt}
+      </MktgText>
+      <MktgText typeStyle="componentLink">Component link - {txt}</MktgText>
+      <MktgText typeStyle="componentLinkSmall">
+        Small component link - {txt}
+      </MktgText>
+      <MktgText typeStyle="label">
+        Label (<MarketingInlineLink href="#">Inline link</MarketingInlineLink>)
+        - {txt}
+      </MktgText>
+      <MktgText typeStyle="navLink">Nav link - {txt}</MktgText>
     </>
   )
 }
