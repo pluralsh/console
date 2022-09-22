@@ -1,5 +1,6 @@
-import { Button, H1 } from 'honorable'
+import { H1 } from 'honorable'
 
+import Button from '../components/Button'
 import DownloadIcon from '../components/icons/DownloadIcon'
 
 export default {
@@ -76,6 +77,7 @@ export const Primary = Template.bind({})
 Primary.args = {
   disabled: false,
   loading: false,
+  pulse: false,
   children: 'Primary Button',
 }
 
