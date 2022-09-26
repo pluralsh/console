@@ -7,6 +7,8 @@ import { Ref, forwardRef } from 'react'
 import Card from './Card'
 import AppIcon from './AppIcon'
 import Tooltip from './Tooltip'
+import Chip from './Chip'
+import StackIcon from './icons/StackIcon'
 
 type StackCardProps = DivProps & {
   title?: string
@@ -88,6 +90,12 @@ ref: Ref<any>) {
                   {apps?.length || 0} APP{apps?.length !== 1 && 'S'}
                 </H3>
               </Flex>
+              <Chip
+                hue="lighter"
+                icon={<StackIcon />}
+              >
+                Stack
+              </Chip>
             </Flex>
           </Flex>
           {description && (

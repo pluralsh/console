@@ -15,37 +15,37 @@ function Template(args: any) {
       wrap="wrap"
     >
       <StackCard
-        title="DevOps Stack"
+        title="DevOps"
         description="Everything you need to lay the foundation of your open-source environment."
         hue="blue"
         {...args}
       />
       <StackCard
-        title="Data Stack"
+        title="Data"
         description="Take a deeper look at your data with this robust Data Stack."
         hue="green"
         {...args}
       />
       <StackCard
-        title="Security Stack"
+        title="Security"
         description="Make sure your infrastructure is secure from the ground up - right here!"
         hue="yellow"
         {...args}
       />
       <StackCard
-        title="Gaming Stack"
+        title="Gaming"
         description="Gaming Stack is a collection of popular game servers."
         hue="red"
         {...args}
       />
       <StackCard
-        title="Single App Stack"
+        title="Single App"
         hue="blue"
         {...args}
         apps={[{ name: 'Console', imageUrl: '/logos/console-logo.png' }]}
       />
       <StackCard
-        title="Empty Stack"
+        title="Empty"
         {...args}
         apps={null}
       />
