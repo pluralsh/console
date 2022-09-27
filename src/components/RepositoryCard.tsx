@@ -61,7 +61,10 @@ ref: Ref<any>) {
       width="100%"
       {...props}
     >
-      <Flex align="flex-start">
+      <Flex
+        height="100%"
+        align="flex-start"
+      >
         <Img
           src={imageUrl}
           width={size === 'medium' ? 140 : 160}
@@ -73,7 +76,11 @@ ref: Ref<any>) {
           border="1px solid border-fill-two"
           marginRight="large"
         />
-        <Div flexGrow={1}>
+        <Flex
+          flexGrow={1}
+          direction="column"
+          height="100%"
+        >
           <Flex align="center">
             <Img
               src={imageUrl}
@@ -183,21 +190,19 @@ ref: Ref<any>) {
                   </Span>
                 </Chip>
               )}
-              {tags
-                .filter((_x, i) => i < maxTags)
-                .map(tag => (
-                  <Chip
-                    size="small"
-                    hue="lighter"
-                    key={tag}
-                    _last={{ marginRight: 0 }}
-                  >
-                    {tag}
-                  </Chip>
-                ))}
+              {tags?.filter((_x, i) => i < maxTags).map(tag => (
+                <Chip
+                  size="small"
+                  hue="lighter"
+                  key={tag}
+                  _last={{ marginRight: 0 }}
+                >
+                  {tag}
+                </Chip>
+              ))}
             </Flex>
           )}
-        </Div>
+        </Flex>
       </Flex>
     </Card>
   )

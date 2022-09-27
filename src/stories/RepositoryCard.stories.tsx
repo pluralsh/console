@@ -35,43 +35,38 @@ function ListTemplate(args: any) {
   return (
     <Flex
       gap="small"
-      direction="column"
+      wrap="wrap"
     >
-      <Flex
-        gap="small"
-        wrap="wrap"
-      >
-        <RepositoryCard
-          {...args}
-        />
-        <RepositoryCard
-          {...{
-            ...args,
-            ...{
-              description: 'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
-            },
-          }}
-        />
-        <RepositoryCard
-          {...{
-            ...args,
-            ...{
-              description: 'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
-              tags: null,
-            },
-          }}
-        />
-        <RepositoryCard
-          {...{
-            ...args,
-            ...{
-              priv: true,
-              description: null,
-              tags: ['tag1', 'tag2'],
-            },
-          }}
-        />
-      </Flex>
+      <RepositoryCard
+        {...args}
+      />
+      <RepositoryCard
+        {...{
+          ...args,
+          ...{
+            description: 'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
+          },
+        }}
+      />
+      <RepositoryCard
+        {...{
+          ...args,
+          ...{
+            description: 'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
+            tags: null,
+          },
+        }}
+      />
+      <RepositoryCard
+        {...{
+          ...args,
+          ...{
+            priv: true,
+            description: null,
+            tags: ['tag1', 'tag2'],
+          },
+        }}
+      />
     </Flex>
   )
 }
@@ -91,4 +86,4 @@ Default.args = {
 }
 
 export const List = ListTemplate.bind({})
-List.args = { ...Default.args }
+List.args = { width: '500px', ...Default.args }
