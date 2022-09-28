@@ -43,7 +43,6 @@ function RepositoryChipRef({
         src={imageUrl}
         width={24}
         height={24}
-        objectFit="cover"
         objectPosition="center"
         backgroundColor="fill-three"
         border="1px solid border-input"
