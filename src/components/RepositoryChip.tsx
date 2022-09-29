@@ -1,4 +1,4 @@
-import { Ref, forwardRef } from 'react'
+import { ReactNode, Ref, forwardRef } from 'react'
 import {
   Div,
   Flex,
@@ -13,19 +13,31 @@ import CheckRoundedIcon from './icons/CheckRoundedIcon'
 type TagProps = FlexProps & {
   label: string
   imageUrl: string
-  checked: boolean
+  checked?: boolean
+  icon?: ReactNode
 }
 
 const propTypes = {
   label: PropTypes.string.isRequired,
   imageUrl: PropTypes.string.isRequired,
-  checked: PropTypes.bool.isRequired,
+  checked: PropTypes.bool,
+  icon: PropTypes.node,
+}
+
+const iconProps = {
+  backgroundColor: 'fill-three',
+  padding: 2,
+  border: '1px solid border-input',
+  borderRadius: 'medium',
+  width: 24,
+  height: 24,
 }
 
 function RepositoryChipRef({
   label,
   imageUrl,
-  checked,
+  checked = false,
+  icon = null,
   ...props
 }: TagProps, ref: Ref<any>) {
   return (
@@ -39,16 +51,21 @@ function RepositoryChipRef({
       cursor="pointer"
       {...props}
     >
-      <Img
-        src={imageUrl}
-        width={24}
-        height={24}
-        objectPosition="center"
-        backgroundColor="fill-three"
-        border="1px solid border-input"
-        padding={2}
-        borderRadius="medium"
-      />
+      {icon ? (
+        <Flex
+          align="center"
+          justify="center"
+          {...iconProps}
+        >
+          {icon}
+        </Flex>
+      ) : (
+        <Img
+          src={imageUrl}
+          objectPosition="center"
+          {...iconProps}
+        />
+      )}
       <P
         body2
         marginLeft="medium"

@@ -1,4 +1,5 @@
 import RepositoryChip from '../components/RepositoryChip'
+import StackIcon from '../components/icons/StackIcon'
 
 export default {
   title: 'RepositoryChip',
@@ -25,4 +26,13 @@ export const Default = Template.bind({})
 Default.args = {
   imageUrl: '/logos/airbyte-logo.svg',
   label: 'Airbyte',
+}
+
+export const Icon = Template.bind({})
+
+Icon.args = {
+  icon: (
+    <StackIcon />
+  ),
+  label: 'DevOps',
 }
