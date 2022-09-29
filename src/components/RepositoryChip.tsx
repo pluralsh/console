@@ -12,14 +12,14 @@ import CheckRoundedIcon from './icons/CheckRoundedIcon'
 
 type TagProps = FlexProps & {
   label: string
-  imageUrl: string
+  imageUrl?: string
   checked?: boolean
   icon?: ReactNode
 }
 
 const propTypes = {
   label: PropTypes.string.isRequired,
-  imageUrl: PropTypes.string.isRequired,
+  imageUrl: PropTypes.string,
   checked: PropTypes.bool,
   icon: PropTypes.node,
 }
@@ -35,7 +35,7 @@ const iconProps = {
 
 function RepositoryChipRef({
   label,
-  imageUrl,
+  imageUrl = '',
   checked = false,
   icon = null,
   ...props
@@ -59,13 +59,13 @@ function RepositoryChipRef({
         >
           {icon}
         </Flex>
-      ) : (
+      ) : imageUrl ? (
         <Img
           src={imageUrl}
           objectPosition="center"
           {...iconProps}
         />
-      )}
+      ) : null}
       <P
         body2
         marginLeft="medium"
