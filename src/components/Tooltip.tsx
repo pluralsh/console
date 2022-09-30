@@ -29,7 +29,7 @@ import WrapWithIf from './WrapWithIf'
 type TooltipProps = {
   label: ReactNode
   placement?: Placement
-  children: JSX.Element
+  children?: JSX.Element
   displayOn?: 'hover' | 'click' | 'focus' | 'manual' | 'none'
   arrowProps?: DivProps
   manualOpen?: boolean

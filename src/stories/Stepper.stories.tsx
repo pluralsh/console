@@ -1,6 +1,7 @@
+import { Flex } from 'honorable'
+
 import Stepper from '../components/Stepper'
 import type { StepperSteps } from '../components/Stepper'
-
 import BrowserIcon from '../components/icons/BrowserIcon'
 import CloudIcon from '../components/icons/CloudIcon'
 import GearTrainIcon from '../components/icons/GearTrainIcon'
@@ -13,9 +14,15 @@ export default {
 
 function Template(args: any) {
   return (
-    <Stepper
-      {...args}
-    />
+    <Flex
+      maxWidth={args.containerWidth || undefined}
+      background={args.showContainer ? 'rgba(255, 255, 255, 0.05)' : undefined}
+      overflow="auto"
+    >
+      <Stepper
+        {...args}
+      />
+    </Flex>
   )
 }
 
@@ -53,6 +60,10 @@ List01.args = {
 export const Vertical = Template.bind({})
 Vertical.args = {
   stepIndex: 1,
-  steps,
+  containerWidth: 170,
+  collapseAtWidth: 160,
+  forceCollapse: false,
+  showContainer: false,
   vertical: true,
+  steps,
 }
