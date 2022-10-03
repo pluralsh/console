@@ -1,4 +1,6 @@
-import { forwardRef, useEffect, useState } from 'react'
+import {
+  RefObject, forwardRef, useEffect, useState,
+} from 'react'
 import {
   Button, Div, Flex, FlexProps,
 } from 'honorable'
@@ -15,7 +17,7 @@ type CodeProps = FlexProps & {
 
 const propTypes = {}
 
-function CodeRef({ children, language, ...props }: CodeProps) {
+function CodeRef({ children, language, ...props }: CodeProps, ref: RefObject<any>) {
   const [copied, setCopied] = useState(false)
   const [hover, setHover] = useState(false)
 
@@ -33,6 +35,7 @@ function CodeRef({ children, language, ...props }: CodeProps) {
 
   return (
     <Card
+      ref={ref}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       {...props}
