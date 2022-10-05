@@ -177,8 +177,6 @@ function Template({ backgroundColor, ...args }: any) {
       && theme.colors[backgroundColor])
     || backgroundColor
 
-  console.log('bgColor', bgColor)
-
   return (
     <div
       style={{

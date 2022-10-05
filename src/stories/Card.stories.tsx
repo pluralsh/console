@@ -135,6 +135,48 @@ function Template({
   )
 }
 
+const hues = [undefined, 'default', 'lighter', 'lightest']
+
+function FillLevelTemplate({
+  clickable,
+  selected,
+  width,
+}: { width: number } & CardProps) {
+  return (
+    <Flex
+      flexWrap="wrap"
+      gap="xxlarge"
+    >
+      {hues.map(hue => (
+        <Card
+          clickable={clickable}
+          selected={selected}
+          width={width}
+          padding="medium"
+          hue={hue}
+        >
+          hue="{hue}"
+          <br />
+          <br />
+          <Card
+            clickable={clickable}
+            selected={selected}
+            padding="medium"
+          >
+            <Card padding="medium">
+              <br />
+              Each Card background should be one level lighter than its parent, but
+              not exceed fill-three
+              <br />
+              <br />
+            </Card>
+          </Card>
+        </Card>
+      ))}
+    </Flex>
+  )
+}
+
 export const Default = Template.bind({})
 Default.args = {
   selected: false,
@@ -149,4 +191,11 @@ Clickable.args = {
   ...{
     clickable: true,
   },
+}
+
+export const WithFillLevelContext = FillLevelTemplate.bind({})
+WithFillLevelContext.args = {
+  selected: false,
+  clickable: false,
+  width: 400,
 }

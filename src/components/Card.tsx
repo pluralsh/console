@@ -1,7 +1,15 @@
 import { Div, DivProps } from 'honorable'
-import { forwardRef } from 'react'
+import { forwardRef, useMemo } from 'react'
 
 import { styledTheme as theme } from '../theme'
+
+import {
+  FillLevel,
+  FillLevelProvider,
+  isFillLevel,
+  toFillLevel,
+  useFillLevel,
+} from './contexts/FillLevelContext'
 
 type CardSize = 'medium' | 'large' | string
 type CardHue = 'default' | 'lighter' | 'lightest' | string
@@ -13,34 +21,44 @@ type CardProps = {
   selected?: boolean
 } & DivProps
 
-const hueToBGColor: { [key in CardHue]: string } = {
-  default: 'fill-one',
-  lighter: 'fill-two',
-  lightest: 'fill-three',
+const fillLevelToBGColor: { [key in CardHue]: string } = {
+  0: 'fill-one',
+  1: 'fill-one',
+  2: 'fill-two',
+  3: 'fill-three',
 }
 
-const hueToBorderColor: {
+const fillLevelToBorderColor: {
   [key in CardHue]: string
 } = {
-  default: 'border',
-  lighter: 'border-fill-two',
-  lightest: 'border-input',
+  0: 'border',
+  1: 'border',
+  2: 'border-fill-two',
+  3: 'border-fill-three',
 }
 
-const hueToHoverBGColor: {
+const fillLevelToHoverBGColor: {
   [key in CardHue]: string
 } = {
-  default: 'fill-one-hover',
-  lighter: 'fill-two-hover',
-  lightest: 'fill-three-hover',
+  0: 'fill-one-hover',
+  1: 'fill-one-hover',
+  2: 'fill-two-hover',
+  3: 'fill-three-hover',
 }
 
-const hueToSelectedBGColor: {
+const hueToFillLevel: { [key in CardHue]: FillLevel } = {
+  default: 1,
+  lighter: 2,
+  lightest: 3,
+}
+
+const fillLevelToSelectedBGColor: {
   [key in CardHue]: string
 } = {
-  default: 'fill-one-selected',
-  lighter: 'fill-two-selected',
-  lightest: 'fill-three-selected',
+  0: 'fill-one-selected',
+  1: 'fill-one-selected',
+  2: 'fill-two-selected',
+  3: 'fill-three-selected',
 }
 
 const cornerSizeToBorderRadius: {
@@ -50,38 +68,59 @@ const cornerSizeToBorderRadius: {
   large: 'large',
 }
 
-const hueToScroll: {
+const fillLevelToScroll: {
   [key in CardHue]: Record<string, any>
 } = {
-  default: theme.partials.scrollBar({ hue: 'default' }),
-  lighter: theme.partials.scrollBar({ hue: 'lighter' }),
-  lightest: theme.partials.scrollBar({ hue: 'lighter' }),
+  0: theme.partials.scrollBar({ hue: 'default' }),
+  1: theme.partials.scrollBar({ hue: 'default' }),
+  2: theme.partials.scrollBar({ hue: 'lighter' }),
+  3: theme.partials.scrollBar({ hue: 'lighter' }),
+}
+
+function useDecideFillLevel(hue: CardHue | null | undefined) {
+  const fillLevel = hueToFillLevel[hue]
+  const parentFillLevel = useFillLevel()
+
+  const ret = useMemo(() => (isFillLevel(fillLevel) ? fillLevel : toFillLevel(parentFillLevel + 1)),
+    [fillLevel, parentFillLevel])
+
+  return ret
 }
 
 const Card = forwardRef<HTMLDivElement, CardProps>(({
   cornerSize: size = 'large',
-  hue = 'default',
+  hue,
   selected = false,
   clickable = false,
   ...props
 },
-ref) => (
-  <Div
-    ref={ref}
-    border={`1px solid ${hueToBorderColor[hue]}`}
-    borderRadius={cornerSizeToBorderRadius[size]}
-    backgroundColor={selected ? hueToSelectedBGColor[hue] : hueToBGColor[hue]}
-    {...(clickable && {
-      cursor: 'pointer',
-    })}
-    {...(clickable
-        && !selected && {
-      _hover: { backgroundColor: hueToHoverBGColor[hue] },
-    })}
-    {...hueToScroll[hue]}
-    {...props}
-  />
-))
+ref) => {
+  const fillLevel = useDecideFillLevel(hue)
+
+  return (
+    <FillLevelProvider value={fillLevel}>
+      <Div
+        ref={ref}
+        border={`1px solid ${fillLevelToBorderColor[fillLevel]}`}
+        borderRadius={cornerSizeToBorderRadius[size]}
+        backgroundColor={
+          selected
+            ? fillLevelToSelectedBGColor[fillLevel]
+            : fillLevelToBGColor[fillLevel]
+        }
+        {...(clickable && {
+          cursor: 'pointer',
+        })}
+        {...(clickable
+            && !selected && {
+          _hover: { backgroundColor: fillLevelToHoverBGColor[fillLevel] },
+        })}
+        {...fillLevelToScroll[fillLevel]}
+        {...props}
+      />
+    </FillLevelProvider>
+  )
+})
 
 export default Card
 export { CardProps, CardSize, CardHue }

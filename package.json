@@ -1,6 +1,6 @@
 {
   "name": "pluralsh-design-system",
-  "version": "1.223.0",
+  "version": "1.224.0",
   "description": "Pluralsh Design System",
   "main": "dist/index.js",
   "files": [
@@ -33,6 +33,7 @@
     "@react-types/shared": "3.14.1",
     "@types/chroma-js": "2.1.4",
     "chroma-js": "2.4.2",
+    "classnames": "2.3.2",
     "grommet": "2.25.3",
     "highlight.js": "11.6.0",
     "prop-types": "15.8.1",
