@@ -28,13 +28,19 @@ defmodule Console.Storage.Git do
       {{:ok, _} = result, _} -> result
       {_, retries} when retries >= 3 -> {:error, :exhausted_retries}
       {_, retry} ->
-        with {:ok, _} <- git("pull"),
+        with {:ok, _} <- do_pull(),
           do: push(retry + 1)
     end
   end
 
   def pull() do
     with {:ok, _} <- reset(),
+      do: do_pull()
+  end
+
+  def do_pull() do
+    with {:error, _} <- git("pull", ["--rebase"]),
+         {:ok, _} <- Plural.repair(),
       do: git("pull", ["--rebase"])
   end
 
