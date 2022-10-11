@@ -5,6 +5,7 @@ import rehypeRaw from 'rehype-raw'
 import styled from 'styled-components'
 
 import MultilineCode from './Code'
+import InlineCode from './InlineCode'
 
 type MarkdownProps = {
   text: string
@@ -83,7 +84,7 @@ const MdOl = styled.ol.withConfig(commonCfg)(({ theme }) => ({
   marginBottom: theme.spacing.small,
 }))
 const MdLi = styled.li.withConfig(commonCfg)(({ theme }) => ({
-  ...theme.partials.text.body2,
+  ...theme.partials.text.body2LooseLineHeight,
   marginTop: theme.spacing.xxsmall,
 }))
 const MdH1 = styled.h1.withConfig(commonCfg)(({ theme }) => ({
@@ -130,12 +131,11 @@ const MdH6 = styled.h6.withConfig(commonCfg)(({ theme }) => ({
 }))
 const MdImg = styled.img(() => ({ display: 'inline', maxWidth: '100%' }))
 const MdP = styled.p.withConfig(commonCfg)(({ theme }) => ({
-  ...theme.partials.text.body2,
-  color: theme.colors.text,
+  ...theme.partials.text.body2LooseLineHeight,
   marginBottom: theme.spacing.medium,
 }))
 const MdDiv = styled.div.withConfig(commonCfg)(({ theme }) => ({
-  ...theme.partials.text.body2,
+  ...theme.partials.text.body2LooseLineHeight,
   marginBottom: theme.spacing.medium,
 }))
 const MdA = styled.a.withConfig(commonCfg)(({ theme }) => ({
@@ -144,15 +144,6 @@ const MdA = styled.a.withConfig(commonCfg)(({ theme }) => ({
 }))
 const MdSpan = styled.span.withConfig(commonCfg)(_p => ({
   verticalAlign: 'bottom',
-}))
-const MdCode = styled.code.withConfig(commonCfg)(({ theme }) => ({
-  fontFamily: theme.fontFamilies.mono,
-  display: 'inline',
-  verticalAlign: 'baseline',
-  padding: '0.1em 0.4em',
-  margin: '-0.1em 0',
-  backgroundColor: theme.colors['fill-one'],
-  borderRadius: theme.borderRadiuses.medium,
 }))
 const MdHr = styled.hr.withConfig(commonCfg)(({ theme }) => ({
   '&::before': {
@@ -218,7 +209,7 @@ function MarkdownRef({ text, gitUrl, mainBranch }: MarkdownProps) {
         div: render({ component: MdDiv }),
         a: render({ component: MdA, props: { target: '_blank' } }),
         span: render({ component: MdSpan }),
-        code: render({ component: MdCode }),
+        code: render({ component: InlineCode }),
         pre: render({
           component: MarkdownPreformatted,
           props: { marginBottom: 'medium' },

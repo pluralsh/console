@@ -6,6 +6,9 @@ import { fontFamilies } from './fonts'
 
 import { semanticColors } from './colors'
 
+export const INLINE_CODE_EMS = 0.8
+export const INLINE_CODE_MIN_PX = 12
+
 const bodyBaseStyle = {
   fontFamily: fontFamilies.sans,
   fontWeight: 400,
@@ -147,11 +150,35 @@ const textPartials = asElementTypes<CSSObject>()({
       color: semanticColors['action-link-inline-visited'],
     },
   },
+  code: {
+    fontFamily: fontFamilies.mono,
+    fontSize: 14,
+    lineHeight: '22px',
+    letterSpacing: '.25px',
+  },
+  inlineCode: {
+    fontFamily: fontFamilies.mono,
+    fontSize: `calc(max(${INLINE_CODE_MIN_PX}px, ${INLINE_CODE_EMS}em))`,
+    letterSpacing: '.25px',
+  },
+  // These empty entries make sure the props show up in autocompletion.
+  // Actual values must be set below, since they're based on other entries
+  // above.
   body1Bold: {},
   body2Bold: {},
+  body2LooseLineHeight: {},
+  body2LooseLineHeightBold: {},
 })
 
 textPartials.body1Bold = { ...textPartials.body1, ...textPartials.bodyBold }
 textPartials.body2Bold = { ...textPartials.body2, ...textPartials.bodyBold }
+textPartials.body2LooseLineHeight = {
+  ...textPartials.body2,
+  lineHeight: '22px',
+}
+textPartials.body2LooseLineHeightBold = {
+  ...textPartials.body2LooseLineHeight,
+  ...textPartials.bodyBold,
+}
 
 export { textPartials }

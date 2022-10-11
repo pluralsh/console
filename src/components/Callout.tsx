@@ -51,7 +51,7 @@ export type CalloutProps = PropsWithChildren<{
   title?: string
   severity?: CalloutSeverity
   size?: CalloutSize
-  buttonProps: ButtonProps
+  buttonProps?: ButtonProps
   fillLevel?: FillLevel
   className?: string
 }>
@@ -141,7 +141,7 @@ const CalloutWrap = styled.div<{
       : `${theme.spacing.medium}px`,
   margin: 0,
   borderRadius: theme.borderRadiuses.medium,
-  ...theme.partials.text.body2,
+  ...theme.partials.text.body2LooseLineHeight,
   backgroundColor:
     fillLevel >= 3 ? theme.colors['fill-three'] : theme.colors['fill-two'],
   color: theme.colors['text-light'],

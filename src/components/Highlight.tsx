@@ -5,7 +5,14 @@ import '../hljs'
 
 import styled from 'styled-components'
 
-const StyledHighlight = styled.div(({ theme }) => `
+const StyledHighlightBase = styled.div(({ theme }) => ({
+  '.hljs': {
+    color: '#ebeff0',
+    ...theme.partials.text.code,
+  },
+}))
+
+const StyledHighlight = styled(StyledHighlightBase)(_ => `
 pre code.hljs {
   display: block;
   overflow-x: auto;
@@ -14,11 +21,6 @@ pre code.hljs {
 
 code.hljs {
   padding: 3px 5px;
-}
-
-.hljs {
-  color: #ebeff0;
-  font-family: ${theme.fontFamilies.mono};
 }
 
 .hljs ::selection,

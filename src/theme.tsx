@@ -123,6 +123,10 @@ const honorableTheme = mergeTheme(defaultTheme, {
       ...(body2 && textPartials.body2),
       ...((body1 || body2) && bold && textPartials.bodyBold),
     }),
+    ({ body2LooseLineHeight, bold }: any) => ({
+      ...(body2LooseLineHeight && textPartials.body2LooseLineHeight),
+      ...(body2LooseLineHeight && bold && textPartials.bodyBold),
+    }),
     ({ caption }: any) => caption && textPartials.caption,
     ({ badgeLabel }: any) => badgeLabel && textPartials.badgeLabel,
     ({ buttonMedium }: any) => buttonMedium && textPartials.buttonMedium,

@@ -213,3 +213,4 @@ export { default as WrapWithIf } from './components/WrapWithIf'
 export {
   FillLevelContext, FillLevelProvider, useFillLevel, toFillLevel, isFillLevel,
 } from './components/contexts/FillLevelContext'
+export { default as InlineCode } from './components/InlineCode'

@@ -21,7 +21,7 @@ type CardProps = {
   selected?: boolean
 } & DivProps
 
-const fillLevelToBGColor: { [key in CardHue]: string } = {
+const fillLevelToBGColor: { [key in FillLevel]: string } = {
   0: 'fill-one',
   1: 'fill-one',
   2: 'fill-two',
@@ -29,7 +29,7 @@ const fillLevelToBGColor: { [key in CardHue]: string } = {
 }
 
 const fillLevelToBorderColor: {
-  [key in CardHue]: string
+  [key in FillLevel]: string
 } = {
   0: 'border',
   1: 'border',
@@ -38,7 +38,7 @@ const fillLevelToBorderColor: {
 }
 
 const fillLevelToHoverBGColor: {
-  [key in CardHue]: string
+  [key in FillLevel]: string
 } = {
   0: 'fill-one-hover',
   1: 'fill-one-hover',

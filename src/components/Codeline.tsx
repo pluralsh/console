@@ -1,7 +1,10 @@
 import {
   Ref, forwardRef, useEffect, useState,
 } from 'react'
-import { Div, Flex, FlexProps } from 'honorable'
+import {
+  CssProps, Div, Flex, FlexProps,
+} from 'honorable'
+import { useTheme } from 'styled-components'
 
 import Tooltip from '../components/Tooltip'
 
@@ -15,6 +18,7 @@ const propTypes = {}
 
 function CodelineRef({ children, displayText, ...props }: CodelineProps, ref: Ref<any>) {
   const [copied, setCopied] = useState(false)
+  const theme = useTheme()
 
   useEffect(() => {
     if (copied) {
@@ -43,7 +47,7 @@ function CodelineRef({ children, displayText, ...props }: CodelineProps, ref: Re
       >
         <Div
           body2
-          fontFamily="Monument Semi-Mono, monospace"
+          {...theme.partials.text.code as CssProps}
           color="text-light"
           flexGrow={1}
           whiteSpace="pre"

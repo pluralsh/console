@@ -3,9 +3,9 @@ import {
   Div, Flex, FlexProps, H1, P, Span, SpanProps,
 } from 'honorable'
 import PropTypes from 'prop-types'
-
 import styled from 'styled-components'
 
+import { FillLevelProvider } from './contexts/FillLevelContext'
 import StatusOkIcon from './icons/StatusOkIcon'
 import ErrorIcon from './icons/ErrorIcon'
 import CloseIcon from './icons/CloseIcon'
@@ -68,7 +68,7 @@ ref: Ref<any>) {
     }
   }
 
-  return (
+  const content = (
     <Flex
       ref={ref}
       display="inline-flex"
@@ -105,7 +105,7 @@ ref: Ref<any>) {
           {children && (
             <P
               marginTop={heading ? 'xxsmall' : 'xxxsmall'}
-              body2
+              body2LooseLineHeight
               color="text-light"
             >
               {children}
@@ -129,6 +129,8 @@ ref: Ref<any>) {
       </Flex>
     </Flex>
   )
+
+  return <FillLevelProvider value={2}>{content}</FillLevelProvider>
 }
 
 const Banner = forwardRef(BannerRef)

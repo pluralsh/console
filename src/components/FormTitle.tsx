@@ -12,21 +12,23 @@ const propTypes = {
   message: PropTypes.string,
 }
 
-function FormTitleRef({ title, message, ...props }: FormTitleProps, ref: Ref<any>) {
+function FormTitleRef({ title, message, ...props }: FormTitleProps,
+  ref: Ref<any>) {
   return (
     <H3
       ref={ref}
       body1
-      fontWeight="600"
+      bold
       color="text"
       {...props}
     >
       {title}
       <P
-        marginTop={4}
-        body2
+        marginTop="xxsmall"
+        body2LooseLineHeight
         color="text-light"
-      >{message}
+      >
+        {message}
       </P>
     </H3>
   )
