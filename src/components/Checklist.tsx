@@ -77,6 +77,7 @@ type ChecklistProps = ComponentPropsWithRef<'div'> & {
 type ChecklistStateProps = {
   onSelectionChange?: Dispatch<number>
   onFocusChange?: Dispatch<number>
+  onOpenChange?: Dispatch<boolean>
   selectedKey?: number,
   focusedKey?: number,
   completedKey?: number,
@@ -93,9 +94,8 @@ function ChecklistUnstyled({
   ...props
 }: ChecklistProps): JSX.Element {
   const {
-    isOpen = true, isDismissed, selectedKey, focusedKey, completedKey, onSelectionChange, onFocusChange,
+    isOpen = true, isDismissed, selectedKey, focusedKey, completedKey, onSelectionChange, onFocusChange, onOpenChange,
   } = stateProps
-  const [open, setOpen] = useState(isOpen)
   const [finished, setFinished] = useState(false)
 
   const isFirstRender = useRef(true)
@@ -154,15 +154,15 @@ function ChecklistUnstyled({
       >
         <div
           className="header"
-          onClick={() => setOpen(!open)}
+          onClick={() => onOpenChange(!isOpen)}
         >
           <div>{label}</div>
           <DropdownArrowIcon
-            className={open ? 'arrowUp' : 'arrowDown'}
+            className={isOpen ? 'arrowUp' : 'arrowDown'}
           />
         </div>
         <AnimateHeight
-          height={open ? 'auto' : 0}
+          height={isFirstRender.current || isOpen ? 'auto' : 0}
           duration={heightAnimationDuration}
         >
           <div

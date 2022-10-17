@@ -20,13 +20,16 @@ function Template() {
   const [selected, setSelected] = useState<number>(0)
   const [focused, setFocused] = useState<number>(-1)
   const [completed, setCompleted] = useState<number>(-1)
+  const [open, setOpen] = useState<boolean>(true)
   const [dismiss, setDismiss] = useState(false)
   const checklistStateProps: ChecklistStateProps = {
     onSelectionChange: setSelected,
     onFocusChange: setFocused,
+    onOpenChange: setOpen,
     selectedKey: selected,
     focusedKey: focused,
     completedKey: completed,
+    isOpen: open,
     isDismissed: dismiss,
   }
 
@@ -155,6 +158,7 @@ function Template() {
                 small
                 secondary
                 startIcon={<TerminalIcon />}
+                onClick={() => setOpen(false)}
               >Launch Cloud Shell
               </Button>
               {completeButton}
