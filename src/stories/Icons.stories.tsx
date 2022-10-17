@@ -141,6 +141,7 @@ const icons = pick(allImports, [
   'WebhooksIcon',
   'WindowsLogoIcon',
   'WorkspaceIcon',
+  'SuccessIcon',
 ])
 
 export default {

@@ -1,6 +1,6 @@
 {
   "name": "pluralsh-design-system",
-  "version": "1.226.0",
+  "version": "1.227.0",
   "description": "Pluralsh Design System",
   "main": "dist/index.js",
   "files": [
@@ -21,6 +21,7 @@
     "@react-aria/button": "3.6.1",
     "@react-aria/combobox": "3.4.1",
     "@react-aria/focus": "3.8.0",
+    "@react-aria/interactions": "3.12.0",
     "@react-aria/listbox": "3.6.1",
     "@react-aria/overlays": "3.10.1",
     "@react-aria/select": "3.8.1",
@@ -37,6 +38,7 @@
     "grommet": "2.25.3",
     "highlight.js": "11.6.0",
     "prop-types": "15.8.1",
+    "react-animate-height": "3.0.4",
     "react-markdown": "8.0.3",
     "react-merge-refs": "2.0.1",
     "react-spring": "9.5.2",

@@ -6,6 +6,18 @@ import DownloadIcon from '../components/icons/DownloadIcon'
 export default {
   title: 'Button',
   component: Button,
+  argTypes: {
+    padding: {
+      options: ['', 'none'],
+      control: {
+        type: 'select',
+        labels: {
+          '': 'Enabled',
+          none: 'Disabled',
+        },
+      },
+    },
+  },
 }
 
 function TemplateBase(args: any) {
@@ -97,6 +109,7 @@ Tertiary.args = {
   loading: false,
   children: 'Tertiary Button',
   tertiary: true,
+  padding: '',
 }
 
 export const Destructive = Template.bind({})
