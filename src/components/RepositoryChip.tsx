@@ -45,10 +45,12 @@ function RepositoryChipRef({
       ref={ref}
       padding="xsmall"
       align="center"
-      backgroundColor="fill-two"
+      cursor="pointer"
       borderRadius="large"
       border={`1px solid ${checked ? 'border-outline-focused' : 'border-fill-two'}`}
-      cursor="pointer"
+      backgroundColor="fill-two"
+      _hover={{ backgroundColor: 'fill-two-hover' }}
+      transition="background-color 200ms ease"
       {...props}
     >
       {icon ? (
