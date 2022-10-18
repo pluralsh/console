@@ -674,6 +674,15 @@ const honorableTheme = mergeTheme(defaultTheme, {
       },
     ],
   },
+  Spinner: {
+    Root: [
+      {
+        '&:before': {
+          borderTop: '2px solid white',
+        },
+      },
+    ],
+  },
   Switch: {
     Root: [
       ({ checked }: any) => ({
