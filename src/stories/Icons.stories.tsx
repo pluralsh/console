@@ -125,6 +125,7 @@ const icons = pick(allImports, [
   'SourcererIcon',
   'SprayIcon',
   'StackIcon',
+  'StarIcon',
   'StatusIpIcon',
   'StatusOkIcon',
   'SuccessIcon',
