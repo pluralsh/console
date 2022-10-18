@@ -24,4 +24,12 @@ if get_env("PLURAL_CLIENT_ID") do
     ]
 end
 
+if get_env("PROMETHEUS_HOST") do
+  config :console, :prometheus, get_env("PROMETHEUS_HOST")
+end
+
+if get_env("LOKI_HOST") do
+  config :console, :loki, get_env("LOKI_HOST")
+end
+
 config :elixir, :ansi_enabled, true
