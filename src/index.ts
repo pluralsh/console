@@ -1,5 +1,5 @@
 export {
-  Avatar, Button, Menu, MenuItem, Switch,
+  Avatar, Menu, MenuItem, Switch,
 } from 'honorable'
 
 // Icons
@@ -147,6 +147,7 @@ export { default as WorkspaceIcon } from './components/icons/WorkspaceIcon'
 // Components
 export { default as Alert } from './components/Alert'
 export { default as Banner } from './components/Banner'
+export { default as Button } from './components/Button'
 export { default as Card, CardProps } from './components/Card'
 export { default as Callout, CalloutProps } from './components/Callout'
 export { default as Checkbox } from './components/Checkbox'
