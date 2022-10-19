@@ -188,6 +188,7 @@ export {
   TabPanel,
   TabBaseProps,
 } from './components/TabList'
+export { default as Table } from './components/Table'
 export { default as TipCarousel } from './components/TipCarousel'
 export { default as UserCard } from './components/UserCard'
 export { default as ValidatedInput } from './components/ValidatedInput'

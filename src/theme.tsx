@@ -318,6 +318,38 @@ const honorableTheme = mergeTheme(defaultTheme, {
           },
         },
       },
+      ({ floating }: any) => floating && {
+        color: 'text-light',
+        backgroundColor: 'fill-two',
+        border: '1px solid border-input',
+        boxShadow: 'slight',
+        ':hover': {
+          color: 'text',
+          backgroundColor: 'fill-two-hover',
+          border: '1px solid border-input',
+          boxShadow: 'moderate',
+        },
+        ':active': {
+          color: 'text',
+          backgroundColor: 'fill-two-hover',
+          border: '1px solid border-input',
+        },
+        ':focus': {
+          color: 'text',
+          backgroundColor: 'fill-two-selected',
+          border: '1px solid border-outline-focused',
+          boxShadow: 'moderate',
+        },
+        ':disabled': {
+          color: 'text-disabled',
+          backgroundColor: 'transparent',
+          border: '1px solid border-input',
+          ':hover': {
+            backgroundColor: 'transparent',
+            border: '1px solid border-input',
+          },
+        },
+      },
       ({ large }: any) => large && {
         buttonLarge: true,
         paddingTop: spacing.small - 1,

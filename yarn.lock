@@ -5598,6 +5598,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/react-table@npm:8.5.13":
+  version: 8.5.13
+  resolution: "@tanstack/react-table@npm:8.5.13"
+  dependencies:
+    "@tanstack/table-core": 8.5.13
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+  checksum: 97f5947e1d5e12ac44e6cb9a88c5a3f4003b36e1accd16abf67abb84df2c0ec40bfc4bc882ab391024e1fadb35c8d2e17da277aaf004a23f5167a1e889a78b1c
+  languageName: node
+  linkType: hard
+
+"@tanstack/table-core@npm:8.5.13":
+  version: 8.5.13
+  resolution: "@tanstack/table-core@npm:8.5.13"
+  checksum: 980e3e547161cc21e681d9db4335e5a636bca63c68898e73ec475bca3043c4a8940f535a9d47df7728b9ae464598cc2cb4daccefa04a10539aace6fa4f369c71
+  languageName: node
+  linkType: hard
+
 "@testing-library/dom@npm:^8.3.0":
   version: 8.16.0
   resolution: "@testing-library/dom@npm:8.16.0"
@@ -16805,6 +16824,7 @@ __metadata:
     "@storybook/preset-create-react-app": 4.1.2
     "@storybook/react": 6.5.10
     "@storybook/testing-library": 0.0.13
+    "@tanstack/react-table": 8.5.13
     "@types/chroma-js": 2.1.4
     "@types/react-transition-group": 4.4.5
     "@types/styled-components": 5.1.26
