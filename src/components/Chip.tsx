@@ -42,8 +42,8 @@ const severityToColor = {
   info: 'text-primary-accent',
   success: 'text-success-light',
   warning: 'text-warning-light',
-  error: 'text-error-light',
-  critical: 'text-error',
+  error: 'text-danger-light',
+  critical: 'text-danger',
 }
 
 const sizeToCloseHeight: { [key in 'small' | 'medium' | 'large']: number } = {

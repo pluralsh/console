@@ -45,7 +45,7 @@ function ValidatedInputRef({
       ref={ref}
       label={label}
       hint={hint}
-      caption={error ? React.createElement(captionComp, { caption: error.message, color: error.error ? 'text-error' : 'text-success' }) : null}
+      caption={error ? React.createElement(captionComp, { caption: error.message, color: error.error ? 'text-danger' : 'text-success' }) : null}
       width={width}
     >
       <Input

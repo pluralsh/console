@@ -24,7 +24,7 @@ function styleToColor(theme: DefaultTheme): Record<CalloutSeverity, string> {
     info: theme.colors['text-primary-accent'],
     success: theme.colors['text-success-light'],
     warning: theme.colors['text-warning-light'],
-    danger: theme.colors['text-error-light'],
+    danger: theme.colors['text-danger-light'],
   }
 }
 

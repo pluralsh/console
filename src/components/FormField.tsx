@@ -86,7 +86,7 @@ ref: Ref<any>) {
           <P
             flexGrow={1}
             caption
-            color={error ? 'text-error' : 'text-xlight'}
+            color={error ? 'text-danger' : 'text-xlight'}
           >
             {hint}
           </P>

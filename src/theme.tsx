@@ -292,16 +292,16 @@ const honorableTheme = mergeTheme(defaultTheme, {
         },
       },
       ({ destructive }: any) => destructive && {
-        color: 'text-error',
+        color: 'text-danger',
         backgroundColor: 'transparent',
-        border: '1px solid border-error',
+        border: '1px solid border-danger',
         ':hover': {
           backgroundColor: 'action-input-hover',
-          border: '1px solid border-error',
+          border: '1px solid border-danger',
         },
         ':active': {
           backgroundColor: 'transparent',
-          border: '1px solid border-error',
+          border: '1px solid border-danger',
         },
         ':focus': {
           backgroundColor: 'action-input-hover',
@@ -529,7 +529,7 @@ const honorableTheme = mergeTheme(defaultTheme, {
         borderColor: 'border-outline',
       },
       ({ error }: any) => error && {
-        borderColor: 'border-error',
+        borderColor: 'border-danger',
       },
       ({ small }: any) => small && {
         caption: true,

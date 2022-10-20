@@ -24,7 +24,7 @@ type App = {
 
 const hueToColor = {
   neutral: 'border',
-  red: 'text-error-light',
+  red: 'text-danger-light',
   green: 'text-success-light',
   blue: 'border-outline-focused',
   yellow: 'text-warning-light',

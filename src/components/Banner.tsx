@@ -39,7 +39,7 @@ const propTypes = {
 
 const severityToColor = {
   success: 'icon-success',
-  error: 'icon-error',
+  error: 'icon-danger',
   info: 'text-primary-accent',
 }
 

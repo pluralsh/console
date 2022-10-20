@@ -79,7 +79,7 @@ const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(({
     color: disabled
       ? theme.colors['text-primary-disabled']
       : destructive
-        ? theme.colors['text-error']
+        ? theme.colors['text-danger']
         : theme.colors.text,
   },
   '.description': {

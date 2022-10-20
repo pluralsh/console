@@ -156,7 +156,7 @@ const MyCustomTab2 = forwardRef<any, any>(({ selectedKey, ...props }, ref) => (
         selectedKey === 'bears'
           ? 'action-primary'
           : selectedKey === 'tigers'
-            ? 'icon-error'
+            ? 'icon-danger'
             : 'fill-two'
       }
     >
@@ -197,7 +197,7 @@ function TemplateComplex() {
                     ? 'border-warning'
                     : selectedKey === 'bears'
                       ? 'border-success'
-                      : 'border-error'
+                      : 'border-danger'
               }
             />
           )}
@@ -216,7 +216,7 @@ function TemplateComplex() {
                 {...props}
                 ref={ref}
                 width="100%"
-                border="2px solid border-error"
+                border="2px solid border-danger"
               >
                 {children}
               </Div>
