@@ -23,15 +23,23 @@ podLabels:
 
 consoleIdentityId: {{ importValue "Terraform" "console_msi_id" }}
 consoleIdentityClientId: {{ importValue "Terraform" "console_msi_client_id" }}
+{{ end }}
 
+{{- if or (eq .Provider "azure") .Configuration.loki }}
 extraEnv:
+{{- if .Configuration.loki }}
+- name: LOKI_HOST
+  value: http://loki-loki-distributed-gateway.loki
+{{- end }}
+{{ if eq .Provider "azure" }}
 - name: ARM_USE_MSI
   value: 'true'
 - name: ARM_SUBSCRIPTION_ID
   value: {{ .Context.SubscriptionId }}
 - name: ARM_TENANT_ID
   value: {{ .Context.TenantId }}
-{{ end }}
+{{- end }}
+{{- end }}
 
 serviceAccount:
 {{ if eq .Provider "google" }}
