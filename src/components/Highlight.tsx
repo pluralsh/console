@@ -1,18 +1,33 @@
-import { forwardRef, useEffect, useRef } from 'react'
-import { Pre, PreProps } from 'honorable'
+import {
+  forwardRef, useEffect, useMemo, useRef,
+} from 'react'
 import hljs from 'highlight.js/lib/core'
 import '../hljs'
 
 import styled from 'styled-components'
+import { ComponentPropsWithoutRef } from 'react-markdown/lib/ast-to-react'
 
-const StyledHighlightBase = styled.div(({ theme }) => ({
-  '.hljs': {
-    color: '#ebeff0',
-    ...theme.partials.text.code,
-  },
+const MainWrap = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.large,
 }))
 
-const StyledHighlight = styled(StyledHighlightBase)(_ => `
+const StyledPre = styled.pre(({ theme }) => ({
+  ...theme.partials.text.code,
+  background: 'none',
+  margin: 0,
+  padding: 0,
+}))
+
+const LineNumbers = styled(StyledPre)(({ theme }) => ({
+  ...theme.partials.text.code,
+  pointerEvents: 'none',
+  userSelect: 'none',
+  display: 'flex',
+  textAlign: 'right',
+}))
+
+const StyledHighlight = styled.div(_ => `
 pre code.hljs {
   display: block;
   overflow-x: auto;
@@ -120,16 +135,26 @@ code.hljs {
   font-weight: 700;
 }`)
 
-type HighlightProps = PreProps & {
-  language: string
+type HighlightProps = Omit<ComponentPropsWithoutRef<'pre'>, 'children'> & {
+  language?: string
+  showLineNumbers?: boolean
+  children: string
 }
 
 const propTypes = {}
 
-function HighlightRef({ language, children, ...props } : HighlightProps) {
-  if (typeof children !== 'string') throw new Error('Highlight component expects a string as its children')
-
+function HighlightRef({
+  language,
+  children,
+  showLineNumbers,
+  ...props
+}: HighlightProps) {
+  if (typeof children !== 'string') {
+    throw new Error('Highlight component expects a string as its children')
+  }
   const codeRef = useRef()
+
+  const lines = useMemo(() => children.split(/\r?\n/), [children])
 
   useEffect(() => {
     if (hljs.getLanguage(language) && codeRef.current) {
@@ -139,19 +164,22 @@ function HighlightRef({ language, children, ...props } : HighlightProps) {
   }, [language, children])
 
   return (
-    <StyledHighlight>
-      <Pre
-        background="none"
-        margin="0"
-        padding="0"
-        lineHeight="22px"
-        className={language ? `language-${language}` : 'nohighlight'}
-        ref={codeRef}
-        {...props}
-      >
-        {children}
-      </Pre>
-    </StyledHighlight>
+    <MainWrap>
+      {showLineNumbers && (
+        <LineNumbers aria-hidden>
+          {lines.map((line, idx) => `${idx + 1}${idx < lines.length - 1 ? '\n' : ''}`)}
+        </LineNumbers>
+      )}
+      <StyledHighlight>
+        <StyledPre
+          className={language ? `language-${language}` : 'nohighlight'}
+          ref={codeRef}
+          {...props}
+        >
+          {children}
+        </StyledPre>
+      </StyledHighlight>
+    </MainWrap>
   )
 }
 

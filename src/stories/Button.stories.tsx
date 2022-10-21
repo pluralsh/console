@@ -12,7 +12,9 @@ export default {
       control: {
         type: 'select',
         labels: {
-          '': 'Enabled',
+          // Can't have empty string as key for labels
+          // Breaks controls for every other component that appears after this
+          // '': 'Enabled',
           none: 'Disabled',
         },
       },
