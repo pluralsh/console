@@ -73,7 +73,7 @@ ENV TERRAFORM_VERSION=v1.2.8
 ENV CLI_VERSION=v0.5.9
 
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
-ENV KUBECTL_VERSION=v1.24.3
+ENV KUBECTL_VERSION=v1.24.7
 
 RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-base && \
     curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz | tar xvz && \
