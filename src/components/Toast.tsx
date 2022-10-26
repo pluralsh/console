@@ -1,7 +1,7 @@
 import { Layer, LayerPositionType } from 'grommet'
 import { FlexProps } from 'honorable'
 import {
-  Dispatch, forwardRef, useCallback, useEffect, useState,
+  Dispatch, Ref, forwardRef, useCallback, useEffect, useState,
 } from 'react'
 
 import Banner from './Banner'
@@ -25,7 +25,7 @@ const defaults = {
 const Toast = forwardRef(({
   position = defaults.position, closeTimeout = defaults.closeTimeout, onClose = defaults.onClose,
   severity = defaults.severity, children, ...props
-}: ToastProps): JSX.Element => {
+}: ToastProps, ref:Ref<any>): JSX.Element => {
   const [open, setOpen] = useState(true)
   const close = useCallback(() => {
     setOpen(false)
@@ -47,6 +47,7 @@ const Toast = forwardRef(({
       position={position}
       plain
       modal={false}
+      ref={ref}
     >
       <Banner
         onClose={close}

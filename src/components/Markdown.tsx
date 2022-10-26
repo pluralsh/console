@@ -1,4 +1,4 @@
-import { Children, forwardRef, useMemo } from 'react'
+import { Children, useMemo } from 'react'
 import { Div } from 'honorable'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
@@ -186,7 +186,7 @@ function MarkdownImage({
   )
 }
 
-function MarkdownRef({ text, gitUrl, mainBranch }: MarkdownProps) {
+function Markdown({ text, gitUrl, mainBranch }: MarkdownProps) {
   return useMemo(() => (
     <ReactMarkdown
       rehypePlugins={[rehypeRaw]}
@@ -222,7 +222,5 @@ function MarkdownRef({ text, gitUrl, mainBranch }: MarkdownProps) {
   ),
   [text, gitUrl, mainBranch])
 }
-
-const Markdown = forwardRef(MarkdownRef)
 
 export default Markdown

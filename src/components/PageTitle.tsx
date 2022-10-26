@@ -10,8 +10,9 @@ export type PageTitleProps = {
 
 const PageTitle = forwardRef<HTMLDivElement, PageTitleProps>(({
   heading, headingProps = {}, children, ...props
-}) => (
+}, ref) => (
   <Flex
+    ref={ref}
     borderBottom="1px solid border"
     paddingBottom="large"
     marginBottom="large"

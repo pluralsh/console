@@ -1,5 +1,5 @@
 import {
-  forwardRef, useEffect, useMemo, useRef,
+  Ref, forwardRef, useEffect, useMemo, useRef,
 } from 'react'
 import hljs from 'highlight.js/lib/core'
 import '../hljs'
@@ -144,11 +144,9 @@ type HighlightProps = Omit<ComponentPropsWithoutRef<'pre'>, 'children'> & {
 const propTypes = {}
 
 function HighlightRef({
-  language,
-  children,
-  showLineNumbers,
-  ...props
-}: HighlightProps) {
+  language, children, showLineNumbers, ...props
+}: HighlightProps,
+ref: Ref<any>) {
   if (typeof children !== 'string') {
     throw new Error('Highlight component expects a string as its children')
   }
@@ -164,7 +162,7 @@ function HighlightRef({
   }, [language, children])
 
   return (
-    <MainWrap>
+    <MainWrap ref={ref}>
       {showLineNumbers && (
         <LineNumbers aria-hidden>
           {lines.map((line, idx) => `${idx + 1}${idx < lines.length - 1 ? '\n' : ''}`)}

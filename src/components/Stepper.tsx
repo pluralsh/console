@@ -55,7 +55,7 @@ const propTypes = {
   stepIndex: PropTypes.number.isRequired,
   steps: PropTypes.arrayOf(PropTypes.shape({
     stepTitle: PropTypes.node.isRequired,
-    IconComponent: PropTypes.func.isRequired,
+    IconComponent: PropTypes.elementType.isRequired,
     iconSize: PropTypes.number,
   }).isRequired).isRequired,
 }
