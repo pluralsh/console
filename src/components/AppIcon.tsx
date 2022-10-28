@@ -6,8 +6,13 @@ import last from 'lodash/last'
 
 import { styledTheme as theme } from '../theme'
 
+import { FillLevel, useFillLevel } from './contexts/FillLevelContext'
+
+type Hue = 'default' | 'lighter' | 'lightest'
+type Size = 'xxsmall' | 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'
+
 type AppIconProps = DivProps & {
-  size?: 'xxsmall' | 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge' | string
+  size?: Size | string
   spacing?: 'none' | 'padding' | string
   hue?: 'default' | 'lighter' | 'lightest' | string
   clickable?: boolean
@@ -26,9 +31,14 @@ const propTypes = {
   alt: PropTypes.string,
 }
 
-const sizeToWidth: {
-  [key in 'xxsmall' | 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge']: number
-} = {
+const parentFillLevelToHue:Record<FillLevel, Hue> = {
+  0: 'default',
+  1: 'lighter',
+  2: 'lightest',
+  3: 'lightest',
+}
+
+const sizeToWidth:Record<Size, number> = {
   xxsmall: 32,
   xsmall: 40,
   small: 64,
@@ -37,9 +47,7 @@ const sizeToWidth: {
   xlarge: 160,
 }
 
-const sizeToIconWidth: {
-  [key in 'xxsmall' | 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge']: number
-} = {
+const sizeToIconWidth:Record<Size, number> = {
   xxsmall: 16,
   xsmall: 24,
   small: 48,
@@ -48,7 +56,7 @@ const sizeToIconWidth: {
   xlarge: 96,
 }
 
-const hueToColor: { [key in 'default' | 'lighter' | 'lightest']: string } = {
+const hueToColor: Record<Hue, string> = {
   default: 'fill-one',
   lighter: 'fill-two',
   lightest: 'fill-three',
@@ -88,7 +96,7 @@ export function toInitials(name: string) {
 function AppIconRef({
   size = 'medium',
   spacing = 'padding',
-  hue = 'lighter',
+  hue,
   clickable = false,
   url,
   alt,
@@ -98,6 +106,9 @@ function AppIconRef({
   ...props
 }: AppIconProps,
 ref: Ref<any>) {
+  const parentFillLevel = useFillLevel()
+
+  hue = hue || parentFillLevelToHue[parentFillLevel]
   const boxSize = sizeToWidth[size]
   const iconSize
     = spacing === 'padding' ? sizeToIconWidth[size] : sizeToWidth[size] + 1

@@ -13,7 +13,7 @@ import StackIcon from './icons/StackIcon'
 type StackCardProps = DivProps & {
   title?: string
   description?: string
-  apps?: App[],
+  apps?: App[]
   hue?: 'neutral' | 'red' | 'green' | 'blue' | 'yellow' | string
 }
 
@@ -62,6 +62,7 @@ ref: Ref<any>) {
       padding="large"
       width="100%"
       borderColor={hueToColor[hue]}
+      fillLevel={1}
       {...props}
     >
       <Flex
@@ -97,12 +98,7 @@ ref: Ref<any>) {
                   {apps?.length || 0} APP{apps?.length !== 1 && 'S'}
                 </H3>
               </Flex>
-              <Chip
-                hue="lighter"
-                icon={<StackIcon />}
-              >
-                Stack
-              </Chip>
+              <Chip icon={<StackIcon />}>Stack</Chip>
             </Flex>
           </Flex>
           {description && (

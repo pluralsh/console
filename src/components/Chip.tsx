@@ -4,40 +4,36 @@ import { ReactElement, Ref, forwardRef } from 'react'
 import styled from 'styled-components'
 
 import Card, { CardProps } from './Card'
+import { FillLevel, useFillLevel } from './contexts/FillLevelContext'
 import CloseIcon from './icons/CloseIcon'
 
-type ChipProps = FlexProps & {
+type Hue = 'default' | 'lighter' | 'lightest'
+type Size = 'small' | 'medium' | 'large'
+type Severity =
+  | 'neutral'
+  | 'info'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'critical'
+
+export type ChipProps = FlexProps & {
   size?: 'small' | 'medium' | 'large' | string
-  severity?:
-    | 'neutral'
-    | 'info'
-    | 'success'
-    | 'warning'
-    | 'error'
-    | 'critical'
-    | string
+  severity?: Severity | string
   icon?: ReactElement
   loading?: boolean
   closeButton?: boolean
   clickable?: boolean
 } & CardProps
 
-const propTypes = {
-  size: PropTypes.oneOf(['small', 'medium', 'large']),
-  severity: PropTypes.oneOf([
-    'neutral',
-    'info',
-    'success',
-    'warning',
-    'error',
-    'critical',
-  ]),
-  hue: PropTypes.oneOf(['default', 'lighter', 'lightest']),
-  icon: PropTypes.element,
-  loading: PropTypes.bool,
+const parentFillLevelToHue: Record<FillLevel, Hue> = {
+  0: 'default',
+  1: 'lighter',
+  2: 'lightest',
+  3: 'lightest',
 }
 
-const severityToColor = {
+const severityToColor: Record<Severity, string> = {
   neutral: 'text-light',
   info: 'text-primary-accent',
   success: 'text-success-light',
@@ -46,7 +42,7 @@ const severityToColor = {
   critical: 'text-danger',
 }
 
-const sizeToCloseHeight: { [key in 'small' | 'medium' | 'large']: number } = {
+const sizeToCloseHeight: Record<Size, number> = {
   small: 8,
   medium: 10,
   large: 12,
@@ -67,7 +63,7 @@ function ChipRef({
   children,
   size = 'medium',
   severity = 'neutral',
-  hue = 'default',
+  hue,
   loading = false,
   icon,
   closeButton,
@@ -75,6 +71,9 @@ function ChipRef({
   ...props
 }: ChipProps,
 ref: Ref<any>) {
+  const parentFillLevel = useFillLevel()
+
+  hue = hue || parentFillLevelToHue[parentFillLevel]
   const col = severityToColor[severity] || 'text-light'
 
   return (
@@ -127,6 +126,19 @@ ref: Ref<any>) {
 
 const Chip = forwardRef(ChipRef)
 
-Chip.propTypes = propTypes
+Chip.propTypes = {
+  size: PropTypes.oneOf(['small', 'medium', 'large']),
+  severity: PropTypes.oneOf([
+    'neutral',
+    'info',
+    'success',
+    'warning',
+    'error',
+    'critical',
+  ]),
+  hue: PropTypes.oneOf(['default', 'lighter', 'lightest']),
+  icon: PropTypes.element,
+  loading: PropTypes.bool,
+}
 
 export default Chip

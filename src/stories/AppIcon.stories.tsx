@@ -1,5 +1,7 @@
 import { Flex, H3 } from 'honorable'
 
+import { Card, WrapWithIf } from '..'
+
 import AppIcon from '../components/AppIcon'
 
 export default {
@@ -24,9 +26,21 @@ export default {
       },
     },
     hue: {
-      options: ['default', 'lighter', 'lightest'],
+      options: [undefined, 'default', 'lighter', 'lightest'],
       control: {
         type: 'select',
+      },
+    },
+    onFillLevel: {
+      options: [0, 1, 2, 3],
+      control: {
+        type: 'select',
+        labels: {
+          0: '0',
+          1: '1',
+          2: '2',
+          3: "3 - Shouldn't be used",
+        },
       },
     },
   },
@@ -40,7 +54,7 @@ const sizes = [
   { label: 'Extra Small', size: 'xsmall' },
 ]
 
-function Template(args: any) {
+function Template({ onFillLevel, ...args }: any) {
   return (
     <Flex
       gap={16}
@@ -49,30 +63,40 @@ function Template(args: any) {
       {sizes.map(({ label, size }) => (
         <>
           <H3>{label}</H3>
-          <Flex
-            direction="row"
-            gap={16}
+          <WrapWithIf
+            condition={onFillLevel > 0}
+            wrapper={(
+              <Card
+                fillLevel={onFillLevel}
+                padding="small"
+              />
+            )}
           >
-            <AppIcon
-              size={size}
-              url={args.icon}
-              {...args}
-            />
+            <Flex
+              direction="row"
+              gap={16}
+            >
+              <AppIcon
+                size={size}
+                url={args.icon}
+                {...args}
+              />
 
-            <AppIcon
-              size={size}
-              url="photo.png"
-              spacing="none"
-              {...args}
-            />
+              <AppIcon
+                size={size}
+                url="photo.png"
+                spacing="none"
+                {...args}
+              />
 
-            <AppIcon
-              size={size}
-              name={args.name || undefined}
-              initials={args.name || undefined}
-              {...args}
-            />
-          </Flex>
+              <AppIcon
+                size={size}
+                name={args.name || undefined}
+                initials={args.name || undefined}
+                {...args}
+              />
+            </Flex>
+          </WrapWithIf>
         </>
       ))}
     </Flex>
@@ -84,6 +108,7 @@ Default.args = {
   name: 'Michael J Guarino',
   initials: '',
   icon: '/logos/plural-logomark-only-black.svg',
-  hue: 'default',
+  onFillLevel: 0,
+  hue: undefined,
   clickable: false,
 }

@@ -27,7 +27,7 @@ const portrait = (
   />
 )
 
-const chipProps = {
+const chipProps:ComponentProps<typeof Chip> = {
   size: 'small',
   hue: 'lighter',
 }

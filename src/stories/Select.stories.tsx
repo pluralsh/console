@@ -1,5 +1,7 @@
 import { Div, Flex } from 'honorable'
-import { Key, forwardRef, useState } from 'react'
+import {
+  ComponentProps, Key, forwardRef, useState,
+} from 'react'
 import styled from 'styled-components'
 
 import {
@@ -32,7 +34,7 @@ const portrait = (
 )
 const smallIcon = <PersonIcon size={16} />
 
-const chipProps = {
+const chipProps:Partial<ComponentProps<typeof Chip>> = {
   size: 'small',
   hue: 'lighter',
 }

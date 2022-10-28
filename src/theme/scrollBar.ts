@@ -1,14 +1,17 @@
+import { StringObj } from 'src/theme'
 import { CSSObject } from 'styled-components'
+
+import { FillLevel } from '../components/contexts/FillLevelContext'
 
 import { semanticColors } from './colors'
 
-export const scrollBar = ({ hue = 'default' } = {}) => {
-  const trackColor = hue === 'lighter'
-    ? semanticColors['fill-three']
-    : semanticColors['fill-two']
-  const barColor = hue === 'lighter'
-    ? semanticColors['text-xlight']
-    : semanticColors['fill-three']
+export const scrollBar = ({ fillLevel }: { fillLevel: FillLevel }) => {
+  const trackColor
+    = fillLevel >= 2 ? semanticColors['fill-three'] : semanticColors['fill-two']
+  const barColor
+    = fillLevel >= 2
+      ? semanticColors['text-xlight']
+      : semanticColors['fill-three']
   const barWidth = 6
   const barRadius = barWidth / 2
 
@@ -34,5 +37,7 @@ export const scrollBar = ({ hue = 'default' } = {}) => {
     },
   }
 
-  return style
+  // Type-cast allows to be used in Honorable, Emotion and
+  // styled-components components
+  return style as StringObj
 }

@@ -1,4 +1,7 @@
 import { Flex } from 'honorable'
+import { ComponentProps } from 'react'
+
+import { FillLevel } from '../components/contexts/FillLevelContext'
 
 import { Card, CardProps } from '../index'
 
@@ -6,6 +9,12 @@ export default {
   title: 'Card',
   component: null,
 }
+
+const fillLevels: (FillLevel | undefined)[] = [undefined, 1, 2, 3]
+const cornerSizes: ComponentProps<typeof Card>['cornerSize'][] = [
+  'medium',
+  'large',
+]
 
 function Template({
   clickable,
@@ -18,124 +27,37 @@ function Template({
       flexWrap="wrap"
       gap="xxlarge"
     >
-      <Flex
-        flexWrap="wrap"
-        gap="xxlarge"
-      >
-        <Card
-          clickable={clickable}
-          selected={selected}
-          width={width}
+      {cornerSizes.map(cornerSize => (
+        <Flex
+          flexWrap="wrap"
+          gap="xxlarge"
         >
-          <Flex
-            caption
-            alignItems="center"
-            height={height}
-            justifyContent="center"
-          >
-            cornerSize="large"
-            <br />
-            hue="default"
-          </Flex>
-        </Card>
-        <Card
-          hue="lighter"
-          clickable={clickable}
-          selected={selected}
-          width={width}
-        >
-          <Flex
-            caption
-            alignItems="center"
-            height={height}
-            justifyContent="center"
-          >
-            cornerSize="large"
-            <br />
-            hue="lighter"
-          </Flex>
-        </Card>
-        <Card
-          hue="lightest"
-          clickable={clickable}
-          selected={selected}
-          width={width}
-        >
-          <Flex
-            caption
-            alignItems="center"
-            height={height}
-            justifyContent="center"
-          >
-            cornerSize="large"
-            <br />
-            hue="lightest"
-          </Flex>
-        </Card>
-      </Flex>{' '}
-      <Flex
-        flexWrap="wrap"
-        gap="xxlarge"
-      >
-        <Card
-          cornerSize="medium"
-          clickable={clickable}
-          selected={selected}
-          width={width}
-        >
-          <Flex
-            caption
-            alignItems="center"
-            height={height}
-            justifyContent="center"
-          >
-            cornerSize="medium"
-            <br />
-            hue="default"
-          </Flex>
-        </Card>
-        <Card
-          hue="lighter"
-          cornerSize="medium"
-          clickable={clickable}
-          selected={selected}
-          width={width}
-        >
-          <Flex
-            caption
-            alignItems="center"
-            height={height}
-            justifyContent="center"
-          >
-            cornerSize="medium"
-            <br />
-            hue="lighter"
-          </Flex>
-        </Card>
-        <Card
-          hue="lightest"
-          cornerSize="medium"
-          clickable={clickable}
-          selected={selected}
-          width={width}
-        >
-          <Flex
-            caption
-            alignItems="center"
-            height={height}
-            justifyContent="center"
-          >
-            cornerSize="medium"
-            <br />
-            hue="lightest"
-          </Flex>
-        </Card>
-      </Flex>
+          {fillLevels.map(fillLevel => (
+            <Card
+              clickable={clickable}
+              selected={selected}
+              width={width}
+              cornerSize={cornerSize}
+              fillLevel={fillLevel}
+            >
+              <Flex
+                caption
+                alignItems="center"
+                height={height}
+                justifyContent="center"
+              >
+                cornerSize="{cornerSize}"
+                <br />
+                fillLevel=
+                {fillLevel === undefined ? 'undefined' : `"${fillLevel}"`}
+              </Flex>
+            </Card>
+          ))}
+        </Flex>
+      ))}
     </Flex>
   )
 }
-
-const hues = [undefined, 'default', 'lighter', 'lightest']
 
 function FillLevelTemplate({
   clickable,
@@ -147,15 +69,15 @@ function FillLevelTemplate({
       flexWrap="wrap"
       gap="xxlarge"
     >
-      {hues.map(hue => (
+      {fillLevels.map(fillLevel => (
         <Card
           clickable={clickable}
           selected={selected}
           width={width}
           padding="medium"
-          hue={hue}
+          fillLevel={fillLevel}
         >
-          hue="{hue}"
+          fillLevel="{fillLevel}"
           <br />
           <br />
           <Card
@@ -165,8 +87,8 @@ function FillLevelTemplate({
           >
             <Card padding="medium">
               <br />
-              Each Card background should be one level lighter than its parent, but
-              not exceed fill-three
+              Each Card background should be one level lighter than its parent,
+              but not exceed fill-three
               <br />
               <br />
             </Card>

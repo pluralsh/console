@@ -3,7 +3,16 @@ import {
 } from 'honorable'
 
 import {
-  Card, IconFrame, IconFrameProps, TrashCanIcon,
+  FillLevel,
+  FillLevelProvider,
+} from '../components/contexts/FillLevelContext'
+
+import {
+  Card,
+  IconFrame,
+  IconFrameProps,
+  TrashCanIcon,
+  WrapWithIf,
 } from '../index'
 
 export default {
@@ -11,7 +20,8 @@ export default {
   component: IconFrame,
 }
 
-const hues: IconFrameProps['hue'][] = ['none', 'default', 'lighter', 'lightest']
+const fillLevels: FillLevel[] = [0, 1, 2, 3]
+
 const sizes: IconFrameProps['size'][] = [
   'xsmall',
   'small',
@@ -28,13 +38,13 @@ function Template({
   tooltipProps,
   ...props
 }: Partial<IconFrameProps>) {
-  return hues.map(hue => (
-    <Div key={hue}>
+  return fillLevels.map(fillLevel => (
+    <Div key={fillLevel}>
       <H1
         caption
         marginBottom="xxsmall"
       >
-        hue="{hue}"
+        On fillLevel={`{${fillLevel}}`}
       </H1>
       <Flex
         gap="xsmall"
@@ -52,19 +62,24 @@ function Template({
             flexDirection="row"
             alignItems="center"
             gap="medium"
-            hue={hue}
+            fillLevel={fillLevel}
+            {...(fillLevel === 0 ? { backgroundColor: 'transparent' } : {})}
           >
-            <Text caption>{size}</Text>
-            <IconFrame
-              size={size || 'medium'}
-              hue={hue}
-              clickable={clickable === undefined ? true : clickable}
-              icon={icon || <TrashCanIcon />}
-              textValue={textValue || 'Delete'}
-              tooltip={tooltip}
-              tooltipProps={tooltipProps}
-              {...props}
-            />
+            <WrapWithIf
+              condition={fillLevel === 0}
+              wrapper={<FillLevelProvider value={fillLevel} />}
+            >
+              <Text caption>size="{size}"</Text>
+              <IconFrame
+                size={size || 'medium'}
+                clickable={clickable === undefined ? true : clickable}
+                icon={icon || <TrashCanIcon />}
+                textValue={textValue || 'Delete'}
+                tooltip={tooltip}
+                tooltipProps={tooltipProps}
+                {...props}
+              />
+            </WrapWithIf>
           </Card>
         ))}
       </Flex>

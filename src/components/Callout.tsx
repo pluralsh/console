@@ -7,6 +7,7 @@ import styled, { DefaultTheme, useTheme } from 'styled-components'
 import {
   FillLevel,
   FillLevelProvider,
+  isFillLevel,
   toFillLevel,
   useFillLevel,
 } from './contexts/FillLevelContext'
@@ -81,9 +82,10 @@ ref) => {
   const Icon = styleToIcon[severity]
   const parentFillLevel = useFillLevel()
 
-  fillLevel = typeof fillLevel === 'number' && fillLevel >= 0
-    ? fillLevel
-    : toFillLevel(parentFillLevel + 1)
+  fillLevel = toFillLevel(Math.max(2,
+    isFillLevel(fillLevel) && fillLevel >= 0
+      ? fillLevel
+      : parentFillLevel + 1))
 
   let iconTopMargin = size === 'full' ? 0 : 2
 
@@ -92,7 +94,7 @@ ref) => {
   }
 
   return (
-    <FillLevelProvider value={2}>
+    <FillLevelProvider value={fillLevel}>
       <CalloutWrap
         className={className}
         color={color}

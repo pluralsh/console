@@ -1,7 +1,15 @@
-import { styledTheme } from 'src'
 import styled, { useTheme } from 'styled-components'
 
+import { FillLevel } from '../components/contexts/FillLevelContext'
+import { styledTheme } from '..'
 import Divider from '../components/Divider'
+
+const fillLevelToBGColor: Record<FillLevel, string> = {
+  0: 'fill-zero',
+  1: 'fill-one',
+  2: 'fill-two',
+  3: 'fill-three',
+}
 
 export default {
   title: 'Semantic System',
@@ -171,10 +179,11 @@ function BoxBorders() {
 }
 
 const ScrollbarBox = styled(FilledBox)<{
-  scrollHue?: string
-}>(({ theme, scrollHue }) => ({
-  ...theme.partials.scrollBar({ hue: scrollHue }),
+  fillLevel?: FillLevel
+}>(({ theme, fillLevel }) => ({
+  ...theme.partials.scrollBar({ fillLevel }),
   ...theme.partials.text.caption,
+  backgroundColor: theme.colors[fillLevelToBGColor[fillLevel]],
   width: '100%',
   height: 'auto',
   padding: theme.spacing.medium,
@@ -196,47 +205,47 @@ const ScrollbarBox = styled(FilledBox)<{
 }))
 
 function Scrollbars() {
-  const scrollHues = ['default', 'lighter']
+  const fillLevels:FillLevel[] = [0, 1, 2, 3]
   const exampleText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
 
   return (
     <>
       <FlexWrap>
-        {scrollHues.map(key => (
-          <BlockWrapper key={key}>
+        {fillLevels.map(fillLevel => (
+          <BlockWrapper key={fillLevel}>
             <ScrollbarBox
               className="vertical"
-              scrollHue={key}
+              fillLevel={fillLevel}
             >
               <div className="inner">{exampleText}</div>
             </ScrollbarBox>
-            <ItemLabel>vertical - {key}</ItemLabel>
+            <ItemLabel>vertical - fillLevel={fillLevel}</ItemLabel>
           </BlockWrapper>
         ))}
       </FlexWrap>
       <FlexWrap>
-        {scrollHues.map(key => (
-          <BlockWrapper key={key}>
+        {fillLevels.map(fillLevel => (
+          <BlockWrapper key={fillLevel}>
             <ScrollbarBox
               className="horizontal"
-              scrollHue={key}
+              fillLevel={fillLevel}
             >
               <div className="inner">{exampleText}</div>
             </ScrollbarBox>
-            <ItemLabel>horizontal - {key}</ItemLabel>
+            <ItemLabel>horizontal - fillLevel={fillLevel}</ItemLabel>
           </BlockWrapper>
         ))}
       </FlexWrap>
       <FlexWrap>
-        {scrollHues.map(key => (
-          <BlockWrapper key={key}>
+        {fillLevels.map(fillLevel => (
+          <BlockWrapper key={fillLevel}>
             <ScrollbarBox
               className="both"
-              scrollHue={key}
+              fillLevel={fillLevel}
             >
               <div className="inner">{exampleText}</div>
             </ScrollbarBox>
-            <ItemLabel>vertical + horizontal - {key}</ItemLabel>
+            <ItemLabel>vertical + horizontal - fillLevel={fillLevel}</ItemLabel>
           </BlockWrapper>
         ))}
       </FlexWrap>

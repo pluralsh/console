@@ -19,6 +19,7 @@ import styled, { CSSObject, useTheme } from 'styled-components'
 import { Item } from '@react-stately/collections'
 
 import Card from './Card'
+import { FillLevel } from './contexts/FillLevelContext'
 
 export const HEADER_KEY = '$$header$$'
 export const FOOTER_KEY = '$$footer$$'
@@ -46,9 +47,11 @@ type ListBoxProps = Omit<
   footer?: ReactElement
 }
 
+const CARD_FILL_LEVEL:FillLevel = 2
+
 const ListBoxCard = styled(Card).attrs(() => ({
   cornerSize: 'medium',
-  hue: 'lighter',
+  fillLevel: CARD_FILL_LEVEL,
 }))(_p => ({
   display: 'flex',
   flexDirection: 'column',
@@ -58,11 +61,10 @@ const ListBoxCard = styled(Card).attrs(() => ({
 }))
 
 type ScrollContainerProps = {
-  hue?: 'default' | 'lighter'
   extendStyle?: CSSObject
 }
 const ScrollContainer = styled.div<ScrollContainerProps>(({ theme, extendStyle }) => ({
-  ...theme.partials.scrollBar({ hue: 'lighter' }),
+  ...theme.partials.scrollBar({ fillLevel: CARD_FILL_LEVEL }),
   position: 'relative',
   overflow: 'auto',
   flexShrink: 1,
@@ -200,7 +202,6 @@ function ListBoxUnmanaged({
       {headerFixed && <div className="headerFixed">{headerFixed}</div>}
       <ScrollContainer
         ref={ref}
-        hue="lighter"
         extendStyle={{
           paddingTop: headerFixed ? 0 : theme.spacing.xxxsmall,
           paddingBottom: footerFixed ? 0 : theme.spacing.xxxsmall,

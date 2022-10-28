@@ -1,6 +1,6 @@
-import { CardHue } from 'src/components/Card'
 import { Div } from 'honorable'
 
+import { FillLevel } from '../components/contexts/FillLevelContext'
 import { Callout, CalloutProps, Card } from '..'
 
 export default {
@@ -11,9 +11,17 @@ export default {
       options: ['full', 'compact'],
       control: { type: 'select' },
     },
-    onCard: {
-      options: ['none', 'default', 'lighter', 'lightest'],
-      control: { type: 'select' },
+    onFillLevel: {
+      options: [0, 1, 2, 3],
+      control: {
+        type: 'select',
+        labels: {
+          0: '0',
+          1: '1',
+          2: '2',
+          3: "3 - Shouldn't be used",
+        },
+      },
     },
   },
 }
@@ -43,22 +51,29 @@ function Template({
   withButton,
   title,
   fillLevel,
-  onCard,
-}: CalloutProps & { withButton: boolean; onCard: CardHue }) {
+  onFillLevel,
+}: CalloutProps & { withButton: boolean; onFillLevel: FillLevel }) {
   let Wrapper = Div
+  let wrapperProps = {}
 
-  if (onCard && onCard !== 'none') {
+  if (onFillLevel > 0) {
     Wrapper = Card
+    wrapperProps = {
+      ...wrapperProps,
+      ...{
+        fillLevel: onFillLevel,
+        padding: 'medium',
+      },
+    }
   }
 
   return (
     <Wrapper
-      hue={onCard}
-      padding={onCard && onCard !== 'none' ? 'medium' : 0}
       display="flex"
       flexDirection="column"
       gap="large"
       maxWidth={600}
+      {...wrapperProps}
     >
       {styles.map(style => (
         <Callout
@@ -80,8 +95,7 @@ Default.args = {
   title: '',
   size: 'full',
   withButton: false,
-  fillLevel: 2,
-  onCard: 'none',
+  onFillLevel: 0,
 }
 
 export const WithTitle = Template.bind({})
@@ -89,8 +103,7 @@ WithTitle.args = {
   title: 'Title text - How to write a dummy title',
   size: 'full',
   withButton: false,
-  fillLevel: 2,
-  onCard: 'none',
+  onFillLevel: 0,
 }
 
 export const Compact = Template.bind({})
@@ -98,8 +111,7 @@ Compact.args = {
   title: '',
   size: 'compact',
   withButton: false,
-  fillLevel: 2,
-  onCard: 'none',
+  onFillLevel: 0,
 }
 
 export const WithButton = Template.bind({})
@@ -107,8 +119,7 @@ WithButton.args = {
   title: '',
   size: 'full',
   withButton: true,
-  fillLevel: 2,
-  onCard: 'none',
+  onFillLevel: 0,
 }
 
 export const KitchenSink = Template.bind({})
@@ -116,14 +127,13 @@ KitchenSink.args = {
   title: 'Title text - How to write a dummy title',
   size: 'full',
   withButton: true,
-  fillLevel: 2,
-  onCard: 'none',
+  onFillLevel: 0,
 }
 
 export const OnCard = Template.bind({})
 OnCard.args = {
-  onCard: 'default',
   title: 'Title text - How to write a dummy title',
   size: 'full',
   withButton: true,
+  onFillLevel: 1,
 }

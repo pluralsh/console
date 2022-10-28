@@ -1,41 +1,85 @@
 import { Row, createColumnHelper } from '@tanstack/react-table'
-import { P } from 'honorable'
+import { Flex, P } from 'honorable'
+import { ReactElement } from 'react'
 
-import { CollapseIcon, Table } from '..'
+import {
+  AppIcon,
+  ArrowRightLeftIcon,
+  CollapseIcon,
+  IconFrame,
+  InfoIcon,
+  LogsIcon,
+  Table,
+} from '..'
 
 type Method = {
   function: string
   inputType: string
-  returnedValue: string
+  returnedValue: ReactElement | string
   description: string
   expandable?: boolean
+}
+
+function StringLabel() {
+  return (
+    <Flex
+      gap="xsmall"
+      justifyContent="space-between"
+      alignItems="center"
+    >
+      String
+      <AppIcon
+        name="String"
+        icon={<LogsIcon />}
+        size="xxsmall"
+      />
+    </Flex>
+  )
+}
+
+function BoolLabel() {
+  return (
+    <Flex
+      gap="xsmall"
+      justifyContent="space-between"
+      alignItems="center"
+    >
+      Boolean
+      <AppIcon
+        name="Boolean"
+        icon={<ArrowRightLeftIcon />}
+        size="xxsmall"
+      />
+    </Flex>
+  )
 }
 
 const data: Method[] = [
   {
     function: 'fileExists',
     inputType: 'Path (string)',
-    returnedValue: 'Boolean',
+    returnedValue: <BoolLabel />,
     description: 'Joins parts of a path',
   },
   {
     function: 'pathJoin',
     inputType: 'Object (interface{}), Path (string), Value (interface{})',
-    returnedValue: 'String',
+    returnedValue: <StringLabel />,
     description: 'Allows for getting values from other applications...',
     expandable: true,
   },
   {
     function: 'repoRoot',
     inputType: 'fileExists',
-    returnedValue: 'String',
-    description: 'Allows for getting values from other applications stored in the contex file. For   example, to use the hostname configured for Grafana in another application {{ .Configuration.grafana.hostname }} can be used.',
+    returnedValue: <StringLabel />,
+    description:
+      'Allows for getting values from other applications stored in the contex file. For   example, to use the hostname configured for Grafana in another application {{ .Configuration.grafana.hostname }} can be used.',
     expandable: true,
   },
   {
     function: 'repoName',
     inputType: 'Object (interface{}), Path (string), Value (interface{})',
-    returnedValue: 'String',
+    returnedValue: <StringLabel />,
     description: 'Allows for getting values from other applications...',
     expandable: true,
   },
@@ -62,7 +106,21 @@ const columns = [
   columnHelper.accessor(row => row.description, {
     id: 'description',
     cell: (info: any) => <span>{info.getValue()}</span>,
-    header: () => <span>Description</span>,
+    header: () => (
+      <Flex
+        gap="xsmall"
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        Description{' '}
+        <IconFrame
+          clickable
+          textValue="Book"
+          icon={<InfoIcon />}
+          size="small"
+        />
+      </Flex>
+    ),
   }),
 ]
 
@@ -70,22 +128,26 @@ const expandingColumns = [
   {
     id: 'expander',
     header: () => {},
-    cell: ({ row }: any) => (row.getCanExpand() && (
+    cell: ({ row }: any) => row.getCanExpand() && (
       <CollapseIcon
         size={8}
         cursor="pointer"
-        style={row.getIsExpanded() ? {
-          transform: 'rotate(270deg)',
-          transitionDuration: '.2s',
-          transitionProperty: 'transform',
-        } : {
-          transform: 'rotate(180deg)',
-          transitionDuration: '.2s',
-          transitionProperty: 'transform',
-        }}
+        style={
+          row.getIsExpanded()
+            ? {
+              transform: 'rotate(270deg)',
+              transitionDuration: '.2s',
+              transitionProperty: 'transform',
+            }
+            : {
+              transform: 'rotate(180deg)',
+              transitionDuration: '.2s',
+              transitionProperty: 'transform',
+            }
+        }
         onClick={row.getToggleExpandedHandler()}
       />
-    )),
+    ),
   },
   columnHelper.accessor(row => row.function, {
     id: 'function',
@@ -115,7 +177,7 @@ export default {
 }
 
 function Template(args: any) {
-  return (<Table {...args} />)
+  return <Table {...args} />
 }
 
 export const Default = Template.bind({})
@@ -155,5 +217,7 @@ Expandable.args = {
   data: Array(25).fill(data).flat(),
   columns: expandingColumns,
   getRowCanExpand: (row: Row<Method>) => row.original.expandable,
-  renderExpanded: ({ row }: { row: Row<Method> }) => <P>{row.original.description}</P>,
+  renderExpanded: ({ row }: { row: Row<Method> }) => (
+    <P>{row.original.description}</P>
+  ),
 }

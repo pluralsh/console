@@ -32,7 +32,6 @@ ref) => (
     >
       <AppIcon
         size="small"
-        hue="default"
         {...icon}
       />
       <Div>

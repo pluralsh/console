@@ -26,6 +26,8 @@ import { focusPartials } from './theme/focus'
 import { resetPartials } from './theme/resets'
 import { marketingTextPartials } from './theme/marketingText'
 
+export type StringObj = { [key: string]: string | StringObj }
+
 const spacers = {
   margin: ['margin'],
   marginTop: ['marginTop'],

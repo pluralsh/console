@@ -13,6 +13,6 @@ export function toFillLevel(x: number | FillLevel): FillLevel {
   return Math.max(Math.min(Math.floor(x), MAX_FILL), MIN_FILL) as FillLevel
 }
 
-export function isFillLevel(x: number,): x is FillLevel {
+export function isFillLevel(x: unknown): x is FillLevel {
   return Number.isInteger(x) && x <= MAX_FILL && x >= MIN_FILL
 }

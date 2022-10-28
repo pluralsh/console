@@ -36,9 +36,13 @@ function Template({ heading, ...props }: SidecarProps) {
           heading={heading}
           {...props}
         >
-          <A href="">
-            <SidecarButton startIcon={<BrowserIcon />}>Homepage</SidecarButton>
-          </A>
+          <SidecarButton
+            as="A"
+            href="#"
+            startIcon={<BrowserIcon />}
+          >
+            Homepage
+          </SidecarButton>
           <SidecarButton startIcon={<CertificateIcon />}>
             Licenses
           </SidecarButton>

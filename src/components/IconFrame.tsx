@@ -5,9 +5,18 @@ import { ButtonBase, Flex, FlexProps } from 'honorable'
 import { useTheme } from 'styled-components'
 
 import Tooltip, { TooltipProps } from './Tooltip'
+import { useFillLevel } from './contexts/FillLevelContext'
+import type { FillLevel } from './contexts/FillLevelContext'
 
 type Hue = 'none' | 'default' | 'lighter' | 'lightest'
 type Size = 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'
+
+const parentFillLevelToHue: Record<FillLevel, Hue> = {
+  0: 'none',
+  1: 'default',
+  2: 'lighter',
+  3: 'lightest',
+}
 
 const hueToHoverBG: Record<Hue, string> = {
   none: 'fill-zero-hover',
@@ -45,7 +54,7 @@ type IconFrameProps = Omit<FlexProps, 'size'> & {
 const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(({
   icon,
   size = 'medium',
-  hue = 'default',
+  hue,
   textValue,
   clickable = false,
   tooltip,
@@ -54,6 +63,11 @@ const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(({
 },
 ref) => {
   const theme = useTheme()
+  const parentFillLevel = useFillLevel()
+
+  if (!hue) {
+    hue = parentFillLevelToHue[parentFillLevel]
+  }
 
   icon = cloneElement(icon, { size: sizeToIconSize[size] })
   if (tooltip && typeof tooltip === 'boolean') {

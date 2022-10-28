@@ -7,6 +7,10 @@ import { FillLevel, useFillLevel } from './contexts/FillLevelContext'
 // This nonsense is to reduce the chance of there being
 // a left margin when a <code> block is the first item in a line of text.
 // Put em space character in pseudo element so it won't ever get copied
+//
+// Investigate replacing Spacer with 'margin-trim' css property when browser
+// support exists
+//
 const Spacer = styled.span(_ => ({
   fontSize: 1.5,
   display: 'inline',
@@ -20,7 +24,7 @@ const Spacer = styled.span(_ => ({
   },
 }))
 
-const fillLevelToBorderColor: {
+const parentFillLevelToBorderColor: {
   [key in FillLevel]: string
 } = {
   0: 'border',
@@ -31,12 +35,12 @@ const fillLevelToBorderColor: {
 
 // Magic number to make the total height equal 20px when within 14px type
 // Proportional to that for larger text sizes
-// If INLINE_CODE_MIN_PX changes in them/text.ts, this needs to change too
+// If INLINE_CODE_MIN_PX changes in theme/text.ts, this needs to change too
 // I cannot for the life of me find a way to just calculate this in a way that's
 // consistent when INLINE_CODE_MIN_PX changes.
 const PADDING_EMS = 0.1669
 
-const Code = styled.code<{fillLevel: FillLevel}>(({ theme, fillLevel }) => ({
+const Code = styled.code<{ parentFillLevel: FillLevel }>(({ theme, parentFillLevel }) => ({
   ...theme.partials.text.inlineCode,
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.large,
@@ -45,7 +49,7 @@ const Code = styled.code<{fillLevel: FillLevel}>(({ theme, fillLevel }) => ({
   paddingTop: `${PADDING_EMS}em`,
   paddingBottom: `${PADDING_EMS}em`,
   color: theme.colors['text-light'],
-  borderColor: theme.colors[fillLevelToBorderColor[fillLevel]],
+  borderColor: theme.colors[parentFillLevelToBorderColor[parentFillLevel]],
   backgroundColor: theme.colors['fill-one'],
   'a:any-link &': {
     color: theme.colors['action-link-inline'],
@@ -59,14 +63,14 @@ const Code = styled.code<{fillLevel: FillLevel}>(({ theme, fillLevel }) => ({
 }))
 
 const InlineCode = forwardRef<HTMLElement, ComponentPropsWithRef<'code'>>(({ ...props }, ref) => {
-  const fillLevel = useFillLevel()
+  const parentFillLevel = useFillLevel()
 
   return (
     <>
       <Spacer />
       <Code
         ref={ref}
-        fillLevel={fillLevel}
+        parentFillLevel={parentFillLevel}
         {...props}
       />
       <Spacer />

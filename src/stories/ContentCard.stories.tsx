@@ -1,6 +1,7 @@
 import {
   Div, H1, H2, P,
 } from 'honorable'
+import { ComponentProps } from 'react'
 
 import { ContentCard } from '../index'
 
@@ -43,14 +44,21 @@ const content = (
   </>
 )
 
-const cards = [{ hue: 'default' }, { hue: 'lighter' }, { hue: 'lightest' }]
+const cards: ComponentProps<typeof ContentCard>[] = [
+  { fillLevel: undefined },
+  { fillLevel: 1 },
+  { fillLevel: 2 },
+  { fillLevel: 3 },
+]
 
 function Template() {
-  return cards.map(({ hue }) => (
+  return cards.map(({ fillLevel }) => (
     <Div>
-      <H1 caption>hue="{hue}"</H1>
+      <H1 caption>
+        fillLevel={fillLevel === undefined ? 'undefined' : `{${fillLevel}}`}
+      </H1>
       <ContentCard
-        hue={hue}
+        fillLevel={fillLevel}
         marginBottom="xxlarge"
         maxHeight="250px"
       >
@@ -62,7 +70,7 @@ function Template() {
           padding="0"
         >
           <H2 subtitle2>Content Area</H2>
-          <P caption>(hue="default")</P>
+          <P caption>(fillLevel="default")</P>
           <P>{content}</P>
         </Div>
       </ContentCard>

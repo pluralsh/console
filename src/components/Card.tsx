@@ -11,75 +11,71 @@ import {
   useFillLevel,
 } from './contexts/FillLevelContext'
 
-type CardSize = 'medium' | 'large' | string
-type CardHue = 'default' | 'lighter' | 'lightest' | string
+type CornerSize = 'medium' | 'large'
+type CardHue = 'default' | 'lighter' | 'lightest'
 
 type CardProps = {
-  hue?: CardHue
-  cornerSize?: CardSize
+  hue?: CardHue // Deprecated, prefer fillLevel
+  fillLevel?: FillLevel
+  cornerSize?: CornerSize
   clickable?: boolean
   selected?: boolean
 } & DivProps
 
-const fillLevelToBGColor: { [key in FillLevel]: string } = {
+const fillLevelToBGColor: Record<FillLevel, string> = {
   0: 'fill-one',
   1: 'fill-one',
   2: 'fill-two',
   3: 'fill-three',
 }
 
-const fillLevelToBorderColor: {
-  [key in FillLevel]: string
-} = {
+const fillLevelToBorderColor: Record<FillLevel, string> = {
   0: 'border',
   1: 'border',
   2: 'border-fill-two',
   3: 'border-fill-three',
 }
 
-const fillLevelToHoverBGColor: {
-  [key in FillLevel]: string
-} = {
+const fillLevelToHoverBGColor: Record<FillLevel, string> = {
   0: 'fill-one-hover',
   1: 'fill-one-hover',
   2: 'fill-two-hover',
   3: 'fill-three-hover',
 }
 
-const hueToFillLevel: { [key in CardHue]: FillLevel } = {
+const hueToFillLevel: Record<CardHue, FillLevel> = {
   default: 1,
   lighter: 2,
   lightest: 3,
 }
 
-const fillLevelToSelectedBGColor: {
-  [key in CardHue]: string
-} = {
+const fillLevelToSelectedBGColor: Record<FillLevel, string> = {
   0: 'fill-one-selected',
   1: 'fill-one-selected',
   2: 'fill-two-selected',
   3: 'fill-three-selected',
 }
 
-const cornerSizeToBorderRadius: {
-  [key in CardSize]: string
-} = {
+const cornerSizeToBorderRadius: Record<CornerSize, string> = {
   medium: 'medium',
   large: 'large',
 }
 
-const fillLevelToScroll: {
-  [key in CardHue]: Record<string, any>
-} = {
-  0: theme.partials.scrollBar({ hue: 'default' }),
-  1: theme.partials.scrollBar({ hue: 'default' }),
-  2: theme.partials.scrollBar({ hue: 'lighter' }),
-  3: theme.partials.scrollBar({ hue: 'lighter' }),
-}
-
-function useDecideFillLevel(hue: CardHue | null | undefined) {
-  const fillLevel = hueToFillLevel[hue]
+function useDecideFillLevel({
+  hue,
+  fillLevel,
+}: {
+  hue?: CardHue
+  fillLevel?: number
+}) {
   const parentFillLevel = useFillLevel()
+
+  if (isFillLevel(fillLevel)) {
+    fillLevel = toFillLevel(Math.max(1, fillLevel))
+  }
+  else {
+    fillLevel = hueToFillLevel[hue]
+  }
 
   const ret = useMemo(() => (isFillLevel(fillLevel) ? fillLevel : toFillLevel(parentFillLevel + 1)),
     [fillLevel, parentFillLevel])
@@ -89,13 +85,14 @@ function useDecideFillLevel(hue: CardHue | null | undefined) {
 
 const Card = forwardRef<HTMLDivElement, CardProps>(({
   cornerSize: size = 'large',
-  hue,
+  hue, // Deprecated, prefer fillLevel
+  fillLevel,
   selected = false,
   clickable = false,
   ...props
 },
 ref) => {
-  const fillLevel = useDecideFillLevel(hue)
+  fillLevel = useDecideFillLevel({ hue, fillLevel })
 
   return (
     <FillLevelProvider value={fillLevel}>
@@ -115,7 +112,7 @@ ref) => {
             && !selected && {
           _hover: { backgroundColor: fillLevelToHoverBGColor[fillLevel] },
         })}
-        {...fillLevelToScroll[fillLevel]}
+        {...theme.partials.scrollBar({ fillLevel })}
         {...props}
       />
     </FillLevelProvider>
@@ -123,4 +120,4 @@ ref) => {
 })
 
 export default Card
-export { CardProps, CardSize, CardHue }
+export { CardProps, CornerSize as CardSize, CardHue }

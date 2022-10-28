@@ -10,7 +10,12 @@ import CopyIcon from './icons/CopyIcon'
 import Card, { CardProps } from './Card'
 import CheckIcon from './icons/CheckIcon'
 import Highlight from './Highlight'
-import { FillLevel, useFillLevel } from './contexts/FillLevelContext'
+import {
+  FillLevel,
+  FillLevelProvider,
+  toFillLevel,
+  useFillLevel,
+} from './contexts/FillLevelContext'
 import FileIcon from './icons/FileIcon'
 
 type CodeProps = Omit<CardProps, 'children'> & {
@@ -26,15 +31,19 @@ const propTypes = {
   showHeader: PropTypes.bool,
 }
 
-const CodeHeader = styled.div<{ fillLevel: FillLevel }>(({ fillLevel, theme }) => ({
+const CodeHeader = styled(({ fillLevel, ...props }) => (
+  <FillLevelProvider value={toFillLevel(fillLevel + 2)}>
+    <div {...props} />
+  </FillLevelProvider>
+))<{ fillLevel: FillLevel }>(({ fillLevel, theme }) => ({
   ...theme.partials.text.overline,
   minHeight: theme.spacing.xlarge + theme.spacing.xsmall * 2,
   padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
   borderBottom:
-      fillLevel >= 1 ? theme.borders['fill-three'] : theme.borders['fill-two'],
+    fillLevel >= 1 ? theme.borders['fill-three'] : theme.borders['fill-two'],
   color: 'text-light',
   backgroundColor:
-      fillLevel >= 1 ? theme.colors['fill-three'] : theme.colors['fill-two'],
+    fillLevel >= 1 ? theme.colors['fill-three'] : theme.colors['fill-two'],
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.xsmall,
