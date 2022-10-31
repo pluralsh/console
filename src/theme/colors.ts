@@ -163,4 +163,10 @@ export const semanticColors = {
   'icon-success': green[200],
   'icon-warning': yellow[100],
   'icon-danger': red[200],
+  'icon-danger-critical': red[400],
+  // Deprecated (Remove after all 'error' colors converted to 'danger' in app)
+  'border-error': red[300],
+  'text-error': red[400],
+  'text-error-light': red[200],
+  'icon-error': red[200],
 }
