@@ -5,11 +5,16 @@ import { asElementTypes } from '../utils/asElementTypes'
 import { boxShadows } from './boxShadows'
 
 import { borderWidths } from './borders'
+import { semanticColors } from './colors'
 
 export const focusPartials = asElementTypes<CSSObject>()({
   default: {
     outline: 'none',
     boxShadow: boxShadows.focused,
+  },
+  button: {
+    outline: `1px solid ${semanticColors['border-outline-focused']}`,
+    outlineOffset: '-1px',
   },
   insetAbsolute: {
     outline: 'none',

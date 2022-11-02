@@ -1,8 +1,6 @@
-import {
-  Div, DivProps, Flex, FlexProps,
-} from 'honorable'
+import { Flex, FlexProps } from 'honorable'
 import { AriaTabListProps } from '@react-types/tabs'
-import { useTab, useTabList, useTabPanel } from '@react-aria/tabs'
+import { useTab, useTabList } from '@react-aria/tabs'
 import { TabListState, useTabListState } from '@react-stately/tabs'
 import { Node } from '@react-types/shared'
 import {
@@ -14,23 +12,18 @@ import {
   ReactNode,
   RefObject,
   cloneElement,
-  forwardRef,
   useEffect,
-  useImperativeHandle,
   useMemo,
-  useReducer,
   useRef,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 
-import { mergeProps, mergeRefs } from '@react-aria/utils'
-
 import { useItemWrappedChildren } from './ListBox'
 
-type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> &
+export type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> &
   Partial<Pick<Type, Key>>
 
-type Renderer = (
+export type Renderer = (
   props: HTMLAttributes<HTMLElement>,
   ref: RefObject<any> | null | undefined,
   state: TabListState<object> | null | undefined
@@ -47,9 +40,11 @@ type TabBaseProps = {
 }
 
 type TabListStateProps = Omit<AriaTabListProps<object>, 'children'>
-type TabStateRef = MutableRefObject<{
+export type TabStateRef = MutableRefObject<{
   state: TabListState<object>
   stateProps: AriaTabListProps<object>
+  tabProps: Record<Key, any>
+  updateTabPanel: () => any
 }>
 
 type ChildrenType = ReactElement<TabBaseProps> | ReactElement<TabBaseProps>[]
@@ -80,12 +75,18 @@ function TabList({
 
   const state = useTabListState(finalStateProps)
 
-  useImperativeHandle(stateRef,
-    () => ({
-      state,
-      stateProps: finalStateProps,
-    }),
-    [state, finalStateProps])
+  stateRef.current = {
+    updateTabPanel: () => {
+      console.warn("TabPanel didn't set stateRef.current.updateTabPanel")
+    },
+    ...(stateRef.current || {}),
+    state,
+    stateProps: finalStateProps,
+    tabProps: stateRef?.current?.tabProps || {},
+  }
+  useEffect(() => {
+    stateRef?.current?.updateTabPanel()
+  })
 
   const ref = useRef<HTMLDivElement>(null)
   const { tabListProps } = useTabList(finalStateProps, state, ref)
@@ -95,6 +96,7 @@ function TabList({
       item={item}
       state={state}
       stateProps={finalStateProps}
+      stateRef={stateRef}
     />
   ))
 
@@ -150,28 +152,26 @@ const TabClone = styled(({
     : {}),
 }))
 
-const TabPanelClone = styled(({
-  className, cloneAs, tabRef, ...props
-}) => cloneElement(cloneAs, {
-  className: `${cloneAs.props.className || ''} ${className || ''}`.trim(),
-  ref: tabRef,
-  ...props,
-}))<{ vertical: boolean }>(({ theme }) => ({
-  position: 'relative',
-  '&:focus, &:focus-visible': {
-    outline: 'none',
-    zIndex: theme.zIndexes.base + 1,
-  },
-}))
-
 type TabRendererProps = {
   item: Node<unknown>
   state: TabListState<object>
   stateProps: AriaTabListProps<object>
+  stateRef: TabStateRef
 }
-function TabRenderer({ item, state, stateProps }: TabRendererProps) {
+function TabRenderer({
+  item, state, stateProps, stateRef,
+}: TabRendererProps) {
   const ref = useRef(null)
   const { tabProps: props } = useTab({ key: item.key }, state, ref)
+
+  props['aria-controls'] = props['aria-controls'] || props.id.replace('-tab-', '-tabpanel-')
+
+  stateRef.current.tabProps = {
+    ...stateRef.current.tabProps,
+    ...{
+      [item.key]: { ...props },
+    },
+  }
   const theme = useTheme()
 
   if (item.props.renderer) {
@@ -203,93 +203,6 @@ function TabRenderer({ item, state, stateProps }: TabRendererProps) {
   )
 }
 
-type WrappedTabPanelProps = DivProps & {
-  stateRef: TabStateRef
-  renderer?: Renderer
-  as: ReactElement & { ref?: MutableRefObject<any> }
-}
-
-type TabPanelProps = MakeOptional<WrappedTabPanelProps, 'as'>
-
-function WrappedTabPanel({
-  stateRef: {
-    current: { state, stateProps },
-  },
-  renderer,
-  as,
-  ...props
-}: WrappedTabPanelProps) {
-  const ref = useRef()
-  const { tabPanelProps } = useTabPanel(stateProps, state, ref)
-
-  if (renderer) {
-    return renderer(mergeProps(tabPanelProps, props), ref, state)
-  }
-
-  const mergedProps = mergeProps(tabPanelProps, as.props, {
-    children: props.children,
-  })
-
-  return (
-    <TabPanelClone
-      tabRef={mergeRefs(as.ref, ref)}
-      cloneAs={as}
-      {...mergedProps}
-    />
-  )
-}
-
-const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(({
-  as, renderer, stateRef, ...props
-}, ref) => {
-  // https://reactjs.org/docs/hooks-faq.html#is-there-something-like-forceupdate
-  const [_ignored, forceUpdate] = useReducer(x => x + 1, 0)
-
-  // Force update every time stateRef changes in case stateRef.current
-  // hasn't been filled yet
-  useEffect(() => {
-    forceUpdate()
-  }, [stateRef])
-
-  if (!renderer && !as) {
-    as = (
-      <Div
-        ref={ref}
-        {...props}
-      />
-    )
-  }
-
-  if (stateRef.current) {
-    return (
-      <WrappedTabPanel
-        as={as}
-        renderer={renderer}
-        stateRef={stateRef}
-        {...props}
-      />
-    )
-  }
-
-  if (renderer) {
-    return renderer({ ...props }, null, null)
-  }
-
-  return (
-    <TabPanelClone
-      tabRef={mergeRefs(as.ref, ref)}
-      cloneAs={as}
-    >
-      {props.children}
-    </TabPanelClone>
-  )
-})
-
 export {
-  TabList,
-  TabListProps,
-  TabPanel,
-  TabPanelProps,
-  TabListStateProps,
-  TabBaseProps,
+  TabList, TabListProps, TabListStateProps, TabBaseProps,
 }

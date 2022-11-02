@@ -192,9 +192,11 @@ const honorableTheme = mergeTheme(defaultTheme, {
         paddingBottom: spacing.xsmall - 1,
         paddingRight: spacing.medium - 1,
         paddingLeft: spacing.medium - 1,
-        _focusVisible: {
+        _focus: {
           outline: 'none',
-          boxShadow: '0px 0px 0px 1.5px border-outline-focused',
+        },
+        _focusVisible: {
+          ...focusPartials.button,
         },
         ':hover': {
           backgroundColor: 'action-primary-hover',
@@ -203,9 +205,6 @@ const honorableTheme = mergeTheme(defaultTheme, {
         ':active': {
           backgroundColor: 'action-primary',
           border: '1px solid action-primary',
-        },
-        ':focus': {
-          boxShadow: boxShadows.focused,
         },
         ':disabled': {
           color: 'text-primary-disabled',
@@ -231,11 +230,9 @@ const honorableTheme = mergeTheme(defaultTheme, {
           backgroundColor: 'transparent',
           border: '1px solid border-input',
         },
-        ':focus': {
+        ':focus-visible': {
           color: 'text',
           backgroundColor: 'action-input-hover',
-          border: '1px solid border-input',
-          boxShadow: boxShadows.focused,
         },
         ':disabled': {
           color: 'text-disabled',
@@ -261,10 +258,9 @@ const honorableTheme = mergeTheme(defaultTheme, {
           backgroundColor: 'transparent',
           border: '1px solid transparent',
         },
-        ':focus': {
+        ':focus-visible': {
           color: 'text',
           backgroundColor: 'action-input-hover',
-          border: '1px solid transparent',
         },
         ':disabled': {
           color: 'text-disabled',
@@ -288,7 +284,7 @@ const honorableTheme = mergeTheme(defaultTheme, {
         ':active': {
           textDecoration: 'underline',
         },
-        ':focus': {
+        ':focus-visible': {
           backgroundColor: 'transparent',
           textDecoration: 'underline',
         },
@@ -305,10 +301,8 @@ const honorableTheme = mergeTheme(defaultTheme, {
           backgroundColor: 'transparent',
           border: '1px solid border-danger',
         },
-        ':focus': {
+        ':focus-visible': {
           backgroundColor: 'action-input-hover',
-          border: '1px solid border-outline-focused',
-          boxShadow: 'none',
         },
         ':disabled': {
           color: 'text-disabled',
@@ -324,23 +318,25 @@ const honorableTheme = mergeTheme(defaultTheme, {
         color: 'text-light',
         backgroundColor: 'fill-two',
         border: '1px solid border-input',
-        boxShadow: 'slight',
+        // boxShadow isn't getting set when placed in the root here,
+        // but using the '&' prop gets around it
+        '&': {
+          boxShadow: boxShadows.slight,
+        },
         ':hover': {
           color: 'text',
           backgroundColor: 'fill-two-hover',
           border: '1px solid border-input',
-          boxShadow: 'moderate',
+          boxShadow: boxShadows.moderate,
         },
         ':active': {
           color: 'text',
           backgroundColor: 'fill-two-hover',
           border: '1px solid border-input',
         },
-        ':focus': {
+        ':focus-visible': {
           color: 'text',
           backgroundColor: 'fill-two-selected',
-          border: '1px solid border-outline-focused',
-          boxShadow: 'moderate',
         },
         ':disabled': {
           color: 'text-disabled',

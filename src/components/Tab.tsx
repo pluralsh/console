@@ -21,10 +21,16 @@ function TabRef({
 ref: Ref<any>) {
   const theme = useTheme()
 
+  const borderRadiuses = {
+    borderTopLeftRadius: theme.borderRadiuses.medium,
+    borderTopRightRadius: vertical ? 0 : theme.borderRadiuses.medium,
+    borderBottomLeftRadius: vertical ? theme.borderRadiuses.medium : 0,
+  }
+
   return (
     <Div
       ref={ref}
-      buttonMedium
+      body2
       tabIndex={0}
       userSelect="none"
       cursor="pointer"
@@ -34,6 +40,7 @@ ref: Ref<any>) {
       borderRight={
         vertical ? `1px solid ${active ? 'border-primary' : 'border'}` : null
       }
+      {...borderRadiuses}
       _focusVisible={{
         zIndex: theme.zIndexes.base + 1,
         ...theme.partials.focus.default,
@@ -42,8 +49,8 @@ ref: Ref<any>) {
     >
       <Flex
         paddingHorizontal="medium"
-        paddingTop={vertical ? 'xsmall' : 'medium'}
-        paddingBottom="xsmall"
+        paddingTop="xsmall"
+        paddingBottom={theme.spacing.xsmall - 3}
         align="center"
         borderBottom={
           vertical
@@ -55,6 +62,7 @@ ref: Ref<any>) {
             ? `3px solid ${active ? 'border-primary' : 'transparent'}`
             : null
         }
+        {...borderRadiuses}
         color={active ? 'text' : 'text-xlight'}
         _hover={{
           color: 'text',

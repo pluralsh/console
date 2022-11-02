@@ -45,9 +45,9 @@ export { default as Tab } from './components/Tab'
 export {
   TabList,
   TabListStateProps,
-  TabPanel,
   TabBaseProps,
 } from './components/TabList'
+export { default as TabPanel } from './components/TabPanel'
 export { default as Table } from './components/Table'
 export { default as TipCarousel } from './components/TipCarousel'
 export { default as UserCard } from './components/UserCard'

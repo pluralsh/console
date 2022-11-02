@@ -1,45 +1,79 @@
-import { ReactNode, Ref, forwardRef } from 'react'
-import { DivProps, Flex, Icon } from 'honorable'
-import { useTheme } from 'styled-components'
+import { ComponentProps, Ref, forwardRef } from 'react'
+import styled from 'styled-components'
 
+import { FillLevel, useFillLevel } from './contexts/FillLevelContext'
 import { TabBaseProps } from './TabList'
 
-type SubTabProps = TabBaseProps & DivProps & {
-  startIcon?: ReactNode
+type SubTabSize = 'small' | 'medium'
+type SubtabProps = TabBaseProps &
+  ComponentProps<'div'> & {
+    size?: SubTabSize
+  }
+
+const parentFillLevelToActiveBG: Record<FillLevel, string> = {
+  0: 'fill-zero-selected',
+  1: 'fill-one-selected',
+  2: 'fill-two-selected',
+  3: 'fill-three-selected',
 }
 
-const SubTab = forwardRef(({
-  startIcon, active, children, ...props
-}: SubTabProps, ref: Ref<any>) => {
-  const theme = useTheme()
+const SubTabBase = styled.div<{
+  size: SubTabSize
+  active: boolean
+  parentFillLevel: FillLevel
+}>(({
+  theme, active, size, parentFillLevel,
+}) => ({
+  ...(size === 'small'
+    ? theme.partials.text.buttonSmall
+    : theme.partials.text.buttonMedium),
+  tabIndex: 0,
+  userSelect: 'none',
+  cursor: 'pointer',
+  color: active ? theme.colors.text : theme.colors['text-xlight'],
+  backgroundColor: active
+    ? theme.colors[parentFillLevelToActiveBG[parentFillLevel]]
+    : 'transparent',
+  borderRadius: theme.borderRadiuses.medium,
+  focusVisible: {
+    zIndex: theme.zIndexes.base + 1,
+    ...theme.partials.focus.default,
+  },
+  padding: `${size === 'small' ? theme.spacing.xxsmall : theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+  align: 'center',
+  hover: {
+    backgroundColor:
+      parentFillLevel >= 2
+        ? theme.colors['fill-two-hover']
+        : theme.colors['fill-one-hover'],
+  },
+  transition:
+    'background-color 150ms ease, border-color 150ms ease, color 150ms ease',
+  '.codeTabInner': {},
+}))
+
+function SubTabRef({
+  active,
+  children,
+  textValue: _textValue,
+  size = 'medium',
+  ...props
+}: SubtabProps,
+ref: Ref<any>) {
+  const parentFillLevel = useFillLevel()
 
   return (
-    <Flex
+    <SubTabBase
+      parentFillLevel={parentFillLevel}
+      active={active}
       ref={ref}
-      buttonMedium
-      tabIndex={0}
-      userSelect="none"
-      cursor="pointer"
-      textAlign="center"
-      paddingVertical="xsmall"
-      paddingHorizontal="medium"
-      borderRadius="medium"
-      color={active ? 'text' : 'text-xlight'}
-      backgroundColor={active ? 'fill-zero-selected' : 'none'}
-      _hover={{
-        color: 'text',
-        backgroundColor: active ? 'fill-zero-selected' : 'action-input-hover',
-      }}
-      _focusVisible={{
-        ...theme.partials.focus.default,
-        zIndex: theme.zIndexes.base + 1,
-      }}
+      size={size}
       {...props}
     >
-      {!!startIcon && <Icon marginRight="small">{startIcon}</Icon>}
       {children}
-    </Flex>
+    </SubTabBase>
   )
-})
+}
 
+export const SubTab = forwardRef(SubTabRef)
 export default SubTab

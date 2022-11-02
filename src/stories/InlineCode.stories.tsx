@@ -55,7 +55,7 @@ const dummyText = (
     <InlineCode>q4q</InlineCode>
     <InlineCode>/regex/</InlineCode>
     <InlineCode>brew install stew</InlineCode>
-    <InlineCode>Plural.console.log('stuff')</InlineCode>. That is all.
+    <InlineCode>Plural.console.warn('stuff')</InlineCode>. That is all.
   </>
 )
 

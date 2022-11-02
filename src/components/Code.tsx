@@ -1,10 +1,17 @@
 import {
-  RefObject, forwardRef, useEffect, useState,
+  ComponentProps,
+  Key,
+  ReactNode,
+  RefObject,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
 } from 'react'
 import PropTypes from 'prop-types'
 import { Button, Div, Flex } from 'honorable'
-
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import CopyIcon from './icons/CopyIcon'
 import Card, { CardProps } from './Card'
@@ -17,12 +24,17 @@ import {
   useFillLevel,
 } from './contexts/FillLevelContext'
 import FileIcon from './icons/FileIcon'
+import { TabList, TabListStateProps } from './TabList'
+import { SubTab } from './SubTab'
+import TabPanel from './TabPanel'
 
 type CodeProps = Omit<CardProps, 'children'> & {
-  children: string
+  children?: string
   language?: string
   showLineNumbers?: boolean
   showHeader?: boolean
+  tabs?: CodeTabData[]
+  title?: ReactNode
 }
 
 const propTypes = {
@@ -46,7 +58,8 @@ const CodeHeader = styled(({ fillLevel, ...props }) => (
     fillLevel >= 1 ? theme.colors['fill-three'] : theme.colors['fill-two'],
   display: 'flex',
   alignItems: 'center',
-  gap: theme.spacing.xsmall,
+  justifyContent: 'space-between',
+  gap: theme.spacing.medium,
 }))
 
 function CopyButtonBase({
@@ -79,21 +92,69 @@ const CopyButton = styled(CopyButtonBase)<{ verticallyCenter: boolean }>(({ vert
   boxShadow: theme.boxShadows.slight,
 }))
 
-function CodeRef({
-  children, language, showLineNumbers, showHeader, ...props
-}: CodeProps,
-ref: RefObject<any>) {
-  const [copied, setCopied] = useState(false)
-  const [hover, setHover] = useState(false)
-  const fillLevel = useFillLevel()
+type CodeTabData = {
+  key: Key
+  label?: string
+  language?: string
+  content: string
+}
 
-  if (typeof children !== 'string') {
-    throw new Error('Code component expects a string as its children')
+const makeTabKey = (tab: Partial<CodeTabData>) => `${tab.label}-${tab.language}`
+
+function CodeTabs({
+  tabStateRef,
+  tabs,
+  selectedKey,
+  onSelectionChange,
+}: {
+  tabStateRef: RefObject<any>
+  tabs: CodeTabData[]
+  selectedKey: Key
+  onSelectionChange: (key: Key) => any
+}) {
+  const tabListStateProps: TabListStateProps = {
+    keyboardActivation: 'manual',
+    orientation: 'horizontal',
+    selectedKey,
+    onSelectionChange,
   }
 
-  showHeader = showHeader === undefined ? !!language : showHeader
-  const codeString = children.trim()
-  const multiLine = !!codeString.match(/\r?\n/) || props.height
+  return (
+    <TabList
+      stateRef={tabStateRef}
+      stateProps={tabListStateProps}
+    >
+      {tabs.map(tab => {
+        if (typeof tab.content !== 'string') {
+          throw new Error('Code component expects a string for tabs[].content')
+        }
+
+        return (
+          <SubTab
+            key={tab.key}
+            size="small"
+            textValue={tab.label || tab.language}
+          >
+            {tab.label || tab.language}
+          </SubTab>
+        )
+      })}
+    </TabList>
+  )
+}
+
+function CodeContent({
+  children,
+  hasSetHeight,
+  ...props
+}: ComponentProps<typeof Highlight> & { hasSetHeight: boolean }) {
+  const [copied, setCopied] = useState(false)
+  const codeString = children?.trim() || ''
+  const multiLine = !!codeString.match(/\r?\n/) || hasSetHeight
+  const handleCopy = useCallback(() => window.navigator.clipboard
+    .writeText(codeString)
+    .then(() => setCopied(true)),
+  [codeString])
 
   useEffect(() => {
     if (copied) {
@@ -103,14 +164,64 @@ ref: RefObject<any>) {
     }
   }, [copied])
 
-  const handleCopy = () => window.navigator.clipboard.writeText(codeString).then(() => setCopied(true))
+  if (typeof children !== 'string') {
+    throw new Error('Code component expects a string as its children')
+
+    return null
+  }
+
+  return (
+    <Div
+      height="100%"
+      overflow="auto"
+      alignItems="center"
+    >
+      <CopyButton
+        copied={copied}
+        handleCopy={handleCopy}
+        verticallyCenter={!multiLine}
+      />
+      <Div
+        paddingHorizontal="medium"
+        paddingVertical={multiLine ? 'medium' : 'small'}
+      >
+        <Highlight {...props}>{codeString}</Highlight>
+      </Div>
+    </Div>
+  )
+}
+
+function CodeRef({
+  children,
+  language,
+  showLineNumbers,
+  showHeader,
+  tabs,
+  title,
+  onSelectedTabChange,
+  ...props
+}: CodeProps,
+ref: RefObject<any>) {
+  const parentFillLevel = useFillLevel()
+  const tabStateRef = useRef()
+  const [selectedTabKey, setSelectedTabKey] = useState<Key>(makeTabKey((tabs && tabs[0]) || {}))
+  const theme = useTheme()
+
+  props.height = props.height || undefined
+  const hasSetHeight = !!props.height || !!props.minHeight
+
+  showHeader = tabs ? true : showHeader === undefined ? !!language : showHeader
 
   return (
     <Card
       ref={ref}
       overflow="hidden"
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
+      fillLevel={toFillLevel(Math.min(parentFillLevel + 1, 2))}
+      borderColor={
+        parentFillLevel >= 1
+          ? theme.colors['border-fill-three']
+          : theme.colors['border-fill-two']
+      }
       {...props}
     >
       <Flex
@@ -119,47 +230,82 @@ ref: RefObject<any>) {
         height="100%"
       >
         {showHeader && (
-          <CodeHeader fillLevel={fillLevel}>
-            <FileIcon />
-            <div>{language}</div>
-          </CodeHeader>
-        )}
-        <Div
-          position="relative"
-          height="100%"
-          overflow="hidden"
-        >
-          <Div
-            height="100%"
-            overflow="auto"
-            alignItems="center"
-          >
-            {hover && (
-              <CopyButton
-                copied={copied}
-                handleCopy={handleCopy}
-                verticallyCenter={!multiLine}
+          <CodeHeader fillLevel={parentFillLevel}>
+            {((tabs && title) || !tabs) && (
+              <Flex gap={theme.spacing.xsmall}>
+                <FileIcon />
+                {(title || language) && <div>{title || language}</div>}
+              </Flex>
+            )}
+            {tabs && (
+              <CodeTabs
+                tabs={tabs}
+                tabStateRef={tabStateRef}
+                selectedKey={selectedTabKey}
+                onSelectionChange={key => {
+                  setSelectedTabKey(key)
+                  if (onSelectedTabChange) onSelectedTabChange(key)
+                }}
               />
             )}
-            <Div
-              paddingHorizontal="medium"
-              paddingVertical={multiLine ? 'medium' : 'small'}
+          </CodeHeader>
+        )}
+        {tabs ? (
+          tabs.map(tab => (
+            <TabPanel
+              key={tab.key}
+              tabKey={tab.key}
+              mode="multipanel"
+              stateRef={tabStateRef}
+              as={(
+                <Div
+                  position="relative"
+                  height="100%"
+                  overflow="hidden"
+                />
+              )}
             >
-              <Highlight
+              <CodeContent
+                language={tab.language}
                 showLineNumbers={showLineNumbers}
-                language={language}
+                hasSetHeight={hasSetHeight}
               >
-                {codeString}
-              </Highlight>
-            </Div>
+                {tab.content}
+              </CodeContent>
+            </TabPanel>
+          ))
+        ) : (
+          <Div
+            position="relative"
+            height="100%"
+            overflow="hidden"
+          >
+            <CodeContent
+              language={language}
+              showLineNumbers={showLineNumbers}
+              hasSetHeight={hasSetHeight}
+            >
+              {children}
+            </CodeContent>
           </Div>
-        </Div>
+        )}
       </Flex>
     </Card>
   )
 }
 
-const Code = forwardRef(CodeRef)
+const Code = styled(forwardRef(CodeRef))(_ => ({
+  [CopyButton]: {
+    opacity: 0,
+    pointerEvents: 'none',
+    transition: 'opacity 0.2s ease',
+  },
+  [`&:hover ${CopyButton}`]: {
+    opacity: 1,
+    pointerEvents: 'auto',
+    transition: 'opacity 0.2s ease',
+  },
+}))
 
 Code.propTypes = propTypes
 
