@@ -32,6 +32,7 @@ import { LOG_FILTER_Q } from './graphql/plural'
 import { AnsiLine } from './utils/AnsiText'
 
 const POLL_INTERVAL = 10 * 1000
+const LIMIT = 1000
 
 const Level = {
   ERROR: 'e',
@@ -332,7 +333,7 @@ export default function Logs({ application: { name }, query }) {
   const [loader, setLoader] = useState(null)
 
   const { data, loading, fetchMore, refetch } = useQuery(LOGS_Q, {
-    variables: { query },
+    variables: { query, limit: LIMIT },
     pollInterval: live ? POLL_INTERVAL : 0,
   })
 

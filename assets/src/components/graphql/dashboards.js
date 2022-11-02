@@ -69,8 +69,8 @@ export const DASHBOARD_Q = gql`
 `
 
 export const LOGS_Q = gql`
-  query Logs($query: String!, $start: Long) {
-    logs(query: $query, start: $start, limit: 200) {
+  query Logs($query: String!, $start: Long, $limit: Int!) {
+    logs(query: $query, start: $start, limit: $limit) {
       ...LogStreamFragment
     }
   }
