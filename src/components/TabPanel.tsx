@@ -89,7 +89,6 @@ function WrappedTabPanel({
         : {}),
     }
   }
-  console.log('tabPanelProps', tabPanelProps)
 
   if (renderer) {
     return renderer(mergeProps(tabPanelProps, props), ref, state)

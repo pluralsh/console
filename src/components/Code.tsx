@@ -99,8 +99,6 @@ type CodeTabData = {
   content: string
 }
 
-const makeTabKey = (tab: Partial<CodeTabData>) => `${tab.label}-${tab.language}`
-
 function CodeTabs({
   tabStateRef,
   tabs,
@@ -204,7 +202,7 @@ function CodeRef({
 ref: RefObject<any>) {
   const parentFillLevel = useFillLevel()
   const tabStateRef = useRef()
-  const [selectedTabKey, setSelectedTabKey] = useState<Key>(makeTabKey((tabs && tabs[0]) || {}))
+  const [selectedTabKey, setSelectedTabKey] = useState<Key>((tabs && tabs[0]?.key) || '')
   const theme = useTheme()
 
   props.height = props.height || undefined
