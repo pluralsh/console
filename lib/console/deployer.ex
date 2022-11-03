@@ -138,7 +138,7 @@ defmodule Console.Deployer do
       {storage, :init, []},
       {Context, :merge, [conf, %Context.Bundle{repository: b["repository"], name: b["name"]}]},
       {Plural, :build, []},
-      {Plural, :install, []},
+      {Plural, :install, [b["repository"]]},
       {storage, :revise, [commit_message(message, b["repository"])]},
       {storage, :push, []}
     ], storage)
