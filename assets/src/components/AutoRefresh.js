@@ -10,7 +10,7 @@ import { LoginContext } from './Login'
 import { Icon } from './Console'
 
 const COMMIT_KEY = 'git-commit'
-const DOC_LINK = 'https://docs.plural.sh/getting-started/admin-console#2.-setup-for-git-authentication'
+const DOC_LINK = 'https://docs.plural.sh/basic-setup-and-deployment/admin-console#installation'
 
 const getCommit = () => localStorage.getItem(COMMIT_KEY) || 'example'
 const setCommit = sha => localStorage.setItem(COMMIT_KEY, sha)
