@@ -1,53 +1,114 @@
-import { ReactNode, Ref, forwardRef } from 'react'
 import {
-  Div, Flex, FlexProps, H1, P, Span, SpanProps,
+  ReactNode, Ref, forwardRef, useMemo,
+} from 'react'
+import {
+  Flex, FlexProps, Span, SpanProps,
 } from 'honorable'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
+import { ColorKey, Severity } from '../types'
+
 import { FillLevelProvider } from './contexts/FillLevelContext'
-import StatusOkIcon from './icons/StatusOkIcon'
 import ErrorIcon from './icons/ErrorIcon'
 import CloseIcon from './icons/CloseIcon'
+import InfoIcon from './icons/InfoIcon'
+import WarningIcon from './icons/WarningIcon'
+import CheckRoundedIcon from './icons/CheckRoundedIcon'
+import createIcon from './icons/createIcon'
+import IconFrame from './IconFrame'
 
-const BannerAction = styled(Span)`
-  margin-left: 12px;
-  &,
-  & a,
-  & a:any-link {
-    font-weight: 600;
-    color: ${({ theme }) => theme.colors['action-link-inline']};
-    text-decoration: none;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-`
+const SEVERITIES = ['info', 'error', 'warning', 'success', 'danger'] as const
+
+type BannerSeverity = Extract<Severity, typeof SEVERITIES[number]>
+const DEFAULT_SEVERITY: BannerSeverity = 'success'
 
 type BannerProps = FlexProps & {
-  severity?: 'success' | 'error' | 'info' | string
+  severity?: Severity
   heading?: ReactNode
   action?: ReactNode
   actionProps?: SpanProps
   onClose?: () => void
 }
 
-const propTypes = {
-  severity: PropTypes.oneOf(['success', 'error', 'info']),
-  onClose: PropTypes.func,
-}
-
-const severityToColor = {
-  success: 'icon-success',
+const severityToIconColorKey: Readonly<Record<BannerSeverity, ColorKey>> = {
+  info: 'icon-info',
   error: 'icon-danger',
-  info: 'text-primary-accent',
+  danger: 'icon-danger',
+  warning: 'icon-warning',
+  success: 'icon-success',
 }
 
-const severityToIcon = {
-  success: StatusOkIcon,
-  error: ErrorIcon,
-  info: ErrorIcon,
+const severityToBorderColorKey: Record<BannerSeverity, ColorKey> = {
+  info: 'border-info',
+  error: 'border-danger',
+  danger: 'border-danger',
+  warning: 'border-warning',
+  success: 'border-success',
 }
+
+const severityToIcon: Record<BannerSeverity, ReturnType<typeof createIcon>> = {
+  info: InfoIcon,
+  error: ErrorIcon,
+  danger: ErrorIcon,
+  warning: WarningIcon,
+  success: CheckRoundedIcon,
+}
+
+const BannerOuter = styled.div<{
+  $borderColorKey: ColorKey
+}>(({ $borderColorKey, theme }) => ({
+  display: 'inline-flex',
+  align: 'flex-start',
+  padding: theme.spacing.medium,
+  backgroundColor: theme.colors['fill-three'],
+  borderRadius: theme.borderRadiuses.medium,
+  borderTop: `4px solid ${theme.colors[$borderColorKey]}`,
+  maxWidth: 480,
+}))
+
+const BannerInner = styled.div(({ theme }) => ({
+  display: 'flex',
+  paddingTop: theme.spacing.xxsmall,
+  alignItems: 'flex-start',
+}))
+
+const IconWrap = styled.div(_ => ({
+  display: 'flex',
+  paddingTop: 2,
+  paddingBottom: 2,
+}))
+
+const Heading = styled.div<{ $bold: boolean }>(({ $bold, theme }) => ({
+  ...theme.partials.text.body1,
+  ...($bold ? theme.partials.text.bodyBold : {}),
+  color: theme.colors.text,
+}))
+
+const BannerAction = styled(Span)(({ theme }) => ({
+  marginLeft: theme.spacing.small,
+  '&, & a, & a:any-link': {
+    ...theme.partials.text.inlineLink,
+    ...theme.partials.text.bodyBold,
+  },
+}))
+
+const Content = styled.p<{ $hasHeading: boolean }>(({ $hasHeading: $heading, theme }) => ({
+  ...theme.partials.text.body2LooseLineHeight,
+  marginTop: $heading ? theme.spacing.xxsmall : theme.spacing.xxxsmall,
+  color: theme.colors['text-light'],
+  '& a, & a:any-link': {
+    ...theme.partials.text.inlineLink,
+  },
+}))
+
+const CloseButton = styled(IconFrame).attrs({
+  size: 'medium',
+  clickable: true,
+  icon: <CloseIcon />,
+})(({ theme }) => ({
+  marginLeft: theme.spacing.medium,
+}))
 
 function BannerRef({
   heading,
@@ -59,8 +120,19 @@ function BannerRef({
   ...props
 }: BannerProps,
 ref: Ref<any>) {
-  const BannerIcon = severityToIcon[severity] || severityToIcon.success
-  const color = severityToColor[severity] || severityToColor.success
+  severity = useMemo(() => {
+    if (!severityToIcon[severity]) {
+      console.warn(`Banner: Incorrect severity (${severity}) specified. Valid values are ${SEVERITIES.map(s => `"${s}"`).join(', ')}. Defaulting to "${DEFAULT_SEVERITY}".`)
+
+      return DEFAULT_SEVERITY
+    }
+
+    return severity
+  }, [severity])
+
+  const BannerIcon = severityToIcon[severity]
+  const iconColorKey = severityToIconColorKey[severity]
+  const borderColorKey = severityToBorderColorKey[severity]
 
   function handleClose() {
     if (typeof onClose === 'function') {
@@ -69,72 +141,46 @@ ref: Ref<any>) {
   }
 
   const content = (
-    <Flex
+    <BannerOuter
       ref={ref}
-      display="inline-flex"
-      align="flex-start"
-      padding="medium"
-      backgroundColor="fill-two"
-      borderRadius="medium"
-      borderTop={`4px solid ${color}`}
-      maxWidth={480}
+      $borderColorKey={borderColorKey}
+      as={Flex}
       {...props}
     >
-      <Flex
-        paddingTop="xxsmall"
-        alignItems="flex-start"
-      >
-        <Flex paddingVertical={2}>
+      <BannerInner>
+        <IconWrap>
           <BannerIcon
             size={20}
-            color={color}
+            color={iconColorKey}
             marginRight="medium"
           />
-        </Flex>
-        <Div>
+        </IconWrap>
+        <div>
           {heading && (
-            <H1 body1>
+            <Heading $bold={!!children}>
               {[
                 heading,
                 action && (
                   <BannerAction {...actionProps}>{action}</BannerAction>
                 ),
               ]}
-            </H1>
+            </Heading>
           )}
-          {children && (
-            <P
-              marginTop={heading ? 'xxsmall' : 'xxxsmall'}
-              body2LooseLineHeight
-              color="text-light"
-            >
-              {children}
-            </P>
-          )}
-        </Div>
-      </Flex>
-      <Flex
-        align="center"
-        justify="center"
-        flexShrink={0}
-        width={32}
-        height={32}
-        marginLeft="medium"
-        borderRadius="50%"
-        cursor="pointer"
-        _hover={{ backgroundColor: 'fill-two-hover' }}
-        onClick={handleClose}
-      >
-        <CloseIcon size={12} />
-      </Flex>
-    </Flex>
+          {children && <Content $hasHeading={!!heading}>{children}</Content>}
+        </div>
+      </BannerInner>
+      <CloseButton onClick={handleClose} />
+    </BannerOuter>
   )
 
-  return <FillLevelProvider value={2}>{content}</FillLevelProvider>
+  return <FillLevelProvider value={3}>{content}</FillLevelProvider>
 }
 
 const Banner = forwardRef(BannerRef)
 
-Banner.propTypes = propTypes
+Banner.propTypes = {
+  severity: PropTypes.oneOf(SEVERITIES),
+  onClose: PropTypes.func,
+}
 
 export default Banner

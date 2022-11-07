@@ -1,8 +1,8 @@
 import classNames from 'classnames'
-
-import { PropsWithChildren, forwardRef } from 'react'
-
-import styled, { DefaultTheme, useTheme } from 'styled-components'
+import PropTypes from 'prop-types'
+import { PropsWithChildren, forwardRef, useMemo } from 'react'
+import styled, { useTheme } from 'styled-components'
+import { ColorKey, Severity } from 'src/types'
 
 import {
   FillLevel,
@@ -17,26 +17,35 @@ import InfoIcon from './icons/InfoIcon'
 import StatusOkIcon from './icons/StatusOkIcon'
 import WarningIcon from './icons/WarningIcon'
 
-export type CalloutSeverity = 'info' | 'success' | 'warning' | 'danger'
+const SEVERITIES = ['info', 'danger', 'warning', 'success'] as const
+
+export type CalloutSeverity = Extract<Severity, typeof SEVERITIES[number]>
+const DEFAULT_SEVERITY: CalloutSeverity = 'info'
+
 export type CalloutSize = 'compact' | 'full'
 
-function styleToColor(theme: DefaultTheme): Record<CalloutSeverity, string> {
-  return {
-    info: theme.colors['text-primary-accent'],
-    success: theme.colors['text-success-light'],
-    warning: theme.colors['text-warning-light'],
-    danger: theme.colors['text-danger-light'],
-  }
+const severityToIconColorKey: Record<CalloutSeverity, ColorKey> = {
+  info: 'icon-info',
+  success: 'icon-success',
+  warning: 'icon-warning',
+  danger: 'icon-danger',
 }
 
-const styleToText: Record<CalloutSeverity, string> = {
+const severityToBorderColorKey: Record<CalloutSeverity, ColorKey> = {
+  info: 'border-info',
+  success: 'border-success',
+  warning: 'border-warning',
+  danger: 'border-danger',
+}
+
+const severityToText: Record<CalloutSeverity, string> = {
   info: 'Info',
   success: 'Success',
   warning: 'Warning',
   danger: 'Danger',
 }
 
-const styleToIcon: Record<CalloutSeverity, any> = {
+const severityToIcon: Record<CalloutSeverity, any> = {
   info: InfoIcon,
   success: StatusOkIcon,
   warning: WarningIcon,
@@ -68,7 +77,7 @@ export function CalloutButton(props: ButtonProps) {
 
 const Callout = forwardRef<HTMLDivElement, CalloutProps>(({
   title,
-  severity = 'info',
+  severity = DEFAULT_SEVERITY,
   size = 'full',
   fillLevel,
   className,
@@ -76,10 +85,21 @@ const Callout = forwardRef<HTMLDivElement, CalloutProps>(({
   children,
 },
 ref) => {
+  severity = useMemo(() => {
+    if (!severityToIconColorKey[severity]) {
+      console.warn(`Callout: Incorrect severity (${severity}) specified. Valid values are ${SEVERITIES.map(s => `"${s}"`).join(', ')}. Defaulting to "${DEFAULT_SEVERITY}".`)
+
+      return DEFAULT_SEVERITY
+    }
+
+    return severity
+  }, [severity])
   const theme = useTheme()
-  const text = styleToText[severity]
-  const color = styleToColor(theme)[severity]
-  const Icon = styleToIcon[severity]
+
+  const text = severityToText[severity]
+  const iconColor = theme.colors[severityToIconColorKey[severity]]
+  const borderColorKey = severityToBorderColorKey[severity]
+  const Icon = severityToIcon[severity]
   const parentFillLevel = useFillLevel()
 
   fillLevel = toFillLevel(Math.max(2,
@@ -97,16 +117,16 @@ ref) => {
     <FillLevelProvider value={fillLevel}>
       <CalloutWrap
         className={className}
-        color={color}
-        fillLevel={fillLevel}
-        size={size}
+        $borderColorKey={borderColorKey}
+        $fillLevel={fillLevel}
+        $size={size}
         ref={ref}
       >
         <div className="icon">
           <Icon
             marginTop={iconTopMargin}
             size={sizeToIconSize[size]}
-            color={color}
+            color={iconColor}
             display="flex"
           />
         </div>
@@ -128,24 +148,24 @@ ref) => {
 })
 
 const CalloutWrap = styled.div<{
-  color: string
-  size: CalloutSize
-  fillLevel: FillLevel
+  $borderColorKey: string
+  $size: CalloutSize
+  $fillLevel: FillLevel
 }>(({
-  theme, color, size, fillLevel,
+  theme, $size, $fillLevel, $borderColorKey,
 }) => ({
   position: 'relative',
   display: 'flex',
   gap: theme.spacing.small,
   padding:
-    size === 'compact'
+    $size === 'compact'
       ? `${theme.spacing.xsmall}px ${theme.spacing.medium}px`
       : `${theme.spacing.medium}px`,
   margin: 0,
   borderRadius: theme.borderRadiuses.medium,
   ...theme.partials.text.body2LooseLineHeight,
   backgroundColor:
-    fillLevel >= 3 ? theme.colors['fill-three'] : theme.colors['fill-two'],
+    $fillLevel >= 3 ? theme.colors['fill-three'] : theme.colors['fill-two'],
   color: theme.colors['text-light'],
   h6: {
     ...theme.partials.text.body1Bold,
@@ -163,7 +183,8 @@ const CalloutWrap = styled.div<{
   '.buttonArea': {
     display: 'flex',
     gap: theme.spacing.xsmall,
-    marginTop: size === 'compact' ? theme.spacing.xsmall : theme.spacing.medium,
+    marginTop:
+      $size === 'compact' ? theme.spacing.xsmall : theme.spacing.medium,
   },
   '&::before, &::after': {
     content: '""',
@@ -179,13 +200,13 @@ const CalloutWrap = styled.div<{
     borderBottomLeftRadius: theme.borderRadiuses.medium,
     right: 'unset',
     width: 3,
-    background: color,
+    background: theme.colors[$borderColorKey],
     zIndex: 2,
   },
   '&::after': {
     borderRadius: theme.borderRadiuses.medium,
     border:
-      fillLevel >= 3 ? theme.borders['fill-three'] : theme.borders['fill-two'],
+      $fillLevel >= 3 ? theme.borders['fill-three'] : theme.borders['fill-two'],
     content: '""',
     position: 'absolute',
     left: 0,
@@ -200,6 +221,17 @@ const CalloutWrap = styled.div<{
     width: 0,
     height: 0,
   },
+  '& a, & a:any-link': {
+    ...theme.partials.text.inlineLink,
+  },
 }))
+
+Callout.propTypes = {
+  severity: PropTypes.oneOf(SEVERITIES),
+  title: PropTypes.string,
+  size: PropTypes.oneOf(['compact', 'full']),
+  fillLevel: PropTypes.oneOf([0, 1, 2, 3]),
+  className: PropTypes.string,
+}
 
 export default Callout
