@@ -13,7 +13,7 @@ defmodule Console.Commands.Plural do
 
   def deploy(_repo \\ :ignore), do: plural("deploy", ["--silence"])
 
-  def install(), do: plural("deploy", ["--silence", "--ignore-console"])
+  def install(repo), do: plural("deploy", ["--silence", "--ignore-console", "--from", repo])
 
   def diff(_repo \\ :ignore), do: plural("diff", [])
 

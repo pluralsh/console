@@ -1,7 +1,7 @@
 defmodule Console.Deployer do
   use GenServer
   alias Console.Commands.{Plural, Command}
-  alias Console.Services.Builds
+  alias Console.Services.{Builds, Users}
   alias Console.Schema.Build
   alias Console.Plural.Context
   require Logger
@@ -138,7 +138,7 @@ defmodule Console.Deployer do
       {storage, :init, []},
       {Context, :merge, [conf, %Context.Bundle{repository: b["repository"], name: b["name"]}]},
       {Plural, :build, []},
-      {Plural, :install, []},
+      {Plural, :install, [b["repository"]]},
       {storage, :revise, [commit_message(message, b["repository"])]},
       {storage, :push, []}
     ], storage)
@@ -158,10 +158,16 @@ defmodule Console.Deployer do
 
   defp update(storage, repo, content, tool) do
     Command.set_build(nil)
+    bot = Users.get_bot!("console")
     with {:ok, _} <- storage.init(),
          {:ok, res} <- Console.Services.Plural.update_configuration(repo, content, tool),
          {:ok, _} <- storage.revise("updated configuration for #{tool} #{repo}"),
          {:ok, _} <- storage.push(),
+         {:ok, _} <- Builds.create(%{
+          type: :deploy,
+          repository: repo,
+          message: "redeploying after #{tool} update for #{repo}",
+        }, bot),
          _ <- broadcast(),
       do: {:ok, res}
   end
