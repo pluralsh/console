@@ -34,8 +34,8 @@ function ValidatedInputRef({
 } : ValidatedInputProps, ref: Ref<any>) {
   const [error, setError] = useState(null)
   const wrappedOnChange = useCallback((e: any) => {
-    if (e.target?.value && validation) setError(validation(e.target.value))
     if (onChange) onChange(e)
+    setError((validation && e.target?.value) ? validation(e.target.value) : undefined)
   }, [onChange, validation])
 
   const captionComp = caption || defaultCaption
