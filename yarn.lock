@@ -10945,9 +10945,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-storybook@npm:0.6.4":
-  version: 0.6.4
-  resolution: "eslint-plugin-storybook@npm:0.6.4"
+"eslint-plugin-storybook@npm:0.6.7":
+  version: 0.6.7
+  resolution: "eslint-plugin-storybook@npm:0.6.7"
   dependencies:
     "@storybook/csf": ^0.0.1
     "@typescript-eslint/experimental-utils": ^5.3.0
@@ -10955,7 +10955,7 @@ __metadata:
     ts-dedent: ^2.2.0
   peerDependencies:
     eslint: ">=6"
-  checksum: 9bc1befb50ed741ee27f0492ba5c8c6c3d8d54a8ac53bd6c2054046a2918829d80b0f0ff916abe10c7e01fb45d29ec284ff9d19d0ef35d7812367b4f708756a3
+  checksum: ca1af54acbe21708e3afe3f4a82523e6d9ade06e6c88ae980f7abaf56c894da7a9388812c3cd8109944fffeb029ed08e49bce5a661612b780f9604cd02eba337
   languageName: node
   linkType: hard
 
@@ -17040,7 +17040,7 @@ __metadata:
     chroma-js: 2.4.2
     classnames: 2.3.2
     eslint: 8.20.0
-    eslint-plugin-storybook: 0.6.4
+    eslint-plugin-storybook: 0.6.7
     fuse.js: 6.6.2
     grommet: 2.25.3
     highlight.js: 11.6.0
