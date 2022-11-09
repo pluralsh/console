@@ -7813,7 +7813,7 @@ __metadata:
     http-proxy-middleware: 2.0.6
     immer: 9.0.15
     js-file-download: 0.4.12
-    js-yaml: 3.14.0
+    js-yaml: 3.14.1
     jsonpath: 1.1.1
     kubernetes-resource-parser: 0.1.0
     lodash: 4.17.21
@@ -14046,19 +14046,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-yaml@npm:3.14.0":
-  version: 3.14.0
-  resolution: "js-yaml@npm:3.14.0"
-  dependencies:
-    argparse: ^1.0.7
-    esprima: ^4.0.0
-  bin:
-    js-yaml: bin/js-yaml.js
-  checksum: a1a47c912ba20956f96cb0998dea2e74c7f7129d831fe33d3c5a16f3f83712ce405172a8dd1c26bf2b3ad74b54016d432ff727928670ae5a50a57a677c387949
-  languageName: node
-  linkType: hard
-
-"js-yaml@npm:^3.13.1":
+"js-yaml@npm:3.14.1, js-yaml@npm:^3.13.1":
   version: 3.14.1
   resolution: "js-yaml@npm:3.14.1"
   dependencies:
