@@ -11,7 +11,7 @@ import Foco from 'react-foco'
 
 import { Next } from 'grommet-icons'
 
-import Sidebar, { SIDEBAR_ICON_HEIGHT } from './Sidebar'
+import ConsoleSidebar, { SIDEBAR_ICON_HEIGHT } from './Sidebar'
 import Builds from './Builds'
 import Build from './Build'
 import BreadcrumbProvider, { Breadcrumbs } from './Breadcrumbs'
@@ -42,7 +42,7 @@ import { Tooltip } from './utils/Tooltip'
 import { Notifications } from './users/Notifications'
 import { PodShell } from './terminal/PodShell'
 import { AutoRefresh } from './AutoRefresh'
-import { SocialLinks } from './Socials'
+import Apps from './Apps'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -268,7 +268,6 @@ export default function Console() {
                     align="center"
                   >
                     <AutoRefresh />
-                    <SocialLinks />
                     <Icon
                       icon={<Install size="18px" />}
                       text="Install"
@@ -286,7 +285,7 @@ export default function Console() {
                   fill
                   direction="row"
                 >
-                  <Sidebar />
+                  <ConsoleSidebar />
                   <Box
                     fill
                     direction="row"
@@ -421,8 +420,12 @@ export default function Console() {
                         component={PodShell}
                       />
                       <Route
-                        path="/"
+                        path="/builds"
                         component={Builds}
+                      />
+                      <Route
+                        path="/"
+                        component={Apps}
                       />
                     </Switch>
                     <FlyoutGutter />

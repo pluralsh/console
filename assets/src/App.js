@@ -25,8 +25,6 @@ const INTERCOM_APP_ID = 'p127zb9y'
 export default function App() {
   const mergedStyledTheme = mergeDeep(DEFAULT_THEME, styledTheme)
 
-  console.log(mergedStyledTheme)
-
   return (
     <ApolloProvider client={client}>
       <IntercomProvider appId={INTERCOM_APP_ID}>
