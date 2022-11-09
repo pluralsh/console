@@ -1,8 +1,13 @@
 import { Flex } from 'honorable'
+import { useTheme } from 'styled-components'
 
 import { Card, Code, WrapWithIf } from '..'
 
-import { goCode, jsCode, tfCode } from '../constants'
+import {
+  cCode,
+  elixirCode,
+  goCode, jsCode, rustCode, tfCode,
+} from '../constants'
 
 export default {
   title: 'Code',
@@ -129,7 +134,49 @@ function Template({ onFillLevel, ...args }: any) {
   )
 }
 
+const tabs = [
+  {
+    key: 'go',
+    label: 'Go',
+    language: 'golang',
+    content: goCode,
+  },
+  {
+    key: 'tf',
+    label: 'Terraform',
+    language: 'terraform',
+    content: tfCode,
+  },
+  {
+    key: 'js',
+    label: 'Javascript',
+    language: 'javascript',
+    content: "const oneLine = 'Just one line'",
+  },
+  {
+    key: 'elixir',
+    label: 'Elixir',
+    language: 'elixir',
+    content: elixirCode,
+  },
+  {
+    key: 'c',
+    label: 'C',
+    language: 'c',
+    content: cCode,
+  },
+  {
+    key: 'rust',
+    label: 'Rust',
+    language: 'rust',
+    content: rustCode,
+  },
+
+]
+
 function WithTabsTemplate({ onFillLevel, title, ...args }: any) {
+  const theme = useTheme()
+
   return (
     <WrapWithIf
       condition={onFillLevel > 0}
@@ -142,33 +189,43 @@ function WithTabsTemplate({ onFillLevel, title, ...args }: any) {
     >
       {' '}
       <Flex
-        direction="column"
-        gap="medium"
+        flexDirection="column"
+        gap={theme.spacing.xxlarge}
+        width="100%"
       >
-        <Code
-          title={title}
-          tabs={[
-            {
-              key: 'go',
-              label: 'Go',
-              language: 'golang',
-              content: goCode,
-            },
-            {
-              key: 'tf',
-              label: 'Terraform',
-              language: 'terraform',
-              content: tfCode,
-            },
-            {
-              key: 'js',
-              label: 'Javascript',
-              language: 'javascript',
-              content: "const oneLine = 'Just one line'",
-            },
-          ]}
-          {...args}
-        />
+        <Flex
+          direction="column"
+          gap="medium"
+        >
+          <Code
+            title={title}
+            tabs={tabs.slice(0, 3)}
+            {...args}
+          />
+        </Flex>
+
+        <Flex
+          direction="column"
+          gap="medium"
+        >
+          <Code
+            title={title}
+            tabs={tabs.slice(0, 3)}
+            {...args}
+          />
+        </Flex>
+
+        <Flex
+          direction="column"
+          gap="medium"
+        >
+          <Code
+            title={title}
+            tabs={tabs.slice(0, 6)}
+            {...args}
+          />
+        </Flex>
+
       </Flex>
     </WrapWithIf>
   )
@@ -182,7 +239,7 @@ Default.args = {
 }
 
 export const WithTabs = WithTabsTemplate.bind({})
-WithTabsTemplate.args = {
+WithTabs.args = {
   title: 'This is an optional title',
   showLineNumbers: true,
   showHeader: undefined,

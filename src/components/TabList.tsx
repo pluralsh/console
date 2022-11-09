@@ -5,6 +5,7 @@ import { TabListState, useTabListState } from '@react-stately/tabs'
 import { Node } from '@react-types/shared'
 import {
   Children,
+  ForwardedRef,
   HTMLAttributes,
   Key,
   MutableRefObject,
@@ -12,11 +13,14 @@ import {
   ReactNode,
   RefObject,
   cloneElement,
+  forwardRef,
   useEffect,
   useMemo,
   useRef,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
+
+import { mergeRefs } from '@react-aria/utils'
 
 import { useItemWrappedChildren } from './ListBox'
 
@@ -25,7 +29,7 @@ export type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> &
 
 export type Renderer = (
   props: HTMLAttributes<HTMLElement>,
-  ref: RefObject<any> | null | undefined,
+  ref: ForwardedRef<any>,
   state: TabListState<object> | null | undefined
 ) => JSX.Element
 
@@ -55,13 +59,10 @@ type TabListProps = {
   as?: ReactElement & { ref?: MutableRefObject<any> }
   children?: ChildrenType
 }
-function TabList({
-  stateRef,
-  stateProps,
-  renderer,
-  as,
-  ...props
-}: TabListProps & FlexProps) {
+function TabListRef({
+  stateRef, stateProps, renderer, as, ...props
+}: TabListProps & FlexProps,
+incomingRef: RefObject<HTMLElement>) {
   const wrappedChildren = useItemWrappedChildren(props.children)
   const finalStateProps: AriaTabListProps<object> = useMemo(() => ({
     ...{
@@ -89,6 +90,7 @@ function TabList({
   })
 
   const ref = useRef<HTMLDivElement>(null)
+  const mergedRef = mergeRefs(ref, incomingRef)
   const { tabListProps } = useTabList(finalStateProps, state, ref)
   const tabChildren = [...state.collection].map(item => (
     <TabRenderer
@@ -105,13 +107,13 @@ function TabList({
       ...tabListProps,
       ...as.props,
       ...{ children: tabChildren },
-      ref,
+      ref: mergedRef,
     })
   }
 
   if (renderer) {
     return renderer({ ...props, ...tabListProps, ...{ children: tabChildren } },
-      ref,
+      mergedRef,
       state)
   }
 
@@ -123,12 +125,14 @@ function TabList({
       alignItems={
         stateProps.orientation === 'vertical' ? 'flex-start' : 'flex-end'
       }
-      ref={ref}
+      ref={mergedRef as any}
     >
       {tabChildren}
     </Flex>
   )
 }
+
+const TabList = forwardRef(TabListRef)
 
 const TabClone = styled(({
   className, children, tabRef, ...props
@@ -164,7 +168,8 @@ function TabRenderer({
   const ref = useRef(null)
   const { tabProps: props } = useTab({ key: item.key }, state, ref)
 
-  props['aria-controls'] = props['aria-controls'] || props.id.replace('-tab-', '-tabpanel-')
+  props['aria-controls']
+    = props['aria-controls'] || props.id.replace('-tab-', '-tabpanel-')
 
   stateRef.current.tabProps = {
     ...stateRef.current.tabProps,
