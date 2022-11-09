@@ -2,7 +2,7 @@ import { semanticColors } from './colors'
 
 export const borderWidths = {
   default: 1,
-  focus: 1.5,
+  focus: 1,
 }
 
 export const borderStyles = {

@@ -11,20 +11,20 @@ export const grey = {
   750: '#383D47',
   725: '#3D424D',
   700: '#454954',
-  675: '#494E5A',
+  675: '#4C505C',
   600: '#5D626F',
   500: '#747B8B',
   400: '#A1A5B0',
   300: '#B2B7C3',
-  200: '#D6D9E0',
+  200: '#C5C9D3',
   100: '#DFE2E7',
   50: '#EBEFF0',
-}
+} as const
 
 export const purple = {
   950: '#020318',
   900: '#030530',
-  850: '#050848',
+  850: '#050847',
   800: '#070A5F',
   700: '#0A0F8F',
   600: '#0D14BF',
@@ -35,7 +35,7 @@ export const purple = {
   200: '#9FA3F9',
   100: '#CFD1FC',
   50: '#F1F1FE',
-}
+} as const
 
 export const blue = {
   950: '#001019',
@@ -51,7 +51,7 @@ export const blue = {
   200: '#99DAFF',
   100: '#C2E9FF',
   50: '#F0F9FF',
-}
+} as const
 
 export const green = {
   950: '#032117',
@@ -66,22 +66,22 @@ export const green = {
   200: '#99F5D5',
   100: '#C7FAE8',
   50: '#F1FEF9',
-}
+} as const
 
 export const yellow = {
   950: '#242000',
   900: '#3D2F00',
-  850: '#573B00',
-  800: '#755200',
-  700: '#A87E00',
-  600: '#D6AF00',
-  500: '#FFC800',
-  400: '#FFD129',
+  850: '#574500',
+  800: '#756200',
+  700: '#A88C00',
+  600: '#D6BA00',
+  500: '#FFE500',
+  400: '#FFEB33',
   300: '#FFF170',
   200: '#FFF59E',
   100: '#FFF9C2',
   50: '#FFFEF0',
-}
+} as const
 
 export const red = {
   950: '#130205',
@@ -91,17 +91,17 @@ export const red = {
   700: '#8B0E23',
   600: '#BA1239',
   500: '#E81748',
-  400: '#ED456A',
+  400: '#E95374',
   300: '#F2788D',
   200: '#F599A8',
   100: '#FAC7D0',
   50: '#FFF0F2',
-}
+} as const
 
 export const semanticColors = {
   // Fill
   'fill-zero': grey[900],
-  'fill-zero-hover': grey[850],
+  'fill-zero-hover': grey[875],
   'fill-zero-selected': grey[825],
   'fill-one': grey[850],
   'fill-one-hover': grey[825],
@@ -133,30 +133,32 @@ export const semanticColors = {
   'border-disabled': grey[700],
   'border-outline-focused': blue[300],
   'border-primary': purple[300],
+  'border-secondary': blue[400],
   'border-success': green[300],
   'border-warning': yellow[200],
   'border-danger': red[300],
   'border-selected': grey[100],
-  'border-secondary': blue[400],
   'border-info': blue[300],
   // Content
   text: grey[50],
   'text-light': grey[200],
   'text-xlight': grey[400],
-  'text-disabled': grey[700],
-  'text-primary-accent': blue[200],
+  'text-long-form': grey[300],
+  'text-disabled': grey[700], // deprecated
+  'text-input-disabled': grey[700],
+  'text-primary-accent': blue[200], // deprecated maybe?
   'text-primary-disabled': grey[500],
   'text-success': green[500],
   'text-success-light': green[200],
   'text-warning': yellow[400],
-  'text-warning-light': yellow[200],
+  'text-warning-light': yellow[100],
   'text-danger': red[400],
   'text-danger-light': red[200],
-  'text-long-form': grey[300],
   // Icon
   'icon-default': grey[100],
   'icon-light': grey[200],
   'icon-xlight': grey[400],
+  'icon-disabled': grey[700],
   'icon-primary': purple[300],
   'icon-secondary': blue[400],
   'icon-info': blue[200],
@@ -169,4 +171,7 @@ export const semanticColors = {
   'text-error': red[400],
   'text-error-light': red[200],
   'icon-error': red[200],
-}
+  // Marketing
+  'marketing-white': '#FFFFFF',
+  'marketing-black': '#000000',
+} as const

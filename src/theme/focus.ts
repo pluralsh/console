@@ -12,6 +12,9 @@ export const focusPartials = asElementTypes<CSSObject>()({
     outline: 'none',
     boxShadow: boxShadows.focused,
   },
+  outline: {
+    outline: `${borderWidths.focus}px solid ${semanticColors['border-outline-focused']}`,
+  },
   button: {
     outline: `1px solid ${semanticColors['border-outline-focused']}`,
     outlineOffset: '-1px',

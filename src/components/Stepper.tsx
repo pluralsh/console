@@ -14,6 +14,8 @@ import {
 import PropTypes from 'prop-types'
 import { mergeRefs } from '@react-aria/utils'
 
+import { useTheme } from 'styled-components'
+
 import useResizeObserver from '../hooks/useResizeObserver'
 
 import StatusOkIcon from './icons/StatusOkIcon'
@@ -71,6 +73,7 @@ function Step({
   collapseTitles = false,
   ...props
 }: StepProps) {
+  const theme = useTheme()
   const bounceEase = 'cubic-bezier(.37,1.4,.62,1)'
   const shownClassName = 'shown'
   const completeIconStyles = {
@@ -105,9 +108,9 @@ function Step({
           marginLeft={vertical ? 'none' : 'auto'}
           marginRight={vertical ? 'none' : 'auto'}
           borderRadius={1000}
-          backgroundColor="fill-one"
+          backgroundColor={theme.colors['fill-one']}
           border={`1px solid ${
-            isActive ? 'action-link-active' : 'border-fill-two'
+            isActive ? theme.colors['border-selected'] : theme.colors.border
           }`}
           transition="all 0.2s ease"
           transitionDelay="0.1"
@@ -124,7 +127,7 @@ function Step({
           >
             <IconComponent
               size={iconSize}
-              color={isActive ? 'action-link-active' : 'text-xlight'}
+              color={isActive ? theme.colors['icon-default'] : theme.colors['icon-xlight']}
             />
           </Flex>
           <Flex
@@ -137,7 +140,7 @@ function Step({
             {...completeIconStyles}
           >
             <StatusOkIcon
-              color="#17E86E"
+              color={theme.colors['icon-success']}
               size={24}
             />
           </Flex>
@@ -149,7 +152,7 @@ function Step({
           marginTop={vertical ? 'none' : 'small'}
           marginLeft={vertical ? 'small' : 'none'}
           textAlign={vertical ? 'left' : 'center'}
-          color={isActive ? 'text' : 'text-xlight'}
+          color={isActive ? theme.colors.text : theme.colors['text-xlight']}
           transition="all 0.2s ease"
           transitionDelay="0.1"
           flexShrink={vertical ? 1 : 0}
@@ -166,12 +169,14 @@ function StepConnection({
   vertical = false,
   ...props
 }: StepConnectionProps) {
+  const theme = useTheme()
+
   return (
     <Div
       width={vertical ? 1 : '100%'}
       height={vertical ? 30 : 1}
       flexGrow={1}
-      backgroundColor="border"
+      backgroundColor={theme.colors.border}
       position="relative"
       aria-hidden="true"
       {...props}
@@ -182,7 +187,7 @@ function StepConnection({
         position="absolute"
         left={0}
         top={0}
-        backgroundColor="text"
+        backgroundColor={theme.colors['border-selected']}
         transition="width 0.1s ease-out, height 0.1s ease-out"
       />
     </Div>

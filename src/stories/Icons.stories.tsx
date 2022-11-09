@@ -6,6 +6,26 @@ import * as icons from '../icons'
 export default {
   title: 'Icons',
   component: icons.MarketPlusIcon,
+  argTypes: {
+    color: {
+      options: [
+        'icon-default',
+        'icon-light',
+        'icon-xlight',
+        'icon-disabled',
+        'icon-primary',
+        'icon-secondary',
+        'icon-info',
+        'icon-success',
+        'icon-warning',
+        'icon-danger',
+        'icon-danger-critical',
+      ],
+      control: {
+        type: 'select',
+      },
+    },
+  },
 }
 
 const AppIcon = styled.div<{ $backgroundColor: string }>(({ theme, $backgroundColor = 'transparent' }) => ({
@@ -69,7 +89,7 @@ function Template({ backgroundColor, ...args }: any) {
 
 export const Default = Template.bind({})
 Default.args = {
-  color: 'text',
+  color: 'icon-default',
   size: 16,
   fullColor: false,
   backgroundColor: 'transparent',
@@ -77,7 +97,7 @@ Default.args = {
 
 export const Xlarge = Template.bind({})
 Xlarge.args = {
-  color: 'text',
+  color: 'icon-default',
   size: 32,
   fullColor: false,
   backgroundColor: 'transparent',
@@ -85,7 +105,7 @@ Xlarge.args = {
 
 export const Large = Template.bind({})
 Large.args = {
-  color: 'text',
+  color: 'icon-default',
   size: 24,
   fullColor: false,
   backgroundColor: 'transparent',
@@ -93,7 +113,7 @@ Large.args = {
 
 export const Small = Template.bind({})
 Small.args = {
-  color: 'text',
+  color: 'icon-default',
   size: 12,
   fullColor: false,
   backgroundColor: 'transparent',
@@ -101,7 +121,7 @@ Small.args = {
 
 export const Color = Template.bind({})
 Color.args = {
-  color: 'action-primary',
+  color: 'icon-primary',
   fullColor: false,
   size: 16,
   backgroundColor: 'transparent',
@@ -109,7 +129,7 @@ Color.args = {
 
 export const FullColor = Template.bind({})
 FullColor.args = {
-  color: 'text',
+  color: 'icon-default',
   fullColor: true,
   size: 32,
   backgroundColor: 'transparent',
