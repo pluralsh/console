@@ -1,6 +1,6 @@
 {
   "name": "pluralsh-design-system",
-  "version": "1.252.0",
+  "version": "1.253.0",
   "description": "Pluralsh Design System",
   "main": "dist/index.js",
   "files": [
@@ -83,7 +83,7 @@
     "react-dom": "18.2.0",
     "react-router-dom": "6.3.0",
     "react-scripts": "5.0.1",
-    "react-transition-group": "4.4.2",
+    "react-transition-group": "4.4.5",
     "rimraf": "3.0.2",
     "styled-components": "5.3.5",
     "typescript": "4.7.4"
