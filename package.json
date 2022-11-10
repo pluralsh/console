@@ -1,6 +1,6 @@
 {
   "name": "pluralsh-design-system",
-  "version": "1.262.0",
+  "version": "1.263.0",
   "description": "Pluralsh Design System",
   "main": "dist/index.js",
   "files": [
@@ -74,7 +74,8 @@
     "@typescript-eslint/eslint-plugin": "5.36.2",
     "@typescript-eslint/parser": "5.36.2",
     "babel-loader": "8.3.0",
-    "eslint": "8.20.0",
+    "eslint": "8.27.0",
+    "eslint-plugin-import": "2.26.0",
     "eslint-plugin-storybook": "0.6.7",
     "fuse.js": "6.6.2",
     "honorable": "0.144.0",
