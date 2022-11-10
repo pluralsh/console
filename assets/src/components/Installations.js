@@ -9,13 +9,11 @@ import {
   Box,
   Layer,
   Text,
-  TextInput,
   ThemeContext,
 } from 'grommet'
-import { Checkmark, CircleInformation } from 'grommet-icons'
+import { CircleInformation } from 'grommet-icons'
 import {
   Links,
-  Explore as Search,
   TabContent,
   TabHeader,
   TabHeaderItem,
@@ -29,76 +27,11 @@ import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
 import { ApplicationReadyIcon } from './Application'
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { CostBreakdown } from './repos/CostAnalysis'
-import { FlyoutContainer, Icon } from './Console'
+import { Icon } from './Console'
 import { ModalHeader } from './utils/Modal'
 import { OIDCProvider } from './oidc/OIDCProvider'
 
 export const InstallationContext = React.createContext({})
-
-function Installation({ application, setCurrentApplication, current: { name } }) {
-  const { name: appname, spec: { descriptor } } = application
-
-  return (
-    <Box
-      direction="row"
-      align="center"
-      gap="small"
-      pad="small"
-      focusIndicator={false}
-      onClick={() => setCurrentApplication(application)}
-      hoverIndicator="hover"
-    >
-      <ApplicationReadyIcon
-        application={application}
-        showIcon
-        dark
-      />
-      {descriptor.icons.length > 0 && (
-        <ApplicationIcon
-          application={application}
-          size="40px"
-          dark
-        />
-      )}
-      <Box fill="horizontal">
-        <Box
-          direction="row"
-          align="center"
-          gap="xsmall"
-        >
-          <Text
-            size="small"
-            weight={500}
-          >{appname}
-          </Text>
-          <Box
-            round="xsmall"
-            background="card"
-            pad={{ horizontal: '3px', vertical: '2px' }}
-          >
-            <Text size="12px">{descriptor.version}</Text>
-          </Box>
-        </Box>
-        <Text
-          size="small"
-          color="dark-3"
-        >{descriptor.description}
-        </Text>
-      </Box>
-      <Box
-        pad="small"
-        flex={false}
-      >
-        {name === appname ? (
-          <Checkmark
-            size="18px"
-            color="brand"
-          />
-        ) : null}
-      </Box>
-    </Box>
-  )
-}
 
 export function ApplicationIcon({ application: { spec: { descriptor: { icons } } }, size }) {
   const { dark } = useContext(ThemeContext)
@@ -114,42 +47,6 @@ export function ApplicationIcon({ application: { spec: { descriptor: { icons } }
 }
 
 export const hasIcon = ({ spec: { descriptor: { icons } } }) => icons.length > 0
-
-export function InstallationsFlyout() {
-  const {
-    applications, setCurrentApplication, currentApplication, setOpen,
-  } = useContext(InstallationContext)
-  const [q, setQ] = useState(null)
-
-  return (
-    <FlyoutContainer
-      header="Applications"
-      close={() => setOpen(false)}
-    >
-      <Box flex={false}>
-        <Box fill="horizontal">
-          <TextInput
-            plain
-            icon={<Search size="15px" />}
-            value={q || ''}
-            placeholder="search for an application"
-            onChange={({ target: { value } }) => setQ(value)}
-          />
-        </Box>
-        {applications
-          .filter(application => !q || application.name.startsWith(q))
-          .map(application => (
-            <Installation
-              key={application.name}
-              application={application}
-              current={currentApplication}
-              setCurrentApplication={setCurrentApplication}
-            />
-          ))}
-      </Box>
-    </FlyoutContainer>
-  )
-}
 
 export function ToolbarItem({ children, onClick, open }) {
   return (
@@ -382,7 +279,6 @@ export function Installations() {
         </ToolbarItem>
       </Box>
       {modal && <ApplicationDetail close={() => setModal(false)} />}
-      {open && <InstallationsFlyout />}
     </>
   )
 }
