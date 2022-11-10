@@ -7842,7 +7842,7 @@ __metadata:
     react-foco: 1.3.1
     react-highlight.js: 1.0.7
     react-lazylog: 4.5.3
-    react-live-clock: 6.0.4
+    react-live-clock: 6.0.7
     react-portal: 4.2.2
     react-pulse-dot: 2.0.0
     react-router: 5.1.2
@@ -18331,15 +18331,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-live-clock@npm:6.0.4":
-  version: 6.0.4
-  resolution: "react-live-clock@npm:6.0.4"
+"react-live-clock@npm:6.0.7":
+  version: 6.0.7
+  resolution: "react-live-clock@npm:6.0.7"
   peerDependencies:
     moment: ^2.29.1
     moment-timezone: ^0.5.33
     react: ^16.14.0 || ^17 || ^18
     react-moment: 1.1.2
-  checksum: 7d02a3d4ac33255b8a848d3ecc6a379e9f82bd96314e6bf48d2d079bc57c1722b23783d6979e90f916291dc1369fb2078ab09fe06be19765c8ceb82dca19ed07
+  checksum: 896ea6aa7bc12c85632dfa9cb327f9e7148092d2d640a5d7d04c1fd4074f6b2714e18266eeb0bd2769ccccbdc0eabbdae0bff305d2631506160fca2a40e617a1
   languageName: node
   linkType: hard
 
