@@ -3709,23 +3709,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-aria/tabs@npm:3.3.1":
-  version: 3.3.1
-  resolution: "@react-aria/tabs@npm:3.3.1"
+"@react-aria/tabs@npm:3.3.2":
+  version: 3.3.2
+  resolution: "@react-aria/tabs@npm:3.3.2"
   dependencies:
     "@babel/runtime": ^7.6.2
-    "@react-aria/focus": ^3.8.0
-    "@react-aria/i18n": ^3.6.0
-    "@react-aria/interactions": ^3.11.0
-    "@react-aria/selection": ^3.10.1
-    "@react-aria/utils": ^3.13.3
-    "@react-stately/list": ^3.5.3
-    "@react-stately/tabs": ^3.2.1
-    "@react-types/shared": ^3.14.1
-    "@react-types/tabs": ^3.1.3
+    "@react-aria/focus": ^3.9.0
+    "@react-aria/i18n": ^3.6.1
+    "@react-aria/interactions": ^3.12.0
+    "@react-aria/selection": ^3.11.0
+    "@react-aria/utils": ^3.14.0
+    "@react-stately/list": ^3.5.4
+    "@react-stately/tabs": ^3.2.2
+    "@react-types/shared": ^3.15.0
+    "@react-types/tabs": ^3.1.4
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: 71cb064187c48b619e68455c244e9d24b4c58bf7055d7a6bec0c8f72d18beca212b4aaab43656aa5d8c86a9c95028effda59476f0e26fae3c6b8158c64d57b32
+  checksum: f59f8c0084284af0817fda0b28555e9b94e6e56ad9ff847a8e24bf6c363a467d3e58f0de384b0fc80a80b8dbcf9b90d883a6792fc55e8f7e974bc73d346618d9
   languageName: node
   linkType: hard
 
@@ -4206,7 +4206,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-stately/tabs@npm:3.2.1, @react-stately/tabs@npm:^3.2.1":
+"@react-stately/tabs@npm:3.2.1":
   version: 3.2.1
   resolution: "@react-stately/tabs@npm:3.2.1"
   dependencies:
@@ -4217,6 +4217,20 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
   checksum: 593d4ea004ed89156ebf6e2eea401d30e4b06e9eae0f83752550bc5d3d776008577ba0e6baca9791c2e1c0af0f15881a8f95f18923132af08de172cecf097d20
+  languageName: node
+  linkType: hard
+
+"@react-stately/tabs@npm:^3.2.2":
+  version: 3.2.2
+  resolution: "@react-stately/tabs@npm:3.2.2"
+  dependencies:
+    "@babel/runtime": ^7.6.2
+    "@react-stately/list": ^3.5.4
+    "@react-stately/utils": ^3.5.1
+    "@react-types/tabs": ^3.1.4
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: d8840a59eaac28f4c3e1fd86f6119d94c8f31448dfd306224573ae47433334cf4d8e0ce486199fc9a1edbaab068fe962d55b81b53dad49b8dda2eb36f5ab23db
   languageName: node
   linkType: hard
 
@@ -4512,6 +4526,17 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
   checksum: 04a95bfb92d2fe44900135bbdd1d256622c51fc90ebecc3374d29eb69bbb77ec13156d39b9fe1806e66b726cf5bbe9ff64822e04e5f3bcacd2429e27c3c260e1
+  languageName: node
+  linkType: hard
+
+"@react-types/tabs@npm:^3.1.4":
+  version: 3.1.4
+  resolution: "@react-types/tabs@npm:3.1.4"
+  dependencies:
+    "@react-types/shared": ^3.15.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: 02f184287e65ccc1ce091b0274116bb3d3b2d4ee973c062e200febd0ad249098fd78d32c21f0afbd07cbc040bfcd72bd1b6b0621a14076cda68dadae06090a0b
   languageName: node
   linkType: hard
 
@@ -17443,7 +17468,7 @@ __metadata:
     "@react-aria/overlays": 3.10.1
     "@react-aria/radio": 3.4.0
     "@react-aria/select": 3.8.2
-    "@react-aria/tabs": 3.3.1
+    "@react-aria/tabs": 3.3.2
     "@react-aria/utils": 3.13.3
     "@react-aria/visually-hidden": 3.5.0
     "@react-stately/collections": 3.4.3
