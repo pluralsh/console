@@ -1,5 +1,9 @@
 name: CI
-on: pull_request
+on:
+  pull_request:
+    branches:
+      - main
+
 jobs:
   version:
     name: Check version
@@ -48,7 +52,7 @@ jobs:
       - run: yarn lint
   preview:
     name: Create preview
-    if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
+    if: ${{ github.triggering_actor != 'plural-renovate[bot]' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
