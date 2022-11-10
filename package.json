@@ -1,6 +1,6 @@
 {
   "name": "pluralsh-design-system",
-  "version": "1.268.0",
+  "version": "1.269.0",
   "description": "Pluralsh Design System",
   "main": "dist/index.js",
   "files": [
@@ -47,7 +47,7 @@
     "react-animate-height": "3.0.4",
     "react-markdown": "8.0.3",
     "react-merge-refs": "2.0.1",
-    "react-spring": "9.5.2",
+    "react-spring": "9.5.5",
     "rehype-raw": "6.1.1",
     "resize-observer-polyfill": "1.5.1"
   },
