@@ -20,7 +20,8 @@
     {
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["patch", "pin", "digest"],
-      "automerge": true
+      "automerge": true,
+      "platformAutomerge": true
     },
     {
       "matchManagers": ["npm"],
@@ -28,7 +29,8 @@
         "devDependencies"
       ],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "automerge": true
+      "automerge": true,
+      "platformAutomerge": true
     },
     {
       "matchManagers": ["npm"],
