@@ -19,7 +19,7 @@ import Highlight from 'react-highlight.js'
 import { fetchToken, wipeToken } from '../../helpers/auth'
 import { LoginContext } from '../Login'
 import { SectionContentContainer, SectionPortal } from '../utils/Section'
-import { SIDEBAR_ICON_HEIGHT } from '../Sidebar'
+import { SIDEBAR_ICON_HEIGHT } from '../ConsoleSidebar'
 import { ModalHeader } from '../utils/Modal'
 import { localized } from '../../helpers/hostname'
 

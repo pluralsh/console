@@ -1,46 +1,18 @@
-import { AppsIcon, DiscordIcon, DocumentIcon, GitHubLogoIcon, ListIcon, PeopleIcon, ServersIcon,
-  Sidebar, SidebarItem, SidebarSection, SirenIcon } from 'pluralsh-design-system'
+import {
+  AppsIcon, Avatar, DiscordIcon, DocumentIcon, GitHubLogoIcon, ListIcon,
+  PeopleIcon, ServersIcon, Sidebar, SidebarItem, SidebarSection, SirenIcon,
+} from 'pluralsh-design-system'
 
 import { Builds } from 'forge-core'
 import { useHistory, useLocation } from 'react-router'
 
+import { useContext } from 'react'
+
+import { Flex } from 'honorable'
+
+import { LoginContext } from './Login'
+
 export const SIDEBAR_ICON_HEIGHT = '42px'
-
-// function Me({ expanded }) {
-//   const history = useHistory()
-//   const { me } = useContext(LoginContext)
-//   if (!me) return null
-
-//   return (
-//     <Box
-//       flex={false}
-//       direction="row"
-//       gap="xsmall"
-//       align="center"
-//       pad="xsmall"
-//       hoverIndicator="sidebarHover"
-//       round="3px"
-//       justify={expanded ? null : 'center'}
-//       onClick={() => history.push('/me/edit')}
-//     >
-//       <Avatar
-//         user={me}
-//         size={expanded ? '45px' : '35px'}
-//       />
-//       {expanded && (
-//         <Box>
-//           <Text
-//             size="small"
-//             color="light-5"
-//             truncate
-//           >{me.name}
-//           </Text>
-//           <Text size="small">{me.email}</Text>
-//         </Box>
-//       )}
-//     </Box>
-//   )
-// }
 
 const MENU_ITEMS = [
   { text: 'Apps', icon: <AppsIcon />, path: '/' },
@@ -67,9 +39,12 @@ const MENU_ITEMS = [
 // const replace = (path, name) => path.replace('{repo}', name)
 
 export default function ConsoleSidebar() {
+  const { me } = useContext(LoginContext)
   const history = useHistory()
   const { pathname } = useLocation()
   const active = ({ path }) => path === '/' ? pathname === path : pathname.startsWith(path)
+  
+  if (!me) return null
 
   // const { currentApplication } = useContext(InstallationContext)
   // const { configuration: conf } = useContext(LoginContext)
@@ -91,8 +66,7 @@ export default function ConsoleSidebar() {
           </SidebarItem>
         )
         )}
-      </SidebarSection>
-      <SidebarSection>
+        <Flex grow={1} />
         <SidebarItem
           clickable
           tooltip="Discord"
@@ -114,11 +88,20 @@ export default function ConsoleSidebar() {
         >
           <DocumentIcon />
         </SidebarItem>
+        <SidebarItem
+          clickable
+          onClick={() => history.push('/me/edit')}
+        >
+          <Avatar
+            name={me.name}
+            size={32}
+          />
+          {/* TODO: Switch to app icon component to make it gray? */}
+        </SidebarItem>
       </SidebarSection>
     </Sidebar>
     //       {OPTIONS.map(({ text, icon, path, name: sbName, git }, ind) => {
     //         if (git && !conf.gitStatus.cloned) return null
     //       })}
-    //     <Me expanded={isExpanded} />
   )
 }

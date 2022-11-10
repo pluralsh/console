@@ -11,7 +11,7 @@ import Foco from 'react-foco'
 
 import { Next } from 'grommet-icons'
 
-import ConsoleSidebar, { SIDEBAR_ICON_HEIGHT } from './Sidebar'
+import ConsoleSidebar, { SIDEBAR_ICON_HEIGHT } from './ConsoleSidebar'
 import Builds from './Builds'
 import Build from './Build'
 import BreadcrumbProvider, { Breadcrumbs } from './Breadcrumbs'

@@ -16,7 +16,7 @@ import { SectionContentContainer, SectionPortal } from '../utils/Section'
 
 import { LoopingLogo } from '../utils/AnimatedLogo'
 
-import { SIDEBAR_ICON_HEIGHT } from '../Sidebar'
+import { SIDEBAR_ICON_HEIGHT } from '../ConsoleSidebar'
 
 import { WebhookManagement } from '../Webhooks'
 
