@@ -7819,7 +7819,7 @@ __metadata:
     lodash: 4.17.21
     moment: 2.29.4
     moment-duration-format: 2.3.2
-    phoenix: 1.5.13
+    phoenix: 1.5.14
     query-string: 7.1.1
     rc-progress: 3.1.4
     react: 16.14.0
@@ -16569,10 +16569,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"phoenix@npm:1.5.13":
-  version: 1.5.13
-  resolution: "phoenix@npm:1.5.13"
-  checksum: de1ce32da3bda100a617b7c15917fc47f14240aee0ce15b38c18a88988bbc855295b5be9cb8ff0c551a4790e1e92f45aa64253acf05146c224088fe285ee8c2a
+"phoenix@npm:1.5.14":
+  version: 1.5.14
+  resolution: "phoenix@npm:1.5.14"
+  checksum: 4249564487f821884505cab6f2f31505407094c2d45f9bd69c29c53192bab9d74e609a0316fc2d31064ee4cb2b03c1e1421c944a704a3d8420ffaabc1c4de84c
   languageName: node
   linkType: hard
 
