@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Box, Text } from 'grommet'
-import { TabContent, TabHeader, TabHeaderItem, Tabs } from 'forge-core'
+import {
+  TabContent,
+  TabHeader,
+  TabHeaderItem,
+  Tabs,
+} from 'forge-core'
 import { useQuery } from 'react-apollo'
 
 import { useParams } from 'react-router'

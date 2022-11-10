@@ -20,7 +20,9 @@ function SubTab({ name, enabled, onClick }) {
   )
 }
 
-export function SidebarTab({ tab, subtab, setTab, setSubTab, name, subnames }) {
+export function SidebarTab({
+  tab, subtab, setTab, setSubTab, name, subnames,
+}) {
   const [open, setOpen] = useState(tab === name)
   const select = useCallback(() => {
     setTab(tab)
@@ -35,7 +37,7 @@ export function SidebarTab({ tab, subtab, setTab, setSubTab, name, subnames }) {
         align="center"
         pad="small"
         hoverIndicator="card"
-        gap="small" 
+        gap="small"
         border={{ side: 'bottom' }}
         onClick={select}
         focusIndicator={false}
@@ -57,10 +59,10 @@ export function SidebarTab({ tab, subtab, setTab, setSubTab, name, subnames }) {
       >
         <Box animation="slideDown">
           {subnames.map(name => (
-            <SubTab 
-              key={name} 
-              name={name} 
-              enabled={name === subtab} 
+            <SubTab
+              key={name}
+              name={name}
+              enabled={name === subtab}
               onClick={() => setSubTab(name)}
             />
           ))}

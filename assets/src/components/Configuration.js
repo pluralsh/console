@@ -1,4 +1,10 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from 'react-apollo'
 
@@ -25,7 +31,12 @@ import { BUILD_PADDING } from './Builds'
 
 import 'ace-builds/src-noconflict/mode-yaml'
 import 'ace-builds/src-noconflict/theme-terminal'
-import { ApplicationIcon, InstallationContext, hasIcon, useEnsureCurrent } from './Installations'
+import {
+  ApplicationIcon,
+  InstallationContext,
+  hasIcon,
+  useEnsureCurrent,
+} from './Installations'
 import { TabHeader } from './utils/TabSelector'
 import { LoopingLogo } from './utils/AnimatedLogo'
 
@@ -77,7 +88,9 @@ const INPUT_COMPONENTS = {
   enum: SelectInput,
 }
 
-export function OverlayInput({ overlay, ctx, setCtx, values }) {
+export function OverlayInput({
+  overlay, ctx, setCtx, values,
+}) {
   const { name } = overlay.spec
   const setValue = useCallback(val => {
     setCtx({ ...ctx, [name]: convertType(val, overlay.spec.inputType) })
@@ -86,8 +99,9 @@ export function OverlayInput({ overlay, ctx, setCtx, values }) {
   useEffect(() => {
     const update = overlay.spec.updates[0].path
     const val = deepFetch(values, update)
+
     if (val && !ctx[name]) {
-      setValue(val) 
+      setValue(val)
     }
   }, [ctx])
 
@@ -110,6 +124,7 @@ function organizeOverlays(overlays) {
     const folder = overlay.spec.folder || 'general'
     const sf = overlay.spec.subfolder || 'all'
     const subfolders = acc[folder] || {}
+
     subfolders[sf] = [overlay, ...(subfolders[sf] || [])]
     acc[folder] = subfolders
 
@@ -117,7 +132,9 @@ function organizeOverlays(overlays) {
   }, {})
 }
 
-function OverlayEdit({ overlays, ctx, setCtx, helm }) {
+function OverlayEdit({
+  overlays, ctx, setCtx, helm,
+}) {
   const values = useMemo(() => yaml.load(helm), [helm])
   const folders = useMemo(() => organizeOverlays(overlays), [overlays])
   const [folder, setFolder] = useState(Object.keys(folders)[0])
@@ -126,6 +143,7 @@ function OverlayEdit({ overlays, ctx, setCtx, helm }) {
   useEffect(() => {
     if (!folders[folder]) {
       const f = Object.keys(folders)[0]
+
       setFolder(f)
       setSubfolder(Object.keys(folders[f] || ['all'])[0])
     }
@@ -141,12 +159,12 @@ function OverlayEdit({ overlays, ctx, setCtx, helm }) {
       <Box
         flex={false}
         fill="vertical"
-        style={{ overflow: 'auto', minWidth: '150px' }} 
+        style={{ overflow: 'auto', minWidth: '150px' }}
         border={{ side: 'right' }}
       >
         <Box flex={false}>
           {Object.keys(folders).map((f, i) => (
-            <SidebarTab 
+            <SidebarTab
               tab={folder}
               subtab={subfolder}
               setTab={setFolder}
@@ -207,6 +225,7 @@ export function EditConfiguration({ onCompleted, overlays, application: { name, 
     setConfig(type === ConfigType.HELM ? helm : terraform)
     setType(type)
   }, [setConfig, setType])
+
   useEffect(() => {
     if (!hasOverlays) setType(ConfigType.HELM)
     setConfig(helm)
@@ -256,9 +275,9 @@ export function EditConfiguration({ onCompleted, overlays, application: { name, 
             </Box>
             <Box direction="row">
               {hasOverlays > 0 && (
-                <TabHeader 
-                  selected={type === ConfigType.OVERLAY} 
-                  text="Configure" 
+                <TabHeader
+                  selected={type === ConfigType.OVERLAY}
+                  text="Configure"
                   onClick={() => setType(ConfigType.OVERLAY)}
                 />
               )}
@@ -275,18 +294,18 @@ export function EditConfiguration({ onCompleted, overlays, application: { name, 
             </Box>
           </Box>
           <Box flex={false}>
-            <Button 
-              flat 
-              label="Commit" 
-              onClick={type === ConfigType.OVERLAY ? oMutation : mutation} 
-              background="brand" 
+            <Button
+              flat
+              label="Commit"
+              onClick={type === ConfigType.OVERLAY ? oMutation : mutation}
+              background="brand"
               loading={type === ConfigType.OVERLAY ? oLoading : loading}
             />
           </Box>
         </Box>
       </Box>
       {type === ConfigType.OVERLAY && (
-        <OverlayEdit 
+        <OverlayEdit
           overlays={overlays}
           ctx={ctx}
           setCtx={setCtx}
@@ -371,7 +390,7 @@ export default function Configuration() {
     fetchPolicy: 'cache-and-network',
   })
   const onCompleted = useCallback(() => {
-    history.push('/') 
+    history.push('/')
   }, [history])
 
   useEffect(() => {
@@ -397,8 +416,8 @@ export default function Configuration() {
   }
 
   return (
-    <EditConfiguration 
-      application={data.application} 
+    <EditConfiguration
+      application={data.application}
       overlays={data.configurationOverlays.map(({ metadata, ...rest }) => {
         const labels = metadata.labels.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {})
 

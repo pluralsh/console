@@ -47,14 +47,16 @@ function ThemeOption({ name, theme }) {
 }
 
 const filterThemes = value => Object.entries(normalizedThemes)
-    .filter(([key]) => key.includes(value))
-    .map(([key, theme]) => (
-      { value: key,
-        label: <ThemeOption
-          name={key}
-          theme={theme}
-        /> }
-    ))
+  .filter(([key]) => key.includes(value))
+  .map(([key, theme]) => (
+    {
+      value: key,
+      label: <ThemeOption
+        name={key}
+        theme={theme}
+      />,
+    }
+  ))
 
 export function ThemeSelector({ theme }) {
   const [value, setValue] = useState(theme)

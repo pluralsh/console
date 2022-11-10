@@ -11,6 +11,7 @@ export const BreadcrumbsContext = React.createContext({
 
 function CrumbLink({ crumb: { url, text, disable } }) {
   const history = useHistory()
+
   if (disable) {
     return (
       <Text
@@ -77,6 +78,7 @@ export default function BreadcrumbProvider({ children }) {
   const [breadcrumbs, setBreadcrumbs] = useState([])
 
   return (
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
     <BreadcrumbsContext.Provider value={{ breadcrumbs, setBreadcrumbs }}>
       {children}
     </BreadcrumbsContext.Provider>

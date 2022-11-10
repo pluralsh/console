@@ -15,7 +15,7 @@ export function Repository({ repo, setRepo }) {
       flex={false}
       direction="row"
       align="center"
-      gap="small" 
+      gap="small"
       pad="small"
       border={{ side: 'bottom', color: 'light-3' }}
       onClick={setRepo && (() => setRepo(repo))}
@@ -84,9 +84,9 @@ export function SearchRepos({ setOpen, setRepo }) {
         >
           <Box flex={false}>
             {data && data.repositories && data.repositories.edges.map(({ node: repo }) => (
-              <Repository 
+              <Repository
                 key={repo.id}
-                repo={repo} 
+                repo={repo}
                 setRepo={setRepo}
               />
             ))}

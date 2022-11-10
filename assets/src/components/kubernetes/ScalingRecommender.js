@@ -1,5 +1,12 @@
 import { useCallback, useState } from 'react'
-import { Button, ModalHeader, TabContent, TabHeader, TabHeaderItem, Tabs } from 'forge-core'
+import {
+  Button,
+  ModalHeader,
+  TabContent,
+  TabHeader,
+  TabHeaderItem,
+  Tabs,
+} from 'forge-core'
 import { useMutation, useQuery } from '@apollo/react-hooks'
 
 import { Box, Layer, Text } from 'grommet'
@@ -55,11 +62,13 @@ function Recommendation({ rec: { cpu, memory } }) {
   )
 }
 
-function ScalingRecommendations({ recommendations, namespace, kind, name, setOpen }) {
+function ScalingRecommendations({
+  recommendations, namespace, kind, name, setOpen,
+}) {
   const [tab, setTab] = useState(recommendations[0].containerName)
   const [exec, setExec] = useState(false)
   const { data: overlayData } = useQuery(CONFIGURATION_OVERLAYS, { variables: { namespace } })
-  
+
   const overlays = overlayData?.configurationOverlays?.map(({ metadata, ...rest }) => {
     const labels = metadata.labels.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {})
 
@@ -70,10 +79,10 @@ function ScalingRecommendations({ recommendations, namespace, kind, name, setOpe
 
   if (exec) {
     return (
-      <ScalingEdit 
+      <ScalingEdit
         rec={recommendations.find(({ containerName }) => containerName === tab).uncappedTarget}
-        namespace={namespace} 
-        overlays={overlays} 
+        namespace={namespace}
+        overlays={overlays}
         setOpen={setOpen}
       />
     )
@@ -136,7 +145,9 @@ function ScalingRecommendations({ recommendations, namespace, kind, name, setOpe
   )
 }
 
-export function ScalingEdit({ namespace, rec: { cpu, memory }, overlays, setOpen }) {
+export function ScalingEdit({
+  namespace, rec: { cpu, memory }, overlays, setOpen,
+}) {
   const byResource = overlays.reduce((acc, overlay) => (
     { ...acc, [overlay.metadata.labels[RESOURCE_LABEL]]: overlay }
   ), {})
@@ -182,7 +193,9 @@ export function ScalingEdit({ namespace, rec: { cpu, memory }, overlays, setOpen
   )
 }
 
-export function ScalingRecommender({ kind, name, namespace, setOpen }) {
+export function ScalingRecommender({
+  kind, name, namespace, setOpen,
+}) {
   const { data } = useQuery(SCALING_RECOMMENDATION, {
     variables: { kind, name, namespace },
     pollInterval: POLL_INTERVAL,
@@ -197,15 +210,15 @@ export function ScalingRecommender({ kind, name, namespace, setOpen }) {
       gap="small"
     >
       {recommendations ? (
-        <ScalingRecommendations 
+        <ScalingRecommendations
           name={name}
           kind={kind}
-          recommendations={recommendations} 
-          namespace={namespace} 
+          recommendations={recommendations}
+          namespace={namespace}
           setOpen={setOpen}
         />
-      ) : 
-        <LoopingLogo />}
+      )
+        : <LoopingLogo />}
     </Box>
   )
 }

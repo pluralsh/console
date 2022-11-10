@@ -2,7 +2,7 @@ export const POLL_INTERVAL = 10 * 1000
 
 export const COMPONENT_LABEL = 'platform.plural.sh/component'
 export const KIND_LABEL = 'platform.plural.sh/kind'
-export const RESOURCE_LABEL = 'platform.plural.sh/resource' 
+export const RESOURCE_LABEL = 'platform.plural.sh/resource'
 
 export const EventType = {
   Normal: 'Normal',

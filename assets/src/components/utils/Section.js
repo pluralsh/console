@@ -15,7 +15,9 @@ export function SectionPortal({ children }) {
   )
 }
 
-export function SectionChoice({ label, icon, selected, onClick }) {
+export function SectionChoice({
+  label, icon, selected, onClick,
+}) {
   return (
     <Box
       focusIndicator={false}
@@ -39,6 +41,7 @@ export function SectionContentContainer({ header, children }) {
   const id = useMemo(() => uuidv4(), [])
 
   return (
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
     <SectionContext.Provider value={{ id, ref }}>
       <Box fill>
         <Box

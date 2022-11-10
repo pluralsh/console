@@ -23,7 +23,9 @@ export function TabHeader({ text, selected, onClick }) {
   )
 }
 
-export function TabSelector({ enabled, children, gap, pad, hoverIndicator, onClick }) {
+export function TabSelector({
+  enabled, children, gap, pad, hoverIndicator, onClick,
+}) {
   const [hover, setHover] = useState(false)
   const border = (hover || enabled) ? { side: 'right', color: 'brand', size: '2px' } : null
 

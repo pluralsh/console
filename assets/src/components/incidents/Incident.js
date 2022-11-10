@@ -1,11 +1,29 @@
-import { useCallback, useContext, useEffect, useState } from 'react'
-import { Button, Close, Edit, File, Messages as MessagesI, ModalHeader, Scroller } from 'forge-core'
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
+import {
+  Button,
+  Close,
+  Edit,
+  File,
+  Messages as MessagesI,
+  ModalHeader,
+  Scroller,
+} from 'forge-core'
 
 import { useMutation, useQuery, useSubscription } from 'react-apollo'
 
 import { useHistory, useParams } from 'react-router'
 
-import { Box, Layer, Text, TextInput } from 'grommet'
+import {
+  Box,
+  Layer,
+  Text,
+  TextInput,
+} from 'grommet'
 
 import moment from 'moment'
 
@@ -30,7 +48,13 @@ import { TagInput } from '../repos/Tags'
 import Avatar from '../users/Avatar'
 
 import Markdown from './Markdown'
-import { DELETE_INCIDENT, INCIDENT_Q, INCIDENT_SUB, MESSAGE_SUB, UPDATE_INCIDENT } from './queries'
+import {
+  DELETE_INCIDENT,
+  INCIDENT_Q,
+  INCIDENT_SUB,
+  MESSAGE_SUB,
+  UPDATE_INCIDENT,
+} from './queries'
 import { Severity } from './Severity'
 import { Status } from './IncidentStatus'
 import { MessageInput, MessageScrollContext } from './MessageInput'
@@ -105,7 +129,9 @@ function DeleteIncident({ incident }) {
   )
 }
 
-function IncidentHeader({ incident, editable, editing, setEditing, mutation, attributes, setAttributes, updating }) {
+function IncidentHeader({
+  incident, editable, editing, setEditing, mutation, attributes, setAttributes, updating,
+}) {
   const [editorState, setEditorState] = useState(plainDeserialize(incident.description || ''))
   const editor = useEditor()
   const setDescription = useCallback(editorState => {
@@ -122,7 +148,7 @@ function IncidentHeader({ incident, editable, editing, setEditing, mutation, att
         direction="row"
         align="center"
         background="light-1"
-        pad={{ vertical: 'xsmall', horizontal: 'small' }} 
+        pad={{ vertical: 'xsmall', horizontal: 'small' }}
         border={{ side: 'bottom', color: 'light-3' }}
         gap="xsmall"
         round={{ corner: 'top', size: 'xsmall' }}
@@ -225,7 +251,9 @@ function IncidentHeader({ incident, editable, editing, setEditing, mutation, att
   )
 }
 
-export function Messages({ incident, loading, fetchMore, subscribeToMore }) {
+export function Messages({
+  incident, loading, fetchMore, subscribeToMore,
+}) {
   const { setListRef, listRef } = useContext(MessageScrollContext)
   const { messages: { pageInfo: { hasNextPage, endCursor }, edges } } = incident
 
@@ -234,7 +262,7 @@ export function Messages({ incident, loading, fetchMore, subscribeToMore }) {
     variables: { id: incident.id },
     updateQuery: (prev, { subscriptionData: { data } }) => applyMessages(prev, data),
   }), [incident.id])
-  
+
   if (edges.length === 0) return <Empty />
 
   return (
@@ -333,13 +361,15 @@ const canDelete = (incident, me) => (
   me.id === incident.creator.id || (incident.owner && incident.owner.id === me.id)
 )
 
-function IncidentInner({ incident, fetchMore, subscribeToMore, loading, editing, setEditing }) {
+function IncidentInner({
+  incident, fetchMore, subscribeToMore, loading, editing, setEditing,
+}) {
   const [view, setView] = useState(IncidentView.MSGS)
   const [listRef, setListRef] = useState(null)
   const currentUser = useContext(CurrentUserContext)
   const editable = canEdit(incident, currentUser)
   const [attributes, setAttributes] = useState({
-    description: incident.description, 
+    description: incident.description,
     title: incident.title,
     tags: incident.tags.map(({ tag }) => tag),
   })
@@ -349,7 +379,7 @@ function IncidentInner({ incident, fetchMore, subscribeToMore, loading, editing,
   })
 
   const refreshList = useCallback(() => {
-    listRef && listRef.resetAfterIndex(0, true)
+    if (listRef) listRef.resetAfterIndex(0, true)
   }, [listRef])
 
   const returnToBeginning = useCallback(() => {
@@ -357,7 +387,11 @@ function IncidentInner({ incident, fetchMore, subscribeToMore, loading, editing,
   }, [listRef])
 
   return (
-    <MessageScrollContext.Provider value={{ listRef, setListRef, refreshList, returnToBeginning }}>
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
+    <MessageScrollContext.Provider value={{
+      listRef, setListRef, refreshList, returnToBeginning,
+    }}
+    >
       <Box fill>
         <AttachmentProvider>
           <Box
@@ -413,14 +447,14 @@ function IncidentInner({ incident, fetchMore, subscribeToMore, loading, editing,
                 pad={{ horizontal: 'small' }}
                 margin={{ top: 'small' }}
               >
-                <IncidentHeader 
+                <IncidentHeader
                   attributes={attributes}
                   setAttributes={setAttributes}
-                  incident={incident} 
-                  editable={editable} 
-                  editing={editing} 
+                  incident={incident}
+                  editable={editable}
+                  editing={editing}
                   setEditing={setEditing}
-                  updating={updating} 
+                  updating={updating}
                   mutation={mutation}
                 />
               </Box>
@@ -443,12 +477,12 @@ function IncidentInner({ incident, fetchMore, subscribeToMore, loading, editing,
                   )}
                   {view === IncidentView.MSGS && (
                     <Dropzone>
-                      <Messages 
+                      <Messages
                         updating={updating}
                         editing={editing}
                         mutation={mutation}
-                        incident={incident} 
-                        fetchMore={fetchMore} 
+                        incident={incident}
+                        fetchMore={fetchMore}
                         subscribeToMore={subscribeToMore}
                         loading={loading}
                       />
@@ -474,11 +508,13 @@ export function Incident({ editing }) {
   const [deleted, setDeleted] = useState(false)
   const { incidentId } = useParams()
   const [edit, setEdit] = useState(editing)
-  const { data, loading, fetchMore, subscribeToMore } = useQuery(INCIDENT_Q, {
-    variables: { id: incidentId }, 
+  const {
+    data, loading, fetchMore, subscribeToMore,
+  } = useQuery(INCIDENT_Q, {
+    variables: { id: incidentId },
     fetchPolicy: 'cache-and-network',
   })
-  
+
   useSubscription(INCIDENT_SUB, {
     variables: { id: incidentId },
     onSubscriptionData: ({ subscriptionData: { data: { incidentDelta: { delta } } } }) => (
@@ -487,6 +523,7 @@ export function Incident({ editing }) {
   })
 
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
+
   useEffect(() => {
     setBreadcrumbs([{ url: '/incidents', text: 'incidents' }, { url: `/incidents/${incidentId}`, text: incidentId }])
   }, [setBreadcrumbs, incidentId])

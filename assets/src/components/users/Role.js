@@ -1,6 +1,16 @@
 import { useCallback, useRef, useState } from 'react'
 import { Box, Layer, Text } from 'grommet'
-import { Button, EditField as Edit, Group, InputCollection, ModalHeader, ResponsiveInput, TagInput, Trash, User } from 'forge-core'
+import {
+  Button,
+  EditField as Edit,
+  Group,
+  InputCollection,
+  ModalHeader,
+  ResponsiveInput,
+  TagInput,
+  Trash,
+  User,
+} from 'forge-core'
 
 import { useApolloClient, useMutation } from 'react-apollo'
 
@@ -31,7 +41,9 @@ function RoleName({ role: { name, description } }) {
   )
 }
 
-function PermissionToggle({ permission, description, attributes, setAttributes }) {
+function PermissionToggle({
+  permission, description, attributes, setAttributes,
+}) {
   const toggle = useCallback(enable => {
     if (enable) {
       setAttributes({ ...attributes, permissions: [permission, ...attributes.permissions] })
@@ -79,7 +91,9 @@ const TEXT = {
   group: { label: 'group bindings', placeholder: 'search for groups to add' },
 }
 
-export function BindingInput({ type, fetcher, bindings, remove, add }) {
+export function BindingInput({
+  type, fetcher, bindings, remove, add,
+}) {
   const client = useApolloClient()
   const [suggestions, setSuggestions] = useState([])
   const { placeholder, label } = TEXT[type]
@@ -118,7 +132,9 @@ export function BindingInput({ type, fetcher, bindings, remove, add }) {
   )
 }
 
-function RoleForm({ attributes, setAttributes, roleBindings, setRoleBindings }) {
+function RoleForm({
+  attributes, setAttributes, roleBindings, setRoleBindings,
+}) {
   const [repositories, setRepositories] = useState(attributes.repositories.join(', '))
 
   return (
@@ -232,12 +248,16 @@ function EditRole({ role, setOpen }) {
 }
 
 export function CreateRole() {
-  const [attributes, setAttributes] = useState({ name: '', description: '', repositories: [], permissions: [] })
+  const [attributes, setAttributes] = useState({
+    name: '', description: '', repositories: [], permissions: [],
+  })
   const [roleBindings, setRoleBindings] = useState([])
-  const [mutation, { loading }] = useMutation(CREATE_ROLE, { variables: {
-    attributes: { ...attributes, roleBindings: roleBindings.map(sanitize) },
-    update: (cache, { data: { createRole } }) => addRole(cache, createRole),
-  } })
+  const [mutation, { loading }] = useMutation(CREATE_ROLE, {
+    variables: {
+      attributes: { ...attributes, roleBindings: roleBindings.map(sanitize) },
+      update: (cache, { data: { createRole } }) => addRole(cache, createRole),
+    },
+  })
 
   return (
     <Box

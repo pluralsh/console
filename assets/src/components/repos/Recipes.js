@@ -94,7 +94,7 @@ export function Recipes({ repo, setOpen, setRecipe }) {
         style={{ overflow: 'auto', maxHeight: '80vh', minHeight: '150px' }}
       >
         {data && data.recipes && (
-          <RecipeGrid 
+          <RecipeGrid
             edges={data.recipes.edges}
             setRecipe={setRecipe}
           />

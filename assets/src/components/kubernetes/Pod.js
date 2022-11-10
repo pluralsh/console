@@ -1,6 +1,23 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { Anchor, Box, Drop, Text } from 'grommet'
-import { Confirm, TabContent, TabHeader, TabHeaderItem, Tabs } from 'forge-core'
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import {
+  Anchor,
+  Box,
+  Drop,
+  Text,
+} from 'grommet'
+import {
+  Confirm,
+  TabContent,
+  TabHeader,
+  TabHeaderItem,
+  Tabs,
+} from 'forge-core'
 
 import { useMutation, useQuery } from 'react-apollo'
 
@@ -36,15 +53,15 @@ import { DeleteIcon } from './Job'
 
 function phaseToReadiness(phase) {
   switch (phase) {
-    case 'Running':
-    case 'Succeeded':
-      return Readiness.Ready
-    case 'Pending':
-      return Readiness.InProgress
-    case 'Failed':
-      return Readiness.Failed
-    default:
-      return null
+  case 'Running':
+  case 'Succeeded':
+    return Readiness.Ready
+  case 'Pending':
+    return Readiness.InProgress
+  case 'Failed':
+    return Readiness.Failed
+  default:
+    return null
   }
 }
 
@@ -53,6 +70,7 @@ function statusToReadiness({ phase, containerStatuses }) {
   if (phase === 'Failed') return Readiness.Failed
   if (phase === 'Pending') return Readiness.InProgress
   const unready = (containerStatuses || []).filter(({ ready }) => !ready)
+
   if (unready.length === 0) return Readiness.Ready
 
   return Readiness.InProgress
@@ -61,6 +79,7 @@ function statusToReadiness({ phase, containerStatuses }) {
 function containerReadiness(status) {
   if (!status) return Readiness.InProgress
   const { ready, state: { terminated } } = status
+
   if (ready && terminated) return Readiness.Complete
   if (ready) return Readiness.Ready
   if (!terminated) return Readiness.InProgress
@@ -93,8 +112,10 @@ export function PodPhase({ phase, message }) {
 export function podResources(containers, type) {
   let memory
   let cpu
+
   for (const { resources } of containers) {
     const resourceSpec = resources[type]
+
     if (!resourceSpec) continue
     if (resourceSpec.cpu) {
       cpu = (cpu || 0) + cpuParser(resourceSpec.cpu)
@@ -110,6 +131,7 @@ export function podResources(containers, type) {
 export function PodResources({ containers, dimension }) {
   const { cpu: cpuReq, memory: memReq } = podResources(containers, 'requests')
   const { cpu: cpuLim, memory: memLim } = podResources(containers, 'limits')
+
   if (dimension === 'memory') {
     return (
       <Box direction="row">
@@ -125,7 +147,9 @@ export function PodResources({ containers, dimension }) {
   )
 }
 
-export function HeaderItem({ width, text, nobold, truncate }) {
+export function HeaderItem({
+  width, text, nobold, truncate,
+}) {
   return (
     <Box
       flex={false}
@@ -225,7 +249,7 @@ export function PodList({ pods, namespace, refetch }) {
 }
 
 export const ignore = e => {
-  e.stopPropagation(); e.preventDefault() 
+  e.stopPropagation(); e.preventDefault()
 }
 
 export function DeletePod({ name, namespace, refetch }) {
@@ -233,7 +257,7 @@ export function DeletePod({ name, namespace, refetch }) {
   const [mutation, { loading }] = useMutation(DELETE_POD, {
     variables: { name, namespace },
     onCompleted: () => {
-      setConfirm(false); refetch() 
+      setConfirm(false); refetch()
     },
   })
 
@@ -253,10 +277,10 @@ export function DeletePod({ name, namespace, refetch }) {
           description="The pod will be replaced by it's managing controller"
           loading={loading}
           cancel={e => {
-            ignore(e); setConfirm(false) 
+            ignore(e); setConfirm(false)
           }}
           submit={e => {
-            ignore(e); mutation() 
+            ignore(e); mutation()
           }}
         />
       )}
@@ -275,6 +299,7 @@ function PodState({ name, state: { running, terminated, waiting } }) {
 
 function PodReadiness({ status: { containerStatuses } }) {
   const unready = (containerStatuses || []).filter(({ ready }) => !ready)
+
   if (unready.length === 0) {
     return (
       <Text size="small">running</Text>
@@ -416,7 +441,7 @@ export function PodRow({ pod: { metadata: { name, namespace }, status, spec }, r
           style={TRUNCATE}
           size="small"
           onClick={e => {
-            ignore(e); history.push(`/nodes/${spec.nodeName}`) 
+            ignore(e); history.push(`/nodes/${spec.nodeName}`)
           }}
         >
           {spec.nodeName}
@@ -728,7 +753,9 @@ function Container({ container, containerStatus }) {
   )
 }
 
-function ContainerTabHeader({ namespace, pod, container, containerStatus }) {
+function ContainerTabHeader({
+  namespace, pod, container, containerStatus,
+}) {
   const history = useHistory()
   const readiness = containerReadiness(containerStatus[container])
 
@@ -772,6 +799,7 @@ export function Pod() {
   const { name, namespace } = useParams()
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const { data } = useQuery(POD_Q, { variables: { name, namespace }, pollInterval: POLL_INTERVAL })
+
   useEffect(() => {
     setBreadcrumbs([
       { text: 'pods', url: '/pods', disable: true },

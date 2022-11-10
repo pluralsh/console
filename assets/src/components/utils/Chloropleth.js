@@ -11,8 +11,8 @@ import { useColorMap } from './Graph'
 
 const COLOR_MAP = [
   'blue-light-2',
-  'blue-light', 
-  'blue', 
+  'blue-light',
+  'blue',
   'blue-dark',
   'blue-dark-2',
 ]
@@ -26,7 +26,7 @@ function Tooltip({ feature }) {
       flex={false}
       direction="row"
       pad="xsmall"
-      round="2px" 
+      round="2px"
       gap="xsmall"
       background="white"
       align="center"

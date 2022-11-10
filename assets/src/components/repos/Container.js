@@ -24,7 +24,7 @@ export function Container({ children, pad, ...props }) {
     <Box
       as={containerStyling}
       pad={pad || 'medium'}
-      round="xsmall" 
+      round="xsmall"
       focusIndicator={false}
       {...props}
     >

@@ -50,7 +50,9 @@ export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
 const APP_ICON = `${process.env.PUBLIC_URL}/console-full.png`
 
-export function Icon({ icon, text, selected, path, onClick, size, align }) {
+export function Icon({
+  icon, text, selected, path, onClick, size, align,
+}) {
   const dropRef = useRef()
   const history = useHistory()
   const [hover, setHover] = useState(false)
@@ -70,7 +72,7 @@ export function Icon({ icon, text, selected, path, onClick, size, align }) {
         hoverIndicator="sidebarHover"
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
-        onClick={() => onClick ? onClick() : history.push(path)}
+        onClick={() => (onClick ? onClick() : history.push(path))}
         background={selected ? 'sidebarHover' : null}
         direction="row"
       >
@@ -81,7 +83,7 @@ export function Icon({ icon, text, selected, path, onClick, size, align }) {
           pad="small"
           round="xsmall"
           justify="center"
-          background="sidebarHover" 
+          background="sidebarHover"
           target={dropRef}
           side="right"
           align={align || { left: 'right' }}
@@ -104,6 +106,7 @@ function FlyoutProvider({ children }) {
   const [ref, setRef] = useState(false)
 
   return (
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
     <FlyoutContext.Provider value={{ ref, setRef }}>
       {children}
     </FlyoutContext.Provider>
@@ -114,10 +117,10 @@ function FlyoutGutter() {
   const { setRef } = useContext(FlyoutContext)
 
   return (
-    <Box 
-      height="100%" 
-      background="backgroundColor" 
-      ref={setRef} 
+    <Box
+      height="100%"
+      background="backgroundColor"
+      ref={setRef}
       flex={false}
       style={{ overflow: 'auto' }}
     />
@@ -136,7 +139,9 @@ function FocoComponent({ children, ...props }) {
   )
 }
 
-export function FlyoutContainer({ width, header, close, modifier, children }) {
+export function FlyoutContainer({
+  width, header, close, modifier, children,
+}) {
   const { ref } = useContext(FlyoutContext)
 
   return (
@@ -149,7 +154,7 @@ export function FlyoutContainer({ width, header, close, modifier, children }) {
           flex={false}
           width={width || '400px'}
           fill="vertical"
-          background="backgroundColor" 
+          background="backgroundColor"
           border={{ side: 'left' }}
         >
           <Box
@@ -265,7 +270,7 @@ export default function Console() {
                     direction="row"
                     fill
                     gap="xsmall"
-                    justify="end" 
+                    justify="end"
                     pad={{ horizontal: 'medium' }}
                     align="center"
                   >

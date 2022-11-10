@@ -1,7 +1,18 @@
 import { useContext, useEffect, useState } from 'react'
-import { Box, FormField, Layer, Text, TextInput } from 'grommet'
+import {
+  Box,
+  FormField,
+  Layer,
+  Text,
+  TextInput,
+} from 'grommet'
 import { useMutation, useQuery } from 'react-apollo'
-import { Button, Copyable, ModalHeader, Scroller } from 'forge-core'
+import {
+  Button,
+  Copyable,
+  ModalHeader,
+  Scroller,
+} from 'forge-core'
 
 import { extendConnection } from '../utils/graphql'
 
@@ -100,6 +111,7 @@ function Invite() {
 export default function Users() {
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const { data, fetchMore } = useQuery(USERS_Q)
+
   useEffect(() => setBreadcrumbs([{ text: 'users', url: '/users' }]), [])
 
   if (!data) return null

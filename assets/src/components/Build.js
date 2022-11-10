@@ -1,8 +1,18 @@
-import { useContext, useEffect, useRef, useState } from 'react'
+import {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from 'react-apollo'
 import { Button, ModalHeader } from 'forge-core'
-import { Box, Layer, Text, ThemeContext } from 'grommet'
+import {
+  Box,
+  Layer,
+  Text,
+  ThemeContext,
+} from 'grommet'
 import { normalizeColor } from 'grommet/utils'
 
 import moment from 'moment'
@@ -13,7 +23,14 @@ import { BeatLoader } from 'react-spinners'
 
 import { groupBy } from 'lodash'
 
-import { APPROVE_BUILD, BUILD_Q, BUILD_SUB, CANCEL_BUILD, COMMAND_SUB, RESTART_BUILD } from './graphql/builds'
+import {
+  APPROVE_BUILD,
+  BUILD_Q,
+  BUILD_SUB,
+  CANCEL_BUILD,
+  COMMAND_SUB,
+  RESTART_BUILD,
+} from './graphql/builds'
 import { mergeEdges } from './graphql/utils'
 
 import { BreadcrumbsContext } from './Breadcrumbs'
@@ -30,6 +47,7 @@ const HEADER_PADDING = { horizontal: 'medium' }
 
 function Timer({ insertedAt, completedAt, status }) {
   const [tick, setTick] = useState(0)
+
   useEffect(() => {
     if (completedAt) return
     setTimeout(() => setTick(tick + 1), 1000)
@@ -49,20 +67,20 @@ function Timer({ insertedAt, completedAt, status }) {
 
 function buildStyles(status) {
   switch (status) {
-    case BuildStatus.QUEUED:
-      return { color: 'status-unknown', label: null }
-    case BuildStatus.RUNNING:
-      return { color: 'progress', label: null }
-    case BuildStatus.CANCELLED:
-      return { color: 'light-6', label: 'Cancelled, ' }
-    case BuildStatus.FAILED:
-      return { color: 'error', label: 'Failed, ' }
-    case BuildStatus.SUCCESSFUL:
-      return { color: 'success', label: 'Passed, ' }
-    case BuildStatus.PENDING:
-      return { color: 'status-warning', label: 'Pending Approval ' }
-    default:
-      return {}
+  case BuildStatus.QUEUED:
+    return { color: 'status-unknown', label: null }
+  case BuildStatus.RUNNING:
+    return { color: 'progress', label: null }
+  case BuildStatus.CANCELLED:
+    return { color: 'light-6', label: 'Cancelled, ' }
+  case BuildStatus.FAILED:
+    return { color: 'error', label: 'Failed, ' }
+  case BuildStatus.SUCCESSFUL:
+    return { color: 'success', label: 'Passed, ' }
+  case BuildStatus.PENDING:
+    return { color: 'status-warning', label: 'Pending Approval ' }
+  default:
+    return {}
   }
 }
 
@@ -209,6 +227,7 @@ function ExitStatusInner({ exitCode }) {
 
 function ExitStatus({ exitCode }) {
   const background = exitCode !== 0 ? 'error' : null
+
   if (!exitCode && exitCode !== 0) {
     return (
       <Box
@@ -235,8 +254,9 @@ function LogLine({ line, number, follow }) {
   const theme = useContext(ThemeContext)
   const mounted = useRef()
   const lineRef = useRef()
+
   useEffect(() => {
-    !mounted.current && follow && lineRef && lineRef.current && lineRef.current.scrollIntoView(true)
+    if (!mounted.current && follow && lineRef && lineRef.current) lineRef.current.scrollIntoView(true)
     mounted.current = true
   }, [follow, lineRef, line])
 
@@ -287,7 +307,9 @@ function Log({ text, follow }) {
 function Command({ command, follow }) {
   const ref = useRef()
   const { stdout } = command
+
   useEffect(() => {
+    // eslint-disable-next-line no-unused-expressions
     ref && ref.current && follow && ref.current.scrollIntoView()
   }, [follow, ref])
 
@@ -308,7 +330,7 @@ function Command({ command, follow }) {
           gap="small"
           align="center"
         >
-          <pre>==> {command.command}</pre>
+          <pre>{'==>'} {command.command}</pre>
           <ExitStatus exitCode={command.exitCode} />
         </Box>
         <Timer
@@ -337,8 +359,14 @@ function updateQuery(prev, { subscriptionData: { data } }) {
     ...prev,
     build: {
       ...build,
-      commands: { ...rest, edges: mergeEdges(edges, delta, payload, 'CommandEdge', 'append') },
-    } }
+      commands: {
+        ...rest,
+        edges: mergeEdges(
+          edges, delta, payload, 'CommandEdge', 'append'
+        ),
+      },
+    },
+  }
 }
 
 function Commands({ edges }) {
@@ -364,6 +392,7 @@ function Commands({ edges }) {
 
 function Approval({ build }) {
   const [mutation, { loading }] = useMutation(APPROVE_BUILD, { variables: { id: build.id } })
+
   if (build.approver) {
     return (
       <OptionContainer>
@@ -387,7 +416,9 @@ function Approval({ build }) {
 
 const SIDEBAR_WIDTH = '150px'
 
-function ChangelogRepo({ repo, current, setRepo, tools, tool, setTool }) {
+function ChangelogRepo({
+  repo, current, setRepo, tools, tool, setTool,
+}) {
   return (
     <SidebarTab
       tab={current}

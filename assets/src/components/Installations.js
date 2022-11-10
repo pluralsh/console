@@ -1,7 +1,26 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
-import { Anchor, Box, Layer, Text, TextInput, ThemeContext } from 'grommet'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
+import {
+  Anchor,
+  Box,
+  Layer,
+  Text,
+  TextInput,
+  ThemeContext,
+} from 'grommet'
 import { Checkmark, CircleInformation } from 'grommet-icons'
-import { Links, Explore as Search, TabContent, TabHeader, TabHeaderItem, Tabs } from 'forge-core'
+import {
+  Links,
+  Explore as Search,
+  TabContent,
+  TabHeader,
+  TabHeaderItem,
+  Tabs,
+} from 'forge-core'
 import { useQuery } from 'react-apollo'
 
 import { chunk } from 'lodash'
@@ -97,7 +116,9 @@ export function ApplicationIcon({ application: { spec: { descriptor: { icons } }
 export const hasIcon = ({ spec: { descriptor: { icons } } }) => icons.length > 0
 
 export function InstallationsFlyout() {
-  const { applications, setCurrentApplication, currentApplication, setOpen } = useContext(InstallationContext)
+  const {
+    applications, setCurrentApplication, currentApplication, setOpen,
+  } = useContext(InstallationContext)
   const [q, setQ] = useState(null)
 
   return (
@@ -116,15 +137,15 @@ export function InstallationsFlyout() {
           />
         </Box>
         {applications
-        .filter(application => !q || application.name.startsWith(q))
-        .map(application => (
-          <Installation
-            key={application.name}
-            application={application}
-            current={currentApplication}
-            setCurrentApplication={setCurrentApplication}
-          />
-        ))}
+          .filter(application => !q || application.name.startsWith(q))
+          .map(application => (
+            <Installation
+              key={application.name}
+              application={application}
+              current={currentApplication}
+              setCurrentApplication={setCurrentApplication}
+            />
+          ))}
       </Box>
     </FlyoutContainer>
   )
@@ -180,7 +201,9 @@ function ApplicationLink({ link: { url, description }, width }) {
 
 export function ApplicationDetails() {
   const { currentApplication } = useContext(InstallationContext)
-  const { name, spec: { descriptor }, cost, license } = currentApplication
+  const {
+    name, spec: { descriptor }, cost, license,
+  } = currentApplication
   const hasLinks = descriptor.links
   const hasCost = cost || license
 
@@ -317,6 +340,7 @@ function ApplicationDetail({ close }) {
 export function Installations() {
   const [modal, setModal] = useState(false)
   const { currentApplication, open, setOpen } = useContext(InstallationContext)
+
   if (!currentApplication) return null
   const { name, spec: { descriptor } } = currentApplication
 
@@ -365,8 +389,10 @@ export function Installations() {
 
 export function useEnsureCurrent(repo) {
   const { applications, currentApplication, setCurrentUnsafe } = useContext(InstallationContext)
+
   useEffect(() => {
     const desired = applications.find(({ name }) => name === repo)
+
     if (desired && currentApplication.name !== desired.name) {
       setCurrentUnsafe(desired)
     }
@@ -375,12 +401,12 @@ export function useEnsureCurrent(repo) {
 
 function applyDelta(prev, { delta, payload }) {
   switch (delta) {
-    case 'CREATE':
-      return { ...prev, applications: [...prev.applications, payload] }
-    case 'DELETE':
-      return { ...prev, applications: prev.applications.filter(({ name }) => name !== payload.name) }
-    default:
-      return { ...prev, applications: prev.applications.map(app => app.name === payload.name ? payload : app) }
+  case 'CREATE':
+    return { ...prev, applications: [...prev.applications, payload] }
+  case 'DELETE':
+    return { ...prev, applications: prev.applications.filter(({ name }) => name !== payload.name) }
+  default:
+    return { ...prev, applications: prev.applications.map(app => (app.name === payload.name ? payload : app)) }
   }
 }
 
@@ -392,7 +418,7 @@ export function InstallationsProvider({ children }) {
   const wrapped = useCallback(application => {
     sessionStorage.setItem('currentApplication', application.name)
     setCurrentApplication(application)
-    application && onChange(application)
+    if (application) onChange(application)
   }, [onChange, setCurrentApplication])
 
   useEffect(() => {
@@ -402,7 +428,8 @@ export function InstallationsProvider({ children }) {
   }, [data, currentApplication, setCurrentApplication])
   useEffect(() => subscribeToMore({
     document: APPLICATION_SUB,
-    updateQuery: (prev, { subscriptionData: { data } }) => data ? applyDelta(prev, data.applicationDelta) : prev }), [])
+    updateQuery: (prev, { subscriptionData: { data } }) => (data ? applyDelta(prev, data.applicationDelta) : prev),
+  }), [])
 
   if (!currentApplication) {
     return (
@@ -419,6 +446,7 @@ export function InstallationsProvider({ children }) {
 
   return (
     <InstallationContext.Provider
+      // eslint-disable-next-line react/jsx-no-constructed-context-values
       value={{
         currentApplication: current,
         setCurrentApplication: wrapped,

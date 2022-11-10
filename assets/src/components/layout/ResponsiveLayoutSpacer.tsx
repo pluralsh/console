@@ -1,4 +1,4 @@
-import { Div } from "honorable";
+import { Div } from 'honorable'
 
 export function ResponsiveLayoutSpacer() {
   return (

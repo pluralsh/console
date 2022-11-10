@@ -1,7 +1,12 @@
 import gql from 'graphql-tag'
 
 import { PageInfo } from '../graphql/base'
-import { RunbookAlertStatus, RunbookDataFragment, RunbookExecutionFragment, RunbookFragment } from '../graphql/runbooks'
+import {
+  RunbookAlertStatus,
+  RunbookDataFragment,
+  RunbookExecutionFragment,
+  RunbookFragment,
+} from '../graphql/runbooks'
 
 export const RUNBOOKS_Q = gql`
   query Runbooks($namespace: String!, $pinned: Boolean) {

@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import { Button, InputCollection, ModalHeader, ResponsiveInput } from 'forge-core'
+import {
+  Button,
+  InputCollection,
+  ModalHeader,
+  ResponsiveInput,
+} from 'forge-core'
 import { Box, Layer } from 'grommet'
 import { useMutation } from 'react-apollo'
 
@@ -11,13 +16,15 @@ export function GroupForm() {
     variables: { attributes: { name } },
     update: (cache, { data: { createGroup } }) => {
       const { groups, ...data } = cache.readQuery({ query: GROUPS_Q, variables: { q: null } })
+
       cache.writeQuery({
         query: GROUPS_Q,
         variables: { q: null },
         data: {
           ...data,
           groups: { ...groups, edges: [{ __typename: 'GroupEdge', node: createGroup }, ...groups.edges] },
-        } })
+        },
+      })
     },
   })
 

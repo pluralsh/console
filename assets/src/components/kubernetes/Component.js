@@ -23,64 +23,64 @@ import { Certificate } from './Certificate'
 
 function ComponentContent({ namespace, kind, name }) {
   switch (kind.toLowerCase()) {
-    case 'service':
-      return (
-        <Service
-          namespace={namespace}
-          kind={kind}
-          name={name}
-        />
-      )
-    case 'deployment':
-      return (
-        <Deployment
-          namespace={namespace}
-          kind={kind}
-          name={name}
-        />
-      )
-    case 'ingress':
-      return (
-        <Ingress
-          namespace={namespace}
-          kind={kind}
-          name={name}
-        />
-      )
-    case 'statefulset':
-      return (
-        <StatefulSet
-          namespace={namespace}
-          kind={kind}
-          name={name}
-        />
-      )
-    case 'cronjob':
-      return (
-        <CronJob
-          namespace={namespace}
-          kind={kind}
-          name={name}
-        />
-      )
-    case 'job':
-      return (
-        <Job
-          namespace={namespace}
-          kind={kind}
-          name={name}
-        />
-      )
-    case 'certificate':
-      return (
-        <Certificate
-          namespace={namespace}
-          kind={kind}
-          name={name}
-        />
-      )
-    default:
-      return null
+  case 'service':
+    return (
+      <Service
+        namespace={namespace}
+        kind={kind}
+        name={name}
+      />
+    )
+  case 'deployment':
+    return (
+      <Deployment
+        namespace={namespace}
+        kind={kind}
+        name={name}
+      />
+    )
+  case 'ingress':
+    return (
+      <Ingress
+        namespace={namespace}
+        kind={kind}
+        name={name}
+      />
+    )
+  case 'statefulset':
+    return (
+      <StatefulSet
+        namespace={namespace}
+        kind={kind}
+        name={name}
+      />
+    )
+  case 'cronjob':
+    return (
+      <CronJob
+        namespace={namespace}
+        kind={kind}
+        name={name}
+      />
+    )
+  case 'job':
+    return (
+      <Job
+        namespace={namespace}
+        kind={kind}
+        name={name}
+      />
+    )
+  case 'certificate':
+    return (
+      <Certificate
+        namespace={namespace}
+        kind={kind}
+        name={name}
+      />
+    )
+  default:
+    return null
   }
 }
 
@@ -104,6 +104,7 @@ export default function Component() {
   const history = useHistory()
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const { setOnChange, currentApplication } = useContext(InstallationContext)
+
   useEffect(() => {
     setBreadcrumbs([
       { text: 'components', url: '/components' },
@@ -113,7 +114,7 @@ export default function Component() {
     ])
   }, [currentApplication])
   useEffect(() => {
-    setOnChange({ func: ({ name }) => history.push(`/components/${name}`) }) 
+    setOnChange({ func: ({ name }) => history.push(`/components/${name}`) })
   }, [])
   useEnsureCurrent(repo)
 

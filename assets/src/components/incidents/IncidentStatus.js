@@ -21,7 +21,7 @@ export function StatusSelector({ status, setStatus }) {
   const theme = useContext(ThemeContext)
 
   return (
-    <Select 
+    <Select
       options={options}
       styles={{
         option: (styles, { data, isFocused, isSelected }) => (

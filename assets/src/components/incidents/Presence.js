@@ -1,4 +1,9 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react'
+import React, {
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 
 import { Presence } from 'phoenix'
 import { Box } from 'grommet'
@@ -15,7 +20,7 @@ export function PresenceIndicator({ border, margin }) {
     <Box
       flex={false}
       background="presence"
-      border={border ? { color: 'white', size: '2px' } : null} 
+      border={border ? { color: 'white', size: '2px' } : null}
       width={width}
       height={width}
       round="full"
@@ -33,13 +38,16 @@ export function PresenceProvider({ incidentId, children }) {
 
   useEffect(() => {
     const channel = socket.channel(`incidents:${incidentId}`)
+
     setChannel(channel)
     channel.join()
     channel.on('typing', msg => cache.add(msg.name))
 
     const presence = new Presence(channel)
+
     presence.onSync(() => {
       const ids = presence.list(id => id).reduce((prev, id) => ({ ...prev, [id]: true }), {})
+
       setPresent({ ...present, ...ids })
     })
     presence.onJoin(id => setPresent({ ...present, [id]: true }))
@@ -57,6 +65,7 @@ export function PresenceProvider({ incidentId, children }) {
   }, [incidentId])
 
   return (
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
     <PresenceContext.Provider value={{ present, channel, typists }}>
       {children}
     </PresenceContext.Provider>

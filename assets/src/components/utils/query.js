@@ -12,6 +12,7 @@ export function toMap(params) {
 
 export function asQuery(params) {
   const search = new URLSearchParams()
+
   for (const [k, v] of Object.entries(params)) {
     search.set(k, v)
   }

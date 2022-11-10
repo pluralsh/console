@@ -7,6 +7,7 @@ const MULTIPLES = {
 
 export function cpuParser(input) {
   const milliMatch = input.match(/^([0-9]+)([a-z])$/)
+
   if (milliMatch) {
     return parseFloat(milliMatch[1]) / MULTIPLES[milliMatch[2]]
   }

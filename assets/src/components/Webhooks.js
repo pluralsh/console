@@ -1,15 +1,33 @@
 import { useContext, useEffect, useState } from 'react'
 import { useMutation, useQuery } from 'react-apollo'
 
-import { Button, Confirm, Copyable, ModalHeader, Scroller, Trash } from 'forge-core'
+import {
+  Button,
+  Confirm,
+  Copyable,
+  ModalHeader,
+  Scroller,
+  Trash,
+} from 'forge-core'
 
-import { Box, FormField, Layer, Text, TextInput } from 'grommet'
+import {
+  Box,
+  FormField,
+  Layer,
+  Text,
+  TextInput,
+} from 'grommet'
 
 import moment from 'moment'
 
 import { chunk } from '../utils/array'
 
-import { appendConnection, extendConnection, removeConnection, updateCache } from '../utils/graphql'
+import {
+  appendConnection,
+  extendConnection,
+  removeConnection,
+  updateCache,
+} from '../utils/graphql'
 
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { CREATE_WEBHOOK, DELETE_WEBHOOK, WEBHOOKS_Q } from './graphql/webhooks'
@@ -133,7 +151,11 @@ function CreateWebhook() {
 const HEIGHT_PX = '45px'
 const HEALTH_WIDTH = '150px'
 
-function WebhookRow({ hook: { id, url, health, insertedAt } }) {
+function WebhookRow({
+  hook: {
+    id, url, health, insertedAt,
+  },
+}) {
   const [confirm, setConfirm] = useState(false)
   const [mutation, { loading }] = useMutation(DELETE_WEBHOOK, {
     variables: { id },
@@ -241,6 +263,7 @@ function WebhooksHeader() {
 export function WebhookManagement() {
   const [listRef, setListRef] = useState(null)
   const { data, loading, fetchMore } = useQuery(WEBHOOKS_Q)
+
   if (!data) return <LoopingLogo scale="0.75" />
   const { edges, pageInfo } = data.webhooks
 
@@ -270,6 +293,7 @@ export function WebhookManagement() {
 
 export default function Webhooks() {
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
+
   useEffect(() => setBreadcrumbs([{ text: 'webhooks', url: '/webhooks' }]), [])
   const { data, fetchMore } = useQuery(WEBHOOKS_Q)
 
@@ -337,12 +361,14 @@ export default function Webhooks() {
             )}
             onLoadMore={() => pageInfo.hasNextPage && fetchMore({
               variables: { cursor: pageInfo.endCursor },
-              updateQuery: (prev, { fetchMoreResult: { webhooks } }) => ({ ...prev,
+              updateQuery: (prev, { fetchMoreResult: { webhooks } }) => ({
+                ...prev,
                 webhooks: {
                   ...prev.webhooks,
                   pageInfo: webhooks.pageInfo,
                   edges: [...prev.webhooks.edges, ...webhooks.edges],
-                } }),
+                },
+              }),
             })}
           />
         </Box>

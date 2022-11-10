@@ -8,14 +8,21 @@ import { extendConnection } from '../../utils/graphql'
 import { INCIDENTS_Q, REPOS_Q } from './queries'
 
 import { RepoOption } from './CreateIncident'
-import { FilterSelect, IncidentRow, IncidentToolbar, IncidentViewContext } from './Incidents'
+import {
+  FilterSelect,
+  IncidentRow,
+  IncidentToolbar,
+  IncidentViewContext,
+} from './Incidents'
 import { IncidentSort, Order } from './types'
 
 function Repositories({ repository, setRepository }) {
   const { data, fetchMore } = useQuery(REPOS_Q, { fetchPolicy: 'cache-and-network' })
+
   useEffect(() => {
     if (!repository && data && data.repositories) {
       const edge = data.repositories.edges[0]
+
       setRepository(edge && edge.node)
     }
   }, [repository, setRepository, data])
@@ -75,9 +82,13 @@ function EmptyState() {
 }
 
 function Incidents({ repository: { id } }) {
-  const { q, setQ, sort, order, filters } = useContext(IncidentViewContext)
+  const {
+    q, setQ, sort, order, filters,
+  } = useContext(IncidentViewContext)
   const { data, fetchMore } = useQuery(INCIDENTS_Q, {
-    variables: { repositoryId: id, q, sort, order, filters },
+    variables: {
+      repositoryId: id, q, sort, order, filters,
+    },
     fetchPolicy: 'cache-and-network',
   })
 
@@ -96,7 +107,7 @@ function Incidents({ repository: { id } }) {
         justify="end"
       >
         <Box fill="horizontal">
-          <TextInput 
+          <TextInput
             plain
             icon={<Search size="15px" />}
             value={q}
@@ -136,9 +147,13 @@ export function Responses() {
   const [order, setOrder] = useState(Order.DESC)
   const [filters, setFilters] = useState([])
   const [repository, setRepository] = useState(null)
-  
+
   return (
-    <IncidentViewContext.Provider value={{ q, setQ, sort, setSort, order, setOrder, filters, setFilters }}>
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
+    <IncidentViewContext.Provider value={{
+      q, setQ, sort, setSort, order, setOrder, filters, setFilters,
+    }}
+    >
       <Box
         direction="row"
         fill

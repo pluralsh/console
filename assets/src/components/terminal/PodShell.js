@@ -1,4 +1,9 @@
-import { useCallback, useContext, useEffect, useState } from 'react'
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 import { useHistory, useParams } from 'react-router'
 import { Box, Text, TextInput } from 'grommet'
 import { Edit } from 'forge-core'
@@ -17,7 +22,9 @@ import { Icon } from '../users/Group'
 
 import { Shell } from './Shell'
 
-function ContainerSidebar({ containers, container, namespace, name }) {
+function ContainerSidebar({
+  containers, container, namespace, name,
+}) {
   const history = useHistory()
   const onClick = useCallback(c => history.push(`/shell/pod/${namespace}/${name}/${c}`), [history, namespace, name])
 
@@ -115,18 +122,18 @@ export function PodShell() {
   const containers = data.pod.spec.containers || []
 
   return (
-    <Shell 
+    <Shell
       room={`pod:${namespace}:${name}:${container}`}
-      command={command} 
+      command={command}
       header={`connecting to pod ${name} using ${command || '/bin/sh'}...`}
     >
       <ShellTitle
         command={command}
         setCommand={setCommand}
       />
-      <ContainerSidebar 
-        containers={containers} 
-        container={container} 
+      <ContainerSidebar
+        containers={containers}
+        container={container}
         namespace={namespace}
         name={name}
       />

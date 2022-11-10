@@ -54,6 +54,7 @@ export default function RepositorySelector({ title, description, prefix }) {
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const { setOnChange, applications, setCurrentApplication } = useContext(InstallationContext)
   const history = useHistory()
+
   useEffect(() => {
     setBreadcrumbs([{ text: title.toLowerCase(), url: `/${prefix}` }])
   }, [])

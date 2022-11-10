@@ -1,5 +1,10 @@
 import { Box, Text } from 'grommet'
-import { TabContent, TabHeader, TabHeaderItem, Tabs } from 'forge-core'
+import {
+  TabContent,
+  TabHeader,
+  TabHeaderItem,
+  Tabs,
+} from 'forge-core'
 
 import { useParams } from 'react-router'
 
@@ -64,7 +69,7 @@ function Spec({ spec: { secretName, dnsNames, issuerRef } }) {
 export function Certificate() {
   const { name, repo } = useParams()
   const { data } = useQuery(CERTIFICATE_Q, {
-    variables: { name, namespace: repo }, 
+    variables: { name, namespace: repo },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })

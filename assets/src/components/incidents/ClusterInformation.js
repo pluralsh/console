@@ -1,4 +1,12 @@
-import { Box, Table, TableBody, TableCell, TableHeader, TableRow, Text } from 'grommet'
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
+  Text,
+} from 'grommet'
 
 function NoInformation() {
   return (
@@ -33,7 +41,7 @@ function Header() {
   )
 }
 
-const truncate = str => str && str.length > 20 ? `${str.substring(0, 17)}...` : str
+const truncate = str => (str && str.length > 20 ? `${str.substring(0, 17)}...` : str)
 
 function Row({ name, value }) {
   return (

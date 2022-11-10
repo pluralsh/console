@@ -24,7 +24,9 @@ function isConsecutive(message, next) {
   return (firstTime.add(-10, 'minutes').isBefore(secondTime))
 }
 
-function MessageBody({ message, next, setHover, setSize }) {
+function MessageBody({
+  message, next, setHover, setSize,
+}) {
   const [painted, setPainted] = useState(false)
   const { present } = useContext(PresenceContext)
   const consecutive = isConsecutive(message, next)

@@ -1,6 +1,29 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { Box, Drop, Text, TextInput, ThemeContext } from 'grommet'
-import { SortAsc as Ascend, Button, Check as Checkmark, Close, SortDesc as Descend, Filters as FiltersI, Notification, Explore as Search, Tag as TagIcon, User } from 'forge-core'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import {
+  Box,
+  Drop,
+  Text,
+  TextInput,
+  ThemeContext,
+} from 'grommet'
+import {
+  SortAsc as Ascend,
+  Button,
+  Check as Checkmark,
+  Close,
+  SortDesc as Descend,
+  Filters as FiltersI,
+  Notification,
+  Explore as Search,
+  Tag as TagIcon,
+  User,
+} from 'forge-core'
 import { Next } from 'grommet-icons'
 import { useQuery } from 'react-apollo'
 
@@ -25,7 +48,12 @@ import { CreateIncident } from './CreateIncident'
 
 import { Status } from './IncidentStatus'
 import { Severity } from './Severity'
-import { IncidentFilter, IncidentSort, IncidentSortNames, Order } from './types'
+import {
+  IncidentFilter,
+  IncidentSort,
+  IncidentSortNames,
+  Order,
+} from './types'
 import { SlaTimer } from './SlaTimer'
 import { INCIDENTS_Q } from './queries'
 
@@ -64,10 +92,10 @@ export function NotificationBadge({ size, color, count }) {
 
   return (
     <Box
-      as={BouncyDiv} 
-      style={{ boxShadow: `0 0 3px ${normalizeColor(background, theme)}` }} 
+      as={BouncyDiv}
+      style={{ boxShadow: `0 0 3px ${normalizeColor(background, theme)}` }}
       width={size}
-      height={size} 
+      height={size}
       align="center"
       justify="center"
       round="full"
@@ -85,7 +113,7 @@ function SubscriptionBadge({ incident: { subscription } }) {
     <Box
       pad={{ horizontal: 'small', vertical: 'xsmall' }}
       round="xsmall"
-      border={{ color: 'light-5' }} 
+      border={{ color: 'light-5' }}
       align="center"
       justify="center"
     >
@@ -94,7 +122,11 @@ function SubscriptionBadge({ incident: { subscription } }) {
   )
 }
 
-export function IncidentRow({ incident: { id, repository, title, insertedAt, owner, ...incident }, selected }) {
+export function IncidentRow({
+  incident: {
+    id, repository, title, insertedAt, owner, ...incident
+  }, selected,
+}) {
   const history = useHistory()
 
   return (
@@ -103,7 +135,7 @@ export function IncidentRow({ incident: { id, repository, title, insertedAt, own
       fill="horizontal"
       pad="small"
       border={{ side: 'bottom', color: 'light-3' }}
-      direction="row" 
+      direction="row"
       align="center"
       gap="small"
       hoverIndicator="light-2"
@@ -157,14 +189,16 @@ export function IncidentRow({ incident: { id, repository, title, insertedAt, own
   )
 }
 
-function FilterOption({ icon, filter, onClick, next }) {
+function FilterOption({
+  icon, filter, onClick, next,
+}) {
   return (
     <Box
       direction="row"
       align="center"
       fill="horizontal"
       onClick={onClick}
-      hoverIndicator="light-2" 
+      hoverIndicator="light-2"
       pad={{ horizontal: 'small', vertical: 'xsmall' }}
     >
       <Box
@@ -249,11 +283,11 @@ export function FilterSelect() {
         direction="row"
         gap="xsmall"
         align="center"
-        background="light-3"  
+        background="light-3"
         hoverIndicator="light-5"
         round="xsmall"
         onClick={() => setOpen(true)}
-        focusIndicator={false} 
+        focusIndicator={false}
         pad={{ horizontal: 'small', vertical: 'xsmall' }}
       >
         <FiltersI size="small" />
@@ -264,7 +298,7 @@ export function FilterSelect() {
           target={ref.current}
           onClickOutside={() => setOpen(false)}
           align={{ top: 'bottom' }}
-        > 
+        >
           <Box
             flex={false}
             width={FILTER_DROP_WIDTH}
@@ -272,27 +306,25 @@ export function FilterSelect() {
             <AlternatingBox>
               {setAlternate => (
                 <Box pad={{ vertical: 'xsmall' }}>
-                  <FilterOption 
+                  <FilterOption
                     icon={<Notification size="small" />}
-                    filter={IncidentFilter.NOTIFICATIONS} 
+                    filter={IncidentFilter.NOTIFICATIONS}
                     onClick={() => setFilters([...filters, { type: IncidentFilter.NOTIFICATIONS }])}
                   />
-                  <FilterOption 
+                  <FilterOption
                     icon={<User size="small" />}
-                    filter={IncidentFilter.FOLLOWING} 
+                    filter={IncidentFilter.FOLLOWING}
                     onClick={() => setFilters([...filters, { type: IncidentFilter.FOLLOWING }])}
                   />
                   <FilterOption
                     next
                     icon={<TagIcon size="small" />}
-                    filter={IncidentFilter.TAG} 
-                    onClick={() => setAlternate(
-                      <TagInput
-                        setFilters={setFilters}
-                        filters={filters}
-                        setAlternate={setAlternate}
-                      />
-                    )}
+                    filter={IncidentFilter.TAG}
+                    onClick={() => setAlternate(<TagInput
+                      setFilters={setFilters}
+                      filters={filters}
+                      setAlternate={setAlternate}
+                    />)}
                   />
                 </Box>
               )}
@@ -323,7 +355,7 @@ function Filters() {
           direction="row"
           round="xsmall"
           pad={{ vertical: '2px', horizontal: 'xsmall' }}
-          background="light-2" 
+          background="light-2"
           align="center"
           onClick={() => removeFilter(filter)}
           hoverIndicator="light-3"
@@ -371,7 +403,9 @@ function DropdownItem({ icon, text, onClick }) {
 function SortOptions() {
   const ref = useRef()
   const [open, setOpen] = useState(false)
-  const { sort, order, setSort, setOrder } = useContext(IncidentViewContext)
+  const {
+    sort, order, setSort, setOrder,
+  } = useContext(IncidentViewContext)
   const selectedSort = sort || IncidentSort.INSERTED_AT
   const selectedOrder = order || Order.DESC
 
@@ -438,7 +472,7 @@ export function IncidentToolbar() {
       flex={false}
       border={{ side: 'bottom', color: 'light-5' }}
       align="center"
-      direction="row" 
+      direction="row"
       pad={{ vertical: 'xsmall', horizontal: 'small' }}
     >
       <Filters />
@@ -486,11 +520,14 @@ export function Incidents() {
   const [sort, setSort] = useState(IncidentSort.INSERTED_AT)
   const [order, setOrder] = useState(Order.DESC)
   const { data, loading, fetchMore } = useQuery(INCIDENTS_Q, {
-    variables: { q, order, sort, filters }, 
+    variables: {
+      q, order, sort, filters,
+    },
     fetchPolicy: 'cache-and-network',
   })
 
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
+
   useEffect(() => {
     setBreadcrumbs([{ url: '/incidents', text: 'incidents' }])
   }, [setBreadcrumbs])
@@ -500,7 +537,11 @@ export function Incidents() {
   const { incidents: { edges, pageInfo } } = data
 
   return (
-    <IncidentViewContext.Provider value={{ filters, setFilters, order, setOrder, sort, setSort }}>
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
+    <IncidentViewContext.Provider value={{
+      filters, setFilters, order, setOrder, sort, setSort,
+    }}
+    >
       <Box fill>
         {!open && (
           <Box
@@ -513,7 +554,7 @@ export function Incidents() {
           >
             <FilterSelect />
             <Box fill="horizontal">
-              <TextInput 
+              <TextInput
                 plain
                 icon={<Search size="15px" />}
                 value={q || ''}

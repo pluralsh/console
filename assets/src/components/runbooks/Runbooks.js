@@ -4,7 +4,12 @@ import { useQuery } from '@apollo/react-hooks'
 
 import { useHistory, useParams } from 'react-router'
 
-import { ApplicationIcon, InstallationContext, hasIcon, useEnsureCurrent } from '../Installations'
+import {
+  ApplicationIcon,
+  InstallationContext,
+  hasIcon,
+  useEnsureCurrent,
+} from '../Installations'
 
 import { BreadcrumbsContext } from '../Breadcrumbs'
 
@@ -57,6 +62,7 @@ export function Runbooks() {
   })
 
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
+
   useEffect(() => {
     setBreadcrumbs([
       { text: 'runbooks', url: '/runbooks' },

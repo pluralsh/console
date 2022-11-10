@@ -1,7 +1,8 @@
 import { Box, Text, TextInput } from 'grommet'
 
-export function SuffixedInput({ suffix, value, onChange, placeholder }) {
-
+export function SuffixedInput({
+  suffix, value, onChange, placeholder,
+}) {
   return (
     <Box
       direction="row"
@@ -16,7 +17,7 @@ export function SuffixedInput({ suffix, value, onChange, placeholder }) {
       <Box
         flex={false}
         style={{ borderLeftStyle: 'none' }}
-        border={{ color: 'light-5' }} 
+        border={{ color: 'light-5' }}
         pad={{ horizontal: 'small' }}
         background="tone-light"
         height="37px"

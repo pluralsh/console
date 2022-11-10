@@ -7,22 +7,22 @@ import { EventType } from './constants'
 
 function EventIcon({ type }) {
   switch (type) {
-    case EventType.Normal:
-      return (
-        <StatusInfo
-          color="progress"
-          size="14px"
-        />
-      )
-    case EventType.Warning:
-      return (
-        <Alert
-          color="status-warning"
-          size="14px"
-        />
-      )
-    default:
-      return null
+  case EventType.Normal:
+    return (
+      <StatusInfo
+        color="progress"
+        size="14px"
+      />
+    )
+  case EventType.Warning:
+    return (
+      <Alert
+        color="status-warning"
+        size="14px"
+      />
+    )
+  default:
+    return null
   }
 }
 

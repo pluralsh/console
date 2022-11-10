@@ -1,5 +1,16 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react'
-import { Anchor, Box, Markdown, Text, ThemeContext } from 'grommet'
+import React, {
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+import {
+  Anchor,
+  Box,
+  Markdown,
+  Text,
+  ThemeContext,
+} from 'grommet'
 import { Button, SecondaryButton } from 'forge-core'
 import { normalizeColor } from 'grommet/utils'
 import { useMutation } from '@apollo/react-hooks'
@@ -43,7 +54,6 @@ function DisplayBox({ children, attributes }) {
 }
 
 function Attachment({ children, attributes, theme }) {
-
   const { accent, margin, ...rest } = attributes || {}
 
   return (
@@ -57,7 +67,8 @@ function Attachment({ children, attributes, theme }) {
         style={{
           borderLeftStyle: 'solid',
           borderLeftWidth: '2px',
-          borderLeftColor: accent ? normalizeColor(accent, theme) : 'rgba(35, 137, 215, 0.5)' }}
+          borderLeftColor: accent ? normalizeColor(accent, theme) : 'rgba(35, 137, 215, 0.5)',
+        }}
       >
         {recurse(children)}
       </Box>
@@ -92,7 +103,11 @@ function DisplayMarkdown({ attributes: { value, ...rest } }) {
   )
 }
 
-function Image({ attributes: { url, width, height, ...rest } }) {
+function Image({
+  attributes: {
+    url, width, height, ...rest
+  },
+}) {
   return (
     <img
       alt={url}
@@ -138,8 +153,8 @@ function DisplayButton({ attributes: { action, headline, ...rest } }) {
       <ActionPortal>
         <>
           {error && (
-            <ErrorModal 
-              error={error} 
+            <ErrorModal
+              error={error}
               modalHeader="Error executing runbook"
               header="GraphQl Error"
             />
@@ -153,8 +168,8 @@ function DisplayButton({ attributes: { action, headline, ...rest } }) {
   return (
     <>
       {error && (
-        <ErrorModal 
-          error={error} 
+        <ErrorModal
+          error={error}
           modalHeader="Error executing runbook"
           header="GraphQl Error"
         />
@@ -197,10 +212,12 @@ export function convertType(val, type) {
 function Input({ attributes, children }) {
   const { context, setContext, ...rest } = useContext(DisplayContext)
   const [value, setValue] = useState(children && children.length > 0 ? valueFrom(children[0], rest) : '')
+
   useEffect(() => {
     const { name } = attributes
     const val = value === '' ? null : value
     const converted = convertType(val, attributes.datatype)
+
     if (context[name] !== converted && converted) {
       setContext({ ...context, [name]: converted })
     }
@@ -217,6 +234,7 @@ function Input({ attributes, children }) {
 
 function valueFrom({ attributes: { datasource, path, doc } }, { datasources }) {
   const object = extract(datasources[datasource], doc)
+
   if (!object) return null
 
   return query(object, path)
@@ -234,7 +252,7 @@ function formatLegend(legend, properties) {
   if (!properties) return legend
 
   return Object.entries(properties)
-          .reduce((leg, [k, v]) => leg.replace(`$${k}`, v), legend)
+    .reduce((leg, [k, v]) => leg.replace(`$${k}`, v), legend)
 }
 
 function Timeseries({ attributes: { datasource, label } }) {
@@ -244,13 +262,13 @@ function Timeseries({ attributes: { datasource, label } }) {
     const legend = source && source.prometheus.legend
     const format = source && source.prometheus.format
     const metrics = prometheus.map(({ metric, values }) => ({
-      id: formatLegend(legend, metric), 
+      id: formatLegend(legend, metric),
       data: convertVals(values),
     }))
 
     return { metrics, format: ValueFormats[format] || (v => v) }
   }, [datasources, datasource])
-  
+
   return (
     <Box
       height="300px"
@@ -288,7 +306,11 @@ function TableRow({ data, columns }) {
   )
 }
 
-function Table({ attributes: { datasource, width, height, path }, children }) {
+function Table({
+  attributes: {
+    datasource, width, height, path,
+  }, children,
+}) {
   const { datasources } = useContext(DisplayContext)
   const entries = path ? query(datasources[datasource], path) : datasources[datasource]
 
@@ -325,31 +347,32 @@ function Table({ attributes: { datasource, width, height, path }, children }) {
 
 function parse(struct, index, theme) {
   const props = { ...struct, key: index, theme }
+
   switch (struct._type) {
-    case 'box':
-      return <DisplayBox {...props} />
-    case 'attachment':
-      return <Attachment {...props} />
-    case 'text':
-      return <DisplayText {...props} />
-    case 'markdown':
-      return <DisplayMarkdown {...props} />
-    case 'image':
-      return <Image {...props} />
-    case 'link':
-      return <Link {...props} />
-    case 'input':
-      return <Input {...props} />
-    case 'button':
-      return <DisplayButton {...props} />
-    case 'valueFrom':
-      return <ValueFrom {...props} />
-    case 'timeseries':
-      return <Timeseries {...props} />
-    case 'table':
-      return <Table {...props} />
-    default:
-      return null
+  case 'box':
+    return <DisplayBox {...props} />
+  case 'attachment':
+    return <Attachment {...props} />
+  case 'text':
+    return <DisplayText {...props} />
+  case 'markdown':
+    return <DisplayMarkdown {...props} />
+  case 'image':
+    return <Image {...props} />
+  case 'link':
+    return <Link {...props} />
+  case 'input':
+    return <Input {...props} />
+  case 'button':
+    return <DisplayButton {...props} />
+  case 'valueFrom':
+    return <ValueFrom {...props} />
+  case 'timeseries':
+    return <Timeseries {...props} />
+  case 'table':
+    return <Table {...props} />
+  default:
+    return null
   }
 }
 
@@ -361,6 +384,7 @@ export function Display({ data, root: { children, attributes } }) {
   const [context, setContext] = useState({})
 
   return (
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
     <DisplayContext.Provider value={{ datasources, context, setContext }}>
       <Box
         flex={false}

@@ -169,7 +169,7 @@ export default function Invite() {
                 label="Email"
                 value={email}
               />
-              <LabelledInput 
+              <LabelledInput
                 label="Name"
                 value={attributes.name}
                 placeholder="John Doe"

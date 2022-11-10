@@ -12,8 +12,8 @@ import { IncidentForm } from './CreateIncident'
 function UpdateInner({ incident }) {
   const history = useHistory()
   const [attributes, setAttributes] = useState({
-    title: incident.title, 
-    description: incident.description, 
+    title: incident.title,
+    description: incident.description,
     severity: incident.severity,
     status: incident.status,
   })

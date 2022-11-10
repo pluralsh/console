@@ -1,4 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import ReactDOM from 'react-dom'
 import { Editor, Range, Transforms } from 'slate'
 import {
@@ -16,50 +21,51 @@ function Portal({ children }) {
   return ReactDOM.createPortal(children, document.body)
 }
 
-export default function TypeaheadEditor({ editor, value, setValue, style, onOpen, searchQuery, handlers }) {
+export default function TypeaheadEditor({
+  editor, value, setValue, style, onOpen, searchQuery, handlers,
+}) {
   const ref = useRef()
   const [target, setTarget] = useState(null)
   const [index, setIndex] = useState(0)
   const [suggestions, setSuggestions] = useState([])
   const renderElement = useCallback(props => <Element {...props} />, [])
 
-  const onKeyDown = useCallback(
-    event => {
-      if (target) {
-        switch (event.key) {
-          case 'ArrowDown':
-            event.preventDefault()
-            setIndex(index >= suggestions.length - 1 ? 0 : index + 1)
-            break
-          case 'ArrowUp':
-            event.preventDefault()
-            setIndex(index <= 0 ? suggestions.length - 1 : index - 1)
-            break
-          case 'Tab':
-          case 'Enter':
-            if (target === null || suggestions.length === 0) break
-            event.preventDefault()
-            Transforms.select(editor, target)
-            insertMention(editor, suggestions[index].value)
-            setTarget(null)
-            break
-          case 'Escape':
-            event.preventDefault()
-            setTarget(null)
-            break
-          default:
+  const onKeyDown = useCallback(event => {
+    if (target) {
+      switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault()
+        setIndex(index >= suggestions.length - 1 ? 0 : index + 1)
+        break
+      case 'ArrowUp':
+        event.preventDefault()
+        setIndex(index <= 0 ? suggestions.length - 1 : index - 1)
+        break
+      case 'Tab':
+      case 'Enter':
+        if (target === null || suggestions.length === 0) break
+        event.preventDefault()
+        Transforms.select(editor, target)
+        insertMention(editor, suggestions[index].value)
+        setTarget(null)
+        break
+      case 'Escape':
+        event.preventDefault()
+        setTarget(null)
+        break
+      default:
             // ignore
-        }
       }
-    },
-    [index, suggestions, target]
-  )
+    }
+  },
+  [index, suggestions, target])
 
   useEffect(() => {
     if (target && suggestions.length > 0) {
       const el = ref.current
       const domRange = ReactEditor.toDOMRange(editor, target)
       const rect = domRange.getBoundingClientRect()
+
       el.style.top = `${rect.top + window.pageYOffset - 16 - el.clientHeight}px`
       el.style.left = `${rect.left + window.pageXOffset}px`
     }
@@ -94,9 +100,10 @@ export default function TypeaheadEditor({ editor, value, setValue, style, onOpen
             if (begin && (!wordBefore || wordBefore.offset > 1)) continue
 
             const beforeMatch = beforeText && beforeText.match(trigger)
+
             if (beforeMatch && afterMatch) {
               setTarget(beforeRange)
-              onOpen && onOpen(true)
+              if (onOpen) onOpen(true)
               searchQuery(beforeMatch[1], suggestions).then(setSuggestions)
               setIndex(0)
 
@@ -105,7 +112,7 @@ export default function TypeaheadEditor({ editor, value, setValue, style, onOpen
           }
         }
 
-        onOpen && onOpen(false)
+        if (onOpen) onOpen(false)
         setTarget(null)
       }}
     >
@@ -154,28 +161,30 @@ const SPECIAL_ELEMENTS = Object.values(EntityType)
 export const withMentions = editor => {
   const { isInline, isVoid } = editor
 
-  editor.isInline = element => SPECIAL_ELEMENTS.includes(element.type) ? true : isInline(element)
+  editor.isInline = element => (SPECIAL_ELEMENTS.includes(element.type) ? true : isInline(element))
 
-  editor.isVoid = element => SPECIAL_ELEMENTS.includes(element.type) ? true : isVoid(element)
+  editor.isVoid = element => (SPECIAL_ELEMENTS.includes(element.type) ? true : isVoid(element))
 
   return editor
 }
 
 const insertMention = (editor, val) => {
   const mention = val.type ? val : { text: `${val} ` }
+
   Transforms.insertNodes(editor, mention)
   Transforms.move(editor)
 }
 
 function Element(props) {
   const { attributes, children, element } = props
+
   switch (element.type) {
-    case EntityType.MENTION:
-      return <MentionElement {...props} />
-    case EntityType.EMOJI:
-      return <EmojiElement {...props} />
-    default:
-      return <div {...attributes}>{children}</div>
+  case EntityType.MENTION:
+    return <MentionElement {...props} />
+  case EntityType.EMOJI:
+    return <EmojiElement {...props} />
+  default:
+    return <div {...attributes}>{children}</div>
   }
 }
 

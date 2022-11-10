@@ -255,6 +255,7 @@ export default function EditUser() {
       fill
     >
       {open && <AllowAccess setOpen={setOpen} />}
+      {/* eslint-disable-next-line react/jsx-no-constructed-context-values */}
       <EditContext.Provider value={{ editing, setEditing }}>
         <Box
           fill

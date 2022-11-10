@@ -70,9 +70,9 @@ export function PinnedRunbooks({ border }) {
     <Box
       flex={false}
       style={{ overflow: 'auto', maxHeight: '25%' }}
-      fill="horizontal" 
+      fill="horizontal"
       pad={{ horizontal: 'medium', vertical: 'small' }}
-      gap="xsmall" 
+      gap="xsmall"
       border={border || { side: 'bottom' }}
     >
       {/* <Box direction='row' gap='xsmall' align='center'>
@@ -91,8 +91,8 @@ export function PinnedRunbooks({ border }) {
             align="center"
           >
             {books.map(book => (
-              <RunbookItem 
-                key={book.name} 
+              <RunbookItem
+                key={book.name}
                 runbook={book}
                 namespace={currentApplication.name}
               />

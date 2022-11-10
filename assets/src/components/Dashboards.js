@@ -44,6 +44,7 @@ export default function Dashboards() {
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const { setOnChange, currentApplication } = useContext(InstallationContext)
   const history = useHistory()
+
   useEffect(() => {
     setBreadcrumbs([
       { text: 'dashboards', url: '/dashboards' },
@@ -51,9 +52,11 @@ export default function Dashboards() {
     ])
   }, [currentApplication])
   useEffect(() => {
-    setOnChange({ func: ({ name }) => {
-      history.push(`/dashboards/${name}`)
-    } })
+    setOnChange({
+      func: ({ name }) => {
+        history.push(`/dashboards/${name}`)
+      },
+    })
   }, [])
 
   const [current, setCurrent] = useState(null)
@@ -61,6 +64,7 @@ export default function Dashboards() {
     variables: { repo: currentApplication.name },
     fetchPolicy: 'cache-and-network',
   })
+
   useEffect(() => {
     if (data && data.dashboards.length > 0) {
       setCurrent(data.dashboards[0])

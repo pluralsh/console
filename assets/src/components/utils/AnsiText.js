@@ -3,12 +3,14 @@ import Anser from 'anser'
 import { escapeCarriageReturn } from 'escape-carriage'
 import { Box } from 'grommet'
 
-function textStyle({ bg, fg, decoration, ...rest }) {
+function textStyle({
+  bg, fg, decoration, ...rest
+}) {
   console.log(rest)
 
   return {
-    backgroundColor: bg && `rgb(${bg})`, 
-    fontWeight: decoration === 'bold' ? 'bold' : null, 
+    backgroundColor: bg && `rgb(${bg})`,
+    fontWeight: decoration === 'bold' ? 'bold' : null,
     color: fg && `rgb(${fg})`,
   }
 }

@@ -2,7 +2,14 @@ import { useCallback, useState } from 'react'
 import { Box, Text } from 'grommet'
 import { useMutation, useQuery } from 'react-apollo'
 import { useParams } from 'react-router'
-import { Confirm, TabContent, TabHeader, TabHeaderItem, Tabs, Trash } from 'forge-core'
+import {
+  Confirm,
+  TabContent,
+  TabHeader,
+  TabHeaderItem,
+  Tabs,
+  Trash,
+} from 'forge-core'
 
 import { LoopingLogo } from '../utils/AnimatedLogo'
 
@@ -39,7 +46,7 @@ export function DeleteJob({ name, namespace, refetch }) {
   const [mutation, { loading }] = useMutation(DELETE_JOB, {
     variables: { name, namespace },
     onCompleted: () => {
-      setConfirm(false); refetch() 
+      setConfirm(false); refetch()
     },
   })
 
@@ -59,10 +66,10 @@ export function DeleteJob({ name, namespace, refetch }) {
           description="The pod will be replaced by it's managing controller"
           loading={loading}
           cancel={e => {
-            ignore(e); setConfirm(false) 
+            ignore(e); setConfirm(false)
           }}
           submit={e => {
-            ignore(e); mutation() 
+            ignore(e); mutation()
           }}
         />
       )}
@@ -114,7 +121,7 @@ function Spec({ spec }) {
 export default function Job() {
   const { repo, name } = useParams()
   const { data, refetch } = useQuery(JOB_Q, {
-    variables: { name, namespace: repo }, 
+    variables: { name, namespace: repo },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })

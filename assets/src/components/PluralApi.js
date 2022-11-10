@@ -38,6 +38,7 @@ export function PluralApi({ children }) {
   }, [token])
 
   return (
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
     <PluralApiContext.Provider value={{ socket }}>
       <ApolloProvider client={client}>
         <CurrentUser>

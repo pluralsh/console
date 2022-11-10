@@ -1,8 +1,28 @@
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { Confirm, Node as NodeI, TabContent, TabHeader, TabHeaderItem, Tabs, Trash } from 'forge-core'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import {
+  Confirm,
+  Node as NodeI,
+  TabContent,
+  TabHeader,
+  TabHeaderItem,
+  Tabs,
+  Trash,
+} from 'forge-core'
 import { useMutation, useQuery } from 'react-apollo'
 
-import { Box, Drop, Text, ThemeContext } from 'grommet'
+import {
+  Box,
+  Drop,
+  Text,
+  ThemeContext,
+} from 'grommet'
 import { useHistory, useParams } from 'react-router'
 
 import { ServerCluster } from 'grommet-icons'
@@ -29,8 +49,20 @@ import { ClusterMetrics as Metrics, NodeMetrics, POLL_INTERVAL } from './constan
 import { Events } from './Event'
 
 import { Metadata, mapify } from './Metadata'
-import { HeaderItem, PodList, RowItem, ignore, podResources } from './Pod'
-import { CLUSTER_SATURATION, DELETE_NODE, NODES_Q, NODE_METRICS_Q, NODE_Q } from './queries'
+import {
+  HeaderItem,
+  PodList,
+  RowItem,
+  ignore,
+  podResources,
+} from './Pod'
+import {
+  CLUSTER_SATURATION,
+  DELETE_NODE,
+  NODES_Q,
+  NODE_METRICS_Q,
+  NODE_Q,
+} from './queries'
 
 function NodeRowHeader() {
   return (
@@ -76,7 +108,9 @@ function NodeRowHeader() {
   )
 }
 
-function UtilBar({ capacity, usage, format, modifier }) {
+function UtilBar({
+  capacity, usage, format, modifier,
+}) {
   const ref = useRef()
   const [hover, setHover] = useState(false)
   const theme = useContext(ThemeContext)
@@ -130,7 +164,7 @@ export function DeleteNode({ name, refetch }) {
   const [mutation, { loading }] = useMutation(DELETE_NODE, {
     variables: { name },
     onCompleted: () => {
-      setConfirm(false); refetch() 
+      setConfirm(false); refetch()
     },
   })
 
@@ -156,10 +190,10 @@ export function DeleteNode({ name, refetch }) {
           description="The node will be replaced within its autoscaling group."
           loading={loading}
           cancel={e => {
-            ignore(e); setConfirm(false) 
+            ignore(e); setConfirm(false)
           }}
           submit={e => {
-            ignore(e); mutation() 
+            ignore(e); mutation()
           }}
         />
       )}
@@ -272,7 +306,9 @@ const podContainers = pods => (
     .flat()
 )
 
-function NodeGraphs({ status: { capacity }, pods, name, usage }) {
+function NodeGraphs({
+  status: { capacity }, pods, name, usage,
+}) {
   const { requests, limits } = useMemo(() => {
     const containers = podContainers(pods)
     const requests = podResources(containers, 'requests')
@@ -321,7 +357,9 @@ function NodeGraphs({ status: { capacity }, pods, name, usage }) {
 
 const round = x => Math.round(x * 100) / 100
 
-const SimpleGauge = React.memo(({ value, total, title, name }) => {
+const SimpleGauge = React.memo(({
+  value, total, title, name,
+}) => {
   const theme = useContext(ThemeContext)
   const val = value || 0
   const tot = total || 0
@@ -361,7 +399,9 @@ const SimpleGauge = React.memo(({ value, total, title, name }) => {
   )
 })
 
-const LayeredGauage = React.memo(({ requests, limits, usage, total, title, name, format }) => {
+const LayeredGauage = React.memo(({
+  requests, limits, usage, total, title, name, format,
+}) => {
   const theme = useContext(ThemeContext)
   const data = useMemo(() => {
     const reqs = requests || 0
@@ -500,7 +540,9 @@ function ClusterGauges({ nodes, usage }) {
 
   const result = useMemo(() => {
     if (!data) return null
-    const { cpuRequests, cpuLimits, memRequests, memLimits, pods } = data
+    const {
+      cpuRequests, cpuLimits, memRequests, memLimits, pods,
+    } = data
 
     const datum = data => round(parseFloat(data[0].values[0].value))
 
@@ -515,7 +557,9 @@ function ClusterGauges({ nodes, usage }) {
 
   if (!result) return null
 
-  const { cpuRequests, cpuLimits, memRequests, memLimits, pods } = result
+  const {
+    cpuRequests, cpuLimits, memRequests, memLimits, pods,
+  } = result
 
   return (
     <Box
@@ -578,6 +622,7 @@ function ClusterMetrics({ nodes, usage }) {
 
 function nodeReadiness(status) {
   const ready = status.conditions.find(({ type }) => type === 'Ready')
+
   if (ready.status === 'True') return Readiness.Ready
 
   return Readiness.InProgress
@@ -591,6 +636,7 @@ export function Node() {
     fetchPolicy: 'cache-and-network',
   })
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
+
   useEffect(() => {
     setBreadcrumbs([
       { text: 'nodes', url: '/nodes' },

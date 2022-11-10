@@ -106,7 +106,9 @@ function PodGraphs({ cpu, mem, tick }) {
   )
 }
 
-export function Metric({ name, namespace, regex, duration: { step, offset, tick } }) {
+export function Metric({
+  name, namespace, regex, duration: { step, offset, tick },
+}) {
   const { data } = useQuery(USAGE_Q, {
     variables: {
       cpu: `sum(rate(container_cpu_usage_seconds_total{namespace="${namespace}",pod=~"${name}${regex}"}[5m]))`,
@@ -121,7 +123,9 @@ export function Metric({ name, namespace, regex, duration: { step, offset, tick 
 
   if (!data) return <LoopingLogo dark />
 
-  const { cpu, mem, podCpu, podMem } = data
+  const {
+    cpu, mem, podCpu, podMem,
+  } = data
 
   return (
     <Box

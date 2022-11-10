@@ -1,5 +1,10 @@
 import { useCallback, useMemo, useState } from 'react'
-import { Box, Layer, Stack, Text } from 'grommet'
+import {
+  Box,
+  Layer,
+  Stack,
+  Text,
+} from 'grommet'
 import { Check, ModalHeader } from 'forge-core'
 
 import { ResponsiveRadar } from '@nivo/radar'
@@ -44,7 +49,9 @@ function CostRadar({ cost, scalar }) {
             keys={['cost']}
             indexBy="dim"
             valueFormat={val => `$${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-            margin={{ top: 50, right: 50, bottom: 50, left: 50 }}
+            margin={{
+              top: 50, right: 50, bottom: 50, left: 50,
+            }}
             borderColor={{ from: 'color' }}
             dotBorderWidth={2}
             fillOpacity={0.7}

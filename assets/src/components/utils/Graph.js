@@ -45,7 +45,7 @@ function SliceTooltip({ point: { serieColor, serieId, data } }) {
         weight={500}
       >{serieId}
       </Text>
-      <Text size="small">~> x:</Text>
+      <Text size="small">{'~>'} x:</Text>
       <Text
         size="small"
         weight="bold"
@@ -62,34 +62,34 @@ function SliceTooltip({ point: { serieColor, serieId, data } }) {
 }
 
 export const COLOR_MAP = [
-  'blue', 
-  'orange', 
-  'green', 
-  'purple', 
+  'blue',
+  'orange',
+  'green',
+  'purple',
   'red',
 
-  'blue-light', 
-  'orange-light', 
-  'green-light', 
-  'purple-light', 
+  'blue-light',
+  'orange-light',
+  'green-light',
+  'purple-light',
   'red-light',
-  
-  'blue-dark', 
-  'orange-dark', 
-  'green-dark', 
-  'purple-dark', 
+
+  'blue-dark',
+  'orange-dark',
+  'green-dark',
+  'purple-dark',
   'red-dark',
 
-  'blue-light-2', 
-  'orange-light-2', 
-  'green-light-2', 
-  'purple-light-2', 
+  'blue-light-2',
+  'orange-light-2',
+  'green-light-2',
+  'purple-light-2',
   'red-light-2',
 
-  'blue-dark-2', 
-  'orange-dark-2', 
-  'green-dark-2', 
-  'purple-dark-2', 
+  'blue-dark-2',
+  'orange-dark-2',
+  'green-dark-2',
+  'purple-dark-2',
   'red-dark-2',
 ]
 
@@ -108,6 +108,7 @@ export function Graph({ data, yFormat, tickRotation }) {
 
     return data
   }, [data, selected])
+
   if (graph.length === 0) return <Text size="small">no data</Text>
 
   const hasData = !!graph[0].data[0]
@@ -124,7 +125,9 @@ export function Graph({ data, yFormat, tickRotation }) {
       }}
       data={graph}
         // curve='catmullRom'
-      margin={{ top: 50, right: 110, bottom: 50, left: 70 }}
+      margin={{
+        top: 50, right: 110, bottom: 50, left: 70,
+      }}
       areaOpacity={0.6}
       lineWidth={2}
       enableArea
@@ -135,7 +138,9 @@ export function Graph({ data, yFormat, tickRotation }) {
       animate={false}
         // enableGridX={false}
       xScale={{ type: 'time', format: 'native' }}
-      yScale={{ type: 'linear', min: 0, max: 'auto', stacked: true, reverse: false }}
+      yScale={{
+        type: 'linear', min: 0, max: 'auto', stacked: true, reverse: false,
+      }}
       colors={colorMap}
       yFormat={yFormat}
       xFormat={dateFormat}
@@ -164,7 +169,7 @@ export function Graph({ data, yFormat, tickRotation }) {
       legends={[
         {
           anchor: 'bottom-right',
-          onClick: ({ id }) => selected ? setSelected(null) : setSelected(id),
+          onClick: ({ id }) => (selected ? setSelected(null) : setSelected(id)),
           direction: 'column',
           justify: false,
           translateX: 100,

@@ -6,7 +6,7 @@ export function SearchIcon({ border, size }) {
       flex={false}
       width={`${size + 10}px`}
       height={`${size + 10}px`}
-      pad="small" 
+      pad="small"
       border={{ side: 'all', color: border }}
       align="center"
       justify="center"

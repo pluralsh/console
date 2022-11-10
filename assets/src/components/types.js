@@ -1,4 +1,9 @@
-import { Check, Deploy, Install, Reload } from 'forge-core'
+import {
+  Check,
+  Deploy,
+  Install,
+  Reload,
+} from 'forge-core'
 
 export const BuildStatus = {
   SUCCESSFUL: 'SUCCESSFUL',

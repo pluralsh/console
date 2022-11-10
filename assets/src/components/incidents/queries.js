@@ -1,7 +1,16 @@
 import { gql } from 'apollo-boost'
 
 import { PageInfo } from '../graphql/base'
-import { FileFragment, FollowerFragment, IncidentFragment, IncidentHistoryFragment, IncidentMessageFragment, NotificationFragment, PostmortemFragment, RepoFragment } from '../graphql/incidents'
+import {
+  FileFragment,
+  FollowerFragment,
+  IncidentFragment,
+  IncidentHistoryFragment,
+  IncidentMessageFragment,
+  NotificationFragment,
+  PostmortemFragment,
+  RepoFragment,
+} from '../graphql/incidents'
 
 export const SEARCH_USERS = gql`
   query Search($incidentId: ID!, $q: String!, $cursor: String) {

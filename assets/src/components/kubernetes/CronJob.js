@@ -1,5 +1,10 @@
 import { Anchor, Box, Text } from 'grommet'
-import { TabContent, TabHeader, TabHeaderItem, Tabs } from 'forge-core'
+import {
+  TabContent,
+  TabHeader,
+  TabHeaderItem,
+  Tabs,
+} from 'forge-core'
 import { useQuery } from 'react-apollo'
 
 import { useHistory, useParams } from 'react-router'
@@ -184,7 +189,7 @@ function Jobs({ jobs, refetch }) {
 export default function CronJob() {
   const { repo, name } = useParams()
   const { data, refetch } = useQuery(CRON_JOB_Q, {
-    variables: { name, namespace: repo }, 
+    variables: { name, namespace: repo },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })

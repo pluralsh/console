@@ -1,4 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { Box } from 'grommet'
 import InfiniteLoader from 'react-window-infinite-loader'
 import { VariableSizeList } from 'react-window'
@@ -30,22 +35,32 @@ function areEqual(prevProps, nextProps) {
   )
 }
 
-const Item = ({ index, mapper, parentRef, isItemLoaded, placeholder, items, style }) => {
+const Item = ({
+  index, mapper, parentRef, isItemLoaded, placeholder, items, style,
+}) => {
   if (!isItemLoaded(index)) {
     return placeholder && placeholder(index)
   }
 
-  return mapper(items[index], items[index + 1] || {}, parentRef, style)
+  return mapper(
+    items[index], items[index + 1] || {}, parentRef, style
+  )
 }
 
-const ItemWrapper = React.memo(({ data: { setSize, width, refreshKey, items, ...rest }, style, index, ...props }) => {
+const ItemWrapper = React.memo(({
+  data: {
+    setSize, width, refreshKey, items, ...rest
+  }, style, index, ...props
+}) => {
   const [rowRef, setRowRef] = useState(null)
   const item = items[index]
+
   useEffect(() => {
     if (!rowRef) return
     const onTimeout = () => {
       setSize(index, rowRef.getBoundingClientRect().height)
     }
+
     onTimeout()
     const timeouts = [10, 50, 100, 500, 1000].map(timeout => setTimeout(onTimeout, timeout))
 
@@ -81,8 +96,12 @@ const ItemWrapper = React.memo(({ data: { setSize, width, refreshKey, items, ...
   )
 }, areEqual)
 
-const buildItemData = memoize((setSize, mapper, isItemLoaded, items, parentRef, width, placeholder, refreshKey, props) => (
-  { setSize, mapper, isItemLoaded, items, parentRef, width, placeholder, refreshKey, ...props }
+const buildItemData = memoize((
+  setSize, mapper, isItemLoaded, items, parentRef, width, placeholder, refreshKey, props
+) => (
+  {
+    setSize, mapper, isItemLoaded, items, parentRef, width, placeholder, refreshKey, ...props,
+  }
 ))
 
 export default function SmoothScroller({
@@ -94,7 +113,7 @@ export default function SmoothScroller({
   const loader = useRef()
   const setSize = useCallback((index, size) => {
     sizeMap.current = { ...sizeMap.current, [index]: size }
-    listRef && listRef.resetAfterIndex(index, true)
+    if (listRef) listRef.resetAfterIndex(index, true)
   }, [sizeMap, listRef])
   const getSize = useCallback(index => sizeMap.current[index] || 50, [sizeMap])
   const count = items.length
@@ -107,7 +126,7 @@ export default function SmoothScroller({
       loader.current.resetloadMoreItemsCache()
     }
     mounted.current = true
-    loader.current && setLoader(loader.current)
+    if (loader.current) setLoader(loader.current)
   }, [refreshKey, mounted, loader, setLoader])
 
   return (
@@ -128,14 +147,16 @@ export default function SmoothScroller({
               itemCount={itemCount}
               itemSize={getSize}
               itemKey={index => `${refreshKey}:${index}`}
-              itemData={buildItemData(setSize, mapper, isItemLoaded, items, listRef, width, placeholder, refreshKey, props)}
+              itemData={buildItemData(
+                setSize, mapper, isItemLoaded, items, listRef, width, placeholder, refreshKey, props
+              )}
               onScroll={({ scrollOffset }) => handleScroll && handleScroll(scrollOffset > (height / 2))}
               onItemsRendered={ctx => {
-                props.onRendered && props.onRendered(ctx)
+                if (props.onRendered) props.onRendered(ctx)
                 onItemsRendered(ctx)
               }}
               ref={listRef => {
-                setListRef && setListRef(listRef)
+                if (setListRef) setListRef(listRef)
                 ref(listRef)
               }}
               {...props}

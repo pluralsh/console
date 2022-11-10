@@ -8,7 +8,7 @@ export function UserRow({ user, next }) {
       pad="small"
       direction="row"
       align="center"
-      gap="small" 
+      gap="small"
       border={next ? { side: 'bottom', color: 'tone-medium' } : null}
     >
       <Avatar

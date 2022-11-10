@@ -1,5 +1,6 @@
 export function download(url, name) {
   const tempLink = document.createElement('a')
+
   tempLink.style.display = 'none'
   tempLink.href = url
   tempLink.setAttribute('download', name || 'true')

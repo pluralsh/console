@@ -151,7 +151,9 @@ export function EnsureLogin({ children }) {
   } = data
 
   return (
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
     <IncidentContext.Provider value={{ clusterInformation }}>
+      {/* eslint-disable-next-line react/jsx-no-constructed-context-values */}
       <LoginContext.Provider value={{ me, configuration, token: externalToken }}>
         {children}
       </LoginContext.Provider>

@@ -1,9 +1,25 @@
-import React, { useCallback, useContext, useRef, useState } from 'react'
-import { Button, Configuration, ModalHeader, Select, Trash } from 'forge-core'
+import React, {
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+} from 'react'
+import {
+  Button,
+  Configuration,
+  ModalHeader,
+  Select,
+  Trash,
+} from 'forge-core'
 
 import { useMutation, useQuery } from 'react-apollo'
 
-import { Box, Drop, Layer, Text } from 'grommet'
+import {
+  Box,
+  Drop,
+  Layer,
+  Text,
+} from 'grommet'
 
 import { LabelledInput } from '../utils/LabelledInput'
 import { CREATE_POLICY, DELETE_POLICY, UPGRADE_POLICIES } from '../graphql/builds'
@@ -16,7 +32,9 @@ const PolicyContext = React.createContext({})
 
 const toSelect = v => ({ label: v, value: v })
 
-export function Icon({ tooltip, icon, iconProps, onClick, background, hoverIndicator }) {
+export function Icon({
+  tooltip, icon, iconProps, onClick, background, hoverIndicator,
+}) {
   const ref = useRef()
   const [hover, setHover] = useState(false)
 
@@ -61,7 +79,7 @@ function UpgradePolicy({ policy }) {
     update: (cache, { data: { deleteUpgradePolicy } }) => updateCache(cache, {
       query: UPGRADE_POLICIES,
       update: prev => ({
-        ...prev, 
+        ...prev,
         upgradePolicies: prev.upgradePolicies.filter(({ id }) => id !== deleteUpgradePolicy.id),
       }),
     }),
@@ -215,9 +233,10 @@ export function UpgradePolicies() {
   const close = useCallback(() => setModal(null), [setModal])
 
   return (
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
     <PolicyContext.Provider value={{ modal, setModal, close }}>
       <>
-        <Icon 
+        <Icon
           icon={Configuration}
           tooltip="upgrade settings"
           hoverIndicator="card"

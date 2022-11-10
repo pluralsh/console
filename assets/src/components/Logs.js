@@ -1,5 +1,16 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { Box, Stack, Text, TextInput } from 'grommet'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+import {
+  Box,
+  Stack,
+  Text,
+  TextInput,
+} from 'grommet'
 import { useQuery } from 'react-apollo'
 import TinyQueue from 'tinyqueue'
 
@@ -7,7 +18,12 @@ import moment from 'moment'
 
 import { Up } from 'grommet-icons'
 
-import { Check as Checkmark, Close, Download, Explore as Search } from 'forge-core'
+import {
+  Check as Checkmark,
+  Close,
+  Download,
+  Explore as Search,
+} from 'forge-core'
 
 import { useHistory, useParams } from 'react-router'
 
@@ -23,7 +39,12 @@ import { LOGS_Q } from './graphql/dashboards'
 import { BreadcrumbsContext } from './Breadcrumbs'
 
 import { BUILD_PADDING } from './Builds'
-import { ApplicationIcon, InstallationContext, hasIcon, useEnsureCurrent } from './Installations'
+import {
+  ApplicationIcon,
+  InstallationContext,
+  hasIcon,
+  useEnsureCurrent,
+} from './Installations'
 import LegacyScroller from './utils/LegacyScroller'
 
 import { toMap, useQueryParams } from './utils/query'
@@ -67,22 +88,23 @@ function determineLevel(line) {
 
 function borderColor(lvl) {
   switch (lvl) {
-    case Level.FATAL:
-      return 'success'
-    case Level.ERROR:
-      return 'success'
-    case Level.WARN:
-      return 'status-warning'
-    case Level.INFO:
-      return 'status-ok'
-    default:
-      return 'dark-6'
+  case Level.FATAL:
+    return 'success'
+  case Level.ERROR:
+    return 'success'
+  case Level.WARN:
+    return 'status-warning'
+  case Level.INFO:
+    return 'status-ok'
+  default:
+    return 'dark-6'
   }
 }
 
 // ghostbusters!
 function* crossStreams(streams) {
   const q = new TinyQueue([], ({ head: { timestamp: left } }, { head: { timestamp: right } }) => right - left)
+
   for (const stream of streams) {
     if (!stream.values || !stream.values[0]) continue
     q.push({ head: stream.values[0], stream, ind: 0 })
@@ -90,6 +112,7 @@ function* crossStreams(streams) {
 
   while (q.length) {
     const { head, stream, ind } = q.pop()
+
     yield { line: head, level: determineLevel(head.value), stream: stream.stream }
     if (stream.values[ind + 1]) {
       q.push({ head: stream.values[ind + 1], stream, ind: ind + 1 })
@@ -225,11 +248,14 @@ function LogInfo({ stream, stamp }) {
   )
 }
 
-function LogContent({ listRef, setListRef, logs, name, loading, fetchMore, onScroll, search, setLoader }) {
+function LogContent({
+  listRef, setListRef, logs, name, loading, fetchMore, onScroll, search, setLoader,
+}) {
   const [done, setDone] = useState(false)
   const end = useMemo(() => last(logs), [logs])
   const lines = useMemo(() => [...crossStreams(logs)], [logs])
-  const start = useMemo(() => lines.length > 0 ? `${last(lines).line.timestamp}` : null, [lines])
+  const start = useMemo(() => (lines.length > 0 ? `${last(lines).line.timestamp}` : null), [lines])
+
   useEffect(() => {
     if (end && !end.values) {
       setDone(true)
@@ -312,8 +338,9 @@ function ScrollIndicator({ live, returnToTop }) {
 function downloadUrl(q, end, repo) {
   const url = `/v1/logs/${repo}/download`
   const params = Object.entries({ q, end })
-  .map(kv => kv.map(encodeURIComponent).join('='))
-  .join('&')
+    .map(kv => kv.map(encodeURIComponent).join('='))
+    .join('&')
+
   console.log(params)
 
   return `${url}?${params}`
@@ -323,6 +350,7 @@ async function download(url, name) {
   console.log(url)
   const resp = await fetch(url, { headers: { Authorization: `Bearer ${fetchToken()}` } })
   const blob = await resp.blob()
+
   fileDownload(blob, name)
 }
 
@@ -332,7 +360,9 @@ export default function Logs({ application: { name }, query }) {
   const [live, setLive] = useState(true)
   const [loader, setLoader] = useState(null)
 
-  const { data, loading, fetchMore, refetch } = useQuery(LOGS_Q, {
+  const {
+    data, loading, fetchMore, refetch,
+  } = useQuery(LOGS_Q, {
     variables: { query, limit: LIMIT },
     pollInterval: live ? POLL_INTERVAL : 0,
   })
@@ -344,6 +374,7 @@ export default function Logs({ application: { name }, query }) {
   }, [setLive, listRef, loader])
 
   return (
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
     <FlyoutContext.Provider value={{ setFlyout }}>
       <Box
         direction="row"
@@ -437,11 +468,14 @@ function selectedFilter(labels, search, spec) {
   return true
 }
 
-function LogFilters({ namespace, labels, search, setSearch, setLabels }) {
+function LogFilters({
+  namespace, labels, search, setSearch, setLabels,
+}) {
   const { data } = useQuery(LOG_FILTER_Q, { variables: { namespace } })
   const select = useCallback(({ query, labels }) => {
     if (labels) {
       const mapified = labels.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {})
+
       console.log(mapified)
       setLabels(mapified)
     }
@@ -451,6 +485,7 @@ function LogFilters({ namespace, labels, search, setSearch, setLabels }) {
     setSearch('')
     setLabels({})
   }, [setSearch, setLabels])
+
   if (!data || data.logFilters.length === 0) return null
 
   const { logFilters } = data
@@ -589,6 +624,7 @@ export function LogViewer() {
   const addLabel = useCallback((name, value) => setLabels({ ...labels, [name]: value }), [labels, setLabels])
   const removeLabel = useCallback(name => {
     const { [name]: _val, ...rest } = labels
+
     setLabels(rest)
   }, [labels, setLabels])
 
@@ -599,6 +635,7 @@ export function LogViewer() {
   const logQuery = `{${labelQuery}}${searchQuery}`
 
   return (
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
     <LabelContext.Provider value={{ addLabel, removeLabel, labels: labelList }}>
       <Box
         fill

@@ -13,13 +13,15 @@ function scaling(scale) {
   return { transform: `scale(${scale})` }
 }
 
-const image = (img, dark) => img.replace('{color}', dark ? 'wht' : 'blk') 
+const image = (img, dark) => img.replace('{color}', dark ? 'wht' : 'blk')
 
-export function LoopingLogo({ nofill, height, scale, dark, still }) {
+export function LoopingLogo({
+  nofill, height, scale, dark, still,
+}) {
   return (
     <Box
       background={dark ? 'backgroundColor' : 'plrl-white'}
-      fill={!nofill} 
+      fill={!nofill}
       height={height}
       align="center"
       justify="center"

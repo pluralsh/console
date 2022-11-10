@@ -23,6 +23,7 @@ export const CurrentUserContext = React.createContext({})
 
 export default function CurrentUser({ children }) {
   const { loading, error, data } = useQuery(ME_Q)
+
   useNotificationSubscription()
 
   if (loading) return null

@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Box, Text } from 'grommet'
-import { TabContent, TabHeader, TabHeaderItem, Tabs } from 'forge-core'
+import {
+  TabContent,
+  TabHeader,
+  TabHeaderItem,
+  Tabs,
+} from 'forge-core'
 import { useQuery } from 'react-apollo'
 
 import { useParams } from 'react-router'
@@ -24,7 +29,11 @@ import { Container, LogLink, logUrl } from './utils'
 
 import { ScalingRecommenderModal } from './ScalingRecommender'
 
-function Status({ status: { currentReplicas, updatedReplicas, readyReplicas, replicas }, metadata }) {
+function Status({
+  status: {
+    currentReplicas, updatedReplicas, readyReplicas, replicas,
+  }, metadata,
+}) {
   return (
     <Container header="Status">
       <Box
@@ -39,9 +48,9 @@ function Status({ status: { currentReplicas, updatedReplicas, readyReplicas, rep
           align="center"
           justify="center"
         >
-          <Pie 
-            success={readyReplicas} 
-            progress={replicas - readyReplicas} 
+          <Pie
+            success={readyReplicas}
+            progress={replicas - readyReplicas}
             error={0}
           />
         </Box>
@@ -85,12 +94,13 @@ export default function StatefulSet() {
   const [duration, setDuration] = useState(DURATIONS[0])
   const { name, repo } = useParams()
   const { data, refetch } = useQuery(STATEFUL_SET_Q, {
-    variables: { name, namespace: repo }, 
+    variables: { name, namespace: repo },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
 
   const { update } = useIntercom()
+
   useEffect(() => {
     update({ hideDefaultLauncher: true })
 

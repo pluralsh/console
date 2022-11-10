@@ -10,7 +10,12 @@ import { StatusCritical } from 'grommet-icons'
 import { chunk } from '../utils/array'
 
 import { BreadcrumbsContext } from './Breadcrumbs'
-import { ApplicationIcon, InstallationContext, hasIcon, useEnsureCurrent } from './Installations'
+import {
+  ApplicationIcon,
+  InstallationContext,
+  hasIcon,
+  useEnsureCurrent,
+} from './Installations'
 import { BUILD_PADDING } from './Builds'
 
 import Icon from './kubernetes/Icon'
@@ -57,23 +62,24 @@ export function ReadyIcon({ size, readiness, showIcon }) {
   let icon = <StatusCritical size="small" />
   let anim = null
   let defaultSize = '20px'
+
   switch (readiness) {
-    case Readiness.Ready:
-      color = 'success'
-      icon = <Check size="small" />
-      break
-    case Readiness.InProgress:
-      color = 'orange-dark'
-      anim = PulsyDiv
-      icon = null
-      defaultSize = '16px'
-      break
-    case Readiness.Complete:
-      color = 'tone-medium'
-      icon = <Check size="small" />
-      break
-    default:
-      break
+  case Readiness.Ready:
+    color = 'success'
+    icon = <Check size="small" />
+    break
+  case Readiness.InProgress:
+    color = 'orange-dark'
+    anim = PulsyDiv
+    icon = null
+    defaultSize = '16px'
+    break
+  case Readiness.Complete:
+    color = 'tone-medium'
+    icon = <Check size="small" />
+    break
+  default:
+    break
   }
 
   return (
@@ -93,7 +99,11 @@ export function ReadyIcon({ size, readiness, showIcon }) {
   )
 }
 
-function Component({ component: { group, kind, name, status }, width }) {
+function Component({
+  component: {
+    group, kind, name, status,
+  }, width,
+}) {
   const { repo } = useParams()
   const history = useHistory()
 
@@ -122,6 +132,7 @@ export default function Application() {
   const history = useHistory()
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const { setOnChange, currentApplication } = useContext(InstallationContext)
+
   useEffect(() => {
     setBreadcrumbs([
       { text: 'components', url: '/components' },

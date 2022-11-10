@@ -16,5 +16,5 @@ export function extract(data, doc) {
 
   const raw = deepFetch(data, doc)
 
-  return JSON.parse(raw) 
+  return JSON.parse(raw)
 }

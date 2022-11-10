@@ -1,8 +1,21 @@
 import React, { useRef, useState } from 'react'
-import { Box, Layer, Text, TextInput } from 'grommet'
+import {
+  Box,
+  Layer,
+  Text,
+  TextInput,
+} from 'grommet'
 import { useApolloClient, useMutation, useQuery } from 'react-apollo'
 
-import { AddUser, Button, EditField as Edit, Group, ModalHeader, TooltipContent, Trash } from 'forge-core'
+import {
+  AddUser,
+  Button,
+  EditField as Edit,
+  Group,
+  ModalHeader,
+  TooltipContent,
+  Trash,
+} from 'forge-core'
 
 import { FixedScroller } from '../utils/SmoothScroller'
 
@@ -12,7 +25,13 @@ import { LoopingLogo } from '../utils/AnimatedLogo'
 import Avatar from './Avatar'
 import { SearchIcon, addGroupMember, deleteGroup } from './utils'
 import { fetchUsers } from './Typeaheads'
-import { CREATE_GROUP_MEMBERS, DELETE_GROUP, DELETE_GROUP_MEMBER, GROUP_MEMBERS, UPDATE_GROUP } from './queries'
+import {
+  CREATE_GROUP_MEMBERS,
+  DELETE_GROUP,
+  DELETE_GROUP_MEMBER,
+  GROUP_MEMBERS,
+  UPDATE_GROUP,
+} from './queries'
 
 const GroupMemberRow = React.memo(({ group, user }) => {
   const [mutation] = useMutation(DELETE_GROUP_MEMBER, {
@@ -30,7 +49,7 @@ const GroupMemberRow = React.memo(({ group, user }) => {
       fill="horizontal"
       direction="row"
       gap="small"
-      border={{ side: 'bottom', color: 'light-3' }} 
+      border={{ side: 'bottom', color: 'light-3' }}
       align="center"
       pad={{ horizontal: 'small' }}
       height="75px"
@@ -55,10 +74,10 @@ const GroupMemberRow = React.memo(({ group, user }) => {
         </Box>
       </Box>
       <Box flex={false}>
-        <Icon 
-          icon={Trash} 
-          tooltip="delete" 
-          onClick={mutation} 
+        <Icon
+          icon={Trash}
+          tooltip="delete"
+          onClick={mutation}
           iconAttrs={{ color: 'error' }}
         />
       </Box>
@@ -134,7 +153,9 @@ function GroupMembers({ group }) {
   )
 }
 
-export function Icon({ icon, iconAttrs, tooltip, onClick, hover }) {
+export function Icon({
+  icon, iconAttrs, tooltip, onClick, hover,
+}) {
   const dropRef = useRef()
   const [open, setOpen] = useState(false)
 
@@ -320,9 +341,9 @@ export default function GroupRow({ group }) {
               />,
             })}
           />
-          <Icon 
-            icon={Group} 
-            tooltip="members" 
+          <Icon
+            icon={Group}
+            tooltip="members"
             onClick={() => setModal({
               text: `${group.name} members`,
               body: <GroupMembers group={group} />,
@@ -330,10 +351,10 @@ export default function GroupRow({ group }) {
               height: '60vh',
             })}
           />
-          <Icon 
+          <Icon
             icon={Trash}
-            tooltip="delete" 
-            onClick={mutation} 
+            tooltip="delete"
+            onClick={mutation}
             iconAttrs={{ color: 'error' }}
           />
         </Box>

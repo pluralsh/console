@@ -57,7 +57,11 @@ export function MetadataTag({ name, value, background }) {
   )
 }
 
-export function Metadata({ metadata: { name, namespace, labels, annotations } }) {
+export function Metadata({
+  metadata: {
+    name, namespace, labels, annotations,
+  },
+}) {
   return (
     <Container header="Metadata">
       <MetadataRow name="name">

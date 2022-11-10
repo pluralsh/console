@@ -1,7 +1,12 @@
 import React, { useContext, useRef, useState } from 'react'
 import { Previous } from 'grommet-icons'
 import { Check } from 'forge-core'
-import { Box, Drop, Text, ThemeContext } from 'grommet'
+import {
+  Box,
+  Drop,
+  Text,
+  ThemeContext,
+} from 'grommet'
 import { normalizeColor } from 'grommet/utils'
 
 import moment from 'moment'
@@ -65,7 +70,7 @@ function AlertDetail({ alert, setAlert }) {
           flex={false}
           pad="xsmall"
           round="xsmall"
-          hoverIndicator="tone-light" 
+          hoverIndicator="tone-light"
           onClick={e => {
             ignore(e); setAlert(null)
           }}
@@ -128,7 +133,7 @@ function Alert({ alert, setAlert }) {
       pad="small"
       round="xsmall"
       onClick={e => {
-        ignore(e); setAlert(alert) 
+        ignore(e); setAlert(alert)
       }}
       hoverIndicator="tone-light"
     >
@@ -158,7 +163,7 @@ function Alert({ alert, setAlert }) {
           </Box>
         </Box>
       </Box>
-    </Box> 
+    </Box>
   )
 }
 
@@ -183,8 +188,8 @@ function Alerts({ alerts }) {
     >
       {alerts.map((alert, ind) => (
         <Alert
-          key={`${ind}`} 
-          alert={alert} 
+          key={`${ind}`}
+          alert={alert}
           setAlert={setAlert}
           hasNext={ind < len - 1}
         />
@@ -209,12 +214,13 @@ export function StatusIcon({ status, size, innerSize }) {
         ref={ref}
         round="full"
         height={outer}
-        width={outer} 
+        width={outer}
         align="center"
         justify="center"
         background={color}
         onClick={e => {
-          ignore(e); !healthy && setOpen(true) 
+          ignore(e)
+          if (!healthy) setOpen(true)
         }}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}

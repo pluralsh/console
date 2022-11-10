@@ -1,8 +1,18 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 import { useHistory } from 'react-router-dom'
 import { useMutation, useQuery } from 'react-apollo'
 
-import { Button, Check, Deploy, Reload } from 'forge-core'
+import {
+  Button,
+  Check,
+  Deploy,
+  Reload,
+} from 'forge-core'
 
 import { Box, Stack, Text } from 'grommet'
 
@@ -81,64 +91,66 @@ export function BuildIcon({ build, size }) {
 
 function BuildStatus({ status }) {
   switch (status) {
-    case Status.QUEUED:
-      return (
-        <BuildStatusInner
-          background="status-unknown"
-          text="queued"
-        />
-      )
-    case Status.CANCELLED:
-      return (
-        <IconStatus
-          icon={Close}
-          background="tone-medium"
-        />
-      )
-    case Status.RUNNING:
-      return (
-        <BuildStatusInner
-          icon={(
-            <BeatLoader
-              size={5}
-              margin={2}
-              color="white"
-            />
-          )}
-          background="progress"
-          text="running"
-        />
-      )
-    case Status.FAILED:
-      return (
-        <IconStatus
-          icon={StatusCritical}
-          background="error"
-        />
-      )
-    case Status.SUCCESSFUL:
-      return (
-        <IconStatus
-          icon={Check}
-          background="success"
-        />
-      )
-    case Status.PENDING:
-      return (
-        <BuildStatusInner
-          background="status-warning"
-          text="pending approval"
-        />
-      )
-    default:
-      return null
+  case Status.QUEUED:
+    return (
+      <BuildStatusInner
+        background="status-unknown"
+        text="queued"
+      />
+    )
+  case Status.CANCELLED:
+    return (
+      <IconStatus
+        icon={Close}
+        background="tone-medium"
+      />
+    )
+  case Status.RUNNING:
+    return (
+      <BuildStatusInner
+        icon={(
+          <BeatLoader
+            size={5}
+            margin={2}
+            color="white"
+          />
+        )}
+        background="progress"
+        text="running"
+      />
+    )
+  case Status.FAILED:
+    return (
+      <IconStatus
+        icon={StatusCritical}
+        background="error"
+      />
+    )
+  case Status.SUCCESSFUL:
+    return (
+      <IconStatus
+        icon={Check}
+        background="success"
+      />
+    )
+  case Status.PENDING:
+    return (
+      <BuildStatusInner
+        background="status-warning"
+        text="pending approval"
+      />
+    )
+  default:
+    return null
   }
 }
 
 export const BUILD_PADDING = { horizontal: 'medium' }
 
 function Build({ build }) {
-  const { id, repository, status, insertedAt, message, creator, sha } = build
+  const {
+    id, repository, status, insertedAt, message, creator, sha,
+  } = build
   const history = useHistory()
 
   return (
@@ -299,13 +311,16 @@ export const HEADER_HEIGHT = '60px'
 export default function Builds() {
   const [listRef, setListRef] = useState(null)
   const [scrolled, setScrolled] = useState(false)
-  const { data, loading, subscribeToMore, fetchMore } = useQuery(BUILDS_Q, {
+  const {
+    data, loading, subscribeToMore, fetchMore,
+  } = useQuery(BUILDS_Q, {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
 
   const { setOnChange } = useContext(InstallationContext)
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
+
   useEffect(() => {
     setOnChange({ func: () => null })
     setBreadcrumbs([{ text: 'builds', url: '/' }])
@@ -313,7 +328,8 @@ export default function Builds() {
 
   useEffect(() => subscribeToMore({
     document: BUILD_SUB,
-    updateQuery: (prev, { subscriptionData: { data: { buildDelta: { delta, payload } } } }) => delta === 'CREATE' ? appendConnection(prev, payload, 'builds') : prev }), [])
+    updateQuery: (prev, { subscriptionData: { data: { buildDelta: { delta, payload } } } }) => (delta === 'CREATE' ? appendConnection(prev, payload, 'builds') : prev),
+  }), [])
 
   const returnToBeginning = useCallback(() => {
     listRef.scrollToItem(0)

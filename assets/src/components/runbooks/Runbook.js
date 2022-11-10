@@ -2,7 +2,12 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useQuery } from '@apollo/react-hooks'
 import { useParams } from 'react-router'
 
-import { TabContent, TabHeader, TabHeaderItem, Tabs } from 'forge-core'
+import {
+  TabContent,
+  TabHeader,
+  TabHeaderItem,
+  Tabs,
+} from 'forge-core'
 
 import { Box, Text } from 'grommet'
 
@@ -54,7 +59,9 @@ export function Runbook() {
   const { namespace, name } = useParams()
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const [ref, setRef] = useState(null)
-  const { data, loading, fetchMore, refetch } = useQuery(RUNBOOK_Q, {
+  const {
+    data, loading, fetchMore, refetch,
+  } = useQuery(RUNBOOK_Q, {
     variables: {
       namespace,
       name,
@@ -79,6 +86,7 @@ export function Runbook() {
   const { runbook } = data
 
   return (
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
     <ActionContext.Provider value={{ ref, setRef }}>
       <Box
         fill

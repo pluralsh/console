@@ -1,9 +1,21 @@
-import React, { useCallback, useContext, useRef, useState } from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+} from 'react'
 
 import { FilePicker } from 'react-file-picker'
 import { useMutation } from 'react-apollo'
 
-import { Box, Drop, Keyboard, Layer, Stack, Text } from 'grommet'
+import {
+  Box,
+  Drop,
+  Keyboard,
+  Layer,
+  Stack,
+  Text,
+} from 'grommet'
 
 import { MoonLoader, SyncLoader } from 'react-spinners'
 import { Progress } from 'react-sweet-progress'
@@ -11,7 +23,12 @@ import { Editor as SlateEditor, Transforms } from 'slate'
 
 import { useParams } from 'react-router'
 
-import { Attachment, Close, Emoji, SendMessage } from 'forge-core'
+import {
+  Attachment,
+  Close,
+  Emoji,
+  SendMessage,
+} from 'forge-core'
 import fs from 'filesize'
 import { NimbleEmoji, emojiIndex } from 'emoji-mart'
 
@@ -44,27 +61,26 @@ export function fetchUsers(client, query, incidentId) {
 
   return client.query({
     query: SEARCH_USERS,
-    variables: { q: query, incidentId } })
-  .then(({ data }) => data.searchUsers.edges.map(edge => ({
-    key: edge.node.id,
-    value: userNode(edge.node),
-    suggestion: userSuggestion(edge.node),
-  })))
+    variables: { q: query, incidentId },
+  })
+    .then(({ data }) => data.searchUsers.edges.map(edge => ({
+      key: edge.node.id,
+      value: userNode(edge.node),
+      suggestion: userSuggestion(edge.node),
+    })))
 }
 
 function fetchEmojis(client, query) {
   if (!query) return
 
-  return Promise.resolve(
-    emojiIndex
-      .search(query)
-      .slice(0, 5)
-      .map(emoji => ({
-        key: emoji.colons,
-        value: emojiNode(emoji),
-        suggestion: emojiSuggestion(emoji),
-      }))
-  )
+  return Promise.resolve(emojiIndex
+    .search(query)
+    .slice(0, 5)
+    .map(emoji => ({
+      key: emoji.colons,
+      value: emojiNode(emoji),
+      suggestion: emojiSuggestion(emoji),
+    })))
 }
 
 export const emojiNode = emoji => {
@@ -132,9 +148,13 @@ function emojiSuggestion(emoji) {
 
 function* extractEntities(editorState) {
   let startIndex = 0
+
   for (const { children } of editorState) {
-    for (const { type, text, user, ...child } of children) {
+    for (const {
+      type, text, user, ...child
+    } of children) {
       let content = text
+
       if (EntityType[type]) {
         content = child.children[0].text
         yield {
@@ -154,6 +174,7 @@ function* extractEntities(editorState) {
 
 const insertEmoji = (editor, emoji) => {
   let at
+
   if (editor.selection) {
     at = editor.selection
   }
@@ -181,8 +202,8 @@ function SendMsg({ loading, empty, onClick }) {
       onClick={empty ? null : onClick}
       background={loading ? null : (empty ? null : 'success')}
     >
-      {loading ?
-        <MoonLoader size={20} /> : (
+      {loading
+        ? <MoonLoader size={20} /> : (
           <SendMessage
             size="23px"
             color={empty ? 'light-3' : 'white'}
@@ -205,7 +226,7 @@ function FileInput() {
         onClick={() => null}
         hoverIndicator="light-2"
         focusIndicator={false}
-        tooltip="add attachment" 
+        tooltip="add attachment"
         align="center"
         justify="center"
       >
@@ -231,7 +252,7 @@ function EmojiInput({ editor }) {
         <Control
           onClick={() => setOpen(true)}
           hoverIndicator="light-2"
-          focusIndicator={false} 
+          focusIndicator={false}
           tooltip="add emoji"
           align="center"
           justify="center"
@@ -252,7 +273,9 @@ function EmojiInput({ editor }) {
   )
 }
 
-function UploadProgress({ attachment, uploadProgress, setAttachment, empty }) {
+function UploadProgress({
+  attachment, uploadProgress, setAttachment, empty,
+}) {
   return (
     <Layer
       plain
@@ -285,8 +308,8 @@ function UploadProgress({ attachment, uploadProgress, setAttachment, empty }) {
               </Text>
             </Box>
           )}
-          {!uploadProgress ?
-            <Text size="small">{empty ? 'add a message and upload' : 'press enter to upload'}</Text> : (
+          {!uploadProgress
+            ? <Text size="small">{empty ? 'add a message and upload' : 'press enter to upload'}</Text> : (
               <Progress
                 percent={uploadProgress}
                 status={uploadProgress === 100 ? 'success' : 'active'}
@@ -323,6 +346,7 @@ function Typing() {
   const theme = useContext(ThemeContext)
   const typing = typists.filter(name => name !== ignore)
   const len = typing.length
+
   if (len === 0) {
     return null
   }
@@ -372,17 +396,19 @@ export function MessageInput() {
   const [disable, setDisable] = useState(false)
   const [mutation, { loading }] = useMutation(CREATE_MESSAGE, {
     variables: { incidentId },
-    context: { fetchOptions: {
-      useUpload: !!attachment,
-      onProgress: ev => setUploadProgress(Math.round((ev.loaded / ev.total) * 100)),
-      onAbortPossible: () => null,
-    } },
+    context: {
+      fetchOptions: {
+        useUpload: !!attachment,
+        onProgress: ev => setUploadProgress(Math.round((ev.loaded / ev.total) * 100)),
+        onAbortPossible: () => null,
+      },
+    },
     update: (cache, { data: { createMessage } }) => updateCache(cache, {
       query: INCIDENT_Q,
       variables: { id: incidentId },
       update: ({ incident, ...prev }) => ({
         ...prev,
-        incident: appendConnection(incident, createMessage, 'messages'), 
+        incident: appendConnection(incident, createMessage, 'messages'),
       }),
     }),
     onCompleted: () => {
@@ -397,6 +423,7 @@ export function MessageInput() {
     if (disable) return
     const entities = [...extractEntities(editorState)]
     const file = attachment ? { blob: attachment } : null
+
     mutation({ variables: { attributes: { text: plainSerialize(editorState), file, entities } } })
     Transforms.select(editor, SlateEditor.start(editor, []))
     setEditorState(plainDeserialize(''))
@@ -411,8 +438,8 @@ export function MessageInput() {
     >
       {(attachment || uploadProgress > 0) && (
         <UploadProgress
-          attachment={attachment} 
-          setAttachment={setAttachment} 
+          attachment={attachment}
+          setAttachment={setAttachment}
           uploadProgress={uploadProgress}
           empty={empty}
         />
@@ -421,7 +448,7 @@ export function MessageInput() {
         flex={false}
         background="white"
         border={{ color: 'dark-3' }}
-        style={{ maxHeight: '210px', minHeight: 'auto' }} 
+        style={{ maxHeight: '210px', minHeight: 'auto' }}
         round="xsmall"
         margin={{ horizontal: 'small', bottom: 'small' }}
       >

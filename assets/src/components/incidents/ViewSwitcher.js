@@ -7,7 +7,9 @@ import { Tooltip } from '../utils/Tooltip'
 
 import { IncidentStatus, IncidentView } from './types'
 
-export function ViewOption({ icon, selected, view, setView, text, side, size, width }) {
+export function ViewOption({
+  icon, selected, view, setView, text, side, size, width,
+}) {
   const ref = useRef()
   const [hover, setHover] = useState(false)
   const props = { size: size || '20px' }
@@ -34,7 +36,7 @@ export function ViewOption({ icon, selected, view, setView, text, side, size, wi
         <Tooltip
           pad={{ horizontal: 'small', vertical: 'xsmall' }}
           round="xsmall"
-          justify="center" 
+          justify="center"
           target={ref}
           side="right"
           align={side || { left: 'right' }}
@@ -59,16 +61,16 @@ export function ViewSwitcher({ incident, view, setView }) {
       pad={{ vertical: 'small' }}
       border={{ side: 'right', color: 'light-5' }}
     >
-      <ViewOption 
-        icon={Messages} 
-        selected={view} 
+      <ViewOption
+        icon={Messages}
+        selected={view}
         view={IncidentView.MSGS}
         setView={setView}
         text="Messages"
       />
-      <ViewOption 
-        icon={File} 
-        selected={view} 
+      <ViewOption
+        icon={File}
+        selected={view}
         view={IncidentView.FILES}
         setView={setView}
         text="Files"

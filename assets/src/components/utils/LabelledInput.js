@@ -1,6 +1,8 @@
 import { Box, Text, TextInput } from 'grommet'
 
-export function LabelledInput({ label, color, weight, value, onChange, placeholder, width, type, modifier }) {
+export function LabelledInput({
+  label, color, weight, value, onChange, placeholder, width, type, modifier,
+}) {
   return (
     <Box
       gap="xxsmall"

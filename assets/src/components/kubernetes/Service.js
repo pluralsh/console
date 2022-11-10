@@ -1,5 +1,10 @@
 import { Box, Text } from 'grommet'
-import { TabContent, TabHeader, TabHeaderItem, Tabs } from 'forge-core'
+import {
+  TabContent,
+  TabHeader,
+  TabHeaderItem,
+  Tabs,
+} from 'forge-core'
 import { useQuery } from 'react-apollo'
 
 import { useParams } from 'react-router'
@@ -27,7 +32,11 @@ function Status({ status: { loadBalancer } }) {
   )
 }
 
-function PortRow({ port: { name, protocol, port, targetPort } }) {
+function PortRow({
+  port: {
+    name, protocol, port, targetPort,
+  },
+}) {
   return (
     <Box
       fill="horizontal"
@@ -44,7 +53,7 @@ function PortRow({ port: { name, protocol, port, targetPort } }) {
         <Text size="small">{protocol}</Text>
       </Box>
       <Box fill="horizontal">
-        <Text size="small">{port} -> {targetPort}</Text>
+        <Text size="small">{port} {'->'} {targetPort}</Text>
       </Box>
     </Box>
   )
@@ -82,7 +91,7 @@ function Spec({ spec: { clusterIp, type, ports } }) {
 export default function Service() {
   const { name, repo } = useParams()
   const { data, refetch } = useQuery(SERVICE_Q, {
-    variables: { name, namespace: repo }, 
+    variables: { name, namespace: repo },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })

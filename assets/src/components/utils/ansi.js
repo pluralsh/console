@@ -30,14 +30,12 @@ const eraseChar = (matchingText, result) => {
   } if (result.length) {
     const index = result.length - 1
     const { text } = result[index]
-    const newResult =
-      text.length === 1
+    const newResult
+      = text.length === 1
         ? result.slice(0, result.length - 1)
-        : result.map((item, i) =>
-          index === i
-            ? { ...item, text: text.substr(0, text.length - 1) }
-            : item
-        )
+        : result.map((item, i) => (index === i
+          ? { ...item, text: text.substr(0, text.length - 1) }
+          : item))
 
     return [matchingText, newResult]
   }

@@ -6,14 +6,16 @@ export function* reverse(array, mapper = i => i) {
 
 export function* lookahead(array, mapper = i => i) {
   const len = array.length
+
   for (let i = 0; i < len; i++) {
     yield mapper(array[i], array[i + 1] || {})
   }
 }
 
 export function* chunk(array, chunkSize) {
-  let i; let 
+  let i; let
     j
+
   for (i = 0, j = array.length; i < j; i += chunkSize) {
     yield array.slice(i, i + chunkSize)
   }
@@ -21,9 +23,11 @@ export function* chunk(array, chunkSize) {
 
 export function groupBy(list, key = i => i.id) {
   const grouped = {}
+
   for (const item of list) {
     const k = key(item)
     const group = grouped[k] || []
+
     group.push(item)
     grouped[k] = group
   }

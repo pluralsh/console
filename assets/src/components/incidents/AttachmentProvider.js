@@ -39,6 +39,7 @@ export function AttachmentProvider({ children }) {
   const [attachment, setAttachment] = useState(null)
 
   return (
+    // eslint-disable-next-line react/jsx-no-constructed-context-values
     <AttachmentContext.Provider value={{ attachment, setAttachment }}>
       <DndProvider backend={HTML5Backend}>
         {children}
