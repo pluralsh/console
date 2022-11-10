@@ -96,13 +96,6 @@ export default function ConsoleSidebar() {
         </SidebarItem>
         <SidebarItem
           clickable
-          tooltip="Documentation"
-          href="https://docs.plural.sh/"
-        >
-          <DocumentIcon />
-        </SidebarItem>
-        <SidebarItem
-          clickable
           onClick={() => history.push('/me/edit')}
         >
           <Avatar
