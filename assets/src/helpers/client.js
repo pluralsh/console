@@ -5,7 +5,7 @@ import { createLink } from 'apollo-absinthe-upload-link'
 import { onError } from 'apollo-link-error'
 import * as AbsintheSocket from '@absinthe/socket'
 import { Socket as PhoenixSocket } from 'phoenix'
-import { createAbsintheSocketLink } from '@absinthe/socket-apollo-link'
+import { createAbsintheSocketLink } from 'pluralsh-absinthe-socket-apollo-link'
 import { RetryLink } from 'apollo-link-retry'
 // import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
 // import { sha256 } from 'crypto-hash';

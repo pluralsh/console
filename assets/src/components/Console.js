@@ -42,7 +42,7 @@ import { Tooltip } from './utils/Tooltip'
 import { Notifications } from './users/Notifications'
 import { PodShell } from './terminal/PodShell'
 import { AutoRefresh } from './AutoRefresh'
-import Apps from './Apps'
+import Apps from './apps/Apps.tsx'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
