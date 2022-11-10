@@ -3488,7 +3488,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-aria/listbox@npm:3.6.1, @react-aria/listbox@npm:^3.6.1":
+"@react-aria/listbox@npm:3.6.1":
   version: 3.6.1
   resolution: "@react-aria/listbox@npm:3.6.1"
   dependencies:
@@ -3537,29 +3537,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-aria/menu@npm:^3.6.1":
-  version: 3.6.1
-  resolution: "@react-aria/menu@npm:3.6.1"
-  dependencies:
-    "@babel/runtime": ^7.6.2
-    "@react-aria/i18n": ^3.6.0
-    "@react-aria/interactions": ^3.11.0
-    "@react-aria/overlays": ^3.10.1
-    "@react-aria/selection": ^3.10.1
-    "@react-aria/utils": ^3.13.3
-    "@react-stately/collections": ^3.4.3
-    "@react-stately/menu": ^3.4.1
-    "@react-stately/tree": ^3.3.3
-    "@react-types/button": ^3.6.1
-    "@react-types/menu": ^3.7.1
-    "@react-types/shared": ^3.14.1
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-    react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: a2632174aa2abfdd6a4e01430f543b8b7f68b49eb27d29418468364962f438234d5c06b1c37c8cd33da52d1e9c752bb1df9c9c7e8a3938c962ed25f2a8031661
-  languageName: node
-  linkType: hard
-
 "@react-aria/menu@npm:^3.6.2":
   version: 3.6.2
   resolution: "@react-aria/menu@npm:3.6.2"
@@ -3583,7 +3560,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-aria/overlays@npm:3.10.1, @react-aria/overlays@npm:^3.10.1":
+"@react-aria/overlays@npm:3.10.1":
   version: 3.10.1
   resolution: "@react-aria/overlays@npm:3.10.1"
   dependencies:
@@ -3645,27 +3622,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-aria/select@npm:3.8.1":
-  version: 3.8.1
-  resolution: "@react-aria/select@npm:3.8.1"
+"@react-aria/select@npm:3.8.2":
+  version: 3.8.2
+  resolution: "@react-aria/select@npm:3.8.2"
   dependencies:
     "@babel/runtime": ^7.6.2
-    "@react-aria/i18n": ^3.6.0
-    "@react-aria/interactions": ^3.11.0
-    "@react-aria/label": ^3.4.1
-    "@react-aria/listbox": ^3.6.1
-    "@react-aria/menu": ^3.6.1
-    "@react-aria/selection": ^3.10.1
-    "@react-aria/utils": ^3.13.3
-    "@react-aria/visually-hidden": ^3.4.1
-    "@react-stately/select": ^3.3.1
-    "@react-types/button": ^3.6.1
-    "@react-types/select": ^3.6.3
-    "@react-types/shared": ^3.14.1
+    "@react-aria/i18n": ^3.6.1
+    "@react-aria/interactions": ^3.12.0
+    "@react-aria/label": ^3.4.2
+    "@react-aria/listbox": ^3.7.0
+    "@react-aria/menu": ^3.6.2
+    "@react-aria/selection": ^3.11.0
+    "@react-aria/utils": ^3.14.0
+    "@react-aria/visually-hidden": ^3.5.0
+    "@react-stately/select": ^3.3.2
+    "@react-types/button": ^3.6.2
+    "@react-types/select": ^3.6.4
+    "@react-types/shared": ^3.15.0
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
     react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: a05399b2564fefbd1a5bfd82ef9a5da2ed42f88c5a04a17361ad5a7030212e34629175efdb75e7c5c9a7b926d63ed9b0ad3369674853c38205113b85e8482154
+  checksum: d92afc863473048c04907c75787008b1823c3a9f695e35b3c50d548db46455649e414094f0cc2a6423a9e53b66e2b6467196d90ead40e8d91c5d7f9aede29c18
   languageName: node
   linkType: hard
 
@@ -4238,21 +4215,6 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
   checksum: 6d98dde6eb8e2b610ccb5824ff3250f21a2af0527997a6e8789b51bdebc54bebfd600dc3b13e40a84ea8484f25c0348f1244349e706c3699cdc91f5bb53bf666
-  languageName: node
-  linkType: hard
-
-"@react-stately/tree@npm:^3.3.3":
-  version: 3.3.3
-  resolution: "@react-stately/tree@npm:3.3.3"
-  dependencies:
-    "@babel/runtime": ^7.6.2
-    "@react-stately/collections": ^3.4.3
-    "@react-stately/selection": ^3.10.3
-    "@react-stately/utils": ^3.5.1
-    "@react-types/shared": ^3.14.1
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: 4e1a94cb478124a2443e84dbf0160dd3a5298e79478336f07003b8c5fcdb26043c65a94439a17315cf00e7f66bf6fd5e3e6fbcb44bced3352554d8f7be94899a
   languageName: node
   linkType: hard
 
@@ -17464,7 +17426,7 @@ __metadata:
     "@react-aria/listbox": 3.6.1
     "@react-aria/overlays": 3.10.1
     "@react-aria/radio": 3.4.0
-    "@react-aria/select": 3.8.1
+    "@react-aria/select": 3.8.2
     "@react-aria/tabs": 3.3.1
     "@react-aria/utils": 3.13.3
     "@react-aria/visually-hidden": 3.5.0
