@@ -1,6 +1,6 @@
 {
   "name": "pluralsh-design-system",
-  "version": "1.265.0",
+  "version": "1.266.0",
   "description": "Pluralsh Design System",
   "main": "dist/index.js",
   "files": [
@@ -32,7 +32,7 @@
     "@react-aria/visually-hidden": "3.5.0",
     "@react-stately/collections": "3.4.4",
     "@react-stately/combobox": "3.2.2",
-    "@react-stately/overlays": "3.4.1",
+    "@react-stately/overlays": "3.4.2",
     "@react-stately/radio": "3.6.0",
     "@react-stately/tabs": "3.2.1",
     "@react-stately/toggle": "3.4.2",
