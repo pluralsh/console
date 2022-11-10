@@ -1,12 +1,24 @@
 import { useCallback, useContext, useState } from 'react'
 
-import { Alert, AlertStatus, Button, Divider, Download, ModalHeader } from 'forge-core'
+import {
+  Alert,
+  AlertStatus,
+  Button,
+  Divider,
+  Download,
+  ModalHeader,
+} from 'forge-core'
 
-import { Anchor, Box, Layer, Text } from 'grommet'
+import {
+  Anchor,
+  Box,
+  Layer,
+  Text,
+} from 'grommet'
 
 import * as serviceWorker from '../serviceWorker'
 
-import { LoginContext } from './Login'
+import { LoginContext } from './contexts'
 import { Icon } from './Console'
 
 const COMMIT_KEY = 'git-commit'
@@ -34,9 +46,9 @@ function GitStatus({ setOpen }) {
           pad="small"
           gap="small"
         >
-          <Alert 
-            status={AlertStatus.ERROR} 
-            header="Git failed to clone locally" 
+          <Alert
+            status={AlertStatus.ERROR}
+            header="Git failed to clone locally"
             description="the git credentials you provided are incorrect, or an internal error occurred"
           />
           <Divider text="Output" />
@@ -86,6 +98,7 @@ export function AutoRefresh() {
     console.log('reloading')
     if (process.env.NODE_ENV === 'production') {
       const promise = serviceWorker.unregister() || Promise.resolve('done')
+
       promise.then(() => {
         setCommit(config.gitCommit)
         window.location.reload()

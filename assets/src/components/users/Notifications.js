@@ -1,8 +1,19 @@
-import { useCallback, useContext, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Eye, Notification } from 'forge-core'
 import { Box, Stack, Text } from 'grommet'
 
-import { useApolloClient, useMutation, useQuery, useSubscription } from '@apollo/react-hooks'
+import {
+  useApolloClient,
+  useMutation,
+  useQuery,
+  useSubscription,
+} from '@apollo/react-hooks'
 
 import { FlyoutContainer } from '../Console'
 import { ME_Q, NOTIFICATIONS_Q } from '../graphql/users'
@@ -11,8 +22,9 @@ import { extendConnection, updateCache } from '../../utils/graphql'
 import { ApplicationIcon, InstallationContext } from '../Installations'
 import { SeverityNub } from '../runbooks/StatusIcon'
 
-import { LoginContext } from '../Login'
 import { Tooltip } from '../utils/Tooltip'
+
+import { LoginContext } from '../contexts'
 
 import { MARK_READ, NOTIFS_SUB } from './queries'
 
@@ -22,7 +34,7 @@ function NotificationRow({ notif }) {
   const { applications, setCurrentApplication } = useContext(InstallationContext)
   const app = useMemo(() => applications.find(({ name }) => name === notif.repository), [applications, notif])
   const setCurrent = useCallback(() => {
-    if (app) setCurrentApplication(app) 
+    if (app) setCurrentApplication(app)
   }, [app, setCurrentApplication])
 
   return (
@@ -33,7 +45,7 @@ function NotificationRow({ notif }) {
       border="bottom"
       hoverIndicator="card"
       direction="row"
-      align="center" 
+      align="center"
       onClick={setCurrent}
     >
       <SeverityNub sev={notif.severity.toLowerCase()} />
@@ -129,7 +141,7 @@ export function Notifications() {
   const [open, setOpen] = useState(false)
   const [hover, setHover] = useState(false)
   const [all, setAll] = useState(false)
-  const { me } = useContext(LoginContext) 
+  const { me } = useContext(LoginContext)
   const [mutation] = useMutation(MARK_READ, {
     update: cache => updateCache(cache, {
       query: ME_Q,
@@ -160,7 +172,7 @@ export function Notifications() {
           flex={false}
           width={SIZE}
           height={SIZE}
-          round="full" 
+          round="full"
           background="backgroundColor"
           align="center"
           justify="center"
@@ -191,7 +203,7 @@ export function Notifications() {
           pad="small"
           round="xsmall"
           justify="center"
-          background="sidebarHover" 
+          background="sidebarHover"
           target={dropRef}
           side="right"
           align={{ top: 'bottom' }}
@@ -205,10 +217,10 @@ export function Notifications() {
         </Tooltip>
       )}
       {open && (
-        <FlyoutContainer 
+        <FlyoutContainer
           width="500px"
           header="Notifications"
-          close={doClose} 
+          close={doClose}
           modifier={(
             <FilterAll
               all={all}

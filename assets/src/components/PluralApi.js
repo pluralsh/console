@@ -4,7 +4,7 @@ import { ApolloProvider } from 'react-apollo'
 import { buildClient } from '../helpers/client'
 
 import CurrentUser from './login/CurrentUser'
-import { LoginContext } from './Login'
+import { LoginContext } from './contexts'
 
 const PLURAL_GQL = 'https://app.plural.sh/gql'
 const PLURAL_WSS = 'wss://app.plural.sh/socket'
@@ -28,9 +28,10 @@ export function PluralApi({ children }) {
     if (API_CACHE[token]) return API_CACHE[token]
     const res = buildClient(
       PLURAL_GQL, PLURAL_WSS, () => {
-        window.location = '/' 
+        window.location = '/'
       }, () => token
     )
+
     API_CACHE[token] = res
 
     return res

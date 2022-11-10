@@ -1,6 +1,16 @@
 import {
-  AppsIcon, Avatar, DiscordIcon, DocumentIcon, GitHubLogoIcon, ListIcon,
-  PeopleIcon, ServersIcon, Sidebar, SidebarItem, SidebarSection, SirenIcon,
+  AppsIcon,
+  Avatar,
+  DiscordIcon,
+  DocumentIcon,
+  GitHubLogoIcon,
+  ListIcon,
+  PeopleIcon,
+  ServersIcon,
+  Sidebar,
+  SidebarItem,
+  SidebarSection,
+  SirenIcon,
 } from 'pluralsh-design-system'
 
 import { Builds } from 'forge-core'
@@ -10,21 +20,25 @@ import { useContext } from 'react'
 
 import { Flex } from 'honorable'
 
-import { LoginContext } from './Login'
+import { LoginContext } from './contexts'
 
 export const SIDEBAR_ICON_HEIGHT = '42px'
 
 const MENU_ITEMS = [
   { text: 'Apps', icon: <AppsIcon />, path: '/' },
-  { text: 'Builds',
+  {
+    text: 'Builds',
     icon: <Builds
       size="16px"
       color="white"
     />, // TODO: Move to design system.
-    path: '/builds' },
+    path: '/builds',
+  },
   { text: 'Nodes', icon: <ServersIcon />, path: '/nodes' },
   { text: 'Incidents', icon: <SirenIcon />, path: '/incidents' },
-  { text: 'Audits', name: 'audits', icon: <ListIcon />, path: '/audits' },
+  {
+    text: 'Audits', name: 'audits', icon: <ListIcon />, path: '/audits',
+  },
   { text: 'Account', icon: <PeopleIcon />, path: '/directory' },
 
   // { text: 'Runbooks', icon: Runbook, path: '/runbooks/{repo}' },
@@ -42,8 +56,8 @@ export default function ConsoleSidebar() {
   const { me } = useContext(LoginContext)
   const history = useHistory()
   const { pathname } = useLocation()
-  const active = ({ path }) => path === '/' ? pathname === path : pathname.startsWith(path)
-  
+  const active = ({ path }) => (path === '/' ? pathname === path : pathname.startsWith(path))
+
   if (!me) return null
 
   // const { currentApplication } = useContext(InstallationContext)
@@ -64,8 +78,7 @@ export default function ConsoleSidebar() {
           >
             {item.icon}
           </SidebarItem>
-        )
-        )}
+        ))}
         <Flex grow={1} />
         <SidebarItem
           clickable

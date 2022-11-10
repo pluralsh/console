@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { Button, GqlError } from 'forge-core'
 import { useMutation, useQuery } from 'react-apollo'
-import { Box, Form, Keyboard, Text } from 'grommet'
+import {
+  Box,
+  Form,
+  Keyboard,
+  Text,
+} from 'grommet'
 
 import gql from 'graphql-tag'
 
@@ -18,6 +23,7 @@ import { IncidentContext } from './incidents/context'
 import { LabelledInput } from './utils/LabelledInput'
 
 import { LoopingLogo } from './utils/AnimatedLogo'
+import { LoginContext } from './contexts'
 
 const POLL_INTERVAL = 3 * 60 * 1000
 const CONSOLE_ICON = `${process.env.PUBLIC_URL}/console-full.png`
@@ -76,8 +82,6 @@ function LoginError({ error }) {
     </LoginPortal>
   )
 }
-
-export const LoginContext = React.createContext({ me: null })
 
 export function GrantAccess() {
   const [jwt, setJwt] = useState('')
@@ -142,7 +146,9 @@ export function EnsureLogin({ children }) {
 
   if (!data) return null
 
-  const { me, externalToken, clusterInfo: { __typename, ...clusterInformation }, configuration } = data
+  const {
+    me, externalToken, clusterInfo: { __typename, ...clusterInformation }, configuration,
+  } = data
 
   return (
     <IncidentContext.Provider value={{ clusterInformation }}>

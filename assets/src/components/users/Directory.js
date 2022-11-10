@@ -1,8 +1,27 @@
 import { useContext, useEffect, useState } from 'react'
-import { Box, Layer, Text, TextInput, ThemeContext } from 'grommet'
+import {
+  Box,
+  Layer,
+  Text,
+  TextInput,
+  ThemeContext,
+} from 'grommet'
 import { useMutation, useQuery } from 'react-apollo'
-import { AddGroup, AddUser, Button, CreateRole as CreateRoleI, Group, InputCollection, Messages,
-  ModalHeader, ResponsiveInput, Roles, Scroller, User, Webhooks } from 'forge-core'
+import {
+  AddGroup,
+  AddUser,
+  Button,
+  CreateRole as CreateRoleI,
+  Group,
+  InputCollection,
+  Messages,
+  ModalHeader,
+  ResponsiveInput,
+  Roles,
+  Scroller,
+  User,
+  Webhooks,
+} from 'forge-core'
 
 import { useHistory, useParams } from 'react-router-dom'
 
@@ -22,9 +41,14 @@ import { WebhookManagement } from '../Webhooks'
 
 import { SMTP_Q, UPDATE_SMTP } from '../graphql/plural'
 
-import { LoginContext } from '../Login'
+import { LoginContext } from '../contexts'
 
-import { EDIT_USER, GROUPS_Q, ROLES_Q, USERS_Q } from './queries'
+import {
+  EDIT_USER,
+  GROUPS_Q,
+  ROLES_Q,
+  USERS_Q,
+} from './queries'
 import Avatar from './Avatar'
 import { GroupForm } from './CreateGroup'
 import { InviteForm } from './CreateInvite'
@@ -99,8 +123,9 @@ function SmtpSettingsInner({ smtp }) {
 
 function SmtpSettings() {
   const { data } = useQuery(SMTP_Q)
+
   console.log(data)
-  
+
   if (!data) return null
 
   return <SmtpSettingsInner smtp={data.smtp} />
@@ -115,7 +140,7 @@ function UserRow({ user }) {
       pad="small"
       direction="row"
       align="center"
-      gap="small" 
+      gap="small"
       border={{ side: 'bottom', color: 'tone-light' }}
     >
       <Avatar
@@ -285,7 +310,9 @@ function RolesInner() {
   )
 }
 
-function SectionChoice({ label, icon, section, onClick, setSection }) {
+function SectionChoice({
+  label, icon, section, onClick, setSection,
+}) {
   const { section: selected } = useParams()
 
   return (
@@ -307,7 +334,9 @@ function SectionChoice({ label, icon, section, onClick, setSection }) {
   )
 }
 
-function CreateModal({ form, width, header, children }) {
+function CreateModal({
+  form, width, header, children,
+}) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -337,11 +366,13 @@ function CreateModal({ form, width, header, children }) {
 
 export default function Directory() {
   let { section } = useParams()
-  const { me, configuration: conf } = useContext(LoginContext) 
+  const { me, configuration: conf } = useContext(LoginContext)
+
   section = section || 'users'
   const history = useHistory()
   const setSection = section => history.push(`/directory/${section}`)
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
+
   useEffect(() => setBreadcrumbs([
     { text: 'directory', url: '/directory' },
     { text: section, url: `/directory/${section}` },
@@ -361,22 +392,22 @@ export default function Directory() {
           flex={false}
           width="200px"
         >
-          <SectionChoice 
-            icon={<User size="14px" />} 
-            label="Users" 
-            section="users" 
+          <SectionChoice
+            icon={<User size="14px" />}
+            label="Users"
+            section="users"
             setSection={setSection}
           />
-          <SectionChoice 
-            icon={<Group size="14px" />} 
-            label="Groups" 
-            section="groups" 
+          <SectionChoice
+            icon={<Group size="14px" />}
+            label="Groups"
+            section="groups"
             setSection={setSection}
           />
-          <SectionChoice 
-            icon={<Roles size="14px" />} 
-            label="Roles" 
-            section="roles" 
+          <SectionChoice
+            icon={<Roles size="14px" />}
+            label="Roles"
+            section="roles"
             setSection={setSection}
           />
           {me.roles?.admin && (
@@ -398,8 +429,8 @@ export default function Directory() {
             form={<GroupForm />}
           >
             {onClick => (
-              <SectionChoice 
-                icon={<AddGroup size="14px" />} 
+              <SectionChoice
+                icon={<AddGroup size="14px" />}
                 label="Create Group"
                 onClick={onClick}
               />
@@ -411,9 +442,9 @@ export default function Directory() {
             form={<CreateRole />}
           >
             {onClick => (
-              <SectionChoice 
-                icon={<CreateRoleI size="14px" />} 
-                label="Create Role" 
+              <SectionChoice
+                icon={<CreateRoleI size="14px" />}
+                label="Create Role"
                 onClick={onClick}
               />
             )}
@@ -423,8 +454,8 @@ export default function Directory() {
             form={<InviteForm />}
           >
             {onClick => (
-              <SectionChoice 
-                icon={<AddUser size="14px" />} 
+              <SectionChoice
+                icon={<AddUser size="14px" />}
                 label="Invite User"
                 onClick={onClick}
               />

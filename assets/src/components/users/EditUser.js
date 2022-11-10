@@ -1,5 +1,10 @@
 import React, { useCallback, useContext, useState } from 'react'
-import { Anchor, Box, Layer, Text } from 'grommet'
+import {
+  Anchor,
+  Box,
+  Layer,
+  Text,
+} from 'grommet'
 import { Checkmark, StatusCritical } from 'grommet-icons'
 import {
   Button,
@@ -17,11 +22,13 @@ import yaml from 'yaml'
 import Highlight from 'react-highlight.js'
 
 import { fetchToken, wipeToken } from '../../helpers/auth'
-import { LoginContext } from '../Login'
+
 import { SectionContentContainer, SectionPortal } from '../utils/Section'
 import { SIDEBAR_ICON_HEIGHT } from '../ConsoleSidebar'
 import { ModalHeader } from '../utils/Modal'
 import { localized } from '../../helpers/hostname'
+
+import { LoginContext } from '../contexts'
 
 import Avatar from './Avatar'
 import { EDIT_USER } from './queries'
@@ -93,6 +100,7 @@ function EditSelect({ edit, icon }) {
 
 function EditContent({ edit, children }) {
   const { editing } = useContext(EditContext)
+
   if (editing !== edit) return null
 
   return (
@@ -107,8 +115,12 @@ function EditContent({ edit, children }) {
   )
 }
 
-function sanitize({ name, repositories, permissions, roleBindings }) {
-  return { name, repositories, permissions, roleBindings: roleBindings.map(sanitizeBinding) }
+function sanitize({
+  name, repositories, permissions, roleBindings,
+}) {
+  return {
+    name, repositories, permissions, roleBindings: roleBindings.map(sanitizeBinding),
+  }
 }
 
 function sanitizeBinding({ user, group }) {

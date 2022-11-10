@@ -1,14 +1,21 @@
 import { useContext, useEffect, useState } from 'react'
 import { Box, Text } from 'grommet'
-import { Button, Expander, InputCollection, ResponsiveInput } from 'forge-core'
+import {
+  Button,
+  Expander,
+  InputCollection,
+  ResponsiveInput,
+} from 'forge-core'
 
 import { useMutation } from 'react-apollo'
 
-import { LoginContext } from './Login'
+import { LoginContext } from './contexts'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { UPDATE_USER } from './graphql/users'
 
-export function Avatar({ me, size, round, textSize, ...rest }) {
+export function Avatar({
+  me, size, round, textSize, ...rest
+}) {
   return (
     <Box
       align="center"
@@ -32,6 +39,7 @@ export default function EditUser() {
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const [attributes, setAttributes] = useState({ name: me.name, email: me.email })
   const [password, setPassword] = useState('')
+
   useEffect(() => setBreadcrumbs([{ text: 'me', url: '/me/edit' }]), [])
   const mergedAttributes = password && password.length > 0 ? { ...attributes, password } : attributes
   const [mutation, { loading }] = useMutation(UPDATE_USER, { variables: { attributes: mergedAttributes } })
