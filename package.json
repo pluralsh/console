@@ -1,6 +1,6 @@
 {
   "name": "pluralsh-design-system",
-  "version": "1.256.0",
+  "version": "1.257.0",
   "description": "Pluralsh Design System",
   "main": "dist/index.js",
   "files": [
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@floating-ui/react-dom-interactions": "0.8.1",
-    "@react-aria/button": "3.6.1",
+    "@react-aria/button": "3.6.2",
     "@react-aria/checkbox": "3.6.0",
     "@react-aria/combobox": "3.4.1",
     "@react-aria/focus": "3.9.0",
