@@ -2,7 +2,6 @@ import {
   AppsIcon,
   Avatar,
   DiscordIcon,
-  DocumentIcon,
   GitHubLogoIcon,
   ListIcon,
   PeopleIcon,
