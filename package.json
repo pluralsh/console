@@ -1,6 +1,6 @@
 {
   "name": "pluralsh-design-system",
-  "version": "1.274.0",
+  "version": "1.275.0",
   "description": "Pluralsh Design System",
   "main": "dist/index.js",
   "files": [
@@ -77,7 +77,7 @@
     "eslint": "8.20.0",
     "eslint-plugin-storybook": "0.6.7",
     "fuse.js": "6.6.2",
-    "honorable": "0.144.0",
+    "honorable": "0.145.0",
     "honorable-theme-default": "0.65.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
