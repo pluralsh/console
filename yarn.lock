@@ -13010,9 +13010,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"honorable@npm:0.145.0":
-  version: 0.145.0
-  resolution: "honorable@npm:0.145.0"
+"honorable@npm:0.147.0":
+  version: 0.147.0
+  resolution: "honorable@npm:0.147.0"
   dependencies:
     "@emotion/is-prop-valid": ^1.2.0
     "@floating-ui/react-dom": ^1.0.0
@@ -13026,7 +13026,7 @@ __metadata:
     "@emotion/styled": ">=10.0.0"
     react: ">=16.0.0"
     react-dom: ">=16.0.0"
-  checksum: 024e8cb09344c09d36941f77a250eb45e6217f5566286da2ba1850ee98202312ea4285ca12a860c729723344db6fb2aec0686ec3190e6d33e1b8865ea8350d24
+  checksum: c766dd40f4182b3f91fc6aa81cd34adaed0d64711b9d18f4c7ab3c0cbbad385483a735b9d8900f771668632bf429c6fb0cd50ab6e820f7ff44ee4d6bc279f486
   languageName: node
   linkType: hard
 
@@ -17424,7 +17424,7 @@ __metadata:
     fuse.js: 6.6.2
     grommet: 2.25.3
     highlight.js: 11.6.0
-    honorable: 0.145.0
+    honorable: 0.147.0
     honorable-theme-default: 0.65.0
     prop-types: 15.8.1
     react: 18.2.0
