@@ -1,6 +1,6 @@
 {
   "name": "pluralsh-design-system",
-  "version": "1.275.0",
+  "version": "1.276.0",
   "description": "Pluralsh Design System",
   "main": "dist/index.js",
   "files": [
@@ -37,7 +37,7 @@
     "@react-stately/tabs": "3.2.2",
     "@react-stately/toggle": "3.4.2",
     "@react-types/shared": "3.14.1",
-    "@tanstack/react-table": "8.5.22",
+    "@tanstack/react-table": "8.5.24",
     "@types/chroma-js": "2.1.4",
     "chroma-js": "2.4.2",
     "classnames": "2.3.2",
