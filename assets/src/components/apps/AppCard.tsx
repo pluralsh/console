@@ -9,7 +9,7 @@ import AppStatus from './AppStatus'
 
 import { getIcon, hasIcons } from './misc'
 
-export default function App({ application, setCurrentApplication }: any) {
+export default function AppCard({ application, setCurrentApplication }: any) {
   const { dark }: any = useContext(ThemeContext)
 
   return (

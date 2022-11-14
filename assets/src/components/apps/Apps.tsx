@@ -3,7 +3,7 @@ import { Div, Flex } from 'honorable'
 import { Input, MagnifyingGlassIcon, PageTitle } from 'pluralsh-design-system'
 import { useContext, useState } from 'react'
 
-import App from './App'
+import App from './AppCard'
 
 export default function Apps() {
   const {
