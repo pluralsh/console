@@ -11,6 +11,10 @@ import Foco from 'react-foco'
 
 import { Next } from 'grommet-icons'
 
+import { A, Div, P } from 'honorable'
+
+import { theme } from 'pluralsh-design-system'
+
 import ConsoleSidebar, { SIDEBAR_ICON_HEIGHT } from './ConsoleSidebar'
 import Builds from './Builds'
 import Build from './Build'
@@ -199,36 +203,28 @@ export function FlyoutContainer({
 function DemoBanner() {
   const { configuration } = useContext(LoginContext)
 
-  if (!configuration.isDemoProject) return null
+  if (configuration.isDemoProject) return null // TODO: Revert logic.
 
   return (
-    <Box
-      direction="row"
-      fill="horizontal"
-      pad={{ vertical: 'small' }}
-      justify="center"
-      background="card"
-      border={{ color: 'orange', size: '3px', side: 'top' }}
+    <Div
+      caption
+      padding="xsmall"
+      backgroundColor={theme.colors.grey[950]}
+      borderBottom="2px solid warning"
     >
-      <Box
-        flex={false}
-        direction="row"
-        gap="xsmall"
-        align="center"
-      >
-        <Text
-          size="small"
-          color="tone-medium"
-        >You are currently deployed on a plural demo GCP project, which will expire 6 hours after creation.  If you'd like to deploy on your own cloud, visit
-        </Text>
-        <a
-          href="https://docs.plural.sh/quickstart/getting-started"
+      <P textAlign="center">
+        You are using a Plural demo GCP project, which will expire 6 hours after creation.
+        If you'd like to learn how to deploy on your own cloud,&nbsp;
+        <A
+          inline
+          href="https://docs.plural.sh/getting-started/quickstart"
           target="_blank"
           rel="noopener noreferrer"
-        >here
-        </a>
-      </Box>
-    </Box>
+        >
+          visit our docs.
+        </A>
+      </P>
+    </Div>
   )
 }
 
@@ -244,6 +240,7 @@ export default function Console() {
               <Box
                 width="100vw"
                 height="100vh"
+                position="relative"
               >
                 <DemoBanner />
                 <Box
