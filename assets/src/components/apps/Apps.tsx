@@ -1,4 +1,5 @@
 import { Readiness, appState } from 'components/Application'
+import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { InstallationContext } from 'components/Installations'
 import { Div, Flex } from 'honorable'
 import {
@@ -8,7 +9,12 @@ import {
   SubTab,
   TabList,
 } from 'pluralsh-design-system'
-import { useContext, useRef, useState } from 'react'
+import {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 
 import App from './AppCard'
 
@@ -24,9 +30,12 @@ export default function Apps() {
   const {
     applications, setCurrentApplication, currentApplication,
   }: any = useContext(InstallationContext)
+  const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('')
   const tabStateRef = useRef<any>(null)
+
+  useEffect(() => setBreadcrumbs([{ text: 'Apps', url: '/' }]), [setBreadcrumbs])
 
   return (
     <Div fill>

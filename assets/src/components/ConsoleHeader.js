@@ -8,11 +8,9 @@ import {
 import { ArrowTopRightIcon, Button, theme } from 'pluralsh-design-system'
 import { useContext } from 'react'
 
-import { Breadcrumbs } from './Breadcrumbs'
-
 import { LoginContext } from './contexts'
 
-const APP_ICON = `${process.env.PUBLIC_URL}/console-full.png`
+const APP_ICON = `${process.env.PUBLIC_URL}/console-logo-white.png`
 
 function DemoBanner() {
   const { configuration: { isDemoProject } } = useContext(LoginContext)
@@ -53,9 +51,10 @@ export default function ConsoleHeader() {
       <Flex
         align="center"
         paddingHorizontal="medium"
+        paddingVertical="xsmall"
       >
         <Img
-          height={50}
+          height={40}
           src={APP_ICON}
         />
         <Flex grow={1} />
@@ -71,7 +70,6 @@ export default function ConsoleHeader() {
         >
           Plural App
         </Button>
-        <Breadcrumbs />
         {/* <AutoRefresh /> */}
         {/* <Icon
           icon={<Install size="18px" />}

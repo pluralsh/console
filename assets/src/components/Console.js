@@ -40,6 +40,7 @@ import { Tooltip } from './utils/Tooltip'
 import { PodShell } from './terminal/PodShell'
 import Apps from './apps/Apps.tsx'
 import ConsoleHeader from './ConsoleHeader'
+import ConsoleSubheader from './ConsoleSubheader'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -209,148 +210,156 @@ export default function Console() {
                   <ConsoleSidebar />
                   <Box
                     fill
-                    direction="row"
+                    direction="column"
                     overflow="auto"
                   >
-                    <Switch>
-                      <Route
-                        path="/config/:repo"
-                        component={Configuration}
-                      />
-                      <Route
-                        path="/config"
-                        render={() => (
-                          <RepositorySelector
-                            prefix="config"
-                            title="Configuration"
-                            description="edit configuration for your installed repos"
-                          />
-                        )}
-                      />
-                      <Route
-                        path="/directory/:section"
-                        component={Directory}
-                      />
-                      <Route
-                        exact
-                        path="/directory"
-                      >
-                        <Redirect to="/directory/users" />
-                      </Route>
-                      <Route
-                        path="/logs/:repo"
-                        component={LogViewer}
-                      />
-                      <Route
-                        path="/incident/:incidentId"
-                        component={withPluralApi(Incident)}
-                      />
-                      <Route
-                        path="/incidents"
-                        component={withPluralApi(Incidents)}
-                      />
-                      <Route
-                        path="/logs"
-                        render={() => (
-                          <RepositorySelector
-                            prefix="logs"
-                            title="Logs"
-                            description="aggregated logstreams for your repos"
-                          />
-                        )}
-                      />
-                      <Route
-                        path="/pods/:namespace/:name"
-                        component={Pod}
-                      />
-                      <Route
-                        path="/runbooks/:namespace/:name"
-                        component={Runbook}
-                      />
-                      <Route
-                        path="/runbooks/:repo"
-                        component={Runbooks}
-                      />
-                      <Route
-                        path="/nodes/:name"
-                        component={Node}
-                      />
-                      <Route
-                        path="/nodes"
-                        component={Nodes}
-                      />
-                      <Route
-                        path="/audits/:graph"
-                        component={Audits}
-                      />
-                      <Route
-                        exact
-                        path="/audits"
-                      >
-                        <Redirect to="/audits/table" />
-                      </Route>
-                      <Route
-                        path="/components/:repo/:kind/:name"
-                        component={Component}
-                      />
-                      <Route
-                        path="/components/:repo"
-                        component={Application}
-                      />
-                      <Route
-                        path="/components"
-                        render={() => (
-                          <RepositorySelector
-                            prefix="components"
-                            title="Components"
-                            description="details for all your applications"
-                          />
-                        )}
-                      />
-                      <Route
-                        path="/build/:buildId"
-                        component={Build}
-                      />
-                      <Route
-                        path="/webhooks"
-                        component={Webhooks}
-                      />
-                      <Route
-                        path="/dashboards/:repo"
-                        component={Dashboards}
-                      />
-                      <Route
-                        path="/dashboards"
-                        render={() => (
-                          <RepositorySelector
-                            prefix="dashboards"
-                            title="Dashboards"
-                            description="view monitoring dashboards for installed repos"
-                          />
-                        )}
-                      />
-                      <Route
-                        path="/me/edit"
-                        component={EditUser}
-                      />
-                      <Route
-                        path="/users"
-                        component={Users}
-                      />
-                      <Route
-                        path="/shell/pod/:namespace/:name/:container"
-                        component={PodShell}
-                      />
-                      <Route
-                        path="/builds"
-                        component={Builds}
-                      />
-                      <Route
-                        path="/"
-                        component={Apps}
-                      />
-                    </Switch>
-                    <FlyoutGutter />
+                    <ConsoleSubheader />
+                    <Box
+                      fill
+                      direction="row"
+                      overflow="auto"
+                    >
+
+                      <Switch>
+                        <Route
+                          path="/config/:repo"
+                          component={Configuration}
+                        />
+                        <Route
+                          path="/config"
+                          render={() => (
+                            <RepositorySelector
+                              prefix="config"
+                              title="Configuration"
+                              description="edit configuration for your installed repos"
+                            />
+                          )}
+                        />
+                        <Route
+                          path="/directory/:section"
+                          component={Directory}
+                        />
+                        <Route
+                          exact
+                          path="/directory"
+                        >
+                          <Redirect to="/directory/users" />
+                        </Route>
+                        <Route
+                          path="/logs/:repo"
+                          component={LogViewer}
+                        />
+                        <Route
+                          path="/incident/:incidentId"
+                          component={withPluralApi(Incident)}
+                        />
+                        <Route
+                          path="/incidents"
+                          component={withPluralApi(Incidents)}
+                        />
+                        <Route
+                          path="/logs"
+                          render={() => (
+                            <RepositorySelector
+                              prefix="logs"
+                              title="Logs"
+                              description="aggregated logstreams for your repos"
+                            />
+                          )}
+                        />
+                        <Route
+                          path="/pods/:namespace/:name"
+                          component={Pod}
+                        />
+                        <Route
+                          path="/runbooks/:namespace/:name"
+                          component={Runbook}
+                        />
+                        <Route
+                          path="/runbooks/:repo"
+                          component={Runbooks}
+                        />
+                        <Route
+                          path="/nodes/:name"
+                          component={Node}
+                        />
+                        <Route
+                          path="/nodes"
+                          component={Nodes}
+                        />
+                        <Route
+                          path="/audits/:graph"
+                          component={Audits}
+                        />
+                        <Route
+                          exact
+                          path="/audits"
+                        >
+                          <Redirect to="/audits/table" />
+                        </Route>
+                        <Route
+                          path="/components/:repo/:kind/:name"
+                          component={Component}
+                        />
+                        <Route
+                          path="/components/:repo"
+                          component={Application}
+                        />
+                        <Route
+                          path="/components"
+                          render={() => (
+                            <RepositorySelector
+                              prefix="components"
+                              title="Components"
+                              description="details for all your applications"
+                            />
+                          )}
+                        />
+                        <Route
+                          path="/build/:buildId"
+                          component={Build}
+                        />
+                        <Route
+                          path="/webhooks"
+                          component={Webhooks}
+                        />
+                        <Route
+                          path="/dashboards/:repo"
+                          component={Dashboards}
+                        />
+                        <Route
+                          path="/dashboards"
+                          render={() => (
+                            <RepositorySelector
+                              prefix="dashboards"
+                              title="Dashboards"
+                              description="view monitoring dashboards for installed repos"
+                            />
+                          )}
+                        />
+                        <Route
+                          path="/me/edit"
+                          component={EditUser}
+                        />
+                        <Route
+                          path="/users"
+                          component={Users}
+                        />
+                        <Route
+                          path="/shell/pod/:namespace/:name/:container"
+                          component={PodShell}
+                        />
+                        <Route
+                          path="/builds"
+                          component={Builds}
+                        />
+                        <Route
+                          path="/"
+                          component={Apps}
+                        />
+                      </Switch>
+                      <FlyoutGutter />
+                    </Box>
                   </Box>
                 </Box>
               </Box>

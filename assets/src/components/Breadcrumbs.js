@@ -1,76 +1,62 @@
 import React, { useContext, useState } from 'react'
-import { useHistory } from 'react-router-dom'
-import { Anchor, Box, Text } from 'grommet'
+
+import { A, Div, Flex } from 'honorable'
+
+import { theme } from 'pluralsh-design-system'
 
 import { lookahead } from '../utils/array'
+
+import { LoginContext } from './contexts'
 
 export const BreadcrumbsContext = React.createContext({
   breadcrumbs: [],
   setBreadcrumbs: () => null,
 })
 
-function CrumbLink({ crumb: { url, text, disable } }) {
-  const history = useHistory()
-
-  if (disable) {
-    return (
-      <Text
-        size="small"
-        color="dark-6"
-      >{text}
-      </Text>
-    )
-  }
-
-  return (
-    <Anchor
-      size="small"
-      onClick={() => history.push(url)}
-    >{text}
-    </Anchor>
-  )
-}
-
 export function Breadcrumbs() {
   const { breadcrumbs } = useContext(BreadcrumbsContext)
-
-  if (breadcrumbs.length === 0) return null
+  const { configuration } = useContext(LoginContext)
+  const cluster = configuration?.manifest?.cluster
 
   const children = Array.from(lookahead(breadcrumbs, (crumb, next) => {
     if (next.url) {
-      return [
-        <CrumbLink
-          key={crumb.url + crumb.text}
-          crumb={crumb}
-        />,
-        <Text
-          key={`${crumb.url + crumb.text}next`}
-          size="small"
-        >/
-        </Text>,
-      ]
+      return (
+        <Flex
+          direction="row"
+          gap="small"
+        >
+          <A
+            href={crumb.url}
+            color="text-xlight"
+          >
+            {crumb.text}
+          </A>
+          <Div color={theme.colors.grey[700]}>&nbsp;/&nbsp;</Div>
+        </Flex>
+      )
     }
 
-    return (
-      <Text
-        key={crumb.url + crumb.text}
-        size="small"
-        color="dark-6"
-      >{crumb.text}
-      </Text>
-    )
-  })).flat()
+    return crumb.text
+  }))
 
   return (
-    <Box
-      flex={false}
-      background="backgroundDark"
+    <Flex
       direction="row"
-      gap="xsmall"
-      pad={{ horizontal: 'small', vertical: 'small' }}
+      gap="small"
+      padding="small"
     >
+      {cluster
+      && (
+        <Flex
+          direction="row"
+          gap="small"
+        >
+          <Div color="text-xlight">{cluster}</Div>
+          <Div color={theme.colors.grey[700]}>&nbsp;/&nbsp;</Div>
+        </Flex>
+      )}
       {children}
-    </Box>
+    </Flex>
   )
 }
 
