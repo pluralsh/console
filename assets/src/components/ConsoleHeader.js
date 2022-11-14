@@ -2,12 +2,11 @@ import {
   A,
   Div,
   Flex,
+  Img,
   P,
 } from 'honorable'
-import { theme } from 'pluralsh-design-system'
+import { ArrowTopRightIcon, Button, theme } from 'pluralsh-design-system'
 import { useContext } from 'react'
-
-import { AutoRefresh } from './AutoRefresh'
 
 import { Breadcrumbs } from './Breadcrumbs'
 
@@ -46,48 +45,46 @@ function DemoBanner() {
 
 export default function ConsoleHeader() {
   return (
-
     <Div
       backgroundColor={theme.colors.grey[950]}
       borderBottom="1px solid border"
-      position="sticky"
-      top={0}
     >
       <DemoBanner />
-      <Flex>
-        <img
-          height="50px"
-          alt=""
+      <Flex
+        align="center"
+        paddingHorizontal="medium"
+      >
+        <Img
+          height={50}
           src={APP_ICON}
         />
-        <Breadcrumbs />
-        <AutoRefresh />
-      </Flex>
-
-      {/*
-
-        <Box
-          direction="row"
-          fill
-          gap="xsmall"
-          justify="end"
-          pad={{ horizontal: 'medium' }}
-          align="center"
+        <Flex grow={1} />
+        <Button
+          small
+          tertiary
+          fontWeight={600}
+          endIcon={<ArrowTopRightIcon size={14} />}
+          as="a"
+          href="https://app.plural.sh"
+          target="_blank"
+          rel="noopener noreferrer"
         >
-
-          <Icon
-            icon={<Install size="18px" />}
-            text="Install"
-            size="40px"
-            selected={open}
-            align={{ top: 'bottom' }}
-            onClick={() => setOpen(true)}
-          />
-          <Notifications />
-          <Installations />
-        </Box>
-        {open && <Installer setOpen={setOpen} />}
-      </Box> */}
+          Plural App
+        </Button>
+        <Breadcrumbs />
+        {/* <AutoRefresh /> */}
+        {/* <Icon
+          icon={<Install size="18px" />}
+          text="Install"
+          size="40px"
+          selected={open}
+          align={{ top: 'bottom' }}
+          onClick={() => setOpen(true)}
+        /> */}
+        {/* <Notifications /> */}
+        {/* <Installations />
+        {open && <Installer setOpen={setOpen} />} */}
+      </Flex>
     </Div>
 
   )
