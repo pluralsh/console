@@ -3,30 +3,23 @@ import { Redirect, Route, Switch } from 'react-router-dom'
 import { Box, Text } from 'grommet'
 import { useHistory } from 'react-router'
 
-import { Install } from 'forge-core'
-
 import { Portal } from 'react-portal'
 
 import Foco from 'react-foco'
 
 import { Next } from 'grommet-icons'
 
-import { A, Div, P } from 'honorable'
-
-import { theme } from 'pluralsh-design-system'
-
 import ConsoleSidebar, { SIDEBAR_ICON_HEIGHT } from './ConsoleSidebar'
 import Builds from './Builds'
 import Build from './Build'
-import BreadcrumbProvider, { Breadcrumbs } from './Breadcrumbs'
+import BreadcrumbProvider from './Breadcrumbs'
 import Webhooks from './Webhooks'
 import Configuration from './Configuration'
 import Dashboards from './Dashboards'
 import { EnsureLogin } from './Login'
-import { LoginContext } from './contexts'
 
 import Users from './Users'
-import { Installations, InstallationsProvider } from './Installations'
+import { InstallationsProvider } from './Installations'
 import { LogViewer } from './Logs'
 import RepositorySelector from './RepositorySelector'
 import Application from './Application'
@@ -39,20 +32,17 @@ import { Audits } from './audits/Audits'
 import { withPluralApi } from './PluralApi'
 import { Incidents } from './incidents/Incidents'
 import { Incident } from './incidents/Incident'
-import { Installer } from './repos/Installer'
 import { Runbook } from './runbooks/Runbook'
 import { Runbooks } from './runbooks/Runbooks'
 import { NavigationContext } from './navigation/Submenu'
 import { Tooltip } from './utils/Tooltip'
 
-import { Notifications } from './users/Notifications'
 import { PodShell } from './terminal/PodShell'
-import { AutoRefresh } from './AutoRefresh'
 import Apps from './apps/Apps.tsx'
+import ConsoleHeader from './ConsoleHeader'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
-const APP_ICON = `${process.env.PUBLIC_URL}/console-full.png`
 
 export function Icon({
   icon, text, selected, path, onClick, size, align,
@@ -200,37 +190,7 @@ export function FlyoutContainer({
   )
 }
 
-function DemoBanner() {
-  const { configuration } = useContext(LoginContext)
-
-  if (configuration.isDemoProject) return null // TODO: Revert logic.
-
-  return (
-    <Div
-      caption
-      padding="xsmall"
-      backgroundColor={theme.colors.grey[950]}
-      borderBottom="2px solid warning"
-    >
-      <P textAlign="center">
-        You are using a Plural demo GCP project, which will expire 6 hours after creation.
-        If you'd like to learn how to deploy on your own cloud,&nbsp;
-        <A
-          inline
-          href="https://docs.plural.sh/getting-started/quickstart"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          visit our docs.
-        </A>
-      </P>
-    </Div>
-  )
-}
-
 export default function Console() {
-  const [open, setOpen] = useState(false)
-
   return (
     <EnsureLogin>
       <FlyoutProvider>
@@ -240,51 +200,8 @@ export default function Console() {
               <Box
                 width="100vw"
                 height="100vh"
-                position="relative"
               >
-                <DemoBanner />
-                <Box
-                  flex={false}
-                  direction="row"
-                  align="center"
-                  background="backgroundDark"
-                  height={TOOLBAR_HEIGHT}
-                  border={{ side: 'bottom', color: 'sidebarBorder' }}
-                >
-                  <Box
-                    flex={false}
-                    direction="row"
-                    align="center"
-                  >
-                    <img
-                      height="50px"
-                      alt=""
-                      src={APP_ICON}
-                    />
-                  </Box>
-                  <Breadcrumbs />
-                  <Box
-                    direction="row"
-                    fill
-                    gap="xsmall"
-                    justify="end"
-                    pad={{ horizontal: 'medium' }}
-                    align="center"
-                  >
-                    <AutoRefresh />
-                    <Icon
-                      icon={<Install size="18px" />}
-                      text="Install"
-                      size="40px"
-                      selected={open}
-                      align={{ top: 'bottom' }}
-                      onClick={() => setOpen(true)}
-                    />
-                    <Notifications />
-                    <Installations />
-                  </Box>
-                  {open && <Installer setOpen={setOpen} />}
-                </Box>
+                <ConsoleHeader />
                 <Box
                   fill
                   direction="row"
@@ -293,6 +210,7 @@ export default function Console() {
                   <Box
                     fill
                     direction="row"
+                    overflow="auto"
                   >
                     <Switch>
                       <Route

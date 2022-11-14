@@ -65,60 +65,51 @@ export default function ConsoleSidebar() {
   // const name = currentApplication && currentApplication.name
 
   return (
-    <Flex
-      width={67}
-    >
-      <Sidebar
-        backgroundColor={theme.colors.grey[950]}
-        height="calc(100% - 55px)"
-        position="fixed"
+    <Sidebar backgroundColor={theme.colors.grey[950]}>
+      <SidebarSection
+        grow={1}
+        shrink={1}
       >
-        <SidebarSection
-          grow={1}
-          shrink={1}
+        {MENU_ITEMS.map((item, i) => (
+          <SidebarItem
+            key={i}
+            clickable
+            tooltip={item.text}
+            onClick={() => history.push(item.path)}
+            backgroundColor={active(item) ? theme.colors.grey[875] : null} // TODO: Add active prop to design system.
+            _hover={{ backgroundColor: theme.colors.grey[900], cursor: 'pointer' }}
+            borderRadius="normal"
+          >
+            {item.icon}
+          </SidebarItem>
+        ))}
+        <Flex grow={1} />
+        <SidebarItem
+          clickable
+          tooltip="Discord"
+          href="https://discord.gg/bEBAMXV64s"
         >
-          {MENU_ITEMS.map((item, i) => (
-            <SidebarItem
-              key={i}
-              clickable
-              tooltip={item.text}
-              onClick={() => history.push(item.path)}
-              backgroundColor={active(item) ? theme.colors.grey[875] : null} // TODO: Add active prop to design system.
-              _hover={{ backgroundColor: theme.colors.grey[900], cursor: 'pointer' }}
-              borderRadius="normal"
-            >
-              {item.icon}
-            </SidebarItem>
-          ))}
-          <Flex grow={1} />
-          <SidebarItem
-            clickable
-            tooltip="Discord"
-            href="https://discord.gg/bEBAMXV64s"
-          >
-            <DiscordIcon />
-          </SidebarItem>
-          <SidebarItem
-            clickable
-            tooltip="GitHub"
-            href="https://github.com/pluralsh/plural"
-          >
-            <GitHubLogoIcon />
-          </SidebarItem>
-          <SidebarItem
-            clickable
-            onClick={() => history.push('/me/edit')}
-          >
-            <Avatar
-              name={me.name}
-              size={32}
-            />
-            {/* TODO: Switch to app icon component to make it gray? */}
-          </SidebarItem>
-        </SidebarSection>
-      </Sidebar>
-    </Flex>
-
+          <DiscordIcon />
+        </SidebarItem>
+        <SidebarItem
+          clickable
+          tooltip="GitHub"
+          href="https://github.com/pluralsh/plural"
+        >
+          <GitHubLogoIcon />
+        </SidebarItem>
+        <SidebarItem
+          clickable
+          onClick={() => history.push('/me/edit')}
+        >
+          <Avatar
+            name={me.name}
+            size={32}
+          />
+          {/* TODO: Switch to app icon component to make it gray? */}
+        </SidebarItem>
+      </SidebarSection>
+    </Sidebar>
     //       {OPTIONS.map(({ text, icon, path, name: sbName, git }, ind) => {
     //         if (git && !conf.gitStatus.cloned) return null
     //       })}
