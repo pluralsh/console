@@ -4,7 +4,7 @@ defmodule Console.Services.Policies do
   alias Console.Schema.{UpgradePolicy, User}
   alias Console.PubSub
 
-  @ttl Nebulex.Time.expiry_time(15, :minute)
+  @ttl :timer.minutes(15)
 
   @decorate cacheable(cache: Console.Cache, key: :upgrade_policies, opts: [ttl: @ttl])
   def upgrade_policies(), do: Console.Repo.all(UpgradePolicy)
