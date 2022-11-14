@@ -7,7 +7,7 @@ defmodule Console.Alertmanager.Incidents do
 
   @behaviour Console.Alertmanager.Sink
 
-  @ttl Nebulex.Time.expiry_time(6, :hour)
+  @ttl :timer.hours(6)
 
   def name(), do: :incident
 

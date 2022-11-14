@@ -4,7 +4,7 @@ defmodule Console.Guardian do
   alias Console.Schema.User
   # use Nebulex.Caching
 
-  # @ttl Nebulex.Time.expiry_time(15, :minute)
+  # @ttl :timer.minutes(15)
 
   def subject_for_token(%User{id: id}, _claims),
     do: {:ok, "user:#{id}"}
