@@ -126,7 +126,7 @@ function Rebuild({ build: { id } }) {
   const [open, setOpen] = useState(false)
   const [mutation, { loading }] = useMutation(RESTART_BUILD, {
     variables: { id },
-    onCompleted: ({ restartBuild: { id } }) => history.push(`/build/${id}`),
+    onCompleted: ({ restartBuild: { id } }) => history.push(`/builds/${id}`),
   })
 
   return (
@@ -482,7 +482,7 @@ export default function Build() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { text: 'builds', url: '/' },
+      { text: 'Builds', url: '/builds' },
       { text: buildId, url: `/builds/${buildId}` },
     ])
 

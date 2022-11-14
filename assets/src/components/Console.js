@@ -316,7 +316,7 @@ export default function Console() {
                           )}
                         />
                         <Route
-                          path="/build/:buildId"
+                          path="/builds/:buildId"
                           component={Build}
                         />
                         <Route

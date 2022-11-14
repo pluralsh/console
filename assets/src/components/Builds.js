@@ -156,7 +156,7 @@ function Build({ build }) {
   return (
     <Box pad={BUILD_PADDING}>
       <Container
-        onClick={() => history.push(`/build/${id}`)}
+        onClick={() => history.push(`/builds/${id}`)}
         margin={{ bottom: 'small' }}
       >
         <BuildIcon build={build} />
@@ -323,7 +323,7 @@ export default function Builds() {
 
   useEffect(() => {
     setOnChange({ func: () => null })
-    setBreadcrumbs([{ text: 'builds', url: '/' }])
+    setBreadcrumbs([{ text: 'Builds', url: '/builds' }])
   }, [])
 
   useEffect(() => subscribeToMore({
