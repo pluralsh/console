@@ -4158,16 +4158,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-types/shared@npm:3.14.1":
-  version: 3.14.1
-  resolution: "@react-types/shared@npm:3.14.1"
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: 117fe230f5a26b7fcaf535c1cfb7c4d42416b0f49d0e0b3436fef2a5851234967908c4e884fc5f2a99a04bee2543543348346a04e1f3f45aaa14c42b6f08491a
-  languageName: node
-  linkType: hard
-
-"@react-types/shared@npm:^3.15.0":
+"@react-types/shared@npm:3.15.0, @react-types/shared@npm:^3.15.0":
   version: 3.15.0
   resolution: "@react-types/shared@npm:3.15.0"
   peerDependencies:
@@ -17151,7 +17142,7 @@ __metadata:
     "@react-stately/radio": 3.6.0
     "@react-stately/tabs": 3.2.2
     "@react-stately/toggle": 3.4.2
-    "@react-types/shared": 3.14.1
+    "@react-types/shared": 3.15.0
     "@storybook/addon-actions": 6.5.13
     "@storybook/addon-docs": 6.5.13
     "@storybook/addon-essentials": 6.5.13
