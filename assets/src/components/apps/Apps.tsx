@@ -61,6 +61,7 @@ export default function Apps() {
       </PageTitle>
       <Flex
         margin="medium"
+        paddingBottom="medium"
         direction="row"
         wrap="wrap"
       >
@@ -75,6 +76,11 @@ export default function Apps() {
               setCurrentApplication={setCurrentApplication}
             />
           ))}
+        <Flex
+          grow={1}
+          basis="40%"
+          margin="xsmall"
+        />
       </Flex>
     </Div>
   )
