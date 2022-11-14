@@ -31,7 +31,7 @@ export function Breadcrumbs() {
           >
             {crumb.text}
           </A>
-          <Div color={theme.colors.grey[700]}>&nbsp;/&nbsp;</Div>
+          <Div color={theme.colors.grey[700]}>/</Div>
         </Flex>
       )
     }
@@ -52,7 +52,7 @@ export function Breadcrumbs() {
           gap="small"
         >
           <Div color="text-xlight">{cluster}</Div>
-          <Div color={theme.colors.grey[700]}>&nbsp;/&nbsp;</Div>
+          <Div color={theme.colors.grey[700]}>/</Div>
         </Flex>
       )}
       {children}
