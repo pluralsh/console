@@ -11,7 +11,10 @@ import { getIcon, hasIcons } from './misc'
 
 export default function AppCard({ application, setCurrentApplication }: any) {
   const { dark }: any = useContext(ThemeContext)
-  const version = application?.spec?.descriptor?.version
+
+  if (!application?.spec?.descriptor) return null
+
+  const { name, spec: { descriptor: { version } } } = application
 
   return (
     <Card
@@ -43,7 +46,7 @@ export default function AppCard({ application, setCurrentApplication }: any) {
               body1
               fontWeight={600}
             >
-              {application.name}
+              {name}
             </P>
             <AppStatus application={application} />
           </Flex>
