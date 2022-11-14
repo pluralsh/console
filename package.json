@@ -1,6 +1,6 @@
 {
   "name": "pluralsh-design-system",
-  "version": "1.279.0",
+  "version": "1.280.0",
   "description": "Pluralsh Design System",
   "main": "dist/index.js",
   "files": [
@@ -23,7 +23,7 @@
     "@react-aria/combobox": "3.4.2",
     "@react-aria/focus": "3.9.0",
     "@react-aria/interactions": "3.12.0",
-    "@react-aria/listbox": "3.6.1",
+    "@react-aria/listbox": "3.7.0",
     "@react-aria/overlays": "3.10.1",
     "@react-aria/radio": "3.4.0",
     "@react-aria/select": "3.8.2",
