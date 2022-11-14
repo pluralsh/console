@@ -34,7 +34,7 @@ const parentFillLevelToHue: Record<FillLevel, Hue> = {
 }
 
 const severityToColor: Record<Severity, string> = {
-  neutral: 'text-light',
+  neutral: 'text',
   info: 'text-primary-accent',
   success: 'text-success-light',
   warning: 'text-warning-light',

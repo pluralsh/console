@@ -4,7 +4,6 @@ export {
 // Icons
 export * from './icons'
 // Components
-export { default as Alert } from './components/Alert'
 export { default as Banner } from './components/Banner'
 export { default as Button } from './components/Button'
 export { default as Card, CardProps } from './components/Card'
@@ -23,7 +22,6 @@ export { default as FormField } from './components/FormField'
 export { default as Highlight } from './components/Highlight'
 export { default as IconFrame, IconFrameProps } from './components/IconFrame'
 export { default as Input } from './components/Input'
-export { default as InstalledLabel } from './components/InstalledLabel'
 export { default as Markdown } from './components/Markdown'
 export { default as PageCard, PageCardProps } from './components/PageCard'
 export { default as PageTitle } from './components/PageTitle'
@@ -50,7 +48,6 @@ export {
 export { default as TabPanel } from './components/TabPanel'
 export { default as Table } from './components/Table'
 export { default as TipCarousel } from './components/TipCarousel'
-export { default as UserCard } from './components/UserCard'
 export { default as ValidatedInput } from './components/ValidatedInput'
 export { default as Tooltip, TooltipProps } from './components/Tooltip'
 export { default as FormTitle } from './components/FormTitle'

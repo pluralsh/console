@@ -129,7 +129,7 @@ export default function ProgressBar({
       width="100%"
       height={height}
       borderRadius={height / 2}
-      backgroundColor="fill-two-selected"
+      backgroundColor="fill-three"
       overflow="hidden"
       {...props}
     >

@@ -148,6 +148,9 @@ const textPartials = asElementTypes<CSSObject>()({
     },
     '&:visited, &:active': {
       color: semanticColors['action-link-inline-visited'],
+      '&:hover': {
+        color: semanticColors['action-link-inline-visited-hover'],
+      },
     },
   },
   code: {
