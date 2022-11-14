@@ -1,5 +1,5 @@
 import { ThemeContext } from 'grommet'
-import { Flex, Span } from 'honorable'
+import { Flex, P } from 'honorable'
 import { AppIcon, Card } from 'pluralsh-design-system'
 import { useContext } from 'react'
 
@@ -14,19 +14,22 @@ export default function AppCard({ application, setCurrentApplication }: any) {
 
   return (
     <Card
-      direction="row"
+      alignItems="top"
       clickable
-      flexShrink={1}
+      display="flex"
+      flexBasis="40%"
       flexGrow={1}
+      flexShrink={1}
       margin="xsmall"
-      width="45%"
       minWidth={240}
       onClick={() => setCurrentApplication(application)}
     >
       <AppBorder app={application} />
       <Flex
         align="center"
+        display="inline-flex"
         gap="small"
+        maxWidth="90%"
         padding="medium"
       >
         {hasIcons(application) && (
@@ -35,12 +38,12 @@ export default function AppCard({ application, setCurrentApplication }: any) {
             size="xsmall"
           />
         )}
-        <Span
+        <P
           body1
           fontWeight={600}
         >
           {application.name}
-        </Span>
+        </P>
         <AppStatus application={application} />
       </Flex>
     </Card>
