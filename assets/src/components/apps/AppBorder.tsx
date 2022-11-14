@@ -12,7 +12,6 @@ export default function AppBorder({ app }) {
       backgroundColor={borderColor}
       borderTopLeftRadius={4}
       borderBottomLeftRadius={4}
-      display="inline-flex"
       height="100%"
       width="3px"
     />

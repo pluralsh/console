@@ -14,7 +14,6 @@ export default function AppCard({ application, setCurrentApplication }: any) {
 
   return (
     <Card
-      alignItems="top"
       clickable
       display="flex"
       flexBasis="40%"
@@ -27,7 +26,6 @@ export default function AppCard({ application, setCurrentApplication }: any) {
       <AppBorder app={application} />
       <Flex
         align="center"
-        display="inline-flex"
         gap="small"
         maxWidth="90%"
         padding="medium"
