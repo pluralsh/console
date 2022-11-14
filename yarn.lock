@@ -6131,22 +6131,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-table@npm:8.5.24":
-  version: 8.5.24
-  resolution: "@tanstack/react-table@npm:8.5.24"
+"@tanstack/react-table@npm:8.5.27":
+  version: 8.5.27
+  resolution: "@tanstack/react-table@npm:8.5.27"
   dependencies:
-    "@tanstack/table-core": 8.5.24
+    "@tanstack/table-core": 8.5.27
   peerDependencies:
     react: ">=16"
     react-dom: ">=16"
-  checksum: 6734d04787298592c2a1ac4e41b5ceb3a4bc089368690f4183eda9a2b44825b47f6069693726d7768465b60e1ded72f6d80ee13358ec2e78663cd6c995679f58
+  checksum: 7b58c39ebf08381c6debb5f503e224fc82fd8c1dbbd3e92c91c39d2eed8a5510c7284d00c0ded1c4f11045c57dc7af78bd6cac9de7c1b6cf8bfb5f6838f9673f
   languageName: node
   linkType: hard
 
-"@tanstack/table-core@npm:8.5.24":
-  version: 8.5.24
-  resolution: "@tanstack/table-core@npm:8.5.24"
-  checksum: ff9fca41aa47d6e56c9c2de0b9dff8825fa51dfb795928759029d67a157cfea7379b36bd6250382121249a059b46621ccc7d725f569e8476d3e0d51c61581af0
+"@tanstack/table-core@npm:8.5.27":
+  version: 8.5.27
+  resolution: "@tanstack/table-core@npm:8.5.27"
+  checksum: 83614456f8710496dbb5a483dc475ab4c203a6075a082b13cb29fdc182c6ec70f9556cc8a3761aa88f503233c33f68f2879eccca9e2d153b0e5cb5b42a4602bf
   languageName: node
   linkType: hard
 
@@ -17410,7 +17410,7 @@ __metadata:
     "@storybook/preset-create-react-app": 4.1.2
     "@storybook/react": 6.5.13
     "@storybook/testing-library": 0.0.13
-    "@tanstack/react-table": 8.5.24
+    "@tanstack/react-table": 8.5.27
     "@types/chroma-js": 2.1.4
     "@types/react-transition-group": 4.4.5
     "@types/styled-components": 5.1.26
