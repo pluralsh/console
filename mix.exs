@@ -106,7 +106,7 @@ defmodule Console.MixProject do
       {:prometheus_plugs, "~> 1.1.1"},
       {:guardian, "~> 1.2.1"},
       {:httpoison, "~> 1.7"},
-      {:nebulex, "2.0.0-rc.1"},
+      {:nebulex, "== 2.0.0"},
       {:shards, "~> 1.0"},      #=> For using :shards as backend
       {:decorator, "~> 1.3"},   #=> For using Caching Annotations
       {:telemetry, "~> 0.4"},

@@ -59,7 +59,7 @@ RUN \
   tar -xzf ${APP_NAME}.tar.gz && \
   rm ${APP_NAME}.tar.gz
 
-FROM alpine:3.16.2 as tools
+FROM alpine:3.16.3 as tools
 
 ARG TARGETARCH
 
@@ -67,13 +67,13 @@ ARG TARGETARCH
 ENV HELM_VERSION=v3.9.4
 
 # renovate: datasource=github-releases depName=hashicorp/terraform
-ENV TERRAFORM_VERSION=v1.2.8
+ENV TERRAFORM_VERSION=v1.2.9
 
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
 ENV CLI_VERSION=v0.5.21
 
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
-ENV KUBECTL_VERSION=v1.24.3
+ENV KUBECTL_VERSION=v1.24.8
 
 RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-base && \
     curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz | tar xvz && \

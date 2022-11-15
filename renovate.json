@@ -1,6 +1,7 @@
 {
   "extends": [
     "config:base",
+    ":semanticCommits",
     ":dependencyDashboard",
     ":prHourlyLimit4",
     ":prConcurrentLimit10"
@@ -44,12 +45,16 @@
     },
     {
       "matchManagers": ["npm"],
+      "additionalBranchPrefix": "frontend/",
+      "semanticCommitScope": "frontend",
       "addLabels": [
         "frontend"
       ]
     },
     {
       "matchManagers": ["mix"],
+      "additionalBranchPrefix": "backend/",
+      "semanticCommitScope": "backend",
       "addLabels": [
         "backend"
       ]
