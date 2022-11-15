@@ -4,7 +4,7 @@ import {
   useEffect,
   useState,
 } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Box, Text, TextInput } from 'grommet'
 import { Edit } from 'forge-core'
 import { Checkmark } from 'grommet-icons'

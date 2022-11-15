@@ -12,7 +12,7 @@ import gql from 'graphql-tag'
 
 import { useIntercom } from 'react-use-intercom'
 
-import { useLocation } from 'react-router'
+import { useLocation } from 'react-router-dom'
 
 import { setToken, wipeToken } from '../helpers/auth'
 

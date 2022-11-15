@@ -1,7 +1,11 @@
 import React, { useContext, useRef, useState } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import {
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+} from 'react-router-dom'
 import { Box, Text } from 'grommet'
-import { Navigate, useNavigate } from 'react-router'
 
 import { Portal } from 'react-portal'
 
@@ -15,7 +19,6 @@ import Build from './Build'
 import BreadcrumbProvider from './Breadcrumbs'
 import Webhooks from './Webhooks'
 import Configuration from './Configuration'
-import Dashboards from './Dashboards'
 import { EnsureLogin } from './Login'
 
 import Users from './Users'
@@ -32,7 +35,6 @@ import { Audits } from './audits/Audits'
 import { PluralApi } from './PluralApi'
 import { Incident } from './incidents/Incident'
 import { Runbook } from './runbooks/Runbook'
-import { Runbooks } from './runbooks/Runbooks'
 import { NavigationContext } from './navigation/Submenu'
 import { Tooltip } from './utils/Tooltip'
 
@@ -41,6 +43,8 @@ import Apps from './apps/Apps'
 import App from './app/App'
 import ConsoleHeader from './ConsoleHeader'
 import ConsoleSubheader from './ConsoleSubheader'
+import Dashboards from './app/dashboards/Dashboards'
+import Runbooks from './app/runbooks/Runbooks'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -279,10 +283,10 @@ export default function Console() {
                           path="/runbooks/:namespace/:name"
                           element={<Runbook />}
                         />
-                        <Route
+                        {/* <Route
                           path="/runbooks/:repo"
                           element={<Runbooks />}
-                        />
+                        /> */}
                         <Route
                           path="/nodes/:name"
                           element={<Node />}
@@ -331,10 +335,10 @@ export default function Console() {
                           path="/webhooks"
                           element={<Webhooks />}
                         />
-                        <Route
+                        {/* <Route
                           path="/dashboards/:repo"
                           element={<Dashboards />}
-                        />
+                        /> */}
                         <Route
                           path="/dashboards"
                           element={(
@@ -364,7 +368,17 @@ export default function Console() {
                         <Route
                           path="/app/:name"
                           element={<App />}
-                        />
+                        >
+                          <Route
+                            index
+                            element={<Dashboards />}
+                          />
+                          <Route
+                            path="runbooks"
+                            element={<Runbooks />}
+                          />
+                        </Route>
+
                         <Route
                           path="/"
                           element={<Apps />}

@@ -13,7 +13,7 @@ import {
 } from 'pluralsh-design-system'
 
 import { Builds } from 'forge-core'
-import { useLocation, useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { useContext } from 'react'
 

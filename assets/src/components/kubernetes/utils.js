@@ -1,6 +1,6 @@
 import { Anchor, Box, Text } from 'grommet'
 
-import { useNavigate } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { Logs } from 'forge-core'
 
 import { asQuery } from '../utils/query'

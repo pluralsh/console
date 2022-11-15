@@ -25,7 +25,7 @@ import {
   Explore as Search,
 } from 'forge-core'
 
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { last } from 'lodash'
 

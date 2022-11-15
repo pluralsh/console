@@ -7,7 +7,7 @@ import {
 } from 'forge-core'
 import { useQuery } from 'react-apollo'
 
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { Readiness, ReadyIcon } from '../Application'
 

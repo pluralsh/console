@@ -7,7 +7,7 @@ import { GraphView, ListView } from 'forge-core'
 
 import lookup from 'country-code-lookup'
 
-import { useParams } from 'react-router'
+import { useParams } from 'react-router-dom'
 
 import { HeaderItem, RowItem } from '../kubernetes/Pod'
 import { dateFormat } from '../utils/Graph'

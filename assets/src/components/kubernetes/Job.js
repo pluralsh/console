@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { Box, Text } from 'grommet'
 import { useMutation, useQuery } from 'react-apollo'
-import { useParams } from 'react-router'
+import { useParams } from 'react-router-dom'
 import {
   Confirm,
   TabContent,

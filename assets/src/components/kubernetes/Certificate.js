@@ -6,7 +6,7 @@ import {
   Tabs,
 } from 'forge-core'
 
-import { useParams } from 'react-router'
+import { useParams } from 'react-router-dom'
 
 import { useQuery } from '@apollo/react-hooks'
 

@@ -1,13 +1,11 @@
 import { useContext, useEffect } from 'react'
 import { Box, Text, ThemeContext } from 'grommet'
 import { Check } from 'forge-core'
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { normalizeColor } from 'grommet/utils'
 
 import { StatusCritical } from 'grommet-icons'
-
-import { useNavigate } from 'react-router-dom'
 
 import { chunk } from '../utils/array'
 

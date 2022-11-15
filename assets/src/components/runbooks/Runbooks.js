@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react'
 import { Box, Text } from 'grommet'
 import { useQuery } from '@apollo/react-hooks'
 
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import {
   ApplicationIcon,

@@ -23,7 +23,7 @@ import {
   Text,
   ThemeContext,
 } from 'grommet'
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { ServerCluster } from 'grommet-icons'
 

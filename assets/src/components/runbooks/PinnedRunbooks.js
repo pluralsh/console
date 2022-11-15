@@ -3,7 +3,7 @@ import { useQuery } from '@apollo/react-hooks'
 
 import { Box, Text } from 'grommet'
 
-import { useNavigate } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 
 import { chunk } from 'lodash'
 

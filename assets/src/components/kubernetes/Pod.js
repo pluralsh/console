@@ -27,7 +27,7 @@ import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
 
 import filesize from 'filesize'
 
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { Readiness, ReadinessColor, ReadyIcon } from '../Application'
 

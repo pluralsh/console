@@ -15,7 +15,7 @@ import { Button, SecondaryButton } from 'forge-core'
 import { normalizeColor } from 'grommet/utils'
 import { useMutation } from '@apollo/react-hooks'
 
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import { Graph, GraphHeader } from '../utils/Graph'
 

@@ -21,7 +21,7 @@ import { MoonLoader, SyncLoader } from 'react-spinners'
 import { Progress } from 'react-sweet-progress'
 import { Editor as SlateEditor, Transforms } from 'slate'
 
-import { useParams } from 'react-router'
+import { useParams } from 'react-router-dom'
 
 import {
   Attachment,

@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react'
 import { Box, Text } from 'grommet'
 import { Scroller } from 'forge-core'
 import { FormNext } from 'grommet-icons'
-import { useNavigate } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 
 import { chunk } from '../utils/array'
 

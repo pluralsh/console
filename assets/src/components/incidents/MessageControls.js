@@ -14,7 +14,7 @@ import {
 
 import { useMutation } from 'react-apollo'
 
-import { useParams } from 'react-router'
+import { useParams } from 'react-router-dom'
 
 import { CurrentUserContext } from '../login/CurrentUser'
 

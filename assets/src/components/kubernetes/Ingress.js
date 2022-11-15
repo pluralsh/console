@@ -7,7 +7,7 @@ import {
 } from 'forge-core'
 import { useQuery } from 'react-apollo'
 
-import { useParams } from 'react-router'
+import { useParams } from 'react-router-dom'
 
 import { LoopingLogo } from '../utils/AnimatedLogo'
 

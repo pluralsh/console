@@ -2,7 +2,7 @@ import { Flex } from 'honorable'
 import { Tab, TabList, TabPanel } from 'pluralsh-design-system'
 
 import { useContext, useEffect, useRef } from 'react'
-import { useLocation } from 'react-router'
+import { Outlet, useLocation } from 'react-router-dom'
 
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
@@ -67,7 +67,7 @@ export default function App() {
         as={<ResponsiveLayoutContentContainer />}
         stateRef={tabStateRef}
       >
-        {/* <Outlet /> */}
+        <Outlet />
       </TabPanel>
       <ResponsiveLayoutSpacer />
     </Flex>

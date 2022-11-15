@@ -29,7 +29,7 @@ import { useQuery } from 'react-apollo'
 
 import moment from 'moment'
 
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import styled, { keyframes } from 'styled-components'
 import { pulse } from 'react-animations'

@@ -8,7 +8,7 @@ import {
 } from 'forge-core'
 import { useQuery } from 'react-apollo'
 
-import { useParams } from 'react-router'
+import { useParams } from 'react-router-dom'
 
 import { useIntercom } from 'react-use-intercom'
 

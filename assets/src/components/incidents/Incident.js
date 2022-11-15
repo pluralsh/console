@@ -16,7 +16,7 @@ import {
 
 import { useMutation, useQuery, useSubscription } from 'react-apollo'
 
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import {
   Box,

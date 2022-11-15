@@ -3,7 +3,7 @@ import gql from 'graphql-tag'
 import { Box } from 'grommet'
 import { GqlError } from 'forge-core'
 import { useMutation } from 'react-apollo'
-import { useLocation } from 'react-router'
+import { useLocation } from 'react-router-dom'
 import qs from 'query-string'
 
 import { setToken } from '../helpers/auth'

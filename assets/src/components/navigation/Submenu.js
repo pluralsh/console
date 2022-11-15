@@ -1,7 +1,7 @@
 import { Box, Text } from 'grommet'
 import React, { useContext, useEffect, useState } from 'react'
 import { Portal } from 'react-portal'
-import { useNavigate } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 
 export const SubmenuContext = React.createContext({})
 

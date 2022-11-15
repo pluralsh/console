@@ -2,7 +2,7 @@ import { ThemeContext } from 'grommet'
 import { Flex, P } from 'honorable'
 import { AppIcon, Card } from 'pluralsh-design-system'
 import { useContext } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 
 import AppBorder from './AppBorder'
 

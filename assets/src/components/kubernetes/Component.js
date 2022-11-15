@@ -1,6 +1,6 @@
 import { useContext, useEffect } from 'react'
 import { Box } from 'grommet'
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import Highlight from 'react-highlight.js'
 

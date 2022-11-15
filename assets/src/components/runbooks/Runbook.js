@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useQuery } from '@apollo/react-hooks'
-import { useParams } from 'react-router'
+import { useParams } from 'react-router-dom'
 
 import {
   TabContent,
