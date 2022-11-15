@@ -40,11 +40,11 @@ import { Tooltip } from './utils/Tooltip'
 
 import { PodShell } from './terminal/PodShell'
 import Apps from './apps/Apps'
-import App from './app/App'
+import App from './apps/app/App'
 import ConsoleHeader from './ConsoleHeader'
 import ConsoleSubheader from './ConsoleSubheader'
-import Dashboards from './app/dashboards/Dashboards'
-import Runbooks from './app/runbooks/Runbooks'
+import Dashboards from './apps/app/dashboards/Dashboards'
+import Runbooks from './apps/app/runbooks/Runbooks'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -337,7 +337,7 @@ export default function Console() {
                         />
                         {/* <Route
                           path="/dashboards/:repo"
-                          element={<Dashboards />}
+                          element={}
                         /> */}
                         <Route
                           path="/dashboards"
@@ -370,7 +370,15 @@ export default function Console() {
                           element={<App />}
                         >
                           <Route
-                            index
+                  index
+                  element={(
+                    <Navigate
+                      replace
+                      to="dashboards"
+                    />
+                  )}></Route>
+                          <Route
+                            path="dashboards"
                             element={<Dashboards />}
                           />
                           <Route
@@ -378,7 +386,6 @@ export default function Console() {
                             element={<Runbooks />}
                           />
                         </Route>
-
                         <Route
                           path="/"
                           element={<Apps />}

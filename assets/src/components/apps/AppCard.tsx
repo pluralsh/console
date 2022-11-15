@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 
 import AppBorder from './AppBorder'
 
-import AppStatus from './AppStatus'
+import AppStatus from './misc/AppStatus'
 
 import { getIcon, hasIcons } from './misc'
 
