@@ -38,7 +38,8 @@ import { NavigationContext } from './navigation/Submenu'
 import { Tooltip } from './utils/Tooltip'
 
 import { PodShell } from './terminal/PodShell'
-import Apps from './apps/Apps.tsx'
+import Apps from './apps/Apps'
+import App from './app/App'
 import ConsoleHeader from './ConsoleHeader'
 import ConsoleSubheader from './ConsoleSubheader'
 
@@ -352,6 +353,10 @@ export default function Console() {
                         <Route
                           path="/builds"
                           component={Builds}
+                        />
+                        <Route
+                          path="/app/:name"
+                          component={App}
                         />
                         <Route
                           path="/"

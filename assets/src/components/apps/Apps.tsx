@@ -27,9 +27,7 @@ const FILTERS = [
 ]
 
 export default function Apps() {
-  const {
-    applications, setCurrentApplication, currentApplication,
-  }: any = useContext(InstallationContext)
+  const { applications, setCurrentApplication }: any = useContext(InstallationContext)
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('')
@@ -81,7 +79,6 @@ export default function Apps() {
             <App
               key={app.name}
               application={app}
-              current={currentApplication}
               setCurrentApplication={setCurrentApplication}
             />
           ))}

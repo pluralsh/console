@@ -2,6 +2,7 @@ import { ThemeContext } from 'grommet'
 import { Flex, P } from 'honorable'
 import { AppIcon, Card } from 'pluralsh-design-system'
 import { useContext } from 'react'
+import { useHistory } from 'react-router'
 
 import AppBorder from './AppBorder'
 
@@ -10,6 +11,7 @@ import AppStatus from './AppStatus'
 import { getIcon, hasIcons } from './misc'
 
 export default function AppCard({ application, setCurrentApplication }: any) {
+  const history = useHistory()
   const { dark }: any = useContext(ThemeContext)
 
   if (!application?.spec?.descriptor) return null
@@ -25,7 +27,10 @@ export default function AppCard({ application, setCurrentApplication }: any) {
       flexShrink={1}
       margin="xsmall"
       minWidth={240}
-      onClick={() => setCurrentApplication(application)}
+      onClick={() => {
+        setCurrentApplication(application) // TODO: Consider removing this context.
+        history.push(`/app/${application.name}`)
+      }}
     >
       <AppBorder app={application} />
       <Flex

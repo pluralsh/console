@@ -9,7 +9,6 @@ import {
   Sidebar,
   SidebarItem,
   SidebarSection,
-  SirenIcon,
   theme,
 } from 'pluralsh-design-system'
 
@@ -35,17 +34,11 @@ const MENU_ITEMS = [
     path: '/builds',
   },
   { text: 'Nodes', icon: <ServersIcon />, path: '/nodes' },
-  { text: 'Incidents', icon: <SirenIcon />, path: '/incidents' },
+  // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents' }, // Disabled for now.
   {
     text: 'Audits', name: 'audits', icon: <ListIcon />, path: '/audits',
   },
   { text: 'Account', icon: <PeopleIcon />, path: '/directory' },
-
-  // { text: 'Runbooks', icon: Runbook, path: '/runbooks/{repo}' },
-  // { text: 'Components', icon: Components, path: '/components/{repo}' },
-  // { text: 'Configuration', icon: Configuration, path: '/config/{repo}', git: true },
-  // { text: 'Dashboards', icon: Dashboard, path: '/dashboards/{repo}' },
-  // { text: 'Logs', icon: Logs, path: '/logs/{repo}' },
 
   // {text: 'Webhooks', icon: Webhooks, path: '/webhooks'},
 ]
@@ -59,10 +52,6 @@ export default function ConsoleSidebar() {
   const active = ({ path }) => (path === '/' ? pathname === path : pathname.startsWith(path))
 
   if (!me) return null
-
-  // const { currentApplication } = useContext(InstallationContext)
-  // const { configuration: conf } = useContext(LoginContext)
-  // const name = currentApplication && currentApplication.name
 
   return (
     <Sidebar backgroundColor={theme.colors.grey[950]}>
@@ -110,8 +99,5 @@ export default function ConsoleSidebar() {
         </SidebarItem>
       </SidebarSection>
     </Sidebar>
-    //       {OPTIONS.map(({ text, icon, path, name: sbName, git }, ind) => {
-    //         if (git && !conf.gitStatus.cloned) return null
-    //       })}
   )
 }
