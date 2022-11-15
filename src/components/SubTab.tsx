@@ -7,6 +7,7 @@ import { TabBaseProps } from './TabList'
 type SubTabSize = 'small' | 'medium'
 type SubtabProps = TabBaseProps &
   ComponentProps<'div'> & {
+    flexGrow?: number
     size?: SubTabSize
   }
 
@@ -56,6 +57,7 @@ function SubTabRef({
   active,
   children,
   textValue: _textValue,
+  flexGrow,
   size = 'medium',
   ...props
 }: SubtabProps,
@@ -68,6 +70,7 @@ ref: Ref<any>) {
       active={active}
       ref={ref}
       size={size}
+      flexGrow={flexGrow}
       {...props}
     >
       {children}
