@@ -67,35 +67,6 @@ export function ToolbarItem({ children, onClick, open }) {
   )
 }
 
-function ApplicationLink({ link: { url, description }, width }) {
-  return (
-    <Box
-      direction="row"
-      align="center"
-      round="xsmall"
-      background="tone-light"
-      gap="small"
-      pad="small"
-      width={width || '33%'}
-    >
-      <Links size="15px" />
-      <Box>
-        <Anchor
-          target="_blank"
-          size="small"
-          href={`https://${url}`}
-        >{url}
-        </Anchor>
-        <Text
-          size="small"
-          color="dark-3"
-        >{description}
-        </Text>
-      </Box>
-    </Box>
-  )
-}
-
 export function ApplicationDetails() {
   const { currentApplication } = useContext(InstallationContext)
   const {
@@ -110,54 +81,8 @@ export function ApplicationDetails() {
       pad="medium"
       gap="small"
     >
-      <Box
-        direction="row"
-        gap="small"
-        align="center"
-      >
-        {descriptor.icons.length > 0 && (
-          <ApplicationIcon
-            size="40px"
-            application={currentApplication}
-          />
-        )}
-        <Box fill="horizontal">
-          <Box
-            direction="row"
-            align="center"
-            gap="xsmall"
-          >
-            <Text
-              size="small"
-              weight={500}
-            >{name}
-            </Text>
-            <Box
-              round="xsmall"
-              background="tone-light"
-              pad={{ horizontal: '3px', vertical: '2px' }}
-            >
-              <Text size="12px">{descriptor.version}</Text>
-            </Box>
-          </Box>
-          <Text
-            size="small"
-            color="dark-3"
-          >{descriptor.description}
-          </Text>
-        </Box>
-      </Box>
-      <Tabs defaultTab={hasLinks ? 'links' : (hasCost ? 'cost' : 'oidc')}>
+      <Tabs defaultTab={hasCost ? 'cost' : 'oidc'}>
         <TabHeader>
-          {hasLinks && (
-            <TabHeaderItem name="links">
-              <Text
-                size="small"
-                weight={500}
-              >Application Links
-              </Text>
-            </TabHeaderItem>
-          )}
           {hasCost && (
             <TabHeaderItem name="cost">
               <Text
@@ -175,29 +100,6 @@ export function ApplicationDetails() {
             </Text>
           </TabHeaderItem>
         </TabHeader>
-        {hasLinks && (
-          <TabContent name="links">
-            <Box
-              gap="small"
-              pad="small"
-            >
-              {chunk(descriptor.links, 3).map((chunk, i) => (
-                <Box
-                  direction="row"
-                  gap="small"
-                  key={i}
-                >
-                  {chunk.map(link => (
-                    <ApplicationLink
-                      link={link}
-                      key={link.url}
-                    />
-                  ))}
-                </Box>
-              ))}
-            </Box>
-          </TabContent>
-        )}
         {hasCost && (
           <TabContent name="cost">
             <CostBreakdown
@@ -215,8 +117,6 @@ export function ApplicationDetails() {
 }
 
 function ApplicationDetail({ close }) {
-  const { currentApplication } = useContext(InstallationContext)
-
   return (
     <Layer
       modal
@@ -224,10 +124,6 @@ function ApplicationDetail({ close }) {
       onClickOutside={close}
     >
       <Box width="50vw">
-        <ModalHeader
-          text={`${currentApplication.name} details`}
-          setOpen={close}
-        />
         <ApplicationDetails />
       </Box>
     </Layer>
