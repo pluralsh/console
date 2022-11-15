@@ -26,7 +26,7 @@ function ContainerSidebar({
   containers, container, namespace, name,
 }) {
   const navigate = useNavigate()
-  const onClick = useCallback(c => navigate(`/shell/pod/${namespace}/${name}/${c}`), [history, namespace, name])
+  const onClick = useCallback(c => navigate(`/shell/pod/${namespace}/${name}/${c}`), [namespace, name])
 
   return (
     <Box

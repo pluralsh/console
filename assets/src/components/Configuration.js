@@ -389,9 +389,7 @@ export default function Configuration() {
     variables: { name: repo },
     fetchPolicy: 'cache-and-network',
   })
-  const onCompleted = useCallback(() => {
-    navigate('/')
-  }, [history])
+  const onCompleted = useCallback(() => navigate('/'), [])
 
   useEffect(() => {
     setBreadcrumbs([

@@ -8755,6 +8755,10 @@ __metadata:
     eslint: 8.26.0
     eslint-config-pluralsh: 3.1.0
     eslint-plugin-import: 2.26.0
+    eslint-plugin-import-newlines: latest
+    eslint-plugin-jsx-a11y: 6.6.1
+    eslint-plugin-react: 7.31.10
+    eslint-plugin-react-hooks: 4.6.0
     filesize: 6.1.0
     forge-core: 1.4.6
     grommet: 2.10.0
@@ -10657,7 +10661,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-import-newlines@npm:^1.2.3":
+"eslint-plugin-import-newlines@npm:^1.2.3, eslint-plugin-import-newlines@npm:latest":
   version: 1.2.3
   resolution: "eslint-plugin-import-newlines@npm:1.2.3"
   peerDependencies:

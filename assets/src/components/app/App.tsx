@@ -2,7 +2,7 @@ import { Flex } from 'honorable'
 import { Tab, TabList, TabPanel } from 'pluralsh-design-system'
 
 import { useContext, useEffect, useRef } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
@@ -29,6 +29,7 @@ const DIRECTORY = [
 export default function App() {
   const { me }: any = useContext(LoginContext)
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
   const currentTab = DIRECTORY.find(tab => pathname?.startsWith(tab.path))
   const { currentApplication }: any = useContext(InstallationContext)
@@ -57,8 +58,13 @@ export default function App() {
             selectedKey: currentTab?.path,
           }}
         >
-          {DIRECTORY.map(({ label }) => (
-            <Tab>{label}</Tab>
+          {DIRECTORY.map(({ label, path }) => (
+            <Tab
+              key={path}
+              onClick={() => navigate(path)}
+            >
+              {label}
+            </Tab>
           ))}
         </TabList>
       </ResponsiveLayoutSidenavContainer>
