@@ -369,13 +369,14 @@ export default function Console() {
                           element={<App />}
                         >
                           <Route
-                  index
-                  element={(
-                    <Navigate
-                      replace
-                      to="dashboards"
-                    />
-                  )}></Route>
+                            index
+                            element={(
+                              <Navigate
+                                replace
+                                to="dashboards"
+                              />
+                            )}
+                          />
                           <Route
                             path="dashboards"
                             element={<Dashboards />}

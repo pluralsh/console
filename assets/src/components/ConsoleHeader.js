@@ -1,4 +1,3 @@
-import { Install } from 'grommet-icons'
 import {
   A,
   Div,
@@ -6,10 +5,15 @@ import {
   Img,
   P,
 } from 'honorable'
-import { ArrowTopRightIcon, Button, DownloadIcon, InstallIcon, theme } from 'pluralsh-design-system'
+import {
+  ArrowTopRightIcon,
+  Button,
+  DownloadIcon,
+  theme,
+} from 'pluralsh-design-system'
 import { useContext, useState } from 'react'
+
 import { AutoRefresh } from './AutoRefresh'
-import { Icon } from './Console'
 
 import { LoginContext } from './contexts'
 import { Installations } from './Installations'

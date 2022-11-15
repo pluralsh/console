@@ -1,7 +1,7 @@
-import { BreadcrumbsContext } from "components/Breadcrumbs";
-import { InstallationContext } from "components/Installations";
-import { PageTitle } from "pluralsh-design-system";
-import { useContext, useEffect } from "react";
+import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { InstallationContext } from 'components/Installations'
+import { PageTitle } from 'pluralsh-design-system'
+import { useContext, useEffect } from 'react'
 
 export default function Dashboards() {
   const { currentApplication }: any = useContext(InstallationContext)
@@ -13,7 +13,7 @@ export default function Dashboards() {
     { text: 'Dashboards', url: `/app/${currentApplication.name}/dashboards` },
   ]), [currentApplication, setBreadcrumbs])
 
-  return <>
-    <PageTitle heading="Dashboards"></PageTitle>
-  </>
+  return (
+    <PageTitle heading="Dashboards" />
+  )
 }

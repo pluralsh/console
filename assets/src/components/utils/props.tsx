@@ -1,12 +1,12 @@
-import { Div } from "honorable";
+import { Div } from 'honorable'
 
 export function Prop({ children, title, ...props }: any) {
   return (
-    <Div margin={"medium"}>
+    <Div margin="medium">
       <Div
         caption
         color="text-xlight"
-        marginBottom={"xxsmall"}
+        marginBottom="xxsmall"
       >
         {title}
       </Div>
@@ -16,22 +16,22 @@ export function Prop({ children, title, ...props }: any) {
 }
 
 export function PropsContainer({ children, title, ...props }: any) {
-    return (
-      <Div
-        border="1px solid border"
-        borderRadius="medium"
-        {...props}
-      >
-        {(!!title && (
-          <Div
+  return (
+    <Div
+      border="1px solid border"
+      borderRadius="medium"
+      {...props}
+    >
+      {(!!title && (
+        <Div
           overline
-            color="text-xlight"
-            margin={"medium"}
-          >
-            {title}
-          </Div>
-        ))}
-        {children}
-      </Div>
-    )
-  }
+          color="text-xlight"
+          margin="medium"
+        >
+          {title}
+        </Div>
+      ))}
+      {children}
+    </Div>
+  )
+}

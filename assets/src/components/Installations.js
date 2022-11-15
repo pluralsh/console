@@ -5,7 +5,6 @@ import React, {
   useState,
 } from 'react'
 import {
-  Anchor,
   Box,
   Layer,
   Text,
@@ -13,7 +12,6 @@ import {
 } from 'grommet'
 import { CircleInformation } from 'grommet-icons'
 import {
-  Links,
   TabContent,
   TabHeader,
   TabHeaderItem,
@@ -21,14 +19,11 @@ import {
 } from 'forge-core'
 import { useQuery } from 'react-apollo'
 
-import { chunk } from 'lodash'
-
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
 import { ApplicationReadyIcon } from './Application'
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { CostBreakdown } from './repos/CostAnalysis'
 import { Icon } from './Console'
-import { ModalHeader } from './utils/Modal'
 import { OIDCProvider } from './oidc/OIDCProvider'
 
 export const InstallationContext = React.createContext({})
@@ -69,10 +64,7 @@ export function ToolbarItem({ children, onClick, open }) {
 
 export function ApplicationDetails() {
   const { currentApplication } = useContext(InstallationContext)
-  const {
-    name, spec: { descriptor }, cost, license,
-  } = currentApplication
-  const hasLinks = descriptor.links
+  const { name, cost, license } = currentApplication
   const hasCost = cost || license
 
   return (

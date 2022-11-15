@@ -1,6 +1,11 @@
 import { ThemeContext } from 'grommet'
 import { Div, Flex, P } from 'honorable'
-import { AppIcon, Card } from 'pluralsh-design-system'
+import {
+  AppIcon,
+  Button,
+  Card,
+  MoreIcon,
+} from 'pluralsh-design-system'
 import { useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -58,12 +63,19 @@ export default function AppCard({ application, setCurrentApplication }: any) {
           {version && <Flex>v{version}</Flex>}
         </Flex>
       </Flex>
-      <Flex grow={1}></Flex>
-      <Flex direction={"column"}>
-        {links?.map(({description, url}) => 
-          <Div key={url}>{url} - {description}</Div>
-        )}
+      <Flex grow={1} />
+      <Flex direction="column">
+        {links?.map(({ description, url }) => <Div key={url}>{url} - {description}</Div>)}
       </Flex>
+      <Button
+        secondary
+        small
+        onClick={e => {
+          e.stopPropagation()
+          e.preventDefault()
+        }}
+      ><MoreIcon />
+      </Button>
     </Card>
   )
 }

@@ -1,20 +1,23 @@
-import {Flex } from 'honorable'
+import { Flex } from 'honorable'
 import { Tab, TabList, TabPanel } from 'pluralsh-design-system'
 
 import { useContext, useEffect, useRef } from 'react'
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
 import { InstallationContext } from 'components/Installations'
+
+import { ResponsiveLayoutSidecarContainer } from 'components/layout/ResponsiveLayoutSidecarContainer'
+
+import { Prop, PropsContainer } from 'components/utils/props'
 
 import { ResponsiveLayoutSidenavContainer } from '../../layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from '../../layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from '../../layout/ResponsiveLayoutContentContainer'
 
 import { LoginContext } from '../../contexts'
-import { ResponsiveLayoutSidecarContainer } from 'components/layout/ResponsiveLayoutSidecarContainer'
-import {Prop, PropsContainer} from 'components/utils/props'
+
 import AppStatus from '../misc/AppStatus'
 
 const DIRECTORY = [
@@ -32,7 +35,6 @@ const DIRECTORY = [
 export default function App() {
   const { me }: any = useContext(LoginContext)
   const { pathname } = useLocation()
-  const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
   const { currentApplication }: any = useContext(InstallationContext)
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
@@ -81,18 +83,18 @@ export default function App() {
         <Outlet />
       </TabPanel>
       <ResponsiveLayoutSidecarContainer width="200px">
-          <Flex
-            gap="medium"
-            direction="column"
-            paddingTop='xsmall'
-          >
-            <PropsContainer title="metadata">
-              <Prop title="Current version">v{currentApplication?.spec?.descriptor?.version}</Prop>
-              <Prop title="Status"><AppStatus application={currentApplication}></AppStatus></Prop>
-            </PropsContainer>
-          </Flex>
-        </ResponsiveLayoutSidecarContainer>
-        <ResponsiveLayoutSpacer />
+        <Flex
+          gap="medium"
+          direction="column"
+          paddingTop="xsmall"
+        >
+          <PropsContainer title="metadata">
+            <Prop title="Current version">v{currentApplication?.spec?.descriptor?.version}</Prop>
+            <Prop title="Status"><AppStatus application={currentApplication} /></Prop>
+          </PropsContainer>
+        </Flex>
+      </ResponsiveLayoutSidecarContainer>
+      <ResponsiveLayoutSpacer />
     </Flex>
   )
 }
