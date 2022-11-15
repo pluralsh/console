@@ -1,6 +1,6 @@
 {
   "name": "pluralsh-design-system",
-  "version": "1.288.0",
+  "version": "1.289.0",
   "description": "Pluralsh Design System",
   "main": "dist/index.js",
   "files": [
@@ -45,7 +45,7 @@
     "grommet-icons": "4.8.0",
     "highlight.js": "11.6.0",
     "prop-types": "15.8.1",
-    "react-animate-height": "3.0.4",
+    "react-animate-height": "3.0.5",
     "react-markdown": "8.0.3",
     "react-merge-refs": "2.0.1",
     "react-spring": "9.5.5",
