@@ -12,11 +12,7 @@ import {
   useState,
 } from 'react'
 import { useComboBox } from '@react-aria/combobox'
-import {
-  ComboBoxState,
-  ComboBoxStateOptions,
-  useComboBoxState,
-} from '@react-stately/combobox'
+import { ComboBoxState, ComboBoxStateOptions, useComboBoxState } from '@react-stately/combobox'
 import { AriaButtonProps, useButton } from '@react-aria/button'
 import pick from 'lodash/pick'
 import omit from 'lodash/omit'
@@ -29,10 +25,7 @@ import { omitBy } from 'lodash'
 import { ListBoxItemBaseProps } from './ListBoxItem'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import Input, { InputProps } from './Input'
-import {
-  setNextFocusedKey,
-  useSelectComboStateProps,
-} from './SelectComboShared'
+import { setNextFocusedKey, useSelectComboStateProps } from './SelectComboShared'
 import { PopoverListBox } from './PopoverListBox'
 import SearchIcon from './icons/SearchIcon'
 import { SelectInner } from './Select'

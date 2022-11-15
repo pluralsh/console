@@ -1,5 +1,8 @@
 import {
-  Div, DivProps, Flex, FlexProps,
+  Div,
+  DivProps,
+  Flex,
+  FlexProps,
 } from 'honorable'
 import {
   Fragment,

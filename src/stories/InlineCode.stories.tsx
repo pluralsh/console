@@ -2,7 +2,10 @@ import { A, P } from 'honorable'
 import styled, { useTheme } from 'styled-components'
 
 import {
-  Banner, Callout, Card, InlineCode,
+  Banner,
+  Callout,
+  Card,
+  InlineCode,
 } from '..'
 
 export default {

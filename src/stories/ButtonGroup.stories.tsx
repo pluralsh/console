@@ -2,7 +2,10 @@ import { Div, Flex, H1 } from 'honorable'
 import { Key, useRef, useState } from 'react'
 
 import {
-  SubTab, TabList, TabListStateProps, TabPanel,
+  SubTab,
+  TabList,
+  TabListStateProps,
+  TabPanel,
 } from '..'
 
 export default {

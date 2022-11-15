@@ -1,11 +1,11 @@
 import {
-  Div, Flex, H1, Text,
+  Div,
+  Flex,
+  H1,
+  Text,
 } from 'honorable'
 
-import {
-  FillLevel,
-  FillLevelProvider,
-} from '../components/contexts/FillLevelContext'
+import { FillLevel, FillLevelProvider } from '../components/contexts/FillLevelContext'
 
 import {
   Card,

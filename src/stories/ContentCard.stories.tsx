@@ -1,5 +1,8 @@
 import {
-  Div, H1, H2, P,
+  Div,
+  H1,
+  H2,
+  P,
 } from 'honorable'
 import { ComponentProps } from 'react'
 

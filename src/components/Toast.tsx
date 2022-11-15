@@ -1,7 +1,12 @@
 import { Layer, LayerPositionType } from 'grommet'
 import { FlexProps } from 'honorable'
 import {
-  Dispatch, Ref, forwardRef, useCallback, useEffect, useState,
+  Dispatch,
+  Ref,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useState,
 } from 'react'
 
 import Banner from './Banner'

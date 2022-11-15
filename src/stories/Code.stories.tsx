@@ -6,7 +6,10 @@ import { Card, Code, WrapWithIf } from '..'
 import {
   cCode,
   elixirCode,
-  goCode, jsCode, rustCode, tfCode,
+  goCode,
+  jsCode,
+  rustCode,
+  tfCode,
 } from '../constants'
 
 export default {

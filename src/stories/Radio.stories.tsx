@@ -1,6 +1,4 @@
-import {
-  Button, Div,
-} from 'honorable'
+import { Button, Div } from 'honorable'
 import { useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 

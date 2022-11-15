@@ -1,6 +1,9 @@
 import { ReactElement, Ref, forwardRef } from 'react'
 import {
-  Div, Flex, FlexProps, Text,
+  Div,
+  Flex,
+  FlexProps,
+  Text,
 } from 'honorable'
 import PropTypes from 'prop-types'
 

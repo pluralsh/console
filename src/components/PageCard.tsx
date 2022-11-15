@@ -1,5 +1,9 @@
 import {
-  Div, DivProps, Flex, H1, H2,
+  Div,
+  DivProps,
+  Flex,
+  H1,
+  H2,
 } from 'honorable'
 import { ReactNode, forwardRef } from 'react'
 

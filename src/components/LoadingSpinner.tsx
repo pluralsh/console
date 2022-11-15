@@ -1,5 +1,11 @@
 import {
-  Div, Flex, FlexProps, H1, Img, ImgProps, Span,
+  Div,
+  Flex,
+  FlexProps,
+  H1,
+  Img,
+  ImgProps,
+  Span,
 } from 'honorable'
 import type { DivProps } from 'honorable'
 import { keyframes } from '@emotion/react'

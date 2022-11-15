@@ -1,5 +1,9 @@
 import {
-  Div, Flex, FlexProps, Modal, P,
+  Div,
+  Flex,
+  FlexProps,
+  Modal,
+  P,
 } from 'honorable'
 import PropTypes from 'prop-types'
 import { Ref, forwardRef } from 'react'
