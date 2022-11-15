@@ -12,10 +12,15 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+      - name: Read Node.js version from package.json
+        run: echo ::set-output name=nodeVersion::$(node -p "require('./package.json').engines.node")
+        id: engines
+      - name: 'Setup Node'
+        uses: actions/setup-node@v3
         with:
-          node-version: 16.15.0
+          node-version: ${{ steps.engines.outputs.nodeVersion }}
       - run: |
           yarn install --immutable
       - run: yarn build
@@ -26,10 +31,15 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+      - name: Read Node.js version from package.json
+        run: echo ::set-output name=nodeVersion::$(node -p "require('./package.json').engines.node")
+        id: engines
+      - name: 'Setup Node'
+        uses: actions/setup-node@v3
         with:
-          node-version: 16.15.0
+          node-version: ${{ steps.engines.outputs.nodeVersion }}
       - run: |
           yarn install --immutable
       - run: yarn build:storybook
@@ -40,10 +50,15 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+      - name: Read Node.js version from package.json
+        run: echo ::set-output name=nodeVersion::$(node -p "require('./package.json').engines.node")
+        id: engines
+      - name: 'Setup Node'
+        uses: actions/setup-node@v3
         with:
-          node-version: 16.15.0
+          node-version: ${{ steps.engines.outputs.nodeVersion }}
       - run: |
           yarn install --immutable
       - run: yarn lint
@@ -52,10 +67,15 @@ jobs:
     if: ${{ github.triggering_actor != 'plural-renovate[bot]' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+      - name: Read Node.js version from package.json
+        run: echo ::set-output name=nodeVersion::$(node -p "require('./package.json').engines.node")
+        id: engines
+      - name: 'Setup Node'
+        uses: actions/setup-node@v3
         with:
-          node-version: 16.15.0
+          node-version: ${{ steps.engines.outputs.nodeVersion }}
       - run: |
           yarn install --immutable
       - run: yarn build:storybook

@@ -16,6 +16,9 @@
     "fix": "eslint src --ext ts,tsx,js,jsx --fix",
     "prepublishOnly": "npm run build"
   },
+  "engines": {
+    "node": "16.15.0"
+  },
   "dependencies": {
     "@floating-ui/react-dom-interactions": "0.11.0",
     "@react-aria/button": "3.6.2",
