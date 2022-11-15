@@ -226,14 +226,13 @@ export default function Console() {
                         </Route>
                         <Route
                           path="/config"
-                          render={() => (
-                            <RepositorySelector
-                              prefix="config"
-                              title="Configuration"
-                              description="edit configuration for your installed repos"
-                            />
-                          )}
-                        />
+                        >
+                          <RepositorySelector
+                            prefix="config"
+                            title="Configuration"
+                            description="edit configuration for your installed repos"
+                          />
+                        </Route>
                         <Route path="/directory/:section">
                           <Directory />
                         </Route>
@@ -255,16 +254,13 @@ export default function Console() {
                           <PluralApi><Incidents /></PluralApi>
                         </Route> */}
                         {/* Disabled for now.  */}
-                        <Route
-                          path="/logs"
-                          render={() => (
-                            <RepositorySelector
-                              prefix="logs"
-                              title="Logs"
-                              description="aggregated logstreams for your repos"
-                            />
-                          )}
-                        />
+                        <Route path="/logs">
+                          <RepositorySelector
+                            prefix="logs"
+                            title="Logs"
+                            description="aggregated logstreams for your repos"
+                          />
+                        </Route>
                         <Route path="/pods/:namespace/:name">
                           <Pod />
                         </Route>
@@ -297,16 +293,13 @@ export default function Console() {
                         >
                           <Application />
                         </Route>
-                        <Route
-                          path="/components"
-                          render={() => (
-                            <RepositorySelector
-                              prefix="components"
-                              title="Components"
-                              description="details for all your applications"
-                            />
-                          )}
-                        />
+                        <Route path="/components">
+                          <RepositorySelector
+                            prefix="components"
+                            title="Components"
+                            description="details for all your applications"
+                          />
+                        </Route>
                         <Route path="/builds/:buildId">
                           <Build />
                         </Route>
@@ -316,16 +309,13 @@ export default function Console() {
                         <Route path="/dashboards/:repo">
                           <Dashboards />
                         </Route>
-                        <Route
-                          path="/dashboards"
-                          render={() => (
-                            <RepositorySelector
-                              prefix="dashboards"
-                              title="Dashboards"
-                              description="view monitoring dashboards for installed repos"
-                            />
-                          )}
-                        />
+                        <Route path="/dashboards">
+                          <RepositorySelector
+                            prefix="dashboards"
+                            title="Dashboards"
+                            description="view monitoring dashboards for installed repos"
+                          />
+                        </Route>
                         <Route path="/me/edit">
                           <EditUser />
                         </Route>
