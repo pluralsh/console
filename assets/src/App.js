@@ -39,26 +39,21 @@ export default function App() {
             >
               <BrowserRouter>
                 <Switch>
-                  <Route
-                    path="/login"
-                    component={Login}
-                  />
-                  <Route
-                    path="/access"
-                    component={GrantAccess}
-                  />
-                  <Route
-                    path="/oauth/callback"
-                    component={OAuthCallback}
-                  />
-                  <Route
-                    path="/invite/:inviteId"
-                    component={Invite}
-                  />
-                  <Route
-                    path="/"
-                    component={Console}
-                  />
+                  <Route path="/login">
+                    <Login />
+                  </Route>
+                  <Route path="/access">
+                    <GrantAccess />
+                  </Route>
+                  <Route path="/oauth/callback">
+                    <OAuthCallback />
+                  </Route>
+                  <Route path="/invite/:inviteId">
+                    <Invite />
+                  </Route>
+                  <Route path="/">
+                    <Console />
+                  </Route>
                 </Switch>
               </BrowserRouter>
             </Grommet>
