@@ -17,7 +17,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@floating-ui/react-dom-interactions": "0.10.3",
+    "@floating-ui/react-dom-interactions": "0.11.0",
     "@react-aria/button": "3.6.2",
     "@react-aria/checkbox": "3.6.0",
     "@react-aria/combobox": "3.4.2",
