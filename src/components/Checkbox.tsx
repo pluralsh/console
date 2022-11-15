@@ -1,5 +1,9 @@
 import {
-  MutableRefObject, forwardRef, memo, useId, useRef,
+  MutableRefObject,
+  forwardRef,
+  memo,
+  useId,
+  useRef,
 } from 'react'
 import { InputProps, Label } from 'honorable'
 import classNames from 'classnames'
@@ -144,11 +148,11 @@ const HonorableLabelStyled = styled(Label)<{
 }))
 
 export type CheckboxProps = {
-  small: boolean
-  indeterminate: boolean
-  disabled: boolean
-  defaultSelected: boolean
-  onChange: (e: { target: { checked: boolean } }) => any
+  small?: boolean
+  indeterminate?: boolean
+  disabled?: boolean
+  defaultSelected?: boolean
+  onChange?: (e: { target: { checked: boolean } }) => any
 } & Omit<InputProps, 'onChange'>
 
 function Checkbox({

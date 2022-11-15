@@ -124,10 +124,10 @@ const HonorableLabelStyled = styled(Label)<{
 }))
 
 export type RadioProps = AriaRadioProps & {
-  small: boolean
-  disabled: boolean
-  defaultSelected: boolean
-  onChange: (e: { target: { checked: boolean } }) => any
+  small?: boolean
+  disabled?: boolean
+  defaultSelected?: boolean
+  onChange?: (e: { target: { checked: boolean } }) => any
 } & InputProps
 
 function Radio({
