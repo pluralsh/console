@@ -1,3 +1,4 @@
+import { Install } from 'grommet-icons'
 import {
   A,
   Div,
@@ -5,10 +6,16 @@ import {
   Img,
   P,
 } from 'honorable'
-import { ArrowTopRightIcon, Button, theme } from 'pluralsh-design-system'
-import { useContext } from 'react'
+import { ArrowTopRightIcon, Button, DownloadIcon, InstallIcon, theme } from 'pluralsh-design-system'
+import { useContext, useState } from 'react'
+import { AutoRefresh } from './AutoRefresh'
+import { Icon } from './Console'
 
 import { LoginContext } from './contexts'
+import { Installations } from './Installations'
+
+import { Installer } from './repos/Installer'
+import { Notifications } from './users/Notifications'
 
 const APP_ICON = `${process.env.PUBLIC_URL}/console-logo-white.png`
 
@@ -42,6 +49,8 @@ function DemoBanner() {
 }
 
 export default function ConsoleHeader() {
+  const [open, setOpen] = useState(false)
+
   return (
     <Div
       backgroundColor={theme.colors.grey[950]}
@@ -50,6 +59,7 @@ export default function ConsoleHeader() {
       <DemoBanner />
       <Flex
         align="center"
+        gap="medium"
         paddingHorizontal="medium"
         paddingVertical="xsmall"
       >
@@ -70,18 +80,19 @@ export default function ConsoleHeader() {
         >
           Plural App
         </Button>
-        {/* <AutoRefresh /> */}
-        {/* <Icon
-          icon={<Install size="18px" />}
-          text="Install"
-          size="40px"
-          selected={open}
-          align={{ top: 'bottom' }}
+        <Button
+          small
+          floating
+          fontWeight={600}
+          endIcon={<DownloadIcon size={14} />}
           onClick={() => setOpen(true)}
-        /> */}
-        {/* <Notifications /> */}
-        {/* <Installations />
-        {open && <Installer setOpen={setOpen} />} */}
+        >
+          Install
+        </Button>
+        {open && <Installer setOpen={setOpen} />}
+        <Installations />
+        <AutoRefresh />
+        <Notifications />
       </Flex>
     </Div>
 

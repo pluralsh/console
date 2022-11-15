@@ -223,7 +223,6 @@ export default function Console() {
                       direction="row"
                       overflow="auto"
                     >
-
                       <Routes>
                         <Route
                           path="/config/:repo"
