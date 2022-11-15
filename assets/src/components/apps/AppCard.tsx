@@ -4,7 +4,15 @@ import {
   AppIcon,
   Button,
   Card,
+  ComponentsIcon,
+  DashboardIcon,
+  GearTrainIcon,
+  IdIcon,
+  ListBoxItem,
+  LogsIcon,
   MoreIcon,
+  RunBookIcon,
+  Select,
 } from 'pluralsh-design-system'
 import { useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -67,15 +75,53 @@ export default function AppCard({ application, setCurrentApplication }: any) {
       <Flex direction="column">
         {links?.map(({ description, url }) => <Div key={url}>{url} - {description}</Div>)}
       </Flex>
-      <Button
-        secondary
-        small
-        onClick={e => {
-          e.stopPropagation()
-          e.preventDefault()
-        }}
-      ><MoreIcon />
-      </Button>
+      {/* TODO: Export to the new component. */}
+      <Select
+        width="max-content"
+        placement="right"
+        triggerButton={(
+          <Button
+            secondary
+            small
+            onClick={e => {
+              e.stopPropagation()
+              e.preventDefault()
+            }}
+          ><MoreIcon />
+          </Button>
+        )}
+      >
+        <ListBoxItem
+          label="Dashboard"
+          textValue="dashboard"
+          leftContent={<DashboardIcon />}
+        />
+        <ListBoxItem
+          label="Runbooks"
+          textValue="runbooks"
+          leftContent={<RunBookIcon />}
+        />
+        <ListBoxItem
+          label="Components"
+          textValue="components"
+          leftContent={<ComponentsIcon />}
+        />
+        <ListBoxItem
+          label="Logs"
+          textValue="logs"
+          leftContent={<LogsIcon />}
+        />
+        <ListBoxItem
+          label="Cost analysis"
+          textValue="costanalysis"
+          leftContent={<IdIcon />}
+        />
+        <ListBoxItem
+          label="Configuration"
+          textValue="config"
+          leftContent={<GearTrainIcon />}
+        />
+      </Select>
     </Card>
   )
 }
