@@ -4,12 +4,12 @@
 
 ## Installation
 
-`npm i -S pluralsh-design-system`
+`npm i -S @pluralsh/design-system`
 
 ## Usage
 
 ```jsx
-Import { Alert } from 'pluralsh-design-system'
+Import { Alert } from '@pluralsh/design-system'
 
 // ...
 return (
@@ -17,7 +17,7 @@ return (
     severy="success"
     title="Wouhou!"
   >
-    You installed pluralsh-design-system correcly
+    You installed @pluralsh/design-system correcly
   </Alert>
 )
 ```

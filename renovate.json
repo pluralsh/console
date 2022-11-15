@@ -33,8 +33,7 @@
       "platformAutomerge": true
     },
     {
-      "matchManagers": ["npm"],
-      "bumpVersion": "minor"
+      "matchManagers": ["npm"]
     }
   ],
   "separateMinorPatch": true

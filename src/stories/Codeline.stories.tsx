@@ -29,5 +29,5 @@ function Template(args: any) {
 export const Default = Template.bind({})
 
 Default.args = {
-  children: 'npm i pluralsh-design-system',
+  children: 'npm i @pluralsh/design-system',
 }
