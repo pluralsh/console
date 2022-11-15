@@ -29,8 +29,7 @@ import { Pod } from './kubernetes/Pod'
 import Directory from './users/Directory'
 import EditUser from './users/EditUser'
 import { Audits } from './audits/Audits'
-import { withPluralApi } from './PluralApi'
-import { Incidents } from './incidents/Incidents'
+import { PluralApi } from './PluralApi'
 import { Incident } from './incidents/Incident'
 import { Runbook } from './runbooks/Runbook'
 import { Runbooks } from './runbooks/Runbooks'
@@ -222,10 +221,9 @@ export default function Console() {
                     >
 
                       <Switch>
-                        <Route
-                          path="/config/:repo"
-                          component={Configuration}
-                        />
+                        <Route path="/config/:repo">
+                          <Configuration />
+                        </Route>
                         <Route
                           path="/config"
                           render={() => (
@@ -236,28 +234,27 @@ export default function Console() {
                             />
                           )}
                         />
-                        <Route
-                          path="/directory/:section"
-                          component={Directory}
-                        />
+                        <Route path="/directory/:section">
+                          <Directory />
+                        </Route>
                         <Route
                           exact
                           path="/directory"
                         >
                           <Redirect to="/directory/users" />
                         </Route>
-                        <Route
-                          path="/logs/:repo"
-                          component={LogViewer}
-                        />
-                        <Route
-                          path="/incident/:incidentId"
-                          component={withPluralApi(Incident)}
-                        />
-                        <Route
+                        <Route path="/logs/:repo">
+                          <LogViewer />
+                        </Route>
+                        <Route path="/incident/:incidentId">
+                          <PluralApi><Incident /></PluralApi>
+                        </Route>
+                        {/* <Route
                           path="/incidents"
-                          component={withPluralApi(Incidents)}
-                        />
+                        >
+                          <PluralApi><Incidents /></PluralApi>
+                        </Route> */}
+                        {/* Disabled for now.  */}
                         <Route
                           path="/logs"
                           render={() => (
@@ -268,44 +265,38 @@ export default function Console() {
                             />
                           )}
                         />
-                        <Route
-                          path="/pods/:namespace/:name"
-                          component={Pod}
-                        />
-                        <Route
-                          path="/runbooks/:namespace/:name"
-                          component={Runbook}
-                        />
-                        <Route
-                          path="/runbooks/:repo"
-                          component={Runbooks}
-                        />
-                        <Route
-                          path="/nodes/:name"
-                          component={Node}
-                        />
-                        <Route
-                          path="/nodes"
-                          component={Nodes}
-                        />
-                        <Route
-                          path="/audits/:graph"
-                          component={Audits}
-                        />
+                        <Route path="/pods/:namespace/:name">
+                          <Pod />
+                        </Route>
+                        <Route path="/runbooks/:namespace/:name">
+                          <Runbook />
+                        </Route>
+                        <Route path="/runbooks/:repo">
+                          <Runbooks />
+                        </Route>
+                        <Route path="/nodes/:name">
+                          <Node />
+                        </Route>
+                        <Route path="/nodes">
+                          <Nodes />
+                        </Route>
+                        <Route path="/audits/:graph">
+                          <Audits />
+                        </Route>
                         <Route
                           exact
                           path="/audits"
                         >
                           <Redirect to="/audits/table" />
                         </Route>
-                        <Route
-                          path="/components/:repo/:kind/:name"
-                          component={Component}
-                        />
+                        <Route path="/components/:repo/:kind/:name">
+                          <Component />
+                        </Route>
                         <Route
                           path="/components/:repo"
-                          component={Application}
-                        />
+                        >
+                          <Application />
+                        </Route>
                         <Route
                           path="/components"
                           render={() => (
@@ -316,18 +307,15 @@ export default function Console() {
                             />
                           )}
                         />
-                        <Route
-                          path="/builds/:buildId"
-                          component={Build}
-                        />
-                        <Route
-                          path="/webhooks"
-                          component={Webhooks}
-                        />
-                        <Route
-                          path="/dashboards/:repo"
-                          component={Dashboards}
-                        />
+                        <Route path="/builds/:buildId">
+                          <Build />
+                        </Route>
+                        <Route path="/webhooks">
+                          <Webhooks />
+                        </Route>
+                        <Route path="/dashboards/:repo">
+                          <Dashboards />
+                        </Route>
                         <Route
                           path="/dashboards"
                           render={() => (
@@ -338,30 +326,24 @@ export default function Console() {
                             />
                           )}
                         />
-                        <Route
-                          path="/me/edit"
-                          component={EditUser}
-                        />
-                        <Route
-                          path="/users"
-                          component={Users}
-                        />
-                        <Route
-                          path="/shell/pod/:namespace/:name/:container"
-                          component={PodShell}
-                        />
-                        <Route
-                          path="/builds"
-                          component={Builds}
-                        />
-                        <Route
-                          path="/app/:name"
-                          component={App}
-                        />
-                        <Route
-                          path="/"
-                          component={Apps}
-                        />
+                        <Route path="/me/edit">
+                          <EditUser />
+                        </Route>
+                        <Route path="/users">
+                          <Users />
+                        </Route>
+                        <Route path="/shell/pod/:namespace/:name/:container">
+                          <PodShell />
+                        </Route>
+                        <Route path="/builds">
+                          <Builds />
+                        </Route>
+                        <Route path="/app/:name">
+                          <App />
+                        </Route>
+                        <Route path="/">
+                          <Apps />
+                        </Route>
                       </Switch>
                       <FlyoutGutter />
                     </Box>
