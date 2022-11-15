@@ -239,18 +239,15 @@ export default function Console() {
                         <Route
                           exact
                           path="/directory"
-                        >
-                          <Redirect to="/directory/users" />
-                        </Route>
+                          render={() => <Redirect to="/directory/users" />}
+                        />
                         <Route path="/logs/:repo">
                           <LogViewer />
                         </Route>
                         <Route path="/incident/:incidentId">
                           <PluralApi><Incident /></PluralApi>
                         </Route>
-                        {/* <Route
-                          path="/incidents"
-                        >
+                        {/* <Route path="/incidents">
                           <PluralApi><Incidents /></PluralApi>
                         </Route> */}
                         {/* Disabled for now.  */}
@@ -282,9 +279,8 @@ export default function Console() {
                         <Route
                           exact
                           path="/audits"
-                        >
-                          <Redirect to="/audits/table" />
-                        </Route>
+                          render={() => <Redirect to="/audits/table" />}
+                        />
                         <Route path="/components/:repo/:kind/:name">
                           <Component />
                         </Route>
