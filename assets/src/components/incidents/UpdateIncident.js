@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Box } from 'grommet'
 import { Button } from 'forge-core'
 import { useMutation, useQuery } from 'react-apollo'
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
 import { LoopingLogo } from '../utils/AnimatedLogo'
 
@@ -10,7 +10,7 @@ import { INCIDENT_Q, UPDATE_INCIDENT } from './queries'
 import { IncidentForm } from './CreateIncident'
 
 function UpdateInner({ incident }) {
-  const history = useHistory()
+  const navigate = useNavigate()
   const [attributes, setAttributes] = useState({
     title: incident.title,
     description: incident.description,
@@ -20,7 +20,7 @@ function UpdateInner({ incident }) {
 
   const [mutation, { loading }] = useMutation(UPDATE_INCIDENT, {
     variables: { id: incident.id, attributes },
-    onCompleted: () => history.push(`/incidents/${incident.id}`),
+    onCompleted: () => navigate(`/incidents/${incident.id}`),
   })
 
   return (

@@ -1,6 +1,6 @@
 import { Anchor, Box, Text } from 'grommet'
 
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router'
 import { Logs } from 'forge-core'
 
 import { asQuery } from '../utils/query'
@@ -24,7 +24,7 @@ export function Container({ header, children, ...props }) {
 }
 
 export function LogLink({ url }) {
-  const history = useHistory()
+  const navigate = useNavigate()
 
   return (
     <Box
@@ -35,7 +35,7 @@ export function LogLink({ url }) {
       <Logs size="small" />
       <Anchor
         size="small"
-        onClick={() => history.push(url)}
+        onClick={() => navigate(url)}
       >view logs
       </Anchor>
     </Box>

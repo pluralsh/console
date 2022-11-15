@@ -4,7 +4,7 @@ import {
   useEffect,
   useState,
 } from 'react'
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { Box, Text, TextInput } from 'grommet'
 import { Edit } from 'forge-core'
 import { Checkmark } from 'grommet-icons'
@@ -25,8 +25,8 @@ import { Shell } from './Shell'
 function ContainerSidebar({
   containers, container, namespace, name,
 }) {
-  const history = useHistory()
-  const onClick = useCallback(c => history.push(`/shell/pod/${namespace}/${name}/${c}`), [history, namespace, name])
+  const navigate = useNavigate()
+  const onClick = useCallback(c => navigate(`/shell/pod/${namespace}/${name}/${c}`), [history, namespace, name])
 
   return (
     <Box

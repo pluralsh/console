@@ -4,7 +4,7 @@ import React, {
   useEffect,
   useState,
 } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery } from 'react-apollo'
 
 import {
@@ -151,12 +151,12 @@ function Build({ build }) {
   const {
     id, repository, status, insertedAt, message, creator, sha,
   } = build
-  const history = useHistory()
+  const navigate = useNavigate()
 
   return (
     <Box pad={BUILD_PADDING}>
       <Container
-        onClick={() => history.push(`/builds/${id}`)}
+        onClick={() => navigate(`/builds/${id}`)}
         margin={{ bottom: 'small' }}
       >
         <BuildIcon build={build} />

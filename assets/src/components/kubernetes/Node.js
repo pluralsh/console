@@ -23,7 +23,7 @@ import {
   Text,
   ThemeContext,
 } from 'grommet'
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
 import { ServerCluster } from 'grommet-icons'
 
@@ -202,7 +202,7 @@ export function DeleteNode({ name, refetch }) {
 }
 
 function NodeRow({ node, metrics, refetch }) {
-  const hist = useHistory()
+  const navigate = useNavigate()
   const labels = mapify(node.metadata.labels)
   const readiness = nodeReadiness(node.status)
   const nodeMetrics = metrics[node.metadata.name]
@@ -214,7 +214,7 @@ function NodeRow({ node, metrics, refetch }) {
       align="center"
       border="bottom"
       hoverIndicator="backgroundDark"
-      onClick={() => hist.push(`/nodes/${node.metadata.name}`)}
+      onClick={() => navigate(`/nodes/${node.metadata.name}`)}
       pad="small"
     >
       <Box

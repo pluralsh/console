@@ -27,7 +27,7 @@ import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
 
 import filesize from 'filesize'
 
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
 import { Readiness, ReadinessColor, ReadyIcon } from '../Application'
 
@@ -390,7 +390,7 @@ function ContainerSummary({ status: { containerStatuses, initContainerStatuses }
 }
 
 export function PodRow({ pod: { metadata: { name, namespace }, status, spec }, refetch }) {
-  const history = useHistory()
+  const navigate = useNavigate()
   const restarts = (status.containerStatuses || []).reduce((count, { restartCount }) => count + (restartCount || 0), 0)
 
   return (
@@ -404,7 +404,7 @@ export function PodRow({ pod: { metadata: { name, namespace }, status, spec }, r
       pad={{ vertical: 'xsmall' }}
       gap="xsmall"
       focusIndicator={false}
-      onClick={() => history.push(`/pods/${namespace}/${name}`)}
+      onClick={() => navigate(`/pods/${namespace}/${name}`)}
     >
       <Box
         flex={false}
@@ -441,7 +441,7 @@ export function PodRow({ pod: { metadata: { name, namespace }, status, spec }, r
           style={TRUNCATE}
           size="small"
           onClick={e => {
-            ignore(e); history.push(`/nodes/${spec.nodeName}`)
+            ignore(e); navigate(`/nodes/${spec.nodeName}`)
           }}
         >
           {spec.nodeName}
@@ -756,7 +756,7 @@ function Container({ container, containerStatus }) {
 function ContainerTabHeader({
   namespace, pod, container, containerStatus,
 }) {
-  const history = useHistory()
+  const navigate = useNavigate()
   const readiness = containerReadiness(containerStatus[container])
 
   return (
@@ -785,7 +785,7 @@ function ContainerTabHeader({
             align="center"
             justify="center"
             hoverIndicator="card"
-            onClick={() => history.push(`/shell/pod/${namespace}/${pod}/${container}`)}
+            onClick={() => navigate(`/shell/pod/${namespace}/${pod}/${container}`)}
           >
             <Terminal size="12px" />
           </Box>

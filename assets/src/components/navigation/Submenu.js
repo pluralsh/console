@@ -1,7 +1,7 @@
 import { Box, Text } from 'grommet'
 import React, { useContext, useEffect, useState } from 'react'
 import { Portal } from 'react-portal'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router'
 
 export const SubmenuContext = React.createContext({})
 
@@ -37,7 +37,7 @@ const ignore = e => {
 export function SubmenuItem({
   icon, label, selected, url,
 }) {
-  const history = useHistory()
+  const navigate = useNavigate()
 
   return (
     <Box
@@ -49,7 +49,7 @@ export function SubmenuItem({
       gap="small"
       pad={{ right: 'small', vertical: '7px', left: '20px' }}
       onClick={e => {
-        ignore(e); history.push(url)
+        ignore(e); navigate(url)
       }}
     >
       {icon}

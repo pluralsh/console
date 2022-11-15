@@ -15,7 +15,7 @@ import { Button, SecondaryButton } from 'forge-core'
 import { normalizeColor } from 'grommet/utils'
 import { useMutation } from '@apollo/react-hooks'
 
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
 import { Graph, GraphHeader } from '../utils/Graph'
 
@@ -134,14 +134,14 @@ function Link({ value, attributes, children }) {
 }
 
 function DisplayButton({ attributes: { action, headline, ...rest } }) {
-  const hist = useHistory()
+  const navigate = useNavigate()
   const { namespace, name } = useParams()
   const { context } = useContext(DisplayContext)
   const [mutation, { loading, error }] = useMutation(EXECUTE_RUNBOOK, {
     variables: { name, namespace, input: { context: JSON.stringify(context), action } },
     onCompleted: ({ executeRunbook: { redirectTo } }) => {
       if (redirectTo) {
-        hist.push(redirectTo)
+        navigate(redirectTo)
       }
     },
   })

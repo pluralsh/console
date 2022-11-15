@@ -3,7 +3,7 @@ import { useQuery } from '@apollo/react-hooks'
 
 import { Box, Text } from 'grommet'
 
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router'
 
 import { chunk } from 'lodash'
 
@@ -17,13 +17,13 @@ import { POLL_INTERVAL } from './constants'
 import { StatusIcon } from './StatusIcon'
 
 function RunbookItem({ runbook, namespace, width }) {
-  const hist = useHistory()
+  const navigate = useNavigate()
   const { name, description } = runbook.spec
 
   return (
     <Container
       width={width || '30%'}
-      onClick={() => hist.push(`/runbooks/${namespace}/${runbook.name}`)}
+      onClick={() => navigate(`/runbooks/${namespace}/${runbook.name}`)}
     >
       <Box
         flex={false}

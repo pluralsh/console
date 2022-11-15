@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react'
 import { Box, Text } from 'grommet'
 import { Scroller } from 'forge-core'
 import { FormNext } from 'grommet-icons'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router'
 
 import { chunk } from '../utils/array'
 
@@ -53,13 +53,13 @@ export function RepositoryChoice({ application, link }) {
 export default function RepositorySelector({ title, description, prefix }) {
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const { setOnChange, applications, setCurrentApplication } = useContext(InstallationContext)
-  const history = useHistory()
+  const navigate = useNavigate()
 
   useEffect(() => {
     setBreadcrumbs([{ text: title.toLowerCase(), url: `/${prefix}` }])
   }, [])
   useEffect(() => {
-    setOnChange({ func: ({ name }) => history.push(`/${prefix}/${name}`) })
+    setOnChange({ func: ({ name }) => navigate(`/${prefix}/${name}`) })
   }, [prefix])
 
   return (

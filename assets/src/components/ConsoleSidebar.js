@@ -13,7 +13,7 @@ import {
 } from 'pluralsh-design-system'
 
 import { Builds } from 'forge-core'
-import { useHistory, useLocation } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 
 import { useContext } from 'react'
 
@@ -47,7 +47,7 @@ const MENU_ITEMS = [
 
 export default function ConsoleSidebar() {
   const { me } = useContext(LoginContext)
-  const history = useHistory()
+  const navigate = useNavigate()
   const { pathname } = useLocation()
   const active = ({ path }) => (path === '/' ? pathname === path : pathname.startsWith(path))
 
@@ -64,7 +64,7 @@ export default function ConsoleSidebar() {
             key={i}
             clickable
             tooltip={item.text}
-            onClick={() => history.push(item.path)}
+            onClick={() => navigate(item.path)}
             backgroundColor={active(item) ? theme.colors.grey[875] : null} // TODO: Add active prop to design system.
             _hover={{ backgroundColor: theme.colors.grey[900], cursor: 'pointer' }}
             borderRadius="normal"
@@ -89,7 +89,7 @@ export default function ConsoleSidebar() {
         </SidebarItem>
         <SidebarItem
           clickable
-          onClick={() => history.push('/me/edit')}
+          onClick={() => navigate('/me/edit')}
         >
           <Avatar
             name={me.name}

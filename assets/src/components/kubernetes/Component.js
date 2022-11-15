@@ -1,6 +1,6 @@
 import { useContext, useEffect } from 'react'
 import { Box } from 'grommet'
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
 import Highlight from 'react-highlight.js'
 
@@ -101,7 +101,7 @@ export function RawContent({ raw }) {
 
 export default function Component() {
   const { repo, kind, name } = useParams()
-  const history = useHistory()
+  const navigate = useNavigate()
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const { setOnChange, currentApplication } = useContext(InstallationContext)
 
@@ -114,7 +114,7 @@ export default function Component() {
     ])
   }, [currentApplication])
   useEffect(() => {
-    setOnChange({ func: ({ name }) => history.push(`/components/${name}`) })
+    setOnChange({ func: ({ name }) => navigate(`/components/${name}`) })
   }, [])
   useEnsureCurrent(repo)
 

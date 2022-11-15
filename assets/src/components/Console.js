@@ -1,7 +1,7 @@
 import React, { useContext, useRef, useState } from 'react'
-import { Redirect, Route, Switch } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import { Box, Text } from 'grommet'
-import { useHistory } from 'react-router'
+import { Navigate, useNavigate } from 'react-router'
 
 import { Portal } from 'react-portal'
 
@@ -49,7 +49,7 @@ export function Icon({
   icon, text, selected, path, onClick, size, align,
 }) {
   const dropRef = useRef()
-  const history = useHistory()
+  const navigate = useNavigate()
   const [hover, setHover] = useState(false)
 
   return (
@@ -67,7 +67,7 @@ export function Icon({
         hoverIndicator="sidebarHover"
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
-        onClick={() => (onClick ? onClick() : history.push(path))}
+        onClick={() => (onClick ? onClick() : navigate(path))}
         background={selected ? 'sidebarHover' : null}
         direction="row"
       >
@@ -220,117 +220,156 @@ export default function Console() {
                       overflow="auto"
                     >
 
-                      <Switch>
-                        <Route path="/config/:repo">
-                          <Configuration />
-                        </Route>
+                      <Routes>
+                        <Route
+                          path="/config/:repo"
+                          element={<Configuration />}
+                        />
                         <Route
                           path="/config"
-                        >
-                          <RepositorySelector
-                            prefix="config"
-                            title="Configuration"
-                            description="edit configuration for your installed repos"
-                          />
-                        </Route>
-                        <Route path="/directory/:section">
-                          <Directory />
-                        </Route>
+                          element={(
+                            <RepositorySelector
+                              prefix="config"
+                              title="Configuration"
+                              description="edit configuration for your installed repos"
+                            />
+                          )}
+                        />
+                        <Route
+                          path="/directory/:section"
+                          element={<Directory />}
+                        />
                         <Route
                           exact
                           path="/directory"
-                          render={() => <Redirect to="/directory/users" />}
+                          element={(
+                            <Navigate
+                              replace
+                              to="/directory/users"
+                            />
+                          )}
                         />
-                        <Route path="/logs/:repo">
-                          <LogViewer />
-                        </Route>
-                        <Route path="/incident/:incidentId">
-                          <PluralApi><Incident /></PluralApi>
-                        </Route>
+                        <Route
+                          path="/logs/:repo"
+                          element={<LogViewer />}
+                        />
+                        <Route
+                          path="/incident/:incidentId"
+                          element={<PluralApi><Incident /></PluralApi>}
+                        />
                         {/* <Route path="/incidents">
                           <PluralApi><Incidents /></PluralApi>
                         </Route> */}
                         {/* Disabled for now.  */}
-                        <Route path="/logs">
-                          <RepositorySelector
-                            prefix="logs"
-                            title="Logs"
-                            description="aggregated logstreams for your repos"
-                          />
-                        </Route>
-                        <Route path="/pods/:namespace/:name">
-                          <Pod />
-                        </Route>
-                        <Route path="/runbooks/:namespace/:name">
-                          <Runbook />
-                        </Route>
-                        <Route path="/runbooks/:repo">
-                          <Runbooks />
-                        </Route>
-                        <Route path="/nodes/:name">
-                          <Node />
-                        </Route>
-                        <Route path="/nodes">
-                          <Nodes />
-                        </Route>
-                        <Route path="/audits/:graph">
-                          <Audits />
-                        </Route>
+                        <Route
+                          path="/logs"
+                          element={(
+                            <RepositorySelector
+                              prefix="logs"
+                              title="Logs"
+                              description="aggregated logstreams for your repos"
+                            />
+                          )}
+                        />
+                        <Route
+                          path="/pods/:namespace/:name"
+                          element={<Pod />}
+                        />
+                        <Route
+                          path="/runbooks/:namespace/:name"
+                          element={<Runbook />}
+                        />
+                        <Route
+                          path="/runbooks/:repo"
+                          element={<Runbooks />}
+                        />
+                        <Route
+                          path="/nodes/:name"
+                          element={<Node />}
+                        />
+                        <Route
+                          path="/nodes"
+                          element={<Nodes />}
+                        />
+                        <Route
+                          path="/audits/:graph"
+                          element={<Audits />}
+                        />
                         <Route
                           exact
                           path="/audits"
-                          render={() => <Redirect to="/audits/table" />}
+                          element={(
+                            <Navigate
+                              replace
+                              to="/audits/table"
+                            />
+                          )}
                         />
-                        <Route path="/components/:repo/:kind/:name">
-                          <Component />
-                        </Route>
+                        <Route
+                          path="/components/:repo/:kind/:name"
+                          element={<Component />}
+                        />
                         <Route
                           path="/components/:repo"
-                        >
-                          <Application />
-                        </Route>
-                        <Route path="/components">
-                          <RepositorySelector
-                            prefix="components"
-                            title="Components"
-                            description="details for all your applications"
-                          />
-                        </Route>
-                        <Route path="/builds/:buildId">
-                          <Build />
-                        </Route>
-                        <Route path="/webhooks">
-                          <Webhooks />
-                        </Route>
-                        <Route path="/dashboards/:repo">
-                          <Dashboards />
-                        </Route>
-                        <Route path="/dashboards">
-                          <RepositorySelector
-                            prefix="dashboards"
-                            title="Dashboards"
-                            description="view monitoring dashboards for installed repos"
-                          />
-                        </Route>
-                        <Route path="/me/edit">
-                          <EditUser />
-                        </Route>
-                        <Route path="/users">
-                          <Users />
-                        </Route>
-                        <Route path="/shell/pod/:namespace/:name/:container">
-                          <PodShell />
-                        </Route>
-                        <Route path="/builds">
-                          <Builds />
-                        </Route>
-                        <Route path="/app/:name">
-                          <App />
-                        </Route>
-                        <Route path="/">
-                          <Apps />
-                        </Route>
-                      </Switch>
+                          element={<Application />}
+                        />
+                        <Route
+                          path="/components"
+                          element={(
+                            <RepositorySelector
+                              prefix="components"
+                              title="Components"
+                              description="details for all your applications"
+                            />
+                          )}
+                        />
+                        <Route
+                          path="/builds/:buildId"
+                          element={<Build />}
+                        />
+                        <Route
+                          path="/webhooks"
+                          element={<Webhooks />}
+                        />
+                        <Route
+                          path="/dashboards/:repo"
+                          element={<Dashboards />}
+                        />
+                        <Route
+                          path="/dashboards"
+                          element={(
+                            <RepositorySelector
+                              prefix="dashboards"
+                              title="Dashboards"
+                              description="view monitoring dashboards for installed repos"
+                            />
+                          )}
+                        />
+                        <Route
+                          path="/me/edit"
+                          element={<EditUser />}
+                        />
+                        <Route
+                          path="/users"
+                          element={<Users />}
+                        />
+                        <Route
+                          path="/shell/pod/:namespace/:name/:container"
+                          element={<PodShell />}
+                        />
+                        <Route
+                          path="/builds"
+                          element={<Builds />}
+                        />
+                        <Route
+                          path="/app/:name"
+                          element={<App />}
+                        />
+                        <Route
+                          path="/"
+                          element={<Apps />}
+                        />
+                      </Routes>
                       <FlyoutGutter />
                     </Box>
                   </Box>

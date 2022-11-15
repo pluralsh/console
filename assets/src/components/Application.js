@@ -1,11 +1,13 @@
 import { useContext, useEffect } from 'react'
 import { Box, Text, ThemeContext } from 'grommet'
 import { Check } from 'forge-core'
-import { useHistory, useParams } from 'react-router'
+import { useParams } from 'react-router'
 
 import { normalizeColor } from 'grommet/utils'
 
 import { StatusCritical } from 'grommet-icons'
+
+import { useNavigate } from 'react-router-dom'
 
 import { chunk } from '../utils/array'
 
@@ -105,12 +107,12 @@ function Component({
   }, width,
 }) {
   const { repo } = useParams()
-  const history = useHistory()
+  const navigate = useNavigate()
 
   return (
     <Container
       width={width}
-      onClick={() => history.push(`/components/${repo}/${kind.toLowerCase()}/${name}`)}
+      onClick={() => navigate(`/components/${repo}/${kind.toLowerCase()}/${name}`)}
     >
       <ReadyIcon
         readiness={status}
@@ -129,7 +131,7 @@ function Component({
 
 export default function Application() {
   const { repo } = useParams()
-  const history = useHistory()
+  const navigate = useNavigate()
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const { setOnChange, currentApplication } = useContext(InstallationContext)
 
@@ -140,7 +142,7 @@ export default function Application() {
     ])
   }, [currentApplication])
   useEffect(() => {
-    setOnChange({ func: ({ name }) => history.push(`/components/${name}`) })
+    setOnChange({ func: ({ name }) => navigate(`/components/${name}`) })
   }, [])
   useEnsureCurrent(repo)
   const { error } = appState(currentApplication)

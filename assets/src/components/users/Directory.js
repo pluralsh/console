@@ -23,7 +23,7 @@ import {
   Webhooks,
 } from 'forge-core'
 
-import { useHistory, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import Toggle from 'react-toggle'
 
@@ -369,8 +369,8 @@ export default function Directory() {
   const { me, configuration: conf } = useContext(LoginContext)
 
   section = section || 'users'
-  const history = useHistory()
-  const setSection = section => history.push(`/directory/${section}`)
+  const navigate = useNavigate()
+  const setSection = section => navigate(`/directory/${section}`)
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
 
   useEffect(() => setBreadcrumbs([

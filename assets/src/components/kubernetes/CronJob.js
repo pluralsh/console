@@ -7,7 +7,7 @@ import {
 } from 'forge-core'
 import { useQuery } from 'react-apollo'
 
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
 import { Readiness, ReadyIcon } from '../Application'
 
@@ -100,7 +100,7 @@ function readiness({ completionTime, failed }) {
 }
 
 function JobRow({ job: { metadata: { name, namespace }, status }, refetch }) {
-  const hist = useHistory()
+  const navigate = useNavigate()
 
   return (
     <Box
@@ -121,7 +121,7 @@ function JobRow({ job: { metadata: { name, namespace }, status }, refetch }) {
         <ReadyIcon readiness={readiness(status)} />
         <Anchor
           size="small"
-          onClick={() => hist.push(`/components/${namespace}/job/${name}`)}
+          onClick={() => navigate(`/components/${namespace}/job/${name}`)}
         >{name}
         </Anchor>
       </Box>

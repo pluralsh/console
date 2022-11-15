@@ -4,7 +4,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useHistory, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from 'react-apollo'
 import { Button, ModalHeader } from 'forge-core'
 import {
@@ -122,11 +122,11 @@ function OptionContainer({ children, ...props }) {
 }
 
 function Rebuild({ build: { id } }) {
-  const history = useHistory()
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [mutation, { loading }] = useMutation(RESTART_BUILD, {
     variables: { id },
-    onCompleted: ({ restartBuild: { id } }) => history.push(`/builds/${id}`),
+    onCompleted: ({ restartBuild: { id } }) => navigate(`/builds/${id}`),
   })
 
   return (

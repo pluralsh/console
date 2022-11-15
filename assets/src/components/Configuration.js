@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useState,
 } from 'react'
-import { useHistory, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from 'react-apollo'
 
 import { Button } from 'forge-core'
@@ -332,11 +332,11 @@ export function EditConfiguration({ onCompleted, overlays, application: { name, 
 }
 
 export function RepositoryChoice({ config: { name, icon, description }, link }) {
-  const history = useHistory()
+  const navigate = useNavigate()
 
   return (
     <Box
-      onClick={() => history.push(link)}
+      onClick={() => navigate(link)}
       width="50%"
       hoverIndicator="backgroundDark"
       background="cardDetailLight"
@@ -381,7 +381,7 @@ export function RepositoryChoice({ config: { name, icon, description }, link }) 
 }
 
 export default function Configuration() {
-  const history = useHistory()
+  const navigate = useNavigate()
   const { repo } = useParams()
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const { setOnChange } = useContext(InstallationContext)
@@ -390,7 +390,7 @@ export default function Configuration() {
     fetchPolicy: 'cache-and-network',
   })
   const onCompleted = useCallback(() => {
-    history.push('/')
+    navigate('/')
   }, [history])
 
   useEffect(() => {
@@ -401,7 +401,7 @@ export default function Configuration() {
   }, [repo])
 
   useEffect(() => {
-    setOnChange({ func: ({ name }) => history.push(`/config/${name}`) })
+    setOnChange({ func: ({ name }) => navigate(`/config/${name}`) })
   }, [])
 
   useEnsureCurrent(repo)

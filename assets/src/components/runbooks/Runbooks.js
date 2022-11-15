@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react'
 import { Box, Text } from 'grommet'
 import { useQuery } from '@apollo/react-hooks'
 
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
 import {
   ApplicationIcon,
@@ -21,11 +21,11 @@ import { POLL_INTERVAL } from './constants'
 import { StatusIcon } from './StatusIcon'
 
 function RunbookRow({ runbook, namespace }) {
-  const hist = useHistory()
+  const navigate = useNavigate()
   const { name, description } = runbook.spec
 
   return (
-    <Container onClick={() => hist.push(`/runbooks/${namespace}/${runbook.name}`)}>
+    <Container onClick={() => navigate(`/runbooks/${namespace}/${runbook.name}`)}>
       <StatusIcon
         status={runbook.status}
         size={30}
@@ -52,7 +52,7 @@ function RunbookRow({ runbook, namespace }) {
 }
 
 export function Runbooks() {
-  const history = useHistory()
+  const navigate = useNavigate()
   const { repo } = useParams()
   const { currentApplication, setOnChange } = useContext(InstallationContext)
   const { data } = useQuery(RUNBOOKS_Q, {
@@ -71,7 +71,7 @@ export function Runbooks() {
   }, [currentApplication])
 
   useEffect(() => {
-    setOnChange({ func: ({ name }) => history.push(`/runbooks/${name}`) })
+    setOnChange({ func: ({ name }) => navigate(`/runbooks/${name}`) })
   }, [])
   useEnsureCurrent(repo)
 

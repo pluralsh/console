@@ -2,7 +2,7 @@ import { ThemeContext } from 'grommet'
 import { Flex, P } from 'honorable'
 import { AppIcon, Card } from 'pluralsh-design-system'
 import { useContext } from 'react'
-import { useHistory } from 'react-router'
+import { useNavigate } from 'react-router'
 
 import AppBorder from './AppBorder'
 
@@ -11,7 +11,7 @@ import AppStatus from './AppStatus'
 import { getIcon, hasIcons } from './misc'
 
 export default function AppCard({ application, setCurrentApplication }: any) {
-  const history = useHistory()
+  const navigate = useNavigate()
   const { dark }: any = useContext(ThemeContext)
 
   if (!application?.spec?.descriptor) return null
@@ -29,7 +29,7 @@ export default function AppCard({ application, setCurrentApplication }: any) {
       minWidth={240}
       onClick={() => {
         setCurrentApplication(application) // TODO: Consider removing this context.
-        history.push(`/app/${application.name}`)
+        navigate(`/app/${application.name}`)
       }}
     >
       <AppBorder app={application} />

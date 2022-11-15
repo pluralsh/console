@@ -25,7 +25,7 @@ import {
   Explore as Search,
 } from 'forge-core'
 
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
 import { last } from 'lodash'
 
@@ -608,7 +608,7 @@ export function LogViewer() {
   const [labels, setLabels] = useState(toMap(query))
   const labelList = Object.entries(labels).map(([name, value]) => ({ name, value }))
   const { setOnChange, currentApplication: app } = useContext(InstallationContext)
-  const history = useHistory()
+  const navigate = useNavigate()
 
   useEffect(() => {
     setBreadcrumbs([
@@ -617,7 +617,7 @@ export function LogViewer() {
     ])
   }, [app])
   useEffect(() => {
-    setOnChange({ func: ({ name }) => history.push(`/logs/${name}`) })
+    setOnChange({ func: ({ name }) => navigate(`/logs/${name}`) })
   }, [])
   useEnsureCurrent(repo)
 

@@ -29,7 +29,7 @@ import { useQuery } from 'react-apollo'
 
 import moment from 'moment'
 
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
 import styled, { keyframes } from 'styled-components'
 import { pulse } from 'react-animations'
@@ -127,7 +127,7 @@ export function IncidentRow({
     id, repository, title, insertedAt, owner, ...incident
   }, selected,
 }) {
-  const history = useHistory()
+  const navigate = useNavigate()
 
   return (
     <Box
@@ -139,7 +139,7 @@ export function IncidentRow({
       align="center"
       gap="small"
       hoverIndicator="light-2"
-      onClick={() => history.push(`/incident/${id}`)}
+      onClick={() => navigate(`/incident/${id}`)}
       height="75px"
     >
       <RepoIcon repo={repository} />

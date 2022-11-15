@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Switch } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { Grommet } from 'grommet'
 
 import { IntercomProvider } from 'react-use-intercom'
@@ -38,23 +38,28 @@ export default function App() {
               themeMode="dark"
             >
               <BrowserRouter>
-                <Switch>
-                  <Route path="/login">
-                    <Login />
-                  </Route>
-                  <Route path="/access">
-                    <GrantAccess />
-                  </Route>
-                  <Route path="/oauth/callback">
-                    <OAuthCallback />
-                  </Route>
-                  <Route path="/invite/:inviteId">
-                    <Invite />
-                  </Route>
-                  <Route path="/">
-                    <Console />
-                  </Route>
-                </Switch>
+                <Routes>
+                  <Route
+                    path="/login"
+                    element={<Login />}
+                  />
+                  <Route
+                    path="/access"
+                    element={<GrantAccess />}
+                  />
+                  <Route
+                    path="/oauth/callback"
+                    element={<OAuthCallback />}
+                  />
+                  <Route
+                    path="/invite/:inviteId"
+                    element={<Invite />}
+                  />
+                  <Route
+                    path="*"
+                    element={<Console />}
+                  />
+                </Routes>
               </BrowserRouter>
             </Grommet>
           </StyledThemeProvider>

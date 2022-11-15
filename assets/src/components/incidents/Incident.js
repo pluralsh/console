@@ -16,7 +16,7 @@ import {
 
 import { useMutation, useQuery, useSubscription } from 'react-apollo'
 
-import { useHistory, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
 import {
   Box,
@@ -504,7 +504,7 @@ function IncidentInner({
 }
 
 export function Incident({ editing }) {
-  const history = useHistory()
+  const navigate = useNavigate()
   const [deleted, setDeleted] = useState(false)
   const { incidentId } = useParams()
   const [edit, setEdit] = useState(editing)
@@ -547,7 +547,7 @@ export function Incident({ editing }) {
               >
                 <Button
                   label="Return"
-                  onClick={() => history.push('/incidents')}
+                  onClick={() => navigate('/incidents')}
                 />
               </Box>
             </Box>

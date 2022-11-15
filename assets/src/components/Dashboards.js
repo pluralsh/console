@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useQuery } from 'react-apollo'
 import { Box, Text } from 'grommet'
 
@@ -43,7 +43,7 @@ function IndividualHeader({ current }) {
 export default function Dashboards() {
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const { setOnChange, currentApplication } = useContext(InstallationContext)
-  const history = useHistory()
+  const navigate = useNavigate()
 
   useEffect(() => {
     setBreadcrumbs([
@@ -54,7 +54,7 @@ export default function Dashboards() {
   useEffect(() => {
     setOnChange({
       func: ({ name }) => {
-        history.push(`/dashboards/${name}`)
+        navigate(`/dashboards/${name}`)
       },
     })
   }, [])
