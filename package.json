@@ -28,7 +28,7 @@
     "@react-aria/interactions": "3.12.0",
     "@react-aria/listbox": "3.7.1",
     "@react-aria/overlays": "3.11.0",
-    "@react-aria/radio": "3.4.0",
+    "@react-aria/radio": "3.4.1",
     "@react-aria/select": "3.8.2",
     "@react-aria/tabs": "3.3.2",
     "@react-aria/utils": "3.14.0",

@@ -3382,7 +3382,7 @@ __metadata:
     "@react-aria/interactions": 3.12.0
     "@react-aria/listbox": 3.7.1
     "@react-aria/overlays": 3.11.0
-    "@react-aria/radio": 3.4.0
+    "@react-aria/radio": 3.4.1
     "@react-aria/select": 3.8.2
     "@react-aria/tabs": 3.3.2
     "@react-aria/utils": 3.14.0
@@ -3842,22 +3842,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-aria/radio@npm:3.4.0":
-  version: 3.4.0
-  resolution: "@react-aria/radio@npm:3.4.0"
+"@react-aria/radio@npm:3.4.1":
+  version: 3.4.1
+  resolution: "@react-aria/radio@npm:3.4.1"
   dependencies:
     "@babel/runtime": ^7.6.2
-    "@react-aria/focus": ^3.9.0
-    "@react-aria/i18n": ^3.6.1
-    "@react-aria/interactions": ^3.12.0
-    "@react-aria/label": ^3.4.2
-    "@react-aria/utils": ^3.14.0
-    "@react-stately/radio": ^3.6.0
-    "@react-types/radio": ^3.3.0
-    "@react-types/shared": ^3.15.0
+    "@react-aria/focus": ^3.10.0
+    "@react-aria/i18n": ^3.6.2
+    "@react-aria/interactions": ^3.13.0
+    "@react-aria/label": ^3.4.3
+    "@react-aria/utils": ^3.14.1
+    "@react-stately/radio": ^3.6.1
+    "@react-types/radio": ^3.3.1
+    "@react-types/shared": ^3.16.0
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: a0d09585727d0b546d55a99082cbe8e26b6e4acf823fc76a073d659fe96dea6a8941e2ac8f50ee6deddb0c3acf35486649386a2aa5e90f263ed45d4fbce86d91
+  checksum: 63b2bb210b8691c8d62761325e0ac1dc80539c809bb4d079d44ac961432886beb8fa2bc421a88ffd7601162fb006c9dd130c4d3d0b497c8df17a1724ed4e4ae5
   languageName: node
   linkType: hard
 
@@ -4362,7 +4362,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-stately/radio@npm:3.6.0, @react-stately/radio@npm:^3.6.0":
+"@react-stately/radio@npm:3.6.0":
   version: 3.6.0
   resolution: "@react-stately/radio@npm:3.6.0"
   dependencies:
@@ -4373,6 +4373,20 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
   checksum: 2e48be448d3ecc3f5a18671f017f94e99f695d65ac65f7d7bfd3a27651630881485720868b8982e940064eeb3e4d51a06e6f71d9dc64c090bb3554927540bf58
+  languageName: node
+  linkType: hard
+
+"@react-stately/radio@npm:^3.6.1":
+  version: 3.6.1
+  resolution: "@react-stately/radio@npm:3.6.1"
+  dependencies:
+    "@babel/runtime": ^7.6.2
+    "@react-stately/utils": ^3.5.1
+    "@react-types/radio": ^3.3.1
+    "@react-types/shared": ^3.16.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: ec21a5a46f0fdb708d2368eb07b1885e37bb9dd34ecfea6fb4147449dde35feebd06018c3fdf060170a99da241274a25ab10dcbedaff9e8acdc6f47d034fb811
   languageName: node
   linkType: hard
 
@@ -4711,6 +4725,17 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
   checksum: 19f10fff20d5aaf3d344df2732893da9fc0593c9cabb71484858774a3f1c74cb11e5b3da6ec61c4d491bddb224ef582a10d2c72140605b8717cb4964034a98ec
+  languageName: node
+  linkType: hard
+
+"@react-types/radio@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "@react-types/radio@npm:3.3.1"
+  dependencies:
+    "@react-types/shared": ^3.16.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: d3d53145e44e695477f16dac9efda91cf547ca2489d01fe80813065fae2b231d6ad6faea83cf525d2e08de4b0bdbdeca358ad0670bb0f6f8c284945166147913
   languageName: node
   linkType: hard
 
