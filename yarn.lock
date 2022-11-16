@@ -3390,7 +3390,7 @@ __metadata:
     "@react-stately/collections": 3.4.4
     "@react-stately/combobox": 3.2.2
     "@react-stately/overlays": 3.4.2
-    "@react-stately/radio": 3.6.0
+    "@react-stately/radio": 3.6.1
     "@react-stately/tabs": 3.2.2
     "@react-stately/toggle": 3.4.2
     "@react-types/shared": 3.15.0
@@ -4301,21 +4301,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-stately/radio@npm:3.6.0":
-  version: 3.6.0
-  resolution: "@react-stately/radio@npm:3.6.0"
-  dependencies:
-    "@babel/runtime": ^7.6.2
-    "@react-stately/utils": ^3.5.1
-    "@react-types/radio": ^3.3.0
-    "@react-types/shared": ^3.15.0
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: 2e48be448d3ecc3f5a18671f017f94e99f695d65ac65f7d7bfd3a27651630881485720868b8982e940064eeb3e4d51a06e6f71d9dc64c090bb3554927540bf58
-  languageName: node
-  linkType: hard
-
-"@react-stately/radio@npm:^3.6.1":
+"@react-stately/radio@npm:3.6.1, @react-stately/radio@npm:^3.6.1":
   version: 3.6.1
   resolution: "@react-stately/radio@npm:3.6.1"
   dependencies:
@@ -4641,17 +4627,6 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
   checksum: a9d559676067a797b76a92d9c2495e55819464c83aba0b8c411b20d8c5cc9e9d465eaf6bcad1c4391502db0d415bbe77d05c59e9caf607562f666724cdf9a9c3
-  languageName: node
-  linkType: hard
-
-"@react-types/radio@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "@react-types/radio@npm:3.3.0"
-  dependencies:
-    "@react-types/shared": ^3.15.0
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: 19f10fff20d5aaf3d344df2732893da9fc0593c9cabb71484858774a3f1c74cb11e5b3da6ec61c4d491bddb224ef582a10d2c72140605b8717cb4964034a98ec
   languageName: node
   linkType: hard
 
