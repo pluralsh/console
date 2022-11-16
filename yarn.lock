@@ -3389,7 +3389,7 @@ __metadata:
     "@react-aria/visually-hidden": 3.5.0
     "@react-stately/collections": 3.4.4
     "@react-stately/combobox": 3.2.2
-    "@react-stately/overlays": 3.4.2
+    "@react-stately/overlays": 3.4.3
     "@react-stately/radio": 3.6.1
     "@react-stately/tabs": 3.2.2
     "@react-stately/toggle": 3.4.2
@@ -4275,20 +4275,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-stately/overlays@npm:3.4.2, @react-stately/overlays@npm:^3.4.2":
-  version: 3.4.2
-  resolution: "@react-stately/overlays@npm:3.4.2"
-  dependencies:
-    "@babel/runtime": ^7.6.2
-    "@react-stately/utils": ^3.5.1
-    "@react-types/overlays": ^3.6.4
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: a96d10946c1b54c97e611daf84cbb38c8e97206a06a906ec2531701a6be51b4c30ccbcef97ebb074c5b788efd299d8c5b8120e7072fd4c2384ab043c3d86ccce
-  languageName: node
-  linkType: hard
-
-"@react-stately/overlays@npm:^3.4.3":
+"@react-stately/overlays@npm:3.4.3, @react-stately/overlays@npm:^3.4.3":
   version: 3.4.3
   resolution: "@react-stately/overlays@npm:3.4.3"
   dependencies:
@@ -4298,6 +4285,19 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
   checksum: b301c6bfccac0ce57f17ec821c98ccf10836bc0f76aed4ceb2595240c39d50c2a579d7de6d10b5ef521c3595b1c68d92ff5025ba2ddae6b068c03f0bf5e6c436
+  languageName: node
+  linkType: hard
+
+"@react-stately/overlays@npm:^3.4.2":
+  version: 3.4.2
+  resolution: "@react-stately/overlays@npm:3.4.2"
+  dependencies:
+    "@babel/runtime": ^7.6.2
+    "@react-stately/utils": ^3.5.1
+    "@react-types/overlays": ^3.6.4
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: a96d10946c1b54c97e611daf84cbb38c8e97206a06a906ec2531701a6be51b4c30ccbcef97ebb074c5b788efd299d8c5b8120e7072fd4c2384ab043c3d86ccce
   languageName: node
   linkType: hard
 
