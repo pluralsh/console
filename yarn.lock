@@ -3391,7 +3391,7 @@ __metadata:
     "@react-stately/combobox": 3.2.2
     "@react-stately/overlays": 3.4.3
     "@react-stately/radio": 3.6.1
-    "@react-stately/tabs": 3.2.2
+    "@react-stately/tabs": 3.2.3
     "@react-stately/toggle": 3.4.2
     "@react-types/shared": 3.15.0
     "@storybook/addon-actions": 6.5.13
@@ -4379,21 +4379,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-stately/tabs@npm:3.2.2":
-  version: 3.2.2
-  resolution: "@react-stately/tabs@npm:3.2.2"
-  dependencies:
-    "@babel/runtime": ^7.6.2
-    "@react-stately/list": ^3.5.4
-    "@react-stately/utils": ^3.5.1
-    "@react-types/tabs": ^3.1.4
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: d8840a59eaac28f4c3e1fd86f6119d94c8f31448dfd306224573ae47433334cf4d8e0ce486199fc9a1edbaab068fe962d55b81b53dad49b8dda2eb36f5ab23db
-  languageName: node
-  linkType: hard
-
-"@react-stately/tabs@npm:^3.2.3":
+"@react-stately/tabs@npm:3.2.3, @react-stately/tabs@npm:^3.2.3":
   version: 3.2.3
   resolution: "@react-stately/tabs@npm:3.2.3"
   dependencies:
@@ -4702,17 +4688,6 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
   checksum: 628a07194135fb3196b434d4b9266d458ed300ce0459deb86b0106527ca19a8b2bbc5ff4f9a4a2ee7afc7acd779c30dc78bcb25bc5b0b31af388843a93d35bfc
-  languageName: node
-  linkType: hard
-
-"@react-types/tabs@npm:^3.1.4":
-  version: 3.1.4
-  resolution: "@react-types/tabs@npm:3.1.4"
-  dependencies:
-    "@react-types/shared": ^3.15.0
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: 02f184287e65ccc1ce091b0274116bb3d3b2d4ee973c062e200febd0ad249098fd78d32c21f0afbd07cbc040bfcd72bd1b6b0621a14076cda68dadae06090a0b
   languageName: node
   linkType: hard
 
