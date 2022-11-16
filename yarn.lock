@@ -3392,7 +3392,7 @@ __metadata:
     "@react-stately/overlays": 3.4.3
     "@react-stately/radio": 3.6.1
     "@react-stately/tabs": 3.2.3
-    "@react-stately/toggle": 3.4.2
+    "@react-stately/toggle": 3.4.3
     "@react-types/shared": 3.15.0
     "@storybook/addon-actions": 6.5.13
     "@storybook/addon-docs": 6.5.13
@@ -4393,21 +4393,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-stately/toggle@npm:3.4.2, @react-stately/toggle@npm:^3.4.2":
-  version: 3.4.2
-  resolution: "@react-stately/toggle@npm:3.4.2"
-  dependencies:
-    "@babel/runtime": ^7.6.2
-    "@react-stately/utils": ^3.5.1
-    "@react-types/checkbox": ^3.4.0
-    "@react-types/shared": ^3.15.0
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: 6d98dde6eb8e2b610ccb5824ff3250f21a2af0527997a6e8789b51bdebc54bebfd600dc3b13e40a84ea8484f25c0348f1244349e706c3699cdc91f5bb53bf666
-  languageName: node
-  linkType: hard
-
-"@react-stately/toggle@npm:^3.4.3":
+"@react-stately/toggle@npm:3.4.3, @react-stately/toggle@npm:^3.4.3":
   version: 3.4.3
   resolution: "@react-stately/toggle@npm:3.4.3"
   dependencies:
@@ -4418,6 +4404,20 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
   checksum: 302fb76c38f7316efd9de840fb4d80ba30d842a23c2adb95b7c4937b0bbfbf43b9f282e314480d831169bc05f7b11637485e733e3cacc0e834b06e662918a696
+  languageName: node
+  linkType: hard
+
+"@react-stately/toggle@npm:^3.4.2":
+  version: 3.4.2
+  resolution: "@react-stately/toggle@npm:3.4.2"
+  dependencies:
+    "@babel/runtime": ^7.6.2
+    "@react-stately/utils": ^3.5.1
+    "@react-types/checkbox": ^3.4.0
+    "@react-types/shared": ^3.15.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: 6d98dde6eb8e2b610ccb5824ff3250f21a2af0527997a6e8789b51bdebc54bebfd600dc3b13e40a84ea8484f25c0348f1244349e706c3699cdc91f5bb53bf666
   languageName: node
   linkType: hard
 
