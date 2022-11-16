@@ -3380,7 +3380,7 @@ __metadata:
     "@react-aria/combobox": 3.4.3
     "@react-aria/focus": 3.9.0
     "@react-aria/interactions": 3.12.0
-    "@react-aria/listbox": 3.7.0
+    "@react-aria/listbox": 3.7.1
     "@react-aria/overlays": 3.11.0
     "@react-aria/radio": 3.4.0
     "@react-aria/select": 3.8.2
@@ -3703,27 +3703,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-aria/listbox@npm:3.7.0, @react-aria/listbox@npm:^3.7.0":
-  version: 3.7.0
-  resolution: "@react-aria/listbox@npm:3.7.0"
-  dependencies:
-    "@babel/runtime": ^7.6.2
-    "@react-aria/focus": ^3.9.0
-    "@react-aria/interactions": ^3.12.0
-    "@react-aria/label": ^3.4.2
-    "@react-aria/selection": ^3.11.0
-    "@react-aria/utils": ^3.14.0
-    "@react-stately/collections": ^3.4.4
-    "@react-stately/list": ^3.5.4
-    "@react-types/listbox": ^3.3.4
-    "@react-types/shared": ^3.15.0
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: 9796ddde2f086e5ac8ba518cc97773e0c21c5f82a71f739e8172f749fab2ec9c4edf9f318551c8d1530372f14ba2c97d5da363d17a2a6e1b051c0a0e23c9a6a7
-  languageName: node
-  linkType: hard
-
-"@react-aria/listbox@npm:^3.7.1":
+"@react-aria/listbox@npm:3.7.1, @react-aria/listbox@npm:^3.7.1":
   version: 3.7.1
   resolution: "@react-aria/listbox@npm:3.7.1"
   dependencies:
@@ -3740,6 +3720,26 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
   checksum: 35a0e86430ad523717f646503005b269c4cd998ba014a1f3f0163f408dee1624ba9bae5d25773da3511ed9a95ae98b90e85086a68037a1832de6db56ab123176
+  languageName: node
+  linkType: hard
+
+"@react-aria/listbox@npm:^3.7.0":
+  version: 3.7.0
+  resolution: "@react-aria/listbox@npm:3.7.0"
+  dependencies:
+    "@babel/runtime": ^7.6.2
+    "@react-aria/focus": ^3.9.0
+    "@react-aria/interactions": ^3.12.0
+    "@react-aria/label": ^3.4.2
+    "@react-aria/selection": ^3.11.0
+    "@react-aria/utils": ^3.14.0
+    "@react-stately/collections": ^3.4.4
+    "@react-stately/list": ^3.5.4
+    "@react-types/listbox": ^3.3.4
+    "@react-types/shared": ^3.15.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: 9796ddde2f086e5ac8ba518cc97773e0c21c5f82a71f739e8172f749fab2ec9c4edf9f318551c8d1530372f14ba2c97d5da363d17a2a6e1b051c0a0e23c9a6a7
   languageName: node
   linkType: hard
 
