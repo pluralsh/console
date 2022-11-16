@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@floating-ui/react-dom-interactions": "0.11.0",
-    "@react-aria/button": "3.6.2",
+    "@react-aria/button": "3.6.3",
     "@react-aria/checkbox": "3.6.0",
     "@react-aria/combobox": "3.4.2",
     "@react-aria/focus": "3.9.0",
