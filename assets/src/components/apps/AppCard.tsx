@@ -2,6 +2,7 @@ import { ThemeContext } from 'grommet'
 import { Div, Flex, P } from 'honorable'
 import {
   AppIcon,
+  ArrowTopRightIcon,
   Button,
   Card,
   ComponentsIcon,
@@ -22,6 +23,15 @@ import AppBorder from './AppBorder'
 import AppStatus from './misc/AppStatus'
 
 import { getIcon, hasIcons } from './misc'
+
+const SHORTCUTS = [
+  { url: 'dashboards', label: 'Dashboards', icon: <DashboardIcon /> },
+  { url: 'runbooks', label: 'Runbooks', icon: <RunBookIcon /> },
+  { url: 'components', label: 'Components', icon: <ComponentsIcon /> },
+  { url: 'logs', label: 'Logs', icon: <LogsIcon /> },
+  { url: 'cost', label: 'Cost analysis', icon: <IdIcon /> },
+  { url: 'config', label: 'Configuration', icon: <GearTrainIcon /> },
+]
 
 export default function AppCard({ application, setCurrentApplication }: any) {
   const navigate = useNavigate()
@@ -72,56 +82,53 @@ export default function AppCard({ application, setCurrentApplication }: any) {
         </Flex>
       </Flex>
       <Flex grow={1} />
-      <Flex direction="column">
-        {links?.map(({ description, url }) => <Div key={url}>{url} - {description}</Div>)}
-      </Flex>
-      {/* TODO: Export to the new component. */}
-      <Select
-        width="max-content"
-        placement="right"
-        triggerButton={(
+      <Flex
+        align="center"
+        gap="16px"
+        padding="medium"
+      >
+        {links?.length > 0 && links[0].url && (
           <Button
-            secondary
             small
-            onClick={e => {
-              e.stopPropagation()
-              e.preventDefault()
-            }}
-          ><MoreIcon />
+            secondary
+            fontWeight={600}
+            endIcon={<ArrowTopRightIcon size={14} />}
+            as="a"
+            href={`//${links[0].url}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+          >
+            Launch
           </Button>
         )}
-      >
-        <ListBoxItem
-          label="Dashboard"
-          textValue="dashboard"
-          leftContent={<DashboardIcon />}
-        />
-        <ListBoxItem
-          label="Runbooks"
-          textValue="runbooks"
-          leftContent={<RunBookIcon />}
-        />
-        <ListBoxItem
-          label="Components"
-          textValue="components"
-          leftContent={<ComponentsIcon />}
-        />
-        <ListBoxItem
-          label="Logs"
-          textValue="logs"
-          leftContent={<LogsIcon />}
-        />
-        <ListBoxItem
-          label="Cost analysis"
-          textValue="costanalysis"
-          leftContent={<IdIcon />}
-        />
-        <ListBoxItem
-          label="Configuration"
-          textValue="config"
-          leftContent={<GearTrainIcon />}
-        />
-      </Select>
+        <Flex direction="column">
+          {links?.map(({ description, url }) => <Div key={url}>{url} - {description}</Div>)}
+        </Flex>
+        <Select
+          width={200}
+          maxHeight={250}
+          placement="right"
+          triggerButton={(
+            <Button
+              secondary
+              small
+              paddingHorizontal="xsmall"
+            >
+              <MoreIcon />
+            </Button>
+          )}
+        >
+          {SHORTCUTS.map(({ url, label, icon }) => (
+            <ListBoxItem
+              key={url}
+              label={label}
+              textValue={label}
+              leftContent={icon}
+            />
+          ))}
+        </Select>
+      </Flex>
     </Card>
   )
 }
