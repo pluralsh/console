@@ -1,13 +1,13 @@
-import { create } from '@storybook/theming'
+import { create } from '@storybook/theming/create'
 
 export default create({
-  base: 'light',
+  base: 'dark',
+
   brandTitle: 'Plural',
   brandUrl: 'https://plural.sh',
   brandImage: '/plural-logo-white-48.png',
   brandTarget: '_self',
 
-  base: 'dark',
 
   colorPrimary: '#293EFF',
   colorSecondary: '#293EFF',
