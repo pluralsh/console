@@ -1,5 +1,5 @@
 import { ThemeContext } from 'grommet'
-import { Div, Flex, P } from 'honorable'
+import { Flex, P } from 'honorable'
 import {
   AppIcon,
   ArrowTopRightIcon,
@@ -32,6 +32,10 @@ const SHORTCUTS = [
   { url: 'cost', label: 'Cost analysis', icon: <IdIcon /> },
   { url: 'config', label: 'Configuration', icon: <GearTrainIcon /> },
 ]
+
+const SHORTCUT_URLS = SHORTCUTS.map(shortcut => shortcut.url)
+
+const isShortcut = url => SHORTCUT_URLS.indexOf(url) > -1
 
 export default function AppCard({ application, setCurrentApplication }: any) {
   const navigate = useNavigate()
@@ -103,6 +107,7 @@ export default function AppCard({ application, setCurrentApplication }: any) {
           </Button>
         )}
         <Select
+          aria-label="shortcuts"
           width="max-content"
           maxHeight={300}
           placement="right"
@@ -115,12 +120,17 @@ export default function AppCard({ application, setCurrentApplication }: any) {
               <MoreIcon />
             </Button>
           )}
+          onSelectionChange={url => {
+            setCurrentApplication(application)
+            if (isShortcut(url)) navigate(`app/${application.name}/${url}`)
+            else window.open(`${url}`, '_blank')?.focus()
+          }}
         >
           {links?.length > 1 && links.slice(1).map(({ url }) => (
             <ListBoxItem
-              key={url}
+              key={`${url}`}
               label={url}
-              textValue={url}
+              textValue={`${url}`}
               leftContent={<ArrowTopRightIcon />}
             />
           ))}
