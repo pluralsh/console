@@ -45,6 +45,7 @@ import ConsoleHeader from './ConsoleHeader'
 import ConsoleSubheader from './ConsoleSubheader'
 import Dashboards from './apps/app/dashboards/Dashboards'
 import Runbooks from './apps/app/runbooks/Runbooks'
+import CostAnalysis from './apps/app/cost/CostAnalysis'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -383,6 +384,10 @@ export default function Console() {
                           <Route
                             path="runbooks"
                             element={<Runbooks />}
+                          />
+                          <Route
+                            path="cost"
+                            element={<CostAnalysis />}
                           />
                         </Route>
                         <Route

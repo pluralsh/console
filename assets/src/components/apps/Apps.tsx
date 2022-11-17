@@ -68,9 +68,10 @@ export default function Apps() {
       </PageTitle>
       <Flex
         margin="medium"
-        paddingBottom="medium"
+        paddingBottom="xxxlarge"
         direction="row"
         wrap="wrap"
+        // TODO: Set scrolling area to this element.
       >
         {applications
           .filter(app => !query || app.name.startsWith(query)) // TODO: Use better search method.
