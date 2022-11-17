@@ -31,6 +31,7 @@ export default function ConsoleSubheader() {
           <Button
             floating
             small
+            // TODO: Add disabled state.
             paddingHorizontal="xsmall"
             onClick={() => navigate(-1)}
           >
@@ -39,6 +40,7 @@ export default function ConsoleSubheader() {
           <Button
             floating
             small
+            // TODO: Add disabled state.
             paddingHorizontal="xsmall"
             onClick={() => navigate(1)}
           >
