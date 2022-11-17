@@ -23,7 +23,7 @@ jobs:
           platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: GIT_COMMIT=$GITHUB_SHA
+          build-args: GIT_COMMIT=${{ github.sha }}
   test:
     name: Test
     runs-on: ubuntu-latest
