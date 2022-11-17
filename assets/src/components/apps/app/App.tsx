@@ -18,7 +18,7 @@ import { ResponsiveLayoutContentContainer } from '../../layout/ResponsiveLayoutC
 
 import { LoginContext } from '../../contexts'
 
-import AppStatus from '../misc/AppStatus'
+import AppStatus from '../AppStatus'
 
 const DIRECTORY = [
   { path: 'dashboards', label: 'Dashboards' },
@@ -38,12 +38,12 @@ export default function App() {
   const tabStateRef = useRef<any>(null)
   const { currentApplication }: any = useContext(InstallationContext)
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
-  const pathPrefix = `/app/${currentApplication.name}`
+  const pathPrefix = `/apps/${currentApplication.name}`
   const currentTab = DIRECTORY.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
 
   useEffect(() => setBreadcrumbs([
     { text: 'Apps', url: '/' },
-    { text: currentApplication.name, url: `/app/${currentApplication.name}` },
+    { text: currentApplication.name, url: `/apps/${currentApplication.name}` },
   ]), [currentApplication, setBreadcrumbs])
 
   if (!me || !currentApplication) return null

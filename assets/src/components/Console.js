@@ -365,7 +365,7 @@ export default function Console() {
                           element={<Builds />}
                         />
                         <Route
-                          path="/app/:name"
+                          path="/apps/:name"
                           element={<App />}
                         >
                           <Route

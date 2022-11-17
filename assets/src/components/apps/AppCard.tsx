@@ -20,7 +20,7 @@ import { useNavigate } from 'react-router-dom'
 
 import AppBorder from './AppBorder'
 
-import AppStatus from './misc/AppStatus'
+import AppStatus from './AppStatus'
 
 import { getIcon, hasIcons } from './misc'
 
@@ -56,7 +56,7 @@ export default function AppCard({ application, setCurrentApplication }: any) {
       minWidth={240}
       onClick={() => {
         setCurrentApplication(application) // TODO: Consider removing this context.
-        navigate(`/app/${application.name}`)
+        navigate(`/apps/${application.name}`)
       }}
     >
       <AppBorder app={application} />
@@ -122,7 +122,7 @@ export default function AppCard({ application, setCurrentApplication }: any) {
           )}
           onSelectionChange={url => {
             setCurrentApplication(application)
-            if (isShortcut(url)) navigate(`app/${application.name}/${url}`)
+            if (isShortcut(url)) navigate(`apps/${application.name}/${url}`)
             else window.open(`${url}`, '_blank')?.focus()
           }}
         >

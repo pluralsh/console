@@ -9,8 +9,8 @@ export default function Dashboards() {
 
   useEffect(() => setBreadcrumbs([
     { text: 'Apps', url: '/' },
-    { text: currentApplication.name, url: `/app/${currentApplication.name}` },
-    { text: 'Dashboards', url: `/app/${currentApplication.name}/dashboards` },
+    { text: currentApplication.name, url: `/apps/${currentApplication.name}` },
+    { text: 'Dashboards', url: `/apps/${currentApplication.name}/dashboards` },
   ]), [currentApplication, setBreadcrumbs])
 
   return (

@@ -43,13 +43,13 @@ const MENU_ITEMS = [
   // {text: 'Webhooks', icon: Webhooks, path: '/webhooks'},
 ]
 
-// const replace = (path, name) => path.replace('{repo}', name)
-
 export default function ConsoleSidebar() {
   const { me } = useContext(LoginContext)
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const active = ({ path }) => (path === '/' ? pathname === path : pathname.startsWith(path))
+  const active = ({ path }) => (path === '/'
+    ? (pathname === path || pathname.startsWith('/apps/'))
+    : pathname.startsWith(path))
 
   if (!me) return null
 
