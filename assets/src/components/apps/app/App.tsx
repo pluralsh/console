@@ -1,10 +1,13 @@
 import { Flex } from 'honorable'
 import { Tab, TabList, TabPanel } from 'pluralsh-design-system'
 
-import { useContext, useEffect, useRef } from 'react'
+import {
+  Key,
+  useContext,
+  useRef,
+  useState,
+} from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
-
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
 import { InstallationContext } from 'components/Installations'
 
@@ -36,15 +39,12 @@ export default function App() {
   const { me }: any = useContext(LoginContext)
   const { pathname } = useLocation()
   const tabStateRef = useRef<any>(null)
+  const [selectedKey, setSelectedKey] = useState<Key>('lions')
   const { currentApplication }: any = useContext(InstallationContext)
-  const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
   const pathPrefix = `/apps/${currentApplication.name}`
   const currentTab = DIRECTORY.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
 
-  useEffect(() => setBreadcrumbs([
-    { text: 'Apps', url: '/' },
-    { text: currentApplication.name, url: `/apps/${currentApplication.name}` },
-  ]), [currentApplication, setBreadcrumbs])
+  console.log(currentTab)
 
   if (!me || !currentApplication) return null
 
