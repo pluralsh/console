@@ -20,7 +20,6 @@ import {
 import { useQuery } from 'react-apollo'
 
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
-import { ApplicationReadyIcon } from './Application'
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { CostBreakdown } from './repos/CostAnalysis'
 import { Icon } from './Console'
@@ -124,48 +123,20 @@ function ApplicationDetail({ close }) {
 
 export function Installations() {
   const [modal, setModal] = useState(false)
-  const { currentApplication, open, setOpen } = useContext(InstallationContext)
+  const { currentApplication } = useContext(InstallationContext)
 
   if (!currentApplication) return null
-  const { name, spec: { descriptor } } = currentApplication
 
   return (
     <>
-      <Box
-        flex={false}
-        direction="row"
-        gap="xsmall"
-        align="center"
-      >
-        <Icon
-          icon={<CircleInformation size="18px" />}
-          text="Application Details"
-          size="40px"
-          selected={modal}
-          align={{ top: 'bottom' }}
-          onClick={() => setModal(true)}
-        />
-        <ToolbarItem
-          onClick={() => setOpen(true)}
-          open={open}
-        >
-          {descriptor.icons.length > 0 && (
-            <ApplicationIcon
-              application={currentApplication}
-              dark
-            />
-          )}
-          <Text
-            size="small"
-            weight={500}
-          >{name}
-          </Text>
-          <ApplicationReadyIcon
-            application={currentApplication}
-            showIcon
-          />
-        </ToolbarItem>
-      </Box>
+      <Icon
+        icon={<CircleInformation size="18px" />}
+        text="Application Details"
+        size="40px"
+        selected={modal}
+        align={{ top: 'bottom' }}
+        onClick={() => setModal(true)}
+      />
       {modal && <ApplicationDetail close={() => setModal(false)} />}
     </>
   )
