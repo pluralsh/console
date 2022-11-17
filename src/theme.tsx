@@ -1,5 +1,6 @@
 import { mergeTheme } from 'honorable'
 import defaultTheme from 'honorable-theme-default'
+import mapperRecipe from 'honorable-recipe-mapper'
 
 import {
   blue,
@@ -91,28 +92,23 @@ const honorableTheme = mergeTheme(defaultTheme, {
   },
   global: [
     /* Spacing */
+    mapperRecipe('gap', spacing),
     ...Object.entries(spacers).map(([key, nextKeys]) => (props: any) => props[key] !== null
-          && typeof props[key] !== 'undefined'
-          && Object.fromEntries(nextKeys.map(nextKey => [
-            nextKey,
-            spacing[props[key]] || props[key],
-          ]))),
-    ({ gap }: any) => typeof gap !== 'undefined' && {
-      gap: spacing[gap] || gap,
-    },
+      && typeof props[key] !== 'undefined'
+      && Object.fromEntries(nextKeys.map(nextKey => [
+        nextKey,
+        spacing[props[key]] || props[key],
+      ]))),
     ({ fill }: any) => fill === true && {
-        // === true to prevent the `fill` css property to apply here
+      // === true to prevent the `fill` css property to apply here
       width: '100%',
       height: '100%',
     },
     /* Border radiuses */
-    ({ borderRadius }: any) => typeof borderRadius !== 'undefined' && {
-      borderRadius: borderRadiuses[borderRadius] || borderRadius,
-    },
+    mapperRecipe('borderRadius', borderRadiuses),
     /* Shadows */
-    ({ boxShadow }: any) => typeof boxShadow !== 'undefined' && {
-      boxShadow: boxShadows[boxShadow] || boxShadow,
-    },
+    mapperRecipe('boxShadow', boxShadows),
+    /* Texts */
     ({ h1 }: any) => h1 && textPartials.h1,
     ({ h2 }: any) => h2 && textPartials.h2,
     ({ h3 }: any) => h3 && textPartials.h3,
