@@ -55,7 +55,7 @@ export default function App() {
             selectedKey: currentTab?.path,
           }}
         >
-          {DIRECTORY.map(({ label, path }, i) => (
+          {DIRECTORY.map(({ label, path }) => (
             <Tab
               key={path}
               as={Link}

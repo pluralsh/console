@@ -7,6 +7,10 @@ import {
 } from 'pluralsh-design-system'
 
 import { Breadcrumbs } from './Breadcrumbs'
+import { ResponsiveLayoutContentContainer } from './layout/ResponsiveLayoutContentContainer'
+import { ResponsiveLayoutSidecarContainer } from './layout/ResponsiveLayoutSidecarContainer'
+import { ResponsiveLayoutSidenavContainer } from './layout/ResponsiveLayoutSidenavContainer'
+import { ResponsiveLayoutSpacer } from './layout/ResponsiveLayoutSpacer'
 
 export default function ConsoleSubheader() {
   return (
@@ -15,38 +19,34 @@ export default function ConsoleSubheader() {
       backgroundColor={theme.colors.grey[950]}
       borderBottom="1px solid border"
       minHeight={48}
-      paddingHorizontal="large"
     >
-      <Flex
-        basis="25%"
-        grow={1}
-        shrink={1}
-        gap="small"
+      <ResponsiveLayoutSidenavContainer
+        width={240}
+        paddingHorizontal="large"
       >
-        <Button
-          floating
-          disabled
-          small
-          paddingHorizontal="xsmall"
-        >
-          <ArrowLeftIcon />
-        </Button>
-        <Button
-          floating
-          disabled
-          small
-          paddingHorizontal="xsmall"
-        >
-          <ArrowRightIcon />
-        </Button>
-      </Flex>
-      <Flex
-        basis="50%"
-        grow={1}
-        shrink={1}
-      >
-        <Breadcrumbs />
-      </Flex>
+        <Flex gap="small">
+          <Button
+            floating
+            disabled
+            small
+            paddingHorizontal="xsmall"
+          >
+            <ArrowLeftIcon />
+          </Button>
+          <Button
+            floating
+            disabled
+            small
+            paddingHorizontal="xsmall"
+          >
+            <ArrowRightIcon />
+          </Button>
+        </Flex>
+      </ResponsiveLayoutSidenavContainer>
+      <ResponsiveLayoutSpacer />
+      <ResponsiveLayoutContentContainer><Flex align="justify"><Breadcrumbs /></Flex></ResponsiveLayoutContentContainer>
+      <ResponsiveLayoutSidecarContainer width={200} />
+      <ResponsiveLayoutSpacer />
     </Flex>
 
   )

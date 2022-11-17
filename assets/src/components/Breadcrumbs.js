@@ -43,7 +43,7 @@ export function Breadcrumbs() {
     <Flex
       direction="row"
       gap="small"
-      padding="small"
+      paddingVertical="small"
     >
       {cluster
       && (
