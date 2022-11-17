@@ -178,7 +178,6 @@ export default function Apps() {
             margin="xsmall"
           />
         )}
-        {/* TODO: Figure out what to do with completed filter and how both filters work at the same time. */}
         {noFilteredApps && query && (
           <QueryEmptyState
             query={query}
