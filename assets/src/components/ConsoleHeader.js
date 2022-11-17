@@ -10,7 +10,7 @@ import {
   Button,
   DownloadIcon,
   theme,
-} from 'pluralsh-design-system'
+} from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
 
 import { AutoRefresh } from './AutoRefresh'

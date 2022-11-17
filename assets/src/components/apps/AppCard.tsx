@@ -14,7 +14,7 @@ import {
   MoreIcon,
   RunBookIcon,
   Select,
-} from 'pluralsh-design-system'
+} from '@pluralsh/design-system'
 import { useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 

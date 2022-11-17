@@ -1,5 +1,5 @@
 import { Readiness, appState } from 'components/Application'
-import { Chip } from 'pluralsh-design-system'
+import { Chip } from '@pluralsh/design-system'
 
 export default function AppStatus({ application }) { // TODO: Verify statuses.
   const { readiness } = appState(application)

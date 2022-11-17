@@ -4,7 +4,7 @@ import {
   ArrowRightIcon,
   Button,
   theme,
-} from 'pluralsh-design-system'
+} from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 
 import { Breadcrumbs } from './Breadcrumbs'

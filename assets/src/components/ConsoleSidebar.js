@@ -10,7 +10,7 @@ import {
   SidebarItem,
   SidebarSection,
   theme,
-} from 'pluralsh-design-system'
+} from '@pluralsh/design-system'
 
 import { Builds } from 'forge-core'
 import { useLocation, useNavigate } from 'react-router-dom'

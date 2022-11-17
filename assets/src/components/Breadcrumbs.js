@@ -7,7 +7,7 @@ import {
   Span,
 } from 'honorable'
 
-import { theme } from 'pluralsh-design-system'
+import { theme } from '@pluralsh/design-system'
 
 import { lookahead } from '../utils/array'
 

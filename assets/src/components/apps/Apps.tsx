@@ -14,7 +14,7 @@ import {
   SourcererIcon,
   SubTab,
   TabList,
-} from 'pluralsh-design-system'
+} from '@pluralsh/design-system'
 import {
   useContext,
   useEffect,

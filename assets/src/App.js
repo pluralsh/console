@@ -7,7 +7,7 @@ import { ApolloProvider } from 'react-apollo'
 
 import { mergeDeep } from '@apollo/client/utilities'
 
-import { GlobalStyle, styledTheme, theme } from 'pluralsh-design-system'
+import { GlobalStyle, styledTheme, theme } from '@pluralsh/design-system'
 import { CssBaseline, ThemeProvider } from 'honorable'
 import { ThemeProvider as StyledThemeProvider } from 'styled-components'
 

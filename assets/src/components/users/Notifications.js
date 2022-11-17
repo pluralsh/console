@@ -15,7 +15,7 @@ import {
   useSubscription,
 } from '@apollo/react-hooks'
 
-import { BellIcon } from 'pluralsh-design-system'
+import { BellIcon } from '@pluralsh/design-system'
 
 import { FlyoutContainer } from '../Console'
 import { ME_Q, NOTIFICATIONS_Q } from '../graphql/users'
