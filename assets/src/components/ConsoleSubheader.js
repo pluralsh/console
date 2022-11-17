@@ -5,6 +5,7 @@ import {
   Button,
   theme,
 } from 'pluralsh-design-system'
+import { useNavigate } from 'react-router-dom'
 
 import { Breadcrumbs } from './Breadcrumbs'
 import { ResponsiveLayoutContentContainer } from './layout/ResponsiveLayoutContentContainer'
@@ -13,6 +14,8 @@ import { ResponsiveLayoutSidenavContainer } from './layout/ResponsiveLayoutSiden
 import { ResponsiveLayoutSpacer } from './layout/ResponsiveLayoutSpacer'
 
 export default function ConsoleSubheader() {
+  const navigate = useNavigate()
+
   return (
     <Flex
       align="center"
@@ -27,17 +30,17 @@ export default function ConsoleSubheader() {
         <Flex gap="small">
           <Button
             floating
-            disabled
             small
             paddingHorizontal="xsmall"
+            onClick={() => navigate(-1)}
           >
             <ArrowLeftIcon />
           </Button>
           <Button
             floating
-            disabled
             small
             paddingHorizontal="xsmall"
+            onClick={() => navigate(1)}
           >
             <ArrowRightIcon />
           </Button>
