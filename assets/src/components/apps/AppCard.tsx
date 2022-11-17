@@ -102,12 +102,9 @@ export default function AppCard({ application, setCurrentApplication }: any) {
             Launch
           </Button>
         )}
-        <Flex direction="column">
-          {links?.map(({ description, url }) => <Div key={url}>{url} - {description}</Div>)}
-        </Flex>
         <Select
-          width={200}
-          maxHeight={250}
+          width="max-content"
+          maxHeight={300}
           placement="right"
           triggerButton={(
             <Button
@@ -119,6 +116,14 @@ export default function AppCard({ application, setCurrentApplication }: any) {
             </Button>
           )}
         >
+          {links?.length > 1 && links.slice(1).map(({ url }) => (
+            <ListBoxItem
+              key={url}
+              label={url}
+              textValue={url}
+              leftContent={<ArrowTopRightIcon />}
+            />
+          ))}
           {SHORTCUTS.map(({ url, label, icon }) => (
             <ListBoxItem
               key={url}
