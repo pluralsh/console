@@ -1,6 +1,11 @@
 import React, { useContext, useState } from 'react'
 
-import { A, Div, Flex } from 'honorable'
+import {
+  A,
+  Div,
+  Flex,
+  Span,
+} from 'honorable'
 
 import { theme } from 'pluralsh-design-system'
 
@@ -28,6 +33,7 @@ export function Breadcrumbs() {
           <A
             href={crumb.url}
             color="text-xlight"
+            _hover={{ color: 'text' }}
           >
             {crumb.text}
           </A>
@@ -36,7 +42,7 @@ export function Breadcrumbs() {
       )
     }
 
-    return crumb.text
+    return <Span fontWeight={600}>{crumb.text}</Span>
   }))
 
   return (
