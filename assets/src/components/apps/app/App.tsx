@@ -1,12 +1,7 @@
 import { Flex } from 'honorable'
 import { Tab, TabList, TabPanel } from 'pluralsh-design-system'
 
-import {
-  Key,
-  useContext,
-  useRef,
-  useState,
-} from 'react'
+import { useContext, useRef } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 
 import { InstallationContext } from 'components/Installations'
@@ -39,12 +34,9 @@ export default function App() {
   const { me }: any = useContext(LoginContext)
   const { pathname } = useLocation()
   const tabStateRef = useRef<any>(null)
-  const [selectedKey, setSelectedKey] = useState<Key>('lions')
   const { currentApplication }: any = useContext(InstallationContext)
   const pathPrefix = `/apps/${currentApplication.name}`
   const currentTab = DIRECTORY.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
-
-  console.log(currentTab)
 
   if (!me || !currentApplication) return null
 
@@ -65,7 +57,7 @@ export default function App() {
         >
           {DIRECTORY.map(({ label, path }, i) => (
             <Tab
-              key={i}
+              key={path}
               as={Link}
               to={path}
               textDecoration="none"
