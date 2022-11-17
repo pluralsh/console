@@ -74,7 +74,7 @@ export default function Apps() {
       >
         {applications
           .filter(app => !query || app.name.startsWith(query)) // TODO: Use better search method.
-          .filter(app => !filter || appState(app).readiness === filter) // TODO: Improve performance.
+          .filter(app => !filter || appState(app).readiness === filter) // TODO: Add cache.
           .map(app => (
             <App
               key={app.name}

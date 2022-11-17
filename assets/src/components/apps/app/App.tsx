@@ -27,7 +27,7 @@ const DIRECTORY = [
   //       {OPTIONS.map(({ text, icon, path, name: sbName, git }, ind) => {
     //         if (git && !conf.gitStatus.cloned) return null
     //       })}
-    // TODO: Cost analysis?
+  { path: 'cost', label: 'Cost analysis' },
 ]
 
 export default function App() {

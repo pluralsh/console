@@ -215,7 +215,6 @@ export default function Console() {
                   <Box
                     fill
                     direction="column"
-                    overflow="auto"
                   >
                     <ConsoleSubheader />
                     <Box
