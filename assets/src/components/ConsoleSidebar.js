@@ -20,6 +20,7 @@ import { useContext } from 'react'
 import { Flex } from 'honorable'
 
 import { LoginContext } from './contexts'
+import { Notifications } from './users/Notifications'
 
 export const SIDEBAR_ICON_HEIGHT = '42px'
 
@@ -86,6 +87,12 @@ export default function ConsoleSidebar() {
           href="https://github.com/pluralsh/plural"
         >
           <GitHubLogoIcon />
+        </SidebarItem>
+        <SidebarItem
+          clickable
+          tooltip="Notifications"
+        >
+          <Notifications />
         </SidebarItem>
         <SidebarItem
           clickable

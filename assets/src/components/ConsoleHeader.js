@@ -19,7 +19,6 @@ import { LoginContext } from './contexts'
 import { Installations } from './Installations'
 
 import { Installer } from './repos/Installer'
-import { Notifications } from './users/Notifications'
 
 const APP_ICON = `${process.env.PUBLIC_URL}/console-logo-white.png`
 
@@ -96,7 +95,6 @@ export default function ConsoleHeader() {
         {open && <Installer setOpen={setOpen} />}
         <Installations />
         <AutoRefresh />
-        <Notifications />
       </Flex>
     </Div>
 

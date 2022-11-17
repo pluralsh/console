@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Eye, Notification } from 'forge-core'
+import { Eye } from 'forge-core'
 import { Box, Stack, Text } from 'grommet'
 
 import {
@@ -15,6 +15,8 @@ import {
   useSubscription,
 } from '@apollo/react-hooks'
 
+import { BellIcon } from 'pluralsh-design-system'
+
 import { FlyoutContainer } from '../Console'
 import { ME_Q, NOTIFICATIONS_Q } from '../graphql/users'
 import { StandardScroller } from '../utils/SmoothScroller'
@@ -22,13 +24,9 @@ import { extendConnection, updateCache } from '../../utils/graphql'
 import { ApplicationIcon, InstallationContext } from '../Installations'
 import { SeverityNub } from '../runbooks/StatusIcon'
 
-import { Tooltip } from '../utils/Tooltip'
-
 import { LoginContext } from '../contexts'
 
 import { MARK_READ, NOTIFS_SUB } from './queries'
-
-const SIZE = '35px'
 
 function NotificationRow({ notif }) {
   const { applications, setCurrentApplication } = useContext(InstallationContext)
@@ -139,7 +137,6 @@ export function Notifications() {
   const dropRef = useRef()
   const client = useApolloClient()
   const [open, setOpen] = useState(false)
-  const [hover, setHover] = useState(false)
   const [all, setAll] = useState(false)
   const { me } = useContext(LoginContext)
   const [mutation] = useMutation(MARK_READ, {
@@ -170,18 +167,11 @@ export function Notifications() {
         <Box
           ref={dropRef}
           flex={false}
-          width={SIZE}
-          height={SIZE}
-          round="full"
-          background="backgroundColor"
           align="center"
           justify="center"
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
-          hoverIndicator="sidebarHover"
           onClick={() => setOpen(true)}
         >
-          <Notification size="18px" />
+          <BellIcon />
         </Box>
         {me.unreadNotifications > 0 && (
           <Box
@@ -198,24 +188,6 @@ export function Notifications() {
           </Box>
         )}
       </Stack>
-      {hover && (
-        <Tooltip
-          pad="small"
-          round="xsmall"
-          justify="center"
-          background="sidebarHover"
-          target={dropRef}
-          side="right"
-          align={{ top: 'bottom' }}
-          margin="xsmall"
-        >
-          <Text
-            size="small"
-            weight={500}
-          >Notifications
-          </Text>
-        </Tooltip>
-      )}
       {open && (
         <FlyoutContainer
           width="500px"
