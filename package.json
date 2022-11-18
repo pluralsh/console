@@ -82,7 +82,7 @@
     "eslint-plugin-storybook": "0.6.7",
     "fuse.js": "6.6.2",
     "honorable": "0.151.0",
-    "honorable-theme-default": "0.66.0",
+    "honorable-theme-default": "0.67.0",
     "jest-mock": "29.3.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
