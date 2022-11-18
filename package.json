@@ -68,6 +68,7 @@
     "@storybook/addon-essentials": "7.0.0-alpha.50",
     "@storybook/addon-interactions": "7.0.0-alpha.50",
     "@storybook/addon-links": "7.0.0-alpha.50",
+    "@storybook/builder-vite": "7.0.0-alpha.50",
     "@storybook/node-logger": "7.0.0-alpha.50",
     "@storybook/preset-create-react-app": "4.1.2",
     "@storybook/react": "7.0.0-alpha.50",
