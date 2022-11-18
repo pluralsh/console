@@ -56,6 +56,6 @@ For Mac Machines, if unable to download Erlang via `asdf` then run:
 
 ```sh
 brew install erlang@23
-cp -r /opt/homebrew/opt/erlang@23/lib/erlang ~/.asdf/installs/erlang/23.1.5
-asdf reshim erlang 23.1.5
+cp -r /opt/homebrew/opt/erlang@23/lib/erlang ~/.asdf/installs/erlang/23.3
+asdf reshim erlang 23.3
 ```

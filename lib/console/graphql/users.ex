@@ -2,9 +2,11 @@ defmodule Console.GraphQl.Users do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.User
   alias Console.Middleware.{Authenticated, AdminRequired, AllowJwt}
+  alias Console.Schema.Notification.{Severity, Status}
 
   enum_from_list :permission, Console.Schema.Role, :permissions, []
-  ecto_enum :severity, Console.Schema.Notification.Severity
+  ecto_enum :severity, Severity
+  ecto_enum :notification_status, Status
 
   input_object :user_attributes do
     field :name,     :string
@@ -119,6 +121,7 @@ defmodule Console.GraphQl.Users do
     field :title,       non_null(:string)
     field :description, :string
     field :fingerprint, non_null(:string)
+    field :status,      :notification_status
     field :labels,      :map
     field :annotations, :map
     field :repository,  non_null(:string)
