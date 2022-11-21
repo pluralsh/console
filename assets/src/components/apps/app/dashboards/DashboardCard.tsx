@@ -16,7 +16,7 @@ export default function DashboardCard({ name, description }: {name: string, desc
       display="flex"
       flexGrow={1}
       flexShrink={1}
-      marginVertical="xsmall"
+      marginBottom="small"
       minWidth={240}
       onClick={() => {
         navigate('/') // TODO: Update.
