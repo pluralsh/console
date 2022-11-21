@@ -105,6 +105,7 @@ export default function App() {
         <Flex
           gap="medium"
           direction="column"
+          marginTop={validLinks?.length > 0 ? 0 : 56}
           paddingTop="xsmall"
         >
           <PropsContainer title="metadata">
