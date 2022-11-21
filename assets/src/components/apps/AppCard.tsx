@@ -18,6 +18,8 @@ import {
 import { useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { toAbsoluteURL } from 'utils/url'
+
 import AppBorder from './AppBorder'
 
 import AppStatus from './AppStatus'
@@ -44,6 +46,7 @@ export default function AppCard({ application, setCurrentApplication }: any) {
   if (!application?.spec?.descriptor) return null
 
   const { name, spec: { descriptor: { links, version } } } = application
+  const validLinks = links?.filter(({ url }) => !!url)
 
   return (
     <Card
@@ -91,14 +94,14 @@ export default function AppCard({ application, setCurrentApplication }: any) {
         gap="16px"
         padding="medium"
       >
-        {links?.length > 0 && links[0].url && (
+        {validLinks?.length > 0 && (
           <Button
             small
             secondary
             fontWeight={600}
             endIcon={<ArrowTopRightIcon size={14} />}
             as="a"
-            href={`//${links[0].url}`}
+            href={toAbsoluteURL(links[0].url)}
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}
@@ -123,10 +126,10 @@ export default function AppCard({ application, setCurrentApplication }: any) {
           onSelectionChange={url => {
             setCurrentApplication(application)
             if (isShortcut(url)) navigate(`apps/${application.name}/${url}`)
-            else window.open(`${url}`, '_blank')?.focus()
+            else window.open(toAbsoluteURL(`${url}`), '_blank')?.focus()
           }}
         >
-          {links?.length > 1 && links.slice(1).map(({ url }) => (
+          {validLinks?.length > 1 && validLinks.slice(1).map(({ url }) => (
             <ListBoxItem
               key={`${url}`}
               label={url}

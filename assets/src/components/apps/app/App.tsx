@@ -1,5 +1,11 @@
-import { Flex } from 'honorable'
-import { Tab, TabList, TabPanel } from '@pluralsh/design-system'
+import { A, Flex } from 'honorable'
+import {
+  ArrowTopRightIcon,
+  Button,
+  Tab,
+  TabList,
+  TabPanel,
+} from '@pluralsh/design-system'
 
 import { useContext, useRef } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
@@ -9,6 +15,8 @@ import { InstallationContext } from 'components/Installations'
 import { ResponsiveLayoutSidecarContainer } from 'components/layout/ResponsiveLayoutSidecarContainer'
 
 import { Prop, PropsContainer } from 'components/utils/props'
+
+import { toAbsoluteURL } from 'utils/url'
 
 import { ResponsiveLayoutSidenavContainer } from '../../layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from '../../layout/ResponsiveLayoutSpacer'
@@ -39,6 +47,9 @@ export default function App() {
   const currentTab = DIRECTORY.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
 
   if (!me || !currentApplication) return null
+
+  const { name, spec: { descriptor: { links, version } } } = currentApplication
+  const validLinks = links?.filter(({ url }) => !!url)
 
   return (
     <Flex
@@ -75,14 +86,45 @@ export default function App() {
         <Outlet />
       </TabPanel>
       <ResponsiveLayoutSidecarContainer width="200px">
+        {validLinks?.length > 0 && (
+          <Button
+            small
+            secondary
+            fontWeight={600}
+            marginVertical="small"
+            endIcon={<ArrowTopRightIcon size={14} />}
+            as="a"
+            href={toAbsoluteURL(links[0].url)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+          >
+            Launch {name}
+          </Button>
+        )}
         <Flex
           gap="medium"
           direction="column"
           paddingTop="xsmall"
         >
           <PropsContainer title="metadata">
-            <Prop title="Current version">v{currentApplication?.spec?.descriptor?.version}</Prop>
+            <Prop title="Current version">v{version}</Prop>
             <Prop title="Status"><AppStatus application={currentApplication} /></Prop>
+            {validLinks?.length > 1 && (
+              <Prop title="Other links">
+                {validLinks.slice(1).map(({ url }) => (
+                  <A
+                    inline
+                    href={toAbsoluteURL(url)}
+                    as="a"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {url}
+                  </A>
+                ))}
+              </Prop>
+            )}
           </PropsContainer>
         </Flex>
       </ResponsiveLayoutSidecarContainer>
