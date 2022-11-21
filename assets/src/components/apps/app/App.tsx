@@ -26,6 +26,8 @@ import { LoginContext } from '../../contexts'
 
 import AppStatus from '../AppStatus'
 
+import AppSelector from './AppSelector'
+
 const DIRECTORY = [
   { path: 'dashboards', label: 'Dashboards' },
   { path: 'runbooks', label: 'Runbooks' },
@@ -59,6 +61,7 @@ export default function App() {
       padding="large"
     >
       <ResponsiveLayoutSidenavContainer width={240}>
+        <AppSelector />
         <TabList
           stateRef={tabStateRef}
           stateProps={{
