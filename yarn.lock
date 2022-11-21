@@ -4422,12 +4422,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/mdx2-csf@npm:next":
-  version: 0.1.0-next.5
-  resolution: "@storybook/mdx2-csf@npm:0.1.0-next.5"
+"@storybook/mdx2-csf@npm:0.1.0-next.6":
+  version: 0.1.0-next.6
+  resolution: "@storybook/mdx2-csf@npm:0.1.0-next.6"
   dependencies:
-    loader-utils: ^2.0.0
-  checksum: e04ba4fd7312d165a0aea130477a283f40c4290c17ebb9ec7bd1e69fba66ae6c63a029d8ca4c421fa5abbad60fd261fc5009b1413c80e9e802fbc20986f3d0ab
+    loader-utils: ^2.0.4
+  checksum: 3a7f252620ffc0bd2a83ba4e9c01645c1c9aae0f3922699d4e84b1343f0c79d77b631b658b9acc0de79bc29af71551d5ba616bd7c534a8a5e092d6141cf26a0c
   languageName: node
   linkType: hard
 
@@ -10841,14 +10841,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loader-utils@npm:^2.0.0":
-  version: 2.0.2
-  resolution: "loader-utils@npm:2.0.2"
+"loader-utils@npm:^2.0.4":
+  version: 2.0.4
+  resolution: "loader-utils@npm:2.0.4"
   dependencies:
     big.js: ^5.2.2
     emojis-list: ^3.0.0
     json5: ^2.1.2
-  checksum: 9078d1ed47cadc57f4c6ddbdb2add324ee7da544cea41de3b7f1128e8108fcd41cd3443a85b7ee8d7d8ac439148aa221922774efe4cf87506d4fb054d5889303
+  checksum: a5281f5fff1eaa310ad5e1164095689443630f3411e927f95031ab4fb83b4a98f388185bb1fe949e8ab8d4247004336a625e9255c22122b815bb9a4c5d8fc3b7
   languageName: node
   linkType: hard
 
