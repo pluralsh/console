@@ -1,7 +1,7 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
 import { InstallationContext } from 'components/Installations'
 import { ThemeContext } from 'grommet'
-import { Div, Flex, Span } from 'honorable'
+import { Div, Span } from 'honorable'
 import { useContext } from 'react'
 
 import { getIcon, hasIcons } from '../misc'
