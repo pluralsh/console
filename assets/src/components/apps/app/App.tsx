@@ -52,7 +52,7 @@ export default function App() {
   const { appName } = useParams()
   const { applications }: any = useContext(InstallationContext)
   const pathPrefix = `/apps/${appName}`
-  const currentApp = applications.find(app => app.name = appName)
+  const currentApp = applications.find(app => app.name === appName)
 
   if (!me || !currentApp) return null
 

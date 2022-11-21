@@ -1,12 +1,13 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
 import { ThemeContext } from 'grommet'
 import { Div, Span } from 'honorable'
-import { useContext } from 'react'
+import { Key, useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { getIcon, hasIcons } from '../misc'
 
 export default function AppSelector({ applications, currentApp }) {
+  const [selectedKey, setSelectedKey] = useState<Key>(currentApp.name)
   const { dark }: any = useContext(ThemeContext)
   const navigate = useNavigate()
 
@@ -25,8 +26,11 @@ export default function AppSelector({ applications, currentApp }) {
           />
         ) : undefined}
         width={240}
-        selectedKey={currentApp.name}
-        onSelectionChange={appName => navigate(`/apps/${appName}`)}
+        selectedKey={selectedKey}
+        onSelectionChange={appName => {
+          setSelectedKey(appName)
+          navigate(`/apps/${appName}`)
+        }}
       >
         {applications.map(app => (
           <ListBoxItem
