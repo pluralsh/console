@@ -1,5 +1,4 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { InstallationContext } from 'components/Installations'
 import { DashboardIcon, EmptyState, PageTitle } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useQuery } from 'react-apollo'
@@ -7,21 +6,23 @@ import { DASHBOARDS_Q } from 'components/graphql/dashboards'
 
 import { A, Div, Flex } from 'honorable'
 
+import { useParams } from 'react-router-dom'
+
 import DashboardCard from './DashboardCard'
 
 export default function Dashboards() {
-  const { currentApplication }: any = useContext(InstallationContext)
+  const { appName } = useParams()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
   const { data } = useQuery(DASHBOARDS_Q, {
-    variables: { repo: currentApplication.name },
+    variables: { repo: appName },
     fetchPolicy: 'cache-and-network',
   })
 
   useEffect(() => setBreadcrumbs([
     { text: 'Apps', url: '/' },
-    { text: currentApplication.name, url: `/apps/${currentApplication.name}` },
-    { text: 'Dashboards', url: `/apps/${currentApplication.name}/dashboards` },
-  ]), [currentApplication, setBreadcrumbs])
+    { text: appName, url: `/apps/${appName}` },
+    { text: 'Dashboards', url: `/apps/${appName}/dashboards` },
+  ]), [appName, setBreadcrumbs])
 
   if (!data) return null
 

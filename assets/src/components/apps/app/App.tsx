@@ -8,7 +8,12 @@ import {
 } from '@pluralsh/design-system'
 
 import { useContext, useRef } from 'react'
-import { Link, Outlet, useLocation } from 'react-router-dom'
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useParams,
+} from 'react-router-dom'
 
 import { InstallationContext } from 'components/Installations'
 
@@ -41,16 +46,18 @@ const DIRECTORY = [
 ]
 
 export default function App() {
+  const tabStateRef = useRef<any>(null)
   const { me }: any = useContext(LoginContext)
   const { pathname } = useLocation()
-  const tabStateRef = useRef<any>(null)
-  const { currentApplication }: any = useContext(InstallationContext)
-  const pathPrefix = `/apps/${currentApplication.name}`
+  const { appName } = useParams()
+  const { applications }: any = useContext(InstallationContext)
+  const pathPrefix = `/apps/${appName}`
+  const currentApp = applications.find(app => app.name = appName)
+
+  if (!me || !currentApp) return null
+
   const currentTab = DIRECTORY.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
-
-  if (!me || !currentApplication) return null
-
-  const { name, spec: { descriptor: { links, version } } } = currentApplication
+  const { name, spec: { descriptor: { links, version } } } = currentApp
   const validLinks = links?.filter(({ url }) => !!url)
 
   return (
@@ -61,7 +68,10 @@ export default function App() {
       padding="large"
     >
       <ResponsiveLayoutSidenavContainer width={240}>
-        <AppSelector />
+        <AppSelector
+          applications={applications}
+          currentApp={currentApp}
+        />
         <TabList
           stateRef={tabStateRef}
           stateProps={{
@@ -91,10 +101,10 @@ export default function App() {
       <ResponsiveLayoutSidecarContainer width="200px">
         {validLinks?.length > 0 && (
           <Button
-            small
             secondary
             fontWeight={600}
-            marginVertical="small"
+            marginTop="xxsmall"
+            marginBottom="small"
             endIcon={<ArrowTopRightIcon size={14} />}
             as="a"
             href={toAbsoluteURL(links[0].url)}
@@ -113,7 +123,7 @@ export default function App() {
         >
           <PropsContainer>
             <Prop title="Current version">v{version}</Prop>
-            <Prop title="Status"><AppStatus application={currentApplication} /></Prop>
+            <Prop title="Status"><AppStatus app={currentApp} /></Prop>
             {validLinks?.length > 1 && (
               <Prop title="Other links">
                 {validLinks.slice(1).map(({ url }) => (

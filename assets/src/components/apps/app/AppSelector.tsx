@@ -1,14 +1,14 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
-import { InstallationContext } from 'components/Installations'
 import { ThemeContext } from 'grommet'
 import { Div, Span } from 'honorable'
 import { useContext } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { getIcon, hasIcons } from '../misc'
 
-export default function AppSelector() {
-  const { applications, currentApplication }: any = useContext(InstallationContext)
+export default function AppSelector({ applications, currentApp }) {
   const { dark }: any = useContext(ThemeContext)
+  const navigate = useNavigate()
 
   return (
     <Div
@@ -18,15 +18,15 @@ export default function AppSelector() {
     >
       <Select
         aria-label="app"
-        leftContent={hasIcons(currentApplication) ? (
+        leftContent={hasIcons(currentApp) ? (
           <img
-            src={getIcon(currentApplication, dark)}
+            src={getIcon(currentApp, dark)}
             height={16}
           />
         ) : undefined}
         width={240}
-        selectedKey={currentApplication.name}
-        label={<>{currentApplication.name} asd</>}
+        selectedKey={currentApp.name}
+        onSelectionChange={appName => navigate(`/apps/${appName}`)}
       >
         {applications.map(app => (
           <ListBoxItem

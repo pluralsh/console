@@ -1,17 +1,17 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { InstallationContext } from 'components/Installations'
 import { PageTitle } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 
 export default function Runbooks() {
-  const { currentApplication }: any = useContext(InstallationContext)
+  const { appName } = useParams()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
 
   useEffect(() => setBreadcrumbs([
     { text: 'Apps', url: '/' },
-    { text: currentApplication.name, url: `/apps/${currentApplication.name}` },
-    { text: 'Runbooks', url: `/apps/${currentApplication.name}/runbooks` },
-  ]), [currentApplication, setBreadcrumbs])
+    { text: appName, url: `/apps/${appName}` },
+    { text: 'Runbooks', url: `/apps/${appName}/runbooks` },
+  ]), [appName, setBreadcrumbs])
 
   return (
     <PageTitle heading="Runbooks" />

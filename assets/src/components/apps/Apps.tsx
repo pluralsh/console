@@ -9,6 +9,7 @@ import {
   EmptyState,
   Input,
   LifePreserverIcon,
+  LoopingLogo,
   MagnifyingGlassIcon,
   PageTitle,
   SourcererIcon,
@@ -113,17 +114,20 @@ function PendingFailedEmptyState({ filter }) {
 }
 
 export default function Apps() {
-  const { applications, setCurrentApplication }: any = useContext(InstallationContext)
+  const { applications }: any = useContext(InstallationContext)
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('')
   const tabStateRef = useRef<any>(null)
+
+  useEffect(() => setBreadcrumbs([{ text: 'Apps', url: '/' }]), [setBreadcrumbs])
+
+  if (!applications) return <LoopingLogo />
+
   const filteredApps = applications
     .filter(app => !query || app.name.startsWith(query)) // TODO: Use better search method.
     .filter(app => !filter || appState(app).readiness === filter) // TODO: Add cache.
   const noFilteredApps = filteredApps?.length < 1
-
-  useEffect(() => setBreadcrumbs([{ text: 'Apps', url: '/' }]), [setBreadcrumbs])
 
   return (
     <Div fill>
@@ -167,8 +171,7 @@ export default function Apps() {
         {!noFilteredApps && filteredApps.map(app => (
           <App
             key={app.name}
-            application={app}
-            setCurrentApplication={setCurrentApplication}
+            app={app}
           />
         ))}
         {!noFilteredApps && (

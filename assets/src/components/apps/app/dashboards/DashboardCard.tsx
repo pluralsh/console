@@ -18,9 +18,7 @@ export default function DashboardCard({ name, description }: {name: string, desc
       flexShrink={1}
       marginBottom="small"
       minWidth={240}
-      onClick={() => {
-        navigate('/') // TODO: Update.
-      }}
+      onClick={() => navigate('/')} // TODO: Update.
     >
       <Flex
         align="center"

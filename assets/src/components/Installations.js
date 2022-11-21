@@ -1,9 +1,4 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import {
   Box,
   Layer,
@@ -20,10 +15,10 @@ import {
 import { useQuery } from 'react-apollo'
 
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
-import { LoopingLogo } from './utils/AnimatedLogo'
 import { CostBreakdown } from './repos/CostAnalysis'
 import { Icon } from './Console'
 import { OIDCProvider } from './oidc/OIDCProvider'
+import { LoopingLogo } from './utils/AnimatedLogo'
 
 export const InstallationContext = React.createContext({})
 
@@ -166,51 +161,21 @@ function applyDelta(prev, { delta, payload }) {
 }
 
 export function InstallationsProvider({ children }) {
-  const [open, setOpen] = useState(false)
-  const [currentApplication, setCurrentApplication] = useState(null)
-  const [{ func: onChange }, setOnChange] = useState({ func: () => null })
   const { data, subscribeToMore } = useQuery(APPLICATIONS_Q, { pollInterval: 120_000 })
-  const wrapped = useCallback(application => {
-    sessionStorage.setItem('currentApplication', application.name)
-    setCurrentApplication(application)
-    if (application) onChange(application)
-  }, [onChange, setCurrentApplication])
 
-  useEffect(() => {
-    if (!currentApplication && data && data.applications) {
-      setCurrentApplication(data.applications[0])
-    }
-  }, [data, currentApplication, setCurrentApplication])
   useEffect(() => subscribeToMore({
     document: APPLICATION_SUB,
     updateQuery: (prev, { subscriptionData: { data } }) => (data ? applyDelta(prev, data.applicationDelta) : prev),
   }), [])
 
-  if (!currentApplication) {
-    return (
-      <Box
-        width="100vw"
-        height="100vh"
-      >
-        <LoopingLogo dark />
-      </Box>
-    )
-  }
-  const lastSessionApplication = data && data.applications.find(({ name }) => name === sessionStorage.getItem('currentApplication'))
-  const current = lastSessionApplication || currentApplication && data && data.applications.find(({ name }) => name === currentApplication.name)
+  if (!data) return <LoopingLogo />
 
   return (
     <InstallationContext.Provider
       // eslint-disable-next-line react/jsx-no-constructed-context-values
       value={{
-        currentApplication: current,
-        setCurrentApplication: wrapped,
-        setCurrentUnsafe: setCurrentApplication,
-        applications: data && data.applications,
-        onChange,
-        setOnChange,
-        open,
-        setOpen,
+        applications: data?.applications,
+        currentApplication: { name: 'mock', spec: { descriptor: { links: [] } } }, // TODO: Remove.
       }}
     >
       {children}

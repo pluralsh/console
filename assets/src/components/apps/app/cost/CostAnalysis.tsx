@@ -1,17 +1,17 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { InstallationContext } from 'components/Installations'
 import { PageTitle } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 
 export default function CostAnalysis() {
-  const { currentApplication }: any = useContext(InstallationContext)
+  const { appName } = useParams()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
 
   useEffect(() => setBreadcrumbs([
     { text: 'Apps', url: '/' },
-    { text: currentApplication.name, url: `/apps/${currentApplication.name}` },
-    { text: 'Cost analysis', url: `/apps/${currentApplication.name}/cost` },
-  ]), [currentApplication, setBreadcrumbs])
+    { text: appName, url: `/apps/${appName}` },
+    { text: 'Cost analysis', url: `/apps/${appName}/cost` },
+  ]), [appName, setBreadcrumbs])
 
   return (
     <PageTitle heading="Cost analysis" />

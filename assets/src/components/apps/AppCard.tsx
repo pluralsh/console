@@ -39,13 +39,13 @@ const SHORTCUT_URLS = SHORTCUTS.map(shortcut => shortcut.url)
 
 const isShortcut = url => SHORTCUT_URLS.indexOf(url) > -1
 
-export default function AppCard({ application, setCurrentApplication }: any) {
+export default function AppCard({ app }: any) {
   const navigate = useNavigate()
   const { dark }: any = useContext(ThemeContext)
 
-  if (!application?.spec?.descriptor) return null
+  if (!app?.spec?.descriptor) return null
 
-  const { name, spec: { descriptor: { links, version } } } = application
+  const { name, spec: { descriptor: { links, version } } } = app
   const validLinks = links?.filter(({ url }) => !!url)
 
   return (
@@ -57,21 +57,18 @@ export default function AppCard({ application, setCurrentApplication }: any) {
       flexShrink={1}
       margin="xsmall"
       minWidth={240}
-      onClick={() => {
-        setCurrentApplication(application) // TODO: Consider removing this context.
-        navigate(`/apps/${application.name}`)
-      }}
+      onClick={() => navigate(`/apps/${name}`)}
     >
-      <AppBorder app={application} />
+      <AppBorder app={app} />
       <Flex
         align="center"
         gap="small"
         maxWidth="90%"
         padding="medium"
       >
-        {hasIcons(application) && (
+        {hasIcons(app) && (
           <AppIcon
-            url={getIcon(application, dark)}
+            url={getIcon(app, dark)}
             size="xsmall"
           />
         )}
@@ -83,7 +80,7 @@ export default function AppCard({ application, setCurrentApplication }: any) {
             >
               {name}
             </P>
-            <AppStatus application={application} />
+            <AppStatus app={app} />
           </Flex>
           {version && <Flex>v{version}</Flex>}
         </Flex>
@@ -123,11 +120,9 @@ export default function AppCard({ application, setCurrentApplication }: any) {
               <MoreIcon />
             </Button>
           )}
-          onSelectionChange={url => {
-            setCurrentApplication(application)
-            if (isShortcut(url)) navigate(`apps/${application.name}/${url}`)
-            else window.open(toAbsoluteURL(`${url}`), '_blank')?.focus()
-          }}
+          onSelectionChange={url => (isShortcut(url)
+            ? navigate(`apps/${name}/${url}`)
+            : window.open(toAbsoluteURL(`${url}`), '_blank')?.focus())}
         >
           {validLinks?.length > 1 && validLinks.slice(1).map(({ url }) => (
             <ListBoxItem

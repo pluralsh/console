@@ -1,8 +1,8 @@
 import { Readiness, appState } from 'components/Application'
 import { Chip } from '@pluralsh/design-system'
 
-export default function AppStatus({ application }) { // TODO: Verify statuses.
-  const { readiness } = appState(application)
+export default function AppStatus({ app }) { // TODO: Verify statuses.
+  const { readiness } = appState(app)
 
   switch (readiness) {
   case Readiness.Ready:
