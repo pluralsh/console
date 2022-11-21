@@ -1,7 +1,7 @@
-import { AppIcon, ListBoxItem, Select } from '@pluralsh/design-system'
+import { ListBoxItem, Select } from '@pluralsh/design-system'
 import { InstallationContext } from 'components/Installations'
 import { ThemeContext } from 'grommet'
-import { Div } from 'honorable'
+import { Div, Flex, Span } from 'honorable'
 import { useContext } from 'react'
 
 import { getIcon, hasIcons } from '../misc'
@@ -26,11 +26,26 @@ export default function AppSelector() {
         ) : undefined}
         width={240}
         selectedKey={currentApplication.name}
+        label={<>{currentApplication.name} asd</>}
       >
         {applications.map(app => (
           <ListBoxItem
             key={app.name}
-            label={app.name}
+            label={(
+              <>
+                <Span>{app.name}</Span>
+                {app.spec?.descriptor?.version
+                && (
+                  <Span
+                    caption
+                    color="text-xlight"
+                    marginLeft="small"
+                  >
+                    v{app.spec.descriptor.version}
+                  </Span>
+                )}
+              </>
+            )}
             textValue={app.name}
             leftContent={hasIcons(app) ? (
               <img
