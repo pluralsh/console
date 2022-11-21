@@ -108,7 +108,7 @@ export default function App() {
           marginTop={validLinks?.length > 0 ? 0 : 56}
           paddingTop="xsmall"
         >
-          <PropsContainer title="metadata">
+          <PropsContainer>
             <Prop title="Current version">v{version}</Prop>
             <Prop title="Status"><AppStatus application={currentApplication} /></Prop>
             {validLinks?.length > 1 && (
