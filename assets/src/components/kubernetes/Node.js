@@ -36,8 +36,9 @@ import { normalizeColor } from 'grommet/utils'
 
 import { Line } from 'rc-progress'
 
+import { format } from 'components/apps/app/dashboards/dashboard/Dashboard'
+
 import { cpuParser } from '../../utils/kubernetes'
-import { format } from '../Dashboard'
 import { Graph } from '../utils/Graph'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { Readiness, ReadyIcon } from '../Application'

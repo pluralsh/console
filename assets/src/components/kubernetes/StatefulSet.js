@@ -12,7 +12,7 @@ import { useParams } from 'react-router-dom'
 
 import { useIntercom } from 'react-use-intercom'
 
-import { DURATIONS, RangePicker } from '../Dashboard'
+import { DURATIONS, RangePicker } from 'components/apps/app/dashboards/dashboard/Dashboard'
 
 import { LoopingLogo } from '../utils/AnimatedLogo'
 

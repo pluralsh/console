@@ -31,8 +31,9 @@ export default function Dashboards() {
   return (
     <Flex direction="column">
       <PageTitle heading="Dashboards" />
-      {dashboards.map(({ spec: { name, description } }) => (
+      {dashboards.map(({ id, spec: { name, description } }) => (
         <DashboardCard
+          id={id}
           name={name}
           description={description}
         />

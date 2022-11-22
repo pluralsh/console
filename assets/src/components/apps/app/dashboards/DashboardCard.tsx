@@ -5,10 +5,11 @@ import {
   DashboardIcon,
   IconFrame,
 } from '@pluralsh/design-system'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
-export default function DashboardCard({ name, description }: {name: string, description: string}) {
+export default function DashboardCard({ id, name, description }: {id: string, name: string, description: string}) {
   const navigate = useNavigate()
+  const { appName } = useParams()
 
   return (
     <Card
@@ -18,7 +19,7 @@ export default function DashboardCard({ name, description }: {name: string, desc
       flexShrink={1}
       marginBottom="small"
       minWidth={240}
-      onClick={() => navigate('/')} // TODO: Update.
+      onClick={() => navigate(`/apps/${appName}/dashboards/${id}`)}
     >
       <Flex
         align="center"

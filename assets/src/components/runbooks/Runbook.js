@@ -13,12 +13,12 @@ import { Box, Text } from 'grommet'
 
 import { Portal } from 'react-portal'
 
+import { DURATIONS, RangePicker } from 'components/apps/app/dashboards/dashboard/Dashboard'
+
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 
 import { useEnsureCurrent } from '../Installations'
-
-import { DURATIONS, RangePicker } from '../Dashboard'
 
 import { Display } from './Display'
 import { RUNBOOK_Q } from './queries'

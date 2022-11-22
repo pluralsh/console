@@ -33,7 +33,6 @@ import fileDownload from 'js-file-download'
 
 import { fetchToken } from '../helpers/auth'
 
-import { DashboardHeader } from './Dashboards'
 import { LOGS_Q } from './graphql/dashboards'
 
 import { BreadcrumbsContext } from './Breadcrumbs'
@@ -595,6 +594,18 @@ function Downloader({ query, repo }) {
           </Text>
         </Box>
       ))}
+    </Box>
+  )
+}
+
+export function DashboardHeader({ name, label }) {
+  return (
+    <Box gap="xxsmall">
+      <Text
+        weight="bold"
+        size="small"
+      >{name} {label}
+      </Text>
     </Box>
   )
 }
