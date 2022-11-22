@@ -30,7 +30,6 @@ import App from './AppCard'
 const FILTERS = [
   { key: '', label: 'All' },
   { key: Readiness.Ready, label: 'Ready' },
-  { key: Readiness.Complete, label: 'Complete' },
   { key: Readiness.InProgress, label: 'Pending' },
   { key: Readiness.Failed, label: 'Failed' },
 ]

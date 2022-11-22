@@ -22,7 +22,6 @@ export const getBorderColor = app => { // TODO: Verify statuses.
   case Readiness.InProgress:
     return 'border-warning'
   case Readiness.Ready:
-  case Readiness.Complete:
   default:
     return undefined
   }

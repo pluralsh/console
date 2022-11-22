@@ -17,15 +17,6 @@ export default function AppStatus({ app }) { // TODO: Verify statuses.
         Ready
       </Chip>
     )
-  case Readiness.Complete:
-    return (
-      <Chip
-        size="small"
-        severity="success"
-      >
-        Complete
-      </Chip>
-    )
   case Readiness.Failed:
     return (
       <Chip
