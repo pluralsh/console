@@ -1,10 +1,11 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { PageTitle } from '@pluralsh/design-system'
+import { PageTitle, SubTab, TabList } from '@pluralsh/design-system'
 import {
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import { useParams } from 'react-router-dom'
@@ -53,58 +54,32 @@ export function format(value, format) {
   }
 }
 
-function RangeOption({
-  duration, current, setDuration, first, last,
-}) {
-  const selected = duration === current
+export function RangePicker({ duration, setDuration }: any) {
+  const tabStateRef = useRef<any>(null)
+  const selectedKey = `${duration.offset}+${duration.step}`
 
   return (
-    <Box
-      round={(first || last) ? { corner: (first ? 'left' : 'right'), size: 'xsmall' } : undefined}
-      pad="small"
-      align="center"
-      justify="center"
-      focusIndicator={false}
-      background={selected ? 'cardHover' : undefined}
-      hoverIndicator="cardHover"
-      onClick={() => setDuration(duration)}
-    >
-      <Text
-        size="small"
-        weight={selected ? 'bold' : undefined}
-      >{duration.label}
-      </Text>
-    </Box>
-  )
-}
+    <TabList
+      stateRef={tabStateRef}
+      stateProps={{
+        orientation: 'horizontal',
+        selectedKey,
+        onSelectionChange: key => {
+          const dur = DURATIONS.find(d => key === `${d.offset}+${d.step}`)
 
-export function RangePicker({ duration, setDuration }) {
-  const count = DURATIONS.length
-
-  return (
-    <Box
-      round="xsmall"
-      background="card"
-      border={{ color: 'cardHover' }}
+          if (dur) setDuration(dur)
+        },
+      }}
     >
-      <Box
-        direction="row"
-        round="xsmall"
-        gap="0px"
-        // border={{ side: 'between', color: 'cardHover' }}
-      >
-        {DURATIONS.map((dur, ind) => (
-          <RangeOption
-            key={ind}
-            duration={dur}
-            current={duration}
-            first={ind === 0}
-            last={ind === count - 1}
-            setDuration={setDuration}
-          />
-        ))}
-      </Box>
-    </Box>
+      {DURATIONS.map(d => (
+        <SubTab
+          key={`${d.offset}+${d.step}`}
+          textValue={d.label}
+        >
+          {d.label}
+        </SubTab>
+      ))}
+    </TabList>
   )
 }
 
@@ -199,7 +174,14 @@ export default function Dashboard() {
 
   return (
     <Div>
-      <PageTitle heading="Dashboard" />
+      <PageTitle heading="Dashboard">
+        <Div margin={2}>
+          <RangePicker
+            duration={duration}
+            setDuration={setDuration}
+          />
+        </Div>
+      </PageTitle>
       <Box
         fill
         style={{ overflow: 'auto' }}
@@ -218,31 +200,17 @@ export default function Dashboard() {
               onSelect={value => setLabel(label.name, value)}
             />
           ))}
-          <RangePicker
-            duration={duration}
-            setDuration={setDuration}
-          />
         </Box>
         <Box
           fill
           pad={{ horizontal: 'small', bottom: 'small' }}
         >
-          {chunk(dashboard.spec.graphs, 2).map((chunk, ind) => (
-            <Box
-              flex={false}
-              key={ind}
-              direction="row"
-              gap="small"
-              margin={{ vertical: 'small' }}
-            >
-              {chunk.map((graph: any) => (
-                <DashboardGraph
-                  key={graph.name}
-                  graph={graph}
-                  tick={duration.tick}
-                />
-              ))}
-            </Box>
+          {dashboard.spec.graphs.map(graph => (
+            <DashboardGraph
+              key={graph.name}
+              graph={graph}
+              tick={duration.tick}
+            />
           ))}
         </Box>
       </Box>
