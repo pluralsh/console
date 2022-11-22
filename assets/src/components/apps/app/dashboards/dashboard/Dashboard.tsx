@@ -24,8 +24,6 @@ import { Graph } from 'components/utils/Graph'
 
 import filesize from 'filesize'
 
-// import { LoopingLogo } from '../../../../utils/AnimatedLogo'
-
 const HOUR = 60 * 60
 const DAY = 24 * HOUR
 
@@ -99,7 +97,7 @@ function DashboardGraph({ graph, tick }) {
       className="dashboard"
       padding="large"
       height={350}
-      minWidth="50%" // TODO: Fix wrapping.
+      width="100%"
     >
       <Div
         color="text-light"
@@ -181,12 +179,15 @@ export default function Dashboard() {
   }
 
   const { dashboard } = data
+  const filteredLabels = dashboard.spec.labels.filter(({ values }) => values.length > 0)
+
+  console.log(dashboard.spec.labels)
 
   return (
     <Div>
       <PageTitle heading="Dashboard">
         <Div margin={2}>
-          {dashboard.spec.labels.filter(({ values }) => values.length > 0).map(label => (
+          {filteredLabels.map(label => (
             <LabelSelect
               key={`${label.name}:${name}:${appName}`}
               label={label}
