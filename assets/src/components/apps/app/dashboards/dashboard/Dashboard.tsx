@@ -155,7 +155,7 @@ export default function Dashboard() {
     { text: 'Apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
     { text: 'Dashboards', url: `/apps/${appName}/dashboards` },
-    { text: name, url: `/apps/${appName}/dashboards/${name}` },
+    { text: name, url: `/apps/${appName}/dashboards/${name}` }, // TODO: Use real name as name and ID as ID.
   ]), [appName, name, setBreadcrumbs])
 
   useEffect(() => {
@@ -180,8 +180,6 @@ export default function Dashboard() {
 
   const { dashboard } = data
   const filteredLabels = dashboard.spec.labels.filter(({ values }) => values.length > 0)
-
-  console.log(dashboard.spec.labels)
 
   return (
     <Div>
