@@ -74,6 +74,8 @@ const SidecarButton = forwardRef<HTMLButtonElement, ButtonProps>(({ ...props }, 
   <Button
     ref={ref}
     tertiary
+    padding="none"
+    width="100%"
     {...props}
   />
 ))

@@ -2475,7 +2475,7 @@ __metadata:
     "@emotion/react": 11.10.5
     "@emotion/styled": 11.10.5
     "@floating-ui/react-dom-interactions": 0.11.0
-    "@pluralsh/eslint-config-typescript": 2.5.4
+    "@pluralsh/eslint-config-typescript": 2.5.5
     "@react-aria/button": 3.6.3
     "@react-aria/checkbox": 3.7.0
     "@react-aria/combobox": 3.4.3
@@ -2514,7 +2514,7 @@ __metadata:
     babel-loader: 9.1.0
     chroma-js: 2.4.2
     classnames: 2.3.2
-    eslint: 8.27.0
+    eslint: 8.28.0
     eslint-plugin-storybook: 0.6.7
     fuse.js: 6.6.2
     grommet: 2.27.0
@@ -2554,36 +2554,36 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@pluralsh/eslint-config-pluralsh@npm:1.4.2":
-  version: 1.4.2
-  resolution: "@pluralsh/eslint-config-pluralsh@npm:1.4.2"
+"@pluralsh/eslint-config-pluralsh@npm:1.4.3":
+  version: 1.4.3
+  resolution: "@pluralsh/eslint-config-pluralsh@npm:1.4.3"
   dependencies:
-    eslint: 8.27.0
+    eslint: 8.28.0
     eslint-config-airbnb: 19.0.4
     eslint-plugin-import: 2.26.0
     eslint-plugin-import-newlines: ^1.2.3
     eslint-plugin-jsx-a11y: 6.6.1
     eslint-plugin-react: 7.31.11
     eslint-plugin-react-hooks: 4.6.0
-  checksum: e25260457332663f60db1b7ee3d1f639326915eccf14b79e48e1db8701e6575868def783398e7bd3ad9c769487e78ff38457631170ad9fcbc7d7cce8a2dbeb5b
+  checksum: 365b0d885f6166b076c277cae58df69a5bb4ee4e7ee9eb986484fdddabcbcbae8c1f005faeead75ff5c9b8c9d6444b4de6d72582761adc35ff1cd9ba1d938b77
   languageName: node
   linkType: hard
 
-"@pluralsh/eslint-config-typescript@npm:2.5.4":
-  version: 2.5.4
-  resolution: "@pluralsh/eslint-config-typescript@npm:2.5.4"
+"@pluralsh/eslint-config-typescript@npm:2.5.5":
+  version: 2.5.5
+  resolution: "@pluralsh/eslint-config-typescript@npm:2.5.5"
   dependencies:
     "@babel/core": 7.20.2
     "@babel/eslint-parser": 7.19.1
     "@babel/preset-env": 7.20.2
     "@babel/preset-react": 7.18.6
-    "@pluralsh/eslint-config-pluralsh": 1.4.2
+    "@pluralsh/eslint-config-pluralsh": 1.4.3
     "@types/node": 18.11.9
     "@typescript-eslint/eslint-plugin": 5.43.0
     "@typescript-eslint/parser": 5.43.0
     eslint: 8.28.0
     typescript: 4.9.3
-  checksum: 6f6a7954fb637eb3f83f21cb50b4c38318a8aad5a194b05e27a8b7fb8ff103668f1eb3a8d146fb4032ee75513624cfc20879572a15454e22d8c9c4b7a24508d6
+  checksum: 41674cd4e7b5fa919661098cd331b6a009baa148ec8652031eb988eed86543f43306e7e3c12d387b417047d843df4b4c66a89cf9469a837d7a1496663968aec3
   languageName: node
   linkType: hard
 
@@ -8226,55 +8226,6 @@ __metadata:
   version: 3.3.0
   resolution: "eslint-visitor-keys@npm:3.3.0"
   checksum: d59e68a7c5a6d0146526b0eec16ce87fbf97fe46b8281e0d41384224375c4e52f5ffb9e16d48f4ea50785cde93f766b0c898e31ab89978d88b0e1720fbfb7808
-  languageName: node
-  linkType: hard
-
-"eslint@npm:8.27.0":
-  version: 8.27.0
-  resolution: "eslint@npm:8.27.0"
-  dependencies:
-    "@eslint/eslintrc": ^1.3.3
-    "@humanwhocodes/config-array": ^0.11.6
-    "@humanwhocodes/module-importer": ^1.0.1
-    "@nodelib/fs.walk": ^1.2.8
-    ajv: ^6.10.0
-    chalk: ^4.0.0
-    cross-spawn: ^7.0.2
-    debug: ^4.3.2
-    doctrine: ^3.0.0
-    escape-string-regexp: ^4.0.0
-    eslint-scope: ^7.1.1
-    eslint-utils: ^3.0.0
-    eslint-visitor-keys: ^3.3.0
-    espree: ^9.4.0
-    esquery: ^1.4.0
-    esutils: ^2.0.2
-    fast-deep-equal: ^3.1.3
-    file-entry-cache: ^6.0.1
-    find-up: ^5.0.0
-    glob-parent: ^6.0.2
-    globals: ^13.15.0
-    grapheme-splitter: ^1.0.4
-    ignore: ^5.2.0
-    import-fresh: ^3.0.0
-    imurmurhash: ^0.1.4
-    is-glob: ^4.0.0
-    is-path-inside: ^3.0.3
-    js-sdsl: ^4.1.4
-    js-yaml: ^4.1.0
-    json-stable-stringify-without-jsonify: ^1.0.1
-    levn: ^0.4.1
-    lodash.merge: ^4.6.2
-    minimatch: ^3.1.2
-    natural-compare: ^1.4.0
-    optionator: ^0.9.1
-    regexpp: ^3.2.0
-    strip-ansi: ^6.0.1
-    strip-json-comments: ^3.1.0
-    text-table: ^0.2.0
-  bin:
-    eslint: bin/eslint.js
-  checksum: 153b022d309e1b647a73b1bb0fa98912add699b06e279084155f23c6f2b5fc5abd05411fc1ba81608a24bbfaf044ca079544c16fffa6fc987b8f676c9960a2c4
   languageName: node
   linkType: hard
 
