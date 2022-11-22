@@ -7,6 +7,8 @@ import { normalizeColor } from 'grommet/utils'
 
 import { StatusCritical } from 'grommet-icons'
 
+import { Readiness } from 'utils/status'
+
 import { chunk } from '../utils/array'
 
 import { BreadcrumbsContext } from './Breadcrumbs'
@@ -21,13 +23,6 @@ import { BUILD_PADDING } from './Builds'
 import Icon from './kubernetes/Icon'
 import { Container } from './utils/Container'
 import { PulsyDiv } from './utils/animations'
-
-export const Readiness = {
-  Ready: 'Ready',
-  InProgress: 'InProgress',
-  Failed: 'Failed',
-  Complete: 'Complete',
-}
 
 export const ReadinessColor = {
   [Readiness.Ready]: 'success',

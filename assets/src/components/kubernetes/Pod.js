@@ -29,7 +29,9 @@ import filesize from 'filesize'
 
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { Readiness, ReadinessColor, ReadyIcon } from '../Application'
+import { Readiness } from 'utils/status'
+
+import { ReadinessColor, ReadyIcon } from '../Application'
 
 import { BreadcrumbsContext } from '../Breadcrumbs'
 

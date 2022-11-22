@@ -9143,6 +9143,7 @@ __metadata:
     phoenix: 1.5.13
     pluralsh-absinthe-socket-apollo-link: 0.2.0
     query-string: 7.1.1
+    randomcolor: 0.6.2
     rc-progress: 3.1.4
     react: 18.2.0
     react-ace: 10.1.0
@@ -18015,6 +18016,13 @@ __metadata:
   dependencies:
     safe-buffer: ^5.1.0
   checksum: d779499376bd4cbb435ef3ab9a957006c8682f343f14089ed5f27764e4645114196e75b7f6abf1cbd84fd247c0cb0651698444df8c9bf30e62120fbbc52269d6
+  languageName: node
+  linkType: hard
+
+"randomcolor@npm:0.6.2":
+  version: 0.6.2
+  resolution: "randomcolor@npm:0.6.2"
+  checksum: 539345c0289f7c52ffd8486e61231e19ccc40b1c4ab9c15594f20a2773b71a9317e0cc8b756160fc8a678ace9ed1e96a8ac90346b2c34c64dfd5acad91f9a73d
   languageName: node
   linkType: hard
 

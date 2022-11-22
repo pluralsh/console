@@ -1,4 +1,4 @@
-import { Readiness, appState } from 'components/Application'
+import { appState } from 'components/Application'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { InstallationContext } from 'components/Installations'
 import { A, Div, Flex } from 'honorable'
@@ -22,6 +22,8 @@ import {
   useRef,
   useState,
 } from 'react'
+
+import { Readiness } from 'utils/status'
 
 import App from './AppCard'
 

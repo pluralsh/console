@@ -41,7 +41,7 @@ import { format } from 'components/apps/app/dashboards/dashboard/Dashboard'
 import { cpuParser } from '../../utils/kubernetes'
 import { Graph } from '../utils/Graph'
 import { LoopingLogo } from '../utils/AnimatedLogo'
-import { Readiness, ReadyIcon } from '../Application'
+import { ReadyIcon } from '../Application'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 
 import { RawContent } from './Component'

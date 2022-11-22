@@ -3,7 +3,8 @@ import { ResponsiveLine } from '@nivo/line'
 import moment from 'moment'
 import { last } from 'lodash'
 import { Box, Text, ThemeContext } from 'grommet'
-import { normalizeColor } from 'grommet/utils'
+import { semanticColors } from '@pluralsh/design-system/dist/theme/colors'
+import { useColorMap } from 'utils/colors'
 
 export function dateFormat(date) {
   return moment(date).format('MM/DD h:mm:ss a')
@@ -61,45 +62,9 @@ function SliceTooltip({ point: { serieColor, serieId, data } }) {
   )
 }
 
-export const COLOR_MAP = [
-  'blue',
-  'orange',
-  'green',
-  'purple',
-  'red',
-
-  'blue-light',
-  'orange-light',
-  'green-light',
-  'purple-light',
-  'red-light',
-
-  'blue-dark',
-  'orange-dark',
-  'green-dark',
-  'purple-dark',
-  'red-dark',
-
-  'blue-light-2',
-  'orange-light-2',
-  'green-light-2',
-  'purple-light-2',
-  'red-light-2',
-
-  'blue-dark-2',
-  'orange-dark-2',
-  'green-dark-2',
-  'purple-dark-2',
-  'red-dark-2',
-]
-
-export function useColorMap(theme, colors) {
-  return useMemo(() => (colors || COLOR_MAP).map(c => normalizeColor(c, theme)), [theme, colors])
-}
-
 export function Graph({ data, yFormat, tickRotation }) {
   const theme = useContext(ThemeContext)
-  const colorMap = useColorMap(theme)
+  const colors = useColorMap(theme)
   const [selected, setSelected] = useState(null)
   const graph = useMemo(() => {
     if (data.find(({ id }) => id === selected)) {
@@ -115,33 +80,22 @@ export function Graph({ data, yFormat, tickRotation }) {
 
   return (
     <ResponsiveLine
-      theme={{
-        textColor: 'white',
-        tooltip: { container: { color: '#13141a' } },
-        crosshair: { line: { stroke: '#efef' } },
-        legends: { text: { fill: 'white' } },
-        axis: { legend: { text: { fill: 'white' } } },
-        grid: { line: { stroke: normalizeColor('dark-1', theme) } },
-      }}
       data={graph}
-        // curve='catmullRom'
       margin={{
-        top: 50, right: 110, bottom: 50, left: 70,
+        top: 20, right: 50, bottom: 110, left: 65,
       }}
-      areaOpacity={0.6}
-      lineWidth={2}
-      enableArea
       activeLineWidth={4}
+      lineWidth={1}
       enablePoints={false}
+      enableArea
+      areaOpacity={0.5}
       useMesh
-        // enableSlices='x'
       animate={false}
-        // enableGridX={false}
       xScale={{ type: 'time', format: 'native' }}
       yScale={{
         type: 'linear', min: 0, max: 'auto', stacked: true, reverse: false,
       }}
-      colors={colorMap}
+      colors={colors}
       yFormat={yFormat}
       xFormat={dateFormat}
       tooltip={SliceTooltip}
@@ -156,44 +110,64 @@ export function Graph({ data, yFormat, tickRotation }) {
       }}
       axisBottom={{
         format: '%H:%M',
-        tickSize: 0,
-          // tickValues: tick || 'every 5 minutes',
-        orient: 'bottom',
+        tickPadding: 10,
         tickRotation,
+        tickSize: 0,
+        orient: 'bottom',
         legendPosition: 'middle',
         legend: hasData ? `${dateFormat(data[0].data[0].x)} to ${dateFormat(last(data[0].data).x)}` : null,
-        legendOffset: 46,
+        legendOffset: 90,
       }}
       pointLabel="y"
       pointLabelYOffset={-15}
       legends={[
         {
-          anchor: 'bottom-right',
+          anchor: 'bottom',
           onClick: ({ id }) => (selected ? setSelected(null) : setSelected(id)),
-          direction: 'column',
+          direction: 'row',
           justify: false,
-          translateX: 100,
-          translateY: 0,
+          translateX: 0,
+          translateY: 70,
           itemsSpacing: 0,
           itemDirection: 'left-to-right',
-          itemWidth: 80,
+          itemWidth: 100,
           itemHeight: 20,
-          itemOpacity: 0.75,
           symbolSize: 12,
           symbolShape: 'circle',
-          symbolBorderColor: 'rgba(0, 0, 0, .5)',
-          itemTextColor: 'white',
+          itemTextColor: semanticColors['text-xlight'],
           effects: [
             {
               on: 'hover',
               style: {
                 itemBackground: 'rgba(0, 0, 0, .03)',
-                itemOpacity: 1,
+                itemTextColor: semanticColors['text-light'],
               },
             },
           ],
         },
       ]}
+      theme={{
+        axis: {
+          ticks: {
+            text: {
+              fill: semanticColors['text-xlight'],
+            },
+            line: {
+              stroke: semanticColors.border,
+            },
+          },
+          legend: {
+            text: {
+              fill: semanticColors['text-light'],
+            },
+          },
+        },
+        grid: {
+          line: {
+            stroke: semanticColors.border,
+          },
+        },
+      }}
     />
   )
 }

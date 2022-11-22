@@ -1,4 +1,5 @@
-import { Readiness, appState } from 'components/Application'
+import { appState } from 'components/Application'
+import { Readiness } from 'utils/status'
 
 export const hasIcons = ({ spec: { descriptor } }) => descriptor?.icons?.length > 0
 

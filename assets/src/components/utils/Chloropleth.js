@@ -6,8 +6,9 @@ import { max } from 'lodash'
 
 import { normalizeColor } from 'grommet/utils'
 
+import { useColorMap } from 'utils/colors'
+
 import countries from './world_countries.json'
-import { useColorMap } from './Graph'
 
 const COLOR_MAP = [
   'blue-light-2',

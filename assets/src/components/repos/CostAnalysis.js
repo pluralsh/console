@@ -11,8 +11,9 @@ import { ResponsiveRadar } from '@nivo/radar'
 
 import { sum } from 'lodash'
 
+import { COLORS } from 'utils/colors'
+
 import { ToolbarItem } from '../Installations'
-import { COLOR_MAP } from '../utils/Graph'
 
 const MINUTES_MONTH = 60 * 24 * 30
 
@@ -59,7 +60,7 @@ function CostRadar({ cost, scalar }) {
             isInteractive
             dotSize={3}
             tooltipFormat={val => `$${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-            colors={COLOR_MAP}
+            colors={COLORS}
           />
         </Box>
         <Box

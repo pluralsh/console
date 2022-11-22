@@ -1,5 +1,11 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { PageTitle, SubTab, TabList } from '@pluralsh/design-system'
+import {
+  Card,
+  LoopingLogo,
+  PageTitle,
+  SubTab,
+  TabList,
+} from '@pluralsh/design-system'
 import {
   useCallback,
   useContext,
@@ -11,12 +17,10 @@ import {
 import { useParams } from 'react-router-dom'
 import { useQuery } from 'react-apollo'
 import { DASHBOARD_Q } from 'components/graphql/dashboards'
-import { Div } from 'honorable'
-import { Box, Text } from 'grommet'
+import { Div, Flex } from 'honorable'
 import { DarkSelect } from 'components/utils/Select'
 
-import { Graph, GraphHeader } from 'components/utils/Graph'
-import { chunk } from 'lodash'
+import { Graph } from 'components/utils/Graph'
 
 import filesize from 'filesize'
 
@@ -91,23 +95,28 @@ function DashboardGraph({ graph, tick }) {
   ), [graph])
 
   return (
-    <Box
+    <Div
       className="dashboard"
-      round="xsmall"
-      width="50%"
-      pad="small"
-      height="300px"
+      padding="large"
+      height={350}
+      minWidth="50%" // TODO: Fix wrapping.
     >
-      <GraphHeader text={graph.name} />
-      <Box fill>
-        <Graph
-          data={data}
-          yFormat={v => format(v, graph.format)}
+      <Div
+        color="text-light"
+        justifyContent="center"
+        overline
+        textAlign="center"
+      >
+        {graph.name}
+      </Div>
+      <Graph
+        data={data}
+        yFormat={v => format(v, graph.format)}
           // @ts-ignore
-          tick={tick}
-        />
-      </Box>
-    </Box>
+        tick={tick}
+        tickRotation={45}
+      />
+    </Div>
   )
 }
 
@@ -119,13 +128,13 @@ function LabelSelect({ label, onSelect }) {
   useEffect(() => onSelect(value), [value])
 
   return (
-    <Box width="200px">
+    <Div width="200px">
       <DarkSelect
         options={label.values.map(toSelect)}
         value={toSelect(value)}
         onChange={({ value }) => setValue(value)}
       />
-    </Box>
+    </Div>
   )
 }
 
@@ -161,13 +170,14 @@ export default function Dashboard() {
   const setLabel = useCallback((label, value) => setLabelMap({ ...labelMap, [label]: value }), [labelMap, setLabelMap])
 
   if (!data) {
-    return 'looping logo'
-    // return (
-    //   <LoopingLogo
-    //     scale="0.75"
-    //     dark
-    //   />
-    // )
+    return (
+      <Flex
+        grow={1}
+        justify="center"
+      >
+        <LoopingLogo scale={1} />
+      </Flex>
+    )
   }
 
   const { dashboard } = data
@@ -176,35 +186,21 @@ export default function Dashboard() {
     <Div>
       <PageTitle heading="Dashboard">
         <Div margin={2}>
-          <RangePicker
-            duration={duration}
-            setDuration={setDuration}
-          />
-        </Div>
-      </PageTitle>
-      <Box
-        fill
-        style={{ overflow: 'auto' }}
-      >
-        <Box
-          direction="row"
-          pad="small"
-          gap="small"
-          justify="end"
-          align="center"
-        >
-          {data.dashboard.spec.labels.filter(({ values }) => values.length > 0).map(label => (
+          {dashboard.spec.labels.filter(({ values }) => values.length > 0).map(label => (
             <LabelSelect
               key={`${label.name}:${name}:${appName}`}
               label={label}
               onSelect={value => setLabel(label.name, value)}
             />
           ))}
-        </Box>
-        <Box
-          fill
-          pad={{ horizontal: 'small', bottom: 'small' }}
-        >
+        </Div>
+      </PageTitle>
+      <RangePicker
+        duration={duration}
+        setDuration={setDuration}
+      />
+      <Card marginVertical="large">
+        <Flex wrap="wrap">
           {dashboard.spec.graphs.map(graph => (
             <DashboardGraph
               key={graph.name}
@@ -212,8 +208,8 @@ export default function Dashboard() {
               tick={duration.tick}
             />
           ))}
-        </Box>
-      </Box>
+        </Flex>
+      </Card>
     </Div>
   )
 }

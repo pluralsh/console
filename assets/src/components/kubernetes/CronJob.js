@@ -9,7 +9,9 @@ import { useQuery } from 'react-apollo'
 
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { Readiness, ReadyIcon } from '../Application'
+import { Readiness } from 'utils/status'
+
+import { ReadyIcon } from '../Application'
 
 import { LoopingLogo } from '../utils/AnimatedLogo'
 

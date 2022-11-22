@@ -1,7 +1,10 @@
-import { Readiness, appState } from 'components/Application'
+import { appState } from 'components/Application'
 import { Chip } from '@pluralsh/design-system'
+import { Readiness } from 'utils/status'
 
 export default function AppStatus({ app }) { // TODO: Verify statuses.
+  if (!app) return <Chip size="small">Unknown</Chip>
+
   const { readiness } = appState(app)
 
   switch (readiness) {
