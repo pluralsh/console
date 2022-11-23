@@ -208,7 +208,11 @@ export default function Dashboard() {
   return (
     <Div>
       <PageTitle heading="Dashboard" />
-      <Flex direction="row">
+      <Flex
+        direction="row"
+        gap="medium"
+        wrap="wrap"
+      >
         {filteredLabels.map(label => (
           <LabelSelect
             key={`${label.name}:${name}:${appName}`}
