@@ -1,12 +1,15 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import {
   Card,
+  ListBoxItem,
   LoopingLogo,
   PageTitle,
+  Select,
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
 import {
+  Key,
   useCallback,
   useContext,
   useEffect,
@@ -18,7 +21,6 @@ import { useParams } from 'react-router-dom'
 import { useQuery } from 'react-apollo'
 import { DASHBOARD_Q } from 'components/graphql/dashboards'
 import { Div, Flex } from 'honorable'
-import { DarkSelect } from 'components/utils/Select'
 
 import { Graph } from 'components/utils/Graph'
 
@@ -118,20 +120,27 @@ function DashboardGraph({ graph, tick }) {
   )
 }
 
-const toSelect = v => ({ label: v, value: v })
-
 function LabelSelect({ label, onSelect }) {
-  const [value, setValue] = useState(label.values[0])
-
-  useEffect(() => onSelect(value), [value])
+  const [selectedKey, setSelectedKey] = useState<Key>(label.values[0])
 
   return (
-    <Div width="200px">
-      <DarkSelect
-        options={label.values.map(toSelect)}
-        value={toSelect(value)}
-        onChange={({ value }) => setValue(value)}
-      />
+    <Div width={200}>
+      <Select
+        selectedKey={selectedKey}
+        onSelectionChange={value => {
+          setSelectedKey(value)
+          onSelect(value)
+        }}
+        width={200}
+      >
+        {label.values.map(value => (
+          <ListBoxItem
+            key={value}
+            label={value}
+            textValue={value}
+          />
+        ))}
+      </Select>
     </Div>
   )
 }
