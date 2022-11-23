@@ -20,7 +20,7 @@ import {
 import { useParams } from 'react-router-dom'
 import { useQuery } from 'react-apollo'
 import { DASHBOARD_Q } from 'components/graphql/dashboards'
-import { Div, Flex } from 'honorable'
+import { Div, Flex, Span } from 'honorable'
 
 import { Graph } from 'components/utils/Graph'
 
@@ -59,8 +59,14 @@ export function format(value, format) {
 }
 
 export function RangePicker({ duration, setDuration }: any) {
-  const tabStateRef = useRef<any>(null)
-  const selectedKey = `${duration.offset}+${duration.step}`
+  const tabStateRef = useRef<any>()
+  const [selectedKey, setSelectedKey] = useState<Key>(`${duration.offset}+${duration.step}`)
+
+  useEffect(() => {
+    const dur = DURATIONS.find(d => selectedKey === `${d.offset}+${d.step}`)
+
+    if (dur) setDuration(dur)
+  }, [selectedKey, setDuration])
 
   return (
     <TabList
@@ -68,11 +74,7 @@ export function RangePicker({ duration, setDuration }: any) {
       stateProps={{
         orientation: 'horizontal',
         selectedKey,
-        onSelectionChange: key => {
-          const dur = DURATIONS.find(d => key === `${d.offset}+${d.step}`)
-
-          if (dur) setDuration(dur)
-        },
+        onSelectionChange: setSelectedKey,
       }}
     >
       {DURATIONS.map(d => (
@@ -123,17 +125,28 @@ function DashboardGraph({ graph, tick }) {
 function LabelSelect({ label, onSelect }) {
   const [selectedKey, setSelectedKey] = useState<Key>(label.values[0])
 
-  useEffect(() => onSelect(label.values[0])) // Run only once.
+  // Run it only once.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => onSelect(label.values[0]), [])
 
   return (
-    <Div width={200}>
+    <Div width={250}>
       <Select
+        aria-label={label.name}
+        leftContent={(
+          <Span
+            caption
+            color="text-xlight"
+          >
+            {label.name}
+          </Span>
+        )}
         selectedKey={selectedKey}
         onSelectionChange={value => {
           setSelectedKey(value)
           onSelect(value)
         }}
-        width={200}
+        width={250}
       >
         {label.values.map(value => (
           <ListBoxItem
@@ -194,21 +207,21 @@ export default function Dashboard() {
 
   return (
     <Div>
-      <PageTitle heading="Dashboard">
-        <Div margin={2}>
-          {filteredLabels.map(label => (
-            <LabelSelect
-              key={`${label.name}:${name}:${appName}`}
-              label={label}
-              onSelect={value => setLabel(label.name, value)}
-            />
-          ))}
-        </Div>
-      </PageTitle>
-      <RangePicker
-        duration={duration}
-        setDuration={setDuration}
-      />
+      <PageTitle heading="Dashboard" />
+      <Flex direction="row">
+        {filteredLabels.map(label => (
+          <LabelSelect
+            key={`${label.name}:${name}:${appName}`}
+            label={label}
+            onSelect={value => setLabel(label.name, value)}
+          />
+        ))}
+        <Flex grow={1} />
+        <RangePicker
+          duration={duration}
+          setDuration={setDuration}
+        />
+      </Flex>
       <Card marginVertical="large">
         <Flex wrap="wrap">
           {dashboard.spec.graphs.map(graph => (
