@@ -41,7 +41,7 @@ export const INSTALLATION = gql`
 `
 
 export const UPDATE_PROVIDER = gql`
-  mutation Update($id: ID!, $attributes: OIDCAttributes!) {
+  mutation Update($id: ID!, $attributes: OidcAttributes!) {
     updateOidcProvider(installationId: $id, attributes: $attributes) {
       ...OIDCProvider
     }
