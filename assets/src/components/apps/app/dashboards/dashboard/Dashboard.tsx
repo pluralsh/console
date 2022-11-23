@@ -98,7 +98,7 @@ function DashboardGraph({ graph, tick }) {
     <Div
       className="dashboard"
       padding="large"
-      height={350}
+      height={360}
       width="100%"
     >
       <Div
