@@ -123,6 +123,8 @@ function DashboardGraph({ graph, tick }) {
 function LabelSelect({ label, onSelect }) {
   const [selectedKey, setSelectedKey] = useState<Key>(label.values[0])
 
+  useEffect(() => onSelect(label.values[0])) // Run only once.
+
   return (
     <Div width={200}>
       <Select
