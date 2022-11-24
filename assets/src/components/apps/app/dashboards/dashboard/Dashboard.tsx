@@ -17,14 +17,16 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from 'react-apollo'
-import { DASHBOARD_Q } from 'components/graphql/dashboards'
+import { DASHBOARDS_Q, DASHBOARD_Q } from 'components/graphql/dashboards'
 import { Div, Flex, Span } from 'honorable'
 
 import { Graph } from 'components/utils/Graph'
 
 import filesize from 'filesize'
+
+import { DashboardSelectButton } from './DashboardSelectButton'
 
 const HOUR = 60 * 60
 const DAY = 24 * HOUR
@@ -161,26 +163,34 @@ function LabelSelect({ label, onSelect }) {
 }
 
 export default function Dashboard() {
-  const { appName, dashboardId: name } = useParams()
+  const navigate = useNavigate()
+  const { appName, dashboardId: id } = useParams()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
-
+  const [selectedKey, setSelectedKey] = useState<Key>('')
   const [duration, setDuration] = useState(DURATIONS[0])
   const [labelMap, setLabelMap] = useState({})
   const labels = useMemo(() => Object.entries(labelMap || {}).map(([name, value]) => ({ name, value })), [labelMap])
   const { data } = useQuery(DASHBOARD_Q, {
     variables: {
-      repo: appName, name, labels, step: duration.step, offset: duration.offset,
+      repo: appName, name: id, labels, step: duration.step, offset: duration.offset,
     },
     pollInterval: 1000 * 30,
     fetchPolicy: 'no-cache',
+  })
+
+  const { data: dashboardsData } = useQuery(DASHBOARDS_Q, {
+    variables: { repo: appName },
+    fetchPolicy: 'cache-and-network',
   })
 
   useEffect(() => setBreadcrumbs([
     { text: 'Apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
     { text: 'Dashboards', url: `/apps/${appName}/dashboards` },
-    { text: name, url: `/apps/${appName}/dashboards/${name}` }, // TODO: Use real name as name and ID as ID.
-  ]), [appName, name, setBreadcrumbs])
+    { text: id, url: `/apps/${appName}/dashboards/${id}` }, // TODO: Use real name as name and ID as ID.
+  ]), [appName, id, setBreadcrumbs])
+
+  useEffect(() => setSelectedKey(data?.dashboard?.spec?.name || ''), [data])
 
   useEffect(() => {
     if (!labelMap && data && data.dashboard) {
@@ -191,7 +201,7 @@ export default function Dashboard() {
   }, [data, labelMap, setLabelMap])
   const setLabel = useCallback((label, value) => setLabelMap({ ...labelMap, [label]: value }), [labelMap, setLabelMap])
 
-  if (!data) {
+  if (!data || !dashboardsData) {
     return (
       <Flex
         grow={1}
@@ -203,11 +213,30 @@ export default function Dashboard() {
   }
 
   const { dashboard } = data
+  const { dashboards } = dashboardsData
+
   const filteredLabels = dashboard.spec.labels.filter(({ values }) => values.length > 0)
 
   return (
     <Div>
-      <PageTitle heading="Dashboard" />
+      <PageTitle heading={(
+        <Div>
+          <Select
+            selectedKey={selectedKey}
+            onSelectionChange={id => navigate(`/apps/${appName}/dashboards/${id}`)}
+            triggerButton={<DashboardSelectButton label={selectedKey} />}
+          >
+            {dashboards.map(({ id, spec: { name } }) => (
+              <ListBoxItem
+                key={id}
+                label={name}
+                textValue={id}
+              />
+            ))}
+          </Select>
+        </Div>
+      )}
+      />
       <Flex
         direction="row"
         gap="medium"
@@ -215,7 +244,7 @@ export default function Dashboard() {
       >
         {filteredLabels.map(label => (
           <LabelSelect
-            key={`${label.name}:${name}:${appName}`}
+            key={`${label.name}:${id}:${appName}`}
             label={label}
             onSelect={value => setLabel(label.name, value)}
           />
