@@ -13,7 +13,7 @@ export const getIcon = (app, dark) => {
   return descriptor.icons[0]
 }
 
-export const getBorderColor = app => { // TODO: Verify statuses.
+export const getBorderColor = app => {
   const { readiness } = appState(app)
 
   switch (readiness) {

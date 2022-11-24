@@ -187,7 +187,7 @@ export default function Dashboard() {
     { text: 'Apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
     { text: 'Dashboards', url: `/apps/${appName}/dashboards` },
-    { text: id, url: `/apps/${appName}/dashboards/${id}` }, // TODO: Use real name as name and ID as ID.
+    { text: id, url: `/apps/${appName}/dashboards/${id}` },
   ]), [appName, id, setBreadcrumbs])
 
   useEffect(() => setSelectedKey(data?.dashboard?.spec?.name || ''), [data])
@@ -222,9 +222,11 @@ export default function Dashboard() {
       <PageTitle heading={(
         <Div>
           <Select
+            aria-label="dashboards"
             selectedKey={selectedKey}
             onSelectionChange={id => navigate(`/apps/${appName}/dashboards/${id}`)}
             triggerButton={<DashboardSelectButton label={selectedKey} />}
+            width={240}
           >
             {dashboards.map(({ id, spec: { name } }) => (
               <ListBoxItem
