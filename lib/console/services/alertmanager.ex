@@ -37,6 +37,7 @@ defmodule Console.Services.Alertmanager do
       labels: alert.labels,
       annotations: alert.annotations,
       repository: repo,
+      status: alert.status,
       severity: Map.get(alert.labels || %{}, "severity", :none),
       seen_at: Timex.now()
     })

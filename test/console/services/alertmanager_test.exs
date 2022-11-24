@@ -48,6 +48,7 @@ defmodule Console.Services.AlertmanagerTest do
       assert notif.title == alert.summary
       assert notif.fingerprint == alert.fingerprint
       assert notif.seen_at
+      assert notif.status == :firing
       assert notif.severity == :critical
 
       assert_receive {:event, %PubSub.NotificationCreated{item: found}}
