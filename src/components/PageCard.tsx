@@ -85,4 +85,4 @@ ref) => (
 ))
 
 export default PageCard
-export { PageCardProps }
+export type { PageCardProps }

@@ -23,7 +23,14 @@ type AppIconProps = DivProps & {
 }
 
 const propTypes = {
-  size: PropTypes.oneOf(['xxsmall', 'xsmall', 'small', 'medium', 'large', 'xlarge']),
+  size: PropTypes.oneOf([
+    'xxsmall',
+    'xsmall',
+    'small',
+    'medium',
+    'large',
+    'xlarge',
+  ]),
   spacing: PropTypes.oneOf(['none', 'padding']),
   hue: PropTypes.oneOf(['default', 'lighter', 'lightest']),
   clickable: PropTypes.bool,
@@ -31,14 +38,14 @@ const propTypes = {
   alt: PropTypes.string,
 }
 
-const parentFillLevelToHue:Record<FillLevel, Hue> = {
+const parentFillLevelToHue: Record<FillLevel, Hue> = {
   0: 'default',
   1: 'lighter',
   2: 'lightest',
   3: 'lightest',
 }
 
-const sizeToWidth:Record<Size, number> = {
+const sizeToWidth: Record<Size, number> = {
   xxsmall: 32,
   xsmall: 40,
   small: 64,
@@ -47,7 +54,7 @@ const sizeToWidth:Record<Size, number> = {
   xlarge: 160,
 }
 
-const sizeToIconWidth:Record<Size, number> = {
+const sizeToIconWidth: Record<Size, number> = {
   xxsmall: 16,
   xsmall: 24,
   small: 48,
@@ -164,4 +171,4 @@ const AppIcon = forwardRef(AppIconRef)
 AppIcon.propTypes = propTypes
 
 export default AppIcon
-export { AppIconProps }
+export type { AppIconProps }

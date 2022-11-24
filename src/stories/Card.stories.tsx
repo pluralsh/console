@@ -3,7 +3,8 @@ import { ComponentProps } from 'react'
 
 import { FillLevel } from '../components/contexts/FillLevelContext'
 
-import { Card, CardProps } from '../index'
+import { Card } from '../index'
+import type { CardProps } from '../components/Card'
 
 export default {
   title: 'Card',

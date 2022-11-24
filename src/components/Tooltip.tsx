@@ -254,4 +254,4 @@ function Tooltip({
 }
 
 export default Tooltip
-export { TooltipProps }
+export type { TooltipProps }

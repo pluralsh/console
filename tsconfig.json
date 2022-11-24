@@ -12,11 +12,8 @@
     "outDir": "dist",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "lib": [
-      "ESNext",
-      "DOM"
-    ],
-    "suppressImplicitAnyIndexErrors": true,
+    "lib": ["ESNext", "DOM"],
+    "suppressImplicitAnyIndexErrors": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "./*"]
 }

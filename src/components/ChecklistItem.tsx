@@ -23,7 +23,9 @@ const ChecklistItemInner = styled(ChecklistItemInnerUnstyled)(({ theme, complete
     display: 'flex',
     gap: 12,
     alignItems: 'center',
-    color: selected ? theme.colors['action-link-active'] : theme.colors['action-link-inactive'],
+    color: selected
+      ? theme.colors['action-link-active']
+      : theme.colors['action-link-inactive'],
     cursor: 'pointer',
 
     ':hover': {
@@ -152,12 +154,7 @@ function ChecklistItem({
   children,
   ...props
 }: ChecklistItemProps): JSX.Element {
-  return (
-    <div
-      {...props}
-    >{children}
-    </div>
-  )
+  return <div {...props}>{children}</div>
 }
 
 enum KeyboardKey {
@@ -251,4 +248,5 @@ function ChecklistItemInnerUnstyled({
   )
 }
 
-export { ChecklistItem, ChecklistItemInner, ChecklistItemProps }
+export type { ChecklistItemProps }
+export { ChecklistItem, ChecklistItemInner }

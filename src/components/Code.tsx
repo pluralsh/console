@@ -483,4 +483,4 @@ const Code = styled(forwardRef(CodeRef))(_ => ({
 Code.propTypes = propTypes
 
 export default Code
-export { CodeProps }
+export type { CodeProps }

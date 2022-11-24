@@ -12,7 +12,8 @@ function ChecklistFooterUnstyled({
   children,
   ...props
 }: ChecklistFooterProps): JSX.Element {
-  return (<div {...props}>{children}</div>)
+  return <div {...props}>{children}</div>
 }
 
-export { ChecklistFooter, ChecklistFooterProps }
+export type { ChecklistFooterProps }
+export { ChecklistFooter }

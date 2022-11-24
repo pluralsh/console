@@ -257,9 +257,10 @@ function ComboBox({
   },
   [isOpen, onOpenChange])
 
-  const setIsOpen = useCallback((isOpen:boolean) => {
+  const setIsOpen = useCallback((isOpen: boolean) => {
     wrappedOnOpenChange(isOpen, 'manual')
-  }, [wrappedOnOpenChange])
+  },
+  [wrappedOnOpenChange])
 
   const wrappedOnSelectionChange: typeof onSelectionChange = useCallback((newKey, ...args) => {
     if (onSelectionChange) {
@@ -273,7 +274,7 @@ function ComboBox({
   [onSelectionChange, setIsOpen])
 
   const wrappedOnFocusChange: typeof onFocusChange = useCallback((isFocused, ...args) => {
-    // Enforce open on focus
+      // Enforce open on focus
     if (isFocused && !isOpen) {
       setIsOpen(true)
     }
@@ -391,4 +392,5 @@ function ComboBox({
   )
 }
 
-export { ComboBox, ComboBoxProps }
+export type { ComboBoxProps }
+export { ComboBox }

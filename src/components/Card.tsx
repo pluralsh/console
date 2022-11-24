@@ -120,4 +120,4 @@ ref) => {
 })
 
 export default Card
-export { CardProps, CornerSize as CardSize, CardHue }
+export type { CardProps, CornerSize as CardSize, CardHue }

@@ -86,4 +86,5 @@ function PopoverListBox({
   )
 }
 
-export { PopoverListBox, PopoverListBoxProps }
+export type { PopoverListBoxProps }
+export { PopoverListBox }

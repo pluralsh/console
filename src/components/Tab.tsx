@@ -9,9 +9,10 @@ import { useTheme } from 'styled-components'
 
 import { TabBaseProps } from './TabList'
 
-type TabProps = DivProps & TabBaseProps & {
-  startIcon?: ReactNode
-}
+type TabProps = DivProps &
+  TabBaseProps & {
+    startIcon?: ReactNode
+  }
 
 function TabRef({
   startIcon,
@@ -83,4 +84,4 @@ ref: Ref<any>) {
 const Tab = forwardRef(TabRef)
 
 export default Tab
-export { TabProps }
+export type { TabProps }

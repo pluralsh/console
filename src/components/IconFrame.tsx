@@ -134,4 +134,4 @@ ref) => {
 })
 
 export default IconFrame
-export { IconFrameProps }
+export type { IconFrameProps }

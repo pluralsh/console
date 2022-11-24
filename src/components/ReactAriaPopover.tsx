@@ -61,4 +61,5 @@ const PopoverStyled = styled.div<{ $isOpen: boolean }>(({ $isOpen: isOpen }) => 
   ...(!isOpen ? { pointerEvents: 'none' } : {}),
 }))
 
-export { Popover, PopoverProps }
+export type { PopoverProps }
+export { Popover }

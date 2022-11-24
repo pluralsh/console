@@ -222,12 +222,14 @@ const ListBoxFooterPlus = forwardRef<HTMLDivElement, ListBoxFooterProps>(({ left
   </ListBoxFooterPlusInner>
 ))
 
+export type {
+  ListBoxItemBaseProps,
+  ListBoxFooterProps,
+  ListBoxFooterProps as ListBoxFooterPlusProps,
+}
 export {
   ListBoxItem,
-  ListBoxItemBaseProps,
   ChipList as ListBoxItemChipList,
   ListBoxFooter,
-  ListBoxFooterProps,
   ListBoxFooterPlus,
-  ListBoxFooterProps as ListBoxFooterPlusProps,
 }

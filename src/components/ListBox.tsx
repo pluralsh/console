@@ -47,7 +47,7 @@ type ListBoxProps = Omit<
   footer?: ReactElement
 }
 
-const CARD_FILL_LEVEL:FillLevel = 2
+const CARD_FILL_LEVEL: FillLevel = 2
 
 const ListBoxCard = styled(Card).attrs(() => ({
   cornerSize: 'medium',
@@ -84,7 +84,7 @@ function useItemWrappedChildren(children: ReactElement | ReactElement[],
   return useMemo(() => {
     // Children.map() prefixes the key props in an undocumented and possibly
     // unstable way, so using Children.forEach() to maintain original key values
-    const wrapped: (JSX.Element)[] = []
+    const wrapped: JSX.Element[] = []
 
     if (header) {
       wrapped.push(<Item key={HEADER_KEY}>{header}</Item>)
@@ -245,10 +245,5 @@ function Option({ item, state }: any) {
   return cloneElement(item.rendered, mergedProps)
 }
 
-export {
-  ListBox,
-  ListBoxProps,
-  ListBoxUnmanaged,
-  ListBoxUnmanagedProps,
-  useItemWrappedChildren,
-}
+export type { ListBoxProps, ListBoxUnmanagedProps }
+export { ListBox, ListBoxUnmanaged, useItemWrappedChildren }

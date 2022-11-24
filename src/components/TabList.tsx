@@ -208,6 +208,5 @@ function TabRenderer({
   )
 }
 
-export {
-  TabList, TabListProps, TabListStateProps, TabBaseProps,
-}
+export type { TabListProps, TabListStateProps, TabBaseProps }
+export { TabList }

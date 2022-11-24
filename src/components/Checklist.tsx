@@ -76,7 +76,9 @@ const Checklist = styled(ChecklistUnstyled)(({ theme }) => ({
 type ChecklistProps = ComponentPropsWithRef<'div'> & {
   label: string
   stateProps: ChecklistStateProps
-  footerChildren: ReactElement<ChecklistFooterProps> | ReactElement<ChecklistFooterProps>[]
+  footerChildren:
+    | ReactElement<ChecklistFooterProps>
+    | ReactElement<ChecklistFooterProps>[]
   completeChildren: ReactElement
   children: ReactElement<ChecklistItemProps>[]
 }
@@ -85,9 +87,9 @@ type ChecklistStateProps = {
   onSelectionChange?: Dispatch<number>
   onFocusChange?: Dispatch<number>
   onOpenChange?: Dispatch<boolean>
-  selectedKey?: number,
-  focusedKey?: number,
-  completedKey?: number,
+  selectedKey?: number
+  focusedKey?: number
+  completedKey?: number
   isOpen?: boolean
   isDismissed?: boolean
 }
@@ -101,7 +103,14 @@ function ChecklistUnstyled({
   ...props
 }: ChecklistProps): JSX.Element {
   const {
-    isOpen = true, isDismissed, selectedKey, focusedKey, completedKey, onSelectionChange, onFocusChange, onOpenChange,
+    isOpen = true,
+    isDismissed,
+    selectedKey,
+    focusedKey,
+    completedKey,
+    onSelectionChange,
+    onFocusChange,
+    onOpenChange,
   } = stateProps
   const [finished, setFinished] = useState(false)
 
@@ -110,7 +119,8 @@ function ChecklistUnstyled({
   const finishedContainerRef = useRef<HTMLDivElement>(null)
 
   const [itemContainerHeight, setItemContainerHeight] = useState<number>(-1)
-  const [finishedContainerHeight, setFinishedContainerHeight] = useState<number>(-1)
+  const [finishedContainerHeight, setFinishedContainerHeight]
+    = useState<number>(-1)
 
   const onSelectionChangeWrapper = useCallback((idx: number) => (idx < children.length && idx > -1 ? onSelectionChange(idx) : undefined),
     [children, onSelectionChange])
@@ -127,9 +137,18 @@ function ChecklistUnstyled({
       completed={completedKey >= index}
       onSelectionChange={onSelectionChangeWrapper}
       onFocusChange={onFocusChangeWrapper}
-    >{child}
+    >
+      {child}
     </ChecklistItemInner>
-  )), [children, selectedKey, focusedKey, completedKey, onSelectionChangeWrapper, onFocusChangeWrapper])
+  )),
+  [
+    children,
+    selectedKey,
+    focusedKey,
+    completedKey,
+    onSelectionChangeWrapper,
+    onFocusChangeWrapper,
+  ])
 
   useEffect(() => {
     setFinished(completedKey === children.length - 1)
@@ -142,12 +161,21 @@ function ChecklistUnstyled({
   })
 
   useEffect(() => {
-    const maxItemContainerHeight = Math.max(itemContainerHeight, itemsContainerRef.current.getBoundingClientRect().height)
-    const maxFinishedContainerHeight = Math.max(finishedContainerHeight, finishedContainerRef.current.getBoundingClientRect().height)
+    const maxItemContainerHeight = Math.max(itemContainerHeight,
+      itemsContainerRef.current.getBoundingClientRect().height)
+    const maxFinishedContainerHeight = Math.max(finishedContainerHeight,
+      finishedContainerRef.current.getBoundingClientRect().height)
 
     setItemContainerHeight(maxItemContainerHeight)
     setFinishedContainerHeight(maxFinishedContainerHeight)
-  }, [itemsContainerRef, finishedContainerRef, setItemContainerHeight, setFinishedContainerHeight, itemContainerHeight, finishedContainerHeight])
+  }, [
+    itemsContainerRef,
+    finishedContainerRef,
+    setItemContainerHeight,
+    setFinishedContainerHeight,
+    itemContainerHeight,
+    finishedContainerHeight,
+  ])
 
   return (
     <AnimateHeight
@@ -164,25 +192,23 @@ function ChecklistUnstyled({
           onClick={() => onOpenChange(!isOpen)}
         >
           <div>{label}</div>
-          <DropdownArrowIcon
-            className={isOpen ? 'arrowUp' : 'arrowDown'}
-          />
+          <DropdownArrowIcon className={isOpen ? 'arrowUp' : 'arrowDown'} />
         </div>
         <AnimateHeight
           height={isFirstRender.current || isOpen ? 'auto' : 0}
           duration={heightAnimationDuration}
         >
-          <div
-            className="content"
-          >
-            {checklistItemInnerWrapper}
-          </div>
+          <div className="content">{checklistItemInnerWrapper}</div>
           <ChecklistFooter>{footerChildren}</ChecklistFooter>
         </AnimateHeight>
       </div>
       <div
         className={finished ? 'finishContainer grow' : 'finishContainer shrink'}
-        style={isFirstRender.current || finished ? { maxHeight: finishedContainerHeight } : { maxHeight: 0, padding: 0 }}
+        style={
+          isFirstRender.current || finished
+            ? { maxHeight: finishedContainerHeight }
+            : { maxHeight: 0, padding: 0 }
+        }
         ref={finishedContainerRef}
       >
         {completeChildren}
@@ -191,4 +217,5 @@ function ChecklistUnstyled({
   )
 }
 
-export { Checklist, ChecklistStateProps, ChecklistProps }
+export type { ChecklistStateProps, ChecklistProps }
+export { Checklist }
