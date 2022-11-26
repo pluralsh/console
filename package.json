@@ -82,7 +82,7 @@
     "eslint": "8.28.0",
     "eslint-plugin-storybook": "0.6.7",
     "fuse.js": "6.6.2",
-    "honorable": "0.166.0",
+    "honorable": "0.176.0",
     "honorable-theme-default": "0.70.0",
     "http-server": "14.1.1",
     "jest-mock": "29.3.1",
