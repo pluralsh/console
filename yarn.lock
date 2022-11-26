@@ -2520,7 +2520,7 @@ __metadata:
     grommet: 2.27.0
     grommet-icons: 4.8.0
     highlight.js: 11.6.0
-    honorable: 0.180.0
+    honorable: 0.181.0
     honorable-recipe-mapper: 0.2.0
     honorable-theme-default: 0.70.0
     http-server: 14.1.1
@@ -9526,9 +9526,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"honorable@npm:0.180.0":
-  version: 0.180.0
-  resolution: "honorable@npm:0.180.0"
+"honorable@npm:0.181.0":
+  version: 0.181.0
+  resolution: "honorable@npm:0.181.0"
   dependencies:
     "@emotion/is-prop-valid": ^1.2.0
     "@floating-ui/react-dom": ^1.0.1
@@ -9542,7 +9542,7 @@ __metadata:
     "@emotion/styled": ">=10.0.0"
     react: ">=16.0.0"
     react-dom: ">=16.0.0"
-  checksum: 748f4bd800461134e1372cfdaefc9e1f50d50288b9ec955c2a73236ccce022d241aae9c1b990ef2ee70208db7979055fd458bbadcd9370adaf470bff4355d3e6
+  checksum: c41cd3a2bdcb023c84b60555047ca0784dae64b602803f581a097fa18aa1f911a09fad957ed9a6db67b190b99b4539708368a3415ee965e7be461d653b3a6711
   languageName: node
   linkType: hard
 
