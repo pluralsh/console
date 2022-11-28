@@ -24,7 +24,7 @@ export const DashboardSelectButton = styled(forwardRef<any, any>((props, ref) =>
       >
         <Div
           subtitle2
-          textDecoration="underline"
+          _hover={{ textDecoration: 'underline' }}
         >
           {props.label}
         </Div>
