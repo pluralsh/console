@@ -24,7 +24,7 @@ import { Div, Flex, Span } from 'honorable'
 
 import { Graph } from 'components/utils/Graph'
 
-import filesize from 'filesize'
+import { filesize } from 'filesize'
 
 import { DashboardSelectButton } from './DashboardSelectButton'
 
@@ -49,10 +49,10 @@ export const DURATIONS = [
   },
 ]
 
-export function format(value, format) {
+export function format(value: any, format: any) {
   switch (format) {
   case 'bytes':
-    return filesize(value)
+    return filesize(value || 0)
   case 'percent':
     return `${Math.round(value * 10000) / 100}%`
   default:

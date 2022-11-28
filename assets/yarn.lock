@@ -6554,14 +6554,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ace-builds@npm:1.7.1":
-  version: 1.7.1
-  resolution: "ace-builds@npm:1.7.1"
-  checksum: da1a550ab3332c055b15fa0fe804d8705e5527d687866f57d5931f080883b2d1c517f2f7bc652169d37aa9aa5eabeb74ffe168f4394e59dc34db3291061ceb41
-  languageName: node
-  linkType: hard
-
-"ace-builds@npm:^1.4.14":
+"ace-builds@npm:1.13.1, ace-builds@npm:^1.4.14":
   version: 1.13.1
   resolution: "ace-builds@npm:1.13.1"
   checksum: 51cf3bf42b6ea5899ce7078f3b2bdbe8d585d201202d43ad6390330c8dab05c80f9b774e100471246c4465ac350b16497b56f05270f0245a9139c600cf06e635
@@ -8231,10 +8224,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:3.5.1":
-  version: 3.5.1
-  resolution: "chart.js@npm:3.5.1"
-  checksum: aab597abd025354608336111da4e9f7a912a65d4c29f3c7fb41df5cc54bb29d235c41a2cf08d82a79a9a8be928812445f930cbee16aeb8075ebeeb963bfc0da2
+"chart.js@npm:4.0.1":
+  version: 4.0.1
+  resolution: "chart.js@npm:4.0.1"
+  checksum: 013dabf3cd4ad2d71574e1d616906ae6f5b3f5914efb7f8ac7407bfe9b621e997f30966350bbdf31e3a1322c8c602715ef4dd6d0b6072590bb48db03861ac401
   languageName: node
   linkType: hard
 
@@ -8706,7 +8699,7 @@ __metadata:
     "@testing-library/user-event": 7.1.2
     "@typescript-eslint/eslint-plugin": 5.42.0
     "@typescript-eslint/parser": 5.42.0
-    ace-builds: 1.7.1
+    ace-builds: 1.13.1
     anser: 2.1.1
     ansi-to-react: 6.1.6
     apollo-absinthe-upload-link: 1.7.0
@@ -8715,27 +8708,27 @@ __metadata:
     apollo-link-error: 1.1.13
     apollo-link-persisted-queries: 0.2.5
     apollo-link-retry: 2.2.16
-    chart.js: 3.5.1
+    chart.js: 4.0.1
     color-alpha: 1.1.3
     concurrently: 7.6.0
     country-code-lookup: 0.0.20
-    crypto-hash: 1.3.0
+    crypto-hash: 2.0.1
     customize-cra: 1.0.0
-    cypress: 10.4.0
+    cypress: 11.2.0
     emoji-mart: 3.0.1
     escape-carriage: 1.3.0
     eslint: 8.28.0
     eslint-config-pluralsh: 3.1.0
     eslint-plugin-import: 2.26.0
-    eslint-plugin-import-newlines: latest
+    eslint-plugin-import-newlines: 1.3.0
     eslint-plugin-jsx-a11y: 6.6.1
     eslint-plugin-react: 7.31.11
     eslint-plugin-react-hooks: 4.6.0
-    filesize: 6.1.0
+    filesize: 10.0.5
     forge-core: 1.4.6
     grommet: 2.28.0
     grommet-icons: 4.8.0
-    highlight.js: 10.6.0
+    highlight.js: 11.7.0
     honorable: 0.187.0
     honorable-theme-default: 0.70.0
     http-proxy-middleware: 2.0.6
@@ -8747,41 +8740,41 @@ __metadata:
     lodash: 4.17.21
     moment: 2.29.4
     moment-duration-format: 2.3.2
-    phoenix: 1.5.13
+    phoenix: 1.6.15
     pluralsh-absinthe-socket-apollo-link: 0.2.0
     query-string: 7.1.1
     randomcolor: 0.6.2
-    rc-progress: 3.1.4
+    rc-progress: 3.4.1
     react: 18.2.0
     react-ace: 10.1.0
     react-animations: 1.0.0
     react-apollo: 3.1.5
-    react-chartjs-2: 3.0.5
-    react-circular-progressbar: 2.0.4
+    react-chartjs-2: 5.0.1
+    react-circular-progressbar: 2.1.0
     react-codemirror: 1.0.0
     react-collapsible: 2.10.0
     react-copy-to-clipboard: 5.1.0
-    react-countdown: 2.3.2
+    react-countdown: 2.3.5
     react-diff-viewer: 3.1.1
     react-dnd: 16.0.1
     react-dnd-html5-backend: 16.0.1
     react-dom: 18.2.0
-    react-file-icon: 1.0.0
+    react-file-icon: 1.2.0
     react-file-picker: 0.0.6
     react-foco: 1.3.1
     react-highlight.js: 1.0.7
     react-lazylog: 4.5.3
-    react-live-clock: 6.0.4
+    react-live-clock: 6.1.0
     react-portal: 4.2.2
-    react-pulse-dot: 2.0.0
+    react-pulse-dot: 2.1.0
     react-router-dom: 6.4.3
     react-scripts: 5.0.1
-    react-spinners: 0.13.3
+    react-spinners: 0.13.6
     react-sweet-progress: 1.1.2
-    react-toggle: 4.1.2
+    react-toggle: 4.1.3
     react-transition-group: 4.4.5
     react-use-intercom: 2.0.0
-    react-virtualized-auto-sizer: 1.0.6
+    react-virtualized-auto-sizer: 1.0.7
     react-window: 1.8.8
     react-window-infinite-loader: 1.0.8
     react-window-reversed: 1.4.1
@@ -8796,7 +8789,7 @@ __metadata:
     universal-cookie: 4.0.4
     uuid: 9.0.0
     wait-on: 6.0.1
-    xterm-addon-fit: 0.5.0
+    xterm-addon-fit: 0.6.0
     xterm-for-react: 1.0.4
     xterm-theme: 1.1.0
     yaml: 2.1.3
@@ -9053,10 +9046,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"crypto-hash@npm:1.3.0":
-  version: 1.3.0
-  resolution: "crypto-hash@npm:1.3.0"
-  checksum: a3a507e0d2b18fbd2da8088a1c62d0c53c009a99bbfa6d851cac069734ffa546922fa51bdd776d006459701cdda873463e5059ece3431aca048fd99e7573d138
+"crypto-hash@npm:2.0.1":
+  version: 2.0.1
+  resolution: "crypto-hash@npm:2.0.1"
+  checksum: 08d304024166ef4856d71ec16f9429dfe6ddd8126d07b2a798e0f586eb60106c0f05b210b6d6f6f8189f8304ec33e7f1a880d5a38c2fadca19c4801fb5bd3e36
   languageName: node
   linkType: hard
 
@@ -9433,9 +9426,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cypress@npm:10.4.0":
-  version: 10.4.0
-  resolution: "cypress@npm:10.4.0"
+"cypress@npm:11.2.0":
+  version: 11.2.0
+  resolution: "cypress@npm:11.2.0"
   dependencies:
     "@cypress/request": ^2.88.10
     "@cypress/xvfb": ^1.2.4
@@ -9456,7 +9449,7 @@ __metadata:
     dayjs: ^1.10.4
     debug: ^4.3.2
     enquirer: ^2.3.6
-    eventemitter2: ^6.4.3
+    eventemitter2: 6.4.7
     execa: 4.1.0
     executable: ^4.1.1
     extract-zip: 2.0.1
@@ -9481,7 +9474,7 @@ __metadata:
     yauzl: ^2.10.0
   bin:
     cypress: bin/cypress
-  checksum: 3f7385e076ac936683d1d1d104a7183f2e61ad0f4c901aff07146ae2e10197e8314019dcdfb6c188312fbf1be05484291f1cf8d49c4c37cf6485103c4ac5303e
+  checksum: e13649fb4b62a3c9dff7cc571f4e01dba009d8179b05c4f885c5ceb4ed76b78a7323fec491d992da35527708b54e596bfc9edb1d702f788317889f794d8c1e76
   languageName: node
   linkType: hard
 
@@ -10626,7 +10619,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-import-newlines@npm:^1.2.3, eslint-plugin-import-newlines@npm:latest":
+"eslint-plugin-import-newlines@npm:1.3.0, eslint-plugin-import-newlines@npm:^1.2.3":
   version: 1.3.0
   resolution: "eslint-plugin-import-newlines@npm:1.3.0"
   peerDependencies:
@@ -10953,10 +10946,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eventemitter2@npm:^6.4.3":
-  version: 6.4.9
-  resolution: "eventemitter2@npm:6.4.9"
-  checksum: be59577c1e1c35509c7ba0e2624335c35bbcfd9485b8a977384c6cc6759341ea1a98d3cb9dbaa5cea4fff9b687e504504e3f9c2cc1674cf3bd8a43a7c74ea3eb
+"eventemitter2@npm:6.4.7":
+  version: 6.4.7
+  resolution: "eventemitter2@npm:6.4.7"
+  checksum: 1b36a77e139d6965ebf3a36c01fa00c089ae6b80faa1911e52888f40b3a7057b36a2cc45dcd1ad87cda3798fe7b97a0aabcbb8175a8b96092a23bb7d0f039e66
   languageName: node
   linkType: hard
 
@@ -11326,10 +11319,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"filesize@npm:6.1.0":
-  version: 6.1.0
-  resolution: "filesize@npm:6.1.0"
-  checksum: c46d644cb562fba7b7e837d5cd339394492abaa06722018b91a97d2a63b6c753ef30653de5c03bf178c631185bf55c3561c28fa9ccc4e9755f42d853c6ed4d09
+"filesize@npm:10.0.5":
+  version: 10.0.5
+  resolution: "filesize@npm:10.0.5"
+  checksum: b373ebd877566a49566564709c221943741a6e264649ae1f5d6c87c31cd87e94c5e51dae8ee16abbe414fda3fdb6855d8fe4f0ed8d1e33327563d2b59176eaa1
   languageName: node
   linkType: hard
 
@@ -12274,17 +12267,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"highlight.js@npm:10.6.0":
-  version: 10.6.0
-  resolution: "highlight.js@npm:10.6.0"
-  checksum: ebdf4c14a80cb366a25ab59675df564e4ae3d9044cbed3ef6487c357bf38d08523d114c046008f42bef8cb782d7ef0c4858bc33ec25c6ade5d3f9e504c8c9bf0
-  languageName: node
-  linkType: hard
-
 "highlight.js@npm:11.6.0":
   version: 11.6.0
   resolution: "highlight.js@npm:11.6.0"
   checksum: 3908eb34a4b442ca1e20c1ae6415ea935fbbcdb2b532a89948d82b0fa4ad41fc5de3802a0de4e88a0bcb7d97d4445579048cd2aab1d105ac47f59dd58a9a98ae
+  languageName: node
+  linkType: hard
+
+"highlight.js@npm:11.7.0":
+  version: 11.7.0
+  resolution: "highlight.js@npm:11.7.0"
+  checksum: 19e3fb8b56f4b361b057a8523b989dfeb6479bbd1e29cec3fac6fa5c78d09927d5fa61b7dba6631fdb57cfdca9b3084aa4da49405ceaf4a67f67beae2ed5b77d
   languageName: node
   linkType: hard
 
@@ -14704,7 +14697,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:4.17.21, lodash@npm:^4.17.11, lodash@npm:^4.17.14, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.17.4, lodash@npm:^4.7.0, lodash@npm:~4.17.0":
+"lodash@npm:4.17.21, lodash@npm:^4.17.11, lodash@npm:^4.17.14, lodash@npm:^4.17.15, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.17.4, lodash@npm:^4.7.0, lodash@npm:~4.17.0":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: eb835a2e51d381e561e508ce932ea50a8e5a68f4ebdd771ea240d3048244a8d13658acbd502cd4829768c56f2e16bdd4340b9ea141297d472517b83868e677f7
@@ -15485,7 +15478,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment@npm:2.29.4":
+"moment-timezone@npm:^0.5.33":
+  version: 0.5.39
+  resolution: "moment-timezone@npm:0.5.39"
+  dependencies:
+    moment: ">= 2.9.0"
+  checksum: 9f972d3a29b2726d4fd1464df27738b756441fe57575f087cda91b7716a5a31d2cfd274255e3edfb15eb60af3ccf33fd339527b456092cac1a2a4124e4369c8b
+  languageName: node
+  linkType: hard
+
+"moment@npm:2.29.4, moment@npm:>= 2.9.0, moment@npm:^2.29.1":
   version: 2.29.4
   resolution: "moment@npm:2.29.4"
   checksum: 0ec3f9c2bcba38dc2451b1daed5daded747f17610b92427bebe1d08d48d8b7bdd8d9197500b072d14e326dd0ccf3e326b9e3d07c5895d3d49e39b6803b76e80e
@@ -16247,10 +16249,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"phoenix@npm:1.5.13":
-  version: 1.5.13
-  resolution: "phoenix@npm:1.5.13"
-  checksum: de1ce32da3bda100a617b7c15917fc47f14240aee0ce15b38c18a88988bbc855295b5be9cb8ff0c551a4790e1e92f45aa64253acf05146c224088fe285ee8c2a
+"phoenix@npm:1.6.15":
+  version: 1.6.15
+  resolution: "phoenix@npm:1.6.15"
+  checksum: c84c5e06ce55e9357ba0d10870f373b9a67b05d20dccdf8925d7e55f4465afd155ca6cde38725325374a2f0181197aff1ebc11c62f2255e1833494c7a3c74107
   languageName: node
   linkType: hard
 
@@ -17519,16 +17521,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rc-progress@npm:3.1.4":
-  version: 3.1.4
-  resolution: "rc-progress@npm:3.1.4"
+"rc-progress@npm:3.4.1":
+  version: 3.4.1
+  resolution: "rc-progress@npm:3.4.1"
   dependencies:
     "@babel/runtime": ^7.10.1
     classnames: ^2.2.6
+    rc-util: ^5.16.1
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: 1ccf0038d9f5bf275c24297ac83d4afbd77756ef91494d1e474e915944238becf6115ca11d202cf84d0c59efde0f08a12a08344061c314b31dab65ea13411e77
+  checksum: d4dce5231ea29bfa866935a59f05473711f9dfc944f95cc78b0fdcd1508a063983cc58973f54c2b20797f0b0f480c4a2b84aaa2ca185158c14800ec659163880
+  languageName: node
+  linkType: hard
+
+"rc-util@npm:^5.16.1":
+  version: 5.24.6
+  resolution: "rc-util@npm:5.24.6"
+  dependencies:
+    "@babel/runtime": ^7.18.3
+    react-is: ^16.12.0
+    shallowequal: ^1.1.0
+  peerDependencies:
+    react: ">=16.9.0"
+    react-dom: ">=16.9.0"
+  checksum: 978276161e726f20b0300566ec46305038a0fed7b29daafca1523030917e9fc67063f3f984367bb50c40be35fb3ff1130cd47c95867007904a87aa7425ca47e4
   languageName: node
   linkType: hard
 
@@ -17600,24 +17617,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-chartjs-2@npm:3.0.5":
-  version: 3.0.5
-  resolution: "react-chartjs-2@npm:3.0.5"
-  dependencies:
-    lodash: ^4.17.19
+"react-chartjs-2@npm:5.0.1":
+  version: 5.0.1
+  resolution: "react-chartjs-2@npm:5.0.1"
   peerDependencies:
-    chart.js: ^3.5.0
-    react: ^16.8.0 || ^17.0.0
-  checksum: e21fad0db09caf9b9345a40766dd942fb24066a467a9c041555008aa9f619d73f7227e69abe3aba4d126f5677f789da682f023d07de9a502b97c0e55e90a657d
+    chart.js: ^4.0.0
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: b6f20cf68eb8961891af10250e737b50b940d74b7a3a07aae51f356960a865f822ee61856131c3965c7c547f06013ad963a679ed14d59d12e7c7d64c1db52f6c
   languageName: node
   linkType: hard
 
-"react-circular-progressbar@npm:2.0.4":
-  version: 2.0.4
-  resolution: "react-circular-progressbar@npm:2.0.4"
+"react-circular-progressbar@npm:2.1.0":
+  version: 2.1.0
+  resolution: "react-circular-progressbar@npm:2.1.0"
   peerDependencies:
-    react: ^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: c9b550e81027c2ebffe8eedc44570cf016731939df9bdb0647d24d5f6b6a97ea70347b73a0e5141ee123ef448bf0df9621c2d30f73d63f6b87f5e304e21035d5
+    react: ^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: dc118010a8f94733daafac586c969f7e889ad0736d96a0fda79406ee62e9410848abfd3dee4887bb0ff46b99e1f8c86ee1afabc88dfbf4dcb95107b22de1d6d7
   languageName: node
   linkType: hard
 
@@ -17660,15 +17675,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-countdown@npm:2.3.2":
-  version: 2.3.2
-  resolution: "react-countdown@npm:2.3.2"
+"react-countdown@npm:2.3.5":
+  version: 2.3.5
+  resolution: "react-countdown@npm:2.3.5"
   dependencies:
     prop-types: ^15.7.2
   peerDependencies:
     react: ">= 15"
     react-dom: ">= 15"
-  checksum: 670d7f6f355cd2c862fde2039e3fbaf39dae2925d2dea78c0406c04a9a5c35cca61bbd137de04a965ebdbbbaee5d435a06f06c0786a86d7bfc175b4fd9789e19
+  checksum: 24289f40591e88003052270e4eb9f7a87838e403ec2036fbd5ef99d57851c8d9739dae619d65f339494e582e34e2691c033a975bd8f7416730fc9beaf76a2b4b
   languageName: node
   linkType: hard
 
@@ -17802,17 +17817,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-file-icon@npm:1.0.0":
-  version: 1.0.0
-  resolution: "react-file-icon@npm:1.0.0"
+"react-file-icon@npm:1.2.0":
+  version: 1.2.0
+  resolution: "react-file-icon@npm:1.2.0"
   dependencies:
     lodash.uniqueid: ^4.0.1
     prop-types: ^15.7.2
-    tinycolor2: ^1.4.1
+    tinycolor2: ^1.4.2
   peerDependencies:
-    react: ^16.2.0
-    react-dom: ^16.2.0
-  checksum: 84165e31c4022caddce73828e5663a61422163206e66028f35d925255d340455e97a00ca4bdbc20654e97552fec1c616d0573645f5426a340cfb437caaf7c2ae
+    react: ^18.0.0 || ^17.0.0 || ^16.2.0
+    react-dom: ^18.0.0 || ^17.0.0 || ^16.2.0
+  checksum: 5e636de688b9c3ab3c3b3f63ddb306a4d68c4fa376f09c23440bc76e05bb89a517e067cb93fad1cdcecf09e97561dba111ac854d75fb5d4df274c8d42bb3bfb1
   languageName: node
   linkType: hard
 
@@ -17904,15 +17919,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-live-clock@npm:6.0.4":
-  version: 6.0.4
-  resolution: "react-live-clock@npm:6.0.4"
-  peerDependencies:
+"react-live-clock@npm:6.1.0":
+  version: 6.1.0
+  resolution: "react-live-clock@npm:6.1.0"
+  dependencies:
     moment: ^2.29.1
     moment-timezone: ^0.5.33
+  peerDependencies:
     react: ^16.14.0 || ^17 || ^18
     react-moment: 1.1.2
-  checksum: 7d02a3d4ac33255b8a848d3ecc6a379e9f82bd96314e6bf48d2d079bc57c1722b23783d6979e90f916291dc1369fb2078ab09fe06be19765c8ceb82dca19ed07
+  checksum: 80e35ee4a531d801e8ee48b3f434d7a47d79f234bef30f7e08b3a26c2f20e54687214ef3c05aea834406e0022d47b4327db6e19b45c051b6acefb0a766c1a320
   languageName: node
   linkType: hard
 
@@ -17983,17 +17999,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-pulse-dot@npm:2.0.0":
-  version: 2.0.0
-  resolution: "react-pulse-dot@npm:2.0.0"
+"react-pulse-dot@npm:2.1.0":
+  version: 2.1.0
+  resolution: "react-pulse-dot@npm:2.1.0"
   dependencies:
     "@fortawesome/fontawesome-svg-core": ^1.2.32
     "@fortawesome/free-solid-svg-icons": ^5.15.1
     "@fortawesome/react-fontawesome": ^0.1.12
     prop-types: ^15.7.2
   peerDependencies:
-    react: ^17.0.0
-  checksum: 8c58aabe1afb03e24a14fd6d9a41b37a99c1cebcc5e830b3bdb223b4cca957d30fcf80551e9714e7f70cca3c0156f29c50a9cf7cbd7ab97189713e48d06df8c5
+    react: ^16.0.0 || ^18.0.0
+  checksum: 79272173128273e0535b09be71b001dcfe72708092dc99f186afcf9e50c10702fa856a9b8f0b22091245a0429cc1d1956510d0c6748853f1a21ed288bf30033f
   languageName: node
   linkType: hard
 
@@ -18113,13 +18129,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-spinners@npm:0.13.3":
-  version: 0.13.3
-  resolution: "react-spinners@npm:0.13.3"
+"react-spinners@npm:0.13.6":
+  version: 0.13.6
+  resolution: "react-spinners@npm:0.13.6"
   peerDependencies:
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
-  checksum: d2798ed59d129fb151e3ec99d027a77ff5a2faeed3d05d94707a53dce56406ed94b72da1c99f142bae563e366827aac53fcb1ae403074a3b1f78bb4f519dea72
+  checksum: 0e557190b5811e62774de0000f91fdcc3afe845872084abd5620d16335eb8292ed3fb3fdb94527fe2802a8366ac4e5d42c8e5bffda9e8ed0d85d3c34b3829d8e
   languageName: node
   linkType: hard
 
@@ -18171,16 +18187,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-toggle@npm:4.1.2":
-  version: 4.1.2
-  resolution: "react-toggle@npm:4.1.2"
+"react-toggle@npm:4.1.3":
+  version: 4.1.3
+  resolution: "react-toggle@npm:4.1.3"
   dependencies:
     classnames: ^2.2.5
   peerDependencies:
-    prop-types: ">= 15.3.0 < 18"
-    react: ">= 15.3.0 < 18"
-    react-dom: ">= 15.3.0 < 18"
-  checksum: 99d2bdff4a550f0188a4e64f1cdff031bc829f0acc8b7ea1c7e216c8e233ba78046f32f217964e3ce1fdb2e6f533c774a80cafa45da8635e2ee302be76b5300a
+    prop-types: ">= 15.3.0 < 19"
+    react: ">= 15.3.0 < 19"
+    react-dom: ">= 15.3.0 < 19"
+  checksum: 21a2d2a5238df067d8227defb274e7c49cdfe4758d2aad2ae4f3a1ec96195d02787f6965e4ef5ad23dd179b75fdd0a86b565bc10d854e2b1d98de81e54e47528
   languageName: node
   linkType: hard
 
@@ -18209,13 +18225,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-virtualized-auto-sizer@npm:1.0.6":
-  version: 1.0.6
-  resolution: "react-virtualized-auto-sizer@npm:1.0.6"
+"react-virtualized-auto-sizer@npm:1.0.7":
+  version: 1.0.7
+  resolution: "react-virtualized-auto-sizer@npm:1.0.7"
   peerDependencies:
-    react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0
-    react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0
-  checksum: 81270e9d328e9b779515f42b6aa8dea2f21097f69fc776906d6b7d31ada03706d34408a6318baf59531f180402fbf74fdb9928ab65d53442a134b7ee5ba01265
+    react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0-rc
+    react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0-rc
+  checksum: 7f2f013c422771828c6613c7890f792aa90a033ea2b41c489c67ca2c6793eefa94d25232c1050fdf69cdd626fad9e3821c5003d45fa6fc831184cd09232023c2
   languageName: node
   linkType: hard
 
@@ -20478,7 +20494,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tinycolor2@npm:^1.4.1":
+"tinycolor2@npm:^1.4.2":
   version: 1.4.2
   resolution: "tinycolor2@npm:1.4.2"
   checksum: 57ed262e08815a4ab0ed933edafdbc6555a17081781766149813b44a080ecbe58b3ee281e81c0e75b42e4d41679f138cfa98eabf043f829e0683c04adb12c031
@@ -22099,12 +22115,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xterm-addon-fit@npm:0.5.0":
-  version: 0.5.0
-  resolution: "xterm-addon-fit@npm:0.5.0"
+"xterm-addon-fit@npm:0.6.0":
+  version: 0.6.0
+  resolution: "xterm-addon-fit@npm:0.6.0"
   peerDependencies:
-    xterm: ^4.0.0
-  checksum: 884d9f360893335c87e4514beeda2af6dbebf38a89b8518f1126d9c4611aefc1598b750bb43a953b79fdf1179c40d70c77a9169ae10f07e0abbbdb39b919b33f
+    xterm: ^5.0.0
+  checksum: 6115e130a58a5ec3d17b424bd0420f3d871e9a6bb455ca62e67c10724534eafbdd205dd35c4707d8037efe8107c09486b48cb4369ba2e3ac97ab78f805195319
   languageName: node
   linkType: hard
 

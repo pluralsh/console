@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from 'react-apollo'
 
-import filesize from 'filesize'
+import { filesize } from 'filesize'
 import { Box } from 'grommet'
 
 import { Graph, GraphHeader } from '../utils/Graph'

@@ -28,7 +28,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ServerCluster } from 'grommet-icons'
 
 import { memoryParser } from 'kubernetes-resource-parser'
-import filesize from 'filesize'
+import { filesize } from 'filesize'
 
 import { sumBy } from 'lodash'
 import { Doughnut } from 'react-chartjs-2'

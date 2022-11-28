@@ -25,7 +25,7 @@ import { Cube, Terminal } from 'grommet-icons'
 
 import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
 
-import filesize from 'filesize'
+import { filesize } from 'filesize'
 
 import { useNavigate, useParams } from 'react-router-dom'
 

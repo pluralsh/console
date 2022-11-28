@@ -3,7 +3,7 @@ import { Box, Stack, Text } from 'grommet'
 import { FileIcon, defaultStyles } from 'react-file-icon'
 import { Download, HoveredBackground, Tooltip } from 'forge-core'
 import moment from 'moment'
-import filesize from 'filesize'
+import { filesize } from 'filesize'
 
 import { download } from '../../utils/file'
 

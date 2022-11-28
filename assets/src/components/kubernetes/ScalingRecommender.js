@@ -11,7 +11,7 @@ import { useMutation, useQuery } from '@apollo/react-hooks'
 
 import { Box, Layer, Text } from 'grommet'
 
-import filesize from 'filesize'
+import { filesize } from 'filesize'
 
 import { LoopingLogo } from '../utils/AnimatedLogo'
 

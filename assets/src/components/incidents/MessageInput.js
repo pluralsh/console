@@ -29,7 +29,7 @@ import {
   Emoji,
   SendMessage,
 } from 'forge-core'
-import fs from 'filesize'
+import { filesize } from 'filesize'
 import { NimbleEmoji, emojiIndex } from 'emoji-mart'
 
 import { ThemeContext } from 'styled-components'
@@ -304,7 +304,7 @@ function UploadProgress({
               <Text
                 size="small"
                 color="dark-3"
-              >{fs(attachment.size)}
+              >{filesize(attachment.size)}
               </Text>
             </Box>
           )}
