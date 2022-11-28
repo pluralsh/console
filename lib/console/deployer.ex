@@ -47,6 +47,8 @@ defmodule Console.Deployer do
     end
   end
 
+  def file(path), do: GenServer.call(leader(), {:file, path})
+
   def wake(), do: GenServer.call(leader(), :poll)
 
   def cancel(), do: GenServer.call(leader(), :cancel)
@@ -58,6 +60,10 @@ defmodule Console.Deployer do
   def update(repo, content, tool), do: GenServer.call(leader(), {:update, repo, content, tool})
 
   def exec(fun), do: GenServer.call(leader(), {:exec, fun})
+
+  def handle_call({:file, path}, _, state) do
+    {:reply, File.read(path), state}
+  end
 
   def handle_call(:poll, _, %State{} = state) do
     send(self(), :poll)
