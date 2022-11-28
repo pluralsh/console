@@ -13,8 +13,6 @@ import {
 } from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
 
-import { AutoRefresh } from './AutoRefresh'
-
 import { LoginContext } from './contexts'
 import { Installations } from './Installations'
 
@@ -94,9 +92,7 @@ export default function ConsoleHeader() {
         </Button>
         {open && <Installer setOpen={setOpen} />}
         <Installations />
-        <AutoRefresh />
       </Flex>
     </Div>
-
   )
 }

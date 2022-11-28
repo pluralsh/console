@@ -5,7 +5,6 @@ import {
   AlertStatus,
   Button,
   Divider,
-  Download,
   ModalHeader,
 } from 'forge-core'
 
@@ -16,6 +15,8 @@ import {
   Text,
 } from 'grommet'
 
+import { DownloadIcon } from '@pluralsh/design-system'
+
 import * as serviceWorker from '../serviceWorker'
 
 import { LoginContext } from './contexts'
@@ -24,7 +25,7 @@ import { Icon } from './Console'
 const COMMIT_KEY = 'git-commit'
 const DOC_LINK = 'https://docs.plural.sh/basic-setup-and-deployment/admin-console#installation'
 
-const getCommit = () => localStorage.getItem(COMMIT_KEY) || 'example'
+export const getCommit = () => localStorage.getItem(COMMIT_KEY) || 'example'
 const setCommit = sha => localStorage.setItem(COMMIT_KEY, sha)
 
 function GitStatus({ setOpen }) {
@@ -95,7 +96,6 @@ export function AutoRefresh() {
   const [git, setGit] = useState(true)
   const { configuration: config } = useContext(LoginContext)
   const reload = useCallback(() => {
-    console.log('reloading')
     if (process.env.NODE_ENV === 'production') {
       const promise = serviceWorker.unregister() || Promise.resolve('done')
 
@@ -125,18 +125,9 @@ export function AutoRefresh() {
   if (!stale) return null
 
   return (
-    <Box margin={{ horizontal: 'xxsmall' }}>
-      <Icon
-        icon={(
-          <Download
-            size="15px"
-            color="orange"
-          />
-        )}
-        onClick={reload}
-        text="New Update Available"
-        align={{ top: 'bottom' }}
-      />
-    </Box>
+    <Icon
+      icon={<DownloadIcon color="warning" />}
+      onClick={reload}
+    />
   )
 }

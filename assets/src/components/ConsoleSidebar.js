@@ -21,6 +21,7 @@ import { Flex } from 'honorable'
 
 import { LoginContext } from './contexts'
 import { Notifications } from './users/Notifications'
+import { AutoRefresh, getCommit } from './AutoRefresh'
 
 export const SIDEBAR_ICON_HEIGHT = '42px'
 
@@ -45,7 +46,7 @@ const MENU_ITEMS = [
 ]
 
 export default function ConsoleSidebar() {
-  const { me } = useContext(LoginContext)
+  const { me, configuration } = useContext(LoginContext)
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const active = ({ path }) => (path === '/'
@@ -94,6 +95,15 @@ export default function ConsoleSidebar() {
         >
           <Notifications />
         </SidebarItem>
+        {getCommit() !== configuration.gitCommit && (
+          <SidebarItem
+            clickable
+            tooltip="New update available"
+          >
+            <AutoRefresh />
+          </SidebarItem>
+        )}
+
         <SidebarItem
           clickable
           onClick={() => navigate('/me/edit')}
