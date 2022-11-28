@@ -61,6 +61,20 @@ defmodule Console.Storage.Git do
       do: git("clean", ["-f"])
   end
 
+  def doctor() do
+    with {:ok, _} <- check_detached(),
+      do: pull()
+  end
+
+  defp check_detached() do
+    case git("rev-parse", ["--symbolic-full-name",  "HEAD"]) do
+      {:ok, "HEAD" <> _} ->
+        git("stash")
+        git("checkout", [branch()])
+      _ -> {:ok, ""}
+    end
+  end
+
   def git(cmd, args \\ []),
     do: cmd("git", [cmd | args], workspace())
 
