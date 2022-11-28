@@ -38,6 +38,8 @@ import { Line } from 'rc-progress'
 
 import { format } from 'components/apps/app/dashboards/dashboard/Dashboard'
 
+import { Readiness } from 'utils/status'
+
 import { cpuParser } from '../../utils/kubernetes'
 import { Graph } from '../utils/Graph'
 import { LoopingLogo } from '../utils/AnimatedLogo'
