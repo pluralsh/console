@@ -32,19 +32,17 @@ export default function KubernetesCost({ cost }) {
       grow={1}
       shrink={1}
     >
-      <Flex marginVertical={9}>
+      <Flex
+        marginVertical={9}
+        justify="space-between"
+      >
         <Span
           body1
-          flexBasis={520}
           fontWeight={600}
         >
           Kubernetes cost
         </Span>
-        <Span
-          flexBasis={80}
-          color="text-light"
-        >${total}
-        </Span>
+        <Span color="text-light">${total}</Span>
       </Flex>
       {data.map(entry => (
         <Flex
@@ -56,7 +54,7 @@ export default function KubernetesCost({ cost }) {
           <Flex
             color="text-xlight"
             overline
-            basis={200}
+            basis={250}
           >
             {entry.dim}
           </Flex>
@@ -70,6 +68,7 @@ export default function KubernetesCost({ cost }) {
           <Flex
             basis={80}
             color="text-light"
+            justify="end"
           >
             ${Number(entry.cost).toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </Flex>
