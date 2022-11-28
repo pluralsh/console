@@ -11,6 +11,10 @@ defmodule Console.Services.LeaderElection do
   @spec atomic_get(binary) :: Leader.t | nil
   def atomic_get(name), do: Console.Repo.get_by(Leader.with_lock(), name: name)
 
+  @doc """
+  Wipes the leader record if `ref` owns `name`, otherwise fails
+  """
+  @spec clear(term, binary) :: leader_resp
   def clear(ref, name) do
     start_transaction()
     |> add_operation(:fetch, fn _ ->
@@ -23,8 +27,14 @@ defmodule Console.Services.LeaderElection do
     |> execute(extract: :update)
   end
 
-  @spec elect(map, binary) :: leader_resp
-  def elect(%{ref: ref} = attrs, name) do
+  @doc """
+  Locks the record for `name` then if either `ref` currently owns it or it does not exist, upserts
+  the record with a current heartbeat.
+
+  If `ref` does not own the record, it fails
+  """
+  @spec elect(term, binary) :: leader_resp
+  def elect(ref, name) do
     start_transaction()
     |> add_operation(:fetch, fn _ ->
       case atomic_get(name) do
@@ -35,7 +45,7 @@ defmodule Console.Services.LeaderElection do
     end)
     |> add_operation(:update, fn %{fetch: fetch} ->
       fetch
-      |> Leader.changeset(Map.merge(attrs, %{heartbeat: Timex.now()}))
+      |> Leader.changeset(%{ref: ref, heartbeat: Timex.now()})
       |> Console.Repo.insert_or_update()
     end)
     |> execute(extract: :update)

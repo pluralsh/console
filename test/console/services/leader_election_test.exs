@@ -4,7 +4,7 @@ defmodule Console.Services.LeaderElectionTest do
 
   describe "elect/2" do
     test "if no leader exists it will elect" do
-      {:ok, leader} = LeaderElection.elect(%{ref: self()}, "usa")
+      {:ok, leader} = LeaderElection.elect(self(), "usa")
 
       assert leader.name == "usa"
       assert leader.ref == self()
@@ -14,13 +14,13 @@ defmodule Console.Services.LeaderElectionTest do
     test "if another leader exists, it will fail" do
       insert(:leader, ref: :else, name: "usa")
 
-      {:error, _} = LeaderElection.elect(%{ref: self()}, "usa")
+      {:error, _} = LeaderElection.elect(self(), "usa")
     end
 
     test "if a stale leader exists, it will take ownership" do
       insert(:leader, ref: :else, name: "usa", heartbeat: Timex.now() |> Timex.shift(minutes: -1))
 
-      {:ok, leader} = LeaderElection.elect(%{ref: self()}, "usa")
+      {:ok, leader} = LeaderElection.elect(self(), "usa")
 
       assert leader.name == "usa"
       assert leader.ref == self()
@@ -30,7 +30,7 @@ defmodule Console.Services.LeaderElectionTest do
     test "if you are leader, the hearbeat will be updated" do
       old = insert(:leader, name: "usa", heartbeat: Timex.now() |> Timex.shift(seconds: -10))
 
-      {:ok, leader} = LeaderElection.elect(%{ref: self()}, "usa")
+      {:ok, leader} = LeaderElection.elect(self(), "usa")
 
       assert leader.name == "usa"
       assert leader.ref == self()

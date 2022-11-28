@@ -1,5 +1,6 @@
 defmodule Console.Plural.Context do
   import Console
+  alias Console.Deployer
 
   defstruct [:configuration, :bundles, :smtp]
 
@@ -34,10 +35,10 @@ defmodule Console.Plural.Context do
   end
 
   def get() do
-    location()
-    |> YamlElixir.read_from_file()
-    |> case do
-      {:ok, %{"spec" => spec}} -> {:ok, new(spec)}
+    with {:ok, content} <- Deployer.file(location()),
+         {:ok, %{"spec" => spec}} <- YamlElixir.read_from_string(content) do
+      {:ok, new(spec)}
+    else
       _ -> {:error, :not_found}
     end
   end

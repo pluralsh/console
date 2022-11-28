@@ -37,7 +37,7 @@ defmodule Console.Deployer do
 
   def elect() do
     Logger.info "attempting to elect #{me()} as leader"
-    LeaderElection.elect(%{ref: me()}, @leader)
+    LeaderElection.elect(me(), @leader)
   end
 
   def leader() do
