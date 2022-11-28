@@ -1,21 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react'
-import {
-  Box,
-  Layer,
-  Text,
-  ThemeContext,
-} from 'grommet'
+import { Box, Layer, ThemeContext } from 'grommet'
 import { CircleInformation } from 'grommet-icons'
-import {
-  TabContent,
-  TabHeader,
-  TabHeaderItem,
-  Tabs,
-} from 'forge-core'
 import { useQuery } from 'react-apollo'
 
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
-import { CostBreakdown } from './repos/CostAnalysis'
 import { Icon } from './Console'
 import { OIDCProvider } from './oidc/OIDCProvider'
 import { LoopingLogo } from './utils/AnimatedLogo'
@@ -58,48 +46,9 @@ export function ToolbarItem({ children, onClick, open }) {
 
 export function ApplicationDetails() {
   const { currentApplication } = useContext(InstallationContext)
-  const { name, cost, license } = currentApplication
-  const hasCost = cost || license
+  const { name } = currentApplication
 
-  return (
-    <Box
-      fill
-      pad="medium"
-      gap="small"
-    >
-      <Tabs defaultTab={hasCost ? 'cost' : 'oidc'}>
-        <TabHeader>
-          {hasCost && (
-            <TabHeaderItem name="cost">
-              <Text
-                size="small"
-                weight={500}
-              >Cost Analysis
-              </Text>
-            </TabHeaderItem>
-          )}
-          <TabHeaderItem name="oidc">
-            <Text
-              size="small"
-              weight={500}
-            >OpenID Connect
-            </Text>
-          </TabHeaderItem>
-        </TabHeader>
-        {hasCost && (
-          <TabContent name="cost">
-            <CostBreakdown
-              cost={cost}
-              license={license}
-            />
-          </TabContent>
-        )}
-        <TabContent name="oidc">
-          <OIDCProvider name={name} />
-        </TabContent>
-      </Tabs>
-    </Box>
-  )
+  return <OIDCProvider name={name} />
 }
 
 function ApplicationDetail({ close }) {

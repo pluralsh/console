@@ -33,16 +33,16 @@ import AppStatus from '../AppStatus'
 
 import AppSelector from './AppSelector'
 
-const DIRECTORY = [
-  { path: 'dashboards', label: 'Dashboards' },
-  { path: 'runbooks', label: 'Runbooks' },
-  { path: 'components', label: 'Components' },
-  { path: 'logs', label: 'Logs' },
-  { path: 'config', label: 'Configuration' }, // path: '/config/{repo}', git: true
+const getDirectory = app => [
+  { path: 'dashboards', label: 'Dashboards', enabled: true },
+  { path: 'runbooks', label: 'Runbooks', enabled: true },
+  { path: 'components', label: 'Components', enabled: true },
+  { path: 'logs', label: 'Logs', enabled: true },
+  { path: 'config', label: 'Configuration', enabled: true }, // path: '/config/{repo}', git: true
   //       {OPTIONS.map(({ text, icon, path, name: sbName, git }, ind) => {
     //         if (git && !conf.gitStatus.cloned) return null
     //       })}
-  { path: 'cost', label: 'Cost analysis' },
+  { path: 'cost', label: 'Cost analysis', enabled: app.cost || app.license },
 ]
 
 export default function App() {
@@ -57,7 +57,8 @@ export default function App() {
 
   if (!me || !currentApp) return null
 
-  const currentTab = DIRECTORY.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
+  const directory = getDirectory(currentApp).filter(({ enabled }) => enabled)
+  const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
   const { name, spec: { descriptor: { links, version } } } = currentApp
   const validLinks = links?.filter(({ url }) => !!url)
 
@@ -80,7 +81,7 @@ export default function App() {
             selectedKey: currentTab?.path,
           }}
         >
-          {DIRECTORY.map(({ label, path }) => (
+          {directory.map(({ label, path }) => (
             <Tab
               key={path}
               as={Link}
