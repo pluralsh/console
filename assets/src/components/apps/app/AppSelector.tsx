@@ -1,6 +1,6 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
 import { ThemeContext } from 'grommet'
-import { Div, Span } from 'honorable'
+import { Div, P, Span } from 'honorable'
 import { Key, useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -36,8 +36,13 @@ export default function AppSelector({ applications, currentApp }) {
           <ListBoxItem
             key={app.name}
             label={(
-              <>
-                <Span>{app.name}</Span>
+              <P
+                overflow="hidden"
+                textOverflow="ellipsis"
+                maxWidth={140}
+                whiteSpace="nowrap"
+              >
+                {app.name}
                 {app.spec?.descriptor?.version
                 && (
                   <Span
@@ -48,7 +53,7 @@ export default function AppSelector({ applications, currentApp }) {
                     v{app.spec.descriptor.version}
                   </Span>
                 )}
-              </>
+              </P>
             )}
             textValue={app.name}
             leftContent={hasIcons(app) ? (
