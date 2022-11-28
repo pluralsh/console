@@ -17,7 +17,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { useQuery } from 'react-apollo'
 import { DASHBOARDS_Q, DASHBOARD_Q } from 'components/graphql/dashboards'
 import { Div, Flex, Span } from 'honorable'
@@ -165,6 +165,7 @@ function LabelSelect({ label, onSelect }) {
 export default function Dashboard() {
   const navigate = useNavigate()
   const { appName, dashboardId: id } = useParams()
+  const { setDashboardDescription }: any = useOutletContext()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
   const [selectedKey, setSelectedKey] = useState<Key>('')
   const [duration, setDuration] = useState(DURATIONS[0])
@@ -215,6 +216,7 @@ export default function Dashboard() {
   const { dashboard } = data
   const { dashboards } = dashboardsData
 
+  setDashboardDescription(dashboard.spec?.description)
   const filteredLabels = dashboard.spec.labels.filter(({ values }) => values.length > 0)
 
   return (

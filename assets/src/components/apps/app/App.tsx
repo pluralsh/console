@@ -7,7 +7,7 @@ import {
   TabPanel,
 } from '@pluralsh/design-system'
 
-import { useContext, useRef } from 'react'
+import { useContext, useRef, useState } from 'react'
 import {
   Link,
   Outlet,
@@ -49,8 +49,9 @@ export default function App() {
   const tabStateRef = useRef<any>(null)
   const { me }: any = useContext(LoginContext)
   const { pathname } = useLocation()
-  const { appName } = useParams()
+  const { appName, dashboardId } = useParams()
   const { applications }: any = useContext(InstallationContext)
+  const [dashboardDescription, setDashboardDescription] = useState<string>('')
   const pathPrefix = `/apps/${appName}`
   const currentApp = applications.find(app => app.name === appName)
 
@@ -96,7 +97,7 @@ export default function App() {
         as={<ResponsiveLayoutContentContainer />}
         stateRef={tabStateRef}
       >
-        <Outlet />
+        <Outlet context={{ setDashboardDescription }} />
       </TabPanel>
       <ResponsiveLayoutSidecarContainer width="200px">
         {validLinks?.length > 0 && (
@@ -140,6 +141,11 @@ export default function App() {
               </Prop>
             )}
           </PropsContainer>
+          {dashboardId && (
+            <PropsContainer>
+              <Prop title="Description">{dashboardDescription}</Prop>
+            </PropsContainer>
+          )}
         </Flex>
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
