@@ -16,7 +16,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { useQuery } from 'react-apollo'
 import { Div, Flex } from 'honorable'
 
@@ -41,6 +41,7 @@ export default function Runbook() {
   const tabStateRef = useRef<any>(null)
   const { appName, runbookName } = useParams()
   const [duration, setDuration] = useState(DURATIONS[0])
+  const { setRunbook }: any = useOutletContext()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
 
   const {
@@ -86,6 +87,8 @@ export default function Runbook() {
 
   const { runbook } = data
   const { runbooks } = runbooksData
+
+  setRunbook(runbook)
 
   return (
     <Div>

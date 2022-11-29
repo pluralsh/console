@@ -52,9 +52,10 @@ export default function App() {
   const tabStateRef = useRef<any>(null)
   const { me }: any = useContext(LoginContext)
   const { pathname } = useLocation()
-  const { appName, dashboardId } = useParams()
+  const { appName, dashboardId, runbookName } = useParams()
   const { applications }: any = useContext(InstallationContext)
-  const [dashboardDescription, setDashboardDescription] = useState<string>('')
+  const [dashboard, setDashboard] = useState<any>()
+  const [runbook, setRunbook] = useState<any>()
   const pathPrefix = `/apps/${appName}`
   const currentApp = applications.find(app => app.name === appName)
 
@@ -101,7 +102,7 @@ export default function App() {
         as={<ResponsiveLayoutContentContainer />}
         stateRef={tabStateRef}
       >
-        <Outlet context={{ setDashboardDescription }} />
+        <Outlet context={{ setDashboard, setRunbook }} />
       </TabPanel>
       <ResponsiveLayoutSidecarContainer width="200px">
         {validLinks?.length > 0 && (
@@ -145,9 +146,14 @@ export default function App() {
               </Prop>
             )}
           </PropsContainer>
-          {dashboardId && (
+          {dashboardId && dashboard && (
             <PropsContainer>
-              <Prop title="Description">{dashboardDescription}</Prop>
+              <Prop title="Description">{dashboard.spec?.description}</Prop>
+            </PropsContainer>
+          )}
+          {runbookName && runbook && (
+            <PropsContainer>
+              <Prop title="Description">{runbook.spec?.description}</Prop>
             </PropsContainer>
           )}
         </Flex>

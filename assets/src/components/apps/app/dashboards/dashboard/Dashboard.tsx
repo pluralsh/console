@@ -31,7 +31,7 @@ import DashboardGraph from './DashboardGraph'
 export default function Dashboard() {
   const navigate = useNavigate()
   const { appName, dashboardId: id } = useParams()
-  const { setDashboardDescription }: any = useOutletContext()
+  const { setDashboard }: any = useOutletContext()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
   const [selectedKey, setSelectedKey] = useState<Key>('')
   const [duration, setDuration] = useState(DURATIONS[0])
@@ -82,7 +82,7 @@ export default function Dashboard() {
   const { dashboard } = data
   const { dashboards } = dashboardsData
 
-  setDashboardDescription(dashboard.spec?.description)
+  setDashboard(dashboard)
   const filteredLabels = dashboard.spec.labels.filter(({ values }) => values.length > 0)
 
   return (
