@@ -19,12 +19,13 @@ import { useQuery } from 'react-apollo'
 import { DASHBOARDS_Q, DASHBOARD_Q } from 'components/graphql/dashboards'
 import { Div, Flex } from 'honorable'
 
+import { DURATIONS } from 'utils/time'
+
 import RangePicker from '../../../../utils/RangePicker'
 
 import { DashboardSelectButton } from './DashboardSelectButton'
 import LabelSelect from './DashboardLabelSelect'
 import DashboardGraph from './DashboardGraph'
-import { DURATIONS } from './misc'
 
 export default function Dashboard() {
   const navigate = useNavigate()

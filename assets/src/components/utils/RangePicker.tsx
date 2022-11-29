@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react'
 
-import { DURATIONS } from '../apps/app/dashboards/dashboard/misc'
+import { DURATIONS } from 'utils/time'
 
 export default function RangePicker({ duration, setDuration }: any) {
   const tabStateRef = useRef<any>()

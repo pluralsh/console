@@ -12,7 +12,7 @@ import { useParams } from 'react-router-dom'
 
 import { useIntercom } from 'react-use-intercom'
 
-import { DURATIONS } from 'components/apps/app/dashboards/dashboard/misc'
+import { DURATIONS } from 'utils/time'
 
 import RangePicker from 'components/utils/RangePicker'
 

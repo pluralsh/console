@@ -4,7 +4,7 @@ import moment from 'moment'
 import { last } from 'lodash'
 import { Box, Text, ThemeContext } from 'grommet'
 import { semanticColors } from '@pluralsh/design-system/dist/theme/colors'
-import { useColorMap } from 'utils/colors'
+import { useColorMap } from 'utils/color'
 
 export function dateFormat(date) {
   return moment(date).format('MM/DD h:mm:ss a')

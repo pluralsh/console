@@ -13,7 +13,7 @@ import { Box, Text } from 'grommet'
 
 import { Portal } from 'react-portal'
 
-import { DURATIONS } from 'components/apps/app/dashboards/dashboard/misc'
+import { DURATIONS } from 'utils/time'
 
 import RangePicker from 'components/utils/RangePicker'
 
