@@ -1,13 +1,14 @@
 defmodule Console.Deployer do
   use GenServer
   alias Console.Commands.{Plural, Command}
-  alias Console.Services.{Builds, Users}
+  alias Console.Services.{Builds, Users, LeaderElection}
   alias Console.Schema.Build
   alias Console.Plural.Context
   require Logger
 
   @poll_interval 10_000
   @group :deployer
+  @leader "deployer"
 
   defmodule State, do: defstruct [:storage, :ref, :pid, :build, :id, :timer, :leader]
 
@@ -24,25 +25,45 @@ defmodule Console.Deployer do
     Logger.info "Starting deployer"
     :pg2.create(@group)
     :pg2.join(@group, self())
-    {:ok, ref} = :timer.send_interval(@poll_interval, :poll)
+    {:ok, _} = :timer.send_interval(@poll_interval, :poll)
     send self(), :init
     if Console.conf(:initialize) do
       :timer.send_interval(:timer.minutes(2), :sync)
     end
-    {:ok, %State{storage: storage, id: Ecto.UUID.generate(), ref: ref}}
+    {:ok, %State{storage: storage, id: Ecto.UUID.generate()}}
   end
 
-  def wake(), do: GenServer.call(__MODULE__, :poll)
+  def me(), do: {__MODULE__, node()}
 
-  def cancel(), do: GenServer.call(__MODULE__, :cancel)
+  def elect() do
+    Logger.info "attempting to elect #{me()} as leader"
+    LeaderElection.elect(me(), @leader)
+  end
 
-  def state(), do: GenServer.call(__MODULE__, :state)
+  def leader() do
+    case LeaderElection.get(@leader) do
+      %{ref: ref} -> ref
+      _ -> __MODULE__
+    end
+  end
 
-  def ping(), do: GenServer.call(__MODULE__, :ping)
+  def file(path), do: GenServer.call(leader(), {:file, path})
 
-  def update(repo, content, tool), do: GenServer.call(__MODULE__, {:update, repo, content, tool})
+  def wake(), do: GenServer.call(leader(), :poll)
 
-  def exec(fun), do: GenServer.call(__MODULE__, {:exec, fun})
+  def cancel(), do: GenServer.call(leader(), :cancel)
+
+  def state(), do: GenServer.call(leader(), :state)
+
+  def ping(), do: GenServer.call(leader(), :ping)
+
+  def update(repo, content, tool), do: GenServer.call(leader(), {:update, repo, content, tool})
+
+  def exec(fun), do: GenServer.call(leader(), {:exec, fun})
+
+  def handle_call({:file, path}, _, state) do
+    {:reply, File.read(path), state}
+  end
 
   def handle_call(:poll, _, %State{} = state) do
     send(self(), :poll)
@@ -73,6 +94,7 @@ defmodule Console.Deployer do
   def handle_cast(:sync, %State{ref: nil, storage: storage} = state) do
     Logger.info "Resyncing git state"
     storage.init()
+    storage.doctor()
     {:noreply, state}
   end
   def handle_cast(:sync, state), do: {:noreply, state}
@@ -85,12 +107,16 @@ defmodule Console.Deployer do
 
   def handle_info(:poll, %State{pid: nil, storage: storage, id: id} = state) do
     Logger.info "Checking for pending builds, pid: #{inspect(self())}, node: #{node()}"
-    with {:ok, %Build{} = build} <- Builds.poll(id) do
+    with {:ok, _} <- elect(),
+         {:ok, %Build{} = build} <- Builds.poll(id) do
       {pid, ref} = perform(storage, build)
       {:noreply, %{state | ref: ref, pid: pid, build: build}}
     else
       {:error, :locked} ->
         Logger.info "deployer is locked"
+        {:noreply, state}
+      {:error, :following} ->
+        Logger.info "#{node()} is a follower"
         {:noreply, state}
       _ ->
         Logger.info "No build found"
@@ -100,6 +126,7 @@ defmodule Console.Deployer do
 
   def handle_info(:poll, %State{pid: pid} = state) when is_pid(pid) do
     Logger.info "Build #{inspect(pid)} already running"
+    elect()
     {:noreply, ping(state)}
   end
 
@@ -115,6 +142,10 @@ defmodule Console.Deployer do
 
   def terminate(state, reason) do
     Logger.info "Terminating with state: #{inspect(state)} reason #{inspect(reason)}"
+    case LeaderElection.clear(me(), @leader) do
+      {:ok, _} -> Logger.info "removed #{me()} as cluster leader"
+      _ -> Logger.info "#{me()} is not leader, moving on"
+    end
     :ok
   end
 

@@ -2,6 +2,7 @@ defmodule Console.Storage do
 
   @type result :: :ok | {:error, term}
 
+  @callback doctor() :: result
 
   @callback init() :: result
 
