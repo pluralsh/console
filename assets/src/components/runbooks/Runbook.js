@@ -1,175 +1,139 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { useQuery } from '@apollo/react-hooks'
-import { useParams } from 'react-router-dom'
+// import React, { useContext, useState } from 'react'
 
-import {
-  TabContent,
-  TabHeader,
-  TabHeaderItem,
-  Tabs,
-} from 'forge-core'
+// import {
+//   TabContent,
+//   TabHeader,
+//   TabHeaderItem,
+//   Tabs,
+// } from 'forge-core'
 
-import { Box, Text } from 'grommet'
+// import { Box, Text } from 'grommet'
 
-import { Portal } from 'react-portal'
+// import { Portal } from 'react-portal'
 
-import { DURATIONS } from 'utils/time'
+// import RangePicker from 'components/utils/RangePicker'
 
-import RangePicker from 'components/utils/RangePicker'
+// import { LoopingLogo } from '../utils/AnimatedLogo'
 
-import { BreadcrumbsContext } from '../Breadcrumbs'
-import { LoopingLogo } from '../utils/AnimatedLogo'
+// import { Display } from './Display'
 
-import { useEnsureCurrent } from '../Installations'
+// import { StatusIcon } from './StatusIcon'
 
-import { Display } from './Display'
-import { RUNBOOK_Q } from './queries'
+// import { RunbookExecutions } from './RunbookExecutions'
 
-import { StatusIcon } from './StatusIcon'
+// export const ActionContext = React.createContext({})
 
-import { RunbookExecutions } from './RunbookExecutions'
+// function ActionContainer() {
+//   const { setRef } = useContext(ActionContext)
 
-const POLL_INTERVAL = 30 * 1000
+//   return (
+//     <Box
+//       ref={setRef}
+//       flex={false}
+//     />
+//   )
+// }
 
-export const ActionContext = React.createContext({})
+// export function ActionPortal({ children }) {
+//   const { ref } = useContext(ActionContext)
 
-function ActionContainer() {
-  const { setRef } = useContext(ActionContext)
+//   return (
+//     <Portal node={ref}>
+//       <Box pad={{ vertical: 'xsmall' }}>
+//         {children}
+//       </Box>
+//     </Portal>
+//   )
+// }
 
-  return (
-    <Box
-      ref={setRef}
-      flex={false}
-    />
-  )
-}
+// export function Runbook() {
+//   const [ref, setRef] = useState(null)
 
-export function ActionPortal({ children }) {
-  const { ref } = useContext(ActionContext)
+//   if (!data) return <LoopingLogo dark />
 
-  return (
-    <Portal node={ref}>
-      <Box pad={{ vertical: 'xsmall' }}>
-        {children}
-      </Box>
-    </Portal>
-  )
-}
-
-export function Runbook() {
-  const [duration, setDuration] = useState(DURATIONS[0])
-  const { namespace, name } = useParams()
-  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
-  const [ref, setRef] = useState(null)
-  const {
-    data, loading, fetchMore, refetch,
-  } = useQuery(RUNBOOK_Q, {
-    variables: {
-      namespace,
-      name,
-      context: { timeseriesStart: -duration.offset, timeseriesStep: duration.step },
-    },
-    fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-  })
-
-  useEffect(() => {
-    setBreadcrumbs([
-      { text: 'runbooks', url: '/runbooks' },
-      { text: namespace, url: `/runbooks/${namespace}` },
-      { text: name, url: `/runbooks/${namespace}/${name}` },
-    ])
-  }, [namespace, name])
-
-  useEnsureCurrent(namespace)
-
-  if (!data) return <LoopingLogo dark />
-
-  const { runbook } = data
-
-  return (
-    // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <ActionContext.Provider value={{ ref, setRef }}>
-      <Box
-        fill
-        background="backgroundColor"
-      >
-        <Box
-          pad="small"
-          direction="row"
-          gap="small"
-          align="center"
-        >
-          <Box flex={false}>
-            <StatusIcon
-              status={runbook.status}
-              size={35}
-              innerSize={20}
-            />
-          </Box>
-          <Box fill="horizontal">
-            <Text
-              size="small"
-              weight="bold"
-            >{runbook.spec.name}
-            </Text>
-            <Text
-              size="small"
-              color="dark-3"
-            >{runbook.spec.description}
-            </Text>
-          </Box>
-          <Box flex={false}>
-            <RangePicker
-              duration={duration}
-              setDuration={setDuration}
-            />
-          </Box>
-          <ActionContainer />
-        </Box>
-        <Box fill>
-          <Tabs
-            defaultTab="runbook"
-            onTabChange={() => refetch()}
-          >
-            <TabHeader>
-              <TabHeaderItem name="runbook">
-                <Text
-                  size="small"
-                  weight={500}
-                >runbook
-                </Text>
-              </TabHeaderItem>
-              <TabHeaderItem name="executions">
-                <Text
-                  size="small"
-                  weight={500}
-                >executions
-                </Text>
-              </TabHeaderItem>
-            </TabHeader>
-            <TabContent name="runbook">
-              <Box
-                style={{ overflow: 'auto' }}
-                pad="small"
-                fill
-              >
-                <Display
-                  root={runbook.spec.display}
-                  data={runbook.data}
-                />
-              </Box>
-            </TabContent>
-            <TabContent name="executions">
-              <RunbookExecutions
-                runbook={runbook}
-                loading={loading}
-                fetchMore={fetchMore}
-              />
-            </TabContent>
-          </Tabs>
-        </Box>
-      </Box>
-    </ActionContext.Provider>
-  )
-}
+//   return (
+//     // eslint-disable-next-line react/jsx-no-constructed-context-values
+//     <ActionContext.Provider value={{ ref, setRef }}>
+//       <Box
+//         fill
+//         background="backgroundColor"
+//       >
+//         <Box
+//           pad="small"
+//           direction="row"
+//           gap="small"
+//           align="center"
+//         >
+//           <Box flex={false}>
+//             <StatusIcon
+//               status={runbook.status}
+//               size={35}
+//               innerSize={20}
+//             />
+//           </Box>
+//           <Box fill="horizontal">
+//             <Text
+//               size="small"
+//               weight="bold"
+//             >{runbook.spec.name}
+//             </Text>
+//             <Text
+//               size="small"
+//               color="dark-3"
+//             >{runbook.spec.description}
+//             </Text>
+//           </Box>
+//           <Box flex={false}>
+//             <RangePicker
+//               duration={duration}
+//               setDuration={setDuration}
+//             />
+//           </Box>
+//           <ActionContainer />
+//         </Box>
+//         <Box fill>
+//           <Tabs
+//             defaultTab="runbook"
+//             onTabChange={() => refetch()}
+//           >
+//             <TabHeader>
+//               <TabHeaderItem name="runbook">
+//                 <Text
+//                   size="small"
+//                   weight={500}
+//                 >runbook
+//                 </Text>
+//               </TabHeaderItem>
+//               <TabHeaderItem name="executions">
+//                 <Text
+//                   size="small"
+//                   weight={500}
+//                 >executions
+//                 </Text>
+//               </TabHeaderItem>
+//             </TabHeader>
+//             <TabContent name="runbook">
+//               <Box
+//                 style={{ overflow: 'auto' }}
+//                 pad="small"
+//                 fill
+//               >
+//                 <Display
+//                   root={runbook.spec.display}
+//                   data={runbook.data}
+//                 />
+//               </Box>
+//             </TabContent>
+//             <TabContent name="executions">
+//               <RunbookExecutions
+//                 runbook={runbook}
+//                 loading={loading}
+//                 fetchMore={fetchMore}
+//               />
+//             </TabContent>
+//           </Tabs>
+//         </Box>
+//       </Box>
+//     </ActionContext.Provider>
+//   )
+// }

@@ -35,6 +35,7 @@ import AppStatus from '../AppStatus'
 
 import AppSelector from './AppSelector'
 
+// TODO: Keep current path when switching views if possible.
 const getDirectory = app => [
   { path: 'dashboards', label: 'Dashboards', enabled: true },
   { path: 'runbooks', label: 'Runbooks', enabled: true },

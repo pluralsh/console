@@ -7,7 +7,7 @@ export function PropsContainer({ children, title, ...props }: any) {
       borderRadius="medium"
       {...props}
     >
-      {(!!title && (
+      {(title && (
         <Div
           overline
           color="text-xlight"

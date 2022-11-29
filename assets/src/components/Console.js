@@ -34,7 +34,6 @@ import EditUser from './users/EditUser'
 import { Audits } from './audits/Audits'
 import { PluralApi } from './PluralApi'
 import { Incident } from './incidents/Incident'
-import { Runbook } from './runbooks/Runbook'
 import { NavigationContext } from './navigation/Submenu'
 import { Tooltip } from './utils/Tooltip'
 
@@ -47,6 +46,7 @@ import Dashboards from './apps/app/dashboards/Dashboards'
 import Runbooks from './apps/app/runbooks/Runbooks'
 import CostAnalysis from './apps/app/cost/CostAnalysis'
 import Dashboard from './apps/app/dashboards/dashboard/Dashboard'
+import Runbook from './apps/app/runbooks/runbook/Runbook'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -280,14 +280,6 @@ export default function Console() {
                           element={<Pod />}
                         />
                         <Route
-                          path="/runbooks/:namespace/:name"
-                          element={<Runbook />}
-                        />
-                        {/* <Route
-                          path="/runbooks/:repo"
-                          element={<Runbooks />}
-                        /> */}
-                        <Route
                           path="/nodes/:name"
                           element={<Node />}
                         />
@@ -335,10 +327,6 @@ export default function Console() {
                           path="/webhooks"
                           element={<Webhooks />}
                         />
-                        {/* <Route
-                          path="/dashboards/:repo"
-                          element={}
-                        /> */}
                         <Route
                           path="/dashboards"
                           element={(
@@ -389,6 +377,10 @@ export default function Console() {
                           <Route
                             path="runbooks"
                             element={<Runbooks />}
+                          />
+                          <Route
+                            path="runbooks/:runbookName"
+                            element={<Runbook />}
                           />
                           <Route
                             path="cost"

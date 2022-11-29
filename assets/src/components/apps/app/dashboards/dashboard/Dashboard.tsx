@@ -53,8 +53,8 @@ export default function Dashboard() {
     { text: 'Apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
     { text: 'Dashboards', url: `/apps/${appName}/dashboards` },
-    { text: id, url: `/apps/${appName}/dashboards/${id}` },
-  ]), [appName, id, setBreadcrumbs])
+    { text: data?.dashboard?.spec?.name, url: `/apps/${appName}/dashboards/${data?.dashboard?.id}` },
+  ]), [appName, data, setBreadcrumbs])
 
   useEffect(() => setSelectedKey(data?.dashboard?.spec?.name || ''), [data])
 

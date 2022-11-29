@@ -67,13 +67,13 @@ export default function Runbooks() {
       <PageTitle heading="Runbooks" />
       {runbooks.map(runbook => (
         <ListItem
-          key={runbook.id}
+          key={runbook.name}
           title={runbook.spec.name}
           description={runbook.spec.description}
           icon={<RunBookIcon />}
           borderColor={getBorderColor(runbook)}
           chips={getChip(runbook)}
-          onClick={() => navigate(`/apps/${appName}/runbooks/${runbook.id}`)}
+          onClick={() => navigate(`/apps/${appName}/runbooks/${runbook.name}`)}
         />
       ))}
       {runbooks?.length < 1 && (
