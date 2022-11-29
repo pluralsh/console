@@ -34,6 +34,7 @@ import { LoginContext } from '../../contexts'
 import AppStatus from '../AppStatus'
 
 import AppSelector from './AppSelector'
+import RunbookStatus from './runbooks/runbook/RunbookStatus'
 
 // TODO: Keep current path when switching views if possible.
 const getDirectory = app => [
@@ -127,7 +128,7 @@ export default function App() {
           marginTop={validLinks?.length > 0 ? 0 : 56}
           paddingTop="xsmall"
         >
-          <PropsContainer>
+          <PropsContainer title="App">
             <Prop title="Current version">v{version}</Prop>
             <Prop title="Status"><AppStatus app={currentApp} /></Prop>
             {validLinks?.length > 1 && (
@@ -147,13 +148,14 @@ export default function App() {
             )}
           </PropsContainer>
           {dashboardId && dashboard && (
-            <PropsContainer>
+            <PropsContainer title="Dashboard">
               <Prop title="Description">{dashboard.spec?.description}</Prop>
             </PropsContainer>
           )}
           {runbookName && runbook && (
-            <PropsContainer>
+            <PropsContainer title="Runbook">
               <Prop title="Description">{runbook.spec?.description}</Prop>
+              <Prop title="Status"><RunbookStatus runbook={runbook} /></Prop>
             </PropsContainer>
           )}
         </Flex>

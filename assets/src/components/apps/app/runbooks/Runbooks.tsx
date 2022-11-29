@@ -1,46 +1,15 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import {
-  Chip,
-  EmptyState,
-  PageTitle,
-  RunBookIcon,
-  WarningIcon,
-} from '@pluralsh/design-system'
+import { EmptyState, PageTitle, RunBookIcon } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { POLL_INTERVAL } from 'components/runbooks/constants'
 import { RUNBOOKS_Q } from 'components/runbooks/queries'
 import { useQuery } from 'react-apollo'
 import { ListItem } from 'components/apps/misc'
-import {
-  A,
-  Div,
-  Flex,
-  Span,
-} from 'honorable'
+import { A, Div, Flex } from 'honorable'
 
-const hasAlerts = runbook => runbook?.status?.alerts?.length > 0
-
-const getBorderColor = runbook => (hasAlerts(runbook) ? 'border-warning' : '')
-
-const getChip = runbook => (hasAlerts(runbook)
-  ? (
-    <Chip
-      icon={<WarningIcon />}
-      size="small"
-      severity="warning"
-    >
-      <Span fontWeight={600}>Alert</Span>
-    </Chip>
-  )
-  : (
-    <Chip
-      size="small"
-      severity="success"
-    >
-      <Span fontWeight={600}>Running</Span>
-    </Chip>
-  ))
+import { getBorderColor } from './misc'
+import RunbookStatus from './runbook/RunbookStatus'
 
 export default function Runbooks() {
   const navigate = useNavigate()
@@ -72,7 +41,12 @@ export default function Runbooks() {
           description={runbook.spec.description}
           icon={<RunBookIcon />}
           borderColor={getBorderColor(runbook)}
-          chips={getChip(runbook)}
+          chips={(
+            <RunbookStatus
+              runbook={runbook}
+              fontWeight={600}
+            />
+          )}
           onClick={() => navigate(`/apps/${appName}/runbooks/${runbook.name}`)}
         />
       ))}
