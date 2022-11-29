@@ -92,7 +92,7 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
 FROM docker:17.12.1-ce as static-docker-source
 
 # From this line onwards, we're in a new image, which will be the image used in production
-FROM erlang:23.3.4.16-alpine
+FROM erlang:23.3.4.18-alpine
 
 ARG CLOUD_SDK_VERSION=273.0.0
 ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION
