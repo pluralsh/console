@@ -28,7 +28,6 @@ import { ErrorModal } from '../utils/ErrorModal'
 import { EXECUTE_RUNBOOK } from './queries'
 
 import { ValueFormats, extract, query } from './utils'
-import { ActionPortal } from './Runbook'
 
 const DisplayContext = React.createContext({})
 
@@ -150,18 +149,16 @@ function DisplayButton({ attributes: { action, headline, ...rest } }) {
 
   if (headline) {
     return (
-      <ActionPortal>
-        <>
-          {error && (
-            <ErrorModal
-              error={error}
-              modalHeader="Error executing runbook"
-              header="GraphQl Error"
-            />
-          )}
-          {buttonComponent({ ...rest, loading, onClick: mutation })}
-        </>
-      </ActionPortal>
+      <>
+        {error && (
+          <ErrorModal
+            error={error}
+            modalHeader="Error executing runbook"
+            header="GraphQl Error"
+          />
+        )}
+        {buttonComponent({ ...rest, loading, onClick: mutation })}
+      </>
     )
   }
 
