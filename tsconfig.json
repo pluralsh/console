@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM"],
     "jsx": "react-jsx",
     "allowJs": true,
-    "target": "ES6",
     "module": "ESNext",
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -10,10 +11,10 @@
     "sourceMap": true,
     "baseUrl": ".",
     "outDir": "dist",
+    "rootDir": "src",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "lib": ["ESNext", "DOM"],
     "suppressImplicitAnyIndexErrors": true
   },
-  "include": ["src/**/*", "./*"]
+  "include": ["src/**/*"],
 }

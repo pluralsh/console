@@ -1,6 +1,6 @@
 module.exports = {
   parserOptions: {
-    project: './tsconfig.json',
+    project: './tsconfig.eslint.json',
   },
   extends: [
     '@pluralsh/eslint-config-typescript',

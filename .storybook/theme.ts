@@ -8,7 +8,6 @@ export default create({
   brandImage: '/plural-logo-white-48.png',
   brandTarget: '_self',
 
-
   colorPrimary: '#293EFF',
   colorSecondary: '#293EFF',
 

@@ -1,9 +1,9 @@
-import * as jest from "jest-mock";
+import * as jest from 'jest-mock'
 
 import ThemeDecorator from '../src/ThemeDecorator'
 
 // @ts-expect-error
-window.jest = jest;
+window.jest = jest
 
 export const parameters = {
   layout: 'fullscreen',

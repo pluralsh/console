@@ -1,44 +1,18 @@
-import type { StorybookConfig } from '@storybook/builder-vite';
+import { StorybookConfig } from '@storybook/builder-vite'
+import { mergeConfig } from 'vite'
+
+import viteConfig from '../vite.config'
 
 const config: StorybookConfig = {
   stories: ['../src/**/*.stories.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],
-  addons: [
-    '@storybook/addon-docs',
-    '@storybook/addon-links',
-    '@storybook/addon-essentials',
-    '@storybook/addon-interactions',
-  ],
+  addons: ['@storybook/addon-links', '@storybook/addon-essentials', '@storybook/addon-interactions'],
   framework: {
     name: '@storybook/react-vite',
-    options: {}
   },
   core: {
     builder: '@storybook/builder-vite',
   },
-  // docsPage: {
-  //   docs: 'automatic',
-  // },
-  async viteFinal(config) {
-    return {
-      ...config,
-      esbuild: {
-        ...config.esbuild,
-        jsxInject: `import React from 'react'`,
-      },
-      rollupOptions: {
-        ...config,
-        // Externalize deps that shouldn't be bundled
-        external: ["react", "react-dom"],
-        output: {
-          // Global vars to use in UMD build for externalized deps
-          globals: {
-            react: "React",
-            "react-dom": "ReactDOM",
-          },
-        },
-      },
-    };
-  },
-};
+  viteFinal: async config => (mergeConfig(config, viteConfig)),
+}
 
-export default config;
+export default config
