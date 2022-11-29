@@ -15,7 +15,7 @@ import { Portal } from 'react-portal'
 
 import { DURATIONS } from 'components/apps/app/dashboards/dashboard/misc'
 
-import DashboardRangePicker from 'components/apps/app/dashboards/dashboard/DashboardRangePicker'
+import RangePicker from 'components/utils/RangePicker'
 
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import { LoopingLogo } from '../utils/AnimatedLogo'
@@ -120,7 +120,7 @@ export function Runbook() {
             </Text>
           </Box>
           <Box flex={false}>
-            <DashboardRangePicker
+            <RangePicker
               duration={duration}
               setDuration={setDuration}
             />

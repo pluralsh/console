@@ -19,9 +19,11 @@ import { InstallationContext } from 'components/Installations'
 
 import { ResponsiveLayoutSidecarContainer } from 'components/layout/ResponsiveLayoutSidecarContainer'
 
-import { Prop, PropsContainer } from 'components/utils/props'
+import { PropsContainer } from 'components/utils/PropsContainer'
 
 import { toAbsoluteURL } from 'utils/url'
+
+import Prop from 'components/utils/Prop'
 
 import { ResponsiveLayoutSidenavContainer } from '../../layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from '../../layout/ResponsiveLayoutSpacer'

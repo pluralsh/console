@@ -14,7 +14,7 @@ import { useIntercom } from 'react-use-intercom'
 
 import { DURATIONS } from 'components/apps/app/dashboards/dashboard/misc'
 
-import DashboardRangePicker from 'components/apps/app/dashboards/dashboard/DashboardRangePicker'
+import RangePicker from 'components/utils/RangePicker'
 
 import { LoopingLogo } from '../utils/AnimatedLogo'
 
@@ -118,7 +118,7 @@ export default function Deployment() {
         defaultTab="info"
         onTabChange={setTab}
         headerEnd={tab === 'metrics' ? (
-          <DashboardRangePicker
+          <RangePicker
             duration={duration}
             setDuration={setDuration}
           />

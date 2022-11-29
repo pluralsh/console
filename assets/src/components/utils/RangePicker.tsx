@@ -6,9 +6,9 @@ import {
   useState,
 } from 'react'
 
-import { DURATIONS } from './misc'
+import { DURATIONS } from '../apps/app/dashboards/dashboard/misc'
 
-export default function DashboardRangePicker({ duration, setDuration }: any) {
+export default function RangePicker({ duration, setDuration }: any) {
   const tabStateRef = useRef<any>()
   const [selectedKey, setSelectedKey] = useState<Key>(`${duration.offset}+${duration.step}`)
 

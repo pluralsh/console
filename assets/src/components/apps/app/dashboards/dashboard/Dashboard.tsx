@@ -21,7 +21,7 @@ import { Div, Flex } from 'honorable'
 
 import { DashboardSelectButton } from './DashboardSelectButton'
 import LabelSelect from './DashboardLabelSelect'
-import DashboardRangePicker from './DashboardRangePicker'
+import RangePicker from '../../../../utils/RangePicker'
 import DashboardGraph from './DashboardGraph'
 import { DURATIONS } from './misc'
 
@@ -117,7 +117,7 @@ export default function Dashboard() {
           />
         ))}
         <Flex grow={1} />
-        <DashboardRangePicker
+        <RangePicker
           duration={duration}
           setDuration={setDuration}
         />
