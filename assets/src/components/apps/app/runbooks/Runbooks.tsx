@@ -8,6 +8,8 @@ import { useQuery } from 'react-apollo'
 import { ListItem } from 'components/apps/misc'
 import { Flex } from 'honorable'
 
+export const getBorderColor = status => (status?.alerts?.length > 0 ? 'border-warning' : '')
+
 export default function Runbooks() {
   const navigate = useNavigate()
   const { appName } = useParams()
@@ -28,17 +30,16 @@ export default function Runbooks() {
 
   const { runbooks } = data
 
-  console.log(runbooks)
-
   return (
     <Flex direction="column">
       <PageTitle heading="Runbooks" />
-      {runbooks.map(({ id, spec: { name, description } }) => (
+      {runbooks.map(({ id, spec: { name, description }, status }) => (
         <ListItem
           key={id}
           title={name}
           description={description}
           icon={<RunBookIcon />}
+          borderColor={getBorderColor(status)}
           onClick={() => navigate(`/apps/${appName}/runbooks/${id}`)}
         />
       ))}
