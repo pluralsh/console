@@ -64,7 +64,7 @@ FROM alpine:3.17.0 as tools
 ARG TARGETARCH
 
 # renovate: datasource=github-releases depName=helm/helm
-ENV HELM_VERSION=v3.9.4
+ENV HELM_VERSION=v3.10.2
 
 # renovate: datasource=github-releases depName=hashicorp/terraform
 ENV TERRAFORM_VERSION=v1.2.9
