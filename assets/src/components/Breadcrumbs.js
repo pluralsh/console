@@ -1,13 +1,10 @@
 import React, { useContext, useState } from 'react'
 
-import {
-  A,
-  Div,
-  Flex,
-  Span,
-} from 'honorable'
+import { Div, Flex, Span } from 'honorable'
 
 import { theme } from '@pluralsh/design-system'
+
+import { useNavigate } from 'react-router-dom'
 
 import { lookahead } from '../utils/array'
 
@@ -19,6 +16,7 @@ export const BreadcrumbsContext = React.createContext({
 })
 
 export function Breadcrumbs() {
+  const navigate = useNavigate()
   const { breadcrumbs } = useContext(BreadcrumbsContext)
   const { configuration } = useContext(LoginContext)
   const cluster = configuration?.manifest?.cluster
@@ -30,13 +28,13 @@ export function Breadcrumbs() {
           direction="row"
           gap="small"
         >
-          <A
-            href={crumb.url}
+          <Span
+            onClick={() => navigate(crumb.url)}
             color="text-xlight"
-            _hover={{ color: 'text' }}
+            _hover={{ cursor: 'pointer', color: 'text', textDecoration: 'underline' }}
           >
             {crumb.text}
-          </A>
+          </Span>
           <Div color={theme.colors.grey[700]}>/</Div>
         </Flex>
       )
