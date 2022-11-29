@@ -28,8 +28,8 @@ export function ListItemBorder({ borderColor }: { borderColor: string }) {
 
 // TODO: Move it to design system.
 export function ListItem({
-  title, description, icon, borderColor, onClick,
-}: {title: string, description: string, icon: any, borderColor?: string, onClick: () => any},) {
+  title, description, icon, borderColor, chips, onClick,
+}: {title: string, description: string, icon: any, borderColor?: string, chips?: any, onClick: () => any},) {
   return (
     <Card
       clickable
@@ -60,6 +60,7 @@ export function ListItem({
             >
               {title}
             </P>
+            {chips}
           </Flex>
           {description && <Flex>{description}</Flex>}
         </Flex>

@@ -1,14 +1,46 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { EmptyState, PageTitle, RunBookIcon } from '@pluralsh/design-system'
+import {
+  Chip,
+  EmptyState,
+  PageTitle,
+  RunBookIcon,
+  WarningIcon,
+} from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { POLL_INTERVAL } from 'components/runbooks/constants'
 import { RUNBOOKS_Q } from 'components/runbooks/queries'
 import { useQuery } from 'react-apollo'
 import { ListItem } from 'components/apps/misc'
-import { A, Div, Flex } from 'honorable'
+import {
+  A,
+  Div,
+  Flex,
+  Span,
+} from 'honorable'
 
-export const getBorderColor = status => (status?.alerts?.length > 0 ? 'border-warning' : '')
+const hasAlerts = runbook => runbook?.status?.alerts?.length > 0
+
+const getBorderColor = runbook => (hasAlerts(runbook) ? 'border-warning' : '')
+
+const getChip = runbook => (hasAlerts(runbook)
+  ? (
+    <Chip
+      icon={<WarningIcon />}
+      size="small"
+      severity="warning"
+    >
+      <Span fontWeight={600}>Alert</Span>
+    </Chip>
+  )
+  : (
+    <Chip
+      size="small"
+      severity="success"
+    >
+      <Span fontWeight={600}>Running</Span>
+    </Chip>
+  ))
 
 export default function Runbooks() {
   const navigate = useNavigate()
@@ -33,14 +65,15 @@ export default function Runbooks() {
   return (
     <Flex direction="column">
       <PageTitle heading="Runbooks" />
-      {runbooks.map(({ id, spec: { name, description }, status }) => (
+      {runbooks.map(runbook => (
         <ListItem
-          key={id}
-          title={name}
-          description={description}
+          key={runbook.id}
+          title={runbook.spec.name}
+          description={runbook.spec.description}
           icon={<RunBookIcon />}
-          borderColor={getBorderColor(status)}
-          onClick={() => navigate(`/apps/${appName}/runbooks/${id}`)}
+          borderColor={getBorderColor(runbook)}
+          chips={getChip(runbook)}
+          onClick={() => navigate(`/apps/${appName}/runbooks/${runbook.id}`)}
         />
       ))}
       {runbooks?.length < 1 && (
