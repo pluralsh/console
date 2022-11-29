@@ -23,7 +23,8 @@ import { DURATIONS } from 'utils/time'
 
 import RangePicker from '../../../../utils/RangePicker'
 
-import { DashboardSelectButton } from './DashboardSelectButton'
+import { PageTitleSelectButton } from '../../../../utils/PageTitleSelectButton'
+
 import LabelSelect from './DashboardLabelSelect'
 import DashboardGraph from './DashboardGraph'
 
@@ -92,7 +93,12 @@ export default function Dashboard() {
             aria-label="dashboards"
             selectedKey={selectedKey}
             onSelectionChange={id => navigate(`/apps/${appName}/dashboards/${id}`)}
-            triggerButton={<DashboardSelectButton label={selectedKey} />}
+            triggerButton={(
+              <PageTitleSelectButton
+                title="Dashboards"
+                label={selectedKey}
+              />
+            )}
             width={240}
           >
             {dashboards.map(({ id, spec: { name } }) => (

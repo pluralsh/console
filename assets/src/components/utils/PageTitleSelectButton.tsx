@@ -3,7 +3,7 @@ import { Div, Flex } from 'honorable'
 import { forwardRef } from 'react'
 import styled from 'styled-components'
 
-export const DashboardSelectButton = styled(forwardRef<any, any>((props, ref) => (
+export const PageTitleSelectButton = styled(forwardRef<any, {title: string, label: string}>((props, ref) => (
   <Div
     ref={ref}
     cursor="pointer"
@@ -16,7 +16,7 @@ export const DashboardSelectButton = styled(forwardRef<any, any>((props, ref) =>
         overline
         textAlign="start"
       >
-        Dashboards
+        {props.title}
       </Div>
       <Flex
         direction="row"

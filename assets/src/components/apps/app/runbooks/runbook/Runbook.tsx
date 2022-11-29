@@ -22,7 +22,7 @@ import { DURATIONS, SECOND_TO_MILLISECONDS } from 'utils/time'
 import { RUNBOOKS_Q, RUNBOOK_Q } from 'components/runbooks/queries'
 
 import RangePicker from '../../../../utils/RangePicker'
-import { DashboardSelectButton } from '../../dashboards/dashboard/DashboardSelectButton'
+import { PageTitleSelectButton } from '../../../../utils/PageTitleSelectButton'
 
 // import { DashboardSelectButton } from './DashboardSelectButton'
 
@@ -83,7 +83,12 @@ export default function Runbook() {
             aria-label="dashboards"
             selectedKey={selectedKey}
             onSelectionChange={name => navigate(`/apps/${appName}/runbooks/${name}`)}
-            triggerButton={<DashboardSelectButton label={selectedKey} />}
+            triggerButton={(
+              <PageTitleSelectButton
+                title="Runbooks"
+                label={selectedKey}
+              />
+            )}
             width={240}
           >
             {runbooks.map(runbook => (
