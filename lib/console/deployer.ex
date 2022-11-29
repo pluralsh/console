@@ -36,7 +36,7 @@ defmodule Console.Deployer do
   def me(), do: {__MODULE__, node()}
 
   def elect() do
-    Logger.info "attempting to elect #{me()} as leader"
+    Logger.info "attempting to elect #{inspect(me())} as leader"
     LeaderElection.elect(me(), @leader)
   end
 
@@ -143,8 +143,8 @@ defmodule Console.Deployer do
   def terminate(state, reason) do
     Logger.info "Terminating with state: #{inspect(state)} reason #{inspect(reason)}"
     case LeaderElection.clear(me(), @leader) do
-      {:ok, _} -> Logger.info "removed #{me()} as cluster leader"
-      _ -> Logger.info "#{me()} is not leader, moving on"
+      {:ok, _} -> Logger.info "removed #{inspect(me())} as cluster leader"
+      _ -> Logger.info "#{inspect(me())} is not leader, moving on"
     end
     :ok
   end
