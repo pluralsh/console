@@ -18,21 +18,6 @@
       "enabled": true
     },
     {
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["patch", "pin", "digest"],
-      "automerge": true,
-      "platformAutomerge": true
-    },
-    {
-      "matchManagers": ["npm"],
-      "matchDepTypes": [
-        "devDependencies"
-      ],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "automerge": true,
-      "platformAutomerge": true
-    },
-    {
       "matchManagers": ["npm"]
     }
   ],
