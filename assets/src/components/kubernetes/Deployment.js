@@ -12,7 +12,9 @@ import { useParams } from 'react-router-dom'
 
 import { useIntercom } from 'react-use-intercom'
 
-import { DURATIONS, RangePicker } from 'components/apps/app/dashboards/dashboard/Dashboard'
+import { DURATIONS } from 'components/apps/app/dashboards/dashboard/misc'
+
+import DashboardRangePicker from 'components/apps/app/dashboards/dashboard/DashboardRangePicker'
 
 import { LoopingLogo } from '../utils/AnimatedLogo'
 
@@ -116,7 +118,7 @@ export default function Deployment() {
         defaultTab="info"
         onTabChange={setTab}
         headerEnd={tab === 'metrics' ? (
-          <RangePicker
+          <DashboardRangePicker
             duration={duration}
             setDuration={setDuration}
           />

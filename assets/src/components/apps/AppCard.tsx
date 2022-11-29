@@ -20,11 +20,13 @@ import { useNavigate } from 'react-router-dom'
 
 import { toAbsoluteURL } from 'utils/url'
 
-import AppBorder from './AppBorder'
+import { appState } from 'components/Application'
+
+import { Readiness } from 'utils/status'
 
 import AppStatus from './AppStatus'
 
-import { getIcon, hasIcons } from './misc'
+import { ListItemBorder, getIcon, hasIcons } from './misc'
 
 const SHORTCUTS = [
   { url: 'dashboards', label: 'Dashboards', icon: <DashboardIcon /> },
@@ -39,6 +41,20 @@ const SHORTCUT_URLS = SHORTCUTS.map(shortcut => shortcut.url)
 
 const isShortcut = url => SHORTCUT_URLS.indexOf(url) > -1
 
+export const getBorderColor = app => {
+  const { readiness } = appState(app)
+
+  switch (readiness) {
+  case Readiness.Failed:
+    return 'border-danger'
+  case Readiness.InProgress:
+    return 'border-warning'
+  case Readiness.Ready:
+  default:
+    return ''
+  }
+}
+
 export default function AppCard({ app }: any) {
   const navigate = useNavigate()
   const { dark }: any = useContext(ThemeContext)
@@ -46,6 +62,7 @@ export default function AppCard({ app }: any) {
   if (!app?.spec?.descriptor) return null
 
   const { name, spec: { descriptor: { links, version } } } = app
+  const borderColor = getBorderColor(app)
   const validLinks = links?.filter(({ url }) => !!url)
 
   return (
@@ -59,7 +76,7 @@ export default function AppCard({ app }: any) {
       minWidth={240}
       onClick={() => navigate(`/apps/${name}`)}
     >
-      <AppBorder app={app} />
+      <ListItemBorder borderColor={borderColor} />
       <Flex
         align="center"
         gap="small"

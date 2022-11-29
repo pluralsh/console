@@ -6,11 +6,12 @@ import { DASHBOARDS_Q } from 'components/graphql/dashboards'
 
 import { A, Div, Flex } from 'honorable'
 
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
-import DashboardCard from './DashboardCard'
+import { ListItem } from 'components/apps/misc'
 
 export default function Dashboards() {
+  const navigate = useNavigate()
   const { appName } = useParams()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
   const { data } = useQuery(DASHBOARDS_Q, {
@@ -32,10 +33,12 @@ export default function Dashboards() {
     <Flex direction="column">
       <PageTitle heading="Dashboards" />
       {dashboards.map(({ id, spec: { name, description } }) => (
-        <DashboardCard
-          id={id}
-          name={name}
+        <ListItem
+          key={id}
+          title={name}
           description={description}
+          icon={<DashboardIcon />}
+          onClick={() => navigate(`/apps/${appName}/dashboards/${id}`)}
         />
       ))}
       {dashboards?.length < 1 && (
