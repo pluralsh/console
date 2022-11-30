@@ -137,28 +137,30 @@ export default function Runbook() {
           ))}
         </TabList>
       </PageTitle>
-      <Flex
-        direction="row"
-        gap="medium"
-        wrap="wrap"
-      >
-        <RangePicker
-          duration={duration}
-          setDuration={setDuration}
-        />
-        <Flex grow={1} />
-        <Button
-          primary
-          fontWeight={600}
-        >
-          Scale
-        </Button>
-      </Flex>
       {selectedTab === 'runbook' && (
-        <Display
-          root={runbook.spec.display}
-          data={runbook.data}
-        />
+        <>
+          <Flex
+            direction="row"
+            gap="medium"
+            wrap="wrap"
+          >
+            <RangePicker
+              duration={duration}
+              setDuration={setDuration}
+            />
+            <Flex grow={1} />
+            <Button
+              primary
+              fontWeight={600}
+            >
+              Scale
+            </Button>
+          </Flex>
+          <Display
+            root={runbook.spec.display}
+            data={runbook.data}
+          />
+        </>
       )}
       {selectedTab === 'executions' && (
         <RunbookExecutions
