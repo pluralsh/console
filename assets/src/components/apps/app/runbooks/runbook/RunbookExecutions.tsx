@@ -56,11 +56,7 @@ export function RunbookExecutions({ runbook, loading, fetchMore }) {
 
       fetchMore({
         variables: { cursor: pageInfo.endCursor },
-        updateQuery: (prev, { fetchMoreResult: { runbook: { executions: nextExecutions } } }) => {
-          const { edges, pageInfo } = nextExecutions
-
-          return update(prev, 'runbook.executions', executions => ({ edges: [...executions.edges, ...edges], pageInfo }))
-        },
+        updateQuery: (prev, { fetchMoreResult: { runbook: { executions: { edges, pageInfo } } } }) => update(prev, 'runbook.executions', executions => ({ edges: [...executions.edges, ...edges], pageInfo })),
       })
     }
   },
