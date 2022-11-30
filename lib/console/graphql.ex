@@ -108,17 +108,6 @@ defmodule Console.GraphQl do
       resolve safe_resolver(&Build.approve_build/2)
     end
 
-    field :update_configuration, :configuration do
-      middleware Authenticated
-      middleware RequiresGit
-      arg :repository, non_null(:string)
-      arg :content,    non_null(:string)
-      arg :tool,       :tool
-
-      middleware Rbac, perm: :configure, arg: :repository
-      resolve safe_resolver(&Plural.update_configuration/2)
-    end
-
     import_fields :user_mutations
     import_fields :kubernetes_mutations
     import_fields :plural_mutations
