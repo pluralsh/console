@@ -1,7 +1,6 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import {
   Button,
-  Card,
   ListBoxItem,
   LoopingLogo,
   PageTitle,
@@ -26,7 +25,7 @@ import { RUNBOOKS_Q, RUNBOOK_Q } from 'components/runbooks/queries'
 
 import { Display } from 'components/runbooks/Display'
 
-import { RunbookExecutions } from 'components/runbooks/RunbookExecutions'
+import { RunbookExecutions } from 'components/apps/app/runbooks/runbook/RunbookExecutions'
 
 import RangePicker from '../../../../utils/RangePicker'
 import { PageTitleSelectButton } from '../../../../utils/PageTitleSelectButton'
@@ -155,21 +154,19 @@ export default function Runbook() {
           Scale
         </Button>
       </Flex>
-      <Card marginVertical="large">
-        {selectedTab === 'runbook' && (
-          <Display
-            root={runbook.spec.display}
-            data={runbook.data}
-          />
-        )}
-        {selectedTab === 'executions' && (
-          <RunbookExecutions
-            runbook={runbook}
-            loading={loading}
-            fetchMore={fetchMore}
-          />
-        )}
-      </Card>
+      {selectedTab === 'runbook' && (
+        <Display
+          root={runbook.spec.display}
+          data={runbook.data}
+        />
+      )}
+      {selectedTab === 'executions' && (
+        <RunbookExecutions
+          runbook={runbook}
+          loading={loading}
+          fetchMore={fetchMore}
+        />
+      )}
     </Div>
   )
 }
