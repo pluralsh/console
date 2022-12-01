@@ -88,7 +88,11 @@ export default function Runbook() {
   setRunbook(runbook)
 
   return (
-    <Div>
+    <Flex
+      direction="column"
+      grow={1}
+      height="100%"
+    >
       <PageTitle heading={(
         <Div>
           <Select
@@ -135,33 +139,40 @@ export default function Runbook() {
           ))}
         </TabList>
       </PageTitle>
-      {selectedTab === 'runbook' && (
-        <>
-          <Flex
-            direction="row"
-            gap="medium"
-            wrap="wrap"
-          >
-            <RangePicker
-              duration={duration}
-              setDuration={setDuration}
-            />
-            <Flex grow={1} />
-            <Button
-              primary
-              fontWeight={600}
+      <Flex
+        direction="column"
+        grow={1}
+        height="100%"
+        overflow="auto"
+      >
+        {selectedTab === 'runbook' && (
+          <>
+            <Flex
+              direction="row"
+              gap="medium"
+              wrap="wrap"
             >
-              Scale
-            </Button>
-          </Flex>
-          <Display
-            root={runbook.spec.display}
-            data={runbook.data}
-          />
-        </>
-      )}
-      {selectedTab === 'executions' && <RunbookExecutions />}
-    </Div>
+              <RangePicker
+                duration={duration}
+                setDuration={setDuration}
+              />
+              <Flex grow={1} />
+              <Button
+                primary
+                fontWeight={600}
+              >
+                Scale
+              </Button>
+            </Flex>
+            <Display
+              root={runbook.spec.display}
+              data={runbook.data}
+            />
+          </>
+        )}
+        {selectedTab === 'executions' && <RunbookExecutions />}
+      </Flex>
+    </Flex>
   )
 }
 

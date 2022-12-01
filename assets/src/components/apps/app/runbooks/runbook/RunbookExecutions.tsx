@@ -61,17 +61,14 @@ export function RunbookExecutions() {
 
     const { scrollHeight, scrollTop, clientHeight } = element
 
-      // Once scrolled within FETCH_MARGIN of the bottom of the table, fetch more data if there is any.
+    // Once scrolled within FETCH_MARGIN of the bottom of the table, fetch more data if there is any.
     if (scrollHeight - scrollTop - clientHeight < FETCH_MARGIN && !loading && pageInfo.hasNextPage) {
-      console.log(pageInfo)
-
       fetchMore({
         variables: { cursor: pageInfo.endCursor },
         updateQuery: (prev, { fetchMoreResult: { runbook: { executions: { edges, pageInfo } } } }) => update(prev, 'runbook.executions', executions => ({ edges: [...executions.edges, ...edges], pageInfo })),
       })
     }
-  },
-  [fetchMore, loading, pageInfo])
+  }, [fetchMore, loading, pageInfo])
 
   if (!data) {
     return (
@@ -88,8 +85,8 @@ export function RunbookExecutions() {
     <Table
       data={executions}
       columns={columns}
-      height={300}
-      onScrollCapture={e => fetchMoreOnBottomReached(e?.target)} // TODO: Add it to design system. Using onScrollCapture as onScroll is already used. Ensure it's run initially when there is no scroll.
+      onScrollCapture={e => fetchMoreOnBottomReached(e?.target)}
+      maxHeight="calc(100vh - 242px)" // TODO: Set design system to use flex.
     />
   )
 }
