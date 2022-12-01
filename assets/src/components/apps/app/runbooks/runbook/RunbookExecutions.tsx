@@ -86,7 +86,7 @@ export function RunbookExecutions() {
       data={executions}
       columns={columns}
       onScrollCapture={e => fetchMoreOnBottomReached(e?.target)}
-      maxHeight="calc(100vh - 242px)" // TODO: Set design system to use flex.
+      maxHeight="calc(100vh - 244px)" // TODO: Set design system to use flex.
     />
   )
 }

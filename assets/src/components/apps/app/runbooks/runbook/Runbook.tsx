@@ -93,30 +93,32 @@ export default function Runbook() {
       grow={1}
       height="100%"
     >
-      <PageTitle heading={(
-        <Div>
-          <Select
-            aria-label="dashboards"
-            selectedKey={selectedKey}
-            onSelectionChange={name => navigate(`/apps/${appName}/runbooks/${name}`)}
-            triggerButton={(
-              <PageTitleSelectButton
-                title="Runbooks"
-                label={selectedKey}
-              />
-            )}
-            width={240}
-          >
-            {runbooks.map(runbook => (
-              <ListBoxItem
-                key={runbook.name}
-                label={runbook.spec.name}
-                textValue={runbook.name}
-              />
-            ))}
-          </Select>
-        </Div>
-      )}
+      <PageTitle
+        padding={1}
+        heading={(
+          <Div>
+            <Select
+              aria-label="dashboards"
+              selectedKey={selectedKey}
+              onSelectionChange={name => navigate(`/apps/${appName}/runbooks/${name}`)}
+              triggerButton={(
+                <PageTitleSelectButton
+                  title="Runbooks"
+                  label={selectedKey}
+                />
+              )}
+              width={240}
+            >
+              {runbooks.map(runbook => (
+                <ListBoxItem
+                  key={runbook.name}
+                  label={runbook.spec.name}
+                  textValue={runbook.name}
+                />
+              ))}
+            </Select>
+          </Div>
+        )}
       >
         <TabList
           stateRef={tabStateRef}
