@@ -11,22 +11,15 @@ import {
   Text,
   ThemeContext,
 } from 'grommet'
-import { Button, SecondaryButton } from 'forge-core'
 import { normalizeColor } from 'grommet/utils'
-import { useMutation } from '@apollo/react-hooks'
-
-import { useNavigate, useParams } from 'react-router-dom'
 
 import { HeaderItem } from '../../../../kubernetes/Pod'
-
-import { ErrorModal } from '../../../../utils/ErrorModal'
-
-import { EXECUTE_RUNBOOK } from '../../../../runbooks/queries'
 
 import { extract, query } from '../../../../runbooks/utils'
 
 import DisplayInput from './display/DisplayInput'
 import { DisplayGraph } from './display/DisplayGraph'
+import { DisplayButton } from './display/DisplayButton'
 
 export const DisplayContext = createContext<any>({})
 
@@ -128,70 +121,6 @@ function Link({ value, attributes, children }) {
       >{val || recurse(children)}
       </Text>
     </Anchor>
-  )
-}
-
-function DisplayButton({ attributes: { action, headline, ...rest } }) {
-  const navigate = useNavigate()
-  const { namespace, name } = useParams()
-  const { context } = useContext(DisplayContext)
-  const [mutation, { loading, error }] = useMutation(EXECUTE_RUNBOOK, {
-    variables: { name, namespace, input: { context: JSON.stringify(context), action } },
-    onCompleted: ({ executeRunbook: { redirectTo } }) => {
-      if (redirectTo) {
-        navigate(redirectTo)
-      }
-    },
-  })
-
-  if (!action) return buttonComponent(rest)
-
-  if (headline) {
-    return (
-      <>
-        {error && (
-          <ErrorModal
-            error={error}
-            modalHeader="Error executing runbook"
-            header="GraphQl Error"
-          />
-        )}
-        {buttonComponent({ ...rest, loading, onClick: mutation })}
-      </>
-    )
-  }
-
-  return (
-    <>
-      {error && (
-        <ErrorModal
-          error={error}
-          modalHeader="Error executing runbook"
-          header="GraphQl Error"
-        />
-      )}
-      {buttonComponent({ ...rest, loading, onClick: mutation })}
-    </>
-  )
-}
-
-function buttonComponent({ primary, key, ...props }: any) {
-  if (primary) {
-    return (
-      <Button
-        key={key}
-        round="xsmall"
-        {...props}
-      />
-    )
-  }
-
-  return (
-    <SecondaryButton
-      key={key}
-      round="xsmall"
-      {...props}
-    />
   )
 }
 

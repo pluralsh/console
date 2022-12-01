@@ -1,6 +1,5 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import {
-  Button,
   ListBoxItem,
   LoopingLogo,
   PageTitle,
@@ -10,6 +9,7 @@ import {
 } from '@pluralsh/design-system'
 import {
   Key,
+  createContext,
   useContext,
   useEffect,
   useRef,
@@ -27,6 +27,8 @@ import { RunbookDisplay } from 'components/apps/app/runbooks/runbook/RunbookDisp
 
 import { RunbookExecutions } from 'components/apps/app/runbooks/runbook/RunbookExecutions'
 
+import { Portal } from 'react-portal'
+
 import RangePicker from '../../../../utils/RangePicker'
 import { PageTitleSelectButton } from '../../../../utils/PageTitleSelectButton'
 
@@ -35,8 +37,31 @@ const DIRECTORY = [
   { key: 'executions', label: 'Executions' },
 ]
 
+export const ActionContext = createContext<any>({})
+
+export function ActionPortal({ children }) {
+  const { ref } = useContext(ActionContext)
+
+  return (
+    <Portal node={ref}>
+      {children}
+    </Portal>
+  )
+}
+function ActionContainer() {
+  const { setRef } = useContext(ActionContext)
+
+  return (
+    <Div
+      ref={setRef}
+      flex={false}
+    />
+  )
+}
+
 export default function Runbook() {
   const navigate = useNavigate()
+  const [ref, setRef] = useState(null)
   const tabStateRef = useRef<any>(null)
   const { appName, runbookName } = useParams()
   const [duration, setDuration] = useState(DURATIONS[0])
@@ -148,7 +173,8 @@ export default function Runbook() {
         overflow="auto"
       >
         {selectedTab === 'runbook' && (
-          <>
+          // eslint-disable-next-line react/jsx-no-constructed-context-values
+          <ActionContext.Provider value={{ ref, setRef }}>
             <Flex
               direction="row"
               gap="medium"
@@ -159,18 +185,13 @@ export default function Runbook() {
                 setDuration={setDuration}
               />
               <Flex grow={1} />
-              <Button
-                primary
-                fontWeight={600}
-              >
-                Scale
-              </Button>
+              <ActionContainer />
             </Flex>
             <RunbookDisplay
               root={runbook.spec.display}
               data={runbook.data}
             />
-          </>
+          </ActionContext.Provider>
         )}
         {selectedTab === 'executions' && <RunbookExecutions />}
       </Flex>

@@ -62,6 +62,7 @@ function SliceTooltip({ point: { serieColor, serieId, data } }) {
   )
 }
 
+// TODO: Style legend.
 export function Graph({ data, yFormat, tickRotation }) {
   const theme = useContext(ThemeContext)
   const colors = useColorMap(theme)
@@ -88,7 +89,7 @@ export function Graph({ data, yFormat, tickRotation }) {
       lineWidth={1}
       enablePoints={false}
       enableArea
-      areaOpacity={0.5}
+      areaOpacity={0.05}
       useMesh
       animate={false}
       xScale={{ type: 'time', format: 'native' }}
