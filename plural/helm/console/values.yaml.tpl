@@ -68,9 +68,8 @@ secrets:
   identity: {{ readFile $identity | quote }}
 {{ else if ne (dig "console" "secrets" "identity" "default" .) "default" }}
   identity: {{ .console.secrets.identity | quote }}
-{{ else }}
-  key: {{ readFile (homeDir ".plural" "key") | quote }}
 {{ end }}
+  key: {{ dedupe . "console.secrets.key" (readFile (homeDir ".plural" "key")) | quote }}
 {{ else }}
   git_url: ''
   repo_root: ''

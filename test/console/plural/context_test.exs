@@ -1,5 +1,5 @@
 defmodule Console.Plural.ContextTest do
-  use ExUnit.Case
+  use Console.DataCase, async: false
   alias Console.Plural.Context
 
   describe "#merge/2" do

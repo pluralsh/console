@@ -1,4 +1,5 @@
 defmodule Console.Services.Plural do
+  alias Console.Deployer
   alias Console.Schema.{User, Manifest}
   alias Console.Services.{Builds}
   alias Console.Plural.{Repositories, Users, Recipe, Installation, OIDCProvider, Manifest, Context}
@@ -21,12 +22,12 @@ defmodule Console.Services.Plural do
 
   def terraform_file(repository) do
     terraform_filename(repository)
-    |> File.read()
+    |> Deployer.file()
   end
 
   def values_file(repository) do
     vals_filename(repository)
-    |> File.read()
+    |> Deployer.file()
   end
 
   def update_configuration(repository, update, tool) do

@@ -125,4 +125,12 @@ defmodule Console.Factory do
       seen_at: Timex.now()
     }
   end
+
+  def leader_factory do
+    %Schema.Leader{
+      name: sequence(:leader, & "leader-#{&1}"),
+      ref: self(),
+      heartbeat: Timex.now()
+    }
+  end
 end

@@ -186,7 +186,7 @@ defmodule Console.Plural.Queries do
   """
 
   @oidc_upsert """
-    mutation OIDC($id: ID!, $attributes: OidcProviderAttributes!) {
+    mutation OIDC($id: ID!, $attributes: OidcAttributes!) {
       upsertOidcProvider(installationId: $id, attributes: $attributes) {
         id
       }

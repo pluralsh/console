@@ -6,9 +6,9 @@ name: Deploy to Firebase Hosting on PR
 jobs:
   build_and_preview:
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository }} && ${{ github.actor != 'plural-bot' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: cd assets && yarn install --immutable && CI=false yarn build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:

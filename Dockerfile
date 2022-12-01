@@ -59,21 +59,21 @@ RUN \
   tar -xzf ${APP_NAME}.tar.gz && \
   rm ${APP_NAME}.tar.gz
 
-FROM alpine:3.16.3 as tools
+FROM alpine:3.17.0 as tools
 
 ARG TARGETARCH
 
 # renovate: datasource=github-releases depName=helm/helm
-ENV HELM_VERSION=v3.9.4
+ENV HELM_VERSION=v3.10.2
 
 # renovate: datasource=github-releases depName=hashicorp/terraform
 ENV TERRAFORM_VERSION=v1.2.9
 
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
-ENV CLI_VERSION=v0.5.21
+ENV CLI_VERSION=v0.5.24
 
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
-ENV KUBECTL_VERSION=v1.24.8
+ENV KUBECTL_VERSION=v1.25.4
 
 RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-base && \
     curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz | tar xvz && \
@@ -92,7 +92,7 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
 FROM docker:17.12.1-ce as static-docker-source
 
 # From this line onwards, we're in a new image, which will be the image used in production
-FROM erlang:23.3.4.16-alpine
+FROM erlang:23.3.4.18-alpine
 
 ARG CLOUD_SDK_VERSION=273.0.0
 ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION
