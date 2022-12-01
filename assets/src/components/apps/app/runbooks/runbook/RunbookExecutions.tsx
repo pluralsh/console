@@ -1,10 +1,13 @@
-import { Avatar, Table } from '@pluralsh/design-system'
+import { Avatar, LoopingLogo, Table } from '@pluralsh/design-system'
 
 import { createColumnHelper } from '@tanstack/react-table'
 import { Flex } from 'honorable'
 import { Date } from 'components/utils/Date'
 import { useCallback, useMemo } from 'react'
 import update from 'lodash/update'
+import { RUNBOOK_EXECUTIONS_Q } from 'components/runbooks/queries'
+import { useQuery } from 'react-apollo'
+import { useParams } from 'react-router-dom'
 
 const columnHelper = createColumnHelper<any>()
 
@@ -41,9 +44,17 @@ const columns = [
 
 const FETCH_MARGIN = 30
 
-export function RunbookExecutions({ runbook, loading, fetchMore }) {
-  const { edges, pageInfo } = runbook.executions
-  const executions = useMemo(() => edges.map(({ node }) => node), [edges])
+export function RunbookExecutions() {
+  const { appName, runbookName } = useParams()
+  const { data, loading, fetchMore }: any = useQuery(RUNBOOK_EXECUTIONS_Q, {
+    variables: { namespace: appName, name: runbookName },
+    fetchPolicy: 'cache-and-network',
+  })
+
+  const runbook = data?.runbook
+  const pageInfo = runbook?.executions?.pageInfo
+  const edges = runbook?.executions?.edges
+  const executions = useMemo(() => edges?.map(({ node }) => node), [edges])
 
   const fetchMoreOnBottomReached = useCallback((element?: HTMLDivElement | undefined) => {
     if (!element) return
@@ -62,12 +73,23 @@ export function RunbookExecutions({ runbook, loading, fetchMore }) {
   },
   [fetchMore, loading, pageInfo])
 
+  if (!data) {
+    return (
+      <Flex
+        grow={1}
+        justify="center"
+      >
+        <LoopingLogo scale={1} />
+      </Flex>
+    )
+  }
+
   return (
     <Table
       data={executions}
       columns={columns}
-      height={200}
-      onScrollCapture={e => fetchMoreOnBottomReached(e?.target)} // TODO: Add it to design system. Using onScrollCapture as onScroll is already used.
+      height={300}
+      onScrollCapture={e => fetchMoreOnBottomReached(e?.target)} // TODO: Add it to design system. Using onScrollCapture as onScroll is already used. Ensure it's run initially when there is no scroll.
     />
   )
 }

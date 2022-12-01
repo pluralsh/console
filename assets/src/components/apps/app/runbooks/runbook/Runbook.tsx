@@ -43,9 +43,7 @@ export default function Runbook() {
   const { setRunbook }: any = useOutletContext()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
 
-  const {
-    data, loading, fetchMore, refetch,
-  } = useQuery(RUNBOOK_Q, {
+  const { data, refetch } = useQuery(RUNBOOK_Q, {
     variables: {
       namespace: appName,
       name: runbookName,
@@ -162,13 +160,7 @@ export default function Runbook() {
           />
         </>
       )}
-      {selectedTab === 'executions' && (
-        <RunbookExecutions
-          runbook={runbook}
-          loading={loading}
-          fetchMore={fetchMore}
-        />
-      )}
+      {selectedTab === 'executions' && <RunbookExecutions />}
     </Div>
   )
 }
