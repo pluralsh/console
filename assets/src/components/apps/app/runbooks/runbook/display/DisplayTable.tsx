@@ -1,6 +1,8 @@
 import { HeaderItem } from 'components/kubernetes/Pod'
 import { query } from 'components/runbooks/utils'
+import { TRUNCATE } from 'components/utils/truncate'
 import { Box } from 'grommet'
+import { Div } from 'honorable'
 import { useContext } from 'react'
 
 import { DisplayContext } from '../RunbookDisplay'
@@ -15,13 +17,14 @@ function TableRow({ data, columns }) {
       border={{ side: 'bottom', color: 'cardDarkLight' }}
     >
       {columns.map(({ attributes: { header, width, path } }) => (
-        <HeaderItem
+        <Div
+          color="text-light"
           key={header}
-          text={query(data, path)}
           width={width}
-          nobold
-          truncate
-        />
+          {...TRUNCATE}
+        >
+          {query(data, path)}
+        </Div>
       ))}
     </Box>
   )
