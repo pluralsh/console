@@ -6,13 +6,13 @@ on:
       - 'v*.*.*'
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - uses: erlef/setup-beam@v1
         with:
-          elixir-version: '1.11.4' # Define the elixir version [required]
-          otp-version: '23.1' # Define the OTP version [required]
+          version-file: .tool-versions
+          version-type: strict
       - uses: azure/setup-helm@v3
         with:
           version: latest
@@ -40,7 +40,7 @@ jobs:
         if: always()
   publish:
     name: Build and push Console container
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: test
     permissions:
       contents: 'read'
@@ -111,7 +111,7 @@ jobs:
       if: always()
   release:
     name: Create GitHub release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: publish
     permissions:
       contents: write

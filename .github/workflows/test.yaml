@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Test Build Docker image
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
         with:
@@ -26,13 +26,13 @@ jobs:
           build-args: GIT_COMMIT=${{ github.sha }}
   test:
     name: Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - uses: erlef/setup-beam@v1
         with:
-          elixir-version: '1.11.4' # Define the elixir version [required]
-          otp-version: '23.1' # Define the OTP version [required]
+          version-file: .tool-versions
+          version-type: strict
       - uses: azure/setup-helm@v3
         with:
           version: latest
