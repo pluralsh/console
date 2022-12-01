@@ -82,7 +82,7 @@ export function Graph({ data, yFormat, tickRotation }) {
     <ResponsiveLine
       data={graph}
       margin={{
-        top: 20, right: 50, bottom: 110, left: 65,
+        top: 20, right: 20, bottom: 110, left: 55,
       }}
       activeLineWidth={4}
       lineWidth={1}

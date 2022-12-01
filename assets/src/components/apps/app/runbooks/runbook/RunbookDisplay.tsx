@@ -17,17 +17,16 @@ import { useMutation } from '@apollo/react-hooks'
 
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { Graph, GraphHeader } from '../../../../utils/Graph'
-
 import { HeaderItem } from '../../../../kubernetes/Pod'
 
 import { ErrorModal } from '../../../../utils/ErrorModal'
 
 import { EXECUTE_RUNBOOK } from '../../../../runbooks/queries'
 
-import { ValueFormats, extract, query } from '../../../../runbooks/utils'
+import { extract, query } from '../../../../runbooks/utils'
 
 import DisplayInput from './display/DisplayInput'
+import { DisplayGraph } from './display/DisplayGraph'
 
 export const DisplayContext = createContext<any>({})
 
@@ -220,44 +219,6 @@ function ValueFrom(props) {
   return valueFrom(props, display)
 }
 
-const convertVals = values => values.map(({ timestamp, value }) => ({ x: new Date(timestamp * 1000), y: parseFloat(value) }))
-
-function formatLegend(legend, properties) {
-  if (!properties) return legend
-
-  return Object.entries(properties)
-    .reduce((leg, [k, v]) => leg.replace(`$${k}`, v), legend)
-}
-
-function Timeseries({ attributes: { datasource, label } }) {
-  const { datasources } = useContext(DisplayContext)
-  const { metrics, format } = useMemo(() => {
-    const { prometheus, source } = datasources[datasource]
-    const legend = source && source.prometheus.legend
-    const format = source && source.prometheus.format
-    const metrics = prometheus.map(({ metric, values }) => ({
-      id: formatLegend(legend, metric),
-      data: convertVals(values),
-    }))
-
-    return { metrics, format: ValueFormats[format] || (v => v) }
-  }, [datasources, datasource])
-
-  return (
-    <Box
-      height="300px"
-      width="500px"
-    >
-      <GraphHeader text={label} />
-      <Graph
-        data={metrics}
-        yFormat={format}
-        tickRotation={45}
-      />
-    </Box>
-  )
-}
-
 function TableRow({ data, columns }) {
   return (
     <Box
@@ -344,7 +305,7 @@ function parse(struct, index, theme) {
   case 'valueFrom':
     return <ValueFrom {...props} />
   case 'timeseries':
-    return <Timeseries {...props} />
+    return <DisplayGraph {...props} />
   case 'table':
     return <Table {...props} />
   default:
