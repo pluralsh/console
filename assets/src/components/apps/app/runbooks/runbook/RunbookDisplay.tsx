@@ -1,6 +1,6 @@
-import React, {
+import {
+  createContext,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -17,21 +17,21 @@ import { useMutation } from '@apollo/react-hooks'
 
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { Graph, GraphHeader } from '../utils/Graph'
+import { Graph, GraphHeader } from '../../../../utils/Graph'
 
-import { LabelledInput } from '../utils/LabelledInput'
+import { HeaderItem } from '../../../../kubernetes/Pod'
 
-import { HeaderItem } from '../kubernetes/Pod'
+import { ErrorModal } from '../../../../utils/ErrorModal'
 
-import { ErrorModal } from '../utils/ErrorModal'
+import { EXECUTE_RUNBOOK } from '../../../../runbooks/queries'
 
-import { EXECUTE_RUNBOOK } from './queries'
+import { ValueFormats, extract, query } from '../../../../runbooks/utils'
 
-import { ValueFormats, extract, query } from './utils'
+import DisplayInput from './display/DisplayInput'
 
-const DisplayContext = React.createContext({})
+export const DisplayContext = createContext<any>({})
 
-function recurse(children, theme) {
+function recurse(children, theme?) {
   if (!children) return null
 
   return children.map((c, i) => parse(c, i, theme))
@@ -176,7 +176,7 @@ function DisplayButton({ attributes: { action, headline, ...rest } }) {
   )
 }
 
-function buttonComponent({ primary, key, ...props }) {
+function buttonComponent({ primary, key, ...props }: any) {
   if (primary) {
     return (
       <Button
@@ -206,30 +206,7 @@ export function convertType(val, type) {
   return val
 }
 
-function Input({ attributes, children }) {
-  const { context, setContext, ...rest } = useContext(DisplayContext)
-  const [value, setValue] = useState(children && children.length > 0 ? valueFrom(children[0], rest) : '')
-
-  useEffect(() => {
-    const { name } = attributes
-    const val = value === '' ? null : value
-    const converted = convertType(val, attributes.datatype)
-
-    if (context[name] !== converted && converted) {
-      setContext({ ...context, [name]: converted })
-    }
-  }, [attributes, context, setContext, value])
-
-  return (
-    <LabelledInput
-      {...attributes}
-      value={`${value}`}
-      onChange={setValue}
-    />
-  )
-}
-
-function valueFrom({ attributes: { datasource, path, doc } }, { datasources }) {
+export function valueFrom({ attributes: { datasource, path, doc } }, { datasources }) {
   const object = extract(datasources[datasource], doc)
 
   if (!object) return null
@@ -328,6 +305,8 @@ function Table({
             key={header}
             text={header}
             width={width}
+            nobold={undefined}
+            truncate={undefined}
           />
         ))}
       </Box>
@@ -359,7 +338,7 @@ function parse(struct, index, theme) {
   case 'link':
     return <Link {...props} />
   case 'input':
-    return <Input {...props} />
+    return <DisplayInput {...props} />
   case 'button':
     return <DisplayButton {...props} />
   case 'valueFrom':
@@ -373,7 +352,7 @@ function parse(struct, index, theme) {
   }
 }
 
-export function Display({ data, root: { children, attributes } }) {
+export function RunbookDisplay({ data, root: { children, attributes } }) {
   const theme = useContext(ThemeContext)
   const datasources = useMemo(() => (
     data.reduce((acc, entry) => ({ ...acc, [entry.name]: entry }), {})

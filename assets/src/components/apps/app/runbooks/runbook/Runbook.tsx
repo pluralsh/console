@@ -23,7 +23,7 @@ import { DURATIONS, SECOND_TO_MILLISECONDS } from 'utils/time'
 
 import { RUNBOOKS_Q, RUNBOOK_Q } from 'components/runbooks/queries'
 
-import { Display } from 'components/runbooks/Display'
+import { RunbookDisplay } from 'components/apps/app/runbooks/runbook/RunbookDisplay'
 
 import { RunbookExecutions } from 'components/apps/app/runbooks/runbook/RunbookExecutions'
 
@@ -166,7 +166,7 @@ export default function Runbook() {
                 Scale
               </Button>
             </Flex>
-            <Display
+            <RunbookDisplay
               root={runbook.spec.display}
               data={runbook.data}
             />
