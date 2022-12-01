@@ -26,7 +26,7 @@ export function DisplayGraph({ attributes: { datasource, label } }) {
   return (
     <Div
       height={300}
-      width={280}
+      width="100%"
     >
       <Div
         color="text-light"

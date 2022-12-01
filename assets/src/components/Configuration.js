@@ -42,11 +42,11 @@ import { LoopingLogo } from './utils/AnimatedLogo'
 
 import { BuildFragment } from './graphql/builds'
 import { LabelledInput } from './utils/LabelledInput'
-import { convertType } from './apps/app/runbooks/runbook/RunbookDisplay'
 import { DarkSelect } from './utils/Select'
 
 import { COMPONENT_LABEL } from './kubernetes/constants'
 import { SidebarTab } from './utils/SidebarTab'
+import { convertType } from './apps/app/runbooks/runbook/display/misc'
 
 const ConfigType = {
   HELM: 'HELM',
