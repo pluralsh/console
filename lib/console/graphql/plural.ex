@@ -159,7 +159,7 @@ defmodule Console.GraphQl.Plural do
       arg :context, non_null(:map)
       arg :oidc,    :boolean
 
-      resolve &Plural.install_recipe/2
+      safe_resolve &Plural.install_recipe/2
     end
 
     field :update_smtp, :smtp do
@@ -168,7 +168,19 @@ defmodule Console.GraphQl.Plural do
       middleware RequiresGit
       arg :smtp, non_null(:smtp_input)
 
-      resolve &Plural.update_smtp/2
+      safe_resolve &Plural.update_smtp/2
+    end
+
+    field :update_configuration, :configuration do
+      middleware Authenticated
+      middleware RequiresGit
+      arg :repository, non_null(:string)
+      arg :content,    non_null(:string)
+      arg :tool,       :tool
+      arg :message,    :string
+      middleware Rbac, perm: :configure, arg: :repository
+
+      safe_resolve &Plural.update_configuration/2
     end
   end
 end

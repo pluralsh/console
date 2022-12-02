@@ -57,7 +57,7 @@ defmodule Console.Deployer do
 
   def ping(), do: GenServer.call(leader(), :ping)
 
-  def update(repo, content, tool), do: GenServer.call(leader(), {:update, repo, content, tool})
+  def update(repo, content, tool, msg \\ nil), do: GenServer.call(leader(), {:update, repo, content, tool, msg})
 
   def exec(fun), do: GenServer.call(leader(), {:exec, fun})
 
@@ -70,8 +70,8 @@ defmodule Console.Deployer do
     {:reply, :ok, state}
   end
 
-  def handle_call({:update, repo, content, tool}, _, %State{storage: storage} = state) do
-    {:reply, update(storage, repo, content, tool), state}
+  def handle_call({:update, repo, content, tool, msg}, _, %State{storage: storage} = state) do
+    {:reply, update(storage, repo, content, tool, msg), state}
   end
 
   def handle_call({:exec, fun}, _, state) when is_function(fun) do
@@ -187,12 +187,12 @@ defmodule Console.Deployer do
     ], storage)
   end
 
-  defp update(storage, repo, content, tool) do
+  defp update(storage, repo, content, tool, msg) do
     Command.set_build(nil)
     bot = Users.get_bot!("console")
     with {:ok, _} <- storage.init(),
          {:ok, res} <- Console.Services.Plural.update_configuration(repo, content, tool),
-         {:ok, _} <- storage.revise("updated configuration for #{tool} #{repo}"),
+         {:ok, _} <- storage.revise(msg || "updated configuration for #{tool} #{repo}"),
          {:ok, _} <- storage.push(),
          {:ok, _} <- Builds.create(%{
           type: :deploy,
