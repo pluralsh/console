@@ -3,6 +3,7 @@ import { Span } from 'honorable'
 
 import { hasAlerts } from '../misc'
 
+// TODO: Add missing list of warnings.
 export default function RunbookStatus({ runbook, fontWeight = 400 }) {
   if (hasAlerts(runbook)) {
     return (

@@ -199,10 +199,3 @@ export default function Runbook() {
   )
 }
 
-// TODO:
-// { /* <StatusIcon
-// status={runbook.status}
-// size={35}
-// innerSize={20}
-// />
-// {runbook.spec.description} */ }
