@@ -1,13 +1,9 @@
-import {
-  Button,
-  Card,
-  FiltersIcon,
-  ListBoxItem,
-} from '@pluralsh/design-system'
+import { Button, FiltersIcon, ListBoxItem } from '@pluralsh/design-system'
 import { LOG_FILTER_Q } from 'components/graphql/plural'
-import { Div, WithOutsideClick } from 'honorable'
 import { useCallback, useState } from 'react'
 import { useQuery } from 'react-apollo'
+
+import { LogsInfoPanel } from './LogsInfoPanel'
 
 function selectedFilter(labels, search, spec) {
   if ((spec.query || '') !== search) return false
@@ -55,57 +51,26 @@ export default function LogsFilters({
         Filters
       </Button>
       {open && (
-        <WithOutsideClick onOutsideClick={() => setOpen(false)}>
-          <Card
-            fillLevel={2}
-            width={420}
-            overflow="hidden"
-            position="absolute"
-            top={40}
-            right={0}
-            marginTop="small"
-            zIndex={1000}
-          >
-            <Div
-              height={80}
-              padding="medium"
-              borderBottom="1px solid border-fill-two"
-            >
-              <Div
-                fontSize={18}
-                fontWeight={500}
-                lineHeight="24px"
-              >
-                Filters
-              </Div>
-              <Div
-                body2
-                color="text-xlight"
-              >
-                Select an attribute below to apply a filter.
-              </Div>
-            </Div>
-            <Div
-              overflowY="auto"
-              height={300}
-            >
-              {logFilters.map(({ metadata: { name }, spec }) => {
-                const selected = selectedFilter(labels, search, spec)
+        <LogsInfoPanel
+          title="Filters"
+          subtitle="Select an attribute below to apply a filter."
+          onOutsideClick={() => setOpen(false)}
+        >
+          {logFilters.map(({ metadata: { name }, spec }) => {
+            const selected = selectedFilter(labels, search, spec)
 
-                return (
-                  <ListBoxItem
-                    key={name}
-                    label={spec.name}
-                    description={spec.description}
-                    textValue={name}
-                    selected={selected}
-                    onClick={selected ? clear : () => select(spec)}
-                  />
-                )
-              })}
-            </Div>
-          </Card>
-        </WithOutsideClick>
+            return (
+              <ListBoxItem
+                key={name}
+                label={spec.name}
+                description={spec.description}
+                textValue={name}
+                selected={selected}
+                onClick={selected ? clear : () => select(spec)}
+              />
+            )
+          })}
+        </LogsInfoPanel>
       )}
     </>
   )
