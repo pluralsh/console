@@ -339,7 +339,6 @@ export function Logss({ application: { name }, query }) {
       <Box
         direction="row"
         fill
-        background="backgroundColor"
         gap="small"
       >
         <Stack
