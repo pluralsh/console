@@ -19,16 +19,18 @@ import { toMap, useQueryParams } from 'components/utils/query'
 import { Box, Stack } from 'grommet'
 import TinyQueue from 'tinyqueue'
 import moment from 'moment'
-import { Checkmark, Close, Up } from 'grommet-icons'
-import { LOG_FILTER_Q } from 'components/graphql/plural'
+import { Close, Up } from 'grommet-icons'
 import { useQuery } from 'react-apollo'
 import { LOGS_Q } from 'components/graphql/dashboards'
 import { AnsiLine } from 'components/utils/AnsiText'
 import LegacyScroller from 'components/utils/LegacyScroller'
 import { last } from 'lodash'
 
+import { Flex } from 'honorable'
+
 import LogsLabels from './LogsLabels'
 import LogsDownloader from './LogsDownloader'
+import LogsFilters from './LogsFilters'
 
 const POLL_INTERVAL = 10 * 1000
 const LIMIT = 1000
@@ -341,80 +343,6 @@ export function Logss({ application: { name }, query }) {
   )
 }
 
-function selectedFilter(labels, search, spec) {
-  if ((spec.query || '') !== search) return false
-
-  for (const { name, value } of spec.labels) {
-    if (labels[name] !== value) return false
-  }
-
-  return true
-}
-
-function LogFilters({
-  namespace, labels, search, setSearch, setLabels,
-}) {
-  const { data } = useQuery(LOG_FILTER_Q, { variables: { namespace } })
-  const select = useCallback(({ query, labels }) => {
-    if (labels) {
-      setLabels(labels.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {}))
-    }
-    setSearch(query || '')
-  }, [setSearch, setLabels])
-  const clear = useCallback(() => {
-    setSearch('')
-    setLabels({})
-  }, [setSearch, setLabels])
-
-  if (!data || data.logFilters.length === 0) return null
-
-  const { logFilters } = data
-
-  return (
-    <Box
-      width="250px"
-      flex={false}
-    >
-      <Box
-        fill
-        style={{ overflow: 'auto' }}
-        gap="xsmall"
-        pad="small"
-      >
-        <Box
-          flex={false}
-          gap="xsmall"
-        >
-          {logFilters.map(({ metadata: { name }, spec }) => {
-            const selected = selectedFilter(labels, search, spec)
-
-            return (
-              <Box
-                key={name}
-                pad={{ vertical: 'xsmall', horizontal: 'small' }}
-                background="card"
-                hoverIndicator="cardHover"
-                onClick={selected ? clear : () => select(spec)}
-                focusIndicator={false}
-                round="xsmall"
-                direction="row"
-                gap="xsmall"
-                align="center"
-              >
-                <Box>
-                  {spec.name}
-                  {spec.description}
-                </Box>
-                {selected && <Checkmark size="15px" />}
-              </Box>
-            )
-          })}
-        </Box>
-      </Box>
-    </Box>
-  )
-}
-
 export default function Logs() {
   const { appName } = useParams()
   const query = useQueryParams()
@@ -446,12 +374,25 @@ export default function Logs() {
 
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <LabelContext.Provider value={{ addLabel, removeLabel, labels: labelList }}>
+    <LabelContext.Provider value={{ addLabel, labels: labelList }}>
       <PageTitle heading="Logs">
-        <LogsDownloader
-          query={logQuery}
-          repo={appName}
-        />
+        <Flex
+          justify="end"
+          gap="medium"
+          grow={1}
+        >
+          <LogsDownloader
+            query={logQuery}
+            repo={appName}
+          />
+          <LogsFilters
+            namespace={appName}
+            setSearch={setSearch}
+            setLabels={setLabels}
+            labels={labels}
+            search={search}
+          />
+        </Flex>
       </PageTitle>
       <Input
         marginBottom="large"
@@ -469,13 +410,6 @@ export default function Logs() {
         paddingVertical="large"
         height={800}
       >
-        <LogFilters
-          namespace={appName}
-          setSearch={setSearch}
-          setLabels={setLabels}
-          labels={labels}
-          search={search}
-        />
         <Logss
           application={currentApp}
           query={logQuery}
