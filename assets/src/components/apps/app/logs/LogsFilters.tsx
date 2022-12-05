@@ -42,7 +42,7 @@ export default function LogsFilters({
   if (logFilters.length < 1) return null
 
   return (
-    <Div position="relative">
+    <>
       <Button
         secondary
         startIcon={<FiltersIcon />}
@@ -61,8 +61,9 @@ export default function LogsFilters({
             width={420}
             overflow="hidden"
             position="absolute"
-            top={0}
+            top={40}
             right={0}
+            marginTop="small"
             zIndex={1000}
           >
             <Div
@@ -106,6 +107,6 @@ export default function LogsFilters({
           </Card>
         </WithOutsideClick>
       )}
-    </Div>
+    </>
   )
 }
