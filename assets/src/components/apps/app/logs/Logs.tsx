@@ -1,55 +1,34 @@
-import React, {
+import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { Card, PageTitle } from '@pluralsh/design-system'
+import {
+  createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
 } from 'react'
-import {
-  Box,
-  Stack,
-  Text,
-  TextInput,
-} from 'grommet'
-import { useQuery } from 'react-apollo'
+import { useParams } from 'react-router-dom'
+import { InstallationContext } from 'components/Installations'
+import { toMap, useQueryParams } from 'components/utils/query'
+import { Box, Stack, TextInput } from 'grommet'
 import TinyQueue from 'tinyqueue'
-
 import moment from 'moment'
-
-import { Up } from 'grommet-icons'
-
 import {
-  Check as Checkmark,
+  Checkmark,
   Close,
   Download,
-  Explore as Search,
-} from 'forge-core'
-
-import { useNavigate, useParams } from 'react-router-dom'
-
-import { last } from 'lodash'
-
+  Search,
+  Up,
+} from 'grommet-icons'
+import { LOG_FILTER_Q } from 'components/graphql/plural'
+import { useQuery } from 'react-apollo'
 import fileDownload from 'js-file-download'
-
-import { fetchToken } from '../helpers/auth'
-
-import { LOGS_Q } from './graphql/dashboards'
-
-import { BreadcrumbsContext } from './Breadcrumbs'
-
-import { BUILD_PADDING } from './Builds'
-import {
-  ApplicationIcon,
-  InstallationContext,
-  hasIcon,
-  useEnsureCurrent,
-} from './Installations'
-import LegacyScroller from './utils/LegacyScroller'
-
-import { toMap, useQueryParams } from './utils/query'
-import { LOG_FILTER_Q } from './graphql/plural'
-
-import { AnsiLine } from './utils/AnsiText'
+import { LOGS_Q } from 'components/graphql/dashboards'
+import { AnsiLine } from 'components/utils/AnsiText'
+import { fetchToken } from 'helpers/auth'
+import LegacyScroller from 'components/utils/LegacyScroller'
+import { last } from 'lodash'
 
 const POLL_INTERVAL = 10 * 1000
 const LIMIT = 1000
@@ -73,8 +52,8 @@ const animation = {
   transition: 'width 0.75s cubic-bezier(0.000, 0.795, 0.000, 1.000)',
 }
 
-const FlyoutContext = React.createContext({})
-const LabelContext = React.createContext({})
+const FlyoutContext = createContext<any>({})
+const LabelContext = createContext<any>({})
 
 function determineLevel(line) {
   if (/fatal/i.test(line)) return Level.FATAL
@@ -102,7 +81,7 @@ function borderColor(lvl) {
 
 // ghostbusters!
 function* crossStreams(streams) {
-  const q = new TinyQueue([], ({ head: { timestamp: left } }, { head: { timestamp: right } }) => right - left)
+  const q = new TinyQueue<any>([], ({ head: { timestamp: left } }, { head: { timestamp: right } }) => right - left)
 
   for (const stream of streams) {
     if (!stream.values || !stream.values[0]) continue
@@ -159,11 +138,7 @@ function LogLine({ line: { timestamp, value }, stream, level }) {
         margin={{ bottom: '1px' }}
       >
         <Box flex={false}>
-          <Text
-            size="small"
-            weight={500}
-          >{ts(timestamp)}
-          </Text>
+          {ts(timestamp)}
         </Box>
         <Box
           fill="horizontal"
@@ -195,11 +170,7 @@ function LogInfo({ stream, stamp }) {
         align="center"
       >
         <Box fill="horizontal">
-          <Text
-            size="small"
-            weight="bold"
-          >Log Info
-          </Text>
+          Log Info
         </Box>
         <Box
           flex={false}
@@ -226,20 +197,11 @@ function LogInfo({ stream, stamp }) {
             hoverIndicator="card"
             pad={{ horizontal: 'small', vertical: 'xsmall' }}
           >
-            <Box
-              flex={false}
-              width="50%"
-            >
-              <Text
-                size="small"
-                weight="bold"
-                truncate
-              >{key}
-              </Text>
-            </Box>
-            <Box width="50%">
-              <Text size="small">{value}</Text>
-            </Box>
+            <>
+              {key}
+              {value}
+              {/* TRUNCATE */}
+            </>
           </Box>
         ))}
       </Box>
@@ -251,12 +213,12 @@ function LogContent({
   listRef, setListRef, logs, name, loading, fetchMore, onScroll, search, setLoader,
 }) {
   const [done, setDone] = useState(false)
-  const end = useMemo(() => last(logs), [logs])
+  const end = useMemo<any>(() => last(logs), [logs])
   const lines = useMemo(() => [...crossStreams(logs)], [logs])
-  const start = useMemo(() => (lines.length > 0 ? `${last(lines).line.timestamp}` : null), [lines])
+  const start = useMemo(() => (lines.length > 0 ? `${last(lines)?.line?.timestamp}` : null), [lines])
 
   useEffect(() => {
-    if (end && !end.values) {
+    if (!end?.values) {
       setDone(true)
     }
   }, [end, done])
@@ -314,11 +276,7 @@ function ScrollIndicator({ live, returnToTop }) {
           height="10px"
           width="10px"
         />
-        <Text
-          size="small"
-          weight={500}
-        >Live
-        </Text>
+        Live
       </IndicatorContainer>
     )
   }
@@ -328,7 +286,7 @@ function ScrollIndicator({ live, returnToTop }) {
       onClick={returnToTop}
       hoverIndicator="sidebarHover"
     >
-      <Text size="small">return to top</Text>
+      return to top
       <Up size="small" />
     </IndicatorContainer>
   )
@@ -353,11 +311,11 @@ async function download(url, name) {
   fileDownload(blob, name)
 }
 
-export default function Logs({ application: { name }, query }) {
+export function Logss({ application: { name }, query }) {
   const [flyout, setFlyout] = useState(null)
-  const [listRef, setListRef] = useState(null)
+  const [listRef, setListRef] = useState<any>(null)
   const [live, setLive] = useState(true)
-  const [loader, setLoader] = useState(null)
+  const [loader, setLoader] = useState<any>(null)
 
   const {
     data, loading, fetchMore, refetch,
@@ -368,9 +326,9 @@ export default function Logs({ application: { name }, query }) {
 
   const returnToTop = useCallback(() => {
     setLive(true)
-    refetch().then(() => listRef.scrollToItem(0))
-    loader.resetloadMoreItemsCache()
-  }, [setLive, listRef, loader])
+    refetch().then(() => listRef?.scrollToItem(0))
+    loader?.resetloadMoreItemsCache()
+  }, [refetch, setLive, listRef, loader])
 
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
@@ -440,17 +398,8 @@ function LogLabels({ labels }) {
           onClick={() => removeLabel(name)}
           key={i}
         >
-          <Text
-            size="small"
-            weight={500}
-            truncate
-          >{name}:
-          </Text>
-          <Text
-            size="small"
-            truncate
-          >{value}
-          </Text>
+          {name}:{value}
+          {/* TRUNCATE */}
         </Box>
       ))}
     </Box>
@@ -501,11 +450,7 @@ function LogFilters({
         margin={{ bottom: 'xsmall' }}
         background="card"
       >
-        <Text
-          size="small"
-          weight={500}
-        >Log Filters
-        </Text>
+        Log Filters
       </Box>
       <Box
         fill
@@ -534,16 +479,8 @@ function LogFilters({
                 align="center"
               >
                 <Box>
-                  <Text
-                    size="small"
-                    weight={500}
-                  >{spec.name}
-                  </Text>
-                  <Text
-                    size="small"
-                    color="dark-3"
-                  >{spec.description}
-                  </Text>
+                  {spec.name}
+                  {spec.description}
                 </Box>
                 {selected && <Checkmark size="15px" />}
               </Box>
@@ -587,50 +524,20 @@ function Downloader({ query, repo }) {
           focusIndicator={false}
           onClick={() => download(downloadUrl(query, value, repo), `${repo}_logs.txt`)}
         >
-          <Text
-            size="small"
-            weight={500}
-          >{text}
-          </Text>
+          {text}
         </Box>
       ))}
     </Box>
   )
 }
 
-export function DashboardHeader({ name, label }) {
-  return (
-    <Box gap="xxsmall">
-      <Text
-        weight="bold"
-        size="small"
-      >{name} {label}
-      </Text>
-    </Box>
-  )
-}
-
-export function LogViewer() {
-  const { repo } = useParams()
+export default function Logs() {
+  const { appName } = useParams()
   const query = useQueryParams()
+  const { applications }: any = useContext(InstallationContext)
+  const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
   const [search, setSearch] = useState('')
-  const [expanded, setExpanded] = useState(false)
-  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const [labels, setLabels] = useState(toMap(query))
-  const labelList = Object.entries(labels).map(([name, value]) => ({ name, value }))
-  const { setOnChange, currentApplication: app } = useContext(InstallationContext)
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    setBreadcrumbs([
-      { text: 'logs', url: '/logs' },
-      { text: app.name, url: `/logs/${app.name}` },
-    ])
-  }, [app])
-  useEffect(() => {
-    setOnChange({ func: ({ name }) => navigate(`/logs/${name}`) })
-  }, [])
-  useEnsureCurrent(repo)
 
   const addLabel = useCallback((name, value) => setLabels({ ...labels, [name]: value }), [labels, setLabels])
   const removeLabel = useCallback(name => {
@@ -639,106 +546,54 @@ export function LogViewer() {
     setLabels(rest)
   }, [labels, setLabels])
 
+  const currentApp = applications.find(app => app.name === appName)
   const searchQuery = search.length > 0 ? ` |~ "${search}"` : ''
+  const labelList = Object.entries(labels).map(([name, value]) => ({ name, value }))
   const labelQuery = useMemo(() => (
-    [...labelList, { name: 'namespace', value: repo }].map(({ name, value }) => `${name}="${value}"`).join(',')
-  ), [labelList, repo])
+    [...labelList, { name: 'namespace', value: appName }].map(({ name, value }) => `${name}="${value}"`).join(',')
+  ), [labelList, appName])
   const logQuery = `{${labelQuery}}${searchQuery}`
+
+  useEffect(() => setBreadcrumbs([
+    { text: 'Apps', url: '/' },
+    { text: appName, url: `/apps/${appName}` },
+    { text: 'Logs', url: `/apps/${appName}/logs` },
+  ]), [appName, setBreadcrumbs])
 
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     <LabelContext.Provider value={{ addLabel, removeLabel, labels: labelList }}>
-      <Box
-        fill
-        background="backgroundColor"
+      <PageTitle heading="Logs">
+        <Downloader
+          query={logQuery}
+          repo={appName}
+        />
+      </PageTitle>
+      <Card
+        paddingHorizontal={100}
+        paddingVertical="large"
       >
-        <Box
-          gap="small"
-          flex={false}
-          border={{ side: 'bottom' }}
-        >
-          <Box
-            pad={BUILD_PADDING}
-            gap="medium"
-            direction="row"
-            fill="horizontal"
-            align="center"
-            height="85px"
-          >
-            <Box
-              direction="row"
-              fill="horizontal"
-              gap="small"
-              align="center"
-            >
-              {hasIcon(app) && (
-                <ApplicationIcon
-                  application={app}
-                  size="40px"
-                  dark
-                />
-              )}
-              <Box gap="xsmall">
-                <DashboardHeader
-                  name={app.name}
-                  label="log streams"
-                />
-                {labelList.length > 0 && <LogLabels labels={labelList} />}
-              </Box>
-            </Box>
-            <Box
-              flex={false}
-              justify="end"
-              pad={{ top: 'xsmall' }}
-              gap="xsmall"
-              direction="row"
-              width="50%"
-            >
-              <Box
-                style={animation}
-                width={expanded ? '100%' : '200px'}
-                direction="row"
-                align="center"
-                border={expanded ? { side: 'bottom', color: 'brand' } : 'bottom'}
-                onClick={() => setExpanded(true)}
-                focusIndicator={false}
-                justify="end"
-              >
-                <Search size="20px" />
-                <TextInput
-                  plain
-                  onBlur={() => setExpanded(false)}
-                  size="small"
-                  style={animation}
-                  value={search}
-                  onChange={({ target: { value } }) => setSearch(value)}
-                  placeholder="this is for searching"
-                />
-              </Box>
-              <Downloader
-                query={logQuery}
-                repo={repo}
-              />
-            </Box>
-          </Box>
-        </Box>
-        <Box
-          fill
-          direction="row"
-        >
-          <LogFilters
-            namespace={repo}
-            setSearch={setSearch}
-            setLabels={setLabels}
-            labels={labels}
-            search={search}
-          />
-          <Logs
-            application={app}
-            query={logQuery}
-          />
-        </Box>
-      </Box>
+        {labelList.length > 0 && <LogLabels labels={labelList} />}
+        <LogFilters
+          namespace={appName}
+          setSearch={setSearch}
+          setLabels={setLabels}
+          labels={labels}
+          search={search}
+        />
+        <Search size="20px" />
+        <TextInput
+          plain
+          size="small"
+          value={search}
+          onChange={({ target: { value } }) => setSearch(value)}
+          placeholder="this is for searching"
+        />
+        <Logss
+          application={currentApp}
+          query={logQuery}
+        />
+      </Card>
     </LabelContext.Provider>
   )
 }

@@ -18,14 +18,18 @@ function textStyle({
 export function AnsiLine({ line }) {
   const blocks = useMemo(() => Anser.ansiToJson(escapeCarriageReturn(line), { json: true, remove_empty: true }), [line])
 
-  return blocks.map((json, i) => (
-    <pre
-      key={i}
-      style={textStyle(json)}
-    >
-      {json.content}
-    </pre>
-  ))
+  return (
+    <>
+      {blocks.map((json, i) => (
+        <pre
+          key={i}
+          style={textStyle(json)}
+        >
+          {json.content}
+        </pre>
+      ))}
+    </>
+  )
 }
 
 export const AnsiText = React.memo(({ text }) => {

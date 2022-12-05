@@ -23,7 +23,6 @@ import { EnsureLogin } from './Login'
 
 import Users from './Users'
 import { InstallationsProvider } from './Installations'
-import { LogViewer } from './Logs'
 import RepositorySelector from './RepositorySelector'
 import Application from './Application'
 import Component from './kubernetes/Component'
@@ -47,6 +46,7 @@ import Runbooks from './apps/app/runbooks/Runbooks'
 import CostAnalysis from './apps/app/cost/CostAnalysis'
 import Dashboard from './apps/app/dashboards/dashboard/Dashboard'
 import Runbook from './apps/app/runbooks/runbook/Runbook'
+import Logs from './apps/app/logs/Logs'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -254,10 +254,6 @@ export default function Console() {
                           )}
                         />
                         <Route
-                          path="/logs/:repo"
-                          element={<LogViewer />}
-                        />
-                        <Route
                           path="/incident/:incidentId"
                           element={<PluralApi><Incident /></PluralApi>}
                         />
@@ -265,16 +261,6 @@ export default function Console() {
                           <PluralApi><Incidents /></PluralApi>
                         </Route> */}
                         {/* Disabled for now.  */}
-                        <Route
-                          path="/logs"
-                          element={(
-                            <RepositorySelector
-                              prefix="logs"
-                              title="Logs"
-                              description="aggregated logstreams for your repos"
-                            />
-                          )}
-                        />
                         <Route
                           path="/pods/:namespace/:name"
                           element={<Pod />}
@@ -381,6 +367,10 @@ export default function Console() {
                           <Route
                             path="runbooks/:runbookName"
                             element={<Runbook />}
+                          />
+                          <Route
+                            path="logs"
+                            element={<Logs />}
                           />
                           <Route
                             path="cost"

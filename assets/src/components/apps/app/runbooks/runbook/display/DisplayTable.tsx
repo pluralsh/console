@@ -30,6 +30,7 @@ function TableRow({ data, columns }) {
   )
 }
 
+// TODO: Update styling.
 export function DisplayTable({
   attributes: {
     datasource, width, height, path,
