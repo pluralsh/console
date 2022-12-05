@@ -16,14 +16,13 @@ import {
 import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
 import { toMap, useQueryParams } from 'components/utils/query'
-import { Box, Stack, TextInput } from 'grommet'
+import { Box, Stack } from 'grommet'
 import TinyQueue from 'tinyqueue'
 import moment from 'moment'
 import {
   Checkmark,
   Close,
   Download,
-  Search,
   Up,
 } from 'grommet-icons'
 import { LOG_FILTER_Q } from 'components/graphql/plural'
@@ -34,6 +33,8 @@ import { AnsiLine } from 'components/utils/AnsiText'
 import { fetchToken } from 'helpers/auth'
 import LegacyScroller from 'components/utils/LegacyScroller'
 import { last } from 'lodash'
+
+import LogsLabels from './LogsLabels'
 
 const POLL_INTERVAL = 10 * 1000
 const LIMIT = 1000
@@ -303,13 +304,10 @@ function downloadUrl(q, end, repo) {
     .map(kv => kv.map(encodeURIComponent).join('='))
     .join('&')
 
-  console.log(params)
-
   return `${url}?${params}`
 }
 
 async function download(url, name) {
-  console.log(url)
   const resp = await fetch(url, { headers: { Authorization: `Bearer ${fetchToken()}` } })
   const blob = await resp.blob()
 
@@ -377,40 +375,6 @@ export function Logss({ application: { name }, query }) {
   )
 }
 
-function LogLabels({ labels }) {
-  const { removeLabel } = useContext(LabelContext)
-
-  return (
-    <Box
-      flex={false}
-      style={{ overflow: 'auto' }}
-      fill
-      direction="row"
-      gap="xsmall"
-      align="center"
-      wrap
-    >
-      {labels.map(({ name, value }, i) => (
-        <Box
-          gap="xsmall"
-          direction="row"
-          round="xsmall"
-          pad={{ horizontal: '7px', vertical: '2px' }}
-          focusIndicator={false}
-          align="center"
-          background="card"
-          hoverIndicator="cardHover"
-          onClick={() => removeLabel(name)}
-          key={i}
-        >
-          {name}:{value}
-          {/* TRUNCATE */}
-        </Box>
-      ))}
-    </Box>
-  )
-}
-
 function selectedFilter(labels, search, spec) {
   if ((spec.query || '') !== search) return false
 
@@ -427,10 +391,7 @@ function LogFilters({
   const { data } = useQuery(LOG_FILTER_Q, { variables: { namespace } })
   const select = useCallback(({ query, labels }) => {
     if (labels) {
-      const mapified = labels.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {})
-
-      console.log(mapified)
-      setLabels(mapified)
+      setLabels(labels.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {}))
     }
     setSearch(query || '')
   }, [setSearch, setLabels])
@@ -447,16 +408,7 @@ function LogFilters({
     <Box
       width="250px"
       flex={false}
-      height="100%"
-      border={{ side: 'right', color: '#444' }}
     >
-      <Box
-        pad={{ horizontal: 'small', vertical: 'xsmall' }}
-        margin={{ bottom: 'xsmall' }}
-        background="card"
-      >
-        Log Filters
-      </Box>
       <Box
         fill
         style={{ overflow: 'auto' }}
@@ -581,12 +533,15 @@ export default function Logs() {
         value={search}
         onChange={({ target: { value } }) => setSearch(value)}
       />
+      <LogsLabels
+        labels={labelList}
+        removeLabel={removeLabel}
+      />
       <Card
         paddingHorizontal={100}
         paddingVertical="large"
         height={800}
       >
-        {labelList.length > 0 && <LogLabels labels={labelList} />}
         <LogFilters
           namespace={appName}
           setSearch={setSearch}
