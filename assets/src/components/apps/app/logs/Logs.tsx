@@ -19,22 +19,16 @@ import { toMap, useQueryParams } from 'components/utils/query'
 import { Box, Stack } from 'grommet'
 import TinyQueue from 'tinyqueue'
 import moment from 'moment'
-import {
-  Checkmark,
-  Close,
-  Download,
-  Up,
-} from 'grommet-icons'
+import { Checkmark, Close, Up } from 'grommet-icons'
 import { LOG_FILTER_Q } from 'components/graphql/plural'
 import { useQuery } from 'react-apollo'
-import fileDownload from 'js-file-download'
 import { LOGS_Q } from 'components/graphql/dashboards'
 import { AnsiLine } from 'components/utils/AnsiText'
-import { fetchToken } from 'helpers/auth'
 import LegacyScroller from 'components/utils/LegacyScroller'
 import { last } from 'lodash'
 
 import LogsLabels from './LogsLabels'
+import LogsDownloader from './LogsDownloader'
 
 const POLL_INTERVAL = 10 * 1000
 const LIMIT = 1000
@@ -45,17 +39,6 @@ const Level = {
   WARN: 'w',
   OTHER: 'o',
   FATAL: 'f',
-}
-
-const DURATIONS = [
-  { text: '30m', value: 30 },
-  { text: '1hr', value: 60 },
-  { text: '2hr', value: 120 },
-]
-
-const animation = {
-  outline: 'none',
-  transition: 'width 0.75s cubic-bezier(0.000, 0.795, 0.000, 1.000)',
 }
 
 const FlyoutContext = createContext<any>({})
@@ -298,22 +281,6 @@ function ScrollIndicator({ live, returnToTop }) {
   )
 }
 
-function downloadUrl(q, end, repo) {
-  const url = `/v1/logs/${repo}/download`
-  const params = Object.entries({ q, end })
-    .map(kv => kv.map(encodeURIComponent).join('='))
-    .join('&')
-
-  return `${url}?${params}`
-}
-
-async function download(url, name) {
-  const resp = await fetch(url, { headers: { Authorization: `Bearer ${fetchToken()}` } })
-  const blob = await resp.blob()
-
-  fileDownload(blob, name)
-}
-
 export function Logss({ application: { name }, query }) {
   const [flyout, setFlyout] = useState(null)
   const [listRef, setListRef] = useState<any>(null)
@@ -448,45 +415,6 @@ function LogFilters({
   )
 }
 
-function Downloader({ query, repo }) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <Box
-      flex={false}
-      style={animation}
-      direction="row"
-      justify="end"
-      align="center"
-      width={open ? '200px' : '40px'}
-    >
-      <Box
-        flex={false}
-        pad="small"
-        round="xsmall"
-        hoverIndicator="card"
-        onClick={() => setOpen(!open)}
-        focusIndicator={false}
-      >
-        <Download size="small" />
-      </Box>
-      {open && DURATIONS.map(({ text, value }) => (
-        <Box
-          key={text}
-          flex={false}
-          pad="small"
-          round="xsmall"
-          hoverIndicator="card"
-          focusIndicator={false}
-          onClick={() => download(downloadUrl(query, value, repo), `${repo}_logs.txt`)}
-        >
-          {text}
-        </Box>
-      ))}
-    </Box>
-  )
-}
-
 export default function Logs() {
   const { appName } = useParams()
   const query = useQueryParams()
@@ -520,7 +448,7 @@ export default function Logs() {
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     <LabelContext.Provider value={{ addLabel, removeLabel, labels: labelList }}>
       <PageTitle heading="Logs">
-        <Downloader
+        <LogsDownloader
           query={logQuery}
           repo={appName}
         />
