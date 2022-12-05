@@ -1,5 +1,10 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { Card, PageTitle } from '@pluralsh/design-system'
+import {
+  Card,
+  Input,
+  PageTitle,
+  SearchIcon,
+} from '@pluralsh/design-system'
 import {
   createContext,
   useCallback,
@@ -569,9 +574,17 @@ export default function Logs() {
           repo={appName}
         />
       </PageTitle>
+      <Input
+        marginBottom="large"
+        placeholder="Filter logs"
+        startIcon={(<SearchIcon size={14} />)}
+        value={search}
+        onChange={({ target: { value } }) => setSearch(value)}
+      />
       <Card
         paddingHorizontal={100}
         paddingVertical="large"
+        height={800}
       >
         {labelList.length > 0 && <LogLabels labels={labelList} />}
         <LogFilters
@@ -580,14 +593,6 @@ export default function Logs() {
           setLabels={setLabels}
           labels={labels}
           search={search}
-        />
-        <Search size="20px" />
-        <TextInput
-          plain
-          size="small"
-          value={search}
-          onChange={({ target: { value } }) => setSearch(value)}
-          placeholder="this is for searching"
         />
         <Logss
           application={currentApp}
