@@ -84,12 +84,10 @@ export default function LogContent({
           <LogLine
             line={line}
             level={level}
-            onClick={e => {
+            onClick={() => {
               setOpen(true)
               setStream(stream)
               setTimestamp(line.timestamp)
-              e.preventDefault()
-              e.stopPropagation()
             }}
           />
         )}

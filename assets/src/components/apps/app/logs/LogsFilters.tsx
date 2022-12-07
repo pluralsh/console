@@ -46,11 +46,7 @@ export default function LogsFilters({
         secondary
         startIcon={<FiltersIcon />}
         height={40}
-        onClick={e => {
-          e.preventDefault()
-          e.stopPropagation()
-          setOpen(true)
-        }}
+        onClick={() => setOpen(true)}
       >
         Filters
       </Button>
@@ -59,10 +55,6 @@ export default function LogsFilters({
           title="Filters"
           subtitle="Select an attribute below to apply a filter."
           onClose={() => setOpen(false)}
-          position="fixed"
-          top={104}
-          right={0}
-          margin="large"
         >
           {logFilters.map(({ metadata: { name }, spec }) => {
             const selected = selectedFilter(labels, search, spec)

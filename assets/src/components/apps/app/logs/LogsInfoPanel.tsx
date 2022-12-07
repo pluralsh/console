@@ -1,22 +1,21 @@
 import { Card, CloseIcon } from '@pluralsh/design-system'
-import {
-  Div,
-  Flex,
-  Span,
-  WithOutsideClick,
-} from 'honorable'
+import { Layer } from 'grommet'
+import { Div, Flex, Span } from 'honorable'
 
 export function LogsInfoPanel({
-  title, subtitle, onClose = () => {}, contentHeight = 300, children, ...props
+  title, subtitle, onClose = _ => {}, contentHeight = 300, children,
 }) {
   return (
-    <WithOutsideClick onOutsideClick={onClose}>
+    <Layer
+      plain
+      onClickOutside={onClose}
+      position="top-right"
+    >
       <Card
         fillLevel={2}
         width={420}
         overflow="hidden"
-        zIndex={1000}
-        {...props}
+        margin="large"
       >
         <Div
           height={80}
@@ -33,7 +32,7 @@ export function LogsInfoPanel({
             </Span>
             <CloseIcon
               cursor="pointer"
-              onClick={onClose}
+              onClick={e => onClose(e)}
             />
           </Flex>
           <Div
@@ -50,6 +49,6 @@ export function LogsInfoPanel({
           {children}
         </Div>
       </Card>
-    </WithOutsideClick>
+    </Layer>
   )
 }

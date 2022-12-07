@@ -38,7 +38,7 @@ export default function LogsFullScreen({
           left="0"
           height="100vh"
           width="100vw"
-          zIndex={999}
+          zIndex={10}
         >
           <IconFrame
             icon={<CloseIcon />}
