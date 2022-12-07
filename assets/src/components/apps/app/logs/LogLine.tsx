@@ -35,6 +35,7 @@ export default function LogLine({
         fontFamily="Monument Mono"
         paddingHorizontal="small"
         paddinbVertical="xxsmall"
+        wordBreak="break-word"
         onClick={e => {
           setOpen(true)
           e.preventDefault()

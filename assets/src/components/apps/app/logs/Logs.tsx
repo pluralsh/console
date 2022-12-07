@@ -1,10 +1,5 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import {
-  Card,
-  Input,
-  PageTitle,
-  SearchIcon,
-} from '@pluralsh/design-system'
+import { Input, PageTitle, SearchIcon } from '@pluralsh/design-system'
 import {
   useCallback,
   useContext,
@@ -15,76 +10,12 @@ import {
 import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
 import { toMap, useQueryParams } from 'components/utils/query'
-import { Box, Stack } from 'grommet'
-import { useQuery } from 'react-apollo'
-import { LOGS_Q } from 'components/graphql/dashboards'
-
 import { Flex } from 'honorable'
 
 import LogsLabels from './LogsLabels'
 import LogsDownloader from './LogsDownloader'
 import LogsFilters from './LogsFilters'
-import LogContent from './LogContent'
-
-const POLL_INTERVAL = 10 * 1000
-const LIMIT = 1000
-
-export function Logss({ application: { name }, query, addLabel }) {
-  const [listRef, setListRef] = useState<any>(null)
-  const [live, setLive] = useState(true)
-  const [_, setLoader] = useState<any>(null)
-
-  const {
-    data, loading, fetchMore, // refetch,
-  } = useQuery(LOGS_Q, {
-    variables: { query, limit: LIMIT },
-    pollInterval: live ? POLL_INTERVAL : 0,
-  })
-
-  // const returnToTop = useCallback(() => {
-  //   setLive(true)
-  //   refetch().then(() => listRef?.scrollToItem(0))
-  //   loader?.resetloadMoreItemsCache()
-  // }, [refetch, setLive, listRef, loader])
-
-  return (
-    <Box
-      direction="row"
-      fill
-      gap="small"
-    >
-      <Stack
-        fill
-        anchor="bottom-left"
-      >
-        <Box
-          fill
-          pad={{ vertical: 'xsmall' }}
-        >
-          {data && (
-            <LogContent
-              listRef={listRef}
-              setListRef={setListRef}
-              name={name}
-              logs={data.logs}
-              setLoader={setLoader}
-              search={query}
-              loading={loading}
-              fetchMore={fetchMore}
-              onScroll={arg => setLive(!arg)}
-              addLabel={addLabel}
-            />
-          )}
-        </Box>
-        {/* Disabled for now as it is not part of designs. */}
-        {/* <ScrollIndicator
-          live={live}
-          returnToTop={returnToTop}
-        /> */}
-      </Stack>
-    </Box>
-  )
-}
+import { LogsCard } from './LogsCard'
 
 export default function Logs() {
   const { appName } = useParams()
@@ -147,16 +78,11 @@ export default function Logs() {
         labels={labelList}
         removeLabel={removeLabel}
       />
-      <Card
-        position="relative"
-        height={800}
-      >
-        <Logss
-          application={currentApp}
-          query={logQuery}
-          addLabel={addLabel}
-        />
-      </Card>
+      <LogsCard
+        application={currentApp}
+        query={logQuery}
+        addLabel={addLabel}
+      />
     </>
   )
 }

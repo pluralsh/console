@@ -5,13 +5,14 @@ import { LogsInfoPanel } from './LogsInfoPanel'
 import { ts } from './misc'
 
 export default function LogInfo({
-  stream, stamp, addLabel, onClose,
+  stream, stamp, addLabel, onClose, ...props
 }) {
   return (
     <LogsInfoPanel
       title="Log info"
       subtitle="Select an attribute below to apply a filter."
       onClose={onClose}
+      {...props}
     >
       {[['timestamp', ts(stamp)], ...Object.entries(stream)].map(([key, value]: any) => (
         <Flex

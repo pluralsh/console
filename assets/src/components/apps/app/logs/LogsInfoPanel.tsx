@@ -7,7 +7,7 @@ import {
 } from 'honorable'
 
 export function LogsInfoPanel({
-  title, subtitle, onClose = () => {}, contentHeight = 300, children,
+  title, subtitle, onClose = () => {}, contentHeight = 300, children, ...props
 }) {
   return (
     <WithOutsideClick onOutsideClick={onClose}>
@@ -20,6 +20,7 @@ export function LogsInfoPanel({
         right={0}
         marginTop="small"
         zIndex={1000}
+        {...props}
       >
         <Div
           height={80}
