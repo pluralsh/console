@@ -10,6 +10,7 @@ export function LogsInfoPanel({
       plain
       onClickOutside={onClose}
       position="top-right"
+      // TODO: Fix position when not in full screen mode. It needs additional top margin for toolbars.
     >
       <Card
         fillLevel={2}
