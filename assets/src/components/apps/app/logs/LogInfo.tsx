@@ -1,4 +1,3 @@
-import { TRUNCATE } from 'components/utils/truncate'
 import { Div, Flex } from 'honorable'
 
 import { LogsInfoPanel } from './LogsInfoPanel'
@@ -30,7 +29,7 @@ export default function LogInfo({
             body1
             fontWeight={600}
             width={120}
-            {...TRUNCATE}
+            wordWrap="wrap"
           >
             {key}
           </Div>
@@ -38,7 +37,7 @@ export default function LogInfo({
             body2
             color="text-light"
             width={300}
-            {...TRUNCATE}
+            wordWrap="wrap"
           >
             {value}
           </Div>
