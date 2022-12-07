@@ -10,6 +10,7 @@ import { Div } from 'honorable'
 
 import LogLine from './LogLine'
 import { Level } from './misc'
+import LogInfo from './LogInfo'
 
 function determineLevel(line) {
   if (/fatal/i.test(line)) return Level.FATAL
@@ -57,6 +58,9 @@ function Placeholder() {
 export default function LogContent({
   listRef, setListRef, logs, name, loading, fetchMore, onScroll, search, setLoader, addLabel,
 }) {
+  const [open, setOpen] = useState<boolean>(false)
+  const [timestamp, setTimestamp] = useState<any>()
+  const [stream, setStream] = useState<any>()
   const [done, setDone] = useState(false)
   const end = useMemo<any>(() => last(logs), [logs])
   const lines = useMemo(() => [...crossStreams(logs)], [logs])
@@ -69,28 +73,47 @@ export default function LogContent({
   }, [end, done])
 
   return (
-    <LegacyScroller
-      listRef={listRef}
-      setListRef={setListRef}
-      setLoader={setLoader}
-      refreshKey={`${name}:${search}`}
-      items={lines}
-      mapper={({ line, level, stream }) => (
-        <LogLine
+    <>
+      <LegacyScroller
+        listRef={listRef}
+        setListRef={setListRef}
+        setLoader={setLoader}
+        refreshKey={`${name}:${search}`}
+        items={lines}
+        mapper={({ line, level, stream }) => (
+          <LogLine
+            line={line}
+            level={level}
+            onClick={e => {
+              setOpen(true)
+              setStream(stream)
+              setTimestamp(line.timestamp)
+              e.preventDefault()
+              e.stopPropagation()
+            }}
+          />
+        )}
+        handleScroll={onScroll}
+        loading={loading}
+        placeholder={Placeholder}
+        loadNextPage={() => !done && fetchMore({
+          variables: { start },
+          updateQuery: (prev, { fetchMoreResult: { logs } }) => ({ ...prev, logs: [...prev.logs, ...logs] }),
+        })}
+        hasNextPage={!done}
+      />
+      {open && (
+        <LogInfo
+          stamp={timestamp}
           stream={stream}
-          line={line}
-          level={level}
           addLabel={addLabel}
+          onClose={() => setOpen(false)}
+          position="fixed"
+          top={104}
+          right={0}
+          margin="large"
         />
       )}
-      handleScroll={onScroll}
-      loading={loading}
-      placeholder={Placeholder}
-      loadNextPage={() => !done && fetchMore({
-        variables: { start },
-        updateQuery: (prev, { fetchMoreResult: { logs } }) => ({ ...prev, logs: [...prev.logs, ...logs] }),
-      })}
-      hasNextPage={!done}
-    />
+    </>
   )
 }

@@ -73,6 +73,7 @@ export default function App() {
       width="100%"
       overflowY="hidden"
       padding="large"
+      position="relative"
     >
       <ResponsiveLayoutSidenavContainer width={240}>
         <AppSelector

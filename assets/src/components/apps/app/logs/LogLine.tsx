@@ -1,9 +1,8 @@
 import { ansiToJson } from 'anser'
 import escapeCarriageReturn from 'escape-carriage'
 import { Flex } from 'honorable'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
-import LogInfo from './LogInfo'
 import { Level, ts } from './misc'
 
 function borderColor(lvl) {
@@ -22,37 +21,22 @@ function borderColor(lvl) {
 }
 
 export default function LogLine({
-  line: { timestamp, value }, stream, level, addLabel,
+  line: { timestamp, value }, level, onClick,
 }) {
-  const [open, setOpen] = useState<boolean>(false)
   const blocks = useMemo(() => ansiToJson(escapeCarriageReturn(value), { json: true, remove_empty: true }), [value])
 
   return (
-    <>
-      <Flex
-        borderLeft={`2px solid ${borderColor(level)}`}
-        direction="row"
-        fontFamily="Monument Mono"
-        paddingHorizontal="small"
-        paddinbVertical="xxsmall"
-        wordBreak="break-word"
-        onClick={e => {
-          setOpen(true)
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-        _hover={{ backgroundColor: 'fill-two', borderColor: 'border-info' }}
-      >
-        {ts(timestamp)}{blocks.map(json => <> {json.content}</>)}
-      </Flex>
-      {open && (
-        <LogInfo // TODO: Fix position.
-          stamp={timestamp}
-          stream={stream}
-          addLabel={addLabel}
-          onClose={() => setOpen(false)}
-        />
-      )}
-    </>
+    <Flex
+      borderLeft={`2px solid ${borderColor(level)}`}
+      direction="row"
+      fontFamily="Monument Mono"
+      paddingHorizontal="small"
+      paddinbVertical="xxsmall"
+      wordBreak="break-word"
+      onClick={onClick}
+      _hover={{ backgroundColor: 'fill-two', borderColor: 'border-info' }}
+    >
+      {ts(timestamp)}{blocks.map(json => <> {json.content}</>)}
+    </Flex>
   )
 }
