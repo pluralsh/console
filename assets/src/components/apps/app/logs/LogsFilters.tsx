@@ -1,5 +1,6 @@
 import { Button, FiltersIcon, ListBoxItem } from '@pluralsh/design-system'
 import { LOG_FILTER_Q } from 'components/graphql/plural'
+import { Div } from 'honorable'
 import { useCallback, useState } from 'react'
 import { useQuery } from 'react-apollo'
 import { useParams } from 'react-router-dom'
@@ -20,7 +21,7 @@ export default function LogsFilters({
   labels, search, setSearch, setLabels,
 }) {
   const { appName } = useParams()
-  const [open, setOpen] = useState<boolean>(false)
+  const [open, setOpen] = useState<boolean>(true)
   const { data } = useQuery(LOG_FILTER_Q, { variables: { namespace: appName } })
 
   const clear = useCallback(() => {
@@ -40,7 +41,7 @@ export default function LogsFilters({
   if (logFilters.length < 1) return null
 
   return (
-    <>
+    <Div position="relative">
       <Button
         secondary
         startIcon={<FiltersIcon />}
@@ -58,6 +59,10 @@ export default function LogsFilters({
           title="Filters"
           subtitle="Select an attribute below to apply a filter."
           onClose={() => setOpen(false)}
+          position="absolute"
+          top={40}
+          right={0}
+          marginTop="medium"
         >
           {logFilters.map(({ metadata: { name }, spec }) => {
             const selected = selectedFilter(labels, search, spec)
@@ -75,6 +80,6 @@ export default function LogsFilters({
           })}
         </LogsInfoPanel>
       )}
-    </>
+    </Div>
   )
 }

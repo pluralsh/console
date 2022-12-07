@@ -15,10 +15,6 @@ export function LogsInfoPanel({
         fillLevel={2}
         width={420}
         overflow="hidden"
-        position="absolute"
-        top={40}
-        right={0}
-        marginTop="small"
         zIndex={1000}
         {...props}
       >
