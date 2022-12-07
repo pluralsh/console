@@ -1,11 +1,16 @@
-import { Card } from '@pluralsh/design-system'
-import { Div, WithOutsideClick } from 'honorable'
+import { Card, CloseIcon } from '@pluralsh/design-system'
+import {
+  Div,
+  Flex,
+  Span,
+  WithOutsideClick,
+} from 'honorable'
 
 export function LogsInfoPanel({
-  title, subtitle, onOutsideClick, contentHeight = 300, children,
+  title, subtitle, onClose = () => {}, contentHeight = 300, children,
 }) {
   return (
-    <WithOutsideClick onOutsideClick={onOutsideClick}>
+    <WithOutsideClick onOutsideClick={onClose}>
       <Card
         fillLevel={2}
         width={420}
@@ -21,13 +26,19 @@ export function LogsInfoPanel({
           padding="medium"
           borderBottom="1px solid border-fill-two"
         >
-          <Div
-            fontSize={18}
-            fontWeight={500}
-            lineHeight="24px"
-          >
-            {title}
-          </Div>
+          <Flex justify="space-between">
+            <Span
+              fontSize={18}
+              fontWeight={500}
+              lineHeight="24px"
+            >
+              {title}
+            </Span>
+            <CloseIcon
+              cursor="pointer"
+              onClick={onClose}
+            />
+          </Flex>
           <Div
             body2
             color="text-xlight"

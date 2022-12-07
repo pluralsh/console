@@ -2,7 +2,7 @@ import { Chip, Tooltip } from '@pluralsh/design-system'
 import { Div, Flex, Span } from 'honorable'
 import { truncate } from 'lodash'
 
-const MAX_LENGTH = 4
+const MAX_LENGTH = 20
 
 function LogsLabelChip({ name, value, removeLabel }) {
   return (

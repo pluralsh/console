@@ -54,7 +54,7 @@ export default function LogsFilters({
         <LogsInfoPanel
           title="Filters"
           subtitle="Select an attribute below to apply a filter."
-          onOutsideClick={() => setOpen(false)}
+          onClose={() => setOpen(false)}
         >
           {logFilters.map(({ metadata: { name }, spec }) => {
             const selected = selectedFilter(labels, search, spec)

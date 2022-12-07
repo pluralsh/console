@@ -17,228 +17,21 @@ import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
 import { toMap, useQueryParams } from 'components/utils/query'
 import { Box, Stack } from 'grommet'
-import TinyQueue from 'tinyqueue'
-import moment from 'moment'
-import { Close, Up } from 'grommet-icons'
+import { Up } from 'grommet-icons'
 import { useQuery } from 'react-apollo'
 import { LOGS_Q } from 'components/graphql/dashboards'
-import { AnsiLine } from 'components/utils/AnsiText'
-import LegacyScroller from 'components/utils/LegacyScroller'
-import { last } from 'lodash'
 
 import { Flex } from 'honorable'
 
 import LogsLabels from './LogsLabels'
 import LogsDownloader from './LogsDownloader'
 import LogsFilters from './LogsFilters'
+import LogContent from './LogContent'
 
 const POLL_INTERVAL = 10 * 1000
 const LIMIT = 1000
 
-const Level = {
-  ERROR: 'e',
-  INFO: 'i',
-  WARN: 'w',
-  OTHER: 'o',
-  FATAL: 'f',
-}
-
-const FlyoutContext = createContext<any>({})
 const LabelContext = createContext<any>({})
-
-function determineLevel(line) {
-  if (/fatal/i.test(line)) return Level.FATAL
-  if (/error/i.test(line)) return Level.ERROR
-  if (/warn/i.test(line)) return Level.WARN
-  if (/info/i.test(line)) return Level.INFO
-
-  return Level.OTHER
-}
-
-function borderColor(lvl) {
-  switch (lvl) {
-  case Level.FATAL:
-    return 'success'
-  case Level.ERROR:
-    return 'success'
-  case Level.WARN:
-    return 'status-warning'
-  case Level.INFO:
-    return 'status-ok'
-  default:
-    return 'dark-6'
-  }
-}
-
-// ghostbusters!
-function* crossStreams(streams) {
-  const q = new TinyQueue<any>([], ({ head: { timestamp: left } }, { head: { timestamp: right } }) => right - left)
-
-  for (const stream of streams) {
-    if (!stream.values || !stream.values[0]) continue
-    q.push({ head: stream.values[0], stream, ind: 0 })
-  }
-
-  while (q.length) {
-    const { head, stream, ind } = q.pop()
-
-    yield { line: head, level: determineLevel(head.value), stream: stream.stream }
-    if (stream.values[ind + 1]) {
-      q.push({ head: stream.values[ind + 1], stream, ind: ind + 1 })
-    }
-  }
-}
-
-const ts = timestamp => moment(new Date(Math.round(timestamp / (1000 * 1000)))).format()
-
-function Placeholder() {
-  return (
-    <Box
-      height="20px"
-      flex={false}
-      style={{ fontFamily: 'monospace' }}
-    >
-      <Box
-        height="16px"
-        width={`${40 + Math.ceil(Math.random() * 40)}%`}
-        background="#444"
-      />
-    </Box>
-  )
-}
-
-function LogLine({ line: { timestamp, value }, stream, level }) {
-  const { setFlyout } = useContext(FlyoutContext)
-
-  return (
-    <Box
-      flex={false}
-      pad={{ left: 'small' }}
-      hoverIndicator="card"
-      onClick={() => setFlyout(<LogInfo
-        stamp={timestamp}
-        stream={stream}
-      />)}
-    >
-      <Box
-        border={{ side: 'left', color: borderColor(level), size: '3px' }}
-        style={{ fontFamily: 'monospace' }}
-        direction="row"
-        gap="small"
-        pad={{ horizontal: 'xsmall' }}
-        margin={{ bottom: '1px' }}
-      >
-        <Box flex={false}>
-          {ts(timestamp)}
-        </Box>
-        <Box
-          fill="horizontal"
-          direction="row"
-        >
-          <AnsiLine line={value} />
-        </Box>
-      </Box>
-    </Box>
-  )
-}
-
-function LogInfo({ stream, stamp }) {
-  const { setFlyout } = useContext(FlyoutContext)
-  const { addLabel } = useContext(LabelContext)
-
-  return (
-    <Box
-      flex={false}
-      width="30%"
-      fill="vertical"
-      style={{ overflow: 'auto' }}
-      border={{ side: 'left' }}
-    >
-      <Box
-        background="card"
-        direction="row"
-        pad={{ horizontal: 'small', vertical: 'xsmall' }}
-        align="center"
-      >
-        <Box fill="horizontal">
-          Log Info
-        </Box>
-        <Box
-          flex={false}
-          pad="xsmall"
-          round="xsmall"
-          onClick={() => setFlyout(null)}
-          hoverIndicator="cardHover"
-        >
-          <Close size="small" />
-        </Box>
-      </Box>
-      <Box
-        fill
-        style={{ fontFamily: 'monospace' }}
-      >
-        {[['timestamp', ts(stamp)], ...Object.entries(stream)].map(([key, value]) => (
-          <Box
-            key={key}
-            direction="row"
-            fill="horizontal"
-            gap="small"
-            flex={false}
-            onClick={() => addLabel(key, value)}
-            hoverIndicator="card"
-            pad={{ horizontal: 'small', vertical: 'xsmall' }}
-          >
-            <>
-              {key}
-              {value}
-              {/* TRUNCATE */}
-            </>
-          </Box>
-        ))}
-      </Box>
-    </Box>
-  )
-}
-
-function LogContent({
-  listRef, setListRef, logs, name, loading, fetchMore, onScroll, search, setLoader,
-}) {
-  const [done, setDone] = useState(false)
-  const end = useMemo<any>(() => last(logs), [logs])
-  const lines = useMemo(() => [...crossStreams(logs)], [logs])
-  const start = useMemo(() => (lines.length > 0 ? `${last(lines)?.line?.timestamp}` : null), [lines])
-
-  useEffect(() => {
-    if (!end?.values) {
-      setDone(true)
-    }
-  }, [end, done])
-
-  return (
-    <LegacyScroller
-      listRef={listRef}
-      setListRef={setListRef}
-      setLoader={setLoader}
-      refreshKey={`${name}:${search}`}
-      items={lines}
-      mapper={({ line, level, stream }) => (
-        <LogLine
-          stream={stream}
-          line={line}
-          level={level}
-        />
-      )}
-      handleScroll={onScroll}
-      loading={loading}
-      placeholder={Placeholder}
-      loadNextPage={() => !done && fetchMore({
-        variables: { start },
-        updateQuery: (prev, { fetchMoreResult: { logs } }) => ({ ...prev, logs: [...prev.logs, ...logs] }),
-      })}
-      hasNextPage={!done}
-    />
-  )
-}
 
 function IndicatorContainer({ children, ...props }) {
   return (
@@ -283,8 +76,7 @@ function ScrollIndicator({ live, returnToTop }) {
   )
 }
 
-export function Logss({ application: { name }, query }) {
-  const [flyout, setFlyout] = useState(null)
+export function Logss({ application: { name }, query, addLabel }) {
   const [listRef, setListRef] = useState<any>(null)
   const [live, setLive] = useState(true)
   const [loader, setLoader] = useState<any>(null)
@@ -303,43 +95,40 @@ export function Logss({ application: { name }, query }) {
   }, [refetch, setLive, listRef, loader])
 
   return (
-    // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <FlyoutContext.Provider value={{ setFlyout }}>
-      <Box
-        direction="row"
+    <Box
+      direction="row"
+      fill
+      gap="small"
+    >
+      <Stack
         fill
-        gap="small"
+        anchor="bottom-left"
       >
-        <Stack
+        <Box
           fill
-          anchor="bottom-left"
+          pad={{ vertical: 'xsmall' }}
         >
-          <Box
-            fill
-            pad={{ vertical: 'xsmall' }}
-          >
-            {data && (
-              <LogContent
-                listRef={listRef}
-                setListRef={setListRef}
-                name={name}
-                logs={data.logs}
-                setLoader={setLoader}
-                search={query}
-                loading={loading}
-                fetchMore={fetchMore}
-                onScroll={arg => setLive(!arg)}
-              />
-            )}
-          </Box>
-          <ScrollIndicator
-            live={live}
-            returnToTop={returnToTop}
-          />
-        </Stack>
-        {flyout}
-      </Box>
-    </FlyoutContext.Provider>
+          {data && (
+            <LogContent
+              listRef={listRef}
+              setListRef={setListRef}
+              name={name}
+              logs={data.logs}
+              setLoader={setLoader}
+              search={query}
+              loading={loading}
+              fetchMore={fetchMore}
+              onScroll={arg => setLive(!arg)}
+              addLabel={addLabel}
+            />
+          )}
+        </Box>
+        <ScrollIndicator
+          live={live}
+          returnToTop={returnToTop}
+        />
+      </Stack>
+    </Box>
   )
 }
 
@@ -374,7 +163,7 @@ export default function Logs() {
 
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <LabelContext.Provider value={{ addLabel, labels: labelList }}>
+    <LabelContext.Provider value={{ labels: labelList }}>
       <PageTitle heading="Logs">
         <Flex
           justify="end"
@@ -406,13 +195,13 @@ export default function Logs() {
         removeLabel={removeLabel}
       />
       <Card
-        paddingHorizontal={100}
-        paddingVertical="large"
+        position="relative"
         height={800}
       >
         <Logss
           application={currentApp}
           query={logQuery}
+          addLabel={addLabel}
         />
       </Card>
     </LabelContext.Provider>
