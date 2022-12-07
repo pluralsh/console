@@ -16,6 +16,7 @@ import LogsLabels from './LogsLabels'
 import LogsDownloader from './LogsDownloader'
 import LogsFilters from './LogsFilters'
 import { LogsCard } from './LogsCard'
+import LogsFullScreen from './LogsFullScreen'
 
 export default function Logs() {
   const { appName } = useParams()
@@ -54,6 +55,15 @@ export default function Logs() {
           gap="medium"
           grow={1}
         >
+          <LogsFullScreen
+            application={currentApp}
+            query={logQuery}
+            search={search}
+            setSearch={setSearch}
+            labels={labelList}
+            addLabel={addLabel}
+            removeLabel={removeLabel}
+          />
           <LogsDownloader
             query={logQuery}
             repo={appName}
@@ -68,7 +78,7 @@ export default function Logs() {
         </Flex>
       </PageTitle>
       <Input
-        marginBottom="large"
+        marginBottom={labelList?.length > 0 ? '' : 'medium'}
         placeholder="Filter logs"
         startIcon={(<SearchIcon size={14} />)}
         value={search}

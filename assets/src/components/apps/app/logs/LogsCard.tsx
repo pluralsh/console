@@ -9,7 +9,9 @@ import LogContent from './LogContent'
 const POLL_INTERVAL = 10 * 1000
 const LIMIT = 1000
 
-export function LogsCard({ application: { name }, query, addLabel }) {
+export function LogsCard({
+  application: { name }, query, addLabel, height = 800,
+}: any) {
   const [listRef, setListRef] = useState<any>(null)
   const [live, setLive] = useState(true)
   const [_, setLoader] = useState<any>(null)
@@ -31,7 +33,7 @@ export function LogsCard({ application: { name }, query, addLabel }) {
     <Card
       overflow="hidden"
       position="relative"
-      height={800}
+      height={height}
     >
       <Flex
         direction="row"
