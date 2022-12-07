@@ -8,14 +8,18 @@ import {
   SearchIcon,
 } from '@pluralsh/design-system'
 
-import { Div } from 'honorable'
+import { Div, Flex } from 'honorable'
+
+import { useParams } from 'react-router-dom'
 
 import LogsLabels from './LogsLabels'
 import { LogsCard } from './LogsCard'
+import LogsFilters from './LogsFilters'
 
 export default function LogsFullScreen({
-  application, query, search, setSearch, labels, addLabel, removeLabel,
+  application, query, search, setSearch, labels, setLabels, addLabel, removeLabel,
 }) {
+  const { appName } = useParams()
   const [open, setOpen] = useState<boolean>(false)
 
   return (
@@ -50,14 +54,27 @@ export default function LogsFullScreen({
             margin="large"
             position="fixed"
           />
-          <Input
-            backgroundColor="fill-one"
-            marginBottom={labels?.length > 0 ? '' : 'medium'}
-            placeholder="Filter logs"
-            startIcon={(<SearchIcon size={14} />)}
-            value={search}
-            onChange={({ target: { value } }) => setSearch(value)}
-          />
+          <Flex
+            gap="medium"
+            grow={1}
+          >
+            <Input
+              backgroundColor="fill-one"
+              marginBottom={labels?.length > 0 ? '' : 'medium'}
+              placeholder="Filter logs"
+              startIcon={(<SearchIcon size={14} />)}
+              value={search}
+              onChange={({ target: { value } }) => setSearch(value)}
+              width="100%"
+            />
+            <LogsFilters
+              namespace={appName}
+              setSearch={setSearch}
+              setLabels={setLabels}
+              labels={labels}
+              search={search}
+            />
+          </Flex>
           <LogsLabels
             labels={labels}
             removeLabel={removeLabel}

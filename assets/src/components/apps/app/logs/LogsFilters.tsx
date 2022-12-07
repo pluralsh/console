@@ -42,6 +42,7 @@ export default function LogsFilters({
       <Button
         secondary
         startIcon={<FiltersIcon />}
+        height={40}
         onClick={e => {
           e.preventDefault()
           e.stopPropagation()

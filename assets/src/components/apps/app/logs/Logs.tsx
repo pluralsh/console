@@ -61,6 +61,7 @@ export default function Logs() {
             search={search}
             setSearch={setSearch}
             labels={labelList}
+            setLabels={setLabels}
             addLabel={addLabel}
             removeLabel={removeLabel}
           />
