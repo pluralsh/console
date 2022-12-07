@@ -10,16 +10,13 @@ import {
 
 import { Div, Flex } from 'honorable'
 
-import { useParams } from 'react-router-dom'
-
 import LogsLabels from './LogsLabels'
 import { LogsCard } from './LogsCard'
 import LogsFilters from './LogsFilters'
 
 export default function LogsFullScreen({
-  application, query, search, setSearch, labels, setLabels, addLabel, removeLabel,
+  application, query, search, setSearch, labelList, labels, setLabels, addLabel, removeLabel,
 }) {
-  const { appName } = useParams()
   const [open, setOpen] = useState<boolean>(false)
 
   return (
@@ -60,7 +57,7 @@ export default function LogsFullScreen({
           >
             <Input
               backgroundColor="fill-one"
-              marginBottom={labels?.length > 0 ? '' : 'medium'}
+              marginBottom={labelList?.length > 0 ? '' : 'medium'}
               placeholder="Filter logs"
               startIcon={(<SearchIcon size={14} />)}
               value={search}
@@ -68,15 +65,14 @@ export default function LogsFullScreen({
               width="100%"
             />
             <LogsFilters
-              namespace={appName}
-              setSearch={setSearch}
-              setLabels={setLabels}
-              labels={labels}
               search={search}
+              setSearch={setSearch}
+              labels={labels}
+              setLabels={setLabels}
             />
           </Flex>
           <LogsLabels
-            labels={labels}
+            labels={labelList}
             removeLabel={removeLabel}
           />
           <LogsCard

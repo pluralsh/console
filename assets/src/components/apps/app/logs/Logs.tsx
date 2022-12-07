@@ -60,7 +60,8 @@ export default function Logs() {
             query={logQuery}
             search={search}
             setSearch={setSearch}
-            labels={labelList}
+            labelList={labelList}
+            labels={labels}
             setLabels={setLabels}
             addLabel={addLabel}
             removeLabel={removeLabel}
@@ -70,11 +71,10 @@ export default function Logs() {
             repo={appName}
           />
           <LogsFilters
-            namespace={appName}
-            setSearch={setSearch}
-            setLabels={setLabels}
-            labels={labels}
             search={search}
+            setSearch={setSearch}
+            labels={labels}
+            setLabels={setLabels}
           />
         </Flex>
       </PageTitle>
