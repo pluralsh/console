@@ -41,8 +41,9 @@ export default function LogsFullScreen({
         >
           <IconFrame
             icon={<CloseIcon />}
-            textValue="close"
-            cursor="pointer"
+            textValue="Close"
+            tooltip
+            clickable
             onClick={() => setOpen(false)}
             top={0}
             right={0}

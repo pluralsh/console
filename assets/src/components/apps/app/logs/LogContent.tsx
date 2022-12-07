@@ -48,7 +48,7 @@ function Placeholder() {
       <Div
         height={16}
         width={`${40 + Math.ceil(Math.random() * 40)}%`}
-        backgroundColor="#444"
+        backgroundColor="fill-two"
       />
     </Div>
   )
