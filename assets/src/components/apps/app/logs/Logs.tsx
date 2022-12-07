@@ -6,7 +6,6 @@ import {
   SearchIcon,
 } from '@pluralsh/design-system'
 import {
-  createContext,
   useCallback,
   useContext,
   useEffect,
@@ -17,7 +16,6 @@ import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
 import { toMap, useQueryParams } from 'components/utils/query'
 import { Box, Stack } from 'grommet'
-import { Up } from 'grommet-icons'
 import { useQuery } from 'react-apollo'
 import { LOGS_Q } from 'components/graphql/dashboards'
 
@@ -31,68 +29,23 @@ import LogContent from './LogContent'
 const POLL_INTERVAL = 10 * 1000
 const LIMIT = 1000
 
-const LabelContext = createContext<any>({})
-
-function IndicatorContainer({ children, ...props }) {
-  return (
-    <Box
-      direction="row"
-      gap="xsmall"
-      background="sidebar"
-      align="center"
-      margin={{ left: 'small', bottom: 'small' }}
-      {...props}
-      round="xxsmall"
-      pad={{ horizontal: 'small', vertical: '3px' }}
-    >
-      {children}
-    </Box>
-  )
-}
-
-function ScrollIndicator({ live, returnToTop }) {
-  if (live) {
-    return (
-      <IndicatorContainer>
-        <Box
-          round="full"
-          background="status-ok"
-          height="10px"
-          width="10px"
-        />
-        Live
-      </IndicatorContainer>
-    )
-  }
-
-  return (
-    <IndicatorContainer
-      onClick={returnToTop}
-      hoverIndicator="sidebarHover"
-    >
-      return to top
-      <Up size="small" />
-    </IndicatorContainer>
-  )
-}
-
 export function Logss({ application: { name }, query, addLabel }) {
   const [listRef, setListRef] = useState<any>(null)
   const [live, setLive] = useState(true)
-  const [loader, setLoader] = useState<any>(null)
+  const [_, setLoader] = useState<any>(null)
 
   const {
-    data, loading, fetchMore, refetch,
+    data, loading, fetchMore, // refetch,
   } = useQuery(LOGS_Q, {
     variables: { query, limit: LIMIT },
     pollInterval: live ? POLL_INTERVAL : 0,
   })
 
-  const returnToTop = useCallback(() => {
-    setLive(true)
-    refetch().then(() => listRef?.scrollToItem(0))
-    loader?.resetloadMoreItemsCache()
-  }, [refetch, setLive, listRef, loader])
+  // const returnToTop = useCallback(() => {
+  //   setLive(true)
+  //   refetch().then(() => listRef?.scrollToItem(0))
+  //   loader?.resetloadMoreItemsCache()
+  // }, [refetch, setLive, listRef, loader])
 
   return (
     <Box
@@ -123,10 +76,11 @@ export function Logss({ application: { name }, query, addLabel }) {
             />
           )}
         </Box>
-        <ScrollIndicator
+        {/* Disabled for now as it is not part of designs. */}
+        {/* <ScrollIndicator
           live={live}
           returnToTop={returnToTop}
-        />
+        /> */}
       </Stack>
     </Box>
   )
@@ -162,8 +116,7 @@ export default function Logs() {
   ]), [appName, setBreadcrumbs])
 
   return (
-    // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <LabelContext.Provider value={{ labels: labelList }}>
+    <>
       <PageTitle heading="Logs">
         <Flex
           justify="end"
@@ -204,6 +157,6 @@ export default function Logs() {
           addLabel={addLabel}
         />
       </Card>
-    </LabelContext.Provider>
+    </>
   )
 }
