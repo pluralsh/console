@@ -1,6 +1,10 @@
 defmodule Console do
   def conf(key, default \\ nil), do: Application.get_env(:console, key, default)
 
+  def sandbox?(), do: conf(:is_sandbox, false)
+
+  def demo_project?(), do: conf(:is_demo_project, false)
+
   def rand_str(size \\ 32) do
     :crypto.strong_rand_bytes(size)
     |> Base.url_encode64()

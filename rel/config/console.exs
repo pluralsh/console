@@ -78,6 +78,7 @@ config :console,
   piazza_secret: get_env("PIAZZA_WEBHOOK_SECRET"),
   cluster_name: get_env("CLUSTER_NAME"),
   is_demo_project: !!get_env("IS_DEMO_PROJECT"),
+  is_sandbox: !!get_env("CONSOLE_SANDBOX"),
   provider: provider
 
 if String.starts_with?(git_url, "https") do
