@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Users do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.User
-  alias Console.Middleware.{Authenticated, AdminRequired, AllowJwt}
+  alias Console.Middleware.{Authenticated, AdminRequired, AllowJwt, Sandboxed}
   alias Console.Schema.Notification.{Severity, Status}
 
   enum_from_list :permission, Console.Schema.Role, :permissions, []
@@ -216,6 +216,7 @@ defmodule Console.GraphQl.Users do
 
     field :signup, :user do
       middleware AllowJwt
+      middleware Sandboxed
       arg :invite_id, non_null(:string)
       arg :attributes, non_null(:user_attributes)
 
@@ -232,6 +233,7 @@ defmodule Console.GraphQl.Users do
 
     field :create_invite, :invite do
       middleware Authenticated
+      middleware Sandboxed
       arg :attributes, non_null(:invite_attributes)
 
       resolve safe_resolver(&User.create_invite/2)
@@ -239,6 +241,7 @@ defmodule Console.GraphQl.Users do
 
     field :update_user, :user do
       middleware Authenticated
+      middleware Sandboxed
       arg :id, :id
       arg :attributes, non_null(:user_attributes)
 
@@ -248,6 +251,7 @@ defmodule Console.GraphQl.Users do
     field :create_group, :group do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :attributes, non_null(:group_attributes)
 
       resolve safe_resolver(&User.create_group/2)
@@ -256,6 +260,7 @@ defmodule Console.GraphQl.Users do
     field :delete_group, :group do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :group_id, non_null(:id)
 
       resolve safe_resolver(&User.delete_group/2)
@@ -264,6 +269,7 @@ defmodule Console.GraphQl.Users do
     field :update_group, :group do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :group_id, non_null(:id)
       arg :attributes, non_null(:group_attributes)
 
@@ -273,6 +279,7 @@ defmodule Console.GraphQl.Users do
     field :create_group_member, :group_member do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :group_id, non_null(:id)
       arg :user_id, non_null(:id)
 
@@ -282,6 +289,7 @@ defmodule Console.GraphQl.Users do
     field :delete_group_member, :group_member do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :group_id, non_null(:id)
       arg :user_id, non_null(:id)
 
@@ -291,6 +299,7 @@ defmodule Console.GraphQl.Users do
     field :create_role, :role do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :attributes, non_null(:role_attributes)
 
       resolve safe_resolver(&User.create_role/2)
@@ -299,6 +308,7 @@ defmodule Console.GraphQl.Users do
     field :update_role, :role do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :id, non_null(:id)
       arg :attributes, non_null(:role_attributes)
 
@@ -308,6 +318,7 @@ defmodule Console.GraphQl.Users do
     field :delete_role, :role do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :id, non_null(:id)
 
       resolve safe_resolver(&User.delete_role/2)
