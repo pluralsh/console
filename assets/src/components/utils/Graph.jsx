@@ -30,8 +30,8 @@ export function GraphHeader({ text }) {
 function SliceTooltip({ point: { serieColor, serieId, data } }) {
   return (
     <Flex
-      background="fill-one"
-      border="1px solid border"
+      background="fill-two"
+      border="1px solid border-fill-two"
       borderRadius="4px"
       paddingVertical="xxsmall"
       paddingHorizontal="xsmall"
