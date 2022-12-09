@@ -44,8 +44,11 @@ export default function LogsFullScreen({
             icon={<CloseIcon />}
             textValue="Close"
             tooltip
+            type="floating"
             clickable
             onClick={() => setOpen(false)}
+            height={40}
+            width={40}
             top={0}
             right={0}
             margin="large"

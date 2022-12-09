@@ -47,10 +47,11 @@ export function ListItem({
         maxWidth="90%"
         padding="medium"
       >
-        {/* TODO: Update once design system will be fixed. */}
         <IconFrame
           icon={icon}
+          size="large"
           textValue={title}
+          type="floating"
         />
         <Flex direction="column">
           <Flex gap="small">

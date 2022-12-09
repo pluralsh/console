@@ -3371,9 +3371,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:1.291.12":
-  version: 1.291.12
-  resolution: "@pluralsh/design-system@npm:1.291.12"
+"@pluralsh/design-system@npm:1.294.0":
+  version: 1.294.0
+  resolution: "@pluralsh/design-system@npm:1.294.0"
   dependencies:
     "@floating-ui/react-dom-interactions": 0.11.0
     "@react-aria/button": 3.6.3
@@ -3394,7 +3394,7 @@ __metadata:
     "@react-stately/radio": 3.6.1
     "@react-stately/tabs": 3.2.3
     "@react-stately/toggle": 3.4.3
-    "@react-types/shared": 3.15.0
+    "@react-types/shared": 3.16.0
     "@tanstack/react-table": 8.5.30
     "@types/chroma-js": 2.1.4
     chroma-js: 2.4.2
@@ -3402,6 +3402,7 @@ __metadata:
     grommet: 2.27.0
     grommet-icons: 4.8.0
     highlight.js: 11.6.0
+    honorable-recipe-mapper: 0.2.0
     prop-types: 15.8.1
     react-animate-height: 3.0.5
     react-markdown: 8.0.3
@@ -3412,13 +3413,13 @@ __metadata:
   peerDependencies:
     "@emotion/react": ">=11.9.3"
     "@emotion/styled": ">=11.9.3"
-    honorable: ">=0.128.0"
-    honorable-theme-default: ">=0.63.0"
+    honorable: ">=0.148.0"
+    honorable-theme-default: ">=0.66.0"
     react: ">=16.0.0"
     react-dom: ">=16.0.0"
     react-transition-group: ">=4.4.2"
     styled-components: ">=5.3.5"
-  checksum: 5b7b59ef07bcfefa31ca9bdb1cd22ec9b38391db1deff6e96669eb68e628d0257f1da0da206228ecb89751e4e56e460ce0a9786e3c4402747461baa1b9f03ab8
+  checksum: 87fa2687570b4ab38693a71f785d0be057b2cd88fe24a3ae0cce35ec496d11b56daaaa20d52ef8ff6073958a1a9928881b747f13de8dde59b72220ea4f8a8b84
   languageName: node
   linkType: hard
 
@@ -4467,16 +4468,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-types/shared@npm:3.15.0":
-  version: 3.15.0
-  resolution: "@react-types/shared@npm:3.15.0"
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: 4bae4444b1002ca4a51ca45313d9ed4469a09b114366a8a8c3a2277f22d36c721fa0132225b4fb461ee2e26ee1fca3b9b2562949faa854d255f2618265911a49
-  languageName: node
-  linkType: hard
-
-"@react-types/shared@npm:^3.15.0, @react-types/shared@npm:^3.16.0":
+"@react-types/shared@npm:3.16.0, @react-types/shared@npm:^3.15.0, @react-types/shared@npm:^3.16.0":
   version: 3.16.0
   resolution: "@react-types/shared@npm:3.16.0"
   peerDependencies:
@@ -7082,7 +7074,7 @@ __metadata:
     "@nivo/radar": 0.80.0
     "@nivo/tooltip": 0.80.0
     "@nivo/waffle": 0.80.0
-    "@pluralsh/design-system": 1.291.12
+    "@pluralsh/design-system": 1.294.0
     "@pluralsh/eslint-config-typescript": 2.5.6
     "@pluralsh/stylelint-config": 1.1.1
     "@tanstack/react-table": 8.7.0
@@ -10047,6 +10039,13 @@ __metadata:
   dependencies:
     react-is: ^16.7.0
   checksum: b1538270429b13901ee586aa44f4cc3ecd8831c061d06cb8322e50ea17b3f5ce4d0e2e66394761e6c8e152cd8c34fb3b4b690116c6ce2bd45b18c746516cb9e8
+  languageName: node
+  linkType: hard
+
+"honorable-recipe-mapper@npm:0.2.0":
+  version: 0.2.0
+  resolution: "honorable-recipe-mapper@npm:0.2.0"
+  checksum: 86521c78ff616ceb76685a1117e90991670f789cb1e9efaed1963295b170ba1bcdeed2998408433e79c94315f1ba0cb9896272f2e2fb5e8495f06b8f715b351b
   languageName: node
   linkType: hard
 
