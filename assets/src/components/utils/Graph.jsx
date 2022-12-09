@@ -5,6 +5,7 @@ import { last } from 'lodash'
 import { Box, Text, ThemeContext } from 'grommet'
 import { semanticColors } from '@pluralsh/design-system/dist/theme/colors'
 import { useColorMap } from 'utils/color'
+import { Flex, P } from 'honorable'
 
 export function dateFormat(date) {
   return moment(date).format('MM/DD h:mm:ss a')
@@ -28,37 +29,24 @@ export function GraphHeader({ text }) {
 
 function SliceTooltip({ point: { serieColor, serieId, data } }) {
   return (
-    <Box
-      flex={false}
-      background="white"
-      pad={{ vertical: 'xsmall', horizontal: 'small' }}
+    <Flex
+      background="fill-one"
+      border="1px solid border"
+      borderRadius="4px"
+      paddingVertical="xxsmall"
+      paddingHorizontal="xsmall"
       direction="row"
       gap="xsmall"
       align="center"
     >
-      <Box
+      <Flex
         width="10px"
         height="10px"
-        background={serieColor}
+        borderRadius="50%"
+        backgroundColor={serieColor}
       />
-      <Text
-        size="small"
-        weight={500}
-      >{serieId}
-      </Text>
-      <Text size="small">{'~>'} x:</Text>
-      <Text
-        size="small"
-        weight="bold"
-      >{data.xFormatted}
-      </Text>
-      <Text size="small">y:</Text>
-      <Text
-        size="small"
-        weight="bold"
-      >{data.yFormatted}
-      </Text>
-    </Box>
+      <P body2>{serieId} [x: {data.xFormatted}, y: {data.yFormatted}]</P>
+    </Flex>
   )
 }
 
