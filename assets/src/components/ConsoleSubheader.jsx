@@ -2,7 +2,7 @@ import { Flex } from 'honorable'
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
-  Button,
+  IconFrame,
   theme,
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
@@ -13,6 +13,7 @@ import { ResponsiveLayoutSidecarContainer } from './layout/ResponsiveLayoutSidec
 import { ResponsiveLayoutSidenavContainer } from './layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from './layout/ResponsiveLayoutSpacer'
 
+// TODO: Disable previous and next button based on navigation history.
 export default function ConsoleSubheader() {
   const navigate = useNavigate()
 
@@ -24,29 +25,23 @@ export default function ConsoleSubheader() {
       minHeight={48}
     >
       <ResponsiveLayoutSidenavContainer
-        width={240}
+        gap="small"
+        display="flex"
         paddingHorizontal="large"
+        width={240}
       >
-        <Flex gap="small">
-          <Button
-            floating
-            small
-            // TODO: Add disabled state.
-            paddingHorizontal="xsmall"
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeftIcon />
-          </Button>
-          <Button
-            floating
-            small
-            // TODO: Add disabled state.
-            paddingHorizontal="xsmall"
-            onClick={() => navigate(1)}
-          >
-            <ArrowRightIcon />
-          </Button>
-        </Flex>
+        <IconFrame
+          clickable
+          icon={<ArrowLeftIcon />}
+          onClick={() => navigate(-1)}
+          type="floating"
+        />
+        <IconFrame
+          clickable
+          icon={<ArrowRightIcon />}
+          onClick={() => navigate(1)}
+          type="floating"
+        />
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer><Flex align="justify"><Breadcrumbs /></Flex></ResponsiveLayoutContentContainer>
