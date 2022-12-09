@@ -74,6 +74,7 @@ export default function LogsFullScreen({
               setSearch={setSearch}
               labels={labels}
               setLabels={setLabels}
+              fullscreen
             />
           </Flex>
           <LogsLabels
@@ -85,6 +86,7 @@ export default function LogsFullScreen({
             query={query}
             addLabel={addLabel}
             height="100%"
+            fullscreen
           />
         </Div>
       )}

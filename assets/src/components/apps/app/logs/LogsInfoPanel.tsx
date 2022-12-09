@@ -3,14 +3,14 @@ import { Layer } from 'grommet'
 import { Div, Flex, Span } from 'honorable'
 
 export function LogsInfoPanel({
-  title, subtitle, onClose = _ => {}, contentHeight = 300, children,
+  title, subtitle, onClose = _ => {}, contentHeight = 300, children, marginTop = '0',
 }) {
   return (
     <Layer
       plain
       onClickOutside={onClose}
       position="top-right"
-      // TODO: Fix position when not in full screen mode. It needs additional top margin for toolbars.
+      margin={{ top: marginTop }}
     >
       <Card
         fillLevel={2}
