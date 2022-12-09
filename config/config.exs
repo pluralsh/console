@@ -75,4 +75,6 @@ config :console, Console.PartitionedCache,
     allocated_memory: 1000 * 1000 * 500
   ]
 
+config :console, :login_link, []
+
 import_config "#{Mix.env()}.exs"

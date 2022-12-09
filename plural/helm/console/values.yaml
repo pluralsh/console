@@ -13,6 +13,8 @@ serviceAccount:
   create: true
   annotations: {}
 
+extraSecretEnv: []
+
 configOverlays:
 - name: console-cpu
   labels:

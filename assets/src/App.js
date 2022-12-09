@@ -13,6 +13,7 @@ import { OAuthCallback } from './components/OauthCallback'
 import 'react-toggle/style.css'
 import 'react-pulse-dot/dist/index.css'
 import { client } from './helpers/client'
+import { LinkLogin } from './components/LinkLogin'
 
 const INTERCOM_APP_ID = 'p127zb9y'
 
@@ -26,6 +27,10 @@ export default function App() {
               <Route
                 path="/login"
                 component={Login}
+              />
+              <Route
+                path="/quick-login/:key"
+                component={LinkLogin}
               />
               <Route
                 path="/access"

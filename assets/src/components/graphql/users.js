@@ -164,6 +164,16 @@ export const SIGNUP = gql`
   ${UserFragment}
 `
 
+export const LOGIN_LINK = gql`
+  mutation Link($key: String!) {
+    loginLink(key: $key) {
+      ...UserFragment
+      jwt
+    }
+  }
+  ${UserFragment}
+`
+
 export const NOTIFICATIONS_Q = gql`
   query Notifs($all: Boolean, $cursor: String) {
     notifications(all: $all, after: $cursor, first: 50) {
