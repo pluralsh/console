@@ -11,7 +11,7 @@ defmodule Kube.Client do
 
   get_request :get_dashboard, Kube.Dashboard, "platform.plural.sh", "v1alpha1", "dashboards"
   get_request :get_slashcommand, Kube.SlashCommand, "platform.plural.sh", "v1alpha1", "slashcommands"
-  get_request :get_application, Kube.Application, "app.k8s.io", "v1", "applications"
+  get_request :get_application, Kube.Application, "app.k8s.io", "v1beta1", "applications"
   get_request :get_certificate, Kube.Certificate, "cert-manager.io", "v1", "certificates"
   get_request :get_runbook, Kube.Runbook, "platform.plural.sh", "v1alpha1", "runbooks"
   get_request :get_statefulset_resize, Kube.StatefulSetResize, "platform.plural.sh", "v1alpha1", "statefulsetresizes"
@@ -28,7 +28,7 @@ defmodule Kube.Client do
   end
 
   def list_applications() do
-    make_request("/apis/app.k8s.io/v1/applications", "get", Kube.ApplicationList)
+    make_request("/apis/app.k8s.io/v1beta1/applications", "get", Kube.ApplicationList)
   end
 
   def list_metrics() do
