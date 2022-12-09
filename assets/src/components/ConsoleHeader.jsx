@@ -18,7 +18,7 @@ import { Installations } from './Installations'
 
 import { Installer } from './repos/Installer'
 
-const APP_ICON = `${process.env.PUBLIC_URL}/console-logo-white.png`
+const APP_ICON = '/console-logo-white.png'
 
 function DemoBanner() {
   const { configuration: { isDemoProject } } = useContext(LoginContext)

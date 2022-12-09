@@ -2,14 +2,12 @@ import { useContext, useEffect } from 'react'
 import { Box, Text, ThemeContext } from 'grommet'
 import { Check } from 'forge-core'
 import { useNavigate, useParams } from 'react-router-dom'
-
 import { normalizeColor } from 'grommet/utils'
-
 import { StatusCritical } from 'grommet-icons'
 
 import { Readiness } from 'utils/status'
 
-import { chunk } from '../utils/array'
+import { chunk } from 'utils/array'
 
 import { BreadcrumbsContext } from './Breadcrumbs'
 import {

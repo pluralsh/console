@@ -26,8 +26,8 @@ import { LoopingLogo } from './utils/AnimatedLogo'
 import { LoginContext } from './contexts'
 
 const POLL_INTERVAL = 3 * 60 * 1000
-const CONSOLE_ICON = `${process.env.PUBLIC_URL}/console-full.png`
-const CONSOLE_LOGO = `${process.env.PUBLIC_URL}/console-logo.png`
+const CONSOLE_ICON = '/console-full.png'
+const CONSOLE_LOGO = '/console-logo.png'
 const LOGIN_INFO = gql`
   query LoginInfo($redirect: String) {
     loginInfo(redirect: $redirect) { oidcUri }

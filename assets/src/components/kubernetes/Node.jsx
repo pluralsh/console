@@ -36,9 +36,9 @@ import { normalizeColor } from 'grommet/utils'
 
 import { Line } from 'rc-progress'
 
-import { Readiness } from 'utils/status'
-
 import { format } from 'components/apps/app/dashboards/dashboard/misc'
+
+import { Readiness } from 'utils/status'
 
 import { cpuParser } from '../../utils/kubernetes'
 import { Graph } from '../utils/Graph'
