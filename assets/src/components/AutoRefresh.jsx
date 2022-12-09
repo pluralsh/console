@@ -20,7 +20,6 @@ import { DownloadIcon } from '@pluralsh/design-system'
 import * as serviceWorker from '../serviceWorker'
 
 import { LoginContext } from './contexts'
-import { Icon } from './Console'
 
 const COMMIT_KEY = 'git-commit'
 const DOC_LINK = 'https://docs.plural.sh/basic-setup-and-deployment/admin-console#installation'
@@ -125,8 +124,8 @@ export function AutoRefresh() {
   if (!stale) return null
 
   return (
-    <Icon
-      icon={<DownloadIcon color="warning" />}
+    <DownloadIcon
+      color="warning"
       onClick={reload}
     />
   )
