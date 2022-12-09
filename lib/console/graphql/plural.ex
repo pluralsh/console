@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Plural do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Plural
-  alias Console.Middleware.{Authenticated, AdminRequired, RequiresGit}
+  alias Console.Middleware.{Authenticated, AdminRequired, RequiresGit, Rbac}
 
   input_object :smtp_input do
     field :server,   :string

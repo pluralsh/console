@@ -1,6 +1,5 @@
 defmodule Console.Middleware.Sandboxed do
   @behaviour Absinthe.Middleware
-  alias Console.Schema.User
 
   def call(resolution, _) do
     case Console.sandbox?() do
