@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import {
   ArrowTopRightIcon,
-  Button,
   CloseIcon,
   IconFrame,
   Input,
@@ -21,14 +20,17 @@ export default function LogsFullScreen({
 
   return (
     <>
-      <Button
-        secondary
-        paddingHorizontal="small"
+      <IconFrame
+        icon={<ArrowTopRightIcon />}
+        tooltip
+        tooltipProps={{ placement: 'bottom' }}
+        clickable
+        textValue="Fullscreen logs"
+        type="secondary"
         onClick={() => setOpen(true)}
-      >
-        {/* TODO: Switch icon. */}
-        <ArrowTopRightIcon />
-      </Button>
+        height={40}
+        width={40}
+      />
       {open && (
         <Div
           backgroundColor="rgba(23, 26, 33, 0.8)"

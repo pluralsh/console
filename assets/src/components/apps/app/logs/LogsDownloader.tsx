@@ -4,6 +4,7 @@ import { fetchToken } from 'helpers/auth'
 import {
   Button,
   DownloadIcon,
+  IconFrame,
   ListBoxItem,
   Modal,
   Select,
@@ -43,13 +44,17 @@ export default function LogsDownloader({ query, repo }) {
 
   return (
     <>
-      <Button
-        secondary
-        paddingHorizontal="small"
+      <IconFrame
+        icon={<DownloadIcon />}
+        tooltip
+        tooltipProps={{ placement: 'bottom' }}
+        clickable
+        textValue="Download logs"
+        type="secondary"
         onClick={() => setOpen(true)}
-      >
-        <DownloadIcon />
-      </Button>
+        height={40}
+        width={40}
+      />
       <Modal
         header="Download logs"
         open={open}
