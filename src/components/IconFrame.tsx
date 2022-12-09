@@ -8,24 +8,26 @@ import { ButtonBase, Flex, FlexProps } from 'honorable'
 import { useTheme } from 'styled-components'
 
 import Tooltip, { TooltipProps } from './Tooltip'
-import { useFillLevel } from './contexts/FillLevelContext'
-import type { FillLevel } from './contexts/FillLevelContext'
 
-type Hue = 'none' | 'default' | 'lighter' | 'lightest'
 type Size = 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'
+type Type = 'secondary' | 'tertiary' | 'floating'
 
-const parentFillLevelToHue: Record<FillLevel, Hue> = {
-  0: 'none',
-  1: 'default',
-  2: 'lighter',
-  3: 'lightest',
+const typeToBG: Record<Type, string> = {
+  secondary: 'transparent',
+  tertiary: 'transparent',
+  floating: 'fill-two',
 }
 
-const hueToHoverBG: Record<Hue, string> = {
-  none: 'fill-zero-hover',
-  default: 'fill-one-hover',
-  lighter: 'fill-two-hover',
-  lightest: 'fill-three-hover',
+const typeToHoverBG: Record<Type, string> = {
+  secondary: 'action-input-hover',
+  tertiary: 'action-input-hover',
+  floating: 'fill-two-hover',
+}
+
+const typeToBorder: Record<Type, string> = {
+  secondary: '1px solid border-input',
+  tertiary: '1px solid transparent',
+  floating: '1px solid border-input',
 }
 
 const sizeToIconSize: Record<Size, number> = {
@@ -45,32 +47,27 @@ const sizeToFrameSize: Record<Size, number> = {
 }
 
 type IconFrameProps = Omit<FlexProps, 'size'> & {
-  hue?: Hue
   clickable?: boolean
   textValue: string
   icon: ReactElement
   size?: Size
   tooltip?: boolean | ReactNode
   tooltipProps?: Partial<TooltipProps>
+  type?: Type
 }
 
 const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(({
   icon,
   size = 'medium',
-  hue,
   textValue,
   clickable = false,
   tooltip,
   tooltipProps,
+  type = 'tertiary',
   ...props
 },
 ref) => {
   const theme = useTheme()
-  const parentFillLevel = useFillLevel()
-
-  if (!hue) {
-    hue = parentFillLevelToHue[parentFillLevel]
-  }
 
   icon = cloneElement(icon, { size: sizeToIconSize[size] })
   if (tooltip && typeof tooltip === 'boolean') {
@@ -85,6 +82,8 @@ ref) => {
       justifyContent="center"
       width={sizeToFrameSize[size]}
       height={sizeToFrameSize[size]}
+      backgroundColor={typeToBG[type]}
+      border={typeToBorder[type]}
       borderRadius={theme.borderRadiuses.medium}
       aria-label={textValue}
       {...{ '&:focus,&:focus-visible': { outline: 'none' } }}
@@ -92,8 +91,6 @@ ref) => {
       {...{
         '&,&:any-link': {
           textDecoration: 'none',
-          border: 'unset',
-          background: 'unset',
           color: 'unset',
           appearance: 'unset',
         },
@@ -104,10 +101,7 @@ ref) => {
         role: 'button',
         cursor: 'pointer',
         '&:hover': {
-          backgroundColor:
-              clickable
-              && (theme.colors[hueToHoverBG[hue]]
-                || theme.colors[hueToHoverBG.default]),
+          backgroundColor: clickable && theme.colors[typeToHoverBG[type]],
         },
       })}
       {...props}

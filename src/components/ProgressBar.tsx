@@ -8,6 +8,8 @@ export type Props = {
   progress?: number,
   complete?: boolean,
   height?: number,
+  progressColor?: string,
+  completeColor?: string,
 }
 
 const keyframesOuter = keyframes`
@@ -98,6 +100,8 @@ export default function ProgressBar({
   paused = false,
   progress,
   height = 6,
+  progressColor = 'blue.200',
+  completeColor = 'border-success',
   ...props
 }: Props) {
   let fill
@@ -117,7 +121,7 @@ export default function ProgressBar({
         left={0}
         top={0}
         bottom={0}
-        backgroundColor={progress >= 1 || complete ? 'border-success' : 'blue.200'}
+        backgroundColor={progress >= 1 || complete ? completeColor : progressColor}
         right={`${(1 - progress) * 100}%`}
       />
     )
