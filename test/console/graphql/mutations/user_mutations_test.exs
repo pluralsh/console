@@ -22,6 +22,45 @@ defmodule Console.GraphQl.UserMutationsTest do
     end
   end
 
+  describe "loginLink" do
+    test "A user can be signed in via a random link" do
+      {:ok, user} = Users.create_user(%{
+        name: "some user",
+        email: "sandbox@plural.sh",
+        password: "bogus password"
+      })
+
+      {:ok, %{data: %{"loginLink" => signin}}} = run_query("""
+        mutation Link($key: String!) {
+          loginLink(key: $key) {
+            id
+            jwt
+          }
+        }
+      """, %{"key" => "test-key"})
+
+      assert signin["id"] == user.id
+      assert signin["jwt"]
+    end
+
+    test "If links are invalid signin won't work" do
+      {:ok, _} = Users.create_user(%{
+        name: "some user",
+        email: "sandbox@plural.sh",
+        password: "bogus password"
+      })
+
+      {:ok, %{data: %{"loginLink" => nil}, errors: [_ | _]}} = run_query("""
+        mutation Link($key: String!) {
+          loginLink(key: $key) {
+            id
+            jwt
+          }
+        }
+      """, %{"key" => "invalid"})
+    end
+  end
+
   describe "updateUser" do
     test "It can update a user's attributes" do
       {:ok, user} = Users.create_user(%{

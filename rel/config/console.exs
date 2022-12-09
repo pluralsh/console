@@ -85,3 +85,9 @@ if String.starts_with?(git_url, "https") do
   config :console,
     git_ssh_key: :pass
 end
+
+if !!get_env("CONSOLE_LOGIN_KEY") and get_env("CONSOLE_LOGIN_EMAIL") do
+  config :console, :login_link,
+    key: get_env("CONSOLE_LOGIN_KEY"),
+    email: get_env("CONSOLE_LOGIN_EMAIL")
+end
