@@ -2,7 +2,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { useHistory, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from 'react-apollo'
 
-import { Button } from 'forge-core'
+import { Button, GqlError } from 'forge-core'
 
 import { Box, Text } from 'grommet'
 
@@ -366,9 +366,9 @@ export default function Configuration() {
   const { repo } = useParams()
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const { setOnChange } = useContext(InstallationContext)
-  const { data } = useQuery(APPLICATION_Q, {
+  const { data, error } = useQuery(APPLICATION_Q, {
     variables: { name: repo },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'network-only',
   })
   const onCompleted = useCallback(() => {
     history.push('/') 
@@ -396,8 +396,19 @@ export default function Configuration() {
     )
   }
 
+  if (error) {
+    return (
+      <Box fill>
+        <GqlError 
+          error={error} 
+          header="Cannot access configuration for this app"
+        />
+      </Box>
+    )
+  }
+
   return (
-    <EditConfiguration 
+    <EditConfiguration
       application={data.application} 
       overlays={data.configurationOverlays.map(({ metadata, ...rest }) => {
         const labels = metadata.labels.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {})
