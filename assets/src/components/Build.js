@@ -446,7 +446,7 @@ function Changelog({ build: { changelogs } }) {
 export default function Build() {
   const { buildId } = useParams()
   const [tab, setTab] = useState('progress')
-  const { data, loading, subscribeToMore } = useQuery(BUILD_Q, { variables: { buildId }, fetchPolicy: 'cache-and-network' })
+  const { data, subscribeToMore } = useQuery(BUILD_Q, { variables: { buildId }, fetchPolicy: 'cache-and-network', errorPolicy: 'ignore' })
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
 
   useEffect(() => {
@@ -464,7 +464,7 @@ export default function Build() {
     }
   }, [buildId, subscribeToMore])
 
-  if (!data || loading) {
+  if (!data) {
     return (
       <LoopingLogo
         scale="0.75"

@@ -387,15 +387,6 @@ export default function Configuration() {
 
   useEnsureCurrent(repo)
 
-  if (!data) {
-    return (
-      <LoopingLogo
-        scale="0.75"
-        dark
-      />
-    )
-  }
-
   if (error) {
     return (
       <Box fill>
@@ -404,6 +395,15 @@ export default function Configuration() {
           header="Cannot access configuration for this app"
         />
       </Box>
+    )
+  }
+
+  if (!data) {
+    return (
+      <LoopingLogo
+        scale="0.75"
+        dark
+      />
     )
   }
 
