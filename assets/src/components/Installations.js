@@ -185,7 +185,7 @@ export function ApplicationDetails() {
   const { name, spec: { descriptor }, cost, license } = currentApplication
   const hasLinks = descriptor.links
   const hasCost = cost || license
-  const sandboxed = !!configuration.hasSandbox
+  const sandboxed = !!configuration.isSandbox
 
   return (
     <Box
