@@ -93,6 +93,7 @@ export const ME_Q = gql`
     configuration { 
       gitCommit
       isDemoProject
+      isSandbox
       manifest { ...ManifestFragment }
       gitStatus { cloned output }
     }
