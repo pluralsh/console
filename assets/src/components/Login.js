@@ -123,7 +123,7 @@ export function GrantAccess() {
 
 export function EnsureLogin({ children }) {
   const location = useLocation()
-  const { data, error } = useQuery(ME_Q, { pollInterval: POLL_INTERVAL })
+  const { data, error } = useQuery(ME_Q, { pollInterval: POLL_INTERVAL, errorPolicy: 'ignore' })
   const { boot, update } = useIntercom()
 
   useEffect(() => {

@@ -30,11 +30,14 @@ export const SIDEBAR_ICON_HEIGHT = '42px'
 const SMALL_WIDTH = '60px'
 const ICON_HEIGHT = '15px'
 
-export function SidebarIcon({ icon, text, name: sidebarName, selected, path }) {
+export function SidebarIcon({ icon, text, name: sidebarName, selected, path, sandboxed }) {
   const { name } = useContext(SubmenuContext)
+  const { configuration } = useContext(LoginContext)
   const history = useHistory()
   const inSubmenu = name === sidebarName
   const textColor = selected && !inSubmenu ? 'white' : 'light-5'
+
+  if (sandboxed && configuration.isSandbox) return null
 
   return (
     <Box
@@ -74,10 +77,13 @@ export function SidebarIcon({ icon, text, name: sidebarName, selected, path }) {
   )
 }
 
-function CompressedIcon({ icon, text, selected, path }) {
+function CompressedIcon({ icon, text, selected, path, sandboxed }) {
+  const { configuration } = useContext(LoginContext)
   const [ref, setRef] = useState(null)
   const [hover, setHover] = useState(false)
   const history = useHistory()
+
+  if (sandboxed && configuration.isSandbox) return null
 
   return (
     <>
@@ -169,7 +175,7 @@ const OPTIONS = [
   { text: 'Components', icon: Components, path: '/components/{repo}' },
   { text: 'Nodes', icon: Nodes, path: '/nodes' },
   { text: 'Configuration', icon: Configuration, path: '/config/{repo}', git: true },
-  { text: 'Incidents', icon: Incidents, path: '/incidents' },
+  { text: 'Incidents', icon: Incidents, path: '/incidents', sandboxed: true },
   { text: 'Dashboards', icon: Dashboard, path: '/dashboards/{repo}' },
   { text: 'Logs', icon: Logs, path: '/logs/{repo}' },
   { text: 'Account', icon: Group, path: '/directory' },
@@ -249,7 +255,7 @@ export default function Sidebar() {
           fill="horizontal"
           align="center"
         >
-          {OPTIONS.map(({ text, icon, path, name: sbName, git }, ind) => {
+          {OPTIONS.map(({ text, icon, path, name: sbName, git, sandboxed }, ind) => {
             if (git && !conf.gitStatus.cloned) return null
  
             return isExpanded ? (
@@ -259,6 +265,7 @@ export default function Sidebar() {
                 path={replace(path, name)}
                 text={text}
                 name={sbName}
+                sandboxed={sandboxed}
                 selected={ind === active}
               />
             ) : (
@@ -268,6 +275,7 @@ export default function Sidebar() {
                 path={replace(path, name)}
                 text={text}
                 name={sbName}
+                sandboxed={sandboxed}
                 selected={ind === active}
               />
             )

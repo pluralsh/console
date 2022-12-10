@@ -13,6 +13,7 @@ import { CostBreakdown } from './repos/CostAnalysis'
 import { FlyoutContainer, Icon } from './Console'
 import { ModalHeader } from './utils/Modal'
 import { OIDCProvider } from './oidc/OIDCProvider'
+import { LoginContext } from './Login'
 
 export const InstallationContext = React.createContext({})
 
@@ -179,10 +180,12 @@ function ApplicationLink({ link: { url, description }, width }) {
 }
 
 export function ApplicationDetails() {
+  const { configuration } = useContext(LoginContext)
   const { currentApplication } = useContext(InstallationContext)
   const { name, spec: { descriptor }, cost, license } = currentApplication
   const hasLinks = descriptor.links
   const hasCost = cost || license
+  const sandboxed = !!configuration.hasSandbox
 
   return (
     <Box
@@ -247,13 +250,15 @@ export function ApplicationDetails() {
               </Text>
             </TabHeaderItem>
           )}
-          <TabHeaderItem name="oidc">
-            <Text
-              size="small"
-              weight={500}
-            >OpenID Connect
-            </Text>
-          </TabHeaderItem>
+          {!sandboxed && (
+            <TabHeaderItem name="oidc">
+              <Text
+                size="small"
+                weight={500}
+              >OpenID Connect
+              </Text>
+            </TabHeaderItem>
+          )}
         </TabHeader>
         {hasLinks && (
           <TabContent name="links">
@@ -286,9 +291,11 @@ export function ApplicationDetails() {
             />
           </TabContent>
         )}
-        <TabContent name="oidc">
-          <OIDCProvider name={name} />
-        </TabContent>
+        {!sandboxed && (
+          <TabContent name="oidc">
+            <OIDCProvider name={name} />
+          </TabContent>
+        )}
       </Tabs>
     </Box>
   )

@@ -101,6 +101,7 @@ defmodule Console.GraphQl.Schema do
   object :console_configuration do
     field :git_commit,      :string
     field :is_demo_project, :boolean
+    field :is_sandbox,      :boolean
 
     field :manifest,        :plural_manifest, resolve: fn
       _, _, _ ->

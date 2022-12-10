@@ -3,7 +3,7 @@ defmodule Console.GraphQl do
   use Absinthe.Relay.Schema, :modern
   import Console.GraphQl.Helpers
   alias Console.GraphQl.Resolvers.{Build, Plural, User, Kubecost, License}
-  alias Console.Middleware.{Authenticated, Rbac, RequiresGit}
+  alias Console.Middleware.{Authenticated, Rbac, RequiresGit, Sandboxed}
 
   import_types Absinthe.Type.Custom
   import_types Console.GraphQl.Schema.Base
@@ -61,6 +61,7 @@ defmodule Console.GraphQl do
 
     field :external_token, :string do
       middleware Authenticated
+      middleware Sandboxed
       resolve &Plural.resolve_external_token/2
     end
 
