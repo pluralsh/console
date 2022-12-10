@@ -1,6 +1,7 @@
 defmodule Console.GraphQl.Schema do
   use Console.GraphQl.Schema.Base
   alias Console.Schema
+  alias Console.Middleware.{Rbac}
   alias Console.GraphQl.Resolvers.{Build, User}
 
   import_types Absinthe.Plug.Types
@@ -43,7 +44,10 @@ defmodule Console.GraphQl.Schema do
 
     field :creator,  :user, resolve: dataloader(User)
     field :approver, :user, resolve: dataloader(User)
-    field :changelogs, list_of(:changelog), resolve: dataloader(Build)
+    field :changelogs, list_of(:changelog) do
+      middleware Rbac, perm: :configure, field: :repository
+      resolve dataloader(Build)
+    end
 
     timestamps()
   end

@@ -26,6 +26,8 @@ defmodule Console.GraphQl.BuildQueriesTest do
     test "It can sideload commands for a build" do
       build      = insert(:build)
       changelogs = insert_list(3, :changelog, build: build)
+      user = insert(:user)
+      setup_rbac(user, [build.repository], configure: true)
       commands   = for i <- 1..3,
         do: insert(:command, build: build, inserted_at: Timex.now() |> Timex.shift(days: -i))
       expected = commands |> Enum.map(& &1.id) |> Enum.reverse()
@@ -49,11 +51,47 @@ defmodule Console.GraphQl.BuildQueriesTest do
             }
           }
         }
-      """, %{"id" => build.id}, %{current_user: insert(:user)})
+      """, %{"id" => build.id}, %{current_user: user})
 
       assert found["id"] == build.id
       assert found["creator"]["id"] == build.creator_id
       assert ids_equal(found["changelogs"], changelogs)
+      assert from_connection(found["commands"]) |> Enum.map(& &1["id"]) == expected
+    end
+
+    test "users w/o perms cannot sideload changelogs" do
+      user = insert(:user)
+      build = insert(:build)
+      setup_rbac(user, ["other"], configure: true)
+      insert_list(3, :changelog, build: build)
+      commands   = for i <- 1..3,
+        do: insert(:command, build: build, inserted_at: Timex.now() |> Timex.shift(days: -i))
+      expected = commands |> Enum.map(& &1.id) |> Enum.reverse()
+
+      {:ok, %{data: %{"build" => found}, errors: [_ | _]}} = run_query("""
+        query Build($id: ID!) {
+          build(id: $id) {
+            id
+            creator {
+              id
+            }
+            changelogs {
+              id
+            }
+            commands(first: 10) {
+              edges {
+                node {
+                  id
+                }
+              }
+            }
+          }
+        }
+      """, %{"id" => build.id}, %{current_user: user})
+
+      assert found["id"] == build.id
+      assert found["creator"]["id"] == build.creator_id
+      refute found["changelogs"]
       assert from_connection(found["commands"]) |> Enum.map(& &1["id"]) == expected
     end
   end
