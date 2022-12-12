@@ -46,6 +46,7 @@ const getDirectory = app => [
   //       {OPTIONS.map(({ text, icon, path, name: sbName, git }, ind) => {
     //         if (git && !conf.gitStatus.cloned) return null
     //       })}
+    // TODO: OpenID Connect cannot be shown if configuration.isSandbox is true.
   { path: 'cost', label: 'Cost analysis', enabled: app.cost || app.license },
 ]
 
