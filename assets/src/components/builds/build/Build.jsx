@@ -23,6 +23,8 @@ import { BeatLoader } from 'react-spinners'
 
 import { groupBy } from 'lodash'
 
+import { BreadcrumbsContext } from 'components/Breadcrumbs'
+
 import { mergeEdges } from 'components/graphql/utils'
 
 import {
@@ -35,15 +37,15 @@ import {
 } from 'components/graphql/builds'
 
 import '../../build.css'
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
-import { BuildStatus } from '../../types'
-import Avatar from '../../users/Avatar'
+import { TabHeader } from 'components/utils/TabSelector'
+import { AnsiLine, AnsiText } from 'components/utils/AnsiText'
+import { LoopingLogo } from 'components/utils/AnimatedLogo'
+import { SidebarTab } from 'components/utils/SidebarTab'
 
-import { TabHeader } from '../../utils/TabSelector'
-import { AnsiLine, AnsiText } from '../../utils/AnsiText'
-import { LoopingLogo } from '../../utils/AnimatedLogo'
-import { SidebarTab } from '../../utils/SidebarTab'
+import Avatar from 'components/users/Avatar'
+
+import BuildStatus from '../BuildStatus'
 
 const HEADER_PADDING = { horizontal: 'medium' }
 
@@ -479,8 +481,8 @@ function Changelog({ build: { changelogs } }) {
 export default function Build() {
   const { buildId } = useParams()
   const [tab, setTab] = useState('progress')
-  const { data, loading, subscribeToMore } = useQuery(BUILD_Q,
-    { variables: { buildId }, fetchPolicy: 'cache-and-network' })
+  const { data, subscribeToMore } = useQuery(BUILD_Q,
+    { variables: { buildId }, fetchPolicy: 'cache-and-network', errorPolicy: 'ignore' })
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
 
   useEffect(() => {
@@ -498,7 +500,7 @@ export default function Build() {
     }
   }, [buildId, subscribeToMore, setBreadcrumbs])
 
-  if (!data || loading) {
+  if (!data) {
     return (
       <LoopingLogo
         scale="0.75"
