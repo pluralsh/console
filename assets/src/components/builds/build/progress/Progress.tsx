@@ -1,3 +1,4 @@
+import { Card, PageTitle } from '@pluralsh/design-system'
 import { AnsiLine } from 'components/utils/AnsiText'
 import { Box, Text, ThemeContext } from 'grommet'
 import { Checkmark, StatusCritical } from 'grommet-icons'
@@ -159,19 +160,20 @@ export default function Progress() {
   const len = edges.length
 
   return (
-    <Box
-      style={{ overflow: 'auto' }}
-      background="backgroundColor"
-      fill
-      pad={{ bottom: 'small' }}
-    >
-      {edges.map(({ node }, ind) => (
-        <Command
-          key={node.id}
-          command={node}
-          follow={ind === len - 1}
-        />
-      ))}
-    </Box>
+    <>
+      <PageTitle heading="Progress" />
+      <Card
+        flexGrow={1}
+        overflowY="auto"
+      >
+        {edges.map(({ node }, ind) => (
+          <Command
+            key={node.id}
+            command={node}
+            follow={ind === len - 1}
+          />
+        ))}
+      </Card>
+    </>
   )
 }
