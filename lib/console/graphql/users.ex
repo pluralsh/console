@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Users do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.User
-  alias Console.Middleware.{Authenticated, AdminRequired, AllowJwt}
+  alias Console.Middleware.{Authenticated, AdminRequired, AllowJwt, Sandboxed}
   alias Console.Schema.Notification.{Severity, Status}
 
   enum_from_list :permission, Console.Schema.Role, :permissions, []
@@ -182,7 +182,7 @@ defmodule Console.GraphQl.Users do
     field :role, :role do
       middleware Authenticated
 
-      resolve safe_resolver(&User.resolve_role/2)
+      safe_resolve &User.resolve_role/2
     end
 
     connection field :roles, node_type: :role do
@@ -205,21 +205,29 @@ defmodule Console.GraphQl.Users do
       arg :email,    non_null(:string)
       arg :password, non_null(:string)
 
-      resolve safe_resolver(&User.signin_user/2)
+      safe_resolve &User.signin_user/2
+    end
+
+    field :login_link, :user do
+      middleware AllowJwt
+      arg :key, non_null(:string)
+
+      safe_resolve &User.login_link/2
     end
 
     field :read_notifications, :user do
       middleware Authenticated
 
-      resolve safe_resolver(&User.read_notifications/2)
+      safe_resolve &User.read_notifications/2
     end
 
     field :signup, :user do
       middleware AllowJwt
+      middleware Sandboxed
       arg :invite_id, non_null(:string)
       arg :attributes, non_null(:user_attributes)
 
-      resolve safe_resolver(&User.signup_user/2)
+      safe_resolve &User.signup_user/2
     end
 
     field :oauth_callback, :user do
@@ -227,90 +235,100 @@ defmodule Console.GraphQl.Users do
       arg :code,     non_null(:string)
       arg :redirect, :string
 
-      resolve safe_resolver(&User.oauth_callback/2)
+      safe_resolve &User.oauth_callback/2
     end
 
     field :create_invite, :invite do
       middleware Authenticated
+      middleware Sandboxed
       arg :attributes, non_null(:invite_attributes)
 
-      resolve safe_resolver(&User.create_invite/2)
+      safe_resolve &User.create_invite/2
     end
 
     field :update_user, :user do
       middleware Authenticated
+      middleware Sandboxed
       arg :id, :id
       arg :attributes, non_null(:user_attributes)
 
-      resolve safe_resolver(&User.update_user/2)
+      safe_resolve &User.update_user/2
     end
 
     field :create_group, :group do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :attributes, non_null(:group_attributes)
 
-      resolve safe_resolver(&User.create_group/2)
+      safe_resolve &User.create_group/2
     end
 
     field :delete_group, :group do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :group_id, non_null(:id)
 
-      resolve safe_resolver(&User.delete_group/2)
+      safe_resolve &User.delete_group/2
     end
 
     field :update_group, :group do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :group_id, non_null(:id)
       arg :attributes, non_null(:group_attributes)
 
-      resolve safe_resolver(&User.update_group/2)
+      safe_resolve &User.update_group/2
     end
 
     field :create_group_member, :group_member do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :group_id, non_null(:id)
       arg :user_id, non_null(:id)
 
-      resolve safe_resolver(&User.create_group_member/2)
+      safe_resolve &User.create_group_member/2
     end
 
     field :delete_group_member, :group_member do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :group_id, non_null(:id)
       arg :user_id, non_null(:id)
 
-      resolve safe_resolver(&User.delete_group_member/2)
+      safe_resolve &User.delete_group_member/2
     end
 
     field :create_role, :role do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :attributes, non_null(:role_attributes)
 
-      resolve safe_resolver(&User.create_role/2)
+      safe_resolve &User.create_role/2
     end
 
     field :update_role, :role do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :id, non_null(:id)
       arg :attributes, non_null(:role_attributes)
 
-      resolve safe_resolver(&User.update_role/2)
+      safe_resolve &User.update_role/2
     end
 
     field :delete_role, :role do
       middleware Authenticated
       middleware AdminRequired
+      middleware Sandboxed
       arg :id, non_null(:id)
 
-      resolve safe_resolver(&User.delete_role/2)
+      safe_resolve &User.delete_role/2
     end
   end
 

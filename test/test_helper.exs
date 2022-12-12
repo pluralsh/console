@@ -14,6 +14,7 @@ Mimic.copy(HTTPoison)
 Mimic.copy(Kazan.Watcher)
 Mimic.copy(Console.Kubernetes.PodExec)
 Mimic.copy(Kazan.Server)
+Mimic.copy(File)
 
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)

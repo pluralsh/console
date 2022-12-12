@@ -294,6 +294,74 @@ defmodule Console.GraphQl.PluralQueriesTest do
       assert app["name"] == "app"
       assert app["spec"]["descriptor"]["type"] == "app"
     end
+
+    test "admins can sideload configuration by name" do
+      user = insert(:user, roles: %{admin: true})
+      expect(Kazan, :run, fn _ -> {:ok, application("app")} end)
+      expect(Console.Deployer, :file, 2, fn _ -> {:ok, "found"} end)
+
+      {:ok, %{data: %{"application" => app}}} = run_query("""
+        query App($name: String!) {
+          application(name: $name) {
+            name
+            spec { descriptor { type } }
+            configuration {
+              terraform
+              helm
+            }
+          }
+        }
+      """, %{"name" => "app"}, %{current_user: user})
+
+      assert app["name"] == "app"
+      assert app["spec"]["descriptor"]["type"] == "app"
+      assert app["configuration"]["helm"] == "found"
+      assert app["configuration"]["terraform"] == "found"
+    end
+
+    test "users w/ rbac can sideload configuration by name" do
+      user = insert(:user)
+      setup_rbac(user, ["app"], configure: true)
+      expect(Kazan, :run, fn _ -> {:ok, application("app")} end)
+      expect(Console.Deployer, :file, 2, fn _ -> {:ok, "found"} end)
+
+      {:ok, %{data: %{"application" => app}}} = run_query("""
+        query App($name: String!) {
+          application(name: $name) {
+            name
+            spec { descriptor { type } }
+            configuration {
+              terraform
+              helm
+            }
+          }
+        }
+      """, %{"name" => "app"}, %{current_user: user})
+
+      assert app["name"] == "app"
+      assert app["spec"]["descriptor"]["type"] == "app"
+      assert app["configuration"]["helm"] == "found"
+      assert app["configuration"]["terraform"] == "found"
+    end
+
+    test "users w/o rbac cannot sideload configuration by name" do
+      user = insert(:user)
+      setup_rbac(user, ["other-app"], configure: true)
+      expect(Kazan, :run, fn _ -> {:ok, application("app")} end)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query App($name: String!) {
+          application(name: $name) {
+            name
+            spec { descriptor { type } }
+            configuration {
+              terraform
+              helm
+            }
+          }
+        }
+      """, %{"name" => "app"}, %{current_user: user})
+    end
   end
 
   defp as_connection(nodes) do

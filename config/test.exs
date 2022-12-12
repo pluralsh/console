@@ -30,6 +30,10 @@ config :console,
   git_ssh_key: :pass,
   grafana_dns: "grafana.example.com"
 
+config :console, :login_link,
+  key: "test-key",
+  email: "sandbox@plural.sh"
+
 config :console, :consumers, [Console.EchoConsumer]
 
 config :kazan, :server, %{url: "kubernetes.default", auth: %{token: "your_token"}}
