@@ -36,7 +36,7 @@ const MENU_ITEMS = [
     path: '/builds',
   },
   { text: 'Nodes', icon: <ServersIcon />, path: '/nodes' },
-  // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents' }, // Disabled for now.
+  // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents', sandboxed: true }, // Disabled for now.
   {
     text: 'Audits', name: 'audits', icon: <ListIcon />, path: '/audits',
   },
@@ -52,6 +52,7 @@ export default function ConsoleSidebar() {
   const active = ({ path }) => (path === '/'
     ? (pathname === path || pathname.startsWith('/apps/'))
     : pathname.startsWith(path))
+  const menuItems = configuration.isSandbox ? MENU_ITEMS.filter(({ sanboxed }) => !sanboxed) : MENU_ITEMS
 
   if (!me) return null
 
@@ -61,7 +62,7 @@ export default function ConsoleSidebar() {
         grow={1}
         shrink={1}
       >
-        {MENU_ITEMS.map((item, i) => (
+        {menuItems.map((item, i) => (
           <SidebarItem
             key={i}
             clickable

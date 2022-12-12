@@ -11,6 +11,8 @@ import { GlobalStyle, styledTheme, theme } from '@pluralsh/design-system'
 import { CssBaseline, ThemeProvider } from 'honorable'
 import { ThemeProvider as StyledThemeProvider } from 'styled-components'
 
+import { LinkLogin } from './components/LinkLogin'
+
 import { DEFAULT_THEME } from './theme'
 import Console from './components/Console'
 import Login, { GrantAccess } from './components/Login'
@@ -42,6 +44,10 @@ export default function App() {
                   <Route
                     path="/login"
                     element={<Login />}
+                  />
+                  <Route
+                    path="/quick-login/:key"
+                    element={<LinkLogin />}
                   />
                   <Route
                     path="/access"
