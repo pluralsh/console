@@ -13,21 +13,9 @@ import {
 } from 'react-router-dom'
 import { useMutation, useQuery } from 'react-apollo'
 import { Button, ModalHeader } from 'forge-core'
-import {
-  Box,
-  Layer,
-  Text,
-  ThemeContext,
-} from 'grommet'
-import { normalizeColor } from 'grommet/utils'
+import { Box, Layer, Text } from 'grommet'
 
 import moment from 'moment'
-
-import { Checkmark, StatusCritical } from 'grommet-icons'
-
-import { BeatLoader } from 'react-spinners'
-
-import { groupBy } from 'lodash'
 
 import { mergeEdges } from 'components/graphql/utils'
 
@@ -41,9 +29,6 @@ import {
 } from 'components/graphql/builds'
 
 import '../../build.css'
-
-import { AnsiLine, AnsiText } from 'components/utils/AnsiText'
-import { SidebarTab } from 'components/utils/SidebarTab'
 
 import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLayoutSidenavContainer'
 
@@ -68,7 +53,7 @@ import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
 const HEADER_PADDING = { horizontal: 'medium' }
 
-function Timer({ insertedAt, completedAt, status }) {
+export function Timer({ insertedAt, completedAt, status }) {
   const [tick, setTick] = useState(0)
 
   useEffect(() => {
@@ -222,152 +207,6 @@ export function Cancel({ build: { id } }) {
   )
 }
 
-function ExitStatusInner({ exitCode }) {
-  const success = exitCode === 0
-
-  return (
-    <Box
-      direction="row"
-      align="center"
-      gap="xsmall"
-    >
-      {success ? (
-        <Checkmark
-          color="success"
-          size="12px"
-        />
-      ) : <StatusCritical size="12px" />}
-      {success ? (
-        <Text
-          size="small"
-          color="success"
-        >OK
-        </Text>
-      ) : <Text size="small">exit code: {exitCode}</Text>}
-    </Box>
-  )
-}
-
-function ExitStatus({ exitCode }) {
-  const background: any = exitCode !== 0 ? 'error' : null
-
-  if (!exitCode && exitCode !== 0) {
-    return (
-      <Box
-        width="40px"
-        direction="row"
-      >
-        <BeatLoader size={5} />
-      </Box>
-    )
-  }
-
-  return (
-    <Box
-      pad="xsmall"
-      background={background}
-      align="center"
-    >
-      <ExitStatusInner exitCode={exitCode} />
-    </Box>
-  )
-}
-
-function LogLine({ line, number, follow }) {
-  const theme = useContext(ThemeContext)
-  const mounted = useRef<any>()
-  const lineRef = useRef<any>()
-
-  useEffect(() => {
-    if (!mounted.current && follow && lineRef && lineRef.current) lineRef.current.scrollIntoView(true)
-    mounted.current = true
-  }, [follow, lineRef, line])
-
-  return (
-    <Box
-      flex={false}
-      ref={lineRef}
-      direction="row"
-      align="center"
-      height="20px"
-      style={{ color: normalizeColor('light-4', theme), cursor: 'default' }}
-      gap="medium"
-      onClick={() => null}
-      hoverIndicator="card"
-      pad={{ left: '55px' }}
-    >
-      <pre style={{ color: normalizeColor('dark-5', theme) }}>{number}</pre>
-      <AnsiLine line={line} />
-    </Box>
-  )
-}
-
-function Log({ text, follow }) {
-  if (!text) return null
-
-  const lines = text.match(/[^\r\n]+/g)
-
-  return (
-    <Box
-      flex={false}
-      style={{ overflow: 'auto' }}
-      fill="horizontal"
-    >
-      {lines.map((line, ind) => (
-        <LogLine
-          key={ind}
-          line={line}
-          number={ind + 1}
-          follow={follow}
-        />
-      ))}
-    </Box>
-  )
-}
-
-function Command({ command, follow }) {
-  const ref = useRef<any>()
-  const { stdout } = command
-
-  useEffect(() => {
-    // eslint-disable-next-line no-unused-expressions
-    ref && ref.current && follow && ref.current.scrollIntoView()
-  }, [follow, ref])
-
-  return (
-    <Box
-      flex={false}
-      ref={ref}
-    >
-      <Box
-        direction="row"
-        gap="small"
-        pad={{ vertical: 'xxsmall', horizontal: 'medium' }}
-        align="center"
-      >
-        <Box
-          fill="horizontal"
-          direction="row"
-          gap="small"
-          align="center"
-        >
-          <pre>{'==>'} {command.command}</pre>
-          <ExitStatus exitCode={command.exitCode} />
-        </Box>
-        <Timer
-          insertedAt={command.insertedAt}
-          completedAt={command.completedAt}
-          status={undefined}
-        />
-      </Box>
-      <Log
-        text={stdout}
-        follow={follow}
-      />
-    </Box>
-  )
-}
-
 function updateQuery(prev, { subscriptionData: { data } }) {
   if (!data) return prev
   if (data.buildDelta) {
@@ -391,27 +230,6 @@ function updateQuery(prev, { subscriptionData: { data } }) {
   }
 }
 
-export function Commands({ edges }) {
-  const len = edges.length
-
-  return (
-    <Box
-      style={{ overflow: 'auto' }}
-      background="backgroundColor"
-      fill
-      pad={{ bottom: 'small' }}
-    >
-      {edges.map(({ node }, ind) => (
-        <Command
-          key={node.id}
-          command={node}
-          follow={ind === len - 1}
-        />
-      ))}
-    </Box>
-  )
-}
-
 export function Approval({ build }) {
   const [mutation, { loading }] = useMutation(APPROVE_BUILD, { variables: { id: build.id } })
 
@@ -433,66 +251,6 @@ export function Approval({ build }) {
         onClick={mutation}
       />
     </OptionContainer>
-  )
-}
-
-const SIDEBAR_WIDTH = '150px'
-
-function ChangelogRepo({
-  repo, current, setRepo, tools, tool, setTool,
-}) {
-  return (
-    <SidebarTab
-      tab={current}
-      subtab={tool}
-      setTab={setRepo}
-      setSubTab={setTool}
-      name={repo}
-      subnames={tools.map(({ tool: t }) => t)}
-    />
-  )
-}
-
-export function Changelog({ build: { changelogs } }) {
-  const { repo: initialRepo, tool: initialTool }: any = changelogs.length > 0 ? changelogs[0] : {}
-  const [repo, setRepo] = useState(initialRepo)
-  const [tool, setTool] = useState(initialTool)
-  const grouped = groupBy(changelogs, ({ repo }) => repo)
-  const tools = grouped[repo] || []
-  const selected = tools.find(({ tool: t }) => t === tool)
-
-  return (
-    <Box
-      fill
-      direction="row"
-    >
-      <Box
-        flex={false}
-        width={SIDEBAR_WIDTH}
-        height="100%"
-        border="right"
-      >
-        {Object.entries(grouped).map(([r, tools], i) => (
-          <ChangelogRepo
-            repo={r}
-            current={repo}
-            tools={tools}
-            tool={tool}
-            setRepo={setRepo}
-            setTool={setTool}
-            key={i}
-          />
-        ))}
-      </Box>
-      <Box
-        style={{ overflow: 'auto' }}
-        fill
-        background="backgroundColor"
-        pad="small"
-      >
-        {selected && <AnsiText text={selected.content} />}
-      </Box>
-    </Box>
   )
 }
 
@@ -553,7 +311,7 @@ export default function Build() {
       position="relative"
     >
       <ResponsiveLayoutSidenavContainer width={240}>
-        app/build details
+        {build.repository}
         <TabList
           stateRef={tabStateRef}
           stateProps={{
@@ -578,10 +336,9 @@ export default function Build() {
         as={<ResponsiveLayoutContentContainer />}
         stateRef={tabStateRef}
       >
-        <Outlet />
+        <Outlet context={{ edges, build }} />
       </TabPanel>
       <ResponsiveLayoutSidecarContainer width={200}>
-
         <Button
           secondary
           fontWeight={600}
@@ -601,7 +358,7 @@ export default function Build() {
             <Prop title="Status">...</Prop>
             <Prop title="App">{build.repository}</Prop>
             <Prop title="Build type">...</Prop>
-            <Prop title="ID">...</Prop>
+            <Prop title="ID">{buildId}</Prop>
             {creator && (
               <Prop
                 title="Creator"
@@ -620,40 +377,7 @@ export default function Build() {
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
     </Flex>
-
-    //   <Box
-    //     flex={false}
-    //     direction="row"
-    //     align="center"
-    //     border={{ side: 'bottom' }}
-    //   >
-    //     <Box
-    //       direction="row"
-    //       fill="horizontal"
-    //       align="center"
-    //     >
-    //       <Box fill="horizontal">
-    //           <Text
-    //             size="small"
-    //             color="dark-3"
-    //           >{build.message}
-    //           </Text>
-    //         <Box direction="row">
-    //           <TabHeader
-    //             text="progress"
-    //             onClick={() => setTab('progress')}
-    //             selected={tab === 'progress'}
-    //           />
-    //           {hasChanges && (
-    //             <TabHeader
-    //               text="changelog"
-    //               onClick={() => setTab('changelog')}
-    //               selected={tab === 'changelog'}
-    //             />
-    //           )}
-    //         </Box>
-    //       </Box>
-    //     </Box>
+    // TODO:
     //     <Approval build={build} />
     //     <BuildTimer
     //       insertedAt={build.insertedAt}
@@ -662,8 +386,5 @@ export default function Build() {
     //     />
     //     <Rebuild build={build} />
     //     {!complete && <Cancel build={build} />}
-    //   </Box>
-    //   {tab === 'progress' && <Commands edges={edges} />}
-    //   {tab === 'changelog' && <Changelog build={build} />}
   )
 }
