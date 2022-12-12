@@ -373,7 +373,7 @@ const SimpleGauge = React.memo(({
       height="200px"
       width="200px"
     >
-      {/* <Doughnut
+      <Doughnut
         data={{
           labels: [` ${name}`, ` ${name} available`],
           datasets: [
@@ -397,7 +397,7 @@ const SimpleGauge = React.memo(({
             title: { color: 'white', text: title, display: true },
           },
         }}
-      /> */}
+      />
     </Box>
   )
 })
@@ -458,7 +458,7 @@ const LayeredGauage = React.memo(({
       height="200px"
       width="200px"
     >
-      {/* <Doughnut
+      <Doughnut
         data={data}
         options={{
           cutout: '70%',
@@ -478,7 +478,7 @@ const LayeredGauage = React.memo(({
             },
           },
         }}
-      /> */}
+      />
     </Box>
   )
 })
