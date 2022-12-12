@@ -237,7 +237,7 @@ function CreateBuild() {
       {error && (
         <ErrorModal
           error={error}
-          modalHeader={`Failed to ${type.toLocaleLowerCase}} build`}
+          modalHeader={`Failed to ${type?.toLocaleLowerCase()} build`}
           header="This deployment action was not permitted"
         />
       )}

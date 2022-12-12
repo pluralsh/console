@@ -15,7 +15,7 @@ import { Next } from 'grommet-icons'
 
 import ConsoleSidebar, { SIDEBAR_ICON_HEIGHT } from './ConsoleSidebar'
 import Builds from './builds/Builds'
-import Build from './builds/Build'
+import Build from './builds/build/Build'
 import BreadcrumbProvider from './Breadcrumbs'
 import Webhooks from './Webhooks'
 import Configuration from './Configuration'
