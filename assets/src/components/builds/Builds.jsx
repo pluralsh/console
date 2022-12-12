@@ -5,14 +5,9 @@ import React, {
   useState,
 } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation, useQuery } from 'react-apollo'
+import { useQuery } from 'react-apollo'
 
-import {
-  Button,
-  Check,
-  Deploy,
-  Reload,
-} from 'forge-core'
+import { Check } from 'forge-core'
 
 import { Box, Stack, Text } from 'grommet'
 
@@ -34,22 +29,21 @@ import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLa
 
 import { ResponsiveLayoutSpacer } from 'components/layout/ResponsiveLayoutSpacer'
 
-import { appendConnection, extendConnection, updateCache } from '../../utils/graphql'
+import { appendConnection, extendConnection } from '../../utils/graphql'
 
-import { BUILDS_Q, BUILD_SUB, CREATE_BUILD } from '../graphql/builds'
+import { BUILDS_Q, BUILD_SUB } from '../graphql/builds'
 
 import { BreadcrumbsContext } from '../Breadcrumbs'
-import { BuildIcons, BuildTypes, BuildStatus as Status } from '../types'
-import { InstallationContext } from '../Installations'
+import { BuildIcons, BuildStatus as Status } from '../types'
 
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { StandardScroller } from '../utils/SmoothScroller'
 
 import { PinnedRunbooks } from '../runbooks/PinnedRunbooks'
 import { Container } from '../utils/Container'
-import { ErrorModal } from '../utils/ErrorModal'
 
 import { UpgradePolicies } from './UpgradePolicies'
+import CreateBuild from './CreateBuild'
 
 function BuildStatusInner({ background, text, icon }) {
   return (
@@ -213,67 +207,6 @@ function Build({ build }) {
         </Box>
       </Container>
     </Box>
-  )
-}
-
-function CreateBuild() {
-  const [type, setType] = useState(BuildTypes.DEPLOY)
-  const { currentApplication } = useContext(InstallationContext)
-  const baseAttrs = { repository: currentApplication.name, message: 'Deployed from console' }
-  const [mutation, { loading, error }] = useMutation(CREATE_BUILD, {
-    update: (cache, { data: { createBuild } }) => updateCache(cache, {
-      query: BUILDS_Q,
-      update: prev => appendConnection(prev, createBuild, 'builds'),
-    }),
-  })
-
-  const deploy = useCallback(type => {
-    setType(type)
-    mutation({ variables: { attributes: { type, ...baseAttrs } } })
-  }, [setType, mutation, baseAttrs])
-
-  return (
-    <>
-      {error && (
-        <ErrorModal
-          error={error}
-          modalHeader={`Failed to ${type?.toLocaleLowerCase()} build`}
-          header="This deployment action was not permitted"
-        />
-      )}
-      <Box
-        flex={false}
-        gap="small"
-        pad={{ horizontal: 'small' }}
-        direction="row"
-        align="center"
-      >
-        <Button
-          icon={<Reload size="small" />}
-          onClick={() => deploy(BuildTypes.BOUNCE)}
-          background="card"
-          flat
-          label="Bounce"
-          loading={loading && type === BuildTypes.BOUNCE}
-        />
-        <Button
-          icon={<Check size="small" />}
-          onClick={() => deploy(BuildTypes.APPROVAL)}
-          background="card"
-          flat
-          label="Approval"
-          loading={loading && type === BuildTypes.APPROVAL}
-        />
-        <Button
-          icon={<Deploy size="small" />}
-          onClick={() => deploy(BuildTypes.DEPLOY)}
-          loading={loading && type === BuildTypes.DEPLOY}
-          label="Deploy"
-          background="brand"
-          flat
-        />
-      </Box>
-    </>
   )
 }
 
