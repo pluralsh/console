@@ -1,8 +1,8 @@
 import { Card, PageTitle } from '@pluralsh/design-system'
 import { AnsiLine } from 'components/utils/AnsiText'
-import { Box, Text, ThemeContext } from 'grommet'
-import { Checkmark, StatusCritical } from 'grommet-icons'
+import { Box, ThemeContext } from 'grommet'
 import { normalizeColor } from 'grommet/utils'
+import { Div, P } from 'honorable'
 import { useContext, useEffect, useRef } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { BeatLoader } from 'react-spinners'
@@ -61,35 +61,7 @@ function LogLine({ line, number, follow }) {
   )
 }
 
-function ExitStatusInner({ exitCode }) {
-  const success = exitCode === 0
-
-  return (
-    <Box
-      direction="row"
-      align="center"
-      gap="xsmall"
-    >
-      {success ? (
-        <Checkmark
-          color="success"
-          size="12px"
-        />
-      ) : <StatusCritical size="12px" />}
-      {success ? (
-        <Text
-          size="small"
-          color="success"
-        >OK
-        </Text>
-      ) : <Text size="small">exit code: {exitCode}</Text>}
-    </Box>
-  )
-}
-
 function ExitStatus({ exitCode }) {
-  const background: any = exitCode !== 0 ? 'error' : null
-
   if (!exitCode && exitCode !== 0) {
     return (
       <Box
@@ -102,13 +74,11 @@ function ExitStatus({ exitCode }) {
   }
 
   return (
-    <Box
-      pad="xsmall"
-      background={background}
-      align="center"
-    >
-      <ExitStatusInner exitCode={exitCode} />
-    </Box>
+    <Div padding="xsmall">
+      {exitCode === 0
+        ? <P color="text-success">✓ OK</P>
+        : <P color="text-error">✗ Exit code: {exitCode}</P>}
+    </Div>
   )
 }
 
@@ -117,8 +87,7 @@ function Command({ command, follow }) {
   const { stdout } = command
 
   useEffect(() => {
-      // eslint-disable-next-line no-unused-expressions
-    ref && ref.current && follow && ref.current.scrollIntoView()
+    if (ref && ref.current && follow) ref.current.scrollIntoView()
   }, [follow, ref])
 
   return (
@@ -164,13 +133,14 @@ export default function Progress() {
       <PageTitle heading="Progress" />
       <Card
         flexGrow={1}
+        fontFamily="monospace"
         overflowY="auto"
       >
-        {edges.map(({ node }, ind) => (
+        {edges.map(({ node }, i) => (
           <Command
             key={node.id}
             command={node}
-            follow={ind === len - 1}
+            follow={i === len - 1}
           />
         ))}
       </Card>
