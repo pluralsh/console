@@ -318,11 +318,9 @@ export default function Builds() {
     pollInterval: POLL_INTERVAL,
   })
 
-  const { setOnChange } = useContext(InstallationContext)
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
 
   useEffect(() => {
-    setOnChange({ func: () => null })
     setBreadcrumbs([{ text: 'Builds', url: '/builds' }])
   }, [])
 
