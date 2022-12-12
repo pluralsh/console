@@ -17,7 +17,7 @@ export class BuildsPage extends BasePage {
 
   static visit(buildID?: string): void {
     if (buildID) {
-      cy.visit(`/build/${buildID}`)
+      cy.visit(`/builds/${buildID}`)
 
       return
     }

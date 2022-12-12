@@ -306,10 +306,6 @@ export default function Console() {
                           )}
                         />
                         <Route
-                          path="/builds/:buildId"
-                          element={<Build />}
-                        />
-                        <Route
                           path="/webhooks"
                           element={<Webhooks />}
                         />
@@ -335,9 +331,10 @@ export default function Console() {
                           path="/shell/pod/:namespace/:name/:container"
                           element={<PodShell />}
                         />
+                        {/* APPS */}
                         <Route
-                          path="/builds"
-                          element={<Builds />}
+                          path="/"
+                          element={<Apps />}
                         />
                         <Route
                           path="/apps/:appName"
@@ -377,9 +374,14 @@ export default function Console() {
                             element={<CostAnalysis />}
                           />
                         </Route>
+                        {/* BUILDS */}
                         <Route
-                          path="/"
-                          element={<Apps />}
+                          path="/builds"
+                          element={<Builds />}
+                        />
+                        <Route
+                          path="/builds/:buildId"
+                          element={<Build />}
                         />
                       </Routes>
                       <FlyoutGutter />
