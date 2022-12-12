@@ -28,8 +28,11 @@ export default function Build({ build }) {
 
   return (
     <Flex
+      borderBottom="1px solid border"
       gap="small"
       padding="medium"
+      cursor="pointer"
+      _hover={{ backgroundColor: 'fill-one-hover' }}
       onClick={() => navigate(`/builds/${id}`)}
     >
       {hasIcons(app) && (

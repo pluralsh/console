@@ -9,6 +9,8 @@ import lookup from 'country-code-lookup'
 
 import { useParams } from 'react-router-dom'
 
+import { ReturnToBeginning } from 'components/utils/ReturnToBeginning'
+
 import { HeaderItem, RowItem } from '../kubernetes/Pod'
 import { dateFormat } from '../utils/Graph'
 import Avatar from '../users/Avatar'
@@ -21,7 +23,6 @@ import { Chloropleth } from '../utils/Chloropleth'
 import { SubmenuItem, SubmenuPortal } from '../navigation/Submenu'
 
 import { StandardScroller } from '../utils/SmoothScroller'
-import { ReturnToBeginning } from '../builds/Builds'
 
 import { AUDITS_Q, AUDIT_METRICS } from './queries'
 

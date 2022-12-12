@@ -26,7 +26,11 @@ import { CREATE_POLICY, DELETE_POLICY, UPGRADE_POLICIES } from '../graphql/build
 
 import { updateCache } from '../../utils/graphql'
 
-import { UpgradePolicyType } from './types'
+const UpgradePolicyType = {
+  DEPLOY: 'DEPLOY',
+  APPROVAL: 'APPROVAL',
+  IGNORE: 'IGNORE',
+}
 
 const PolicyContext = React.createContext({})
 
