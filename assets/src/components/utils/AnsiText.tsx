@@ -3,7 +3,7 @@ import Anser from 'anser'
 import { escapeCarriageReturn } from 'escape-carriage'
 import { Box } from 'grommet'
 
-function textStyle({ bg, fg, decoration }) {
+function textStyle({ bg, fg, decoration }): any {
   return {
     backgroundColor: bg && `rgb(${bg})`,
     fontWeight: decoration === 'bold' ? 'bold' : null,
@@ -28,7 +28,7 @@ export function AnsiLine({ line }) {
   )
 }
 
-export const AnsiText = React.memo(({ text }) => {
+export const AnsiText = React.memo(({ text }: any) => {
   if (!text) return null
 
   return text.split(/\r?\n/).map((line, ind) => (

@@ -4,7 +4,13 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+} from 'react-router-dom'
 import { useMutation, useQuery } from 'react-apollo'
 import { Button, ModalHeader } from 'forge-core'
 import {
@@ -23,8 +29,6 @@ import { BeatLoader } from 'react-spinners'
 
 import { groupBy } from 'lodash'
 
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
-
 import { mergeEdges } from 'components/graphql/utils'
 
 import {
@@ -38,14 +42,29 @@ import {
 
 import '../../build.css'
 
-import { TabHeader } from 'components/utils/TabSelector'
 import { AnsiLine, AnsiText } from 'components/utils/AnsiText'
-import { LoopingLogo } from 'components/utils/AnimatedLogo'
 import { SidebarTab } from 'components/utils/SidebarTab'
 
-import Avatar from 'components/users/Avatar'
+import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLayoutSidenavContainer'
 
-import BuildStatus from '../BuildStatus'
+import {
+  AppIcon,
+  CraneIcon,
+  LoopingLogo,
+  Tab,
+  TabList,
+  TabPanel,
+} from '@pluralsh/design-system'
+import { ResponsiveLayoutSpacer } from 'components/layout/ResponsiveLayoutSpacer'
+import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLayoutContentContainer'
+import { ResponsiveLayoutSidecarContainer } from 'components/layout/ResponsiveLayoutSidecarContainer'
+
+import { Flex } from 'honorable'
+
+import { PropsContainer } from 'components/utils/PropsContainer'
+import Prop from 'components/utils/Prop'
+import { BuildStatus } from 'components/types'
+import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
 const HEADER_PADDING = { horizontal: 'medium' }
 
@@ -88,7 +107,7 @@ function buildStyles(status) {
   }
 }
 
-function BuildTimer({ insertedAt, completedAt, status }) {
+export function BuildTimer({ insertedAt, completedAt, status }) {
   const { color, label } = buildStyles(status)
 
   return (
@@ -109,7 +128,7 @@ function BuildTimer({ insertedAt, completedAt, status }) {
   )
 }
 
-function OptionContainer({ children, ...props }) {
+export function OptionContainer({ children, ...props }) {
   return (
     <Box
       flex={false}
@@ -125,7 +144,7 @@ function OptionContainer({ children, ...props }) {
   )
 }
 
-function Rebuild({ build: { id } }) {
+export function Rebuild({ build: { id } }) {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [mutation, { loading }] = useMutation(RESTART_BUILD, {
@@ -166,7 +185,7 @@ function Rebuild({ build: { id } }) {
   )
 }
 
-function Cancel({ build: { id } }) {
+export function Cancel({ build: { id } }) {
   const [open, setOpen] = useState(false)
   const [mutation, { loading }] = useMutation(CANCEL_BUILD, { variables: { id } })
 
@@ -230,7 +249,7 @@ function ExitStatusInner({ exitCode }) {
 }
 
 function ExitStatus({ exitCode }) {
-  const background = exitCode !== 0 ? 'error' : null
+  const background: any = exitCode !== 0 ? 'error' : null
 
   if (!exitCode && exitCode !== 0) {
     return (
@@ -256,8 +275,8 @@ function ExitStatus({ exitCode }) {
 
 function LogLine({ line, number, follow }) {
   const theme = useContext(ThemeContext)
-  const mounted = useRef()
-  const lineRef = useRef()
+  const mounted = useRef<any>()
+  const lineRef = useRef<any>()
 
   useEffect(() => {
     if (!mounted.current && follow && lineRef && lineRef.current) lineRef.current.scrollIntoView(true)
@@ -287,7 +306,6 @@ function Log({ text, follow }) {
   if (!text) return null
 
   const lines = text.match(/[^\r\n]+/g)
-  const last = lines.length
 
   return (
     <Box
@@ -301,7 +319,6 @@ function Log({ text, follow }) {
           line={line}
           number={ind + 1}
           follow={follow}
-          last={last}
         />
       ))}
     </Box>
@@ -309,7 +326,7 @@ function Log({ text, follow }) {
 }
 
 function Command({ command, follow }) {
-  const ref = useRef()
+  const ref = useRef<any>()
   const { stdout } = command
 
   useEffect(() => {
@@ -340,6 +357,7 @@ function Command({ command, follow }) {
         <Timer
           insertedAt={command.insertedAt}
           completedAt={command.completedAt}
+          status={undefined}
         />
       </Box>
       <Log
@@ -373,7 +391,7 @@ function updateQuery(prev, { subscriptionData: { data } }) {
   }
 }
 
-function Commands({ edges }) {
+export function Commands({ edges }) {
   const len = edges.length
 
   return (
@@ -394,7 +412,7 @@ function Commands({ edges }) {
   )
 }
 
-function Approval({ build }) {
+export function Approval({ build }) {
   const [mutation, { loading }] = useMutation(APPROVE_BUILD, { variables: { id: build.id } })
 
   if (build.approver) {
@@ -435,8 +453,8 @@ function ChangelogRepo({
   )
 }
 
-function Changelog({ build: { changelogs } }) {
-  const { repo: initialRepo, tool: initialTool } = changelogs.length > 0 ? changelogs[0] : {}
+export function Changelog({ build: { changelogs } }) {
+  const { repo: initialRepo, tool: initialTool }: any = changelogs.length > 0 ? changelogs[0] : {}
   const [repo, setRepo] = useState(initialRepo)
   const [tool, setTool] = useState(initialTool)
   const grouped = groupBy(changelogs, ({ repo }) => repo)
@@ -478,12 +496,21 @@ function Changelog({ build: { changelogs } }) {
   )
 }
 
+const DIRECTORY = [
+  { path: 'progress', label: 'Progress' },
+  { path: 'changelog', label: 'Changelog' },
+]
+
 export default function Build() {
+  const tabStateRef = useRef<any>(null)
+  const { pathname } = useLocation()
   const { buildId } = useParams()
-  const [tab, setTab] = useState('progress')
+  const pathPrefix = `/builds/${buildId}`
+  // const [tab, setTab] = useState('progress')
   const { data, subscribeToMore } = useQuery(BUILD_Q,
     { variables: { buildId }, fetchPolicy: 'cache-and-network', errorPolicy: 'ignore' })
-  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
+  const currentTab = DIRECTORY.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
 
   useEffect(() => {
     setBreadcrumbs([
@@ -502,97 +529,141 @@ export default function Build() {
 
   if (!data) {
     return (
-      <LoopingLogo
-        scale="0.75"
-        dark
-      />
+      <Flex
+        grow={1}
+        justify="center"
+      >
+        <LoopingLogo scale={1} />
+      </Flex>
     )
   }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { commands: { edges }, creator, ...build } = data.build
-  const hasChanges = build.changelogs && build.changelogs.length > 0
-  const complete = (
-    build.status === BuildStatus.FAILED || build.status === BuildStatus.SUCCESSFUL
-  )
+  // const hasChanges = build.changelogs && build.changelogs.length > 0
+  // const complete = (
+  //   build.status === BuildStatus.FAILED || build.status === BuildStatus.SUCCESSFUL
+  // )
 
   return (
-    <Box
-      fill
-      background="backgroundColor"
+    <Flex
+      height="100%"
+      width="100%"
+      overflowY="hidden"
+      padding="large"
+      position="relative"
     >
-      <Box
-        flex={false}
-        direction="row"
-        align="center"
-        border={{ side: 'bottom' }}
-      >
-        <Box
-          direction="row"
-          fill="horizontal"
-          align="center"
+      <ResponsiveLayoutSidenavContainer width={240}>
+        app/build details
+        <TabList
+          stateRef={tabStateRef}
+          stateProps={{
+            orientation: 'vertical',
+            selectedKey: currentTab?.path,
+          }}
         >
-          <Box fill="horizontal">
-            <Box
-              direction="row"
-              gap="small"
-              pad={{ left: 'small', vertical: 'small' }}
+          {DIRECTORY.map(({ label, path }) => (
+            <Tab
+              key={path}
+              as={Link}
+              to={path}
+              textDecoration="none"
             >
-              <Text
-                size="small"
-                weight="bold"
-              >{build.repository}
-              </Text>
-              <Text
-                size="small"
-                color="dark-3"
-              >{build.message}
-              </Text>
-            </Box>
-            <Box direction="row">
-              <TabHeader
-                text="progress"
-                onClick={() => setTab('progress')}
-                selected={tab === 'progress'}
-              />
-              {hasChanges && (
-                <TabHeader
-                  text="changelog"
-                  onClick={() => setTab('changelog')}
-                  selected={tab === 'changelog'}
+              {label}
+            </Tab>
+          ))}
+        </TabList>
+      </ResponsiveLayoutSidenavContainer>
+      <ResponsiveLayoutSpacer />
+      <TabPanel
+        as={<ResponsiveLayoutContentContainer />}
+        stateRef={tabStateRef}
+      >
+        <Outlet />
+      </TabPanel>
+      <ResponsiveLayoutSidecarContainer width={200}>
+
+        <Button
+          secondary
+          fontWeight={600}
+          marginTop="xxsmall"
+          marginBottom="small"
+          startIcon={<CraneIcon />}
+          onClick={e => e.stopPropagation()}
+        >
+          Restart build
+        </Button>
+        <Flex
+          gap="medium"
+          direction="column"
+          paddingTop="xsmall"
+        >
+          <PropsContainer title="App">
+            <Prop title="Status">...</Prop>
+            <Prop title="App">{build.repository}</Prop>
+            <Prop title="Build type">...</Prop>
+            <Prop title="ID">...</Prop>
+            {creator && (
+              <Prop
+                title="Creator"
+                display="flex"
+                gap="xsmall"
+              >
+                <AppIcon
+                  size="xxsmall"
+                  name={creator.name}
                 />
-              )}
-            </Box>
-          </Box>
-          {creator && (
-            <Box
-              flex={false}
-              pad={{ right: 'medium' }}
-              direction="row"
-              gap="xsmall"
-              align="center"
-            >
-              <Avatar
-                user={creator}
-                size="40px"
-              />
-              <Text
-                size="small"
-                weight={500}
-              >{creator.name}
-              </Text>
-            </Box>
-          )}
-        </Box>
-        <Approval build={build} />
-        <BuildTimer
-          insertedAt={build.insertedAt}
-          completedAt={build.completedAt}
-          status={build.status}
-        />
-        <Rebuild build={build} />
-        {!complete && <Cancel build={build} />}
-      </Box>
-      {tab === 'progress' && <Commands edges={edges} />}
-      {tab === 'changelog' && <Changelog build={build} />}
-    </Box>
+                {creator.name}
+              </Prop>
+            )}
+          </PropsContainer>
+        </Flex>
+      </ResponsiveLayoutSidecarContainer>
+      <ResponsiveLayoutSpacer />
+    </Flex>
+
+    //   <Box
+    //     flex={false}
+    //     direction="row"
+    //     align="center"
+    //     border={{ side: 'bottom' }}
+    //   >
+    //     <Box
+    //       direction="row"
+    //       fill="horizontal"
+    //       align="center"
+    //     >
+    //       <Box fill="horizontal">
+    //           <Text
+    //             size="small"
+    //             color="dark-3"
+    //           >{build.message}
+    //           </Text>
+    //         <Box direction="row">
+    //           <TabHeader
+    //             text="progress"
+    //             onClick={() => setTab('progress')}
+    //             selected={tab === 'progress'}
+    //           />
+    //           {hasChanges && (
+    //             <TabHeader
+    //               text="changelog"
+    //               onClick={() => setTab('changelog')}
+    //               selected={tab === 'changelog'}
+    //             />
+    //           )}
+    //         </Box>
+    //       </Box>
+    //     </Box>
+    //     <Approval build={build} />
+    //     <BuildTimer
+    //       insertedAt={build.insertedAt}
+    //       completedAt={build.completedAt}
+    //       status={build.status}
+    //     />
+    //     <Rebuild build={build} />
+    //     {!complete && <Cancel build={build} />}
+    //   </Box>
+    //   {tab === 'progress' && <Commands edges={edges} />}
+    //   {tab === 'changelog' && <Changelog build={build} />}
   )
 }
