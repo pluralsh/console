@@ -1,0 +1,67 @@
+import { ThemeContext } from '@emotion/react'
+import { AppIcon, CaretRightIcon, Chip } from '@pluralsh/design-system'
+import { getIcon, hasIcons } from 'components/apps/misc'
+import { InstallationContext } from 'components/Installations'
+import { BuildTypes } from 'components/types'
+import { Flex, P } from 'honorable'
+import moment from 'moment'
+import { useContext, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+import BuildStatus from './BuildStatus'
+
+const BUILD_TYPE_DISPLAY_NAMES = {
+  [BuildTypes.BOUNCE]: 'Bounce',
+  [BuildTypes.DEPLOY]: 'Deployment',
+  [BuildTypes.APPROVAL]: 'New images',
+  [BuildTypes.INSTALL]: 'Installation',
+}
+
+export default function Build({ build }) {
+  const {
+    id, repository, status, insertedAt, message, type,
+  } = build
+  const navigate = useNavigate()
+  const { applications } = useContext<any>(InstallationContext)
+  const { dark } = useContext<any>(ThemeContext)
+  const app = useMemo(() => applications?.find(app => app.name === repository), [applications, repository])
+
+  return (
+    <Flex
+      gap="small"
+      padding="medium"
+      onClick={() => navigate(`/builds/${id}`)}
+    >
+      {hasIcons(app) && (
+        <AppIcon
+          url={getIcon(app, dark)}
+          size="xsmall"
+        />
+      )}
+      <Flex direction="column">
+        <Flex gap="small">
+          <P
+            body1
+            fontWeight={600}
+          >
+            {repository}
+          </P>
+          <Chip size="small">{BUILD_TYPE_DISPLAY_NAMES[type] || type}</Chip>
+        </Flex>
+        {message}
+      </Flex>
+      <Flex
+        caption
+        color="text-xlight"
+        gap="medium"
+        grow={1}
+        align="center"
+        justify="end"
+      >
+        <P>{moment(insertedAt).fromNow()}</P>
+        <BuildStatus status={status} />
+        <CaretRightIcon />
+      </Flex>
+    </Flex>
+  )
+}

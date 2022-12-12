@@ -4,18 +4,9 @@ import React, {
   useEffect,
   useState,
 } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useQuery } from 'react-apollo'
 
-import { Check } from 'forge-core'
-
 import { Box, Stack, Text } from 'grommet'
-
-import moment from 'moment'
-
-import { BeatLoader } from 'react-spinners'
-
-import { Close, StatusCritical, Up } from 'grommet-icons'
 
 import { Flex } from 'honorable'
 
@@ -29,58 +20,23 @@ import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLa
 
 import { ResponsiveLayoutSpacer } from 'components/layout/ResponsiveLayoutSpacer'
 
+import { Up } from 'grommet-icons'
+
 import { appendConnection, extendConnection } from '../../utils/graphql'
 
 import { BUILDS_Q, BUILD_SUB } from '../graphql/builds'
 
 import { BreadcrumbsContext } from '../Breadcrumbs'
-import { BuildIcons, BuildStatus as Status } from '../types'
+import { BuildIcons } from '../types'
 
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { StandardScroller } from '../utils/SmoothScroller'
 
 import { PinnedRunbooks } from '../runbooks/PinnedRunbooks'
-import { Container } from '../utils/Container'
 
 import { UpgradePolicies } from './UpgradePolicies'
 import CreateBuild from './CreateBuild'
-
-function BuildStatusInner({ background, text, icon }) {
-  return (
-    <Box
-      flex={false}
-      direction="row"
-      justify="center"
-      align="center"
-      pad={{ horizontal: 'small', vertical: 'xsmall' }}
-      round="xxsmall"
-      background={background}
-    >
-      {icon && <Box width="50px">{icon}</Box>}
-      <Text
-        size="small"
-        weight={500}
-      >{text}
-      </Text>
-    </Box>
-  )
-}
-
-function IconStatus({ icon, background }) {
-  return (
-    <Box
-      flex={false}
-      round="full"
-      width="30px"
-      height="30px"
-      align="center"
-      justify="center"
-      background={background}
-    >
-      {React.createElement(icon, { size: '16px' })}
-    </Box>
-  )
-}
+import Build from './Build'
 
 export function BuildIcon({ build, size }) {
   const icon = BuildIcons[build.type]
@@ -96,119 +52,7 @@ export function BuildIcon({ build, size }) {
   )
 }
 
-function BuildStatus({ status }) {
-  switch (status) {
-  case Status.QUEUED:
-    return (
-      <BuildStatusInner
-        background="status-unknown"
-        text="queued"
-      />
-    )
-  case Status.CANCELLED:
-    return (
-      <IconStatus
-        icon={Close}
-        background="tone-medium"
-      />
-    )
-  case Status.RUNNING:
-    return (
-      <BuildStatusInner
-        icon={(
-          <BeatLoader
-            size={5}
-            margin={2}
-            color="white"
-          />
-        )}
-        background="progress"
-        text="running"
-      />
-    )
-  case Status.FAILED:
-    return (
-      <IconStatus
-        icon={StatusCritical}
-        background="error"
-      />
-    )
-  case Status.SUCCESSFUL:
-    return (
-      <IconStatus
-        icon={Check}
-        background="success"
-      />
-    )
-  case Status.PENDING:
-    return (
-      <BuildStatusInner
-        background="status-warning"
-        text="pending approval"
-      />
-    )
-  default:
-    return null
-  }
-}
-
 export const BUILD_PADDING = { horizontal: 'medium' }
-
-function Build({ build }) {
-  const {
-    id, repository, status, insertedAt, message, creator, sha,
-  } = build
-  const navigate = useNavigate()
-
-  return (
-    <Box pad={BUILD_PADDING}>
-      <Container
-        onClick={() => navigate(`/builds/${id}`)}
-        margin={{ bottom: 'small' }}
-      >
-        <BuildIcon build={build} />
-        <Box fill="horizontal">
-          <Text
-            size="small"
-            weight="bold"
-          >{repository}
-          </Text>
-          <Box
-            direction="row"
-            align="center"
-            gap="xsmall"
-          >
-            <Box flex={false}>
-              <Text
-                size="small"
-                color="dark-6"
-              >{moment(insertedAt).fromNow()} -- {creator && creator.name} --
-              </Text>
-            </Box>
-            <Box style={{ maxWidth: '100%' }}>
-              <Text
-                size="small"
-                color="dark-6"
-                truncate
-              >{message}
-              </Text>
-            </Box>
-            <Box flex={false}>
-              <Text
-                size="small"
-                color="dark-6"
-              >-- {sha}
-              </Text>
-            </Box>
-          </Box>
-        </Box>
-        <Box margin={{ left: 'small' }}>
-          <BuildStatus status={status} />
-        </Box>
-      </Container>
-    </Box>
-  )
-}
 
 const POLL_INTERVAL = 1000 * 30
 
@@ -297,6 +141,7 @@ export default function Builds() {
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer>
         <PageTitle heading="Builds">
+          <Flex grow={1} />
           <UpgradePolicies />
           <CreateBuild />
         </PageTitle>
