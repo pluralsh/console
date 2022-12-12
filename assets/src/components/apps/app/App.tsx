@@ -106,7 +106,7 @@ export default function App() {
       >
         <Outlet context={{ setDashboard, setRunbook }} />
       </TabPanel>
-      <ResponsiveLayoutSidecarContainer width="200px">
+      <ResponsiveLayoutSidecarContainer width={200}>
         {validLinks?.length > 0 && (
           <Button
             secondary

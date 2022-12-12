@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { chunk } from '../utils/array'
 
-import { BUILD_PADDING } from './Builds'
+import { BUILD_PADDING } from './builds/Builds'
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { ApplicationIcon, InstallationContext, hasIcon } from './Installations'
 import { Container } from './utils/Container'

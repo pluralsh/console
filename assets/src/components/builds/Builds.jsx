@@ -22,21 +22,34 @@ import { BeatLoader } from 'react-spinners'
 
 import { Close, StatusCritical, Up } from 'grommet-icons'
 
-import { appendConnection, extendConnection, updateCache } from '../utils/graphql'
+import { Flex } from 'honorable'
 
-import { BUILDS_Q, BUILD_SUB, CREATE_BUILD } from './graphql/builds'
+import { PageTitle } from '@pluralsh/design-system'
 
-import { BreadcrumbsContext } from './Breadcrumbs'
-import { BuildIcons, BuildTypes, BuildStatus as Status } from './types'
-import { InstallationContext } from './Installations'
+import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLayoutSidenavContainer'
 
-import { LoopingLogo } from './utils/AnimatedLogo'
-import { StandardScroller } from './utils/SmoothScroller'
-import { UpgradePolicies } from './builds/UpgradePolicies'
+import { ResponsiveLayoutSidecarContainer } from 'components/layout/ResponsiveLayoutSidecarContainer'
 
-import { PinnedRunbooks } from './runbooks/PinnedRunbooks'
-import { Container } from './utils/Container'
-import { ErrorModal } from './utils/ErrorModal'
+import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLayoutContentContainer'
+
+import { ResponsiveLayoutSpacer } from 'components/layout/ResponsiveLayoutSpacer'
+
+import { appendConnection, extendConnection, updateCache } from '../../utils/graphql'
+
+import { BUILDS_Q, BUILD_SUB, CREATE_BUILD } from '../graphql/builds'
+
+import { BreadcrumbsContext } from '../Breadcrumbs'
+import { BuildIcons, BuildTypes, BuildStatus as Status } from '../types'
+import { InstallationContext } from '../Installations'
+
+import { LoopingLogo } from '../utils/AnimatedLogo'
+import { StandardScroller } from '../utils/SmoothScroller'
+
+import { PinnedRunbooks } from '../runbooks/PinnedRunbooks'
+import { Container } from '../utils/Container'
+import { ErrorModal } from '../utils/ErrorModal'
+
+import { UpgradePolicies } from './UpgradePolicies'
 
 function BuildStatusInner({ background, text, icon }) {
   return (
@@ -311,6 +324,7 @@ export const HEADER_HEIGHT = '60px'
 export default function Builds() {
   const [listRef, setListRef] = useState(null)
   const [scrolled, setScrolled] = useState(false)
+  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const {
     data, loading, subscribeToMore, fetchMore,
   } = useQuery(BUILDS_Q, {
@@ -318,20 +332,14 @@ export default function Builds() {
     pollInterval: POLL_INTERVAL,
   })
 
-  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
-
-  useEffect(() => {
-    setBreadcrumbs([{ text: 'Builds', url: '/builds' }])
-  }, [])
+  useEffect(() => setBreadcrumbs([{ text: 'Builds', url: '/builds' }]), [setBreadcrumbs])
 
   useEffect(() => subscribeToMore({
     document: BUILD_SUB,
     updateQuery: (prev, { subscriptionData: { data: { buildDelta: { delta, payload } } } }) => (delta === 'CREATE' ? appendConnection(prev, payload, 'builds') : prev),
   }), [])
 
-  const returnToBeginning = useCallback(() => {
-    listRef.scrollToItem(0)
-  }, [listRef])
+  const returnToBeginning = useCallback(() => listRef.scrollToItem(0), [listRef])
 
   if (loading && !data) {
     return (
@@ -345,64 +353,54 @@ export default function Builds() {
   const { edges, pageInfo } = data.builds
 
   return (
-    <Box
-      fill
-      background="backgroundColor"
+    <Flex
+      height="100%"
+      width="100%"
+      overflowY="hidden"
+      padding="large"
+      position="relative"
     >
-      <Box
-        flex={false}
-        pad={{ vertical: 'small', ...BUILD_PADDING }}
-        direction="row"
-        align="center"
-        height={HEADER_HEIGHT}
-        border={{ side: 'bottom' }}
-      >
-        <Box fill="horizontal">
-          <Text
-            weight="bold"
-            size="small"
-          >Builds
-          </Text>
-          <Text
-            size="small"
-            color="dark-3"
-          >a list of historical changes managed by console
-          </Text>
-        </Box>
-        <UpgradePolicies />
-        <CreateBuild />
-      </Box>
-      <PinnedRunbooks />
-      <Stack
-        fill
-        anchor="bottom-left"
-      >
-        <Box
+      <ResponsiveLayoutSidenavContainer width={240} />
+      <ResponsiveLayoutSpacer />
+      <ResponsiveLayoutContentContainer>
+        <PageTitle heading="Builds">
+          <UpgradePolicies />
+          <CreateBuild />
+        </PageTitle>
+        <PinnedRunbooks />
+        <Stack
           fill
-          pad={{ vertical: 'small' }}
+          anchor="bottom-left"
         >
-          <StandardScroller
-            listRef={listRef}
-            setListRef={setListRef}
-            items={edges}
-            loading={loading}
-            handleScroll={setScrolled}
-            placeholder={Placeholder}
-            hasNextPage={pageInfo.hasNextPage}
-            mapper={({ node }) => (
-              <Build
-                key={node.id}
-                build={node}
-              />
-            )}
-            loadNextPage={() => pageInfo.hasNextPage && fetchMore({
-              variables: { cursor: pageInfo.endCursor },
-              updateQuery: (prev, { fetchMoreResult: { builds } }) => extendConnection(prev, builds, 'builds'),
-            })}
-          />
-        </Box>
-        {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
-      </Stack>
-    </Box>
+          <Box
+            fill
+            pad={{ vertical: 'small' }}
+          >
+            <StandardScroller
+              listRef={listRef}
+              setListRef={setListRef}
+              items={edges}
+              loading={loading}
+              handleScroll={setScrolled}
+              placeholder={Placeholder}
+              hasNextPage={pageInfo.hasNextPage}
+              mapper={({ node }) => (
+                <Build
+                  key={node.id}
+                  build={node}
+                />
+              )}
+              loadNextPage={() => pageInfo.hasNextPage && fetchMore({
+                variables: { cursor: pageInfo.endCursor },
+                updateQuery: (prev, { fetchMoreResult: { builds } }) => extendConnection(prev, builds, 'builds'),
+              })}
+            />
+          </Box>
+          {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
+        </Stack>
+      </ResponsiveLayoutContentContainer>
+      <ResponsiveLayoutSidecarContainer width={200} />
+      <ResponsiveLayoutSpacer />
+    </Flex>
   )
 }

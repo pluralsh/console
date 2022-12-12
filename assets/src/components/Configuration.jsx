@@ -27,7 +27,7 @@ import { deepFetch } from '../utils/graphql'
 import { APPLICATION_Q, UPDATE_CONFIGURATION } from './graphql/plural'
 
 import { BreadcrumbsContext } from './Breadcrumbs'
-import { BUILD_PADDING } from './Builds'
+import { BUILD_PADDING } from './builds/Builds'
 
 import 'ace-builds/src-noconflict/mode-yaml'
 import 'ace-builds/src-noconflict/theme-terminal'

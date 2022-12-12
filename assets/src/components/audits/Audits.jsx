@@ -21,7 +21,7 @@ import { Chloropleth } from '../utils/Chloropleth'
 import { SubmenuItem, SubmenuPortal } from '../navigation/Submenu'
 
 import { StandardScroller } from '../utils/SmoothScroller'
-import { ReturnToBeginning } from '../Builds'
+import { ReturnToBeginning } from '../builds/Builds'
 
 import { AUDITS_Q, AUDIT_METRICS } from './queries'
 

@@ -23,6 +23,8 @@ import { BeatLoader } from 'react-spinners'
 
 import { groupBy } from 'lodash'
 
+import { mergeEdges } from '../graphql/utils'
+
 import {
   APPROVE_BUILD,
   BUILD_Q,
@@ -30,18 +32,17 @@ import {
   CANCEL_BUILD,
   COMMAND_SUB,
   RESTART_BUILD,
-} from './graphql/builds'
-import { mergeEdges } from './graphql/utils'
+} from '../graphql/builds'
 
-import { BreadcrumbsContext } from './Breadcrumbs'
-import './build.css'
-import { BuildStatus } from './types'
-import Avatar from './users/Avatar'
+import { BreadcrumbsContext } from '../Breadcrumbs'
+import '../build.css'
+import { BuildStatus } from '../types'
+import Avatar from '../users/Avatar'
 
-import { TabHeader } from './utils/TabSelector'
-import { AnsiLine, AnsiText } from './utils/AnsiText'
-import { LoopingLogo } from './utils/AnimatedLogo'
-import { SidebarTab } from './utils/SidebarTab'
+import { TabHeader } from '../utils/TabSelector'
+import { AnsiLine, AnsiText } from '../utils/AnsiText'
+import { LoopingLogo } from '../utils/AnimatedLogo'
+import { SidebarTab } from '../utils/SidebarTab'
 
 const HEADER_PADDING = { horizontal: 'medium' }
 
