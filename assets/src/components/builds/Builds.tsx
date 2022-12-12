@@ -84,7 +84,10 @@ export default function Builds() {
       <ResponsiveLayoutSidenavContainer width={240} />
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer overflowY="hidden">
-        <PageTitle heading="Builds">
+        <PageTitle
+          heading="Builds"
+          gap="small"
+        >
           <Flex grow={1} />
           <UpgradePolicies />
           <CreateBuild />
