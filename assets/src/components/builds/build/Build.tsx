@@ -9,11 +9,10 @@ import {
   Link,
   Outlet,
   useLocation,
-  useNavigate,
   useParams,
 } from 'react-router-dom'
 import { useMutation, useQuery } from 'react-apollo'
-import { Button, ModalHeader } from 'forge-core'
+import { ModalHeader } from 'forge-core'
 import {
   Box,
   Layer,
@@ -29,7 +28,6 @@ import {
   BUILD_SUB,
   CANCEL_BUILD,
   COMMAND_SUB,
-  RESTART_BUILD,
 } from 'components/graphql/builds'
 
 import '../../build.css'
@@ -38,7 +36,7 @@ import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLa
 
 import {
   AppIcon,
-  CraneIcon,
+  Button,
   LoopingLogo,
   Tab,
   TabList,
@@ -67,6 +65,7 @@ import { InstallationContext } from 'components/Installations'
 import { BUILD_TYPE_DISPLAY_NAMES } from '../Build'
 
 import { BuildTimer } from './BuildTimer'
+import BuildRestart from './BuildRestart'
 
 export function OptionContainer({ children, ...props }) {
   return (
@@ -81,47 +80,6 @@ export function OptionContainer({ children, ...props }) {
     >
       {children}
     </Box>
-  )
-}
-
-export function Rebuild({ build: { id } }) {
-  const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
-  const [mutation, { loading }] = useMutation(RESTART_BUILD, {
-    variables: { id },
-    onCompleted: ({ restartBuild: { id } }) => navigate(`/builds/${id}`),
-  })
-
-  return (
-    <>
-      <OptionContainer
-        hoverIndicator="card"
-        onClick={() => setOpen(true)}
-      >
-        <Text size="small">restart</Text>
-      </OptionContainer>
-      {open && (
-        <Layer modal>
-          <Box width="40vw">
-            <ModalHeader
-              text="Are you sure you want to restart this build?"
-              setOpen={setOpen}
-            />
-            <Box
-              direction="row"
-              justify="end"
-              pad="medium"
-            >
-              <Button
-                label="restart"
-                onClick={mutation}
-                loading={loading}
-              />
-            </Box>
-          </Box>
-        </Layer>
-      )}
-    </>
   )
 }
 
@@ -327,16 +285,7 @@ export default function Build() {
         <Outlet context={{ edges, build }} />
       </TabPanel>
       <ResponsiveLayoutSidecarContainer width={200}>
-        <Button
-          secondary
-          fontWeight={600}
-          marginTop="xxsmall"
-          marginBottom="small"
-          startIcon={<CraneIcon />}
-          onClick={e => e.stopPropagation()}
-        >
-          Restart build
-        </Button>
+        <BuildRestart build={build} />
         <Flex
           gap="medium"
           direction="column"
@@ -373,7 +322,6 @@ export default function Build() {
     </Flex>
     // TODO:
     //     <Approval build={build} />
-    //     <Rebuild build={build} />
     //     {!complete && <Cancel build={build} />}
   )
 }
