@@ -3,24 +3,28 @@ import {
   ListBoxItem,
   PageTitle,
   Select,
+  SubTab,
+  TabList,
 } from '@pluralsh/design-system'
 import { getIcon, hasIcons } from 'components/apps/misc'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { InstallationContext } from 'components/Installations'
 import { AnsiText } from 'components/utils/AnsiText'
 import { ThemeContext } from 'grommet'
-import { Div, Flex } from 'honorable'
+import { Flex } from 'honorable'
 import { groupBy } from 'lodash'
 import {
   Key,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 
 export default function Changelog() {
+  const tabStateRef = useRef<any>(null)
   const { buildId } = useParams()
   const { dark } = useContext<any>(ThemeContext)
   const { applications } = useContext<any>(InstallationContext)
@@ -35,8 +39,8 @@ export default function Changelog() {
   const currentRepo = useMemo(() => repos.find(r => r.name === repo), [repos, repo])
 
   const [tool, setTool] = useState<Key>(initialTool)
-  const tools = grouped[repo] || []
-  const selected = tools.find(({ tool: t }) => t === tool)
+  const tools = useMemo(() => grouped[repo] || [], [grouped, repo])
+  const currentTool = useMemo(() => tools.find(({ tool: t }) => t === tool), [tools, tool])
 
   useEffect(() => {
     setBreadcrumbs([
@@ -77,13 +81,25 @@ export default function Changelog() {
         </Select>
       </PageTitle>
       <Flex>
-        {tools.map(({ id, tool }) => (
-          <Div id={id}>
-            {tool}
-          </Div>
-        ))}
+        <TabList
+          stateRef={tabStateRef}
+          stateProps={{
+            orientation: 'horizontal',
+            selectedKey: tool,
+            onSelectionChange: setTool,
+          }}
+        >
+          {tools.map(({ tool }) => (
+            <SubTab
+              key={tool}
+              textValue={tool}
+            >
+              {tool}
+            </SubTab>
+          ))}
+        </TabList>
       </Flex>
-      {selected && (
+      {currentTool && (
         <Card
           marginVertical="medium"
           padding="small"
@@ -91,7 +107,7 @@ export default function Changelog() {
           flexShrink={1}
           overflowY="auto"
         >
-          <AnsiText text={selected.content} />
+          <AnsiText text={currentTool.content} />
         </Card>
       ) }
     </>
