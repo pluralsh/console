@@ -10,7 +10,6 @@ import { useContext } from 'react'
 
 import { LoginContext } from './contexts'
 import { Installations } from './Installations'
-import { InstallerModal } from './repos/installer/Modal'
 
 const APP_ICON = '/console-logo-white.png'
 
@@ -73,7 +72,7 @@ export default function ConsoleHeader() {
         >
           Plural App
         </Button>
-        <InstallerModal />
+        {/* <InstallerModal /> */}
         <Installations />
       </Flex>
     </Div>
