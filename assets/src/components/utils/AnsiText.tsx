@@ -3,7 +3,7 @@ import Anser from 'anser'
 import { escapeCarriageReturn } from 'escape-carriage'
 import { Box } from 'grommet'
 
-function textStyle({ bg, fg, decoration }): any {
+export function textStyle({ bg, fg, decoration }): any {
   return {
     backgroundColor: bg && `rgb(${bg})`,
     fontWeight: decoration === 'bold' ? 'bold' : null,
