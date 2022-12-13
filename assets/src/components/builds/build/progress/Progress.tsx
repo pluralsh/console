@@ -1,12 +1,24 @@
 import { Card, PageTitle } from '@pluralsh/design-system'
+import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { useContext, useEffect } from 'react'
 
-import { useOutletContext } from 'react-router-dom'
+import { useOutletContext, useParams } from 'react-router-dom'
 
 import Command from './Command'
 
 export default function Progress() {
+  const { buildId } = useParams()
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { edges } = useOutletContext<any>()
   const len = edges.length
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { text: 'Builds', url: '/builds' },
+      { text: buildId, url: `/builds/${buildId}` },
+      { text: 'Progress', url: `/builds/${buildId}/progress` },
+    ])
+  }, [buildId, setBreadcrumbs])
 
   return (
     <>

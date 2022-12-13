@@ -1,9 +1,10 @@
+import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { AnsiText } from 'components/utils/AnsiText'
 import { SidebarTab } from 'components/utils/SidebarTab'
 import { Box } from 'grommet'
 import { groupBy } from 'lodash'
-import { useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { useContext, useEffect, useState } from 'react'
+import { useOutletContext, useParams } from 'react-router-dom'
 
 const SIDEBAR_WIDTH = '150px'
 
@@ -23,6 +24,8 @@ function ChangelogRepo({
 }
 
 export default function Changelog() {
+  const { buildId } = useParams()
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { build: { changelogs } } = useOutletContext<any>()
   const { repo: initialRepo, tool: initialTool }: any = changelogs?.length > 0 ? changelogs[0] : {}
   const [repo, setRepo] = useState(initialRepo)
@@ -30,6 +33,14 @@ export default function Changelog() {
   const grouped = groupBy(changelogs, ({ repo }) => repo)
   const tools = grouped[repo] || []
   const selected = tools.find(({ tool: t }) => t === tool)
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { text: 'Builds', url: '/builds' },
+      { text: buildId, url: `/builds/${buildId}` },
+      { text: 'Changelog', url: `/builds/${buildId}/changelog` },
+    ])
+  }, [buildId, setBreadcrumbs])
 
   return (
     <Box
