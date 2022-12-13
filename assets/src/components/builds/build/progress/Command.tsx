@@ -1,4 +1,4 @@
-import { Div, Flex } from 'honorable'
+import { Div, Flex, Span } from 'honorable'
 import { useEffect, useRef } from 'react'
 
 import { Timer } from '../Build'
@@ -15,20 +15,18 @@ export default function Command({ command, follow }) {
   }, [follow, ref])
 
   return (
-    <Div
-      ref={ref}
-    >
+    <Div ref={ref}>
       <Flex
         gap="small"
         paddingHorizontal="medium"
         paddingVertical="xsmall"
-        align="center"
+        justify="space-between"
       >
         <Flex
           gap="small"
           align="center"
         >
-          <pre>→ {command.command}</pre>
+          <Span>→ {command.command}</Span>
           <CommandExitStatus exitCode={command.exitCode} />
         </Flex>
         <Timer
