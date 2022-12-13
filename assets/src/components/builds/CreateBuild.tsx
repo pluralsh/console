@@ -60,7 +60,6 @@ export default function CreateBuild() {
       variables: {},
     }),
   })
-// onCompleted: () => reset(),
 
   const deploy = useCallback(() => {
     mutation({ variables: { attributes: { type: selectedType, repository: selectedApp, message: 'Deployed from console' } } })
