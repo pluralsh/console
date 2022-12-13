@@ -5,18 +5,11 @@ import {
   Img,
   P,
 } from 'honorable'
-import {
-  ArrowTopRightIcon,
-  Button,
-  DownloadIcon,
-  theme,
-} from '@pluralsh/design-system'
-import { useContext, useState } from 'react'
+import { ArrowTopRightIcon, Button, theme } from '@pluralsh/design-system'
+import { useContext } from 'react'
 
 import { LoginContext } from './contexts'
 import { Installations } from './Installations'
-
-import { Installer } from './repos/Installer'
 
 const APP_ICON = '/console-logo-white.png'
 
@@ -50,8 +43,6 @@ function DemoBanner() {
 }
 
 export default function ConsoleHeader() {
-  const [open, setOpen] = useState(false)
-
   return (
     <Div
       backgroundColor={theme.colors.grey[950]}
@@ -81,16 +72,7 @@ export default function ConsoleHeader() {
         >
           Plural App
         </Button>
-        <Button
-          small
-          floating
-          fontWeight={600}
-          endIcon={<DownloadIcon size={14} />}
-          onClick={() => setOpen(true)}
-        >
-          Install
-        </Button>
-        {open && <Installer setOpen={setOpen} />}
+        {/* <InstallerModal /> */}
         <Installations />
       </Flex>
     </Div>

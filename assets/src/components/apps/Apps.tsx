@@ -121,7 +121,9 @@ export default function Apps() {
   const [filter, setFilter] = useState('')
   const tabStateRef = useRef<any>(null)
 
-  useEffect(() => setBreadcrumbs([{ text: 'Apps', url: '/' }]), [setBreadcrumbs])
+  useEffect(() => {
+    setBreadcrumbs([{ text: 'Apps', url: '/' }])
+  }, [setBreadcrumbs])
 
   if (!applications) return <LoopingLogo />
 
