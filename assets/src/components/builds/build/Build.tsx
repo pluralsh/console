@@ -42,7 +42,7 @@ import { ResponsiveLayoutSpacer } from 'components/layout/ResponsiveLayoutSpacer
 import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from 'components/layout/ResponsiveLayoutSidecarContainer'
 
-import { Flex } from 'honorable'
+import { Div, Flex } from 'honorable'
 
 import { PropsContainer } from 'components/utils/PropsContainer'
 import Prop from 'components/utils/Prop'
@@ -317,7 +317,7 @@ export default function Build() {
                   size="xxsmall"
                   name={creator.name}
                 />
-                {creator.name}
+                <Flex align="center">{creator.email}</Flex>
               </Prop>
             )}
           </PropsContainer>
