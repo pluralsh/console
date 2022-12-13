@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom'
 
 import BuildStatus from './BuildStatus'
 
-const BUILD_TYPE_DISPLAY_NAMES = {
+export const BUILD_TYPE_DISPLAY_NAMES = {
   [BuildTypes.BOUNCE]: 'Bounce',
   [BuildTypes.DEPLOY]: 'Deployment',
   [BuildTypes.APPROVAL]: 'New images',

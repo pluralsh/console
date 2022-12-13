@@ -20,7 +20,7 @@ function CommandLogLine({ line, number, follow }) {
       align="center"
       color="text-light"
       gap="medium"
-      paddingLeft={40}
+      paddingLeft={50}
       ref={lineRef}
       _hover={{ backgroundColor: 'fill-one-hover' }}
     >

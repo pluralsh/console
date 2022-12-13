@@ -2,21 +2,42 @@ import { Chip } from '@pluralsh/design-system'
 
 import { BuildStatus as Status } from '../types'
 
-export default function BuildStatus({ status }) {
+export default function BuildStatus({ status, ...props }) {
   switch (status) {
   case Status.QUEUED:
-    return <Chip>Queued</Chip>
+    return <Chip {...props}>Queued</Chip>
   case Status.CANCELLED:
-    return <Chip>Cancelled</Chip>
+    return <Chip {...props}>Cancelled</Chip>
   case Status.RUNNING:
-    return <Chip severity="success">Running</Chip>
+    return (
+      <Chip
+        severity="success"
+        {...props}
+      >
+        Running
+      </Chip>
+    )
   case Status.FAILED:
-    return <Chip severity="error">Error</Chip>
+    return (
+      <Chip
+        severity="error"
+        {...props}
+      >
+        Error
+      </Chip>
+    )
   case Status.SUCCESSFUL:
-    return <Chip severity="success">Success</Chip>
+    return (
+      <Chip
+        severity="success"
+        {...props}
+      >
+        Passed
+      </Chip>
+    )
   case Status.PENDING:
-    return <Chip>Pending</Chip>
+    return <Chip {...props}>Pending Approval </Chip>
   default:
-    return <Chip>Unknown</Chip>
+    return <Chip {...props}>Unknown</Chip>
   }
 }

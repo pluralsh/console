@@ -15,8 +15,6 @@ import { useMutation, useQuery } from 'react-apollo'
 import { Button, ModalHeader } from 'forge-core'
 import { Box, Layer, Text } from 'grommet'
 
-import moment from 'moment'
-
 import { mergeEdges } from 'components/graphql/utils'
 
 import {
@@ -51,73 +49,15 @@ import Prop from 'components/utils/Prop'
 import { BuildStatus } from 'components/types'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
-const HEADER_PADDING = { horizontal: 'medium' }
+import { BUILD_TYPE_DISPLAY_NAMES } from '../Build'
 
-export function Timer({ insertedAt, completedAt, status }) {
-  const [tick, setTick] = useState(0)
-
-  useEffect(() => {
-    if (completedAt) return
-    setTimeout(() => setTick(tick + 1), 1000)
-  }, [completedAt, tick, setTick])
-
-  const end = completedAt ? moment(completedAt) : moment()
-  const begin = moment(insertedAt)
-  const fromBeginning = dt => moment.duration(dt.diff(begin))
-  const duration = fromBeginning(end)
-
-  return (
-    <pre>
-      {status}{moment.utc(duration.as('milliseconds')).format('HH:mm:ss')}
-    </pre>
-  )
-}
-
-function buildStyles(status) {
-  switch (status) {
-  case BuildStatus.QUEUED:
-    return { color: 'status-unknown', label: null }
-  case BuildStatus.RUNNING:
-    return { color: 'progress', label: null }
-  case BuildStatus.CANCELLED:
-    return { color: 'light-6', label: 'Cancelled, ' }
-  case BuildStatus.FAILED:
-    return { color: 'error', label: 'Failed, ' }
-  case BuildStatus.SUCCESSFUL:
-    return { color: 'success', label: 'Passed, ' }
-  case BuildStatus.PENDING:
-    return { color: 'status-warning', label: 'Pending Approval ' }
-  default:
-    return {}
-  }
-}
-
-export function BuildTimer({ insertedAt, completedAt, status }) {
-  const { color, label } = buildStyles(status)
-
-  return (
-    <OptionContainer>
-      <Box
-        id="build-status"
-        flex={false}
-        pad="xsmall"
-        background={color}
-      >
-        <Timer
-          insertedAt={insertedAt}
-          completedAt={completedAt}
-          status={label}
-        />
-      </Box>
-    </OptionContainer>
-  )
-}
+import { BuildTimer } from './BuildTimer'
 
 export function OptionContainer({ children, ...props }) {
   return (
     <Box
       flex={false}
-      pad={HEADER_PADDING}
+      pad={{ horizontal: 'medium' }}
       border="left"
       fill="vertical"
       justify="center"
@@ -264,11 +204,9 @@ export default function Build() {
   const { pathname } = useLocation()
   const { buildId } = useParams()
   const pathPrefix = `/builds/${buildId}`
-  // const [tab, setTab] = useState('progress')
   const { data, subscribeToMore } = useQuery(BUILD_Q,
     { variables: { buildId }, fetchPolicy: 'cache-and-network', errorPolicy: 'ignore' })
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
-  const currentTab = DIRECTORY.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
 
   useEffect(() => {
     setBreadcrumbs([
@@ -295,9 +233,13 @@ export default function Build() {
       </Flex>
     )
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const { commands: { edges }, creator, ...build } = data.build
-  // const hasChanges = build.changelogs && build.changelogs.length > 0
+  const directory = build.changelogs?.length > 0
+    ? DIRECTORY
+    : DIRECTORY.filter(({ path }) => path !== 'changelog')
+  const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
+
   // const complete = (
   //   build.status === BuildStatus.FAILED || build.status === BuildStatus.SUCCESSFUL
   // )
@@ -319,7 +261,7 @@ export default function Build() {
             selectedKey: currentTab?.path,
           }}
         >
-          {DIRECTORY.map(({ label, path }) => (
+          {directory.map(({ label, path }) => (
             <Tab
               key={path}
               as={Link}
@@ -354,10 +296,16 @@ export default function Build() {
           direction="column"
           paddingTop="xsmall"
         >
-          <PropsContainer title="App">
-            <Prop title="Status">...</Prop>
+          <PropsContainer>
+            <Prop title="Status">
+              <BuildTimer
+                insertedAt={build.insertedAt}
+                completedAt={build.completedAt}
+                status={build.status}
+              />
+            </Prop>
             <Prop title="App">{build.repository}</Prop>
-            <Prop title="Build type">...</Prop>
+            <Prop title="Build type">{BUILD_TYPE_DISPLAY_NAMES[build.type] || build.type}</Prop>
             <Prop title="ID">{buildId}</Prop>
             {creator && (
               <Prop
@@ -379,11 +327,6 @@ export default function Build() {
     </Flex>
     // TODO:
     //     <Approval build={build} />
-    //     <BuildTimer
-    //       insertedAt={build.insertedAt}
-    //       completedAt={build.completedAt}
-    //       status={build.status}
-    //     />
     //     <Rebuild build={build} />
     //     {!complete && <Cancel build={build} />}
   )
