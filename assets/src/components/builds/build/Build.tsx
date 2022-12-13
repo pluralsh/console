@@ -3,7 +3,6 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from 'react'
 import {
   Link,
@@ -11,23 +10,12 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom'
-import { useMutation, useQuery } from 'react-apollo'
-import { ModalHeader } from 'forge-core'
-import {
-  Box,
-  Layer,
-  Text,
-  ThemeContext,
-} from 'grommet'
+import { useQuery } from 'react-apollo'
+import { ThemeContext } from 'grommet'
 
 import { mergeEdges } from 'components/graphql/utils'
 
-import {
-  BUILD_Q,
-  BUILD_SUB,
-  CANCEL_BUILD,
-  COMMAND_SUB,
-} from 'components/graphql/builds'
+import { BUILD_Q, BUILD_SUB, COMMAND_SUB } from 'components/graphql/builds'
 
 import '../../build.css'
 
@@ -35,7 +23,6 @@ import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLa
 
 import {
   AppIcon,
-  Button,
   LoopingLogo,
   Tab,
   TabList,
@@ -65,59 +52,7 @@ import { BUILD_TYPE_DISPLAY_NAMES } from '../Build'
 import { BuildTimer } from './BuildTimer'
 import BuildRestart from './BuildRestart'
 import BuildApproval from './BuildApproval'
-
-export function OptionContainer({ children, ...props }) {
-  return (
-    <Box
-      flex={false}
-      pad={{ horizontal: 'medium' }}
-      border="left"
-      fill="vertical"
-      justify="center"
-      align="center"
-      {...props}
-    >
-      {children}
-    </Box>
-  )
-}
-
-export function Cancel({ build: { id } }) {
-  const [open, setOpen] = useState(false)
-  const [mutation, { loading }] = useMutation(CANCEL_BUILD, { variables: { id } })
-
-  return (
-    <>
-      <OptionContainer
-        hoverIndicator="card"
-        onClick={() => setOpen(true)}
-      >
-        <Text size="small">cancel</Text>
-      </OptionContainer>
-      {open && (
-        <Layer modal>
-          <Box width="40vw">
-            <ModalHeader
-              text="Are you sure you want to cancel this build?"
-              setOpen={setOpen}
-            />
-            <Box
-              direction="row"
-              justify="end"
-              pad="medium"
-            >
-              <Button
-                label="Cancel"
-                onClick={mutation}
-                loading={loading}
-              />
-            </Box>
-          </Box>
-        </Layer>
-      )}
-    </>
-  )
-}
+import BuildCancel from './BuildCancel'
 
 function updateQuery(prev, { subscriptionData: { data } }) {
   if (!data) return prev
@@ -195,10 +130,6 @@ export default function Build() {
     : DIRECTORY.filter(({ path }) => path !== 'changelog')
   const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
 
-  // const complete = (
-  //   build.status === BuildStatus.FAILED || build.status === BuildStatus.SUCCESSFUL
-  // )
-
   return (
     <Flex
       height="100%"
@@ -267,6 +198,7 @@ export default function Build() {
           gap="xsmall"
           marginBottom="xsmall"
         >
+          <BuildCancel build={build} />
           <BuildRestart build={build} />
           <BuildApproval build={build} />
         </Flex>
@@ -317,6 +249,5 @@ export default function Build() {
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
     </Flex>
-    // TODO: {!complete && <Cancel build={build} />}
   )
 }
