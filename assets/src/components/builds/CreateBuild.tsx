@@ -115,6 +115,7 @@ export default function CreateBuild() {
             ) : undefined}
             selectedKey={selectedApp}
             onSelectionChange={setSelectedApp}
+            maxHeight={200}
           >
             {applications.map(app => (
               <ListBoxItem
