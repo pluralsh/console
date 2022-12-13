@@ -1,27 +1,11 @@
+import { Card, PageTitle } from '@pluralsh/design-system'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { AnsiText } from 'components/utils/AnsiText'
 import { SidebarTab } from 'components/utils/SidebarTab'
-import { Box } from 'grommet'
+import { Flex } from 'honorable'
 import { groupBy } from 'lodash'
 import { useContext, useEffect, useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
-
-const SIDEBAR_WIDTH = '150px'
-
-function ChangelogRepo({
-  repo, current, setRepo, tools, tool, setTool,
-}) {
-  return (
-    <SidebarTab
-      tab={current}
-      subtab={tool}
-      setTab={setRepo}
-      setSubTab={setTool}
-      name={repo}
-      subnames={tools.map(({ tool: t }) => t)}
-    />
-  )
-}
 
 export default function Changelog() {
   const { buildId } = useParams()
@@ -34,6 +18,8 @@ export default function Changelog() {
   const tools = grouped[repo] || []
   const selected = tools.find(({ tool: t }) => t === tool)
 
+  console.log(changelogs)
+
   useEffect(() => {
     setBreadcrumbs([
       { text: 'Builds', url: '/builds' },
@@ -43,36 +29,32 @@ export default function Changelog() {
   }, [buildId, setBreadcrumbs])
 
   return (
-    <Box
-      fill
-      direction="row"
-    >
-      <Box
-        flex={false}
-        width={SIDEBAR_WIDTH}
-        height="100%"
-        border="right"
-      >
+    <>
+      <PageTitle heading="Changelog" />
+      <Flex>
         {Object.entries(grouped).map(([r, tools], i) => (
-          <ChangelogRepo
-            repo={r}
-            current={repo}
-            tools={tools}
-            tool={tool}
-            setRepo={setRepo}
-            setTool={setTool}
+          <SidebarTab
             key={i}
+            tab={repo}
+            subtab={tool}
+            setTab={setRepo}
+            setSubTab={setTool}
+            name={r}
+            subnames={tools.map(({ tool: t }) => t)}
           />
         ))}
-      </Box>
-      <Box
-        style={{ overflow: 'auto' }}
-        fill
-        background="backgroundColor"
-        pad="small"
-      >
-        {selected && <AnsiText text={selected.content} />}
-      </Box>
-    </Box>
+      </Flex>
+      {selected && (
+        <Card
+          marginVertical="medium"
+          padding="small"
+          flexGrow={1}
+          flexShrink={1}
+          overflowY="auto"
+        >
+          <AnsiText text={selected.content} />
+        </Card>
+      ) }
+    </>
   )
 }
