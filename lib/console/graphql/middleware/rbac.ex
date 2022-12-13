@@ -7,10 +7,9 @@ defmodule Console.Middleware.Rbac do
   @dummy "!!invalid!!"
 
   def call(%{context: %{current_user: %User{roles: %{admin: true}}}} = res, _), do: res
-  def call(%{arguments: args, context: %{current_user: %User{} = user}} = res, opts) do
+  def call(%{context: %{current_user: %User{} = user}} = res, opts) do
     perm = Keyword.get(opts, :perm)
-    arg  = Keyword.get(opts, :arg)
-    repo = arg_fetch(args, arg)
+    repo = fetch(res, Map.new(opts))
 
     case Rbac.validate(user, repo, perm) do
       true -> res
@@ -18,6 +17,8 @@ defmodule Console.Middleware.Rbac do
     end
   end
 
-  defp arg_fetch(%{} = args, arg) when is_atom(arg), do: Map.get(args, arg, @dummy)
-  defp arg_fetch(%{} = args, [_ | _] = path), do: get_in(args, path) || @dummy
+  defp fetch(%{source: %{} = source}, %{field: arg}) when is_atom(arg), do: Map.get(source, arg, @dummy)
+  defp fetch(%{source: %{} = source}, %{field: [_ | _] = path}), do: Console.deep_get(source, path, @dummy)
+  defp fetch(%{arguments: %{} = args}, %{arg: arg}) when is_atom(arg), do: Map.get(args, arg, @dummy)
+  defp fetch(%{arguments: %{} = args}, %{arg: [_ | _] = path}), do: get_in(args, path) || @dummy
 end

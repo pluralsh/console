@@ -16,7 +16,7 @@ import {
   hasIcon,
   useEnsureCurrent,
 } from './Installations'
-import { BUILD_PADDING } from './Builds'
+import { BUILD_PADDING } from './builds/Builds'
 
 import Icon from './kubernetes/Icon'
 import { Container } from './utils/Container'

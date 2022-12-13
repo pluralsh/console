@@ -93,6 +93,7 @@ export const ME_Q = gql`
     configuration { 
       gitCommit
       isDemoProject
+      isSandbox
       manifest { ...ManifestFragment }
       gitStatus { cloned output }
     }
@@ -157,6 +158,16 @@ export const INVITE_Q = gql`
 export const SIGNUP = gql`
   mutation SignUp($inviteId: String!, $attributes: UserAttributes!) {
     signup(inviteId: $inviteId, attributes: $attributes) {
+      ...UserFragment
+      jwt
+    }
+  }
+  ${UserFragment}
+`
+
+export const LOGIN_LINK = gql`
+  mutation Link($key: String!) {
+    loginLink(key: $key) {
       ...UserFragment
       jwt
     }

@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Kubernetes.Application do
   use Console.GraphQl.Schema.Base
+  alias Console.Middleware.{Rbac}
   alias Console.GraphQl.Resolvers.{Plural, Kubecost, License}
 
   object :application do
@@ -25,7 +26,10 @@ defmodule Console.GraphQl.Kubernetes.Application do
         end)
     end
 
-    field :configuration, :configuration, resolve: &Plural.resolve_configuration/3
+    field :configuration, :configuration do
+      middleware Rbac, perm: :configure, field: [:metadata, :name]
+      resolve &Plural.resolve_configuration/3
+    end
   end
 
   object :cost_analysis do

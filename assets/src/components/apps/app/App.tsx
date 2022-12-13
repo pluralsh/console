@@ -46,6 +46,7 @@ const getDirectory = app => [
   //       {OPTIONS.map(({ text, icon, path, name: sbName, git }, ind) => {
     //         if (git && !conf.gitStatus.cloned) return null
     //       })}
+    // TODO: OpenID Connect cannot be shown if configuration.isSandbox is true.
   { path: 'cost', label: 'Cost analysis', enabled: app.cost || app.license },
 ]
 
@@ -106,7 +107,7 @@ export default function App() {
       >
         <Outlet context={{ setDashboard, setRunbook }} />
       </TabPanel>
-      <ResponsiveLayoutSidecarContainer width="200px">
+      <ResponsiveLayoutSidecarContainer width={200}>
         {validLinks?.length > 0 && (
           <Button
             secondary

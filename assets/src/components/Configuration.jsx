@@ -8,7 +8,7 @@ import React, {
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from 'react-apollo'
 
-import { Button } from 'forge-core'
+import { Button, GqlError } from 'forge-core'
 
 import { Box, Text } from 'grommet'
 
@@ -27,7 +27,7 @@ import { deepFetch } from '../utils/graphql'
 import { APPLICATION_Q, UPDATE_CONFIGURATION } from './graphql/plural'
 
 import { BreadcrumbsContext } from './Breadcrumbs'
-import { BUILD_PADDING } from './Builds'
+import { BUILD_PADDING } from './builds/Builds'
 
 import 'ace-builds/src-noconflict/mode-yaml'
 import 'ace-builds/src-noconflict/theme-terminal'
@@ -385,9 +385,9 @@ export default function Configuration() {
   const { repo } = useParams()
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
   const { setOnChange } = useContext(InstallationContext)
-  const { data } = useQuery(APPLICATION_Q, {
+  const { data, error } = useQuery(APPLICATION_Q, {
     variables: { name: repo },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'network-only',
   })
   const onCompleted = useCallback(() => navigate('/'), [])
 
@@ -403,6 +403,17 @@ export default function Configuration() {
   }, [])
 
   useEnsureCurrent(repo)
+
+  if (error) {
+    return (
+      <Box fill>
+        <GqlError
+          error={error}
+          header="Cannot access configuration for this app"
+        />
+      </Box>
+    )
+  }
 
   if (!data) {
     return (

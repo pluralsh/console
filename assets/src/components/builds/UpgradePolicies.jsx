@@ -6,7 +6,6 @@ import React, {
 } from 'react'
 import {
   Button,
-  Configuration,
   ModalHeader,
   Select,
   Trash,
@@ -21,12 +20,18 @@ import {
   Text,
 } from 'grommet'
 
+import { GearTrainIcon, IconFrame } from '@pluralsh/design-system'
+
 import { LabelledInput } from '../utils/LabelledInput'
 import { CREATE_POLICY, DELETE_POLICY, UPGRADE_POLICIES } from '../graphql/builds'
 
 import { updateCache } from '../../utils/graphql'
 
-import { UpgradePolicyType } from './types'
+const UpgradePolicyType = {
+  DEPLOY: 'DEPLOY',
+  APPROVAL: 'APPROVAL',
+  IGNORE: 'IGNORE',
+}
 
 const PolicyContext = React.createContext({})
 
@@ -236,10 +241,15 @@ export function UpgradePolicies() {
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     <PolicyContext.Provider value={{ modal, setModal, close }}>
       <>
-        <Icon
-          icon={Configuration}
-          tooltip="upgrade settings"
-          hoverIndicator="card"
+        <IconFrame
+          icon={<GearTrainIcon />}
+          textValue="Upgrade settings"
+          tooltip
+          type="secondary"
+          size="medium"
+          height={40}
+          width={40}
+          clickable
           onClick={() => setModal({
             header: 'Upgrade Policies',
             content: <Policies />,

@@ -10,7 +10,7 @@ const POLL_INTERVAL = 10 * 1000
 const LIMIT = 1000
 
 export function LogsCard({
-  application: { name }, query, addLabel, height = 800,
+  application: { name }, query, addLabel, fullscreen = false, height = 800,
 }: any) {
   const [listRef, setListRef] = useState<any>(null)
   const [live, setLive] = useState(true)
@@ -52,6 +52,7 @@ export function LogsCard({
             fetchMore={fetchMore}
             onScroll={arg => setLive(!arg)}
             addLabel={addLabel}
+            fullscreen={fullscreen}
           />
         )}
       </Flex>

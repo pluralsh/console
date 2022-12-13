@@ -6,12 +6,14 @@ replicaCount: 2
 
 image:
   repository: dkr.plural.sh/console/console
-  tag: '0.3.6' ## PLRL-REPLACE[  tag: '%s']
+  tag: '0.3.10' ## PLRL-REPLACE[  tag: '%s']
   pullPolicy: IfNotPresent
 
 serviceAccount:
   create: true
   annotations: {}
+
+extraSecretEnv: []
 
 configOverlays:
 - name: console-cpu

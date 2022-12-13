@@ -14,8 +14,8 @@ import Foco from 'react-foco'
 import { Next } from 'grommet-icons'
 
 import ConsoleSidebar, { SIDEBAR_ICON_HEIGHT } from './ConsoleSidebar'
-import Builds from './Builds'
-import Build from './Build'
+import Builds from './builds/Builds'
+import Build from './builds/build/Build'
 import BreadcrumbProvider from './Breadcrumbs'
 import Webhooks from './Webhooks'
 import Configuration from './Configuration'
@@ -47,6 +47,8 @@ import CostAnalysis from './apps/app/cost/CostAnalysis'
 import Dashboard from './apps/app/dashboards/dashboard/Dashboard'
 import Runbook from './apps/app/runbooks/runbook/Runbook'
 import Logs from './apps/app/logs/Logs'
+import Changelog from './builds/build/changelog/Changelog'
+import Progress from './builds/build/progress/Progress'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -306,10 +308,6 @@ export default function Console() {
                           )}
                         />
                         <Route
-                          path="/builds/:buildId"
-                          element={<Build />}
-                        />
-                        <Route
                           path="/webhooks"
                           element={<Webhooks />}
                         />
@@ -335,9 +333,11 @@ export default function Console() {
                           path="/shell/pod/:namespace/:name/:container"
                           element={<PodShell />}
                         />
+
+                        {/* APPS */}
                         <Route
-                          path="/builds"
-                          element={<Builds />}
+                          path="/"
+                          element={<Apps />}
                         />
                         <Route
                           path="/apps/:appName"
@@ -377,10 +377,34 @@ export default function Console() {
                             element={<CostAnalysis />}
                           />
                         </Route>
+
+                        {/* BUILDS */}
                         <Route
-                          path="/"
-                          element={<Apps />}
+                          path="/builds"
+                          element={<Builds />}
                         />
+                        <Route
+                          path="/builds/:buildId"
+                          element={<Build />}
+                        >
+                          <Route
+                            index
+                            element={(
+                              <Navigate
+                                replace
+                                to="progress"
+                              />
+                            )}
+                          />
+                          <Route
+                            path="progress"
+                            element={<Progress />}
+                          />
+                          <Route
+                            path="changelog"
+                            element={<Changelog />}
+                          />
+                        </Route>
                       </Routes>
                       <FlyoutGutter />
                     </Box>

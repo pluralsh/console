@@ -31,7 +31,7 @@ import {
 
 import { BreadcrumbsContext } from './Breadcrumbs'
 import { CREATE_WEBHOOK, DELETE_WEBHOOK, WEBHOOKS_Q } from './graphql/webhooks'
-import { BUILD_PADDING } from './Builds'
+import { BUILD_PADDING } from './builds/Builds'
 
 import { LoopingLogo } from './utils/AnimatedLogo'
 import { Container } from './utils/Container'

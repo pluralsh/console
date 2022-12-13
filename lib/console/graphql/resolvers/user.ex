@@ -9,6 +9,18 @@ defmodule Console.GraphQl.Resolvers.User do
   def query(RoleBinding, _), do: RoleBinding
   def query(_, _), do: User
 
+  def login_link(%{key: k}, _) do
+    Console.conf(:login_link)
+    |> Map.new()
+    |> case do
+      %{key: ^k, email: email} when is_binary(email) ->
+        Users.get_user_by_email(email)
+        |> ok()
+        |> with_jwt()
+      _ -> {:error, "unauthorized"}
+    end
+  end
+
   def list_users(args, _) do
     User.ordered()
     |> maybe_search(User, args)

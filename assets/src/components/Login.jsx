@@ -127,7 +127,7 @@ export function GrantAccess() {
 
 export function EnsureLogin({ children }) {
   const location = useLocation()
-  const { data, error } = useQuery(ME_Q, { pollInterval: POLL_INTERVAL })
+  const { data, error, loading } = useQuery(ME_Q, { pollInterval: POLL_INTERVAL, errorPolicy: 'ignore' })
   const { boot, update } = useIntercom()
 
   useEffect(() => {
@@ -138,13 +138,13 @@ export function EnsureLogin({ children }) {
     if (data && data.me) update()
   }, [data, location])
 
-  if (error) {
+  if (error || (!loading && !data.clusterInfo)) {
     console.log(error)
 
     return <LoginError error={error} />
   }
 
-  if (!data) return null
+  if (!data?.clusterInfo) return null
 
   const {
     me, externalToken, clusterInfo: { __typename, ...clusterInformation }, configuration,

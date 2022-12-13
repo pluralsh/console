@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import {
   ArrowTopRightIcon,
-  Button,
   CloseIcon,
   IconFrame,
   Input,
@@ -21,14 +20,17 @@ export default function LogsFullScreen({
 
   return (
     <>
-      <Button
-        secondary
-        paddingHorizontal="small"
+      <IconFrame
+        icon={<ArrowTopRightIcon />}
+        tooltip
+        tooltipProps={{ placement: 'bottom' }}
+        clickable
+        textValue="Fullscreen logs"
+        type="secondary"
         onClick={() => setOpen(true)}
-      >
-        {/* TODO: Switch icon. */}
-        <ArrowTopRightIcon />
-      </Button>
+        height={40}
+        width={40}
+      />
       {open && (
         <Div
           backgroundColor="rgba(23, 26, 33, 0.8)"
@@ -44,8 +46,11 @@ export default function LogsFullScreen({
             icon={<CloseIcon />}
             textValue="Close"
             tooltip
+            type="floating"
             clickable
             onClick={() => setOpen(false)}
+            height={40}
+            width={40}
             top={0}
             right={0}
             margin="large"
@@ -69,6 +74,7 @@ export default function LogsFullScreen({
               setSearch={setSearch}
               labels={labels}
               setLabels={setLabels}
+              fullscreen
             />
           </Flex>
           <LogsLabels
@@ -80,6 +86,7 @@ export default function LogsFullScreen({
             query={query}
             addLabel={addLabel}
             height="100%"
+            fullscreen
           />
         </Div>
       )}

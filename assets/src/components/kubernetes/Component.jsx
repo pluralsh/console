@@ -9,7 +9,7 @@ import yaml from 'yaml'
 import { BreadcrumbsContext } from '../Breadcrumbs'
 import { InstallationContext, useEnsureCurrent } from '../Installations'
 
-import { BUILD_PADDING } from '../Builds'
+import { BUILD_PADDING } from '../builds/Builds'
 
 import Service from './Service'
 import ComponentName from './ComponentName'

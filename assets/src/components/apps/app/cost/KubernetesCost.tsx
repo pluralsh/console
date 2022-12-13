@@ -62,7 +62,8 @@ export default function KubernetesCost({ cost }) {
             <ProgressBar
               mode="determinate"
               progress={entry.cost / total}
-              // TODO: Change color to blue 400 instead of blue 200. Allow it in design system.
+              progressColor="blue.400"
+              completeColor="blue.400"
             />
           </Flex>
           <Flex

@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Webhooks do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Webhook
-  alias Console.Middleware.{Authenticated}
+  alias Console.Middleware.{Authenticated, Sandboxed}
   alias Console.Schema
 
   ecto_enum :webhook_type, Schema.Webhook.Type
@@ -33,6 +33,7 @@ defmodule Console.GraphQl.Webhooks do
   object :webhook_mutations do
     field :create_webhook, :webhook do
       middleware Authenticated
+      middleware Sandboxed
       arg :attributes, non_null(:webhook_attributes)
 
       resolve safe_resolver(&Webhook.create_webhook/2)
@@ -40,6 +41,7 @@ defmodule Console.GraphQl.Webhooks do
 
     field :delete_webhook, :webhook do
       middleware Authenticated
+      middleware Sandboxed
       arg :id, non_null(:id)
 
       resolve safe_resolver(&Webhook.delete_webhook/2)

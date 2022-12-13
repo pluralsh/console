@@ -56,7 +56,7 @@ function Placeholder() {
 }
 
 export default function LogContent({
-  listRef, setListRef, logs, name, loading, fetchMore, onScroll, search, setLoader, addLabel,
+  listRef, setListRef, logs, name, loading, fetchMore, onScroll, search, setLoader, addLabel, fullscreen = false,
 }) {
   const [open, setOpen] = useState<boolean>(false)
   const [timestamp, setTimestamp] = useState<any>()
@@ -106,10 +106,7 @@ export default function LogContent({
           stream={stream}
           addLabel={addLabel}
           onClose={() => setOpen(false)}
-          position="fixed"
-          top={104}
-          right={0}
-          margin="large"
+          marginTop={fullscreen ? '0' : '104px'}
         />
       )}
     </>
