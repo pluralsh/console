@@ -18,8 +18,6 @@ export default function BuildRestart({ build: { id } }) {
       <Button
         secondary
         fontWeight={600}
-        marginTop="xxsmall"
-        marginBottom="small"
         startIcon={<CraneIcon />}
         onClick={() => setOpen(true)}
         width={200}

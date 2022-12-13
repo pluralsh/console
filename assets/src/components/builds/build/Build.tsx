@@ -23,7 +23,6 @@ import {
 import { mergeEdges } from 'components/graphql/utils'
 
 import {
-  APPROVE_BUILD,
   BUILD_Q,
   BUILD_SUB,
   CANCEL_BUILD,
@@ -55,7 +54,6 @@ import {
 
 import { PropsContainer } from 'components/utils/PropsContainer'
 import Prop from 'components/utils/Prop'
-import { BuildStatus } from 'components/types'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
 import { getIcon, hasIcons } from 'components/apps/misc'
@@ -66,6 +64,7 @@ import { BUILD_TYPE_DISPLAY_NAMES } from '../Build'
 
 import { BuildTimer } from './BuildTimer'
 import BuildRestart from './BuildRestart'
+import BuildApproval from './BuildApproval'
 
 export function OptionContainer({ children, ...props }) {
   return (
@@ -143,30 +142,6 @@ function updateQuery(prev, { subscriptionData: { data } }) {
   }
 }
 
-export function Approval({ build }) {
-  const [mutation, { loading }] = useMutation(APPROVE_BUILD, { variables: { id: build.id } })
-
-  if (build.approver) {
-    return (
-      <OptionContainer>
-        <Text size="small">approved by: {build.approver.name}</Text>
-      </OptionContainer>
-    )
-  }
-
-  if (build.status !== BuildStatus.PENDING) return null
-
-  return (
-    <OptionContainer>
-      <Button
-        label="approve"
-        loading={loading}
-        onClick={mutation}
-      />
-    </OptionContainer>
-  )
-}
-
 const DIRECTORY = [
   { path: 'progress', label: 'Progress' },
   { path: 'changelog', label: 'Changelog' },
@@ -212,7 +187,9 @@ export default function Build() {
     )
   }
 
-  const { commands: { edges }, creator, ...build } = data.build
+  const {
+    commands: { edges }, creator, approver, ...build
+  } = data.build
   const directory = build.changelogs?.length > 0
     ? DIRECTORY
     : DIRECTORY.filter(({ path }) => path !== 'changelog')
@@ -285,7 +262,14 @@ export default function Build() {
         <Outlet context={{ edges, build }} />
       </TabPanel>
       <ResponsiveLayoutSidecarContainer width={200}>
-        <BuildRestart build={build} />
+        <Flex
+          direction="column"
+          gap="xsmall"
+          marginBottom="xsmall"
+        >
+          <BuildRestart build={build} />
+          <BuildApproval build={build} />
+        </Flex>
         <Flex
           gap="medium"
           direction="column"
@@ -315,13 +299,24 @@ export default function Build() {
                 <Flex align="center">{creator.email}</Flex>
               </Prop>
             )}
+            {approver && (
+              <Prop
+                title="Approver"
+                display="flex"
+                gap="xsmall"
+              >
+                <AppIcon
+                  size="xxsmall"
+                  name={approver.name}
+                />
+                <Flex align="center">{approver.email}</Flex>
+              </Prop>
+            )}
           </PropsContainer>
         </Flex>
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
     </Flex>
-    // TODO:
-    //     <Approval build={build} />
-    //     {!complete && <Cancel build={build} />}
+    // TODO: {!complete && <Cancel build={build} />}
   )
 }
