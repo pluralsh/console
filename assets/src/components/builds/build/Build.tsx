@@ -1,6 +1,7 @@
 import {
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -13,7 +14,12 @@ import {
 } from 'react-router-dom'
 import { useMutation, useQuery } from 'react-apollo'
 import { Button, ModalHeader } from 'forge-core'
-import { Box, Layer, Text } from 'grommet'
+import {
+  Box,
+  Layer,
+  Text,
+  ThemeContext,
+} from 'grommet'
 
 import { mergeEdges } from 'components/graphql/utils'
 
@@ -42,12 +48,21 @@ import { ResponsiveLayoutSpacer } from 'components/layout/ResponsiveLayoutSpacer
 import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from 'components/layout/ResponsiveLayoutSidecarContainer'
 
-import { Div, Flex } from 'honorable'
+import {
+  Div,
+  Flex,
+  H2,
+  P,
+} from 'honorable'
 
 import { PropsContainer } from 'components/utils/PropsContainer'
 import Prop from 'components/utils/Prop'
 import { BuildStatus } from 'components/types'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
+
+import { getIcon, hasIcons } from 'components/apps/misc'
+
+import { InstallationContext } from 'components/Installations'
 
 import { BUILD_TYPE_DISPLAY_NAMES } from '../Build'
 
@@ -201,6 +216,8 @@ const DIRECTORY = [
 
 export default function Build() {
   const tabStateRef = useRef<any>(null)
+  const { dark } = useContext<any>(ThemeContext)
+  const { applications } = useContext<any>(InstallationContext)
   const { pathname } = useLocation()
   const { buildId } = useParams()
   const pathPrefix = `/builds/${buildId}`
@@ -222,6 +239,9 @@ export default function Build() {
       second()
     }
   }, [buildId, subscribeToMore, setBreadcrumbs])
+
+  const app = useMemo(() => applications?.find(app => app.name === data?.build?.repository),
+    [applications, data?.build?.repository])
 
   if (!data) {
     return (
@@ -253,7 +273,33 @@ export default function Build() {
       position="relative"
     >
       <ResponsiveLayoutSidenavContainer width={240}>
-        {build.repository}
+        <Flex
+          align="center"
+          gap="small"
+          marginBottom="large"
+        >
+          {hasIcons(app) && (
+            <AppIcon
+              url={getIcon(app, dark)}
+              size="small"
+            />
+          )}
+          <Div>
+            <H2
+              fontSize="20px"
+              fontWeight="500"
+              lineHeight="24px"
+            >
+              {build.repository}
+            </H2>
+            <P
+              color="text-xlight"
+              caption
+            >
+              {build.message}
+            </P>
+          </Div>
+        </Flex>
         <TabList
           stateRef={tabStateRef}
           stateProps={{
