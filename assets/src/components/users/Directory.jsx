@@ -373,10 +373,12 @@ export default function Directory() {
   const setSection = section => navigate(`/directory/${section}`)
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
 
-  useEffect(() => setBreadcrumbs([
-    { text: 'directory', url: '/directory' },
-    { text: section, url: `/directory/${section}` },
-  ]), [section])
+  useEffect(() => {
+    setBreadcrumbs([
+      { text: 'directory', url: '/directory' },
+      { text: section, url: `/directory/${section}` },
+    ])
+  }, [section])
 
   return (
     <ThemeContext.Extend value={{ global: { input: { padding: '8px' } } }}>
