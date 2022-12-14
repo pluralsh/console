@@ -1,8 +1,14 @@
 import { LoopingLogo, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
+import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { Date } from 'components/utils/Date'
 import { Flex } from 'honorable'
-import { useCallback, useMemo } from 'react'
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+} from 'react'
 import { useQuery } from 'react-apollo'
 import { extendConnection } from 'utils/graphql'
 
@@ -41,10 +47,18 @@ const columns = [
 ]
 
 export default function AuditsTable() {
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { data, loading, fetchMore } = useQuery(AUDITS_Q, { fetchPolicy: 'cache-and-network' })
   const pageInfo = data?.audits?.pageInfo
   const edges = data?.audits?.edges
   const audits = useMemo(() => edges?.map(({ node }) => node), [edges])
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { text: 'Audits', url: '/audits' },
+      { text: 'Table', url: '/audits/table' },
+    ])
+  }, [setBreadcrumbs])
 
   const fetchMoreOnBottomReached = useCallback((element?: HTMLDivElement | undefined) => {
     if (!element) return
