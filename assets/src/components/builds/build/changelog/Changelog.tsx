@@ -11,7 +11,7 @@ import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { InstallationContext } from 'components/Installations'
 import { AnsiText } from 'components/utils/AnsiText'
 import { ThemeContext } from 'grommet'
-import { Flex } from 'honorable'
+import { Flex, Span } from 'honorable'
 import { groupBy } from 'lodash'
 import {
   Key,
@@ -94,7 +94,7 @@ export default function Changelog() {
               key={tool}
               textValue={tool}
             >
-              {tool}
+              <Span fontWeight={600}>{tool}</Span>
             </SubTab>
           ))}
         </TabList>
