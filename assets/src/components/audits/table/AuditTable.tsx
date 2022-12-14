@@ -1,4 +1,4 @@
-import { LoopingLogo, Table } from '@pluralsh/design-system'
+import { AppIcon, LoopingLogo, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { Date } from 'components/utils/Date'
@@ -15,15 +15,16 @@ import { extendConnection } from 'utils/graphql'
 import { AUDITS_Q } from '../queries'
 
 import { AuditLocation } from './AuditLocation'
+import { AuditAction } from './AuditAction'
 
 const FETCH_MARGIN = 30
 
 const COLUMN_HELPER = createColumnHelper<any>()
 
 const columns = [
-  COLUMN_HELPER.accessor(audit => audit.action, {
+  COLUMN_HELPER.accessor(audit => audit, {
     id: 'action',
-    cell: (action: any) => action.getValue(), // TODO:
+    cell: (audit: any) => <AuditAction audit={audit.getValue()} />,
     header: 'Action / Type',
   }),
   COLUMN_HELPER.accessor(audit => audit.repository, {
@@ -33,7 +34,25 @@ const columns = [
   }),
   COLUMN_HELPER.accessor(audit => audit.actor, {
     id: 'actor',
-    cell: (actor: any) => actor.getValue()?.email,
+    cell: (actor: any) => {
+      const a = actor.getValue()
+
+      return (
+        <Flex
+          align="center"
+          gap="xsmall"
+        >
+          {/* TODO: Fix aspect ratios. */}
+          <AppIcon
+            url={a.profile}
+            name={a.name}
+            size="xxsmall"
+            spacing="none"
+          />
+          {a.email}
+        </Flex>
+      )
+    },
     header: 'Creator',
   }),
   COLUMN_HELPER.accessor(audit => audit.insertedAt, {
@@ -106,14 +125,3 @@ export default function AuditsTable() {
     />
   )
 }
-
-// { /* <RowItem
-//         width="10%"
-//         text={audit.ip}
-//         truncate={undefined}
-//       />
-//       <RowItem
-//         width="15%"
-//         text={formatLocation(audit.country, audit.city)}
-//         truncate={undefined}
-//       /> */ }
