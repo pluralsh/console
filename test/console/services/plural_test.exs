@@ -210,6 +210,71 @@ defmodule Console.Services.PluralTest do
     end
   end
 
+  describe "#install_stack/4" do
+    test "a user can enable oidc after installation" do
+      inst_body = Jason.encode!(%{
+        query: Queries.install_stack_mutation(),
+        variables: %{name: "id", provider: "AWS"}
+      })
+
+      me_body = Jason.encode!(%{
+        query: Queries.me_query(),
+        variables: %{}
+      })
+
+      get_inst_body = Jason.encode!(%{
+        query: Queries.get_installation_query(),
+        variables: %{name: "repo"}
+      })
+
+      oidc_body = Jason.encode!(%{
+        query: Queries.upsert_oidc_provider(),
+        variables: %{id: "instid", attributes: %{
+          redirectUris: ["https://domain.com/oauth"],
+          bindings: [%{userId: "me"}],
+          authMethod: "POST"
+        }}
+      })
+
+      recipe = %{
+        id: "id",
+        name: "name",
+        description: "description",
+        oidcSettings: %{authMethod: "POST", uriFormat: "https://{domain}/oauth", domainKey: "domain"},
+        repository: %{id: "id2", name: "repo"}
+      }
+
+      expect(HTTPoison, :post, 4, fn
+        _, ^me_body, _ -> {:ok, %{body: Jason.encode!(%{data: %{me: %{id: "me"}}})}}
+        _, ^get_inst_body, _ ->
+          {:ok, %{body: Jason.encode!(%{data: %{installation: %{id: "instid"}}})}}
+        _, ^oidc_body, _ ->
+          {:ok, %{body: Jason.encode!(%{data: %{upsertOidcProvider: %{id: "id"}}})}}
+        _, ^inst_body, _ ->
+          {:ok, %{body: Jason.encode!(%{data: %{installStack: [recipe]}})}}
+      end)
+
+      expect(Manifest, :get, fn ->
+        {:ok, %Manifest{network: %Manifest.Network{subdomain: "some.domain.co"}}}
+      end)
+
+      user = insert(:user)
+      {:ok, build} = Plural.install_stack(
+        "id",
+        %{"repo" => %{"domain" => "domain.com"}},
+        true,
+        user
+      )
+
+      assert build.type == :install
+      assert build.context == %{
+        configuration: %{"repo" => %{"domain" => "domain.com"}},
+        bundles: [%{repository: "repo", name: "name"}]
+      }
+      assert build.creator_id == user.id
+    end
+  end
+
   describe "#update_smtp/1" do
     test "it can update the smtp section of a wkspace's context" do
       context = %Context{

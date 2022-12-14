@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Plural do
   use Nebulex.Caching
   alias Console.Plural.{Repositories, ExternalToken}
-  alias Console.Plural.{Connection, PageInfo}
+  alias Console.Plural.{Connection, PageInfo, Stack}
   alias Console.Services.Plural
   alias Kube.Client
 
@@ -28,11 +28,20 @@ defmodule Console.GraphQl.Resolvers.Plural do
 
   def get_recipe(%{id: id}, _) do
     with {:ok, recipe} <- Repositories.get_recipe(id) do
-      sections = Enum.map(recipe.recipeSections, fn section ->
-        Map.put(section, :recipe_items, section.recipeItems)
-      end)
-      {:ok, Map.put(recipe, :recipe_sections, sections)}
+      {:ok, format_recipe(recipe)}
     end
+  end
+
+  defp format_section(section), do: Map.put(section, :recipe_items, section.recipeItems)
+
+  defp format_recipe(recipe) do
+    sections = Enum.map(recipe.recipeSections, &format_section/1)
+    Map.put(recipe, :recipe_sections, sections)
+  end
+
+  def get_stack(%{name: name}, _) do
+    with {:ok, %Stack{bundles: recipes, sections: sections} = stack} <- Repositories.get_stack(name),
+      do: {:ok, %{stack | bundles: Enum.map(recipes, &format_recipe/1), sections: Enum.map(sections, &format_section/1)}}
   end
 
   def list_applications(_, _) do
@@ -51,6 +60,10 @@ defmodule Console.GraphQl.Resolvers.Plural do
 
   def install_recipe(%{id: id, context: context} = args, %{context: %{current_user: user}}) do
     Plural.install_recipe(id, context, !!args[:oidc], user)
+  end
+
+  def install_stack(%{name: name, context: context} = args, %{context: %{current_user: user}}) do
+    Plural.install_stack(name, context, !!args[:oidc], user)
   end
 
   def update_smtp(%{smtp: smtp}, _), do: Plural.update_smtp(smtp)

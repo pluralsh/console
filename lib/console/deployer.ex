@@ -175,6 +175,17 @@ defmodule Console.Deployer do
     ], storage)
   end
 
+  defp perform(storage, %Build{type: :install, context: %{"configuration" => conf, "bundles" => bs}, message: message} = build) do
+    with_build(build, [
+      {storage, :init, []},
+      {Context, :merge, [conf, Enum.map(bs, fn b -> %Context.Bundle{repository: b["repository"], name: b["name"]} end)]},
+      {Plural, :build, []},
+      {Plural, :install, [Enum.map(bs, & &1["repository"])]},
+      {storage, :revise, [message]},
+      {storage, :push, []}
+    ], storage)
+  end
+
   defp perform(storage, %Build{type: :approval, repository: repo, message: message} = build) do
     with_build(build, [
       {storage, :init, []},

@@ -125,6 +125,19 @@ defmodule Console.Plural.Recipe do
   end
 end
 
+defmodule Console.Plural.Stack do
+  alias Console.Plural.{Recipe, RecipeSection}
+
+  defstruct [:id, :name, :bundles, :sections]
+
+  def spec() do
+    %__MODULE__{
+      bundles: [Recipe.spec()],
+      sections: [RecipeSection.spec()]
+    }
+  end
+end
+
 defmodule Console.Plural.Edge do
   defstruct [:node]
 end
