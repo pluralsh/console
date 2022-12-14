@@ -14,6 +14,8 @@ import { extendConnection } from 'utils/graphql'
 
 import { AUDITS_Q } from '../queries'
 
+import { AuditLocation } from './AuditLocation'
+
 const FETCH_MARGIN = 30
 
 const COLUMN_HELPER = createColumnHelper<any>()
@@ -41,7 +43,17 @@ const columns = [
   }),
   COLUMN_HELPER.accessor(audit => audit, {
     id: 'locationIp',
-    cell: (audit: any) => audit.getValue().ip,
+    cell: (audit: any) => {
+      const a = audit.getValue()
+
+      return (
+        <AuditLocation
+          ip={a.ip}
+          country={a.country}
+          city={a.city}
+        />
+      )
+    },
     header: 'Location / IP',
   }),
 ]

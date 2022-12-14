@@ -10,8 +10,9 @@ export function Date({ date }: any) {
     <Flex direction="column">
       <Span whiteSpace="nowrap">{moment(date).format('ll')}</Span>
       <Span
-        whiteSpace="nowrap"
+        caption
         color="text-xlight"
+        whiteSpace="nowrap"
       >
         {moment(date).format('h:mm A')}
       </Span>
