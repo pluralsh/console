@@ -93,6 +93,17 @@ defmodule Console.Plural.Queries do
     #{@oidc_provider_fragment}
   """
 
+  @stack_fragment """
+    fragment StackFragment on Stack {
+      id
+      name
+      bundles { ...RecipeFragment }
+      sections { ...RecipeSectionFragment }
+    }
+    #{@recipe_fragment}
+    #{@recipe_section_fragment}
+  """
+
   @installation_query """
     query Installations($first: Int!, $cursor: String) {
       installations(first: $first, after: $cursor) {
@@ -185,6 +196,24 @@ defmodule Console.Plural.Queries do
     }
   """
 
+  @install_stack """
+    mutation Install($name: String!, $provider: Provider!) {
+      installStack(name: $name, provider: $provider) {
+        ...RecipeFragment
+      }
+    }
+    #{@recipe_fragment}
+  """
+
+  @get_stack """
+    query Stack($name: String!, $provider: Provider!) {
+      stack(name: $name, provider: $provider) {
+        ...StackFragment
+      }
+    }
+    #{@stack_fragment}
+  """
+
   @oidc_upsert """
     mutation OIDC($id: ID!, $attributes: OidcAttributes!) {
       upsertOidcProvider(installationId: $id, attributes: $attributes) {
@@ -247,4 +276,8 @@ defmodule Console.Plural.Queries do
   def update_incident_mutation(), do: @update_incident
 
   def create_incident_mutation(), do: @create_incident
+
+  def get_stack_query(), do: @get_stack
+
+  def install_stack_mutation(), do: @install_stack
 end

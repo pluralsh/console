@@ -9,15 +9,16 @@ defmodule Console.Plural.Repositories do
     Dashboard,
     Recipe,
     Workspace,
-    OIDCProvider
+    OIDCProvider,
+    Stack
   }
 
   defmodule Query do
-    defstruct [:installations, :searchRepositories, :recipes, :recipe, :installation]
+    defstruct [:installations, :searchRepositories, :recipes, :recipe, :installation, :stack]
   end
 
   defmodule Mutation do
-    defstruct [:installRecipe, :upsertOidcProvider]
+    defstruct [:installRecipe, :upsertOidcProvider, :installStack]
   end
 
   def search_repositories(query, first) do
@@ -57,6 +58,20 @@ defmodule Console.Plural.Repositories do
       %Query{recipe: Recipe.spec()}
     )
     |> when_ok(fn %{recipe: result} -> result end)
+  end
+
+  def get_stack(name) do
+    prov = Workspace.provider()
+    get_stack_query()
+    |> Client.run(%{name: name, provider: provider(prov)}, %Query{stack: Stack.spec()})
+    |> when_ok(fn %{stack: s} -> s end)
+  end
+
+  def install_stack(name) do
+    prov = Workspace.provider()
+    install_stack_mutation()
+    |> Client.run(%{name: name, provider: provider(prov)}, %Mutation{installStack: [Recipe.spec()]})
+    |> when_ok(fn %{installStack: recipes} -> recipes end)
   end
 
   def install_recipe(id) do

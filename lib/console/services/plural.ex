@@ -1,4 +1,5 @@
 defmodule Console.Services.Plural do
+  use Console.Services.Base
   alias Console.Deployer
   alias Console.Schema.{User, Manifest}
   alias Console.Services.{Builds}
@@ -62,6 +63,32 @@ defmodule Console.Services.Plural do
         },
       }, user)
     end
+  end
+
+  def install_stack(name, context, oidc, %User{} = user) do
+    with {:ok, [recipe | _] = recipes} <- Repositories.install_stack(name),
+         {:ok, _} <- oidc_for_stack(recipes, context, oidc) do
+      repos = Enum.map(recipes, & &1.repository.name)
+      Builds.create(%{
+        type: :install,
+        repository: recipe.repository.name,
+        message: "Installed stack #{name} with repositories #{Enum.join(repos, ", ")}",
+        context: %{
+          configuration: context,
+          bundles: Enum.map(recipes, & %{name: &1.name, repository: &1.repository.name}),
+        },
+      }, user)
+    end
+  end
+
+  def oidc_for_stack([_ | _] = recipes, context, oidc) do
+    Enum.reduce(recipes, short_circuit(), fn recipe, circuit ->
+      short(circuit, recipe.id, fn ->
+        with :ok <- configure_oidc(recipe, context, oidc),
+          do: oidc_dependencies(recipe.recipeDependencies, context, oidc)
+      end)
+    end)
+    |> execute()
   end
 
   def configure_oidc(
