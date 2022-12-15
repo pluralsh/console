@@ -49,6 +49,8 @@ import Runbook from './apps/app/runbooks/runbook/Runbook'
 import Logs from './apps/app/logs/Logs'
 import Changelog from './builds/build/changelog/Changelog'
 import Progress from './builds/build/progress/Progress'
+import AuditsTable from './audits/table/AuditTable'
+import AuditsGraph from './audits/graph/AuditsGraph'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -276,20 +278,6 @@ export default function Console() {
                           element={<Nodes />}
                         />
                         <Route
-                          path="/audits/:graph"
-                          element={<Audits />}
-                        />
-                        <Route
-                          exact
-                          path="/audits"
-                          element={(
-                            <Navigate
-                              replace
-                              to="/audits/table"
-                            />
-                          )}
-                        />
-                        <Route
                           path="/components/:repo/:kind/:name"
                           element={<Component />}
                         />
@@ -403,6 +391,30 @@ export default function Console() {
                           <Route
                             path="changelog"
                             element={<Changelog />}
+                          />
+                        </Route>
+
+                        {/* AUDITS */}
+                        <Route
+                          path="/audits"
+                          element={<Audits />}
+                        >
+                          <Route
+                            index
+                            element={(
+                              <Navigate
+                                replace
+                                to="table"
+                              />
+                            )}
+                          />
+                          <Route
+                            path="table"
+                            element={<AuditsTable />}
+                          />
+                          <Route
+                            path="graph"
+                            element={<AuditsGraph />}
                           />
                         </Route>
                       </Routes>
