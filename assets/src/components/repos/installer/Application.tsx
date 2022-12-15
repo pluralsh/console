@@ -4,10 +4,15 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { LoopingLogo, WizardStep, useActive } from '@pluralsh/design-system'
+import {
+  Chip,
+  LoopingLogo,
+  WizardStep,
+  useActive,
+} from '@pluralsh/design-system'
 import { useQuery } from 'react-apollo'
 import { Box } from 'grommet'
-import { P } from 'honorable'
+import { Div, Span } from 'honorable'
 
 import { RECIPES_Q, RECIPE_Q } from '../../graphql/plural'
 import { Recipe, RepositoryContext } from '../../../generated/graphql'
@@ -22,24 +27,27 @@ const findContext = (contexts: Array<RepositoryContext>, repository: string): Re
 export function Application({ ...props }: any): ReactElement {
   const { active, setData } = useActive<Record<string, unknown>>()
   const [context, setContext] = useState<Record<string, unknown>>(active.data || {})
+  const [oidc, setOIDC] = useState(false)
   const [valid, setValid] = useState(true)
   const { data: { recipes: { edges: recipeEdges } = {} } = {} } = useQuery(RECIPES_Q, {
     variables: { id: active.key },
-    fetchPolicy: 'cache-and-network',
   })
 
   // There should only be a single bundle available on the list
   const recipeBase = recipeEdges?.at(0)?.node
   const { data: recipe } = useQuery<{recipe: Recipe, context: Array<RepositoryContext>}>(RECIPE_Q, {
     variables: { id: recipeBase?.id },
-    fetchPolicy: 'cache-and-network',
     skip: !recipeBase,
   })
 
-  // Update step data on change
-  useEffect(() => setData(context), [context, setData])
   const recipeContext = useMemo(() => findContext(recipe?.context || [], active.label),
     [recipe?.context, active.label])
+  const mergedContext = useMemo(() => ({ ...recipeContext, ...context }), [recipeContext, context])
+
+  // Update step data on change
+  useEffect(() => setData({
+    ...active.data, ...{ id: recipe?.recipe.id }, ...{ oidc }, ...{ context: mergedContext },
+  }), [active.data, mergedContext, oidc, setData])
 
   if (!recipe) {
     return (
@@ -73,17 +81,35 @@ export function Application({ ...props }: any): ReactElement {
       data={context}
       {...props}
     >
-      <P
-        overline
-        color="text-xlight"
-        paddingBottom="medium"
-      >configure {active.label}
-      </P>
+      <Div
+        marginBottom="medium"
+        display="flex"
+        lineHeight="24px"
+        alignItems="center"
+        height="24px"
+      >
+        <Span
+          overline
+          color="text-xlight"
+        >
+          configure {active.label}
+        </Span>
+        {active.isDependency && (
+          <Chip
+            size="small"
+            hue="lighter"
+            marginLeft="xsmall"
+          >Dependency
+          </Chip>
+        )}
+      </Div>
       <Configuration
         recipe={recipe.recipe}
-        context={{ ...context, ...recipeContext }}
+        context={mergedContext}
+        oidc={oidc}
         setContext={setContext}
         setValid={setValid}
+        setOIDC={setOIDC}
       />
     </WizardStep>
   )

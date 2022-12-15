@@ -156,5 +156,8 @@
     "vite-tsconfig-paths": "4.0.1",
     "vitest": "0.25.6",
     "wait-on": "6.0.1"
+  },
+  "resolutions": {
+    "@pluralsh/design-system": "portal:/home/floreks/Projekty/plural/design-system"
   }
 }

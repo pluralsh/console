@@ -23,14 +23,13 @@ function StringConfiguration({
   }, type, ctx, setValue, setValid,
 }) {
   const value = ctx[name]
+  const msg = validation && validateRegex(value, validation)
 
   useEffect(() => {
-    if (!ctx[name] && def) {
+    if (value === undefined && def) {
       setValue(name, def)
     }
   }, [ctx, value, def, name, setValue])
-
-  const msg = validation && validateRegex(value, validation)
 
   useEffect(() => (setValid ? msg ? setValid(false) : setValid(true) : undefined), [msg, setValid])
 
@@ -132,7 +131,7 @@ function DomainConfiguration({
   const suffixed = useCallback(value => `${trimSuffix(value, suffix)}${suffix}`, [suffix])
 
   useEffect(() => {
-    if (!ctx[name] && def) {
+    if (ctx[name] === undefined && def) {
       setValue(name, def)
     }
   }, [name, ctx, def, setValue])
@@ -164,7 +163,7 @@ function IntConfiguration({
   const [err, setErr] = useState(null)
 
   useEffect(() => {
-    if (!ctx[name] && def) {
+    if (ctx[name] === undefined && def) {
       setValue(name, def)
     }
   }, [name, ctx, def])
@@ -213,7 +212,7 @@ function BoolConfiguration({ config: { name, default: def }, ctx, setValue }) {
   const value: boolean = ctx[name]
 
   useEffect(() => {
-    if (!ctx[name] && def) {
+    if (ctx[name] === undefined && def) {
       setValue(name, def)
     }
   }, [ctx, def, name, setValue])
