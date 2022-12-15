@@ -63,7 +63,7 @@ export function DeleteJob({ name, namespace, refetch }) {
       />
       {confirm && (
         <Confirm
-          description="The pod will be replaced by it's managing controller"
+          description="The pod will be replaced by it's managing controller. Note: You need the ADMIN/DELETE role to perform this action."
           loading={loading}
           cancel={e => {
             ignore(e); setConfirm(false)
