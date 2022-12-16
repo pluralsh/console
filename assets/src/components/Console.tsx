@@ -23,7 +23,6 @@ import { EnsureLogin } from './Login'
 
 import Users from './Users'
 import { InstallationsProvider } from './Installations'
-import RepositorySelector from './RepositorySelector'
 import Application from './Application'
 import Component from './kubernetes/Component'
 import { Node, Nodes } from './kubernetes/Node'
@@ -58,7 +57,7 @@ export const SIDEBAR_WIDTH = '200px'
 export function Icon({
   icon, text, selected, path, onClick, size, align,
 }) {
-  const dropRef = useRef()
+  const dropRef = useRef<any>()
   const navigate = useNavigate()
   const [hover, setHover] = useState(false)
 
@@ -78,7 +77,7 @@ export function Icon({
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
         onClick={() => (onClick ? onClick() : navigate(path))}
-        background={selected ? 'sidebarHover' : null}
+        background={selected ? 'sidebarHover' : undefined}
         direction="row"
       >
         {icon}
@@ -105,7 +104,7 @@ export function Icon({
   )
 }
 
-const FlyoutContext = React.createContext({})
+const FlyoutContext = React.createContext<any>({})
 
 function FlyoutProvider({ children }) {
   const [ref, setRef] = useState(false)
@@ -234,21 +233,10 @@ export default function Console() {
                           element={<Configuration />}
                         />
                         <Route
-                          path="/config"
-                          element={(
-                            <RepositorySelector
-                              prefix="config"
-                              title="Configuration"
-                              description="edit configuration for your installed repos"
-                            />
-                          )}
-                        />
-                        <Route
                           path="/directory/:section"
                           element={<Directory />}
                         />
                         <Route
-                          exact
                           path="/directory"
                           element={(
                             <Navigate
@@ -259,7 +247,7 @@ export default function Console() {
                         />
                         <Route
                           path="/incident/:incidentId"
-                          element={<PluralApi><Incident /></PluralApi>}
+                          element={<PluralApi><Incident editing={undefined} /></PluralApi>}
                         />
                         {/* <Route path="/incidents">
                           <PluralApi><Incidents /></PluralApi>
@@ -286,28 +274,8 @@ export default function Console() {
                           element={<Application />}
                         />
                         <Route
-                          path="/components"
-                          element={(
-                            <RepositorySelector
-                              prefix="components"
-                              title="Components"
-                              description="details for all your applications"
-                            />
-                          )}
-                        />
-                        <Route
                           path="/webhooks"
                           element={<Webhooks />}
-                        />
-                        <Route
-                          path="/dashboards"
-                          element={(
-                            <RepositorySelector
-                              prefix="dashboards"
-                              title="Dashboards"
-                              description="view monitoring dashboards for installed repos"
-                            />
-                          )}
                         />
                         <Route
                           path="/me/edit"

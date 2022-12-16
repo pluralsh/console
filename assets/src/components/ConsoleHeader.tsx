@@ -45,7 +45,7 @@ function DemoBanner() {
 export default function ConsoleHeader() {
   return (
     <Div
-      backgroundColor={theme.colors.grey[950]}
+      backgroundColor={theme.colors?.grey[950]}
       borderBottom="1px solid border"
     >
       <DemoBanner />
