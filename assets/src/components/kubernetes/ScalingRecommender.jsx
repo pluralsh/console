@@ -15,7 +15,7 @@ import { filesize } from 'filesize'
 
 import { LoopingLogo } from '../utils/AnimatedLogo'
 
-import { EXECUTE_OVERLAY, OverlayInput } from '../Configuration'
+import { EXECUTE_OVERLAY, OverlayInput } from '../apps/app/config/Configuration'
 
 import { CONFIGURATION_OVERLAYS, SCALING_RECOMMENDATION } from './queries'
 import { MetadataRow } from './Metadata'

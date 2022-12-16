@@ -44,10 +44,7 @@ const getDirectory = (app, config) => [
   { path: 'logs', label: 'Logs', enabled: true },
   { path: 'cost', label: 'Cost analysis', enabled: app.cost || app.license },
   { path: 'oidc', label: 'User management', enabled: config && !config.isSandbox },
-  { path: 'config', label: 'Configuration', enabled: true }, // path: '/config/{repo}', git: true
-  //       {OPTIONS.map(({ text, icon, path, name: sbName, git }, ind) => {
-    //         if (git && !conf.gitStatus.cloned) return null
-    //       })}
+  { path: 'config', label: 'Configuration', enabled: config?.gitStatus?.cloned },
 ]
 
 export default function App() {

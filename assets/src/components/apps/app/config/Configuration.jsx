@@ -22,12 +22,12 @@ import { chunk } from 'lodash'
 
 import yaml from 'js-yaml'
 
-import { deepFetch } from '../utils/graphql'
+import { deepFetch } from '../../../../utils/graphql'
 
-import { APPLICATION_Q, UPDATE_CONFIGURATION } from './graphql/plural'
+import { APPLICATION_Q, UPDATE_CONFIGURATION } from '../../../graphql/plural'
 
-import { BreadcrumbsContext } from './Breadcrumbs'
-import { BUILD_PADDING } from './builds/Builds'
+import { BreadcrumbsContext } from '../../../Breadcrumbs'
+import { BUILD_PADDING } from '../../../builds/Builds'
 
 import 'ace-builds/src-noconflict/mode-yaml'
 import 'ace-builds/src-noconflict/theme-terminal'
@@ -36,17 +36,17 @@ import {
   InstallationContext,
   hasIcon,
   useEnsureCurrent,
-} from './Installations'
-import { TabHeader } from './utils/TabSelector'
-import { LoopingLogo } from './utils/AnimatedLogo'
+} from '../../../Installations'
+import { TabHeader } from '../../../utils/TabSelector'
+import { LoopingLogo } from '../../../utils/AnimatedLogo'
 
-import { BuildFragment } from './graphql/builds'
-import { LabelledInput } from './utils/LabelledInput'
-import { DarkSelect } from './utils/Select'
+import { BuildFragment } from '../../../graphql/builds'
+import { LabelledInput } from '../../../utils/LabelledInput'
+import { DarkSelect } from '../../../utils/Select'
 
-import { COMPONENT_LABEL } from './kubernetes/constants'
-import { SidebarTab } from './utils/SidebarTab'
-import { convertType } from './apps/app/runbooks/runbook/display/misc'
+import { COMPONENT_LABEL } from '../../../kubernetes/constants'
+import { SidebarTab } from '../../../utils/SidebarTab'
+import { convertType } from '../runbooks/runbook/display/misc'
 
 const ConfigType = {
   HELM: 'HELM',

@@ -18,7 +18,6 @@ import Builds from './builds/Builds'
 import Build from './builds/build/Build'
 import BreadcrumbProvider from './Breadcrumbs'
 import Webhooks from './Webhooks'
-import Configuration from './Configuration'
 import { EnsureLogin } from './Login'
 
 import Users from './Users'
@@ -51,6 +50,7 @@ import Progress from './builds/build/progress/Progress'
 import AuditsTable from './audits/table/AuditTable'
 import AuditsGraph from './audits/graph/AuditsGraph'
 import UserManagement from './apps/app/oidc/UserManagement'
+import Configuration from './apps/app/config/Configuration'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -230,10 +230,6 @@ export default function Console() {
                     >
                       <Routes>
                         <Route
-                          path="/config/:repo"
-                          element={<Configuration />}
-                        />
-                        <Route
                           path="/directory/:section"
                           element={<Directory />}
                         />
@@ -336,6 +332,10 @@ export default function Console() {
                           <Route
                             path="oidc"
                             element={<UserManagement />}
+                          />
+                          <Route
+                            path="config"
+                            element={<Configuration />}
                           />
                         </Route>
 
