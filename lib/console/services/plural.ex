@@ -65,16 +65,18 @@ defmodule Console.Services.Plural do
     end
   end
 
-  def install_stack(name, context, oidc, %User{} = user) do
+  def install_stack(name, %{configuration: ctx} = context, oidc, %User{} = user) do
     with {:ok, [recipe | _] = recipes} <- Repositories.install_stack(name),
-         {:ok, _} <- oidc_for_stack(recipes, context, oidc) do
+         {:ok, _} <- oidc_for_stack(recipes, ctx, oidc) do
       repos = Enum.map(recipes, & &1.repository.name)
       Builds.create(%{
         type: :install,
         repository: recipe.repository.name,
         message: "Installed stack #{name} with repositories #{Enum.join(repos, ", ")}",
         context: %{
-          configuration: context,
+          configuration: ctx,
+          domains: Map.get(context, :domains, []),
+          buckets: Map.get(context, :buckets, []),
           bundles: Enum.map(recipes, & %{name: &1.name, repository: &1.repository.name}),
         },
       }, user)

@@ -11,6 +11,12 @@ defmodule Console.GraphQl.Plural do
     field :user,     :string
   end
 
+  input_object :context_attributes do
+    field :buckets,       list_of(:string)
+    field :domain,        list_of(:string)
+    field :configuration, non_null(:map)
+  end
+
   object :smtp do
     field :server,   :string
     field :port,     :integer
@@ -98,6 +104,12 @@ defmodule Console.GraphQl.Plural do
     field :context,    :map
   end
 
+  object :plural_context do
+    field :buckets,       list_of(:string)
+    field :domains,       list_of(:string)
+    field :configuration, non_null(:map)
+  end
+
   connection node_type: :installation
   connection node_type: :repository
   connection node_type: :recipe
@@ -138,8 +150,16 @@ defmodule Console.GraphQl.Plural do
 
     field :context, list_of(:repository_context) do
       middleware Authenticated
+      middleware Rbac, perm: :deploy, arg: :id
 
       resolve &Plural.resolve_context/2
+    end
+
+    field :plural_context, :plural_context do
+      middleware Authenticated
+      middleware Rbac, perm: :deploy, arg: :id
+
+      resolve &Plural.resolve_plural_context/2
     end
 
     field :recipe, :recipe do
@@ -186,7 +206,7 @@ defmodule Console.GraphQl.Plural do
       middleware Rbac, perm: :deploy, arg: :id
 
       arg :name,    non_null(:string)
-      arg :context, non_null(:map)
+      arg :context, non_null(:context_attributes)
       arg :oidc,    :boolean
 
       safe_resolve &Plural.install_stack/2

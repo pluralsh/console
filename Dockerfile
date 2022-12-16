@@ -70,7 +70,7 @@ ENV HELM_VERSION=v3.10.2
 ENV TERRAFORM_VERSION=v1.2.9
 
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
-ENV CLI_VERSION=v0.5.24
+ENV CLI_VERSION=v0.5.30
 
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
 ENV KUBECTL_VERSION=v1.25.4

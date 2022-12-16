@@ -2,7 +2,7 @@ defmodule Console.Plural.Context do
   import Console
   alias Console.Deployer
 
-  defstruct [:configuration, :bundles, :smtp]
+  defstruct [:configuration, :bundles, :smtp, :buckets, :domains]
 
   defmodule Smtp do
     defstruct [:user, :password, :server, :port, :sender]
@@ -43,15 +43,21 @@ defmodule Console.Plural.Context do
     end
   end
 
-  def merge(ctx, new_bundles) do
+  def merge(ctx, new_bundles, buckets \\ [], domains \\ []) do
     with {:ok, %{configuration: config, bundles: bundles} = context} <- get() do
       updated = DeepMerge.deep_merge(config, ctx)
-      write(%{context | configuration: updated, bundles: merge_bundles(new_bundles, bundles)})
+      %{context | configuration: updated, bundles: merge_list(new_bundles, bundles)}
+      |> add_meta(buckets, domains)
+      |> write()
     end
   end
 
-  defp merge_bundles([_ | _] = new, bundles), do: Enum.uniq(new ++ bundles)
-  defp merge_bundles(b, bundles), do: merge_bundles([b], bundles)
+  defp add_meta(%__MODULE__{buckets: buckets, domains: domains} = ctx, new_buckets, new_domains) do
+    %{ctx | buckets: merge_list(buckets || [], new_buckets || []), domains: merge_list(domains || [], new_domains || [])}
+  end
+
+  defp merge_list(new, bundles) when is_list(new), do: Enum.uniq(new ++ bundles)
+  defp merge_list(b, bundles), do: merge_list([b], bundles)
 
   def write(%__MODULE__{bundles: bundles, configuration: conf, smtp: smtp} = context) do
     sanitized = %{
