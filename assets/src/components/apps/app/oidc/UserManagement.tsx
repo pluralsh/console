@@ -13,14 +13,13 @@ import { PluralApi } from 'components/PluralApi'
 
 import { GqlError } from 'forge-core'
 
-import { BindingInput } from 'components/apps/app/oidc/BindingInput'
-
 import { isEqual } from 'lodash'
 
 import { sanitize } from '../../../users/Role'
 
+import { BindingInput, fetchGroups, fetchUsers } from './BindingInput'
+
 import { INSTALLATION, UPDATE_PROVIDER } from './queries'
-import { fetchGroups, fetchUsers } from './typeaheads'
 
 function UserManagementCard({ id, provider }) {
   const { authMethod, redirectUris, bindings: initialBindings } = provider
@@ -96,7 +95,7 @@ function UserManagementCard({ id, provider }) {
             loading={loading}
             onClick={() => mutation}
           >
-            Update {/* // TODO: form inputs. */}
+            Update
           </Button>
         </Flex>
       </Flex>

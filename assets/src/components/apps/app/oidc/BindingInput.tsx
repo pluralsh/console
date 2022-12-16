@@ -1,16 +1,18 @@
 import {
+  AppIcon,
   Chip,
   ComboBox,
   FormField,
+  ListBoxItem,
+  ListBoxItemChipList,
   PeopleIcon,
   PersonIcon,
 } from '@pluralsh/design-system'
-import ChipList from '@pluralsh/design-system/dist/components/ListBoxItemChipList'
-import { fetchGroups, fetchUsers } from 'components/apps/app/oidc/typeaheads'
-import { Flex } from 'honorable'
 import { useEffect, useState } from 'react'
 import { useApolloClient } from 'react-apollo'
 import styled from 'styled-components'
+
+import { SEARCH_GROUPS, SEARCH_USERS } from './queries'
 
 const ICONS = {
   user: <PersonIcon size={14} />,
@@ -26,6 +28,57 @@ const FETCHER = {
   user: fetchUsers,
   group: fetchGroups,
 }
+
+export function fetchUsers(client, query, setSuggestions) {
+  client.query({ query: SEARCH_USERS, variables: { q: query, all: true } })
+    .then(({ data: { users: { edges } } }) => edges.map(({ node }) => ({ value: node, label: userSuggestion(node) })))
+    .then(setSuggestions)
+}
+
+export function fetchGroups(client, query, setSuggestions) {
+  client.query({ query: SEARCH_GROUPS, variables: { q: query } })
+    .then(({ data: { groups: { edges } } }) => edges.map(({ node }) => ({ value: node, label: groupSuggestion(node) })))
+    .then(setSuggestions)
+}
+
+function userSuggestion({
+  name, email, avatar, id,
+}: any) {
+  return (
+    <ListBoxItem
+      key={id}
+      label={name}
+      textValue={`${name} - ${email}`}
+      description={email}
+      leftContent={(
+        <AppIcon
+          spacing={avatar ? 'none' : undefined}
+          hue="lightest"
+          size="xsmall"
+          name={name}
+          url={avatar}
+        />
+      )}
+    />
+  )
+}
+
+function groupSuggestion({ name, description, id }: any) {
+  return (
+    <ListBoxItem
+      key={id}
+      label={name}
+      textValue={`${name} - ${description}`}
+      description={description}
+      leftContent={<PeopleIcon />}
+    />
+  )
+}
+
+const ChipList = styled(ListBoxItemChipList)(({ theme }) => ({
+  marginTop: theme.spacing.small,
+  justifyContent: 'start',
+}))
 
 // TODO: Move it to design system.
 export function BindingInput({
@@ -74,7 +127,7 @@ function TagInput({
 }) {
   const [inputValue, setInputValue] = useState('')
 
-    // FIXME: Run only on first render. Make sure there will be data in Combo Box to start with.
+    // Run only on first render. Make sure there will be data in Combo Box to start with.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => onChange({ target: { value: inputValue } }), [])
 
@@ -105,21 +158,19 @@ function TagInput({
           {suggestions.map(({ label }) => label)}
         </ComboBox>
         {items?.length > 0 && (
-          <Flex marginTop="small">
-            <ChipList
-              maxVisible={Infinity}
-              chips={items.map(key => (
-                <Chip
-                  size="small"
-                  clickable
-                  onClick={() => onRemove(key)}
-                  closeButton
-                >
-                  {key}
-                </Chip>
-              ))}
-            />
-          </Flex>
+          <ChipList
+            maxVisible={Infinity}
+            chips={items.map(key => (
+              <Chip
+                size="small"
+                clickable
+                onClick={() => onRemove(key)}
+                closeButton
+              >
+                {key}
+              </Chip>
+            ))}
+          />
         )}
       </FormField>
     </TagPicker>
