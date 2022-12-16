@@ -1,18 +1,14 @@
 import React, {
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
 } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useMutation, useQuery } from 'react-apollo'
+import { useMutation } from 'react-apollo'
 
-import { Button, GqlError } from 'forge-core'
+import { Button } from 'forge-core'
 
 import { Box, Text } from 'grommet'
-
-import { FormNext } from 'grommet-icons'
 
 import AceEditor from 'react-ace'
 
@@ -24,21 +20,14 @@ import yaml from 'js-yaml'
 
 import { deepFetch } from '../../../../utils/graphql'
 
-import { APPLICATION_Q, UPDATE_CONFIGURATION } from '../../../graphql/plural'
+import { UPDATE_CONFIGURATION } from '../../../graphql/plural'
 
-import { BreadcrumbsContext } from '../../../Breadcrumbs'
 import { BUILD_PADDING } from '../../../builds/Builds'
 
 import 'ace-builds/src-noconflict/mode-yaml'
 import 'ace-builds/src-noconflict/theme-terminal'
-import {
-  ApplicationIcon,
-  InstallationContext,
-  hasIcon,
-  useEnsureCurrent,
-} from '../../../Installations'
+import { ApplicationIcon, hasIcon } from '../../../Installations'
 import { TabHeader } from '../../../utils/TabSelector'
-import { LoopingLogo } from '../../../utils/AnimatedLogo'
 
 import { BuildFragment } from '../../../graphql/builds'
 import { LabelledInput } from '../../../utils/LabelledInput'
@@ -331,99 +320,7 @@ export function EditConfiguration({ onCompleted, overlays, application: { name, 
   )
 }
 
-export function RepositoryChoice({ config: { name, icon, description }, link }) {
-  const navigate = useNavigate()
-
-  return (
-    <Box
-      onClick={() => navigate(link)}
-      width="50%"
-      hoverIndicator="backgroundDark"
-      background="cardDetailLight"
-      direction="row"
-      align="center"
-      justify="center"
-      round="xsmall"
-      pad="medium"
-    >
-      <Box
-        direction="row"
-        fill="horizontal"
-        gap="small"
-        align="center"
-      >
-        {icon && (
-          <img
-            alt=""
-            src={icon}
-            height="40px"
-            width="40px"
-          />
-        )}
-        <Box>
-          <Text
-            size="small"
-            style={{ fontWeight: 500 }}
-          >{name}
-          </Text>
-          <Text
-            size="small"
-            color="dark-6"
-          >{description}
-          </Text>
-        </Box>
-      </Box>
-      <Box flex={false}>
-        <FormNext size="25px" />
-      </Box>
-    </Box>
-  )
-}
-
-export default function Configuration() {
-  const navigate = useNavigate()
-  const { repo } = useParams()
-  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
-  const { setOnChange } = useContext(InstallationContext)
-  const { data, error } = useQuery(APPLICATION_Q, {
-    variables: { name: repo },
-    fetchPolicy: 'network-only',
-  })
-  const onCompleted = useCallback(() => navigate('/'), [])
-
-  useEffect(() => {
-    setBreadcrumbs([
-      { text: 'configuration', url: '/config' },
-      { text: repo, url: `/config/${repo}` },
-    ])
-  }, [repo])
-
-  useEffect(() => {
-    setOnChange({ func: ({ name }) => navigate(`/config/${name}`) })
-  }, [])
-
-  useEnsureCurrent(repo)
-
-  if (error) {
-    return (
-      <Box fill>
-        <GqlError
-          error={error}
-          header="Cannot access configuration for this app"
-        />
-      </Box>
-    )
-  }
-
-  if (!data) {
-    return (
-      <LoopingLogo
-        scale="0.75"
-        dark
-      />
-    )
-  }
-
+export default function Configuration({ data, onCompleted }) {
   return (
     <EditConfiguration
       application={data.application}
