@@ -74,7 +74,7 @@ function TagInput({
 }) {
   const [inputValue, setInputValue] = useState('')
 
-    // Run only on first render. Make sure there will be data in Combo Box to start with.
+    // FIXME: Run only on first render. Make sure there will be data in Combo Box to start with.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => onChange({ target: { value: inputValue } }), [])
 
