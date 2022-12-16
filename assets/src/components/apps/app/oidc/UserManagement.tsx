@@ -21,6 +21,9 @@ import { BindingInput, fetchGroups, fetchUsers } from './BindingInput'
 
 import { INSTALLATION, UPDATE_PROVIDER } from './queries'
 
+// TODO: Add confirmation dialog when there are unsaved changes.
+// See https://github.com/remix-run/react-router/issues/8139
+// and https://github.com/remix-run/react-router/pull/9709.
 function UserManagementCard({ id, provider }) {
   const { authMethod, redirectUris, bindings: initialBindings } = provider
   const [bindings, setBindings] = useState(initialBindings)
