@@ -1,14 +1,129 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { Card, PageTitle } from '@pluralsh/design-system'
-import { useContext, useEffect } from 'react'
+import {
+  Button,
+  Card,
+  LoopingLogo,
+  PageTitle,
+} from '@pluralsh/design-system'
+import { useContext, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { InstallationContext } from 'components/Installations'
+import { useMutation, useQuery } from 'react-apollo'
+import { Flex, P } from 'honorable'
+import { PluralApi } from 'components/PluralApi'
+import { Box } from 'grommet'
+
+import { GqlError } from 'forge-core'
+
+import { BindingInput } from 'components/apps/app/oidc/BindingInput'
+
+import { sanitize } from '../../../users/Role'
+
+import { INSTALLATION, UPDATE_PROVIDER } from './queries'
+import { fetchGroups, fetchUsers } from './typeaheads'
+
+function UserManagementCard({ id, provider }) {
+  const { authMethod, redirectUris } = provider
+  const [bindings, setBindings] = useState(provider.bindings)
+  const [mutation, { loading, error }] = useMutation(UPDATE_PROVIDER, {
+    variables: { id, attributes: { authMethod, redirectUris, bindings: bindings.map(sanitize) } },
+  })
+
+  return (
+    <Card
+      paddingHorizontal={100}
+      paddingVertical="large"
+    >
+      <Flex
+        direction="column"
+        gap="xxsmall"
+        paddingVertical="xsmall"
+      >
+        <P
+          body1
+          fontWeight={600}
+        >
+          OpenID Connect
+        </P>
+        <P
+          body2
+          color="text-light"
+        >
+          Control which users and groups have access to this application with OIDC.
+        </P>
+      </Flex>
+      <Flex
+        direction="column"
+        gap="small"
+        paddingVertical="medium"
+      >
+        {error && (
+          <GqlError
+            error={error}
+            header="Could not update provider"
+          />
+        )}
+        <BindingInput
+          type="group"
+          bindings={bindings.filter(({ group }) => !!group).map(({ group: { name } }) => name)}
+          fetcher={fetchGroups}
+          add={group => setBindings([...bindings, { group }])}
+          remove={name => setBindings(bindings.filter(({ group }) => !group || group.name !== name))}
+        />
+        <BindingInput
+          type="user"
+          bindings={bindings.filter(({ user }) => !!user).map(({ user: { email } }) => email)}
+          fetcher={fetchUsers}
+          add={user => setBindings([...bindings, { user }])}
+          remove={email => setBindings(bindings.filter(({ user }) => !user || user.email !== email))}
+        />
+        <Box
+          direction="row"
+          justify="end"
+          align="center"
+        >
+          <Button
+            loading={loading}
+            onClick={() => mutation}
+          >
+            Update {/* // TODO: form inputs. */}
+          </Button>
+        </Box>
+      </Flex>
+    </Card>
+  )
+}
+
+function UserManagementContent() {
+  const { appName } = useParams()
+  const { data } = useQuery(INSTALLATION,
+    { variables: { name: appName }, fetchPolicy: 'cache-and-network' })
+
+  if (!data) {
+    return (
+      <Flex
+        grow={1}
+        justify="center"
+      >
+        <LoopingLogo scale={1} />
+      </Flex>
+    )
+  }
+
+  const { installation: { id, oidcProvider } } = data
+
+  return oidcProvider
+    ? (
+      <UserManagementCard
+        id={id}
+        provider={oidcProvider}
+      />
+    )
+    : (<Flex>No OIDC provider configured.</Flex>)
+}
 
 export default function UserManagement() {
   const { appName } = useParams()
-  const { applications }: any = useContext(InstallationContext)
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
-  const currentApp = applications.find(app => app.name === appName)
 
   useEffect(() => setBreadcrumbs([
     { text: 'Apps', url: '/' },
@@ -19,12 +134,9 @@ export default function UserManagement() {
   return (
     <>
       <PageTitle heading="User management" />
-      <Card
-        paddingHorizontal={100}
-        paddingVertical="large"
-      >
-        {currentApp.name}
-      </Card>
+      <PluralApi>
+        <UserManagementContent />
+      </PluralApi>
     </>
   )
 }

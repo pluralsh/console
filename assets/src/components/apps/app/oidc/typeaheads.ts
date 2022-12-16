@@ -1,4 +1,4 @@
-import { groupSuggestion, userSuggestion } from '../users/Typeaheads'
+import { groupSuggestion, userSuggestion } from '../../../users/Typeaheads'
 
 import { SEARCH_GROUPS, SEARCH_USERS } from './queries'
 

@@ -9,7 +9,6 @@ import { ArrowTopRightIcon, Button, theme } from '@pluralsh/design-system'
 import { useContext } from 'react'
 
 import { LoginContext } from './contexts'
-import { Installations } from './Installations'
 
 const APP_ICON = '/console-logo-white.png'
 
@@ -73,7 +72,6 @@ export default function ConsoleHeader() {
           Plural App
         </Button>
         {/* <InstallerModal /> */}
-        <Installations />
       </Flex>
     </Div>
   )

@@ -12,16 +12,6 @@ const PLURAL_WSS = 'wss://app.plural.sh/socket'
 export const PluralApiContext = React.createContext({})
 const API_CACHE = {}
 
-export function withPluralApi(Component) {
-  return function (props) {
-    return (
-      <PluralApi>
-        <Component {...props} />
-      </PluralApi>
-    )
-  }
-}
-
 export function PluralApi({ children }) {
   const { token } = useContext(LoginContext)
   const { client, socket } = useMemo(() => {

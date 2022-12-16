@@ -1,11 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { Box, Layer, ThemeContext } from 'grommet'
-import { CircleInformation } from 'grommet-icons'
+import React, { useContext, useEffect } from 'react'
+import { ThemeContext } from 'grommet'
 import { useQuery } from 'react-apollo'
 
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
-import { Icon } from './Console'
-import { OIDCProvider } from './oidc/OIDCProvider'
 import { LoopingLogo } from './utils/AnimatedLogo'
 
 export const InstallationContext = React.createContext({})
@@ -24,67 +21,6 @@ export function ApplicationIcon({ application: { spec: { descriptor: { icons } }
 }
 
 export const hasIcon = ({ spec: { descriptor: { icons } } }) => icons.length > 0
-
-export function ToolbarItem({ children, onClick, open }) {
-  return (
-    <Box
-      flex={false}
-      direction="row"
-      round="xsmall"
-      background={open ? 'sidebarHover' : null}
-      margin={{ vertical: 'xsmall' }}
-      pad={{ horizontal: 'small', vertical: 'xsmall' }}
-      gap="small"
-      align="center"
-      hoverIndicator="sidebarHover"
-      onClick={onClick}
-    >
-      {children}
-    </Box>
-  )
-}
-
-export function ApplicationDetails() {
-  const { currentApplication } = useContext(InstallationContext)
-  const { name } = currentApplication
-
-  return <OIDCProvider name={name} />
-}
-
-function ApplicationDetail({ close }) {
-  return (
-    <Layer
-      modal
-      onEsc={close}
-      onClickOutside={close}
-    >
-      <Box width="50vw">
-        <ApplicationDetails />
-      </Box>
-    </Layer>
-  )
-}
-
-export function Installations() {
-  const [modal, setModal] = useState(false)
-  const { currentApplication } = useContext(InstallationContext)
-
-  if (!currentApplication) return null
-
-  return (
-    <>
-      <Icon
-        icon={<CircleInformation size="18px" />}
-        text="Application Details"
-        size="40px"
-        selected={modal}
-        align={{ top: 'bottom' }}
-        onClick={() => setModal(true)}
-      />
-      {modal && <ApplicationDetail close={() => setModal(false)} />}
-    </>
-  )
-}
 
 export function useEnsureCurrent(repo) {
   const { applications, currentApplication, setCurrentUnsafe } = useContext(InstallationContext)
