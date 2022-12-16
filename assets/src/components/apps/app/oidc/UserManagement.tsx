@@ -10,11 +10,12 @@ import { useParams } from 'react-router-dom'
 import { useMutation, useQuery } from 'react-apollo'
 import { Flex, P } from 'honorable'
 import { PluralApi } from 'components/PluralApi'
-import { Box } from 'grommet'
 
 import { GqlError } from 'forge-core'
 
 import { BindingInput } from 'components/apps/app/oidc/BindingInput'
+
+import { isEqual } from 'lodash'
 
 import { sanitize } from '../../../users/Role'
 
@@ -22,11 +23,12 @@ import { INSTALLATION, UPDATE_PROVIDER } from './queries'
 import { fetchGroups, fetchUsers } from './typeaheads'
 
 function UserManagementCard({ id, provider }) {
-  const { authMethod, redirectUris } = provider
-  const [bindings, setBindings] = useState(provider.bindings)
+  const { authMethod, redirectUris, bindings: initialBindings } = provider
+  const [bindings, setBindings] = useState(initialBindings)
   const [mutation, { loading, error }] = useMutation(UPDATE_PROVIDER, {
     variables: { id, attributes: { authMethod, redirectUris, bindings: bindings.map(sanitize) } },
   })
+  const changed = !isEqual(initialBindings, bindings)
 
   return (
     <Card
@@ -76,18 +78,27 @@ function UserManagementCard({ id, provider }) {
           add={user => setBindings([...bindings, { user }])}
           remove={email => setBindings(bindings.filter(({ user }) => !user || user.email !== email))}
         />
-        <Box
-          direction="row"
+        <Flex
+          gap="medium"
           justify="end"
           align="center"
         >
+          {changed && (
+            <P
+              body2
+              color="text-xlight"
+            >
+              Unsaved changes
+            </P>
+          )}
           <Button
+            disabled={!changed}
             loading={loading}
             onClick={() => mutation}
           >
             Update {/* // TODO: form inputs. */}
           </Button>
-        </Box>
+        </Flex>
       </Flex>
     </Card>
   )
