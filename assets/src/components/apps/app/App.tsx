@@ -37,22 +37,22 @@ import AppSelector from './AppSelector'
 import RunbookStatus from './runbooks/runbook/RunbookStatus'
 
 // TODO: Keep current path when switching views if possible.
-const getDirectory = app => [
+const getDirectory = (app, config) => [
   { path: 'dashboards', label: 'Dashboards', enabled: true },
   { path: 'runbooks', label: 'Runbooks', enabled: true },
   { path: 'components', label: 'Components', enabled: true },
   { path: 'logs', label: 'Logs', enabled: true },
+  { path: 'cost', label: 'Cost analysis', enabled: app.cost || app.license },
+  { path: 'oidc', label: 'User management', enabled: config && !config.isSandbox },
   { path: 'config', label: 'Configuration', enabled: true }, // path: '/config/{repo}', git: true
   //       {OPTIONS.map(({ text, icon, path, name: sbName, git }, ind) => {
     //         if (git && !conf.gitStatus.cloned) return null
     //       })}
-    // TODO: OpenID Connect cannot be shown if configuration.isSandbox is true.
-  { path: 'cost', label: 'Cost analysis', enabled: app.cost || app.license },
 ]
 
 export default function App() {
   const tabStateRef = useRef<any>(null)
-  const { me }: any = useContext(LoginContext)
+  const { me, configuration } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
   const { appName, dashboardId, runbookName } = useParams()
   const { applications }: any = useContext(InstallationContext)
@@ -63,7 +63,7 @@ export default function App() {
 
   if (!me || !currentApp) return null
 
-  const directory = getDirectory(currentApp).filter(({ enabled }) => enabled)
+  const directory = getDirectory(currentApp, configuration).filter(({ enabled }) => enabled)
   const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
   const { name, spec: { descriptor: { links, version } } } = currentApp
   const validLinks = links?.filter(({ url }) => !!url)

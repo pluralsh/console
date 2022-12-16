@@ -50,6 +50,7 @@ import Changelog from './builds/build/changelog/Changelog'
 import Progress from './builds/build/progress/Progress'
 import AuditsTable from './audits/table/AuditTable'
 import AuditsGraph from './audits/graph/AuditsGraph'
+import UserManagement from './apps/app/oidc/UserManagement'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -331,6 +332,10 @@ export default function Console() {
                           <Route
                             path="cost"
                             element={<CostAnalysis />}
+                          />
+                          <Route
+                            path="oidc"
+                            element={<UserManagement />}
                           />
                         </Route>
 
