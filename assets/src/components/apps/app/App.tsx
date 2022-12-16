@@ -43,7 +43,7 @@ const getDirectory = (app, config) => [
   { path: 'components', label: 'Components', enabled: true },
   { path: 'logs', label: 'Logs', enabled: true },
   { path: 'cost', label: 'Cost analysis', enabled: app.cost || app.license },
-  { path: 'oidc', label: 'User management', enabled: config && !config.isSandbox },
+  { path: 'oidc', label: 'User management', enabled: true }, // TODO: Handle forbidden error.
   { path: 'config', label: 'Configuration', enabled: config?.gitStatus?.cloned },
 ]
 
