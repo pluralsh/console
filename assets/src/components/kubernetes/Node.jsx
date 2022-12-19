@@ -16,7 +16,6 @@ import {
   Trash,
 } from 'forge-core'
 import { useMutation, useQuery } from 'react-apollo'
-
 import {
   Box,
   Drop,
@@ -24,21 +23,16 @@ import {
   ThemeContext,
 } from 'grommet'
 import { useNavigate, useParams } from 'react-router-dom'
-
 import { ServerCluster } from 'grommet-icons'
-
 import { memoryParser } from 'kubernetes-resource-parser'
 import { filesize } from 'filesize'
-
 import { sumBy } from 'lodash'
 import { Doughnut } from 'react-chartjs-2'
 import { normalizeColor } from 'grommet/utils'
-
 import { Line } from 'rc-progress'
-
 import { format } from 'components/apps/app/dashboards/dashboard/misc'
-
 import { Readiness } from 'utils/status'
+import { ArcElement, Chart } from 'chart.js'
 
 import { cpuParser } from '../../utils/kubernetes'
 import { Graph } from '../utils/Graph'
@@ -48,9 +42,7 @@ import { BreadcrumbsContext } from '../Breadcrumbs'
 
 import { RawContent } from './Component'
 import { ClusterMetrics as Metrics, NodeMetrics, POLL_INTERVAL } from './constants'
-
 import { Events } from './Event'
-
 import { Metadata, mapify } from './Metadata'
 import {
   HeaderItem,
@@ -66,6 +58,11 @@ import {
   NODE_METRICS_Q,
   NODE_Q,
 } from './queries'
+
+/*
+Must explicitly import and register chart.js elements used in react-chartjs-2
+*/
+Chart.register(ArcElement)
 
 function NodeRowHeader() {
   return (
@@ -118,7 +115,8 @@ function UtilBar({
   const [hover, setHover] = useState(false)
   const theme = useContext(ThemeContext)
   const percent = round(Math.min((usage / capacity) * 100, 100))
-  const color = percent < 50 ? 'success' : (percent < 75 ? 'status-warning' : 'error')
+  const color
+    = percent < 50 ? 'success' : percent < 75 ? 'status-warning' : 'error'
 
   return (
     <>
