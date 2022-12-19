@@ -39,14 +39,13 @@ export default function Configuration() {
     { text: 'Configuration', url: `/apps/${appName}/config` },
   ]), [appName, setBreadcrumbs])
 
+  // TODO: Replace.
   if (error) {
     return (
-      <Flex>
-        <GqlError
-          error={error}
-          header="Cannot access configuration for this app"
-        />
-      </Flex>
+      <GqlError
+        error={error}
+        header="Cannot access configuration for this app"
+      />
     )
   }
 
@@ -69,7 +68,7 @@ export default function Configuration() {
   }).filter(({ metadata: { labels } }) => !labels[COMPONENT_LABEL])
   const views = overlays?.length > 0
     ? Object.keys(ConfigType)
-    : Object.keys(ConfigType).filter(key => key !== ConfigType.OVERLAY)
+    : Object.keys(ConfigType).filter(key => key !== ConfigType.SETTINGS)
 
   if (!view) setView(views[0])
 
@@ -101,7 +100,7 @@ export default function Configuration() {
           ))}
         </TabList>
       </PageTitle>
-      {view === ConfigType.OVERLAY && (
+      {view === ConfigType.SETTINGS && (
         <ConfigurationSettings
           application={application}
           overlays={overlays}

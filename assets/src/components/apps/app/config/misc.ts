@@ -1,5 +1,5 @@
 export const ConfigType = {
-  OVERLAY: 'OVERLAY',
+  SETTINGS: 'SETTINGS',
   HELM: 'HELM',
   TERRAFORM: 'TERRAFORM',
 }

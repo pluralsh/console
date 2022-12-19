@@ -8,12 +8,13 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { Button } from 'forge-core'
 import { useMutation } from 'react-apollo'
-import { Box, Text } from 'grommet'
-import { LabelledInput } from 'components/utils/LabelledInput'
+import { Box } from 'grommet'
 import { DarkSelect } from 'components/utils/Select'
 import { SidebarTab } from 'components/utils/SidebarTab'
 import { chunk } from 'lodash'
 import yaml from 'js-yaml'
+
+import { FormField, Input } from '@pluralsh/design-system'
 
 import { deepFetch } from '../../../../utils/graphql'
 
@@ -21,18 +22,11 @@ import { convertType } from '../runbooks/runbook/display/misc'
 
 import { EXECUTE_OVERLAY } from './queries'
 
-function BaseInput({ overlay: { spec }, value, setValue }) {
+function ConfigurationSettingsInput({ value = '', setValue }) {
   return (
-    <LabelledInput
-      label={spec.name}
-      value={`${value || ''}`}
+    <Input
+      value={value}
       onChange={setValue}
-      color={undefined}
-      weight={undefined}
-      placeholder={undefined}
-      width={undefined}
-      type={undefined}
-      modifier={undefined}
     />
   )
 }
@@ -56,31 +50,26 @@ const INPUT_COMPONENTS = {
 export function OverlayInput({
   overlay, ctx, setCtx, values,
 }) {
-  const { name } = overlay.spec
-  const setValue = useCallback(val => {
-    setCtx({ ...ctx, [name]: convertType(val, overlay.spec.inputType) })
-  }, [name, overlay.spec, ctx, setCtx])
+  const {
+    name, documentation, updates, inputType,
+  } = overlay.spec
+  const setValue = useCallback(val => setCtx({ ...ctx, [name]: convertType(val, inputType) }), [name, inputType, ctx, setCtx])
 
   useEffect(() => {
-    const update = overlay.spec.updates[0].path
-    const val = deepFetch(values, update)
+    const val = deepFetch(values, updates[0].path)
 
-    if (val && !ctx[name]) {
-      setValue(val)
-    }
-  }, [ctx])
+    if (val && !ctx[name]) setValue(val)
+  }, [name, updates, values, setValue, ctx])
 
-  const component = INPUT_COMPONENTS[overlay.spec.inputType] || BaseInput
+  const component = INPUT_COMPONENTS[inputType] || ConfigurationSettingsInput
 
   return (
-    <Box gap="xsmall">
+    <FormField
+      label={overlay.spec.name}
+      hint={documentation}
+    >
       {createElement(component, { overlay, setValue, value: ctx[name] })}
-      <Text
-        size="small"
-        color="dark-3"
-      ><i>{overlay.spec.documentation}</i>
-      </Text>
-    </Box>
+    </FormField>
   )
 }
 
@@ -121,25 +110,18 @@ function OverlayEdit({
       direction="row"
       fill
     >
-      <Box
-        flex={false}
-        fill="vertical"
-        style={{ overflow: 'auto', minWidth: '150px' }}
-        border={{ side: 'right' }}
-      >
-        <Box flex={false}>
-          {Object.keys(folders).map((f, i) => (
-            <SidebarTab
-              tab={folder}
-              subtab={subfolder}
-              setTab={setFolder}
-              setSubTab={setSubfolder}
-              name={f}
-              subnames={Object.keys(folders[f])}
-              key={i}
-            />
-          ))}
-        </Box>
+      <Box flex={false}>
+        {Object.keys(folders).map((f, i) => (
+          <SidebarTab
+            tab={folder}
+            subtab={subfolder}
+            setTab={setFolder}
+            setSubTab={setSubfolder}
+            name={f}
+            subnames={Object.keys(folders[f])}
+            key={i}
+          />
+        ))}
       </Box>
       <Box
         style={{ overflow: 'auto' }}
@@ -193,7 +175,6 @@ export function ConfigurationSettings({ overlays, application: { name, configura
         flat
         label="Commit"
         onClick={mutation}
-        background="brand"
         loading={loading}
       />
       <OverlayEdit
