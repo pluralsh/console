@@ -13,9 +13,11 @@ import { Box, Layer, Text } from 'grommet'
 
 import { filesize } from 'filesize'
 
-import { LoopingLogo } from '../utils/AnimatedLogo'
+import { EXECUTE_OVERLAY } from 'components/apps/app/config/queries'
 
-import { EXECUTE_OVERLAY, OverlayInput } from '../apps/app/config/Configuration'
+import { OverlayInput } from 'components/apps/app/config/ConfigurationEditor'
+
+import { LoopingLogo } from '../utils/AnimatedLogo'
 
 import { CONFIGURATION_OVERLAYS, SCALING_RECOMMENDATION } from './queries'
 import { MetadataRow } from './Metadata'
