@@ -17,7 +17,7 @@ function ConfigurationSettingsInput({ value = '', setValue }) {
   return (
     <Input
       value={value}
-      onChange={setValue}
+      onChange={({ target: { value: v } }) => setValue(v)}
     />
   )
 }

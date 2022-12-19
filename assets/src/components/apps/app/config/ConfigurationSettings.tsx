@@ -6,12 +6,16 @@ import {
 } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from 'react-apollo'
-import { SidebarTab } from 'components/utils/SidebarTab'
 import yaml from 'js-yaml'
 
-import { Button, Card } from '@pluralsh/design-system'
+import {
+  Button,
+  Card,
+  ListBoxItem,
+  Select,
+} from '@pluralsh/design-system'
 
-import { Flex } from 'honorable'
+import { Div, Flex, P } from 'honorable'
 
 import { EXECUTE_OVERLAY } from './queries'
 import ConfigurationSettingsField from './ConfigurationSettingsField'
@@ -40,8 +44,11 @@ export function ConfigurationSettings({ overlays, application: { name, configura
 
   const values = useMemo(() => yaml.load(helm), [helm])
   const folders = useMemo(() => organizeOverlays(overlays), [overlays])
-  const [folder, setFolder] = useState(Object.keys(folders)[0])
-  const [subfolder, setSubfolder] = useState(Object.keys(folders[folder] || ['all'])[0])
+  const [folder, setFolder] = useState<any>(Object.keys(folders)[0])
+  const [subfolder, setSubfolder] = useState<any>(Object.keys(folders[folder] || ['all'])[0])
+  const changed = true
+
+  console.log(ctx)
 
   useEffect(() => {
     if (!folders[folder]) {
@@ -59,23 +66,58 @@ export function ConfigurationSettings({ overlays, application: { name, configura
       direction="column"
       gap="large"
     >
-      <Button
-        onClick={() => mutation}
-        loading={loading}
+      <Flex
+        gap="medium"
+        align="center"
       >
-        Commit
-      </Button>
-      {Object.keys(folders).map((f, i) => (
-        <SidebarTab
-          tab={folder}
-          subtab={subfolder}
-          setTab={setFolder}
-          setSubTab={setSubfolder}
-          name={f}
-          subnames={Object.keys(folders[f])}
-          key={i}
-        />
-      ))}
+        <Div width={240}>
+          <Select
+            aria-label="folder"
+            label="Folder"
+            selectedKey={folder}
+            onSelectionChange={setFolder}
+          >
+            {Object.keys(folders).map(f => (
+              <ListBoxItem
+                key={f}
+                label={f}
+                textValue={f}
+              />
+            ))}
+          </Select>
+        </Div>
+        <Div width={240}>
+          <Select
+            aria-label="subfolder"
+            label="Sub-folder"
+            selectedKey={subfolder}
+            onSelectionChange={setSubfolder}
+          >
+            {Object.keys(folders[folder]).map(s => (
+              <ListBoxItem
+                key={s}
+                label={s}
+                textValue={s}
+              />
+            ))}
+          </Select>
+        </Div>
+        <Flex grow={1} />
+        {changed && (
+          <P
+            body2
+            color="text-xlight"
+          >
+            Unsaved changes
+          </P>
+        )}
+        <Button
+          onClick={() => mutation}
+          loading={loading}
+        >
+          Commit
+        </Button>
+      </Flex>
       <Card
         display="flex"
         flexWrap="wrap"
