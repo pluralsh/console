@@ -49,7 +49,7 @@ export function ConfigurationSettings({ overlays, application: { name, configura
   const folders = useMemo(() => organizeOverlays(overlays), [overlays])
   const [folder, setFolder] = useState<any>(Object.keys(folders)[0])
   const [subfolder, setSubfolder] = useState<any>(Object.keys(folders[folder] || ['all'])[0])
-  const changed = !isEqual(ctx, init)
+  const changed = !isEqual(ctx, init) // TODO: Fix when '' is not equal to undefined.
 
   useEffect(() => {
     if (!folders[folder]) {
