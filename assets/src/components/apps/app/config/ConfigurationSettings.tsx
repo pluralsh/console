@@ -6,15 +6,19 @@ import {
   useState,
 } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button } from 'forge-core'
 import { useMutation } from 'react-apollo'
-import { Box } from 'grommet'
 import { DarkSelect } from 'components/utils/Select'
 import { SidebarTab } from 'components/utils/SidebarTab'
-import { chunk } from 'lodash'
 import yaml from 'js-yaml'
 
-import { FormField, Input } from '@pluralsh/design-system'
+import {
+  Button,
+  Card,
+  FormField,
+  Input,
+} from '@pluralsh/design-system'
+
+import { Flex } from 'honorable'
 
 import { deepFetch } from '../../../../utils/graphql'
 
@@ -48,7 +52,7 @@ const INPUT_COMPONENTS = {
 }
 
 export function OverlayInput({
-  overlay, ctx, setCtx, values,
+  overlay, ctx, setCtx, values, ...props
 }) {
   const {
     name, documentation, updates, inputType,
@@ -64,12 +68,15 @@ export function OverlayInput({
   const component = INPUT_COMPONENTS[inputType] || ConfigurationSettingsInput
 
   return (
-    <FormField
-      label={overlay.spec.name}
-      hint={documentation}
-    >
-      {createElement(component, { overlay, setValue, value: ctx[name] })}
-    </FormField>
+    <Flex {...props}>
+      <FormField
+        label={overlay.spec.name}
+        hint={documentation}
+        width="100%"
+      >
+        {createElement(component, { overlay, setValue, value: ctx[name] })}
+      </FormField>
+    </Flex>
   )
 }
 
@@ -86,9 +93,15 @@ function organizeOverlays(overlays) {
   }, {})
 }
 
-function OverlayEdit({
-  overlays, ctx, setCtx, helm,
-}: any) {
+export function ConfigurationSettings({ overlays, application: { name, configuration: { helm } } }) {
+  const navigate = useNavigate()
+  const onCompleted = useCallback(() => navigate('/'), [navigate])
+  const [ctx, setCtx] = useState({})
+  const [mutation, { loading }] = useMutation(EXECUTE_OVERLAY, {
+    variables: { name, ctx: JSON.stringify(ctx) },
+    onCompleted,
+  })
+
   const values = useMemo(() => yaml.load(helm), [helm])
   const folders = useMemo(() => organizeOverlays(overlays), [overlays])
   const [folder, setFolder] = useState(Object.keys(folders)[0])
@@ -106,84 +119,54 @@ function OverlayEdit({
   if (!folders[folder]) return null
 
   return (
-    <Box
-      direction="row"
-      fill
+    <Flex
+      direction="column"
+      gap="large"
     >
-      <Box flex={false}>
-        {Object.keys(folders).map((f, i) => (
-          <SidebarTab
-            tab={folder}
-            subtab={subfolder}
-            setTab={setFolder}
-            setSubTab={setSubfolder}
-            name={f}
-            subnames={Object.keys(folders[f])}
-            key={i}
+      <Button
+        onClick={() => mutation}
+        loading={loading}
+      >
+        Commit
+      </Button>
+      {Object.keys(folders).map((f, i) => (
+        <SidebarTab
+          tab={folder}
+          subtab={subfolder}
+          setTab={setFolder}
+          setSubTab={setSubfolder}
+          name={f}
+          subnames={Object.keys(folders[f])}
+          key={i}
+        />
+      ))}
+      <Card
+        display="flex"
+        flexWrap="wrap"
+        gap="medium"
+        overflowY="auto"
+        paddingHorizontal={100}
+        paddingVertical="large"
+      >
+        {folders[folder][subfolder].map((overlay: any) => (
+          <OverlayInput
+            key={overlay.metadata.name}
+            overlay={overlay}
+            values={values}
+            ctx={ctx}
+            setCtx={setCtx}
+            grow={1}
+            shrink={1}
+            basis="45%"
           />
         ))}
-      </Box>
-      <Box
-        style={{ overflow: 'auto' }}
-        fill
-      >
-        <Box
-          flex={false}
-          pad="medium"
-          gap="medium"
-        >
-          {chunk(folders[folder][subfolder], 2).map((chunk: any, ind) => (
-            <Box
-              key={`${ind}`}
-              direction="row"
-              align="center"
-              gap="medium"
-            >
-              {chunk.map(overlay => (
-                <Box
-                  key={overlay.metadata.name}
-                  width="50%"
-                >
-                  <OverlayInput
-                    overlay={overlay}
-                    values={values}
-                    ctx={ctx}
-                    setCtx={setCtx}
-                  />
-                </Box>
-              ))}
-            </Box>
-          ))}
-        </Box>
-      </Box>
-    </Box>
-  )
-}
-
-export function ConfigurationSettings({ overlays, application: { name, configuration: { helm } } }) {
-  const navigate = useNavigate()
-  const onCompleted = useCallback(() => navigate('/'), [navigate])
-  const [ctx, setCtx] = useState({})
-  const [mutation, { loading }] = useMutation(EXECUTE_OVERLAY, {
-    variables: { name, ctx: JSON.stringify(ctx) },
-    onCompleted,
-  })
-
-  return (
-    <Box fill>
-      <Button
-        flat
-        label="Commit"
-        onClick={mutation}
-        loading={loading}
-      />
-      <OverlayEdit
-        overlays={overlays}
-        ctx={ctx}
-        setCtx={setCtx}
-        helm={helm}
-      />
-    </Box>
+        <Flex
+          grow={1}
+          shrink={1}
+          basis="45%"
+        />
+      </Card>
+    </Flex>
   )
 }
 
