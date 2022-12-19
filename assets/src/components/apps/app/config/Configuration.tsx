@@ -19,10 +19,9 @@ import { GqlError } from 'forge-core'
 import { COMPONENT_LABEL } from 'components/kubernetes/constants'
 import { useQuery } from 'react-apollo'
 
-import 'ace-builds/src-noconflict/mode-yaml'
-import 'ace-builds/src-noconflict/theme-terminal'
 import { ConfigType } from './misc'
 import { ConfigurationEditor } from './ConfigurationEditor'
+import { ConfigurationSettings } from './ConfigurationSettings'
 
 export default function Configuration() {
   const tabStateRef = useRef<any>(null)
@@ -102,11 +101,18 @@ export default function Configuration() {
           ))}
         </TabList>
       </PageTitle>
-      <ConfigurationEditor
-        application={application}
-        overlays={overlays}
-        view={view}
-      />
+      {view === ConfigType.OVERLAY && (
+        <ConfigurationSettings
+          application={application}
+          overlays={overlays}
+        />
+      )}
+      {(view === ConfigType.HELM || view === ConfigType.TERRAFORM) && (
+        <ConfigurationEditor
+          application={application}
+          view={view}
+        />
+      )}
     </>
   )
 }

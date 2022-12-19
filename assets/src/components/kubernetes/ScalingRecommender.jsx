@@ -15,7 +15,7 @@ import { filesize } from 'filesize'
 
 import { EXECUTE_OVERLAY } from 'components/apps/app/config/queries'
 
-import { OverlayInput } from 'components/apps/app/config/ConfigurationEditor'
+import { OverlayInput } from 'components/apps/app/config/ConfigurationSettings'
 
 import { LoopingLogo } from '../utils/AnimatedLogo'
 
