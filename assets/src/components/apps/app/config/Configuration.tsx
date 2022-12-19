@@ -50,12 +50,15 @@ export default function Configuration() {
 
   if (!data) {
     return (
-      <Flex
-        grow={1}
-        justify="center"
-      >
-        <LoopingLogo scale={1} />
-      </Flex>
+      <>
+        <PageTitle heading="Configuration" />
+        <Flex
+          grow={1}
+          justify="center"
+        >
+          <LoopingLogo scale={1} />
+        </Flex>
+      </>
     )
   }
 
