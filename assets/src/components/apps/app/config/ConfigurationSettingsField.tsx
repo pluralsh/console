@@ -45,12 +45,20 @@ const INPUT_COMPONENTS = {
 }
 
 export default function ConfigurationSettingsField({
-  overlay, ctx, setCtx, values, ...props
+  overlay, ctx, setCtx, init, setInit, values, ...props
 }) {
   const {
     name, documentation, updates, inputType,
   } = overlay.spec
   const setValue = useCallback(val => setCtx({ ...ctx, [name]: convertType(val, inputType) }), [name, inputType, ctx, setCtx])
+  const setInitValue = useCallback(val => setInit({ ...init, [name]: convertType(val, inputType) }), [name, inputType, init, setInit])
+
+  useEffect(() => {
+    const val = deepFetch(values, updates[0].path)
+
+    if (val && !ctx[name]) setValue(val)
+    if (val && !init[name]) setInitValue(val)
+  }, [name, updates, values, setValue, ctx, setInitValue, init])
 
   useEffect(() => {
     const val = deepFetch(values, updates[0].path)
