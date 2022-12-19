@@ -15,7 +15,7 @@ import { filesize } from 'filesize'
 
 import { EXECUTE_OVERLAY } from 'components/apps/app/config/queries'
 
-import { OverlayInput } from 'components/apps/app/config/ConfigurationSettings'
+import ConfigurationSettingsField from 'components/apps/app/config/ConfigurationSettingsField'
 
 import { LoopingLogo } from '../utils/AnimatedLogo'
 
@@ -169,13 +169,13 @@ export function ScalingEdit({
       pad="medium"
       gap="small"
     >
-      <OverlayInput
+      <ConfigurationSettingsField
         overlay={byResource.cpu}
         ctx={ctx}
         setCtx={setCtx}
         values={{}}
       />
-      <OverlayInput
+      <ConfigurationSettingsField
         overlay={byResource.memory}
         ctx={ctx}
         setCtx={setCtx}
