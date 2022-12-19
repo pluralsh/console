@@ -14,8 +14,7 @@ import {
 } from 'react'
 import { useParams } from 'react-router-dom'
 import { APPLICATION_Q } from 'components/graphql/plural'
-import { Flex, Span } from 'honorable'
-import { GqlError } from 'forge-core'
+import { Flex, P, Span } from 'honorable'
 import { COMPONENT_LABEL } from 'components/kubernetes/constants'
 import { useQuery } from 'react-apollo'
 
@@ -31,6 +30,7 @@ export default function Configuration() {
   const { data, error } = useQuery(APPLICATION_Q, {
     variables: { name: appName },
     fetchPolicy: 'network-only',
+    onError: console.error,
   })
 
   useEffect(() => setBreadcrumbs([
@@ -39,13 +39,12 @@ export default function Configuration() {
     { text: 'Configuration', url: `/apps/${appName}/config` },
   ]), [appName, setBreadcrumbs])
 
-  // TODO: Replace.
   if (error) {
     return (
-      <GqlError
-        error={error}
-        header="Cannot access configuration for this app"
-      />
+      <>
+        <PageTitle heading="Configuration" />
+        <P>Cannot access configuration for this app.</P>
+      </>
     )
   }
 
