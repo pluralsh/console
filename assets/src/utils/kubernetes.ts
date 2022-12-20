@@ -5,7 +5,7 @@ const MULTIPLES = {
   n: 1000 ** 3,
 }
 
-export function cpuParser(input) {
+export function cpuParser(input:string) {
   const milliMatch = input.match(/^([0-9]+)([a-z])$/)
 
   if (milliMatch) {
@@ -15,7 +15,7 @@ export function cpuParser(input) {
   return parseFloat(input)
 }
 
-export function cpuFormat(value) {
+export function cpuFormat(value:string | number) {
   value = isString(value) ? parseFloat(value) : value
   if (value < 1 / MULTIPLES.n) {
     return `${value * MULTIPLES.n}n`

@@ -21,7 +21,7 @@ import { RawContent } from './Component'
 import { CRON_JOB_Q } from './queries'
 import { Events } from './Event'
 import { Container } from './utils'
-import { HeaderItem, RowItem } from './Pod'
+import { HeaderItem, RowItem } from './pods/Pod'
 import { DeleteJob } from './Job'
 
 function Status({ status }) {

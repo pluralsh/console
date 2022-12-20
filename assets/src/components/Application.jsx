@@ -49,7 +49,7 @@ export function ApplicationReadyIcon({ application, size, showIcon }) {
   )
 }
 
-export function ReadyIcon({ size, readiness, showIcon }) {
+export function ReadyIcon({ size, readiness, showIcon = false }) {
   const theme = useContext(ThemeContext)
   let color = 'error'
   let icon = <StatusCritical size="small" />

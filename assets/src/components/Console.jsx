@@ -6,11 +6,8 @@ import {
   useNavigate,
 } from 'react-router-dom'
 import { Box, Text } from 'grommet'
-
 import { Portal } from 'react-portal'
-
 import Foco from 'react-foco'
-
 import { Next } from 'grommet-icons'
 
 import ConsoleSidebar, { SIDEBAR_ICON_HEIGHT } from './ConsoleSidebar'
@@ -20,14 +17,14 @@ import BreadcrumbProvider from './Breadcrumbs'
 import Webhooks from './Webhooks'
 import Configuration from './Configuration'
 import { EnsureLogin } from './Login'
-
 import Users from './Users'
 import { InstallationsProvider } from './Installations'
 import RepositorySelector from './RepositorySelector'
 import Application from './Application'
 import Component from './kubernetes/Component'
-import { Node, Nodes } from './kubernetes/Node'
-import { Pod } from './kubernetes/Pod'
+import { Node } from './kubernetes/nodes/Node'
+import { Nodes } from './kubernetes/nodes/Nodes'
+import { Pod } from './kubernetes/pods/Pod'
 import Directory from './users/Directory'
 import EditUser from './users/EditUser'
 import { Audits } from './audits/Audits'
@@ -35,7 +32,6 @@ import { PluralApi } from './PluralApi'
 import { Incident } from './incidents/Incident'
 import { NavigationContext } from './navigation/Submenu'
 import { Tooltip } from './utils/Tooltip'
-
 import { PodShell } from './terminal/PodShell'
 import Apps from './apps/Apps'
 import App from './apps/app/App'
@@ -51,10 +47,11 @@ import Changelog from './builds/build/changelog/Changelog'
 import Progress from './builds/build/progress/Progress'
 import AuditsTable from './audits/table/AuditTable'
 import AuditsGraph from './audits/graph/AuditsGraph'
+import Cluster from './kubernetes/Cluster'
+import Pods from './kubernetes/pods/Pods'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
-
 export function Icon({
   icon, text, selected, path, onClick, size, align,
 }) {
@@ -97,7 +94,8 @@ export function Icon({
           <Text
             size="small"
             weight={500}
-          >{text}
+          >
+            {text}
           </Text>
         </Tooltip>
       )}
@@ -174,7 +172,8 @@ export function FlyoutContainer({
               <Text
                 size="small"
                 weight={500}
-              >{header}
+              >
+                {header}
               </Text>
             </Box>
             {modifier}
@@ -259,7 +258,11 @@ export default function Console() {
                         />
                         <Route
                           path="/incident/:incidentId"
-                          element={<PluralApi><Incident /></PluralApi>}
+                          element={(
+                            <PluralApi>
+                              <Incident />
+                            </PluralApi>
+                          )}
                         />
                         {/* <Route path="/incidents">
                           <PluralApi><Incidents /></PluralApi>
@@ -270,13 +273,31 @@ export default function Console() {
                           element={<Pod />}
                         />
                         <Route
-                          path="/nodes/:name"
-                          element={<Node />}
-                        />
+                          path="/pods"
+                          element={<Cluster />}
+                        >
+                          <Route
+                            index
+                            element={<Pods />}
+                          />
+                          <Route
+                            path=":name"
+                            element={<Node />}
+                          />
+                        </Route>
                         <Route
                           path="/nodes"
-                          element={<Nodes />}
-                        />
+                          element={<Cluster />}
+                        >
+                          <Route
+                            index
+                            element={<Nodes />}
+                          />
+                          <Route
+                            path=":name"
+                            element={<Node />}
+                          />
+                        </Route>
                         <Route
                           path="/components/:repo/:kind/:name"
                           element={<Component />}

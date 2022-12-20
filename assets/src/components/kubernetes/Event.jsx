@@ -2,7 +2,7 @@ import { Box, Text } from 'grommet'
 
 import { Alert, StatusInfo } from 'grommet-icons'
 
-import { HeaderItem, RowItem } from './Pod'
+import { HeaderItem, RowItem } from './pods/Pod'
 import { EventType } from './constants'
 
 function EventIcon({ type }) {

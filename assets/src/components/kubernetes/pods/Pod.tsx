@@ -18,40 +18,28 @@ import {
   TabHeaderItem,
   Tabs,
 } from 'forge-core'
-
+import { Table } from '@pluralsh/design-system'
 import { useMutation, useQuery } from 'react-apollo'
-
 import { Cube, Terminal } from 'grommet-icons'
-
 import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
-
 import { filesize } from 'filesize'
-
 import { useNavigate, useParams } from 'react-router-dom'
-
 import { Readiness } from 'utils/status'
 
-import { ReadinessColor, ReadyIcon } from '../Application'
+import { ReadinessColor, ReadyIcon } from '../../Application'
+import { BreadcrumbsContext } from '../../Breadcrumbs'
+import { asQuery } from '../../utils/query'
+import { LoopingLogo } from '../../utils/AnimatedLogo'
+import { TRUNCATE } from '../../utils/truncate'
 
-import { BreadcrumbsContext } from '../Breadcrumbs'
-
-import { asQuery } from '../utils/query'
-
-import { LoopingLogo } from '../utils/AnimatedLogo'
-
-import { TRUNCATE } from '../utils/truncate'
-
-import { DELETE_POD, POD_Q } from './queries'
-
-import Icon from './Icon'
-import { POLL_INTERVAL } from './constants'
-import { Metadata, MetadataRow } from './Metadata'
-import { RawContent } from './Component'
-
-import { Container as Con, LogLink } from './utils'
-
-import { Events } from './Event'
-import { DeleteIcon } from './Job'
+import { DELETE_POD, POD_Q } from '../queries'
+import Icon from '../Icon'
+import { POLL_INTERVAL } from '../constants'
+import { Metadata, MetadataRow } from '../Metadata'
+import { RawContent } from '../Component'
+import { Container as Con, LogLink } from '../utils'
+import { Events } from '../Event'
+import { DeleteIcon } from '../Job'
 
 function phaseToReadiness(phase) {
   switch (phase) {
@@ -80,7 +68,10 @@ function statusToReadiness({ phase, containerStatuses }) {
 
 function containerReadiness(status) {
   if (!status) return Readiness.InProgress
-  const { ready, state: { terminated } } = status
+  const {
+    ready,
+    state: { terminated },
+  } = status
 
   if (ready && terminated) return Readiness.Complete
   if (ready) return Readiness.Ready
@@ -98,13 +89,19 @@ export function PodPhase({ phase, message }) {
       gap="xsmall"
       align="center"
     >
-      {readiness && <ReadyIcon readiness={readiness} />}
+      {readiness && (
+        <ReadyIcon
+          readiness={readiness}
+          size={undefined}
+        />
+      )}
       <Text size="small">{phase}</Text>
       {message && (
         <Text
           size="small"
           color="dark-5"
-        >{message}
+        >
+          {message}
         </Text>
       )}
     </Box>
@@ -137,20 +134,28 @@ export function PodResources({ containers, dimension }) {
   if (dimension === 'memory') {
     return (
       <Box direction="row">
-        <Text size="small">{memReq === undefined ? '--' : filesize(memReq)} / {memLim === undefined ? '--' : filesize(memLim)}</Text>
+        <Text size="small">
+          <>
+            {memReq === undefined ? '--' : filesize(memReq)} /{' '}
+            {memLim === undefined ? '--' : filesize(memLim)}
+          </>
+        </Text>
       </Box>
     )
   }
 
   return (
     <Box direction="row">
-      <Text size="small">{cpuReq === undefined ? '--' : cpuReq} / {cpuLim === undefined ? '--' : cpuLim}</Text>
+      <Text size="small">
+        {cpuReq === undefined ? '--' : cpuReq} /{' '}
+        {cpuLim === undefined ? '--' : cpuLim}
+      </Text>
     </Box>
   )
 }
 
 export function HeaderItem({
-  width, text, nobold, truncate,
+  width, text, nobold = false, truncate = false,
 }) {
   return (
     <Box
@@ -159,15 +164,16 @@ export function HeaderItem({
     >
       <Text
         size="small"
-        weight={nobold ? null : 500}
+        weight={nobold ? undefined : 500}
         truncate={!!truncate}
-      >{text}
+      >
+        {text}
       </Text>
     </Box>
   )
 }
 
-export function RowItem({ width, text, truncate }) {
+export function RowItem({ width, text, truncate = false }) {
   return (
     <Box
       flex={false}
@@ -176,7 +182,8 @@ export function RowItem({ width, text, truncate }) {
       <Text
         size="small"
         truncate={!!truncate}
-      >{text}
+      >
+        {text}
       </Text>
     </Box>
   )
@@ -228,45 +235,25 @@ export function PodHeader() {
   )
 }
 
-export function PodList({ pods, namespace, refetch }) {
-  return (
-    <Box
-      flex={false}
-      pad="small"
-    >
-      <Box pad={{ vertical: 'small' }}>
-        <Text size="small">Pods</Text>
-      </Box>
-      <PodHeader />
-      {pods.map((pod, ind) => (
-        <PodRow
-          key={ind}
-          pod={pod}
-          namespace={namespace}
-          refetch={refetch}
-        />
-      ))}
-    </Box>
-  )
-}
-
 export const ignore = e => {
-  e.stopPropagation(); e.preventDefault()
+  e.stopPropagation()
+  e.preventDefault()
 }
-
 export function DeletePod({ name, namespace, refetch }) {
   const [confirm, setConfirm] = useState(false)
   const [mutation, { loading }] = useMutation(DELETE_POD, {
     variables: { name, namespace },
     onCompleted: () => {
-      setConfirm(false); refetch()
+      setConfirm(false)
+      refetch()
     },
   })
 
   const doConfirm = useCallback(e => {
     ignore(e)
     setConfirm(true)
-  }, [setConfirm])
+  },
+  [setConfirm])
 
   return (
     <>
@@ -279,10 +266,12 @@ export function DeletePod({ name, namespace, refetch }) {
           description="The pod will be replaced by it's managing controller"
           loading={loading}
           cancel={e => {
-            ignore(e); setConfirm(false)
+            ignore(e)
+            setConfirm(false)
           }}
           submit={e => {
-            ignore(e); mutation()
+            ignore(e)
+            mutation()
           }}
         />
       )}
@@ -295,7 +284,9 @@ function PodState({ name, state: { running, terminated, waiting } }) {
   if (waiting) return <Text size="small">{name} is waiting</Text>
 
   return (
-    <Text size="small">{name} exited with code {terminated.exitCode}</Text>
+    <Text size="small">
+      {name} exited with code {terminated.exitCode}
+    </Text>
   )
 }
 
@@ -303,9 +294,7 @@ function PodReadiness({ status: { containerStatuses } }) {
   const unready = (containerStatuses || []).filter(({ ready }) => !ready)
 
   if (unready.length === 0) {
-    return (
-      <Text size="small">running</Text>
-    )
+    return <Text size="small">running</Text>
   }
 
   return (
@@ -372,8 +361,13 @@ function SimpleContainerStatus({ status }) {
   )
 }
 
-function ContainerSummary({ status: { containerStatuses, initContainerStatuses } }) {
-  const allStatuses = [...(initContainerStatuses || []), ...(containerStatuses || [])]
+function ContainerSummary({
+  status: { containerStatuses, initContainerStatuses },
+}) {
+  const allStatuses = [
+    ...(initContainerStatuses || []),
+    ...(containerStatuses || []),
+  ]
 
   return (
     <Box
@@ -391,9 +385,26 @@ function ContainerSummary({ status: { containerStatuses, initContainerStatuses }
   )
 }
 
-export function PodRow({ pod: { metadata: { name, namespace }, status, spec }, refetch }) {
+type Pod = {
+  metadata: { name: string; namespace: string };
+  status: { containerStatuses?: unknown[] };
+  spec:unknown;
+};
+
+export function PodRow({
+  pod: {
+    metadata: { name, namespace },
+    status,
+    spec,
+  },
+  refetch,
+}: {
+  pod: Pod;
+  refetch: any;
+}) {
   const navigate = useNavigate()
-  const restarts = (status.containerStatuses || []).reduce((count, { restartCount }) => count + (restartCount || 0), 0)
+  const restarts = (status.containerStatuses || []).reduce((count, { restartCount }) => count + (restartCount || 0),
+    0)
 
   return (
     <Box
@@ -419,7 +430,8 @@ export function PodRow({ pod: { metadata: { name, namespace }, status, spec }, r
         <Text
           size="small"
           truncate
-        >{name}
+        >
+          {name}
         </Text>
       </Box>
       <Box
@@ -443,7 +455,8 @@ export function PodRow({ pod: { metadata: { name, namespace }, status, spec }, r
           style={TRUNCATE}
           size="small"
           onClick={e => {
-            ignore(e); navigate(`/nodes/${spec.nodeName}`)
+            ignore(e)
+            navigate(`/nodes/${spec.nodeName}`)
           }}
         >
           {spec.nodeName}
@@ -483,7 +496,8 @@ export function PodRow({ pod: { metadata: { name, namespace }, status, spec }, r
           <Text
             size="small"
             truncate
-          >{spec.containers.map(({ image }) => image).join(', ')}
+          >
+            {spec.containers.map(({ image }) => image).join(', ')}
           </Text>
         </Box>
         <DeletePod
@@ -566,13 +580,15 @@ function Resource({ resources, dim }) {
       <Text
         size="small"
         weight={500}
-      >requests:
+      >
+        requests:
       </Text>
       <Text size="small">{request}</Text>
       <Text
         size="small"
         weight={500}
-      >limits:
+      >
+        limits:
       </Text>
       <Text size="small">{limit}</Text>
     </Box>
@@ -581,7 +597,9 @@ function Resource({ resources, dim }) {
 
 function ContainerState({ status }) {
   if (!status) return null
-  const { state: { terminated, running, waiting } } = status
+  const {
+    state: { terminated, running, waiting },
+  } = status
 
   return (
     <Box flex={false}>
@@ -723,7 +741,13 @@ function Container({ container, containerStatus }) {
               size="10px"
               readiness={readiness}
             />
-            <Text size="small">{readiness === Readiness.Ready ? 'Running' : (readiness === Readiness.Failed ? 'Stopped' : 'Pending')}</Text>
+            <Text size="small">
+              {readiness === Readiness.Ready
+                ? 'Running'
+                : readiness === Readiness.Failed
+                  ? 'Stopped'
+                  : 'Pending'}
+            </Text>
           </Box>
         </MetadataRow>
         <MetadataRow name="cpu">
@@ -744,7 +768,8 @@ function Container({ container, containerStatus }) {
               <Text
                 key={containerPort}
                 size="small"
-              >{protocol} {containerPort}
+              >
+                {protocol} {containerPort}
               </Text>
             ))}
           </Box>
@@ -778,7 +803,8 @@ function ContainerTabHeader({
         <Text
           size="small"
           weight={500}
-        >container: {container}
+        >
+          container: {container}
         </Text>
         {Readiness.Ready === readiness && (
           <Box
@@ -800,7 +826,10 @@ function ContainerTabHeader({
 export function Pod() {
   const { name, namespace } = useParams()
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
-  const { data } = useQuery(POD_Q, { variables: { name, namespace }, pollInterval: POLL_INTERVAL })
+  const { data } = useQuery(POD_Q, {
+    variables: { name, namespace },
+    pollInterval: POLL_INTERVAL,
+  })
 
   useEffect(() => {
     setBreadcrumbs([
@@ -813,8 +842,10 @@ export function Pod() {
   if (!data) return <LoopingLogo dark />
 
   const { pod } = data
-  const containerStatus = (pod.status.containerStatuses || []).reduce((acc, container) => ({ ...acc, [container.name]: container }), {})
-  const initContainerStatus = (pod.status.initContainerStatuses || []).reduce((acc, container) => ({ ...acc, [container.name]: container }), {})
+  const containerStatus = (pod.status.containerStatuses || []).reduce((acc, container) => ({ ...acc, [container.name]: container }),
+    {})
+  const initContainerStatus = (pod.status.initContainerStatuses || []).reduce((acc, container) => ({ ...acc, [container.name]: container }),
+    {})
   const containers = pod.spec.containers || []
   const initContainers = pod.spec.initContainers || []
 
@@ -838,7 +869,8 @@ export function Pod() {
         <Text
           size="medium"
           weight={500}
-        >pod/{name}
+        >
+          pod/{name}
         </Text>
         <ReadyIcon
           readiness={statusToReadiness(pod.status)}
@@ -858,7 +890,8 @@ export function Pod() {
               <Text
                 size="small"
                 weight={500}
-              >info
+              >
+                info
               </Text>
             </TabHeaderItem>
             {initContainers.map(({ name }) => (
@@ -878,7 +911,8 @@ export function Pod() {
                   <Text
                     size="small"
                     weight={500}
-                  >init: {name}
+                  >
+                    init: {name}
                   </Text>
                 </Box>
               </TabHeaderItem>
@@ -896,14 +930,16 @@ export function Pod() {
               <Text
                 size="small"
                 weight={500}
-              >events
+              >
+                events
               </Text>
             </TabHeaderItem>
             <TabHeaderItem name="raw">
               <Text
                 size="small"
                 weight={500}
-              >raw
+              >
+                raw
               </Text>
             </TabHeaderItem>
           </TabHeader>

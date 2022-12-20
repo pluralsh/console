@@ -19,7 +19,8 @@ import { DELETE_JOB, JOB_Q } from './queries'
 import { Container } from './utils'
 import { Events } from './Event'
 import { RawContent } from './Component'
-import { PodList, ignore } from './Pod'
+import { ignore } from './pods/Pod'
+import { PodList } from './pods/PodList'
 
 export function DeleteIcon({ onClick, loading }) {
   return (
