@@ -79,6 +79,7 @@ export function InstallerModal() {
             position={'bottom-right' as LayerPositionType}
             onClose={() => setVisible(false)}
             margin="large"
+            marginRight="xxxxlarge"
             severity="success"
           >
             Successfully installed selected applications.

@@ -1,5 +1,3 @@
-import { Box, Text } from 'grommet'
-
 import {
   useCallback,
   useContext,
@@ -9,9 +7,9 @@ import {
 } from 'react'
 import { Switch } from 'honorable'
 import { FormField, Input } from '@pluralsh/design-system'
+import StartCase from 'lodash/startCase'
 
 import { validateRegex } from '../validation'
-import { LabelledInput } from '../../utils/LabelledInput'
 import { LoginContext } from '../../contexts'
 import { deepFetch } from '../../../utils/graphql'
 import { trimSuffix } from '../../../utils/array'
@@ -35,7 +33,7 @@ function StringConfiguration({
 
   return (
     <FormField
-      label={name}
+      label={StartCase(name)}
       hint={msg || documentation}
       error={!!msg}
     >
@@ -89,7 +87,7 @@ function BucketConfiguration({
 
   const trim = useCallback(val => val.replace(`${prefix}-${cluster}-`, ''), [prefix, cluster])
 
-  const [local, setLocal] = useState(trim(ctx[name] || def || ''))
+  const [local, setLocal] = useState<string>(trim(ctx[name] || def || ''))
 
   useEffect(() => {
     if (!ctx[name] && def) {
@@ -100,7 +98,7 @@ function BucketConfiguration({
   return (
     <FormField
       hint={documentation}
-      label={name}
+      label={StartCase(name)}
     >
       <Input
         onChange={({ target: { value } }) => {
@@ -118,8 +116,9 @@ function BucketConfiguration({
 function DomainConfiguration({
   config: {
     name, default: def, placeholder, documentation,
-  }, ctx, setValue,
+  }, ctx, setValue, setValid,
 }) {
+  const domainRegex = /^(((?!-)[A-Za-z0-9-]{1,63}(?<!-)\.)+[A-Za-z]{2,253})$/
   const { configuration } = useContext(LoginContext)
   const suffix = useMemo(() => {
     const subdomain = deepFetch(configuration, 'manifest.network.subdomain')
@@ -129,6 +128,9 @@ function DomainConfiguration({
 
   const [local, setLocal] = useState(trimSuffix(ctx[name] || '', suffix))
   const suffixed = useCallback(value => `${trimSuffix(value, suffix)}${suffix}`, [suffix])
+  const valid = useMemo(() => domainRegex.test(ctx[name]), [domainRegex, ctx, name])
+
+  useEffect(() => setValid(valid), [setValid, valid])
 
   useEffect(() => {
     if (ctx[name] === undefined && def) {
@@ -138,8 +140,10 @@ function DomainConfiguration({
 
   return (
     <FormField
-      hint={documentation}
-      label={name}
+      hint={valid ? documentation : 'Provide a valid domain name'}
+      label={StartCase(name)}
+      error={!valid && 'hello'}
+      required
     >
       <Input
         onChange={({ target: { value } }) => {
@@ -148,6 +152,7 @@ function DomainConfiguration({
         }}
         suffix={suffix}
         placeholder={placeholder}
+        error={!valid}
         value={local}
       />
     </FormField>
@@ -155,60 +160,22 @@ function DomainConfiguration({
 }
 
 function IntConfiguration({
-  config: {
-    name, default: def, placeholder, documentation,
-  }, ctx, setValue,
+  config, ctx, setValue, setValid,
 }) {
-  const value = ctx[name]
-  const [err, setErr] = useState(null)
-
-  useEffect(() => {
-    if (ctx[name] === undefined && def) {
-      setValue(name, def)
-    }
-  }, [name, ctx, def])
-
   return (
-    <Box
-      flex={false}
-      gap="xsmall"
-    >
-      <LabelledInput
-        width="100%"
-        color="dark-1"
-        weight={450}
-        label={name}
-        value={value || ''}
-        placeholder={placeholder}
-        modifier={err && (
-          <Text
-            size="small"
-            color="error"
-          >{err}
-          </Text>
-        )}
-        onChange={val => {
-          const parsed = parseInt(val)
-
-          if (!parsed) {
-            setErr(`${val} is not an integer`)
-          }
-          else {
-            setErr(null)
-            setValue(name, parsed)
-          }
-        }}
-      />
-      <Text
-        size="small"
-        color="dark-6"
-      ><i>{documentation}</i>
-      </Text>
-    </Box>
+    <StringConfiguration
+      config={config}
+      ctx={ctx}
+      setValue={setValue}
+      setValid={setValid}
+      type="number"
+    />
   )
 }
 
-function BoolConfiguration({ config: { name, default: def }, ctx, setValue }) {
+function BoolConfiguration({
+  config: { name, default: def }, ctx, setValue,
+}) {
   const value: boolean = ctx[name]
 
   useEffect(() => {
@@ -218,18 +185,12 @@ function BoolConfiguration({ config: { name, default: def }, ctx, setValue }) {
   }, [ctx, def, name, setValue])
 
   return (
-    <Box
-      flex={false}
-      direction="row"
-      align="center"
-      gap="xsmall"
+    <Switch
+      checked={value}
+      onChange={({ target: { checked } }) => setValue(name, checked)}
     >
-      <Switch
-        checked={value}
-        onChange={({ target: { checked } }) => setValue(name, checked)}
-      />
-      <Text size="small">{name}</Text>
-    </Box>
+      {StartCase(name)}
+    </Switch>
   )
 }
 

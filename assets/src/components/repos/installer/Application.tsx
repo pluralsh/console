@@ -19,14 +19,20 @@ import { Recipe, RepositoryContext } from '../../../generated/graphql'
 
 import { Configuration } from './Configuration'
 
+interface StepData {
+  id: string | undefined,
+  oidc: boolean,
+  context: Record<string, unknown>
+}
+
 const findContext = (contexts: Array<RepositoryContext>, repository: string): Record<string, unknown> => contexts
   .filter(ctx => ctx.repository === repository)
   .map(ctx => ctx.context)
   .reduce((acc, ctx) => ({ ...acc, ...ctx }), {})
 
 export function Application({ ...props }: any): ReactElement {
-  const { active, setData } = useActive<Record<string, unknown>>()
-  const [context, setContext] = useState<Record<string, unknown>>(active.data || {})
+  const { active, setData } = useActive<StepData>()
+  const [context, setContext] = useState<Record<string, unknown>>(active.data?.context || {})
   const [oidc, setOIDC] = useState(false)
   const [valid, setValid] = useState(true)
   const { data: { recipes: { edges: recipeEdges } = {} } = {} } = useQuery(RECIPES_Q, {
@@ -42,12 +48,13 @@ export function Application({ ...props }: any): ReactElement {
 
   const recipeContext = useMemo(() => findContext(recipe?.context || [], active.label),
     [recipe?.context, active.label])
-  const mergedContext = useMemo(() => ({ ...recipeContext, ...context }), [recipeContext, context])
+  const mergedContext = useMemo<Record<string, unknown>>(() => ({ ...recipeContext, ...context }), [recipeContext, context])
+  const stepData = useMemo(() => ({
+    ...active.data, ...{ id: recipe?.recipe.id }, ...{ oidc }, ...{ context: mergedContext },
+  }), [active.data, mergedContext, oidc, recipe?.recipe.id])
 
   // Update step data on change
-  useEffect(() => setData({
-    ...active.data, ...{ id: recipe?.recipe.id }, ...{ oidc }, ...{ context: mergedContext },
-  }), [active.data, mergedContext, oidc, setData])
+  useEffect(() => setData(stepData), [stepData, setData])
 
   if (!recipe) {
     return (
@@ -66,11 +73,27 @@ export function Application({ ...props }: any): ReactElement {
   if (recipe.recipe?.restricted) {
     return (
       <WizardStep
-        valid
+        valid={false}
         {...props}
       >
-        <h2>Cannot install app</h2>
-        <span>This recipe has been marked restricted because it requires configuration, like ssh keys, that are only able to be securely configured locally</span>
+        <Div
+          marginTop="xxsmall"
+          marginBottom="medium"
+          display="flex"
+          gap="medium"
+          flexDirection="column"
+        >
+          <Span
+            color="text-xlight"
+            overline
+          >Cannot install app
+          </Span>
+          <Span
+            color="text-light"
+            body2
+          >This application has been marked restricted because it requires configuration, like ssh keys, that are only able to be securely configured locally.
+          </Span>
+        </Div>
       </WizardStep>
     )
   }
@@ -78,7 +101,7 @@ export function Application({ ...props }: any): ReactElement {
   return (
     <WizardStep
       valid={valid}
-      data={context}
+      data={stepData}
       {...props}
     >
       <Div

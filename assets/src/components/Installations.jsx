@@ -110,20 +110,20 @@ function applyDelta(prev, { delta, payload }) {
 }
 
 export function InstallationsProvider({ children }) {
-  const { data, subscribeToMore } = useQuery(APPLICATIONS_Q, { pollInterval: 120_000 })
+  const { data, subscribeToMore, loading } = useQuery(APPLICATIONS_Q, { pollInterval: 120_000 })
 
   useEffect(() => subscribeToMore({
     document: APPLICATION_SUB,
     updateQuery: (prev, { subscriptionData: { data } }) => (data ? applyDelta(prev, data.applicationDelta) : prev),
   }), [])
 
-  if (!data) return <LoopingLogo />
+  if (loading || !data) return <LoopingLogo />
 
   return (
     <InstallationContext.Provider
       // eslint-disable-next-line react/jsx-no-constructed-context-values
       value={{
-        applications: data?.applications,
+        applications: data?.applications || [],
         currentApplication: { name: 'mock', spec: { descriptor: { links: [] } } }, // TODO: Remove.
       }}
     >

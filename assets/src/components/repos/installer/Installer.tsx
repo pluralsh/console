@@ -20,7 +20,6 @@ import { useQuery } from 'react-apollo'
 import { Box } from 'grommet'
 import { ApolloClient } from 'apollo-client'
 import { useApolloClient } from '@apollo/react-hooks'
-
 import { FetchResult } from '@apollo/client'
 
 import {
@@ -31,8 +30,8 @@ import {
 } from '../../graphql/plural'
 import { InstallationContext } from '../../Installations'
 import { Recipe, RecipeSection, RepositoryContext } from '../../../generated/graphql'
-
 import { BUILDS_Q } from '../../graphql/builds'
+import { appendConnection } from '../../../utils/graphql'
 
 import { Application } from './Application'
 
@@ -93,6 +92,8 @@ const buildSteps = async (client: ApolloClient, selectedApplications: Array<Wiza
     const sections = recipe.recipe.recipeSections!.filter(section => section!.repository!.name !== app.label)
 
     sections.forEach(section => {
+      if (selectedApplications.find(app => app.key === section!.repository!.id)) return
+
       if (!dependencyMap.has(section!.repository!.name)) {
         dependencyMap.set(section!.repository!.name, { section: section!, dependencyOf: new Set([app.label]) })
 
@@ -111,18 +112,15 @@ const buildSteps = async (client: ApolloClient, selectedApplications: Array<Wiza
 
 const install = async (client: ApolloClient, apps: Array<WizardStepConfig>) => {
   const installableApps = apps.filter(app => !app.isDependency)
-  const promises: Array<Promise<FetchResult<any>>> = []
+  const promises: Array<Promise<FetchResult<unknown>>> = []
 
   for (const installableApp of installableApps) {
-    console.log(`Installing app: ${installableApp.label}, id: ${installableApp.data.id}`)
-
     const dependencies = apps.filter(app => app.dependencyOf?.has(installableApp.label))
     const context = [...dependencies, installableApp].reduce((acc, app) => ({ ...acc, [app.label]: app.data.context || {} }), {})
 
     const promise = client.mutate({
       mutation: INSTALL_RECIPE,
       variables: { id: installableApp.data.id, oidc: installableApp.data.oidc, context: JSON.stringify(context) },
-      refetchQueries: [{ query: BUILDS_Q }],
     })
 
     promises.push(promise)
@@ -143,17 +141,25 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
   })
 
   const applications = applicationNodes?.map(({ node }) => node)
-  // Not the most efficient solution O(n*m) but simple and clean.
-  // TODO: reverse installedApplications logic (tests only)
-  const installableApplications = useMemo(() => applications?.filter(app => installedApplications?.find(s => s.name === app.name)),
+  const installableApplications = useMemo(() => applications?.filter(app => !installedApplications?.find(s => s.name === app.name)),
     [applications, installedApplications])
 
   const onInstall = useCallback((payload: Array<WizardStepConfig>) => {
+    setStepsLoading(true)
+
     install(client, payload)
-      .then(response => {
-        console.log(response)
-      }).catch()
+      .then(responses => {
+        responses.forEach(({ data: { installRecipe } }) => {
+          const builds = client.cache.readQuery({ query: BUILDS_Q })
+
+          client.cache.writeQuery({
+            query: BUILDS_Q,
+            data: appendConnection(builds, installRecipe, 'builds'),
+          })
+        })
+      }).catch(err => console.error(err))
       .finally(() => {
+        setStepsLoading(false)
         setOpen(false)
         setVisible(true)
       })
@@ -185,10 +191,10 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
   return (
     <Wizard
       onClose={() => (inProgress ? setConfirmClose(true) : setOpen(false))}
-      onComplete={(stepCompleted, completed) => setInProgress(stepCompleted || completed)}
+      onComplete={completed => setInProgress(completed)}
       onSelect={apps => setSelectedApplications(apps)}
       defaultSteps={toDefaultSteps(installableApplications)}
-      steps={steps}
+      dependencySteps={steps}
       limit={5}
       loading={stepsLoading}
     >
