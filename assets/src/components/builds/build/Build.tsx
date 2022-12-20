@@ -23,6 +23,7 @@ import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLa
 
 import {
   AppIcon,
+  InstallIcon,
   LoopingLogo,
   Tab,
   TabList,
@@ -144,9 +145,15 @@ export default function Build() {
           gap="small"
           marginBottom="large"
         >
-          {hasIcons(app) && (
+          {app && hasIcons(app) && (
             <AppIcon
               url={getIcon(app, dark)}
+              size="small"
+            />
+          )}
+          {!app && (
+            <AppIcon
+              icon={<InstallIcon />}
               size="small"
             />
           )}

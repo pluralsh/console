@@ -22,6 +22,8 @@ import { ApolloClient } from 'apollo-client'
 import { useApolloClient } from '@apollo/react-hooks'
 import { FetchResult } from '@apollo/client'
 
+import { useNavigate } from 'react-router-dom'
+
 import {
   INSTALL_RECIPE,
   RECIPES_Q,
@@ -95,13 +97,13 @@ const buildSteps = async (client: ApolloClient, selectedApplications: Array<Wiza
       if (selectedApplications.find(app => app.key === section!.repository!.id)) return
 
       if (!dependencyMap.has(section!.repository!.name)) {
-        dependencyMap.set(section!.repository!.name, { section: section!, dependencyOf: new Set([app.label]) })
+        dependencyMap.set(section!.repository!.name, { section: section!, dependencyOf: new Set([app.label!]) })
 
         return
       }
 
       const dep = dependencyMap.get(section!.repository!.name)
-      const dependencyOf = [...Array.from(dep.dependencyOf.values()), app.label]
+      const dependencyOf: Array<string> = [...Array.from(dep.dependencyOf.values()), app.label!]
 
       dependencyMap.set(section!.repository!.name, { section: section!, dependencyOf: new Set<string>(dependencyOf) })
     })
@@ -115,7 +117,7 @@ const install = async (client: ApolloClient, apps: Array<WizardStepConfig>) => {
   const promises: Array<Promise<FetchResult<unknown>>> = []
 
   for (const installableApp of installableApps) {
-    const dependencies = apps.filter(app => app.dependencyOf?.has(installableApp.label))
+    const dependencies = apps.filter(app => app.dependencyOf?.has(installableApp.label!))
     const context = [...dependencies, installableApp].reduce((acc, app) => ({ ...acc, [app.label]: app.data.context || {} }), {})
 
     const promise = client.mutate({
@@ -131,6 +133,7 @@ const install = async (client: ApolloClient, apps: Array<WizardStepConfig>) => {
 
 export function Installer({ setOpen, setConfirmClose, setVisible }) {
   const client = useApolloClient()
+  const navigate = useNavigate()
   const [inProgress, setInProgress] = useState<boolean>(false)
   const [selectedApplications, setSelectedApplications] = useState([])
   const [steps, setSteps] = useState([])
@@ -162,8 +165,9 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
         setStepsLoading(false)
         setOpen(false)
         setVisible(true)
+        navigate('/builds')
       })
-  }, [client, setOpen, setVisible])
+  }, [client, setOpen, setVisible, navigate])
 
   useEffect(() => {
     const build = async () => {

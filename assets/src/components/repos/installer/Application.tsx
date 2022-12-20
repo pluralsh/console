@@ -33,7 +33,7 @@ const findContext = (contexts: Array<RepositoryContext>, repository: string): Re
 export function Application({ ...props }: any): ReactElement {
   const { active, setData } = useActive<StepData>()
   const [context, setContext] = useState<Record<string, unknown>>(active.data?.context || {})
-  const [oidc, setOIDC] = useState(false)
+  const [oidc, setOIDC] = useState(active.data?.oidc || false)
   const [valid, setValid] = useState(true)
   const { data: { recipes: { edges: recipeEdges } = {} } = {} } = useQuery(RECIPES_Q, {
     variables: { id: active.key },
@@ -46,7 +46,7 @@ export function Application({ ...props }: any): ReactElement {
     skip: !recipeBase,
   })
 
-  const recipeContext = useMemo(() => findContext(recipe?.context || [], active.label),
+  const recipeContext = useMemo(() => findContext(recipe?.context || [], active.label!),
     [recipe?.context, active.label])
   const mergedContext = useMemo<Record<string, unknown>>(() => ({ ...recipeContext, ...context }), [recipeContext, context])
   const stepData = useMemo(() => ({

@@ -1,6 +1,5 @@
 import { ReactElement, useCallback } from 'react'
 import { Flex, Span, Switch } from 'honorable'
-
 import { useActive } from '@pluralsh/design-system'
 
 import { ConfigurationItem as ConfigurationItemType, Recipe } from '../../../generated/graphql'

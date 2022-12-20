@@ -72,7 +72,6 @@ export default function ConsoleHeader() {
         >
           Plural App
         </Button>
-        {/* TODO: disable before commit until DS is merged */}
         <InstallerModal />
       </Flex>
     </Div>

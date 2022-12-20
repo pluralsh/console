@@ -1,4 +1,9 @@
-import { AppIcon, CaretRightIcon, Chip } from '@pluralsh/design-system'
+import {
+  AppIcon,
+  CaretRightIcon,
+  Chip,
+  InstallIcon,
+} from '@pluralsh/design-system'
 import { getIcon, hasIcons } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
 import { BuildTypes } from 'components/types'
@@ -35,9 +40,15 @@ export default function Build({ build }) {
       _hover={{ backgroundColor: 'fill-one-hover' }}
       onClick={() => navigate(`/builds/${id}`)}
     >
-      {hasIcons(app) && (
+      {app && hasIcons(app) && (
         <AppIcon
           url={getIcon(app, dark)}
+          size="xsmall"
+        />
+      )}
+      {!app && (
+        <AppIcon
+          icon={<InstallIcon />}
           size="xsmall"
         />
       )}
