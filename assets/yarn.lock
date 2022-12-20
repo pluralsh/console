@@ -4750,6 +4750,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/hoist-non-react-statics@npm:*":
+  version: 3.3.1
+  resolution: "@types/hoist-non-react-statics@npm:3.3.1"
+  dependencies:
+    "@types/react": "*"
+    hoist-non-react-statics: ^3.3.0
+  checksum: 2c0778570d9a01d05afabc781b32163f28409bb98f7245c38d5eaf082416fdb73034003f5825eb5e21313044e8d2d9e1f3fe2831e345d3d1b1d20bcd12270719
+  languageName: node
+  linkType: hard
+
 "@types/is-hotkey@npm:^0.1.1":
   version: 0.1.7
   resolution: "@types/is-hotkey@npm:0.1.7"
@@ -4962,6 +4972,17 @@ __metadata:
   version: 2.3.3
   resolution: "@types/sizzle@npm:2.3.3"
   checksum: 586a9fb1f6ff3e325e0f2cc1596a460615f0bc8a28f6e276ac9b509401039dd242fa8b34496d3a30c52f5b495873922d09a9e76c50c2ab2bcc70ba3fb9c4e160
+  languageName: node
+  linkType: hard
+
+"@types/styled-components@npm:5.1.26":
+  version: 5.1.26
+  resolution: "@types/styled-components@npm:5.1.26"
+  dependencies:
+    "@types/hoist-non-react-statics": "*"
+    "@types/react": "*"
+    csstype: ^3.0.2
+  checksum: 84f53b3101739b20d1731554fb7735bc2f3f5d050a8b392e9845403c8c8bbd729737d033978649f9195a97b557875b010d46e35a4538564a2d0dbcce661dbf76
   languageName: node
   linkType: hard
 
@@ -7100,6 +7121,7 @@ __metadata:
     "@testing-library/react": 9.3.3
     "@testing-library/user-event": 7.1.2
     "@types/jsdom": 20.0.1
+    "@types/styled-components": 5.1.26
     "@typescript-eslint/eslint-plugin": 5.42.0
     "@typescript-eslint/parser": 5.42.0
     "@vitejs/plugin-basic-ssl": 0.1.2
