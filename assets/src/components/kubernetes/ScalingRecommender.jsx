@@ -13,9 +13,11 @@ import { Box, Layer, Text } from 'grommet'
 
 import { filesize } from 'filesize'
 
-import { LoopingLogo } from '../utils/AnimatedLogo'
+import { EXECUTE_OVERLAY } from 'components/apps/app/config/queries'
 
-import { EXECUTE_OVERLAY, OverlayInput } from '../Configuration'
+import ConfigurationSettingsField from 'components/apps/app/config/ConfigurationSettingsField'
+
+import { LoopingLogo } from '../utils/AnimatedLogo'
 
 import { CONFIGURATION_OVERLAYS, SCALING_RECOMMENDATION } from './queries'
 import { MetadataRow } from './Metadata'
@@ -167,13 +169,13 @@ export function ScalingEdit({
       pad="medium"
       gap="small"
     >
-      <OverlayInput
+      <ConfigurationSettingsField
         overlay={byResource.cpu}
         ctx={ctx}
         setCtx={setCtx}
         values={{}}
       />
-      <OverlayInput
+      <ConfigurationSettingsField
         overlay={byResource.memory}
         ctx={ctx}
         setCtx={setCtx}

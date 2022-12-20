@@ -1,6 +1,7 @@
 import {
   Banner,
   Button,
+  FormField,
   ListBoxItem,
   Modal,
   Select,
@@ -11,7 +12,7 @@ import { BUILDS_Q, CREATE_BUILD } from 'components/graphql/builds'
 import { InstallationContext } from 'components/Installations'
 import { BuildTypes } from 'components/types'
 import { ThemeContext } from 'grommet'
-import { A, P } from 'honorable'
+import { A, Flex } from 'honorable'
 import {
   Key,
   useCallback,
@@ -97,62 +98,56 @@ export default function CreateBuild() {
             </>
           )}
         >
-          <P
-            fontSize={14}
-            fontWeight={600}
-            marginBottom="xsmall"
+          <Flex
+            direction="column"
+            gap="small"
           >
-            App
-          </P>
-          <Select
-            aria-label="app"
-            label="Choose an app"
-            leftContent={(!!currentApp && hasIcons(currentApp)) ? (
-              <img
-                src={getIcon(currentApp, dark)}
-                height={16}
-              />
-            ) : undefined}
-            selectedKey={selectedApp}
-            onSelectionChange={setSelectedApp}
-            maxHeight={200}
-          >
-            {applications.map(app => (
-              <ListBoxItem
-                key={app.name}
-                label={app.name}
-                textValue={app.name}
-                leftContent={hasIcons(app) ? (
+            <FormField label="App">
+              <Select
+                aria-label="app"
+                label="Choose an app"
+                leftContent={(!!currentApp && hasIcons(currentApp)) ? (
                   <img
-                    src={getIcon(app, dark)}
+                    src={getIcon(currentApp, dark)}
                     height={16}
                   />
                 ) : undefined}
-              />
-            ))}
-          </Select>
-          <P
-            fontSize={14}
-            fontWeight={600}
-            marginTop="large"
-            marginBottom="xsmall"
-          >
-            Type of build
-          </P>
-          <Select
-            aria-label="type"
-            label="Choose build type"
-            selectedKey={selectedType}
-            onSelectionChange={setSelectedType}
-          >
-            {BUILD_TYPES.map(({ key, value }) => (
-              <ListBoxItem
-                key={key}
-                label={value}
-                textValue={value}
-              />
-            ))}
-          </Select>
+                selectedKey={selectedApp}
+                onSelectionChange={setSelectedApp}
+                maxHeight={200}
+              >
+                {applications.map(app => (
+                  <ListBoxItem
+                    key={app.name}
+                    label={app.name}
+                    textValue={app.name}
+                    leftContent={hasIcons(app) ? (
+                      <img
+                        src={getIcon(app, dark)}
+                        height={16}
+                      />
+                    ) : undefined}
+                  />
+                ))}
+              </Select>
+            </FormField>
+            <FormField label="Type of build">
+              <Select
+                aria-label="type"
+                label="Choose build type"
+                selectedKey={selectedType}
+                onSelectionChange={setSelectedType}
+              >
+                {BUILD_TYPES.map(({ key, value }) => (
+                  <ListBoxItem
+                    key={key}
+                    label={value}
+                    textValue={value}
+                  />
+                ))}
+              </Select>
+            </FormField>
+          </Flex>
         </Modal>
       )}
       {success && (

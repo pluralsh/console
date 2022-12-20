@@ -20,7 +20,7 @@ export default function ConsoleSubheader() {
   return (
     <Flex
       align="center"
-      backgroundColor={theme.colors.grey[950]}
+      backgroundColor={theme.colors?.grey[950]}
       borderBottom="1px solid border"
       minHeight={48}
     >
@@ -34,12 +34,14 @@ export default function ConsoleSubheader() {
           clickable
           icon={<ArrowLeftIcon />}
           onClick={() => navigate(-1)}
+          textValue="Back"
           type="floating"
         />
         <IconFrame
           clickable
           icon={<ArrowRightIcon />}
           onClick={() => navigate(1)}
+          textValue="Forward"
           type="floating"
         />
       </ResponsiveLayoutSidenavContainer>

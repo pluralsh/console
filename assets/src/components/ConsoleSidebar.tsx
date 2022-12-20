@@ -25,7 +25,7 @@ import { AutoRefresh, getCommit } from './AutoRefresh'
 
 export const SIDEBAR_ICON_HEIGHT = '42px'
 
-const MENU_ITEMS = [
+const MENU_ITEMS: any[] = [
   { text: 'Apps', icon: <AppsIcon />, path: '/' },
   {
     text: 'Builds',
@@ -57,7 +57,7 @@ export default function ConsoleSidebar() {
   if (!me) return null
 
   return (
-    <Sidebar backgroundColor={theme.colors.grey[950]}>
+    <Sidebar backgroundColor={theme.colors?.grey[950]}>
       <SidebarSection
         grow={1}
         shrink={1}
@@ -68,8 +68,8 @@ export default function ConsoleSidebar() {
             clickable
             tooltip={item.text}
             onClick={() => navigate(item.path)}
-            backgroundColor={active(item) ? theme.colors.grey[875] : null} // TODO: Add active prop to design system.
-            _hover={{ backgroundColor: theme.colors.grey[900], cursor: 'pointer' }}
+            backgroundColor={active(item) ? theme.colors?.grey[875] : null} // TODO: Add active prop to design system.
+            _hover={{ backgroundColor: theme.colors?.grey[900], cursor: 'pointer' }}
             borderRadius="normal"
           >
             {item.icon}

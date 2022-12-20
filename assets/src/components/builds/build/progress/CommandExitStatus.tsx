@@ -6,6 +6,19 @@ export default function CommandExitStatus({ exitCode }) {
   }
 
   return exitCode === 0
-    ? <P color="text-success">✓ OK</P>
-    : <P color="text-error">✗ Exit code: {exitCode}</P>
+    ? (
+      <P
+        color="text-success"
+        whiteSpace="pre"
+      >✓ OK
+      </P>
+    )
+    : (
+      <P
+        color="text-error"
+        whiteSpace="pre"
+      >
+        ✗ Exit code: {exitCode}
+      </P>
+    )
 }

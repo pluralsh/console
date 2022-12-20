@@ -18,12 +18,10 @@ import Builds from './builds/Builds'
 import Build from './builds/build/Build'
 import BreadcrumbProvider from './Breadcrumbs'
 import Webhooks from './Webhooks'
-import Configuration from './Configuration'
 import { EnsureLogin } from './Login'
 
 import Users from './Users'
 import { InstallationsProvider } from './Installations'
-import RepositorySelector from './RepositorySelector'
 import Application from './Application'
 import Component from './kubernetes/Component'
 import { Node, Nodes } from './kubernetes/Node'
@@ -51,6 +49,8 @@ import Changelog from './builds/build/changelog/Changelog'
 import Progress from './builds/build/progress/Progress'
 import AuditsTable from './audits/table/AuditTable'
 import AuditsGraph from './audits/graph/AuditsGraph'
+import UserManagement from './apps/app/oidc/UserManagement'
+import Configuration from './apps/app/config/Configuration'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -58,7 +58,7 @@ export const SIDEBAR_WIDTH = '200px'
 export function Icon({
   icon, text, selected, path, onClick, size, align,
 }) {
-  const dropRef = useRef()
+  const dropRef = useRef<any>()
   const navigate = useNavigate()
   const [hover, setHover] = useState(false)
 
@@ -78,7 +78,7 @@ export function Icon({
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
         onClick={() => (onClick ? onClick() : navigate(path))}
-        background={selected ? 'sidebarHover' : null}
+        background={selected ? 'sidebarHover' : undefined}
         direction="row"
       >
         {icon}
@@ -105,7 +105,7 @@ export function Icon({
   )
 }
 
-const FlyoutContext = React.createContext({})
+const FlyoutContext = React.createContext<any>({})
 
 function FlyoutProvider({ children }) {
   const [ref, setRef] = useState(false)
@@ -230,25 +230,10 @@ export default function Console() {
                     >
                       <Routes>
                         <Route
-                          path="/config/:repo"
-                          element={<Configuration />}
-                        />
-                        <Route
-                          path="/config"
-                          element={(
-                            <RepositorySelector
-                              prefix="config"
-                              title="Configuration"
-                              description="edit configuration for your installed repos"
-                            />
-                          )}
-                        />
-                        <Route
                           path="/directory/:section"
                           element={<Directory />}
                         />
                         <Route
-                          exact
                           path="/directory"
                           element={(
                             <Navigate
@@ -259,7 +244,7 @@ export default function Console() {
                         />
                         <Route
                           path="/incident/:incidentId"
-                          element={<PluralApi><Incident /></PluralApi>}
+                          element={<PluralApi><Incident editing={undefined} /></PluralApi>}
                         />
                         {/* <Route path="/incidents">
                           <PluralApi><Incidents /></PluralApi>
@@ -286,28 +271,8 @@ export default function Console() {
                           element={<Application />}
                         />
                         <Route
-                          path="/components"
-                          element={(
-                            <RepositorySelector
-                              prefix="components"
-                              title="Components"
-                              description="details for all your applications"
-                            />
-                          )}
-                        />
-                        <Route
                           path="/webhooks"
                           element={<Webhooks />}
-                        />
-                        <Route
-                          path="/dashboards"
-                          element={(
-                            <RepositorySelector
-                              prefix="dashboards"
-                              title="Dashboards"
-                              description="view monitoring dashboards for installed repos"
-                            />
-                          )}
                         />
                         <Route
                           path="/me/edit"
@@ -363,6 +328,14 @@ export default function Console() {
                           <Route
                             path="cost"
                             element={<CostAnalysis />}
+                          />
+                          <Route
+                            path="oidc"
+                            element={<UserManagement />}
+                          />
+                          <Route
+                            path="config"
+                            element={<Configuration />}
                           />
                         </Route>
 

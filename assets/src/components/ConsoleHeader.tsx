@@ -9,7 +9,6 @@ import { ArrowTopRightIcon, Button, theme } from '@pluralsh/design-system'
 import { useContext } from 'react'
 
 import { LoginContext } from './contexts'
-import { Installations } from './Installations'
 import { InstallerModal } from './repos/installer/Modal'
 
 const APP_ICON = '/console-logo-white.png'
@@ -46,7 +45,7 @@ function DemoBanner() {
 export default function ConsoleHeader() {
   return (
     <Div
-      backgroundColor={theme.colors.grey[950]}
+      backgroundColor={theme.colors?.grey[950]}
       borderBottom="1px solid border"
     >
       <DemoBanner />
@@ -75,7 +74,6 @@ export default function ConsoleHeader() {
         </Button>
         {/* TODO: disable before commit until DS is merged */}
         <InstallerModal />
-        <Installations />
       </Flex>
     </Div>
   )

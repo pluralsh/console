@@ -4,12 +4,12 @@ import { fetchToken } from 'helpers/auth'
 import {
   Button,
   DownloadIcon,
+  FormField,
   IconFrame,
   ListBoxItem,
   Modal,
   Select,
 } from '@pluralsh/design-system'
-import { P } from 'honorable'
 
 interface Duration {
     text: string
@@ -79,26 +79,21 @@ export default function LogsDownloader({ query, repo }) {
           </>
         )}
       >
-        <P
-          fontSize={14}
-          fontWeight={600}
-          marginBottom="xsmall"
-        >
-          Time frame
-        </P>
-        <Select
-          aria-label="durations"
-          selectedKey={selectedKey}
-          onSelectionChange={setSelectedKey}
-        >
-          {DURATIONS.map(({ text, value }) => (
-            <ListBoxItem
-              key={`${value}`}
-              textValue={`${value}`}
-              label={text}
-            />
-          ))}
-        </Select>
+        <FormField label="Time frame">
+          <Select
+            aria-label="durations"
+            selectedKey={selectedKey}
+            onSelectionChange={setSelectedKey}
+          >
+            {DURATIONS.map(({ text, value }) => (
+              <ListBoxItem
+                key={`${value}`}
+                textValue={`${value}`}
+                label={text}
+              />
+            ))}
+          </Select>
+        </FormField>
       </Modal>
     </>
   )
