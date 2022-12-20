@@ -3,6 +3,7 @@ import {
   DivProps,
   Flex,
   FlexProps,
+  Img,
 } from 'honorable'
 import {
   Fragment,
@@ -26,10 +27,33 @@ import type createIcon from './icons/createIcon'
 import Tooltip from './Tooltip'
 import WrapWithIf from './WrapWithIf'
 
+type Hue = 'none' | 'default' | 'lighter' | 'lightest'
+
+const hueToBorder: Record<Hue, string> = {
+  none: 'border-disabled',
+  default: 'border',
+  lighter: 'border-fill-two',
+  lightest: 'border-fill-three',
+}
+
+const hueToBG: Record<Hue, string> = {
+  none: 'fill-zero',
+  default: 'fill-one',
+  lighter: 'fill-two',
+  lightest: 'fill-three',
+}
+
 type StepBaseProps = {
-  stepTitle: ReactNode
-  IconComponent: ReturnType<typeof createIcon>
+  stepTitle?: ReactNode
+  IconComponent?: ReturnType<typeof createIcon>
+  imageUrl?: string
   iconSize?: number
+  circleSize?: number
+  collapseTitle?: boolean
+  vertical?: boolean
+  hue?: Hue
+  compact?: boolean
+  canComplete?: boolean
 }
 
 type StepProps = DivProps &
@@ -44,6 +68,7 @@ type StepProps = DivProps &
 type StepConnectionProps = DivProps & {
   isActive: boolean
   vertical?: boolean
+  compact?: boolean,
 }
 
 export type StepperSteps = (StepBaseProps & { key: string })[]
@@ -54,13 +79,14 @@ type StepperProps = FlexProps & {
   vertical?: boolean
   forceCollapse?: boolean
   collapseAtWidth?: number
+  compact?: boolean
 }
 
 const propTypes = {
   stepIndex: PropTypes.number.isRequired,
   steps: PropTypes.arrayOf(PropTypes.shape({
-    stepTitle: PropTypes.node.isRequired,
-    IconComponent: PropTypes.elementType.isRequired,
+    stepTitle: PropTypes.node,
+    IconComponent: PropTypes.elementType,
     iconSize: PropTypes.number,
   }).isRequired).isRequired,
 }
@@ -70,10 +96,14 @@ function Step({
   isComplete = false,
   stepTitle,
   IconComponent,
+  imageUrl = '',
   iconSize = 24,
   circleSize = 48,
   vertical = false,
   collapseTitles = false,
+  hue = 'default',
+  compact = false,
+  canComplete = true,
   ...props
 }: StepProps) {
   const theme = useTheme()
@@ -93,15 +123,16 @@ function Step({
 
   return (
     <Flex
-      width="100%"
-      minWidth="68px"
+      width={compact ? 'auto' : '100%'}
+      minWidth={compact ? 'auto' : '68px'}
       maxWidth={vertical ? '100%' : '100px'}
       direction={vertical ? 'row' : 'column'}
       align="center"
+      alignSelf="center"
       {...props}
     >
       <WrapWithIf
-        condition={collapseTitles}
+        condition={collapseTitles && !!stepTitle}
         wrapper={<Tooltip label={stepTitle} />}
       >
         <Div
@@ -110,10 +141,10 @@ function Step({
           height={circleSize}
           marginLeft={vertical ? 'none' : 'auto'}
           marginRight={vertical ? 'none' : 'auto'}
-          borderRadius={1000}
-          backgroundColor={theme.colors['fill-one']}
+          borderRadius="100%"
+          backgroundColor={theme.colors[hueToBG[hue]]}
           border={`1px solid ${
-            isActive ? theme.colors['border-selected'] : theme.colors.border
+            isActive ? theme.colors['border-selected'] : theme.colors[hueToBorder[hue]]
           }`}
           transition="all 0.2s ease"
           transitionDelay="0.1"
@@ -125,13 +156,23 @@ function Step({
             position="absolute"
             justifyContent="center"
             alignItems="center"
-            className={isComplete ? '' : shownClassName}
+            className={canComplete && isComplete ? '' : shownClassName}
             {...completeIconStyles}
           >
-            <IconComponent
-              size={iconSize}
-              color={isActive ? theme.colors['icon-default'] : theme.colors['icon-xlight']}
-            />
+            {IconComponent && (
+              <IconComponent
+                size={iconSize}
+                color={isActive ? theme.colors['icon-default'] : theme.colors['icon-xlight']}
+              />
+            )}
+            {imageUrl && (
+              <Img
+                src={imageUrl}
+                width={iconSize}
+                height={iconSize}
+                opacity={isActive ? 1 : 0.5}
+              />
+            )}
           </Flex>
           <Flex
             width="100%"
@@ -139,12 +180,12 @@ function Step({
             position="absolute"
             justifyContent="center"
             alignItems="center"
-            className={isComplete ? shownClassName : ''}
+            className={canComplete && isComplete ? shownClassName : ''}
             {...completeIconStyles}
           >
             <StatusOkIcon
-              color={theme.colors['icon-success']}
-              size={24}
+              color={compact ? theme.colors['text-xlight'] : theme.colors['icon-success']}
+              size={iconSize}
             />
           </Flex>
         </Div>
@@ -170,18 +211,20 @@ function Step({
 function StepConnection({
   isActive = false,
   vertical = false,
+  compact = false,
   ...props
 }: StepConnectionProps) {
   const theme = useTheme()
 
   return (
     <Div
-      width={vertical ? 1 : '100%'}
+      width={compact ? '16px' : vertical ? 1 : '100%'}
       height={vertical ? 30 : 1}
-      flexGrow={1}
+      flexGrow={compact ? 0 : 1}
       backgroundColor={theme.colors.border}
       position="relative"
       aria-hidden="true"
+      alignSelf={compact ? 'center' : 'none'}
       {...props}
     >
       <Div
@@ -203,9 +246,9 @@ function StepperRef({
   vertical = false,
   collapseAtWidth = 160,
   forceCollapse = false,
+  compact = false,
 }: StepperProps,
 ref: Ref<any>) {
-  const circleSize = 48
   const eltRef = useRef<HTMLDivElement>()
   const mergedRef = mergeRefs(ref, eltRef)
   const [collapseTitles, setCollapseTitles] = useState(true)
@@ -226,7 +269,7 @@ ref: Ref<any>) {
   return (
     <Flex
       ref={mergedRef}
-      width="100%"
+      width={compact ? 'auto' : '100%'}
       direction={vertical ? 'column' : 'row'}
       justifyContent="space-between"
       overflow="hidden"
@@ -238,18 +281,23 @@ ref: Ref<any>) {
             isComplete={stepIndex > index}
             stepTitle={step.stepTitle}
             IconComponent={step.IconComponent}
+            imageUrl={step.imageUrl}
             iconSize={step.iconSize || 24}
-            circleSize={48}
-            vertical={vertical}
-            collapseTitles={vertical && collapseTitles}
+            circleSize={step.circleSize || 48}
+            vertical={step.vertical || vertical}
+            collapseTitles={vertical && collapseTitles || step.collapseTitle}
+            hue={step.hue}
+            compact={compact}
+            canComplete={step.canComplete}
           />
           {index < steps.length - 1 && (
             <StepConnection
               isActive={stepIndex > index}
               vertical={vertical}
-              marginTop={vertical ? 'small' : circleSize / 2}
+              marginTop={vertical ? 'small' : compact ? 0 : (step.circleSize || 48) / 2}
               marginBottom={vertical ? 'small' : 'none'}
               marginLeft={vertical ? 'large' : 'none'}
+              compact={compact}
             />
           )}
         </Fragment>

@@ -1,4 +1,9 @@
-import { ReactNode, Ref, forwardRef } from 'react'
+import {
+  ReactNode,
+  Ref,
+  forwardRef,
+  useState,
+} from 'react'
 import {
   Div,
   Flex,
@@ -9,11 +14,13 @@ import {
 import PropTypes from 'prop-types'
 
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
+import PlusIcon from './icons/PlusIcon'
 
 type TagProps = FlexProps & {
   label: string
   imageUrl?: string
   checked?: boolean
+  disabled? : boolean
   icon?: ReactNode
 }
 
@@ -21,6 +28,7 @@ const propTypes = {
   label: PropTypes.string.isRequired,
   imageUrl: PropTypes.string,
   checked: PropTypes.bool,
+  disabled: PropTypes.bool,
   icon: PropTypes.node,
 }
 
@@ -37,20 +45,27 @@ function RepositoryChipRef({
   label,
   imageUrl = '',
   checked = false,
+  disabled = false,
   icon = null,
   ...props
 }: TagProps, ref: Ref<any>) {
+  const [hovered, setHovered] = useState(false)
+
   return (
     <Flex
       ref={ref}
       padding="xsmall"
       align="center"
-      cursor="pointer"
+      cursor={disabled && !checked ? 'not-allowed' : 'pointer'}
+      opacity={disabled && !checked ? 0.5 : 1}
       borderRadius="large"
       border={`1px solid ${checked ? 'border-outline-focused' : 'border-fill-two'}`}
       backgroundColor="fill-two"
-      _hover={{ backgroundColor: 'fill-two-hover' }}
+      _hover={disabled ? {} : { backgroundColor: 'fill-two-hover' }}
       transition="background-color 200ms ease"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      whiteSpace="nowrap"
       {...props}
     >
       {icon ? (
@@ -79,6 +94,12 @@ function RepositoryChipRef({
         color="border-outline-focused"
         visibility={checked ? 'visible' : 'hidden'}
         marginLeft="medium"
+      />
+      <PlusIcon
+        color="text-light"
+        display={hovered && !checked && !disabled ? 'visible' : 'none'}
+        marginLeft="medium"
+        height={16}
       />
     </Flex>
   )

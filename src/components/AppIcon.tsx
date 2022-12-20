@@ -1,6 +1,6 @@
 import { DivProps, Flex, Img } from 'honorable'
 import PropTypes from 'prop-types'
-import { Ref, forwardRef } from 'react'
+import { ReactNode, Ref, forwardRef } from 'react'
 import { CSSObject } from 'styled-components'
 import last from 'lodash/last'
 
@@ -17,6 +17,7 @@ type AppIconProps = DivProps & {
   hue?: 'default' | 'lighter' | 'lightest' | string
   clickable?: boolean
   url?: string
+  icon?: ReactNode
   alt?: string
   name?: string
   initials?: string
@@ -35,6 +36,7 @@ const propTypes = {
   hue: PropTypes.oneOf(['default', 'lighter', 'lightest']),
   clickable: PropTypes.bool,
   url: PropTypes.string,
+  IconComponent: PropTypes.elementType,
   alt: PropTypes.string,
 }
 
@@ -106,6 +108,7 @@ function AppIconRef({
   hue,
   clickable = false,
   url,
+  icon = null,
   alt,
   name,
   initials,
@@ -149,7 +152,7 @@ ref: Ref<any>) {
           height={iconSize}
           {...props}
         />
-      ) : (
+      ) : icon || (
         <Flex
           width="100%"
           height="100%"
