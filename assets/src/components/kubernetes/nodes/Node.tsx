@@ -27,7 +27,7 @@ import { memoryParser } from 'kubernetes-resource-parser'
 import { filesize } from 'filesize'
 import { normalizeColor } from 'grommet/utils'
 import { Line } from 'rc-progress'
-import { Readiness, ReadinessT } from 'utils/status'
+import { Readiness, nodeStatusToReadiness } from 'utils/status'
 import { ArcElement, Chart } from 'chart.js'
 
 import { cpuParser } from '../../../utils/kubernetes'
@@ -196,7 +196,7 @@ export function DeleteNode({ name, refetch }) {
 export function NodeRow({ node, metrics, refetch }) {
   const navigate = useNavigate()
   const labels = mapify(node.metadata.labels)
-  const readiness = nodeReadiness(node.status)
+  const readiness = nodeStatusToReadiness(node.status)
   const nodeMetrics = metrics[node.metadata.name]
 
   return (
@@ -231,7 +231,7 @@ export function NodeRow({ node, metrics, refetch }) {
           readiness={readiness}
         />
         <Text size="small">
-          {nodeReadiness(node.status) === Readiness.Ready ? 'Ready' : 'Pending'}
+          {nodeStatusToReadiness(node.status) === Readiness.Ready ? 'Ready' : 'Pending'}
         </Text>
       </Box>
       <Box
@@ -321,14 +321,6 @@ export const datum = ({ timestamp, value }) => ({
 
 export const cpuFmt = cpu => `${cpu}vcpu`
 
-export function nodeReadiness(status:any):ReadinessT {
-  const ready = status.conditions.find(({ type }) => type === 'Ready')
-
-  if (ready.status === 'True') return Readiness.Ready
-
-  return Readiness.InProgress
-}
-
 export function Node() {
   const { name } = useParams()
   const { data, refetch } = useQuery(NODE_Q, {
@@ -371,7 +363,7 @@ export function Node() {
           {node.metadata.name}
         </Text>
         <ReadyIcon
-          readiness={nodeReadiness(node.status)}
+          readiness={nodeStatusToReadiness(node.status)}
           size="20px"
           showIcon
         />

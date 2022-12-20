@@ -389,6 +389,8 @@ export default function Configuration() {
     variables: { name: repo },
     fetchPolicy: 'network-only',
   })
+
+  console.log('data', data)
   const onCompleted = useCallback(() => navigate('/'), [])
 
   useEffect(() => {
