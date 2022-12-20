@@ -1,13 +1,17 @@
 import { Flex, FlexProps } from 'honorable'
-import PropTypes from 'prop-types'
-import { Ref, forwardRef } from 'react'
+import {
+  Children,
+  Ref,
+  cloneElement,
+  forwardRef,
+  isValidElement,
+} from 'react'
+
+import { SidebarLayout } from './Sidebar'
 
 type SidebarSectionProps = FlexProps & {
   grow?: number
-}
-
-const propTypes = {
-  grow: PropTypes.number,
+  layout?: SidebarLayout
 }
 
 const styles = {
@@ -16,26 +20,29 @@ const styles = {
   },
 }
 
-function SidebarSectionRef({ children, grow = 0, ...props }: SidebarSectionProps, ref: Ref<any>) {
+function SidebarSectionRef({
+  layout = 'vertical', children, grow = 0, ...props
+}: SidebarSectionProps, ref: Ref<any>) {
+  const isHorizontal = layout === 'horizontal'
+  const childrenWithProps = Children.map(children, child => (isValidElement(child) ? cloneElement(child, { layout, ...child.props }) : child))
+
   return (
     <Flex
-      direction="column"
+      direction={isHorizontal ? 'row' : 'column'}
       grow={grow}
-      justify="start"
       align="center"
       ref={ref}
-      borderBottom="1px solid border"
+      borderBottom={isHorizontal ? '' : '1px solid border'}
+      gap={isHorizontal ? 'medium' : 'xsmall'}
       padding={12}
       {...styles}
       {...props}
     >
-      {children}
+      {childrenWithProps}
     </Flex>
   )
 }
 
 const SidebarSection = forwardRef(SidebarSectionRef)
-
-SidebarSection.propTypes = propTypes
 
 export default SidebarSection

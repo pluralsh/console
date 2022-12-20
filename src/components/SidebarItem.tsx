@@ -1,28 +1,19 @@
 import { Flex, FlexProps } from 'honorable'
-import PropTypes from 'prop-types'
 import { Ref, forwardRef } from 'react'
 
 import Tooltip from '../components/Tooltip'
+
+import { SidebarLayout } from './Sidebar'
 
 type SidebarItemProps = FlexProps & {
   clickable?: boolean
   tooltip?: string
   href?: string
-}
-
-const propTypes = {
-  clickable: PropTypes.bool,
-  tooltip: PropTypes.string,
-  href: PropTypes.string,
-}
-
-const styles = {
-  ':first-of-type': {
-    marginTop: 0,
-  },
+  layout?: SidebarLayout
 }
 
 function SidebarItemRef({
+  layout = 'vertical',
   children,
   clickable = false,
   tooltip = '',
@@ -30,9 +21,16 @@ function SidebarItemRef({
   ...props
 }: SidebarItemProps, ref: Ref<any>) {
   return (
-    <WithTooltip tooltip={tooltip}>
-      <WithLink href={href}>
+    <WithTooltip
+      layout={layout}
+      tooltip={tooltip}
+    >
+      <WithLink
+        layout={layout}
+        href={href}
+      >
         <Item
+          layout={layout}
           clickable={clickable}
           ref={ref}
           {...props}
@@ -44,6 +42,7 @@ function SidebarItemRef({
 }
 
 function withTooltipRef({
+  layout = 'vertical',
   children,
   clickable,
   tooltip = '',
@@ -59,6 +58,7 @@ function withTooltipRef({
       whiteSpace="nowrap"
     >
       <Item
+        layout={layout}
         clickable={clickable}
         ref={ref}
         {...props}
@@ -70,7 +70,7 @@ function withTooltipRef({
 }
 
 function withLinkRef({
-  children, clickable, href = '', ...props
+  layout = 'vertical', children, clickable, href = '', ...props
 }: SidebarItemProps, ref: Ref<any>) {
   if (!href) return (<> {children}</>)
 
@@ -81,6 +81,7 @@ function withLinkRef({
       rel="noreferrer"
     >
       <Item
+        layout={layout}
         clickable={clickable}
         ref={ref}
         {...props}
@@ -91,14 +92,17 @@ function withLinkRef({
   )
 }
 
-function ItemRef({ children, clickable = false, ...props }: SidebarItemProps, ref: Ref<any>) {
+function ItemRef({
+  layout = 'vertical', children, clickable = false, ...props
+}: SidebarItemProps, ref: Ref<any>) {
+  const isHorizontal = layout === 'horizontal'
+
   return (
     <Flex
       grow={0}
       justify="center"
       alignItems="center"
-      marginTop="xsmall"
-      width={32}
+      width={isHorizontal ? '32' : ''}
       height={32}
       _hover={clickable && {
         backgroundColor: 'fill-one-hover',
@@ -108,7 +112,6 @@ function ItemRef({ children, clickable = false, ...props }: SidebarItemProps, re
       }}
       color="text"
       ref={ref}
-      {...styles}
       {...props}
     >
       {children}
@@ -120,7 +123,5 @@ const SidebarItem = forwardRef(SidebarItemRef)
 const Item = forwardRef(ItemRef)
 const WithTooltip = forwardRef(withTooltipRef)
 const WithLink = forwardRef(withLinkRef)
-
-SidebarItem.propTypes = propTypes
 
 export default SidebarItem

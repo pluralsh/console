@@ -1,27 +1,39 @@
 import { Flex, FlexProps } from 'honorable'
-import { Ref, forwardRef } from 'react'
+import {
+  Children,
+  Ref,
+  cloneElement,
+  forwardRef,
+  isValidElement,
+} from 'react'
 
-type SidebarProps = FlexProps
+type SidebarLayout = 'vertical' | 'horizontal'
+type SidebarProps = {
+  layout?: SidebarLayout
+} & FlexProps
 
-function SidebarRef({ children, ...props }: SidebarProps, ref: Ref<any>) {
-  const width = '64px'
+function SidebarRef({ layout = 'vertical', children, ...props }: SidebarProps, ref: Ref<any>) {
+  const isHorizontal = layout === 'horizontal'
+  const size = isHorizontal ? '56px' : '64px'
+  const childrenWithProps = Children.map(children, child => (isValidElement(child) ? cloneElement(child, { layout, ...child.props }) : child))
 
   return (
     <Flex
-      direction="column"
+      direction={isHorizontal ? 'row' : 'column'}
       grow={1}
       justify="start"
-      height="100%"
-      width={width}
-      maxWidth={width}
-      minWidth={width}
+      height={isHorizontal ? size : '100%'}
+      width={isHorizontal ? '100%' : size}
+      maxWidth={isHorizontal ? '100%' : size}
+      minWidth={isHorizontal ? '100%' : size}
       backgroundColor="fill-zero"
-      borderRight="1px solid border"
+      borderRight={isHorizontal ? '' : '1px solid border'}
+      borderBottom={isHorizontal ? '1px solid border' : ''}
       overflowY="hidden"
       ref={ref}
       {...props}
     >
-      {children}
+      {childrenWithProps}
     </Flex>
   )
 }
@@ -29,3 +41,4 @@ function SidebarRef({ children, ...props }: SidebarProps, ref: Ref<any>) {
 const Sidebar = forwardRef(SidebarRef)
 
 export default Sidebar
+export type { SidebarLayout }
