@@ -13,7 +13,7 @@ import { cpuParser } from '../../../utils/kubernetes'
 import { ClusterMetrics as Metrics } from '../constants'
 import { NODE_METRICS_Q } from '../queries'
 
-import { cpuFmt, roundToTwoPlaces } from './Node'
+import { cpuFmt, roundToTwoPlaces } from '../utils'
 
 Chart.register(ChartDataLabels)
 

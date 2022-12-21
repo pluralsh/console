@@ -7,8 +7,9 @@ import { cpuParser } from '../../../utils/kubernetes'
 import { NodeMetrics } from '../constants'
 import { podResources } from '../pods/Pod'
 
+import { cpuFmt, podContainers } from '../utils'
+
 import { SaturationGraphs } from './SaturationGraphs'
-import { cpuFmt, podContainers } from './Node'
 import { LayeredGauge } from './ClusterGauges'
 
 export function NodeGraphs({

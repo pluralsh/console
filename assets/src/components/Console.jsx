@@ -22,8 +22,11 @@ import { InstallationsProvider } from './Installations'
 import RepositorySelector from './RepositorySelector'
 import Application from './Application'
 import Component from './kubernetes/Component'
-import { Node } from './kubernetes/nodes/Node'
-import { Nodes } from './kubernetes/nodes/Nodes'
+import Node from './kubernetes/nodes/Node'
+import Nodes from './kubernetes/nodes/Nodes'
+import NodeInfo from './kubernetes/nodes/NodeInfo'
+import NodeEvents from './kubernetes/nodes/NodeEvents'
+import NodeRaw from './kubernetes/nodes/NodeRaw'
 import { Pod } from './kubernetes/pods/Pod'
 import Directory from './users/Directory'
 import EditUser from './users/EditUser'
@@ -280,10 +283,6 @@ export default function Console() {
                             index
                             element={<Pods />}
                           />
-                          <Route
-                            path=":name"
-                            element={<Node />}
-                          />
                         </Route>
                         <Route
                           path="/nodes"
@@ -293,9 +292,22 @@ export default function Console() {
                             index
                             element={<Nodes />}
                           />
+                        </Route>
+                        <Route
+                          path="/nodes/:name"
+                          element={<Node />}
+                        >
                           <Route
-                            path=":name"
-                            element={<Node />}
+                            index
+                            element={<NodeInfo />}
+                          />
+                          <Route
+                            path="events"
+                            element={<NodeEvents />}
+                          />
+                          <Route
+                            path="raw"
+                            element={<NodeRaw />}
                           />
                         </Route>
                         <Route

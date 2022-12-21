@@ -6,7 +6,7 @@ import { format } from 'components/apps/app/dashboards/dashboard/misc'
 import { Graph } from '../../utils/Graph'
 import { CLUSTER_SATURATION } from '../queries'
 
-import { datum } from './Node'
+import { datum } from '../utils'
 
 export function SaturationGraphs({ cpu, mem }) {
   const { data } = useQuery(CLUSTER_SATURATION, {

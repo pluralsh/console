@@ -1,4 +1,5 @@
 import type { Chip } from '@pluralsh/design-system'
+import { NodeStatus } from 'generated/graphql'
 import { ComponentProps } from 'react'
 
 type Severity = ComponentProps<typeof Chip>['severity']
@@ -22,10 +23,10 @@ export const readinessToSeverity: Record<ReadinessT, Severity> = {
   Complete: 'success',
 }
 
-export function nodeStatusToReadiness(status:any):ReadinessT {
-  const ready = status.conditions.find(({ type }) => type === 'Ready')
+export function nodeStatusToReadiness(status: NodeStatus): ReadinessT {
+  const ready = status?.conditions?.find(({ type }) => type === 'Ready')
 
-  if (ready.status === 'True') return Readiness.Ready
+  if (ready?.status === 'True') return Readiness.Ready
 
   return Readiness.InProgress
 }

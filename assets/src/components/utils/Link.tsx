@@ -9,16 +9,12 @@ export function SafeLink({ children, ...props }: ComponentProps<typeof Link>) {
     </span>
   )
 }
-
-const unstyledStyles = ({ $extendStyle }) => ({
+type UnstyledLinkProps = { $extendStyle?: object }
+const unstyledStyles = ({ $extendStyle }: UnstyledLinkProps) => ({
   textDecoration: 'none',
   ...$extendStyle,
 })
 
-export const UnstyledLink: (
-  props: ComponentProps<typeof Link> & ComponentProps<typeof unstyledStyles>
-) => JSX.Element = styled(Link)(unstyledStyles)
+export const UnstyledLink = styled(Link)(unstyledStyles)
 
-export const UnstyledSafeLink: (
-  props: ComponentProps<typeof Link>
-) => JSX.Element = styled(SafeLink)(unstyledStyles)
+export const UnstyledSafeLink = styled(SafeLink)(unstyledStyles)
