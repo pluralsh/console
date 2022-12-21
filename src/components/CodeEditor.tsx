@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Dispatch, useEffect, useState } from 'react'
 import { Button, Flex, P } from 'honorable'
 import { useTheme } from 'styled-components'
 
@@ -13,12 +13,12 @@ import { toFillLevel, useFillLevel } from './contexts/FillLevelContext'
 
 type CodeEditorProps = Omit<CardProps, 'children'> & {
   value?: string
-  onChange?: (value: string | undefined) => void,
+  onChange?: Dispatch<string>,
   language?: string
   options?: object
   save?: boolean
   saving?: boolean
-  onSave?: () => void
+  onSave?: Dispatch<string>,
   saveLabel?: string
   height?: string | number
 }
@@ -64,7 +64,10 @@ export default function CodeEditor({
     }
   }, [copied])
 
-  useEffect(() => monaco?.editor?.defineTheme('plural', editorTheme), [monaco])
+  useEffect(() => {
+    monaco?.editor?.defineTheme('plural', editorTheme)
+    monaco?.editor?.setTheme('plural')
+  }, [monaco])
 
   return (
     <Card
@@ -82,11 +85,11 @@ export default function CodeEditor({
       {...props}
     >
       <Editor
-        defaultLanguage={language}
-        defaultValue={value}
+        language={language}
+        value={value}
         onChange={v => {
           setCurrent(v)
-          onChange(v)
+          if (onChange) onChange(v)
         }}
         options={merge(defaultOptions, options)}
         theme="plural"
@@ -103,7 +106,7 @@ export default function CodeEditor({
           <Button
             disabled={!changed}
             loading={saving}
-            onClick={onSave}
+            onClick={() => onSave && onSave(current)}
           >
             {saveLabel}
           </Button>
