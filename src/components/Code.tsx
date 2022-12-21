@@ -264,26 +264,18 @@ function CodeSelectUnstyled({ className }: ComponentProps<'div'>) {
     <div className={className}>
       <Select
         selectedKey={selectedKey}
-        onSelectionChange={key => {
-          onSelectionChange(key)
-        }}
+        onSelectionChange={onSelectionChange}
         width="max-content"
         placement="right"
-        triggerButton={
-          <TabsDropdownButton>{selectedTab.label} </TabsDropdownButton>
-        }
+        triggerButton={<TabsDropdownButton>{selectedTab.label} </TabsDropdownButton>}
       >
-        {tabs.map(tab => {
-          console.log('tab', tab)
-
-          return (
-            <ListBoxItem
-              key={tab.key}
-              label={tab.label || tab.language}
-              textValue={tab.label || tab.language}
-            />
-          )
-        })}
+        {tabs.map(tab => (
+          <ListBoxItem
+            key={tab.key}
+            label={tab.label || tab.language}
+            textValue={tab.label || tab.language}
+          />
+        ))}
       </Select>
     </div>
   )
@@ -388,7 +380,6 @@ ref: RefObject<any>) {
   const content = (
     <Card
       ref={ref}
-      // overflow="hidden"
       fillLevel={toFillLevel(Math.min(parentFillLevel + 1, 2))}
       borderColor={
         parentFillLevel >= 1
