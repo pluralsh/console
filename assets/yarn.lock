@@ -3396,9 +3396,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:1.297.0":
-  version: 1.297.0
-  resolution: "@pluralsh/design-system@npm:1.297.0"
+"@pluralsh/design-system@npm:1.297.1":
+  version: 1.297.1
+  resolution: "@pluralsh/design-system@npm:1.297.1"
   dependencies:
     "@floating-ui/react-dom-interactions": 0.11.0
     "@monaco-editor/react": 4.4.6
@@ -3445,7 +3445,7 @@ __metadata:
     react-dom: ">=16.0.0"
     react-transition-group: ">=4.4.2"
     styled-components: ">=5.3.5"
-  checksum: f44adccc9187ea5f7722d9629278a9cfa25c7e0c13f698ef6f8c71de4aaf1d8527840231bf58b7eb6d70f55a9d5b9a05089442b7dc6b10d1371afd71496d7248
+  checksum: f6aeed6f493eb19ff5874cd08374fa67384bd025e8f107172dd909ae3d73598f18c77e723088e3749c576ac52437029984de78280ea530e04a29d83a5cc205df
   languageName: node
   linkType: hard
 
@@ -7205,7 +7205,7 @@ __metadata:
     "@nivo/radar": 0.80.0
     "@nivo/tooltip": 0.80.0
     "@nivo/waffle": 0.80.0
-    "@pluralsh/design-system": 1.297.0
+    "@pluralsh/design-system": 1.297.1
     "@pluralsh/eslint-config-typescript": 2.5.6
     "@pluralsh/stylelint-config": 1.1.1
     "@tanstack/react-table": 8.7.0

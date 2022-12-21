@@ -37,7 +37,7 @@
     "@nivo/radar": "0.80.0",
     "@nivo/tooltip": "0.80.0",
     "@nivo/waffle": "0.80.0",
-    "@pluralsh/design-system": "1.297.0",
+    "@pluralsh/design-system": "1.297.1",
     "@tanstack/react-table": "8.7.0",
     "@testing-library/jest-dom": "4.2.4",
     "@testing-library/react": "9.3.3",
