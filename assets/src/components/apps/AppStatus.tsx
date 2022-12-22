@@ -1,4 +1,4 @@
-import { appState } from 'components/Application'
+import { appState } from 'components/apps/app/components/Application'
 import { Chip } from '@pluralsh/design-system'
 
 import { Readiness } from 'utils/status'

@@ -1,15 +1,15 @@
 import { useContext, useEffect } from 'react'
 import { Box } from 'grommet'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 import Highlight from 'react-highlight.js'
 
 import yaml from 'yaml'
 
-import { BreadcrumbsContext } from '../Breadcrumbs'
-import { InstallationContext, useEnsureCurrent } from '../Installations'
+import { BreadcrumbsContext } from '../../../../Breadcrumbs'
+import { InstallationContext } from '../../../../Installations'
 
-import { BUILD_PADDING } from '../builds/Builds'
+import { BUILD_PADDING } from '../../../../builds/Builds'
 
 import Service from './Service'
 import ComponentName from './ComponentName'
@@ -101,9 +101,8 @@ export function RawContent({ raw }) {
 
 export default function Component() {
   const { repo, kind, name } = useParams()
-  const navigate = useNavigate()
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
-  const { setOnChange, currentApplication } = useContext(InstallationContext)
+  const { currentApplication } = useContext(InstallationContext)
 
   useEffect(() => {
     setBreadcrumbs([
@@ -113,10 +112,6 @@ export default function Component() {
       { text: name, url: `/components/${currentApplication.name}/${kind}/${name}` },
     ])
   }, [currentApplication])
-  useEffect(() => {
-    setOnChange({ func: ({ name }) => navigate(`/components/${name}`) })
-  }, [])
-  useEnsureCurrent(repo)
 
   return (
     <Box

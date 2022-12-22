@@ -17,7 +17,7 @@ import { EXECUTE_OVERLAY } from 'components/apps/app/config/queries'
 
 import ConfigurationSettingsField from 'components/apps/app/config/ConfigurationSettingsField'
 
-import { LoopingLogo } from '../utils/AnimatedLogo'
+import { LoopingLogo } from '../../../../utils/AnimatedLogo'
 
 import { CONFIGURATION_OVERLAYS, SCALING_RECOMMENDATION } from './queries'
 import { MetadataRow } from './Metadata'

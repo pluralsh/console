@@ -4,8 +4,8 @@ import { useQuery } from 'react-apollo'
 import { filesize } from 'filesize'
 import { Box } from 'grommet'
 
-import { Graph, GraphHeader } from '../utils/Graph'
-import { LoopingLogo } from '../utils/AnimatedLogo'
+import { Graph, GraphHeader } from '../../../../utils/Graph'
+import { LoopingLogo } from '../../../../utils/AnimatedLogo'
 
 import { USAGE_Q } from './queries'
 import { POLL_INTERVAL } from './constants'

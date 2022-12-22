@@ -3,7 +3,7 @@ import { Anchor, Box, Text } from 'grommet'
 import { useNavigate } from 'react-router-dom'
 import { Logs } from 'forge-core'
 
-import { asQuery } from '../utils/query'
+import { asQuery } from '../../../../utils/query'
 
 export function Container({ header, children, ...props }) {
   return (

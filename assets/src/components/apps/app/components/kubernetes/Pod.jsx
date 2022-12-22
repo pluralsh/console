@@ -33,13 +33,13 @@ import { Readiness } from 'utils/status'
 
 import { ReadinessColor, ReadyIcon } from '../Application'
 
-import { BreadcrumbsContext } from '../Breadcrumbs'
+import { BreadcrumbsContext } from '../../../../Breadcrumbs'
 
-import { asQuery } from '../utils/query'
+import { asQuery } from '../../../../utils/query'
 
-import { LoopingLogo } from '../utils/AnimatedLogo'
+import { LoopingLogo } from '../../../../utils/AnimatedLogo'
 
-import { TRUNCATE } from '../utils/truncate'
+import { TRUNCATE } from '../../../../utils/truncate'
 
 import { DELETE_POD, POD_Q } from './queries'
 

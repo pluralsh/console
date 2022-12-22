@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom'
 
 import { useQuery } from '@apollo/react-hooks'
 
-import { LoopingLogo } from '../utils/AnimatedLogo'
+import { LoopingLogo } from '../../../../utils/AnimatedLogo'
 
 import { Metadata, MetadataRow } from './Metadata'
 import { Container } from './utils'

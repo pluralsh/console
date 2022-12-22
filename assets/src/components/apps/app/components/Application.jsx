@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import { Box, Text, ThemeContext } from 'grommet'
 import { Check } from 'forge-core'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -9,18 +9,13 @@ import { Readiness } from 'utils/status'
 
 import { chunk } from 'utils/array'
 
-import { BreadcrumbsContext } from './Breadcrumbs'
-import {
-  ApplicationIcon,
-  InstallationContext,
-  hasIcon,
-  useEnsureCurrent,
-} from './Installations'
-import { BUILD_PADDING } from './builds/Builds'
+import { ApplicationIcon, InstallationContext, hasIcon } from '../../../Installations'
+import { BUILD_PADDING } from '../../../builds/Builds'
+
+import { Container } from '../../../utils/Container'
+import { PulsyDiv } from '../../../utils/animations'
 
 import Icon from './kubernetes/Icon'
-import { Container } from './utils/Container'
-import { PulsyDiv } from './utils/animations'
 
 export const ReadinessColor = {
   [Readiness.Ready]: 'success',
@@ -121,21 +116,8 @@ function Component({
 }
 
 export default function Application() {
-  const { repo } = useParams()
-  const navigate = useNavigate()
-  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
-  const { setOnChange, currentApplication } = useContext(InstallationContext)
+  const { currentApplication } = useContext(InstallationContext)
 
-  useEffect(() => {
-    setBreadcrumbs([
-      { text: 'components', url: '/components' },
-      { text: currentApplication.name, url: `/components/${currentApplication.name}` },
-    ])
-  }, [currentApplication])
-  useEffect(() => {
-    setOnChange({ func: ({ name }) => navigate(`/components/${name}`) })
-  }, [])
-  useEnsureCurrent(repo)
   const { error } = appState(currentApplication)
 
   return (

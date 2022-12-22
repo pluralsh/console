@@ -2,7 +2,7 @@ import { useContext } from 'react'
 import { Box, Text } from 'grommet'
 import { useParams } from 'react-router-dom'
 
-import { InstallationContext } from '../Installations'
+import { InstallationContext } from '../../../../Installations'
 import { ReadyIcon } from '../Application'
 
 import Icon from './Icon'

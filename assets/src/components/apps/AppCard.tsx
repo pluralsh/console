@@ -20,7 +20,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { toAbsoluteURL } from 'utils/url'
 
-import { appState } from 'components/Application'
+import { appState } from 'components/apps/app/components/Application'
 
 import { Readiness } from 'utils/status'
 

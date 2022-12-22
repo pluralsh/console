@@ -40,11 +40,11 @@ import { format } from 'components/apps/app/dashboards/dashboard/misc'
 
 import { Readiness } from 'utils/status'
 
-import { cpuParser } from '../../utils/kubernetes'
-import { Graph } from '../utils/Graph'
-import { LoopingLogo } from '../utils/AnimatedLogo'
+import { cpuParser } from '../../../../../utils/kubernetes'
+import { Graph } from '../../../../utils/Graph'
+import { LoopingLogo } from '../../../../utils/AnimatedLogo'
 import { ReadyIcon } from '../Application'
-import { BreadcrumbsContext } from '../Breadcrumbs'
+import { BreadcrumbsContext } from '../../../../Breadcrumbs'
 
 import { RawContent } from './Component'
 import { ClusterMetrics as Metrics, NodeMetrics, POLL_INTERVAL } from './constants'

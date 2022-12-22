@@ -11,7 +11,7 @@ import {
   Trash,
 } from 'forge-core'
 
-import { LoopingLogo } from '../utils/AnimatedLogo'
+import { LoopingLogo } from '../../../../utils/AnimatedLogo'
 
 import { POLL_INTERVAL } from './constants'
 import { Metadata, MetadataRow } from './Metadata'

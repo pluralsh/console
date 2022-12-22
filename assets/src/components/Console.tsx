@@ -22,10 +22,8 @@ import { EnsureLogin } from './Login'
 
 import Users from './Users'
 import { InstallationsProvider } from './Installations'
-import Application from './Application'
-import Component from './kubernetes/Component'
-import { Node, Nodes } from './kubernetes/Node'
-import { Pod } from './kubernetes/Pod'
+import { Node, Nodes } from './apps/app/components/kubernetes/Node'
+import { Pod } from './apps/app/components/kubernetes/Pod'
 import Directory from './users/Directory'
 import EditUser from './users/EditUser'
 import { Audits } from './audits/Audits'
@@ -51,6 +49,7 @@ import AuditsTable from './audits/table/AuditTable'
 import AuditsGraph from './audits/graph/AuditsGraph'
 import UserManagement from './apps/app/oidc/UserManagement'
 import Configuration from './apps/app/config/Configuration'
+import Components from './apps/app/components/Components'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -263,14 +262,6 @@ export default function Console() {
                           element={<Nodes />}
                         />
                         <Route
-                          path="/components/:repo/:kind/:name"
-                          element={<Component />}
-                        />
-                        <Route
-                          path="/components/:repo"
-                          element={<Application />}
-                        />
-                        <Route
                           path="/webhooks"
                           element={<Webhooks />}
                         />
@@ -320,6 +311,10 @@ export default function Console() {
                           <Route
                             path="runbooks/:runbookName"
                             element={<Runbook />}
+                          />
+                          <Route
+                            path="components"
+                            element={<Components />}
                           />
                           <Route
                             path="logs"

@@ -11,9 +11,9 @@ import { normalizeColor } from 'grommet/utils'
 
 import moment from 'moment'
 
-import { ignore } from '../kubernetes/Pod'
+import { ignore } from '../apps/app/components/kubernetes/Pod'
 
-import { MetadataRow, MetadataTag } from '../kubernetes/Metadata'
+import { MetadataRow, MetadataTag } from '../apps/app/components/kubernetes/Metadata'
 
 import { SEVERITY_COLORS } from './constants'
 

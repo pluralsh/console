@@ -13,7 +13,7 @@ import { Readiness } from 'utils/status'
 
 import { ReadyIcon } from '../Application'
 
-import { LoopingLogo } from '../utils/AnimatedLogo'
+import { LoopingLogo } from '../../../../utils/AnimatedLogo'
 
 import { Metadata, MetadataRow } from './Metadata'
 import { POLL_INTERVAL } from './constants'

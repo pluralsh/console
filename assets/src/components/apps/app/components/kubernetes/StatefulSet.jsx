@@ -16,9 +16,9 @@ import { DURATIONS } from 'utils/time'
 
 import RangePicker from 'components/utils/RangePicker'
 
-import { LoopingLogo } from '../utils/AnimatedLogo'
+import { LoopingLogo } from '../../../../utils/AnimatedLogo'
 
-import { Pie } from '../utils/ProgressGauge'
+import { Pie } from '../../../../utils/ProgressGauge'
 
 import { STATEFUL_SET_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
