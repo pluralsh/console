@@ -220,7 +220,7 @@ function FileInput() {
     <FilePicker
       onChange={file => setAttachment(file)}
       maxSize={2000}
-      onError={console.log}
+      onError={console.error}
     >
       <Control
         onClick={() => null}

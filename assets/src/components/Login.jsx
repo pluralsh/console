@@ -203,7 +203,7 @@ export default function Login() {
       setToken(jwt)
       window.location = '/'
     },
-    onError: console.log,
+    onError: console.error,
   })
 
   if (!error && data && data.me) {

@@ -7,8 +7,6 @@ import { StatusCritical } from 'grommet-icons'
 
 import { Readiness } from 'utils/status'
 
-import { InstallationContext } from '../../../Installations'
-
 import { Container } from '../../../utils/Container'
 import { PulsyDiv } from '../../../utils/animations'
 
@@ -32,8 +30,8 @@ export function appState({ status: { conditions } }) {
 export function ReadyIcon({ size, readiness, showIcon }) {
   const theme = useContext(ThemeContext)
   let color = 'error'
-  let icon = <StatusCritical size="small" />
-  let anim = null
+  let icon: any = <StatusCritical size="small" />
+  let anim
   let defaultSize = '20px'
 
   switch (readiness) {
@@ -44,7 +42,7 @@ export function ReadyIcon({ size, readiness, showIcon }) {
   case Readiness.InProgress:
     color = 'orange-dark'
     anim = PulsyDiv
-    icon = null
+    icon = undefined
     defaultSize = '16px'
     break
   case Readiness.Complete:
@@ -81,12 +79,19 @@ export function Component({
   const navigate = useNavigate()
 
   return (
-    <Container onClick={() => navigate(`/components/${repo}/${kind.toLowerCase()}/${name}`)}>
+    <Container
+      onClick={() => navigate(`/components/${repo}/${kind.toLowerCase()}/${name}`)}
+      gap={undefined}
+    >
       <ReadyIcon
         readiness={status}
         size="10px"
+        showIcon={undefined}
       />
-      <Icon kind={kind} />
+      <Icon
+        kind={kind}
+        size={undefined}
+      />
       <Text
         size="small"
         color="dark-6"
@@ -95,11 +100,4 @@ export function Component({
       <Text size="small">{name}</Text>
     </Container>
   )
-}
-
-export default function Application() {
-  const { currentApplication } = useContext(InstallationContext)
-  const { error } = appState(currentApplication)
-
-  return <Text size="small">{error.message}</Text>
 }

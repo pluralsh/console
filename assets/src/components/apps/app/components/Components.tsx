@@ -4,7 +4,7 @@ import { useContext, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
 
-import { Component } from './Application'
+import { Component } from './Component'
 
 export default function Components() {
   const { appName } = useParams()
@@ -21,9 +21,9 @@ export default function Components() {
   return (
     <>
       <PageTitle heading="Components" />
-      {currentApp.status.components.map(component => (
+      {currentApp.status.components.map((component, i) => (
         <Component
-          key={`${component.group}:${component.name}`}
+          key={i}
           component={component}
         />
       ))}

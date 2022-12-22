@@ -1,4 +1,4 @@
-import { appState } from 'components/apps/app/components/Application'
+import { appState } from 'components/apps/app/components/Component'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { InstallationContext } from 'components/Installations'
 import { A, Div, Flex } from 'honorable'

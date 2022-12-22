@@ -86,8 +86,6 @@ export default function App() {
   const { name, spec: { descriptor: { links, version } } } = currentApp
   const validLinks = links?.filter(({ url }) => !!url)
 
-  console.log(currentApp.status)
-
   return (
     <Flex
       height="100%"

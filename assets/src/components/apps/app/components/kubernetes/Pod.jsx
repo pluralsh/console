@@ -31,7 +31,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { Readiness } from 'utils/status'
 
-import { ReadinessColor, ReadyIcon } from '../Application'
+import { ReadinessColor, ReadyIcon } from '../Component'
 
 import { BreadcrumbsContext } from '../../../../Breadcrumbs'
 

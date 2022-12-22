@@ -1,12 +1,12 @@
-import { appState } from 'components/apps/app/components/Application'
-import { Chip } from '@pluralsh/design-system'
+import { appState } from 'components/apps/app/components/Component'
+import { Chip, Tooltip } from '@pluralsh/design-system'
 
 import { Readiness } from 'utils/status'
 
 export default function AppStatus({ app }) { // TODO: Verify statuses.
   if (!app) return <Chip size="small">Unknown</Chip>
 
-  const { readiness } = appState(app)
+  const { readiness, error } = appState(app)
 
   switch (readiness) {
   case Readiness.Ready:
@@ -20,12 +20,14 @@ export default function AppStatus({ app }) { // TODO: Verify statuses.
     )
   case Readiness.Failed:
     return (
-      <Chip
-        size="small"
-        severity="error"
-      >
-        Failed
-      </Chip>
+      <Tooltip label={error.message}>
+        <Chip
+          size="small"
+          severity="error"
+        >
+          Failed
+        </Chip>
+      </Tooltip>
     )
   case Readiness.InProgress:
     return (

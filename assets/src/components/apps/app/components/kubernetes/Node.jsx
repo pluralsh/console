@@ -43,7 +43,7 @@ import { Readiness } from 'utils/status'
 import { cpuParser } from '../../../../../utils/kubernetes'
 import { Graph } from '../../../../utils/Graph'
 import { LoopingLogo } from '../../../../utils/AnimatedLogo'
-import { ReadyIcon } from '../Application'
+import { ReadyIcon } from '../Component'
 import { BreadcrumbsContext } from '../../../../Breadcrumbs'
 
 import { RawContent } from './Component'
