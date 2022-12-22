@@ -14,7 +14,7 @@ function borderColor(lvl) {
   case Level.WARN:
     return 'border-warning'
   case Level.INFO:
-    return 'border-success'
+    return 'border-selected'
   default:
     return 'border-fill-two'
   }
