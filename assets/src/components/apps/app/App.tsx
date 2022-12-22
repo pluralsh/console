@@ -2,6 +2,7 @@ import { A, Flex } from 'honorable'
 import {
   ArrowTopRightIcon,
   Button,
+  Chip,
   Tab,
   TabList,
   TabPanel,
@@ -37,15 +38,35 @@ import AppSelector from './AppSelector'
 import RunbookStatus from './runbooks/runbook/RunbookStatus'
 
 // TODO: Keep current path when switching views if possible.
-const getDirectory = (app, config) => [
-  { path: 'dashboards', label: 'Dashboards', enabled: true },
-  { path: 'runbooks', label: 'Runbooks', enabled: true },
-  { path: 'components', label: 'Components', enabled: true },
-  { path: 'logs', label: 'Logs', enabled: true },
-  { path: 'cost', label: 'Cost analysis', enabled: app.cost || app.license },
-  { path: 'oidc', label: 'User management', enabled: true }, // TODO: Handle forbidden error.
-  { path: 'config', label: 'Configuration', enabled: config?.gitStatus?.cloned },
-]
+const getDirectory = (app, config) => {
+  const componentsReady = app?.status?.componentsReady
+  const split = componentsReady?.split('/')
+  const ready = split?.length > 1 && split[0] === split[1]
+  const severity = ready ? 'success' : 'warning'
+
+  return [
+    { path: 'dashboards', label: 'Dashboards', enabled: true },
+    { path: 'runbooks', label: 'Runbooks', enabled: true },
+    {
+      path: 'components',
+      label: (
+        <Flex gap="small">
+          Components
+          <Chip
+            size="small"
+            severity={severity}
+          >
+            {componentsReady}
+          </Chip>
+        </Flex>),
+      enabled: true,
+    },
+    { path: 'logs', label: 'Logs', enabled: true },
+    { path: 'cost', label: 'Cost analysis', enabled: app.cost || app.license },
+    { path: 'oidc', label: 'User management', enabled: true }, // TODO: Handle forbidden error.
+    { path: 'config', label: 'Configuration', enabled: config?.gitStatus?.cloned },
+  ]
+}
 
 export default function App() {
   const tabStateRef = useRef<any>(null)
@@ -64,6 +85,8 @@ export default function App() {
   const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
   const { name, spec: { descriptor: { links, version } } } = currentApp
   const validLinks = links?.filter(({ url }) => !!url)
+
+  console.log(currentApp.status)
 
   return (
     <Flex

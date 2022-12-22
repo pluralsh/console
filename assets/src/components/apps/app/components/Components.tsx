@@ -4,6 +4,8 @@ import { useContext, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
 
+import { Component } from './Application'
+
 export default function Components() {
   const { appName } = useParams()
   const { applications }: any = useContext(InstallationContext)
@@ -19,12 +21,12 @@ export default function Components() {
   return (
     <>
       <PageTitle heading="Components" />
-      <Card
-        paddingHorizontal={100}
-        paddingVertical="large"
-      >
-        Components of {currentApp.name}
-      </Card>
+      {currentApp.status.components.map(component => (
+        <Component
+          key={`${component.group}:${component.name}`}
+          component={component}
+        />
+      ))}
     </>
   )
 }

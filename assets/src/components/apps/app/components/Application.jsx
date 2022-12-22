@@ -7,10 +7,7 @@ import { StatusCritical } from 'grommet-icons'
 
 import { Readiness } from 'utils/status'
 
-import { chunk } from 'utils/array'
-
-import { ApplicationIcon, InstallationContext, hasIcon } from '../../../Installations'
-import { BUILD_PADDING } from '../../../builds/Builds'
+import { InstallationContext } from '../../../Installations'
 
 import { Container } from '../../../utils/Container'
 import { PulsyDiv } from '../../../utils/animations'
@@ -30,18 +27,6 @@ export function appState({ status: { conditions } }) {
   const readiness = error.status === 'True' ? Readiness.Failed : (ready.status === 'True' ? Readiness.Ready : Readiness.InProgress)
 
   return { ready, error, readiness }
-}
-
-export function ApplicationReadyIcon({ application, size, showIcon }) {
-  const { readiness } = appState(application)
-
-  return (
-    <ReadyIcon
-      readiness={readiness}
-      size={size}
-      showIcon={showIcon}
-    />
-  )
 }
 
 export function ReadyIcon({ size, readiness, showIcon }) {
@@ -87,19 +72,16 @@ export function ReadyIcon({ size, readiness, showIcon }) {
   )
 }
 
-function Component({
+export function Component({
   component: {
     group, kind, name, status,
-  }, width,
+  },
 }) {
   const { repo } = useParams()
   const navigate = useNavigate()
 
   return (
-    <Container
-      width={width}
-      onClick={() => navigate(`/components/${repo}/${kind.toLowerCase()}/${name}`)}
-    >
+    <Container onClick={() => navigate(`/components/${repo}/${kind.toLowerCase()}/${name}`)}>
       <ReadyIcon
         readiness={status}
         size="10px"
@@ -117,71 +99,7 @@ function Component({
 
 export default function Application() {
   const { currentApplication } = useContext(InstallationContext)
-
   const { error } = appState(currentApplication)
 
-  return (
-    <Box
-      fill
-      background="backgroundColor"
-      gap="small"
-    >
-      <Box
-        flex={false}
-        pad={{ vertical: 'small', ...BUILD_PADDING }}
-        direction="row"
-        align="center"
-        border={{ side: 'bottom' }}
-        gap="small"
-      >
-        {hasIcon(currentApplication) && (
-          <ApplicationIcon
-            application={currentApplication}
-            size="40px"
-            dark
-          />
-        )}
-        <Box>
-          <Text
-            weight="bold"
-            size="small"
-          >{currentApplication.name}
-          </Text>
-          <Text
-            size="small"
-            color="dark-6"
-          >{currentApplication.status.componentsReady} ready; {error.message}
-          </Text>
-        </Box>
-        <ApplicationReadyIcon
-          application={currentApplication}
-          showIcon
-        />
-      </Box>
-      <Box
-        fill
-        style={{ overflow: 'auto' }}
-        pad={{ horizontal: 'medium', bottom: 'small' }}
-        gap="xsmall"
-      >
-        {[...chunk(currentApplication.status.components, 2)].map((chunk, ind) => (
-          <Box
-            key={ind}
-            flex={false}
-            fill="horizontal"
-            direction="row"
-            gap="xsmall"
-          >
-            {chunk.map(component => (
-              <Component
-                width="50%"
-                key={`${component.group}:${component.name}`}
-                component={component}
-              />
-            ))}
-          </Box>
-        ))}
-      </Box>
-    </Box>
-  )
+  return <Text size="small">{error.message}</Text>
 }
