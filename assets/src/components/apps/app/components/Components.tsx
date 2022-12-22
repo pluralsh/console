@@ -1,5 +1,5 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { Card, PageTitle } from '@pluralsh/design-system'
+import { PageTitle } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
