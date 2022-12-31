@@ -20,6 +20,8 @@ defmodule Console.Commands.Plural do
 
   def bounce(repo), do: plural("bounce", [repo])
 
+  def destroy(repo), do: plural("destroy", ["--force", repo])
+
   def terminate(node), do: plural("ops", ["terminate", node])
 
   def repair(), do: plural("repair", [])

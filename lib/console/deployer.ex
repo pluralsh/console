@@ -164,6 +164,15 @@ defmodule Console.Deployer do
     ], storage)
   end
 
+  defp perform(storage, %Build{type: :destroy, repository: repo} = build) do
+    with_build(build, [
+      {storage, :init, []},
+      {Plural, :destroy, [repo]},
+      {storage, :revise, ["destroyed application #{repo}"]},
+      {storage, :push, []}
+    ], storage)
+  end
+
   defp perform(storage, %Build{type: :install, context: %{"configuration" => conf, "bundle" => b}, message: message} = build) do
     with_build(build, [
       {storage, :init, []},
