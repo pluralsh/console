@@ -118,6 +118,9 @@ function DomainConfiguration({
     name, default: def, placeholder, documentation,
   }, ctx, setValue, setValid,
 }) {
+  // Support for lookahead operator in Safari was just added but it's not released yet.
+  // We might need to replace it for now.
+  // See: https://github.com/WebKit/WebKit/pull/7109
   const domainRegex = /^(((?!-)[A-Za-z0-9-]{1,63}(?<!-)\.)+[A-Za-z]{2,253})$/
   const { configuration } = useContext(LoginContext)
   const suffix = useMemo(() => {
