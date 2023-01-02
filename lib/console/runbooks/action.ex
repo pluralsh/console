@@ -25,19 +25,13 @@ defimpl Console.Runbooks.Action, for: Kube.Runbook.ConfigurationAction do
   alias Console.Services.Builds
   alias Kube.{Runbook, StatefulSetResize}
 
-  def enact(%{updates: updates, stateful_sets: ss}, %Actor{ctx: ctx, repo: repo, actor: actor}) do
+  def enact(%{updates: updates, stateful_sets: ss}, %Actor{ctx: ctx, repo: repo}) do
     with {:ok, vals} <- Plural.values_file(repo),
          {:ok, map} <- YamlElixir.read_from_string(vals),
          map <- make_updates(updates, map, ctx),
          {:ok, doc} <- Ymlr.document(map),
          :ok <- maybe_resize(ss, repo, ctx),
-         _ <- Console.Deployer.update(repo, String.trim_leading(doc, "---\n"), :helm) do
-      Builds.create(%{
-        type: :deploy,
-        repository: repo,
-        message: "updated configuration"
-      }, actor)
-    end
+      do: Console.Deployer.update(repo, String.trim_leading(doc, "---\n"), :helm)
   end
 
   defp make_updates(updates, values, map) do

@@ -84,6 +84,15 @@ defmodule Console.GraphQl.Plural do
     field :operation, :string
   end
 
+  object :stack do
+    field :id,       non_null(:id)
+    field :name,     non_null(:string)
+    field :bundles,  list_of(:recipe)
+    field :sections, list_of(:recipe_section)
+
+    timestamps()
+  end
+
   object :repository_context do
     field :repository, non_null(:string)
     field :context,    :map
@@ -140,6 +149,13 @@ defmodule Console.GraphQl.Plural do
       resolve &Plural.get_recipe/2
     end
 
+    field :stack, :stack do
+      middleware Authenticated
+      arg :name, non_null(:string)
+
+      resolve &Plural.get_stack/2
+    end
+
     field :smtp, :smtp do
       middleware Authenticated
       middleware AdminRequired
@@ -155,11 +171,25 @@ defmodule Console.GraphQl.Plural do
     field :install_recipe, :build do
       middleware Authenticated
       middleware RequiresGit
+      middleware Rbac, perm: :deploy, arg: :id
+
       arg :id,      non_null(:id)
       arg :context, non_null(:map)
       arg :oidc,    :boolean
 
       safe_resolve &Plural.install_recipe/2
+    end
+
+    field :install_stack, :build do
+      middleware Authenticated
+      middleware RequiresGit
+      middleware Rbac, perm: :deploy, arg: :id
+
+      arg :name,    non_null(:string)
+      arg :context, non_null(:map)
+      arg :oidc,    :boolean
+
+      safe_resolve &Plural.install_stack/2
     end
 
     field :update_smtp, :smtp do

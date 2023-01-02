@@ -278,6 +278,55 @@ defmodule Console.GraphQl.PluralQueriesTest do
     end
   end
 
+  describe "stack" do
+    test "it can get a stack by name" do
+      body = Jason.encode!(%{
+        query: Queries.get_stack_query(),
+        variables: %{name: "id", provider: "AWS"}
+      })
+
+      section = %{
+        id: "id2",
+        repository: %{id: "id3"},
+        recipeItems: [
+          %{
+            id: "id4",
+            configuration: [%{name: "name", documentation: "some documentation", type: "STRING"}]
+          }
+        ]
+      }
+
+      recipe = %{
+        id: "id",
+        name: "name",
+        description: "description",
+        recipeSections: [section]
+      }
+
+      stack = %{name: "id", sections: [section], bundles: [recipe]}
+
+      expect(HTTPoison, :post, fn _, ^body, _ ->
+        {:ok, %{body: Jason.encode!(%{data: %{stack: stack}})}}
+      end)
+
+      {:ok, %{data: %{"stack" => %{"bundles" => [r], "sections" => [s]}}}} = run_query("""
+        query Stack($name: String!) {
+          stack(name: $name) {
+            bundles { name }
+            sections { id recipeItems { id } }
+          }
+        }
+      """, %{"name" => "id"}, %{current_user: insert(:user)})
+
+      assert r["name"] == "name"
+
+      assert s["id"] == "id2"
+
+      [item] = s["recipeItems"]
+      assert item["id"] == "id4"
+    end
+  end
+
   describe "application" do
     test "it can fetch an application by name" do
       expect(Kazan, :run, fn _ -> {:ok, application("app")} end)

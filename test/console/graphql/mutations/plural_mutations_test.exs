@@ -29,7 +29,7 @@ defmodule Console.GraphQl.PluralMutationsTest do
           {:ok, %{body: Jason.encode!(%{data: %{installRecipe: [%{id: "huh"}]}})}}
       end)
 
-      user = insert(:user)
+      user = insert(:user, roles: %{admin: true})
 
       {:ok, %{data: %{"installRecipe" => build}}} = run_query("""
         mutation Install($id: ID!, $context: Map!) {
@@ -40,6 +40,41 @@ defmodule Console.GraphQl.PluralMutationsTest do
           }
         }
       """, %{"id" => "id", "context" => Jason.encode!(%{"repo" => %{"some" => "val"}})}, %{current_user: user})
+
+      assert build["type"] == "INSTALL"
+      assert build["creator"]["id"] == user.id
+    end
+  end
+
+  describe "installStack" do
+    test "a user can install a stack" do
+      inst_body = Jason.encode!(%{
+        query: Queries.install_stack_mutation(),
+        variables: %{name: "id", provider: "AWS"}
+      })
+
+      recipe = %{
+        id: "id",
+        name: "name",
+        description: "description",
+        repository: %{id: "id2", name: "repo"}
+      }
+
+      expect(HTTPoison, :post, fn _, ^inst_body, _ ->
+          {:ok, %{body: Jason.encode!(%{data: %{installStack: [recipe]}})}}
+      end)
+
+      user = insert(:user, roles: %{admin: true})
+
+      {:ok, %{data: %{"installStack" => build}}} = run_query("""
+        mutation Install($name: Name!, $context: Map!) {
+          installStack(name: $name, context: $context) {
+            id
+            type
+            creator { id }
+          }
+        }
+      """, %{"name" => "id", "context" => Jason.encode!(%{"repo" => %{"some" => "val"}})}, %{current_user: user})
 
       assert build["type"] == "INSTALL"
       assert build["creator"]["id"] == user.id

@@ -164,6 +164,15 @@ defmodule Console.Deployer do
     ], storage)
   end
 
+  defp perform(storage, %Build{type: :destroy, repository: repo} = build) do
+    with_build(build, [
+      {storage, :init, []},
+      {Plural, :destroy, [repo]},
+      {storage, :revise, ["destroyed application #{repo}"]},
+      {storage, :push, []}
+    ], storage)
+  end
+
   defp perform(storage, %Build{type: :install, context: %{"configuration" => conf, "bundle" => b}, message: message} = build) do
     with_build(build, [
       {storage, :init, []},
@@ -171,6 +180,17 @@ defmodule Console.Deployer do
       {Plural, :build, []},
       {Plural, :install, [b["repository"]]},
       {storage, :revise, [commit_message(message, b["repository"])]},
+      {storage, :push, []}
+    ], storage)
+  end
+
+  defp perform(storage, %Build{type: :install, context: %{"configuration" => conf, "bundles" => bs}, message: message} = build) do
+    with_build(build, [
+      {storage, :init, []},
+      {Context, :merge, [conf, Enum.map(bs, fn b -> %Context.Bundle{repository: b["repository"], name: b["name"]} end)]},
+      {Plural, :build, []},
+      {Plural, :install, [Enum.map(bs, & &1["repository"])]},
+      {storage, :revise, [message]},
       {storage, :push, []}
     ], storage)
   end

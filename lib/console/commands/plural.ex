@@ -13,11 +13,14 @@ defmodule Console.Commands.Plural do
 
   def deploy(_repo \\ :ignore), do: plural("deploy", ["--silence"])
 
+  def install([_ | _] = repos), do: plural("deploy", ["--silence", "--ignore-console" | Enum.flat_map(repos, & ["--from", &1])])
   def install(repo), do: plural("deploy", ["--silence", "--ignore-console", "--from", repo])
 
   def diff(_repo \\ :ignore), do: plural("diff", [])
 
   def bounce(repo), do: plural("bounce", [repo])
+
+  def destroy(repo), do: plural("destroy", ["--force", repo])
 
   def terminate(node), do: plural("ops", ["terminate", node])
 
