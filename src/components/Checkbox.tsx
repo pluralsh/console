@@ -148,11 +148,14 @@ const HonorableLabelStyled = styled(Label)<{
 }))
 
 export type CheckboxProps = {
+  checked?: boolean
+  name?: string
   small?: boolean
   indeterminate?: boolean
   disabled?: boolean
   defaultSelected?: boolean
   onChange?: (e: { target: { checked: boolean } }) => any
+  onFocusChange?: (isFocused: boolean) => void
 } & Omit<InputProps, 'onChange'>
 
 function Checkbox({

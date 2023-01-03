@@ -127,6 +127,8 @@ export type RadioProps = AriaRadioProps & {
   small?: boolean
   disabled?: boolean
   defaultSelected?: boolean
+  checked?: boolean
+  name?: string
   onChange?: (e: { target: { checked: boolean } }) => any
 } & InputProps
 

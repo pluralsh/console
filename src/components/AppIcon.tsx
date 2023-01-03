@@ -21,6 +21,7 @@ type AppIconProps = DivProps & {
   alt?: string
   name?: string
   initials?: string
+  onClose?: () => void
 }
 
 const propTypes = {

@@ -41,6 +41,7 @@ type TooltipProps = {
   arrow?: boolean
   dismissable?: boolean
   portal?: boolean
+  portalProps?: any
   onOpenChange?: (open: boolean) => unknown
 } & DivProps
 

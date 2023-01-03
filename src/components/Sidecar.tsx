@@ -2,6 +2,7 @@ import {
   Button,
   ButtonProps,
   Div,
+  DivProps,
   FlexProps,
   H1,
   H1Props,
@@ -13,10 +14,14 @@ import { ReactNode, forwardRef } from 'react'
 export type SidecarProps = {
   heading?: ReactNode
   headingProps?: H1Props
+  contentProps?: DivProps
 } & FlexProps
 
 const Sidecar = forwardRef<HTMLElement, SidecarProps>(({
-  heading, headingProps, children, ...props
+  heading,
+  headingProps,
+  children,
+  ...props
 }, ref) => (
   <Section
     ref={ref}
@@ -40,7 +45,11 @@ const Sidecar = forwardRef<HTMLElement, SidecarProps>(({
 ))
 
 const SidecarItem = forwardRef<HTMLDivElement, SidecarProps>(({
-  heading, headingProps, contentProps, children, ...props
+  heading,
+  headingProps,
+  contentProps,
+  children,
+  ...props
 }, ref) => (
   <Div
     ref={ref}

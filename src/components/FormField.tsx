@@ -22,6 +22,7 @@ type FormFieldProps = DivProps & PropsWithChildren<{
   maxLength?: number
   required?: boolean
   small?: boolean
+  error?: boolean
 }>
 
 const propTypes = {

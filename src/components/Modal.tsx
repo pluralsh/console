@@ -1,21 +1,25 @@
+import { ReactNode, Ref, forwardRef } from 'react'
 import {
   Div,
   Flex,
-  FlexProps,
-  Modal,
+  Modal as HonorableModal,
+  ModalProps,
   P,
 } from 'honorable'
 import PropTypes from 'prop-types'
-import { Ref, forwardRef } from 'react'
 
-type ModalProps = FlexProps & {
+type ModalPropsType = ModalProps & {
   form?: boolean
   size?: 'medium' | 'large' | string
+  header?: ReactNode
+  actions?: ReactNode
 }
 
 const propTypes = {
   form: PropTypes.bool,
   size: PropTypes.oneOf(['medium', 'large']),
+  header: PropTypes.node,
+  actions: PropTypes.node,
 }
 
 const sizeToWidth: { [key in 'medium' | 'large']: number } = {
@@ -32,10 +36,10 @@ function ModalRef({
   size = form ? 'large' : 'medium',
   onClose,
   ...props
-}: ModalProps,
+}: ModalPropsType,
 ref: Ref<any>) {
   return (
-    <Modal
+    <HonorableModal
       open={open}
       onClose={onClose}
       form={form}
@@ -87,12 +91,12 @@ ref: Ref<any>) {
           </Flex>
         </Flex>
       )}
-    </Modal>
+    </HonorableModal>
   )
 }
 
-const ModalProps = forwardRef(ModalRef)
+const Modal = forwardRef(ModalRef)
 
-ModalProps.propTypes = propTypes
+Modal.propTypes = propTypes
 
-export default ModalProps
+export default Modal

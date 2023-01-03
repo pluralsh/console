@@ -44,6 +44,7 @@ type CodeProps = Omit<CardProps, 'children'> & {
   showHeader?: boolean
   tabs?: CodeTabData[]
   title?: ReactNode
+  onSelectedTabChange: (key: string) => void
 }
 
 const propTypes = {

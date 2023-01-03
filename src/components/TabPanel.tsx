@@ -91,6 +91,7 @@ function WrappedTabPanel({
   }
 
   if (renderer) {
+    // @ts-expect-error
     return renderer(mergeProps(tabPanelProps, props), ref, state)
   }
 

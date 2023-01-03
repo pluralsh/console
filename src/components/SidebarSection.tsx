@@ -24,7 +24,7 @@ function SidebarSectionRef({
   layout = 'vertical', children, grow = 0, ...props
 }: SidebarSectionProps, ref: Ref<any>) {
   const isHorizontal = layout === 'horizontal'
-  const childrenWithProps = Children.map(children, child => (isValidElement(child) ? cloneElement(child, { layout, ...child.props }) : child))
+  const childrenWithProps = Children.map(children, child => (isValidElement(child) ? cloneElement(child, { layout, ...(child as any).props }) : child))
 
   return (
     <Flex

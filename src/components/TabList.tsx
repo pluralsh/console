@@ -55,12 +55,17 @@ type ChildrenType = ReactElement<TabBaseProps> | ReactElement<TabBaseProps>[]
 
 type TabListProps = {
   stateRef: TabStateRef
+  stateProps?: TabListStateProps
   renderer?: Renderer
   as?: ReactElement & { ref?: MutableRefObject<any> }
   children?: ChildrenType
 }
 function TabListRef({
-  stateRef, stateProps, renderer, as, ...props
+  stateRef,
+  stateProps,
+  renderer,
+  as,
+  ...props
 }: TabListProps & FlexProps,
 incomingRef: RefObject<HTMLElement>) {
   const wrappedChildren = useItemWrappedChildren(props.children)
@@ -112,6 +117,7 @@ incomingRef: RefObject<HTMLElement>) {
   }
 
   if (renderer) {
+    // @ts-expect-error
     return renderer({ ...props, ...tabListProps, ...{ children: tabChildren } },
       mergedRef,
       state)

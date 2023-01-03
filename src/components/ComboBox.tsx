@@ -72,6 +72,9 @@ type ComboBoxInputProps = {
   isOpen?: boolean
   outerInputProps?: InputProps
   onInputClick?: MouseEventHandler
+  inputRef?: RefObject<HTMLInputElement>
+  buttonRef?: RefObject<HTMLDivElement>
+  buttonProps?: AriaButtonProps
 }
 
 const OpenButton = styled(({

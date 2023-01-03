@@ -48,7 +48,7 @@ const sizeToFrameSize: Record<Size, number> = {
 
 type IconFrameProps = Omit<FlexProps, 'size'> & {
   clickable?: boolean
-  textValue: string
+  textValue?: string
   icon: ReactElement
   size?: Size
   tooltip?: boolean | ReactNode
@@ -59,7 +59,7 @@ type IconFrameProps = Omit<FlexProps, 'size'> & {
 const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(({
   icon,
   size = 'medium',
-  textValue,
+  textValue = '',
   clickable = false,
   tooltip,
   tooltipProps,

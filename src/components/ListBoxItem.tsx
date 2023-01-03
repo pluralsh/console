@@ -210,7 +210,7 @@ const ListBoxFooterPlus = forwardRef<HTMLDivElement, ListBoxFooterProps>(({ left
       leftContent || (
         <PlusIcon
           size={16}
-          color={theme.colors['text-primary-accent']}
+          color={theme.colors['text-primary-accent'] as string}
         >
           {children || 'Add'}
         </PlusIcon>

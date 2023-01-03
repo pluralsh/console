@@ -101,7 +101,7 @@ const CenteringWrapperBase = styled(WrapperBase)`
   --initialShift: 7px;
   --shiftMultiplier: -13;
   --shiftRatio: calc(
-    (${({ areaHeight }) => areaHeight} - (var(--clampMin) * 1px)) /
+    (${({ areaHeight }: any) => areaHeight} - (var(--clampMin) * 1px)) /
       (var(--clampMax) - var(--clampMin))
   );
   --clampedShiftRatio: calc(max(0px, min(1px, var(--shiftRatio))));
@@ -205,7 +205,7 @@ function CenteringWrapper({ children, ...props }: FlexProps) {
   )
 }
 
-const Wrapper = forwardRef<HTMLDivElement, DivProps>(({ centered, children, ...props }, ref) => (
+const Wrapper = forwardRef<HTMLDivElement, DivProps & { centered: boolean }>(({ centered, children, ...props }, ref) => (
   <Div
     ref={ref}
     {...exitStyles}

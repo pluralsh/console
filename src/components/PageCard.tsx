@@ -3,7 +3,9 @@ import {
   DivProps,
   Flex,
   H1,
+  H1Props,
   H2,
+  H2Props,
 } from 'honorable'
 import { ReactNode, forwardRef } from 'react'
 
@@ -14,6 +16,8 @@ type PageCardProps = {
   heading?: ReactNode
   subheading?: ReactNode
   subheadingIcon?: ReactNode
+  headingProps?: H1Props,
+  subheadingProps?: H2Props,
 } & DivProps
 
 const PageCard = forwardRef<HTMLDivElement, PageCardProps>(({

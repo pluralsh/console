@@ -1,4 +1,4 @@
-import { Avatar, Box, Img } from 'honorable'
+import { Avatar, Div, Img } from 'honorable'
 
 import BellIcon from '../components/icons/BellIcon'
 
@@ -21,7 +21,7 @@ export default {
 
 function Template() {
   return (
-    <Box
+    <Div
       width="800px"
       height="600px"
       border="1px solid border"
@@ -90,13 +90,13 @@ function Template() {
           <SidebarItem clickable><Avatar size={32} /></SidebarItem>
         </SidebarSection>
       </Sidebar>
-    </Box>
+    </Div>
   )
 }
 
 function HorizontalTemplate() {
   return (
-    <Box
+    <Div
       width="800px"
       height="600px"
       border="1px solid border"
@@ -148,7 +148,7 @@ function HorizontalTemplate() {
           </SidebarItem>
         </SidebarSection>
       </Sidebar>
-    </Box>
+    </Div>
   )
 }
 
