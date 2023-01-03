@@ -38,11 +38,14 @@ export default function Components() {
             title={name}
             subtitle={`${group || 'v1'}/${kind.toLowerCase()}`}
             icon={<ComponentIcon kind={kind} />}
+            iconFrameType="tertiary"
+            iconFrameSize="small"
             borderColor={statusToBorder[status]}
             chips={<Flex><Flex grow={1} /><ComponentStatus status={status} /></Flex>}
             chipsPlacement="right"
             onClick={() => navigate(`/apps/${appName}/components/${kind.toLowerCase()}/${name}`)}
             flexBasis="40%"
+            marginBottom={0}
           />
         ))}
         <Flex

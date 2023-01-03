@@ -33,8 +33,8 @@ export function ListItemBorder({ borderColor }: { borderColor: string }) {
 
 // TODO: Move it to design system.
 export function ListItem({
-  title, subtitle, description, icon, borderColor, chips, chipsPlacement = 'left', onClick, ...props
-}: CardProps & {title: string, subtitle?: string, description?: string, icon?: any, borderColor?: string, chips?: any, chipsPlacement?: 'left' | 'right', onClick: () => any},) {
+  title, subtitle, description, icon, iconFrameType = 'floating', iconFrameSize = 'large', borderColor, chips, chipsPlacement = 'left', onClick, ...props
+}: CardProps & {title: string, subtitle?: string, description?: string, icon?: any, iconFrameType?: any, iconFrameSize?: any, borderColor?: string, chips?: any, chipsPlacement?: 'left' | 'right', onClick: () => any},) {
   return (
     <Card
       clickable
@@ -55,9 +55,9 @@ export function ListItem({
         {icon && (
           <IconFrame
             icon={icon}
-            size="large"
+            size={iconFrameSize}
             textValue={title}
-            type="floating"
+            type={iconFrameType}
           />
         )}
         <Flex direction="column">

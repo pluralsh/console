@@ -42,7 +42,7 @@ export function ComponentStatus({ status }: {status: string}) {
   )
 }
 
-export function ComponentIcon({ kind, size }: {kind: string | undefined, size: number | undefined}) {
+export function ComponentIcon({ kind, size }: {kind: string | undefined, size?: number | undefined}) {
   switch (kind?.toLowerCase()) {
   case 'service':
     return <NetworkInterfaceIcon size={size} />
