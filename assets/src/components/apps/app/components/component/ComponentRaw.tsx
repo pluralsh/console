@@ -17,11 +17,9 @@ export default function ComponentRaw() {
     { text: componentName, url: `/apps/${appName}/components/${componentKind}/${componentName}` },
   ]), [appName, componentKind, componentName, setBreadcrumbs])
 
-  // To avoid creating map between component types and fields of data returned by API
-  // we are picking first available value from API object. In the future replacement might be needed.
+  // To avoid mapping between component types and fields of data returned by API
+  // we are picking first available value from API object for now.
   const value: any = Object.values(data).find(value => value !== undefined)
-  const raw = value?.raw
-  const object = JSON.parse(raw)
 
   return (
     <>
@@ -30,7 +28,7 @@ export default function ComponentRaw() {
         language="yaml"
         maxHeight="calc(100vh - 244px)"
       >
-        {stringify(object)}
+        {stringify(JSON.parse(value?.raw))}
       </Code>
     </>
   )

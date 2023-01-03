@@ -11,7 +11,6 @@ import {
 import { Metadata, MetadataRow } from './Metadata'
 import { DELETE_JOB } from './queries'
 import { Container } from './utils'
-import { Events } from './Event'
 import { PodList, ignore } from './Pod'
 
 export function DeleteIcon({ onClick, loading }) {
@@ -124,9 +123,6 @@ export default function Job() {
             refetch={refetch}
             namespace={repo}
           />
-        </TabContent>
-        <TabContent name="events">
-          <Events events={job.events} />
         </TabContent>
       </Tabs>
     </Box>

@@ -3,8 +3,6 @@ import { TabContent, Tabs } from 'forge-core'
 
 import { Metadata, MetadataRow } from './Metadata'
 import { Container } from './utils'
-import { Events } from './Event'
-import { RawContent } from './Component'
 
 function Status({ status: { notBefore, notAfter, renewalTime } }) {
   return (
@@ -64,9 +62,6 @@ export function Certificate() {
           <Metadata metadata={certificate.metadata} />
           <Status status={certificate.status} />
           <Spec spec={certificate.spec} />
-        </TabContent>
-        <TabContent name="events">
-          <Events events={certificate.events} />
         </TabContent>
       </Tabs>
     </Box>

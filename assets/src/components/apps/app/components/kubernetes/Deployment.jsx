@@ -18,7 +18,6 @@ import { Pie } from '../../../../utils/ProgressGauge'
 import { Metadata, MetadataRow } from './Metadata'
 import { ScalingTypes } from './constants'
 import { PodList } from './Pod'
-import { Events } from './Event'
 import { Metric } from './Metrics'
 import { Container, LogLink, logUrl } from './utils'
 
@@ -142,9 +141,6 @@ export default function Deployment() {
             regex="-[a-z0-9]+-[a-z0-9]+"
             duration={duration}
           />
-        </TabContent>
-        <TabContent name="events">
-          <Events events={deployment.events} />
         </TabContent>
       </Tabs>
     </Box>

@@ -94,9 +94,6 @@ export function Service() {
             namespace={undefined} // TODO: repo.
           />
         </TabContent>
-        <TabContent name="events">
-          <Events events={service.events} />
-        </TabContent>
       </Tabs>
     </Box>
   )

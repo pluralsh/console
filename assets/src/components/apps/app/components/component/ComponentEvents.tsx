@@ -1,12 +1,13 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { PageTitle } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useOutletContext, useParams } from 'react-router-dom'
 
-import { Flex } from 'honorable'
+import { Events } from '../kubernetes/Event'
 
 export default function ComponentEvents() {
   const { appName, componentKind, componentName } = useParams()
+  const { data } = useOutletContext<any>()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
 
   useEffect(() => setBreadcrumbs([
@@ -16,17 +17,14 @@ export default function ComponentEvents() {
     { text: componentName, url: `/apps/${appName}/components/${componentKind}/${componentName}` },
   ]), [appName, componentKind, componentName, setBreadcrumbs])
 
+  // To avoid mapping between component types and fields of data returned by API
+  // we are picking first available value from API object for now.
+  const value: any = Object.values(data).find(value => value !== undefined)
+
   return (
     <>
       <PageTitle heading="Events" />
-      <Flex
-        gap="small"
-        wrap="wrap"
-      >
-        {appName}
-        {componentKind}
-        {componentName}
-      </Flex>
+      <Events events={value?.events} />
     </>
   )
 }

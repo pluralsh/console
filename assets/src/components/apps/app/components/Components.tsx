@@ -41,7 +41,7 @@ export default function Components() {
             iconFrameType="tertiary"
             iconFrameSize="small"
             borderColor={statusToBorder[status]}
-            chips={<Flex><Flex grow={1} /><ComponentStatus status={status} /></Flex>}
+            chips={<ComponentStatus status={status} />}
             chipsPlacement="right"
             onClick={() => navigate(`/apps/${appName}/components/${kind.toLowerCase()}/${name}`)}
             flexBasis="40%"

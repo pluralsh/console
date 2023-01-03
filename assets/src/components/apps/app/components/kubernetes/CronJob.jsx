@@ -8,8 +8,6 @@ import { Readiness } from 'utils/status'
 import { ReadyIcon } from '../../../../Component'
 
 import { Metadata, MetadataRow } from './Metadata'
-import { RawContent } from './Component'
-import { Events } from './Event'
 import { Container } from './utils'
 import { HeaderItem, RowItem } from './Pod'
 import { DeleteJob } from './Job'
@@ -193,12 +191,6 @@ export default function CronJob() {
             jobs={cronJob.jobs}
             refetch={refetch}
           />
-        </TabContent>
-        <TabContent name="events">
-          <Events events={cronJob.events} />
-        </TabContent>
-        <TabContent name="raw">
-          <RawContent raw={cronJob.raw} />
         </TabContent>
       </Tabs>
     </Box>

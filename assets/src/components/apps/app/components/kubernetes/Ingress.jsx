@@ -3,7 +3,6 @@ import { TabContent, Tabs } from 'forge-core'
 
 import { Metadata, MetadataRow } from './Metadata'
 
-import { Events } from './Event'
 import { Container } from './utils'
 
 function Status({ status: { loadBalancer } }) {
@@ -121,9 +120,6 @@ export default function Ingress() {
           <Metadata metadata={ingress.metadata} />
           <Status status={ingress.status} />
           <Spec spec={ingress.spec} />
-        </TabContent>
-        <TabContent name="events">
-          <Events events={ingress.events} />
         </TabContent>
       </Tabs>
     </Box>

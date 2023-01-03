@@ -20,8 +20,6 @@ import { Pie } from '../../../../utils/ProgressGauge'
 import { Metadata, MetadataRow } from './Metadata'
 import { ScalingTypes } from './constants'
 import { PodList } from './Pod'
-import { RawContent } from './Component'
-import { Events } from './Event'
 import { Metric } from './Metrics'
 import { Container, LogLink, logUrl } from './utils'
 
@@ -150,9 +148,6 @@ export default function StatefulSet() {
             regex="-[0-9]+"
             duration={duration}
           />
-        </TabContent>
-        <TabContent name="events">
-          <Events events={statefulSet.events} />
         </TabContent>
       </Tabs>
     </Box>
