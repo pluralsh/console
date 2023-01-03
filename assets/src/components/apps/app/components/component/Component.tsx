@@ -1,5 +1,15 @@
-import { Flex } from 'honorable'
-import { Tab, TabList, TabPanel } from '@pluralsh/design-system'
+import {
+  Div,
+  Flex,
+  H2,
+  P,
+} from 'honorable'
+import {
+  AppIcon,
+  Tab,
+  TabList,
+  TabPanel,
+} from '@pluralsh/design-system'
 
 import { useContext, useRef } from 'react'
 import {
@@ -25,9 +35,7 @@ import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLa
 
 import { LoginContext } from '../../../../contexts'
 
-import AppSelector from '../../AppSelector'
-
-import { ComponentStatus } from '../misc'
+import { ComponentIcon, ComponentStatus } from '../misc'
 
 const directory = [
   { label: 'Info', path: 'info' },
@@ -58,10 +66,35 @@ export default function Component() {
       position="relative"
     >
       <ResponsiveLayoutSidenavContainer width={240}>
-        <AppSelector
-          applications={applications}
-          currentApp={currentApp}
-        />
+        <Flex
+          align="center"
+          gap="small"
+          marginBottom="large"
+        >
+          <AppIcon
+            icon={(
+              <ComponentIcon
+                size={48}
+                kind={componentKind}
+              />
+            )}
+            size="small"
+          />
+          <Div>
+            <H2
+              subtitle2
+              fontWeight="500"
+            >
+              {componentName}
+            </H2>
+            <P
+              color="text-xlight"
+              caption
+            >
+              {currentComponent?.group || 'v1'}/{componentKind?.toLowerCase()}
+            </P>
+          </Div>
+        </Flex>
         <TabList
           stateRef={tabStateRef}
           stateProps={{

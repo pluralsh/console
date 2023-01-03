@@ -42,24 +42,24 @@ export function ComponentStatus({ status }: {status: string}) {
   )
 }
 
-export function ComponentIcon({ kind }: {kind: string}) {
-  switch (kind.toLowerCase()) {
+export function ComponentIcon({ kind, size }: {kind: string | undefined, size: number | undefined}) {
+  switch (kind?.toLowerCase()) {
   case 'service':
-    return <NetworkInterfaceIcon />
+    return <NetworkInterfaceIcon size={size} />
   case 'deployment':
-    return <DeploymentIcon />
+    return <DeploymentIcon size={size} />
   case 'statefulset':
-    return <VolumesIcon />
+    return <VolumesIcon size={size} />
   case 'ingress':
-    return <NetworkInIcon />
+    return <NetworkInIcon size={size} />
   case 'cronjob':
-    return <HistoryIcon />
+    return <HistoryIcon size={size} />
   case 'pod':
-    return <ErrorIcon /> // TODO: Pod icon.
+    return <ErrorIcon size={size} /> // TODO: Pod icon.
   case 'job':
-    return <ErrorIcon /> // TODO: Briefcase icon.
+    return <ErrorIcon size={size} /> // TODO: Briefcase icon.
   case 'certificate':
-    return <CertificateIcon />
+    return <CertificateIcon size={size} />
   default:
     return null
   }
