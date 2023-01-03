@@ -1,8 +1,17 @@
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
-import { PropsWithChildren, forwardRef, useMemo } from 'react'
+import {
+  Dispatch,
+  PropsWithChildren,
+  forwardRef,
+  useMemo,
+} from 'react'
 import styled, { useTheme } from 'styled-components'
 import { ColorKey, Severity } from 'src/types'
+import { Flex } from 'honorable'
+import AnimateHeight from 'react-animate-height'
+
+import { CaretDownIcon } from '../icons'
 
 import {
   FillLevel,
@@ -16,6 +25,7 @@ import ErrorIcon from './icons/ErrorIcon'
 import InfoIcon from './icons/InfoIcon'
 import StatusOkIcon from './icons/StatusOkIcon'
 import WarningIcon from './icons/WarningIcon'
+import IconFrame from './IconFrame'
 
 const SEVERITIES = ['info', 'danger', 'warning', 'success'] as const
 
@@ -64,6 +74,9 @@ export type CalloutProps = PropsWithChildren<{
   buttonProps?: ButtonProps
   fillLevel?: FillLevel
   className?: string
+  expandable?: boolean
+  expanded?: boolean
+  onExpand?: Dispatch<boolean>
 }>
 
 export function CalloutButton(props: ButtonProps) {
@@ -79,6 +92,9 @@ const Callout = forwardRef<HTMLDivElement, CalloutProps>(({
   title,
   severity = DEFAULT_SEVERITY,
   size = 'full',
+  expandable = false,
+  expanded = false,
+  onExpand,
   fillLevel,
   className,
   buttonProps,
@@ -120,6 +136,7 @@ ref) => {
         $borderColorKey={borderColorKey}
         $fillLevel={fillLevel}
         $size={size}
+        $expanded={expanded}
         ref={ref}
       >
         <div className="icon">
@@ -131,17 +148,34 @@ ref) => {
           />
         </div>
         <div>
-          <h6 className={classNames({ visuallyHidden: !title })}>
+          <h6 className={classNames({ visuallyHidden: !title, expandable })}>
             <span className="visuallyHidden">{`${text}: `}</span>
             {title}
           </h6>
-          <div className="children">{children}</div>
-          {buttonProps && (
-            <div className="buttonArea">
-              <CalloutButton {...buttonProps} />
-            </div>
-          )}
+          <AnimateHeight height={(expandable && expanded) || !expandable ? 'auto' : 0}>
+            <div className="children">{children}</div>
+            {buttonProps && (
+              <div className="buttonArea">
+                <CalloutButton {...buttonProps} />
+              </div>
+            )}
+          </AnimateHeight>
         </div>
+        {expandable && (
+          <Flex
+            grow={1}
+            justify="end"
+          >
+            <IconFrame
+              textValue=""
+              display="flex"
+              size="small"
+              clickable
+              onClick={() => onExpand && onExpand(!expanded)}
+              icon={<CaretDownIcon className="expandIcon" />}
+            />
+          </Flex>
+        )}
       </CalloutWrap>
     </FillLevelProvider>
   )
@@ -151,8 +185,9 @@ const CalloutWrap = styled.div<{
   $borderColorKey: string
   $size: CalloutSize
   $fillLevel: FillLevel
+  $expanded: boolean
 }>(({
-  theme, $size, $fillLevel, $borderColorKey,
+  theme, $size, $fillLevel, $borderColorKey, $expanded,
 }) => ({
   position: 'relative',
   display: 'flex',
@@ -172,7 +207,11 @@ const CalloutWrap = styled.div<{
     color: theme.colors.text,
     margin: 0,
     padding: 0,
-    marginBottom: theme.spacing.xxsmall,
+    marginBottom: theme.spacing.small,
+
+    '&.expandable': {
+      marginBottom: $expanded ? theme.spacing.small : 0,
+    },
   },
   '.children *:first-child': {
     marginTop: '0',
@@ -223,6 +262,9 @@ const CalloutWrap = styled.div<{
   },
   '& a, & a:any-link': {
     ...theme.partials.text.inlineLink,
+  },
+  '.expandIcon': {
+    ...theme.partials.dropdown.arrowTransition({ isOpen: $expanded }),
   },
 }))
 

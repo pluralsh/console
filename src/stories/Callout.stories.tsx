@@ -1,4 +1,6 @@
-import { Div } from 'honorable'
+import { Div, Flex } from 'honorable'
+
+import { useState } from 'react'
 
 import { FillLevel } from '../components/contexts/FillLevelContext'
 import { Callout, CalloutProps, Card } from '..'
@@ -49,6 +51,7 @@ const compactContent = (
 function Template({
   size,
   withButton,
+  expandable,
   title,
   fillLevel,
   onFillLevel,
@@ -82,11 +85,38 @@ function Template({
           title={title}
           fillLevel={fillLevel}
           buttonProps={withButton ? { children: 'Button text' } : undefined}
+          expandable={expandable}
         >
           {size === 'compact' ? compactContent : fullContent}
         </Callout>
       ))}
     </Wrapper>
+  )
+}
+
+function ExpandableTemplate({ title }: CalloutProps) {
+  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <Flex
+      flexDirection="column"
+      gap="large"
+      maxWidth={600}
+    >
+      {styles.map(style => (
+        <Callout
+          key={style}
+          severity={style}
+          title={title}
+          buttonProps={{ children: 'Learn more' }}
+          expandable
+          expanded={expanded}
+          onExpand={setExpanded}
+        >
+          {fullContent}
+        </Callout>
+      ))}
+    </Flex>
   )
 }
 
@@ -122,6 +152,11 @@ WithButton.args = {
   onFillLevel: 0,
 }
 
+export const Expandable = ExpandableTemplate.bind({})
+Expandable.args = {
+  title: 'Why do I need to authenticate with GitHub/GitLab?',
+}
+
 export const KitchenSink = Template.bind({})
 KitchenSink.args = {
   title: 'Title text - How to write a dummy title',
@@ -136,4 +171,5 @@ OnCard.args = {
   size: 'full',
   withButton: true,
   onFillLevel: 1,
+  expandable: false,
 }
