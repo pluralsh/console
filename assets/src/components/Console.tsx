@@ -50,6 +50,10 @@ import AuditsGraph from './audits/graph/AuditsGraph'
 import UserManagement from './apps/app/oidc/UserManagement'
 import Configuration from './apps/app/config/Configuration'
 import Components from './apps/app/components/Components'
+import Component from './apps/app/components/component/Component'
+import ComponentInfo from './apps/app/components/component/ComponentInfo'
+import ComponentEvents from './apps/app/components/component/ComponentEvents'
+import ComponentRaw from './apps/app/components/component/ComponentRaw'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -329,6 +333,34 @@ export default function Console() {
                           <Route
                             path="config"
                             element={<Configuration />}
+                          />
+                        </Route>
+
+                        {/* COMPONENTS */}
+                        <Route
+                          path="/apps/:appName/components/:componentKind/:componentName"
+                          element={<Component />}
+                        >
+                          <Route
+                            index
+                            element={(
+                              <Navigate
+                                replace
+                                to="info"
+                              />
+                            )}
+                          />
+                          <Route
+                            path="info"
+                            element={<ComponentInfo />}
+                          />
+                          <Route
+                            path="events"
+                            element={<ComponentEvents />}
+                          />
+                          <Route
+                            path="raw"
+                            element={<ComponentRaw />}
                           />
                         </Route>
 
