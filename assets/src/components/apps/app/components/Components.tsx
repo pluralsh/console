@@ -48,10 +48,6 @@ export default function Components() {
             marginBottom="medium"
           />
         ))}
-        <Flex
-          grow={1}
-          basis="40%"
-        />
       </Flex>
     </>
   )
