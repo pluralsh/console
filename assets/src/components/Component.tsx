@@ -1,23 +1,12 @@
 import { useContext } from 'react'
-import { Box, Text, ThemeContext } from 'grommet'
+import { Box, ThemeContext } from 'grommet'
 import { Check } from 'forge-core'
-import { useNavigate, useParams } from 'react-router-dom'
 import { normalizeColor } from 'grommet/utils'
 import { StatusCritical } from 'grommet-icons'
 
 import { Readiness } from 'utils/status'
 
-import { Container } from '../../../utils/Container'
-import { PulsyDiv } from '../../../utils/animations'
-
-import Icon from './kubernetes/Icon'
-
-export const ReadinessColor = {
-  [Readiness.Ready]: 'success',
-  [Readiness.InProgress]: 'status-warning',
-  [Readiness.Failed]: 'error',
-  [Readiness.Complete]: 'tone-medium',
-}
+import { PulsyDiv } from './utils/animations'
 
 export function appState({ status: { conditions } }) {
   const ready = conditions.find(({ type }) => type === 'Ready')
@@ -70,34 +59,3 @@ export function ReadyIcon({ size, readiness, showIcon }) {
   )
 }
 
-export function Component({
-  component: {
-    group, kind, name, status,
-  },
-}) {
-  const { repo } = useParams()
-  const navigate = useNavigate()
-
-  return (
-    <Container
-      onClick={() => navigate(`/components/${repo}/${kind.toLowerCase()}/${name}`)}
-      gap={undefined}
-    >
-      <ReadyIcon
-        readiness={status}
-        size="10px"
-        showIcon={undefined}
-      />
-      <Icon
-        kind={kind}
-        size={undefined}
-      />
-      <Text
-        size="small"
-        color="dark-6"
-      >{group || 'v1'}/{kind.toLowerCase()}
-      </Text>
-      <Text size="small">{name}</Text>
-    </Container>
-  )
-}

@@ -31,7 +31,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { Readiness } from 'utils/status'
 
-import { ReadinessColor, ReadyIcon } from '../Component'
+import { ReadyIcon } from '../../../../Component'
 
 import { BreadcrumbsContext } from '../../../../Breadcrumbs'
 
@@ -41,9 +41,10 @@ import { LoopingLogo } from '../../../../utils/AnimatedLogo'
 
 import { TRUNCATE } from '../../../../utils/truncate'
 
+import { ComponentIcon } from '../misc'
+
 import { DELETE_POD, POD_Q } from './queries'
 
-import Icon from './Icon'
 import { POLL_INTERVAL } from './constants'
 import { Metadata, MetadataRow } from './Metadata'
 import { RawContent } from './Component'
@@ -52,6 +53,13 @@ import { Container as Con, LogLink } from './utils'
 
 import { Events } from './Event'
 import { DeleteIcon } from './Job'
+
+export const ReadinessColor = {
+  [Readiness.Ready]: 'success',
+  [Readiness.InProgress]: 'status-warning',
+  [Readiness.Failed]: 'error',
+  [Readiness.Complete]: 'tone-medium',
+}
 
 function phaseToReadiness(phase) {
   switch (phase) {
@@ -831,10 +839,7 @@ export function Pod() {
         margin={{ left: 'small', vertical: 'small' }}
         pad={{ horizontal: 'medium' }}
       >
-        <Icon
-          kind="pod"
-          size="15px"
-        />
+        <ComponentIcon kind="pod" />
         <Text
           size="medium"
           weight={500}

@@ -3,9 +3,8 @@ import { Box, Text } from 'grommet'
 import { useParams } from 'react-router-dom'
 
 import { InstallationContext } from '../../../../Installations'
-import { ReadyIcon } from '../Component'
-
-import Icon from './Icon'
+import { ReadyIcon } from '../../../../Component'
+import { ComponentIcon } from '../misc'
 
 export default function ComponentName() {
   const { kind, name } = useParams()
@@ -21,10 +20,7 @@ export default function ComponentName() {
       align="center"
       margin={{ left: 'small' }}
     >
-      <Icon
-        kind={kind}
-        size="15px"
-      />
+      <ComponentIcon kind={kind} />
       <Text
         size="medium"
         weight={500}

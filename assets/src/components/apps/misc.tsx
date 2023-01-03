@@ -1,4 +1,9 @@
-import { Card, CaretRightIcon, IconFrame } from '@pluralsh/design-system'
+import {
+  Card,
+  CardProps,
+  CaretRightIcon,
+  IconFrame,
+} from '@pluralsh/design-system'
 import { Flex, P } from 'honorable'
 
 export const hasIcons = ({ spec: { descriptor } }) => descriptor?.icons?.length > 0
@@ -28,17 +33,17 @@ export function ListItemBorder({ borderColor }: { borderColor: string }) {
 
 // TODO: Move it to design system.
 export function ListItem({
-  title, description, icon, borderColor, chips, onClick,
-}: {title: string, description: string, icon: any, borderColor?: string, chips?: any, onClick: () => any},) {
+  title, subtitle, description, icon, borderColor, chips, chipsPlacement = 'left', onClick, ...props
+}: CardProps & {title: string, subtitle?: string, description?: string, icon?: any, borderColor?: string, chips?: any, chipsPlacement: 'left' | 'right', onClick: () => any},) {
   return (
     <Card
       clickable
       display="flex"
       flexGrow={1}
-      flexShrink={1}
       marginBottom="small"
       minWidth={240}
       onClick={onClick}
+      {...props}
     >
       {borderColor && <ListItemBorder borderColor={borderColor} />}
       <Flex
@@ -47,21 +52,35 @@ export function ListItem({
         maxWidth="90%"
         padding="medium"
       >
-        <IconFrame
-          icon={icon}
-          size="large"
-          textValue={title}
-          type="floating"
-        />
+        {icon && (
+          <IconFrame
+            icon={icon}
+            size="large"
+            textValue={title}
+            type="floating"
+          />
+        )}
         <Flex direction="column">
-          <Flex gap="small">
+          <Flex
+            gap="small"
+            align="center"
+            grow={1}
+          >
             <P
               body1
               fontWeight={600}
             >
               {title}
             </P>
-            {chips}
+            {subtitle && (
+              <P
+                caption
+                color="text-xlight"
+              >
+                {subtitle}
+              </P>
+            )}
+            {chipsPlacement === 'left' && chips}
           </Flex>
           {description && <Flex>{description}</Flex>}
         </Flex>
@@ -72,6 +91,7 @@ export function ListItem({
         gap="16px"
         padding="medium"
       >
+        {chipsPlacement === 'right' && chips}
         <CaretRightIcon />
       </Flex>
     </Card>

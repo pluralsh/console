@@ -11,7 +11,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { Readiness } from 'utils/status'
 
-import { ReadyIcon } from '../Component'
+import { ReadyIcon } from '../../../../Component'
 
 import { LoopingLogo } from '../../../../utils/AnimatedLogo'
 
