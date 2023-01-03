@@ -40,7 +40,7 @@ export function Breadcrumbs() {
       )
     }
 
-    return <Span fontWeight={600}>{crumb.text}</Span>
+    return crumb.text
   }))
 
   return (
