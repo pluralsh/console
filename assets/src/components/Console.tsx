@@ -245,9 +245,7 @@ export default function Console() {
                           path="/incident/:incidentId"
                           element={<PluralApi><Incident editing={undefined} /></PluralApi>}
                         />
-                        {/* <Route path="/incidents">
-                          <PluralApi><Incidents /></PluralApi>
-                        </Route> */}
+                        {/* <Route path="/incidents"><PluralApi><Incidents /></PluralApi></Route> */}
                         {/* Disabled for now.  */}
                         <Route
                           path="/pods/:namespace/:name"

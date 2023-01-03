@@ -25,7 +25,7 @@ export default function Components() {
 
   return (
     <>
-      <PageTitle heading="Components" />
+      <PageTitle heading="Components" /> {/* TODO: Add filtering. */}
       <Flex
         gap="small"
         wrap="wrap"

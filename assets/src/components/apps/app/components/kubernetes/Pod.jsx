@@ -816,7 +816,7 @@ export function Pod() {
       { text: namespace, url: namespace, disable: true },
       { text: name, url: name, disable: true },
     ])
-  }, [])
+  }, [name, namespace, setBreadcrumbs])
 
   if (!data) return <LoopingLogo dark />
 
