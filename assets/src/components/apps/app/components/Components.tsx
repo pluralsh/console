@@ -27,8 +27,9 @@ export default function Components() {
     <>
       <PageTitle heading="Components" /> {/* TODO: Add filtering. */}
       <Flex
-        gap="small"
-        wrap="wrap"
+        direction="column"
+        paddingRight="xxxsmall"
+        overflowY="auto"
       >
         {currentApp.status.components.map(({
           name, group, kind, status,
@@ -44,8 +45,7 @@ export default function Components() {
             chips={<ComponentStatus status={status} />}
             chipsPlacement="right"
             onClick={() => navigate(`/apps/${appName}/components/${kind.toLowerCase()}/${name}`)}
-            flexBasis="40%"
-            marginBottom={0}
+            marginBottom="medium"
           />
         ))}
         <Flex
