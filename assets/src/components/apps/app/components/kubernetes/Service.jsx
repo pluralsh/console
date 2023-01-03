@@ -1,19 +1,9 @@
 import { Box, Text } from 'grommet'
-import {
-  TabContent,
-  TabHeader,
-  TabHeaderItem,
-  Tabs,
-} from 'forge-core'
-import { useQuery } from 'react-apollo'
-
-import { useParams } from 'react-router-dom'
+import { TabContent, Tabs } from 'forge-core'
 
 import { LoopingLogo } from '../../../../utils/AnimatedLogo'
 
-import { SERVICE_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
-import { POLL_INTERVAL } from './constants'
 import { PodList } from './Pod'
 import { RawContent } from './Component'
 import { Events } from './Event'
@@ -88,14 +78,7 @@ function Spec({ spec: { clusterIp, type, ports } }) {
   )
 }
 
-export default function Service() {
-  const { name, repo } = useParams()
-  const { data, refetch } = useQuery(SERVICE_Q, {
-    variables: { name, namespace: repo },
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
-
+export function Service({ data, refetch }) {
   if (!data) return <LoopingLogo dark />
 
   const { service } = data
@@ -106,29 +89,6 @@ export default function Service() {
       style={{ overflow: 'auto' }}
     >
       <Tabs defaultTab="info">
-        <TabHeader>
-          <TabHeaderItem name="info">
-            <Text
-              size="small"
-              weight={500}
-            >info
-            </Text>
-          </TabHeaderItem>
-          <TabHeaderItem name="events">
-            <Text
-              size="small"
-              weight={500}
-            >events
-            </Text>
-          </TabHeaderItem>
-          <TabHeaderItem name="raw">
-            <Text
-              size="small"
-              weight={500}
-            >raw
-            </Text>
-          </TabHeaderItem>
-        </TabHeader>
         <TabContent name="info">
           <Metadata metadata={service.metadata} />
           <Status status={service.status} />
@@ -136,7 +96,7 @@ export default function Service() {
           <PodList
             pods={service.pods}
             refetch={refetch}
-            namespace={repo}
+            namespace={undefined} // TODO: repo.
           />
         </TabContent>
         <TabContent name="events">

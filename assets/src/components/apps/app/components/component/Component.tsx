@@ -6,6 +6,7 @@ import {
 } from 'honorable'
 import {
   AppIcon,
+  LoopingLogo,
   Tab,
   TabList,
   TabPanel,
@@ -33,9 +34,13 @@ import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLa
 
 import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLayoutSidenavContainer'
 
+import { useQuery } from 'react-apollo'
+
 import { LoginContext } from '../../../../contexts'
 
 import { ComponentIcon, ComponentStatus } from '../misc'
+import { POD_Q, SERVICE_Q } from '../kubernetes/queries'
+import { POLL_INTERVAL } from '../kubernetes/constants'
 
 const directory = [
   { label: 'Info', path: 'info' },
@@ -43,18 +48,35 @@ const directory = [
   { label: 'Raw', path: 'raw' },
 ]
 
+const queries = {
+  pod: POD_Q,
+  service: SERVICE_Q,
+}
+
 export default function Component() {
   const tabStateRef = useRef<any>(null)
   const { me } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
-  const { appName, componentKind, componentName } = useParams()
+  const { appName, componentKind = '', componentName } = useParams()
   const { applications }: any = useContext(InstallationContext)
   const pathPrefix = `/apps/${appName}/components/${componentKind}/${componentName}`
   const currentApp = applications.find(app => app.name === appName)
+  const { data, loading, refetch } = useQuery(queries[componentKind],
+    { variables: { name: componentName, namespace: appName }, pollInterval: POLL_INTERVAL })
 
-  if (!me || !currentApp) return null
+  if (!me || !currentApp || !data || loading) {
+    return (
+      <Flex
+        grow={1}
+        justify="center"
+      >
+        <LoopingLogo scale={1} />
+      </Flex>
+    )
+  }
 
-  const currentComponent = currentApp.status.components.find(({ name, kind }) => name === componentName && kind.toLowerCase() === componentKind)
+  const currentComponent = currentApp.status.components
+    .find(({ name, kind }) => name === componentName && kind.toLowerCase() === componentKind)
   const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
 
   return (
@@ -119,7 +141,7 @@ export default function Component() {
         as={<ResponsiveLayoutContentContainer />}
         stateRef={tabStateRef}
       >
-        <Outlet />
+        <Outlet context={{ data, loading, refetch }} />
       </TabPanel>
       <ResponsiveLayoutSidecarContainer width={200}>
         <PropsContainer marginTop={64}>

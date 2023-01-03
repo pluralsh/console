@@ -11,7 +11,6 @@ import { InstallationContext } from '../../../../Installations'
 
 import { BUILD_PADDING } from '../../../../builds/Builds'
 
-import Service from './Service'
 import ComponentName from './ComponentName'
 import Deployment from './Deployment'
 import Ingress from './Ingress'
@@ -23,14 +22,6 @@ import { Certificate } from './Certificate'
 
 function ComponentContent({ namespace, kind, name }) {
   switch (kind.toLowerCase()) {
-  case 'service':
-    return (
-      <Service
-        namespace={namespace}
-        kind={kind}
-        name={name}
-      />
-    )
   case 'deployment':
     return (
       <Deployment

@@ -34,7 +34,7 @@ export function ListItemBorder({ borderColor }: { borderColor: string }) {
 // TODO: Move it to design system.
 export function ListItem({
   title, subtitle, description, icon, borderColor, chips, chipsPlacement = 'left', onClick, ...props
-}: CardProps & {title: string, subtitle?: string, description?: string, icon?: any, borderColor?: string, chips?: any, chipsPlacement: 'left' | 'right', onClick: () => any},) {
+}: CardProps & {title: string, subtitle?: string, description?: string, icon?: any, borderColor?: string, chips?: any, chipsPlacement?: 'left' | 'right', onClick: () => any},) {
   return (
     <Card
       clickable

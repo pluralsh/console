@@ -1,12 +1,13 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { PageTitle } from '@pluralsh/design-system'
+import { Code, PageTitle } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useOutletContext, useParams } from 'react-router-dom'
 
-import { Flex } from 'honorable'
+import { stringify } from 'yaml'
 
 export default function ComponentRaw() {
-  const { appName, componentKind, componentName } = useParams()
+  const { appName, componentKind = '', componentName } = useParams()
+  const { data } = useOutletContext<any>()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
 
   useEffect(() => setBreadcrumbs([
@@ -16,17 +17,18 @@ export default function ComponentRaw() {
     { text: componentName, url: `/apps/${appName}/components/${componentKind}/${componentName}` },
   ]), [appName, componentKind, componentName, setBreadcrumbs])
 
+  const raw = data[componentKind]?.raw
+  const object = JSON.parse(raw)
+
   return (
     <>
       <PageTitle heading="Raw" />
-      <Flex
-        gap="small"
-        wrap="wrap"
+      <Code
+        language="yaml"
+        maxHeight="calc(100vh - 244px)"
       >
-        {appName}
-        {componentKind}
-        {componentName}
-      </Flex>
+        {stringify(object)}
+      </Code>
     </>
   )
 }

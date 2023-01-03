@@ -1,5 +1,10 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { EmptyState, PageTitle, RunBookIcon } from '@pluralsh/design-system'
+import {
+  EmptyState,
+  LoopingLogo,
+  PageTitle,
+  RunBookIcon,
+} from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { POLL_INTERVAL } from 'components/runbooks/constants'
@@ -27,7 +32,16 @@ export default function Runbooks() {
     { text: 'Runbooks', url: `/apps/${appName}/runbooks` },
   ]), [appName, setBreadcrumbs])
 
-  if (!data) return null
+  if (!data) {
+    return (
+      <Flex
+        grow={1}
+        justify="center"
+      >
+        <LoopingLogo scale={1} />
+      </Flex>
+    )
+  }
 
   const { runbooks } = data
 
