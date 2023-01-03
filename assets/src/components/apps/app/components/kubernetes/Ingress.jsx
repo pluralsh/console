@@ -1,20 +1,8 @@
 import { Box, Text } from 'grommet'
-import {
-  TabContent,
-  TabHeader,
-  TabHeaderItem,
-  Tabs,
-} from 'forge-core'
-import { useQuery } from 'react-apollo'
+import { TabContent, Tabs } from 'forge-core'
 
-import { useParams } from 'react-router-dom'
-
-import { LoopingLogo } from '../../../../utils/AnimatedLogo'
-
-import { INGRESS_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
-import { POLL_INTERVAL } from './constants'
-import { RawContent } from './Component'
+
 import { Events } from './Event'
 import { Container } from './utils'
 
@@ -123,46 +111,12 @@ function Spec({ spec: { rules } }) {
 }
 
 export default function Ingress() {
-  const { name, repo } = useParams()
-  const { data } = useQuery(INGRESS_Q, {
-    variables: { name, namespace: repo },
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
-
-  if (!data) return <LoopingLogo dark />
-
-  const { ingress } = data
-
   return (
     <Box
       fill
       style={{ overflow: 'auto' }}
     >
       <Tabs defaultTab="info">
-        <TabHeader>
-          <TabHeaderItem name="info">
-            <Text
-              size="small"
-              weight={500}
-            >info
-            </Text>
-          </TabHeaderItem>
-          <TabHeaderItem name="events">
-            <Text
-              size="small"
-              weight={500}
-            >events
-            </Text>
-          </TabHeaderItem>
-          <TabHeaderItem name="raw">
-            <Text
-              size="small"
-              weight={500}
-            >raw
-            </Text>
-          </TabHeaderItem>
-        </TabHeader>
         <TabContent name="info">
           <Metadata metadata={ingress.metadata} />
           <Status status={ingress.status} />
@@ -170,9 +124,6 @@ export default function Ingress() {
         </TabContent>
         <TabContent name="events">
           <Events events={ingress.events} />
-        </TabContent>
-        <TabContent name="raw">
-          <RawContent raw={ingress.raw} />
         </TabContent>
       </Tabs>
     </Box>

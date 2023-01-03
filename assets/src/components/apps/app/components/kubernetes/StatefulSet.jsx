@@ -6,7 +6,6 @@ import {
   TabHeaderItem,
   Tabs,
 } from 'forge-core'
-import { useQuery } from 'react-apollo'
 
 import { useParams } from 'react-router-dom'
 
@@ -16,13 +15,10 @@ import { DURATIONS } from 'utils/time'
 
 import RangePicker from 'components/utils/RangePicker'
 
-import { LoopingLogo } from '../../../../utils/AnimatedLogo'
-
 import { Pie } from '../../../../utils/ProgressGauge'
 
-import { STATEFUL_SET_Q } from './queries'
 import { Metadata, MetadataRow } from './Metadata'
-import { POLL_INTERVAL, ScalingTypes } from './constants'
+import { ScalingTypes } from './constants'
 import { PodList } from './Pod'
 import { RawContent } from './Component'
 import { Events } from './Event'
@@ -95,11 +91,6 @@ export default function StatefulSet() {
   const [tab, setTab] = useState('info')
   const [duration, setDuration] = useState(DURATIONS[0])
   const { name, repo } = useParams()
-  const { data, refetch } = useQuery(STATEFUL_SET_Q, {
-    variables: { name, namespace: repo },
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
 
   const { update } = useIntercom()
 
@@ -108,10 +99,6 @@ export default function StatefulSet() {
 
     return () => update({ hideDefaultLauncher: false })
   }, [])
-
-  if (!data) return <LoopingLogo dark />
-
-  const { statefulSet } = data
 
   return (
     <Box
@@ -135,32 +122,11 @@ export default function StatefulSet() {
         )}
       >
         <TabHeader>
-          <TabHeaderItem name="info">
-            <Text
-              size="small"
-              weight={500}
-            >info
-            </Text>
-          </TabHeaderItem>
           <TabHeaderItem name="metrics">
             <Text
               size="small"
               weight={500}
             >metrics
-            </Text>
-          </TabHeaderItem>
-          <TabHeaderItem name="events">
-            <Text
-              size="small"
-              weight={500}
-            >events
-            </Text>
-          </TabHeaderItem>
-          <TabHeaderItem name="raw">
-            <Text
-              size="small"
-              weight={500}
-            >raw
             </Text>
           </TabHeaderItem>
         </TabHeader>
@@ -187,9 +153,6 @@ export default function StatefulSet() {
         </TabContent>
         <TabContent name="events">
           <Events events={statefulSet.events} />
-        </TabContent>
-        <TabContent name="raw">
-          <RawContent raw={statefulSet.raw} />
         </TabContent>
       </Tabs>
     </Box>

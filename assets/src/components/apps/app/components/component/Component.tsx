@@ -39,7 +39,15 @@ import { useQuery } from 'react-apollo'
 import { LoginContext } from '../../../../contexts'
 
 import { ComponentIcon, ComponentStatus } from '../misc'
-import { POD_Q, SERVICE_Q } from '../kubernetes/queries'
+import {
+  CERTIFICATE_Q,
+  CRON_JOB_Q,
+  DEPLOYMENT_Q,
+  INGRESS_Q,
+  JOB_Q,
+  SERVICE_Q,
+  STATEFUL_SET_Q,
+} from '../kubernetes/queries'
 import { POLL_INTERVAL } from '../kubernetes/constants'
 
 const directory = [
@@ -48,9 +56,14 @@ const directory = [
   { label: 'Raw', path: 'raw' },
 ]
 
-const queries = {
-  pod: POD_Q,
+const kindToQuery = {
+  certificate: CERTIFICATE_Q,
+  cronjob: CRON_JOB_Q,
+  deployment: DEPLOYMENT_Q,
+  ingress: INGRESS_Q,
+  job: JOB_Q,
   service: SERVICE_Q,
+  statefulset: STATEFUL_SET_Q,
 }
 
 export default function Component() {
@@ -61,7 +74,7 @@ export default function Component() {
   const { applications }: any = useContext(InstallationContext)
   const pathPrefix = `/apps/${appName}/components/${componentKind}/${componentName}`
   const currentApp = applications.find(app => app.name === appName)
-  const { data, loading, refetch } = useQuery(queries[componentKind],
+  const { data, loading, refetch } = useQuery(kindToQuery[componentKind],
     { variables: { name: componentName, namespace: appName }, pollInterval: POLL_INTERVAL })
 
   if (!me || !currentApp || !data || loading) {

@@ -5,7 +5,6 @@ import { LoopingLogo } from '../../../../utils/AnimatedLogo'
 
 import { Metadata, MetadataRow } from './Metadata'
 import { PodList } from './Pod'
-import { RawContent } from './Component'
 import { Events } from './Event'
 import { Container } from './utils'
 
@@ -78,11 +77,7 @@ function Spec({ spec: { clusterIp, type, ports } }) {
   )
 }
 
-export function Service({ data, refetch }) {
-  if (!data) return <LoopingLogo dark />
-
-  const { service } = data
-
+export function Service() {
   return (
     <Box
       fill
@@ -101,9 +96,6 @@ export function Service({ data, refetch }) {
         </TabContent>
         <TabContent name="events">
           <Events events={service.events} />
-        </TabContent>
-        <TabContent name="raw">
-          <RawContent raw={service.raw} />
         </TabContent>
       </Tabs>
     </Box>

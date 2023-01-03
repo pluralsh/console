@@ -1,24 +1,17 @@
 import { useCallback, useState } from 'react'
 import { Box, Text } from 'grommet'
-import { useMutation, useQuery } from 'react-apollo'
-import { useParams } from 'react-router-dom'
+import { useMutation } from 'react-apollo'
 import {
   Confirm,
   TabContent,
-  TabHeader,
-  TabHeaderItem,
   Tabs,
   Trash,
 } from 'forge-core'
 
-import { LoopingLogo } from '../../../../utils/AnimatedLogo'
-
-import { POLL_INTERVAL } from './constants'
 import { Metadata, MetadataRow } from './Metadata'
-import { DELETE_JOB, JOB_Q } from './queries'
+import { DELETE_JOB } from './queries'
 import { Container } from './utils'
 import { Events } from './Event'
-import { RawContent } from './Component'
 import { PodList, ignore } from './Pod'
 
 export function DeleteIcon({ onClick, loading }) {
@@ -119,46 +112,9 @@ function Spec({ spec }) {
 }
 
 export default function Job() {
-  const { repo, name } = useParams()
-  const { data, refetch } = useQuery(JOB_Q, {
-    variables: { name, namespace: repo },
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
-
-  if (!data) return <LoopingLogo dark />
-
-  const { job } = data
-
   return (
-    <Box
-      fill
-      style={{ overflow: 'auto' }}
-    >
+    <Box>
       <Tabs defaultTab="info">
-        <TabHeader>
-          <TabHeaderItem name="info">
-            <Text
-              size="small"
-              weight={500}
-            >info
-            </Text>
-          </TabHeaderItem>
-          <TabHeaderItem name="events">
-            <Text
-              size="small"
-              weight={500}
-            >events
-            </Text>
-          </TabHeaderItem>
-          <TabHeaderItem name="raw">
-            <Text
-              size="small"
-              weight={500}
-            >raw
-            </Text>
-          </TabHeaderItem>
-        </TabHeader>
         <TabContent name="info">
           <Metadata metadata={job.metadata} />
           <Status status={job.status} />
@@ -171,9 +127,6 @@ export default function Job() {
         </TabContent>
         <TabContent name="events">
           <Events events={job.events} />
-        </TabContent>
-        <TabContent name="raw">
-          <RawContent raw={job.raw} />
         </TabContent>
       </Tabs>
     </Box>

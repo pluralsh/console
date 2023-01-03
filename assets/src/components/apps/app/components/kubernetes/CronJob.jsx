@@ -1,24 +1,14 @@
 import { Anchor, Box, Text } from 'grommet'
-import {
-  TabContent,
-  TabHeader,
-  TabHeaderItem,
-  Tabs,
-} from 'forge-core'
-import { useQuery } from 'react-apollo'
+import { TabContent, Tabs } from 'forge-core'
 
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import { Readiness } from 'utils/status'
 
 import { ReadyIcon } from '../../../../Component'
 
-import { LoopingLogo } from '../../../../utils/AnimatedLogo'
-
 import { Metadata, MetadataRow } from './Metadata'
-import { POLL_INTERVAL } from './constants'
 import { RawContent } from './Component'
-import { CRON_JOB_Q } from './queries'
 import { Events } from './Event'
 import { Container } from './utils'
 import { HeaderItem, RowItem } from './Pod'
@@ -189,46 +179,12 @@ function Jobs({ jobs, refetch }) {
 }
 
 export default function CronJob() {
-  const { repo, name } = useParams()
-  const { data, refetch } = useQuery(CRON_JOB_Q, {
-    variables: { name, namespace: repo },
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
-
-  if (!data) return <LoopingLogo dark />
-
-  const { cronJob } = data
-
   return (
     <Box
       fill
       style={{ overflow: 'auto' }}
     >
       <Tabs defaultTab="info">
-        <TabHeader>
-          <TabHeaderItem name="info">
-            <Text
-              size="small"
-              weight={500}
-            >info
-            </Text>
-          </TabHeaderItem>
-          <TabHeaderItem name="events">
-            <Text
-              size="small"
-              weight={500}
-            >events
-            </Text>
-          </TabHeaderItem>
-          <TabHeaderItem name="raw">
-            <Text
-              size="small"
-              weight={500}
-            >raw
-            </Text>
-          </TabHeaderItem>
-        </TabHeader>
         <TabContent name="info">
           <Metadata metadata={cronJob.metadata} />
           <Status status={cronJob.status} />
