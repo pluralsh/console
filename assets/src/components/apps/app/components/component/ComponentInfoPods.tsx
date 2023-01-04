@@ -10,9 +10,7 @@ import {
 } from 'honorable'
 import { memoryParser } from 'kubernetes-resource-parser'
 import { cpuParser } from 'utils/kubernetes'
-import { Readiness } from 'utils/status'
-
-import { containerReadiness } from '../kubernetes/Pod'
+import { Readiness, containerStatusToReadiness } from 'utils/status'
 
 const COLUMN_HELPER = createColumnHelper<any>()
 
@@ -72,7 +70,7 @@ const columns = [
     id: 'containers',
     cell: (statuses: any) => {
       const all = statuses.getValue().length
-      const ready = statuses.getValue().reduce((count, status) => count + (containerReadiness(status) === Readiness.Ready ? 1 : 0), 0)
+      const ready = statuses.getValue().reduce((count, status) => count + (containerStatusToReadiness(status) === Readiness.Ready ? 1 : 0), 0)
       const severity = ready === 0 ? 'error' : (all === ready ? 'success' : 'warning')
 
       return (

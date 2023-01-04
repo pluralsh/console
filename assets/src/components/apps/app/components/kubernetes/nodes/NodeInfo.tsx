@@ -17,6 +17,9 @@ import { useParams } from 'react-router-dom'
 import { normalizeColor } from 'grommet/utils'
 import { Line } from 'rc-progress'
 import { ArcElement, Chart } from 'chart.js'
+import styled from 'styled-components'
+import { Card } from '@pluralsh/design-system'
+import { Flex } from 'honorable'
 
 import {
   Event,
@@ -25,20 +28,14 @@ import {
   Pod,
 } from 'generated/graphql'
 
-import styled from 'styled-components'
+import { LoopingLogo } from 'components/utils/AnimatedLogo'
+import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { ignoreEvent } from 'components/utils/events'
 
-import { Card } from '@pluralsh/design-system'
-
-import { Flex } from 'honorable'
-
-import { LoopingLogo } from '../../utils/AnimatedLogo'
-import { BreadcrumbsContext } from '../../Breadcrumbs'
 import { POLL_INTERVAL } from '../constants'
-import { ignore } from '../pods/Pod'
 import { PodList } from '../pods/PodList'
 import { DELETE_NODE, NODE_Q } from '../queries'
 import { roundToTwoPlaces } from '../utils'
-
 import { Metadata } from '../Metadata'
 
 import { NodeGraphs } from './NodeGraphs'
@@ -120,7 +117,7 @@ export function DeleteNode({ name, refetch }) {
   })
 
   const doConfirm = useCallback(e => {
-    ignore(e)
+    ignoreEvent(e)
     setConfirm(true)
   },
   [setConfirm])
@@ -142,11 +139,11 @@ export function DeleteNode({ name, refetch }) {
           description="The node will be replaced within its autoscaling group."
           loading={loading}
           cancel={e => {
-            ignore(e)
+            ignoreEvent(e)
             setConfirm(false)
           }}
           submit={e => {
-            ignore(e)
+            ignoreEvent(e)
             mutation()
           }}
         />

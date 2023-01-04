@@ -9,7 +9,8 @@ import { normalizeColor } from 'grommet/utils'
 import { Chart } from 'chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 
-import { cpuParser } from '../../../utils/kubernetes'
+import { cpuParser } from 'utils/kubernetes'
+
 import { ClusterMetrics as Metrics } from '../constants'
 import { NODE_METRICS_Q } from '../queries'
 

@@ -1,7 +1,7 @@
 import { PageTitle } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 
-import { BreadcrumbsContext } from '../../Breadcrumbs'
+import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
 export default function Pods() {
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)

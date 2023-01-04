@@ -1,42 +1,11 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { PageTitle, Table } from '@pluralsh/design-system'
+import { PageTitle } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 
-import { Date } from 'components/utils/Date'
-
-import { createColumnHelper } from '@tanstack/react-table'
 import { Event as EventT } from 'generated/graphql'
 
-const COLUMN_HELPER = createColumnHelper<EventT>()
-
-const columns = [
-  COLUMN_HELPER.accessor(event => event.type, {
-    id: 'type',
-    cell: type => type.getValue(),
-    header: 'Type',
-  }),
-  COLUMN_HELPER.accessor(event => event.reason, {
-    id: 'reason',
-    cell: reason => reason.getValue(),
-    header: 'Reason',
-  }),
-  COLUMN_HELPER.accessor(event => event.message, {
-    id: 'message',
-    cell: message => message.getValue(),
-    header: 'Message',
-  }),
-  COLUMN_HELPER.accessor(event => event.count, {
-    id: 'count',
-    cell: count => count.getValue(),
-    header: 'Count',
-  }),
-  COLUMN_HELPER.accessor(event => event.lastTimestamp, {
-    id: 'lastTimestamp',
-    cell: lastTimestamp => <Date date={lastTimestamp.getValue()} />,
-    header: 'Last seen',
-  }),
-]
+import EventsTable from '../EventsTable'
 
 export default function ComponentEvents() {
   const { appName, componentKind, componentName } = useParams()
@@ -61,14 +30,7 @@ export default function ComponentEvents() {
   return (
     <>
       <PageTitle heading="Events" />
-      {events?.length > 0 && (
-        <Table
-          data={events}
-          columns={columns}
-          maxHeight="calc(100vh - 244px)"
-        />
-      )}
-      {(!events || events.length === 0) && 'No events available.'}
+      <EventsTable events={events} />
     </>
   )
 }

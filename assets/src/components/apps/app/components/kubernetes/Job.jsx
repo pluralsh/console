@@ -7,11 +7,11 @@ import {
   Tabs,
   Trash,
 } from 'forge-core'
+import { ignoreEvent } from 'components/utils/events'
 
 import { MetadataRow } from './Metadata'
 import { DELETE_JOB } from './queries'
 import { Container } from './utils'
-import { ignore } from './pods/Pod'
 import { PodList } from './pods/PodList'
 
 export function DeleteIcon({ onClick, loading }) {
@@ -44,7 +44,7 @@ export function DeleteJob({ name, namespace, refetch }) {
   })
 
   const doConfirm = useCallback(e => {
-    ignore(e)
+    ignoreEvent(e)
     setConfirm(true)
   }, [setConfirm])
 
@@ -59,10 +59,10 @@ export function DeleteJob({ name, namespace, refetch }) {
           description="The pod will be replaced by it's managing controller"
           loading={loading}
           cancel={e => {
-            ignore(e); setConfirm(false)
+            ignoreEvent(e); setConfirm(false)
           }}
           submit={e => {
-            ignore(e); mutation()
+            ignoreEvent(e); mutation()
           }}
         />
       )}

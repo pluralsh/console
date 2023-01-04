@@ -8,10 +8,9 @@ import {
   ThemeContext,
 } from 'grommet'
 import { normalizeColor } from 'grommet/utils'
-
 import moment from 'moment'
 
-import { ignore } from '../apps/app/components/kubernetes/Pod'
+import { ignoreEvent } from 'components/utils/events'
 
 import { MetadataRow, MetadataTag } from '../apps/app/components/kubernetes/Metadata'
 
@@ -72,7 +71,7 @@ function AlertDetail({ alert, setAlert }) {
           round="xsmall"
           hoverIndicator="tone-light"
           onClick={e => {
-            ignore(e); setAlert(null)
+            ignoreEvent(e); setAlert(null)
           }}
         >
           <Previous

@@ -3,18 +3,15 @@ import { useQuery } from 'react-apollo'
 import { useParams } from 'react-router-dom'
 
 import type { Event } from 'generated/graphql'
+import { LoopingLogo } from 'components/utils/AnimatedLogo'
+import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
-import { LoopingLogo } from '../../utils/AnimatedLogo'
-import { BreadcrumbsContext } from '../../Breadcrumbs'
 import { POLL_INTERVAL } from '../constants'
-import { Events } from '../Event'
 import { NODE_EVENTS_Q } from '../queries'
 
+import EventsTable from '../../EventsTable'
+
 import { ScrollablePage } from './Node'
-
-export const EventTable = () => {
-
-}
 
 export default function NodeEvents() {
   const { name } = useParams()
@@ -42,7 +39,7 @@ export default function NodeEvents() {
 
   return (
     <ScrollablePage heading="Events">
-      <Events events={events} />
+      <EventsTable events={events} />
     </ScrollablePage>
   )
 }

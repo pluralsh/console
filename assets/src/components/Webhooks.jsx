@@ -37,7 +37,7 @@ import { LoopingLogo } from './utils/AnimatedLogo'
 import { Container } from './utils/Container'
 import { SectionContentContainer, SectionPortal } from './utils/Section'
 import SmoothScroller from './utils/SmoothScroller'
-import { HeaderItem } from './apps/app/components/kubernetes/Pod'
+import { HeaderItem } from './apps/app/components/kubernetes/pods/Pod'
 import { Icon } from './users/Group'
 
 // const MAX_LEN = 100

@@ -15,34 +15,23 @@ import {
 } from 'forge-core'
 
 import { useMutation, useQuery } from 'react-apollo'
-
 import { Terminal } from 'grommet-icons'
-
 import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
-
 import { filesize } from 'filesize'
-
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { Readiness, containerStatusToReadiness } from 'utils/status'
-
 import { ReadyIcon } from 'components/Component'
-
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-
 import { asQuery } from 'components/utils/query'
-
 import { LoopingLogo } from 'components/utils/AnimatedLogo'
+import { ignoreEvent } from 'components/utils/events'
 
 import { ComponentIcon } from '../../misc'
-
 import { DELETE_POD, POD_Q } from '../queries'
-
 import { POLL_INTERVAL } from '../constants'
 import { Metadata, MetadataRow } from '../Metadata'
-
 import { Container as Con, LogLink } from '../utils'
-
 import { DeleteIcon } from '../Job'
 
 export const ReadinessColor = {
@@ -52,7 +41,9 @@ export const ReadinessColor = {
   [Readiness.Complete]: 'tone-medium',
 }
 
-function phaseToReadiness(phase) {
+type Phase = 'Running' | 'Succeeded' | 'Pending' | 'Failed'
+
+function phaseToReadiness(phase: Phase) {
   switch (phase) {
   case 'Running':
   case 'Succeeded':
@@ -66,28 +57,6 @@ function phaseToReadiness(phase) {
   }
 }
 
-function statusToReadiness({ phase, containerStatuses }) {
-  if (phase === 'Succeeded') return Readiness.Ready
-  if (phase === 'Failed') return Readiness.Failed
-  if (phase === 'Pending') return Readiness.InProgress
-  const unready = (containerStatuses || []).filter(({ ready }) => !ready)
-
-  if (unready.length === 0) return Readiness.Ready
-
-  return Readiness.InProgress
-}
-
-export function containerReadiness(status) {
-  if (!status) return Readiness.InProgress
-  const { ready, state: { terminated } } = status
-
-  if (ready && terminated) return Readiness.Complete
-  if (ready) return Readiness.Ready
-  if (!terminated) return Readiness.InProgress
-
-  return Readiness.Failed
-}
-
 export function PodPhase({ phase, message }) {
   const readiness = phaseToReadiness(phase)
 
@@ -97,9 +66,7 @@ export function PodPhase({ phase, message }) {
       gap="xsmall"
       align="center"
     >
-      {readiness && (
-        <ReadyIcon readiness={readiness} />
-      )}
+      {readiness && <ReadyIcon readiness={readiness} />}
       <Text size="small">{phase}</Text>
       {message && (
         <Text
@@ -114,11 +81,15 @@ export function PodPhase({ phase, message }) {
 }
 
 export function podResources(containers: Iterable<{
-  resources: Record<string, {
-    cpu?: number | null,
-    memory?: number | null,
-  }>
-}>, type:string) {
+    resources: Record<
+      string,
+      {
+        cpu?: number | null
+        memory?: number | null
+      }
+    >
+  }>,
+type: string) {
   let memory: number | undefined
   let cpu: number | undefined
 
@@ -183,7 +154,7 @@ export function HeaderItem({
   )
 }
 
-export function RowItem({ width, text, truncate = false }:any) {
+export function RowItem({ width, text, truncate = false }: any) {
   return (
     <Box
       flex={false}
@@ -245,11 +216,6 @@ export function PodHeader() {
   )
 }
 
-export const ignore = e => {
-  e.stopPropagation()
-  e.preventDefault()
-}
-
 export function DeletePod({ name, namespace, refetch }) {
   const [confirm, setConfirm] = useState(false)
   const [mutation, { loading }] = useMutation(DELETE_POD, {
@@ -261,7 +227,7 @@ export function DeletePod({ name, namespace, refetch }) {
   })
 
   const doConfirm = useCallback(e => {
-    ignore(e)
+    ignoreEvent(e)
     setConfirm(true)
   },
   [setConfirm])
@@ -277,11 +243,11 @@ export function DeletePod({ name, namespace, refetch }) {
           description="The pod will be replaced by it's managing controller"
           loading={loading}
           cancel={e => {
-            ignore(e)
+            ignoreEvent(e)
             setConfirm(false)
           }}
           submit={e => {
-            ignore(e)
+            ignoreEvent(e)
             mutation()
           }}
         />
@@ -374,7 +340,7 @@ function SimpleContainerStatus({ status }) {
 
 function ContainerSummary({
   status: { containerStatuses, initContainerStatuses },
-}:any) {
+}: any) {
   const allStatuses = [
     ...(initContainerStatuses || []),
     ...(containerStatuses || []),
