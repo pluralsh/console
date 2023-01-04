@@ -121,13 +121,14 @@ export function GrantAccess() {
   )
 }
 
-function intercomAttributes({email, name}) {
+function intercomAttributes({ email, name }) {
   if (email === 'demo-user@plural.sh') { 
     const randstr = Math.random().toString(36).slice(2)
-    return ({ email: `sandbox+${randstr}@plural.sh`, name})
+
+    return ({ email: `sandbox+${randstr}@plural.sh`, name })
   }
 
-  return {email, name}
+  return { email, name }
 }
 
 export function EnsureLogin({ children }) {
