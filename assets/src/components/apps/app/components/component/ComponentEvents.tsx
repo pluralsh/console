@@ -52,15 +52,19 @@ export default function ComponentEvents() {
   // To avoid mapping between component types and fields of data returned by API
   // we are picking first available value from API object for now.
   const value: any = Object.values(data).find(value => value !== undefined)
+  const events: any = value?.events
 
   return (
     <>
       <PageTitle heading="Events" />
-      <Table
-        data={value?.events}
-        columns={columns}
-        maxHeight="calc(100vh - 244px)"
-      />
+      {events?.length > 0 && (
+        <Table
+          data={events}
+          columns={columns}
+          maxHeight="calc(100vh - 244px)"
+        />
+      )}
+      {(!events || events.length === 0) && 'No events available.'}
     </>
   )
 }
