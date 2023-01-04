@@ -163,7 +163,7 @@ export default function Component() {
         <PropsContainer marginTop={64}>
           <Prop title="Name">{componentName}</Prop>
           <Prop title="Namespace">{appName}</Prop>
-          <Prop title="Kind">{component?.kind}</Prop>
+          <Prop title="Kind">{component?.group || 'v1'}/{component?.kind}</Prop>
           <Prop title="Status"><ComponentStatus status={component?.status} /></Prop>
         </PropsContainer>
       </ResponsiveLayoutSidecarContainer>
