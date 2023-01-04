@@ -115,7 +115,6 @@ export default function Job() {
     <Box>
       <Tabs defaultTab="info">
         <TabContent name="info">
-          <Metadata metadata={job.metadata} />
           <Status status={job.status} />
           <Spec spec={job.spec} />
           <PodList

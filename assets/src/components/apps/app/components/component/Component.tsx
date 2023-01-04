@@ -88,7 +88,7 @@ export default function Component() {
     )
   }
 
-  const currentComponent = currentApp.status.components
+  const component = currentApp.status.components
     .find(({ name, kind }) => name === componentName && kind.toLowerCase() === componentKind)
   const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
 
@@ -126,7 +126,7 @@ export default function Component() {
               color="text-xlight"
               caption
             >
-              {currentComponent?.group || 'v1'}/{componentKind?.toLowerCase()}
+              {component?.group || 'v1'}/{component?.kind}
             </P>
           </Div>
         </Flex>
@@ -154,14 +154,17 @@ export default function Component() {
         as={<ResponsiveLayoutContentContainer />}
         stateRef={tabStateRef}
       >
-        <Outlet context={{ data, loading, refetch }} />
+        <Outlet context={{
+          component, data, loading, refetch,
+        }}
+        />
       </TabPanel>
       <ResponsiveLayoutSidecarContainer width={200}>
         <PropsContainer marginTop={64}>
           <Prop title="Name">{componentName}</Prop>
           <Prop title="Namespace">{appName}</Prop>
-          <Prop title="Kind">{componentKind}</Prop>
-          <Prop title="Status"><ComponentStatus status={currentComponent?.status} /></Prop>
+          <Prop title="Kind">{component?.kind}</Prop>
+          <Prop title="Status"><ComponentStatus status={component?.status} /></Prop>
         </PropsContainer>
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />

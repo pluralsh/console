@@ -1,11 +1,8 @@
 import { Box, Text } from 'grommet'
 import { TabContent, Tabs } from 'forge-core'
 
-import { LoopingLogo } from '../../../../utils/AnimatedLogo'
-
-import { Metadata, MetadataRow } from './Metadata'
+import { MetadataRow } from './Metadata'
 import { PodList } from './Pod'
-import { Events } from './Event'
 import { Container } from './utils'
 
 function Status({ status: { loadBalancer } }) {
@@ -85,7 +82,6 @@ export function Service() {
     >
       <Tabs defaultTab="info">
         <TabContent name="info">
-          <Metadata metadata={service.metadata} />
           <Status status={service.status} />
           <Spec spec={service.spec} />
           <PodList

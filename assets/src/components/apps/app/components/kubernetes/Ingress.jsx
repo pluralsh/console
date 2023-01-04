@@ -117,7 +117,6 @@ export default function Ingress() {
     >
       <Tabs defaultTab="info">
         <TabContent name="info">
-          <Metadata metadata={ingress.metadata} />
           <Status status={ingress.status} />
           <Spec spec={ingress.spec} />
         </TabContent>

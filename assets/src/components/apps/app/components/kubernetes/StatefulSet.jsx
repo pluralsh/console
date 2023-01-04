@@ -129,7 +129,6 @@ export default function StatefulSet() {
           </TabHeaderItem>
         </TabHeader>
         <TabContent name="info">
-          <Metadata metadata={statefulSet.metadata} />
           <Status
             status={statefulSet.status}
             metadata={statefulSet.metadata}

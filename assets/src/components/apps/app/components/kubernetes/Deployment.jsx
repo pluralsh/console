@@ -122,7 +122,6 @@ export default function Deployment() {
           </TabHeaderItem>
         </TabHeader>
         <TabContent name="info">
-          <Metadata metadata={deployment.metadata} />
           <Status
             status={deployment.status}
             metadata={deployment.metadata}

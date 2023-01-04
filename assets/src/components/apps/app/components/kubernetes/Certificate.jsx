@@ -59,7 +59,6 @@ export function Certificate() {
     >
       <Tabs defaultTab="info">
         <TabContent name="info">
-          <Metadata metadata={certificate.metadata} />
           <Status status={certificate.status} />
           <Spec spec={certificate.spec} />
         </TabContent>

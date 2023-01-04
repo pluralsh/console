@@ -4,7 +4,7 @@ import { Container } from './utils'
 
 export const mapify = tags => tags.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {})
 
-export function MetadataRow({ name, children, final }) {
+export function MetadataRow({ name, children, final = false }) {
   return (
     <Box
       flex={false}
@@ -37,7 +37,7 @@ export function MetadataRow({ name, children, final }) {
   )
 }
 
-export function MetadataTag({ name, value, background }) {
+export function MetadataTag({ name, value, background = undefined }) {
   return (
     <Box
       round="xsmall"

@@ -7,7 +7,7 @@ import { Readiness } from 'utils/status'
 
 import { ReadyIcon } from '../../../../Component'
 
-import { Metadata, MetadataRow } from './Metadata'
+import { MetadataRow } from './Metadata'
 import { Container } from './utils'
 import { HeaderItem, RowItem } from './Pod'
 import { DeleteJob } from './Job'
@@ -184,7 +184,6 @@ export default function CronJob() {
     >
       <Tabs defaultTab="info">
         <TabContent name="info">
-          <Metadata metadata={cronJob.metadata} />
           <Status status={cronJob.status} />
           <Spec spec={cronJob.spec} />
           <Jobs
