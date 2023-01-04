@@ -145,7 +145,7 @@ export const semanticColors = {
   'text-xlight': grey[400],
   'text-long-form': grey[300],
   'text-disabled': grey[700], // deprecated
-  'text-input-disabled': grey[700],
+  'text-input-disabled': grey[500],
   'text-primary-accent': blue[200], // deprecated maybe?
   'text-primary-disabled': grey[500],
   'text-success': green[500],
