@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useQuery } from 'react-apollo'
 import { memoryParser } from 'kubernetes-resource-parser'
 import { sumBy } from 'lodash'
@@ -8,20 +8,18 @@ import { ReadinessT, nodeStatusToReadiness, readinessToChipTitle } from 'utils/s
 
 import { cpuParser } from 'utils/kubernetes'
 import { LoopingLogo } from 'components/utils/AnimatedLogo'
-import { UnstyledLink } from 'components/utils/Link'
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
 import type { Node, NodeMetric } from 'generated/graphql'
 
 import { filesize } from 'filesize'
-
-import styled from 'styled-components'
 
 import { A, Flex } from 'honorable'
 
 import { Card, Tooltip } from '@pluralsh/design-system'
 
 import { Link } from 'react-router-dom'
+
+import { ScrollablePage } from 'components/layout/ScrollablePage'
 
 import { mapify } from '../Metadata'
 import { POLL_INTERVAL } from '../constants'
@@ -33,11 +31,11 @@ import {
   CaptionText,
   GridTable,
   StatusChip,
+  TABLE_HEIGHT,
   TableCaretLink,
   TableText,
   Usage,
 } from './TableElements'
-import { ScrollablePage } from './Node'
 
 const columnHelper = createColumnHelper<TableData>()
 
@@ -141,19 +139,6 @@ type TableData = {
   readiness?: ReadinessT
 }
 
-const NodesTable = styled(GridTable)(_ => ({
-  table: {
-    gridTemplateColumns: 'minmax(100px, 1fr) auto auto auto auto auto',
-  },
-  'td:nth-child(1)': {
-    '*': {
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-    },
-  },
-}))
-
 export default function Nodes() {
   const { data } = useQuery<{
     nodes: Node[]
@@ -162,11 +147,6 @@ export default function Nodes() {
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
-  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
-
-  useEffect(() => {
-    setBreadcrumbs([{ text: 'nodes', url: '/nodes' }])
-  }, [setBreadcrumbs])
 
   const metrics: Record<string, { cpu?: number; memory?: number }>
     = useMemo(() => {
@@ -230,13 +210,12 @@ export default function Nodes() {
         direction="column"
         gap="xlarge"
       >
-
         {tableData && tableData.length > 0 && (
           <GridTable
             data={tableData}
             columns={columns}
             $truncColIndex={0}
-            maxHeight="calc(100vh - 500px)"
+            {...TABLE_HEIGHT}
           />
         )}
         <Card padding="xlarge">
@@ -249,4 +228,3 @@ export default function Nodes() {
     </ScrollablePage>
   )
 }
-

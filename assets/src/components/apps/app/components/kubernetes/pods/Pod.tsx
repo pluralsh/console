@@ -615,9 +615,10 @@ export function Pod() {
   useEffect(() => {
     if (name && namespace) {
       setBreadcrumbs([
-        { text: 'pods', url: '/pods', disable: true },
-        { text: namespace, url: namespace, disable: true },
-        { text: name, url: name, disable: true },
+        { text: 'pods', url: '/pods' },
+        { text: 'pods', url: '/pods' },
+        { text: namespace, url: namespace },
+        { text: name, url: name },
       ])
     }
   }, [name, namespace, setBreadcrumbs])

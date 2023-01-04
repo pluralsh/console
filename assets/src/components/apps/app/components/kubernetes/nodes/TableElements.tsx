@@ -6,7 +6,7 @@ import {
 } from '@pluralsh/design-system'
 import { UnstyledLink } from 'components/utils/Link'
 import { TRUNCATE } from 'components/utils/truncate'
-import { ComponentProps, ReactNode } from 'react'
+import { CSSProperties, ComponentProps, ReactNode } from 'react'
 import styled from 'styled-components'
 import { ReadinessT, readinessToChipTitle, readinessToSeverity } from 'utils/status'
 
@@ -148,3 +148,7 @@ export function ContainersReadyChip({
     </Chip>
   )
 }
+
+export const TABLE_HEIGHT = {
+  maxHeight: 'clamp(390px, calc(100vh - 420px), 600px)',
+} satisfies CSSProperties

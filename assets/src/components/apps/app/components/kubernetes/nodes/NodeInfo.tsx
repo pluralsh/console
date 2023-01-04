@@ -32,6 +32,8 @@ import { LoopingLogo } from 'components/utils/AnimatedLogo'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { ignoreEvent } from 'components/utils/events'
 
+import { ScrollablePage } from 'components/layout/ScrollablePage'
+
 import { POLL_INTERVAL } from '../constants'
 import { PodList } from '../pods/PodList'
 import { DELETE_NODE, NODE_Q } from '../queries'
@@ -39,7 +41,6 @@ import { roundToTwoPlaces } from '../utils'
 import { Metadata } from '../Metadata'
 
 import { NodeGraphs } from './NodeGraphs'
-import { ScrollablePage } from './Node'
 
 const SubTitle = styled.h2(({ theme }) => ({
   ...theme.partials.text.subtitle1,

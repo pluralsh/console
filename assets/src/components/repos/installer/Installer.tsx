@@ -178,7 +178,7 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
 
     setStepsLoading(true)
     build().then(() => setStepsLoading(false))
-  }, [client, selectedApplications.length])
+  }, [client, selectedApplications, selectedApplications.length])
 
   if (loading) {
     return (

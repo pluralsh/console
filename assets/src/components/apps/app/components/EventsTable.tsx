@@ -1,4 +1,4 @@
-import { PageTitle, Table } from '@pluralsh/design-system'
+import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { Event as EventT } from 'generated/graphql'
@@ -37,7 +37,7 @@ const columns = [
 
 export default function EventsTable({ events }: { events?: Iterable<EventT> }) {
   if (!events || isEmptyIterable(events)) {
-    return 'No events available.'
+    return <>No events available.</>
   }
 
   return (

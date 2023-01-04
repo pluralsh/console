@@ -6,12 +6,12 @@ import type { Event } from 'generated/graphql'
 import { LoopingLogo } from 'components/utils/AnimatedLogo'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
+import { ScrollablePage } from 'components/layout/ScrollablePage'
+
 import { POLL_INTERVAL } from '../constants'
 import { NODE_EVENTS_Q } from '../queries'
 
 import EventsTable from '../../EventsTable'
-
-import { ScrollablePage } from './Node'
 
 export default function NodeEvents() {
   const { name } = useParams()

@@ -5,7 +5,6 @@ import { useMemo } from 'react'
 import { filesize } from 'filesize'
 
 import type { Maybe, Pod } from 'generated/graphql'
-import { UnstyledLink } from 'components/utils/Link'
 import { containerStatusToReadiness } from 'utils/status'
 
 import { Tooltip } from '@pluralsh/design-system'
@@ -13,6 +12,7 @@ import { Tooltip } from '@pluralsh/design-system'
 import {
   ContainersReadyChip,
   GridTable,
+  TABLE_HEIGHT,
   TableCaretLink,
   TableText,
   Usage,
@@ -201,10 +201,6 @@ export function PodList({
   namespace: _namespace,
   refetch: _refetch,
 }: PodListProps) {
-  if (!pods || pods.length === 0) {
-    return <>No pods available.</>
-  }
-
   const tableData: PodTableRow[] = useMemo(() => (pods || [])
     .filter((pod): pod is Pod => !!pod)
     .map(pod => {
@@ -236,13 +232,17 @@ export function PodList({
     }),
   [pods])
 
+  if (!pods || pods.length === 0) {
+    return <>No pods available.</>
+  }
+
   return (
     <GridTable
       data={tableData}
       columns={columns}
       enableColumnResizing
-      maxHeight="calc(100vh - 500px)"
       $truncColIndex={truncColIndex}
+      {...TABLE_HEIGHT}
     />
   )
 }

@@ -35,7 +35,7 @@ const MENU_ITEMS: any[] = [
     />, // TODO: Move to design system.
     path: '/builds',
   },
-  { text: 'Nodes', icon: <ServersIcon />, path: '/nodes' },
+  { text: 'Cluster', icon: <ServersIcon />, path: '/nodes' },
   // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents', sandboxed: true }, // Disabled for now.
   {
     text: 'Audits', name: 'audits', icon: <ListIcon />, path: '/audits',

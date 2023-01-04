@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Outlet } from 'react-router-dom'
 
 import { Flex } from 'honorable'
@@ -12,11 +12,21 @@ import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLa
 import { ResponsiveLayoutSpacer } from 'components/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLayoutContentContainer'
 
+import { useBreadcrumbs } from 'components/Breadcrumbs'
+
 import NodesSideNav from './nodes/NodesSideNav'
 
-function NodesPods() {
+function Cluster() {
   const tabStateRef = useRef<any>()
   const theme = useTheme()
+
+  const { setBreadcrumbs } = useBreadcrumbs()
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { text: 'cluster', url: '/nodes' },
+    ])
+  }, [setBreadcrumbs])
 
   return (
     <Flex
@@ -25,7 +35,6 @@ function NodesPods() {
       overflowY="hidden"
       padding={theme.spacing.xlarge}
       paddingTop={theme.spacing.large}
-      paddingBottom={0}
     >
       <ResponsiveLayoutSidenavContainer
         width={240}
@@ -46,4 +55,5 @@ function NodesPods() {
   )
 }
 
-export default NodesPods
+export default Cluster
+
