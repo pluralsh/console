@@ -1,3 +1,4 @@
+import { ignoreEvent } from 'components/utils/events'
 import { Box, Text } from 'grommet'
 import React, { useContext, useEffect, useState } from 'react'
 import { Portal } from 'react-portal'
@@ -8,7 +9,7 @@ export const SubmenuContext = React.createContext({})
 export function SubmenuPortal({ children, name }) {
   const { ref, setName } = useContext(SubmenuContext)
 
-  useEffect(() => setName(name), [name])
+  useEffect(() => setName(name), [name, setName])
 
   return (
     <Portal node={ref}>
@@ -30,10 +31,6 @@ export function Submenu() {
   )
 }
 
-const ignore = e => {
-  e.preventDefault(); e.stopPropagation()
-}
-
 export function SubmenuItem({
   icon, label, selected, url,
 }) {
@@ -49,7 +46,7 @@ export function SubmenuItem({
       gap="small"
       pad={{ right: 'small', vertical: '7px', left: '20px' }}
       onClick={e => {
-        ignore(e); navigate(url)
+        ignoreEvent(e); navigate(url)
       }}
     >
       {icon}

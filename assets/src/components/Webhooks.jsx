@@ -294,7 +294,7 @@ export function WebhookManagement() {
 export default function Webhooks() {
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
 
-  useEffect(() => setBreadcrumbs([{ text: 'webhooks', url: '/webhooks' }]), [])
+  useEffect(() => setBreadcrumbs([{ text: 'webhooks', url: '/webhooks' }]), [setBreadcrumbs])
   const { data, fetchMore } = useQuery(WEBHOOKS_Q)
 
   if (!data) {

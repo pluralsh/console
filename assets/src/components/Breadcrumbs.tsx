@@ -10,6 +10,7 @@ import { LoginContext } from './contexts'
 type Breadcrumb = {
   url: string,
   text: string,
+  disable?: boolean
 }
 
 export const BreadcrumbsContext = React.createContext<{breadcrumbs:Breadcrumb[], setBreadcrumbs:(arg:Breadcrumb[])=>void}>({

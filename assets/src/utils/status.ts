@@ -24,7 +24,7 @@ export const readinessToSeverity: Record<ReadinessT, Severity> = {
 }
 
 export function nodeStatusToReadiness(status: NodeStatus): ReadinessT {
-  const ready = status?.conditions?.find(({ type }) => type === 'Ready')
+  const ready = status?.conditions?.find(condition => condition?.type === 'Ready')
 
   if (ready?.status === 'True') return Readiness.Ready
 

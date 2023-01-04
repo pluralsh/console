@@ -29,7 +29,7 @@ import { ClusterMetrics } from './ClusterMetrics'
 import { UsageBar } from './UsageBar'
 import {
   CaptionText,
-  NTable,
+  GridTable,
   StatusChip,
   TableCaretLink,
   TableText,
@@ -133,7 +133,7 @@ type TableData = {
   readiness?: ReadinessT
 }
 
-const NodesTable = styled(NTable)(_ => ({
+const NodesTable = styled(GridTable)(_ => ({
   table: {
     gridTemplateColumns: 'minmax(100px, 1fr) auto auto auto auto auto',
   },
@@ -224,9 +224,10 @@ export default function Nodes() {
       >
 
         {tableData && tableData.length > 0 && (
-          <NodesTable
+          <GridTable
             data={tableData}
             columns={columns}
+            $truncColIndex={0}
             maxHeight="calc(100vh - 500px)"
           />
         )}
@@ -240,3 +241,4 @@ export default function Nodes() {
     </ScrollablePage>
   )
 }
+

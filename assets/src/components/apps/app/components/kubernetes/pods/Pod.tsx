@@ -2,10 +2,9 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useRef,
   useState,
 } from 'react'
-import { Box, Drop, Text } from 'grommet'
+import { Box, Text } from 'grommet'
 import {
   Confirm,
   TabContent,
@@ -293,75 +292,6 @@ function PodReadiness({ status: { containerStatuses } }) {
   )
 }
 
-function SimpleContainerStatus({ status }) {
-  const ref = useRef<any>()
-  const [open, setOpen] = useState(false)
-  const readiness = containerStatusToReadiness(status)
-  const background = ReadinessColor[readiness]
-
-  return (
-    <>
-      <Box
-        ref={ref}
-        flex={false}
-        width="13px"
-        height="13px"
-        round="xxsmall"
-        background={background}
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
-      />
-      {open && (
-        <Drop
-          target={ref.current}
-          align={{ bottom: 'top' }}
-          round="xsmall"
-        >
-          <Box
-            pad={{ vertical: 'xsmall', horizontal: 'small' }}
-            direction="row"
-            gap="xsmall"
-            align="center"
-          >
-            <Box
-              flex={false}
-              width="12px"
-              height="12px"
-              background={background}
-              round="xxsmall"
-            />
-            <Text size="small">{status.name}</Text>
-          </Box>
-        </Drop>
-      )}
-    </>
-  )
-}
-
-function ContainerSummary({
-  status: { containerStatuses, initContainerStatuses },
-}: any) {
-  const allStatuses = [
-    ...(initContainerStatuses || []),
-    ...(containerStatuses || []),
-  ]
-
-  return (
-    <Box
-      direction="row"
-      gap="xsmall"
-      align="center"
-    >
-      {allStatuses.map(status => (
-        <SimpleContainerStatus
-          key={status.name}
-          status={status}
-        />
-      ))}
-    </Box>
-  )
-}
-
 function Status({ status, metadata: { namespace, name } }) {
   const query = asQuery({ pod: name })
 
@@ -406,7 +336,6 @@ function Spec({ spec }) {
       </MetadataRow>
       <MetadataRow
         name="service account"
-        final
       >
         <Text size="small">{spec.serviceAccountName || 'default'}</Text>
       </MetadataRow>
@@ -684,11 +613,13 @@ export function Pod() {
   })
 
   useEffect(() => {
-    setBreadcrumbs([
-      { text: 'pods', url: '/pods', disable: true },
-      { text: namespace, url: namespace, disable: true },
-      { text: name, url: name, disable: true },
-    ])
+    if (name && namespace) {
+      setBreadcrumbs([
+        { text: 'pods', url: '/pods', disable: true },
+        { text: namespace, url: namespace, disable: true },
+        { text: name, url: name, disable: true },
+      ])
+    }
   }, [name, namespace, setBreadcrumbs])
 
   if (!data) return <LoopingLogo dark />
@@ -722,7 +653,7 @@ export function Pod() {
           pod/{name}
         </Text>
         <ReadyIcon
-          readiness={statusToReadiness(pod.status)}
+          readiness={containerStatusToReadiness(pod.status)}
           size="20px"
           showIcon
         />

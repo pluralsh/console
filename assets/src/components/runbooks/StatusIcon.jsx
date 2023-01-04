@@ -132,7 +132,7 @@ function Alert({ alert, setAlert }) {
       pad="small"
       round="xsmall"
       onClick={e => {
-        ignore(e); setAlert(alert)
+        ignoreEvent(e); setAlert(alert)
       }}
       hoverIndicator="tone-light"
     >
@@ -218,7 +218,7 @@ export function StatusIcon({ status, size, innerSize }) {
         justify="center"
         background={color}
         onClick={e => {
-          ignore(e)
+          ignoreEvent(e)
           if (!healthy) setOpen(true)
         }}
         onMouseEnter={() => setHover(true)}

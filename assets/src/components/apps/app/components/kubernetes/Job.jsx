@@ -1,18 +1,10 @@
 import { useCallback, useState } from 'react'
-import { Box, Text } from 'grommet'
+import { Box } from 'grommet'
 import { useMutation } from 'react-apollo'
-import {
-  Confirm,
-  TabContent,
-  Tabs,
-  Trash,
-} from 'forge-core'
+import { Confirm, Trash } from 'forge-core'
 import { ignoreEvent } from 'components/utils/events'
 
-import { MetadataRow } from './Metadata'
 import { DELETE_JOB } from './queries'
-import { Container } from './utils'
-import { PodList } from './pods/PodList'
 
 export function DeleteIcon({ onClick, loading }) {
   return (
@@ -67,64 +59,5 @@ export function DeleteJob({ name, namespace, refetch }) {
         />
       )}
     </>
-  )
-}
-
-function Status({ status }) {
-  return (
-    <Container header="Status">
-      <MetadataRow name="active">
-        <Text size="small">{status.active}</Text>
-      </MetadataRow>
-      <MetadataRow name="succeeded">
-        <Text size="small">{status.succeeded}</Text>
-      </MetadataRow>
-      <MetadataRow name="failed">
-        <Text size="small">{status.failed}</Text>
-      </MetadataRow>
-      <MetadataRow name="completionTime">
-        <Text size="small">{status.completionTime}</Text>
-      </MetadataRow>
-      <MetadataRow name="startTime">
-        <Text size="small">{status.startTime}</Text>
-      </MetadataRow>
-    </Container>
-  )
-}
-
-function Spec({ spec }) {
-  return (
-    <Container header="Spec">
-      <MetadataRow name="backoffLimit">
-        <Text size="small">{spec.backoffLimit}</Text>
-      </MetadataRow>
-      <MetadataRow name="parallelism">
-        <Text size="small">{spec.parallelism}</Text>
-      </MetadataRow>
-      <MetadataRow
-        name="deadline"
-        final
-      >
-        <Text size="small">{spec.activeDeadlineSeconds}</Text>
-      </MetadataRow>
-    </Container>
-  )
-}
-
-export default function Job() {
-  return (
-    <Box>
-      <Tabs defaultTab="info">
-        <TabContent name="info">
-          <Status status={job.status} />
-          <Spec spec={job.spec} />
-          <PodList
-            pods={job.pods}
-            refetch={refetch}
-            namespace={repo}
-          />
-        </TabContent>
-      </Tabs>
-    </Box>
   )
 }

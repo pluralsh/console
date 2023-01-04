@@ -1,15 +1,16 @@
 import {
-  Table as BaseTable,
   CaretRightIcon,
   Chip,
   IconFrame,
+  Table,
 } from '@pluralsh/design-system'
 import { UnstyledLink } from 'components/utils/Link'
+import { TRUNCATE } from 'components/utils/truncate'
 import { ComponentProps, ReactNode } from 'react'
 import styled from 'styled-components'
 import { ReadinessT, readinessToChipTitle, readinessToSeverity } from 'utils/status'
 
-export const NTable = styled(BaseTable)(({ theme }) => ({
+const GridTableBase = styled(Table)(({ theme }) => ({
   table: {
     display: 'grid',
     borderCollapse: 'collapse',
@@ -24,7 +25,39 @@ export const NTable = styled(BaseTable)(({ theme }) => ({
   'thead, tbody, tr': {
     display: 'contents',
   },
+  td: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
 }))
+
+export const GridTable = styled(GridTableBase)<{ $truncColIndex: string }>(({ columns, $truncColIndex = 0 }) => {
+  const gridTemplateColumns = columns
+    .reduce((val, _, i) => [
+      ...val,
+      i === $truncColIndex ? 'minmax(100px, 1fr)' : 'auto',
+    ],
+    [])
+    .join(' ')
+
+  const ret = {
+    table: {
+      gridTemplateColumns,
+    },
+    ...(typeof $truncColIndex === 'number' && $truncColIndex >= 0
+      ? {
+        [`td:nth-child(${$truncColIndex + 1})`]: {
+          '*': TRUNCATE,
+        },
+      }
+      : {}),
+  }
+
+  console.log({ ret })
+
+  return ret
+})
 
 const isNullishIsh = (val: any) => {
   if (typeof val === 'number') {
@@ -37,11 +70,6 @@ const isNullishIsh = (val: any) => {
 export const TableText = styled.div(({ theme }) => ({
   ...theme.partials.text.body2LooseLineHeight,
   color: theme.colors['text-light'],
-  '*:where(a) &': {
-    '&:hover': {
-      ...theme.partials.text.inlineLink,
-    },
-  },
 }))
 
 export const CaptionText = styled.div(({ theme }) => ({
@@ -63,8 +91,8 @@ export function UsageUnstyled({
 }: {
   used?: any | null
   total?: any | null
-    units?: ReactNode
-  className?:string,
+  units?: ReactNode
+  className?: string
 }) {
   return (
     <TableText className={className}>
@@ -94,8 +122,29 @@ function TableCaretLinkUnstyled({
     </UnstyledLink>
   )
 }
+
 export const TableCaretLink = styled(TableCaretLinkUnstyled)(({ theme }) => ({
   'a&': {
     color: theme.colors['icon-default'],
   },
 }))
+
+export function ContainersReadyChip({
+  ready = 0,
+  total = 0,
+}: {
+  ready: number
+  total: number
+}) {
+  const severity
+    = ready === 0 ? 'error' : total === ready ? 'success' : 'warning'
+
+  return (
+    <Chip
+      severity={severity}
+      whiteSpace="nowrap"
+    >
+      {ready}/{total} ready
+    </Chip>
+  )
+}

@@ -36,16 +36,15 @@ const columns = [
 ]
 
 export default function EventsTable({ events }: { events?: Iterable<EventT> }) {
+  if (!events || isEmptyIterable(events)) {
+    return 'No events available.'
+  }
+
   return (
-    <>
-      <PageTitle heading="Events" />
-      {events && !isEmptyIterable(events) ? (
-        <Table
-          data={events}
-          columns={columns}
-          maxHeight="calc(100vh - 244px)"
-        />
-      ) : 'No events available.'}
-    </>
+    <Table
+      data={events}
+      columns={columns}
+      maxHeight="calc(100vh - 244px)"
+    />
   )
 }

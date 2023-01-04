@@ -1,18 +1,18 @@
-import { Chip } from '@pluralsh/design-system'
-import type { Maybe, Pod } from 'generated/graphql'
-
+import { A } from 'honorable'
+import { Link } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
-import { UnstyledLink } from 'components/utils/Link'
 import { useMemo } from 'react'
-
 import { filesize } from 'filesize'
 
+import type { Maybe, Pod } from 'generated/graphql'
+import { UnstyledLink } from 'components/utils/Link'
 import { containerStatusToReadiness } from 'utils/status'
 
-import styled from 'styled-components'
+import { Tooltip } from '@pluralsh/design-system'
 
 import {
-  NTable,
+  ContainersReadyChip,
+  GridTable,
   TableCaretLink,
   TableText,
   Usage,
@@ -22,6 +22,7 @@ import { podResources } from './Pod'
 
 type PodTableRow = {
   name?: string
+  nodeName?: string
   namespace?: string
   memory: {
     used?: number
@@ -33,103 +34,118 @@ type PodTableRow = {
   }
   restarts?: number
   containers?: {
-    running?: number
+    ready?: number
     total?: number
   }
 }
 const columnHelper = createColumnHelper<PodTableRow>()
 
-const columns = [
-  columnHelper.accessor(row => row.name, {
-    id: 'name',
-    cell: ({ row: { original }, ...props }) => (
-      <UnstyledLink
-        to={`/pods/${original.namespace}/${original.name}`}
-        $extendStyle={undefined}
-      >
-        <TableText>{props.getValue()}</TableText>
-      </UnstyledLink>
-    ),
-    header: 'Name',
-    maxSize: 30,
-    enableResizing: true,
-  }),
-  columnHelper.accessor(row => row.name, {
-    id: 'memory',
-    cell: ({ row: { original } }) => (
-      <Usage
-        used={
-          original?.memory?.used === undefined
-            ? undefined
-            : filesize(original.memory.used)
-        }
-        total={
-          original.memory.total === undefined
-            ? undefined
-            : filesize(original.memory.total)
-        }
-      />
-    ),
-    header: 'Memory',
-    maxSize: 30,
-    enableResizing: true,
-  }),
-  columnHelper.accessor(row => row.name, {
-    id: 'cpu',
-    cell: ({ row: { original } }) => (
-      <Usage
-        used={original?.cpu?.used}
-        total={original?.cpu?.total}
-      />
-    ),
-    header: 'CPU',
-    maxSize: 30,
-    enableResizing: true,
-  }),
-  columnHelper.accessor(row => row.name, {
-    id: 'restarts',
-    cell: ({ row: { original } }) => <TableText>{original.restarts}</TableText>,
-    header: 'Restarts',
-    maxSize: 30,
-    enableResizing: true,
-  }),
-  columnHelper.accessor(row => row.name, {
-    id: 'containers',
-    cell: ({ row: { original } }) => (
-      <Chip
-        size="medium"
-        severity={
-          !original?.containers?.running
-            ? 'critical'
-            : !original.containers.total
-              || original?.containers?.running < original?.containers?.total
-              ? 'warning'
-              : undefined
-        }
-      >
-        {`${original?.containers?.running}/${original?.containers?.total} running`}
-      </Chip>
-    ),
-    header: 'Containers',
-    maxSize: 30,
-    enableResizing: true,
-  }),
-  columnHelper.display({
-    id: 'link',
-    cell: ({ row: { original } }: any) => (
-      <TableCaretLink
-        to={`/pods/${original.namespace}/${original.name}`}
-        textValue={`View node ${original?.name}`}
-      />
-    ),
-    header: '',
-  }),
-]
+export const ColNameLink = columnHelper.accessor(row => row.name, {
+  id: 'name',
+  cell: ({ row: { original }, ...props }) => (
+    <A
+      as={Link}
+      to={`/pods/${original.namespace}/${original.name}`}
+      $extendStyle={undefined}
+    >
+      <TableText>{props.getValue()}</TableText>
+    </A>
+  ),
+  header: 'Name',
+})
+
+export const ColName = columnHelper.accessor(row => row.name, {
+  id: 'name',
+  cell: props => <TableText>{props.getValue()}</TableText>,
+  header: 'Name',
+})
+
+export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
+  id: 'nodeName',
+  cell: ({ row: { original }, ...props }) => (
+    <Tooltip
+      label={original.nodeName}
+      placement="top"
+    >
+      <TableText>
+        <A
+          inline
+          as={Link}
+          to={`/nodes/${original.nodeName}`}
+          display="inline"
+        >
+          {props.getValue()}
+        </A>
+      </TableText>
+    </Tooltip>
+  ),
+  header: 'Node name',
+})
+
+export const ColMemory = columnHelper.accessor(row => row.name, {
+  id: 'memory',
+  cell: ({ row: { original } }) => (
+    <Usage
+      used={
+        original?.memory?.used === undefined
+          ? undefined
+          : filesize(original.memory.used)
+      }
+      total={
+        original.memory.total === undefined
+          ? undefined
+          : filesize(original.memory.total)
+      }
+    />
+  ),
+  header: 'Memory',
+})
+
+export const ColCpu = columnHelper.accessor(row => row.name, {
+  id: 'cpu',
+  cell: ({ row: { original } }) => (
+    <Usage
+      used={original?.cpu?.used}
+      total={original?.cpu?.total}
+    />
+  ),
+  header: 'CPU',
+})
+
+export const ColRestarts = columnHelper.accessor(row => row.name, {
+  id: 'restarts',
+  cell: ({ row: { original } }) => <TableText>{original.restarts}</TableText>,
+  header: 'Restarts',
+})
+
+export const ColContainers = columnHelper.accessor(row => row.name, {
+  id: 'containers',
+  cell: ({ row: { original } }) => (
+    <ContainersReadyChip
+      ready={original?.containers?.ready || 0}
+      total={original.containers?.total || 0}
+    />
+  ),
+  header: 'Containers',
+})
+
+export const ColLink = columnHelper.display({
+  id: 'link',
+  cell: ({ row: { original } }: any) => (
+    <TableCaretLink
+      to={`/pods/${original.namespace}/${original.name}`}
+      textValue={`View node ${original?.name}`}
+    />
+  ),
+  header: '',
+})
 
 type PodListProps = {
   pods?: Maybe<Pod>[] & Pod[]
   namespace?: any
   refetch?: any
+  columns?: any[]
+  truncColIndex?: number
 }
 
 function getRestarts(status: Pod['status']) {
@@ -144,96 +160,81 @@ function getAllStatuses({
   return [...(initContainerStatuses || []), ...(containerStatuses || [])]
 }
 
-function getRunningStats(status: Pod['status']) {
+function getReadyStats(status: Pod['status']) {
   const allStatuses = getAllStatuses(status)
 
-  const runningCount = allStatuses.reduce((prev, status) => {
+  const readyCount = allStatuses.reduce((prev, status) => {
     if (!status) {
       return prev
     }
     const readiness = containerStatusToReadiness(status)
 
-    console.log('prev', prev)
-
     return {
-      running: prev.running + (readiness === 'Ready' ? 1 : 0),
+      ready: prev.ready + (readiness === 'Ready' ? 1 : 0),
       total: prev.total + 1,
     }
   },
-  { running: 0, total: 0 })
+  { ready: 0, total: 0 })
 
-  return runningCount
+  return readyCount
 }
 
-const PodsTable = styled(NTable)(_ => ({
-  table: {
-    gridTemplateColumns: 'minmax(100px, 1fr) auto auto auto auto auto',
-  },
-  'td:nth-child(1)': {
-    '*': {
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-    },
-  },
-}))
+export function PodList({
+  pods,
+  columns = [
+    ColNameLink,
+    ColMemory,
+    ColCpu,
+    ColRestarts,
+    ColContainers,
+    ColLink,
+  ],
+  truncColIndex = 0,
+  namespace: _namespace,
+  refetch: _refetch,
+}: PodListProps) {
+  if (!pods || pods.length === 0) {
+    return <>No pods available.</>
+  }
 
-export function PodList({ pods, namespace: _namespace, refetch }: PodListProps) {
   const tableData: PodTableRow[] = useMemo(() => (pods || [])
-    .filter((pod):pod is Pod => !!pod)
+    .filter((pod): pod is Pod => !!pod)
     .map(pod => {
       const { containers } = pod.spec
-      const containersRunning = getRunningStats(pod.status)
+      const containersReady = getReadyStats(pod.status)
 
-      console.log('containersRunning', containersRunning)
-      const { cpu: cpuReq, memory: memoryReq } = podResources(containers as any,
+      const { cpu: cpuRequests, memory: memoryRequests } = podResources(containers as any,
         'requests')
-      const { cpu: cpuLim, memory: memoryLim } = podResources(containers as any,
+      const { cpu: cpuLimits, memory: memoryLimits } = podResources(containers as any,
         'limits')
-          // const labelsMap = mapify(pod.metadata.labels)
 
       return {
         name: pod?.metadata?.name,
+        nodeName: pod?.spec?.nodeName || undefined,
         namespace: pod?.metadata?.namespace || undefined,
         memory: {
-          used: memoryReq,
-          total: memoryLim,
+          used: memoryRequests,
+          total: memoryLimits,
+          sortVal: (memoryRequests ?? 0) / (memoryLimits ?? Infinity),
         },
         cpu: {
-          used: cpuReq,
-          total: cpuLim,
+          used: cpuRequests,
+          total: cpuLimits,
+          sortVal: (cpuRequests ?? 0) / (cpuLimits ?? Infinity),
         },
         restarts: getRestarts(pod.status),
-        containers: containersRunning,
+        containers: containersReady,
       }
     }),
   [pods])
 
   return (
-    <>
-      <PodsTable
-        data={tableData}
-        columns={columns}
-        enableColumnResizing
-        maxHeight="calc(100vh - 500px)"
-      />
-      {/* <Box
-        flex={false}
-        pad="small"
-      >
-        <Box pad={{ vertical: 'small' }}>
-          <Text size="small">Pods</Text>
-        </Box>
-        <PodHeader />
-        {pods.map((pod, ind) => (
-          <PodRow
-            key={ind}
-            pod={pod}
-            namespace={namespace}
-            refetch={refetch}
-          />
-        ))}
-      </Box> */}
-    </>
+    <GridTable
+      data={tableData}
+      columns={columns}
+      enableColumnResizing
+      maxHeight="calc(100vh - 500px)"
+      $truncColIndex={truncColIndex}
+    />
   )
 }
