@@ -8,10 +8,11 @@ import {
   Trash,
 } from 'forge-core'
 
-import { Metadata, MetadataRow } from './Metadata'
+import { MetadataRow } from './Metadata'
 import { DELETE_JOB } from './queries'
 import { Container } from './utils'
-import { PodList, ignore } from './Pod'
+import { ignore } from './pods/Pod'
+import { PodList } from './pods/PodList'
 
 export function DeleteIcon({ onClick, loading }) {
   return (

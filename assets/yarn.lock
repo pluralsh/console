@@ -3043,6 +3043,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@kurkle/color@npm:^0.3.0":
+  version: 0.3.1
+  resolution: "@kurkle/color@npm:0.3.1"
+  checksum: e6be5c081bf5acfd4a1803dcd5a0733caf450e73148d5f02dc536b1ff0c60c959c23472a26c9c3c6c78ada04fb6a53c9202db9b2de8ea56f6eeec381f9cc3a1a
+  languageName: node
+  linkType: hard
+
 "@mattiasbuelens/web-streams-polyfill@npm:^0.2.0":
   version: 0.2.1
   resolution: "@mattiasbuelens/web-streams-polyfill@npm:0.2.1"
@@ -4881,6 +4888,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/hoist-non-react-statics@npm:*":
+  version: 3.3.1
+  resolution: "@types/hoist-non-react-statics@npm:3.3.1"
+  dependencies:
+    "@types/react": "*"
+    hoist-non-react-statics: ^3.3.0
+  checksum: 2c0778570d9a01d05afabc781b32163f28409bb98f7245c38d5eaf082416fdb73034003f5825eb5e21313044e8d2d9e1f3fe2831e345d3d1b1d20bcd12270719
+  languageName: node
+  linkType: hard
+
 "@types/is-hotkey@npm:^0.1.1":
   version: 0.1.7
   resolution: "@types/is-hotkey@npm:0.1.7"
@@ -5093,6 +5110,17 @@ __metadata:
   version: 2.3.3
   resolution: "@types/sizzle@npm:2.3.3"
   checksum: 586a9fb1f6ff3e325e0f2cc1596a460615f0bc8a28f6e276ac9b509401039dd242fa8b34496d3a30c52f5b495873922d09a9e76c50c2ab2bcc70ba3fb9c4e160
+  languageName: node
+  linkType: hard
+
+"@types/styled-components@npm:5.1.26":
+  version: 5.1.26
+  resolution: "@types/styled-components@npm:5.1.26"
+  dependencies:
+    "@types/hoist-non-react-statics": "*"
+    "@types/react": "*"
+    csstype: ^3.0.2
+  checksum: 84f53b3101739b20d1731554fb7735bc2f3f5d050a8b392e9845403c8c8bbd729737d033978649f9195a97b557875b010d46e35a4538564a2d0dbcce661dbf76
   languageName: node
   linkType: hard
 
@@ -6849,10 +6877,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:4.0.1":
-  version: 4.0.1
-  resolution: "chart.js@npm:4.0.1"
-  checksum: 013dabf3cd4ad2d71574e1d616906ae6f5b3f5914efb7f8ac7407bfe9b621e997f30966350bbdf31e3a1322c8c602715ef4dd6d0b6072590bb48db03861ac401
+"chart.js@npm:4.1.1":
+  version: 4.1.1
+  resolution: "chart.js@npm:4.1.1"
+  dependencies:
+    "@kurkle/color": ^0.3.0
+  checksum: e195abc7b1271a0d4f616b90ac56465b639bffef8e965d26bf1fd65050011bf359fdc25e43dac1576420c1173dc1430c576fd0f953ae8b62bf257ec571424882
+  languageName: node
+  linkType: hard
+
+"chartjs-plugin-datalabels@npm:2.2.0":
+  version: 2.2.0
+  resolution: "chartjs-plugin-datalabels@npm:2.2.0"
+  peerDependencies:
+    chart.js: ">=3.0.0"
+  checksum: 26086a908a8e88507959b7aaf798b2d9794ea95f7a5889b8bb9f6b9f3437a7e2fdf18952d3ba403b2ff78e5b70452439fb323bd0dfe76e9d7d1dae1328dacb99
   languageName: node
   linkType: hard
 
@@ -7175,6 +7214,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"connect-history-api-fallback@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "connect-history-api-fallback@npm:1.6.0"
+  checksum: 804ca2be28c999032ecd37a9f71405e5d7b7a4b3defcebbe41077bb8c5a0a150d7b59f51dcc33b2de30bc7e217a31d10f8cfad27e8e74c2fc7655eeba82d6e7e
+  languageName: node
+  linkType: hard
+
 "console-control-strings@npm:^1.1.0":
   version: 1.1.0
   resolution: "console-control-strings@npm:1.1.0"
@@ -7213,6 +7259,7 @@ __metadata:
     "@testing-library/react": 9.3.3
     "@testing-library/user-event": 7.1.2
     "@types/jsdom": 20.0.1
+    "@types/styled-components": 5.1.26
     "@typescript-eslint/eslint-plugin": 5.42.0
     "@typescript-eslint/parser": 5.42.0
     "@vitejs/plugin-basic-ssl": 0.1.2
@@ -7226,7 +7273,8 @@ __metadata:
     apollo-link-error: 1.1.13
     apollo-link-persisted-queries: 0.2.5
     apollo-link-retry: 2.2.16
-    chart.js: 4.0.1
+    chart.js: 4.1.1
+    chartjs-plugin-datalabels: 2.2.0
     color-alpha: 1.1.3
     concurrently: 7.6.0
     country-code-lookup: 0.0.22
@@ -7266,7 +7314,7 @@ __metadata:
     react: 18.2.0
     react-animations: 1.0.0
     react-apollo: 3.1.5
-    react-chartjs-2: 5.0.1
+    react-chartjs-2: 5.1.0
     react-circular-progressbar: 2.1.0
     react-codemirror: 1.0.0
     react-collapsible: 2.10.0
@@ -7306,6 +7354,7 @@ __metadata:
     universal-cookie: 4.0.4
     uuid: 9.0.0
     vite: 3.2.5
+    vite-plugin-rewrite-all: 1.0.1
     vite-tsconfig-paths: 4.0.1
     vitest: 0.25.6
     wait-on: 6.0.1
@@ -13308,13 +13357,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-chartjs-2@npm:5.0.1":
-  version: 5.0.1
-  resolution: "react-chartjs-2@npm:5.0.1"
+"react-chartjs-2@npm:5.1.0":
+  version: 5.1.0
+  resolution: "react-chartjs-2@npm:5.1.0"
   peerDependencies:
-    chart.js: ^4.0.0
+    chart.js: ^4.1.1
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: b6f20cf68eb8961891af10250e737b50b940d74b7a3a07aae51f356960a865f822ee61856131c3965c7c547f06013ad963a679ed14d59d12e7c7d64c1db52f6c
+  checksum: 43d738377d143f40d7b3984462bdd066487808a311c226df3d57b0096394e3d9ae3bcf98f7862e3adff8e9b6a5ae2ea24d38a8e2a11727493ed331cd9475c448
   languageName: node
   linkType: hard
 
@@ -16253,6 +16302,17 @@ __metadata:
     unist-util-stringify-position: ^3.0.0
     vfile-message: ^3.0.0
   checksum: 1aa5efff510bc6621ff8a7dc6513110529a11a8d665b44f169cc2a2b6bfa4f312efa00bfe86ca20e506538ff2915c8e538a664bd02a06419421ff964844fbe94
+  languageName: node
+  linkType: hard
+
+"vite-plugin-rewrite-all@npm:1.0.1":
+  version: 1.0.1
+  resolution: "vite-plugin-rewrite-all@npm:1.0.1"
+  dependencies:
+    connect-history-api-fallback: ^1.6.0
+  peerDependencies:
+    vite: ^2.0.0 || ^3.0.0 || ^4.0.0
+  checksum: 9a22e51e80fc14d58d32556208c26740baf3f02eae2d0a5f356ddc1ea478bd2f56803cc17e77261ffad33d27301017ba03736143446685c03bb0f076eef2fdd0
   languageName: node
   linkType: hard
 

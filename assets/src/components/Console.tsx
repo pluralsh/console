@@ -6,11 +6,8 @@ import {
   useNavigate,
 } from 'react-router-dom'
 import { Box, Text } from 'grommet'
-
 import { Portal } from 'react-portal'
-
 import Foco from 'react-foco'
-
 import { Next } from 'grommet-icons'
 
 import ConsoleSidebar, { SIDEBAR_ICON_HEIGHT } from './ConsoleSidebar'
@@ -19,11 +16,15 @@ import Build from './builds/build/Build'
 import BreadcrumbProvider from './Breadcrumbs'
 import Webhooks from './Webhooks'
 import { EnsureLogin } from './Login'
-
 import Users from './Users'
 import { InstallationsProvider } from './Installations'
-import { Node, Nodes } from './apps/app/components/kubernetes/Node'
-import { Pod } from './apps/app/components/kubernetes/Pod'
+import { Pod } from './apps/app/components/kubernetes/pods/Pod'
+import Pods from './apps/app/components/kubernetes/pods/Pods'
+import Node from './apps/app/components/kubernetes/nodes/Node'
+import Nodes from './apps/app/components/kubernetes/nodes/Nodes'
+import NodeInfo from './apps/app/components/kubernetes/nodes/NodeInfo'
+import NodeEvents from './apps/app/components/kubernetes/nodes/NodeEvents'
+import NodeRaw from './apps/app/components/kubernetes/nodes/NodeRaw'
 import Directory from './users/Directory'
 import EditUser from './users/EditUser'
 import { Audits } from './audits/Audits'
@@ -31,7 +32,6 @@ import { PluralApi } from './PluralApi'
 import { Incident } from './incidents/Incident'
 import { NavigationContext } from './navigation/Submenu'
 import { Tooltip } from './utils/Tooltip'
-
 import { PodShell } from './terminal/PodShell'
 import Apps from './apps/Apps'
 import App from './apps/app/App'
@@ -54,10 +54,10 @@ import Component from './apps/app/components/component/Component'
 import ComponentInfo from './apps/app/components/component/ComponentInfo'
 import ComponentEvents from './apps/app/components/component/ComponentEvents'
 import ComponentRaw from './apps/app/components/component/ComponentRaw'
+import Cluster from './apps/app/components/kubernetes/Cluster'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
-
 export function Icon({
   icon, text, selected, path, onClick, size, align,
 }) {
@@ -100,7 +100,8 @@ export function Icon({
           <Text
             size="small"
             weight={500}
-          >{text}
+          >
+            {text}
           </Text>
         </Tooltip>
       )}
@@ -177,7 +178,8 @@ export function FlyoutContainer({
               <Text
                 size="small"
                 weight={500}
-              >{header}
+              >
+                {header}
               </Text>
             </Box>
             {modifier}
@@ -256,13 +258,40 @@ export default function Console() {
                           element={<Pod />}
                         />
                         <Route
-                          path="/nodes/:name"
-                          element={<Node />}
-                        />
+                          path="/pods"
+                          element={<Cluster />}
+                        >
+                          <Route
+                            index
+                            element={<Pods />}
+                          />
+                        </Route>
                         <Route
                           path="/nodes"
-                          element={<Nodes />}
-                        />
+                          element={<Cluster />}
+                        >
+                          <Route
+                            index
+                            element={<Nodes />}
+                          />
+                        </Route>
+                        <Route
+                          path="/nodes/:name"
+                          element={<Node />}
+                        >
+                          <Route
+                            index
+                            element={<NodeInfo />}
+                          />
+                          <Route
+                            path="events"
+                            element={<NodeEvents />}
+                          />
+                          <Route
+                            path="raw"
+                            element={<NodeRaw />}
+                          />
+                        </Route>
                         <Route
                           path="/webhooks"
                           element={<Webhooks />}

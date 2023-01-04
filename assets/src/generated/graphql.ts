@@ -325,6 +325,7 @@ export type ConsoleConfiguration = {
   gitCommit?: Maybe<Scalars['String']>;
   gitStatus?: Maybe<GitStatus>;
   isDemoProject?: Maybe<Scalars['Boolean']>;
+  isSandbox?: Maybe<Scalars['Boolean']>;
   manifest?: Maybe<PluralManifest>;
 };
 
@@ -1099,6 +1100,8 @@ export type RootMutationType = {
   deleteWebhook?: Maybe<Webhook>;
   executeRunbook?: Maybe<RunbookActionResponse>;
   installRecipe?: Maybe<Build>;
+  installStack?: Maybe<Build>;
+  loginLink?: Maybe<User>;
   oauthCallback?: Maybe<User>;
   overlayConfiguration?: Maybe<Build>;
   readNotifications?: Maybe<User>;
@@ -1216,6 +1219,18 @@ export type RootMutationTypeInstallRecipeArgs = {
 };
 
 
+export type RootMutationTypeInstallStackArgs = {
+  context: Scalars['Map'];
+  name: Scalars['String'];
+  oidc?: InputMaybe<Scalars['Boolean']>;
+};
+
+
+export type RootMutationTypeLoginLinkArgs = {
+  key: Scalars['String'];
+};
+
+
 export type RootMutationTypeOauthCallbackArgs = {
   code: Scalars['String'];
   redirect?: InputMaybe<Scalars['String']>;
@@ -1247,6 +1262,7 @@ export type RootMutationTypeSignupArgs = {
 
 export type RootMutationTypeUpdateConfigurationArgs = {
   content: Scalars['String'];
+  message?: InputMaybe<Scalars['String']>;
   repository: Scalars['String'];
   tool?: InputMaybe<Tool>;
 };
@@ -1320,6 +1336,7 @@ export type RootQueryType = {
   scalingRecommendation?: Maybe<VerticalPodAutoscaler>;
   service?: Maybe<Service>;
   smtp?: Maybe<Smtp>;
+  stack?: Maybe<Stack>;
   statefulSet?: Maybe<StatefulSet>;
   upgradePolicies?: Maybe<Array<Maybe<UpgradePolicy>>>;
   users?: Maybe<UserConnection>;
@@ -1540,6 +1557,11 @@ export type RootQueryTypeServiceArgs = {
 };
 
 
+export type RootQueryTypeStackArgs = {
+  name: Scalars['String'];
+};
+
+
 export type RootQueryTypeStatefulSetArgs = {
   name: Scalars['String'];
   namespace: Scalars['String'];
@@ -1752,6 +1774,16 @@ export type SmtpInput = {
   sender?: InputMaybe<Scalars['String']>;
   server?: InputMaybe<Scalars['String']>;
   user?: InputMaybe<Scalars['String']>;
+};
+
+export type Stack = {
+  __typename?: 'Stack';
+  bundles?: Maybe<Array<Maybe<Recipe>>>;
+  id: Scalars['ID'];
+  insertedAt?: Maybe<Scalars['DateTime']>;
+  name: Scalars['String'];
+  sections?: Maybe<Array<Maybe<RecipeSection>>>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
 };
 
 export type StatefulSet = {

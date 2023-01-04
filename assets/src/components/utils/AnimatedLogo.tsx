@@ -1,23 +1,37 @@
 import { Box } from 'grommet'
+import { HeightType } from 'grommet/utils'
 import './logo-animation.css'
 
-const BOTTOM_LEFT = '/plural-logomark-mechanical-for-animation-{color}_bottom-left_100px.svg'
-const BOTTOM_RIGHT = '/plural-logomark-mechanical-for-animation-{color}_bottom-right_100px.svg'
-const TOP_LEFT = '/plural-logomark-mechanical-for-animation-{color}_top-left_100px.svg'
-const TOP_RIGHT = '/plural-logomark-mechanical-for-animation-{color}_top-right_100px.svg'
+const BOTTOM_LEFT
+  = '/plural-logomark-mechanical-for-animation-{color}_bottom-left_100px.svg'
+const BOTTOM_RIGHT
+  = '/plural-logomark-mechanical-for-animation-{color}_bottom-right_100px.svg'
+const TOP_LEFT
+  = '/plural-logomark-mechanical-for-animation-{color}_top-left_100px.svg'
+const TOP_RIGHT
+  = '/plural-logomark-mechanical-for-animation-{color}_top-right_100px.svg'
 const DOT = '/plural-logomark-mechanical-for-animation-{color}_dot_100px.svg'
 
 function scaling(scale) {
-  if (!scale) return null
-
-  return { transform: `scale(${scale})` }
+  return !scale ? {} : { transform: `scale(${scale})` }
 }
 
-const image = (img, dark) => img.replace('{color}', dark ? 'wht' : 'blk')
+const image = (img: string, dark = false) => img.replace('{color}', dark ? 'wht' : 'blk')
 
-export function LoopingLogo({
-  nofill, height, scale, dark, still,
-}) {
+export type LoopingLogoProps = {
+  nofill?: boolean;
+  height?: HeightType;
+  scale?: number;
+  dark?: boolean;
+  still?: boolean;
+}
+;export function LoopingLogo({
+  nofill = false,
+  height,
+  scale,
+  dark = false,
+  still = false,
+}: LoopingLogoProps) {
   return (
     <Box
       background={dark ? 'backgroundColor' : 'plrl-white'}

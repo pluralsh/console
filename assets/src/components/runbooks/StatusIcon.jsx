@@ -11,7 +11,11 @@ import { normalizeColor } from 'grommet/utils'
 
 import moment from 'moment'
 
+<<<<<<< HEAD
 import { ignore } from '../apps/app/components/kubernetes/Pod'
+=======
+import { ignore } from '../kubernetes/pods/Pod'
+>>>>>>> klink/eng-1019-implement-nodes
 
 import { MetadataRow, MetadataTag } from '../apps/app/components/kubernetes/Metadata'
 

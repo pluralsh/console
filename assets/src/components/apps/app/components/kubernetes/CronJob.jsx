@@ -9,7 +9,7 @@ import { ReadyIcon } from '../../../../Component'
 
 import { MetadataRow } from './Metadata'
 import { Container } from './utils'
-import { HeaderItem, RowItem } from './Pod'
+import { HeaderItem, RowItem } from './pods/Pod'
 import { DeleteJob } from './Job'
 
 function Status({ status }) {
