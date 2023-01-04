@@ -2,7 +2,6 @@ import { useContext, useEffect, useMemo } from 'react'
 import { useQuery } from 'react-apollo'
 import { memoryParser } from 'kubernetes-resource-parser'
 import { sumBy } from 'lodash'
-import { PageTitle, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { ReadinessT, nodeStatusToReadiness, readinessToChipTitle } from 'utils/status'
@@ -17,6 +16,10 @@ import type { Node, NodeMetric } from 'generated/graphql'
 import { filesize } from 'filesize'
 
 import styled from 'styled-components'
+
+import { Flex } from 'honorable'
+
+import { Card } from '@pluralsh/design-system'
 
 import { mapify } from '../Metadata'
 import { POLL_INTERVAL } from '../constants'
@@ -215,19 +218,25 @@ export default function Nodes() {
 
   return (
     <ScrollablePage heading="Nodes">
+      <Flex
+        direction="column"
+        gap="xlarge"
+      >
 
-      {tableData && tableData.length > 0 && (
-        <NodesTable
-          data={tableData}
-          columns={columns}
-          maxHeight="calc(100vh - 500px)"
-        />
-      )}
-      <ClusterMetrics
-        nodes={data.nodes}
-        usage={usage}
-      />
-      <div>Some content</div>
+        {tableData && tableData.length > 0 && (
+          <NodesTable
+            data={tableData}
+            columns={columns}
+            maxHeight="calc(100vh - 500px)"
+          />
+        )}
+        <Card padding="xlarge">
+          <ClusterMetrics
+            nodes={data.nodes}
+            usage={usage}
+          />
+        </Card>
+      </Flex>
     </ScrollablePage>
   )
 }

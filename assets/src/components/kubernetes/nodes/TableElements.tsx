@@ -13,7 +13,6 @@ export const NTable = styled(BaseTable)(({ theme }) => ({
   table: {
     display: 'grid',
     borderCollapse: 'collapse',
-    // gridTemplateColumns: 'minmax(100px, 1fr) auto auto auto auto auto',
     minWidth: '100%',
   },
   th: {

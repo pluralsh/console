@@ -1,9 +1,10 @@
 import React, { useCallback, useMemo } from 'react'
-import { Box } from 'grommet'
 import { memoryParser } from 'kubernetes-resource-parser'
 import { filesize } from 'filesize'
 
 import { NodeStatus, NodeUsage, Pod } from 'generated/graphql'
+
+import { Div, Flex } from 'honorable'
 
 import { cpuParser } from '../../../utils/kubernetes'
 import { NodeMetrics } from '../constants'
@@ -39,36 +40,41 @@ export function NodeGraphs({
   console.log('CAPACITY', capacity)
 
   return (
-    <Box
+    <Flex
       flex={false}
-      direction="row"
-      gap="medium"
+      direction="column"
+      gap="xlarge"
       align="center"
     >
-      <LayeredGauge
-        usage={cpuParser(usage?.cpu)}
-        requests={requests.cpu}
-        limits={limits.cpu}
-        total={cpuParser(capacity?.cpu)}
-        name="CPU"
-        title="CPU Reservation"
-        format={cpuFmt}
-      />
-      <LayeredGauge
-        usage={memoryParser(usage?.memory)}
-        requests={requests.memory}
-        limits={limits.memory}
-        total={memoryParser(capacity.memory)}
-        name="Mem"
-        title="Memory Reservation"
-        format={filesize}
-      />
-      <Box fill="horizontal">
+      <Flex
+        direction="row"
+        gap="xlarge"
+      >
+        <LayeredGauge
+          usage={cpuParser(usage?.cpu)}
+          requests={requests.cpu}
+          limits={limits.cpu}
+          total={cpuParser(capacity?.cpu)}
+          name="CPU"
+          title="CPU Reservation"
+          format={cpuFmt}
+        />
+        <LayeredGauge
+          usage={memoryParser(usage?.memory)}
+          requests={requests.memory}
+          limits={limits.memory}
+          total={memoryParser(capacity.memory)}
+          name="Mem"
+          title="Memory Reservation"
+          format={filesize}
+        />
+      </Flex>
+      <Div width="100%">
         <SaturationGraphs
           cpu={localize(NodeMetrics.CPU)}
           mem={localize(NodeMetrics.Memory)}
         />
-      </Box>
-    </Box>
+      </Div>
+    </Flex>
   )
 }

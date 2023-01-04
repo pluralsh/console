@@ -120,6 +120,23 @@ export const NODE_Q = gql`
   ${NodeMetricFragment}
 `
 
+export const NODE_EVENTS_Q = gql`
+  query Node($name: String!) {
+    node(name: $name) {
+      events { ...EventFragment }
+    }
+  }
+  ${EventFragment}
+`
+
+export const NODE_RAW_Q = gql`
+  query Node($name: String!) {
+    node(name: $name) {
+      raw
+    }
+  }
+`
+
 export const NODE_METRICS_Q = gql`
   query Metrics($cpuRequests: String!, $cpuLimits: String!, $memRequests: String!, $memLimits: String!, $pods: String!, $offset: Int) {
     cpuRequests: metric(query: $cpuRequests, offset: $offset) { ...MetricResponseFragment }

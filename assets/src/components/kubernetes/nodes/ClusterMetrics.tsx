@@ -1,5 +1,4 @@
-import React from 'react'
-import { Box } from 'grommet'
+import { Flex } from 'honorable'
 
 import { ClusterMetrics as Metrics } from '../constants'
 
@@ -8,13 +7,11 @@ import { SaturationGraphs } from './SaturationGraphs'
 
 export function ClusterMetrics({ nodes, usage }) {
   return (
-    <Box
+    <Flex
       flex={false}
-      direction="row"
-      fill="horizontal"
-      gap="small"
+      direction="column"
+      gap="xlarge"
       align="center"
-      pad="small"
     >
       <ClusterGauges
         nodes={nodes}
@@ -24,8 +21,6 @@ export function ClusterMetrics({ nodes, usage }) {
         cpu={Metrics.CPU}
         mem={Metrics.Memory}
       />
-      {/* <Box fill='horizontal' direction='row' align='center' gap='small'>
-            </Box> */}
-    </Box>
+    </Flex>
   )
 }

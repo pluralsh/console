@@ -58,8 +58,16 @@ const columns = [
     id: 'memory',
     cell: ({ row: { original } }) => (
       <Usage
-        used={original?.memory?.used === undefined ? undefined : filesize(original.memory.used)}
-        total={original.memory.total === undefined ? undefined : filesize(original.memory.total)}
+        used={
+          original?.memory?.used === undefined
+            ? undefined
+            : filesize(original.memory.used)
+        }
+        total={
+          original.memory.total === undefined
+            ? undefined
+            : filesize(original.memory.total)
+        }
       />
     ),
     header: 'Memory',
@@ -80,10 +88,7 @@ const columns = [
   }),
   columnHelper.accessor(row => row.name, {
     id: 'restarts',
-    cell: ({ row: { original } }) => (
-      <TableText>{ original.restarts}
-      </TableText>
-    ),
+    cell: ({ row: { original } }) => <TableText>{original.restarts}</TableText>,
     header: 'Restarts',
     maxSize: 30,
     enableResizing: true,
@@ -93,8 +98,16 @@ const columns = [
     cell: ({ row: { original } }) => (
       <Chip
         size="medium"
-        severity={!original?.containers?.running ? 'critical' : !original.containers.total || original?.containers?.running < original?.containers?.total ? 'warning' : null}
-      >{ `${original?.containers?.running}/${original?.containers?.total} running`}
+        severity={
+          !original?.containers?.running
+            ? 'critical'
+            : !original.containers.total
+              || original?.containers?.running < original?.containers?.total
+              ? 'warning'
+              : undefined
+        }
+      >
+        {`${original?.containers?.running}/${original?.containers?.total} running`}
       </Chip>
     ),
     header: 'Containers',
@@ -111,7 +124,6 @@ const columns = [
     ),
     header: '',
   }),
-
 ]
 
 type PodListProps = {
@@ -166,34 +178,35 @@ const PodsTable = styled(NTable)(_ => ({
   },
 }))
 
-export function PodList({ pods, namespace, refetch }: PodListProps) {
-  const tableData: PodTableRow[] = useMemo(() => (pods || []).map(pod => {
-    const { containers } = pod.spec
-        // TODO: Figure out how to check if container is running
-    const containersRunning = getRunningStats(pod.status)
+export function PodList({ pods, namespace: _namespace, refetch }: PodListProps) {
+  const tableData: PodTableRow[] = useMemo(() => (pods || [])
+    .filter((pod):pod is Pod => !!pod)
+    .map(pod => {
+      const { containers } = pod.spec
+      const containersRunning = getRunningStats(pod.status)
 
-    console.log('containersRunning', containersRunning)
-    const { cpu: cpuReq, memory: memoryReq } = podResources(containers as any,
-      'requests')
-    const { cpu: cpuLim, memory: memoryLim } = podResources(containers as any,
-      'limits')
-        // const labelsMap = mapify(pod.metadata.labels)
+      console.log('containersRunning', containersRunning)
+      const { cpu: cpuReq, memory: memoryReq } = podResources(containers as any,
+        'requests')
+      const { cpu: cpuLim, memory: memoryLim } = podResources(containers as any,
+        'limits')
+          // const labelsMap = mapify(pod.metadata.labels)
 
-    return {
-      name: pod?.metadata?.name,
-      namespace: pod?.metadata?.namespace,
-      memory: {
-        used: memoryReq,
-        total: memoryLim,
-      },
-      cpu: {
-        used: cpuReq,
-        total: cpuLim,
-      },
-      restarts: getRestarts(pod.status),
-      containers: containersRunning,
-    }
-  }),
+      return {
+        name: pod?.metadata?.name,
+        namespace: pod?.metadata?.namespace || undefined,
+        memory: {
+          used: memoryReq,
+          total: memoryLim,
+        },
+        cpu: {
+          used: cpuReq,
+          total: cpuLim,
+        },
+        restarts: getRestarts(pod.status),
+        containers: containersRunning,
+      }
+    }),
   [pods])
 
   return (

@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Confirm, Node as NodeI, Trash } from 'forge-core'
+import { Confirm, Trash } from 'forge-core'
 import { useMutation, useQuery } from 'react-apollo'
 import {
   Box,
@@ -14,12 +14,9 @@ import {
   ThemeContext,
 } from 'grommet'
 import { useParams } from 'react-router-dom'
-
 import { normalizeColor } from 'grommet/utils'
 import { Line } from 'rc-progress'
 import { ArcElement, Chart } from 'chart.js'
-
-import { PageTitle } from '@pluralsh/design-system'
 
 import {
   Event,
@@ -30,6 +27,10 @@ import {
 
 import styled from 'styled-components'
 
+import { Card } from '@pluralsh/design-system'
+
+import { Flex } from 'honorable'
+
 import { LoopingLogo } from '../../utils/AnimatedLogo'
 import { BreadcrumbsContext } from '../../Breadcrumbs'
 import { POLL_INTERVAL } from '../constants'
@@ -38,11 +39,15 @@ import { PodList } from '../pods/PodList'
 import { DELETE_NODE, NODE_Q } from '../queries'
 import { roundToTwoPlaces } from '../utils'
 
+import { Metadata } from '../Metadata'
+
 import { NodeGraphs } from './NodeGraphs'
 import { ScrollablePage } from './Node'
 
 const SubTitle = styled.h2(({ theme }) => ({
   ...theme.partials.text.subtitle1,
+  margin: 0,
+  marginBottom: theme.spacing.medium,
 }))
 
 /*
@@ -183,24 +188,35 @@ export default function NodeInfo() {
 
   const { node, nodeMetric } = data
 
-  console.log('node.raw', node.raw)
-
   return (
     <ScrollablePage heading="Info">
-      <SubTitle>Pods</SubTitle>
-      <PodList
-        pods={node.pods}
-        refetch={refetch}
-        namespace={undefined}
-      />
-      <SubTitle>Overview</SubTitle>
-      <NodeGraphs
-        status={node.status}
-        pods={node.pods}
-        name={name}
-        usage={nodeMetric.usage}
-      />
-
+      <Flex
+        direction="column"
+        gap="xlarge"
+      >
+        <section>
+          <SubTitle>Pods</SubTitle>
+          <PodList
+            pods={node.pods}
+            refetch={refetch}
+            namespace={undefined}
+          />
+        </section>
+        <section>
+          <SubTitle>Overview</SubTitle>
+          <Card padding="medium">
+            <NodeGraphs
+              status={node.status}
+              pods={node.pods}
+              name={name}
+              usage={nodeMetric.usage}
+            />
+          </Card>
+        </section>
+        <section>
+          <Metadata metadata={node.metadata} />
+        </section>
+      </Flex>
     </ScrollablePage>
   )
 }

@@ -19,6 +19,7 @@ export const ScrollablePageContent = styled.div(({ theme }) => ({
   overflowY: 'auto',
   paddingTop: theme.spacing.large,
   paddingRight: theme.spacing.medium,
+  paddingBottom: theme.spacing.xlarge,
 }))
 
 export function ScrollablePage({ heading, children }:{heading:ReactNode, children: ReactNode}) {

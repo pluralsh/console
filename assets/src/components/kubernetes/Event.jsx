@@ -96,6 +96,8 @@ function EventRow({ event }) {
 }
 
 export function Events({ events }) {
+  console.log('events', events)
+
   return (
     <Box
       flex={false}
