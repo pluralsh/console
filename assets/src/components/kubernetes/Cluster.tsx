@@ -25,10 +25,11 @@ function NodesPods() {
       overflowY="hidden"
       padding={theme.spacing.xlarge}
       paddingTop={theme.spacing.large}
+      paddingBottom={0}
     >
       <ResponsiveLayoutSidenavContainer
         width={240}
-        paddingTop={theme.spacing.xxxlarge + theme.spacing.large}
+        paddingTop={theme.spacing.xxxlarge}
       >
         <NodesSideNav tabStateRef={tabStateRef} />
       </ResponsiveLayoutSidenavContainer>

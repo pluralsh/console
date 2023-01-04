@@ -1,10 +1,5 @@
 import { Tab, TabList } from '@pluralsh/design-system'
-import {
-  useLocation,
-  useMatch,
-  useParams,
-  useResolvedPath,
-} from 'react-router-dom'
+import { useMatch } from 'react-router-dom'
 
 import { LinkTabWrap } from 'components/utils/Tabs'
 

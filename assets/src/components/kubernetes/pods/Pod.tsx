@@ -18,13 +18,12 @@ import {
   TabHeaderItem,
   Tabs,
 } from 'forge-core'
-import { Table } from '@pluralsh/design-system'
 import { useMutation, useQuery } from 'react-apollo'
 import { Cube, Terminal } from 'grommet-icons'
 import { cpuParser, memoryParser } from 'kubernetes-resource-parser'
 import { filesize } from 'filesize'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Readiness } from 'utils/status'
+import { Readiness, containerStatusToReadiness } from 'utils/status'
 
 import { ReadinessColor, ReadyIcon } from '../../Application'
 import { BreadcrumbsContext } from '../../Breadcrumbs'
@@ -66,20 +65,6 @@ function statusToReadiness({ phase, containerStatuses }) {
   return Readiness.InProgress
 }
 
-function containerReadiness(status) {
-  if (!status) return Readiness.InProgress
-  const {
-    ready,
-    state: { terminated },
-  } = status
-
-  if (ready && terminated) return Readiness.Complete
-  if (ready) return Readiness.Ready
-  if (!terminated) return Readiness.InProgress
-
-  return Readiness.Failed
-}
-
 export function PodPhase({ phase, message }) {
   const readiness = phaseToReadiness(phase)
 
@@ -108,9 +93,14 @@ export function PodPhase({ phase, message }) {
   )
 }
 
-export function podResources(containers, type) {
-  let memory
-  let cpu
+export function podResources(containers: Iterable<{
+  resources: Record<string, {
+    cpu?: number | null,
+    memory?: number | null,
+  }>
+}>, type:string) {
+  let memory: number | undefined
+  let cpu: number | undefined
 
   for (const { resources } of containers) {
     const resourceSpec = resources[type]
@@ -173,7 +163,7 @@ export function HeaderItem({
   )
 }
 
-export function RowItem({ width, text, truncate = false }) {
+export function RowItem({ width, text, truncate = false }:any) {
   return (
     <Box
       flex={false}
@@ -317,9 +307,9 @@ function PodReadiness({ status: { containerStatuses } }) {
 }
 
 function SimpleContainerStatus({ status }) {
-  const ref = useRef()
+  const ref = useRef<any>()
   const [open, setOpen] = useState(false)
-  const readiness = containerReadiness(status)
+  const readiness = containerStatusToReadiness(status)
   const background = ReadinessColor[readiness]
 
   return (
@@ -363,7 +353,7 @@ function SimpleContainerStatus({ status }) {
 
 function ContainerSummary({
   status: { containerStatuses, initContainerStatuses },
-}) {
+}:any) {
   const allStatuses = [
     ...(initContainerStatuses || []),
     ...(containerStatuses || []),
@@ -386,10 +376,10 @@ function ContainerSummary({
 }
 
 type Pod = {
-  metadata: { name: string; namespace: string };
-  status: { containerStatuses?: unknown[] };
-  spec:unknown;
-};
+  metadata: { name: string; namespace: string }
+  status: { containerStatuses?: unknown[] }
+  spec: unknown
+}
 
 export function PodRow({
   pod: {
@@ -399,12 +389,14 @@ export function PodRow({
   },
   refetch,
 }: {
-  pod: Pod;
-  refetch: any;
+  pod: Pod
+  refetch: any
 }) {
   const navigate = useNavigate()
-  const restarts = (status.containerStatuses || []).reduce((count, { restartCount }) => count + (restartCount || 0),
+  const restarts = (status.containerStatuses || []).reduce((count, status) => count + ((status as any)?.restartCount || 0),
     0)
+
+  console.log('SPEC', spec)
 
   return (
     <Box
@@ -719,7 +711,7 @@ function PodConditions({ conditions }) {
 }
 
 function Container({ container, containerStatus }) {
-  const readiness = containerReadiness(containerStatus)
+  const readiness = containerStatusToReadiness(containerStatus)
 
   return (
     <Box
@@ -784,7 +776,7 @@ function ContainerTabHeader({
   namespace, pod, container, containerStatus,
 }) {
   const navigate = useNavigate()
-  const readiness = containerReadiness(containerStatus[container])
+  const readiness = containerStatusToReadiness(containerStatus[container])
 
   return (
     <TabHeaderItem
@@ -906,7 +898,7 @@ export function Pod() {
                 >
                   <ReadyIcon
                     size="12px"
-                    readiness={containerReadiness(initContainerStatus[name])}
+                    readiness={containerStatusToReadiness(initContainerStatus[name])}
                   />
                   <Text
                     size="small"

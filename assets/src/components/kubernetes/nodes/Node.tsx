@@ -1,8 +1,8 @@
-import { useRef } from 'react'
+import { ReactNode, useRef } from 'react'
 import { Outlet } from 'react-router-dom'
 import { Flex } from 'honorable'
-import { TabPanel } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
+import { PageTitle, TabPanel } from '@pluralsh/design-system'
+import styled, { useTheme } from 'styled-components'
 
 import { ResponsiveLayoutSidecarContainer } from 'components/layout/ResponsiveLayoutSidecarContainer'
 import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLayoutSidenavContainer'
@@ -10,6 +10,28 @@ import { ResponsiveLayoutSpacer } from 'components/layout/ResponsiveLayoutSpacer
 import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLayoutContentContainer'
 
 import NodeSideNav from './NodeSideNav'
+import NodeSidecar from './NodeSidecar'
+
+export const ScrollablePageContent = styled.div(({ theme }) => ({
+  height: '100%',
+  maxHeight: '100%',
+  width: '100%',
+  overflowY: 'auto',
+  paddingTop: theme.spacing.large,
+  paddingRight: theme.spacing.medium,
+}))
+
+export function ScrollablePage({ heading, children }:{heading:ReactNode, children: ReactNode}) {
+  return (
+    <>
+      <PageTitle
+        heading={heading}
+        marginBottom="0"
+      />
+      <ScrollablePageContent>{children}</ScrollablePageContent>
+    </>
+  )
+}
 
 export default function Node() {
   const tabStateRef = useRef<any>()
@@ -20,12 +42,14 @@ export default function Node() {
       height="100%"
       width="100%"
       overflowY="hidden"
-      padding={theme.spacing.xlarge}
+      paddingLeft={theme.spacing.xlarge}
+      paddingRight={theme.spacing.xlarge}
       paddingTop={theme.spacing.large}
+      paddingBottom={0}
     >
       <ResponsiveLayoutSidenavContainer
         width={240}
-        paddingTop={theme.spacing.xxxlarge + theme.spacing.large}
+        paddingTop={theme.spacing.xxxlarge}
       >
         <NodeSideNav tabStateRef={tabStateRef} />
       </ResponsiveLayoutSidenavContainer>
@@ -37,7 +61,9 @@ export default function Node() {
         <Outlet />
       </TabPanel>
       <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutSidecarContainer width="200px" />
+      <ResponsiveLayoutSidecarContainer width="200px">
+        <NodeSidecar />
+      </ResponsiveLayoutSidecarContainer>
     </Flex>
   )
 }

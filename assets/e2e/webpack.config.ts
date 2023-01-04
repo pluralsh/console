@@ -20,12 +20,14 @@ export const options = {
         rules: [
           {
             test: /\.ts?$/,
-            use: [{
-              loader: 'ts-loader',
-              options: {
-                configFile: path.resolve(__dirname, 'tsconfig.json'),
+            use: [
+              {
+                loader: 'ts-loader',
+                options: {
+                  configFile: path.resolve(__dirname, 'tsconfig.json'),
+                },
               },
-            }],
+            ],
             exclude: /node_modules/,
           },
         ],

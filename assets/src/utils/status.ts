@@ -30,3 +30,17 @@ export function nodeStatusToReadiness(status: NodeStatus): ReadinessT {
 
   return Readiness.InProgress
 }
+
+export function containerStatusToReadiness(status:ContainerStatus) {
+  if (!status) return Readiness.InProgress
+  const {
+    ready,
+    state,
+  } = status
+
+  if (ready && state?.terminated) return Readiness.Complete
+  if (ready) return Readiness.Ready
+  if (!state?.terminated) return Readiness.InProgress
+
+  return Readiness.Failed
+}

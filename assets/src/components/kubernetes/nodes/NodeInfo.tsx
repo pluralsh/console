@@ -1,4 +1,4 @@
-import React, {
+import {
   useCallback,
   useContext,
   useEffect,
@@ -13,37 +13,33 @@ import {
   Text,
   ThemeContext,
 } from 'grommet'
-import { useNavigate, useParams } from 'react-router-dom'
-import { ServerCluster } from 'grommet-icons'
-import { memoryParser } from 'kubernetes-resource-parser'
-import { filesize } from 'filesize'
+import { useParams } from 'react-router-dom'
+
 import { normalizeColor } from 'grommet/utils'
 import { Line } from 'rc-progress'
-import { Readiness, nodeStatusToReadiness } from 'utils/status'
 import { ArcElement, Chart } from 'chart.js'
 
 import { PageTitle } from '@pluralsh/design-system'
 
-import { Event, NodeMetric, Pod } from 'generated/graphql'
-
-import { H1 } from 'honorable'
+import {
+  Event,
+  NodeMetric,
+  Node as NodeT,
+  Pod,
+} from 'generated/graphql'
 
 import styled from 'styled-components'
 
-import { cpuParser } from '../../../utils/kubernetes'
 import { LoopingLogo } from '../../utils/AnimatedLogo'
-import { ReadyIcon } from '../../Application'
 import { BreadcrumbsContext } from '../../Breadcrumbs'
-import { RawContent } from '../Component'
 import { POLL_INTERVAL } from '../constants'
-import { Events } from '../Event'
-import { Metadata, mapify } from '../Metadata'
-import { HeaderItem, RowItem, ignore } from '../pods/Pod'
+import { ignore } from '../pods/Pod'
 import { PodList } from '../pods/PodList'
 import { DELETE_NODE, NODE_Q } from '../queries'
 import { roundToTwoPlaces } from '../utils'
 
 import { NodeGraphs } from './NodeGraphs'
+import { ScrollablePage } from './Node'
 
 const SubTitle = styled.h2(({ theme }) => ({
   ...theme.partials.text.subtitle1,
@@ -154,121 +150,16 @@ export function DeleteNode({ name, refetch }) {
   )
 }
 
-export function NodeRow({ node, metrics, refetch }) {
-  const navigate = useNavigate()
-  const labels = mapify(node.metadata.labels)
-  const readiness = nodeStatusToReadiness(node.status)
-  const nodeMetrics = metrics[node.metadata.name]
-
-  return (
-    <Box
-      fill="horizontal"
-      direction="row"
-      align="center"
-      border="bottom"
-      hoverIndicator="backgroundDark"
-      onClick={() => navigate(`/nodes/${node.metadata.name}`)}
-      pad="small"
-    >
-      <Box
-        flex={false}
-        width="30%"
-        direction="row"
-        align="center"
-        gap="xsmall"
-      >
-        <NodeI size="small" />
-        <Text size="small">{node.metadata.name}</Text>
-      </Box>
-      <Box
-        flex={false}
-        width="10%"
-        direction="row"
-        gap="xsmall"
-        align="center"
-      >
-        <ReadyIcon
-          size="12px"
-          readiness={readiness}
-        />
-        <Text size="small">
-          {nodeStatusToReadiness(node.status) === Readiness.Ready
-            ? 'Ready'
-            : 'Pending'}
-        </Text>
-      </Box>
-      <Box
-        flex={false}
-        width="10%"
-        direction="row"
-        gap="xsmall"
-        align="center"
-        pad={{ horizontal: 'xsmall' }}
-      >
-        <UtilBar
-          capacity={cpuParser(node.status.capacity.cpu)}
-          usage={nodeMetrics && nodeMetrics.cpu}
-          format={v => `${roundToTwoPlaces(v)} cores`}
-          modifier="CPU"
-        />
-      </Box>
-      <Box
-        flex={false}
-        width="10%"
-        direction="row"
-        gap="xsmall"
-        align="center"
-        pad={{ horizontal: 'xsmall' }}
-      >
-        <UtilBar
-          capacity={memoryParser(node.status.capacity.memory)}
-          usage={nodeMetrics && nodeMetrics.memory}
-          format={filesize}
-          modifier="Mem"
-        />
-      </Box>
-      <RowItem
-        width="10%"
-        text={labels['failure-domain.beta.kubernetes.io/region']}
-      />
-      <RowItem
-        width="10%"
-        text={labels['failure-domain.beta.kubernetes.io/zone']}
-      />
-      <RowItem
-        width="10%"
-        text={cpuParser(node.status.capacity.cpu)}
-      />
-      <Box
-        width="10%"
-        direction="row"
-        align="center"
-        gap="small"
-      >
-        <Box fill="horizontal">
-          <Text size="small">
-            {filesize(memoryParser(node?.status?.capacity?.memory)) as any}
-          </Text>
-        </Box>
-        <DeleteNode
-          name={node.metadata.name}
-          refetch={refetch}
-        />
-      </Box>
-    </Box>
-  )
-}
-
 export const podContainers = pods => pods
   .filter(({ status: { phase } }) => phase !== 'Succeeded')
   .map(({ spec: { containers } }) => containers)
   .flat()
 
-export default function Node() {
+export default function NodeInfo() {
   const { name } = useParams()
 
   const { data, refetch } = useQuery<{
-    node: Node & {
+    node: NodeT & {
       raw?: string
       pods?: Pod[]
       events?: Event[]
@@ -295,8 +186,7 @@ export default function Node() {
   console.log('node.raw', node.raw)
 
   return (
-    <>
-      <PageTitle title="Info" />
+    <ScrollablePage heading="Info">
       <SubTitle>Pods</SubTitle>
       <PodList
         pods={node.pods}
@@ -311,6 +201,6 @@ export default function Node() {
         usage={nodeMetric.usage}
       />
 
-    </>
+    </ScrollablePage>
   )
 }

@@ -1,29 +1,11 @@
-import {
-  ComponentProps,
-  useContext,
-  useEffect,
-  useMemo,
-} from 'react'
+import { useContext, useEffect, useMemo } from 'react'
 import { useQuery } from 'react-apollo'
 import { memoryParser } from 'kubernetes-resource-parser'
 import { sumBy } from 'lodash'
-import {
-  CaretRightIcon,
-  Chip,
-  IconFrame,
-  PageTitle,
-  ProgressBar,
-  Table,
-} from '@pluralsh/design-system'
+import { PageTitle, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import styled, { useTheme } from 'styled-components'
 
-import {
-  ReadinessT,
-  nodeStatusToReadiness,
-  readinessToChipTitle,
-  readinessToSeverity,
-} from 'utils/status'
+import { ReadinessT, nodeStatusToReadiness, readinessToChipTitle } from 'utils/status'
 
 import { cpuParser } from 'utils/kubernetes'
 import { LoopingLogo } from 'components/utils/AnimatedLogo'
@@ -34,83 +16,27 @@ import type { Node, NodeMetric } from 'generated/graphql'
 
 import { filesize } from 'filesize'
 
+import styled from 'styled-components'
+
 import { mapify } from '../Metadata'
 import { POLL_INTERVAL } from '../constants'
 import { NODES_Q } from '../queries'
 
 import { ClusterMetrics } from './ClusterMetrics'
-
-function UsageBarUnstyled({ usage, ...props }: { usage: number }) {
-  const theme = useTheme()
-  const color
-    = usage > 0.9
-      ? theme.colors['border-danger']
-      : usage > 0.75
-        ? theme.colors['border-warning']
-        : theme.colors['text-xlight']
-
-  return (
-    <ProgressBar
-      mode="determinate"
-      progress={usage}
-      progressColor={color}
-      completeColor={color}
-      {...props}
-    />
-  )
-}
-const UsageBar = styled(UsageBarUnstyled)(({ theme }) => ({
-  marginTop: theme.spacing.xxsmall,
-}))
-
-const TableText = styled.div(({ theme }) => ({
-  ...theme.partials.text.body2LooseLineHeight,
-  color: theme.colors['text-light'],
-  '*:where(a) &': {
-    '&:hover': {
-      ...theme.partials.text.inlineLink,
-    },
-  },
-}))
-const CaptionText = styled.div(({ theme }) => ({
-  ...theme.partials.text.caption,
-  color: theme.colors['text-xlight'],
-}))
-const StatusChip = styled(({ readiness }: { readiness: ReadinessT }) => (
-  <Chip severity={readinessToSeverity[readiness]}>
-    {readinessToChipTitle[readiness]}
-  </Chip>
-))(_ => ({}))
-const NameCell = styled.div(_ => ({
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  textOverflow: 'ellipsis',
-}))
+import { UsageBar } from './UsageBar'
+import {
+  CaptionText,
+  NTable,
+  StatusChip,
+  TableCaretLink,
+  TableText,
+  Usage,
+} from './TableElements'
+import { ScrollablePage } from './Node'
 
 const columnHelper = createColumnHelper<TableData>()
 
-function TableCaretLinkUnstyled({
-  textValue,
-  ...props
-}: ComponentProps<typeof UnstyledLink> & { textValue: string }) {
-  const theme = useTheme()
-
-  return (
-    <UnstyledLink {...props}>
-      <IconFrame
-        clickable
-        textValue={textValue}
-        size="medium"
-        icon={<CaretRightIcon />}
-      />
-    </UnstyledLink>
-  )
-}
-const TableCaretLink = styled(TableCaretLinkUnstyled)(({ theme }) => ({
-  'a&': {
-    color: theme.colors['icon-default'],
-  },
-}))
+type Capacity = { memory?: string; cpu?: string }
 
 const zoneKey = 'failure-domain.beta.kubernetes.io/zone'
 const regionKey = 'failure-domain.beta.kubernetes.io/region'
@@ -118,14 +44,15 @@ const columns = [
   columnHelper.accessor(row => row.name, {
     id: 'name',
     cell: ({ row: { original }, ...props }) => (
-      <NameCell>
-        <UnstyledLink
-          to={`/nodes/${original.name}`}
-          $extendStyle={undefined}
-        >
-          <TableText>{props.getValue()}</TableText>
-        </UnstyledLink>
-      </NameCell>
+      <UnstyledLink
+        to={`/nodes/${original.name}`}
+        $extendStyle={undefined}
+      >
+        <TableText>
+          aslkjdfalsdjfasdfasdlkjasdf
+          {props.getValue()}
+        </TableText>
+      </UnstyledLink>
     ),
     header: 'Name',
     maxSize: 30,
@@ -146,12 +73,10 @@ const columns = [
       id: 'memory-usage',
       cell: ({ row: { original }, ...props }) => (
         <>
-          <TableText>
-            <>
-              {filesize(original?.memory?.used)} /{' '}
-              {filesize(original?.memory?.total)}
-            </>
-          </TableText>
+          <Usage
+            used={filesize(original?.memory?.used)}
+            total={filesize(original?.memory?.total)}
+          />
           <UsageBar usage={props.getValue()} />
         </>
       ),
@@ -161,10 +86,10 @@ const columns = [
     id: 'cpu-usage',
     cell: ({ row: { original }, ...props }: any) => (
       <>
-        <TableText>
-          {Math.round((original?.cpu?.used || 0) * 100) / 100} /{' '}
-          {original?.cpu?.total} cores
-        </TableText>
+        <Usage
+          used={Math.round((original?.cpu?.used || 0) * 100) / 100}
+          total={original?.cpu?.total}
+        />
         <UsageBar usage={props.getValue()} />
       </>
     ),
@@ -204,6 +129,19 @@ type TableData = {
   zone?: any
   readiness?: ReadinessT
 }
+
+const NodesTable = styled(NTable)(_ => ({
+  table: {
+    gridTemplateColumns: 'minmax(100px, 1fr) auto auto auto auto auto',
+  },
+  'td:nth-child(1)': {
+    '*': {
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    },
+  },
+}))
 
 export default function Nodes() {
   const { data } = useQuery<{
@@ -248,55 +186,48 @@ export default function Nodes() {
     return { cpu, mem }
   }, [data])
 
-  console.log({ usage, metrics })
-
   const tableData: TableData[] = useMemo(() => (data?.nodes || []).map(node => {
     const thisMetrics = metrics[node.metadata.name]
     const labelsMap = mapify(node.metadata.labels)
 
-        type Capacity = { memory?: string; cpu?: string }
-        const capacity: Capacity = (node?.status?.capacity as Capacity) ?? {}
+    const capacity: Capacity = (node?.status?.capacity as Capacity) ?? {}
 
-        console.log({ node })
-        console.log('nodeStatus', node.status)
-
-        return {
-          name: node?.metadata?.name,
-          memory: {
-            used: thisMetrics.memory,
-            total: memoryParser(capacity?.memory ?? ''),
-          },
-          cpu: {
-            used: thisMetrics.cpu,
-            total: cpuParser(capacity?.cpu ?? ''),
-          },
-          region: labelsMap[regionKey],
-          zone: labelsMap[zoneKey],
-          readiness: nodeStatusToReadiness(node?.status),
-        }
+    return {
+      name: node?.metadata?.name,
+      memory: {
+        used: thisMetrics?.memory,
+        total: memoryParser(capacity?.memory ?? ''),
+      },
+      cpu: {
+        used: thisMetrics?.cpu,
+        total: cpuParser(capacity?.cpu ?? ''),
+      },
+      region: labelsMap[regionKey],
+      zone: labelsMap[zoneKey],
+      readiness: nodeStatusToReadiness(node?.status),
+    }
   }),
   [data?.nodes, metrics])
 
-  console.log('tableData', tableData)
   if (!data) {
     return <LoopingLogo dark />
   }
-  console.log('data', data)
 
   return (
-    <>
-      <PageTitle heading="Nodes" />
-      <Table
-        data={tableData}
-        columns={columns}
-        enableColumnResizing
-        maxHeight="calc(100vh - 500px)"
-      />
+    <ScrollablePage heading="Nodes">
+
+      {tableData && tableData.length > 0 && (
+        <NodesTable
+          data={tableData}
+          columns={columns}
+          maxHeight="calc(100vh - 500px)"
+        />
+      )}
       <ClusterMetrics
         nodes={data.nodes}
         usage={usage}
       />
       <div>Some content</div>
-    </>
+    </ScrollablePage>
   )
 }
