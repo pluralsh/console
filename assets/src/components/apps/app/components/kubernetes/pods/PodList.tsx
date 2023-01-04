@@ -43,13 +43,21 @@ const columnHelper = createColumnHelper<PodTableRow>()
 export const ColNameLink = columnHelper.accessor(row => row.name, {
   id: 'name',
   cell: ({ row: { original }, ...props }) => (
-    <A
-      as={Link}
-      to={`/pods/${original.namespace}/${original.name}`}
-      $extendStyle={undefined}
+    <Tooltip
+      label={props.getValue()}
+      placement="top"
     >
-      <TableText>{props.getValue()}</TableText>
-    </A>
+      <TableText>
+        <A
+          inline
+          display="inline"
+          as={Link}
+          to={`/pods/${original.namespace}/${original.name}`}
+        >
+          {props.getValue()}
+        </A>
+      </TableText>
+    </Tooltip>
   ),
   header: 'Name',
 })

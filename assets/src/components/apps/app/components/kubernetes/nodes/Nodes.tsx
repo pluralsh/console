@@ -17,9 +17,11 @@ import { filesize } from 'filesize'
 
 import styled from 'styled-components'
 
-import { Flex } from 'honorable'
+import { A, Flex } from 'honorable'
 
-import { Card } from '@pluralsh/design-system'
+import { Card, Tooltip } from '@pluralsh/design-system'
+
+import { Link } from 'react-router-dom'
 
 import { mapify } from '../Metadata'
 import { POLL_INTERVAL } from '../constants'
@@ -47,15 +49,21 @@ const columns = [
   columnHelper.accessor(row => row.name, {
     id: 'name',
     cell: ({ row: { original }, ...props }) => (
-      <UnstyledLink
-        to={`/nodes/${original.name}`}
-        $extendStyle={undefined}
+      <Tooltip
+        label={props.getValue()}
+        placement="top"
       >
         <TableText>
-          aslkjdfalsdjfasdfasdlkjasdf
-          {props.getValue()}
+          <A
+            inline
+            display="inline"
+            as={Link}
+            to={`/nodes/${original.name}`}
+          >
+            {props.getValue()}
+          </A>
         </TableText>
-      </UnstyledLink>
+      </Tooltip>
     ),
     header: 'Name',
     maxSize: 30,
