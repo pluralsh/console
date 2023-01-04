@@ -13,8 +13,8 @@ import { ComponentIcon, ComponentStatus, statusToBorder } from './misc'
 export default function Components() {
   const navigate = useNavigate()
   const { appName } = useParams()
-  const { applications }: any = useContext(InstallationContext)
-  const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
+  const { applications } = useContext<any>(InstallationContext)
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const currentApp = applications.find(app => app.name === appName)
 
   useEffect(() => setBreadcrumbs([
