@@ -3,6 +3,8 @@ import { PageTitle } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 
+import { Flex } from 'honorable'
+
 import ComponentInfoMetadata from './ComponentInfoMetadata'
 import ComponentInfoPods from './ComponentInfoPods'
 
@@ -27,17 +29,22 @@ export default function ComponentInfo() {
   return (
     <>
       <PageTitle heading="Info" />
-      {componentsWithPods.includes(componentKind) && (
-        <ComponentInfoPods
-          pods={value?.pods}
-          namespace={appName}
-          refetch={refetch}
+      <Flex
+        direction="column"
+        gap="large"
+      >
+        {componentsWithPods.includes(componentKind) && (
+          <ComponentInfoPods
+            pods={value?.pods}
+            namespace={appName}
+            refetch={refetch}
+          />
+        )}
+        <ComponentInfoMetadata
+          component={component}
+          metadata={value?.metadata}
         />
-      )}
-      <ComponentInfoMetadata
-        component={component}
-        metadata={value?.metadata}
-      />
+      </Flex>
     </>
   )
 }

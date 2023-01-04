@@ -1,12 +1,18 @@
-import { Table } from '@pluralsh/design-system'
+import { Chip, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { TRUNCATE } from 'components/utils/truncate'
 import { filesize } from 'filesize'
-import { A, Div, H2 } from 'honorable'
+import {
+  A,
+  Div,
+  Flex,
+  H2,
+} from 'honorable'
 import { memoryParser } from 'kubernetes-resource-parser'
 import { cpuParser } from 'utils/kubernetes'
+import { Readiness } from 'utils/status'
 
-import { PodList } from '../kubernetes/Pod'
+import { containerReadiness } from '../kubernetes/Pod'
 
 const COLUMN_HELPER = createColumnHelper<any>()
 
@@ -62,9 +68,22 @@ const columns = [
     cell: (statuses: any) => statuses.getValue().reduce((count, { restartCount }) => count + (restartCount || 0), 0),
     header: 'Restarts',
   }),
-  COLUMN_HELPER.accessor(pod => pod.metadata.name, {
+  COLUMN_HELPER.accessor(pod => pod.status.containerStatuses || [], {
     id: 'containers',
-    cell: (name: any) => name.getValue(),
+    cell: (statuses: any) => {
+      const all = statuses.getValue().length
+      const ready = statuses.getValue().reduce((count, status) => count + (containerReadiness(status) === Readiness.Ready ? 1 : 0), 0)
+      const severity = ready === 0 ? 'error' : (all === ready ? 'success' : 'warning')
+
+      return (
+        <Chip
+          severity={severity}
+          whiteSpace="nowrap"
+        >
+          {ready}/{all} ready
+        </Chip>
+      )
+    },
     header: 'Containers',
   }),
 ]
@@ -103,7 +122,7 @@ export default function ComponentInfoPods({
   pods, namespace, refetch,
 }) {
   return (
-    <>
+    <Flex direction="column">
       <H2 marginBottom="medium">Pods</H2>
       {pods?.length > 0 && (
         <Table
@@ -113,11 +132,6 @@ export default function ComponentInfoPods({
         />
       )}
       {(!pods || pods.length === 0) && 'No pods available.'}
-      <PodList
-        pods={pods}
-        refetch={refetch}
-        namespace={namespace}
-      />
-    </>
+    </Flex>
   )
 }

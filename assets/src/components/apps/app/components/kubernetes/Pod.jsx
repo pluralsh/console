@@ -84,7 +84,7 @@ function statusToReadiness({ phase, containerStatuses }) {
   return Readiness.InProgress
 }
 
-function containerReadiness(status) {
+export function containerReadiness(status) {
   if (!status) return Readiness.InProgress
   const { ready, state: { terminated } } = status
 

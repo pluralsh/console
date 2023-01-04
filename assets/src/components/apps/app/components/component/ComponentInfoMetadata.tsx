@@ -13,7 +13,7 @@ export default function ComponentInfoMetadata({
   },
 }) {
   return (
-    <>
+    <Flex direction="column">
       <H2 marginBottom="medium">Metadata</H2>
       <Card padding="large">
         <PropWide
@@ -75,6 +75,6 @@ export default function ComponentInfoMetadata({
           {(!annotations || annotations.length === 0) && 'There are no annotations.'}
         </Flex>
       </Card>
-    </>
+    </Flex>
   )
 }
