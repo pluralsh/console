@@ -86,6 +86,7 @@ const columns = [
     },
     header: 'Containers',
   }),
+  // TODO: Add tooltip for containers and add delete button.
 ]
 
 function podMemory(containers, type) {
