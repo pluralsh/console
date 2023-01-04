@@ -17,9 +17,8 @@ import RangePicker from 'components/utils/RangePicker'
 
 import { Pie } from '../../../../utils/ProgressGauge'
 
-import { Metadata, MetadataRow } from './Metadata'
+import { MetadataRow } from './Metadata'
 import { ScalingTypes } from './constants'
-import { PodList } from './Pod'
 import { Metric } from './Metrics'
 import { Container, LogLink, logUrl } from './utils'
 
@@ -134,11 +133,6 @@ export default function StatefulSet() {
             metadata={statefulSet.metadata}
           />
           <Spec spec={statefulSet.spec} />
-          <PodList
-            pods={statefulSet.pods}
-            refetch={refetch}
-            namespace={repo}
-          />
         </TabContent>
         <TabContent name="metrics">
           <Metric

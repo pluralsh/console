@@ -4,10 +4,13 @@ import { useContext, useEffect } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 
 import ComponentInfoMetadata from './ComponentInfoMetadata'
+import ComponentInfoPods from './ComponentInfoPods'
+
+const componentsWithPods = ['deployment', 'service', 'statefulset']
 
 export default function ComponentInfo() {
-  const { appName, componentKind, componentName } = useParams()
-  const { component, data } = useOutletContext<any>()
+  const { appName, componentKind = '', componentName } = useParams()
+  const { component, data, refetch } = useOutletContext<any>()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
 
   useEffect(() => setBreadcrumbs([
@@ -24,6 +27,13 @@ export default function ComponentInfo() {
   return (
     <>
       <PageTitle heading="Info" />
+      {componentsWithPods.includes(componentKind) && (
+        <ComponentInfoPods
+          pods={value?.pods}
+          namespace={appName}
+          refetch={refetch}
+        />
+      )}
       <ComponentInfoMetadata
         component={component}
         metadata={value?.metadata}

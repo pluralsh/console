@@ -15,9 +15,8 @@ import RangePicker from 'components/utils/RangePicker'
 
 import { Pie } from '../../../../utils/ProgressGauge'
 
-import { Metadata, MetadataRow } from './Metadata'
+import { MetadataRow } from './Metadata'
 import { ScalingTypes } from './constants'
-import { PodList } from './Pod'
 import { Metric } from './Metrics'
 import { Container, LogLink, logUrl } from './utils'
 
@@ -112,26 +111,12 @@ export default function Deployment() {
           />
         )}
       >
-        <TabHeader>
-          <TabHeaderItem name="metrics">
-            <Text
-              size="small"
-              weight={500}
-            >metrics
-            </Text>
-          </TabHeaderItem>
-        </TabHeader>
         <TabContent name="info">
           <Status
             status={deployment.status}
             metadata={deployment.metadata}
           />
           <Spec spec={deployment.spec} />
-          <PodList
-            pods={deployment.pods}
-            refetch={refetch}
-            namespace={repo}
-          />
         </TabContent>
         <TabContent name="metrics">
           <Metric

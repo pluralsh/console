@@ -2,7 +2,6 @@ import { Box, Text } from 'grommet'
 import { TabContent, Tabs } from 'forge-core'
 
 import { MetadataRow } from './Metadata'
-import { PodList } from './Pod'
 import { Container } from './utils'
 
 function Status({ status: { loadBalancer } }) {
@@ -84,11 +83,6 @@ export function Service() {
         <TabContent name="info">
           <Status status={service.status} />
           <Spec spec={service.spec} />
-          <PodList
-            pods={service.pods}
-            refetch={refetch}
-            namespace={undefined} // TODO: repo.
-          />
         </TabContent>
       </Tabs>
     </Box>
