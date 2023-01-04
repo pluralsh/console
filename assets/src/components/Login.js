@@ -3,6 +3,8 @@ import { Button, GqlError } from 'forge-core'
 import { useMutation, useQuery } from 'react-apollo'
 import { Box, Form, Keyboard, Text } from 'grommet'
 
+import { v4 as uuidv4 } from 'uuid'
+
 import gql from 'graphql-tag'
 
 import { useIntercom } from 'react-use-intercom'
@@ -121,11 +123,26 @@ export function GrantAccess() {
   )
 }
 
+const FUDGED_USER = 'plrl-fudged-user'
+
+function fudgedUser(name) {
+  if (localStorage.getItem(FUDGED_USER)) {
+    return localStorage.getItem(FUDGED_USER)
+  }
+
+  const id = uuidv4()
+  const randstr = Math.random().toString(36).slice(2)
+  const user = { email: `sandbox+${randstr}@plural.sh`, name, userId: id }
+  localStorage.setItem(FUDGED_USER, user)
+
+  return user
+}
+
 function intercomAttributes({ email, name }) {
   if (email === 'demo-user@plural.sh') { 
-    const randstr = Math.random().toString(36).slice(2)
+    console.log('here')
 
-    return ({ email: `sandbox+${randstr}@plural.sh`, name })
+    return fudgedUser(name)
   }
 
   return { email, name }

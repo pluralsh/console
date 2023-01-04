@@ -108,7 +108,7 @@
     "terminal-in-react": "4.3.1",
     "tinyqueue": "2.0.3",
     "universal-cookie": "4.0.4",
-    "uuid": "8.3.2",
+    "uuid": "^9.0.0",
     "xterm-addon-fit": "0.5.0",
     "xterm-for-react": "1.0.4",
     "xterm-theme": "1.1.0",
