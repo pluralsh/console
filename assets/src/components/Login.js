@@ -121,13 +121,22 @@ export function GrantAccess() {
   )
 }
 
+function intercomAttributes({email, name}) {
+  if (email === 'demo-user@plural.sh') { 
+    const randstr = Math.random().toString(36).slice(2)
+    return ({ email: `sandbox+${randstr}@plural.sh`, name})
+  }
+
+  return {email, name}
+}
+
 export function EnsureLogin({ children }) {
   const location = useLocation()
   const { data, error, loading } = useQuery(ME_Q, { pollInterval: POLL_INTERVAL, errorPolicy: 'ignore' })
   const { boot, update } = useIntercom()
 
   useEffect(() => {
-    if (data && data.me) boot({ email: data.me.email, name: data.me.name })
+    if (data && data.me) boot(intercomAttributes(data.me))
   }, [data])
 
   useEffect(() => {
