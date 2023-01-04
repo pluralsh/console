@@ -49,8 +49,6 @@ import { BreadcrumbsContext } from '../../../../Breadcrumbs'
 import { RawContent } from './Component'
 import { ClusterMetrics as Metrics, NodeMetrics, POLL_INTERVAL } from './constants'
 
-import { Events } from './Event'
-
 import { Metadata, mapify } from './Metadata'
 import {
   HeaderItem,
@@ -715,7 +713,7 @@ export function Node() {
           />
         </TabContent>
         <TabContent name="events">
-          <Events events={node.events} />
+          {/* <Events events={node.events} /> */}
         </TabContent>
         <TabContent name="raw">
           <RawContent raw={node.raw} />

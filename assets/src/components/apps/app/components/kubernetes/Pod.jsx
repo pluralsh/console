@@ -47,11 +47,9 @@ import { DELETE_POD, POD_Q } from './queries'
 
 import { POLL_INTERVAL } from './constants'
 import { Metadata, MetadataRow } from './Metadata'
-import { RawContent } from './Component'
 
 import { Container as Con, LogLink } from './utils'
 
-import { Events } from './Event'
 import { DeleteIcon } from './Job'
 
 export const ReadinessColor = {
@@ -942,12 +940,12 @@ export function Pod() {
               />
             </TabContent>
           ))}
-          <TabContent name="events">
+          {/* <TabContent name="events">
             <Events events={pod.events} />
           </TabContent>
           <TabContent name="raw">
             <RawContent raw={pod.raw} />
-          </TabContent>
+          </TabContent> */}
         </Tabs>
       </Box>
     </Box>
