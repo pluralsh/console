@@ -16,9 +16,9 @@ import {
   TableCaretLink,
   TableText,
   Usage,
-} from '../nodes/TableElements'
+} from '../TableElements'
 
-import { DeletePod, podResources } from './Pod'
+import { DeletePod, podResources } from './Pod-old'
 
 export type ContainerStatus = {name: string, readiness: ReadinessT}
 

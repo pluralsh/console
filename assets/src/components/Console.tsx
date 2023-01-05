@@ -19,8 +19,11 @@ import { EnsureLogin } from './Login'
 import Users from './Users'
 import { InstallationsProvider } from './Installations'
 import Cluster from './cluster/Cluster'
-import { Pod } from './cluster/pods/Pod'
+import Pod from './cluster/pods/Pod'
 import Pods from './cluster/pods/Pods'
+import PodInfo from './cluster/pods/PodInfo'
+import PodEvents from './cluster/pods/PodEvents'
+import PodRaw from './cluster/pods/PodRaw'
 import Node from './cluster/nodes/Node'
 import Nodes from './cluster/nodes/Nodes'
 import NodeInfo from './cluster/nodes/NodeInfo'
@@ -254,10 +257,6 @@ export default function Console() {
                         {/* <Route path="/incidents"><PluralApi><Incidents /></PluralApi></Route> */}
                         {/* Disabled for now.  */}
                         <Route
-                          path="/pods/:namespace/:name"
-                          element={<Pod />}
-                        />
-                        <Route
                           path="/pods"
                           element={<Cluster />}
                         >
@@ -291,6 +290,24 @@ export default function Console() {
                             path="raw"
                             element={<NodeRaw />}
                           />
+                        </Route>
+                        <Route
+                          path="/pods/:namespace/:name"
+                          element={<Pod />}
+                        >
+                          <Route
+                            index
+                            element={<PodInfo />}
+                          />
+                          <Route
+                            path="events"
+                            element={<PodEvents />}
+                          />
+                          <Route
+                            path="raw"
+                            element={<PodRaw />}
+                          />
+
                         </Route>
                         <Route
                           path="/webhooks"

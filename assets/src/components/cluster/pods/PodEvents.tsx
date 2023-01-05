@@ -1,8 +1,10 @@
+import { useContext, useEffect } from 'react'
 import { useQuery } from 'react-apollo'
 import { useParams } from 'react-router-dom'
 
 import type { Event } from 'generated/graphql'
 import { LoopingLogo } from 'components/utils/AnimatedLogo'
+import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
 import { ScrollablePage } from 'components/layout/ScrollablePage'
 
@@ -22,6 +24,14 @@ export default function NodeEvents() {
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
+  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { text: 'nodes', url: '/nodes' },
+      { text: name || '', url: `/nodes/${name}` },
+    ])
+  }, [name, setBreadcrumbs])
 
   if (!data) return <LoopingLogo dark />
 

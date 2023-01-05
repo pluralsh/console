@@ -1,32 +1,23 @@
 import { useMemo } from 'react'
 import { useQuery } from 'react-apollo'
-import { memoryParser } from 'kubernetes-resource-parser'
 import { sumBy } from 'lodash'
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { ReadinessT, nodeStatusToReadiness, readinessToChipTitle } from 'utils/status'
-
-import { cpuParser } from 'utils/kubernetes'
-import { LoopingLogo } from 'components/utils/AnimatedLogo'
+import { filesize } from 'filesize'
+import { A, Flex } from 'honorable'
+import { Card, Tooltip } from '@pluralsh/design-system'
+import { Link } from 'react-router-dom'
+import { ScrollablePage } from 'components/layout/ScrollablePage'
 
 import type { Node, NodeMetric } from 'generated/graphql'
-
-import { filesize } from 'filesize'
-
-import { A, Flex } from 'honorable'
-
-import { Card, Tooltip } from '@pluralsh/design-system'
-
-import { Link } from 'react-router-dom'
-
-import { ScrollablePage } from 'components/layout/ScrollablePage'
+import { ReadinessT, nodeStatusToReadiness, readinessToChipTitle } from 'utils/status'
+import { cpuParser, memoryParser } from 'utils/kubernetes'
+import { LoopingLogo } from 'components/utils/AnimatedLogo'
 
 import { mapify } from '../Metadata'
 import { POLL_INTERVAL } from '../constants'
 import { NODES_Q } from '../queries'
 
-import { ClusterMetrics } from './ClusterMetrics'
-import { UsageBar } from './UsageBar'
 import {
   CaptionText,
   GridTable,
@@ -35,11 +26,14 @@ import {
   TableCaretLink,
   TableText,
   Usage,
-} from './TableElements'
+} from '../TableElements'
 
-const columnHelper = createColumnHelper<TableData>()
+import { ClusterMetrics } from './ClusterMetrics'
+import { UsageBar } from './UsageBar'
 
 type Capacity = { memory?: string; cpu?: string }
+
+const columnHelper = createColumnHelper<TableData>()
 
 const zoneKey = 'failure-domain.beta.kubernetes.io/zone'
 const regionKey = 'failure-domain.beta.kubernetes.io/region'
@@ -168,9 +162,8 @@ export default function Nodes() {
     if (!data) {
       return null
     }
-
     const cpu = sumBy(data.nodeMetrics,
-      metrics => cpuParser((metrics as any)?.usage?.cpu) ?? 0)
+      metrics => cpuParser(metrics?.usage?.cpu) ?? 0)
     const mem = sumBy(data.nodeMetrics,
       metrics => memoryParser((metrics as any)?.usage?.memory) ?? 0)
 
@@ -180,18 +173,17 @@ export default function Nodes() {
   const tableData: TableData[] = useMemo(() => (data?.nodes || []).map(node => {
     const thisMetrics = metrics[node.metadata.name]
     const labelsMap = mapify(node.metadata.labels)
-
     const capacity: Capacity = (node?.status?.capacity as Capacity) ?? {}
 
     return {
       name: node?.metadata?.name,
       memory: {
         used: thisMetrics?.memory,
-        total: memoryParser(capacity?.memory ?? ''),
+        total: memoryParser(capacity?.memory),
       },
       cpu: {
         used: thisMetrics?.cpu,
-        total: cpuParser(capacity?.cpu ?? ''),
+        total: cpuParser(capacity?.cpu),
       },
       region: labelsMap[regionKey],
       zone: labelsMap[zoneKey],

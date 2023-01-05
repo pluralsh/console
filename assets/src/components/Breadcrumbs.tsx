@@ -39,6 +39,7 @@ export function Breadcrumbs() {
         <Flex
           direction="row"
           gap="small"
+          key={`${crumb.text}-${crumb.url}`}
         >
           <Span color="text-xlight">
             {typeof crumb.url !== 'string' ? (

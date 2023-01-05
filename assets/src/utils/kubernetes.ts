@@ -1,13 +1,17 @@
 import { isString } from 'lodash'
 
+import { memoryParser as mParser } from 'kubernetes-resource-parser'
+
 const MULTIPLES = {
   m: 1000,
   n: 1000 ** 3,
 }
 
+const nanToUndef = val => (Number.isNaN(val) ? undefined : val)
+
 export function cpuParser(input?: string | null) {
   if (!input || typeof input !== 'string') {
-    return NaN
+    return undefined
   }
   const milliMatch = input.match(/^([0-9]+)([a-z])$/)
 
@@ -18,9 +22,17 @@ export function cpuParser(input?: string | null) {
   return parseFloat(input)
 }
 
+export function memoryParser(value: string | null | undefined) {
+  if (typeof value !== 'string') {
+    return undefined
+  }
+
+  return nanToUndef(mParser(value) as number)
+}
+
 export function cpuFormat(value?: string | number | null) {
   if (value === undefined || value === null) {
-    return NaN
+    return ''
   }
   value = isString(value) ? parseFloat(value) : value
   if (value < 1 / MULTIPLES.n) {

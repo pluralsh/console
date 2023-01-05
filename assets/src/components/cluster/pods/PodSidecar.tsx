@@ -6,7 +6,6 @@ import { nodeStatusToReadiness } from 'utils/status'
 
 import { POLL_INTERVAL } from '../constants'
 import { NODE_Q } from '../queries'
-
 import { StatusChip } from '../TableElements'
 
 export default function NodeSidecar() {
@@ -32,7 +31,11 @@ export default function NodeSidecar() {
 
   return (
     <Sidecar heading="Metadata">
-      <SidecarItem heading="Name">{node.metadata.name}</SidecarItem>
+      <SidecarItem heading="Pod name">xxx</SidecarItem>
+      <SidecarItem heading="Namespace">xxx</SidecarItem>
+      <SidecarItem heading="IP">xxx.xxx.xxx</SidecarItem>
+      <SidecarItem heading="Parent node">xxx.xxx.xxx</SidecarItem>
+      <SidecarItem heading="Service account">xxx.xxx.xxx</SidecarItem>
       <SidecarItem heading="Status"><StatusChip readiness={readiness} /></SidecarItem>
     </Sidecar>
   )

@@ -1,7 +1,6 @@
 import {
   useCallback,
   useContext,
-  useEffect,
   useRef,
   useState,
 } from 'react'
@@ -17,7 +16,6 @@ import { useParams } from 'react-router-dom'
 import { normalizeColor } from 'grommet/utils'
 import { Line } from 'rc-progress'
 import { ArcElement, Chart } from 'chart.js'
-import styled from 'styled-components'
 import { Card } from '@pluralsh/design-system'
 import { Flex } from 'honorable'
 
@@ -29,7 +27,6 @@ import {
 } from 'generated/graphql'
 
 import { LoopingLogo } from 'components/utils/AnimatedLogo'
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { ignoreEvent } from 'components/utils/events'
 
 import { ScrollablePage } from 'components/layout/ScrollablePage'
@@ -41,12 +38,7 @@ import { roundToTwoPlaces } from '../utils'
 import { Metadata } from '../Metadata'
 
 import { NodeGraphs } from './NodeGraphs'
-
-const SubTitle = styled.h2(({ theme }) => ({
-  ...theme.partials.text.subtitle1,
-  margin: 0,
-  marginBottom: theme.spacing.medium,
-}))
+import { SubTitle } from './SubTitle'
 
 /*
 Must explicitly import and register chart.js elements used in react-chartjs-2
@@ -173,14 +165,6 @@ export default function NodeInfo() {
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
-  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
-
-  useEffect(() => {
-    setBreadcrumbs([
-      { text: 'nodes', url: '/nodes' },
-      { text: name || '', url: `/nodes/${name}` },
-    ])
-  }, [name, setBreadcrumbs])
 
   if (!data) return <LoopingLogo dark />
 

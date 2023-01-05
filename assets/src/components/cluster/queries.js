@@ -205,6 +205,34 @@ export const POD_Q = gql`
   ${EventFragment}
 `
 
+export const POD_INFO_Q = gql`
+  query Pod($name: String!, $namespace: String!) {
+    pod(name: $name, namespace: $namespace) {
+      ...PodFragment
+    }
+  }
+  ${PodFragment}
+`
+
+export const POD_EVENTS_Q = gql`
+  query Pod($name: String!, $namespace: String!) {
+    pod(name: $name, namespace: $namespace) {
+      ...PodFragment
+      events { ...EventFragment }
+    }
+  }
+  ${EventFragment}
+`
+
+export const POD_RAW_Q = gql`
+  query Pod($name: String!, $namespace: String!) {
+    pod(name: $name, namespace: $namespace) {
+      ...PodFragment
+      raw
+    }
+  }
+`
+
 export const USAGE_Q = gql`
   query Usage($cpu: String!, $mem: String!, $podCpu: String!, $podMem: String!, $step: String!, $offset: Int!) {
     cpu: metric(query: $cpu, offset: $offset, step: $step) { ...MetricResponseFragment }

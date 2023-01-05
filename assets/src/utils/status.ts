@@ -1,5 +1,5 @@
 import type { Chip } from '@pluralsh/design-system'
-import { ContainerStatus, NodeStatus } from 'generated/graphql'
+import { ContainerStatus, Maybe, NodeStatus } from 'generated/graphql'
 import { ComponentProps } from 'react'
 
 type Severity = ComponentProps<typeof Chip>['severity']
@@ -38,7 +38,7 @@ export function nodeStatusToReadiness(status: NodeStatus): ReadinessT {
   return Readiness.InProgress
 }
 
-export function containerStatusToReadiness(status: ContainerStatus | null) {
+export function containerStatusToReadiness(status?: Maybe<ContainerStatus>) {
   if (!status) return Readiness.InProgress
   const {
     ready,

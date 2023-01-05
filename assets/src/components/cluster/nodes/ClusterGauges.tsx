@@ -24,7 +24,7 @@ export function ClusterGauges({ nodes, usage }: { nodes: any; usage: any }) {
       status: {
         capacity: { cpu },
       },
-    }: any) => cpuParser(cpu))
+    }: any) => cpuParser(cpu) ?? 0)
   const totalMem = sumBy(nodes,
     ({
       status: {
