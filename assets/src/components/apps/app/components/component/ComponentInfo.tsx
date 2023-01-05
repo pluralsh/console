@@ -6,10 +6,13 @@ import { Flex } from 'honorable'
 
 import { ScrollablePage } from 'components/layout/ScrollablePage'
 
-import ComponentInfoMetadata from './ComponentInfoMetadata'
-import ComponentInfoPods from './ComponentInfoPods'
+import Metadata from './info/Metadata'
+import Pods from './info/Pods'
+import Job from './info/Job'
+import CronJob from './info/CronJob'
+import Certificate from './info/Certificate'
 
-const componentsWithPods = ['deployment', 'service', 'statefulset']
+const componentsWithPods = ['deployment', 'job', 'service', 'statefulset']
 
 export default function ComponentInfo() {
   const { appName, componentKind = '', componentName } = useParams()
@@ -34,13 +37,16 @@ export default function ComponentInfo() {
         gap="large"
       >
         {componentsWithPods.includes(componentKind) && (
-          <ComponentInfoPods
+          <Pods
             pods={value?.pods}
             namespace={appName}
             refetch={refetch}
           />
         )}
-        <ComponentInfoMetadata
+        {componentKind === 'certificate' && <Certificate />}
+        {componentKind === 'cronjob' && <CronJob />}
+        {componentKind === 'job' && <Job />}
+        <Metadata
           component={component}
           metadata={value?.metadata}
         />

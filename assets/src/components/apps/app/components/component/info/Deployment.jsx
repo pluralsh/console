@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Box, Text } from 'grommet'
-import {
-  TabContent,
-  TabHeader,
-  TabHeaderItem,
-  Tabs,
-} from 'forge-core'
+import { TabContent, Tabs } from 'forge-core'
 
 import { useIntercom } from 'react-use-intercom'
 
@@ -15,12 +10,12 @@ import RangePicker from 'components/utils/RangePicker'
 
 import { Pie } from '../../../../utils/ProgressGauge'
 
-import { MetadataRow } from './Metadata'
+import { MetadataRow } from '../../../../../cluster/Metadata'
 import { ScalingTypes } from '../../../../cluster/constants'
-import { Metric } from './Metrics'
-import { Container, LogLink, logUrl } from './utils'
+import { Metric } from '../../../../../cluster/Metrics'
+import { Container, LogLink, logUrl } from '../../../../../cluster/utils'
 
-import { ScalingRecommenderModal } from './ScalingRecommender'
+import { ScalingRecommenderModal } from '../../../../../cluster/ScalingRecommender'
 
 function Status({ status: { availableReplicas, replicas, unavailableReplicas }, metadata }) {
   return (

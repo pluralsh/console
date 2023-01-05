@@ -3,12 +3,21 @@ import {
   Chip,
   IconFrame,
   Table,
+  Tooltip,
 } from '@pluralsh/design-system'
 import { UnstyledLink } from 'components/utils/Link'
 import { TRUNCATE } from 'components/utils/truncate'
+import { Flex, Span } from 'honorable'
 import { CSSProperties, ComponentProps, ReactNode } from 'react'
 import styled from 'styled-components'
-import { ReadinessT, readinessToChipTitle, readinessToSeverity } from 'utils/status'
+import {
+  ReadinessT,
+  readinessToChipTitle,
+  readinessToColor,
+  readinessToSeverity,
+} from 'utils/status'
+
+import { ContainerStatus } from '../pods/PodList'
 
 const GridTableBase = styled(Table)(({ theme }) => ({
   table: {
@@ -132,20 +141,40 @@ export const TableCaretLink = styled(TableCaretLinkUnstyled)(({ theme }) => ({
 export function ContainersReadyChip({
   ready = 0,
   total = 0,
+  statuses = [],
 }: {
   ready: number
   total: number
+  statuses: ContainerStatus[]
 }) {
   const severity
     = ready === 0 ? 'error' : total === ready ? 'success' : 'warning'
 
   return (
-    <Chip
-      severity={severity}
-      whiteSpace="nowrap"
+    <Tooltip label={(
+      <>
+        {statuses.map(({ name, readiness }) => (
+          <Flex whiteSpace="nowrap">
+            <Span>{name}:&nbsp;</Span>
+            <Span
+              color={readinessToColor[readiness]}
+              fontWeight={600}
+            >
+              {readiness}
+            </Span>
+          </Flex>
+        ))}
+      </>
+    )}
     >
-      {ready}/{total} ready
-    </Chip>
+      <Chip
+        cursor="help"
+        severity={severity}
+        whiteSpace="nowrap"
+      >
+        {ready}/{total} ready
+      </Chip>
+    </Tooltip>
   )
 }
 

@@ -1,12 +1,6 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Box, Text } from 'grommet'
 import {
-  Confirm,
   TabContent,
   TabHeader,
   TabHeaderItem,
@@ -24,14 +18,16 @@ import { ReadyIcon } from 'components/Component'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { asQuery } from 'components/utils/query'
 import { LoopingLogo } from 'components/utils/AnimatedLogo'
-import { ignoreEvent } from 'components/utils/events'
+
+import { IconFrame, TrashCanIcon } from '@pluralsh/design-system'
+
+import { Confirm } from 'components/utils/Confirm'
 
 import { ComponentIcon } from '../../apps/app/components/misc'
 import { DELETE_POD, POD_Q } from '../queries'
 import { POLL_INTERVAL } from '../constants'
 import { Metadata, MetadataRow } from '../Metadata'
 import { Container as Con, LogLink } from '../utils'
-import { DeleteIcon } from '../Job'
 
 export const ReadinessColor = {
   [Readiness.Ready]: 'success',
@@ -225,32 +221,29 @@ export function DeletePod({ name, namespace, refetch }) {
     },
   })
 
-  const doConfirm = useCallback(e => {
-    ignoreEvent(e)
-    setConfirm(true)
-  },
-  [setConfirm])
-
   return (
     <>
-      <DeleteIcon
-        loading={loading}
-        onClick={doConfirm}
+      <IconFrame
+        clickable
+        icon={(
+          <TrashCanIcon
+            color="icon-danger"
+          />
+        )}
+        onClick={() => setConfirm(true)}
+        textValue="Delete"
+        tooltip
       />
-      {confirm && (
-        <Confirm
-          description="The pod will be replaced by it's managing controller"
-          loading={loading}
-          cancel={e => {
-            ignoreEvent(e)
-            setConfirm(false)
-          }}
-          submit={e => {
-            ignoreEvent(e)
-            mutation()
-          }}
-        />
-      )}
+      <Confirm
+        close={() => setConfirm(false)}
+        destructive
+        label="Delete"
+        loading={loading}
+        open={confirm}
+        submit={() => mutation()}
+        title="Delete pod"
+        text="The pod will be replaced by it's managing controller."
+      />
     </>
   )
 }

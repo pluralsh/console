@@ -13,8 +13,6 @@ export default function ComponentEvents() {
   const data = 'data' in outletContext ? (outletContext.data ?? {}) : {}
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
 
-  console.log('outletContext', outletContext)
-
   useEffect(() => setBreadcrumbs([
     { text: 'Apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },

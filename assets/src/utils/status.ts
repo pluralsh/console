@@ -23,6 +23,13 @@ export const readinessToSeverity: Record<ReadinessT, Severity> = {
   Complete: 'success',
 }
 
+export const readinessToColor: Record<ReadinessT, Severity> = {
+  Ready: 'text-success-light',
+  InProgress: 'text-warning-light',
+  Failed: 'text-danger-light',
+  Complete: 'text-success-light',
+}
+
 export function nodeStatusToReadiness(status: NodeStatus): ReadinessT {
   const ready = status?.conditions?.find(condition => condition?.type === 'Ready')
 
@@ -31,7 +38,7 @@ export function nodeStatusToReadiness(status: NodeStatus): ReadinessT {
   return Readiness.InProgress
 }
 
-export function containerStatusToReadiness(status:ContainerStatus) {
+export function containerStatusToReadiness(status: ContainerStatus | null) {
   if (!status) return Readiness.InProgress
   const {
     ready,
