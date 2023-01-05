@@ -131,10 +131,11 @@ export function InstallationsFlyout() {
   )
 }
 
-export function ToolbarItem({ children, onClick, open }) {
+export function ToolbarItem({ id, children, onClick, open }) {
   return (
     <Box
       flex={false}
+      id={id}
       direction="row"
       round="xsmall"
       background={open ? 'sidebarHover' : null}
@@ -336,6 +337,7 @@ export function Installations() {
         align="center"
       >
         <Icon
+          id="application-information"
           icon={<CircleInformation size="18px" />}
           text="Application Details"
           size="40px"
@@ -344,6 +346,7 @@ export function Installations() {
           onClick={() => setModal(true)}
         />
         <ToolbarItem
+          id="application-selector"
           onClick={() => setOpen(true)}
           open={open}
         >
