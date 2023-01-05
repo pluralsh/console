@@ -5,7 +5,7 @@ import { useMemo } from 'react'
 import { filesize } from 'filesize'
 
 import type { Maybe, Pod } from 'generated/graphql'
-import { containerStatusToReadiness } from 'utils/status'
+import { Readiness, ReadinessT, containerStatusToReadiness } from 'utils/status'
 
 import { Tooltip } from '@pluralsh/design-system'
 
@@ -19,6 +19,8 @@ import {
 } from '../nodes/TableElements'
 
 import { DeletePod, podResources } from './Pod'
+
+export type ContainerStatus = {name: string, readiness: ReadinessT}
 
 type PodTableRow = {
   name?: string
@@ -36,6 +38,7 @@ type PodTableRow = {
   containers?: {
     ready?: number
     total?: number
+    statuses?: ContainerStatus[]
   }
 }
 const columnHelper = createColumnHelper<PodTableRow>()
@@ -131,7 +134,8 @@ export const ColContainers = columnHelper.accessor(row => row.name, {
   cell: ({ row: { original } }) => (
     <ContainersReadyChip
       ready={original?.containers?.ready || 0}
-      total={original.containers?.total || 0}
+      total={original?.containers?.total || 0}
+      statuses={original?.containers?.statuses || []}
     />
   ),
   header: 'Containers',
@@ -180,7 +184,11 @@ function getAllStatuses({
   return [...(initContainerStatuses || []), ...(containerStatuses || [])]
 }
 
-function getReadyStats(status: Pod['status']) {
+function getContainersStats(status: Pod['status']): {
+  ready?: number
+  total?: number
+  statuses?: ContainerStatus[]
+} {
   const allStatuses = getAllStatuses(status)
 
   const readyCount = allStatuses.reduce((prev, status) => {
@@ -190,13 +198,18 @@ function getReadyStats(status: Pod['status']) {
     const readiness = containerStatusToReadiness(status)
 
     return {
-      ready: prev.ready + (readiness === 'Ready' ? 1 : 0),
+      ready: prev.ready + (readiness === Readiness.Ready ? 1 : 0),
       total: prev.total + 1,
     }
   },
   { ready: 0, total: 0 })
 
-  return readyCount
+  const statuses = allStatuses.map(status => ({
+    name: status?.name,
+    readiness: containerStatusToReadiness(status),
+  }) as ContainerStatus)
+
+  return { statuses, ...readyCount }
 }
 
 export function PodList({
@@ -217,7 +230,7 @@ export function PodList({
     .filter((pod): pod is Pod => !!pod)
     .map(pod => {
       const { containers } = pod.spec
-      const containersReady = getReadyStats(pod.status)
+      const containersStats = getContainersStats(pod.status)
 
       const { cpu: cpuRequests, memory: memoryRequests } = podResources(containers as any,
         'requests')
@@ -239,7 +252,7 @@ export function PodList({
           sortVal: (cpuRequests ?? 0) / (cpuLimits ?? Infinity),
         },
         restarts: getRestarts(pod.status),
-        containers: containersReady,
+        containers: containersStats,
       }
     }),
   [pods])

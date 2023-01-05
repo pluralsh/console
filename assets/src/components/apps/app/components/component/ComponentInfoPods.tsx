@@ -25,7 +25,7 @@ export default function ComponentInfoPods({
           ColMemory,
           ColCpu,
           ColRestarts,
-          ColContainers, // TODO: Add tooltip for containers.
+          ColContainers,
           ColDelete(namespace, refetch),
         ]}
         truncColIndex={1}
