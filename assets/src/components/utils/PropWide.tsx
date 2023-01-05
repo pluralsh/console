@@ -1,7 +1,7 @@
 import { Divider } from '@pluralsh/design-system'
 import { Flex, FlexProps } from 'honorable'
 
-export default function PropWide({ children, title, ...props }: {children: JSX.Element | string, title: string} & FlexProps) {
+export default function PropWide({ children, title, ...props }: {children: JSX.Element | JSX.Element[] | string, title: string} & FlexProps) {
   return (
     <Flex
       align="center"

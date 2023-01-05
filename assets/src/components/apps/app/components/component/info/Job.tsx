@@ -40,7 +40,7 @@ export function DeleteJob({ name, namespace, refetch }) {
   )
 }
 
-export default function ComponentInfoJob() {
+export default function Job() {
   const { data } = useOutletContext<any>()
 
   if (!data?.job) return null

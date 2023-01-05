@@ -10,6 +10,7 @@ import Metadata from './info/Metadata'
 import Pods from './info/Pods'
 import Job from './info/Job'
 import CronJob from './info/CronJob'
+import Certificate from './info/Certificate'
 
 const componentsWithPods = ['deployment', 'job', 'service', 'statefulset']
 
@@ -42,6 +43,7 @@ export default function ComponentInfo() {
             refetch={refetch}
           />
         )}
+        {componentKind === 'certificate' && <Certificate />}
         {componentKind === 'cronjob' && <CronJob />}
         {componentKind === 'job' && <Job />}
         <Metadata
