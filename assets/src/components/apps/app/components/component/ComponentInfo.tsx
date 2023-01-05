@@ -8,8 +8,9 @@ import { ScrollablePage } from 'components/layout/ScrollablePage'
 
 import ComponentInfoMetadata from './ComponentInfoMetadata'
 import ComponentInfoPods from './ComponentInfoPods'
+import ComponentInfoJob from './ComponentInfoJob'
 
-const componentsWithPods = ['deployment', 'service', 'statefulset']
+const componentsWithPods = ['deployment', 'job', 'service', 'statefulset']
 
 export default function ComponentInfo() {
   const { appName, componentKind = '', componentName } = useParams()
@@ -44,6 +45,7 @@ export default function ComponentInfo() {
           component={component}
           metadata={value?.metadata}
         />
+        {componentKind === 'job' && <ComponentInfoJob />}
       </Flex>
     </ScrollablePage>
   )
