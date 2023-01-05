@@ -48,7 +48,7 @@ export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
 const APP_ICON = `${process.env.PUBLIC_URL}/console-full.png`
 
-export function Icon({ icon, text, selected, path, onClick, size, align }) {
+export function Icon({ id, icon, text, selected, path, onClick, size, align }) {
   const dropRef = useRef()
   const history = useHistory()
   const [hover, setHover] = useState(false)
@@ -59,6 +59,7 @@ export function Icon({ icon, text, selected, path, onClick, size, align }) {
         ref={dropRef}
         focusIndicator={false}
         className={`sidebar-icon${selected ? ' selected' : ''}`}
+        id={id}
         align="center"
         justify="center"
         margin={{ horizontal: 'xsmall' }}
@@ -270,6 +271,7 @@ export default function Console() {
                     <AutoRefresh />
                     <SocialLinks />
                     <Icon
+                      id="installer"
                       icon={<Install size="18px" />}
                       text="Install"
                       size="40px"
