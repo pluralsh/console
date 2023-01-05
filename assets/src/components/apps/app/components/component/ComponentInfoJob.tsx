@@ -1,7 +1,44 @@
-import { Card } from '@pluralsh/design-system'
+import { Card, IconFrame, TrashCanIcon } from '@pluralsh/design-system'
+import { DELETE_JOB } from 'components/cluster/queries'
+import { Confirm } from 'components/utils/Confirm'
 import PropWide from 'components/utils/PropWide'
 import { Flex, H2 } from 'honorable'
+import { useState } from 'react'
+import { useMutation } from 'react-apollo'
 import { useOutletContext } from 'react-router-dom'
+
+export function DeleteJob({ name, namespace, refetch }) {
+  const [confirm, setConfirm] = useState(false)
+  const [mutation, { loading }] = useMutation(DELETE_JOB, {
+    variables: { name, namespace },
+    onCompleted: () => {
+      setConfirm(false)
+      refetch()
+    },
+  })
+
+  return (
+    <>
+      <IconFrame
+        clickable
+        icon={<TrashCanIcon color="icon-danger" />}
+        onClick={() => setConfirm(true)}
+        textValue="Delete"
+        tooltip
+      />
+      <Confirm
+        close={() => setConfirm(false)}
+        destructive
+        label="Delete"
+        loading={loading}
+        open={confirm}
+        submit={() => mutation()}
+        title="Delete job"
+        text="Are you sure?"
+      />
+    </>
+  )
+}
 
 export default function ComponentInfoJob() {
   const { data } = useOutletContext<any>()
@@ -45,7 +82,12 @@ export default function ComponentInfoJob() {
           {job?.status?.startTime || '-'}
         </PropWide>
       </Card>
-      <H2 marginBottom="medium">Spec</H2>
+      <H2
+        marginBottom="medium"
+        marginTop="large"
+      >
+        Spec
+      </H2>
       <Card padding="large">
         <PropWide
           title="Backoff limit"

@@ -27,6 +27,7 @@ export default function CostAnalysis() {
         paddingVertical="large"
       >
         {cost && <KubernetesCost cost={cost} />}
+        {!cost && 'Cost data is not available.'}
         {/* Disabled for now as it is not part of designs. */}
         {/* {license && <PluralCost license={license} />} */}
       </Card>

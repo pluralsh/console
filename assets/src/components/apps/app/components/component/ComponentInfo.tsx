@@ -9,6 +9,7 @@ import { ScrollablePage } from 'components/layout/ScrollablePage'
 import ComponentInfoMetadata from './ComponentInfoMetadata'
 import ComponentInfoPods from './ComponentInfoPods'
 import ComponentInfoJob from './ComponentInfoJob'
+import ComponentInfoCronJob from './ComponentInfoCronJob'
 
 const componentsWithPods = ['deployment', 'job', 'service', 'statefulset']
 
@@ -41,11 +42,12 @@ export default function ComponentInfo() {
             refetch={refetch}
           />
         )}
+        {componentKind === 'cronjob' && <ComponentInfoCronJob />}
+        {componentKind === 'job' && <ComponentInfoJob />}
         <ComponentInfoMetadata
           component={component}
           metadata={value?.metadata}
         />
-        {componentKind === 'job' && <ComponentInfoJob />}
       </Flex>
     </ScrollablePage>
   )
