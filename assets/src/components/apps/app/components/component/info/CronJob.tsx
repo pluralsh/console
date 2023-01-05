@@ -4,7 +4,7 @@ import PropWide from 'components/utils/PropWide'
 import { Div, Flex, H2 } from 'honorable'
 import { useOutletContext, useParams } from 'react-router-dom'
 
-import { DeleteJob } from './ComponentInfoJob'
+import { DeleteJob } from './Job'
 
 const columnHelper = createColumnHelper<any>()
 
@@ -61,7 +61,7 @@ const columns = (namespace, refetch) => [
   }),
 ]
 
-function ComponentInfoCronJobJobs({ jobs, namespace, refetch }) {
+function CronJobJobs({ jobs, namespace, refetch }) {
   return (
     <Table
       data={jobs}
@@ -70,7 +70,7 @@ function ComponentInfoCronJobJobs({ jobs, namespace, refetch }) {
   )
 }
 
-export default function ComponentInfoCronJob() {
+export default function CronJob() {
   const { appName } = useParams()
   const { data, refetch } = useOutletContext<any>()
 
@@ -83,7 +83,7 @@ export default function ComponentInfoCronJob() {
       direction="column"
     >
       <H2 marginBottom="medium">Jobs</H2>
-      <ComponentInfoCronJobJobs
+      <CronJobJobs
         jobs={cronJob.jobs}
         namespace={appName}
         refetch={refetch}

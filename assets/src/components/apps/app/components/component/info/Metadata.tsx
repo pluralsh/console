@@ -4,9 +4,9 @@ import { Flex, H2, H3 } from 'honorable'
 
 import PropWide from 'components/utils/PropWide'
 
-import { ComponentStatus } from '../misc'
+import { ComponentStatus } from '../../misc'
 
-export default function ComponentInfoMetadata({
+export default function Metadata({
   component,
   metadata: {
     name, namespace, labels, annotations,

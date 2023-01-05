@@ -9,9 +9,9 @@ import {
   ColNodeName,
   ColRestarts,
   PodList,
-} from '../../../../cluster/pods/PodList'
+} from '../../../../../cluster/pods/PodList'
 
-export default function ComponentInfoPods({
+export default function Pods({
   pods, namespace, refetch,
 }) {
   return (

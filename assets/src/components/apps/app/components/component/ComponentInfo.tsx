@@ -6,10 +6,10 @@ import { Flex } from 'honorable'
 
 import { ScrollablePage } from 'components/layout/ScrollablePage'
 
-import ComponentInfoMetadata from './ComponentInfoMetadata'
-import ComponentInfoPods from './ComponentInfoPods'
-import ComponentInfoJob from './ComponentInfoJob'
-import ComponentInfoCronJob from './ComponentInfoCronJob'
+import Metadata from './info/Metadata'
+import Pods from './info/Pods'
+import Job from './info/Job'
+import CronJob from './info/CronJob'
 
 const componentsWithPods = ['deployment', 'job', 'service', 'statefulset']
 
@@ -36,15 +36,15 @@ export default function ComponentInfo() {
         gap="large"
       >
         {componentsWithPods.includes(componentKind) && (
-          <ComponentInfoPods
+          <Pods
             pods={value?.pods}
             namespace={appName}
             refetch={refetch}
           />
         )}
-        {componentKind === 'cronjob' && <ComponentInfoCronJob />}
-        {componentKind === 'job' && <ComponentInfoJob />}
-        <ComponentInfoMetadata
+        {componentKind === 'cronjob' && <CronJob />}
+        {componentKind === 'job' && <Job />}
+        <Metadata
           component={component}
           metadata={value?.metadata}
         />
