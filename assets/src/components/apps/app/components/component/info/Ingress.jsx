@@ -1,7 +1,7 @@
 import { Box, Text } from 'grommet'
 import { TabContent, Tabs } from 'forge-core'
 
-import { Metadata, MetadataRow } from './Metadata'
+import { MetadataRow } from './Metadata'
 
 import { Container } from './utils'
 
