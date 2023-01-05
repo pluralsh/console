@@ -15,7 +15,7 @@ import {
 import { useParams } from 'react-router-dom'
 import { APPLICATION_Q } from 'components/graphql/plural'
 import { Flex, P, Span } from 'honorable'
-import { COMPONENT_LABEL } from 'components/apps/app/components/kubernetes/constants'
+import { COMPONENT_LABEL } from 'components/cluster/constants'
 import { useQuery } from 'react-apollo'
 
 import { ConfigType } from './misc'

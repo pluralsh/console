@@ -1,39 +1,61 @@
 import React, { useContext, useState } from 'react'
-
-import { Div, Flex, Span } from 'honorable'
-
-import { theme } from '@pluralsh/design-system'
-
-import { useNavigate } from 'react-router-dom'
+import {
+  A,
+  Div,
+  Flex,
+  Span,
+} from 'honorable'
+import { useTheme } from 'styled-components'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { lookahead } from '../utils/array'
 
 import { LoginContext } from './contexts'
 
-export const BreadcrumbsContext = React.createContext({
-  breadcrumbs: [],
-  setBreadcrumbs: () => null,
-})
+type Breadcrumb = {
+  url?: string
+  text: string
+}
+
+export const BreadcrumbsContext = React.createContext<{
+  breadcrumbs: Breadcrumb[]
+  setBreadcrumbs:(arg: Breadcrumb[]) => void
+    }>({
+      breadcrumbs: [],
+      setBreadcrumbs: () => {},
+    })
+
+export const useBreadcrumbs = () => useContext(BreadcrumbsContext)
 
 export function Breadcrumbs() {
-  const navigate = useNavigate()
   const { breadcrumbs } = useContext(BreadcrumbsContext)
   const { configuration } = useContext(LoginContext)
   const cluster = configuration?.manifest?.cluster
+  const theme = useTheme()
 
-  const children = Array.from(lookahead(breadcrumbs, (crumb, next) => {
+  const children = Array.from(lookahead(breadcrumbs, (crumb: Breadcrumb, next: Breadcrumb) => {
     if (next.url) {
       return (
         <Flex
           direction="row"
           gap="small"
         >
-          <Span
-            onClick={() => navigate(crumb.url)}
-            color="text-xlight"
-            _hover={{ cursor: 'pointer', color: 'text', textDecoration: 'underline' }}
-          >
-            {crumb.text}
+          <Span color="text-xlight">
+            {typeof crumb.url !== 'string' ? (
+              crumb.text
+            ) : (
+              <A
+                as={Link}
+                to={crumb.url}
+                _hover={{
+                  cursor: 'pointer',
+                  color: 'text',
+                  textDecoration: 'underline',
+                }}
+              >
+                {crumb.text}
+              </A>
+            )}
           </Span>
           <Div color={theme.colors.grey[700]}>/</Div>
         </Flex>
@@ -49,8 +71,7 @@ export function Breadcrumbs() {
       gap="small"
       paddingVertical="small"
     >
-      {cluster
-      && (
+      {cluster && (
         <Flex
           direction="row"
           gap="small"
@@ -65,7 +86,7 @@ export function Breadcrumbs() {
 }
 
 export default function BreadcrumbProvider({ children }) {
-  const [breadcrumbs, setBreadcrumbs] = useState([])
+  const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([])
 
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
@@ -74,3 +95,4 @@ export default function BreadcrumbProvider({ children }) {
     </BreadcrumbsContext.Provider>
   )
 }
+

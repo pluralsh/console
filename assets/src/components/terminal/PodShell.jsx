@@ -15,8 +15,8 @@ import { BreadcrumbsContext } from '../Breadcrumbs'
 import { useEnsureCurrent } from '../Installations'
 import { TabSelector } from '../utils/TabSelector'
 
-import { POD_Q } from '../apps/app/components/kubernetes/queries'
-import { POLL_INTERVAL } from '../apps/app/components/kubernetes/constants'
+import { POD_Q } from '../cluster/queries'
+import { POLL_INTERVAL } from '../cluster/constants'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 import { Icon } from '../users/Group'
 

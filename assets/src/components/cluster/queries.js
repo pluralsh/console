@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost'
 
-import { MetricResponseFragment } from '../../../../graphql/dashboards'
+import { MetricResponseFragment } from 'components/graphql/dashboards'
 import {
   CertificateFragment,
   ConfigurationOverlayFragment,
@@ -16,7 +16,7 @@ import {
   ServiceFragment,
   StatefulSetFragment,
   VerticalPodAutoscalerFragment,
-} from '../../../../graphql/kubernetes'
+} from 'components/graphql/kubernetes'
 
 export const SERVICE_Q = gql`
   query Service($name: String!, $namespace: String!) {
@@ -118,6 +118,23 @@ export const NODE_Q = gql`
   ${PodFragment}
   ${EventFragment}
   ${NodeMetricFragment}
+`
+
+export const NODE_EVENTS_Q = gql`
+  query Node($name: String!) {
+    node(name: $name) {
+      events { ...EventFragment }
+    }
+  }
+  ${EventFragment}
+`
+
+export const NODE_RAW_Q = gql`
+  query Node($name: String!) {
+    node(name: $name) {
+      raw
+    }
+  }
 `
 
 export const NODE_METRICS_Q = gql`

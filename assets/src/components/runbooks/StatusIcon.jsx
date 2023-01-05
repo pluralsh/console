@@ -8,12 +8,11 @@ import {
   ThemeContext,
 } from 'grommet'
 import { normalizeColor } from 'grommet/utils'
-
 import moment from 'moment'
 
-import { ignore } from '../apps/app/components/kubernetes/Pod'
+import { ignoreEvent } from 'components/utils/events'
 
-import { MetadataRow, MetadataTag } from '../apps/app/components/kubernetes/Metadata'
+import { MetadataRow, MetadataTag } from 'components/cluster/Metadata'
 
 import { SEVERITY_COLORS } from './constants'
 
@@ -72,7 +71,7 @@ function AlertDetail({ alert, setAlert }) {
           round="xsmall"
           hoverIndicator="tone-light"
           onClick={e => {
-            ignore(e); setAlert(null)
+            ignoreEvent(e); setAlert(null)
           }}
         >
           <Previous
@@ -133,7 +132,7 @@ function Alert({ alert, setAlert }) {
       pad="small"
       round="xsmall"
       onClick={e => {
-        ignore(e); setAlert(alert)
+        ignoreEvent(e); setAlert(alert)
       }}
       hoverIndicator="tone-light"
     >
@@ -219,7 +218,7 @@ export function StatusIcon({ status, size, innerSize }) {
         justify="center"
         background={color}
         onClick={e => {
-          ignore(e)
+          ignoreEvent(e)
           if (!healthy) setOpen(true)
         }}
         onMouseEnter={() => setHover(true)}

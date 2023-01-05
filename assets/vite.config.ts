@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 import tsconfigPaths from 'vite-tsconfig-paths'
+import pluginRewriteAll from 'vite-plugin-rewrite-all'
 
 const API_URL = process.env.BASE_URL ? `https://${process.env.BASE_URL}` : 'https://console.plural.sh'
 const WS_URL = process.env.BASE_URL ? `wss://${process.env.BASE_URL}` : 'wss://console.plural.sh'
@@ -14,6 +15,7 @@ export default defineConfig({
     basicSsl(),
     react(),
     tsconfigPaths(),
+    pluginRewriteAll(), // Fix 404 error for urls with dots in their path
   ],
   server: {
     port: 3000,

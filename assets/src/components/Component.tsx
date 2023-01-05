@@ -16,7 +16,7 @@ export function appState({ status: { conditions } }) {
   return { ready, error, readiness }
 }
 
-export function ReadyIcon({ size, readiness, showIcon }) {
+export function ReadyIcon({ size = '', readiness, showIcon = false }) {
   const theme = useContext(ThemeContext)
   let color = 'error'
   let icon: any = <StatusCritical size="small" />

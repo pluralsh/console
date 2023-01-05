@@ -17,12 +17,12 @@ import { EXECUTE_OVERLAY } from 'components/apps/app/config/queries'
 
 import ConfigurationSettingsField from 'components/apps/app/config/ConfigurationSettingsField'
 
-import { LoopingLogo } from '../../../../utils/AnimatedLogo'
+import { LoopingLogo } from 'components/utils/AnimatedLogo'
+
+import { COMPONENT_LABEL, KIND_LABEL, RESOURCE_LABEL } from './constants'
 
 import { CONFIGURATION_OVERLAYS, SCALING_RECOMMENDATION } from './queries'
 import { MetadataRow } from './Metadata'
-
-import { COMPONENT_LABEL, KIND_LABEL, RESOURCE_LABEL } from './constants'
 
 const POLL_INTERVAL = 10000
 

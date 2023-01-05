@@ -37,7 +37,7 @@ import { LoopingLogo } from './utils/AnimatedLogo'
 import { Container } from './utils/Container'
 import { SectionContentContainer, SectionPortal } from './utils/Section'
 import SmoothScroller from './utils/SmoothScroller'
-import { HeaderItem } from './apps/app/components/kubernetes/Pod'
+import { HeaderItem } from './cluster/pods/Pod'
 import { Icon } from './users/Group'
 
 // const MAX_LEN = 100
@@ -294,7 +294,7 @@ export function WebhookManagement() {
 export default function Webhooks() {
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
 
-  useEffect(() => setBreadcrumbs([{ text: 'webhooks', url: '/webhooks' }]), [])
+  useEffect(() => setBreadcrumbs([{ text: 'webhooks', url: '/webhooks' }]), [setBreadcrumbs])
   const { data, fetchMore } = useQuery(WEBHOOKS_Q)
 
   if (!data) {

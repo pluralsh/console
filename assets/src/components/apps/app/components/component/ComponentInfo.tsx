@@ -1,9 +1,10 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { PageTitle } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 
 import { Flex } from 'honorable'
+
+import { ScrollablePage } from 'components/layout/ScrollablePage'
 
 import ComponentInfoMetadata from './ComponentInfoMetadata'
 import ComponentInfoPods from './ComponentInfoPods'
@@ -27,8 +28,7 @@ export default function ComponentInfo() {
   const value: any = Object.values(data).find(value => value !== undefined)
 
   return (
-    <>
-      <PageTitle heading="Info" />
+    <ScrollablePage heading="Info">
       <Flex
         direction="column"
         gap="large"
@@ -45,6 +45,6 @@ export default function ComponentInfo() {
           metadata={value?.metadata}
         />
       </Flex>
-    </>
+    </ScrollablePage>
   )
 }
