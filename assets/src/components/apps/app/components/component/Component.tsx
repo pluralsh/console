@@ -36,9 +36,8 @@ import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLa
 
 import { useQuery } from 'react-apollo'
 
-import { LoginContext } from '../../../../contexts'
+import { POLL_INTERVAL } from 'components/cluster/constants'
 
-import { ComponentIcon, ComponentStatus } from '../misc'
 import {
   CERTIFICATE_Q,
   CRON_JOB_Q,
@@ -47,8 +46,11 @@ import {
   JOB_Q,
   SERVICE_Q,
   STATEFUL_SET_Q,
-} from '../kubernetes/queries'
-import { POLL_INTERVAL } from '../kubernetes/constants'
+} from 'components/cluster/queries'
+
+import { LoginContext } from 'components/contexts'
+
+import { ComponentIcon, ComponentStatus } from '../misc'
 
 const directory = [
   { label: 'Info', path: 'info' },

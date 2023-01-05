@@ -16,7 +16,7 @@ import RangePicker from 'components/utils/RangePicker'
 import { Pie } from '../../../../utils/ProgressGauge'
 
 import { MetadataRow } from './Metadata'
-import { ScalingTypes } from './constants'
+import { ScalingTypes } from '../../../../cluster/constants'
 import { Metric } from './Metrics'
 import { Container, LogLink, logUrl } from './utils'
 

@@ -26,7 +26,7 @@ import { asQuery } from 'components/utils/query'
 import { LoopingLogo } from 'components/utils/AnimatedLogo'
 import { ignoreEvent } from 'components/utils/events'
 
-import { ComponentIcon } from '../../misc'
+import { ComponentIcon } from '../../apps/app/components/misc'
 import { DELETE_POD, POD_Q } from '../queries'
 import { POLL_INTERVAL } from '../constants'
 import { Metadata, MetadataRow } from '../Metadata'

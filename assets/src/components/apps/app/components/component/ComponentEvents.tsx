@@ -5,7 +5,7 @@ import { useOutletContext, useParams } from 'react-router-dom'
 
 import { Event as EventT } from 'generated/graphql'
 
-import EventsTable from '../EventsTable'
+import EventsTable from '../../../../utils/EventsTable'
 
 export default function ComponentEvents() {
   const { appName, componentKind, componentName } = useParams()

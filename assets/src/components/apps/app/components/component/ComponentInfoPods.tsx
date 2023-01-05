@@ -8,7 +8,7 @@ import {
   ColNodeName,
   ColRestarts,
   PodList,
-} from '../kubernetes/pods/PodList'
+} from '../../../../cluster/pods/PodList'
 
 export default function ComponentInfoPods({
   pods, refetch: _refetch, // Will need refetch once delete is implemented

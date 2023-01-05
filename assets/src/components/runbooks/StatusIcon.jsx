@@ -12,7 +12,7 @@ import moment from 'moment'
 
 import { ignoreEvent } from 'components/utils/events'
 
-import { MetadataRow, MetadataTag } from '../apps/app/components/kubernetes/Metadata'
+import { MetadataRow, MetadataTag } from 'components/cluster/Metadata'
 
 import { SEVERITY_COLORS } from './constants'
 

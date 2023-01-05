@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost'
 
-import { MetricResponseFragment } from '../../../../graphql/dashboards'
+import { MetricResponseFragment } from 'components/graphql/dashboards'
 import {
   CertificateFragment,
   ConfigurationOverlayFragment,
@@ -16,7 +16,7 @@ import {
   ServiceFragment,
   StatefulSetFragment,
   VerticalPodAutoscalerFragment,
-} from '../../../../graphql/kubernetes'
+} from 'components/graphql/kubernetes'
 
 export const SERVICE_Q = gql`
   query Service($name: String!, $namespace: String!) {

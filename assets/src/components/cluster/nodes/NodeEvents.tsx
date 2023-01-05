@@ -11,7 +11,7 @@ import { ScrollablePage } from 'components/layout/ScrollablePage'
 import { POLL_INTERVAL } from '../constants'
 import { NODE_EVENTS_Q } from '../queries'
 
-import EventsTable from '../../EventsTable'
+import EventsTable from '../../utils/EventsTable'
 
 export default function NodeEvents() {
   const { name } = useParams()

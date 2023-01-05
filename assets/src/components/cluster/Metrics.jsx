@@ -4,11 +4,13 @@ import { useQuery } from 'react-apollo'
 import { filesize } from 'filesize'
 import { Box } from 'grommet'
 
-import { Graph, GraphHeader } from '../../../../utils/Graph'
-import { LoopingLogo } from '../../../../utils/AnimatedLogo'
+import { LoopingLogo } from 'components/utils/AnimatedLogo'
+
+import { Graph, GraphHeader } from 'components/utils/Graph'
+
+import { POLL_INTERVAL } from './constants'
 
 import { USAGE_Q } from './queries'
-import { POLL_INTERVAL } from './constants'
 
 const convertVals = values => values.map(({ timestamp, value }) => ({ x: new Date(timestamp * 1000), y: parseFloat(value) }))
 
