@@ -121,7 +121,8 @@ function DomainConfiguration({
   // Support for lookahead operator in Safari was just added but it's not released yet.
   // /^(((?!-)[A-Za-z0-9-]{1,63}(?<!-)\.)+[A-Za-z]{2,253})$/ is replaced for now.
   // See: https://github.com/WebKit/WebKit/pull/7109
-  const domainRegex = /^(?!\-)(?:(?:[a-zA-Z\d][a-zA-Z\d\-]{0,61})?[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}$/
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const domainRegex = /^(?!-)(?:(?:[a-zA-Z\d][a-zA-Z\d-]{0,61})?[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}$/
   const { configuration } = useContext(LoginContext)
   const suffix = useMemo(() => {
     const subdomain = deepFetch(configuration, 'manifest.network.subdomain')
@@ -207,7 +208,6 @@ export function ConfigurationItem({
         config={config}
         ctx={ctx}
         setValue={setValue}
-        setValid={setValid}
       />
     )
   case ConfigurationType.INT:
@@ -234,7 +234,6 @@ export function ConfigurationItem({
         config={config}
         ctx={ctx}
         setValue={setValue}
-        setValid={setValid}
       />
     )
   case ConfigurationType.PASSWORD:
@@ -253,6 +252,7 @@ export function ConfigurationItem({
         ctx={ctx}
         setValue={setValue}
         setValid={setValid}
+        type={undefined}
       />
     )
   }
