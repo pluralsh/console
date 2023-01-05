@@ -79,7 +79,7 @@ export default function Component() {
   const { data, loading, refetch } = useQuery(kindToQuery[componentKind],
     { variables: { name: componentName, namespace: appName }, pollInterval: POLL_INTERVAL })
 
-  if (!me || !currentApp || !data || loading) {
+  if (!me || !currentApp || !data) {
     return (
       <Flex
         grow={1}
