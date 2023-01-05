@@ -3,6 +3,7 @@ import { Flex, H2 } from 'honorable'
 import {
   ColContainers,
   ColCpu,
+  ColDelete,
   ColMemory,
   ColName,
   ColNodeName,
@@ -11,7 +12,7 @@ import {
 } from '../../../../cluster/pods/PodList'
 
 export default function ComponentInfoPods({
-  pods, refetch: _refetch, // Will need refetch once delete is implemented
+  pods, namespace, refetch,
 }) {
   return (
     <Flex direction="column">
@@ -24,8 +25,8 @@ export default function ComponentInfoPods({
           ColMemory,
           ColCpu,
           ColRestarts,
-          ColContainers,
-          // TODO: Add tooltip for containers and add delete button.
+          ColContainers, // TODO: Add tooltip for containers.
+          ColDelete(namespace, refetch),
         ]}
         truncColIndex={1}
       />

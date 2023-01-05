@@ -18,7 +18,7 @@ import {
   Usage,
 } from '../nodes/TableElements'
 
-import { podResources } from './Pod'
+import { DeletePod, podResources } from './Pod'
 
 type PodTableRow = {
   name?: string
@@ -143,6 +143,18 @@ export const ColLink = columnHelper.display({
     <TableCaretLink
       to={`/pods/${original.namespace}/${original.name}`}
       textValue={`View node ${original?.name}`}
+    />
+  ),
+  header: '',
+})
+
+export const ColDelete = (namespace, refetch) => columnHelper.accessor(row => row.name, {
+  id: 'delete',
+  cell: ({ row: { original } }) => (
+    <DeletePod
+      name={original.name}
+      namespace={namespace}
+      refetch={refetch}
     />
   ),
   header: '',
