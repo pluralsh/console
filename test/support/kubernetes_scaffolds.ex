@@ -1,7 +1,7 @@
 defmodule KubernetesScaffolds do
   alias Kazan.Apis.Core.V1, as: Core
   alias Kazan.Apis.Apps.V1, as: Apps
-  alias Kazan.Apis.Extensions.V1beta1, as: Extensions
+  alias Kazan.Apis.Networking.V1, as: Networking
   alias Kazan.Apis.Batch.V1beta1, as: Batch
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector, ObjectMeta}
@@ -53,15 +53,15 @@ defmodule KubernetesScaffolds do
   end
 
   def ingress(namespace, name) do
-    %Extensions.Ingress{
+    %Networking.Ingress{
       metadata: %{name: name, namespace: namespace},
-      status: %Extensions.IngressStatus{load_balancer: %{ingress: [%{ip: "1.2.3.4"}]}},
-      spec: %Extensions.IngressSpec{
-        tls: [%Extensions.IngressTLS{hosts: ["example.com"]}],
-        rules: [%Extensions.IngressRule{
+      status: %Networking.IngressStatus{load_balancer: %{ingress: [%{ip: "1.2.3.4"}]}},
+      spec: %Networking.IngressSpec{
+        tls: [%Networking.IngressTLS{hosts: ["example.com"]}],
+        rules: [%Networking.IngressRule{
           host: "example.com",
-          http: %Extensions.HTTPIngressRuleValue{
-            paths: [%Extensions.HTTPIngressPath{path: "*"}]
+          http: %Networking.HTTPIngressRuleValue{
+            paths: [%Networking.HTTPIngressPath{path: "*"}]
           }
         }]
       }

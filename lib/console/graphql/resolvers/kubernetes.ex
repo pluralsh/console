@@ -2,7 +2,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   alias Kube.Client
   alias Kazan.Apis.Core.V1, as: Core
   alias Kazan.Apis.Apps.V1, as: Apps
-  alias Kazan.Apis.Extensions.V1beta1, as: Extensions
+  alias Kazan.Apis.Networking.V1, as: Networking
   alias Kazan.Apis.Batch.V1beta1, as: Batch
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector, LabelSelectorRequirement}
@@ -60,7 +60,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   def resolve_ingress(%{namespace: ns, name: name}, _) do
     Console.namespace(ns)
-    |> Extensions.read_namespaced_ingress!(name)
+    |> Networking.read_namespaced_ingress!(name)
     |> Kazan.run()
   end
 
