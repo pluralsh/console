@@ -10,11 +10,12 @@ import { ScrollablePage } from 'components/layout/ScrollablePage'
 import { ContainerStatus, Maybe, Pod } from 'generated/graphql'
 
 import { POLL_INTERVAL } from '../constants'
-import { POD_INFO_Q, POD_Q } from '../queries'
+import { POD_INFO_Q } from '../queries'
 
 import { SubTitle } from '../nodes/SubTitle'
 
-import { ContainerList } from './ContainerList'
+import { ContainersList } from '../containers/ContainersList'
+
 import PodMetadata from './PodMetadata'
 
 /*
@@ -53,7 +54,7 @@ export default function NodeInfo() {
       >
         <section>
           <SubTitle>Containers</SubTitle>
-          <ContainerList
+          <ContainersList
             containers={containers}
             containerStatuses={containerStatuses}
             initContainers={initContainers}

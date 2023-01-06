@@ -38,6 +38,7 @@ const GridTableBase = styled(Table)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
+    height: 'auto',
   },
 }))
 

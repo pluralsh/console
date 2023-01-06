@@ -1,12 +1,16 @@
-import { Card, Chip } from '@pluralsh/design-system'
+import { Card } from '@pluralsh/design-system'
 
-import { Flex, H2, H3 } from 'honorable'
+import { Flex } from 'honorable'
 
 import PropWide from 'components/utils/PropWide'
 import { ComponentStatus } from 'components/apps/app/components/misc'
 import { Pod } from 'generated/graphql'
 import { LabelPairsSection } from 'components/utils/LabelPairsSection'
 import { Readiness, podStatusToReadiness } from 'utils/status'
+
+import { ContainersReadyChip } from '../TableElements'
+
+import { getPodContainersStats as getContainersStats } from '../containers/getPodContainersStats'
 
 type Phase = 'Running' | 'Succeeded' | 'Pending' | 'Failed'
 
@@ -26,7 +30,7 @@ function phaseToReadiness(phase?: string) {
 
 export default function Metadata({ pod }: { pod: Pod }) {
   const { labels, annotations } = pod.metadata
-  const containers = pod
+  const containerStats = getContainersStats(pod.status)
 
   return (
     <Flex direction="column">
@@ -48,7 +52,11 @@ export default function Metadata({ pod }: { pod: Pod }) {
               title="containers"
               fontWeight={600}
             >
-              TODO: Add containers chip
+              <ContainersReadyChip
+                ready={containerStats.ready || 0}
+                total={containerStats.total || 0}
+                statuses={containerStats.statuses || []}
+              />
             </PropWide>
 
             <PropWide

@@ -14,7 +14,7 @@ import { RawPageCode } from '../RawPageCode'
 
 export default function NodeEvents() {
   const { name, namespace } = useParams()
-  const { data, refetch: _refetch, error } = useQuery<{
+  const { data } = useQuery<{
     pod: Pod,
   }>(POD_RAW_Q, {
     variables: { name, namespace },

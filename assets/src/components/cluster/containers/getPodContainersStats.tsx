@@ -1,7 +1,7 @@
 import { Pod } from 'generated/graphql'
 import { Readiness, containerStatusToReadiness } from 'utils/status'
 
-import { ContainerStatus } from './PodsList'
+import { ContainerStatus } from '../pods/PodsList'
 
 function getAllContainerStatuses({
   containerStatuses, initContainerStatuses,
@@ -9,7 +9,7 @@ function getAllContainerStatuses({
   return [...(initContainerStatuses || []), ...(containerStatuses || [])]
 }
 
-export function getAllContainerStats(podStatus: Pod['status']): {
+export function getPodContainersStats(podStatus: Pod['status']): {
   ready?: number;
   total?: number;
   statuses?: ContainerStatus[];

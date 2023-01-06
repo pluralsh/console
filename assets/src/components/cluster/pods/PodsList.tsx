@@ -22,8 +22,9 @@ import {
 } from '../TableElements'
 import { DELETE_POD } from '../queries'
 
+import { getPodContainersStats } from '../containers/getPodContainersStats'
+
 import { getPodResources } from './getPodResources'
-import { getAllContainerStats } from './getAllContainerStats'
 
 function DeletePod({ name, namespace, refetch }) {
   const [confirm, setConfirm] = useState(false)
@@ -260,7 +261,7 @@ export function PodsList({
           sortVal: (cpuRequests ?? 0) / (cpuLimits ?? Infinity),
         },
         restarts: getRestarts(pod.status),
-        containers: getAllContainerStats(pod.status),
+        containers: getPodContainersStats(pod.status),
       }
     }),
   [pods])

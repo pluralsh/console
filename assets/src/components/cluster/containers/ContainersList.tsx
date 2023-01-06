@@ -126,7 +126,7 @@ export const ColLink = columnHelper.display({
   header: '',
 })
 
-type ContainerListProps = {
+type ContainersListProps = {
   containers?: Maybe<Container>[]
   containerStatuses?: Record<string, Maybe<ContainerStatus>>
   initContainers?: Maybe<Container>[]
@@ -170,7 +170,7 @@ function toTableData(container: Container,
   }
 }
 
-export function ContainerList({
+export function ContainersList({
   containers,
   containerStatuses,
   initContainers,
@@ -179,7 +179,7 @@ export function ContainerList({
   truncColIndexes = [0],
   namespace: _namespace,
   refetch: _refetch,
-}: ContainerListProps) {
+}: ContainersListProps) {
   const tableData: ContainerTableRow[] = useMemo(() => {
     const initContainerData = (initContainers || [])
       .filter((container): container is Container => !!container)
