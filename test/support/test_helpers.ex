@@ -14,6 +14,18 @@ defmodule Console.TestHelpers do
     Enum.map(list, &id/1)
   end
 
+  def wait(query, valid, elapsed \\ 0)
+  def wait(_, _, elapsed) when elapsed > 5_000, do: :error
+  def wait(query, valid, elapsed) do
+    res = query.()
+    case valid.(res) do
+      true -> {:ok, res}
+      _ ->
+        :timer.sleep(200)
+        wait(query, valid, elapsed + 200)
+    end
+  end
+
   def id(%{id: id}), do: id
   def id(%{"id" => id}), do: id
   def id(id) when is_binary(id), do: id

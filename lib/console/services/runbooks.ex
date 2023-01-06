@@ -2,7 +2,7 @@ defmodule Console.Services.Runbooks do
   use Console.Services.Base
   alias Kube.{Runbook, Client, ConfigurationOverlay}
   alias Console.Schema.{User, RunbookExecution}
-  alias Console.Services.{Plural, Builds}
+  alias Console.Services.{Plural}
   alias Console.Runbooks
 
   @type error :: {:error, term}
@@ -53,13 +53,8 @@ defmodule Console.Services.Runbooks do
          {:ok, %{items: overlays}} <- Kube.Client.list_configuration_overlays(repo),
          map <- make_updates(overlays, map, ctx),
          {:ok, doc} <- Ymlr.document(map),
-         _ <- Console.Deployer.update(repo, String.trim_leading(doc, "---\n"), :helm) do
-      Builds.create(%{
-        type: :deploy,
-        repository: repo,
-        message: "updated configuration"
-      }, actor)
-    end
+         {:ok, _, build} <- Console.Deployer.update(repo, String.trim_leading(doc, "---\n"), :helm, nil, actor),
+      do: {:ok, build}
   end
 
   defp make_updates(overlays, values, map) do

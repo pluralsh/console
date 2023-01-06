@@ -80,7 +80,7 @@ defmodule Console.DeployerTest do
 
       expect(File, :write, fn _, _ -> :ok end)
 
-      {:ok, "content"} = Console.Deployer.update("repo", "content", :helm)
+      {:ok, "content", _} = Console.Deployer.update("repo", "content", :helm)
     end
   end
 end
