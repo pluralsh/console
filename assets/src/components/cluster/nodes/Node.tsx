@@ -33,8 +33,7 @@ export default function Node() {
       height="100%"
       width="100%"
       overflowY="hidden"
-      paddingLeft={theme.spacing.xlarge}
-      paddingRight={theme.spacing.xlarge}
+      padding={theme.spacing.xlarge}
       paddingTop={theme.spacing.large}
     >
       <ResponsiveLayoutSidenavContainer
