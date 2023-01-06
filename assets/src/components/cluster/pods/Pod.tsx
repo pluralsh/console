@@ -20,7 +20,9 @@ export default function Node() {
   const { name, namespace } = useParams()
   const { setBreadcrumbs } = useBreadcrumbs()
 
-  // TODO: Investigate whether these links should be more specific, based on where they navigated from
+  // TODO: Investigate whether these links could more specific,
+  // based on where they navigated from, perhaps the `namespace` crumb
+  // could navigate to the Pods view already filtered for that namespace
   useEffect(() => {
     if (name && namespace) {
       setBreadcrumbs([

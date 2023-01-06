@@ -1,24 +1,20 @@
 import { Sidecar, SidecarItem } from '@pluralsh/design-system'
 import { Node, NodeMetric, Pod } from 'generated/graphql'
+import { A } from 'honorable'
 import { useQuery } from 'react-apollo'
-import { useParams } from 'react-router-dom'
-import { nodeStatusToReadiness } from 'utils/status'
+import { Link, useParams } from 'react-router-dom'
+import { nodeStatusToReadiness, podStatusToReadiness } from 'utils/status'
 
 import { POLL_INTERVAL } from '../constants'
-import { NODE_Q } from '../queries'
+import { NODE_Q, POD_INFO_Q } from '../queries'
 import { StatusChip } from '../TableElements'
 
 export default function NodeSidecar() {
-  const { name } = useParams()
+  const { name, namespace } = useParams()
   const { data } = useQuery<{
-    node: Node & {
-      raw?: string
-      pods?: Pod[]
-      events?: Event[]
-    }
-    nodeMetric: NodeMetric
-  }>(NODE_Q, {
-    variables: { name },
+    pod: Pod
+  }>(POD_INFO_Q, {
+    variables: { name, namespace },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
@@ -26,17 +22,29 @@ export default function NodeSidecar() {
   if (!data) {
     return null
   }
-  const { node } = data
-  const readiness = nodeStatusToReadiness(node?.status)
+  const { pod } = data
+  const readiness = podStatusToReadiness(pod?.status)
 
   return (
     <Sidecar heading="Metadata">
-      <SidecarItem heading="Pod name">xxx</SidecarItem>
-      <SidecarItem heading="Namespace">xxx</SidecarItem>
-      <SidecarItem heading="IP">xxx.xxx.xxx</SidecarItem>
-      <SidecarItem heading="Parent node">xxx.xxx.xxx</SidecarItem>
-      <SidecarItem heading="Service account">xxx.xxx.xxx</SidecarItem>
-      <SidecarItem heading="Status"><StatusChip readiness={readiness} /></SidecarItem>
+      <SidecarItem heading="Pod name">{pod?.metadata?.name}</SidecarItem>
+      <SidecarItem heading="Namespace">{pod?.metadata?.namespace}</SidecarItem>
+      <SidecarItem heading="IP">{pod?.status?.podIp}</SidecarItem>
+      <SidecarItem heading="Parent node">
+        <A
+          as={Link}
+          to={`/nodes/${pod.spec.nodeName}`}
+          inline
+        >
+          {pod.spec.nodeName}
+        </A>
+      </SidecarItem>
+      <SidecarItem heading="Service account">
+        {pod.spec.serviceAccountName}
+      </SidecarItem>
+      <SidecarItem heading="Status">
+        <StatusChip readiness={readiness} />
+      </SidecarItem>
     </Sidecar>
   )
 }
