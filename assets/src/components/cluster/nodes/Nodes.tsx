@@ -17,7 +17,7 @@ import { ClusterMetrics } from './ClusterMetrics'
 import { NodesList } from './NodesList'
 
 export default function Nodes() {
-  const { data } = useQuery<{
+  const { data, refetch } = useQuery<{
     nodes: Node[]
     nodeMetrics: NodeMetric[]
   }>(NODES_Q, {
@@ -50,6 +50,7 @@ export default function Nodes() {
         <NodesList
           nodes={data.nodes}
           nodeMetrics={data.nodeMetrics}
+          refetch={refetch}
         />
         <Card padding="xlarge">
           <ClusterMetrics

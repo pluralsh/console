@@ -173,7 +173,7 @@ export function FileEntry({ file }) {
               <Text
                 size="xsmall"
                 color="dark-5"
-              >{filesize(file.filesize || 0)}
+              >{filesize(file.filesize ?? 0)}
               </Text>
               <Text size="xsmall">{moment(file.insertedAt).fromNow()}</Text>
             </Box>
@@ -222,7 +222,7 @@ export function StandardFile({
             <Text
               size="xsmall"
               color="dark-5"
-            >{filesize(file.filesize || 0)}
+            >{filesize(file.filesize ?? 0)}
             </Text>
             <Text size="xsmall">{moment(insertedAt).fromNow()}</Text>
           </Box>

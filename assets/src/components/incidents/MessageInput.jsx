@@ -304,7 +304,7 @@ function UploadProgress({
               <Text
                 size="small"
                 color="dark-3"
-              >{filesize(attachment.size)}
+              >{filesize(attachment.size ?? 0)}
               </Text>
             </Box>
           )}

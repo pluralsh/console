@@ -1,13 +1,17 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { filesize } from 'filesize'
 import { A } from 'honorable'
-import { Tooltip } from '@pluralsh/design-system'
+import { IconFrame, Tooltip, TrashCanIcon } from '@pluralsh/design-system'
 import { Link } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { Node, NodeMetric } from 'generated/graphql'
 import { ReadinessT, nodeStatusToReadiness, readinessToLabel } from 'utils/status'
 import { cpuParser, memoryParser } from 'utils/kubernetes'
+
+import { Confirm } from 'components/utils/Confirm'
+
+import { useMutation } from 'react-apollo'
 
 import { mapify } from '../Metadata'
 import {
@@ -19,6 +23,8 @@ import {
   TableText,
   Usage,
 } from '../TableElements'
+
+import { DELETE_NODE } from '../queries'
 
 import { UsageBar } from './UsageBar'
 
@@ -44,31 +50,68 @@ const columnHelper = createColumnHelper<TableData>()
 const zoneKey = 'failure-domain.beta.kubernetes.io/zone'
 const regionKey = 'failure-domain.beta.kubernetes.io/region'
 
-const columns = [
-  columnHelper.accessor(row => row.name, {
-    id: 'name',
-    cell: ({ row: { original }, ...props }) => (
-      <Tooltip
-        label={props.getValue()}
-        placement="top"
-      >
-        <TableText>
-          <A
-            inline
-            display="inline"
-            as={Link}
-            to={`/nodes/${original.name}`}
-          >
-            {props.getValue()}
-          </A>
-        </TableText>
-      </Tooltip>
-    ),
-    header: 'Name',
-    maxSize: 30,
-    enableResizing: true,
-  }),
-  columnHelper.accessor(row => `${row.zone} - ${row.zone}`, {
+function DeleteNode({ name, refetch }) {
+  const [confirm, setConfirm] = useState(false)
+  const [mutation, { loading }] = useMutation(DELETE_NODE, {
+    variables: { name },
+    onCompleted: () => {
+      setConfirm(false)
+      refetch()
+    },
+  })
+
+  return (
+    <>
+      <IconFrame
+        clickable
+        icon={<TrashCanIcon color="icon-danger" />}
+        onClick={() => setConfirm(true)}
+        textValue="Delete"
+        tooltip
+      />
+      <Confirm
+        close={() => {
+          console.log('close')
+          setConfirm(false)
+        }}
+        destructive
+        label="Delete"
+        loading={loading}
+        open={confirm}
+        submit={() => mutation()}
+        title="Delete node"
+        text={`The node "${name}" will be replaced within its autoscaling group.`}
+      />
+    </>
+  )
+}
+
+const ColName = columnHelper.accessor(row => row.name, {
+  id: 'name',
+  cell: ({ row: { original }, ...props }) => (
+    <Tooltip
+      label={props.getValue()}
+      placement="top"
+    >
+      <TableText>
+        <A
+          inline
+          display="inline"
+          as={Link}
+          to={`/nodes/${original.name}`}
+        >
+          {props.getValue()}
+        </A>
+      </TableText>
+    </Tooltip>
+  ),
+  header: 'Name',
+  maxSize: 30,
+  enableResizing: true,
+})
+
+const ColRegionZone = columnHelper.accessor(row => `${row.zone} - ${row.zone}`,
+  {
     id: 'region-zone',
     cell: ({ row: { original } }) => (
       <>
@@ -77,22 +120,25 @@ const columns = [
       </>
     ),
     header: 'Region/Zone',
-  }),
-  columnHelper.accessor(row => (row?.memory?.used ?? 0) / (row?.memory?.total ?? 1),
-    {
-      id: 'memory-usage',
-      cell: ({ row: { original }, ...props }) => (
-        <>
-          <Usage
-            used={filesize(original?.memory?.used)}
-            total={filesize(original?.memory?.total)}
-          />
-          <UsageBar usage={props.getValue()} />
-        </>
-      ),
-      header: 'Memory usage',
-    }),
-  columnHelper.accessor(row => (row?.cpu.used ?? 0) / (row?.cpu.total ?? 1), {
+  })
+
+const ColMemory = columnHelper.accessor(row => (row?.memory?.used ?? 0) / (row?.memory?.total ?? 1),
+  {
+    id: 'memory-usage',
+    cell: ({ row: { original }, ...props }) => (
+      <>
+        <Usage
+          used={filesize(original?.memory?.used ?? 0)}
+          total={filesize(original?.memory?.total ?? 0)}
+        />
+        <UsageBar usage={props.getValue()} />
+      </>
+    ),
+    header: 'Memory usage',
+  })
+
+const ColCpu = columnHelper.accessor(row => (row?.cpu.used ?? 0) / (row?.cpu.total ?? 1),
+  {
     id: 'cpu-usage',
     cell: ({ row: { original }, ...props }: any) => (
       <>
@@ -104,33 +150,47 @@ const columns = [
       </>
     ),
     header: 'Memory usage',
-  }),
-  columnHelper.accessor(row => (row?.readiness ? readinessToLabel[row.readiness] : ''),
-    {
-      id: 'status',
-      cell: ({ row: { original } }) => (
-        <StatusChip readiness={original.readiness} />
-      ),
-      header: 'Status',
-    }),
-  columnHelper.display({
-    id: 'link',
-    cell: ({ row: { original } }: any) => (
-      <TableCaretLink
-        to={`/nodes/${original.name}`}
-        textValue={`View node ${original?.name}`}
-      />
+  })
+
+const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToLabel[row.readiness] : ''),
+  {
+    id: 'status',
+    cell: ({ row: { original } }) => (
+      <StatusChip readiness={original.readiness} />
     ),
-    header: '',
-  }),
-]
+    header: 'Status',
+  })
+
+const ColDelete = refetch => columnHelper.accessor(row => row.name, {
+  id: 'delete',
+  cell: ({ row: { original } }) => (
+    <DeleteNode
+      name={original.name}
+      refetch={refetch}
+    />
+  ),
+  header: '',
+})
+
+const ColLink = columnHelper.display({
+  id: 'link',
+  cell: ({ row: { original } }: any) => (
+    <TableCaretLink
+      to={`/nodes/${original.name}`}
+      textValue={`View node ${original?.name}`}
+    />
+  ),
+  header: '',
+})
 
 export function NodesList({
   nodes,
   nodeMetrics,
+  refetch,
 }: {
   nodes: Node[]
   nodeMetrics: NodeMetric[]
+  refetch: any
 }) {
   const metrics: Record<string, { cpu?: number; memory?: number }>
     = useMemo(() => {
@@ -169,6 +229,17 @@ export function NodesList({
     }
   }),
   [metrics, nodes])
+
+  // Memoize columns to prevent rerendering entire table
+  const columns = useMemo(() => [
+    ColName,
+    ColRegionZone,
+    ColMemory,
+    ColCpu,
+    ColStatus,
+    ColDelete(refetch),
+    ColLink,
+  ], [refetch])
 
   if (!tableData || tableData.length === 0) {
     return <>No nodes available.</>

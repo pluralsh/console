@@ -1,6 +1,7 @@
 import {
   useCallback,
   useContext,
+  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -25,14 +26,21 @@ import {
   Node as NodeT,
   Pod,
 } from 'generated/graphql'
-
 import { LoopingLogo } from 'components/utils/AnimatedLogo'
 import { ignoreEvent } from 'components/utils/events'
-
 import { ScrollablePage } from 'components/layout/ScrollablePage'
 
 import { POLL_INTERVAL } from '../constants'
-import { PodsList } from '../pods/PodsList'
+import {
+  ColContainers,
+  ColCpu,
+  ColDelete,
+  ColLink,
+  ColMemory,
+  ColNameLink,
+  ColRestarts,
+  PodsList,
+} from '../pods/PodsList'
 import { DELETE_NODE, NODE_Q } from '../queries'
 import { roundToTwoPlaces } from '../utils'
 import { Metadata } from '../Metadata'
@@ -44,60 +52,6 @@ import { SubTitle } from './SubTitle'
 Must explicitly import and register chart.js elements used in react-chartjs-2
 */
 Chart.register(ArcElement)
-
-export function UtilBar({
-  capacity, usage, format, modifier,
-}) {
-  const ref = useRef<any>()
-  const [hover, setHover] = useState(false)
-  const theme = useContext(ThemeContext)
-  const percent = roundToTwoPlaces(Math.min((usage / capacity) * 100, 100))
-  const color
-    = percent < 50 ? 'success' : percent < 75 ? 'status-warning' : 'error'
-
-  return (
-    <>
-      <Box
-        flex={false}
-        ref={ref}
-        fill="horizontal"
-        height="20px"
-        align="center"
-        justify="center"
-        onMouseOver={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
-      >
-        <Line
-          percent={percent}
-          trailColor={normalizeColor('cardDetailLight', theme)}
-          strokeColor={normalizeColor(color, theme)}
-          strokeWidth={2}
-          trailWidth={2}
-        />
-      </Box>
-      {hover && (
-        <Drop
-          target={ref.current}
-          plain
-          align={{ bottom: 'top' }}
-          round="xsmall"
-        >
-          <Box
-            direction="row"
-            gap="xsmall"
-            align="center"
-            background="sidebar"
-            pad={{ horizontal: 'small', vertical: 'xsmall' }}
-          >
-            <Text size="small">
-              {modifier}: {percent}% {usage ? format(usage) : ''}
-            </Text>
-          </Box>
-        </Drop>
-      )}
-    </>
-  )
-}
 
 export function DeleteNode({ name, refetch }) {
   const [confirm, setConfirm] = useState(false)
@@ -166,6 +120,17 @@ export default function NodeInfo() {
     fetchPolicy: 'cache-and-network',
   })
 
+  const columns = useMemo(() => [
+    ColNameLink,
+    ColMemory,
+    ColCpu,
+    ColRestarts,
+    ColContainers,
+    ColDelete(refetch),
+    ColLink,
+  ],
+  [refetch])
+
   if (!data) return <LoopingLogo dark />
 
   const { node, nodeMetric } = data
@@ -179,9 +144,9 @@ export default function NodeInfo() {
         <section>
           <SubTitle>Pods</SubTitle>
           <PodsList
+            columns={columns}
+            truncColIndexes={[0]}
             pods={node.pods}
-            refetch={refetch}
-            namespace={undefined}
           />
         </section>
         <section>

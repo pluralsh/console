@@ -7,7 +7,12 @@ import { filesize } from 'filesize'
 import type { Maybe, Pod } from 'generated/graphql'
 import { ReadinessT } from 'utils/status'
 
-import { IconFrame, Tooltip, TrashCanIcon } from '@pluralsh/design-system'
+import {
+  IconFrame,
+  Tooltip,
+  TrashCanIcon,
+  usePrevious,
+} from '@pluralsh/design-system'
 
 import { Confirm } from 'components/utils/Confirm'
 import { useMutation } from 'react-apollo'
@@ -28,6 +33,7 @@ import { getPodResources } from './getPodResources'
 
 function DeletePod({ name, namespace, refetch }) {
   const [confirm, setConfirm] = useState(false)
+
   const [mutation, { loading }] = useMutation(DELETE_POD, {
     variables: { name, namespace },
     onCompleted: () => {
@@ -40,11 +46,7 @@ function DeletePod({ name, namespace, refetch }) {
     <>
       <IconFrame
         clickable
-        icon={(
-          <TrashCanIcon
-            color="icon-danger"
-          />
-        )}
+        icon={<TrashCanIcon color="icon-danger" />}
         onClick={() => setConfirm(true)}
         textValue="Delete"
         tooltip
@@ -57,7 +59,9 @@ function DeletePod({ name, namespace, refetch }) {
         open={confirm}
         submit={() => mutation()}
         title="Delete pod"
-        text="The pod will be replaced by it's managing controller."
+        text={`The pod "${name}"${
+          namespace ? ` in namespace "${namespace}"` : ''
+        } will be replaced by it's managing controller.`}
       />
     </>
   )
@@ -110,14 +114,22 @@ export const ColNameLink = columnHelper.accessor(row => row.name, {
 
 export const ColName = columnHelper.accessor(row => row.name, {
   id: 'name',
-  cell: props => <TableText>{props.getValue()}</TableText>,
+  cell: props => (
+    <TableText>
+      <Tooltip
+        label={props.getValue()}
+        placement="top-start"
+      >
+        <span>{props.getValue()}</span>
+      </Tooltip>
+    </TableText>
+  ),
   header: 'Name',
 })
 
 export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
   id: 'nodeName',
   cell: ({ row: { original }, ...props }) => (
-
     <TableText>
       <Tooltip
         label={original.nodeName}
@@ -132,7 +144,6 @@ export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
           {props.getValue()}
         </A>
       </Tooltip>
-
     </TableText>
   ),
   header: 'Node name',
@@ -145,12 +156,12 @@ export const ColMemory = columnHelper.accessor(row => row.name, {
       used={
         original?.memory?.used === undefined
           ? undefined
-          : filesize(original.memory.used)
+          : filesize(original.memory.used ?? 0)
       }
       total={
         original.memory.total === undefined
           ? undefined
-          : filesize(original.memory.total)
+          : filesize(original.memory.total ?? 0)
       }
     />
   ),
@@ -197,12 +208,12 @@ export const ColLink = columnHelper.display({
   header: '',
 })
 
-export const ColDelete = (namespace, refetch) => columnHelper.accessor(row => row.name, {
+export const ColDelete = refetch => columnHelper.accessor(row => row.name, {
   id: 'delete',
   cell: ({ row: { original } }) => (
     <DeletePod
       name={original.name}
-      namespace={namespace}
+      namespace={original.namespace}
       refetch={refetch}
     />
   ),
@@ -211,8 +222,6 @@ export const ColDelete = (namespace, refetch) => columnHelper.accessor(row => ro
 
 type PodListProps = {
   pods?: Maybe<Pod>[] & Pod[]
-  namespace?: any
-  refetch?: any
   columns?: any[]
   truncColIndexes?: number[]
 }
@@ -224,17 +233,8 @@ function getRestarts(status: Pod['status']) {
 
 export function PodsList({
   pods,
-  columns = [
-    ColNameLink,
-    ColMemory,
-    ColCpu,
-    ColRestarts,
-    ColContainers,
-    ColLink,
-  ],
+  columns,
   truncColIndexes = [0],
-  namespace: _namespace,
-  refetch: _refetch,
 }: PodListProps) {
   const tableData: PodTableRow[] = useMemo(() => (pods || [])
     .filter((pod): pod is Pod => !!pod)

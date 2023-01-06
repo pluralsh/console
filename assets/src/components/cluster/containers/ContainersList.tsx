@@ -91,12 +91,12 @@ export const ColMemory = columnHelper.accessor(row => row.name, {
       used={
         original?.memory?.requests === undefined
           ? undefined
-          : filesize(original.memory.requests)
+          : filesize(original.memory.requests ?? 0)
       }
       total={
         original.memory.limits === undefined
           ? undefined
-          : filesize(original.memory.limits)
+          : filesize(original.memory.limits ?? 0)
       }
     />
   ),
