@@ -32,7 +32,7 @@ import { ignoreEvent } from 'components/utils/events'
 import { ScrollablePage } from 'components/layout/ScrollablePage'
 
 import { POLL_INTERVAL } from '../constants'
-import { PodList } from '../pods/PodList'
+import { PodsList } from '../pods/PodsList'
 import { DELETE_NODE, NODE_Q } from '../queries'
 import { roundToTwoPlaces } from '../utils'
 import { Metadata } from '../Metadata'
@@ -178,7 +178,7 @@ export default function NodeInfo() {
       >
         <section>
           <SubTitle>Pods</SubTitle>
-          <PodList
+          <PodsList
             pods={node.pods}
             refetch={refetch}
             namespace={undefined}

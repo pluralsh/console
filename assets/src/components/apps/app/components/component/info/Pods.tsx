@@ -8,8 +8,8 @@ import {
   ColName,
   ColNodeName,
   ColRestarts,
-  PodList,
-} from '../../../../../cluster/pods/PodList'
+  PodsList,
+} from 'components/cluster/pods/PodsList'
 
 export default function Pods({
   pods, namespace, refetch,
@@ -21,7 +21,7 @@ export default function Pods({
         marginBottom="medium"
       >Pods
       </H2>
-      <PodList
+      <PodsList
         pods={pods}
         columns={[
           ColName,

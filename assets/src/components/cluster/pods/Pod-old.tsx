@@ -7,7 +7,7 @@ import {
   Tabs,
 } from 'forge-core'
 
-import { useMutation, useQuery } from 'react-apollo'
+import { useQuery } from 'react-apollo'
 import { Terminal } from 'grommet-icons'
 import { filesize } from 'filesize'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -18,17 +18,13 @@ import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { asQuery } from 'components/utils/query'
 import { LoopingLogo } from 'components/utils/AnimatedLogo'
 
-import { IconFrame, TrashCanIcon } from '@pluralsh/design-system'
-
-import { Confirm } from 'components/utils/Confirm'
-
-import { cpuParser, memoryParser } from 'utils/kubernetes'
-
 import { ComponentIcon } from '../../apps/app/components/misc'
-import { DELETE_POD, POD_Q } from '../queries'
+import { POD_Q } from '../queries'
 import { POLL_INTERVAL } from '../constants'
 import { Metadata, MetadataRow } from '../Metadata'
 import { Container as Con, LogLink } from '../utils'
+
+import { getPodResources } from './getPodResources'
 
 export const ReadinessColor = {
   [Readiness.Ready]: 'success',
@@ -53,83 +49,32 @@ function phaseToReadiness(phase: Phase) {
   }
 }
 
-export function PodPhase({ phase, message }) {
-  const readiness = phaseToReadiness(phase)
+// export function PodResources({ containers, dimension }) {
+//   const { cpu: cpuReq, memory: memReq } = getPodResources(containers, 'requests')
+//   const { cpu: cpuLim, memory: memLim } = getPodResources(containers, 'limits')
 
-  return (
-    <Box
-      direction="row"
-      gap="xsmall"
-      align="center"
-    >
-      {readiness && <ReadyIcon readiness={readiness} />}
-      <Text size="small">{phase}</Text>
-      {message && (
-        <Text
-          size="small"
-          color="dark-5"
-        >
-          {message}
-        </Text>
-      )}
-    </Box>
-  )
-}
+//   if (dimension === 'memory') {
+//     return (
+//       <Box direction="row">
+//         <Text size="small">
+//           <>
+//             {memReq === undefined ? '--' : filesize(memReq)} /{' '}
+//             {memLim === undefined ? '--' : filesize(memLim)}
+//           </>
+//         </Text>
+//       </Box>
+//     )
+//   }
 
-export function podResources(containers: Iterable<{
-    resources: Record<
-      string,
-      {
-        cpu?: string | null
-        memory?: string | null
-      }
-    >
-  }>,
-type: string) {
-  let memory: number | undefined
-  let cpu: number | undefined
-
-  for (const { resources } of containers) {
-    const resourceSpec = resources[type]
-
-    if (!resourceSpec) continue
-    if (resourceSpec.cpu) {
-      cpu = (cpu || 0) + (cpuParser(resourceSpec.cpu) ?? 0)
-    }
-    if (resourceSpec.memory) {
-      memory = (memory || 0) + (memoryParser(resourceSpec.memory) ?? 0)
-    }
-  }
-
-  return { cpu: cpu === undefined ? cpu : Math.ceil(100 * cpu) / 100, memory }
-}
-
-export function PodResources({ containers, dimension }) {
-  const { cpu: cpuReq, memory: memReq } = podResources(containers, 'requests')
-  const { cpu: cpuLim, memory: memLim } = podResources(containers, 'limits')
-
-  if (dimension === 'memory') {
-    return (
-      <Box direction="row">
-        <Text size="small">
-          <>
-            {memReq === undefined ? '--' : filesize(memReq)} /{' '}
-            {memLim === undefined ? '--' : filesize(memLim)}
-          </>
-        </Text>
-      </Box>
-    )
-  }
-
-  return (
-    <Box direction="row">
-      <Text size="small">
-        {cpuReq === undefined ? '--' : cpuReq} /{' '}
-        {cpuLim === undefined ? '--' : cpuLim}
-      </Text>
-    </Box>
-  )
-}
+//   return (
+//     <Box direction="row">
+//       <Text size="small">
+//         {cpuReq === undefined ? '--' : cpuReq} /{' '}
+//         {cpuLim === undefined ? '--' : cpuLim}
+//       </Text>
+//     </Box>
+//   )
+// }
 
 export function HeaderItem({
   width, text, nobold = false, truncate = false,
@@ -456,7 +401,7 @@ function PodConditions({ conditions }) {
   )
 }
 
-function Container({ container, containerStatus }) {
+export function Container({ container, containerStatus }) {
   const readiness = containerStatusToReadiness(containerStatus)
 
   return (

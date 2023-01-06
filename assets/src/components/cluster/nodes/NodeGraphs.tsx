@@ -6,7 +6,7 @@ import { NodeStatus, NodeUsage, Pod } from 'generated/graphql'
 import { cpuParser, memoryParser } from 'utils/kubernetes'
 
 import { NodeMetrics } from '../constants'
-import { podResources } from '../pods/Pod-old'
+import { getPodResources } from '../pods/getPodResources'
 
 import { cpuFmt, podContainers } from '../utils'
 
@@ -26,8 +26,8 @@ export function NodeGraphs({
 }) {
   const { requests, limits } = useMemo(() => {
     const containers = podContainers(pods)
-    const requests = podResources(containers, 'requests')
-    const limits = podResources(containers, 'limits')
+    const requests = getPodResources(containers, 'requests')
+    const limits = getPodResources(containers, 'limits')
 
     return { requests, limits }
   }, [pods])

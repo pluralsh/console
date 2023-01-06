@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react'
 import { filesize } from 'filesize'
 
 import type { Maybe, Pod } from 'generated/graphql'
-import { Readiness, ReadinessT, containerStatusToReadiness } from 'utils/status'
+import { ReadinessT } from 'utils/status'
 
 import { IconFrame, Tooltip, TrashCanIcon } from '@pluralsh/design-system'
 
@@ -22,7 +22,8 @@ import {
 } from '../TableElements'
 import { DELETE_POD } from '../queries'
 
-import { podResources } from './Pod-old'
+import { getPodResources } from './getPodResources'
+import { getAllContainerStats } from './getAllContainerStats'
 
 function DeletePod({ name, namespace, refetch }) {
   const [confirm, setConfirm] = useState(false)
@@ -220,42 +221,7 @@ function getRestarts(status: Pod['status']) {
     0)
 }
 
-function getAllStatuses({
-  containerStatuses,
-  initContainerStatuses,
-}: Pod['status']) {
-  return [...(initContainerStatuses || []), ...(containerStatuses || [])]
-}
-
-function getContainersStats(status: Pod['status']): {
-  ready?: number
-  total?: number
-  statuses?: ContainerStatus[]
-} {
-  const allStatuses = getAllStatuses(status)
-
-  const readyCount = allStatuses.reduce((prev, status) => {
-    if (!status) {
-      return prev
-    }
-    const readiness = containerStatusToReadiness(status)
-
-    return {
-      ready: prev.ready + (readiness === Readiness.Ready ? 1 : 0),
-      total: prev.total + 1,
-    }
-  },
-  { ready: 0, total: 0 })
-
-  const statuses = allStatuses.map(status => ({
-    name: status?.name,
-    readiness: containerStatusToReadiness(status),
-  } as ContainerStatus))
-
-  return { statuses, ...readyCount }
-}
-
-export function PodList({
+export function PodsList({
   pods,
   columns = [
     ColNameLink,
@@ -273,11 +239,10 @@ export function PodList({
     .filter((pod): pod is Pod => !!pod)
     .map(pod => {
       const { containers } = pod.spec
-      const containersStats = getContainersStats(pod.status)
 
-      const { cpu: cpuRequests, memory: memoryRequests } = podResources(containers as any,
+      const { cpu: cpuRequests, memory: memoryRequests } = getPodResources(containers,
         'requests')
-      const { cpu: cpuLimits, memory: memoryLimits } = podResources(containers as any,
+      const { cpu: cpuLimits, memory: memoryLimits } = getPodResources(containers,
         'limits')
 
       return {
@@ -295,7 +260,7 @@ export function PodList({
           sortVal: (cpuRequests ?? 0) / (cpuLimits ?? Infinity),
         },
         restarts: getRestarts(pod.status),
-        containers: containersStats,
+        containers: getAllContainerStats(pod.status),
       }
     }),
   [pods])

@@ -17,7 +17,7 @@ import {
   readinessToSeverity,
 } from 'utils/status'
 
-import { ContainerStatus } from './pods/PodList'
+import { ContainerStatus } from './pods/PodsList'
 
 const GridTableBase = styled(Table)(({ theme }) => ({
   table: {
