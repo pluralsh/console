@@ -22,16 +22,16 @@ end
 defimpl Console.Runbooks.Action, for: Kube.Runbook.ConfigurationAction do
   alias Console.Services.Plural
   alias Console.Runbooks.Actor
-  alias Console.Services.Builds
   alias Kube.{Runbook, StatefulSetResize}
 
-  def enact(%{updates: updates, stateful_sets: ss}, %Actor{ctx: ctx, repo: repo}) do
+  def enact(%{updates: updates, stateful_sets: ss}, %Actor{ctx: ctx, repo: repo, actor: actor}) do
     with {:ok, vals} <- Plural.values_file(repo),
          {:ok, map} <- YamlElixir.read_from_string(vals),
          map <- make_updates(updates, map, ctx),
          {:ok, doc} <- Ymlr.document(map),
          :ok <- maybe_resize(ss, repo, ctx),
-      do: Console.Deployer.update(repo, String.trim_leading(doc, "---\n"), :helm)
+         {:ok, _, build} <- Console.Deployer.update(repo, String.trim_leading(doc, "---\n"), :helm, nil, actor),
+      do: {:ok, build}
   end
 
   defp make_updates(updates, values, map) do

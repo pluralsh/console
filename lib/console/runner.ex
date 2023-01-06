@@ -48,7 +48,7 @@ defmodule Console.Runner do
 
   def handle_info(_, state), do: {:noreply, state}
 
-  defp continue(state, [], build), do: {:stop, {:shutdown, :succeed}, state}
+  defp continue(state, [], _), do: {:stop, {:shutdown, :succeed}, state}
   defp continue(state, ops, build) do
     send self(), :kick
     {:noreply, %{state | operations: ops, build: build}}

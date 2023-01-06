@@ -82,7 +82,7 @@ defmodule Console.GraphQl.Resolvers.Plural do
 
   def update_configuration(%{repository: repo, content: content} = args, _) do
     tool = args[:tool] || :helm
-    with {:ok, conf} <- Console.Deployer.update(repo, content, tool, args[:message]) do
+    with {:ok, conf, _} <- Console.Deployer.update(repo, content, tool, args[:message]) do
       {:ok, %{configuration: %{tool => conf}}}
     end
   end
