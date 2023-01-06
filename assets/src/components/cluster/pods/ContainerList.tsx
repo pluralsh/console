@@ -181,13 +181,12 @@ export function ContainerList({
   refetch: _refetch,
 }: ContainerListProps) {
   const tableData: ContainerTableRow[] = useMemo(() => {
-    // const initContainerData = (initContainers || [])
-    //   .filter((container): container is Container => !!container)
-    //   .map(container => toTableData(container, {
-    //     isInit: true,
-    //     statuses: initContainerStatuses,
-    //   }))
-    const initContainerData = []
+    const initContainerData = (initContainers || [])
+      .filter((container): container is Container => !!container)
+      .map(container => toTableData(container, {
+        isInit: true,
+        statuses: initContainerStatuses,
+      }))
     const containerData = (containers || [])
       .filter((container): container is Container => !!container)
       .map(container => toTableData(container, { isInit: false, statuses: containerStatuses }))

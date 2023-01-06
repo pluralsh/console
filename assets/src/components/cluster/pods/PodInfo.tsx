@@ -41,9 +41,9 @@ export default function NodeInfo() {
 
   const { pod } = data
   const containerStatuses = statusesToRecord(pod?.status?.containerStatuses)
-  //   const initContainerStatuses = statusesToRecord(pod?.status?.initContainerStatuses)
+  const initContainerStatuses = statusesToRecord(pod?.status?.initContainerStatuses)
   const containers = pod.spec.containers || []
-  //   const initContainers = pod.spec.initContainers || []
+  const initContainers = pod.spec.initContainers || []
 
   return (
     <ScrollablePage heading="Info">
@@ -56,8 +56,8 @@ export default function NodeInfo() {
           <ContainerList
             containers={containers}
             containerStatuses={containerStatuses}
-            initContainers={containers}
-            initContainerStatuses={containerStatuses}
+            initContainers={initContainers}
+            initContainerStatuses={initContainerStatuses}
           />
         </section>
         <section>
