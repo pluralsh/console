@@ -67,14 +67,14 @@ defmodule Console.GraphQl.PluralMutationsTest do
       user = insert(:user, roles: %{admin: true})
 
       {:ok, %{data: %{"installStack" => build}}} = run_query("""
-        mutation Install($name: Name!, $context: Map!) {
+        mutation Install($name: Name!, $context: ContextAttributes!) {
           installStack(name: $name, context: $context) {
             id
             type
             creator { id }
           }
         }
-      """, %{"name" => "id", "context" => Jason.encode!(%{"repo" => %{"some" => "val"}})}, %{current_user: user})
+      """, %{"name" => "id", "context" => %{"configuration" => Jason.encode!(%{"repo" => %{"some" => "val"}})}}, %{current_user: user})
 
       assert build["type"] == "INSTALL"
       assert build["creator"]["id"] == user.id
