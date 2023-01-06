@@ -169,7 +169,7 @@ type PodListProps = {
   namespace?: any
   refetch?: any
   columns?: any[]
-  truncColIndex?: number
+  truncColIndexes?: number[]
 }
 
 function getRestarts(status: Pod['status']) {
@@ -222,7 +222,7 @@ export function PodList({
     ColContainers,
     ColLink,
   ],
-  truncColIndex = 0,
+  truncColIndexes = [0],
   namespace: _namespace,
   refetch: _refetch,
 }: PodListProps) {
@@ -266,7 +266,7 @@ export function PodList({
       data={tableData}
       columns={columns}
       enableColumnResizing
-      $truncColIndex={truncColIndex}
+      $truncColIndexes={truncColIndexes}
       {...TABLE_HEIGHT}
     />
   )

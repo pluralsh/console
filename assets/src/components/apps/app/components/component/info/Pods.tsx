@@ -28,7 +28,7 @@ export default function Pods({
           ColContainers,
           ColDelete(namespace, refetch),
         ]}
-        truncColIndex={1}
+        truncColIndexes={[0, 1]}
       />
     </Flex>
   )

@@ -206,7 +206,7 @@ export default function Nodes() {
           <GridTable
             data={tableData}
             columns={columns}
-            $truncColIndex={0}
+            $truncColIndexes={[0]}
             {...TABLE_HEIGHT}
           />
         )}

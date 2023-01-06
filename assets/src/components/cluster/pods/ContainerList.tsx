@@ -104,7 +104,7 @@ export const ColCpu = columnHelper.accessor(row => row?.cpu?.requests, {
     //   used={original?.cpu?.requests}
     //   total={original?.cpu?.limits}
     // />
-    <TableText>{props.getValue()}</TableText>
+    <TableText>{props.getValue() ?? '—'}</TableText>
   ),
   header: 'CPU',
 })
@@ -128,7 +128,7 @@ type ContainerListProps = {
   namespace?: any
   refetch?: any
   columns?: any[]
-  truncColIndex?: number
+  truncColIndexes?: number[]
 }
 
 function toTableData(container: Container,
@@ -170,7 +170,7 @@ export function ContainerList({
   initContainers,
   initContainerStatuses,
   columns = [ColName, ColMemory, ColCpu, ColPorts, ColStatus],
-  truncColIndex = 0,
+  truncColIndexes = [0],
   namespace: _namespace,
   refetch: _refetch,
 }: ContainerListProps) {
@@ -199,7 +199,7 @@ export function ContainerList({
       data={tableData}
       columns={columns}
       enableColumnResizing
-      $truncColIndex={truncColIndex}
+      $truncColIndexes={truncColIndexes}
       {...TABLE_HEIGHT}
     />
   )
