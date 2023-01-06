@@ -48,6 +48,7 @@ export function SidebarIcon({ icon, text, name: sidebarName, selected, path, san
     >
       <Box
         focusIndicator={false}
+        className={`sidebar-${text}`}
         fill="horizontal"
         align="center"
         direction="row" 
@@ -90,6 +91,7 @@ function CompressedIcon({ icon, text, selected, path, sandboxed }) {
       <Box
         ref={setRef}
         focusIndicator={false}
+        className={`sidebar-${text}`}
         align="center"
         justify="center"
         direction="row" 

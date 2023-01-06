@@ -4,7 +4,7 @@ defmodule Console.Schema.Build do
 
   @expiry 30
 
-  defenum Type, deploy: 0, bounce: 1, approval: 2, install: 3
+  defenum Type, deploy: 0, bounce: 1, approval: 2, install: 3, destroy: 4
   defenum Status, queued: 0, running: 1, successful: 2, failed: 3, cancelled: 4, pending: 5
 
   schema "builds" do
