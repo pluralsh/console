@@ -35,8 +35,6 @@ export function NodeGraphs({
     [name])
   const capacity = ((status?.capacity as unknown as {cpu?: string, memory?:string}) ?? {})
 
-  console.log('CAPACITY', capacity)
-
   return (
     <Flex
       flex={false}

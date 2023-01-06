@@ -8,7 +8,7 @@ import type {
   Maybe,
   Port,
 } from 'generated/graphql'
-import { ReadinessT, containerStatusToReadiness, readinessToChipTitle } from 'utils/status'
+import { ReadinessT, containerStatusToReadiness, readinessToLabel } from 'utils/status'
 
 import { Tooltip } from '@pluralsh/design-system'
 
@@ -40,7 +40,7 @@ type ContainerTableRow = {
 }
 const columnHelper = createColumnHelper<ContainerTableRow>()
 
-const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToChipTitle[row.readiness] : ''),
+const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToLabel[row.readiness] : ''),
   {
     id: 'status',
     cell: ({ row: { original } }) => (
@@ -52,29 +52,35 @@ const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToChip
 export const ColName = columnHelper.accessor(row => row.name, {
   id: 'name',
   cell: ({ row: { original }, ...props }) => (
-    <Tooltip
-      label={props.getValue()}
-      placement="top"
-    >
-      <TableText>
-        {`${original.isInit && 'init:'}${props.getValue()}`}
-      </TableText>
-    </Tooltip>
+    <TableText>
+      <Tooltip
+        label={props.getValue()}
+        placement="top-start"
+      >
+        <span>{`${original.isInit ? 'init: ' : ''}${props.getValue()}`}</span>
+      </Tooltip>
+    </TableText>
   ),
   header: 'Name',
 })
 
 export const ColPorts = columnHelper.accessor(row => row.ports, {
   id: 'ports',
-  cell: props => (
-    <TableText>
-      {props
-        .getValue()
-        ?.map(port => (port ? `${port.protocol} ${port.containerPort}` : undefined))
-        .filter(port => !!port)
-        .join(', ')}
-    </TableText>
-  ),
+  cell: props => {
+    const content = props
+      .getValue()
+      ?.map(port => (port ? (
+        <div>
+          {port.protocol ? `${port.protocol} ` : ''}
+          {port.containerPort}
+        </div>
+      ) : undefined))
+      .filter(port => !!port)
+
+    return (
+      <TableText>{!content || content.length === 0 ? '—' : content}</TableText>
+    )
+  },
   header: 'Ports',
 })
 
@@ -175,14 +181,13 @@ export function ContainerList({
   refetch: _refetch,
 }: ContainerListProps) {
   const tableData: ContainerTableRow[] = useMemo(() => {
-    console.log('')
-
-    const initContainerData = (initContainers || [])
-      .filter((container): container is Container => !!container)
-      .map(container => toTableData(container, {
-        isInit: true,
-        statuses: initContainerStatuses,
-      }))
+    // const initContainerData = (initContainers || [])
+    //   .filter((container): container is Container => !!container)
+    //   .map(container => toTableData(container, {
+    //     isInit: true,
+    //     statuses: initContainerStatuses,
+    //   }))
+    const initContainerData = []
     const containerData = (containers || [])
       .filter((container): container is Container => !!container)
       .map(container => toTableData(container, { isInit: false, statuses: containerStatuses }))

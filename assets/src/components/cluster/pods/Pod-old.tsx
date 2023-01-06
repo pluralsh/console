@@ -212,43 +212,6 @@ export function PodHeader() {
   )
 }
 
-export function DeletePod({ name, namespace, refetch }) {
-  const [confirm, setConfirm] = useState(false)
-  const [mutation, { loading }] = useMutation(DELETE_POD, {
-    variables: { name, namespace },
-    onCompleted: () => {
-      setConfirm(false)
-      refetch()
-    },
-  })
-
-  return (
-    <>
-      <IconFrame
-        clickable
-        icon={(
-          <TrashCanIcon
-            color="icon-danger"
-          />
-        )}
-        onClick={() => setConfirm(true)}
-        textValue="Delete"
-        tooltip
-      />
-      <Confirm
-        close={() => setConfirm(false)}
-        destructive
-        label="Delete"
-        loading={loading}
-        open={confirm}
-        submit={() => mutation()}
-        title="Delete pod"
-        text="The pod will be replaced by it's managing controller."
-      />
-    </>
-  )
-}
-
 function PodState({ name, state: { running, terminated, waiting } }) {
   if (running) return <Text size="small">{name} is running</Text>
   if (waiting) return <Text size="small">{name} is waiting</Text>

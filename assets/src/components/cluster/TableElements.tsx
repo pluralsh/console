@@ -12,8 +12,8 @@ import { CSSProperties, ComponentProps, ReactNode } from 'react'
 import styled from 'styled-components'
 import {
   ReadinessT,
-  readinessToChipTitle,
   readinessToColor,
+  readinessToLabel,
   readinessToSeverity,
 } from 'utils/status'
 
@@ -67,8 +67,6 @@ export const GridTable = styled(GridTableBase)<{ $truncColIndexes: number[] }>((
     ...truncStyles,
   }
 
-  console.log({ ret })
-
   return ret
 })
 
@@ -92,7 +90,7 @@ export const CaptionText = styled.div(({ theme }) => ({
 
 export const StatusChip = styled(({ readiness }: { readiness: ReadinessT }) => (
   <Chip severity={readinessToSeverity[readiness]}>
-    {readinessToChipTitle[readiness]}
+    {readinessToLabel[readiness]}
   </Chip>
 ))(_ => ({}))
 
@@ -165,7 +163,7 @@ export function ContainersReadyChip({
                 color={readinessToColor[readiness]}
                 fontWeight={600}
               >
-                {readiness}
+                {readinessToLabel[readiness]}
               </Span>
             </Flex>
           ))}

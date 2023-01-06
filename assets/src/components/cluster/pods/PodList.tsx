@@ -1,13 +1,16 @@
 import { A } from 'honorable'
 import { Link } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { filesize } from 'filesize'
 
 import type { Maybe, Pod } from 'generated/graphql'
 import { Readiness, ReadinessT, containerStatusToReadiness } from 'utils/status'
 
-import { Tooltip } from '@pluralsh/design-system'
+import { IconFrame, Tooltip, TrashCanIcon } from '@pluralsh/design-system'
+
+import { Confirm } from 'components/utils/Confirm'
+import { useMutation } from 'react-apollo'
 
 import {
   ContainersReadyChip,
@@ -17,10 +20,48 @@ import {
   TableText,
   Usage,
 } from '../TableElements'
+import { DELETE_POD } from '../queries'
 
-import { DeletePod, podResources } from './Pod-old'
+import { podResources } from './Pod-old'
 
-export type ContainerStatus = {name: string, readiness: ReadinessT}
+function DeletePod({ name, namespace, refetch }) {
+  const [confirm, setConfirm] = useState(false)
+  const [mutation, { loading }] = useMutation(DELETE_POD, {
+    variables: { name, namespace },
+    onCompleted: () => {
+      setConfirm(false)
+      refetch()
+    },
+  })
+
+  return (
+    <>
+      <IconFrame
+        clickable
+        icon={(
+          <TrashCanIcon
+            color="icon-danger"
+          />
+        )}
+        onClick={() => setConfirm(true)}
+        textValue="Delete"
+        tooltip
+      />
+      <Confirm
+        close={() => setConfirm(false)}
+        destructive
+        label="Delete"
+        loading={loading}
+        open={confirm}
+        submit={() => mutation()}
+        title="Delete pod"
+        text="The pod will be replaced by it's managing controller."
+      />
+    </>
+  )
+}
+
+export type ContainerStatus = { name: string; readiness: ReadinessT }
 
 type PodTableRow = {
   name?: string
@@ -46,11 +87,11 @@ const columnHelper = createColumnHelper<PodTableRow>()
 export const ColNameLink = columnHelper.accessor(row => row.name, {
   id: 'name',
   cell: ({ row: { original }, ...props }) => (
-    <Tooltip
-      label={props.getValue()}
-      placement="top"
-    >
-      <TableText>
+    <TableText>
+      <Tooltip
+        label={props.getValue()}
+        placement="top-start"
+      >
         <A
           inline
           display="inline"
@@ -59,8 +100,8 @@ export const ColNameLink = columnHelper.accessor(row => row.name, {
         >
           {props.getValue()}
         </A>
-      </TableText>
-    </Tooltip>
+      </Tooltip>
+    </TableText>
   ),
   header: 'Name',
 })
@@ -74,11 +115,12 @@ export const ColName = columnHelper.accessor(row => row.name, {
 export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
   id: 'nodeName',
   cell: ({ row: { original }, ...props }) => (
-    <Tooltip
-      label={original.nodeName}
-      placement="top"
-    >
-      <TableText>
+
+    <TableText>
+      <Tooltip
+        label={original.nodeName}
+        placement="top-start"
+      >
         <A
           inline
           as={Link}
@@ -87,8 +129,9 @@ export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
         >
           {props.getValue()}
         </A>
-      </TableText>
-    </Tooltip>
+      </Tooltip>
+
+    </TableText>
   ),
   header: 'Node name',
 })
@@ -207,7 +250,7 @@ function getContainersStats(status: Pod['status']): {
   const statuses = allStatuses.map(status => ({
     name: status?.name,
     readiness: containerStatusToReadiness(status),
-  }) as ContainerStatus)
+  } as ContainerStatus))
 
   return { statuses, ...readyCount }
 }

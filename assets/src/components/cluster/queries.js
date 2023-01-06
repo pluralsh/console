@@ -221,6 +221,7 @@ export const POD_EVENTS_Q = gql`
       events { ...EventFragment }
     }
   }
+  ${PodFragment}
   ${EventFragment}
 `
 
@@ -231,6 +232,7 @@ export const POD_RAW_Q = gql`
       raw
     }
   }
+  ${PodFragment}
 `
 
 export const USAGE_Q = gql`

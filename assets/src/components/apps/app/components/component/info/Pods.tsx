@@ -16,7 +16,11 @@ export default function Pods({
 }) {
   return (
     <Flex direction="column">
-      <H2 marginBottom="medium">Pods</H2>
+      <H2
+        subtitle1
+        marginBottom="medium"
+      >Pods
+      </H2>
       <PodList
         pods={pods}
         columns={[

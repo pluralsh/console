@@ -19,8 +19,8 @@ export default function NodeEvents() {
     }
   }>(NODE_EVENTS_Q, {
     variables: { name },
-    pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
   })
 
   if (!data) return <LoopingLogo dark />

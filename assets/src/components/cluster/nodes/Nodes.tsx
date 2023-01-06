@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom'
 import { ScrollablePage } from 'components/layout/ScrollablePage'
 
 import type { Node, NodeMetric } from 'generated/graphql'
-import { ReadinessT, nodeStatusToReadiness, readinessToChipTitle } from 'utils/status'
+import { ReadinessT, nodeStatusToReadiness, readinessToLabel } from 'utils/status'
 import { cpuParser, memoryParser } from 'utils/kubernetes'
 import { LoopingLogo } from 'components/utils/AnimatedLogo'
 
@@ -98,11 +98,11 @@ const columns = [
     ),
     header: 'Memory usage',
   }),
-  columnHelper.accessor(row => (row?.readiness ? readinessToChipTitle[row.readiness] : ''),
+  columnHelper.accessor(row => (row?.readiness ? readinessToLabel[row.readiness] : ''),
     {
       id: 'status',
-      cell: ({ row: { original } }: any) => (
-        <StatusChip readiness={nodeStatusToReadiness(original?.status)} />
+      cell: ({ row: { original } }) => (
+        <StatusChip readiness={original.readiness} />
       ),
       header: 'Status',
     }),
@@ -130,7 +130,7 @@ type TableData = {
   }
   region?: any
   zone?: any
-  readiness?: ReadinessT
+  readiness: ReadinessT
 }
 
 export default function Nodes() {
@@ -141,22 +141,6 @@ export default function Nodes() {
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
-
-  const metrics: Record<string, { cpu?: number; memory?: number }>
-    = useMemo(() => {
-      if (!data) {
-        return {}
-      }
-
-      return data.nodeMetrics.reduce((prev, { metadata: { name }, usage }) => ({
-        ...prev,
-        [name]: {
-          cpu: cpuParser(usage?.cpu ?? ''),
-          memory: memoryParser(usage?.memory ?? ''),
-        },
-      }),
-      {})
-    }, [data])
 
   const usage = useMemo(() => {
     if (!data) {
@@ -170,7 +154,52 @@ export default function Nodes() {
     return { cpu, mem }
   }, [data])
 
-  const tableData: TableData[] = useMemo(() => (data?.nodes || []).map(node => {
+  if (!data) {
+    return <LoopingLogo dark />
+  }
+
+  return (
+    <ScrollablePage heading="Nodes">
+      <Flex
+        direction="column"
+        gap="xlarge"
+      >
+        <NodeList
+          nodes={data.nodes}
+          nodeMetrics={data.nodeMetrics}
+        />
+        <Card padding="xlarge">
+          <ClusterMetrics
+            nodes={data.nodes}
+            usage={usage}
+          />
+        </Card>
+      </Flex>
+    </ScrollablePage>
+  )
+}
+
+function NodeList({ nodes, nodeMetrics }: {
+  nodes: Node[]
+  nodeMetrics: NodeMetric[]
+}) {
+  const metrics: Record<string, { cpu?: number; memory?: number }>
+  = useMemo(() => {
+    if (!nodeMetrics) {
+      return {}
+    }
+
+    return nodeMetrics.reduce((prev, { metadata: { name }, usage }) => ({
+      ...prev,
+      [name]: {
+        cpu: cpuParser(usage?.cpu ?? ''),
+        memory: memoryParser(usage?.memory ?? ''),
+      },
+    }),
+    {})
+  }, [nodeMetrics])
+
+  const tableData: TableData[] = useMemo(() => (nodes || []).map(node => {
     const thisMetrics = metrics[node.metadata.name]
     const labelsMap = mapify(node.metadata.labels)
     const capacity: Capacity = (node?.status?.capacity as Capacity) ?? {}
@@ -190,33 +219,18 @@ export default function Nodes() {
       readiness: nodeStatusToReadiness(node?.status),
     }
   }),
-  [data?.nodes, metrics])
+  [metrics, nodes])
 
-  if (!data) {
-    return <LoopingLogo dark />
+  if (!tableData || tableData.length === 0) {
+    return <>No nodes available.</>
   }
 
   return (
-    <ScrollablePage heading="Nodes">
-      <Flex
-        direction="column"
-        gap="xlarge"
-      >
-        {tableData && tableData.length > 0 && (
-          <GridTable
-            data={tableData}
-            columns={columns}
-            $truncColIndexes={[0]}
-            {...TABLE_HEIGHT}
-          />
-        )}
-        <Card padding="xlarge">
-          <ClusterMetrics
-            nodes={data.nodes}
-            usage={usage}
-          />
-        </Card>
-      </Flex>
-    </ScrollablePage>
+    <GridTable
+      data={tableData}
+      columns={columns}
+      $truncColIndexes={[0]}
+      {...TABLE_HEIGHT}
+    />
   )
 }
