@@ -1,4 +1,4 @@
-import { A } from 'honorable'
+import { A, Flex } from 'honorable'
 import { Link } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
@@ -91,7 +91,7 @@ type PodTableRow = {
 const columnHelper = createColumnHelper<PodTableRow>()
 
 export const ColNameLink = columnHelper.accessor(row => row.name, {
-  id: 'name',
+  id: 'name-link',
   cell: ({ row: { original }, ...props }) => (
     <TableText>
       <Tooltip
@@ -197,13 +197,23 @@ export const ColContainers = columnHelper.accessor(row => row.name, {
   header: 'Containers',
 })
 
-export const ColLink = columnHelper.display({
-  id: 'link',
+export const ColActions = refetch => columnHelper.display({
+  id: 'actions',
   cell: ({ row: { original } }: any) => (
-    <TableCaretLink
-      to={`/pods/${original.namespace}/${original.name}`}
-      textValue={`View node ${original?.name}`}
-    />
+    <Flex
+      flexDirection="row"
+      gap="xxsmall"
+    >
+      <DeletePod
+        name={original.name}
+        namespace={original.namespace}
+        refetch={refetch}
+      />
+      <TableCaretLink
+        to={`/pods/${original.namespace}/${original.name}`}
+        textValue={`View node ${original?.name}`}
+      />
+    </Flex>
   ),
   header: '',
 })

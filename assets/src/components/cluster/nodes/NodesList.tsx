@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { filesize } from 'filesize'
-import { A } from 'honorable'
+import { A, Flex } from 'honorable'
 import { IconFrame, Tooltip, TrashCanIcon } from '@pluralsh/design-system'
 import { Link } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -161,24 +161,22 @@ const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToLabe
     header: 'Status',
   })
 
-const ColDelete = refetch => columnHelper.accessor(row => row.name, {
-  id: 'delete',
+const ColActions = refetch => columnHelper.accessor(row => row.name, {
+  id: 'actions',
   cell: ({ row: { original } }) => (
-    <DeleteNode
-      name={original.name}
-      refetch={refetch}
-    />
-  ),
-  header: '',
-})
-
-const ColLink = columnHelper.display({
-  id: 'link',
-  cell: ({ row: { original } }: any) => (
-    <TableCaretLink
-      to={`/nodes/${original.name}`}
-      textValue={`View node ${original?.name}`}
-    />
+    <Flex
+      flexDirection="row"
+      gap="xxsmall"
+    >
+      <DeleteNode
+        name={original.name}
+        refetch={refetch}
+      />
+      <TableCaretLink
+        to={`/nodes/${original.name}`}
+        textValue={`View node ${original?.name}`}
+      />
+    </Flex>
   ),
   header: '',
 })
@@ -237,8 +235,7 @@ export function NodesList({
     ColMemory,
     ColCpu,
     ColStatus,
-    ColDelete(refetch),
-    ColLink,
+    ColActions(refetch),
   ], [refetch])
 
   if (!tableData || tableData.length === 0) {

@@ -1,21 +1,7 @@
-import {
-  useCallback,
-  useContext,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-import { Confirm, Trash } from 'forge-core'
-import { useMutation, useQuery } from 'react-apollo'
-import {
-  Box,
-  Drop,
-  Text,
-  ThemeContext,
-} from 'grommet'
+import { useMemo } from 'react'
+import { useQuery } from 'react-apollo'
 import { useParams } from 'react-router-dom'
-import { normalizeColor } from 'grommet/utils'
-import { Line } from 'rc-progress'
+
 import { ArcElement, Chart } from 'chart.js'
 import { Card } from '@pluralsh/design-system'
 import { Flex } from 'honorable'
@@ -27,22 +13,19 @@ import {
   Pod,
 } from 'generated/graphql'
 import { LoopingLogo } from 'components/utils/AnimatedLogo'
-import { ignoreEvent } from 'components/utils/events'
 import { ScrollablePage } from 'components/layout/ScrollablePage'
 
 import { POLL_INTERVAL } from '../constants'
 import {
+  ColActions,
   ColContainers,
   ColCpu,
-  ColDelete,
-  ColLink,
   ColMemory,
   ColNameLink,
   ColRestarts,
   PodsList,
 } from '../pods/PodsList'
-import { DELETE_NODE, NODE_Q } from '../queries'
-import { roundToTwoPlaces } from '../utils'
+import { NODE_Q } from '../queries'
 import { Metadata } from '../Metadata'
 
 import { NodeGraphs } from './NodeGraphs'
@@ -52,52 +35,6 @@ import { SubTitle } from './SubTitle'
 Must explicitly import and register chart.js elements used in react-chartjs-2
 */
 Chart.register(ArcElement)
-
-export function DeleteNode({ name, refetch }) {
-  const [confirm, setConfirm] = useState(false)
-  const [mutation, { loading }] = useMutation(DELETE_NODE, {
-    variables: { name },
-    onCompleted: () => {
-      setConfirm(false)
-      refetch()
-    },
-  })
-
-  const doConfirm = useCallback(e => {
-    ignoreEvent(e)
-    setConfirm(true)
-  },
-  [setConfirm])
-
-  return (
-    <>
-      <Box
-        onClick={doConfirm}
-        pad={{ horizontal: 'small' }}
-      >
-        <Trash
-          color={loading ? 'dark-5' : 'error'}
-          size="small"
-        />
-      </Box>
-      {confirm && (
-        <Confirm
-          header={`Are you sure you want to delete ${name}`}
-          description="The node will be replaced within its autoscaling group."
-          loading={loading}
-          cancel={e => {
-            ignoreEvent(e)
-            setConfirm(false)
-          }}
-          submit={e => {
-            ignoreEvent(e)
-            mutation()
-          }}
-        />
-      )}
-    </>
-  )
-}
 
 export const podContainers = pods => pods
   .filter(({ status: { phase } }) => phase !== 'Succeeded')
@@ -126,8 +63,7 @@ export default function NodeInfo() {
     ColCpu,
     ColRestarts,
     ColContainers,
-    ColDelete(refetch),
-    ColLink,
+    ColActions(refetch),
   ],
   [refetch])
 
