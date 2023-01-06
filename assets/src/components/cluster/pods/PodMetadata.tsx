@@ -15,7 +15,7 @@ import { getPodContainersStats as getContainersStats } from '../containers/getPo
 type Phase = 'Running' | 'Succeeded' | 'Pending' | 'Failed'
 
 function phaseToReadiness(phase?: string | null) {
-  switch (phase as Phase) {
+  switch (phase as Phase | null | undefined) {
   case 'Running':
   case 'Succeeded':
     return Readiness.Ready

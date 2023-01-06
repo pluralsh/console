@@ -1,12 +1,12 @@
 import { Sidecar, SidecarItem } from '@pluralsh/design-system'
-import { Node, NodeMetric, Pod } from 'generated/graphql'
+import { Pod } from 'generated/graphql'
 import { A } from 'honorable'
 import { useQuery } from 'react-apollo'
 import { Link, useParams } from 'react-router-dom'
-import { nodeStatusToReadiness, podStatusToReadiness } from 'utils/status'
+import { podStatusToReadiness } from 'utils/status'
 
 import { POLL_INTERVAL } from '../constants'
-import { NODE_Q, POD_INFO_Q } from '../queries'
+import { POD_INFO_Q } from '../queries'
 import { StatusChip } from '../TableElements'
 
 export default function NodeSidecar() {

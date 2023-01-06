@@ -31,7 +31,11 @@ const statusToDisplay = {
   [Readiness.Complete]: 'Complete',
 } as const satisfies Record<ReadinessT, string>
 
-export function ComponentStatus({ status }: {status: string}) {
+export function ComponentStatus({ status }: { status?: string | null }) {
+  if (!status) {
+    status = Readiness.InProgress
+  }
+
   return (
     <Chip
       size="small"

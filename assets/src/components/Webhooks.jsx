@@ -37,11 +37,29 @@ import { LoopingLogo } from './utils/AnimatedLogo'
 import { Container } from './utils/Container'
 import { SectionContentContainer, SectionPortal } from './utils/Section'
 import SmoothScroller from './utils/SmoothScroller'
-import { HeaderItem } from './cluster/pods/Pod-old'
 import { Icon } from './users/Group'
 
 // const MAX_LEN = 100
 // const trim = (url) => url.length > 10 ? `${url.slice(0, MAX_LEN)}...` : url
+
+function HeaderItem({
+  width, text, nobold = false, truncate = false,
+}) {
+  return (
+    <Box
+      flex={false}
+      width={width}
+    >
+      <Text
+        size="small"
+        weight={nobold ? undefined : 500}
+        truncate={!!truncate}
+      >
+        {text}
+      </Text>
+    </Box>
+  )
+}
 
 function WebhookHealth({ health }) {
   const background = health === 'HEALTHY' ? 'success' : 'error'

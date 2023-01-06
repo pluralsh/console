@@ -5,7 +5,7 @@ import { LabelPair, Maybe } from 'generated/graphql'
 export function LabelPairsSection({
   vals, title,
 }: {
-  vals: Maybe<Maybe<LabelPair>[]>;
+  vals?: Maybe<Maybe<LabelPair>[]>;
   title: string;
 }) {
   return (
