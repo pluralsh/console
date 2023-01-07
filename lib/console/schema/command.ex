@@ -24,7 +24,7 @@ defmodule Console.Schema.Command do
     do: from(c in query, order_by: ^order)
 
   defimpl Collectable, for: __MODULE__ do
-    alias Console.Services.Base
+    alias Console.Services.{Base, Builds}
 
     def into(command) do
       {command, fn
@@ -39,7 +39,8 @@ defmodule Console.Schema.Command do
 
     defp maybe_persist(%{stdout: stdo} = cmd, line) do
       stdo = safe_concat(stdo, line)
-      with true <- String.contains?(line, "\n"),
+      with _ <- Builds.cache_line(cmd, stdo),
+           true <- String.contains?(line, "\n"),
            {:ok, command} <- Ecto.Changeset.change(cmd, %{stdout: stdo})
                              |> Console.Repo.update() do
         command

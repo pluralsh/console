@@ -24,7 +24,8 @@ defmodule Console.Commands.Command do
   end
 
   defp complete(%Command{} = command, exit_code) do
-    with {:ok, command} <- Builds.complete(command, exit_code) do
+    with {:ok, command} <- Builds.complete(command, exit_code),
+         :ok <- Builds.clear_cache(command) do
       case exit_code do
         0 -> {:ok, command}
         _ -> {:error, command}

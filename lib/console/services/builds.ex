@@ -123,6 +123,15 @@ defmodule Console.Services.Builds do
     |> notify(:complete)
   end
 
+  def cache_line(%Command{id: id}, stdo), do: Console.Cache.put({:command, id}, stdo, ttl: 360_000)
+
+  def get_line(%Command{id: id, stdout: stdo}) do
+    with nil <- Console.Cache.get({:command, id}),
+      do: stdo
+  end
+
+  def clear_cache(%Command{id: id}), do: Console.Cache.delete({:command, id})
+
   def poll(id) do
     start_transaction()
     |> add_operation(:lock, fn _ -> lock("deployer", id) end)
