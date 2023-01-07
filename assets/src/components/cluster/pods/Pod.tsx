@@ -26,8 +26,8 @@ export default function Node() {
   useEffect(() => {
     if (name && namespace) {
       setBreadcrumbs([
-        { text: 'pods', url: '/pods' },
-        { text: namespace },
+        { text: 'nodes', url: '/nodes' }, // Add filter param here later maybe?
+        { text: 'pods', url: '/pods' }, // Add filter param here later maybe?
         { text: name, url: name },
       ])
     }

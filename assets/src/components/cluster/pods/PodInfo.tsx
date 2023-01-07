@@ -59,6 +59,8 @@ export default function NodeInfo() {
             containerStatuses={containerStatuses}
             initContainers={initContainers}
             initContainerStatuses={initContainerStatuses}
+            namespace={namespace}
+            podName={name}
           />
         </section>
         <section>

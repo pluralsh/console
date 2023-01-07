@@ -7,12 +7,7 @@ import { filesize } from 'filesize'
 import type { Maybe, Pod } from 'generated/graphql'
 import { ReadinessT } from 'utils/status'
 
-import {
-  IconFrame,
-  Tooltip,
-  TrashCanIcon,
-  usePrevious,
-} from '@pluralsh/design-system'
+import { IconFrame, Tooltip, TrashCanIcon } from '@pluralsh/design-system'
 
 import { Confirm } from 'components/utils/Confirm'
 import { useMutation } from 'react-apollo'

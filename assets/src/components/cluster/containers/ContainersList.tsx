@@ -1,5 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { useMemo } from 'react'
+import { ComponentProps, useMemo } from 'react'
 import { filesize } from 'filesize'
 
 import type {
@@ -10,15 +10,19 @@ import type {
 } from 'generated/graphql'
 import { ReadinessT, containerStatusToReadiness, readinessToLabel } from 'utils/status'
 
-import { Tooltip } from '@pluralsh/design-system'
+import { IconFrame, TerminalIcon, Tooltip } from '@pluralsh/design-system'
 
 import { cpuParser, memoryParser } from 'utils/kubernetes'
+
+import { Flex } from 'honorable'
+
+import { UnstyledLink } from 'components/utils/Link'
+import styled from 'styled-components'
 
 import {
   GridTable,
   StatusChip,
   TABLE_HEIGHT,
-  TableCaretLink,
   TableText,
   Usage,
 } from '../TableElements'
@@ -49,7 +53,7 @@ const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToLabe
     header: 'Status',
   })
 
-export const ColName = columnHelper.accessor(row => row.name, {
+const ColName = columnHelper.accessor(row => row.name, {
   id: 'name',
   cell: ({ row: { original }, ...props }) => (
     <TableText>
@@ -64,7 +68,7 @@ export const ColName = columnHelper.accessor(row => row.name, {
   header: 'Name',
 })
 
-export const ColPorts = columnHelper.accessor(row => row.ports, {
+const ColPorts = columnHelper.accessor(row => row.ports, {
   id: 'ports',
   cell: props => {
     const content = props
@@ -84,7 +88,7 @@ export const ColPorts = columnHelper.accessor(row => row.ports, {
   header: 'Ports',
 })
 
-export const ColMemory = columnHelper.accessor(row => row.name, {
+const ColMemory = columnHelper.accessor(row => row.name, {
   id: 'memory',
   cell: ({ row: { original } }) => (
     <Usage
@@ -103,7 +107,7 @@ export const ColMemory = columnHelper.accessor(row => row.name, {
   header: 'Memory',
 })
 
-export const ColCpu = columnHelper.accessor(row => row?.cpu?.requests, {
+const ColCpu = columnHelper.accessor(row => row?.cpu?.requests, {
   id: 'cpu',
   cell: props => (
     // <Usage
@@ -115,13 +119,50 @@ export const ColCpu = columnHelper.accessor(row => row?.cpu?.requests, {
   header: 'CPU',
 })
 
-export const ColLink = columnHelper.display({
-  id: 'link',
+function ShellLinkUnstyled({
+  textValue,
+  ...props
+}: ComponentProps<typeof UnstyledLink> & { textValue: string }) {
+  return (
+    <UnstyledLink {...props}>
+      <Tooltip
+        label={textValue}
+        placement="top"
+      >
+        <IconFrame
+          clickable
+          textValue={textValue}
+          size="medium"
+          icon={<TerminalIcon />}
+        />
+      </Tooltip>
+    </UnstyledLink>
+  )
+}
+export const ShellLink = styled(ShellLinkUnstyled)(({ theme }) => ({
+  'a&': {
+    color: theme.colors['icon-default'],
+  },
+}))
+
+export const ColActions = ({
+  podName,
+  namespace,
+}: {
+  podName?: string
+  namespace?: string
+}) => columnHelper.display({
+  id: 'actions',
   cell: ({ row: { original } }: any) => (
-    <TableCaretLink
-      to={`/containers/${original.namespace}/${original.name}`}
-      textValue={`View node ${original?.name}`}
-    />
+    <Flex
+      flexDirection="row"
+      gap="xxsmall"
+    >
+      <ShellLink
+        to={`/pods/${namespace}/${podName}/shell/${original.name}`}
+        textValue={`Launch ${original?.name} shell`}
+      />
+    </Flex>
   ),
   header: '',
 })
@@ -131,7 +172,8 @@ type ContainersListProps = {
   containerStatuses?: Record<string, Maybe<ContainerStatus>>
   initContainers?: Maybe<Container>[]
   initContainerStatuses?: Record<string, Maybe<ContainerStatus>>
-  namespace?: any
+  namespace: string
+  podName: string
   refetch?: any
   columns?: any[]
   truncColIndexes?: number[]
@@ -175,10 +217,10 @@ export function ContainersList({
   containerStatuses,
   initContainers,
   initContainerStatuses,
-  columns = [ColName, ColMemory, ColCpu, ColPorts, ColStatus],
+  columns,
   truncColIndexes = [0],
-  namespace: _namespace,
-  refetch: _refetch,
+  namespace,
+  podName,
 }: ContainersListProps) {
   const tableData: ContainerTableRow[] = useMemo(() => {
     const initContainerData = (initContainers || [])
@@ -193,6 +235,16 @@ export function ContainersList({
 
     return [...initContainerData, ...containerData]
   }, [containerStatuses, containers, initContainerStatuses, initContainers])
+
+  columns = useMemo(() => columns ?? [
+    ColName,
+    ColMemory,
+    ColCpu,
+    ColPorts,
+    ColStatus,
+    ColActions({ podName, namespace }),
+  ],
+  [columns, namespace, podName])
 
   if (!containers || containers.length === 0) {
     return <>No containers available.</>

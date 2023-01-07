@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { Flex } from 'honorable'
 import { TabPanel } from '@pluralsh/design-system'
@@ -9,41 +9,46 @@ import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLa
 import { ResponsiveLayoutSpacer } from 'components/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLayoutContentContainer'
 
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { useBreadcrumbs } from 'components/Breadcrumbs'
 
-import NodeSideNav from './NodeSideNav'
-import NodeSidecar from './NodeSidecar'
+import Sidecar from './ContainerSidecar'
+import SideNav from './PodSideNav'
 
 export default function Node() {
-  const { name } = useParams()
   const tabStateRef = useRef<any>()
   const theme = useTheme()
+  const { name, namespace, container } = useParams()
+  const { setBreadcrumbs } = useBreadcrumbs()
 
-  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
-
+  // TODO: Investigate whether these links could more specific,
+  // based on where they navigated from, perhaps the `namespace` crumb
+  // could navigate to the Pods view already filtered for that namespace
   useEffect(() => {
-    if (name) {
+    if (name && namespace && container) {
       setBreadcrumbs([
-        { text: 'nodes', url: '/nodes' },
-        { text: 'pods', url: '/pods' }, // Add filter param here later
-        { text: name || '', url: `/nodes/${name}` },
+        { text: 'nodes', url: '/nodes' }, // Add filter param here later maybe?
+        { text: 'pods', url: '/pods' }, // Add filter param here later maybe?
+        { text: name, url: `/pods/${namespace}/${name}` },
+        { text: 'containers' }, // Add filter param here later maybe?
+        { text: container, url: `/pods/${namespace}/${name}/shell/${container}` },
       ])
     }
-  }, [name, setBreadcrumbs])
+  }, [container, name, namespace, setBreadcrumbs])
 
   return (
     <Flex
       height="100%"
       width="100%"
       overflowY="hidden"
-      padding={theme.spacing.xlarge}
+      paddingLeft={theme.spacing.xlarge}
+      paddingRight={theme.spacing.xlarge}
       paddingTop={theme.spacing.large}
     >
       <ResponsiveLayoutSidenavContainer
         width={240}
         paddingTop={theme.spacing.xxxlarge}
       >
-        <NodeSideNav tabStateRef={tabStateRef} />
+        <SideNav tabStateRef={tabStateRef} />
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <TabPanel
@@ -54,7 +59,7 @@ export default function Node() {
       </TabPanel>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutSidecarContainer width="200px">
-        <NodeSidecar />
+        <Sidecar />
       </ResponsiveLayoutSidecarContainer>
     </Flex>
   )

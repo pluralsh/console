@@ -3,8 +3,6 @@ import { Route, redirect } from 'react-router-dom'
 import Cluster from 'components/cluster/Cluster'
 import NodeInfo from 'components/cluster/nodes/NodeInfo'
 import Pods from 'components/cluster/pods/Pods'
-import Webhooks from 'components/Webhooks'
-import Users from 'components/Users'
 import Pod from 'components/cluster/pods/Pod'
 import PodInfo from 'components/cluster/pods/PodInfo'
 import PodEvents from 'components/cluster/pods/PodEvents'
@@ -13,8 +11,8 @@ import Node from 'components/cluster/nodes/Node'
 import Nodes from 'components/cluster/nodes/Nodes'
 import NodeEvents from 'components/cluster/nodes/NodeEvents'
 import NodeRaw from 'components/cluster/nodes/NodeRaw'
-import { PodShell } from 'components/terminal/PodShell'
-import EditUser from 'components/EditUser'
+import PodShell from 'components/cluster/pods/PodShell'
+// import { PodShell } from 'components/terminal/PodShell'
 
 export const clusterRoutes = [
   /* Pods */
@@ -87,7 +85,7 @@ export const clusterRoutes = [
     path="shell/pod/:namespace/:name/:container"
     element={<PodShell />}
     loader={async ({ params: { namespace, name, container } }) => {
-      console.log('LOADER')
+      redirect(`/pods/${namespace}/${name}/shell/${container}`)
     }}
   />,
 ]
