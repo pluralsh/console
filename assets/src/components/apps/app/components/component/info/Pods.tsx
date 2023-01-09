@@ -11,10 +11,13 @@ import {
   PodsList,
 } from 'components/cluster/pods/PodsList'
 import { useMemo } from 'react'
+import { useOutletContext } from 'react-router-dom'
 
-export default function Pods({ pods, refetch }) {
+export default function Pods({ pods }) {
+  const { refetch } = useOutletContext<any>()
+
   const columns = useMemo(() => [
-    ColName,
+    ColName, // TODO: Make it link to pod.
     ColNodeName,
     ColMemory,
     ColCpu,

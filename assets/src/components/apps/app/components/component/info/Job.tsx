@@ -55,31 +55,31 @@ export default function Job() {
           title="Active"
           fontWeight={600}
         >
-          {job?.status?.active || 0}
+          {job.status?.active || 0}
         </PropWide>
         <PropWide
           title="Succeeded"
           fontWeight={600}
         >
-          {job?.status?.succeeded || 0}
+          {job.status?.succeeded || 0}
         </PropWide>
         <PropWide
           title="Failed"
           fontWeight={600}
         >
-          {job?.status?.failed || 0}
+          {job.status?.failed || 0}
         </PropWide>
         <PropWide
           title="Completion time"
           fontWeight={600}
         >
-          {job?.status?.completionTime || '-'}
+          {job.status?.completionTime || '-'}
         </PropWide>
         <PropWide
           title="Start time"
           fontWeight={600}
         >
-          {job?.status?.startTime || '-'}
+          {job.status?.startTime || '-'}
         </PropWide>
       </Card>
       <H2
@@ -93,19 +93,19 @@ export default function Job() {
           title="Backoff limit"
           fontWeight={600}
         >
-          {job?.spec?.backoffLimit || 0}
+          {job.spec?.backoffLimit || 0}
         </PropWide>
         <PropWide
           title="Parallelism"
           fontWeight={600}
         >
-          {job?.spec?.parallelism || 0}
+          {job.spec?.parallelism || 0}
         </PropWide>
         <PropWide
           title="Deadline"
           fontWeight={600}
         >
-          {job?.spec?.activeDeadlineSeconds || 0}
+          {job.spec?.activeDeadlineSeconds || 0}
         </PropWide>
       </Card>
     </Flex>

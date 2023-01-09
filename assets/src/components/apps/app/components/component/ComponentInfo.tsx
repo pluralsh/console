@@ -11,12 +11,13 @@ import Pods from './info/Pods'
 import Job from './info/Job'
 import CronJob from './info/CronJob'
 import Certificate from './info/Certificate'
+import Service from './info/Service'
 
 const componentsWithPods = ['deployment', 'job', 'service', 'statefulset']
 
 export default function ComponentInfo() {
   const { appName, componentKind = '', componentName } = useParams()
-  const { component, data, refetch } = useOutletContext<any>()
+  const { component, data } = useOutletContext<any>()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
 
   useEffect(() => setBreadcrumbs([
@@ -36,16 +37,11 @@ export default function ComponentInfo() {
         direction="column"
         gap="large"
       >
-        {componentsWithPods.includes(componentKind) && (
-          <Pods
-            pods={value?.pods}
-            namespace={appName}
-            refetch={refetch}
-          />
-        )}
+        {componentsWithPods.includes(componentKind) && <Pods pods={value?.pods} />}
         {componentKind === 'certificate' && <Certificate />}
         {componentKind === 'cronjob' && <CronJob />}
         {componentKind === 'job' && <Job />}
+        {componentKind === 'service' && <Service />}
         <Metadata
           component={component}
           metadata={value?.metadata}

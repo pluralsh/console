@@ -19,7 +19,8 @@ export default function Metadata({
       <H2
         subtitle1
         marginBottom="medium"
-      >Metadata
+      >
+        Metadata
       </H2>
       <Card padding="large">
         <Flex
