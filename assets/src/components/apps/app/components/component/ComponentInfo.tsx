@@ -13,6 +13,7 @@ import CronJob from './info/CronJob'
 import Certificate from './info/Certificate'
 import Service from './info/Service'
 import Ingress from './info/Ingress'
+import Deployment from './info/Deployment'
 
 const componentsWithPods: string[] = ['deployment', 'job', 'service', 'statefulset']
 
@@ -26,6 +27,8 @@ function getInfo(kind: string): JSX.Element | undefined {
     return <Certificate />
   case 'cronjob':
     return <CronJob />
+  case 'deployment':
+    return <Deployment />
   case 'ingress':
     return <Ingress />
   case 'job':
