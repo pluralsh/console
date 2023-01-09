@@ -12,8 +12,30 @@ import Job from './info/Job'
 import CronJob from './info/CronJob'
 import Certificate from './info/Certificate'
 import Service from './info/Service'
+import Ingress from './info/Ingress'
 
-const componentsWithPods = ['deployment', 'job', 'service', 'statefulset']
+const componentsWithPods: string[] = ['deployment', 'job', 'service', 'statefulset']
+
+function hasPods(kind: string): boolean {
+  return componentsWithPods.includes(kind)
+}
+
+function getInfo(kind: string): JSX.Element | undefined {
+  switch (kind) {
+  case 'certificate':
+    return <Certificate />
+  case 'cronjob':
+    return <CronJob />
+  case 'ingress':
+    return <Ingress />
+  case 'job':
+    return <Job />
+  case 'service':
+    return <Service />
+  default:
+    return undefined
+  }
+}
 
 export default function ComponentInfo() {
   const { appName, componentKind = '', componentName } = useParams()
@@ -37,11 +59,8 @@ export default function ComponentInfo() {
         direction="column"
         gap="large"
       >
-        {componentsWithPods.includes(componentKind) && <Pods pods={value?.pods} />}
-        {componentKind === 'certificate' && <Certificate />}
-        {componentKind === 'cronjob' && <CronJob />}
-        {componentKind === 'job' && <Job />}
-        {componentKind === 'service' && <Service />}
+        {hasPods(componentKind) && <Pods pods={value?.pods} />}
+        {getInfo(componentKind)}
         <Metadata
           component={component}
           metadata={value?.metadata}
