@@ -2,8 +2,8 @@ import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { Event as EventT } from 'generated/graphql'
-import { isEmptyIterable } from 'utils/iterables'
 import { Date } from 'components/utils/Date'
+import isEmpty from 'lodash/isEmpty'
 
 const COLUMN_HELPER = createColumnHelper<EventT>()
 
@@ -36,7 +36,7 @@ const columns = [
 ]
 
 export default function EventsTable({ events }: { events?: Iterable<EventT> }) {
-  if (!events || isEmptyIterable(events)) {
+  if (!events || isEmpty(events)) {
     return <>No events available.</>
   }
 
