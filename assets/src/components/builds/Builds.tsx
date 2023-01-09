@@ -51,7 +51,7 @@ export default function Builds() {
     pollInterval: POLL_INTERVAL,
   })
 
-  useEffect(() => setBreadcrumbs([{ text: 'Builds', url: '/builds' }]), [setBreadcrumbs])
+  useEffect(() => setBreadcrumbs([{ text: 'builds', url: '/builds' }]), [setBreadcrumbs])
 
   useEffect(() => subscribeToMore({
     document: BUILD_SUB,

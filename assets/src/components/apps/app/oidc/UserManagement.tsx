@@ -140,9 +140,9 @@ export default function UserManagement() {
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
 
   useEffect(() => setBreadcrumbs([
-    { text: 'Apps', url: '/' },
+    { text: 'apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
-    { text: 'User management', url: `/apps/${appName}/oidc` },
+    { text: 'user management', url: `/apps/${appName}/oidc` },
   ]), [appName, setBreadcrumbs])
 
   return (

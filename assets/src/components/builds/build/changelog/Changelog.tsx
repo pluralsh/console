@@ -44,9 +44,9 @@ export default function Changelog() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { text: 'Builds', url: '/builds' },
+      { text: 'builds', url: '/builds' },
       { text: buildId, url: `/builds/${buildId}` },
-      { text: 'Changelog', url: `/builds/${buildId}/changelog` },
+      { text: 'changelog', url: `/builds/${buildId}/changelog` },
     ])
   }, [buildId, setBreadcrumbs])
 

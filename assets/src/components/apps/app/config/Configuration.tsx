@@ -34,9 +34,9 @@ export default function Configuration() {
   })
 
   useEffect(() => setBreadcrumbs([
-    { text: 'Apps', url: '/' },
+    { text: 'apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
-    { text: 'Configuration', url: `/apps/${appName}/config` },
+    { text: 'configuration', url: `/apps/${appName}/config` },
   ]), [appName, setBreadcrumbs])
 
   if (error) {

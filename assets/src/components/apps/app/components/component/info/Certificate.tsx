@@ -9,7 +9,7 @@ export default function Certificate() {
   if (!data?.certificate) return null
 
   const { certificate } = data
-  const issuer = certificate?.spec?.issuerRef
+  const issuer = certificate.spec?.issuerRef
 
   return (
     <Flex direction="column">
@@ -19,19 +19,19 @@ export default function Certificate() {
           title="Renewal date"
           fontWeight={600}
         >
-          {certificate?.status?.renewalTime || '-'}
+          {certificate.status?.renewalTime || '-'}
         </PropWide>
         <PropWide
           title="Not before"
           fontWeight={600}
         >
-          {certificate?.status?.notBefore || '-'}
+          {certificate.status?.notBefore || '-'}
         </PropWide>
         <PropWide
           title="Not after"
           fontWeight={600}
         >
-          {certificate?.status?.notAfter || '-'}
+          {certificate.status?.notAfter || '-'}
         </PropWide>
       </Card>
       <H2
@@ -45,13 +45,13 @@ export default function Certificate() {
           title="Secret name"
           fontWeight={600}
         >
-          {certificate?.spec?.secretName || 0}
+          {certificate.spec?.secretName || 0}
         </PropWide>
         <PropWide
           title="DNS names"
           fontWeight={600}
         >
-          {certificate?.spec?.dnsNames?.join(', ')}
+          {certificate.spec?.dnsNames?.join(', ')}
         </PropWide>
         <PropWide
           title="Issuer"

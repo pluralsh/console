@@ -2,6 +2,8 @@ import { Div } from 'honorable'
 import { useMemo } from 'react'
 import { Graph } from 'components/utils/Graph'
 
+import GraphHeader from 'components/utils/GraphHeader'
+
 import { format } from './misc'
 
 export default function DashboardGraph({ graph, tick }) {
@@ -21,14 +23,7 @@ export default function DashboardGraph({ graph, tick }) {
       height={360}
       width="100%"
     >
-      <Div
-        color="text-light"
-        justifyContent="center"
-        overline
-        textAlign="center"
-      >
-        {graph.name}
-      </Div>
+      <GraphHeader title={graph.name} />
       <Graph
         data={data}
         yFormat={v => format(v, graph.format)}

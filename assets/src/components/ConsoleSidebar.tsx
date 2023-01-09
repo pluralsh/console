@@ -71,6 +71,8 @@ export default function ConsoleSidebar() {
             backgroundColor={active(item) ? theme.colors?.grey[875] : null} // TODO: Add active prop to design system.
             _hover={{ backgroundColor: theme.colors?.grey[900], cursor: 'pointer' }}
             borderRadius="normal"
+            height={32}
+            width={32}
           >
             {item.icon}
           </SidebarItem>

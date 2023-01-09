@@ -5,16 +5,19 @@ import {
   ColCpu,
   ColDelete,
   ColMemory,
-  ColName,
+  ColNameLink,
   ColNodeName,
   ColRestarts,
   PodsList,
 } from 'components/cluster/pods/PodsList'
 import { useMemo } from 'react'
+import { useOutletContext } from 'react-router-dom'
 
-export default function Pods({ pods, refetch }) {
+export default function Pods({ pods }) {
+  const { refetch } = useOutletContext<any>()
+
   const columns = useMemo(() => [
-    ColName,
+    ColNameLink,
     ColNodeName,
     ColMemory,
     ColCpu,

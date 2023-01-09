@@ -17,8 +17,8 @@ export default function AuditsGraph() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { text: 'Audits', url: '/audits' },
-      { text: 'Graph', url: '/audits/graph' },
+      { text: 'audits', url: '/audits' },
+      { text: 'graph', url: '/audits/graph' },
     ])
   }, [setBreadcrumbs])
 

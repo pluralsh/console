@@ -99,7 +99,7 @@ export default function CronJob() {
           title="Last scheduled"
           fontWeight={600}
         >
-          {cronJob?.status?.lastScheduleTime || 0}
+          {cronJob.status?.lastScheduleTime || 0}
         </PropWide>
       </Card>
       <H2
@@ -113,20 +113,20 @@ export default function CronJob() {
           title="Schedule"
           fontWeight={600}
         >
-          {cronJob?.spec?.schedule || '-'}
+          {cronJob.spec?.schedule || '-'}
         </PropWide>
         <PropWide
           title="Concurrency"
           fontWeight={600}
         >
-          {cronJob?.spec?.concurrencyPolicy || '-'}
+          {cronJob.spec?.concurrencyPolicy || '-'}
         </PropWide>
 
         <PropWide
           title="Suspended"
           fontWeight={600}
         >
-          {cronJob?.spec?.suspend ? 'Yes' : 'No'}
+          {cronJob.spec?.suspend ? 'Yes' : 'No'}
         </PropWide>
       </Card>
     </Flex>

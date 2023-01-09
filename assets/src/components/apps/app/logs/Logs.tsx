@@ -42,9 +42,9 @@ export default function Logs() {
   const logQuery = `{${labelQuery}}${searchQuery}`
 
   useEffect(() => setBreadcrumbs([
-    { text: 'Apps', url: '/' },
+    { text: 'apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
-    { text: 'Logs', url: `/apps/${appName}/logs` },
+    { text: 'logs', url: `/apps/${appName}/logs` },
   ]), [appName, setBreadcrumbs])
 
   return (

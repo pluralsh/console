@@ -157,8 +157,11 @@ export function ContainersReadyChip({
     <Tooltip
       label={(
         <>
-          {statuses.map(({ name, readiness }) => (
-            <Flex whiteSpace="nowrap">
+          {statuses.map(({ name, readiness }, i) => (
+            <Flex
+              key={i}
+              whiteSpace="nowrap"
+            >
               <Span>{name}:&nbsp;</Span>
               <Span
                 color={readinessToColor[readiness]}

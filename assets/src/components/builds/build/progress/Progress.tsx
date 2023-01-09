@@ -14,9 +14,9 @@ export default function Progress() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { text: 'Builds', url: '/builds' },
+      { text: 'builds', url: '/builds' },
       { text: buildId, url: `/builds/${buildId}` },
-      { text: 'Progress', url: `/builds/${buildId}/progress` },
+      { text: 'progress', url: `/builds/${buildId}/progress` },
     ])
   }, [buildId, setBreadcrumbs])
 

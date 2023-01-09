@@ -11,10 +11,11 @@ export default function ComponentRaw() {
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
 
   useEffect(() => setBreadcrumbs([
-    { text: 'Apps', url: '/' },
+    { text: 'apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
-    { text: 'Components', url: `/apps/${appName}/components` },
+    { text: 'components', url: `/apps/${appName}/components` },
     { text: componentName, url: `/apps/${appName}/components/${componentKind}/${componentName}` },
+    { text: 'raw', url: `/apps/${appName}/components/${componentKind}/${componentName}/raw` },
   ]), [appName, componentKind, componentName, setBreadcrumbs])
 
   // To avoid mapping between component types and fields of data returned by API
