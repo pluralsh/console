@@ -54,6 +54,7 @@ import { ComponentIcon, ComponentStatus } from '../misc'
 
 const directory = [
   { label: 'Info', path: 'info' },
+  { label: 'Metrics', path: 'metrics', onlyFor: ['deployment', 'statefulset'] },
   { label: 'Events', path: 'events' },
   { label: 'Raw', path: 'raw' },
 ]
@@ -92,7 +93,8 @@ export default function Component() {
 
   const component = currentApp.status.components
     .find(({ name, kind }) => name === componentName && kind.toLowerCase() === componentKind)
-  const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
+  const filteredDirectory = directory.filter(({ onlyFor }) => !onlyFor || onlyFor.includes(componentKind))
+  const currentTab = filteredDirectory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
 
   return (
     <Flex
@@ -139,7 +141,7 @@ export default function Component() {
             selectedKey: currentTab?.path,
           }}
         >
-          {directory.map(({ label, path }) => (
+          {filteredDirectory.map(({ label, path }) => (
             <Tab
               key={path}
               as={Link}

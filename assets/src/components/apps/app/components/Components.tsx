@@ -31,6 +31,7 @@ export default function Components() {
         paddingRight="xxxsmall"
         overflowY="auto"
       >
+        {/* TODO: Apply new design changes. */}
         {currentApp.status.components.map(({
           name, group, kind, status,
         }, i) => (

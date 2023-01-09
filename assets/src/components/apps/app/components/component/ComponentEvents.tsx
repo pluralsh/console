@@ -18,6 +18,7 @@ export default function ComponentEvents() {
     { text: appName, url: `/apps/${appName}` },
     { text: 'Components', url: `/apps/${appName}/components` },
     { text: componentName, url: `/apps/${appName}/components/${componentKind}/${componentName}` },
+    { text: 'Events', url: `/apps/${appName}/components/${componentKind}/${componentName}/events` },
   ]), [appName, componentKind, componentName, setBreadcrumbs])
 
   // To avoid mapping between component types and fields of data returned by API

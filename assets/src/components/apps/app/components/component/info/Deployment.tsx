@@ -6,20 +6,7 @@ import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
 // TODO: <LogLink url={logUrl(metadata)} />
-// TODO: <Metric
-// namespace={repo}
-// name={name}
-// regex="-[a-z0-9]+-[a-z0-9]+"
-// duration={duration}
-// />
-// TODO:   const [duration, setDuration] = useState(DURATIONS[0])
-// headerEnd={tab === 'metrics' ? (
-//   <RangePicker
-//   duration={duration}
-//   setDuration={setDuration}
-// />
-// ) : (
-// <ScalingRecommenderModal
+// TODO: <ScalingRecommenderModal
 //   kind={ScalingTypes.DEPLOYMENT}
 //   name={name}
 //   namespace={repo}

@@ -1,15 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Box, Text } from 'grommet'
-import {
-  TabContent,
-  TabHeader,
-  TabHeaderItem,
-  Tabs,
-} from 'forge-core'
+import { Tabs } from 'forge-core'
 
 import { useParams } from 'react-router-dom'
-
-import { useIntercom } from 'react-use-intercom'
 
 import { DURATIONS } from 'utils/time'
 
@@ -19,7 +12,6 @@ import { Pie } from '../../../../utils/ProgressGauge'
 
 import { MetadataRow } from './Metadata'
 import { ScalingTypes } from './constants'
-import { Metric } from './Metrics'
 import { Container, LogLink, logUrl } from './utils'
 
 import { ScalingRecommenderModal } from './ScalingRecommender'
@@ -89,14 +81,6 @@ export default function StatefulSet() {
   const [duration, setDuration] = useState(DURATIONS[0])
   const { name, repo } = useParams()
 
-  const { update } = useIntercom()
-
-  useEffect(() => {
-    update({ hideDefaultLauncher: true })
-
-    return () => update({ hideDefaultLauncher: false })
-  }, [])
-
   return (
     <Box
       fill
@@ -117,32 +101,7 @@ export default function StatefulSet() {
             namespace={repo}
           />
         )}
-      >
-        <TabHeader>
-          <TabHeaderItem name="metrics">
-            <Text
-              size="small"
-              weight={500}
-            >metrics
-            </Text>
-          </TabHeaderItem>
-        </TabHeader>
-        <TabContent name="info">
-          <Status
-            status={statefulSet.status}
-            metadata={statefulSet.metadata}
-          />
-          <Spec spec={statefulSet.spec} />
-        </TabContent>
-        <TabContent name="metrics">
-          <Metric
-            name={name}
-            namespace={repo}
-            regex="-[0-9]+"
-            duration={duration}
-          />
-        </TabContent>
-      </Tabs>
+      />
     </Box>
   )
 }

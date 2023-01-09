@@ -1,5 +1,7 @@
 import { Navigate, Route } from 'react-router-dom'
 
+import ComponentMetrics from 'components/apps/app/components/component/ComponentMetrics'
+
 import Apps from '../components/apps/Apps'
 import App from '../components/apps/app/App'
 import Dashboards from '../components/apps/app/dashboards/Dashboards'
@@ -71,7 +73,8 @@ export const appsRoutes = [
       element={<Configuration />}
     />
   </Route>,
-    /* COMPONENTS */
+
+  /* COMPONENTS */
   <Route
     path="apps/:appName/components/:componentKind/:componentName"
     element={<Component />}
@@ -88,6 +91,10 @@ export const appsRoutes = [
     <Route
       path="info"
       element={<ComponentInfo />}
+    />
+    <Route
+      path="metrics"
+      element={<ComponentMetrics />}
     />
     <Route
       path="events"

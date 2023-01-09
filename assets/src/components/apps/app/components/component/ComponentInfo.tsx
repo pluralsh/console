@@ -50,6 +50,7 @@ export default function ComponentInfo() {
     { text: appName, url: `/apps/${appName}` },
     { text: 'Components', url: `/apps/${appName}/components` },
     { text: componentName, url: `/apps/${appName}/components/${componentKind}/${componentName}` },
+    { text: 'Info', url: `/apps/${appName}/components/${componentKind}/${componentName}/info` },
   ]), [appName, componentKind, componentName, setBreadcrumbs])
 
   // To avoid mapping between component types and fields of data returned by API
