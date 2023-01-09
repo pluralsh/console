@@ -55,7 +55,7 @@ function getInfo(kind: string): JSX.Element | undefined {
 function getLogUrl({ name, namespace, labels }) {
   const appLabel = labels.find(({ name }) => name === 'app' || name === 'app.kubernetes.io/name')
 
-  return `/logs/${namespace}?${asQuery({ job: `${namespace}/${appLabel ? appLabel.value : name}` })}` // TODO: Fix link.
+  return `/apps/${namespace}/logs?${asQuery({ job: `${namespace}/${appLabel ? appLabel.value : name}` })}`
 }
 
 function ViewLogsButton({ metadata }: any) {
