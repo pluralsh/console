@@ -5,7 +5,6 @@ import { Flex, H2 } from 'honorable'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
-// TODO: <LogLink url={logUrl(metadata)} />
 // TODO: <ScalingRecommenderModal
 // kind={ScalingTypes.STATEFULSET}
 // name={name}

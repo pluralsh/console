@@ -13,9 +13,11 @@ const ScrollablePageContent = styled.div(({ theme }) => ({
 
 export function ScrollablePage({
   heading,
+  headingContent,
   children,
 }: {
   heading: ReactNode
+  headingContent?: ReactNode | undefined
   children: ReactNode
 }) {
   return (
@@ -24,7 +26,9 @@ export function ScrollablePage({
         <PageTitle
           heading={heading}
           marginBottom="0"
-        />
+        >
+          {headingContent}
+        </PageTitle>
       )}
       <ScrollablePageContent>{children}</ScrollablePageContent>
     </>

@@ -1,12 +1,10 @@
 import { Card } from '@pluralsh/design-system'
 import PropWide from 'components/utils/PropWide'
+import { PieChart } from 'components/utils/PieChart'
 import { Flex, H2 } from 'honorable'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
-import { PieChart } from '../../../../../utils/PieChart'
-
-// TODO: <LogLink url={logUrl(metadata)} />
 // TODO: <ScalingRecommenderModal
 //   kind={ScalingTypes.DEPLOYMENT}
 //   name={name}
