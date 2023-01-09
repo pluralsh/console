@@ -18,9 +18,9 @@ export default function Components() {
   const currentApp = applications.find(app => app.name === appName)
 
   useEffect(() => setBreadcrumbs([
-    { text: 'Apps', url: '/' },
+    { text: 'apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
-    { text: 'Components', url: `/apps/${appName}/components` },
+    { text: 'components', url: `/apps/${appName}/components` },
   ]), [appName, setBreadcrumbs])
 
   return (

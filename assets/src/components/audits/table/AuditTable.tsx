@@ -86,8 +86,8 @@ export default function AuditsTable() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { text: 'Audits', url: '/audits' },
-      { text: 'Table', url: '/audits/table' },
+      { text: 'audits', url: '/audits' },
+      { text: 'table', url: '/audits/table' },
     ])
   }, [setBreadcrumbs])
 

@@ -96,7 +96,7 @@ export default function Build() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { text: 'Builds', url: '/builds' },
+      { text: 'builds', url: '/builds' },
       { text: buildId, url: `/builds/${buildId}` },
     ])
 

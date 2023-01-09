@@ -27,9 +27,9 @@ export default function Runbooks() {
   })
 
   useEffect(() => setBreadcrumbs([
-    { text: 'Apps', url: '/' },
+    { text: 'apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
-    { text: 'Runbooks', url: `/apps/${appName}/runbooks` },
+    { text: 'runbooks', url: `/apps/${appName}/runbooks` },
   ]), [appName, setBreadcrumbs])
 
   if (!data) {

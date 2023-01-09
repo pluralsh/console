@@ -14,9 +14,9 @@ export default function CostAnalysis() {
   const { cost } = currentApp
 
   useEffect(() => setBreadcrumbs([
-    { text: 'Apps', url: '/' },
+    { text: 'apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
-    { text: 'Cost analysis', url: `/apps/${appName}/cost` },
+    { text: 'cost analysis', url: `/apps/${appName}/cost` },
   ]), [appName, setBreadcrumbs])
 
   return (

@@ -154,11 +154,11 @@ export default function ComponentMetrics() {
   const [duration, setDuration] = useState<any>(DURATIONS[0])
 
   useEffect(() => setBreadcrumbs([
-    { text: 'Apps', url: '/' },
+    { text: 'apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
-    { text: 'Components', url: `/apps/${appName}/components` },
+    { text: 'components', url: `/apps/${appName}/components` },
     { text: componentName, url: `/apps/${appName}/components/${componentKind}/${componentName}` },
-    { text: 'Metrics', url: `/apps/${appName}/components/${componentKind}/${componentName}/metrics` },
+    { text: 'metrics', url: `/apps/${appName}/components/${componentKind}/${componentName}/metrics` },
   ]), [appName, componentKind, componentName, setBreadcrumbs])
 
   return (

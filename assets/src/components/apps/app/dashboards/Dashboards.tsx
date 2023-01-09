@@ -20,9 +20,9 @@ export default function Dashboards() {
   })
 
   useEffect(() => setBreadcrumbs([
-    { text: 'Apps', url: '/' },
+    { text: 'apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
-    { text: 'Dashboards', url: `/apps/${appName}/dashboards` },
+    { text: 'dashboards', url: `/apps/${appName}/dashboards` },
   ]), [appName, setBreadcrumbs])
 
   if (!data) return null

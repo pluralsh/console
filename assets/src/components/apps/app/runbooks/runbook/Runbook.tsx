@@ -88,9 +88,9 @@ export default function Runbook() {
   const [selectedTab, setSelectedTab] = useState('audit-logs')
 
   useEffect(() => setBreadcrumbs([
-    { text: 'Apps', url: '/' },
+    { text: 'apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
-    { text: 'Runbooks', url: `/apps/${appName}/runbooks` },
+    { text: 'runbooks', url: `/apps/${appName}/runbooks` },
     { text: data?.runbook?.spec?.name, url: `/apps/${appName}/runbooks/${data?.runbook?.name}` },
   ]), [appName, data, setBreadcrumbs])
 
