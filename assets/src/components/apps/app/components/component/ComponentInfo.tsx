@@ -14,6 +14,7 @@ import Certificate from './info/Certificate'
 import Service from './info/Service'
 import Ingress from './info/Ingress'
 import Deployment from './info/Deployment'
+import StatefulSet from './info/StatefulSet'
 
 const componentsWithPods: string[] = ['deployment', 'job', 'service', 'statefulset']
 
@@ -35,6 +36,8 @@ function getInfo(kind: string): JSX.Element | undefined {
     return <Job />
   case 'service':
     return <Service />
+  case 'statefulset':
+    return <StatefulSet />
   default:
     return undefined
   }

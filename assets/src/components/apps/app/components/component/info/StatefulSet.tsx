@@ -1,35 +1,38 @@
 import { Card } from '@pluralsh/design-system'
+import { PieChart } from 'components/utils/PieChart'
 import PropWide from 'components/utils/PropWide'
 import { Flex, H2 } from 'honorable'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
-import { PieChart } from '../../../../../utils/PieChart'
-
 // TODO: <LogLink url={logUrl(metadata)} />
 // TODO: <ScalingRecommenderModal
-//   kind={ScalingTypes.DEPLOYMENT}
-//   name={name}
-//   namespace={repo}
+// kind={ScalingTypes.STATEFULSET}
+// name={name}
+// namespace={repo}
 // />
-// )}
 
-function StatusChart({ available, unavailable, pending }: {available: number, unavailable: number, pending: number}) {
+function StatusChart({ ready, notReady }: {ready: number, notReady: number}) {
   const data = useMemo(() => [
-    { id: 'Available', value: available, color: '#99F5D5' },
-    { id: 'Unavailable', value: unavailable, color: '#F599A8' },
-    { id: 'Pending', value: pending, color: '#FFF9C2' },
-  ], [available, unavailable, pending])
+    { id: 'Ready', value: ready, color: '#99F5D5' },
+    { id: 'Not ready', value: notReady, color: '#F599A8' },
+  ], [ready, notReady])
 
   return <PieChart data={data} />
 }
 
-export default function Deployment() {
+export default function StatefulSet() {
   const { data } = useOutletContext<any>()
 
-  if (!data?.deployment) return null
+  if (!data?.statefulSet) return null
 
-  const { deployment: { spec, status: { availableReplicas, replicas, unavailableReplicas } } } = data
+  const {
+    statefulSet: {
+      spec, status: {
+        replicas, currentReplicas, updatedReplicas, readyReplicas,
+      },
+    },
+  } = data
 
   return (
     <Flex direction="column">
@@ -41,9 +44,8 @@ export default function Deployment() {
             height={180}
           >
             <StatusChart
-              available={availableReplicas}
-              unavailable={unavailableReplicas}
-              pending={replicas - availableReplicas - unavailableReplicas}
+              ready={readyReplicas}
+              notReady={replicas - readyReplicas}
             />
           </Flex>
           <Flex
@@ -58,16 +60,22 @@ export default function Deployment() {
               {replicas || 0}
             </PropWide>
             <PropWide
-              title="Available"
+              title="Current replicas"
               fontWeight={600}
             >
-              {availableReplicas || 0}
+              {currentReplicas || 0}
             </PropWide>
             <PropWide
-              title="Unavailable"
+              title="Updated replicas"
               fontWeight={600}
             >
-              {unavailableReplicas || 0}
+              {updatedReplicas || 0}
+            </PropWide>
+            <PropWide
+              title="Ready replicas"
+              fontWeight={600}
+            >
+              {readyReplicas || 0}
             </PropWide>
           </Flex>
         </Flex>
@@ -80,10 +88,10 @@ export default function Deployment() {
       </H2>
       <Card padding="large">
         <PropWide
-          title="Strategy"
+          title="Service name"
           fontWeight={600}
         >
-          {spec?.strategy?.type || '-'}
+          {spec?.serviceName || '-'}
         </PropWide>
       </Card>
     </Flex>
