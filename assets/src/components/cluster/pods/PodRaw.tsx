@@ -5,18 +5,19 @@ import { PageTitle } from '@pluralsh/design-system'
 
 import { LoopingLogo } from 'components/utils/AnimatedLogo'
 
+import { Pod } from 'generated/graphql'
+
 import { POLL_INTERVAL } from '../constants'
-import { NODE_RAW_Q } from '../queries'
+import { POD_RAW_Q } from '../queries'
+
 import { RawPageCode } from '../RawPageCode'
 
 export default function NodeEvents() {
-  const { name } = useParams()
-  const { data, refetch: _refetch } = useQuery<{
-    node: {
-      raw: string
-    }
-  }>(NODE_RAW_Q, {
-    variables: { name },
+  const { name, namespace } = useParams()
+  const { data } = useQuery<{
+    pod: Pod,
+  }>(POD_RAW_Q, {
+    variables: { name, namespace },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
@@ -24,7 +25,7 @@ export default function NodeEvents() {
   if (!data) return <LoopingLogo dark />
 
   const {
-    node: { raw },
+    pod: { raw },
   } = data
 
   const content = stringify(JSON.parse(raw))
@@ -36,3 +37,4 @@ export default function NodeEvents() {
     </>
   )
 }
+

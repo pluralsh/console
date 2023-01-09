@@ -6,30 +6,26 @@ import { LoopingLogo } from 'components/utils/AnimatedLogo'
 
 import { ScrollablePage } from 'components/layout/ScrollablePage'
 
-import { POLL_INTERVAL } from '../constants'
-import { NODE_EVENTS_Q } from '../queries'
+import { POD_EVENTS_Q } from '../queries'
 
 import EventsTable from '../../utils/EventsTable'
 
 export default function NodeEvents() {
-  const { name } = useParams()
-  const { data, refetch: _refetch } = useQuery<{
-    node: {
-      events?: Event[]
-    }
-  }>(NODE_EVENTS_Q, {
-    variables: { name },
+  const { name, namespace } = useParams()
+  const { data } = useQuery<{ pod: { events: Event[] } }>(POD_EVENTS_Q, {
+    variables: { name, namespace },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
   })
 
   if (!data) return <LoopingLogo dark />
 
-  const { node: { events } } = data
+  const {
+    pod: { events },
+  } = data
 
   return (
     <ScrollablePage heading="Events">
-      <EventsTable events={events} />
+      <EventsTable events={events || []} />
     </ScrollablePage>
   )
 }

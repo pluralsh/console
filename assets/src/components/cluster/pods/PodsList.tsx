@@ -1,13 +1,16 @@
-import { A } from 'honorable'
+import { A, Flex } from 'honorable'
 import { Link } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { filesize } from 'filesize'
 
 import type { Maybe, Pod } from 'generated/graphql'
-import { Readiness, ReadinessT, containerStatusToReadiness } from 'utils/status'
+import { ReadinessT } from 'utils/status'
 
-import { Tooltip } from '@pluralsh/design-system'
+import { IconFrame, Tooltip, TrashCanIcon } from '@pluralsh/design-system'
+
+import { Confirm } from 'components/utils/Confirm'
+import { useMutation } from 'react-apollo'
 
 import {
   ContainersReadyChip,
@@ -16,11 +19,50 @@ import {
   TableCaretLink,
   TableText,
   Usage,
-} from '../nodes/TableElements'
+} from '../TableElements'
+import { DELETE_POD } from '../queries'
 
-import { DeletePod, podResources } from './Pod'
+import { getPodContainersStats } from '../containers/getPodContainersStats'
 
-export type ContainerStatus = {name: string, readiness: ReadinessT}
+import { getPodResources } from './getPodResources'
+
+function DeletePod({ name, namespace, refetch }) {
+  const [confirm, setConfirm] = useState(false)
+
+  const [mutation, { loading }] = useMutation(DELETE_POD, {
+    variables: { name, namespace },
+    onCompleted: () => {
+      setConfirm(false)
+      refetch()
+    },
+  })
+
+  return (
+    <>
+      <IconFrame
+        clickable
+        icon={<TrashCanIcon color="icon-danger" />}
+        onClick={() => setConfirm(true)}
+        textValue="Delete"
+        tooltip
+      />
+      <Confirm
+        close={() => setConfirm(false)}
+        destructive
+        label="Delete"
+        loading={loading}
+        open={confirm}
+        submit={() => mutation()}
+        title="Delete pod"
+        text={`The pod "${name}"${
+          namespace ? ` in namespace "${namespace}"` : ''
+        } will be replaced by it's managing controller.`}
+      />
+    </>
+  )
+}
+
+export type ContainerStatus = { name: string; readiness: ReadinessT }
 
 type PodTableRow = {
   name?: string
@@ -44,13 +86,13 @@ type PodTableRow = {
 const columnHelper = createColumnHelper<PodTableRow>()
 
 export const ColNameLink = columnHelper.accessor(row => row.name, {
-  id: 'name',
+  id: 'name-link',
   cell: ({ row: { original }, ...props }) => (
-    <Tooltip
-      label={props.getValue()}
-      placement="top"
-    >
-      <TableText>
+    <TableText>
+      <Tooltip
+        label={props.getValue()}
+        placement="top-start"
+      >
         <A
           inline
           display="inline"
@@ -59,26 +101,35 @@ export const ColNameLink = columnHelper.accessor(row => row.name, {
         >
           {props.getValue()}
         </A>
-      </TableText>
-    </Tooltip>
+      </Tooltip>
+    </TableText>
   ),
   header: 'Name',
 })
 
 export const ColName = columnHelper.accessor(row => row.name, {
   id: 'name',
-  cell: props => <TableText>{props.getValue()}</TableText>,
+  cell: props => (
+    <TableText>
+      <Tooltip
+        label={props.getValue()}
+        placement="top-start"
+      >
+        <span>{props.getValue()}</span>
+      </Tooltip>
+    </TableText>
+  ),
   header: 'Name',
 })
 
 export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
   id: 'nodeName',
   cell: ({ row: { original }, ...props }) => (
-    <Tooltip
-      label={original.nodeName}
-      placement="top"
-    >
-      <TableText>
+    <TableText>
+      <Tooltip
+        label={original.nodeName}
+        placement="top-start"
+      >
         <A
           inline
           as={Link}
@@ -87,8 +138,8 @@ export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
         >
           {props.getValue()}
         </A>
-      </TableText>
-    </Tooltip>
+      </Tooltip>
+    </TableText>
   ),
   header: 'Node name',
 })
@@ -100,12 +151,12 @@ export const ColMemory = columnHelper.accessor(row => row.name, {
       used={
         original?.memory?.used === undefined
           ? undefined
-          : filesize(original.memory.used)
+          : filesize(original.memory.used ?? 0)
       }
       total={
         original.memory.total === undefined
           ? undefined
-          : filesize(original.memory.total)
+          : filesize(original.memory.total ?? 0)
       }
     />
   ),
@@ -141,23 +192,33 @@ export const ColContainers = columnHelper.accessor(row => row.name, {
   header: 'Containers',
 })
 
-export const ColLink = columnHelper.display({
-  id: 'link',
+export const ColActions = refetch => columnHelper.display({
+  id: 'actions',
   cell: ({ row: { original } }: any) => (
-    <TableCaretLink
-      to={`/pods/${original.namespace}/${original.name}`}
-      textValue={`View node ${original?.name}`}
-    />
+    <Flex
+      flexDirection="row"
+      gap="xxsmall"
+    >
+      <DeletePod
+        name={original.name}
+        namespace={original.namespace}
+        refetch={refetch}
+      />
+      <TableCaretLink
+        to={`/pods/${original.namespace}/${original.name}`}
+        textValue={`View node ${original?.name}`}
+      />
+    </Flex>
   ),
   header: '',
 })
 
-export const ColDelete = (namespace, refetch) => columnHelper.accessor(row => row.name, {
+export const ColDelete = refetch => columnHelper.accessor(row => row.name, {
   id: 'delete',
   cell: ({ row: { original } }) => (
     <DeletePod
       name={original.name}
-      namespace={namespace}
+      namespace={original.namespace}
       refetch={refetch}
     />
   ),
@@ -166,10 +227,8 @@ export const ColDelete = (namespace, refetch) => columnHelper.accessor(row => ro
 
 type PodListProps = {
   pods?: Maybe<Pod>[] & Pod[]
-  namespace?: any
-  refetch?: any
   columns?: any[]
-  truncColIndex?: number
+  truncColIndexes?: number[]
 }
 
 function getRestarts(status: Pod['status']) {
@@ -177,64 +236,19 @@ function getRestarts(status: Pod['status']) {
     0)
 }
 
-function getAllStatuses({
-  containerStatuses,
-  initContainerStatuses,
-}: Pod['status']) {
-  return [...(initContainerStatuses || []), ...(containerStatuses || [])]
-}
-
-function getContainersStats(status: Pod['status']): {
-  ready?: number
-  total?: number
-  statuses?: ContainerStatus[]
-} {
-  const allStatuses = getAllStatuses(status)
-
-  const readyCount = allStatuses.reduce((prev, status) => {
-    if (!status) {
-      return prev
-    }
-    const readiness = containerStatusToReadiness(status)
-
-    return {
-      ready: prev.ready + (readiness === Readiness.Ready ? 1 : 0),
-      total: prev.total + 1,
-    }
-  },
-  { ready: 0, total: 0 })
-
-  const statuses = allStatuses.map(status => ({
-    name: status?.name,
-    readiness: containerStatusToReadiness(status),
-  }) as ContainerStatus)
-
-  return { statuses, ...readyCount }
-}
-
-export function PodList({
+export function PodsList({
   pods,
-  columns = [
-    ColNameLink,
-    ColMemory,
-    ColCpu,
-    ColRestarts,
-    ColContainers,
-    ColLink,
-  ],
-  truncColIndex = 0,
-  namespace: _namespace,
-  refetch: _refetch,
+  columns,
+  truncColIndexes = [0],
 }: PodListProps) {
   const tableData: PodTableRow[] = useMemo(() => (pods || [])
     .filter((pod): pod is Pod => !!pod)
     .map(pod => {
       const { containers } = pod.spec
-      const containersStats = getContainersStats(pod.status)
 
-      const { cpu: cpuRequests, memory: memoryRequests } = podResources(containers as any,
+      const { cpu: cpuRequests, memory: memoryRequests } = getPodResources(containers,
         'requests')
-      const { cpu: cpuLimits, memory: memoryLimits } = podResources(containers as any,
+      const { cpu: cpuLimits, memory: memoryLimits } = getPodResources(containers,
         'limits')
 
       return {
@@ -252,7 +266,7 @@ export function PodList({
           sortVal: (cpuRequests ?? 0) / (cpuLimits ?? Infinity),
         },
         restarts: getRestarts(pod.status),
-        containers: containersStats,
+        containers: getPodContainersStats(pod.status),
       }
     }),
   [pods])
@@ -266,7 +280,7 @@ export function PodList({
       data={tableData}
       columns={columns}
       enableColumnResizing
-      $truncColIndex={truncColIndex}
+      $truncColIndexes={truncColIndexes}
       {...TABLE_HEIGHT}
     />
   )

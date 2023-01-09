@@ -1,34 +1,41 @@
 import type { Chip } from '@pluralsh/design-system'
-import { ContainerStatus, NodeStatus } from 'generated/graphql'
+import {
+  ContainerStatus,
+  Maybe,
+  NodeStatus,
+  PodStatus,
+} from 'generated/graphql'
 import { ComponentProps } from 'react'
 
-type Severity = ComponentProps<typeof Chip>['severity']
-
-const readinesses = ['Ready', 'InProgress', 'Failed', 'Complete'] as const
-
-export type ReadinessT = typeof readinesses[number]
-export const Readiness = Object.fromEntries(readinesses.map(r => [r, r])) as Record<ReadinessT, ReadinessT>
-
-export const readinessToChipTitle: Record<ReadinessT, string> = {
+type ReadinessI = 'Ready' | 'InProgress' | 'Failed' | 'Complete'
+export const Readiness = {
   Ready: 'Ready',
-  InProgress: 'Pending',
+  InProgress: 'InProgress',
   Failed: 'Failed',
   Complete: 'Complete',
-}
+} as const satisfies Record<ReadinessI, ReadinessI>
+export type ReadinessT = typeof Readiness[ReadinessI]
 
-export const readinessToSeverity: Record<ReadinessT, Severity> = {
-  Ready: 'success',
-  InProgress: 'neutral',
-  Failed: 'critical',
-  Complete: 'success',
-}
+export const readinessToLabel = {
+  [Readiness.Ready]: 'Ready',
+  [Readiness.InProgress]: 'Pending',
+  [Readiness.Failed]: 'Failed',
+  [Readiness.Complete]: 'Complete',
+} as const satisfies Record<ReadinessT, string>
 
-export const readinessToColor: Record<ReadinessT, Severity> = {
-  Ready: 'text-success-light',
-  InProgress: 'text-warning-light',
-  Failed: 'text-danger-light',
-  Complete: 'text-success-light',
-}
+export const readinessToSeverity = {
+  [Readiness.Ready]: 'success',
+  [Readiness.InProgress]: 'neutral',
+  [Readiness.Failed]: 'critical',
+  [Readiness.Complete]: 'success',
+} as const satisfies Record<ReadinessT, ComponentProps<typeof Chip>['severity']>
+
+export const readinessToColor = {
+  [Readiness.Ready]: 'text-success-light',
+  [Readiness.InProgress]: 'text-warning-light',
+  [Readiness.Failed]: 'text-danger-light',
+  [Readiness.Complete]: 'text-success-light',
+} as const satisfies Record<ReadinessT, string>
 
 export function nodeStatusToReadiness(status: NodeStatus): ReadinessT {
   const ready = status?.conditions?.find(condition => condition?.type === 'Ready')
@@ -38,7 +45,15 @@ export function nodeStatusToReadiness(status: NodeStatus): ReadinessT {
   return Readiness.InProgress
 }
 
-export function containerStatusToReadiness(status: ContainerStatus | null) {
+export function podStatusToReadiness(status: PodStatus): ReadinessT {
+  const ready = status?.conditions?.find(condition => condition?.type === 'Ready')
+
+  if (ready?.status === 'True') return Readiness.Ready
+
+  return Readiness.InProgress
+}
+
+export function containerStatusToReadiness(status?: Maybe<ContainerStatus>) {
   if (!status) return Readiness.InProgress
   const {
     ready,

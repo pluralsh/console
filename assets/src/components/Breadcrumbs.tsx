@@ -34,11 +34,12 @@ export function Breadcrumbs() {
   const theme = useTheme()
 
   const children = Array.from(lookahead(breadcrumbs, (crumb: Breadcrumb, next: Breadcrumb) => {
-    if (next.url) {
+    if (next.text) {
       return (
         <Flex
           direction="row"
           gap="small"
+          key={`${crumb.text}-${crumb.url}`}
         >
           <Span color="text-xlight">
             {typeof crumb.url !== 'string' ? (

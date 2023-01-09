@@ -8,27 +8,34 @@ import {
   ColName,
   ColNodeName,
   ColRestarts,
-  PodList,
-} from '../../../../../cluster/pods/PodList'
+  PodsList,
+} from 'components/cluster/pods/PodsList'
+import { useMemo } from 'react'
 
-export default function Pods({
-  pods, namespace, refetch,
-}) {
+export default function Pods({ pods, refetch }) {
+  const columns = useMemo(() => [
+    ColName,
+    ColNodeName,
+    ColMemory,
+    ColCpu,
+    ColRestarts,
+    ColContainers,
+    ColDelete(refetch),
+  ],
+  [refetch])
+
   return (
     <Flex direction="column">
-      <H2 marginBottom="medium">Pods</H2>
-      <PodList
+      <H2
+        subtitle1
+        marginBottom="medium"
+      >
+        Pods
+      </H2>
+      <PodsList
         pods={pods}
-        columns={[
-          ColName,
-          ColNodeName,
-          ColMemory,
-          ColCpu,
-          ColRestarts,
-          ColContainers,
-          ColDelete(namespace, refetch),
-        ]}
-        truncColIndex={1}
+        columns={columns}
+        truncColIndexes={[0, 1]}
       />
     </Flex>
   )

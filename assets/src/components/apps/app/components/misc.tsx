@@ -1,4 +1,4 @@
-import { Readiness } from 'utils/status'
+import { Readiness, ReadinessT } from 'utils/status'
 import {
   CertificateIcon,
   Chip,
@@ -15,23 +15,27 @@ export const statusToBorder = {
   [Readiness.InProgress]: 'border-warning',
   [Readiness.Failed]: 'border-error',
   [Readiness.Complete]: '',
-}
+} as const satisfies Record<ReadinessT, string>
 
 export const statusToSeverity = {
   [Readiness.Ready]: 'success',
   [Readiness.InProgress]: 'warning',
   [Readiness.Failed]: 'error',
   [Readiness.Complete]: 'success',
-}
+} as const satisfies Record<ReadinessT, string>
 
 const statusToDisplay = {
   [Readiness.Ready]: 'Ready',
   [Readiness.InProgress]: 'In progress',
   [Readiness.Failed]: 'Failed',
   [Readiness.Complete]: 'Complete',
-}
+} as const satisfies Record<ReadinessT, string>
 
-export function ComponentStatus({ status }: {status: string}) {
+export function ComponentStatus({ status }: { status?: string | null }) {
+  if (!status) {
+    status = Readiness.InProgress
+  }
+
   return (
     <Chip
       size="small"

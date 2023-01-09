@@ -26,7 +26,7 @@ function ContainerSidebar({
   containers, container, namespace, name,
 }) {
   const navigate = useNavigate()
-  const onClick = useCallback(c => navigate(`/shell/pod/${namespace}/${name}/${c}`), [namespace, name])
+  const onClick = useCallback(c => navigate(`/shell/pod/${namespace}/${name}/${c}`), [navigate, namespace, name])
 
   return (
     <Box
@@ -114,7 +114,7 @@ export function PodShell() {
       { text: name, url: `/pods/${namespace}/${name}` },
       { text: container, url: `/shell/pod/${namespace}/${name}/${container}` },
     ])
-  }, [namespace, name, container])
+  }, [namespace, name, container, setBreadcrumbs])
   useEnsureCurrent(namespace)
 
   if (!data) return <LoopingLogo dark />

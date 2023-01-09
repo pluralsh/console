@@ -26,7 +26,14 @@ import { MetadataRow } from './Metadata'
 
 const POLL_INTERVAL = 10000
 
-const mem = memory => filesize(parseInt(memory))
+const mem = memory => {
+  try {
+    return filesize(parseInt(memory))
+  }
+  catch {
+    return 0
+  }
+}
 
 function RecommendationNub({ text, value }) {
   return (
@@ -38,7 +45,8 @@ function RecommendationNub({ text, value }) {
       <Text
         size="small"
         weight={500}
-      >{text}
+      >
+        {text}
       </Text>
       <Text size="small">{value}</Text>
     </Box>
@@ -65,24 +73,35 @@ function Recommendation({ rec: { cpu, memory } }) {
 }
 
 function ScalingRecommendations({
-  recommendations, namespace, kind, name, setOpen,
+  recommendations,
+  namespace,
+  kind,
+  name,
+  setOpen,
 }) {
   const [tab, setTab] = useState(recommendations[0].containerName)
   const [exec, setExec] = useState(false)
-  const { data: overlayData } = useQuery(CONFIGURATION_OVERLAYS, { variables: { namespace } })
+  const { data: overlayData } = useQuery(CONFIGURATION_OVERLAYS, {
+    variables: { namespace },
+  })
 
-  const overlays = overlayData?.configurationOverlays?.map(({ metadata, ...rest }) => {
-    const labels = metadata.labels.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {})
+  const overlays = overlayData?.configurationOverlays
+    ?.map(({ metadata, ...rest }) => {
+      const labels = metadata.labels.reduce((acc, { name, value }) => ({ ...acc, [name]: value }),
+        {})
 
-    return { ...rest, metadata: { ...metadata, labels } }
-  }).filter(({ metadata: { labels } }) => (
-    labels[COMPONENT_LABEL] === name && labels[KIND_LABEL] === kind.toLowerCase()
-  ))
+      return { ...rest, metadata: { ...metadata, labels } }
+    })
+    .filter(({ metadata: { labels } }) => labels[COMPONENT_LABEL] === name
+        && labels[KIND_LABEL] === kind.toLowerCase())
 
   if (exec) {
     return (
       <ScalingEdit
-        rec={recommendations.find(({ containerName }) => containerName === tab).uncappedTarget}
+        rec={
+          recommendations.find(({ containerName }) => containerName === tab)
+            .uncappedTarget
+        }
         namespace={namespace}
         overlays={overlays}
         setOpen={setOpen}
@@ -108,7 +127,8 @@ function ScalingRecommendations({
               <Text
                 size="small"
                 weight={500}
-              >{containerName}
+              >
+                {containerName}
               </Text>
             </TabHeaderItem>
           ))}
@@ -148,11 +168,16 @@ function ScalingRecommendations({
 }
 
 export function ScalingEdit({
-  namespace, rec: { cpu, memory }, overlays, setOpen,
+  namespace,
+  rec: { cpu, memory },
+  overlays,
+  setOpen,
 }) {
-  const byResource = overlays.reduce((acc, overlay) => (
-    { ...acc, [overlay.metadata.labels[RESOURCE_LABEL]]: overlay }
-  ), {})
+  const byResource = overlays.reduce((acc, overlay) => ({
+    ...acc,
+    [overlay.metadata.labels[RESOURCE_LABEL]]: overlay,
+  }),
+  {})
 
   const [ctx, setCtx] = useState({
     [byResource.cpu.spec.name]: cpu,
@@ -203,7 +228,9 @@ export function ScalingRecommender({
     pollInterval: POLL_INTERVAL,
   })
 
-  const recommendations = data?.scalingRecommendation?.status?.recommendation?.containerRecommendations
+  const recommendations
+    = data?.scalingRecommendation?.status?.recommendation
+      ?.containerRecommendations
 
   return (
     <Box
@@ -219,8 +246,9 @@ export function ScalingRecommender({
           namespace={namespace}
           setOpen={setOpen}
         />
-      )
-        : <LoopingLogo />}
+      ) : (
+        <LoopingLogo />
+      )}
     </Box>
   )
 }

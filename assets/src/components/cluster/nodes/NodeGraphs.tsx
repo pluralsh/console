@@ -1,15 +1,12 @@
 import React, { useCallback, useMemo } from 'react'
-import { memoryParser } from 'kubernetes-resource-parser'
 import { filesize } from 'filesize'
-
-import { NodeStatus, NodeUsage, Pod } from 'generated/graphql'
-
 import { Div, Flex } from 'honorable'
 
-import { cpuParser } from 'utils/kubernetes'
+import { NodeStatus, NodeUsage, Pod } from 'generated/graphql'
+import { cpuParser, memoryParser } from 'utils/kubernetes'
 
 import { NodeMetrics } from '../constants'
-import { podResources } from '../pods/Pod'
+import { getPodResources } from '../pods/getPodResources'
 
 import { cpuFmt, podContainers } from '../utils'
 
@@ -29,16 +26,14 @@ export function NodeGraphs({
 }) {
   const { requests, limits } = useMemo(() => {
     const containers = podContainers(pods)
-    const requests = podResources(containers, 'requests')
-    const limits = podResources(containers, 'limits')
+    const requests = getPodResources(containers, 'requests')
+    const limits = getPodResources(containers, 'limits')
 
     return { requests, limits }
   }, [pods])
   const localize = useCallback(metric => metric.replaceAll('{instance}', name),
     [name])
   const capacity = ((status?.capacity as unknown as {cpu?: string, memory?:string}) ?? {})
-
-  console.log('CAPACITY', capacity)
 
   return (
     <Flex
@@ -52,16 +47,16 @@ export function NodeGraphs({
         gap="xlarge"
       >
         <LayeredGauge
-          usage={cpuParser(usage?.cpu)}
+          usage={cpuParser(usage?.cpu) ?? 0}
           requests={requests.cpu}
           limits={limits.cpu}
-          total={cpuParser(capacity?.cpu)}
+          total={cpuParser(capacity?.cpu) ?? 0}
           name="CPU"
           title="CPU Reservation"
           format={cpuFmt}
         />
         <LayeredGauge
-          usage={memoryParser(usage?.memory)}
+          usage={memoryParser(usage?.memory) ?? 0}
           requests={requests.memory}
           limits={limits.memory}
           total={memoryParser(capacity.memory)}

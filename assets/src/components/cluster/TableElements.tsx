@@ -12,12 +12,12 @@ import { CSSProperties, ComponentProps, ReactNode } from 'react'
 import styled from 'styled-components'
 import {
   ReadinessT,
-  readinessToChipTitle,
   readinessToColor,
+  readinessToLabel,
   readinessToSeverity,
 } from 'utils/status'
 
-import { ContainerStatus } from '../pods/PodList'
+import { ContainerStatus } from './pods/PodsList'
 
 const GridTableBase = styled(Table)(({ theme }) => ({
   table: {
@@ -38,32 +38,35 @@ const GridTableBase = styled(Table)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
+    height: 'auto',
   },
 }))
 
-export const GridTable = styled(GridTableBase)<{ $truncColIndex: string }>(({ columns, $truncColIndex = 0 }) => {
+export const GridTable = styled(GridTableBase)<{ $truncColIndexes: number[] }>(({ columns, $truncColIndexes = [] }) => {
   const gridTemplateColumns = columns
     .reduce((val, _, i) => [
       ...val,
-      i === $truncColIndex ? 'minmax(100px, 1fr)' : 'auto',
+      ($truncColIndexes as number[]).findIndex(truncIdx => truncIdx === i) >= 0
+        ? 'minmax(100px, 1fr)'
+        : 'auto',
     ],
     [])
     .join(' ')
+
+  const truncStyles = $truncColIndexes.reduce((prev, truncIdx) => ({
+    ...prev,
+    [`td:nth-child(${truncIdx + 1})`]: {
+      '*': TRUNCATE,
+    },
+  }),
+      {} as CSSProperties)
 
   const ret = {
     table: {
       gridTemplateColumns,
     },
-    ...(typeof $truncColIndex === 'number' && $truncColIndex >= 0
-      ? {
-        [`td:nth-child(${$truncColIndex + 1})`]: {
-          '*': TRUNCATE,
-        },
-      }
-      : {}),
+    ...truncStyles,
   }
-
-  console.log({ ret })
 
   return ret
 })
@@ -88,7 +91,7 @@ export const CaptionText = styled.div(({ theme }) => ({
 
 export const StatusChip = styled(({ readiness }: { readiness: ReadinessT }) => (
   <Chip severity={readinessToSeverity[readiness]}>
-    {readinessToChipTitle[readiness]}
+    {readinessToLabel[readiness]}
   </Chip>
 ))(_ => ({}))
 
@@ -151,21 +154,22 @@ export function ContainersReadyChip({
     = ready === 0 ? 'error' : total === ready ? 'success' : 'warning'
 
   return (
-    <Tooltip label={(
-      <>
-        {statuses.map(({ name, readiness }) => (
-          <Flex whiteSpace="nowrap">
-            <Span>{name}:&nbsp;</Span>
-            <Span
-              color={readinessToColor[readiness]}
-              fontWeight={600}
-            >
-              {readiness}
-            </Span>
-          </Flex>
-        ))}
-      </>
-    )}
+    <Tooltip
+      label={(
+        <>
+          {statuses.map(({ name, readiness }) => (
+            <Flex whiteSpace="nowrap">
+              <Span>{name}:&nbsp;</Span>
+              <Span
+                color={readinessToColor[readiness]}
+                fontWeight={600}
+              >
+                {readinessToLabel[readiness]}
+              </Span>
+            </Flex>
+          ))}
+        </>
+      )}
     >
       <Chip
         cursor="help"

@@ -23,15 +23,15 @@ import {
   useState,
 } from 'react'
 
-import { Readiness } from 'utils/status'
+import { Readiness, readinessToLabel } from 'utils/status'
 
 import App from './AppCard'
 
 const FILTERS = [
   { key: '', label: 'All' },
-  { key: Readiness.Ready, label: 'Ready' },
-  { key: Readiness.InProgress, label: 'Pending' },
-  { key: Readiness.Failed, label: 'Failed' },
+  { key: Readiness.Ready, label: readinessToLabel[Readiness.Ready] },
+  { key: Readiness.InProgress, label: readinessToLabel[Readiness.InProgress] },
+  { key: Readiness.Failed, label: readinessToLabel[Readiness.Failed] },
 ]
 
 function QueryEmptyState({ query, setQuery }) {

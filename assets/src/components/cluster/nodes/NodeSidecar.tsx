@@ -7,7 +7,7 @@ import { nodeStatusToReadiness } from 'utils/status'
 import { POLL_INTERVAL } from '../constants'
 import { NODE_Q } from '../queries'
 
-import { StatusChip } from './TableElements'
+import { StatusChip } from '../TableElements'
 
 export default function NodeSidecar() {
   const { name } = useParams()
