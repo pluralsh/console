@@ -5,7 +5,7 @@ import {
   ColCpu,
   ColDelete,
   ColMemory,
-  ColName,
+  ColNameLink,
   ColNodeName,
   ColRestarts,
   PodsList,
@@ -17,7 +17,7 @@ export default function Pods({ pods }) {
   const { refetch } = useOutletContext<any>()
 
   const columns = useMemo(() => [
-    ColName, // TODO: Make it link to pod.
+    ColNameLink,
     ColNodeName,
     ColMemory,
     ColCpu,
