@@ -19,7 +19,7 @@ import { BreadcrumbsContext } from 'components/Breadcrumbs'
 const directory = [
   { path: 'me', label: 'Profile' },
   { path: 'security', label: 'Security' },
-  { path: 'roles', label: 'Roles' },
+  { path: 'permissions', label: 'Permissions' },
 ]
 
 export default function MyProfile() {

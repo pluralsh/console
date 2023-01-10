@@ -19,6 +19,8 @@ import { Profile } from 'components/profile/Profile'
 
 import { Security } from 'components/profile/Security'
 
+import { Permissions } from 'components/profile/Permissions'
+
 import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
 
@@ -98,10 +100,10 @@ const profileRoutes = [
       path="security"
       element={<Security />}
     />
-    {/* <Route
-      path="roles"
-      element={<Roles />}
-    /> */}
+    <Route
+      path="permissions"
+      element={<Permissions />}
+    />
   </Route>,
 ]
 
