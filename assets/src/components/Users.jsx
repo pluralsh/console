@@ -17,8 +17,28 @@ import {
 import { extendConnection } from '../utils/graphql'
 
 import { INVITE_USER, USERS_Q } from './graphql/users'
-import { Avatar } from './EditUser'
 import { BreadcrumbsContext } from './Breadcrumbs'
+
+export function Avatar({
+  me, size, round, textSize, ...rest
+}) {
+  return (
+    <Box
+      align="center"
+      justify="center"
+      width={size}
+      height={size}
+      background={me.backgroundColor}
+      pad="small"
+      round={round || 'xsmall'}
+      {...rest}
+    >
+      <Text size={textSize || 'small'}>
+        {me.name.substring(0, 1)}
+      </Text>
+    </Box>
+  )
+}
 
 function User({ user }) {
   return (
