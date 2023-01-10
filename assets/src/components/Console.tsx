@@ -9,7 +9,6 @@ import ConsoleSidebar, { SIDEBAR_ICON_HEIGHT } from './ConsoleSidebar'
 import BreadcrumbProvider from './Breadcrumbs'
 import { EnsureLogin } from './Login'
 import { InstallationsProvider } from './Installations'
-import { NavigationContext } from './navigation/Submenu'
 import { Tooltip } from './utils/Tooltip'
 import ConsoleHeader from './ConsoleHeader'
 import ConsoleSubheader from './ConsoleSubheader'
@@ -169,36 +168,34 @@ export default function Console() {
     <EnsureLogin>
       <FlyoutProvider>
         <InstallationsProvider>
-          <NavigationContext>
-            <BreadcrumbProvider>
+          <BreadcrumbProvider>
+            <Box
+              width="100vw"
+              height="100vh"
+            >
+              <ConsoleHeader />
               <Box
-                width="100vw"
-                height="100vh"
+                fill
+                direction="row"
               >
-                <ConsoleHeader />
+                <ConsoleSidebar />
                 <Box
                   fill
-                  direction="row"
+                  direction="column"
                 >
-                  <ConsoleSidebar />
+                  <ConsoleSubheader />
                   <Box
                     fill
-                    direction="column"
+                    direction="row"
+                    overflow="auto"
                   >
-                    <ConsoleSubheader />
-                    <Box
-                      fill
-                      direction="row"
-                      overflow="auto"
-                    >
-                      <Outlet />
-                      <FlyoutGutter />
-                    </Box>
+                    <Outlet />
+                    <FlyoutGutter />
                   </Box>
                 </Box>
               </Box>
-            </BreadcrumbProvider>
-          </NavigationContext>
+            </Box>
+          </BreadcrumbProvider>
         </InstallationsProvider>
       </FlyoutProvider>
     </EnsureLogin>
