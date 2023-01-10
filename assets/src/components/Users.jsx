@@ -17,7 +17,7 @@ import {
 import { extendConnection } from '../utils/graphql'
 
 import { INVITE_USER, USERS_Q } from './graphql/users'
-import { Avatar } from './EditUser'
+import { Avatar } from './profile/EditUser'
 import { BreadcrumbsContext } from './Breadcrumbs'
 
 function User({ user }) {

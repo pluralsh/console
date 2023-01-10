@@ -1,6 +1,5 @@
 import { Navigate, Route } from 'react-router-dom'
 
-import EditUser from 'components/EditUser'
 import Users from 'components/Users'
 import Webhooks from 'components/Webhooks'
 import Builds from 'components/builds/Builds'
@@ -13,6 +12,10 @@ import Changelog from 'components/builds/build/changelog/Changelog'
 import Progress from 'components/builds/build/progress/Progress'
 import AuditsTable from 'components/audits/table/AuditTable'
 import AuditsGraph from 'components/audits/graph/AuditsGraph'
+
+import MyProfile from 'components/profile/MyProfile'
+
+import { Profile } from 'components/profile/Profile'
 
 import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
@@ -68,6 +71,35 @@ const auditsRoutes = [
       path="graph"
       element={<AuditsGraph />}
     />
+  </Route>,
+]
+
+const profileRoutes = [
+  <Route
+    path="profile"
+    element={<MyProfile />}
+  >
+    <Route
+      index
+      element={(
+        <Navigate
+          replace
+          to="me"
+        />
+      )}
+    />
+    <Route
+      path="me"
+      element={<Profile />}
+    />
+    {/* <Route
+      path="security"
+      element={<Security />}
+    />
+    <Route
+      path="roles"
+      element={<Roles />}
+    /> */}
   </Route>,
 ]
 
@@ -128,14 +160,13 @@ export const consoleRoutes = [
   /* AUDITS */
   ...auditsRoutes,
 
+  /* PROFILE */
+  ...profileRoutes,
+
   /* ETC */
   <Route
     path="webhooks"
     element={<Webhooks />}
-  />,
-  <Route
-    path="me/edit"
-    element={<EditUser />}
   />,
   <Route
     path="users"

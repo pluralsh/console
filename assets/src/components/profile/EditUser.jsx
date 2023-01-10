@@ -9,9 +9,9 @@ import {
 
 import { useMutation } from 'react-apollo'
 
-import { LoginContext } from './contexts'
-import { BreadcrumbsContext } from './Breadcrumbs'
-import { UPDATE_USER } from './graphql/users'
+import { LoginContext } from '../contexts'
+import { BreadcrumbsContext } from '../Breadcrumbs'
+import { UPDATE_USER } from '../graphql/users'
 
 export function Avatar({
   me, size, round, textSize, ...rest
@@ -37,11 +37,10 @@ export function Avatar({
 export default function EditUser() {
   const { me } = useContext(LoginContext)
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
-  const [attributes, setAttributes] = useState({ name: me.name, email: me.email })
   const [password, setPassword] = useState('')
 
   useEffect(() => setBreadcrumbs([{ text: 'me', url: '/me/edit' }]), [])
-  const mergedAttributes = password && password.length > 0 ? { ...attributes, password } : attributes
+  const mergedAttributes = { password }
   const [mutation, { loading }] = useMutation(UPDATE_USER, { variables: { attributes: mergedAttributes } })
 
   return (
@@ -78,32 +77,6 @@ export default function EditUser() {
               >Edit {me.name}
               </Text>
             </Box>
-            <Expander text="attributes">
-              <Box pad="small">
-                <InputCollection>
-                  <ResponsiveInput
-                    value={attributes.name}
-                    label="name"
-                    onChange={({ target: { value } }) => setAttributes({ ...attributes, name: value })}
-                  />
-                  <ResponsiveInput
-                    value={attributes.email}
-                    label="email"
-                    onChange={({ target: { value } }) => setAttributes({ ...attributes, email: value })}
-                  />
-                </InputCollection>
-                <Box
-                  direction="row"
-                  justify="end"
-                >
-                  <Button
-                    loading={loading}
-                    onClick={mutation}
-                    label="Update"
-                  />
-                </Box>
-              </Box>
-            </Expander>
             <Expander text="password">
               <Box pad="small">
                 <InputCollection>
