@@ -11,7 +11,7 @@ import Node from 'components/cluster/nodes/Node'
 import Nodes from 'components/cluster/nodes/Nodes'
 import NodeEvents from 'components/cluster/nodes/NodeEvents'
 import NodeRaw from 'components/cluster/nodes/NodeRaw'
-import PodShell from 'components/cluster/pods/PodShell'
+import PodShell from 'components/cluster/containers/Container'
 // import { PodShell } from 'components/terminal/PodShell'
 
 export const clusterRoutes = [
@@ -83,9 +83,6 @@ export const clusterRoutes = [
   /* Redirect old routes */
   <Route
     path="shell/pod/:namespace/:name/:container"
-    element={<PodShell />}
-    loader={async ({ params: { namespace, name, container } }) => {
-      redirect(`/pods/${namespace}/${name}/shell/${container}`)
-    }}
+    loader={async ({ params: { namespace, name, container } }) => redirect(`/pods/${namespace}/${name}/shell/${container}`)}
   />,
 ]

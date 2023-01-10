@@ -23,7 +23,7 @@ export default function NodeEvents() {
     pollInterval: POLL_INTERVAL,
   })
 
-  if (!data) return <LoopingLogo dark />
+  if (!data) return <LoopingLogo />
 
   const { node: { events } } = data
 

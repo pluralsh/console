@@ -17,7 +17,7 @@ import { EXECUTE_OVERLAY } from 'components/apps/app/config/queries'
 
 import ConfigurationSettingsField from 'components/apps/app/config/ConfigurationSettingsField'
 
-import { LoopingLogo } from 'components/utils/AnimatedLogo'
+import { LoopingLogo } from '@pluralsh/design-system'
 
 import { COMPONENT_LABEL, KIND_LABEL, RESOURCE_LABEL } from './constants'
 

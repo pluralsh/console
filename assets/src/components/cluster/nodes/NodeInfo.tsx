@@ -3,7 +3,7 @@ import { useQuery } from 'react-apollo'
 import { useParams } from 'react-router-dom'
 
 import { ArcElement, Chart } from 'chart.js'
-import { Card } from '@pluralsh/design-system'
+import { Card, LoopingLogo } from '@pluralsh/design-system'
 import { Flex } from 'honorable'
 
 import {
@@ -12,7 +12,6 @@ import {
   Node as NodeT,
   Pod,
 } from 'generated/graphql'
-import { LoopingLogo } from 'components/utils/AnimatedLogo'
 import { ScrollablePage } from 'components/layout/ScrollablePage'
 
 import { POLL_INTERVAL } from '../constants'
@@ -67,7 +66,7 @@ export default function NodeInfo() {
   ],
   [refetch])
 
-  if (!data) return <LoopingLogo dark />
+  if (!data) return <LoopingLogo />
 
   const { node, nodeMetric } = data
 
