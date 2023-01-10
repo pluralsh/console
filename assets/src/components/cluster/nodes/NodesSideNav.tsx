@@ -35,23 +35,6 @@ function NodesTabList({ tabStateRef }: any) {
 
 export default function AccountSideNav({ tabStateRef = {} }: any) {
   return (
-    <>
-      {/* <PageCard
-        marginBottom="large"
-        heading={(
-          <Div
-            display="-webkit-box"
-            webkitLineClamp={2}
-            webkitBoxOrient="vertical"
-            overflowY="hidden"
-            lineBreak="all"
-          >{me?.account?.name || ''}
-          </Div>
-        )}
-        subheading={me?.publisher ? 'Publisher' : undefined}
-        icon={{ name: me?.account?.name || '?' }}
-      /> */}
-      <NodesTabList tabStateRef={tabStateRef} />
-    </>
+    <NodesTabList tabStateRef={tabStateRef} />
   )
 }

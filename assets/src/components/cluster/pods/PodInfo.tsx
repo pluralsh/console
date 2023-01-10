@@ -23,7 +23,7 @@ Must explicitly import and register chart.js elements used in react-chartjs-2
 */
 Chart.register(ArcElement)
 
-const statusesToRecord = (statuses?: Maybe<Maybe<ContainerStatus>[]>) => (statuses || []).reduce((acc, container) => ({
+export const statusesToRecord = (statuses?: Maybe<Maybe<ContainerStatus>[]>) => (statuses || []).reduce((acc, container) => ({
   ...acc,
   ...(typeof container?.name === 'string'
     ? { [container.name]: container }
@@ -38,6 +38,9 @@ export default function NodeInfo() {
     pollInterval: POLL_INTERVAL,
   })
 
+  if (!name || !namespace) {
+    return null
+  }
   if (!data) return <LoopingLogo dark />
 
   const { pod } = data
