@@ -359,4 +359,25 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       assert overlay["spec"]["name"] == "config"
     end
   end
+
+  describe "namespaces" do
+    test "it will fetch all namespaces" do
+      user = insert(:user)
+      expect(Console, :namespaces, fn -> [namespace_scaffold("test")] end)
+
+      {:ok, %{data: %{"namespaces" => [namespace]}}} = run_query("""
+        query {
+          namespaces {
+            metadata { name }
+            status { phase }
+            spec { finalizers }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert namespace["metadata"]["name"] == "test"
+      assert namespace["status"]["phase"] == "Created"
+      assert namespace["spec"]["finalizers"] == ["finalizer"]
+    end
+  end
 end

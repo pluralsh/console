@@ -233,4 +233,12 @@ defmodule KubernetesScaffolds do
       }
     }
   end
+
+  def namespace_scaffold(name) do
+    %Core.Namespace{
+      metadata: %{name: name},
+      spec: %Core.NamespaceSpec{finalizers: ["finalizer"]},
+      status: %Core.NamespaceStatus{phase: "Created"}
+    }
+  end
 end
