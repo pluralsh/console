@@ -1,9 +1,7 @@
 import { useQuery } from 'react-apollo'
 import { useParams } from 'react-router-dom'
 import { stringify } from 'yaml'
-import { PageTitle } from '@pluralsh/design-system'
-
-import { LoopingLogo } from 'components/utils/AnimatedLogo'
+import { LoopingLogo, PageTitle } from '@pluralsh/design-system'
 
 import { POLL_INTERVAL } from '../constants'
 import { NODE_RAW_Q } from '../queries'
@@ -21,7 +19,7 @@ export default function NodeEvents() {
     fetchPolicy: 'cache-and-network',
   })
 
-  if (!data) return <LoopingLogo dark />
+  if (!data) return <LoopingLogo />
 
   const {
     node: { raw },

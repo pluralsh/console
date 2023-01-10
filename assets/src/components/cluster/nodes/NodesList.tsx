@@ -71,7 +71,6 @@ function DeleteNode({ name, refetch }) {
       />
       <Confirm
         close={() => {
-          console.log('close')
           setConfirm(false)
         }}
         destructive
@@ -236,7 +235,8 @@ export function NodesList({
     ColCpu,
     ColStatus,
     ColActions(refetch),
-  ], [refetch])
+  ],
+  [refetch])
 
   if (!tableData || tableData.length === 0) {
     return <>No nodes available.</>

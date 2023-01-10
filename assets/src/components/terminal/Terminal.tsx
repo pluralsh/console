@@ -1,15 +1,4 @@
 import {
-  Button,
-  CheckIcon,
-  Code,
-  IconFrame,
-  Input,
-  PageTitle,
-  PencilIcon,
-  ReloadIcon,
-} from '@pluralsh/design-system'
-
-import {
   MutableRefObject,
   createContext,
   useCallback,
@@ -29,13 +18,10 @@ import { socket } from 'helpers/client'
 
 import { normalizedThemes } from 'components/terminal/themes'
 import TerminalThemeContext from 'components/terminal/TerminalThemeContext'
-import TerminalThemeSelector from 'components/terminal/TerminalThemeSelector'
-import { Flex, Form } from 'honorable'
 import debounce from 'lodash/debounce'
-import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
-const ShellStyleWrapper = styled.div<{ $backgroundColor: string }>(({ theme, $backgroundColor }) => ({
+const TerminalWrapper = styled.div<{ $backgroundColor: string }>(({ theme, $backgroundColor }) => ({
   backgroundColor: $backgroundColor,
   display: 'flex',
   flexGrow: 1,
@@ -61,7 +47,7 @@ const ShellStyleWrapper = styled.div<{ $backgroundColor: string }>(({ theme, $ba
   },
 }))
 
-function Terminal({
+export function Terminal({
   room,
   header,
   command,
@@ -172,7 +158,7 @@ function Terminal({
     [channel])
 
   return (
-    <ShellStyleWrapper
+    <TerminalWrapper
       ref={ref}
       $backgroundColor={normalizedThemes[terminalTheme].background}
     >
@@ -186,134 +172,11 @@ function Terminal({
         }}
         onData={handleData}
       />
-    </ShellStyleWrapper>
+    </TerminalWrapper>
   )
 }
 
-function ShellTitle({ command, setCommand }) {
-  const [edit, setEdit] = useState(false)
-  const [val, setVal] = useState(command || DEFAULT_COMMAND)
-  const { namespace, name, container } = useParams()
-
-  return (
-    <Flex
-      gap="xsmall"
-      marginBottom="xsmall"
-      alignItems="stretch"
-    >
-      <Code
-        minWidth={200}
-        flexShrink={1}
-        flexGrow={1}
-      >
-        {`kubectl exec ${name} -it -n ${namespace} -c ${container}`}
-      </Code>
-      {!edit && (
-        <Code
-          flexGrow={1}
-          flexShrink={1}
-          minWidth="200px"
-        >
-          {command || DEFAULT_COMMAND}
-        </Code>
-      )}
-      {edit && (
-        <Form
-          display="flex"
-          onSubmit={() => {
-            setEdit(false)
-            setCommand(val)
-          }}
-        >
-          <Input
-            plain
-            value={val}
-            flexGrow={1}
-            flexShrink={1}
-            minWidth="200px"
-            alignItems="center"
-            onChange={({ target: { value } }) => setVal(value)}
-          />
-        </Form>
-      )}
-      <Flex alignItems="center">
-        <IconFrame
-          clickable
-          size="medium"
-          icon={edit ? <CheckIcon /> : <PencilIcon />}
-          textValue={edit ? 'Set command' : 'Change command'}
-          tooltip
-          onClick={() => {
-            if (!edit) {
-              setEdit(true)
-            }
-            else {
-              setEdit(false)
-              setCommand(val)
-            }
-          }}
-        />
-      </Flex>
-    </Flex>
-  )
-}
-
-const DEFAULT_COMMAND = '/bin/sh'
-
-type ShellContextVal = { handleResetSize: () => void }
-const ShellContext = createContext<MutableRefObject<ShellContextVal>>({
+export type TerminalActions = { handleResetSize: () => void }
+export const ShellContext = createContext<MutableRefObject<TerminalActions>>({
   current: { handleResetSize: () => {} },
 })
-
-function ShellWithContext() {
-  const [command, setCommand] = useState(DEFAULT_COMMAND)
-  const { namespace, name, container } = useParams()
-  const shellContext = useContext(ShellContext)
-
-  return (
-    <Flex
-      flexDirection="column"
-      height="100%"
-    >
-      <PageTitle heading={container}>
-        <Flex
-          align="center"
-          gap="medium"
-        >
-          <Button
-            small
-            tertiary
-            startIcon={<ReloadIcon />}
-            onClick={() => {
-              shellContext?.current?.handleResetSize()
-            }}
-          >
-            Repair viewport
-          </Button>
-          <TerminalThemeSelector />
-        </Flex>
-      </PageTitle>
-      <ShellTitle
-        command={command}
-        setCommand={setCommand}
-      />
-      <Terminal
-        room={`pod:${namespace}:${name}:${container}`}
-        command={command || DEFAULT_COMMAND}
-        header={`connecting to pod ${name} using ${
-          command || DEFAULT_COMMAND
-        }...`}
-      />
-    </Flex>
-  )
-}
-
-export default function Shell() {
-  const ref = useRef<ShellContextVal>({ handleResetSize: () => {} })
-
-  return (
-    <ShellContext.Provider value={ref}>
-      <ShellWithContext />
-    </ShellContext.Provider>
-  )
-}

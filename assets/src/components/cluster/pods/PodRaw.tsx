@@ -1,9 +1,7 @@
 import { useQuery } from 'react-apollo'
 import { useParams } from 'react-router-dom'
 import { stringify } from 'yaml'
-import { PageTitle } from '@pluralsh/design-system'
-
-import { LoopingLogo } from 'components/utils/AnimatedLogo'
+import { LoopingLogo, PageTitle } from '@pluralsh/design-system'
 
 import { Pod } from 'generated/graphql'
 
@@ -15,14 +13,14 @@ import { RawPageCode } from '../RawPageCode'
 export default function NodeEvents() {
   const { name, namespace } = useParams()
   const { data } = useQuery<{
-    pod: Pod,
+    pod: Pod
   }>(POD_RAW_Q, {
     variables: { name, namespace },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
 
-  if (!data) return <LoopingLogo dark />
+  if (!data) return <LoopingLogo />
 
   const {
     pod: { raw },
@@ -37,4 +35,3 @@ export default function NodeEvents() {
     </>
   )
 }
-

@@ -19,7 +19,7 @@ import { POLL_INTERVAL } from '../constants'
 
 import { statusesToRecord } from '../pods/PodInfo'
 
-import PodShellShell from './PodShellShell'
+import PodShellShell from './ContainerShell'
 import SideNav from './ContainerSideNav'
 import Sidecar from './ContainerSidecar'
 
@@ -82,7 +82,7 @@ export default function PodShell() {
   if (error || !transformedData) {
     return <>Could not find container "{containerName}"</>
   }
-  if (!data) return <LoopingLogo dark />
+  if (!data) return <LoopingLogo />
 
   const {
     container, containerStatus, pod, containers = [], initContainers = [],

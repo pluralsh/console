@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { ArcElement, Chart } from 'chart.js'
 import { Flex } from 'honorable'
 
-import { LoopingLogo } from 'components/utils/AnimatedLogo'
+import { LoopingLogo } from '@pluralsh/design-system'
 
 import { ScrollablePage } from 'components/layout/ScrollablePage'
 
@@ -41,7 +41,7 @@ export default function NodeInfo() {
   if (!name || !namespace) {
     return null
   }
-  if (!data) return <LoopingLogo dark />
+  if (!data) return <LoopingLogo />
 
   const { pod } = data
   const containerStatuses = statusesToRecord(pod?.status?.containerStatuses)

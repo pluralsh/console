@@ -9,6 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 export default function AccountSideNav({
   containers = [],
+  initContainers = [],
   pod,
 }: {
   containers?: Maybe<Container>[]
@@ -16,7 +17,7 @@ export default function AccountSideNav({
   pod?: Pod
 }) {
   const navigate = useNavigate()
-  const { name, namespace, container: containerName } = useParams()
+  const { container: containerName } = useParams()
 
   return (
     <>
@@ -32,19 +33,22 @@ export default function AccountSideNav({
           navigate(`/pods/${pod?.metadata.namespace}/${pod?.metadata.name}/shell/${toContainerName}`)
         }}
       >
-        {containers.map(container => {
-          console.log('c', container)
-
-          return (
+        {[
+          ...initContainers.map((container, i) => (
             <ListBoxItem
-              key={container?.name}
-              label={container?.name}
-              textValue={container?.name}
-            >
-              {container.name}
-            </ListBoxItem>
-          )
-        })}
+              key={`init: ${container?.name || i}`}
+              label={container?.name ? `init: ${container?.name}` : ''}
+              textValue={container?.name ? `init: ${container?.name}` : ''}
+            />
+          )),
+          ...containers.map((container, i) => (
+            <ListBoxItem
+              key={container?.name || `${i}`}
+              label={container?.name || ''}
+              textValue={container?.name || ''}
+            />
+          )),
+        ]}
       </Select>
     </>
   )

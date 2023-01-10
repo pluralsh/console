@@ -2,7 +2,7 @@ import { useQuery } from 'react-apollo'
 import { useParams } from 'react-router-dom'
 
 import type { Event } from 'generated/graphql'
-import { LoopingLogo } from 'components/utils/AnimatedLogo'
+import { LoopingLogo } from '@pluralsh/design-system'
 
 import { ScrollablePage } from 'components/layout/ScrollablePage'
 
@@ -17,7 +17,7 @@ export default function NodeEvents() {
     fetchPolicy: 'cache-and-network',
   })
 
-  if (!data) return <LoopingLogo dark />
+  if (!data) return <LoopingLogo />
 
   const {
     pod: { events },

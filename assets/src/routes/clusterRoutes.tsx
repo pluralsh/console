@@ -11,7 +11,7 @@ import Node from 'components/cluster/nodes/Node'
 import Nodes from 'components/cluster/nodes/Nodes'
 import NodeEvents from 'components/cluster/nodes/NodeEvents'
 import NodeRaw from 'components/cluster/nodes/NodeRaw'
-import PodShell from 'components/cluster/containers/PodShell'
+import PodShell from 'components/cluster/containers/Container'
 // import { PodShell } from 'components/terminal/PodShell'
 
 export const clusterRoutes = [
