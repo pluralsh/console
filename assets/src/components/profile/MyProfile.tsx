@@ -6,7 +6,7 @@ import {
   TabPanel,
 } from '@pluralsh/design-system'
 
-import { useContext, useRef } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 
 import { ResponsiveLayoutSidecarContainer } from 'components/layout/ResponsiveLayoutSidecarContainer'
@@ -14,6 +14,7 @@ import { ResponsiveLayoutSpacer } from 'components/layout/ResponsiveLayoutSpacer
 import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLayoutSidenavContainer'
 import { LoginContext } from 'components/contexts'
+import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
 const directory = [
   { path: 'me', label: 'Profile' },
@@ -23,9 +24,12 @@ const directory = [
 
 export default function MyProfile() {
   const tabStateRef = useRef<any>(null)
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { me } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
   const pathPrefix = '/profile'
+
+  useEffect(() => setBreadcrumbs([{ text: 'profile', url: '/profile' }]), [setBreadcrumbs])
 
   if (!me) return null
 

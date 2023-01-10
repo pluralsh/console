@@ -17,6 +17,8 @@ import MyProfile from 'components/profile/MyProfile'
 
 import { Profile } from 'components/profile/Profile'
 
+import { Security } from 'components/profile/Security'
+
 import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
 
@@ -92,11 +94,11 @@ const profileRoutes = [
       path="me"
       element={<Profile />}
     />
-    {/* <Route
+    <Route
       path="security"
       element={<Security />}
     />
-    <Route
+    {/* <Route
       path="roles"
       element={<Roles />}
     /> */}
