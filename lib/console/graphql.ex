@@ -3,11 +3,13 @@ defmodule Console.GraphQl do
   use Absinthe.Relay.Schema, :modern
   import Console.GraphQl.Helpers
   alias Console.GraphQl.Resolvers.{Build, Plural, User, Kubecost, License}
-  alias Console.Middleware.{Authenticated, Rbac, RequiresGit, Sandboxed}
 
   import_types Absinthe.Type.Custom
+  import_types Absinthe.Plug.Types
+  import_types Console.GraphQl.CustomTypes
   import_types Console.GraphQl.Schema.Base
-  import_types Console.GraphQl.Schema
+  import_types Console.GraphQl.Build
+  import_types Console.GraphQl.Configuration
   import_types Console.GraphQl.Users
   import_types Console.GraphQl.Kubernetes
   import_types Console.GraphQl.Observability
@@ -40,31 +42,8 @@ defmodule Console.GraphQl do
   end
 
   query do
-    connection field :builds, node_type: :build do
-      middleware Authenticated
-
-      resolve &Build.list_builds/2
-    end
-
-    field :configuration, :console_configuration do
-      resolve fn _, _ -> {:ok, Console.Configuration.new()} end
-    end
-
-    field :build, :build do
-      middleware Authenticated
-
-      arg :id, non_null(:id)
-
-      resolve safe_resolver(&Build.resolve_build/2)
-    end
-
-
-    field :external_token, :string do
-      middleware Authenticated
-      middleware Sandboxed
-      resolve &Plural.resolve_external_token/2
-    end
-
+    import_fields :configuration_queries
+    import_fields :build_queries
     import_fields :user_queries
     import_fields :observability_queries
     import_fields :kubernetes_queries
@@ -76,39 +55,7 @@ defmodule Console.GraphQl do
   end
 
   mutation do
-    field :create_build, :build do
-      middleware Authenticated
-      middleware RequiresGit
-      arg :attributes, non_null(:build_attributes)
-
-      middleware Rbac, perm: :deploy, arg: [:attributes, :repository]
-      resolve safe_resolver(&Build.create_build/2)
-    end
-
-    field :restart_build, :build do
-      middleware Authenticated
-      middleware RequiresGit
-      arg :id, non_null(:id)
-
-      resolve safe_resolver(&Build.restart_build/2)
-    end
-
-    field :cancel_build, :build do
-      middleware Authenticated
-      middleware RequiresGit
-      arg :id, non_null(:id)
-
-      resolve safe_resolver(&Build.cancel_build/2)
-    end
-
-    field :approve_build, :build do
-      middleware Authenticated
-      middleware RequiresGit
-      arg :id, non_null(:id)
-
-      resolve safe_resolver(&Build.approve_build/2)
-    end
-
+    import_fields :build_mutations
     import_fields :user_mutations
     import_fields :kubernetes_mutations
     import_fields :plural_mutations
@@ -118,25 +65,8 @@ defmodule Console.GraphQl do
   end
 
   subscription do
-    field :build_delta, :build_delta do
-      arg :build_id, :id
-
-      config fn
-        %{id: id}, _ when is_binary(id) -> {:ok, topic: "builds:#{id}"}
-        _, _ -> {:ok, topic: "builds"}
-      end
-    end
-
-    field :command_delta, :command_delta do
-      arg :build_id, non_null(:id)
-
-      config fn %{build_id: build_id}, _ -> {:ok, topic: "commands:#{build_id}"} end
-    end
-
-    field :application_delta, :application_delta do
-      config fn _, _ -> {:ok, topic: "applications"} end
-    end
-
+    import_fields :kubernetes_subscriptions
+    import_fields :build_subscriptions
     import_fields :user_subscriptions
   end
 

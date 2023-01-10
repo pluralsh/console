@@ -227,4 +227,10 @@ defmodule Console.GraphQl.Kubernetes do
       safe_resolve &Kubernetes.execute_overlay/2
     end
   end
+
+  object :kubernetes_subscriptions do
+    field :application_delta, :application_delta do
+      config fn _, _ -> {:ok, topic: "applications"} end
+    end
+  end
 end
