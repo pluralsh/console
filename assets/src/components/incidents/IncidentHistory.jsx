@@ -7,7 +7,7 @@ import { sortBy } from 'lodash'
 import yaml from 'js-yaml'
 import ReactDiffViewer from 'react-diff-viewer'
 
-import Avatar from '../users/Avatar'
+import Avatar from '../account/Avatar'
 import { dateFormat } from '../../utils/date'
 import { extendConnection } from '../../utils/graphql'
 

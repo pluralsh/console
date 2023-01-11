@@ -1,10 +1,9 @@
 import { Navigate, Route } from 'react-router-dom'
 
-import Users from 'components/Users'
 import Webhooks from 'components/Webhooks'
 import Builds from 'components/builds/Builds'
 import Build from 'components/builds/build/Build'
-import Directory from 'components/users/Directory'
+import Directory from 'components/account/Directory'
 import { Audits } from 'components/audits/Audits'
 import { PluralApi } from 'components/PluralApi'
 import { Incident } from 'components/incidents/Incident'
@@ -20,6 +19,10 @@ import { Profile } from 'components/profile/Profile'
 import { Security } from 'components/profile/Security'
 
 import { Permissions } from 'components/profile/Permissions'
+
+import { Users } from 'components/account/Users'
+
+import Account from 'components/account/Account'
 
 import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
@@ -107,7 +110,27 @@ const profileRoutes = [
   </Route>,
 ]
 
-const directoryRoutes = [
+const accountRoutes = [
+  <Route
+    path="account"
+    element={<Account />}
+  >
+    <Route
+      index
+      element={(
+        <Navigate
+          replace
+          to="users"
+        />
+      )}
+    />
+    <Route
+      path="users"
+      element={<Users />}
+    />
+  </Route>,
+
+  // Old views.
   <Route
     path="directory/:section"
     element={<Directory />}
@@ -152,9 +175,6 @@ export const consoleRoutes = [
   /* CLUSTER */
   ...clusterRoutes,
 
-  /* DIRECTORY */
-  ...directoryRoutes,
-
   /* INCIDENTS */
   ...incidentsRoutes,
 
@@ -164,6 +184,9 @@ export const consoleRoutes = [
   /* AUDITS */
   ...auditsRoutes,
 
+    /* ACCOUNT */
+  ...accountRoutes,
+
   /* PROFILE */
   ...profileRoutes,
 
@@ -171,9 +194,5 @@ export const consoleRoutes = [
   <Route
     path="webhooks"
     element={<Webhooks />}
-  />,
-  <Route
-    path="users"
-    element={<Users />}
   />,
 ]

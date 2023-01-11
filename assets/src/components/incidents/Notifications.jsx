@@ -12,7 +12,7 @@ import moment from 'moment'
 
 import { truncate } from 'lodash'
 
-import Avatar from '../users/Avatar'
+import Avatar from '../account/Avatar'
 
 import {
   appendConnection,
