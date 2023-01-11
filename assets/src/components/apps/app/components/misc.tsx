@@ -1,9 +1,9 @@
 import { Readiness, ReadinessT } from 'utils/status'
 import {
+  BriefcaseIcon,
   CertificateIcon,
   Chip,
   DeploymentIcon,
-  ErrorIcon,
   HistoryIcon,
   NetworkInIcon,
   NetworkInterfaceIcon,
@@ -58,10 +58,8 @@ export function ComponentIcon({ kind, size }: {kind: string | undefined, size?: 
     return <NetworkInIcon size={size} />
   case 'cronjob':
     return <HistoryIcon size={size} />
-  case 'pod':
-    return <ErrorIcon size={size} /> // TODO: Pod icon.
   case 'job':
-    return <ErrorIcon size={size} /> // TODO: Briefcase icon.
+    return <BriefcaseIcon size={size} />
   case 'certificate':
     return <CertificateIcon size={size} />
   default:

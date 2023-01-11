@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
-  ArrowTopRightIcon,
   CloseIcon,
+  ExpandIcon,
   IconFrame,
   Input,
   SearchIcon,
@@ -21,7 +21,7 @@ export default function LogsFullScreen({
   return (
     <>
       <IconFrame
-        icon={<ArrowTopRightIcon />}
+        icon={<ExpandIcon />}
         tooltip
         tooltipProps={{ placement: 'bottom' }}
         clickable
