@@ -122,6 +122,16 @@ export const ColName = columnHelper.accessor(row => row.name, {
   header: 'Name',
 })
 
+export const ColNamespace = columnHelper.accessor(row => row.namespace, {
+  id: 'name',
+  cell: props => (
+    <TableText>
+      <span>{props.getValue()}</span>
+    </TableText>
+  ),
+  header: 'Name',
+})
+
 export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
   id: 'nodeName',
   cell: ({ row: { original }, ...props }) => (
