@@ -62,6 +62,7 @@ defmodule Console.GraphQl.Kubernetes do
   import_types Console.GraphQl.Kubernetes.Certificate
   import_types Console.GraphQl.Kubernetes.ConfigurationOverlay
   import_types Console.GraphQl.Kubernetes.VerticalPodAutoscaler
+  import_types Console.GraphQl.Kubernetes.Namespace
 
   delta :application
 
@@ -156,10 +157,17 @@ defmodule Console.GraphQl.Kubernetes do
       safe_resolve &Kubernetes.resolve_pod/2
     end
 
-    field :pods, list_of(:pod) do
+    connection field :pods, node_type: :pod do
       middleware Authenticated
+      arg :namespaces, list_of(:string)
 
       safe_resolve &Kubernetes.list_all_pods/2
+    end
+
+    field :namespaces, list_of(:namespace) do
+      middleware Authenticated
+
+      safe_resolve &Kubernetes.list_namespaces/2
     end
 
     field :log_filters, list_of(:log_filter) do
@@ -225,6 +233,16 @@ defmodule Console.GraphQl.Kubernetes do
       arg :context,   non_null(:map)
 
       safe_resolve &Kubernetes.execute_overlay/2
+    end
+  end
+
+  object :kubernetes_subscriptions do
+    field :application_delta, :application_delta do
+      config fn _, _ -> {:ok, topic: "applications"} end
+    end
+
+    field :pod_delta, :pod_delta do
+      config fn _, _ -> {:ok, topic: "pods"} end
     end
   end
 end

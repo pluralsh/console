@@ -31,6 +31,8 @@ defmodule Console do
     end
   end
 
+  def namespaces(), do: Console.Cached.Namespace.fetch()
+
   def namespace(namespace) do
     case Console.Plural.Config.fetch_file() do
       %{"namespacePrefix" => pref} when is_binary(pref) -> "#{pref}#{namespace}"

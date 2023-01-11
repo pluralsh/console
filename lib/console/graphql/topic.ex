@@ -18,3 +18,7 @@ end
 defimpl Console.GraphQl.Topic, for: Console.Schema.Notification do
   def infer(_, _), do: [notification_delta: "notifications"]
 end
+
+defimpl Console.GraphQl.Topic, for: Kazan.Apis.Core.V1.Pod do
+  def infer(%{metadata: %{namespace: ns, name: name}}, _), do: [pod_delta: "pods:#{ns}:#{name}", pod_delta: "pods"]
+end
