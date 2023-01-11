@@ -6,7 +6,7 @@ import {
   P,
   Span,
 } from 'honorable'
-import { Codeline, ContentCard } from '@pluralsh/design-system'
+import { Code, ContentCard } from '@pluralsh/design-system'
 import { localized } from 'helpers/hostname'
 import { fetchToken } from 'helpers/auth'
 import { useState } from 'react'
@@ -39,7 +39,7 @@ export default function SecurityAccess() {
             Generate temporary access token
           </Button>
         )}
-        {token && <Codeline>{jwt}</Codeline>}
+        {token && <Code showLineNumbers={false}>{jwt}</Code>}
         <P color="text-light">
           <Span>2. Have the recipent enter the code into&nbsp;</Span>
           <A
