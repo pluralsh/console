@@ -1,7 +1,11 @@
-import { AppIcon, LoopingLogo, Table } from '@pluralsh/design-system'
+import {
+  AppIcon,
+  Date,
+  LoopingLogo,
+  Table,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { Date } from 'components/utils/Date'
 import { Flex } from 'honorable'
 import {
   useCallback,

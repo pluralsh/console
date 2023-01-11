@@ -1,8 +1,12 @@
-import { Avatar, LoopingLogo, Table } from '@pluralsh/design-system'
+import {
+  Avatar,
+  Date,
+  LoopingLogo,
+  Table,
+} from '@pluralsh/design-system'
 
 import { createColumnHelper } from '@tanstack/react-table'
 import { Flex } from 'honorable'
-import { Date } from 'components/utils/Date'
 import { useCallback, useMemo } from 'react'
 import update from 'lodash/update'
 import { RUNBOOK_EXECUTIONS_Q } from 'components/runbooks/queries'
