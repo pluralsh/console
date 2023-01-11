@@ -36,7 +36,7 @@ import { ThemeContext } from 'styled-components'
 
 import { normalizeColor } from 'grommet/utils'
 
-import Avatar from '../users/Avatar'
+import Avatar from '../account/Avatar'
 import { appendConnection, updateCache } from '../../utils/graphql'
 
 import { isEmpty, plainDeserialize, plainSerialize } from '../../utils/slate'

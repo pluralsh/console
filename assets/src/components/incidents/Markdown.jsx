@@ -15,7 +15,7 @@ import { normalizeColor } from 'grommet/utils'
 import { sortBy } from 'lodash'
 import { Emoji as Emojii } from 'emoji-mart'
 
-import Avatar from '../users/Avatar'
+import Avatar from '../account/Avatar'
 
 import { EntityType } from './types'
 

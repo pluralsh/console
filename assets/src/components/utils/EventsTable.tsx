@@ -1,8 +1,7 @@
-import { Table } from '@pluralsh/design-system'
+import { Date, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { Event as EventT } from 'generated/graphql'
-import { Date } from 'components/utils/Date'
 import isEmpty from 'lodash/isEmpty'
 
 const COLUMN_HELPER = createColumnHelper<EventT>()

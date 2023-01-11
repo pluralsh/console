@@ -5,7 +5,7 @@ import { useQuery } from 'react-apollo'
 
 import { SEARCH_REPOS } from '../graphql/plural'
 
-import { SearchIcon } from '../users/utils'
+import { SearchIcon } from '../account/utils'
 
 import { MODAL_WIDTH } from './constants'
 

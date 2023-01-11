@@ -22,8 +22,9 @@ import { FixedScroller } from '../utils/SmoothScroller'
 import { extendConnection, removeConnection, updateCache } from '../../utils/graphql'
 import { LoopingLogo } from '../utils/AnimatedLogo'
 
-import Avatar from './Avatar'
 import { SearchIcon, addGroupMember, deleteGroup } from './utils'
+
+import Avatar from './Avatar'
 import { fetchUsers } from './Typeaheads'
 import {
   CREATE_GROUP_MEMBERS,

@@ -7,7 +7,6 @@ import {
   ValidatedInput,
 } from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
-// import { useFilePicker } from 'react-sage'
 
 import { UPDATE_USER } from 'components/graphql/users'
 

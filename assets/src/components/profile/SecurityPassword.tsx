@@ -67,6 +67,7 @@ function UpdatePassword({ cancel }: any) {
   )
 }
 
+// TODO: Hide for users logged in with OIDC.
 export default function SecurityPassword() {
   const [pass, setPass] = useState(false)
 

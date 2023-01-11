@@ -16,10 +16,12 @@ import { useApolloClient, useMutation } from 'react-apollo'
 
 import Toggle from 'react-toggle'
 
-import { Icon } from './Group'
-import { CREATE_ROLE, DELETE_ROLE, UPDATE_ROLE } from './queries'
 import { addRole, deleteRole } from './utils'
 import { PermissionTypes } from './types'
+
+import { Icon } from './Group'
+
+import { CREATE_ROLE, DELETE_ROLE, UPDATE_ROLE } from './queries'
 import { fetchGroups, fetchUsers } from './Typeaheads'
 
 function RoleName({ role: { name, description } }) {
