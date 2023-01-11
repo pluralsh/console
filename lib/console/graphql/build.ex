@@ -56,7 +56,10 @@ defmodule Console.GraphQl.Build do
     field :id,           non_null(:id)
     field :command,      non_null(:string)
     field :exit_code,    :integer
-    field :stdout,       :string
+    field :stdout,       :string, resolve: fn
+      %{completed_at: nil} = cmd, _, _ -> Core.Services.Builds.get_line(cmd)
+      %{stdout: stdo}, _, _ -> stdo
+    end
     field :completed_at, :datetime
     field :build,        :build, resolve: dataloader(Build)
 
