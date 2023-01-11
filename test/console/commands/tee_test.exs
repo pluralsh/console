@@ -4,10 +4,7 @@ defmodule Console.Commands.TeeTest do
 
   describe "Collectible" do
     test "tee implements the collectible protocol for strings" do
-      res =
-        ~w(one two three)
-        |> Enum.into(Tee.new())
-
+      res = Enum.into(~w(one two three), Tee.new())
       assert Tee.output(res) == "onetwothree"
     end
 
