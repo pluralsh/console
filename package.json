@@ -52,6 +52,7 @@
     "grommet-icons": "4.8.0",
     "highlight.js": "11.7.0",
     "honorable-recipe-mapper": "0.2.0",
+    "moment": "2.29.4",
     "prop-types": "15.8.1",
     "react-animate-height": "3.1.0",
     "react-markdown": "8.0.4",
