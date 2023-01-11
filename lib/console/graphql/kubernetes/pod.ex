@@ -89,4 +89,7 @@ defmodule Console.GraphQl.Kubernetes.Pod do
     field :limits,   :resource_spec
     field :requests, :resource_spec
   end
+
+  connection node_type: :pod
+  delta :pod
 end

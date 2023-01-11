@@ -19,6 +19,10 @@ defmodule Console.GraphQl.Users do
     field :admin, :boolean
   end
 
+  input_object :invite_attributes do
+    field :email, :string
+  end
+
   input_object :group_attributes do
     field :name,  non_null(:string)
     field :description, :string
