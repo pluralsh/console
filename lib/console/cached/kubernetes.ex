@@ -24,7 +24,6 @@ defmodule Console.Cached.Kubernetes do
   def handle_info({:start, request}, state) do
     Logger.info "starting namespace watcher"
     {:ok, %{items: instances, metadata: %MetaV1.ListMeta{resource_version: vsn}}} = Kazan.run(request)
-    request = %{request | watch: true, resource_vsn: vsn}
     {:ok, pid} = Watcher.start_link(request, send_to: self(), resource_vsn: vsn)
 
     :timer.send_interval(5000, :watcher_ping)
