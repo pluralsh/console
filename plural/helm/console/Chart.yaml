@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 0.3.19
+appVersion: 0.3.20
 description: A chart for plural console
 name: console
 version: 0.7.38
