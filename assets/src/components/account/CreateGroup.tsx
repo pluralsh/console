@@ -12,14 +12,16 @@ import { CREATE_GROUP, GROUPS_Q } from './queries'
 export function CreateGroup({ q }: any) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
 
   const resetAndClose = useCallback(() => {
     setName('')
+    setDescription('')
     setOpen(false)
   }, [])
 
   const [mutation, { loading, error }] = useMutation(CREATE_GROUP, {
-    variables: { attributes: { name } },
+    variables: { attributes: { name, description } },
     onCompleted: () => resetAndClose(),
     update: (cache, { data: { createGroup } }) => updateCache(cache, {
       query: GROUPS_Q,
@@ -73,6 +75,11 @@ export function CreateGroup({ q }: any) {
             value={name}
             onChange={({ target: { value } }) => setName(value)}
             label="Name"
+          />
+          <ValidatedInput
+            label="Description"
+            value={description}
+            onChange={({ target: { value } }) => setDescription(value)}
           />
         </Box>
       </Modal>
