@@ -297,7 +297,7 @@ function GroupEdit({ group, setEdit }) {
   )
 }
 
-export default function GroupRow({ group }) {
+function GroupRow({ group }) {
   const ref = useRef()
   const [modal, setModal] = useState(null)
   const [edit, setEdit] = useState(false)

@@ -8,10 +8,8 @@ import {
 } from 'grommet'
 import { useMutation, useQuery } from '@apollo/client'
 import {
-  AddGroup,
   Button,
   CreateRole as CreateRoleI,
-  Group,
   InputCollection,
   Messages,
   ModalHeader,
@@ -41,13 +39,9 @@ import { LoginContext } from '../contexts'
 
 import { SearchIcon } from './utils'
 
-import GroupRow from './Group'
-
 import RoleRow, { CreateRole } from './Role'
 
-import { GROUPS_Q, ROLES_Q } from './queries'
-
-import { GroupForm } from './CreateGroup'
+import { ROLES_Q } from './queries'
 
 const INPUT_WIDTH = '350px'
 
@@ -118,50 +112,6 @@ function SmtpSettings() {
   if (!data) return null
 
   return <SmtpSettingsInner smtp={data.smtp} />
-}
-
-function GroupsInner() {
-  const [q, setQ] = useState(null)
-  const { data, fetchMore } = useQuery(GROUPS_Q, { variables: { q } })
-
-  if (!data) return <LoopingLogo scale="0.75" />
-
-  const { groups: { pageInfo, edges } } = data
-
-  return (
-    <SectionContentContainer header="Groups">
-      <Scroller
-        id="groups"
-        style={{ height: '100%', overflow: 'auto' }}
-        edges={edges}
-        mapper={({ node }, next) => (
-          <GroupRow
-            key={node.id}
-            group={node}
-            next={next.node}
-          />
-        )}
-        onLoadMore={() => pageInfo.hasNextPage && fetchMore({
-          variables: { userCursor: pageInfo.endCursor },
-          updateQuery: (prev, { fetchMoreResult: { groups } }) => extendConnection(prev, groups, 'groups'),
-        })}
-      />
-      <SectionPortal>
-        <Box
-          flex={false}
-          width={INPUT_WIDTH}
-        >
-          <TextInput
-            icon={<SearchIcon />}
-            reverse
-            placeholder="search for groups"
-            value={q || ''}
-            onChange={({ target: { value } }) => setQ(value)}
-          />
-        </Box>
-      </SectionPortal>
-    </SectionContentContainer>
-  )
 }
 
 function RolesInner() {
@@ -293,12 +243,6 @@ export default function Directory() {
           width="200px"
         >
           <SectionChoice
-            icon={<Group size="14px" />}
-            label="Groups"
-            section="groups"
-            setSection={setSection}
-          />
-          <SectionChoice
             icon={<Roles size="14px" />}
             label="Roles"
             section="roles"
@@ -319,18 +263,6 @@ export default function Directory() {
             setSection={setSection}
           />
           <CreateModal
-            header="Create a new group"
-            form={<GroupForm />}
-          >
-            {onClick => (
-              <SectionChoice
-                icon={<AddGroup size="14px" />}
-                label="Create Group"
-                onClick={onClick}
-              />
-            )}
-          </CreateModal>
-          <CreateModal
             width="50vw"
             header="Create a new role"
             form={<CreateRole />}
@@ -349,7 +281,6 @@ export default function Directory() {
           elevation="small"
           fill
         >
-          {section === 'groups' && <GroupsInner />}
           {section === 'roles' && <RolesInner />}
           {section === 'webhooks' && <WebhookManagement />}
           {section === 'smtp' && conf.gitStatus.cloned && <SmtpSettings />}

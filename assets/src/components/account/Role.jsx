@@ -19,7 +19,7 @@ import Toggle from 'react-toggle'
 import { addRole, deleteRole } from './utils'
 import { PermissionTypes } from './types'
 
-import { Icon } from './Group'
+import { Icon } from './Groupx'
 
 import { CREATE_ROLE, DELETE_ROLE, UPDATE_ROLE } from './queries'
 import { fetchGroups, fetchUsers } from './Typeaheads'
