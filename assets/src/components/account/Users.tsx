@@ -9,6 +9,7 @@ import {
 import { useRef, useState } from 'react'
 
 import { InviteUser } from './InviteUser'
+import { UsersList } from './UsersList'
 
 const DIRECTORY = [
   {
@@ -65,8 +66,8 @@ export function Users() {
         )}
         stateRef={tabStateRef}
       >
-        {/* {selectedKey === 'Users' && <UsersList />}
-        {selectedKey === 'Invites' && <Invites />} */}
+        {selectedKey === 'Users' && <UsersList />}
+        {/* {selectedKey === 'Invites' && <Invites />} */}
         TODO: TBD.
       </TabPanel>
     </Flex>
