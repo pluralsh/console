@@ -1,11 +1,19 @@
 import { Flex } from 'honorable'
+import { Node } from 'generated/graphql'
 
 import { ClusterMetrics as Metrics } from '../constants'
 
 import { ClusterGauges } from './ClusterGauges'
+import { ResourceUsage } from './Nodes'
 import { SaturationGraphs } from './SaturationGraphs'
 
-export function ClusterMetrics({ nodes, usage }) {
+export function ClusterMetrics({
+  nodes,
+  usage,
+}: {
+  nodes: Node[]
+  usage: ResourceUsage
+}) {
   return (
     <Flex
       flex={false}
@@ -13,7 +21,6 @@ export function ClusterMetrics({ nodes, usage }) {
       gap="xlarge"
       align="center"
     >
-
       <ClusterGauges
         nodes={nodes}
         usage={usage}

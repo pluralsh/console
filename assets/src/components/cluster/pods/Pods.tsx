@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 
 import { Flex } from 'honorable'
 import { LoopingLogo, PageTitle } from '@pluralsh/design-system'
@@ -14,11 +14,9 @@ import {
   ColActions,
   ColContainers,
   ColCpu,
-  ColDelete,
   ColMemory,
   ColNameLink,
   ColNamespace,
-  ColNodeName,
   ColRestarts,
   PodsList,
 } from './PodsList'

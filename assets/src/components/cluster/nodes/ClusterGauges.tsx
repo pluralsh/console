@@ -4,6 +4,7 @@ import {
   useContext,
   useMemo,
 } from 'react'
+import { Flex, FlexProps } from 'honorable'
 import { useQuery } from '@apollo/client'
 import { Box, ThemeContext } from 'grommet'
 import { memoryParser } from 'kubernetes-resource-parser'
@@ -14,22 +15,25 @@ import { normalizeColor } from 'grommet/utils'
 import { Chart } from 'chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 
+import { MetricResponse, Node } from 'generated/graphql'
 import { cpuParser } from 'utils/kubernetes'
-
 import { PieChart } from 'components/utils/PieChart'
 
-import { Flex, FlexProps } from 'honorable'
-
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { ClusterMetrics as Metrics } from '../constants'
 import { NODE_METRICS_Q } from '../queries'
 
 import { cpuFmt, roundToTwoPlaces } from '../utils'
 
+import { ResourceUsage } from './Nodes'
+
 Chart.register(ChartDataLabels)
 
-const ChartHeading = styled.h3(({ theme: _ }) => ({}))
+const ChartHeading = styled.h3(({ theme }) => ({
+  ...theme.partials.text.caption,
+  textAlign: 'center',
+}))
 
 function ChartWrap({
   children,
@@ -38,42 +42,40 @@ function ChartWrap({
 }: Omit<FlexProps, 'heading'> & { heading: ReactNode }) {
   return (
     <Flex
-      width={180}
-      height={180}
+      flexDirection="column"
+      overflow="visible"
       {...props}
     >
+      <Flex
+        width={140}
+        height={140}
+      >
+        {children}
+      </Flex>
       <ChartHeading>{heading}</ChartHeading>
-      {children}
     </Flex>
   )
 }
+type Capacity = { cpu?: string; pods?: string; memory?: string } | undefined
 
-const chartColors = {
-  used: '#F599A8',
-  available: '#FFF9C2',
-} as const satisfies Record<string, string>
+const datum = (data: MetricResponse[]) => (data[0]?.values?.[0]?.value ? parseFloat(data[0].values[0].value) : undefined)
 
-export function ClusterGauges({ nodes, usage }: { nodes: any; usage: any }) {
-  const totalCpu = sumBy(nodes,
-    ({
-      status: {
-        capacity: { cpu },
-      },
-    }: any) => cpuParser(cpu) ?? 0)
-  const totalMem = sumBy(nodes,
-    ({
-      status: {
-        capacity: { memory },
-      },
-    }: any) => memoryParser(memory))
-  const totalPods = sumBy(nodes,
-    ({
-      status: {
-        capacity: { pods },
-      },
-    }: any) => parseInt(pods))
+export function ClusterGauges({
+  nodes,
+  usage,
+}: {
+  nodes: Node[]
+  usage: ResourceUsage
+}) {
+  const theme = useTheme()
 
-  const { data } = useQuery(NODE_METRICS_Q, {
+  const { data } = useQuery<{
+    cpuRequests: MetricResponse[]
+    cpuLimits: MetricResponse[]
+    memRequests: MetricResponse[]
+    memLimits: MetricResponse[]
+    pods: MetricResponse[]
+  }>(NODE_METRICS_Q, {
     variables: {
       cpuRequests: Metrics.CPURequests,
       cpuLimits: Metrics.CPULimits,
@@ -86,89 +88,148 @@ export function ClusterGauges({ nodes, usage }: { nodes: any; usage: any }) {
     pollInterval: 5000,
   })
 
-  const result = useMemo(() => {
-    if (!data) {
-      return {}
-    }
-    const {
-      cpuRequests, cpuLimits, memRequests, memLimits, pods,
-    } = data || {}
-
-    const datum = data => roundToTwoPlaces(parseFloat(data[0].values[0].value))
-
-    return {
-      cpuRequests: datum(cpuRequests),
-      cpuLimits: datum(cpuLimits),
-      memRequests: datum(memRequests),
-      memLimits: datum(memLimits),
-      pods: datum(pods),
-    }
-  }, [data])
-
-  const {
-    cpuRequests, cpuLimits, memRequests, memLimits, pods,
-  } = result || {}
+  console.log('req', data?.cpuRequests)
 
   const chartData = useMemo(() => {
-    if (!result) return { cpu: [], memory: [] }
+    if (!data) {
+      return null
+    }
+    const cpuRequests = datum(data.cpuRequests)
+    const cpuLimits = datum(data.cpuLimits)
+    const memRequests = datum(data.memRequests)
+    const memLimits = datum(data.memLimits)
+    const podsUsed = datum(data.pods)
+
+    const chartColors = {
+      used: theme.colors['text-danger-light'],
+      available: theme.colors['icon-success'],
+    } as const satisfies Record<string, string>
+
+    const cpuTotal = sumBy(nodes,
+      n => cpuParser((n?.status?.capacity as Capacity)?.cpu) ?? 0)
+    const memTotal = sumBy(nodes, n => memoryParser((n?.status?.capacity as Capacity)?.memory))
+    const podsTotal = sumBy(nodes, n => {
+      const pods = (n?.status?.capacity as Capacity)?.pods
+
+      return pods ? parseInt(pods) ?? 0 : 0
+    })
+    const { cpu: cpuUsed, mem: memUsed } = usage || {}
 
     return {
-      cpuUsage: [
-        { id: 'CPU Usage', value: usage.cpu, color: chartColors.used },
+      cpuUsage: cpuUsed !== undefined && [
+        { id: 'CPU used', value: cpuUsed, color: chartColors.used },
         {
-          id: 'CPU Available',
-          value: totalCpu - usage.cpu,
+          id: 'CPU remaining',
+          value: cpuTotal - cpuUsed || 0,
           color: chartColors.available,
         },
       ],
-      cpuRequests: [
+      cpuRequests: cpuLimits !== undefined
+        && cpuRequests !== undefined && [
         {
-          id: 'CPU Requests',
-          value: cpuRequests || 0,
+          id: 'CPU requests',
+          value: cpuRequests,
           color: chartColors.used,
         },
         {
-          id: 'CPU Remaining Limits',
-          value: (cpuLimits || 0) - (cpuRequests || 0),
+          id: 'CPU limits remaining',
+          value: cpuLimits - cpuRequests,
+          color: chartColors.available,
+        },
+      ],
+      memoryUsage: memUsed !== undefined && [
+        { id: 'Memory used', value: memUsed, color: chartColors.used },
+        {
+          id: 'Memory remaining',
+          value: memTotal - memUsed,
+          color: chartColors.available,
+        },
+      ],
+      memoryRequests: memRequests !== undefined
+        && memLimits !== undefined && [
+        {
+          id: 'Memory requests',
+          value: memRequests || 0,
+          color: chartColors.used,
+        },
+        {
+          id: 'Memory limits remaining',
+          value: memLimits - memRequests,
+          color: chartColors.available,
+        },
+      ],
+      podUsage: [
+        {
+          id: 'Pods used',
+          value: podsUsed || 0,
+          color: chartColors.used,
+        },
+        {
+          id: 'Pods remaining',
+          value: (podsTotal || 0) - (podsUsed || 0),
           color: chartColors.available,
         },
       ],
     }
-  }, [result, usage.cpu, cpuRequests, cpuLimits, totalCpu])
+  }, [data, nodes, theme.colors, usage])
 
-  if (!result) {
+  if (!chartData) {
     return null
   }
 
-  console.log(
-    'result', cpuRequests, cpuLimits, usage.cpu, totalCpu
-  )
-
   return (
-    <Box
+    <Flex
       flex={false}
-      direction="row"
-      gap="small"
+      flexDirection="row"
       align="center"
+      justifyContent="space-between"
+      width="100%"
+      gap="xsmall"
+      marginBottom="xlarge"
+      overflow="visible"
     >
       {chartData.cpuUsage && (
-        <ChartWrap>
+        <ChartWrap heading="CPU Utilization">
           <PieChart
             data={chartData.cpuUsage}
-            valueFormat={() => '20'}
+            valueFormat={val => cpuFmt(roundToTwoPlaces(val))}
           />
         </ChartWrap>
       )}
       {chartData.cpuRequests && (
-        <ChartWrap>
-          <PieChart data={chartData.cpuRequests} />
+        <ChartWrap heading="CPU Requests">
+          <PieChart
+            data={chartData.cpuRequests}
+            valueFormat={val => cpuFmt(roundToTwoPlaces(val))}
+          />
         </ChartWrap>
       )}
-      <LayeredGauge
+      {chartData.memoryUsage && (
+        <ChartWrap heading="Memory Usage">
+          <PieChart
+            data={chartData.memoryUsage}
+            valueFormat={val => filesize(roundToTwoPlaces(val)) as string}
+          />
+        </ChartWrap>
+      )}
+      {chartData.memoryRequests && (
+        <ChartWrap heading="Memory Requests">
+          <PieChart
+            data={chartData.memoryRequests}
+            valueFormat={val => filesize(roundToTwoPlaces(val)) as string}
+          />
+        </ChartWrap>
+      )}
+      {chartData.memoryRequests && (
+        <ChartWrap heading="Pod Usage">
+          <PieChart data={chartData.podUsage} />
+        </ChartWrap>
+      )}
+      {/* <LayeredGauge
         usage={usage.cpu}
         requests={cpuRequests}
         limits={cpuLimits}
-        total={totalCpu}
+        total={cpuTotal}
         title="CPU Reservation"
         name="CPU"
         format={cpuFmt}
@@ -177,18 +238,18 @@ export function ClusterGauges({ nodes, usage }: { nodes: any; usage: any }) {
         usage={usage.mem}
         requests={memRequests}
         limits={memLimits}
-        total={totalMem}
+        total={memTotal}
         title="Memory Reservation"
         name="Mem"
         format={filesize}
       />
       <SimpleGauge
-        value={pods || undefined}
-        total={totalPods}
+        value={podCount || undefined}
+        total={podsTotal}
         title="Pod Usage"
         name="Pods"
-      />
-    </Box>
+      /> */}
+    </Flex>
   )
 }
 
