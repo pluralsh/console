@@ -3,6 +3,8 @@ import { useMutation } from '@apollo/client'
 import { Box } from 'grommet'
 import { Button, Modal, ValidatedInput } from '@pluralsh/design-system'
 
+import isEmpty from 'lodash/isEmpty'
+
 import { appendConnection, updateCache } from '../../utils/graphql'
 
 import { GqlError } from '../utils/Alert'
@@ -52,6 +54,7 @@ export function CreateGroup({ q }: any) {
             </Button>
             <Button
               type="submit"
+              disabled={isEmpty(name)}
               onClick={() => mutation()}
               loading={loading}
               marginLeft="medium"

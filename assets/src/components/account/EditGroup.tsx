@@ -3,7 +3,6 @@ import {
   ComboBox,
   FormField,
   Modal,
-  Switch,
   Tab,
   TabList,
   TabPanel,
@@ -32,9 +31,8 @@ export function EditGroup({ group, edit, setEdit }: any) {
   const [value, setValue] = useState('')
   const [name, setName] = useState(group.name)
   const [description, setDescription] = useState(group.description)
-  const [global, setGlobal] = useState(group.global)
   const [mutation, { loading, error }] = useMutation(UPDATE_GROUP, {
-    variables: { id: group.id, attributes: { name, description, global } },
+    variables: { id: group.id, attributes: { name, description } },
     onCompleted: () => setEdit(false),
   })
   const [addMut] = useMutation(CREATE_GROUP_MEMBERS, {
@@ -103,12 +101,6 @@ export function EditGroup({ group, edit, setEdit }: any) {
                 value={description}
                 onChange={({ target: { value } }) => setDescription(value)}
               />
-              <Switch
-                checked={global}
-                onChange={({ target: { checked } }) => setGlobal(checked)}
-              >
-                Apply globally
-              </Switch>
             </Flex>
           )}
           {view === 'Users' && (

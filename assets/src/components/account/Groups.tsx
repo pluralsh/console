@@ -10,11 +10,9 @@ import {
   SearchIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
-import { useContext, useState } from 'react'
+import { useState } from 'react'
 
 import { Confirm } from 'components/utils/Confirm'
-
-import { LoginContext } from 'components/contexts'
 
 import ListInput from '../utils/ListInput'
 
@@ -45,7 +43,7 @@ function Header({ q, setQ }: any) {
 }
 
 export function Group({ group, q }: any) {
-  const { me } = useContext(LoginContext)
+  // const { me } = useContext(LoginContext)
   const editable = true // TODO: canEdit(me, account) || hasRbac(me, Permissions.USERS)
   const [edit, setEdit] = useState(false)
   const [view, setView] = useState(false)
