@@ -57,7 +57,7 @@ defmodule Console.GraphQl.Build do
     field :command,      non_null(:string)
     field :exit_code,    :integer
     field :stdout,       :string, resolve: fn
-      %{completed_at: nil} = cmd, _, _ -> {:ok, Core.Services.Builds.get_line(cmd)}
+      %{completed_at: nil} = cmd, _, _ -> {:ok, Console.Services.Builds.get_line(cmd)}
       %{stdout: stdo}, _, _ -> {:ok, stdo}
     end
     field :completed_at, :datetime

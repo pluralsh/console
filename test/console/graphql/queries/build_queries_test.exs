@@ -8,11 +8,7 @@ defmodule Console.GraphQl.BuildQueriesTest do
       {:ok, %{data: %{"builds" => found}}} = run_query("""
         query {
           builds(first: 5) {
-            edges {
-              node {
-                id
-              }
-            }
+            edges { node { id } }
           }
         }
       """, %{}, %{current_user: insert(:user)})
@@ -36,18 +32,10 @@ defmodule Console.GraphQl.BuildQueriesTest do
         query Build($id: ID!) {
           build(id: $id) {
             id
-            creator {
-              id
-            }
-            changelogs {
-              id
-            }
+            creator { id }
+            changelogs { id }
             commands(first: 10) {
-              edges {
-                node {
-                  id
-                }
-              }
+              edges { node { id stdout } }
             }
           }
         }
@@ -72,18 +60,10 @@ defmodule Console.GraphQl.BuildQueriesTest do
         query Build($id: ID!) {
           build(id: $id) {
             id
-            creator {
-              id
-            }
-            changelogs {
-              id
-            }
+            creator { id }
+            changelogs { id }
             commands(first: 10) {
-              edges {
-                node {
-                  id
-                }
-              }
+              edges { node { id } }
             }
           }
         }
