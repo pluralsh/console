@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 import { Box, Text, TextInput } from 'grommet'
 import { Incidents as IncidentsI, Scroller, Explore as Search } from 'forge-core'
 

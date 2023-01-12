@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UPDATE_CONFIGURATION } from 'components/graphql/plural'
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 
 import { CodeEditor } from '@pluralsh/design-system'
 

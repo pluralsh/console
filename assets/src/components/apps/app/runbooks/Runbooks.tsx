@@ -9,7 +9,7 @@ import { useContext, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { POLL_INTERVAL } from 'components/runbooks/constants'
 import { RUNBOOKS_Q } from 'components/runbooks/queries'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 import { ListItem } from 'components/apps/misc'
 import { A, Div, Flex } from 'honorable'
 

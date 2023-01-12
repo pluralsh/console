@@ -2,7 +2,7 @@ import { Button, FiltersIcon, ListBoxItem } from '@pluralsh/design-system'
 import { LOG_FILTER_Q } from 'components/graphql/plural'
 import { Div } from 'honorable'
 import { useCallback, useState } from 'react'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
 
 import { LogsInfoPanel } from './LogsInfoPanel'

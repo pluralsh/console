@@ -6,7 +6,7 @@ import {
   TextInput,
   ThemeContext,
 } from 'grommet'
-import { useMutation, useQuery } from 'react-apollo'
+import { useMutation, useQuery } from '@apollo/client'
 import {
   AddGroup,
   AddUser,

@@ -1,7 +1,7 @@
 import React from 'react'
 
 import gql from 'graphql-tag'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 
 import { useNotificationSubscription } from '../incidents/Notifications'
 

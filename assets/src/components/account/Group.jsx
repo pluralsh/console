@@ -5,7 +5,7 @@ import {
   Text,
   TextInput,
 } from 'grommet'
-import { useApolloClient, useMutation, useQuery } from 'react-apollo'
+import { useApolloClient, useMutation, useQuery } from '@apollo/client'
 
 import {
   AddUser,

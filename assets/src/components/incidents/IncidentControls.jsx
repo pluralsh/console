@@ -14,7 +14,7 @@ import {
   SecondaryButton,
 } from 'forge-core'
 import { Zoom } from 'grommet-icons'
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 
 import { Editable, Slate } from 'slate-react'
 

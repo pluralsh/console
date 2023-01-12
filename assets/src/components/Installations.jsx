@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 import { ThemeContext } from 'grommet'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
 import { LoopingLogo } from './utils/AnimatedLogo'

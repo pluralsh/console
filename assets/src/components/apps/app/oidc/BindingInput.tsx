@@ -9,7 +9,7 @@ import {
   PersonIcon,
 } from '@pluralsh/design-system'
 import { useEffect, useState } from 'react'
-import { useApolloClient } from 'react-apollo'
+import { useApolloClient } from '@apollo/client'
 import styled from 'styled-components'
 
 import { SEARCH_GROUPS, SEARCH_USERS } from './queries'

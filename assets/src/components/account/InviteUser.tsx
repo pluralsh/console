@@ -7,7 +7,7 @@ import {
 } from '@pluralsh/design-system'
 import { useCallback, useState } from 'react'
 
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 
 import { GqlError } from '../utils/Alert'
 

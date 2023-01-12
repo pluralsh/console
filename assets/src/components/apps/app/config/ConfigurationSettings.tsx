@@ -5,7 +5,7 @@ import {
   useState,
 } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 import yaml from 'js-yaml'
 
 import {

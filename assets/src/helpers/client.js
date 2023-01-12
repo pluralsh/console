@@ -1,4 +1,4 @@
-import { ApolloClient } from 'apollo-client'
+import { ApolloClient } from '@apollo/client'
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory'
 import { setContext } from 'apollo-link-context'
 import { createLink } from 'apollo-absinthe-upload-link'

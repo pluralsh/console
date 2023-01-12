@@ -20,7 +20,7 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 import { appendConnection, updateCache } from 'utils/graphql'
 
 const BUILD_TYPES = [

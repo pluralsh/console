@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { TagInput } from 'forge-core'
-import { useApolloClient } from 'react-apollo'
+import { useApolloClient } from '@apollo/client'
 
 import { Box, Text } from 'grommet'
 import moment from 'moment'

@@ -8,7 +8,7 @@ import { Box, Text, TextInput } from 'grommet'
 import { Button, Check as Checkmark, SecondaryButton } from 'forge-core'
 import { Editable, Slate } from 'slate-react'
 
-import { useMutation, useQuery } from 'react-apollo'
+import { useMutation, useQuery } from '@apollo/client'
 
 import { useEditor } from '../utils/hooks'
 import { plainDeserialize, plainSerialize } from '../../utils/slate'

@@ -3,7 +3,7 @@ import { Button, Div } from 'honorable'
 import { ContentCard, ValidatedInput } from '@pluralsh/design-system'
 import { useState } from 'react'
 import { UPDATE_USER } from 'components/graphql/users'
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 
 const validPassword = pass => (pass.length < 8 ? { error: true, message: 'password is too short' } : { error: false, message: 'valid password!' })
 

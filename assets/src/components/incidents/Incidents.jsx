@@ -25,7 +25,7 @@ import {
   User,
 } from 'forge-core'
 import { Next } from 'grommet-icons'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 
 import moment from 'moment'
 

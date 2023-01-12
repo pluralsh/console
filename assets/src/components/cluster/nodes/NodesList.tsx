@@ -11,7 +11,7 @@ import { cpuParser, memoryParser } from 'utils/kubernetes'
 
 import { Confirm } from 'components/utils/Confirm'
 
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 
 import { mapify } from '../Metadata'
 import {

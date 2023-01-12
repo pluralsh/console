@@ -11,7 +11,7 @@ import { useContext, useState } from 'react'
 import { UPDATE_USER } from 'components/graphql/users'
 
 import { LoginContext } from 'components/contexts'
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 
 export function Profile() {
   const { me } = useContext<any>(LoginContext)

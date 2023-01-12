@@ -13,7 +13,7 @@ import {
   useMutation,
   useQuery,
   useSubscription,
-} from '@apollo/react-hooks'
+} from '@apollo/client'
 
 import { BellIcon } from '@pluralsh/design-system'
 

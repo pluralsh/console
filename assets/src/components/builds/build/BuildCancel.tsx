@@ -3,7 +3,7 @@ import { CANCEL_BUILD } from 'components/graphql/builds'
 import { BuildStatus } from 'components/types'
 import { P } from 'honorable'
 import { useState } from 'react'
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 
 export default function BuildCancel({ build }) {
   const [open, setOpen] = useState<boolean>(false)
