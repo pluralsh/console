@@ -1,7 +1,5 @@
 import { CSSObject } from 'styled-components'
 
-import { asElementTypes } from '../utils/asElementTypes'
-
 import { fontFamilies } from './fonts'
 
 import { semanticColors } from './colors'
@@ -16,9 +14,35 @@ const bodyBaseStyle = {
   '& b, & strong': {
     fontWeight: 600,
   },
-}
+} as const satisfies CSSObject
 
-const textPartials = asElementTypes<CSSObject>()({
+const body1 = {
+  ...bodyBaseStyle,
+  ...{
+    fontSize: 16,
+    lineHeight: '24px',
+  },
+} as const satisfies CSSObject
+
+const body2 = {
+  ...bodyBaseStyle,
+  ...{
+    fontSize: 14,
+    lineHeight: '20px',
+  },
+} as const satisfies CSSObject
+
+const bodyBold = {
+  fontWeight: 600,
+} as const satisfies CSSObject
+
+const body2LooseLineHeight
+  = {
+    ...body2,
+    lineHeight: '22px',
+  } as const satisfies CSSObject
+
+const textPartials = {
   h1: {
     fontFamily: fontFamilies.semi,
     fontSize: 72,
@@ -75,22 +99,15 @@ const textPartials = asElementTypes<CSSObject>()({
     fontWeight: 500,
     letterSpacing: 0,
   },
-  body1: {
-    ...bodyBaseStyle,
-    ...{
-      fontSize: 16,
-      lineHeight: '24px',
-    },
-  },
-  body2: {
-    ...bodyBaseStyle,
-    ...{
-      fontSize: 14,
-      lineHeight: '20px',
-    },
-  },
-  bodyBold: {
-    fontWeight: 600,
+  body1,
+  body2,
+  bodyBold,
+  body1Bold: { ...body1, ...bodyBold },
+  body2Bold: { ...body2, ...bodyBold },
+  body2LooseLineHeight,
+  body2LooseLineHeightBold: {
+    ...body2LooseLineHeight,
+    ...bodyBold,
   },
   caption: {
     fontFamily: fontFamilies.sans,
@@ -164,24 +181,6 @@ const textPartials = asElementTypes<CSSObject>()({
     fontSize: `calc(max(${INLINE_CODE_MIN_PX}px, ${INLINE_CODE_EMS}em))`,
     letterSpacing: '.25px',
   },
-  // These empty entries make sure the props show up in autocompletion.
-  // Actual values must be set below, since they're based on other entries
-  // above.
-  body1Bold: {},
-  body2Bold: {},
-  body2LooseLineHeight: {},
-  body2LooseLineHeightBold: {},
-})
-
-textPartials.body1Bold = { ...textPartials.body1, ...textPartials.bodyBold }
-textPartials.body2Bold = { ...textPartials.body2, ...textPartials.bodyBold }
-textPartials.body2LooseLineHeight = {
-  ...textPartials.body2,
-  lineHeight: '22px',
-}
-textPartials.body2LooseLineHeightBold = {
-  ...textPartials.body2LooseLineHeight,
-  ...textPartials.bodyBold,
-}
+} as const satisfies Record<string, CSSObject>
 
 export { textPartials }

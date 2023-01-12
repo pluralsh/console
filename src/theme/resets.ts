@@ -1,8 +1,6 @@
 import { CSSObject } from 'styled-components'
 
-import { asElementTypes } from '../utils/asElementTypes'
-
-export const resetPartials = asElementTypes<CSSObject>()({
+export const resetPartials = {
   button: {
     textAlign: 'inherit',
     background: 'none',
@@ -13,4 +11,4 @@ export const resetPartials = asElementTypes<CSSObject>()({
     cursor: 'pointer',
     outline: 'inherit',
   },
-})
+} as const satisfies Record<string, CSSObject>

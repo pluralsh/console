@@ -1,11 +1,32 @@
 import { CSSObject } from 'styled-components'
 
-import { asElementTypes } from '../utils/asElementTypes'
-
 import { fontFamilies } from './fonts'
 import { semanticColors } from './colors'
 
-const marketingTextPartials = asElementTypes<CSSObject>()({
+const body1 = {
+  fontFamily: fontFamilies.sans,
+  fontSize: 18,
+  lineHeight: '140%',
+  fontWeight: 300,
+  letterSpacing: '0.25px',
+  color: semanticColors['text-xlight'],
+} as const satisfies CSSObject
+
+const body2 = {
+  fontFamily: fontFamilies.sans,
+  fontSize: 16,
+  lineHeight: '160%',
+  fontWeight: 300,
+  letterSpacing: '0.5px',
+  color: semanticColors['text-xlight'],
+} as const satisfies CSSObject
+
+const bodyBold = {
+  fontWeight: 700,
+  color: semanticColors['text-light'],
+} as const satisfies CSSObject
+
+const marketingTextPartials = {
   bigHeader: {
     fontFamily: fontFamilies.sansHero,
     fontSize: 62,
@@ -62,21 +83,16 @@ const marketingTextPartials = asElementTypes<CSSObject>()({
     letterSpacing: '0.25px',
     color: semanticColors.text,
   },
-  body1: {
-    fontFamily: fontFamilies.sans,
-    fontSize: 18,
-    lineHeight: '140%',
-    fontWeight: 300,
-    letterSpacing: '0.25px',
-    color: semanticColors['text-xlight'],
+  body1,
+  body2,
+  bodyBold,
+  body1Bold: {
+    ...body1,
+    ...bodyBold,
   },
-  body2: {
-    fontFamily: fontFamilies.sans,
-    fontSize: 16,
-    lineHeight: '160%',
-    fontWeight: 300,
-    letterSpacing: '0.5px',
-    color: semanticColors['text-xlight'],
+  body2Bold: {
+    ...body2,
+    ...bodyBold,
   },
   inlineLink: {
     color: semanticColors['action-link-inline'],
@@ -153,21 +169,6 @@ const marketingTextPartials = asElementTypes<CSSObject>()({
     color: semanticColors['text-xlight'],
     textTransform: 'uppercase',
   },
-  bodyBold: {
-    fontWeight: 700,
-    color: semanticColors['text-light'],
-  },
-  body1Bold: {},
-  body2Bold: {},
-})
-
-marketingTextPartials.body1Bold = {
-  ...marketingTextPartials.body1,
-  ...marketingTextPartials.bodyBold,
-}
-marketingTextPartials.body2Bold = {
-  ...marketingTextPartials.body2,
-  ...marketingTextPartials.bodyBold,
-}
+} as const satisfies Record<string, CSSObject>
 
 export { marketingTextPartials }

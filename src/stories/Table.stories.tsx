@@ -1,6 +1,13 @@
-import { Row, createColumnHelper } from '@tanstack/react-table'
-import { Flex, P } from 'honorable'
-import { ReactElement } from 'react'
+import { createColumnHelper } from '@tanstack/react-table'
+import {
+  Div,
+  Flex,
+  Input,
+  InputProps,
+  P,
+} from 'honorable'
+import React, { ReactElement, useEffect } from 'react'
+import type { Row } from '@tanstack/react-table'
 
 import {
   AppIcon,
@@ -10,9 +17,11 @@ import {
   InfoIcon,
   LogsIcon,
   Table,
+  Tooltip,
 } from '..'
 
 type Method = {
+  id?: string | number
   function: string
   inputType: string
   returnedValue: ReactElement | string
@@ -90,13 +99,33 @@ const columnHelper = createColumnHelper<Method>()
 const columns = [
   columnHelper.accessor(row => row.function, {
     id: 'function',
+    enableGlobalFilter: true,
+    enableSorting: true,
     cell: (info: any) => info.getValue(),
     header: () => <span>Function</span>,
   }),
+  columnHelper.accessor(row => row.id, {
+    id: 'id',
+    enableSorting: true,
+    cell: (info: any) => info.getValue(),
+    header: () => <span>ID</span>,
+  }),
   columnHelper.accessor(row => row.inputType, {
     id: 'inputType',
-    cell: (info: any) => <span>{info.getValue()}</span>,
+    enableSorting: true,
+    cell: (info: any) => (
+      <Tooltip
+        placement="top-start"
+        label={info.getValue()}
+      >
+        <span>{info.getValue()}</span>
+      </Tooltip>
+    ),
     header: () => <span>Input (type)</span>,
+    meta: {
+      truncate: true,
+      gridTemplate: 'minmax(150px, 1fr)',
+    },
   }),
   columnHelper.accessor(row => row.returnedValue, {
     id: 'returnedValue',
@@ -105,6 +134,7 @@ const columns = [
   }),
   columnHelper.accessor(row => row.description, {
     id: 'description',
+    enableGlobalFilter: true,
     cell: (info: any) => <span>{info.getValue()}</span>,
     header: () => (
       <Flex
@@ -180,12 +210,83 @@ function Template(args: any) {
   return <Table {...args} />
 }
 
+// A debounced input react component
+function DebouncedInput({
+  initialValue,
+  onChange,
+  debounce = 200,
+  ...props
+}: {
+  initialValue: string | number
+  onChange: (value: string | number) => void
+  debounce?: number
+} & Omit<InputProps, 'onChange' | 'value'>) {
+  const [value, setValue] = React.useState(initialValue)
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      onChange(value)
+    }, debounce)
+
+    return () => clearTimeout(timeout)
+  }, [debounce, onChange, value])
+
+  return (
+    <Input
+      {...props}
+      value={value}
+      onChange={e => setValue(e.target.value)}
+    />
+  )
+}
+
+function FilterableTemplate(args: any) {
+  const [globalFilter, setGlobalFilter] = React.useState('')
+
+  return (
+    <Div maxWidth="900px">
+      <DebouncedInput
+        initialValue={globalFilter}
+        onChange={value => setGlobalFilter(String(value))}
+        marginBottom="small"
+        placeholder="Filter by Function or Description'"
+      />
+      <Table
+        reactTableOptions={{
+          // globalFilterFn,
+          state: { globalFilter },
+        }}
+        {...args}
+      />
+    </Div>
+  )
+}
+
+const repeatedData = Array(25)
+  .fill(data)
+  .flat()
+  .map((item, i) => ({ ...item, id: i }))
+
+const extremeLengthData = Array(200)
+  .fill(data)
+  .flat()
+  .map((item, i) => ({ ...item, id: i }))
+
 export const Default = Template.bind({})
 
 Default.args = {
   width: '900px',
   height: '400px',
-  data: Array(25).fill(data).flat(),
+  data: repeatedData,
+  columns,
+}
+
+export const VirtualizedRows = Template.bind({})
+VirtualizedRows.args = {
+  virtualizeRows: true,
+  width: '900px',
+  height: '400px',
+  data: extremeLengthData,
   columns,
 }
 
@@ -194,7 +295,7 @@ export const Loose = Template.bind({})
 Loose.args = {
   width: '900px',
   height: '400px',
-  data: Array(25).fill(data).flat(),
+  data: repeatedData,
   columns,
   loose: true,
 }
@@ -204,7 +305,7 @@ export const StickyColumn = Template.bind({})
 StickyColumn.args = {
   width: '400px',
   height: '400px',
-  data: Array(25).fill(data).flat(),
+  data: repeatedData,
   columns,
   stickyColumn: true,
 }
@@ -214,10 +315,19 @@ export const Expandable = Template.bind({})
 Expandable.args = {
   width: '900px',
   height: '400px',
-  data: Array(25).fill(data).flat(),
+  data: repeatedData,
   columns: expandingColumns,
   getRowCanExpand: (row: Row<Method>) => row.original.expandable,
   renderExpanded: ({ row }: { row: Row<Method> }) => (
     <P>{row.original.description}</P>
   ),
+}
+
+export const FilterableAndSortable = FilterableTemplate.bind({})
+FilterableAndSortable.args = {
+  virtualizeRows: true,
+  width: 'auto',
+  height: '400px',
+  data: extremeLengthData,
+  columns,
 }

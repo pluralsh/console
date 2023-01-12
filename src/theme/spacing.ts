@@ -22,4 +22,4 @@ export const spacing = {
   xxxlarge: 64,
   xxxxlarge: 96,
   xxxxxlarge: 128,
-}
+} as const satisfies Record<string, number>

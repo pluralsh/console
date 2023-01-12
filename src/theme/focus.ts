@@ -1,13 +1,11 @@
 import { CSSObject } from 'styled-components'
 
-import { asElementTypes } from '../utils/asElementTypes'
-
 import { boxShadows } from './boxShadows'
 
 import { borderWidths } from './borders'
 import { semanticColors } from './colors'
 
-export const focusPartials = asElementTypes<CSSObject>()({
+export const focusPartials = {
   default: {
     outline: 'none',
     boxShadow: boxShadows.focused,
@@ -30,4 +28,4 @@ export const focusPartials = asElementTypes<CSSObject>()({
     bottom: `${borderWidths.focus}px`,
     boxShadow: boxShadows.focused,
   },
-})
+} as const satisfies Record<string, CSSObject>
