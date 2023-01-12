@@ -31,8 +31,7 @@ config :console, :watchers, [
   Console.Watchers.Application,
   Console.Watchers.Plural,
   Console.Watchers.Upgrade,
-  Console.Watchers.Pod,
-  Console.Watchers.Namespace
+  Console.Watchers.Pod
 ]
 
 config :console,
