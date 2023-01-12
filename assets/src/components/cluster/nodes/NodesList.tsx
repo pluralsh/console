@@ -152,7 +152,7 @@ const ColCpu = columnHelper.accessor(row => (row?.cpu.used ?? 0) / (row?.cpu.tot
         <UsageBar usage={props.getValue()} />
       </>
     ),
-    header: 'Memory usage',
+    header: 'CPU usage',
   })
 
 const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToLabel[row.readiness] : ''),
@@ -251,7 +251,6 @@ export function NodesList({
       loose
       data={tableData}
       columns={columns}
-      $truncColIndexes={[0]}
       {...TABLE_HEIGHT}
     />
   )

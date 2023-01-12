@@ -42,9 +42,7 @@ export default function AllPods() {
   ],
   [refetch])
 
-  if (error) {
-    console.log('error', error)
-  }
+  console.log('error', error)
 
   if (!data) {
     return <LoopingLogo />

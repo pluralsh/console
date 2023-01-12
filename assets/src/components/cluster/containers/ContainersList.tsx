@@ -183,7 +183,6 @@ type ContainersListProps = {
   podName: string
   refetch?: any
   columns?: any[]
-  truncColIndexes?: number[]
 }
 
 function toTableData(container: Container,

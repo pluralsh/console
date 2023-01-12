@@ -11,7 +11,7 @@ import Node from 'components/cluster/nodes/Node'
 import Nodes from 'components/cluster/nodes/Nodes'
 import NodeEvents from 'components/cluster/nodes/NodeEvents'
 import NodeRaw from 'components/cluster/nodes/NodeRaw'
-import ContainerShell from 'components/cluster/containers/ContainerShell'
+import Container from 'components/cluster/containers/Container'
 // import { PodShell } from 'components/terminal/PodShell'
 
 export const clusterRoutes = [
@@ -79,7 +79,7 @@ export const clusterRoutes = [
   /* Pod Shell */
   <Route
     path="pods/:namespace/:name/shell/:container"
-    element={<ContainerShell />}
+    element={<Container />}
   />,
   /* Redirect old routes */
   <Route

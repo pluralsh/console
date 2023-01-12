@@ -1,4 +1,9 @@
-import { memo, useContext, useMemo } from 'react'
+import {
+  ReactNode,
+  memo,
+  useContext,
+  useMemo,
+} from 'react'
 import { useQuery } from '@apollo/client'
 import { Box, ThemeContext } from 'grommet'
 import { memoryParser } from 'kubernetes-resource-parser'
@@ -11,12 +16,42 @@ import ChartDataLabels from 'chartjs-plugin-datalabels'
 
 import { cpuParser } from 'utils/kubernetes'
 
+import { PieChart } from 'components/utils/PieChart'
+
+import { Flex, FlexProps } from 'honorable'
+
+import styled from 'styled-components'
+
 import { ClusterMetrics as Metrics } from '../constants'
 import { NODE_METRICS_Q } from '../queries'
 
 import { cpuFmt, roundToTwoPlaces } from '../utils'
 
 Chart.register(ChartDataLabels)
+
+const ChartHeading = styled.h3(({ theme: _ }) => ({}))
+
+function ChartWrap({
+  children,
+  heading,
+  ...props
+}: Omit<FlexProps, 'heading'> & { heading: ReactNode }) {
+  return (
+    <Flex
+      width={180}
+      height={180}
+      {...props}
+    >
+      <ChartHeading>{heading}</ChartHeading>
+      {children}
+    </Flex>
+  )
+}
+
+const chartColors = {
+  used: '#F599A8',
+  available: '#FFF9C2',
+} as const satisfies Record<string, string>
 
 export function ClusterGauges({ nodes, usage }: { nodes: any; usage: any }) {
   const totalCpu = sumBy(nodes,
@@ -53,11 +88,11 @@ export function ClusterGauges({ nodes, usage }: { nodes: any; usage: any }) {
 
   const result = useMemo(() => {
     if (!data) {
-      return null
+      return {}
     }
     const {
       cpuRequests, cpuLimits, memRequests, memLimits, pods,
-    } = data
+    } = data || {}
 
     const datum = data => roundToTwoPlaces(parseFloat(data[0].values[0].value))
 
@@ -70,13 +105,44 @@ export function ClusterGauges({ nodes, usage }: { nodes: any; usage: any }) {
     }
   }, [data])
 
+  const {
+    cpuRequests, cpuLimits, memRequests, memLimits, pods,
+  } = result || {}
+
+  const chartData = useMemo(() => {
+    if (!result) return { cpu: [], memory: [] }
+
+    return {
+      cpuUsage: [
+        { id: 'CPU Usage', value: usage.cpu, color: chartColors.used },
+        {
+          id: 'CPU Available',
+          value: totalCpu - usage.cpu,
+          color: chartColors.available,
+        },
+      ],
+      cpuRequests: [
+        {
+          id: 'CPU Requests',
+          value: cpuRequests || 0,
+          color: chartColors.used,
+        },
+        {
+          id: 'CPU Remaining Limits',
+          value: (cpuLimits || 0) - (cpuRequests || 0),
+          color: chartColors.available,
+        },
+      ],
+    }
+  }, [result, usage.cpu, cpuRequests, cpuLimits, totalCpu])
+
   if (!result) {
     return null
   }
 
-  const {
-    cpuRequests, cpuLimits, memRequests, memLimits, pods,
-  } = result
+  console.log(
+    'result', cpuRequests, cpuLimits, usage.cpu, totalCpu
+  )
 
   return (
     <Box
@@ -85,6 +151,19 @@ export function ClusterGauges({ nodes, usage }: { nodes: any; usage: any }) {
       gap="small"
       align="center"
     >
+      {chartData.cpuUsage && (
+        <ChartWrap>
+          <PieChart
+            data={chartData.cpuUsage}
+            valueFormat={() => '20'}
+          />
+        </ChartWrap>
+      )}
+      {chartData.cpuRequests && (
+        <ChartWrap>
+          <PieChart data={chartData.cpuRequests} />
+        </ChartWrap>
+      )}
       <LayeredGauge
         usage={usage.cpu}
         requests={cpuRequests}
@@ -119,10 +198,10 @@ export const SimpleGauge = memo(({
   title,
   name,
 }: {
-    value?: number;
-    total?: number;
-    title: string;
-    name: string;
+    value?: number
+    total?: number
+    title: string
+    name: string
   }) => {
   const theme = useContext(ThemeContext)
   const val = value || 0
@@ -172,13 +251,13 @@ export const LayeredGauge = memo(({
   name,
   format,
 }: {
-    requests: any;
-    limits: any;
-    usage: any;
-    total: any;
-    title: any;
-    name: any;
-    format: any;
+    requests: any
+    limits: any
+    usage: any
+    total: any
+    title: any
+    name: any
+    format: any
   }) => {
   const theme = useContext(ThemeContext)
   const data = useMemo(() => {

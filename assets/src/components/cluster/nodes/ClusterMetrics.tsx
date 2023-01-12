@@ -13,6 +13,7 @@ export function ClusterMetrics({ nodes, usage }) {
       gap="xlarge"
       align="center"
     >
+
       <ClusterGauges
         nodes={nodes}
         usage={usage}
