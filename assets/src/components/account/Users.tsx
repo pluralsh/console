@@ -8,6 +8,8 @@ import {
 } from '@pluralsh/design-system'
 import { useRef, useState } from 'react'
 
+import { InviteUser } from './InviteUser'
+
 const DIRECTORY = [
   {
     key: 'Users',
@@ -51,7 +53,7 @@ export function Users() {
               </SubTab>
             ))}
           </TabList>
-          {/* <InviteUser /> */}
+          <InviteUser />
         </Flex>
       </PageTitle>
       <TabPanel

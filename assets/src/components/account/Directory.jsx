@@ -58,7 +58,6 @@ import {
 
 import Avatar from './Avatar'
 import { GroupForm } from './CreateGroup'
-import { InviteForm } from './CreateInvite'
 
 const INPUT_WIDTH = '350px'
 
@@ -449,18 +448,6 @@ export default function Directory() {
               <SectionChoice
                 icon={<CreateRoleI size="14px" />}
                 label="Create Role"
-                onClick={onClick}
-              />
-            )}
-          </CreateModal>
-          <CreateModal
-            header="Invite a user"
-            form={<InviteForm />}
-          >
-            {onClick => (
-              <SectionChoice
-                icon={<AddUser size="14px" />}
-                label="Invite User"
                 onClick={onClick}
               />
             )}
