@@ -1,6 +1,6 @@
 import { Sidecar, SidecarItem } from '@pluralsh/design-system'
 import { Node, NodeMetric, Pod } from 'generated/graphql'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
 import { nodeStatusToReadiness } from 'utils/status'
 

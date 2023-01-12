@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Button, GqlError } from 'forge-core'
-import { useMutation, useQuery } from 'react-apollo'
+import { useMutation, useQuery } from '@apollo/client'
 import {
   Box,
   Form,
@@ -137,13 +137,14 @@ function fudgedUser(name) {
   const id = uuidv4()
   const randstr = Math.random().toString(36).slice(2)
   const user = { email: `sandbox+${randstr}@plural.sh`, name, userId: id }
+
   localStorage.setItem(FUDGED_USER, user)
 
   return user
 }
 
 function intercomAttributes({ email, name }) {
-  if (email === 'demo-user@plural.sh') { 
+  if (email === 'demo-user@plural.sh') {
     console.log('here')
 
     return fudgedUser(name)

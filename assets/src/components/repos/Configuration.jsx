@@ -5,7 +5,7 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { useMutation, useQuery } from 'react-apollo'
+import { useMutation, useQuery } from '@apollo/client'
 import {
   Box,
   Text,

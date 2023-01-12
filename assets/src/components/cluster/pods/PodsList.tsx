@@ -10,7 +10,7 @@ import { ReadinessT } from 'utils/status'
 import { IconFrame, Tooltip, TrashCanIcon } from '@pluralsh/design-system'
 
 import { Confirm } from 'components/utils/Confirm'
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 
 import {
   ContainersReadyChip,

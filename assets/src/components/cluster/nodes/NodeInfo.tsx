@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
 
 import { ArcElement, Chart } from 'chart.js'

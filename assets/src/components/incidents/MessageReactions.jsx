@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 import { Box, Text } from 'grommet'
 import { Tooltip } from 'forge-core'
 import 'emoji-mart/css/emoji-mart.css'

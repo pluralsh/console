@@ -1,7 +1,7 @@
 import { Sidecar, SidecarItem } from '@pluralsh/design-system'
 import { Pod } from 'generated/graphql'
 import { A } from 'honorable'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 import { Link, useParams } from 'react-router-dom'
 import { podStatusToReadiness } from 'utils/status'
 

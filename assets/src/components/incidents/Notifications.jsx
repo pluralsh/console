@@ -6,7 +6,7 @@ import {
   useMutation,
   useQuery,
   useSubscription,
-} from 'react-apollo'
+} from '@apollo/client'
 
 import moment from 'moment'
 

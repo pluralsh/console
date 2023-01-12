@@ -14,7 +14,7 @@ import {
   Scroller,
 } from 'forge-core'
 
-import { useMutation, useQuery, useSubscription } from 'react-apollo'
+import { useMutation, useQuery, useSubscription } from '@apollo/client'
 
 import { useNavigate, useParams } from 'react-router-dom'
 

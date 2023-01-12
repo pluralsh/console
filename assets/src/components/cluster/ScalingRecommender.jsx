@@ -7,7 +7,7 @@ import {
   TabHeaderItem,
   Tabs,
 } from 'forge-core'
-import { useMutation, useQuery } from '@apollo/react-hooks'
+import { useMutation, useQuery } from '@apollo/client'
 
 import { Box, Layer, Text } from 'grommet'
 

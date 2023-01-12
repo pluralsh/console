@@ -7,7 +7,7 @@ import {
 } from '@pluralsh/design-system'
 import { useContext, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useMutation, useQuery } from 'react-apollo'
+import { useMutation, useQuery } from '@apollo/client'
 import { Flex, P } from 'honorable'
 import { PluralApi } from 'components/PluralApi'
 

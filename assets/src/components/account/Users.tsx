@@ -1,26 +1,34 @@
 import { Flex } from 'honorable'
 import { Box } from 'grommet'
-import {
-  PageTitle,
-  SubTab,
-  TabList,
-  TabPanel,
-} from '@pluralsh/design-system'
+import { PageTitle, TabPanel } from '@pluralsh/design-system'
 import { useRef, useState } from 'react'
 
-const DIRECTORY = [
-  {
-    key: 'Users',
-    label: 'Users',
-  },
-  {
-    key: 'Invites',
-    label: 'Invites',
-  },
-]
+import { InviteUser } from './InviteUser'
+import { UsersList } from './UsersList'
+
+// const DIRECTORY = [
+//   {
+//     key: 'Users',
+//     label: 'Users',
+//   },
+//   {
+//     key: 'Invites',
+//     label: 'Invites',
+//   },
+// ]
+
+function getContent(selectedKey: string): JSX.Element | null {
+  switch (selectedKey) {
+  case 'Invites':
+    return null // Add list of invites once API will be ready.
+  case 'Users':
+  default:
+    return <UsersList />
+  }
+}
 
 export function Users() {
-  const [selectedKey, setSelectedKey] = useState<any>('Users')
+  const [selectedKey] = useState<any>('Users')
   const tabStateRef = useRef<any>(null)
 
   return (
@@ -34,7 +42,7 @@ export function Users() {
           alignItems="flex-end"
           gap="medium"
         >
-          <TabList
+          {/* <TabList
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',
@@ -50,8 +58,8 @@ export function Users() {
                 {label}
               </SubTab>
             ))}
-          </TabList>
-          {/* <InviteUser /> */}
+          </TabList> */}
+          <InviteUser />
         </Flex>
       </PageTitle>
       <TabPanel
@@ -63,9 +71,7 @@ export function Users() {
         )}
         stateRef={tabStateRef}
       >
-        {/* {selectedKey === 'Users' && <UsersList />}
-        {selectedKey === 'Invites' && <Invites />} */}
-        TODO: TBD.
+        {getContent(selectedKey)}
       </TabPanel>
     </Flex>
   )

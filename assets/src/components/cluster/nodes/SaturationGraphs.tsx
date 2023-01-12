@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 import { Box } from 'grommet'
 import { format } from 'components/apps/app/dashboards/dashboard/misc'
 

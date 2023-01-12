@@ -16,7 +16,7 @@ import {
   useState,
 } from 'react'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 import { Div, Flex } from 'honorable'
 
 import { DURATIONS, SECOND_TO_MILLISECONDS } from 'utils/time'

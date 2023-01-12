@@ -1,6 +1,6 @@
 import { Card, LoopingLogo } from '@pluralsh/design-system'
 import { Flex } from 'honorable'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 
 import { byIso } from 'country-code-lookup'
 

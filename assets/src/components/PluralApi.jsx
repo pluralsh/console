@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from 'react'
-import { ApolloProvider } from 'react-apollo'
+import { ApolloProvider } from '@apollo/client'
 
 import { buildClient } from '../helpers/client'
 

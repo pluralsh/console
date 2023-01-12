@@ -1,6 +1,6 @@
 import { Box, Text } from 'grommet'
 import { useEffect } from 'react'
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 import { useParams } from 'react-router'
 
 import { setToken } from '../helpers/auth'

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Box } from 'grommet'
 import { Button } from 'forge-core'
-import { useMutation, useQuery } from 'react-apollo'
+import { useMutation, useQuery } from '@apollo/client'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { LoopingLogo } from '../utils/AnimatedLogo'

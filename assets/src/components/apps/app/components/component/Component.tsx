@@ -34,7 +34,7 @@ import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLa
 
 import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLayoutSidenavContainer'
 
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 
 import { POLL_INTERVAL } from 'components/cluster/constants'
 

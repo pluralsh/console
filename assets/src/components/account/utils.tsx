@@ -1,3 +1,5 @@
+import { apiHost } from '../../utils/hostname'
+
 import { SearchIcon as SI } from '../utils/SearchIcon'
 
 import { GROUPS_Q, GROUP_MEMBERS, ROLES_Q } from './queries'
@@ -62,3 +64,13 @@ export function addRole(cache, role) {
     data: { ...data, roles: { ...roles, edges: [{ __typename: 'RoleEdge', node: role }, ...roles.edges] } },
   })
 }
+
+export const inviteLink = invite => `https://${apiHost()}/invite/${invite.secureId}`
+
+export const sanitize = ({ id, user, group }) => ({ id, userId: user && user.id, groupId: group && group.id })
+
+export const canEdit = ({ roles, id }, { rootUser }) => (
+  (roles && roles.admin) || id === rootUser.id
+)
+
+export const hasRbac = ({ boundRoles }, role) => (boundRoles || []).some(({ permissions }) => permissions.includes(role))

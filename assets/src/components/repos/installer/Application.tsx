@@ -10,9 +10,10 @@ import {
   WizardStep,
   useActive,
 } from '@pluralsh/design-system'
-import { useQuery } from 'react-apollo'
 import { Box } from 'grommet'
 import { Div, Span } from 'honorable'
+
+import { useQuery } from '@apollo/client'
 
 import { RECIPES_Q, RECIPE_Q } from '../../graphql/plural'
 import { Recipe, RepositoryContext } from '../../../generated/graphql'

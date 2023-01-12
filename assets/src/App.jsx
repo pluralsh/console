@@ -3,7 +3,7 @@ import { Grommet } from 'grommet'
 
 import { IntercomProvider } from 'react-use-intercom'
 
-import { ApolloProvider } from 'react-apollo'
+import { ApolloProvider } from '@apollo/client'
 
 import { mergeDeep } from '@apollo/client/utilities'
 

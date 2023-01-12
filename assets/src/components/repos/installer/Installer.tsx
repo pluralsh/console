@@ -16,11 +16,13 @@ import {
   WizardStepConfig,
   WizardStepper,
 } from '@pluralsh/design-system'
-import { useQuery } from 'react-apollo'
 import { Box } from 'grommet'
-import { ApolloClient } from 'apollo-client'
-import { useApolloClient } from '@apollo/react-hooks'
-import { FetchResult } from '@apollo/client'
+import {
+  ApolloClient,
+  FetchResult,
+  useApolloClient,
+  useQuery,
+} from '@apollo/client'
 
 import { useNavigate } from 'react-router-dom'
 

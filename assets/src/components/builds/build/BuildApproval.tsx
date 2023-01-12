@@ -1,7 +1,7 @@
 import { Button, CheckIcon } from '@pluralsh/design-system'
 import { APPROVE_BUILD } from 'components/graphql/builds'
 import { BuildStatus } from 'components/types'
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 
 export default function BuildApproval({ build }) {
   const [mutation, { loading }] = useMutation(APPROVE_BUILD, { variables: { id: build.id } })

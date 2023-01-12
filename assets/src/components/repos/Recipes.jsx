@@ -1,4 +1,4 @@
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 import { ModalHeader } from 'forge-core'
 
 import { Box, Text } from 'grommet'

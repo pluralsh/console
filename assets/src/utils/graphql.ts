@@ -1,15 +1,6 @@
-import { isString } from 'lodash'
+import isString from 'lodash/isString'
 
-export function deepFetch(map, path) {
-  if (isString(path)) return deepFetch(map, path.split('.'))
-
-  const key = path[0]
-
-  if (path.length === 1) return map[key]
-  if (!map[key]) return null
-
-  return deepFetch(map[key], path.slice(1))
-}
+import uniqWith from 'lodash/uniqWith'
 
 export function updateFragment(cache, {
   fragment, id, update, fragmentName,
@@ -25,11 +16,12 @@ export function updateFragment(cache, {
 
 export function extendConnection(prev, next, key) {
   const { edges, pageInfo } = next
+  const uniq = uniqWith([...prev[key].edges, ...edges], (a, b) => (a.node?.id ? a.node?.id === b.node?.id : false))
 
   return {
     ...prev,
     [key]: {
-      ...prev[key], pageInfo, edges: [...prev[key].edges, ...edges],
+      ...prev[key], pageInfo, edges: uniq,
     },
   }
 }
@@ -69,4 +61,17 @@ export function updateCache(cache, { query, variables, update }) {
   cache.writeQuery({ query, variables, data: update(prev) })
 }
 
+// eslint-disable-next-line
 export const prune = ({ __typename, ...rest }) => rest
+
+export function deepFetch(map, path) {
+  if (isString(path)) return deepFetch(map, path.split('.'))
+
+  const key = path[0]
+
+  if (path.length === 1) return map[key]
+  if (!map[key]) return null
+
+  return deepFetch(map[key], path.slice(1))
+}
+

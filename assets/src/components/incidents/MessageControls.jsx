@@ -12,7 +12,7 @@ import {
   Trash,
 } from 'forge-core'
 
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 
 import { useParams } from 'react-router-dom'
 

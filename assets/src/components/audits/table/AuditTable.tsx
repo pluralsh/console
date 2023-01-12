@@ -13,7 +13,7 @@ import {
   useEffect,
   useMemo,
 } from 'react'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 import { extendConnection } from 'utils/graphql'
 
 import { AUDITS_Q } from '../queries'

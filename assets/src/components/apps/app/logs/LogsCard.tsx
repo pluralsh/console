@@ -2,7 +2,7 @@ import { Card } from '@pluralsh/design-system'
 import { LOGS_Q } from 'components/graphql/dashboards'
 import { Flex } from 'honorable'
 import { useState } from 'react'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 
 import LogContent from './LogContent'
 

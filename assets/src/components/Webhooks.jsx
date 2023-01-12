@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
-import { useMutation, useQuery } from 'react-apollo'
+import { useMutation, useQuery } from '@apollo/client'
 
 import {
   Button,
@@ -37,7 +37,7 @@ import { LoopingLogo } from './utils/AnimatedLogo'
 import { Container } from './utils/Container'
 import { SectionContentContainer, SectionPortal } from './utils/Section'
 import SmoothScroller from './utils/SmoothScroller'
-import { Icon } from './account/Group'
+import { Icon } from './account/Groupx'
 
 // const MAX_LEN = 100
 // const trim = (url) => url.length > 10 ? `${url.slice(0, MAX_LEN)}...` : url

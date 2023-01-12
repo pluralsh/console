@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useMutation, useQuery } from 'react-apollo'
+import { useMutation, useQuery } from '@apollo/client'
 import { Box, Keyboard, Text } from 'grommet'
 import { Button, GqlError, SecondaryButton } from 'forge-core'
 import { Checkmark, StatusCritical } from 'grommet-icons'

@@ -4,7 +4,7 @@ import { Confirm } from 'components/utils/Confirm'
 import PropWide from 'components/utils/PropWide'
 import { Flex, H2 } from 'honorable'
 import { useState } from 'react'
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 import { useOutletContext } from 'react-router-dom'
 
 export function DeleteJob({ name, namespace, refetch }) {

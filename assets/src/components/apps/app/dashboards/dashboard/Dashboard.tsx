@@ -15,7 +15,7 @@ import {
   useState,
 } from 'react'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 import { DASHBOARDS_Q, DASHBOARD_Q } from 'components/graphql/dashboards'
 import { Div, Flex } from 'honorable'
 

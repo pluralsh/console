@@ -2,7 +2,7 @@ import { Banner, Button } from '@pluralsh/design-system'
 import { ApolloError } from 'apollo-boost'
 import { EXECUTE_RUNBOOK } from 'components/runbooks/queries'
 import { useContext, useState } from 'react'
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { ActionPortal } from '../Runbook'

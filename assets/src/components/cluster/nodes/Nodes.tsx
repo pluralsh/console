@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 import { sumBy } from 'lodash'
 
 import { Flex } from 'honorable'

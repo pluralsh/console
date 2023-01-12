@@ -6,7 +6,7 @@ import React, {
 } from 'react'
 
 import { FilePicker } from 'react-file-picker'
-import { useMutation } from 'react-apollo'
+import { useMutation } from '@apollo/client'
 
 import {
   Box,

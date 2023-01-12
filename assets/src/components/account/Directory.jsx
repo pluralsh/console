@@ -6,26 +6,20 @@ import {
   TextInput,
   ThemeContext,
 } from 'grommet'
-import { useMutation, useQuery } from 'react-apollo'
+import { useMutation, useQuery } from '@apollo/client'
 import {
-  AddGroup,
-  AddUser,
   Button,
   CreateRole as CreateRoleI,
-  Group,
   InputCollection,
   Messages,
   ModalHeader,
   ResponsiveInput,
   Roles,
   Scroller,
-  User,
   Webhooks,
 } from 'forge-core'
 
 import { useNavigate, useParams } from 'react-router-dom'
-
-import Toggle from 'react-toggle'
 
 import { BreadcrumbsContext } from '../Breadcrumbs'
 
@@ -45,20 +39,9 @@ import { LoginContext } from '../contexts'
 
 import { SearchIcon } from './utils'
 
-import GroupRow from './Group'
-
 import RoleRow, { CreateRole } from './Role'
 
-import {
-  EDIT_USER,
-  GROUPS_Q,
-  ROLES_Q,
-  USERS_Q,
-} from './queries'
-
-import Avatar from './Avatar'
-import { GroupForm } from './CreateGroup'
-import { InviteForm } from './CreateInvite'
+import { ROLES_Q } from './queries'
 
 const INPUT_WIDTH = '350px'
 
@@ -126,146 +109,9 @@ function SmtpSettingsInner({ smtp }) {
 function SmtpSettings() {
   const { data } = useQuery(SMTP_Q)
 
-  console.log(data)
-
   if (!data) return null
 
   return <SmtpSettingsInner smtp={data.smtp} />
-}
-
-function UserRow({ user }) {
-  const admin = user.roles && user.roles.admin
-  const [mutation] = useMutation(EDIT_USER, { variables: { id: user.id } })
-
-  return (
-    <Box
-      pad="small"
-      direction="row"
-      align="center"
-      gap="small"
-      border={{ side: 'bottom', color: 'tone-light' }}
-    >
-      <Avatar
-        user={user}
-        size="50px"
-      />
-      <Box flex={false}>
-        <Text
-          size="small"
-          weight="bold"
-        >{user.email}
-        </Text>
-        <Text size="small">{user.name}</Text>
-      </Box>
-      <Box
-        fill="horizontal"
-        direction="row"
-        align="center"
-        justify="end"
-      >
-        <Box
-          flex={false}
-          direction="row"
-          align="center"
-          gap="xsmall"
-        >
-          <Toggle
-            checked={!!admin}
-            onChange={({ target: { checked } }) => mutation({ variables: { attributes: { roles: { admin: !!checked } } } })}
-          />
-          <Text size="small">admin</Text>
-        </Box>
-      </Box>
-    </Box>
-  )
-}
-
-function UsersInner() {
-  const [q, setQ] = useState(null)
-  const { data, fetchMore } = useQuery(USERS_Q, { variables: { q } })
-
-  if (!data) return <LoopingLogo scale="0.75" />
-
-  const { users: { pageInfo, edges } } = data
-
-  return (
-    <SectionContentContainer header="Users">
-      <Scroller
-        id="users"
-        style={{ height: '100%', overflow: 'auto' }}
-        edges={edges}
-        mapper={({ node }, next) => (
-          <UserRow
-            key={node.id}
-            user={node}
-            next={next.node}
-          />
-        )}
-        onLoadMore={() => pageInfo.hasNextPage && fetchMore({
-          variables: { userCursor: pageInfo.endCursor },
-          updateQuery: (prev, { fetchMoreResult: { users } }) => extendConnection(prev, users, 'users'),
-        })}
-      />
-      <SectionPortal>
-        <Box
-          flex={false}
-          width={INPUT_WIDTH}
-        >
-          <TextInput
-            icon={<SearchIcon />}
-            reverse
-            placeholder="search for users"
-            value={q || ''}
-            onChange={({ target: { value } }) => setQ(value)}
-          />
-        </Box>
-      </SectionPortal>
-    </SectionContentContainer>
-  )
-}
-
-function GroupsInner() {
-  const [q, setQ] = useState(null)
-  const { data, fetchMore } = useQuery(GROUPS_Q, { variables: { q } })
-
-  if (!data) return <LoopingLogo scale="0.75" />
-
-  const { groups: { pageInfo, edges } } = data
-
-  return (
-    <SectionContentContainer header="Groups">
-      <Scroller
-        id="groups"
-        style={{ height: '100%', overflow: 'auto' }}
-        edges={edges}
-        mapper={({ node }, next) => (
-          <GroupRow
-            key={node.id}
-            group={node}
-            next={next.node}
-          />
-        )}
-        onLoadMore={() => pageInfo.hasNextPage && fetchMore({
-          variables: { userCursor: pageInfo.endCursor },
-          updateQuery: (prev, { fetchMoreResult: { groups } }) => extendConnection(prev, groups, 'groups'),
-        })}
-      />
-      <SectionPortal>
-        <Box
-          flex={false}
-          width={INPUT_WIDTH}
-        >
-          <TextInput
-            icon={<SearchIcon />}
-            reverse
-            placeholder="search for groups"
-            value={q || ''}
-            onChange={({ target: { value } }) => setQ(value)}
-          />
-        </Box>
-      </SectionPortal>
-    </SectionContentContainer>
-  )
 }
 
 function RolesInner() {
@@ -397,18 +243,6 @@ export default function Directory() {
           width="200px"
         >
           <SectionChoice
-            icon={<User size="14px" />}
-            label="Users"
-            section="users"
-            setSection={setSection}
-          />
-          <SectionChoice
-            icon={<Group size="14px" />}
-            label="Groups"
-            section="groups"
-            setSection={setSection}
-          />
-          <SectionChoice
             icon={<Roles size="14px" />}
             label="Roles"
             section="roles"
@@ -429,18 +263,6 @@ export default function Directory() {
             setSection={setSection}
           />
           <CreateModal
-            header="Create a new group"
-            form={<GroupForm />}
-          >
-            {onClick => (
-              <SectionChoice
-                icon={<AddGroup size="14px" />}
-                label="Create Group"
-                onClick={onClick}
-              />
-            )}
-          </CreateModal>
-          <CreateModal
             width="50vw"
             header="Create a new role"
             form={<CreateRole />}
@@ -453,26 +275,12 @@ export default function Directory() {
               />
             )}
           </CreateModal>
-          <CreateModal
-            header="Invite a user"
-            form={<InviteForm />}
-          >
-            {onClick => (
-              <SectionChoice
-                icon={<AddUser size="14px" />}
-                label="Invite User"
-                onClick={onClick}
-              />
-            )}
-          </CreateModal>
         </Box>
         <Box
           background="white"
           elevation="small"
           fill
         >
-          {section === 'users' && <UsersInner />}
-          {section === 'groups' && <GroupsInner />}
           {section === 'roles' && <RolesInner />}
           {section === 'webhooks' && <WebhookManagement />}
           {section === 'smtp' && conf.gitStatus.cloned && <SmtpSettings />}

@@ -10,7 +10,7 @@ import { Flex } from 'honorable'
 import { useCallback, useMemo } from 'react'
 import update from 'lodash/update'
 import { RUNBOOK_EXECUTIONS_Q } from 'components/runbooks/queries'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
 
 const columnHelper = createColumnHelper<any>()

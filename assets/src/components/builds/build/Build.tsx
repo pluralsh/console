@@ -10,7 +10,7 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 import { ThemeContext } from 'grommet'
 
 import { mergeEdges } from 'components/graphql/utils'

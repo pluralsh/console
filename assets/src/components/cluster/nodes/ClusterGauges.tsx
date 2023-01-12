@@ -1,5 +1,5 @@
 import { memo, useContext, useMemo } from 'react'
-import { useQuery } from 'react-apollo'
+import { useQuery } from '@apollo/client'
 import { Box, ThemeContext } from 'grommet'
 import { memoryParser } from 'kubernetes-resource-parser'
 import { filesize } from 'filesize'
