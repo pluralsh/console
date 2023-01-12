@@ -1,9 +1,14 @@
 import { useMemo, useState } from 'react'
 import { filesize } from 'filesize'
 import { A, Flex } from 'honorable'
-import { IconFrame, Tooltip, TrashCanIcon } from '@pluralsh/design-system'
+import {
+  IconFrame,
+  Table,
+  Tooltip,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 import { Link } from 'react-router-dom'
-import { createColumnHelper } from '@tanstack/react-table'
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 
 import { Node, NodeMetric } from 'generated/graphql'
 import { ReadinessT, nodeStatusToReadiness, readinessToLabel } from 'utils/status'
@@ -16,7 +21,6 @@ import { useMutation } from '@apollo/client'
 import { mapify } from '../Metadata'
 import {
   CaptionText,
-  GridTable,
   StatusChip,
   TABLE_HEIGHT,
   TableCaretLink,
@@ -106,7 +110,7 @@ const ColName = columnHelper.accessor(row => row.name, {
   ),
   header: 'Name',
   maxSize: 30,
-  enableResizing: true,
+  meta: { truncate: true },
 })
 
 const ColRegionZone = columnHelper.accessor(row => `${row.zone} - ${row.zone}`,
@@ -228,7 +232,7 @@ export function NodesList({
   [metrics, nodes])
 
   // Memoize columns to prevent rerendering entire table
-  const columns = useMemo(() => [
+  const columns: ColumnDef<TableData, any>[] = useMemo(() => [
     ColName,
     ColRegionZone,
     ColMemory,
@@ -243,7 +247,8 @@ export function NodesList({
   }
 
   return (
-    <GridTable
+    <Table
+      loose
       data={tableData}
       columns={columns}
       $truncColIndexes={[0]}

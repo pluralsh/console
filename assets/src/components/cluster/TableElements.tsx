@@ -2,11 +2,9 @@ import {
   CaretRightIcon,
   Chip,
   IconFrame,
-  Table,
   Tooltip,
 } from '@pluralsh/design-system'
 import { UnstyledLink } from 'components/utils/Link'
-import { TRUNCATE } from 'components/utils/truncate'
 import { Flex, Span } from 'honorable'
 import { CSSProperties, ComponentProps, ReactNode } from 'react'
 import styled from 'styled-components'
@@ -18,58 +16,6 @@ import {
 } from 'utils/status'
 
 import { ContainerStatus } from './pods/PodsList'
-
-const GridTableBase = styled(Table)(({ theme }) => ({
-  table: {
-    display: 'grid',
-    borderCollapse: 'collapse',
-    minWidth: '100%',
-  },
-  th: {
-    backgroundColor: theme.colors['fill-two'],
-    position: 'sticky',
-    top: 0,
-    zIndex: 1,
-  },
-  'thead, tbody, tr': {
-    display: 'contents',
-  },
-  td: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    height: 'auto',
-  },
-}))
-
-export const GridTable = styled(GridTableBase)<{ $truncColIndexes: number[] }>(({ columns, $truncColIndexes = [] }) => {
-  const gridTemplateColumns = columns
-    .reduce((val, _, i) => [
-      ...val,
-      ($truncColIndexes as number[]).findIndex(truncIdx => truncIdx === i) >= 0
-        ? 'minmax(100px, 1fr)'
-        : 'auto',
-    ],
-    [])
-    .join(' ')
-
-  const truncStyles = $truncColIndexes.reduce((prev, truncIdx) => ({
-    ...prev,
-    [`td:nth-child(${truncIdx + 1})`]: {
-      '*': TRUNCATE,
-    },
-  }),
-      {} as CSSProperties)
-
-  const ret = {
-    table: {
-      gridTemplateColumns,
-    },
-    ...truncStyles,
-  }
-
-  return ret
-})
 
 const isNullishIsh = (val: any) => {
   if (typeof val === 'number') {
@@ -107,12 +53,12 @@ export function UsageUnstyled({
   className?: string
 }) {
   return (
-    <TableText className={className}>
+    <div className={className}>
       {isNullishIsh(used) ? '—' : used}
       {' / '}
       {isNullishIsh(total) ? '—' : total}
       {units && ` ${units}`}
-    </TableText>
+    </div>
   )
 }
 export const Usage = styled(UsageUnstyled)(_ => ({

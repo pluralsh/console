@@ -6,7 +6,6 @@ import {
   ColDelete,
   ColMemory,
   ColNameLink,
-  ColNodeName,
   ColRestarts,
   PodsList,
 } from 'components/cluster/pods/PodsList'
@@ -18,8 +17,12 @@ export default function Pods({ pods }) {
 
   const columns = useMemo(() => [
     ColNameLink,
-    ColNodeName,
-    ColMemory,
+    {
+      ...ColMemory,
+      meta: {
+        truncate: true,
+      },
+    },
     ColCpu,
     ColRestarts,
     ColContainers,
@@ -38,7 +41,6 @@ export default function Pods({ pods }) {
       <PodsList
         pods={pods}
         columns={columns}
-        truncColIndexes={[0, 1]}
       />
     </Flex>
   )

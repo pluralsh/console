@@ -10,7 +10,12 @@ import type {
 } from 'generated/graphql'
 import { ReadinessT, containerStatusToReadiness, readinessToLabel } from 'utils/status'
 
-import { IconFrame, TerminalIcon, Tooltip } from '@pluralsh/design-system'
+import {
+  IconFrame,
+  Table,
+  TerminalIcon,
+  Tooltip,
+} from '@pluralsh/design-system'
 
 import { cpuParser, memoryParser } from 'utils/kubernetes'
 
@@ -20,7 +25,6 @@ import { UnstyledLink } from 'components/utils/Link'
 import styled from 'styled-components'
 
 import {
-  GridTable,
   StatusChip,
   TABLE_HEIGHT,
   TableText,
@@ -66,6 +70,9 @@ const ColName = columnHelper.accessor(row => row.name, {
     </TableText>
   ),
   header: 'Name',
+  meta: {
+    truncate: true,
+  },
 })
 
 const ColPorts = columnHelper.accessor(row => row.ports, {
@@ -218,7 +225,6 @@ export function ContainersList({
   initContainers,
   initContainerStatuses,
   columns,
-  truncColIndexes = [0],
   namespace,
   podName,
 }: ContainersListProps) {
@@ -251,11 +257,11 @@ export function ContainersList({
   }
 
   return (
-    <GridTable
+    <Table
+      loose
       data={tableData}
       columns={columns}
       enableColumnResizing
-      $truncColIndexes={truncColIndexes}
       {...TABLE_HEIGHT}
     />
   )

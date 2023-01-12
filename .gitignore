@@ -31,3 +31,7 @@ watchman-*.tar
 
 # misc
 .DS_Store
+
+# yalc
+.yalc
+yalc.lock

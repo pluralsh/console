@@ -1,19 +1,17 @@
 import { useMemo } from 'react'
 import { useQuery } from 'react-apollo'
-import { sumBy } from 'lodash'
 
 import { Flex } from 'honorable'
-import { Card, LoopingLogo, PageTitle } from '@pluralsh/design-system'
-import { ScrollablePage } from 'components/layout/ScrollablePage'
+import { LoopingLogo, PageTitle } from '@pluralsh/design-system'
 
-import type { Node, NodeMetric, Pod } from 'generated/graphql'
-import { cpuParser, memoryParser } from 'utils/kubernetes'
+import type { Pod } from 'generated/graphql'
 
 import { PODS_Q } from '../queries'
 
 import { POLL_INTERVAL } from '../constants'
 
 import {
+  ColActions,
   ColContainers,
   ColCpu,
   ColDelete,
@@ -36,12 +34,11 @@ export default function AllPods() {
   const columns = useMemo(() => [
     ColNameLink,
     ColNamespace,
-    ColNodeName,
     ColMemory,
     ColCpu,
     ColRestarts,
     ColContainers,
-    ColDelete(refetch),
+    ColActions(refetch),
   ],
   [refetch])
 
@@ -59,7 +56,6 @@ export default function AllPods() {
       gap="xlarge"
     >
       <PageTitle heading="Pods" />
-      hello
       <PodsList
         pods={data.pods}
         columns={columns}

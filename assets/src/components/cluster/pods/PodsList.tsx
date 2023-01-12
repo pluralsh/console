@@ -7,14 +7,18 @@ import { filesize } from 'filesize'
 import type { Maybe, Pod } from 'generated/graphql'
 import { ReadinessT } from 'utils/status'
 
-import { IconFrame, Tooltip, TrashCanIcon } from '@pluralsh/design-system'
+import {
+  IconFrame,
+  Table,
+  Tooltip,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 
 import { Confirm } from 'components/utils/Confirm'
 import { useMutation } from '@apollo/client'
 
 import {
   ContainersReadyChip,
-  GridTable,
   TABLE_HEIGHT,
   TableCaretLink,
   TableText,
@@ -105,6 +109,9 @@ export const ColNameLink = columnHelper.accessor(row => row.name, {
     </TableText>
   ),
   header: 'Name',
+  meta: {
+    truncate: true,
+  },
 })
 
 export const ColName = columnHelper.accessor(row => row.name, {
@@ -237,8 +244,7 @@ export const ColDelete = refetch => columnHelper.accessor(row => row.name, {
 
 type PodListProps = {
   pods?: Maybe<Pod>[] & Pod[]
-  columns?: any[]
-  truncColIndexes?: number[]
+  columns: any[]
 }
 
 function getRestarts(status: Pod['status']) {
@@ -249,7 +255,6 @@ function getRestarts(status: Pod['status']) {
 export function PodsList({
   pods,
   columns,
-  truncColIndexes = [0],
 }: PodListProps) {
   const tableData: PodTableRow[] = useMemo(() => (pods || [])
     .filter((pod): pod is Pod => !!pod)
@@ -286,11 +291,11 @@ export function PodsList({
   }
 
   return (
-    <GridTable
+    <Table
       data={tableData}
       columns={columns}
       enableColumnResizing
-      $truncColIndexes={truncColIndexes}
+      virtualizeRows
       {...TABLE_HEIGHT}
     />
   )

@@ -3473,9 +3473,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:1.300.0":
-  version: 1.300.0
-  resolution: "@pluralsh/design-system@npm:1.300.0"
+"@pluralsh/design-system@npm:1.301.0":
+  version: 1.301.0
+  resolution: "@pluralsh/design-system@npm:1.301.0"
   dependencies:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@monaco-editor/react": 4.4.6
@@ -3498,7 +3498,8 @@ __metadata:
     "@react-stately/tabs": 3.2.3
     "@react-stately/toggle": 3.4.3
     "@react-types/shared": 3.16.0
-    "@tanstack/react-table": 8.7.4
+    "@tanstack/match-sorter-utils": 8.7.6
+    "@tanstack/react-table": 8.7.6
     "@types/chroma-js": 2.1.4
     chroma-js: 2.4.2
     classnames: 2.3.2
@@ -3512,6 +3513,7 @@ __metadata:
     react-markdown: 8.0.4
     react-merge-refs: 2.0.1
     react-spring: 9.6.1
+    react-virtual: 2.10.4
     rehype-raw: 6.1.1
     resize-observer-polyfill: 1.5.1
   peerDependencies:
@@ -3523,7 +3525,7 @@ __metadata:
     react-dom: ">=16.0.0"
     react-transition-group: ">=4.4.2"
     styled-components: ">=5.3.5"
-  checksum: 747bf20862b57d23aa0c0169a2995d7c94007cc2e74e06ee5ec5dcf27cc6995e993997aaa154cc9ac6f56c3c947523271b8c09568e80f4b78efa28c6d75837a5
+  checksum: 2910640ade0c054f0421bcbe2f38217119ebe0736933e12d0df6bce077cd60a5898673387b3dda723fca6d8e5dddb8948c66e44776f66b5d15f49de3d24e0f2d
   languageName: node
   linkType: hard
 
@@ -3578,6 +3580,13 @@ __metadata:
   version: 1.0.0-next.21
   resolution: "@polka/url@npm:1.0.0-next.21"
   checksum: c7654046d38984257dd639eab3dc770d1b0340916097b2fac03ce5d23506ada684e05574a69b255c32ea6a144a957c8cd84264159b545fca031c772289d88788
+  languageName: node
+  linkType: hard
+
+"@reach/observe-rect@npm:^1.1.0":
+  version: 1.2.0
+  resolution: "@reach/observe-rect@npm:1.2.0"
+  checksum: 7dd903eeaad0e22c6d973bd26265d91eadba56ab5134701ceb3e85214db75339fae94aa7e8b88a65e8daa64bc7cf1b915d4ffcdfd324466b561dc6adc3c6e070
   languageName: node
   linkType: hard
 
@@ -4802,6 +4811,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/match-sorter-utils@npm:8.7.6":
+  version: 8.7.6
+  resolution: "@tanstack/match-sorter-utils@npm:8.7.6"
+  dependencies:
+    remove-accents: 0.4.2
+  checksum: 3f3dda277e6e55ca1224a28b38a2deb3ac912c2f2f5263a32fa0d9126c6b6d05feb475539729fd248f1eb88b612109db90b847ec8fdfc05d0f4073c900a2d3f6
+  languageName: node
+  linkType: hard
+
 "@tanstack/react-table@npm:8.7.0":
   version: 8.7.0
   resolution: "@tanstack/react-table@npm:8.7.0"
@@ -4814,15 +4832,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-table@npm:8.7.4":
-  version: 8.7.4
-  resolution: "@tanstack/react-table@npm:8.7.4"
+"@tanstack/react-table@npm:8.7.6":
+  version: 8.7.6
+  resolution: "@tanstack/react-table@npm:8.7.6"
   dependencies:
-    "@tanstack/table-core": 8.7.4
+    "@tanstack/table-core": 8.7.6
   peerDependencies:
     react: ">=16"
     react-dom: ">=16"
-  checksum: d850aa51f4b7f5e01a02d3645e7b54e3e4726b90eedca757ceecd7c8bd0029e06401b5b38a43c6c5a796bfce29b3070a66f18caa9073d98406b8676f1d6d28fe
+  checksum: 20b10ace9ff32bab79e7fa6cedbde44b74b1760b510e3b67766eaec6d4f55a741b77f3ec458fa5908119397d3ee1e37b0628653a71aa25cb45a7787349b4b392
   languageName: node
   linkType: hard
 
@@ -4833,10 +4851,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/table-core@npm:8.7.4":
-  version: 8.7.4
-  resolution: "@tanstack/table-core@npm:8.7.4"
-  checksum: 39e2b38ce6a08f3bdc0fea8d16eb92696283de33e17c756b5fec3d875a7f84512edc94edaf90a64e378a08c5681ed4843814f56841933a95ba7d60253c614e2d
+"@tanstack/table-core@npm:8.7.6":
+  version: 8.7.6
+  resolution: "@tanstack/table-core@npm:8.7.6"
+  checksum: edba55731245a5a1a46a9a69a1ca2a7d7ae24377ed478f6622d043b80b6f8fbcb19605843e0feb85b99b4a7d5407633be4e440e71c82a4bf876f05a62e8005ae
   languageName: node
   linkType: hard
 
@@ -7380,7 +7398,7 @@ __metadata:
     "@nivo/radar": 0.80.0
     "@nivo/tooltip": 0.80.0
     "@nivo/waffle": 0.80.0
-    "@pluralsh/design-system": 1.300.0
+    "@pluralsh/design-system": 1.301.0
     "@pluralsh/eslint-config-typescript": 2.5.6
     "@pluralsh/stylelint-config": 1.1.1
     "@tanstack/react-table": 8.7.0
@@ -14259,6 +14277,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-virtual@npm:2.10.4":
+  version: 2.10.4
+  resolution: "react-virtual@npm:2.10.4"
+  dependencies:
+    "@reach/observe-rect": ^1.1.0
+  peerDependencies:
+    react: ^16.6.3 || ^17.0.0
+  checksum: 1bebc741b01057829a7d7f29256114caecf0597d41b187cb41e75af77f24a87c780bc1a81ec11205b78ee2e9c801fc5e36b20a9e1ab7ddc70a18dd95417795f8
+  languageName: node
+  linkType: hard
+
 "react-virtualized-auto-sizer@npm:1.0.7":
   version: 1.0.7
   resolution: "react-virtualized-auto-sizer@npm:1.0.7"
@@ -14592,6 +14621,13 @@ __metadata:
   version: 1.0.8
   resolution: "remedial@npm:1.0.8"
   checksum: 12df7c55eb92501d7f33cfe5f5ad12be13bb6ac0c53f494aaa9963d5a5155bb8be2143e8d5e17afa1a500ef5dc71d13642920d35350f2a31b65a9778afab6869
+  languageName: node
+  linkType: hard
+
+"remove-accents@npm:0.4.2":
+  version: 0.4.2
+  resolution: "remove-accents@npm:0.4.2"
+  checksum: 84a6988555dea24115e2d1954db99509588d43fe55a1590f0b5894802776f7b488b3151c37ceb9e4f4b646f26b80b7325dcea2fae58bc3865df146e1fa606711
   languageName: node
   linkType: hard
 

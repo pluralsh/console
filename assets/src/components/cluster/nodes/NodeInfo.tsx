@@ -80,7 +80,6 @@ export default function NodeInfo() {
           <SubTitle>Pods</SubTitle>
           <PodsList
             columns={columns}
-            truncColIndexes={[0]}
             pods={node.pods}
           />
         </section>
