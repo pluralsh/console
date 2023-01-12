@@ -1,5 +1,5 @@
-import { ApolloClient } from '@apollo/client'
-import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory'
+import { ApolloClient, InMemoryCache } from '@apollo/client'
+import { IntrospectionFragmentMatcher } from 'apollo-cache-inmemory'
 import { setContext } from 'apollo-link-context'
 import { createLink } from 'apollo-absinthe-upload-link'
 import { onError } from 'apollo-link-error'
@@ -7,8 +7,6 @@ import * as AbsintheSocket from '@absinthe/socket'
 import { Socket as PhoenixSocket } from 'phoenix'
 import { createAbsintheSocketLink } from 'pluralsh-absinthe-socket-apollo-link'
 import { RetryLink } from 'apollo-link-retry'
-// import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
-// import { sha256 } from 'crypto-hash';
 import { hasSubscription } from '@jumpn/utils-graphql'
 import { split } from 'apollo-link'
 

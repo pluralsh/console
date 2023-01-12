@@ -39,10 +39,8 @@ function AlertIcon({ status, color }: any) {
       />
     )
   default:
-    // nothing
+    return null
   }
-
-  return null
 }
 
 export function GqlError({ header, error }: any) {
@@ -50,7 +48,7 @@ export function GqlError({ header, error }: any) {
     <Alert
       status={AlertStatus.ERROR}
       header={header}
-      description={error.graphQLErrors[0].message}
+      description={error?.graphQLErrors[0]?.message}
     />
   )
 }
