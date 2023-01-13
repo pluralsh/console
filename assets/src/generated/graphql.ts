@@ -1219,7 +1219,7 @@ export type RootMutationTypeInstallRecipeArgs = {
 };
 
 
-export type RootMutationTypeInstallStackArgs = {
+export type RootMutationTypeInstallSt`ac`kArgs = {
   context: Scalars['Map'];
   name: Scalars['String'];
   oidc?: InputMaybe<Scalars['Boolean']>;

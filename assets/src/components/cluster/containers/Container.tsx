@@ -57,9 +57,6 @@ export default function PodShell() {
     }
     const { pod } = data
 
-    console.log('pod', pod)
-    console.log('pod.spec', pod?.spec)
-
     const containerStatuses = statusesToRecord(pod?.status?.containerStatuses)
     const initContainerStatuses = statusesToRecord(pod?.status?.initContainerStatuses)
     const containers = pod.spec.containers || []

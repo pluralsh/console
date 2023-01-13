@@ -7,14 +7,18 @@ import { filesize } from 'filesize'
 import type { Maybe, Pod } from 'generated/graphql'
 import { ReadinessT } from 'utils/status'
 
-import { IconFrame, Tooltip, TrashCanIcon } from '@pluralsh/design-system'
+import {
+  IconFrame,
+  Table,
+  Tooltip,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 
 import { Confirm } from 'components/utils/Confirm'
 import { useMutation } from '@apollo/client'
 
 import {
   ContainersReadyChip,
-  GridTable,
   TABLE_HEIGHT,
   TableCaretLink,
   TableText,
@@ -69,12 +73,12 @@ type PodTableRow = {
   nodeName?: string
   namespace?: string
   memory: {
-    used?: number
-    total?: any
+    requests?: number
+    limits?: any
   }
   cpu: {
-    used?: number
-    total?: number
+    requests?: number
+    limits?: number
   }
   restarts?: number
   containers?: {
@@ -105,6 +109,9 @@ export const ColNameLink = columnHelper.accessor(row => row.name, {
     </TableText>
   ),
   header: 'Name',
+  meta: {
+    truncate: true,
+  },
 })
 
 export const ColName = columnHelper.accessor(row => row.name, {
@@ -117,6 +124,16 @@ export const ColName = columnHelper.accessor(row => row.name, {
       >
         <span>{props.getValue()}</span>
       </Tooltip>
+    </TableText>
+  ),
+  header: 'Name',
+})
+
+export const ColNamespace = columnHelper.accessor(row => row.namespace, {
+  id: 'name',
+  cell: props => (
+    <TableText>
+      <span>{props.getValue()}</span>
     </TableText>
   ),
   header: 'Name',
@@ -144,35 +161,37 @@ export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
   header: 'Node name',
 })
 
-export const ColMemory = columnHelper.accessor(row => row.name, {
-  id: 'memory',
-  cell: ({ row: { original } }) => (
-    <Usage
-      used={
-        original?.memory?.used === undefined
-          ? undefined
-          : filesize(original.memory.used ?? 0)
-      }
-      total={
-        original.memory.total === undefined
-          ? undefined
-          : filesize(original.memory.total ?? 0)
-      }
-    />
-  ),
-  header: 'Memory',
-})
+export const ColMemoryReservation = columnHelper.accessor(row => row.memory.requests,
+  {
+    id: 'memory',
+    cell: ({ row: { original } }) => (
+      <Usage
+        used={
+          original?.memory?.requests === undefined
+            ? undefined
+            : filesize(original.memory.requests ?? 0)
+        }
+        total={
+          original.memory.limits === undefined
+            ? undefined
+            : filesize(original.memory.limits ?? 0)
+        }
+      />
+    ),
+    header: 'Memory',
+  })
 
-export const ColCpu = columnHelper.accessor(row => row.name, {
-  id: 'cpu',
-  cell: ({ row: { original } }) => (
-    <Usage
-      used={original?.cpu?.used}
-      total={original?.cpu?.total}
-    />
-  ),
-  header: 'CPU',
-})
+export const ColCpuReservation = columnHelper.accessor(row => row.cpu.requests,
+  {
+    id: 'cpu-reservations',
+    cell: ({ row: { original }, ...props }) => (
+      <Usage
+        used={props.getValue()}
+        total={original?.cpu?.limits}
+      />
+    ),
+    header: 'CPU',
+  })
 
 export const ColRestarts = columnHelper.accessor(row => row.name, {
   id: 'restarts',
@@ -227,8 +246,7 @@ export const ColDelete = refetch => columnHelper.accessor(row => row.name, {
 
 type PodListProps = {
   pods?: Maybe<Pod>[] & Pod[]
-  columns?: any[]
-  truncColIndexes?: number[]
+  columns: any[]
 }
 
 function getRestarts(status: Pod['status']) {
@@ -236,34 +254,28 @@ function getRestarts(status: Pod['status']) {
     0)
 }
 
-export function PodsList({
-  pods,
-  columns,
-  truncColIndexes = [0],
-}: PodListProps) {
+export function PodsList({ pods, columns }: PodListProps) {
   const tableData: PodTableRow[] = useMemo(() => (pods || [])
     .filter((pod): pod is Pod => !!pod)
     .map(pod => {
       const { containers } = pod.spec
 
-      const { cpu: cpuRequests, memory: memoryRequests } = getPodResources(containers,
-        'requests')
-      const { cpu: cpuLimits, memory: memoryLimits } = getPodResources(containers,
-        'limits')
+      const {
+        cpu: { requests: cpuRequests, limits: cpuLimits },
+        memory: { requests: memoryRequests, limits: memoryLimits },
+      } = getPodResources(containers)
 
       return {
         name: pod?.metadata?.name,
         nodeName: pod?.spec?.nodeName || undefined,
         namespace: pod?.metadata?.namespace || undefined,
         memory: {
-          used: memoryRequests,
-          total: memoryLimits,
-          sortVal: (memoryRequests ?? 0) / (memoryLimits ?? Infinity),
+          requests: memoryRequests,
+          limits: memoryLimits,
         },
         cpu: {
-          used: cpuRequests,
-          total: cpuLimits,
-          sortVal: (cpuRequests ?? 0) / (cpuLimits ?? Infinity),
+          requests: cpuRequests,
+          limits: cpuLimits,
         },
         restarts: getRestarts(pod.status),
         containers: getPodContainersStats(pod.status),
@@ -276,11 +288,11 @@ export function PodsList({
   }
 
   return (
-    <GridTable
+    <Table
       data={tableData}
       columns={columns}
       enableColumnResizing
-      $truncColIndexes={truncColIndexes}
+      virtualizeRows
       {...TABLE_HEIGHT}
     />
   )

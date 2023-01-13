@@ -15,6 +15,11 @@ import { NODES_Q } from '../queries'
 import { ClusterMetrics } from './ClusterMetrics'
 import { NodesList } from './NodesList'
 
+export type ResourceUsage = {
+  cpu: number,
+  mem: number,
+} | null
+
 export default function Nodes() {
   const { data, refetch } = useQuery<{
     nodes: Node[]
@@ -24,7 +29,7 @@ export default function Nodes() {
     fetchPolicy: 'cache-and-network',
   })
 
-  const usage = useMemo(() => {
+  const usage:ResourceUsage = useMemo(() => {
     if (!data) {
       return null
     }

@@ -7,7 +7,7 @@ const MULTIPLES = {
   n: 1000 ** 3,
 }
 
-const nanToUndef = val => (Number.isNaN(val) ? undefined : val)
+const nanToUndef = val => (typeof val !== 'number' || Number.isNaN(val) ? undefined : val)
 
 export function cpuParser(input?: string | null) {
   if (!input || typeof input !== 'string') {
@@ -27,7 +27,7 @@ export function memoryParser(value: string | null | undefined) {
     return undefined
   }
 
-  return nanToUndef(mParser(value) as number)
+  return nanToUndef(mParser(value))
 }
 
 export function cpuFormat(value?: string | number | null) {

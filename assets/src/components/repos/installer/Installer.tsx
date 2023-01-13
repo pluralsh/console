@@ -74,11 +74,11 @@ const toDependencySteps = (applications: {section: RecipeSection, dependencyOf: 
   dependencyOf: app.dependencyOf,
 }))]
 
-const buildSteps = async (client: ApolloClient, selectedApplications: Array<WizardStepConfig>) => {
+const buildSteps = async (client: ApolloClient<unknown>, selectedApplications: Array<WizardStepConfig>) => {
   const dependencyMap = new Map<string, {section: RecipeSection, dependencyOf: Set<string>}>()
 
   for (const app of selectedApplications) {
-    const { data: { recipes: { edges } = {} } = {} } = await client.query({
+    const { data: { recipes: { edges } = { edges: undefined } } = {} } = await client.query({
       query: RECIPES_Q,
       variables: { id: app.key },
     })
@@ -104,7 +104,7 @@ const buildSteps = async (client: ApolloClient, selectedApplications: Array<Wiza
         return
       }
 
-      const dep = dependencyMap.get(section!.repository!.name)
+      const dep = dependencyMap.get(section!.repository!.name)!
       const dependencyOf: Array<string> = [...Array.from(dep.dependencyOf.values()), app.label!]
 
       dependencyMap.set(section!.repository!.name, { section: section!, dependencyOf: new Set<string>(dependencyOf) })
@@ -114,13 +114,13 @@ const buildSteps = async (client: ApolloClient, selectedApplications: Array<Wiza
   return toDependencySteps(Array.from(dependencyMap.values()))
 }
 
-const install = async (client: ApolloClient, apps: Array<WizardStepConfig>) => {
+const install = async (client: ApolloClient<unknown>, apps: Array<WizardStepConfig<any>>) => {
   const installableApps = apps.filter(app => !app.isDependency)
-  const promises: Array<Promise<FetchResult<unknown>>> = []
+  const promises: Array<Promise<FetchResult<any>>> = []
 
   for (const installableApp of installableApps) {
     const dependencies = apps.filter(app => app.dependencyOf?.has(installableApp.label!))
-    const context = [...dependencies, installableApp].reduce((acc, app) => ({ ...acc, [app.label]: app.data.context || {} }), {})
+    const context = [...dependencies, installableApp].reduce((acc, app) => ({ ...acc, [app.label!]: app.data.context || {} }), {})
 
     const promise = client.mutate({
       mutation: INSTALL_RECIPE,
@@ -137,11 +137,11 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
   const client = useApolloClient()
   const navigate = useNavigate()
   const [inProgress, setInProgress] = useState<boolean>(false)
-  const [selectedApplications, setSelectedApplications] = useState([])
-  const [steps, setSteps] = useState([])
+  const [selectedApplications, setSelectedApplications] = useState<Array<WizardStepConfig>>([])
+  const [steps, setSteps] = useState<Array<WizardStepConfig>>([])
   const [stepsLoading, setStepsLoading] = useState(false)
-  const { applications: installedApplications } = useContext(InstallationContext as React.Context<unknown>)
-  const { data: { repositories: { edges: applicationNodes } = {} } = {}, loading } = useQuery(SEARCH_REPOS, {
+  const { applications: installedApplications } = useContext(InstallationContext as React.Context<any>)
+  const { data: { repositories: { edges: applicationNodes } = { edges: undefined } } = {}, loading } = useQuery(SEARCH_REPOS, {
     variables: { query: '' },
   })
 
@@ -180,7 +180,7 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
 
     setStepsLoading(true)
     build().then(() => setStepsLoading(false))
-  }, [client, selectedApplications])
+  }, [client, selectedApplications.length])
 
   if (loading) {
     return (

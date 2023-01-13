@@ -30,6 +30,8 @@ function StringConfiguration({
   }, [ctx, value, def, name, setValue])
 
   useEffect(() => (setValid ? msg ? setValid(false) : setValid(true) : undefined), [msg, setValid])
+  // console.log(setValid)
+  // console.log(msg)
 
   return (
     <FormField
@@ -146,7 +148,7 @@ function DomainConfiguration({
     <FormField
       hint={valid ? documentation : 'Provide a valid domain name'}
       label={StartCase(name)}
-      error={!valid && 'hello'}
+      error={!valid}
       required
     >
       <Input

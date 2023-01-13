@@ -36,7 +36,7 @@ export function Application({ ...props }: any): ReactElement {
   const [context, setContext] = useState<Record<string, unknown>>(active.data?.context || {})
   const [oidc, setOIDC] = useState(active.data?.oidc || false)
   const [valid, setValid] = useState(true)
-  const { data: { recipes: { edges: recipeEdges } = {} } = {} } = useQuery(RECIPES_Q, {
+  const { data: { recipes: { edges: recipeEdges } = { edges: undefined } } = {} } = useQuery(RECIPES_Q, {
     variables: { id: active.key },
   })
 
@@ -65,6 +65,7 @@ export function Application({ ...props }: any): ReactElement {
           fill="vertical"
           justify="center"
         >
+          {/* @ts-expect-error */}
           <LoopingLogo overflow="hidden" />
         </Box>
       </WizardStep>

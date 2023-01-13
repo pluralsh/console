@@ -1,9 +1,14 @@
 import { useMemo, useState } from 'react'
 import { filesize } from 'filesize'
 import { A, Flex } from 'honorable'
-import { IconFrame, Tooltip, TrashCanIcon } from '@pluralsh/design-system'
+import {
+  IconFrame,
+  Table,
+  Tooltip,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 import { Link } from 'react-router-dom'
-import { createColumnHelper } from '@tanstack/react-table'
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 
 import { Node, NodeMetric } from 'generated/graphql'
 import { ReadinessT, nodeStatusToReadiness, readinessToLabel } from 'utils/status'
@@ -16,7 +21,6 @@ import { useMutation } from '@apollo/client'
 import { mapify } from '../Metadata'
 import {
   CaptionText,
-  GridTable,
   StatusChip,
   TABLE_HEIGHT,
   TableCaretLink,
@@ -106,7 +110,7 @@ const ColName = columnHelper.accessor(row => row.name, {
   ),
   header: 'Name',
   maxSize: 30,
-  enableResizing: true,
+  meta: { truncate: true },
 })
 
 const ColRegionZone = columnHelper.accessor(row => `${row.zone} - ${row.zone}`,
@@ -121,7 +125,7 @@ const ColRegionZone = columnHelper.accessor(row => `${row.zone} - ${row.zone}`,
     header: 'Region/Zone',
   })
 
-const ColMemory = columnHelper.accessor(row => (row?.memory?.used ?? 0) / (row?.memory?.total ?? 1),
+const ColMemoryUsage = columnHelper.accessor(row => (row?.memory?.used ?? 0) / (row?.memory?.total ?? 1),
   {
     id: 'memory-usage',
     cell: ({ row: { original }, ...props }) => (
@@ -136,26 +140,25 @@ const ColMemory = columnHelper.accessor(row => (row?.memory?.used ?? 0) / (row?.
     header: 'Memory usage',
   })
 
-const ColCpu = columnHelper.accessor(row => (row?.cpu.used ?? 0) / (row?.cpu.total ?? 1),
-  {
-    id: 'cpu-usage',
-    cell: ({ row: { original }, ...props }: any) => (
-      <>
-        <Usage
-          used={Math.round((original?.cpu?.used || 0) * 100) / 100}
-          total={original?.cpu?.total}
-        />
-        <UsageBar usage={props.getValue()} />
-      </>
-    ),
-    header: 'Memory usage',
-  })
+const ColCpuUsage = columnHelper.accessor(row => row?.cpu.used, {
+  id: 'cpu-usage',
+  cell: ({ row: { original }, ...props }: any) => (
+    <>
+      <Usage
+        used={Math.round((original?.cpu?.used || 0) * 100) / 100}
+        total={original?.cpu?.total}
+      />
+      <UsageBar usage={props.getValue()} />
+    </>
+  ),
+  header: 'CPU usage',
+})
 
 const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToLabel[row.readiness] : ''),
   {
     id: 'status',
     cell: ({ row: { original } }) => (
-      <StatusChip readiness={original.readiness} />
+      <div><StatusChip readiness={original.readiness} /></div>
     ),
     header: 'Status',
   })
@@ -228,11 +231,11 @@ export function NodesList({
   [metrics, nodes])
 
   // Memoize columns to prevent rerendering entire table
-  const columns = useMemo(() => [
+  const columns: ColumnDef<TableData, any>[] = useMemo(() => [
     ColName,
     ColRegionZone,
-    ColMemory,
-    ColCpu,
+    ColMemoryUsage,
+    ColCpuUsage,
     ColStatus,
     ColActions(refetch),
   ],
@@ -243,10 +246,10 @@ export function NodesList({
   }
 
   return (
-    <GridTable
+    <Table
+      loose
       data={tableData}
       columns={columns}
-      $truncColIndexes={[0]}
       {...TABLE_HEIGHT}
     />
   )

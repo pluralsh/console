@@ -1,44 +1,47 @@
-import { memo, useContext, useMemo } from 'react'
+import { useMemo } from 'react'
+import { Flex } from 'honorable'
 import { useQuery } from '@apollo/client'
-import { Box, ThemeContext } from 'grommet'
 import { memoryParser } from 'kubernetes-resource-parser'
-import { filesize } from 'filesize'
 import { sumBy } from 'lodash'
-import { Doughnut } from 'react-chartjs-2'
-import { normalizeColor } from 'grommet/utils'
 import { Chart } from 'chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 
+import { MetricResponse, Node } from 'generated/graphql'
 import { cpuParser } from 'utils/kubernetes'
 
 import { ClusterMetrics as Metrics } from '../constants'
 import { NODE_METRICS_Q } from '../queries'
 
-import { cpuFmt, roundToTwoPlaces } from '../utils'
+import {
+  CpuReservationGauge,
+  CpuUsageGauge,
+  MemoryReservationGauge,
+  MemoryUsageGauge,
+  UsageGauge,
+} from '../Gauges'
+
+import { ResourceUsage } from './Nodes'
 
 Chart.register(ChartDataLabels)
 
-export function ClusterGauges({ nodes, usage }: { nodes: any; usage: any }) {
-  const totalCpu = sumBy(nodes,
-    ({
-      status: {
-        capacity: { cpu },
-      },
-    }: any) => cpuParser(cpu) ?? 0)
-  const totalMem = sumBy(nodes,
-    ({
-      status: {
-        capacity: { memory },
-      },
-    }: any) => memoryParser(memory))
-  const totalPods = sumBy(nodes,
-    ({
-      status: {
-        capacity: { pods },
-      },
-    }: any) => parseInt(pods))
+type Capacity = { cpu?: string; pods?: string; memory?: string } | undefined
 
-  const { data } = useQuery(NODE_METRICS_Q, {
+const datum = (data: MetricResponse[]) => (data[0]?.values?.[0]?.value ? parseFloat(data[0].values[0].value) : undefined)
+
+export function ClusterGauges({
+  nodes,
+  usage,
+}: {
+  nodes: Node[]
+  usage: ResourceUsage
+}) {
+  const { data } = useQuery<{
+    cpuRequests: MetricResponse[]
+    cpuLimits: MetricResponse[]
+    memRequests: MetricResponse[]
+    memLimits: MetricResponse[]
+    pods: MetricResponse[]
+  }>(NODE_METRICS_Q, {
     variables: {
       cpuRequests: Metrics.CPURequests,
       cpuLimits: Metrics.CPULimits,
@@ -51,219 +54,77 @@ export function ClusterGauges({ nodes, usage }: { nodes: any; usage: any }) {
     pollInterval: 5000,
   })
 
-  const result = useMemo(() => {
+  const chartData = useMemo(() => {
     if (!data) {
       return null
     }
-    const {
-      cpuRequests, cpuLimits, memRequests, memLimits, pods,
-    } = data
+    const cpuRequests = datum(data.cpuRequests)
+    const cpuLimits = datum(data.cpuLimits)
+    const memRequests = datum(data.memRequests)
+    const memLimits = datum(data.memLimits)
+    const podsUsed = datum(data.pods)
 
-    const datum = data => roundToTwoPlaces(parseFloat(data[0].values[0].value))
+    const cpuTotal = sumBy(nodes,
+      n => cpuParser((n?.status?.capacity as Capacity)?.cpu) ?? 0)
+    const memTotal = sumBy(nodes, n => memoryParser((n?.status?.capacity as Capacity)?.memory))
+    const podsTotal = sumBy(nodes, n => {
+      const pods = (n?.status?.capacity as Capacity)?.pods
+
+      return pods ? parseInt(pods) ?? 0 : 0
+    })
+    const { cpu: cpuUsed, mem: memUsed } = usage || {}
 
     return {
-      cpuRequests: datum(cpuRequests),
-      cpuLimits: datum(cpuLimits),
-      memRequests: datum(memRequests),
-      memLimits: datum(memLimits),
-      pods: datum(pods),
+      cpuUsage: cpuUsed !== undefined && {
+        used: cpuUsed,
+        remainder: cpuTotal - cpuUsed || 0,
+      },
+      cpuReservation: cpuLimits !== undefined
+        && cpuRequests !== undefined && {
+        requests: cpuRequests,
+        remainder: cpuLimits - cpuRequests,
+      },
+      memoryUsage: memUsed !== undefined && {
+        used: memUsed,
+        remainder: memTotal - memUsed,
+      },
+      memoryReservation: memRequests !== undefined
+        && memLimits !== undefined && {
+        requests: memRequests || 0,
+        remainder: memLimits - memRequests,
+      },
+      podUsage: {
+        used: podsUsed || 0,
+        remainder: (podsTotal || 0) - (podsUsed || 0),
+      },
     }
-  }, [data])
+  }, [data, nodes, usage])
 
-  if (!result) {
+  if (!chartData) {
     return null
   }
 
-  const {
-    cpuRequests, cpuLimits, memRequests, memLimits, pods,
-  } = result
-
   return (
-    <Box
+    <Flex
       flex={false}
-      direction="row"
-      gap="small"
+      flexDirection="row"
       align="center"
+      justifyContent="center"
+      width="100%"
+      gap="xsmall"
+      marginBottom="xlarge"
+      overflow="visible"
     >
-      <LayeredGauge
-        usage={usage.cpu}
-        requests={cpuRequests}
-        limits={cpuLimits}
-        total={totalCpu}
-        title="CPU Reservation"
-        name="CPU"
-        format={cpuFmt}
-      />
-      <LayeredGauge
-        usage={usage.mem}
-        requests={memRequests}
-        limits={memLimits}
-        total={totalMem}
-        title="Memory Reservation"
-        name="Mem"
-        format={filesize}
-      />
-      <SimpleGauge
-        value={pods || undefined}
-        total={totalPods}
+      <CpuUsageGauge {...chartData.cpuUsage} />
+      <CpuReservationGauge {...chartData.cpuReservation} />
+      <MemoryUsageGauge {...chartData.memoryUsage} />
+      <MemoryReservationGauge {...chartData.memoryReservation} />
+      <UsageGauge
         title="Pod Usage"
-        name="Pods"
+        {...chartData.podUsage}
+        usedLabel="Pods used"
+        remainderLabel="Pods available"
       />
-    </Box>
+    </Flex>
   )
 }
-
-export const SimpleGauge = memo(({
-  value,
-  total,
-  title,
-  name,
-}: {
-    value?: number;
-    total?: number;
-    title: string;
-    name: string;
-  }) => {
-  const theme = useContext(ThemeContext)
-  const val = value || 0
-  const tot = total || 0
-
-  return (
-    <Box
-      flex={false}
-      height="200px"
-      width="200px"
-    >
-      <Doughnut
-        data={{
-          labels: [` ${name}`, ` ${name} available`],
-          datasets: [
-            {
-              label: name,
-              data: [val, Math.max(tot - val, 0)],
-              backgroundColor: [
-                normalizeColor('success', theme),
-                normalizeColor('cardDetailLight', theme),
-              ],
-              hoverOffset: 4,
-              borderWidth: 0,
-            },
-          ],
-        }}
-        options={{
-          cutout: '75%',
-          animation: false,
-          plugins: {
-            legend: { display: false },
-            title: { color: 'white', text: title, display: true },
-          },
-        }}
-      />
-    </Box>
-  )
-})
-
-export const LayeredGauge = memo(({
-  requests,
-  limits,
-  usage,
-  total,
-  title,
-  name,
-  format,
-}: {
-    requests: any;
-    limits: any;
-    usage: any;
-    total: any;
-    title: any;
-    name: any;
-    format: any;
-  }) => {
-  const theme = useContext(ThemeContext)
-  const data = useMemo(() => {
-    const reqs = requests || 0
-    const lims = limits || 0
-    const tot = total || 0
-    const used = roundToTwoPlaces(usage)
-
-    return {
-      labels: [
-        `${name} requests`,
-        `${name} remaining`,
-        `${name} limits`,
-        `${name} remaining`,
-        `${name} used`,
-        `${name} free`,
-      ],
-      datasets: [
-        {
-          labels: [`${name} requests`, `${name} available`],
-          data: [reqs, Math.max(tot - reqs, 0)],
-          backgroundColor: [
-            normalizeColor('success', theme),
-            normalizeColor('cardDetailLight', theme),
-          ],
-            // hoverOffset: 4,
-          borderWidth: 0,
-          hoverBorderWidth: 0,
-        },
-        {
-          labels: [`${name} limits`, `${name} available`],
-          data: [lims, Math.max(tot - lims, 0)],
-          backgroundColor: [
-            normalizeColor('blue', theme),
-            normalizeColor('cardDetailLight', theme),
-          ],
-            // hoverOffset: 4,
-          hoverBorderWidth: 0,
-          borderWidth: 0,
-        },
-        {
-          labels: [`${name} utilized`, `${name} available`],
-          data: [used, Math.max(tot - used, 0)],
-          backgroundColor: [
-            normalizeColor('purple', theme),
-            normalizeColor('cardDetailLight', theme),
-          ],
-            // hoverOffset: 4,
-          hoverBorderWidth: 0,
-          borderWidth: 0,
-        },
-      ],
-    }
-  }, [requests, limits, total, name, theme, usage])
-
-  return (
-    <Box
-      flex={false}
-      height="200px"
-      width="200px"
-    >
-      <Doughnut
-        data={data}
-        options={{
-          cutout: '70%',
-          animation: false,
-          plugins: {
-            legend: { display: false },
-            title: { color: 'white', text: title, display: true },
-            datalabels: { formatter: format },
-            tooltip: {
-              callbacks: {
-                label(context) {
-                  const dataLabels = context?.chart?.data?.labels || []
-
-                  const labelIndex
-                      = context.datasetIndex * 2 + context.dataIndex
-
-                  return ` ${dataLabels[labelIndex]}: ${format(context.raw)}`
-                },
-              },
-            },
-          },
-        }}
-      />
-    </Box>
-  )
-})

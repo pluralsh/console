@@ -121,7 +121,7 @@ export const NODE_Q = gql`
 `
 
 export const NODE_EVENTS_Q = gql`
-  query Node($name: String!) {
+  query NodeEvents($name: String!) {
     node(name: $name) {
       events { ...EventFragment }
     }
@@ -130,7 +130,7 @@ export const NODE_EVENTS_Q = gql`
 `
 
 export const NODE_RAW_Q = gql`
-  query Node($name: String!) {
+  query NodeRaw($name: String!) {
     node(name: $name) {
       raw
     }
@@ -194,6 +194,15 @@ export const CERTIFICATE_Q = gql`
   ${EventFragment}
 `
 
+export const PODS_Q = gql`
+  query Pods {
+    pods {
+      ...PodFragment
+    }
+  }
+  ${PodFragment}
+`
+
 export const POD_Q = gql`
   query Pod($name: String!, $namespace: String!) {
     pod(name: $name, namespace: $namespace) {
@@ -206,7 +215,7 @@ export const POD_Q = gql`
 `
 
 export const POD_INFO_Q = gql`
-  query Pod($name: String!, $namespace: String!) {
+  query PodInfo($name: String!, $namespace: String!) {
     pod(name: $name, namespace: $namespace) {
       ...PodFragment
     }
@@ -215,7 +224,7 @@ export const POD_INFO_Q = gql`
 `
 
 export const POD_EVENTS_Q = gql`
-  query Pod($name: String!, $namespace: String!) {
+  query PodEvents($name: String!, $namespace: String!) {
     pod(name: $name, namespace: $namespace) {
       ...PodFragment
       events { ...EventFragment }
@@ -226,7 +235,7 @@ export const POD_EVENTS_Q = gql`
 `
 
 export const POD_RAW_Q = gql`
-  query Pod($name: String!, $namespace: String!) {
+  query PodRaw($name: String!, $namespace: String!) {
     pod(name: $name, namespace: $namespace) {
       ...PodFragment
       raw
