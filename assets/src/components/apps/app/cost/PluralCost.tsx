@@ -1,7 +1,6 @@
 import { Box, Text } from 'grommet'
 import { Check } from 'forge-core'
 
-// TODO: Refactor before using in app.
 export default function PluralCost({ license }) {
   const { status: plural } = license
 

@@ -1,6 +1,7 @@
 import {
   AppsIcon,
   ArrowTopRightIcon,
+  BuildIcon,
   DiscordIcon,
   GitHubLogoIcon,
   ListIcon,
@@ -15,7 +16,6 @@ import {
   theme,
 } from '@pluralsh/design-system'
 
-import { Builds } from 'forge-core'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import {
@@ -43,20 +43,26 @@ export const SIDEBAR_ICON_HEIGHT = '42px'
 
 const MENU_ITEMS: any[] = [
   { text: 'Apps', icon: <AppsIcon />, path: '/' },
-  {
-    text: 'Builds',
-    icon: <Builds
-      size="16px"
-      color="white"
-    />, // TODO: Move to design system.
-    path: '/builds',
-  },
+  { text: 'Builds', icon: <BuildIcon />, path: '/builds' },
   { text: 'Cluster', icon: <ServersIcon />, path: '/nodes' },
-  // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents', sandboxed: true }, // Disabled for now.
+  // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents', sandboxed: true },
   { text: 'Audits', icon: <ListIcon />, path: '/audits' },
-  { text: 'Account', icon: <PeopleIcon />, path: '/directory' },
-  // {text: 'Webhooks', icon: Webhooks, path: '/webhooks'},
+  { text: 'Account', icon: <PeopleIcon />, path: '/account' },
 ]
+
+function SidebarMenuItem({ tooltip, href, children } : {tooltip: string, href?: string, children: JSX.Element}) {
+  return (
+    <SidebarItem
+      clickable
+      tooltip={tooltip}
+      href={href}
+      height={32}
+      width={32}
+    >
+      {children}
+    </SidebarItem>
+  )
+}
 
 export default function ConsoleSidebar() {
   const menuItemRef = useRef<HTMLDivElement>(null)
@@ -98,7 +104,7 @@ export default function ConsoleSidebar() {
               clickable
               tooltip={item.text}
               onClick={() => navigate(item.path)}
-              backgroundColor={active(item) ? theme.colors?.grey[875] : null} // TODO: Add active prop to design system.
+              backgroundColor={active(item) ? theme.colors?.grey[875] : null}
               _hover={{ backgroundColor: theme.colors?.grey[900], cursor: 'pointer' }}
               borderRadius="normal"
               height={32}
@@ -108,33 +114,25 @@ export default function ConsoleSidebar() {
             </SidebarItem>
           ))}
           <Flex grow={1} />
-          <SidebarItem
-            clickable
+          <SidebarMenuItem
             tooltip="Discord"
             href="https://discord.gg/bEBAMXV64s"
           >
             <DiscordIcon />
-          </SidebarItem>
-          <SidebarItem
-            clickable
+          </SidebarMenuItem>
+          <SidebarMenuItem
             tooltip="GitHub"
             href="https://github.com/pluralsh/plural"
           >
             <GitHubLogoIcon />
-          </SidebarItem>
-          <SidebarItem
-            clickable
-            tooltip="Notifications"
-          >
+          </SidebarMenuItem>
+          <SidebarMenuItem tooltip="Notifications">
             <Notifications />
-          </SidebarItem>
+          </SidebarMenuItem>
           {getCommit() !== configuration.gitCommit && (
-            <SidebarItem
-              clickable
-              tooltip="New update available"
-            >
+            <SidebarMenuItem tooltip="New update available">
               <AutoRefresh />
-            </SidebarItem>
+            </SidebarMenuItem>
           )}
           <SidebarItem
             ref={menuItemRef}

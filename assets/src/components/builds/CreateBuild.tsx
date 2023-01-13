@@ -35,7 +35,7 @@ export default function CreateBuild() {
   const [open, setOpen] = useState<boolean>(false)
   const [selectedApp, setSelectedApp] = useState<Key>()
   const [selectedType, setSelectedType] = useState<Key>()
-  const [success, setSuccess] = useState<any>()
+  const [success, setSuccess] = useState<string>()
   const [error, setError] = useState<ApolloError>()
 
   const currentApp = useMemo(() => applications.find(app => app.name === selectedApp), [applications, selectedApp])
@@ -46,9 +46,9 @@ export default function CreateBuild() {
   }, [])
 
   const [mutation, { loading }] = useMutation(CREATE_BUILD, {
-    onCompleted: success => {
+    onCompleted: result => {
       reset()
-      setSuccess(success)
+      setSuccess(result?.createBuild?.id)
       setTimeout(() => setSuccess(undefined), 3000)
     },
     onError: error => {
@@ -160,9 +160,13 @@ export default function CreateBuild() {
           zIndex={1000}
           onClose={() => setSuccess(undefined)}
         >
-          Build created
-          {/* TODO: Update link */}
-          <A inline>View build</A>
+          Build created&nbsp;
+          <A
+            inline
+            href={`/builds/${success}`}
+          >
+            View build
+          </A>
         </Banner>
       )}
       {error && (

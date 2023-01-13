@@ -72,7 +72,6 @@ export default function AppCard({ app }: any) {
       flexBasis="40%"
       flexGrow={1}
       flexShrink={1}
-      margin="xsmall"
       minWidth={240}
       onClick={() => navigate(`/apps/${name}`)}
     >

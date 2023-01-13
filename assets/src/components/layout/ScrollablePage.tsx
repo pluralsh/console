@@ -1,4 +1,5 @@
 import { PageTitle } from '@pluralsh/design-system'
+import { FlexProps } from 'honorable'
 import { ReactNode } from 'react'
 import styled from 'styled-components'
 
@@ -15,17 +16,19 @@ export function ScrollablePage({
   heading,
   headingContent,
   children,
+  ...props
 }: {
   heading: ReactNode
   headingContent?: ReactNode | undefined
   children: ReactNode
-}) {
+} & FlexProps) {
   return (
     <>
       {heading && (
         <PageTitle
           heading={heading}
           marginBottom="0"
+          {...props}
         >
           {headingContent}
         </PageTitle>

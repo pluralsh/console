@@ -3,10 +3,6 @@ import { Navigate, Route } from 'react-router-dom'
 import Webhooks from 'components/Webhooks'
 import Builds from 'components/builds/Builds'
 import Build from 'components/builds/build/Build'
-import Directory from 'components/account/Directory'
-import { Audits } from 'components/audits/Audits'
-import { PluralApi } from 'components/PluralApi'
-import { Incident } from 'components/incidents/Incident'
 import Changelog from 'components/builds/build/changelog/Changelog'
 import Progress from 'components/builds/build/progress/Progress'
 import AuditsTable from 'components/audits/table/AuditTable'
@@ -25,6 +21,8 @@ import { Users } from 'components/account/Users'
 import Account from 'components/account/Account'
 
 import { Groups } from 'components/account/Groups'
+
+import Audits from 'components/audits/Audits'
 
 import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
@@ -135,23 +133,9 @@ const accountRoutes = [
       element={<Groups />}
     />
   </Route>,
-
-  // Old views.
-  <Route
-    path="directory/:section"
-    element={<Directory />}
-  />,
-  <Route
-    path="directory"
-    element={(
-      <Navigate
-        replace
-        to="/directory/users"
-      />
-    )}
-  />,
 ]
 
+/*
 const incidentsRoutes = [
   <Route
     path="incident/:incidentId"
@@ -161,8 +145,6 @@ const incidentsRoutes = [
       </PluralApi>
     )}
   />,
-  // Disabled for now.
-  /*
   <Route
     path="incidents"
     element={(
@@ -171,8 +153,7 @@ const incidentsRoutes = [
       </PluralApi>
     )}
   />,
-  */
-]
+] */
 
 export const consoleRoutes = [
   /* APPS */
@@ -182,7 +163,7 @@ export const consoleRoutes = [
   ...clusterRoutes,
 
   /* INCIDENTS */
-  ...incidentsRoutes,
+  // ...incidentsRoutes,
 
   /* BUILDS */
   ...buildsRoutes,

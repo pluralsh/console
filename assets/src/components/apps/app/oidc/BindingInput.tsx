@@ -80,7 +80,6 @@ const ChipList = styled(ListBoxItemChipList)(({ theme }) => ({
   justifyContent: 'start',
 }))
 
-// TODO: Move it to design system.
 export function BindingInput({
   type,
   fetcher,

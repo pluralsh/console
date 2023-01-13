@@ -11,7 +11,6 @@ import {
   LifePreserverIcon,
   LoopingLogo,
   MagnifyingGlassIcon,
-  PageTitle,
   SourcererIcon,
   SubTab,
   TabList,
@@ -19,11 +18,15 @@ import {
 import {
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
+import Fuse from 'fuse.js'
 
 import { Readiness, readinessToLabel } from 'utils/status'
+
+import { ScrollablePage } from 'components/layout/ScrollablePage'
 
 import App from './AppCard'
 
@@ -114,86 +117,105 @@ function PendingFailedEmptyState({ filter }) {
   )
 }
 
+const searchOptions = {
+  keys: ['name'],
+  threshold: 0.25,
+}
+
 export default function Apps() {
-  const { applications }: any = useContext(InstallationContext)
-  const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
-  const [query, setQuery] = useState('')
-  const [filter, setFilter] = useState('')
+  const { applications } = useContext<any>(InstallationContext)
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
+  const [query, setQuery] = useState<string>('')
+  const [filter, setFilter] = useState<any>('')
   const tabStateRef = useRef<any>(null)
 
   useEffect(() => {
     setBreadcrumbs([{ text: 'apps', url: '/' }])
   }, [setBreadcrumbs])
 
-  if (!applications) return <LoopingLogo />
+  const filteredApps = useMemo(() => {
+    const apps = applications || []
 
-  const filteredApps = applications
-    .filter(app => !query || app.name.startsWith(query)) // TODO: Use better search method.
-    .filter(app => !filter || appState(app).readiness === filter) // TODO: Add cache.
+    const filteredByState = apps.filter(app => !filter || appState(app).readiness === filter)
+
+    const fuse = new Fuse(filteredByState, searchOptions)
+    const filteredByQuery = query ? fuse.search(query).map(({ item }) => item) : filteredByState
+
+    return filteredByQuery
+  }, [applications, filter, query])
   const noFilteredApps = filteredApps?.length < 1
 
+  if (!applications) return <LoopingLogo />
+
   return (
-    <Div fill>
-      <PageTitle
+    <Flex
+      direction="column"
+      grow={1}
+    >
+      <ScrollablePage
         heading="Apps"
+        headingContent={(
+          <>
+            <Flex grow={1} />
+            <TabList
+              stateRef={tabStateRef}
+              stateProps={{
+                orientation: 'horizontal',
+                selectedKey: filter,
+                onSelectionChange: setFilter,
+              }}
+            >
+              {FILTERS.map(({ label, key }) => (
+                <SubTab
+                  key={key}
+                  textValue={label}
+                >
+                  {label}
+                </SubTab>
+              ))}
+            </TabList>
+            <Input
+              placeholder="Filter applications"
+              startIcon={(<MagnifyingGlassIcon size={14} />)}
+              value={query}
+              onChange={event => setQuery(event.target.value)}
+            />
+          </>
+        )}
         margin="large"
       >
-        <Flex grow={1} />
-        <TabList
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: filter,
-            onSelectionChange: setFilter,
-          }}
+        <Flex
+          justify="center"
+          margin="medium"
+          padding="xsmall"
+          paddingBottom="xxxlarge"
+          direction="row"
+          wrap="wrap"
+          gap="small"
         >
-          {FILTERS.map(({ label, key }) => (
-            <SubTab
-              key={key}
-              textValue={label}
-            >
-              {label}
-            </SubTab>
+          {!noFilteredApps && filteredApps.map(app => (
+            <App
+              key={app.name}
+              app={app}
+            />
           ))}
-        </TabList>
-        <Input
-          placeholder="Filter applications"
-          startIcon={(<MagnifyingGlassIcon size={14} />)}
-          value={query}
-          onChange={event => setQuery(event.target.value)}
-        />
-      </PageTitle>
-      <Flex
-        justify="center"
-        margin="medium"
-        paddingBottom="xxxlarge"
-        direction="row"
-        wrap="wrap"
-        // TODO: Set scrolling area to this element.
-      >
-        {!noFilteredApps && filteredApps.map(app => (
-          <App
-            key={app.name}
-            app={app}
-          />
-        ))}
-        {!noFilteredApps && (
-          <Flex
-            grow={1}
-            basis="40%"
-            margin="xsmall"
-          />
-        )}
-        {noFilteredApps && query && (
-          <QueryEmptyState
-            query={query}
-            setQuery={setQuery}
-          />
-        )}
-        {noFilteredApps && !query && filter === Readiness.Ready && <ReadyEmptyState />}
-        {noFilteredApps && !query && ([Readiness.InProgress, Readiness.Failed].includes(filter))
+          {!noFilteredApps && (
+            <Flex
+              grow={1}
+              basis="40%"
+            />
+          )}
+          {noFilteredApps && query && (
+            <QueryEmptyState
+              query={query}
+              setQuery={setQuery}
+            />
+          )}
+          {noFilteredApps && !query && filter === Readiness.Ready && <ReadyEmptyState />}
+          {noFilteredApps && !query && ([Readiness.InProgress, Readiness.Failed].includes(filter))
           && <PendingFailedEmptyState filter={filter} />}
-      </Flex>
-    </Div>
+        </Flex>
+      </ScrollablePage>
+    </Flex>
   )
 }

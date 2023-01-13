@@ -50,7 +50,6 @@ function SliceTooltip({ point: { serieColor, serieId, data } }) {
   )
 }
 
-// TODO: Style legend.
 export function Graph({ data, yFormat, tickRotation }) {
   const theme = useContext(ThemeContext)
   const colors = useColorMap(theme)

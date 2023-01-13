@@ -1,9 +1,10 @@
 import { Box } from 'grommet'
 import { Button, Div } from 'honorable'
 import { ContentCard, ValidatedInput } from '@pluralsh/design-system'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { UPDATE_USER } from 'components/graphql/users'
 import { useMutation } from '@apollo/client'
+import { LoginContext } from 'components/contexts'
 
 const validPassword = pass => (pass.length < 8 ? { error: true, message: 'password is too short' } : { error: false, message: 'valid password!' })
 
@@ -67,9 +68,11 @@ function UpdatePassword({ cancel }: any) {
   )
 }
 
-// TODO: Hide for users logged in with OIDC.
 export default function SecurityPassword() {
+  const { configuration } = useContext<any>(LoginContext)
   const [pass, setPass] = useState(false)
+
+  if (configuration?.pluralLogin) return null
 
   return (
     <ContentCard overflowY="auto">

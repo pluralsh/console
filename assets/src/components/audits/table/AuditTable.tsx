@@ -46,7 +46,6 @@ const columns = [
           align="center"
           gap="xsmall"
         >
-          {/* TODO: Fix aspect ratios. */}
           <AppIcon
             url={a.profile}
             name={a.name}
