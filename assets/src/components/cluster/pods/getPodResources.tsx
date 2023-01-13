@@ -1,33 +1,67 @@
 import { cpuParser, memoryParser } from 'utils/kubernetes'
 import { Container, Maybe } from 'generated/graphql'
 
-export function getPodResources(containers: Maybe<Maybe<Container>[]> | undefined,
-  type: string) {
-  let memory: number | undefined
-  let cpu: number | undefined
+function isValidNum(n?: unknown): n is number {
+  return typeof n === 'number' && !Number.isNaN(n)
+}
+
+type Reservations = {
+  limits?: number
+  requests?: number
+  remainder?: number
+}
+
+export function getPodResources(containers: Maybe<Maybe<Container>[]> | undefined) {
+  const cpuSum: Reservations = {
+    requests: undefined,
+    limits: undefined,
+    remainder: undefined,
+  }
+  const memorySum: Reservations = {
+    requests: undefined,
+    limits: undefined,
+    remainder: undefined,
+  }
 
   if (!containers || containers.length === 0) {
     return {
-      cpu: undefined,
-      memory: undefined,
+      cpu: cpuSum,
+      memory: memorySum,
     }
   }
-  for (const { resources } of containers) {
-    const resourceSpec = resources[type]
+  for (const container of containers) {
+    const requests = {
+      cpu: cpuParser(container?.resources?.requests?.cpu),
+      memory: memoryParser(container?.resources?.requests?.memory),
+    }
+    const limits = {
+      cpu: cpuParser(container?.resources?.limits?.cpu),
+      memory: memoryParser(container?.resources?.limits?.memory),
+    }
 
-    if (!resourceSpec) {
-      continue
+    if (isValidNum(limits?.cpu)) {
+      cpuSum.limits = (cpuSum.limits || 0) + limits.cpu
     }
-    if (resourceSpec.cpu) {
-      cpu = (cpu || 0) + (cpuParser(resourceSpec.cpu) ?? 0)
+    if (isValidNum(requests?.cpu)) {
+      cpuSum.requests = (cpuSum.requests || 0) + requests.cpu
     }
-    if (resourceSpec.memory) {
-      memory = (memory || 0) + (memoryParser(resourceSpec.memory) ?? 0)
+    if (isValidNum(limits?.memory)) {
+      memorySum.limits = (memorySum.limits || 0) + limits.memory
+    }
+    if (isValidNum(requests?.memory)) {
+      memorySum.requests = (memorySum.requests || 0) + requests.memory
+    }
+    if (isValidNum(requests?.memory) && isValidNum(limits.memory)) {
+      memorySum.remainder
+        = (memorySum.remainder || 0) + (limits.memory - requests.memory)
+    }
+    if (isValidNum(requests?.cpu) && isValidNum(limits.cpu)) {
+      cpuSum.remainder = (cpuSum.remainder || 0) + (limits.cpu - requests.cpu)
     }
   }
 
   return {
-    cpu: cpu === undefined ? cpu : Math.ceil(100 * cpu) / 100,
-    memory,
+    cpu: cpuSum,
+    memory: memorySum,
   }
 }

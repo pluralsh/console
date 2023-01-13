@@ -36,11 +36,11 @@ type ContainerTableRow = {
   isInit: boolean
   memory: {
     requests?: number
-    limits?: any
+    limits?: number
   }
   cpu: {
     requests?: number
-    limits?: any
+    limits?: number
   }
   ports?: Maybe<Port>[]
   status?: ContainerStatus
@@ -95,34 +95,32 @@ const ColPorts = columnHelper.accessor(row => row.ports, {
   header: 'Ports',
 })
 
-const ColMemory = columnHelper.accessor(row => row.name, {
+const ColMemoryReservation = columnHelper.accessor(row => row?.memory?.requests, {
   id: 'memory',
-  cell: ({ row: { original } }) => (
-    <Usage
-      used={
-        original?.memory?.requests === undefined
-          ? undefined
-          : filesize(original.memory.requests ?? 0)
-      }
-      total={
-        original.memory.limits === undefined
-          ? undefined
-          : filesize(original.memory.limits ?? 0)
-      }
-    />
-  ),
+  cell: ({ row: { original }, ...props }) => {
+    const requests = props.getValue()
+
+    return (
+      <Usage
+        used={
+          requests === undefined
+            ? undefined
+            : filesize(requests)
+        }
+        total={
+          original.memory.limits === undefined
+            ? undefined
+            : filesize(original.memory.limits)
+        }
+      />
+    )
+  },
   header: 'Memory',
 })
 
-const ColCpu = columnHelper.accessor(row => row?.cpu?.requests, {
+const ColCpuReservation = columnHelper.accessor(row => row?.cpu?.requests, {
   id: 'cpu',
-  cell: props => (
-    // <Usage
-    //   used={original?.cpu?.requests}
-    //   total={original?.cpu?.limits}
-    // />
-    <TableText>{props.getValue() ?? '—'}</TableText>
-  ),
+  cell: props => <TableText>{props.getValue() ?? '—'}</TableText>,
   header: 'CPU',
 })
 
@@ -206,12 +204,10 @@ function toTableData(container: Container,
     memory: {
       requests: memoryRequests,
       limits: memoryLimits,
-      sortVal: (memoryRequests ?? 0) / (memoryLimits ?? Infinity),
     },
     cpu: {
       requests: cpuRequests,
       limits: cpuLimits,
-      sortVal: (cpuRequests ?? 0) / (cpuLimits ?? Infinity),
     },
     ports: container.ports || undefined,
     readiness: containerStatusToReadiness(status),
@@ -243,8 +239,8 @@ export function ContainersList({
 
   columns = useMemo(() => columns ?? [
     ColName,
-    ColMemory,
-    ColCpu,
+    ColMemoryReservation,
+    ColCpuReservation,
     ColPorts,
     ColStatus,
     ColActions({ podName, namespace }),

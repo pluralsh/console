@@ -38,7 +38,7 @@ export const datum = ({ timestamp, value }) => ({
 
 export const cpuFmt = cpu => `${cpu}vcpu`
 
-export const podContainers = pods => pods
+export const getAllContainersFromPods = pods => pods
   .filter(({ status: { phase } }) => phase !== 'Succeeded')
   .map(({ spec: { containers } }) => containers)
   .flat()

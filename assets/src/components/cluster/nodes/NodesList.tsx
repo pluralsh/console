@@ -125,7 +125,7 @@ const ColRegionZone = columnHelper.accessor(row => `${row.zone} - ${row.zone}`,
     header: 'Region/Zone',
   })
 
-const ColMemory = columnHelper.accessor(row => (row?.memory?.used ?? 0) / (row?.memory?.total ?? 1),
+const ColMemoryUsage = columnHelper.accessor(row => (row?.memory?.used ?? 0) / (row?.memory?.total ?? 1),
   {
     id: 'memory-usage',
     cell: ({ row: { original }, ...props }) => (
@@ -140,20 +140,19 @@ const ColMemory = columnHelper.accessor(row => (row?.memory?.used ?? 0) / (row?.
     header: 'Memory usage',
   })
 
-const ColCpu = columnHelper.accessor(row => (row?.cpu.used ?? 0) / (row?.cpu.total ?? 1),
-  {
-    id: 'cpu-usage',
-    cell: ({ row: { original }, ...props }: any) => (
-      <>
-        <Usage
-          used={Math.round((original?.cpu?.used || 0) * 100) / 100}
-          total={original?.cpu?.total}
-        />
-        <UsageBar usage={props.getValue()} />
-      </>
-    ),
-    header: 'CPU usage',
-  })
+const ColCpuUsage = columnHelper.accessor(row => row?.cpu.used, {
+  id: 'cpu-usage',
+  cell: ({ row: { original }, ...props }: any) => (
+    <>
+      <Usage
+        used={Math.round((original?.cpu?.used || 0) * 100) / 100}
+        total={original?.cpu?.total}
+      />
+      <UsageBar usage={props.getValue()} />
+    </>
+  ),
+  header: 'CPU usage',
+})
 
 const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToLabel[row.readiness] : ''),
   {
@@ -235,8 +234,8 @@ export function NodesList({
   const columns: ColumnDef<TableData, any>[] = useMemo(() => [
     ColName,
     ColRegionZone,
-    ColMemory,
-    ColCpu,
+    ColMemoryUsage,
+    ColCpuUsage,
     ColStatus,
     ColActions(refetch),
   ],

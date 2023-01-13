@@ -73,12 +73,12 @@ type PodTableRow = {
   nodeName?: string
   namespace?: string
   memory: {
-    used?: number
-    total?: any
+    requests?: number
+    limits?: any
   }
   cpu: {
-    used?: number
-    total?: number
+    requests?: number
+    limits?: number
   }
   restarts?: number
   containers?: {
@@ -161,31 +161,31 @@ export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
   header: 'Node name',
 })
 
-export const ColMemory = columnHelper.accessor(row => row.name, {
+export const ColMemoryReservations = columnHelper.accessor(row => row.name, {
   id: 'memory',
   cell: ({ row: { original } }) => (
     <Usage
       used={
-        original?.memory?.used === undefined
+        original?.memory?.requests === undefined
           ? undefined
-          : filesize(original.memory.used ?? 0)
+          : filesize(original.memory.requests ?? 0)
       }
       total={
-        original.memory.total === undefined
+        original.memory.limits === undefined
           ? undefined
-          : filesize(original.memory.total ?? 0)
+          : filesize(original.memory.limits ?? 0)
       }
     />
   ),
   header: 'Memory',
 })
 
-export const ColCpu = columnHelper.accessor(row => row.name, {
-  id: 'cpu',
-  cell: ({ row: { original } }) => (
+export const ColCpuReservations = columnHelper.accessor(row => row.cpu.requests, {
+  id: 'cpu-reservations',
+  cell: ({ row: { original }, ...props }) => (
     <Usage
-      used={original?.cpu?.used}
-      total={original?.cpu?.total}
+      used={props.getValue()}
+      total={original?.cpu?.limits}
     />
   ),
   header: 'CPU',
@@ -252,33 +252,28 @@ function getRestarts(status: Pod['status']) {
     0)
 }
 
-export function PodsList({
-  pods,
-  columns,
-}: PodListProps) {
+export function PodsList({ pods, columns }: PodListProps) {
   const tableData: PodTableRow[] = useMemo(() => (pods || [])
     .filter((pod): pod is Pod => !!pod)
     .map(pod => {
       const { containers } = pod.spec
 
-      const { cpu: cpuRequests, memory: memoryRequests } = getPodResources(containers,
-        'requests')
-      const { cpu: cpuLimits, memory: memoryLimits } = getPodResources(containers,
-        'limits')
+      const {
+        cpu: { requests: cpuRequests, limits: cpuLimits },
+        memory: { requests: memoryRequests, limits: memoryLimits },
+      } = getPodResources(containers)
 
       return {
         name: pod?.metadata?.name,
         nodeName: pod?.spec?.nodeName || undefined,
         namespace: pod?.metadata?.namespace || undefined,
         memory: {
-          used: memoryRequests,
-          total: memoryLimits,
-          sortVal: (memoryRequests ?? 0) / (memoryLimits ?? Infinity),
+          requests: memoryRequests,
+          limits: memoryLimits,
         },
         cpu: {
-          used: cpuRequests,
-          total: cpuLimits,
-          sortVal: (cpuRequests ?? 0) / (cpuLimits ?? Infinity),
+          requests: cpuRequests,
+          limits: cpuLimits,
         },
         restarts: getRestarts(pod.status),
         containers: getPodContainersStats(pod.status),

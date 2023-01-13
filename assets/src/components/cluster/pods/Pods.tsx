@@ -13,8 +13,8 @@ import { POLL_INTERVAL } from '../constants'
 import {
   ColActions,
   ColContainers,
-  ColCpu,
-  ColMemory,
+  ColCpuReservations,
+  ColMemoryReservations,
   ColNameLink,
   ColNamespace,
   ColRestarts,
@@ -32,8 +32,8 @@ export default function AllPods() {
   const columns = useMemo(() => [
     ColNameLink,
     ColNamespace,
-    ColMemory,
-    ColCpu,
+    ColMemoryReservations,
+    ColCpuReservations,
     ColRestarts,
     ColContainers,
     ColActions(refetch),
