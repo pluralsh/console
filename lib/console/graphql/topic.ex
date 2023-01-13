@@ -1,6 +1,11 @@
 defprotocol Console.GraphQl.Topic do
+  @fallback_to_any true
   @spec infer(struct, :create | :update | :delete) :: [{atom, binary}]
   def infer(resource, delta)
+end
+
+defimpl Console.GraphQl.Topic, for: Any do
+  def infer(_, _), do: []
 end
 
 defimpl Console.GraphQl.Topic, for: Console.Schema.Build do
