@@ -23,11 +23,11 @@ function getButton({ primary, key, ...props }: any) {
 
 export function DisplayButton({ attributes: { action, headline, ...rest } }) {
   const navigate = useNavigate()
-  const { namespace, name } = useParams()
+  const { appName, runbookName } = useParams()
   const { context } = useContext(DisplayContext)
   const [error, setError] = useState<ApolloError>()
   const [mutation, { loading }] = useMutation(EXECUTE_RUNBOOK, {
-    variables: { name, namespace, input: { context: JSON.stringify(context), action } },
+    variables: { name: runbookName, namespace: appName, input: { context: JSON.stringify(context), action } },
     onCompleted: ({ executeRunbook: { redirectTo } }) => {
       if (redirectTo) navigate(redirectTo)
     },
