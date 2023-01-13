@@ -4,7 +4,12 @@ defmodule Console.Watchers.Pod do
 
   def handle_info(:start, state) do
     Logger.info "starting pod watcher"
-    request = CoreV1.list_pod_for_all_namespaces!()
+    request = %Kazan.Request{
+      method: "get",
+      path: "/api/v1/pods",
+      query_params: %{},
+      response_model: CoreV1.Pod
+    }
     {:ok, pid} = Watcher.start_link(request, send_to: self(), recv_timeout: 15_000)
 
     :timer.send_interval(5000, :watcher_ping)
