@@ -1,7 +1,9 @@
 import { Flex } from 'honorable'
 import { Box } from 'grommet'
 import { PageTitle, TabPanel } from '@pluralsh/design-system'
-import { useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
+
+import { LoginContext } from 'components/contexts'
 
 import { InviteUser } from './InviteUser'
 import { UsersList } from './UsersList'
@@ -28,6 +30,7 @@ function getContent(selectedKey: string): JSX.Element | null {
 }
 
 export function Users() {
+  const { configuration } = useContext<any>(LoginContext)
   const [selectedKey] = useState<any>('Users')
   const tabStateRef = useRef<any>(null)
 
@@ -59,7 +62,8 @@ export function Users() {
               </SubTab>
             ))}
           </TabList> */}
-          <InviteUser />
+          {/* Invites are only available when not using login with Plural. */}
+          {configuration && !configuration?.pluralLogin && <InviteUser />}
         </Flex>
       </PageTitle>
       <TabPanel
