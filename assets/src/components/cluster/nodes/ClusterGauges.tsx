@@ -15,7 +15,7 @@ import { NODE_METRICS_Q } from '../queries'
 import {
   CpuReservationGauge,
   CpuUsageGauge,
-  MemoryReservationsGauge,
+  MemoryReservationGauge,
   MemoryUsageGauge,
   UsageGauge,
 } from '../Gauges'
@@ -118,7 +118,7 @@ export function ClusterGauges({
       <CpuUsageGauge {...chartData.cpuUsage} />
       <CpuReservationGauge {...chartData.cpuReservation} />
       <MemoryUsageGauge {...chartData.memoryUsage} />
-      <MemoryReservationsGauge {...chartData.memoryReservation} />
+      <MemoryReservationGauge {...chartData.memoryReservation} />
       <UsageGauge
         title="Pod Usage"
         {...chartData.podUsage}

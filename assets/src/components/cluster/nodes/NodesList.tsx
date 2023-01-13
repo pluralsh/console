@@ -158,7 +158,7 @@ const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToLabe
   {
     id: 'status',
     cell: ({ row: { original } }) => (
-      <StatusChip readiness={original.readiness} />
+      <div><StatusChip readiness={original.readiness} /></div>
     ),
     header: 'Status',
   })

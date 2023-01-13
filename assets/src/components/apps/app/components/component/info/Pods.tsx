@@ -2,9 +2,9 @@ import { Flex, H2 } from 'honorable'
 
 import {
   ColContainers,
-  ColCpuReservations,
+  ColCpuReservation,
   ColDelete,
-  ColMemoryReservations,
+  ColMemoryReservation,
   ColNameLink,
   ColRestarts,
   PodsList,
@@ -18,12 +18,12 @@ export default function Pods({ pods }) {
   const columns = useMemo(() => [
     ColNameLink,
     {
-      ...ColMemoryReservations,
+      ...ColMemoryReservation,
       meta: {
         truncate: true,
       },
     },
-    ColCpuReservations,
+    ColCpuReservation,
     ColRestarts,
     ColContainers,
     ColDelete(refetch),

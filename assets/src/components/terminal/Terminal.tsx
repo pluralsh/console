@@ -135,7 +135,6 @@ export function Terminal({
   ])
 
   const handleResetSize = useCallback(() => {
-    console.log('handleResetSize')
     if (!channel) return
     channel.push('resize', { width: dimensions.cols, height: dimensions.rows })
   }, [channel, dimensions])

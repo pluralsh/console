@@ -156,7 +156,7 @@ export function MemoryUsageGauge(props: { used?: number; remainder?: number }) {
   )
 }
 
-export function MemoryReservationsGauge({ requests, remainder, ...props }: {
+export function MemoryReservationGauge({ requests, remainder, ...props }: {
   requests?: number
   remainder?: number
 }) {

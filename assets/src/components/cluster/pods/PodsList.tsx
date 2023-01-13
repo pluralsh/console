@@ -161,35 +161,37 @@ export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
   header: 'Node name',
 })
 
-export const ColMemoryReservations = columnHelper.accessor(row => row.name, {
-  id: 'memory',
-  cell: ({ row: { original } }) => (
-    <Usage
-      used={
-        original?.memory?.requests === undefined
-          ? undefined
-          : filesize(original.memory.requests ?? 0)
-      }
-      total={
-        original.memory.limits === undefined
-          ? undefined
-          : filesize(original.memory.limits ?? 0)
-      }
-    />
-  ),
-  header: 'Memory',
-})
+export const ColMemoryReservation = columnHelper.accessor(row => row.memory.requests,
+  {
+    id: 'memory',
+    cell: ({ row: { original } }) => (
+      <Usage
+        used={
+          original?.memory?.requests === undefined
+            ? undefined
+            : filesize(original.memory.requests ?? 0)
+        }
+        total={
+          original.memory.limits === undefined
+            ? undefined
+            : filesize(original.memory.limits ?? 0)
+        }
+      />
+    ),
+    header: 'Memory',
+  })
 
-export const ColCpuReservations = columnHelper.accessor(row => row.cpu.requests, {
-  id: 'cpu-reservations',
-  cell: ({ row: { original }, ...props }) => (
-    <Usage
-      used={props.getValue()}
-      total={original?.cpu?.limits}
-    />
-  ),
-  header: 'CPU',
-})
+export const ColCpuReservation = columnHelper.accessor(row => row.cpu.requests,
+  {
+    id: 'cpu-reservations',
+    cell: ({ row: { original }, ...props }) => (
+      <Usage
+        used={props.getValue()}
+        total={original?.cpu?.limits}
+      />
+    ),
+    header: 'CPU',
+  })
 
 export const ColRestarts = columnHelper.accessor(row => row.name, {
   id: 'restarts',

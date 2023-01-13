@@ -16,6 +16,7 @@ import {
 } from 'utils/status'
 
 import { ContainerStatus } from './pods/PodsList'
+import { roundToTwoPlaces } from './utils'
 
 const isNullishIsh = (val: any) => {
   if (typeof val === 'number') {
@@ -54,9 +55,17 @@ export function UsageUnstyled({
 }) {
   return (
     <div className={className}>
-      {isNullishIsh(used) ? '—' : used}
+      {isNullishIsh(used)
+        ? '—'
+        : typeof used === 'number'
+          ? roundToTwoPlaces(used)
+          : used}
       {' / '}
-      {isNullishIsh(total) ? '—' : total}
+      {isNullishIsh(total)
+        ? '—'
+        : typeof total === 'number'
+          ? roundToTwoPlaces(total)
+          : total}
       {units && ` ${units}`}
     </div>
   )

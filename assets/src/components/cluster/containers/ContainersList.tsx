@@ -52,7 +52,7 @@ const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToLabe
   {
     id: 'status',
     cell: ({ row: { original } }) => (
-      <StatusChip readiness={original?.readiness} />
+      <div><StatusChip readiness={original?.readiness} /></div>
     ),
     header: 'Status',
   })
@@ -119,8 +119,13 @@ const ColMemoryReservation = columnHelper.accessor(row => row?.memory?.requests,
 })
 
 const ColCpuReservation = columnHelper.accessor(row => row?.cpu?.requests, {
-  id: 'cpu',
-  cell: props => <TableText>{props.getValue() ?? '—'}</TableText>,
+  id: 'cpu-reservations',
+  cell: ({ row: { original }, ...props }) => (
+    <Usage
+      used={props.getValue()}
+      total={original?.cpu?.limits}
+    />
+  ),
   header: 'CPU',
 })
 

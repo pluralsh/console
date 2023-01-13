@@ -12,7 +12,7 @@ import { getAllContainersFromPods } from '../utils'
 import {
   CpuReservationGauge,
   CpuUsageGauge,
-  MemoryReservationsGauge,
+  MemoryReservationGauge,
   MemoryUsageGauge,
 } from '../Gauges'
 
@@ -29,7 +29,6 @@ export function NodeGraphs({
   name?: string
   usage?: NodeUsage | null
 }) {
-  console.log('node graphs')
   const { cpu: cpuReservations, memory: memoryReservations } = useMemo(() => {
     const allContainers = getAllContainersFromPods(pods)
 
@@ -95,7 +94,7 @@ export function NodeGraphs({
         <CpuUsageGauge {...chartData.cpuUsage} />
         <CpuReservationGauge {...chartData.cpuReservation} />
         <MemoryUsageGauge {...chartData.memoryUsage} />
-        <MemoryReservationsGauge {...chartData.memoryReservation} />
+        <MemoryReservationGauge {...chartData.memoryReservation} />
       </Flex>
       <Div width="100%">
         <SaturationGraphs
