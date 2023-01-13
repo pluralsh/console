@@ -11,7 +11,7 @@ export function Security() {
         direction="column"
         gap="large"
       >
-        <SecurityPassword /> {/* TODO: Hide if using OIDC. */}
+        <SecurityPassword />
         <SecurityAccess />
       </Flex>
     </ScrollablePage>
