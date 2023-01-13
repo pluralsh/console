@@ -1,10 +1,11 @@
 import { Card } from '@pluralsh/design-system'
 import { LOGS_Q } from 'components/graphql/dashboards'
 import { Flex } from 'honorable'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useQuery } from '@apollo/client'
 
 import LogContent from './LogContent'
+import LogsScrollIndicator from './LogsScrollIndicator'
 
 const POLL_INTERVAL = 10 * 1000
 const LIMIT = 1000
@@ -14,20 +15,20 @@ export function LogsCard({
 }: any) {
   const [listRef, setListRef] = useState<any>(null)
   const [live, setLive] = useState(true)
-  const [_, setLoader] = useState<any>(null)
+  const [loader, setLoader] = useState<any>(null)
 
   const {
-    data, loading, fetchMore, // refetch,
+    data, loading, fetchMore, refetch,
   } = useQuery(LOGS_Q, {
     variables: { query, limit: LIMIT },
     pollInterval: live ? POLL_INTERVAL : 0,
   })
 
-  // const returnToTop = useCallback(() => {
-  //   setLive(true)
-  //   refetch().then(() => listRef?.scrollToItem(0))
-  //   loader?.resetloadMoreItemsCache()
-  // }, [refetch, setLive, listRef, loader])
+  const returnToTop = useCallback(() => {
+    setLive(true)
+    refetch().then(() => listRef?.scrollToItem(0))
+    loader?.resetloadMoreItemsCache()
+  }, [refetch, setLive, listRef, loader])
 
   return (
     <Card
@@ -56,8 +57,10 @@ export function LogsCard({
           />
         )}
       </Flex>
-      {/* Disabled for now as it is not part of designs. */}
-      {/* <ScrollIndicator live={live} returnToTop={returnToTop} /> */}
+      <LogsScrollIndicator
+        live={live}
+        returnToTop={returnToTop}
+      />
     </Card>
   )
 }
