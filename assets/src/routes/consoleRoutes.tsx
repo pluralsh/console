@@ -5,8 +5,6 @@ import Builds from 'components/builds/Builds'
 import Build from 'components/builds/build/Build'
 import Directory from 'components/account/Directory'
 import { Audits } from 'components/audits/Audits'
-import { PluralApi } from 'components/PluralApi'
-import { Incident } from 'components/incidents/Incident'
 import Changelog from 'components/builds/build/changelog/Changelog'
 import Progress from 'components/builds/build/progress/Progress'
 import AuditsTable from 'components/audits/table/AuditTable'
@@ -152,6 +150,7 @@ const accountRoutes = [
   />,
 ]
 
+/*
 const incidentsRoutes = [
   <Route
     path="incident/:incidentId"
@@ -161,8 +160,6 @@ const incidentsRoutes = [
       </PluralApi>
     )}
   />,
-  // Disabled for now.
-  /*
   <Route
     path="incidents"
     element={(
@@ -171,8 +168,7 @@ const incidentsRoutes = [
       </PluralApi>
     )}
   />,
-  */
-]
+] */
 
 export const consoleRoutes = [
   /* APPS */
@@ -182,7 +178,7 @@ export const consoleRoutes = [
   ...clusterRoutes,
 
   /* INCIDENTS */
-  ...incidentsRoutes,
+  // ...incidentsRoutes,
 
   /* BUILDS */
   ...buildsRoutes,

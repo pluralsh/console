@@ -11,7 +11,6 @@ import {
   LifePreserverIcon,
   LoopingLogo,
   MagnifyingGlassIcon,
-  PageTitle,
   SourcererIcon,
   SubTab,
   TabList,
@@ -24,6 +23,8 @@ import {
 } from 'react'
 
 import { Readiness, readinessToLabel } from 'utils/status'
+
+import { ScrollablePage } from 'components/layout/ScrollablePage'
 
 import App from './AppCard'
 
@@ -115,10 +116,10 @@ function PendingFailedEmptyState({ filter }) {
 }
 
 export default function Apps() {
-  const { applications }: any = useContext(InstallationContext)
-  const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
-  const [query, setQuery] = useState('')
-  const [filter, setFilter] = useState('')
+  const { applications } = useContext<any>(InstallationContext)
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
+  const [query, setQuery] = useState<string>('')
+  const [filter, setFilter] = useState<any>('')
   const tabStateRef = useRef<any>(null)
 
   useEffect(() => {
@@ -133,67 +134,71 @@ export default function Apps() {
   const noFilteredApps = filteredApps?.length < 1
 
   return (
-    <Div fill>
-      <PageTitle
+    <Flex direction="column">
+      <ScrollablePage
         heading="Apps"
+        headingContent={(
+          <>
+            <Flex grow={1} />
+            <TabList
+              stateRef={tabStateRef}
+              stateProps={{
+                orientation: 'horizontal',
+                selectedKey: filter,
+                onSelectionChange: setFilter,
+              }}
+            >
+              {FILTERS.map(({ label, key }) => (
+                <SubTab
+                  key={key}
+                  textValue={label}
+                >
+                  {label}
+                </SubTab>
+              ))}
+            </TabList>
+            <Input
+              placeholder="Filter applications"
+              startIcon={(<MagnifyingGlassIcon size={14} />)}
+              value={query}
+              onChange={event => setQuery(event.target.value)}
+            />
+          </>
+        )}
         margin="large"
       >
-        <Flex grow={1} />
-        <TabList
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: filter,
-            onSelectionChange: setFilter,
-          }}
+        <Flex
+          justify="center"
+          margin="medium"
+          padding="xsmall"
+          paddingBottom="xxxlarge"
+          direction="row"
+          wrap="wrap"
+          gap="small"
         >
-          {FILTERS.map(({ label, key }) => (
-            <SubTab
-              key={key}
-              textValue={label}
-            >
-              {label}
-            </SubTab>
+          {!noFilteredApps && filteredApps.map(app => (
+            <App
+              key={app.name}
+              app={app}
+            />
           ))}
-        </TabList>
-        <Input
-          placeholder="Filter applications"
-          startIcon={(<MagnifyingGlassIcon size={14} />)}
-          value={query}
-          onChange={event => setQuery(event.target.value)}
-        />
-      </PageTitle>
-      <Flex
-        justify="center"
-        margin="medium"
-        paddingBottom="xxxlarge"
-        direction="row"
-        wrap="wrap"
-        // TODO: Set scrolling area to this element.
-      >
-        {!noFilteredApps && filteredApps.map(app => (
-          <App
-            key={app.name}
-            app={app}
-          />
-        ))}
-        {!noFilteredApps && (
-          <Flex
-            grow={1}
-            basis="40%"
-            margin="xsmall"
-          />
-        )}
-        {noFilteredApps && query && (
-          <QueryEmptyState
-            query={query}
-            setQuery={setQuery}
-          />
-        )}
-        {noFilteredApps && !query && filter === Readiness.Ready && <ReadyEmptyState />}
-        {noFilteredApps && !query && ([Readiness.InProgress, Readiness.Failed].includes(filter))
+          {!noFilteredApps && (
+            <Flex
+              grow={1}
+              basis="40%"
+            />
+          )}
+          {noFilteredApps && query && (
+            <QueryEmptyState
+              query={query}
+              setQuery={setQuery}
+            />
+          )}
+          {noFilteredApps && !query && filter === Readiness.Ready && <ReadyEmptyState />}
+          {noFilteredApps && !query && ([Readiness.InProgress, Readiness.Failed].includes(filter))
           && <PendingFailedEmptyState filter={filter} />}
-      </Flex>
-    </Div>
+        </Flex>
+      </ScrollablePage>
+    </Flex>
   )
 }

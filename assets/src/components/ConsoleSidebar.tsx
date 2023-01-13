@@ -45,7 +45,7 @@ const MENU_ITEMS: any[] = [
   { text: 'Apps', icon: <AppsIcon />, path: '/' },
   { text: 'Builds', icon: <BuildIcon />, path: '/builds' },
   { text: 'Cluster', icon: <ServersIcon />, path: '/nodes' },
-  // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents', sandboxed: true }, Disabled for now.
+  // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents', sandboxed: true },
   { text: 'Audits', icon: <ListIcon />, path: '/audits' },
   { text: 'Account', icon: <PeopleIcon />, path: '/directory' },
 ]
