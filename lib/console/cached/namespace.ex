@@ -8,5 +8,7 @@ defmodule Console.Cached.Namespace do
 
   def start_link(), do: Console.Cached.Kubernetes.start_link(__MODULE__, CoreV1.list_namespace!())
 
+  def start(), do: Console.Cached.Kubernetes.start(__MODULE__, CoreV1.list_namespace!())
+
   def fetch(), do: Console.Cached.Kubernetes.fetch(__MODULE__)
 end

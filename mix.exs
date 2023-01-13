@@ -98,6 +98,7 @@ defmodule Console.MixProject do
       {:yaml_elixir, "~> 2.4"},
       {:poison, "~> 3.1"},
       {:mojito, "~> 0.3.0"},
+      {:ets, "~> 0.9"},
       {:reverse_proxy_plug, "~> 1.2.1"},
       {:kazan, "~> 0.11", github: "michaeljguarino/kazan", branch: "k8s-1.23"},
       {:comeonin, "~> 5.1.2"},

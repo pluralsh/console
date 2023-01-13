@@ -1,34 +1,43 @@
 defmodule Console.Cached.Kubernetes do
   use GenServer
   alias Kazan.Watcher
-  require Logger
+  alias ETS.KeyValueSet
   alias Kazan.Models.Apimachinery.Meta.V1, as: MetaV1
+  require Logger
 
-  defmodule State, do: defstruct [:instances, :pid]
+  defmodule State, do: defstruct [:table, :pid]
 
   def start_link(name, request) do
-    GenServer.start_link(__MODULE__, request, name: name)
+    GenServer.start_link(__MODULE__, {request, name}, name: name)
   end
 
-  def init(request) do
+  def start(name, request) do
+    GenServer.start(__MODULE__, {request, name}, name: name)
+  end
+
+  def init({request, name}) do
     if Console.conf(:initialize) do
       send self(), {:start, request}
     end
-    {:ok, %State{}}
+    {:ok, table} = KeyValueSet.new(name: name, read_concurrency: true, ordered: true)
+    {:ok, %State{table: table}}
   end
 
-  def fetch(pid \\ __MODULE__), do: GenServer.call(pid, :fetch)
+  def fetch(name) do
+    KeyValueSet.wrap_existing!(name)
+    |> KeyValueSet.to_list!()
+    |> Enum.map(fn {_, v} -> v end)
+  end
 
-  def handle_call(:fetch, _, %State{instances: instances} = state), do: {:reply, Map.values(instances), state}
-
-  def handle_info({:start, request}, state) do
+  def handle_info({:start, request}, %State{table: table} = state) do
     Logger.info "starting namespace watcher"
     {:ok, %{items: instances, metadata: %MetaV1.ListMeta{resource_version: vsn}}} = Kazan.run(request)
     {:ok, pid} = Watcher.start_link(request, send_to: self(), resource_vsn: vsn)
 
     :timer.send_interval(5000, :watcher_ping)
     Process.link(pid)
-    {:noreply, %{state | pid: pid,  instances: as_map(instances)}}
+    table = Enum.reduce(instances, table, fn inst, table -> KeyValueSet.put!(table, inst.metadata.name, inst) end)
+    {:noreply, %{state | pid: pid, table: table}}
   end
 
   def handle_info(:watcher_ping, %{pid: pid} = state) do
@@ -36,15 +45,13 @@ defmodule Console.Cached.Kubernetes do
     {:noreply, state}
   end
 
-  def handle_info(%Watcher.Event{object: o, type: event}, %{instances: instances} = state) when event in [:added, :modified] do
-    {:noreply, %{state | instances: Map.put(instances, o.metadata.name, o)}}
+  def handle_info(%Watcher.Event{object: o, type: event}, %{table: table} = state) when event in [:added, :modified] do
+    {:noreply, %{state | table: KeyValueSet.put!(table, o.metadata.name, o)}}
   end
 
-  def handle_info(%Watcher.Event{object: o, type: :deleted}, %{instances: instances} = state) do
-    {:noreply, %{state | instances: Map.delete(instances, o.metadata.name)}}
+  def handle_info(%Watcher.Event{object: o, type: :deleted}, %{table: table} = state) do
+    {:noreply, %{state | table: KeyValueSet.delete!(table, o.metadata.name)}}
   end
 
   def handle_info(_, state), do: {:noreply, state}
-
-  defp as_map(instances), do: Enum.into(instances, %{}, & {&1.metadata.name, &1})
 end

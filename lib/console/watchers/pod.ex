@@ -3,8 +3,8 @@ defmodule Console.Watchers.Pod do
 
   def handle_info(:start, state) do
     Logger.info "starting pod watcher"
-    request = Kazan.Apis.Core.V1.list_pod_for_all_namespaces!(watch: true)
-    {:ok, pid} = Watcher.start_link(request, send_to: self())
+    request = Kazan.Apis.Core.V1.list_pod_for_all_namespaces!()
+    {:ok, pid} = Watcher.start_link(request, send_to: self(), recv_timeout: 15_000)
 
     :timer.send_interval(5000, :watcher_ping)
     Process.link(pid)
