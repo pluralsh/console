@@ -7,7 +7,7 @@ replicaCount: 2
 image:
   repository: dkr.plural.sh/console/console
   tag: '0.3.21' ## PLRL-REPLACE[  tag: '%s']
-  pullPolicy: IfNotPresent
+  imagePullPolicy: IfNotPresent
 
 serviceAccount:
   create: true
