@@ -47,7 +47,7 @@ const MENU_ITEMS: any[] = [
   { text: 'Cluster', icon: <ServersIcon />, path: '/nodes' },
   // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents', sandboxed: true },
   { text: 'Audits', icon: <ListIcon />, path: '/audits' },
-  { text: 'Account', icon: <PeopleIcon />, path: '/directory' },
+  { text: 'Account', icon: <PeopleIcon />, path: '/account' },
 ]
 
 function SidebarMenuItem({ tooltip, href, children } : {tooltip: string, href?: string, children: JSX.Element}) {

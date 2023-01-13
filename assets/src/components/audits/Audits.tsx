@@ -43,7 +43,7 @@ const DIRECTORY = [
   { path: 'graph', label: 'Graph view' },
 ]
 
-export function Audits() {
+export default function Audits() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const tabStateRef = useRef<any>(null)

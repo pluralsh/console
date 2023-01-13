@@ -3,8 +3,6 @@ import { Navigate, Route } from 'react-router-dom'
 import Webhooks from 'components/Webhooks'
 import Builds from 'components/builds/Builds'
 import Build from 'components/builds/build/Build'
-import Directory from 'components/account/Directory'
-import { Audits } from 'components/audits/Audits'
 import Changelog from 'components/builds/build/changelog/Changelog'
 import Progress from 'components/builds/build/progress/Progress'
 import AuditsTable from 'components/audits/table/AuditTable'
@@ -23,6 +21,8 @@ import { Users } from 'components/account/Users'
 import Account from 'components/account/Account'
 
 import { Groups } from 'components/account/Groups'
+
+import Audits from 'components/audits/Audits'
 
 import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
@@ -133,21 +133,6 @@ const accountRoutes = [
       element={<Groups />}
     />
   </Route>,
-
-  // Old views.
-  <Route
-    path="directory/:section"
-    element={<Directory />}
-  />,
-  <Route
-    path="directory"
-    element={(
-      <Navigate
-        replace
-        to="/directory/users"
-      />
-    )}
-  />,
 ]
 
 /*
