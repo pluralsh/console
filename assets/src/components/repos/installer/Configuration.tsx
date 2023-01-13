@@ -1,8 +1,13 @@
-import { ReactElement, useCallback } from 'react'
+import {
+  Dispatch,
+  ReactElement,
+  SetStateAction,
+  useCallback,
+} from 'react'
 import { Flex, Span, Switch } from 'honorable'
 import { useActive } from '@pluralsh/design-system'
 
-import { ConfigurationItem as ConfigurationItemType, Recipe } from '../../../generated/graphql'
+import { ConfigurationItem as ConfigurationItemType, Maybe, Recipe } from '../../../generated/graphql'
 import { OperationType } from '../constants'
 
 import { ConfigurationItem } from './ConfigurationItem'
@@ -20,9 +25,18 @@ const available = (config, context) => {
   return true
 }
 
+interface ConfigurationProps {
+  recipe: Recipe,
+  context: Record<string, unknown>
+  setContext: Dispatch<SetStateAction<Record<string, unknown>>>
+  oidc?: boolean
+  setOIDC: Dispatch<boolean>
+  setValid: Dispatch<boolean>
+}
+
 export function Configuration({
   recipe, context, oidc, setContext, setValid, setOIDC,
-}: {recipe: Recipe, context: Record<string, unknown>}): ReactElement {
+}: ConfigurationProps): ReactElement {
   const { active } = useActive<Record<string, unknown>>()
   const sections = recipe.recipeSections
   const configurations = sections!.filter(section => section!.repository!.name === active.label).map(section => section!.configuration).flat()
@@ -34,9 +48,9 @@ export function Configuration({
       direction="column"
       marginRight="xsmall"
     >
-      {configurations.filter(conf => available(conf, context)).map((conf: ConfigurationItemType) => (
+      {configurations.filter(conf => available(conf, context)).map((conf?: Maybe<ConfigurationItemType>) => (
         <ConfigurationItem
-          key={`${recipe.name}-${conf.name}`}
+          key={`${recipe.name}-${conf?.name}`}
           config={conf}
           ctx={context}
           setValue={setValue}
