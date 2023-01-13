@@ -18,9 +18,11 @@ import {
 import {
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
+import Fuse from 'fuse.js'
 
 import { Readiness, readinessToLabel } from 'utils/status'
 
@@ -115,6 +117,11 @@ function PendingFailedEmptyState({ filter }) {
   )
 }
 
+const searchOptions = {
+  keys: ['name'],
+  threshold: 0.25,
+}
+
 export default function Apps() {
   const { applications } = useContext<any>(InstallationContext)
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
@@ -126,15 +133,25 @@ export default function Apps() {
     setBreadcrumbs([{ text: 'apps', url: '/' }])
   }, [setBreadcrumbs])
 
-  if (!applications) return <LoopingLogo />
+  const filteredApps = useMemo(() => {
+    const apps = applications || []
 
-  const filteredApps = applications
-    .filter(app => !query || app.name.startsWith(query)) // TODO: Use better search method.
-    .filter(app => !filter || appState(app).readiness === filter) // TODO: Add cache.
+    const filteredByState = apps.filter(app => !filter || appState(app).readiness === filter)
+
+    const fuse = new Fuse(filteredByState, searchOptions)
+    const filteredByQuery = query ? fuse.search(query).map(({ item }) => item) : filteredByState
+
+    return filteredByQuery
+  }, [applications, filter, query])
   const noFilteredApps = filteredApps?.length < 1
 
+  if (!applications) return <LoopingLogo />
+
   return (
-    <Flex direction="column">
+    <Flex
+      direction="column"
+      grow={1}
+    >
       <ScrollablePage
         heading="Apps"
         headingContent={(
