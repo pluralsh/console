@@ -94,6 +94,7 @@ export const ME_Q = gql`
       gitCommit
       isDemoProject
       isSandbox
+      pluralLogin
       manifest { ...ManifestFragment }
       gitStatus { cloned output }
     }
