@@ -186,6 +186,7 @@ export enum BuildType {
   Approval = 'APPROVAL',
   Bounce = 'BOUNCE',
   Deploy = 'DEPLOY',
+  Destroy = 'DESTROY',
   Install = 'INSTALL'
 }
 
@@ -327,6 +328,7 @@ export type ConsoleConfiguration = {
   isDemoProject?: Maybe<Scalars['Boolean']>;
   isSandbox?: Maybe<Scalars['Boolean']>;
   manifest?: Maybe<PluralManifest>;
+  pluralLogin?: Maybe<Scalars['Boolean']>;
 };
 
 export type Container = {
@@ -367,6 +369,12 @@ export type ContainerStatus = {
   ready?: Maybe<Scalars['Boolean']>;
   restartCount?: Maybe<Scalars['Int']>;
   state?: Maybe<ContainerState>;
+};
+
+export type ContextAttributes = {
+  buckets?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  configuration: Scalars['Map'];
+  domain?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
 export type CostAnalysis = {
@@ -774,6 +782,25 @@ export type MetricResult = {
   value?: Maybe<Scalars['String']>;
 };
 
+export type Namespace = {
+  __typename?: 'Namespace';
+  events?: Maybe<Array<Maybe<Event>>>;
+  metadata: Metadata;
+  raw: Scalars['String'];
+  spec: NamespaceSpec;
+  status: NamespaceStatus;
+};
+
+export type NamespaceSpec = {
+  __typename?: 'NamespaceSpec';
+  finalizers?: Maybe<Array<Maybe<Scalars['String']>>>;
+};
+
+export type NamespaceStatus = {
+  __typename?: 'NamespaceStatus';
+  phase?: Maybe<Scalars['String']>;
+};
+
 export type Node = {
   __typename?: 'Node';
   events?: Maybe<Array<Maybe<Event>>>;
@@ -890,6 +917,13 @@ export enum Permission {
   Read = 'READ'
 }
 
+export type PluralContext = {
+  __typename?: 'PluralContext';
+  buckets?: Maybe<Array<Maybe<Scalars['String']>>>;
+  configuration: Scalars['Map'];
+  domains?: Maybe<Array<Maybe<Scalars['String']>>>;
+};
+
 export type PluralManifest = {
   __typename?: 'PluralManifest';
   bucketPrefix?: Maybe<Scalars['String']>;
@@ -914,6 +948,24 @@ export type PodCondition = {
   reason?: Maybe<Scalars['String']>;
   status?: Maybe<Scalars['String']>;
   type?: Maybe<Scalars['String']>;
+};
+
+export type PodConnection = {
+  __typename?: 'PodConnection';
+  edges?: Maybe<Array<Maybe<PodEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PodDelta = {
+  __typename?: 'PodDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<Pod>;
+};
+
+export type PodEdge = {
+  __typename?: 'PodEdge';
+  cursor?: Maybe<Scalars['String']>;
+  node?: Maybe<Pod>;
 };
 
 export type PodSpec = {
@@ -1219,8 +1271,8 @@ export type RootMutationTypeInstallRecipeArgs = {
 };
 
 
-export type RootMutationTypeInstallSt`ac`kArgs = {
-  context: Scalars['Map'];
+export type RootMutationTypeInstallStackArgs = {
+  context: ContextAttributes;
   name: Scalars['String'];
   oidc?: InputMaybe<Scalars['Boolean']>;
 };
@@ -1319,13 +1371,15 @@ export type RootQueryType = {
   logs?: Maybe<Array<Maybe<LogStream>>>;
   me?: Maybe<User>;
   metric?: Maybe<Array<Maybe<MetricResponse>>>;
+  namespaces?: Maybe<Array<Maybe<Namespace>>>;
   node?: Maybe<Node>;
   nodeMetric?: Maybe<NodeMetric>;
   nodeMetrics?: Maybe<Array<Maybe<NodeMetric>>>;
   nodes?: Maybe<Array<Maybe<Node>>>;
   notifications?: Maybe<NotificationConnection>;
+  pluralContext?: Maybe<PluralContext>;
   pod?: Maybe<Pod>;
-  pods?: Maybe<Array<Maybe<Pod>>>;
+  pods?: Maybe<PodConnection>;
   recipe?: Maybe<Recipe>;
   recipes?: Maybe<RecipeConnection>;
   repositories?: Maybe<RepositoryConnection>;
@@ -1501,6 +1555,15 @@ export type RootQueryTypePodArgs = {
 };
 
 
+export type RootQueryTypePodsArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+  namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+};
+
+
 export type RootQueryTypeRecipeArgs = {
   id: Scalars['ID'];
 };
@@ -1590,6 +1653,7 @@ export type RootSubscriptionType = {
   buildDelta?: Maybe<BuildDelta>;
   commandDelta?: Maybe<CommandDelta>;
   notificationDelta?: Maybe<NotificationDelta>;
+  podDelta?: Maybe<PodDelta>;
 };
 
 
