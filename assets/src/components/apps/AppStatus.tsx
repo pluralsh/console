@@ -3,7 +3,7 @@ import { Chip, Tooltip } from '@pluralsh/design-system'
 
 import { Readiness } from 'utils/status'
 
-export default function AppStatus({ app }) { // TODO: Verify statuses.
+export default function AppStatus({ app }) {
   if (!app) return <Chip size="small">Unknown</Chip>
 
   const { readiness, error } = appState(app)
