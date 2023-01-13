@@ -9,6 +9,8 @@ import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { MetricResponse, Node } from 'generated/graphql'
 import { cpuParser } from 'utils/kubernetes'
 
+import RadialBarChart from 'components/utils/RadialBarChart'
+
 import { ClusterMetrics as Metrics } from '../constants'
 import { NODE_METRICS_Q } from '../queries'
 
@@ -105,26 +107,41 @@ export function ClusterGauges({
   }
 
   return (
-    <Flex
-      flex={false}
-      flexDirection="row"
-      align="center"
-      justifyContent="center"
-      width="100%"
-      gap="xsmall"
-      marginBottom="xlarge"
-      overflow="visible"
-    >
-      <CpuUsageGauge {...chartData.cpuUsage} />
-      <CpuReservationGauge {...chartData.cpuReservation} />
-      <MemoryUsageGauge {...chartData.memoryUsage} />
-      <MemoryReservationGauge {...chartData.memoryReservation} />
-      <UsageGauge
-        title="Pod Usage"
-        {...chartData.podUsage}
-        usedLabel="Pods used"
-        remainderLabel="Pods available"
-      />
-    </Flex>
+    <>
+      <Flex
+        flex={false}
+        flexDirection="row"
+        align="center"
+        justifyContent="center"
+        width="100%"
+        gap="xsmall"
+        marginBottom="xlarge"
+        overflow="visible"
+      >
+        <RadialBarChart />
+      </Flex>
+      <Flex
+        flex={false}
+        flexDirection="row"
+        align="center"
+        justifyContent="center"
+        width="100%"
+        gap="xsmall"
+        marginBottom="xlarge"
+        overflow="visible"
+      >
+        <CpuUsageGauge {...chartData.cpuUsage} />
+        <CpuReservationGauge {...chartData.cpuReservation} />
+        <MemoryUsageGauge {...chartData.memoryUsage} />
+        <MemoryReservationGauge {...chartData.memoryReservation} />
+        <UsageGauge
+          title="Pod Usage"
+          {...chartData.podUsage}
+          usedLabel="Pods used"
+          remainderLabel="Pods available"
+        />
+      </Flex>
+      ¸
+    </>
   )
 }
