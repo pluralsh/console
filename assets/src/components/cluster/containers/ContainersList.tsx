@@ -10,7 +10,12 @@ import type {
 } from 'generated/graphql'
 import { ReadinessT, containerStatusToReadiness, readinessToLabel } from 'utils/status'
 
-import { IconFrame, TerminalIcon, Tooltip } from '@pluralsh/design-system'
+import {
+  IconFrame,
+  Table,
+  TerminalIcon,
+  Tooltip,
+} from '@pluralsh/design-system'
 
 import { cpuParser, memoryParser } from 'utils/kubernetes'
 
@@ -20,7 +25,6 @@ import { UnstyledLink } from 'components/utils/Link'
 import styled from 'styled-components'
 
 import {
-  GridTable,
   StatusChip,
   TABLE_HEIGHT,
   TableText,
@@ -32,11 +36,11 @@ type ContainerTableRow = {
   isInit: boolean
   memory: {
     requests?: number
-    limits?: any
+    limits?: number
   }
   cpu: {
     requests?: number
-    limits?: any
+    limits?: number
   }
   ports?: Maybe<Port>[]
   status?: ContainerStatus
@@ -48,7 +52,7 @@ const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToLabe
   {
     id: 'status',
     cell: ({ row: { original } }) => (
-      <StatusChip readiness={original?.readiness} />
+      <div><StatusChip readiness={original?.readiness} /></div>
     ),
     header: 'Status',
   })
@@ -66,6 +70,9 @@ const ColName = columnHelper.accessor(row => row.name, {
     </TableText>
   ),
   header: 'Name',
+  meta: {
+    truncate: true,
+  },
 })
 
 const ColPorts = columnHelper.accessor(row => row.ports, {
@@ -88,33 +95,36 @@ const ColPorts = columnHelper.accessor(row => row.ports, {
   header: 'Ports',
 })
 
-const ColMemory = columnHelper.accessor(row => row.name, {
+const ColMemoryReservation = columnHelper.accessor(row => row?.memory?.requests, {
   id: 'memory',
-  cell: ({ row: { original } }) => (
-    <Usage
-      used={
-        original?.memory?.requests === undefined
-          ? undefined
-          : filesize(original.memory.requests ?? 0)
-      }
-      total={
-        original.memory.limits === undefined
-          ? undefined
-          : filesize(original.memory.limits ?? 0)
-      }
-    />
-  ),
+  cell: ({ row: { original }, ...props }) => {
+    const requests = props.getValue()
+
+    return (
+      <Usage
+        used={
+          requests === undefined
+            ? undefined
+            : filesize(requests)
+        }
+        total={
+          original.memory.limits === undefined
+            ? undefined
+            : filesize(original.memory.limits)
+        }
+      />
+    )
+  },
   header: 'Memory',
 })
 
-const ColCpu = columnHelper.accessor(row => row?.cpu?.requests, {
-  id: 'cpu',
-  cell: props => (
-    // <Usage
-    //   used={original?.cpu?.requests}
-    //   total={original?.cpu?.limits}
-    // />
-    <TableText>{props.getValue() ?? '—'}</TableText>
+const ColCpuReservation = columnHelper.accessor(row => row?.cpu?.requests, {
+  id: 'cpu-reservations',
+  cell: ({ row: { original }, ...props }) => (
+    <Usage
+      used={props.getValue()}
+      total={original?.cpu?.limits}
+    />
   ),
   header: 'CPU',
 })
@@ -176,7 +186,6 @@ type ContainersListProps = {
   podName: string
   refetch?: any
   columns?: any[]
-  truncColIndexes?: number[]
 }
 
 function toTableData(container: Container,
@@ -200,12 +209,10 @@ function toTableData(container: Container,
     memory: {
       requests: memoryRequests,
       limits: memoryLimits,
-      sortVal: (memoryRequests ?? 0) / (memoryLimits ?? Infinity),
     },
     cpu: {
       requests: cpuRequests,
       limits: cpuLimits,
-      sortVal: (cpuRequests ?? 0) / (cpuLimits ?? Infinity),
     },
     ports: container.ports || undefined,
     readiness: containerStatusToReadiness(status),
@@ -218,7 +225,6 @@ export function ContainersList({
   initContainers,
   initContainerStatuses,
   columns,
-  truncColIndexes = [0],
   namespace,
   podName,
 }: ContainersListProps) {
@@ -238,8 +244,8 @@ export function ContainersList({
 
   columns = useMemo(() => columns ?? [
     ColName,
-    ColMemory,
-    ColCpu,
+    ColMemoryReservation,
+    ColCpuReservation,
     ColPorts,
     ColStatus,
     ColActions({ podName, namespace }),
@@ -251,11 +257,11 @@ export function ContainersList({
   }
 
   return (
-    <GridTable
+    <Table
+      loose
       data={tableData}
       columns={columns}
       enableColumnResizing
-      $truncColIndexes={truncColIndexes}
       {...TABLE_HEIGHT}
     />
   )

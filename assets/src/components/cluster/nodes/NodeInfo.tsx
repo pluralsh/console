@@ -18,8 +18,8 @@ import { POLL_INTERVAL } from '../constants'
 import {
   ColActions,
   ColContainers,
-  ColCpu,
-  ColMemory,
+  ColCpuReservation,
+  ColMemoryReservation,
   ColNameLink,
   ColRestarts,
   PodsList,
@@ -58,8 +58,8 @@ export default function NodeInfo() {
 
   const columns = useMemo(() => [
     ColNameLink,
-    ColMemory,
-    ColCpu,
+    ColMemoryReservation,
+    ColCpuReservation,
     ColRestarts,
     ColContainers,
     ColActions(refetch),
@@ -80,7 +80,6 @@ export default function NodeInfo() {
           <SubTitle>Pods</SubTitle>
           <PodsList
             columns={columns}
-            truncColIndexes={[0]}
             pods={node.pods}
           />
         </section>
