@@ -29,7 +29,6 @@ const columns = [
         direction="row"
         gap="xsmall"
       >
-        {/* TODO: Update it in design system. */}
         <Avatar
           name={user.getValue().name}
           size={32}
@@ -90,7 +89,7 @@ export function RunbookExecutions() {
       data={executions}
       columns={columns}
       onScrollCapture={e => fetchMoreOnBottomReached(e?.target)}
-      maxHeight="calc(100vh - 244px)" // TODO: Set design system to use flex.
+      maxHeight="calc(100vh - 244px)"
     />
   )
 }
