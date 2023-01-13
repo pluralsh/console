@@ -3,7 +3,6 @@ import {
   Card,
   ListBoxItem,
   LoopingLogo,
-  PageTitle,
   Select,
 } from '@pluralsh/design-system'
 import {
@@ -20,6 +19,8 @@ import { DASHBOARDS_Q, DASHBOARD_Q } from 'components/graphql/dashboards'
 import { Div, Flex } from 'honorable'
 
 import { DURATIONS } from 'utils/time'
+
+import { ScrollablePage } from 'components/layout/ScrollablePage'
 
 import RangePicker from '../../../../utils/RangePicker'
 
@@ -86,32 +87,31 @@ export default function Dashboard() {
   const filteredLabels = dashboard.spec.labels.filter(({ values }) => values.length > 0)
 
   return (
-    <Div>
-      <PageTitle heading={(
-        <Div>
-          <Select
-            aria-label="dashboards"
-            selectedKey={selectedKey}
-            onSelectionChange={id => navigate(`/apps/${appName}/dashboards/${id}`)}
-            triggerButton={(
-              <PageTitleSelectButton
-                title="Dashboards"
-                label={selectedKey}
-              />
-            )}
-            width={240}
-          >
-            {dashboards.map(({ id, spec: { name } }) => (
-              <ListBoxItem
-                key={id}
-                label={name}
-                textValue={id}
-              />
-            ))}
-          </Select>
-        </Div>
-      )}
-      />
+    <ScrollablePage heading={(
+      <Div>
+        <Select
+          aria-label="dashboards"
+          selectedKey={selectedKey}
+          onSelectionChange={id => navigate(`/apps/${appName}/dashboards/${id}`)}
+          triggerButton={(
+            <PageTitleSelectButton
+              title="Dashboards"
+              label={selectedKey}
+            />
+          )}
+          width={240}
+        >
+          {dashboards.map(({ id, spec: { name } }) => (
+            <ListBoxItem
+              key={id}
+              label={name}
+              textValue={id}
+            />
+          ))}
+        </Select>
+      </Div>
+    )}
+    >
       <Flex
         direction="row"
         gap="medium"
@@ -141,6 +141,6 @@ export default function Dashboard() {
           ))}
         </Flex>
       </Card>
-    </Div>
+    </ScrollablePage>
   )
 }
