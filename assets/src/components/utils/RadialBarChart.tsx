@@ -2,29 +2,21 @@
 // yarn add @nivo/core @nivo/radial-bar
 import { ResponsiveRadialBar } from '@nivo/radial-bar'
 import { cpuFmt, roundToTwoPlaces } from 'components/cluster/utils'
-import { ComponentProps } from 'react'
+import {
+  ComponentProps,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import { Card, styledTheme as theme } from '@pluralsh/design-system'
 
-const defaultData = {
-  id: 'Supermarket',
-  data: [
-    {
-      x: 'Limits',
-      y: 107,
-    },
-    {
-      x: 'Requests',
-      y: 30,
-    },
-    {
-      x: 'Used',
-      y: 277,
-    },
-    {
-      x: 'Available',
-      y: 555,
-    },
-  ],
-}
+import styled, { useTheme } from 'styled-components'
+
+import { Div } from 'honorable'
+
+import { createPortal } from 'react-dom'
+
+import { CHART_THEME } from './charts'
 
 // make sure parent container have a defined height when using
 // responsive component, otherwise height will be 0 and
@@ -69,57 +61,157 @@ const chartColors = {
   available: COLOR_MAP.green,
   requests: COLOR_MAP.orange,
   limits: COLOR_MAP.blue,
+  track: theme.colors['fill-two'],
 } as const satisfies Record<string, string>
 
-export default function RadialBarChart({
-  data /* see data tab */,
-  ...props
-}: Partial<ComponentProps<typeof ResponsiveRadialBar>>) {
+function BarChartTooltip({ color, category, value }) {
+  const theme = useTheme()
+  const ref = useRef<HTMLDivElement>(null)
+  const [transform, setTransform] = useState('')
+  const [position, setPosition] = useState({ top: 0, left: 0 })
+  const mousePositionRef = useRef<unknown>()
+
+  useEffect(() => {
+    const parentNode = ref?.current?.parentElement
+
+    if (!parentNode) {
+      return
+    }
+    console.log('parent', parentNode?.offsetTop, parentNode?.offsetLeft)
+    const parentRect = parentNode.getBoundingClientRect()
+
+    setPosition({
+      top: parentRect.x,
+      left: parentRect.y,
+    })
+    setTransform(parentNode?.style?.transform)
+    const observer = new MutationObserver(observed => {
+      if (observed.findIndex(record => record.attributeName === 'style') >= 0) {
+        console.log('observed', observed)
+        console.log(parentNode?.style?.transform)
+        setTransform(parentNode?.style?.transform)
+        const parentRect = parentNode.getBoundingClientRect()
+
+        setPosition({
+          top: parentRect.x,
+          left: parentRect.y,
+        })
+        console.log('parent', parentNode.getBoundingClientRect())
+      }
+    })
+
+    observer.observe(parentNode, { attributes: true })
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
+  const content = (
+    <Card
+      display="flex"
+      fillLevel={2}
+      position="absolute"
+      zIndex={100}
+      {...position}
+      paddingLeft={theme.spacing.xsmall}
+      paddingRight={theme.spacing.xsmall}
+      paddingBottom={theme.spacing.xxsmall}
+      paddingTop={theme.spacing.xxsmall}
+      flexDirection="row"
+      alignItems="center"
+      gap={theme.spacing.xsmall}
+      caption
+      pointerEvents="none"
+      transition="transform 0.1s ease-out"
+      style={{ transform }}
+    >
+      <Div
+        width={12}
+        height={12}
+        backgroundColor={color}
+        aria-hidden
+      />
+      <Div>
+        {category}:{' '}
+        {value}
+      </Div>
+    </Card>
+  )
+
   return (
-    <ResponsiveRadialBar
-      colors={[
-        chartColors.requests,
-        chartColors.limits,
-        chartColors.used,
-        chartColors.available,
-      ]}
-      data={data || defaultData}
-      valueFormat={val => cpuFmt(roundToTwoPlaces(val))}
-      padding={0.4}
-      cornerRadius={2}
-      margin={{
-        top: 40,
-        right: 120,
-        bottom: 40,
-        left: 40,
-      }}
-      radialAxisStart={{ tickSize: 5, tickPadding: 5, tickRotation: 0 }}
-      circularAxisOuter={{ tickSize: 5, tickPadding: 12, tickRotation: 0 }}
-      legends={[
-        {
-          anchor: 'right',
-          direction: 'column',
-          justify: false,
-          translateX: 80,
-          translateY: 0,
-          itemsSpacing: 6,
-          itemDirection: 'left-to-right',
-          itemWidth: 100,
-          itemHeight: 18,
-          itemTextColor: '#999',
-          symbolSize: 18,
-          symbolShape: 'square',
-          effects: [
-            {
-              on: 'hover',
-              style: {
-                itemTextColor: '#000',
-              },
-            },
-          ],
-        },
-      ]}
-      {...props}
-    />
+    <Div
+      className="stuff"
+      width="0"
+      height="0"
+      ref={ref as any}
+    >
+      stuff
+      {transform && createPortal(content, document.body)}
+    </Div>
   )
 }
+
+function RadialBarChartUnstyled({
+  data /* see data tab */,
+  className,
+  width,
+  height,
+  ...props
+}: {
+  className?: string
+  width?: number
+  height?: number
+  data: ComponentProps<typeof ResponsiveRadialBar>['data']
+} & Omit<Partial<ComponentProps<typeof ResponsiveRadialBar>>, 'data'>) {
+  return (
+    <Div
+      className={`${className}`}
+      height={height || 180}
+      width={width || 180}
+    >
+      <ResponsiveRadialBar
+        colors={[
+          chartColors.used,
+          chartColors.available,
+          chartColors.requests,
+          chartColors.limits,
+        ]}
+        tracksColor={chartColors.track}
+        data={data}
+        valueFormat={val => cpuFmt(roundToTwoPlaces(val))}
+        padding={0.3}
+        innerRadius={0.5}
+        cornerRadius={0}
+        margin={{
+          top: 0,
+          right: 7,
+          bottom: 0,
+          left: 7,
+        }}
+        radialAxisStart={{ tickSize: 0, tickPadding: 8, tickRotation: 0 }}
+        circularAxisOuter={{ tickSize: 0, tickPadding: 12, tickRotation: 0 }}
+        theme={CHART_THEME}
+        enableCircularGrid={false}
+        enableRadialGrid
+        tooltip={props => (
+          <BarChartTooltip
+            color={props.bar.color}
+            value={props.bar.formattedValue}
+            category={props.bar.category}
+          />
+        )}
+        {...props}
+      />
+    </Div>
+  )
+}
+
+const RadialBarChart = styled(RadialBarChartUnstyled)(_ => ({
+  // Hide radial tick labels without hiding bar labels
+  'text[text-anchor="middle"]': {
+    display: 'none',
+  },
+}))
+
+export default RadialBarChart

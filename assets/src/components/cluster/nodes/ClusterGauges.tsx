@@ -9,18 +9,10 @@ import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { MetricResponse, Node } from 'generated/graphql'
 import { cpuParser } from 'utils/kubernetes'
 
-import RadialBarChart from 'components/utils/RadialBarChart'
-
 import { ClusterMetrics as Metrics } from '../constants'
 import { NODE_METRICS_Q } from '../queries'
 
-import {
-  CpuReservationGauge,
-  CpuUsageGauge,
-  MemoryReservationGauge,
-  MemoryUsageGauge,
-  UsageGauge,
-} from '../Gauges'
+import { GaugeWrap, ResourceGauge, UsageGauge } from '../Gauges'
 
 import { ResourceUsage } from './Nodes'
 
@@ -77,27 +69,22 @@ export function ClusterGauges({
     const { cpu: cpuUsed, mem: memUsed } = usage || {}
 
     return {
-      cpuUsage: cpuUsed !== undefined && {
+      cpu: cpuUsed !== undefined && {
         used: cpuUsed,
-        remainder: cpuTotal - cpuUsed || 0,
-      },
-      cpuReservation: cpuLimits !== undefined
-        && cpuRequests !== undefined && {
+        total: cpuTotal,
         requests: cpuRequests,
-        remainder: cpuLimits - cpuRequests,
+        limits: cpuLimits,
       },
-      memoryUsage: memUsed !== undefined && {
+      memory: memUsed !== undefined && {
         used: memUsed,
-        remainder: memTotal - memUsed,
-      },
-      memoryReservation: memRequests !== undefined
-        && memLimits !== undefined && {
+        total: memTotal,
         requests: memRequests || 0,
-        remainder: memLimits - memRequests,
+        limits: memLimits,
       },
-      podUsage: {
+      pods: {
         used: podsUsed || 0,
-        remainder: (podsTotal || 0) - (podsUsed || 0),
+        total: podsTotal,
+        remainder: podsTotal - (podsUsed || 0),
       },
     }
   }, [data, nodes, usage])
@@ -107,41 +94,43 @@ export function ClusterGauges({
   }
 
   return (
-    <>
-      <Flex
-        flex={false}
-        flexDirection="row"
-        align="center"
-        justifyContent="center"
-        width="100%"
-        gap="xsmall"
-        marginBottom="xlarge"
-        overflow="visible"
+    <Flex
+      flex={false}
+      flexDirection="row"
+      alignItems="stretch"
+      justifyContent="center"
+      width="100%"
+      gap="xsmall"
+      marginBottom="xlarge"
+      overflow="visible"
+      wrap="wrap"
+    >
+      <GaugeWrap
+        heading="CPU Reservation"
+        width="auto"
+        height="auto"
       >
-        <RadialBarChart />
-      </Flex>
-      <Flex
-        flex={false}
-        flexDirection="row"
-        align="center"
-        justifyContent="center"
-        width="100%"
-        gap="xsmall"
-        marginBottom="xlarge"
-        overflow="visible"
-      >
-        <CpuUsageGauge {...chartData.cpuUsage} />
-        <CpuReservationGauge {...chartData.cpuReservation} />
-        <MemoryUsageGauge {...chartData.memoryUsage} />
-        <MemoryReservationGauge {...chartData.memoryReservation} />
-        <UsageGauge
-          title="Pod Usage"
-          {...chartData.podUsage}
-          usedLabel="Pods used"
-          remainderLabel="Pods available"
+        <ResourceGauge
+          {...chartData.cpu}
+          type="CPU"
         />
-      </Flex>
-      ¸
-    </>
+      </GaugeWrap>
+      <GaugeWrap
+        heading="Memory Reservation"
+        width="auto"
+        height="auto"
+      >
+        <ResourceGauge
+          {...chartData.cpu}
+          type="Memory"
+        />
+      </GaugeWrap>
+      <UsageGauge
+        title="Pod Usage"
+        {...chartData.pods}
+        usedLabel="Pods used"
+        remainderLabel="Pods available"
+      />
+    </Flex>
   )
 }

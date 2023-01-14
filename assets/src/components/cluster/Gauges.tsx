@@ -5,9 +5,11 @@ import styled, { useTheme } from 'styled-components'
 
 import { Flex, FlexProps } from 'honorable'
 
+import RadialBarChart from 'components/utils/RadialBarChart'
+
 import { cpuFmt, roundToTwoPlaces } from './utils'
 
-const ChartHeading = styled.caption(({ theme }) => ({
+const ChartHeading = styled.h3(({ theme }) => ({
   ...theme.partials.text.caption,
   textAlign: 'center',
 }))
@@ -15,17 +17,23 @@ const ChartHeading = styled.caption(({ theme }) => ({
 export function GaugeWrap({
   children,
   heading,
+  width,
+  height,
   ...props
 }: Omit<FlexProps, 'heading'> & { heading: ReactNode }) {
   return (
     <Flex
       flexDirection="column"
+      justifyContent="space-between"
       overflow="visible"
       {...props}
     >
       <Flex
-        width={140}
-        height={140}
+        alignItems="center"
+        justifyContent="center"
+        flexGrow={1}
+        width={height ?? 170}
+        height={width ?? 170}
       >
         {children}
       </Flex>
@@ -108,6 +116,63 @@ export function UsageGauge({
   )
 }
 
+export function ResourceGauge({
+  requests = 0,
+  limits = 0,
+  used = 0,
+  total = 0,
+  type,
+  ...props
+}: {
+  requests?: number
+  limits?: number
+  used?: number
+  total?: number
+  type: 'CPU' | 'Memory'
+}) {
+  const label = type
+  const data = useMemo(() => [
+    {
+      id: `${label} usage`,
+      data: [
+        {
+          x: `${label} used`,
+          y: used,
+        },
+        {
+          x: `${label} available`,
+          y: total - used,
+        },
+      ],
+    },
+    {
+      id: `${label} limits`,
+      data: [
+        {
+          x: `${label} limits`,
+          y: limits,
+        },
+      ],
+    },
+    {
+      id: `${label} requests`,
+      data: [
+        {
+          x: `${label} requests`,
+          y: requests,
+        },
+      ],
+    },
+  ], [label, limits, requests, total, used])
+
+  return (
+    <RadialBarChart
+      data={data}
+      {...props}
+    />
+  )
+}
+
 export function CpuUsageGauge(props: { used?: number; remainder?: number }) {
   return (
     <UsageGauge
@@ -156,7 +221,11 @@ export function MemoryUsageGauge(props: { used?: number; remainder?: number }) {
   )
 }
 
-export function MemoryReservationGauge({ requests, remainder, ...props }: {
+export function MemoryReservationGauge({
+  requests,
+  remainder,
+  ...props
+}: {
   requests?: number
   remainder?: number
 }) {
