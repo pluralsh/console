@@ -7526,7 +7526,6 @@ __metadata:
     react-window-infinite-loader: 1.0.8
     react-window-reversed: 1.4.1
     regenerator-runtime: 0.13.11
-    rooks: ^7.4.3
     slate: 0.88.1
     slate-history: 0.86.0
     slate-react: 0.88.0
@@ -13746,7 +13745,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"raf@npm:^3.1.0, raf@npm:^3.4.1":
+"raf@npm:^3.1.0":
   version: 3.4.1
   resolution: "raf@npm:3.4.1"
   dependencies:
@@ -14879,19 +14878,6 @@ __metadata:
   bin:
     rollup: dist/bin/rollup
   checksum: 929cfab6b8bb2e20c28d7a4c3909b53729f4a63d8cc14f3b1a217d5f8e550737ee0903124ba58a1f2e7efd45c596e044a968aa379411731d0e76c910621d7d3f
-  languageName: node
-  linkType: hard
-
-"rooks@npm:^7.4.3":
-  version: 7.4.3
-  resolution: "rooks@npm:7.4.3"
-  dependencies:
-    lodash.debounce: ^4.0.8
-    raf: ^3.4.1
-  peerDependencies:
-    react: ^16.8.0  || ^17.0.0 || ^18.0.0
-    react-dom: ^16.8.0  || ^17.0.0 || ^18.0.0
-  checksum: 3bdde0ca21c30080ee92c418c454848b10699d943118f390bae3aa0109df0ee25180679b41ce7b0edadc8ddf796923041e8ae32a73f2201b4e90bbf24e817a9b
   languageName: node
   linkType: hard
 
