@@ -6,9 +6,9 @@ defmodule Console.Cached.Namespace do
   use Console.Cached.Base
   alias Kazan.Apis.Core.V1, as: CoreV1
 
-  def start_link(), do: Console.Cached.Kubernetes.start_link(__MODULE__, CoreV1.list_namespace!())
+  def start_link(), do: Console.Cached.Kubernetes.start_link(__MODULE__, CoreV1.list_namespace!(), CoreV1.Namespace)
 
-  def start(), do: Console.Cached.Kubernetes.start(__MODULE__, CoreV1.list_namespace!())
+  def start(), do: Console.Cached.Kubernetes.start(__MODULE__, CoreV1.list_namespace!(), CoreV1.Namespace)
 
   def fetch(), do: Console.Cached.Kubernetes.fetch(__MODULE__)
 end
