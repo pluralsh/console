@@ -69,7 +69,7 @@ function BarChartTooltip({ color, category, value }) {
   const ref = useRef<HTMLDivElement>(null)
   const [transform, setTransform] = useState('')
   const [position, setPosition] = useState({ top: 0, left: 0 })
-  const mousePositionRef = useRef<unknown>()
+  // const mousePositionRef = useRef<unknown>()
 
   useEffect(() => {
     const parentNode = ref?.current?.parentElement
@@ -77,7 +77,6 @@ function BarChartTooltip({ color, category, value }) {
     if (!parentNode) {
       return
     }
-    console.log('parent', parentNode?.offsetTop, parentNode?.offsetLeft)
     const parentRect = parentNode.getBoundingClientRect()
 
     setPosition({
@@ -87,8 +86,6 @@ function BarChartTooltip({ color, category, value }) {
     setTransform(parentNode?.style?.transform)
     const observer = new MutationObserver(observed => {
       if (observed.findIndex(record => record.attributeName === 'style') >= 0) {
-        console.log('observed', observed)
-        console.log(parentNode?.style?.transform)
         setTransform(parentNode?.style?.transform)
         const parentRect = parentNode.getBoundingClientRect()
 
@@ -96,7 +93,6 @@ function BarChartTooltip({ color, category, value }) {
           top: parentRect.x,
           left: parentRect.y,
         })
-        console.log('parent', parentNode.getBoundingClientRect())
       }
     })
 
@@ -141,12 +137,10 @@ function BarChartTooltip({ color, category, value }) {
 
   return (
     <Div
-      className="stuff"
       width="0"
       height="0"
       ref={ref as any}
     >
-      stuff
       {transform && createPortal(content, document.body)}
     </Div>
   )
