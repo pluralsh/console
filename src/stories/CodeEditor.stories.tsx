@@ -46,8 +46,8 @@ function Template({ onFillLevel, ...args }: any) {
         <CodeEditor
           language="hcl"
           value={tfCode}
-          width="600px"
-          height="300px"
+          width="1100px"
+          height="550px"
           save
           saveLabel="Commit"
           {...args}
@@ -56,14 +56,14 @@ function Template({ onFillLevel, ...args }: any) {
           language="javascript"
           value={jsCode}
           width="600px"
-          height="200px"
+          height="300px"
           {...args}
         />
-        <Div height={200}>
+        <Div height={300}>
           <CodeEditor
             language="go"
             value={goCode}
-            width="400px"
+            width="700px"
             {...args}
           />
         </Div>
