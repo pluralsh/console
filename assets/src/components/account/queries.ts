@@ -94,13 +94,9 @@ export const SEARCH_GROUPS = gql`
 export const GROUP_MEMBERS = gql`
   query GroupMembers($cursor: String, $id: ID!) {
     groupMembers(groupId: $id, after: $cursor, first: 20) {
-      pageInfo {
-        ...PageInfo
-      }
+      pageInfo { ...PageInfo }
       edges {
-        node {
-          ...GroupMemberFragment
-        }
+        node { ...GroupMemberFragment }
       }
     }
   }

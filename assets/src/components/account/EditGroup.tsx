@@ -8,7 +8,7 @@ import {
   TabPanel,
   ValidatedInput,
 } from '@pluralsh/design-system'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Flex } from 'honorable'
 
 import { appendConnection, updateCache } from '../../utils/graphql'
@@ -46,6 +46,10 @@ export function EditGroup({ group, edit, setEdit }: any) {
   const [suggestions, setSuggestions] = useState([])
   const tabStateRef = useRef<any>(null)
   const [view, setView] = useState('Attributes')
+
+  // Run only on first render. Make sure there will be data in Combo Box to start with.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => fetchUsers(client, value, setSuggestions), [])
 
   return (
     <Modal
