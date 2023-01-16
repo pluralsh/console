@@ -11,13 +11,13 @@ export function borderColor(lvl) {
   case Level.FATAL:
     return red[300]
   case Level.ERROR:
-    return red[300]
+    return red[200]
   case Level.WARN:
     return yellow[200]
   case Level.INFO:
-    return grey[100]
-  default:
     return grey[750]
+  default:
+    return grey[100]
   }
 }
 
