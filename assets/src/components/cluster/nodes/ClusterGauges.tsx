@@ -12,13 +12,7 @@ import { cpuParser } from 'utils/kubernetes'
 import { ClusterMetrics as Metrics } from '../constants'
 import { NODE_METRICS_Q } from '../queries'
 
-import {
-  CpuReservationGauge,
-  CpuUsageGauge,
-  MemoryReservationGauge,
-  MemoryUsageGauge,
-  UsageGauge,
-} from '../Gauges'
+import { GaugeWrap, ResourceGauge, UsageGauge } from '../Gauges'
 
 import { ResourceUsage } from './Nodes'
 
@@ -75,27 +69,22 @@ export function ClusterGauges({
     const { cpu: cpuUsed, mem: memUsed } = usage || {}
 
     return {
-      cpuUsage: cpuUsed !== undefined && {
+      cpu: cpuUsed !== undefined && {
         used: cpuUsed,
-        remainder: cpuTotal - cpuUsed || 0,
-      },
-      cpuReservation: cpuLimits !== undefined
-        && cpuRequests !== undefined && {
+        total: cpuTotal,
         requests: cpuRequests,
-        remainder: cpuLimits - cpuRequests,
+        limits: cpuLimits,
       },
-      memoryUsage: memUsed !== undefined && {
+      memory: memUsed !== undefined && {
         used: memUsed,
-        remainder: memTotal - memUsed,
-      },
-      memoryReservation: memRequests !== undefined
-        && memLimits !== undefined && {
+        total: memTotal,
         requests: memRequests || 0,
-        remainder: memLimits - memRequests,
+        limits: memLimits,
       },
-      podUsage: {
+      pods: {
         used: podsUsed || 0,
-        remainder: (podsTotal || 0) - (podsUsed || 0),
+        total: podsTotal,
+        remainder: podsTotal - (podsUsed || 0),
       },
     }
   }, [data, nodes, usage])
@@ -108,20 +97,37 @@ export function ClusterGauges({
     <Flex
       flex={false}
       flexDirection="row"
-      align="center"
+      alignItems="stretch"
       justifyContent="center"
       width="100%"
       gap="xsmall"
       marginBottom="xlarge"
       overflow="visible"
+      wrap="wrap"
     >
-      <CpuUsageGauge {...chartData.cpuUsage} />
-      <CpuReservationGauge {...chartData.cpuReservation} />
-      <MemoryUsageGauge {...chartData.memoryUsage} />
-      <MemoryReservationGauge {...chartData.memoryReservation} />
+      <GaugeWrap
+        heading="CPU Reservation"
+        width="auto"
+        height="auto"
+      >
+        <ResourceGauge
+          {...chartData.cpu}
+          type="CPU"
+        />
+      </GaugeWrap>
+      <GaugeWrap
+        heading="Memory Reservation"
+        width="auto"
+        height="auto"
+      >
+        <ResourceGauge
+          {...chartData.cpu}
+          type="Memory"
+        />
+      </GaugeWrap>
       <UsageGauge
         title="Pod Usage"
-        {...chartData.podUsage}
+        {...chartData.pods}
         usedLabel="Pods used"
         remainderLabel="Pods available"
       />

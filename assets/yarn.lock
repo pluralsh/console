@@ -3311,6 +3311,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nivo/polar-axes@npm:0.80.0":
+  version: 0.80.0
+  resolution: "@nivo/polar-axes@npm:0.80.0"
+  dependencies:
+    "@nivo/arcs": 0.80.0
+    "@nivo/scales": 0.80.0
+    "@react-spring/web": 9.4.5
+  peerDependencies:
+    "@nivo/core": 0.80.0
+    react: ">= 16.14.0 < 19.0.0"
+  checksum: 8b2dc4159800f6aad2a68aa154f7a647dd8994b5dac6e75be708af7f62191445f54934ca5e3b9429ab45faa4059d74321b3ac64a75fead1e5fc963fa359ecc19
+  languageName: node
+  linkType: hard
+
 "@nivo/radar@npm:0.80.0":
   version: 0.80.0
   resolution: "@nivo/radar@npm:0.80.0"
@@ -3325,6 +3339,26 @@ __metadata:
     "@nivo/core": 0.80.0
     react: ">= 16.14.0 < 19.0.0"
   checksum: 06e3b546c3bd46f49f0715da331094fbd1180a797d8d2d875e0fb54f2613b2d9b74ba0cdc14a872d86364bcbe91cb35feacde1f17b04e887935df50647068361
+  languageName: node
+  linkType: hard
+
+"@nivo/radial-bar@npm:0.80.0":
+  version: 0.80.0
+  resolution: "@nivo/radial-bar@npm:0.80.0"
+  dependencies:
+    "@nivo/arcs": 0.80.0
+    "@nivo/colors": 0.80.0
+    "@nivo/legends": 0.80.0
+    "@nivo/polar-axes": 0.80.0
+    "@nivo/scales": 0.80.0
+    "@nivo/tooltip": 0.80.0
+    "@react-spring/web": 9.4.5
+    d3-scale: ^3.2.3
+    d3-shape: ^1.3.5
+  peerDependencies:
+    "@nivo/core": 0.80.0
+    react: ">= 16.14.0 < 19.0.0"
+  checksum: 1eac048cea26c8a091d4b7b612fd4089db9a2470bd5bb7541cb923d4585cea5ce393426d7c6ecb04a021f3cb77c89cdd7f2197c9e8d1da6cdba24f36e1b01fb7
   languageName: node
   linkType: hard
 
@@ -7396,6 +7430,7 @@ __metadata:
     "@nivo/line": 0.80.0
     "@nivo/pie": 0.80.0
     "@nivo/radar": 0.80.0
+    "@nivo/radial-bar": 0.80.0
     "@nivo/tooltip": 0.80.0
     "@nivo/waffle": 0.80.0
     "@pluralsh/design-system": 1.301.0

@@ -36,6 +36,7 @@
     "@nivo/line": "0.80.0",
     "@nivo/pie": "0.80.0",
     "@nivo/radar": "0.80.0",
+    "@nivo/radial-bar": "0.80.0",
     "@nivo/tooltip": "0.80.0",
     "@nivo/waffle": "0.80.0",
     "@pluralsh/design-system": "1.301.0",
