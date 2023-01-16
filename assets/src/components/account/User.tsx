@@ -1,12 +1,11 @@
 import { useMutation } from '@apollo/client'
 import { Box } from 'grommet'
-import { Flex, Span } from 'honorable'
-import { AppIcon, Chip, ListBoxItem } from '@pluralsh/design-system'
-import { useContext } from 'react'
+import { Span, Switch } from 'honorable'
+import { AppIcon } from '@pluralsh/design-system'
+import { useCallback, useContext } from 'react'
 import { LoginContext } from 'components/contexts'
 
 import { EDIT_USER } from './queries'
-import { MoreMenu } from './MoreMenu'
 
 export function UserInfo({ user: { email, name, avatar }, hue = 'lighter', ...box }: any) {
   return (
@@ -31,42 +30,12 @@ export function UserInfo({ user: { email, name, avatar }, hue = 'lighter', ...bo
   )
 }
 
-function UserEdit({ user }: any) {
-  const [mutation] = useMutation(EDIT_USER, {
-    variables: { id: user.id },
-  })
-  const isAdmin = !!user.roles?.admin
-
-  const menuItems = {
-    addAdmin: {
-      label: isAdmin ? 'Remove admin role' : 'Add admin role',
-      // @ts-expect-error
-      onSelect: () => mutation({ variables: { attributes: { roles: { admin: !isAdmin } } } }),
-      props: {},
-    },
-  }
-
-  return (
-    <MoreMenu
-      onSelectionChange={selectedKey => {
-        menuItems[selectedKey]?.onSelect()
-      }}
-    >
-      {Object.entries(menuItems).map(([key, { label, props = {} }]) => (
-        <ListBoxItem
-          key={key}
-          textValue={label}
-          label={label}
-          {...props}
-          color="blue"
-        />
-      ))}
-    </MoreMenu>
-  )
-}
-
+// TODO: Test.
 export function User({ user }: any) {
   const { me } = useContext(LoginContext)
+  const [mutation, { loading }] = useMutation<any>(EDIT_USER, { variables: { id: user.id } })
+  const isAdmin = !!user.roles?.admin
+  const setAdmin = useCallback(() => mutation({ variables: { attributes: { roles: { admin: !isAdmin } } } }), [mutation, isAdmin])
 
   return (
     <Box
@@ -78,20 +47,15 @@ export function User({ user }: any) {
         fill="horizontal"
         user={user}
       />
-      <Flex
-        gap="small"
-        align="center"
-      >
-        {user.roles?.admin && (
-          <Chip
-            size="medium"
-            hue="lighter"
-          >
-            Admin
-          </Chip>
-        )}
-        {!!me.roles?.admin && <UserEdit user={user} />}
-      </Flex>
+      {!!me.roles?.admin && (
+        <Switch
+          defaultChecked={isAdmin}
+          disabled={loading}
+          onChange={() => setAdmin()}
+        >
+          Admin
+        </Switch>
+      )}
     </Box>
   )
 }
