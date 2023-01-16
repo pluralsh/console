@@ -36,6 +36,7 @@ import AppStatus from '../AppStatus'
 
 import AppSelector from './AppSelector'
 import RunbookStatus from './runbooks/runbook/RunbookStatus'
+import LogsLegend from './logs/LogsLegend'
 
 // TODO: Keep current path when switching views if possible.
 const getDirectory = (app, config) => {
@@ -178,6 +179,7 @@ export default function App() {
               <Prop title="Status"><RunbookStatus runbook={runbook} /></Prop>
             </PropsContainer>
           )}
+          {currentTab?.path === 'logs' && <LogsLegend />}
         </Flex>
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
