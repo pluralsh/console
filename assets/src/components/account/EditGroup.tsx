@@ -11,8 +11,6 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import { Flex } from 'honorable'
 
-import { appendConnection, updateCache } from '../../utils/graphql'
-
 import { GqlError } from '../utils/Alert'
 
 import { CREATE_GROUP_MEMBERS, GROUP_MEMBERS, UPDATE_GROUP } from './queries'
@@ -37,11 +35,7 @@ export function EditGroup({ group, edit, setEdit }: any) {
   })
   const [addMut] = useMutation(CREATE_GROUP_MEMBERS, {
     variables: { groupId: group.id },
-    update: (cache, { data: { createGroupMember } }) => updateCache(cache, {
-      query: GROUP_MEMBERS,
-      variables: { id: group.id },
-      update: prev => appendConnection(prev, createGroupMember, 'groupMembers'),
-    }),
+    refetchQueries: [{ query: GROUP_MEMBERS, variables: { id: group.id } }],
   })
   const [suggestions, setSuggestions] = useState([])
   const tabStateRef = useRef<any>(null)

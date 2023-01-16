@@ -1,10 +1,10 @@
 import { useMutation, useQuery } from '@apollo/client'
 import { Box } from 'grommet'
-import { IconFrame, Switch, TrashCanIcon } from '@pluralsh/design-system'
+import { IconFrame, TrashCanIcon } from '@pluralsh/design-system'
 import { useState } from 'react'
 import { Div } from 'honorable'
 
-import { extendConnection, removeConnection, updateCache } from '../../utils/graphql'
+import { extendConnection } from '../../utils/graphql'
 
 import { StandardScroller } from '../utils/SmoothScroller'
 
@@ -19,11 +19,7 @@ function GroupMember({
 }: any) {
   const [mutation] = useMutation(DELETE_GROUP_MEMBER, {
     variables: { groupId: group.id, userId: user.id },
-    update: (cache, { data: { deleteGroupMember } }) => updateCache(cache, {
-      query: GROUP_MEMBERS,
-      variables: { id: group.id },
-      update: prev => removeConnection(prev, deleteGroupMember, 'groupMembers'),
-    }),
+    refetchQueries: [{ query: GROUP_MEMBERS, variables: { id: group.id } }],
   })
 
   return (
@@ -63,7 +59,7 @@ export function GroupMembers({ group, edit }: any) {
   const [listRef, setListRef] = useState<any>(null)
   const { data, loading, fetchMore } = useQuery(GROUP_MEMBERS, {
     variables: { id: group.id },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'network-only',
   })
 
   if (!data) return null
@@ -122,12 +118,6 @@ export function ViewGroup({ group }: any) {
       pad={{ bottom: 'small' }}
       gap="small"
     >
-      <Switch
-        checked={group.global}
-        disabled
-      >
-        apply group globally
-      </Switch>
       <GroupMembers group={group} />
     </Box>
   )

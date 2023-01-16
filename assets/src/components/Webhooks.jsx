@@ -37,7 +37,7 @@ import { LoopingLogo } from './utils/AnimatedLogo'
 import { Container } from './utils/Container'
 import { SectionContentContainer, SectionPortal } from './utils/Section'
 import SmoothScroller from './utils/SmoothScroller'
-import { Icon } from './account/Groupx'
+import { Icon } from './account/Icon'
 
 // const MAX_LEN = 100
 // const trim = (url) => url.length > 10 ? `${url.slice(0, MAX_LEN)}...` : url
