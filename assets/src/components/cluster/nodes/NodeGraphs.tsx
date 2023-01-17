@@ -4,17 +4,11 @@ import { Div, Flex } from 'honorable'
 import { NodeStatus, NodeUsage, Pod } from 'generated/graphql'
 import { cpuParser, memoryParser } from 'utils/kubernetes'
 
-import { NodeMetrics } from '../constants'
 import { getPodResources } from '../pods/getPodResources'
 
+import { NodeMetrics } from '../constants'
 import { getAllContainersFromPods } from '../utils'
-
-import {
-  CpuReservationGauge,
-  CpuUsageGauge,
-  MemoryReservationGauge,
-  MemoryUsageGauge,
-} from '../Gauges'
+import { GaugeWrap, ResourceGauge } from '../Gauges'
 
 import { SaturationGraphs } from './SaturationGraphs'
 
@@ -48,18 +42,20 @@ export function NodeGraphs({
     const memUsed = memoryParser(usage?.memory) ?? undefined
 
     return {
-      cpuUsage: cpuUsed !== undefined
+      cpu: cpuUsed !== undefined
         && cpuTotal !== undefined && {
         used: cpuUsed,
+        total: cpuTotal,
         remainder: cpuTotal - cpuUsed || 0,
+        ...cpuReservations,
       },
-      cpuReservation: cpuReservations,
-      memoryUsage: memUsed !== undefined
+      memory: memUsed !== undefined
         && memTotal !== undefined && {
         used: memUsed,
+        total: memTotal,
         remainder: memTotal - memUsed,
+        ...memoryReservations,
       },
-      memoryReservation: memoryReservations,
     }
   }, [
     capacity.cpu,
@@ -91,10 +87,26 @@ export function NodeGraphs({
         marginBottom="xlarge"
         overflow="visible"
       >
-        <CpuUsageGauge {...chartData.cpuUsage} />
-        <CpuReservationGauge {...chartData.cpuReservation} />
-        <MemoryUsageGauge {...chartData.memoryUsage} />
-        <MemoryReservationGauge {...chartData.memoryReservation} />
+        <GaugeWrap
+          heading="CPU Reservation"
+          width="auto"
+          height="auto"
+        >
+          <ResourceGauge
+            {...chartData.cpu}
+            type="cpu"
+          />
+        </GaugeWrap>
+        <GaugeWrap
+          heading="Memory Reservation"
+          width="auto"
+          height="auto"
+        >
+          <ResourceGauge
+            {...chartData.memory}
+            type="memory"
+          />
+        </GaugeWrap>
       </Flex>
       <Div width="100%">
         <SaturationGraphs
