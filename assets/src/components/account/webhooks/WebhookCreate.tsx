@@ -10,7 +10,7 @@ import { useMutation } from '@apollo/client'
 import { CREATE_WEBHOOK, WEBHOOKS_Q } from 'components/graphql/webhooks'
 import isEmpty from 'lodash/isEmpty'
 
-export default function WebhooksCreate() {
+export default function WebhookCreate() {
   const [open, setOpen] = useState<boolean>(false)
   const [attributes, setAttributes] = useState({ url: '' })
   const [mutation, { loading }] = useMutation(CREATE_WEBHOOK, {

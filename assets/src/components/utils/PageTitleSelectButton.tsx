@@ -1,9 +1,9 @@
 import { DropdownArrowIcon } from '@pluralsh/design-system'
 import { Div, Flex } from 'honorable'
-import { forwardRef } from 'react'
+import { Key, forwardRef } from 'react'
 import styled from 'styled-components'
 
-export const PageTitleSelectButton = styled(forwardRef<any, {title: string, label: string}>((props, ref) => (
+export const PageTitleSelectButton = styled(forwardRef<any, {title: string, label: string | Key}>((props, ref) => (
   <Div
     ref={ref}
     cursor="pointer"

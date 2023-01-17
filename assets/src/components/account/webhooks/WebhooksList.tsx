@@ -1,4 +1,4 @@
-import { LoopingLogo } from '@pluralsh/design-system'
+import { Card, LoopingLogo } from '@pluralsh/design-system'
 
 import { extendConnection } from 'utils/graphql'
 
@@ -10,11 +10,9 @@ import { useState } from 'react'
 
 import { WEBHOOKS_Q } from 'components/graphql/webhooks'
 
-import { Flex } from 'honorable'
+import Webhook from './Webhook'
 
-import { WebhookRow } from './WebhooksOld'
-
-export function WebhooksList() {
+export default function WebhooksList() {
   const [listRef, setListRef] = useState<any>(null)
   const { data, loading, fetchMore } = useQuery(WEBHOOKS_Q)
 
@@ -22,15 +20,17 @@ export function WebhooksList() {
   const { edges, pageInfo } = data.webhooks
 
   return (
-    <Flex
+    <Card
       direction="column"
-      grow={1}
+      display="flex"
+      flexGrow={1}
+      marginTop="medium"
     >
       <SmoothScroller
         listRef={listRef}
         setListRef={setListRef}
         items={edges}
-        mapper={({ node }) => <WebhookRow hook={node} />}
+        mapper={({ node }) => <Webhook hook={node} />}
         loading={loading}
         loadNextPage={() => pageInfo.hasNextPage && fetchMore({
           variables: { cursor: pageInfo.endCursor },
@@ -42,7 +42,6 @@ export function WebhooksList() {
         refreshKey={undefined}
         setLoader={undefined}
       />
-    </Flex>
-
+    </Card>
   )
 }

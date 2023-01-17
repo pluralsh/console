@@ -1,7 +1,7 @@
 import { Card, IconFrame, SlackLogoIcon } from '@pluralsh/design-system'
 import { Flex, P } from 'honorable'
 
-import WebhooksCreate from './WebhooksCreate'
+import WebhookCreate from './WebhookCreate'
 
 export default function WebhooksHeader() {
   return (
@@ -31,7 +31,7 @@ export default function WebhooksHeader() {
         </P>
       </div>
       <Flex grow={1} />
-      <WebhooksCreate />
+      <WebhookCreate />
     </Card>
   )
 }
