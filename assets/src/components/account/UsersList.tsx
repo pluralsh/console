@@ -2,7 +2,7 @@ import { useQuery } from '@apollo/client'
 
 import { Div } from 'honorable'
 
-import { SearchIcon } from '@pluralsh/design-system'
+import { LoopingLogo, SearchIcon } from '@pluralsh/design-system'
 
 import { useEffect, useState } from 'react'
 
@@ -12,8 +12,6 @@ import { List, ListItem } from '../utils/List'
 import ListInput from '../utils/ListInput'
 
 import { extendConnection } from '../../utils/graphql'
-
-import { LoopingLogo } from '../utils/AnimatedLogo'
 
 import { USERS_Q } from './queries'
 import { User } from './User'
@@ -28,9 +26,7 @@ export function UsersList() {
   const [dataCache, setDataCache] = useState(data)
 
   useEffect(() => {
-    if (data) {
-      setDataCache(data)
-    }
+    if (data) setDataCache(data)
   }, [data])
 
   const { edges, pageInfo } = data?.users || dataCache?.users || {}
@@ -49,9 +45,7 @@ export function UsersList() {
         flexGrow={1}
         width="100%"
       >
-        {!data && !dataCache ? (
-          <LoopingLogo />
-        ) : (
+        {!data && !dataCache ? <LoopingLogo /> : (
           <StandardScroller
             listRef={listRef}
             setListRef={setListRef}

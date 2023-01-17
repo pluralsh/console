@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client'
 import isEmpty from 'lodash/isEmpty'
-import { EmptyState } from '@pluralsh/design-system'
+import { EmptyState, LoopingLogo } from '@pluralsh/design-system'
 import { useState } from 'react'
 
 import { Div } from 'honorable'
@@ -8,7 +8,6 @@ import { Div } from 'honorable'
 import { extendConnection } from '../../utils/graphql'
 
 import { ListItem } from '../utils/List'
-import { LoopingLogo } from '../utils/AnimatedLogo'
 import { StandardScroller } from '../utils/SmoothScroller'
 
 import { GROUPS_Q } from './queries'
@@ -20,9 +19,7 @@ export function GroupsList({ q }: any) {
   const [listRef, setListRef] = useState<any>(null)
   const { data, loading, fetchMore } = useQuery(GROUPS_Q, { variables: { q } })
 
-  if (!data) {
-    return <LoopingLogo />
-  }
+  if (!data) return <LoopingLogo />
 
   const { edges, pageInfo } = data.groups
 
