@@ -2,42 +2,31 @@ import { useContext, useEffect, useState } from 'react'
 import { useMutation, useQuery } from '@apollo/client'
 
 import {
-  Button,
   Confirm,
   Copyable,
-  ModalHeader,
   Scroller,
   Trash,
 } from 'forge-core'
 
-import {
-  Box,
-  FormField,
-  Layer,
-  Text,
-  TextInput,
-} from 'grommet'
+import { Box, Text } from 'grommet'
 
 import moment from 'moment'
 
-import { chunk } from '../utils/array'
+import SmoothScroller from 'components/utils/SmoothScroller'
 
-import {
-  appendConnection,
-  extendConnection,
-  removeConnection,
-  updateCache,
-} from '../utils/graphql'
+import { chunk } from '../../../utils/array'
 
-import { BreadcrumbsContext } from './Breadcrumbs'
-import { CREATE_WEBHOOK, DELETE_WEBHOOK, WEBHOOKS_Q } from './graphql/webhooks'
-import { BUILD_PADDING } from './builds/Builds'
+import { extendConnection, removeConnection, updateCache } from '../../../utils/graphql'
 
-import { LoopingLogo } from './utils/AnimatedLogo'
-import { Container } from './utils/Container'
-import { SectionContentContainer, SectionPortal } from './utils/Section'
-import SmoothScroller from './utils/SmoothScroller'
-import { Icon } from './account/Icon'
+import { BreadcrumbsContext } from '../../Breadcrumbs'
+import { DELETE_WEBHOOK, WEBHOOKS_Q } from '../../graphql/webhooks'
+import { BUILD_PADDING } from '../../builds/Builds'
+
+import { LoopingLogo } from '../../utils/AnimatedLogo'
+import { Container } from '../../utils/Container'
+import { SectionContentContainer } from '../../utils/Section'
+
+import { Icon } from '../Icon'
 
 // const MAX_LEN = 100
 // const trim = (url) => url.length > 10 ? `${url.slice(0, MAX_LEN)}...` : url
@@ -95,74 +84,6 @@ function Webhook({ webhook: { url, health } }) {
         <WebhookHealth health={health} />
       </Box>
     </Container>
-  )
-}
-
-function WebhookForm({ onSubmit }) {
-  const [attributes, setAttributes] = useState({ url: '' })
-  const [mutation, { loading }] = useMutation(CREATE_WEBHOOK, {
-    variables: { attributes },
-    update: (cache, { data: { createWebhook } }) => updateCache(cache, {
-      query: WEBHOOKS_Q,
-      update: prev => appendConnection(prev, createWebhook, 'webhooks'),
-    }),
-    onCompleted: onSubmit,
-  })
-
-  return (
-    <Box
-      pad="medium"
-      gap="small"
-    >
-      <FormField label="url">
-        <TextInput
-          placeholder="https://hooks.slack.com/services/..."
-          value={attributes.url}
-          onChange={({ target: { value } }) => setAttributes({ ...attributes, url: value })}
-        />
-      </FormField>
-      <Box
-        direction="row"
-        align="center"
-        justify="end"
-      >
-        <Button
-          label="Create"
-          onClick={mutation}
-          loading={loading}
-        />
-      </Box>
-    </Box>
-  )
-}
-
-function CreateWebhook() {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <>
-      <Box pad={{ horizontal: 'small' }}>
-        <Button
-          onClick={() => setOpen(true)}
-          label="Create"
-          flat
-          background="brand"
-          round="xsmall"
-          pad={{ horizontal: 'medium', vertical: 'xsmall' }}
-        />
-      </Box>
-      {open && (
-        <Layer modal>
-          <Box width="50vw">
-            <ModalHeader
-              text="Create webhook"
-              setOpen={setOpen}
-            />
-            <WebhookForm onSubmit={() => setOpen(false)} />
-          </Box>
-        </Layer>
-      )}
-    </>
   )
 }
 
@@ -244,40 +165,6 @@ function WebhookRow({
   )
 }
 
-function WebhooksHeader() {
-  return (
-    <Box
-      flex={false}
-      height={HEIGHT_PX}
-      direction="row"
-      align="center"
-      gap="small"
-      border={{ side: 'bottom' }}
-      pad={{ horizontal: 'small' }}
-    >
-      <Box
-        fill="horizontal"
-        direction="row"
-        align="center"
-        gap="small"
-      >
-        <HeaderItem
-          width="70%"
-          text="Url"
-        />
-        <HeaderItem
-          width="30%"
-          text="Created On"
-        />
-      </Box>
-      <HeaderItem
-        width={HEALTH_WIDTH}
-        text="Health"
-      />
-    </Box>
-  )
-}
-
 export function WebhookManagement() {
   const [listRef, setListRef] = useState(null)
   const { data, loading, fetchMore } = useQuery(WEBHOOKS_Q)
@@ -287,7 +174,6 @@ export function WebhookManagement() {
 
   return (
     <SectionContentContainer header="Webhooks">
-      <WebhooksHeader />
       <Box fill>
         <SmoothScroller
           listRef={listRef}
@@ -302,9 +188,6 @@ export function WebhookManagement() {
           hasNextPage={pageInfo.hasNextPage}
         />
       </Box>
-      <SectionPortal>
-        <CreateWebhook />
-      </SectionPortal>
     </SectionContentContainer>
   )
 }
@@ -353,7 +236,6 @@ export default function Webhooks() {
             >will notify other tools of build success/failure
             </Text>
           </Box>
-          <CreateWebhook />
         </Box>
         <Box
           height="calc(100vh - 105px)"

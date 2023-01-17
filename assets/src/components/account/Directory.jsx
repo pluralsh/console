@@ -6,7 +6,6 @@ import {
   InputCollection,
   Messages,
   ResponsiveInput,
-  Webhooks,
 } from 'forge-core'
 
 import { useNavigate, useParams } from 'react-router-dom'
@@ -16,8 +15,6 @@ import { BreadcrumbsContext } from '../Breadcrumbs'
 import { SectionContentContainer, SectionPortal } from '../utils/Section'
 
 import { SIDEBAR_ICON_HEIGHT } from '../ConsoleSidebar'
-
-import { WebhookManagement } from '../Webhooks'
 
 import { SMTP_Q, UPDATE_SMTP } from '../graphql/plural'
 
@@ -154,19 +151,12 @@ export default function Directory() {
               setSection={setSection}
             />
           )}
-          <SectionChoice
-            icon={<Webhooks size="14px" />}
-            label="Webhooks"
-            section="webhooks"
-            setSection={setSection}
-          />
         </Box>
         <Box
           background="white"
           elevation="small"
           fill
         >
-          {section === 'webhooks' && <WebhookManagement />}
           {section === 'smtp' && conf.gitStatus.cloned && <SmtpSettings />}
         </Box>
       </Box>
