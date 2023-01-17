@@ -1,7 +1,8 @@
-import { appState } from 'components/Component'
 import { Chip, Tooltip } from '@pluralsh/design-system'
 
 import { Readiness } from 'utils/status'
+
+import { appState } from './misc'
 
 export default function AppStatus({ app }) {
   if (!app) return <Chip size="small">Unknown</Chip>

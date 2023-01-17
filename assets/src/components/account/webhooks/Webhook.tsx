@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'
 
-import { Confirm } from 'forge-core'
-
 import moment from 'moment'
 
 import { Div, Flex, P } from 'honorable'
 
 import { IconFrame, SlackLogoIcon, TrashCanIcon } from '@pluralsh/design-system'
+
+import { Confirm } from 'components/utils/Confirm'
 
 import { removeConnection, updateCache } from '../../../utils/graphql'
 
@@ -80,14 +80,14 @@ export default function Webhook({
           />
         </Flex>
       </Flex>
-      {confirm && (
-        <Confirm
-          description="This will permanently delete this webhook"
-          loading={loading}
-          cancel={() => setConfirm(false)}
-          submit={mutation}
-        />
-      )}
+      <Confirm
+        text="This will permanently delete this webhook"
+        loading={loading}
+        open={confirm}
+        close={() => setConfirm(false)}
+        submit={mutation}
+        destructive
+      />
     </>
   )
 }

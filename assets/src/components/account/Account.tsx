@@ -1,10 +1,5 @@
-import { Div, Flex } from 'honorable'
-import {
-  PageCard,
-  Tab,
-  TabList,
-  TabPanel,
-} from '@pluralsh/design-system'
+import { Flex } from 'honorable'
+import { Tab, TabList, TabPanel } from '@pluralsh/design-system'
 
 import { useContext, useEffect, useRef } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
@@ -21,6 +16,7 @@ const directory = [
   { path: 'groups', label: 'Groups' },
   { path: 'roles', label: 'Roles' },
   { path: 'webhooks', label: 'Webhooks' },
+  { path: 'smtp', label: 'Email settings' },
 ]
 
 export default function Account() {
@@ -45,23 +41,8 @@ export default function Account() {
       position="relative"
     >
       <ResponsiveLayoutSidenavContainer width={240}>
-        <PageCard
-          marginBottom="large"
-          heading={(
-            <Div
-              display="-webkit-box"
-              webkitLineClamp={2}
-              webkitBoxOrient="vertical"
-              overflowY="hidden"
-              lineBreak="all"
-            >
-              {me?.account?.name || ''}
-            </Div>
-          )}
-          subheading={me?.publisher ? 'Publisher' : undefined}
-          icon={{ name: me?.account?.name || '?' }}
-        />
         <TabList
+          marginTop={90}
           stateRef={tabStateRef}
           stateProps={{
             orientation: 'vertical',

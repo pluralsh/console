@@ -15,27 +15,6 @@ export function SectionPortal({ children }) {
   )
 }
 
-export function SectionChoice({
-  label, icon, selected, onClick,
-}) {
-  return (
-    <Box
-      focusIndicator={false}
-      hoverIndicator="sidebar"
-      background={selected ? 'sidebar' : null}
-      direction="row"
-      align="center"
-      gap="small"
-      pad="small"
-      round="xsmall"
-      onClick={onClick}
-    >
-      {React.createElement(icon, { size: '15px' })}
-      <Text size="small">{label}</Text>
-    </Box>
-  )
-}
-
 export function SectionContentContainer({ header, children }) {
   const [ref, setRef] = useState(null)
   const id = useMemo(() => uuidv4(), [])

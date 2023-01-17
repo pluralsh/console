@@ -21,10 +21,11 @@ export default function WebhooksList() {
 
   return (
     <Card
-      direction="column"
-      display="flex"
-      flexGrow={1}
       marginTop="medium"
+      alignItems="top"
+      display="flex"
+      flexDirection="column"
+      flexGrow={1}
     >
       <SmoothScroller
         listRef={listRef}
