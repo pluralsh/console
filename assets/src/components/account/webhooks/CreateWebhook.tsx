@@ -1,9 +1,14 @@
-import { Button, Modal } from '@pluralsh/design-system'
+import {
+  Button,
+  FormField,
+  Input,
+  Modal,
+} from '@pluralsh/design-system'
 import { useState } from 'react'
-import { FormField, TextInput } from 'grommet'
 import { appendConnection, updateCache } from 'utils/graphql'
 import { useMutation } from '@apollo/client'
 import { CREATE_WEBHOOK, WEBHOOKS_Q } from 'components/graphql/webhooks'
+import isEmpty from 'lodash/isEmpty'
 
 export function CreateWebhook() {
   const [open, setOpen] = useState<boolean>(false)
@@ -28,6 +33,7 @@ export function CreateWebhook() {
         Add Slack webhook
       </Button>
       <Modal
+        size="large"
         header="Create webhook"
         open={open}
         onClose={() => setOpen(false)}
@@ -41,6 +47,7 @@ export function CreateWebhook() {
             </Button>
             <Button
               type="submit"
+              disabled={isEmpty(attributes?.url)}
               onClick={() => mutation()}
               loading={loading}
               marginLeft="medium"
@@ -50,11 +57,11 @@ export function CreateWebhook() {
           </>
         )}
       >
-        <FormField label="url">
-          <TextInput
+        <FormField label="URL">
+          <Input
+            onChange={({ target: { value } }) => setAttributes({ ...attributes, url: value })}
             placeholder="https://hooks.slack.com/services/..."
             value={attributes.url}
-            onChange={({ target: { value } }) => setAttributes({ ...attributes, url: value })}
           />
         </FormField>
       </Modal>
