@@ -1,49 +1,24 @@
 import { useMutation } from '@apollo/client'
 import { Box } from 'grommet'
-import { Flex } from 'honorable'
-import {
-  ListBoxItem,
-  Modal,
-  PageTitle,
-  SearchIcon,
-} from '@pluralsh/design-system'
+import { ListBoxItem, Modal } from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
 
 import { Confirm } from 'components/utils/Confirm'
 
+import { MoreMenu } from 'components/utils/MoreMenu'
+
 import { LoginContext } from 'components/contexts'
 
-import ListInput from '../utils/ListInput'
+import { removeConnection, updateCache } from '../../../utils/graphql'
 
-import { List } from '../utils/List'
+import { DELETE_GROUP, GROUPS_Q } from '../queries'
 
-import { removeConnection, updateCache } from '../../utils/graphql'
+import { Info } from '../Info'
 
-import { MoreMenu } from '../utils/MoreMenu'
+import GroupEdit from './GroupEdit'
+import GroupView from './GroupView'
 
-import { DELETE_GROUP, GROUPS_Q } from './queries'
-
-import { ViewGroup } from './Group'
-import { CreateGroup } from './CreateGroup'
-import { EditGroup } from './EditGroup'
-
-import { Info } from './Info'
-import { GroupsList } from './GroupsList'
-
-function Header({ q, setQ }: any) {
-  return (
-    <ListInput
-      width="100%"
-      value={q}
-      placeholder="Search a group"
-      startIcon={<SearchIcon color="text-light" />}
-      onChange={({ target: { value } }) => setQ(value)}
-      flexGrow={0}
-    />
-  )
-}
-
-export function Group({ group, q }: any) {
+export default function Group({ group, q }: any) {
   const { me } = useContext<any>(LoginContext)
   const editable = !!me.roles?.admin
   const [edit, setEdit] = useState(false)
@@ -102,9 +77,9 @@ export function Group({ group, q }: any) {
           width="60vw"
           onClose={() => setView(false)}
         >
-          <ViewGroup group={group} />
+          <GroupView group={group} />
         </Modal>
-        <EditGroup
+        <GroupEdit
           group={group}
           edit={edit}
           setEdit={setEdit}
@@ -120,28 +95,5 @@ export function Group({ group, q }: any) {
         />
       </>
     </Box>
-  )
-}
-
-export function Groups() {
-  const [q, setQ] = useState('')
-
-  return (
-    <Flex
-      flexGrow={1}
-      flexDirection="column"
-      maxHeight="100%"
-    >
-      <PageTitle heading="Groups">
-        <CreateGroup q={q} />
-      </PageTitle>
-      <List>
-        <Header
-          q={q}
-          setQ={setQ}
-        />
-        <GroupsList q={q} />
-      </List>
-    </Flex>
   )
 }

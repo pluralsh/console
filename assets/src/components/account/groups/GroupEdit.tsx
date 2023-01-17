@@ -11,20 +11,21 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import { Flex } from 'honorable'
 
-import { GqlError } from '../utils/Alert'
+import { GqlError } from '../../utils/Alert'
 
-import { CREATE_GROUP_MEMBERS, GROUP_MEMBERS, UPDATE_GROUP } from './queries'
+import { CREATE_GROUP_MEMBERS, GROUP_MEMBERS, UPDATE_GROUP } from '../queries'
 
-import { Actions } from './Actions'
-import { fetchUsers } from './Typeaheads'
-import { GroupMembers } from './Group'
+import { Actions } from '../Actions'
+import { fetchUsers } from '../Typeaheads'
+
+import GroupMembers from './GroupMembers'
 
 const TABS = {
   Attributes: { label: 'Attributes' },
   Users: { label: 'Users' },
 }
 
-export function EditGroup({ group, edit, setEdit }: any) {
+export default function GroupEdit({ group, edit, setEdit }: any) {
   const client = useApolloClient()
   const [value, setValue] = useState('')
   const [name, setName] = useState(group.name)

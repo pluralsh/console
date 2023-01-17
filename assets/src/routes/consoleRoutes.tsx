@@ -19,7 +19,7 @@ import { Users } from 'components/account/Users'
 
 import Account from 'components/account/Account'
 
-import { Groups } from 'components/account/Groups'
+import { Groups } from 'components/account/groups/Groups'
 
 import Audits from 'components/audits/Audits'
 

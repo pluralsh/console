@@ -5,15 +5,15 @@ import { useState } from 'react'
 
 import { Div } from 'honorable'
 
-import { extendConnection } from '../../utils/graphql'
+import { extendConnection } from '../../../utils/graphql'
 
-import { ListItem } from '../utils/List'
-import { StandardScroller } from '../utils/SmoothScroller'
+import { ListItem } from '../../utils/List'
+import { StandardScroller } from '../../utils/SmoothScroller'
 
-import { GROUPS_Q } from './queries'
+import { GROUPS_Q } from '../queries'
 
-import { CreateGroup } from './CreateGroup'
-import { Group } from './Groups'
+import GroupCreate from './GroupCreate'
+import Group from './Group'
 
 export function GroupsList({ q }: any) {
   const [listRef, setListRef] = useState<any>(null)
@@ -68,7 +68,7 @@ export function GroupsList({ q }: any) {
             ? "Looks like you don't have any groups yet."
             : `No groups found for ${q}`}
         >
-          <CreateGroup q={q} />
+          <GroupCreate q={q} />
         </EmptyState>
       )}
     </Div>

@@ -41,7 +41,7 @@ export function ListItemBorder({ borderColor }: { borderColor: string }) {
 
 export function ListItem({
   title, subtitle, description, icon, iconFrameType = 'floating', iconFrameSize = 'large', borderColor, chips, chipsPlacement = 'left', onClick, ...props
-}: CardProps & {title: string, subtitle?: string, description?: string, icon?: any, iconFrameType?: any, iconFrameSize?: any, borderColor?: string, chips?: any, chipsPlacement?: 'left' | 'right', onClick: () => any},) {
+}: CardProps & {title: string, subtitle?: string, description?: string, icon?: any, iconFrameType?: any, iconFrameSize?: any, borderColor?: string, chips?: any, chipsPlacement?: 'left' | 'right', onClick?: () => any},) {
   return (
     <Card
       clickable

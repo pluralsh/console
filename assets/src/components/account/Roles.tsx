@@ -5,6 +5,7 @@ import { Div, Flex } from 'honorable'
 import {
   EmptyState,
   ListBoxItem,
+  LoopingLogo,
   PageTitle,
   SearchIcon,
 } from '@pluralsh/design-system'
@@ -20,7 +21,6 @@ import { List, ListItem } from '../utils/List'
 import ListInput from '../utils/ListInput'
 import { extendConnection, removeConnection, updateCache } from '../../utils/graphql'
 
-import { LoopingLogo } from '../utils/AnimatedLogo'
 import { StandardScroller } from '../utils/SmoothScroller'
 
 import { DELETE_ROLE, ROLES_Q } from './queries'
@@ -183,7 +183,6 @@ export function Roles() {
       maxHeight="100%"
     >
       <PageTitle heading="Roles">
-        {' '}
         <CreateRole q={q} />
       </PageTitle>
       <List>
