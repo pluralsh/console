@@ -24,6 +24,8 @@ import { Groups } from 'components/account/Groups'
 
 import Audits from 'components/audits/Audits'
 
+import { Roles } from 'components/account/Roles'
+
 import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
 
@@ -131,6 +133,10 @@ const accountRoutes = [
     <Route
       path="groups"
       element={<Groups />}
+    />
+    <Route
+      path="roles"
+      element={<Roles />}
     />
   </Route>,
 ]

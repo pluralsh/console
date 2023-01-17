@@ -19,6 +19,8 @@ import { List } from '../utils/List'
 
 import { removeConnection, updateCache } from '../../utils/graphql'
 
+import { MoreMenu } from '../utils/MoreMenu'
+
 import { DELETE_GROUP, GROUPS_Q } from './queries'
 
 import { ViewGroup } from './Group'
@@ -27,7 +29,6 @@ import { EditGroup } from './EditGroup'
 
 import { Info } from './Info'
 import { GroupsList } from './GroupsList'
-import { MoreMenu } from '../utils/MoreMenu'
 
 function Header({ q, setQ }: any) {
   return (

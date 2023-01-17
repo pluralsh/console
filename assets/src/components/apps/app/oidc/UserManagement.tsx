@@ -15,7 +15,7 @@ import { GqlError } from 'forge-core'
 
 import { isEqual } from 'lodash'
 
-import { sanitize } from '../../../account/Role'
+import { sanitize } from '../../../account/RoleOld'
 
 import { BindingInput, fetchGroups, fetchUsers } from './BindingInput'
 

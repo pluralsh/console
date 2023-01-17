@@ -8,7 +8,6 @@ import {
   ModalHeader,
   ResponsiveInput,
   TagInput,
-  Trash,
   User,
 } from 'forge-core'
 
@@ -16,12 +15,12 @@ import { useApolloClient, useMutation } from '@apollo/client'
 
 import Toggle from 'react-toggle'
 
-import { addRole, deleteRole } from './utils'
+import { addRole } from './utils'
 import { PermissionTypes } from './types'
 
 import { Icon } from './Icon'
 
-import { CREATE_ROLE, DELETE_ROLE, UPDATE_ROLE } from './queries'
+import { CREATE_ROLE, UPDATE_ROLE } from './queries'
 import { fetchGroups, fetchUsers } from './Typeaheads'
 
 function RoleName({ role: { name, description } }) {
@@ -290,10 +289,6 @@ export function CreateRole() {
 export default function RoleRow({ role }) {
   const ref = useRef()
   const [modal, setModal] = useState(null)
-  const [mutation] = useMutation(DELETE_ROLE, {
-    variables: { id: role.id },
-    update: (cache, { data }) => deleteRole(cache, data.deleteRole),
-  })
 
   return (
     <Box
@@ -320,12 +315,6 @@ export default function RoleRow({ role }) {
                 setOpen={setModal}
               />,
             })}
-          />
-          <Icon
-            icon={Trash}
-            tooltip="delete"
-            onClick={mutation}
-            iconAttrs={{ color: 'error' }}
           />
         </Box>
       </Box>
