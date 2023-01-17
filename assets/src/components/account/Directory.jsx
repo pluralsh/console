@@ -1,21 +1,11 @@
 import { useContext, useEffect, useState } from 'react'
-import {
-  Box,
-  Layer,
-  Text,
-  TextInput,
-  ThemeContext,
-} from 'grommet'
+import { Box, Text, ThemeContext } from 'grommet'
 import { useMutation, useQuery } from '@apollo/client'
 import {
   Button,
-  CreateRole as CreateRoleI,
   InputCollection,
   Messages,
-  ModalHeader,
   ResponsiveInput,
-  Roles,
-  Scroller,
   Webhooks,
 } from 'forge-core'
 
@@ -23,11 +13,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { BreadcrumbsContext } from '../Breadcrumbs'
 
-import { extendConnection } from '../../utils/graphql'
-
 import { SectionContentContainer, SectionPortal } from '../utils/Section'
-
-import { LoopingLogo } from '../utils/AnimatedLogo'
 
 import { SIDEBAR_ICON_HEIGHT } from '../ConsoleSidebar'
 
@@ -36,14 +22,6 @@ import { WebhookManagement } from '../Webhooks'
 import { SMTP_Q, UPDATE_SMTP } from '../graphql/plural'
 
 import { LoginContext } from '../contexts'
-
-import { SearchIcon } from './utils'
-
-import RoleRow, { CreateRole } from './Role'
-
-import { ROLES_Q } from './queries'
-
-const INPUT_WIDTH = '350px'
 
 const clean = smtp => {
   const { __typename, ...vals } = smtp || {}
@@ -114,50 +92,6 @@ function SmtpSettings() {
   return <SmtpSettingsInner smtp={data.smtp} />
 }
 
-function RolesInner() {
-  const [q, setQ] = useState(null)
-  const { data, fetchMore } = useQuery(ROLES_Q)
-
-  if (!data) return <LoopingLogo scale="0.75" />
-
-  const { roles: { pageInfo, edges } } = data
-
-  return (
-    <SectionContentContainer header="Roles">
-      <Scroller
-        id="roles"
-        style={{ height: '100%', overflow: 'auto' }}
-        edges={edges}
-        mapper={({ node }, next) => (
-          <RoleRow
-            key={node.id}
-            role={node}
-            next={next.node}
-          />
-        )}
-        onLoadMore={() => pageInfo.hasNextPage && fetchMore({
-          variables: { userCursor: pageInfo.endCursor },
-          updateQuery: (prev, { fetchMoreResult: { roles } }) => extendConnection(prev, roles, 'roles'),
-        })}
-      />
-      <SectionPortal>
-        <Box
-          flex={false}
-          width={INPUT_WIDTH}
-        >
-          <TextInput
-            icon={<SearchIcon />}
-            reverse
-            placeholder="search for roles"
-            value={q || ''}
-            onChange={({ target: { value } }) => setQ(value)}
-          />
-        </Box>
-      </SectionPortal>
-    </SectionContentContainer>
-  )
-}
-
 function SectionChoice({
   label, icon, section, onClick, setSection,
 }) {
@@ -179,36 +113,6 @@ function SectionChoice({
       {icon}
       <Text size="small">{label}</Text>
     </Box>
-  )
-}
-
-function CreateModal({
-  form, width, header, children,
-}) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <>
-      {children(() => setOpen(true))}
-      {open && (
-        <Layer
-          modal
-          position="center"
-          onClickOutside={() => setOpen(false)}
-          onEsc={() => setOpen(false)}
-        >
-          <Box width={width || '30vw'}>
-            <ModalHeader
-              text={header}
-              setOpen={setOpen}
-            />
-            <Box pad="small">
-              {form}
-            </Box>
-          </Box>
-        </Layer>
-      )}
-    </>
   )
 }
 
@@ -242,12 +146,6 @@ export default function Directory() {
           flex={false}
           width="200px"
         >
-          <SectionChoice
-            icon={<Roles size="14px" />}
-            label="Roles"
-            section="roles"
-            setSection={setSection}
-          />
           {me.roles?.admin && (
             <SectionChoice
               icon={<Messages size="14px" />}
@@ -262,26 +160,12 @@ export default function Directory() {
             section="webhooks"
             setSection={setSection}
           />
-          <CreateModal
-            width="50vw"
-            header="Create a new role"
-            form={<CreateRole />}
-          >
-            {onClick => (
-              <SectionChoice
-                icon={<CreateRoleI size="14px" />}
-                label="Create Role"
-                onClick={onClick}
-              />
-            )}
-          </CreateModal>
         </Box>
         <Box
           background="white"
           elevation="small"
           fill
         >
-          {section === 'roles' && <RolesInner />}
           {section === 'webhooks' && <WebhookManagement />}
           {section === 'smtp' && conf.gitStatus.cloned && <SmtpSettings />}
         </Box>

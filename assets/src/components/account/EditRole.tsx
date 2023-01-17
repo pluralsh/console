@@ -11,6 +11,7 @@ import { Actions } from './Actions'
 import { sanitize } from './utils'
 import { RoleForm } from './RoleForm'
 
+// TODO: Wrong role can open after creation > edit.
 export function EditRole({ role }: any) {
   const [open, setOpen] = useState(false)
   const [attributes, setAttributes] = useState({

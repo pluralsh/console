@@ -15,11 +15,11 @@ import { GqlError } from 'forge-core'
 
 import { isEqual } from 'lodash'
 
-import { sanitize } from '../../../account/RoleOld'
-
 import { BindingInput, fetchGroups, fetchUsers } from './BindingInput'
 
 import { INSTALLATION, UPDATE_PROVIDER } from './queries'
+
+const sanitize = ({ id, user, group }) => ({ id, userId: user && user.id, groupId: group && group.id })
 
 // TODO: Add confirmation dialog when there are unsaved changes.
 // See https://github.com/remix-run/react-router/issues/8139

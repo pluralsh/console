@@ -2,7 +2,7 @@ import { apiHost } from '../../utils/hostname'
 
 import { SearchIcon as SI } from '../utils/SearchIcon'
 
-import { GROUPS_Q, GROUP_MEMBERS, ROLES_Q } from './queries'
+import { GROUPS_Q, GROUP_MEMBERS } from './queries'
 
 export function SearchIcon() {
   return (
@@ -45,22 +45,14 @@ export function deleteGroup(cache, group) {
   })
 }
 
-export function addRole(cache, role) {
-  const { roles, ...data } = cache.readQuery({ query: ROLES_Q, variables: { q: null } })
-
-  cache.writeQuery({
-    query: ROLES_Q,
-    variables: { q: null },
-    data: { ...data, roles: { ...roles, edges: [{ __typename: 'RoleEdge', node: role }, ...roles.edges] } },
-  })
-}
-
 export const inviteLink = invite => `https://${apiHost()}/invite/${invite.secureId}`
 
 export const sanitize = ({ id, user, group }) => ({ id, userId: user && user.id, groupId: group && group.id })
 
+// TODO: Use it?
 export const canEdit = ({ roles, id }, { rootUser }) => (
   (roles && roles.admin) || id === rootUser.id
 )
 
+// TODO: Use it?
 export const hasRbac = ({ boundRoles }, role) => (boundRoles || []).some(({ permissions }) => permissions.includes(role))
