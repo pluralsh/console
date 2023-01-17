@@ -1,5 +1,4 @@
 import { useMutation } from '@apollo/client'
-import { Button } from 'honorable'
 import { Modal } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
 import uniqWith from 'lodash/uniqWith'
@@ -12,8 +11,7 @@ import { sanitize } from './utils'
 import { RoleForm } from './RoleForm'
 
 // TODO: Wrong role can open after creation > edit.
-export function EditRole({ role }: any) {
-  const [open, setOpen] = useState(false)
+export function EditRole({ role, open, setOpen }: any) {
   const [attributes, setAttributes] = useState({
     name: role.name,
     description: role.description,
@@ -33,37 +31,28 @@ export function EditRole({ role }: any) {
   })
 
   return (
-    <>
-      <Button
-        secondary
-        small
-        onClick={() => setOpen(true)}
-      >
-        Edit
-      </Button>
-      <Modal
-        header="Edit role"
-        portal
-        open={open}
-        size="large"
-        onClose={() => setOpen(false)}
-        actions={(
-          <Actions
-            cancel={() => setOpen(false)}
-            submit={() => mutation()}
-            loading={loading}
-            action="Update"
-          />
-        )}
-      >
-        <RoleForm
-          attributes={attributes}
-          setAttributes={setAttributes}
-          bindings={uniqueRoleBindings}
-          setBindings={setRoleBindings}
-          error={error}
+    <Modal
+      header="Edit role"
+      portal
+      open={open}
+      size="large"
+      onClose={() => setOpen(false)}
+      actions={(
+        <Actions
+          cancel={() => setOpen(false)}
+          submit={() => mutation()}
+          loading={loading}
+          action="Update"
         />
-      </Modal>
-    </>
+      )}
+    >
+      <RoleForm
+        attributes={attributes}
+        setAttributes={setAttributes}
+        bindings={uniqueRoleBindings}
+        setBindings={setRoleBindings}
+        error={error}
+      />
+    </Modal>
   )
 }

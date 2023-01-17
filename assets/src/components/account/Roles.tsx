@@ -4,16 +4,17 @@ import isEmpty from 'lodash/isEmpty'
 import { Div, Flex } from 'honorable'
 import {
   EmptyState,
-  IconFrame,
+  ListBoxItem,
   PageTitle,
   SearchIcon,
-  TrashCanIcon,
 } from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
 
 import { LoginContext } from 'components/contexts'
 
 import { Confirm } from 'components/utils/Confirm'
+
+import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { List, ListItem } from '../utils/List'
 import ListInput from '../utils/ListInput'
@@ -42,6 +43,7 @@ function Header({ q, setQ }: any) {
 }
 
 function Role({ role, q }: any) {
+  const [edit, setEdit] = useState(false)
   const [confirm, setConfirm] = useState(false)
   const { me } = useContext<any>(LoginContext)
   const editable = !!me.roles?.admin
@@ -55,6 +57,17 @@ function Role({ role, q }: any) {
     onCompleted: () => setConfirm(false),
   })
 
+  const menuItems = editable ? {
+    edit: {
+      label: 'Edit group',
+      onSelect: () => setEdit(true),
+    },
+    delete: {
+      label: 'Delete group',
+      onSelect: () => setConfirm(true),
+    },
+  } : {}
+
   return (
     <Box
       fill="horizontal"
@@ -65,27 +78,17 @@ function Role({ role, q }: any) {
         text={role.name}
         description={role.description || 'no description'}
       />
-      <>
-        <Box
-          flex={false}
-          direction="row"
-          gap="24px"
-          align="center"
-        >
-          {editable && (
-            <EditRole
-              role={role}
-              q={q}
-            />
-          )}
-          <IconFrame
-            size="medium"
-            clickable
-            icon={<TrashCanIcon color="icon-danger" />}
-            textValue="Delete"
-            onClick={() => setConfirm(true)}
+      <MoreMenu onSelectionChange={selectedKey => menuItems[selectedKey]?.onSelect()}>
+        {Object.entries(menuItems).map(([key, { label }]) => (
+          <ListBoxItem
+            key={key}
+            textValue={label}
+            label={label}
+            color="blue"
           />
-        </Box>
+        ))}
+      </MoreMenu>
+      <>
         <Confirm
           open={confirm}
           text="Deleting roles cannot be undone."
@@ -94,6 +97,11 @@ function Role({ role, q }: any) {
           loading={loading}
           destructive
           error={error}
+        />
+        <EditRole
+          role={role}
+          open={edit}
+          setOpen={setEdit}
         />
       </>
     </Box>

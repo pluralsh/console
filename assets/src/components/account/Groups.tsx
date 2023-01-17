@@ -85,25 +85,17 @@ export function Group({ group, q }: any) {
         text={group.name}
         description={group.description || 'no description'}
       />
+      <MoreMenu onSelectionChange={selectedKey => menuItems[selectedKey]?.onSelect()}>
+        {Object.entries(menuItems).map(([key, { label }]) => (
+          <ListBoxItem
+            key={key}
+            textValue={label}
+            label={label}
+            color="blue"
+          />
+        ))}
+      </MoreMenu>
       <>
-        <Box
-          flex={false}
-          direction="row"
-          gap="24px"
-          align="center"
-        >
-          <MoreMenu onSelectionChange={selectedKey => menuItems[selectedKey]?.onSelect()}>
-            {Object.entries(menuItems).map(([key, { label, props = {} }]) => (
-              <ListBoxItem
-                key={key}
-                textValue={label}
-                label={label}
-                {...props}
-                color="blue"
-              />
-            ))}
-          </MoreMenu>
-        </Box>
         <Modal
           header="View group"
           open={view}
