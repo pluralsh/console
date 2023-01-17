@@ -3,7 +3,7 @@ import { Box, Text } from 'grommet'
 import { Scroller } from 'forge-core'
 
 import { extendConnection } from '../../utils/graphql'
-import Avatar from '../account/Avatar'
+import Avatar from '../utils/Avatar'
 
 import { PresenceContext, PresenceIndicator } from './Presence'
 

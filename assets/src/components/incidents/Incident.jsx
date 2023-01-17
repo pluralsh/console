@@ -45,7 +45,7 @@ import { useEditor } from '../utils/hooks'
 
 import { TagInput } from '../repos/Tags'
 
-import Avatar from '../account/Avatar'
+import Avatar from '../utils/Avatar'
 
 import Markdown from './Markdown'
 import {

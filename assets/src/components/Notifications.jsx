@@ -17,16 +17,17 @@ import {
 
 import { BellIcon } from '@pluralsh/design-system'
 
-import { FlyoutContainer } from '../Console'
-import { ME_Q, NOTIFICATIONS_Q } from '../graphql/users'
-import { StandardScroller } from '../utils/SmoothScroller'
-import { extendConnection, updateCache } from '../../utils/graphql'
-import { ApplicationIcon, InstallationContext } from '../Installations'
-import { SeverityNub } from '../runbooks/StatusIcon'
+import { extendConnection, updateCache } from '../utils/graphql'
 
-import { LoginContext } from '../contexts'
+import { FlyoutContainer } from './Console'
+import { ME_Q, NOTIFICATIONS_Q } from './graphql/users'
+import { StandardScroller } from './utils/SmoothScroller'
+import { ApplicationIcon, InstallationContext } from './Installations'
+import { SeverityNub } from './runbooks/StatusIcon'
 
-import { MARK_READ, NOTIFS_SUB } from './queries'
+import { LoginContext } from './contexts'
+
+import { MARK_READ, NOTIFS_SUB } from './account/queries'
 
 function NotificationRow({ notif }) {
   const { applications, setCurrentApplication } = useContext(InstallationContext)

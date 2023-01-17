@@ -27,7 +27,7 @@ import { EditGroup } from './EditGroup'
 
 import { Info } from './Info'
 import { GroupsList } from './GroupsList'
-import { MoreMenu } from './MoreMenu'
+import { MoreMenu } from '../utils/MoreMenu'
 
 function Header({ q, setQ }: any) {
   return (

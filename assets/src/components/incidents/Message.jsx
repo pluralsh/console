@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { Box, Stack, Text } from 'grommet'
 import moment from 'moment'
 
-import Avatar from '../account/Avatar'
+import Avatar from '../utils/Avatar'
 
 import Markdown from './Markdown'
 import { MessageControls } from './MessageControls'
