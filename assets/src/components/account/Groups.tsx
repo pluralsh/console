@@ -2,17 +2,16 @@ import { useMutation } from '@apollo/client'
 import { Box } from 'grommet'
 import { Flex } from 'honorable'
 import {
-  Button,
-  GlobeIcon,
-  IconFrame,
+  ListBoxItem,
   Modal,
   PageTitle,
   SearchIcon,
-  TrashCanIcon,
 } from '@pluralsh/design-system'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 
 import { Confirm } from 'components/utils/Confirm'
+
+import { LoginContext } from 'components/contexts'
 
 import ListInput from '../utils/ListInput'
 
@@ -28,6 +27,7 @@ import { EditGroup } from './EditGroup'
 
 import { Info } from './Info'
 import { GroupsList } from './GroupsList'
+import { MoreMenu } from './MoreMenu'
 
 function Header({ q, setQ }: any) {
   return (
@@ -43,8 +43,8 @@ function Header({ q, setQ }: any) {
 }
 
 export function Group({ group, q }: any) {
-  // const { me } = useContext(LoginContext)
-  const editable = true // TODO: canEdit(me, account) || hasRbac(me, Permissions.USERS)
+  const { me } = useContext<any>(LoginContext)
+  const editable = !!me.roles?.admin
   const [edit, setEdit] = useState(false)
   const [view, setView] = useState(false)
   const [confirm, setConfirm] = useState(false)
@@ -57,6 +57,22 @@ export function Group({ group, q }: any) {
       update: prev => removeConnection(prev, deleteGroup, 'groups'),
     }),
   })
+
+  const menuItems = editable ? {
+    edit: {
+      label: 'Edit group',
+      onSelect: () => setEdit(true),
+    },
+    delete: {
+      label: 'Delete group',
+      onSelect: () => setConfirm(true),
+    },
+  } : {
+    view: {
+      label: 'View group',
+      onSelect: () => setView(true),
+    },
+  }
 
   return (
     <Box
@@ -75,35 +91,17 @@ export function Group({ group, q }: any) {
           gap="24px"
           align="center"
         >
-          {group.global && <GlobeIcon size={20} />}
-          {!editable && (
-            <Button
-              secondary
-              small
-              onClick={() => setView(true)}
-            >
-              View
-            </Button>
-          )}
-          {editable && (
-            <Button
-              secondary
-              small
-              onClick={() => setEdit(true)}
-            >
-              Edit
-            </Button>
-          )}
-
-          {editable && (
-            <IconFrame
-              size="medium"
-              clickable
-              icon={<TrashCanIcon color="icon-danger" />}
-              textValue="Delete"
-              onClick={() => setConfirm(true)}
-            />
-          )}
+          <MoreMenu onSelectionChange={selectedKey => menuItems[selectedKey]?.onSelect()}>
+            {Object.entries(menuItems).map(([key, { label, props = {} }]) => (
+              <ListBoxItem
+                key={key}
+                textValue={label}
+                label={label}
+                {...props}
+                color="blue"
+              />
+            ))}
+          </MoreMenu>
         </Box>
         <Modal
           header="View group"

@@ -30,7 +30,6 @@ export function UserInfo({ user: { email, name, avatar }, hue = 'lighter', ...bo
   )
 }
 
-// TODO: Test.
 export function User({ user }: any) {
   const { me } = useContext(LoginContext)
   const [mutation, { loading }] = useMutation<any>(EDIT_USER, { variables: { id: user.id } })
