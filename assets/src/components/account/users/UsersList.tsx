@@ -8,15 +8,16 @@ import { useEffect, useState } from 'react'
 
 import { StandardScroller } from 'components/utils/SmoothScroller'
 
-import { List, ListItem } from '../utils/List'
-import ListInput from '../utils/ListInput'
+import { List, ListItem } from '../../utils/List'
+import ListInput from '../../utils/ListInput'
 
-import { extendConnection } from '../../utils/graphql'
+import { extendConnection } from '../../../utils/graphql'
 
-import { USERS_Q } from './queries'
+import { USERS_Q } from '../queries'
+
 import { User } from './User'
 
-export function UsersList() {
+export default function UsersList() {
   const [q, setQ] = useState('')
   const [listRef, setListRef] = useState<any>(null)
   const { data, loading, fetchMore } = useQuery(USERS_Q, {

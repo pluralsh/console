@@ -15,8 +15,6 @@ import { Security } from 'components/profile/Security'
 
 import { Permissions } from 'components/profile/Permissions'
 
-import { Users } from 'components/account/Users'
-
 import Account from 'components/account/Account'
 
 import { Groups } from 'components/account/groups/Groups'
@@ -26,6 +24,8 @@ import Audits from 'components/audits/Audits'
 import { Roles } from 'components/account/Roles'
 
 import { Webhooks } from 'components/account/webhooks/Webhooks'
+
+import Users from 'components/account/users/Users'
 
 import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'

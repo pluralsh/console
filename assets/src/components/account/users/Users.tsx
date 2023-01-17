@@ -5,10 +5,10 @@ import { useContext, useRef, useState } from 'react'
 
 import { LoginContext } from 'components/contexts'
 
-import { InviteUser } from './InviteUser'
-import { UsersList } from './UsersList'
+import UserList from './UsersList'
+import UserInvite from './UserInvite'
 
-// const DIRECTORY = [
+// const directory = [
 //   {
 //     key: 'Users',
 //     label: 'Users',
@@ -19,17 +19,7 @@ import { UsersList } from './UsersList'
 //   },
 // ]
 
-function getContent(selectedKey: string): JSX.Element | null {
-  switch (selectedKey) {
-  case 'Invites':
-    return null // Add list of invites once API will be ready.
-  case 'Users':
-  default:
-    return <UsersList />
-  }
-}
-
-export function Users() {
+export default function Users() {
   const { configuration } = useContext<any>(LoginContext)
   const [selectedKey] = useState<any>('Users')
   const tabStateRef = useRef<any>(null)
@@ -53,7 +43,7 @@ export function Users() {
               onSelectionChange: setSelectedKey,
             }}
           >
-            {DIRECTORY.map(({ label, key }) => (
+            {directory.map(({ label, key }) => (
               <SubTab
                 key={key}
                 textValue={label}
@@ -63,7 +53,7 @@ export function Users() {
             ))}
           </TabList> */}
           {/* Invites are only available when not using login with Plural. */}
-          {configuration && !configuration?.pluralLogin && <InviteUser />}
+          {configuration && !configuration?.pluralLogin && <UserInvite />}
         </Flex>
       </PageTitle>
       <TabPanel
@@ -75,7 +65,8 @@ export function Users() {
         )}
         stateRef={tabStateRef}
       >
-        {getContent(selectedKey)}
+        {/* {selectedKey === 'Invites' && <Invites />} Add it once API will be ready. */}
+        {selectedKey === 'Users' && <UserList />}
       </TabPanel>
     </Flex>
   )

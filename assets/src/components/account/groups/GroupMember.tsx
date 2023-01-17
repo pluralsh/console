@@ -4,7 +4,7 @@ import { ListItem } from 'components/apps/misc'
 import { Box } from 'grommet'
 
 import { DELETE_GROUP_MEMBER, GROUP_MEMBERS } from '../queries'
-import { UserInfo } from '../User'
+import UserInfo from '../UserInfo'
 
 export default function GroupMember({
   user, group, first, last, edit,

@@ -1,34 +1,12 @@
 import { useMutation } from '@apollo/client'
 import { Box } from 'grommet'
-import { Span, Switch } from 'honorable'
-import { AppIcon } from '@pluralsh/design-system'
+import { Switch } from 'honorable'
 import { useCallback, useContext } from 'react'
 import { LoginContext } from 'components/contexts'
 
-import { EDIT_USER } from './queries'
+import { EDIT_USER } from '../queries'
 
-export function UserInfo({ user: { email, name, avatar }, hue = 'lighter', ...box }: any) {
-  return (
-    <Box
-      {...box}
-      direction="row"
-      gap="small"
-      align="center"
-    >
-      <AppIcon
-        url={avatar}
-        name={name}
-        spacing={avatar ? 'none' : undefined}
-        size="xsmall"
-        hue={hue}
-      />
-      <Box>
-        <Span fontWeight="bold">{name}</Span>
-        <Span color="text-light">{email}</Span>
-      </Box>
-    </Box>
-  )
-}
+import UserInfo from '../UserInfo'
 
 export function User({ user }: any) {
   const { me } = useContext(LoginContext)
