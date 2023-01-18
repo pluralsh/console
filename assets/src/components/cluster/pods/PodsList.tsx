@@ -130,13 +130,13 @@ export const ColName = columnHelper.accessor(row => row.name, {
 })
 
 export const ColNamespace = columnHelper.accessor(row => row.namespace, {
-  id: 'name',
+  id: 'namespace',
   cell: props => (
     <TableText>
       <span>{props.getValue()}</span>
     </TableText>
   ),
-  header: 'Name',
+  header: 'Namespace',
 })
 
 export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
@@ -244,8 +244,11 @@ export const ColDelete = refetch => columnHelper.accessor(row => row.name, {
   header: '',
 })
 
+export type PodWithId = Pod & {
+  id?: Maybe<string>
+}
 type PodListProps = {
-  pods?: Maybe<Pod>[] & Pod[]
+  pods?: Maybe<PodWithId>[] & PodWithId[]
   columns: any[]
 }
 

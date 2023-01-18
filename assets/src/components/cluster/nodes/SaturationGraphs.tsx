@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { Box } from 'grommet'
 import { format } from 'components/apps/app/dashboards/dashboard/misc'
@@ -28,8 +28,8 @@ export function SaturationGraphs({ cpu, mem }) {
     }
 
     return ([
-      { id: 'cpu utilization', data: cpuUtilization[0].values.map(datum) },
-      { id: 'memory utilization', data: memUtilization[0].values.map(datum) },
+      { id: 'CPU usage', data: cpuUtilization[0].values.map(datum) },
+      { id: 'Memory usage', data: memUtilization[0].values.map(datum) },
     ])
   }, [data])
 
@@ -41,7 +41,7 @@ export function SaturationGraphs({ cpu, mem }) {
     <Box
       fill="horizontal"
       gap="small"
-      height="250px"
+      height="300px"
     >
       <Graph
         data={result}

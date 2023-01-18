@@ -17,13 +17,12 @@ import Container from 'components/cluster/containers/Container'
 export const clusterRoutes = [
   /* Pods */
   <Route
-    path="pods"
+    path="pods/:namespace?"
     element={<Cluster />}
   >
     <Route
       index
       element={<Pods />}
-      // loader={() => {}}
     />
   </Route>,
 
