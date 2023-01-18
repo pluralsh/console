@@ -12,7 +12,6 @@ import { UPDATE_ROLE } from './queries'
 
 import RoleForm from './RoleForm'
 
-// TODO: Wrong role can open after creation > edit.
 export default function RoleEdit({ role, open, setOpen }: any) {
   const [attributes, setAttributes] = useState({
     name: role.name,

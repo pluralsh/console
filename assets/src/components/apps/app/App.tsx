@@ -38,7 +38,6 @@ import AppSelector from './AppSelector'
 import RunbookStatus from './runbooks/runbook/RunbookStatus'
 import LogsLegend from './logs/LogsLegend'
 
-// TODO: Keep current path when switching views if possible.
 const getDirectory = (app, config) => {
   const componentsReady = app?.status?.componentsReady
   const split = componentsReady?.split('/')

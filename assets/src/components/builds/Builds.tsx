@@ -92,7 +92,7 @@ export default function Builds() {
           <UpgradePolicies />
           <CreateBuild />
         </PageTitle>
-        <PinnedRunbooks border={undefined} /> {/* TODO: Where to put it? */}
+        {/* <PinnedRunbooks border={undefined} /> */}
         <Card flexGrow="1">
           <StandardScroller
             listRef={listRef}

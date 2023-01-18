@@ -205,7 +205,6 @@ export default function Build() {
           gap="xsmall"
           marginBottom="xsmall"
         >
-          {/* TODO: Use dropdown button with the three options. */}
           <BuildCancel build={build} />
           <BuildRestart build={build} />
           <BuildApproval build={build} />

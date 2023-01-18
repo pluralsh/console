@@ -11,7 +11,7 @@ const columnHelper = createColumnHelper<any>()
 const columns = (namespace, refetch) => [
   columnHelper.accessor(row => row?.metadata?.name, {
     id: 'name',
-    cell: props => props.getValue(), // TODO: Add navigation on row/name click.
+    cell: props => props.getValue(),
     header: 'Name',
   }),
   columnHelper.accessor(row => row?.status, {

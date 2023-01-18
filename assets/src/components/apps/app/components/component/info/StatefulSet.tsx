@@ -5,12 +5,6 @@ import { Flex, H2 } from 'honorable'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
-// TODO: <ScalingRecommenderModal
-// kind={ScalingTypes.STATEFULSET}
-// name={name}
-// namespace={repo}
-// />
-
 function StatusChart({ ready, notReady }: {ready: number, notReady: number}) {
   const data = useMemo(() => [
     { id: 'Ready', value: ready, color: '#99F5D5' },
