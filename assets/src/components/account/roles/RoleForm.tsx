@@ -1,65 +1,22 @@
 import { Box } from 'grommet'
-import { Span, Switch } from 'honorable'
+import { Span } from 'honorable'
 import { Tab, TabList, TabPanel } from '@pluralsh/design-system'
-import { useCallback, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
-import { ListItem } from 'components/utils/ListItem'
+import { GqlError } from '../../utils/Alert'
 
-import { GqlError } from '../utils/Alert'
+import { PermissionTypes } from '../types'
 
-import { PermissionTypes } from './types'
+import RoleFormGeneralAttributes from './RoleFormGeneralAttributes'
 
-import { GeneralAttributes } from './Role'
-
-function PermissionToggle({
-  permission,
-  description,
-  attributes,
-  setAttributes,
-  first,
-  last,
-}: any) {
-  const toggle = useCallback(enable => {
-    if (enable) {
-      setAttributes({
-        ...attributes,
-        permissions: [permission, ...attributes.permissions],
-      })
-    }
-    else {
-      setAttributes({
-        ...attributes,
-        permissions: attributes.permissions.filter(perm => perm !== permission),
-      })
-    }
-  },
-  [permission, attributes, setAttributes])
-
-  return (
-    <ListItem
-      first={first}
-      last={last}
-      background="fill-two"
-    >
-      <Box fill="horizontal">
-        <Span fontWeight={500}>{permission.toLowerCase()}</Span>
-        <Span color="text-light">{description}</Span>
-      </Box>
-      <Switch
-        checked={!!attributes.permissions.find(perm => perm === permission)}
-        onChange={({ target: { checked } }) => toggle(checked)}
-      />
-    </ListItem>
-  )
-}
+import RolePermissionToggle from './RolePermissionToggle'
 
 const TABS = {
   General: { label: 'General' },
   Permissions: { label: 'Permissions' },
 }
 
-export function RoleForm({
-  // eslint-disable-next-line
+export default function RoleForm({
   error,
   attributes,
   setAttributes,
@@ -98,7 +55,7 @@ export function RoleForm({
       </TabList>
       <TabPanel stateRef={tabStateRef}>
         {view === 'General' && (
-          <GeneralAttributes
+          <RoleFormGeneralAttributes
             attributes={attributes}
             setAttributes={setAttributes}
             bindings={bindings}
@@ -115,7 +72,7 @@ export function RoleForm({
             </Box>
             <Box>
               {permissions.map(([perm, description], i) => (
-                <PermissionToggle
+                <RolePermissionToggle
                   key={perm}
                   permission={perm}
                   description={description}

@@ -4,14 +4,15 @@ import { useMemo, useState } from 'react'
 import uniqWith from 'lodash/uniqWith'
 import isEqual from 'lodash/isEqual'
 
-import { UPDATE_ROLE } from './queries'
+import { UPDATE_ROLE } from '../queries'
 
-import { Actions } from './Actions'
-import { sanitize } from './utils'
-import { RoleForm } from './RoleForm'
+import { Actions } from '../Actions'
+import { sanitize } from '../utils'
+
+import RoleForm from './RoleForm'
 
 // TODO: Wrong role can open after creation > edit.
-export function EditRole({ role, open, setOpen }: any) {
+export default function RoleEdit({ role, open, setOpen }: any) {
   const [attributes, setAttributes] = useState({
     name: role.name,
     description: role.description,

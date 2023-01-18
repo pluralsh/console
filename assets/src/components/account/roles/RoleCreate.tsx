@@ -5,13 +5,14 @@ import { Modal } from '@pluralsh/design-system'
 import uniqWith from 'lodash/uniqWith'
 import isEqual from 'lodash/isEqual'
 
-import { appendConnection, updateCache } from '../../utils/graphql'
+import { appendConnection, updateCache } from '../../../utils/graphql'
 
-import { CREATE_ROLE, ROLES_Q } from './queries'
+import { CREATE_ROLE, ROLES_Q } from '../queries'
 
-import { Actions } from './Actions'
-import { sanitize } from './utils'
-import { RoleForm } from './RoleForm'
+import { Actions } from '../Actions'
+import { sanitize } from '../utils'
+
+import RoleForm from './RoleForm'
 
 const defaultAttributes = {
   name: '',
@@ -20,7 +21,7 @@ const defaultAttributes = {
   permissions: [],
 }
 
-export function CreateRole({ q }: any) {
+export default function RoleCreate({ q }: any) {
   const [open, setOpen] = useState(false)
   const [attributes, setAttributes] = useState(defaultAttributes)
   const [roleBindings, setRoleBindings] = useState([])

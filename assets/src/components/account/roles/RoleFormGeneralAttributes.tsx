@@ -2,9 +2,9 @@ import { Box } from 'grommet'
 import { ValidatedInput } from '@pluralsh/design-system'
 import { useState } from 'react'
 
-import { BindingInput } from './Typeaheads'
+import { BindingInput } from '../Typeaheads'
 
-export function GeneralAttributes({
+export default function RoleFormGeneralAttributes({
   attributes,
   setAttributes,
   bindings,

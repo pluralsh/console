@@ -21,7 +21,7 @@ import { Groups } from 'components/account/groups/Groups'
 
 import Audits from 'components/audits/Audits'
 
-import { Roles } from 'components/account/Roles'
+import Roles from 'components/account/roles/Roles'
 
 import { Webhooks } from 'components/account/webhooks/Webhooks'
 
