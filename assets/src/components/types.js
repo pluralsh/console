@@ -14,6 +14,7 @@ export const BuildTypes = {
   DEPLOY: 'DEPLOY',
   APPROVAL: 'APPROVAL',
   INSTALL: 'INSTALL',
+  DEDICATED: 'DEDICATED',
 }
 
 export const BuildIcons = {
@@ -21,4 +22,5 @@ export const BuildIcons = {
   DEPLOY: Deploy,
   APPROVAL: Check,
   INSTALL: Install,
+  DEDICATED: Deploy,
 }
