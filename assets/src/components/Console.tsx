@@ -1,15 +1,14 @@
-import React, { useContext, useRef, useState } from 'react'
-import { Outlet, useNavigate } from 'react-router-dom'
+import React, { useContext, useState } from 'react'
+import { Outlet } from 'react-router-dom'
 import { Box, Text } from 'grommet'
 import { Portal } from 'react-portal'
 import Foco from 'react-foco'
 import { Next } from 'grommet-icons'
 
-import ConsoleSidebar, { SIDEBAR_ICON_HEIGHT } from './ConsoleSidebar'
+import ConsoleSidebar from './ConsoleSidebar'
 import BreadcrumbProvider from './Breadcrumbs'
 import { EnsureLogin } from './Login'
 import { InstallationsProvider } from './Installations'
-import { Tooltip } from './utils/Tooltip'
 import ConsoleHeader from './ConsoleHeader'
 import ConsoleSubheader from './ConsoleSubheader'
 import TerminalThemeProvider from './terminal/TerminalThemeProvider'
@@ -17,56 +16,6 @@ import { CursorPositionProvider } from './utils/CursorPosition'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
-export function Icon({
-  icon, text, selected, path, onClick, size, align,
-}) {
-  const dropRef = useRef<any>()
-  const navigate = useNavigate()
-  const [hover, setHover] = useState(false)
-
-  return (
-    <>
-      <Box
-        ref={dropRef}
-        focusIndicator={false}
-        className={`sidebar-icon${selected ? ' selected' : ''}`}
-        align="center"
-        justify="center"
-        margin={{ horizontal: 'xsmall' }}
-        round="xsmall"
-        height={size || SIDEBAR_ICON_HEIGHT}
-        width={size || SIDEBAR_ICON_HEIGHT}
-        hoverIndicator="sidebarHover"
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
-        onClick={() => (onClick ? onClick() : navigate(path))}
-        background={selected ? 'sidebarHover' : undefined}
-        direction="row"
-      >
-        {icon}
-      </Box>
-      {hover && (
-        <Tooltip
-          pad="small"
-          round="xsmall"
-          justify="center"
-          background="sidebarHover"
-          target={dropRef}
-          side="right"
-          align={align || { left: 'right' }}
-          margin="xsmall"
-        >
-          <Text
-            size="small"
-            weight={500}
-          >
-            {text}
-          </Text>
-        </Tooltip>
-      )}
-    </>
-  )
-}
 
 const FlyoutContext = React.createContext<any>({})
 

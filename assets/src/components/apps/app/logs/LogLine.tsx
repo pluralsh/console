@@ -1,3 +1,4 @@
+import { grey, red, yellow } from '@pluralsh/design-system/dist/theme/colors'
 import { ansiToJson } from 'anser'
 import escapeCarriageReturn from 'escape-carriage'
 import { Flex } from 'honorable'
@@ -5,18 +6,18 @@ import { useMemo } from 'react'
 
 import { Level, ts } from './misc'
 
-function borderColor(lvl) {
+export function borderColor(lvl) {
   switch (lvl) {
   case Level.FATAL:
-    return 'border-danger'
+    return red[300]
   case Level.ERROR:
-    return 'border-danger'
+    return red[200]
   case Level.WARN:
-    return 'border-warning'
+    return yellow[200]
   case Level.INFO:
-    return 'border-selected'
+    return grey[100]
   default:
-    return 'border-fill-two'
+    return grey[750]
   }
 }
 

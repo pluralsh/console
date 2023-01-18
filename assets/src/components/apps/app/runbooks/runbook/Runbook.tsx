@@ -85,7 +85,7 @@ export default function Runbook() {
   })
 
   const [selectedKey, setSelectedKey] = useState<Key>('')
-  const [selectedTab, setSelectedTab] = useState('audit-logs')
+  const [selectedTab, setSelectedTab] = useState<any>('audit-logs')
 
   useEffect(() => setBreadcrumbs([
     { text: 'apps', url: '/' },

@@ -51,9 +51,7 @@ import { InstallationContext } from 'components/Installations'
 import { BUILD_TYPE_DISPLAY_NAMES } from '../Build'
 
 import { BuildTimer } from './BuildTimer'
-import BuildRestart from './BuildRestart'
-import BuildApproval from './BuildApproval'
-import BuildCancel from './BuildCancel'
+import BuildActions from './BuildActions'
 
 function updateQuery(prev, { subscriptionData: { data } }) {
   if (!data) return prev
@@ -200,16 +198,7 @@ export default function Build() {
         <Outlet context={{ edges, build }} />
       </TabPanel>
       <ResponsiveLayoutSidecarContainer width={200}>
-        <Flex
-          direction="column"
-          gap="xsmall"
-          marginBottom="xsmall"
-        >
-          {/* TODO: Use dropdown button with the three options. */}
-          <BuildCancel build={build} />
-          <BuildRestart build={build} />
-          <BuildApproval build={build} />
-        </Flex>
+        <BuildActions build={build} />
         <Flex
           gap="medium"
           direction="column"

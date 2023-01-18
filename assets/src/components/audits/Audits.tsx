@@ -16,7 +16,7 @@ import { ResponsiveLayoutSidecarContainer } from 'components/layout/ResponsiveLa
 
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
-import Avatar from '../account/Avatar'
+import Avatar from '../utils/Avatar'
 
 export function AvatarCell({ user, width }) {
   return (

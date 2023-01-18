@@ -22,7 +22,6 @@ function ConfigurationSettingsInput({ value = '', setValue }) {
   )
 }
 
-// TODO: Test it as there are no apps with enum configOverlays in the system now.
 function ConfigurationSettingsSelect({ overlay: { spec: { inputValues } }, value, setValue }) {
   return (
     <Select

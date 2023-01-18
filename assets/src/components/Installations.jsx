@@ -20,20 +20,6 @@ export function ApplicationIcon({ application: { spec: { descriptor: { icons } }
   )
 }
 
-export const hasIcon = ({ spec: { descriptor: { icons } } }) => icons.length > 0
-
-export function useEnsureCurrent(repo) {
-  const { applications, currentApplication, setCurrentUnsafe } = useContext(InstallationContext)
-
-  useEffect(() => {
-    const desired = applications.find(({ name }) => name === repo)
-
-    if (desired && currentApplication.name !== desired.name) {
-      setCurrentUnsafe(desired)
-    }
-  }, [repo, applications, currentApplication])
-}
-
 function applyDelta(prev, { delta, payload }) {
   switch (delta) {
   case 'CREATE':
@@ -51,7 +37,7 @@ export function InstallationsProvider({ children }) {
   useEffect(() => subscribeToMore({
     document: APPLICATION_SUB,
     updateQuery: (prev, { subscriptionData: { data } }) => (data ? applyDelta(prev, data.applicationDelta) : prev),
-  }), [])
+  }), [subscribeToMore])
 
   if (loading || !data) return <LoopingLogo />
 
@@ -60,7 +46,7 @@ export function InstallationsProvider({ children }) {
       // eslint-disable-next-line react/jsx-no-constructed-context-values
       value={{
         applications: data?.applications || [],
-        currentApplication: { name: 'mock', spec: { descriptor: { links: [] } } }, // TODO: Remove.
+        currentApplication: { name: 'mock', spec: { descriptor: { links: [] } } },
       }}
     >
       {children}

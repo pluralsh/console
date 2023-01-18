@@ -20,13 +20,16 @@ import { useNavigate } from 'react-router-dom'
 
 import { toAbsoluteURL } from 'utils/url'
 
-import { appState } from 'components/Component'
-
 import { Readiness } from 'utils/status'
 
 import AppStatus from './AppStatus'
 
-import { ListItemBorder, getIcon, hasIcons } from './misc'
+import {
+  ListItemBorder,
+  appState,
+  getIcon,
+  hasIcons,
+} from './misc'
 
 const SHORTCUTS = [
   { url: 'dashboards', label: 'Dashboards', icon: <DashboardIcon /> },

@@ -25,13 +25,12 @@ export default function Components() {
 
   return (
     <>
-      <PageTitle heading="Components" /> {/* TODO: Add filtering. */}
+      <PageTitle heading="Components" />
       <Flex
         direction="column"
         paddingRight="xxxsmall"
         overflowY="auto"
       >
-        {/* TODO: Apply new design changes. */}
         {currentApp.status.components.map(({
           name, group, kind, status,
         }, i) => (

@@ -1,4 +1,3 @@
-import { appState } from 'components/Component'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { InstallationContext } from 'components/Installations'
 import { A, Div, Flex } from 'honorable'
@@ -29,6 +28,7 @@ import { Readiness, readinessToLabel } from 'utils/status'
 import { ScrollablePage } from 'components/layout/ScrollablePage'
 
 import App from './AppCard'
+import { appState } from './misc'
 
 const FILTERS = [
   { key: '', label: 'All' },

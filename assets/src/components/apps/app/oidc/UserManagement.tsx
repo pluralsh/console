@@ -15,15 +15,12 @@ import { GqlError } from 'forge-core'
 
 import { isEqual } from 'lodash'
 
-import { sanitize } from '../../../account/Role'
-
-import { BindingInput, fetchGroups, fetchUsers } from './BindingInput'
+import { BindingInput, fetchGroups, fetchUsers } from '../../../utils/BindingInput'
 
 import { INSTALLATION, UPDATE_PROVIDER } from './queries'
 
-// TODO: Add confirmation dialog when there are unsaved changes.
-// See https://github.com/remix-run/react-router/issues/8139
-// and https://github.com/remix-run/react-router/pull/9709.
+const sanitize = ({ id, user, group }) => ({ id, userId: user && user.id, groupId: group && group.id })
+
 function UserManagementCard({ id, provider }) {
   const { authMethod, redirectUris, bindings: initialBindings } = provider
   const [bindings, setBindings] = useState(initialBindings)
@@ -60,7 +57,6 @@ function UserManagementCard({ id, provider }) {
         gap="small"
         paddingVertical="medium"
       >
-        {/* TODO: Update. */}
         {error && (
           <GqlError
             error={error}

@@ -17,7 +17,9 @@ import {
 
 import { Div, Flex, P } from 'honorable'
 
-import { isEqual } from 'lodash'
+import isEqualWith from 'lodash/isEqualWith'
+
+import { omitBy } from 'lodash'
 
 import { EXECUTE_OVERLAY } from './queries'
 import ConfigurationSettingsField from './ConfigurationSettingsField'
@@ -49,7 +51,7 @@ export function ConfigurationSettings({ overlays, application: { name, configura
   const folders = useMemo(() => organizeOverlays(overlays), [overlays])
   const [folder, setFolder] = useState<any>(Object.keys(folders)[0])
   const [subfolder, setSubfolder] = useState<any>(Object.keys(folders[folder] || ['all'])[0])
-  const changed = !isEqual(ctx, init) // TODO: Fix when '' is not equal to undefined.
+  const changed = !isEqualWith(omitBy(ctx, v => v === ''), init)
 
   useEffect(() => {
     if (!folders[folder]) {

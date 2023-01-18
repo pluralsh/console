@@ -1,6 +1,5 @@
 import { Navigate, Route } from 'react-router-dom'
 
-import Webhooks from 'components/Webhooks'
 import Builds from 'components/builds/Builds'
 import Build from 'components/builds/build/Build'
 import Changelog from 'components/builds/build/changelog/Changelog'
@@ -16,13 +15,19 @@ import { Security } from 'components/profile/Security'
 
 import { Permissions } from 'components/profile/Permissions'
 
-import { Users } from 'components/account/Users'
-
 import Account from 'components/account/Account'
 
-import { Groups } from 'components/account/Groups'
+import { Groups } from 'components/account/groups/Groups'
 
 import Audits from 'components/audits/Audits'
+
+import Roles from 'components/account/roles/Roles'
+
+import { Webhooks } from 'components/account/webhooks/Webhooks'
+
+import Users from 'components/account/users/Users'
+
+import EmailSettings from 'components/account/email/EmailSettings'
 
 import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
@@ -132,6 +137,18 @@ const accountRoutes = [
       path="groups"
       element={<Groups />}
     />
+    <Route
+      path="roles"
+      element={<Roles />}
+    />
+    <Route
+      path="webhooks"
+      element={<Webhooks />}
+    />
+    <Route
+      path="email"
+      element={<EmailSettings />}
+    />
   </Route>,
 ]
 
@@ -176,10 +193,4 @@ export const consoleRoutes = [
 
   /* PROFILE */
   ...profileRoutes,
-
-  /* ETC */
-  <Route
-    path="webhooks"
-    element={<Webhooks />}
-  />,
 ]

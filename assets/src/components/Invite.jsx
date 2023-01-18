@@ -7,7 +7,7 @@ import { Checkmark, StatusCritical } from 'grommet-icons'
 
 import { setToken } from '../helpers/auth'
 
-import { initials } from './account/Avatar'
+import { initials } from './utils/Avatar'
 import { INVITE_Q, SIGNUP } from './graphql/users'
 import { LoginPortal } from './Login'
 import { LabelledInput } from './utils/LabelledInput'

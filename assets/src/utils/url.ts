@@ -1,5 +1,5 @@
 export function isAbsoluteURL(url: string): boolean {
-  return /^https?:\/\//igm.test(url) // TODO: Use better regexp and write unit tests.
+  return /^https?:\/\//igm.test(url)
 }
 
 export function toAbsoluteURL(url: string): string {

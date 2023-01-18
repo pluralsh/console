@@ -13,7 +13,6 @@ import { ResponsiveLayoutSidecarContainer } from './layout/ResponsiveLayoutSidec
 import { ResponsiveLayoutSidenavContainer } from './layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from './layout/ResponsiveLayoutSpacer'
 
-// TODO: Disable previous and next button based on navigation history.
 export default function ConsoleSubheader() {
   const navigate = useNavigate()
 

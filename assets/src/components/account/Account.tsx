@@ -1,10 +1,5 @@
-import { Div, Flex } from 'honorable'
-import {
-  PageCard,
-  Tab,
-  TabList,
-  TabPanel,
-} from '@pluralsh/design-system'
+import { Flex } from 'honorable'
+import { Tab, TabList, TabPanel } from '@pluralsh/design-system'
 
 import { useContext, useEffect, useRef } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
@@ -16,17 +11,18 @@ import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLa
 import { LoginContext } from 'components/contexts'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
-const directory = [
-  { path: 'users', label: 'Users' },
-  { path: 'groups', label: 'Groups' },
-  { path: 'roles', label: 'Roles' },
-  { path: 'webhooks', label: 'Webhooks' },
+const getDirectory = (me, configuration) => [
+  { path: 'users', label: 'Users', enabled: true },
+  { path: 'groups', label: 'Groups', enabled: true },
+  { path: 'roles', label: 'Roles', enabled: true },
+  { path: 'webhooks', label: 'Webhooks', enabled: true },
+  { path: 'email', label: 'Email settings', enabled: me?.roles?.admin && configuration?.gitStatus?.cloned },
 ]
 
 export default function Account() {
   const tabStateRef = useRef<any>(null)
+  const { me, configuration } = useContext<any>(LoginContext)
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
-  const { me } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
   const pathPrefix = '/account'
 
@@ -34,6 +30,7 @@ export default function Account() {
 
   if (!me) return null
 
+  const directory = getDirectory(me, configuration).filter(({ enabled }) => enabled)
   const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
 
   return (
@@ -45,23 +42,8 @@ export default function Account() {
       position="relative"
     >
       <ResponsiveLayoutSidenavContainer width={240}>
-        <PageCard
-          marginBottom="large"
-          heading={(
-            <Div
-              display="-webkit-box"
-              webkitLineClamp={2}
-              webkitBoxOrient="vertical"
-              overflowY="hidden"
-              lineBreak="all"
-            >
-              {me?.account?.name || ''}
-            </Div>
-          )}
-          subheading={me?.publisher ? 'Publisher' : undefined}
-          icon={{ name: me?.account?.name || '?' }}
-        />
         <TabList
+          marginTop={90}
           stateRef={tabStateRef}
           stateProps={{
             orientation: 'vertical',

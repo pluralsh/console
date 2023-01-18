@@ -36,8 +36,8 @@ import AppStatus from '../AppStatus'
 
 import AppSelector from './AppSelector'
 import RunbookStatus from './runbooks/runbook/RunbookStatus'
+import LogsLegend from './logs/LogsLegend'
 
-// TODO: Keep current path when switching views if possible.
 const getDirectory = (app, config) => {
   const componentsReady = app?.status?.componentsReady
   const split = componentsReady?.split('/')
@@ -63,7 +63,7 @@ const getDirectory = (app, config) => {
     },
     { path: 'logs', label: 'Logs', enabled: true },
     { path: 'cost', label: 'Cost analysis', enabled: app.cost || app.license },
-    { path: 'oidc', label: 'User management', enabled: true }, // TODO: Handle forbidden error.
+    { path: 'oidc', label: 'User management', enabled: true },
     { path: 'config', label: 'Configuration', enabled: config?.gitStatus?.cloned },
   ]
 }
@@ -178,6 +178,7 @@ export default function App() {
               <Prop title="Status"><RunbookStatus runbook={runbook} /></Prop>
             </PropsContainer>
           )}
+          {currentTab?.path === 'logs' && <LogsLegend />}
         </Flex>
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />

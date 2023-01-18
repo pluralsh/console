@@ -28,8 +28,6 @@ import { BreadcrumbsContext } from '../Breadcrumbs'
 
 import { StandardScroller } from '../utils/SmoothScroller'
 
-import { PinnedRunbooks } from '../runbooks/PinnedRunbooks'
-
 import { UpgradePolicies } from './UpgradePolicies'
 import CreateBuild from './CreateBuild'
 import Build from './Build'
@@ -92,7 +90,7 @@ export default function Builds() {
           <UpgradePolicies />
           <CreateBuild />
         </PageTitle>
-        <PinnedRunbooks border={undefined} /> {/* TODO: Where to put it? */}
+        {/* <PinnedRunbooks border={undefined} /> */}
         <Card flexGrow="1">
           <StandardScroller
             listRef={listRef}

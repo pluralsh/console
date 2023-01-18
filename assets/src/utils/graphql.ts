@@ -1,5 +1,4 @@
 import isString from 'lodash/isString'
-
 import uniqWith from 'lodash/uniqWith'
 
 export function updateFragment(cache, {

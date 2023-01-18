@@ -36,7 +36,7 @@ import {
 import { wipeToken } from 'helpers/auth'
 
 import { LoginContext } from './contexts'
-import { Notifications } from './account/Notifications'
+import { Notifications } from './Notifications'
 import { AutoRefresh, getCommit } from './AutoRefresh'
 
 export const SIDEBAR_ICON_HEIGHT = '42px'
