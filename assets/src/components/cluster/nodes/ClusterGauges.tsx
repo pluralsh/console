@@ -9,10 +9,12 @@ import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { MetricResponse, Node } from 'generated/graphql'
 import { cpuParser } from 'utils/kubernetes'
 
+import RadialBarChart from 'components/utils/RadialBarChart'
+
 import { ClusterMetrics as Metrics } from '../constants'
 import { NODE_METRICS_Q } from '../queries'
 
-import { GaugeWrap, ResourceGauge, UsageGauge } from '../Gauges'
+import { GaugeWrap, ResourceGauge } from '../Gauges'
 
 import { ResourceUsage } from './Nodes'
 
@@ -112,7 +114,7 @@ export function ClusterGauges({
       >
         <ResourceGauge
           {...chartData.cpu}
-          type="CPU"
+          type="cpu"
         />
       </GaugeWrap>
       <GaugeWrap
@@ -121,16 +123,35 @@ export function ClusterGauges({
         height="auto"
       >
         <ResourceGauge
-          {...chartData.cpu}
-          type="Memory"
+          {...chartData.memory}
+          type="memory"
         />
       </GaugeWrap>
-      <UsageGauge
-        title="Pod Usage"
-        {...chartData.pods}
-        usedLabel="Pods used"
-        remainderLabel="Pods available"
-      />
+      <GaugeWrap
+        heading="Pods"
+        width="auto"
+        height="auto"
+      >
+        <RadialBarChart
+          data={[
+            {
+              id: 'Pod usage',
+              data: [
+                {
+                  x: 'Pods used',
+                  y: chartData.pods.used,
+                },
+                {
+                  x: 'Pods available',
+                  y: chartData.pods.remainder,
+                },
+              ],
+            },
+          ]}
+          centerLabel="Used"
+          centerVal={`${Math.round((chartData.pods.used / chartData.pods.total) * 100)}%`}
+        />
+      </GaugeWrap>
     </Flex>
   )
 }

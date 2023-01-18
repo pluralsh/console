@@ -7517,6 +7517,7 @@ __metadata:
     react-resize-detector: 7.1.2
     react-router-dom: 6.6.2
     react-spinners: 0.13.7
+    react-spring: 9.6.1
     react-sweet-progress: 1.1.2
     react-toggle: 4.1.3
     react-transition-group: 4.4.5

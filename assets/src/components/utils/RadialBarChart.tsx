@@ -1,28 +1,14 @@
 // install (please make sure versions match peerDependencies)
 // yarn add @nivo/core @nivo/radial-bar
 import { ResponsiveRadialBar } from '@nivo/radial-bar'
-import { cpuFmt, roundToTwoPlaces } from 'components/cluster/utils'
-import {
-  ComponentProps,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
-import { Card, styledTheme as theme } from '@pluralsh/design-system'
+import { ComponentProps, useMemo } from 'react'
 
 import styled, { useTheme } from 'styled-components'
 
 import { Div } from 'honorable'
 
-import { createPortal } from 'react-dom'
-
 import { CHART_THEME } from './charts'
-
-// make sure parent container have a defined height when using
-// responsive component, otherwise height will be 0 and
-// no chart will be rendered.
-// website examples showcase many properties,
-// you'll often use just a few of them.
+import { ChartTooltip } from './ChartTooltip'
 
 const COLOR_MAP = {
   blue: '#99DAFF',
@@ -61,88 +47,48 @@ const chartColors = {
   available: COLOR_MAP.green,
   requests: COLOR_MAP.orange,
   limits: COLOR_MAP.blue,
-  track: theme.colors['fill-two'],
+  track: 'transparent',
 } as const satisfies Record<string, string>
 
-function BarChartTooltip({ color, category, value }) {
+export const createCenteredMetric = (val, label, { fontSize = 25 } = {}) => function CenteredMetric({ center }: any) {
   const theme = useTheme()
-  const ref = useRef<HTMLDivElement>(null)
-  const [transform, setTransform] = useState('')
-  const [position, setPosition] = useState({ top: 0, left: 0 })
-  // const mousePositionRef = useRef<unknown>()
+  const percentFontSize = fontSize * 0.85
+  let showPercent = false
+  let displayVal = typeof val === 'string' ? val.trim() : ''
 
-  useEffect(() => {
-    const parentNode = ref?.current?.parentElement
-
-    if (!parentNode) {
-      return
-    }
-    const parentRect = parentNode.getBoundingClientRect()
-
-    setPosition({
-      top: parentRect.x,
-      left: parentRect.y,
-    })
-    setTransform(parentNode?.style?.transform)
-    const observer = new MutationObserver(observed => {
-      if (observed.findIndex(record => record.attributeName === 'style') >= 0) {
-        setTransform(parentNode?.style?.transform)
-        const parentRect = parentNode.getBoundingClientRect()
-
-        setPosition({
-          top: parentRect.x,
-          left: parentRect.y,
-        })
-      }
-    })
-
-    observer.observe(parentNode, { attributes: true })
-
-    return () => {
-      observer.disconnect()
-    }
-  }, [])
-
-  const content = (
-    <Card
-      display="flex"
-      fillLevel={2}
-      position="absolute"
-      zIndex={100}
-      {...position}
-      paddingLeft={theme.spacing.xsmall}
-      paddingRight={theme.spacing.xsmall}
-      paddingBottom={theme.spacing.xxsmall}
-      paddingTop={theme.spacing.xxsmall}
-      flexDirection="row"
-      alignItems="center"
-      gap={theme.spacing.xsmall}
-      caption
-      pointerEvents="none"
-      transition="transform 0.1s ease-out"
-      style={{ transform }}
-    >
-      <Div
-        width={12}
-        height={12}
-        backgroundColor={color}
-        aria-hidden
-      />
-      <Div>
-        {category}:{' '}
-        {value}
-      </Div>
-    </Card>
-  )
+  if (displayVal[displayVal.length - 1] === '%') {
+    showPercent = true
+    displayVal = displayVal.substring(0, displayVal.length - 1)
+  }
 
   return (
-    <Div
-      width="0"
-      height="0"
-      ref={ref as any}
-    >
-      {transform && createPortal(content, document.body)}
-    </Div>
+    <g transform={`translate(${center[0]},${center[1] + 3})`}>
+      <text
+        fill={theme.colors['text-light']}
+        x="0"
+        y="0"
+        textAnchor="middle"
+        dominantBaseline="alphabetic"
+        style={{ ...theme.partials.text.h4, display: 'block', fontSize: 27 }}
+      >
+        {displayVal}
+        {showPercent && <tspan fontSize={percentFontSize}>%</tspan>}
+      </text>
+      <text
+        fill={theme.colors['text-xlight']}
+        x="0"
+        y="3"
+        textAnchor="middle"
+        dominantBaseline="hanging"
+        style={{
+          ...theme.partials.text.overline,
+          display: 'block',
+          fontSize: 10,
+        }}
+      >
+        {label}
+      </text>
+    </g>
   )
 }
 
@@ -151,18 +97,25 @@ function RadialBarChartUnstyled({
   className,
   width,
   height,
+  centerVal,
+  centerLabel,
   ...props
 }: {
   className?: string
   width?: number
   height?: number
+  centerVal?: string
+  centerLabel?: string
   data: ComponentProps<typeof ResponsiveRadialBar>['data']
 } & Omit<Partial<ComponentProps<typeof ResponsiveRadialBar>>, 'data'>) {
+  const CenteredMetric = useMemo(() => (true ? createCenteredMetric(centerVal, centerLabel) : () => null),
+    [centerLabel, centerVal])
+
   return (
     <Div
       className={`${className}`}
-      height={height || 180}
-      width={width || 180}
+      width={width ?? 180}
+      height={height ?? 180}
     >
       <ResponsiveRadialBar
         colors={[
@@ -173,7 +126,6 @@ function RadialBarChartUnstyled({
         ]}
         tracksColor={chartColors.track}
         data={data}
-        valueFormat={val => cpuFmt(roundToTwoPlaces(val))}
         padding={0.3}
         innerRadius={0.5}
         cornerRadius={0}
@@ -189,12 +141,13 @@ function RadialBarChartUnstyled({
         enableCircularGrid={false}
         enableRadialGrid
         tooltip={props => (
-          <BarChartTooltip
+          <ChartTooltip
             color={props.bar.color}
             value={props.bar.formattedValue}
-            category={props.bar.category}
+            label={props.bar.category}
           />
         )}
+        layers={['grid', 'bars', CenteredMetric]}
         {...props}
       />
     </Div>

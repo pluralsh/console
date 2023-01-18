@@ -2,6 +2,7 @@ import { ResponsivePie } from '@nivo/pie'
 import { ComponentProps } from 'react'
 
 import { CHART_THEME } from './charts'
+import { ChartTooltip } from './ChartTooltip'
 
 export type PieChartData = { id: string; value: number; color: string }[]
 export function PieChart({
@@ -26,6 +27,13 @@ export function PieChart({
         bottom: 10,
         left: 10,
       }}
+      tooltip={({ datum }) => (
+        <ChartTooltip
+          color={datum.color}
+          label={datum.label}
+          value={datum.formattedValue}
+        />
+      )}
       theme={CHART_THEME}
       {...props}
     />
