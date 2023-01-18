@@ -28,8 +28,6 @@ import { BreadcrumbsContext } from '../Breadcrumbs'
 
 import { StandardScroller } from '../utils/SmoothScroller'
 
-import { PinnedRunbooks } from '../runbooks/PinnedRunbooks'
-
 import { UpgradePolicies } from './UpgradePolicies'
 import CreateBuild from './CreateBuild'
 import Build from './Build'

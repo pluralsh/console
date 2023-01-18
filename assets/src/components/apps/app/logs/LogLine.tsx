@@ -15,9 +15,9 @@ export function borderColor(lvl) {
   case Level.WARN:
     return yellow[200]
   case Level.INFO:
-    return grey[750]
-  default:
     return grey[100]
+  default:
+    return grey[750]
   }
 }
 

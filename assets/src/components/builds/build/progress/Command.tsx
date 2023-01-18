@@ -1,3 +1,4 @@
+import { ArrowRightIcon } from '@pluralsh/design-system'
 import { Div, Flex, Span } from 'honorable'
 import { useEffect, useRef } from 'react'
 
@@ -26,7 +27,8 @@ export default function Command({ command, follow }) {
           gap="small"
           align="center"
         >
-          <Span>{'==>'} {command.command}</Span>
+          <ArrowRightIcon size={12} />
+          <Span> {command.command}</Span>
           <CommandExitStatus exitCode={command.exitCode} />
         </Flex>
         <Timer
