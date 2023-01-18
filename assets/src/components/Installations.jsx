@@ -46,7 +46,7 @@ export function InstallationsProvider({ children }) {
       // eslint-disable-next-line react/jsx-no-constructed-context-values
       value={{
         applications: data?.applications || [],
-        currentApplication: { name: 'mock', spec: { descriptor: { links: [] } } }, // TODO: Remove.
+        currentApplication: { name: 'mock', spec: { descriptor: { links: [] } } },
       }}
     >
       {children}
