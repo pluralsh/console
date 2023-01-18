@@ -27,6 +27,8 @@ import { Webhooks } from 'components/account/webhooks/Webhooks'
 
 import Users from 'components/account/users/Users'
 
+import EmailSettings from 'components/account/email/EmailSettings'
+
 import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
 
@@ -142,6 +144,10 @@ const accountRoutes = [
     <Route
       path="webhooks"
       element={<Webhooks />}
+    />
+    <Route
+      path="email"
+      element={<EmailSettings />}
     />
   </Route>,
 ]

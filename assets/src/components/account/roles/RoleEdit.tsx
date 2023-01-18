@@ -5,7 +5,8 @@ import uniqWith from 'lodash/uniqWith'
 import isEqual from 'lodash/isEqual'
 
 import { Actions } from '../../utils/Actions'
-import { sanitize } from '../utils'
+
+import { sanitize } from './misc'
 
 import { UPDATE_ROLE } from './queries'
 

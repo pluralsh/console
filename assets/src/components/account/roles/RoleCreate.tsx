@@ -8,7 +8,8 @@ import isEqual from 'lodash/isEqual'
 import { appendConnection, updateCache } from '../../../utils/graphql'
 
 import { Actions } from '../../utils/Actions'
-import { sanitize } from '../utils'
+
+import { sanitize } from './misc'
 
 import { CREATE_ROLE, ROLES_Q } from './queries'
 
