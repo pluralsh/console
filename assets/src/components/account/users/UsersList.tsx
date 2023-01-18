@@ -13,7 +13,7 @@ import ListInput from '../../utils/ListInput'
 
 import { extendConnection } from '../../../utils/graphql'
 
-import { USERS_Q } from '../queries'
+import { USERS_Q } from './queries'
 
 import { User } from './User'
 

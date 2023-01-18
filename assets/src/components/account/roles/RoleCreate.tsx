@@ -7,10 +7,10 @@ import isEqual from 'lodash/isEqual'
 
 import { appendConnection, updateCache } from '../../../utils/graphql'
 
-import { CREATE_ROLE, ROLES_Q } from '../queries'
-
-import { Actions } from '../Actions'
+import { Actions } from '../../utils/Actions'
 import { sanitize } from '../utils'
+
+import { CREATE_ROLE, ROLES_Q } from './queries'
 
 import RoleForm from './RoleForm'
 

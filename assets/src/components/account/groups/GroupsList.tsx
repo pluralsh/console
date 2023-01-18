@@ -10,7 +10,7 @@ import { extendConnection } from '../../../utils/graphql'
 import { ListItem } from '../../utils/List'
 import { StandardScroller } from '../../utils/SmoothScroller'
 
-import { GROUPS_Q } from '../queries'
+import { GROUPS_Q } from './queries'
 
 import GroupCreate from './GroupCreate'
 import Group from './Group'

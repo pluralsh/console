@@ -4,9 +4,9 @@ import { Switch } from 'honorable'
 import { useCallback, useContext } from 'react'
 import { LoginContext } from 'components/contexts'
 
-import { EDIT_USER } from '../queries'
+import UserInfo from '../../utils/UserInfo'
 
-import UserInfo from '../UserInfo'
+import { EDIT_USER } from './queries'
 
 export function User({ user }: any) {
   const { me } = useContext(LoginContext)

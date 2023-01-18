@@ -13,7 +13,8 @@ import {
 
 import styled from 'styled-components'
 
-import { SEARCH_GROUPS, SEARCH_USERS } from './queries'
+import { SEARCH_USERS } from './users/queries'
+import { SEARCH_GROUPS } from './groups/queries'
 
 export function fetchUsers(client, query, setSuggestions) {
   client.query({ query: SEARCH_USERS, variables: { q: query, all: true } })

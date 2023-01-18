@@ -3,8 +3,9 @@ import { IconFrame, TrashCanIcon } from '@pluralsh/design-system'
 import { ListItem } from 'components/apps/misc'
 import { Box } from 'grommet'
 
-import { DELETE_GROUP_MEMBER, GROUP_MEMBERS } from '../queries'
-import UserInfo from '../UserInfo'
+import UserInfo from '../../utils/UserInfo'
+
+import { DELETE_GROUP_MEMBER, GROUP_MEMBERS } from './queries'
 
 export default function GroupMember({
   user, group, first, last, edit,

@@ -9,7 +9,7 @@ import { StandardScroller } from '../../utils/SmoothScroller'
 
 import { List } from '../../utils/List'
 
-import { GROUP_MEMBERS } from '../queries'
+import { GROUP_MEMBERS } from './queries'
 
 import GroupMember from './GroupMember'
 

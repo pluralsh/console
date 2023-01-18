@@ -9,7 +9,7 @@ import { appendConnection, updateCache } from '../../../utils/graphql'
 
 import { GqlError } from '../../utils/Alert'
 
-import { CREATE_GROUP, GROUPS_Q } from '../queries'
+import { CREATE_GROUP, GROUPS_Q } from './queries'
 
 export default function GroupCreate({ q }: {q: string}) {
   const [open, setOpen] = useState(false)

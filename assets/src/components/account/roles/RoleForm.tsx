@@ -5,8 +5,6 @@ import { useRef, useState } from 'react'
 
 import { GqlError } from '../../utils/Alert'
 
-import { PermissionTypes } from '../types'
-
 import RoleFormGeneralAttributes from './RoleFormGeneralAttributes'
 
 import RolePermissionToggle from './RolePermissionToggle'
@@ -14,6 +12,13 @@ import RolePermissionToggle from './RolePermissionToggle'
 const TABS = {
   General: { label: 'General' },
   Permissions: { label: 'Permissions' },
+}
+
+const PermissionTypes = {
+  READ: 'can view components',
+  CONFIGURE: 'can edit helm/terraform configuration',
+  DEPLOY: 'can create/approve deployments',
+  OPERATE: 'can delete pods, export logs, and other operational tasks',
 }
 
 export default function RoleForm({

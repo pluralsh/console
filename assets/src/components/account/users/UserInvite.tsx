@@ -9,11 +9,13 @@ import { useCallback, useState } from 'react'
 
 import { useMutation } from '@apollo/client'
 
+import { apiHost } from 'utils/hostname'
+
 import { GqlError } from '../../utils/Alert'
 
-import { CREATE_INVITE } from '../queries'
+import { CREATE_INVITE } from './queries'
 
-import { inviteLink } from '../utils'
+export const inviteLink = invite => `https://${apiHost()}/invite/${invite.secureId}`
 
 export default function UserInvite() {
   const [open, setOpen] = useState(false)

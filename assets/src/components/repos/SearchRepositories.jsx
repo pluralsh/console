@@ -3,9 +3,9 @@ import { Box, Text, TextInput } from 'grommet'
 import { ModalHeader } from 'forge-core'
 import { useQuery } from '@apollo/client'
 
-import { SEARCH_REPOS } from '../graphql/plural'
+import { SearchIcon } from 'components/utils/SearchIcon'
 
-import { SearchIcon } from '../account/utils'
+import { SEARCH_REPOS } from '../graphql/plural'
 
 import { MODAL_WIDTH } from './constants'
 
@@ -71,7 +71,12 @@ export function SearchRepos({ setOpen, setRepo }) {
           pad="small"
         >
           <TextInput
-            icon={<SearchIcon />}
+            icon={(
+              <SearchIcon
+                size={16}
+                border="tone-medium"
+              />
+            )}
             reverse
             value={query}
             placeholder="search for a repo by name"

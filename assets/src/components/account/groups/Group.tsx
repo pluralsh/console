@@ -11,9 +11,9 @@ import { LoginContext } from 'components/contexts'
 
 import { removeConnection, updateCache } from '../../../utils/graphql'
 
-import { DELETE_GROUP, GROUPS_Q } from '../queries'
+import { Info } from '../../utils/Info'
 
-import { Info } from '../Info'
+import { DELETE_GROUP, GROUPS_Q } from './queries'
 
 import GroupEdit from './GroupEdit'
 import GroupView from './GroupView'

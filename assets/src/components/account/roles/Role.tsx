@@ -11,10 +11,10 @@ import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { removeConnection, updateCache } from '../../../utils/graphql'
 
-import { DELETE_ROLE, ROLES_Q } from '../queries'
-
-import { Info } from '../Info'
+import { Info } from '../../utils/Info'
 import RoleEdit from '../roles/RoleEdit'
+
+import { DELETE_ROLE, ROLES_Q } from './queries'
 
 export default function Role({ role, q }: any) {
   const [edit, setEdit] = useState(false)

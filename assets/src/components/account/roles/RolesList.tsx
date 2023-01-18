@@ -10,9 +10,9 @@ import { extendConnection } from '../../../utils/graphql'
 
 import { StandardScroller } from '../../utils/SmoothScroller'
 
-import { ROLES_Q } from '../queries'
-
 import RoleCreate from '../roles/RoleCreate'
+
+import { ROLES_Q } from './queries'
 
 import Role from './Role'
 

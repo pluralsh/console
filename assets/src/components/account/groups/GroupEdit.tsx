@@ -13,10 +13,10 @@ import { Flex } from 'honorable'
 
 import { GqlError } from '../../utils/Alert'
 
-import { CREATE_GROUP_MEMBERS, GROUP_MEMBERS, UPDATE_GROUP } from '../queries'
-
-import { Actions } from '../Actions'
+import { Actions } from '../../utils/Actions'
 import { fetchUsers } from '../Typeaheads'
+
+import { CREATE_GROUP_MEMBERS, GROUP_MEMBERS, UPDATE_GROUP } from './queries'
 
 import GroupMembers from './GroupMembers'
 

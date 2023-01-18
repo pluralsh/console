@@ -9,6 +9,7 @@ import { Eye } from 'forge-core'
 import { Box, Stack, Text } from 'grommet'
 
 import {
+  gql,
   useApolloClient,
   useMutation,
   useQuery,
@@ -20,14 +21,33 @@ import { BellIcon } from '@pluralsh/design-system'
 import { extendConnection, updateCache } from '../utils/graphql'
 
 import { FlyoutContainer } from './Console'
-import { ME_Q, NOTIFICATIONS_Q } from './graphql/users'
+import {
+  ME_Q,
+  NOTIFICATIONS_Q,
+  NotificationFragment,
+  UserFragment,
+} from './graphql/users'
 import { StandardScroller } from './utils/SmoothScroller'
 import { ApplicationIcon, InstallationContext } from './Installations'
 import { SeverityNub } from './runbooks/StatusIcon'
 
 import { LoginContext } from './contexts'
 
-import { MARK_READ, NOTIFS_SUB } from './account/queries'
+export const MARK_READ = gql`
+  mutation {
+    readNotifications {
+      ...UserFragment
+    }
+  }
+  ${UserFragment}
+`
+
+export const NOTIFS_SUB = gql`
+  subscription {
+    notificationDelta { delta payload { ...NotificationFragment } }
+  }
+  ${NotificationFragment}
+`
 
 function NotificationRow({ notif }) {
   const { applications, setCurrentApplication } = useContext(InstallationContext)
