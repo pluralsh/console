@@ -1,4 +1,4 @@
-import { ListItem } from 'components/utils/ListItem'
+import { ListItem } from 'components/utils/List'
 import { Box } from 'grommet'
 import { Span, Switch } from 'honorable'
 import { useCallback } from 'react'

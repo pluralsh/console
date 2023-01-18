@@ -1,6 +1,6 @@
 import { useMutation } from '@apollo/client'
 import { IconFrame, TrashCanIcon } from '@pluralsh/design-system'
-import { ListItem } from 'components/apps/misc'
+import { ListItem } from 'components/utils/List'
 import { Box } from 'grommet'
 
 import UserInfo from '../../utils/UserInfo'
