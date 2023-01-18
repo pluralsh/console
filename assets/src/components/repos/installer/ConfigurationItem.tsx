@@ -30,8 +30,6 @@ function StringConfiguration({
   }, [ctx, value, def, name, setValue])
 
   useEffect(() => (setValid ? msg ? setValid(false) : setValid(true) : undefined), [msg, setValid])
-  // console.log(setValid)
-  // console.log(msg)
 
   return (
     <FormField
