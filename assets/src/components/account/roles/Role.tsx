@@ -14,13 +14,15 @@ import { removeConnection, updateCache } from '../../../utils/graphql'
 import { Info } from '../../utils/Info'
 import RoleEdit from '../roles/RoleEdit'
 
+import { Permissions, hasRbac } from '../misc'
+
 import { DELETE_ROLE, ROLES_Q } from './queries'
 
 export default function Role({ role, q }: any) {
   const [edit, setEdit] = useState(false)
   const [confirm, setConfirm] = useState(false)
   const { me } = useContext<any>(LoginContext)
-  const editable = !!me.roles?.admin
+  const editable = !!me.roles?.admin || hasRbac(me, Permissions.USERS)
   const [mutation, { loading, error }] = useMutation(DELETE_ROLE, {
     variables: { id: role.id },
     update: (cache, { data }) => updateCache(cache, {

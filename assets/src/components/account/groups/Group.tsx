@@ -13,6 +13,8 @@ import { removeConnection, updateCache } from '../../../utils/graphql'
 
 import { Info } from '../../utils/Info'
 
+import { Permissions, hasRbac } from '../misc'
+
 import { DELETE_GROUP, GROUPS_Q } from './queries'
 
 import GroupEdit from './GroupEdit'
@@ -20,7 +22,7 @@ import GroupView from './GroupView'
 
 export default function Group({ group, q }: any) {
   const { me } = useContext<any>(LoginContext)
-  const editable = !!me.roles?.admin
+  const editable = !!me.roles?.admin || hasRbac(me, Permissions.USERS)
   const [edit, setEdit] = useState(false)
   const [view, setView] = useState(false)
   const [confirm, setConfirm] = useState(false)
