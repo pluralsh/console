@@ -13,6 +13,7 @@ import { Tooltip } from './utils/Tooltip'
 import ConsoleHeader from './ConsoleHeader'
 import ConsoleSubheader from './ConsoleSubheader'
 import TerminalThemeProvider from './terminal/TerminalThemeProvider'
+import { CursorPositionProvider } from './utils/CursorPosition'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -166,41 +167,43 @@ export function FlyoutContainer({
 
 export default function Console() {
   return (
-    <EnsureLogin>
-      <FlyoutProvider>
-        <InstallationsProvider>
-          <BreadcrumbProvider>
-            <TerminalThemeProvider>
-              <Box
-                width="100vw"
-                height="100vh"
-              >
-                <ConsoleHeader />
+    <CursorPositionProvider>
+      <EnsureLogin>
+        <FlyoutProvider>
+          <InstallationsProvider>
+            <BreadcrumbProvider>
+              <TerminalThemeProvider>
                 <Box
-                  fill
-                  direction="row"
+                  width="100vw"
+                  height="100vh"
                 >
-                  <ConsoleSidebar />
+                  <ConsoleHeader />
                   <Box
                     fill
-                    direction="column"
+                    direction="row"
                   >
-                    <ConsoleSubheader />
+                    <ConsoleSidebar />
                     <Box
                       fill
-                      direction="row"
-                      overflow="auto"
+                      direction="column"
                     >
-                      <Outlet />
-                      <FlyoutGutter />
+                      <ConsoleSubheader />
+                      <Box
+                        fill
+                        direction="row"
+                        overflow="auto"
+                      >
+                        <Outlet />
+                        <FlyoutGutter />
+                      </Box>
                     </Box>
                   </Box>
                 </Box>
-              </Box>
-            </TerminalThemeProvider>
-          </BreadcrumbProvider>
-        </InstallationsProvider>
-      </FlyoutProvider>
-    </EnsureLogin>
+              </TerminalThemeProvider>
+            </BreadcrumbProvider>
+          </InstallationsProvider>
+        </FlyoutProvider>
+      </EnsureLogin>
+    </CursorPositionProvider>
   )
 }

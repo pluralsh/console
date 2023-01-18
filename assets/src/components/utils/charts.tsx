@@ -6,16 +6,16 @@ export const CHART_THEME = {
   axis: {
     ticks: {
       text: {
-        fontSize: 10,
         fill: theme.colors['text-light'],
+        ...theme.partials.text.body2,
+        fontSize: 10,
       },
     },
-    // domain: { line: null },
   },
   grid: {
     line: {
-      strokeWidth: 0.5,
-      stroke: theme.colors['text-xlight'],
+      strokeWidth: 0.75,
+      stroke: theme.colors['border-fill-three'],
     },
   },
 
