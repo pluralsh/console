@@ -2,8 +2,5 @@ export const hasRbac = ({ boundRoles }, role) => (boundRoles || []).some(({ perm
 
 export const Permissions = {
   INSTALL: 'INSTALL',
-  PUBLISH: 'PUBLISH',
-  BILLING: 'BILLING',
   USERS: 'USERS',
-  SUPPORT: 'SUPPORT',
 }

@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react'
 import { useApolloClient } from '@apollo/client'
 import styled from 'styled-components'
 
-import { SEARCH_GROUPS, SEARCH_USERS } from './queries'
+import { SEARCH_GROUPS, SEARCH_USERS } from '../apps/app/oidc/queries'
 
 const ICONS = {
   user: <PersonIcon size={14} />,
@@ -86,20 +86,22 @@ export function BindingInput({
   bindings,
   remove,
   add,
-  hint = undefined,
+  hint,
   placeholder = TEXT[type]?.placeholder,
   label = TEXT[type]?.label,
-}) {
+}: any) {
   const client = useApolloClient()
   const [suggestions, setSuggestions] = useState([])
   const fetch = fetcher || FETCHER[type]
 
   return (
     <TagInput
+      noborder
       placeholder={placeholder}
       hint={hint}
       icon={type ? ICONS[type] : null}
       label={label}
+      round="xsmall"
       width="100%"
       suggestions={suggestions}
       items={bindings}
@@ -123,11 +125,11 @@ function TagInput({
   onAdd,
   width,
   onChange,
-}) {
+}: any) {
   const [inputValue, setInputValue] = useState('')
 
-    // Run only on first render. Make sure there will be data in Combo Box to start with.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Run only on first render. Make sure there will be data in Combo Box to start with.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => onChange({ target: { value: inputValue } }), [])
 
   return (

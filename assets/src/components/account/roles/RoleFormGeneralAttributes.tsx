@@ -1,8 +1,7 @@
 import { Box } from 'grommet'
 import { ValidatedInput } from '@pluralsh/design-system'
 import { useState } from 'react'
-
-import { BindingInput } from '../Typeaheads'
+import { BindingInput } from 'components/utils/BindingInput'
 
 export default function RoleFormGeneralAttributes({
   attributes,

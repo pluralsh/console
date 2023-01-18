@@ -15,7 +15,7 @@ import { GqlError } from 'forge-core'
 
 import { isEqual } from 'lodash'
 
-import { BindingInput, fetchGroups, fetchUsers } from './BindingInput'
+import { BindingInput, fetchGroups, fetchUsers } from '../../../utils/BindingInput'
 
 import { INSTALLATION, UPDATE_PROVIDER } from './queries'
 

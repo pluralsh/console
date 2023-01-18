@@ -11,10 +11,11 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import { Flex } from 'honorable'
 
+import { fetchUsers } from 'components/utils/BindingInput'
+
 import { GqlError } from '../../utils/Alert'
 
 import { Actions } from '../../utils/Actions'
-import { fetchUsers } from '../Typeaheads'
 
 import { CREATE_GROUP_MEMBERS, GROUP_MEMBERS, UPDATE_GROUP } from './queries'
 
