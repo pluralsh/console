@@ -15,12 +15,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import {
-  Div,
-  Flex,
-  Form,
-  Span,
-} from 'honorable'
+import { Flex, Form, Span } from 'honorable'
 import { useParams } from 'react-router-dom'
 
 import TerminalThemeSelector from 'components/terminal/TerminalThemeSelector'
@@ -44,8 +39,7 @@ const CodeInput = styled(Input)(({ theme }) => ({
     justifyContent: 'left',
     overflow: 'hidden',
     whiteSpace: 'nowrap',
-    '&, *':
-    {
+    '&, *': {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
@@ -112,11 +106,20 @@ export function ShellCommand({
   const [isEditing, setIsEditing] = useState(false)
   const [inputVal, setInputVal] = useState(command)
   const { namespace, name, container } = useParams()
-  const inputRef = useRef<any>()
+  const inputWrapRef = useRef<HTMLDivElement>()
+
+  console.log('command', command)
+  useEffect(() => {
+    if (!isEditing) {
+      setInputVal(command)
+    }
+  }, [command, isEditing])
 
   useEffect(() => {
-    if (isEditing) {
-      console.log('inputRef', inputRef.current)
+    if (isEditing && inputWrapRef.current) {
+      const input = inputWrapRef.current.querySelector('input')
+
+      input?.focus()
     }
   }, [isEditing])
 
@@ -130,21 +133,20 @@ export function ShellCommand({
   )
 
   return (
-    <Div
+    <Form
       display="flex"
       gap="xsmall"
       marginBottom="xsmall"
       onSubmit={e => {
         e.preventDefault()
-        setIsEditing(false)
-        console.log('inputVal', inputVal)
         setCommand(inputVal)
+        setIsEditing(false)
       }}
       width="100%"
     >
       <Flex
-        className="flex outer"
-        width="50%"
+        ref={inputWrapRef as any}
+        width="50px"
         flex="1 1"
       >
         <CodeWrap
@@ -155,7 +157,6 @@ export function ShellCommand({
         </CodeWrap>
         {isEditing && (
           <CodeInput
-            ref={inputRef}
             placeholder={defaultCommand}
             value={inputVal}
             prefix={commandLeftTrunc}
@@ -182,9 +183,7 @@ export function ShellCommand({
           floating
           size="medium"
           startIcon={<CliIcon />}
-          onClick={() => {
-            setIsEditing(false)
-          }}
+          type="submit"
         >
           Run
         </Button>
@@ -202,7 +201,7 @@ export function ShellCommand({
           Reset
         </Button>
       )}
-    </Div>
+    </Form>
   )
 }
 
