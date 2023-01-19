@@ -9,7 +9,7 @@ export default function RoleFormGeneralAttributes({
   bindings,
   setBindings,
 }: any) {
-  const [repositories, setRepositories] = useState(attributes.repositories.join(', '))
+  const [repositories, setRepositories] = useState(attributes?.repositories?.join(', '))
 
   return (
     <Box

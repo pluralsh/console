@@ -29,8 +29,8 @@ const TABS = {
 export default function GroupEdit({ group, edit, setEdit }: any) {
   const client = useApolloClient()
   const [value, setValue] = useState('')
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
+  const [name, setName] = useState(group.name)
+  const [description, setDescription] = useState(group.description)
   const [mutation, { loading, error }] = useMutation(UPDATE_GROUP, {
     variables: { id: group.id, attributes: { name, description } },
     onCompleted: () => setEdit(false),

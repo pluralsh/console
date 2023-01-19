@@ -15,7 +15,7 @@ import { UPDATE_ROLE } from './queries'
 import RoleForm from './RoleForm'
 
 export default function RoleEdit({ role, open, setOpen }: any) {
-  const [attributes, setAttributes] = useState({})
+  const [attributes, setAttributes] = useState(pick(role, ['name', 'description', 'repositories', 'permissions']))
   const [roleBindings, setRoleBindings] = useState(role.roleBindings || [])
   const uniqueRoleBindings = useMemo(() => uniqWith(roleBindings, isEqual), [roleBindings])
   const [mutation, { loading, error }] = useMutation(UPDATE_ROLE, {
