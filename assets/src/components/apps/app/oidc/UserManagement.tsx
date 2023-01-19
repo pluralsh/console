@@ -110,7 +110,7 @@ function UserManagementCard({ id, provider }) {
           <Button
             disabled={!changed}
             loading={loading}
-            onClick={() => mutation}
+            onClick={() => mutation()}
           >
             Update
           </Button>
@@ -136,13 +136,13 @@ function UserManagementContent() {
     )
   }
 
-  const { installation: { id, oidcProvider } } = data
+  const { installation } = data
 
-  return oidcProvider
+  return installation && installation.oidcProvider
     ? (
       <UserManagementCard
-        id={id}
-        provider={oidcProvider}
+        id={installation.id}
+        provider={installation.oidcProvider}
       />
     )
     : (<Flex>No OIDC provider configured.</Flex>)
