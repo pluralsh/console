@@ -41,6 +41,7 @@ export default function Role({ role, q }: any) {
     delete: {
       label: 'Delete role',
       onSelect: () => setConfirm(true),
+      destructive: true,
     },
   } : {}
 
@@ -55,11 +56,12 @@ export default function Role({ role, q }: any) {
         description={role.description || 'no description'}
       />
       <MoreMenu onSelectionChange={selectedKey => menuItems[selectedKey]?.onSelect()}>
-        {Object.entries(menuItems).map(([key, { label }]) => (
+        {Object.entries(menuItems).map(([key, { label, destructive }]) => (
           <ListBoxItem
             key={key}
             textValue={label}
             label={label}
+            destructive={destructive}
             color="blue"
           />
         ))}
