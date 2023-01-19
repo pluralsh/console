@@ -122,8 +122,17 @@ function UserManagementCard({ id, provider }) {
 
 function UserManagementContent() {
   const { appName } = useParams()
-  const { data } = useQuery(INSTALLATION,
+  const { data, error } = useQuery(INSTALLATION,
     { variables: { name: appName }, fetchPolicy: 'cache-and-network' })
+
+  if (error) {
+    return (
+      <GqlError
+        error={error}
+        header="Could not update provider"
+      />
+    )
+  }
 
   if (!data) {
     return (
