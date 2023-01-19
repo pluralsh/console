@@ -108,7 +108,6 @@ export function ShellCommand({
   const { namespace, name, container } = useParams()
   const inputWrapRef = useRef<HTMLDivElement>()
 
-  console.log('command', command)
   useEffect(() => {
     if (!isEditing) {
       setInputVal(command)
@@ -162,6 +161,11 @@ export function ShellCommand({
             prefix={commandLeftTrunc}
             onChange={({ target: { value } }) => {
               setInputVal(value)
+            }}
+            onKeyDown={(e: KeyboardEvent) => {
+              if (e.code.toLowerCase() === 'escape') {
+                setIsEditing(false)
+              }
             }}
           />
         )}
@@ -228,8 +232,6 @@ function ShellWithContext() {
   } = useCommand(null)
   const { namespace, name, container } = useParams()
   const shellContext = useContext(ShellContext)
-
-  console.log('command', command)
 
   return (
     <Flex
