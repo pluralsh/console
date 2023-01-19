@@ -15,11 +15,28 @@ import { GqlError } from 'forge-core'
 
 import { isEqual } from 'lodash'
 
-import { BindingInput, fetchGroups, fetchUsers } from '../../../utils/BindingInput'
+import { BindingInput, groupSuggestion, userSuggestion } from '../../../utils/BindingInput'
 
-import { INSTALLATION, UPDATE_PROVIDER } from './queries'
+import {
+  INSTALLATION,
+  SEARCH_GROUPS,
+  SEARCH_USERS,
+  UPDATE_PROVIDER,
+} from './queries'
 
 const sanitize = ({ id, user, group }) => ({ id, userId: user && user.id, groupId: group && group.id })
+
+export function fetchUsers(client, query, setSuggestions) {
+  client.query({ query: SEARCH_USERS, variables: { q: query, all: true } })
+    .then(({ data: { users: { edges } } }) => edges.map(({ node }) => ({ value: node, label: userSuggestion(node) })))
+    .then(setSuggestions)
+}
+
+export function fetchGroups(client, query, setSuggestions) {
+  client.query({ query: SEARCH_GROUPS, variables: { q: query } })
+    .then(({ data: { groups: { edges } } }) => edges.map(({ node }) => ({ value: node, label: groupSuggestion(node) })))
+    .then(setSuggestions)
+}
 
 function UserManagementCard({ id, provider }) {
   const { authMethod, redirectUris, bindings: initialBindings } = provider

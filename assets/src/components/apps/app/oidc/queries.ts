@@ -1,6 +1,5 @@
 import { gql } from 'apollo-boost'
 import { PageInfo } from 'components/graphql/base'
-import { UserFragment } from 'components/graphql/incidents'
 import { GroupFragment, OIDCProvider } from 'components/graphql/oauth'
 
 export const SEARCH_USERS = gql`
@@ -8,12 +7,16 @@ export const SEARCH_USERS = gql`
     users(q: $q, after: $cursor, first: 5, all: true) {
       pageInfo { ...PageInfo }
       edges {
-        node { ...UserFragment }
+        node { 
+          id
+          name
+          email
+          roles { admin }
+         }
       }
     }
   }
   ${PageInfo}
-  ${UserFragment}
 `
 
 export const SEARCH_GROUPS = gql`
