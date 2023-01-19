@@ -29,8 +29,8 @@ const TABS = {
 export default function GroupEdit({ group, edit, setEdit }: any) {
   const client = useApolloClient()
   const [value, setValue] = useState('')
-  const [name, setName] = useState(group.name)
-  const [description, setDescription] = useState(group.description)
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
   const [mutation, { loading, error }] = useMutation(UPDATE_GROUP, {
     variables: { id: group.id, attributes: { name, description } },
     onCompleted: () => setEdit(false),
@@ -46,6 +46,11 @@ export default function GroupEdit({ group, edit, setEdit }: any) {
   // Run only on first render. Make sure there will be data in Combo Box to start with.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => fetchUsers(client, value, setSuggestions), [])
+
+  useEffect(() => {
+    setName(group.name)
+    setDescription(group.description)
+  }, [group])
 
   return (
     <Modal

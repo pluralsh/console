@@ -1,8 +1,10 @@
 import { useMutation } from '@apollo/client'
 import { Modal } from '@pluralsh/design-system'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import uniqWith from 'lodash/uniqWith'
 import isEqual from 'lodash/isEqual'
+
+import pick from 'lodash/pick'
 
 import { Actions } from '../../utils/Actions'
 
@@ -13,23 +15,15 @@ import { UPDATE_ROLE } from './queries'
 import RoleForm from './RoleForm'
 
 export default function RoleEdit({ role, open, setOpen }: any) {
-  const [attributes, setAttributes] = useState({
-    name: role.name,
-    description: role.description,
-    repositories: role.repositories,
-    permissions: role.permissions,
-  })
+  const [attributes, setAttributes] = useState({})
   const [roleBindings, setRoleBindings] = useState(role.roleBindings || [])
-  const uniqueRoleBindings = useMemo(() => uniqWith(roleBindings, isEqual),
-    [roleBindings])
-
+  const uniqueRoleBindings = useMemo(() => uniqWith(roleBindings, isEqual), [roleBindings])
   const [mutation, { loading, error }] = useMutation(UPDATE_ROLE, {
-    variables: {
-      id: role.id,
-      attributes: { ...attributes, roleBindings: roleBindings.map(sanitize) },
-    },
+    variables: { id: role.id, attributes: { ...attributes, roleBindings: roleBindings.map(sanitize) } },
     onCompleted: () => setOpen(false),
   })
+
+  useEffect(() => setAttributes(pick(role, ['name', 'description', 'repositories', 'permissions'])), [role])
 
   return (
     <Modal

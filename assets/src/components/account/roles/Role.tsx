@@ -77,11 +77,13 @@ export default function Role({ role, q }: any) {
           destructive
           error={error}
         />
-        <RoleEdit
-          role={role}
-          open={edit}
-          setOpen={setEdit}
-        />
+        {edit && (
+          <RoleEdit
+            role={role}
+            open={edit}
+            setOpen={setEdit}
+          />
+        )}
       </>
     </Box>
   )

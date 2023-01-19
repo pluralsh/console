@@ -83,11 +83,13 @@ export default function Group({ group, q }: any) {
         >
           <GroupView group={group} />
         </Modal>
-        <GroupEdit
-          group={group}
-          edit={edit}
-          setEdit={setEdit}
-        />
+        {edit && (
+          <GroupEdit
+            group={group}
+            edit={edit}
+            setEdit={setEdit}
+          />
+        )}
         <Confirm
           open={confirm}
           title="Delete group"
