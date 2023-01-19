@@ -68,6 +68,7 @@ export function deepFetch(map, path) {
 
   const key = path[0]
 
+  if (!map) return null
   if (path.length === 1) return map[key]
   if (!map[key]) return null
 
