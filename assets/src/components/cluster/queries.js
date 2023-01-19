@@ -259,15 +259,24 @@ export const CERTIFICATE_Q = gql`
 
 export const PODS_Q = gql`
   query Pods($namespaces: [String], $cursor: String) {
+    pods(namespaces: $namespaces, after: $cursor) {
+      edges {
+        node {
+          ...PodFragment
+        }
+      }
+    }
     namespaces {
       metadata {
         ...MetadataFragment
       }
     }
-    pods(namespaces: $namespaces, after: $cursor) {
-      edges {
-        node {
-          ...PodFragment
+    applications {
+      name
+      spec {
+        descriptor {
+          type
+          icons
         }
       }
     }
@@ -286,17 +295,6 @@ export const PODS_SUB = gql`
   }
   ${PodFragment}
 `
-
-// export const PODS_SUB = gql`
-//   subscription PodsSub {
-//     podDelta {
-//       payload {
-//         chickens
-//       }
-//     }
-//   }
-//   ${PodFragment}
-// `
 
 export const POD_Q = gql`
   query Pod($name: String!, $namespace: String!) {

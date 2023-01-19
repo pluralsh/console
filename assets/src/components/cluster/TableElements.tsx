@@ -1,13 +1,15 @@
 import {
+  AppIcon,
   CaretRightIcon,
   Chip,
   IconFrame,
   Tooltip,
 } from '@pluralsh/design-system'
 import { UnstyledLink } from 'components/utils/Link'
-import { Flex, Span } from 'honorable'
+import { Maybe } from 'generated/graphql'
+import { Div, Flex, Span } from 'honorable'
 import { CSSProperties, ComponentProps, ReactNode } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import {
   ReadinessT,
   readinessToColor,
@@ -137,6 +139,31 @@ export function ContainersReadyChip({
         {ready}/{total} ready
       </Chip>
     </Tooltip>
+  )
+}
+
+export function LabelWithIcon({
+  label,
+  icon,
+}: {
+  label?: Maybe<string>
+  icon?: Maybe<string>
+}) {
+  const theme = useTheme()
+
+  return (
+    <Flex
+      gap={theme.spacing.xsmall}
+      alignItems="center"
+    >
+      {icon && (
+        <AppIcon
+          size="xxsmall"
+          url={icon}
+        />
+      )}
+      {label && <Div>{label}</Div>}
+    </Flex>
   )
 }
 

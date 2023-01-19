@@ -1,12 +1,14 @@
 import { forwardRef, useMemo, useState } from 'react'
 import { useQuery } from '@apollo/client'
-import { Flex } from 'honorable'
+import { Flex, useDebounce } from 'honorable'
 import {
   AppsIcon,
+  Input,
   ListBoxFooter,
   ListBoxItem,
   LoopingLogo,
   PageTitle,
+  SearchIcon,
   Select,
 } from '@pluralsh/design-system'
 
@@ -17,6 +19,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ListBoxFooterProps } from '@pluralsh/design-system/dist/components/ListBoxItem'
 
 import styled, { useTheme } from 'styled-components'
+
+import { filter } from 'lodash'
 
 import { PODS_Q } from '../queries'
 
@@ -34,11 +38,45 @@ import {
   PodsList,
 } from './PodsList'
 
+const ListBoxFooterPlusInner = styled(ListBoxFooter)(({ theme }) => ({
+  color: theme.colors['text-primary-accent'],
+}))
+const NamespaceListFooter = forwardRef<
+  HTMLDivElement,
+  Omit<ListBoxFooterProps, 'children'>
+>(({ leftContent, ...props }, ref) => {
+  const theme = useTheme()
+  const label = 'View all'
+
+  return (
+    <ListBoxFooterPlusInner
+      ref={ref}
+      leftContent={
+        leftContent || (
+          <AppsIcon
+            size={16}
+            color={theme.colors['text-primary-accent'] as string}
+          >
+            {label}
+          </AppsIcon>
+        )
+      }
+      {...props}
+    >
+      {label}
+    </ListBoxFooterPlusInner>
+  )
+})
+
 export default function AllPods() {
   const {
-    data, refetch, error, subscribeToMore: _subscribeToMore,
+    data,
+    refetch,
+    error,
+    subscribeToMore: _subscribeToMore,
   } = useQuery<{
     pods: RootQueryType['pods']
+    applications: RootQueryType['applications']
     namespaces: RootQueryType['namespaces']
   }>(PODS_Q, {
     pollInterval: POLL_INTERVAL,
@@ -64,39 +102,9 @@ export default function AllPods() {
   //   })
   // }, [subscribeToMore])
 
-  const ListBoxFooterPlusInner = styled(ListBoxFooter)(({ theme }) => ({
-    color: theme.colors['text-primary-accent'],
-  }))
-  const NamespaceListFooter = forwardRef<
-    HTMLDivElement,
-    Omit<ListBoxFooterProps, 'children'>
-  >(({ leftContent, ...props }, ref) => {
-    const theme = useTheme()
-    const label = 'Select all'
-
-    return (
-      <ListBoxFooterPlusInner
-        ref={ref}
-        leftContent={
-          leftContent || (
-            <AppsIcon
-              size={16}
-              color={theme.colors['text-primary-accent'] as string}
-            >
-              {label}
-            </AppsIcon>
-          )
-        }
-        {...props}
-      >
-        {label}
-      </ListBoxFooterPlusInner>
-    )
-  })
-
   const columns = useMemo(() => [
-    ColNameLink,
     ColNamespace,
+    ColNameLink,
     ColMemoryReservation,
     ColCpuReservation,
     ColRestarts,
@@ -104,9 +112,12 @@ export default function AllPods() {
     ColActions(refetch),
   ],
   [refetch])
-
+  const theme = useTheme()
   const namespace = useParams().namespace || null
   const navigate = useNavigate()
+  const [selectIsOpen, setSelectIsOpen] = useState(false)
+  const [filterString, setFilterString] = useState('')
+  const debouncedFilterString = useDebounce(filterString, 300)
 
   // Filter out namespaces that don't exist in the pods list
   const namespaces = useMemo(() => {
@@ -146,11 +157,11 @@ export default function AllPods() {
     return pods || []
   }, [data, namespace])
 
-  const [selectIsOpen, setSelectIsOpen] = useState(false)
+  const reactTableOptions = useMemo(() => ({
+    state: { globalFilter: debouncedFilterString },
+  }), [debouncedFilterString])
 
   if (error) {
-    console.log('error', error)
-
     return <>'Sorry, something went wrong'</>
   }
   if (!data) {
@@ -160,10 +171,11 @@ export default function AllPods() {
   return (
     <Flex
       direction="column"
-      gap="xlarge"
+      height="100%"
     >
       <PageTitle heading="Pods">
         <Select
+          label="Filter by namespace"
           placement="right"
           width="300px"
           selectedKey={namespace}
@@ -188,10 +200,31 @@ export default function AllPods() {
           )) || []}
         </Select>
       </PageTitle>
-      <PodsList
-        pods={pods}
-        columns={columns}
+      <Input
+        startIcon={<SearchIcon />}
+        placeholder="Filter pods"
+        value={filterString}
+        onChange={e => setFilterString(e.currentTarget.value)}
+        marginBottom={theme.spacing.medium}
       />
+      <Flex
+        flexDirection="column"
+        overflow="hidden"
+        {...({
+          '& > div': {
+            maxHeight: '100%',
+          },
+        })}
+      >
+        <PodsList
+          pods={pods}
+          applications={data?.applications}
+          columns={columns}
+          reactTableOptions={reactTableOptions}
+          maxHeight="unset"
+          height="100%"
+        />
+      </Flex>
     </Flex>
   )
 }
