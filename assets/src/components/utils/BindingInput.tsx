@@ -12,7 +12,8 @@ import { useEffect, useState } from 'react'
 import { useApolloClient } from '@apollo/client'
 import styled from 'styled-components'
 
-import { SEARCH_GROUPS, SEARCH_USERS } from '../apps/app/oidc/queries'
+import { SEARCH_GROUPS } from 'components/account/groups/queries'
+import { SEARCH_USERS } from 'components/account/users/queries'
 
 const ICONS = {
   user: <PersonIcon size={14} />,
@@ -41,7 +42,7 @@ export function fetchGroups(client, query, setSuggestions) {
     .then(setSuggestions)
 }
 
-function userSuggestion({
+export function userSuggestion({
   name, email, avatar, id,
 }: any) {
   return (
@@ -63,7 +64,7 @@ function userSuggestion({
   )
 }
 
-function groupSuggestion({ name, description, id }: any) {
+export function groupSuggestion({ name, description, id }: any) {
   return (
     <ListBoxItem
       key={id}

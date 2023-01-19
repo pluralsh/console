@@ -20,7 +20,7 @@ import { Div, Flex } from 'honorable'
 
 import { DURATIONS } from 'utils/time'
 
-import { ScrollablePage } from 'components/layout/ScrollablePage'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import RangePicker from '../../../../utils/RangePicker'
 

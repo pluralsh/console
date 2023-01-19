@@ -17,7 +17,7 @@ export const DisplayContext = createContext<any>({})
 export function RunbookDisplay({ data, root: { children, attributes } }) {
   const theme = useContext(ThemeContext)
   const datasources = useMemo(() => (
-    data.reduce((acc, entry) => ({ ...acc, [entry.name]: entry }), {})
+    data.filter(d => !!d).reduce((acc, entry) => ({ ...acc, [entry.name]: entry }), {})
   ), [data])
   const [context, setContext] = useState({})
 
@@ -31,7 +31,7 @@ export function RunbookDisplay({ data, root: { children, attributes } }) {
       >
         <Flex
           direction="column"
-          {...(attributes)}
+          {...attributes}
         >
           {recurse(children, theme)}
         </Flex>

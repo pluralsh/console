@@ -47,6 +47,11 @@ export default function GroupEdit({ group, edit, setEdit }: any) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => fetchUsers(client, value, setSuggestions), [])
 
+  useEffect(() => {
+    setName(group.name)
+    setDescription(group.description)
+  }, [group])
+
   return (
     <Modal
       header="Edit group"

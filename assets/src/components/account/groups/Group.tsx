@@ -44,6 +44,7 @@ export default function Group({ group, q }: any) {
     delete: {
       label: 'Delete group',
       onSelect: () => setConfirm(true),
+      destructive: true,
     },
   } : {
     view: {
@@ -63,11 +64,12 @@ export default function Group({ group, q }: any) {
         description={group.description || 'no description'}
       />
       <MoreMenu onSelectionChange={selectedKey => menuItems[selectedKey]?.onSelect()}>
-        {Object.entries(menuItems).map(([key, { label }]) => (
+        {Object.entries(menuItems).map(([key, { label, destructive }]) => (
           <ListBoxItem
             key={key}
             textValue={label}
             label={label}
+            destructive={destructive}
             color="blue"
           />
         ))}
@@ -81,14 +83,17 @@ export default function Group({ group, q }: any) {
         >
           <GroupView group={group} />
         </Modal>
-        <GroupEdit
-          group={group}
-          edit={edit}
-          setEdit={setEdit}
-        />
+        {edit && (
+          <GroupEdit
+            group={group}
+            edit={edit}
+            setEdit={setEdit}
+          />
+        )}
         <Confirm
           open={confirm}
-          text="Deleting groups cannot be undone and permissions attached to this group will be removed."
+          title="Delete group"
+          text="Are you sure? Deleting groups cannot be undone. Permissions attached to this group will be removed."
           close={() => setConfirm(false)}
           submit={() => mutation()}
           loading={loading}

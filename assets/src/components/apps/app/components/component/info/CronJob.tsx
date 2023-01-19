@@ -1,8 +1,14 @@
-import { Card, Table } from '@pluralsh/design-system'
+import { Card, Table, Tooltip } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
+import { TableText } from 'components/cluster/TableElements'
 import PropWide from 'components/utils/PropWide'
-import { Div, Flex, H2 } from 'honorable'
-import { useOutletContext, useParams } from 'react-router-dom'
+import {
+  A,
+  Div,
+  Flex,
+  H2,
+} from 'honorable'
+import { Link, useOutletContext, useParams } from 'react-router-dom'
 
 import { DeleteJob } from './Job'
 
@@ -11,7 +17,23 @@ const columnHelper = createColumnHelper<any>()
 const columns = (namespace, refetch) => [
   columnHelper.accessor(row => row?.metadata?.name, {
     id: 'name',
-    cell: props => props.getValue(),
+    cell: (props => (
+      <TableText>
+        <Tooltip
+          label={props.getValue()}
+          placement="top-start"
+        >
+          <A
+            inline
+            display="inline"
+            as={Link}
+            to={`/apps/${namespace}/components/job/${props.getValue()}`}
+          >
+            {props.getValue()}
+          </A>
+        </Tooltip>
+      </TableText>
+    )),
     header: 'Name',
   }),
   columnHelper.accessor(row => row?.status, {

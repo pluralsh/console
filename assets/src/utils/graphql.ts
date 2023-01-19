@@ -54,7 +54,7 @@ export function removeConnection(prev, val, key) {
   return { ...prev, [key]: { ...prev[key], edges: prev[key].edges.filter(({ node }) => node.id !== val.id) } }
 }
 
-export function updateCache(cache, { query, variables, update }) {
+export function updateCache(cache, { query, variables, update }: any) {
   const prev = cache.readQuery({ query, variables })
 
   cache.writeQuery({ query, variables, data: update(prev) })
@@ -68,6 +68,7 @@ export function deepFetch(map, path) {
 
   const key = path[0]
 
+  if (!map) return null
   if (path.length === 1) return map[key]
   if (!map[key]) return null
 

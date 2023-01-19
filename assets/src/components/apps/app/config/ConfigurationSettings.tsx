@@ -115,7 +115,7 @@ export function ConfigurationSettings({ overlays, application: { name, configura
           </P>
         )}
         <Button
-          onClick={() => mutation}
+          onClick={() => mutation()}
           loading={loading}
         >
           Commit

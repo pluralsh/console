@@ -28,6 +28,8 @@ export function Confirm({
   loading = false,
   destructive = false,
 }: ConfirmProps) {
+  if (!open) return null
+
   return (
     <Modal
       header={title}

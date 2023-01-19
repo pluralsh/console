@@ -4,7 +4,7 @@ import { useOutletContext, useParams } from 'react-router-dom'
 
 import { Flex } from 'honorable'
 
-import { ScrollablePage } from 'components/layout/ScrollablePage'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { asQuery } from 'components/utils/query'
 
 import { Button, LogsIcon } from '@pluralsh/design-system'

@@ -1,4 +1,4 @@
-import { ScrollablePage } from 'components/layout/ScrollablePage'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Flex } from 'honorable'
 
 import SecurityAccess from './SecurityAccess'

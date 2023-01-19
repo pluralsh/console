@@ -11,7 +11,6 @@ import { getIcon, hasIcons } from 'components/apps/misc'
 import { BUILDS_Q, CREATE_BUILD } from 'components/graphql/builds'
 import { InstallationContext } from 'components/Installations'
 import { BuildTypes } from 'components/types'
-import { ThemeContext } from 'grommet'
 import { A, Flex } from 'honorable'
 import {
   Key,
@@ -31,7 +30,6 @@ const BUILD_TYPES = [
 
 export default function CreateBuild() {
   const { applications } = useContext<any>(InstallationContext)
-  const { dark } = useContext<any>(ThemeContext)
   const [open, setOpen] = useState<boolean>(false)
   const [selectedApp, setSelectedApp] = useState<Key>()
   const [selectedType, setSelectedType] = useState<Key>()
@@ -108,7 +106,7 @@ export default function CreateBuild() {
                 label="Choose an app"
                 leftContent={(!!currentApp && hasIcons(currentApp)) ? (
                   <img
-                    src={getIcon(currentApp, dark)}
+                    src={getIcon(currentApp)}
                     height={16}
                   />
                 ) : undefined}
@@ -123,7 +121,7 @@ export default function CreateBuild() {
                     textValue={app.name}
                     leftContent={hasIcons(app) ? (
                       <img
-                        src={getIcon(app, dark)}
+                        src={getIcon(app)}
                         height={16}
                       />
                     ) : undefined}

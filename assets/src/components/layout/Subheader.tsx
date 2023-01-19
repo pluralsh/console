@@ -7,13 +7,13 @@ import {
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 
-import { Breadcrumbs } from './Breadcrumbs'
-import { ResponsiveLayoutContentContainer } from './layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutSidecarContainer } from './layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutSidenavContainer } from './layout/ResponsiveLayoutSidenavContainer'
-import { ResponsiveLayoutSpacer } from './layout/ResponsiveLayoutSpacer'
+import { Breadcrumbs } from '../Breadcrumbs'
+import { ResponsiveLayoutContentContainer } from '../utils/layout/ResponsiveLayoutContentContainer'
+import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer'
+import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
+import { ResponsiveLayoutSpacer } from '../utils/layout/ResponsiveLayoutSpacer'
 
-export default function ConsoleSubheader() {
+export default function Subheader() {
   const navigate = useNavigate()
 
   return (

@@ -28,7 +28,6 @@ export default function Build({ build }) {
   } = build
   const navigate = useNavigate()
   const { applications } = useContext<any>(InstallationContext)
-  const { dark } = useContext<any>(ThemeContext)
   const app = useMemo(() => applications?.find(app => app.name === repository), [applications, repository])
 
   return (
@@ -42,7 +41,7 @@ export default function Build({ build }) {
     >
       {app && hasIcons(app) && (
         <AppIcon
-          url={getIcon(app, dark)}
+          url={getIcon(app)}
           size="xsmall"
         />
       )}

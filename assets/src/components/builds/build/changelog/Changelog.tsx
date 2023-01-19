@@ -10,7 +10,6 @@ import { getIcon, hasIcons } from 'components/apps/misc'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { InstallationContext } from 'components/Installations'
 import { AnsiText } from 'components/utils/AnsiText'
-import { ThemeContext } from 'grommet'
 import { Flex, Span } from 'honorable'
 import { groupBy } from 'lodash'
 import {
@@ -26,7 +25,6 @@ import { useOutletContext, useParams } from 'react-router-dom'
 export default function Changelog() {
   const tabStateRef = useRef<any>(null)
   const { buildId } = useParams()
-  const { dark } = useContext<any>(ThemeContext)
   const { applications } = useContext<any>(InstallationContext)
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { build: { changelogs } } = useOutletContext<any>()
@@ -58,7 +56,7 @@ export default function Changelog() {
           label="Choose an app"
           leftContent={(!!currentRepo && hasIcons(currentRepo)) ? (
             <img
-              src={getIcon(currentRepo, dark)}
+              src={getIcon(currentRepo)}
               height={16}
             />
           ) : undefined}
@@ -72,7 +70,7 @@ export default function Changelog() {
               textValue={r.name}
               leftContent={hasIcons(r) ? (
                 <img
-                  src={getIcon(r, dark)}
+                  src={getIcon(r)}
                   height={16}
                 />
               ) : undefined}
