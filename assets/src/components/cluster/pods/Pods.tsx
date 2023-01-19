@@ -1,5 +1,10 @@
-import { forwardRef, useMemo, useState } from 'react'
-import { useQuery } from '@apollo/client'
+import {
+  forwardRef,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+import { useQuery, useSubscription } from '@apollo/client'
 import { Flex, useDebounce } from 'honorable'
 import {
   AppsIcon,
@@ -22,7 +27,7 @@ import styled, { useTheme } from 'styled-components'
 
 import { filter } from 'lodash'
 
-import { PODS_Q } from '../queries'
+import { PODS_Q, PODS_SUB } from '../queries'
 
 import { POLL_INTERVAL } from '../constants'
 
@@ -73,7 +78,7 @@ export default function AllPods() {
     data,
     refetch,
     error,
-    subscribeToMore: _subscribeToMore,
+    subscribeToMore,
   } = useQuery<{
     pods: RootQueryType['pods']
     applications: RootQueryType['applications']
@@ -86,21 +91,27 @@ export default function AllPods() {
   /*
     TODO: Add subscription when subscription actually starts returning values.
   */
-  // useEffect(() => {
-  //   console.log('subscribe!')
-  //   subscribeToMore({
-  //     document: PODS_SUB,
-  //     updateQuery: (prev, { subscriptionData }) => {
-  //       console.log('subscribe prev', prev)
-  //       console.log('subscribe data', subscriptionData)
+  useEffect(() => {
+    console.log('subscribe!')
+    subscribeToMore({
+      document: PODS_SUB,
+      updateQuery: (prev, { subscriptionData }) => {
+        console.log('subscribe prev', prev)
+        console.log('subscribe data', subscriptionData)
 
-  //       return prev
-  //     },
-  //     onError: e => {
-  //       console.log('subscribe error msg', e.message)
-  //     },
-  //   })
-  // }, [subscribeToMore])
+        return prev
+      },
+      onError: e => {
+        console.log('subscribe error msg', e.message)
+      },
+    })
+  }, [subscribeToMore])
+
+  const { data: subscribeData, error: subscribeError, ...subscribeProps } = useSubscription(PODS_SUB, {})
+
+  console.log('subscribeData', subscribeData)
+  console.log('subscribeError', subscribeError)
+  console.log('subscribeProps', subscribeProps)
 
   const columns = useMemo(() => [
     ColNamespace,

@@ -291,6 +291,7 @@ export const PODS_SUB = gql`
       payload {
         ...PodFragment
       }
+      delta
     }
   }
   ${PodFragment}
