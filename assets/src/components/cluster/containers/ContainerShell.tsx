@@ -34,7 +34,7 @@ export function ShellCommand({ command, setCommand }) {
         flexShrink={1}
         flexGrow={1}
       >
-        {`kubectl exec ${name} -it -n ${namespace} -c ${container}`}
+        {`kubectl exec ${name} -it -n ${namespace} -c ${container} -- `}
       </Code>
       {!edit && (
         <Code
