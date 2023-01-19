@@ -6,13 +6,13 @@ import { PageTitle, SubTab, TabList } from '@pluralsh/design-system'
 
 import { Flex, Span } from 'honorable'
 
-import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLayoutContentContainer'
+import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 
-import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLayoutSidenavContainer'
+import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 
-import { ResponsiveLayoutSpacer } from 'components/layout/ResponsiveLayoutSpacer'
+import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 
-import { ResponsiveLayoutSidecarContainer } from 'components/layout/ResponsiveLayoutSidecarContainer'
+import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 

@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom'
 import type { Event } from 'generated/graphql'
 import { LoopingLogo } from '@pluralsh/design-system'
 
-import { ScrollablePage } from 'components/layout/ScrollablePage'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { POD_EVENTS_Q } from '../queries'
 

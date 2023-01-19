@@ -4,7 +4,7 @@ import { sumBy } from 'lodash'
 
 import { Flex } from 'honorable'
 import { Card, LoopingLogo } from '@pluralsh/design-system'
-import { ScrollablePage } from 'components/layout/ScrollablePage'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import type { Node, NodeMetric } from 'generated/graphql'
 import { cpuParser, memoryParser } from 'utils/kubernetes'

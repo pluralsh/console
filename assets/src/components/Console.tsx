@@ -5,12 +5,12 @@ import { Portal } from 'react-portal'
 import Foco from 'react-foco'
 import { Next } from 'grommet-icons'
 
-import ConsoleSidebar from './ConsoleSidebar'
+import Sidebar from './layout/Sidebar'
 import BreadcrumbProvider from './Breadcrumbs'
 import { EnsureLogin } from './Login'
 import { InstallationsProvider } from './Installations'
-import ConsoleHeader from './ConsoleHeader'
-import ConsoleSubheader from './ConsoleSubheader'
+import Header from './layout/Header'
+import Subheader from './layout/Subheader'
 import TerminalThemeProvider from './terminal/TerminalThemeProvider'
 import { CursorPositionProvider } from './utils/CursorPosition'
 
@@ -126,17 +126,17 @@ export default function Console() {
                   width="100vw"
                   height="100vh"
                 >
-                  <ConsoleHeader />
+                  <Header />
                   <Box
                     fill
                     direction="row"
                   >
-                    <ConsoleSidebar />
+                    <Sidebar />
                     <Box
                       fill
                       direction="column"
                     >
-                      <ConsoleSubheader />
+                      <Subheader />
                       <Box
                         fill
                         direction="row"

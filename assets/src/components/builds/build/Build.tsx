@@ -11,7 +11,6 @@ import {
   useParams,
 } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
-import { ThemeContext } from 'grommet'
 
 import { mergeEdges } from 'components/graphql/utils'
 
@@ -19,7 +18,7 @@ import { BUILD_Q, BUILD_SUB, COMMAND_SUB } from 'components/graphql/builds'
 
 import '../../build.css'
 
-import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLayoutSidenavContainer'
+import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 
 import {
   AppIcon,
@@ -29,9 +28,9 @@ import {
   TabList,
   TabPanel,
 } from '@pluralsh/design-system'
-import { ResponsiveLayoutSpacer } from 'components/layout/ResponsiveLayoutSpacer'
-import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutSidecarContainer } from 'components/layout/ResponsiveLayoutSidecarContainer'
+import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
+import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
+import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 
 import {
   Div,
@@ -83,7 +82,6 @@ const DIRECTORY = [
 
 export default function Build() {
   const tabStateRef = useRef<any>(null)
-  const { dark } = useContext<any>(ThemeContext)
   const { applications } = useContext<any>(InstallationContext)
   const { pathname } = useLocation()
   const { buildId } = useParams()
@@ -145,7 +143,7 @@ export default function Build() {
         >
           {app && hasIcons(app) && (
             <AppIcon
-              url={getIcon(app, dark)}
+              url={getIcon(app)}
               size="small"
             />
           )}

@@ -1,24 +1,10 @@
-import React, { useContext, useEffect } from 'react'
-import { ThemeContext } from 'grommet'
+import { createContext, useEffect } from 'react'
 import { useQuery } from '@apollo/client'
 
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
 import { LoopingLogo } from './utils/AnimatedLogo'
 
-export const InstallationContext = React.createContext({})
-
-export function ApplicationIcon({ application: { spec: { descriptor: { icons } } }, size }) {
-  const { dark } = useContext(ThemeContext)
-
-  return (
-    <img
-      alt=""
-      src={(dark && icons[1]) ? icons[1] : icons[0]}
-      width={size || '25px'}
-      height={size || '25px'}
-    />
-  )
-}
+export const InstallationContext = createContext({})
 
 function applyDelta(prev, { delta, payload }) {
   switch (delta) {
@@ -44,10 +30,7 @@ export function InstallationsProvider({ children }) {
   return (
     <InstallationContext.Provider
       // eslint-disable-next-line react/jsx-no-constructed-context-values
-      value={{
-        applications: data?.applications || [],
-        currentApplication: { name: 'mock', spec: { descriptor: { links: [] } } },
-      }}
+      value={{ applications: data?.applications || [] }}
     >
       {children}
     </InstallationContext.Provider>

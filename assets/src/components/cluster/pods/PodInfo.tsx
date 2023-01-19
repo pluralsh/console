@@ -5,7 +5,7 @@ import { Flex } from 'honorable'
 
 import { LoopingLogo } from '@pluralsh/design-system'
 
-import { ScrollablePage } from 'components/layout/ScrollablePage'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { ContainerStatus, Maybe, Pod } from 'generated/graphql'
 

@@ -9,10 +9,10 @@ import {
 import { useContext, useEffect, useRef } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 
-import { ResponsiveLayoutSidecarContainer } from 'components/layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutSpacer } from 'components/layout/ResponsiveLayoutSpacer'
-import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLayoutSidenavContainer'
+import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
+import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
+import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
+import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { LoginContext } from 'components/contexts'
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 

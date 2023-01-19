@@ -22,17 +22,17 @@ import {
 
 import { InstallationContext } from 'components/Installations'
 
-import { ResponsiveLayoutSidecarContainer } from 'components/layout/ResponsiveLayoutSidecarContainer'
+import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 
 import { PropsContainer } from 'components/utils/PropsContainer'
 
 import Prop from 'components/utils/Prop'
 
-import { ResponsiveLayoutSpacer } from 'components/layout/ResponsiveLayoutSpacer'
+import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 
-import { ResponsiveLayoutContentContainer } from 'components/layout/ResponsiveLayoutContentContainer'
+import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 
-import { ResponsiveLayoutSidenavContainer } from 'components/layout/ResponsiveLayoutSidenavContainer'
+import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 
 import { useQuery } from '@apollo/client'
 

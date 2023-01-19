@@ -12,7 +12,7 @@ import {
   Node as NodeT,
   Pod,
 } from 'generated/graphql'
-import { ScrollablePage } from 'components/layout/ScrollablePage'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { POLL_INTERVAL } from '../constants'
 import {

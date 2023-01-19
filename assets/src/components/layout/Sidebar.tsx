@@ -1,7 +1,10 @@
 import {
   AppsIcon,
   ArrowTopRightIcon,
+  BellIcon,
   BuildIcon,
+  CloseIcon,
+  Sidebar as DSSidebar,
   DiscordIcon,
   GitHubLogoIcon,
   ListIcon,
@@ -10,7 +13,6 @@ import {
   PersonIcon,
   ScrollIcon,
   ServersIcon,
-  Sidebar,
   SidebarItem,
   SidebarSection,
   theme,
@@ -30,14 +32,18 @@ import {
   Flex,
   Menu,
   MenuItem,
+  P,
+  Span,
   useOutsideClick,
 } from 'honorable'
 
 import { wipeToken } from 'helpers/auth'
 
-import { LoginContext } from './contexts'
-import { Notifications } from './Notifications'
-import { AutoRefresh, getCommit } from './AutoRefresh'
+import { LoginContext } from '../contexts'
+
+import { AutoRefresh, getCommit } from '../AutoRefresh'
+
+import { NotificationsPanel } from './NotificationsPanel'
 
 export const SIDEBAR_ICON_HEIGHT = '42px'
 
@@ -64,10 +70,12 @@ function SidebarMenuItem({ tooltip, href, children } : {tooltip: string, href?: 
   )
 }
 
-export default function ConsoleSidebar() {
+export default function Sidebar() {
   const menuItemRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
+  const notificationsPanelRef = useRef<HTMLDivElement>(null)
   const [isMenuOpen, setIsMenuOpened] = useState<boolean>(false)
+  const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] = useState(false)
   const { me, configuration } = useContext<any>(LoginContext)
   const navigate = useNavigate()
   const { pathname } = useLocation()
@@ -82,6 +90,10 @@ export default function ConsoleSidebar() {
     }
   })
 
+  useOutsideClick(notificationsPanelRef, () => {
+    setIsNotificationsPanelOpen(false)
+  })
+
   const handleLogout = useCallback(() => {
     wipeToken()
     const w: Window = window
@@ -93,7 +105,7 @@ export default function ConsoleSidebar() {
 
   return (
     <>
-      <Sidebar backgroundColor={theme.colors?.grey[950]}>
+      <DSSidebar backgroundColor={theme.colors?.grey[950]}>
         <SidebarSection
           grow={1}
           shrink={1}
@@ -126,9 +138,39 @@ export default function ConsoleSidebar() {
           >
             <GitHubLogoIcon />
           </SidebarMenuItem>
-          <SidebarMenuItem tooltip="Notifications">
-            <Notifications />
-          </SidebarMenuItem>
+          <SidebarItem
+            position="relative"
+            clickable
+            label="Notifications"
+            tooltip="Notifications"
+            onClick={event => {
+              event.stopPropagation()
+              setIsNotificationsPanelOpen(x => !x)
+            }}
+            badge={me?.unreadNotifications}
+            backgroundColor={isNotificationsPanelOpen ? theme.colors?.grey[875] : null}
+            width={32}
+            height={32}
+          >
+            <BellIcon />
+            {me?.unreadNotifications > 0 && (
+              <Flex
+                color="white"
+                backgroundColor="error"
+                borderRadius="100%"
+                fontSize={11}
+                align="start"
+                justify="center"
+                height={15}
+                width={15}
+                position="absolute"
+                left={16}
+                top={2}
+              >
+                <Span marginTop={-2}>{me.unreadNotifications > 99 ? '!' : me.unreadNotifications}</Span>
+              </Flex>
+            )}
+          </SidebarItem>
           {getCommit() !== configuration.gitCommit && (
             <SidebarMenuItem tooltip="New update available">
               <AutoRefresh />
@@ -150,7 +192,7 @@ export default function ConsoleSidebar() {
             />
           </SidebarItem>
         </SidebarSection>
-      </Sidebar>
+      </DSSidebar>
       {isMenuOpen && (
         <Menu
           ref={menuRef}
@@ -191,6 +233,59 @@ export default function ConsoleSidebar() {
             Logout
           </MenuItem>
         </Menu>
+      )}
+      {/* ---
+        NOTIFICATIONS PANEL
+      --- */}
+      {isNotificationsPanelOpen && (
+        <Flex
+          position="fixed"
+          top={57}
+          bottom={0}
+          left={64}
+          right={0}
+          align="flex-end"
+          backgroundColor="rgba(0, 0, 0, 0.5)"
+          zIndex={999}
+        >
+          <Flex
+            ref={notificationsPanelRef}
+            direction="column"
+            backgroundColor="fill-one"
+            height="calc(100% - 16px)"
+            width={480}
+            borderTop="1px solid border"
+            borderRight="1px solid border"
+            borderTopRightRadius={6}
+          >
+            <Flex
+              align="center"
+              justify="space-between"
+              padding="medium"
+              borderBottom="1px solid border"
+            >
+              <P subtitle2>Notifications</P>
+              <Flex
+                align="center"
+                justify="center"
+                padding="xsmall"
+                cursor="pointer"
+                _hover={{ backgroundColor: 'fill-one-hover' }}
+                borderRadius="medium"
+                onClick={() => setIsNotificationsPanelOpen(false)}
+              >
+                <CloseIcon />
+              </Flex>
+            </Flex>
+            <Flex
+              flexGrow={1}
+              direction="column"
+              overflowY="auto"
+            >
+              <NotificationsPanel closePanel={() => setIsNotificationsPanelOpen(false)} />
+            </Flex>
+          </Flex>
+        </Flex>
       )}
     </>
   )

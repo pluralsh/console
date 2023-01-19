@@ -9,7 +9,7 @@ import { Readiness } from 'utils/status'
 
 export const hasIcons = ({ spec: { descriptor } }) => descriptor?.icons?.length > 0
 
-export const getIcon = (app, dark) => {
+export const getIcon = (app, dark = true) => {
   const { spec: { descriptor } } = app
 
   if (!hasIcons(app)) return undefined

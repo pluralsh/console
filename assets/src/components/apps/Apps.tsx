@@ -25,7 +25,7 @@ import Fuse from 'fuse.js'
 
 import { Readiness, readinessToLabel } from 'utils/status'
 
-import { ScrollablePage } from 'components/layout/ScrollablePage'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import App from './AppCard'
 import { appState } from './misc'

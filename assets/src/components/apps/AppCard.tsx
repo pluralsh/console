@@ -1,4 +1,3 @@
-import { ThemeContext } from 'grommet'
 import { Flex, P } from 'honorable'
 import {
   AppIcon,
@@ -60,7 +59,6 @@ export const getBorderColor = app => {
 
 export default function AppCard({ app }: any) {
   const navigate = useNavigate()
-  const { dark }: any = useContext(ThemeContext)
 
   if (!app?.spec?.descriptor) return null
 
@@ -87,7 +85,7 @@ export default function AppCard({ app }: any) {
       >
         {hasIcons(app) && (
           <AppIcon
-            url={getIcon(app, dark)}
+            url={getIcon(app)}
             size="xsmall"
           />
         )}

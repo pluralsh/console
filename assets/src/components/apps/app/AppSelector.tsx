@@ -1,5 +1,4 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
-import { ThemeContext } from 'grommet'
 import { Div, P, Span } from 'honorable'
 import { Key, useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -8,7 +7,6 @@ import { getIcon, hasIcons } from '../misc'
 
 export default function AppSelector({ applications, currentApp }) {
   const [selectedKey, setSelectedKey] = useState<Key>(currentApp.name)
-  const { dark }: any = useContext(ThemeContext)
   const navigate = useNavigate()
 
   return (
@@ -21,7 +19,7 @@ export default function AppSelector({ applications, currentApp }) {
         aria-label="app"
         leftContent={hasIcons(currentApp) ? (
           <img
-            src={getIcon(currentApp, dark)}
+            src={getIcon(currentApp)}
             height={16}
           />
         ) : undefined}
@@ -58,7 +56,7 @@ export default function AppSelector({ applications, currentApp }) {
             textValue={app.name}
             leftContent={hasIcons(app) ? (
               <img
-                src={getIcon(app, dark)}
+                src={getIcon(app)}
                 height={16}
               />
             ) : undefined}
