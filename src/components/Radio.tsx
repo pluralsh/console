@@ -11,7 +11,6 @@ import {
 import { InputProps, Label } from 'honorable'
 import classNames from 'classnames'
 import styled from 'styled-components'
-import PropTypes from 'prop-types'
 import { AriaRadioProps, useRadio } from '@react-aria/radio'
 import { VisuallyHidden } from '@react-aria/visually-hidden'
 import { useFocusRing } from '@react-aria/focus'
@@ -210,10 +209,6 @@ ref: MutableRefObject<any>) {
       <div className="label"> {props.children}</div>
     </HonorableLabelStyled>
   )
-}
-
-Radio.propTypes = {
-  small: PropTypes.bool,
 }
 
 export default forwardRef(Radio)

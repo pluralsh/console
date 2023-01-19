@@ -164,7 +164,7 @@ ref) => {
         {expandable && (
           <Flex
             grow={1}
-            justify="end"
+            justify="flex-end"
           >
             <IconFrame
               textValue=""

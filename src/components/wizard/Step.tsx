@@ -10,7 +10,6 @@ type StepProps<T = unknown> = {
 }
 
 const Step = styled(UnstyledStep)(() => ({
-  maxHeight: '576px',
   height: '100%',
   minHeight: '200px',
   overflow: 'auto',

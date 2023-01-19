@@ -27,7 +27,6 @@ const Picker = styled(PickerUnstyled)(({ theme }) => ({
     gridTemplateColumns: 'repeat(auto-fill, minmax(225px, 1fr))',
     gridAutoRows: 'minmax(auto, 40px)',
     gap: '16px',
-    maxHeight: '576px',
     height: 'calc(100% - 56px)',
     minHeight: '200px',
     overflow: 'auto',
@@ -59,27 +58,40 @@ type PickerProps = {
 function PickerUnstyled({ items, ...props }: PickerProps): JSX.Element {
   const { limit } = useContext(WizardContext)
   const size = useWindowSize()
-  const { onSelect, selected } = usePicker()
+  const { onSelect, selected, selectedCount } = usePicker()
   const [search, setSearch] = useState<string>(undefined)
   const [scrollable, setScrollable] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const isScrollbarVisible = (el: HTMLDivElement) => el?.scrollHeight > el?.clientHeight
   const filtered = useMemo(() => items.filter(item => (search ? item.label.toLowerCase().includes(search) : true)), [items, search])
 
-  const select = useCallback((item: StepConfig) => {
-    const isSelected = !!selected.find(i => i.key === item.key)
-    const isMax = selected.length >= limit
+  const isSelected = useCallback((item: StepConfig) => !!selected.find(i => i.key === item.key), [selected])
+  const isDisabled = useCallback((item: StepConfig) => {
+    if (item.isRequired) return true
+    if (isSelected(item)) return false
 
-    return isSelected || !isMax ? onSelect(item) : undefined
-  }, [limit, selected, onSelect])
+    return selectedCount >= limit
+  }, [isSelected, limit, selectedCount])
+
+  const select = useCallback((item: StepConfig) => {
+    const itemSelected = isSelected(item)
+    const isMax = selectedCount >= limit
+
+    // Select
+    if (!itemSelected && !isMax) onSelect(item)
+
+    // Un-select
+    if (itemSelected && !item.isRequired) onSelect(item)
+  }, [isSelected, selectedCount, limit, onSelect])
 
   useEffect(() => {
-    const { current } = scrollRef
+    if (!scrollRef.current) return
 
-    if (!current) return
-
-    setScrollable(isScrollbarVisible(current))
+    setScrollable(isScrollbarVisible(scrollRef.current))
   }, [scrollRef, size])
+
+  // Select required items
+  useEffect(() => items.filter(item => item.isRequired).forEach(item => select(item)), [items, select])
 
   return (
     <div {...props}>
@@ -103,7 +115,8 @@ function PickerUnstyled({ items, ...props }: PickerProps): JSX.Element {
               icon={item.Icon && <item.Icon />}
               onClick={() => select(item)}
               checked={selected.findIndex(s => s.label === item.label) > -1}
-              disabled={selected.length >= limit}
+              disabled={isDisabled(item)}
+              tooltip={item.isRequired ? item.tooltip || 'This is a required application.' : undefined}
             />
           ))}
         </div>

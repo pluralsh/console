@@ -1,11 +1,15 @@
 import styled from 'styled-components'
-import { Flex } from 'honorable'
 import {
+  Dispatch,
   MouseEventHandler,
+  MutableRefObject,
   ReactElement,
+  Ref,
+  forwardRef,
   useCallback,
   useContext,
   useEffect,
+  useImperativeHandle,
   useMemo,
 } from 'react'
 import IsEmpty from 'lodash/isEmpty'
@@ -36,6 +40,7 @@ const Wizard = styled(WizardUnstyled)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     height: '40px',
     marginBottom: '24px',
   },
@@ -82,6 +87,8 @@ type WizardProps = {
   onClose?: MouseEventHandler<void>
   onComplete?: (completed: boolean) => void
   onSelect?: (selected: Array<StepConfig>) => void
+  onResetRef?: MutableRefObject<{onReset: Dispatch<void>}>
+  ref?: Ref<HTMLDivElement>
   children?: {
     stepper?: ReactElement,
     navigation?: ReactElement<NavigationProps>
@@ -89,15 +96,16 @@ type WizardProps = {
 }
 
 function WizardUnstyled({
-  dependencySteps, loading, onClose, onComplete, onSelect, children, ...props
+  dependencySteps, loading, onClose, onComplete, onSelect, onResetRef, ref, children, ...props
 }: WizardProps): ReactElement<WizardProps> {
   const { steps, setSteps, completed } = useContext(WizardContext)
   const { active } = useActive()
   const { isFirst, onReset } = useNavigation()
   const { selected } = usePicker()
   const { stepper, navigation } = children
-
   const hasHeader = useCallback(() => stepper || onClose, [stepper, onClose])
+
+  useImperativeHandle(onResetRef, () => ({ onReset: () => onReset() }), [onReset])
 
   useEffect(() => onComplete && onComplete(completed || steps.filter(s => !s.isDefault && !s.isPlaceholder).some(s => s.isCompleted)),
     [steps, completed, onComplete])
@@ -116,7 +124,10 @@ function WizardUnstyled({
   }, [dependencySteps])
 
   return (
-    <div {...props}>
+    <div
+      ref={ref}
+      {...props}
+    >
       {loading && (
         <div className="loader">
           <div className="overlay" />
@@ -128,7 +139,6 @@ function WizardUnstyled({
         <div className="header">
           {/* Stepper */}
           {stepper && stepper}
-          <Flex flexGrow={1} />
           {onClose && (
             <IconFrame
               icon={<CloseIcon color="icon-light" />}
@@ -158,15 +168,20 @@ type WizardContextProps = {
 
 function ContextAwareWizard({
   defaultSteps, limit, ...props
-}: WizardContextProps): ReactElement<WizardContextProps> {
+}: WizardContextProps, ref: Ref<HTMLDivElement>): ReactElement<WizardContextProps> {
   const context = useWizard(defaultSteps, limit)
   const memo = useMemo(() => context, [context])
 
   return (
     <WizardContext.Provider value={memo}>
-      <Wizard {...props} />
+      <Wizard
+        {...props}
+        ref={ref}
+      />
     </WizardContext.Provider>
   )
 }
 
-export { ContextAwareWizard as Wizard }
+const WizardRef = forwardRef(ContextAwareWizard)
+
+export { WizardRef as Wizard }

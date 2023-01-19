@@ -46,7 +46,7 @@ function NavigationUnstyled<T = unknown>({ onInstall, ...props }: NavigationProp
     isLast, isFirst, onReset, onBack, onNext, onReturn,
   } = useNavigation()
   const { selected: stepperSteps } = useStepper<T>()
-  const { selected: pickerSteps } = usePicker()
+  const { selected: pickerSteps, selectedCount } = usePicker()
 
   useEffect(() => {
     const stepsCompleted = stepperSteps.every(s => s.isCompleted)
@@ -72,7 +72,7 @@ function NavigationUnstyled<T = unknown>({ onInstall, ...props }: NavigationProp
         </Button>
       )}
       <div className="spacer" />
-      {isFirst && <div className="text">{pickerSteps?.length || 0} selected {pickerSteps?.length >= limit ? '(max)' : ''}</div>}
+      {isFirst && <div className="text">{selectedCount} selected {selectedCount >= limit ? '(max)' : ''}</div>}
       {isFirst && (
         <Button
           secondary

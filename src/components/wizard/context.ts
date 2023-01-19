@@ -19,6 +19,7 @@ type ContextProps<T = unknown> = {
 type StepConfig<T = unknown> = {
   key: string
   label?: string
+  tooltip?: string
   imageUrl?: string
   Icon?: ReturnType<typeof createIcon>
   isDefault?: boolean
@@ -26,6 +27,7 @@ type StepConfig<T = unknown> = {
   isDependency?: boolean
   isCompleted?: boolean
   isValid?: boolean
+  isRequired?: boolean
   node?: ReactElement<typeof Step | typeof Installer | typeof Picker>
   data?: T | null
   dependencyOf?: Set<string>

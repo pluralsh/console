@@ -154,7 +154,6 @@ function ModalTemplate() {
 
       <HonorableModal
         open={open}
-        form={false}
         fontSize={16}
         width={768}
         maxWidth={768}
@@ -227,7 +226,7 @@ function StandaloneTemplate() {
   return (
     <Flex
       width="100%"
-      height="500px"
+      height="1000px"
     >
       <Wizard
         defaultSteps={DEFAULT_STEPS}

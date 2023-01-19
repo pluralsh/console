@@ -13,7 +13,7 @@ import { ContextProps, StepConfig, WizardContext } from './context'
 const useActive = <T = unknown>() => {
   const { steps, setSteps, active: activeIdx } = useContext<ContextProps<T>>(WizardContext)
   const active: StepConfig<T> = useMemo<StepConfig<T>>(() => steps?.at(activeIdx), [activeIdx, steps])
-  const valid = useMemo(() => active.isDefault || active.isValid, [active])
+  const valid = useMemo(() => active.isDefault || active.isValid, [active, steps])
   const completed = useMemo(() => !active.isDefault && active.isCompleted, [active])
 
   const setValid = useCallback((valid: boolean) => {
@@ -95,9 +95,10 @@ const useNavigation = () => {
   const onReset = useCallback(() => {
     const defaultSteps = steps.filter(step => step.isDefault || step.isPlaceholder)
 
+    setActive(0)
     setSteps(defaultSteps)
     setCompleted(false)
-  }, [setSteps, steps, setCompleted])
+  }, [steps, setActive, setSteps, setCompleted])
 
   const onEdit = useCallback((step: StepConfig) => {
     const idx = steps.findIndex(s => s.key === step.key)
@@ -147,7 +148,8 @@ const usePicker = () => {
   }, [steps, setSteps])
 
   const selected = useMemo(() => steps.filter(step => !step.isDefault && !step.isPlaceholder && !step.isDependency), [steps])
-  const selectedCount = selected?.length || 0
+  const requiredLength = useMemo(() => steps.filter(step => step.isRequired).length, [steps])
+  const selectedCount = (selected.length || 0) - requiredLength
 
   return {
     onSelect,

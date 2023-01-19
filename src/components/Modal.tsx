@@ -42,7 +42,6 @@ ref: Ref<any>) {
     <HonorableModal
       open={open}
       onClose={onClose}
-      form={form}
       ref={ref}
       fontSize={16}
       color="text"

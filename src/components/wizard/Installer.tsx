@@ -7,12 +7,15 @@ import { AppIcon } from '../../index'
 import PencilIcon from '../icons/PencilIcon'
 import Chip from '../Chip'
 
+import Tooltip from '../Tooltip'
+
+import InfoOutlineIcon from '../icons/InfoOutlineIcon'
+
 import { useNavigation, useStepper } from './hooks'
 
 const Installer = styled(InstallerUnstyled)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  maxHeight: '576px',
   height: '100%',
   minHeight: '200px',
   gap: theme.spacing.small,
@@ -26,6 +29,10 @@ const Installer = styled(InstallerUnstyled)(({ theme }) => ({
   '.item-right-content': {
     display: 'flex',
     alignItems: 'center',
+  },
+
+  '.chip-content': {
+    marginLeft: theme.spacing.xxsmall,
   },
 }))
 
@@ -59,6 +66,21 @@ function InstallerUnstyled({ ...props }: StyledProps<unknown>): ReactElement {
                     hue="lightest"
                     size="small"
                   >Dependency
+                  </Chip>
+                )}
+                {app.isRequired && (
+                  <Chip
+                    marginRight="medium"
+                    hue="lightest"
+                    size="small"
+                    gap="medium"
+                  >
+                    {app.tooltip && (
+                      <Tooltip label={app.tooltip}>
+                        <InfoOutlineIcon size={14} />
+                      </Tooltip>
+                    )}
+                    <span className="chip-content">Required</span>
                   </Chip>
                 )}
                 <PencilIcon

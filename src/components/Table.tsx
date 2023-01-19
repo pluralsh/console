@@ -2,6 +2,7 @@ import { Div, DivProps } from 'honorable'
 import {
   CSSProperties,
   ComponentProps,
+  Ref,
   forwardRef,
   useMemo,
   useRef,
@@ -375,7 +376,7 @@ function TableRef({
   reactVirtualOptions: virtualizerOptions,
   reactTableOptions,
   ...props
-}: TableProps) {
+}: TableProps, forwardRef: Ref<any>) {
   const tableContainerRef = useRef<HTMLDivElement>()
   const [hover, setHover] = useState(false)
   const [scrollTop, setScrollTop] = useState(0)
@@ -438,6 +439,7 @@ function TableRef({
       width={width}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      ref={forwardRef}
     >
       <Div
         backgroundColor="fill-two"

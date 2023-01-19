@@ -86,7 +86,7 @@ ref: Ref<any>) {
         {children}
       </Div>
       <Flex
-        align="top"
+        align="flex-start"
         color="text-light"
         marginTop="xsmall"
       >

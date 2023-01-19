@@ -21,7 +21,7 @@ function SidebarRef({ layout = 'vertical', children, ...props }: SidebarProps, r
     <Flex
       direction={isHorizontal ? 'row' : 'column'}
       grow={1}
-      justify="start"
+      justify="flex-start"
       height={isHorizontal ? size : '100%'}
       width={isHorizontal ? '100%' : size}
       maxWidth={isHorizontal ? '100%' : size}

@@ -8,7 +8,6 @@ import {
 import { InputProps, Label } from 'honorable'
 import classNames from 'classnames'
 import styled from 'styled-components'
-import PropTypes from 'prop-types'
 import { useToggleState } from '@react-stately/toggle'
 import { useCheckbox } from '@react-aria/checkbox'
 import { VisuallyHidden } from '@react-aria/visually-hidden'
@@ -237,10 +236,6 @@ ref: MutableRefObject<any>) {
       <div className="label"> {props.children}</div>
     </HonorableLabelStyled>
   )
-}
-
-Checkbox.propTypes = {
-  small: PropTypes.bool,
 }
 
 export default forwardRef(Checkbox)

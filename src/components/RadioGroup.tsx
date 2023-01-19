@@ -5,7 +5,6 @@ import {
   forwardRef,
 } from 'react'
 import { Div } from 'honorable'
-// import styled from 'styled-components'
 import { AriaRadioGroupProps, useRadioGroup } from '@react-aria/radio'
 import { useRadioGroupState } from '@react-stately/radio'
 
@@ -58,7 +57,5 @@ ref: any) {
     </Div>
   )
 }
-
-RadioGroup.propTypes = {}
 
 export default forwardRef(RadioGroup)
