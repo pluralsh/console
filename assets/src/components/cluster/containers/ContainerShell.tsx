@@ -1,93 +1,233 @@
 import {
   Button,
-  CheckIcon,
-  Code,
-  IconFrame,
+  CliIcon,
+  CloseIcon,
   Input,
   PageTitle,
   PencilIcon,
   ReloadIcon,
 } from '@pluralsh/design-system'
-import { useContext, useRef, useState } from 'react'
-import { Flex, Form } from 'honorable'
+import {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import { Flex, Form, Span } from 'honorable'
 import { useParams } from 'react-router-dom'
 
 import TerminalThemeSelector from 'components/terminal/TerminalThemeSelector'
+
+import styled from 'styled-components'
 
 import { ShellContext, Terminal, TerminalActions } from '../../terminal/Terminal'
 
 export const DEFAULT_COMMAND = '/bin/sh'
 
-export function ShellCommand({ command, setCommand }) {
-  const [edit, setEdit] = useState(false)
-  const [val, setVal] = useState(command || DEFAULT_COMMAND)
+const CodeInput = styled(Input)(({ theme }) => ({
+  display: 'flex',
+  flexGrow: 1,
+  flexShrink: 1,
+  alignItems: 'center',
+  'input, div': {
+    ...theme.partials.text.code,
+  },
+  '& > div': {
+    maxWidth: '70%',
+    justifyContent: 'left',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    '&, *': {
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      textAlign: 'left',
+      justifyContent: 'left',
+    },
+  },
+}))
+
+const CODELINE_HEIGHT = 42
+
+const CodeLine = styled(({ children, ...props }) => (
+  <div {...props}>
+    <div>{children}</div>
+  </div>
+))(({ theme }) => ({
+  ...theme.partials.text.code,
+  position: 'relative',
+  overflowX: 'auto',
+  overflowY: 'hidden',
+  height: CODELINE_HEIGHT,
+  whiteSpace: 'nowrap',
+  border: theme.borders.input,
+  borderRadius: theme.borderRadiuses.medium,
+  color: theme.colors['text-xlight'],
+  backgroundColor: theme.colors['fill-one'],
+  div: {
+    display: 'flex',
+    alignItems: 'center',
+    position: 'absolute',
+    paddingLeft: theme.spacing.small,
+    paddingRight: theme.spacing.small,
+    top: 0,
+    height: CODELINE_HEIGHT - theme.borderWidths.default * 2,
+  },
+}))
+
+function truncRight(str: string, amt: number) {
+  return str.slice(str.length - amt, str.length)
+}
+function truncLeft(str: string, amt: number) {
+  return str.slice(0, amt)
+}
+
+const CodeWrap = styled.div<{ $isEditing: boolean }>(({ $isEditing }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'stretch',
+  overflowX: 'hidden',
+  ...($isEditing ? { width: 0 } : { flexGrow: 1, flexShrink: 1 }),
+}))
+
+export function ShellCommand({
+  command,
+  setCommand,
+  isDefault,
+  defaultCommand,
+}: {
+  command: string
+  setCommand: (arg: string | null) => void
+  isDefault: boolean
+  defaultCommand: string
+}) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [inputVal, setInputVal] = useState(command)
   const { namespace, name, container } = useParams()
+  const inputWrapRef = useRef<HTMLDivElement>()
+
+  useEffect(() => {
+    if (!isEditing) {
+      setInputVal(command)
+    }
+  }, [command, isEditing])
+
+  useEffect(() => {
+    if (isEditing && inputWrapRef.current) {
+      const input = inputWrapRef.current.querySelector('input')
+
+      input?.focus()
+    }
+  }, [isEditing])
+
+  const commandLeft = `kubectl exec ${name} -it -n ${namespace} -c ${container} -- `
+  const commandLeftTrunc = (
+    <span>
+      {truncLeft(commandLeft, 13)}
+      <Span color="text-xlight">...</Span>
+      {truncRight(commandLeft, 20)}
+    </span>
+  )
 
   return (
-    <Flex
+    <Form
+      display="flex"
       gap="xsmall"
       marginBottom="xsmall"
-      alignItems="stretch"
+      onSubmit={e => {
+        e.preventDefault()
+        setCommand(inputVal)
+        setIsEditing(false)
+      }}
+      width="100%"
     >
-      <Code
-        minWidth={200}
-        flexShrink={1}
-        flexGrow={1}
+      <Flex
+        ref={inputWrapRef as any}
+        width="50px"
+        flex="1 1"
       >
-        {`kubectl exec ${name} -it -n ${namespace} -c ${container}`}
-      </Code>
-      {!edit && (
-        <Code
-          flexGrow={1}
-          flexShrink={1}
-          minWidth="200px"
+        <CodeWrap
+          $isEditing={isEditing}
+          className="codeWrap"
         >
-          {command || DEFAULT_COMMAND}
-        </Code>
-      )}
-      {edit && (
-        <Form
-          display="flex"
-          onSubmit={() => {
-            setEdit(false)
-            setCommand(val)
-          }}
-        >
-          <Input
-            plain
-            value={val}
-            flexGrow={1}
-            flexShrink={1}
-            minWidth="200px"
-            alignItems="center"
-            onChange={({ target: { value } }) => setVal(value)}
+          <CodeLine className="codeEdit">{`${commandLeft}${command}`}</CodeLine>
+        </CodeWrap>
+        {isEditing && (
+          <CodeInput
+            placeholder={defaultCommand}
+            value={inputVal}
+            prefix={commandLeftTrunc}
+            onChange={({ target: { value } }) => {
+              setInputVal(value)
+            }}
+            onKeyDown={(e: KeyboardEvent) => {
+              if (e.code.toLowerCase() === 'escape') {
+                setIsEditing(false)
+              }
+            }}
           />
-        </Form>
-      )}
-      <Flex alignItems="center">
-        <IconFrame
-          clickable
-          size="medium"
-          icon={edit ? <CheckIcon /> : <PencilIcon />}
-          textValue={edit ? 'Set command' : 'Change command'}
-          tooltip
-          onClick={() => {
-            if (!edit) {
-              setEdit(true)
-            }
-            else {
-              setEdit(false)
-              setCommand(val)
-            }
-          }}
-        />
+        )}
       </Flex>
-    </Flex>
+      {!isEditing && (
+        <Button
+          floating
+          size="medium"
+          startIcon={<PencilIcon />}
+          onClick={() => {
+            setIsEditing(true)
+          }}
+        >
+          Edit
+        </Button>
+      )}
+      {isEditing && (
+        <Button
+          floating
+          size="medium"
+          startIcon={<CliIcon />}
+          type="submit"
+        >
+          Run
+        </Button>
+      )}
+      {(isEditing || !isDefault) && (
+        <Button
+          secondary
+          size="medium"
+          startIcon={<CloseIcon />}
+          onClick={() => {
+            setCommand(null)
+            setIsEditing(false)
+          }}
+        >
+          Reset
+        </Button>
+      )}
+    </Form>
   )
 }
 
+const useCommand = (initialCommand?: string | null) => {
+  const [command, setCommand] = useState(initialCommand || DEFAULT_COMMAND)
+  const setCommandSafe: (arg: string | null) => void = newCmd => {
+    if (typeof newCmd === 'string') {
+      newCmd = newCmd.trim()
+    }
+    setCommand(newCmd || DEFAULT_COMMAND)
+  }
+
+  return {
+    command,
+    defaultCommand: DEFAULT_COMMAND,
+    setCommand: setCommandSafe,
+    isDefault: command === DEFAULT_COMMAND,
+  }
+}
+
 function ShellWithContext() {
-  const [command, setCommand] = useState(DEFAULT_COMMAND)
+  const {
+    command, setCommand, defaultCommand, isDefault,
+  } = useCommand(null)
   const { namespace, name, container } = useParams()
   const shellContext = useContext(ShellContext)
 
@@ -116,19 +256,21 @@ function ShellWithContext() {
       </PageTitle>
       <ShellCommand
         command={command}
+        defaultCommand={defaultCommand}
+        isDefault={isDefault}
         setCommand={setCommand}
       />
       <Terminal
         room={`pod:${namespace}:${name}:${container}`}
-        command={command || DEFAULT_COMMAND}
-        header={`connecting to pod ${name} using ${command || DEFAULT_COMMAND}...`}
+        command={command}
+        header={`Connecting to pod ${name} using ${command}...`}
       />
     </Flex>
   )
 }
 
 export default function Shell() {
-  const ref = useRef<TerminalActions>({ handleResetSize: () => { } })
+  const ref = useRef<TerminalActions>({ handleResetSize: () => {} })
 
   return (
     <ShellContext.Provider value={ref}>

@@ -62,7 +62,7 @@ export const createCenteredMetric = (val, label, { fontSize = 25 } = {}) => func
   }
 
   return (
-    <g transform={`translate(${center[0]},${center[1] + 3})`}>
+    <g transform={`translate(${center[0]},${center[1] + 1})`}>
       <text
         fill={theme.colors['text-light']}
         x="0"
@@ -77,7 +77,7 @@ export const createCenteredMetric = (val, label, { fontSize = 25 } = {}) => func
       <text
         fill={theme.colors['text-xlight']}
         x="0"
-        y="3"
+        y="5.5"
         textAnchor="middle"
         dominantBaseline="hanging"
         style={{

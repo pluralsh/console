@@ -1,10 +1,15 @@
 import { A, Flex } from 'honorable'
 import { Link } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
-import { useMemo, useState } from 'react'
+import {
+  ComponentProps,
+  memo,
+  useMemo,
+  useState,
+} from 'react'
 import { filesize } from 'filesize'
 
-import type { Maybe, Pod } from 'generated/graphql'
+import type { Application, Maybe, Pod } from 'generated/graphql'
 import { ReadinessT } from 'utils/status'
 
 import {
@@ -19,6 +24,7 @@ import { useMutation } from '@apollo/client'
 
 import {
   ContainersReadyChip,
+  LabelWithIcon,
   TABLE_HEIGHT,
   TableCaretLink,
   TableText,
@@ -72,6 +78,7 @@ type PodTableRow = {
   name?: string
   nodeName?: string
   namespace?: string
+  namespaceIcon?: string
   memory: {
     requests?: number
     limits?: any
@@ -91,6 +98,7 @@ const columnHelper = createColumnHelper<PodTableRow>()
 
 export const ColNameLink = columnHelper.accessor(row => row.name, {
   id: 'name-link',
+  enableGlobalFilter: true,
   cell: ({ row: { original }, ...props }) => (
     <TableText>
       <Tooltip
@@ -116,6 +124,7 @@ export const ColNameLink = columnHelper.accessor(row => row.name, {
 
 export const ColName = columnHelper.accessor(row => row.name, {
   id: 'name',
+  enableGlobalFilter: true,
   cell: props => (
     <TableText>
       <Tooltip
@@ -130,13 +139,15 @@ export const ColName = columnHelper.accessor(row => row.name, {
 })
 
 export const ColNamespace = columnHelper.accessor(row => row.namespace, {
-  id: 'name',
-  cell: props => (
-    <TableText>
-      <span>{props.getValue()}</span>
-    </TableText>
+  id: 'namespace',
+  enableGlobalFilter: true,
+  cell: ({ row: { original }, ...props }) => (
+    <LabelWithIcon
+      label={props.getValue()}
+      icon={original.namespaceIcon}
+    />
   ),
-  header: 'Name',
+  header: 'Namespace',
 })
 
 export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
@@ -244,8 +255,12 @@ export const ColDelete = refetch => columnHelper.accessor(row => row.name, {
   header: '',
 })
 
-type PodListProps = {
-  pods?: Maybe<Pod>[] & Pod[]
+export type PodWithId = Pod & {
+  id?: Maybe<string>
+}
+type PodListProps = Omit<ComponentProps<typeof Table>, 'data'> & {
+  pods?: Maybe<PodWithId>[] & PodWithId[]
+  applications?: Maybe<Maybe<Application>[]>
   columns: any[]
 }
 
@@ -254,7 +269,9 @@ function getRestarts(status: Pod['status']) {
     0)
 }
 
-export function PodsList({ pods, columns }: PodListProps) {
+export const PodsList = memo(({
+  pods, applications, columns, ...props
+}: PodListProps) => {
   const tableData: PodTableRow[] = useMemo(() => (pods || [])
     .filter((pod): pod is Pod => !!pod)
     .map(pod => {
@@ -265,10 +282,16 @@ export function PodsList({ pods, columns }: PodListProps) {
         memory: { requests: memoryRequests, limits: memoryLimits },
       } = getPodResources(containers)
 
+      const namespaceIcon
+              = pod?.metadata?.namespace
+              && applications?.find(app => app?.name === pod.metadata.namespace)
+                ?.spec?.descriptor?.icons?.[0]
+
       return {
         name: pod?.metadata?.name,
         nodeName: pod?.spec?.nodeName || undefined,
         namespace: pod?.metadata?.namespace || undefined,
+        namespaceIcon: namespaceIcon || undefined,
         memory: {
           requests: memoryRequests,
           limits: memoryLimits,
@@ -281,7 +304,7 @@ export function PodsList({ pods, columns }: PodListProps) {
         containers: getPodContainersStats(pod.status),
       }
     }),
-  [pods])
+  [applications, pods])
 
   if (!pods || pods.length === 0) {
     return <>No pods available.</>
@@ -291,9 +314,9 @@ export function PodsList({ pods, columns }: PodListProps) {
     <Table
       data={tableData}
       columns={columns}
-      enableColumnResizing
       virtualizeRows
       {...TABLE_HEIGHT}
+      {...props}
     />
   )
-}
+})
