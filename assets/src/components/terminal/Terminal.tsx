@@ -9,17 +9,16 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useResizeDetector } from 'react-resize-detector'
-
+import styled from 'styled-components'
 import { XTerm } from 'xterm-for-react'
 import { FitAddon } from 'xterm-addon-fit'
+import { useResizeDetector } from 'react-resize-detector'
+import debounce from 'lodash/debounce'
 
 import { socket } from 'helpers/client'
 
-import { normalizedThemes } from 'components/terminal/themes'
-import TerminalThemeContext from 'components/terminal/TerminalThemeContext'
-import debounce from 'lodash/debounce'
-import styled from 'styled-components'
+import { normalizedThemes } from './themes'
+import TerminalThemeContext from './TerminalThemeContext'
 
 const TerminalWrapper = styled.div<{ $backgroundColor: string }>(({ theme, $backgroundColor }) => ({
   backgroundColor: $backgroundColor,
@@ -47,6 +46,7 @@ const TerminalWrapper = styled.div<{ $backgroundColor: string }>(({ theme, $back
   },
 }))
 
+/* Stolen and adapted from app.plural.sh */
 export function Terminal({
   room,
   header,
@@ -62,11 +62,29 @@ export function Terminal({
   const fitAddon = useMemo(() => new FitAddon(), [])
   const [terminalTheme] = useContext(TerminalThemeContext)
   const [restart, setRestart] = useState(false)
-  const [fitted, setFitted] = useState(false)
-  const [retry, setRetry] = useState(0)
   const shellContext = useContext(ShellContext)
+  const isFirstConnect = useRef(true)
 
-  /* Stolen from app.plural.sh */
+  const getDimensions = useCallback(() => {
+    let cols = 80
+    let rows = 24
+
+    try {
+      if (!xterm.current.terminal.options) {
+        // hack around an xterm-addon-fit bug
+        xterm.current.terminal.options = {}
+      }
+      ({ cols, rows } = fitAddon.proposeDimensions() as any)
+    }
+    catch (error) {
+      console.error(error)
+    }
+    if (cols !== dimensions.cols || rows !== dimensions.rows) {
+      setDimensions({ cols, rows })
+    }
+
+    return { cols, rows }
+  }, [dimensions.cols, dimensions.rows, fitAddon])
 
   useEffect(() => {
     if (!xterm?.current?.terminal || restart) {
@@ -77,12 +95,17 @@ export function Terminal({
     }
 
     const term = xterm.current.terminal
-
-    term.options = {} // hack around an xterm-addon-fit bug
     const params = command ? { command } : {}
     const chan = socket.channel(room, params)
 
-    term.write(`${header}\r\n\r\n`)
+    try {
+      fitAddon.fit()
+    }
+    catch (error) {
+      console.error(error)
+    }
+
+    term.write(`${isFirstConnect.current ? '' : '\r\n\r\n'}${header}\r\n`)
     chan.onError(err => console.error(`Unknown error during booting into your shell: ${JSON.stringify(err)}`))
     chan.on('stdo', ({ message }) => {
       term.write(message)
@@ -93,55 +116,35 @@ export function Terminal({
       // }
     })
     chan.join()
+
+    const { cols, rows } = getDimensions()
+
     setChannel(chan)
 
+    const ref = socket.onOpen(() => setTimeout(() => chan.push('resize', { width: cols, height: rows }), 1000))
+
+    isFirstConnect.current = false
+
     return () => {
+      socket.off([ref])
       chan.leave()
     }
-  }, [xterm, restart, command, room, header])
-
-  const handleResize = useCallback(({ cols, rows }) => {
-    if (!channel) return
-    channel.push('resize', { width: cols, height: rows })
-  },
-  [channel])
-
-  useEffect(() => {
-    if (fitted || !xterm?.current?.terminal || !channel) return
-
-    try {
-      fitAddon.fit()
-      const { cols, rows } = fitAddon.proposeDimensions() as any
-
-      handleResize({ cols, rows })
-      setDimensions({ cols, rows })
-      setFitted(true)
-    }
-    catch (error) {
-      console.error(error)
-      console.log(`retrying fitting window, retries ${retry}`)
-      setTimeout(() => setRetry(retry + 1), 1000)
-    }
-  }, [
-    xterm,
-    fitAddon,
-    setFitted,
-    fitted,
-    channel,
-    handleResize,
-    retry,
-    setRetry,
-    setDimensions,
-  ])
+  }, [xterm, fitAddon, restart, header, command, room, getDimensions])
 
   const handleResetSize = useCallback(() => {
     if (!channel) return
     channel.push('resize', { width: dimensions.cols, height: dimensions.rows })
   }, [channel, dimensions])
 
-  useImperativeHandle(shellContext, () => ({ handleResetSize }), [
-    handleResetSize,
-  ])
+  useEffect(() => {
+    handleResetSize()
+  }, [handleResetSize])
+
+  const handleResize = useCallback(({ cols, rows }) => {
+    if (!channel) return
+    channel.push('resize', { width: cols, height: rows })
+  },
+  [channel])
 
   const { ref } = useResizeDetector({
     onResize: debounce(() => {
@@ -156,6 +159,10 @@ export function Terminal({
   const handleData = useCallback(text => channel.push('command', { cmd: text }),
     [channel])
 
+  useImperativeHandle(shellContext, () => ({ handleResetSize }), [
+    handleResetSize,
+  ])
+
   return (
     <TerminalWrapper
       ref={ref}
@@ -166,9 +173,7 @@ export function Terminal({
         ref={xterm}
         addons={[fitAddon]}
         options={{ theme: normalizedThemes[terminalTheme] }}
-        onResize={({ cols, rows }) => {
-          if (channel) channel.push('resize', { width: cols, height: rows })
-        }}
+        onResize={handleResize}
         onData={handleData}
       />
     </TerminalWrapper>

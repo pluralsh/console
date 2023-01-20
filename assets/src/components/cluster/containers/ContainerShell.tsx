@@ -263,7 +263,7 @@ function ShellWithContext() {
       <Terminal
         room={`pod:${namespace}:${name}:${container}`}
         command={command}
-        header={`connecting to pod ${name} using ${command}...`}
+        header={`Connecting to pod ${name} using ${command}...`}
       />
     </Flex>
   )
