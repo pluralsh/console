@@ -15,8 +15,8 @@ import { useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@apollo/client'
 import { Flex, P } from 'honorable'
 import { GqlError } from 'forge-core'
-import isEqual from 'lodash/isEqual'
 import sortBy from 'lodash/sortBy'
+import uniqBy from 'lodash/uniqBy'
 
 import { PluralApi } from 'components/PluralApi'
 import { useNavBlocker } from 'components/hooks/useNavBlocker'
@@ -30,38 +30,50 @@ import {
   UPDATE_PROVIDER,
 } from './queries'
 
-const sanitize = ({ id, user, group }) => ({ id, userId: user && user.id, groupId: group && group.id })
+const sanitize = ({ id, user, group }) => ({
+  id,
+  userId: user && user.id,
+  groupId: group && group.id,
+})
 
 export function fetchUsers(client, query, setSuggestions) {
-  client.query({ query: SEARCH_USERS, variables: { q: query, all: true } })
-    .then(({ data: { users: { edges } } }) => edges.map(({ node }) => ({ value: node, label: userSuggestion(node) })))
+  client
+    .query({ query: SEARCH_USERS, variables: { q: query, all: true } })
+    .then(({
+      data: {
+        users: { edges },
+      },
+    }) => edges.map(({ node }) => ({ value: node, label: userSuggestion(node) })))
     .then(setSuggestions)
 }
 
 export function fetchGroups(client, query, setSuggestions) {
-  client.query({ query: SEARCH_GROUPS, variables: { q: query } })
-    .then(({ data: { groups: { edges } } }) => edges.map(({ node }) => ({ value: node, label: groupSuggestion(node) })))
+  client
+    .query({ query: SEARCH_GROUPS, variables: { q: query } })
+    .then(({
+      data: {
+        groups: { edges },
+      },
+    }) => edges.map(({ node }) => ({ value: node, label: groupSuggestion(node) })))
     .then(setSuggestions)
 }
 
-function bindingsAreEquivalent(bindings1: any[], bindings2: any[]) {
+function getBindingsOfType(bindings: any[], type: string) {
+  return uniqBy(sortBy(bindings.map(b => b[type]).filter(b => !!b),
+    ['name']),
+  'id')
+}
+
+function isEquivalentBinding(b1, b2) {
+  return b1.id === b2.id
+}
+
+function areEquivalentBindings(bindings1, bindings2) {
   if (bindings1.length !== bindings2.length) {
     return false
   }
-  const groups1 = sortBy(bindings1.map(b => b.group).filter(b => !!b),
-    ['id'])
-  const groups2 = sortBy(bindings2.map(b => b.group).filter(b => !!b),
-    ['id'])
-  const users1 = sortBy(bindings1.map(b => b.user).filter(b => !!b),
-    ['id'])
-  const users2 = sortBy(bindings2.map(b => b.user).filter(b => !!b),
-    ['id'])
-
-  const sorted1 = [...groups1, ...users1]
-  const sorted2 = [...groups2, ...users2]
-
-  sorted1.forEach((b1, i) => {
-    if (!isEqual(b1, sorted2[i])) {
+  bindings1.forEach((b1, i) => {
+    if (!isEquivalentBinding(b1, bindings2[i])) {
       return false
     }
   })
@@ -73,10 +85,32 @@ function UserManagementCard({ id, provider }) {
   const { authMethod, redirectUris, bindings: initialBindings } = provider
   const [bindings, setBindings] = useState(initialBindings)
   const [mutation, { loading, error }] = useMutation(UPDATE_PROVIDER, {
-    variables: { id, attributes: { authMethod, redirectUris, bindings: bindings.map(sanitize) } },
+    variables: {
+      id,
+      attributes: {
+        authMethod,
+        redirectUris,
+        bindings: bindings.map(sanitize),
+      },
+    },
   })
-  const changed = useMemo(() => !bindingsAreEquivalent(initialBindings, bindings),
-    [bindings, initialBindings])
+
+  const { initialGroupBindings, initialUserBindings } = useMemo(() => ({
+    initialGroupBindings: getBindingsOfType(initialBindings, 'group'),
+    initialUserBindings: getBindingsOfType(initialBindings, 'user'),
+  }),
+  [initialBindings])
+
+  const { groupBindings, userBindings } = useMemo(() => ({
+    groupBindings: getBindingsOfType(bindings, 'group'),
+    userBindings: getBindingsOfType(bindings, 'user'),
+  }),
+  [bindings])
+
+  const changed = useMemo(() => !areEquivalentBindings(initialGroupBindings, groupBindings)
+      || !areEquivalentBindings(initialUserBindings, userBindings),
+  [groupBindings, initialGroupBindings, initialUserBindings, userBindings])
+
   const navBlocker = useNavBlocker(changed)
 
   return (
@@ -100,7 +134,8 @@ function UserManagementCard({ id, provider }) {
           body2
           color="text-light"
         >
-          Control which users and groups have access to this application with OIDC.
+          Control which users and groups have access to this application with
+          OIDC.
         </P>
       </Flex>
       <Flex
@@ -116,16 +151,20 @@ function UserManagementCard({ id, provider }) {
         )}
         <BindingInput
           type="group"
-          bindings={bindings.filter(({ group }) => !!group).map(({ group: { name } }) => name)}
+          bindings={groupBindings.map(({ name }) => name)}
           fetcher={fetchGroups}
-          add={group => setBindings([...bindings, { group }])}
+          add={group => (groupBindings.find(({ id }) => id === group?.id)
+            ? null
+            : setBindings([...bindings, { group }]))}
           remove={name => setBindings(bindings.filter(({ group }) => !group || group.name !== name))}
         />
         <BindingInput
           type="user"
-          bindings={bindings.filter(({ user }) => !!user).map(({ user: { email } }) => email)}
+          bindings={userBindings.map(({ email }) => email)}
           fetcher={fetchUsers}
-          add={user => setBindings([...bindings, { user }])}
+          add={user => (userBindings.find(({ id }) => id === user?.id)
+            ? null
+            : setBindings([...bindings, { user }]))}
           remove={email => setBindings(bindings.filter(({ user }) => !user || user.email !== email))}
         />
         <Flex
@@ -156,8 +195,10 @@ function UserManagementCard({ id, provider }) {
 
 function UserManagementContent() {
   const { appName } = useParams()
-  const { data, error } = useQuery(INSTALLATION,
-    { variables: { name: appName }, fetchPolicy: 'cache-and-network' })
+  const { data, error } = useQuery(INSTALLATION, {
+    variables: { name: appName },
+    fetchPolicy: 'cache-and-network',
+  })
 
   if (error) {
     return (
@@ -181,14 +222,14 @@ function UserManagementContent() {
 
   const { installation } = data
 
-  return installation && installation.oidcProvider
-    ? (
-      <UserManagementCard
-        id={installation.id}
-        provider={installation.oidcProvider}
-      />
-    )
-    : (<Flex>No OIDC provider configured.</Flex>)
+  return installation && installation.oidcProvider ? (
+    <UserManagementCard
+      id={installation.id}
+      provider={installation.oidcProvider}
+    />
+  ) : (
+    <Flex>No OIDC provider configured.</Flex>
+  )
 }
 
 export default function UserManagement() {
@@ -199,7 +240,8 @@ export default function UserManagement() {
     { text: 'apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
     { text: 'user management', url: `/apps/${appName}/oidc` },
-  ]), [appName, setBreadcrumbs])
+  ]),
+  [appName, setBreadcrumbs])
 
   return (
     <>
