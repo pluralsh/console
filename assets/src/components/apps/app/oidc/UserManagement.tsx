@@ -9,11 +9,11 @@ import { useContext, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@apollo/client'
 import { Flex, P } from 'honorable'
-import { PluralApi } from 'components/PluralApi'
-
 import { GqlError } from 'forge-core'
-
 import { isEqual } from 'lodash'
+
+import { PluralApi } from 'components/PluralApi'
+import { useNavBlocker } from 'components/hooks/useNavBlocker'
 
 import { BindingInput, groupSuggestion, userSuggestion } from '../../../utils/BindingInput'
 
@@ -45,12 +45,14 @@ function UserManagementCard({ id, provider }) {
     variables: { id, attributes: { authMethod, redirectUris, bindings: bindings.map(sanitize) } },
   })
   const changed = !isEqual(initialBindings, bindings)
+  const navBlocker = useNavBlocker(changed)
 
   return (
     <Card
       paddingHorizontal={100}
       paddingVertical="large"
     >
+      {navBlocker}
       <Flex
         direction="column"
         gap="xxsmall"
