@@ -27,16 +27,14 @@ export function appState({ status: { conditions } }) {
   return { ready, error, readiness }
 }
 
-export function ListItemBorder({ borderColor }: { borderColor: string }) {
-  if (!borderColor) return null
-
+export function ListItemBorder({ color, width = 3, radius = 4 }: { color: string, width?: number, radius?: number }) {
   return (
     <Flex
-      backgroundColor={borderColor}
-      borderTopLeftRadius={4}
-      borderBottomLeftRadius={4}
-      height="100%"
-      width="3px"
+      backgroundColor={color}
+      borderTopLeftRadius={radius}
+      borderBottomLeftRadius={radius}
+      height="inherit"
+      width={width}
     />
   )
 }
@@ -54,7 +52,7 @@ export function ListItem({
       onClick={onClick}
       {...props}
     >
-      {borderColor && <ListItemBorder borderColor={borderColor} />}
+      {borderColor && <ListItemBorder color={borderColor} />}
       <Flex
         align="center"
         gap="small"

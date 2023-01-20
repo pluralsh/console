@@ -22,7 +22,11 @@ export default function Component({ component, last }: {component: any, last: bo
       minWidth={240}
       onClick={() => navigate(`/apps/${appName}/components/${kind.toLowerCase()}/${name}`)}
     >
-      <ListItemBorder borderColor={statusToBorder[status]} />
+      <ListItemBorder
+        color={statusToBorder[status]}
+        width={2}
+        radius={0}
+      />
       <Flex
         align="center"
         gap="small"
