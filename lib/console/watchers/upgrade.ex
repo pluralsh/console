@@ -16,16 +16,22 @@ defmodule Console.Watchers.Upgrade do
     Logger.info "starting upgrades watcher"
     Logger.info "provider info: #{System.get_env("PROVIDER")}"
 
-    {:ok, %{id: id}} = Upgrades.create_queue(%{
+    Upgrades.create_queue(%{
       git: Console.conf(:git_url),
       domain: Console.conf(:url),
       name: Console.conf(:cluster_name),
       provider: to_provider(Console.conf(:provider))
     })
-
-    Process.send_after(self(), :connect, 1000)
-    {:ok, ref} = :timer.send_interval(@poll_interval, :next)
-    {:noreply, %{state | queue_id: id, timer: ref}}
+    |> case do
+      {:ok, %{id: id}} ->
+        Process.send_after(self(), :connect, 1000)
+        {:ok, ref} = :timer.send_interval(@poll_interval, :next)
+        {:noreply, %{state | queue_id: id, timer: ref}}
+      err ->
+        Logger.error "failed to create upgrade queue: #{inspect(err)}"
+        Process.send_after(self(), :start, :timer.seconds(5))
+        {:noreply, state}
+    end
   end
 
   def handle_info(:connect, state) do
