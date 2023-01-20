@@ -53,7 +53,7 @@ export function NotificationsPanel({ closePanel }: any) {
           <Notification
             key={node.id}
             notification={node}
-            _closePanel={closePanel}
+            closePanel={closePanel}
           />
         ))}
       </InfiniteScroller>
