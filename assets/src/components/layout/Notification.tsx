@@ -1,6 +1,7 @@
 import { AppIcon, Button, CollapseIcon } from '@pluralsh/design-system'
 import { getIcon, hasIcons } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
+import { Collapsible } from 'grommet'
 import { Div, Flex, P } from 'honorable'
 import moment from 'moment'
 import { useContext, useMemo, useState } from 'react'
@@ -70,7 +71,10 @@ export default function Notification({ notification, closePanel }: any) {
           }}
         />
       </Flex>
-      {open && (
+      <Collapsible
+        open={open}
+        direction="vertical"
+      >
         <Flex
           backgroundColor="fill-zero"
           borderBottom="1px solid border"
@@ -98,7 +102,7 @@ export default function Notification({ notification, closePanel }: any) {
             </Button>
           </div>
         </Flex>
-      )}
+      </Collapsible>
     </>
   )
 }
