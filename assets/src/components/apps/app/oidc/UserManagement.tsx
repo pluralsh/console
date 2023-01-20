@@ -5,12 +5,18 @@ import {
   LoopingLogo,
   PageTitle,
 } from '@pluralsh/design-system'
-import { useContext, useEffect, useState } from 'react'
+import {
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@apollo/client'
 import { Flex, P } from 'honorable'
 import { GqlError } from 'forge-core'
-import { isEqual } from 'lodash'
+import isEqual from 'lodash/isEqual'
+import sortBy from 'lodash/sortBy'
 
 import { PluralApi } from 'components/PluralApi'
 import { useNavBlocker } from 'components/hooks/useNavBlocker'
@@ -38,13 +44,39 @@ export function fetchGroups(client, query, setSuggestions) {
     .then(setSuggestions)
 }
 
+function bindingsAreEquivalent(bindings1: any[], bindings2: any[]) {
+  if (bindings1.length !== bindings2.length) {
+    return false
+  }
+  const groups1 = sortBy(bindings1.map(b => b.group).filter(b => !!b),
+    ['id'])
+  const groups2 = sortBy(bindings2.map(b => b.group).filter(b => !!b),
+    ['id'])
+  const users1 = sortBy(bindings1.map(b => b.user).filter(b => !!b),
+    ['id'])
+  const users2 = sortBy(bindings2.map(b => b.user).filter(b => !!b),
+    ['id'])
+
+  const sorted1 = [...groups1, ...users1]
+  const sorted2 = [...groups2, ...users2]
+
+  sorted1.forEach((b1, i) => {
+    if (!isEqual(b1, sorted2[i])) {
+      return false
+    }
+  })
+
+  return true
+}
+
 function UserManagementCard({ id, provider }) {
   const { authMethod, redirectUris, bindings: initialBindings } = provider
   const [bindings, setBindings] = useState(initialBindings)
   const [mutation, { loading, error }] = useMutation(UPDATE_PROVIDER, {
     variables: { id, attributes: { authMethod, redirectUris, bindings: bindings.map(sanitize) } },
   })
-  const changed = !isEqual(initialBindings, bindings)
+  const changed = useMemo(() => !bindingsAreEquivalent(initialBindings, bindings),
+    [bindings, initialBindings])
   const navBlocker = useNavBlocker(changed)
 
   return (
