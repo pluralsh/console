@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
 
-import { ArcElement, Chart } from 'chart.js'
 import { Card, LoopingLogo } from '@pluralsh/design-system'
 import { Flex } from 'honorable'
 
@@ -29,11 +28,6 @@ import { Metadata } from '../Metadata'
 
 import { NodeGraphs } from './NodeGraphs'
 import { SubTitle } from './SubTitle'
-
-/*
-Must explicitly import and register chart.js elements used in react-chartjs-2
-*/
-Chart.register(ArcElement)
 
 export const podContainers = pods => pods
   .filter(({ status: { phase } }) => phase !== 'Succeeded')
