@@ -13,7 +13,6 @@ function InfiniteScroller({
     if (!current) return
 
     if (!isScrollbarVisible(current) && hasMore && !loading) {
-      console.log('loadmore111')
       loadMore(loadMoreArgs)
     }
 
@@ -24,7 +23,6 @@ function InfiniteScroller({
         && hasMore
         && Math.abs(event.target.scrollTop - (event.target.scrollHeight - event.target.offsetHeight)) < 32
       ) {
-        console.log('loadmore')
         loadMore(loadMoreArgs)
       }
     }
