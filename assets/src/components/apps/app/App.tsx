@@ -22,7 +22,7 @@ import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/Respon
 
 import { PropsContainer } from 'components/utils/PropsContainer'
 
-import { toAbsoluteURL } from 'utils/url'
+import { ensureURLValidity } from 'utils/url'
 
 import Prop from 'components/utils/Prop'
 
@@ -134,7 +134,7 @@ export default function App() {
             marginBottom="small"
             endIcon={<ArrowTopRightIcon size={14} />}
             as="a"
-            href={toAbsoluteURL(links[0].url)}
+            href={ensureURLValidity(links[0].url)}
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}
@@ -156,7 +156,7 @@ export default function App() {
                 {validLinks.slice(1).map(({ url }) => (
                   <A
                     inline
-                    href={toAbsoluteURL(url)}
+                    href={ensureURLValidity(url)}
                     as="a"
                     target="_blank"
                     rel="noopener noreferrer"
