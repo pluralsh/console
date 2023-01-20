@@ -28,6 +28,8 @@ export function appState({ status: { conditions } }) {
 }
 
 export function ListItemBorder({ borderColor }: { borderColor: string }) {
+  if (!borderColor) return null
+
   return (
     <Flex
       backgroundColor={borderColor}
