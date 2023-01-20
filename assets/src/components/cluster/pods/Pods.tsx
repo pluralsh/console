@@ -85,27 +85,21 @@ export default function AllPods() {
   /*
     TODO: Add subscription when subscription actually starts returning values.
   */
-  useEffect(() => {
-    console.log('subscribe!')
-    subscribeToMore({
-      document: PODS_SUB,
-      updateQuery: (prev, { subscriptionData }) => {
-        console.log('subscribe prev', prev)
-        console.log('subscribe data', subscriptionData)
+  // useEffect(() => {
+  //   console.log('subscribe!')
+  //   subscribeToMore({
+  //     document: PODS_SUB,
+  //     updateQuery: (prev, { subscriptionData }) => {
+  //       console.log('subscribe prev', prev)
+  //       console.log('subscribe data', subscriptionData)
 
-        return prev
-      },
-      onError: e => {
-        console.log('subscribe error msg', e.message)
-      },
-    })
-  }, [subscribeToMore])
-
-  const { data: subscribeData, error: subscribeError, ...subscribeProps } = useSubscription(PODS_SUB, {})
-
-  console.log('subscribeData', subscribeData)
-  console.log('subscribeError', subscribeError)
-  console.log('subscribeProps', subscribeProps)
+  //       return prev
+  //     },
+  //     onError: e => {
+  //       console.log('subscribe error msg', e.message)
+  //     },
+  //   })
+  // }, [subscribeToMore])
 
   const columns = useMemo(() => [
     ColNamespace,
