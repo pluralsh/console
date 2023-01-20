@@ -3,7 +3,7 @@ import { Flex, P } from 'honorable'
 import { ME_Q, NOTIFICATIONS_Q } from 'components/graphql/users'
 import InfiniteScroller from 'components/utils/InfiniteScroller'
 import { useApolloClient, useQuery, useSubscription } from '@apollo/client'
-import { updateCache } from 'utils/graphql'
+import { extendConnection, updateCache } from 'utils/graphql'
 import { Dispatch, useEffect } from 'react'
 
 import Notification from './Notification'
@@ -35,7 +35,6 @@ export function NotificationsPanel({ closePanel, all }: {closePanel: Dispatch<vo
   if (!data) return null
 
   const { edges, pageInfo } = data.notifications
-  const hasMoreNotifications = pageInfo?.hasNextPage
 
   if (!edges.length) {
     return <P padding="medium">You do not have any notifications yet.</P>
@@ -48,8 +47,12 @@ export function NotificationsPanel({ closePanel, all }: {closePanel: Dispatch<vo
     >
       <InfiniteScroller
         loading={loading}
-        hasMore={hasMoreNotifications}
+        hasMore={pageInfo.hasNextPage}
         loadMore={fetchMore}
+        loadMoreArgs={{
+          variables: { cursor: pageInfo.endCursor },
+          updateQuery: (prev, { fetchMoreResult: { notifications } }) => extendConnection(prev, notifications, 'notifications'),
+        }}
         // Allow for scrolling in a flexbox layout
         flexGrow={1}
         height={0}
@@ -65,13 +68,6 @@ export function NotificationsPanel({ closePanel, all }: {closePanel: Dispatch<vo
     </Flex>
   )
 }
-
-// hasNextPage={pageInfo.hasNextPage}
-
-//       loadNextPage={() => pageInfo.hasNextPage && fetchMore({
-//         variables: { cursor: pageInfo.endCursor },
-//         updateQuery: (prev, { fetchMoreResult: { notifications } }) => extendConnection(prev, notifications, 'notifications'),
-//       })}
 
   // const [mutation] = useMutation(MARK_READ, {
   //   update: cache => updateCache(cache, {
