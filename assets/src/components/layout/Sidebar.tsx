@@ -3,10 +3,12 @@ import {
   ArrowTopRightIcon,
   BellIcon,
   BuildIcon,
+  Checkbox,
   CloseIcon,
   Sidebar as DSSidebar,
   DiscordIcon,
   GitHubLogoIcon,
+  IconFrame,
   ListIcon,
   LogoutIcon,
   PeopleIcon,
@@ -39,11 +41,19 @@ import {
 
 import { wipeToken } from 'helpers/auth'
 
+import { ME_Q } from 'components/graphql/users'
+
+import { useMutation } from '@apollo/client'
+
+import { updateCache } from 'utils/graphql'
+
 import { LoginContext } from '../contexts'
 
 import { AutoRefresh, getCommit } from '../AutoRefresh'
 
 import { NotificationsPanel } from './NotificationsPanel'
+
+import { MARK_READ } from './queries'
 
 export const SIDEBAR_ICON_HEIGHT = '42px'
 
@@ -76,6 +86,7 @@ export default function Sidebar() {
   const notificationsPanelRef = useRef<HTMLDivElement>(null)
   const [isMenuOpen, setIsMenuOpened] = useState<boolean>(false)
   const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] = useState(false)
+  const [all, setAll] = useState<boolean>(false)
   const { me, configuration } = useContext<any>(LoginContext)
   const navigate = useNavigate()
   const { pathname } = useLocation()
@@ -84,15 +95,17 @@ export default function Sidebar() {
     : pathname.startsWith(path))
   const menuItems = configuration.isSandbox ? MENU_ITEMS.filter(({ sanboxed }) => !sanboxed) : MENU_ITEMS
 
-  useOutsideClick(menuRef, event => {
-    if (!menuItemRef.current?.contains(event.target as any)) {
-      setIsMenuOpened(false)
-    }
+  const [mutation] = useMutation(MARK_READ, {
+    update: cache => updateCache(cache, {
+      query: ME_Q,
+      update: ({ me, ...rest }) => ({ ...rest, me: { ...me, unreadNotifications: 0 } }),
+    }),
   })
 
-  useOutsideClick(notificationsPanelRef, () => {
-    setIsNotificationsPanelOpen(false)
-  })
+  const toggleNotificationPanel = useCallback(open => {
+    if (!open) mutation()
+    setIsNotificationsPanelOpen(open)
+  }, [mutation, setIsNotificationsPanelOpen])
 
   const handleLogout = useCallback(() => {
     wipeToken()
@@ -100,6 +113,14 @@ export default function Sidebar() {
 
     w.location = '/login'
   }, [])
+
+  useOutsideClick(menuRef, event => {
+    if (!menuItemRef.current?.contains(event.target as any)) {
+      setIsMenuOpened(false)
+    }
+  })
+
+  useOutsideClick(notificationsPanelRef, () => toggleNotificationPanel(false))
 
   if (!me) return null
 
@@ -145,7 +166,7 @@ export default function Sidebar() {
             tooltip="Notifications"
             onClick={event => {
               event.stopPropagation()
-              setIsNotificationsPanelOpen(x => !x)
+              toggleNotificationPanel(!isNotificationsPanelOpen)
             }}
             badge={me?.unreadNotifications}
             backgroundColor={isNotificationsPanelOpen ? theme.colors?.grey[875] : null}
@@ -267,14 +288,24 @@ export default function Sidebar() {
               <P subtitle2>Notifications</P>
               <Flex
                 align="center"
+                gap="small"
                 justify="center"
                 padding="xsmall"
-                cursor="pointer"
-                _hover={{ backgroundColor: 'fill-one-hover' }}
-                borderRadius="medium"
-                onClick={() => setIsNotificationsPanelOpen(false)}
               >
-                <CloseIcon />
+                <Checkbox
+                  checked={all}
+                  onChange={() => setAll(!all)}
+                  small
+                >
+                  Show all notifications
+                </Checkbox>
+                <IconFrame
+                  clickable
+                  icon={<CloseIcon />}
+                  tooltip
+                  textValue="Close notification panel"
+                  onClick={() => toggleNotificationPanel(false)}
+                />
               </Flex>
             </Flex>
             <Flex
@@ -282,7 +313,10 @@ export default function Sidebar() {
               direction="column"
               overflowY="auto"
             >
-              <NotificationsPanel closePanel={() => setIsNotificationsPanelOpen(false)} />
+              <NotificationsPanel
+                closePanel={() => toggleNotificationPanel(false)}
+                all={all}
+              />
             </Flex>
           </Flex>
         </Flex>

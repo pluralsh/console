@@ -1,16 +1,15 @@
 import { Flex, P } from 'honorable'
 
 import { ME_Q, NOTIFICATIONS_Q } from 'components/graphql/users'
-
 import InfiniteScroller from 'components/utils/InfiniteScroller'
-
 import { useApolloClient, useQuery, useSubscription } from '@apollo/client'
-import { updateCache } from 'utils/graphql'
+import { extendConnection, updateCache } from 'utils/graphql'
+import { Dispatch, useEffect } from 'react'
 
 import Notification from './Notification'
 import { NOTIFS_SUB } from './queries'
 
-export function NotificationsPanel({ closePanel }: any) {
+export function NotificationsPanel({ closePanel, all }: {closePanel: Dispatch<void>, all: boolean}) {
   const client = useApolloClient()
 
   useSubscription(NOTIFS_SUB, {
@@ -22,15 +21,20 @@ export function NotificationsPanel({ closePanel }: any) {
     },
   })
 
-  const { data, loading, fetchMore } = useQuery(NOTIFICATIONS_Q, {
-    variables: { all: true },
+  const {
+    data, loading, refetch, fetchMore,
+  } = useQuery(NOTIFICATIONS_Q, {
+    variables: { all },
     fetchPolicy: 'cache-and-network',
   })
+
+  useEffect(() => {
+    refetch()
+  }, [all, refetch])
 
   if (!data) return null
 
   const { edges, pageInfo } = data.notifications
-  const hasMoreNotifications = pageInfo?.hasNextPage
 
   if (!edges.length) {
     return <P padding="medium">You do not have any notifications yet.</P>
@@ -43,8 +47,12 @@ export function NotificationsPanel({ closePanel }: any) {
     >
       <InfiniteScroller
         loading={loading}
-        hasMore={hasMoreNotifications}
+        hasMore={pageInfo.hasNextPage}
         loadMore={fetchMore}
+        loadMoreArgs={{
+          variables: { cursor: pageInfo.endCursor },
+          updateQuery: (prev, { fetchMoreResult: { notifications } }) => extendConnection(prev, notifications, 'notifications'),
+        }}
         // Allow for scrolling in a flexbox layout
         flexGrow={1}
         height={0}
@@ -53,39 +61,11 @@ export function NotificationsPanel({ closePanel }: any) {
           <Notification
             key={node.id}
             notification={node}
-            _closePanel={closePanel}
+            closePanel={closePanel}
           />
         ))}
       </InfiniteScroller>
     </Flex>
   )
 }
-
-// hasNextPage={pageInfo.hasNextPage}
-
-//       loadNextPage={() => pageInfo.hasNextPage && fetchMore({
-//         variables: { cursor: pageInfo.endCursor },
-//         updateQuery: (prev, { fetchMoreResult: { notifications } }) => extendConnection(prev, notifications, 'notifications'),
-//       })}
-
-  // const [mutation] = useMutation(MARK_READ, {
-  //   update: cache => updateCache(cache, {
-  //     query: ME_Q,
-  //     update: ({ me, ...rest }) => ({ ...rest, me: { ...me, unreadNotifications: 0 } }),
-  //   }),
-  // })
-
-// function FilterAll({ all, setAll }) {
-//   return (
-//     <Box
-//       flex={false}
-//       pad="xsmall"
-//       round="3px"
-//       hoverIndicator="card"
-//       onClick={() => setAll(!all)}
-//     >
-//       <Eye size="14px" />
-//     </Box>
-//   )
-// }
 

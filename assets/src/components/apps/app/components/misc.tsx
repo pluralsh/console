@@ -37,12 +37,14 @@ export function ComponentStatus({ status }: { status?: string | null }) {
   }
 
   return (
-    <Chip
-      size="small"
-      severity={statusToSeverity[status]}
-    >
-      {statusToDisplay[status]}
-    </Chip>
+    <div>
+      <Chip
+        size="small"
+        severity={statusToSeverity[status]}
+      >
+        {statusToDisplay[status]}
+      </Chip>
+    </div>
   )
 }
 

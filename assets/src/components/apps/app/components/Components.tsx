@@ -1,17 +1,12 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { PageTitle } from '@pluralsh/design-system'
+import { Card, PageTitle } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
 
-import { ListItem } from 'components/apps/misc'
-
-import { Flex } from 'honorable'
-
-import { ComponentIcon, ComponentStatus, statusToBorder } from './misc'
+import Component from './Component'
 
 export default function Components() {
-  const navigate = useNavigate()
   const { appName } = useParams()
   const { applications } = useContext<any>(InstallationContext)
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
@@ -26,29 +21,19 @@ export default function Components() {
   return (
     <>
       <PageTitle heading="Components" />
-      <Flex
+      <Card
         direction="column"
         paddingRight="xxxsmall"
         overflowY="auto"
       >
-        {currentApp.status.components.map(({
-          name, group, kind, status,
-        }, i) => (
-          <ListItem
+        {currentApp.status.components.map((component, i) => (
+          <Component
             key={i}
-            title={name}
-            subtitle={`${group || 'v1'}/${kind.toLowerCase()}`}
-            icon={<ComponentIcon kind={kind} />}
-            iconFrameType="tertiary"
-            iconFrameSize="small"
-            borderColor={statusToBorder[status]}
-            chips={<ComponentStatus status={status} />}
-            chipsPlacement="right"
-            onClick={() => navigate(`/apps/${appName}/components/${kind.toLowerCase()}/${name}`)}
-            marginBottom="medium"
+            component={component}
+            last={currentApp.status.components.length === i + 1}
           />
         ))}
-      </Flex>
+      </Card>
     </>
   )
 }

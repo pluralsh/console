@@ -14,10 +14,9 @@ import {
   RunBookIcon,
   Select,
 } from '@pluralsh/design-system'
-import { useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { toAbsoluteURL } from 'utils/url'
+import { ensureURLValidity } from 'utils/url'
 
 import { Readiness } from 'utils/status'
 
@@ -76,7 +75,7 @@ export default function AppCard({ app }: any) {
       minWidth={240}
       onClick={() => navigate(`/apps/${name}`)}
     >
-      <ListItemBorder borderColor={borderColor} />
+      <ListItemBorder color={borderColor} />
       <Flex
         align="center"
         gap="small"
@@ -115,7 +114,7 @@ export default function AppCard({ app }: any) {
             fontWeight={600}
             endIcon={<ArrowTopRightIcon size={14} />}
             as="a"
-            href={toAbsoluteURL(links[0].url)}
+            href={ensureURLValidity(links[0].url)}
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}
@@ -139,7 +138,7 @@ export default function AppCard({ app }: any) {
           )}
           onSelectionChange={url => (isShortcut(url)
             ? navigate(`apps/${name}/${url}`)
-            : window.open(toAbsoluteURL(`${url}`), '_blank')?.focus())}
+            : window.open(ensureURLValidity(`${url}`), '_blank')?.focus())}
         >
           {validLinks?.length > 1 && validLinks.slice(1).map(({ url }) => (
             <ListBoxItem
