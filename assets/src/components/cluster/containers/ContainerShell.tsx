@@ -8,8 +8,6 @@ import {
   ReloadIcon,
 } from '@pluralsh/design-system'
 import {
-  Dispatch,
-  SetStateAction,
   useContext,
   useEffect,
   useRef,
@@ -84,7 +82,7 @@ function truncLeft(str: string, amt: number) {
   return str.slice(0, amt)
 }
 
-const CodeWrap = styled.div<{ $isEditing: boolean }>(({ theme, $isEditing }) => ({
+const CodeWrap = styled.div<{ $isEditing: boolean }>(({ $isEditing }) => ({
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'stretch',
@@ -99,7 +97,7 @@ export function ShellCommand({
   defaultCommand,
 }: {
   command: string
-  setCommand: Dispatch<SetStateAction<string | null>>
+  setCommand: (arg: string | null) => void
   isDefault: boolean
   defaultCommand: string
 }) {

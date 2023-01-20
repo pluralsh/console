@@ -16,19 +16,13 @@ import {
   SearchIcon,
   Select,
 } from '@pluralsh/design-system'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ListBoxFooterProps } from '@pluralsh/design-system/dist/components/ListBoxItem'
+import styled, { useTheme } from 'styled-components'
 
 import type { RootQueryType } from 'generated/graphql'
 
-import { useNavigate, useParams } from 'react-router-dom'
-
-import { ListBoxFooterProps } from '@pluralsh/design-system/dist/components/ListBoxItem'
-
-import styled, { useTheme } from 'styled-components'
-
-import { filter } from 'lodash'
-
 import { PODS_Q, PODS_SUB } from '../queries'
-
 import { POLL_INTERVAL } from '../constants'
 
 import {
