@@ -3,10 +3,12 @@ import {
   ArrowTopRightIcon,
   BellIcon,
   BuildIcon,
+  Checkbox,
   CloseIcon,
   Sidebar as DSSidebar,
   DiscordIcon,
   GitHubLogoIcon,
+  IconFrame,
   ListIcon,
   LogoutIcon,
   PeopleIcon,
@@ -76,6 +78,7 @@ export default function Sidebar() {
   const notificationsPanelRef = useRef<HTMLDivElement>(null)
   const [isMenuOpen, setIsMenuOpened] = useState<boolean>(false)
   const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] = useState(false)
+  const [all, setAll] = useState<boolean>(false)
   const { me, configuration } = useContext<any>(LoginContext)
   const navigate = useNavigate()
   const { pathname } = useLocation()
@@ -267,14 +270,24 @@ export default function Sidebar() {
               <P subtitle2>Notifications</P>
               <Flex
                 align="center"
+                gap="small"
                 justify="center"
                 padding="xsmall"
-                cursor="pointer"
-                _hover={{ backgroundColor: 'fill-one-hover' }}
-                borderRadius="medium"
-                onClick={() => setIsNotificationsPanelOpen(false)}
               >
-                <CloseIcon />
+                <Checkbox
+                  checked={all}
+                  onChange={() => setAll(!all)}
+                  small
+                >
+                  Show all notifications
+                </Checkbox>
+                <IconFrame
+                  clickable
+                  icon={<CloseIcon />}
+                  tooltip
+                  textValue="Close notification panel"
+                  onClick={() => setIsNotificationsPanelOpen(false)}
+                />
               </Flex>
             </Flex>
             <Flex
@@ -282,7 +295,10 @@ export default function Sidebar() {
               direction="column"
               overflowY="auto"
             >
-              <NotificationsPanel closePanel={() => setIsNotificationsPanelOpen(false)} />
+              <NotificationsPanel
+                closePanel={() => setIsNotificationsPanelOpen(false)}
+                all={all}
+              />
             </Flex>
           </Flex>
         </Flex>

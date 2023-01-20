@@ -1,16 +1,15 @@
 import { Flex, P } from 'honorable'
 
 import { ME_Q, NOTIFICATIONS_Q } from 'components/graphql/users'
-
 import InfiniteScroller from 'components/utils/InfiniteScroller'
-
 import { useApolloClient, useQuery, useSubscription } from '@apollo/client'
 import { updateCache } from 'utils/graphql'
+import { Dispatch, useEffect } from 'react'
 
 import Notification from './Notification'
 import { NOTIFS_SUB } from './queries'
 
-export function NotificationsPanel({ closePanel }: any) {
+export function NotificationsPanel({ closePanel, all }: {closePanel: Dispatch<void>, all: boolean}) {
   const client = useApolloClient()
 
   useSubscription(NOTIFS_SUB, {
@@ -22,10 +21,16 @@ export function NotificationsPanel({ closePanel }: any) {
     },
   })
 
-  const { data, loading, fetchMore } = useQuery(NOTIFICATIONS_Q, {
-    variables: { all: true },
+  const {
+    data, loading, refetch, fetchMore,
+  } = useQuery(NOTIFICATIONS_Q, {
+    variables: { all },
     fetchPolicy: 'cache-and-network',
   })
+
+  useEffect(() => {
+    refetch()
+  }, [all, refetch])
 
   if (!data) return null
 
@@ -74,18 +79,4 @@ export function NotificationsPanel({ closePanel }: any) {
   //     update: ({ me, ...rest }) => ({ ...rest, me: { ...me, unreadNotifications: 0 } }),
   //   }),
   // })
-
-// function FilterAll({ all, setAll }) {
-//   return (
-//     <Box
-//       flex={false}
-//       pad="xsmall"
-//       round="3px"
-//       hoverIndicator="card"
-//       onClick={() => setAll(!all)}
-//     >
-//       <Eye size="14px" />
-//     </Box>
-//   )
-// }
 
