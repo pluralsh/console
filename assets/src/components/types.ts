@@ -20,10 +20,3 @@ export const BuildTypes = {
   APPROVAL: 'APPROVAL',
   INSTALL: 'INSTALL',
 }
-
-export const BuildIcons = {
-  BOUNCE: Reload,
-  DEPLOY: Deploy,
-  APPROVAL: Check,
-  INSTALL: Install,
-}
