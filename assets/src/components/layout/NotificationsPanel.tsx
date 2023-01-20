@@ -69,10 +69,3 @@ export function NotificationsPanel({ closePanel, all }: {closePanel: Dispatch<vo
   )
 }
 
-  // const [mutation] = useMutation(MARK_READ, {
-  //   update: cache => updateCache(cache, {
-  //     query: ME_Q,
-  //     update: ({ me, ...rest }) => ({ ...rest, me: { ...me, unreadNotifications: 0 } }),
-  //   }),
-  // })
-
