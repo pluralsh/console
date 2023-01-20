@@ -3,8 +3,6 @@ import { Flex } from 'honorable'
 import { useQuery } from '@apollo/client'
 import { memoryParser } from 'kubernetes-resource-parser'
 import { sumBy } from 'lodash'
-import { Chart } from 'chart.js'
-import ChartDataLabels from 'chartjs-plugin-datalabels'
 
 import { MetricResponse, Node } from 'generated/graphql'
 import { cpuParser } from 'utils/kubernetes'
@@ -17,8 +15,6 @@ import { NODE_METRICS_Q } from '../queries'
 import { GaugeWrap, ResourceGauge } from '../Gauges'
 
 import { ResourceUsage } from './Nodes'
-
-Chart.register(ChartDataLabels)
 
 type Capacity = { cpu?: string; pods?: string; memory?: string } | undefined
 

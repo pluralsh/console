@@ -3113,13 +3113,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kurkle/color@npm:^0.3.0":
-  version: 0.3.1
-  resolution: "@kurkle/color@npm:0.3.1"
-  checksum: e6be5c081bf5acfd4a1803dcd5a0733caf450e73148d5f02dc536b1ff0c60c959c23472a26c9c3c6c78ada04fb6a53c9202db9b2de8ea56f6eeec381f9cc3a1a
-  languageName: node
-  linkType: hard
-
 "@monaco-editor/loader@npm:^1.3.2":
   version: 1.3.2
   resolution: "@monaco-editor/loader@npm:1.3.2"
@@ -6968,24 +6961,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:4.1.2":
-  version: 4.1.2
-  resolution: "chart.js@npm:4.1.2"
-  dependencies:
-    "@kurkle/color": ^0.3.0
-  checksum: 938ac88baf04eb8d784a8d89064696375bc12545421186f5ec9b69ba9b6f7b7da960754f351b59b1df2b1c314dfa848aab44267076888e664d5253bc6a4059dd
-  languageName: node
-  linkType: hard
-
-"chartjs-plugin-datalabels@npm:2.2.0":
-  version: 2.2.0
-  resolution: "chartjs-plugin-datalabels@npm:2.2.0"
-  peerDependencies:
-    chart.js: ">=3.0.0"
-  checksum: 26086a908a8e88507959b7aaf798b2d9794ea95f7a5889b8bb9f6b9f3437a7e2fdf18952d3ba403b2ff78e5b70452439fb323bd0dfe76e9d7d1dae1328dacb99
-  languageName: node
-  linkType: hard
-
 "check-error@npm:^1.0.2":
   version: 1.0.2
   resolution: "check-error@npm:1.0.2"
@@ -7336,8 +7311,6 @@ __metadata:
     apollo-link-context: 1.0.20
     apollo-link-error: 1.1.13
     apollo-link-retry: 2.2.16
-    chart.js: 4.1.2
-    chartjs-plugin-datalabels: 2.2.0
     concurrently: 7.6.0
     country-code-lookup: 0.0.22
     customize-cra: 1.0.0
@@ -7373,7 +7346,6 @@ __metadata:
     randomcolor: 0.6.2
     react: 18.2.0
     react-animations: 1.0.0
-    react-chartjs-2: 5.2.0
     react-collapsible: 2.10.0
     react-copy-to-clipboard: 5.1.0
     react-countdown: 2.3.5
@@ -13507,16 +13479,6 @@ __metadata:
   version: 1.0.0
   resolution: "react-animations@npm:1.0.0"
   checksum: dc4425628fe33bf3a49c7128167f765ee16089902535285db1b377136f422ae9463dcb0df0532a82dfaf4c378ae18909409d6b66606c460962c361ec5a951ba1
-  languageName: node
-  linkType: hard
-
-"react-chartjs-2@npm:5.2.0":
-  version: 5.2.0
-  resolution: "react-chartjs-2@npm:5.2.0"
-  peerDependencies:
-    chart.js: ^4.1.1
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: ace702185be1450e5888a8bcd8b5fc1995067e3b11d236764a67f5567a3d7c32ff16923b8d48d3d39bda6e45135da6c044c9b43fbe8e1978f95aca9d2c0ce348
   languageName: node
   linkType: hard
 
