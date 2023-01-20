@@ -86,6 +86,7 @@ export default function Notification({ notification, closePanel }: any) {
           <P
             body2
             color="text-light"
+            wordBreak="break-word"
           >
             {description}
           </P>
