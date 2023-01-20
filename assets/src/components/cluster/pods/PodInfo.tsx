@@ -1,6 +1,5 @@
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
-import { ArcElement, Chart } from 'chart.js'
 import { Flex } from 'honorable'
 
 import { LoopingLogo } from '@pluralsh/design-system'
@@ -17,11 +16,6 @@ import { SubTitle } from '../nodes/SubTitle'
 import { ContainersList } from '../containers/ContainersList'
 
 import PodMetadata from './PodMetadata'
-
-/*
-Must explicitly import and register chart.js elements used in react-chartjs-2
-*/
-Chart.register(ArcElement)
 
 export const statusesToRecord = (statuses?: Maybe<Maybe<ContainerStatus>[]>) => (statuses || []).reduce((acc, container) => ({
   ...acc,
