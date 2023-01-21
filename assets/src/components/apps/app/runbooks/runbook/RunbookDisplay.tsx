@@ -14,7 +14,7 @@ import { recurse } from './display/misc'
 
 export const DisplayContext = createContext<any>({})
 
-export function RunbookDisplay({ data, root: { children, attributes } }) {
+export function RunbookDisplay({ data, root: { children, attributes }, ...props }) {
   const theme = useContext(ThemeContext)
   const datasources = useMemo(() => (
     data.filter(d => !!d).reduce((acc, entry) => ({ ...acc, [entry.name]: entry }), {})
@@ -25,9 +25,8 @@ export function RunbookDisplay({ data, root: { children, attributes } }) {
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     <DisplayContext.Provider value={{ datasources, context, setContext }}>
       <Card
-        marginTop="large"
-        overflow="auto"
         padding="large"
+        {...props}
       >
         <Flex
           direction="column"
