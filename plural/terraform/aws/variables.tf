@@ -18,6 +18,11 @@ variable "role_name" {
   default = "console"
 }
 
+variable "node_role_arn" {
+  type = string
+  description = "Manually supply an arn for dedicated console nodes"
+}
+
 variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
