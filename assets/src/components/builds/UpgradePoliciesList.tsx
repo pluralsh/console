@@ -21,7 +21,11 @@ export default function UpgradePoliciesList() {
   return (
     <>
       {!isEmpty(upgradePolicies) ? (
-        <Card fillLevel={2}>
+        <Card
+          fillLevel={2}
+          maxHeight={300}
+          overflowY="auto"
+        >
           {upgradePolicies.map(policy => (
             <UpgradePolicy
               key={policy.id}

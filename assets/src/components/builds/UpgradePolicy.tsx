@@ -20,7 +20,7 @@ export default function UpgradePolicy({ policy }) {
   return (
     <Flex
       align="center"
-      borderBottom="1px solid border"
+      borderBottom="1px solid border-fill-two"
       gap="small"
       padding="small"
     >
