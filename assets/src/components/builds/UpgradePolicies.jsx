@@ -4,23 +4,13 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import {
-  Button,
-  ModalHeader,
-  Select,
-  Trash,
-} from 'forge-core'
+import { Button, Select, Trash } from 'forge-core'
 
 import { useMutation, useQuery } from '@apollo/client'
 
-import {
-  Box,
-  Drop,
-  Layer,
-  Text,
-} from 'grommet'
+import { Box, Drop, Text } from 'grommet'
 
-import { GearTrainIcon, IconFrame } from '@pluralsh/design-system'
+import { GearTrainIcon, IconFrame, Modal } from '@pluralsh/design-system'
 
 import { LabelledInput } from '../utils/LabelledInput'
 import { CREATE_POLICY, DELETE_POLICY, UPGRADE_POLICIES } from '../graphql/builds'
@@ -255,26 +245,13 @@ export function UpgradePolicies() {
             content: <Policies />,
           })}
         />
-        {modal && (
-          <Layer
-            modal
-            onEsc={close}
-            onClickOutside={close}
-          >
-            <Box width="50vw">
-              <ModalHeader
-                text={modal.header}
-                setOpen={setModal}
-              />
-              <Box
-                fill
-                pad="small"
-              >
-                {modal.content}
-              </Box>
-            </Box>
-          </Layer>
-        )}
+        <Modal
+          header={modal?.header}
+          open={modal}
+          size="large"
+        >
+          {modal?.content}
+        </Modal>
       </>
     </PolicyContext.Provider>
   )
