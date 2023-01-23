@@ -29,6 +29,7 @@ export function UpgradePolicies() {
         />
         <Modal
           header={modal?.header}
+          onClose={() => setModal(null)}
           open={modal}
           size="large"
         >

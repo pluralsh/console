@@ -1,11 +1,18 @@
 import { useContext, useState } from 'react'
-import { Button, Select } from 'forge-core'
 
 import { useMutation } from '@apollo/client'
 
-import { Box } from 'grommet'
+import {
+  Button,
+  FormField,
+  Input,
+  ListBoxItem,
+  Select,
+} from '@pluralsh/design-system'
 
-import { LabelledInput } from 'components/utils/LabelledInput'
+import { Flex } from 'honorable'
+
+import { isEmpty } from 'lodash'
 
 import { CREATE_POLICY, UPGRADE_POLICIES } from '../graphql/builds'
 
@@ -19,8 +26,6 @@ const UpgradePolicyType = {
   APPROVAL: 'APPROVAL',
   IGNORE: 'IGNORE',
 }
-
-const toSelect = v => ({ label: v, value: v })
 
 export default function UpgradePolicyCreate() {
   const [attributes, setAttributes] = useState({
@@ -45,67 +50,68 @@ export default function UpgradePolicyCreate() {
   })
 
   return (
-    <Box gap="small">
-      <LabelledInput
-        width="100%"
-        color="dark-2"
-        weight={450}
-        label="Name"
-        value={attributes.name}
-        placeholder="Name for this policy"
-        onChange={name => setAttributes({ ...attributes, name })}
-        type={undefined}
-        modifier={undefined}
-      />
-      <LabelledInput
-        width="100%"
-        color="dark-2"
-        weight={450}
-        label="Description"
-        value={attributes.description}
-        placeholder="description for this policy"
-        onChange={description => setAttributes({ ...attributes, description })}
-        type={undefined}
-        modifier={undefined}
-      />
-      <LabelledInput
-        width="100%"
-        color="dark-2"
-        weight={450}
-        label="Target"
-        value={attributes.target}
-        placeholder="repos to target (wildcards allowed)"
-        onChange={target => setAttributes({ ...attributes, target })}
-        type={undefined}
-        modifier={undefined}
-      />
-      <LabelledInput
-        width="100%"
-        color="dark-2"
-        weight={450}
-        label="Weight"
-        value={`${attributes.weight}`}
-        placeholder="weight for this policy"
-        onChange={weight => setAttributes({ ...attributes, weight: parseInt(weight) })}
-        type={undefined}
-        modifier={undefined}
-      />
-      <Select
-        options={Object.values(UpgradePolicyType).map(toSelect)}
-        value={toSelect(attributes.type)}
-        onChange={({ value }) => setAttributes({ ...attributes, type: value })}
-      />
-      <Box
-        direction="row"
-        align="center"
-        justify="end"
-      >
-        <Button
-          label="Create"
-          onClick={mutation}
-          loading={loading}
+    <Flex
+      direction="column"
+      gap="small"
+    >
+      <FormField label="Name">
+        <Input
+          placeholder="New upgrade policy"
+          onChange={({ target: { value } }) => setAttributes({ ...attributes, name: value })}
+          value={attributes.name}
         />
-      </Box>
-    </Box>
+      </FormField>
+      <FormField label="Description">
+        <Input
+          onChange={({ target: { value } }) => setAttributes({ ...attributes, description: value })}
+          value={attributes.description}
+        />
+      </FormField>
+      <FormField label="Type">
+        <Select
+          aria-label="type"
+          label="Choose type"
+          selectedKey={attributes.type}
+          onSelectionChange={type => setAttributes({ ...attributes, type: `${type}` })}
+        >
+          {Object.values(UpgradePolicyType).map(v => (
+            <ListBoxItem
+              key={v}
+              label={v}
+              textValue={v}
+            />
+          ))}
+        </Select>
+      </FormField>
+      <FormField
+        label="App bindings"
+        hint="Target applications using a regex expression, e.g. “*” to select all."
+      >
+        <Input
+          placeholder="*"
+          onChange={({ target: { value } }) => setAttributes({ ...attributes, target: value })}
+          value={attributes.target}
+        />
+      </FormField>
+      <FormField
+        label="Weight"
+        hint="Higher weights get priorized over lower weights."
+      >
+        <Input
+          placeholder="0"
+          onChange={({ target: { value } }) => setAttributes({ ...attributes, weight: parseInt(value) })}
+          value={attributes.weight}
+        />
+      </FormField>
+      <Flex justify="end">
+        <Button
+          disabled={isEmpty(attributes?.name)}
+          loading={loading}
+          onClick={() => mutation()}
+        >
+          Create
+        </Button>
+      </Flex>
+    </Flex>
   )
 }

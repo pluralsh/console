@@ -7,7 +7,6 @@ import {
 import { getIcon, hasIcons } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
 import { BuildTypes } from 'components/types'
-import { ThemeContext } from 'grommet'
 import { Flex, P } from 'honorable'
 import moment from 'moment'
 import { useContext, useMemo } from 'react'
