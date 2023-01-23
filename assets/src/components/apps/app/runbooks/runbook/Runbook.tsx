@@ -30,6 +30,8 @@ import { Portal } from 'react-portal'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
+import { useTheme } from 'styled-components'
+
 import RangePicker from '../../../../utils/RangePicker'
 import { PageTitleSelectButton } from '../../../../utils/PageTitleSelectButton'
 
@@ -66,8 +68,10 @@ export default function Runbook() {
   const [duration, setDuration] = useState(DURATIONS[0])
   const { setRunbook }: any = useOutletContext()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
+  const theme = useTheme()
+  const prevData = useRef()
 
-  const { data, refetch } = useQuery(RUNBOOK_Q, {
+  const result = useQuery(RUNBOOK_Q, {
     variables: {
       namespace: appName,
       name: runbookName,
@@ -79,6 +83,13 @@ export default function Runbook() {
     fetchPolicy: 'cache-and-network',
     pollInterval: SECOND_TO_MILLISECONDS * 30,
   })
+  const { refetch, loading } = result
+
+  /* Apollo returns undefined data intially when changing duration for some reason,
+  so this cache prevent full page reload while waiting for new data */
+  const data = result.data || (loading ? prevData.current : undefined)
+
+  prevData.current = data
 
   const { data: runbooksData } = useQuery(RUNBOOKS_Q, {
     variables: { namespace: appName },
@@ -184,17 +195,17 @@ export default function Runbook() {
               />
             </>
           )}
-          <H3
-            subtitle1
-            marginBottom="medium"
-          >
-            Scaling
-          </H3>
+          <H3 subtitle1>Scaling</H3>
           <Flex
             direction="row"
             gap="medium"
             wrap="wrap"
-            marginBottom="medium"
+            paddingTop="medium"
+            paddingBottom="medium"
+            position="sticky"
+            top={-theme.spacing.large}
+            backgroundColor="fill-zero"
+            zIndex={10}
           >
             <RangePicker
               duration={duration}
