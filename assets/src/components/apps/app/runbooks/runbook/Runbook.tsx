@@ -2,7 +2,6 @@ import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import {
   ListBoxItem,
   LoopingLogo,
-  PageTitle,
   Select,
   SubTab,
   TabList,
@@ -17,7 +16,7 @@ import {
 } from 'react'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
-import { Div, Flex } from 'honorable'
+import { Div, Flex, H3 } from 'honorable'
 
 import { DURATIONS, SECOND_TO_MILLISECONDS } from 'utils/time'
 
@@ -29,8 +28,12 @@ import { RunbookExecutions } from 'components/apps/app/runbooks/runbook/RunbookE
 
 import { Portal } from 'react-portal'
 
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
 import RangePicker from '../../../../utils/RangePicker'
 import { PageTitleSelectButton } from '../../../../utils/PageTitleSelectButton'
+
+import { RunbookAlerts } from './RunbookAlerts'
 
 const DIRECTORY = [
   { key: 'runbook', label: 'Runbook' },
@@ -42,11 +45,7 @@ export const ActionContext = createContext<any>({})
 export function ActionPortal({ children }) {
   const { ref } = useContext(ActionContext)
 
-  return (
-    <Portal node={ref}>
-      {children}
-    </Portal>
-  )
+  return <Portal node={ref}>{children}</Portal>
 }
 function ActionContainer() {
   const { setRef } = useContext(ActionContext)
@@ -72,7 +71,10 @@ export default function Runbook() {
     variables: {
       namespace: appName,
       name: runbookName,
-      context: { timeseriesStart: -duration.offset, timeseriesStep: duration.step },
+      context: {
+        timeseriesStart: -duration.offset,
+        timeseriesStep: duration.step,
+      },
     },
     fetchPolicy: 'cache-and-network',
     pollInterval: SECOND_TO_MILLISECONDS * 30,
@@ -91,8 +93,12 @@ export default function Runbook() {
     { text: 'apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
     { text: 'runbooks', url: `/apps/${appName}/runbooks` },
-    { text: data?.runbook?.spec?.name, url: `/apps/${appName}/runbooks/${data?.runbook?.name}` },
-  ]), [appName, data, setBreadcrumbs])
+    {
+      text: data?.runbook?.spec?.name,
+      url: `/apps/${appName}/runbooks/${data?.runbook?.name}`,
+    },
+  ]),
+  [appName, data, setBreadcrumbs])
 
   useEffect(() => setSelectedKey(data?.runbook?.spec?.name || ''), [data])
 
@@ -113,38 +119,32 @@ export default function Runbook() {
   setRunbook(runbook)
 
   return (
-    <Flex
-      direction="column"
-      grow={1}
-      height="100%"
-    >
-      <PageTitle
-        padding={1}
-        heading={(
-          <Div>
-            <Select
-              aria-label="dashboards"
-              selectedKey={selectedKey}
-              onSelectionChange={name => navigate(`/apps/${appName}/runbooks/${name}`)}
-              triggerButton={(
-                <PageTitleSelectButton
-                  title="Runbooks"
-                  label={selectedKey}
-                />
-              )}
-              width={240}
-            >
-              {runbooks.map(runbook => (
-                <ListBoxItem
-                  key={runbook.name}
-                  label={runbook.spec.name}
-                  textValue={runbook.name}
-                />
-              ))}
-            </Select>
-          </Div>
-        )}
-      >
+    <ScrollablePage
+      heading={(
+        <Div>
+          <Select
+            aria-label="dashboards"
+            selectedKey={selectedKey}
+            onSelectionChange={name => navigate(`/apps/${appName}/runbooks/${name}`)}
+            triggerButton={(
+              <PageTitleSelectButton
+                title="Runbooks"
+                label={selectedKey}
+              />
+            )}
+            width={240}
+          >
+            {runbooks.map(runbook => (
+              <ListBoxItem
+                key={runbook.name}
+                label={runbook.spec.name}
+                textValue={runbook.name}
+              />
+            ))}
+          </Select>
+        </Div>
+      )}
+      headingContent={(
         <TabList
           stateRef={tabStateRef}
           stateProps={{
@@ -165,37 +165,51 @@ export default function Runbook() {
             </SubTab>
           ))}
         </TabList>
-      </PageTitle>
-      <Flex
-        direction="column"
-        grow={1}
-        height="100%"
-        overflow="auto"
-      >
-        {selectedTab === 'runbook' && (
-          // eslint-disable-next-line react/jsx-no-constructed-context-values
-          <ActionContext.Provider value={{ ref, setRef }}>
-            <Flex
-              direction="row"
-              gap="medium"
-              wrap="wrap"
-            >
-              <RangePicker
-                duration={duration}
-                setDuration={setDuration}
+      )}
+    >
+      {selectedTab === 'runbook' && (
+        // eslint-disable-next-line react/jsx-no-constructed-context-values
+        <ActionContext.Provider value={{ ref, setRef }}>
+          {runbook.status.alerts && runbook.status.alerts.length > 0 && (
+            <>
+              <H3
+                subtitle1
+                marginBottom="medium"
+              >
+                Alerts
+              </H3>
+              <RunbookAlerts
+                alerts={runbook.status.alerts}
+                marginBottom="xxlarge"
               />
-              <Flex grow={1} />
-              <ActionContainer />
-            </Flex>
-            <RunbookDisplay
-              root={runbook.spec.display}
-              data={runbook.data}
+            </>
+          )}
+          <H3
+            subtitle1
+            marginBottom="medium"
+          >
+            Scaling
+          </H3>
+          <Flex
+            direction="row"
+            gap="medium"
+            wrap="wrap"
+            marginBottom="medium"
+          >
+            <RangePicker
+              duration={duration}
+              setDuration={setDuration}
             />
-          </ActionContext.Provider>
-        )}
-        {selectedTab === 'executions' && <RunbookExecutions />}
-      </Flex>
-    </Flex>
+            <Flex grow={1} />
+            <ActionContainer />
+          </Flex>
+          <RunbookDisplay
+            root={runbook.spec.display}
+            data={runbook.data}
+          />
+        </ActionContext.Provider>
+      )}
+      {selectedTab === 'executions' && <RunbookExecutions />}
+    </ScrollablePage>
   )
 }
-
