@@ -66,7 +66,10 @@ const MENU_ITEMS: any[] = [
   { text: 'Account', icon: <PeopleIcon />, path: '/account' },
 ]
 
-function SidebarMenuItem({ tooltip, href, children } : {tooltip: string, href?: string, children: JSX.Element}) {
+function SidebarMenuItem({
+  tooltip, href, className, children,
+} :
+  {tooltip: string, href?: string, className?: string, children: JSX.Element}) {
   return (
     <SidebarItem
       clickable
@@ -74,6 +77,7 @@ function SidebarMenuItem({ tooltip, href, children } : {tooltip: string, href?: 
       href={href}
       height={32}
       width={32}
+      className={className}
     >
       {children}
     </SidebarItem>
@@ -136,6 +140,7 @@ export default function Sidebar() {
               key={i}
               clickable
               tooltip={item.text}
+              className={`sidebar-${item.text}`}
               onClick={() => navigate(item.path)}
               backgroundColor={active(item) ? theme.colors?.grey[875] : null}
               _hover={{ backgroundColor: theme.colors?.grey[900], cursor: 'pointer' }}
@@ -149,12 +154,14 @@ export default function Sidebar() {
           <Flex grow={1} />
           <SidebarMenuItem
             tooltip="Discord"
+            className="sidebar-discord"
             href="https://discord.gg/bEBAMXV64s"
           >
             <DiscordIcon />
           </SidebarMenuItem>
           <SidebarMenuItem
             tooltip="GitHub"
+            className="sidebar-github"
             href="https://github.com/pluralsh/plural"
           >
             <GitHubLogoIcon />
@@ -164,6 +171,7 @@ export default function Sidebar() {
             clickable
             label="Notifications"
             tooltip="Notifications"
+            className="sidebar-notifications"
             onClick={event => {
               event.stopPropagation()
               toggleNotificationPanel(!isNotificationsPanelOpen)
@@ -199,6 +207,7 @@ export default function Sidebar() {
           )}
           <SidebarItem
             ref={menuItemRef}
+            className="sidebar-menu"
             py={0.25 / 2}
             px={0.5}
             active={isMenuOpen}
@@ -227,6 +236,7 @@ export default function Sidebar() {
           <MenuItem
             as={Link}
             to="/profile"
+            className="sidebar-menu-myprofile"
             color="inherit"
             textDecoration="none"
           >
@@ -238,6 +248,7 @@ export default function Sidebar() {
             href="https://docs.plural.sh"
             target="_blank"
             rel="noopener noreferrer"
+            className="sidebar-menu-docs"
             color="inherit"
             textDecoration="none"
           >
@@ -248,6 +259,7 @@ export default function Sidebar() {
           </MenuItem>
           <MenuItem
             onClick={handleLogout}
+            className="sidebar-menu-logout"
             color="icon-error"
           >
             <LogoutIcon marginRight="xsmall" />
