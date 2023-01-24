@@ -6,7 +6,6 @@ import {
   Modal,
   Select,
 } from '@pluralsh/design-system'
-import { ApolloError } from 'apollo-boost'
 import { getIcon, hasIcons } from 'components/apps/misc'
 import { BUILDS_Q, CREATE_BUILD } from 'components/graphql/builds'
 import { InstallationContext } from 'components/Installations'
@@ -19,7 +18,7 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { useMutation } from '@apollo/client'
+import { ApolloError, useMutation } from '@apollo/client'
 import { appendConnection, updateCache } from 'utils/graphql'
 
 const BUILD_TYPES = [
