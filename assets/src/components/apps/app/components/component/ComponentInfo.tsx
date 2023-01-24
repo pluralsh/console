@@ -90,9 +90,7 @@ function ViewLogsButton({ metadata }: any) {
 }
 
 export default function ComponentInfo() {
-  const {
-    appName, componentKind = '', componentName, ...params
-  } = useParams()
+  const { appName, componentKind = '', componentName } = useParams()
 
   const { component, data } = useOutletContext<any>()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
@@ -128,7 +126,6 @@ export default function ComponentInfo() {
             kind={kind}
             componentName={componentName}
             namespace={appName}
-
           />
           <ViewLogsButton metadata={value?.metadata} />
         </Flex>
