@@ -59,7 +59,7 @@ RUN \
   tar -xzf ${APP_NAME}.tar.gz && \
   rm ${APP_NAME}.tar.gz
 
-FROM alpine:3.17.0 as tools
+FROM alpine:3.17.1 as tools
 
 ARG TARGETARCH
 
@@ -70,7 +70,7 @@ ENV HELM_VERSION=v3.10.3
 ENV TERRAFORM_VERSION=v1.2.9
 
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
-ENV CLI_VERSION=v0.5.33
+ENV CLI_VERSION=v0.6.1
 
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
 ENV KUBECTL_VERSION=v1.25.5

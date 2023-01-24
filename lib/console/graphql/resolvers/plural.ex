@@ -58,13 +58,13 @@ defmodule Console.GraphQl.Resolvers.Plural do
     end
   end
 
-  def install_recipe(%{id: id, context: context} = args, %{context: %{current_user: user}}) do
-    Plural.install_recipe(id, context, !!args[:oidc], user)
-  end
+  def resolve_plural_context(_, _), do: Console.Plural.Context.get()
 
-  def install_stack(%{name: name, context: context} = args, %{context: %{current_user: user}}) do
-    Plural.install_stack(name, context, !!args[:oidc], user)
-  end
+  def install_recipe(%{id: id, context: context} = args, %{context: %{current_user: user}}),
+    do: Plural.install_recipe(id, context, !!args[:oidc], user)
+
+  def install_stack(%{name: name, context: ctx} = args, %{context: %{current_user: user}}),
+    do: Plural.install_stack(name, ctx, !!args[:oidc], user)
 
   def update_smtp(%{smtp: smtp}, _), do: Plural.update_smtp(smtp)
 
@@ -82,7 +82,7 @@ defmodule Console.GraphQl.Resolvers.Plural do
 
   def update_configuration(%{repository: repo, content: content} = args, _) do
     tool = args[:tool] || :helm
-    with {:ok, conf} <- Console.Deployer.update(repo, content, tool, args[:message]) do
+    with {:ok, conf, _} <- Console.Deployer.update(repo, content, tool, args[:message]) do
       {:ok, %{configuration: %{tool => conf}}}
     end
   end

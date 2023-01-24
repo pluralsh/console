@@ -2,7 +2,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   alias Kube.Client
   alias Kazan.Apis.Core.V1, as: Core
   alias Kazan.Apis.Apps.V1, as: Apps
-  alias Kazan.Apis.Extensions.V1beta1, as: Extensions
+  alias Kazan.Apis.Networking.V1, as: Networking
   alias Kazan.Apis.Batch.V1beta1, as: Batch
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector, LabelSelectorRequirement}
@@ -60,7 +60,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   def resolve_ingress(%{namespace: ns, name: name}, _) do
     Console.namespace(ns)
-    |> Extensions.read_namespaced_ingress!(name)
+    |> Networking.read_namespaced_ingress!(name)
     |> Kazan.run()
   end
 
@@ -160,14 +160,42 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> items_response()
   end
 
-  def list_all_pods(_, _) do
-    Core.list_pod_for_all_namespaces!()
+  def list_all_pods(args, _) do
+    (page_params(args) ++ namespace_params(args))
+    |> Core.list_pod_for_all_namespaces!()
     |> Kazan.run()
-    |> items_response()
+    |> items_connection()
   end
+
+  def list_namespaces(_, _), do: {:ok, Console.namespaces()}
+
+
+  defp namespace_params(%{namespaces: [_ | _] = namespaces}) do
+    namespaces = MapSet.new(namespaces)
+    ignore_namespaces =
+      Console.namespaces()
+      |> Enum.filter(& !MapSet.member?(namespaces, &1.metadata.name))
+      |> Enum.map(&"metadata.namespace!=#{&1.metadata.name}")
+      |> Enum.join(",")
+
+    [fied_selector: ignore_namespaces]
+  end
+  defp namespace_params(_), do: []
+
+  defp page_params(args), do: Enum.reduce(args, [], &page_params/2)
+
+  defp page_params({:after, cursor}, args), do: [{:continue, cursor} | args]
+  defp page_params({:first, limit}, args), do: [{:limit, limit} | args]
+  defp page_params(_, args), do: args
 
   defp items_response({:ok, %{items: items}}), do: {:ok, items}
   defp items_response(err), do: err
+
+  defp items_connection({:ok, %{items: items, metadata: %{continue: cursor}}}) do
+    edges = Enum.map(items, &%{node: &1})
+    {:ok, %{edges: edges, page_info: %{end_cursor: cursor}}}
+  end
+  defp items_connection(err), do: err
 
   defp construct_label_selector(%LabelSelector{match_labels: labels, match_expressions: expressions}) do
     (build_labels(labels) ++ build_expressions(expressions))

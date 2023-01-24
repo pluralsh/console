@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: 0.3.16
+appVersion: 0.3.21
 description: A chart for plural console
 name: console
-version: 0.7.36
+version: 0.7.39
 dependencies:
 - name: test-base
   repository: https://pluralsh.github.io/module-library

@@ -15,4 +15,15 @@ defmodule Console.Commands.CommandTest do
       assert command.completed_at
     end
   end
+
+  describe "Collectible" do
+    test "commands implement the collectible protocol and caches the contents" do
+      command = insert(:command)
+      command = Enum.into(["one", "two", "three", "four\n"], command)
+
+      assert command.stdout == "onetwothreefour\n"
+      assert refetch(command).stdout == "onetwothreefour\n"
+      assert Console.Services.Builds.get_line(%{command | stdout: nil}) == "onetwothreefour\n"
+    end
+  end
 end

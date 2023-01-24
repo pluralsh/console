@@ -261,7 +261,7 @@ defmodule Console.Services.PluralTest do
       user = insert(:user)
       {:ok, build} = Plural.install_stack(
         "id",
-        %{"repo" => %{"domain" => "domain.com"}},
+        %{configuration: %{"repo" => %{"domain" => "domain.com"}}},
         true,
         user
       )
@@ -269,7 +269,9 @@ defmodule Console.Services.PluralTest do
       assert build.type == :install
       assert build.context == %{
         configuration: %{"repo" => %{"domain" => "domain.com"}},
-        bundles: [%{repository: "repo", name: "name"}]
+        bundles: [%{repository: "repo", name: "name"}],
+        buckets: [],
+        domains: []
       }
       assert build.creator_id == user.id
     end
