@@ -1,6 +1,6 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { useContext, useEffect } from 'react'
-import { useOutletContext, useParams } from 'react-router-dom'
+import { Link, useOutletContext, useParams } from 'react-router-dom'
 
 import { Flex } from 'honorable'
 
@@ -8,6 +8,10 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { asQuery } from 'components/utils/query'
 
 import { Button, LogsIcon } from '@pluralsh/design-system'
+
+import { ScalingRecommenderModal } from 'components/cluster/ScalingRecommender'
+
+import { ScalingType, ScalingTypes } from 'components/cluster/constants'
 
 import Metadata from './info/Metadata'
 import Pods from './info/Pods'
@@ -19,7 +23,12 @@ import Ingress from './info/Ingress'
 import Deployment from './info/Deployment'
 import StatefulSet from './info/StatefulSet'
 
-const componentsWithPods: string[] = ['deployment', 'job', 'service', 'statefulset']
+const componentsWithPods: string[] = [
+  'deployment',
+  'job',
+  'service',
+  'statefulset',
+]
 
 const componentsWithLogs: string[] = ['deployment', 'statefulset']
 
@@ -55,7 +64,9 @@ function getInfo(kind: string): JSX.Element | undefined {
 function getLogUrl({ name, namespace, labels }) {
   const appLabel = labels.find(({ name }) => name === 'app' || name === 'app.kubernetes.io/name')
 
-  return `/apps/${namespace}/logs?${asQuery({ job: `${namespace}/${appLabel ? appLabel.value : name}` })}`
+  return `/apps/${namespace}/logs?${asQuery({
+    job: `${namespace}/${appLabel ? appLabel.value : name}`,
+  })}`
 }
 
 function ViewLogsButton({ metadata }: any) {
@@ -68,8 +79,8 @@ function ViewLogsButton({ metadata }: any) {
       secondary
       fontWeight={600}
       startIcon={<LogsIcon />}
-      as="a"
-      href={url}
+      as={Link}
+      to={url}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -79,17 +90,31 @@ function ViewLogsButton({ metadata }: any) {
 }
 
 export default function ComponentInfo() {
-  const { appName, componentKind = '', componentName } = useParams()
+  const {
+    appName, componentKind = '', componentName, ...params
+  } = useParams()
+
+  console.log('params', params)
   const { component, data } = useOutletContext<any>()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
+
+  const kind: ScalingType
+    = ScalingTypes[componentKind.toUpperCase()] ?? ScalingTypes.DEPLOYMENT
 
   useEffect(() => setBreadcrumbs([
     { text: 'apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
     { text: 'components', url: `/apps/${appName}/components` },
-    { text: componentName, url: `/apps/${appName}/components/${componentKind}/${componentName}` },
-    { text: 'info', url: `/apps/${appName}/components/${componentKind}/${componentName}/info` },
-  ]), [appName, componentKind, componentName, setBreadcrumbs])
+    {
+      text: componentName,
+      url: `/apps/${appName}/components/${componentKind}/${componentName}`,
+    },
+    {
+      text: 'info',
+      url: `/apps/${appName}/components/${componentKind}/${componentName}/info`,
+    },
+  ]),
+  [appName, componentKind, componentName, setBreadcrumbs])
 
   // To avoid mapping between component types and fields of data returned by API
   // we are picking first available value from API object for now.
@@ -98,7 +123,16 @@ export default function ComponentInfo() {
   return (
     <ScrollablePage
       heading="Info"
-      headingContent={<ViewLogsButton metadata={value?.metadata} />}
+      headingContent={(
+        <Flex gap="medium">
+          <ScalingRecommenderModal
+            kind={kind}
+            name={componentName}
+            namespace={appName}
+          />
+          <ViewLogsButton metadata={value?.metadata} />
+        </Flex>
+      )}
     >
       <Flex
         direction="column"

@@ -32,7 +32,8 @@ export default function DisplayInput({ attributes, children }) {
       <Input
         value={value || ''}
         onChange={(({ target: { value } }) => setValue(value))}
-        width={attributes.width || 150}
+        width="100%"
+        maxWidth={attributes.width || 150}
         {...attributes}
       />
     </Div>

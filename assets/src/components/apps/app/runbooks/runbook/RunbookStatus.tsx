@@ -46,7 +46,6 @@ function AlertsTooltipLabel({
                 flexDirection="column"
                 flexGrow={1}
                 gap="xxsmall"
-                className="ttklink"
               >
                 <Flex
                   gap="small"
