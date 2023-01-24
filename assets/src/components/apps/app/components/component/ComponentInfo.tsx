@@ -1,21 +1,17 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { Link, useOutletContext, useParams } from 'react-router-dom'
 
-import {
-  ButtonProps,
-  Flex,
-  Modal,
-  ModalBaseProps,
-  ModalProps,
-} from 'honorable'
+import { Flex } from 'honorable'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { asQuery } from 'components/utils/query'
 
-import { Button, InfoIcon, LogsIcon, Tab } from '@pluralsh/design-system'
+import { Button, LogsIcon } from '@pluralsh/design-system'
 
-import { TabList, TabStateRef } from '@pluralsh/design-system/dist/components/TabList'
+import { ScalingRecommenderModal } from 'components/cluster/ScalingRecommender'
+
+import { ScalingType, ScalingTypes } from 'components/cluster/constants'
 
 import Metadata from './info/Metadata'
 import Pods from './info/Pods'
@@ -93,45 +89,17 @@ function ViewLogsButton({ metadata }: any) {
   )
 }
 
-function ScalingButton({ ...props }: { props: ButtonProps }) {
-  return (
-    <Button
-      secondary
-      fontWeight={600}
-      startIcon={<InfoIcon />}
-      {...props}
-    >
-      Scaling
-    </Button>
-  )
-}
-
-function ScalingModal({ ...props }: ModalBaseProps) {
-  console.log('open', props.open)
-  const tabStateRef = useRef<TabStateRef>()
-
-  return (
-    <Modal
-      paddingTop={0}
-      paddingBottom={0}
-      paddingRight={0}
-      paddingLeft={0}
-      margin={0}
-      {...props}
-    >
-      Stuff n things
-      <TabList stateRef={tabStateRef}><Tab>Popstgres</Tab><Tab>Exporter</Tab></TabList>
-      <TabPanel stateRef={tabStateRef}>{'content
-      '}</TabPanel>
-    </Modal>
-  )
-}
-
 export default function ComponentInfo() {
-  const { appName, componentKind = '', componentName } = useParams()
+  const {
+    appName, componentKind = '', componentName, ...params
+  } = useParams()
+
+  console.log('params', params)
   const { component, data } = useOutletContext<any>()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
-  const [showScaling, setShowScaling] = useState(false)
+
+  const kind: ScalingType
+    = ScalingTypes[componentKind.toUpperCase()] ?? ScalingTypes.DEPLOYMENT
 
   useEffect(() => setBreadcrumbs([
     { text: 'apps', url: '/' },
@@ -153,37 +121,30 @@ export default function ComponentInfo() {
   const value: any = Object.values(data).find(value => value !== undefined)
 
   return (
-    <>
-      <ScalingModal
-        open={showScaling}
-        onClose={() => setShowScaling(false)}
-      />
-      <ScrollablePage
-        heading="Info"
-        headingContent={(
-          <Flex gap="medium">
-            <ScalingButton
-              onClick={() => {
-                console.log('clicked')
-                setShowScaling(true)
-              }}
-            />
-            <ViewLogsButton metadata={value?.metadata} />
-          </Flex>
-        )}
-      >
-        <Flex
-          direction="column"
-          gap="large"
-        >
-          {hasPods(componentKind) && <Pods pods={value?.pods} />}
-          {getInfo(componentKind)}
-          <Metadata
-            component={component}
-            metadata={value?.metadata}
+    <ScrollablePage
+      heading="Info"
+      headingContent={(
+        <Flex gap="medium">
+          <ScalingRecommenderModal
+            kind={kind}
+            name={componentName}
+            namespace={appName}
           />
+          <ViewLogsButton metadata={value?.metadata} />
         </Flex>
-      </ScrollablePage>
-    </>
+      )}
+    >
+      <Flex
+        direction="column"
+        gap="large"
+      >
+        {hasPods(componentKind) && <Pods pods={value?.pods} />}
+        {getInfo(componentKind)}
+        <Metadata
+          component={component}
+          metadata={value?.metadata}
+        />
+      </Flex>
+    </ScrollablePage>
   )
 }
