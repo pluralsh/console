@@ -11,6 +11,7 @@ defmodule Console.Deployer do
   alias Console.Schema.Build
   require Logger
 
+  @call_timeout :timer.seconds(10)
   @poll_interval 10_000
   @group :deployer
   @leader "deployer"
@@ -52,19 +53,21 @@ defmodule Console.Deployer do
     end
   end
 
-  def file(path), do: GenServer.call(leader(), {:file, path})
+  def file(path), do: GenServer.call(leader(), {:file, path}, @call_timeout)
 
-  def wake(), do: GenServer.call(leader(), :poll)
+  def wake(), do: GenServer.call(leader(), :poll, @call_timeout)
 
-  def cancel(), do: GenServer.call(leader(), :cancel)
+  def cancel(), do: GenServer.call(leader(), :cancel, @call_timeout)
 
-  def state(), do: GenServer.call(leader(), :state)
+  def state(), do: GenServer.call(leader(), :state, @call_timeout)
 
-  def ping(), do: GenServer.call(leader(), :ping)
+  def ping(), do: GenServer.call(leader(), :ping, @call_timeout)
 
-  def update(repo, content, tool, msg \\ nil, actor \\ nil), do: GenServer.call(leader(), {:update, repo, content, tool, msg, actor})
+  def update(repo, content, tool, msg \\ nil, actor \\ nil) do
+    GenServer.call(leader(), {:update, repo, content, tool, msg, actor}, @call_timeout)
+  end
 
-  def exec(fun), do: GenServer.call(leader(), {:exec, fun})
+  def exec(fun), do: GenServer.call(leader(), {:exec, fun}, @call_timeout)
 
   def handle_call({:file, path}, _, state) do
     {:reply, File.read(path), state}
