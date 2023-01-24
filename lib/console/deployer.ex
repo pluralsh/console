@@ -2,6 +2,10 @@ defmodule Console.Deployer do
   use GenServer
   import Console.Deployer.Operations
 
+  alias Kazan.Apis.Batch.V1, as: BatchV1
+  alias Kazan.Watcher
+  alias Console.Bootstrapper
+  alias Console.Deployer.Dedicated
   alias Console.Commands.Command
   alias Console.Services.{Builds, Users, LeaderElection}
   alias Console.Schema.Build
@@ -11,7 +15,7 @@ defmodule Console.Deployer do
   @group :deployer
   @leader "deployer"
 
-  defmodule State, do: defstruct [:storage, :ref, :pid, :build, :id, :timer, :leader]
+  defmodule State, do: defstruct [:storage, :ref, :pid, :build, :id, :timer, :leader, :job, cloned: false]
 
   def start(storage) do
     GenServer.start(__MODULE__, storage)
@@ -31,7 +35,7 @@ defmodule Console.Deployer do
     if Console.conf(:initialize) do
       :timer.send_interval(:timer.minutes(2), :sync)
     end
-    {:ok, %State{storage: storage, id: Ecto.UUID.generate()}}
+    {:ok, %State{storage: storage, id: Ecto.UUID.generate(), cloned: Bootstrapper.git_enabled?()}}
   end
 
   def me(), do: {__MODULE__, node()}
@@ -83,12 +87,19 @@ defmodule Console.Deployer do
 
   def handle_call(:ping, _, state), do: {:reply, :pong, state}
 
-  def handle_call(:cancel, _, state) do
-    Logger.info "Attempting to cancel build"
-    with %{id: id} <- Builds.get_running(),
-      do: GenServer.stop({:via, :swarm, id}, {:shutdown, :cancel})
+  def handle_call(:cancel, _, %State{job: %BatchV1.Job{} = job} = state) do
+    Logger.info "cancelling build job"
+    Dedicated.cancel_job(job)
     {:reply, :ok, state}
   end
+
+  def handle_call(:cancel, _, %State{pid: pid} = state) when is_pid(pid) do
+    Logger.info "Attempting to cancel build proc: #{inspect(pid)}"
+    GenServer.stop(pid, {:shutdown, :cancel})
+    {:reply, :ok, state}
+  end
+
+  def handle_call(:cancel, _, state), do: {:reply, :ok, state}
 
   def handle_call(:state, _, state), do: {:reply, state, state}
 
@@ -106,13 +117,21 @@ defmodule Console.Deployer do
     {:noreply, state}
   end
 
+  def handle_info(:poll, %State{cloned: false} = state) do
+    {:noreply, %{state | cloned: Bootstrapper.git_enabled?()}}
+  end
+
   def handle_info(:poll, %State{pid: nil, storage: storage, id: id} = state) do
     Logger.info "Checking for pending builds, pid: #{inspect(self())}, node: #{node()}"
     with {:ok, _} <- elect(),
-         {:ok, %Build{} = build} <- Builds.poll(id) do
-      {pid, ref} = perform(storage, build)
+         {:ok, %Build{} = build} <- Builds.poll(id),
+         {:perform, {:ok, pid, ref}, _} <- {:perform, perform(storage, build), build} do
       {:noreply, %{state | ref: ref, pid: pid, build: build}}
     else
+      {:perform, error, build} ->
+        Logger.error "failed to execute build, error: #{inspect(error)}"
+        Builds.fail(build)
+        {:noreply, state}
       {:error, :locked} ->
         Logger.info "deployer is locked"
         {:noreply, state}
@@ -131,12 +150,30 @@ defmodule Console.Deployer do
     {:noreply, ping(state)}
   end
 
+  def handle_info(%Watcher.Event{object: %BatchV1.Job{}, type: :deleted}, %State{build: build} = state) do
+    Logger.info "build k8s job deleted, cancelling"
+    Builds.cancel(build)
+    flush_job(state)
+  end
+
+  def handle_info(%Watcher.Event{object: %BatchV1.Job{} = job}, %State{build: build, pid: pid} = state) do
+    Logger.info "Found k8s job update: #{inspect(job)}"
+    case Console.Deployer.Dedicated.job_status(job) do
+      :running ->
+        Logger.info "job still running, ignoring for now"
+        {:noreply, state}
+      :done ->
+        Logger.info "job completed, unblocking deployer #{inspect(self())}, job watcher: #{inspect(pid)}"
+        Builds.cancel(build)
+        Watcher.stop_watch(pid)
+        flush_job(state)
+    end
+  end
+
   def handle_info({:DOWN, ref, :process, _, _}, %State{ref: ref, build: build} = state) do
     Logger.info "tearing down build #{build.id}, proc: #{inspect(state.pid)}"
     Builds.cancel(build)
-    broadcast()
-    send(self(), :poll)
-    {:noreply, %{state | ref: nil, pid: nil, build: nil}}
+    flush_job(state)
   end
 
   def handle_info(_, state), do: {:noreply, state}
@@ -148,6 +185,12 @@ defmodule Console.Deployer do
       _ -> Logger.info "#{inspect(me())} is not leader, moving on"
     end
     :ok
+  end
+
+  defp flush_job(state) do
+    broadcast()
+    send(self(), :poll)
+    {:noreply, %{state | ref: nil, pid: nil, build: nil}}
   end
 
   defp update(storage, repo, content, tool, msg, actor) do

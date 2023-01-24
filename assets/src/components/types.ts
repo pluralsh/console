@@ -12,4 +12,5 @@ export const BuildTypes = {
   DEPLOY: 'DEPLOY',
   APPROVAL: 'APPROVAL',
   INSTALL: 'INSTALL',
+  DEDICATED: 'DEDICATED',
 }

@@ -1,7 +1,16 @@
 defmodule Console.Deployer.Operations do
   alias Console.Schema.Build
   alias Console.Commands.{Plural}
+  alias Console.Services.Builds
   alias Console.Plural.Context
+  alias Console.Deployer.Dedicated
+
+  def perform(_, %Build{type: :dedicated, id: id} = build) do
+    with {:ok, job} <- Dedicated.create_job(id),
+         {:ok, build} <- Builds.add_job_name(build, job.metadata.name),
+         {:ok, build} <- Builds.running(build),
+      do: Dedicated.watch_job(build.job_name)
+  end
 
   def perform(storage, %Build{repository: repo, type: :bounce} = build) do
     with_build(build, [
@@ -69,9 +78,9 @@ defmodule Console.Deployer.Operations do
     Swarm.register_name(build.id, pid)
     Console.Runner.register(pid)
     ref = Process.monitor(pid)
-    {pid, ref}
+    {:ok, pid, ref}
   end
 
-  defp commit_message(nil, repo), do: "console deployment for #{repo}"
-  defp commit_message(message, repo), do: "console deployment for #{repo} -- #{message}"
+  def commit_message(nil, repo), do: "console deployment for #{repo}"
+  def commit_message(message, repo), do: "console deployment for #{repo} -- #{message}"
 end
