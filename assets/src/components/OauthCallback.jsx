@@ -2,9 +2,10 @@ import { useEffect } from 'react'
 import gql from 'graphql-tag'
 import { Box } from 'grommet'
 import { Alert, AlertStatus, GqlError } from 'forge-core'
-import { useMutation } from 'react-apollo'
 import { useLocation } from 'react-router'
 import qs from 'query-string'
+
+import { useMutation } from '@apollo/client'
 
 import { setToken } from '../helpers/auth'
 
