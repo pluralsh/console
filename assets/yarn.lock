@@ -7356,7 +7356,6 @@ __metadata:
     react-dom: 18.2.0
     react-file-icon: 1.3.0
     react-file-picker: 0.0.6
-    react-foco: 1.3.1
     react-highlight.js: 1.0.7
     react-portal: 4.2.2
     react-pulse-dot: 2.1.0
@@ -13528,16 +13527,6 @@ __metadata:
   version: 0.0.6
   resolution: "react-file-picker@npm:0.0.6"
   checksum: 638077c0281f714354c8282e078841462b3bb98ed74441b7a55629b3887b091b7f63eedab1749eaf6b73c8aa77ef35be7791f824b8e41885a65cab6618747229
-  languageName: node
-  linkType: hard
-
-"react-foco@npm:1.3.1":
-  version: 1.3.1
-  resolution: "react-foco@npm:1.3.1"
-  peerDependencies:
-    react: ">16.0.0"
-    react-dom: ">16.0.0"
-  checksum: aa1e72538d5a9864857c7c3b74cc00de44ca44dfd179224a6767197f6facfe4bec196d82e9ece9bc7a4c8c043d406680a7ab1ba13c3d09b425d77213f7be48b5
   languageName: node
   linkType: hard
 

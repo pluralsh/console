@@ -1,7 +1,7 @@
 import { Route } from 'react-router-dom'
 
 import { LinkLogin } from '../components/LinkLogin'
-import Console from '../components/Console'
+import Console from '../components/layout/Console'
 
 import Login, { GrantAccess } from '../components/Login'
 import Invite from '../components/Invite'
