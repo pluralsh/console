@@ -34,7 +34,7 @@ const findContext = (contexts: Array<RepositoryContext>, repository: string): Re
 export function Application({ ...props }: any): ReactElement {
   const { active, setData } = useActive<StepData>()
   const [context, setContext] = useState<Record<string, unknown>>(active.data?.context || {})
-  const [oidc, setOIDC] = useState(active.data?.oidc || false)
+  const [oidc, setOIDC] = useState(active.data?.oidc ?? false)
   const [valid, setValid] = useState(true)
   const { data: { recipes: { edges: recipeEdges } = { edges: undefined } } = {} } = useQuery(RECIPES_Q, {
     variables: { id: active.key },
@@ -53,6 +53,12 @@ export function Application({ ...props }: any): ReactElement {
   const stepData = useMemo(() => ({
     ...active.data, ...{ id: recipe?.recipe.id }, ...{ oidc }, ...{ context: mergedContext },
   }), [active.data, mergedContext, oidc, recipe?.recipe.id])
+
+  useEffect(() => {
+    const valid = Object.values<any>(context).every(({ valid }) => valid)
+
+    setValid(valid)
+  }, [context, setValid])
 
   // Update step data on change
   useEffect(() => setData(stepData), [stepData, setData])
@@ -133,7 +139,6 @@ export function Application({ ...props }: any): ReactElement {
         context={mergedContext}
         oidc={oidc}
         setContext={setContext}
-        setValid={setValid}
         setOIDC={setOIDC}
       />
     </WizardStep>
