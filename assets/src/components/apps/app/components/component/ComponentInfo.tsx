@@ -127,8 +127,9 @@ export default function ComponentInfo() {
         <Flex gap="medium">
           <ScalingRecommenderModal
             kind={kind}
-            name={componentName}
+            componentName={componentName}
             namespace={appName}
+
           />
           <ViewLogsButton metadata={value?.metadata} />
         </Flex>
