@@ -24,6 +24,7 @@ export function InstallerModal() {
         fontWeight={600}
         endIcon={<DownloadIcon size={14} />}
         onClick={() => setOpen(true)}
+        id="installer"
       >
         Install
       </Button>
