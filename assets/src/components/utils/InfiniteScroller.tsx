@@ -32,7 +32,7 @@ function InfiniteScroller({
     return () => {
       current.removeEventListener('scroll', handleScroll)
     }
-  }, [loading, hasMore, loadMore])
+  }, [loading, hasMore, loadMore, loadMoreArgs])
 
   return (
     <Div

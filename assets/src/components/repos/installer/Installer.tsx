@@ -180,6 +180,7 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
 
     setStepsLoading(true)
     build().then(() => setStepsLoading(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client, selectedApplications.length])
 
   if (loading) {

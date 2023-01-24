@@ -1,10 +1,5 @@
-import {
-  forwardRef,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
-import { useQuery, useSubscription } from '@apollo/client'
+import { forwardRef, useMemo, useState } from 'react'
+import { useQuery } from '@apollo/client'
 import { Flex, useDebounce } from 'honorable'
 import {
   AppsIcon,
@@ -22,7 +17,7 @@ import styled, { useTheme } from 'styled-components'
 
 import type { RootQueryType } from 'generated/graphql'
 
-import { PODS_Q, PODS_SUB } from '../queries'
+import { PODS_Q } from '../queries'
 import { POLL_INTERVAL } from '../constants'
 
 import {
@@ -72,7 +67,6 @@ export default function AllPods() {
     data,
     refetch,
     error,
-    subscribeToMore,
   } = useQuery<{
     pods: RootQueryType['pods']
     applications: RootQueryType['applications']
