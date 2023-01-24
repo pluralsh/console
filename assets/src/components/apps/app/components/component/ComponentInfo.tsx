@@ -94,7 +94,6 @@ export default function ComponentInfo() {
     appName, componentKind = '', componentName, ...params
   } = useParams()
 
-  console.log('params', params)
   const { component, data } = useOutletContext<any>()
   const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
 
