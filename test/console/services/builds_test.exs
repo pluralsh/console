@@ -2,6 +2,7 @@ defmodule Console.Services.BuildsTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.Services.Builds
+  alias Console.Plural.Context
   alias Console.{PubSub, Storage.Git}
 
   describe "Command implements Collectable" do
@@ -55,6 +56,13 @@ defmodule Console.Services.BuildsTest do
       {:ok, build} = Builds.create(%{type: :deploy, repository: "repo"}, user)
 
       assert_receive {:event, %PubSub.BuildCreated{item: ^build}}
+    end
+
+    test "destroy builds fail when protected" do
+      user = insert(:user)
+      expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{}} end)
+      expect(Context, :get, fn -> {:ok, %Context{protect: ["repo"]}} end)
+      {:error, _} = Builds.create(%{type: :destroy, repository: "repo"}, user)
     end
   end
 
