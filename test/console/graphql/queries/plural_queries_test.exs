@@ -128,7 +128,7 @@ defmodule Console.GraphQl.PluralQueriesTest do
             recipeItems: [
               %{
                 id: "id4",
-                configuration: [%{name: "name", documentation: "some documentation", type: "STRING"}]
+                configuration: [%{name: "name", documentation: "some documentation", type: "STRING", optional: true}]
               }
             ]
           }
@@ -150,7 +150,7 @@ defmodule Console.GraphQl.PluralQueriesTest do
               repository { id }
               recipeItems {
                 id
-                configuration { name documentation type }
+                configuration { name documentation type optional }
               }
             }
           }
@@ -171,6 +171,7 @@ defmodule Console.GraphQl.PluralQueriesTest do
       assert hd(item["configuration"])["name"] == "name"
       assert hd(item["configuration"])["documentation"] == "some documentation"
       assert hd(item["configuration"])["type"] == "STRING"
+      assert hd(item["configuration"])["optional"]
     end
 
     test "it will set oidc enabled correctly" do
