@@ -7,7 +7,6 @@ import {
   TabList,
 } from '@pluralsh/design-system'
 import { getIcon, hasIcons } from 'components/apps/misc'
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { InstallationContext } from 'components/Installations'
 import { AnsiText } from 'components/utils/AnsiText'
 import { Flex, Span } from 'honorable'
@@ -15,18 +14,15 @@ import { groupBy } from 'lodash'
 import {
   Key,
   useContext,
-  useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react'
-import { useOutletContext, useParams } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
 
 export default function Changelog() {
   const tabStateRef = useRef<any>(null)
-  const { buildId } = useParams()
   const { applications } = useContext<any>(InstallationContext)
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { build: { changelogs } } = useOutletContext<any>()
   const { repo: initialRepo, tool: initialTool }: any = changelogs?.length > 0 ? changelogs[0] : {}
 
@@ -39,14 +35,6 @@ export default function Changelog() {
   const [tool, setTool] = useState<Key>(initialTool)
   const tools = useMemo(() => grouped[repo] || [], [grouped, repo])
   const currentTool = useMemo(() => tools.find(({ tool: t }) => t === tool), [tools, tool])
-
-  useEffect(() => {
-    setBreadcrumbs([
-      { text: 'builds', url: '/builds' },
-      { text: buildId, url: `/builds/${buildId}` },
-      { text: 'changelog', url: `/builds/${buildId}/changelog` },
-    ])
-  }, [buildId, setBreadcrumbs])
 
   return (
     <>
