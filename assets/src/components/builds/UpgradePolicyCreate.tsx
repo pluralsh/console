@@ -103,7 +103,19 @@ export default function UpgradePolicyCreate() {
           value={attributes.weight}
         />
       </FormField>
-      <Flex justify="end">
+      <Flex
+        gap="medium"
+        justify="end"
+      >
+        <Button
+          secondary
+          onClick={() => setModal({
+            header: 'Upgrade Policies',
+            content: <UpgradePoliciesList />,
+          })}
+        >
+          Cancel
+        </Button>
         <Button
           disabled={isEmpty(attributes?.name)}
           loading={loading}

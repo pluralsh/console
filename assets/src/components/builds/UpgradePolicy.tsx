@@ -81,8 +81,8 @@ export default function UpgradePolicy({ policy, last = false }) {
         direction="vertical"
       >
         <Flex
-          backgroundColor="fill-three"
-          borderBottom="1px solid border"
+          backgroundColor="fill-zero"
+          borderBottom="1px solid border-zero"
           direction="column"
           gap="medium"
           padding="small"
