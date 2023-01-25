@@ -52,10 +52,10 @@ export default function Node() {
       >
         <Outlet />
       </TabPanel>
-      <ResponsiveLayoutSpacer />
       <ResponsiveLayoutSidecarContainer width="200px">
         <NodeSidecar />
       </ResponsiveLayoutSidecarContainer>
+      <ResponsiveLayoutSpacer />
     </Flex>
   )
 }
