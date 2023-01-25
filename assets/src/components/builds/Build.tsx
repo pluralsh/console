@@ -16,6 +16,7 @@ import BuildStatus from './BuildStatus'
 
 export const BUILD_TYPE_DISPLAY_NAMES = {
   [BuildTypes.BOUNCE]: 'Bounce',
+  [BuildTypes.DEDICATED]: 'Dedicated',
   [BuildTypes.DEPLOY]: 'Deployment',
   [BuildTypes.APPROVAL]: 'New images',
   [BuildTypes.INSTALL]: 'Installation',
