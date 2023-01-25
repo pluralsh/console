@@ -1,6 +1,5 @@
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { Card, PageTitle } from '@pluralsh/design-system'
-import { useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
 
@@ -9,14 +8,7 @@ import Component from './Component'
 export default function Components() {
   const { appName } = useParams()
   const { applications } = useContext<any>(InstallationContext)
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const currentApp = applications.find(app => app.name === appName)
-
-  useEffect(() => setBreadcrumbs([
-    { text: 'apps', url: '/' },
-    { text: appName, url: `/apps/${appName}` },
-    { text: 'components', url: `/apps/${appName}/components` },
-  ]), [appName, setBreadcrumbs])
 
   return (
     <>

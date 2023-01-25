@@ -12,7 +12,7 @@ import {
   TabPanel,
 } from '@pluralsh/design-system'
 
-import { useContext, useRef } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import {
   Link,
   Outlet,
@@ -50,6 +50,8 @@ import {
 
 import { LoginContext } from 'components/contexts'
 
+import { BreadcrumbsContext } from 'components/Breadcrumbs'
+
 import { ComponentIcon, ComponentStatus } from '../misc'
 
 const directory = [
@@ -71,6 +73,7 @@ const kindToQuery = {
 
 export default function Component() {
   const tabStateRef = useRef<any>(null)
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { me } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
   const { appName, componentKind = '', componentName } = useParams()
@@ -79,6 +82,17 @@ export default function Component() {
   const currentApp = applications.find(app => app.name === appName)
   const { data, loading, refetch } = useQuery(kindToQuery[componentKind],
     { variables: { name: componentName, namespace: appName }, pollInterval: POLL_INTERVAL })
+
+  useEffect(() => setBreadcrumbs([
+    { text: 'apps', url: '/' },
+    { text: appName, url: `/apps/${appName}` },
+    { text: 'components', url: `/apps/${appName}/components` },
+    {
+      text: componentName,
+      url: `/apps/${appName}/components/${componentKind}/${componentName}`,
+    },
+  ]),
+  [appName, componentKind, componentName, setBreadcrumbs])
 
   if (!me || !currentApp || !data) {
     return (
