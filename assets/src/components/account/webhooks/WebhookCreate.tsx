@@ -25,13 +25,15 @@ export default function WebhookCreate() {
 
   return (
     <>
-      <Button
-        small
-        fontWeight={600}
-        onClick={() => setOpen(true)}
-      >
-        Add Slack webhook
-      </Button>
+      <div>
+        <Button
+          small
+          fontWeight={600}
+          onClick={() => setOpen(true)}
+        >
+          Add Slack webhook
+        </Button>
+      </div>
       <Modal
         size="large"
         header="Create webhook"
