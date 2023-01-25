@@ -171,7 +171,7 @@ defmodule Console.GraphQl.PluralQueriesTest do
       assert hd(item["configuration"])["name"] == "name"
       assert hd(item["configuration"])["documentation"] == "some documentation"
       assert hd(item["configuration"])["type"] == "STRING"
-      assert hd(item["configuration"])["optional"] == true
+      assert hd(item["configuration"])["optional"]
     end
 
     test "it will set oidc enabled correctly" do
