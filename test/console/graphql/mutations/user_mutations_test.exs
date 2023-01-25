@@ -284,4 +284,18 @@ defmodule Console.GraphQl.UserMutationsTest do
       assert read["readTimestamp"]
     end
   end
+
+  describe "markRead" do
+    test "it can mark the build timestamp for a user" do
+      user = insert(:user)
+
+      {:ok, %{data: %{"markRead" => read}}} = run_query("""
+        mutation Read($type: ReadType) {
+          markRead(type: $type) { buildTimestamp }
+        }
+      """, %{"type" => "BUILD"}, %{current_user: user})
+
+      assert read["buildTimestamp"]
+    end
+  end
 end

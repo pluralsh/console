@@ -40,6 +40,24 @@ defmodule Console.Schema.Build do
     from(b in query, limit: 1)
   end
 
+  @frag "case when ? = ? then 1 else 0 end"
+
+  def inserted_after(query \\ __MODULE__, ts)
+  def inserted_after(query, nil), do: query
+  def inserted_after(query, ts), do: from(b in query, where: b.inserted_at >= ^ts)
+
+  def info(query \\ __MODULE__) do
+    from(b in query,
+      select: %{
+        all:        count(b.id),
+        failed:     sum(fragment(@frag, b.status, type(^:failed, Status))),
+        running:    sum(fragment(@frag, b.status, type(^:running, Status))),
+        successful: sum(fragment(@frag, b.status, type(^:successful, Status))),
+        queued:     sum(fragment(@frag, b.status, type(^:queued, Status)))
+      }
+    )
+  end
+
   def with_status(query \\ __MODULE__, status) do
     from(b in query, where: b.status == ^status)
   end

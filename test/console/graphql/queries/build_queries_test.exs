@@ -18,6 +18,30 @@ defmodule Console.GraphQl.BuildQueriesTest do
     end
   end
 
+  describe "info" do
+    test "it can aggregate all builds after your read timestamp" do
+      old = Timex.now() |> Timex.shift(hours: -1)
+      user = insert(:user, build_timestamp: old)
+      insert_list(2, :build, status: :failed)
+      insert_list(3, :build, status: :successful)
+      insert(:build, status: :queued)
+      insert_list(5, :build, status: :running)
+      insert(:build, inserted_at: Timex.shift(old, hours: -1))
+
+      {:ok, %{data: %{"buildInfo" => info}}} = run_query("""
+        query {
+          buildInfo { all running queued successful failed }
+        }
+      """, %{}, %{current_user: user})
+
+      assert info["all"] == 11
+      assert info["running"] == 5
+      assert info["queued"] == 1
+      assert info["successful"] == 3
+      assert info["failed"] == 2
+    end
+  end
+
   describe "build" do
     test "It can sideload commands for a build" do
       build      = insert(:build)
