@@ -77,7 +77,7 @@ export default function Component() {
   const { me } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
   const { appName, componentKind = '', componentName } = useParams()
-  const { applications }: any = useContext(InstallationContext)
+  const { applications } = useContext<any>(InstallationContext)
   const pathPrefix = `/apps/${appName}/components/${componentKind}/${componentName}`
   const currentApp = applications.find(app => app.name === appName)
   const { data, loading, refetch } = useQuery(kindToQuery[componentKind],

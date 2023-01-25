@@ -1,10 +1,5 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import {
-  LoopingLogo,
-  PageTitle,
-  SubTab,
-  TabList,
-} from '@pluralsh/design-system'
+import { LoopingLogo, SubTab, TabList } from '@pluralsh/design-system'
 import {
   Key,
   useContext,
@@ -14,9 +9,11 @@ import {
 } from 'react'
 import { useParams } from 'react-router-dom'
 import { APPLICATION_Q } from 'components/graphql/plural'
-import { Flex, P, Span } from 'honorable'
+import { Flex, Span } from 'honorable'
 import { COMPONENT_LABEL } from 'components/cluster/constants'
 import { useQuery } from '@apollo/client'
+
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { ConfigType } from './misc'
 import { ConfigurationEditor } from './ConfigurationEditor'
@@ -39,26 +36,18 @@ export default function Configuration() {
     { text: 'configuration', url: `/apps/${appName}/config` },
   ]), [appName, setBreadcrumbs])
 
-  if (error) {
-    return (
-      <>
-        <PageTitle heading="Configuration" />
-        <P>Cannot access configuration for this app.</P>
-      </>
-    )
-  }
+  if (error) return <ScrollablePage heading="Configuration">Cannot access configuration for this app.</ScrollablePage>
 
   if (!data) {
     return (
-      <>
-        <PageTitle heading="Configuration" />
+      <ScrollablePage heading="Configuration">
         <Flex
           grow={1}
           justify="center"
         >
           <LoopingLogo scale={1} />
         </Flex>
-      </>
+      </ScrollablePage>
     )
   }
 
@@ -75,33 +64,36 @@ export default function Configuration() {
   if (!view) setView(views[0])
 
   return (
-    <>
-      <PageTitle heading="Configuration">
-        <Flex grow={1} />
-        <TabList
-          margin={1}
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: view,
-            onSelectionChange: setView,
-          }}
-        >
-          {views.map(view => (
-            <SubTab
-              key={view}
-              textValue={view}
-            >
-              <Span
-                fontWeight={600}
-                textTransform="capitalize"
+    <ScrollablePage
+      heading="Configuration"
+      headingContent={(
+        <><Flex grow={1} />
+          <TabList
+            margin={1}
+            stateRef={tabStateRef}
+            stateProps={{
+              orientation: 'horizontal',
+              selectedKey: view,
+              onSelectionChange: setView,
+            }}
+          >
+            {views.map(view => (
+              <SubTab
+                key={view}
+                textValue={view}
               >
-                {view.toLowerCase()}
-              </Span>
-            </SubTab>
-          ))}
-        </TabList>
-      </PageTitle>
+                <Span
+                  fontWeight={600}
+                  textTransform="capitalize"
+                >
+                  {view.toLowerCase()}
+                </Span>
+              </SubTab>
+            ))}
+          </TabList>
+        </>
+      )}
+    >
       {view === ConfigType.SETTINGS && (
         <ConfigurationSettings
           application={application}
@@ -114,6 +106,6 @@ export default function Configuration() {
           view={view}
         />
       )}
-    </>
+    </ScrollablePage>
   )
 }
