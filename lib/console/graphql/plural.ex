@@ -74,6 +74,7 @@ defmodule Console.GraphQl.Plural do
     field :placeholder,   :string
     field :documentation, :string
     field :default,       :string
+    field :optional,      :boolean
     field :condition,     :configuration_condition
     field :validation,    :configuration_validation
   end

@@ -20,6 +20,7 @@ variable "role_name" {
 
 variable "node_role_arn" {
   type = string
+  default = null
   description = "Manually supply an arn for dedicated console nodes"
 }
 

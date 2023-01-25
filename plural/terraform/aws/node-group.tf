@@ -15,7 +15,7 @@ locals {
 module "dedicated_node_group" {
   source = "github.com/pluralsh/module-library//terraform/eks-node-groups/multi-az-node-groups?ref=20e64863ffc5e361045db8e6b81b9d244a55809e"
   cluster_name           = var.cluster_name
-  default_iam_role_arn   = try(local.node_groups[0].node_role_arn, var.ndoe_role_arn)
+  default_iam_role_arn   = try(local.node_groups[0].node_role_arn, var.node_role_arn)
   tags                   = var.tags
   node_groups_defaults   = var.node_groups_defaults
 
