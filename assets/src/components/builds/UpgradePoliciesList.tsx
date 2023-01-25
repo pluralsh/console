@@ -26,10 +26,11 @@ export default function UpgradePoliciesList() {
           maxHeight={300}
           overflowY="auto"
         >
-          {upgradePolicies.map(policy => (
+          {upgradePolicies.map((policy, i) => (
             <UpgradePolicy
               key={policy.id}
               policy={policy}
+              last={i === upgradePolicies.length - 1}
             />
           ))}
         </Card>
