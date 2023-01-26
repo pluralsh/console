@@ -60,6 +60,7 @@ export default function KubernetesCost({ cost }) {
           </Flex>
           <Flex basis={320}>
             <ProgressBar
+              height={4}
               mode="determinate"
               progress={entry.cost / total}
               progressColor="blue.400"
