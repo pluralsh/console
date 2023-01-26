@@ -20,6 +20,13 @@ defmodule Console.GraphQl.Resolvers.Build do
     |> paginate(args)
   end
 
+  def info(_, %{context: %{current_user: user}}) do
+    Build.inserted_after(user.build_timestamp)
+    |> Build.info()
+    |> Console.Repo.one()
+    |> ok()
+  end
+
   def create_build(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Builds.create(attrs, user)
 

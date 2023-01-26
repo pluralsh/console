@@ -91,6 +91,9 @@ defmodule Console.GraphQl.Resolvers.User do
   def read_notifications(_, %{context: %{current_user: user}}),
     do: Users.mark_read(user)
 
+  def mark_read(args, %{context: %{current_user: user}}),
+    do: Users.mark_read(user, Map.get(args, :type, :notification))
+
   def resolve_role(%{id: role_id}, _), do: {:ok, Users.get_role!(role_id)}
 
   def resolve_invite(%{id: secure_id}, _),
