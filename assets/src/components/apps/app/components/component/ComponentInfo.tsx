@@ -83,10 +83,7 @@ function ViewLogsButton({ metadata }: any) {
 }
 
 export default function ComponentInfo() {
-  const {
-    appName, componentKind = '', componentName,
-  } = useParams()
-
+  const { appName, componentKind = '', componentName } = useParams()
   const { component, data } = useOutletContext<any>()
 
   const kind: ScalingType
@@ -103,7 +100,7 @@ export default function ComponentInfo() {
         <Flex gap="medium">
           <ScalingRecommenderModal
             kind={kind}
-            name={componentName}
+            componentName={componentName}
             namespace={appName}
           />
           <ViewLogsButton metadata={value?.metadata} />

@@ -1,11 +1,23 @@
 import {
   ComponentProps,
-  Key,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
-import { ContainerRecommendation, RootQueryType } from 'generated/graphql'
-import { useQuery } from '@apollo/client'
+import {
+  ConfigurationOverlay,
+  ConfigurationOverlaySpec,
+  ContainerRecommendation,
+  ContainerResources,
+  LabelPair,
+  Maybe,
+  RootQueryType,
+} from 'generated/graphql'
+import { useMutation, useQuery } from '@apollo/client'
 
 import { filesize } from 'filesize'
 
@@ -16,6 +28,7 @@ import {
   Tab,
   TabList,
   TabPanel,
+  usePrevious,
 } from '@pluralsh/design-system'
 
 import {
@@ -28,9 +41,20 @@ import {
 
 import { useTheme } from 'styled-components'
 
-import { ScalingType } from './constants'
+import { EXECUTE_OVERLAY } from 'components/apps/app/config/queries'
 
-import { SCALING_RECOMMENDATION } from './queries'
+import ConfigurationSettingsField from 'components/apps/app/config/ConfigurationSettingsField'
+
+import { GqlError } from 'components/utils/Alert'
+
+import {
+  COMPONENT_LABEL,
+  KIND_LABEL,
+  RESOURCE_LABEL,
+  ScalingType,
+} from './constants'
+
+import { CONFIGURATION_OVERLAYS, SCALING_RECOMMENDATION } from './queries'
 
 const POLL_INTERVAL = 10000
 
@@ -111,22 +135,23 @@ function RecommendationComp({ label, cpu, memory }: any) {
   )
 }
 
-function Recos({
+function ContainerRecommendations({
   lowerBound,
   upperBound,
-  containerName,
   uncappedTarget,
-}: ContainerRecommendation) {
+  setIsModifying,
+}: ContainerRecommendation & { setIsModifying: (arg: boolean) => void }) {
   const recos = [
     ...(lowerBound ? [{ label: 'Lower bound', ...lowerBound }] : []),
     ...(upperBound ? [{ label: 'Upper bound', ...upperBound }] : []),
     ...(uncappedTarget ? [{ label: 'Target', ...uncappedTarget }] : []),
   ]
+  const { overlays, componentName } = useScalingContext()
 
   return (
     <Div padding="large">
       <P marginBottom="large">
-        Recommendations for how to scale your {containerName} instance on this
+        Recommendations for how to scale your {componentName} instance on this
         application.
       </P>
       <Card
@@ -141,209 +166,313 @@ function Recos({
           <RecommendationComp {...r} />
         ))}
       </Card>
+      {overlays && overlays.length > 0 && (
+        <Flex
+          marginTop="medium"
+          direction="row"
+          justify="end"
+        >
+          <Button onClick={() => setIsModifying(true)}>
+            Apply recommendations
+          </Button>
+        </Flex>
+      )}
     </Div>
   )
 }
 
-/*
-function ScalingRecommendations({
-  recommendations,
-  namespace,
-  kind,
-  name,
-  setOpen,
-}) {
-  const [tab, setTab] = useState(recommendations[0].containerName)
-  const [exec, setExec] = useState(false)
-  const { data: overlayData } = useQuery(CONFIGURATION_OVERLAYS, {
-    variables: { namespace },
+export function ScalingEdit({ rec }: { rec: ContainerResources }) {
+  const {
+    namespace, overlays, setIsModifying, setSuccess,
+  }
+    = useScalingContext()
+  const { cpu, memory } = rec || {}
+
+  const byResource = overlays?.reduce((acc, overlay) => ({
+    ...acc,
+    [overlay?.metadata?.labels?.[RESOURCE_LABEL]]: overlay,
+  }),
+    {} as Maybe<{ cpu?: Maybe<string>; memory?: Maybe<string> }>)
+
+  const [ctx, setCtx] = useState({
+    [(byResource as any)?.cpu.spec.name]: cpu,
+    [(byResource as any)?.memory.spec.name]: memory,
+  })
+  const [initCtx, setInitCtx] = useState(ctx)
+
+  const [mutation, { loading, error }] = useMutation(EXECUTE_OVERLAY, {
+    variables: { name: namespace, ctx: JSON.stringify(ctx) },
+    onCompleted: () => {
+      setSuccess(true)
+    },
   })
 
-  const overlays = overlayData?.configurationOverlays
-    ?.map(({ metadata, ...rest }) => {
-      const labels = metadata.labels.reduce((acc, { name, value }) => ({ ...acc, [name]: value }),
-        {})
-
-      return { ...rest, metadata: { ...metadata, labels } }
-    })
-    .filter(({ metadata: { labels } }) => labels[COMPONENT_LABEL] === name
-        && labels[KIND_LABEL] === kind.toLowerCase())
-
-  if (exec) {
-    return (
-      <ScalingEdit
-        rec={
-          recommendations.find(({ containerName }) => containerName === tab)
-            .uncappedTarget
-        }
-        namespace={namespace}
-        overlays={overlays}
-        setOpen={setOpen}
-      />
-    )
-  }
-
   return (
-    <Box
-      flex={false}
-      pad="small"
-    >
-      <Tabs
-        defaultTab={recommendations[0].containerName}
-        onTabChange={setTab}
+    <Div padding="large">
+      <Flex
+        flexDirection="column"
+        pad="medium"
+        gap="small"
+        marginBottom="large"
       >
-        <TabHeader>
-          {recommendations.map(({ containerName }) => (
-            <TabHeaderItem
-              key={containerName}
-              name={containerName}
-            >
-              <Text
-                size="small"
-                weight={500}
-              >
-                {containerName}
-              </Text>
-            </TabHeaderItem>
-          ))}
-        </TabHeader>
-        {recommendations.map(recommendation => (
-          <TabContent
-            key={recommendation.containerName}
-            name={recommendation.containerName}
+        <ConfigurationSettingsField
+          overlay={byResource?.cpu}
+          ctx={ctx}
+          setCtx={setCtx}
+          values={{}}
+          init={initCtx}
+          setInit={setInitCtx}
+        />
+        <ConfigurationSettingsField
+          overlay={byResource?.memory}
+          ctx={ctx}
+          setCtx={setCtx}
+          values={{}}
+          init={initCtx}
+          setInit={setInitCtx}
+        />
+      </Flex>
+      <Flex
+        gap="small"
+        flexDirection="column"
+      >
+        {error && <GqlError error={error} />}
+        <Flex
+          direction="row"
+          gap="xsmall"
+          justify="end"
+        >
+          <Button
+            secondary
+            disabled={loading}
+            onClick={() => setIsModifying(false)}
           >
-            <Box pad="small">
-              <MetadataRow name="lower bound">
-                <RecommendationComp rec={recommendation.lowerBound} />
-              </MetadataRow>
-              <MetadataRow name="upper bound">
-                <RecommendationComp rec={recommendation.upperBound} />
-              </MetadataRow>
-              <MetadataRow name="target">
-                <RecommendationComp rec={recommendation.uncappedTarget} />
-              </MetadataRow>
-            </Box>
-            {overlays && overlays.length > 0 && (
-              <Box
-                direction="row"
-                justify="end"
-              >
-                <Button
-                  label="Apply"
-                  onClick={() => setExec(true)}
-                />
-              </Box>
-            )}
-          </TabContent>
-        ))}
-      </Tabs>
-    </Box>
+            Cancel
+          </Button>
+          <Button
+            loading={loading}
+            onClick={() => mutation()}
+          >
+            Update
+          </Button>
+        </Flex>
+      </Flex>
+    </Div>
   )
 }
 
-export function ScalingEdit({
-  namespace,
-  rec: { cpu, memory },
-  overlays,
-  setOpen,
-}) {
-  const byResource = overlays.reduce((acc, overlay) => ({
-    ...acc,
-    [overlay.metadata.labels[RESOURCE_LABEL]]: overlay,
-  }),
-  {})
-
-  const [ctx, setCtx] = useState({
-    [byResource.cpu.spec.name]: cpu,
-    [byResource.memory.spec.name]: memory,
-  })
-  const [mutation, { loading }] = useMutation(EXECUTE_OVERLAY, {
-    variables: { name: namespace, ctx: JSON.stringify(ctx) },
-    onCompleted: () => setOpen(false),
-  })
+export function SuccessConfirm() {
+  const { closeModal } = useScalingContext()
 
   return (
-    <Box
-      fill
-      pad="medium"
+    <Flex
+      padding="large"
       gap="small"
+      flexDirection="column"
     >
-      <ConfigurationSettingsField
-        overlay={byResource.cpu}
-        ctx={ctx}
-        setCtx={setCtx}
-        values={{}}
-      />
-      <ConfigurationSettingsField
-        overlay={byResource.memory}
-        ctx={ctx}
-        setCtx={setCtx}
-        values={{}}
-      />
-      <Box
+      <P
+        body1
+        marginBottom="medium"
+      >
+        Scaling recommendations successfully applied.
+      </P>
+      <Flex
         direction="row"
+        gap="xsmall"
         justify="end"
       >
         <Button
-          label="Update"
-          loading={loading}
-          onClick={mutation}
-        />
-      </Box>
-    </Box>
+          primary
+          onClick={() => closeModal()}
+        >
+          Done
+        </Button>
+      </Flex>
+    </Flex>
   )
 }
-*/
+
+export function ScalingRecommender() {
+  const {
+    success, namespace, recommendations, isModifying, setIsModifying,
+  }
+    = useScalingContext()
+
+  const tabStateRef = useRef<any>()
+  const [recoIndex, setRecoIndex] = useState<number>(0)
+  const currentReco = recommendations?.[recoIndex] ?? undefined
+
+  if (success) {
+    return <SuccessConfirm />
+  }
+
+  if (isModifying && currentReco?.uncappedTarget && namespace) {
+    return <ScalingEdit rec={currentReco?.uncappedTarget} />
+  }
+
+  return (
+    <>
+      <TabList
+        stateRef={tabStateRef}
+        stateProps={{
+          orientation: 'horizontal',
+          selectedKey: recoIndex,
+          onSelectionChange: index => {
+            setRecoIndex(index as typeof recoIndex)
+          },
+        }}
+      >
+        {(recommendations || []).map((r, i) => (
+          <Tab
+            key={i}
+            flexGrow={1}
+            flexShrink={1}
+            justifyContent="center"
+            {...{
+              '& div': {
+                justifyContent: 'center',
+              },
+            }}
+          >
+            {r?.containerName}
+          </Tab>
+        ))}
+      </TabList>
+      <TabPanel stateRef={tabStateRef}>
+        <ContainerRecommendations
+          {...currentReco}
+          setIsModifying={setIsModifying}
+        />
+      </TabPanel>
+    </>
+  )
+}
+
+const ScalingContext = createContext<
+  |(ScalingModalProps & {
+      closeModal: () => void
+      setIsModifying: (arg: boolean) => void
+      isModifying: boolean
+      setSuccess: (arg: boolean) => void
+      success: boolean
+      recommendations?: Maybe<Maybe<ContainerRecommendation>[]>
+      configurationOverlays?: Maybe<Maybe<ConfigurationOverlay>[]>
+      overlays?: OverlaysType
+    })
+    | undefined
+    >(undefined)
+
+function useScalingContext() {
+  const context = useContext(ScalingContext)
+
+  if (!context) {
+    throw Error('ScalingContext has no value')
+  }
+
+  return context
+}
+
+type OverlaysType =
+  | {
+      metadata: {
+        labels: Maybe<LabelPair> | undefined
+        annotations?: Maybe<Maybe<LabelPair>[]> | undefined
+        name?: string | undefined
+        namespace?: Maybe<string> | undefined
+      }
+      spec?: ConfigurationOverlaySpec | undefined
+    }[]
+  | undefined
+
+type ScalingModalProps = {
+  kind?: ScalingType
+  componentName?: string
+  namespace?: string
+}
 
 export function ScalingRecommenderModal({
   kind,
-  name,
+  componentName,
   namespace,
   ...props
-}: { kind?: ScalingType; name?: string; namespace?: string } & ModalBaseProps) {
-  const tabStateRef = useRef<any>()
-  const [recoIndex, setRecoIndex] = useState<Key>('postgres')
+}: ScalingModalProps & ModalBaseProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const wasOpen = usePrevious(isOpen)
+  const [isModifying, setIsModifying] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const closeModal = useCallback(() => {
+    setIsOpen(false)
+  }, [])
+
+  useEffect(() => {
+    if (isOpen && !wasOpen) {
+      setIsModifying(false)
+      setSuccess(false)
+    }
+  }, [isOpen, wasOpen])
 
   const { data } = useQuery<{
     scalingRecommendation?: RootQueryType['scalingRecommendation']
   }>(SCALING_RECOMMENDATION, {
-    variables: { kind, name, namespace },
+    variables: { kind, name: componentName, namespace },
     pollInterval: POLL_INTERVAL,
   })
-  // const { data: overlayData } = useQuery<{
-  //   configurationOverlays: RootQueryType['configurationOverlays']
-  // }>(CONFIGURATION_OVERLAYS, {
-  //   variables: { namespace },
-  // })
-
-  // const overlays = overlayData?.configurationOverlays
-  //   ?.map(overlay => {
-  //     const { metadata, ...rest } = overlay || {}
-
-  //     const labels = metadata?.labels?.reduce((acc, { name, value }) => ({ ...acc, [name]: value }),
-  //       {})
-
-  //     return { ...rest, metadata: { ...metadata, labels } }
-  //   })
-  //   .filter(({ metadata: { labels } }) => (
-  //     labels?.[COMPONENT_LABEL] === name
-  //       && labels?.[KIND_LABEL] === kind?.toLowerCase()
-  //   ))
+  const { data: overlayData } = useQuery<{
+    configurationOverlays: RootQueryType['configurationOverlays']
+  }>(CONFIGURATION_OVERLAYS, {
+    variables: { namespace },
+  })
 
   const recommendations
     = data?.scalingRecommendation?.status?.recommendation
       ?.containerRecommendations
+  const configurationOverlays = overlayData?.configurationOverlays
+
+  const contextVal = useMemo(() => {
+    const overlays = configurationOverlays
+      ?.map(overlay => {
+        const { metadata, ...rest } = overlay || {}
+
+        const labels = metadata?.labels?.reduce((acc, label) => ({
+          ...acc,
+          ...(label ? { [label?.name || '']: label?.value } : {}),
+        }),
+        {})
+
+        return { ...rest, metadata: { ...metadata, labels } }
+      })
+      .filter(({ metadata: { labels } }) => labels?.[COMPONENT_LABEL] === componentName
+          && labels?.[KIND_LABEL] === kind?.toLowerCase())
+
+    return {
+      kind,
+      componentName,
+      namespace,
+      recommendations,
+      overlays,
+      setIsModifying,
+      isModifying,
+      setSuccess,
+      success,
+      closeModal,
+    }
+  }, [
+    configurationOverlays,
+    kind,
+    componentName,
+    namespace,
+    recommendations,
+    isModifying,
+    success,
+    closeModal,
+  ])
 
   if (!recommendations || recommendations.length === 0) {
     return null
   }
 
-  const currentReco: ContainerRecommendation | undefined
-    = recommendations?.[recoIndex]
-
   return (
-    <>
+    <ScalingContext.Provider value={contextVal}>
       <ScalingButton onClick={() => setIsOpen(true)} />
       <Modal
         paddingTop={0}
@@ -353,39 +482,13 @@ export function ScalingRecommenderModal({
         margin={0}
         minWidth={300}
         open={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={() => {
+          closeModal()
+        }}
         {...props}
       >
-        <TabList
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: recoIndex,
-            onSelectionChange: index => {
-              setRecoIndex(index)
-            },
-          }}
-        >
-          {(recommendations || []).map((r, i) => (
-            <Tab
-              key={i}
-              flexGrow={1}
-              flexShrink={1}
-              justifyContent="center"
-              {...{
-                '& div': {
-                  justifyContent: 'center',
-                },
-              }}
-            >
-              {r?.containerName}
-            </Tab>
-          ))}
-        </TabList>
-        <TabPanel stateRef={tabStateRef}>
-          <Recos {...currentReco} />
-        </TabPanel>
+        <ScalingRecommender />
       </Modal>
-    </>
+    </ScalingContext.Provider>
   )
 }
