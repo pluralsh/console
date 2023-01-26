@@ -15,7 +15,7 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@v3
       - name: Read Node.js version from package.json
-        run: echo ::set-output name=nodeVersion::$(node -p "require('./package.json').engines.node")
+        run: echo "nodeVersion=$(node -p "require('./package.json').engines.node")" >> $GITHUB_OUTPUT
         id: engines
       - name: 'Setup Node'
         uses: actions/setup-node@v3
@@ -34,7 +34,7 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@v3
       - name: Read Node.js version from package.json
-        run: echo ::set-output name=nodeVersion::$(node -p "require('./package.json').engines.node")
+        run: echo "nodeVersion=$(node -p "require('./package.json').engines.node")" >> $GITHUB_OUTPUT
         id: engines
       - name: 'Setup Node'
         uses: actions/setup-node@v3
@@ -52,7 +52,7 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@v3
       - name: Read Node.js version from package.json
-        run: echo ::set-output name=nodeVersion::$(node -p "require('./package.json').engines.node")
+        run: echo "nodeVersion=$(node -p "require('./package.json').engines.node")" >> $GITHUB_OUTPUT
         id: engines
       - name: 'Setup Node'
         uses: actions/setup-node@v3
@@ -69,7 +69,7 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@v3
       - name: Read Node.js version from package.json
-        run: echo ::set-output name=nodeVersion::$(node -p "require('./package.json').engines.node")
+        run: echo "nodeVersion=$(node -p "require('./package.json').engines.node")" >> $GITHUB_OUTPUT
         id: engines
       - name: 'Setup Node'
         uses: actions/setup-node@v3
@@ -83,3 +83,27 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PLURALSH_DESIGN }}'
           projectId: pluralsh-design
+  trivy-scan:
+    name: Trivy fs scan
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Run Trivy vulnerability scanner in fs mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          hide-progress: false
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          security-checks: 'vuln,secret'
+          ignore-unfixed: true
+          #severity: 'CRITICAL,HIGH'
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
