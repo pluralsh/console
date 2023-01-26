@@ -62,8 +62,8 @@ function getLogUrl({ name, namespace, labels }) {
   })}`
 }
 
-function ViewLogsButton({ metadata }: any) {
-  if (!hasLogs || !metadata) return null
+function ViewLogsButton({ metadata, kind }: any) {
+  if (!hasLogs(kind) || !metadata) return null
 
   const url = getLogUrl(metadata)
 
@@ -103,7 +103,10 @@ export default function ComponentInfo() {
             componentName={componentName}
             namespace={appName}
           />
-          <ViewLogsButton metadata={value?.metadata} />
+          <ViewLogsButton
+            metadata={value?.metadata}
+            kind={componentKind}
+          />
         </Flex>
       )}
     >
