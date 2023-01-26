@@ -80,7 +80,7 @@ export default function AppCard({ app }: any) {
         align="center"
         gap="small"
         maxWidth="90%"
-        padding="medium"
+        padding="small"
       >
         {hasIcons(app) && (
           <AppIcon
@@ -108,7 +108,7 @@ export default function AppCard({ app }: any) {
       <Flex
         align="center"
         gap="16px"
-        padding="medium"
+        padding="small"
       >
         {validLinks?.length > 0 && (
           <Button
