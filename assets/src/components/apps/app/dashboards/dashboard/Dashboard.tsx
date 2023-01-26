@@ -32,8 +32,8 @@ import DashboardGraph from './DashboardGraph'
 export default function Dashboard() {
   const navigate = useNavigate()
   const { appName, dashboardId: id } = useParams()
-  const { setDashboard }: any = useOutletContext()
-  const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
+  const { setDashboard } = useOutletContext<any>()
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const [selectedKey, setSelectedKey] = useState<Key>('')
   const [duration, setDuration] = useState(DURATIONS[0])
   const [labelMap, setLabelMap] = useState({})

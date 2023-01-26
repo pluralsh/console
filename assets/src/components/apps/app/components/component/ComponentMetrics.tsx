@@ -1,28 +1,15 @@
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
 import { Card, LoopingLogo, PageTitle } from '@pluralsh/design-system'
-import {
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
-
 import { DURATIONS } from 'utils/time'
-
 import RangePicker from 'components/utils/RangePicker'
-
 import { Div, Flex } from 'honorable'
-
 import { Graph } from 'components/utils/Graph'
-
 import { filesize } from 'filesize'
-
 import GraphHeader from 'components/utils/GraphHeader'
 
 import { POLL_INTERVAL } from '../../../../cluster/constants'
-
 import { USAGE_Q } from '../../../../cluster/queries'
 
 const convertVals = values => values.map(({ timestamp, value }) => ({ x: new Date(timestamp * 1000), y: parseFloat(value) }))
@@ -150,16 +137,7 @@ const kindToRegex = {
 
 export default function ComponentMetrics() {
   const { appName, componentKind = '', componentName } = useParams()
-  const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
   const [duration, setDuration] = useState<any>(DURATIONS[0])
-
-  useEffect(() => setBreadcrumbs([
-    { text: 'apps', url: '/' },
-    { text: appName, url: `/apps/${appName}` },
-    { text: 'components', url: `/apps/${appName}/components` },
-    { text: componentName, url: `/apps/${appName}/components/${componentKind}/${componentName}` },
-    { text: 'metrics', url: `/apps/${appName}/components/${componentKind}/${componentName}/metrics` },
-  ]), [appName, componentKind, componentName, setBreadcrumbs])
 
   return (
     <>

@@ -69,10 +69,10 @@ export default function AppCard({ app }: any) {
     <Card
       clickable
       display="flex"
-      flexBasis="40%"
+      flexBasis="45%"
       flexGrow={1}
       flexShrink={1}
-      minWidth={240}
+      minWidth={450}
       onClick={() => navigate(`/apps/${name}`)}
     >
       <ListItemBorder color={borderColor} />
@@ -80,7 +80,7 @@ export default function AppCard({ app }: any) {
         align="center"
         gap="small"
         maxWidth="90%"
-        padding="medium"
+        padding="small"
       >
         {hasIcons(app) && (
           <AppIcon
@@ -89,7 +89,10 @@ export default function AppCard({ app }: any) {
           />
         )}
         <Flex direction="column">
-          <Flex gap="small">
+          <Flex
+            align="center"
+            gap="small"
+          >
             <P
               body1
               fontWeight={600}
@@ -105,7 +108,7 @@ export default function AppCard({ app }: any) {
       <Flex
         align="center"
         gap="16px"
-        padding="medium"
+        padding="small"
       >
         {validLinks?.length > 0 && (
           <Button

@@ -11,7 +11,7 @@ import { Flex, P } from 'honorable'
 import { useState } from 'react'
 import { updateCache } from 'utils/graphql'
 
-export default function UpgradePolicy({ policy }) {
+export default function UpgradePolicy({ policy, last = false }) {
   const [open, setOpen] = useState<boolean>(false)
   const [mutation] = useMutation(DELETE_POLICY, {
     variables: { id: policy.id },
@@ -28,7 +28,7 @@ export default function UpgradePolicy({ policy }) {
     <>
       <Flex
         align="center"
-        borderBottom="1px solid border-fill-two"
+        borderBottom={!last && '1px solid border-fill-two'}
         cursor="pointer"
         gap="small"
         onClick={() => setOpen(!open)}
@@ -81,8 +81,8 @@ export default function UpgradePolicy({ policy }) {
         direction="vertical"
       >
         <Flex
-          backgroundColor="fill-three"
-          borderBottom="1px solid border"
+          backgroundColor="fill-zero"
+          borderBottom="1px solid border-zero"
           direction="column"
           gap="medium"
           padding="small"

@@ -179,15 +179,18 @@ export default function Apps() {
               startIcon={(<MagnifyingGlassIcon size={14} />)}
               value={query}
               onChange={event => setQuery(event.target.value)}
+              width={320}
             />
           </>
         )}
         margin="large"
+        contentPaddingRight={2}
+        contentPaddingTop={8}
       >
         <Flex
           justify="center"
           margin="medium"
-          padding="xsmall"
+          paddingLeft="xsmall"
           paddingBottom="xxxlarge"
           direction="row"
           wrap="wrap"
@@ -202,7 +205,7 @@ export default function Apps() {
           {!noFilteredApps && (
             <Flex
               grow={1}
-              basis="40%"
+              basis="45%"
             />
           )}
           {noFilteredApps && query && (

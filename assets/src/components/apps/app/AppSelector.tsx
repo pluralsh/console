@@ -1,6 +1,6 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
 import { Div, P, Span } from 'honorable'
-import { Key, useContext, useState } from 'react'
+import { Key, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { getIcon, hasIcons } from '../misc'

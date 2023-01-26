@@ -35,7 +35,8 @@ config :console,
   url: "https://watchman.piazzaapp.com",
   incoming_webhook: "https://some.piazza.webhook",
   cluster_name: "default",
-  git_commit: "abd132"
+  git_commit: "abd132",
+  version: Mix.Project.config[:version]
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

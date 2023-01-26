@@ -4,7 +4,7 @@ defmodule Console.Schema.Build do
 
   @expiry 30
 
-  defenum Type, deploy: 0, bounce: 1, approval: 2, install: 3, destroy: 4
+  defenum Type, deploy: 0, bounce: 1, approval: 2, install: 3, destroy: 4, dedicated: 5
   defenum Status, queued: 0, running: 1, successful: 2, failed: 3, cancelled: 4, pending: 5
 
   schema "builds" do
@@ -13,6 +13,7 @@ defmodule Console.Schema.Build do
     field :status,       Status
     field :message,      :string
     field :sha,          :string
+    field :job_name,     :string
     field :completed_at, :utc_datetime_usec
     field :pinged_at,    :utc_datetime_usec
     field :context,      :map
@@ -58,7 +59,7 @@ defmodule Console.Schema.Build do
     from(b in query, where: (not is_nil(b.pinged_at) and b.pinged_at <= ^time) or (is_nil(b.pinged_at) and b.inserted_at <= ^time))
   end
 
-  @valid ~w(repository type status completed_at approver_id message sha context)a
+  @valid ~w(repository type status completed_at approver_id message sha context job_name)a
 
   def changeset(schema, attrs \\ %{}) do
     schema

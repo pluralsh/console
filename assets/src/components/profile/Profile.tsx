@@ -12,6 +12,7 @@ import { UPDATE_USER } from 'components/graphql/users'
 
 import { LoginContext } from 'components/contexts'
 import { useMutation } from '@apollo/client'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 export function Profile() {
   const { me } = useContext<any>(LoginContext)
@@ -20,8 +21,7 @@ export function Profile() {
   const [mutation, { loading }] = useMutation(UPDATE_USER, { variables: { attributes: { name, email } } })
 
   return (
-    <Box fill>
-      <PageTitle heading="Profile" />
+    <ScrollablePage heading="Profile">
       <ContentCard overflowY="auto">
         <Box gap="small">
           <ValidatedInput
@@ -49,6 +49,6 @@ export function Profile() {
           </Button>
         </Flex>
       </ContentCard>
-    </Box>
+    </ScrollablePage>
   )
 }

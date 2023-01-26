@@ -1,10 +1,5 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import {
-  Button,
-  Card,
-  LoopingLogo,
-  PageTitle,
-} from '@pluralsh/design-system'
+import { Button, Card, LoopingLogo } from '@pluralsh/design-system'
 import {
   useContext,
   useEffect,
@@ -20,6 +15,8 @@ import uniqBy from 'lodash/uniqBy'
 
 import { PluralApi } from 'components/PluralApi'
 import { useNavBlocker } from 'components/hooks/useNavBlocker'
+
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { BindingInput, groupSuggestion, userSuggestion } from '../../../utils/BindingInput'
 
@@ -234,7 +231,7 @@ function UserManagementContent() {
 
 export default function UserManagement() {
   const { appName } = useParams()
-  const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
 
   useEffect(() => setBreadcrumbs([
     { text: 'apps', url: '/' },
@@ -244,11 +241,8 @@ export default function UserManagement() {
   [appName, setBreadcrumbs])
 
   return (
-    <>
-      <PageTitle heading="User management" />
-      <PluralApi>
-        <UserManagementContent />
-      </PluralApi>
-    </>
+    <ScrollablePage heading="User management">
+      <PluralApi><UserManagementContent /></PluralApi>
+    </ScrollablePage>
   )
 }

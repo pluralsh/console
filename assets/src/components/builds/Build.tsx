@@ -16,6 +16,7 @@ import BuildStatus from './BuildStatus'
 
 export const BUILD_TYPE_DISPLAY_NAMES = {
   [BuildTypes.BOUNCE]: 'Bounce',
+  [BuildTypes.DEDICATED]: 'Dedicated',
   [BuildTypes.DEPLOY]: 'Deployment',
   [BuildTypes.APPROVAL]: 'New images',
   [BuildTypes.INSTALL]: 'Installation',
@@ -58,7 +59,12 @@ export default function Build({ build }) {
           >
             {repository}
           </P>
-          <Chip size="small">{BUILD_TYPE_DISPLAY_NAMES[type] || type}</Chip>
+          <Chip
+            size="small"
+            whiteSpace="nowrap"
+          >
+            {BUILD_TYPE_DISPLAY_NAMES[type] || type}
+          </Chip>
         </Flex>
         {message}
       </Flex>
@@ -70,7 +76,7 @@ export default function Build({ build }) {
         align="center"
         justify="end"
       >
-        <P>{moment(insertedAt).fromNow()}</P>
+        <P whiteSpace="nowrap">{moment(insertedAt).fromNow()}</P>
         <BuildStatus status={status} />
         <CaretRightIcon />
       </Flex>

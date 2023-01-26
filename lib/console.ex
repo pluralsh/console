@@ -1,4 +1,6 @@
 defmodule Console do
+  @chars String.codepoints("abcdefghijklmnopqrstuvwxyz")
+
   def conf(key, default \\ nil), do: Application.get_env(:console, key, default)
 
   def sandbox?(), do: conf(:is_sandbox, false)
@@ -18,6 +20,11 @@ defmodule Console do
     :crypto.strong_rand_bytes(size)
     |> Base.url_encode64()
     |> String.replace("/", "")
+  end
+
+  def rand_alphanum(len) do
+    Enum.map((1..len), fn _ -> Enum.random(@chars) end)
+    |> Enum.join("")
   end
 
   def stream_result(enum) do

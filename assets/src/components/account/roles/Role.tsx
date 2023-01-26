@@ -33,17 +33,18 @@ export default function Role({ role, q }: any) {
     onCompleted: () => setConfirm(false),
   })
 
-  const menuItems = editable ? {
+  const menuItems = {
     edit: {
       label: 'Edit role',
       onSelect: () => setEdit(true),
+      destructive: false,
     },
     delete: {
       label: 'Delete role',
       onSelect: () => setConfirm(true),
       destructive: true,
     },
-  } : {}
+  }
 
   return (
     <Box
@@ -55,17 +56,20 @@ export default function Role({ role, q }: any) {
         text={role.name}
         description={role.description || 'no description'}
       />
-      <MoreMenu onSelectionChange={selectedKey => menuItems[selectedKey]?.onSelect()}>
-        {Object.entries(menuItems).map(([key, { label, destructive }]) => (
-          <ListBoxItem
-            key={key}
-            textValue={label}
-            label={label}
-            destructive={destructive}
-            color="blue"
-          />
-        ))}
-      </MoreMenu>
+      {editable
+      && (
+        <MoreMenu onSelectionChange={selectedKey => menuItems[selectedKey]?.onSelect()}>
+          {Object.entries(menuItems).map(([key, { label, destructive }]) => (
+            <ListBoxItem
+              key={key}
+              textValue={label}
+              label={label}
+              destructive={destructive}
+              color="blue"
+            />
+          ))}
+        </MoreMenu>
+      )}
       <>
         <Confirm
           open={confirm}

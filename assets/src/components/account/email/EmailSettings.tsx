@@ -1,5 +1,5 @@
 import { Flex } from 'honorable'
-import { ContentCard, LoopingLogo, PageTitle } from '@pluralsh/design-system'
+import { LoopingLogo, PageTitle } from '@pluralsh/design-system'
 
 import { SMTP_Q } from 'components/graphql/plural'
 
@@ -18,7 +18,7 @@ export default function EmailSettings() {
       overflow="hidden"
     >
       <PageTitle heading="Email settings" />
-      {data ? <ContentCard><EmailSettingsForm smtp={data.smtp} /></ContentCard> : <LoopingLogo />}
+      {data ? <EmailSettingsForm smtp={data.smtp} /> : <LoopingLogo />}
     </Flex>
   )
 }

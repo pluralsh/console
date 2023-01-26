@@ -21,8 +21,8 @@ import LogsFullScreen from './LogsFullScreen'
 export default function Logs() {
   const { appName } = useParams()
   const query = useQueryParams()
-  const { applications }: any = useContext(InstallationContext)
-  const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
+  const { applications } = useContext<any>(InstallationContext)
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const [search, setSearch] = useState('')
   const [labels, setLabels] = useState(toMap(query))
 

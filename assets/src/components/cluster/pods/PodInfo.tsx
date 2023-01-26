@@ -1,12 +1,14 @@
 import { useQuery } from '@apollo/client'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { Flex } from 'honorable'
 
-import { LoopingLogo } from '@pluralsh/design-system'
+import { Button, LogsIcon, LoopingLogo } from '@pluralsh/design-system'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { ContainerStatus, Maybe, Pod } from 'generated/graphql'
+
+import { asQuery } from 'components/utils/query'
 
 import { POLL_INTERVAL } from '../constants'
 import { POD_INFO_Q } from '../queries'
@@ -25,7 +27,31 @@ export const statusesToRecord = (statuses?: Maybe<Maybe<ContainerStatus>[]>) => 
 }),
     {} as Record<string, Maybe<ContainerStatus>>)
 
-export default function NodeInfo() {
+function getLogUrl({ name, namespace }) {
+  return `/apps/${namespace}/logs?${asQuery({ pod: name })}`
+}
+
+function ViewLogsButton({ metadata }: any) {
+  if (!metadata) return null
+
+  const url = getLogUrl(metadata)
+
+  return (
+    <Button
+      secondary
+      fontWeight={600}
+      startIcon={<LogsIcon />}
+      as={Link}
+      to={url}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      View logs
+    </Button>
+  )
+}
+
+export default function PodInfo() {
   const { name, namespace } = useParams()
   const { data } = useQuery<{ pod: Pod }>(POD_INFO_Q, {
     variables: { name, namespace },
@@ -44,7 +70,10 @@ export default function NodeInfo() {
   const initContainers = pod.spec.initContainers || []
 
   return (
-    <ScrollablePage heading="Info">
+    <ScrollablePage
+      heading="Info"
+      headingContent={<ViewLogsButton metadata={pod?.metadata} />}
+    >
       <Flex
         direction="column"
         gap="xlarge"

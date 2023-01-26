@@ -66,8 +66,8 @@ export default function Runbook() {
   const tabStateRef = useRef<any>(null)
   const { appName, runbookName } = useParams()
   const [duration, setDuration] = useState(DURATIONS[0])
-  const { setRunbook }: any = useOutletContext()
-  const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
+  const { setRunbook } = useOutletContext<any>()
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const theme = useTheme()
   const prevData = useRef()
 

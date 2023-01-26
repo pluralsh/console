@@ -1,16 +1,9 @@
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { useContext, useEffect } from 'react'
 import { Link, useOutletContext, useParams } from 'react-router-dom'
-
 import { Flex } from 'honorable'
-
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { asQuery } from 'components/utils/query'
-
 import { Button, LogsIcon } from '@pluralsh/design-system'
-
 import { ScalingRecommenderModal } from 'components/cluster/ScalingRecommender'
-
 import { ScalingType, ScalingTypes } from 'components/cluster/constants'
 
 import Metadata from './info/Metadata'
@@ -90,31 +83,11 @@ function ViewLogsButton({ metadata }: any) {
 }
 
 export default function ComponentInfo() {
-  const {
-    appName, componentKind = '', componentName, ...params
-  } = useParams()
-
-  console.log('params', params)
+  const { appName, componentKind = '', componentName } = useParams()
   const { component, data } = useOutletContext<any>()
-  const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
 
   const kind: ScalingType
     = ScalingTypes[componentKind.toUpperCase()] ?? ScalingTypes.DEPLOYMENT
-
-  useEffect(() => setBreadcrumbs([
-    { text: 'apps', url: '/' },
-    { text: appName, url: `/apps/${appName}` },
-    { text: 'components', url: `/apps/${appName}/components` },
-    {
-      text: componentName,
-      url: `/apps/${appName}/components/${componentKind}/${componentName}`,
-    },
-    {
-      text: 'info',
-      url: `/apps/${appName}/components/${componentKind}/${componentName}/info`,
-    },
-  ]),
-  [appName, componentKind, componentName, setBreadcrumbs])
 
   // To avoid mapping between component types and fields of data returned by API
   // we are picking first available value from API object for now.
@@ -127,7 +100,7 @@ export default function ComponentInfo() {
         <Flex gap="medium">
           <ScalingRecommenderModal
             kind={kind}
-            name={componentName}
+            componentName={componentName}
             namespace={appName}
           />
           <ViewLogsButton metadata={value?.metadata} />

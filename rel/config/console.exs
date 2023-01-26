@@ -19,6 +19,7 @@ config :libcluster,
   topologies: [
     console: [
       strategy: Cluster.Strategy.Kubernetes,
+      connect: {Console.Clustering.Connect, :connect, []},
       config: [
         mode: :ip,
         kubernetes_node_basename: "console",
@@ -79,7 +80,8 @@ config :console,
   cluster_name: get_env("CLUSTER_NAME"),
   is_demo_project: !!get_env("IS_DEMO_PROJECT"),
   is_sandbox: !!get_env("CONSOLE_SANDBOX"),
-  provider: provider
+  provider: provider,
+  build_id: get_env("CONSOLE_BUILD_ID")
 
 if String.starts_with?(git_url, "https") do
   config :console,

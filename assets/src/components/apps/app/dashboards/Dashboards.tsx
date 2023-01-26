@@ -1,5 +1,5 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { DashboardIcon, EmptyState, PageTitle } from '@pluralsh/design-system'
+import { DashboardIcon, EmptyState } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useQuery } from '@apollo/client'
 import { DASHBOARDS_Q } from 'components/graphql/dashboards'
@@ -9,11 +9,12 @@ import { A, Div, Flex } from 'honorable'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { ListItem } from 'components/apps/misc'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 export default function Dashboards() {
   const navigate = useNavigate()
   const { appName } = useParams()
-  const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { data } = useQuery(DASHBOARDS_Q, {
     variables: { repo: appName },
     fetchPolicy: 'cache-and-network',
@@ -30,8 +31,7 @@ export default function Dashboards() {
   const { dashboards } = data
 
   return (
-    <Flex direction="column">
-      <PageTitle heading="Dashboards" />
+    <ScrollablePage heading="Dashboards">
       {dashboards.map(({ id, spec: { name, description } }) => (
         <ListItem
           key={id}
@@ -68,6 +68,6 @@ export default function Dashboards() {
           />
         </Flex>
       )}
-    </Flex>
+    </ScrollablePage>
   )
 }

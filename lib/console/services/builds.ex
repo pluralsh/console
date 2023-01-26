@@ -222,6 +222,11 @@ defmodule Console.Services.Builds do
     |> Repo.update()
   end
 
+  def add_job_name(%Build{} = build, job_name) do
+    Build.changeset(build, %{job_name: job_name})
+    |> Repo.update()
+  end
+
   def failed_incident(%Build{status: :failed, repository: repo} = build) do
     %{commands: commands} = Console.Repo.preload(build, [:commands])
 

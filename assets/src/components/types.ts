@@ -1,10 +1,3 @@
-import {
-  Check,
-  Deploy,
-  Install,
-  Reload,
-} from 'forge-core'
-
 export const BuildStatus = {
   SUCCESSFUL: 'SUCCESSFUL',
   CANCELLED: 'CANCELLED',
@@ -19,4 +12,5 @@ export const BuildTypes = {
   DEPLOY: 'DEPLOY',
   APPROVAL: 'APPROVAL',
   INSTALL: 'INSTALL',
+  DEDICATED: 'DEDICATED',
 }
