@@ -184,11 +184,13 @@ export default function Apps() {
           </>
         )}
         margin="large"
+        contentPaddingRight={2}
+        contentPaddingTop={8}
       >
         <Flex
           justify="center"
           margin="medium"
-          padding="xsmall"
+          paddingLeft="xsmall"
           paddingBottom="xxxlarge"
           direction="row"
           wrap="wrap"
