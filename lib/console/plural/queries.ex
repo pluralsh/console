@@ -22,6 +22,7 @@ defmodule Console.Plural.Queries do
       default
       placeholder
       documentation
+      optional
       condition { operation field value }
       validation { type regex message }
     }
