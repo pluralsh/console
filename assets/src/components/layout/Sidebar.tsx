@@ -112,6 +112,7 @@ export default function Sidebar() {
   }, [mutation, setIsNotificationsPanelOpen])
 
   const handleLogout = useCallback(() => {
+    setIsMenuOpened(false)
     wipeToken()
     const w: Window = window
 
@@ -238,6 +239,7 @@ export default function Sidebar() {
             to="/profile"
             className="sidebar-menu-myprofile"
             color="inherit"
+            onClick={() => setIsMenuOpened(false)}
             textDecoration="none"
           >
             <PersonIcon marginRight="xsmall" />
@@ -250,6 +252,7 @@ export default function Sidebar() {
             rel="noopener noreferrer"
             className="sidebar-menu-docs"
             color="inherit"
+            onClick={() => setIsMenuOpened(false)}
             textDecoration="none"
           >
             <ScrollIcon marginRight="xsmall" />

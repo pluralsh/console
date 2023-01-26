@@ -73,7 +73,7 @@ export default function App() {
   const { me, configuration } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
   const { appName, dashboardId, runbookName } = useParams()
-  const { applications }: any = useContext(InstallationContext)
+  const { applications } = useContext<any>(InstallationContext)
   const [dashboard, setDashboard] = useState<any>()
   const [runbook, setRunbook] = useState<any>()
   const pathPrefix = `/apps/${appName}`

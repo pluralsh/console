@@ -1,10 +1,5 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import {
-  EmptyState,
-  LoopingLogo,
-  PageTitle,
-  RunBookIcon,
-} from '@pluralsh/design-system'
+import { EmptyState, LoopingLogo, RunBookIcon } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { POLL_INTERVAL } from 'components/runbooks/constants'
@@ -13,13 +8,15 @@ import { useQuery } from '@apollo/client'
 import { ListItem } from 'components/apps/misc'
 import { A, Div, Flex } from 'honorable'
 
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
 import { getBorderColor } from './misc'
 import RunbookStatus from './runbook/RunbookStatus'
 
 export default function Runbooks() {
   const navigate = useNavigate()
   const { appName } = useParams()
-  const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { data } = useQuery(RUNBOOKS_Q, {
     variables: { namespace: appName },
     fetchPolicy: 'cache-and-network',
@@ -46,8 +43,7 @@ export default function Runbooks() {
   const { runbooks } = data
 
   return (
-    <Flex direction="column">
-      <PageTitle heading="Runbooks" />
+    <ScrollablePage heading="Runbooks">
       {runbooks.map(runbook => (
         <ListItem
           key={runbook.name}
@@ -90,6 +86,6 @@ export default function Runbooks() {
           />
         </Flex>
       )}
-    </Flex>
+    </ScrollablePage>
   )
 }

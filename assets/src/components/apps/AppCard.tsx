@@ -69,10 +69,10 @@ export default function AppCard({ app }: any) {
     <Card
       clickable
       display="flex"
-      flexBasis="40%"
+      flexBasis="45%"
       flexGrow={1}
       flexShrink={1}
-      minWidth={240}
+      minWidth={450}
       onClick={() => navigate(`/apps/${name}`)}
     >
       <ListItemBorder color={borderColor} />
@@ -89,7 +89,10 @@ export default function AppCard({ app }: any) {
           />
         )}
         <Flex direction="column">
-          <Flex gap="small">
+          <Flex
+            align="center"
+            gap="small"
+          >
             <P
               body1
               fontWeight={600}

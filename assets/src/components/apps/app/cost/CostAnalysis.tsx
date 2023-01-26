@@ -1,15 +1,16 @@
 import { BreadcrumbsContext } from 'components/Breadcrumbs'
-import { Card, PageTitle } from '@pluralsh/design-system'
+import { Card } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import KubernetesCost from './KubernetesCost'
 
 export default function CostAnalysis() {
   const { appName } = useParams()
-  const { applications }: any = useContext(InstallationContext)
-  const { setBreadcrumbs }: any = useContext(BreadcrumbsContext)
+  const { applications } = useContext<any>(InstallationContext)
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const currentApp = applications.find(app => app.name === appName)
   const { cost } = currentApp
 
@@ -20,8 +21,7 @@ export default function CostAnalysis() {
   ]), [appName, setBreadcrumbs])
 
   return (
-    <>
-      <PageTitle heading="Cost analysis" />
+    <ScrollablePage heading="Cost analysis">
       <Card
         paddingHorizontal={100}
         paddingVertical="large"
@@ -30,6 +30,6 @@ export default function CostAnalysis() {
         {!cost && 'Cost data is not available.'}
         {/* {license && <PluralCost license={license} />} */}
       </Card>
-    </>
+    </ScrollablePage>
   )
 }

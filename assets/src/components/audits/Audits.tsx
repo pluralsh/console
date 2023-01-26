@@ -1,4 +1,10 @@
-import { Key, useRef, useState } from 'react'
+import {
+  Key,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 
 import { Box, Text } from 'grommet'
 
@@ -15,6 +21,8 @@ import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayout
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+
+import { BreadcrumbsContext } from 'components/Breadcrumbs'
 
 import Avatar from '../utils/Avatar'
 
@@ -47,8 +55,11 @@ export default function Audits() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const tabStateRef = useRef<any>(null)
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const currentView = DIRECTORY.find(tab => pathname?.startsWith(`/audits/${tab.path}`))?.path || DIRECTORY[0].path
   const [view, setView] = useState<Key>(currentView)
+
+  useEffect(() => setBreadcrumbs([{ text: 'audits', url: '/audits' }]), [setBreadcrumbs])
 
   return (
     <Flex

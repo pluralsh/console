@@ -58,7 +58,7 @@ end
 
 defmodule Console.Plural.ConfigurationItem do
   alias Console.Plural.{Condition, Validation}
-  defstruct [:name, :default, :documentation, :type, :placeholder, :condition, :validation]
+  defstruct [:name, :default, :documentation, :type, :placeholder, :condition, :validation, :optional]
 
   def spec() do
     %__MODULE__{

@@ -9,6 +9,8 @@ import { IconFrame, SlackLogoIcon, TrashCanIcon } from '@pluralsh/design-system'
 
 import { Confirm } from 'components/utils/Confirm'
 
+import { TRUNCATE } from 'components/utils/truncate'
+
 import { removeConnection, updateCache } from '../../../utils/graphql'
 
 import { DELETE_WEBHOOK, WEBHOOKS_Q } from '../../graphql/webhooks'
@@ -45,10 +47,14 @@ export default function Webhook({
           textValue="Slack"
           type="floating"
         />
-        <Div flexGrow={1}>
+        <Div
+          flexGrow={1}
+          {...TRUNCATE}
+        >
           <P
             body2
             fontWeight={600}
+            {...TRUNCATE}
           >
             {url}
           </P>

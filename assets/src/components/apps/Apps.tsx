@@ -202,7 +202,7 @@ export default function Apps() {
           {!noFilteredApps && (
             <Flex
               grow={1}
-              basis="40%"
+              basis="45%"
             />
           )}
           {noFilteredApps && query && (

@@ -14,6 +14,8 @@ import { Flex } from 'honorable'
 
 import { isEmpty } from 'lodash'
 
+import { GqlError } from 'components/utils/Alert'
+
 import { CREATE_POLICY, UPGRADE_POLICIES } from '../graphql/builds'
 
 import { updateCache } from '../../utils/graphql'
@@ -37,7 +39,7 @@ export default function UpgradePolicyCreate() {
   })
   const { setModal } = useContext<any>(PolicyContext)
 
-  const [mutation, { loading }] = useMutation(CREATE_POLICY, {
+  const [mutation, { error, loading }] = useMutation(CREATE_POLICY, {
     variables: { attributes },
     update: (cache, { data: { createUpgradePolicy } }) => updateCache(cache, {
       query: UPGRADE_POLICIES,
@@ -103,7 +105,25 @@ export default function UpgradePolicyCreate() {
           value={attributes.weight}
         />
       </FormField>
-      <Flex justify="end">
+      {error && (
+        <GqlError
+          error={error}
+          header="Failed to create upgrade policy"
+        />
+      )}
+      <Flex
+        gap="medium"
+        justify="end"
+      >
+        <Button
+          secondary
+          onClick={() => setModal({
+            header: 'Upgrade Policies',
+            content: <UpgradePoliciesList />,
+          })}
+        >
+          Cancel
+        </Button>
         <Button
           disabled={isEmpty(attributes?.name)}
           loading={loading}

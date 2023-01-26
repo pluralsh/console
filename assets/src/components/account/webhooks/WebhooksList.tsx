@@ -19,6 +19,8 @@ export default function WebhooksList() {
   if (!data) return <LoopingLogo />
   const { edges, pageInfo } = data.webhooks
 
+  if (edges?.length < 1) return null
+
   return (
     <Card
       marginTop="medium"
