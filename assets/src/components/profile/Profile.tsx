@@ -1,11 +1,6 @@
 import { Box } from 'grommet'
 import { Flex } from 'honorable'
-import {
-  Button,
-  ContentCard,
-  PageTitle,
-  ValidatedInput,
-} from '@pluralsh/design-system'
+import { Button, ContentCard, ValidatedInput } from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
 
 import { UPDATE_USER } from 'components/graphql/users'

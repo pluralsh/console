@@ -3,6 +3,8 @@ import {
   ReactElement,
   SetStateAction,
   useCallback,
+  useEffect,
+  useMemo,
 } from 'react'
 import { Flex, Span, Switch } from 'honorable'
 import { useActive } from '@pluralsh/design-system'
@@ -19,7 +21,9 @@ const available = (config, context) => {
 
   switch (condition.operation) {
   case OperationType.NOT:
-    return !context[condition.field]
+    return !(context[condition.field]?.value)
+  case OperationType.PREFIX:
+    return context[condition.field]?.value?.startsWith(condition.value) ?? false
   }
 
   return true
@@ -27,20 +31,27 @@ const available = (config, context) => {
 
 interface ConfigurationProps {
   recipe: Recipe,
-  context: Record<string, unknown>
-  setContext: Dispatch<SetStateAction<Record<string, unknown>>>
+  context: Record<string, any>
+  setContext: Dispatch<SetStateAction<Record<string, any>>>
   oidc?: boolean
   setOIDC: Dispatch<boolean>
-  setValid: Dispatch<boolean>
 }
 
 export function Configuration({
-  recipe, context, oidc, setContext, setValid, setOIDC,
+  recipe, context, oidc, setContext, setOIDC,
 }: ConfigurationProps): ReactElement {
   const { active } = useActive<Record<string, unknown>>()
   const sections = recipe.recipeSections
   const configurations = sections!.filter(section => section!.repository!.name === active.label).map(section => section!.configuration).flat()
-  const setValue = useCallback((fieldName, value) => setContext({ ...context, ...{ [fieldName]: value } }), [setContext, context])
+  const setValue = useCallback((fieldName, value, valid = true) => setContext(context => ({ ...context, ...{ [fieldName]: { value, valid } } })), [setContext])
+  const hiddenConfigurations = useMemo(() => configurations.filter(conf => !available(conf, context)), [configurations, context])
+
+  useEffect(() => {
+    hiddenConfigurations.forEach(conf => {
+      setContext(context => ({ ...context, ...{ [conf!.name!]: { value: context[conf!.name!]?.value, valid: true } } }))
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hiddenConfigurations.length, setContext])
 
   return (
     <Flex
@@ -54,7 +65,6 @@ export function Configuration({
           config={conf}
           ctx={context}
           setValue={setValue}
-          setValid={setValid}
         />
       ))}
       {configurations?.length === 0 && (

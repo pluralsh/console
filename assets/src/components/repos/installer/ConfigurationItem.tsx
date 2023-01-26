@@ -1,5 +1,4 @@
 import {
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -9,184 +8,99 @@ import { Switch } from 'honorable'
 import { FormField, Input } from '@pluralsh/design-system'
 import StartCase from 'lodash/startCase'
 
-import { validateRegex } from '../validation'
 import { LoginContext } from '../../contexts'
 import { deepFetch } from '../../../utils/graphql'
-import { trimSuffix } from '../../../utils/array'
 import { ConfigurationType } from '../constants'
 
-function StringConfiguration({
-  config: {
-    name, default: def, placeholder, documentation, validation,
-  }, type, ctx, setValue, setValid,
-}) {
-  const value = ctx[name]
-  const msg = validation && validateRegex(value, validation)
+type ModifierFunction = (value: string, trim?: boolean) => string
 
-  useEffect(() => {
-    if (value === undefined && def) {
-      setValue(name, def)
-    }
-  }, [ctx, value, def, name, setValue])
+const modifierFactory = (type: ConfigurationType, configuration): ModifierFunction => {
+  switch (type) {
+  case ConfigurationType.STRING:
+  case ConfigurationType.INT:
+  case ConfigurationType.PASSWORD:
+    return stringModifier
+  case ConfigurationType.BUCKET:
+    return bucketModifier.bind({ configuration })
+  case ConfigurationType.DOMAIN:
+    return domainModifier.bind({ configuration })
+  }
 
-  useEffect(() => (setValid ? msg ? setValid(false) : setValid(true) : undefined), [msg, setValid])
-
-  return (
-    <FormField
-      label={StartCase(name)}
-      hint={msg || documentation}
-      error={!!msg}
-    >
-      <Input
-        placeholder={placeholder}
-        value={value}
-        type={type}
-        error={!!msg}
-        onChange={({ target: { value } }) => setValue(name, value)}
-      />
-    </FormField>
-  )
+  return stringModifier
 }
 
-function PasswordConfiguration({
-  config, ctx, setValue, setValid,
-}) {
-  return (
-    <StringConfiguration
-      config={config}
-      ctx={ctx}
-      setValue={setValue}
-      setValid={setValid}
-      type="password"
-    />
-  )
+const stringModifier = value => value
+
+function bucketModifier(this: {configuration}, value: string, trim = false) {
+  const { configuration } = this
+  const bucketPrefix = deepFetch(configuration, 'manifest.bucketPrefix')
+  const cluster = deepFetch(configuration, 'manifest.cluster')
+  const prefix = `${bucketPrefix}-${cluster}-`
+
+  if (trim) return value?.replace(prefix, '')
+
+  return bucketPrefix && cluster ? `${prefix}${value}` : value
+}
+function domainModifier(this: {configuration}, value: string, trim = false) {
+  const { configuration } = this
+  const subdomain = deepFetch(configuration, 'manifest.network.subdomain') || ''
+  const suffix = subdomain ? `.${subdomain}` : ''
+
+  if (trim) return value?.replace(suffix, '')
+
+  return subdomain ? `${value}${suffix}` : value
 }
 
-function BucketConfiguration({
-  config: {
-    name, default: def, placeholder, documentation,
-  }, ctx, setValue,
+const createValidator = (regex: RegExp, optional: boolean, error: string) => (value): {valid: boolean, message: string} => ({
+  valid: (value ? regex.test(value) : optional),
+  message: error,
+})
+
+function ConfigurationField({
+  config, type, ctx, setValue,
 }) {
+  const {
+    name, default: defaultValue, placeholder, documentation, validation, optional,
+  } = config
   const { configuration } = useContext(LoginContext)
-  const { prefix, cluster } = useMemo(() => {
-    const prefix = deepFetch(configuration, 'manifest.bucketPrefix')
-    const cluster = deepFetch(configuration, 'manifest.cluster')
 
-    if (prefix && prefix !== '') {
-      return { prefix, cluster }
-    }
+  const value = useMemo(() => ctx[name]?.value, [ctx, name])
+  const validator = useMemo(() => createValidator(new RegExp(validation?.regex ? `^${validation?.regex}$` : /.*/), optional, validation?.message), [config.optional, validation?.message, validation?.regex])
+  const { valid, message } = useMemo(() => validator(value), [validator, value])
+  const modifier = useMemo(() => modifierFactory(config.type, configuration), [config.type, configuration])
 
-    return {}
-  }, [configuration])
+  const [local, setLocal] = useState(modifier(value, true) || defaultValue)
 
-  const format = useCallback(val => {
-    if (prefix) return `${prefix}-${cluster}-${val}`
-
-    return val
-  }, [prefix, cluster])
-
-  const trim = useCallback(val => val.replace(`${prefix}-${cluster}-`, ''), [prefix, cluster])
-
-  const [local, setLocal] = useState<string>(trim(ctx[name] || def || ''))
-
-  useEffect(() => {
-    if (!ctx[name] && def) {
-      setValue(name, format(ctx[name] || def))
-    }
-  }, [ctx, name, def, setValue, format])
+  useEffect(() => (local ? setValue(name, modifier(local), valid) : setValue(name, local, valid)), [local, setValue, modifier, name, valid, config])
 
   return (
     <FormField
-      hint={documentation}
       label={StartCase(name)}
-    >
-      <Input
-        onChange={({ target: { value } }) => {
-          setLocal(value)
-          setValue(name, format(value))
-        }}
-        prefix={prefix}
-        placeholder={placeholder}
-        value={local}
-      />
-    </FormField>
-  )
-}
-
-function DomainConfiguration({
-  config: {
-    name, default: def, placeholder, documentation,
-  }, ctx, setValue, setValid,
-}) {
-  // Support for lookahead operator in Safari was just added but it's not released yet.
-  // /^(((?!-)[A-Za-z0-9-]{1,63}(?<!-)\.)+[A-Za-z]{2,253})$/ is replaced for now.
-  // See: https://github.com/WebKit/WebKit/pull/7109
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const domainRegex = /^(?!-)(?:(?:[a-zA-Z\d][a-zA-Z\d-]{0,61})?[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}$/
-  const { configuration } = useContext(LoginContext)
-  const suffix = useMemo(() => {
-    const subdomain = deepFetch(configuration, 'manifest.network.subdomain')
-
-    return subdomain ? `.${subdomain}` : ''
-  }, [configuration])
-
-  const [local, setLocal] = useState(trimSuffix(ctx[name] || '', suffix))
-  const suffixed = useCallback(value => `${trimSuffix(value, suffix)}${suffix}`, [suffix])
-  const valid = useMemo(() => domainRegex.test(ctx[name]), [domainRegex, ctx, name])
-
-  useEffect(() => setValid(valid), [setValid, valid])
-
-  useEffect(() => {
-    if (ctx[name] === undefined && def) {
-      setValue(name, def)
-    }
-  }, [name, ctx, def, setValue])
-
-  return (
-    <FormField
-      hint={valid ? documentation : 'Provide a valid domain name'}
-      label={StartCase(name)}
+      hint={message || documentation}
       error={!valid}
-      required
+      required={!optional}
     >
       <Input
-        onChange={({ target: { value } }) => {
-          setLocal(value)
-          setValue(name, suffixed(value))
-        }}
-        suffix={suffix}
         placeholder={placeholder}
-        error={!valid}
         value={local}
+        type={type}
+        error={!valid}
+        prefix={config.type === ConfigurationType.BUCKET ? deepFetch(configuration, 'manifest.bucketPrefix') : ''}
+        suffix={config.type === ConfigurationType.DOMAIN ? deepFetch(configuration, 'manifest.network.subdomain') : ''}
+        onChange={({ target: { value } }) => setLocal(value)}
       />
     </FormField>
-  )
-}
-
-function IntConfiguration({
-  config, ctx, setValue, setValid,
-}) {
-  return (
-    <StringConfiguration
-      config={config}
-      ctx={ctx}
-      setValue={setValue}
-      setValid={setValid}
-      type="number"
-    />
   )
 }
 
 function BoolConfiguration({
   config: { name, default: def }, ctx, setValue,
 }) {
-  const value: boolean = ctx[name]
+  const value: boolean = ctx[name]?.value
 
   useEffect(() => {
-    if (ctx[name] === undefined && def) {
-      setValue(name, def)
-    }
-  }, [ctx, def, name, setValue])
+    if (value === undefined && def) setValue(name, def)
+  }, [value, def, name, setValue])
 
   return (
     <Switch
@@ -199,8 +113,12 @@ function BoolConfiguration({
 }
 
 export function ConfigurationItem({
-  config, ctx, setValue, setValid,
+  config, ctx, setValue,
 }) {
+  const isInt = config.type === ConfigurationType.INT
+  const renderAsPassword = ['private_key', 'public_key']
+  const isPassword = config.type === ConfigurationType.PASSWORD || renderAsPassword.includes(config.name)
+
   switch (config.type) {
   case ConfigurationType.BOOL:
     return (
@@ -210,49 +128,13 @@ export function ConfigurationItem({
         setValue={setValue}
       />
     )
-  case ConfigurationType.INT:
-    return (
-      <IntConfiguration
-        config={config}
-        ctx={ctx}
-        setValue={setValue}
-        setValid={setValid}
-      />
-    )
-  case ConfigurationType.DOMAIN:
-    return (
-      <DomainConfiguration
-        config={config}
-        ctx={ctx}
-        setValue={setValue}
-        setValid={setValid}
-      />
-    )
-  case ConfigurationType.BUCKET:
-    return (
-      <BucketConfiguration
-        config={config}
-        ctx={ctx}
-        setValue={setValue}
-      />
-    )
-  case ConfigurationType.PASSWORD:
-    return (
-      <PasswordConfiguration
-        config={config}
-        ctx={ctx}
-        setValue={setValue}
-        setValid={setValid}
-      />
-    )
   default:
     return (
-      <StringConfiguration
+      <ConfigurationField
         config={config}
         ctx={ctx}
         setValue={setValue}
-        setValid={setValid}
-        type={undefined}
+        type={isInt ? 'number' : isPassword ? 'password' : 'text'}
       />
     )
   }

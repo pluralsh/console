@@ -22,15 +22,16 @@ export const DarkProviderIcons = {
   AWS: DARK_AWS_ICON,
 }
 
-export const ConfigurationType = {
-  STRING: 'STRING',
-  BOOL: 'BOOL',
-  INT: 'INT',
-  DOMAIN: 'DOMAIN',
-  BUCKET: 'BUCKET',
-  PASSWORD: 'PASSWORD',
+export enum ConfigurationType {
+  STRING = 'STRING',
+  BOOL = 'BOOL',
+  INT = 'INT',
+  DOMAIN = 'DOMAIN',
+  BUCKET = 'BUCKET',
+  PASSWORD = 'PASSWORD',
 }
 
-export const OperationType = {
-  NOT: 'NOT',
+export enum OperationType {
+  NOT = 'NOT',
+  PREFIX = 'PREFIX',
 }
