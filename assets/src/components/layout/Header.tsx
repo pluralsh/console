@@ -21,7 +21,8 @@ export default function Header() {
         paddingVertical="xsmall"
       >
         <Img
-          height={40}
+          height={32}
+          marginVertical={4}
           src={APP_ICON}
         />
         <Flex grow={1} />
