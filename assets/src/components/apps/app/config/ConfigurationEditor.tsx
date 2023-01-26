@@ -7,24 +7,22 @@ import { CodeEditor } from '@pluralsh/design-system'
 
 import { ConfigType } from './misc'
 
-export function ConfigurationEditor({ application: { name: repository, configuration: { helm, terraform } }, view }) {
+export function ConfigurationEditor({ application: { name: repository, configuration: { helm, terraform } }, type }) {
   const navigate = useNavigate()
-  const [content, setContent] = useState<any>(helm)
+  const [content, setContent] = useState<string>(helm)
   const onCompleted = useCallback(() => navigate('/'), [navigate])
   const [mutation, { loading }] = useMutation(UPDATE_CONFIGURATION, {
-    variables: { repository, content, type: view }, onCompleted,
+    variables: { repository, content, type }, onCompleted,
   })
 
   return (
     <CodeEditor
-      value={view === ConfigType.HELM ? helm : terraform}
-      language={view === ConfigType.HELM ? 'yaml' : 'hcl'}
+      value={type === ConfigType.HELM ? helm : terraform}
+      language={type === ConfigType.HELM ? 'yaml' : 'hcl'}
       save
       saving={loading}
-      onSave={value => {
-        setContent(value)
-        mutation()
-      }}
+      onChange={setContent}
+      onSave={() => mutation()}
       saveLabel="Commit"
     />
   )

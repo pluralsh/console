@@ -103,7 +103,7 @@ export default function Configuration() {
       {(view === ConfigType.HELM || view === ConfigType.TERRAFORM) && (
         <ConfigurationEditor
           application={application}
-          view={view}
+          type={view}
         />
       )}
     </ScrollablePage>
