@@ -179,6 +179,7 @@ export default function Apps() {
               startIcon={(<MagnifyingGlassIcon size={14} />)}
               value={query}
               onChange={event => setQuery(event.target.value)}
+              width={320}
             />
           </>
         )}
