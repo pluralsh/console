@@ -1,11 +1,14 @@
 import React, {
+  Dispatch,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import {
+  GraphQLToast,
   LoopingLogo,
   Wizard,
   WizardNavigation,
@@ -26,10 +29,12 @@ import { buildSteps, install, toDefaultSteps } from './helpers'
 export function Installer({ setOpen, setConfirmClose, setVisible }) {
   const client = useApolloClient()
   const navigate = useNavigate()
+  const onResetRef = useRef<{onReset: Dispatch<void>}>({ onReset: () => {} })
   const [inProgress, setInProgress] = useState<boolean>(false)
   const [selectedApplications, setSelectedApplications] = useState<Array<WizardStepConfig>>([])
   const [steps, setSteps] = useState<Array<WizardStepConfig>>([])
   const [stepsLoading, setStepsLoading] = useState(false)
+  const [error, setError] = useState()
   const { applications: installedApplications } = useContext(InstallationContext as React.Context<any>)
   const { data: { repositories: { edges: applicationNodes } = { edges: undefined } } = {}, loading } = useQuery(SEARCH_REPOS, {
     variables: { query: '' },
@@ -69,7 +74,12 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
     }
 
     setStepsLoading(true)
-    build().then(() => setStepsLoading(false))
+    build().then(() => setStepsLoading(false)).catch(err => {
+      setError(err)
+      setStepsLoading(false)
+      onResetRef?.current?.onReset()
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client, selectedApplications.length])
 
   if (loading) {
@@ -85,19 +95,31 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
   }
 
   return (
-    <Wizard
-      onClose={() => (inProgress ? setConfirmClose(true) : setOpen(false))}
-      onComplete={completed => setInProgress(completed)}
-      onSelect={apps => setSelectedApplications(apps)}
-      defaultSteps={toDefaultSteps(installableApplications)}
-      dependencySteps={steps}
-      limit={5}
-      loading={stepsLoading}
-    >
-      {{
-        stepper: <WizardStepper />,
-        navigation: <WizardNavigation onInstall={onInstall} />,
-      }}
-    </Wizard>
+    <>
+      {error && (
+        <GraphQLToast
+          onClose={() => setError(undefined)}
+          error={error}
+          header="Error"
+          margin="medium"
+          marginHorizontal="xxxxlarge"
+        />
+      )}
+      <Wizard
+        onClose={() => (inProgress ? setConfirmClose(true) : setOpen(false))}
+        onComplete={completed => setInProgress(completed)}
+        onSelect={apps => setSelectedApplications(apps)}
+        defaultSteps={toDefaultSteps(installableApplications)}
+        dependencySteps={steps}
+        limit={5}
+        loading={stepsLoading}
+        onResetRef={onResetRef}
+      >
+        {{
+          stepper: <WizardStepper />,
+          navigation: <WizardNavigation onInstall={onInstall} />,
+        }}
+      </Wizard>
+    </>
   )
 }

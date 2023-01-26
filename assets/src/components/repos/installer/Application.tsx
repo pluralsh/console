@@ -42,6 +42,7 @@ export function Application({ ...props }: any): ReactElement {
 
   // There should only be a single bundle available on the list
   const recipeBase = recipeEdges?.at(0)?.node
+
   const { data: recipe } = useQuery<{recipe: Recipe, context: Array<RepositoryContext>}>(RECIPE_Q, {
     variables: { id: recipeBase?.id },
     skip: !recipeBase,

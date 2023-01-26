@@ -53,8 +53,6 @@ export function Configuration({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hiddenConfigurations.length, setContext])
 
-  console.log(context)
-
   return (
     <Flex
       gap="large"

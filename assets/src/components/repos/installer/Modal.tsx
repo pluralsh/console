@@ -30,6 +30,7 @@ export function InstallerModal() {
       </Button>
 
       <HonorableModal
+        BackdropProps={{ zIndex: 20 }}
         open={open}
         fontSize={16}
         width={768}
