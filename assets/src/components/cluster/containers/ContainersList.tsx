@@ -94,7 +94,7 @@ const ColImage = columnHelper.accessor(row => row.image, {
       </Span>
     </Tooltip>
   ),
-  header: 'Name',
+  header: 'Image',
   meta: {
     truncate: true,
   },
