@@ -4,9 +4,12 @@ import {
   MutableRefObject,
   RefObject,
   SetStateAction,
+  useCallback,
   useRef,
 } from 'react'
 import { ListState } from '@react-stately/list'
+
+import { Selection } from '@react-types/shared'
 
 import { FOOTER_KEY, HEADER_KEY, useItemWrappedChildren } from './ListBox'
 import { ComboBoxProps } from './ComboBox'
@@ -34,6 +37,10 @@ type UseSelectComboStatePropsReturn<T extends TType> = Pick<
   'children' | 'onOpenChange' | 'onSelectionChange'
 >
 
+function setDifference<T>(a: Set<T>, b: Set<T>): Set<T> {
+  return new Set([...a].filter(x => !b.has(x)))
+}
+
 function useSelectComboStateProps<T extends TType>({
   setIsOpen,
   onOpenChange,
@@ -47,6 +54,8 @@ function useSelectComboStateProps<T extends TType>({
   nextFocusedKeyRef,
 }: UseSelectComboStatePropsArgs<T>): UseSelectComboStatePropsReturn<T> {
   const temporarilyPreventClose = useRef(false)
+  const getCurrentKeys = useCallback(() => new Set<Key>(stateRef.current?.selectionManager.selectedKeys ?? []),
+    [stateRef])
 
   return {
     onOpenChange: (open: boolean, ...args: any[]) => {
@@ -60,24 +69,37 @@ function useSelectComboStateProps<T extends TType>({
         onOpenChange.apply(this, [open, ...args])
       }
     },
-    onSelectionChange: (newKey, ...args) => {
-      if (newKey === HEADER_KEY && onHeaderClick) {
-        temporarilyPreventClose.current = true
-        onHeaderClick()
+    onSelectionChange: (newKeyOrKeys: Key | Selection, ...args: any) => {
+      let newKey: Key
+
+      if (
+        typeof newKeyOrKeys === 'string'
+        || typeof newKeyOrKeys === 'number'
+      ) {
+        newKey = newKeyOrKeys
       }
-      else if (newKey === FOOTER_KEY && onFooterClick) {
+      else {
+        const currentKeys = getCurrentKeys()
+        const diff = setDifference(newKeyOrKeys, currentKeys)
+
+        newKey = diff.keys().next().value || ''
+      }
+      switch (newKey) {
+      case HEADER_KEY:
         temporarilyPreventClose.current = true
-        onFooterClick()
+        onHeaderClick?.()
+        break
+      case FOOTER_KEY:
+        temporarilyPreventClose.current = true
+        onFooterClick?.()
         if (stateRef.current) {
           nextFocusedKeyRef.current
-            = stateRef?.current?.collection?.getKeyBefore(FOOTER_KEY)
+              = stateRef?.current?.collection?.getKeyBefore(FOOTER_KEY)
         }
-      }
-      else if (onSelectionChange) {
-        onSelectionChange.apply(this, [
-          typeof newKey === 'string' ? newKey : '',
-          ...args,
-        ])
+        break
+      default:
+        onSelectionChange?.apply(this, [newKeyOrKeys, ...args])
+        break
       }
     },
     children: useItemWrappedChildren(children, dropdownHeader, dropdownFooter),

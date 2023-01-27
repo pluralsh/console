@@ -1,4 +1,4 @@
-import { Div, Flex } from 'honorable'
+import { Div, Flex, H4 } from 'honorable'
 import {
   ComponentProps,
   Key,
@@ -37,7 +37,7 @@ const portrait = (
 )
 const smallIcon = <PersonIcon size={16} />
 
-const chipProps:Partial<ComponentProps<typeof Chip>> = {
+const chipProps: Partial<ComponentProps<typeof Chip>> = {
   size: 'small',
   hue: 'lighter',
 }
@@ -177,10 +177,18 @@ function Template() {
   const shownStep = 4
   const [shownLimit, setShownLimit] = useState<number>(shownStep)
 
+  const [selectedKeys, setSelectedKeys] = useState(new Set<Key>(['pizza', 'sushi']))
+
   const curItem = items.find(item => item.key === selectedKey)
   const customLabel = curItem
     ? `You have selected ${curItem.label}`
     : 'Select an item please'
+
+  const curItems = items.filter(item => selectedKeys.has(item.key))
+  const customLabelMultiple
+    = curItems.length > 0
+      ? `Selections: ${curItems.map(item => item.label).join(', ')}`
+      : 'Select items'
 
   return (
     <Flex
@@ -188,7 +196,9 @@ function Template() {
       gap="large"
       maxWidth={512}
     >
+      {/* SINGLE SELECT */}
       <Div>
+        <h4>Single select</h4>
         <Select
           defaultOpen={false}
           label="Pick something"
@@ -207,7 +217,6 @@ function Template() {
           ))}
         </Select>
       </Div>
-
       <Div>
         <Select
           label="Pick something"
@@ -293,6 +302,146 @@ function Template() {
               />
             )
           }
+          dropdownFooter={
+            shownLimit < items.length && (
+              <ListBoxFooterPlus>View more</ListBoxFooterPlus>
+            )
+          }
+        >
+          {items.slice(0, shownLimit).map(({ key, chips, version }) => (
+            <ListBoxItem
+              key={key}
+              label={version}
+              textValue={version}
+              rightContent={(
+                <ListBoxItemChipList
+                  maxVisible={1}
+                  showExtra
+                  chips={chips}
+                />
+              )}
+            />
+          ))}
+        </Select>
+      </Flex>
+
+      {/*  */}
+      {/*  */}
+      {/*  */}
+      {/*  */}
+      {/*  */}
+      {/*  */}
+
+      {/* MULTIPLE SELECT */}
+      <H4
+        subtitle
+        margin="0"
+        marginBottom="small"
+      >
+        Multiple select
+      </H4>
+      <Div>
+        <Select
+          defaultOpen={false}
+          label="Pick something"
+          selectionMode="multiple"
+          selectedKeys={selectedKeys}
+          onSelectionChange={keys => {
+            setSelectedKeys(keys)
+          }}
+        >
+          {items.slice(0, 4).map(({ key, label }) => (
+            <ListBoxItem
+              key={key}
+              label={label}
+              textValue={label}
+              leftContent={smallIcon}
+            />
+          ))}
+        </Select>
+      </Div>
+
+      <Div>
+        <Select
+          label="Pick something"
+          selectionMode="multiple"
+          selectedKeys={selectedKeys}
+          onSelectionChange={keys => {
+            setSelectedKeys(keys)
+          }}
+          defaultOpen={false}
+          leftContent={<SearchIcon />}
+          rightContent={<ListBoxItemChipList chips={curItem?.chips} />}
+          dropdownFooterFixed={
+            <ListBoxFooterPlus>Create new</ListBoxFooterPlus>
+          }
+        >
+          {items.map(({
+            key, label, description, chips,
+          }) => (
+            <ListBoxItem
+              key={key}
+              label={label}
+              textValue={label}
+              description={description}
+              rightContent={<ListBoxItemChipList chips={chips} />}
+              leftContent={portrait}
+            />
+          ))}
+        </Select>
+      </Div>
+
+      <Div>
+        <Select
+          label="Pick something"
+          selectionMode="multiple"
+          selectedKeys={selectedKeys}
+          onSelectionChange={keys => {
+            setSelectedKeys(keys)
+          }}
+          defaultOpen={false}
+          dropdownFooterFixed={
+            <ListBoxFooterPlus>Create new</ListBoxFooterPlus>
+          }
+          triggerButton={(
+            <SelectButton leftContent={curItem ? <CheckIcon /> : <InfoIcon />}>
+              {customLabelMultiple}
+            </SelectButton>
+          )}
+        >
+          {items.map(({
+            key, label, description, chips,
+          }) => (
+            <ListBoxItem
+              key={key}
+              label={label}
+              textValue={label}
+              description={description}
+              rightContent={<ListBoxItemChipList chips={chips} />}
+              leftContent={portrait}
+            />
+          ))}
+        </Select>
+      </Div>
+
+      <Flex justifyContent="right">
+        <Select
+          label="Version"
+          selectionMode="multiple"
+          selectedKeys={selectedKeys}
+          onSelectionChange={keys => {
+            setSelectedKeys(keys)
+          }}
+          triggerButton={<CustomTriggerButton />}
+          width="max-content"
+          maxHeight={197}
+          placement="right"
+          onFooterClick={() => {
+            setShownLimit(shownLimit + shownStep)
+          }}
+          onOpenChange={open => {
+            if (!open) setShownLimit(shownStep)
+          }}
           dropdownFooter={
             shownLimit < items.length && (
               <ListBoxFooterPlus>View more</ListBoxFooterPlus>

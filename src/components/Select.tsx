@@ -10,10 +10,12 @@ import {
   useState,
 } from 'react'
 import { HiddenSelect, useSelect } from '@react-aria/select'
-import { SelectState, useSelectState } from '@react-stately/select'
-import { AriaSelectProps } from '@react-types/select'
 import { useButton } from '@react-aria/button'
 import styled, { useTheme } from 'styled-components'
+
+import { AriaSelectProps } from '@react-types/select'
+
+import { BimodalSelectProps, BimodalSelectState, useBimodalSelectState } from '../utils/useBimodalSelectState'
 
 import { ListBoxItemBaseProps } from './ListBoxItem'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
@@ -44,8 +46,9 @@ export type SelectProps = Exclude<SelectButtonProps, 'children'> & {
   placement?: Placement
   width?: string | number
   maxHeight?: string | number
+  onSelectionChange?: (arg: any) => any
 } & Omit<
-    AriaSelectProps<object>,
+    BimodalSelectProps<object>,
     'autoFocus' | 'onLoadMore' | 'isLoading' | 'validationState' | 'placeholder'
   >
 
@@ -147,6 +150,22 @@ const SelectInner = styled.div<{
   },
 }))
 
+function Select(
+  props: Omit<
+    SelectProps,
+    'selectionMode' | 'selectedKeys' | 'onSelectionChange'
+  > & {
+    selectionMode?: 'single'
+  } & Pick<AriaSelectProps<object>, 'onSelectionChange'>
+): ReactElement
+function Select(
+  props: Omit<
+    SelectProps,
+    'selectionMode' | 'selectedKey' | 'onSelectionChange'
+  > & {
+    selectionMode: 'multiple'
+  } & { onSelectionChange: (keys: Set<Key>) => any }
+): ReactElement
 function Select({
   children,
   selectedKey,
@@ -169,12 +188,15 @@ function Select({
   maxHeight,
   ...props
 }: SelectProps) {
-  const stateRef = useRef<SelectState<object> | null>(null)
+  const stateRef = useRef<BimodalSelectState<object> | null>(null)
   const [isOpenUncontrolled, setIsOpen] = useState(false)
   const nextFocusedKeyRef = useRef<Key>(null)
 
   if (typeof isOpen !== 'boolean') {
     isOpen = isOpenUncontrolled
+  }
+  if (props.selectionMode === 'multiple' && selectedKey) {
+    throw new Error('When using selectionMode="multiple", you must use "selectedKeys" instead of "selectedKey"')
   }
 
   const selectStateBaseProps = useSelectComboStateProps<SelectProps>({
@@ -190,7 +212,7 @@ function Select({
     nextFocusedKeyRef,
   })
 
-  const selectStateProps: AriaSelectProps<object> = {
+  const selectStateProps: BimodalSelectProps<object> = {
     ...selectStateBaseProps,
     isOpen,
     defaultOpen: false,
@@ -199,7 +221,7 @@ function Select({
     ...props,
   }
 
-  const state = useSelectState(selectStateProps)
+  const state = useBimodalSelectState(selectStateProps)
 
   setNextFocusedKey({ nextFocusedKeyRef, state, stateRef })
 
@@ -215,7 +237,14 @@ function Select({
       rightContent={rightContent}
       isOpen={state.isOpen}
     >
-      {state.selectedItem?.props?.children?.props?.label || label}
+      {(props.selectionMode === 'multiple'
+        && state.selectedItems.length > 0
+        && state.selectedItems
+          .map(item => item?.props?.children?.props?.label)
+          .filter(label => !!label)
+          .join(', '))
+        || state.selectedItem?.props?.children?.props?.label
+        || label}
     </SelectButton>
   )
 
