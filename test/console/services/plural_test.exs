@@ -292,9 +292,7 @@ defmodule Console.Services.PluralTest do
         send me, val
         {:ok, val}
       end
-      expect(Command, :cmd, 5, fn
-        "git", ["reset", "--hard", "origin/master"], _ -> echo.(:reset)
-        "git", ["clean", "-f"], _ -> echo.(:clean)
+      expect(Command, :cmd, 3, fn
         "git", ["add", "."], _ -> echo.(:add)
         "git", ["commit", "-m", _], _ -> echo.(:commit)
         "git", ["push"], _ -> echo.(:push)
@@ -302,8 +300,6 @@ defmodule Console.Services.PluralTest do
 
       {:ok, _} = Plural.update_smtp(%{service: "smtp.service.com"})
 
-      assert_receive :reset
-      assert_receive :clean
       assert_receive :add
       assert_receive :commit
       assert_receive :push

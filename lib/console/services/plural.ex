@@ -38,14 +38,14 @@ defmodule Console.Services.Plural do
   end
 
   def update_smtp(smtp) do
-    Console.Deployer.exec(fn storage ->
-      with {:ok, _} <- storage.reset(),
-           {:ok, context} <- Context.get(),
-           {:ok, _} <- Context.write(%{context | smtp: smtp}),
-           {:ok, _} <- storage.revise("update workspace smtp configuration"),
-           {:ok, _} <- storage.push(),
-        do: {:ok, smtp}
-    end)
+    with {:ok, context} <- Context.get() do
+      Console.Deployer.exec(fn storage ->
+        with {:ok, _} <- Context.write(%{context | smtp: smtp}),
+             {:ok, _} <- storage.revise("update workspace smtp configuration"),
+             {:ok, _} <- storage.push(),
+          do: {:ok, smtp}
+      end)
+    end
   end
 
   def install_recipe(id, context, oidc, %User{} = user) do
