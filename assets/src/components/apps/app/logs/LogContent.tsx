@@ -61,7 +61,7 @@ function Placeholder() {
 export default function LogContent({
   listRef, setListRef, logs, name, loading, fetchMore, onScroll, search, setLoader, addLabel, fullscreen = false,
 }) {
-  const [open, setOpen] = useState<boolean>(false)
+  const [open, setOpen] = useState<any>(null)
   const [timestamp, setTimestamp] = useState<any>()
   const [stream, setStream] = useState<any>()
   const [done, setDone] = useState(false)
@@ -83,13 +83,13 @@ export default function LogContent({
         setLoader={setLoader}
         refreshKey={`${name}:${search}`}
         items={lines}
-        mapper={({ line, level, stream }, i) => (
+        mapper={({ line, level, stream }, o) => (
           <LogLine
             line={line}
             level={level}
+            open={open === o}
             onClick={() => {
-              console.log(i)
-              setOpen(true)
+              setOpen(o)
               setStream(stream)
               setTimestamp(line.timestamp)
             }}
@@ -109,7 +109,7 @@ export default function LogContent({
           stamp={timestamp}
           stream={stream}
           addLabel={addLabel}
-          onClose={() => setOpen(false)}
+          onClose={() => setOpen(null)}
           marginTop={fullscreen ? '0' : '104px'}
         />
       )}

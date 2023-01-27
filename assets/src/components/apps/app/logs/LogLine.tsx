@@ -22,14 +22,15 @@ export function borderColor(lvl) {
 }
 
 export default function LogLine({
-  line: { timestamp, value }, level, onClick,
+  line: { timestamp, value }, level, open = false, onClick,
 }) {
   const blocks = useMemo(() => ansiToJson(escapeCarriageReturn(value), { json: true, remove_empty: true }), [value])
 
   return (
     <>
       <Flex
-        borderLeft={`4px solid ${borderColor(level)}`}
+        borderLeft={open ? '4px solid border-info' : `4px solid ${borderColor(level)}`}
+        backgroundColor={open ? 'fill-one-selected' : undefined}
         direction="row"
         fontFamily="Monument Mono"
         paddingHorizontal="small"
