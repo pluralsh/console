@@ -19,10 +19,12 @@ import {
 
 import { cpuParser, memoryParser } from 'utils/kubernetes'
 
-import { Flex } from 'honorable'
+import { Flex, Span } from 'honorable'
 
 import { UnstyledLink } from 'components/utils/Link'
 import styled from 'styled-components'
+
+import { TRUNCATE } from 'components/utils/truncate'
 
 import {
   StatusChip,
@@ -33,6 +35,7 @@ import {
 
 type ContainerTableRow = {
   name?: string
+  image?: string
   isInit: boolean
   memory: {
     requests?: number
@@ -68,6 +71,28 @@ const ColName = columnHelper.accessor(row => row.name, {
         <span>{`${original.isInit ? 'init: ' : ''}${props.getValue()}`}</span>
       </Tooltip>
     </TableText>
+  ),
+  header: 'Name',
+  meta: {
+    truncate: true,
+  },
+})
+
+const ColImage = columnHelper.accessor(row => row.image, {
+  id: 'image',
+  cell: props => (
+    <Tooltip
+      label={props.getValue()}
+      placement="top-start"
+    >
+      <Span
+        color="text-light"
+        direction="rtl"
+        textAlign="left"
+      >
+        {props.getValue()}
+      </Span>
+    </Tooltip>
   ),
   header: 'Name',
   meta: {
@@ -244,6 +269,7 @@ export function ContainersList({
 
   columns = useMemo(() => columns ?? [
     ColName,
+    ColImage,
     ColMemoryReservation,
     ColCpuReservation,
     ColPorts,
@@ -255,6 +281,8 @@ export function ContainersList({
   if (!containers || containers.length === 0) {
     return <>No containers available.</>
   }
+
+  console.log(containers)
 
   return (
     <Table
