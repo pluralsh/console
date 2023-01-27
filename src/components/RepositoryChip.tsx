@@ -5,7 +5,6 @@ import {
   useState,
 } from 'react'
 import {
-  Div,
   Flex,
   FlexProps,
   Img,
@@ -55,6 +54,7 @@ function RepositoryChipRef({
         ref={ref}
         padding="xsmall"
         align="center"
+        justify="space-between"
         cursor={disabled ? 'not-allowed' : 'pointer'}
         opacity={disabled ? 0.5 : 1}
         borderRadius="large"
@@ -67,37 +67,45 @@ function RepositoryChipRef({
         whiteSpace="nowrap"
         {...props}
       >
-        {icon ? (
-          <Flex
-            align="center"
-            justify="center"
-            {...iconProps}
-          >
-            {icon}
-          </Flex>
-        ) : imageUrl ? (
-          <Img
-            src={imageUrl}
-            objectPosition="center"
-            {...iconProps}
-          />
-        ) : null}
-        <P
-          body2
-          marginLeft="medium"
+        <Flex
+          align="center"
+          overflow="hidden"
         >
-          {label}
-        </P>
-        <Div flexGrow={1} />
+          {icon ? (
+            <Flex
+              align="center"
+              justify="center"
+              {...iconProps}
+            >
+              {icon}
+            </Flex>
+          ) : imageUrl ? (
+            <Img
+              src={imageUrl}
+              objectPosition="center"
+              {...iconProps}
+            />
+          ) : null}
+          <P
+            body2
+            marginLeft="medium"
+            overflow="hidden"
+            textOverflow="ellipsis"
+            whiteSpace="nowrap"
+            title={label}
+          >
+            {label}
+          </P>
+        </Flex>
         <CheckRoundedIcon
           color="border-outline-focused"
-          visibility={checked ? 'visible' : 'hidden'}
-          marginLeft="medium"
+          display={checked ? 'visible' : 'none'}
+          marginLeft="small"
         />
         <PlusIcon
           color="text-light"
           display={hovered && !checked && !disabled ? 'visible' : 'none'}
-          marginLeft="medium"
+          marginLeft="small"
           height={16}
         />
       </Flex>

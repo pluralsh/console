@@ -36,3 +36,11 @@ Icon.args = {
   ),
   label: 'DevOps',
 }
+
+export const Small = Template.bind({})
+
+Small.args = {
+  imageUrl: '/logos/airbyte-logo.svg',
+  label: 'Really long application name',
+  width: '200px',
+}
