@@ -17,7 +17,7 @@ export default function Header() {
       <Flex
         align="center"
         gap="medium"
-        paddingHorizontal="medium"
+        paddingHorizontal="large"
         paddingVertical="xsmall"
       >
         <Img
