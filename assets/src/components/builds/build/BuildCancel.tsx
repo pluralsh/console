@@ -5,6 +5,8 @@ import { P } from 'honorable'
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'
 
+const noncancelable = [BuildStatus.CANCELLED, BuildStatus.FAILED, BuildStatus.SUCCESSFUL]
+
 export default function BuildCancel({ build }) {
   const [open, setOpen] = useState<boolean>(false)
   const [mutation, { loading }] = useMutation(CANCEL_BUILD, {
@@ -12,7 +14,7 @@ export default function BuildCancel({ build }) {
     onCompleted: () => setOpen(false),
   })
 
-  if (build.status === BuildStatus.FAILED || build.status === BuildStatus.SUCCESSFUL) return null
+  if (noncancelable.includes(build.status)) return null
 
   return (
     <>
