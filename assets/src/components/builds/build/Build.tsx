@@ -50,7 +50,9 @@ import { InstallationContext } from 'components/Installations'
 import { BUILD_TYPE_DISPLAY_NAMES } from '../Build'
 
 import { BuildTimer } from './BuildTimer'
-import BuildActions from './BuildActions'
+import BuildCancel from './BuildCancel'
+import BuildRestart from './BuildRestart'
+import BuildApproval from './BuildApproval'
 
 function updateQuery(prev, { subscriptionData: { data } }) {
   if (!data) return prev
@@ -196,7 +198,15 @@ export default function Build() {
         <Outlet context={{ edges, build }} />
       </TabPanel>
       <ResponsiveLayoutSidecarContainer width={200}>
-        <BuildActions build={build} />
+        <Flex
+          direction="column"
+          gap="xsmall"
+          marginBottom="xsmall"
+        >
+          <BuildApproval build={build} />
+          <BuildRestart build={build} />
+          <BuildCancel build={build} />
+        </Flex>
         <Flex
           gap="medium"
           direction="column"
