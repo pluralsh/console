@@ -35,6 +35,9 @@ export function LogsCard({
       overflow="hidden"
       position="relative"
       height={height}
+      borderLeft="none"
+      borderTopLeftRadius={0}
+      borderBottomLeftRadius={0}
     >
       <Flex
         direction="row"

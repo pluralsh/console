@@ -27,17 +27,23 @@ export default function LogLine({
   const blocks = useMemo(() => ansiToJson(escapeCarriageReturn(value), { json: true, remove_empty: true }), [value])
 
   return (
-    <Flex
-      borderLeft={`2px solid ${borderColor(level)}`}
-      direction="row"
-      fontFamily="Monument Mono"
-      paddingHorizontal="small"
-      paddinbVertical="xxsmall"
-      wordBreak="break-word"
-      onClick={onClick}
-      _hover={{ backgroundColor: 'fill-two', borderColor: 'border-info' }}
-    >
-      {ts(timestamp)}{blocks.map(json => <> {json.content}</>)}
-    </Flex>
+    <>
+      <Flex
+        borderLeft={`4px solid ${borderColor(level)}`}
+        direction="row"
+        fontFamily="Monument Mono"
+        paddingHorizontal="small"
+        paddinbVertical="xxsmall"
+        wordBreak="break-word"
+        onClick={onClick}
+        _hover={{ backgroundColor: 'fill-two', borderColor: 'border-info' }}
+      >
+        {ts(timestamp)}{blocks.map(json => <> {json.content}</>)}
+      </Flex>
+      <Flex
+        borderLeft="4px solid border"
+        height={4}
+      />
+    </>
   )
 }

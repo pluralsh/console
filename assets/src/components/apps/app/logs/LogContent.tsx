@@ -42,9 +42,12 @@ function* crossStreams(streams) {
 function Placeholder() {
   return (
     <Div
+      borderLeft="4px solid border"
       height={20}
       flex={false}
       fontFamily="monospace"
+      paddingHorizontal="small"
+      paddinbVertical="xxsmall"
     >
       <Div
         height={16}
@@ -80,11 +83,12 @@ export default function LogContent({
         setLoader={setLoader}
         refreshKey={`${name}:${search}`}
         items={lines}
-        mapper={({ line, level, stream }) => (
+        mapper={({ line, level, stream }, i) => (
           <LogLine
             line={line}
             level={level}
             onClick={() => {
+              console.log(i)
               setOpen(true)
               setStream(stream)
               setTimestamp(line.timestamp)
