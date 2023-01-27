@@ -24,6 +24,8 @@ export default function Header() {
           height={32}
           marginVertical={4}
           src={APP_ICON}
+          alt="Plural console"
+          marginLeft={-3.5} /* Optically center with sidebar buttons */
         />
         <Flex grow={1} />
         <Button

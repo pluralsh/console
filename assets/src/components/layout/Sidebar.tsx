@@ -17,12 +17,12 @@ import {
   ServersIcon,
   SidebarItem,
   SidebarSection,
-  theme,
 } from '@pluralsh/design-system'
 
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import {
+  ReactElement,
   useCallback,
   useContext,
   useRef,
@@ -47,6 +47,8 @@ import { useMutation } from '@apollo/client'
 
 import { updateCache } from 'utils/graphql'
 
+import { useTheme } from 'styled-components'
+
 import { LoginContext } from '../contexts'
 
 import { AutoRefresh, getCommit } from '../AutoRefresh'
@@ -57,19 +59,56 @@ import { MARK_READ } from './queries'
 
 export const SIDEBAR_ICON_HEIGHT = '42px'
 
-const MENU_ITEMS: any[] = [
-  { text: 'Apps', icon: <AppsIcon />, path: '/' },
-  { text: 'Builds', icon: <BuildIcon />, path: '/builds' },
-  { text: 'Cluster', icon: <ServersIcon />, path: '/nodes' },
+type MenuItem = {
+  text: string
+  icon: ReactElement
+  path: string
+  pathRegexp?: RegExp
+  sandboxed?: boolean
+}
+
+const MENU_ITEMS: MenuItem[] = [
+  {
+    text: 'Apps',
+    icon: <AppsIcon />,
+    path: '/',
+    pathRegexp: /^\/(apps)/,
+  },
+  {
+    text: 'Builds',
+    icon: <BuildIcon />,
+    path: '/builds',
+  },
+  {
+    text: 'Cluster',
+    icon: <ServersIcon />,
+    path: '/nodes',
+    pathRegexp: /^\/(nodes|pods)/,
+  },
   // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents', sandboxed: true },
-  { text: 'Audits', icon: <ListIcon />, path: '/audits' },
-  { text: 'Account', icon: <PeopleIcon />, path: '/account' },
+  {
+    text: 'Audits',
+    icon: <ListIcon />,
+    path: '/audits',
+  },
+  {
+    text: 'Account',
+    icon: <PeopleIcon />,
+    path: '/account',
+  },
 ]
 
 function SidebarMenuItem({
-  tooltip, href, className, children,
-} :
-  {tooltip: string, href?: string, className?: string, children: JSX.Element}) {
+  tooltip,
+  href,
+  className,
+  children,
+}: {
+  tooltip: string
+  href?: string
+  className?: string
+  children: JSX.Element
+}) {
   return (
     <SidebarItem
       clickable
@@ -84,32 +123,48 @@ function SidebarMenuItem({
   )
 }
 
+function isActiveMenuItem({ path, pathRegexp }: Pick<MenuItem, 'path' | 'pathRegexp'>,
+  currentPath) {
+  return (
+    (path === '/' ? currentPath === path : currentPath.startsWith(path))
+    || (pathRegexp && (currentPath.match(pathRegexp)?.length ?? 0 > 0))
+  )
+}
+
 export default function Sidebar() {
   const menuItemRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const notificationsPanelRef = useRef<HTMLDivElement>(null)
   const [isMenuOpen, setIsMenuOpened] = useState<boolean>(false)
-  const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] = useState(false)
+  const [isNotificationsPanelOpen, setIsNotificationsPanelOpen]
+    = useState(false)
   const [all, setAll] = useState<boolean>(false)
   const { me, configuration } = useContext<any>(LoginContext)
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const active = ({ path }) => (path === '/'
-    ? (pathname === path || pathname.startsWith('/apps/'))
-    : pathname.startsWith(path))
-  const menuItems = configuration.isSandbox ? MENU_ITEMS.filter(({ sanboxed }) => !sanboxed) : MENU_ITEMS
+  const active = useCallback((menuItem: Parameters<typeof isActiveMenuItem>[0]) => isActiveMenuItem(menuItem, pathname),
+    [pathname])
+  const menuItems = configuration.isSandbox
+    ? MENU_ITEMS.filter(({ sandboxed }) => !sandboxed)
+    : MENU_ITEMS
+
+  const theme = useTheme()
 
   const [mutation] = useMutation(MARK_READ, {
     update: cache => updateCache(cache, {
       query: ME_Q,
-      update: ({ me, ...rest }) => ({ ...rest, me: { ...me, unreadNotifications: 0 } }),
+      update: ({ me, ...rest }) => ({
+        ...rest,
+        me: { ...me, unreadNotifications: 0 },
+      }),
     }),
   })
 
   const toggleNotificationPanel = useCallback(open => {
     if (!open) mutation()
     setIsNotificationsPanelOpen(open)
-  }, [mutation, setIsNotificationsPanelOpen])
+  },
+  [mutation, setIsNotificationsPanelOpen])
 
   const handleLogout = useCallback(() => {
     setIsMenuOpened(false)
@@ -144,7 +199,10 @@ export default function Sidebar() {
               className={`sidebar-${item.text}`}
               onClick={() => navigate(item.path)}
               backgroundColor={active(item) ? theme.colors?.grey[875] : null}
-              _hover={{ backgroundColor: theme.colors?.grey[900], cursor: 'pointer' }}
+              _hover={{
+                backgroundColor: theme.colors?.grey[900],
+                cursor: 'pointer',
+              }}
               borderRadius="normal"
               height={32}
               width={32}
@@ -178,7 +236,9 @@ export default function Sidebar() {
               toggleNotificationPanel(!isNotificationsPanelOpen)
             }}
             badge={me?.unreadNotifications}
-            backgroundColor={isNotificationsPanelOpen ? theme.colors?.grey[875] : null}
+            backgroundColor={
+              isNotificationsPanelOpen ? theme.colors?.grey[875] : null
+            }
             width={32}
             height={32}
           >
@@ -197,7 +257,9 @@ export default function Sidebar() {
                 left={16}
                 top={2}
               >
-                <Span marginTop={-2}>{me.unreadNotifications > 99 ? '!' : me.unreadNotifications}</Span>
+                <Span marginTop={-2}>
+                  {me.unreadNotifications > 99 ? '!' : me.unreadNotifications}
+                </Span>
               </Flex>
             )}
           </SidebarItem>
