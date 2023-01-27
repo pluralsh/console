@@ -2,7 +2,7 @@ defmodule Console.Plural.Context do
   import Console
   alias Console.Deployer
 
-  defstruct [:configuration, :bundles, :smtp, :buckets, :domains]
+  defstruct [:configuration, :bundles, :smtp, :buckets, :domains, :protect]
 
   defmodule Smtp do
     defstruct [:user, :password, :server, :port, :sender]
@@ -33,6 +33,9 @@ defmodule Console.Plural.Context do
       bundles: bundles(spec)
     }
   end
+
+  def protected?(%__MODULE__{protect: [_ | _] = protect}, repo), do: Enum.member?(protect, repo)
+  def protected?(_, _), do: false
 
   def get() do
     with {:ok, content} <- Deployer.file(location()),

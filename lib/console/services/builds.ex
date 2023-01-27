@@ -4,7 +4,10 @@ defmodule Console.Services.Builds do
   alias Kube.{Client, Application}
   alias Console.Schema.{Build, Command, User, Lock}
   alias Console.Services.{Changelogs, Rbac}
-  alias Console.Plural.Incidents
+  alias Console.Plural.{Incidents, Context}
+
+  @type error :: {:error, term}
+  @type build_resp :: {:ok, Build.t} | error
 
   def get!(id), do: Repo.get!(Build, id)
 
@@ -68,6 +71,14 @@ defmodule Console.Services.Builds do
     end
   end
 
+  @doc """
+  Creates a new build and goes from there
+
+  fails if:
+  * there is no current application for that repo
+  * if its a destroy build, the repo is protected
+  """
+  @spec create(map, User.t) :: build_resp
   def create(attrs, %User{id: id} = user) do
     start_transaction()
     |> add_operation(:build, fn _ ->
@@ -82,6 +93,16 @@ defmodule Console.Services.Builds do
           {:ok, %Application{}} -> {:ok, build}
           _ -> {:error, :invalid_repository}
         end
+    end)
+    |> add_operation(:protect, fn
+      %{build: %Build{type: :destroy, repository: repo} = b} ->
+        with {:ok, ctx} <- Context.get(),
+             true <- Context.protected?(ctx, repo) do
+          {:error, "repo #{repo} is protected from being destroyed, update context.yaml if you really want to destroy it"}
+        else
+          _ -> {:ok, b}
+        end
+      %{build: b} -> {:ok, b}
     end)
     |> execute(extract: :build)
     |> notify(:create, user)

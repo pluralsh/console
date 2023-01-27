@@ -8,6 +8,11 @@ defmodule Console.GraphQl.Users do
   ecto_enum :severity, Severity
   ecto_enum :notification_status, Status
 
+  enum :read_type do
+    value :notification
+    value :build
+  end
+
   input_object :user_attributes do
     field :name,     :string
     field :email,    :string
@@ -43,14 +48,15 @@ defmodule Console.GraphQl.Users do
   end
 
   object :user do
-    field :id,             non_null(:id)
-    field :name,           non_null(:string)
-    field :email,          non_null(:string)
-    field :deleted_at,     :datetime
-    field :profile,        :string
-    field :roles,          :user_roles
-    field :read_timestamp, :datetime
-    field :bound_roles,    list_of(:role), resolve: fn user, _, _ ->
+    field :id,              non_null(:id)
+    field :name,            non_null(:string)
+    field :email,           non_null(:string)
+    field :deleted_at,      :datetime
+    field :profile,         :string
+    field :roles,           :user_roles
+    field :read_timestamp,  :datetime
+    field :build_timestamp, :datetime
+    field :bound_roles,     list_of(:role), resolve: fn user, _, _ ->
       {:ok, Console.Schema.User.roles(user)}
     end
 
@@ -257,6 +263,13 @@ defmodule Console.GraphQl.Users do
       arg :attributes, non_null(:user_attributes)
 
       safe_resolve &User.update_user/2
+    end
+
+    field :mark_read, :user do
+      middleware Authenticated
+      arg :type, :read_type
+
+      safe_resolve &User.mark_read/2
     end
 
     field :create_group, :group do

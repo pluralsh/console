@@ -5,15 +5,16 @@ defmodule Console.Schema.User do
   @email_re ~r/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-\.]+\.[a-zA-Z]{2,}$/
 
   schema "watchman_users" do
-    field :name,           :string
-    field :email,          :string
-    field :bot_name,       :string
-    field :password_hash,  :string
-    field :profile,        :string
-    field :password,       :string, virtual: true
-    field :jwt,            :string, virtual: true
-    field :deleted_at,     :utc_datetime_usec
-    field :read_timestamp, :utc_datetime_usec
+    field :name,            :string
+    field :email,           :string
+    field :bot_name,        :string
+    field :password_hash,   :string
+    field :profile,         :string
+    field :password,        :string, virtual: true
+    field :jwt,             :string, virtual: true
+    field :deleted_at,      :utc_datetime_usec
+    field :read_timestamp,  :utc_datetime_usec
+    field :build_timestamp, :utc_datetime_usec
 
     embeds_one :roles,  Roles, on_replace: :update do
       field :admin, :boolean, default: false

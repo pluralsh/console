@@ -66,6 +66,14 @@ defmodule Console.GraphQl.Build do
     timestamps()
   end
 
+  object :build_info do
+    field :all,        :integer
+    field :failed,     :integer
+    field :queued,     :integer
+    field :running,    :integer
+    field :successful, :integer
+  end
+
   delta :build
   delta :command
 
@@ -81,10 +89,15 @@ defmodule Console.GraphQl.Build do
 
     field :build, :build do
       middleware Authenticated
-
       arg :id, non_null(:id)
 
-      resolve safe_resolver(&Build.resolve_build/2)
+      safe_resolve &Build.resolve_build/2
+    end
+
+    field :build_info, :build_info do
+      middleware Authenticated
+
+      safe_resolve &Build.info/2
     end
   end
 
@@ -95,7 +108,7 @@ defmodule Console.GraphQl.Build do
       arg :attributes, non_null(:build_attributes)
 
       middleware Rbac, perm: :deploy, arg: [:attributes, :repository]
-      resolve safe_resolver(&Build.create_build/2)
+      safe_resolve &Build.create_build/2
     end
 
     field :restart_build, :build do
@@ -103,7 +116,7 @@ defmodule Console.GraphQl.Build do
       middleware RequiresGit
       arg :id, non_null(:id)
 
-      resolve safe_resolver(&Build.restart_build/2)
+      safe_resolve &Build.restart_build/2
     end
 
     field :cancel_build, :build do
@@ -111,7 +124,7 @@ defmodule Console.GraphQl.Build do
       middleware RequiresGit
       arg :id, non_null(:id)
 
-      resolve safe_resolver(&Build.cancel_build/2)
+      safe_resolve &Build.cancel_build/2
     end
 
     field :approve_build, :build do
@@ -119,7 +132,7 @@ defmodule Console.GraphQl.Build do
       middleware RequiresGit
       arg :id, non_null(:id)
 
-      resolve safe_resolver(&Build.approve_build/2)
+      safe_resolve &Build.approve_build/2
     end
   end
 
