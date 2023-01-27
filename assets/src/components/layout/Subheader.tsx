@@ -31,6 +31,7 @@ export default function Subheader() {
       >
         <IconFrame
           clickable
+          size="small"
           icon={<ArrowLeftIcon />}
           onClick={() => navigate(-1)}
           textValue="Back"
@@ -38,6 +39,7 @@ export default function Subheader() {
         />
         <IconFrame
           clickable
+          size="small"
           icon={<ArrowRightIcon />}
           onClick={() => navigate(1)}
           textValue="Forward"
