@@ -13,6 +13,7 @@ locals {
 }
 
 module "dedicated_node_group" {
+  count = var.create_node_group ? 1 : 0
   source = "github.com/pluralsh/module-library//terraform/eks-node-groups/multi-az-node-groups?ref=20e64863ffc5e361045db8e6b81b9d244a55809e"
   cluster_name           = var.cluster_name
   default_iam_role_arn   = try(local.node_groups[0].node_role_arn, var.node_role_arn)
@@ -22,4 +23,9 @@ module "dedicated_node_group" {
   node_groups            = var.dedicated_node_groups
   set_desired_size       = false
   private_subnet_ids     = distinct(concat(flatten(local.node_groups[*].subnet_ids), var.subnet_ids))
+}
+
+moved {
+  from = module.dedicated_node_group
+  to = module.dedicated_node_group[0]
 }
