@@ -3456,9 +3456,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@portal:/home/floreks/Projekty/plural/design-system::locator=console%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@pluralsh/design-system@portal:/home/floreks/Projekty/plural/design-system::locator=console%40workspace%3A."
+"@pluralsh/design-system@npm:1.303.1":
+  version: 1.303.1
+  resolution: "@pluralsh/design-system@npm:1.303.1"
   dependencies:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@monaco-editor/react": 4.4.6
@@ -3482,11 +3482,11 @@ __metadata:
     "@react-stately/toggle": 3.4.3
     "@react-types/shared": 3.16.0
     "@tanstack/match-sorter-utils": 8.7.6
-    "@tanstack/react-table": 8.7.8
+    "@tanstack/react-table": 8.7.6
     "@types/chroma-js": 2.1.4
     chroma-js: 2.4.2
     classnames: 2.3.2
-    grommet: 2.29.1
+    grommet: 2.28.0
     grommet-icons: 4.8.0
     highlight.js: 11.7.0
     honorable-recipe-mapper: 0.2.0
@@ -3508,8 +3508,9 @@ __metadata:
     react-dom: ">=16.0.0"
     react-transition-group: ">=4.4.2"
     styled-components: ">=5.3.5"
+  checksum: cfbd1f067fe8a66a6112a0b446c36a8b423765d1b647344372d0c6ee6172927a8adba9105571d513a353c3629d33813bc5920c164a8d9ce792bd99c2d04e41c7
   languageName: node
-  linkType: soft
+  linkType: hard
 
 "@pluralsh/eslint-config-pluralsh@npm:1.4.3":
   version: 1.4.3
@@ -4802,6 +4803,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/react-table@npm:8.7.6":
+  version: 8.7.6
+  resolution: "@tanstack/react-table@npm:8.7.6"
+  dependencies:
+    "@tanstack/table-core": 8.7.6
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+  checksum: 20b10ace9ff32bab79e7fa6cedbde44b74b1760b510e3b67766eaec6d4f55a741b77f3ec458fa5908119397d3ee1e37b0628653a71aa25cb45a7787349b4b392
+  languageName: node
+  linkType: hard
+
 "@tanstack/react-table@npm:8.7.8":
   version: 8.7.8
   resolution: "@tanstack/react-table@npm:8.7.8"
@@ -4811,6 +4824,13 @@ __metadata:
     react: ">=16"
     react-dom: ">=16"
   checksum: 6070f81b2f3fcd05c2bf9798642300ef81f43c5dbb97c0da865920f83dbef465b91b6ad0631712511945c698d63ac2efae3aba9482dad21755125a6161541616
+  languageName: node
+  linkType: hard
+
+"@tanstack/table-core@npm:8.7.6":
+  version: 8.7.6
+  resolution: "@tanstack/table-core@npm:8.7.6"
+  checksum: edba55731245a5a1a46a9a69a1ca2a7d7ae24377ed478f6622d043b80b6f8fbcb19605843e0feb85b99b4a7d5407633be4e440e71c82a4bf876f05a62e8005ae
   languageName: node
   linkType: hard
 
@@ -10134,6 +10154,22 @@ __metadata:
     react-dom: ">= 16.4.1"
     styled-components: ">= 4.X"
   checksum: 7b29e6fd773a29a9f7b48e5b0a163e1c51b3b196891228d88a0e5b99faab4ece03b5410a97665105fe886402016a337237b956d5f46af06ec2e06e2b328a0757
+  languageName: node
+  linkType: hard
+
+"grommet@npm:2.28.0":
+  version: 2.28.0
+  resolution: "grommet@npm:2.28.0"
+  dependencies:
+    grommet-icons: ^4.8.0
+    hoist-non-react-statics: ^3.2.0
+    markdown-to-jsx: ^7.1.5
+    prop-types: ^15.8.1
+  peerDependencies:
+    react: ^16.6.1 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.6.1 || ^17.0.0 || ^18.0.0
+    styled-components: ">= 5.1"
+  checksum: 5def847ca4b722b397e9084f6dbdced9875a4cff54f34629b8258be5c697feb97d1f1bf1ff3ae47342affd592e7269a137bb8e494ab85b9ee647c7cb0125b3c3
   languageName: node
   linkType: hard
 
