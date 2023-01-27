@@ -1,7 +1,8 @@
 import { grey, red, yellow } from '@pluralsh/design-system/dist/theme/colors'
 import { ansiToJson } from 'anser'
+import { textStyle } from 'components/utils/AnsiText'
 import escapeCarriageReturn from 'escape-carriage'
-import { Flex } from 'honorable'
+import { Flex, Span } from 'honorable'
 import { useMemo } from 'react'
 
 import { Level, ts } from './misc'
@@ -36,10 +37,12 @@ export default function LogLine({
         paddingHorizontal="small"
         paddinbVertical="xxsmall"
         wordBreak="break-word"
+        wrap="wrap"
         onClick={onClick}
         _hover={{ backgroundColor: 'fill-two', borderColor: 'border-info' }}
       >
-        {ts(timestamp)}{blocks.map(json => <> {json.content}</>)}
+        {ts(timestamp)}
+        {blocks.map(json => <Span {...textStyle(json)}>&nbsp;{json.content}</Span>)}
       </Flex>
       <Flex
         borderLeft="4px solid border"
