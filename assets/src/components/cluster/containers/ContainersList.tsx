@@ -1,7 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { ComponentProps, useMemo } from 'react'
 import { filesize } from 'filesize'
-
 import type {
   Container,
   ContainerStatus,
@@ -9,22 +8,16 @@ import type {
   Port,
 } from 'generated/graphql'
 import { ReadinessT, containerStatusToReadiness, readinessToLabel } from 'utils/status'
-
 import {
   IconFrame,
   Table,
   TerminalIcon,
   Tooltip,
 } from '@pluralsh/design-system'
-
 import { cpuParser, memoryParser } from 'utils/kubernetes'
-
 import { Flex, Span } from 'honorable'
-
 import { UnstyledLink } from 'components/utils/Link'
 import styled from 'styled-components'
-
-import { TRUNCATE } from 'components/utils/truncate'
 
 import {
   StatusChip,

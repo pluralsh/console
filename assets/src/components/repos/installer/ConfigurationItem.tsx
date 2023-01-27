@@ -86,7 +86,7 @@ function ConfigurationField({
         type={type}
         error={!valid}
         prefix={config.type === ConfigurationType.BUCKET ? deepFetch(configuration, 'manifest.bucketPrefix') : ''}
-        suffix={config.type === ConfigurationType.DOMAIN ? deepFetch(configuration, 'manifest.network.subdomain') : ''}
+        suffix={config.type === ConfigurationType.DOMAIN ? `.${deepFetch(configuration, 'manifest.network.subdomain')}` : ''}
         onChange={({ target: { value } }) => setLocal(value)}
       />
     </FormField>

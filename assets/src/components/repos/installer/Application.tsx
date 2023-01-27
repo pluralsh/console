@@ -23,6 +23,7 @@ import { Configuration } from './Configuration'
 interface StepData {
   id: string | undefined,
   oidc: boolean,
+  skipped?: boolean,
   context: Record<string, unknown>
 }
 
@@ -43,13 +44,20 @@ export function Application({ ...props }: any): ReactElement {
   // There should only be a single bundle available on the list
   const recipeBase = recipeEdges?.at(0)?.node
 
-  const { data: recipe } = useQuery<{recipe: Recipe, context: Array<RepositoryContext>}>(RECIPE_Q, {
+  const { data: recipe } = useQuery<{ recipe: Recipe, context: Array<RepositoryContext> }>(RECIPE_Q, {
     variables: { id: recipeBase?.id },
     skip: !recipeBase,
   })
 
-  const recipeContext = useMemo(() => findContext(recipe?.context || [], active.label!),
-    [recipe?.context, active.label])
+  const recipeContext = useMemo(() => {
+    const context = findContext(recipe?.context || [], active.label!)
+
+    return Object.keys(context)
+      .map(key => ({ [key]: { value: context[key], valid: true } }))
+      .reduce((acc, entry) => ({ ...acc, ...entry }), {})
+  },
+  [recipe?.context, active.label])
+
   const mergedContext = useMemo<Record<string, unknown>>(() => ({ ...recipeContext, ...context }), [recipeContext, context])
   const stepData = useMemo(() => ({
     ...active.data, ...{ id: recipe?.recipe.id }, ...{ oidc }, ...{ context: mergedContext },
@@ -100,7 +108,8 @@ export function Application({ ...props }: any): ReactElement {
           <Span
             color="text-light"
             body2
-          >This application has been marked restricted because it requires configuration, like ssh keys, that are only able to be securely configured locally.
+          >This application has been marked restricted because it requires configuration, like ssh keys, that are only
+            able to be securely configured locally.
           </Span>
         </Div>
       </WizardStep>
