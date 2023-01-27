@@ -23,7 +23,6 @@ import { Confirm } from 'components/utils/Confirm'
 import { useMutation } from '@apollo/client'
 
 import {
-  ContainersReadyChip,
   LabelWithIcon,
   TABLE_HEIGHT,
   TableCaretLink,
@@ -33,6 +32,8 @@ import {
 import { DELETE_POD } from '../queries'
 
 import { getPodContainersStats } from '../containers/getPodContainersStats'
+
+import { ContainerStatuses } from '../ContainerStatuses'
 
 import { getPodResources } from './getPodResources'
 
@@ -212,13 +213,7 @@ export const ColRestarts = columnHelper.accessor(row => row.name, {
 
 export const ColContainers = columnHelper.accessor(row => row.name, {
   id: 'containers',
-  cell: ({ row: { original } }) => (
-    <ContainersReadyChip
-      ready={original?.containers?.ready || 0}
-      total={original?.containers?.total || 0}
-      statuses={original?.containers?.statuses || []}
-    />
-  ),
+  cell: ({ row: { original } }) => <ContainerStatuses statuses={original?.containers?.statuses || []} />,
   header: 'Containers',
 })
 
