@@ -11,7 +11,7 @@ export default function BuildStatus({ status, ...props }) {
   case Status.RUNNING:
     return (
       <Chip
-        severity="success"
+        severity="info"
         {...props}
       >
         Running
