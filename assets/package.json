@@ -38,7 +38,7 @@
     "@nivo/radial-bar": "0.80.0",
     "@nivo/tooltip": "0.80.0",
     "@pluralsh/design-system": "1.303.1",
-    "@tanstack/react-table": "8.7.0",
+    "@tanstack/react-table": "8.7.8",
     "@testing-library/jest-dom": "4.2.4",
     "@testing-library/react": "9.3.3",
     "@testing-library/user-event": "7.1.2",
@@ -54,7 +54,7 @@
     "filesize": "10.0.6",
     "forge-core": "1.4.6",
     "fuse.js": "6.6.2",
-    "grommet": "2.29.0",
+    "grommet": "2.29.1",
     "grommet-icons": "4.8.0",
     "highlight.js": "11.7.0",
     "honorable": "0.194.0",
@@ -142,5 +142,8 @@
     "vite-tsconfig-paths": "4.0.3",
     "vitest": "0.27.2",
     "wait-on": "6.0.1"
+  },
+  "resolutions": {
+    "@pluralsh/design-system": "portal:/home/floreks/Projekty/plural/design-system"
   }
 }
