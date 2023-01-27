@@ -12,6 +12,7 @@ import update from 'lodash/update'
 import { RUNBOOK_EXECUTIONS_Q } from 'components/runbooks/queries'
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
+import { isEmpty } from 'lodash'
 
 const columnHelper = createColumnHelper<any>()
 
@@ -83,6 +84,8 @@ export function RunbookExecutions() {
       </Flex>
     )
   }
+
+  if (isEmpty(executions)) return 'No executions available.'
 
   return (
     <Table
