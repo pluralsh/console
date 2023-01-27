@@ -31,7 +31,6 @@ export default function UsersList() {
 
   return (
     <List>
-      {pageInfo?.hasNextPage?.toString()}
       <ListInput
         width="100%"
         value={q}
