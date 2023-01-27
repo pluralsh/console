@@ -20,10 +20,7 @@ import { User } from './User'
 export default function UsersList() {
   const [q, setQ] = useState('')
   const [listRef, setListRef] = useState<any>(null)
-  const { data, loading, fetchMore } = useQuery(USERS_Q, {
-    variables: { q },
-    fetchPolicy: 'cache-and-network',
-  })
+  const { data, loading, fetchMore } = useQuery(USERS_Q, { variables: { q } })
   const [dataCache, setDataCache] = useState(data)
 
   useEffect(() => {
@@ -34,6 +31,7 @@ export default function UsersList() {
 
   return (
     <List>
+      {pageInfo?.hasNextPage?.toString()}
       <ListInput
         width="100%"
         value={q}
@@ -61,11 +59,10 @@ export default function UsersList() {
                 />
               </ListItem>
             )}
-            loadNextPage={() => pageInfo.hasNextPage
-                && fetchMore({
-                  variables: { cursor: pageInfo.endCursor },
-                  updateQuery: (prev, { fetchMoreResult: { users } }) => extendConnection(prev, users, 'users'),
-                })}
+            loadNextPage={() => pageInfo.hasNextPage && fetchMore({
+              variables: { cursor: pageInfo.endCursor },
+              updateQuery: (prev, { fetchMoreResult: { users } }) => extendConnection(prev, users, 'users'),
+            })}
             hasNextPage={pageInfo.hasNextPage}
             loading={loading}
             placeholder={() => (

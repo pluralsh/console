@@ -4,8 +4,8 @@ import { PageInfo } from '../../graphql/base'
 import { InviteFragment, UserFragment } from '../../graphql/users'
 
 export const USERS_Q = gql`
-  query Users($q: String, $ursor: String) {
-    users(q: $q, first: 20, after: $ursor) {
+  query Users($q: String, $cursor: String) {
+    users(q: $q, first: 20, after: $cursor) {
       pageInfo {
         ...PageInfo
       }
