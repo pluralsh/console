@@ -113,12 +113,12 @@ const ColName = columnHelper.accessor(row => row.name, {
   meta: { truncate: true },
 })
 
-const ColRegionZone = columnHelper.accessor(row => `${row.zone} - ${row.zone}`,
+const ColRegionZone = columnHelper.accessor(row => `${row.region} - ${row.zone}`,
   {
     id: 'region-zone',
     cell: ({ row: { original } }) => (
       <>
-        <TableText>{original.zone}</TableText>
+        <TableText>{original.region}</TableText>
         <CaptionText>{original.zone}</CaptionText>
       </>
     ),

@@ -10,7 +10,7 @@ import { ConfigType } from './misc'
 export function ConfigurationEditor({ application: { name: repository, configuration: { helm, terraform } }, type }) {
   const navigate = useNavigate()
   const [content, setContent] = useState<string>(helm)
-  const onCompleted = useCallback(() => navigate('/'), [navigate])
+  const onCompleted = useCallback(() => navigate('/builds'), [navigate])
   const [mutation, { loading }] = useMutation(UPDATE_CONFIGURATION, {
     variables: { repository, content, type }, onCompleted,
   })

@@ -6,6 +6,7 @@ import { appState } from './misc'
 
 export default function AppStatus({ app }) {
   if (!app) return <Chip size="small">Unknown</Chip>
+  const componentsReady = app?.status?.componentsReady
 
   const { readiness, error } = appState(app)
 
@@ -26,7 +27,7 @@ export default function AppStatus({ app }) {
           size="small"
           severity="error"
         >
-          Failed
+          Failed ({componentsReady})
         </Chip>
       </Tooltip>
     )
@@ -36,7 +37,7 @@ export default function AppStatus({ app }) {
         size="small"
         severity="warning"
       >
-        Pending
+        Pending ({componentsReady})
       </Chip>
     )
   default:
