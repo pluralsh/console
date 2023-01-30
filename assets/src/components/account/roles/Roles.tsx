@@ -4,12 +4,11 @@ import { useState } from 'react'
 
 import { List } from '../../utils/List'
 
-import RolesSearchHeader from './RolesSearchHeader'
 import RoleCreate from './RoleCreate'
 import RolesList from './RolesList'
 
 export default function Roles() {
-  const [q, setQ] = useState('')
+  const [q, _setQ] = useState('')
 
   return (
     <Flex
@@ -19,10 +18,10 @@ export default function Roles() {
     >
       <PageTitle heading="Roles"><RoleCreate q={q} /></PageTitle>
       <List>
-        <RolesSearchHeader
+        {/* <RolesSearchHeader
           q={q}
           setQ={setQ}
-        />
+        /> */}
         <RolesList q={q} />
       </List>
     </Flex>
