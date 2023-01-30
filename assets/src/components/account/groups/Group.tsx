@@ -1,6 +1,6 @@
 import { useMutation } from '@apollo/client'
 import { Box } from 'grommet'
-import { ListBoxItem, Modal } from '@pluralsh/design-system'
+import { ListBoxItem } from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
 
 import { Confirm } from 'components/utils/Confirm'
@@ -75,14 +75,11 @@ export default function Group({ group, q }: any) {
         ))}
       </MoreMenu>
       <>
-        <Modal
-          header="View group"
-          open={view}
-          width="60vw"
-          onClose={() => setView(false)}
-        >
-          <GroupView group={group} />
-        </Modal>
+        <GroupView
+          group={group}
+          view={view}
+          setView={setView}
+        />
         {edit && (
           <GroupEdit
             group={group}

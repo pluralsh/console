@@ -28,7 +28,7 @@ export function GroupsList({ q }: any) {
       flexGrow={1}
       maxHeight="max-content"
     >
-      {edges?.length ? (
+      {edges?.length > 0 ? (
         <StandardScroller
           listRef={listRef}
           setListRef={setListRef}
