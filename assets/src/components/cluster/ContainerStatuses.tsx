@@ -1,7 +1,7 @@
 import { Tooltip } from '@pluralsh/design-system'
 import { Div, Flex, Span } from 'honorable'
 import styled from 'styled-components'
-import { Readiness, ReadinessT, readinessToLabel } from 'utils/status'
+import { Readiness, ReadinessT } from 'utils/status'
 
 import { ContainerStatus } from './pods/PodsList'
 
@@ -39,6 +39,13 @@ export const readinessToIcon = {
   [Readiness.Failed]: <FailedIcon />,
   [Readiness.Complete]: <CompleteIcon />,
 } as const satisfies Record<ReadinessT, JSX.Element>
+
+export const readinessToLabel = {
+  [Readiness.Ready]: 'Running',
+  [Readiness.InProgress]: 'Pending',
+  [Readiness.Failed]: 'Failed',
+  [Readiness.Complete]: 'Complete',
+} as const satisfies Record<ReadinessT, string>
 
 export const readinessToTooltipColor = {
   [Readiness.Ready]: 'text-success-light',

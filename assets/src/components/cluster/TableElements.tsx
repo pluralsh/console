@@ -3,21 +3,14 @@ import {
   CaretRightIcon,
   Chip,
   IconFrame,
-  Tooltip,
 } from '@pluralsh/design-system'
 import { UnstyledLink } from 'components/utils/Link'
 import { Maybe } from 'generated/graphql'
-import { Div, Flex, Span } from 'honorable'
+import { Div, Flex } from 'honorable'
 import { CSSProperties, ComponentProps, ReactNode } from 'react'
 import styled, { useTheme } from 'styled-components'
-import {
-  ReadinessT,
-  readinessToColor,
-  readinessToLabel,
-  readinessToSeverity,
-} from 'utils/status'
+import { ReadinessT, readinessToLabel, readinessToSeverity } from 'utils/status'
 
-import { ContainerStatus } from './pods/PodsList'
 import { roundToTwoPlaces } from './utils'
 
 const isNullishIsh = (val: any) => {
@@ -97,50 +90,6 @@ export const TableCaretLink = styled(TableCaretLinkUnstyled)(({ theme }) => ({
     color: theme.colors['icon-default'],
   },
 }))
-
-export function ContainersReadyChip({
-  ready = 0,
-  total = 0,
-  statuses = [],
-}: {
-  ready: number
-  total: number
-  statuses: ContainerStatus[]
-}) {
-  const severity
-    = ready === 0 ? 'error' : total === ready ? 'success' : 'warning'
-
-  return (
-    <Tooltip
-      label={(
-        <>
-          {statuses.map(({ name, readiness }, i) => (
-            <Flex
-              key={i}
-              whiteSpace="nowrap"
-            >
-              <Span>{name}:&nbsp;</Span>
-              <Span
-                color={readinessToColor[readiness]}
-                fontWeight={600}
-              >
-                {readinessToLabel[readiness]}
-              </Span>
-            </Flex>
-          ))}
-        </>
-      )}
-    >
-      <Chip
-        cursor="help"
-        severity={severity}
-        whiteSpace="nowrap"
-      >
-        {ready}/{total} ready
-      </Chip>
-    </Tooltip>
-  )
-}
 
 export function LabelWithIcon({
   label,

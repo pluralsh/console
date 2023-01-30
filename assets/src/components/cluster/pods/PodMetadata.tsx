@@ -8,9 +8,8 @@ import { Pod } from 'generated/graphql'
 import { LabelPairsSection } from 'components/utils/LabelPairsSection'
 import { Readiness, podStatusToReadiness } from 'utils/status'
 
-import { ContainersReadyChip } from '../TableElements'
-
 import { getPodContainersStats as getContainersStats } from '../containers/getPodContainersStats'
+import { ContainerStatuses } from '../ContainerStatuses'
 
 type Phase = 'Running' | 'Succeeded' | 'Pending' | 'Failed'
 
@@ -52,11 +51,7 @@ export default function Metadata({ pod }: { pod: Pod }) {
               title="containers"
               fontWeight={600}
             >
-              <ContainersReadyChip
-                ready={containerStats.ready || 0}
-                total={containerStats.total || 0}
-                statuses={containerStats.statuses || []}
-              />
+              <ContainerStatuses statuses={containerStats.statuses || []} />
             </PropWide>
 
             <PropWide
