@@ -1,6 +1,5 @@
 import { A, Flex } from 'honorable'
 import {
-  ArrowTopRightIcon,
   Button,
   Tab,
   TabList,
