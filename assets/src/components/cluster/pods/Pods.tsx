@@ -1,6 +1,6 @@
 import { forwardRef, useMemo, useState } from 'react'
 import { useQuery } from '@apollo/client'
-import { Flex, useDebounce } from 'honorable'
+import { Div, Flex, useDebounce } from 'honorable'
 import {
   AppsIcon,
   Input,
@@ -155,7 +155,7 @@ export default function AllPods() {
   }), [debouncedFilterString])
 
   if (error) {
-    return <>'Sorry, something went wrong'</>
+    return <>Sorry, something went wrong</>
   }
   if (!data) {
     return <LoopingLogo />
@@ -167,31 +167,33 @@ export default function AllPods() {
       height="100%"
     >
       <PageTitle heading="Pods">
-        <Select
-          label="Filter by namespace"
-          placement="right"
-          width="300px"
-          selectedKey={namespace}
-          isOpen={selectIsOpen}
-          onOpenChange={setSelectIsOpen}
-          onSelectionChange={toNamespace => navigate(`/pods/${toNamespace}`)}
-          dropdownFooterFixed={(
-            <NamespaceListFooter
-              onClick={() => {
-                navigate('/pods')
-                setSelectIsOpen(false)
-              }}
-            />
-          )}
-        >
-          {namespaces?.map((namespace, i) => (
-            <ListBoxItem
-              key={`${namespace?.metadata?.name || i}`}
-              textValue={`${namespace?.metadata?.name}`}
-              label={`${namespace?.metadata?.name}`}
-            />
-          )) || []}
-        </Select>
+        <Div width={320}>
+          <Select
+            label="Filter by namespace"
+            placement="right"
+            width={320}
+            selectedKey={namespace}
+            isOpen={selectIsOpen}
+            onOpenChange={setSelectIsOpen}
+            onSelectionChange={toNamespace => navigate(`/pods/${toNamespace}`)}
+            dropdownFooterFixed={(
+              <NamespaceListFooter
+                onClick={() => {
+                  navigate('/pods')
+                  setSelectIsOpen(false)
+                }}
+              />
+            )}
+          >
+            {namespaces?.map((namespace, i) => (
+              <ListBoxItem
+                key={`${namespace?.metadata?.name || i}`}
+                textValue={`${namespace?.metadata?.name}`}
+                label={`${namespace?.metadata?.name}`}
+              />
+            )) || []}
+          </Select>
+        </Div>
       </PageTitle>
       <Input
         startIcon={<SearchIcon />}
