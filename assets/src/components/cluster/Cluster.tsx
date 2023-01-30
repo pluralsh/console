@@ -12,7 +12,7 @@ import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 
-import { useBreadcrumbs } from 'components/Breadcrumbs'
+import { useBreadcrumbs } from 'components/layout/Breadcrumbs'
 
 import NodesSideNav from './nodes/NodesSideNav'
 

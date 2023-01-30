@@ -1,6 +1,6 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
 import { Div, P, Span } from 'honorable'
-import { Key, useState } from 'react'
+import { Key, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { getIcon, hasIcons } from '../misc'
@@ -8,6 +8,8 @@ import { getIcon, hasIcons } from '../misc'
 export default function AppSelector({ applications, currentApp }) {
   const [selectedKey, setSelectedKey] = useState<Key>(currentApp.name)
   const navigate = useNavigate()
+
+  useEffect(() => setSelectedKey(currentApp.name), [currentApp])
 
   return (
     <Div

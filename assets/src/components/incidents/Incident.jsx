@@ -37,7 +37,7 @@ import SmoothScroller from '../utils/SmoothScroller'
 
 import { extendConnection } from '../../utils/graphql'
 
-import { BreadcrumbsContext } from '../Breadcrumbs'
+import { BreadcrumbsContext } from '../layout/Breadcrumbs'
 
 import { plainDeserialize, plainSerialize } from '../../utils/slate'
 

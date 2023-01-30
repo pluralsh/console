@@ -14,7 +14,7 @@ import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayout
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { LoginContext } from 'components/contexts'
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
 const directory = [
   { path: 'me', label: 'Profile' },

@@ -50,7 +50,7 @@ import {
 
 import { LoginContext } from 'components/contexts'
 
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
 import { ComponentIcon, ComponentStatus } from '../misc'
 

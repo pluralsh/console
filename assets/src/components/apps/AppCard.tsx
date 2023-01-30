@@ -11,6 +11,7 @@ import {
   ListBoxItem,
   LogsIcon,
   MoreIcon,
+  PeopleIcon,
   RunBookIcon,
   Select,
 } from '@pluralsh/design-system'
@@ -34,6 +35,7 @@ const SHORTCUTS = [
   { url: 'components', label: 'Components', icon: <ComponentsIcon /> },
   { url: 'logs', label: 'Logs', icon: <LogsIcon /> },
   { url: 'cost', label: 'Cost analysis', icon: <IdIcon /> },
+  { url: 'oidc', label: 'User management', icon: <PeopleIcon /> },
   { url: 'config', label: 'Configuration', icon: <GearTrainIcon /> },
 ]
 
@@ -114,7 +116,6 @@ export default function AppCard({ app }: any) {
             small
             secondary
             fontWeight={600}
-            endIcon={<ArrowTopRightIcon size={14} />}
             as="a"
             href={ensureURLValidity(links[0].url)}
             target="_blank"

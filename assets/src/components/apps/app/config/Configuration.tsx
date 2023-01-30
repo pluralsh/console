@@ -1,4 +1,4 @@
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import { LoopingLogo, SubTab, TabList } from '@pluralsh/design-system'
 import {
   Key,

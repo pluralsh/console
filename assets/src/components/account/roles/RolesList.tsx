@@ -18,10 +18,7 @@ import Role from './Role'
 
 export default function RolesList({ q }: any) {
   const [listRef, setListRef] = useState<any>(null)
-  const { data, loading, fetchMore } = useQuery(ROLES_Q, {
-    variables: { q },
-    fetchPolicy: 'cache-and-network',
-  })
+  const { data, loading, fetchMore } = useQuery(ROLES_Q, { variables: { q } })
 
   if (!data) return <LoopingLogo />
 

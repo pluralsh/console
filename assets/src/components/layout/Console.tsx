@@ -1,13 +1,14 @@
 import { Outlet } from 'react-router-dom'
 import { Box } from 'grommet'
 
-import BreadcrumbProvider from '../Breadcrumbs'
 import { EnsureLogin } from '../Login'
 import { InstallationsProvider } from '../Installations'
 
 import TerminalThemeProvider from '../terminal/TerminalThemeProvider'
 
 import { CursorPositionProvider } from '../utils/CursorPosition'
+
+import BreadcrumbProvider from './Breadcrumbs'
 
 import Header from './Header'
 import Subheader from './Subheader'

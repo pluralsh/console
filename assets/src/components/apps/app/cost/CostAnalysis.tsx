@@ -1,4 +1,4 @@
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import { Card } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useParams } from 'react-router-dom'

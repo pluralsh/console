@@ -24,6 +24,7 @@ function NavBlockerModal({
             Stay here
           </Button>
           <Button
+            destructive
             onClick={() => {
               onConfirm()
             }}

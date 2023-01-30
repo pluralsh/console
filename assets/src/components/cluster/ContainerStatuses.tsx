@@ -1,7 +1,7 @@
 import { Tooltip } from '@pluralsh/design-system'
 import { Div, Flex, Span } from 'honorable'
 import styled from 'styled-components'
-import { Readiness, ReadinessT, readinessToLabel } from 'utils/status'
+import { Readiness, ReadinessT, readinessToContainerLabel } from 'utils/status'
 
 import { ContainerStatus } from './pods/PodsList'
 
@@ -58,7 +58,7 @@ export function ContainerStatuses({ statuses = [] }: {statuses: ContainerStatus[
               color={readinessToTooltipColor[readiness]}
               fontWeight={600}
             >
-              {readinessToLabel[readiness]}
+              {readinessToContainerLabel[readiness]}
             </Span>
           </>
         )}

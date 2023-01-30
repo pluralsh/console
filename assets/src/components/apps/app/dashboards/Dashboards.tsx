@@ -1,4 +1,4 @@
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import { DashboardIcon, EmptyState } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useQuery } from '@apollo/client'
@@ -49,21 +49,19 @@ export default function Dashboards() {
             icon={<DashboardIcon size={64} />}
             message="No dashboards available"
             description={(
-              <>
-                <Div>If you're interested in adding your dashboards to this</Div>
-                <Div>
-                  application,&nbsp;
-                  <A
-                    inline
-                    href="https://www.plural.sh/community"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    visit our docs
-                  </A>
+              <Div>
+                If you're interested in adding your dashboards to this
+                application,&nbsp;
+                <A
+                  inline
+                  href="https://www.plural.sh/community"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  visit our docs
+                </A>
                 &nbsp;for more details.
-                </Div>
-              </> as any // Workaround as JSX elements are not allowed here.
+              </Div> as any // Workaround as JSX elements are not allowed here.
             )}
           />
         </Flex>

@@ -10,7 +10,7 @@ import { A } from 'honorable'
 import { Link } from 'react-router-dom'
 import { containerStatusToReadiness } from 'utils/status'
 
-import { StatusChip } from '../TableElements'
+import { ContainerStatusChip } from '../TableElements'
 
 type ContainerSidecarProps = {
   pod: Pod
@@ -49,7 +49,7 @@ export default function ContainerSidecar({
         {pod.spec.serviceAccountName}
       </SidecarItem>
       <SidecarItem heading="Status">
-        <StatusChip readiness={containerStatusToReadiness(containerStatus)} />
+        <ContainerStatusChip readiness={containerStatusToReadiness(containerStatus)} />
       </SidecarItem>
       {containerStatus?.state?.running?.startedAt && (
         <SidecarItem heading="Started at">

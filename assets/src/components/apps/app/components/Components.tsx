@@ -9,10 +9,7 @@ import {
   SelectButton,
 } from '@pluralsh/design-system'
 import {
-  ComponentPropsWithRef,
   Key,
-  Ref,
-  forwardRef,
   useContext,
   useEffect,
   useState,
@@ -20,7 +17,7 @@ import {
 import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
 
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
 import styled, { useTheme } from 'styled-components'
 import { Component as ComponentT } from 'generated/graphql'
@@ -51,7 +48,7 @@ function FooterSelectAll({ ...props }) {
   )
 }
 
-const FilterTrigger = styled(SelectButton)(({ theme }) => ({
+const FilterTrigger = styled(SelectButton)({
   width: 220,
   '&, *': {
     overflow: 'hidden',
@@ -59,7 +56,7 @@ const FilterTrigger = styled(SelectButton)(({ theme }) => ({
     textOverflow: 'ellipsis',
     flexShrink: 1,
   },
-}))
+})
 
 export default function Components() {
   const { appName } = useParams()
@@ -70,11 +67,11 @@ export default function Components() {
   useEffect(() => setBreadcrumbs([
     { text: 'apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
-    { text: 'cost analysis', url: `/apps/${appName}/cost` },
+    { text: 'components', url: `/apps/${appName}/components` },
   ]),
   [appName, setBreadcrumbs])
 
-  const componentKinds = Array.from((currentApp?.status?.components as ComponentT[])?.reduce((kinds, component, i) => {
+  const componentKinds = Array.from((currentApp?.status?.components as ComponentT[])?.reduce((kinds, component) => {
     kinds.add(component.kind)
 
     return kinds

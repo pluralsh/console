@@ -1,6 +1,5 @@
 import { A, Flex } from 'honorable'
 import {
-  ArrowTopRightIcon,
   Button,
   Tab,
   TabList,
@@ -116,7 +115,6 @@ export default function App() {
             fontWeight={600}
             marginTop="xxsmall"
             marginBottom="small"
-            endIcon={<ArrowTopRightIcon size={14} />}
             as="a"
             href={ensureURLValidity(links[0].url)}
             target="_blank"

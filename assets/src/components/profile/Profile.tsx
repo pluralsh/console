@@ -1,5 +1,5 @@
 import { Box } from 'grommet'
-import { Flex } from 'honorable'
+import { Flex, P } from 'honorable'
 import { Button, ContentCard, ValidatedInput } from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
 
@@ -14,6 +14,7 @@ export function Profile() {
   const [name, setName] = useState(me.name)
   const [email, setEmail] = useState(me.email)
   const [mutation, { loading }] = useMutation(UPDATE_USER, { variables: { attributes: { name, email } } })
+  const changed = name !== me.name || email !== me.email
 
   return (
     <ScrollablePage heading="Profile">
@@ -33,9 +34,19 @@ export function Profile() {
           />
         </Box>
         <Flex
+          align="center"
+          gap="medium"
           justifyContent="flex-end"
           marginTop="small"
         >
+          {changed && (
+            <P
+              body2
+              color="text-xlight"
+            >
+              Unsaved changes
+            </P>
+          )}
           <Button
             onClick={() => mutation()}
             loading={loading}

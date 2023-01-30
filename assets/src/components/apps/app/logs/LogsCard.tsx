@@ -1,4 +1,4 @@
-import { Card } from '@pluralsh/design-system'
+import { Card, LoopingLogo } from '@pluralsh/design-system'
 import { LOGS_Q } from 'components/graphql/dashboards'
 import { Flex } from 'honorable'
 import { useCallback, useState } from 'react'
@@ -44,7 +44,7 @@ export function LogsCard({
         fill
         gap="small"
       >
-        {data && (
+        {data ? (
           <LogContent
             listRef={listRef}
             setListRef={setListRef}
@@ -58,12 +58,21 @@ export function LogsCard({
             addLabel={addLabel}
             fullscreen={fullscreen}
           />
+        ) : (
+          <Flex
+            grow={1}
+            justify="center"
+          >
+            <LoopingLogo scale={1} />
+          </Flex>
         )}
       </Flex>
-      <LogsScrollIndicator
-        live={live}
-        returnToTop={returnToTop}
-      />
+      {data && (
+        <LogsScrollIndicator
+          live={live}
+          returnToTop={returnToTop}
+        />
+      )}
     </Card>
   )
 }
