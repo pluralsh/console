@@ -162,6 +162,7 @@ const ListBoxFooterInner = styled.div<{ focused?: boolean }>(({ theme, focused =
   position: 'relative',
   width: '100%',
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  borderTop: theme.borders['fill-two'],
   '&:hover': {
     backgroundColor: theme.colors['fill-two-hover'],
   },
