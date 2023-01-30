@@ -93,7 +93,7 @@ export default function Group({ group, q }: any) {
         <Confirm
           open={confirm}
           title="Delete group"
-          text="Are you sure? Deleting groups cannot be undone. Permissions attached to this group will be removed."
+          text="Are you sure you want to delete this group? This could have downstream effects on a large number of users and their roles."
           close={() => setConfirm(false)}
           submit={() => mutation()}
           loading={loading}
