@@ -9,10 +9,7 @@ import {
   SelectButton,
 } from '@pluralsh/design-system'
 import {
-  ComponentPropsWithRef,
   Key,
-  Ref,
-  forwardRef,
   useContext,
   useEffect,
   useState,
@@ -51,7 +48,7 @@ function FooterSelectAll({ ...props }) {
   )
 }
 
-const FilterTrigger = styled(SelectButton)(({ theme }) => ({
+const FilterTrigger = styled(SelectButton)({
   width: 220,
   '&, *': {
     overflow: 'hidden',
@@ -59,7 +56,7 @@ const FilterTrigger = styled(SelectButton)(({ theme }) => ({
     textOverflow: 'ellipsis',
     flexShrink: 1,
   },
-}))
+})
 
 export default function Components() {
   const { appName } = useParams()
@@ -74,7 +71,7 @@ export default function Components() {
   ]),
   [appName, setBreadcrumbs])
 
-  const componentKinds = Array.from((currentApp?.status?.components as ComponentT[])?.reduce((kinds, component, i) => {
+  const componentKinds = Array.from((currentApp?.status?.components as ComponentT[])?.reduce((kinds, component) => {
     kinds.add(component.kind)
 
     return kinds
