@@ -20,7 +20,7 @@ import { UnstyledLink } from 'components/utils/Link'
 import styled from 'styled-components'
 
 import {
-  StatusChip,
+  ContainerStatusChip,
   TABLE_HEIGHT,
   TableText,
   Usage,
@@ -48,7 +48,7 @@ const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToLabe
   {
     id: 'status',
     cell: ({ row: { original } }) => (
-      <div><StatusChip readiness={original?.readiness} /></div>
+      <div><ContainerStatusChip readiness={original?.readiness} /></div>
     ),
     header: 'Status',
   })

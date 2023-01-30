@@ -9,7 +9,12 @@ import { Maybe } from 'generated/graphql'
 import { Div, Flex } from 'honorable'
 import { CSSProperties, ComponentProps, ReactNode } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { ReadinessT, readinessToLabel, readinessToSeverity } from 'utils/status'
+import {
+  ReadinessT,
+  readinessToContainerLabel,
+  readinessToLabel,
+  readinessToSeverity,
+} from 'utils/status'
 
 import { roundToTwoPlaces } from './utils'
 
@@ -30,6 +35,12 @@ export const CaptionText = styled.div(({ theme }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-xlight'],
 }))
+
+export const ContainerStatusChip = styled(({ readiness }: { readiness: ReadinessT }) => (
+  <Chip severity={readinessToSeverity[readiness]}>
+    {readinessToContainerLabel[readiness]}
+  </Chip>
+))(_ => ({}))
 
 export const StatusChip = styled(({ readiness }: { readiness: ReadinessT }) => (
   <Chip severity={readinessToSeverity[readiness]}>

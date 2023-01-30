@@ -23,6 +23,13 @@ export const readinessToLabel = {
   [Readiness.Complete]: 'Complete',
 } as const satisfies Record<ReadinessT, string>
 
+export const readinessToContainerLabel = {
+  [Readiness.Ready]: 'Running',
+  [Readiness.InProgress]: 'Pending',
+  [Readiness.Failed]: 'Failed',
+  [Readiness.Complete]: 'Complete',
+} as const satisfies Record<ReadinessT, string>
+
 export const readinessToSeverity = {
   [Readiness.Ready]: 'success',
   [Readiness.InProgress]: 'neutral',
