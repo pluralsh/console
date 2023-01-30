@@ -1,4 +1,4 @@
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import { DashboardIcon, EmptyState } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useQuery } from '@apollo/client'

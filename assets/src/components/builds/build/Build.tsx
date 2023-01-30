@@ -41,7 +41,7 @@ import {
 
 import { PropsContainer } from 'components/utils/PropsContainer'
 import Prop from 'components/utils/Prop'
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
 import { getIcon, hasIcons } from 'components/apps/misc'
 

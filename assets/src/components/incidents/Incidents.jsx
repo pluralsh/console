@@ -35,7 +35,7 @@ import styled, { keyframes } from 'styled-components'
 import { pulse } from 'react-animations'
 import { normalizeColor } from 'grommet/utils'
 
-import { BreadcrumbsContext } from '../Breadcrumbs'
+import { BreadcrumbsContext } from '../layout/Breadcrumbs'
 import { RepoIcon } from '../repos/Repositories'
 import { extendConnection } from '../../utils/graphql'
 

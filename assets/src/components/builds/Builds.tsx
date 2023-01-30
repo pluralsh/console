@@ -24,7 +24,7 @@ import { appendConnection, extendConnection } from '../../utils/graphql'
 
 import { BUILDS_Q, BUILD_SUB } from '../graphql/builds'
 
-import { BreadcrumbsContext } from '../Breadcrumbs'
+import { BreadcrumbsContext } from '../layout/Breadcrumbs'
 
 import { StandardScroller } from '../utils/SmoothScroller'
 

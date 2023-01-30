@@ -20,7 +20,7 @@ import {
 import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
 
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
 import styled, { useTheme } from 'styled-components'
 import { Component as ComponentT } from 'generated/graphql'
@@ -70,7 +70,7 @@ export default function Components() {
   useEffect(() => setBreadcrumbs([
     { text: 'apps', url: '/' },
     { text: appName, url: `/apps/${appName}` },
-    { text: 'cost analysis', url: `/apps/${appName}/cost` },
+    { text: 'components', url: `/apps/${appName}/components` },
   ]),
   [appName, setBreadcrumbs])
 

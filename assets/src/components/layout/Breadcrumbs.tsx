@@ -8,9 +8,9 @@ import {
 import { useTheme } from 'styled-components'
 import { Link } from 'react-router-dom'
 
-import { lookahead } from '../utils/array'
+import { lookahead } from '../../utils/array'
 
-import { LoginContext } from './contexts'
+import { LoginContext } from '../contexts'
 
 type Breadcrumb = {
   url?: string
@@ -47,6 +47,7 @@ export function Breadcrumbs() {
             ) : (
               <A
                 as={Link}
+                color="text-xlight"
                 to={crumb.url}
                 _hover={{
                   cursor: 'pointer',

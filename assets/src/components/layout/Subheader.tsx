@@ -7,11 +7,12 @@ import {
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 
-import { Breadcrumbs } from '../Breadcrumbs'
 import { ResponsiveLayoutContentContainer } from '../utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer'
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from '../utils/layout/ResponsiveLayoutSpacer'
+
+import { Breadcrumbs } from './Breadcrumbs'
 
 export default function Subheader() {
   const navigate = useNavigate()

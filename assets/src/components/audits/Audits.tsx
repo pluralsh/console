@@ -22,7 +22,7 @@ import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/Respon
 
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
 import Avatar from '../utils/Avatar'
 

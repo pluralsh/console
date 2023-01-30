@@ -1,4 +1,4 @@
-import { BreadcrumbsContext } from 'components/Breadcrumbs'
+import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import { EmptyState, LoopingLogo, RunBookIcon } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
