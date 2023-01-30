@@ -20,14 +20,13 @@ import { ensureURLValidity } from 'utils/url'
 
 import { Readiness } from 'utils/status'
 
-import AppStatus from './AppStatus'
-
 import {
   ListItemBorder,
   appState,
   getIcon,
   hasIcons,
 } from './misc'
+import AppStatus from './AppStatus'
 
 const SHORTCUTS = [
   { url: 'dashboards', label: 'Dashboards', icon: <DashboardIcon /> },

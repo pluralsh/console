@@ -32,7 +32,7 @@ export default function BuildStatus({ status, ...props }) {
         severity="success"
         {...props}
       >
-        Passed
+        Success
       </Chip>
     )
   case Status.PENDING:
