@@ -68,20 +68,18 @@ export default function Runbooks() {
             icon={<RunBookIcon size={64} />}
             message="No runbooks available"
             description={(
-              <>
-                <Div>If you're interested in adding runbooks to this application,&nbsp;</Div>
-                <Div>
-                  <A
-                    inline
-                    href="https://www.plural.sh/community"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    visit our docs
-                  </A>
+              <Div>
+                If you're interested in adding runbooks to this application,&nbsp;
+                <A
+                  inline
+                  href="https://www.plural.sh/community"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  visit our docs
+                </A>
                 &nbsp;for more details.
-                </Div>
-              </> as any // Workaround as JSX elements are not allowed here.
+              </Div> as any // Workaround as JSX elements are not allowed here.
             )}
           />
         </Flex>
