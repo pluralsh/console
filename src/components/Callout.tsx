@@ -132,12 +132,13 @@ ref) => {
   return (
     <FillLevelProvider value={fillLevel}>
       <CalloutWrap
-        className={className}
+        className={`${className} ${classNames({ expandable })}`}
         $borderColorKey={borderColorKey}
         $fillLevel={fillLevel}
         $size={size}
         $expanded={expanded}
         ref={ref}
+        onClick={expandable && !expanded ? () => onExpand && onExpand(!expanded) : null}
       >
         <div className="icon">
           <Icon
@@ -202,6 +203,17 @@ const CalloutWrap = styled.div<{
   backgroundColor:
     $fillLevel >= 3 ? theme.colors['fill-three'] : theme.colors['fill-two'],
   color: theme.colors['text-light'],
+
+  '&.expandable': {
+    cursor: $expanded ? 'inherit' : 'pointer',
+
+    ...(!$expanded && {
+      '&:hover': {
+        backgroundColor: $fillLevel >= 3 ? theme.colors['fill-four'] : theme.colors['fill-three'],
+      },
+    }),
+  },
+
   h6: {
     ...theme.partials.text.body1Bold,
     color: theme.colors.text,
@@ -211,6 +223,7 @@ const CalloutWrap = styled.div<{
 
     '&.expandable': {
       marginBottom: $expanded ? theme.spacing.small : 0,
+      transition: 'margin-bottom .5s',
     },
   },
   '.children *:first-child': {
