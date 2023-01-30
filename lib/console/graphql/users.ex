@@ -197,6 +197,7 @@ defmodule Console.GraphQl.Users do
 
     connection field :roles, node_type: :role do
       middleware Authenticated
+      arg :q, :string
 
       resolve &User.list_roles/2
     end
