@@ -4,10 +4,11 @@ import { sumBy } from 'lodash'
 
 import { Flex } from 'honorable'
 import { Card, LoopingLogo } from '@pluralsh/design-system'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import type { Node, NodeMetric } from 'generated/graphql'
 import { cpuParser, memoryParser } from 'utils/kubernetes'
+
+import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
 import { POLL_INTERVAL } from '../constants'
 import { NODES_Q } from '../queries'
@@ -16,8 +17,8 @@ import { ClusterMetrics } from './ClusterMetrics'
 import { NodesList } from './NodesList'
 
 export type ResourceUsage = {
-  cpu: number,
-  mem: number,
+  cpu: number
+  mem: number
 } | null
 
 export default function Nodes() {
@@ -29,7 +30,7 @@ export default function Nodes() {
     fetchPolicy: 'cache-and-network',
   })
 
-  const usage:ResourceUsage = useMemo(() => {
+  const usage: ResourceUsage = useMemo(() => {
     if (!data) {
       return null
     }
@@ -46,24 +47,25 @@ export default function Nodes() {
   }
 
   return (
-    <ScrollablePage heading="Nodes">
+    <ResponsivePageFullWidth
+      heading="Nodes"
+    >
       <Flex
         direction="column"
         gap="xlarge"
       >
-        <NodesList
-          nodes={data.nodes}
-          nodeMetrics={data.nodeMetrics}
-          refetch={refetch}
-        />
         <Card padding="xlarge">
           <ClusterMetrics
             nodes={data.nodes}
             usage={usage}
           />
         </Card>
+        <NodesList
+          nodes={data.nodes}
+          nodeMetrics={data.nodeMetrics}
+          refetch={refetch}
+        />
       </Flex>
-    </ScrollablePage>
+    </ResponsivePageFullWidth>
   )
 }
-

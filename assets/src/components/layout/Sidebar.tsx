@@ -1,4 +1,5 @@
 import {
+  ApiIcon,
   AppsIcon,
   ArrowTopRightIcon,
   BellIcon,
@@ -80,10 +81,14 @@ const MENU_ITEMS: MenuItem[] = [
     path: '/builds',
   },
   {
-    text: 'Cluster',
+    text: 'Nodes',
     icon: <ServersIcon />,
     path: '/nodes',
-    pathRegexp: /^\/(nodes|pods)/,
+  },
+  {
+    text: 'Pods',
+    icon: <ApiIcon />,
+    path: '/pods',
   },
   // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents', sandboxed: true },
   {

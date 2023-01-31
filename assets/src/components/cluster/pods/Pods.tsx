@@ -7,7 +7,6 @@ import {
   ListBoxFooter,
   ListBoxItem,
   LoopingLogo,
-  PageTitle,
   SearchIcon,
   Select,
 } from '@pluralsh/design-system'
@@ -16,6 +15,8 @@ import { ListBoxFooterProps } from '@pluralsh/design-system/dist/components/List
 import styled, { useTheme } from 'styled-components'
 
 import type { RootQueryType } from 'generated/graphql'
+
+import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
 import { PODS_Q } from '../queries'
 import { POLL_INTERVAL } from '../constants'
@@ -63,11 +64,7 @@ const NamespaceListFooter = forwardRef<
 })
 
 export default function AllPods() {
-  const {
-    data,
-    refetch,
-    error,
-  } = useQuery<{
+  const { data, refetch, error } = useQuery<{
     pods: RootQueryType['pods']
     applications: RootQueryType['applications']
     namespaces: RootQueryType['namespaces']
@@ -152,7 +149,8 @@ export default function AllPods() {
 
   const reactTableOptions = useMemo(() => ({
     state: { globalFilter: debouncedFilterString },
-  }), [debouncedFilterString])
+  }),
+  [debouncedFilterString])
 
   if (error) {
     return <>Sorry, something went wrong</>
@@ -162,11 +160,10 @@ export default function AllPods() {
   }
 
   return (
-    <Flex
-      direction="column"
-      height="100%"
-    >
-      <PageTitle heading="Pods">
+    <ResponsivePageFullWidth
+      heading="Pods"
+      scrollable={false}
+      headingContent={(
         <Div width={320}>
           <Select
             label="Filter by namespace"
@@ -194,32 +191,38 @@ export default function AllPods() {
             )) || []}
           </Select>
         </Div>
-      </PageTitle>
-      <Input
-        startIcon={<SearchIcon />}
-        placeholder="Filter pods"
-        value={filterString}
-        onChange={e => setFilterString(e.currentTarget.value)}
-        marginBottom={theme.spacing.medium}
-      />
+      )}
+    >
       <Flex
-        flexDirection="column"
-        overflow="hidden"
-        {...({
-          '& > div': {
-            maxHeight: '100%',
-          },
-        })}
+        direction="column"
+        height="100%"
       >
-        <PodsList
-          pods={pods}
-          applications={data?.applications}
-          columns={columns}
-          reactTableOptions={reactTableOptions}
-          maxHeight="unset"
-          height="100%"
+        <Input
+          startIcon={<SearchIcon />}
+          placeholder="Filter pods"
+          value={filterString}
+          onChange={e => setFilterString(e.currentTarget.value)}
+          marginBottom={theme.spacing.medium}
         />
+        <Flex
+          flexDirection="column"
+          overflow="hidden"
+          {...{
+            '& > div': {
+              maxHeight: '100%',
+            },
+          }}
+        >
+          <PodsList
+            pods={pods}
+            applications={data?.applications}
+            columns={columns}
+            reactTableOptions={reactTableOptions}
+            maxHeight="unset"
+            height="100%"
+          />
+        </Flex>
       </Flex>
-    </Flex>
+    </ResponsivePageFullWidth>
   )
 }

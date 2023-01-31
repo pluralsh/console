@@ -31,6 +31,8 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { isEmpty } from 'lodash'
 
+import { useTheme } from 'styled-components'
+
 import App from './AppCard'
 import { appState } from './misc'
 
@@ -38,9 +40,21 @@ const ALL_FILTER = 'All'
 
 const FILTERS = [
   { key: ALL_FILTER, label: 'All', color: 'neutral' },
-  { key: Readiness.Ready, label: readinessToLabel[Readiness.Ready], color: 'success' },
-  { key: Readiness.InProgress, label: readinessToLabel[Readiness.InProgress], color: 'warning' },
-  { key: Readiness.Failed, label: readinessToLabel[Readiness.Failed], color: 'error' },
+  {
+    key: Readiness.Ready,
+    label: readinessToLabel[Readiness.Ready],
+    color: 'success',
+  },
+  {
+    key: Readiness.InProgress,
+    label: readinessToLabel[Readiness.InProgress],
+    color: 'warning',
+  },
+  {
+    key: Readiness.Failed,
+    label: readinessToLabel[Readiness.Failed],
+    color: 'error',
+  },
 ]
 
 function QueryEmptyState({ query, setQuery }) {
@@ -99,23 +113,26 @@ function PendingFailedEmptyState({ filter }) {
       )}
       message="Woah."
       description={
-        <>
-          <Div>
-            There are no {FILTERS.find(f => f.key === filter)?.label.toLowerCase()} apps.
-          </Div>
-          <Div>
-            You may be ready to become an&nbsp;
-            <A
-              inline
-              href="https://www.plural.sh/community"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              open-sourcerer
-            </A>
-            .
-          </Div>
-        </> as any // Workaround as JSX elements are not allowed here.
+        (
+          <>
+            <Div>
+              There are no{' '}
+              {FILTERS.find(f => f.key === filter)?.label.toLowerCase()} apps.
+            </Div>
+            <Div>
+              You may be ready to become an&nbsp;
+              <A
+                inline
+                href="https://www.plural.sh/community"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                open-sourcerer
+              </A>
+              .
+            </Div>
+          </>
+        ) as any // Workaround as JSX elements are not allowed here.
       }
       marginTop={96}
       width={500}
@@ -134,24 +151,29 @@ export default function Apps() {
   const [query, setQuery] = useState<string>('')
   const [filter, setFilter] = useState<any>(ALL_FILTER)
   const tabStateRef = useRef<any>(null)
+  const theme = useTheme()
 
-  useEffect(() => setBreadcrumbs([{ text: 'apps', url: '/' }]), [setBreadcrumbs])
+  useEffect(() => setBreadcrumbs([{ text: 'apps', url: '/' }]),
+    [setBreadcrumbs])
 
-  const handleFilter = useCallback(f => applications
-    .filter(app => !f || appState(app).readiness === f), [applications])
+  const handleFilter = useCallback(f => applications.filter(app => !f || appState(app).readiness === f),
+    [applications])
 
   const appsByState = useMemo(() => ({
     [ALL_FILTER]: applications,
     [Readiness.Ready]: handleFilter(Readiness.Ready),
     [Readiness.InProgress]: handleFilter(Readiness.InProgress),
     [Readiness.Failed]: handleFilter(Readiness.Failed),
-  }), [applications, handleFilter])
+  }),
+  [applications, handleFilter])
 
   const filteredApps = useMemo(() => {
     const filteredByState = appsByState[filter]
 
     const fuse = new Fuse(filteredByState, searchOptions)
-    const filteredByQuery = query ? fuse.search(query).map(({ item }) => item) : filteredByState
+    const filteredByQuery = query
+      ? fuse.search(query).map(({ item }) => item)
+      : filteredByState
 
     return filteredByQuery
   }, [appsByState, filter, query])
@@ -165,6 +187,11 @@ export default function Apps() {
       grow={1}
     >
       <ScrollablePage
+        margin="large"
+        contentStyles={{
+          paddingRight: theme.spacing.xxxsmall,
+          paddingTop: theme.spacing.xsmall,
+        }}
         heading="Apps"
         headingContent={(
           <>
@@ -203,16 +230,13 @@ export default function Apps() {
             </TabList>
             <Input
               placeholder="Filter applications"
-              startIcon={(<MagnifyingGlassIcon size={14} />)}
+              startIcon={<MagnifyingGlassIcon size={14} />}
               value={query}
               onChange={event => setQuery(event.target.value)}
               width={320}
             />
           </>
         )}
-        margin="large"
-        contentPaddingRight={2}
-        contentPaddingTop={8}
       >
         <Flex
           justify="center"
@@ -223,12 +247,13 @@ export default function Apps() {
           wrap="wrap"
           gap="small"
         >
-          {!noFilteredApps && filteredApps.map(app => (
-            <App
-              key={app.name}
-              app={app}
-            />
-          ))}
+          {!noFilteredApps
+            && filteredApps.map(app => (
+              <App
+                key={app.name}
+                app={app}
+              />
+            ))}
           {!noFilteredApps && (
             <Flex
               grow={1}
@@ -241,9 +266,14 @@ export default function Apps() {
               setQuery={setQuery}
             />
           )}
-          {noFilteredApps && !query && filter === Readiness.Ready && <ReadyEmptyState />}
-          {noFilteredApps && !query && ([Readiness.InProgress, Readiness.Failed].includes(filter))
-          && <PendingFailedEmptyState filter={filter} />}
+          {noFilteredApps && !query && filter === Readiness.Ready && (
+            <ReadyEmptyState />
+          )}
+          {noFilteredApps
+            && !query
+            && [Readiness.InProgress, Readiness.Failed].includes(filter) && (
+            <PendingFailedEmptyState filter={filter} />
+          )}
         </Flex>
       </ScrollablePage>
     </Flex>

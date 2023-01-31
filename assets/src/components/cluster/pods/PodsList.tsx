@@ -100,6 +100,7 @@ const columnHelper = createColumnHelper<PodTableRow>()
 export const ColNameLink = columnHelper.accessor(row => row.name, {
   id: 'name-link',
   enableGlobalFilter: true,
+  enableSorting: true,
   cell: ({ row: { original }, ...props }) => (
     <TableText>
       <Tooltip
@@ -126,6 +127,7 @@ export const ColNameLink = columnHelper.accessor(row => row.name, {
 export const ColName = columnHelper.accessor(row => row.name, {
   id: 'name',
   enableGlobalFilter: true,
+  enableSorting: true,
   cell: props => (
     <TableText>
       <Tooltip
@@ -142,6 +144,7 @@ export const ColName = columnHelper.accessor(row => row.name, {
 export const ColNamespace = columnHelper.accessor(row => row.namespace, {
   id: 'namespace',
   enableGlobalFilter: true,
+  enableSorting: true,
   cell: ({ row: { original }, ...props }) => (
     <LabelWithIcon
       label={props.getValue()}
@@ -153,6 +156,7 @@ export const ColNamespace = columnHelper.accessor(row => row.namespace, {
 
 export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
   id: 'nodeName',
+  enableSorting: true,
   cell: ({ row: { original }, ...props }) => (
     <TableText>
       <Tooltip
@@ -176,6 +180,7 @@ export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
 export const ColMemoryReservation = columnHelper.accessor(row => row.memory.requests,
   {
     id: 'memory',
+    enableSorting: true,
     cell: ({ row: { original } }) => (
       <Usage
         used={
@@ -196,6 +201,7 @@ export const ColMemoryReservation = columnHelper.accessor(row => row.memory.requ
 export const ColCpuReservation = columnHelper.accessor(row => row.cpu.requests,
   {
     id: 'cpu-reservations',
+    enableSorting: true,
     cell: ({ row: { original }, ...props }) => (
       <Usage
         used={props.getValue()}
@@ -207,15 +213,19 @@ export const ColCpuReservation = columnHelper.accessor(row => row.cpu.requests,
 
 export const ColRestarts = columnHelper.accessor(row => row.name, {
   id: 'restarts',
+  enableSorting: true,
   cell: ({ row: { original } }) => <TableText>{original.restarts}</TableText>,
   header: 'Restarts',
 })
 
-export const ColContainers = columnHelper.accessor(row => row.name, {
-  id: 'containers',
-  cell: ({ row: { original } }) => <ContainerStatuses statuses={original?.containers?.statuses || []} />,
-  header: 'Containers',
-})
+export const ColContainers = columnHelper.accessor(row => row?.containers?.statuses?.length || 0,
+  {
+    id: 'containers',
+    cell: ({ row: { original } }) => (
+      <ContainerStatuses statuses={original?.containers?.statuses || []} />
+    ),
+    header: 'Containers',
+  })
 
 export const ColActions = refetch => columnHelper.display({
   id: 'actions',
