@@ -24,7 +24,7 @@ import {
   TABLE_HEIGHT,
   TableCaretLink,
   TableText,
-  Usage,
+  UsageText,
 } from '../TableElements'
 
 import { DELETE_NODE } from '../queries'
@@ -126,34 +126,42 @@ const ColZone = columnHelper.accessor(row => `${row.region} - ${row.zone}`,
     header: 'Zone',
   })
 
+const ColCpuUsage = columnHelper.accessor(row => row?.cpu.used, {
+  id: 'cpu-usage',
+  cell: (props : any) => (
+    <UsageBar
+      usage={props.getValue()}
+      width={120}
+    />
+  ),
+  header: 'CPU usage',
+})
+
 const ColMemoryUsage = columnHelper.accessor(row => (row?.memory?.used ?? 0) / (row?.memory?.total ?? 1),
   {
     id: 'memory-usage',
-    cell: ({ row: { original }, ...props }) => (
-      <>
-        <Usage
-          used={filesize(original?.memory?.used ?? 0)}
-          total={filesize(original?.memory?.total ?? 0)}
-        />
-        <UsageBar usage={props.getValue()} />
-      </>
+    cell: (props : any) => (
+      <UsageBar
+        usage={props.getValue()}
+        width={120}
+      />
     ),
     header: 'Memory usage',
   })
 
-const ColCpuUsage = columnHelper.accessor(row => row?.cpu.used, {
-  id: 'cpu-usage',
-  cell: ({ row: { original }, ...props }: any) => (
-    <>
-      <Usage
-        used={Math.round((original?.cpu?.used || 0) * 100) / 100}
-        total={original?.cpu?.total}
-      />
-      <UsageBar usage={props.getValue()} />
-    </>
-  ),
-  header: 'CPU usage',
-})
+const ColCpuTotal = columnHelper.accessor(row => row?.cpu?.total ?? 0,
+  {
+    id: 'cpu-total',
+    cell: props => <UsageText>{props.getValue()}</UsageText>,
+    header: 'CPU',
+  })
+
+const ColMemoryTotal = columnHelper.accessor(row => row?.memory?.total ?? 0,
+  {
+    id: 'memory-total',
+    cell: (props: any) => <UsageText>{filesize(props.getValue())?.toString()}</UsageText>,
+    header: 'Memory',
+  })
 
 const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToLabel[row.readiness] : ''),
   {
@@ -236,8 +244,10 @@ export function NodesList({
     ColName,
     ColRegion,
     ColZone,
-    ColMemoryUsage,
     ColCpuUsage,
+    ColMemoryUsage,
+    ColCpuTotal,
+    ColMemoryTotal,
     ColStatus,
     ColActions(refetch),
   ],

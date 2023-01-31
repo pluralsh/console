@@ -21,6 +21,6 @@ function UsageBarUnstyled({ usage, ...props }: { usage: number; }) {
   )
 }
 
-export const UsageBar = styled(UsageBarUnstyled)(({ theme }) => ({
+export const UsageBar = styled<any>(UsageBarUnstyled)(({ theme }) => ({
   marginTop: theme.spacing.xxsmall,
 }))

@@ -76,7 +76,13 @@ export function UsageUnstyled({
     </div>
   )
 }
-export const Usage = styled(UsageUnstyled)(_ => ({
+export const Usage = styled(UsageUnstyled)({
+  whiteSpace: 'nowrap',
+})
+
+export const UsageText = styled.div(({ theme }) => ({
+  ...theme.partials.text.body2LooseLineHeight,
+  color: theme.colors['text-light'],
   whiteSpace: 'nowrap',
 }))
 
