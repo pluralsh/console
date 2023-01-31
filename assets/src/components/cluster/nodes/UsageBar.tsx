@@ -4,10 +4,10 @@ import styled, { useTheme } from 'styled-components'
 function UsageBarUnstyled({ usage, ...props }: { usage: number; }) {
   const theme = useTheme()
   const color = usage > 0.9
-    ? theme.colors['border-danger']
+    ? theme.colors['icon-danger']
     : usage > 0.75
       ? theme.colors['border-warning']
-      : theme.colors['text-xlight']
+      : theme.colors['icon-success']
 
   return (
     <ProgressBar
@@ -21,6 +21,6 @@ function UsageBarUnstyled({ usage, ...props }: { usage: number; }) {
   )
 }
 
-export const UsageBar = styled(UsageBarUnstyled)(({ theme }) => ({
+export const UsageBar = styled<any>(UsageBarUnstyled)(({ theme }) => ({
   marginTop: theme.spacing.xxsmall,
 }))

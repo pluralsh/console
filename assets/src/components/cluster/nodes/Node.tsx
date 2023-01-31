@@ -7,7 +7,6 @@ import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
 import { LinkTabWrap } from 'components/utils/Tabs'
-import { current } from 'immer'
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
@@ -50,7 +49,6 @@ export default function Node() {
     if (name) {
       setBreadcrumbs([
         { text: 'nodes', url: '/nodes' },
-        { text: 'pods', url: '/pods' }, // Add filter param here later
         { text: name || '', url: `/nodes/${name}` },
       ])
     }

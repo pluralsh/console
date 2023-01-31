@@ -1,5 +1,5 @@
 import { Div, Flex, Img } from 'honorable'
-import { ArrowTopRightIcon, Button, theme } from '@pluralsh/design-system'
+import { Button, theme } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 
 import { InstallerModal } from '../repos/installer/Modal'
@@ -37,13 +37,12 @@ export default function Header() {
           small
           tertiary
           fontWeight={600}
-          endIcon={<ArrowTopRightIcon size={14} />}
           as="a"
           href="https://app.plural.sh"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Plural App
+          Plural Account
         </Button>
         <InstallerModal />
       </Flex>
