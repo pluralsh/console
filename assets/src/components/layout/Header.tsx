@@ -37,13 +37,12 @@ export default function Header() {
           small
           tertiary
           fontWeight={600}
-          endIcon={<ArrowTopRightIcon size={14} />}
           as="a"
           href="https://app.plural.sh"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Plural App
+          Plural Account
         </Button>
         <InstallerModal />
       </Flex>
