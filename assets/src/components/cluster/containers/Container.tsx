@@ -39,7 +39,6 @@ export default function PodShell() {
   useEffect(() => {
     if (name && namespace && containerName) {
       setBreadcrumbs([
-        { text: 'nodes', url: '/nodes' }, // Add filter param here later maybe?
         { text: 'pods', url: '/pods' }, // Add filter param here later maybe?
         { text: name, url: `/pods/${namespace}/${name}` },
         { text: 'containers' }, // Add filter param here later maybe?

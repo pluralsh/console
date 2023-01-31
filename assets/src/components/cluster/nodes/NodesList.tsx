@@ -20,11 +20,10 @@ import { useMutation } from '@apollo/client'
 
 import { mapify } from '../Metadata'
 import {
-  CaptionText,
   StatusChip,
   TableCaretLink,
   TableText,
-  Usage,
+  UsageText,
 } from '../TableElements'
 
 import { DELETE_NODE } from '../queries'
@@ -112,46 +111,56 @@ const ColName = columnHelper.accessor(row => row.name, {
   meta: { truncate: true },
 })
 
-const ColRegionZone = columnHelper.accessor(row => `${row.region} - ${row.zone}`,
+const ColRegion = columnHelper.accessor(row => `${row.region} - ${row.zone}`,
   {
-    id: 'region-zone',
-    cell: ({ row: { original } }) => (
-      <>
-        <TableText>{original.region}</TableText>
-        <CaptionText>{original.zone}</CaptionText>
-      </>
-    ),
-    header: 'Region/Zone',
+    id: 'region',
+    cell: ({ row: { original } }) => <TableText>{original.region}</TableText>,
+    header: 'Region',
   })
 
-const ColMemoryUsage = columnHelper.accessor(row => (row?.memory?.used ?? 0) / (row?.memory?.total ?? 1),
+const ColZone = columnHelper.accessor(row => `${row.region} - ${row.zone}`,
   {
-    id: 'memory-usage',
-    cell: ({ row: { original }, ...props }) => (
-      <>
-        <Usage
-          used={filesize(original?.memory?.used ?? 0)}
-          total={filesize(original?.memory?.total ?? 0)}
-        />
-        <UsageBar usage={props.getValue()} />
-      </>
-    ),
-    header: 'Memory usage',
+    id: 'zone',
+    cell: ({ row: { original } }) => (<TableText>{original.zone}</TableText>),
+    header: 'Zone',
   })
 
 const ColCpuUsage = columnHelper.accessor(row => row?.cpu.used, {
   id: 'cpu-usage',
-  cell: ({ row: { original }, ...props }: any) => (
-    <>
-      <Usage
-        used={Math.round((original?.cpu?.used || 0) * 100) / 100}
-        total={original?.cpu?.total}
-      />
-      <UsageBar usage={props.getValue()} />
-    </>
+  cell: (props : any) => (
+    <UsageBar
+      usage={props.getValue()}
+      width={120}
+    />
   ),
   header: 'CPU usage',
 })
+
+const ColMemoryUsage = columnHelper.accessor(row => (row?.memory?.used ?? 0) / (row?.memory?.total ?? 1),
+  {
+    id: 'memory-usage',
+    cell: (props : any) => (
+      <UsageBar
+        usage={props.getValue()}
+        width={120}
+      />
+    ),
+    header: 'Memory usage',
+  })
+
+const ColCpuTotal = columnHelper.accessor(row => row?.cpu?.total ?? 0,
+  {
+    id: 'cpu-total',
+    cell: props => <UsageText>{props.getValue()}</UsageText>,
+    header: 'CPU',
+  })
+
+const ColMemoryTotal = columnHelper.accessor(row => row?.memory?.total ?? 0,
+  {
+    id: 'memory-total',
+    cell: (props: any) => <UsageText>{filesize(props.getValue())?.toString()}</UsageText>,
+    header: 'Memory',
+  })
 
 const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToLabel[row.readiness] : ''),
   {
@@ -232,9 +241,12 @@ export function NodesList({
   // Memoize columns to prevent rerendering entire table
   const columns: ColumnDef<TableData, any>[] = useMemo(() => [
     ColName,
-    ColRegionZone,
-    ColMemoryUsage,
+    ColRegion,
+    ColZone,
     ColCpuUsage,
+    ColMemoryUsage,
+    ColCpuTotal,
+    ColMemoryTotal,
     ColStatus,
     ColActions(refetch),
   ],

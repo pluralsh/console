@@ -7,7 +7,12 @@ import type {
   Maybe,
   Port,
 } from 'generated/graphql'
-import { ReadinessT, containerStatusToReadiness, readinessToLabel } from 'utils/status'
+import {
+  Readiness,
+  ReadinessT,
+  containerStatusToReadiness,
+  readinessToLabel,
+} from 'utils/status'
 import {
   IconFrame,
   Table,
@@ -181,16 +186,18 @@ export const ColActions = ({
   namespace?: string
 }) => columnHelper.display({
   id: 'actions',
-  cell: ({ row: { original } }: any) => (
-    <Flex
-      flexDirection="row"
-      gap="xxsmall"
-    >
-      <ShellLink
-        to={`/pods/${namespace}/${podName}/shell/${original.name}`}
-        textValue={`Launch ${original?.name} shell`}
-      />
-    </Flex>
+  cell: ({ row: { original: { name, readiness } } }: any) => (
+    readiness && readiness !== Readiness.Complete && (
+      <Flex
+        flexDirection="row"
+        gap="xxsmall"
+      >
+        <ShellLink
+          to={`/pods/${namespace}/${podName}/shell/${name}`}
+          textValue={`Launch ${name} shell`}
+        />
+      </Flex>
+    )
   ),
   header: '',
 })

@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react'
-import { Div, Flex } from 'honorable'
+import { Flex } from 'honorable'
 
 import { NodeStatus, NodeUsage, Pod } from 'generated/graphql'
 import { cpuParser, memoryParser } from 'utils/kubernetes'

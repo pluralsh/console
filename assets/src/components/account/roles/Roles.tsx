@@ -6,9 +6,10 @@ import { List } from '../../utils/List'
 
 import RoleCreate from './RoleCreate'
 import RolesList from './RolesList'
+import RolesSearchHeader from './RolesSearchHeader'
 
 export default function Roles() {
-  const [q, _setQ] = useState('')
+  const [q, setQ] = useState('')
 
   return (
     <Flex
@@ -18,10 +19,10 @@ export default function Roles() {
     >
       <PageTitle heading="Roles"><RoleCreate q={q} /></PageTitle>
       <List>
-        {/* <RolesSearchHeader
+        <RolesSearchHeader
           q={q}
           setQ={setQ}
-        /> */}
+        />
         <RolesList q={q} />
       </List>
     </Flex>
