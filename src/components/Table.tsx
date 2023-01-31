@@ -2,12 +2,19 @@ import { Div, DivProps } from 'honorable'
 import {
   CSSProperties,
   ComponentProps,
+  MouseEvent,
   Ref,
   forwardRef,
   useMemo,
   useRef,
   useState,
 } from 'react'
+import type {
+  ColumnDef,
+  FilterFn,
+  Row,
+  SortDirection,
+} from '@tanstack/react-table'
 import {
   flexRender,
   getCoreRowModel,
@@ -17,20 +24,11 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { rankItem } from '@tanstack/match-sorter-utils'
+import type { VirtualItem } from 'react-virtual'
 import { useVirtual } from 'react-virtual'
-
 import styled from 'styled-components'
 
-import type {
-  ColumnDef,
-  FilterFn,
-  Row,
-  SortDirection,
-} from '@tanstack/react-table'
-import type { VirtualItem } from 'react-virtual'
-
 import Button from './Button'
-
 import CaretUpIcon from './icons/CaretUpIcon'
 import ArrowRightIcon from './icons/ArrowRightIcon'
 import { FillLevelProvider } from './contexts/FillLevelContext'
@@ -48,6 +46,7 @@ export type TableProps =
       | 'virtualizeRows'
       | 'virtualizerOptions'
       | 'reactTableOptions'
+      | 'onRowClick'
     > & {
       data: any[]
       columns: any[]
@@ -65,6 +64,7 @@ export type TableProps =
         Parameters<typeof useReactTable>,
         'data' | 'columns'
       >
+      onRowClick(e: MouseEvent<HTMLTableRowElement>, row: Row<any>): void
     }
 
 const propTypes = {}
@@ -198,6 +198,7 @@ const Td = styled.td<{
   loose?: boolean
   stickyColumn: boolean
   truncateColumn: boolean
+  clickable?: boolean
 }>(({
   theme,
   firstRow,
@@ -205,6 +206,7 @@ const Td = styled.td<{
   loose,
   stickyColumn,
   truncateColumn = false,
+  clickable = false,
 }) => ({
   display: 'flex',
   flexDirection: 'column',
@@ -217,6 +219,10 @@ const Td = styled.td<{
     : theme.colors['fill-one-hover'],
   borderTop: firstRow ? '' : theme.borders.default,
   color: theme.colors.text,
+
+  ...(clickable && {
+    cursor: 'pointer',
+  }),
 
   padding: loose ? '16px 12px' : '8px 12px',
   '&:first-child': stickyColumn
@@ -301,6 +307,7 @@ function FillerRow({
   height,
   index,
   stickyColumn,
+  ...props
 }: {
   columns: unknown[]
   height: number
@@ -322,6 +329,7 @@ function FillerRow({
         }}
         colSpan={columns.length}
         truncateColumn={false}
+        {...props}
       />
     </Tr>
   )
@@ -338,6 +346,7 @@ function FillerRows({
   height: number
   position: 'top' | 'bottom'
   stickyColumn: boolean
+  clickable?: boolean
 }) {
   return (
     <>
@@ -375,6 +384,7 @@ function TableRef({
   virtualizeRows = false,
   reactVirtualOptions: virtualizerOptions,
   reactTableOptions,
+  onRowClick,
   ...props
 }: TableProps, forwardRef: Ref<any>) {
   const tableContainerRef = useRef<HTMLDivElement>()
@@ -497,6 +507,7 @@ function TableRef({
                 height={paddingTop}
                 position="top"
                 stickyColumn={stickyColumn}
+                clickable={!!onRowClick}
               />
             )}
             {rows.map(maybeRow => {
@@ -507,7 +518,10 @@ function TableRef({
 
               return (
                 <>
-                  <Tr key={row.id}>
+                  <Tr
+                    key={row.id}
+                    onClick={e => onRowClick(e, row)}
+                  >
                     {row.getVisibleCells().map(cell => (
                       <Td
                         key={cell.id}
@@ -516,6 +530,7 @@ function TableRef({
                         loose={loose}
                         stickyColumn={stickyColumn}
                         truncateColumn={cell.column?.columnDef?.meta?.truncate}
+                        clickable={!!onRowClick}
                       >
                         {flexRender(cell.column.columnDef.cell,
                           cell.getContext())}
