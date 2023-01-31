@@ -1,6 +1,6 @@
 import { Div, FlexProps } from 'honorable'
 import { ReactNode } from 'react'
-import styled, { CSSProperties, useTheme } from 'styled-components'
+import styled, { CSSProperties } from 'styled-components'
 
 import ConsolePageTitle from './ConsolePageTitle'
 
@@ -46,8 +46,6 @@ export function ScrollablePage({
   children: ReactNode
   scrollable?: boolean
 } & FlexProps) {
-  const theme = useTheme()
-
   return (
     <>
       {heading && (
@@ -58,7 +56,7 @@ export function ScrollablePage({
             {...props}
           >
             {headingContent}
-          </ConsolePageTitle>{' '}
+          </ConsolePageTitle>
         </Div>
       )}
       <ScrollablePageContent
