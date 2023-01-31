@@ -1,5 +1,5 @@
 import { Div, Flex, Img } from 'honorable'
-import { ArrowTopRightIcon, Button, theme } from '@pluralsh/design-system'
+import { Button, theme } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 
 import { InstallerModal } from '../repos/installer/Modal'
