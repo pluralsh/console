@@ -1,4 +1,4 @@
-import { Code, PageTitle } from '@pluralsh/design-system'
+import { Code } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useOutletContext } from 'react-router-dom'
 

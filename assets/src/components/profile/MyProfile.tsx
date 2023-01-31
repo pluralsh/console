@@ -1,4 +1,3 @@
-import { Flex } from 'honorable'
 import {
   PageCard,
   Tab,

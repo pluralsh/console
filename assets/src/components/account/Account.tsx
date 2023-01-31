@@ -1,4 +1,3 @@
-import { Flex } from 'honorable'
 import { Tab, TabList, TabPanel } from '@pluralsh/design-system'
 
 import { useContext, useEffect, useRef } from 'react'

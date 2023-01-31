@@ -1,5 +1,5 @@
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
-import { Input, PageTitle, SearchIcon } from '@pluralsh/design-system'
+import { Input, SearchIcon } from '@pluralsh/design-system'
 import {
   useCallback,
   useContext,

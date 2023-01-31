@@ -1,5 +1,4 @@
 import { Flex } from 'honorable'
-import { PageTitle } from '@pluralsh/design-system'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 

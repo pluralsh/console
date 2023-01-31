@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
 import { stringify } from 'yaml'
-import { LoopingLogo, PageTitle } from '@pluralsh/design-system'
+import { LoopingLogo } from '@pluralsh/design-system'
 
 import { Pod } from 'generated/graphql'
 

@@ -65,7 +65,7 @@ function ConfigurationField({
   const { configuration } = useContext(LoginContext)
 
   const value = useMemo(() => ctx[name]?.value, [ctx, name])
-  const validator = useMemo(() => createValidator(new RegExp(validation?.regex ? `^${validation?.regex}$` : /.*/), optional, validation?.message), [config.optional, validation?.message, validation?.regex])
+  const validator = useMemo(() => createValidator(new RegExp(validation?.regex ? `^${validation?.regex}$` : /.*/), optional, validation?.message), [optional, validation?.message, validation?.regex])
   const { valid, message } = useMemo(() => validator(value), [validator, value])
   const modifier = useMemo(() => modifierFactory(config.type, configuration), [config.type, configuration])
 

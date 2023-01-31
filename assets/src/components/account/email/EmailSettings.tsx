@@ -9,10 +9,7 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import EmailSettingsForm from './EmailSettingsForm'
 
 export default function EmailSettings() {
-  // const { data, error } = useQuery(SMTP_Q)
-
-  // console.log('error', error)
-  const data = true
+  const { data } = useQuery(SMTP_Q)
 
   return (
     <ScrollablePage
