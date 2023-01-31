@@ -2,12 +2,12 @@ import { Box, Text } from 'grommet'
 import { useEffect } from 'react'
 import { useMutation } from '@apollo/client'
 import { useParams } from 'react-router'
+import { LoopingLogo } from '@pluralsh/design-system'
 
 import { setToken } from '../helpers/auth'
 
 import { LOGIN_LINK } from './graphql/users'
 import { LoginPortal } from './Login'
-import { LoopingLogo } from './utils/AnimatedLogo'
 
 export function LinkLogin() {
   const { key } = useParams()

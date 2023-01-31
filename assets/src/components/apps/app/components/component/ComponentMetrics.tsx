@@ -103,7 +103,7 @@ function Metric({
         grow={1}
         justify="center"
       >
-        <LoopingLogo scale={1} />
+        <LoopingLogo />
       </Flex>
     )
   }

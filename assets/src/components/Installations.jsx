@@ -1,8 +1,9 @@
 import { createContext, useEffect } from 'react'
 import { useQuery } from '@apollo/client'
+import { LoopingLogo } from '@pluralsh/design-system'
 
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
-import { LoopingLogo } from './utils/AnimatedLogo'
+import ShowAfterDelay from './utils/ShowAfterDelay'
 
 export const InstallationContext = createContext({})
 
@@ -25,7 +26,13 @@ export function InstallationsProvider({ children }) {
     updateQuery: (prev, { subscriptionData: { data } }) => (data ? applyDelta(prev, data.applicationDelta) : prev),
   }), [subscribeToMore])
 
-  if (loading || !data) return <LoopingLogo />
+  if (loading || !data) {
+    return (
+      <ShowAfterDelay>
+        <LoopingLogo />
+      </ShowAfterDelay>
+    )
+  }
 
   return (
     <InstallationContext.Provider

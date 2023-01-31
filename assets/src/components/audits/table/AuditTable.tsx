@@ -100,7 +100,7 @@ export default function AuditsTable() {
         grow={1}
         justify="center"
       >
-        <LoopingLogo scale={1} />
+        <LoopingLogo />
       </Flex>
     )
   }

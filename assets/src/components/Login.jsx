@@ -7,24 +7,18 @@ import {
   Keyboard,
   Text,
 } from 'grommet'
-
 import { v4 as uuidv4 } from 'uuid'
-
 import gql from 'graphql-tag'
-
 import { useIntercom } from 'react-use-intercom'
-
 import { useLocation } from 'react-router-dom'
+import { LoopingLogo } from '@pluralsh/design-system'
 
 import { setToken, wipeToken } from '../helpers/auth'
-
 import { localized } from '../helpers/hostname'
 
 import { ME_Q, SIGNIN } from './graphql/users'
 import { IncidentContext } from './incidents/context'
 import { LabelledInput } from './utils/LabelledInput'
-
-import { LoopingLogo } from './utils/AnimatedLogo'
 import { LoginContext } from './contexts'
 
 const POLL_INTERVAL = 3 * 60 * 1000

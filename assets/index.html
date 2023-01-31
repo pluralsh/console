@@ -19,6 +19,7 @@
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
     <meta name="theme-color" content="#000">
+    <link rel="stylesheet" href="/page-load-spinner/page-load-spinner.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" />
     <meta
       name="description"
@@ -132,6 +133,18 @@
         font-weight: 600;
       }
     </style>
+    <!-- Fix Hljs background color so it can be overridden -->
+    <style>
+      .hljs {
+        background: unset;
+      }
+    </style>
+    <style>
+      html,
+      body {
+        background-color: #171a21;
+      }
+    </style>
     <script> 
       (function(g,u,i,d,e,s){g[e]=g[e]||[];var f=u.getElementsByTagName(i)[0];var k=u.createElement(i);k.async=true;k.src='https://static.userguiding.com/media/user-guiding-'+s+'-embedded.js';f.parentNode.insertBefore(k,f);if(g[d])return;var ug=g[d]={q:[]};ug.c=function(n){return function(){ug.q.push([n,arguments])};};var m=['previewGuide','finishPreview','track','triggerNps','hideChecklist','launchChecklist'];for(var j=0;j<m.length;j+=1){ug[m[j]]=ug.c(m[j]);}})(window,document,'script','userGuiding','userGuidingLayer','845079529ID'); 
     </script>
@@ -149,6 +162,21 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    <div id="loading-placeholder">
+      <div class="spinner">
+        <div class="spinner-graphic">
+          <div class="bg">
+            <div class="bg-image"></div>
+            <div class="bg-image"></div>
+            <div class="bg-image"></div>
+          </div>
+        </div>
+        <h1>
+          Loading Plural Console<span data-dot-num="1" class="dot">.</span><span data-dot-num="2" class="dot">.</span><span data-dot-num="3" class="dot">.</span>
+        </h1>
+      </div>
+      <script src="/page-load-spinner/page-load-spinner.js"></script>
+    </div>
     <script type="module" src="/src/index.tsx"></script>
     <!--
       This HTML file is a template.

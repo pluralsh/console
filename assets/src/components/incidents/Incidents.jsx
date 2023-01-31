@@ -26,26 +26,20 @@ import {
 } from 'forge-core'
 import { Next } from 'grommet-icons'
 import { useQuery } from '@apollo/client'
-
 import moment from 'moment'
-
 import { useNavigate, useParams } from 'react-router-dom'
-
 import styled, { keyframes } from 'styled-components'
 import { pulse } from 'react-animations'
 import { normalizeColor } from 'grommet/utils'
+import { LoopingLogo } from '@pluralsh/design-system'
 
 import { BreadcrumbsContext } from '../layout/Breadcrumbs'
 import { RepoIcon } from '../repos/Repositories'
 import { extendConnection } from '../../utils/graphql'
-
 import { AlternatingBox } from '../utils/AlternatingBox'
-
-import { LoopingLogo } from '../utils/AnimatedLogo'
 import { FixedScroller } from '../utils/SmoothScroller'
 
 import { CreateIncident } from './CreateIncident'
-
 import { Status } from './IncidentStatus'
 import { Severity } from './Severity'
 import {

@@ -3,8 +3,7 @@ import { Box } from 'grommet'
 import { Button } from 'forge-core'
 import { useMutation, useQuery } from '@apollo/client'
 import { useNavigate, useParams } from 'react-router-dom'
-
-import { LoopingLogo } from '../utils/AnimatedLogo'
+import { LoopingLogo } from '@pluralsh/design-system'
 
 import { INCIDENT_Q, UPDATE_INCIDENT } from './queries'
 import { IncidentForm } from './CreateIncident'
