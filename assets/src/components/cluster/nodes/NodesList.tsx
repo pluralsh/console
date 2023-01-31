@@ -20,7 +20,6 @@ import { useMutation } from '@apollo/client'
 
 import { mapify } from '../Metadata'
 import {
-  CaptionText,
   StatusChip,
   TABLE_HEIGHT,
   TableCaretLink,
@@ -113,16 +112,18 @@ const ColName = columnHelper.accessor(row => row.name, {
   meta: { truncate: true },
 })
 
-const ColRegionZone = columnHelper.accessor(row => `${row.region} - ${row.zone}`,
+const ColRegion = columnHelper.accessor(row => `${row.region} - ${row.zone}`,
   {
-    id: 'region-zone',
-    cell: ({ row: { original } }) => (
-      <>
-        <TableText>{original.region}</TableText>
-        <CaptionText>{original.zone}</CaptionText>
-      </>
-    ),
-    header: 'Region/Zone',
+    id: 'region',
+    cell: ({ row: { original } }) => <TableText>{original.region}</TableText>,
+    header: 'Region',
+  })
+
+const ColZone = columnHelper.accessor(row => `${row.region} - ${row.zone}`,
+  {
+    id: 'zone',
+    cell: ({ row: { original } }) => (<TableText>{original.zone}</TableText>),
+    header: 'Zone',
   })
 
 const ColMemoryUsage = columnHelper.accessor(row => (row?.memory?.used ?? 0) / (row?.memory?.total ?? 1),
@@ -233,7 +234,8 @@ export function NodesList({
   // Memoize columns to prevent rerendering entire table
   const columns: ColumnDef<TableData, any>[] = useMemo(() => [
     ColName,
-    ColRegionZone,
+    ColRegion,
+    ColZone,
     ColMemoryUsage,
     ColCpuUsage,
     ColStatus,
