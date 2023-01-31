@@ -27,11 +27,7 @@ import Fuse from 'fuse.js'
 
 import { Readiness, readinessToLabel } from 'utils/status'
 
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-
 import { isEmpty } from 'lodash'
-
-import { useTheme } from 'styled-components'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
@@ -153,7 +149,8 @@ export default function Apps() {
   const [query, setQuery] = useState<string>('')
   const [filter, setFilter] = useState<any>(ALL_FILTER)
   const tabStateRef = useRef<any>(null)
-  const theme = useTheme()
+
+  useEffect(() => setBreadcrumbs([{ text: 'apps', url: '/' }]), [])
 
   const handleFilter = useCallback(f => applications.filter(app => !f || appState(app).readiness === f),
     [applications])
