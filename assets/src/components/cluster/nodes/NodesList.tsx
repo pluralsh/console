@@ -22,7 +22,6 @@ import { mapify } from '../Metadata'
 import {
   CaptionText,
   StatusChip,
-  TABLE_HEIGHT,
   TableCaretLink,
   TableText,
   Usage,
@@ -250,7 +249,6 @@ export function NodesList({
       loose
       data={tableData}
       columns={columns}
-      {...TABLE_HEIGHT}
     />
   )
 }
