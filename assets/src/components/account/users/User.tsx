@@ -1,8 +1,10 @@
 import { useMutation } from '@apollo/client'
 import { Box } from 'grommet'
 import { Switch } from 'honorable'
-import { useCallback, useContext } from 'react'
+import { useCallback, useContext, useState } from 'react'
 import { LoginContext } from 'components/contexts'
+
+import { Confirm } from 'components/utils/Confirm'
 
 import UserInfo from '../../utils/UserInfo'
 
@@ -12,10 +14,34 @@ import { EDIT_USER } from './queries'
 
 export function User({ user }: any) {
   const { me } = useContext(LoginContext)
-  const [mutation, { loading }] = useMutation<any>(EDIT_USER, { variables: { id: user.id } })
+  const [mutation, { loading, error }] = useMutation<any>(EDIT_USER, {
+    variables: { id: user.id },
+    onCompleted: () => setConfirm(false),
+  })
   const editable = !!me.roles?.admin || hasRbac(me, Permissions.USERS)
   const isAdmin = !!user.roles?.admin
-  const setAdmin = useCallback(() => mutation({ variables: { attributes: { roles: { admin: !isAdmin } } } }), [mutation, isAdmin])
+  const setAdmin = useCallback(() => mutation({ variables: { attributes: { roles: { admin: !isAdmin } } } }),
+    [mutation, isAdmin])
+  const [confirm, setConfirm] = useState(false)
+
+  const isSelf = user.id === me.id
+
+  const confirmModal = confirm && (
+    <Confirm
+      open={confirm}
+      title="Remove admin role"
+      text={`Are you sure you want to remove ${
+        isSelf ? 'yourself' : user.name
+      } as admin?${isSelf ? ' This cannot be undone.' : ''}`}
+      close={() => setConfirm(false)}
+      submit={() => {
+        setAdmin()
+      }}
+      loading={loading}
+      destructive
+      error={error}
+    />
+  )
 
   return (
     <Box
@@ -27,11 +53,19 @@ export function User({ user }: any) {
         fill="horizontal"
         user={user}
       />
+      {confirmModal}
       {editable && (
         <Switch
-          defaultChecked={isAdmin}
+          checked={isAdmin}
           disabled={loading}
-          onChange={() => setAdmin()}
+          onChange={() => {
+            if (isAdmin) {
+              setConfirm(true)
+            }
+            else {
+              setAdmin()
+            }
+          }}
         >
           Admin
         </Switch>
