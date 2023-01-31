@@ -61,7 +61,6 @@ function QueryEmptyState({ query, setQuery }) {
       icon={<AppsIcon size={64} />}
       message="No apps found."
       description={`"${query}" did not match any of your installed applications.`}
-      marginTop={96}
       width={600}
     >
       <Button
@@ -82,7 +81,6 @@ function ReadyEmptyState() {
       icon={<LifePreserverIcon size={64} />}
       message="That's awkward."
       description="None of yout apps appear to be ready. Don't worry — we're here to help."
-      marginTop={96}
       width={400}
     >
       <Button
@@ -132,7 +130,6 @@ function PendingFailedEmptyState({ filter }) {
           </>
         ) as any // Workaround as JSX elements are not allowed here.
       }
-      marginTop={96}
       width={500}
     />
   )
@@ -150,7 +147,8 @@ export default function Apps() {
   const [filter, setFilter] = useState<any>(ALL_FILTER)
   const tabStateRef = useRef<any>(null)
 
-  useEffect(() => setBreadcrumbs([{ text: 'apps', url: '/' }]), [setBreadcrumbs])
+  useEffect(() => setBreadcrumbs([{ text: 'apps', url: '/' }]),
+    [setBreadcrumbs])
 
   const handleFilter = useCallback(f => applications.filter(app => !f || appState(app).readiness === f),
     [applications])
@@ -225,41 +223,40 @@ export default function Apps() {
         </>
       )}
     >
-      <Flex
-        justify="center"
-        paddingBottom="xlarge"
-        direction="row"
-        wrap="wrap"
-        gap="small"
-      >
-        {!noFilteredApps
-          && filteredApps.map(app => (
-            <App
-              key={app.name}
-              app={app}
+      {!noFilteredApps ? (
+        <Div
+          display="grid"
+          gap="large"
+          gridTemplateColumns="repeat(auto-fit, minmax(500px, 1fr))"
+        >
+          {!noFilteredApps
+            && filteredApps.map(app => (
+              <App
+                key={app.name}
+                app={app}
+              />
+            ))}
+        </Div>
+      ) : (
+        <Flex
+          justifyContent="center"
+          alignItems="center"
+          minHeight="100%"
+          overflow="auto"
+        >
+          {query && (
+            <QueryEmptyState
+              query={query}
+              setQuery={setQuery}
             />
-          ))}
-        {!noFilteredApps && (
-          <Flex
-            grow={1}
-            basis="45%"
-          />
-        )}
-        {noFilteredApps && query && (
-          <QueryEmptyState
-            query={query}
-            setQuery={setQuery}
-          />
-        )}
-        {noFilteredApps && !query && filter === Readiness.Ready && (
-          <ReadyEmptyState />
-        )}
-        {noFilteredApps
-          && !query
-          && [Readiness.InProgress, Readiness.Failed].includes(filter) && (
-          <PendingFailedEmptyState filter={filter} />
-        )}
-      </Flex>
+          )}
+          {!query && filter === Readiness.Ready && <ReadyEmptyState />}
+          {!query
+            && [Readiness.InProgress, Readiness.Failed].includes(filter) && (
+            <PendingFailedEmptyState filter={filter} />
+          )}
+        </Flex>
+      )}
     </ResponsivePageFullWidth>
   )
 }
