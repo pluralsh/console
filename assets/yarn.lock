@@ -3456,9 +3456,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:1.304.0":
-  version: 1.304.0
-  resolution: "@pluralsh/design-system@npm:1.304.0"
+"@pluralsh/design-system@npm:1.308.0":
+  version: 1.308.0
+  resolution: "@pluralsh/design-system@npm:1.308.0"
   dependencies:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@monaco-editor/react": 4.4.6
@@ -3482,11 +3482,11 @@ __metadata:
     "@react-stately/toggle": 3.4.3
     "@react-types/shared": 3.16.0
     "@tanstack/match-sorter-utils": 8.7.6
-    "@tanstack/react-table": 8.7.6
+    "@tanstack/react-table": 8.7.9
     "@types/chroma-js": 2.1.4
     chroma-js: 2.4.2
     classnames: 2.3.2
-    grommet: 2.28.0
+    grommet: 2.29.1
     grommet-icons: 4.8.0
     highlight.js: 11.7.0
     honorable-recipe-mapper: 0.2.0
@@ -3508,7 +3508,7 @@ __metadata:
     react-dom: ">=16.0.0"
     react-transition-group: ">=4.4.2"
     styled-components: ">=5.3.5"
-  checksum: 3b99998b5f8abb8ac394474690fc66a8f7d02480570550832eaa8a9f0de45ff8cfe92769e1520feec3df5eb81479b95561cf29ba3be78514992f36a80fa2bc68
+  checksum: 0ab8297dbae7b456b269d12c16052a094d9abbef251352e15910ce413433903c38c2776c66ec5579288dcac4facdba5b68c92d1211428a5813191c5d37d0ab10
   languageName: node
   linkType: hard
 
@@ -4803,41 +4803,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-table@npm:8.7.6":
-  version: 8.7.6
-  resolution: "@tanstack/react-table@npm:8.7.6"
+"@tanstack/react-table@npm:8.7.9":
+  version: 8.7.9
+  resolution: "@tanstack/react-table@npm:8.7.9"
   dependencies:
-    "@tanstack/table-core": 8.7.6
+    "@tanstack/table-core": 8.7.9
   peerDependencies:
     react: ">=16"
     react-dom: ">=16"
-  checksum: 20b10ace9ff32bab79e7fa6cedbde44b74b1760b510e3b67766eaec6d4f55a741b77f3ec458fa5908119397d3ee1e37b0628653a71aa25cb45a7787349b4b392
+  checksum: 3c704ac903405972641c9857e1466025bcdac04ee4890d64b018386cad5a778aca3a8d3f78542ae7a0ed609841d32ef3a7e563b079e87fa93b9ae8570a310499
   languageName: node
   linkType: hard
 
-"@tanstack/react-table@npm:8.7.8":
-  version: 8.7.8
-  resolution: "@tanstack/react-table@npm:8.7.8"
-  dependencies:
-    "@tanstack/table-core": 8.7.8
-  peerDependencies:
-    react: ">=16"
-    react-dom: ">=16"
-  checksum: 6070f81b2f3fcd05c2bf9798642300ef81f43c5dbb97c0da865920f83dbef465b91b6ad0631712511945c698d63ac2efae3aba9482dad21755125a6161541616
-  languageName: node
-  linkType: hard
-
-"@tanstack/table-core@npm:8.7.6":
-  version: 8.7.6
-  resolution: "@tanstack/table-core@npm:8.7.6"
-  checksum: edba55731245a5a1a46a9a69a1ca2a7d7ae24377ed478f6622d043b80b6f8fbcb19605843e0feb85b99b4a7d5407633be4e440e71c82a4bf876f05a62e8005ae
-  languageName: node
-  linkType: hard
-
-"@tanstack/table-core@npm:8.7.8":
-  version: 8.7.8
-  resolution: "@tanstack/table-core@npm:8.7.8"
-  checksum: 6b35a03c3e990eaf1bb03bc77215782621374ba9de68d0b6d74d34d85add8473e6c2ef83a65cdc6bc388b8c99e8dd7c10cc52154be9755c2a5258553851c1643
+"@tanstack/table-core@npm:8.7.9":
+  version: 8.7.9
+  resolution: "@tanstack/table-core@npm:8.7.9"
+  checksum: 78d2314928c29559088e4bada0248cc7f94e93756e1a2c1f37a651db30276e9ae960d647bd3a61b67b3f0f9f7e4dec5dd58eb49b8adb80ee5952ef417b6e581f
   languageName: node
   linkType: hard
 
@@ -7292,10 +7273,10 @@ __metadata:
     "@nivo/pie": 0.80.0
     "@nivo/radial-bar": 0.80.0
     "@nivo/tooltip": 0.80.0
-    "@pluralsh/design-system": 1.304.0
+    "@pluralsh/design-system": 1.308.0
     "@pluralsh/eslint-config-typescript": 2.5.6
     "@pluralsh/stylelint-config": 1.1.1
-    "@tanstack/react-table": 8.7.8
+    "@tanstack/react-table": 8.7.9
     "@testing-library/jest-dom": 4.2.4
     "@testing-library/react": 9.3.3
     "@testing-library/user-event": 7.1.2
@@ -10154,22 +10135,6 @@ __metadata:
     react-dom: ">= 16.4.1"
     styled-components: ">= 4.X"
   checksum: 7b29e6fd773a29a9f7b48e5b0a163e1c51b3b196891228d88a0e5b99faab4ece03b5410a97665105fe886402016a337237b956d5f46af06ec2e06e2b328a0757
-  languageName: node
-  linkType: hard
-
-"grommet@npm:2.28.0":
-  version: 2.28.0
-  resolution: "grommet@npm:2.28.0"
-  dependencies:
-    grommet-icons: ^4.8.0
-    hoist-non-react-statics: ^3.2.0
-    markdown-to-jsx: ^7.1.5
-    prop-types: ^15.8.1
-  peerDependencies:
-    react: ^16.6.1 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.6.1 || ^17.0.0 || ^18.0.0
-    styled-components: ">= 5.1"
-  checksum: 5def847ca4b722b397e9084f6dbdced9875a4cff54f34629b8258be5c697feb97d1f1bf1ff3ae47342affd592e7269a137bb8e494ab85b9ee647c7cb0125b3c3
   languageName: node
   linkType: hard
 

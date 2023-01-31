@@ -1,4 +1,4 @@
-import { createColumnHelper } from '@tanstack/react-table'
+import { Row, createColumnHelper } from '@tanstack/react-table'
 import { ComponentProps, useMemo } from 'react'
 import { filesize } from 'filesize'
 import type {
@@ -23,6 +23,7 @@ import { cpuParser, memoryParser } from 'utils/kubernetes'
 import { Flex, Span } from 'honorable'
 import { UnstyledLink } from 'components/utils/Link'
 import styled from 'styled-components'
+import { useNavigate } from 'react-router-dom'
 
 import {
   ContainerStatusChip,
@@ -253,6 +254,7 @@ export function ContainersList({
   namespace,
   podName,
 }: ContainersListProps) {
+  const navigate = useNavigate()
   const tableData: ContainerTableRow[] = useMemo(() => {
     const initContainerData = (initContainers || [])
       .filter((container): container is Container => !!container)
@@ -288,6 +290,7 @@ export function ContainersList({
       data={tableData}
       columns={columns}
       enableColumnResizing
+      onRowClick={(e, { original }: Row<ContainerTableRow>) => navigate(`/pods/${namespace}/${podName}/shell/${original?.name}`)}
       {...TABLE_HEIGHT}
     />
   )
