@@ -18,6 +18,10 @@ defmodule Console.Schema.Role do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, q) do
+    from(r in query, where: ilike(r.name, ^"%#{q}%"))
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(r in query, order_by: ^order)
   end

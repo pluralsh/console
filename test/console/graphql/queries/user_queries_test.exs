@@ -9,11 +9,7 @@ defmodule Console.GraphQl.UserQueriesTest do
       {:ok, %{data: %{"users" => found}}} = run_query("""
         query {
           users(first: 5) {
-            edges {
-              node {
-                id
-              }
-            }
+            edges {  node { id } }
           }
         }
       """, %{}, %{current_user: hd(users)})
@@ -29,11 +25,7 @@ defmodule Console.GraphQl.UserQueriesTest do
       {:ok, %{data: %{"users" => found}}} = run_query("""
         query Search($q: String) {
           users(q: $q, first: 5) {
-            edges {
-              node {
-                id
-              }
-            }
+            edges { node { id } }
           }
         }
       """, %{"q" => "search"}, %{current_user: user})
@@ -65,9 +57,7 @@ defmodule Console.GraphQl.UserQueriesTest do
 
       {:ok, %{data: %{"invite" => found}}} = run_query("""
         query Invite($id: String!) {
-          invite(id: $id) {
-            email
-          }
+          invite(id: $id) { email }
         }
       """, %{"id" => "secure"})
 
@@ -82,9 +72,7 @@ defmodule Console.GraphQl.UserQueriesTest do
       {:ok, %{data: %{"groups" => found}}} = run_query("""
         query {
           groups(first: 5) {
-            edges {
-              node { id }
-            }
+            edges { node { id } }
           }
         }
       """, %{}, %{current_user: insert(:user)})
@@ -100,11 +88,7 @@ defmodule Console.GraphQl.UserQueriesTest do
       {:ok, %{data: %{"groups" => found}}} = run_query("""
         query Search($q: String) {
           groups(q: $q, first: 5) {
-            edges {
-              node {
-                id
-              }
-            }
+            edges { node { id } }
           }
         }
       """, %{"q" => "search"}, %{current_user: insert(:user)})
@@ -123,9 +107,7 @@ defmodule Console.GraphQl.UserQueriesTest do
       {:ok, %{data: %{"groupMembers" => found}}} = run_query("""
         query Members($id: ID!) {
           groupMembers(groupId: $id, first: 5) {
-            edges {
-              node { id }
-            }
+            edges { node { id } }
           }
         }
       """, %{"id" => group.id}, %{current_user: insert(:user)})
@@ -142,15 +124,28 @@ defmodule Console.GraphQl.UserQueriesTest do
       {:ok, %{data: %{"roles" => found}}} = run_query("""
         query {
           roles(first: 5) {
-            edges {
-              node { id }
-            }
+            edges { node { id } }
           }
         }
       """, %{}, %{current_user: insert(:user)})
 
       assert from_connection(found)
              |> ids_equal(roles)
+    end
+
+    test "it can search roles by name" do
+      insert_list(3, :role)
+      role = insert(:role, name: "query")
+
+      {:ok, %{data: %{"roles" => %{"edges" => [%{"node" => found}]}}}} = run_query("""
+        query Search($q: String) {
+          roles(first: 5, q: $q) {
+            edges { node { id } }
+          }
+        }
+      """, %{"q" => "quer"}, %{current_user: insert(:user)})
+
+      assert found["id"] == role.id
     end
   end
 

@@ -35,6 +35,7 @@ defmodule Console.GraphQl.Resolvers.User do
 
   def list_roles(args, _) do
     Role.ordered()
+    |> maybe_search(Role, args)
     |> paginate(args)
   end
 
