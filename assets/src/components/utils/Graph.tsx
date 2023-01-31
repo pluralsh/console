@@ -1,14 +1,45 @@
-import { useContext, useMemo, useState } from 'react'
+import {
+  Key,
+  useContext,
+  useMemo,
+  useState,
+} from 'react'
 import { ResponsiveLine } from '@nivo/line'
 import moment from 'moment'
 import { last } from 'lodash'
 import { Box, Text, ThemeContext } from 'grommet'
 import { semanticColors } from '@pluralsh/design-system/dist/theme/colors'
+import { Card } from '@pluralsh/design-system'
 import { useColorMap } from 'utils/color'
-import { Flex, P } from 'honorable'
+import { Div, Flex, Span } from 'honorable'
+import { DEFAULT_THEME } from 'theme'
 
 export function dateFormat(date) {
   return moment(date).format('MM/DD h:mm:ss a')
+}
+
+const graphTheme = {
+  ...DEFAULT_THEME,
+  axis: {
+    ticks: {
+      text: {
+        fill: semanticColors['text-xlight'],
+      },
+      line: {
+        stroke: semanticColors.border,
+      },
+    },
+    legend: {
+      text: {
+        fill: semanticColors['text-light'],
+      },
+    },
+  },
+  grid: {
+    line: {
+      stroke: semanticColors.border,
+    },
+  },
 }
 
 export function GraphHeader({ text }) {
@@ -21,7 +52,8 @@ export function GraphHeader({ text }) {
       <Text
         size="small"
         weight="bold"
-      >{text}
+      >
+        {text}
       </Text>
     </Box>
   )
@@ -29,31 +61,42 @@ export function GraphHeader({ text }) {
 
 function SliceTooltip({ point: { serieColor, serieId, data } }) {
   return (
-    <Flex
-      background="fill-two"
-      border="1px solid border-fill-two"
-      borderRadius="4px"
+    <Card
+      display="flex"
+      alignItems="center"
+      fillLevel={2}
       paddingVertical="xxsmall"
       paddingHorizontal="xsmall"
       direction="row"
       gap="xsmall"
-      align="center"
+      caption
     >
       <Flex
-        width="10px"
-        height="10px"
-        borderRadius="50%"
+        width={12}
+        height={12}
         backgroundColor={serieColor}
       />
-      <P body2>{serieId} [x: {data.xFormatted}, y: {data.yFormatted}]</P>
-    </Flex>
+      <Div>
+        {serieId}: <Span style={{ fontWeight: 700 }}>{data.yFormatted}</Span>
+        <br />
+        {data.xFormatted}
+      </Div>
+    </Card>
   )
 }
 
-export function Graph({ data, yFormat, tickRotation }) {
+export function Graph({
+  data,
+  yFormat,
+  tickRotation,
+}: {
+  data: any
+  yFormat: any
+  tickRotation?: number
+}) {
   const theme = useContext(ThemeContext)
   const colors = useColorMap(theme)
-  const [selected, setSelected] = useState(null)
+  const [selected, setSelected] = useState<Key | null>(null)
   const graph = useMemo(() => {
     if (data.find(({ id }) => id === selected)) {
       return data.filter(({ id }) => id === selected)
@@ -70,25 +113,30 @@ export function Graph({ data, yFormat, tickRotation }) {
     <ResponsiveLine
       data={graph}
       margin={{
-        top: 20, right: 20, bottom: 110, left: 55,
+        top: 16,
+        right: 16,
+        bottom: 70,
+        left: 45,
       }}
-      activeLineWidth={4}
       lineWidth={1}
       enablePoints={false}
       enableArea
       areaOpacity={0.05}
       useMesh
-      animate={false}
+      animate
       xScale={{ type: 'time', format: 'native' }}
       yScale={{
-        type: 'linear', min: 0, max: 'auto', stacked: true, reverse: false,
+        type: 'linear',
+        min: 0,
+        max: 'auto',
+        stacked: true,
+        reverse: false,
       }}
       colors={colors}
       yFormat={yFormat}
       xFormat={dateFormat}
       tooltip={SliceTooltip}
       axisLeft={{
-        orient: 'left',
         tickSize: 0,
         format: yFormat,
         tickPadding: 5,
@@ -99,29 +147,31 @@ export function Graph({ data, yFormat, tickRotation }) {
       axisBottom={{
         format: '%H:%M',
         tickPadding: 10,
-        tickRotation,
+        tickRotation: tickRotation || 45,
         tickSize: 0,
-        orient: 'bottom',
-        legendPosition: 'middle',
-        legend: hasData ? `${dateFormat(data[0].data[0].x)} to ${dateFormat(last(data[0].data).x)}` : null,
-        legendOffset: 90,
+        legend: hasData
+            /* @ts-expect-error */
+          ? `${dateFormat(data[0].data[0].x)} — ${dateFormat(last(data?.[0]?.data).x)}`
+          : null,
+        legendOffset: 48,
+        legendPosition: 'start',
       }}
       pointLabel="y"
       pointLabelYOffset={-15}
       legends={[
         {
-          anchor: 'bottom',
+          anchor: 'bottom-right',
           onClick: ({ id }) => (selected ? setSelected(null) : setSelected(id)),
           direction: 'row',
           justify: false,
-          translateX: 0,
-          translateY: 70,
-          itemsSpacing: 0,
+          translateX: 20,
+          translateY: 56,
+          itemsSpacing: 10,
           itemDirection: 'left-to-right',
           itemWidth: 100,
           itemHeight: 20,
           symbolSize: 12,
-          symbolShape: 'circle',
+          symbolShape: 'square',
           itemTextColor: semanticColors['text-xlight'],
           effects: [
             {
@@ -134,28 +184,7 @@ export function Graph({ data, yFormat, tickRotation }) {
           ],
         },
       ]}
-      theme={{
-        axis: {
-          ticks: {
-            text: {
-              fill: semanticColors['text-xlight'],
-            },
-            line: {
-              stroke: semanticColors.border,
-            },
-          },
-          legend: {
-            text: {
-              fill: semanticColors['text-light'],
-            },
-          },
-        },
-        grid: {
-          line: {
-            stroke: semanticColors.border,
-          },
-        },
-      }}
+      theme={graphTheme}
     />
   )
 }

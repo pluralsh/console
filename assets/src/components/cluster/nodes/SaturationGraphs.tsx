@@ -47,7 +47,6 @@ export function SaturationGraphs({ cpu, mem }) {
       <Graph
         data={result}
         yFormat={v => format(v, 'percent')}
-        tickRotation={undefined}
       />
     </Div>
   )

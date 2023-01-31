@@ -52,7 +52,7 @@ export function generateColor(i = -1) {
   return i >= 0 && i < COLORS.length ? COLORS[i] : randomColor()
 }
 
-export function useColorMap(theme, colors) {
-  return useMemo(() => (colors || COLORS).map(c => normalizeColor(c, theme)), [theme, colors])
+export function useColorMap(theme, colors = COLORS) {
+  return useMemo(() => colors.map(c => normalizeColor(c, theme)), [theme, colors])
 }
 
