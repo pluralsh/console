@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { Flex } from 'honorable'
 import { useQuery } from '@apollo/client'
 import { memoryParser } from 'kubernetes-resource-parser'
 import { sumBy } from 'lodash'

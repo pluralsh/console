@@ -150,7 +150,7 @@ export default function Apps() {
   const [filter, setFilter] = useState<any>(ALL_FILTER)
   const tabStateRef = useRef<any>(null)
 
-  useEffect(() => setBreadcrumbs([{ text: 'apps', url: '/' }]), [])
+  useEffect(() => setBreadcrumbs([{ text: 'apps', url: '/' }]), [setBreadcrumbs])
 
   const handleFilter = useCallback(f => applications.filter(app => !f || appState(app).readiness === f),
     [applications])
