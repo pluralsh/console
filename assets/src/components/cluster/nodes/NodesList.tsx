@@ -1,21 +1,18 @@
 import { useMemo, useState } from 'react'
 import { filesize } from 'filesize'
-import { A, Flex } from 'honorable'
+import { A, Div, Flex } from 'honorable'
 import {
   IconFrame,
   Table,
   Tooltip,
   TrashCanIcon,
 } from '@pluralsh/design-system'
-import { Link } from 'react-router-dom'
-import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
-
+import { Link, useNavigate } from 'react-router-dom'
+import { ColumnDef, Row, createColumnHelper } from '@tanstack/react-table'
 import { Node, NodeMetric } from 'generated/graphql'
 import { ReadinessT, nodeStatusToReadiness, readinessToLabel } from 'utils/status'
 import { cpuParser, memoryParser } from 'utils/kubernetes'
-
 import { Confirm } from 'components/utils/Confirm'
-
 import { useMutation } from '@apollo/client'
 
 import { mapify } from '../Metadata'
@@ -27,7 +24,6 @@ import {
   TableText,
   Usage,
 } from '../TableElements'
-
 import { DELETE_NODE } from '../queries'
 
 import { UsageBar } from './UsageBar'
@@ -65,7 +61,7 @@ function DeleteNode({ name, refetch }) {
   })
 
   return (
-    <>
+    <Div onClick={e => e.stopPropagation()}>
       <IconFrame
         clickable
         icon={<TrashCanIcon color="icon-danger" />}
@@ -73,19 +69,21 @@ function DeleteNode({ name, refetch }) {
         textValue="Delete"
         tooltip
       />
-      <Confirm
-        close={() => {
-          setConfirm(false)
-        }}
-        destructive
-        label="Delete"
-        loading={loading}
-        open={confirm}
-        submit={() => mutation()}
-        title="Delete node"
-        text={`The node "${name}" will be replaced within its autoscaling group.`}
-      />
-    </>
+      {confirm && (
+        <Div>
+          <Confirm
+            close={() => setConfirm(false)}
+            destructive
+            label="Delete"
+            loading={loading}
+            open={confirm}
+            submit={() => mutation()}
+            title="Delete node"
+            text={`The node "${name}" will be replaced within its autoscaling group.`}
+          />
+        </Div>
+      )}
+    </Div>
   )
 }
 
@@ -192,6 +190,7 @@ export function NodesList({
   nodeMetrics: NodeMetric[]
   refetch: any
 }) {
+  const navigate = useNavigate()
   const metrics: Record<string, { cpu?: number; memory?: number }>
     = useMemo(() => {
       if (!nodeMetrics) {
@@ -250,6 +249,7 @@ export function NodesList({
       loose
       data={tableData}
       columns={columns}
+      onRowClick={(e, { original }: Row<TableData>) => navigate(`/nodes/${original?.name}`)}
       {...TABLE_HEIGHT}
     />
   )

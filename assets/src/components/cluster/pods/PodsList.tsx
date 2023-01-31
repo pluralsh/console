@@ -1,6 +1,6 @@
-import { A, Flex } from 'honorable'
-import { Link } from 'react-router-dom'
-import { createColumnHelper } from '@tanstack/react-table'
+import { A, Div, Flex } from 'honorable'
+import { Link, useNavigate } from 'react-router-dom'
+import { Row, createColumnHelper } from '@tanstack/react-table'
 import {
   ComponentProps,
   memo,
@@ -49,7 +49,7 @@ function DeletePod({ name, namespace, refetch }) {
   })
 
   return (
-    <>
+    <Div onClick={e => e.stopPropagation()}>
       <IconFrame
         clickable
         icon={<TrashCanIcon color="icon-danger" />}
@@ -69,7 +69,7 @@ function DeletePod({ name, namespace, refetch }) {
           namespace ? ` in namespace "${namespace}"` : ''
         } will be replaced by it's managing controller.`}
       />
-    </>
+    </Div>
   )
 }
 
@@ -277,6 +277,7 @@ function getRestarts(status: Pod['status']) {
 export const PodsList = memo(({
   pods, applications, columns, ...props
 }: PodListProps) => {
+  const navigate = useNavigate()
   const tableData: PodTableRow[] = useMemo(() => (pods || [])
     .filter((pod): pod is Pod => !!pod)
     .map(pod => {
@@ -322,6 +323,7 @@ export const PodsList = memo(({
       virtualizeRows
       {...TABLE_HEIGHT}
       {...props}
+      onRowClick={(e, { original }: Row<PodTableRow>) => navigate(`/pods/${original.namespace}/${original.name}`)}
     />
   )
 })
