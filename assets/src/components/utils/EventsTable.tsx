@@ -3,6 +3,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 
 import { Event as EventT } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
+import { ComponentProps } from 'react'
 
 const COLUMN_HELPER = createColumnHelper<EventT>()
 
@@ -34,7 +35,10 @@ const columns = [
   }),
 ]
 
-export default function EventsTable({ events }: { events?: Iterable<EventT> }) {
+export default function EventsTable({
+  events,
+  ...props
+}: { events?: EventT[] } & Partial<ComponentProps<typeof Table>>) {
   if (!events || isEmpty(events)) {
     return <>No events available.</>
   }
@@ -44,6 +48,7 @@ export default function EventsTable({ events }: { events?: Iterable<EventT> }) {
       data={events}
       columns={columns}
       maxHeight="calc(100vh - 244px)"
+      {...props}
     />
   )
 }

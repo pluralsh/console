@@ -6,7 +6,9 @@ import SecurityPassword from './SecurityPassword'
 
 export function Security() {
   return (
-    <ScrollablePage heading="Security">
+    <ScrollablePage
+      heading="Security"
+    >
       <Flex
         direction="column"
         gap="large"

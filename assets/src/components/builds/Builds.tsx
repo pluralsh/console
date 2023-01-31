@@ -8,7 +8,7 @@ import { useQuery } from '@apollo/client'
 
 import { Flex } from 'honorable'
 
-import { Card, LoopingLogo, PageTitle } from '@pluralsh/design-system'
+import { Card, LoopingLogo } from '@pluralsh/design-system'
 
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 
@@ -19,6 +19,10 @@ import { ResponsiveLayoutContentContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 
 import { ReturnToBeginning } from 'components/utils/ReturnToBeginning'
+
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { appendConnection, extendConnection } from '../../utils/graphql'
 
@@ -49,14 +53,24 @@ export default function Builds() {
     pollInterval: POLL_INTERVAL,
   })
 
-  useEffect(() => setBreadcrumbs([{ text: 'builds', url: '/builds' }]), [setBreadcrumbs])
+  useEffect(() => setBreadcrumbs([{ text: 'builds', url: '/builds' }]),
+    [setBreadcrumbs])
 
   useEffect(() => subscribeToMore({
     document: BUILD_SUB,
-    updateQuery: (prev, { subscriptionData: { data: { buildDelta: { delta, payload } } } }) => (delta === 'CREATE' ? appendConnection(prev, payload, 'builds') : prev),
-  }), [subscribeToMore])
+    updateQuery: (prev,
+      {
+        subscriptionData: {
+          data: {
+            buildDelta: { delta, payload },
+          },
+        },
+      }) => (delta === 'CREATE' ? appendConnection(prev, payload, 'builds') : prev),
+  }),
+  [subscribeToMore])
 
-  const returnToBeginning = useCallback(() => listRef.scrollToItem(0), [listRef])
+  const returnToBeginning = useCallback(() => listRef.scrollToItem(0),
+    [listRef])
 
   if (loading && !data) {
     return (
@@ -72,57 +86,57 @@ export default function Builds() {
   const { edges, pageInfo } = data.builds
 
   return (
-    <Flex
-      height="100%"
-      width="100%"
-      overflowY="hidden"
-      padding="large"
-      position="relative"
-    >
-      <ResponsiveLayoutSidenavContainer width={240} />
+    <ResponsiveLayoutPage>
+      <ResponsiveLayoutSidenavContainer />
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer overflowY="hidden">
-        <PageTitle
+        <ScrollablePage
+          scrollable={false}
           heading="Builds"
           gap="small"
+          headingContent={(
+            <>
+              <Flex grow={1} />
+              <UpgradePolicies />
+              <CreateBuild />
+            </>
+          )}
         >
-          <Flex grow={1} />
-          <UpgradePolicies />
-          <CreateBuild />
-        </PageTitle>
-        {/* <PinnedRunbooks border={undefined} /> */}
-        <Card flexGrow="1">
-          <StandardScroller
-            listRef={listRef}
-            setListRef={setListRef}
-            items={edges}
-            loading={loading}
-            handleScroll={setScrolled}
-            placeholder={() => (
-              <Flex
-                height={77}
-                borderBottom="1px solid border"
-              />
-            )}
-            hasNextPage={pageInfo.hasNextPage}
-            mapper={({ node }) => (
-              <Build
-                key={node.id}
-                build={node}
-              />
-            )}
-            loadNextPage={() => pageInfo.hasNextPage && fetchMore({
-              variables: { cursor: pageInfo.endCursor },
-              updateQuery: (prev, { fetchMoreResult: { builds } }) => extendConnection(prev, builds, 'builds'),
-            })}
-            refreshKey={undefined}
-            setLoader={undefined}
-          />
-          {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
-        </Card>
+          {/* <PinnedRunbooks border={undefined} /> */}
+          <Card height="100%">
+            <StandardScroller
+              listRef={listRef}
+              setListRef={setListRef}
+              items={edges}
+              loading={loading}
+              handleScroll={setScrolled}
+              placeholder={() => (
+                <Flex
+                  height={77}
+                  borderBottom="1px solid border"
+                />
+              )}
+              hasNextPage={pageInfo.hasNextPage}
+              mapper={({ node }) => (
+                <Build
+                  key={node.id}
+                  build={node}
+                />
+              )}
+              loadNextPage={() => pageInfo.hasNextPage
+                && fetchMore({
+                  variables: { cursor: pageInfo.endCursor },
+                  updateQuery: (prev, { fetchMoreResult: { builds } }) => extendConnection(prev, builds, 'builds'),
+                })}
+              refreshKey={undefined}
+              setLoader={undefined}
+            />
+            {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
+          </Card>
+        </ScrollablePage>
       </ResponsiveLayoutContentContainer>
-      <ResponsiveLayoutSidecarContainer width={200} />
+      <ResponsiveLayoutSidecarContainer />
       <ResponsiveLayoutSpacer />
-    </Flex>
+    </ResponsiveLayoutPage>
   )
 }

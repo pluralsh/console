@@ -6,7 +6,10 @@ export function ResponsiveLayoutPage({ children, ...props }: FlexProps) {
       height="100%"
       width="100%"
       overflowY="hidden"
-      padding="large"
+      paddingTop="large"
+      paddingLeft="large"
+      paddingRight="large"
+      paddingBottom={0}
       flexGrow={1}
       {...props}
     >

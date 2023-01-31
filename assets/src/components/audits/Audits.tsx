@@ -8,7 +8,7 @@ import {
 
 import { Box, Text } from 'grommet'
 
-import { PageTitle, SubTab, TabList } from '@pluralsh/design-system'
+import { SubTab, TabList } from '@pluralsh/design-system'
 
 import { Flex, Span } from 'honorable'
 
@@ -23,6 +23,10 @@ import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/Respon
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
+
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
 import Avatar from '../utils/Avatar'
 
@@ -56,50 +60,54 @@ export default function Audits() {
   const { pathname } = useLocation()
   const tabStateRef = useRef<any>(null)
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
-  const currentView = DIRECTORY.find(tab => pathname?.startsWith(`/audits/${tab.path}`))?.path || DIRECTORY[0].path
+  const currentView
+    = DIRECTORY.find(tab => pathname?.startsWith(`/audits/${tab.path}`))?.path
+    || DIRECTORY[0].path
   const [view, setView] = useState<Key>(currentView)
 
-  useEffect(() => setBreadcrumbs([{ text: 'audits', url: '/audits' }]), [setBreadcrumbs])
+  useEffect(() => setBreadcrumbs([{ text: 'audits', url: '/audits' }]),
+    [setBreadcrumbs])
 
   return (
-    <Flex
-      height="100%"
-      width="100%"
-      overflowY="hidden"
-      padding="large"
-      position="relative"
-    >
-      <ResponsiveLayoutSidenavContainer width={240} />
+    <ResponsiveLayoutPage>
+      <ResponsiveLayoutSidenavContainer />
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer overflowY="hidden">
-        <PageTitle heading="Audits">
-          <Flex grow={1} />
-          <TabList
-            margin={1}
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: view,
-              onSelectionChange: view => {
-                setView(view)
-                navigate(view)
-              },
-            }}
-          >
-            {DIRECTORY.map(({ path, label }) => (
-              <SubTab
-                key={path}
-                textValue={label}
+        <ScrollablePage
+          scrollable={false}
+          heading="Audits"
+          headingContent={(
+            <>
+              <Flex grow={1} />
+              <TabList
+                margin={1}
+                stateRef={tabStateRef}
+                stateProps={{
+                  orientation: 'horizontal',
+                  selectedKey: view,
+                  onSelectionChange: view => {
+                    setView(view)
+                    navigate(view as string)
+                  },
+                }}
               >
-                <Span fontWeight={600}>{label}</Span>
-              </SubTab>
-            ))}
-          </TabList>
-        </PageTitle>
-        <Outlet />
+                {DIRECTORY.map(({ path, label }) => (
+                  <SubTab
+                    key={path}
+                    textValue={label}
+                  >
+                    <Span fontWeight={600}>{label}</Span>
+                  </SubTab>
+                ))}
+              </TabList>
+            </>
+          )}
+        >
+          <Outlet />
+        </ScrollablePage>
       </ResponsiveLayoutContentContainer>
-      <ResponsiveLayoutSidecarContainer width={200} />
+      <ResponsiveLayoutSidecarContainer />
       <ResponsiveLayoutSpacer />
-    </Flex>
+    </ResponsiveLayoutPage>
   )
 }

@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
-import { Flex } from 'honorable'
 import { TabPanel } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
@@ -10,6 +9,8 @@ import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayout
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 
 import { useBreadcrumbs } from 'components/layout/Breadcrumbs'
+
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
 import Sidecar from './PodSidecar'
 import SideNav from './PodSideNav'
@@ -33,17 +34,8 @@ export default function Node() {
   }, [name, namespace, setBreadcrumbs])
 
   return (
-    <Flex
-      height="100%"
-      width="100%"
-      overflowY="hidden"
-      padding={theme.spacing.xlarge}
-      paddingTop={theme.spacing.large}
-    >
-      <ResponsiveLayoutSidenavContainer
-        width={240}
-        paddingTop={theme.spacing.xxxlarge}
-      >
+    <ResponsiveLayoutPage>
+      <ResponsiveLayoutSidenavContainer paddingTop={theme.spacing.xxxlarge}>
         <SideNav tabStateRef={tabStateRef} />
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
@@ -53,10 +45,10 @@ export default function Node() {
       >
         <Outlet />
       </TabPanel>
-      <ResponsiveLayoutSidecarContainer width="200px">
+      <ResponsiveLayoutSpacer />
+      <ResponsiveLayoutSidecarContainer>
         <Sidecar />
       </ResponsiveLayoutSidecarContainer>
-      <ResponsiveLayoutSpacer />
-    </Flex>
+    </ResponsiveLayoutPage>
   )
 }

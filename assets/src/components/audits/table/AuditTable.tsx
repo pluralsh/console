@@ -106,11 +106,22 @@ export default function AuditsTable() {
   }
 
   return (
-    <Table
-      data={audits}
-      columns={columns}
-      onScrollCapture={e => fetchMoreOnBottomReached(e?.target)}
-      maxHeight="calc(100vh - 244px)"
-    />
+    <Flex
+      direction="column"
+      height="100%"
+      overflow="hidden"
+      {...{
+        '& > div': {
+          maxHeight: '100%',
+        },
+      }}
+    >
+      <Table
+        data={audits}
+        columns={columns}
+        onScrollCapture={e => fetchMoreOnBottomReached(e?.target)}
+        maxHeight="100%"
+      />
+    </Flex>
   )
 }

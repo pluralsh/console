@@ -1,20 +1,26 @@
 import { Flex } from 'honorable'
 import { PageTitle } from '@pluralsh/design-system'
 
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
 import WebhooksHeader from './WebhooksHeader'
 import WebhooksList from './WebhooksList'
 
 export function Webhooks() {
   return (
-    <Flex
-      flexGrow={1}
-      flexDirection="column"
-      maxHeight="100%"
-      overflow="hidden"
+    <ScrollablePage
+      scrollable={false}
+      heading="Webhooks"
     >
-      <PageTitle heading="Webhooks" />
-      <WebhooksHeader />
-      <WebhooksList />
-    </Flex>
+      <Flex
+        direction="column"
+        height="100%"
+        overflow="hidden"
+        gap="medium"
+      >
+        <WebhooksHeader />
+        <WebhooksList />
+      </Flex>
+    </ScrollablePage>
   )
 }

@@ -24,7 +24,7 @@ export default function Configuration() {
   const [view, setView] = useState<Key>()
   const { appName } = useParams()
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
-  const { data, error } = useQuery(APPLICATION_Q, {
+  const { data, error, loading } = useQuery(APPLICATION_Q, {
     variables: { name: appName },
     fetchPolicy: 'network-only',
     onError: console.error,
@@ -35,6 +35,10 @@ export default function Configuration() {
     { text: appName, url: `/apps/${appName}` },
     { text: 'configuration', url: `/apps/${appName}/config` },
   ]), [appName, setBreadcrumbs])
+
+  console.log('error', error)
+  console.log('data', data)
+  console.log('loading', loading)
 
   if (error) return <ScrollablePage heading="Configuration">Cannot access configuration for this app.</ScrollablePage>
 
@@ -67,7 +71,8 @@ export default function Configuration() {
     <ScrollablePage
       heading="Configuration"
       headingContent={(
-        <><Flex grow={1} />
+        <>
+          <Flex grow={1} />
           <TabList
             margin={1}
             stateRef={tabStateRef}

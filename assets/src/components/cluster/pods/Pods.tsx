@@ -9,6 +9,7 @@ import { useQuery } from '@apollo/client'
 import { Div, Flex, useDebounce } from 'honorable'
 import {
   AppsIcon,
+  EmptyState,
   Input,
   ListBoxFooter,
   ListBoxItem,
@@ -219,24 +220,28 @@ export default function AllPods() {
             onChange={e => setFilterString(e.currentTarget.value)}
             marginBottom={theme.spacing.medium}
           />
-          <Flex
-            flexDirection="column"
-            overflow="hidden"
-            {...{
-              '& > div': {
-                maxHeight: '100%',
-              },
-            }}
-          >
-            <PodsList
-              pods={pods}
-              applications={data?.applications}
-              columns={columns}
-              reactTableOptions={reactTableOptions}
-              maxHeight="unset"
-              height="100%"
-            />
-          </Flex>
+          {!pods || pods.length === 0 ? (
+            <EmptyState message="No pods match your selection" />
+          ) : (
+            <Flex
+              flexDirection="column"
+              overflow="hidden"
+              {...{
+                '& > div': {
+                  maxHeight: '100%',
+                },
+              }}
+            >
+              <PodsList
+                pods={pods}
+                applications={data?.applications}
+                columns={columns}
+                reactTableOptions={reactTableOptions}
+                maxHeight="unset"
+                height="100%"
+              />
+            </Flex>
+          )}
         </Flex>
       )}
     </ResponsivePageFullWidth>

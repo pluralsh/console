@@ -1,9 +1,10 @@
 import { Flex } from 'honorable'
-import { Box } from 'grommet'
-import { PageTitle, TabPanel } from '@pluralsh/design-system'
+import { TabPanel } from '@pluralsh/design-system'
 import { useContext, useRef, useState } from 'react'
 
 import { LoginContext } from 'components/contexts'
+
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import UserList from './UsersList'
 import UserInvite from './UserInvite'
@@ -25,42 +26,41 @@ export default function Users() {
   const tabStateRef = useRef<any>(null)
 
   return (
-    <Flex
-      flexGrow={1}
-      flexDirection="column"
-      maxHeight="100%"
-    >
-      <PageTitle heading="Users">
+    <ScrollablePage
+      scrollable={false}
+      heading="Users"
+      headingContent={(
         <Flex
           alignItems="flex-end"
           gap="medium"
         >
           {/* <TabList
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey,
-              onSelectionChange: setSelectedKey,
-            }}
-          >
-            {directory.map(({ label, key }) => (
-              <SubTab
-                key={key}
-                textValue={label}
-              >
-                {label}
-              </SubTab>
-            ))}
-          </TabList> */}
+          stateRef={tabStateRef}
+          stateProps={{
+            orientation: 'horizontal',
+            selectedKey,
+            onSelectionChange: setSelectedKey,
+          }}
+        >
+          {directory.map(({ label, key }) => (
+            <SubTab
+              key={key}
+              textValue={label}
+            >
+              {label}
+            </SubTab>
+          ))}
+        </TabList> */}
           {/* Invites are only available when not using login with Plural. */}
           {configuration && !configuration?.pluralLogin && <UserInvite />}
         </Flex>
-      </PageTitle>
+      )}
+    >
       <TabPanel
         as={(
-          <Box
-            fill
-            gap="medium"
+          <Flex
+            direction="column"
+            height="100%"
           />
         )}
         stateRef={tabStateRef}
@@ -68,6 +68,6 @@ export default function Users() {
         {/* {selectedKey === 'Invites' && <Invites />} Add it once API will be ready. */}
         {selectedKey === 'Users' && <UserList />}
       </TabPanel>
-    </Flex>
+    </ScrollablePage>
   )
 }

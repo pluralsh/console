@@ -114,6 +114,8 @@ function UserManagementCard({ id, provider }) {
     <Card
       paddingHorizontal={100}
       paddingVertical="large"
+      maxHeight="100%"
+      overflowY="auto"
     >
       {navBlocker}
       <Flex
@@ -225,7 +227,12 @@ function UserManagementContent() {
       provider={installation.oidcProvider}
     />
   ) : (
-    <Flex>No OIDC provider configured.</Flex>
+    <Flex
+      maxHeight="100%"
+      overflowY="auto"
+    >
+      No OIDC provider configured.
+    </Flex>
   )
 }
 
@@ -241,7 +248,10 @@ export default function UserManagement() {
   [appName, setBreadcrumbs])
 
   return (
-    <ScrollablePage heading="User management">
+    <ScrollablePage
+      scrollable={false}
+      heading="User management"
+    >
       <PluralApi><UserManagementContent /></PluralApi>
     </ScrollablePage>
   )

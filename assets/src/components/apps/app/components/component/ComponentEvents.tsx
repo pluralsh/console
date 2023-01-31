@@ -1,6 +1,7 @@
-import { PageTitle } from '@pluralsh/design-system'
 import { useOutletContext } from 'react-router-dom'
 import { Event as EventT } from 'generated/graphql'
+
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import EventsTable from '../../../../utils/EventsTable'
 
@@ -14,9 +15,11 @@ export default function ComponentEvents() {
   const events: EventT[] = value?.events || []
 
   return (
-    <>
-      <PageTitle heading="Events" />
+    <ScrollablePage
+      scrollable={false}
+      heading="Events"
+    >
       <EventsTable events={events} />
-    </>
+    </ScrollablePage>
   )
 }

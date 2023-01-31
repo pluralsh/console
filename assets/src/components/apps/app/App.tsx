@@ -24,6 +24,8 @@ import { ensureURLValidity } from 'utils/url'
 
 import Prop from 'components/utils/Prop'
 
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+
 import { ResponsiveLayoutSidenavContainer } from '../../utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveLayoutContentContainer'
@@ -70,14 +72,8 @@ export default function App() {
   const validLinks = links?.filter(({ url }) => !!url)
 
   return (
-    <Flex
-      height="100%"
-      width="100%"
-      overflowY="hidden"
-      padding="large"
-      position="relative"
-    >
-      <ResponsiveLayoutSidenavContainer width={240}>
+    <ResponsiveLayoutPage>
+      <ResponsiveLayoutSidenavContainer>
         <AppSelector
           applications={applications}
           currentApp={currentApp}
@@ -108,12 +104,11 @@ export default function App() {
       >
         <Outlet context={{ setDashboard, setRunbook }} />
       </TabPanel>
-      <ResponsiveLayoutSidecarContainer width={200}>
+      <ResponsiveLayoutSidecarContainer>
         {validLinks?.length > 0 && (
           <Button
             secondary
             fontWeight={600}
-            marginTop="xxsmall"
             marginBottom="small"
             as="a"
             href={ensureURLValidity(links[0].url)}
@@ -164,6 +159,6 @@ export default function App() {
         </Flex>
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
-    </Flex>
+    </ResponsiveLayoutPage>
   )
 }

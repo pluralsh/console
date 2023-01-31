@@ -52,6 +52,10 @@ import { LoginContext } from 'components/contexts'
 
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
+import { useTheme } from 'styled-components'
+
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+
 import { ComponentIcon, ComponentStatus } from '../misc'
 
 const directory = [
@@ -72,6 +76,7 @@ const kindToQuery = {
 }
 
 export default function Component() {
+  const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { me } = useContext<any>(LoginContext)
@@ -80,8 +85,10 @@ export default function Component() {
   const { applications } = useContext<any>(InstallationContext)
   const pathPrefix = `/apps/${appName}/components/${componentKind}/${componentName}`
   const currentApp = applications.find(app => app.name === appName)
-  const { data, loading, refetch } = useQuery(kindToQuery[componentKind],
-    { variables: { name: componentName, namespace: appName }, pollInterval: POLL_INTERVAL })
+  const { data, loading, refetch } = useQuery(kindToQuery[componentKind], {
+    variables: { name: componentName, namespace: appName },
+    pollInterval: POLL_INTERVAL,
+  })
 
   useEffect(() => setBreadcrumbs([
     { text: 'apps', url: '/' },
@@ -105,20 +112,13 @@ export default function Component() {
     )
   }
 
-  const component = currentApp.status.components
-    .find(({ name, kind }) => name === componentName && kind.toLowerCase() === componentKind)
+  const component = currentApp.status.components.find(({ name, kind }) => name === componentName && kind.toLowerCase() === componentKind)
   const filteredDirectory = directory.filter(({ onlyFor }) => !onlyFor || onlyFor.includes(componentKind))
   const currentTab = filteredDirectory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
 
   return (
-    <Flex
-      height="100%"
-      width="100%"
-      overflowY="hidden"
-      padding="large"
-      position="relative"
-    >
-      <ResponsiveLayoutSidenavContainer width={240}>
+    <ResponsiveLayoutPage>
+      <ResponsiveLayoutSidenavContainer>
         <Flex
           align="center"
           gap="small"
@@ -172,21 +172,28 @@ export default function Component() {
         as={<ResponsiveLayoutContentContainer />}
         stateRef={tabStateRef}
       >
-        <Outlet context={{
-          component, data, loading, refetch,
-        }}
+        <Outlet
+          context={{
+            component,
+            data,
+            loading,
+            refetch,
+          }}
         />
       </TabPanel>
-      <ResponsiveLayoutSidecarContainer width={200}>
-        <PropsContainer marginTop={64}>
+      <ResponsiveLayoutSidecarContainer>
+        <PropsContainer marginTop={theme.spacing.xlarge + theme.spacing.medium}>
           <Prop title="Name">{componentName}</Prop>
           <Prop title="Namespace">{appName}</Prop>
-          <Prop title="Kind">{component?.group || 'v1'}/{component?.kind}</Prop>
-          <Prop title="Status"><ComponentStatus status={component?.status} /></Prop>
+          <Prop title="Kind">
+            {component?.group || 'v1'}/{component?.kind}
+          </Prop>
+          <Prop title="Status">
+            <ComponentStatus status={component?.status} />
+          </Prop>
         </PropsContainer>
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
-    </Flex>
+    </ResponsiveLayoutPage>
   )
 }
-

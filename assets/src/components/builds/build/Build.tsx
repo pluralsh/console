@@ -47,6 +47,8 @@ import { getIcon, hasIcons } from 'components/apps/misc'
 
 import { InstallationContext } from 'components/Installations'
 
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+
 import { BUILD_TYPE_DISPLAY_NAMES } from '../Build'
 
 import { BuildTimer } from './BuildTimer'
@@ -130,14 +132,8 @@ export default function Build() {
   const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
 
   return (
-    <Flex
-      height="100%"
-      width="100%"
-      overflowY="hidden"
-      padding="large"
-      position="relative"
-    >
-      <ResponsiveLayoutSidenavContainer width={240}>
+    <ResponsiveLayoutPage>
+      <ResponsiveLayoutSidenavContainer>
         <Flex
           align="center"
           gap="small"
@@ -197,7 +193,7 @@ export default function Build() {
       >
         <Outlet context={{ edges, build }} />
       </TabPanel>
-      <ResponsiveLayoutSidecarContainer width={200}>
+      <ResponsiveLayoutSidecarContainer>
         <Flex
           direction="column"
           gap="xsmall"
@@ -253,6 +249,6 @@ export default function Build() {
         </Flex>
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
-    </Flex>
+    </ResponsiveLayoutPage>
   )
 }

@@ -21,10 +21,15 @@ export default function CostAnalysis() {
   ]), [appName, setBreadcrumbs])
 
   return (
-    <ScrollablePage heading="Cost analysis">
+    <ScrollablePage
+      scrollable={false}
+      heading="Cost analysis"
+    >
       <Card
         paddingHorizontal={100}
         paddingVertical="large"
+        overflowY="auto"
+        maxHeight="100%"
       >
         {cost && <KubernetesCost cost={cost} />}
         {!cost && 'Cost data is not available.'}

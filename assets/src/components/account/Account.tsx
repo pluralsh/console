@@ -10,6 +10,7 @@ import { ResponsiveLayoutContentContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { LoginContext } from 'components/contexts'
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
 const getDirectory = (me, configuration) => [
   { path: 'users', label: 'Users', enabled: true },
@@ -34,14 +35,8 @@ export default function Account() {
   const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
 
   return (
-    <Flex
-      height="100%"
-      width="100%"
-      overflowY="hidden"
-      padding="large"
-      position="relative"
-    >
-      <ResponsiveLayoutSidenavContainer width={240}>
+    <ResponsiveLayoutPage>
+      <ResponsiveLayoutSidenavContainer>
         <TabList
           marginTop={90}
           stateRef={tabStateRef}
@@ -69,8 +64,8 @@ export default function Account() {
       >
         <Outlet />
       </TabPanel>
-      <ResponsiveLayoutSidecarContainer width={200} />
+      <ResponsiveLayoutSidecarContainer />
       <ResponsiveLayoutSpacer />
-    </Flex>
+    </ResponsiveLayoutPage>
   )
 }

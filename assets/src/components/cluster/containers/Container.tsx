@@ -1,8 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
-import { Flex } from 'honorable'
 import { LoopingLogo } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
 
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
@@ -14,6 +12,8 @@ import { useBreadcrumbs } from 'components/layout/Breadcrumbs'
 import { useQuery } from '@apollo/client'
 import { Pod } from 'generated/graphql'
 
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+
 import { POD_INFO_Q } from '../queries'
 import { POLL_INTERVAL } from '../constants'
 
@@ -24,7 +24,6 @@ import SideNav from './ContainerSideNav'
 import Sidecar from './ContainerSidecar'
 
 export default function PodShell() {
-  const theme = useTheme()
   const { setBreadcrumbs } = useBreadcrumbs()
 
   const { name, namespace, container: containerName } = useParams()
@@ -85,17 +84,8 @@ export default function PodShell() {
   } = transformedData
 
   return (
-    <Flex
-      height="100%"
-      width="100%"
-      overflowY="hidden"
-      padding={theme.spacing.large}
-      paddingLeft={theme.spacing.xlarge}
-      paddingRight={theme.spacing.xlarge}
-    >
-      <ResponsiveLayoutSidenavContainer
-        width={240}
-      >
+    <ResponsiveLayoutPage>
+      <ResponsiveLayoutSidenavContainer>
         <SideNav
           pod={pod}
           containers={containers}
@@ -107,13 +97,13 @@ export default function PodShell() {
         <PodShellShell />
       </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutSidecarContainer width="200px">
+      <ResponsiveLayoutSidecarContainer>
         <Sidecar
           pod={pod}
           container={container}
           containerStatus={containerStatus}
         />
       </ResponsiveLayoutSidecarContainer>
-    </Flex>
+    </ResponsiveLayoutPage>
   )
 }

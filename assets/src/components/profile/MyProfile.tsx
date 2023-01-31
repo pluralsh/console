@@ -15,6 +15,7 @@ import { ResponsiveLayoutContentContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { LoginContext } from 'components/contexts'
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
 const directory = [
   { path: 'me', label: 'Profile' },
@@ -36,14 +37,8 @@ export default function MyProfile() {
   const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
 
   return (
-    <Flex
-      height="100%"
-      width="100%"
-      overflowY="hidden"
-      padding="large"
-      position="relative"
-    >
-      <ResponsiveLayoutSidenavContainer width={240}>
+    <ResponsiveLayoutPage>
+      <ResponsiveLayoutSidenavContainer>
         <PageCard
           heading={me.name}
           icon={{ name: me.name, url: me.avatar, spacing: 'none' }}
@@ -76,8 +71,8 @@ export default function MyProfile() {
       >
         <Outlet />
       </TabPanel>
-      <ResponsiveLayoutSidecarContainer width={200} />
+      <ResponsiveLayoutSidecarContainer />
       <ResponsiveLayoutSpacer />
-    </Flex>
+    </ResponsiveLayoutPage>
   )
 }

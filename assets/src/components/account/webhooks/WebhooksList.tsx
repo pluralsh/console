@@ -23,7 +23,6 @@ export default function WebhooksList() {
 
   return (
     <Card
-      marginTop="medium"
       alignItems="top"
       display="flex"
       flexDirection="column"

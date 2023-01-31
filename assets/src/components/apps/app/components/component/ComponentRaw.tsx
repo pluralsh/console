@@ -1,4 +1,5 @@
 import { Code, PageTitle } from '@pluralsh/design-system'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useOutletContext } from 'react-router-dom'
 
 import { stringify } from 'yaml'
@@ -11,14 +12,17 @@ export default function ComponentRaw() {
   const value: any = Object.values(data).find(value => value !== undefined)
 
   return (
-    <>
-      <PageTitle heading="Raw" />
+    <ScrollablePage
+      scrollable={false}
+      heading="Raw"
+    >
       <Code
         language="yaml"
-        maxHeight="calc(100vh - 244px)"
+        maxHeight="100%"
+        overflowY="auto"
       >
         {stringify(JSON.parse(value?.raw))}
       </Code>
-    </>
+    </ScrollablePage>
   )
 }

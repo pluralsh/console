@@ -12,6 +12,8 @@ import { InstallationContext } from 'components/Installations'
 import { toMap, useQueryParams } from 'components/utils/query'
 import { Flex } from 'honorable'
 
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
 import LogsLabels from './LogsLabels'
 import LogsDownloader from './LogsDownloader'
 import LogsFilters from './LogsFilters'
@@ -48,8 +50,10 @@ export default function Logs() {
   ]), [appName, setBreadcrumbs])
 
   return (
-    <>
-      <PageTitle heading="Logs">
+    <ScrollablePage
+      heading="Logs"
+      scrollable={false}
+      headingContent={(
         <Flex
           justify="end"
           gap="medium"
@@ -77,23 +81,29 @@ export default function Logs() {
             setLabels={setLabels}
           />
         </Flex>
-      </PageTitle>
-      <Input
-        marginBottom={labelList?.length > 0 ? '' : 'medium'}
-        placeholder="Filter logs"
-        startIcon={(<SearchIcon size={14} />)}
-        value={search}
-        onChange={({ target: { value } }) => setSearch(value)}
-      />
-      <LogsLabels
-        labels={labelList}
-        removeLabel={removeLabel}
-      />
-      <LogsCard
-        application={currentApp}
-        query={logQuery}
-        addLabel={addLabel}
-      />
-    </>
+      )}
+    >
+      <Flex
+        height="100%"
+        flexDirection="column"
+      >
+        <Input
+          marginBottom={labelList?.length > 0 ? '' : 'medium'}
+          placeholder="Filter logs"
+          startIcon={(<SearchIcon size={14} />)}
+          value={search}
+          onChange={({ target: { value } }) => setSearch(value)}
+        />
+        <LogsLabels
+          labels={labelList}
+          removeLabel={removeLabel}
+        />
+        <LogsCard
+          application={currentApp}
+          query={logQuery}
+          addLabel={addLabel}
+        />
+      </Flex>
+    </ScrollablePage>
   )
 }

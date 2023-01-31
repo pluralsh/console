@@ -1,7 +1,6 @@
-import { PageTitle } from '@pluralsh/design-system'
 import { FlexProps } from 'honorable'
 import { ReactNode } from 'react'
-import styled, { CSSProperties, useTheme } from 'styled-components'
+import styled, { CSSProperties } from 'styled-components'
 
 import ConsolePageTitle from './ConsolePageTitle'
 
@@ -16,6 +15,7 @@ const ScrollablePageContent = styled.div<{
   overflowX: 'hidden',
   paddingTop: theme.spacing.medium,
   paddingRight: scrollable ? theme.spacing.small : 0,
+  paddingBottom: scrollable ? theme.spacing.xxlarge : theme.spacing.large,
   ...(extraStyles ?? {}),
   position: 'relative',
 }))

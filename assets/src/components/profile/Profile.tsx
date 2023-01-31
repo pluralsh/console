@@ -16,13 +16,18 @@ export function Profile() {
   const { me } = useContext<any>(LoginContext)
   const [name, setName] = useState<string>(me.name)
   const [email, setEmail] = useState<string>(me.email)
-  const [mutation, { loading }] = useMutation(UPDATE_USER, { variables: { attributes: { name, email } } })
+  const [mutation, { loading }] = useMutation(UPDATE_USER, {
+    variables: { attributes: { name, email } },
+  })
   const changed = name !== me.name || email !== me.email
   const valid = !isEmpty(name) && isValidEmail(email)
 
   return (
     <ScrollablePage heading="Profile">
-      <ContentCard overflowY="auto">
+      <ContentCard
+        maxHeight="100%"
+        overflowY="auto"
+      >
         <Box gap="small">
           <ValidatedInput
             label="Full name"
@@ -35,7 +40,7 @@ export function Profile() {
             width="100%"
             value={email}
             onChange={({ target: { value } }) => setEmail(value)}
-            validation={(email: string) : ValidationResponse => (isValidEmail(email)
+            validation={(email: string): ValidationResponse => (isValidEmail(email)
               ? { error: false, message: '' }
               : { error: true, message: 'Invalid email address' })}
           />

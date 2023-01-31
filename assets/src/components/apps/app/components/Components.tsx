@@ -4,7 +4,6 @@ import {
   EmptyState,
   ListBoxFooter,
   ListBoxItem,
-  PageTitle,
   Select,
   SelectButton,
 } from '@pluralsh/design-system'
@@ -21,6 +20,8 @@ import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
 import styled, { useTheme } from 'styled-components'
 import { Component as ComponentT } from 'generated/graphql'
+
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import Component from './Component'
 
@@ -82,8 +83,10 @@ export default function Components() {
   const sortedSelectedKinds = Array.from(selectedKinds).sort()
 
   return (
-    <>
-      <PageTitle heading="Components">
+    <ScrollablePage
+      scrollable={false}
+      heading="Components"
+      headingContent={(
         <Select
           label="All components"
           triggerButton={(
@@ -116,8 +119,10 @@ export default function Components() {
             />
           ))}
         </Select>
-      </PageTitle>
+      )}
+    >
       <Card
+        maxHeight="100%"
         direction="column"
         paddingRight="xxxsmall"
         overflowY="auto"
@@ -134,6 +139,6 @@ export default function Components() {
           ))
         )}
       </Card>
-    </>
+    </ScrollablePage>
   )
 }

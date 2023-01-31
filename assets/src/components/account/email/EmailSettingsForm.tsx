@@ -19,7 +19,8 @@ export default function EmailSettingsForm({ smtp }) {
   return (
     <Card
       direction="column"
-      overflow="hidden"
+      maxHeight="100%"
+      overflow="auto"
     >
       <Div
         direction="column"

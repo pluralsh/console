@@ -49,7 +49,7 @@ export default function Subheader() {
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer><Flex align="justify"><Breadcrumbs /></Flex></ResponsiveLayoutContentContainer>
-      <ResponsiveLayoutSidecarContainer width={200} />
+      <ResponsiveLayoutSidecarContainer />
       <ResponsiveLayoutSpacer />
     </Flex>
 

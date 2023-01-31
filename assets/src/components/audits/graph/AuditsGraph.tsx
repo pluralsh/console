@@ -21,8 +21,13 @@ export default function AuditsGraph() {
   }
 
   const metrics = data.auditMetrics.map(({ country, count }) => ({
-    id: byIso(country)?.iso3, value: count,
+    id: byIso(country)?.iso3,
+    value: count,
   }))
 
-  return <Card height="calc(100vh - 244px)"><Chloropleth data={metrics} /></Card>
+  return (
+    <Card height="100%">
+      <Chloropleth data={metrics} />
+    </Card>
+  )
 }

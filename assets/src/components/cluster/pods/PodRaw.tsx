@@ -5,6 +5,8 @@ import { LoopingLogo, PageTitle } from '@pluralsh/design-system'
 
 import { Pod } from 'generated/graphql'
 
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
 import { POLL_INTERVAL } from '../constants'
 import { POD_RAW_Q } from '../queries'
 
@@ -29,9 +31,11 @@ export default function NodeEvents() {
   const content = stringify(JSON.parse(raw))
 
   return (
-    <>
-      <PageTitle heading="Raw" />
+    <ScrollablePage
+      scrollable={false}
+      heading="Raw"
+    >
       <RawPageCode>{content}</RawPageCode>
-    </>
+    </ScrollablePage>
   )
 }
