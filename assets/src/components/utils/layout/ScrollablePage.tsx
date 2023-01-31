@@ -8,6 +8,7 @@ const ScrollablePageContent = styled.div<{ scrollable?: boolean, extraStyles?: C
   maxHeight: '100%',
   width: '100%',
   overflowY: scrollable ? 'auto' : 'hidden',
+  overflowX: 'hidden',
   paddingTop: theme.spacing.large,
   paddingRight: scrollable ? theme.spacing.small : 0,
   ...(extraStyles ?? {}),

@@ -21,14 +21,25 @@ export function ClusterMetrics({
       gap="xlarge"
       align="center"
     >
-      <ClusterGauges
-        nodes={nodes}
-        usage={usage}
-      />
-      <SaturationGraphs
-        cpu={Metrics.CPU}
-        mem={Metrics.Memory}
-      />
+      <Flex
+        flex={false}
+        flexDirection="row"
+        alignItems="stretch"
+        justifyContent="center"
+        width="100%"
+        gap="xsmall"
+        overflow="visible"
+        wrap="wrap"
+      >
+        <ClusterGauges
+          nodes={nodes}
+          usage={usage}
+        />
+        <SaturationGraphs
+          cpu={Metrics.CPU}
+          mem={Metrics.Memory}
+        />
+      </Flex>
     </Flex>
   )
 }

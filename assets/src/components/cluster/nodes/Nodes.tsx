@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useContext, useEffect, useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { sumBy } from 'lodash'
 
@@ -9,6 +9,8 @@ import type { Node, NodeMetric } from 'generated/graphql'
 import { cpuParser, memoryParser } from 'utils/kubernetes'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
+
+import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
 import { POLL_INTERVAL } from '../constants'
 import { NODES_Q } from '../queries'
@@ -22,6 +24,11 @@ export type ResourceUsage = {
 } | null
 
 export default function Nodes() {
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
+
+  useEffect(() => setBreadcrumbs([{ text: 'nodes', url: '/nodes' }]),
+    [setBreadcrumbs])
+
   const { data, refetch } = useQuery<{
     nodes: Node[]
     nodeMetrics: NodeMetric[]
@@ -42,30 +49,28 @@ export default function Nodes() {
     return { cpu, mem }
   }, [data])
 
-  if (!data) {
-    return <LoopingLogo />
-  }
-
   return (
-    <ResponsivePageFullWidth
-      heading="Nodes"
-    >
-      <Flex
-        direction="column"
-        gap="xlarge"
-      >
-        <Card padding="xlarge">
-          <ClusterMetrics
+    <ResponsivePageFullWidth heading="Nodes">
+      {!data ? (
+        <LoopingLogo />
+      ) : (
+        <Flex
+          direction="column"
+          gap="xlarge"
+        >
+          <Card padding="xlarge">
+            <ClusterMetrics
+              nodes={data.nodes}
+              usage={usage}
+            />
+          </Card>
+          <NodesList
             nodes={data.nodes}
-            usage={usage}
+            nodeMetrics={data.nodeMetrics}
+            refetch={refetch}
           />
-        </Card>
-        <NodesList
-          nodes={data.nodes}
-          nodeMetrics={data.nodeMetrics}
-          refetch={refetch}
-        />
-      </Flex>
+        </Flex>
+      )}
     </ResponsivePageFullWidth>
   )
 }

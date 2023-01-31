@@ -92,17 +92,7 @@ export function ClusterGauges({
   }
 
   return (
-    <Flex
-      flex={false}
-      flexDirection="row"
-      alignItems="stretch"
-      justifyContent="center"
-      width="100%"
-      gap="xsmall"
-      marginBottom="xlarge"
-      overflow="visible"
-      wrap="wrap"
-    >
+    <>
       <GaugeWrap
         heading="CPU Reservation"
         width="auto"
@@ -148,6 +138,6 @@ export function ClusterGauges({
           centerVal={`${Math.round((chartData.pods.used / chartData.pods.total) * 100)}%`}
         />
       </GaugeWrap>
-    </Flex>
+    </>
   )
 }

@@ -1,7 +1,9 @@
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
 import { stringify } from 'yaml'
-import { LoopingLogo, PageTitle } from '@pluralsh/design-system'
+import { LoopingLogo } from '@pluralsh/design-system'
+
+import { Flex } from 'honorable/dist/components/Flex/Flex'
 
 import { POLL_INTERVAL } from '../constants'
 import { NODE_RAW_Q } from '../queries'
@@ -28,9 +30,12 @@ export default function NodeEvents() {
   const content = stringify(JSON.parse(raw))
 
   return (
-    <>
-      <PageTitle heading="Raw" />
+    <Flex
+      direction="column"
+      height="100%"
+      overflow="hidden"
+    >
       <RawPageCode>{content}</RawPageCode>
-    </>
+    </Flex>
   )
 }

@@ -33,6 +33,8 @@ import { isEmpty } from 'lodash'
 
 import { useTheme } from 'styled-components'
 
+import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
+
 import App from './AppCard'
 import { appState } from './misc'
 
@@ -153,9 +155,6 @@ export default function Apps() {
   const tabStateRef = useRef<any>(null)
   const theme = useTheme()
 
-  useEffect(() => setBreadcrumbs([{ text: 'apps', url: '/' }]),
-    [setBreadcrumbs])
-
   const handleFilter = useCallback(f => applications.filter(app => !f || appState(app).readiness === f),
     [applications])
 
@@ -182,100 +181,88 @@ export default function Apps() {
   if (isEmpty(applications)) return <LoopingLogo />
 
   return (
-    <Flex
-      direction="column"
-      grow={1}
-    >
-      <ScrollablePage
-        margin="large"
-        contentStyles={{
-          paddingRight: theme.spacing.xxxsmall,
-          paddingTop: theme.spacing.xsmall,
-        }}
-        heading="Apps"
-        headingContent={(
-          <>
-            <Flex grow={1} />
-            <TabList
-              stateRef={tabStateRef}
-              stateProps={{
-                orientation: 'horizontal',
-                selectedKey: filter,
-                onSelectionChange: setFilter,
-              }}
-            >
-              {FILTERS.map(({ label, key, color }) => {
-                const appCount = appsByState[key]?.length
+    <ResponsivePageFullWidth
+      heading="Apps"
+      headingContent={(
+        <>
+          <Flex grow={1} />
+          <TabList
+            stateRef={tabStateRef}
+            stateProps={{
+              orientation: 'horizontal',
+              selectedKey: filter,
+              onSelectionChange: setFilter,
+            }}
+          >
+            {FILTERS.map(({ label, key, color }) => {
+              const appCount = appsByState[key]?.length
 
-                return (
-                  <SubTab
-                    key={key}
-                    textValue={label}
-                  >
-                    <Flex align="center">
-                      {label}
-                      {!!appCount && (
-                        <Chip
-                          marginLeft="xsmall"
-                          size="small"
-                          severity={color}
-                        >
-                          {appCount}
-                        </Chip>
-                      )}
-                    </Flex>
-                  </SubTab>
-                )
-              })}
-            </TabList>
-            <Input
-              placeholder="Filter applications"
-              startIcon={<MagnifyingGlassIcon size={14} />}
-              value={query}
-              onChange={event => setQuery(event.target.value)}
-              width={320}
-            />
-          </>
-        )}
+              return (
+                <SubTab
+                  key={key}
+                  textValue={label}
+                >
+                  <Flex align="center">
+                    {label}
+                    {!!appCount && (
+                      <Chip
+                        marginLeft="xsmall"
+                        size="small"
+                        severity={color}
+                      >
+                        {appCount}
+                      </Chip>
+                    )}
+                  </Flex>
+                </SubTab>
+              )
+            })}
+          </TabList>
+          <Input
+            placeholder="Filter applications"
+            startIcon={<MagnifyingGlassIcon size={14} />}
+            value={query}
+            onChange={event => setQuery(event.target.value)}
+            width={320}
+          />
+        </>
+      )}
+    >
+      <Flex
+        justify="center"
+        paddingBottom="xlarge"
+        direction="row"
+        wrap="wrap"
+        gap="small"
       >
-        <Flex
-          justify="center"
-          margin="medium"
-          paddingLeft="xsmall"
-          paddingBottom="xxxlarge"
-          direction="row"
-          wrap="wrap"
-          gap="small"
-        >
-          {!noFilteredApps
-            && filteredApps.map(app => (
-              <App
-                key={app.name}
-                app={app}
-              />
-            ))}
-          {!noFilteredApps && (
-            <Flex
-              grow={1}
-              basis="45%"
+        {!noFilteredApps
+          && filteredApps.map(app => (
+            <App
+              key={app.name}
+              app={app}
             />
-          )}
-          {noFilteredApps && query && (
-            <QueryEmptyState
-              query={query}
-              setQuery={setQuery}
-            />
-          )}
-          {noFilteredApps && !query && filter === Readiness.Ready && (
-            <ReadyEmptyState />
-          )}
-          {noFilteredApps
-            && !query
-            && [Readiness.InProgress, Readiness.Failed].includes(filter) && (
-            <PendingFailedEmptyState filter={filter} />
-          )}
-        </Flex>
-      </ScrollablePage>
-    </Flex>
+          ))}
+        {!noFilteredApps && (
+          <Flex
+            grow={1}
+            basis="45%"
+          />
+        )}
+        {noFilteredApps && query && (
+          <QueryEmptyState
+            query={query}
+            setQuery={setQuery}
+          />
+        )}
+        {noFilteredApps && !query && filter === Readiness.Ready && (
+          <ReadyEmptyState />
+        )}
+        {noFilteredApps
+          && !query
+          && [Readiness.InProgress, Readiness.Failed].includes(filter) && (
+          <PendingFailedEmptyState filter={filter} />
+        )}
+      </Flex>
+    </ResponsivePageFullWidth>
   )
 }

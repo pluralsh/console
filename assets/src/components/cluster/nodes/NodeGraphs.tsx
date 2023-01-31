@@ -73,47 +73,37 @@ export function NodeGraphs({
   return (
     <Flex
       flex={false}
-      direction="column"
-      gap="xlarge"
+      flexDirection="row"
       align="center"
+      justifyContent="center"
+      width="100%"
+      gap="medium"
+      overflow="visible"
     >
-      <Flex
-        flex={false}
-        flexDirection="row"
-        align="center"
-        justifyContent="center"
-        width="100%"
-        gap="medium"
-        marginBottom="xlarge"
-        overflow="visible"
+      <GaugeWrap
+        heading="CPU Reservation"
+        width="auto"
+        height="auto"
       >
-        <GaugeWrap
-          heading="CPU Reservation"
-          width="auto"
-          height="auto"
-        >
-          <ResourceGauge
-            {...chartData.cpu}
-            type="cpu"
-          />
-        </GaugeWrap>
-        <GaugeWrap
-          heading="Memory Reservation"
-          width="auto"
-          height="auto"
-        >
-          <ResourceGauge
-            {...chartData.memory}
-            type="memory"
-          />
-        </GaugeWrap>
-      </Flex>
-      <Div width="100%">
-        <SaturationGraphs
-          cpu={localize(NodeMetrics.CPU)}
-          mem={localize(NodeMetrics.Memory)}
+        <ResourceGauge
+          {...chartData.cpu}
+          type="cpu"
         />
-      </Div>
+      </GaugeWrap>
+      <GaugeWrap
+        heading="Memory Reservation"
+        width="auto"
+        height="auto"
+      >
+        <ResourceGauge
+          {...chartData.memory}
+          type="memory"
+        />
+      </GaugeWrap>
+      <SaturationGraphs
+        cpu={localize(NodeMetrics.CPU)}
+        mem={localize(NodeMetrics.Memory)}
+      />
     </Flex>
   )
 }
