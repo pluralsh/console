@@ -1,9 +1,10 @@
 import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
-import { Box } from 'grommet'
 import { format } from 'components/apps/app/dashboards/dashboard/misc'
 
 import { Graph } from 'components/utils/Graph'
+
+import { Div } from 'honorable'
 
 import { CLUSTER_SATURATION } from '../queries'
 
@@ -38,16 +39,16 @@ export function SaturationGraphs({ cpu, mem }) {
   }
 
   return (
-    <Box
-      fill="horizontal"
-      gap="small"
-      height="300px"
+    <Div
+      height="240px"
+      width="300px"
+      flexGrow={1}
     >
       <Graph
         data={result}
         yFormat={v => format(v, 'percent')}
         tickRotation={undefined}
       />
-    </Box>
+    </Div>
   )
 }

@@ -6,7 +6,7 @@ import {
   forwardRef,
 } from 'react'
 import { Link } from 'react-router-dom'
-import styled from 'styled-components'
+import styled, { CSSProperties } from 'styled-components'
 import { TabBaseProps } from '@pluralsh/design-system'
 
 import { UnstyledLink } from './Link'
@@ -35,7 +35,9 @@ ref) => (
   </UnstyledLink>
 ))
 
-export const LinkTabWrap = styled(LinkTabWrapUnstyled)(({
+export const LinkTabWrap = styled(LinkTabWrapUnstyled)<{
+  $extendStyle?: CSSProperties
+}>(({
   theme, vertical, subTab, $extendStyle,
 }) => ({
   ...(vertical ? { width: '100%' } : {}),

@@ -1,24 +1,49 @@
 import { useContext, useEffect, useRef } from 'react'
-import { Outlet, useParams } from 'react-router-dom'
-import { Flex } from 'honorable'
-import { TabPanel } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
-
-import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
-import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
-import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
+import { Outlet, useMatch, useParams } from 'react-router-dom'
+import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
-import NodeSideNav from './NodeSideNav'
-import NodeSidecar from './NodeSidecar'
+import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
+
+import { LinkTabWrap } from 'components/utils/Tabs'
+import { current } from 'immer'
+
+const DIRECTORY = [
+  { path: '', label: 'Info' },
+  { path: 'events', label: 'Events' },
+  { path: 'raw', label: 'Raw' },
+] as const
+
+function HeadingTabList({ tabStateRef, currentTab }: any) {
+  return (
+    <TabList
+      stateRef={tabStateRef}
+      stateProps={{
+        orientation: 'horizontal',
+        selectedKey: currentTab?.path,
+      }}
+    >
+      {DIRECTORY.map(({ label, path }) => (
+        <LinkTabWrap
+          key={path}
+          textValue={label}
+          to={path}
+          subTab
+        >
+          <SubTab>{label}</SubTab>
+        </LinkTabWrap>
+      ))}
+    </TabList>
+  )
+}
 
 export default function Node() {
   const { name } = useParams()
   const tabStateRef = useRef<any>()
-  const theme = useTheme()
+  const subpath = useMatch('/nodes/:name/:subpath')?.params?.subpath || ''
 
+  const currentTab = DIRECTORY.find(({ path }) => path === subpath)
   const { setBreadcrumbs } = useContext(BreadcrumbsContext)
 
   useEffect(() => {
@@ -32,30 +57,22 @@ export default function Node() {
   }, [name, setBreadcrumbs])
 
   return (
-    <Flex
-      height="100%"
-      width="100%"
-      overflowY="hidden"
-      padding={theme.spacing.xlarge}
-      paddingTop={theme.spacing.large}
-    >
-      <ResponsiveLayoutSidenavContainer
-        width={240}
-        paddingTop={theme.spacing.xxxlarge}
-      >
-        <NodeSideNav tabStateRef={tabStateRef} />
-      </ResponsiveLayoutSidenavContainer>
-      <ResponsiveLayoutSpacer />
-      <TabPanel
-        as={<ResponsiveLayoutContentContainer overflow="visible" />}
-        stateRef={tabStateRef}
-      >
-        <Outlet />
-      </TabPanel>
-      <ResponsiveLayoutSidecarContainer width="200px">
-        <NodeSidecar />
-      </ResponsiveLayoutSidecarContainer>
-      <ResponsiveLayoutSpacer />
-    </Flex>
+    <TabPanel
+      as={(
+        <ResponsivePageFullWidth
+          scrollable={(currentTab?.label ?? 'Info') === 'Info'}
+          heading={name}
+          headingContent={(
+            <HeadingTabList
+              tabStateRef={tabStateRef}
+              currentTab={currentTab}
+            />
+          )}
+          // eslint-disable-next-line react/no-children-prop
+          children={<Outlet />}
+        />
+      )}
+      stateRef={tabStateRef}
+    />
   )
 }

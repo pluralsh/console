@@ -2,9 +2,9 @@ import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
 
 import type { Event } from 'generated/graphql'
-import { LoopingLogo } from 'components/utils/AnimatedLogo'
+import { LoopingLogo } from '@pluralsh/design-system'
 
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import { Flex } from 'honorable'
 
 import { POLL_INTERVAL } from '../constants'
 import { NODE_EVENTS_Q } from '../queries'
@@ -28,8 +28,12 @@ export default function NodeEvents() {
   const { node: { events } } = data
 
   return (
-    <ScrollablePage heading="Events">
+    <Flex
+      direction="column"
+      height="100%"
+      overflow="hidden"
+    >
       <EventsTable events={events} />
-    </ScrollablePage>
+    </Flex>
   )
 }

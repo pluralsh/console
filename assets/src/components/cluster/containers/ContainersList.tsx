@@ -275,8 +275,6 @@ export function ContainersList({
     return <>No containers available.</>
   }
 
-  console.log(containers)
-
   return (
     <Table
       loose

@@ -128,5 +128,5 @@ export function LabelWithIcon({
 }
 
 export const TABLE_HEIGHT = {
-  maxHeight: 'clamp(390px, calc(100vh - 420px), 600px)',
+  maxHeight: 'clamp(390px, calc(100vh - 260px), 1000px)',
 } satisfies CSSProperties

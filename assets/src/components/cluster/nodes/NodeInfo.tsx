@@ -11,7 +11,6 @@ import {
   Node as NodeT,
   Pod,
 } from 'generated/graphql'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { POLL_INTERVAL } from '../constants'
 import {
@@ -65,33 +64,32 @@ export default function NodeInfo() {
   const { node, nodeMetric } = data
 
   return (
-    <ScrollablePage heading="Info">
-      <Flex
-        direction="column"
-        gap="xlarge"
-      >
-        <section>
-          <SubTitle>Pods</SubTitle>
-          <PodsList
-            columns={columns}
+    <Flex
+      direction="column"
+      gap="xlarge"
+      className="podinfo"
+    >
+      <section>
+        <SubTitle>Overview</SubTitle>
+        <Card padding="medium">
+          <NodeGraphs
+            status={node.status}
             pods={node.pods}
+            name={name}
+            usage={nodeMetric.usage}
           />
-        </section>
-        <section>
-          <SubTitle>Overview</SubTitle>
-          <Card padding="medium">
-            <NodeGraphs
-              status={node.status}
-              pods={node.pods}
-              name={name}
-              usage={nodeMetric.usage}
-            />
-          </Card>
-        </section>
-        <section>
-          <Metadata metadata={node.metadata} />
-        </section>
-      </Flex>
-    </ScrollablePage>
+        </Card>
+      </section>
+      <section>
+        <SubTitle>Pods</SubTitle>
+        <PodsList
+          columns={columns}
+          pods={node.pods}
+        />
+      </section>
+      <section>
+        <Metadata metadata={node.metadata} />
+      </section>
+    </Flex>
   )
 }

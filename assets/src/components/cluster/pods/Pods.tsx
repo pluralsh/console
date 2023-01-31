@@ -1,4 +1,10 @@
-import { forwardRef, useMemo, useState } from 'react'
+import {
+  forwardRef,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { useQuery } from '@apollo/client'
 import { Div, Flex, useDebounce } from 'honorable'
 import {
@@ -7,7 +13,6 @@ import {
   ListBoxFooter,
   ListBoxItem,
   LoopingLogo,
-  PageTitle,
   SearchIcon,
   Select,
 } from '@pluralsh/design-system'
@@ -16,6 +21,10 @@ import { ListBoxFooterProps } from '@pluralsh/design-system/dist/components/List
 import styled, { useTheme } from 'styled-components'
 
 import type { RootQueryType } from 'generated/graphql'
+
+import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
+
+import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
 import { PODS_Q } from '../queries'
 import { POLL_INTERVAL } from '../constants'
@@ -63,11 +72,12 @@ const NamespaceListFooter = forwardRef<
 })
 
 export default function AllPods() {
-  const {
-    data,
-    refetch,
-    error,
-  } = useQuery<{
+  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
+
+  useEffect(() => setBreadcrumbs([{ text: 'pods', url: '/pods' }]),
+    [setBreadcrumbs])
+
+  const { data, refetch, error } = useQuery<{
     pods: RootQueryType['pods']
     applications: RootQueryType['applications']
     namespaces: RootQueryType['namespaces']
@@ -152,74 +162,83 @@ export default function AllPods() {
 
   const reactTableOptions = useMemo(() => ({
     state: { globalFilter: debouncedFilterString },
-  }), [debouncedFilterString])
+  }),
+  [debouncedFilterString])
 
   if (error) {
     return <>Sorry, something went wrong</>
   }
-  if (!data) {
-    return <LoopingLogo />
-  }
 
   return (
-    <Flex
-      direction="column"
-      height="100%"
+    <ResponsivePageFullWidth
+      heading="Pods"
+      scrollable={false}
+      headingContent={
+        !namespaces || namespaces.length === 0 ? null : (
+          <Div width={320}>
+            <Select
+              label="Filter by namespace"
+              placement="right"
+              width={320}
+              selectedKey={namespace}
+              isOpen={selectIsOpen}
+              onOpenChange={setSelectIsOpen}
+              onSelectionChange={toNamespace => navigate(`/pods/${toNamespace}`)}
+              dropdownFooterFixed={(
+                <NamespaceListFooter
+                  onClick={() => {
+                    navigate('/pods')
+                    setSelectIsOpen(false)
+                  }}
+                />
+              )}
+            >
+              {namespaces?.map((namespace, i) => (
+                <ListBoxItem
+                  key={`${namespace?.metadata?.name || i}`}
+                  textValue={`${namespace?.metadata?.name}`}
+                  label={`${namespace?.metadata?.name}`}
+                />
+              )) || []}
+            </Select>
+          </Div>
+        )
+      }
     >
-      <PageTitle heading="Pods">
-        <Div width={320}>
-          <Select
-            label="Filter by namespace"
-            placement="right"
-            width={320}
-            selectedKey={namespace}
-            isOpen={selectIsOpen}
-            onOpenChange={setSelectIsOpen}
-            onSelectionChange={toNamespace => navigate(`/pods/${toNamespace}`)}
-            dropdownFooterFixed={(
-              <NamespaceListFooter
-                onClick={() => {
-                  navigate('/pods')
-                  setSelectIsOpen(false)
-                }}
-              />
-            )}
-          >
-            {namespaces?.map((namespace, i) => (
-              <ListBoxItem
-                key={`${namespace?.metadata?.name || i}`}
-                textValue={`${namespace?.metadata?.name}`}
-                label={`${namespace?.metadata?.name}`}
-              />
-            )) || []}
-          </Select>
-        </Div>
-      </PageTitle>
-      <Input
-        startIcon={<SearchIcon />}
-        placeholder="Filter pods"
-        value={filterString}
-        onChange={e => setFilterString(e.currentTarget.value)}
-        marginBottom={theme.spacing.medium}
-      />
-      <Flex
-        flexDirection="column"
-        overflow="hidden"
-        {...({
-          '& > div': {
-            maxHeight: '100%',
-          },
-        })}
-      >
-        <PodsList
-          pods={pods}
-          applications={data?.applications}
-          columns={columns}
-          reactTableOptions={reactTableOptions}
-          maxHeight="unset"
+      {!data ? (
+        <LoopingLogo />
+      ) : (
+        <Flex
+          direction="column"
           height="100%"
-        />
-      </Flex>
-    </Flex>
+        >
+          <Input
+            startIcon={<SearchIcon />}
+            placeholder="Filter pods"
+            value={filterString}
+            onChange={e => setFilterString(e.currentTarget.value)}
+            marginBottom={theme.spacing.medium}
+          />
+          <Flex
+            flexDirection="column"
+            overflow="hidden"
+            {...{
+              '& > div': {
+                maxHeight: '100%',
+              },
+            }}
+          >
+            <PodsList
+              pods={pods}
+              applications={data?.applications}
+              columns={columns}
+              reactTableOptions={reactTableOptions}
+              maxHeight="unset"
+              height="100%"
+            />
+          </Flex>
+        </Flex>
+      )}
+    </ResponsivePageFullWidth>
   )
 }
