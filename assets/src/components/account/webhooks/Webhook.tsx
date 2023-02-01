@@ -46,6 +46,7 @@ export default function Webhook({
           size="medium"
           textValue="Slack"
           type="floating"
+          minWidth={32}
         />
         <Div
           flexGrow={1}
