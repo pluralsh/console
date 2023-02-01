@@ -64,7 +64,7 @@ export type TableProps =
         Parameters<typeof useReactTable>,
         'data' | 'columns'
       >
-      onRowClick(e: MouseEvent<HTMLTableRowElement>, row: Row<any>): void
+      onRowClick?: (e: MouseEvent<HTMLTableRowElement>, row: Row<any>) => void
     }
 
 const propTypes = {}
@@ -520,7 +520,7 @@ function TableRef({
                 <>
                   <Tr
                     key={row.id}
-                    onClick={e => onRowClick(e, row)}
+                    onClick={e => onRowClick?.(e, row)}
                   >
                     {row.getVisibleCells().map(cell => (
                       <Td
