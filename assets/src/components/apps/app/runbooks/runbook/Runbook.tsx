@@ -131,6 +131,7 @@ export default function Runbook() {
 
   return (
     <ScrollablePage
+      scrollable={selectedTab !== 'executions'}
       heading={(
         <Div>
           <Select
@@ -181,43 +182,47 @@ export default function Runbook() {
       {selectedTab === 'runbook' && (
         // eslint-disable-next-line react/jsx-no-constructed-context-values
         <ActionContext.Provider value={{ ref, setRef }}>
-          {runbook?.status?.alerts?.length > 0 && (
-            <>
-              <H3
-                subtitle1
-                marginBottom="medium"
-              >
-                Alerts
-              </H3>
-              <RunbookAlerts
-                alerts={runbook.status.alerts}
-                marginBottom="xxlarge"
-              />
-            </>
-          )}
-          <H3 subtitle1>Scaling</H3>
           <Flex
-            direction="row"
-            gap="medium"
-            wrap="wrap"
-            paddingTop="medium"
-            paddingBottom="medium"
-            position="sticky"
-            top={-theme.spacing.large}
-            backgroundColor="fill-zero"
-            zIndex={10}
+            direction="column"
+            gap="xxlarge"
           >
-            <RangePicker
-              duration={duration}
-              setDuration={setDuration}
-            />
-            <Flex grow={1} />
-            <ActionContainer />
+            <Div>
+              <H3 subtitle1>Scaling</H3>
+              <Flex
+                direction="row"
+                gap="medium"
+                wrap="wrap"
+                paddingTop="medium"
+                paddingBottom="medium"
+                position="sticky"
+                top={-theme.spacing.large}
+                backgroundColor="fill-zero"
+                zIndex={10}
+              >
+                <RangePicker
+                  duration={duration}
+                  setDuration={setDuration}
+                />
+                <Flex grow={1} />
+                <ActionContainer />
+              </Flex>
+              <RunbookDisplay
+                root={runbook.spec.display}
+                data={runbook.data}
+              />
+            </Div>
+            {runbook?.status?.alerts?.length > 0 && (
+              <Div>
+                <H3
+                  subtitle1
+                  marginBottom="medium"
+                >
+                  Alerts
+                </H3>
+                <RunbookAlerts alerts={runbook.status.alerts} />
+              </Div>
+            )}
           </Flex>
-          <RunbookDisplay
-            root={runbook.spec.display}
-            data={runbook.data}
-          />
         </ActionContext.Provider>
       )}
       {selectedTab === 'executions' && <RunbookExecutions />}
