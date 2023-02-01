@@ -5,28 +5,13 @@ import {
   useRef,
   useState,
 } from 'react'
-
 import { Box, Text } from 'grommet'
-
 import { SubTab, TabList } from '@pluralsh/design-system'
-
 import { Flex, Span } from 'honorable'
-
-import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-
-import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
-
-import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
-
-import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-
-import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
 import Avatar from '../utils/Avatar'
 
@@ -69,45 +54,37 @@ export default function Audits() {
     [setBreadcrumbs])
 
   return (
-    <ResponsiveLayoutPage>
-      <ResponsiveLayoutSidenavContainer />
-      <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutContentContainer overflowY="hidden">
-        <ScrollablePage
-          scrollable={false}
-          heading="Audits"
-          headingContent={(
-            <>
-              <Flex grow={1} />
-              <TabList
-                margin={1}
-                stateRef={tabStateRef}
-                stateProps={{
-                  orientation: 'horizontal',
-                  selectedKey: view,
-                  onSelectionChange: view => {
-                    setView(view)
-                    navigate(view as string)
-                  },
-                }}
+    <ResponsivePageFullWidth
+      scrollable={false}
+      heading="Audits"
+      headingContent={(
+        <>
+          <Flex grow={1} />
+          <TabList
+            margin={1}
+            stateRef={tabStateRef}
+            stateProps={{
+              orientation: 'horizontal',
+              selectedKey: view,
+              onSelectionChange: view => {
+                setView(view)
+                navigate(view as string)
+              },
+            }}
+          >
+            {DIRECTORY.map(({ path, label }) => (
+              <SubTab
+                key={path}
+                textValue={label}
               >
-                {DIRECTORY.map(({ path, label }) => (
-                  <SubTab
-                    key={path}
-                    textValue={label}
-                  >
-                    <Span fontWeight={600}>{label}</Span>
-                  </SubTab>
-                ))}
-              </TabList>
-            </>
-          )}
-        >
-          <Outlet />
-        </ScrollablePage>
-      </ResponsiveLayoutContentContainer>
-      <ResponsiveLayoutSidecarContainer />
-      <ResponsiveLayoutSpacer />
-    </ResponsiveLayoutPage>
+                <Span fontWeight={600}>{label}</Span>
+              </SubTab>
+            ))}
+          </TabList>
+        </>
+      )}
+    >
+      <Outlet />
+    </ResponsivePageFullWidth>
   )
 }
