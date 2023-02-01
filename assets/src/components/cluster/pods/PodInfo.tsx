@@ -18,6 +18,7 @@ import { SubTitle } from '../nodes/SubTitle'
 import { ContainersList } from '../containers/ContainersList'
 
 import PodMetadata from './PodMetadata'
+import PodConditions from './PodConditions'
 
 export const statusesToRecord = (statuses?: Maybe<Maybe<ContainerStatus>[]>) => (statuses || []).reduce((acc, container) => ({
   ...acc,
@@ -62,10 +63,13 @@ export default function PodInfo() {
   if (!data) return <LoopingLogo />
 
   const { pod } = data
-  const containerStatuses = statusesToRecord(pod?.status?.containerStatuses)
-  const initContainerStatuses = statusesToRecord(pod?.status?.initContainerStatuses)
   const containers = pod.spec.containers || []
   const initContainers = pod.spec.initContainers || []
+  const containerStatuses = statusesToRecord(pod.status?.containerStatuses)
+  const initContainerStatuses = statusesToRecord(pod.status?.initContainerStatuses)
+  const conditions = pod?.status?.conditions || []
+
+  console.log(conditions)
 
   return (
     <ScrollablePage
@@ -86,6 +90,10 @@ export default function PodInfo() {
             namespace={namespace}
             podName={name}
           />
+        </section>
+        <section>
+          <SubTitle>Conditions</SubTitle>
+          <PodConditions conditions={conditions} />
         </section>
         <section>
           <SubTitle>Metadata</SubTitle>
