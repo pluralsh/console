@@ -1,6 +1,7 @@
 import {
   Avatar,
   Date,
+  EmptyState,
   LoopingLogo,
   Table,
 } from '@pluralsh/design-system'
@@ -65,14 +66,29 @@ export function RunbookExecutions() {
 
     const { scrollHeight, scrollTop, clientHeight } = element
 
-    // Once scrolled within FETCH_MARGIN of the bottom of the table, fetch more data if there is any.
-    if (scrollHeight - scrollTop - clientHeight < FETCH_MARGIN && !loading && pageInfo.hasNextPage) {
+      // Once scrolled within FETCH_MARGIN of the bottom of the table, fetch more data if there is any.
+    if (
+      scrollHeight - scrollTop - clientHeight < FETCH_MARGIN
+        && !loading
+        && pageInfo.hasNextPage
+    ) {
       fetchMore({
         variables: { cursor: pageInfo.endCursor },
-        updateQuery: (prev, { fetchMoreResult: { runbook: { executions: { edges, pageInfo } } } }) => update(prev, 'runbook.executions', executions => ({ edges: [...executions.edges, ...edges], pageInfo })),
+        updateQuery: (prev,
+          {
+            fetchMoreResult: {
+              runbook: {
+                executions: { edges, pageInfo },
+              },
+            },
+          }) => update(prev, 'runbook.executions', executions => ({
+          edges: [...executions.edges, ...edges],
+          pageInfo,
+        })),
       })
     }
-  }, [fetchMore, loading, pageInfo])
+  },
+  [fetchMore, loading, pageInfo])
 
   if (!data) {
     return (
@@ -85,14 +101,27 @@ export function RunbookExecutions() {
     )
   }
 
-  if (isEmpty(executions)) return 'No executions available.'
+  if (isEmpty(executions)) {
+    return <EmptyState message="No executions available." />
+  }
 
   return (
-    <Table
-      data={executions}
-      columns={columns}
-      onScrollCapture={e => fetchMoreOnBottomReached(e?.target)}
-      maxHeight="calc(100vh - 244px)"
-    />
+    <Flex
+      direction="column"
+      height="100%"
+      overflow="hidden"
+      {...{
+        '& > div': {
+          maxHeight: '100%',
+        },
+      }}
+    >
+      <Table
+        data={executions}
+        columns={columns}
+        onScrollCapture={e => fetchMoreOnBottomReached(e?.target)}
+        maxHeight="100%"
+      />
+    </Flex>
   )
 }

@@ -226,8 +226,8 @@ export default function Apps() {
       {!noFilteredApps ? (
         <Div
           display="grid"
-          gap="large"
-          gridTemplateColumns="repeat(auto-fit, minmax(500px, 1fr))"
+          gap="small"
+          gridTemplateColumns="repeat(auto-fit, minmax(450px, 1fr))"
         >
           {!noFilteredApps
             && filteredApps.map(app => (
