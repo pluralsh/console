@@ -102,8 +102,8 @@
     "styled-components": "5.3.6",
     "tinyqueue": "2.0.3",
     "uuid": "9.0.0",
+    "xterm": "5.1.0",
     "xterm-addon-fit": "0.7.0",
-    "xterm-for-react": "1.0.4",
     "xterm-theme": "1.1.0",
     "yaml": "2.2.1"
   },

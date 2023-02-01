@@ -3,7 +3,6 @@ import {
   CliIcon,
   CloseIcon,
   Input,
-  PageTitle,
   PencilIcon,
   ReloadIcon,
 } from '@pluralsh/design-system'
@@ -20,7 +19,9 @@ import TerminalThemeSelector from 'components/terminal/TerminalThemeSelector'
 
 import styled from 'styled-components'
 
-import { ShellContext, Terminal, TerminalActions } from '../../terminal/Terminal'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
+import { ShellContext, TerminalActions, TerminalScreen } from '../../terminal/Terminal'
 
 export const DEFAULT_COMMAND = '/bin/sh'
 
@@ -232,11 +233,10 @@ function ShellWithContext() {
   const shellContext = useContext(ShellContext)
 
   return (
-    <Flex
-      flexDirection="column"
-      height="100%"
-    >
-      <PageTitle heading={container}>
+    <ScrollablePage
+      scrollable={false}
+      heading={container}
+      headingContent={(
         <Flex
           align="center"
           gap="medium"
@@ -253,19 +253,25 @@ function ShellWithContext() {
           </Button>
           <TerminalThemeSelector />
         </Flex>
-      </PageTitle>
-      <ShellCommand
-        command={command}
-        defaultCommand={defaultCommand}
-        isDefault={isDefault}
-        setCommand={setCommand}
-      />
-      <Terminal
-        room={`pod:${namespace}:${name}:${container}`}
-        command={command}
-        header={`Connecting to pod ${name} using ${command}...`}
-      />
-    </Flex>
+      )}
+    >
+      <Flex
+        direction="column"
+        height="100%"
+      >
+        <ShellCommand
+          command={command}
+          defaultCommand={defaultCommand}
+          isDefault={isDefault}
+          setCommand={setCommand}
+        />
+        <TerminalScreen
+          room={`pod:${namespace}:${name}:${container}`}
+          command={command}
+          header={`Connecting to pod ${name} using ${command}...`}
+        />
+      </Flex>
+    </ScrollablePage>
   )
 }
 
