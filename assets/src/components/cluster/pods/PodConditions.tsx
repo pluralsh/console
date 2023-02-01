@@ -4,32 +4,34 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { PodCondition as PodConditionT } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 
+import { TableText } from '../TableElements'
+
 const COLUMN_HELPER = createColumnHelper<PodConditionT>()
 
 const columns = [
   COLUMN_HELPER.accessor(condition => condition.lastTransitionTime, {
     id: 'timestamp',
-    cell: lastTransitionTime => <Date date={lastTransitionTime.getValue()} />,
+    cell: lastTransitionTime => <TableText><Date date={lastTransitionTime.getValue()} /></TableText>,
     header: 'Timestamp',
   }),
   COLUMN_HELPER.accessor(condition => condition.type, {
     id: 'type',
-    cell: type => type.getValue(),
+    cell: type => <TableText>{type.getValue()}</TableText>,
     header: 'Type',
   }),
   COLUMN_HELPER.accessor(condition => condition.status, {
     id: 'status',
-    cell: status => status.getValue(),
+    cell: status => <TableText>{status.getValue()}</TableText>,
     header: 'Status',
   }),
   COLUMN_HELPER.accessor(condition => condition.reason, {
     id: 'reason',
-    cell: reason => reason.getValue() ?? '-',
+    cell: reason => <TableText>{reason.getValue() ?? '-'}</TableText>,
     header: 'Reason',
   }),
   COLUMN_HELPER.accessor(condition => condition.message, {
     id: 'message',
-    cell: message => message.getValue() ?? '-',
+    cell: message => <TableText>{message.getValue() ?? '-'}</TableText>,
     header: 'Message',
   }),
 
