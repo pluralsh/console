@@ -31,16 +31,16 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
   const navigate = useNavigate()
   const onResetRef = useRef<{onReset: Dispatch<void>}>({ onReset: () => {} })
   const [inProgress, setInProgress] = useState<boolean>(false)
-  const [selectedApplications, setSelectedApplications] = useState<Array<WizardStepConfig>>([])
   const [steps, setSteps] = useState<Array<WizardStepConfig>>([])
   const [stepsLoading, setStepsLoading] = useState(false)
   const [error, setError] = useState()
+  const [defaultSteps, setDefaultSteps] = useState<Array<WizardStepConfig>>([])
   const { applications: installedApplications } = useContext(InstallationContext as React.Context<any>)
   const { data: { repositories: { edges: applicationNodes } = { edges: undefined } } = {}, loading } = useQuery(SEARCH_REPOS, {
     variables: { query: '' },
   })
 
-  const applications = applicationNodes?.map(({ node }) => node)
+  const applications = useMemo(() => applicationNodes?.map(({ node }) => node), [applicationNodes])
   const installableApplications = useMemo(() => applications?.filter(app => !installedApplications?.find(s => s.name === app.name)),
     [applications, installedApplications])
 
@@ -57,7 +57,7 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
             data: appendConnection(builds, installRecipe, 'builds'),
           })
         })
-      }).catch(err => console.error(err))
+      }).catch(err => setError(err))
       .finally(() => {
         setStepsLoading(false)
         setOpen(false)
@@ -66,7 +66,7 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
       })
   }, [client, setOpen, setVisible, navigate])
 
-  useEffect(() => {
+  const onSelect = useCallback(selectedApplications => {
     const build = async () => {
       const steps = await buildSteps(client, selectedApplications)
 
@@ -74,15 +74,18 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
     }
 
     setStepsLoading(true)
-    build().then(() => setStepsLoading(false)).catch(err => {
-      setError(err)
-      setStepsLoading(false)
-      onResetRef?.current?.onReset()
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [client, selectedApplications.length])
+    build()
+      .then(() => setStepsLoading(false))
+      .catch(err => {
+        setError(err)
+        setStepsLoading(false)
+        onResetRef?.current?.onReset()
+      })
+  }, [client])
 
-  if (loading) {
+  useEffect(() => setDefaultSteps(toDefaultSteps(installableApplications)), [installableApplications])
+
+  if (loading || defaultSteps.length === 0) {
     return (
       <Box
         overflow="hidden"
@@ -108,8 +111,8 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
       <Wizard
         onClose={() => (inProgress ? setConfirmClose(true) : setOpen(false))}
         onComplete={completed => setInProgress(completed)}
-        onSelect={apps => setSelectedApplications(apps)}
-        defaultSteps={toDefaultSteps(installableApplications)}
+        onSelect={onSelect}
+        defaultSteps={defaultSteps}
         dependencySteps={steps}
         limit={5}
         loading={stepsLoading}
