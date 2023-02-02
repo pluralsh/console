@@ -62,6 +62,7 @@ export default function Ingress() {
   const loadBalancer = ingress.status?.loadBalancer
   const hasIngress = !!loadBalancer?.ingress && !isEmpty(loadBalancer.ingress)
   const rules = ingress.spec?.rules || []
+  console.log(loadBalancer.ingress)
 
   return (
     <Flex direction="column">
@@ -70,10 +71,10 @@ export default function Ingress() {
           <H2 marginBottom="medium">Status</H2>
           <Card padding="large">
             <PropWide
-              title="IP"
+              title={loadBalancer.ingress[0].ip ? "IP" : "Hostname"}
               fontWeight={600}
             >
-              {loadBalancer.ingress[0].ip || '-'}
+              {loadBalancer.ingress[0].ip || loadBalancer.ingress[0].hostname || '-'}
             </PropWide>
           </Card>
         </>

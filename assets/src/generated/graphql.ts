@@ -35,7 +35,7 @@ export type ApplicationDelta = {
 
 export type ApplicationDescriptor = {
   __typename?: 'ApplicationDescriptor';
-  description: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
   icons?: Maybe<Array<Maybe<Scalars['String']>>>;
   links?: Maybe<Array<Maybe<ApplicationLink>>>;
   type: Scalars['String'];
@@ -182,9 +182,19 @@ export type BuildEdge = {
   node?: Maybe<Build>;
 };
 
+export type BuildInfo = {
+  __typename?: 'BuildInfo';
+  all?: Maybe<Scalars['Int']>;
+  failed?: Maybe<Scalars['Int']>;
+  queued?: Maybe<Scalars['Int']>;
+  running?: Maybe<Scalars['Int']>;
+  successful?: Maybe<Scalars['Int']>;
+};
+
 export enum BuildType {
   Approval = 'APPROVAL',
   Bounce = 'BOUNCE',
+  Dedicated = 'DEDICATED',
   Deploy = 'DEPLOY',
   Destroy = 'DESTROY',
   Install = 'INSTALL'
@@ -292,6 +302,7 @@ export type ConfigurationItem = {
   default?: Maybe<Scalars['String']>;
   documentation?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
+  optional?: Maybe<Scalars['Boolean']>;
   placeholder?: Maybe<Scalars['String']>;
   type?: Maybe<Scalars['String']>;
   validation?: Maybe<ConfigurationValidation>;
@@ -1002,6 +1013,11 @@ export type PrometheusDatasource = {
   query: Scalars['String'];
 };
 
+export enum ReadType {
+  Build = 'BUILD',
+  Notification = 'NOTIFICATION'
+}
+
 export type Recipe = {
   __typename?: 'Recipe';
   description?: Maybe<Scalars['String']>;
@@ -1154,6 +1170,7 @@ export type RootMutationType = {
   installRecipe?: Maybe<Build>;
   installStack?: Maybe<Build>;
   loginLink?: Maybe<User>;
+  markRead?: Maybe<User>;
   oauthCallback?: Maybe<User>;
   overlayConfiguration?: Maybe<Build>;
   readNotifications?: Maybe<User>;
@@ -1283,6 +1300,11 @@ export type RootMutationTypeLoginLinkArgs = {
 };
 
 
+export type RootMutationTypeMarkReadArgs = {
+  type?: InputMaybe<ReadType>;
+};
+
+
 export type RootMutationTypeOauthCallbackArgs = {
   code: Scalars['String'];
   redirect?: InputMaybe<Scalars['String']>;
@@ -1349,7 +1371,9 @@ export type RootQueryType = {
   auditMetrics?: Maybe<Array<Maybe<AuditMetric>>>;
   audits?: Maybe<AuditConnection>;
   build?: Maybe<Build>;
+  buildInfo?: Maybe<BuildInfo>;
   builds?: Maybe<BuildConnection>;
+  cachedPods?: Maybe<Array<Maybe<Pod>>>;
   certificate?: Maybe<Certificate>;
   clusterInfo?: Maybe<ClusterInfo>;
   configuration?: Maybe<ConsoleConfiguration>;
@@ -1422,6 +1446,11 @@ export type RootQueryTypeBuildsArgs = {
   before?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
+};
+
+
+export type RootQueryTypeCachedPodsArgs = {
+  namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
 
@@ -1592,6 +1621,7 @@ export type RootQueryTypeRolesArgs = {
   before?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
+  q?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -1943,6 +1973,7 @@ export type User = {
   __typename?: 'User';
   backgroundColor?: Maybe<Scalars['String']>;
   boundRoles?: Maybe<Array<Maybe<Role>>>;
+  buildTimestamp?: Maybe<Scalars['DateTime']>;
   deletedAt?: Maybe<Scalars['DateTime']>;
   email: Scalars['String'];
   id: Scalars['ID'];
