@@ -1,4 +1,9 @@
-import { Dispatch, ReactElement, createContext } from 'react'
+import {
+  Dispatch,
+  ReactElement,
+  SetStateAction,
+  createContext,
+} from 'react'
 
 import createIcon from '../icons/createIcon'
 
@@ -8,7 +13,7 @@ import { Installer } from './Installer'
 
 type ContextProps<T = unknown> = {
   steps: Array<StepConfig<T>>
-  setSteps: Dispatch<Array<StepConfig<T>>>
+  setSteps: Dispatch<SetStateAction<Array<StepConfig<T>>>>
   active: number
   setActive: Dispatch<number>
   completed: boolean

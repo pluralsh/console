@@ -226,7 +226,7 @@ function StandaloneTemplate() {
   return (
     <Flex
       width="100%"
-      height="1000px"
+      height="750px"
     >
       <Wizard
         defaultSteps={DEFAULT_STEPS}

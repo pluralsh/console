@@ -1,11 +1,11 @@
 import styled from 'styled-components'
 
 import {
+  createRef,
   useCallback,
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react'
 
@@ -61,7 +61,7 @@ function PickerUnstyled({ items, ...props }: PickerProps): JSX.Element {
   const { onSelect, selected, selectedCount } = usePicker()
   const [search, setSearch] = useState<string>(undefined)
   const [scrollable, setScrollable] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const scrollRef = createRef<HTMLDivElement>()
   const isScrollbarVisible = (el: HTMLDivElement) => el?.scrollHeight > el?.clientHeight
   const filtered = useMemo(() => items.filter(item => (search ? item.label.toLowerCase().includes(search) : true)), [items, search])
 

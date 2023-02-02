@@ -87,7 +87,7 @@ type WizardProps = {
   onClose?: MouseEventHandler<void>
   onComplete?: (completed: boolean) => void
   onSelect?: (selected: Array<StepConfig>) => void
-  onResetRef?: MutableRefObject<{onReset: Dispatch<void>}>
+  onResetRef?: MutableRefObject<{ onReset: Dispatch<void> }>
   ref?: Ref<HTMLDivElement>
   children?: {
     stepper?: ReactElement,
@@ -111,17 +111,21 @@ function WizardUnstyled({
     [steps, completed, onComplete])
   useEffect(() => onSelect && onSelect(selected), [onSelect, selected])
   useEffect(() => {
-    if (IsEmpty(dependencySteps)) {
-      if (steps.some(s => s.isDependency)) onReset()
+    setSteps(steps => {
+      if (IsEmpty(dependencySteps)) {
+        if (steps.some(s => s.isDependency)) onReset()
 
-      return
-    }
+        return steps
+      }
 
-    const arr = steps.filter(step => !step.isDependency)
+      const arr = steps.filter(step => !step.isDependency)
 
-    arr.splice(1, 0, ...dependencySteps)
-    setSteps(arr)
-  }, [dependencySteps])
+      arr.splice(1, 0, ...dependencySteps)
+
+      return arr
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dependencySteps?.length, onReset, setSteps])
 
   return (
     <div

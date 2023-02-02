@@ -12,48 +12,60 @@ import { ContextProps, StepConfig, WizardContext } from './context'
 
 const useActive = <T = unknown>() => {
   const { steps, setSteps, active: activeIdx } = useContext<ContextProps<T>>(WizardContext)
-  const active: StepConfig<T> = useMemo<StepConfig<T>>(() => steps?.at(activeIdx), [activeIdx, steps])
-  const valid = useMemo(() => active.isDefault || active.isValid, [active, steps])
+  const active: StepConfig<T> = useMemo<StepConfig<T>>(() => steps.at(activeIdx), [activeIdx, steps])
+  const valid = useMemo(() => active.isDefault || active.isValid, [active])
   const completed = useMemo(() => !active.isDefault && active.isCompleted, [active])
 
   const setValid = useCallback((valid: boolean) => {
-    if (valid === active.isValid) {
-      return
-    }
+    setSteps(steps => {
+      const active = steps.at(activeIdx)
 
-    const updated = { ...active, isValid: valid } as StepConfig<T>
-    const arr = Array.from(steps)
+      if (valid === active.isValid) {
+        return steps
+      }
 
-    arr[activeIdx] = updated
+      const updated = { ...active, isValid: valid } as StepConfig<T>
+      const arr = Array.from(steps)
 
-    setSteps(arr)
-  }, [active, steps, activeIdx, setSteps])
+      arr[activeIdx] = updated
+
+      return arr
+    })
+  }, [activeIdx, setSteps])
 
   const setCompleted = useCallback((completed: boolean) => {
-    if (completed === active.isCompleted) {
-      return
-    }
+    setSteps(steps => {
+      const active = steps.at(activeIdx)
 
-    const updated = { ...active, isCompleted: completed } as StepConfig<T>
-    const arr = Array.from(steps)
+      if (completed === active.isCompleted) {
+        return steps
+      }
 
-    arr[activeIdx] = updated
+      const updated = { ...active, isCompleted: completed } as StepConfig<T>
+      const arr = Array.from(steps)
 
-    setSteps(arr)
-  }, [active, steps, activeIdx, setSteps])
+      arr[activeIdx] = updated
+
+      return arr
+    })
+  }, [activeIdx, setSteps])
 
   const setData = useCallback((data: T) => {
-    if (IsEmpty(data) || IsEqual(data, active.data)) {
-      return
-    }
+    setSteps(steps => {
+      const active = steps.at(activeIdx)
 
-    const updated = { ...active, data } as StepConfig<T>
-    const arr = Array.from(steps)
+      if (IsEmpty(data) || IsEqual(data, active.data)) {
+        return steps
+      }
 
-    arr[activeIdx] = updated
+      const updated = { ...active, data } as StepConfig<T>
+      const arr = Array.from(steps)
 
-    setSteps(arr)
-  }, [active, steps, activeIdx, setSteps])
+      arr[activeIdx] = updated
+
+      return arr
+    })
+  }, [activeIdx, setSteps])
 
   return {
     active, setValid, setData, setCompleted, valid, completed,
@@ -93,12 +105,10 @@ const useNavigation = () => {
   }, [steps, active, setActive])
 
   const onReset = useCallback(() => {
-    const defaultSteps = steps.filter(step => step.isDefault || step.isPlaceholder)
-
     setActive(0)
-    setSteps(defaultSteps)
     setCompleted(false)
-  }, [steps, setActive, setSteps, setCompleted])
+    setSteps(steps => steps.filter(step => step.isDefault || step.isPlaceholder))
+  }, [setActive, setSteps, setCompleted])
 
   const onEdit = useCallback((step: StepConfig) => {
     const idx = steps.findIndex(s => s.key === step.key)
@@ -132,20 +142,22 @@ const usePicker = () => {
   const { steps, setSteps } = useContext(WizardContext)
 
   const onSelect = useCallback((elem: StepConfig) => {
-    const idx = steps.findIndex(s => s.label === elem.label)
-    const isDependency = steps.at(idx)?.isDependency
-    const arr = Array.from(steps)
+    setSteps(steps => {
+      const idx = steps.findIndex(s => s.label === elem.label)
+      const isDependency = steps.at(idx)?.isDependency
+      const arr = Array.from(steps)
 
-    if (idx > -1) {
-      arr.splice(idx, 1)
-    }
+      if (idx > -1) {
+        arr.splice(idx, 1)
+      }
 
-    if (idx < 0 || (idx > -1 && isDependency)) {
-      arr.splice(-2, 0, elem)
-    }
+      if (idx < 0 || (idx > -1 && isDependency)) {
+        arr.splice(-2, 0, elem)
+      }
 
-    setSteps(arr)
-  }, [steps, setSteps])
+      return arr
+    })
+  }, [setSteps])
 
   const selected = useMemo(() => steps.filter(step => !step.isDefault && !step.isPlaceholder && !step.isDependency), [steps])
   const requiredLength = useMemo(() => steps.filter(step => step.isRequired).length, [steps])
@@ -170,9 +182,11 @@ const useStepper = <T = unknown>() => {
 }
 
 const useWizard = (initialSteps: Array<StepConfig> = [], limit = 10): ContextProps => {
-  const [steps, setSteps] = useState<Array<StepConfig>>(initialSteps)
+  const [steps, setSteps] = useState<Array<StepConfig>>(initialSteps ?? [])
   const [active, setActive] = useState<number>(0)
   const [completed, setCompleted] = useState<boolean>(false)
+
+  useEffect(() => setSteps(initialSteps), [initialSteps])
 
   return {
     steps,
