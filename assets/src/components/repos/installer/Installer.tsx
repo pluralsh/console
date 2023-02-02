@@ -57,7 +57,7 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
             data: appendConnection(builds, installRecipe, 'builds'),
           })
         })
-      }).catch(err => console.error(err))
+      }).catch(err => setError(err))
       .finally(() => {
         setStepsLoading(false)
         setOpen(false)

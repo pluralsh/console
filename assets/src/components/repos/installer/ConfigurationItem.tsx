@@ -43,8 +43,6 @@ function bucketModifier(this: {configuration}, value: string, trim = false) {
 }
 function domainModifier(this: {configuration}, value: string, trim = false) {
   const { configuration } = this
-
-  console.log(configuration)
   const subdomain = deepFetch(configuration, 'manifest.network.subdomain') || ''
   const suffix = subdomain ? `.${subdomain}` : ''
 
