@@ -29,8 +29,8 @@ const isNullishIsh = (val: any) => {
 
 export const numishSort: SortingFn<any> = (thingA, thingB, colId) => {
   console.log('thingA', thingA)
-  const a = thingA.getValue(colId)
-  const b = thingB.getValue(colId)
+  const a = thingA.getValue<any>(colId)
+  const b = thingB.getValue<any>(colId)
 
   console.log({ a, b })
   if (isNullishIsh(a) && isNullishIsh(b)) {

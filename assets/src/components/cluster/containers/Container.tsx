@@ -43,9 +43,6 @@ function HeadingTabList({ tabStateRef }: any) {
       ?.subpath || ''
   const currentTab = DIRECTORY.find(({ path }) => path === subpath)
 
-  console.log('subpath', subpath)
-  console.log('currentTab', currentTab)
-
   return (
     <TabList
       stateRef={tabStateRef}

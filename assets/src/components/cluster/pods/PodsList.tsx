@@ -199,14 +199,14 @@ export const ColMemoryReservation = columnHelper.accessor(row => row.memory.requ
     header: 'Memory',
   })
 
-export const ColCpuReservation = columnHelper.accessor(row => (row.cpu.requests),
+export const ColCpuReservation = columnHelper.accessor(row => (row?.cpu?.requests),
   {
     id: 'cpu-reservations',
     enableSorting: true,
     sortingFn: numishSort,
-    cell: ({ row: { original }, ...props }) => (
+    cell: ({ row: { original }, getValue }) => (
       <Usage
-        used={original?.cpu?.requests}
+        used={getValue()}
         total={original?.cpu?.limits}
       />
     ),
