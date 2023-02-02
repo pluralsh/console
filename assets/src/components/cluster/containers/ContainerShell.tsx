@@ -4,7 +4,8 @@ import {
   CloseIcon,
   Input,
   PencilIcon,
-  ReloadIcon,
+  ToolIcon,
+  Tooltip,
 } from '@pluralsh/design-system'
 import {
   useContext,
@@ -15,11 +16,7 @@ import {
 import { Flex, Form, Span } from 'honorable'
 import { useParams } from 'react-router-dom'
 
-import TerminalThemeSelector from 'components/terminal/TerminalThemeSelector'
-
 import styled from 'styled-components'
-
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { ShellContext, TerminalActions, TerminalScreen } from '../../terminal/Terminal'
 
@@ -134,7 +131,6 @@ export function ShellCommand({
     <Form
       display="flex"
       gap="xsmall"
-      marginBottom="xsmall"
       onSubmit={e => {
         e.preventDefault()
         setCommand(inputVal)
@@ -233,31 +229,13 @@ function ShellWithContext() {
   const shellContext = useContext(ShellContext)
 
   return (
-    <ScrollablePage
-      scrollable={false}
-      heading={container}
-      headingContent={(
-        <Flex
-          align="center"
-          gap="medium"
-        >
-          <Button
-            small
-            tertiary
-            startIcon={<ReloadIcon />}
-            onClick={() => {
-              shellContext?.current?.handleResetSize()
-            }}
-          >
-            Repair viewport
-          </Button>
-          <TerminalThemeSelector />
-        </Flex>
-      )}
+    <Flex
+      direction="column"
+      height="100%"
+      gap="medium"
     >
       <Flex
-        direction="column"
-        height="100%"
+        gap="medium"
       >
         <ShellCommand
           command={command}
@@ -265,13 +243,25 @@ function ShellWithContext() {
           isDefault={isDefault}
           setCommand={setCommand}
         />
-        <TerminalScreen
-          room={`pod:${namespace}:${name}:${container}`}
-          command={command}
-          header={`Connecting to pod ${name} using ${command}...`}
-        />
+        <Tooltip label="Repair viewport">
+          <Button
+            floating
+            small
+            onClick={() => {
+              shellContext?.current?.handleResetSize()
+            }}
+          ><ToolIcon size={16} />
+          </Button>
+        </Tooltip>
+        {/* <TerminalThemeSelector /> */}
       </Flex>
-    </ScrollablePage>
+
+      <TerminalScreen
+        room={`pod:${namespace}:${name}:${container}`}
+        command={command}
+        header={`Connecting to pod ${name} using ${command}...`}
+      />
+    </Flex>
   )
 }
 

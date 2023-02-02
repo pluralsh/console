@@ -17,6 +17,7 @@ import Component from '../components/apps/app/components/component/Component'
 import ComponentInfo from '../components/apps/app/components/component/ComponentInfo'
 import ComponentEvents from '../components/apps/app/components/component/ComponentEvents'
 import ComponentRaw from '../components/apps/app/components/component/ComponentRaw'
+import ComponentMetadata from '../components/apps/app/components/component/ComponentMetadata'
 
 export const appsRoutes = [
   <Route
@@ -103,6 +104,10 @@ export const appsRoutes = [
     <Route
       path="raw"
       element={<ComponentRaw />}
+    />
+    <Route
+      path="metadata"
+      element={<ComponentMetadata />}
     />
   </Route>,
 ]

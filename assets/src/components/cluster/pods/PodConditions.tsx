@@ -1,7 +1,7 @@
 import { Date, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { PodCondition as PodConditionT } from 'generated/graphql'
+import { Maybe, PodCondition as PodConditionT } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 
 import { TableText } from '../TableElements'
@@ -37,7 +37,7 @@ const columns = [
 
 ]
 
-export default function PodConditions({ conditions }: { conditions?: PodConditionT[] }) {
+export default function PodConditions({ conditions }: { conditions?: Maybe<PodConditionT>[] }) {
   if (!conditions || isEmpty(conditions)) {
     return <>No conditions available.</>
   }

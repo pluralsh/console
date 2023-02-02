@@ -15,6 +15,8 @@ import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
 import { isEmpty } from 'lodash'
 
+import { FullHeightTableWrap } from '../../../../utils/layout/FullHeightTableWrap'
+
 const columnHelper = createColumnHelper<any>()
 
 const columns = [
@@ -106,22 +108,13 @@ export function RunbookExecutions() {
   }
 
   return (
-    <Flex
-      direction="column"
-      height="100%"
-      overflow="hidden"
-      {...{
-        '& > div': {
-          maxHeight: '100%',
-        },
-      }}
-    >
+    <FullHeightTableWrap>
       <Table
         data={executions}
         columns={columns}
         onScrollCapture={e => fetchMoreOnBottomReached(e?.target)}
         maxHeight="100%"
       />
-    </Flex>
+    </FullHeightTableWrap>
   )
 }

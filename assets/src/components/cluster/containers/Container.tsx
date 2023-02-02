@@ -1,32 +1,85 @@
-import { useEffect, useMemo } from 'react'
-import { useParams } from 'react-router-dom'
-import { LoopingLogo } from '@pluralsh/design-system'
-
-import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
-import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
-import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
+import { useEffect, useMemo, useRef } from 'react'
+import {
+  Outlet,
+  useMatch,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom'
+import {
+  EmptyState,
+  LoopingLogo,
+  SubTab,
+  TabList,
+  TabPanel,
+} from '@pluralsh/design-system'
 
 import { useBreadcrumbs } from 'components/layout/Breadcrumbs'
 
 import { useQuery } from '@apollo/client'
-import { Pod } from 'generated/graphql'
+import {
+  ContainerStatus,
+  Container as ContainerT,
+  Maybe,
+  Pod,
+} from 'generated/graphql'
 
-import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
+
+import { LinkTabWrap } from 'components/utils/Tabs'
 
 import { POD_INFO_Q } from '../queries'
 import { POLL_INTERVAL } from '../constants'
 
 import { statusesToRecord } from '../pods/PodInfo'
 
-import PodShellShell from './ContainerShell'
-import SideNav from './ContainerSideNav'
-import Sidecar from './ContainerSidecar'
+const DIRECTORY = [
+  { path: '', label: 'Cloud shell' },
+  { path: 'metadata', label: 'Metadata' },
+] as const
 
-export default function PodShell() {
+function HeadingTabList({ tabStateRef }: any) {
+  const subpath
+    = useMatch('/pods/:namespace/:name/shell/:container/:subpath')?.params
+      ?.subpath || ''
+  const currentTab = DIRECTORY.find(({ path }) => path === subpath)
+
+  return (
+    <TabList
+      stateRef={tabStateRef}
+      stateProps={{
+        orientation: 'horizontal',
+        selectedKey: currentTab?.path,
+      }}
+    >
+      {DIRECTORY.map(({ label, path }) => (
+        <LinkTabWrap
+          key={path}
+          textValue={label}
+          to={path}
+          subTab
+        >
+          <SubTab>{label}</SubTab>
+        </LinkTabWrap>
+      ))}
+    </TabList>
+  )
+}
+
+type ContainerContext = {
+  container: Maybe<ContainerT> | undefined
+  containerStatus: Maybe<ContainerStatus>
+  pod: Pod
+  containers: Maybe<ContainerT>[]
+  initContainers: Maybe<ContainerT>[]
+}
+
+export default function Container() {
+  const {
+    name, namespace, container: containerName,
+  } = useParams()
   const { setBreadcrumbs } = useBreadcrumbs()
+  const tabStateRef = useRef<any>()
 
-  const { name, namespace, container: containerName } = useParams()
   const { data, error } = useQuery<{ pod: Pod }>(POD_INFO_Q, {
     variables: { name, namespace },
     pollInterval: POLL_INTERVAL,
@@ -49,7 +102,7 @@ export default function PodShell() {
     }
   }, [containerName, name, namespace, setBreadcrumbs])
 
-  const transformedData = useMemo(() => {
+  const transformedData: ContainerContext | undefined = useMemo(() => {
     if (!data?.pod) {
       return undefined
     }
@@ -70,40 +123,37 @@ export default function PodShell() {
         || initContainerStatuses[container?.name]
 
     return {
-      container, containerStatus, pod, containers, initContainers,
+      container,
+      containerStatus,
+      pod,
+      containers,
+      initContainers,
     }
   }, [containerName, data])
 
-  if (error || !transformedData) {
-    return <>Could not find container "{containerName}"</>
+  if (error || (data && !transformedData)) {
+    return (
+      <EmptyState message={`Could not find container "${containerName}"`} />
+    )
   }
   if (!data) return <LoopingLogo />
 
-  const {
-    container, containerStatus, pod, containers = [], initContainers = [],
-  } = transformedData
-
   return (
-    <ResponsiveLayoutPage>
-      <ResponsiveLayoutSidenavContainer>
-        <SideNav
-          pod={pod}
-          containers={containers}
-          initContainers={initContainers}
-        />
-      </ResponsiveLayoutSidenavContainer>
-      <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutContentContainer overflow="visible">
-        <PodShellShell />
-      </ResponsiveLayoutContentContainer>
-      <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutSidecarContainer>
-        <Sidecar
-          pod={pod}
-          container={container}
-          containerStatus={containerStatus}
-        />
-      </ResponsiveLayoutSidecarContainer>
-    </ResponsiveLayoutPage>
+    <ResponsivePageFullWidth
+      scrollable={false}
+      heading={containerName}
+      headingContent={<HeadingTabList tabStateRef={tabStateRef} />}
+    >
+      <TabPanel
+        stateRef={tabStateRef}
+        height="100%"
+      >
+        <Outlet context={transformedData} />
+      </TabPanel>
+    </ResponsivePageFullWidth>
   )
+}
+
+export function useContainer() {
+  return useOutletContext<ContainerContext>()
 }

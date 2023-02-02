@@ -10,6 +10,8 @@ import { useCallback, useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { extendConnection } from 'utils/graphql'
 
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+
 import { AUDITS_Q } from '../queries'
 
 import { AuditLocation } from './AuditLocation'
@@ -106,22 +108,13 @@ export default function AuditsTable() {
   }
 
   return (
-    <Flex
-      direction="column"
-      height="100%"
-      overflow="hidden"
-      {...{
-        '& > div': {
-          maxHeight: '100%',
-        },
-      }}
-    >
+    <FullHeightTableWrap>
       <Table
         data={audits}
         columns={columns}
         onScrollCapture={e => fetchMoreOnBottomReached(e?.target)}
         maxHeight="100%"
       />
-    </Flex>
+    </FullHeightTableWrap>
   )
 }
