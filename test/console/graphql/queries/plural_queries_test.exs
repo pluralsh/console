@@ -54,7 +54,7 @@ defmodule Console.GraphQl.PluralQueriesTest do
 
       repositories = [%{id: "id", name: "repo", description: "a repository"}]
       expect(HTTPoison, :post, fn _, ^body, _ ->
-        {:ok, %{body: Jason.encode!(%{data: %{searchRepositories: as_connection(repositories)}})}}
+        {:ok, %{body: Jason.encode!(%{data: %{repositories: as_connection(repositories)}})}}
       end)
 
       {:ok, %{data: %{"repositories" => %{"pageInfo" => page_info, "edges" => [edge]}}}} = run_query("""
