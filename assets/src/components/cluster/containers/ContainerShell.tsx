@@ -2,10 +2,8 @@ import {
   Button,
   CliIcon,
   CloseIcon,
-  IconFrame,
   Input,
   PencilIcon,
-  ReloadIcon,
   ToolIcon,
   Tooltip,
 } from '@pluralsh/design-system'
@@ -18,11 +16,7 @@ import {
 import { Flex, Form, Span } from 'honorable'
 import { useParams } from 'react-router-dom'
 
-import TerminalThemeSelector from 'components/terminal/TerminalThemeSelector'
-
 import styled from 'styled-components'
-
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { ShellContext, TerminalActions, TerminalScreen } from '../../terminal/Terminal'
 
@@ -268,7 +262,6 @@ function ShellWithContext() {
         room={`pod:${namespace}:${name}:${container}`}
         command={command}
         header={`Connecting to pod ${name} using ${command}...`}
-        height="100%"
       />
     </Flex>
   )

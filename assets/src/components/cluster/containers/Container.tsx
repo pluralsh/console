@@ -78,7 +78,7 @@ type ContainerContext = {
 
 export default function Container() {
   const {
-    name, namespace, container: containerName, subpath,
+    name, namespace, container: containerName,
   } = useParams()
   const { setBreadcrumbs } = useBreadcrumbs()
   const tabStateRef = useRef<any>()
