@@ -2,19 +2,22 @@ import { useEffect, useMemo, useRef } from 'react'
 import {
   Outlet,
   useMatch,
+  useNavigate,
   useOutletContext,
   useParams,
 } from 'react-router-dom'
 import {
   EmptyState,
+  ListBoxItem,
   LoopingLogo,
+  Select,
+  SelectButton,
   SubTab,
   TabList,
   TabPanel,
 } from '@pluralsh/design-system'
-
-import { useBreadcrumbs } from 'components/layout/Breadcrumbs'
-
+import { Flex } from 'honorable'
+import styled from 'styled-components'
 import { useQuery } from '@apollo/client'
 import {
   ContainerStatus,
@@ -23,13 +26,12 @@ import {
   Pod,
 } from 'generated/graphql'
 
+import { useBreadcrumbs } from 'components/layout/Breadcrumbs'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-
 import { LinkTabWrap } from 'components/utils/Tabs'
 
 import { POD_INFO_Q } from '../queries'
 import { POLL_INTERVAL } from '../constants'
-
 import { statusesToRecord } from '../pods/PodInfo'
 
 const DIRECTORY = [
@@ -37,10 +39,7 @@ const DIRECTORY = [
   { path: 'metadata', label: 'Metadata' },
 ] as const
 
-function HeadingTabList({ tabStateRef }: any) {
-  const subpath
-    = useMatch('/pods/:namespace/:name/shell/:container/:subpath')?.params
-      ?.subpath || ''
+function HeadingTabList({ tabStateRef, subpath }: any) {
   const currentTab = DIRECTORY.find(({ path }) => path === subpath)
 
   return (
@@ -73,12 +72,18 @@ type ContainerContext = {
   initContainers: Maybe<ContainerT>[]
 }
 
+const SelectTrigger = styled(SelectButton)({
+  minWidth: 230,
+})
+
 export default function Container() {
-  const {
-    name, namespace, container: containerName,
-  } = useParams()
+  const { name, namespace, container: containerName } = useParams()
   const { setBreadcrumbs } = useBreadcrumbs()
   const tabStateRef = useRef<any>()
+  const navigate = useNavigate()
+
+  const match = useMatch('/pods/:namespace/:name/shell/:container/:subpath')
+  const subpath = match?.params?.subpath || ''
 
   const { data, error } = useQuery<{ pod: Pod }>(POD_INFO_Q, {
     variables: { name, namespace },
@@ -131,6 +136,8 @@ export default function Container() {
     }
   }, [containerName, data])
 
+  const { initContainers, containers, pod } = { ...transformedData }
+
   if (error || (data && !transformedData)) {
     return (
       <EmptyState message={`Could not find container "${containerName}"`} />
@@ -142,7 +149,46 @@ export default function Container() {
     <ResponsivePageFullWidth
       scrollable={false}
       heading={containerName}
-      headingContent={<HeadingTabList tabStateRef={tabStateRef} />}
+      headingContent={(
+        <Flex gap="medium">
+          <HeadingTabList
+            subpath={subpath}
+            tabStateRef={tabStateRef}
+          />
+          {(initContainers || containers) && (
+            <Select
+              width="100%"
+              placement="right"
+              selectedKey={containerName}
+              onSelectionChange={toContainerName => {
+                navigate(`/pods/${pod?.metadata.namespace}/${
+                  pod?.metadata.name
+                }/shell/${toContainerName}${subpath ? `/${subpath}` : ''}`)
+              }}
+              triggerButton={<SelectTrigger>{containerName}</SelectTrigger>}
+            >
+              {[
+                ...(initContainers || []).map((container, i) => (
+                  <ListBoxItem
+                    key={`init: ${container?.name || i}`}
+                    label={container?.name ? `init: ${container?.name}` : ''}
+                    textValue={
+                      container?.name ? `init: ${container?.name}` : ''
+                    }
+                  />
+                )),
+                ...(containers || []).map((container, i) => (
+                  <ListBoxItem
+                    key={container?.name || `${i}`}
+                    label={container?.name || ''}
+                    textValue={container?.name || ''}
+                  />
+                )),
+              ]}
+            </Select>
+          )}
+        </Flex>
+      )}
     >
       <TabPanel
         stateRef={tabStateRef}

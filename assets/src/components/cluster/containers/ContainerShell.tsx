@@ -13,14 +13,37 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Flex, Form, Span } from 'honorable'
+import {
+  Div,
+  Flex,
+  Form,
+  Span,
+} from 'honorable'
 import { useParams } from 'react-router-dom'
 
 import styled from 'styled-components'
 
+import TerminalThemeSelector from 'components/terminal/TerminalThemeSelector'
+
 import { ShellContext, TerminalActions, TerminalScreen } from '../../terminal/Terminal'
 
 export const DEFAULT_COMMAND = '/bin/sh'
+
+export function HeaderIconButton({ tooltipProps, ...props }) {
+  // Button needs div wrapper for tooltip to work
+  return (
+    <Tooltip {...tooltipProps}>
+      <Div height="100%">
+        <Button
+          floating
+          width={42}
+          height="100%"
+          {...props}
+        />
+      </Div>
+    </Tooltip>
+  )
+}
 
 const CodeInput = styled(Input)(({ theme }) => ({
   display: 'flex',
@@ -130,7 +153,7 @@ export function ShellCommand({
   return (
     <Form
       display="flex"
-      gap="xsmall"
+      gap="medium"
       onSubmit={e => {
         e.preventDefault()
         setCommand(inputVal)
@@ -234,28 +257,22 @@ function ShellWithContext() {
       height="100%"
       gap="medium"
     >
-      <Flex
-        gap="medium"
-      >
+      <Flex gap="medium">
         <ShellCommand
           command={command}
           defaultCommand={defaultCommand}
           isDefault={isDefault}
           setCommand={setCommand}
         />
-        <Tooltip label="Repair viewport">
-          <Button
-            floating
-            small
-            onClick={() => {
-              shellContext?.current?.handleResetSize()
-            }}
-          ><ToolIcon size={16} />
-          </Button>
-        </Tooltip>
-        {/* <TerminalThemeSelector /> */}
-      </Flex>
+        <HeaderIconButton
+          tooltipProps={{ label: 'Repair viewport' }}
+          onClick={shellContext.current?.handleResetSize()}
+        >
+          <ToolIcon size={16} />
+        </HeaderIconButton>
 
+        <TerminalThemeSelector />
+      </Flex>
       <TerminalScreen
         room={`pod:${namespace}:${name}:${container}`}
         command={command}
