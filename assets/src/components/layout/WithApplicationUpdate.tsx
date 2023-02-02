@@ -25,9 +25,7 @@ function WithApplicationUpdate({ children }: any) {
     const promise = serviceWorker.unregister() || Promise.resolve('done')
 
     setStale(false)
-
     promise.then(() => {
-      alert('promise then')
       setCommit(config.gitCommit)
       window.location.reload()
     })
