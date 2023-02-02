@@ -24,10 +24,10 @@ import { useMutation } from '@apollo/client'
 
 import {
   LabelWithIcon,
-  TABLE_HEIGHT,
   TableCaretLink,
   TableText,
   Usage,
+  numishSort,
 } from '../TableElements'
 import { DELETE_POD } from '../queries'
 
@@ -181,6 +181,7 @@ export const ColMemoryReservation = columnHelper.accessor(row => row.memory.requ
   {
     id: 'memory',
     enableSorting: true,
+    sortingFn: numishSort,
     cell: ({ row: { original } }) => (
       <Usage
         used={
@@ -198,29 +199,33 @@ export const ColMemoryReservation = columnHelper.accessor(row => row.memory.requ
     header: 'Memory',
   })
 
-export const ColCpuReservation = columnHelper.accessor(row => row.cpu.requests,
+export const ColCpuReservation = columnHelper.accessor(row => (row.cpu.requests),
   {
     id: 'cpu-reservations',
     enableSorting: true,
+    sortingFn: numishSort,
     cell: ({ row: { original }, ...props }) => (
       <Usage
-        used={props.getValue()}
+        used={original?.cpu?.requests}
         total={original?.cpu?.limits}
       />
     ),
     header: 'CPU',
   })
 
-export const ColRestarts = columnHelper.accessor(row => row.name, {
+export const ColRestarts = columnHelper.accessor(row => row.restarts, {
   id: 'restarts',
   enableSorting: true,
-  cell: ({ row: { original } }) => <TableText>{original.restarts}</TableText>,
+  sortingFn: numishSort,
+  cell: props => <TableText>{props.getValue()}</TableText>,
   header: 'Restarts',
 })
 
-export const ColContainers = columnHelper.accessor(row => row?.containers?.statuses?.length || 0,
+export const ColContainers = columnHelper.accessor(row => row?.containers?.statuses?.length,
   {
     id: 'containers',
+    enableSorting: true,
+    sortingFn: numishSort,
     cell: ({ row: { original } }) => (
       <ContainerStatuses statuses={original?.containers?.statuses || []} />
     ),
@@ -321,7 +326,6 @@ export const PodsList = memo(({
       data={tableData}
       columns={columns}
       virtualizeRows
-      {...TABLE_HEIGHT}
       {...props}
       onRowClick={(e, { original }: Row<PodTableRow>) => navigate(`/pods/${original.namespace}/${original.name}`)}
     />
