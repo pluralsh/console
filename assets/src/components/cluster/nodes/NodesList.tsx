@@ -21,6 +21,7 @@ import {
   TableCaretLink,
   TableText,
   UsageText,
+  numishSort,
 } from '../TableElements'
 import { DELETE_NODE } from '../queries'
 
@@ -87,6 +88,7 @@ function DeleteNode({ name, refetch }) {
 
 const ColName = columnHelper.accessor(row => row.name, {
   id: 'name',
+  enableSorting: true,
   cell: ({ row: { original }, ...props }) => (
     <Tooltip
       label={props.getValue()}
@@ -109,23 +111,27 @@ const ColName = columnHelper.accessor(row => row.name, {
   meta: { truncate: true },
 })
 
-const ColRegion = columnHelper.accessor(row => `${row.region} - ${row.zone}`,
+const ColRegion = columnHelper.accessor(row => row.region,
   {
     id: 'region',
-    cell: ({ row: { original } }) => <TableText>{original.region}</TableText>,
+    enableSorting: true,
+    cell: ({ getValue }) => <TableText>{getValue()}</TableText>,
     header: 'Region',
   })
 
-const ColZone = columnHelper.accessor(row => `${row.region} - ${row.zone}`,
+const ColZone = columnHelper.accessor(row => row.zone,
   {
     id: 'zone',
-    cell: ({ row: { original } }) => (<TableText>{original.zone}</TableText>),
+    enableSorting: true,
+    cell: ({ getValue }) => (<TableText>{getValue()}</TableText>),
     header: 'Zone',
   })
 
 const ColCpuUsage = columnHelper.accessor(row => row?.cpu.used, {
   id: 'cpu-usage',
-  cell: (props : any) => (
+  enableSorting: true,
+  sortingFn: numishSort,
+  cell: props => (
     <UsageBar
       usage={props.getValue()}
       width={120}
@@ -137,7 +143,9 @@ const ColCpuUsage = columnHelper.accessor(row => row?.cpu.used, {
 const ColMemoryUsage = columnHelper.accessor(row => (row?.memory?.used ?? 0) / (row?.memory?.total ?? 1),
   {
     id: 'memory-usage',
-    cell: (props : any) => (
+    enableSorting: true,
+    sortingFn: numishSort,
+    cell: props => (
       <UsageBar
         usage={props.getValue()}
         width={120}
@@ -149,6 +157,8 @@ const ColMemoryUsage = columnHelper.accessor(row => (row?.memory?.used ?? 0) / (
 const ColCpuTotal = columnHelper.accessor(row => row?.cpu?.total ?? 0,
   {
     id: 'cpu-total',
+    enableSorting: true,
+    sortingFn: numishSort,
     cell: props => <UsageText>{props.getValue()}</UsageText>,
     header: 'CPU',
   })
@@ -156,6 +166,8 @@ const ColCpuTotal = columnHelper.accessor(row => row?.cpu?.total ?? 0,
 const ColMemoryTotal = columnHelper.accessor(row => row?.memory?.total ?? 0,
   {
     id: 'memory-total',
+    enableSorting: true,
+    sortingFn: numishSort,
     cell: (props: any) => <UsageText>{filesize(props.getValue())?.toString()}</UsageText>,
     header: 'Memory',
   })
@@ -163,13 +175,14 @@ const ColMemoryTotal = columnHelper.accessor(row => row?.memory?.total ?? 0,
 const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToLabel[row.readiness] : ''),
   {
     id: 'status',
+    enableSorting: true,
     cell: ({ row: { original } }) => (
       <div><StatusChip readiness={original.readiness} /></div>
     ),
     header: 'Status',
   })
 
-const ColActions = refetch => columnHelper.accessor(row => row.name, {
+const ColActions = refetch => columnHelper.accessor(() => null, {
   id: 'actions',
   cell: ({ row: { original } }) => (
     <Flex
