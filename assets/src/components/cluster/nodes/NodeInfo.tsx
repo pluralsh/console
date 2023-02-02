@@ -23,7 +23,6 @@ import {
   PodsList,
 } from '../pods/PodsList'
 import { NODE_Q } from '../queries'
-import { Metadata } from '../Metadata'
 
 import { NodeGraphs } from './NodeGraphs'
 import { SubTitle } from './SubTitle'
@@ -67,7 +66,6 @@ export default function NodeInfo() {
     <Flex
       direction="column"
       gap="xlarge"
-      className="podinfo"
     >
       <section>
         <SubTitle>Overview</SubTitle>
@@ -86,9 +84,6 @@ export default function NodeInfo() {
           columns={columns}
           pods={node.pods}
         />
-      </section>
-      <section>
-        <Metadata metadata={node.metadata} />
       </section>
     </Flex>
   )

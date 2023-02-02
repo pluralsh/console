@@ -15,7 +15,7 @@ import { cpuParser, memoryParser } from 'utils/kubernetes'
 import { Confirm } from 'components/utils/Confirm'
 import { useMutation } from '@apollo/client'
 
-import { mapify } from '../Metadata'
+import { mapify } from '../LabelsAnnotations'
 import {
   StatusChip,
   TableCaretLink,

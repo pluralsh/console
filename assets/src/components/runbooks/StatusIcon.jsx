@@ -12,7 +12,7 @@ import moment from 'moment'
 
 import { ignoreEvent } from 'components/utils/events'
 
-import { MetadataRow, MetadataTag } from 'components/cluster/Metadata'
+import { LabelsAnnotationsRow, LabelsAnnotationsTag } from 'components/cluster/LabelsAnnotations'
 
 import { SEVERITY_COLORS } from './constants'
 
@@ -87,35 +87,35 @@ function AlertDetail({ alert, setAlert }) {
         </Text>
       </Box>
       <Box>
-        <MetadataRow name="summary">
+        <LabelsAnnotationsRow name="summary">
           <Text size="small">{summary}</Text>
-        </MetadataRow>
-        <MetadataRow name="description">
+        </LabelsAnnotationsRow>
+        <LabelsAnnotationsRow name="description">
           <Text size="small">{description}</Text>
-        </MetadataRow>
-        <MetadataRow name="labels">
+        </LabelsAnnotationsRow>
+        <LabelsAnnotationsRow name="labels">
           {Object.entries(alert.labels).map(([name, value]) => (
-            <MetadataTag
+            <LabelsAnnotationsTag
               key={name}
               background="tone-light"
               name={name}
               value={value}
             />
           ))}
-        </MetadataRow>
-        <MetadataRow
+        </LabelsAnnotationsRow>
+        <LabelsAnnotationsRow
           name="annotations"
           final
         >
           {Object.entries(rest).map(([name, value]) => (
-            <MetadataTag
+            <LabelsAnnotationsTag
               key={name}
               background="tone-light"
               name={name}
               value={value}
             />
           ))}
-        </MetadataRow>
+        </LabelsAnnotationsRow>
       </Box>
     </Box>
   )
