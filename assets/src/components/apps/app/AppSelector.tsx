@@ -22,7 +22,7 @@ export default function AppSelector({ applications, currentApp }) {
   const paths = useMemo(() => getDirectory().map(({ path }) => path), [])
 
   const switchApp = useCallback(appName => {
-    const matches = paths.filter(path => pathname.includes(`/${path}`))
+    const matches = paths.filter(path => pathname.endsWith(path) || pathname.includes(`/${path}/`))
     const match = isEmpty(matches) ? '' : matches[0]
 
     setSelectedKey(appName)
