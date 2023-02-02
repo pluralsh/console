@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import pluginRewriteAll from 'vite-plugin-rewrite-all'
+import { VitePWA } from 'vite-plugin-pwa'
 
 const API_URL = process.env.BASE_URL ? `https://${process.env.BASE_URL}` : 'https://console.plural.sh'
 const WS_URL = process.env.BASE_URL ? `wss://${process.env.BASE_URL}` : 'wss://console.plural.sh'
@@ -14,6 +15,12 @@ export default defineConfig({
   plugins: [
     basicSsl(),
     react(),
+    VitePWA({
+      injectRegister: null,
+      filename: 'service-worker.ts',
+      srcDir: 'src',
+      strategies: 'injectManifest',
+    }),
     tsconfigPaths(),
     pluginRewriteAll(), // Fix 404 error for urls with dots in their path
   ],
