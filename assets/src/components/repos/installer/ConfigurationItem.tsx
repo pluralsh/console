@@ -43,6 +43,8 @@ function bucketModifier(this: {configuration}, value: string, trim = false) {
 }
 function domainModifier(this: {configuration}, value: string, trim = false) {
   const { configuration } = this
+
+  console.log(configuration)
   const subdomain = deepFetch(configuration, 'manifest.network.subdomain') || ''
   const suffix = subdomain ? `.${subdomain}` : ''
 
@@ -85,7 +87,7 @@ function ConfigurationField({
         value={local}
         type={type}
         error={!valid}
-        prefix={config.type === ConfigurationType.BUCKET ? deepFetch(configuration, 'manifest.bucketPrefix') : ''}
+        prefix={config.type === ConfigurationType.BUCKET ? `${deepFetch(configuration, 'manifest.bucketPrefix')}-` : ''}
         suffix={config.type === ConfigurationType.DOMAIN ? `.${deepFetch(configuration, 'manifest.network.subdomain')}` : ''}
         onChange={({ target: { value } }) => setLocal(value)}
       />
