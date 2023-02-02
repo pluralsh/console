@@ -12,19 +12,10 @@ import {
   useMemo,
   useRef,
 } from 'react'
-import {
-  Outlet,
-  useLocation,
-  useMatch,
-  useParams,
-} from 'react-router-dom'
+import { Outlet, useMatch, useParams } from 'react-router-dom'
 
 import { InstallationContext } from 'components/Installations'
-
-import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
-
 import { useQuery } from '@apollo/client'
-
 import { POLL_INTERVAL, ScalingType, ScalingTypes } from 'components/cluster/constants'
 
 import {
@@ -71,7 +62,6 @@ export default function Component() {
   const tabStateRef = useRef<any>(null)
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { me } = useContext<any>(LoginContext)
-  const { pathname } = useLocation()
   const { appName, componentKind = '', componentName } = useParams()
   const { applications } = useContext<any>(InstallationContext)
   const currentApp = applications.find(app => app.name === appName)

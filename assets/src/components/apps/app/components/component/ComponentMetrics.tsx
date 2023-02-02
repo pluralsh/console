@@ -1,4 +1,4 @@
-import { Card, LoopingLogo, PageTitle } from '@pluralsh/design-system'
+import { Card, LoopingLogo } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@apollo/client'

@@ -1,5 +1,4 @@
 import { Code } from '@pluralsh/design-system'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
@@ -13,7 +12,6 @@ export default function ComponentRaw() {
   const value: any = useMemo(() => (data ? Object.values(data).find(value => value !== undefined) : null), [data])
 
   return (
-
     <Code
       language="yaml"
       maxHeight="100%"

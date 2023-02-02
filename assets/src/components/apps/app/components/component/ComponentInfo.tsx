@@ -2,7 +2,6 @@ import { useOutletContext, useParams } from 'react-router-dom'
 import { Flex } from 'honorable'
 import { useMemo } from 'react'
 
-import Metadata from './info/Metadata'
 import Pods from './info/Pods'
 import Job from './info/Job'
 import CronJob from './info/CronJob'
@@ -48,7 +47,7 @@ function getInfo(kind: string): JSX.Element | undefined {
 
 export default function ComponentInfo() {
   const { componentKind = '' } = useParams()
-  const { component, data } = useOutletContext<any>()
+  const { data } = useOutletContext<any>()
 
   // To avoid mapping between component types and fields of data returned by API
   // we are picking first available value from API object for now.
