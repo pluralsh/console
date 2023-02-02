@@ -1,13 +1,33 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
 import { Div, P, Span } from 'honorable'
-import { Key, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { isEmpty } from 'lodash'
+import {
+  Key,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { getIcon, hasIcons } from '../misc'
+
+import { getDirectory } from './App'
 
 export default function AppSelector({ applications, currentApp }) {
   const [selectedKey, setSelectedKey] = useState<Key>(currentApp.name)
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+
+  const paths = useMemo(() => getDirectory().map(({ path }) => path), [])
+
+  const switchApp = useCallback(appName => {
+    const matches = paths.filter(path => pathname.endsWith(path) || pathname.includes(`/${path}/`))
+    const match = isEmpty(matches) ? '' : matches[0]
+
+    setSelectedKey(appName)
+    navigate(`/apps/${appName}/${match}`)
+  }, [navigate, pathname, paths])
 
   useEffect(() => setSelectedKey(currentApp.name), [currentApp])
 
@@ -27,10 +47,7 @@ export default function AppSelector({ applications, currentApp }) {
         ) : undefined}
         width={240}
         selectedKey={selectedKey}
-        onSelectionChange={appName => {
-          setSelectedKey(appName)
-          navigate(`/apps/${appName}`)
-        }}
+        onSelectionChange={switchApp}
       >
         {applications.map(app => (
           <ListBoxItem

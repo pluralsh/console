@@ -52,8 +52,6 @@ import { useTheme } from 'styled-components'
 
 import { LoginContext } from '../contexts'
 
-import { AutoRefresh, getCommit } from '../AutoRefresh'
-
 import { NotificationsPanel } from './NotificationsPanel'
 
 import { MARK_READ } from './queries'
@@ -268,11 +266,6 @@ export default function Sidebar() {
               </Flex>
             )}
           </SidebarItem>
-          {getCommit() !== configuration.gitCommit && (
-            <SidebarMenuItem tooltip="New update available">
-              <AutoRefresh />
-            </SidebarMenuItem>
-          )}
           <SidebarItem
             ref={menuItemRef}
             className="sidebar-menu"

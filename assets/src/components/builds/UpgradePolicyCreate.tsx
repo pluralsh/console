@@ -11,7 +11,7 @@ import {
   Select,
 } from '@pluralsh/design-system'
 
-import { Flex } from 'honorable'
+import { A, Flex } from 'honorable'
 
 import { isEmpty } from 'lodash'
 
@@ -92,6 +92,16 @@ export default function UpgradePolicyCreate() {
         </FormField>
         <FormField
           label="App bindings"
+          caption={(
+            <A
+              inline
+              href="https://www.sitepoint.com/learn-regex/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Regex guide
+            </A>
+          )}
           hint="Target applications using a regex expression, e.g. “*” to select all."
         >
           <Input

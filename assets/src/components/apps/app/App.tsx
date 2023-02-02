@@ -39,7 +39,7 @@ import RunbookStatus from './runbooks/runbook/RunbookStatus'
 import LogsLegend from './logs/LogsLegend'
 import ComponentProgress from './components/ComponentProgress'
 
-const getDirectory = (app, config) => [
+export const getDirectory = (app: any = null, config: any = null) => [
   { path: 'dashboards', label: 'Dashboards', enabled: true },
   { path: 'runbooks', label: 'Runbooks', enabled: true },
   {
@@ -48,7 +48,7 @@ const getDirectory = (app, config) => [
     enabled: true,
   },
   { path: 'logs', label: 'Logs', enabled: true },
-  { path: 'cost', label: 'Cost analysis', enabled: app.cost || app.license },
+  { path: 'cost', label: 'Cost analysis', enabled: app?.cost || app?.license },
   { path: 'oidc', label: 'User management', enabled: true },
   { path: 'config', label: 'Configuration', enabled: config?.gitStatus?.cloned },
 ]

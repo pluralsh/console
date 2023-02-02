@@ -68,6 +68,7 @@ export default function Component() {
   const { data, loading, refetch } = useQuery(kindToQuery[componentKind], {
     variables: { name: componentName, namespace: appName },
     pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
   })
 
   useEffect(() => setBreadcrumbs([
