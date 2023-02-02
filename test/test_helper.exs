@@ -15,6 +15,7 @@ Mimic.copy(HTTPoison)
 Mimic.copy(Kazan.Watcher)
 Mimic.copy(Console.Kubernetes.PodExec)
 Mimic.copy(Kazan.Server)
+Mimic.copy(Console.Cached.Pod)
 Mimic.copy(File)
 
 ExUnit.start()
