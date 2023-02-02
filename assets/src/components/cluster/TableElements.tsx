@@ -28,24 +28,16 @@ const isNullishIsh = (val: any) => {
 }
 
 export const numishSort: SortingFn<any> = (thingA, thingB, colId) => {
-  console.log('thingA', thingA)
   const a = thingA.getValue<any>(colId)
   const b = thingB.getValue<any>(colId)
 
-  console.log({ a, b })
   if (isNullishIsh(a) && isNullishIsh(b)) {
-    console.log('both null')
-
     return 0
   }
   if (isNullishIsh(a)) {
-    console.log('a null')
-
     return -1
   }
   if (isNullishIsh(b)) {
-    console.log('b null')
-
     return 1
   }
 
