@@ -1,6 +1,9 @@
-import { ListItem } from 'components/utils/List'
-import { Box } from 'grommet'
-import { Span, Switch } from 'honorable'
+import {
+  Div,
+  Flex,
+  P,
+  Switch,
+} from 'honorable'
 import { useCallback } from 'react'
 
 export default function RolePermissionToggle({
@@ -8,7 +11,6 @@ export default function RolePermissionToggle({
   description,
   attributes,
   setAttributes,
-  first,
   last,
 }: any) {
   const toggle = useCallback(enable => {
@@ -28,19 +30,30 @@ export default function RolePermissionToggle({
   [permission, attributes, setAttributes])
 
   return (
-    <ListItem
-      first={first}
-      last={last}
-      background="fill-two"
+    <Flex
+      borderBottom={!last && '1px solid border'}
+      justify="space-between"
+      paddingVertical="small"
     >
-      <Box fill="horizontal">
-        <Span fontWeight={500}>{permission.toLowerCase()}</Span>
-        <Span color="text-light">{description}</Span>
-      </Box>
+      <Div>
+        <P
+          body2
+          fontWeight={600}
+          textTransform="capitalize"
+        >
+          {permission.toLowerCase()}
+        </P>
+        <P
+          body2
+          color="text-light"
+        >
+          {description}
+        </P>
+      </Div>
       <Switch
         checked={!!attributes.permissions.find(perm => perm === permission)}
         onChange={({ target: { checked } }) => toggle(checked)}
       />
-    </ListItem>
+    </Flex>
   )
 }

@@ -17,18 +17,8 @@ export default function RoleFormGeneralAttributes({
       gap="small"
     >
       <ValidatedInput
-        label="Name"
-        value={attributes.name}
-        onChange={({ target: { value } }) => setAttributes({ ...attributes, name: value })}
-      />
-      <ValidatedInput
-        label="Description"
-        value={attributes.description}
-        onChange={({ target: { value } }) => setAttributes({ ...attributes, description: value })}
-      />
-      <ValidatedInput
-        label="Repositories"
-        hint="Repositories for the role to apply to. Comma separated or * for any."
+        label="App bindings"
+        hint="Target applications using a regex expression, e.g. “*” to select all."
         value={repositories}
         onChange={({ target: { value } }) => {
           setRepositories(value)
