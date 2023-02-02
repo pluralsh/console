@@ -228,8 +228,6 @@ function ShellWithContext() {
   const { namespace, name, container } = useParams()
   const shellContext = useContext(ShellContext)
 
-  console.log('shell with context')
-
   return (
     <Flex
       direction="column"
@@ -269,8 +267,6 @@ function ShellWithContext() {
 
 export default function Shell() {
   const ref = useRef<TerminalActions>({ handleResetSize: () => {} })
-
-  console.log('shell')
 
   return (
     <ShellContext.Provider value={ref}>

@@ -83,7 +83,7 @@ function PodGraphs({ cpu, mem }) {
 }
 
 function Metric({
-  name, namespace, regex, duration: { step, offset },
+  name, namespace, regex, duration: { step, offset }, ...props
 }) {
   const { data } = useQuery(USAGE_Q, {
     variables: {
@@ -117,6 +117,7 @@ function Metric({
       overflow="auto"
       padding="medium"
       gap="small"
+      {...props}
     >
       <Graphs
         cpu={cpu}
@@ -140,19 +141,26 @@ export default function ComponentMetrics() {
   const [duration, setDuration] = useState<any>(DURATIONS[0])
 
   return (
-    <>
-      <PageTitle heading="Metrics">
-        <RangePicker
-          duration={duration}
-          setDuration={setDuration}
-        />
-      </PageTitle>
+    <Flex
+      direction="column"
+      gap="medium"
+      height="100%"
+      overflow="hidden"
+    >
+      <RangePicker
+        duration={duration}
+        setDuration={setDuration}
+        position="sticky"
+        top={0}
+      />
       <Metric
         namespace={appName}
         name={componentName}
         regex={kindToRegex[componentKind]}
         duration={duration}
+        maxHeight="100%"
+        overflowY="auto"
       />
-    </>
+    </Flex>
   )
 }

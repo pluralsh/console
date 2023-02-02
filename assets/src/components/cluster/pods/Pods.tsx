@@ -27,6 +27,8 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+
 import { PODS_Q } from '../queries'
 import { POLL_INTERVAL } from '../constants'
 
@@ -223,15 +225,7 @@ export default function AllPods() {
           {!pods || pods.length === 0 ? (
             <EmptyState message="No pods match your selection" />
           ) : (
-            <Flex
-              flexDirection="column"
-              overflow="hidden"
-              {...{
-                '& > div': {
-                  maxHeight: '100%',
-                },
-              }}
-            >
+            <FullHeightTableWrap>
               <PodsList
                 pods={pods}
                 applications={data?.applications}
@@ -240,7 +234,7 @@ export default function AllPods() {
                 maxHeight="unset"
                 height="100%"
               />
-            </Flex>
+            </FullHeightTableWrap>
           )}
         </Flex>
       )}
