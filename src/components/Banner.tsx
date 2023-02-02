@@ -5,6 +5,7 @@ import {
   useMemo,
 } from 'react'
 import {
+  Div,
   Flex,
   FlexProps,
   Span,
@@ -34,6 +35,7 @@ type BannerProps = FlexProps & {
   heading?: ReactNode
   action?: ReactNode
   actionProps?: SpanProps
+  fullWidth?: boolean
   onClose?: () => void
 }
 
@@ -63,14 +65,16 @@ const severityToIcon: Record<BannerSeverity, ReturnType<typeof createIcon>> = {
 
 const BannerOuter = styled.div<{
   $borderColorKey: ColorKey
-}>(({ $borderColorKey, theme }) => ({
+  $fullWidth?: boolean
+}>(({ $borderColorKey, $fullWidth, theme }) => ({
   display: 'inline-flex',
   align: 'flex-start',
   padding: theme.spacing.medium,
   backgroundColor: theme.colors['fill-three'],
   borderRadius: theme.borderRadiuses.medium,
-  borderTop: `4px solid ${theme.colors[$borderColorKey]}`,
-  maxWidth: 480,
+  borderLeft: `4px solid ${theme.colors[$borderColorKey]}`,
+  maxWidth: $fullWidth ? null : 480,
+  width: $fullWidth ? '100%' : null,
 }))
 
 const BannerInner = styled.div(({ theme }) => ({
@@ -102,6 +106,7 @@ const BannerAction = styled(Span)(({ theme }) => ({
 const Content = styled.p<{ $hasHeading: boolean }>(({ $hasHeading: $heading, theme }) => ({
   ...theme.partials.text.body2LooseLineHeight,
   marginTop: $heading ? theme.spacing.xxsmall : theme.spacing.xxxsmall,
+  marginBottom: 0,
   color: theme.colors['text-light'],
   '& a, & a:any-link': {
     ...theme.partials.text.inlineLink,
@@ -122,6 +127,7 @@ function BannerRef({
   actionProps,
   children,
   severity = 'success',
+  fullWidth = false,
   onClose,
   ...props
 }: BannerProps,
@@ -150,6 +156,7 @@ ref: Ref<any>) {
     <BannerOuter
       ref={ref}
       $borderColorKey={borderColorKey}
+      $fullWidth={fullWidth}
       as={Flex}
       {...props}
     >
@@ -164,17 +171,16 @@ ref: Ref<any>) {
         <div>
           {heading && (
             <Heading $bold={!!children}>
-              {[
-                heading,
-                action && (
-                  <BannerAction {...actionProps}>{action}</BannerAction>
-                ),
-              ]}
+              {heading}
+              {action && (
+                <BannerAction {...actionProps}>{action}</BannerAction>
+              )}
             </Heading>
           )}
           {children && <Content $hasHeading={!!heading}>{children}</Content>}
         </div>
       </BannerInner>
+      <Div flexGrow={1} />
       <CloseButton onClick={handleClose} />
     </BannerOuter>
   )

@@ -111,6 +111,19 @@ function Template(args: any) {
         to make sure old usage still looks good.{' '}
         <A color="action-link-inline">Now go do something</A>.
       </Banner>
+
+      <H1
+        marginTop="medium"
+        subtitle2
+      >
+        fullWidth=true
+      </H1>
+      <Banner
+        {...args}
+        fullWidth
+      >
+        Having a full width Banner can sometimes be useful.
+      </Banner>
     </Flex>
   )
 }
