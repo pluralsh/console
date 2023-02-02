@@ -11,6 +11,8 @@ import Nodes from 'components/cluster/nodes/Nodes'
 import NodeEvents from 'components/cluster/nodes/NodeEvents'
 import NodeRaw from 'components/cluster/nodes/NodeRaw'
 import Container from 'components/cluster/containers/Container'
+import ContainerShell from 'components/cluster/containers/ContainerShell'
+import ContainerMetadata from 'components/cluster/containers/ContainerMetadata'
 
 export const clusterRoutes = [
   /* Pods */
@@ -69,7 +71,16 @@ export const clusterRoutes = [
   <Route
     path="pods/:namespace/:name/shell/:container"
     element={<Container />}
-  />,
+  >
+    <Route
+      index
+      element={<ContainerShell />}
+    />
+    <Route
+      path="metadata"
+      element={<ContainerMetadata />}
+    />
+  </Route>,
   /* Redirect old routes */
   <Route
     path="shell/pod/:namespace/:name/:container"

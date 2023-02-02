@@ -56,6 +56,7 @@ export default function Node() {
 
   return (
     <TabPanel
+      stateRef={tabStateRef}
       as={(
         <ResponsivePageFullWidth
           scrollable={(currentTab?.label ?? 'Info') === 'Info'}
@@ -70,7 +71,6 @@ export default function Node() {
           children={<Outlet />}
         />
       )}
-      stateRef={tabStateRef}
     />
   )
 }

@@ -2,9 +2,12 @@ import {
   Button,
   CliIcon,
   CloseIcon,
+  IconFrame,
   Input,
   PencilIcon,
   ReloadIcon,
+  ToolIcon,
+  Tooltip,
 } from '@pluralsh/design-system'
 import {
   useContext,
@@ -134,7 +137,6 @@ export function ShellCommand({
     <Form
       display="flex"
       gap="xsmall"
-      marginBottom="xsmall"
       onSubmit={e => {
         e.preventDefault()
         setCommand(inputVal)
@@ -232,32 +234,16 @@ function ShellWithContext() {
   const { namespace, name, container } = useParams()
   const shellContext = useContext(ShellContext)
 
+  console.log('shell with context')
+
   return (
-    <ScrollablePage
-      scrollable={false}
-      heading={container}
-      headingContent={(
-        <Flex
-          align="center"
-          gap="medium"
-        >
-          <Button
-            small
-            tertiary
-            startIcon={<ReloadIcon />}
-            onClick={() => {
-              shellContext?.current?.handleResetSize()
-            }}
-          >
-            Repair viewport
-          </Button>
-          <TerminalThemeSelector />
-        </Flex>
-      )}
+    <Flex
+      direction="column"
+      height="100%"
+      gap="medium"
     >
       <Flex
-        direction="column"
-        height="100%"
+        gap="medium"
       >
         <ShellCommand
           command={command}
@@ -265,18 +251,33 @@ function ShellWithContext() {
           isDefault={isDefault}
           setCommand={setCommand}
         />
-        <TerminalScreen
-          room={`pod:${namespace}:${name}:${container}`}
-          command={command}
-          header={`Connecting to pod ${name} using ${command}...`}
-        />
+        <Tooltip label="Repair viewport">
+          <Button
+            floating
+            small
+            onClick={() => {
+              shellContext?.current?.handleResetSize()
+            }}
+          ><ToolIcon size={16} />
+          </Button>
+        </Tooltip>
+        {/* <TerminalThemeSelector /> */}
       </Flex>
-    </ScrollablePage>
+
+      <TerminalScreen
+        room={`pod:${namespace}:${name}:${container}`}
+        command={command}
+        header={`Connecting to pod ${name} using ${command}...`}
+        height="100%"
+      />
+    </Flex>
   )
 }
 
 export default function Shell() {
   const ref = useRef<TerminalActions>({ handleResetSize: () => {} })
+
+  console.log('shell')
 
   return (
     <ShellContext.Provider value={ref}>
