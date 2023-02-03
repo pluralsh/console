@@ -15,7 +15,7 @@ We strive to make it powerful enough to make you feel like any application you d
 
 ## Development
 
-Console's server side is written in elixir, and exposes a graphql api. The frontend is in react, all code lives in this single repo and common development tasks can be done using the Makefile at the root of the repo.
+Console's server side is written in Elixir, and exposes a graphql api. The frontend is in react, all code lives in this single repo and common development tasks can be done using the Makefile at the root of the repo.
 
 
 ### Developing Web
