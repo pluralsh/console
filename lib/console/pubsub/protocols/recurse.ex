@@ -23,7 +23,10 @@ end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.BuildApproved do
   require Logger
-  def process(%{item: _}) do
+  alias Console.Schema.Build
+
+  def process(%{item: %Build{pid: p}}) when is_pid(p), do: send(p, :kick)
+  def process(_) do
     Logger.info "kicking any active runners"
     Swarm.members(:builds)
     |> IO.inspect()

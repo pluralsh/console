@@ -248,6 +248,11 @@ defmodule Console.Services.Builds do
     |> Repo.update()
   end
 
+  def set_pid(%Build{} = build, pid) do
+    Ecto.Changeset.change(build, %{pid: pid})
+    |> Repo.update()
+  end
+
   def failed_incident(%Build{status: :failed, repository: repo} = build) do
     %{commands: commands} = Console.Repo.preload(build, [:commands])
 

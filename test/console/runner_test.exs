@@ -23,7 +23,9 @@ defmodule Console.RunnerTest do
 
       assert_receive {:DOWN, ^ref, :process, _, _}
 
-      assert refetch(build).status == :successful
+      build = refetch(build)
+      assert build.status == :successful
+      assert build.pid == pid
     end
 
     test "if a build requires approval, it needs to be manually kicked" do

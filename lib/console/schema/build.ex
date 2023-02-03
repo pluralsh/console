@@ -13,6 +13,7 @@ defmodule Console.Schema.Build do
     field :status,       Status
     field :message,      :string
     field :sha,          :string
+    field :pid,          Piazza.Ecto.Types.Erlang
     field :job_name,     :string
     field :completed_at, :utc_datetime_usec
     field :pinged_at,    :utc_datetime_usec
