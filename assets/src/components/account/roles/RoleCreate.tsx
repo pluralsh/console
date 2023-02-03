@@ -62,6 +62,7 @@ export default function RoleCreate({ q }: any) {
           setAttributes={setAttributes}
           bindings={uniqueRoleBindings}
           setBindings={setRoleBindings}
+          label="Create"
           cancel={() => resetAndClose()}
           submit={() => mutation()}
           loading={loading}

@@ -43,6 +43,7 @@ const PermissionTypes = {
 }
 
 export default function RoleForm({
+  label = 'Create',
   cancel,
   submit,
   loading,
@@ -69,7 +70,7 @@ export default function RoleForm({
         />
       </Flex>
 
-      {/* ROLE INFO */}
+      {/* Role info */}
       {step === 0 && (
         <Flex
           direction="column"
@@ -110,7 +111,7 @@ export default function RoleForm({
         </Flex>
       )}
 
-      {/* BINDINGS */}
+      {/* Bindings */}
       {step === 1 && (
         <RoleFormBindings
           attributes={attributes}
@@ -160,7 +161,7 @@ export default function RoleForm({
               onClick={submit}
               loading={loading}
             >
-              Create
+              {label}
             </Button>
           </>
         )}

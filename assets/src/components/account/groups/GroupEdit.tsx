@@ -1,30 +1,47 @@
 import { useApolloClient, useMutation } from '@apollo/client'
 import {
+  Button,
   ComboBox,
   FormField,
   Modal,
-  Tab,
-  TabList,
-  TabPanel,
+  PeopleIcon,
+  PersonPlusIcon,
+  Stepper,
   ValidatedInput,
 } from '@pluralsh/design-system'
-import { useEffect, useRef, useState } from 'react'
-import { Flex } from 'honorable'
+import { useEffect, useState } from 'react'
+import { Div, Flex } from 'honorable'
 
 import { fetchUsers } from 'components/utils/BindingInput'
 
-import { GqlError } from '../../utils/Alert'
+import { StepperSteps } from '@pluralsh/design-system/dist/components/Stepper'
 
-import { Actions } from '../../utils/Actions'
+import { GqlError } from '../../utils/Alert'
 
 import { CREATE_GROUP_MEMBERS, GROUP_MEMBERS, UPDATE_GROUP } from './queries'
 
 import GroupMembers from './GroupMembers'
 
-const TABS = {
-  Attributes: { label: 'Attributes' },
-  Users: { label: 'Users' },
+const stepBase = {
+  circleSize: 32,
+  iconSize: 16,
+  vertical: true,
 }
+
+const steps: StepperSteps = [
+  {
+    key: 'info',
+    stepTitle: <Div marginRight="small">Group info</Div>,
+    IconComponent: PeopleIcon,
+    ...stepBase,
+  },
+  {
+    key: 'bindings',
+    stepTitle: <Div marginRight="small">User bindings</Div>,
+    IconComponent: PersonPlusIcon,
+    ...stepBase,
+  },
+]
 
 export default function GroupEdit({ group, edit, setEdit }: any) {
   const client = useApolloClient()
@@ -40,8 +57,7 @@ export default function GroupEdit({ group, edit, setEdit }: any) {
     refetchQueries: [{ query: GROUP_MEMBERS, variables: { id: group.id } }],
   })
   const [suggestions, setSuggestions] = useState([])
-  const tabStateRef = useRef<any>(null)
-  const [view, setView] = useState('Attributes')
+  const [step, setStep] = useState<0|1>(0)
 
   // Run only on first render. Make sure there will be data in Combo Box to start with.
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -54,98 +70,126 @@ export default function GroupEdit({ group, edit, setEdit }: any) {
 
   return (
     <Modal
-      header="Edit group"
       portal
       open={edit}
       size="large"
       onClose={() => setEdit(false)}
-      actions={(
-        <Actions
-          cancel={() => setEdit(false)}
-          submit={() => mutation()}
-          loading={loading}
-          action="Update"
-        />
-      )}
     >
       <Flex
-        flexDirection="column"
-        gap="large"
+        direction="column"
+        gap="medium"
       >
+        <Flex>
+          <Stepper
+            compact
+            steps={steps}
+            stepIndex={step}
+          />
+        </Flex>
+
+        {/* Group info */}
+        {step === 0 && (
+          <Flex
+            flexDirection="column"
+            gap="large"
+          >
+            <ValidatedInput
+              label="Name"
+              value={name}
+              onChange={({ target: { value } }) => setName(value)}
+            />
+            <ValidatedInput
+              label="Description"
+              value={description}
+              onChange={({ target: { value } }) => setDescription(value)}
+            />
+          </Flex>
+        )}
+
+        {/* Bindings */}
+        {step === 1 && (
+          <Flex
+            flexDirection="column"
+            gap="large"
+          >
+            <FormField
+              label="Add users"
+              width="100%"
+              {...{
+                '& :last-child': {
+                  marginTop: 0,
+                },
+              }}
+            >
+              <ComboBox
+                inputValue={value}
+                  // @ts-expect-error
+                placeholder="Search a user"
+                onSelectionChange={key => {
+                  setValue('')
+                    // @ts-expect-error
+                  addMut({ variables: { userId: key } })
+                }}
+                onInputChange={value => {
+                  setValue(value)
+                  fetchUsers(client, value, setSuggestions)
+                }}
+              >
+                {suggestions.map(({ label }) => label)}
+              </ComboBox>
+            </FormField>
+            <GroupMembers
+              group={group}
+              edit
+            />
+          </Flex>
+        )}
+
         {error && (
           <GqlError
             header="Something went wrong"
             error={error}
           />
         )}
-        <TabList
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: view,
-            onSelectionChange: key => setView(key as string),
-          }}
+
+        <Flex
+          gap="medium"
+          justify="end"
         >
-          {Object.entries(TABS).map(([key, { label }]) => (
-            <Tab key={key}>{label}</Tab>
-          ))}
-        </TabList>
-        <TabPanel stateRef={tabStateRef}>
-          {view === 'Attributes' && (
-            <Flex
-              flexDirection="column"
-              gap="large"
-            >
-              <ValidatedInput
-                label="Name"
-                value={name}
-                onChange={({ target: { value } }) => setName(value)}
-              />
-              <ValidatedInput
-                label="Description"
-                value={description}
-                onChange={({ target: { value } }) => setDescription(value)}
-              />
-            </Flex>
-          )}
-          {view === 'Users' && (
-            <Flex
-              flexDirection="column"
-              gap="large"
-            >
-              <FormField
-                label="Add users"
-                width="100%"
-                {...{
-                  '& :last-child': {
-                    marginTop: 0,
-                  },
-                }}
+          {step === 0 && (
+            <>
+              <Button
+                secondary
+                onClick={() => setEdit(false)}
               >
-                <ComboBox
-                  inputValue={value}
-                  // @ts-expect-error
-                  placeholder="Search a user"
-                  onSelectionChange={key => {
-                    setValue('')
-                    // @ts-expect-error
-                    addMut({ variables: { userId: key } })
-                  }}
-                  onInputChange={value => {
-                    setValue(value)
-                    fetchUsers(client, value, setSuggestions)
-                  }}
-                >
-                  {suggestions.map(({ label }) => label)}
-                </ComboBox>
-              </FormField>
-              <GroupMembers
-                group={group}
-                edit
-              />
-            </Flex>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => setStep(1)}
+                loading={loading}
+              >
+                Next
+              </Button>
+            </>
           )}
-        </TabPanel>
+
+          {step === 1 && (
+            <>
+              <Button
+                secondary
+                onClick={() => setStep(0)}
+              >
+                Back
+              </Button>
+              <Button
+                onClick={() => mutation()}
+                loading={loading}
+              >
+                Update
+              </Button>
+            </>
+          )}
+        </Flex>
       </Flex>
     </Modal>
   )

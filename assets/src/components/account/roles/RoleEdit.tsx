@@ -36,6 +36,7 @@ export default function RoleEdit({ role, open, setOpen }: any) {
         setAttributes={setAttributes}
         bindings={uniqueRoleBindings}
         setBindings={setRoleBindings}
+        label="Update"
         cancel={() => setOpen(false)}
         submit={() => mutation()}
         loading={loading}
