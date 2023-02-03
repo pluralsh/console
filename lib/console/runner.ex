@@ -23,6 +23,7 @@ defmodule Console.Runner do
     Process.flag(:trap_exit, true)
     Command.set_build(build)
     send self(), :kick
+    register(self())
     {:ok, %State{build: build, operations: operations, storage: storage}}
   end
 

@@ -36,7 +36,7 @@ defmodule Console.PubSub.Recurse.BuildsTest do
   end
 
   describe "BuildApproved" do
-    test "it will cancel build" do
+    test "it will kick the build" do
       build = insert(:build)
       parent = self()
       pid = spawn(fn ->
