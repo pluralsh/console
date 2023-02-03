@@ -1,4 +1,3 @@
-import { Box } from 'grommet'
 import { Div, Flex, P } from 'honorable'
 import {
   BriefcaseIcon,
@@ -12,7 +11,7 @@ import { StepperSteps } from '@pluralsh/design-system/dist/components/Stepper'
 
 import { GqlError } from '../../utils/Alert'
 
-import RoleFormGeneralAttributes from './RoleFormGeneralAttributes'
+import RoleFormBindings from './RoleFormBindings'
 import RolePermissionToggle from './RolePermissionToggle'
 
 const stepBase = {
@@ -58,47 +57,45 @@ export default function RoleForm({
   const len = permissions.length
 
   return (
-    <Box
-      flex={false}
-      gap="small"
+    <Flex
+      direction="column"
+      gap="medium"
     >
-      <Flex
-        align="center"
-        justify="space-between"
-      >
+      <Flex>
         <Stepper
           compact
           steps={steps}
           stepIndex={step}
         />
       </Flex>
-      {error && (
-        <GqlError
-          header="Something went wrong"
-          error={error}
-        />
-      )}
 
       {/* ROLE INFO */}
       {step === 0 && (
-        <Box gap="small">
-          <Box>
-            <ValidatedInput
-              label="Name"
-              value={attributes.name}
-              onChange={({ target: { value } }) => setAttributes({ ...attributes, name: value })}
-            />
-            <ValidatedInput
-              label="Description"
-              value={attributes.description}
-              onChange={({ target: { value } }) => setAttributes({ ...attributes, description: value })}
-            />
-            <P
-              body1
-              fontWeight={600}
-            >
-              Permissions
-            </P>
+        <Flex
+          direction="column"
+          gap="small"
+        >
+          <ValidatedInput
+            label="Name"
+            placeholder="Role name"
+            value={attributes.name}
+            onChange={({ target: { value } }) => setAttributes({ ...attributes, name: value })}
+          />
+          <ValidatedInput
+            label="Description"
+            placeholder="Role description"
+            value={attributes.description}
+            onChange={({ target: { value } }) => setAttributes({ ...attributes, description: value })}
+          />
+          <P
+            body1
+            borderTop="1px solid border"
+            fontWeight={600}
+            paddingTop="large"
+          >
+            Permissions
+          </P>
+          <section>
             {permissions.map(([perm, description], i) => (
               <RolePermissionToggle
                 key={perm}
@@ -109,13 +106,13 @@ export default function RoleForm({
                 last={i === len - 1}
               />
             ))}
-          </Box>
-        </Box>
+          </section>
+        </Flex>
       )}
 
       {/* BINDINGS */}
       {step === 1 && (
-        <RoleFormGeneralAttributes
+        <RoleFormBindings
           attributes={attributes}
           setAttributes={setAttributes}
           bindings={bindings}
@@ -123,33 +120,51 @@ export default function RoleForm({
         />
       )}
 
-      <Flex gap="medium">
-        <Button
-          secondary
-          onClick={cancel}
-        >
-          Cancel
-        </Button>
-        <Button
-          onClick={() => setStep(1)}
-          loading={loading}
-        >
-          Next
-        </Button>
+      {error && (
+        <GqlError
+          header="Something went wrong"
+          error={error}
+        />
+      )}
 
-        <Button
-          secondary
-          onClick={() => setStep(0)}
-        >
-          Back
-        </Button>
-        <Button
-          onClick={submit}
-          loading={loading}
-        >
-          Create
-        </Button>
+      <Flex
+        gap="medium"
+        justify="end"
+      >
+        {step === 0 && (
+          <>
+            <Button
+              secondary
+              onClick={cancel}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => setStep(1)}
+              loading={loading}
+            >
+              Next
+            </Button>
+          </>
+        )}
+
+        {step === 1 && (
+          <>
+            <Button
+              secondary
+              onClick={() => setStep(0)}
+            >
+              Back
+            </Button>
+            <Button
+              onClick={submit}
+              loading={loading}
+            >
+              Create
+            </Button>
+          </>
+        )}
       </Flex>
-    </Box>
+    </Flex>
   )
 }

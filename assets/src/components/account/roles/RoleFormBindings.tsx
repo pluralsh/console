@@ -3,7 +3,7 @@ import { ValidatedInput } from '@pluralsh/design-system'
 import { useState } from 'react'
 import { BindingInput } from 'components/utils/BindingInput'
 
-export default function RoleFormGeneralAttributes({
+export default function RoleFormBindings({
   attributes,
   setAttributes,
   bindings,
