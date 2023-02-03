@@ -9,7 +9,8 @@ import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
 
 import { ReactNode } from 'react'
 
-import { EnsureLogin } from '../login/Login'
+import { EnsureLogin } from '../Login'
+import { Posthog } from '../utils/Posthog'
 import { InstallationsProvider } from '../Installations'
 
 import TerminalThemeProvider from '../terminal/TerminalThemeProvider'
@@ -51,6 +52,7 @@ export default function Console() {
 
   return (
     <ContextProviders>
+      <Posthog />
       <Flex
         position="relative"
         width="100vw"
