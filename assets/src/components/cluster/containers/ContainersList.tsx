@@ -188,7 +188,7 @@ export const ColActions = ({
 }) => columnHelper.display({
   id: 'actions',
   cell: ({ row: { original: { name, readiness } } }: any) => (
-    readiness && readiness !== Readiness.Complete && (
+    readiness && readiness === Readiness.Ready && (
       <Flex
         flexDirection="row"
         gap="xxsmall"
@@ -290,7 +290,7 @@ export function ContainersList({
       data={tableData}
       columns={columns}
       enableColumnResizing
-      onRowClick={(e, { original }: Row<ContainerTableRow>) => navigate(`/pods/${namespace}/${podName}/shell/${original?.name}`)}
+      onRowClick={(e, { original }: Row<ContainerTableRow>) => original?.readiness === Readiness.Ready && navigate(`/pods/${namespace}/${podName}/shell/${original?.name}`)}
       {...TABLE_HEIGHT}
     />
   )

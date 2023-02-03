@@ -1,4 +1,5 @@
 export const POLL_INTERVAL = 10 * 1000
+export const SHORT_POLL_INTERVAL = 3 * 1000
 
 export const COMPONENT_LABEL = 'platform.plural.sh/component'
 export const KIND_LABEL = 'platform.plural.sh/kind'

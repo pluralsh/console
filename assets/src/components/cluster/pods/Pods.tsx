@@ -30,7 +30,7 @@ import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
 import { PODS_Q } from '../queries'
-import { POLL_INTERVAL } from '../constants'
+import { SHORT_POLL_INTERVAL } from '../constants'
 
 import {
   ColActions,
@@ -81,11 +81,11 @@ export default function AllPods() {
     [setBreadcrumbs])
 
   const { data, refetch, error } = useQuery<{
-    pods: RootQueryType['pods']
+    cachedPods: RootQueryType['cachedPods']
     applications: RootQueryType['applications']
     namespaces: RootQueryType['namespaces']
   }>(PODS_Q, {
-    pollInterval: POLL_INTERVAL,
+    pollInterval: SHORT_POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
 
@@ -127,33 +127,28 @@ export default function AllPods() {
 
   // Filter out namespaces that don't exist in the pods list
   const namespaces = useMemo(() => {
-    if (!data?.pods) {
+    if (!data?.cachedPods) {
       return []
     }
     const namespaceSet = new Set<string>()
 
-    for (const pod of data?.pods?.edges || []) {
-      if (pod?.node?.metadata?.namespace) {
-        namespaceSet.add(pod.node.metadata.namespace)
+    for (const pod of data?.cachedPods || []) {
+      if (pod?.metadata?.namespace) {
+        namespaceSet.add(pod.metadata.namespace)
       }
     }
 
     return (
       data?.namespaces?.filter(ns => ns?.metadata?.name && namespaceSet.has(ns.metadata.name)) || []
     )
-  }, [data?.namespaces, data?.pods])
+  }, [data?.namespaces, data?.cachedPods])
 
   const pods = useMemo(() => {
-    if (!data?.pods?.edges) {
+    if (!data?.cachedPods) {
       return undefined
     }
-    let pods = data.pods.edges
-      .map(edge => (edge?.node
-        ? {
-          id: edge.node.metadata?.namespace,
-          ...edge.node,
-        }
-        : undefined))
+    let pods = data.cachedPods
+      .map(pod => ({ id: pod.metadata?.namespace, ...pod }))
       .filter((pod?: PodWithId): pod is PodWithId => !!pod) as PodWithId[]
 
     if (namespace) {

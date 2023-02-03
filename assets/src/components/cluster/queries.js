@@ -14,6 +14,7 @@ import {
   NodeFragment,
   NodeMetricFragment,
   PodFragment,
+  PodMiniFragment,
   ServiceFragment,
   StatefulSetFragment,
   VerticalPodAutoscalerFragment,
@@ -258,13 +259,9 @@ export const CERTIFICATE_Q = gql`
 `
 
 export const PODS_Q = gql`
-  query Pods($namespaces: [String], $cursor: String) {
-    pods(namespaces: $namespaces, after: $cursor) {
-      edges {
-        node {
-          ...PodFragment
-        }
-      }
+  query Pods($namespaces: [String]) {
+    cachedPods(namespaces: $namespaces) {
+      ...PodMiniFragment
     }
     namespaces {
       metadata {
@@ -281,7 +278,7 @@ export const PODS_Q = gql`
       }
     }
   }
-  ${PodFragment}
+  ${PodMiniFragment}
   ${MetadataFragment}
 `
 
