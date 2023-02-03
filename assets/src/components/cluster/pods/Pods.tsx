@@ -36,6 +36,7 @@ import {
   ColActions,
   ColContainers,
   ColCpuReservation,
+  ColImages,
   ColMemoryReservation,
   ColNameLink,
   ColNamespace,
@@ -115,6 +116,7 @@ export default function AllPods() {
     ColCpuReservation,
     ColRestarts,
     ColContainers,
+    ColImages,
     ColActions(refetch),
   ],
   [refetch])

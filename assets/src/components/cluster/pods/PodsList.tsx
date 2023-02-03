@@ -1,4 +1,9 @@
-import { A, Div, Flex } from 'honorable'
+import {
+  A,
+  Div,
+  Flex,
+  Span,
+} from 'honorable'
 import { Link, useNavigate } from 'react-router-dom'
 import { Row, createColumnHelper } from '@tanstack/react-table'
 import {
@@ -94,6 +99,7 @@ type PodTableRow = {
     total?: number
     statuses?: ContainerStatus[]
   }
+  images?: string[]
 }
 const columnHelper = createColumnHelper<PodTableRow>()
 
@@ -232,6 +238,34 @@ export const ColContainers = columnHelper.accessor(row => row?.containers?.statu
     header: 'Containers',
   })
 
+export const ColImages = columnHelper.accessor(row => row?.images || [],
+  {
+    id: 'images',
+    cell: props => {
+      const images = props.getValue()
+
+      return images.map(image => (
+        <Tooltip
+          label={image}
+          placement="left-start"
+        >
+          <Span
+            color="text-light"
+            direction="rtl"
+            textAlign="left"
+            whiteSpace="nowrap"
+          >
+            {image}
+          </Span>
+        </Tooltip>
+      ))
+    },
+    header: 'Images',
+    meta: {
+      truncate: true,
+    },
+  })
+
 export const ColActions = refetch => columnHelper.display({
   id: 'actions',
   cell: ({ row: { original } }: any) => (
@@ -298,6 +332,9 @@ export const PodsList = memo(({
               && applications?.find(app => app?.name === pod.metadata.namespace)
                 ?.spec?.descriptor?.icons?.[0]
 
+      const containerImages = pod?.spec?.containers?.map(container => container?.image) || []
+      const initContainerImages = pod?.spec?.initContainers?.map(container => container?.image) || []
+
       return {
         name: pod?.metadata?.name,
         nodeName: pod?.spec?.nodeName || undefined,
@@ -313,6 +350,7 @@ export const PodsList = memo(({
         },
         restarts: getRestarts(pod.status),
         containers: getPodContainersStats(pod.status),
+        images: [...new Set([...initContainerImages, ...containerImages])],
       }
     }),
   [applications, pods])
