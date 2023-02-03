@@ -27,6 +27,8 @@ import {
 import { Confirm } from 'components/utils/Confirm'
 import { useMutation } from '@apollo/client'
 
+import { isEmpty } from 'lodash'
+
 import {
   LabelWithIcon,
   TableCaretLink,
@@ -313,6 +315,14 @@ function getRestarts(status: Pod['status']) {
     0)
 }
 
+function getImages(containers): string[] {
+  return containers?.map(container => container?.image).filter(image => !isEmpty(image)) || []
+}
+
+function getPodImages(spec: Pod['spec']) {
+  return [...new Set([...getImages(spec?.containers), ...getImages(spec?.initContainers)])]
+}
+
 export const PodsList = memo(({
   pods, applications, columns, ...props
 }: PodListProps) => {
@@ -332,9 +342,6 @@ export const PodsList = memo(({
               && applications?.find(app => app?.name === pod.metadata.namespace)
                 ?.spec?.descriptor?.icons?.[0]
 
-      const containerImages = pod?.spec?.containers?.map(container => container?.image) || []
-      const initContainerImages = pod?.spec?.initContainers?.map(container => container?.image) || []
-
       return {
         name: pod?.metadata?.name,
         nodeName: pod?.spec?.nodeName || undefined,
@@ -350,7 +357,7 @@ export const PodsList = memo(({
         },
         restarts: getRestarts(pod.status),
         containers: getPodContainersStats(pod.status),
-        images: [...new Set([...initContainerImages, ...containerImages])],
+        images: getPodImages(pod.spec),
       }
     }),
   [applications, pods])
