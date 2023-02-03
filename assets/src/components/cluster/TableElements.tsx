@@ -4,6 +4,7 @@ import {
   Chip,
   IconFrame,
 } from '@pluralsh/design-system'
+import { SortingFn } from '@tanstack/table-core'
 import { UnstyledLink } from 'components/utils/Link'
 import { Maybe } from 'generated/graphql'
 import { Div, Flex } from 'honorable'
@@ -24,6 +25,23 @@ const isNullishIsh = (val: any) => {
   }
 
   return val === null || val === undefined || val === ''
+}
+
+export const numishSort: SortingFn<any> = (thingA, thingB, colId) => {
+  const a = thingA.getValue<any>(colId)
+  const b = thingB.getValue<any>(colId)
+
+  if (isNullishIsh(a) && isNullishIsh(b)) {
+    return 0
+  }
+  if (isNullishIsh(a)) {
+    return -1
+  }
+  if (isNullishIsh(b)) {
+    return 1
+  }
+
+  return a - b
 }
 
 export const TableText = styled.div(({ theme }) => ({

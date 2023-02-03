@@ -32,9 +32,9 @@ export const readinessToContainerLabel = {
 
 export const readinessToSeverity = {
   [Readiness.Ready]: 'success',
-  [Readiness.InProgress]: 'neutral',
+  [Readiness.InProgress]: 'info',
   [Readiness.Failed]: 'critical',
-  [Readiness.Complete]: 'success',
+  [Readiness.Complete]: 'neutral',
 } as const satisfies Record<ReadinessT, ComponentProps<typeof Chip>['severity']>
 
 export const readinessToColor = {

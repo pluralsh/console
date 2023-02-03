@@ -12,6 +12,7 @@ const DIRECTORY = [
   { path: '', label: 'Info' },
   { path: 'events', label: 'Events' },
   { path: 'raw', label: 'Raw' },
+  { path: 'metadata', label: 'Metadata' },
 ] as const
 
 function HeadingTabList({ tabStateRef, currentTab }: any) {
@@ -56,6 +57,7 @@ export default function Node() {
 
   return (
     <TabPanel
+      stateRef={tabStateRef}
       as={(
         <ResponsivePageFullWidth
           scrollable={(currentTab?.label ?? 'Info') === 'Info'}
@@ -70,7 +72,6 @@ export default function Node() {
           children={<Outlet />}
         />
       )}
-      stateRef={tabStateRef}
     />
   )
 }

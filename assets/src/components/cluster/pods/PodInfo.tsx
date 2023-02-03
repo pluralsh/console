@@ -69,8 +69,6 @@ export default function PodInfo() {
   const initContainerStatuses = statusesToRecord(pod.status?.initContainerStatuses)
   const conditions = pod?.status?.conditions || []
 
-  console.log(conditions)
-
   return (
     <ScrollablePage
       heading="Info"

@@ -1,42 +1,22 @@
+import { Flex } from 'honorable'
 import {
-  Div,
-  Flex,
-  H2,
-  P,
-} from 'honorable'
-import {
-  AppIcon,
   LoopingLogo,
-  Tab,
+  SubTab,
   TabList,
   TabPanel,
 } from '@pluralsh/design-system'
 
-import { useContext, useEffect, useRef } from 'react'
 import {
-  Link,
-  Outlet,
-  useLocation,
-  useParams,
-} from 'react-router-dom'
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react'
+import { Outlet, useMatch, useParams } from 'react-router-dom'
 
 import { InstallationContext } from 'components/Installations'
-
-import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-
-import { PropsContainer } from 'components/utils/PropsContainer'
-
-import Prop from 'components/utils/Prop'
-
-import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
-
-import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-
-import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
-
 import { useQuery } from '@apollo/client'
-
-import { POLL_INTERVAL } from 'components/cluster/constants'
+import { POLL_INTERVAL, ScalingType, ScalingTypes } from 'components/cluster/constants'
 
 import {
   CERTIFICATE_Q,
@@ -52,17 +32,20 @@ import { LoginContext } from 'components/contexts'
 
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
-import { useTheme } from 'styled-components'
+import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
-import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import { LinkTabWrap } from 'components/utils/Tabs'
 
-import { ComponentIcon, ComponentStatus } from '../misc'
+import { ScalingRecommenderModal } from 'components/cluster/ScalingRecommender'
+
+import { ViewLogsButton } from './ViewLogsButton'
 
 const directory = [
   { label: 'Info', path: 'info' },
   { label: 'Metrics', path: 'metrics', onlyFor: ['deployment', 'statefulset'] },
   { label: 'Events', path: 'events' },
   { label: 'Raw', path: 'raw' },
+  { label: 'Metadata', path: 'metadata' },
 ]
 
 const kindToQuery = {
@@ -76,18 +59,16 @@ const kindToQuery = {
 }
 
 export default function Component() {
-  const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { me } = useContext<any>(LoginContext)
-  const { pathname } = useLocation()
   const { appName, componentKind = '', componentName } = useParams()
   const { applications } = useContext<any>(InstallationContext)
-  const pathPrefix = `/apps/${appName}/components/${componentKind}/${componentName}`
   const currentApp = applications.find(app => app.name === appName)
   const { data, loading, refetch } = useQuery(kindToQuery[componentKind], {
     variables: { name: componentName, namespace: appName },
     pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
   })
 
   useEffect(() => setBreadcrumbs([
@@ -100,6 +81,17 @@ export default function Component() {
     },
   ]),
   [appName, componentKind, componentName, setBreadcrumbs])
+
+  const kind: ScalingType
+    = ScalingTypes[componentKind.toUpperCase()] ?? ScalingTypes.DEPLOYMENT
+
+  // To avoid mapping between component types and fields of data returned by API
+  // we are picking first available value from API object for now.
+  const value: any = useMemo(() => (data ? Object.values(data).find(value => value !== undefined) : null),
+    [data])
+  const subpath
+    = useMatch('/apps/:appName/components/:componentKind/:componentName/:subpath')
+      ?.params?.subpath || ''
 
   if (!me || !currentApp || !data) {
     return (
@@ -114,86 +106,63 @@ export default function Component() {
 
   const component = currentApp.status.components.find(({ name, kind }) => name === componentName && kind.toLowerCase() === componentKind)
   const filteredDirectory = directory.filter(({ onlyFor }) => !onlyFor || onlyFor.includes(componentKind))
-  const currentTab = filteredDirectory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
+  const currentTab = filteredDirectory.find(({ path }) => path === subpath)
 
   return (
-    <ResponsiveLayoutPage>
-      <ResponsiveLayoutSidenavContainer>
+    <ResponsivePageFullWidth
+      scrollable={
+        currentTab?.path === '' || currentTab?.path === 'info'
+        || currentTab?.path === 'metadata'
+      }
+      heading={componentName}
+      headingContent={(
         <Flex
-          align="center"
-          gap="small"
-          marginBottom="large"
+          gap="medium"
+          className="DELETE"
         >
-          <AppIcon
-            icon={(
-              <ComponentIcon
-                size={48}
-                kind={componentKind}
-              />
-            )}
-            size="small"
+          <TabList
+            stateRef={tabStateRef}
+            stateProps={{
+              orientation: 'horizontal',
+              selectedKey: currentTab?.path,
+            }}
+          >
+            {filteredDirectory.map(({ label, path }) => (
+              <LinkTabWrap
+                key={path}
+                textValue={label}
+                to={path}
+                subTab
+              >
+                <SubTab>{label}</SubTab>
+              </LinkTabWrap>
+            ))}
+          </TabList>
+          <ScalingRecommenderModal
+            kind={kind}
+            componentName={componentName}
+            namespace={appName}
           />
-          <Div>
-            <H2
-              subtitle2
-              fontWeight="500"
-            >
-              {componentName}
-            </H2>
-            <P
-              color="text-xlight"
-              caption
-            >
-              {component?.group || 'v1'}/{component?.kind}
-            </P>
-          </Div>
+          <ViewLogsButton
+            metadata={value?.metadata}
+            kind={componentKind}
+          />
         </Flex>
-        <TabList
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'vertical',
-            selectedKey: currentTab?.path,
-          }}
-        >
-          {filteredDirectory.map(({ label, path }) => (
-            <Tab
-              key={path}
-              as={Link}
-              to={path}
-              textDecoration="none"
-            >
-              {label}
-            </Tab>
-          ))}
-        </TabList>
-      </ResponsiveLayoutSidenavContainer>
-      <ResponsiveLayoutSpacer />
+      )}
+    >
       <TabPanel
-        as={<ResponsiveLayoutContentContainer />}
+        as={(
+          <Outlet
+            context={{
+              component,
+              data,
+              loading,
+              refetch,
+            }}
+          />
+        )}
         stateRef={tabStateRef}
-      >
-        <Outlet
-          context={{
-            component,
-            data,
-            loading,
-            refetch,
-          }}
-        />
-      </TabPanel>
-      <ResponsiveLayoutSidecarContainer>
-        <PropsContainer marginTop={theme.spacing.xlarge + theme.spacing.medium}>
-          <Prop title="Name">{componentName}</Prop>
-          <Prop title="Namespace">{appName}</Prop>
-          <Prop title="Kind">
-            {component?.group || 'v1'}/{component?.kind}
-          </Prop>
-          <Prop title="Status">
-            <ComponentStatus status={component?.status} />
-          </Prop>
-        </PropsContainer>
-      </ResponsiveLayoutSidecarContainer>
-      <ResponsiveLayoutSpacer />
-    </ResponsiveLayoutPage>
+      />
+    </ResponsivePageFullWidth>
   )
 }

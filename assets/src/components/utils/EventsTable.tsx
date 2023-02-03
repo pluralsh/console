@@ -1,4 +1,4 @@
-import { Date, Table } from '@pluralsh/design-system'
+import { Date, EmptyState, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { Event as EventT } from 'generated/graphql'
@@ -40,7 +40,7 @@ export default function EventsTable({
   ...props
 }: { events?: EventT[] } & Partial<ComponentProps<typeof Table>>) {
   if (!events || isEmpty(events)) {
-    return <>No events available.</>
+    return <EmptyState message="No events available." />
   }
 
   return (

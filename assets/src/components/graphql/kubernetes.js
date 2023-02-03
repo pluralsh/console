@@ -58,6 +58,36 @@ export const Container = gql`
   ${ResourcesFragment}
 `
 
+export const PodMiniFragment = gql`
+fragment PodMiniFragment on Pod {
+  metadata { ...MetadataFragment }
+  status {
+    phase
+    podIp
+    reason
+    containerStatuses { ...ContainerStatus }
+    initContainerStatuses { ...ContainerStatus }
+    conditions {
+      lastProbeTime
+      lastTransitionTime
+      message
+      reason
+      status
+      type
+    }
+  }
+  spec {
+    nodeName
+    serviceAccountName
+    containers { ...Container }
+    initContainers { ...Container }
+  }
+}
+${Container}
+${ContainerStatus}
+${MetadataFragment}
+`
+
 export const PodFragment = gql`
   fragment PodFragment on Pod {
     metadata { ...MetadataFragment }
@@ -154,7 +184,7 @@ export const IngressFragment = gql`
     metadata { ...MetadataFragment }
     status {
       loadBalancer {
-        ingress { ip }
+        ingress { ip hostname }
       }
     }
     spec {

@@ -28,7 +28,7 @@ const ScrollShadow = styled.div(({ theme }) => ({
   left: 0,
   right: 0,
   height: theme.spacing.medium,
-  zIndex: theme.zIndexes.base + 1,
+  zIndex: theme.zIndexes.base + 10,
   background: `linear-gradient(0deg, transparent 0%, ${theme.colors['fill-zero']} 90%)`,
 }))
 

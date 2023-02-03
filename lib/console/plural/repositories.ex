@@ -14,23 +14,23 @@ defmodule Console.Plural.Repositories do
   }
 
   defmodule Query do
-    defstruct [:installations, :searchRepositories, :recipes, :recipe, :installation, :stack]
+    defstruct [:installations, :repositories, :recipes, :recipe, :installation, :stack]
   end
 
   defmodule Mutation do
     defstruct [:installRecipe, :upsertOidcProvider, :installStack]
   end
 
-  def search_repositories(query, first) do
+  def search_repositories(query, first, cursor \\ nil) do
     search_repositories_query()
     |> Client.run(
-      prune_variables(%{query: query, first: first}),
-      %Query{searchRepositories: %Connection{
+      prune_variables(%{query: query, first: first, cursor: cursor}),
+      %Query{repositories: %Connection{
         pageInfo: %PageInfo{},
         edges: [%Edge{node: %Repository{}}]
       }}
     )
-    |> when_ok(fn %{searchRepositories: result} -> result end)
+    |> when_ok(fn %{repositories: result} -> result end)
   end
 
   def list_recipes(id, cursor) do
