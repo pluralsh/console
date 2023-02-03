@@ -6,8 +6,6 @@ import isEqual from 'lodash/isEqual'
 
 import pick from 'lodash/pick'
 
-import { Actions } from '../../utils/Actions'
-
 import { sanitize } from './misc'
 
 import { UPDATE_ROLE } from './queries'
@@ -32,20 +30,16 @@ export default function RoleEdit({ role, open, setOpen }: any) {
       open={open}
       size="large"
       onClose={() => setOpen(false)}
-      actions={(
-        <Actions
-          cancel={() => setOpen(false)}
-          submit={() => mutation()}
-          loading={loading}
-          action="Update"
-        />
-      )}
     >
       <RoleForm
         attributes={attributes}
         setAttributes={setAttributes}
         bindings={uniqueRoleBindings}
         setBindings={setRoleBindings}
+        label="Update"
+        cancel={() => setOpen(false)}
+        submit={() => mutation()}
+        loading={loading}
         error={error}
       />
     </Modal>
