@@ -74,7 +74,7 @@ export default function Role({ role, q }: any) {
         <Confirm
           open={confirm}
           title="Delete role"
-          text="Are you sure? Deleting roles cannot be undone."
+          text="Are you sure you want to delete this role? This could have downstream effects on a large number of users."
           close={() => setConfirm(false)}
           submit={() => mutation()}
           loading={loading}
