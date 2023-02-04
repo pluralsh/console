@@ -29,7 +29,11 @@ import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
-import { PODS_Q } from '../queries'
+import { isEqual } from 'utils/kubernetes'
+
+import { uniqBy } from 'lodash'
+
+import { PODS_Q, PODS_SUB } from '../queries'
 import { SHORT_POLL_INTERVAL } from '../constants'
 
 import {
@@ -81,7 +85,9 @@ export default function AllPods() {
   useEffect(() => setBreadcrumbs([{ text: 'pods', url: '/pods' }]),
     [setBreadcrumbs])
 
-  const { data, refetch, error } = useQuery<{
+  const {
+    data, refetch, error, subscribeToMore,
+  } = useQuery<{
     cachedPods: RootQueryType['cachedPods']
     applications: RootQueryType['applications']
     namespaces: RootQueryType['namespaces']
@@ -93,21 +99,25 @@ export default function AllPods() {
   /*
     TODO: Add subscription when subscription actually starts returning values.
   */
-  // useEffect(() => {
-  //   console.log('subscribe!')
-  //   subscribeToMore({
-  //     document: PODS_SUB,
-  //     updateQuery: (prev, { subscriptionData }) => {
-  //       console.log('subscribe prev', prev)
-  //       console.log('subscribe data', subscriptionData)
+  useEffect(() => {
+    console.log('subscribe!')
 
-  //       return prev
-  //     },
-  //     onError: e => {
-  //       console.log('subscribe error msg', e.message)
-  //     },
-  //   })
-  // }, [subscribeToMore])
+    return subscribeToMore({
+      document: PODS_SUB,
+      updateQuery: (prev, { subscriptionData: { data } } : any) => {
+        if (!data?.podDelta) return prev
+        const { podDelta: { delta, payload } } = data
+
+        if (delta === 'CREATE') return { ...prev, cachedPods: uniqBy([payload, ...prev.cachedPods], p => `${p.metadata.name}:${p.metadata.namespace}`) }
+        if (delta === 'DELETE') return { ...prev, cachedPods: prev.cachedPods.filter(p => !isEqual(p, payload)) }
+
+        return prev
+      },
+      onError: e => {
+        console.log('subscribe error msg', e.message)
+      },
+    })
+  }, [subscribeToMore])
 
   const columns = useMemo(() => [
     ColNamespace,

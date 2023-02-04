@@ -12,7 +12,7 @@ import {
 } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 
-import { mergeEdges } from 'components/graphql/utils'
+import { appendEdge } from 'components/graphql/utils'
 
 import { BUILD_Q, BUILD_SUB, COMMAND_SUB } from 'components/graphql/builds'
 
@@ -62,15 +62,13 @@ const UPDATE_PATH = 'build.commands.edges'.split('.')
 
 function updateQuery(prev, { subscriptionData: { data } }) {
   if (!data) return prev
-  if (data.buildDelta) {
-    return { ...prev, build: { ...prev, ...data.buildDelta.payload } }
-  }
-
   const { commandDelta: { delta, payload } } = data
 
-  return deepUpdate(prev, UPDATE_PATH, edges => mergeEdges(
-    edges, delta, payload, 'CommandEdge', 'append'
-  ))
+  if (delta === 'CREATE') {
+    return deepUpdate(prev, UPDATE_PATH, edges => appendEdge(edges, payload, 'append'))
+  }
+
+  return prev
 }
 
 const DIRECTORY = [
@@ -84,12 +82,11 @@ export default function Build() {
   const { pathname } = useLocation()
   const { buildId } = useParams()
   const pathPrefix = `/builds/${buildId}`
-  const { data, subscribeToMore } = useQuery(BUILD_Q,
-    {
-      variables: { buildId },
-      fetchPolicy: 'cache-and-network',
-      errorPolicy: 'ignore',
-    })
+  const { data, subscribeToMore } = useQuery(BUILD_Q, {
+    variables: { buildId },
+    fetchPolicy: 'cache-and-network',
+    errorPolicy: 'ignore',
+  })
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
 
   useEffect(() => {
@@ -99,7 +96,7 @@ export default function Build() {
     ])
 
     const first = subscribeToMore({ document: COMMAND_SUB, variables: { buildId }, updateQuery })
-    const second = subscribeToMore({ document: BUILD_SUB, variables: { buildId }, updateQuery })
+    const second = subscribeToMore({ document: BUILD_SUB, variables: { buildId } })
 
     return () => {
       first()
