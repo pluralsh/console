@@ -25,16 +25,27 @@ export function extendConnection(prev, next, key) {
   }
 }
 
-export function deepUpdate(prev, path, update) {
-  if (isString(path)) return deepUpdate(prev, path.split('.'), update)
+export function deepUpdate(
+  prev, path, update, ind = 0
+) {
+  if (isString(path)) {
+    return deepUpdate(
+      prev, path.split('.'), update, ind
+    )
+  }
 
-  const key = path[0]
+  const key = path[ind]
 
-  if (path.length === 1) {
+  if (!path[ind + 1]) {
     return { ...prev, [key]: update(prev[key]) }
   }
 
-  return { ...prev, [key]: deepUpdate(prev[key], path.slice(1), update) }
+  return {
+    ...prev,
+    [key]: deepUpdate(
+      prev[key], path, update, ind + 1
+    ),
+  }
 }
 
 export function appendConnection(prev, next, key) {

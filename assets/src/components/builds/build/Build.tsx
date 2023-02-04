@@ -49,12 +49,16 @@ import { InstallationContext } from 'components/Installations'
 
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
+import { deepUpdate } from 'utils/graphql'
+
 import { BUILD_TYPE_DISPLAY_NAMES } from '../Build'
 
 import { BuildTimer } from './BuildTimer'
 import BuildCancel from './BuildCancel'
 import BuildRestart from './BuildRestart'
 import BuildApproval from './BuildApproval'
+
+const UPDATE_PATH = 'build.commands.edges'.split('.')
 
 function updateQuery(prev, { subscriptionData: { data } }) {
   if (!data) return prev
@@ -63,20 +67,10 @@ function updateQuery(prev, { subscriptionData: { data } }) {
   }
 
   const { commandDelta: { delta, payload } } = data
-  const { commands: { edges, ...rest }, ...build } = prev.build
 
-  return {
-    ...prev,
-    build: {
-      ...build,
-      commands: {
-        ...rest,
-        edges: mergeEdges(
-          edges, delta, payload, 'CommandEdge', 'append'
-        ),
-      },
-    },
-  }
+  return deepUpdate(prev, UPDATE_PATH, edges => mergeEdges(
+    edges, delta, payload, 'CommandEdge', 'append'
+  ))
 }
 
 const DIRECTORY = [
@@ -91,7 +85,11 @@ export default function Build() {
   const { buildId } = useParams()
   const pathPrefix = `/builds/${buildId}`
   const { data, subscribeToMore } = useQuery(BUILD_Q,
-    { variables: { buildId }, fetchPolicy: 'cache-and-network', errorPolicy: 'ignore' })
+    {
+      variables: { buildId },
+      fetchPolicy: 'cache-and-network',
+      errorPolicy: 'ignore',
+    })
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
 
   useEffect(() => {

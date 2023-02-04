@@ -155,7 +155,7 @@ defmodule Console.Plural.Queries do
 
   @search_repositories """
     query SearchRepos($query: String!, $first: Int, $cursor: String) {
-      repositories(q: $query, first: $first, after: $cursor) {
+      repositories(q: $query, first: $first, after: $cursor, installed: true) {
         pageInfo { ...PageInfo }
         edges { node { ...RepositoryFragment } }
       }
