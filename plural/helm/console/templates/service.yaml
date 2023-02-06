@@ -2,6 +2,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: console
+  {{- with .Values.service.annotations }}
+  annotations:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
     app: console
 {{ include "console.labels" . | indent 4 }}

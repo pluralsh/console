@@ -11,7 +11,7 @@ image:
 
 serviceAccount:
   create: true
-  annotations: {}
+  annotations: {}  
 
 extraSecretEnv: []
 
@@ -45,6 +45,8 @@ fullnameOverride: ""
 service:
   type: ClusterIP
   port: 4000
+  annotations:
+    traefik.ingress.kubernetes.io/service.sticky.cookie: 'true'
 
 dbPasswordSecret: console.plural-console.credentials.postgresql.acid.zalan.do
 
