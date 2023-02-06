@@ -1,5 +1,4 @@
 import {
-  Card,
   ComponentsIcon,
   EmptyState,
   ListBoxFooter,
@@ -22,6 +21,8 @@ import styled, { useTheme } from 'styled-components'
 import { Component as ComponentT } from 'generated/graphql'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
+import { Div } from 'honorable'
 
 import Component from './Component'
 
@@ -84,7 +85,7 @@ export default function Components() {
 
   return (
     <ScrollablePage
-      scrollable={false}
+      scrollable
       heading="Components"
       headingContent={(
         <Select
@@ -121,11 +122,10 @@ export default function Components() {
         </Select>
       )}
     >
-      <Card
-        maxHeight="100%"
-        direction="column"
-        paddingRight="xxxsmall"
-        overflowY="auto"
+      <Div
+        display="grid"
+        gap="small"
+        gridTemplateColumns="repeat(auto-fit, minmax(420px, 1fr))"
       >
         {(filteredComponents || []).length === 0 ? (
           <EmptyState message="No components match your selection" />
@@ -134,11 +134,10 @@ export default function Components() {
             <Component
               key={i}
               component={component}
-              last={currentApp.status.components.length === i + 1}
             />
           ))
         )}
-      </Card>
+      </Div>
     </ScrollablePage>
   )
 }

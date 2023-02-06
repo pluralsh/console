@@ -1,80 +1,80 @@
-import { IconFrame, Tooltip } from '@pluralsh/design-system'
-import { ListItemBorder } from 'components/apps/misc'
+import { Card, IconFrame, Tooltip } from '@pluralsh/design-system'
 import { TRUNCATE } from 'components/utils/truncate'
 import { Flex, P } from 'honorable'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { ComponentIcon, ComponentStatus, statusToBorder } from './misc'
+import { ComponentIcon, ComponentStatus } from './misc'
 
-export default function Component({ component, last }: {component: any, last: boolean}) {
+export default function Component({
+  component,
+}: {
+  component: any
+}) {
   const navigate = useNavigate()
   const { appName } = useParams()
   const {
     name, group, kind, status,
   } = component
 
+  const kindString = `${group || 'v1'}/${kind.toLowerCase()}`
+
   return (
-    <Flex
+    <Card
+      display="flex"
+      gap="small"
+      paddingHorizontal="small"
+      paddingVertical="xsmall"
+      grow={1}
       cursor="pointer"
       _hover={{ backgroundColor: 'fill-one-hover' }}
-      borderBottom={!last && '1px solid border'}
-      grow={1}
-      minWidth={240}
       onClick={() => navigate(`/apps/${appName}/components/${kind.toLowerCase()}/${name}`)}
+      overflow="hidden"
     >
-      <ListItemBorder
-        color={statusToBorder[status]}
-        width={2}
-        radius={0}
+      <IconFrame
+        icon={<ComponentIcon kind={kind} />}
+        size="medium"
+        textValue={name}
+        type="tertiary"
       />
       <Flex
         align="center"
         gap="small"
-        maxWidth="90%"
-        paddingHorizontal="small"
-        paddingVertical="xsmall"
+        flexShrink={1}
+        overflow="hidden"
       >
-        <IconFrame
-          icon={<ComponentIcon kind={kind} />}
-          size="medium"
-          textValue={name}
-          type="tertiary"
-        />
-        <Flex
-          gap="small"
-          align="center"
-          grow={1}
-          {...TRUNCATE}
+        <Tooltip
+          label={name}
+          placement="bottom"
         >
-          <Tooltip
-            label={name}
-            placement="bottom"
+          <P
+            body1
+            fontWeight={600}
+            {...TRUNCATE}
+            flexShrink={1}
           >
-            <P
-              body1
-              fontWeight={600}
-              {...TRUNCATE}
-            >
-              {name}
-            </P>
-          </Tooltip>
+            {name}
+          </P>
+        </Tooltip>
+        <Tooltip label={kindString}>
           <P
             caption
             color="text-xlight"
+            {...TRUNCATE}
+            flexShrink={0}
+            marginRight="xsmall"
           >
-            {group || 'v1'}/{kind.toLowerCase()}
+            {kindString}
           </P>
-        </Flex>
+        </Tooltip>
       </Flex>
       <Flex
         align="center"
         justify="end"
         grow={1}
-        marginRight="small"
+        shrink={0}
       >
         <ComponentStatus status={status} />
       </Flex>
-    </Flex>
+    </Card>
   )
 }
-
