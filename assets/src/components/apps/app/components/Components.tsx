@@ -10,6 +10,7 @@ import {
   Key,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react'
 import { useParams } from 'react-router-dom'
@@ -60,6 +61,24 @@ const FilterTrigger = styled(SelectButton)({
   },
 })
 
+const ORDER = {
+  deployment: 1,
+  statefulset: 2,
+  certificate: 3,
+  ingress: 4,
+  cronjob: 5,
+  service: 6,
+  job: 7,
+}
+
+const kindInd = kind => ORDER[kind.toLowerCase()] || 7
+
+function orderBy({ kind: k1, name: n1 }, { kind: k2, name: n2 }) {
+  if (k1 === k2) return (n1 > n2) ? 1 : ((n1 === n2) ? 0 : -1)
+
+  return kindInd(k1) - kindInd(k2)
+}
+
 export default function Components() {
   const { appName } = useParams()
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
@@ -80,7 +99,9 @@ export default function Components() {
   },
   new Set<string>([]))).sort()
   const [selectedKinds, setSelectedKinds] = useState<Set<Key>>(new Set(componentKinds))
-  const filteredComponents = currentApp?.status?.components.filter(comp => selectedKinds.has(comp.kind))
+  const filteredComponents = useMemo(() => (
+    currentApp?.status?.components.filter(comp => selectedKinds.has(comp.kind)).sort(orderBy)
+  ), [currentApp, selectedKinds])
   const sortedSelectedKinds = Array.from(selectedKinds).sort()
 
   return (
@@ -124,8 +145,8 @@ export default function Components() {
     >
       <Div
         display="grid"
-        gap="small"
-        gridTemplateColumns="repeat(auto-fit, minmax(420px, 1fr))"
+        gap="xsmall"
+        gridTemplateColumns="1fr 1fr"
       >
         {(filteredComponents || []).length === 0 ? (
           <EmptyState message="No components match your selection" />
