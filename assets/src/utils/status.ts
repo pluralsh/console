@@ -71,5 +71,9 @@ export function containerStatusToReadiness(status?: Maybe<ContainerStatus>) {
   if (ready) return Readiness.Ready
   if (!state?.terminated) return Readiness.InProgress
 
+  if (state?.terminated) {
+    return state?.terminated?.exitCode === 0 ? Readiness.Complete : Readiness.Failed
+  }
+
   return Readiness.Failed
 }
