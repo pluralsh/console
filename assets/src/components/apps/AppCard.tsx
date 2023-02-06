@@ -74,6 +74,7 @@ export default function AppCard({ app }: any) {
       flexGrow={1}
       flexShrink={1}
       minWidth={450}
+      className={`app-${name}`}
       onClick={() => navigate(`/apps/${name}`)}
     >
       <ListItemBorder color={borderColor} />

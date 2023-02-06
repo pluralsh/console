@@ -1,4 +1,4 @@
-import { grey, red, yellow } from '@pluralsh/design-system/dist/theme/colors'
+import { grey, red, yellow, green } from '@pluralsh/design-system/dist/theme/colors'
 import { ansiToJson } from 'anser'
 import { textStyle } from 'components/utils/AnsiText'
 import escapeCarriageReturn from 'escape-carriage'
@@ -16,7 +16,7 @@ export function borderColor(lvl) {
   case Level.WARN:
     return yellow[200]
   case Level.INFO:
-    return grey[100]
+    return green[300]
   default:
     return grey[750]
   }
