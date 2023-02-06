@@ -33,7 +33,7 @@ defmodule Console.Schema.User do
 
   def search(query \\ __MODULE__, name) do
     from(u in query,
-      where: like(u.name, ^"#{name}%") or like(u.email, ^"#{name}%")
+      where: ilike(u.name, ^"%#{name}%") or like(u.email, ^"#{name}%")
     )
   end
 
