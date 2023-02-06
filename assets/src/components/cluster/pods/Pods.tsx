@@ -99,25 +99,21 @@ export default function AllPods() {
   /*
     TODO: Add subscription when subscription actually starts returning values.
   */
-  useEffect(() => {
-    console.log('subscribe!')
+  useEffect(() => subscribeToMore({
+    document: PODS_SUB,
+    updateQuery: (prev, { subscriptionData: { data } } : any) => {
+      if (!data?.podDelta) return prev
+      const { podDelta: { delta, payload } } = data
 
-    return subscribeToMore({
-      document: PODS_SUB,
-      updateQuery: (prev, { subscriptionData: { data } } : any) => {
-        if (!data?.podDelta) return prev
-        const { podDelta: { delta, payload } } = data
+      if (delta === 'CREATE') return { ...prev, cachedPods: uniqBy([payload, ...prev.cachedPods], p => `${p.metadata.name}:${p.metadata.namespace}`) }
+      if (delta === 'DELETE') return { ...prev, cachedPods: prev.cachedPods.filter(p => !isEqual(p, payload)) }
 
-        if (delta === 'CREATE') return { ...prev, cachedPods: uniqBy([payload, ...prev.cachedPods], p => `${p.metadata.name}:${p.metadata.namespace}`) }
-        if (delta === 'DELETE') return { ...prev, cachedPods: prev.cachedPods.filter(p => !isEqual(p, payload)) }
-
-        return prev
-      },
-      onError: e => {
-        console.log('subscribe error msg', e.message)
-      },
-    })
-  }, [subscribeToMore])
+      return prev
+    },
+    onError: e => {
+      console.error('subscribe error msg', e.message)
+    },
+  }), [subscribeToMore])
 
   const columns = useMemo(() => [
     ColNamespace,
