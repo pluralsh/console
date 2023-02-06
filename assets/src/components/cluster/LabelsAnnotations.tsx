@@ -1,7 +1,7 @@
 import { Card, CardProps, Chip } from '@pluralsh/design-system'
 import { Div, Flex } from 'honorable'
 import { ReactNode } from 'react'
-import type { Metadata as MetadataT } from 'generated/graphql'
+import type { LabelPair, Metadata as MetadataT } from 'generated/graphql'
 
 export const mapify = tags => tags.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {})
 
@@ -32,8 +32,13 @@ export function LabelsAnnotationsRow({
   )
 }
 
-export function LabelsAnnotationsTag({ name }) {
-  return <Chip>{name}</Chip>
+export function LabelsAnnotationsTag({ name, value }: LabelPair) {
+  return (
+    <Chip>
+      {name}
+      {value && `: ${value}`}
+    </Chip>
+  )
 }
 
 export function LabelsAnnotations({
@@ -55,7 +60,7 @@ export function LabelsAnnotations({
           {labels?.map(label => (
             <LabelsAnnotationsTag
               key={label?.name}
-              name={label?.name}
+              {...label}
             />
           ))}
         </LabelsAnnotationsRow>
@@ -63,7 +68,7 @@ export function LabelsAnnotations({
           {annotations?.map(annotation => (
             <LabelsAnnotationsTag
               key={annotation?.name}
-              name={annotation?.name}
+              {...annotation}
             />
           ))}
         </LabelsAnnotationsRow>
