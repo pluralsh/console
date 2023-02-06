@@ -22,8 +22,8 @@ export default function Component({
     <Card
       display="flex"
       gap="small"
-      paddingHorizontal="small"
-      paddingVertical="xsmall"
+      paddingHorizontal="xsmall"
+      paddingVertical="xxsmall"
       grow={1}
       cursor="pointer"
       _hover={{ backgroundColor: 'fill-one-hover' }}
@@ -47,7 +47,7 @@ export default function Component({
           placement="bottom"
         >
           <P
-            body1
+            body2
             fontWeight={600}
             {...TRUNCATE}
             flexShrink={1}
