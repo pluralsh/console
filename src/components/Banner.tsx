@@ -80,6 +80,7 @@ const BannerOuter = styled.div<{
 const BannerInner = styled.div(({ theme }) => ({
   display: 'flex',
   paddingTop: theme.spacing.xxsmall,
+  paddingBottom: theme.spacing.xxsmall,
   alignItems: 'flex-start',
 }))
 
@@ -146,12 +147,6 @@ ref: Ref<any>) {
   const iconColorKey = severityToIconColorKey[severity]
   const borderColorKey = severityToBorderColorKey[severity]
 
-  function handleClose() {
-    if (typeof onClose === 'function') {
-      onClose()
-    }
-  }
-
   const content = (
     <BannerOuter
       ref={ref}
@@ -181,7 +176,9 @@ ref: Ref<any>) {
         </div>
       </BannerInner>
       <Div flexGrow={1} />
-      <CloseButton onClick={handleClose} />
+      {typeof onClose === 'function' && (
+        <CloseButton onClick={onClose} />
+      )}
     </BannerOuter>
   )
 

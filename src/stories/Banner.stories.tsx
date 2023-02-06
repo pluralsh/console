@@ -124,6 +124,19 @@ function Template(args: any) {
       >
         Having a full width Banner can sometimes be useful.
       </Banner>
+      <H1
+        marginTop="medium"
+        subtitle2
+      >
+        onClose=fn
+      </H1>
+      <Banner
+        {...args}
+        fullWidth
+        onClose={() => {}}
+      >
+        Having a full width Banner can sometimes be useful.
+      </Banner>
     </Flex>
   )
 }
