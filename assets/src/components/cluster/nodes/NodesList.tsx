@@ -15,6 +15,8 @@ import { cpuParser, memoryParser } from 'utils/kubernetes'
 import { Confirm } from 'components/utils/Confirm'
 import { useMutation } from '@apollo/client'
 
+import { rounded } from 'utils/number'
+
 import { mapify } from '../LabelsAnnotations'
 import {
   StatusChip,
@@ -132,10 +134,17 @@ const ColCpuUsage = columnHelper.accessor(row => row?.cpu.used, {
   enableSorting: true,
   sortingFn: numishSort,
   cell: props => (
-    <UsageBar
-      usage={props.getValue()}
-      width={120}
-    />
+    <Tooltip
+      label={`${rounded(props.getValue())}%`}
+      placement="top"
+    >
+      <TableText>
+        <UsageBar
+          usage={props.getValue()}
+          width={120}
+        />
+      </TableText>
+    </Tooltip>
   ),
   header: 'CPU usage',
 })
@@ -146,10 +155,17 @@ const ColMemoryUsage = columnHelper.accessor(row => (row?.memory?.used ?? 0) / (
     enableSorting: true,
     sortingFn: numishSort,
     cell: props => (
-      <UsageBar
-        usage={props.getValue()}
-        width={120}
-      />
+      <Tooltip
+        label={`${rounded(props.getValue())}%`}
+        placement="top"
+      >
+        <TableText>
+          <UsageBar
+            usage={props.getValue()}
+            width={120}
+          />
+        </TableText>
+      </Tooltip>
     ),
     header: 'Memory usage',
   })

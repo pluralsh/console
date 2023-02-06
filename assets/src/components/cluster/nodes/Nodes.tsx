@@ -12,7 +12,7 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
-import { POLL_INTERVAL } from '../constants'
+import { SHORT_POLL_INTERVAL } from '../constants'
 import { NODES_Q } from '../queries'
 
 import { ClusterMetrics } from './ClusterMetrics'
@@ -33,7 +33,7 @@ export default function Nodes() {
     nodes: Node[]
     nodeMetrics: NodeMetric[]
   }>(NODES_Q, {
-    pollInterval: POLL_INTERVAL,
+    pollInterval: SHORT_POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
 

@@ -9,6 +9,10 @@ const MULTIPLES = {
 
 const nanToUndef = val => (typeof val !== 'number' || Number.isNaN(val) ? undefined : val)
 
+export function isEqual({ metadata: first }, { metadata: second }) {
+  return (first.namespace === second.namespace && first.name === second.name)
+}
+
 export function cpuParser(input?: string | null) {
   if (!input || typeof input !== 'string') {
     return undefined

@@ -68,7 +68,22 @@ export function buildClient(
 
   const client = new ApolloClient({
     link: splitLink,
-    cache: new InMemoryCache({ fragmentMatcher }),
+    cache: new InMemoryCache({
+      fragmentMatcher,
+      typePolicies: {
+        Command: {
+          fields: {
+            exitCode: {
+              merge(code, incoming) {
+                if (code || code === 0) return code
+
+                return incoming
+              },
+            },
+          },
+        },
+      },
+    }),
   })
 
   return { client, socket }
