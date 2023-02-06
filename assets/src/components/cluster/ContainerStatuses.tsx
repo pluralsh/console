@@ -48,6 +48,8 @@ export const readinessToTooltipColor = {
 } as const satisfies Record<ReadinessT, string>
 
 export function ContainerStatuses({ statuses = [] }: {statuses: ContainerStatus[]}) {
+  console.log(statuses)
+
   return (
     <Flex gap="xxxsmall">
       {statuses.map(({ name, readiness }) => (

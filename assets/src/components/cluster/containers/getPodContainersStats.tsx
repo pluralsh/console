@@ -16,6 +16,7 @@ export function getPodContainersStats(podStatus: Pod['status']): {
 } {
   const allStatuses = getAllContainerStatuses(podStatus)
 
+  console.log(allStatuses)
   const readyCount = allStatuses.reduce((prev, status) => {
     if (!status) {
       return prev

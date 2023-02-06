@@ -1,4 +1,9 @@
-import { grey, red, yellow, green } from '@pluralsh/design-system/dist/theme/colors'
+import {
+  green,
+  grey,
+  red,
+  yellow,
+} from '@pluralsh/design-system/dist/theme/colors'
 import { ansiToJson } from 'anser'
 import { textStyle } from 'components/utils/AnsiText'
 import escapeCarriageReturn from 'escape-carriage'
