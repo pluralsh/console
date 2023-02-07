@@ -1,11 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Button, LoopingLogo } from '@pluralsh/design-system'
-import {
-  Div,
-  Flex,
-  Form,
-  P,
-} from 'honorable'
+import { Flex, Form, P } from 'honorable'
 import { useMutation, useQuery } from '@apollo/client'
 import { Box, Text } from 'grommet'
 import { v4 as uuidv4 } from 'uuid'
