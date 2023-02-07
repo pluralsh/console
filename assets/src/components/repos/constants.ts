@@ -34,4 +34,5 @@ export enum ConfigurationType {
 export enum OperationType {
   NOT = 'NOT',
   PREFIX = 'PREFIX',
+  EQUAL = 'EQ',
 }

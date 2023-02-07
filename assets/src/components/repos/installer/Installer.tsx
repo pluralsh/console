@@ -16,7 +16,7 @@ import {
   WizardStepper,
 } from '@pluralsh/design-system'
 import { Box } from 'grommet'
-import { useApolloClient, useQuery } from '@apollo/client'
+import { ApolloError, useApolloClient, useQuery } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
 
 import { SEARCH_REPOS } from '../../graphql/plural'
@@ -25,6 +25,15 @@ import { BUILDS_Q } from '../../graphql/builds'
 import { appendConnection } from '../../../utils/graphql'
 
 import { buildSteps, install, toDefaultSteps } from './helpers'
+
+const ERROR_MESSAGE_MAP = {
+  forbidden: 'Insufficient permissions to install applications',
+}
+const localize = (err: ApolloError) => ({
+  ...err,
+  graphQLErrors:
+  err?.graphQLErrors?.map(e => (ERROR_MESSAGE_MAP[e.message] ? { ...e, message: ERROR_MESSAGE_MAP[e.message] } : e)),
+})
 
 export function Installer({ setOpen, setConfirmClose, setVisible }) {
   const client = useApolloClient()
@@ -102,7 +111,7 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
       {error && (
         <GraphQLToast
           onClose={() => setError(undefined)}
-          error={error}
+          error={localize(error)}
           header="Error"
           margin="medium"
           marginHorizontal="xxxxlarge"
