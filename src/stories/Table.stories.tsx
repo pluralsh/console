@@ -300,6 +300,16 @@ Loose.args = {
   loose: true,
 }
 
+export const Clickable = Template.bind({})
+
+Clickable.args = {
+  width: '900px',
+  height: '400px',
+  data: repeatedData,
+  columns: expandingColumns,
+  onRowClick: (e: MouseEvent, row: Row<any>) => console.log(row?.original),
+}
+
 export const StickyColumn = Template.bind({})
 
 StickyColumn.args = {

@@ -131,9 +131,21 @@ const Tbody = styled(TbodyUnstyled)(({ theme }) => ({
   backgroundColor: theme.colors['fill-one'],
 }))
 
-const Tr = styled.tr(() => ({
+const Tr = styled.tr<{clickable?: boolean, lighter?: boolean}>(({ theme, clickable = false, lighter = false }) => ({
   display: 'contents',
-  backgroundColor: 'inherit',
+  backgroundColor: lighter
+    ? theme.colors['fill-one']
+    : theme.colors['fill-one-hover'],
+
+  ...(clickable && {
+    cursor: 'pointer',
+
+    '&:hover': {
+      backgroundColor: lighter
+        ? theme.colors['fill-one-hover']
+        : theme.colors['fill-one-selected'],
+    },
+  }),
 }))
 
 const Th = styled.th<{
@@ -194,19 +206,15 @@ const Th = styled.th<{
 // TODO: Set vertical align to top for tall cells (~3 lines of text or more). See ENG-683.
 const Td = styled.td<{
   firstRow?: boolean
-  lighter: boolean
   loose?: boolean
   stickyColumn: boolean
   truncateColumn: boolean
-  clickable?: boolean
 }>(({
   theme,
   firstRow,
-  lighter,
   loose,
   stickyColumn,
   truncateColumn = false,
-  clickable = false,
 }) => ({
   display: 'flex',
   flexDirection: 'column',
@@ -214,15 +222,9 @@ const Td = styled.td<{
   height: 'auto',
   minHeight: 52,
 
-  backgroundColor: lighter
-    ? theme.colors['fill-one']
-    : theme.colors['fill-one-hover'],
+  backgroundColor: 'inherit',
   borderTop: firstRow ? '' : theme.borders.default,
   color: theme.colors.text,
-
-  ...(clickable && {
-    cursor: 'pointer',
-  }),
 
   padding: loose ? '16px 12px' : '8px 12px',
   '&:first-child': stickyColumn
@@ -244,13 +246,11 @@ const Td = styled.td<{
     : {}),
 }))
 
-const TdExpand = styled.td<{ lighter: boolean }>(({ theme, lighter }) => ({
+const TdExpand = styled.td(({ theme }) => ({
   '&:last-child': {
     gridColumn: '2 / -1',
   },
-  backgroundColor: lighter
-    ? theme.colors['fill-one']
-    : theme.colors['fill-one-hover'],
+  backgroundColor: 'inherit',
   color: theme.colors.text,
   height: 'auto',
   minHeight: 52,
@@ -315,11 +315,13 @@ function FillerRow({
   stickyColumn: boolean
 }) {
   return (
-    <Tr aria-hidden="true">
+    <Tr
+      aria-hidden="true"
+      lighter={index % 2 === 0}
+    >
       <Td
         aria-hidden="true"
         stickyColumn={stickyColumn}
-        lighter={index % 2 === 0}
         style={{
           height,
           minHeight: height,
@@ -521,16 +523,16 @@ function TableRef({
                   <Tr
                     key={row.id}
                     onClick={e => onRowClick?.(e, row)}
+                    lighter={i % 2 === 0}
+                    clickable={!!onRowClick}
                   >
                     {row.getVisibleCells().map(cell => (
                       <Td
                         key={cell.id}
                         firstRow={i === 0}
-                        lighter={i % 2 === 0}
                         loose={loose}
                         stickyColumn={stickyColumn}
                         truncateColumn={cell.column?.columnDef?.meta?.truncate}
-                        clickable={!!onRowClick}
                       >
                         {flexRender(cell.column.columnDef.cell,
                           cell.getContext())}
@@ -538,12 +540,9 @@ function TableRef({
                     ))}
                   </Tr>
                   {row.getIsExpanded() && (
-                    <Tr>
-                      <TdExpand lighter={i % 2 === 0} />
-                      <TdExpand
-                        colSpan={row.getVisibleCells().length - 1}
-                        lighter={i % 2 === 0}
-                      >
+                    <Tr lighter={i % 2 === 0}>
+                      <TdExpand />
+                      <TdExpand colSpan={row.getVisibleCells().length - 1}>
                         {renderExpanded({ row })}
                       </TdExpand>
                     </Tr>
