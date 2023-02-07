@@ -13,20 +13,22 @@ import { useIntercom } from 'react-use-intercom'
 import { useLocation } from 'react-router-dom'
 import { LoopingLogo } from '@pluralsh/design-system'
 
-import { setToken, wipeToken } from '../helpers/auth'
-import { localized } from '../helpers/hostname'
+import { setToken, wipeToken } from '../../helpers/auth'
+import { localized } from '../../helpers/hostname'
 
-import { ME_Q, SIGNIN } from './graphql/users'
-import { IncidentContext } from './incidents/context'
-import { LabelledInput } from './utils/LabelledInput'
-import { LoginContext } from './contexts'
+import { ME_Q, SIGNIN } from '../graphql/users'
+import { IncidentContext } from '../incidents/context'
+import { LabelledInput } from '../utils/LabelledInput'
+import { LoginContext } from '../contexts'
+import { LoginPortal } from '../login/LoginPortal'
 
 const POLL_INTERVAL = 3 * 60 * 1000
-const CONSOLE_ICON = '/console-full.png'
 const CONSOLE_LOGO = '/console-logo.png'
 const LOGIN_INFO = gql`
   query LoginInfo($redirect: String) {
-    loginInfo(redirect: $redirect) { oidcUri }
+    loginInfo(redirect: $redirect) {
+      oidcUri
+    }
   }
 `
 
@@ -34,13 +36,13 @@ function LoginError({ error }) {
   useEffect(() => {
     const to = setTimeout(() => {
       wipeToken()
-      window.location = '/login'
+      window.location = '/login' as any as Location
     }, 2000)
 
     return () => clearTimeout(to)
   }, [])
 
-  console.log(error)
+  console.error(error)
 
   return (
     <LoginPortal>
@@ -67,7 +69,8 @@ export function GrantAccess() {
           <Text
             size="small"
             color="dark-3"
-          >Enter the login token given to you to gain access
+          >
+            Enter the login token given to you to gain access
           </Text>
         </Box>
         <LabelledInput
@@ -82,7 +85,8 @@ export function GrantAccess() {
           pad={{ vertical: '8px' }}
           margin={{ top: 'xsmall' }}
           onClick={() => {
-            setToken(jwt); window.location = '/'
+            setToken(jwt)
+            window.location = '/' as any as Location
           }}
           disabled={jwt === ''}
         />
@@ -95,14 +99,23 @@ const FUDGED_USER = 'plrl-fudged-user'
 
 function fudgedUser(name) {
   if (localStorage.getItem(FUDGED_USER)) {
-    return localStorage.getItem(FUDGED_USER)
+    let item = {}
+
+    try {
+      item = JSON.parse(localStorage.getItem(FUDGED_USER) || '')
+    }
+    catch (e) {
+      console.error('Error retrieving fudged user: ', e)
+    }
+
+    return item
   }
 
   const id = uuidv4()
   const randstr = Math.random().toString(36).slice(2)
   const user = { email: `sandbox+${randstr}@plural.sh`, name, userId: id }
 
-  localStorage.setItem(FUDGED_USER, user)
+  localStorage.setItem(FUDGED_USER, JSON.stringify(user))
 
   return user
 }
@@ -119,7 +132,10 @@ function intercomAttributes({ email, name }) {
 
 export function EnsureLogin({ children }) {
   const location = useLocation()
-  const { data, error, loading } = useQuery(ME_Q, { pollInterval: POLL_INTERVAL, errorPolicy: 'ignore' })
+  const { data, error, loading } = useQuery(ME_Q, {
+    pollInterval: POLL_INTERVAL,
+    errorPolicy: 'ignore',
+  })
   const { boot, update } = useIntercom()
 
   useEffect(() => {
@@ -139,14 +155,19 @@ export function EnsureLogin({ children }) {
   if (!data?.clusterInfo) return null
 
   const {
-    me, externalToken, clusterInfo: { __typename, ...clusterInformation }, configuration,
+    me,
+    externalToken,
+    clusterInfo: { __typename, ...clusterInformation },
+    configuration,
   } = data
 
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     <IncidentContext.Provider value={{ clusterInformation }}>
       {/* eslint-disable-next-line react/jsx-no-constructed-context-values */}
-      <LoginContext.Provider value={{ me, configuration, token: externalToken }}>
+      <LoginContext.Provider
+        value={{ me, configuration, token: externalToken }}
+      >
         {children}
       </LoginContext.Provider>
     </IncidentContext.Provider>
@@ -169,7 +190,8 @@ function OIDCLogin({ oidcUri }) {
           <Text
             size="small"
             color="dark-3"
-          >It looks like this instance is using plural oauth
+          >
+            It looks like this instance is using plural oauth
           </Text>
         </Box>
         <Button
@@ -188,7 +210,9 @@ function OIDCLogin({ oidcUri }) {
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' })
   const { data } = useQuery(ME_Q)
-  const { data: loginData } = useQuery(LOGIN_INFO, { variables: { redirect: localized('/oauth/callback') } })
+  const { data: loginData } = useQuery(LOGIN_INFO, {
+    variables: { redirect: localized('/oauth/callback') },
+  })
   const [mutation, { loading, error }] = useMutation(SIGNIN, {
     variables: form,
     onCompleted: ({ signIn: { jwt } }) => {
@@ -223,7 +247,8 @@ export default function Login() {
           <Text
             size="small"
             color="dark-3"
-          >Enter your email and password to get started
+          >
+            Enter your email and password to get started
           </Text>
         </Box>
         <Keyboard onEnter={disabled ? null : mutation}>
