@@ -4,6 +4,7 @@ import {
   ColContainers,
   ColCpuReservation,
   ColDelete,
+  ColImages,
   ColMemoryReservation,
   ColNameLink,
   ColRestarts,
@@ -26,6 +27,7 @@ export default function Pods({ pods }) {
     ColCpuReservation,
     ColRestarts,
     ColContainers,
+    ColImages,
     ColDelete(refetch),
   ],
   [refetch])
