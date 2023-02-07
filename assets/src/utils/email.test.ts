@@ -5,6 +5,8 @@ describe('Email utils', () => {
     expect(isValidEmail('marcin@plural.sh')).toBeTruthy()
     expect(isValidEmail('marcin.123@plural.sh')).toBeTruthy()
     expect(isValidEmail('marcin.123@plural.123.sh')).toBeTruthy()
+    expect(isValidEmail('移动@移动.移动')).toBeTruthy()
+    expect(isValidEmail('laniña@somwhere.mx')).toBeTruthy()
 
     expect(isValidEmail('')).toBeFalsy()
     expect(isValidEmail('marcin')).toBeFalsy()
