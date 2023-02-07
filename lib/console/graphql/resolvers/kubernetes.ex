@@ -167,6 +167,17 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> items_connection()
   end
 
+  def list_cached_pods(args, _) do
+    Console.Cached.Pod.fetch()
+    |> maybe_filter_pods(args)
+  end
+
+  defp maybe_filter_pods(pods, %{namespaces: [_ | _] = namespaces}) do
+    namespaces = MapSet.new(namespaces)
+    {:ok, Enum.filter(pods, &MapSet.member?(namespaces, &1.metadata.namespace))}
+  end
+  defp maybe_filter_pods(pods, _), do: {:ok, pods}
+
   def list_namespaces(_, _), do: {:ok, Console.namespaces()}
 
 

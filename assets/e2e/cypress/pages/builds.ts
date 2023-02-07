@@ -5,7 +5,6 @@ import { Time } from '@ctypes/time'
 import { GQLInterceptor } from '@intercept/graphql'
 import { CreateBuildQueryResponse } from '@intercept/query/build'
 import { BasePage } from '@pages/base'
-import { RootPage } from '@pages/root'
 
 enum BuildStatus {
   Running = 'Running',
@@ -14,14 +13,16 @@ enum BuildStatus {
 }
 
 export class BuildsPage extends BasePage {
+  private static readonly _url = '/builds'
+
   static visit(buildID?: string): void {
     if (buildID) {
-      cy.visit(`/build/${buildID}`)
+      cy.visit(`/builds/${buildID}`)
 
       return
     }
 
-    RootPage.visit()
+    cy.visit(this._url)
   }
 
   static deploy(): void {

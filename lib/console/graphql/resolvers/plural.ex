@@ -17,7 +17,7 @@ defmodule Console.GraphQl.Resolvers.Plural do
   end
 
   def search_repositories(%{query: query} = args, _) do
-    Repositories.search_repositories(query, args[:first] || 20)
+    Repositories.search_repositories(query, args[:first] || 20, args[:after])
     |> clean_up_connection()
   end
 

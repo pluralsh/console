@@ -1,7 +1,12 @@
 import gql from 'graphql-tag'
 
 import { PageInfo } from '../graphql/base'
-import { RunbookAlertStatus, RunbookDataFragment, RunbookExecutionFragment, RunbookFragment } from '../graphql/runbooks'
+import {
+  RunbookAlertStatus,
+  RunbookDataFragment,
+  RunbookExecutionFragment,
+  RunbookFragment,
+} from '../graphql/runbooks'
 
 export const RUNBOOKS_Q = gql`
   query Runbooks($namespace: String!, $pinned: Boolean) {
@@ -13,7 +18,7 @@ export const RUNBOOKS_Q = gql`
 `
 
 export const RUNBOOK_Q = gql`
-  query Runbooks($namespace: String!, $name: String!, $context: RunbookContext, $cursor: String) {
+  query Runbooks($namespace: String!, $name: String!, $context: RunbookContext) {
     runbook(namespace: $namespace, name: $name) {
       name
       status { alerts { ...RunbookAlertStatus } }
@@ -23,14 +28,21 @@ export const RUNBOOK_Q = gql`
         display
       }
       data(context: $context) { ...RunbookDataFragment }
-      executions(first: 50, after: $cursor) {
+    }
+  }
+  ${RunbookAlertStatus}
+  ${RunbookDataFragment}
+`
+
+export const RUNBOOK_EXECUTIONS_Q = gql`
+  query Runbooks($namespace: String!, $name: String!, $cursor: String) {
+    runbook(namespace: $namespace, name: $name) {
+      executions(first: 20, after: $cursor) {
         pageInfo { ...PageInfo }
         edges { node { ...RunbookExecutionFragment } }
       }
     }
   }
-  ${RunbookAlertStatus}
-  ${RunbookDataFragment}
   ${PageInfo}
   ${RunbookExecutionFragment}
 `

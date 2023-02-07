@@ -36,7 +36,16 @@ defmodule Console.PubSub.Recurse.BuildsTest do
   end
 
   describe "BuildApproved" do
-    test "it will cancel build" do
+    test "if the build registers a pid it will send to that" do
+      build = insert(:build, pid: self())
+
+      event = %PubSub.BuildApproved{item: build}
+      Recurse.handle_event(event)
+
+      assert_receive :kick
+    end
+
+    test "it will kick the build" do
       build = insert(:build)
       parent = self()
       pid = spawn(fn ->

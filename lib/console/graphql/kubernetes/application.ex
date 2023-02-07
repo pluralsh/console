@@ -66,9 +66,10 @@ defmodule Console.GraphQl.Kubernetes.Application do
   object :application_descriptor do
     field :type,        non_null(:string)
     field :version,     non_null(:string)
-    field :description, non_null(:string)
-    field :icons,       list_of(:string), resolve: fn %{icons: icons}, _, _ ->
-      {:ok, Enum.map(icons, & &1.src)}
+    field :description, :string
+    field :icons,       list_of(:string), resolve: fn
+      %{icons: [_ | _] = icons}, _, _ -> {:ok, Enum.map(icons, & &1.src)}
+      _, _, _ -> {:ok, []}
     end
     field :links, list_of(:application_link)
   end

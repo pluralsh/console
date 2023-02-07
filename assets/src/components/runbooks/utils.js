@@ -1,4 +1,4 @@
-import fileSize from 'filesize'
+import { filesize } from 'filesize'
 import jp from 'jsonpath'
 
 import { deepFetch } from '../../utils/graphql'
@@ -8,7 +8,7 @@ export const query = (object, path) => jp.query(object, `$.${path}`)[0]
 
 export const ValueFormats = {
   cpu: cpuFormat,
-  memory: fileSize,
+  memory: filesize,
 }
 
 export function extract(data, doc) {
@@ -16,5 +16,5 @@ export function extract(data, doc) {
 
   const raw = deepFetch(data, doc)
 
-  return JSON.parse(raw) 
+  return JSON.parse(raw)
 }

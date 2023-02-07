@@ -28,3 +28,10 @@ watchman-*.tar
 /.vscode/**/*
 !/.vscode/settings.json
 /.idea
+
+# misc
+.DS_Store
+
+# yalc
+.yalc
+yalc.lock

@@ -22,7 +22,9 @@ defmodule Console.Runner do
   def init({build, operations, storage}) do
     Process.flag(:trap_exit, true)
     Command.set_build(build)
+    {:ok, build} = Builds.set_pid(build, self())
     send self(), :kick
+    register(self())
     {:ok, %State{build: build, operations: operations, storage: storage}}
   end
 

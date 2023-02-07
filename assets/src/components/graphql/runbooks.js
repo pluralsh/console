@@ -3,7 +3,7 @@ import { gql } from 'apollo-boost'
 import { MetricResponseFragment } from './dashboards'
 import { DeploymentFragment, NodeFragment, StatefulSetFragment } from './kubernetes'
 import { UserFragment } from './users'
- 
+
 export const RunbookAlertStatus = gql`
   fragment RunbookAlertStatus on RunbookAlertStatus {
     name

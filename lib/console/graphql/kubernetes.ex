@@ -164,6 +164,13 @@ defmodule Console.GraphQl.Kubernetes do
       safe_resolve &Kubernetes.list_all_pods/2
     end
 
+    field :cached_pods, list_of(:pod) do
+      middleware Authenticated
+      arg :namespaces, list_of(:string)
+
+      safe_resolve &Kubernetes.list_cached_pods/2
+    end
+
     field :namespaces, list_of(:namespace) do
       middleware Authenticated
 

@@ -1,14 +1,12 @@
-import { ApolloClient } from 'apollo-client'
-import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory'
+import { ApolloClient, InMemoryCache } from '@apollo/client'
+import { IntrospectionFragmentMatcher } from 'apollo-cache-inmemory'
 import { setContext } from 'apollo-link-context'
 import { createLink } from 'apollo-absinthe-upload-link'
 import { onError } from 'apollo-link-error'
 import * as AbsintheSocket from '@absinthe/socket'
 import { Socket as PhoenixSocket } from 'phoenix'
-import { createAbsintheSocketLink } from '@absinthe/socket-apollo-link'
+import { createAbsintheSocketLink } from 'pluralsh-absinthe-socket-apollo-link'
 import { RetryLink } from 'apollo-link-retry'
-// import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
-// import { sha256 } from 'crypto-hash';
 import { hasSubscription } from '@jumpn/utils-graphql'
 import { split } from 'apollo-link'
 
@@ -24,7 +22,9 @@ const fragmentMatcher = new IntrospectionFragmentMatcher({
 const GQL_URL = '/gql'
 const WS_URI = '/socket'
 
-export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
+export function buildClient(
+  gqlUrl, wsUrl, onNetworkError, fetchToken
+) {
   const httpLink = createLink({ uri: gqlUrl, fetch: customFetch })
 
   const authLink = setContext((_, { headers }) => {
@@ -62,15 +62,28 @@ export function buildClient(gqlUrl, wsUrl, onNetworkError, fetchToken) {
   const socketLink = createAbsintheSocketLink(absintheSocket)
   const gqlLink = resetToken.concat(httpLink)
 
-  const splitLink = split(
-    operation => hasSubscription(operation.query),
+  const splitLink = split(operation => hasSubscription(operation.query),
     socketLink,
-    authLink.concat(retryLink).concat(gqlLink)
-  )
+    authLink.concat(retryLink).concat(gqlLink))
 
   const client = new ApolloClient({
     link: splitLink,
-    cache: new InMemoryCache({ fragmentMatcher }),
+    cache: new InMemoryCache({
+      fragmentMatcher,
+      typePolicies: {
+        Command: {
+          fields: {
+            exitCode: {
+              merge(code, incoming) {
+                if (code || code === 0) return code
+
+                return incoming
+              },
+            },
+          },
+        },
+      },
+    }),
   })
 
   return { client, socket }
@@ -81,5 +94,8 @@ function onNetworkError() {
   window.location = '/login'
 }
 
-const { client, socket } = buildClient(GQL_URL, WS_URI, onNetworkError, fetchToken)
+const { client, socket } = buildClient(
+  GQL_URL, WS_URI, onNetworkError, fetchToken
+)
+
 export { client, socket }
