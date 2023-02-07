@@ -1,12 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button, GqlError } from 'forge-core'
 import { useMutation, useQuery } from '@apollo/client'
-import {
-  Box,
-  Form,
-  Keyboard,
-  Text,
-} from 'grommet'
+import { Box, Form, Text } from 'grommet'
 import { v4 as uuidv4 } from 'uuid'
 import gql from 'graphql-tag'
 import { useIntercom } from 'react-use-intercom'
@@ -140,11 +135,23 @@ export function EnsureLogin({ children }) {
 
   useEffect(() => {
     if (data && data.me) boot(intercomAttributes(data.me))
-  }, [data])
+  }, [boot, data])
 
   useEffect(() => {
-    if (data && data.me) update()
-  }, [data, location])
+    if (data?.me) {
+      update()
+    }
+  }, [data, location, update])
+
+  const {
+    me,
+    externalToken,
+    clusterInfo: { __typename, ...clusterInformation },
+    configuration,
+  } = data
+
+  const loginContextValue = useMemo(() => ({ me, configuration, token: externalToken }),
+    [configuration, externalToken, me])
 
   if (error || (!loading && !data.clusterInfo)) {
     console.log(error)
@@ -154,20 +161,11 @@ export function EnsureLogin({ children }) {
 
   if (!data?.clusterInfo) return null
 
-  const {
-    me,
-    externalToken,
-    clusterInfo: { __typename, ...clusterInformation },
-    configuration,
-  } = data
-
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     <IncidentContext.Provider value={{ clusterInformation }}>
       {/* eslint-disable-next-line react/jsx-no-constructed-context-values */}
-      <LoginContext.Provider
-        value={{ me, configuration, token: externalToken }}
-      >
+      <LoginContext.Provider value={loginContextValue}>
         {children}
       </LoginContext.Provider>
     </IncidentContext.Provider>
@@ -217,13 +215,13 @@ export default function Login() {
     variables: form,
     onCompleted: ({ signIn: { jwt } }) => {
       setToken(jwt)
-      window.location = '/'
+      window.location = '/' as any as Location
     },
     onError: console.error,
   })
 
   if (!error && data && data.me) {
-    window.location = '/'
+    window.location = '/' as any as Location
   }
 
   if (loginData && loginData.loginInfo && loginData.loginInfo.oidcUri) {
@@ -231,6 +229,12 @@ export default function Login() {
   }
 
   const disabled = form.password.length === 0 || form.email.length === 0
+  const onSubmit = () => {
+    if (disabled) {
+      return
+    }
+    mutation()
+  }
 
   return (
     <LoginPortal>
@@ -251,43 +255,41 @@ export default function Login() {
             Enter your email and password to get started
           </Text>
         </Box>
-        <Keyboard onEnter={disabled ? null : mutation}>
-          <Form onSubmit={disabled ? null : mutation}>
-            <Box
-              margin={{ bottom: '10px' }}
-              gap="xsmall"
-            >
-              {error && (
-                <GqlError
-                  header="Login failed"
-                  error={error}
-                />
-              )}
-              <LabelledInput
-                value={form.email}
-                placeholder="someone@example.com"
-                label="Email"
-                onChange={email => setForm({ ...form, email })}
+        <Form onSubmit={onSubmit}>
+          <Box
+            margin={{ bottom: '10px' }}
+            gap="xsmall"
+          >
+            {error && (
+              <GqlError
+                header="Login failed"
+                error={error}
               />
-              <LabelledInput
-                type="password"
-                value={form.password}
-                placeholder="a long password"
-                label="Password"
-                onChange={password => setForm({ ...form, password })}
-              />
-              <Button
-                fill="horizontal"
-                label="Login"
-                pad={{ vertical: '8px' }}
-                margin={{ top: 'xsmall' }}
-                onClick={mutation}
-                loading={loading}
-                disabled={disabled}
-              />
-            </Box>
-          </Form>
-        </Keyboard>
+            )}
+            <LabelledInput
+              value={form.email}
+              placeholder="someone@example.com"
+              label="Email"
+              onChange={email => setForm({ ...form, email })}
+            />
+            <LabelledInput
+              type="password"
+              value={form.password}
+              placeholder="a long password"
+              label="Password"
+              onChange={password => setForm({ ...form, password })}
+            />
+            <Button
+              type="submit"
+              fill="horizontal"
+              label="Login"
+              pad={{ vertical: '8px' }}
+              margin={{ top: 'xsmall' }}
+              loading={loading}
+              disabled={disabled}
+            />
+          </Box>
+        </Form>
       </Box>
     </LoginPortal>
   )
