@@ -113,10 +113,10 @@ export function Graph({
     <ResponsiveLine
       data={graph}
       margin={{
-        top: 16,
-        right: 16,
-        bottom: 70,
-        left: 45,
+        top: 20,
+        right: 20,
+        bottom: 100,
+        left: 50,
       }}
       lineWidth={1}
       enablePoints={false}
@@ -153,25 +153,24 @@ export function Graph({
             /* @ts-expect-error */
           ? `${dateFormat(data[0].data[0].x)} — ${dateFormat(last(data?.[0]?.data).x)}`
           : null,
-        legendOffset: 48,
-        legendPosition: 'start',
+        legendOffset: 70,
+        legendPosition: 'middle',
       }}
       pointLabel="y"
       pointLabelYOffset={-15}
       legends={[
         {
-          anchor: 'bottom-right',
+          anchor: 'bottom',
           onClick: ({ id }) => (selected ? setSelected(null) : setSelected(id)),
           direction: 'row',
           justify: false,
-          translateX: 20,
           translateY: 56,
           itemsSpacing: 10,
           itemDirection: 'left-to-right',
           itemWidth: 100,
           itemHeight: 20,
           symbolSize: 12,
-          symbolShape: 'square',
+          symbolShape: 'circle',
           itemTextColor: semanticColors['text-xlight'],
           effects: [
             {

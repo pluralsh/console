@@ -119,6 +119,7 @@ export default function Component() {
         <Flex
           gap="medium"
           className="DELETE"
+          marginVertical={1}
         >
           <TabList
             stateRef={tabStateRef}
