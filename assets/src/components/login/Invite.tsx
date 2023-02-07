@@ -1,16 +1,20 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@apollo/client'
-import { Box, Keyboard, Text } from 'grommet'
+import { Box, Text } from 'grommet'
 import { Button, GqlError, SecondaryButton } from 'forge-core'
 import { Checkmark, StatusCritical } from 'grommet-icons'
 
-import { setToken } from '../helpers/auth'
+import { Form } from 'honorable'
 
-import { initials } from './utils/Avatar'
-import { INVITE_Q, SIGNUP } from './graphql/users'
-import { LoginPortal } from './Login'
-import { LabelledInput } from './utils/LabelledInput'
+import { setToken } from '../../helpers/auth'
+
+import { initials } from '../utils/Avatar'
+import { INVITE_Q, SIGNUP } from '../graphql/users'
+
+import { LabelledInput } from '../utils/LabelledInput'
+
+import { LoginPortal } from './LoginPortal'
 
 function InvalidInvite() {
   return (
@@ -35,7 +39,7 @@ export function disableState(password, confirm) {
   return { disabled: false, reason: 'passwords match!' }
 }
 
-function DummyAvatar({ name, size: given }) {
+function DummyAvatar({ name, size: given }:{name:any, size?:any}) {
   const size = given || '50px'
 
   return (
@@ -90,7 +94,7 @@ export default function Invite() {
     variables: { inviteId, attributes },
     onCompleted: ({ signup: { jwt } }) => {
       setToken(jwt)
-      window.location = '/'
+      window.location = '/' as any as Location
     },
     onError: console.log,
   })
@@ -102,10 +106,17 @@ export default function Invite() {
   const { disabled, reason } = disableState(attributes.password, confirm)
   const { email } = data.invite
   const filled = attributes.name.length > 0
+  const onSubmit = e => {
+    e.preventDefault()
+    if (!(editPassword && filled)) {
+      return
+    }
+    mutation()
+  }
 
   return (
     <LoginPortal>
-      <Keyboard onEnter={editPassword && filled ? mutation : null}>
+      <Form onSubmit={onSubmit}>
         <Box gap="small">
           {signupError && (
             <GqlError
@@ -208,7 +219,7 @@ export default function Invite() {
             </Box>
           </Box>
         </Box>
-      </Keyboard>
+      </Form>
     </LoginPortal>
   )
 }

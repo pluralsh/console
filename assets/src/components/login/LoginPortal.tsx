@@ -15,7 +15,7 @@ export type PictureProps = {
 } & ImgProps
 export function Picture({ sources, ...props }: PictureProps) {
   return (
-    <picture>
+    <picture style={{ display: 'contents' }}>
       {sources.map(source => (
         <source {...source} />
       ))}
@@ -37,7 +37,13 @@ export function LoginPortal({ children }: any) {
         width={504}
         height="100%"
       >
-        <Picture {...LOGIN_SIDEBAR_IMAGE} />
+        <Picture
+          {...LOGIN_SIDEBAR_IMAGE}
+          width="100%"
+          height="100%"
+          objectFit="cover"
+          objectPosition="top center"
+        />
       </Flex>
       {/* RIGHT SIDE */}
       <Flex

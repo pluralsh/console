@@ -1,12 +1,21 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Button, GqlError } from 'forge-core'
+import { Button, LoopingLogo } from '@pluralsh/design-system'
+import {
+  Div,
+  Flex,
+  Form,
+  P,
+} from 'honorable'
 import { useMutation, useQuery } from '@apollo/client'
-import { Box, Form, Text } from 'grommet'
+import { Box, Text } from 'grommet'
 import { v4 as uuidv4 } from 'uuid'
 import gql from 'graphql-tag'
 import { useIntercom } from 'react-use-intercom'
 import { useLocation } from 'react-router-dom'
-import { LoopingLogo } from '@pluralsh/design-system'
+
+import { WelcomeHeader } from 'components/utils/WelcomeHeader'
+
+import { GqlError } from '../utils/Alert'
 
 import { setToken, wipeToken } from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
@@ -175,32 +184,32 @@ export function EnsureLogin({ children }) {
 function OIDCLogin({ oidcUri }) {
   return (
     <LoginPortal>
-      <Box gap="medium">
-        <Box
+      <Flex
+        flexDirection="column"
+        gap="xlarge"
+      >
+        <Flex
+          flexDirection="column"
           gap="xsmall"
-          align="center"
         >
-          <img
-            src={CONSOLE_LOGO}
-            width="45px"
-          />
-          <Text size="large">Welcome</Text>
-          <Text
-            size="small"
-            color="dark-3"
+          <WelcomeHeader />
+          <P
+            body1
+            color="text-light"
           >
-            It looks like this instance is using plural oauth
-          </Text>
-        </Box>
+            Connect to your Plural account for access to this Console.
+          </P>
+        </Flex>
         <Button
           id="plrl-login"
           fill="horizontal"
-          label="Login with Plural"
+          label=""
           onClick={() => {
             window.location = oidcUri
           }}
-        />
-      </Box>
+        >Login with Plural
+        </Button>
+      </Flex>
     </LoginPortal>
   )
 }

@@ -7,10 +7,10 @@ import qs from 'query-string'
 import { useMutation } from '@apollo/client'
 import { LoopingLogo } from '@pluralsh/design-system'
 
-import { setToken } from '../helpers/auth'
-import { localized } from '../helpers/hostname'
+import { setToken } from '../../helpers/auth'
+import { localized } from '../../helpers/hostname'
 
-import { LoginPortal } from './Login'
+import { LoginPortal } from './LoginPortal'
 
 const CALLBACK = gql`
   mutation Callback($code: String!, $redirect: String) {

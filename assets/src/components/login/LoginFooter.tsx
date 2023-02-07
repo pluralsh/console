@@ -27,7 +27,7 @@ export function Footer(props) {
     >
       <FooterList>
         <FooterLink as="div">
-          © Plural Labs{' '}
+          © Plural{' '}
           {new Date().toLocaleString('en-us', { year: 'numeric' })}
         </FooterLink>
         <FooterLink
