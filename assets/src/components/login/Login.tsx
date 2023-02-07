@@ -138,7 +138,7 @@ export function EnsureLogin({ children }) {
   const { boot, update } = useIntercom()
 
   useEffect(() => {
-    if (data && data.me) boot(intercomAttributes(data.me))
+    if (data?.me) boot(intercomAttributes(data.me))
   }, [boot, data])
 
   useEffect(() => {
@@ -150,9 +150,8 @@ export function EnsureLogin({ children }) {
   const {
     me,
     externalToken,
-    clusterInfo: { __typename, ...clusterInformation },
     configuration,
-  } = data
+  } = data || {}
 
   const loginContextValue = useMemo(() => ({ me, configuration, token: externalToken }),
     [configuration, externalToken, me])
@@ -164,11 +163,11 @@ export function EnsureLogin({ children }) {
   }
 
   if (!data?.clusterInfo) return null
+  const { __typename, ...clusterInformation } = data.clusterInfo
 
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     <IncidentContext.Provider value={{ clusterInformation }}>
-      {/* eslint-disable-next-line react/jsx-no-constructed-context-values */}
       <LoginContext.Provider value={loginContextValue}>
         {children}
       </LoginContext.Provider>
