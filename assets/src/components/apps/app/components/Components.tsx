@@ -143,22 +143,22 @@ export default function Components() {
         </Select>
       )}
     >
-      <Div
-        display="grid"
-        gap="xsmall"
-        gridTemplateColumns="1fr 1fr"
-      >
-        {(filteredComponents || []).length === 0 ? (
-          <EmptyState message="No components match your selection" />
-        ) : (
-          filteredComponents?.map((component, i) => (
+      {(filteredComponents || []).length === 0 ? (
+        <EmptyState message="No components match your selection" />
+      ) : (
+        <Div
+          display="grid"
+          gap="xsmall"
+          gridTemplateColumns="1fr 1fr"
+        >
+          {filteredComponents?.map((component, i) => (
             <Component
               key={i}
               component={component}
             />
-          ))
-        )}
-      </Div>
+          ))}
+        </Div>
+      )}
     </ScrollablePage>
   )
 }
