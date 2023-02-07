@@ -6,7 +6,7 @@ import {
   ColDelete,
   ColImages,
   ColMemoryReservation,
-  ColNameLink,
+  ColName,
   ColRestarts,
   PodsList,
 } from 'components/cluster/pods/PodsList'
@@ -17,7 +17,7 @@ export default function Pods({ pods }) {
   const { refetch } = useOutletContext<any>()
 
   const columns = useMemo(() => [
-    ColNameLink,
+    ColName,
     {
       ...ColMemoryReservation,
       meta: {

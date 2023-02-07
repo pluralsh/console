@@ -42,7 +42,7 @@ import {
   ColCpuReservation,
   ColImages,
   ColMemoryReservation,
-  ColNameLink,
+  ColName,
   ColNamespace,
   ColRestarts,
   PodWithId,
@@ -117,7 +117,7 @@ export default function AllPods() {
 
   const columns = useMemo(() => [
     ColNamespace,
-    ColNameLink,
+    ColName,
     ColMemoryReservation,
     ColCpuReservation,
     ColRestarts,

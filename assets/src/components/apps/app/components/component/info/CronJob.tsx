@@ -1,14 +1,9 @@
 import { Card, Table, Tooltip } from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
+import { Row, createColumnHelper } from '@tanstack/react-table'
 import { TableText } from 'components/cluster/TableElements'
 import PropWide from 'components/utils/PropWide'
-import {
-  A,
-  Div,
-  Flex,
-  H2,
-} from 'honorable'
-import { Link, useOutletContext, useParams } from 'react-router-dom'
+import { Div, Flex, H2 } from 'honorable'
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 
 import { DeleteJob } from './Job'
 
@@ -18,21 +13,12 @@ const columns = (namespace, refetch) => [
   columnHelper.accessor(row => row?.metadata?.name, {
     id: 'name',
     cell: (props => (
-      <TableText>
-        <Tooltip
-          label={props.getValue()}
-          placement="top-start"
-        >
-          <A
-            inline
-            display="inline"
-            as={Link}
-            to={`/apps/${namespace}/components/job/${props.getValue()}`}
-          >
-            {props.getValue()}
-          </A>
-        </Tooltip>
-      </TableText>
+      <Tooltip
+        label={props.getValue()}
+        placement="top-start"
+      >
+        <TableText>{props.getValue()}</TableText>
+      </Tooltip>
     )),
     header: 'Name',
   }),
@@ -84,10 +70,13 @@ const columns = (namespace, refetch) => [
 ]
 
 function CronJobJobs({ jobs, namespace, refetch }) {
+  const navigate = useNavigate()
+
   return (
     <Table
       data={jobs}
       columns={columns(namespace, refetch)}
+      onRowClick={(_e, { original }: Row<any>) => navigate(`/apps/${namespace}/components/job/${original?.metadata?.name}`)}
     />
   )
 }

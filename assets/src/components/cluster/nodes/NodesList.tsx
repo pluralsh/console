@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react'
 import { filesize } from 'filesize'
-import { A, Div, Flex } from 'honorable'
+import { Div, Flex } from 'honorable'
 import {
   IconFrame,
   Table,
   Tooltip,
   TrashCanIcon,
 } from '@pluralsh/design-system'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { ColumnDef, Row, createColumnHelper } from '@tanstack/react-table'
 import { Node, NodeMetric } from 'generated/graphql'
 import { ReadinessT, nodeStatusToReadiness, readinessToLabel } from 'utils/status'
@@ -91,21 +91,12 @@ function DeleteNode({ name, refetch }) {
 const ColName = columnHelper.accessor(row => row.name, {
   id: 'name',
   enableSorting: true,
-  cell: ({ row: { original }, ...props }) => (
+  cell: props => (
     <Tooltip
       label={props.getValue()}
       placement="top"
     >
-      <TableText>
-        <A
-          inline
-          display="inline"
-          as={Link}
-          to={`/nodes/${original.name}`}
-        >
-          {props.getValue()}
-        </A>
-      </TableText>
+      <TableText> {props.getValue()} </TableText>
     </Tooltip>
   ),
   header: 'Name',
@@ -289,7 +280,7 @@ export function NodesList({
       loose
       data={tableData}
       columns={columns}
-      onRowClick={(e, { original }: Row<TableData>) => navigate(`/nodes/${original?.name}`)}
+      onRowClick={(_e, { original }: Row<TableData>) => navigate(`/nodes/${original?.name}`)}
     />
   )
 }
