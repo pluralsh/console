@@ -1,87 +1,99 @@
-import { useState } from 'react'
+import { ComponentProps, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@apollo/client'
-import { Box, Text } from 'grommet'
-import { Button, GqlError, SecondaryButton } from 'forge-core'
-import { Checkmark, StatusCritical } from 'grommet-icons'
+import {
+  Div,
+  Flex,
+  Form,
+  P,
+} from 'honorable'
+import { Button } from '@pluralsh/design-system'
 
-import { Form } from 'honorable'
+import { GqlError } from 'components/utils/Alert'
+
+import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 
 import { setToken } from '../../helpers/auth'
 
-import { initials } from '../utils/Avatar'
+import { LabelledInput } from '../utils/LabelledInput'
 import { INVITE_Q, SIGNUP } from '../graphql/users'
 
-import { LabelledInput } from '../utils/LabelledInput'
-
 import { LoginPortal } from './LoginPortal'
+import {
+  PasswordError,
+  PasswordErrorCode,
+  PasswordErrorMessage,
+  validatePassword,
+} from './PasswordValidation'
 
 function InvalidInvite() {
   return (
-    <Box
+    <Flex
       width="100vw"
       height="100vh"
-      justify="center"
-      align="center"
+      justifyContent="center"
+      alignItems="center"
     >
-      <Box>
-        <Text>That invite code is no longer valid</Text>
-      </Box>
-    </Box>
+      This invite code is no longer valid
+    </Flex>
   )
 }
 
-export function disableState(password, confirm) {
-  if (password.length === 0) return { disabled: true, reason: 'enter a password' }
-  if (password.length < 10) return { disabled: true, reason: 'password is too short' }
-  if (password !== confirm) return { disabled: true, reason: 'passwords do not match' }
-
-  return { disabled: false, reason: 'passwords match!' }
-}
-
-function DummyAvatar({ name, size: given }:{name:any, size?:any}) {
-  const size = given || '50px'
-
+function PasswordErrorMsg({ errorCode }: { errorCode: PasswordErrorCode }) {
   return (
-    <Box
-      flex={false}
-      round="xsmall"
-      align="center"
-      justify="center"
-      width={size}
-      height={size}
-      background="#6b5b95"
+    <P
+      caption
+      color="text-error"
     >
-      <Text size="small">{initials(name)}</Text>
-    </Box>
+      {PasswordErrorMessage[errorCode]}
+    </P>
   )
 }
 
-export function PasswordStatus({ disabled, reason }) {
+export function SetPasswordField({
+  errorCode,
+  ...props
+}: { errorCode?: PasswordErrorCode } & Omit<
+  ComponentProps<typeof LabelledInput>,
+  'errorCode'
+>) {
   return (
-    <Box
-      direction="row"
-      fill="horizontal"
-      align="center"
-      gap="xsmall"
-    >
-      {disabled ? (
-        <StatusCritical
-          color="error"
-          size="12px"
-        />
-      ) : (
-        <Checkmark
-          color="status-ok"
-          size="12px"
-        />
-      )}
-      <Text
-        size="small"
-        color={disabled ? 'error' : 'status-ok'}
-      >{reason}
-      </Text>
-    </Box>
+    <LabelledInput
+      required
+      label="Password"
+      type="password"
+      placeholder="Enter password"
+      hint="10 character minimum"
+      caption={
+        errorCode === PasswordError.TooShort && (
+          <PasswordErrorMsg errorCode={errorCode} />
+        )
+      }
+      error={errorCode === PasswordError.TooShort}
+      {...props}
+    />
+  )
+}
+
+export function ConfirmPasswordField({
+  errorCode,
+  ...props
+}: ComponentProps<typeof SetPasswordField>) {
+  return (
+    <LabelledInput
+      required
+      label="Confirm password"
+      type="password"
+      placeholder="Confirm password"
+      hint=""
+      caption={
+        errorCode === PasswordError.NoMatch && (
+          <PasswordErrorMsg errorCode={errorCode} />
+        )
+      }
+      error={errorCode === PasswordError.NoMatch}
+      {...props}
+    />
   )
 }
 
@@ -89,7 +101,6 @@ export default function Invite() {
   const { inviteId } = useParams()
   const [attributes, setAttributes] = useState({ name: '', password: '' })
   const [confirm, setConfirm] = useState('')
-  const [editPassword, setEditPassword] = useState(false)
   const [mutation, { loading, error: signupError }] = useMutation(SIGNUP, {
     variables: { inviteId, attributes },
     onCompleted: ({ signup: { jwt } }) => {
@@ -100,15 +111,20 @@ export default function Invite() {
   })
   const { data, error } = useQuery(INVITE_Q, { variables: { id: inviteId } })
 
-  if (error) return <InvalidInvite />
+  if (error || (data && !data.invite)) return <InvalidInvite />
   if (!data) return null
 
-  const { disabled, reason } = disableState(attributes.password, confirm)
-  const { email } = data.invite
-  const filled = attributes.name.length > 0
+  const email = data?.invite?.email
+
+  const { disabled: passwordDisabled, error: passwordError } = validatePassword(attributes.password,
+    confirm)
+
+  const isNameValid = attributes.name.length > 0
+  const submitEnabled = isNameValid && !passwordDisabled && email
+
   const onSubmit = e => {
     e.preventDefault()
-    if (!(editPassword && filled)) {
+    if (!submitEnabled) {
       return
     }
     mutation()
@@ -116,109 +132,65 @@ export default function Invite() {
 
   return (
     <LoginPortal>
-      <Form onSubmit={onSubmit}>
-        <Box gap="small">
-          {signupError && (
+      <Div marginBottom="xlarge">
+        <WelcomeHeader textAlign="left" />
+        <P
+          body1
+          color="text-xlight"
+        >
+          You have been invited to join this Plural account. Create an account
+          to join.
+        </P>
+      </Div>
+      <Form
+        onSubmit={onSubmit}
+      >
+        {signupError && (
+          <Div marginBottom="large">
             <GqlError
               header="Signup failed"
               error={signupError}
             />
-          )}
-          <Box
-            justify="center"
-            align="center"
-          >
-            <Text size="large">Accept your invite</Text>
-          </Box>
-          <Box
-            direction="row"
-            gap="small"
-            align="center"
-          >
-            <DummyAvatar name={attributes.name} />
-            <Box>
-              <Text
-                size="small"
-                weight={500}
-              >{attributes.name}
-              </Text>
-              <Text
-                size="small"
-                color="dark-3"
-              >{email}
-              </Text>
-            </Box>
-          </Box>
-          {editPassword ? (
-            <Box
-              animation={{ type: 'fadeIn', duration: 500 }}
-              gap="small"
-            >
-              <LabelledInput
-                type="password"
-                label="Password"
-                width="400px"
-                value={attributes.password}
-                placeholder="battery horse fire stapler"
-                onChange={password => setAttributes({ ...attributes, password })}
-              />
-              <LabelledInput
-                type="password"
-                label="Confirm"
-                width="400px"
-                value={confirm}
-                placeholder="type it again"
-                onChange={setConfirm}
-              />
-            </Box>
-          ) : (
-            <Box
-              animation={{ type: 'fadeIn', duration: 500 }}
-              gap="small"
-            >
-              <LabelledInput
-                label="Email"
-                value={email}
-              />
-              <LabelledInput
-                label="Name"
-                value={attributes.name}
-                placeholder="John Doe"
-                onChange={name => setAttributes({ ...attributes, name })}
-              />
-            </Box>
-          )}
-          <Box
-            direction="row"
-            justify="end"
-            align="center"
-          >
-            {editPassword && (
-              <PasswordStatus
-                disabled={disabled}
-                reason={reason}
-              />
-            )}
-            <Box
-              flex={false}
-              direction="row"
-              gap="small"
-            >
-              {editPassword && (
-                <SecondaryButton
-                  label="Go Back"
-                  onClick={() => setEditPassword(false)}
-                />
-              )}
-              <Button
-                loading={loading}
-                disabled={editPassword ? disabled : !filled}
-                label={editPassword ? 'Sign up' : 'continue'}
-                onClick={editPassword ? mutation : () => setEditPassword(true)}
-              />
-            </Box>
-          </Box>
-        </Box>
+          </Div>
+        )}
+        <Flex
+          flexDirection="column"
+          gap="small"
+          marginBottom="small"
+        >
+          <LabelledInput
+            label="Email"
+            value={email}
+            disabled
+          />
+          <LabelledInput
+            label="Username"
+            value={attributes.name}
+            placeholder="Enter username"
+            onChange={name => setAttributes({ ...attributes, name })}
+            required
+          />
+
+          <SetPasswordField
+            value={attributes.password}
+            onChange={password => setAttributes({ ...attributes, password })}
+            errorCode={passwordError}
+          />
+          <ConfirmPasswordField
+            value={confirm}
+            onChange={setConfirm}
+            errorCode={passwordError}
+          />
+        </Flex>
+        <Button
+          type="submit"
+          primary
+          width="100%"
+          loading={loading}
+          disabled={!submitEnabled}
+        >
+          Sign up
+        </Button>
       </Form>
     </LoginPortal>
   )
