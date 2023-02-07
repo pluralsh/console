@@ -30,36 +30,6 @@ const LOGIN_INFO = gql`
   }
 `
 
-export function LoginPortal({ children }) {
-  return (
-    <Box
-      height="100vh"
-      fill="horizontal"
-      direction="row"
-    >
-      <Box
-        width="40%"
-        fill="vertical"
-        justify="center"
-        align="center"
-        background="plural-blk"
-      >
-        <img
-          src={CONSOLE_ICON}
-          width="300px"
-        />
-      </Box>
-      <Box
-        fill
-        align="center"
-        justify="center"
-      >
-        {children}
-      </Box>
-    </Box>
-  )
-}
-
 function LoginError({ error }) {
   useEffect(() => {
     const to = setTimeout(() => {
