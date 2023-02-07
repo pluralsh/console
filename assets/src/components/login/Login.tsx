@@ -80,7 +80,6 @@ export function GrantAccess() {
         />
         <Button
           fill="horizontal"
-          label="Get Access"
           pad={{ vertical: '8px' }}
           margin={{ top: 'xsmall' }}
           onClick={() => {
@@ -88,7 +87,9 @@ export function GrantAccess() {
             window.location = '/' as any as Location
           }}
           disabled={jwt === ''}
-        />
+        >
+          Get access
+        </Button>
       </Box>
     </LoginPortal>
   )
@@ -147,11 +148,7 @@ export function EnsureLogin({ children }) {
     }
   }, [data, location, update])
 
-  const {
-    me,
-    externalToken,
-    configuration,
-  } = data || {}
+  const { me, externalToken, configuration } = data || {}
 
   const loginContextValue = useMemo(() => ({ me, configuration, token: externalToken }),
     [configuration, externalToken, me])
@@ -201,7 +198,8 @@ function OIDCLogin({ oidcUri }) {
           onClick={() => {
             window.location = oidcUri
           }}
-        >Login with Plural
+        >
+          Log in with Plural
         </Button>
       </Flex>
     </LoginPortal>
@@ -228,7 +226,13 @@ export default function Login() {
   }
 
   if (loginData && loginData.loginInfo && loginData.loginInfo.oidcUri) {
-    return <OIDCLogin oidcUri={loginData.loginInfo.oidcUri} />
+    // DON'T FORGET TO REMOVE THIS COMMENT, KLINK
+    //
+    //
+    // return <OIDCLogin oidcUri={loginData.loginInfo.oidcUri} />
+    //
+    //
+    //
   }
 
   const disabled = form.password.length === 0 || form.email.length === 0
@@ -285,12 +289,13 @@ export default function Login() {
             <Button
               type="submit"
               fill="horizontal"
-              label="Login"
               pad={{ vertical: '8px' }}
               margin={{ top: 'xsmall' }}
               loading={loading}
               disabled={disabled}
-            />
+            >
+              Log in
+            </Button>
           </Box>
         </Form>
       </Box>
