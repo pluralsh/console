@@ -78,6 +78,9 @@ defmodule Console.Deployer do
     {:reply, :ok, state}
   end
 
+  def handle_call({:update, _, _, _, _, _}, _, %State{pid: pid} = state) when is_pid(pid),
+    do: {:reply, {:error, "cannot update configuration when deployment is in progress"}, state}
+
   def handle_call({:update, repo, content, tool, msg, actor}, _, %State{storage: storage} = state) do
     {:reply, update(storage, repo, content, tool, msg, actor), state}
   end

@@ -60,9 +60,14 @@ export function ConfigurationSettings({ overlays, application: { name, configura
       setFolder(f)
       setSubfolder(Object.keys(folders[f] || ['all'])[0])
     }
-  }, [folders, folder])
+    else if (!folders[folder][subfolder]) {
+      setSubfolder(Object.keys(folders[folder] || ['all'])[0])
+    }
+  }, [folders, folder, subfolder])
 
   if (!folders[folder]) return null
+
+  console.log(folders)
 
   return (
     <Flex
@@ -129,7 +134,7 @@ export function ConfigurationSettings({ overlays, application: { name, configura
         paddingHorizontal={100}
         paddingVertical="large"
       >
-        {folders[folder][subfolder].map((overlay: any) => (
+        {(folders[folder][subfolder] || []).map((overlay: any) => (
           <ConfigurationSettingsField
             key={overlay.metadata.name}
             overlay={overlay}
