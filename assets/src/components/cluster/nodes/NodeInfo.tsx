@@ -18,7 +18,7 @@ import {
   ColContainers,
   ColCpuReservation,
   ColMemoryReservation,
-  ColNameLink,
+  ColName,
   ColRestarts,
   PodsList,
 } from '../pods/PodsList'
@@ -49,7 +49,7 @@ export default function NodeInfo() {
   })
 
   const columns = useMemo(() => [
-    ColNameLink,
+    ColName,
     ColMemoryReservation,
     ColCpuReservation,
     ColRestarts,

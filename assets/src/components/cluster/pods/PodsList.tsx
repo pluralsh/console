@@ -105,46 +105,17 @@ type PodTableRow = {
 }
 const columnHelper = createColumnHelper<PodTableRow>()
 
-export const ColNameLink = columnHelper.accessor(row => row.name, {
-  id: 'name-link',
-  enableGlobalFilter: true,
-  enableSorting: true,
-  cell: ({ row: { original }, ...props }) => (
-    <TableText>
-      <Tooltip
-        label={props.getValue()}
-        placement="top-start"
-      >
-        <A
-          inline
-          display="inline"
-          as={Link}
-          to={`/pods/${original.namespace}/${original.name}`}
-        >
-          {props.getValue()}
-        </A>
-      </Tooltip>
-    </TableText>
-  ),
-  header: 'Name',
-  meta: {
-    truncate: true,
-  },
-})
-
 export const ColName = columnHelper.accessor(row => row.name, {
   id: 'name',
   enableGlobalFilter: true,
   enableSorting: true,
   cell: props => (
-    <TableText>
-      <Tooltip
-        label={props.getValue()}
-        placement="top-start"
-      >
-        <span>{props.getValue()}</span>
-      </Tooltip>
-    </TableText>
+    <Tooltip
+      label={props.getValue()}
+      placement="top-start"
+    >
+      <TableText>{props.getValue()}</TableText>
+    </Tooltip>
   ),
   header: 'Name',
 })
@@ -372,7 +343,7 @@ export const PodsList = memo(({
       columns={columns}
       virtualizeRows
       {...props}
-      onRowClick={(e, { original }: Row<PodTableRow>) => navigate(`/pods/${original.namespace}/${original.name}`)}
+      onRowClick={(_e, { original }: Row<PodTableRow>) => navigate(`/pods/${original.namespace}/${original.name}`)}
     />
   )
 })
