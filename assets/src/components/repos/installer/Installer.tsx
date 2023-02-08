@@ -19,12 +19,12 @@ import { Box } from 'grommet'
 import { ApolloError, useApolloClient, useQuery } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
 
-import { SEARCH_REPOS } from '../../graphql/plural'
 import { InstallationContext } from '../../Installations'
 import { BUILDS_Q } from '../../graphql/builds'
 import { appendConnection } from '../../../utils/graphql'
 
 import { buildSteps, install, toDefaultSteps } from './helpers'
+import { QUERY_REPOS } from './query'
 
 const ERROR_MESSAGE_MAP = {
   forbidden: 'Insufficient permissions to install applications',
@@ -45,9 +45,7 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
   const [error, setError] = useState()
   const [defaultSteps, setDefaultSteps] = useState<Array<WizardStepConfig>>([])
   const { applications: installedApplications } = useContext(InstallationContext as React.Context<any>)
-  const { data: { repositories: { edges: applicationNodes } = { edges: undefined } } = {}, loading } = useQuery(SEARCH_REPOS, {
-    variables: { query: '' },
-  })
+  const { data: { repositories: { edges: applicationNodes } = { edges: undefined } } = {}, loading } = useQuery(QUERY_REPOS)
 
   const applications = useMemo(() => applicationNodes?.map(({ node }) => node), [applicationNodes])
   const installableApplications = useMemo(() => applications?.filter(app => !installedApplications?.find(s => s.name === app.name)),
