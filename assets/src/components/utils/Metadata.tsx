@@ -17,7 +17,7 @@ const MetadataGridGrid = styled.div<{ maxCols: number }>(({ theme, maxCols = MAX
 export const MetadataCard = styled(Card)(({ theme }) => ({
   padding: theme.spacing.xlarge,
   '& > *': {
-    maxWidth: 1102,
+    maxWidth: 920,
   },
 }))
 

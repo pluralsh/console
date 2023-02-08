@@ -1,4 +1,4 @@
-import { CardProps, Chip } from '@pluralsh/design-system'
+import { CardProps, Chip, ChipList } from '@pluralsh/design-system'
 import { Div, Flex } from 'honorable'
 import { ReactNode } from 'react'
 import type { LabelPair, Metadata as MetadataT } from 'generated/graphql'
@@ -54,21 +54,33 @@ export function LabelsAnnotations({
         direction="column"
         gap="xlarge"
       >
-        <LabelsAnnotationsRow name="Labels">
-          {labels?.map(label => (
-            <LabelsAnnotationsTag
-              key={label?.name}
-              {...label}
+        {labels && labels?.length > 0 && (
+          <LabelsAnnotationsRow name="Labels">
+            <ChipList
+              size="small"
+              limit={8}
+              values={labels}
+              transformValue={label => (
+                <>
+                  {label?.name}
+                  {label?.value && `: ${label.value}`}
+                </>
+              )}
             />
-          ))}
-        </LabelsAnnotationsRow>
+          </LabelsAnnotationsRow>
+        )}
         <LabelsAnnotationsRow name="Annotations">
-          {annotations?.map(annotation => (
-            <LabelsAnnotationsTag
-              key={annotation?.name}
-              {...annotation}
-            />
-          ))}
+          <ChipList
+            size="small"
+            limit={8}
+            values={annotations}
+            transformValue={label => (
+              <>
+                {label?.name}
+                {label?.value && `: ${label.value}`}
+              </>
+            )}
+          />
         </LabelsAnnotationsRow>
       </Flex>
     </MetadataCard>
