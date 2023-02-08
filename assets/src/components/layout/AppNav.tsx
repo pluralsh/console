@@ -8,7 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import { appState } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
-import orderBy from 'lodash/orderBy'
+import sortBy from 'lodash/sortBy'
 import { useContext, useMemo } from 'react'
 import { Readiness, ReadinessT } from 'utils/status'
 
@@ -59,7 +59,7 @@ export default function AppNav() {
   const statuses = useMemo(() => {
     const unsorted = applications.map(app => ({ app, ...appState(app) }))
 
-    return orderBy(unsorted, [({ readiness }) => readinessOrder(readiness), 'app.name'])
+    return sortBy(unsorted, [({ readiness }) => readinessOrder(readiness), 'app.name'])
   }, [applications])
 
   return (
