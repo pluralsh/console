@@ -1,8 +1,9 @@
 import { CardProps, Chip, ChipList } from '@pluralsh/design-system'
 import { Div, Flex } from 'honorable'
 import { ReactNode } from 'react'
-import type { LabelPair, Metadata as MetadataT } from 'generated/graphql'
-import { MetadataCard } from 'components/utils/Metadata'
+import type { LabelPair, Maybe, Metadata as MetadataT } from 'generated/graphql'
+import { CARD_CONTENT_MAX_WIDTH, MetadataCard } from 'components/utils/Metadata'
+import { useTheme } from 'styled-components'
 
 export const mapify = tags => tags.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {})
 
@@ -42,17 +43,29 @@ export function LabelsAnnotationsTag({ name, value }: LabelPair) {
   )
 }
 
+function renderLabel(label: Maybe<LabelPair>) {
+  return (
+    <>
+      {label?.name}
+      {label?.value && `: ${label.value}`}
+    </>
+  )
+}
+
 export function LabelsAnnotations({
   metadata: { labels, annotations },
   ...props
 }: {
   metadata: MetadataT
-} & CardProps) {
+  } & CardProps) {
+  const theme = useTheme()
+
   return (
     <MetadataCard {...props}>
       <Flex
         direction="column"
         gap="xlarge"
+        maxWidth={(CARD_CONTENT_MAX_WIDTH - (theme.spacing.xlarge * 3)) / 2}
       >
         {labels && labels?.length > 0 && (
           <LabelsAnnotationsRow name="Labels">
@@ -60,28 +73,20 @@ export function LabelsAnnotations({
               size="small"
               limit={8}
               values={labels}
-              transformValue={label => (
-                <>
-                  {label?.name}
-                  {label?.value && `: ${label.value}`}
-                </>
-              )}
+              transformValue={renderLabel}
             />
           </LabelsAnnotationsRow>
         )}
-        <LabelsAnnotationsRow name="Annotations">
-          <ChipList
-            size="small"
-            limit={8}
-            values={annotations}
-            transformValue={label => (
-              <>
-                {label?.name}
-                {label?.value && `: ${label.value}`}
-              </>
-            )}
-          />
-        </LabelsAnnotationsRow>
+        {annotations && annotations.length > 0 && (
+          <LabelsAnnotationsRow name="Annotations">
+            <ChipList
+              size="small"
+              limit={8}
+              values={annotations}
+              transformValue={renderLabel}
+            />
+          </LabelsAnnotationsRow>
+        )}
       </Flex>
     </MetadataCard>
   )
