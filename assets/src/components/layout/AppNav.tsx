@@ -13,15 +13,25 @@ import {
 } from '@pluralsh/design-system'
 import { appState, getIcon, hasIcons } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
-import { Layer } from 'grommet'
 import sortBy from 'lodash/sortBy'
-import { useContext, useMemo, useState } from 'react'
+import {
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Readiness, ReadinessT } from 'utils/status'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import AppStatus from 'components/apps/AppStatus'
 import Fuse from 'fuse.js'
 import { isEmpty } from 'lodash'
+import { useOnClickOutside } from 'components/hooks/useOnClickOutside'
+import { Div } from 'honorable'
+import { animated, useTransition } from 'react-spring'
+import { createPortal } from 'react-dom'
+
+const CARD_WIDTH = 420
 
 function readinessOrder(readiness: ReadinessT) {
   switch (readiness) {
@@ -36,7 +46,7 @@ function readinessOrder(readiness: ReadinessT) {
   }
 }
 
-function StatusIcon({ readiness }: {readiness: ReadinessT}) {
+function StatusIcon({ readiness }: { readiness: ReadinessT }) {
   if (!readiness) return null
 
   switch (readiness) {
@@ -84,7 +94,7 @@ const StatusPanelHeader = styled.div({
   lineHeight: '24px',
 })
 
-const AppStatusWrap = styled.div<{last: boolean}>(({ theme, last = false }) => ({
+const AppStatusWrap = styled.div<{ last: boolean }>(({ theme, last = false }) => ({
   alignItems: 'center',
   cursor: 'pointer',
   borderBottom: !last ? theme.borders['fill-two'] : undefined,
@@ -119,30 +129,59 @@ const searchOptions = {
   shouldSort: false,
 }
 
-export function StatusPanel({ statuses, onClose }) {
+const getTransitionProps = (isOpen: boolean) => ({
+  from: { opacity: 0, translateX: `${CARD_WIDTH + 24}px` },
+  enter: { opacity: 1, translateX: '0px' },
+  leave: { opacity: 0, translateX: `${CARD_WIDTH + 24}px` },
+  config: isOpen
+    ? {
+      mass: 0.6,
+      tension: 280,
+      velocity: 0.02,
+    }
+    : {
+      mass: 0.6,
+      tension: 400,
+      velocity: 0.02,
+      restVelocity: 0.1,
+    },
+})
+
+export function StatusPanel({ statuses, open, onClose }) {
   const navigate = useNavigate()
   const [query, setQuery] = useState<string>('')
+  const ref = useRef<any>()
+  const theme = useTheme()
+
+  useOnClickOutside(ref, () => {
+    onClose()
+  })
+
+  const transitionProps = useMemo(() => getTransitionProps(open), [open])
+  const transitions = useTransition(open ? [true] : [], transitionProps)
 
   const apps = useMemo(() => {
     if (isEmpty(query)) return statuses.map(({ app }) => app)
 
-    const fuse = new Fuse<{app, readiness}>(statuses, searchOptions)
+    const fuse = new Fuse<{ app; readiness }>(statuses, searchOptions)
 
     return fuse.search(query).map(({ item: { app } }) => app)
   }, [query, statuses])
 
-  return (
-    <Layer
-      plain
-      onClickOutside={onClose}
-      position="top-right"
-      margin={{ top: '105px', right: '24px', bottom: '24px' }}
+  let content = (
+    <Div
+      ref={ref}
+      position="absolute"
+      top={104}
+      right={theme.spacing.large}
+      bottom={theme.spacing.large}
     >
       <Card
         fillLevel={2}
-        width={420}
+        width={CARD_WIDTH}
         overflow="auto"
         position="relative"
+        height="100%"
       >
         <StatusPanelTopContainer>
           <StatusPanelHeaderWrap>
@@ -169,9 +208,11 @@ export function StatusPanel({ statuses, onClose }) {
             }}
             last={i === apps.length - 1}
           >
-            {hasIcons(app) && <AppIcon src={getIcon(app)} /> }
+            {hasIcons(app) && <AppIcon src={getIcon(app)} />}
             <AppName>{app.name}</AppName>
-            {app.spec?.descriptor?.version && <AppVersion>v{app.spec.descriptor.version}</AppVersion>}
+            {app.spec?.descriptor?.version && (
+              <AppVersion>v{app.spec.descriptor.version}</AppVersion>
+            )}
             <AppStatus app={app} />
           </AppStatusWrap>
         ))}
@@ -182,8 +223,26 @@ export function StatusPanel({ statuses, onClose }) {
           />
         )}
       </Card>
-    </Layer>
+    </Div>
   )
+
+  content = transitions(styles => (
+    <animated.div
+      style={{
+        position: 'fixed',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        zIndex: theme.zIndexes.modal - 1,
+        ...styles,
+      }}
+    >
+      {content}
+    </animated.div>
+  ))
+
+  return createPortal(content, document.body)
 }
 
 export default function AppNav() {
@@ -193,7 +252,10 @@ export default function AppNav() {
   const statuses = useMemo(() => {
     const unsorted = applications.map(app => ({ app, ...appState(app) }))
 
-    return sortBy(unsorted, [({ readiness }) => readinessOrder(readiness), 'app.name'])
+    return sortBy(unsorted, [
+      ({ readiness }) => readinessOrder(readiness),
+      'app.name',
+    ])
   }, [applications])
 
   return (
@@ -204,16 +266,16 @@ export default function AppNav() {
         clickable
         onClick={() => setOpen(true)}
         size="small"
+        userSelect="none"
       >
         Apps
         <StatusIcon readiness={statuses.length > 0 && statuses[0].readiness} />
       </Chip>
-      {open && (
-        <StatusPanel
-          statuses={statuses}
-          onClose={() => setOpen(false)}
-        />
-      )}
+      <StatusPanel
+        statuses={statuses}
+        open={open}
+        onClose={() => setOpen(false)}
+      />
     </>
   )
 }
