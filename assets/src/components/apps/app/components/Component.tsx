@@ -22,6 +22,7 @@ export default function Component({
     <Card
       display="flex"
       gap="small"
+      alignItems="center"
       paddingHorizontal="xsmall"
       paddingVertical="xxsmall"
       grow={1}
@@ -37,7 +38,7 @@ export default function Component({
         type="tertiary"
       />
       <Flex
-        align="center"
+        align="baseline"
         gap="small"
         flexShrink={1}
         overflow="hidden"
