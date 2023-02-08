@@ -7,7 +7,6 @@ import {
 } from 'react'
 import { Button, LoopingLogo } from '@pluralsh/design-system'
 import {
-  A,
   Div,
   Flex,
   Form,
@@ -18,7 +17,7 @@ import { Box } from 'grommet'
 import { v4 as uuidv4 } from 'uuid'
 import gql from 'graphql-tag'
 import { useIntercom } from 'react-use-intercom'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 
