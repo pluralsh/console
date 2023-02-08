@@ -3,6 +3,7 @@ import { ComponentProps } from 'react'
 import Chip from '../components/Chip'
 import Card from '../components/Card'
 import ChipList from '../components/ChipList'
+import WrapWithIf from '../components/WrapWithIf'
 
 const sizes: ComponentProps<typeof Chip>['size'][] = [
   'small',
@@ -45,24 +46,36 @@ export default {
 }
 
 function TextTemplate({ onFillLevel, ...args }: any) {
-  const VALUES = ['avengers', 'iron man', 'doctor strange', 'thor', 'black panther', 'guardians of the galaxy']
+  const VALUES = [
+    'avengers',
+    'iron man',
+    'doctor strange',
+    'thor',
+    'black panther',
+    'guardians of the galaxy',
+  ]
 
   return (
-    <Card
-      width="600px"
-      padding="medium"
-      fillLevel={onFillLevel}
+    <WrapWithIf
+      condition={onFillLevel > 0}
+      wrapper={(
+        <Card
+          width="600px"
+          padding="medium"
+          fillLevel={onFillLevel}
+        />
+      )}
     >
       <ChipList
         values={VALUES}
         {...args}
       />
-    </Card>
+    </WrapWithIf>
   )
 }
 
 interface Label {
-  key?: string,
+  key?: string
   value: string
 }
 
@@ -76,32 +89,42 @@ function LabelTemplate({ onFillLevel, ...args }: any) {
   ]
 
   return (
-    <Card
-      width="600px"
-      padding="medium"
-      fillLevel={onFillLevel}
+    <WrapWithIf
+      condition={onFillLevel > 0}
+      wrapper={(
+        <Card
+          width="600px"
+          padding="medium"
+          fillLevel={onFillLevel}
+        />
+      )}
     >
       <ChipList<Label>
         values={VALUES}
-        transform={v => `${v.key?.concat(':') ?? ''} ${v.value}`}
+        transformValue={v => `${v.key?.concat(':') ?? ''} ${v.value}`}
         {...args}
       />
-    </Card>
+    </WrapWithIf>
   )
 }
 
 function EmptyTemplate({ onFillLevel, ...args }: any) {
   return (
-    <Card
-      width="600px"
-      padding="medium"
-      fillLevel={onFillLevel}
+    <WrapWithIf
+      condition={onFillLevel > 0}
+      wrapper={(
+        <Card
+          width="600px"
+          padding="medium"
+          fillLevel={onFillLevel}
+        />
+      )}
     >
       <ChipList
         values={[]}
         {...args}
       />
-    </Card>
+    </WrapWithIf>
   )
 }
 

@@ -1,34 +1,44 @@
 import { Flex, Span } from 'honorable'
-import { ReactElement, useMemo, useState } from 'react'
+import {
+  ComponentProps,
+  ReactElement,
+  useMemo,
+  useState,
+} from 'react'
 
 import { HamburgerMenuCollapseIcon } from '../icons'
 
 import Chip, { ChipProps } from './Chip'
 import { useFillLevel } from './contexts/FillLevelContext'
 
-type TransformFn<TValue> = (value: TValue) => string
+type TransformFn<TValue> = (
+  value: TValue
+) => ComponentProps<typeof Chip>['children']
 
 export type ChipListProps<TValue> = {
-  values: Array<TValue>
-  transform?: TransformFn<TValue>
+  values: TValue[]
+  transformValue?: TransformFn<TValue>
   limit: number
 } & ChipProps
 
 function ChipList<TValue = string>({
-  values = [], transform, limit = 4, ...props
+  values = [],
+  transformValue,
+  limit = 4,
+  ...props
 }: ChipListProps<TValue>): ReactElement {
   const [collapsed, setCollapsed] = useState(true)
   const parentFillLevel = useFillLevel()
   const fillLevelClassName = useMemo(() => {
     switch (parentFillLevel) {
-    case 0:
-      return 'fill-zero'
-    case 1:
-      return 'fill-one'
-    case 2:
-      return 'fill-two'
     case 3:
       return 'fill-three'
+    case 2:
+      return 'fill-two'
+    case 1:
+      return 'fill-one'
+    default:
+      return 'fill-zero'
     }
   }, [parentFillLevel])
 
@@ -40,9 +50,12 @@ function ChipList<TValue = string>({
       {values.length === 0 && (
         <Span body2>There is nothing to display here.</Span>
       )}
-      {values.slice(0, collapsed ? limit : undefined).map(v => (
-        <Chip {...props}>
-          {transform ? transform(v) : `${v}`}
+      {values.slice(0, collapsed ? limit : undefined).map((v, i) => (
+        <Chip
+          key={(v as any).key || i}
+          {...props}
+        >
+          {transformValue ? transformValue(v) : `${v}`}
         </Chip>
       ))}
       {values.length > limit && (
@@ -53,7 +66,8 @@ function ChipList<TValue = string>({
               {...props}
               clickable
               background={fillLevelClassName}
-            > {`+${values.length - limit}`}
+            >
+              {`+${values.length - limit}`}
             </Chip>
           )}
           {!collapsed && (
@@ -62,7 +76,8 @@ function ChipList<TValue = string>({
               {...props}
               clickable
               background={fillLevelClassName}
-            ><HamburgerMenuCollapseIcon />
+            >
+              <HamburgerMenuCollapseIcon />
             </Chip>
           )}
         </>
