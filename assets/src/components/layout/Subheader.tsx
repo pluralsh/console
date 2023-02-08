@@ -13,6 +13,7 @@ import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayo
 import { ResponsiveLayoutSpacer } from '../utils/layout/ResponsiveLayoutSpacer'
 
 import { Breadcrumbs } from './Breadcrumbs'
+import AppNav from './AppNav'
 
 export default function Subheader() {
   const navigate = useNavigate()
@@ -23,11 +24,11 @@ export default function Subheader() {
       backgroundColor={theme.colors?.grey[950]}
       borderBottom="1px solid border"
       minHeight={48}
+      paddingHorizontal="large"
     >
       <ResponsiveLayoutSidenavContainer
         gap="small"
         display="flex"
-        paddingHorizontal="large"
         width={240}
       >
         <IconFrame
@@ -48,9 +49,12 @@ export default function Subheader() {
         />
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutContentContainer><Flex align="justify"><Breadcrumbs /></Flex></ResponsiveLayoutContentContainer>
+      <ResponsiveLayoutContentContainer>
+        <Breadcrumbs />
+      </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSidecarContainer />
       <ResponsiveLayoutSpacer />
+      <AppNav />
     </Flex>
 
   )
