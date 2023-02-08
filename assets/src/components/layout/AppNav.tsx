@@ -9,7 +9,7 @@ import {
   StatusIpIcon,
   SuccessIcon,
 } from '@pluralsh/design-system'
-import { appState } from 'components/apps/misc'
+import { appState, getIcon, hasIcons } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
 import { Layer } from 'grommet'
 import { Div } from 'honorable'
@@ -17,6 +17,8 @@ import sortBy from 'lodash/sortBy'
 import { useContext, useMemo, useState } from 'react'
 import { Readiness, ReadinessT } from 'utils/status'
 import styled from 'styled-components'
+import { useNavigate } from 'react-router-dom'
+import AppStatus from 'components/apps/AppStatus'
 
 function readinessOrder(readiness: ReadinessT) {
   switch (readiness) {
@@ -71,20 +73,55 @@ const StatusPanelHeader = styled.div({
   lineHeight: '24px',
 })
 
+const AppStatusWrap = styled.div<{last: boolean}>(({ theme, last = false }) => ({
+  alignItems: 'center',
+  cursor: 'pointer',
+  borderBottom: !last ? theme.borders['fill-two'] : undefined,
+  display: 'flex',
+  padding: '12px 16px',
+  '&:hover': {
+    backgroundColor: theme.colors['fill-two-hover'],
+  },
+}))
+
+const AppIcon = styled.img({
+  height: 16,
+  width: 16,
+})
+
+const AppName = styled.div(({ theme }) => ({
+  ...theme.partials.text.body2,
+  marginLeft: 8,
+}))
+
+const AppVersion = styled.div(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  display: 'flex',
+  flexGrow: 1,
+  marginLeft: 8,
+}))
+
 export function StatusPanel({ statuses, onClose = _ => {} }) {
+  const navigate = useNavigate()
+
   return (
     <Layer
       plain
       onClickOutside={onClose}
       position="top-right"
-      margin={{ top: '104px', right: '24px', bottom: '24px' }}
+      margin={{ top: '105px', right: '24px', bottom: '24px' }}
     >
       <Card
         fillLevel={2}
         width={420}
-        overflow="hidden"
+        overflow="auto"
+        position="relative"
       >
         <Div
+          backgroundColor="fill-two"
+          position="sticky"
+          top={0}
           padding="medium"
           borderBottom="1px solid border-fill-two"
         >
@@ -101,11 +138,18 @@ export function StatusPanel({ statuses, onClose = _ => {} }) {
             placeholder="Filter applications"
           />
         </Div>
-        <Div
-          overflowY="auto"
-          maxHeight="100vh"
-        >
-          {statuses.map(({ app, readiness }) => <div>{app.name}</div>)}
+        <Div>
+          {statuses.map(({ app }, i) => (
+            <AppStatusWrap
+              onClick={() => navigate(`/apps/${app.name}`)}
+              last={i === statuses.length - 1}
+            >
+              {hasIcons(app) && <AppIcon src={getIcon(app)} /> }
+              <AppName>{app.name}</AppName>
+              {app.spec?.descriptor?.version && <AppVersion>v{app.spec.descriptor.version}</AppVersion>}
+              <AppStatus app={app} />
+            </AppStatusWrap>
+          ))}
         </Div>
       </Card>
     </Layer>
