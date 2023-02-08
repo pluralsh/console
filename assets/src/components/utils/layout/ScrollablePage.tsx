@@ -1,4 +1,4 @@
-import { Div, FlexProps } from 'honorable'
+import { Div, DivProps, FlexProps } from 'honorable'
 import { ReactNode } from 'react'
 import styled, { CSSProperties } from 'styled-components'
 
@@ -7,17 +7,38 @@ import ConsolePageTitle from './ConsolePageTitle'
 const ScrollablePageContent = styled.div<{
   scrollable?: boolean
   extraStyles?: CSSProperties
-}>(({ theme, scrollable, extraStyles }) => ({
+  maxContentWidth?: number
+  fullWidth?: boolean
+}>(({
+  theme, scrollable, extraStyles, maxContentWidth, fullWidth,
+}) => ({
+  position: 'relative',
   height: '100%',
   maxHeight: '100%',
   width: '100%',
   overflowY: scrollable ? 'auto' : 'hidden',
   overflowX: 'hidden',
-  paddingTop: theme.spacing.medium,
   paddingRight: scrollable ? theme.spacing.small : 0,
-  paddingBottom: scrollable ? theme.spacing.xxlarge : theme.spacing.large,
-  ...(extraStyles ?? {}),
-  position: 'relative',
+  ...(scrollable ? { scrollbarGutter: 'stable' } : {}),
+  ...(scrollable && fullWidth
+    ? {
+      paddingRight: theme.spacing.large - 6,
+    }
+    : {}),
+  '& > .widthLimiter': {
+    width: '100%',
+    paddingTop: theme.spacing.medium,
+    paddingBottom: scrollable ? theme.spacing.xxlarge : theme.spacing.large,
+    ...(!scrollable
+      ? {
+        height: '100%',
+      }
+      : {}),
+    ...(maxContentWidth
+      ? { maxWidth: maxContentWidth, marginLeft: 'auto', marginRight: 'auto' }
+      : {}),
+    ...(extraStyles ?? {}),
+  },
 }))
 
 const ScrollShadow = styled.div(({ theme }) => ({
@@ -38,6 +59,8 @@ export function ScrollablePage({
   contentStyles,
   children,
   scrollable = true,
+  maxContentWidth,
+  fullWidth,
   ...props
 }: {
   heading: ReactNode
@@ -45,25 +68,37 @@ export function ScrollablePage({
   contentStyles?: CSSProperties
   children: ReactNode
   scrollable?: boolean
+  maxContentWidth?: number
+  fullWidth?: boolean
 } & FlexProps) {
   return (
     <>
       {heading && (
-        <Div position="relative">
-          {scrollable && <ScrollShadow />}
-          <ConsolePageTitle
-            heading={heading}
-            {...props}
+        <Div paddingRight={scrollable && fullWidth ? 'large' : undefined}>
+          <Div
+            position="relative"
+            width="100%"
+            marginLeft="auto"
+            marginRight="auto"
+            maxWidth={maxContentWidth}
           >
-            {headingContent}
-          </ConsolePageTitle>
+            {scrollable && <ScrollShadow />}
+            <ConsolePageTitle
+              heading={heading}
+              {...props}
+            >
+              {headingContent}
+            </ConsolePageTitle>
+          </Div>
         </Div>
       )}
       <ScrollablePageContent
         scrollable={scrollable}
         extraStyles={contentStyles}
+        maxContentWidth={maxContentWidth}
+        fullWidth={fullWidth}
       >
-        {children}
+        <div className="widthLimiter">{children}</div>
       </ScrollablePageContent>
     </>
   )
