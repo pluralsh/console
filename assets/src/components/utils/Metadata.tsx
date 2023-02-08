@@ -6,20 +6,32 @@ import { makeGrid } from 'utils/makeGrid'
 
 const MAX_COLS = 4
 
-export const MetadataGridCard = styled(Card)<{$maxCols:number}>(({ theme, maxCols = MAX_COLS }) => ({
-  ...makeGrid({ maxCols, minColWidth: 186, gap: theme.spacing.xlarge }),
-  padding: theme.spacing.large,
+const MetadataGridGrid = styled.div<{ maxCols: number }>(({ theme, maxCols = MAX_COLS }) => ({
+  ...makeGrid({
+    maxCols,
+    minColWidth: 186,
+    gap: theme.spacing.xlarge,
+  }),
+}))
+
+export const MetadataCard = styled(Card)(({ theme }) => ({
+  padding: theme.spacing.xlarge,
+  '& > *': {
+    maxWidth: 1102,
+  },
 }))
 
 export function MetadataGrid(props) {
   const numChildren = Children.count(props.children)
-  const maxCols = (numChildren < MAX_COLS) ? numChildren : MAX_COLS
+  const maxCols = numChildren < MAX_COLS ? numChildren : MAX_COLS
 
   return (
-    <MetadataGridCard
-      maxCols={maxCols}
-      {...props}
-    />
+    <MetadataCard>
+      <MetadataGridGrid
+        maxCols={maxCols}
+        {...props}
+      />
+    </MetadataCard>
   )
 }
 

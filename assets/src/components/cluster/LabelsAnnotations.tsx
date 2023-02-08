@@ -1,7 +1,8 @@
-import { Card, CardProps, Chip } from '@pluralsh/design-system'
+import { CardProps, Chip } from '@pluralsh/design-system'
 import { Div, Flex } from 'honorable'
 import { ReactNode } from 'react'
 import type { LabelPair, Metadata as MetadataT } from 'generated/graphql'
+import { MetadataCard } from 'components/utils/Metadata'
 
 export const mapify = tags => tags.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {})
 
@@ -34,7 +35,7 @@ export function LabelsAnnotationsRow({
 
 export function LabelsAnnotationsTag({ name, value }: LabelPair) {
   return (
-    <Chip>
+    <Chip size="small">
       {name}
       {value && `: ${value}`}
     </Chip>
@@ -48,10 +49,7 @@ export function LabelsAnnotations({
   metadata: MetadataT
 } & CardProps) {
   return (
-    <Card
-      padding="xlarge"
-      {...props}
-    >
+    <MetadataCard {...props}>
       <Flex
         direction="column"
         gap="xlarge"
@@ -73,6 +71,6 @@ export function LabelsAnnotations({
           ))}
         </LabelsAnnotationsRow>
       </Flex>
-    </Card>
+    </MetadataCard>
   )
 }
