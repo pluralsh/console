@@ -1,14 +1,28 @@
-import { useEffect, useMemo, useState } from 'react'
+import {
+  RefObject,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Button, LoopingLogo } from '@pluralsh/design-system'
-import { Flex, Form, P } from 'honorable'
+import {
+  A,
+  Div,
+  Flex,
+  Form,
+  P,
+} from 'honorable'
 import { useMutation, useQuery } from '@apollo/client'
-import { Box, Text } from 'grommet'
+import { Box } from 'grommet'
 import { v4 as uuidv4 } from 'uuid'
 import gql from 'graphql-tag'
 import { useIntercom } from 'react-use-intercom'
-import { useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
+
+import { isValidEmail } from 'utils/email'
 
 import { GqlError } from '../utils/Alert'
 
@@ -22,7 +36,6 @@ import { LoginContext } from '../contexts'
 import { LoginPortal } from '../login/LoginPortal'
 
 const POLL_INTERVAL = 3 * 60 * 1000
-const CONSOLE_LOGO = '/console-logo.png'
 const LOGIN_INFO = gql`
   query LoginInfo($redirect: String) {
     loginInfo(redirect: $redirect) {
@@ -30,6 +43,12 @@ const LOGIN_INFO = gql`
     }
   }
 `
+
+const setInputFocus = (ref: RefObject<any>) => {
+  requestAnimationFrame(() => {
+    ref.current?.querySelector('input')?.focus()
+  })
+}
 
 function LoginError({ error }) {
   useEffect(() => {
@@ -55,42 +74,36 @@ export function GrantAccess() {
 
   return (
     <LoginPortal>
-      <Box gap="small">
-        <Box
-          gap="xsmall"
-          align="center"
-        >
-          <img
-            src={CONSOLE_LOGO}
-            width="45px"
-          />
-          <Text size="large">Welcome</Text>
-          <Text
-            size="small"
-            color="dark-3"
-          >
-            Enter the login token given to you to gain access
-          </Text>
-        </Box>
-        <LabelledInput
-          value={jwt}
-          width="100%"
-          label="Login Token"
-          onChange={setJwt}
+      <Div marginBottom="large">
+        <WelcomeHeader
+          textAlign="left"
+          marginBottom="xxsmall"
         />
-        <Button
-          fill="horizontal"
-          pad={{ vertical: '8px' }}
-          margin={{ top: 'xsmall' }}
-          onClick={() => {
-            setToken(jwt)
-            window.location = '/' as any as Location
-          }}
-          disabled={jwt === ''}
+        <P
+          body1
+          color="text-xlight"
         >
-          Get access
-        </Button>
-      </Box>
+          Enter the login token given to you to gain access
+        </P>
+      </Div>
+      <LabelledInput
+        value={jwt}
+        width="100%"
+        label="Login Token"
+        onChange={setJwt}
+      />
+      <Button
+        fill="horizontal"
+        pad={{ vertical: '8px' }}
+        margin={{ top: 'xsmall' }}
+        onClick={() => {
+          setToken(jwt)
+          window.location = '/' as any as Location
+        }}
+        disabled={jwt === ''}
+      >
+        Get access
+      </Button>
     </LoginPortal>
   )
 }
@@ -208,20 +221,27 @@ function OIDCLogin({ oidcUri }) {
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' })
+  const emailRef = useRef<any>()
+
+  useEffect(() => {
+    setInputFocus(emailRef)
+  }, [])
+
   const { data } = useQuery(ME_Q)
   const { data: loginData } = useQuery(LOGIN_INFO, {
     variables: { redirect: localized('/oauth/callback') },
   })
-  const [mutation, { loading, error }] = useMutation(SIGNIN, {
-    variables: form,
-    onCompleted: ({ signIn: { jwt } }) => {
-      setToken(jwt)
-      window.location = '/' as any as Location
-    },
-    onError: console.error,
-  })
+  const [loginMutation, { loading: loginMLoading, error: loginMError }]
+    = useMutation(SIGNIN, {
+      variables: form,
+      onCompleted: ({ signIn: { jwt } }) => {
+        setToken(jwt)
+        window.location = '/' as any as Location
+      },
+      onError: console.error,
+    })
 
-  if (!error && data && data.me) {
+  if (!loginMError && data?.me) {
     window.location = '/' as any as Location
   }
 
@@ -235,70 +255,68 @@ export default function Login() {
     //
   }
 
-  const disabled = form.password.length === 0 || form.email.length === 0
-  const onSubmit = () => {
+  const disabled = form.password.length === 0 || !isValidEmail(form.email)
+  const onSubmit = e => {
+    e.preventDefault()
     if (disabled) {
       return
     }
-    mutation()
+    loginMutation()
   }
+  const passwordErrorMsg
+    = loginMError?.message === 'invalid password' ? 'Invalid password' : undefined
+  const loginError = !passwordErrorMsg && loginMError
 
   return (
     <LoginPortal>
-      <Box gap="medium">
+      <WelcomeHeader marginBottom="xlarge" />
+      <Form onSubmit={onSubmit}>
         <Box
+          margin={{ bottom: '10px' }}
           gap="xsmall"
-          align="center"
         >
-          <img
-            src={CONSOLE_LOGO}
-            width="45px"
-          />
-          <Text size="large">Welcome</Text>
-          <Text
-            size="small"
-            color="dark-3"
-          >
-            Enter your email and password to get started
-          </Text>
-        </Box>
-        <Form onSubmit={onSubmit}>
-          <Box
-            margin={{ bottom: '10px' }}
-            gap="xsmall"
-          >
-            {error && (
+          {loginMError && (
+            <Div marginBottom="large">
               <GqlError
                 header="Login failed"
-                error={error}
+                error={loginError}
               />
-            )}
+            </Div>
+          )}
+          <Flex
+            flexDirection="column"
+            gap="small"
+            marginBottom="small"
+          >
             <LabelledInput
+              ref={emailRef}
+              label="Email address"
               value={form.email}
-              placeholder="someone@example.com"
-              label="Email"
               onChange={email => setForm({ ...form, email })}
+              placeholder="Enter email address"
             />
             <LabelledInput
-              type="password"
-              value={form.password}
-              placeholder="a long password"
               label="Password"
+              type="password"
+              hint={passwordErrorMsg}
+              error={!!passwordErrorMsg}
+              value={form.password}
               onChange={password => setForm({ ...form, password })}
+              placeholder="Enter password"
             />
-            <Button
-              type="submit"
-              fill="horizontal"
-              pad={{ vertical: '8px' }}
-              margin={{ top: 'xsmall' }}
-              loading={loading}
-              disabled={disabled}
-            >
-              Log in
-            </Button>
-          </Box>
-        </Form>
-      </Box>
+          </Flex>
+          <Button
+            type="submit"
+            fill="horizontal"
+            pad={{ vertical: '8px' }}
+            margin={{ top: 'xsmall' }}
+            loading={loginMLoading}
+            disabled={disabled}
+          >
+            Log in
+          </Button>
+        </Box>
+      </Form>
     </LoginPortal>
   )
 }

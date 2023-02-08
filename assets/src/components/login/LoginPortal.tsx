@@ -16,8 +16,11 @@ export type PictureProps = {
 export function Picture({ sources, ...props }: PictureProps) {
   return (
     <picture style={{ display: 'contents' }}>
-      {sources.map(source => (
-        <source {...source} />
+      {sources.map((source, i) => (
+        <source
+          key={source.srcSet || i}
+          {...source}
+        />
       ))}
       <Img {...props} />
     </picture>
