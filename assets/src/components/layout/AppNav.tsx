@@ -3,22 +3,25 @@ import {
   Card,
   Chip,
   CloseIcon,
+  EmptyState,
   ErrorIcon,
   IconFrame,
   Input,
+  MagnifyingGlassIcon,
   StatusIpIcon,
   SuccessIcon,
 } from '@pluralsh/design-system'
 import { appState, getIcon, hasIcons } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
 import { Layer } from 'grommet'
-import { Div } from 'honorable'
 import sortBy from 'lodash/sortBy'
 import { useContext, useMemo, useState } from 'react'
 import { Readiness, ReadinessT } from 'utils/status'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import AppStatus from 'components/apps/AppStatus'
+import Fuse from 'fuse.js'
+import { isEmpty } from 'lodash'
 
 function readinessOrder(readiness: ReadinessT) {
   switch (readiness) {
@@ -27,9 +30,9 @@ function readinessOrder(readiness: ReadinessT) {
   case Readiness.InProgress:
     return 1
   case Readiness.Ready:
-    return 3
+    return 2
   default:
-    return 4
+    return 3
   }
 }
 
@@ -60,6 +63,14 @@ function StatusIcon({ readiness }: {readiness: ReadinessT}) {
     )
   }
 }
+
+const StatusPanelTopContainer = styled.div(({ theme }) => ({
+  backgroundColor: theme.colors['fill-two'],
+  borderBottom: theme.borders['fill-two'],
+  padding: theme.spacing.medium,
+  position: 'sticky',
+  top: 0,
+}))
 
 const StatusPanelHeaderWrap = styled.div({
   alignItems: 'center',
@@ -102,8 +113,23 @@ const AppVersion = styled.div(({ theme }) => ({
   marginLeft: 8,
 }))
 
-export function StatusPanel({ statuses, onClose = _ => {} }) {
+const searchOptions = {
+  keys: ['app.name'],
+  threshold: 0.25,
+  shouldSort: false,
+}
+
+export function StatusPanel({ statuses, onClose }) {
   const navigate = useNavigate()
+  const [query, setQuery] = useState<string>('')
+
+  const apps = useMemo(() => {
+    if (isEmpty(query)) return statuses.map(({ app }) => app)
+
+    const fuse = new Fuse<{app, readiness}>(statuses, searchOptions)
+
+    return fuse.search(query).map(({ item: { app } }) => app)
+  }, [query, statuses])
 
   return (
     <Layer
@@ -118,13 +144,7 @@ export function StatusPanel({ statuses, onClose = _ => {} }) {
         overflow="auto"
         position="relative"
       >
-        <Div
-          backgroundColor="fill-two"
-          position="sticky"
-          top={0}
-          padding="medium"
-          borderBottom="1px solid border-fill-two"
-        >
+        <StatusPanelTopContainer>
           <StatusPanelHeaderWrap>
             <StatusPanelHeader>Apps</StatusPanelHeader>
             <IconFrame
@@ -136,28 +156,38 @@ export function StatusPanel({ statuses, onClose = _ => {} }) {
           <Input
             marginTop="xsmall"
             placeholder="Filter applications"
+            startIcon={<MagnifyingGlassIcon size={14} />}
+            value={query}
+            onChange={event => setQuery(event.target.value)}
           />
-        </Div>
-        <Div>
-          {statuses.map(({ app }, i) => (
-            <AppStatusWrap
-              onClick={() => navigate(`/apps/${app.name}`)}
-              last={i === statuses.length - 1}
-            >
-              {hasIcons(app) && <AppIcon src={getIcon(app)} /> }
-              <AppName>{app.name}</AppName>
-              {app.spec?.descriptor?.version && <AppVersion>v{app.spec.descriptor.version}</AppVersion>}
-              <AppStatus app={app} />
-            </AppStatusWrap>
-          ))}
-        </Div>
+        </StatusPanelTopContainer>
+        {apps.map((app, i) => (
+          <AppStatusWrap
+            onClick={() => {
+              onClose()
+              navigate(`/apps/${app.name}`)
+            }}
+            last={i === apps.length - 1}
+          >
+            {hasIcons(app) && <AppIcon src={getIcon(app)} /> }
+            <AppName>{app.name}</AppName>
+            {app.spec?.descriptor?.version && <AppVersion>v{app.spec.descriptor.version}</AppVersion>}
+            <AppStatus app={app} />
+          </AppStatusWrap>
+        ))}
+        {isEmpty(apps) && (
+          <EmptyState
+            message="No apps found."
+            description={`"${query}" did not match any of your installed applications.`}
+          />
+        )}
       </Card>
     </Layer>
   )
 }
 
 export default function AppNav() {
-  const [open, setOpen] = useState<boolean>(true)
+  const [open, setOpen] = useState<boolean>(false)
   const { applications = [] } = useContext<any>(InstallationContext)
 
   const statuses = useMemo(() => {
