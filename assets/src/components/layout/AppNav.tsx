@@ -77,13 +77,12 @@ export function StatusPanel({ statuses, onClose = _ => {} }) {
       plain
       onClickOutside={onClose}
       position="top-right"
-      margin={{ top: '80px' }}
+      margin={{ top: '104px', right: '24px', bottom: '24px' }}
     >
       <Card
         fillLevel={2}
         width={420}
         overflow="hidden"
-        margin="large"
       >
         <Div
           padding="medium"
