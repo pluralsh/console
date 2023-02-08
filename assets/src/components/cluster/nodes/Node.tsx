@@ -60,7 +60,7 @@ export default function Node() {
       stateRef={tabStateRef}
       as={(
         <ResponsivePageFullWidth
-          scrollable={(currentTab?.label ?? 'Info') === 'Info'}
+          scrollable={(currentTab?.label ?? 'Info') === 'Info' || currentTab?.label === 'Metadata'}
           heading={name}
           headingContent={(
             <HeadingTabList

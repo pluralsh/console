@@ -84,6 +84,7 @@ export default function Container() {
 
   const match = useMatch('/pods/:namespace/:name/shell/:container/:subpath')
   const subpath = match?.params?.subpath || ''
+  const currentTab = DIRECTORY.find(({ path }) => path === subpath)
 
   const { data, error } = useQuery<{ pod: Pod }>(POD_INFO_Q, {
     variables: { name, namespace },
@@ -147,7 +148,7 @@ export default function Container() {
 
   return (
     <ResponsivePageFullWidth
-      scrollable={false}
+      scrollable={currentTab?.path === 'metadata'}
       heading={containerName}
       headingContent={(
         <Flex gap="medium">
