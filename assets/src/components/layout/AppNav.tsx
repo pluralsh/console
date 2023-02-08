@@ -60,11 +60,12 @@ function StatusIcon({ readiness }: {readiness: ReadinessT}) {
 }
 
 const StatusPanelHeaderWrap = styled.div({
+  alignItems: 'center',
   display: 'flex',
   justifyContent: 'space-between',
 })
 
-const StatusPanelHeader = styled.span({
+const StatusPanelHeader = styled.div({
   fontSize: 18,
   fontWeight: 500,
   lineHeight: '24px',
@@ -90,13 +91,14 @@ export function StatusPanel({ statuses, onClose = _ => {} }) {
         >
           <StatusPanelHeaderWrap>
             <StatusPanelHeader>Apps</StatusPanelHeader>
-            <CloseIcon
-              cursor="pointer"
+            <IconFrame
+              clickable
+              icon={<CloseIcon />}
               onClick={e => onClose(e)}
             />
           </StatusPanelHeaderWrap>
           <Input
-            marginTop="small"
+            marginTop="xsmall"
             placeholder="Filter applications"
           />
         </Div>
