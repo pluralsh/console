@@ -35,6 +35,7 @@ export default function Users() {
           gap="medium"
         >
           {/* <TabList
+          gap="xxsmall"
           stateRef={tabStateRef}
           stateProps={{
             orientation: 'horizontal',

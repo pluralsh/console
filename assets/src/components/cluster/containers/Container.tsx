@@ -44,6 +44,7 @@ function HeadingTabList({ tabStateRef, subpath }: any) {
 
   return (
     <TabList
+      gap="xxsmall"
       stateRef={tabStateRef}
       stateProps={{
         orientation: 'horizontal',
