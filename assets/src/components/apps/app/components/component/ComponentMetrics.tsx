@@ -19,10 +19,15 @@ function Graphs({ cpu: [cpu], mem: [mem] }) {
     { cpuValues: convertVals(cpu.values), memValues: convertVals(mem.values) }), [cpu, mem])
 
   return (
-    <>
-      <Div
-        height={280}
-        marginVertical="large"
+    <Flex
+      gap="large"
+      grow={1}
+      height={320}
+      padding="large"
+    >
+      <Flex
+        direction="column"
+        grow={1}
       >
         <GraphHeader title="Overall CPU Usage" />
         <Graph
@@ -30,10 +35,10 @@ function Graphs({ cpu: [cpu], mem: [mem] }) {
           yFormat={undefined}
           tickRotation={undefined}
         />
-      </Div>
-      <Div
-        height={280}
-        marginVertical="large"
+      </Flex>
+      <Flex
+        direction="column"
+        grow={1}
       >
         <GraphHeader title="Overall Memory Usage" />
         <Graph
@@ -41,8 +46,8 @@ function Graphs({ cpu: [cpu], mem: [mem] }) {
           yFormat={filesize}
           tickRotation={undefined}
         />
-      </Div>
-    </>
+      </Flex>
+    </Flex>
   )
 }
 
@@ -55,10 +60,15 @@ function PodGraphs({ cpu, mem }) {
   }, [cpu, mem])
 
   return (
-    <>
-      <Div
-        height={280}
-        marginVertical="large"
+    <Flex
+      gap="large"
+      grow={1}
+      height={320}
+      padding="large"
+    >
+      <Flex
+        direction="column"
+        grow={1}
       >
         <GraphHeader title="Pod CPU Usage" />
         <Graph
@@ -66,10 +76,10 @@ function PodGraphs({ cpu, mem }) {
           yFormat={undefined}
           tickRotation={undefined}
         />
-      </Div>
-      <Div
-        height={280}
-        marginVertical="large"
+      </Flex>
+      <Flex
+        direction="column"
+        grow={1}
       >
         <GraphHeader title="Pod Memory Usage" />
         <Graph
@@ -77,8 +87,8 @@ function PodGraphs({ cpu, mem }) {
           yFormat={filesize}
           tickRotation={undefined}
         />
-      </Div>
-    </>
+      </Flex>
+    </Flex>
   )
 }
 
