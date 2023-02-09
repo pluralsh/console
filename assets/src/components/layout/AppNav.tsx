@@ -15,6 +15,7 @@ import { appState, getIcon, hasIcons } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
 import sortBy from 'lodash/sortBy'
 import {
+  useCallback,
   useContext,
   useMemo,
   useRef,
@@ -153,9 +154,7 @@ export function StatusPanel({ statuses, open, onClose }) {
   const ref = useRef<any>()
   const theme = useTheme()
 
-  useOnClickOutside(ref, () => {
-    onClose()
-  })
+  useOnClickOutside(ref, onClose)
 
   const transitionProps = useMemo(() => getTransitionProps(open), [open])
   const transitions = useTransition(open ? [true] : [], transitionProps)
@@ -248,6 +247,9 @@ export function StatusPanel({ statuses, open, onClose }) {
 export default function AppNav() {
   const [open, setOpen] = useState<boolean>(false)
   const { applications = [] } = useContext<any>(InstallationContext)
+  const onClose = useCallback(() => {
+    setOpen(false)
+  }, [])
 
   const statuses = useMemo(() => {
     const unsorted = applications.map(app => ({ app, ...appState(app) }))
@@ -274,7 +276,7 @@ export default function AppNav() {
       <StatusPanel
         statuses={statuses}
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={onClose}
       />
     </>
   )
