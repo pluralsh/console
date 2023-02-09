@@ -42,7 +42,7 @@ function OAuthError({ error: { error, error_description: description } }:any) {
 export function OAuthCallback() {
   const location = useLocation()
   const { code, ...oauthError } = qs.parse(location.search)
-  const prevCode = useRef(code)
+  const prevCode = useRef<any>()
   const [mutation, { error, loading }] = useMutation(CALLBACK, {
     variables: { code, redirect: localized('/oauth/callback') },
     onCompleted: result => {
