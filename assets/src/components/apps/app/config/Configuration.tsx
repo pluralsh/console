@@ -70,6 +70,7 @@ export default function Configuration() {
         <>
           <Flex grow={1} />
           <TabList
+            gap="xxsmall"
             margin={1}
             stateRef={tabStateRef}
             stateProps={{

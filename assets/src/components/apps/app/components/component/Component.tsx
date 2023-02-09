@@ -121,6 +121,7 @@ export default function Component() {
           marginVertical={1}
         >
           <TabList
+            gap="xxsmall"
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',
