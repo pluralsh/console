@@ -21,7 +21,10 @@ export default function Service() {
   const hasPorts = !isEmpty(ports)
 
   return (
-    <Flex direction="column">
+    <Flex
+      direction="column"
+      grow={1}
+    >
       {hasIngress && (
         <>
           <H2 marginBottom="medium">Status</H2>

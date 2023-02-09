@@ -33,7 +33,10 @@ export default function Pods({ pods }) {
   [refetch])
 
   return (
-    <Flex direction="column">
+    <Flex
+      direction="column"
+      grow={1}
+    >
       <H2
         subtitle1
         marginBottom="medium"
