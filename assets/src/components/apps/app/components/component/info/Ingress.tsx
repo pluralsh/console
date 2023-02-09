@@ -64,7 +64,10 @@ export default function Ingress() {
   const rules = ingress.spec?.rules || []
 
   return (
-    <Flex direction="column">
+    <Flex
+      direction="column"
+      grow={1}
+    >
       {hasIngress && (
         <>
           <H2 marginBottom="medium">Status</H2>

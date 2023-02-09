@@ -28,7 +28,10 @@ export default function StatefulSet() {
   } = data
 
   return (
-    <Flex direction="column">
+    <Flex
+      direction="column"
+      grow={1}
+    >
       <H2 marginBottom="medium">Status</H2>
       <Card padding="large">
         <Flex gap="xlarge">

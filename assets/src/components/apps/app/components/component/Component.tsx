@@ -45,7 +45,6 @@ const directory = [
   { label: 'Metrics', path: 'metrics', onlyFor: ['deployment', 'statefulset'] },
   { label: 'Events', path: 'events' },
   { label: 'Raw', path: 'raw' },
-  { label: 'Metadata', path: 'metadata' },
 ]
 
 const kindToQuery = {
