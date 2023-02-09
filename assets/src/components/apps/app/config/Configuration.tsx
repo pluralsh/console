@@ -65,6 +65,7 @@ export default function Configuration() {
 
   return (
     <ScrollablePage
+      scrollable={view === ConfigType.SETTINGS}
       heading="Configuration"
       headingContent={(
         <>
