@@ -1,11 +1,11 @@
 import { Route } from 'react-router-dom'
 
-import { LinkLogin } from '../components/LinkLogin'
+import { LinkLogin } from '../components/login/LinkLogin'
 import Console from '../components/layout/Console'
 
-import Login, { GrantAccess } from '../components/Login'
-import Invite from '../components/Invite'
-import { OAuthCallback } from '../components/OauthCallback'
+import Login, { GrantAccess } from '../components/login/Login'
+import Invite from '../components/login/Invite'
+import { OAuthCallback } from '../components/login/OauthCallback'
 
 import { consoleRoutes } from './consoleRoutes'
 

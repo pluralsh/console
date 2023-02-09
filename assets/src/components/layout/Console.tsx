@@ -5,7 +5,7 @@ import { Toast } from '@pluralsh/design-system'
 
 import { A, Span } from 'honorable'
 
-import { EnsureLogin } from '../Login'
+import { EnsureLogin } from '../login/Login'
 import { InstallationsProvider } from '../Installations'
 
 import TerminalThemeProvider from '../terminal/TerminalThemeProvider'

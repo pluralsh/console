@@ -1,16 +1,18 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import gql from 'graphql-tag'
 import { Box } from 'grommet'
-import { Alert, AlertStatus, GqlError } from 'forge-core'
+import { Alert, AlertStatus } from 'forge-core'
 import { useLocation } from 'react-router'
 import qs from 'query-string'
 import { useMutation } from '@apollo/client'
 import { LoopingLogo } from '@pluralsh/design-system'
 
-import { setToken } from '../helpers/auth'
-import { localized } from '../helpers/hostname'
+import { GqlError } from 'components/utils/Alert'
 
-import { LoginPortal } from './Login'
+import { setToken } from '../../helpers/auth'
+import { localized } from '../../helpers/hostname'
+
+import { LoginPortal } from './LoginPortal'
 
 const CALLBACK = gql`
   mutation Callback($code: String!, $redirect: String) {
@@ -18,7 +20,7 @@ const CALLBACK = gql`
   }
 `
 
-function OAuthError({ error: { error, error_description: description } }) {
+function OAuthError({ error: { error, error_description: description } }:any) {
   return (
     <LoginPortal>
       <Box gap="medium">
@@ -40,6 +42,7 @@ function OAuthError({ error: { error, error_description: description } }) {
 export function OAuthCallback() {
   const location = useLocation()
   const { code, ...oauthError } = qs.parse(location.search)
+  const prevCode = useRef(code)
   const [mutation, { error, loading }] = useMutation(CALLBACK, {
     variables: { code, redirect: localized('/oauth/callback') },
     onCompleted: result => {
@@ -50,8 +53,11 @@ export function OAuthCallback() {
   })
 
   useEffect(() => {
-    if (code) mutation()
-  }, [code])
+    if (code !== prevCode.current) {
+      mutation()
+      prevCode.current = code
+    }
+  }, [code, mutation])
 
   if (!code) return <OAuthError error={oauthError} />
 
