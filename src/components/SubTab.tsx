@@ -17,6 +17,13 @@ const parentFillLevelToActiveBG: Record<FillLevel, string> = {
   3: 'fill-three-selected',
 }
 
+const parentFillLevelToHoverBG: Record<FillLevel, string> = {
+  0: 'fill-zero-hover',
+  1: 'fill-one-hover',
+  2: 'fill-two-hover',
+  3: 'fill-three-hover',
+}
+
 const SubTabBase = styled.div<{
   size: SubTabSize
   active: boolean
@@ -29,7 +36,7 @@ const SubTabBase = styled.div<{
     : theme.partials.text.buttonMedium),
   tabIndex: 0,
   userSelect: 'none',
-  cursor: 'pointer',
+  cursor: active ? 'default' : 'pointer',
   color: active ? theme.colors.text : theme.colors['text-xlight'],
   backgroundColor: active
     ? theme.colors[parentFillLevelToActiveBG[parentFillLevel]]
@@ -41,11 +48,8 @@ const SubTabBase = styled.div<{
   },
   padding: `${size === 'small' ? theme.spacing.xxsmall : theme.spacing.xsmall}px ${theme.spacing.medium}px`,
   align: 'center',
-  hover: {
-    backgroundColor:
-      parentFillLevel >= 2
-        ? theme.colors['fill-two-hover']
-        : theme.colors['fill-one-hover'],
+  ':hover': {
+    backgroundColor: !active ? theme.colors[parentFillLevelToHoverBG[parentFillLevel]] : undefined,
   },
   transition:
     'background-color 150ms ease, border-color 150ms ease, color 150ms ease',
