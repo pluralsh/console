@@ -10,6 +10,7 @@ import Service from './info/Service'
 import Ingress from './info/Ingress'
 import Deployment from './info/Deployment'
 import StatefulSet from './info/StatefulSet'
+import Metadata from './info/Metadata'
 
 const componentsWithPods: string[] = [
   'deployment',
@@ -60,7 +61,24 @@ export default function ComponentInfo() {
       gap="large"
     >
       {hasPods(componentKind) && <Pods pods={value?.pods} />}
-      {getInfo(componentKind)}
+      <Flex gap="large">
+        <Flex
+          direction="row"
+          basis="50%"
+          grow={1}
+          shrink={0}
+        >
+          {getInfo(componentKind)}
+        </Flex>
+        <Flex
+          direction="row"
+          basis="50%"
+          grow={1}
+          shrink={0}
+        >
+          <Metadata />
+        </Flex>
+      </Flex>
     </Flex>
   )
 }

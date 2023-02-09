@@ -12,7 +12,10 @@ export default function Certificate() {
   const issuer = certificate.spec?.issuerRef
 
   return (
-    <Flex direction="column">
+    <Flex
+      direction="column"
+      grow={1}
+    >
       <H2 marginBottom="medium">Status</H2>
       <Card padding="large">
         <PropWide

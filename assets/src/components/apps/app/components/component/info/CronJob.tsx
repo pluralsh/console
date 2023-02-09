@@ -92,6 +92,7 @@ export default function CronJob() {
   return (
     <Flex
       direction="column"
+      grow={1}
     >
       <H2 marginBottom="medium">Jobs</H2>
       <CronJobJobs

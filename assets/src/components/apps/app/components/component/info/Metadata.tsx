@@ -1,5 +1,5 @@
 import { useOutletContext } from 'react-router-dom'
-import { Flex } from 'honorable'
+import { Flex, H2 } from 'honorable'
 
 import { useMemo } from 'react'
 
@@ -7,11 +7,11 @@ import { LabelsAnnotations } from 'components/cluster/LabelsAnnotations'
 
 import { MetadataGrid, MetadataItem } from 'components/utils/Metadata'
 
-import { ComponentStatus } from '../misc'
+import { ComponentStatus } from '../../misc'
 
 export const componentsWithLogs: string[] = ['deployment', 'statefulset']
 
-export default function ComponentInfo() {
+export default function Metadata() {
   const { component, data } = useOutletContext<any>()
 
   // To avoid mapping between component types and fields of data returned by API
@@ -22,10 +22,8 @@ export default function ComponentInfo() {
   const { metadata } = value
 
   return (
-    <Flex
-      direction="column"
-      gap="large"
-    >
+    <Flex direction="column">
+      <H2 marginBottom="medium">Metadata</H2>
       <MetadataGrid>
         <MetadataItem
           heading="Name"
@@ -54,7 +52,10 @@ export default function ComponentInfo() {
           <ComponentStatus status={component?.status} />
         </MetadataItem>
       </MetadataGrid>
-      <LabelsAnnotations metadata={value?.metadata} />
+      <LabelsAnnotations
+        metadata={value?.metadata}
+        marginTop="large"
+      />
     </Flex>
   )
 }
