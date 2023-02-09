@@ -1,4 +1,4 @@
-import { Div, DivProps, FlexProps } from 'honorable'
+import { Div, FlexProps } from 'honorable'
 import { ReactNode } from 'react'
 import styled, { CSSProperties } from 'styled-components'
 
