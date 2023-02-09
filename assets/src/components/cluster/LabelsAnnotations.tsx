@@ -57,17 +57,25 @@ export function LabelsAnnotations({
   ...props
 }: {
   metadata: MetadataT
-  } & CardProps) {
+} & CardProps) {
   const theme = useTheme()
+
+  const hasLabels = labels && labels?.length > 0
+  const hasAnnotations = annotations && annotations.length > 0
+  const hasData = hasLabels || hasAnnotations
+
+  if (!hasData) {
+    return null
+  }
 
   return (
     <MetadataCard {...props}>
       <Flex
         direction="column"
         gap="xlarge"
-        maxWidth={(CARD_CONTENT_MAX_WIDTH - (theme.spacing.xlarge * 3)) / 2}
+        maxWidth={(CARD_CONTENT_MAX_WIDTH - theme.spacing.xlarge * 3) / 2}
       >
-        {labels && labels?.length > 0 && (
+        {hasLabels && (
           <LabelsAnnotationsRow name="Labels">
             <ChipList
               size="small"
@@ -77,7 +85,7 @@ export function LabelsAnnotations({
             />
           </LabelsAnnotationsRow>
         )}
-        {annotations && annotations.length > 0 && (
+        {hasAnnotations && (
           <LabelsAnnotationsRow name="Annotations">
             <ChipList
               size="small"
