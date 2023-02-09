@@ -178,6 +178,8 @@ export default function Apps() {
   return (
     <ResponsivePageFullWidth
       heading="Apps"
+      // 1528 is magic number for content width when screen is 1640px wide
+      maxContentWidth={1528}
       headingContent={(
         <>
           <Flex grow={1} />

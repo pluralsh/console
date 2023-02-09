@@ -1,7 +1,9 @@
-import { Card, CardProps, Chip } from '@pluralsh/design-system'
+import { CardProps, Chip, ChipList } from '@pluralsh/design-system'
 import { Div, Flex } from 'honorable'
 import { ReactNode } from 'react'
-import type { LabelPair, Metadata as MetadataT } from 'generated/graphql'
+import type { LabelPair, Maybe, Metadata as MetadataT } from 'generated/graphql'
+import { CARD_CONTENT_MAX_WIDTH, MetadataCard } from 'components/utils/Metadata'
+import { useTheme } from 'styled-components'
 
 export const mapify = tags => tags.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {})
 
@@ -34,10 +36,19 @@ export function LabelsAnnotationsRow({
 
 export function LabelsAnnotationsTag({ name, value }: LabelPair) {
   return (
-    <Chip>
+    <Chip size="small">
       {name}
       {value && `: ${value}`}
     </Chip>
+  )
+}
+
+function renderLabel(label: Maybe<LabelPair>) {
+  return (
+    <>
+      {label?.name}
+      {label?.value && `: ${label.value}`}
+    </>
   )
 }
 
@@ -47,32 +58,44 @@ export function LabelsAnnotations({
 }: {
   metadata: MetadataT
 } & CardProps) {
+  const theme = useTheme()
+
+  const hasLabels = labels && labels?.length > 0
+  const hasAnnotations = annotations && annotations.length > 0
+  const hasData = hasLabels || hasAnnotations
+
+  if (!hasData) {
+    return null
+  }
+
   return (
-    <Card
-      padding="xlarge"
-      {...props}
-    >
+    <MetadataCard {...props}>
       <Flex
         direction="column"
         gap="xlarge"
+        maxWidth={(CARD_CONTENT_MAX_WIDTH - theme.spacing.xlarge * 3) / 2}
       >
-        <LabelsAnnotationsRow name="Labels">
-          {labels?.map(label => (
-            <LabelsAnnotationsTag
-              key={label?.name}
-              {...label}
+        {hasLabels && (
+          <LabelsAnnotationsRow name="Labels">
+            <ChipList
+              size="small"
+              limit={8}
+              values={labels}
+              transformValue={renderLabel}
             />
-          ))}
-        </LabelsAnnotationsRow>
-        <LabelsAnnotationsRow name="Annotations">
-          {annotations?.map(annotation => (
-            <LabelsAnnotationsTag
-              key={annotation?.name}
-              {...annotation}
+          </LabelsAnnotationsRow>
+        )}
+        {hasAnnotations && (
+          <LabelsAnnotationsRow name="Annotations">
+            <ChipList
+              size="small"
+              limit={8}
+              values={annotations}
+              transformValue={renderLabel}
             />
-          ))}
-        </LabelsAnnotationsRow>
+          </LabelsAnnotationsRow>
+        )}
       </Flex>
-    </Card>
+    </MetadataCard>
   )
 }

@@ -1,5 +1,4 @@
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
-import { useTheme } from 'styled-components'
 import { ComponentProps } from 'react'
 
 import { ScrollablePage } from './ScrollablePage'
@@ -9,8 +8,6 @@ export function ResponsivePageFullWidth({
   children,
   ...props
 }: ComponentProps<typeof ScrollablePage>) {
-  const theme = useTheme()
-
   return (
     <ResponsiveLayoutPage
       flexDirection="column"
@@ -23,16 +20,7 @@ export function ResponsivePageFullWidth({
     >
       <ScrollablePage
         scrollable={scrollable}
-        {...(scrollable
-          ? {
-            marginRight: 'large',
-            contentStyles: {
-              paddingRight: theme.spacing.large - 6,
-              paddingTop: theme.spacing.medium,
-              paddingBottom: theme.spacing.large,
-            },
-          }
-          : {})}
+        fullWidth
         {...props}
       >
         {children}

@@ -1,25 +1,55 @@
 import { Card, SidecarProps } from '@pluralsh/design-system'
-import { Div, Flex, H2 } from 'honorable'
+import {
+  CardProps,
+  Div,
+  Flex,
+  H2,
+} from 'honorable'
 import { Children, forwardRef } from 'react'
 import styled from 'styled-components'
 import { makeGrid } from 'utils/makeGrid'
 
 const MAX_COLS = 4
 
-export const MetadataGridCard = styled(Card)<{$maxCols:number}>(({ theme, maxCols = MAX_COLS }) => ({
-  ...makeGrid({ maxCols, minColWidth: 186, gap: theme.spacing.xlarge }),
-  padding: theme.spacing.large,
+export const CARD_CONTENT_MAX_WIDTH = 1526
+
+const MetadataGridGrid = styled.div<{ maxCols: number }>(({ theme, maxCols = MAX_COLS }) => ({
+  ...makeGrid({
+    maxCols,
+    minColWidth: 186,
+    gap: theme.spacing.xlarge,
+  }),
 }))
+
+export function MetadataCard({ children, ...props }: CardProps) {
+  return (
+    <Card
+      display="flex"
+      justifyContent="center"
+      {...props}
+    >
+      {/* 1526 is magic number which is the card's width when screen is 1940px wide */}
+      <Div
+        maxWidth={CARD_CONTENT_MAX_WIDTH}
+        width="100%"
+        padding="xlarge"
+      >{children}
+      </Div>
+    </Card>
+  )
+}
 
 export function MetadataGrid(props) {
   const numChildren = Children.count(props.children)
-  const maxCols = (numChildren < MAX_COLS) ? numChildren : MAX_COLS
+  const maxCols = numChildren < MAX_COLS ? numChildren : MAX_COLS
 
   return (
-    <MetadataGridCard
-      maxCols={maxCols}
-      {...props}
-    />
+    <MetadataCard>
+      <MetadataGridGrid
+        maxCols={maxCols}
+        {...props}
+      />
+    </MetadataCard>
   )
 }
 
