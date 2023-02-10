@@ -24,7 +24,7 @@ metadata:
 {{ include "console.labels" . | indent 4 }}
 spec:
   type: sh
-  target: statefulset/console
+  target: statefulset/plural-console
   shConfig:
     command: /opt/app/bin/console
     args: [remote_console]
@@ -37,7 +37,7 @@ metadata:
 {{ include "console.labels" . | indent 4 }}
 spec:
   type: sh
-  target: statefulset/console
+  target: statefulset/plural-console
   shConfig:
     command: ""
     args: []
