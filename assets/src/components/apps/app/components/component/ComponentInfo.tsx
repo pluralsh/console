@@ -66,7 +66,6 @@ export default function ComponentInfo() {
           direction="row"
           basis="50%"
           grow={1}
-          shrink={0}
         >
           {getInfo(componentKind)}
         </Flex>
@@ -74,7 +73,6 @@ export default function ComponentInfo() {
           direction="row"
           basis="50%"
           grow={1}
-          shrink={0}
         >
           <Metadata />
         </Flex>

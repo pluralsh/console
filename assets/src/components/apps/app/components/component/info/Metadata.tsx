@@ -22,7 +22,10 @@ export default function Metadata() {
   const { metadata } = value
 
   return (
-    <Flex direction="column">
+    <Flex
+      direction="column"
+      grow={1}
+    >
       <H2 marginBottom="medium">Metadata</H2>
       <MetadataGrid>
         <MetadataItem
