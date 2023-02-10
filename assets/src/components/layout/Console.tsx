@@ -39,22 +39,20 @@ export default function Console() {
                 {isProduction && (
                   <WithApplicationUpdate>
                     {({ reloadApplication }) => (
-                      <>test
-                        <Toast
-                          severity="info"
-                          marginBottom="medium"
-                          marginRight="xxxxlarge"
+                      <Toast
+                        severity="info"
+                        marginBottom="medium"
+                        marginRight="xxxxlarge"
+                      >
+                        <Span marginRight="small">Time for a new update!</Span>
+                        <A
+                          onClick={() => reloadApplication()}
+                          style={{ textDecoration: 'none' }}
+                          color="action-link-inline"
                         >
-                          <Span marginRight="small">Time for a new update!</Span>
-                          <A
-                            onClick={() => reloadApplication()}
-                            style={{ textDecoration: 'none' }}
-                            color="action-link-inline"
-                          >
-                            Update now
-                          </A>
-                        </Toast>
-                      </>
+                          Update now
+                        </A>
+                      </Toast>
                     )}
                   </WithApplicationUpdate>
                 )}
