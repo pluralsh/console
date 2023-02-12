@@ -30,8 +30,6 @@ export function ViewLogsButton({ metadata, kind }: any) {
       startIcon={<LogsIcon />}
       as={Link}
       to={url}
-      target="_blank"
-      rel="noopener noreferrer"
     >
       View logs
     </Button>
