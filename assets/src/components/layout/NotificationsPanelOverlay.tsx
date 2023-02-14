@@ -3,15 +3,21 @@ import {
   SetStateAction,
   useMemo,
   useRef,
+  useState,
 } from 'react'
-import { Flex, P, useOutsideClick } from 'honorable'
-import { CloseIcon } from '@pluralsh/design-system'
+import {
+  Checkbox,
+  Flex,
+  P,
+  useOutsideClick,
+} from 'honorable'
+import { CloseIcon, IconFrame } from '@pluralsh/design-system'
 import { animated, useTransition } from 'react-spring'
 
 import styled from 'styled-components'
 
 import { useContentOverlay } from './Overlay'
-import { NotificationsPanel } from './WithNotifications'
+import { NotificationsPanel } from './NotificationsPanel'
 
 const PANEL_WIDTH = 480
 const PANEL_HEIGHT = 464
@@ -67,6 +73,7 @@ export function NotificationsPanelOverlay({
   setIsOpen: Dispatch<SetStateAction<boolean>>
 }) {
   const notificationsPanelRef = useRef<any>()
+  const [all, setAll] = useState<boolean>(false)
 
   useContentOverlay(isOpen)
 
@@ -91,16 +98,24 @@ export function NotificationsPanelOverlay({
           <P subtitle2>Notifications</P>
           <Flex
             align="center"
+            gap="small"
             justify="center"
             padding="xsmall"
-            cursor="pointer"
-            _hover={{
-              backgroundColor: 'fill-one-hover',
-            }}
-            borderRadius="medium"
-            onClick={() => setIsOpen(false)}
           >
-            <CloseIcon />
+            <Checkbox
+              checked={all}
+              onChange={() => setAll(!all)}
+              small
+            >
+              Show all notifications
+            </Checkbox>
+            <IconFrame
+              clickable
+              icon={<CloseIcon />}
+              tooltip
+              textValue="Close notification panel"
+              onClick={() => setIsOpen(false)}
+            />
           </Flex>
         </Flex>
         <Flex
@@ -108,7 +123,20 @@ export function NotificationsPanelOverlay({
           direction="column"
           overflowY="auto"
         >
-          <NotificationsPanel closePanel={() => setIsOpen(false)} />
+          <NotificationsPanel
+            closePanel={() => setIsOpen(false)}
+            all={all}
+          />
+        </Flex>
+        <Flex
+          flexGrow={1}
+          direction="column"
+          overflowY="auto"
+        >
+          <NotificationsPanel
+            closePanel={() => setIsOpen(false)}
+            all={all}
+          />
         </Flex>
       </Animated>
     </Wrapper>

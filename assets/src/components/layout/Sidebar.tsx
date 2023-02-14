@@ -137,7 +137,6 @@ export default function Sidebar() {
   const [isNotificationsPanelOpen, setIsNotificationsPanelOpen]
     = useState(false)
   const sidebarWidth = 65 // 64 + 1px border
-  const [all, setAll] = useState<boolean>(false)
   const { me, configuration } = useContext<any>(LoginContext)
   const navigate = useNavigate()
   const { pathname } = useLocation()
