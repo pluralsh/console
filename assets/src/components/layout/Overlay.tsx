@@ -57,26 +57,17 @@ type OverlayContextT = {
 
 const OverlayContext = createContext<OverlayContextT | null>(null)
 
-function activeOverlaysReducer(activeOverlays, { id, show }: { id: string; show: boolean }) {
-  let next
-
+const activeOverlaysReducer = produce((activeOverlays: Record<string, boolean>,
+  { id, show }: { id: string; show: boolean }) => {
   if (show) {
-    next = produce(activeOverlays, draft => {
-      draft[id] = true
-
-      return draft
-    })
+    activeOverlays[id] = true
   }
   else {
-    next = produce(activeOverlays, draft => {
-      delete draft[id]
-
-      return draft
-    })
+    delete activeOverlays[id]
   }
 
-  return next
-}
+  return activeOverlays
+})
 
 export function OverlayContextProvider(props: Omit<ComponentProps<typeof OverlayContext.Provider>, 'value'>) {
   const [activeOverlays, dispatch] = useReducer(activeOverlaysReducer, {})
@@ -101,8 +92,6 @@ export function OverlayContextProvider(props: Omit<ComponentProps<typeof Overlay
 export const useContentOverlay = (show: boolean) => {
   const id = useId()
   const overlayCtx = useContext(OverlayContext)
-
-  console.log('show', show, id)
 
   if (!overlayCtx) {
     throw Error('useContentOverlay() must be used inside an <OverlayContextProvider />')
