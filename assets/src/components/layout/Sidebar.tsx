@@ -136,7 +136,7 @@ export default function Sidebar() {
   const [isMenuOpen, setIsMenuOpened] = useState<boolean>(false)
   const [isNotificationsPanelOpen, setIsNotificationsPanelOpen]
     = useState(false)
-  const sidebarWidth = 65 // 64 + 1px border
+  const sidebarWidth = 64
   const { me, configuration } = useContext<any>(LoginContext)
   const navigate = useNavigate()
   const { pathname } = useLocation()
@@ -328,13 +328,11 @@ export default function Sidebar() {
       {/* ---
         NOTIFICATIONS PANEL
       --- */}
-      {isNotificationsPanelOpen && (
-        <NotificationsPanelOverlay
-          leftOffset={sidebarWidth}
-          isOpen={isNotificationsPanelOpen}
-          setIsOpen={setIsNotificationsPanelOpen}
-        />
-      )}
+      <NotificationsPanelOverlay
+        leftOffset={sidebarWidth}
+        isOpen={isNotificationsPanelOpen}
+        setIsOpen={setIsNotificationsPanelOpen}
+      />
     </>
   )
 }

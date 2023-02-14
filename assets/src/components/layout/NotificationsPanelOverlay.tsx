@@ -20,7 +20,6 @@ import { useContentOverlay } from './Overlay'
 import { NotificationsPanel } from './NotificationsPanel'
 
 const PANEL_WIDTH = 480
-const PANEL_HEIGHT = 464
 
 const getTransitionProps = (isOpen: boolean) => ({
   from: { opacity: 0, translateX: `${-PANEL_WIDTH}px` },
@@ -40,14 +39,11 @@ const getTransitionProps = (isOpen: boolean) => ({
     },
 })
 
-const Wrapper = styled(animated.div)<{$leftOffset:number}>(({ $leftOffset, theme }) => ({
+const Wrapper = styled(animated.div)<{ $leftOffset: number }>(({ $leftOffset, theme }) => ({
   position: 'fixed',
   display: 'flex',
   alignItems: 'flex-end',
-  top: 0,
-  bottom: 0,
-  left: $leftOffset,
-  right: 0,
+  inset: `${56}px 0 0 ${$leftOffset}px`,
   zIndex: theme.zIndexes.selectPopover - 1,
   overflow: 'hidden',
 }))
@@ -57,7 +53,7 @@ const Animated = styled(animated.div)(({ theme }) => ({
   flexDirection: 'column',
   backgroundColor: theme.colors['fill-one'],
   width: PANEL_WIDTH,
-  height: PANEL_HEIGHT,
+  height: `calc(100% - ${theme.spacing.medium}px)`,
   borderTop: theme.borders.default,
   borderRight: theme.borders.default,
   borderTopRightRadius: 6,
@@ -75,20 +71,22 @@ export function NotificationsPanelOverlay({
   const notificationsPanelRef = useRef<any>()
   const [all, setAll] = useState<boolean>(false)
 
+  console.log('isOpen', isOpen)
   useContentOverlay(isOpen)
 
   useOutsideClick(notificationsPanelRef, () => {
     setIsOpen(false)
   })
 
-  const transitionProps = useMemo(() => getTransitionProps(isOpen),
-    [isOpen])
+  const transitionProps = useMemo(() => getTransitionProps(isOpen), [isOpen])
   const transitions = useTransition(isOpen ? [true] : [], transitionProps)
 
   return transitions(styles => (
-
     <Wrapper $leftOffset={leftOffset}>
-      <Animated style={styles}>
+      <Animated
+        style={styles}
+        ref={notificationsPanelRef}
+      >
         <Flex
           align="center"
           justify="space-between"
@@ -117,16 +115,6 @@ export function NotificationsPanelOverlay({
               onClick={() => setIsOpen(false)}
             />
           </Flex>
-        </Flex>
-        <Flex
-          flexGrow={1}
-          direction="column"
-          overflowY="auto"
-        >
-          <NotificationsPanel
-            closePanel={() => setIsOpen(false)}
-            all={all}
-          />
         </Flex>
         <Flex
           flexGrow={1}

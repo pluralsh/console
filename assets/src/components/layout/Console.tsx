@@ -51,7 +51,9 @@ export default function Console() {
                         marginBottom="medium"
                         marginRight="xxxxlarge"
                       >
-                        <Span marginRight="small">Time for a new update!</Span>
+                        <Span marginRight="small">
+                          Time for a new update!
+                        </Span>
                         <A
                           onClick={() => reloadApplication()}
                           style={{ textDecoration: 'none' }}
