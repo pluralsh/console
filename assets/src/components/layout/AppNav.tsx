@@ -184,6 +184,7 @@ export function StatusPanel({ statuses, open, onClose }) {
         overflow="auto"
         position="relative"
         height="100%"
+        pointerEvents="auto"
       >
         <StatusPanelTopContainer>
           <StatusPanelHeaderWrap>
@@ -237,6 +238,7 @@ export function StatusPanel({ statuses, open, onClose }) {
         bottom: 0,
         left: 0,
         zIndex: theme.zIndexes.modal - 1,
+        pointerEvents: 'none',
         ...styles,
       }}
     >
