@@ -15,7 +15,7 @@ export class LoginPage extends BasePage {
 
       this._oidcLoginButton.click()
 
-      this._allowCookies.click()
+      // this._allowCookies.click()
 
       this._emailInput.type(email)
       this._continueButton.should(Condition.BeVisible).and(Condition.BeEnabled).click()
