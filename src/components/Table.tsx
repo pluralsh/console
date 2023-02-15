@@ -24,8 +24,8 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { rankItem } from '@tanstack/match-sorter-utils'
-import type { VirtualItem } from 'react-virtual'
-import { useVirtual } from 'react-virtual'
+import type { VirtualItem } from '@tanstack/react-virtual'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import styled from 'styled-components'
 
 import Button from './Button'
@@ -57,7 +57,7 @@ export type TableProps =
       scrollTopMargin?: number
       virtualizeRows?: boolean
       reactVirtualOptions?: Omit<
-        Parameters<typeof useVirtual>,
+        Parameters<typeof useVirtualizer>,
         'parentRef' | 'size'
       >
       reactTableOptions?: Omit<
@@ -131,7 +131,7 @@ const Tbody = styled(TbodyUnstyled)(({ theme }) => ({
   backgroundColor: theme.colors['fill-one'],
 }))
 
-const Tr = styled.tr<{clickable?: boolean, lighter?: boolean}>(({ theme, clickable = false, lighter = false }) => ({
+const Tr = styled.tr<{ clickable?: boolean; lighter?: boolean }>(({ theme, clickable = false, lighter = false }) => ({
   display: 'contents',
   backgroundColor: lighter
     ? theme.colors['fill-one']
@@ -210,11 +210,7 @@ const Td = styled.td<{
   stickyColumn: boolean
   truncateColumn: boolean
 }>(({
-  theme,
-  firstRow,
-  loose,
-  stickyColumn,
-  truncateColumn = false,
+  theme, firstRow, loose, stickyColumn, truncateColumn = false,
 }) => ({
   display: 'flex',
   flexDirection: 'column',
@@ -388,7 +384,8 @@ function TableRef({
   reactTableOptions,
   onRowClick,
   ...props
-}: TableProps, forwardRef: Ref<any>) {
+}: TableProps,
+forwardRef: Ref<any>) {
   const tableContainerRef = useRef<HTMLDivElement>()
   const [hover, setHover] = useState(false)
   const [scrollTop, setScrollTop] = useState(0)
@@ -418,14 +415,29 @@ function TableRef({
   })
 
   const { rows: tableRows } = table.getRowModel()
-  const rowVirtualizer = useVirtual({
-    parentRef: tableContainerRef,
-    size: tableRows.length,
-    overscan: 40,
+  const rowVirtualizer = useVirtualizer({
+    count: tableRows.length,
+    overscan: 1,
+    getScrollElement: () => tableContainerRef.current,
+    estimateSize: () => 52,
+    measureElement: el => {
+      // Since <td>s are rendered with `display: contents`, we need to calculate
+      // row height from contents using Range
+      if (el?.getBoundingClientRect().height <= 0 && el?.hasChildNodes()) {
+        const range = document.createRange()
 
+        range.setStart(el, 0)
+        range.setEnd(el, el.childNodes.length)
+
+        return range.getBoundingClientRect().height
+      }
+
+      return el.getBoundingClientRect().height
+    },
     ...virtualizerOptions,
   })
-  const { virtualItems: virtualRows, totalSize } = rowVirtualizer
+  const virtualRows = rowVirtualizer.getVirtualItems()
+  const virtualHeight = rowVirtualizer.getTotalSize()
 
   const { paddingTop, paddingBottom } = useMemo(() => ({
     paddingTop:
@@ -434,10 +446,10 @@ function TableRef({
           : 0,
     paddingBottom:
         virtualizeRows && virtualRows.length > 0
-          ? totalSize - (virtualRows?.[virtualRows.length - 1]?.end || 0)
+          ? virtualHeight - (virtualRows?.[virtualRows.length - 1]?.end || 0)
           : 0,
   }),
-  [totalSize, virtualRows, virtualizeRows])
+  [virtualHeight, virtualRows, virtualizeRows])
 
   const headerGroups = useMemo(() => table.getHeaderGroups(), [table])
 
@@ -525,6 +537,11 @@ function TableRef({
                     onClick={e => onRowClick?.(e, row)}
                     lighter={i % 2 === 0}
                     clickable={!!onRowClick}
+                    // data-index is required for virtual scrolling to work
+                    data-index={row.index}
+                    {...(virtualizeRows
+                      ? { ref: rowVirtualizer.measureElement }
+                      : {})}
                   >
                     {row.getVisibleCells().map(cell => (
                       <Td
