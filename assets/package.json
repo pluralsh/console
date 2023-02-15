@@ -140,12 +140,14 @@
     "eslint-plugin-react-hooks": "4.6.0",
     "jsdom": "21.1.0",
     "stylelint": "14.16.1",
+    "ts-loader": "9.4.2",
     "typescript": "4.9.5",
     "vite": "4.1.1",
     "vite-plugin-pwa": "0.14.3",
     "vite-plugin-rewrite-all": "1.0.1",
     "vite-tsconfig-paths": "4.0.5",
     "vitest": "0.28.4",
-    "wait-on": "6.0.1"
+    "wait-on": "6.0.1",
+    "webpack": "5.75.0"
   }
 }

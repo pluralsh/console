@@ -29,14 +29,13 @@ ref) => (
     <Input
       ref={ref}
       width="100%"
-      name={label}
       type={type}
       value={value || ''}
       onChange={onChange && (({ target: { value } }) => onChange(value))}
       placeholder={placeholder}
       error={error}
       disabled={disabled}
-      {...inputProps}
+      inputProps={{ name: label, ...inputProps }}
     />
   </FormField>
 ))

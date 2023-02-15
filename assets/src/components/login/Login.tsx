@@ -287,6 +287,7 @@ export default function Login() {
               value={form.email}
               onChange={email => setForm({ ...form, email })}
               placeholder="Enter email address"
+              inputProps={{ id: 'input-email' }}
             />
             <LabelledInput
               label="Password"
@@ -296,6 +297,7 @@ export default function Login() {
               value={form.password}
               onChange={password => setForm({ ...form, password })}
               placeholder="Enter password"
+              inputProps={{ id: 'input-password' }}
             />
           </Flex>
           <Button

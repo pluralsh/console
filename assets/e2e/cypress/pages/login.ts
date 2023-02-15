@@ -14,13 +14,15 @@ export class LoginPage extends BasePage {
       GQLInterceptor.wait(Queries.LoginInfo)
 
       this._oidcLoginButton.click()
+
+      this._allowCookies.should(Condition.BeVisible).and(Condition.BeEnabled).click()
+
       this._emailInput.type(email)
       this._continueButton.should(Condition.BeVisible).and(Condition.BeEnabled).click()
 
       GQLInterceptor.wait(Queries.LoginMethod)
-
       this._passwordInput.type(password)
-      this._continueButton.should(Condition.BeVisible).and(Condition.BeEnabled).click()
+      this._loginButton.should(Condition.BeVisible).and(Condition.BeEnabled).click()
 
       GQLInterceptor.wait([Mutations.Login, Queries.OIDCConsent])
 
@@ -35,18 +37,26 @@ export class LoginPage extends BasePage {
   }
 
   private static get _emailInput(): Cypress.Chainable {
-    return this._get('[name=\'Email address\']')
+    return this._get('input[placeholder*="email" i]')
   }
 
   private static get _passwordInput(): Cypress.Chainable {
-    return this._get('[name=\'Password\']')
+    return this._get('input[type*="password" i]')
+  }
+
+  private static get _loginButton(): Cypress.Chainable {
+    return this._get('button[type="submit"]')
   }
 
   private static get _continueButton(): Cypress.Chainable {
-    return this._contains('button', 'Continue')
+    return this._get('button[type="submit"]')
   }
 
   private static get _allowButton(): Cypress.Chainable {
-    return this._contains('div', 'Allow')
+    return this._contains('button', 'Allow')
+  }
+
+  private static get _allowCookies(): Cypress.Chainable {
+    return this._contains('button', 'Allow all')
   }
 }
