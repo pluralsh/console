@@ -36,7 +36,7 @@ const searchOptions = {
 
 export default function CreateBuild() {
   const { applications } = useContext<any>(InstallationContext)
-  const [open, setOpen] = useState<boolean>(true)
+  const [open, setOpen] = useState<boolean>(false)
   const [inputValue, setInputValue] = useState('')
   const [selectedApp, setSelectedApp] = useState<Key>()
   const [selectedType, setSelectedType] = useState<Key>()
