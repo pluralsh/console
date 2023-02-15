@@ -54,6 +54,7 @@ export default function CreateBuild() {
   }, [applications, inputValue])
 
   const reset = useCallback(() => {
+    setInputValue('')
     setSelectedApp(undefined)
     setSelectedType(undefined)
     setOpen(false)
