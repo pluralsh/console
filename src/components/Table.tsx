@@ -141,9 +141,7 @@ const Tr = styled.tr<{ clickable?: boolean; lighter?: boolean }>(({ theme, click
     cursor: 'pointer',
 
     '&:hover': {
-      backgroundColor: lighter
-        ? theme.colors['fill-one-hover']
-        : theme.colors['fill-one-selected'],
+      backgroundColor: theme.colors['fill-one-selected'],
     },
   }),
 }))
