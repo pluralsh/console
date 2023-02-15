@@ -20,6 +20,10 @@ Cypress.on('uncaught:exception', () => false)
 before(() => {
   cy.clearCookies()
   cy.clearLocalStorage()
+  // Cookie to preset cookie consent to Allow all
+  cy.setCookie('CookieConsent',
+    '{stamp:%27Qkw6PZWUvBtscFb1mDYm2+J3xCsJ6030PuT8uahuzcUjr3FkzMix3Q==%27%2Cnecessary:true%2Cpreferences:true%2Cstatistics:true%2Cmarketing:true%2Cmethod:%27explicit%27%2Cver:2%2Cutc:1676483264501%2Cregion:%27us-06%27}',
+    { domain: 'app.plural.sh' })
 })
 beforeEach(() => {
   GQLInterceptor.setup()
