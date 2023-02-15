@@ -1,6 +1,7 @@
 import {
   Banner,
   Button,
+  ComboBox,
   FormField,
   ListBoxItem,
   Modal,
@@ -20,6 +21,7 @@ import {
 } from 'react'
 import { ApolloError, useMutation } from '@apollo/client'
 import { appendConnection, updateCache } from 'utils/graphql'
+import Fuse from 'fuse.js'
 
 const BUILD_TYPES = [
   { key: BuildTypes.DEPLOY, value: 'Deployment' },
@@ -27,15 +29,30 @@ const BUILD_TYPES = [
   { key: BuildTypes.BOUNCE, value: 'Bounce' },
 ]
 
+const searchOptions = {
+  keys: ['name'],
+  threshold: 0.25,
+}
+
 export default function CreateBuild() {
   const { applications } = useContext<any>(InstallationContext)
-  const [open, setOpen] = useState<boolean>(false)
+  const [open, setOpen] = useState<boolean>(true)
+  const [inputValue, setInputValue] = useState('')
   const [selectedApp, setSelectedApp] = useState<Key>()
   const [selectedType, setSelectedType] = useState<Key>()
   const [success, setSuccess] = useState<string>()
   const [error, setError] = useState<ApolloError>()
 
-  const currentApp = useMemo(() => applications.find(app => app.name === selectedApp), [applications, selectedApp])
+  const currentApp = useMemo(() => applications.find(app => app.name === inputValue), [applications, inputValue])
+
+  const filteredApps = useMemo(() => {
+    const fuse = new Fuse(applications, searchOptions)
+
+    return inputValue
+      ? fuse.search(inputValue).map(({ item }) => item)
+      : applications
+  }, [applications, inputValue])
+
   const reset = useCallback(() => {
     setSelectedApp(undefined)
     setSelectedType(undefined)
@@ -62,6 +79,18 @@ export default function CreateBuild() {
   const deploy = useCallback(() => {
     mutation({ variables: { attributes: { type: selectedType, repository: selectedApp, message: 'Deployed from console' } } })
   }, [mutation, selectedApp, selectedType])
+
+  const onSelectionChange = key => {
+    if (key) {
+      setSelectedApp(key)
+      setInputValue(key)
+    }
+  }
+
+  const onInputChange = value => {
+    setSelectedApp(undefined)
+    setInputValue(value)
+  }
 
   return (
     <>
@@ -100,20 +129,22 @@ export default function CreateBuild() {
             gap="small"
           >
             <FormField label="App">
-              <Select
+              <ComboBox
                 aria-label="app"
-                label="Choose an app"
-                leftContent={(!!currentApp && hasIcons(currentApp)) ? (
+                inputValue={inputValue}
+                onSelectionChange={onSelectionChange}
+                onInputChange={onInputChange}
+                inputProps={{ placeholder: 'Choose an app' }}
+                startIcon={(!!currentApp && hasIcons(currentApp)) ? (
                   <img
                     src={getIcon(currentApp)}
                     height={16}
                   />
                 ) : undefined}
                 selectedKey={selectedApp}
-                onSelectionChange={setSelectedApp}
                 maxHeight={200}
               >
-                {applications.map(app => (
+                {filteredApps.map(app => (
                   <ListBoxItem
                     key={app.name}
                     label={app.name}
@@ -126,7 +157,7 @@ export default function CreateBuild() {
                     ) : undefined}
                   />
                 ))}
-              </Select>
+              </ComboBox>
             </FormField>
             <FormField label="Type of build">
               <Select
