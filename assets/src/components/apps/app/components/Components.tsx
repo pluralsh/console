@@ -29,15 +29,15 @@ import Component from './Component'
 
 import { ComponentIcon } from './misc'
 
-const FooterSelectAllInner = styled(ListBoxFooter)(({ theme }) => ({
+const FilterFooterInner = styled(ListBoxFooter)(({ theme }) => ({
   color: theme.colors['text-primary-accent'],
 }))
 
-function FooterSelectAll({ ...props }) {
+function FilterFooter({ allSelected = true, ...props }) {
   const theme = useTheme()
 
   return (
-    <FooterSelectAllInner
+    <FilterFooterInner
       leftContent={(
         <ComponentsIcon
           size={16}
@@ -46,8 +46,8 @@ function FooterSelectAll({ ...props }) {
       )}
       {...props}
     >
-      Select all
-    </FooterSelectAllInner>
+      {allSelected ? 'Clear all' : 'Select all'}
+    </FilterFooterInner>
   )
 }
 
@@ -103,6 +103,7 @@ export default function Components() {
     currentApp?.status?.components.filter(comp => selectedKinds.has(comp.kind)).sort(orderBy)
   ), [currentApp, selectedKinds])
   const sortedSelectedKinds = Array.from(selectedKinds).sort()
+  const allSelected = sortedSelectedKinds.length >= componentKinds.length
 
   return (
     <ScrollablePage
@@ -113,7 +114,7 @@ export default function Components() {
           label="All components"
           triggerButton={(
             <FilterTrigger>
-              {sortedSelectedKinds.length >= componentKinds.length
+              {allSelected
                 ? 'All components'
                 : sortedSelectedKinds.length === 0
                   ? 'Select types'
@@ -127,8 +128,9 @@ export default function Components() {
           }}
           placement="right"
           dropdownFooterFixed={(
-            <FooterSelectAll
-              onClick={() => setSelectedKinds(new Set(componentKinds))}
+            <FilterFooter
+              allSelected={allSelected}
+              onClick={() => setSelectedKinds(new Set(allSelected ? undefined : componentKinds))}
             />
           )}
           maxHeight={300}
