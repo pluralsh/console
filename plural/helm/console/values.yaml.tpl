@@ -55,7 +55,9 @@ secrets:
   admin_password: {{ dedupe . "console.secrets.admin_password" (randAlphaNum 20) }}
 {{ if .Values.console_dns  }}
 {{ $gitUrl := dig "console" "secrets" "git_url" "default" .}}
-{{ if or (eq $gitUrl "default") (not $gitUrl) }}
+{{ if .Values.repo_url }}
+  git_url: {{ .Values.repo_url }}
+{{ else if or (eq $gitUrl "default") (not $gitUrl) }}
   git_url: {{ repoUrl }}
 {{ else }}
   git_url: {{ $gitUrl }}
