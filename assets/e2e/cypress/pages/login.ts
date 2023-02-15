@@ -9,6 +9,13 @@ import { GQLInterceptor } from '@intercept/graphql'
 export class LoginPage extends BasePage {
   static login(email: string = Config.EMAIL, password: string = Config.PASSWORD): void {
     cy.session([email, password], () => {
+      // Cookie meaning user has selected "Allow all"
+      cy.setCookie('CookieConsent',
+        '{stamp:%27Qkw6PZWUvBtscFb1mDYm2+J3xCsJ6030PuT8uahuzcUjr3FkzMix3Q==%27%2Cnecessary:true%2Cpreferences:true%2Cstatistics:true%2Cmarketing:true%2Cmethod:%27explicit%27%2Cver:2%2Cutc:1676483264501%2Cregion:%27us-06%27}',
+        { domain: 'app.plural.sh' })
+      cy.setCookie('CookieConsent',
+        '{stamp:%27Qkw6PZWUvBtscFb1mDYm2+J3xCsJ6030PuT8uahuzcUjr3FkzMix3Q==%27%2Cnecessary:true%2Cpreferences:true%2Cstatistics:true%2Cmarketing:true%2Cmethod:%27explicit%27%2Cver:2%2Cutc:1676483264501%2Cregion:%27us-06%27}',)
+
       RootPage.visit()
 
       GQLInterceptor.wait(Queries.LoginInfo)
