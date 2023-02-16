@@ -8,8 +8,9 @@ import { A, Div, Flex } from 'honorable'
 
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { ListItem } from 'components/apps/misc'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
+import { ListItem } from '../misc'
 
 export default function Dashboards() {
   const navigate = useNavigate()

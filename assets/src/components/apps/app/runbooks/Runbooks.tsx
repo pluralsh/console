@@ -5,10 +5,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { POLL_INTERVAL } from 'components/runbooks/constants'
 import { RUNBOOKS_Q } from 'components/runbooks/queries'
 import { useQuery } from '@apollo/client'
-import { ListItem } from 'components/apps/misc'
 import { A, Div, Flex } from 'honorable'
-
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
+import { ListItem } from '../misc'
 
 import { getBorderColor } from './misc'
 import RunbookStatus from './runbook/RunbookStatus'
