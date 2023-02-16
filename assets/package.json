@@ -145,7 +145,7 @@
     "vite-plugin-pwa": "0.14.4",
     "vite-plugin-rewrite-all": "1.0.1",
     "vite-tsconfig-paths": "4.0.5",
-    "vitest": "0.28.4",
+    "vitest": "0.28.5",
     "wait-on": "6.0.1"
   }
 }
