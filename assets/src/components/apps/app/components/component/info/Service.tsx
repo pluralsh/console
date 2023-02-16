@@ -1,11 +1,6 @@
 import { Card } from '@pluralsh/design-system'
 import PropWide from 'components/utils/PropWide'
-import {
-  Flex,
-  H2,
-  H3,
-  Span,
-} from 'honorable'
+import { Flex, H2, H3 } from 'honorable'
 import isEmpty from 'lodash/isEmpty'
 import { useOutletContext } from 'react-router-dom'
 
@@ -76,8 +71,8 @@ export default function Service() {
                 fontWeight={600}
                 title={name || '-'}
               >
-                <Span>{protocol}</Span>
-                <Span>{port} {'->'} {targetPort}</Span>
+                <span>{protocol}</span>
+                <span>{port} {'->'} {targetPort}</span>
               </PropWide>
             ))}
           </>

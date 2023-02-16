@@ -31,7 +31,6 @@ const hueToBorderColor: Record<Hue | 'none', string> = {
 const ListItemInner = styled(LiBare)<{
   $last?: boolean
   $hue?: string
-  $first?: boolean
 }>(({ theme, $last = false, $hue = 'default' }) => ({
   padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
   borderBottomStyle: $last ? 'none' : 'solid',
@@ -40,18 +39,16 @@ const ListItemInner = styled(LiBare)<{
 }))
 
 type ListItemProps = any & {
-  first: boolean
   last: boolean
   children: ReactNode
 }
 
-const ListItem = forwardRef<HTMLLIElement, ListItemProps>(({ first, last, ...props }, ref) => {
+const ListItem = forwardRef<HTMLLIElement, ListItemProps>(({ last, ...props }, ref) => {
   const { hue } = useContext(ListContext)
 
   return (
     <ListItemInner
       ref={ref}
-      $first={first}
       $last={last}
       $hue={hue}
       {...props}

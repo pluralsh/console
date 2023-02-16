@@ -111,11 +111,11 @@ function PendingFailedEmptyState({ filter }) {
       description={
         (
           <>
-            <Div>
+            <div>
               There are no{' '}
               {FILTERS.find(f => f.key === filter)?.label.toLowerCase()} apps.
-            </Div>
-            <Div>
+            </div>
+            <div>
               You may be ready to become an&nbsp;
               <A
                 inline
@@ -126,7 +126,7 @@ function PendingFailedEmptyState({ filter }) {
                 open-sourcerer
               </A>
               .
-            </Div>
+            </div>
           </>
         ) as any // Workaround as JSX elements are not allowed here.
       }

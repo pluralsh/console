@@ -28,15 +28,15 @@ const columns = (namespace, refetch) => [
       const status = props.getValue()
 
       return (
-        <Div>
-          <Div>{status?.startTime}</Div>
+        <div>
+          <div>{status?.startTime}</div>
           <Div
             caption
             color="text-xlight"
           >
             {status.completionTime}
           </Div>
-        </Div>
+        </div>
       )
     },
     header: 'Start / Completion time',

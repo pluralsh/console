@@ -133,7 +133,7 @@ export default function Runbook() {
     <ScrollablePage
       scrollable={selectedTab !== 'executions'}
       heading={(
-        <Div>
+        <div>
           <Select
             aria-label="dashboards"
             selectedKey={selectedKey}
@@ -154,7 +154,7 @@ export default function Runbook() {
               />
             ))}
           </Select>
-        </Div>
+        </div>
       )}
       headingContent={(
         <TabList
@@ -187,7 +187,7 @@ export default function Runbook() {
             direction="column"
             gap="xxlarge"
           >
-            <Div>
+            <div>
               <H3 subtitle1>Scaling</H3>
               <Flex
                 direction="row"
@@ -211,9 +211,9 @@ export default function Runbook() {
                 root={runbook.spec.display}
                 data={runbook.data}
               />
-            </Div>
+            </div>
             {runbook?.status?.alerts?.length > 0 && (
-              <Div>
+              <div>
                 <H3
                   subtitle1
                   marginBottom="medium"
@@ -221,7 +221,7 @@ export default function Runbook() {
                   Alerts
                 </H3>
                 <RunbookAlerts alerts={runbook.status.alerts} />
-              </Div>
+              </div>
             )}
           </Flex>
         </ActionContext.Provider>

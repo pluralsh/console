@@ -32,12 +32,7 @@ import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayout
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 
-import {
-  Div,
-  Flex,
-  H2,
-  P,
-} from 'honorable'
+import { Flex, H2, P } from 'honorable'
 
 import { PropsContainer } from 'components/utils/PropsContainer'
 import Prop from 'components/utils/Prop'
@@ -146,7 +141,7 @@ export default function Build() {
               size="small"
             />
           )}
-          <Div>
+          <div>
             <H2
               fontSize="20px"
               fontWeight="500"
@@ -160,7 +155,7 @@ export default function Build() {
             >
               {build.message}
             </P>
-          </Div>
+          </div>
         </Flex>
         <TabList
           stateRef={tabStateRef}

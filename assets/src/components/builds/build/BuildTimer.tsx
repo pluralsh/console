@@ -1,4 +1,4 @@
-import { Flex, Span } from 'honorable'
+import { Flex } from 'honorable'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 
@@ -28,7 +28,7 @@ export function BuildTimer({ insertedAt, completedAt, status }) {
         status={status}
         size="small"
       />
-      <Span>in</Span>
+      <span>in</span>
       <Timer
         insertedAt={insertedAt}
         completedAt={completedAt}

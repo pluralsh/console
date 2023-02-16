@@ -16,7 +16,7 @@ import {
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import { DASHBOARDS_Q, DASHBOARD_Q } from 'components/graphql/dashboards'
-import { Div, Flex } from 'honorable'
+import { Flex } from 'honorable'
 
 import { DURATIONS } from 'utils/time'
 
@@ -88,7 +88,7 @@ export default function Dashboard() {
 
   return (
     <ScrollablePage heading={(
-      <Div>
+      <div>
         <Select
           aria-label="dashboards"
           selectedKey={selectedKey}
@@ -109,7 +109,7 @@ export default function Dashboard() {
             />
           ))}
         </Select>
-      </Div>
+      </div>
     )}
     >
       <Flex

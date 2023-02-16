@@ -4,7 +4,6 @@ import {
   Button,
   Div,
   P,
-  Span,
 } from 'honorable'
 import { Code, ContentCard } from '@pluralsh/design-system'
 import { localized } from 'helpers/hostname'
@@ -41,7 +40,7 @@ export default function SecurityAccess() {
         )}
         {token && <Code showLineNumbers={false}>{jwt}</Code>}
         <P color="text-light">
-          <Span>2. Have the recipent enter the code into&nbsp;</Span>
+          <span>2. Have the recipent enter the code into&nbsp;</span>
           <A
             inline
             href={url}
@@ -49,7 +48,7 @@ export default function SecurityAccess() {
           >
             {url}
           </A>
-          <Span>.</Span>
+          <span>.</span>
         </P>
       </Box>
     </ContentCard>

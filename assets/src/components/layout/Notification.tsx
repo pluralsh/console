@@ -2,7 +2,7 @@ import { AppIcon, Button, CollapseIcon } from '@pluralsh/design-system'
 import { getIcon, hasIcons } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
 import { Collapsible } from 'grommet'
-import { Div, Flex, P } from 'honorable'
+import { Flex, P } from 'honorable'
 import moment from 'moment'
 import { useContext, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -40,7 +40,7 @@ export default function Notification({ notification, closePanel }: any) {
             size="xxsmall"
           />
         )}
-        <Div>
+        <div>
           <P
             body2
             fontWeight={600}
@@ -54,7 +54,7 @@ export default function Notification({ notification, closePanel }: any) {
           >
             {moment(seenAt).format('MMM D, h:mm')}
           </P>
-        </Div>
+        </div>
         <Flex grow={1} />
         <NotificationSeverity severity={severity} />
         <CollapseIcon

@@ -1,9 +1,4 @@
-import {
-  Div,
-  Flex,
-  P,
-  Switch,
-} from 'honorable'
+import { Flex, P, Switch } from 'honorable'
 import { useCallback } from 'react'
 
 export default function RolePermissionToggle({
@@ -35,7 +30,7 @@ export default function RolePermissionToggle({
       justify="space-between"
       paddingVertical="small"
     >
-      <Div>
+      <div>
         <P
           body2
           fontWeight={600}
@@ -49,7 +44,7 @@ export default function RolePermissionToggle({
         >
           {description}
         </P>
-      </Div>
+      </div>
       <Switch
         checked={!!attributes.permissions.find(perm => perm === permission)}
         onChange={({ target: { checked } }) => toggle(checked)}

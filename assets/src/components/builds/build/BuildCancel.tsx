@@ -1,7 +1,6 @@
 import { Button, CloseIcon, Modal } from '@pluralsh/design-system'
 import { CANCEL_BUILD } from 'components/graphql/builds'
 import { BuildStatus } from 'components/types'
-import { P } from 'honorable'
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'
 
@@ -52,7 +51,7 @@ export default function BuildCancel({ build }) {
             </>
           )}
         >
-          <P>Are you sure you want to cancel this build?</P>
+          <p>Are you sure you want to cancel this build?</p>
         </Modal>
       )}
     </>

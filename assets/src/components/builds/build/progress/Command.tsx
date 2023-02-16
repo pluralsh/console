@@ -1,5 +1,5 @@
 import { ArrowRightIcon } from '@pluralsh/design-system'
-import { Div, Flex, Span } from 'honorable'
+import { Div, Flex } from 'honorable'
 import { useEffect, useRef } from 'react'
 
 import { Timer } from '../BuildTimer'
@@ -28,7 +28,7 @@ export default function Command({ command, follow }) {
           align="center"
         >
           <ArrowRightIcon size={12} />
-          <Span> {command.command}</Span>
+          <span> {command.command}</span>
           <CommandExitStatus exitCode={command.exitCode} />
         </Flex>
         <Timer

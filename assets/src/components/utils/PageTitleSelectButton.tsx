@@ -10,7 +10,7 @@ export const PageTitleSelectButton = styled(forwardRef<any, {title: string, labe
     outline="none"
     {...props}
   >
-    <Div>
+    <div>
       <Div
         color="text-xlight"
         overline
@@ -30,7 +30,7 @@ export const PageTitleSelectButton = styled(forwardRef<any, {title: string, labe
         </Div>
         <DropdownArrowIcon className="dropdownIcon" />
       </Flex>
-    </Div>
+    </div>
   </Div>
 )))<{ isOpen?: boolean }>(({ isOpen = false }) => ({
   '.dropdownIcon': {

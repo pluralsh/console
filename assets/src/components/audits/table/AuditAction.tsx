@@ -1,7 +1,7 @@
 import { Flex, Span } from 'honorable'
 
 export function AuditAction({ audit: { action, type } }: any) {
-  if (!action) return (<Span>n/a</Span>)
+  if (!action) return (<span>n/a</span>)
 
   return (
     <Flex direction="column">

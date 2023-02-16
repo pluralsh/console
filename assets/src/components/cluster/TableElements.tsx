@@ -7,7 +7,7 @@ import {
 import { SortingFn } from '@tanstack/table-core'
 import { UnstyledLink } from 'components/utils/Link'
 import { Maybe } from 'generated/graphql'
-import { Div, Flex } from 'honorable'
+import { Flex } from 'honorable'
 import { CSSProperties, ComponentProps, ReactNode } from 'react'
 import styled, { useTheme } from 'styled-components'
 import {
@@ -146,7 +146,7 @@ export function LabelWithIcon({
           url={icon}
         />
       )}
-      {label && <Div>{label}</Div>}
+      {label && <div>{label}</div>}
     </Flex>
   )
 }
