@@ -9,13 +9,13 @@ import { useQuery } from '@apollo/client'
 import { Div, Flex, useDebounce } from 'honorable'
 import {
   AppsIcon,
+  ComboBox,
   EmptyState,
   Input,
   ListBoxFooter,
   ListBoxItem,
   LoopingLogo,
   SearchIcon,
-  Select,
 } from '@pluralsh/design-system'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ListBoxFooterProps } from '@pluralsh/design-system/dist/components/ListBoxItem'
@@ -129,7 +129,7 @@ export default function AllPods() {
   const theme = useTheme()
   const namespace = useParams().namespace || null
   const navigate = useNavigate()
-  const [selectIsOpen, setSelectIsOpen] = useState(false)
+  const [inputValue, setInputValue] = useState<string>(namespace || '')
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 300)
 
@@ -182,22 +182,27 @@ export default function AllPods() {
       headingContent={
         !namespaces || namespaces.length === 0 ? null : (
           <Div width={320}>
-            <Select
-              label="Filter by namespace"
-              placement="right"
-              width={320}
+            <ComboBox
+              inputProps={{ placeholder: 'Filter by namespace' }}
+              inputValue={inputValue}
+              onInputChange={setInputValue}
               selectedKey={namespace}
-              isOpen={selectIsOpen}
-              onOpenChange={setSelectIsOpen}
-              onSelectionChange={toNamespace => navigate(`/pods/${toNamespace}`)}
+              onSelectionChange={ns => {
+                setInputValue(`${ns}`)
+                navigate(`/pods/${ns}`)
+              }}
+              // Close combobox panel once footer is clicked.
+              // It does not work with isOpen and onOpenChange at the moment.
               dropdownFooterFixed={(
                 <NamespaceListFooter
                   onClick={() => {
+                    setInputValue('')
                     navigate('/pods')
-                    setSelectIsOpen(false)
                   }}
                 />
               )}
+              aria-label="namespace"
+              width={320}
             >
               {namespaces?.map((namespace, i) => (
                 <ListBoxItem
@@ -206,7 +211,7 @@ export default function AllPods() {
                   label={`${namespace?.metadata?.name}`}
                 />
               )) || []}
-            </Select>
+            </ComboBox>
           </Div>
         )
       }
