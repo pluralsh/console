@@ -1,5 +1,16 @@
-import { Flex } from 'honorable'
 import { Readiness } from 'utils/status'
+import styled from 'styled-components'
+
+export const ListItemBorder = styled.div<{color?: string, width?: number, radius?: number}>(({
+  theme, color, radius = 4, width = 3,
+}) => ({
+  backgroundColor: color ? theme.colors[color] : undefined,
+  borderBottomLeftRadius: radius,
+  borderTopLeftRadius: radius,
+  display: 'flex',
+  height: 'inherit',
+  width,
+}))
 
 export const hasIcons = ({ spec: { descriptor } }) => descriptor?.icons?.length > 0
 
@@ -19,16 +30,4 @@ export function appState({ status: { conditions } }) {
   const readiness = error.status === 'True' ? Readiness.Failed : (ready.status === 'True' ? Readiness.Ready : Readiness.InProgress)
 
   return { ready, error, readiness }
-}
-
-export function ListItemBorder({ color = 'none', width = 3, radius = 4 }: { color: string, width?: number, radius?: number }) {
-  return (
-    <Flex
-      backgroundColor={color}
-      borderTopLeftRadius={radius}
-      borderBottomLeftRadius={radius}
-      height="inherit"
-      width={width}
-    />
-  )
 }
