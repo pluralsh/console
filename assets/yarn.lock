@@ -3538,17 +3538,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/stylelint-config@npm:1.1.1":
-  version: 1.1.1
-  resolution: "@pluralsh/stylelint-config@npm:1.1.1"
+"@pluralsh/stylelint-config@npm:1.1.3":
+  version: 1.1.3
+  resolution: "@pluralsh/stylelint-config@npm:1.1.3"
   dependencies:
-    stylelint: 14.15.0
+    stylelint: 14.16.1
     stylelint-config-standard: 29.0.0
     stylelint-no-unsupported-browser-features: 6.0.1
     stylelint-order: 5.0.0
   peerDependencies:
     stylelint: ">= 14.9.1"
-  checksum: bf34ecefc150d7e6b32e399566b6c9f61904ae354053e6291a54bce9d5f7ecd168c3847aab5270c767a6c3aa55baec14ee75270a2ba29ab7d52f6e15d50e9cb4
+  checksum: 88334e760b9c2ce6bca2bad285162b6abea910074c4ca1d11980992c60062c398846c0e9d8c3ea89bc17afee372ef4480c9d3808d1f2d71dec8ac30d49192332
   languageName: node
   linkType: hard
 
@@ -7483,7 +7483,7 @@ __metadata:
     "@nivo/tooltip": 0.80.0
     "@pluralsh/design-system": 1.315.1
     "@pluralsh/eslint-config-typescript": 2.5.40
-    "@pluralsh/stylelint-config": 1.1.1
+    "@pluralsh/stylelint-config": 1.1.3
     "@tanstack/react-table": 8.7.9
     "@testing-library/jest-dom": 4.2.4
     "@testing-library/react": 9.3.3
@@ -13223,7 +13223,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss-selector-parser@npm:^6.0.10, postcss-selector-parser@npm:^6.0.11":
+"postcss-selector-parser@npm:^6.0.11":
   version: 6.0.11
   resolution: "postcss-selector-parser@npm:6.0.11"
   dependencies:
@@ -15314,54 +15314,6 @@ __metadata:
   peerDependencies:
     stylelint: ^14.0.0
   checksum: fa3ace3cc65486b9f94165603bd04983636fda5ac959cd29bf87847a95b32f366b16faf612bd49e3b9f96073f8fe28a22a5c5727cc08c8f9d7327c89084b3f30
-  languageName: node
-  linkType: hard
-
-"stylelint@npm:14.15.0":
-  version: 14.15.0
-  resolution: "stylelint@npm:14.15.0"
-  dependencies:
-    "@csstools/selector-specificity": ^2.0.2
-    balanced-match: ^2.0.0
-    colord: ^2.9.3
-    cosmiconfig: ^7.1.0
-    css-functions-list: ^3.1.0
-    debug: ^4.3.4
-    fast-glob: ^3.2.12
-    fastest-levenshtein: ^1.0.16
-    file-entry-cache: ^6.0.1
-    global-modules: ^2.0.0
-    globby: ^11.1.0
-    globjoin: ^0.1.4
-    html-tags: ^3.2.0
-    ignore: ^5.2.0
-    import-lazy: ^4.0.0
-    imurmurhash: ^0.1.4
-    is-plain-object: ^5.0.0
-    known-css-properties: ^0.26.0
-    mathml-tag-names: ^2.1.3
-    meow: ^9.0.0
-    micromatch: ^4.0.5
-    normalize-path: ^3.0.0
-    picocolors: ^1.0.0
-    postcss: ^8.4.19
-    postcss-media-query-parser: ^0.2.3
-    postcss-resolve-nested-selector: ^0.1.1
-    postcss-safe-parser: ^6.0.0
-    postcss-selector-parser: ^6.0.10
-    postcss-value-parser: ^4.2.0
-    resolve-from: ^5.0.0
-    string-width: ^4.2.3
-    strip-ansi: ^6.0.1
-    style-search: ^0.1.0
-    supports-hyperlinks: ^2.3.0
-    svg-tags: ^1.0.0
-    table: ^6.8.1
-    v8-compile-cache: ^2.3.0
-    write-file-atomic: ^4.0.2
-  bin:
-    stylelint: bin/stylelint.js
-  checksum: a3b4593a35a2303987305ca5147ea31e92a47e1994d393be8d1a07a6dc8720b9eee1fed62aafaca618cd8f06e0b3ca601af4fa6618967f1f359ea36ade4c2550
   languageName: node
   linkType: hard
 
