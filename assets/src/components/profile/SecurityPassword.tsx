@@ -86,7 +86,7 @@ export default function SecurityPassword() {
         >
           Password
         </Div>
-        <Div>
+        <div>
           {!pass && (
             <Button
               alignSelf="start"
@@ -97,7 +97,7 @@ export default function SecurityPassword() {
             </Button>
           )}
           {pass && <UpdatePassword cancel={() => setPass(false)} />}
-        </Div>
+        </div>
       </Box>
     </ContentCard>
   )

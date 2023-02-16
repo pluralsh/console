@@ -76,11 +76,11 @@ function SliceTooltip({ point: { serieColor, serieId, data } }) {
         height={12}
         backgroundColor={serieColor}
       />
-      <Div>
+      <div>
         {serieId}: <Span style={{ fontWeight: 700 }}>{data.yFormatted}</Span>
         <br />
         {data.xFormatted}
-      </Div>
+      </div>
     </Card>
   )
 }

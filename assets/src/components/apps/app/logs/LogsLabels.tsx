@@ -1,5 +1,5 @@
 import { Chip, Tooltip } from '@pluralsh/design-system'
-import { Div, Flex, Span } from 'honorable'
+import { Flex, Span } from 'honorable'
 import { truncate } from 'lodash'
 
 const MAX_LENGTH = 20
@@ -11,7 +11,7 @@ function LogsLabelChip({ name, value, removeLabel }) {
       closeButton
       onClick={() => removeLabel(name)}
     >
-      <Span>{name}:</Span>
+      <span>{name}:</span>
       <Span fontWeight={400}>{truncate(value, { length: MAX_LENGTH })}</Span>
     </Chip>
   )
@@ -32,13 +32,13 @@ export default function LogsLabels({ labels, removeLabel }) {
         <>
           {value.length > MAX_LENGTH && (
             <Tooltip label={value}>
-              <Div>
+              <div>
                 <LogsLabelChip
                   name={name}
                   value={value}
                   removeLabel={removeLabel}
                 />
-              </Div>
+              </div>
             </Tooltip>
           )}
           {value.length <= MAX_LENGTH && (

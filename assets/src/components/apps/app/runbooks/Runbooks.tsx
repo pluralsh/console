@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { POLL_INTERVAL } from 'components/runbooks/constants'
 import { RUNBOOKS_Q } from 'components/runbooks/queries'
 import { useQuery } from '@apollo/client'
-import { A, Div, Flex } from 'honorable'
+import { A, Flex } from 'honorable'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { ListItem } from '../misc'
@@ -68,7 +68,7 @@ export default function Runbooks() {
             icon={<RunBookIcon size={64} />}
             message="No runbooks available"
             description={(
-              <Div>
+              <div>
                 If you're interested in adding runbooks to this application,&nbsp;
                 <A
                   inline
@@ -79,7 +79,7 @@ export default function Runbooks() {
                   visit our docs
                 </A>
                 &nbsp;for more details.
-              </Div> as any // Workaround as JSX elements are not allowed here.
+              </div> as any // Workaround as JSX elements are not allowed here.
             )}
           />
         </Flex>

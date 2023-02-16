@@ -15,7 +15,7 @@ export function LabelsAnnotationsRow({
   children: ReactNode
 }) {
   return (
-    <Div>
+    <div>
       <Div
         body1
         bold
@@ -30,7 +30,7 @@ export function LabelsAnnotationsRow({
       >
         {children}
       </Flex>
-    </Div>
+    </div>
   )
 }
 

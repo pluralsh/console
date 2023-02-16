@@ -1,4 +1,4 @@
-import { Button, Div, Span } from 'honorable'
+import { Button } from 'honorable'
 import {
   Codeline,
   MailIcon,
@@ -34,14 +34,14 @@ export default function UserInvite() {
 
   return (
     <>
-      <Div>
+      <div>
         <Button
           secondary
           onClick={() => setOpen(true)}
         >
           Invite user
         </Button>
-      </Div>
+      </div>
       <Modal
         header="Invite users"
         open={open}
@@ -82,7 +82,7 @@ export default function UserInvite() {
           />
         )}
         {invite?.secureId && <Codeline marginTop="small">{inviteLink(invite)}</Codeline>}
-        {invite && !invite.secureId && <Span>An email was sent to {email} to accept the invite</Span>}
+        {invite && !invite.secureId && <span>An email was sent to {email} to accept the invite</span>}
       </Modal>
     </>
   )

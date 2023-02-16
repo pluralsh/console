@@ -1,6 +1,5 @@
 import { Button, CraneIcon, Modal } from '@pluralsh/design-system'
 import { RESTART_BUILD } from 'components/graphql/builds'
-import { P } from 'honorable'
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
@@ -50,7 +49,7 @@ export default function BuildRestart({ build: { id } }) {
             </>
           )}
         >
-          <P>Are you sure you want to restart this build?</P>
+          <p>Are you sure you want to restart this build?</p>
         </Modal>
       )}
     </>

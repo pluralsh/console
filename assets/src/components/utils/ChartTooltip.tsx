@@ -63,9 +63,7 @@ export function ChartTooltip({
           backgroundColor={color}
           aria-hidden
         />
-        <Div>
-          {label}: <b>{value}</b>
-        </Div>
+        <div>{label}: <b>{value}</b></div>
       </ChartTooltipWrap>
     </animated.div>
   )

@@ -53,7 +53,7 @@ export function ContainerStatuses({ statuses = [] }: {statuses: ContainerStatus[
       {statuses.map(({ name, readiness }) => (
         <Tooltip label={(
           <>
-            <Span>{name}:&nbsp;</Span>
+            <span>{name}:&nbsp;</span>
             <Span
               color={readinessToTooltipColor[readiness]}
               fontWeight={600}

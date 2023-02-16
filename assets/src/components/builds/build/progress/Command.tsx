@@ -28,7 +28,7 @@ export default function Command({ command, follow }) {
           align="center"
         >
           <ArrowRightIcon size={12} />
-          <Span> {command.command}</Span>
+          <span> {command.command}</span>
           <CommandExitStatus exitCode={command.exitCode} />
         </Flex>
         <Timer

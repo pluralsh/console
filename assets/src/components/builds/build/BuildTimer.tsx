@@ -28,7 +28,7 @@ export function BuildTimer({ insertedAt, completedAt, status }) {
         status={status}
         size="small"
       />
-      <Span>in</Span>
+      <span>in</span>
       <Timer
         insertedAt={insertedAt}
         completedAt={completedAt}

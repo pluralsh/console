@@ -4,7 +4,7 @@ import { useContext, useEffect } from 'react'
 import { useQuery } from '@apollo/client'
 import { DASHBOARDS_Q } from 'components/graphql/dashboards'
 
-import { A, Div, Flex } from 'honorable'
+import { A, Flex } from 'honorable'
 
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -50,7 +50,7 @@ export default function Dashboards() {
             icon={<DashboardIcon size={64} />}
             message="No dashboards available"
             description={(
-              <Div>
+              <div>
                 If you're interested in adding your dashboards to this
                 application,&nbsp;
                 <A
@@ -62,7 +62,7 @@ export default function Dashboards() {
                   visit our docs
                 </A>
                 &nbsp;for more details.
-              </Div> as any // Workaround as JSX elements are not allowed here.
+              </div> as any // Workaround as JSX elements are not allowed here.
             )}
           />
         </Flex>

@@ -71,7 +71,7 @@ function DeleteNode({ name, refetch }) {
         tooltip
       />
       {confirm && (
-        <Div>
+        <div>
           <Confirm
             close={() => setConfirm(false)}
             destructive
@@ -82,7 +82,7 @@ function DeleteNode({ name, refetch }) {
             title="Delete node"
             text={`The node "${name}" will be replaced within its autoscaling group.`}
           />
-        </Div>
+        </div>
       )}
     </Div>
   )

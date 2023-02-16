@@ -7,7 +7,6 @@ import {
   Toast,
 } from '@pluralsh/design-system'
 import { Modal as HonorableModal } from 'honorable/dist/components/Modal/Modal'
-import { P } from 'honorable'
 
 import { Installer } from './Installer'
 
@@ -72,7 +71,7 @@ export function InstallerModal() {
           padding: 0,
         }}
       >
-        <P>Are you sure you want to cancel installation? You will lose all progress.</P>
+        <p>Are you sure you want to cancel installation? You will lose all progress.</p>
       </Modal>
 
       {visible
