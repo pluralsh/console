@@ -17,6 +17,7 @@ import {
   LoopingLogo,
   SearchIcon,
 } from '@pluralsh/design-system'
+import Fuse from 'fuse.js'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ListBoxFooterProps } from '@pluralsh/design-system/dist/components/ListBoxItem'
 import styled, { useTheme } from 'styled-components'
@@ -31,7 +32,7 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 
 import { isEqual } from 'utils/kubernetes'
 
-import { uniqBy } from 'lodash'
+import { isEmpty, uniqBy } from 'lodash'
 
 import { PODS_Q, PODS_SUB } from '../queries'
 import { SHORT_POLL_INTERVAL } from '../constants'
@@ -78,6 +79,11 @@ const NamespaceListFooter = forwardRef<
     </ListBoxFooterPlusInner>
   )
 })
+
+const searchOptions = {
+  keys: ['metadata.name'],
+  threshold: 0.25,
+}
 
 export default function AllPods() {
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
@@ -151,6 +157,13 @@ export default function AllPods() {
     )
   }, [data?.namespaces, data?.cachedPods])
 
+  //  Filter out namespaces that don't match search criteria
+  const filteredNamespaces = useMemo(() => {
+    const fuse = new Fuse(namespaces, searchOptions)
+
+    return inputValue ? fuse.search(inputValue).map(({ item }) => item) : namespaces
+  }, [namespaces, inputValue])
+
   const pods = useMemo(() => {
     if (!data?.cachedPods) {
       return undefined
@@ -180,7 +193,7 @@ export default function AllPods() {
       heading="Pods"
       scrollable={false}
       headingContent={
-        !namespaces || namespaces.length === 0 ? null : (
+        isEmpty(namespaces) ? null : (
           <Div width={320}>
             <ComboBox
               inputProps={{ placeholder: 'Filter by namespace' }}
@@ -204,7 +217,7 @@ export default function AllPods() {
               aria-label="namespace"
               width={320}
             >
-              {namespaces?.map((namespace, i) => (
+              {filteredNamespaces?.map((namespace, i) => (
                 <ListBoxItem
                   key={`${namespace?.metadata?.name || i}`}
                   textValue={`${namespace?.metadata?.name}`}
