@@ -1,4 +1,4 @@
-import { Flex, Span } from 'honorable'
+import { Flex } from 'honorable'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 

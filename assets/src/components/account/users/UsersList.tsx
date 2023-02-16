@@ -1,16 +1,7 @@
 import { useQuery } from '@apollo/client'
-
 import { Div } from 'honorable'
-
-import {
-  EmptyState,
-  ListBoxItem,
-  LoopingLogo,
-  SearchIcon,
-} from '@pluralsh/design-system'
-
+import { EmptyState, LoopingLogo, SearchIcon } from '@pluralsh/design-system'
 import { useContext, useEffect, useState } from 'react'
-
 import { StandardScroller } from 'components/utils/SmoothScroller'
 import { isEmpty } from 'lodash'
 import { LoginContext } from 'components/contexts'

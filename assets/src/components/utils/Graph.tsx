@@ -11,7 +11,7 @@ import { Box, Text, ThemeContext } from 'grommet'
 import { semanticColors } from '@pluralsh/design-system/dist/theme/colors'
 import { Card } from '@pluralsh/design-system'
 import { useColorMap } from 'utils/color'
-import { Div, Flex, Span } from 'honorable'
+import { Flex, Span } from 'honorable'
 import { DEFAULT_THEME } from 'theme'
 
 export function dateFormat(date) {

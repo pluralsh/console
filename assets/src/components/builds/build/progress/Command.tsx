@@ -1,5 +1,5 @@
 import { ArrowRightIcon } from '@pluralsh/design-system'
-import { Div, Flex, Span } from 'honorable'
+import { Div, Flex } from 'honorable'
 import { useEffect, useRef } from 'react'
 
 import { Timer } from '../BuildTimer'
