@@ -7569,7 +7569,7 @@ __metadata:
     typescript: 4.9.5
     uuid: 9.0.0
     vite: 4.1.1
-    vite-plugin-pwa: 0.14.3
+    vite-plugin-pwa: 0.14.4
     vite-plugin-rewrite-all: 1.0.1
     vite-tsconfig-paths: 4.0.5
     vitest: 0.28.4
@@ -16461,9 +16461,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-plugin-pwa@npm:0.14.3":
-  version: 0.14.3
-  resolution: "vite-plugin-pwa@npm:0.14.3"
+"vite-plugin-pwa@npm:0.14.4":
+  version: 0.14.4
+  resolution: "vite-plugin-pwa@npm:0.14.4"
   dependencies:
     "@rollup/plugin-replace": ^5.0.1
     debug: ^4.3.4
@@ -16476,7 +16476,7 @@ __metadata:
     vite: ^3.1.0 || ^4.0.0
     workbox-build: ^6.5.4
     workbox-window: ^6.5.4
-  checksum: 2fc1db72f0ba37f4454f5a2888c355c8f802e009da88fa88d803118f33a7dbbae4d4b6ef5b4be02cf97c70ba2f185258eb4b4094192d34349d7e690e0aa91e82
+  checksum: 498278d023788b59f6c6eb2b3f7c4fab7b9dd72e3c4f4b8df7c3c5c56a487ffe17e29832abd35c2700ab31a2525f04f028e44ceebe6b830ad346888e752ed7e6
   languageName: node
   linkType: hard
 
