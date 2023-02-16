@@ -9,14 +9,15 @@ import { useQuery } from '@apollo/client'
 import { Div, Flex, useDebounce } from 'honorable'
 import {
   AppsIcon,
+  ComboBox,
   EmptyState,
   Input,
   ListBoxFooter,
   ListBoxItem,
   LoopingLogo,
   SearchIcon,
-  Select,
 } from '@pluralsh/design-system'
+import Fuse from 'fuse.js'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ListBoxFooterProps } from '@pluralsh/design-system/dist/components/ListBoxItem'
 import styled, { useTheme } from 'styled-components'
@@ -31,7 +32,7 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 
 import { isEqual } from 'utils/kubernetes'
 
-import { uniqBy } from 'lodash'
+import { isEmpty, uniqBy } from 'lodash'
 
 import { PODS_Q, PODS_SUB } from '../queries'
 import { SHORT_POLL_INTERVAL } from '../constants'
@@ -78,6 +79,11 @@ const NamespaceListFooter = forwardRef<
     </ListBoxFooterPlusInner>
   )
 })
+
+const searchOptions = {
+  keys: ['metadata.name'],
+  threshold: 0.25,
+}
 
 export default function AllPods() {
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
@@ -129,7 +135,7 @@ export default function AllPods() {
   const theme = useTheme()
   const namespace = useParams().namespace || null
   const navigate = useNavigate()
-  const [selectIsOpen, setSelectIsOpen] = useState(false)
+  const [inputValue, setInputValue] = useState<string>(namespace || '')
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 300)
 
@@ -150,6 +156,13 @@ export default function AllPods() {
       data?.namespaces?.filter(ns => ns?.metadata?.name && namespaceSet.has(ns.metadata.name)) || []
     )
   }, [data?.namespaces, data?.cachedPods])
+
+  //  Filter out namespaces that don't match search criteria
+  const filteredNamespaces = useMemo(() => {
+    const fuse = new Fuse(namespaces, searchOptions)
+
+    return inputValue ? fuse.search(inputValue).map(({ item }) => item) : namespaces
+  }, [namespaces, inputValue])
 
   const pods = useMemo(() => {
     if (!data?.cachedPods) {
@@ -180,33 +193,38 @@ export default function AllPods() {
       heading="Pods"
       scrollable={false}
       headingContent={
-        !namespaces || namespaces.length === 0 ? null : (
+        isEmpty(namespaces) ? null : (
           <Div width={320}>
-            <Select
-              label="Filter by namespace"
-              placement="right"
-              width={320}
+            <ComboBox
+              inputProps={{ placeholder: 'Filter by namespace' }}
+              inputValue={inputValue}
+              onInputChange={setInputValue}
               selectedKey={namespace}
-              isOpen={selectIsOpen}
-              onOpenChange={setSelectIsOpen}
-              onSelectionChange={toNamespace => navigate(`/pods/${toNamespace}`)}
+              onSelectionChange={ns => {
+                setInputValue(`${ns}`)
+                navigate(`/pods/${ns}`)
+              }}
+              // Close combobox panel once footer is clicked.
+              // It does not work with isOpen and onOpenChange at the moment.
               dropdownFooterFixed={(
                 <NamespaceListFooter
                   onClick={() => {
+                    setInputValue('')
                     navigate('/pods')
-                    setSelectIsOpen(false)
                   }}
                 />
               )}
+              aria-label="namespace"
+              width={320}
             >
-              {namespaces?.map((namespace, i) => (
+              {filteredNamespaces?.map((namespace, i) => (
                 <ListBoxItem
                   key={`${namespace?.metadata?.name || i}`}
                   textValue={`${namespace?.metadata?.name}`}
                   label={`${namespace?.metadata?.name}`}
                 />
               )) || []}
-            </Select>
+            </ComboBox>
           </Div>
         )
       }

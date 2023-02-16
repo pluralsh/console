@@ -134,8 +134,6 @@ function fudgedUser(name) {
 
 function intercomAttributes({ email, name }) {
   if (email === 'demo-user@plural.sh') {
-    console.log('here')
-
     return fudgedUser(name)
   }
 
