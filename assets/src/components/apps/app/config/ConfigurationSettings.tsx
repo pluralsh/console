@@ -67,8 +67,6 @@ export function ConfigurationSettings({ overlays, application: { name, configura
 
   if (!folders[folder]) return null
 
-  console.log(folders)
-
   return (
     <Flex
       direction="column"
