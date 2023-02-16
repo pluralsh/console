@@ -7,6 +7,7 @@ defmodule KubernetesScaffolds do
   alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector, ObjectMeta}
   alias Kazan.Models.Apimachinery
   alias Kube
+  alias Console.Schema
 
   def stateful_set(namespace, name) do
     %Apps.StatefulSet{
@@ -239,6 +240,26 @@ defmodule KubernetesScaffolds do
       metadata: %{name: name},
       spec: %Core.NamespaceSpec{finalizers: ["finalizer"]},
       status: %Core.NamespaceStatus{phase: "Created"}
+    }
+  end
+
+  def wireguard_peer(name) do
+    %Kube.WireguardPeer{
+      metadata: %{name: name, namespage: "wireguard", labels: %{}},
+      spec: %Kube.WireguardPeer.Spec{wireguard_ref: "wireguard"},
+      status: %Kube.WireguardPeer.Status{ready: true, config_ref: %Core.SecretKeySelector{name: "n", key: "k"}}
+    }
+  end
+
+  def wireguard_peer(name, %Schema.User{email: email}) do
+    peer = wireguard_peer(name)
+    put_in(peer.metadata.labels["vpn.plural.sh/email"], email)
+  end
+
+  def wireguard_server() do
+    %Kube.WireguardServer{
+      metadata: %{name: "wireguard", namespage: "wireguard"},
+      status: %Kube.WireguardServer.Status{ready: true}
     }
   end
 end

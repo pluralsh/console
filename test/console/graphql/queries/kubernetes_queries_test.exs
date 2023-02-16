@@ -1,6 +1,7 @@
 defmodule Console.GraphQl.KubernetesQueriesTest do
   use Console.DataCase, async: true
   use Mimic
+  alias Kazan.Apis.Core.V1, as: CoreV1
   import KubernetesScaffolds
 
   describe "statefulSet" do
@@ -378,6 +379,92 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       assert namespace["metadata"]["name"] == "test"
       assert namespace["status"]["phase"] == "Created"
       assert namespace["spec"]["finalizers"] == ["finalizer"]
+    end
+  end
+
+  describe "wireguardPeers" do
+    test "an admin can list all peers" do
+      admin = insert(:user, roles: %{admin: true})
+      peers = [wireguard_peer("first", insert(:user)), wireguard_peer("second", insert(:user))]
+      expect(Kazan, :run, fn _ -> {:ok, %{items: peers}} end)
+
+      {:ok, %{data: %{"wireguardPeers" => found}}} = run_query("""
+        query {
+          wireguardPeers {
+            metadata { namespace name }
+            user { id }
+          }
+        }
+      """, %{}, %{current_user: admin})
+
+      assert Enum.map(found, & &1["metadata"]["name"]) == Enum.map(peers, & &1.metadata.name)
+      assert Enum.all?(found, & &1["user"]["id"])
+    end
+
+    test "non admins cannot list" do
+      user = insert(:user)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query {
+          wireguardPeers {
+            metadata { namespace name }
+            user { id }
+          }
+        }
+      """, %{}, %{current_user: user})
+    end
+  end
+
+  describe "myWireguardPeers" do
+    test "you can list your own peers" do
+      user = insert(:user)
+      peers = [wireguard_peer("first", insert(:user)), wireguard_peer("second", insert(:user))]
+      expect(Kazan, :run, fn _ -> {:ok, %{items: peers}} end)
+
+      {:ok, %{data: %{"myWireguardPeers" => found}}} = run_query("""
+        query {
+          myWireguardPeers {
+            metadata { namespace name }
+            user { id }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert Enum.map(found, & &1["metadata"]["name"]) == Enum.map(peers, & &1.metadata.name)
+      assert Enum.all?(found, & &1["user"]["id"])
+    end
+  end
+
+  describe "wireguardPeer" do
+    test "it can fetch a wireguard peer for a user" do
+      user = insert(:user)
+      peer = wireguard_peer("test", user)
+      expect(Kube.Client, :get_wireguard_peer, fn _, "test" -> {:ok, peer} end)
+      expect(Kazan, :run, fn _ -> {:ok, %CoreV1.Secret{data: %{"k" => Base.encode64("data")}}} end)
+
+      {:ok, %{data: %{"wireguardPeer" => fetch}}} = run_query("""
+        query Peer($name: String!) {
+          wireguardPeer(name: $name) {
+            config
+          }
+        }
+      """, %{"name" => "test"}, %{current_user: user})
+
+      assert fetch["config"] == "data"
+    end
+
+    test "it cannot fetch if you are not the owner" do
+      user = insert(:user)
+      peer = wireguard_peer("test", insert(:user))
+      expect(Kube.Client, :get_wireguard_peer, fn _, "test" -> {:ok, peer} end)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Peer($name: String!) {
+          wireguardPeer(name: $name) {
+            config
+          }
+        }
+      """, %{"name" => "test"}, %{current_user: user})
     end
   end
 end

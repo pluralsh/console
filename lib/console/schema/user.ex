@@ -27,6 +27,10 @@ defmodule Console.Schema.User do
     timestamps()
   end
 
+  def with_emails(query \\ __MODULE__, emails) do
+    from(u in query, where: u.email in ^emails)
+  end
+
   def roles(%__MODULE__{role_bindings: roles, group_role_bindings: group_roles}) when is_list(roles) and is_list(group_roles),
     do: Enum.map(roles ++ group_roles, & &1.role) |> Enum.uniq_by(& &1.id)
   def roles(_), do: []

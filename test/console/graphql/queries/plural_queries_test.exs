@@ -45,6 +45,34 @@ defmodule Console.GraphQl.PluralQueriesTest do
     end
   end
 
+  describe "repository" do
+    test "it can fetch a repository by name" do
+      body = Jason.encode!(%{
+        query: Queries.repository_query(),
+        variables: %{name: "repo"}
+      })
+
+      repository = %{id: "id", name: "repo", docs: [%{path: "readme.md", content: "bogus"}]}
+      expect(HTTPoison, :post, fn _, ^body, _ ->
+        {:ok, %{body: Jason.encode!(%{data: %{repository: repository}})}}
+      end)
+
+      {:ok, %{data: %{"repository" => repo}}} = run_query("""
+        query Repo($name: String!) {
+          repository(name: $name) {
+            id
+            name
+            docs { path content }
+          }
+        }
+      """, %{"name" => "repo"}, %{current_user: insert(:user)})
+
+      assert repo["id"]
+      assert repo["name"] == "repo"
+      [%{"path" => "readme.md", "content" => "bogus"}] = repo["docs"]
+    end
+  end
+
   describe "repositories" do
     test "it can search repositories" do
       body = Jason.encode!(%{

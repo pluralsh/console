@@ -15,7 +15,11 @@ defmodule Console.Plural.Dashboard do
 end
 
 defmodule Console.Plural.Repository do
-  defstruct [:id, :icon, :name, :description, :dashboards]
+  defstruct [:id, :icon, :name, :description, :dashboards, :docs]
+end
+
+defmodule Console.Plural.Doc do
+  defstruct [:path, :content]
 end
 
 defmodule Console.Plural.OIDCSettings do
@@ -156,4 +160,20 @@ end
 
 defmodule Console.Plural.Incident do
   defstruct [:id, :title, :description, :severity, :status]
+end
+
+defmodule Console.Plural.Features do
+  defstruct [:vpn, :userManagement]
+end
+
+defmodule Console.Plural.Account do
+  alias Console.Plural.Features
+
+  defstruct [:availableFeatures]
+
+  def spec() do
+    %__MODULE__{
+      availableFeatures: %Features{}
+    }
+  end
 end

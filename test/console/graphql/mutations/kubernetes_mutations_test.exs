@@ -67,4 +67,92 @@ defmodule Console.GraphQl.KubernetesMutationsTest do
       assert del["metadata"]["name"] == "node-name"
     end
   end
+
+  describe "createPeer" do
+    test "admins can create wireguard peers" do
+      admin = insert(:user, roles: %{admin: true})
+      user = insert(:user)
+      expect(Kazan, :run, fn _ -> {:ok, wireguard_peer("test", user)} end)
+      expect(Console.Cached.VPN, :get, fn "wireguard" -> wireguard_server() end)
+      expect(Console.Features, :available?, fn :vpn -> true end)
+
+      {:ok, %{data: %{"createPeer" => peer}}} = run_query("""
+        mutation Create($name: String!, $userId: ID!) {
+          createPeer(name: $name, userId: $userId) {
+            metadata { name }
+          }
+        }
+      """, %{"name" => "test", "userId" => user.id}, %{current_user: admin})
+
+      assert peer["metadata"]["name"] == "test"
+    end
+
+    test "admins cannot create wireguard peers w/o the feature enabled" do
+      admin = insert(:user, roles: %{admin: true})
+      expect(Console.Features, :available?, fn :vpn -> false end)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Create($name: String!, $userId: ID!) {
+          createPeer(name: $name, userId: $userId) {
+            metadata { name }
+          }
+        }
+      """, %{"name" => "test", "userId" => insert(:user).id}, %{current_user: admin})
+    end
+
+    test "non-admins cannot create wireguard peers" do
+      user = insert(:user)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Create($name: String!, $userId: ID!) {
+          createPeer(name: $name, userId: $userId) {
+            metadata { name }
+          }
+        }
+      """, %{"name" => "test", "userId" => insert(:user).id}, %{current_user: user})
+    end
+  end
+
+  describe "deletePeer" do
+    test "admins can delete wireguard peers" do
+      admin = insert(:user, roles: %{admin: true})
+      expect(Console.Features, :available?, fn :vpn -> true end)
+      expect(Kazan, :run, fn _ -> {:ok, wireguard_peer("test")} end)
+
+      {:ok, %{data: %{"deletePeer" => peer}}} = run_query("""
+        mutation Delete($name: String!) {
+          deletePeer(name: $name) {
+            metadata { name }
+          }
+        }
+      """, %{"name" => "test"}, %{current_user: admin})
+
+      assert peer["metadata"]["name"] == "test"
+    end
+
+    test "admins cannot delete wireguard peers w/o the feature enabled" do
+      admin = insert(:user, roles: %{admin: true})
+      expect(Console.Features, :available?, fn :vpn -> false end)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Delete($name: String!) {
+          deletePeer(name: $name) {
+            metadata { name }
+          }
+        }
+      """, %{"name" => "test"}, %{current_user: admin})
+    end
+
+    test "non-admins cannot delete wireguard peers" do
+      user = insert(:user)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Delete($name: String!) {
+          deletePeer(name: $name) {
+            metadata { name }
+          }
+        }
+      """, %{"name" => "test"}, %{current_user: user})
+    end
+  end
 end

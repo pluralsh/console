@@ -248,6 +248,24 @@ defmodule Console.Plural.Queries do
     #{@incident_fragment}
   """
 
+  @account_q """
+    query {
+      account {
+        availableFeatures { vpn }
+      }
+    }
+  """
+
+  @repo_q """
+    query Repository($name: String!) {
+      repository(name: $name) {
+        ...RepositoryFragment
+        docs { path content }
+      }
+    }
+    #{@repository_fragment}
+  """
+
   def installation_query(), do: @installation_query
 
   def get_installation_query(), do: @get_installation_q
@@ -281,4 +299,8 @@ defmodule Console.Plural.Queries do
   def get_stack_query(), do: @get_stack
 
   def install_stack_mutation(), do: @install_stack
+
+  def account_query(), do: @account_q
+
+  def repository_query(), do: @repo_q
 end

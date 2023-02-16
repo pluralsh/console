@@ -2,7 +2,6 @@ defmodule Console.Cached.Kubernetes do
   use GenServer
   alias Kazan.Watcher
   alias ETS.KeyValueSet
-  alias Kazan.Models.Apimachinery.Meta.V1, as: MetaV1
   require Logger
 
   defmodule State, do: defstruct [:table, :model, :pid]
@@ -29,9 +28,16 @@ defmodule Console.Cached.Kubernetes do
     |> Enum.map(fn {_, v} -> v end)
   end
 
+  def get(name, key) do
+    case KeyValueSet.wrap_existing(name) do
+      {:ok, set} -> set[key]
+      _ -> nil
+    end
+  end
+
   def handle_info({:start, request}, %State{table: table, model: model} = state) do
     Logger.info "starting namespace watcher"
-    {:ok, %{items: instances, metadata: %MetaV1.ListMeta{resource_version: vsn}}} = Kazan.run(request)
+    {:ok, %{items: instances, metadata: %{resource_version: vsn}}} = Kazan.run(request)
     {:ok, pid} = Watcher.start_link(%{request | response_model: model}, send_to: self(), resource_vsn: vsn)
 
     :timer.send_interval(5000, :watcher_ping)
