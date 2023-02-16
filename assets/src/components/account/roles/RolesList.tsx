@@ -34,11 +34,8 @@ export default function RolesList({ q }: any) {
           listRef={listRef}
           setListRef={setListRef}
           items={edges}
-          mapper={({ node: role }, { prev, next }) => (
-            <ListItem
-              first={!prev.node}
-              last={!next.node}
-            >
+          mapper={({ node: role }, { next }) => (
+            <ListItem last={!next.node}>
               <Role
                 role={role}
                 q={q}

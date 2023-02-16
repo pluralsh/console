@@ -2,7 +2,12 @@ import { useQuery } from '@apollo/client'
 
 import { Div } from 'honorable'
 
-import { EmptyState, LoopingLogo, SearchIcon } from '@pluralsh/design-system'
+import {
+  EmptyState,
+  ListBoxItem,
+  LoopingLogo,
+  SearchIcon,
+} from '@pluralsh/design-system'
 
 import { useContext, useEffect, useState } from 'react'
 
@@ -52,14 +57,9 @@ export default function UsersList() {
             listRef={listRef}
             setListRef={setListRef}
             items={edges}
-            mapper={({ node: user }, { prev, next }) => (
-              <ListItem
-                first={!prev.node}
-                last={!next.node}
-              >
-                <User
-                  user={user}
-                />
+            mapper={({ node: user }, { next }) => (
+              <ListItem last={!next.node}>
+                <User user={user} />
               </ListItem>
             )}
             loadNextPage={() => pageInfo.hasNextPage && fetchMore({

@@ -34,10 +34,7 @@ export function GroupsList({ q }: any) {
           setListRef={setListRef}
           items={edges}
           mapper={({ node: group }, { prev, next }) => (
-            <ListItem
-              first={!prev.node}
-              last={!next.node}
-            >
+            <ListItem last={!next.node}>
               <Group
                 group={group}
                 q={q}

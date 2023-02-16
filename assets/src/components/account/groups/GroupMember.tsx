@@ -8,7 +8,7 @@ import UserInfo from '../../utils/UserInfo'
 import { DELETE_GROUP_MEMBER, GROUP_MEMBERS } from './queries'
 
 export default function GroupMember({
-  user, group, first, last, edit,
+  user, group, last, edit,
 }: any) {
   const [mutation] = useMutation(DELETE_GROUP_MEMBER, {
     variables: { groupId: group.id, userId: user.id },
@@ -19,7 +19,6 @@ export default function GroupMember({
     <ListItem
       flex={false}
       background="fill-two"
-      first={first}
       last={last}
       title=""
     >

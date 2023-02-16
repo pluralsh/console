@@ -49,12 +49,11 @@ export default function GroupMembers({ group, edit = false }: any) {
             />
           )}
           hasNextPage={pageInfo.hasNextPage}
-          mapper={({ node }, { prev, next }) => (
+          mapper={({ node }, { next }) => (
             <GroupMember
               key={node.user.id}
               user={node.user}
               group={group}
-              first={!prev.node}
               last={!next.node}
               edit={edit}
             />
