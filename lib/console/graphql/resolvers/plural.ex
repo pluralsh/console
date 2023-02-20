@@ -26,6 +26,8 @@ defmodule Console.GraphQl.Resolvers.Plural do
     |> clean_up_connection()
   end
 
+  def get_repository(%{name: name}, _), do: Repositories.repository(name)
+
   def get_recipe(%{id: id}, _) do
     with {:ok, recipe} <- Repositories.get_recipe(id) do
       {:ok, format_recipe(recipe)}

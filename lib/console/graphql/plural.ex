@@ -35,10 +35,16 @@ defmodule Console.GraphQl.Plural do
     field :name,          non_null(:string)
     field :description,   :string
     field :icon,          :string
+    field :docs,          list_of(:file_content)
     field :configuration, :configuration, resolve: &Plural.resolve_configuration/3
     field :grafana_dns,   :string, resolve: fn _, _, _ ->
       {:ok, Console.conf(:grafana_dns)}
     end
+  end
+
+  object :file_content do
+    field :path,    :string
+    field :content, :string
   end
 
   object :recipe do
@@ -133,6 +139,13 @@ defmodule Console.GraphQl.Plural do
       arg :name, non_null(:string)
 
       resolve &Plural.resolve_application/2
+    end
+
+    field :repository, :repository do
+      middleware Authenticated
+      arg :name, non_null(:string)
+
+      resolve &Plural.get_repository/2
     end
 
     connection field :repositories, node_type: :repository do

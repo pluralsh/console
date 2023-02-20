@@ -2,7 +2,7 @@ defmodule Console.GraphQl do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
   import Console.GraphQl.Helpers
-  alias Console.GraphQl.Resolvers.{Build, User, Kubecost, License}
+  alias Console.GraphQl.Resolvers.{Build, User, Kubecost, License, UserLoader}
 
   import_types Absinthe.Type.Custom
   import_types Absinthe.Plug.Types
@@ -23,7 +23,8 @@ defmodule Console.GraphQl do
     Build,
     User,
     Kubecost,
-    License
+    License,
+    UserLoader
   ]
 
   def context(ctx) do
