@@ -22,6 +22,8 @@ import { ExtendTheme, mergeTheme } from 'honorable'
 
 import { omitBy } from 'lodash'
 
+import { mergeRefs } from 'react-merge-refs'
+
 import { ListBoxItemBaseProps } from './ListBoxItem'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import Input, { InputProps } from './Input'
@@ -29,6 +31,7 @@ import { setNextFocusedKey, useSelectComboStateProps } from './SelectComboShared
 import { PopoverListBox } from './PopoverListBox'
 import SearchIcon from './icons/SearchIcon'
 import { SelectInner } from './Select'
+import { useFloatingDropdown } from './useFloatingDropdown'
 
 type Placement = 'left' | 'right'
 
@@ -356,14 +359,22 @@ function ComboBox({
     startIcon = <SearchIcon />
   }
 
+  const { floating, triggerRef } = useFloatingDropdown({
+    triggerRef: inputRef,
+    width,
+    maxHeight,
+  })
+
+  outerInputProps = {
+    ...outerInputProps,
+    ...(outerInputProps.ref
+      ? { ref: mergeRefs([outerInputProps.ref, triggerRef]) }
+      : { ref: triggerRef }),
+  }
+
   return (
-    <ComboBoxInner
-      $isOpen={state.isOpen}
-      $maxHeight={maxHeight}
-      $placement={placement}
-    >
+    <ComboBoxInner>
       <ComboBoxInput
-        inputRef={inputRef}
         inputProps={inputProps}
         buttonRef={buttonRef}
         buttonProps={buttonProps}
@@ -390,6 +401,7 @@ function ComboBox({
         dropdownFooterFixed={dropdownFooterFixed}
         width={width}
         placement={placement}
+        floating={floating}
       />
     </ComboBoxInner>
   )

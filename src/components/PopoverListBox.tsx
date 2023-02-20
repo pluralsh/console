@@ -1,24 +1,54 @@
 import { ListState } from '@react-stately/list'
 import { AriaListBoxOptions } from '@react-aria/listbox'
-import { useTheme } from 'styled-components'
-import { animated, useTransition } from 'react-spring'
-import { CSSTransition } from 'react-transition-group'
+import styled, { useTheme } from 'styled-components'
+import { animated, to, useTransition } from 'react-spring'
+
+import { FloatingPortal, Placement, UseFloatingReturn } from '@floating-ui/react-dom-interactions'
 
 import { ListBoxUnmanaged, ListBoxUnmanagedProps } from './ListBox'
 import { Popover, PopoverProps } from './ReactAriaPopover'
-import { PopoverWrapper, SelectProps } from './Select'
+import { SelectProps } from './Select'
+import WrapWithIf from './WrapWithIf'
 
 type PopoverListBoxProps = {
   isOpen: boolean
   onClose: () => void
   listBoxState: ListState<object>
   listBoxProps: AriaListBoxOptions<object>
+  floating: UseFloatingReturn<any>
 } & Pick<PopoverProps, 'popoverRef'> &
   Pick<ListBoxUnmanagedProps, 'listBoxRef'> &
   Pick<
     SelectProps,
     'width' | 'placement' | 'dropdownHeaderFixed' | 'dropdownFooterFixed'
   >
+
+export const PopoverWrapper = styled.div<{
+  $isOpen: boolean
+  $placement: Placement
+}>(({ theme, $placement: placement }) => ({
+  position: 'absolute',
+  display: 'flex',
+  width: '100%',
+  alignItems: placement.startsWith('top') ? 'end' : 'start',
+  ...(placement.endsWith('end') && { right: 0, left: 'auto' }),
+  pointerEvents: 'none',
+  zIndex: theme.zIndexes.selectPopover,
+  clipPath: placement.startsWith('top')
+    ? `polygon(-100px calc(100% + ${theme.spacing.xxsmall}px), calc(100% + 100px) calc(100% + ${theme.spacing.xxsmall}px), calc(100% + 100px) -100px, -100px -100px)`
+    : `polygon(-100px ${-theme.spacing
+      .xxsmall}px, -100px calc(100% + 100px), calc(100% + 100px) calc(100% + 100px), calc(100% + 100px) ${-theme
+      .spacing.xxsmall}px)`,
+  '&.enter-done': {
+    clipPath: 'none',
+  },
+}))
+
+const Animated = styled(animated.div)(_ => ({
+  width: '100%',
+  maxHeight: '100%',
+  display: 'flex',
+}))
 
 function PopoverListBox({
   isOpen,
@@ -29,13 +59,20 @@ function PopoverListBox({
   popoverRef,
   dropdownHeaderFixed,
   dropdownFooterFixed,
-  placement,
+  floating,
 }: PopoverListBoxProps) {
   const theme = useTheme()
-  const transitions = useTransition(isOpen, {
-    from: { opacity: 0, translateY: '-150px' },
-    enter: { opacity: 1, translateY: '0' },
-    leave: { opacity: 0, translateY: '-150px' },
+
+  const direction = floating.placement.startsWith('bottom') ? -1 : 1
+
+  const out = {
+    opacity: 0,
+    yOffset: 150,
+  }
+  const transitions = useTransition(isOpen ? [true] : [], {
+    from: { ...out, delay: 1000 },
+    enter: { opacity: 1, yOffset: 0 },
+    leave: out,
     config: isOpen
       ? {
         mass: 0.6,
@@ -50,40 +87,60 @@ function PopoverListBox({
       },
   })
 
-  return (
-    <CSSTransition
-      in={isOpen}
-      timeout={150}
+  const portalProps = {}
+
+  return transitions(styles => (
+    <WrapWithIf
+      condition
+      wrapper={(
+        <FloatingPortal
+          id={theme.portals.default.id}
+          {...portalProps}
+        />
+      )}
     >
       <PopoverWrapper
         $isOpen={isOpen}
-        $placement={placement}
+        $placement={floating.placement}
         className="popoverWrapper"
+        ref={floating.floating}
+        style={{
+          position: floating.strategy,
+          left: floating.x ?? 0,
+          top: floating.y ?? 0,
+        }}
       >
-        {transitions((styles, item) => item && (
-          <animated.div style={{ ...styles }}>
-            <Popover
-              popoverRef={popoverRef}
-              isOpen={isOpen}
-              onClose={onClose}
-            >
-              <ListBoxUnmanaged
-                className="listBox"
-                state={listBoxState}
-                headerFixed={dropdownHeaderFixed}
-                footerFixed={dropdownFooterFixed}
-                extendStyle={{
-                  boxShadow: theme.boxShadows.moderate,
-                }}
-                listBoxRef={listBoxRef}
-                {...listBoxProps}
-              />
-            </Popover>
-          </animated.div>
-        ))}
+        <Animated
+          style={{
+            ...styles,
+            // Need to set translateY() here since flip() middleware might
+            // change placement (and thus animation direction) right after
+            // transition starts
+            transform: to(styles.yOffset,
+              value => `translateY(${direction * value}px)`),
+          }}
+        >
+          <Popover
+            popoverRef={popoverRef}
+            isOpen={isOpen}
+            onClose={onClose}
+          >
+            <ListBoxUnmanaged
+              className="listBox"
+              state={listBoxState}
+              headerFixed={dropdownHeaderFixed}
+              footerFixed={dropdownFooterFixed}
+              extendStyle={{
+                boxShadow: theme.boxShadows.moderate,
+              }}
+              listBoxRef={listBoxRef}
+              {...listBoxProps}
+            />
+          </Popover>
+        </Animated>
       </PopoverWrapper>
-    </CSSTransition>
-  )
+    </WrapWithIf>
+  ))
 }
 
 export type { PopoverListBoxProps }

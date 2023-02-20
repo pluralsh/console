@@ -1,6 +1,6 @@
 import { ExtendTheme, Input as HonorableInput, mergeTheme } from 'honorable'
 import type { InputProps as HonorableInputProps } from 'honorable'
-import type { ReactNode } from 'react'
+import { ReactNode, forwardRef } from 'react'
 
 export type InputProps = HonorableInputProps & {
   suffix?: ReactNode
@@ -13,13 +13,13 @@ const prefixSuffixIconStyle = {
   backgroundColor: 'fill-two',
 }
 
-export default function Input({
+const Input = forwardRef(({
   startIcon,
   endIcon,
   suffix,
   prefix,
   ...props
-}: InputProps) {
+}: InputProps, ref) => {
   let themeExtension: any = {}
 
   if (suffix) {
@@ -42,10 +42,13 @@ export default function Input({
   return (
     <ExtendTheme theme={themeExtension}>
       <HonorableInput
+        ref={ref}
         endIcon={suffix || endIcon}
         startIcon={prefix || startIcon}
         {...props}
       />
     </ExtendTheme>
   )
-}
+})
+
+export default Input

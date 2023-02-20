@@ -30,7 +30,7 @@ const portrait = (
   />
 )
 
-const chipProps:ComponentProps<typeof Chip> = {
+const chipProps: ComponentProps<typeof Chip> = {
   size: 'small',
   hue: 'lighter',
 }
@@ -196,10 +196,11 @@ function Template() {
     }
   }
 
-  const onInputChange: ComponentProps<typeof ComboBox>['onInputChange']
-    = value => {
-      setInputValue(value)
-    }
+  const onInputChange: ComponentProps<
+    typeof ComboBox
+  >['onInputChange'] = value => {
+    setInputValue(value)
+  }
 
   return (
     <Flex
@@ -292,10 +293,11 @@ function TagsTemplate() {
     }
   }
 
-  const onInputChange: ComponentProps<typeof ComboBox>['onInputChange']
-    = value => {
-      setInputValue(value)
-    }
+  const onInputChange: ComponentProps<
+    typeof ComboBox
+  >['onInputChange'] = value => {
+    setInputValue(value)
+  }
 
   let newKey = inputValue
     .toLowerCase()

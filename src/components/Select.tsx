@@ -21,6 +21,7 @@ import { ListBoxItemBaseProps } from './ListBoxItem'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import { PopoverListBox } from './PopoverListBox'
 import { setNextFocusedKey, useSelectComboStateProps } from './SelectComboShared'
+import { useFloatingDropdown } from './useFloatingDropdown'
 
 type SelectButtonProps = {
   leftContent?: ReactNode
@@ -135,19 +136,8 @@ ref) => (
   </SelectButtonInner>
 ))
 
-const SelectInner = styled.div<{
-  $isOpen: boolean
-  $maxHeight: string | number
-  $placement: Placement
-  $width?: string | number
-}>(({ $maxHeight: maxHeight, $placement: placement, $width: width }) => ({
+const SelectInner = styled.div(_ => ({
   position: 'relative',
-  '.popover': {
-    maxHeight: maxHeight || 230,
-    width: width || '100%',
-    ...(placement === 'right' && { right: 0, left: 'auto' }),
-    pointerEvents: 'auto',
-  },
 }))
 
 function Select(
@@ -248,14 +238,10 @@ function Select({
     </SelectButton>
   )
 
+  const { floating, triggerRef } = useFloatingDropdown({ triggerRef: ref, width, maxHeight })
+
   return (
-    <SelectInner
-      className="selectInner"
-      $isOpen={state.isOpen}
-      $maxHeight={maxHeight}
-      $width={width}
-      $placement={placement}
-    >
+    <SelectInner className="selectInner">
       <HiddenSelect
         state={state}
         triggerRef={ref}
@@ -263,7 +249,7 @@ function Select({
         name={name}
       />
       <Trigger
-        buttonRef={ref}
+        buttonRef={triggerRef as unknown as RefObject<HTMLElement>}
         buttonElt={triggerButton}
         isOpen={state.isOpen}
         {...triggerProps}
@@ -277,25 +263,11 @@ function Select({
         dropdownFooterFixed={dropdownFooterFixed}
         width={width}
         placement={placement}
+        floating={floating}
       />
     </SelectInner>
   )
 }
-
-export const PopoverWrapper = styled.div<{
-  $isOpen: boolean
-  $placement: Placement
-}>(({ theme, $placement: placement }) => ({
-  position: 'absolute',
-  width: '100%',
-  ...(placement === 'right' && { right: 0, left: 'auto' }),
-  pointerEvents: 'none',
-  zIndex: theme.zIndexes.selectPopover,
-  clipPath: 'polygon(-100px 0, -100px 99999px, 99999px 99999px, 99999px 0)',
-  '&.enter-done': {
-    clipPath: 'none',
-  },
-}))
 
 export {
   Select,

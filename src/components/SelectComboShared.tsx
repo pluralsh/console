@@ -8,8 +8,8 @@ import {
   useRef,
 } from 'react'
 import { ListState } from '@react-stately/list'
-
 import { Selection } from '@react-types/shared'
+import isNil from 'lodash/isNil'
 
 import { FOOTER_KEY, HEADER_KEY, useItemWrappedChildren } from './ListBox'
 import { ComboBoxProps } from './ComboBox'
@@ -70,7 +70,7 @@ function useSelectComboStateProps<T extends TType>({
       }
     },
     onSelectionChange: (newKeyOrKeys: Key | Selection, ...args: any) => {
-      let newKey: Key
+      let newKey: Key = ''
 
       if (
         typeof newKeyOrKeys === 'string'
@@ -78,7 +78,7 @@ function useSelectComboStateProps<T extends TType>({
       ) {
         newKey = newKeyOrKeys
       }
-      else {
+      else if (!isNil(newKeyOrKeys)) {
         const currentKeys = getCurrentKeys()
         const diff = setDifference(newKeyOrKeys, currentKeys)
 
