@@ -20,6 +20,7 @@ const directory = [
   { path: 'me', label: 'Profile' },
   { path: 'security', label: 'Security' },
   { path: 'permissions', label: 'Permissions' },
+  { path: 'vpn', label: 'VPN clients' },
 ]
 
 export default function MyProfile() {
