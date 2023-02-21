@@ -1,8 +1,7 @@
 import { gql } from 'apollo-boost'
 
-export const MY_WIREGUARD_PEERS = gql`
-query MyWireguardPeers {
-  myWireguardPeers {
+const WireguardPeerFragment = gql`
+  fragment WireguardPeerFragment on WireguardPeer {
     config
     metadata {
       name
@@ -16,5 +15,24 @@ query MyWireguardPeers {
       profile
     }
   }
-}
 `
+
+const MyWireguardPeers = gql`
+  query MyWireguardPeers {
+    myWireguardPeers {
+      ...WireguardPeerFragment
+    }
+  }
+  ${WireguardPeerFragment}
+`
+
+const WireguardPeers = gql`
+  query WireguardPeers {
+    wireguardPeers {
+      ...WireguardPeerFragment
+    }
+    ${WireguardPeerFragment}
+  }
+`
+
+export { MyWireguardPeers, WireguardPeers }

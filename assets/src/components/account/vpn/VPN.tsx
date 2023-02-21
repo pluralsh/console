@@ -1,7 +1,7 @@
 import { Button, ListBoxItem, Select } from '@pluralsh/design-system'
 import styled from 'styled-components'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import VPNClientList from '../../vpn/VPNClientList'
@@ -14,6 +14,7 @@ import {
   ColumnUser,
   VPNClientRow,
 } from '../../vpn/columns'
+import { CreateClient } from '../../vpn/actions/Create'
 
 const HeaderActions = styled(HeaderActionsUnstyled)(({ theme }) => ({
   display: 'flex',
@@ -22,6 +23,8 @@ const HeaderActions = styled(HeaderActionsUnstyled)(({ theme }) => ({
 }))
 
 function HeaderActionsUnstyled({ ...props }) {
+  const [open, setOpen] = useState(false)
+
   return (
     <div {...props}>
       <Select
@@ -33,7 +36,14 @@ function HeaderActionsUnstyled({ ...props }) {
           label="test"
         />
       </Select>
-      <Button secondary>Create VPN client</Button>
+      <Button
+        secondary
+        onClick={() => setOpen(true)}
+      >Create VPN client
+      </Button>
+
+      {/* Modals */}
+      {open && <CreateClient onClose={() => setOpen(false)} />}
     </div>
   )
 }
@@ -44,7 +54,7 @@ function VPN() {
     name: 'Sebastian Florek',
     address: '127.0.0.1',
     publicKey: '15182j192ghj192j1e9jg91j2d9J(J91jf91j9j1jg91j2349J91jf91j9j1jg91j2349J91jf91j9j1jg91j2349',
-    status: 'Running',
+    isReady: true,
     user: {
       id: '123',
       name: 'Sebastian Florek',

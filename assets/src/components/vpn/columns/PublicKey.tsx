@@ -1,8 +1,6 @@
 import { Tooltip } from '@pluralsh/design-system'
 import { CellContext } from '@tanstack/react-table'
 
-import { Div } from 'honorable'
-
 import { ColumnBuilder, VPNClientRow } from './types'
 
 const ColumnPublicKey = ColumnBuilder.accessor(row => row.publicKey, {

@@ -7,7 +7,7 @@ type VPNClientRow = {
   user?: User
   address?: string
   publicKey?: string
-  status?: string
+  isReady?: boolean
 }
 
 const ColumnBuilder = createColumnHelper<VPNClientRow>()

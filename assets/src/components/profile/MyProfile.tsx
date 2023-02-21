@@ -16,19 +16,21 @@ import { LoginContext } from 'components/contexts'
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
-const directory = [
-  { path: 'me', label: 'Profile' },
-  { path: 'security', label: 'Security' },
-  { path: 'permissions', label: 'Permissions' },
-  { path: 'vpn', label: 'VPN clients' },
+const getDirectory = (me, configuration) => [
+  { path: 'me', label: 'Profile', enabled: true },
+  { path: 'security', label: 'Security', enabled: true },
+  { path: 'permissions', label: 'Permissions', enabled: true },
+  // TODO: default to false when development is finished
+  { path: 'vpn', label: 'VPN clients', enabled: configuration?.vpnEnabled ?? true },
 ]
 
 export default function MyProfile() {
   const tabStateRef = useRef<any>(null)
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
-  const { me } = useContext<any>(LoginContext)
+  const { me, configuration } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
   const pathPrefix = '/profile'
+  const directory = getDirectory(me, configuration).filter(({ enabled }) => enabled)
 
   useEffect(() => setBreadcrumbs([{ text: 'profile', url: '/profile' }]), [setBreadcrumbs])
 

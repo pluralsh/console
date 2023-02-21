@@ -1,11 +1,9 @@
-import { Tooltip } from '@pluralsh/design-system'
+import { Chip, Tooltip } from '@pluralsh/design-system'
 import { CellContext } from '@tanstack/react-table'
-
-import { TableText } from '../../cluster/TableElements'
 
 import { ColumnBuilder, VPNClientRow } from './types'
 
-const ColumnStatus = ColumnBuilder.accessor(row => row.status, {
+const ColumnStatus = ColumnBuilder.accessor(row => row.isReady, {
   id: 'status',
   header: 'Status',
   enableGlobalFilter: true,
@@ -13,15 +11,21 @@ const ColumnStatus = ColumnBuilder.accessor(row => row.status, {
   cell,
 })
 
-function cell(props: CellContext<VPNClientRow, string | undefined>): JSX.Element {
-  const status = props.getValue()
+function cell(props: CellContext<VPNClientRow, boolean | undefined>): JSX.Element {
+  const isReady = props.getValue()
+  const label = isReady ? 'Ready' : 'Pending'
+  const severity = isReady ? 'success' : 'info'
 
   return (
     <Tooltip
-      label={status}
+      label={label}
       placement="top-start"
     >
-      <TableText>{status}</TableText>
+      <Chip
+        severity={severity}
+        loading={!isReady}
+      >{label}
+      </Chip>
     </Tooltip>
   )
 }
