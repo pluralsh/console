@@ -245,7 +245,7 @@ defmodule KubernetesScaffolds do
 
   def wireguard_peer(name) do
     %Kube.WireguardPeer{
-      metadata: %{name: name, namespage: "wireguard", labels: %{}},
+      metadata: %{name: name, namespage: "wireguard", annotations: %{}},
       spec: %Kube.WireguardPeer.Spec{wireguard_ref: "wireguard"},
       status: %Kube.WireguardPeer.Status{ready: true, config_ref: %Core.SecretKeySelector{name: "n", key: "k"}}
     }
@@ -253,7 +253,7 @@ defmodule KubernetesScaffolds do
 
   def wireguard_peer(name, %Schema.User{email: email}) do
     peer = wireguard_peer(name)
-    put_in(peer.metadata.labels["vpn.plural.sh/email"], email)
+    put_in(peer.metadata.annotations["vpn.plural.sh/email"], email)
   end
 
   def wireguard_server() do

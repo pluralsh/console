@@ -13,7 +13,7 @@ defmodule Console.GraphQl.Kubernetes.VPN do
     end
 
     field :user, :user, resolve: fn
-      %{metadata: %{labels: %{"vpn.plural.sh/email" => email}}}, _, %{context: %{loader: loader}} when is_binary(email) ->
+      %{metadata: %{annotations: %{"vpn.plural.sh/email" => email}}}, _, %{context: %{loader: loader}} when is_binary(email) ->
         loader
         |> Dataloader.load(UserLoader, :email, email)
         |> on_load(fn loader ->
