@@ -12,6 +12,7 @@ defmodule Console.Application do
       Console.Clustering.Connect,
       Console.Commands.Configuration,
       Console.Plural.Config,
+      Console.Features,
       Console.Cron,
       Console.Cache,
       Console.ReplicatedCache,
@@ -20,6 +21,7 @@ defmodule Console.Application do
       {Absinthe.Subscription, [ConsoleWeb.Endpoint]},
       Console.Cached.Namespace,
       Console.Cached.Pod,
+      Console.Cached.VPN,
       {OpenIDConnect.Worker, Application.get_env(:console, :oidc_providers)},
     ] ++ consumers() ++ [
       Piazza.GracefulShutdown

@@ -10,15 +10,22 @@ defmodule Console.Plural.Repositories do
     Recipe,
     Workspace,
     OIDCProvider,
-    Stack
+    Stack,
+    Doc
   }
 
   defmodule Query do
-    defstruct [:installations, :repositories, :recipes, :recipe, :installation, :stack]
+    defstruct [:installations, :repositories, :recipes, :recipe, :installation, :stack, :repository]
   end
 
   defmodule Mutation do
     defstruct [:installRecipe, :upsertOidcProvider, :installStack]
+  end
+
+  def repository(name) do
+    repository_query()
+    |> Client.run(%{name: name}, %Query{repository: %Repository{docs: [%Doc{}]}})
+    |> when_ok(fn %{repository: repo} -> repo end)
   end
 
   def search_repositories(query, first, cursor \\ nil) do

@@ -1,7 +1,8 @@
 defmodule Console.GraphQl.Kubernetes do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Kubernetes
-  alias Console.Middleware.{Authenticated, AdminRequired, Rbac}
+  alias Console.GraphQl.Resolvers.VPN
+  alias Console.Middleware.{Authenticated, AdminRequired, Rbac, Feature}
 
   object :metadata do
     field :labels,      list_of(:label_pair), resolve: fn %{labels: labels}, _, _ -> {:ok, make_labels(labels)} end
@@ -63,6 +64,7 @@ defmodule Console.GraphQl.Kubernetes do
   import_types Console.GraphQl.Kubernetes.ConfigurationOverlay
   import_types Console.GraphQl.Kubernetes.VerticalPodAutoscaler
   import_types Console.GraphQl.Kubernetes.Namespace
+  import_types Console.GraphQl.Kubernetes.VPN
 
   delta :application
 
@@ -164,6 +166,26 @@ defmodule Console.GraphQl.Kubernetes do
       safe_resolve &Kubernetes.list_all_pods/2
     end
 
+    field :wireguard_peers, list_of(:wireguard_peer) do
+      middleware Authenticated
+      middleware AdminRequired
+
+      safe_resolve &VPN.list_peers/2
+    end
+
+    field :my_wireguard_peers, list_of(:wireguard_peer) do
+      middleware Authenticated
+
+      safe_resolve &VPN.list_my_peers/2
+    end
+
+    field :wireguard_peer, :wireguard_peer do
+      middleware Authenticated
+      arg :name, non_null(:string)
+
+      safe_resolve &VPN.get_peer/2
+    end
+
     field :cached_pods, list_of(:pod) do
       middleware Authenticated
       arg :namespaces, list_of(:string)
@@ -240,6 +262,26 @@ defmodule Console.GraphQl.Kubernetes do
       arg :context,   non_null(:map)
 
       safe_resolve &Kubernetes.execute_overlay/2
+    end
+
+    field :create_peer, :wireguard_peer do
+      middleware Authenticated
+      middleware AdminRequired
+      middleware Feature, :vpn
+      arg :user_id, :id
+      arg :email,   :string
+      arg :name,    non_null(:string)
+
+      safe_resolve &VPN.create_peer/2
+    end
+
+    field :delete_peer, :wireguard_peer do
+      middleware Authenticated
+      middleware AdminRequired
+      middleware Feature, :vpn
+      arg :name,    non_null(:string)
+
+      safe_resolve &VPN.delete_peer/2
     end
   end
 

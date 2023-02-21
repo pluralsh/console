@@ -8,6 +8,7 @@ defmodule Kube.Client do
   list_request :list_configuration_overlays, Kube.ConfigurationOverlayList, "platform.plural.sh", "v1alpha1", "configurationoverlays"
   list_request :list_runbooks, Kube.RunbookList, "platform.plural.sh", "v1alpha1", "runbooks"
   list_request :list_vertical_pod_autoscalers, Kube.VerticalPodAutoscalerList, "autoscaling.k8s.io", "v1", "verticalpodautoscalers"
+  list_request :list_wireguard_peers, Kube.WireguardPeerList, "vpn.plural.sh", "v1alpha1", "wireguardpeers"
 
   get_request :get_dashboard, Kube.Dashboard, "platform.plural.sh", "v1alpha1", "dashboards"
   get_request :get_slashcommand, Kube.SlashCommand, "platform.plural.sh", "v1alpha1", "slashcommands"
@@ -16,6 +17,8 @@ defmodule Kube.Client do
   get_request :get_runbook, Kube.Runbook, "platform.plural.sh", "v1alpha1", "runbooks"
   get_request :get_statefulset_resize, Kube.StatefulSetResize, "platform.plural.sh", "v1alpha1", "statefulsetresizes"
   get_request :get_vertical_pod_autoscaler, Kube.VerticalPodAutoscaler, "autoscaling.k8s.io", "v1", "verticalpodautoscalers"
+  get_request :get_wireguard_peer, Kube.WireguardPeer, "vpn.plural.sh", "v1alpha1", "wireguardpeers"
+  get_request :get_wireguard_server, Kube.WireguardServer, "vpn.plural.sh", "v1alpha1", "wireguardservers"
 
   def get_application(name), do: get_application(name, name)
 
@@ -33,6 +36,30 @@ defmodule Kube.Client do
 
   def list_metrics() do
     make_request("/apis/metrics.k8s.io/v1beta1/nodes", "get", Kube.NodeMetricList)
+  end
+
+  def list_peers_for_user(email) do
+    path_builder("vpn.plural.sh", "v1alpha1", "wireguardpeers", Console.namespace("wireguard"))
+    |> make_request("get", Kube.WireguardPeerList, "", %{labelSelector: "vpn.plural.sh/email=#{URI.encode(email)}"})
+  end
+
+  def delete_wireguard_peer(name) do
+    path_builder("vpn.plural.sh", "v1alpha1", "wireguardpeers", Console.namespace("wireguard"), name)
+    |> make_request("delete", Kube.WireguardPeer)
+  end
+
+  def create_wireguard_peer(email, name) do
+    namespace = Console.namespace(name)
+    peer = %Kube.WireguardPeer{
+      metadata: %ObjectMeta{name: name, namespace: namespace, labels: %{"vpn.plural.sh/email" => email}},
+      spec: %Kube.WireguardPeer.Spec{
+        wireguard_ref: "wireguard"
+      }
+    }
+    {:ok, encoded} = Kube.WireguardPeer.encode(peer)
+
+    path_builder("vpn.plural.sh", "v1alpha1", "wireguardpeers", namespace, name)
+    |> make_request("post", Kube.WireguardPeer, Jason.encode!(encoded))
   end
 
   def get_metrics(node) do

@@ -29,11 +29,17 @@ defmodule Console.GraphQl.Configuration do
     field :output, :string
   end
 
+  object :available_features do
+    field :vpn, :boolean
+  end
+
   object :console_configuration do
     field :git_commit,      :string
     field :is_demo_project, :boolean
     field :is_sandbox,      :boolean
     field :plural_login,    :boolean
+    field :vpn_enabled,     :boolean
+    field :features,        :available_features
 
     field :manifest,        :plural_manifest, resolve: fn
       _, _, _ ->
