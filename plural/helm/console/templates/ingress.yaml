@@ -10,10 +10,12 @@ metadata:
   {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.ingressClass }}
+  {{- if .Values.ingress.tlsEnabled }}
   tls:
   - hosts:
     - {{ .Values.ingress.console_dns | quote }}
     secretName: console-tls
+  {{- end }}
   rules:
   - host: {{ .Values.ingress.console_dns | quote }}
     http:
