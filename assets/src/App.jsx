@@ -11,6 +11,8 @@ import { GlobalStyle, styledTheme, theme } from '@pluralsh/design-system'
 import { CssBaseline, ThemeProvider } from 'honorable'
 import { ThemeProvider as StyledThemeProvider } from 'styled-components'
 
+import { OverlayContextProvider } from 'components/layout/Overlay'
+
 import { DEFAULT_THEME } from './theme'
 import 'react-toggle/style.css'
 import 'react-pulse-dot/dist/index.css'
@@ -29,15 +31,17 @@ export default function App() {
       <IntercomProvider appId={INTERCOM_APP_ID}>
         <ThemeProvider theme={theme}>
           <StyledThemeProvider theme={mergedStyledTheme}>
-            <CssBaseline />
-            <GlobalStyle />
-            <Grommet
-              full
-              theme={mergedStyledTheme}
-              themeMode="dark"
-            >
-              <RouterProvider router={router} />
-            </Grommet>
+            <OverlayContextProvider>
+              <CssBaseline />
+              <GlobalStyle />
+              <Grommet
+                full
+                theme={mergedStyledTheme}
+                themeMode="dark"
+              >
+                <RouterProvider router={router} />
+              </Grommet>
+            </OverlayContextProvider>
           </StyledThemeProvider>
         </ThemeProvider>
       </IntercomProvider>

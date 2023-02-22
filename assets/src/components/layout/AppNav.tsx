@@ -32,6 +32,8 @@ import { Div } from 'honorable'
 import { animated, useTransition } from 'react-spring'
 import { createPortal } from 'react-dom'
 
+import { useContentOverlay } from './Overlay'
+
 const CARD_WIDTH = 420
 
 function readinessOrder(readiness: ReadinessT) {
@@ -155,6 +157,7 @@ export function StatusPanel({ statuses, open, onClose }) {
   const theme = useTheme()
 
   useOnClickOutside(ref, onClose)
+  useContentOverlay(open)
 
   const transitionProps = useMemo(() => getTransitionProps(open), [open])
   const transitions = useTransition(open ? [true] : [], transitionProps)
@@ -181,6 +184,7 @@ export function StatusPanel({ statuses, open, onClose }) {
         overflow="auto"
         position="relative"
         height="100%"
+        pointerEvents="auto"
       >
         <StatusPanelTopContainer>
           <StatusPanelHeaderWrap>
@@ -234,6 +238,7 @@ export function StatusPanel({ statuses, open, onClose }) {
         bottom: 0,
         left: 0,
         zIndex: theme.zIndexes.modal - 1,
+        pointerEvents: 'none',
         ...styles,
       }}
     >

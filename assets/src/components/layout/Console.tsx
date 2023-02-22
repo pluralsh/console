@@ -1,9 +1,8 @@
 import { Outlet } from 'react-router-dom'
-import { Box } from 'grommet'
 
 import { Toast } from '@pluralsh/design-system'
 
-import { A, Span } from 'honorable'
+import { A, Flex, Span } from 'honorable'
 
 import { EnsureLogin } from '../login/Login'
 import { InstallationsProvider } from '../Installations'
@@ -19,6 +18,7 @@ import Subheader from './Subheader'
 
 import Sidebar from './Sidebar'
 import WithApplicationUpdate from './WithApplicationUpdate'
+import { ContentOverlay } from './Overlay'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -32,9 +32,16 @@ export default function Console() {
         <InstallationsProvider>
           <BreadcrumbProvider>
             <TerminalThemeProvider>
-              <Box
+              <Flex
+                position="relative"
                 width="100vw"
+                maxWidth="100vw"
                 height="100vh"
+                minWidth="0"
+                minHeight="0"
+                maxHeight="100vh"
+                overflow="hidden"
+                flexDirection="column"
               >
                 {isProduction && (
                   <WithApplicationUpdate>
@@ -44,7 +51,9 @@ export default function Console() {
                         marginBottom="medium"
                         marginRight="xxxxlarge"
                       >
-                        <Span marginRight="small">Time for a new update!</Span>
+                        <Span marginRight="small">
+                          Time for a new update!
+                        </Span>
                         <A
                           onClick={() => reloadApplication()}
                           style={{ textDecoration: 'none' }}
@@ -57,26 +66,25 @@ export default function Console() {
                   </WithApplicationUpdate>
                 )}
                 <Header />
-                <Box
-                  fill
-                  direction="row"
+                <Flex
+                  width="100%"
+                  minWidth={0}
+                  minHeight={0}
+                  flexGrow={1}
                 >
                   <Sidebar />
-                  <Box
-                    fill
+                  <Flex
                     direction="column"
+                    flexGrow={1}
+                    overflowX="hidden"
+                    position="relative"
                   >
+                    <ContentOverlay />
                     <Subheader />
-                    <Box
-                      fill
-                      direction="row"
-                      overflow="auto"
-                    >
-                      <Outlet />
-                    </Box>
-                  </Box>
-                </Box>
-              </Box>
+                    <Outlet />
+                  </Flex>
+                </Flex>
+              </Flex>
             </TerminalThemeProvider>
           </BreadcrumbProvider>
         </InstallationsProvider>
