@@ -56,7 +56,7 @@ defmodule Kube.Client do
   end
 
   def create_wireguard_peer(email, name) do
-    namespace = Console.namespace(name)
+    namespace = Console.namespace("wireguard")
     peer = %Kube.WireguardPeer{
       metadata: %ObjectMeta{name: name, namespace: namespace, annotations: %{"vpn.plural.sh/email" => email}},
       spec: %Kube.WireguardPeer.Spec{

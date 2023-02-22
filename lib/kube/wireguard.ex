@@ -17,6 +17,8 @@ defmodule Kube.WireguardPeer do
 
     defmodel  "WireguardPeerSpec", "vpn.plural.sh", "v1alpha1" do
       property :wireguard_ref,"wireguardRef", :string
+      property :address, "address", :string
+      property :public_key, "publicKey", :string
     end
   end
 

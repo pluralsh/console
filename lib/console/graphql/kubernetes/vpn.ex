@@ -39,6 +39,8 @@ defmodule Console.GraphQl.Kubernetes.VPN do
 
   object :wireguard_peer_spec do
     field :wireguard_ref, :string
+    field :address,       :string
+    field :public_key,    :string
   end
 
   object :wireguard_server_status do

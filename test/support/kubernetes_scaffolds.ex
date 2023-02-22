@@ -245,7 +245,7 @@ defmodule KubernetesScaffolds do
 
   def wireguard_peer(name) do
     %Kube.WireguardPeer{
-      metadata: %{name: name, namespage: "wireguard", annotations: %{}},
+      metadata: %{name: name, namespace: "wireguard", annotations: %{}},
       spec: %Kube.WireguardPeer.Spec{wireguard_ref: "wireguard"},
       status: %Kube.WireguardPeer.Status{ready: true, config_ref: %Core.SecretKeySelector{name: "n", key: "k"}}
     }
