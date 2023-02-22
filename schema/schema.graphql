@@ -1298,6 +1298,8 @@ type WireguardPeerStatus {
 
 type WireguardPeerSpec {
   wireguardRef: String
+  address: String
+  publicKey: String
 }
 
 type PodSpec {
