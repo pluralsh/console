@@ -1,4 +1,4 @@
-import Fence from '../../components/md/Fence'
+import Fence from '../components/Fence'
 
 export const fence = {
   render: Fence,

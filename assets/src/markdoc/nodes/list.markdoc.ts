@@ -1,4 +1,4 @@
-import { List, ListItem } from '../../components/md/List'
+import { List, ListItem } from '../components/List'
 
 export const list = {
   render: List,

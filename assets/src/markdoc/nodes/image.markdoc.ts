@@ -1,4 +1,4 @@
-import Image from '../../components/md/Image'
+import Image from '../components/Image'
 
 export const image = {
   render: Image,

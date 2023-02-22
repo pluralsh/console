@@ -1,6 +1,6 @@
 import { Tag } from '@markdoc/markdoc'
 
-import Button, { ButtonGroup } from '../../components/md/Button'
+import Button, { ButtonGroup } from '../components/Button'
 import unwrapParagraphs from '../utils/unwrapParagraphs'
 
 export const button = {

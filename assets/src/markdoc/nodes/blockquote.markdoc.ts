@@ -1,4 +1,4 @@
-import Blockquote from '../../components/md/Blockquote'
+import Blockquote from '../components/Blockquote'
 
 export const blockquote = {
   render: Blockquote,

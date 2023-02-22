@@ -1,5 +1,5 @@
 import { LoopingLogo } from '@pluralsh/design-system'
-import MarkdocComponent from 'components/md/MarkdocContent'
+import MarkdocComponent from 'markdoc/components/MarkdocContent'
 import { GqlError } from 'components/utils/Alert'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useRepositoryQuery } from 'generated/graphql'

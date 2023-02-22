@@ -1,4 +1,4 @@
-import Embed from '../../components/md/Embed'
+import Embed from '../components/Embed'
 
 export const embed = {
   render: Embed,

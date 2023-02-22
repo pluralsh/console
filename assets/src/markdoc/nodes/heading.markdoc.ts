@@ -1,6 +1,6 @@
 import { Tag } from '@markdoc/markdoc'
 
-import { Heading } from '../../components/md/Heading'
+import { Heading } from '../components/Heading'
 import { toHtmlId } from '../utils/text'
 
 function generateID(children: any[], attributes: { id?: unknown } = {}) {

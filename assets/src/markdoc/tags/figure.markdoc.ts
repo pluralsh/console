@@ -1,6 +1,6 @@
 import { Tag } from '@markdoc/markdoc'
 
-import { FigCaption, Figure } from '../../components/md/Figure'
+import { FigCaption, Figure } from '../components/Figure'
 import unwrapParagraphs from '../utils/unwrapParagraphs'
 
 const makeBareImage = node => {
