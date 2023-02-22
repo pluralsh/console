@@ -12,6 +12,12 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  /**
+   * The `DateTime` scalar type represents a date and time in the UTC
+   * timezone. The DateTime appears in a JSON response as an ISO8601 formatted
+   * string, including UTC timezone ("Z"). The parsed date and time string will
+   * be converted to UTC if there is an offset.
+   */
   DateTime: Date;
   Long: any;
   Map: Map<string, unknown>;
@@ -126,6 +132,11 @@ export enum AutoscalingTarget {
   Deployment = 'DEPLOYMENT',
   Statefulset = 'STATEFULSET'
 }
+
+export type AvailableFeatures = {
+  __typename?: 'AvailableFeatures';
+  vpn?: Maybe<Scalars['Boolean']>;
+};
 
 export type BindingAttributes = {
   groupId?: InputMaybe<Scalars['ID']>;
@@ -334,12 +345,14 @@ export type ConfigurationValidation = {
 
 export type ConsoleConfiguration = {
   __typename?: 'ConsoleConfiguration';
+  features?: Maybe<AvailableFeatures>;
   gitCommit?: Maybe<Scalars['String']>;
   gitStatus?: Maybe<GitStatus>;
   isDemoProject?: Maybe<Scalars['Boolean']>;
   isSandbox?: Maybe<Scalars['Boolean']>;
   manifest?: Maybe<PluralManifest>;
   pluralLogin?: Maybe<Scalars['Boolean']>;
+  vpnEnabled?: Maybe<Scalars['Boolean']>;
 };
 
 export type Container = {
@@ -513,6 +526,12 @@ export type Event = {
   message?: Maybe<Scalars['String']>;
   reason?: Maybe<Scalars['String']>;
   type?: Maybe<Scalars['String']>;
+};
+
+export type FileContent = {
+  __typename?: 'FileContent';
+  content?: Maybe<Scalars['String']>;
+  path?: Maybe<Scalars['String']>;
 };
 
 export type GitStatus = {
@@ -1064,6 +1083,7 @@ export type Repository = {
   __typename?: 'Repository';
   configuration?: Maybe<Configuration>;
   description?: Maybe<Scalars['String']>;
+  docs?: Maybe<Array<Maybe<FileContent>>>;
   grafanaDns?: Maybe<Scalars['String']>;
   icon?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
@@ -1155,6 +1175,7 @@ export type RootMutationType = {
   createGroup?: Maybe<Group>;
   createGroupMember?: Maybe<GroupMember>;
   createInvite?: Maybe<Invite>;
+  createPeer?: Maybe<WireguardPeer>;
   createRole?: Maybe<Role>;
   createUpgradePolicy?: Maybe<UpgradePolicy>;
   createWebhook?: Maybe<Webhook>;
@@ -1162,6 +1183,7 @@ export type RootMutationType = {
   deleteGroupMember?: Maybe<GroupMember>;
   deleteJob?: Maybe<Job>;
   deleteNode?: Maybe<Node>;
+  deletePeer?: Maybe<WireguardPeer>;
   deletePod?: Maybe<Pod>;
   deleteRole?: Maybe<Role>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
@@ -1216,6 +1238,13 @@ export type RootMutationTypeCreateInviteArgs = {
 };
 
 
+export type RootMutationTypeCreatePeerArgs = {
+  email?: InputMaybe<Scalars['String']>;
+  name: Scalars['String'];
+  userId?: InputMaybe<Scalars['ID']>;
+};
+
+
 export type RootMutationTypeCreateRoleArgs = {
   attributes: RoleAttributes;
 };
@@ -1249,6 +1278,11 @@ export type RootMutationTypeDeleteJobArgs = {
 
 
 export type RootMutationTypeDeleteNodeArgs = {
+  name: Scalars['String'];
+};
+
+
+export type RootMutationTypeDeletePeerArgs = {
   name: Scalars['String'];
 };
 
@@ -1395,6 +1429,7 @@ export type RootQueryType = {
   logs?: Maybe<Array<Maybe<LogStream>>>;
   me?: Maybe<User>;
   metric?: Maybe<Array<Maybe<MetricResponse>>>;
+  myWireguardPeers?: Maybe<Array<Maybe<WireguardPeer>>>;
   namespaces?: Maybe<Array<Maybe<Namespace>>>;
   node?: Maybe<Node>;
   nodeMetric?: Maybe<NodeMetric>;
@@ -1407,6 +1442,7 @@ export type RootQueryType = {
   recipe?: Maybe<Recipe>;
   recipes?: Maybe<RecipeConnection>;
   repositories?: Maybe<RepositoryConnection>;
+  repository?: Maybe<Repository>;
   role?: Maybe<Role>;
   roles?: Maybe<RoleConnection>;
   runbook?: Maybe<Runbook>;
@@ -1419,6 +1455,8 @@ export type RootQueryType = {
   upgradePolicies?: Maybe<Array<Maybe<UpgradePolicy>>>;
   users?: Maybe<UserConnection>;
   webhooks?: Maybe<WebhookConnection>;
+  wireguardPeer?: Maybe<WireguardPeer>;
+  wireguardPeers?: Maybe<Array<Maybe<WireguardPeer>>>;
 };
 
 
@@ -1616,6 +1654,11 @@ export type RootQueryTypeRepositoriesArgs = {
 };
 
 
+export type RootQueryTypeRepositoryArgs = {
+  name: Scalars['String'];
+};
+
+
 export type RootQueryTypeRolesArgs = {
   after?: InputMaybe<Scalars['String']>;
   before?: InputMaybe<Scalars['String']>;
@@ -1675,6 +1718,11 @@ export type RootQueryTypeWebhooksArgs = {
   before?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
   last?: InputMaybe<Scalars['Int']>;
+};
+
+
+export type RootQueryTypeWireguardPeerArgs = {
+  name: Scalars['String'];
 };
 
 export type RootSubscriptionType = {
@@ -2079,3 +2127,24 @@ export enum WebhookType {
   Piazza = 'PIAZZA',
   Slack = 'SLACK'
 }
+
+export type WireguardPeer = {
+  __typename?: 'WireguardPeer';
+  config?: Maybe<Scalars['String']>;
+  metadata: Metadata;
+  raw: Scalars['String'];
+  spec: WireguardPeerSpec;
+  status: WireguardPeerStatus;
+  user?: Maybe<User>;
+};
+
+export type WireguardPeerSpec = {
+  __typename?: 'WireguardPeerSpec';
+  wireguardRef?: Maybe<Scalars['String']>;
+};
+
+export type WireguardPeerStatus = {
+  __typename?: 'WireguardPeerStatus';
+  conditions?: Maybe<Array<Maybe<StatusCondition>>>;
+  ready?: Maybe<Scalars['Boolean']>;
+};
