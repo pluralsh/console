@@ -9,6 +9,10 @@ interface VPNClientListProps {
 }
 
 export default function VPNClientList({ columns, data, ...props }: VPNClientListProps) {
+  if (!data || data.length === 0) {
+    return <>No VPN clients available.</>
+  }
+
   return (
     <Table
       data={data}

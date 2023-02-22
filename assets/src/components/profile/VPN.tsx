@@ -14,24 +14,16 @@ import {
 } from '../vpn/columns'
 import { MyWireguardPeers } from '../vpn/graphql/queries'
 import { RootQueryType } from '../../generated/graphql'
-
-const MOCK_CLIENT_LIST = [{
-  name: 'sebastian-vpn-test',
-  address: '127.0.0.1',
-  publicKey: '15182j192ghj192j1e9jg91j2d9J(J91jf91j9j1jg91j2349J91jf91j9j1jg91j2349J91jf91j9j1jg91j2349',
-  isReady: true,
-  user: {
-    id: '123',
-    name: 'Sebastian Florek',
-    email: 'sebastian@plural.sh',
-    profile: '',
-  },
-}]
+import { LoopingLogo } from '../../../../../design-system/src'
 
 function VPN() {
-  const columns = useMemo(() => [ColumnName, ColumnAddress, ColumnPublicKey, ColumnStatus, ColumnDownload, ColumnDelete], [])
-  const { data: { myWireguardPeers } = {}, error } = useQuery<Pick<RootQueryType, 'myWireguardPeers'>>(MyWireguardPeers)
+  const { data: { myWireguardPeers } = {}, loading, refetch } = useQuery<Pick<RootQueryType, 'myWireguardPeers'>>(MyWireguardPeers)
+  const columns = useMemo(() => [ColumnName, ColumnAddress, ColumnPublicKey, ColumnStatus, ColumnDownload, ColumnDelete(refetch)], [])
   const clientList = useMemo(() => myWireguardPeers?.map(peer => toVPNClientRow(peer)) ?? [], [myWireguardPeers])
+
+  if (loading) {
+    return <LoopingLogo />
+  }
 
   return (
     <ScrollablePage
@@ -40,7 +32,7 @@ function VPN() {
     >
       <VPNClientList
         columns={columns}
-        data={clientList.concat(MOCK_CLIENT_LIST)}
+        data={clientList}
       />
     </ScrollablePage>
   )

@@ -3,10 +3,11 @@ import { Dispatch, ReactElement, useState } from 'react'
 import {
   Button,
   FormField,
+  GraphQLToast,
   Input,
   Modal,
 } from '@pluralsh/design-system'
-import { useMutation } from '@apollo/client'
+import { ServerError, useMutation } from '@apollo/client'
 
 import { CreateWireguardPeer } from '../graphql/mutations'
 import { RootMutationTypeCreatePeerArgs, WireguardPeer } from '../../../generated/graphql'
@@ -19,6 +20,7 @@ interface CreateClientProps {
 function CreateClient({ onClose, refetch }: CreateClientProps): ReactElement {
   return (
     <Modal
+      BackdropProps={{ zIndex: 20 }}
       header="create vpn client"
       open
       onClose={onClose}
@@ -59,8 +61,6 @@ function ModalContentUnstyled({ onClose, refetch, ...props }: CreateClientProps)
     },
   })
 
-  console.log(error)
-
   return (
     <div {...props}>
       <FormField
@@ -97,6 +97,15 @@ function ModalContentUnstyled({ onClose, refetch, ...props }: CreateClientProps)
         >Create
         </Button>
       </div>
+
+      {error && (
+        <GraphQLToast
+          header={(error?.networkError as ServerError)?.statusCode?.toString() ?? 'Error'}
+          error={{ graphQLErrors: [...error?.graphQLErrors ?? []] }}
+          margin="medium"
+          marginHorizontal="xxxxlarge"
+        />
+      )}
     </div>
   )
 }

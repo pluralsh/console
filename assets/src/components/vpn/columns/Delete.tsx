@@ -1,12 +1,14 @@
 import { Button, Tooltip, TrashCanIcon } from '@pluralsh/design-system'
 import { CellContext } from '@tanstack/react-table'
-import { useState } from 'react'
+import { Dispatch, useState } from 'react'
+
+import { ColumnDefTemplate } from '@tanstack/table-core/src/types'
 
 import { DeleteClient } from '../actions/Delete'
 
 import { ColumnBuilder, VPNClientRow } from './types'
 
-const ColumnDelete = ColumnBuilder.display({
+const ColumnDelete = refetch => ColumnBuilder.display({
   id: 'delete',
   header: '',
   enableGlobalFilter: false,
@@ -15,26 +17,33 @@ const ColumnDelete = ColumnBuilder.display({
     center: true,
     gridTemplate: '48px',
   },
-  cell,
+  cell: cell(refetch),
 })
 
-function cell(props: CellContext<VPNClientRow, unknown>): JSX.Element {
-  const { isReady, name } = props.row.original
+function cell(refetch): ColumnDefTemplate<CellContext<VPNClientRow, unknown>> {
+  const context = (props: CellContext<VPNClientRow, unknown>): JSX.Element => {
+    const { isReady, name } = props.row.original
 
-  return (
-    <DeleteAction
-      disabled={!isReady}
-      name={name ?? ''}
-    />
-  )
+    return (
+      <DeleteAction
+        disabled={!isReady}
+        name={name ?? ''}
+        refetch={refetch}
+
+      />
+    )
+  }
+
+  return context
 }
 
 interface DeleteActionsProps {
   disabled: boolean,
   name: string
+  refetch: Dispatch<void>
 }
 
-function DeleteAction({ disabled, name }: DeleteActionsProps) {
+function DeleteAction({ disabled, name, refetch }: DeleteActionsProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -59,7 +68,7 @@ function DeleteAction({ disabled, name }: DeleteActionsProps) {
         <DeleteClient
           onClose={() => setOpen(false)}
           name={name}
-          refetch={() => {}}
+          refetch={refetch}
         />
       )}
     </>

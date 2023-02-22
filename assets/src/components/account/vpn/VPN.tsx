@@ -5,7 +5,7 @@ import {
   Select,
 } from '@pluralsh/design-system'
 import styled from 'styled-components'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@apollo/client'
 
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
@@ -29,7 +29,7 @@ const HeaderActions = styled(HeaderActionsUnstyled)(({ theme }) => ({
   gap: theme.spacing.medium,
 }))
 
-function HeaderActionsUnstyled({ ...props }) {
+function HeaderActionsUnstyled({ refetch, ...props }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -53,32 +53,17 @@ function HeaderActionsUnstyled({ ...props }) {
       {open && (
         <CreateClient
           onClose={() => setOpen(false)}
-          refetch={() => {}}
+          refetch={refetch}
         />
       )}
     </div>
   )
 }
 
-const MOCK_CLIENT_LIST = [{
-  name: 'sebastian-vpn-test',
-  address: '127.0.0.1',
-  publicKey: '15182j192ghj192j1e9jg91j2d9J(J91jf91j9j1jg91j2349J91jf91j9j1jg91j2349J91jf91j9j1jg91j2349',
-  isReady: false,
-  user: {
-    id: '123',
-    name: 'Sebastian Florek',
-    email: 'sebastian@plural.sh',
-    profile: '',
-  },
-}]
-
 function VPN() {
   const { data: { wireguardPeers } = {}, loading, refetch } = useQuery<Pick<RootQueryType, 'wireguardPeers'>>(WireguardPeers)
   const columns = useMemo(() => [ColumnName, ColumnUser, ColumnAddress, ColumnPublicKey, ColumnStatus, ColumnActions(refetch)], [refetch])
   const clientList = useMemo(() => wireguardPeers?.map(peer => toVPNClientRow(peer)) ?? [], [wireguardPeers])
-
-  console.log(wireguardPeers)
 
   if (loading) {
     return <LoopingLogo />
@@ -88,11 +73,11 @@ function VPN() {
     <ScrollablePage
       scrollable={false}
       heading="VPN clients"
-      headingContent={<HeaderActions />}
+      headingContent={<HeaderActions refetch={refetch} />}
     >
       <VPNClientList
         columns={columns}
-        data={clientList.concat(MOCK_CLIENT_LIST)}
+        data={clientList}
       />
     </ScrollablePage>
   )

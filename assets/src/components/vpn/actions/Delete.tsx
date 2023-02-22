@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { Dispatch, ReactElement } from 'react'
-import { Button, Modal } from '@pluralsh/design-system'
-import { useMutation } from '@apollo/client'
+import { Button, GraphQLToast, Modal } from '@pluralsh/design-system'
+import { ServerError, useMutation } from '@apollo/client'
 
 import { RootMutationTypeDeletePeerArgs, WireguardPeer } from '../../../generated/graphql'
 import { DeleteWireguardPeer } from '../graphql/mutations'
@@ -26,11 +26,10 @@ const DeleteClient = styled(DeleteClientUnstyled)(() => ({
 function DeleteClientUnstyled({
   name, onClose, refetch, ...props
 }: DeleteClientProps): ReactElement {
-  console.log(name)
-
   return (
     <div {...props}>
       <Modal
+        BackdropProps={{ zIndex: 20 }}
         header="delete vpn client"
         open
         onClose={onClose}
@@ -78,8 +77,6 @@ function ModalContentUnstyled({
     },
   })
 
-  console.log(error)
-
   return (
     <div {...props}>
       <span>Are you sure you want to delete this VPN client?</span>
@@ -97,6 +94,15 @@ function ModalContentUnstyled({
         >Delete
         </Button>
       </div>
+
+      {error && (
+        <GraphQLToast
+          header={(error?.networkError as ServerError)?.statusCode?.toString() ?? 'Error'}
+          error={{ graphQLErrors: [...error?.graphQLErrors ?? []] }}
+          margin="medium"
+          marginHorizontal="xxxxlarge"
+        />
+      )}
     </div>
   )
 }

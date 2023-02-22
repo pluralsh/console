@@ -2140,6 +2140,8 @@ export type WireguardPeer = {
 
 export type WireguardPeerSpec = {
   __typename?: 'WireguardPeerSpec';
+  address?: Maybe<Scalars['String']>;
+  publicKey?: Maybe<Scalars['String']>;
   wireguardRef?: Maybe<Scalars['String']>;
 };
 
