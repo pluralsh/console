@@ -26,10 +26,10 @@ defmodule Kube.WireguardPeer do
   end
 end
 
-defmodule Kube.WireguadPeerList do
+defmodule Kube.WireguardPeerList do
   use Kazan.Model
 
-  defmodellist "WireguadPeerList",
+  defmodellist "WireguardPeerList",
                "vpn.plural.sh",
                "v1alpha1",
                Kube.WireguardPeer
