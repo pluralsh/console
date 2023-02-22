@@ -51,6 +51,7 @@ export const getDirectory = (app: any = null, config: any = null) => [
   { path: 'cost', label: 'Cost analysis', enabled: app?.cost || app?.license },
   { path: 'oidc', label: 'User management', enabled: true },
   { path: 'config', label: 'Configuration', enabled: config?.gitStatus?.cloned },
+  { path: 'docs', label: app => `${app.name} docs`, enabled: true },
 ]
 
 export default function App() {
@@ -65,6 +66,8 @@ export default function App() {
   const currentApp = applications.find(app => app.name === appName)
 
   if (!me || !currentApp) return null
+
+  console.log('apps', applications)
 
   const directory = getDirectory(currentApp, configuration).filter(({ enabled }) => enabled)
   const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
@@ -85,16 +88,21 @@ export default function App() {
             selectedKey: currentTab?.path,
           }}
         >
-          {directory.map(({ label, path }) => (
-            <Tab
-              key={path}
-              as={Link}
-              to={path}
-              textDecoration="none"
-            >
-              {label}
-            </Tab>
-          ))}
+          {directory.map(({ label, path }) => {
+            console.log('label', label)
+            console.log('path', path)
+
+            return (
+              <Tab
+                key={path}
+                as={Link}
+                to={path}
+                textDecoration="none"
+              >
+                {typeof label === 'function' ? label(currentApp) : label}
+              </Tab>
+            )
+          })}
         </TabList>
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />

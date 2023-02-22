@@ -2,6 +2,8 @@ import { Navigate, Route } from 'react-router-dom'
 
 import ComponentMetrics from 'components/apps/app/components/component/ComponentMetrics'
 
+import AppDocs from 'components/apps/app/docs/AppDocs'
+
 import Apps from '../components/apps/Apps'
 import App from '../components/apps/app/App'
 import Dashboards from '../components/apps/app/dashboards/Dashboards'
@@ -71,6 +73,10 @@ export const appsRoutes = [
     <Route
       path="config"
       element={<Configuration />}
+    />
+    <Route
+      path="docs"
+      element={<AppDocs />}
     />
   </Route>,
 
