@@ -19,25 +19,36 @@ function cell(props: CellContext<VPNClientRow, User | undefined>): JSX.Element {
 
   return (
     <Flex gap="xsmall">
-      <AppIcon
-        name={user?.name}
-        url={user?.profile ?? undefined}
-        size="xxsmall"
-      />
-      <Flex direction="column">
+      {!user && (
         <Span
           body2
           color="text-light"
-          lineHeight="18px"
-        >{user?.name}
+        >N/A
         </Span>
-        <Span
-          caption
-          color="text-xlight"
-          lineHeight="14px"
-        >{user?.email}
-        </Span>
-      </Flex>
+      )}
+      {user && (
+        <>
+          <AppIcon
+            name={user?.name}
+            url={user?.profile ?? undefined}
+            size="xxsmall"
+          />
+          <Flex direction="column">
+            <Span
+              body2
+              color="text-light"
+              lineHeight="18px"
+            >{user?.name}
+            </Span>
+            <Span
+              caption
+              color="text-xlight"
+              lineHeight="14px"
+            >{user?.email}
+            </Span>
+          </Flex>
+        </>
+      )}
     </Flex>
   )
 }

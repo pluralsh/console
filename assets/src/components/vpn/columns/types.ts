@@ -1,6 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { User } from '../../../generated/graphql'
+import { User, WireguardPeer } from '../../../generated/graphql'
 
 type VPNClientRow = {
   name?: string
@@ -10,7 +10,17 @@ type VPNClientRow = {
   isReady?: boolean
 }
 
+function toVPNClientRow(peer: WireguardPeer | null): VPNClientRow {
+  return {
+    name: peer?.metadata?.name,
+    user: peer?.user ?? undefined,
+    isReady: peer?.status.ready ?? false,
+    address: peer?.spec.address,
+    publicKey: peer?.spec.publicKey,
+  }
+}
+
 const ColumnBuilder = createColumnHelper<VPNClientRow>()
 
 export type { VPNClientRow }
-export { ColumnBuilder }
+export { ColumnBuilder, toVPNClientRow }

@@ -1,7 +1,12 @@
-import { Button, ListBoxItem, Select } from '@pluralsh/design-system'
+import {
+  Button,
+  ListBoxItem,
+  LoopingLogo,
+  Select,
+} from '@pluralsh/design-system'
 import styled from 'styled-components'
-
 import { useMemo, useState } from 'react'
+import { useQuery } from '@apollo/client'
 
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import VPNClientList from '../../vpn/VPNClientList'
@@ -12,9 +17,11 @@ import {
   ColumnPublicKey,
   ColumnStatus,
   ColumnUser,
-  VPNClientRow,
+  toVPNClientRow,
 } from '../../vpn/columns'
 import { CreateClient } from '../../vpn/actions/Create'
+import { RootQueryType } from '../../../generated/graphql'
+import { WireguardPeers } from '../../vpn/graphql/queries'
 
 const HeaderActions = styled(HeaderActionsUnstyled)(({ theme }) => ({
   display: 'flex',
@@ -43,25 +50,39 @@ function HeaderActionsUnstyled({ ...props }) {
       </Button>
 
       {/* Modals */}
-      {open && <CreateClient onClose={() => setOpen(false)} />}
+      {open && (
+        <CreateClient
+          onClose={() => setOpen(false)}
+          refetch={() => {}}
+        />
+      )}
     </div>
   )
 }
 
-function VPN() {
-  const columns = useMemo(() => [ColumnName, ColumnUser, ColumnAddress, ColumnPublicKey, ColumnStatus, ColumnActions], [])
-  const data: Array<VPNClientRow> = [{
+const MOCK_CLIENT_LIST = [{
+  name: 'sebastian-vpn-test',
+  address: '127.0.0.1',
+  publicKey: '15182j192ghj192j1e9jg91j2d9J(J91jf91j9j1jg91j2349J91jf91j9j1jg91j2349J91jf91j9j1jg91j2349',
+  isReady: false,
+  user: {
+    id: '123',
     name: 'Sebastian Florek',
-    address: '127.0.0.1',
-    publicKey: '15182j192ghj192j1e9jg91j2d9J(J91jf91j9j1jg91j2349J91jf91j9j1jg91j2349J91jf91j9j1jg91j2349',
-    isReady: true,
-    user: {
-      id: '123',
-      name: 'Sebastian Florek',
-      email: 'sebastian@plural.sh',
-      profile: '',
-    },
-  }]
+    email: 'sebastian@plural.sh',
+    profile: '',
+  },
+}]
+
+function VPN() {
+  const { data: { wireguardPeers } = {}, loading, refetch } = useQuery<Pick<RootQueryType, 'wireguardPeers'>>(WireguardPeers)
+  const columns = useMemo(() => [ColumnName, ColumnUser, ColumnAddress, ColumnPublicKey, ColumnStatus, ColumnActions(refetch)], [refetch])
+  const clientList = useMemo(() => wireguardPeers?.map(peer => toVPNClientRow(peer)) ?? [], [wireguardPeers])
+
+  console.log(wireguardPeers)
+
+  if (loading) {
+    return <LoopingLogo />
+  }
 
   return (
     <ScrollablePage
@@ -71,7 +92,7 @@ function VPN() {
     >
       <VPNClientList
         columns={columns}
-        data={data}
+        data={clientList.concat(MOCK_CLIENT_LIST)}
       />
     </ScrollablePage>
   )

@@ -3,13 +3,15 @@ import { CellContext } from '@tanstack/react-table'
 import { Div } from 'honorable'
 import { Dispatch, useMemo, useState } from 'react'
 
+import { ColumnDefTemplate } from '@tanstack/table-core/src/types'
+
 import { MoreMenu } from '../../utils/MoreMenu'
 import { DeleteClient } from '../actions/Delete'
 import { DownloadConfig } from '../actions/Download'
 
 import { ColumnBuilder, VPNClientRow } from './types'
 
-const ColumnActions = ColumnBuilder.display({
+const ColumnActions = refetch => ColumnBuilder.display({
   id: 'actions',
   header: '',
   enableGlobalFilter: false,
@@ -17,13 +19,23 @@ const ColumnActions = ColumnBuilder.display({
   meta: {
     gridTemplate: '48px',
   },
-  cell,
+  cell: cell(refetch),
 })
 
-function cell(props: CellContext<VPNClientRow, unknown>): JSX.Element {
-  const { isReady } = props.row.original
+function cell(refetch): ColumnDefTemplate<CellContext<VPNClientRow, unknown>> {
+  const context = (props: CellContext<VPNClientRow, unknown>): JSX.Element => {
+    const { isReady, name } = props.row.original
 
-  return <VPNColumnActions disabled={!isReady} />
+    return (
+      <VPNColumnActions
+        disabled={!isReady}
+        name={name}
+        refetch={refetch}
+      />
+    )
+  }
+
+  return context
 }
 
 interface MenuItem {
@@ -39,16 +51,22 @@ enum MenuItemSelection {
 
 type MenuItems = {[key in MenuItemSelection]: MenuItem}
 
-function VPNColumnActions({ disabled }) {
+function VPNColumnActions({ disabled, refetch, name }) {
   const [selected, setSelected] = useState<MenuItemSelection | undefined>()
   const dialog = useMemo(() => {
     switch (selected) {
     case MenuItemSelection.DownloadConfig:
       return <DownloadConfig onClose={() => setSelected(undefined)} />
     case MenuItemSelection.DeleteClient:
-      return <DeleteClient onClose={() => setSelected(undefined)} />
+      return (
+        <DeleteClient
+          name={name}
+          onClose={() => setSelected(undefined)}
+          refetch={refetch}
+        />
+      )
     }
-  }, [selected])
+  }, [name, refetch, selected])
 
   const menuItems: MenuItems = {
     [MenuItemSelection.DownloadConfig]: {

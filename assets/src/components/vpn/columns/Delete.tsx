@@ -19,12 +19,22 @@ const ColumnDelete = ColumnBuilder.display({
 })
 
 function cell(props: CellContext<VPNClientRow, unknown>): JSX.Element {
-  const { isReady } = props.row.original
+  const { isReady, name } = props.row.original
 
-  return <DeleteAction disabled={!isReady} />
+  return (
+    <DeleteAction
+      disabled={!isReady}
+      name={name ?? ''}
+    />
+  )
 }
 
-function DeleteAction({ disabled }) {
+interface DeleteActionsProps {
+  disabled: boolean,
+  name: string
+}
+
+function DeleteAction({ disabled, name }: DeleteActionsProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -45,7 +55,13 @@ function DeleteAction({ disabled }) {
         </Button>
       </Tooltip>
 
-      {open && <DeleteClient onClose={() => setOpen(false)} />}
+      {open && (
+        <DeleteClient
+          onClose={() => setOpen(false)}
+          name={name}
+          refetch={() => {}}
+        />
+      )}
     </>
   )
 }

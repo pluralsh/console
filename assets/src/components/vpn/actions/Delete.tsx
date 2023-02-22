@@ -1,6 +1,16 @@
 import styled from 'styled-components'
-import { ReactElement } from 'react'
+import { Dispatch, ReactElement } from 'react'
 import { Button, Modal } from '@pluralsh/design-system'
+import { useMutation } from '@apollo/client'
+
+import { RootMutationTypeDeletePeerArgs, WireguardPeer } from '../../../generated/graphql'
+import { DeleteWireguardPeer } from '../graphql/mutations'
+
+interface DeleteClientProps {
+  name: string
+  refetch: Dispatch<void>
+  onClose: Dispatch<void>
+}
 
 const DeleteClient = styled(DeleteClientUnstyled)(() => ({
   '.modalContainer': {
@@ -13,7 +23,11 @@ const DeleteClient = styled(DeleteClientUnstyled)(() => ({
   },
 }))
 
-function DeleteClientUnstyled({ onClose, ...props }): ReactElement {
+function DeleteClientUnstyled({
+  name, onClose, refetch, ...props
+}: DeleteClientProps): ReactElement {
+  console.log(name)
+
   return (
     <div {...props}>
       <Modal
@@ -23,7 +37,11 @@ function DeleteClientUnstyled({ onClose, ...props }): ReactElement {
         size="large"
         className="modalContainer"
       >
-        <ModalContent onClose={onClose} />
+        <ModalContent
+          onClose={onClose}
+          refetch={refetch}
+          name={name}
+        />
       </Modal>
     </div>
   )
@@ -47,8 +65,20 @@ const ModalContent = styled(ModalContentUnstyled)(({ theme }) => ({
   },
 }))
 
-function ModalContentUnstyled({ onClose, ...props }): ReactElement {
-  // TODO: wire API calls and validation
+function ModalContentUnstyled({
+  name, onClose, refetch, ...props
+}: DeleteClientProps): ReactElement {
+  const [deletePeer, { loading, error }] = useMutation<WireguardPeer, RootMutationTypeDeletePeerArgs>(DeleteWireguardPeer, {
+    variables: {
+      name,
+    },
+    onCompleted: () => {
+      refetch()
+      onClose()
+    },
+  })
+
+  console.log(error)
 
   return (
     <div {...props}>
@@ -60,7 +90,12 @@ function ModalContentUnstyled({ onClose, ...props }): ReactElement {
           onClick={onClose}
         >Cancel
         </Button>
-        <Button destructive>Delete</Button>
+        <Button
+          destructive
+          onClick={deletePeer}
+          loading={loading}
+        >Delete
+        </Button>
       </div>
     </div>
   )

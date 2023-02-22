@@ -1,13 +1,22 @@
 import styled from 'styled-components'
-import { ReactElement } from 'react'
+import { Dispatch, ReactElement, useState } from 'react'
 import {
   Button,
   FormField,
   Input,
   Modal,
 } from '@pluralsh/design-system'
+import { useMutation } from '@apollo/client'
 
-function CreateClient({ onClose }): ReactElement {
+import { CreateWireguardPeer } from '../graphql/mutations'
+import { RootMutationTypeCreatePeerArgs, WireguardPeer } from '../../../generated/graphql'
+
+interface CreateClientProps {
+  refetch: Dispatch<void>
+  onClose: Dispatch<void>
+}
+
+function CreateClient({ onClose, refetch }: CreateClientProps): ReactElement {
   return (
     <Modal
       header="create vpn client"
@@ -16,7 +25,10 @@ function CreateClient({ onClose }): ReactElement {
       size="large"
       style={{ padding: 0 }}
     >
-      <ModalContent onClose={onClose} />
+      <ModalContent
+        onClose={onClose}
+        refetch={refetch}
+      />
     </Modal>
   )
 }
@@ -33,17 +45,44 @@ const ModalContent = styled(ModalContentUnstyled)(({ theme }) => ({
   },
 }))
 
-function ModalContentUnstyled({ onClose, ...props }): ReactElement {
-  // TODO: wire API calls and validation
+function ModalContentUnstyled({ onClose, refetch, ...props }: CreateClientProps): ReactElement {
+  const [name, setName] = useState<string>('')
+  const [email, setEmail] = useState<string>()
+  const [createPeer, { loading, error }] = useMutation<WireguardPeer, RootMutationTypeCreatePeerArgs>(CreateWireguardPeer, {
+    variables: {
+      name,
+      email,
+    },
+    onCompleted: () => {
+      refetch()
+      onClose()
+    },
+  })
+
+  console.log(error)
 
   return (
     <div {...props}>
-      <FormField label="Name">
-        <Input placeholder="VPN client name" />
+      <FormField
+        label="Name"
+        required
+      >
+        <Input
+          placeholder="VPN client name"
+          value={name}
+          onChange={({ target: { value } }) => setName(value)}
+        />
       </FormField>
 
-      <FormField label="User email">
-        <Input placeholder="Enter user email" />
+      <FormField
+        label="User email"
+        required
+      >
+        <Input
+          placeholder="Enter user email"
+          value={email}
+          onChange={({ target: { value } }) => setEmail(value)}
+        />
       </FormField>
 
       <div className="footer">
@@ -52,7 +91,11 @@ function ModalContentUnstyled({ onClose, ...props }): ReactElement {
           onClick={onClose}
         >Cancel
         </Button>
-        <Button>Create</Button>
+        <Button
+          loading={loading}
+          onClick={createPeer}
+        >Create
+        </Button>
       </div>
     </div>
   )
