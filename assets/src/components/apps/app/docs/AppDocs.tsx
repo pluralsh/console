@@ -1,11 +1,13 @@
 import { LoopingLogo } from '@pluralsh/design-system'
-import MarkdocComponent from 'markdoc/components/MarkdocContent'
+
 import { GqlError } from 'components/utils/Alert'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useRepositoryQuery } from 'generated/graphql'
 import { Div } from 'honorable'
 import { capitalize } from 'lodash'
 import { useParams } from 'react-router-dom'
+
+import MarkdocComponent from './MarkdocContent'
 
 export default function AppDocs() {
   const { appName } = useParams()

@@ -5,7 +5,9 @@ import styled from 'styled-components'
 
 export function bodyText({ theme, fillLevel, variant }) {
   return {
-    ...theme.partials.marketingText.body2,
+    ...(variant === 'docs'
+      ? theme.partials.marketingText.body2
+      : theme.partials.text.body2LooseLineHeight),
     color:
       fillLevel > 0
         ? theme.colors['text-light']
@@ -13,7 +15,7 @@ export function bodyText({ theme, fillLevel, variant }) {
     'b, strong': {
       ...(variant === 'docs'
         ? theme.partials.marketingText.bodyBold
-        : theme.partials.text.bodyBold),
+        : theme.partials.text.body2LooseLineHeightBold),
       color: theme.colors['text-light'],
     },
     'i, em': {
