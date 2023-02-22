@@ -1,0 +1,118 @@
+fragment CostAnalysisFragment on CostAnalysis {
+  minutes
+  cpuCost
+  pvCost
+  ramCost
+  totalCost
+}
+
+fragment FileContentFragment on FileContent {
+  content
+  path
+}
+
+fragment ConfigurationFragment on Configuration {
+  helm
+  terraform
+}
+
+fragment ApplicationFragment on Application {
+  name
+  spec {
+    descriptor {
+      type
+      icons
+      description
+      version
+      links {
+        description
+        url
+      }
+    }
+    components {
+      group
+      kind
+    }
+  }
+  status {
+    components {
+      group
+      kind
+      name
+      status
+    }
+    conditions {
+      message
+      reason
+      status
+      type
+    }
+    componentsReady
+  }
+  cost {
+    ...CostAnalysisFragment
+  }
+}
+
+fragment MetadataFragment on Metadata {
+  name
+  namespace
+  labels {
+    name
+    value
+  }
+  annotations {
+    name
+    value
+  }
+}
+
+fragment ConfigurationOverlayFragment on ConfigurationOverlay {
+  metadata {
+    ...MetadataFragment
+  }
+  spec {
+    name
+    folder
+    subfolder
+    documentation
+    inputType
+    inputValues
+    updates {
+      path
+    }
+  }
+}
+
+fragment RepositoryFragment on Repository {
+  id
+  name
+  icon
+  description
+  grafanaDns
+  configuration {
+    ...ConfigurationFragment
+  }
+  docs {
+    ...FileContentFragment
+  }
+}
+
+query Repository($name: String!) {
+  repository(name: $name) {
+    ...RepositoryFragment
+  }
+}
+
+query App($name: String!) {
+  application(name: $name) {
+    configuration {
+      helm
+      terraform
+    }
+    ...ApplicationFragment
+  }
+  configurationOverlays(namespace: $name) {
+    ...ConfigurationOverlayFragment
+  }
+}

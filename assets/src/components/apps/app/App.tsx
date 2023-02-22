@@ -14,21 +14,16 @@ import {
   useParams,
 } from 'react-router-dom'
 
-import { InstallationContext } from 'components/Installations'
-
-import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-
-import { PropsContainer } from 'components/utils/PropsContainer'
-
 import { ensureURLValidity } from 'utils/url'
-
+import { InstallationContext } from 'components/Installations'
+import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
+import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
+import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
+import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
+import { PropsContainer } from 'components/utils/PropsContainer'
 import Prop from 'components/utils/Prop'
 
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
-
-import { ResponsiveLayoutSidenavContainer } from '../../utils/layout/ResponsiveLayoutSidenavContainer'
-import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'
-import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveLayoutContentContainer'
 
 import { LoginContext } from '../../contexts'
 
@@ -67,8 +62,6 @@ export default function App() {
 
   if (!me || !currentApp) return null
 
-  console.log('apps', applications)
-
   const directory = getDirectory(currentApp, configuration).filter(({ enabled }) => enabled)
   const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
   const { name, spec: { descriptor: { links, version } } } = currentApp
@@ -88,21 +81,16 @@ export default function App() {
             selectedKey: currentTab?.path,
           }}
         >
-          {directory.map(({ label, path }) => {
-            console.log('label', label)
-            console.log('path', path)
-
-            return (
-              <Tab
-                key={path}
-                as={Link}
-                to={path}
-                textDecoration="none"
-              >
-                {typeof label === 'function' ? label(currentApp) : label}
-              </Tab>
-            )
-          })}
+          {directory.map(({ label, path }) => (
+            <Tab
+              key={path}
+              as={Link}
+              to={path}
+              textDecoration="none"
+            >
+              {typeof label === 'function' ? label(currentApp) : label}
+            </Tab>
+          ))}
         </TabList>
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
