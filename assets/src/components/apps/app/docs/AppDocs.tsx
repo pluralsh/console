@@ -27,7 +27,9 @@ export default function AppDocs() {
   return (
     <ScrollablePage heading={`${displayAppName} docs`}>
       {data.repository?.docs?.map(docPage => (
-        <Div marginBottom="large"><MarkdocComponent raw={docPage?.content} /></Div>
+        <Div marginBottom="xxxxlarge">
+          <MarkdocComponent raw={docPage?.content} />
+        </Div>
       ))}
     </ScrollablePage>
   )
