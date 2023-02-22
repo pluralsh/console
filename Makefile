@@ -77,3 +77,7 @@ release-vsn: # tags and pushes a new release
 	git pull --rebase; \
 	git tag -a $$tag -m "new release"; \
 	git push origin $$tag
+
+update-schema:
+	MIX_ENV=test mix absinthe.schema.sdl --schema Console.GraphQl  schema/schema.graphql
+	cd assets && yarn graphql:codegen
