@@ -5,7 +5,7 @@ defmodule Console.GraphQl.Kubernetes.VPN do
 
   object :wireguard_peer do
     field :metadata, non_null(:metadata)
-    field :status,   non_null(:wireguard_peer_status)
+    field :status,   :wireguard_peer_status
     field :spec,     non_null(:wireguard_peer_spec)
 
     field :config, :string, resolve: fn
