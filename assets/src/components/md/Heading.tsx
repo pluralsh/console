@@ -1,4 +1,5 @@
 import { LinksIcon } from '@pluralsh/design-system'
+import { useMarkdocContext } from 'markdoc/DocsContext'
 import { Link } from 'react-router-dom'
 
 import styled, { useTheme } from 'styled-components'
@@ -9,17 +10,22 @@ const StyledH = styled.h1.withConfig({ shouldForwardProp: () => true })<{
   $level: number
 }>(({ theme, $level }) => {
   let style
+  const { variant } = useMarkdocContext()
 
   switch ($level) {
   case 1:
   case 2:
     style = {
-      ...theme.partials.marketingText.title1,
+      ...(variant === 'docs'
+        ? theme.partials.marketingText.title1
+        : theme.partials.text.title1),
     }
     break
   case 3:
     style = {
-      ...theme.partials.marketingText.title2,
+      ...(variant === 'docs'
+        ? theme.partials.marketingText.title2
+        : theme.partials.text.title2),
     }
     break
   case 4:
@@ -29,12 +35,16 @@ const StyledH = styled.h1.withConfig({ shouldForwardProp: () => true })<{
     break
   case 5:
     style = {
-      ...theme.partials.marketingText.subtitle2,
+      ...(variant === 'docs'
+        ? theme.partials.marketingText.subtitle2
+        : theme.partials.text.subtitle2),
     }
     break
   case 6:
     style = {
-      ...theme.partials.marketingText.body1Bold,
+      ...(variant === 'docs'
+        ? theme.partials.marketingText.body1Bold
+        : theme.partials.text.body1Bold),
     }
     break
   }

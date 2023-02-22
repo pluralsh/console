@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom'
 
 import styled from 'styled-components'
 
-import { useHref } from 'markdoc/utils/react-router'
-
 import { isExternalUrl } from 'markdoc/utils/text'
+
+import { useMarkdocContext } from 'markdoc/DocsContext'
 
 import { ListItem } from './List'
 import Paragraph from './Paragraph'
@@ -17,7 +17,8 @@ function MarkdocCallout({
 }: Omit<CalloutProps, 'buttonProps'> & { ctas: any[] }) {
   let buttonProps
   const navigate = useNavigate()
-  const href = useHref(ctas?.[0]?.href)
+  const { useNormalizeHref } = useMarkdocContext()
+  const href = useNormalizeHref(ctas?.[0]?.href)
 
   if (ctas[0]) {
     const { title, newTab = true } = ctas[0]

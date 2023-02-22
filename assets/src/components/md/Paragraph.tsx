@@ -1,10 +1,9 @@
 import { useFillLevel } from '@pluralsh/design-system'
+import { useMarkdocContext } from 'markdoc/DocsContext'
 
 import styled from 'styled-components'
 
-export function bodyText({ theme, fillLevel }) {
-  const variant
-
+export function bodyText({ theme, fillLevel, variant }) {
   return {
     ...theme.partials.marketingText.body2,
     color:
@@ -12,7 +11,9 @@ export function bodyText({ theme, fillLevel }) {
         ? theme.colors['text-light']
         : theme.colors['text-long-form'],
     'b, strong': {
-      ...theme.partials.marketingText.bodyBold,
+      ...(variant === 'docs'
+        ? theme.partials.marketingText.bodyBold
+        : theme.partials.text.bodyBold),
       color: theme.colors['text-light'],
     },
     'i, em': {
@@ -23,10 +24,10 @@ export function bodyText({ theme, fillLevel }) {
 
 const Paragraph = styled.p(({ theme }) => {
   const fillLevel = useFillLevel()
-  const docsContext = useDocsContext()
+  const { variant } = useMarkdocContext()
 
   return {
-    ...bodyText({ theme, fillLevel, variant: docsContext.variant }),
+    ...bodyText({ theme, fillLevel, variant }),
     marginBottom: theme.spacing.small,
   }
 })

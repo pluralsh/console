@@ -1,8 +1,18 @@
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { MdLinkProps } from 'markdoc/DocsContext'
 
 import { isRelativeUrl, removeTrailingSlashes, stripMdExtension } from './text'
 
-export function useHref(href?:string) {
+export function renderLink({ href, ...props }: MdLinkProps) {
+  return (
+    <Link
+      to={href ?? ''}
+      {...props}
+    />
+  )
+}
+
+export function useNormalizeHref(href?:string) {
   const { pathname } = useLocation()
   let finalHref = stripMdExtension(href)
 
@@ -16,3 +26,4 @@ export function useHref(href?:string) {
 export {
   useNavigate,
 }
+

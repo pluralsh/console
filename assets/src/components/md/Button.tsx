@@ -6,7 +6,7 @@ import * as icons from '@pluralsh/design-system/dist/icons'
 import styled from 'styled-components'
 
 import { isExternalUrl } from 'markdoc/utils/text'
-import { useHref } from 'react-router-dom'
+import { useMarkdocContext } from 'markdoc/DocsContext'
 
 function Button({
   href,
@@ -24,7 +24,9 @@ function Button({
   renderLink: (props: ComponentProps<'a'>) => ReactNode
   useCurrentPath: () => string
 }) {
-  href = useHref(href)
+  const { useNormalizeHref, renderLink: LinkComponent } = useMarkdocContext()
+
+  href = useNormalizeHref(href)
   const buttonProps: any = props
 
   if (type === 'floating') {
@@ -45,15 +47,15 @@ function Button({
       <PluralButton
         {...buttonProps}
         {...(Icon ? { startIcon: <Icon size={16} /> } : {})}
+        href={href}
         {...(isExternalUrl(href)
           ? {
             as: 'a',
-            href,
             target: '_blank',
             rel: 'nofollow noopener',
           }
           : {
-            to: href,
+            as: LinkComponent,
           })}
       >
         {children}

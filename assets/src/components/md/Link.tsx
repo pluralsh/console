@@ -1,11 +1,9 @@
 import type { ReactNode } from 'react'
 
-import { Link as NextLink } from 'react-router-dom'
-
 import styled from 'styled-components'
 
 import { isExternalUrl } from 'markdoc/utils/text'
-import { useHref } from 'markdoc/utils/react-router'
+import { useMarkdocContext } from 'markdoc/DocsContext'
 
 function Link({
   href,
@@ -14,19 +12,22 @@ function Link({
 }: {
   href: string
   children?: ReactNode
-}) {
-  href = useHref(href)
+  }) {
+  const { useNormalizeHref } = useMarkdocContext()
+
+  href = useNormalizeHref(href)
+  const { renderLink: LinkComponent } = useMarkdocContext()
 
   return (
-    <NextLink
-      to={href}
+    <LinkComponent
+      href={href}
       {...props}
       {...(isExternalUrl(href)
         ? { target: '_blank', rel: 'nofollow noopener' }
         : {})}
     >
       {children}
-    </NextLink>
+    </LinkComponent>
   )
 }
 
