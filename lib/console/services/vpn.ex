@@ -48,13 +48,13 @@ defmodule Console.Services.VPN do
 
   @spec config(WireguardPeer.t) :: {:ok, binary} | error
   def config(%WireguardPeer{
+    metadata: %{namespace: ns},
     status: %WireguardPeer.Status{
       ready: true,
       config_ref: %CoreV1.SecretKeySelector{key: k, name: n}
     }
   }) do
-    Console.namespace("wireguard")
-    |> CoreV1.read_namespaced_secret(n)
+    CoreV1.read_namespaced_secret!(ns, n)
     |> Kazan.run()
     |> case do
       {:ok, %CoreV1.Secret{data: %{^k => value}}} -> Base.decode64(value)
