@@ -1,3 +1,31 @@
+import { LoopingLogo } from '@pluralsh/design-system'
+import { GqlError } from 'components/utils/Alert'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import { useRepositoryQuery } from 'generated/graphql'
+import { Div } from 'honorable'
+import { capitalize } from 'lodash'
+import { useParams } from 'react-router-dom'
+
 export default function AppDocs() {
-  return <div>Hello</div>
+  const { appName } = useParams()
+  const { data, loading, error } = useRepositoryQuery({
+    variables: { name: appName ?? '' },
+  })
+
+  if (error) {
+    return <GqlError error={error} />
+  }
+  if (!data) {
+    return <LoopingLogo />
+  }
+
+  const displayAppName = capitalize(appName)
+
+  return (
+    <ScrollablePage heading={`${displayAppName} docs`}>
+      {data.repository?.docs?.map(docPage => (
+        <Div marginBottom="large">{docPage?.content}</Div>
+      ))}
+    </ScrollablePage>
+  )
 }

@@ -16,38 +16,46 @@ fragment ConfigurationFragment on Configuration {
   terraform
 }
 
+fragment ApplicationSpecFragment on ApplicationSpec {
+  descriptor {
+    type
+    icons
+    description
+    version
+    links {
+      description
+      url
+    }
+  }
+  components {
+    group
+    kind
+  }
+}
+
+fragment ApplicationStatusFragment on ApplicationStatus {
+  components {
+    group
+    kind
+    name
+    status
+  }
+  conditions {
+    message
+    reason
+    status
+    type
+  }
+  componentsReady
+}
+
 fragment ApplicationFragment on Application {
   name
   spec {
-    descriptor {
-      type
-      icons
-      description
-      version
-      links {
-        description
-        url
-      }
-    }
-    components {
-      group
-      kind
-    }
+    ...ApplicationSpecFragment
   }
   status {
-    components {
-      group
-      kind
-      name
-      status
-    }
-    conditions {
-      message
-      reason
-      status
-      type
-    }
-    componentsReady
+    ...ApplicationStatusFragment
   }
   cost {
     ...CostAnalysisFragment
@@ -84,6 +92,19 @@ fragment ConfigurationOverlayFragment on ConfigurationOverlay {
   }
 }
 
+query App($name: String!) {
+  application(name: $name) {
+    configuration {
+      helm
+      terraform
+    }
+    ...ApplicationFragment
+  }
+  configurationOverlays(namespace: $name) {
+    ...ConfigurationOverlayFragment
+  }
+}
+
 fragment RepositoryFragment on Repository {
   id
   name
@@ -101,18 +122,5 @@ fragment RepositoryFragment on Repository {
 query Repository($name: String!) {
   repository(name: $name) {
     ...RepositoryFragment
-  }
-}
-
-query App($name: String!) {
-  application(name: $name) {
-    configuration {
-      helm
-      terraform
-    }
-    ...ApplicationFragment
-  }
-  configurationOverlays(namespace: $name) {
-    ...ConfigurationOverlayFragment
   }
 }
