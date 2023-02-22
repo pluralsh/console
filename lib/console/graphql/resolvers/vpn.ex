@@ -22,7 +22,10 @@ defmodule Console.GraphQl.Resolvers.VPN do
     do: VPN.create_peer(email, name)
   def create_peer(_, _), do: {:error, "at least one of userId or name are required"}
 
-  def delete_peer(%{name: name}, _), do: VPN.delete_peer(name)
+  def delete_peer(%{name: name}, _) do
+    with {:ok, _} <- VPN.delete_peer(name),
+      do: {:ok, true}
+  end
 
   defp items_response({:ok, %{items: items}}), do: {:ok, items}
   defp items_response(err), do: err

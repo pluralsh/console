@@ -4,12 +4,9 @@ import {
   ArrowTopRightIcon,
   BellIcon,
   BuildIcon,
-  Checkbox,
-  CloseIcon,
   Sidebar as DSSidebar,
   DiscordIcon,
   GitHubLogoIcon,
-  IconFrame,
   ListIcon,
   LogoutIcon,
   PeopleIcon,
@@ -35,7 +32,6 @@ import {
   Flex,
   Menu,
   MenuItem,
-  P,
   Span,
   useOutsideClick,
 } from 'honorable'
@@ -52,9 +48,8 @@ import { useTheme } from 'styled-components'
 
 import { LoginContext } from '../contexts'
 
-import { NotificationsPanel } from './NotificationsPanel'
-
 import { MARK_READ } from './queries'
+import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
 
 export const SIDEBAR_ICON_HEIGHT = '42px'
 
@@ -141,7 +136,7 @@ export default function Sidebar() {
   const [isMenuOpen, setIsMenuOpened] = useState<boolean>(false)
   const [isNotificationsPanelOpen, setIsNotificationsPanelOpen]
     = useState(false)
-  const [all, setAll] = useState<boolean>(false)
+  const sidebarWidth = 64
   const { me, configuration } = useContext<any>(LoginContext)
   const navigate = useNavigate()
   const { pathname } = useLocation()
@@ -333,69 +328,11 @@ export default function Sidebar() {
       {/* ---
         NOTIFICATIONS PANEL
       --- */}
-      {isNotificationsPanelOpen && (
-        <Flex
-          position="fixed"
-          top={57}
-          bottom={0}
-          left={64}
-          right={0}
-          align="flex-end"
-          backgroundColor="rgba(0, 0, 0, 0.5)"
-          zIndex={999}
-        >
-          <Flex
-            ref={notificationsPanelRef}
-            direction="column"
-            backgroundColor="fill-one"
-            height="calc(100% - 16px)"
-            width={480}
-            borderTop="1px solid border"
-            borderRight="1px solid border"
-            borderTopRightRadius={6}
-          >
-            <Flex
-              align="center"
-              justify="space-between"
-              padding="medium"
-              borderBottom="1px solid border"
-            >
-              <P subtitle2>Notifications</P>
-              <Flex
-                align="center"
-                gap="small"
-                justify="center"
-                padding="xsmall"
-              >
-                <Checkbox
-                  checked={all}
-                  onChange={() => setAll(!all)}
-                  small
-                >
-                  Show all notifications
-                </Checkbox>
-                <IconFrame
-                  clickable
-                  icon={<CloseIcon />}
-                  tooltip
-                  textValue="Close notification panel"
-                  onClick={() => toggleNotificationPanel(false)}
-                />
-              </Flex>
-            </Flex>
-            <Flex
-              flexGrow={1}
-              direction="column"
-              overflowY="auto"
-            >
-              <NotificationsPanel
-                closePanel={() => toggleNotificationPanel(false)}
-                all={all}
-              />
-            </Flex>
-          </Flex>
-        </Flex>
-      )}
+      <NotificationsPanelOverlay
+        leftOffset={sidebarWidth}
+        isOpen={isNotificationsPanelOpen}
+        setIsOpen={setIsNotificationsPanelOpen}
+      />
     </>
   )
 }

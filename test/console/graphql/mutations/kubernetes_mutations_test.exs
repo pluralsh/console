@@ -119,15 +119,11 @@ defmodule Console.GraphQl.KubernetesMutationsTest do
       expect(Console.Features, :available?, fn :vpn -> true end)
       expect(Kazan, :run, fn _ -> {:ok, wireguard_peer("test")} end)
 
-      {:ok, %{data: %{"deletePeer" => peer}}} = run_query("""
+      {:ok, %{data: %{"deletePeer" => true}}} = run_query("""
         mutation Delete($name: String!) {
-          deletePeer(name: $name) {
-            metadata { name }
-          }
+          deletePeer(name: $name)
         }
       """, %{"name" => "test"}, %{current_user: admin})
-
-      assert peer["metadata"]["name"] == "test"
     end
 
     test "admins cannot delete wireguard peers w/o the feature enabled" do
@@ -136,9 +132,7 @@ defmodule Console.GraphQl.KubernetesMutationsTest do
 
       {:ok, %{errors: [_ | _]}} = run_query("""
         mutation Delete($name: String!) {
-          deletePeer(name: $name) {
-            metadata { name }
-          }
+          deletePeer(name: $name)
         }
       """, %{"name" => "test"}, %{current_user: admin})
     end
@@ -148,9 +142,7 @@ defmodule Console.GraphQl.KubernetesMutationsTest do
 
       {:ok, %{errors: [_ | _]}} = run_query("""
         mutation Delete($name: String!) {
-          deletePeer(name: $name) {
-            metadata { name }
-          }
+          deletePeer(name: $name)
         }
       """, %{"name" => "test"}, %{current_user: user})
     end
