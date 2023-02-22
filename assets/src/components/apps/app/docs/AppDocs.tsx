@@ -1,4 +1,5 @@
 import { LoopingLogo } from '@pluralsh/design-system'
+import MarkdocComponent from 'components/md/MarkdocContent'
 import { GqlError } from 'components/utils/Alert'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useRepositoryQuery } from 'generated/graphql'
@@ -8,7 +9,7 @@ import { useParams } from 'react-router-dom'
 
 export default function AppDocs() {
   const { appName } = useParams()
-  const { data, loading, error } = useRepositoryQuery({
+  const { data, error } = useRepositoryQuery({
     variables: { name: appName ?? '' },
   })
 
@@ -24,7 +25,7 @@ export default function AppDocs() {
   return (
     <ScrollablePage heading={`${displayAppName} docs`}>
       {data.repository?.docs?.map(docPage => (
-        <Div marginBottom="large">{docPage?.content}</Div>
+        <Div marginBottom="large"><MarkdocComponent raw={docPage?.content} /></Div>
       ))}
     </ScrollablePage>
   )
