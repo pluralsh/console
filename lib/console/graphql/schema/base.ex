@@ -75,6 +75,7 @@ defmodule Console.GraphQl.Schema.Base do
         case fun.(args, ctx) do
           {:ok, res} -> {:ok, res}
           {:error, %Ecto.Changeset{} = cs} -> {:error, resolve_changeset(cs)}
+          {:error, _, %{"message" => msg}} -> {:error, msg}
           error -> error
         end
       rescue
