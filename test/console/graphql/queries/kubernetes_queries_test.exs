@@ -418,7 +418,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
   describe "myWireguardPeers" do
     test "you can list your own peers" do
       user = insert(:user)
-      peers = [wireguard_peer("first", insert(:user)), wireguard_peer("second", insert(:user))]
+      [f, s | _] = peers = [wireguard_peer("first", user), wireguard_peer("second", user), wireguard_peer("third", insert(:user))]
       expect(Kazan, :run, fn _ -> {:ok, %{items: peers}} end)
 
       {:ok, %{data: %{"myWireguardPeers" => found}}} = run_query("""
@@ -430,8 +430,8 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
         }
       """, %{}, %{current_user: user})
 
-      assert Enum.map(found, & &1["metadata"]["name"]) == Enum.map(peers, & &1.metadata.name)
-      assert Enum.all?(found, & &1["user"]["id"])
+      assert Enum.map(found, & &1["metadata"]["name"]) == Enum.map([f, s], & &1.metadata.name)
+      assert Enum.all?(found, & &1["user"]["id"] == user.id)
     end
   end
 

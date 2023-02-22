@@ -39,9 +39,16 @@ defmodule Kube.Client do
   end
 
   def list_peers_for_user(email) do
-    path_builder("vpn.plural.sh", "v1alpha1", "wireguardpeers", Console.namespace("wireguard"))
-    |> make_request("get", Kube.WireguardPeerList, "", %{labelSelector: "vpn.plural.sh/email=#{URI.encode(email)}"})
+    Console.namespace("wireguard")
+    |> list_wireguard_peers()
+    |> case do
+      {:ok, %{items: items} = peers} -> {:ok, %{peers | items: Enum.filter(items, &has_email?(&1, email))}}
+      error -> error
+    end
   end
+
+  defp has_email?(%Kube.WireguardPeer{metadata: %{annotations: %{"vpn.plural.sh/email" => e}}}, e), do: true
+  defp has_email?(_, _), do: false
 
   def delete_wireguard_peer(name) do
     path_builder("vpn.plural.sh", "v1alpha1", "wireguardpeers", Console.namespace("wireguard"), name)
@@ -51,7 +58,7 @@ defmodule Kube.Client do
   def create_wireguard_peer(email, name) do
     namespace = Console.namespace(name)
     peer = %Kube.WireguardPeer{
-      metadata: %ObjectMeta{name: name, namespace: namespace, labels: %{"vpn.plural.sh/email" => email}},
+      metadata: %ObjectMeta{name: name, namespace: namespace, annotations: %{"vpn.plural.sh/email" => email}},
       spec: %Kube.WireguardPeer.Spec{
         wireguard_ref: "wireguard"
       }

@@ -35,7 +35,7 @@ defmodule Console.Services.VPN do
 
   @spec accessible(WireguardPeer.t, User.t) :: peer_resp
   def accessible(peer, %User{roles: %{admin: true}}), do: {:ok, peer}
-  def accessible(%WireguardPeer{metadata: %{labels: %{"vpn.plural.sh/email" => e}}} = peer, %User{email: e}),
+  def accessible(%WireguardPeer{metadata: %{annotations: %{"vpn.plural.sh/email" => e}}} = peer, %User{email: e}),
     do: {:ok, peer}
   def accessible(_, _), do: {:error, "cannot access this wireguard peer"}
 
