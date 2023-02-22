@@ -275,7 +275,7 @@ defmodule Console.GraphQl.Kubernetes do
       safe_resolve &VPN.create_peer/2
     end
 
-    field :delete_peer, :wireguard_peer do
+    field :delete_peer, :boolean do
       middleware Authenticated
       middleware AdminRequired
       middleware Feature, :vpn
