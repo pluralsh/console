@@ -4,7 +4,7 @@ import { Toast } from '@pluralsh/design-system'
 
 import { A, Flex, Span } from 'honorable'
 
-import { MarkdocContextProvider } from 'markdoc/DocsContext'
+import { MarkdocContextProvider } from 'markdoc/MarkdocContext'
 
 import * as mdContext from 'markdoc/utils/contextReactRouter'
 

@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { MdLinkProps } from 'markdoc/DocsContext'
+import { MdLinkProps } from 'markdoc/MarkdocContext'
 
 import { isRelativeUrl, removeTrailingSlashes, stripMdExtension } from './text'
 

@@ -7,7 +7,7 @@ import {
 
 export type MdLinkProps = Omit<ComponentProps<'a'>, 'ref'> & { ref?: any }
 
-type MarkdocContextT = {
+export type MarkdocContextT = {
   variant: 'console' | 'docs'
   renderLink: (props: MdLinkProps) => ReactElement
   useNormalizeHref: (href?: string) => string

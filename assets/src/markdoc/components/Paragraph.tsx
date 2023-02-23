@@ -1,9 +1,18 @@
-import { useFillLevel } from '@pluralsh/design-system'
-import { useMarkdocContext } from 'markdoc/DocsContext'
+import { styledTheme, useFillLevel } from '@pluralsh/design-system'
+import type { FillLevel } from '@pluralsh/design-system/dist/components/contexts/FillLevelContext'
+import { MarkdocContextT, useMarkdocContext } from 'markdoc/MarkdocContext'
 
 import styled from 'styled-components'
 
-export function bodyText({ theme, fillLevel, variant }) {
+export function bodyText({
+  theme,
+  fillLevel,
+  variant,
+}: {
+  theme: typeof styledTheme
+  fillLevel: FillLevel
+  variant: MarkdocContextT['variant']
+}) {
   return {
     ...(variant === 'docs'
       ? theme.partials.marketingText.body2

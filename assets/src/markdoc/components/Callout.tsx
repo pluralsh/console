@@ -6,7 +6,7 @@ import styled from 'styled-components'
 
 import { isExternalUrl } from 'markdoc/utils/text'
 
-import { useMarkdocContext } from 'markdoc/DocsContext'
+import { useMarkdocContext } from 'markdoc/MarkdocContext'
 
 import { ListItem } from './List'
 import Paragraph from './Paragraph'

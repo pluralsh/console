@@ -1,5 +1,5 @@
 import { useFillLevel } from '@pluralsh/design-system'
-import { useMarkdocContext } from 'markdoc/DocsContext'
+import { useMarkdocContext } from 'markdoc/MarkdocContext'
 
 import styled from 'styled-components'
 
