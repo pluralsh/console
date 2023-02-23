@@ -75,6 +75,7 @@ const StyledH = styled.h1.withConfig({ shouldForwardProp: () => true })<{
 
 export function Heading({ level = 1, children, ...props }) {
   const theme = useTheme()
+  const { variant } = useMarkdocContext()
 
   return (
     <StyledH
@@ -83,7 +84,7 @@ export function Heading({ level = 1, children, ...props }) {
       {...props}
     >
       {children}
-      {props.id && (
+      {props.id && variant === 'docs' && (
         <Link
           className="link"
           to={`#${props.id}`}
