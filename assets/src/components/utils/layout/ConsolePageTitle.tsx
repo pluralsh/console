@@ -20,11 +20,13 @@ const ConsolePageTitle = forwardRef<HTMLDivElement, PageTitleProps>(({
     alignItems="center"
     justifyContent="space-between"
     position="relative"
+    minHeight={40}
     {...props}
   >
     {heading && (
       <H1
         title2
+        marginBottom="-0.1em" // optically center title
         {...headingProps}
       >
         {heading}

@@ -10,6 +10,7 @@ import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/Respon
 import { LoginContext } from 'components/contexts'
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import { useTheme } from 'styled-components'
 
 const getDirectory = (me, configuration) => [
   { path: 'users', label: 'Users', enabled: true },
@@ -20,6 +21,7 @@ const getDirectory = (me, configuration) => [
 ]
 
 export default function Account() {
+  const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const { me, configuration } = useContext<any>(LoginContext)
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
@@ -37,7 +39,7 @@ export default function Account() {
     <ResponsiveLayoutPage>
       <ResponsiveLayoutSidenavContainer>
         <TabList
-          marginTop={90}
+          marginTop={40 + theme.spacing.medium}
           stateRef={tabStateRef}
           stateProps={{
             orientation: 'vertical',
