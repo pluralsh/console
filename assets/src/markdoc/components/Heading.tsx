@@ -18,26 +18,28 @@ const StyledH = styled.h1.withConfig({ shouldForwardProp: () => true })<{
     style = {
       ...(variant === 'docs'
         ? theme.partials.marketingText.title1
-        : theme.partials.text.title1),
+        : theme.partials.text.title2),
     }
     break
   case 3:
     style = {
       ...(variant === 'docs'
         ? theme.partials.marketingText.title2
-        : theme.partials.text.title2),
+        : theme.partials.text.subtitle1),
     }
     break
   case 4:
     style = {
-      ...theme.partials.marketingText.subtitle1,
+      ...(variant === 'docs'
+        ? theme.partials.marketingText.subtitle1
+        : theme.partials.text.subtitle2),
     }
     break
   case 5:
     style = {
       ...(variant === 'docs'
         ? theme.partials.marketingText.subtitle2
-        : theme.partials.text.subtitle2),
+        : theme.partials.text.body1Bold),
     }
     break
   case 6:
@@ -48,8 +50,6 @@ const StyledH = styled.h1.withConfig({ shouldForwardProp: () => true })<{
     }
     break
   }
-
-  console.log('variant', variant)
 
   return {
     marginTop: theme.spacing.xxlarge,
