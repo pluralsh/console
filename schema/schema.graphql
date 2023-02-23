@@ -1,605 +1,144 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
 schema {
   query: RootQueryType
   mutation: RootMutationType
   subscription: RootSubscriptionType
 }
 
-type PageInfo {
-  "When paginating backwards, are there more items?"
-  hasPreviousPage: Boolean!
-
-  "When paginating forwards, are there more items?"
-  hasNextPage: Boolean!
-
-  "When paginating backwards, the cursor to continue."
-  startCursor: String
-
-  "When paginating forwards, the cursor to continue."
-  endCursor: String
-}
-
-type RunbookAction {
-  name: String!
-  type: String!
-  configuration: ConfigurationAction
-}
-
-enum AuditAction {
-  CREATE
-  UPDATE
-  DELETE
-  APPROVE
-  CANCEL
-}
-
-type RecipeSection {
-  id: ID!
-  repository: Repository
-  recipeItems: [RecipeItem]
-  configuration: [ConfigurationItem]
-}
-
-type StatusCondition {
-  message: String!
-  reason: String!
-  status: String!
-  type: String!
-}
-
-type UserConnection {
-  pageInfo: PageInfo!
-  edges: [UserEdge]
-}
-
-type Application {
-  name: String!
-  spec: ApplicationSpec!
-  status: ApplicationStatus!
-  cost: CostAnalysis
-  license: License
-  configuration: Configuration
-}
-
-type ConfigurationAction {
-  updates: [PathUpdate]
-}
-
-type NotificationConnection {
-  pageInfo: PageInfo!
-  edges: [NotificationEdge]
-}
-
-type RecipeItem {
-  id: ID!
-  configuration: [ConfigurationItem]
-}
-
-type DashboardLabel {
-  name: String!
-  values: [String]
-}
-
-type Changelog {
-  id: ID!
-  repo: String!
-  tool: String!
-  content: String
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-type RoleEdge {
-  node: Role
-  cursor: String
-}
-
-type GroupEdge {
-  node: Group
-  cursor: String
-}
-
-type InstallationEdge {
-  node: Installation
-  cursor: String
-}
-
-type WebhookEdge {
-  node: Webhook
-  cursor: String
-}
-
-type NodeUsage {
-  cpu: String
-  memory: String
-}
-
-type RepositoryEdge {
-  node: Repository
-  cursor: String
-}
-
-type OverlayUpdate {
-  path: [String]
-}
-
-enum AutoscalingTarget {
-  STATEFULSET
-  DEPLOYMENT
-}
-
-type StatusComponent {
-  group: String
-  kind: String!
-  name: String!
-  status: String!
-}
-
-input SmtpInput {
-  server: String
-  port: Int
-  password: String
-  sender: String
-  user: String
-}
-
-type StatefulSet {
-  metadata: Metadata!
-  status: StatefulSetStatus!
-  spec: StatefulSetSpec!
-  pods: [Pod]
-  raw: String!
-  events: [Event]
-}
-
-type FileContent {
-  path: String
-  content: String
-}
-
-type MetricResult {
-  timestamp: Int
-  value: String
-}
-
-type Component {
-  group: String!
-  kind: String!
-}
-
-type ConfigurationOverlaySpec {
-  name: String
-  folder: String
-  subfolder: String
-  documentation: String
-  updates: [OverlayUpdate]
-  inputType: String
-  inputValues: [String]
-}
-
-type LoadBalancerStatus {
-  ingress: [LoadBalancerIngressStatus]
-}
-
-type ContainerStatus {
-  restartCount: Int
-  ready: Boolean
-  name: String
-  image: String
-  state: ContainerState
-}
-
-input ContextAttributes {
-  buckets: [String]
-  domain: [String]
-  configuration: Map!
-}
-
-type IngressTls {
-  hosts: [String]
-}
-
-type NodeStatus {
-  allocatable: Map
-  capacity: Map
-  phase: String
-  conditions: [NodeCondition]
-}
-
-type IngressSpec {
-  rules: [IngressRule]
-  tls: [IngressTls]
-}
-
-type DeploymentStatus {
-  availableReplicas: Int
-  replicas: Int
-  readyReplicas: Int
-  unavailableReplicas: Int
-}
-
-input InviteAttributes {
-  email: String
-}
-
-input BindingAttributes {
-  id: ID
-  userId: ID
-  groupId: ID
-}
-
-input BuildAttributes {
-  repository: String!
-  type: BuildType
-  message: String
-}
-
-type DeploymentSpec {
-  replicas: Int
-  strategy: DeploymentStrategy
-}
-
-type CronJob {
-  metadata: Metadata!
-  status: CronStatus!
-  spec: CronSpec!
-  raw: String!
-  events: [Event]
-  jobs: [Job]
-}
-
-type PodDelta {
-  delta: Delta
-  payload: Pod
-}
-
 "supported kubernetes objects fetchable in runbooks"
 union KubernetesData = Deployment | StatefulSet
 
-type Smtp {
-  server: String
-  port: Int
-  password: String
-  sender: String
-  user: String
-}
-
-type ClusterInfo {
-  gitCommit: String
-  gitVersion: String
-  platform: String
-  version: String
-}
-
-type LoginInfo {
-  oidcUri: String
-}
-
-type RootSubscriptionType {
-  applicationDelta: ApplicationDelta
-  podDelta: PodDelta
-  buildDelta(buildId: ID): BuildDelta
-  commandDelta(buildId: ID!): CommandDelta
-  notificationDelta: NotificationDelta
-}
-
-type RepositoryConnection {
-  pageInfo: PageInfo!
-  edges: [RepositoryEdge]
-}
-
-type WebhookConnection {
-  pageInfo: PageInfo!
-  edges: [WebhookEdge]
-}
-
-type ConfigurationValidation {
-  type: String
-  regex: String
-  message: String
-}
-
-type InstallationConnection {
-  pageInfo: PageInfo!
-  edges: [InstallationEdge]
-}
-
-type PodCondition {
-  lastProbeTime: String
-  lastTransitionTime: String
-  message: String
-  reason: String
-  status: String
-  type: String
-}
-
-type GroupConnection {
-  pageInfo: PageInfo!
-  edges: [GroupEdge]
-}
-
-type RoleConnection {
-  pageInfo: PageInfo!
-  edges: [RoleEdge]
-}
-
-type RunbookExecution {
-  id: ID!
+type Application {
+  configuration: Configuration
+  cost: CostAnalysis
+  license: License
   name: String!
-  namespace: String!
-  context: Map!
-  user: User
-  insertedAt: DateTime
-  updatedAt: DateTime
+  spec: ApplicationSpec!
+  status: ApplicationStatus!
 }
 
-type ConfigurationItem {
-  name: String
-  type: String
-  placeholder: String
-  documentation: String
-  default: String
-  optional: Boolean
-  condition: ConfigurationCondition
-  validation: ConfigurationValidation
+type ApplicationDelta {
+  delta: Delta
+  payload: Application
 }
 
-type LogStream {
-  stream: Map
-  values: [MetricResult]
+type ApplicationDescriptor {
+  description: String
+  icons: [String]
+  links: [ApplicationLink]
+  type: String!
+  version: String!
 }
 
 type ApplicationInfoItem {
+  name: String
   type: String
-  name: String
   value: String
 }
 
-type LogLabel {
-  name: String
-  value: String
+type ApplicationLink {
+  description: String
+  url: String
 }
 
-type ManifestNetwork {
-  pluralDns: Boolean
-  subdomain: String
+type ApplicationSpec {
+  components: [Component]
+  descriptor: ApplicationDescriptor!
+  info: [ApplicationInfoItem]
 }
 
-type Webhook {
+type ApplicationStatus {
+  components: [StatusComponent]
+  componentsReady: String!
+  conditions: [StatusCondition]
+}
+
+type Audit {
+  action: AuditAction!
+  actor: User
+  city: String
+  country: String
   id: ID!
-  url: String!
-  health: WebhookHealth!
-  type: WebhookType!
   insertedAt: DateTime
+  ip: String
+  latitude: String
+  longitude: String
+  repository: String
+  type: AuditType!
   updatedAt: DateTime
 }
 
-type Runbook {
-  name: String!
-  spec: RunbookSpec!
-  status: RunbookStatus
-  data(context: RunbookContext): [RunbookData]
-  executions(after: String, first: Int, before: String, last: Int): RunbookExecutionConnection
-}
-
-type Repository {
-  id: ID!
-  name: String!
-  description: String
-  icon: String
-  docs: [FileContent]
-  configuration: Configuration
-  grafanaDns: String
-}
-
-type DeploymentStrategy {
-  type: String
-  rollingUpdate: RollingUpdate
-}
-
-enum Severity {
-  NONE
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
-type DashboardGraph {
-  name: String!
-  queries: [DashboardMetric]
-  format: String
-}
-
-type IngressPath {
-  backend: IngressBackend
-  path: String
-}
-
-type IngressRule {
-  host: String
-  http: HttpIngressRule
-}
-
-type Service {
-  metadata: Metadata!
-  status: ServiceStatus!
-  spec: ServiceSpec!
-  pods: [Pod]
-  raw: String!
-  events: [Event]
-}
-
-type License {
-  metadata: Metadata!
-  spec: LicenseSpec!
-  status: LicenseStatus
-}
-
-type Node {
-  status: NodeStatus!
-  spec: NodeSpec!
-  metadata: Metadata!
-  raw: String!
-  pods: [Pod]
-  events: [Event]
-}
-
-type Invite {
-  secureId: String!
-  email: String
-}
-
-type PodEdge {
-  node: Pod
-  cursor: String
-}
-
-type PrometheusDatasource {
-  query: String!
-  format: String
-  legend: String
-}
-
-type Recipe {
-  id: ID!
-  name: String!
-  description: String
-  provider: String
-  restricted: Boolean
-  recipeSections: [RecipeSection]
-  oidcEnabled: Boolean
-}
-
-enum BuildType {
-  DEPLOY
-  BOUNCE
-  APPROVAL
-  INSTALL
-  DESTROY
-  DEDICATED
+type AuditConnection {
+  edges: [AuditEdge]
+  pageInfo: PageInfo!
 }
 
 type AuditEdge {
-  node: Audit
   cursor: String
+  node: Audit
 }
 
-type KubernetesDatasource {
-  resource: String!
-  name: String!
+type AuditMetric {
+  count: Int
+  country: String
 }
 
-type RunbookActionResponse {
-  redirectTo: String
-}
-
-type LicenseFeature {
-  name: String!
-  description: String
-}
-
-type Role {
-  id: ID!
-  name: String!
-  description: String
-  repositories: [String]
-  permissions: [Permission]
-  roleBindings: [RoleBinding]
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-type CrossVersionResourceTarget {
-  apiVersion: String
-  kind: String
-  name: String
-}
-
-type PluralManifest {
-  network: ManifestNetwork
-  bucketPrefix: String
-  cluster: String
-}
-
-input RunbookContext {
-  timeseriesStart: Int
-  timeseriesStep: String
-}
-
-type ServicePort {
-  name: String
-  protocol: String
-  port: Int
-  targetPort: String
-}
-
-type Deployment {
-  metadata: Metadata!
-  status: DeploymentStatus!
-  spec: DeploymentSpec!
-  pods: [Pod]
-  raw: String!
-  events: [Event]
+type AvailableFeatures {
+  vpn: Boolean
 }
 
 type Build {
-  id: ID!
-  repository: String!
-  type: BuildType!
-  status: Status!
-  message: String
-  completedAt: DateTime
-  sha: String
-  commands(after: String, first: Int, before: String, last: Int): CommandConnection
-  creator: User
   approver: User
   changelogs: [Changelog]
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-type Command {
-  id: ID!
-  command: String!
-  exitCode: Int
-  stdout: String
+  commands(after: String, before: String, first: Int, last: Int): CommandConnection
   completedAt: DateTime
-  build: Build
+  creator: User
+  id: ID!
   insertedAt: DateTime
+  message: String
+  repository: String!
+  sha: String
+  status: Status!
+  type: BuildType!
   updatedAt: DateTime
 }
 
-type DashboardMetric {
-  legend: String
-  query: String
-  results: [MetricResult]
+type BuildConnection {
+  edges: [BuildEdge]
+  pageInfo: PageInfo!
 }
 
-type NodeSpec {
-  podCidr: String
-  providerId: String
-  unschedulable: Boolean
+type BuildDelta {
+  delta: Delta
+  payload: Build
 }
 
-type LicenseSpec {
-  secretRef: SecretKeySelector!
+type BuildEdge {
+  cursor: String
+  node: Build
 }
 
-input UserAttributes {
-  name: String
-  email: String
-  password: String
-  roles: UserRoleAttributes
+type BuildInfo {
+  all: Int
+  failed: Int
+  queued: Int
+  running: Int
+  successful: Int
 }
 
-type VerticalPodAutoscalerSpec {
-  targetRef: CrossVersionResourceTarget!
-  updatePolicy: VerticalPodAutoscalerUpdatePolicy!
+type Certificate {
+  events: [Event]
+  metadata: Metadata!
+  raw: String!
+  spec: CertificateSpec!
+  status: CertificateStatus!
 }
 
-type ContainerResources {
-  cpu: String
-  memory: String
+type CertificateSpec {
+  dnsNames: [String]
+  issuerRef: IssuerRef
+  secretName: String!
 }
 
 type CertificateStatus {
@@ -609,79 +148,109 @@ type CertificateStatus {
   renewalTime: String
 }
 
-type CertificateSpec {
-  dnsNames: [String]
-  secretName: String!
-  issuerRef: IssuerRef
+type Changelog {
+  content: String
+  id: ID!
+  insertedAt: DateTime
+  repo: String!
+  tool: String!
+  updatedAt: DateTime
 }
 
-type JobSpec {
-  backoffLimit: Int
-  parallelism: Int
-  activeDeadlineSeconds: Int
+type ClusterInfo {
+  gitCommit: String
+  gitVersion: String
+  platform: String
+  version: String
 }
 
-type RunbookStatus {
-  alerts: [RunbookAlertStatus]
+type Command {
+  build: Build
+  command: String!
+  completedAt: DateTime
+  exitCode: Int
+  id: ID!
+  insertedAt: DateTime
+  stdout: String
+  updatedAt: DateTime
 }
 
-type NamespaceStatus {
-  phase: String
+type CommandConnection {
+  edges: [CommandEdge]
+  pageInfo: PageInfo!
 }
 
-type PodStatus {
-  message: String
-  phase: String
-  hostIp: String
-  podIp: String
-  reason: String
-  conditions: [PodCondition]
-  containerStatuses: [ContainerStatus]
-  initContainerStatuses: [ContainerStatus]
+type CommandDelta {
+  delta: Delta
+  payload: Command
 }
 
-type GitStatus {
-  cloned: Boolean
-  output: String
+type CommandEdge {
+  cursor: String
+  node: Command
 }
 
-type CronSpec {
-  schedule: String!
-  suspend: Boolean
-  concurrencyPolicy: String
+type Component {
+  group: String!
+  kind: String!
 }
 
-type CostAnalysis {
-  minutes: Float
-  cpuCost: Float
-  cpuEfficiency: Float
-  efficiency: Float
-  gpuCost: Float
-  networkCost: Float
-  pvCost: Float
-  ramCost: Float
-  ramEfficiency: Float
-  totalCost: Float
-  sharedCost: Float
+type Configuration {
+  helm: String
+  terraform: String
 }
 
-type ApplicationSpec {
-  descriptor: ApplicationDescriptor!
-  components: [Component]
-  info: [ApplicationInfoItem]
+type ConfigurationAction {
+  updates: [PathUpdate]
 }
 
-type AvailableFeatures {
-  vpn: Boolean
+type ConfigurationCondition {
+  field: String
+  operation: String
+  value: String
 }
 
-type WireguardPeer {
+type ConfigurationItem {
+  condition: ConfigurationCondition
+  default: String
+  documentation: String
+  name: String
+  optional: Boolean
+  placeholder: String
+  type: String
+  validation: ConfigurationValidation
+}
+
+type ConfigurationOverlay {
   metadata: Metadata!
-  status: WireguardPeerStatus!
-  spec: WireguardPeerSpec!
-  config: String
-  user: User
-  raw: String!
+  spec: ConfigurationOverlaySpec!
+}
+
+type ConfigurationOverlaySpec {
+  documentation: String
+  folder: String
+  inputType: String
+  inputValues: [String]
+  name: String
+  subfolder: String
+  updates: [OverlayUpdate]
+}
+
+type ConfigurationValidation {
+  message: String
+  regex: String
+  type: String
+}
+
+type ConsoleConfiguration {
+  features: AvailableFeatures
+  gitCommit: String
+  gitStatus: GitStatus
+  isDemoProject: Boolean
+  isSandbox: Boolean
+  manifest: PluralManifest
+  pluralLogin: Boolean
+  vpnEnabled: Boolean
 }
 
 type Container {
@@ -691,326 +260,128 @@ type Container {
   resources: Resources
 }
 
-type GroupMember {
-  id: ID!
-  user: User
-  group: Group
-  insertedAt: DateTime
-  updatedAt: DateTime
+type ContainerRecommendation {
+  containerName: String
+  lowerBound: ContainerResources
+  name: String
+  target: ContainerResources
+  uncappedTarget: ContainerResources
+  upperBound: ContainerResources
 }
 
-type ApplicationDescriptor {
-  type: String!
-  version: String!
-  description: String
-  icons: [String]
-  links: [ApplicationLink]
+type ContainerResources {
+  cpu: String
+  memory: String
 }
 
-enum Delta {
-  CREATE
-  UPDATE
-  DELETE
+type ContainerState {
+  running: RunningState
+  terminated: TerminatedState
+  waiting: WaitingState
 }
 
-type ApplicationDelta {
-  delta: Delta
-  payload: Application
+type ContainerStatus {
+  image: String
+  name: String
+  ready: Boolean
+  restartCount: Int
+  state: ContainerState
 }
 
-type Installation {
-  id: ID!
-  repository: Repository
+type CostAnalysis {
+  cpuCost: Float
+  cpuEfficiency: Float
+  efficiency: Float
+  gpuCost: Float
+  minutes: Float
+  networkCost: Float
+  pvCost: Float
+  ramCost: Float
+  ramEfficiency: Float
+  sharedCost: Float
+  totalCost: Float
 }
 
-type Configuration {
-  terraform: String
-  helm: String
+type CronJob {
+  events: [Event]
+  jobs: [Job]
+  metadata: Metadata!
+  raw: String!
+  spec: CronSpec!
+  status: CronStatus!
 }
 
-type Notification {
-  id: ID!
-  title: String!
-  description: String
-  fingerprint: String!
-  status: NotificationStatus
-  labels: Map
-  annotations: Map
-  repository: String!
-  seenAt: DateTime
-  severity: Severity
-  insertedAt: DateTime
-  updatedAt: DateTime
+type CronSpec {
+  concurrencyPolicy: String
+  schedule: String!
+  suspend: Boolean
 }
 
-type AuditConnection {
-  pageInfo: PageInfo!
-  edges: [AuditEdge]
+type CronStatus {
+  active: [JobReference]
+  lastScheduleTime: String
 }
 
-type RootMutationType {
-  createBuild(attributes: BuildAttributes!): Build
-  restartBuild(id: ID!): Build
-  cancelBuild(id: ID!): Build
-  approveBuild(id: ID!): Build
-  signIn(email: String!, password: String!): User
-  loginLink(key: String!): User
-  readNotifications: User
-  signup(inviteId: String!, attributes: UserAttributes!): User
-  oauthCallback(code: String!, redirect: String): User
-  createInvite(attributes: InviteAttributes!): Invite
-  updateUser(id: ID, attributes: UserAttributes!): User
-  markRead(type: ReadType): User
-  createGroup(attributes: GroupAttributes!): Group
-  deleteGroup(groupId: ID!): Group
-  updateGroup(groupId: ID!, attributes: GroupAttributes!): Group
-  createGroupMember(groupId: ID!, userId: ID!): GroupMember
-  deleteGroupMember(groupId: ID!, userId: ID!): GroupMember
-  createRole(attributes: RoleAttributes!): Role
-  updateRole(id: ID!, attributes: RoleAttributes!): Role
-  deleteRole(id: ID!): Role
-  deletePod(namespace: String!, name: String!): Pod
-  deleteJob(namespace: String!, name: String!): Job
-  deleteNode(name: String!): Node
-  overlayConfiguration(namespace: String!, context: Map!): Build
-  createPeer(userId: ID, email: String, name: String!): WireguardPeer
-  deletePeer(name: String!): WireguardPeer
-  installRecipe(id: ID!, context: Map!, oidc: Boolean): Build
-  installStack(name: String!, context: ContextAttributes!, oidc: Boolean): Build
-  updateSmtp(smtp: SmtpInput!): Smtp
-  updateConfiguration(repository: String!, content: String!, tool: Tool, message: String): Configuration
-  createUpgradePolicy(attributes: UpgradePolicyAttributes!): UpgradePolicy
-  deleteUpgradePolicy(id: ID!): UpgradePolicy
-  executeRunbook(namespace: String!, name: String!, input: RunbookActionInput!): RunbookActionResponse
-  createWebhook(attributes: WebhookAttributes!): Webhook
-  deleteWebhook(id: ID!): Webhook
-}
-
-type ConfigurationCondition {
-  field: String
-  value: String
-  operation: String
-}
-
-type Recommendation {
-  containerRecommendations: [ContainerRecommendation]
-}
-
-type PodConnection {
-  pageInfo: PageInfo!
-  edges: [PodEdge]
-}
-
-enum Tool {
-  HELM
-  TERRAFORM
-}
-
-type ApplicationLink {
-  url: String
-  description: String
-}
-
-type Stack {
-  id: ID!
-  name: String!
-  bundles: [Recipe]
-  sections: [RecipeSection]
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-type UpgradePolicy {
-  id: ID!
-  name: String!
-  description: String
-  type: UpgradePolicyType!
-  target: String!
-  weight: Int
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-type RootQueryType {
-  configuration: ConsoleConfiguration
-  externalToken: String
-  builds(after: String, first: Int, before: String, last: Int): BuildConnection
-  build(id: ID!): Build
-  buildInfo: BuildInfo
-  users(after: String, first: Int, before: String, last: Int, q: String): UserConnection
-  loginInfo(redirect: String): LoginInfo
-  me: User
-  invite(id: String!): Invite
-  groups(after: String, first: Int, before: String, last: Int, q: String): GroupConnection
-  groupMembers(after: String, first: Int, before: String, last: Int, groupId: ID!): GroupMemberConnection
-  role: Role
-  roles(after: String, first: Int, before: String, last: Int, q: String): RoleConnection
-  notifications(after: String, first: Int, before: String, last: Int, all: Boolean): NotificationConnection
-  dashboards(repo: String!): [Dashboard]
-  dashboard(repo: String!, name: String!, step: String, offset: Int, labels: [LabelInput]): Dashboard
-  metric(query: String!, offset: Int, step: String): [MetricResponse]
-  logs(query: String!, start: Long, end: Long, limit: Int!): [LogStream]
-  scalingRecommendation(kind: AutoscalingTarget!, namespace: String!, name: String!): VerticalPodAutoscaler
-  service(namespace: String!, name: String!): Service
-  clusterInfo: ClusterInfo
-  deployment(namespace: String!, name: String!): Deployment
-  statefulSet(namespace: String!, name: String!): StatefulSet
-  ingress(namespace: String!, name: String!): Ingress
-  nodes: [Node]
-  node(name: String!): Node
-  cronJob(namespace: String!, name: String!): CronJob
-  job(namespace: String!, name: String!): Job
-  certificate(namespace: String!, name: String!): Certificate
-  pod(namespace: String!, name: String!): Pod
-  pods(after: String, first: Int, before: String, last: Int, namespaces: [String]): PodConnection
-  wireguardPeers: [WireguardPeer]
-  myWireguardPeers: [WireguardPeer]
-  wireguardPeer(name: String!): WireguardPeer
-  cachedPods(namespaces: [String]): [Pod]
-  namespaces: [Namespace]
-  logFilters(namespace: String!): [LogFilter]
-  nodeMetrics: [NodeMetric]
-  nodeMetric(name: String!): NodeMetric
-  configurationOverlays(namespace: String!): [ConfigurationOverlay]
-  audits(after: String, first: Int, before: String, last: Int, repo: String): AuditConnection
-  auditMetrics: [AuditMetric]
-  installations(after: String, first: Int, before: String, last: Int): InstallationConnection
-  applications: [Application]
-  application(name: String!): Application
-  repository(name: String!): Repository
-  repositories(after: String, first: Int, before: String, last: Int, query: String!): RepositoryConnection
-  recipes(after: String, first: Int, before: String, last: Int, id: ID!): RecipeConnection
-  context: [RepositoryContext]
-  pluralContext: PluralContext
-  recipe(id: ID!): Recipe
-  stack(name: String!): Stack
-  smtp: Smtp
-  upgradePolicies: [UpgradePolicy]
-  runbook(namespace: String!, name: String!): Runbook
-  runbooks(namespace: String!, pinned: Boolean): [Runbook]
-  webhooks(after: String, first: Int, before: String, last: Int): WebhookConnection
-}
-
-type RoleBinding {
-  id: ID!
-  user: User
-  group: Group
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-type IssuerRef {
-  group: String
+type CrossVersionResourceTarget {
+  apiVersion: String
   kind: String
   name: String
 }
 
-enum AuditType {
-  BUILD
-  POD
-  CONFIGURATION
-  USER
-  GROUP
-  ROLE
-  GROUP_MEMBER
-  POLICY
+type Dashboard {
+  id: String!
+  spec: DashboardSpec!
 }
 
-type MetricResponse {
-  metric: Map
-  values: [MetricResult]
-}
-
-enum ReadType {
-  NOTIFICATION
-  BUILD
-}
-
-type BuildEdge {
-  node: Build
-  cursor: String
-}
-
-type RecipeEdge {
-  node: Recipe
-  cursor: String
-}
-
-type RunningState {
-  startedAt: String
-}
-
-type WaitingState {
-  message: String
-  reason: String
-}
-
-"""
-The `DateTime` scalar type represents a date and time in the UTC
-timezone. The DateTime appears in a JSON response as an ISO8601 formatted
-string, including UTC timezone ("Z"). The parsed date and time string will
-be converted to UTC if there is an offset.
-"""
-scalar DateTime
-
-type GroupMemberEdge {
-  node: GroupMember
-  cursor: String
-}
-
-type RunbookDatasource {
+type DashboardGraph {
+  format: String
   name: String!
-  type: String!
-  prometheus: PrometheusDatasource
-  kubernetes: KubernetesDatasource
+  queries: [DashboardMetric]
 }
 
-type JobReference {
+type DashboardLabel {
   name: String!
-  namespace: String!
+  values: [String]
 }
 
-type CommandEdge {
-  node: Command
-  cursor: String
+type DashboardMetric {
+  legend: String
+  query: String
+  results: [MetricResult]
 }
 
-type RunbookExecutionEdge {
-  node: RunbookExecution
-  cursor: String
+type DashboardSpec {
+  description: String
+  graphs: [DashboardGraph]
+  labels: [DashboardLabel]
+  name: String
+  timeslices: [String]
 }
 
-type Namespace {
-  status: NamespaceStatus!
-  spec: NamespaceSpec!
-  metadata: Metadata!
-  raw: String!
+type Deployment {
   events: [Event]
-}
-
-type PluralContext {
-  buckets: [String]
-  domains: [String]
-  configuration: Map!
-}
-
-type Port {
-  hostPort: Int
-  containerPort: Int
-  protocol: String
-}
-
-type IngressBackend {
-  serviceName: String
-  servicePort: String
-}
-
-type Pod {
-  status: PodStatus!
-  spec: PodSpec!
   metadata: Metadata!
+  pods: [Pod]
   raw: String!
-  events: [Event]
+  spec: DeploymentSpec!
+  status: DeploymentStatus!
+}
+
+type DeploymentSpec {
+  replicas: Int
+  strategy: DeploymentStrategy
+}
+
+type DeploymentStatus {
+  availableReplicas: Int
+  readyReplicas: Int
+  replicas: Int
+  unavailableReplicas: Int
+}
+
+type DeploymentStrategy {
+  rollingUpdate: RollingUpdate
+  type: String
 }
 
 type Event {
@@ -1023,85 +394,182 @@ type Event {
   type: String
 }
 
-type RunbookSpec {
-  name: String!
+type FileContent {
+  content: String
+  path: String
+}
+
+type GitStatus {
+  cloned: Boolean
+  output: String
+}
+
+type Group {
   description: String
-  display: Map
-  datasources: [RunbookDatasource]
-  actions: [RunbookAction]
+  id: ID!
+  insertedAt: DateTime
+  name: String!
+  updatedAt: DateTime
+}
+
+type GroupConnection {
+  edges: [GroupEdge]
+  pageInfo: PageInfo!
+}
+
+type GroupEdge {
+  cursor: String
+  node: Group
+}
+
+type GroupMember {
+  group: Group
+  id: ID!
+  insertedAt: DateTime
+  updatedAt: DateTime
+  user: User
+}
+
+type GroupMemberConnection {
+  edges: [GroupMemberEdge]
+  pageInfo: PageInfo!
+}
+
+type GroupMemberEdge {
+  cursor: String
+  node: GroupMember
+}
+
+type HttpIngressRule {
+  paths: [IngressPath]
 }
 
 type Ingress {
-  metadata: Metadata!
-  status: ServiceStatus!
-  spec: IngressSpec!
-  raw: String!
   events: [Event]
+  metadata: Metadata!
+  raw: String!
+  spec: IngressSpec!
+  status: ServiceStatus!
 }
 
-input UserRoleAttributes {
-  admin: Boolean
+type IngressBackend {
+  serviceName: String
+  servicePort: String
 }
 
-type DashboardSpec {
+type IngressPath {
+  backend: IngressBackend
+  path: String
+}
+
+type IngressRule {
+  host: String
+  http: HttpIngressRule
+}
+
+type IngressSpec {
+  rules: [IngressRule]
+  tls: [IngressTls]
+}
+
+type IngressTls {
+  hosts: [String]
+}
+
+type Installation {
+  id: ID!
+  repository: Repository
+}
+
+type InstallationConnection {
+  edges: [InstallationEdge]
+  pageInfo: PageInfo!
+}
+
+type InstallationEdge {
+  cursor: String
+  node: Installation
+}
+
+type Invite {
+  email: String
+  secureId: String!
+}
+
+type IssuerRef {
+  group: String
+  kind: String
   name: String
-  description: String
-  timeslices: [String]
-  labels: [DashboardLabel]
-  graphs: [DashboardGraph]
-}
-
-input UpgradePolicyAttributes {
-  name: String!
-  description: String
-  type: UpgradePolicyType!
-  target: String!
-  weight: Int
-}
-
-type AuditMetric {
-  country: String
-  count: Int
-}
-
-type LicenseStatus {
-  plan: String
-  free: Boolean
-  features: [LicenseFeature]
-  limits: Map
-  secrets: Map
-}
-
-input WebhookAttributes {
-  url: String!
-}
-
-type ApplicationStatus {
-  components: [StatusComponent]
-  conditions: [StatusCondition]
-  componentsReady: String!
-}
-
-input GroupAttributes {
-  name: String!
-  description: String
-}
-
-input RoleAttributes {
-  name: String
-  description: String
-  repositories: [String]
-  roleBindings: [BindingAttributes]
-  permissions: [Permission]
 }
 
 type Job {
-  metadata: Metadata!
-  status: JobStatus!
-  spec: JobSpec!
-  raw: String!
   events: [Event]
+  metadata: Metadata!
   pods: [Pod]
+  raw: String!
+  spec: JobSpec!
+  status: JobStatus!
+}
+
+type JobReference {
+  name: String!
+  namespace: String!
+}
+
+type JobSpec {
+  activeDeadlineSeconds: Int
+  backoffLimit: Int
+  parallelism: Int
+}
+
+type JobStatus {
+  active: Int
+  completionTime: String
+  failed: Int
+  startTime: String
+  succeeded: Int
+}
+
+type KubernetesDatasource {
+  name: String!
+  resource: String!
+}
+
+type LabelPair {
+  name: String
+  value: String
+}
+
+type License {
+  metadata: Metadata!
+  spec: LicenseSpec!
+  status: LicenseStatus
+}
+
+type LicenseFeature {
+  description: String
+  name: String!
+}
+
+type LicenseSpec {
+  secretRef: SecretKeySelector!
+}
+
+type LicenseStatus {
+  features: [LicenseFeature]
+  free: Boolean
+  limits: Map
+  plan: String
+  secrets: Map
+}
+
+type LoadBalancerIngressStatus {
+  hostname: String
+  ip: String
+}
+
+type LoadBalancerStatus {
+  ingress: [LoadBalancerIngressStatus]
 }
 
 type LogFilter {
@@ -1109,47 +577,72 @@ type LogFilter {
   spec: LogFilterSpec!
 }
 
+type LogFilterSpec {
+  description: String
+  labels: [LogLabel]
+  name: String
+  query: String
+}
+
+type LogLabel {
+  name: String
+  value: String
+}
+
+type LogStream {
+  stream: Map
+  values: [MetricResult]
+}
+
+type LoginInfo {
+  oidcUri: String
+}
+
+type ManifestNetwork {
+  pluralDns: Boolean
+  subdomain: String
+}
+
 type Metadata {
-  labels: [LabelPair]
   annotations: [LabelPair]
+  labels: [LabelPair]
   name: String!
   namespace: String
 }
 
-type BuildInfo {
-  all: Int
-  failed: Int
-  queued: Int
-  running: Int
-  successful: Int
+type MetricResponse {
+  metric: Map
+  values: [MetricResult]
 }
 
-enum Permission {
-  READ
-  CONFIGURE
-  DEPLOY
-  OPERATE
+type MetricResult {
+  timestamp: Int
+  value: String
 }
 
-type RunbookExecutionConnection {
-  pageInfo: PageInfo!
-  edges: [RunbookExecutionEdge]
+type Namespace {
+  events: [Event]
+  metadata: Metadata!
+  raw: String!
+  spec: NamespaceSpec!
+  status: NamespaceStatus!
 }
 
-type ConsoleConfiguration {
-  gitCommit: String
-  isDemoProject: Boolean
-  isSandbox: Boolean
-  pluralLogin: Boolean
-  vpnEnabled: Boolean
-  features: AvailableFeatures
-  manifest: PluralManifest
-  gitStatus: GitStatus
+type NamespaceSpec {
+  finalizers: [String]
 }
 
-type CommandConnection {
-  pageInfo: PageInfo!
-  edges: [CommandEdge]
+type NamespaceStatus {
+  phase: String
+}
+
+type Node {
+  events: [Event]
+  metadata: Metadata!
+  pods: [Pod]
+  raw: String!
+  spec: NodeSpec!
+  status: NodeStatus!
 }
 
 type NodeCondition {
@@ -1159,66 +652,74 @@ type NodeCondition {
   type: String
 }
 
-type GroupMemberConnection {
-  pageInfo: PageInfo!
-  edges: [GroupMemberEdge]
-}
-
-type RecipeConnection {
-  pageInfo: PageInfo!
-  edges: [RecipeEdge]
-}
-
-type ContainerRecommendation {
-  name: String
-  containerName: String
-  target: ContainerResources
-  lowerBound: ContainerResources
-  upperBound: ContainerResources
-  uncappedTarget: ContainerResources
-}
-
-type BuildConnection {
-  pageInfo: PageInfo!
-  edges: [BuildEdge]
-}
-
-type VerticalPodAutoscalerUpdatePolicy {
-  updateMode: String
-}
-
-type ConfigurationOverlay {
+type NodeMetric {
   metadata: Metadata!
-  spec: ConfigurationOverlaySpec!
+  timestamp: String
+  usage: NodeUsage
+  window: String
 }
 
-enum WebhookHealth {
-  HEALTHY
-  UNHEALTHY
+type NodeSpec {
+  podCidr: String
+  providerId: String
+  unschedulable: Boolean
 }
 
-scalar Long
+type NodeStatus {
+  allocatable: Map
+  capacity: Map
+  conditions: [NodeCondition]
+  phase: String
+}
 
-type RollingUpdate {
-  maxSurge: Int
-  maxUnavailable: Int
+type NodeUsage {
+  cpu: String
+  memory: String
+}
+
+type Notification {
+  annotations: Map
+  description: String
+  fingerprint: String!
+  id: ID!
+  insertedAt: DateTime
+  labels: Map
+  repository: String!
+  seenAt: DateTime
+  severity: Severity
+  status: NotificationStatus
+  title: String!
+  updatedAt: DateTime
+}
+
+type NotificationConnection {
+  edges: [NotificationEdge]
+  pageInfo: PageInfo!
+}
+
+type NotificationDelta {
+  delta: Delta
+  payload: Notification
 }
 
 type NotificationEdge {
-  node: Notification
   cursor: String
+  node: Notification
 }
 
-type HttpIngressRule {
-  paths: [IngressPath]
+type OverlayUpdate {
+  path: [String]
 }
 
-type TerminatedState {
-  exitCode: Int
-  finishedAt: String
-  startedAt: String
-  message: String
-  reason: String
+type PageInfo {
+  "When paginating forwards, the cursor to continue."
+  endCursor: String
+  "When paginating forwards, are there more items?"
+  hasNextPage: Boolean!
+  "When paginating backwards, are there more items?"
+  hasPreviousPage: Boolean!
+  "When paginating backwards, the cursor to continue."
+  startCursor: String
 }
 
 type PathUpdate {
@@ -1226,129 +727,139 @@ type PathUpdate {
   valueFrom: String!
 }
 
-enum UpgradePolicyType {
-  DEPLOY
-  APPROVAL
-  IGNORE
+type PluralContext {
+  buckets: [String]
+  configuration: Map!
+  domains: [String]
 }
 
-type UserEdge {
-  node: User
-  cursor: String
+type PluralManifest {
+  bucketPrefix: String
+  cluster: String
+  network: ManifestNetwork
 }
 
-enum WebhookType {
-  PIAZZA
-  SLACK
-}
-
-type Certificate {
-  metadata: Metadata!
-  status: CertificateStatus!
-  spec: CertificateSpec!
-  raw: String!
+type Pod {
   events: [Event]
+  metadata: Metadata!
+  raw: String!
+  spec: PodSpec!
+  status: PodStatus!
 }
 
-type ContainerState {
-  running: RunningState
-  terminated: TerminatedState
-  waiting: WaitingState
+type PodCondition {
+  lastProbeTime: String
+  lastTransitionTime: String
+  message: String
+  reason: String
+  status: String
+  type: String
 }
 
-input RunbookActionInput {
-  action: String!
-  context: Map!
+type PodConnection {
+  edges: [PodEdge]
+  pageInfo: PageInfo!
 }
 
-type RepositoryContext {
-  repository: String!
-  context: Map
+type PodDelta {
+  delta: Delta
+  payload: Pod
 }
 
-type Audit {
-  id: ID!
-  action: AuditAction!
-  type: AuditType!
-  repository: String
-  ip: String
-  city: String
-  country: String
-  latitude: String
-  longitude: String
-  actor: User
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-input LabelInput {
-  name: String
-  value: String
-}
-
-type Dashboard {
-  id: String!
-  spec: DashboardSpec!
-}
-
-type WireguardPeerStatus {
-  ready: Boolean
-  conditions: [StatusCondition]
-}
-
-type WireguardPeerSpec {
-  wireguardRef: String
-  address: String
-  publicKey: String
+type PodEdge {
+  cursor: String
+  node: Pod
 }
 
 type PodSpec {
-  serviceAccountName: String
-  nodeName: String
   containers: [Container]
   initContainers: [Container]
+  nodeName: String
+  serviceAccountName: String
 }
 
-enum Status {
-  QUEUED
-  RUNNING
-  SUCCESSFUL
-  FAILED
-  CANCELLED
-  PENDING
+type PodStatus {
+  conditions: [PodCondition]
+  containerStatuses: [ContainerStatus]
+  hostIp: String
+  initContainerStatuses: [ContainerStatus]
+  message: String
+  phase: String
+  podIp: String
+  reason: String
 }
 
-type RunbookAlertStatus {
+type Port {
+  containerPort: Int
+  hostPort: Int
+  protocol: String
+}
+
+type PrometheusDatasource {
+  format: String
+  legend: String
+  query: String!
+}
+
+type Recipe {
+  description: String
+  id: ID!
   name: String!
-  startsAt: String
-  fingerprint: String
-  annotations: Map
-  labels: Map
+  oidcEnabled: Boolean
+  provider: String
+  recipeSections: [RecipeSection]
+  restricted: Boolean
 }
 
-type NamespaceSpec {
-  finalizers: [String]
+type RecipeConnection {
+  edges: [RecipeEdge]
+  pageInfo: PageInfo!
 }
 
-type CronStatus {
-  active: [JobReference]
-  lastScheduleTime: String
+type RecipeEdge {
+  cursor: String
+  node: Recipe
 }
 
-type ServiceStatus {
-  loadBalancer: LoadBalancerStatus
+type RecipeItem {
+  configuration: [ConfigurationItem]
+  id: ID!
 }
 
-type StatefulSetStatus {
-  currentReplicas: Int
-  replicas: Int
-  readyReplicas: Int
-  updatedReplicas: Int
+type RecipeSection {
+  configuration: [ConfigurationItem]
+  id: ID!
+  recipeItems: [RecipeItem]
+  repository: Repository
 }
 
-type StatefulSetSpec {
-  replicas: Int
-  serviceName: String
+type Recommendation {
+  containerRecommendations: [ContainerRecommendation]
+}
+
+type Repository {
+  configuration: Configuration
+  description: String
+  docs: [FileContent]
+  grafanaDns: String
+  icon: String
+  id: ID!
+  name: String!
+}
+
+type RepositoryConnection {
+  edges: [RepositoryEdge]
+  pageInfo: PageInfo!
+}
+
+type RepositoryContext {
+  context: Map
+  repository: String!
+}
+
+type RepositoryEdge {
+  cursor: String
+  node: Repository
 }
 
 type ResourceSpec {
@@ -1356,78 +867,360 @@ type ResourceSpec {
   memory: String
 }
 
-type JobStatus {
-  active: Int
-  completionTime: String
-  startTime: String
-  succeeded: Int
-  failed: Int
-}
-
-type LogFilterSpec {
-  name: String
-  description: String
-  query: String
-  labels: [LogLabel]
-}
-
-type NodeMetric {
-  metadata: Metadata!
-  timestamp: String
-  window: String
-  usage: NodeUsage
-}
-
-type LoadBalancerIngressStatus {
-  hostname: String
-  ip: String
-}
-
-type ServiceSpec {
-  type: String
-  clusterIp: String
-  selector: Map
-  ports: [ServicePort]
-}
-
-type VerticalPodAutoscalerStatus {
-  recommendation: Recommendation
-}
-
 type Resources {
   limits: ResourceSpec
   requests: ResourceSpec
 }
 
-enum NotificationStatus {
-  FIRING
-  RESOLVED
+type Role {
+  description: String
+  id: ID!
+  insertedAt: DateTime
+  name: String!
+  permissions: [Permission]
+  repositories: [String]
+  roleBindings: [RoleBinding]
+  updatedAt: DateTime
+}
+
+type RoleBinding {
+  group: Group
+  id: ID!
+  insertedAt: DateTime
+  updatedAt: DateTime
+  user: User
+}
+
+type RoleConnection {
+  edges: [RoleEdge]
+  pageInfo: PageInfo!
+}
+
+type RoleEdge {
+  cursor: String
+  node: Role
+}
+
+type RollingUpdate {
+  maxSurge: Int
+  maxUnavailable: Int
+}
+
+type RootMutationType {
+  approveBuild(id: ID!): Build
+  cancelBuild(id: ID!): Build
+  createBuild(attributes: BuildAttributes!): Build
+  createGroup(attributes: GroupAttributes!): Group
+  createGroupMember(groupId: ID!, userId: ID!): GroupMember
+  createInvite(attributes: InviteAttributes!): Invite
+  createPeer(email: String, name: String!, userId: ID): WireguardPeer
+  createRole(attributes: RoleAttributes!): Role
+  createUpgradePolicy(attributes: UpgradePolicyAttributes!): UpgradePolicy
+  createWebhook(attributes: WebhookAttributes!): Webhook
+  deleteGroup(groupId: ID!): Group
+  deleteGroupMember(groupId: ID!, userId: ID!): GroupMember
+  deleteJob(name: String!, namespace: String!): Job
+  deleteNode(name: String!): Node
+  deletePeer(name: String!): Boolean
+  deletePod(name: String!, namespace: String!): Pod
+  deleteRole(id: ID!): Role
+  deleteUpgradePolicy(id: ID!): UpgradePolicy
+  deleteWebhook(id: ID!): Webhook
+  executeRunbook(input: RunbookActionInput!, name: String!, namespace: String!): RunbookActionResponse
+  installRecipe(context: Map!, id: ID!, oidc: Boolean): Build
+  installStack(context: ContextAttributes!, name: String!, oidc: Boolean): Build
+  loginLink(key: String!): User
+  markRead(type: ReadType): User
+  oauthCallback(code: String!, redirect: String): User
+  overlayConfiguration(context: Map!, namespace: String!): Build
+  readNotifications: User
+  restartBuild(id: ID!): Build
+  signIn(email: String!, password: String!): User
+  signup(attributes: UserAttributes!, inviteId: String!): User
+  updateConfiguration(content: String!, message: String, repository: String!, tool: Tool): Configuration
+  updateGroup(attributes: GroupAttributes!, groupId: ID!): Group
+  updateRole(attributes: RoleAttributes!, id: ID!): Role
+  updateSmtp(smtp: SmtpInput!): Smtp
+  updateUser(attributes: UserAttributes!, id: ID): User
+}
+
+type RootQueryType {
+  application(name: String!): Application
+  applications: [Application]
+  auditMetrics: [AuditMetric]
+  audits(after: String, before: String, first: Int, last: Int, repo: String): AuditConnection
+  build(id: ID!): Build
+  buildInfo: BuildInfo
+  builds(after: String, before: String, first: Int, last: Int): BuildConnection
+  cachedPods(namespaces: [String]): [Pod]
+  certificate(name: String!, namespace: String!): Certificate
+  clusterInfo: ClusterInfo
+  configuration: ConsoleConfiguration
+  configurationOverlays(namespace: String!): [ConfigurationOverlay]
+  context: [RepositoryContext]
+  cronJob(name: String!, namespace: String!): CronJob
+  dashboard(labels: [LabelInput], name: String!, offset: Int, repo: String!, step: String): Dashboard
+  dashboards(repo: String!): [Dashboard]
+  deployment(name: String!, namespace: String!): Deployment
+  externalToken: String
+  groupMembers(after: String, before: String, first: Int, groupId: ID!, last: Int): GroupMemberConnection
+  groups(after: String, before: String, first: Int, last: Int, q: String): GroupConnection
+  ingress(name: String!, namespace: String!): Ingress
+  installations(after: String, before: String, first: Int, last: Int): InstallationConnection
+  invite(id: String!): Invite
+  job(name: String!, namespace: String!): Job
+  logFilters(namespace: String!): [LogFilter]
+  loginInfo(redirect: String): LoginInfo
+  logs(end: Long, limit: Int!, query: String!, start: Long): [LogStream]
+  me: User
+  metric(offset: Int, query: String!, step: String): [MetricResponse]
+  myWireguardPeers: [WireguardPeer]
+  namespaces: [Namespace]
+  node(name: String!): Node
+  nodeMetric(name: String!): NodeMetric
+  nodeMetrics: [NodeMetric]
+  nodes: [Node]
+  notifications(after: String, all: Boolean, before: String, first: Int, last: Int): NotificationConnection
+  pluralContext: PluralContext
+  pod(name: String!, namespace: String!): Pod
+  pods(after: String, before: String, first: Int, last: Int, namespaces: [String]): PodConnection
+  recipe(id: ID!): Recipe
+  recipes(after: String, before: String, first: Int, id: ID!, last: Int): RecipeConnection
+  repositories(after: String, before: String, first: Int, last: Int, query: String!): RepositoryConnection
+  repository(name: String!): Repository
+  role: Role
+  roles(after: String, before: String, first: Int, last: Int, q: String): RoleConnection
+  runbook(name: String!, namespace: String!): Runbook
+  runbooks(namespace: String!, pinned: Boolean): [Runbook]
+  scalingRecommendation(kind: AutoscalingTarget!, name: String!, namespace: String!): VerticalPodAutoscaler
+  service(name: String!, namespace: String!): Service
+  smtp: Smtp
+  stack(name: String!): Stack
+  statefulSet(name: String!, namespace: String!): StatefulSet
+  upgradePolicies: [UpgradePolicy]
+  users(after: String, before: String, first: Int, last: Int, q: String): UserConnection
+  webhooks(after: String, before: String, first: Int, last: Int): WebhookConnection
+  wireguardPeer(name: String!): WireguardPeer
+  wireguardPeers: [WireguardPeer]
+}
+
+type RootSubscriptionType {
+  applicationDelta: ApplicationDelta
+  buildDelta(buildId: ID): BuildDelta
+  commandDelta(buildId: ID!): CommandDelta
+  notificationDelta: NotificationDelta
+  podDelta: PodDelta
+}
+
+type Runbook {
+  data(context: RunbookContext): [RunbookData]
+  executions(after: String, before: String, first: Int, last: Int): RunbookExecutionConnection
+  name: String!
+  spec: RunbookSpec!
+  status: RunbookStatus
+}
+
+type RunbookAction {
+  configuration: ConfigurationAction
+  name: String!
+  type: String!
+}
+
+type RunbookActionResponse {
+  redirectTo: String
+}
+
+type RunbookAlertStatus {
+  annotations: Map
+  fingerprint: String
+  labels: Map
+  name: String!
+  startsAt: String
+}
+
+type RunbookData {
+  kubernetes: KubernetesData
+  name: String!
+  nodes: [Node]
+  prometheus: [MetricResponse]
+  source: RunbookDatasource
+}
+
+type RunbookDatasource {
+  kubernetes: KubernetesDatasource
+  name: String!
+  prometheus: PrometheusDatasource
+  type: String!
+}
+
+type RunbookExecution {
+  context: Map!
+  id: ID!
+  insertedAt: DateTime
+  name: String!
+  namespace: String!
+  updatedAt: DateTime
+  user: User
+}
+
+type RunbookExecutionConnection {
+  edges: [RunbookExecutionEdge]
+  pageInfo: PageInfo!
+}
+
+type RunbookExecutionEdge {
+  cursor: String
+  node: RunbookExecution
+}
+
+type RunbookSpec {
+  actions: [RunbookAction]
+  datasources: [RunbookDatasource]
+  description: String
+  display: Map
+  name: String!
+}
+
+type RunbookStatus {
+  alerts: [RunbookAlertStatus]
+}
+
+type RunningState {
+  startedAt: String
+}
+
+type SecretKeySelector {
+  key: String
+  name: String!
+}
+
+type Service {
+  events: [Event]
+  metadata: Metadata!
+  pods: [Pod]
+  raw: String!
+  spec: ServiceSpec!
+  status: ServiceStatus!
+}
+
+type ServicePort {
+  name: String
+  port: Int
+  protocol: String
+  targetPort: String
+}
+
+type ServiceSpec {
+  clusterIp: String
+  ports: [ServicePort]
+  selector: Map
+  type: String
+}
+
+type ServiceStatus {
+  loadBalancer: LoadBalancerStatus
+}
+
+type Smtp {
+  password: String
+  port: Int
+  sender: String
+  server: String
+  user: String
+}
+
+type Stack {
+  bundles: [Recipe]
+  id: ID!
+  insertedAt: DateTime
+  name: String!
+  sections: [RecipeSection]
+  updatedAt: DateTime
+}
+
+type StatefulSet {
+  events: [Event]
+  metadata: Metadata!
+  pods: [Pod]
+  raw: String!
+  spec: StatefulSetSpec!
+  status: StatefulSetStatus!
+}
+
+type StatefulSetSpec {
+  replicas: Int
+  serviceName: String
+}
+
+type StatefulSetStatus {
+  currentReplicas: Int
+  readyReplicas: Int
+  replicas: Int
+  updatedReplicas: Int
+}
+
+type StatusComponent {
+  group: String
+  kind: String!
+  name: String!
+  status: String!
+}
+
+type StatusCondition {
+  message: String!
+  reason: String!
+  status: String!
+  type: String!
+}
+
+type TerminatedState {
+  exitCode: Int
+  finishedAt: String
+  message: String
+  reason: String
+  startedAt: String
+}
+
+type UpgradePolicy {
+  description: String
+  id: ID!
+  insertedAt: DateTime
+  name: String!
+  target: String!
+  type: UpgradePolicyType!
+  updatedAt: DateTime
+  weight: Int
+}
+
+type User {
+  backgroundColor: String
+  boundRoles: [Role]
+  buildTimestamp: DateTime
+  deletedAt: DateTime
+  email: String!
+  id: ID!
+  insertedAt: DateTime
+  jwt: String
+  name: String!
+  profile: String
+  readTimestamp: DateTime
+  roles: UserRoles
+  unreadNotifications: Int
+  updatedAt: DateTime
+}
+
+type UserConnection {
+  edges: [UserEdge]
+  pageInfo: PageInfo!
+}
+
+type UserEdge {
+  cursor: String
+  node: User
 }
 
 type UserRoles {
   admin: Boolean
-}
-
-type User {
-  id: ID!
-  name: String!
-  email: String!
-  deletedAt: DateTime
-  profile: String
-  roles: UserRoles
-  readTimestamp: DateTime
-  buildTimestamp: DateTime
-  boundRoles: [Role]
-  jwt: String
-  unreadNotifications: Int
-  backgroundColor: String
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-type LabelPair {
-  name: String
-  value: String
 }
 
 type VerticalPodAutoscaler {
@@ -1436,40 +1229,247 @@ type VerticalPodAutoscaler {
   status: VerticalPodAutoscalerStatus
 }
 
-type SecretKeySelector {
-  name: String!
-  key: String
+type VerticalPodAutoscalerSpec {
+  targetRef: CrossVersionResourceTarget!
+  updatePolicy: VerticalPodAutoscalerUpdatePolicy!
 }
 
-type RunbookData {
-  name: String!
-  source: RunbookDatasource
-  kubernetes: KubernetesData
-  prometheus: [MetricResponse]
-  nodes: [Node]
+type VerticalPodAutoscalerStatus {
+  recommendation: Recommendation
 }
 
-type BuildDelta {
-  delta: Delta
-  payload: Build
+type VerticalPodAutoscalerUpdatePolicy {
+  updateMode: String
 }
 
-type CommandDelta {
-  delta: Delta
-  payload: Command
+type WaitingState {
+  message: String
+  reason: String
 }
 
-type NotificationDelta {
-  delta: Delta
-  payload: Notification
-}
-
-type Group {
+type Webhook {
+  health: WebhookHealth!
   id: ID!
-  name: String!
-  description: String
   insertedAt: DateTime
+  type: WebhookType!
   updatedAt: DateTime
+  url: String!
 }
+
+type WebhookConnection {
+  edges: [WebhookEdge]
+  pageInfo: PageInfo!
+}
+
+type WebhookEdge {
+  cursor: String
+  node: Webhook
+}
+
+type WireguardPeer {
+  config: String
+  metadata: Metadata!
+  raw: String!
+  spec: WireguardPeerSpec!
+  status: WireguardPeerStatus
+  user: User
+}
+
+type WireguardPeerSpec {
+  address: String
+  publicKey: String
+  wireguardRef: String
+}
+
+type WireguardPeerStatus {
+  conditions: [StatusCondition]
+  ready: Boolean
+}
+
+enum AuditAction {
+  APPROVE
+  CANCEL
+  CREATE
+  DELETE
+  UPDATE
+}
+
+enum AuditType {
+  BUILD
+  CONFIGURATION
+  GROUP
+  GROUP_MEMBER
+  POD
+  POLICY
+  ROLE
+  USER
+}
+
+enum AutoscalingTarget {
+  DEPLOYMENT
+  STATEFULSET
+}
+
+enum BuildType {
+  APPROVAL
+  BOUNCE
+  DEDICATED
+  DEPLOY
+  DESTROY
+  INSTALL
+}
+
+enum Delta {
+  CREATE
+  DELETE
+  UPDATE
+}
+
+enum NotificationStatus {
+  FIRING
+  RESOLVED
+}
+
+enum Permission {
+  CONFIGURE
+  DEPLOY
+  OPERATE
+  READ
+}
+
+enum ReadType {
+  BUILD
+  NOTIFICATION
+}
+
+enum Severity {
+  CRITICAL
+  HIGH
+  LOW
+  MEDIUM
+  NONE
+}
+
+enum Status {
+  CANCELLED
+  FAILED
+  PENDING
+  QUEUED
+  RUNNING
+  SUCCESSFUL
+}
+
+enum Tool {
+  HELM
+  TERRAFORM
+}
+
+enum UpgradePolicyType {
+  APPROVAL
+  DEPLOY
+  IGNORE
+}
+
+enum WebhookHealth {
+  HEALTHY
+  UNHEALTHY
+}
+
+enum WebhookType {
+  PIAZZA
+  SLACK
+}
+
+"""
+
+The `DateTime` scalar type represents a date and time in the UTC
+timezone. The DateTime appears in a JSON response as an ISO8601 formatted
+string, including UTC timezone ("Z"). The parsed date and time string will
+be converted to UTC if there is an offset.
+"""
+scalar DateTime
+
+scalar Long
 
 scalar Map
+
+input BindingAttributes {
+  groupId: ID
+  id: ID
+  userId: ID
+}
+
+input BuildAttributes {
+  message: String
+  repository: String!
+  type: BuildType
+}
+
+input ContextAttributes {
+  buckets: [String]
+  configuration: Map!
+  domain: [String]
+}
+
+input GroupAttributes {
+  description: String
+  name: String!
+}
+
+input InviteAttributes {
+  email: String
+}
+
+input LabelInput {
+  name: String
+  value: String
+}
+
+input RoleAttributes {
+  description: String
+  name: String
+  permissions: [Permission]
+  repositories: [String]
+  roleBindings: [BindingAttributes]
+}
+
+input RunbookActionInput {
+  action: String!
+  context: Map!
+}
+
+input RunbookContext {
+  timeseriesStart: Int
+  timeseriesStep: String
+}
+
+input SmtpInput {
+  password: String
+  port: Int
+  sender: String
+  server: String
+  user: String
+}
+
+input UpgradePolicyAttributes {
+  description: String
+  name: String!
+  target: String!
+  type: UpgradePolicyType!
+  weight: Int
+}
+
+input UserAttributes {
+  email: String
+  name: String
+  password: String
+  roles: UserRoleAttributes
+}
+
+input UserRoleAttributes {
+  admin: Boolean
+}
+
+input WebhookAttributes {
+  url: String!
+}
