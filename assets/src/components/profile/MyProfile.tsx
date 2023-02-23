@@ -20,8 +20,7 @@ const getDirectory = (me, configuration) => [
   { path: 'me', label: 'Profile', enabled: true },
   { path: 'security', label: 'Security', enabled: true },
   { path: 'permissions', label: 'Permissions', enabled: true },
-  // TODO: default to false when development is finished
-  { path: 'vpn', label: 'VPN clients', enabled: configuration?.vpnEnabled ?? true },
+  { path: 'vpn', label: 'VPN clients', enabled: configuration?.vpnEnabled ?? false },
 ]
 
 export default function MyProfile() {
