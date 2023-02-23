@@ -1,4 +1,5 @@
 import { useFillLevel } from '@pluralsh/design-system'
+import { useMarkdocContext } from 'markdoc/DocsContext'
 
 import styled from 'styled-components'
 
@@ -18,10 +19,11 @@ const StyledList = styled.div.withConfig(commonCfg)(({ theme }) => ({
 export const ListItem = styled.li.withConfig(commonCfg)(({ theme }) => {
   const offset = theme.spacing.large
   const fillLevel = useFillLevel()
+  const { variant } = useMarkdocContext()
 
   return {
     position: 'relative',
-    ...bodyText({ theme, fillLevel }),
+    ...bodyText({ theme, fillLevel, variant }),
     margin: 0,
     marginLeft: offset,
     listStyle: 'none',
