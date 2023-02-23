@@ -48,7 +48,7 @@ function Embed({
   aspectRatio: string
 }) {
   const [loomEmbed, setLoomEmbed] = useState('')
-  const isLoomUrl = useMemo(() => !!url.match(/^https{0,1}:\/\/(www.){0,1}loom\.com/g),
+  const isLoomUrl = useMemo(() => !!url.match(/^https{0,1}:\/\/(www\.){0,1}loom\.com/g),
     [url])
 
   useEffect(() => {
