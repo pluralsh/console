@@ -5,5 +5,6 @@ declare module '@tanstack/table-core' {
   interface ColumnMeta<TData extends RowData, TValue> {
     truncate?: boolean
     gridTemplate?: string
+    center?: boolean
   }
 }
