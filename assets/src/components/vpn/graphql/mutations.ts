@@ -10,7 +10,7 @@ const CreateWireguardPeer = gql`
 
 const DeleteWireguardPeer = gql`
   mutation DeleteWireguardPeer($name: String!) {
-    deletePeer(name: $name) {}
+    deletePeer(name: $name)
   }
 `
 

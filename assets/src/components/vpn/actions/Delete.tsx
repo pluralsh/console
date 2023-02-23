@@ -32,7 +32,7 @@ function DeleteClientUnstyled({
         BackdropProps={{ zIndex: 20 }}
         header="delete vpn client"
         open
-        onClose={onClose}
+        onClose={() => onClose()}
         size="large"
         className="modalContainer"
       >
@@ -84,12 +84,12 @@ function ModalContentUnstyled({
       <div className="footer">
         <Button
           secondary
-          onClick={onClose}
+          onClick={() => onClose()}
         >Cancel
         </Button>
         <Button
           destructive
-          onClick={deletePeer}
+          onClick={() => deletePeer()}
           loading={loading}
         >Delete
         </Button>

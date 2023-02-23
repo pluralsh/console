@@ -1,9 +1,4 @@
-import {
-  Button,
-  DownloadIcon,
-  IconFrame,
-  Tooltip,
-} from '@pluralsh/design-system'
+import { Button, DownloadIcon, Tooltip } from '@pluralsh/design-system'
 import { CellContext } from '@tanstack/react-table'
 import { useState } from 'react'
 
@@ -24,12 +19,17 @@ const ColumnDownload = ColumnBuilder.display({
 })
 
 function cell(props: CellContext<VPNClientRow, unknown>): JSX.Element {
-  const { isReady } = props.row.original
+  const { isReady, name } = props.row.original
 
-  return <DownloadAction disabled={!isReady} />
+  return (
+    <DownloadAction
+      name={name}
+      disabled={!isReady}
+    />
+  )
 }
 
-function DownloadAction({ disabled }) {
+function DownloadAction({ name, disabled }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -47,7 +47,12 @@ function DownloadAction({ disabled }) {
         </Button>
       </Tooltip>
 
-      {open && <DownloadConfig onClose={() => setOpen(false)} />}
+      {open && (
+        <DownloadConfig
+          onClose={() => setOpen(false)}
+          name={name}
+        />
+      )}
     </>
   )
 }

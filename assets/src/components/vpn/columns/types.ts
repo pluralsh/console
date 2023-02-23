@@ -14,7 +14,7 @@ function toVPNClientRow(peer: WireguardPeer | null): VPNClientRow {
   return {
     name: peer?.metadata?.name,
     user: peer?.user ?? undefined,
-    isReady: peer?.status.ready ?? false,
+    isReady: peer?.status?.ready ?? false,
     address: peer?.spec.address ?? undefined,
     publicKey: peer?.spec.publicKey ?? undefined,
   }

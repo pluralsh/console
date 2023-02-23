@@ -31,6 +31,7 @@ function cell(props: CellContext<VPNClientRow, User | undefined>): JSX.Element {
           <AppIcon
             name={user?.name}
             url={user?.profile ?? undefined}
+            spacing={user?.profile ? 'none' : undefined}
             size="xxsmall"
           />
           <Flex direction="column">

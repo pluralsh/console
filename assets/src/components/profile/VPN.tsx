@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
+import { LoopingLogo } from '@pluralsh/design-system'
 
 import { ScrollablePage } from '../utils/layout/ScrollablePage'
 import VPNClientList from '../vpn/VPNClientList'
@@ -14,11 +15,12 @@ import {
 } from '../vpn/columns'
 import { MyWireguardPeers } from '../vpn/graphql/queries'
 import { RootQueryType } from '../../generated/graphql'
-import { LoopingLogo } from '../../../../../design-system/src'
 
 function VPN() {
-  const { data: { myWireguardPeers } = {}, loading, refetch } = useQuery<Pick<RootQueryType, 'myWireguardPeers'>>(MyWireguardPeers)
-  const columns = useMemo(() => [ColumnName, ColumnAddress, ColumnPublicKey, ColumnStatus, ColumnDownload, ColumnDelete(refetch)], [])
+  const { data: { myWireguardPeers } = {}, loading, refetch } = useQuery<Pick<RootQueryType, 'myWireguardPeers'>>(MyWireguardPeers, {
+    fetchPolicy: 'network-only',
+  })
+  const columns = useMemo(() => [ColumnName, ColumnAddress, ColumnPublicKey, ColumnStatus, ColumnDownload, ColumnDelete(refetch)], [refetch])
   const clientList = useMemo(() => myWireguardPeers?.map(peer => toVPNClientRow(peer)) ?? [], [myWireguardPeers])
 
   if (loading) {

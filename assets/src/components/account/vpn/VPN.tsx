@@ -1,11 +1,10 @@
+import { LoopingLogo } from '@pluralsh/design-system'
 import {
-  Button,
-  ListBoxItem,
-  LoopingLogo,
-  Select,
-} from '@pluralsh/design-system'
-import styled from 'styled-components'
-import { useEffect, useMemo, useState } from 'react'
+  Key,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react'
 import { useQuery } from '@apollo/client'
 
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
@@ -19,51 +18,28 @@ import {
   ColumnUser,
   toVPNClientRow,
 } from '../../vpn/columns'
-import { CreateClient } from '../../vpn/actions/Create'
-import { RootQueryType } from '../../../generated/graphql'
+import { RootQueryType, User } from '../../../generated/graphql'
 import { WireguardPeers } from '../../vpn/graphql/queries'
 
-const HeaderActions = styled(HeaderActionsUnstyled)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'row',
-  gap: theme.spacing.medium,
-}))
-
-function HeaderActionsUnstyled({ refetch, ...props }) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <div {...props}>
-      <Select
-        label="All users"
-        selectedKey={null}
-      >
-        <ListBoxItem
-          key="test"
-          label="test"
-        />
-      </Select>
-      <Button
-        secondary
-        onClick={() => setOpen(true)}
-      >Create VPN client
-      </Button>
-
-      {/* Modals */}
-      {open && (
-        <CreateClient
-          onClose={() => setOpen(false)}
-          refetch={refetch}
-        />
-      )}
-    </div>
-  )
-}
+import { VPNHeaderActions } from './VPNHeaderActions'
 
 function VPN() {
-  const { data: { wireguardPeers } = {}, loading, refetch } = useQuery<Pick<RootQueryType, 'wireguardPeers'>>(WireguardPeers)
+  const { data: { wireguardPeers } = {}, loading, refetch } = useQuery<Pick<RootQueryType, 'wireguardPeers'>>(WireguardPeers, {
+    fetchPolicy: 'network-only',
+  })
+  const [selectedUsers, setSelectedUsers] = useState<Set<Key>>(new Set<Key>())
   const columns = useMemo(() => [ColumnName, ColumnUser, ColumnAddress, ColumnPublicKey, ColumnStatus, ColumnActions(refetch)], [refetch])
   const clientList = useMemo(() => wireguardPeers?.map(peer => toVPNClientRow(peer)) ?? [], [wireguardPeers])
+  const users = useMemo(() => Array.from(clientList.reduce((map, row) => {
+    if (!row?.user) return map
+    if (!map.has(row.user.id)) map.set(row.user.id, row.user)
+
+    return map
+  }, new Map<string, User>()).values()), [clientList])
+  const filteredClientList = useMemo(() => (selectedUsers.size === 0
+    ? clientList
+    : clientList.filter(client => selectedUsers.has(client.user?.id ?? ''))), [selectedUsers, clientList])
+  const onFilter = useCallback(selectedUsers => setSelectedUsers(selectedUsers), [])
 
   if (loading) {
     return <LoopingLogo />
@@ -73,11 +49,17 @@ function VPN() {
     <ScrollablePage
       scrollable={false}
       heading="VPN clients"
-      headingContent={<HeaderActions refetch={refetch} />}
+      headingContent={(
+        <VPNHeaderActions
+          refetch={refetch}
+          users={users}
+          onFilter={onFilter}
+        />
+      )}
     >
       <VPNClientList
         columns={columns}
-        data={clientList}
+        data={filteredClientList}
       />
     </ScrollablePage>
   )

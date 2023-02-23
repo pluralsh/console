@@ -9,6 +9,7 @@ const WireguardPeerListFragment = gql`
       ready
     }
     user {
+      id
       name
       email
       profile
@@ -23,9 +24,7 @@ const WireguardPeerListFragment = gql`
 const WireguardPeerFragment = gql`
   fragment WireguardPeerFragment on WireguardPeer {
     config
-    ...WireguardPeerListFragment
   }
-  ${WireguardPeerListFragment}
 `
 
 export { WireguardPeerFragment, WireguardPeerListFragment }

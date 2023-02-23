@@ -21,3 +21,10 @@ export function download(url, name) {
     document.body.removeChild(tempLink)
   }, 0)
 }
+
+export function downloadAsFile(content, name, type = 'text') {
+  const data = new Blob([content], { type })
+  const url = window.URL.createObjectURL(data)
+
+  download(url, name)
+}

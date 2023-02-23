@@ -56,7 +56,12 @@ function VPNColumnActions({ disabled, refetch, name }) {
   const dialog = useMemo(() => {
     switch (selected) {
     case MenuItemSelection.DownloadConfig:
-      return <DownloadConfig onClose={() => setSelected(undefined)} />
+      return (
+        <DownloadConfig
+          name={name}
+          onClose={() => setSelected(undefined)}
+        />
+      )
     case MenuItemSelection.DeleteClient:
       return (
         <DeleteClient
