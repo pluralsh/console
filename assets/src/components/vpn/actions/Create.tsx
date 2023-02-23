@@ -32,6 +32,7 @@ import {
 } from '../../../generated/graphql'
 import { USERS_Q } from '../../graphql/users'
 import { extendConnection } from '../../../utils/graphql'
+import { isValidEmail } from '../../../utils/email'
 
 interface CreateClientProps {
   refetch: Dispatch<void>
@@ -113,7 +114,8 @@ function ModalContentUnstyled({ onClose, refetch, ...props }: CreateClientProps)
 
     return users
   }, [fuse, inputValue, users])
-  const isValid = useMemo(() => name && (email || selectedKey), [email, name, selectedKey])
+  const isEmailValid = useMemo(() => isValidEmail(email ?? ''), [email])
+  const isValid = useMemo(() => name && (isEmailValid || selectedKey), [isEmailValid, name, selectedKey])
 
   // Callbacks
   const onSelectionChange = useCallback(key => {
@@ -141,6 +143,8 @@ function ModalContentUnstyled({ onClose, refetch, ...props }: CreateClientProps)
       <FormField
         label={mode === UserSelectionMode.Select ? 'User' : 'User email'}
         required
+        error={!isEmailValid}
+        hint={email && !isEmailValid ? 'Invalid email address' : undefined}
         caption={(
           <A
             inline
@@ -195,6 +199,7 @@ function ModalContentUnstyled({ onClose, refetch, ...props }: CreateClientProps)
           <Input
             placeholder="Enter user email"
             value={email}
+            error={!isEmailValid}
             onChange={({ target: { value } }) => setEmail(value)}
           />
         )}
