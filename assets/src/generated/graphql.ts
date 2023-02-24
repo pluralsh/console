@@ -1183,7 +1183,7 @@ export type RootMutationType = {
   deleteGroupMember?: Maybe<GroupMember>;
   deleteJob?: Maybe<Job>;
   deleteNode?: Maybe<Node>;
-  deletePeer?: Maybe<WireguardPeer>;
+  deletePeer?: Maybe<Scalars['Boolean']>;
   deletePod?: Maybe<Pod>;
   deleteRole?: Maybe<Role>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
@@ -2134,12 +2134,14 @@ export type WireguardPeer = {
   metadata: Metadata;
   raw: Scalars['String'];
   spec: WireguardPeerSpec;
-  status: WireguardPeerStatus;
+  status?: Maybe<WireguardPeerStatus>;
   user?: Maybe<User>;
 };
 
 export type WireguardPeerSpec = {
   __typename?: 'WireguardPeerSpec';
+  address?: Maybe<Scalars['String']>;
+  publicKey?: Maybe<Scalars['String']>;
   wireguardRef?: Maybe<Scalars['String']>;
 };
 

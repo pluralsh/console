@@ -111,8 +111,8 @@ export default function AllPods() {
       if (!data?.podDelta) return prev
       const { podDelta: { delta, payload } } = data
 
-      if (delta === 'CREATE') return { ...prev, cachedPods: uniqBy([payload, ...prev.cachedPods], p => `${p.metadata.name}:${p.metadata.namespace}`) }
-      if (delta === 'DELETE') return { ...prev, cachedPods: prev.cachedPods.filter(p => !isEqual(p, payload)) }
+      if (delta === 'CREATE') return { ...prev, cachedPods: uniqBy([payload, ...prev.cachedPods ?? []], p => `${p.metadata.name}:${p.metadata.namespace}`) }
+      if (delta === 'DELETE') return { ...prev, cachedPods: prev.cachedPods?.filter(p => !isEqual(p!, payload)) }
 
       return prev
     },
@@ -169,7 +169,7 @@ export default function AllPods() {
       return undefined
     }
     let pods = data.cachedPods
-      .map(pod => ({ id: pod.metadata?.namespace, ...pod }))
+      .map(pod => ({ id: pod?.metadata?.namespace, ...pod } as PodWithId))
       .filter((pod?: PodWithId): pod is PodWithId => !!pod) as PodWithId[]
 
     if (namespace) {

@@ -14,14 +14,14 @@ export function initials(name) {
 export default function Avatar({
   size, user: {
     backgroundColor, avatar, profile, name,
-  }, onClick, round,
+  }, onClick = undefined, round = '3px',
 }) {
   const icon = profile || avatar
 
   return (
     <Box
       flex={false}
-      round={round || '3px'}
+      round={round}
       style={icon ? { backgroundImage: `url(${icon})`, backgroundPosition: 'center', backgroundSize: 'cover' } : null}
       align="center"
       justify="center"

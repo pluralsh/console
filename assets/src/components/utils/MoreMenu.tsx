@@ -1,7 +1,9 @@
 import { IconFrame, MoreIcon, Select } from '@pluralsh/design-system'
 import { useState } from 'react'
 
-export function MoreMenu({ children, onSelectionChange, ...props }: any) {
+export function MoreMenu({
+  children, onSelectionChange, disabled = false, ...props
+}: any) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -11,6 +13,7 @@ export function MoreMenu({ children, onSelectionChange, ...props }: any) {
       placement="right"
       width="max-content"
       onOpenChange={isOpen => setIsOpen(isOpen)}
+      isDisabled={disabled}
       onSelectionChange={selectedKey => {
         setIsOpen(false)
         onSelectionChange(selectedKey)
@@ -19,9 +22,9 @@ export function MoreMenu({ children, onSelectionChange, ...props }: any) {
       triggerButton={(
         <IconFrame
           textValue="Menu"
-          clickable
+          clickable={!disabled}
           size="medium"
-          icon={<MoreIcon />}
+          icon={<MoreIcon color={disabled ? 'icon-disabled' : undefined} />}
           background="transparent"
           border="none"
         />
