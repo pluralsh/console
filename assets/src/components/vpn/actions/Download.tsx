@@ -1,6 +1,5 @@
 import { Dispatch, ReactElement, useEffect } from 'react'
 import { Layer } from 'grommet'
-import { timeout } from 'workbox-core/_private'
 import { LoopingLogo } from '@pluralsh/design-system'
 import { useQuery } from '@apollo/client'
 

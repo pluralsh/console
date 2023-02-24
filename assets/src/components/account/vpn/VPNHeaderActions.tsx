@@ -81,7 +81,7 @@ function HeaderActionsUnstyled({
     />,
   })), [users])
 
-  useEffect(() => onFilter(selectedKeys), [selectedKeys])
+  useEffect(() => onFilter(selectedKeys), [onFilter, selectedKeys])
 
   return (
     <div {...props}>
