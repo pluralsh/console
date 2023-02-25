@@ -1,10 +1,12 @@
 /* eslint-disable */
 import { gql } from '@apollo/client';
+import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -12,12 +14,6 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /**
-   * The `DateTime` scalar type represents a date and time in the UTC
-   * timezone. The DateTime appears in a JSON response as an ISO8601 formatted
-   * string, including UTC timezone ("Z"). The parsed date and time string will
-   * be converted to UTC if there is an offset.
-   */
   DateTime: Date;
   Long: any;
   Map: Map<string, unknown>;
@@ -2150,3 +2146,218 @@ export type WireguardPeerStatus = {
   conditions?: Maybe<Array<Maybe<StatusCondition>>>;
   ready?: Maybe<Scalars['Boolean']>;
 };
+
+export type CostAnalysisFragmentFragment = { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null };
+
+export type FileContentFragmentFragment = { __typename?: 'FileContent', content?: string | null, path?: string | null };
+
+export type ConfigurationFragmentFragment = { __typename?: 'Configuration', helm?: string | null, terraform?: string | null };
+
+export type ApplicationFragmentFragment = { __typename?: 'Application', name: string, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null };
+
+export type MetadataFragmentFragment = { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null };
+
+export type ConfigurationOverlayFragmentFragment = { __typename?: 'ConfigurationOverlay', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'ConfigurationOverlaySpec', name?: string | null, folder?: string | null, subfolder?: string | null, documentation?: string | null, inputType?: string | null, inputValues?: Array<string | null> | null, updates?: Array<{ __typename?: 'OverlayUpdate', path?: Array<string | null> | null } | null> | null } };
+
+export type RepositoryFragmentFragment = { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null };
+
+export type RepositoryQueryVariables = Exact<{
+  name: Scalars['String'];
+}>;
+
+
+export type RepositoryQuery = { __typename?: 'RootQueryType', repository?: { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null } | null };
+
+export type AppQueryVariables = Exact<{
+  name: Scalars['String'];
+}>;
+
+
+export type AppQuery = { __typename?: 'RootQueryType', application?: { __typename?: 'Application', name: string, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null } | null, configurationOverlays?: Array<{ __typename?: 'ConfigurationOverlay', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'ConfigurationOverlaySpec', name?: string | null, folder?: string | null, subfolder?: string | null, documentation?: string | null, inputType?: string | null, inputValues?: Array<string | null> | null, updates?: Array<{ __typename?: 'OverlayUpdate', path?: Array<string | null> | null } | null> | null } } | null> | null };
+
+export const CostAnalysisFragmentFragmentDoc = gql`
+    fragment CostAnalysisFragment on CostAnalysis {
+  minutes
+  cpuCost
+  pvCost
+  ramCost
+  totalCost
+}
+    `;
+export const ApplicationFragmentFragmentDoc = gql`
+    fragment ApplicationFragment on Application {
+  name
+  spec {
+    descriptor {
+      type
+      icons
+      description
+      version
+      links {
+        description
+        url
+      }
+    }
+    components {
+      group
+      kind
+    }
+  }
+  status {
+    components {
+      group
+      kind
+      name
+      status
+    }
+    conditions {
+      message
+      reason
+      status
+      type
+    }
+    componentsReady
+  }
+  cost {
+    ...CostAnalysisFragment
+  }
+}
+    ${CostAnalysisFragmentFragmentDoc}`;
+export const MetadataFragmentFragmentDoc = gql`
+    fragment MetadataFragment on Metadata {
+  name
+  namespace
+  labels {
+    name
+    value
+  }
+  annotations {
+    name
+    value
+  }
+}
+    `;
+export const ConfigurationOverlayFragmentFragmentDoc = gql`
+    fragment ConfigurationOverlayFragment on ConfigurationOverlay {
+  metadata {
+    ...MetadataFragment
+  }
+  spec {
+    name
+    folder
+    subfolder
+    documentation
+    inputType
+    inputValues
+    updates {
+      path
+    }
+  }
+}
+    ${MetadataFragmentFragmentDoc}`;
+export const ConfigurationFragmentFragmentDoc = gql`
+    fragment ConfigurationFragment on Configuration {
+  helm
+  terraform
+}
+    `;
+export const FileContentFragmentFragmentDoc = gql`
+    fragment FileContentFragment on FileContent {
+  content
+  path
+}
+    `;
+export const RepositoryFragmentFragmentDoc = gql`
+    fragment RepositoryFragment on Repository {
+  id
+  name
+  icon
+  description
+  grafanaDns
+  configuration {
+    ...ConfigurationFragment
+  }
+  docs {
+    ...FileContentFragment
+  }
+}
+    ${ConfigurationFragmentFragmentDoc}
+${FileContentFragmentFragmentDoc}`;
+export const RepositoryDocument = gql`
+    query Repository($name: String!) {
+  repository(name: $name) {
+    ...RepositoryFragment
+  }
+}
+    ${RepositoryFragmentFragmentDoc}`;
+
+/**
+ * __useRepositoryQuery__
+ *
+ * To run a query within a React component, call `useRepositoryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRepositoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRepositoryQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useRepositoryQuery(baseOptions: Apollo.QueryHookOptions<RepositoryQuery, RepositoryQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<RepositoryQuery, RepositoryQueryVariables>(RepositoryDocument, options);
+      }
+export function useRepositoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RepositoryQuery, RepositoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<RepositoryQuery, RepositoryQueryVariables>(RepositoryDocument, options);
+        }
+export type RepositoryQueryHookResult = ReturnType<typeof useRepositoryQuery>;
+export type RepositoryLazyQueryHookResult = ReturnType<typeof useRepositoryLazyQuery>;
+export type RepositoryQueryResult = Apollo.QueryResult<RepositoryQuery, RepositoryQueryVariables>;
+export const AppDocument = gql`
+    query App($name: String!) {
+  application(name: $name) {
+    configuration {
+      helm
+      terraform
+    }
+    ...ApplicationFragment
+  }
+  configurationOverlays(namespace: $name) {
+    ...ConfigurationOverlayFragment
+  }
+}
+    ${ApplicationFragmentFragmentDoc}
+${ConfigurationOverlayFragmentFragmentDoc}`;
+
+/**
+ * __useAppQuery__
+ *
+ * To run a query within a React component, call `useAppQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAppQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAppQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useAppQuery(baseOptions: Apollo.QueryHookOptions<AppQuery, AppQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AppQuery, AppQueryVariables>(AppDocument, options);
+      }
+export function useAppLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AppQuery, AppQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AppQuery, AppQueryVariables>(AppDocument, options);
+        }
+export type AppQueryHookResult = ReturnType<typeof useAppQuery>;
+export type AppLazyQueryHookResult = ReturnType<typeof useAppLazyQuery>;
+export type AppQueryResult = Apollo.QueryResult<AppQuery, AppQueryVariables>;

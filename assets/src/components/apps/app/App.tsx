@@ -1,6 +1,7 @@
 import { A, Flex } from 'honorable'
 import {
   Button,
+  LoopingLogo,
   Tab,
   TabList,
   TabPanel,
@@ -14,21 +15,24 @@ import {
   useParams,
 } from 'react-router-dom'
 
+import { ensureURLValidity } from 'utils/url'
 import { InstallationContext } from 'components/Installations'
 
+import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
+import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
+import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 
 import { PropsContainer } from 'components/utils/PropsContainer'
-
-import { ensureURLValidity } from 'utils/url'
-
 import Prop from 'components/utils/Prop'
 
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
-import { ResponsiveLayoutSidenavContainer } from '../../utils/layout/ResponsiveLayoutSidenavContainer'
-import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'
-import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveLayoutContentContainer'
+import { Repository, useRepositoryQuery } from 'generated/graphql'
+
+import { GqlError } from 'components/utils/Alert'
+
+import capitalize from 'lodash/capitalize'
 
 import { LoginContext } from '../../contexts'
 
@@ -39,18 +43,29 @@ import RunbookStatus from './runbooks/runbook/RunbookStatus'
 import LogsLegend from './logs/LogsLegend'
 import ComponentProgress from './components/ComponentProgress'
 
-export const getDirectory = (app: any = null, config: any = null) => [
+export const getDirectory = (app: any = null,
+  config: any = null,
+  repo: Repository | null = null) => [
   { path: 'dashboards', label: 'Dashboards', enabled: true },
   { path: 'runbooks', label: 'Runbooks', enabled: true },
   {
     path: 'components',
-    label: (<ComponentProgress app={app} />),
+    label: <ComponentProgress app={app} />,
     enabled: true,
   },
   { path: 'logs', label: 'Logs', enabled: true },
   { path: 'cost', label: 'Cost analysis', enabled: app?.cost || app?.license },
   { path: 'oidc', label: 'User management', enabled: true },
-  { path: 'config', label: 'Configuration', enabled: config?.gitStatus?.cloned },
+  {
+    path: 'config',
+    label: 'Configuration',
+    enabled: config?.gitStatus?.cloned,
+  },
+  {
+    path: 'docs',
+    label: app => `${capitalize(app.name)} docs`,
+    enabled: (repo?.docs?.length ?? 0) > 0,
+  },
 ]
 
 export default function App() {
@@ -63,12 +78,28 @@ export default function App() {
   const [runbook, setRunbook] = useState<any>()
   const pathPrefix = `/apps/${appName}`
   const currentApp = applications.find(app => app.name === appName)
+  const { data: repoData, error: repoError } = useRepositoryQuery({
+    variables: { name: appName ?? '' },
+  })
 
   if (!me || !currentApp) return null
+  if (repoError) {
+    return <GqlError error={repoError} />
+  }
+  if (!repoData?.repository) {
+    return <LoopingLogo />
+  }
 
-  const directory = getDirectory(currentApp, configuration).filter(({ enabled }) => enabled)
+  const directory = getDirectory(currentApp,
+    configuration,
+    repoData.repository).filter(({ enabled }) => enabled)
   const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
-  const { name, spec: { descriptor: { links, version } } } = currentApp
+  const {
+    name,
+    spec: {
+      descriptor: { links, version },
+    },
+  } = currentApp
   const validLinks = links?.filter(({ url }) => !!url)
 
   return (
@@ -92,7 +123,7 @@ export default function App() {
               to={path}
               textDecoration="none"
             >
-              {label}
+              {typeof label === 'function' ? label(currentApp) : label}
             </Tab>
           ))}
         </TabList>
@@ -109,7 +140,7 @@ export default function App() {
           <Button
             secondary
             fontWeight={600}
-            marginBottom="small"
+            marginBottom="medium"
             as="a"
             href={ensureURLValidity(links[0].url)}
             target="_blank"
@@ -123,11 +154,12 @@ export default function App() {
           gap="medium"
           direction="column"
           marginTop={validLinks?.length > 0 ? 0 : 56}
-          paddingTop="xsmall"
         >
           <PropsContainer title="App">
             <Prop title="Current version">v{version}</Prop>
-            <Prop title="Status"><AppStatus app={currentApp} /></Prop>
+            <Prop title="Status">
+              <AppStatus app={currentApp} />
+            </Prop>
             {validLinks?.length > 1 && (
               <Prop title="Other links">
                 {validLinks.slice(1).map(({ url }) => (
@@ -152,7 +184,9 @@ export default function App() {
           {runbookName && runbook && (
             <PropsContainer title="Runbook">
               <Prop title="Description">{runbook.spec?.description}</Prop>
-              <Prop title="Status"><RunbookStatus runbook={runbook} /></Prop>
+              <Prop title="Status">
+                <RunbookStatus runbook={runbook} />
+              </Prop>
             </PropsContainer>
           )}
           {currentTab?.path === 'logs' && <LogsLegend />}

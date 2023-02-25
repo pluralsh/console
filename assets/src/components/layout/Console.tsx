@@ -4,6 +4,10 @@ import { Toast } from '@pluralsh/design-system'
 
 import { A, Flex, Span } from 'honorable'
 
+import { MarkdocContextProvider } from 'markdoc/MarkdocContext'
+
+import * as mdContext from 'markdoc/utils/contextReactRouter'
+
 import { EnsureLogin } from '../login/Login'
 import { InstallationsProvider } from '../Installations'
 
@@ -28,67 +32,71 @@ export default function Console() {
 
   return (
     <CursorPositionProvider>
-      <EnsureLogin>
-        <InstallationsProvider>
-          <BreadcrumbProvider>
-            <TerminalThemeProvider>
-              <Flex
-                position="relative"
-                width="100vw"
-                maxWidth="100vw"
-                height="100vh"
-                minWidth="0"
-                minHeight="0"
-                maxHeight="100vh"
-                overflow="hidden"
-                flexDirection="column"
-              >
-                {isProduction && (
-                  <WithApplicationUpdate>
-                    {({ reloadApplication }) => (
-                      <Toast
-                        severity="info"
-                        marginBottom="medium"
-                        marginRight="xxxxlarge"
-                      >
-                        <Span marginRight="small">
-                          Time for a new update!
-                        </Span>
-                        <A
-                          onClick={() => reloadApplication()}
-                          style={{ textDecoration: 'none' }}
-                          color="action-link-inline"
-                        >
-                          Update now
-                        </A>
-                      </Toast>
-                    )}
-                  </WithApplicationUpdate>
-                )}
-                <Header />
+      <MarkdocContextProvider
+        value={{ variant: 'console', ...mdContext }}
+      >
+        <EnsureLogin>
+          <InstallationsProvider>
+            <BreadcrumbProvider>
+              <TerminalThemeProvider>
                 <Flex
-                  width="100%"
-                  minWidth={0}
-                  minHeight={0}
-                  flexGrow={1}
+                  position="relative"
+                  width="100vw"
+                  maxWidth="100vw"
+                  height="100vh"
+                  minWidth="0"
+                  minHeight="0"
+                  maxHeight="100vh"
+                  overflow="hidden"
+                  flexDirection="column"
                 >
-                  <Sidebar />
+                  {isProduction && (
+                    <WithApplicationUpdate>
+                      {({ reloadApplication }) => (
+                        <Toast
+                          severity="info"
+                          marginBottom="medium"
+                          marginRight="xxxxlarge"
+                        >
+                          <Span marginRight="small">
+                            Time for a new update!
+                          </Span>
+                          <A
+                            onClick={() => reloadApplication()}
+                            style={{ textDecoration: 'none' }}
+                            color="action-link-inline"
+                          >
+                            Update now
+                          </A>
+                        </Toast>
+                      )}
+                    </WithApplicationUpdate>
+                  )}
+                  <Header />
                   <Flex
-                    direction="column"
+                    width="100%"
+                    minWidth={0}
+                    minHeight={0}
                     flexGrow={1}
-                    overflowX="hidden"
-                    position="relative"
                   >
-                    <ContentOverlay />
-                    <Subheader />
-                    <Outlet />
+                    <Sidebar />
+                    <Flex
+                      direction="column"
+                      flexGrow={1}
+                      overflowX="hidden"
+                      position="relative"
+                    >
+                      <ContentOverlay />
+                      <Subheader />
+                      <Outlet />
+                    </Flex>
                   </Flex>
                 </Flex>
-              </Flex>
-            </TerminalThemeProvider>
-          </BreadcrumbProvider>
-        </InstallationsProvider>
-      </EnsureLogin>
+              </TerminalThemeProvider>
+            </BreadcrumbProvider>
+          </InstallationsProvider>
+        </EnsureLogin>
+      </MarkdocContextProvider>
     </CursorPositionProvider>
   )
 }

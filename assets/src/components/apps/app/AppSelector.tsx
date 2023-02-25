@@ -33,8 +33,7 @@ export default function AppSelector({ applications, currentApp }) {
 
   return (
     <Div
-      marginTop="xxxsmall"
-      marginBottom="large"
+      marginBottom="medium"
       width={240}
     >
       <Select

@@ -44,7 +44,7 @@ export default function MyProfile() {
           heading={me.name}
           icon={{ name: me.name, url: me.avatar, spacing: 'none' }}
           subheading={me?.email}
-          marginBottom="xlarge"
+          marginBottom="medium"
         />
         <TabList
           stateRef={tabStateRef}
