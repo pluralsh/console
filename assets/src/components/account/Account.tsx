@@ -1,5 +1,4 @@
 import { Tab, TabList, TabPanel } from '@pluralsh/design-system'
-
 import { useContext, useEffect, useRef } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 
@@ -17,6 +16,7 @@ const getDirectory = (me, configuration) => [
   { path: 'groups', label: 'Groups', enabled: true },
   { path: 'roles', label: 'Roles', enabled: true },
   { path: 'webhooks', label: 'Webhooks', enabled: true },
+  { path: 'vpn', label: 'VPN clients', enabled: configuration?.vpnEnabled ?? false },
   { path: 'email', label: 'Email settings', enabled: me?.roles?.admin && configuration?.gitStatus?.cloned },
 ]
 

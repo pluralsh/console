@@ -197,6 +197,7 @@ function OIDCLogin({ oidcUri }) {
           <P
             body1
             color="text-light"
+            textAlign="center"
           >
             Connect to your Plural account for access to this Console.
           </P>

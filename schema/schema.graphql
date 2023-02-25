@@ -677,7 +677,7 @@ type AvailableFeatures {
 
 type WireguardPeer {
   metadata: Metadata!
-  status: WireguardPeerStatus!
+  status: WireguardPeerStatus
   spec: WireguardPeerSpec!
   config: String
   user: User
@@ -774,7 +774,7 @@ type RootMutationType {
   deleteNode(name: String!): Node
   overlayConfiguration(namespace: String!, context: Map!): Build
   createPeer(userId: ID, email: String, name: String!): WireguardPeer
-  deletePeer(name: String!): WireguardPeer
+  deletePeer(name: String!): Boolean
   installRecipe(id: ID!, context: Map!, oidc: Boolean): Build
   installStack(name: String!, context: ContextAttributes!, oidc: Boolean): Build
   updateSmtp(smtp: SmtpInput!): Smtp
@@ -1298,6 +1298,8 @@ type WireguardPeerStatus {
 
 type WireguardPeerSpec {
   wireguardRef: String
+  address: String
+  publicKey: String
 }
 
 type PodSpec {
