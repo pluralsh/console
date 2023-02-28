@@ -1,24 +1,27 @@
 import React from 'react'
 
-import { parse, renderers, transform } from '@markdoc/markdoc'
+import { RenderableTreeNode, renderers } from '@markdoc/markdoc'
 
-import { components, config } from 'markdoc/mdSchema'
+import { components } from 'markdoc/mdSchema'
+
+import { getMdContent } from '../../../../markdoc/utils/getMdContent'
 
 export default function MarkdocComponent({
   raw,
+  content,
   components: userComponents = {},
 }: {
   raw?: string | null
+  content?: RenderableTreeNode
   components?: any
-}) {
-  if (!raw) {
+  }) {
+  content = content || getMdContent(raw)
+
+  if (!content) {
     return null
   }
 
-  const ast = parse(raw)
-  const renderable = transform(ast, config)
-
-  const node = renderers.react(renderable, React, {
+  const node = renderers.react(content, React, {
     components: {
       ...components,
       // Allows users to override default components

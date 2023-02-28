@@ -61,6 +61,7 @@ export function ScrollablePage({
   scrollable = true,
   maxContentWidth,
   fullWidth,
+  scrollRef,
   ...props
 }: {
   heading: ReactNode
@@ -97,9 +98,11 @@ export function ScrollablePage({
         extraStyles={contentStyles}
         maxContentWidth={maxContentWidth}
         fullWidth={fullWidth}
+        ref={scrollRef}
       >
         <div className="widthLimiter">{children}</div>
       </ScrollablePageContent>
     </>
   )
 }
+

@@ -77,7 +77,12 @@ export const appsRoutes = [
     <Route
       path="docs"
       element={<AppDocs />}
-    />
+    >
+      <Route
+        path=":docName"
+        element={<AppDocs />}
+      />
+    </Route>
   </Route>,
 
   /* COMPONENTS */

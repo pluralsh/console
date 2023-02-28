@@ -1,17 +1,9 @@
-import {
-  ComponentProps,
-  ReactElement,
-  createContext,
-  useContext,
-} from 'react'
+import { ComponentProps, createContext, useContext } from 'react'
 
 export type MdLinkProps = Omit<ComponentProps<'a'>, 'ref'> & { ref?: any }
 
 export type MarkdocContextT = {
   variant: 'console' | 'docs'
-  renderLink: (props: MdLinkProps) => ReactElement
-  useNormalizeHref: (href?: string) => string
-  useNavigate: (location?: string) => void
 }
 
 const MarkdocContext = createContext<MarkdocContextT | null>(null)

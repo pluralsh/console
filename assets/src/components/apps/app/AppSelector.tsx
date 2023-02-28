@@ -1,35 +1,25 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
 import { Div, P, Span } from 'honorable'
 import { isEmpty } from 'lodash'
-import {
-  Key,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { memo, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { getIcon, hasIcons } from '../misc'
 
-import { getDirectory } from './App'
-
-export default function AppSelector({ applications, currentApp }) {
-  const [selectedKey, setSelectedKey] = useState<Key>(currentApp.name)
+export default function AppSelector({ applications, currentApp, directory }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
 
-  const paths = useMemo(() => getDirectory().map(({ path }) => path), [])
+  const paths = directory.map(({ path }) => path).filter(path => !!path)
 
   const switchApp = useCallback(appName => {
+    console.log('selection changled', appName)
     const matches = paths.filter(path => pathname.endsWith(path) || pathname.includes(`/${path}/`))
     const match = isEmpty(matches) ? '' : matches[0]
 
-    setSelectedKey(appName)
     navigate(`/apps/${appName}/${match}`)
-  }, [navigate, pathname, paths])
-
-  useEffect(() => setSelectedKey(currentApp.name), [currentApp])
+  },
+  [navigate, pathname, paths])
 
   return (
     <Div
@@ -38,14 +28,17 @@ export default function AppSelector({ applications, currentApp }) {
     >
       <Select
         aria-label="app"
-        leftContent={hasIcons(currentApp) ? (
-          <img
-            src={getIcon(currentApp)}
-            height={16}
-          />
-        ) : undefined}
-        width={240}
-        selectedKey={selectedKey}
+        leftContent={
+          hasIcons(currentApp) ? (
+            <img
+              style={{ display: 'block' }}
+              src={getIcon(currentApp)}
+              height={16}
+              width={16}
+            />
+          ) : undefined
+        }
+        selectedKey={currentApp.name}
         onSelectionChange={switchApp}
       >
         {applications.map(app => (
@@ -59,14 +52,13 @@ export default function AppSelector({ applications, currentApp }) {
                 whiteSpace="nowrap"
               >
                 {app.name}
-                {app.spec?.descriptor?.version
-                && (
+                {app.spec?.descriptor?.version && (
                   <Span
                     caption
                     color="text-xlight"
                     marginLeft="small"
                   >
-                    v{app.spec.descriptor.version}
+                    {app.spec.descriptor.version}
                   </Span>
                 )}
               </P>
@@ -74,10 +66,13 @@ export default function AppSelector({ applications, currentApp }) {
             textValue={app.name}
             leftContent={hasIcons(app) ? (
               <img
+                style={{ display: 'block' }}
                 src={getIcon(app)}
                 height={16}
+                width={16}
               />
             ) : undefined}
+
           />
         ))}
       </Select>

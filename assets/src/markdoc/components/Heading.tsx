@@ -84,7 +84,7 @@ export function Heading({ level = 1, children, ...props }) {
       {...props}
     >
       {children}
-      {props.id && variant === 'docs' && (
+      {props.id && (
         <Link
           className="link"
           to={`#${props.id}`}

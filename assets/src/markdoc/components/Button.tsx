@@ -1,12 +1,12 @@
 import type { ComponentProps, ReactNode } from 'react'
 
-import { Button as PluralButton } from '@pluralsh/design-system'
+import { Button as PluralButton, useNavigationContext } from '@pluralsh/design-system'
 
 import * as icons from '@pluralsh/design-system/dist/icons'
 import styled from 'styled-components'
 
 import { isExternalUrl } from 'markdoc/utils/text'
-import { useMarkdocContext } from 'markdoc/MarkdocContext'
+import { useNormalizeHref } from 'markdoc/utils/useNormalizeHref'
 
 function Button({
   href,
@@ -24,7 +24,7 @@ function Button({
   renderLink: (props: ComponentProps<'a'>) => ReactNode
   useCurrentPath: () => string
 }) {
-  const { useNormalizeHref, renderLink: LinkComponent } = useMarkdocContext()
+  const { Link: LinkComponent } = useNavigationContext()
 
   href = useNormalizeHref(href)
   const buttonProps: any = props

@@ -1,41 +1,69 @@
-import { LoopingLogo } from '@pluralsh/design-system'
-
-import { GqlError } from 'components/utils/Alert'
+import { scrollIntoContainerView } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { useRepositoryQuery } from 'generated/graphql'
-import { Div } from 'honorable'
 import { capitalize } from 'lodash'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+
+import {
+  useLocation,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom'
+import { useTheme } from 'styled-components'
+
+import { getDocsData } from '../App'
 
 import MarkdocComponent from './MarkdocContent'
 
 export default function AppDocs() {
-  const { appName } = useParams()
+  const scrollRef = useRef<HTMLElement>()
+  const { appName, docName } = useParams()
+  const { docs } = useOutletContext() as {
+    docs: ReturnType<typeof getDocsData>
+  }
+
+  const currentDoc = docs?.find(doc => doc.id === docName)
+
   const location = useLocation()
-  const { data, error } = useRepositoryQuery({
-    variables: { name: appName ?? '' },
-  })
+  const { hash } = location
+
+  const theme = useTheme()
+
+  useEffect(() => {
+    if (hash && scrollRef.current) {
+      console.log('hash', hash)
+      const hashElt = scrollRef.current.querySelector(hash)
+
+      if (!hashElt) {
+        return
+      }
+
+      console.log('hashElt?.clientTop', hashElt?.getBoundingClientRect())
+      scrollIntoContainerView(hashElt, scrollRef.current, {
+        behavior: 'smooth',
+        block: 'start',
+        blockOffset: theme.spacing.xlarge,
+        preventIfVisible: false,
+      })
+    }
+  }, [hash, theme.spacing.xlarge])
+
   const navigate = useNavigate()
 
-  if (error) {
-    return <GqlError error={error} />
-  }
-  if (!data) {
-    return <LoopingLogo />
-  }
-  if (!data.repository?.docs?.length ?? 0 > 0) {
+  if (!currentDoc) {
     navigate(location.pathname.split('/').slice(0, -1).join('/'))
+
+    return null
   }
 
   const displayAppName = capitalize(appName)
 
   return (
-    <ScrollablePage heading={`${displayAppName} docs`}>
-      {data.repository?.docs?.map(docPage => (
-        <Div marginBottom="xxxxlarge">
-          <MarkdocComponent raw={docPage?.content} />
-        </Div>
-      ))}
+    <ScrollablePage
+      heading={`${displayAppName} docs`}
+      scrollRef={scrollRef}
+    >
+      <MarkdocComponent content={currentDoc.content} />
     </ScrollablePage>
   )
 }

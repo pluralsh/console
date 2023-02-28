@@ -3,7 +3,8 @@ import type { ReactNode } from 'react'
 import styled from 'styled-components'
 
 import { isExternalUrl } from 'markdoc/utils/text'
-import { useMarkdocContext } from 'markdoc/MarkdocContext'
+import { useNavigationContext } from '@pluralsh/design-system'
+import { useNormalizeHref } from 'markdoc/utils/useNormalizeHref'
 
 function Link({
   href,
@@ -13,10 +14,8 @@ function Link({
   href: string
   children?: ReactNode
   }) {
-  const { useNormalizeHref } = useMarkdocContext()
-
   href = useNormalizeHref(href)
-  const { renderLink: LinkComponent } = useMarkdocContext()
+  const { Link: LinkComponent } = useNavigationContext()
 
   return (
     <LinkComponent
