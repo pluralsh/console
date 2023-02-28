@@ -7,6 +7,8 @@ import {
 } from 'react'
 import { useQuery } from '@apollo/client'
 
+import { SHORT_POLL_INTERVAL } from 'components/cluster/constants'
+
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import VPNClientList from '../../vpn/VPNClientList'
 import {
@@ -26,6 +28,7 @@ import { VPNHeaderActions } from './VPNHeaderActions'
 function VPN() {
   const { data: { wireguardPeers } = {}, loading, refetch } = useQuery<Pick<RootQueryType, 'wireguardPeers'>>(WireguardPeers, {
     fetchPolicy: 'network-only',
+    pollInterval: SHORT_POLL_INTERVAL,
   })
   const [selectedUsers, setSelectedUsers] = useState<Set<Key>>(new Set<Key>())
   const columns = useMemo(() => [ColumnName, ColumnUser, ColumnAddress, ColumnPublicKey, ColumnStatus, ColumnActions(refetch)], [refetch])
