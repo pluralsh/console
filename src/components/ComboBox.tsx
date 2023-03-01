@@ -243,7 +243,7 @@ function ComboBox({
   placement,
   width,
   maxHeight,
-  inputProps: outerInputProps,
+  inputProps: outerInputProps = {},
   ...props
 }: ComboBoxProps) {
   const nextFocusedKeyRef = useRef<Key>(null)
