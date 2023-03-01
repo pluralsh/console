@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { LoopingLogo } from '@pluralsh/design-system'
 
-import { ScrollablePage } from '../utils/layout/ScrollablePage'
 import VPNClientList from '../vpn/VPNClientList'
 import {
   ColumnAddress,

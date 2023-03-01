@@ -7,11 +7,6 @@ import {
 } from 'react'
 import { useQuery } from '@apollo/client'
 
-import { SHORT_POLL_INTERVAL } from 'components/cluster/constants'
-
-import { Flex } from 'honorable'
-
-import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import VPNClientList from '../../vpn/VPNClientList'
 import {
   ColumnActions,
@@ -24,8 +19,8 @@ import {
 } from '../../vpn/columns'
 import { RootQueryType, User } from '../../../generated/graphql'
 import { WireguardPeers } from '../../vpn/graphql/queries'
-
 import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
+import { SHORT_POLL_INTERVAL } from '../../cluster/constants'
 
 import { VPNHeaderActions } from './VPNHeaderActions'
 
