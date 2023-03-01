@@ -9,6 +9,8 @@ import { useQuery } from '@apollo/client'
 
 import { SHORT_POLL_INTERVAL } from 'components/cluster/constants'
 
+import { Flex } from 'honorable'
+
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import VPNClientList from '../../vpn/VPNClientList'
 import {
@@ -22,6 +24,8 @@ import {
 } from '../../vpn/columns'
 import { RootQueryType, User } from '../../../generated/graphql'
 import { WireguardPeers } from '../../vpn/graphql/queries'
+
+import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
 
 import { VPNHeaderActions } from './VPNHeaderActions'
 
@@ -49,7 +53,7 @@ function VPN() {
   }
 
   return (
-    <ScrollablePage
+    <ResponsivePageFullWidth
       scrollable={false}
       heading="VPN clients"
       headingContent={(
@@ -64,7 +68,7 @@ function VPN() {
         columns={columns}
         data={filteredClientList}
       />
-    </ScrollablePage>
+    </ResponsivePageFullWidth>
   )
 }
 
