@@ -89,7 +89,6 @@ function VPNColumnActions({ disabled, refetch, name }) {
 
   return (
     <Div
-      position="absolute"
       right={0}
       marginRight="small"
     >
