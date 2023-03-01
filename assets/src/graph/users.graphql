@@ -1,0 +1,11 @@
+fragment UserFragment on User {
+  id
+  name
+  email
+  profile
+  backgroundColor
+  readTimestamp
+  roles {
+    admin
+  }
+}
