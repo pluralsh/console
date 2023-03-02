@@ -1,0 +1,84 @@
+fragment GroupMemberFragment on GroupMember {
+  user {
+    ...UserFragment
+  }
+  group {
+    ...GroupFragment
+  }
+}
+
+fragment GroupFragment on Group {
+  id
+  name
+  description
+  insertedAt
+}
+
+query Groups($q: String, $cursor: String) {
+  groups(q: $q, first: 20, after: $cursor) {
+    pageInfo {
+      ...PageInfoFragment
+    }
+    edges {
+      node {
+        ...GroupFragment
+      }
+    }
+  }
+}
+
+query SearchGroups($q: String, $cursor: String) {
+  groups(q: $q, after: $cursor, first: 5) {
+    pageInfo {
+      ...PageInfoFragment
+    }
+    edges {
+      node {
+        ...GroupFragment
+      }
+    }
+  }
+}
+
+query GroupMembers($cursor: String, $id: ID!) {
+  groupMembers(groupId: $id, after: $cursor, first: 20) {
+    pageInfo {
+      ...PageInfoFragment
+    }
+    edges {
+      node {
+        ...GroupMemberFragment
+      }
+    }
+  }
+}
+
+mutation CreateGroupMember($groupId: ID!, $userId: ID!) {
+  createGroupMember(groupId: $groupId, userId: $userId) {
+    ...GroupMemberFragment
+  }
+}
+
+mutation DeleteMember($groupId: ID!, $userId: ID!) {
+  deleteGroupMember(groupId: $groupId, userId: $userId) {
+    ...GroupMemberFragment
+  }
+}
+
+mutation CreateGroup($attributes: GroupAttributes!) {
+  createGroup(attributes: $attributes) {
+    ...GroupFragment
+  }
+}
+
+mutation UpdateGroup($id: ID!, $attributes: GroupAttributes!) {
+  updateGroup(groupId: $id, attributes: $attributes) {
+    ...GroupFragment
+  }
+}
+
+mutation DeleteGroup($id: ID!) {
+  deleteGroup(groupId: $id) {
+    ...GroupFragment
+  }
+}

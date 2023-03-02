@@ -1,31 +1,23 @@
-import { useQuery } from '@apollo/client'
-
 import { useState } from 'react'
 import { Div } from 'honorable'
-
 import { isEmpty } from 'lodash'
+import { useGroupMembersQuery } from 'generated/graphql'
 
 import { extendConnection } from '../../../utils/graphql'
-
 import { StandardScroller } from '../../utils/SmoothScroller'
-
 import { List } from '../../utils/List'
-
-import { GROUP_MEMBERS } from './queries'
 
 import GroupMember from './GroupMember'
 
 export default function GroupMembers({ group, edit = false }: any) {
   const [listRef, setListRef] = useState<any>(null)
-  const { data, loading, fetchMore } = useQuery(GROUP_MEMBERS, {
+  const { data, loading, fetchMore } = useGroupMembersQuery({
     variables: { id: group.id },
     fetchPolicy: 'network-only',
   })
 
-  if (!data) return null
-  const {
-    groupMembers: { pageInfo, edges },
-  } = data
+  if (!data?.groupMembers) return null
+  const { pageInfo, edges } = data?.groupMembers || {}
 
   if (isEmpty(edges)) return <>This group has no members.</>
 

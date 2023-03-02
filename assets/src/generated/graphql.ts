@@ -2153,11 +2153,22 @@ export type FileContentFragmentFragment = { __typename?: 'FileContent', content?
 
 export type ConfigurationFragmentFragment = { __typename?: 'Configuration', helm?: string | null, terraform?: string | null };
 
+export type ApplicationSpecFragmentFragment = { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null };
+
+export type ApplicationStatusFragmentFragment = { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null };
+
 export type ApplicationFragmentFragment = { __typename?: 'Application', name: string, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null };
 
 export type MetadataFragmentFragment = { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null };
 
 export type ConfigurationOverlayFragmentFragment = { __typename?: 'ConfigurationOverlay', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'ConfigurationOverlaySpec', name?: string | null, folder?: string | null, subfolder?: string | null, documentation?: string | null, inputType?: string | null, inputValues?: Array<string | null> | null, updates?: Array<{ __typename?: 'OverlayUpdate', path?: Array<string | null> | null } | null> | null } };
+
+export type AppQueryVariables = Exact<{
+  name: Scalars['String'];
+}>;
+
+
+export type AppQuery = { __typename?: 'RootQueryType', application?: { __typename?: 'Application', name: string, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null } | null, configurationOverlays?: Array<{ __typename?: 'ConfigurationOverlay', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'ConfigurationOverlaySpec', name?: string | null, folder?: string | null, subfolder?: string | null, documentation?: string | null, inputType?: string | null, inputValues?: Array<string | null> | null, updates?: Array<{ __typename?: 'OverlayUpdate', path?: Array<string | null> | null } | null> | null } } | null> | null };
 
 export type RepositoryFragmentFragment = { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null };
 
@@ -2168,13 +2179,111 @@ export type RepositoryQueryVariables = Exact<{
 
 export type RepositoryQuery = { __typename?: 'RootQueryType', repository?: { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null } | null };
 
-export type AppQueryVariables = Exact<{
-  name: Scalars['String'];
+export type PageInfoFragmentFragment = { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null };
+
+export type GroupMemberFragmentFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null };
+
+export type GroupFragmentFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null };
+
+export type GroupsQueryVariables = Exact<{
+  q?: InputMaybe<Scalars['String']>;
+  cursor?: InputMaybe<Scalars['String']>;
 }>;
 
 
-export type AppQuery = { __typename?: 'RootQueryType', application?: { __typename?: 'Application', name: string, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null } | null, configurationOverlays?: Array<{ __typename?: 'ConfigurationOverlay', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'ConfigurationOverlaySpec', name?: string | null, folder?: string | null, subfolder?: string | null, documentation?: string | null, inputType?: string | null, inputValues?: Array<string | null> | null, updates?: Array<{ __typename?: 'OverlayUpdate', path?: Array<string | null> | null } | null> | null } } | null> | null };
+export type GroupsQuery = { __typename?: 'RootQueryType', groups?: { __typename?: 'GroupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupEdge', node?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null } | null> | null } | null };
 
+export type SearchGroupsQueryVariables = Exact<{
+  q?: InputMaybe<Scalars['String']>;
+  cursor?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type SearchGroupsQuery = { __typename?: 'RootQueryType', groups?: { __typename?: 'GroupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupEdge', node?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null } | null> | null } | null };
+
+export type GroupMembersQueryVariables = Exact<{
+  cursor?: InputMaybe<Scalars['String']>;
+  id: Scalars['ID'];
+}>;
+
+
+export type GroupMembersQuery = { __typename?: 'RootQueryType', groupMembers?: { __typename?: 'GroupMemberConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupMemberEdge', node?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null } | null } | null> | null } | null };
+
+export type CreateGroupMemberMutationVariables = Exact<{
+  groupId: Scalars['ID'];
+  userId: Scalars['ID'];
+}>;
+
+
+export type CreateGroupMemberMutation = { __typename?: 'RootMutationType', createGroupMember?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null } | null };
+
+export type DeleteMemberMutationVariables = Exact<{
+  groupId: Scalars['ID'];
+  userId: Scalars['ID'];
+}>;
+
+
+export type DeleteMemberMutation = { __typename?: 'RootMutationType', deleteGroupMember?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null } | null };
+
+export type CreateGroupMutationVariables = Exact<{
+  attributes: GroupAttributes;
+}>;
+
+
+export type CreateGroupMutation = { __typename?: 'RootMutationType', createGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null };
+
+export type UpdateGroupMutationVariables = Exact<{
+  id: Scalars['ID'];
+  attributes: GroupAttributes;
+}>;
+
+
+export type UpdateGroupMutation = { __typename?: 'RootMutationType', updateGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null };
+
+export type DeleteGroupMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null };
+
+export type UserFragmentFragment = { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null };
+
+export const ApplicationSpecFragmentFragmentDoc = gql`
+    fragment ApplicationSpecFragment on ApplicationSpec {
+  descriptor {
+    type
+    icons
+    description
+    version
+    links {
+      description
+      url
+    }
+  }
+  components {
+    group
+    kind
+  }
+}
+    `;
+export const ApplicationStatusFragmentFragmentDoc = gql`
+    fragment ApplicationStatusFragment on ApplicationStatus {
+  components {
+    group
+    kind
+    name
+    status
+  }
+  conditions {
+    message
+    reason
+    status
+    type
+  }
+  componentsReady
+}
+    `;
 export const CostAnalysisFragmentFragmentDoc = gql`
     fragment CostAnalysisFragment on CostAnalysis {
   minutes
@@ -2188,41 +2297,18 @@ export const ApplicationFragmentFragmentDoc = gql`
     fragment ApplicationFragment on Application {
   name
   spec {
-    descriptor {
-      type
-      icons
-      description
-      version
-      links {
-        description
-        url
-      }
-    }
-    components {
-      group
-      kind
-    }
+    ...ApplicationSpecFragment
   }
   status {
-    components {
-      group
-      kind
-      name
-      status
-    }
-    conditions {
-      message
-      reason
-      status
-      type
-    }
-    componentsReady
+    ...ApplicationStatusFragment
   }
   cost {
     ...CostAnalysisFragment
   }
 }
-    ${CostAnalysisFragmentFragmentDoc}`;
+    ${ApplicationSpecFragmentFragmentDoc}
+${ApplicationStatusFragmentFragmentDoc}
+${CostAnalysisFragmentFragmentDoc}`;
 export const MetadataFragmentFragmentDoc = gql`
     fragment MetadataFragment on Metadata {
   name
@@ -2283,41 +2369,44 @@ export const RepositoryFragmentFragmentDoc = gql`
 }
     ${ConfigurationFragmentFragmentDoc}
 ${FileContentFragmentFragmentDoc}`;
-export const RepositoryDocument = gql`
-    query Repository($name: String!) {
-  repository(name: $name) {
-    ...RepositoryFragment
+export const PageInfoFragmentFragmentDoc = gql`
+    fragment PageInfoFragment on PageInfo {
+  hasNextPage
+  endCursor
+}
+    `;
+export const UserFragmentFragmentDoc = gql`
+    fragment UserFragment on User {
+  id
+  name
+  email
+  profile
+  backgroundColor
+  readTimestamp
+  roles {
+    admin
   }
 }
-    ${RepositoryFragmentFragmentDoc}`;
-
-/**
- * __useRepositoryQuery__
- *
- * To run a query within a React component, call `useRepositoryQuery` and pass it any options that fit your needs.
- * When your component renders, `useRepositoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useRepositoryQuery({
- *   variables: {
- *      name: // value for 'name'
- *   },
- * });
- */
-export function useRepositoryQuery(baseOptions: Apollo.QueryHookOptions<RepositoryQuery, RepositoryQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<RepositoryQuery, RepositoryQueryVariables>(RepositoryDocument, options);
-      }
-export function useRepositoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RepositoryQuery, RepositoryQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<RepositoryQuery, RepositoryQueryVariables>(RepositoryDocument, options);
-        }
-export type RepositoryQueryHookResult = ReturnType<typeof useRepositoryQuery>;
-export type RepositoryLazyQueryHookResult = ReturnType<typeof useRepositoryLazyQuery>;
-export type RepositoryQueryResult = Apollo.QueryResult<RepositoryQuery, RepositoryQueryVariables>;
+    `;
+export const GroupFragmentFragmentDoc = gql`
+    fragment GroupFragment on Group {
+  id
+  name
+  description
+  insertedAt
+}
+    `;
+export const GroupMemberFragmentFragmentDoc = gql`
+    fragment GroupMemberFragment on GroupMember {
+  user {
+    ...UserFragment
+  }
+  group {
+    ...GroupFragment
+  }
+}
+    ${UserFragmentFragmentDoc}
+${GroupFragmentFragmentDoc}`;
 export const AppDocument = gql`
     query App($name: String!) {
   application(name: $name) {
@@ -2361,3 +2450,338 @@ export function useAppLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AppQue
 export type AppQueryHookResult = ReturnType<typeof useAppQuery>;
 export type AppLazyQueryHookResult = ReturnType<typeof useAppLazyQuery>;
 export type AppQueryResult = Apollo.QueryResult<AppQuery, AppQueryVariables>;
+export const RepositoryDocument = gql`
+    query Repository($name: String!) {
+  repository(name: $name) {
+    ...RepositoryFragment
+  }
+}
+    ${RepositoryFragmentFragmentDoc}`;
+
+/**
+ * __useRepositoryQuery__
+ *
+ * To run a query within a React component, call `useRepositoryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRepositoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRepositoryQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useRepositoryQuery(baseOptions: Apollo.QueryHookOptions<RepositoryQuery, RepositoryQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<RepositoryQuery, RepositoryQueryVariables>(RepositoryDocument, options);
+      }
+export function useRepositoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RepositoryQuery, RepositoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<RepositoryQuery, RepositoryQueryVariables>(RepositoryDocument, options);
+        }
+export type RepositoryQueryHookResult = ReturnType<typeof useRepositoryQuery>;
+export type RepositoryLazyQueryHookResult = ReturnType<typeof useRepositoryLazyQuery>;
+export type RepositoryQueryResult = Apollo.QueryResult<RepositoryQuery, RepositoryQueryVariables>;
+export const GroupsDocument = gql`
+    query Groups($q: String, $cursor: String) {
+  groups(q: $q, first: 20, after: $cursor) {
+    pageInfo {
+      ...PageInfoFragment
+    }
+    edges {
+      node {
+        ...GroupFragment
+      }
+    }
+  }
+}
+    ${PageInfoFragmentFragmentDoc}
+${GroupFragmentFragmentDoc}`;
+
+/**
+ * __useGroupsQuery__
+ *
+ * To run a query within a React component, call `useGroupsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGroupsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGroupsQuery({
+ *   variables: {
+ *      q: // value for 'q'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useGroupsQuery(baseOptions?: Apollo.QueryHookOptions<GroupsQuery, GroupsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GroupsQuery, GroupsQueryVariables>(GroupsDocument, options);
+      }
+export function useGroupsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GroupsQuery, GroupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GroupsQuery, GroupsQueryVariables>(GroupsDocument, options);
+        }
+export type GroupsQueryHookResult = ReturnType<typeof useGroupsQuery>;
+export type GroupsLazyQueryHookResult = ReturnType<typeof useGroupsLazyQuery>;
+export type GroupsQueryResult = Apollo.QueryResult<GroupsQuery, GroupsQueryVariables>;
+export const SearchGroupsDocument = gql`
+    query SearchGroups($q: String, $cursor: String) {
+  groups(q: $q, after: $cursor, first: 5) {
+    pageInfo {
+      ...PageInfoFragment
+    }
+    edges {
+      node {
+        ...GroupFragment
+      }
+    }
+  }
+}
+    ${PageInfoFragmentFragmentDoc}
+${GroupFragmentFragmentDoc}`;
+
+/**
+ * __useSearchGroupsQuery__
+ *
+ * To run a query within a React component, call `useSearchGroupsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchGroupsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchGroupsQuery({
+ *   variables: {
+ *      q: // value for 'q'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useSearchGroupsQuery(baseOptions?: Apollo.QueryHookOptions<SearchGroupsQuery, SearchGroupsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchGroupsQuery, SearchGroupsQueryVariables>(SearchGroupsDocument, options);
+      }
+export function useSearchGroupsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchGroupsQuery, SearchGroupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchGroupsQuery, SearchGroupsQueryVariables>(SearchGroupsDocument, options);
+        }
+export type SearchGroupsQueryHookResult = ReturnType<typeof useSearchGroupsQuery>;
+export type SearchGroupsLazyQueryHookResult = ReturnType<typeof useSearchGroupsLazyQuery>;
+export type SearchGroupsQueryResult = Apollo.QueryResult<SearchGroupsQuery, SearchGroupsQueryVariables>;
+export const GroupMembersDocument = gql`
+    query GroupMembers($cursor: String, $id: ID!) {
+  groupMembers(groupId: $id, after: $cursor, first: 20) {
+    pageInfo {
+      ...PageInfoFragment
+    }
+    edges {
+      node {
+        ...GroupMemberFragment
+      }
+    }
+  }
+}
+    ${PageInfoFragmentFragmentDoc}
+${GroupMemberFragmentFragmentDoc}`;
+
+/**
+ * __useGroupMembersQuery__
+ *
+ * To run a query within a React component, call `useGroupMembersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGroupMembersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGroupMembersQuery({
+ *   variables: {
+ *      cursor: // value for 'cursor'
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGroupMembersQuery(baseOptions: Apollo.QueryHookOptions<GroupMembersQuery, GroupMembersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GroupMembersQuery, GroupMembersQueryVariables>(GroupMembersDocument, options);
+      }
+export function useGroupMembersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GroupMembersQuery, GroupMembersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GroupMembersQuery, GroupMembersQueryVariables>(GroupMembersDocument, options);
+        }
+export type GroupMembersQueryHookResult = ReturnType<typeof useGroupMembersQuery>;
+export type GroupMembersLazyQueryHookResult = ReturnType<typeof useGroupMembersLazyQuery>;
+export type GroupMembersQueryResult = Apollo.QueryResult<GroupMembersQuery, GroupMembersQueryVariables>;
+export const CreateGroupMemberDocument = gql`
+    mutation CreateGroupMember($groupId: ID!, $userId: ID!) {
+  createGroupMember(groupId: $groupId, userId: $userId) {
+    ...GroupMemberFragment
+  }
+}
+    ${GroupMemberFragmentFragmentDoc}`;
+export type CreateGroupMemberMutationFn = Apollo.MutationFunction<CreateGroupMemberMutation, CreateGroupMemberMutationVariables>;
+
+/**
+ * __useCreateGroupMemberMutation__
+ *
+ * To run a mutation, you first call `useCreateGroupMemberMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateGroupMemberMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createGroupMemberMutation, { data, loading, error }] = useCreateGroupMemberMutation({
+ *   variables: {
+ *      groupId: // value for 'groupId'
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useCreateGroupMemberMutation(baseOptions?: Apollo.MutationHookOptions<CreateGroupMemberMutation, CreateGroupMemberMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateGroupMemberMutation, CreateGroupMemberMutationVariables>(CreateGroupMemberDocument, options);
+      }
+export type CreateGroupMemberMutationHookResult = ReturnType<typeof useCreateGroupMemberMutation>;
+export type CreateGroupMemberMutationResult = Apollo.MutationResult<CreateGroupMemberMutation>;
+export type CreateGroupMemberMutationOptions = Apollo.BaseMutationOptions<CreateGroupMemberMutation, CreateGroupMemberMutationVariables>;
+export const DeleteMemberDocument = gql`
+    mutation DeleteMember($groupId: ID!, $userId: ID!) {
+  deleteGroupMember(groupId: $groupId, userId: $userId) {
+    ...GroupMemberFragment
+  }
+}
+    ${GroupMemberFragmentFragmentDoc}`;
+export type DeleteMemberMutationFn = Apollo.MutationFunction<DeleteMemberMutation, DeleteMemberMutationVariables>;
+
+/**
+ * __useDeleteMemberMutation__
+ *
+ * To run a mutation, you first call `useDeleteMemberMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteMemberMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteMemberMutation, { data, loading, error }] = useDeleteMemberMutation({
+ *   variables: {
+ *      groupId: // value for 'groupId'
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useDeleteMemberMutation(baseOptions?: Apollo.MutationHookOptions<DeleteMemberMutation, DeleteMemberMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteMemberMutation, DeleteMemberMutationVariables>(DeleteMemberDocument, options);
+      }
+export type DeleteMemberMutationHookResult = ReturnType<typeof useDeleteMemberMutation>;
+export type DeleteMemberMutationResult = Apollo.MutationResult<DeleteMemberMutation>;
+export type DeleteMemberMutationOptions = Apollo.BaseMutationOptions<DeleteMemberMutation, DeleteMemberMutationVariables>;
+export const CreateGroupDocument = gql`
+    mutation CreateGroup($attributes: GroupAttributes!) {
+  createGroup(attributes: $attributes) {
+    ...GroupFragment
+  }
+}
+    ${GroupFragmentFragmentDoc}`;
+export type CreateGroupMutationFn = Apollo.MutationFunction<CreateGroupMutation, CreateGroupMutationVariables>;
+
+/**
+ * __useCreateGroupMutation__
+ *
+ * To run a mutation, you first call `useCreateGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createGroupMutation, { data, loading, error }] = useCreateGroupMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateGroupMutation(baseOptions?: Apollo.MutationHookOptions<CreateGroupMutation, CreateGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateGroupMutation, CreateGroupMutationVariables>(CreateGroupDocument, options);
+      }
+export type CreateGroupMutationHookResult = ReturnType<typeof useCreateGroupMutation>;
+export type CreateGroupMutationResult = Apollo.MutationResult<CreateGroupMutation>;
+export type CreateGroupMutationOptions = Apollo.BaseMutationOptions<CreateGroupMutation, CreateGroupMutationVariables>;
+export const UpdateGroupDocument = gql`
+    mutation UpdateGroup($id: ID!, $attributes: GroupAttributes!) {
+  updateGroup(groupId: $id, attributes: $attributes) {
+    ...GroupFragment
+  }
+}
+    ${GroupFragmentFragmentDoc}`;
+export type UpdateGroupMutationFn = Apollo.MutationFunction<UpdateGroupMutation, UpdateGroupMutationVariables>;
+
+/**
+ * __useUpdateGroupMutation__
+ *
+ * To run a mutation, you first call `useUpdateGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateGroupMutation, { data, loading, error }] = useUpdateGroupMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateGroupMutation(baseOptions?: Apollo.MutationHookOptions<UpdateGroupMutation, UpdateGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateGroupMutation, UpdateGroupMutationVariables>(UpdateGroupDocument, options);
+      }
+export type UpdateGroupMutationHookResult = ReturnType<typeof useUpdateGroupMutation>;
+export type UpdateGroupMutationResult = Apollo.MutationResult<UpdateGroupMutation>;
+export type UpdateGroupMutationOptions = Apollo.BaseMutationOptions<UpdateGroupMutation, UpdateGroupMutationVariables>;
+export const DeleteGroupDocument = gql`
+    mutation DeleteGroup($id: ID!) {
+  deleteGroup(groupId: $id) {
+    ...GroupFragment
+  }
+}
+    ${GroupFragmentFragmentDoc}`;
+export type DeleteGroupMutationFn = Apollo.MutationFunction<DeleteGroupMutation, DeleteGroupMutationVariables>;
+
+/**
+ * __useDeleteGroupMutation__
+ *
+ * To run a mutation, you first call `useDeleteGroupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteGroupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteGroupMutation, { data, loading, error }] = useDeleteGroupMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteGroupMutation(baseOptions?: Apollo.MutationHookOptions<DeleteGroupMutation, DeleteGroupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteGroupMutation, DeleteGroupMutationVariables>(DeleteGroupDocument, options);
+      }
+export type DeleteGroupMutationHookResult = ReturnType<typeof useDeleteGroupMutation>;
+export type DeleteGroupMutationResult = Apollo.MutationResult<DeleteGroupMutation>;
+export type DeleteGroupMutationOptions = Apollo.BaseMutationOptions<DeleteGroupMutation, DeleteGroupMutationVariables>;

@@ -1,13 +1,20 @@
-import { useMutation } from '@apollo/client'
-import { Box } from 'grommet'
-import { ListBoxItem } from '@pluralsh/design-system'
+import {
+  GearTrainIcon,
+  GlobeIcon,
+  IconFrame,
+  PeopleIcon,
+} from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
 
 import { Confirm } from 'components/utils/Confirm'
 
-import { MoreMenu } from 'components/utils/MoreMenu'
-
 import { LoginContext } from 'components/contexts'
+
+import { Button, Flex, Modal } from 'honorable'
+
+import { GroupsDocument, useDeleteGroupMutation } from 'generated/graphql'
+
+import { DeleteIconButton } from 'components/utils/IconButtons'
 
 import { removeConnection, updateCache } from '../../../utils/graphql'
 
@@ -15,89 +22,106 @@ import { Info } from '../../utils/Info'
 
 import { Permissions, hasRbac } from '../misc'
 
-import { DELETE_GROUP, GROUPS_Q } from './queries'
-
-import GroupEdit from './GroupEdit'
+import { EditGroupAttributes, EditGroupMembers } from './GroupEdit'
 import GroupView from './GroupView'
 
 export default function Group({ group, q }: any) {
   const { me } = useContext<any>(LoginContext)
   const editable = !!me.roles?.admin || hasRbac(me, Permissions.USERS)
-  const [edit, setEdit] = useState(false)
-  const [view, setView] = useState(false)
-  const [confirm, setConfirm] = useState(false)
-  const [mutation, { loading, error }] = useMutation(DELETE_GROUP, {
+  const [dialogKey, setDialogKey] = useState<
+    'confirmDelete' | 'editAttrs' | 'editMembers' | 'viewGroup' | ''
+  >('')
+
+  const [mutation, { loading, error }] = useDeleteGroupMutation({
     variables: { id: group.id },
-    onCompleted: () => setConfirm(false),
-    update: (cache, { data: { deleteGroup } }) => updateCache(cache, {
-      query: GROUPS_Q,
+    onCompleted: () => dialogKey === 'confirmDelete' && setDialogKey(''),
+    update: (cache, { data }) => updateCache(cache, {
+      query: GroupsDocument,
       variables: { q },
-      update: prev => removeConnection(prev, deleteGroup, 'groups'),
+      update: prev => removeConnection(prev, data?.deleteGroup, 'groups'),
     }),
   })
 
-  const menuItems = editable ? {
-    edit: {
-      label: 'Edit group',
-      onSelect: () => setEdit(true),
-    },
-    delete: {
-      label: 'Delete group',
-      onSelect: () => setConfirm(true),
-      destructive: true,
-    },
-  } : {
-    view: {
-      label: 'View group',
-      onSelect: () => setView(true),
-    },
-  }
-
   return (
-    <Box
-      fill="horizontal"
-      direction="row"
-      align="center"
+    <Flex
+      width="100%"
+      flexDirection="row"
+      alignItems="center"
     >
       <Info
         text={group.name}
         description={group.description || 'no description'}
       />
-      <MoreMenu onSelectionChange={selectedKey => menuItems[selectedKey]?.onSelect()}>
-        {Object.entries(menuItems).map(([key, { label, destructive }]) => (
-          <ListBoxItem
-            key={key}
-            textValue={label}
-            label={label}
-            destructive={destructive}
-            color="blue"
-          />
-        ))}
-      </MoreMenu>
-      <>
-        <GroupView
-          group={group}
-          view={view}
-          setView={setView}
-        />
-        {edit && (
-          <GroupEdit
-            group={group}
-            edit={edit}
-            setEdit={setEdit}
-          />
+      <Flex
+        flex={false}
+        direction="row"
+        gap="large"
+        align="center"
+      >
+        {group.global && <GlobeIcon size={20} />}
+        {!editable && (
+          <Button
+            secondary
+            small
+            onClick={() => dialogKey === '' && setDialogKey('viewGroup')}
+          >
+            View
+          </Button>
         )}
+        {editable && (
+          <Flex gap="xsmall">
+            <>
+              <IconFrame
+                clickable
+                size="medium"
+                onClick={() => dialogKey === '' && setDialogKey('editAttrs')}
+                tooltip="Edit attributes"
+                icon={<GearTrainIcon />}
+              />
+              <IconFrame
+                clickable
+                size="medium"
+                onClick={() => dialogKey === '' && setDialogKey('editMembers')}
+                tooltip="Edit members"
+                icon={<PeopleIcon />}
+              />
+              <DeleteIconButton
+                onClick={() => dialogKey === '' && setDialogKey('confirmDelete')}
+              />
+            </>
+          </Flex>
+        )}
+      </Flex>
+      <>
+        <Modal
+          portal
+          header="View group"
+          open={dialogKey === 'viewGroup'}
+          onClose={() => dialogKey === 'viewGroup' && setDialogKey('')}
+        >
+          <GroupView group={group} />
+        </Modal>
+        <EditGroupAttributes
+          group={group}
+          open={dialogKey === 'editAttrs'}
+          onClose={() => dialogKey === 'editAttrs' && setDialogKey('')}
+        />
+        <EditGroupMembers
+          group={group}
+          open={dialogKey === 'editMembers'}
+          onClose={() => dialogKey === 'editMembers' && setDialogKey('')}
+        />
         <Confirm
-          open={confirm}
-          title="Delete group"
-          text="Are you sure you want to delete this group? This could have downstream effects on a large number of users and their roles."
-          close={() => setConfirm(false)}
+          open={dialogKey === 'confirmDelete'}
+          text={<>Are you sure you want to delete the <b>{group.name}</b> group? This could have downstream effects on a large number of users and their roles.</>}
+          close={() => dialogKey === 'confirmDelete' && setDialogKey('')}
+          label="Delete group"
           submit={() => mutation()}
           loading={loading}
           destructive
           error={error}
         />
       </>
-    </Box>
+    </Flex>
   )
 }
