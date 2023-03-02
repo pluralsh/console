@@ -59,7 +59,6 @@ export function EditGroupMembers({
   }, [client, userFilter])
 
   const reset = useCallback(() => {
-    console.log('reset')
     setErrorMsg(undefined)
   }, [])
 
@@ -70,7 +69,6 @@ export function EditGroupMembers({
   })
 
   useEffect(() => {
-    console.log('MESSAGe', error?.graphQLErrors[0].message)
     if (
       error?.graphQLErrors[0].message === 'group_id has already been taken'
       || error?.graphQLErrors[0].message.startsWith('constraint error')
@@ -127,7 +125,6 @@ export function EditGroupMembers({
             // @ts-expect-error
             placeholder="Search a user"
             onSelectionChange={key => {
-              console.log('selection Changed', key)
               setUserFilter('')
               if (key && typeof key === 'string') {
                 // @ts-expect-error
@@ -182,7 +179,6 @@ export function EditGroupAttributes({ group, open, onClose }: any) {
     }
   })
   useEffect(() => {
-    console.log('useeffect error', error)
     setErrorMsg(error && (
       <GqlError
         header="Problem editing group attributes"
