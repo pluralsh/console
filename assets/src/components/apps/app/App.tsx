@@ -4,6 +4,8 @@ import {
   LoopingLogo,
   TreeNav,
   TreeNavEntry,
+  getBarePathFromPath,
+  removeTrailingSlashes,
 } from '@pluralsh/design-system'
 
 import { useContext, useMemo, useState } from 'react'
@@ -40,10 +42,15 @@ import AppSelector from './AppSelector'
 import RunbookStatus from './runbooks/runbook/RunbookStatus'
 import LogsLegend from './logs/LogsLegend'
 import ComponentProgress from './components/ComponentProgress'
+import { DocPageContextProvider, useDocPageContext } from './docs/AppDocsContext'
 
 export function getDocsData(docs: Repository['docs']) {
+  // const docsContext = useDocPageContext()
+  // const currentPath = getBarePathFromPath(useLocation().pathname)
+
   return docs?.map((doc, i) => {
     const content = getMdContent(doc?.content)
+
     const headings = collectHeadings(content)
     const id = headings?.[0]?.id || `page-${i}`
     const label = headings?.[0]?.title || `Page ${i}`
@@ -56,6 +63,7 @@ export function getDocsData(docs: Repository['docs']) {
             path: `${path}#${heading.id}`,
             label: `${heading.title}`,
             id: heading.id,
+            type: 'docPageHash',
           }
         }
 
@@ -70,6 +78,7 @@ export function getDocsData(docs: Repository['docs']) {
       subpaths,
       content,
       headings,
+      type: 'docPage',
     }
   })
 }
@@ -80,7 +89,7 @@ export const getDirectory = ({
   config = null,
 }: {
   app: Application | null
-  docs?: Repository['docs']
+  docs?: ReturnType<typeof getDocsData> | null
   config: any
 }) => {
   if (!app || !docs) {
@@ -116,7 +125,7 @@ export const getDirectory = ({
   ]
 }
 
-export default function App() {
+function AppWithoutContext() {
   const { me, configuration } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
   const { appName, dashboardId, runbookName } = useParams()
@@ -128,6 +137,7 @@ export default function App() {
   const { data: repoData, error: repoError } = useRepositoryQuery({
     variables: { name: appName ?? '' },
   })
+  const docPageContext = useDocPageContext()
 
   const docs = useMemo(() => getDocsData(repoData?.repository?.docs),
     [repoData?.repository?.docs])
@@ -135,7 +145,7 @@ export default function App() {
   const directory = useMemo(() => getDirectory({ app: currentApp, docs, config: configuration }),
     [configuration, currentApp, docs])
 
-  console.log('directory', directory)
+  console.log('docs', docs)
 
   if (!me || !currentApp) return null
   if (repoError) {
@@ -144,16 +154,58 @@ export default function App() {
   if (!repoData?.repository) {
     return <LoopingLogo />
   }
+  console.log('hash', docPageContext.selectedHash)
 
-  const renderDirectory = directory => directory.map(({ label, path, subpaths }) => (
-    <TreeNavEntry
-      key={path}
-      href={path}
-      label={label}
-    >
-      {subpaths ? renderDirectory(subpaths) : undefined}
-    </TreeNavEntry>
-  ))
+  const renderDirectory = directory => directory.map(({
+    label, path, subpaths, type, ...props
+  }) => {
+    const currentPath
+        = removeTrailingSlashes(getBarePathFromPath(pathname)) || ''
+
+    path = `/apps/${appName}/${removeTrailingSlashes(path) || ''}`
+    const hashlessPath = path.split('#')[0]
+
+    const isInCurrentPath = currentPath.startsWith(hashlessPath)
+    const isExactlyCurrentPath = currentPath === hashlessPath
+
+    const docPageRootHash = props?.headings?.[0]?.id || ''
+    const active
+        = type === 'docPage'
+          ? isExactlyCurrentPath
+            && (docPageContext.selectedHash === docPageRootHash
+              || !docPageContext.selectedHash)
+          : type === 'docPageHash'
+            ? isExactlyCurrentPath && docPageContext.selectedHash === props.id
+            : isExactlyCurrentPath
+    const defaultOpen
+        = type === 'docPageHash' ? false : isInCurrentPath && !active
+
+    return (
+      <TreeNavEntry
+        key={path}
+        href={path}
+        label={label}
+        active={active}
+        defaultOpen={defaultOpen}
+        {...(type === 'docPageHash' && props.id
+          ? {
+            onClick: () => {
+              docPageContext.scrollToHash(props.id)
+            },
+          }
+          : type === 'docPage'
+            ? {
+              onClick: () => {
+                console.log('docPageRootHash', docPageRootHash)
+                docPageContext.scrollToHash(docPageRootHash)
+              },
+            }
+            : {})}
+      >
+        {subpaths ? renderDirectory(subpaths) : undefined}
+      </TreeNavEntry>
+    )
+  })
 
   const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
   const {
@@ -237,5 +289,13 @@ export default function App() {
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
     </ResponsiveLayoutPage>
+  )
+}
+
+export default function App({ ...props }) {
+  return (
+    <DocPageContextProvider>
+      <AppWithoutContext {...props} />
+    </DocPageContextProvider>
   )
 }

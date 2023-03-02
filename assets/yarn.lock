@@ -3487,7 +3487,7 @@ __metadata:
 
 "@pluralsh/design-system@file:.yalc/@pluralsh/design-system::locator=console%40workspace%3A.":
   version: 0.1.0
-  resolution: "@pluralsh/design-system@file:.yalc/@pluralsh/design-system#.yalc/@pluralsh/design-system::hash=6ab583&locator=console%40workspace%3A."
+  resolution: "@pluralsh/design-system@file:.yalc/@pluralsh/design-system#.yalc/@pluralsh/design-system::hash=290c7d&locator=console%40workspace%3A."
   dependencies:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@monaco-editor/react": 4.4.6
@@ -3539,7 +3539,7 @@ __metadata:
     react-dom: ">=16.0.0"
     react-transition-group: ">=4.4.2"
     styled-components: ">=5.3.5"
-  checksum: 356fdbf4e4a1efad4424537d48cbe9ef92309b0183af688c0c45a1472634f27c468d7f0603f4c827fd3794d1a18cfd169bc32266745443a816cfdc3ce992f002
+  checksum: 63270c043a99a2ba194cf2e39e50d0e66247055b0f0550d31fa2cb96b2b25d138da73d5ff2f6e9fdae84a4b202508266227b5f2f62cf41ba86c7fff9116fd9b3
   languageName: node
   linkType: hard
 
@@ -7762,6 +7762,7 @@ __metadata:
     stylelint: 14.16.1
     tinyqueue: 2.0.3
     typescript: 4.9.5
+    use-immer: 0.8.1
     uuid: 9.0.0
     vite: 4.1.1
     vite-plugin-pwa: 0.14.4
@@ -16890,6 +16891,16 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
   checksum: f771cbadfdc91e03b7ab9eb32d0fc0cc647755711801bf507e891ad38c4bbc5f02b2509acadf9c965ec9c5f2f642fd33bdfdfb17b0873c4ad0a9b1f5e5e724bf
+  languageName: node
+  linkType: hard
+
+"use-immer@npm:0.8.1":
+  version: 0.8.1
+  resolution: "use-immer@npm:0.8.1"
+  peerDependencies:
+    immer: ">=2.0.0"
+    react: ^16.8.0 || ^17.0.1 || ^18.0.0
+  checksum: 9ffc1a201a92b6b026c420718e6a00e72ba48b62420bb515927b379bb1d791b5b4766b57c755b4851c0e1f80000e639bc1cf8e73424e44466741c159391d35dd
   languageName: node
   linkType: hard
 
