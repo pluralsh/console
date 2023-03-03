@@ -145,8 +145,6 @@ function AppWithoutContext() {
   const directory = useMemo(() => getDirectory({ app: currentApp, docs, config: configuration }),
     [configuration, currentApp, docs])
 
-  console.log('docs', docs)
-
   if (!me || !currentApp) return null
   if (repoError) {
     return <GqlError error={repoError} />
@@ -154,7 +152,6 @@ function AppWithoutContext() {
   if (!repoData?.repository) {
     return <LoopingLogo />
   }
-  console.log('hash', docPageContext.selectedHash)
 
   const renderDirectory = directory => directory.map(({
     label, path, subpaths, type, ...props
