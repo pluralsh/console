@@ -3,17 +3,11 @@ import { Outlet } from 'react-router-dom'
 import { Toast } from '@pluralsh/design-system'
 
 import { A, Flex, Span } from 'honorable'
-import ReactArrayToTree from 'react-array-to-tree'
 import { MarkdocContextProvider } from 'markdoc/MarkdocContext'
 
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
 
-import {
-  PropsWithChildren,
-  ReactElement,
-  ReactNode,
-  cloneElement,
-} from 'react'
+import { ReactNode } from 'react'
 
 import { EnsureLogin } from '../login/Login'
 import { InstallationsProvider } from '../Installations'
