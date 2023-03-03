@@ -57,7 +57,7 @@ export default function AppSelector({ applications, currentApp, directory }) {
                     color="text-xlight"
                     marginLeft="small"
                   >
-                    {app.spec.descriptor.version}
+                    v{app.spec.descriptor.version}
                   </Span>
                 )}
               </P>
