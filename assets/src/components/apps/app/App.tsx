@@ -1,4 +1,4 @@
-import { A, Flex } from 'honorable'
+import { A, Div, Flex } from 'honorable'
 import {
   Button,
   LoopingLogo,
@@ -32,6 +32,8 @@ import capitalize from 'lodash/capitalize'
 
 import collectHeadings from 'markdoc/utils/collectHeadings'
 
+import { useTheme } from 'styled-components'
+
 import { LoginContext } from '../../contexts'
 
 import AppStatus from '../AppStatus'
@@ -45,9 +47,6 @@ import ComponentProgress from './components/ComponentProgress'
 import { DocPageContextProvider, useDocPageContext } from './docs/AppDocsContext'
 
 export function getDocsData(docs: Repository['docs']) {
-  // const docsContext = useDocPageContext()
-  // const currentPath = getBarePathFromPath(useLocation().pathname)
-
   return docs?.map((doc, i) => {
     const content = getMdContent(doc?.content)
 
@@ -126,6 +125,7 @@ export const getDirectory = ({
 }
 
 function AppWithoutContext() {
+  const theme = useTheme()
   const { me, configuration } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
   const { appName, dashboardId, runbookName } = useParams()
@@ -162,31 +162,27 @@ function AppWithoutContext() {
     const currentPath
         = removeTrailingSlashes(getBarePathFromPath(pathname)) || ''
 
-    path = `/apps/${appName}/${removeTrailingSlashes(path) || ''}`
-    const hashlessPath = path.split('#')[0]
+    const fullPath = `/apps/${appName}/${removeTrailingSlashes(path) || ''}`
+    const hashlessPath = fullPath.split('#')[0]
 
     const isInCurrentPath = currentPath.startsWith(hashlessPath)
-    const isExactlyCurrentPath = currentPath === hashlessPath
 
     const docPageRootHash = props?.headings?.[0]?.id || ''
     const active
         = type === 'docPage'
-          ? isExactlyCurrentPath
+          ? isInCurrentPath
             && (docPageContext.selectedHash === docPageRootHash
               || !docPageContext.selectedHash)
           : type === 'docPageHash'
-            ? isExactlyCurrentPath && docPageContext.selectedHash === props.id
-            : isExactlyCurrentPath
-    const defaultOpen
-        = type === 'docPageHash' ? false : isInCurrentPath && !active
+            ? isInCurrentPath && docPageContext.selectedHash === props.id
+            : isInCurrentPath
 
     return (
       <TreeNavEntry
-        key={path}
-        href={path}
+        key={fullPath}
+        href={path === 'docs' ? undefined : fullPath}
         label={label}
         active={active}
-        defaultOpen={defaultOpen}
         {...(type === 'docPageHash' && props.id
           ? {
             onClick: () => {
@@ -219,12 +215,23 @@ function AppWithoutContext() {
   return (
     <ResponsiveLayoutPage>
       <ResponsiveLayoutSidenavContainer>
-        <AppSelector
-          directory={directory}
-          applications={applications}
-          currentApp={currentApp}
-        />
-        <TreeNav>{renderDirectory(directory)}</TreeNav>
+        <Flex
+          flexDirection="column"
+          maxHeight="100%"
+          overflow="hidden"
+        >
+          <AppSelector
+            directory={directory}
+            applications={applications}
+            currentApp={currentApp}
+          />
+          <Div
+            overflowY="auto"
+            paddingBottom={theme.spacing.medium}
+          >
+            <TreeNav>{renderDirectory(directory)}</TreeNav>
+          </Div>
+        </Flex>
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer role="main">

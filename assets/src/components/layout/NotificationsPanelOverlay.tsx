@@ -71,7 +71,6 @@ export function NotificationsPanelOverlay({
   const notificationsPanelRef = useRef<any>()
   const [all, setAll] = useState<boolean>(false)
 
-  console.log('isOpen', isOpen)
   useContentOverlay(isOpen)
 
   useOutsideClick(notificationsPanelRef, () => {

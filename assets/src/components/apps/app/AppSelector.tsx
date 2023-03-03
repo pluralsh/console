@@ -1,7 +1,7 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
 import { Div, P, Span } from 'honorable'
 import { isEmpty } from 'lodash'
-import { memo, useCallback } from 'react'
+import { useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { getIcon, hasIcons } from '../misc'
@@ -13,7 +13,6 @@ export default function AppSelector({ applications, currentApp, directory }) {
   const paths = directory.map(({ path }) => path).filter(path => !!path)
 
   const switchApp = useCallback(appName => {
-    console.log('selection changled', appName)
     const matches = paths.filter(path => pathname.endsWith(path) || pathname.includes(`/${path}/`))
     const match = isEmpty(matches) ? '' : matches[0]
 

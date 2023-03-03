@@ -1,12 +1,7 @@
 import { scrollIntoContainerView } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { capitalize } from 'lodash'
-import {
-  MutableRefObject,
-  useCallback,
-  useEffect,
-  useRef,
-} from 'react'
+import { MutableRefObject, useEffect, useRef } from 'react'
 
 import {
   useLocation,
@@ -42,7 +37,6 @@ export default function AppDocs() {
 
   scrollToId.current = (id: string) => {
     if (scrollRef.current) {
-      console.log('hash', hash)
       const scrollToElt = id
         ? scrollRef.current.querySelector(`#${id}`)
         : Array.from(scrollRef.current.children)[0]
@@ -50,8 +44,6 @@ export default function AppDocs() {
       if (!scrollToElt) {
         return
       }
-
-      console.log('hashElt?.clientTop', scrollToElt?.getBoundingClientRect())
       scrollIntoContainerView(scrollToElt, scrollRef.current, {
         behavior: 'smooth',
         block: 'start',
@@ -69,7 +61,6 @@ export default function AppDocs() {
 
   useEffect(() => {
     if (scrollHash.value && scrollRef.current) {
-      console.log('scrollHash', scrollHash)
       const hashElt = scrollRef.current.querySelector(`#${scrollHash.value}`)
 
       if (!hashElt) {
@@ -81,7 +72,6 @@ export default function AppDocs() {
         blockOffset: 32,
         preventIfVisible: false,
       })
-      console.log('hashElt?.clientTop', hashElt?.getBoundingClientRect())
     }
   }, [scrollHash])
 
