@@ -9,6 +9,8 @@ import {
 import Button from '../Button'
 import InstallIcon from '../icons/InstallIcon'
 import { ReturnIcon } from '../../icons'
+import InfoOutlineIcon from '../icons/InfoOutlineIcon'
+import Tooltip from '../Tooltip'
 
 import {
   useActive,
@@ -21,23 +23,31 @@ import { ContextProps, StepConfig, WizardContext } from './context'
 const Navigation = styled(NavigationUnstyled)(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.medium,
+  justifyContent: 'flex-end',
 
   '.spacer': {
     flex: 1,
   },
 
-  '.text': {
-    color: theme.colors['text-xlight'],
-    whiteSpace: 'nowrap',
-    alignSelf: 'center',
+  '.textContainer': {
+    display: 'flex',
+    gap: theme.spacing.xsmall,
+    color: theme.colors['icon-light'],
+
+    '.text': {
+      color: theme.colors['text-xlight'],
+      whiteSpace: 'nowrap',
+      alignSelf: 'center',
+    },
   },
 }))
 
 type NavigationProps<T = unknown> = {
   onInstall: Dispatch<Array<StepConfig<T>>>
+  tooltip?: string
 }
 
-function NavigationUnstyled<T = unknown>({ onInstall, ...props }: NavigationProps<T>): ReactElement<NavigationProps<T>> {
+function NavigationUnstyled<T = unknown>({ onInstall, tooltip, ...props }: NavigationProps<T>): ReactElement<NavigationProps<T>> {
   const {
     completed, setCompleted, limit,
   } = useContext<ContextProps<T>>(WizardContext)
@@ -62,17 +72,6 @@ function NavigationUnstyled<T = unknown>({ onInstall, ...props }: NavigationProp
 
   return (
     <div {...props}>
-      {completed && stepCompleted && (
-        <Button
-          secondary
-          startIcon={<ReturnIcon />}
-          disabled={!valid}
-          onClick={() => onReturn()}
-        >Return to install
-        </Button>
-      )}
-      <div className="spacer" />
-      {isFirst && <div className="text">{selectedCount} selected {selectedCount >= limit ? '(max)' : ''}</div>}
       {isFirst && (
         <Button
           secondary
@@ -80,11 +79,31 @@ function NavigationUnstyled<T = unknown>({ onInstall, ...props }: NavigationProp
         >Clear
         </Button>
       )}
+      {isFirst && (
+        <div className="textContainer">
+          <div className="text">{selectedCount}/{limit} selected</div>
+          {tooltip && (
+            <Tooltip label={tooltip}>
+              <InfoOutlineIcon size={16} />
+            </Tooltip>
+          )}
+        </div>
+      )}
       {!isFirst && (
         <Button
           secondary
           onClick={() => onBack()}
         >Back
+        </Button>
+      )}
+      <div className="spacer" />
+      {completed && stepCompleted && (
+        <Button
+          secondary
+          startIcon={<ReturnIcon />}
+          disabled={!valid}
+          onClick={() => onReturn()}
+        >Return to install
         </Button>
       )}
       {!isLast && (
