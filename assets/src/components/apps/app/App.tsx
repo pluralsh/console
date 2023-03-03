@@ -1,19 +1,15 @@
-import { A, Flex } from 'honorable'
+import { A, Div, Flex } from 'honorable'
 import {
   Button,
   LoopingLogo,
-  Tab,
-  TabList,
-  TabPanel,
+  TreeNav,
+  TreeNavEntry,
+  getBarePathFromPath,
+  removeTrailingSlashes,
 } from '@pluralsh/design-system'
 
-import { useContext, useRef, useState } from 'react'
-import {
-  Link,
-  Outlet,
-  useLocation,
-  useParams,
-} from 'react-router-dom'
+import { useContext, useMemo, useState } from 'react'
+import { Outlet, useLocation, useParams } from 'react-router-dom'
 
 import { ensureURLValidity } from 'utils/url'
 import { InstallationContext } from 'components/Installations'
@@ -28,48 +24,108 @@ import Prop from 'components/utils/Prop'
 
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
-import { Repository, useRepositoryQuery } from 'generated/graphql'
+import { Application, Repository, useRepositoryQuery } from 'generated/graphql'
 
 import { GqlError } from 'components/utils/Alert'
 
 import capitalize from 'lodash/capitalize'
 
+import collectHeadings from 'markdoc/utils/collectHeadings'
+
+import { useTheme } from 'styled-components'
+
 import { LoginContext } from '../../contexts'
 
 import AppStatus from '../AppStatus'
+
+import { getMdContent } from '../../../markdoc/utils/getMdContent'
 
 import AppSelector from './AppSelector'
 import RunbookStatus from './runbooks/runbook/RunbookStatus'
 import LogsLegend from './logs/LogsLegend'
 import ComponentProgress from './components/ComponentProgress'
+import { DocPageContextProvider, useDocPageContext } from './docs/AppDocsContext'
 
-export const getDirectory = (app: any = null,
-  config: any = null,
-  repo: Repository | null = null) => [
-  { path: 'dashboards', label: 'Dashboards', enabled: true },
-  { path: 'runbooks', label: 'Runbooks', enabled: true },
-  {
-    path: 'components',
-    label: <ComponentProgress app={app} />,
-    enabled: true,
-  },
-  { path: 'logs', label: 'Logs', enabled: true },
-  { path: 'cost', label: 'Cost analysis', enabled: app?.cost || app?.license },
-  { path: 'oidc', label: 'User management', enabled: true },
-  {
-    path: 'config',
-    label: 'Configuration',
-    enabled: config?.gitStatus?.cloned,
-  },
-  {
-    path: 'docs',
-    label: app => `${capitalize(app.name)} docs`,
-    enabled: (repo?.docs?.length ?? 0) > 0,
-  },
-]
+export function getDocsData(docs: Repository['docs']) {
+  return docs?.map((doc, i) => {
+    const content = getMdContent(doc?.content)
 
-export default function App() {
-  const tabStateRef = useRef<any>(null)
+    const headings = collectHeadings(content)
+    const id = headings?.[0]?.id || `page-${i}`
+    const label = headings?.[0]?.title || `Page ${i}`
+    const path = `docs/${id}`
+
+    const subpaths = headings
+      .map(heading => {
+        if (heading.level === 3 && heading.id && heading.title) {
+          return {
+            path: `${path}#${heading.id}`,
+            label: `${heading.title}`,
+            id: heading.id,
+            type: 'docPageHash',
+          }
+        }
+
+        return null
+      })
+      .filter(heading => !!heading)
+
+    return {
+      path,
+      id,
+      label,
+      subpaths,
+      content,
+      headings,
+      type: 'docPage',
+    }
+  })
+}
+
+export const getDirectory = ({
+  app = null,
+  docs = null,
+  config = null,
+}: {
+  app: Application | null
+  docs?: ReturnType<typeof getDocsData> | null
+  config: any
+}) => {
+  if (!app || !docs) {
+    return []
+  }
+
+  return [
+    { path: 'dashboards', label: 'Dashboards', enabled: true },
+    { path: 'runbooks', label: 'Runbooks', enabled: true },
+    {
+      path: 'components',
+      label: <ComponentProgress app={app} />,
+      enabled: true,
+    },
+    { path: 'logs', label: 'Logs', enabled: true },
+    {
+      path: 'cost',
+      label: 'Cost analysis',
+      enabled: app?.cost || app?.license,
+    },
+    { path: 'oidc', label: 'User management', enabled: true },
+    {
+      path: 'config',
+      label: 'Configuration',
+      enabled: config?.gitStatus?.cloned,
+    },
+    {
+      path: 'docs',
+      label: `${capitalize(app?.name)} docs`,
+      enabled: (docs?.length ?? 0) > 0,
+      ...(docs ? { subpaths: docs } : {}),
+    },
+  ]
+}
+
+function AppWithoutContext() {
+  const theme = useTheme()
   const { me, configuration } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
   const { appName, dashboardId, runbookName } = useParams()
@@ -81,6 +137,13 @@ export default function App() {
   const { data: repoData, error: repoError } = useRepositoryQuery({
     variables: { name: appName ?? '' },
   })
+  const docPageContext = useDocPageContext()
+
+  const docs = useMemo(() => getDocsData(repoData?.repository?.docs),
+    [repoData?.repository?.docs])
+
+  const directory = useMemo(() => getDirectory({ app: currentApp, docs, config: configuration }),
+    [configuration, currentApp, docs])
 
   if (!me || !currentApp) return null
   if (repoError) {
@@ -90,9 +153,53 @@ export default function App() {
     return <LoopingLogo />
   }
 
-  const directory = getDirectory(currentApp,
-    configuration,
-    repoData.repository).filter(({ enabled }) => enabled)
+  const renderDirectory = directory => directory.map(({
+    label, path, subpaths, type, ...props
+  }) => {
+    const currentPath
+        = removeTrailingSlashes(getBarePathFromPath(pathname)) || ''
+
+    const fullPath = `/apps/${appName}/${removeTrailingSlashes(path) || ''}`
+    const hashlessPath = fullPath.split('#')[0]
+
+    const isInCurrentPath = currentPath.startsWith(hashlessPath)
+
+    const docPageRootHash = props?.headings?.[0]?.id || ''
+    const active
+        = type === 'docPage'
+          ? isInCurrentPath
+            && (docPageContext.selectedHash === docPageRootHash
+              || !docPageContext.selectedHash)
+          : type === 'docPageHash'
+            ? isInCurrentPath && docPageContext.selectedHash === props.id
+            : isInCurrentPath
+
+    return (
+      <TreeNavEntry
+        key={fullPath}
+        href={path === 'docs' ? undefined : fullPath}
+        label={label}
+        active={active}
+        {...(type === 'docPageHash' && props.id
+          ? {
+            onClick: () => {
+              docPageContext.scrollToHash(props.id)
+            },
+          }
+          : type === 'docPage'
+            ? {
+              onClick: () => {
+                console.log('docPageRootHash', docPageRootHash)
+                docPageContext.scrollToHash(docPageRootHash)
+              },
+            }
+            : {})}
+      >
+        {subpaths ? renderDirectory(subpaths) : undefined}
+      </TreeNavEntry>
+    )
+  })
+
   const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
   const {
     name,
@@ -105,36 +212,28 @@ export default function App() {
   return (
     <ResponsiveLayoutPage>
       <ResponsiveLayoutSidenavContainer>
-        <AppSelector
-          applications={applications}
-          currentApp={currentApp}
-        />
-        <TabList
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'vertical',
-            selectedKey: currentTab?.path,
-          }}
+        <Flex
+          flexDirection="column"
+          maxHeight="100%"
+          overflow="hidden"
         >
-          {directory.map(({ label, path }) => (
-            <Tab
-              key={path}
-              as={Link}
-              to={path}
-              textDecoration="none"
-            >
-              {typeof label === 'function' ? label(currentApp) : label}
-            </Tab>
-          ))}
-        </TabList>
+          <AppSelector
+            directory={directory}
+            applications={applications}
+            currentApp={currentApp}
+          />
+          <Div
+            overflowY="auto"
+            paddingBottom={theme.spacing.medium}
+          >
+            <TreeNav>{renderDirectory(directory)}</TreeNav>
+          </Div>
+        </Flex>
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
-      <TabPanel
-        as={<ResponsiveLayoutContentContainer />}
-        stateRef={tabStateRef}
-      >
-        <Outlet context={{ setDashboard, setRunbook }} />
-      </TabPanel>
+      <ResponsiveLayoutContentContainer role="main">
+        <Outlet context={{ setDashboard, setRunbook, docs }} />
+      </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSidecarContainer>
         {validLinks?.length > 0 && (
           <Button
@@ -194,5 +293,13 @@ export default function App() {
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
     </ResponsiveLayoutPage>
+  )
+}
+
+export default function App({ ...props }) {
+  return (
+    <DocPageContextProvider>
+      <AppWithoutContext {...props} />
+    </DocPageContextProvider>
   )
 }

@@ -1,6 +1,5 @@
 import { styledTheme, useFillLevel } from '@pluralsh/design-system'
-import type { FillLevel } from '@pluralsh/design-system/dist/components/contexts/FillLevelContext'
-import { MarkdocContextT, useMarkdocContext } from 'markdoc/MarkdocContext'
+import { type MarkdocContextT, useMarkdocContext } from 'markdoc/MarkdocContext'
 
 import styled from 'styled-components'
 
@@ -10,7 +9,7 @@ export function bodyText({
   variant,
 }: {
   theme: typeof styledTheme
-  fillLevel: FillLevel
+  fillLevel: ReturnType<typeof useFillLevel>
   variant: MarkdocContextT['variant']
 }) {
   return {

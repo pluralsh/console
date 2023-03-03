@@ -1,41 +1,96 @@
-import { LoopingLogo } from '@pluralsh/design-system'
-
-import { GqlError } from 'components/utils/Alert'
+import { scrollIntoContainerView } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { useRepositoryQuery } from 'generated/graphql'
-import { Div } from 'honorable'
 import { capitalize } from 'lodash'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { MutableRefObject, useEffect, useRef } from 'react'
+
+import {
+  useLocation,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom'
+
+import { useTheme } from 'styled-components'
+
+import { getDocsData } from '../App'
+
+import { useDocPageContext } from './AppDocsContext'
 
 import MarkdocComponent from './MarkdocContent'
 
 export default function AppDocs() {
-  const { appName } = useParams()
+  const scrollRef = useRef<HTMLElement>()
+  const { appName, docName } = useParams()
+  const { docs, scrollToId = { current: null } } = useOutletContext() as {
+    docs: ReturnType<typeof getDocsData>
+    scrollToId: MutableRefObject<(id: string) => void>
+  }
+  const { scrollHash, scrollToHash } = useDocPageContext()
+
+  const hashFromUrl = useLocation().hash.slice(1)
+
+  useEffect(() => {
+    scrollToHash(hashFromUrl)
+    // Only want to run this on first render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  scrollToId.current = (id: string) => {
+    if (scrollRef.current) {
+      const scrollToElt = id
+        ? scrollRef.current.querySelector(`#${id}`)
+        : Array.from(scrollRef.current.children)[0]
+
+      if (!scrollToElt) {
+        return
+      }
+      scrollIntoContainerView(scrollToElt, scrollRef.current, {
+        behavior: 'smooth',
+        block: 'start',
+        blockOffset: theme.spacing.xlarge,
+        preventIfVisible: false,
+      })
+    }
+  }
+
+  const currentDoc = docs?.find(doc => doc.id === docName)
+
   const location = useLocation()
-  const { data, error } = useRepositoryQuery({
-    variables: { name: appName ?? '' },
-  })
+
+  const theme = useTheme()
+
+  useEffect(() => {
+    if (scrollHash.value && scrollRef.current) {
+      const hashElt = scrollRef.current.querySelector(`#${scrollHash.value}`)
+
+      if (!hashElt) {
+        return
+      }
+      scrollIntoContainerView(hashElt, scrollRef.current, {
+        behavior: 'smooth',
+        block: 'start',
+        blockOffset: 32,
+        preventIfVisible: false,
+      })
+    }
+  }, [scrollHash])
+
   const navigate = useNavigate()
 
-  if (error) {
-    return <GqlError error={error} />
-  }
-  if (!data) {
-    return <LoopingLogo />
-  }
-  if (!data.repository?.docs?.length ?? 0 > 0) {
+  if (!currentDoc) {
     navigate(location.pathname.split('/').slice(0, -1).join('/'))
+
+    return null
   }
 
   const displayAppName = capitalize(appName)
 
   return (
-    <ScrollablePage heading={`${displayAppName} docs`}>
-      {data.repository?.docs?.map(docPage => (
-        <Div marginBottom="xxxxlarge">
-          <MarkdocComponent raw={docPage?.content} />
-        </Div>
-      ))}
+    <ScrollablePage
+      heading={`${displayAppName} docs`}
+      scrollRef={scrollRef}
+    >
+      <MarkdocComponent content={currentDoc.content} />
     </ScrollablePage>
   )
 }

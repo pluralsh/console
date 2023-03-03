@@ -56,11 +56,13 @@ const StyledH = styled.h1.withConfig({ shouldForwardProp: () => true })<{
     '&:first-child': {
       marginBottom: '100px',
     },
-    ...(variant === 'docs' ? {} : {
-      '&:first-child': {
-        marginTop: 0,
-      },
-    }),
+    ...(variant === 'docs'
+      ? {}
+      : {
+        '&:first-child': {
+          marginTop: 0,
+        },
+      }),
     marginBottom: theme.spacing.small,
     ...style,
     '.link': {
@@ -75,7 +77,6 @@ const StyledH = styled.h1.withConfig({ shouldForwardProp: () => true })<{
 
 export function Heading({ level = 1, children, ...props }) {
   const theme = useTheme()
-  const { variant } = useMarkdocContext()
 
   return (
     <StyledH
@@ -84,7 +85,7 @@ export function Heading({ level = 1, children, ...props }) {
       {...props}
     >
       {children}
-      {props.id && variant === 'docs' && (
+      {props.id && (
         <Link
           className="link"
           to={`#${props.id}`}

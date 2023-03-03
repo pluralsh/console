@@ -3485,9 +3485,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:1.318.3":
-  version: 1.318.3
-  resolution: "@pluralsh/design-system@npm:1.318.3"
+"@pluralsh/design-system@npm:1.320.0":
+  version: 1.320.0
+  resolution: "@pluralsh/design-system@npm:1.320.0"
   dependencies:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@monaco-editor/react": 4.4.6
@@ -3520,15 +3520,18 @@ __metadata:
     grommet-icons: 4.9.0
     highlight.js: 11.7.0
     honorable-recipe-mapper: 0.2.0
+    immer: 9.0.19
     moment: 2.29.4
     prop-types: 15.8.1
     react-animate-height: 3.1.0
     react-markdown: 8.0.5
     react-merge-refs: 2.0.1
     react-spring: 9.6.1
+    react-use-measure: 2.1.1
     react-virtual: 2.10.4
     rehype-raw: 6.1.1
     resize-observer-polyfill: 1.5.1
+    use-immer: 0.8.1
   peerDependencies:
     "@emotion/react": ">=11.9.3"
     "@emotion/styled": ">=11.9.3"
@@ -3538,7 +3541,7 @@ __metadata:
     react-dom: ">=16.0.0"
     react-transition-group: ">=4.4.2"
     styled-components: ">=5.3.5"
-  checksum: da76b207a932767512d176a23642e80d541259ed5c65bcd47e50de527ee39e72b630856e0f4e2b5a62c6d996a81f3fbbe84d777d1b54d2215458822ada808b31
+  checksum: 3e2daeaebafbd4bd63ecf0f69445c3422221449333accc33c82288ac647327dd826ad8d18c080189c963bd795e38d1384f1086b6b0799dfcc962084c1a8583eb
   languageName: node
   linkType: hard
 
@@ -3725,7 +3728,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-aria/listbox@npm:3.8.0, @react-aria/listbox@npm:^3.8.0":
+"@react-aria/listbox@npm:3.8.0":
   version: 3.8.0
   resolution: "@react-aria/listbox@npm:3.8.0"
   dependencies:
@@ -3745,6 +3748,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-aria/listbox@npm:^3.8.0":
+  version: 3.8.1
+  resolution: "@react-aria/listbox@npm:3.8.1"
+  dependencies:
+    "@react-aria/focus": ^3.11.0
+    "@react-aria/interactions": ^3.14.0
+    "@react-aria/label": ^3.5.0
+    "@react-aria/selection": ^3.13.1
+    "@react-aria/utils": ^3.15.0
+    "@react-stately/collections": ^3.6.0
+    "@react-stately/list": ^3.7.0
+    "@react-types/listbox": ^3.4.0
+    "@react-types/shared": ^3.17.0
+    "@swc/helpers": ^0.4.14
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: 7848de8a89384a6ab29fb37ed6ef05fa5d7e05861e8c6ecf1fda7979a9fa80edfa3b7c321c5b5e0e2bad944f50d65a7baf2b0f6f69193f4a540dd3038851bc22
+  languageName: node
+  linkType: hard
+
 "@react-aria/live-announcer@npm:^3.2.0":
   version: 3.2.0
   resolution: "@react-aria/live-announcer@npm:3.2.0"
@@ -3755,13 +3778,13 @@ __metadata:
   linkType: hard
 
 "@react-aria/menu@npm:^3.8.0":
-  version: 3.8.0
-  resolution: "@react-aria/menu@npm:3.8.0"
+  version: 3.8.1
+  resolution: "@react-aria/menu@npm:3.8.1"
   dependencies:
     "@react-aria/i18n": ^3.7.0
     "@react-aria/interactions": ^3.14.0
     "@react-aria/overlays": ^3.13.0
-    "@react-aria/selection": ^3.13.0
+    "@react-aria/selection": ^3.13.1
     "@react-aria/utils": ^3.15.0
     "@react-stately/collections": ^3.6.0
     "@react-stately/menu": ^3.5.0
@@ -3773,7 +3796,7 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
     react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: 4ae183aa6b1bbb5fb7f90d7ce5e6acaa82307751a156c81bc7f9d49c3aac105a8aa5b98682e7410b7ffca13a8d3d8fcb2c0ae697ac9e7712caa18c17b26f464c
+  checksum: 8a8155dcbb6b1bae31e575d528c9dece97b694862dd9080c7025c1f30dd4f02a087f53c6422769900e9c48af4c0682a863e7095d72930e7e8e3becc3a3271b95
   languageName: node
   linkType: hard
 
@@ -3857,6 +3880,24 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
   checksum: 11069304b30bb299d9bd7fe486ed5f67222002fccd865386f7c52d18a4adda242a8feffa65454093060005ac95e2c062af0c2767cda5827046e59017dea4aaeb
+  languageName: node
+  linkType: hard
+
+"@react-aria/selection@npm:^3.13.1":
+  version: 3.13.1
+  resolution: "@react-aria/selection@npm:3.13.1"
+  dependencies:
+    "@react-aria/focus": ^3.11.0
+    "@react-aria/i18n": ^3.7.0
+    "@react-aria/interactions": ^3.14.0
+    "@react-aria/utils": ^3.15.0
+    "@react-stately/collections": ^3.6.0
+    "@react-stately/selection": ^3.12.0
+    "@react-types/shared": ^3.17.0
+    "@swc/helpers": ^0.4.14
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: 240766af913c9b0f55782bb8ce4163ba993e626597999152ff2ccfcd852fc344d4eb3c7e71417b0eb18e430d2fec459c1ac30e5272905f1572427bfc01413cbb
   languageName: node
   linkType: hard
 
@@ -7392,7 +7433,7 @@ __metadata:
     "@nivo/pie": 0.80.0
     "@nivo/radial-bar": 0.80.0
     "@nivo/tooltip": 0.80.0
-    "@pluralsh/design-system": 1.318.3
+    "@pluralsh/design-system": 1.320.0
     "@pluralsh/eslint-config-typescript": 2.5.40
     "@pluralsh/stylelint-config": 1.1.3
     "@tanstack/react-table": 8.7.9
@@ -7480,6 +7521,7 @@ __metadata:
     stylelint: 14.16.1
     tinyqueue: 2.0.3
     typescript: 4.9.5
+    use-immer: 0.8.1
     uuid: 9.0.0
     vite: 4.1.1
     vite-plugin-pwa: 0.14.4
@@ -8064,7 +8106,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debounce@npm:^1.2.0":
+"debounce@npm:^1.2.0, debounce@npm:^1.2.1":
   version: 1.2.1
   resolution: "debounce@npm:1.2.1"
   checksum: 682a89506d9e54fb109526f4da255c5546102fbb8e3ae75eef3b04effaf5d4853756aee97475cd4650641869794e44f410eeb20ace2b18ea592287ab2038519e
@@ -14042,6 +14084,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-use-measure@npm:2.1.1":
+  version: 2.1.1
+  resolution: "react-use-measure@npm:2.1.1"
+  dependencies:
+    debounce: ^1.2.1
+  peerDependencies:
+    react: ">=16.13"
+    react-dom: ">=16.13"
+  checksum: b8e8939229d463c3c505f7b617925c0228efae0cd6f651371f463846417b06c9170be57df51293a61027c41770f8a090fdb8a08717c4e36290ccb496e0318f1f
+  languageName: node
+  linkType: hard
+
 "react-use@npm:*":
   version: 17.4.0
   resolution: "react-use@npm:17.4.0"
@@ -16596,6 +16650,16 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
   checksum: f771cbadfdc91e03b7ab9eb32d0fc0cc647755711801bf507e891ad38c4bbc5f02b2509acadf9c965ec9c5f2f642fd33bdfdfb17b0873c4ad0a9b1f5e5e724bf
+  languageName: node
+  linkType: hard
+
+"use-immer@npm:0.8.1":
+  version: 0.8.1
+  resolution: "use-immer@npm:0.8.1"
+  peerDependencies:
+    immer: ">=2.0.0"
+    react: ^16.8.0 || ^17.0.1 || ^18.0.0
+  checksum: 9ffc1a201a92b6b026c420718e6a00e72ba48b62420bb515927b379bb1d791b5b4766b57c755b4851c0e1f80000e639bc1cf8e73424e44466741c159391d35dd
   languageName: node
   linkType: hard
 

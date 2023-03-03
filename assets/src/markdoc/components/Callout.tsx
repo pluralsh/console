@@ -6,7 +6,7 @@ import styled from 'styled-components'
 
 import { isExternalUrl } from 'markdoc/utils/text'
 
-import { useMarkdocContext } from 'markdoc/MarkdocContext'
+import { useNormalizeHref } from 'markdoc/utils/useNormalizeHref'
 
 import { ListItem } from './List'
 import Paragraph from './Paragraph'
@@ -17,7 +17,6 @@ function MarkdocCallout({
 }: Omit<CalloutProps, 'buttonProps'> & { ctas: any[] }) {
   let buttonProps
   const navigate = useNavigate()
-  const { useNormalizeHref } = useMarkdocContext()
   const href = useNormalizeHref(ctas?.[0]?.href)
 
   if (ctas[0]) {

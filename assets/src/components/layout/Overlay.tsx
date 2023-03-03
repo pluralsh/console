@@ -12,7 +12,7 @@ import {
   useMemo,
   useReducer,
 } from 'react'
-import useUnmount from 'components/hooks/useUnmount'
+import { useUnmount } from '@pluralsh/design-system'
 import { produce } from 'immer'
 
 const getTransitionProps = (isOpen: boolean) => ({
