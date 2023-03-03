@@ -12,14 +12,19 @@ import { TabBaseProps } from './TabList'
 type TabProps = DivProps &
   TabBaseProps & {
     startIcon?: ReactNode
+    innerProps?: DivProps
   }
+
+export const TAB_INDICATOR_THICKNESS = 2
 
 function TabRef({
   startIcon,
   active,
+  activeSecondary,
   children,
   vertical,
   textValue: _textValue,
+  innerProps,
   ...props
 }: TabProps,
 ref: Ref<any>) {
@@ -35,6 +40,8 @@ ref: Ref<any>) {
     <Div
       ref={ref}
       body2
+      display="block"
+      textDecoration="none"
       tabIndex={0}
       userSelect="none"
       cursor="pointer"
@@ -42,7 +49,7 @@ ref: Ref<any>) {
         vertical ? null : `1px solid ${active ? 'border-primary' : 'border'}`
       }
       borderRight={
-        vertical ? `1px solid ${active ? 'border-primary' : 'border'}` : null
+        vertical ? `1px solid ${active ? 'border-primary' : activeSecondary ? 'border-fill-two' : 'border'}` : null
       }
       {...borderRadiuses}
       _focusVisible={{
@@ -54,25 +61,37 @@ ref: Ref<any>) {
       <Flex
         paddingHorizontal="medium"
         paddingTop="xsmall"
-        paddingBottom={theme.spacing.xsmall - 3}
+        paddingBottom="xsmall"
         align="center"
         borderBottom={
           vertical
             ? null
-            : `3px solid ${active ? 'border-primary' : 'transparent'}`
+            : `${TAB_INDICATOR_THICKNESS - 1}px solid ${
+              active ? 'border-primary' : 'transparent'
+            }`
         }
         borderRight={
           vertical
-            ? `3px solid ${active ? 'border-primary' : 'transparent'}`
+            ? `${TAB_INDICATOR_THICKNESS - 1}px solid ${
+              active
+                ? 'border-primary'
+                : activeSecondary
+                  ? 'border-fill-two'
+                  : 'transparent'
+            }`
             : null
         }
         {...borderRadiuses}
-        color={active ? 'text' : 'text-xlight'}
+        color={active || activeSecondary ? 'text' : 'text-xlight'}
+        backgroundColor={
+          !active && activeSecondary ? theme.colors['fill-two'] : 'transparent'
+        }
         _hover={{
           color: 'text',
-          backgroundColor: 'action-input-hover',
+          ...(!(!active && activeSecondary) ? { backgroundColor: 'fill-zero-hover' } : { }),
         }}
         transition="background-color 150ms ease, border-color 150ms ease, color 150ms ease"
+        {...innerProps}
       >
         {!!startIcon && <Icon marginRight="small">{startIcon}</Icon>}
         {children}

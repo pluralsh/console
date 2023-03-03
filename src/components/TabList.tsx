@@ -37,6 +37,7 @@ type TabBaseProps = {
   key?: Key
   ref?: MutableRefObject<any>
   active?: boolean
+  activeSecondary?: boolean
   vertical?: boolean
   textValue?: string
   renderer?: Renderer

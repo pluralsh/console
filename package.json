@@ -54,15 +54,18 @@
     "grommet-icons": "4.9.0",
     "highlight.js": "11.7.0",
     "honorable-recipe-mapper": "0.2.0",
+    "immer": "9.0.19",
     "moment": "2.29.4",
     "prop-types": "15.8.1",
     "react-animate-height": "3.1.0",
     "react-markdown": "8.0.5",
     "react-merge-refs": "2.0.1",
     "react-spring": "9.6.1",
+    "react-use-measure": "2.1.1",
     "react-virtual": "2.10.4",
     "rehype-raw": "6.1.1",
-    "resize-observer-polyfill": "1.5.1"
+    "resize-observer-polyfill": "1.5.1",
+    "use-immer": "0.8.1"
   },
   "devDependencies": {
     "@babel/core": "7.20.12",

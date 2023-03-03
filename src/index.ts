@@ -1,8 +1,10 @@
 export {
   Avatar, Menu, MenuItem, Switch,
 } from 'honorable'
+
 // Icons
 export * from './icons'
+
 // Components
 export { default as Banner } from './components/Banner'
 export { default as Button } from './components/Button'
@@ -66,11 +68,9 @@ export type {
 export { Checklist } from './components/Checklist'
 export type { ChecklistItemProps } from './components/ChecklistItem'
 export { ChecklistItem } from './components/ChecklistItem'
-// Hooks
-export { default as usePrevious } from './hooks/usePrevious'
-// Theme
-export { default as theme, styledTheme } from './theme'
-export { default as GlobalStyle } from './GlobalStyle'
+export { default as InlineCode } from './components/InlineCode'
+export * from './components/wizard'
+export * from './components/TreeNavigation'
 export { ListBox } from './components/ListBox'
 export {
   ListBoxItem,
@@ -84,6 +84,12 @@ export { default as LoopingLogo } from './components/LoopingLogo'
 export { ComboBox } from './components/ComboBox'
 export { Toast, GraphQLToast } from './components/Toast'
 export { default as WrapWithIf } from './components/WrapWithIf'
+
+// Hooks
+export { default as usePrevious } from './hooks/usePrevious'
+export { default as useUnmount } from './hooks/useUnmount'
+
+// Contexts
 export {
   FillLevelContext,
   FillLevelProvider,
@@ -91,5 +97,13 @@ export {
   toFillLevel,
   isFillLevel,
 } from './components/contexts/FillLevelContext'
-export { default as InlineCode } from './components/InlineCode'
-export * from './components/wizard'
+export * from './components/contexts/NavigationContext'
+export * from './components/TreeNavigation'
+
+// Theme
+export { default as theme, styledTheme } from './theme'
+export { default as GlobalStyle } from './GlobalStyle'
+
+// Utils
+export { default as scrollIntoContainerView } from './utils/scrollIntoContainerView'
+export * from './utils/urls'
