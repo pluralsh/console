@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { LoopingLogo } from '@pluralsh/design-system'
 
-import { ScrollablePage } from '../utils/layout/ScrollablePage'
 import VPNClientList from '../vpn/VPNClientList'
 import {
   ColumnAddress,
@@ -15,6 +14,7 @@ import {
 } from '../vpn/columns'
 import { MyWireguardPeers } from '../vpn/graphql/queries'
 import { RootQueryType } from '../../generated/graphql'
+import { ResponsivePageFullWidth } from '../utils/layout/ResponsivePageFullWidth'
 
 function VPN() {
   const { data: { myWireguardPeers } = {}, loading, refetch } = useQuery<Pick<RootQueryType, 'myWireguardPeers'>>(MyWireguardPeers, {
@@ -28,7 +28,7 @@ function VPN() {
   }
 
   return (
-    <ScrollablePage
+    <ResponsivePageFullWidth
       scrollable={false}
       heading="VPN clients"
     >
@@ -36,7 +36,7 @@ function VPN() {
         columns={columns}
         data={clientList}
       />
-    </ScrollablePage>
+    </ResponsivePageFullWidth>
   )
 }
 

@@ -1,6 +1,8 @@
 import { Table } from '@pluralsh/design-system'
 import { ColumnDef } from '@tanstack/react-table'
 
+import { FullHeightTableWrap } from '../utils/layout/FullHeightTableWrap'
+
 import { VPNClientRow } from './columns'
 
 interface VPNClientListProps {
@@ -14,11 +16,14 @@ export default function VPNClientList({ columns, data, ...props }: VPNClientList
   }
 
   return (
-    <Table
-      data={data}
-      columns={columns}
-      virtualizeRows
-      {...props}
-    />
+    <FullHeightTableWrap>
+      <Table
+        data={data}
+        columns={columns}
+        maxHeight="unset"
+        height="100%"
+        {...props}
+      />
+    </FullHeightTableWrap>
   )
 }

@@ -7,7 +7,6 @@ import {
 } from 'react'
 import { useQuery } from '@apollo/client'
 
-import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import VPNClientList from '../../vpn/VPNClientList'
 import {
   ColumnActions,
@@ -20,12 +19,15 @@ import {
 } from '../../vpn/columns'
 import { RootQueryType, User } from '../../../generated/graphql'
 import { WireguardPeers } from '../../vpn/graphql/queries'
+import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
+import { SHORT_POLL_INTERVAL } from '../../cluster/constants'
 
 import { VPNHeaderActions } from './VPNHeaderActions'
 
 function VPN() {
   const { data: { wireguardPeers } = {}, loading, refetch } = useQuery<Pick<RootQueryType, 'wireguardPeers'>>(WireguardPeers, {
     fetchPolicy: 'network-only',
+    pollInterval: SHORT_POLL_INTERVAL,
   })
   const [selectedUsers, setSelectedUsers] = useState<Set<Key>>(new Set<Key>())
   const columns = useMemo(() => [ColumnName, ColumnUser, ColumnAddress, ColumnPublicKey, ColumnStatus, ColumnActions(refetch)], [refetch])
@@ -46,7 +48,7 @@ function VPN() {
   }
 
   return (
-    <ScrollablePage
+    <ResponsivePageFullWidth
       scrollable={false}
       heading="VPN clients"
       headingContent={(
@@ -61,7 +63,7 @@ function VPN() {
         columns={columns}
         data={filteredClientList}
       />
-    </ScrollablePage>
+    </ResponsivePageFullWidth>
   )
 }
 

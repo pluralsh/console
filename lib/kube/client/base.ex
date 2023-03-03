@@ -47,4 +47,18 @@ defmodule Kube.Client.Base do
       end
     end
   end
+
+  defmacro delete_request(name, g, v, k) do
+    quote do
+      def unquote(name)(namespace, name, params \\ %{}) do
+        %Kazan.Request{
+          method: "delete",
+          path: path_builder(unquote(g), unquote(v), unquote(k), namespace, name),
+          query_params: params,
+          response_model: Kazan.Models.Apimachinery.Meta.V1.Status
+        }
+        |> Kazan.run()
+      end
+    end
+  end
 end

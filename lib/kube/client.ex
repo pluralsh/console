@@ -20,6 +20,8 @@ defmodule Kube.Client do
   get_request :get_wireguard_peer, Kube.WireguardPeer, "vpn.plural.sh", "v1alpha1", "wireguardpeers"
   get_request :get_wireguard_server, Kube.WireguardServer, "vpn.plural.sh", "v1alpha1", "wireguardservers"
 
+  delete_request :delete_wireguard_peer, "vpn.plural.sh", "v1alpha1", "wireguardpeers"
+
   def get_application(name), do: get_application(name, name)
 
   def list_slashcommands() do
@@ -50,10 +52,7 @@ defmodule Kube.Client do
   defp has_email?(%Kube.WireguardPeer{metadata: %{annotations: %{"vpn.plural.sh/email" => e}}}, e), do: true
   defp has_email?(_, _), do: false
 
-  def delete_wireguard_peer(name) do
-    path_builder("vpn.plural.sh", "v1alpha1", "wireguardpeers", Console.namespace("wireguard"), name)
-    |> make_request("delete", Kube.WireguardPeer)
-  end
+  def delete_wireguard_peer(name), do: delete_wireguard_peer(Console.namespace("wireguard"), name)
 
   def create_wireguard_peer(email, name) do
     namespace = Console.namespace("wireguard")
