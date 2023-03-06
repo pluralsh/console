@@ -38,7 +38,7 @@ export default function Header() {
           tertiary
           fontWeight={600}
           as="a"
-          href="https://app.plural.sh"
+          href="https://app.plural.sh/account"
           target="_blank"
           rel="noopener noreferrer"
         >
