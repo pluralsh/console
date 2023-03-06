@@ -57,12 +57,7 @@ secrets:
   git_url: {{ ternary .Values.repo_url repoUrl (hasKey .Values "repo_url") | quote }}
   repo_root: {{ repoName }}
   branch_name: {{ branchName }}
-  config: |
-    apiVersion: platform.plural.sh/v1alpha1
-    kind: Config
-    metadata:
-      name: prod
-    spec:{{ toYaml .Config | nindent 6 }}
+  config: {{ toYaml .Config | nindent 4 }}
 
 {{ $identity := pathJoin repoRoot ".plural-crypt" "identity" }}
 {{ if fileExists $identity }}

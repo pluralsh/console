@@ -48,6 +48,14 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 console-migration-{{ .Release.Revision }}
 {{- end -}}
 
+{{- define "plural-config" -}}
+apiVersion: platform.plural.sh/v1alpha1
+kind: Config
+metadata:
+  name: prod
+spec: {{ .Values.secrets.config | toYaml | nindent 2 }}
+{{- end -}}
+
 {{- define "console.env" -}}
 - name: HOST
   value: {{ .Values.ingress.console_dns }}
