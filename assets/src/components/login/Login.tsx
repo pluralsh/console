@@ -34,7 +34,8 @@ import { LabelledInput } from '../utils/LabelledInput'
 import { LoginContext } from '../contexts'
 import { LoginPortal } from '../login/LoginPortal'
 
-const POLL_INTERVAL = 3 * 60 * 1000
+// 30 seconds
+const POLL_INTERVAL = 30 * 1000
 const LOGIN_INFO = gql`
   query LoginInfo($redirect: String) {
     loginInfo(redirect: $redirect) {

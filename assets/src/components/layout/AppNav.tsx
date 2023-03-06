@@ -237,7 +237,7 @@ export function StatusPanel({ statuses, open, onClose }) {
         right: 0,
         bottom: 0,
         left: 0,
-        zIndex: theme.zIndexes.modal - 1,
+        zIndex: theme.zIndexes.selectPopover - 1,
         pointerEvents: 'none',
         ...styles,
       }}
