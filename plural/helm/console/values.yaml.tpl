@@ -54,15 +54,16 @@ secrets:
   admin_email: {{ dedupe . "console.secrets.admin_email" (default "someone@example.com" .Config.Email) }}
   admin_password: {{ dedupe . "console.secrets.admin_password" (randAlphaNum 20) }}
 {{ if .Values.console_dns  }}
-{{ $gitUrl := dig "console" "secrets" "git_url" "default" .}}
-{{ if or (eq $gitUrl "default") (not $gitUrl) }}
-  git_url: {{ repoUrl }}
-{{ else }}
-  git_url: {{ $gitUrl }}
-{{ end }}
+  git_url: {{ ternary .Values.repo_url repoUrl (hasKey .Values "repo_url") | quote }}
   repo_root: {{ repoName }}
   branch_name: {{ branchName }}
-  config: {{ readFile (homeDir ".plural" "config.yml") | quote }}
+  config: |
+    apiVersion: platform.plural.sh/v1alpha1
+    kind: Config
+    metadata:
+      name: prod
+    spec:{{ toYaml .Config | nindent 6 }}
+
 {{ $identity := pathJoin repoRoot ".plural-crypt" "identity" }}
 {{ if fileExists $identity }}
   identity: {{ readFile $identity | quote }}
