@@ -29,7 +29,7 @@ import Users from 'components/account/users/Users'
 
 import EmailSettings from 'components/account/email/EmailSettings'
 
-import AccountSettings from 'components/account/settings/EmailSettings'
+import AccountSettings from 'components/account/settings/AccountSettings'
 
 import { ProfileVPN } from '../components/profile/VPN'
 
