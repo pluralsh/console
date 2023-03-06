@@ -58,7 +58,6 @@ secrets:
   repo_root: {{ repoName }}
   branch_name: {{ branchName }}
   config: {{ toYaml .Config | nindent 4 }}
-
 {{ $identity := pathJoin repoRoot ".plural-crypt" "identity" }}
 {{ if fileExists $identity }}
   identity: {{ readFile $identity | quote }}
