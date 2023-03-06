@@ -42,6 +42,15 @@ const severityToColor: Record<Severity, string> = {
   critical: 'text-danger',
 }
 
+const severityToIconColor: Record<Severity, string> = {
+  neutral: 'icon-default',
+  info: 'icon-info',
+  success: 'icon-success',
+  warning: 'icon-warning',
+  error: 'icon-danger',
+  critical: 'icon-danger-critical',
+}
+
 const sizeToCloseHeight: Record<Size, number> = {
   small: 8,
   medium: 10,
@@ -74,7 +83,8 @@ ref: Ref<any>) {
   const parentFillLevel = useFillLevel()
 
   hue = hue || parentFillLevelToHue[parentFillLevel]
-  const col = severityToColor[severity] || 'text-light'
+  const col = severityToColor[severity] || 'text'
+  const iconCol = severityToIconColor[severity] || 'icon-default'
 
   return (
     <ChipCard
@@ -90,7 +100,7 @@ ref: Ref<any>) {
     >
       {loading && (
         <Spinner
-          color={col}
+          color={iconCol}
           size={size === 'large' ? 15 : 13}
           marginRight="xsmall"
         />
@@ -99,7 +109,7 @@ ref: Ref<any>) {
         <icon.type
           size={size === 'large' ? 15 : 13}
           marginRight="xsmall"
-          color={col}
+          color={iconCol}
         />
       )}
       <Flex
