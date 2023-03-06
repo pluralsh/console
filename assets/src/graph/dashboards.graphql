@@ -1,0 +1,68 @@
+fragment Dashboard on Dashboard {
+  id
+  spec {
+    name
+    description
+    timeslices
+    labels {
+      name
+      values
+    }
+    graphs {
+      queries {
+        query
+        legend
+        results {
+          timestamp
+          value
+        }
+      }
+      format
+      name
+    }
+  }
+}
+
+fragment LogStream on LogStream {
+  stream
+  values {
+    timestamp
+    value
+  }
+}
+
+fragment MetricResponse on MetricResponse {
+  metric
+  values {
+    timestamp
+    value
+  }
+}
+
+query Dashboards($repo: String!) {
+  dashboards(repo: $repo) {
+    id
+    spec {
+      name
+      description
+    }
+  }
+}
+
+query Dashboard($repo: String!, $name: String!, $step: String, $offset: Int, $labels: [LabelInput]) {
+  dashboard(repo: $repo, name: $name, step: $step, offset: $offset, labels: $labels) {
+    ...Dashboard
+  }
+}
+
+query Logs($query: String!, $start: Long, $limit: Int!) {
+  logs(query: $query, start: $start, limit: $limit) {
+    ...LogStream
+  }
+}
+
+query Metrics($query: String!, $offset: Int) {
+  metric(query: $query, offset: $offset) {
+    ...MetricResponse
+  }
+}

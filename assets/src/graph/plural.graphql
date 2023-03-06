@@ -1,0 +1,157 @@
+fragment Smtp on Smtp {
+  server
+  port
+  sender
+  user
+  password
+}
+
+fragment Installation on Installation {
+  id
+  repository {
+    ...Repository
+  }
+}
+
+fragment Recipe on Recipe {
+  id
+  name
+  description
+  restricted
+  provider
+  oidcEnabled
+}
+
+fragment ConfigurationItem on ConfigurationItem {
+  name 
+  default 
+  documentation 
+  type 
+  placeholder 
+  optional
+  condition { operation field value }
+  validation { type regex message }
+}
+
+fragment RecipeSection on RecipeSection {
+  id
+  repository { ...Repository }
+  configuration { ...ConfigurationItem }
+  recipeItems {
+    id
+    configuration { ...ConfigurationItem }
+  }
+}
+
+query Search($query: String!) {
+  repositories(query: $query, first: 20) {
+    pageInfo { ...PageInfo }
+    edges { node { ...Repository } }
+  }
+}
+
+query Recipes($id: ID!, $cursor: String) {
+  recipes(id: $id, after: $cursor, first: 20) {
+    pageInfo { ...PageInfo }
+    edges { node { ...Recipe } }
+  }
+}
+
+query Recipe($id: ID!) {
+  recipe(id: $id) {
+    ...Recipe
+    recipeSections { ...RecipeSection }
+  }
+  context {
+    repository
+    context
+  }
+}
+
+mutation Install($id: ID!, $context: Map!, $oidc: Boolean) {
+  installRecipe(id: $id, context: $context, oidc: $oidc) {
+    ...Build
+  }
+}
+
+query Installations($cursor: String) {
+  installations(first: 20, after: $cursor) {
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      node {
+        ...Installation
+      }
+    }
+  }
+}
+
+query Configurations($cursor: String) {
+  installations(first: 20, after: $cursor) {
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      node {
+        id
+        repository {
+          ...Repository
+          configuration {
+            ...Configuration
+          }
+          grafanaDns
+        }
+      }
+    }
+  }
+}
+
+fragment License on License {
+  metadata { name }
+  status { 
+    free
+    features { name description }
+    limits
+    plan
+  }
+}
+
+mutation UpdateConfiguration($repository: String!, $content: String!, $type: Tool) {
+  updateConfiguration(repository: $repository, content: $content, tool: $type) {
+    helm
+    terraform
+  }
+}
+
+query Applications {
+  applications {
+    ...Application
+    license { ...License }
+  }
+}
+
+subscription ApplicationSub {
+  applicationDelta {
+    delta
+    payload {
+      ...Application
+    }
+  }
+}
+
+query LogFilters($namespace: String!) {
+  logFilters(namespace: $namespace) {
+    ...LogFilter
+  }
+}
+
+query Smtp {
+  smtp { ...Smtp }
+}
+
+mutation UpdateSmtp($smtp: SmtpInput!) {
+  updateSmtp(smtp: $smtp) { ...Smtp }
+}

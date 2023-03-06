@@ -1,0 +1,13 @@
+fragment Audit on Audit {
+  id
+  type
+  action
+  repository
+  ip
+  city
+  country
+  latitude
+  longitude
+  actor { ...User }
+  insertedAt
+}

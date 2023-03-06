@@ -1,0 +1,110 @@
+# fragment IncidentUser on User {
+#   id
+#   name
+#   email
+#   profile
+#   backgroundColor
+# }
+
+
+# fragment ClusterInformation on ClusterInfo {
+#   gitCommit
+#   version
+#   platform
+# }
+
+
+# fragment Repo on Repository {
+#   id
+#   name
+#   description
+#   documentation
+#   icon
+#   private
+# }
+
+# fragment Plan on Plan {
+#   id
+#   name
+#   cost
+#   period
+#   lineItems {
+#     included { dimension quantity }
+#     items { name dimension cost period }
+#   }
+#   serviceLevels { minSeverity maxSeverity responseTime }
+#   metadata { features { name description } }
+# }
+
+
+# fragment Postmortem on Postmortem {
+#   id
+#   content
+#   actionItems { type link }
+# }
+
+# fragment Follower on Follower {
+#   id
+#   incident { id }
+#   user { ...IncidentUser }
+#   preferences { message incidentUpdate }
+# }
+
+# fragment Subscription on SlimSubscription {
+#   id
+#   lineItems { items { dimension quantity } }
+#   plan { ...Plan }
+# }
+
+# fragment Incident on Incident {
+#   id
+#   title
+#   description
+#   severity
+#   status
+#   notificationCount
+#   nextResponseAt
+#   creator { ...IncidentUser }
+#   owner { ...IncidentUser }
+#   repository { ...Repo }
+#   subscription { ...Subscription }
+#   clusterInformation { ...ClusterInformation }
+#   tags { tag }
+#   insertedAt
+# }
+
+# fragment IncidentHistory on IncidentHistory {
+#   id
+#   action
+#   changes { key prev next }
+#   actor { ...IncidentUser }
+#   insertedAt
+# }
+
+# fragment File on File {
+#   id
+#   blob
+#   mediaType
+#   contentType
+#   filesize
+#   filename
+# }
+
+# fragment IncidentMessage on IncidentMessage {
+#   id
+#   text
+#   creator { ...IncidentUser }
+#   reactions { name creator { id email } }
+#   file { ...File }
+#   entities { type user { ...IncidentUser } text startIndex endIndex }
+#   insertedAt
+# }
+
+# fragment IncidentNotification on Notification {
+#   id
+#   type
+#   actor { ...IncidentUser }
+#   incident { id title repository { id name icon } }
+#   message { text }
+#   insertedAt
+# }

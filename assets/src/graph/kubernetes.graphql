@@ -1,0 +1,263 @@
+fragment Metadata on Metadata {
+  name
+  namespace
+  labels { name value }
+  annotations { name value }
+}
+
+fragment Event on Event {
+  action
+  lastTimestamp
+  count
+  message
+  reason
+  type
+}
+
+fragment PodCondition on PodCondition {
+  message
+  reason
+  status
+}
+
+fragment ContainerStatus on ContainerStatus {
+  restartCount
+  ready
+  name
+  state {
+    running { startedAt }
+    terminated { exitCode message reason }
+    waiting { message reason }
+  }
+}
+
+fragment Resources on Resources {
+  limits { cpu memory }
+  requests { cpu memory }
+}
+
+fragment Container on Container {
+  name
+  image
+  ports { containerPort protocol }
+  resources { ...Resources }
+}
+
+fragment PodMini on Pod {
+  metadata { ...Metadata }
+  status {
+    phase
+    podIp
+    reason
+    containerStatuses { ...ContainerStatus }
+    initContainerStatuses { ...ContainerStatus }
+    conditions {
+      lastProbeTime
+      lastTransitionTime
+      message
+      reason
+      status
+      type
+    }
+  }
+  spec {
+    nodeName
+    serviceAccountName
+    containers { ...Container }
+    initContainers { ...Container }
+  }
+}
+
+fragment Pod on Pod {
+  metadata { ...Metadata }
+  status {
+    phase
+    podIp
+    reason
+    containerStatuses { ...ContainerStatus }
+    initContainerStatuses { ...ContainerStatus }
+    conditions {
+      lastProbeTime
+      lastTransitionTime
+      message
+      reason
+      status
+      type
+    }
+  }
+  spec {
+    nodeName
+    serviceAccountName
+    containers { ...Container }
+    initContainers { ...Container }
+  }
+  raw
+}
+
+
+fragment Deployment on Deployment {
+  metadata { ...Metadata }
+  status {
+    availableReplicas
+    replicas
+    unavailableReplicas
+  }
+  spec {
+    replicas
+    strategy {
+      type
+    }
+  }
+  raw
+}
+
+fragment StatefulSet on StatefulSet {
+  metadata { ...Metadata }
+  status {
+    replicas
+    currentReplicas
+    readyReplicas
+    updatedReplicas
+  }
+  spec {
+    replicas
+    serviceName
+  }
+  raw
+}
+
+fragment Service on Service {
+  metadata { ...Metadata }
+  status {
+    loadBalancer {
+      ingress { ip }
+    }
+  }
+  spec {
+    type
+    clusterIp
+    ports {
+      name
+      protocol
+      port
+      targetPort
+    }
+  }
+  raw
+}
+
+fragment Ingress on Ingress {
+  metadata { ...Metadata }
+  status {
+    loadBalancer {
+      ingress { ip hostname }
+    }
+  }
+  spec {
+    tls { hosts }
+    rules {
+      host
+      http {
+        paths {
+          path
+          backend { serviceName servicePort }
+        }
+      }
+    }
+  }
+  raw
+}
+
+fragment Node on Node {
+  metadata { ...Metadata }
+  status {
+    phase
+    allocatable
+    capacity
+    conditions { type status message }
+  }
+  spec { podCidr providerId }
+}
+
+fragment NodeMetric on NodeMetric {
+  metadata { ...Metadata }
+  usage { cpu memory }
+  timestamp
+  window
+}
+
+fragment CronJob on CronJob {
+  metadata { ...Metadata }
+  status { lastScheduleTime }
+  spec { schedule suspend concurrencyPolicy }
+  raw
+}
+
+fragment JobStatus on JobStatus {
+  active
+  completionTime
+  succeeded
+  failed
+  startTime
+}
+
+fragment Job on Job {
+  metadata { ...Metadata }
+  status { ...JobStatus }
+  spec { backoffLimit parallelism activeDeadlineSeconds }
+  pods { ...Pod }
+  raw
+}
+
+fragment LogFilter on LogFilter {
+  metadata {  ...Metadata }
+  spec {
+    name
+    description
+    query
+    labels { name value }
+  }
+}
+
+fragment Certificate on Certificate {
+  metadata { ...Metadata }
+  status { renewalTime notBefore notAfter }
+  spec { 
+    dnsNames 
+    secretName 
+    issuerRef { group kind name }
+  }
+  raw
+}
+
+fragment ConfigurationOverlay on ConfigurationOverlay {
+  metadata { ...Metadata }
+  spec {
+    name
+    folder
+    subfolder
+    documentation
+    inputType
+    inputValues
+    updates { path }
+  }
+}
+
+fragment ContainerResources on ContainerResources {
+  cpu
+  memory
+}
+
+fragment VerticalPodAutoscaler on VerticalPodAutoscaler {
+  metadata { ...Metadata }
+  status {
+    recommendation {
+      containerRecommendations {
+        containerName
+        lowerBound { ...ContainerResources }
+        upperBound { ...ContainerResources }
+        uncappedTarget { ...ContainerResources }
+      }
+    }
+  }
+}

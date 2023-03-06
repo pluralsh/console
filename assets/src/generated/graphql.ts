@@ -2154,21 +2154,21 @@ export type WireguardPeerStatus = {
   ready?: Maybe<Scalars['Boolean']>;
 };
 
-export type CostAnalysisFragmentFragment = { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null };
+export type CostAnalysisFragment = { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null };
 
-export type FileContentFragmentFragment = { __typename?: 'FileContent', content?: string | null, path?: string | null };
+export type FileContentFragment = { __typename?: 'FileContent', content?: string | null, path?: string | null };
 
-export type ConfigurationFragmentFragment = { __typename?: 'Configuration', helm?: string | null, terraform?: string | null };
+export type ConfigurationFragment = { __typename?: 'Configuration', terraform?: string | null, helm?: string | null };
 
-export type ApplicationSpecFragmentFragment = { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null };
+export type ApplicationSpecFragment = { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null };
 
-export type ApplicationStatusFragmentFragment = { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null };
+export type ApplicationStatusFragment = { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null };
 
-export type ApplicationFragmentFragment = { __typename?: 'Application', name: string, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null };
+export type ApplicationFragment = { __typename?: 'Application', name: string, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null };
 
-export type MetadataFragmentFragment = { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null };
+export type MetadataFragment = { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null };
 
-export type ConfigurationOverlayFragmentFragment = { __typename?: 'ConfigurationOverlay', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'ConfigurationOverlaySpec', name?: string | null, folder?: string | null, subfolder?: string | null, documentation?: string | null, inputType?: string | null, inputValues?: Array<string | null> | null, updates?: Array<{ __typename?: 'OverlayUpdate', path?: Array<string | null> | null } | null> | null } };
+export type ConfigurationOverlayFragment = { __typename?: 'ConfigurationOverlay', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'ConfigurationOverlaySpec', name?: string | null, folder?: string | null, subfolder?: string | null, documentation?: string | null, inputType?: string | null, inputValues?: Array<string | null> | null, updates?: Array<{ __typename?: 'OverlayUpdate', path?: Array<string | null> | null } | null> | null } };
 
 export type AppQueryVariables = Exact<{
   name: Scalars['String'];
@@ -2177,20 +2177,146 @@ export type AppQueryVariables = Exact<{
 
 export type AppQuery = { __typename?: 'RootQueryType', application?: { __typename?: 'Application', name: string, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null } | null, configurationOverlays?: Array<{ __typename?: 'ConfigurationOverlay', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'ConfigurationOverlaySpec', name?: string | null, folder?: string | null, subfolder?: string | null, documentation?: string | null, inputType?: string | null, inputValues?: Array<string | null> | null, updates?: Array<{ __typename?: 'OverlayUpdate', path?: Array<string | null> | null } | null> | null } } | null> | null };
 
-export type RepositoryFragmentFragment = { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null };
+export type RepositoryFragment = { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', terraform?: string | null, helm?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null };
 
 export type RepositoryQueryVariables = Exact<{
   name: Scalars['String'];
 }>;
 
 
-export type RepositoryQuery = { __typename?: 'RootQueryType', repository?: { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null } | null };
+export type RepositoryQuery = { __typename?: 'RootQueryType', repository?: { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', terraform?: string | null, helm?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null } | null };
 
-export type PageInfoFragmentFragment = { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null };
+export type AuditFragment = { __typename?: 'Audit', id: string, type: AuditType, action: AuditAction, repository?: string | null, ip?: string | null, city?: string | null, country?: string | null, latitude?: string | null, longitude?: string | null, insertedAt?: Date | null, actor?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null };
 
-export type GroupMemberFragmentFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null };
+export type PageInfoFragment = { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null };
 
-export type GroupFragmentFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null };
+export type BuildFragment = { __typename?: 'Build', id: string, repository: string, type: BuildType, sha?: string | null, status: Status, message?: string | null, insertedAt?: Date | null, completedAt?: Date | null, creator?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, approver?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null };
+
+export type CommandFragment = { __typename?: 'Command', id: string, command: string, exitCode?: number | null, stdout?: string | null, completedAt?: Date | null, insertedAt?: Date | null };
+
+export type ChangelogFragment = { __typename?: 'Changelog', id: string, repo: string, tool: string, content?: string | null };
+
+export type UpgradePolicyFragment = { __typename?: 'UpgradePolicy', id: string, name: string, type: UpgradePolicyType, target: string, weight?: number | null, description?: string | null };
+
+export type BuildsQueryVariables = Exact<{
+  cursor?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type BuildsQuery = { __typename?: 'RootQueryType', builds?: { __typename?: 'BuildConnection', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean }, edges?: Array<{ __typename?: 'BuildEdge', node?: { __typename?: 'Build', id: string, repository: string, type: BuildType, sha?: string | null, status: Status, message?: string | null, insertedAt?: Date | null, completedAt?: Date | null, creator?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, approver?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null } | null> | null } | null };
+
+export type BuildQueryVariables = Exact<{
+  buildId: Scalars['ID'];
+}>;
+
+
+export type BuildQuery = { __typename?: 'RootQueryType', build?: { __typename?: 'Build', id: string, repository: string, type: BuildType, sha?: string | null, status: Status, message?: string | null, insertedAt?: Date | null, completedAt?: Date | null, commands?: { __typename?: 'CommandConnection', edges?: Array<{ __typename?: 'CommandEdge', node?: { __typename?: 'Command', id: string, command: string, exitCode?: number | null, stdout?: string | null, completedAt?: Date | null, insertedAt?: Date | null } | null } | null> | null } | null, changelogs?: Array<{ __typename?: 'Changelog', id: string, repo: string, tool: string, content?: string | null } | null> | null, creator?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, approver?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null };
+
+export type UpgradePoliciesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UpgradePoliciesQuery = { __typename?: 'RootQueryType', upgradePolicies?: Array<{ __typename?: 'UpgradePolicy', id: string, name: string, type: UpgradePolicyType, target: string, weight?: number | null, description?: string | null } | null> | null };
+
+export type CreateUpgradePolicyMutationVariables = Exact<{
+  attributes: UpgradePolicyAttributes;
+}>;
+
+
+export type CreateUpgradePolicyMutation = { __typename?: 'RootMutationType', createUpgradePolicy?: { __typename?: 'UpgradePolicy', id: string, name: string, type: UpgradePolicyType, target: string, weight?: number | null, description?: string | null } | null };
+
+export type DeleteUpgradePolicyMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type DeleteUpgradePolicyMutation = { __typename?: 'RootMutationType', deleteUpgradePolicy?: { __typename?: 'UpgradePolicy', id: string, name: string, type: UpgradePolicyType, target: string, weight?: number | null, description?: string | null } | null };
+
+export type CreateBuildMutationVariables = Exact<{
+  attributes: BuildAttributes;
+}>;
+
+
+export type CreateBuildMutation = { __typename?: 'RootMutationType', createBuild?: { __typename?: 'Build', id: string, repository: string, type: BuildType, sha?: string | null, status: Status, message?: string | null, insertedAt?: Date | null, completedAt?: Date | null, creator?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, approver?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null };
+
+export type CancelBuildMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type CancelBuildMutation = { __typename?: 'RootMutationType', cancelBuild?: { __typename?: 'Build', id: string, repository: string, type: BuildType, sha?: string | null, status: Status, message?: string | null, insertedAt?: Date | null, completedAt?: Date | null, creator?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, approver?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null };
+
+export type ApproveBuildMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type ApproveBuildMutation = { __typename?: 'RootMutationType', approveBuild?: { __typename?: 'Build', id: string, repository: string, type: BuildType, sha?: string | null, status: Status, message?: string | null, insertedAt?: Date | null, completedAt?: Date | null, creator?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, approver?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null };
+
+export type RestartBuildMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type RestartBuildMutation = { __typename?: 'RootMutationType', restartBuild?: { __typename?: 'Build', id: string, repository: string, type: BuildType, sha?: string | null, status: Status, message?: string | null, insertedAt?: Date | null, completedAt?: Date | null, creator?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, approver?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null };
+
+export type BuildSubSubscriptionVariables = Exact<{
+  buildId?: InputMaybe<Scalars['ID']>;
+}>;
+
+
+export type BuildSubSubscription = { __typename?: 'RootSubscriptionType', buildDelta?: { __typename?: 'BuildDelta', delta?: Delta | null, payload?: { __typename?: 'Build', id: string, repository: string, type: BuildType, sha?: string | null, status: Status, message?: string | null, insertedAt?: Date | null, completedAt?: Date | null, changelogs?: Array<{ __typename?: 'Changelog', id: string, repo: string, tool: string, content?: string | null } | null> | null, creator?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, approver?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null } | null };
+
+export type CommandSubsSubscriptionVariables = Exact<{
+  buildId: Scalars['ID'];
+}>;
+
+
+export type CommandSubsSubscription = { __typename?: 'RootSubscriptionType', commandDelta?: { __typename?: 'CommandDelta', delta?: Delta | null, payload?: { __typename?: 'Command', id: string, command: string, exitCode?: number | null, stdout?: string | null, completedAt?: Date | null, insertedAt?: Date | null } | null } | null };
+
+export type DashboardFragment = { __typename?: 'Dashboard', id: string, spec: { __typename?: 'DashboardSpec', name?: string | null, description?: string | null, timeslices?: Array<string | null> | null, labels?: Array<{ __typename?: 'DashboardLabel', name: string, values?: Array<string | null> | null } | null> | null, graphs?: Array<{ __typename?: 'DashboardGraph', format?: string | null, name: string, queries?: Array<{ __typename?: 'DashboardMetric', query?: string | null, legend?: string | null, results?: Array<{ __typename?: 'MetricResult', timestamp?: number | null, value?: string | null } | null> | null } | null> | null } | null> | null } };
+
+export type LogStreamFragment = { __typename?: 'LogStream', stream?: Map<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: number | null, value?: string | null } | null> | null };
+
+export type MetricResponseFragment = { __typename?: 'MetricResponse', metric?: Map<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: number | null, value?: string | null } | null> | null };
+
+export type DashboardsQueryVariables = Exact<{
+  repo: Scalars['String'];
+}>;
+
+
+export type DashboardsQuery = { __typename?: 'RootQueryType', dashboards?: Array<{ __typename?: 'Dashboard', id: string, spec: { __typename?: 'DashboardSpec', name?: string | null, description?: string | null } } | null> | null };
+
+export type DashboardQueryVariables = Exact<{
+  repo: Scalars['String'];
+  name: Scalars['String'];
+  step?: InputMaybe<Scalars['String']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  labels?: InputMaybe<Array<InputMaybe<LabelInput>> | InputMaybe<LabelInput>>;
+}>;
+
+
+export type DashboardQuery = { __typename?: 'RootQueryType', dashboard?: { __typename?: 'Dashboard', id: string, spec: { __typename?: 'DashboardSpec', name?: string | null, description?: string | null, timeslices?: Array<string | null> | null, labels?: Array<{ __typename?: 'DashboardLabel', name: string, values?: Array<string | null> | null } | null> | null, graphs?: Array<{ __typename?: 'DashboardGraph', format?: string | null, name: string, queries?: Array<{ __typename?: 'DashboardMetric', query?: string | null, legend?: string | null, results?: Array<{ __typename?: 'MetricResult', timestamp?: number | null, value?: string | null } | null> | null } | null> | null } | null> | null } } | null };
+
+export type LogsQueryVariables = Exact<{
+  query: Scalars['String'];
+  start?: InputMaybe<Scalars['Long']>;
+  limit: Scalars['Int'];
+}>;
+
+
+export type LogsQuery = { __typename?: 'RootQueryType', logs?: Array<{ __typename?: 'LogStream', stream?: Map<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: number | null, value?: string | null } | null> | null } | null> | null };
+
+export type MetricsQueryVariables = Exact<{
+  query: Scalars['String'];
+  offset?: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type MetricsQuery = { __typename?: 'RootQueryType', metric?: Array<{ __typename?: 'MetricResponse', metric?: Map<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: number | null, value?: string | null } | null> | null } | null> | null };
+
+export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null };
+
+export type GroupFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null };
 
 export type GroupsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']>;
@@ -2254,10 +2380,252 @@ export type DeleteGroupMutationVariables = Exact<{
 
 export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null };
 
-export type UserFragmentFragment = { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null };
+export type EventFragment = { __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null };
 
-export const ApplicationSpecFragmentFragmentDoc = gql`
-    fragment ApplicationSpecFragment on ApplicationSpec {
+export type PodConditionFragment = { __typename?: 'PodCondition', message?: string | null, reason?: string | null, status?: string | null };
+
+export type ContainerStatusFragment = { __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null };
+
+export type ResourcesFragment = { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null };
+
+export type ContainerFragment = { __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null };
+
+export type PodMiniFragment = { __typename?: 'Pod', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } };
+
+export type PodFragment = { __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } };
+
+export type DeploymentFragment = { __typename?: 'Deployment', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'DeploymentStatus', availableReplicas?: number | null, replicas?: number | null, unavailableReplicas?: number | null }, spec: { __typename?: 'DeploymentSpec', replicas?: number | null, strategy?: { __typename?: 'DeploymentStrategy', type?: string | null } | null } };
+
+export type StatefulSetFragment = { __typename?: 'StatefulSet', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'StatefulSetStatus', replicas?: number | null, currentReplicas?: number | null, readyReplicas?: number | null, updatedReplicas?: number | null }, spec: { __typename?: 'StatefulSetSpec', replicas?: number | null, serviceName?: string | null } };
+
+export type ServiceFragment = { __typename?: 'Service', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null } | null> | null } | null }, spec: { __typename?: 'ServiceSpec', type?: string | null, clusterIp?: string | null, ports?: Array<{ __typename?: 'ServicePort', name?: string | null, protocol?: string | null, port?: number | null, targetPort?: string | null } | null> | null } };
+
+export type IngressFragment = { __typename?: 'Ingress', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null, hostname?: string | null } | null> | null } | null }, spec: { __typename?: 'IngressSpec', tls?: Array<{ __typename?: 'IngressTls', hosts?: Array<string | null> | null } | null> | null, rules?: Array<{ __typename?: 'IngressRule', host?: string | null, http?: { __typename?: 'HttpIngressRule', paths?: Array<{ __typename?: 'IngressPath', path?: string | null, backend?: { __typename?: 'IngressBackend', serviceName?: string | null, servicePort?: string | null } | null } | null> | null } | null } | null> | null } };
+
+export type NodeFragment = { __typename?: 'Node', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Map<string, unknown> | null, capacity?: Map<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } };
+
+export type NodeMetricFragment = { __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null };
+
+export type CronJobFragment = { __typename?: 'CronJob', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CronStatus', lastScheduleTime?: string | null }, spec: { __typename?: 'CronSpec', schedule: string, suspend?: boolean | null, concurrencyPolicy?: string | null } };
+
+export type JobStatusFragment = { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null };
+
+export type JobFragment = { __typename?: 'Job', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null };
+
+export type LogFilterFragment = { __typename?: 'LogFilter', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'LogFilterSpec', name?: string | null, description?: string | null, query?: string | null, labels?: Array<{ __typename?: 'LogLabel', name?: string | null, value?: string | null } | null> | null } };
+
+export type CertificateFragment = { __typename?: 'Certificate', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CertificateStatus', renewalTime?: string | null, notBefore?: string | null, notAfter?: string | null }, spec: { __typename?: 'CertificateSpec', dnsNames?: Array<string | null> | null, secretName: string, issuerRef?: { __typename?: 'IssuerRef', group?: string | null, kind?: string | null, name?: string | null } | null } };
+
+export type ContainerResourcesFragment = { __typename?: 'ContainerResources', cpu?: string | null, memory?: string | null };
+
+export type VerticalPodAutoscalerFragment = { __typename?: 'VerticalPodAutoscaler', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status?: { __typename?: 'VerticalPodAutoscalerStatus', recommendation?: { __typename?: 'Recommendation', containerRecommendations?: Array<{ __typename?: 'ContainerRecommendation', containerName?: string | null, lowerBound?: { __typename?: 'ContainerResources', cpu?: string | null, memory?: string | null } | null, upperBound?: { __typename?: 'ContainerResources', cpu?: string | null, memory?: string | null } | null, uncappedTarget?: { __typename?: 'ContainerResources', cpu?: string | null, memory?: string | null } | null } | null> | null } | null } | null };
+
+export type SmtpFragment = { __typename?: 'Smtp', server?: string | null, port?: number | null, sender?: string | null, user?: string | null, password?: string | null };
+
+export type InstallationFragment = { __typename?: 'Installation', id: string, repository?: { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', terraform?: string | null, helm?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null } | null };
+
+export type RecipeFragment = { __typename?: 'Recipe', id: string, name: string, description?: string | null, restricted?: boolean | null, provider?: string | null, oidcEnabled?: boolean | null };
+
+export type ConfigurationItemFragment = { __typename?: 'ConfigurationItem', name?: string | null, default?: string | null, documentation?: string | null, type?: string | null, placeholder?: string | null, optional?: boolean | null, condition?: { __typename?: 'ConfigurationCondition', operation?: string | null, field?: string | null, value?: string | null } | null, validation?: { __typename?: 'ConfigurationValidation', type?: string | null, regex?: string | null, message?: string | null } | null };
+
+export type RecipeSectionFragment = { __typename?: 'RecipeSection', id: string, repository?: { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', terraform?: string | null, helm?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null } | null, configuration?: Array<{ __typename?: 'ConfigurationItem', name?: string | null, default?: string | null, documentation?: string | null, type?: string | null, placeholder?: string | null, optional?: boolean | null, condition?: { __typename?: 'ConfigurationCondition', operation?: string | null, field?: string | null, value?: string | null } | null, validation?: { __typename?: 'ConfigurationValidation', type?: string | null, regex?: string | null, message?: string | null } | null } | null> | null, recipeItems?: Array<{ __typename?: 'RecipeItem', id: string, configuration?: Array<{ __typename?: 'ConfigurationItem', name?: string | null, default?: string | null, documentation?: string | null, type?: string | null, placeholder?: string | null, optional?: boolean | null, condition?: { __typename?: 'ConfigurationCondition', operation?: string | null, field?: string | null, value?: string | null } | null, validation?: { __typename?: 'ConfigurationValidation', type?: string | null, regex?: string | null, message?: string | null } | null } | null> | null } | null> | null };
+
+export type SearchQueryVariables = Exact<{
+  query: Scalars['String'];
+}>;
+
+
+export type SearchQuery = { __typename?: 'RootQueryType', repositories?: { __typename?: 'RepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'RepositoryEdge', node?: { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', terraform?: string | null, helm?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null } | null } | null> | null } | null };
+
+export type RecipesQueryVariables = Exact<{
+  id: Scalars['ID'];
+  cursor?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type RecipesQuery = { __typename?: 'RootQueryType', recipes?: { __typename?: 'RecipeConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'RecipeEdge', node?: { __typename?: 'Recipe', id: string, name: string, description?: string | null, restricted?: boolean | null, provider?: string | null, oidcEnabled?: boolean | null } | null } | null> | null } | null };
+
+export type RecipeQueryVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type RecipeQuery = { __typename?: 'RootQueryType', recipe?: { __typename?: 'Recipe', id: string, name: string, description?: string | null, restricted?: boolean | null, provider?: string | null, oidcEnabled?: boolean | null, recipeSections?: Array<{ __typename?: 'RecipeSection', id: string, repository?: { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', terraform?: string | null, helm?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null } | null, configuration?: Array<{ __typename?: 'ConfigurationItem', name?: string | null, default?: string | null, documentation?: string | null, type?: string | null, placeholder?: string | null, optional?: boolean | null, condition?: { __typename?: 'ConfigurationCondition', operation?: string | null, field?: string | null, value?: string | null } | null, validation?: { __typename?: 'ConfigurationValidation', type?: string | null, regex?: string | null, message?: string | null } | null } | null> | null, recipeItems?: Array<{ __typename?: 'RecipeItem', id: string, configuration?: Array<{ __typename?: 'ConfigurationItem', name?: string | null, default?: string | null, documentation?: string | null, type?: string | null, placeholder?: string | null, optional?: boolean | null, condition?: { __typename?: 'ConfigurationCondition', operation?: string | null, field?: string | null, value?: string | null } | null, validation?: { __typename?: 'ConfigurationValidation', type?: string | null, regex?: string | null, message?: string | null } | null } | null> | null } | null> | null } | null> | null } | null, context?: Array<{ __typename?: 'RepositoryContext', repository: string, context?: Map<string, unknown> | null } | null> | null };
+
+export type InstallMutationVariables = Exact<{
+  id: Scalars['ID'];
+  context: Scalars['Map'];
+  oidc?: InputMaybe<Scalars['Boolean']>;
+}>;
+
+
+export type InstallMutation = { __typename?: 'RootMutationType', installRecipe?: { __typename?: 'Build', id: string, repository: string, type: BuildType, sha?: string | null, status: Status, message?: string | null, insertedAt?: Date | null, completedAt?: Date | null, creator?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, approver?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null };
+
+export type InstallationsQueryVariables = Exact<{
+  cursor?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type InstallationsQuery = { __typename?: 'RootQueryType', installations?: { __typename?: 'InstallationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'InstallationEdge', node?: { __typename?: 'Installation', id: string, repository?: { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', terraform?: string | null, helm?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null } | null } | null } | null> | null } | null };
+
+export type ConfigurationsQueryVariables = Exact<{
+  cursor?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type ConfigurationsQuery = { __typename?: 'RootQueryType', installations?: { __typename?: 'InstallationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'InstallationEdge', node?: { __typename?: 'Installation', id: string, repository?: { __typename?: 'Repository', grafanaDns?: string | null, id: string, name: string, icon?: string | null, description?: string | null, configuration?: { __typename?: 'Configuration', terraform?: string | null, helm?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null } | null } | null } | null> | null } | null };
+
+export type LicenseFragment = { __typename?: 'License', metadata: { __typename?: 'Metadata', name: string }, status?: { __typename?: 'LicenseStatus', free?: boolean | null, limits?: Map<string, unknown> | null, plan?: string | null, features?: Array<{ __typename?: 'LicenseFeature', name: string, description?: string | null } | null> | null } | null };
+
+export type UpdateConfigurationMutationVariables = Exact<{
+  repository: Scalars['String'];
+  content: Scalars['String'];
+  type?: InputMaybe<Tool>;
+}>;
+
+
+export type UpdateConfigurationMutation = { __typename?: 'RootMutationType', updateConfiguration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null };
+
+export type ApplicationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ApplicationsQuery = { __typename?: 'RootQueryType', applications?: Array<{ __typename?: 'Application', name: string, license?: { __typename?: 'License', metadata: { __typename?: 'Metadata', name: string }, status?: { __typename?: 'LicenseStatus', free?: boolean | null, limits?: Map<string, unknown> | null, plan?: string | null, features?: Array<{ __typename?: 'LicenseFeature', name: string, description?: string | null } | null> | null } | null } | null, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null } | null> | null };
+
+export type ApplicationSubSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ApplicationSubSubscription = { __typename?: 'RootSubscriptionType', applicationDelta?: { __typename?: 'ApplicationDelta', delta?: Delta | null, payload?: { __typename?: 'Application', name: string, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null, description?: string | null, version: string, links?: Array<{ __typename?: 'ApplicationLink', description?: string | null, url?: string | null } | null> | null }, components?: Array<{ __typename?: 'Component', group: string, kind: string } | null> | null }, status: { __typename?: 'ApplicationStatus', componentsReady: string, components?: Array<{ __typename?: 'StatusComponent', group?: string | null, kind: string, name: string, status: string } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, cost?: { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null } | null } | null } | null };
+
+export type LogFiltersQueryVariables = Exact<{
+  namespace: Scalars['String'];
+}>;
+
+
+export type LogFiltersQuery = { __typename?: 'RootQueryType', logFilters?: Array<{ __typename?: 'LogFilter', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'LogFilterSpec', name?: string | null, description?: string | null, query?: string | null, labels?: Array<{ __typename?: 'LogLabel', name?: string | null, value?: string | null } | null> | null } } | null> | null };
+
+export type SmtpQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SmtpQuery = { __typename?: 'RootQueryType', smtp?: { __typename?: 'Smtp', server?: string | null, port?: number | null, sender?: string | null, user?: string | null, password?: string | null } | null };
+
+export type UpdateSmtpMutationVariables = Exact<{
+  smtp: SmtpInput;
+}>;
+
+
+export type UpdateSmtpMutation = { __typename?: 'RootMutationType', updateSmtp?: { __typename?: 'Smtp', server?: string | null, port?: number | null, sender?: string | null, user?: string | null, password?: string | null } | null };
+
+export type RunbookAlertStatusFragment = { __typename?: 'RunbookAlertStatus', name: string, startsAt?: string | null, labels?: Map<string, unknown> | null, annotations?: Map<string, unknown> | null, fingerprint?: string | null };
+
+export type RunbookExecutionFragment = { __typename?: 'RunbookExecution', id: string, name: string, namespace: string, context: Map<string, unknown>, insertedAt?: Date | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null };
+
+export type RunbookFragment = { __typename?: 'Runbook', name: string, status?: { __typename?: 'RunbookStatus', alerts?: Array<{ __typename?: 'RunbookAlertStatus', name: string, startsAt?: string | null, labels?: Map<string, unknown> | null, annotations?: Map<string, unknown> | null, fingerprint?: string | null } | null> | null } | null, spec: { __typename?: 'RunbookSpec', name: string, description?: string | null } };
+
+export type RunbookDatasourceFragment = { __typename?: 'RunbookDatasource', name: string, type: string, prometheus?: { __typename?: 'PrometheusDatasource', query: string, format?: string | null, legend?: string | null } | null, kubernetes?: { __typename?: 'KubernetesDatasource', resource: string, name: string } | null };
+
+export type RunbookDataFragment = { __typename?: 'RunbookData', name: string, source?: { __typename?: 'RunbookDatasource', name: string, type: string, prometheus?: { __typename?: 'PrometheusDatasource', query: string, format?: string | null, legend?: string | null } | null, kubernetes?: { __typename?: 'KubernetesDatasource', resource: string, name: string } | null } | null, prometheus?: Array<{ __typename?: 'MetricResponse', metric?: Map<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: number | null, value?: string | null } | null> | null } | null> | null, nodes?: Array<{ __typename?: 'Node', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Map<string, unknown> | null, capacity?: Map<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, kubernetes?: { __typename: 'Deployment', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'DeploymentStatus', availableReplicas?: number | null, replicas?: number | null, unavailableReplicas?: number | null }, spec: { __typename?: 'DeploymentSpec', replicas?: number | null, strategy?: { __typename?: 'DeploymentStrategy', type?: string | null } | null } } | { __typename: 'StatefulSet', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'StatefulSetStatus', replicas?: number | null, currentReplicas?: number | null, readyReplicas?: number | null, updatedReplicas?: number | null }, spec: { __typename?: 'StatefulSetSpec', replicas?: number | null, serviceName?: string | null } } | null };
+
+export type UserFragment = { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null };
+
+export type InviteFragment = { __typename?: 'Invite', secureId: string };
+
+export type RoleBindingFragment = { __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null };
+
+export type RoleFragment = { __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null } | null> | null };
+
+export type ManifestFragment = { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null };
+
+export type NotificationFragment = { __typename?: 'Notification', id: string, title: string, description?: string | null, repository: string, severity?: Severity | null, labels?: Map<string, unknown> | null, annotations?: Map<string, unknown> | null, seenAt?: Date | null };
+
+export type MeQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MeQuery = { __typename?: 'RootQueryType', externalToken?: string | null, me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null } | null> | null } | null> | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, clusterInfo?: { __typename?: 'ClusterInfo', version?: string | null, platform?: string | null, gitCommit?: string | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null } | null };
+
+export type SignInMutationVariables = Exact<{
+  email: Scalars['String'];
+  password: Scalars['String'];
+}>;
+
+
+export type SignInMutation = { __typename?: 'RootMutationType', signIn?: { __typename?: 'User', jwt?: string | null, id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null };
+
+export type UpdateUserMutationVariables = Exact<{
+  attributes: UserAttributes;
+}>;
+
+
+export type UpdateUserMutation = { __typename?: 'RootMutationType', updateUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null };
+
+export type UsersQueryVariables = Exact<{
+  cursor?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type UsersQuery = { __typename?: 'RootQueryType', users?: { __typename?: 'UserConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'UserEdge', node?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null } | null> | null } | null };
+
+export type InviteUserMutationVariables = Exact<{
+  email?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type InviteUserMutation = { __typename?: 'RootMutationType', createInvite?: { __typename?: 'Invite', secureId: string } | null };
+
+export type InviteQueryVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type InviteQuery = { __typename?: 'RootQueryType', invite?: { __typename?: 'Invite', email?: string | null } | null };
+
+export type SignUpMutationVariables = Exact<{
+  inviteId: Scalars['String'];
+  attributes: UserAttributes;
+}>;
+
+
+export type SignUpMutation = { __typename?: 'RootMutationType', signup?: { __typename?: 'User', jwt?: string | null, id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null };
+
+export type LinkMutationVariables = Exact<{
+  key: Scalars['String'];
+}>;
+
+
+export type LinkMutation = { __typename?: 'RootMutationType', loginLink?: { __typename?: 'User', jwt?: string | null, id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null };
+
+export type NotifsQueryVariables = Exact<{
+  all?: InputMaybe<Scalars['Boolean']>;
+  cursor?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type NotifsQuery = { __typename?: 'RootQueryType', notifications?: { __typename?: 'NotificationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'NotificationEdge', node?: { __typename?: 'Notification', id: string, title: string, description?: string | null, repository: string, severity?: Severity | null, labels?: Map<string, unknown> | null, annotations?: Map<string, unknown> | null, seenAt?: Date | null } | null } | null> | null } | null };
+
+export type WebhookFragment = { __typename?: 'Webhook', id: string, url: string, health: WebhookHealth, insertedAt?: Date | null };
+
+export type WebhooksQueryVariables = Exact<{
+  cursor?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type WebhooksQuery = { __typename?: 'RootQueryType', webhooks?: { __typename?: 'WebhookConnection', pageInfo: { __typename?: 'PageInfo', endCursor?: string | null, hasNextPage: boolean }, edges?: Array<{ __typename?: 'WebhookEdge', node?: { __typename?: 'Webhook', id: string, url: string, health: WebhookHealth, insertedAt?: Date | null } | null } | null> | null } | null };
+
+export type CreateWebhookMutationVariables = Exact<{
+  attributes: WebhookAttributes;
+}>;
+
+
+export type CreateWebhookMutation = { __typename?: 'RootMutationType', createWebhook?: { __typename?: 'Webhook', id: string, url: string, health: WebhookHealth, insertedAt?: Date | null } | null };
+
+export type DeleteWebhookMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type DeleteWebhookMutation = { __typename?: 'RootMutationType', deleteWebhook?: { __typename?: 'Webhook', id: string, url: string, health: WebhookHealth, insertedAt?: Date | null } | null };
+
+export const ApplicationSpecFragmentDoc = gql`
+    fragment ApplicationSpec on ApplicationSpec {
   descriptor {
     type
     icons
@@ -2274,8 +2642,8 @@ export const ApplicationSpecFragmentFragmentDoc = gql`
   }
 }
     `;
-export const ApplicationStatusFragmentFragmentDoc = gql`
-    fragment ApplicationStatusFragment on ApplicationStatus {
+export const ApplicationStatusFragmentDoc = gql`
+    fragment ApplicationStatus on ApplicationStatus {
   components {
     group
     kind
@@ -2291,8 +2659,8 @@ export const ApplicationStatusFragmentFragmentDoc = gql`
   componentsReady
 }
     `;
-export const CostAnalysisFragmentFragmentDoc = gql`
-    fragment CostAnalysisFragment on CostAnalysis {
+export const CostAnalysisFragmentDoc = gql`
+    fragment CostAnalysis on CostAnalysis {
   minutes
   cpuCost
   pvCost
@@ -2300,24 +2668,24 @@ export const CostAnalysisFragmentFragmentDoc = gql`
   totalCost
 }
     `;
-export const ApplicationFragmentFragmentDoc = gql`
-    fragment ApplicationFragment on Application {
+export const ApplicationFragmentDoc = gql`
+    fragment Application on Application {
   name
   spec {
-    ...ApplicationSpecFragment
+    ...ApplicationSpec
   }
   status {
-    ...ApplicationStatusFragment
+    ...ApplicationStatus
   }
   cost {
-    ...CostAnalysisFragment
+    ...CostAnalysis
   }
 }
-    ${ApplicationSpecFragmentFragmentDoc}
-${ApplicationStatusFragmentFragmentDoc}
-${CostAnalysisFragmentFragmentDoc}`;
-export const MetadataFragmentFragmentDoc = gql`
-    fragment MetadataFragment on Metadata {
+    ${ApplicationSpecFragmentDoc}
+${ApplicationStatusFragmentDoc}
+${CostAnalysisFragmentDoc}`;
+export const MetadataFragmentDoc = gql`
+    fragment Metadata on Metadata {
   name
   namespace
   labels {
@@ -2330,10 +2698,10 @@ export const MetadataFragmentFragmentDoc = gql`
   }
 }
     `;
-export const ConfigurationOverlayFragmentFragmentDoc = gql`
-    fragment ConfigurationOverlayFragment on ConfigurationOverlay {
+export const ConfigurationOverlayFragmentDoc = gql`
+    fragment ConfigurationOverlay on ConfigurationOverlay {
   metadata {
-    ...MetadataFragment
+    ...Metadata
   }
   spec {
     name
@@ -2347,43 +2715,9 @@ export const ConfigurationOverlayFragmentFragmentDoc = gql`
     }
   }
 }
-    ${MetadataFragmentFragmentDoc}`;
-export const ConfigurationFragmentFragmentDoc = gql`
-    fragment ConfigurationFragment on Configuration {
-  helm
-  terraform
-}
-    `;
-export const FileContentFragmentFragmentDoc = gql`
-    fragment FileContentFragment on FileContent {
-  content
-  path
-}
-    `;
-export const RepositoryFragmentFragmentDoc = gql`
-    fragment RepositoryFragment on Repository {
-  id
-  name
-  icon
-  description
-  grafanaDns
-  configuration {
-    ...ConfigurationFragment
-  }
-  docs {
-    ...FileContentFragment
-  }
-}
-    ${ConfigurationFragmentFragmentDoc}
-${FileContentFragmentFragmentDoc}`;
-export const PageInfoFragmentFragmentDoc = gql`
-    fragment PageInfoFragment on PageInfo {
-  hasNextPage
-  endCursor
-}
-    `;
-export const UserFragmentFragmentDoc = gql`
-    fragment UserFragment on User {
+    ${MetadataFragmentDoc}`;
+export const UserFragmentDoc = gql`
+    fragment User on User {
   id
   name
   email
@@ -2395,25 +2729,766 @@ export const UserFragmentFragmentDoc = gql`
   }
 }
     `;
-export const GroupFragmentFragmentDoc = gql`
-    fragment GroupFragment on Group {
+export const AuditFragmentDoc = gql`
+    fragment Audit on Audit {
+  id
+  type
+  action
+  repository
+  ip
+  city
+  country
+  latitude
+  longitude
+  actor {
+    ...User
+  }
+  insertedAt
+}
+    ${UserFragmentDoc}`;
+export const PageInfoFragmentDoc = gql`
+    fragment PageInfo on PageInfo {
+  hasNextPage
+  endCursor
+}
+    `;
+export const BuildFragmentDoc = gql`
+    fragment Build on Build {
+  id
+  repository
+  type
+  sha
+  status
+  message
+  insertedAt
+  completedAt
+  creator {
+    ...User
+  }
+  approver {
+    ...User
+  }
+}
+    ${UserFragmentDoc}`;
+export const CommandFragmentDoc = gql`
+    fragment Command on Command {
+  id
+  command
+  exitCode
+  stdout
+  completedAt
+  insertedAt
+}
+    `;
+export const ChangelogFragmentDoc = gql`
+    fragment Changelog on Changelog {
+  id
+  repo
+  tool
+  content
+}
+    `;
+export const UpgradePolicyFragmentDoc = gql`
+    fragment UpgradePolicy on UpgradePolicy {
+  id
+  name
+  type
+  target
+  weight
+  description
+}
+    `;
+export const DashboardFragmentDoc = gql`
+    fragment Dashboard on Dashboard {
+  id
+  spec {
+    name
+    description
+    timeslices
+    labels {
+      name
+      values
+    }
+    graphs {
+      queries {
+        query
+        legend
+        results {
+          timestamp
+          value
+        }
+      }
+      format
+      name
+    }
+  }
+}
+    `;
+export const LogStreamFragmentDoc = gql`
+    fragment LogStream on LogStream {
+  stream
+  values {
+    timestamp
+    value
+  }
+}
+    `;
+export const GroupFragmentDoc = gql`
+    fragment Group on Group {
   id
   name
   description
   insertedAt
 }
     `;
-export const GroupMemberFragmentFragmentDoc = gql`
-    fragment GroupMemberFragment on GroupMember {
+export const GroupMemberFragmentDoc = gql`
+    fragment GroupMember on GroupMember {
   user {
-    ...UserFragment
+    ...User
   }
   group {
-    ...GroupFragment
+    ...Group
   }
 }
-    ${UserFragmentFragmentDoc}
-${GroupFragmentFragmentDoc}`;
+    ${UserFragmentDoc}
+${GroupFragmentDoc}`;
+export const EventFragmentDoc = gql`
+    fragment Event on Event {
+  action
+  lastTimestamp
+  count
+  message
+  reason
+  type
+}
+    `;
+export const PodConditionFragmentDoc = gql`
+    fragment PodCondition on PodCondition {
+  message
+  reason
+  status
+}
+    `;
+export const ContainerStatusFragmentDoc = gql`
+    fragment ContainerStatus on ContainerStatus {
+  restartCount
+  ready
+  name
+  state {
+    running {
+      startedAt
+    }
+    terminated {
+      exitCode
+      message
+      reason
+    }
+    waiting {
+      message
+      reason
+    }
+  }
+}
+    `;
+export const ResourcesFragmentDoc = gql`
+    fragment Resources on Resources {
+  limits {
+    cpu
+    memory
+  }
+  requests {
+    cpu
+    memory
+  }
+}
+    `;
+export const ContainerFragmentDoc = gql`
+    fragment Container on Container {
+  name
+  image
+  ports {
+    containerPort
+    protocol
+  }
+  resources {
+    ...Resources
+  }
+}
+    ${ResourcesFragmentDoc}`;
+export const PodMiniFragmentDoc = gql`
+    fragment PodMini on Pod {
+  metadata {
+    ...Metadata
+  }
+  status {
+    phase
+    podIp
+    reason
+    containerStatuses {
+      ...ContainerStatus
+    }
+    initContainerStatuses {
+      ...ContainerStatus
+    }
+    conditions {
+      lastProbeTime
+      lastTransitionTime
+      message
+      reason
+      status
+      type
+    }
+  }
+  spec {
+    nodeName
+    serviceAccountName
+    containers {
+      ...Container
+    }
+    initContainers {
+      ...Container
+    }
+  }
+}
+    ${MetadataFragmentDoc}
+${ContainerStatusFragmentDoc}
+${ContainerFragmentDoc}`;
+export const ServiceFragmentDoc = gql`
+    fragment Service on Service {
+  metadata {
+    ...Metadata
+  }
+  status {
+    loadBalancer {
+      ingress {
+        ip
+      }
+    }
+  }
+  spec {
+    type
+    clusterIp
+    ports {
+      name
+      protocol
+      port
+      targetPort
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const IngressFragmentDoc = gql`
+    fragment Ingress on Ingress {
+  metadata {
+    ...Metadata
+  }
+  status {
+    loadBalancer {
+      ingress {
+        ip
+        hostname
+      }
+    }
+  }
+  spec {
+    tls {
+      hosts
+    }
+    rules {
+      host
+      http {
+        paths {
+          path
+          backend {
+            serviceName
+            servicePort
+          }
+        }
+      }
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const NodeMetricFragmentDoc = gql`
+    fragment NodeMetric on NodeMetric {
+  metadata {
+    ...Metadata
+  }
+  usage {
+    cpu
+    memory
+  }
+  timestamp
+  window
+}
+    ${MetadataFragmentDoc}`;
+export const CronJobFragmentDoc = gql`
+    fragment CronJob on CronJob {
+  metadata {
+    ...Metadata
+  }
+  status {
+    lastScheduleTime
+  }
+  spec {
+    schedule
+    suspend
+    concurrencyPolicy
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const JobStatusFragmentDoc = gql`
+    fragment JobStatus on JobStatus {
+  active
+  completionTime
+  succeeded
+  failed
+  startTime
+}
+    `;
+export const PodFragmentDoc = gql`
+    fragment Pod on Pod {
+  metadata {
+    ...Metadata
+  }
+  status {
+    phase
+    podIp
+    reason
+    containerStatuses {
+      ...ContainerStatus
+    }
+    initContainerStatuses {
+      ...ContainerStatus
+    }
+    conditions {
+      lastProbeTime
+      lastTransitionTime
+      message
+      reason
+      status
+      type
+    }
+  }
+  spec {
+    nodeName
+    serviceAccountName
+    containers {
+      ...Container
+    }
+    initContainers {
+      ...Container
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}
+${ContainerStatusFragmentDoc}
+${ContainerFragmentDoc}`;
+export const JobFragmentDoc = gql`
+    fragment Job on Job {
+  metadata {
+    ...Metadata
+  }
+  status {
+    ...JobStatus
+  }
+  spec {
+    backoffLimit
+    parallelism
+    activeDeadlineSeconds
+  }
+  pods {
+    ...Pod
+  }
+  raw
+}
+    ${MetadataFragmentDoc}
+${JobStatusFragmentDoc}
+${PodFragmentDoc}`;
+export const LogFilterFragmentDoc = gql`
+    fragment LogFilter on LogFilter {
+  metadata {
+    ...Metadata
+  }
+  spec {
+    name
+    description
+    query
+    labels {
+      name
+      value
+    }
+  }
+}
+    ${MetadataFragmentDoc}`;
+export const CertificateFragmentDoc = gql`
+    fragment Certificate on Certificate {
+  metadata {
+    ...Metadata
+  }
+  status {
+    renewalTime
+    notBefore
+    notAfter
+  }
+  spec {
+    dnsNames
+    secretName
+    issuerRef {
+      group
+      kind
+      name
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const ContainerResourcesFragmentDoc = gql`
+    fragment ContainerResources on ContainerResources {
+  cpu
+  memory
+}
+    `;
+export const VerticalPodAutoscalerFragmentDoc = gql`
+    fragment VerticalPodAutoscaler on VerticalPodAutoscaler {
+  metadata {
+    ...Metadata
+  }
+  status {
+    recommendation {
+      containerRecommendations {
+        containerName
+        lowerBound {
+          ...ContainerResources
+        }
+        upperBound {
+          ...ContainerResources
+        }
+        uncappedTarget {
+          ...ContainerResources
+        }
+      }
+    }
+  }
+}
+    ${MetadataFragmentDoc}
+${ContainerResourcesFragmentDoc}`;
+export const SmtpFragmentDoc = gql`
+    fragment Smtp on Smtp {
+  server
+  port
+  sender
+  user
+  password
+}
+    `;
+export const ConfigurationFragmentDoc = gql`
+    fragment Configuration on Configuration {
+  terraform
+  helm
+}
+    `;
+export const FileContentFragmentDoc = gql`
+    fragment FileContent on FileContent {
+  content
+  path
+}
+    `;
+export const RepositoryFragmentDoc = gql`
+    fragment Repository on Repository {
+  id
+  name
+  icon
+  description
+  grafanaDns
+  configuration {
+    ...Configuration
+  }
+  docs {
+    ...FileContent
+  }
+}
+    ${ConfigurationFragmentDoc}
+${FileContentFragmentDoc}`;
+export const InstallationFragmentDoc = gql`
+    fragment Installation on Installation {
+  id
+  repository {
+    ...Repository
+  }
+}
+    ${RepositoryFragmentDoc}`;
+export const RecipeFragmentDoc = gql`
+    fragment Recipe on Recipe {
+  id
+  name
+  description
+  restricted
+  provider
+  oidcEnabled
+}
+    `;
+export const ConfigurationItemFragmentDoc = gql`
+    fragment ConfigurationItem on ConfigurationItem {
+  name
+  default
+  documentation
+  type
+  placeholder
+  optional
+  condition {
+    operation
+    field
+    value
+  }
+  validation {
+    type
+    regex
+    message
+  }
+}
+    `;
+export const RecipeSectionFragmentDoc = gql`
+    fragment RecipeSection on RecipeSection {
+  id
+  repository {
+    ...Repository
+  }
+  configuration {
+    ...ConfigurationItem
+  }
+  recipeItems {
+    id
+    configuration {
+      ...ConfigurationItem
+    }
+  }
+}
+    ${RepositoryFragmentDoc}
+${ConfigurationItemFragmentDoc}`;
+export const LicenseFragmentDoc = gql`
+    fragment License on License {
+  metadata {
+    name
+  }
+  status {
+    free
+    features {
+      name
+      description
+    }
+    limits
+    plan
+  }
+}
+    `;
+export const RunbookExecutionFragmentDoc = gql`
+    fragment RunbookExecution on RunbookExecution {
+  id
+  name
+  namespace
+  context
+  user {
+    ...User
+  }
+  insertedAt
+}
+    ${UserFragmentDoc}`;
+export const RunbookAlertStatusFragmentDoc = gql`
+    fragment RunbookAlertStatus on RunbookAlertStatus {
+  name
+  startsAt
+  labels
+  annotations
+  fingerprint
+}
+    `;
+export const RunbookFragmentDoc = gql`
+    fragment Runbook on Runbook {
+  name
+  status {
+    alerts {
+      ...RunbookAlertStatus
+    }
+  }
+  spec {
+    name
+    description
+  }
+}
+    ${RunbookAlertStatusFragmentDoc}`;
+export const RunbookDatasourceFragmentDoc = gql`
+    fragment RunbookDatasource on RunbookDatasource {
+  name
+  type
+  prometheus {
+    query
+    format
+    legend
+  }
+  kubernetes {
+    resource
+    name
+  }
+}
+    `;
+export const MetricResponseFragmentDoc = gql`
+    fragment MetricResponse on MetricResponse {
+  metric
+  values {
+    timestamp
+    value
+  }
+}
+    `;
+export const NodeFragmentDoc = gql`
+    fragment Node on Node {
+  metadata {
+    ...Metadata
+  }
+  status {
+    phase
+    allocatable
+    capacity
+    conditions {
+      type
+      status
+      message
+    }
+  }
+  spec {
+    podCidr
+    providerId
+  }
+}
+    ${MetadataFragmentDoc}`;
+export const StatefulSetFragmentDoc = gql`
+    fragment StatefulSet on StatefulSet {
+  metadata {
+    ...Metadata
+  }
+  status {
+    replicas
+    currentReplicas
+    readyReplicas
+    updatedReplicas
+  }
+  spec {
+    replicas
+    serviceName
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const DeploymentFragmentDoc = gql`
+    fragment Deployment on Deployment {
+  metadata {
+    ...Metadata
+  }
+  status {
+    availableReplicas
+    replicas
+    unavailableReplicas
+  }
+  spec {
+    replicas
+    strategy {
+      type
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const RunbookDataFragmentDoc = gql`
+    fragment RunbookData on RunbookData {
+  name
+  source {
+    ...RunbookDatasource
+  }
+  prometheus {
+    ...MetricResponse
+  }
+  nodes {
+    ...Node
+  }
+  kubernetes {
+    __typename
+    ... on StatefulSet {
+      ...StatefulSet
+    }
+    ... on Deployment {
+      ...Deployment
+    }
+  }
+}
+    ${RunbookDatasourceFragmentDoc}
+${MetricResponseFragmentDoc}
+${NodeFragmentDoc}
+${StatefulSetFragmentDoc}
+${DeploymentFragmentDoc}`;
+export const InviteFragmentDoc = gql`
+    fragment Invite on Invite {
+  secureId
+}
+    `;
+export const RoleBindingFragmentDoc = gql`
+    fragment RoleBinding on RoleBinding {
+  id
+  user {
+    ...User
+  }
+  group {
+    ...Group
+  }
+}
+    ${UserFragmentDoc}
+${GroupFragmentDoc}`;
+export const RoleFragmentDoc = gql`
+    fragment Role on Role {
+  id
+  name
+  description
+  repositories
+  permissions
+  roleBindings {
+    ...RoleBinding
+  }
+}
+    ${RoleBindingFragmentDoc}`;
+export const ManifestFragmentDoc = gql`
+    fragment Manifest on PluralManifest {
+  network {
+    pluralDns
+    subdomain
+  }
+  cluster
+  bucketPrefix
+}
+    `;
+export const NotificationFragmentDoc = gql`
+    fragment Notification on Notification {
+  id
+  title
+  description
+  repository
+  severity
+  labels
+  annotations
+  seenAt
+}
+    `;
+export const WebhookFragmentDoc = gql`
+    fragment Webhook on Webhook {
+  id
+  url
+  health
+  insertedAt
+}
+    `;
 export const AppDocument = gql`
     query App($name: String!) {
   application(name: $name) {
@@ -2421,14 +3496,14 @@ export const AppDocument = gql`
       helm
       terraform
     }
-    ...ApplicationFragment
+    ...Application
   }
   configurationOverlays(namespace: $name) {
-    ...ConfigurationOverlayFragment
+    ...ConfigurationOverlay
   }
 }
-    ${ApplicationFragmentFragmentDoc}
-${ConfigurationOverlayFragmentFragmentDoc}`;
+    ${ApplicationFragmentDoc}
+${ConfigurationOverlayFragmentDoc}`;
 
 /**
  * __useAppQuery__
@@ -2460,10 +3535,10 @@ export type AppQueryResult = Apollo.QueryResult<AppQuery, AppQueryVariables>;
 export const RepositoryDocument = gql`
     query Repository($name: String!) {
   repository(name: $name) {
-    ...RepositoryFragment
+    ...Repository
   }
 }
-    ${RepositoryFragmentFragmentDoc}`;
+    ${RepositoryFragmentDoc}`;
 
 /**
  * __useRepositoryQuery__
@@ -2492,21 +3567,570 @@ export function useRepositoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions
 export type RepositoryQueryHookResult = ReturnType<typeof useRepositoryQuery>;
 export type RepositoryLazyQueryHookResult = ReturnType<typeof useRepositoryLazyQuery>;
 export type RepositoryQueryResult = Apollo.QueryResult<RepositoryQuery, RepositoryQueryVariables>;
-export const GroupsDocument = gql`
-    query Groups($q: String, $cursor: String) {
-  groups(q: $q, first: 20, after: $cursor) {
+export const BuildsDocument = gql`
+    query Builds($cursor: String) {
+  builds(first: 15, after: $cursor) {
     pageInfo {
-      ...PageInfoFragment
+      endCursor
+      hasNextPage
     }
     edges {
       node {
-        ...GroupFragment
+        ...Build
       }
     }
   }
 }
-    ${PageInfoFragmentFragmentDoc}
-${GroupFragmentFragmentDoc}`;
+    ${BuildFragmentDoc}`;
+
+/**
+ * __useBuildsQuery__
+ *
+ * To run a query within a React component, call `useBuildsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useBuildsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useBuildsQuery({
+ *   variables: {
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useBuildsQuery(baseOptions?: Apollo.QueryHookOptions<BuildsQuery, BuildsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<BuildsQuery, BuildsQueryVariables>(BuildsDocument, options);
+      }
+export function useBuildsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BuildsQuery, BuildsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<BuildsQuery, BuildsQueryVariables>(BuildsDocument, options);
+        }
+export type BuildsQueryHookResult = ReturnType<typeof useBuildsQuery>;
+export type BuildsLazyQueryHookResult = ReturnType<typeof useBuildsLazyQuery>;
+export type BuildsQueryResult = Apollo.QueryResult<BuildsQuery, BuildsQueryVariables>;
+export const BuildDocument = gql`
+    query Build($buildId: ID!) {
+  build(id: $buildId) {
+    ...Build
+    commands(first: 100) {
+      edges {
+        node {
+          ...Command
+        }
+      }
+    }
+    changelogs {
+      ...Changelog
+    }
+  }
+}
+    ${BuildFragmentDoc}
+${CommandFragmentDoc}
+${ChangelogFragmentDoc}`;
+
+/**
+ * __useBuildQuery__
+ *
+ * To run a query within a React component, call `useBuildQuery` and pass it any options that fit your needs.
+ * When your component renders, `useBuildQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useBuildQuery({
+ *   variables: {
+ *      buildId: // value for 'buildId'
+ *   },
+ * });
+ */
+export function useBuildQuery(baseOptions: Apollo.QueryHookOptions<BuildQuery, BuildQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<BuildQuery, BuildQueryVariables>(BuildDocument, options);
+      }
+export function useBuildLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BuildQuery, BuildQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<BuildQuery, BuildQueryVariables>(BuildDocument, options);
+        }
+export type BuildQueryHookResult = ReturnType<typeof useBuildQuery>;
+export type BuildLazyQueryHookResult = ReturnType<typeof useBuildLazyQuery>;
+export type BuildQueryResult = Apollo.QueryResult<BuildQuery, BuildQueryVariables>;
+export const UpgradePoliciesDocument = gql`
+    query UpgradePolicies {
+  upgradePolicies {
+    ...UpgradePolicy
+  }
+}
+    ${UpgradePolicyFragmentDoc}`;
+
+/**
+ * __useUpgradePoliciesQuery__
+ *
+ * To run a query within a React component, call `useUpgradePoliciesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUpgradePoliciesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUpgradePoliciesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useUpgradePoliciesQuery(baseOptions?: Apollo.QueryHookOptions<UpgradePoliciesQuery, UpgradePoliciesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UpgradePoliciesQuery, UpgradePoliciesQueryVariables>(UpgradePoliciesDocument, options);
+      }
+export function useUpgradePoliciesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UpgradePoliciesQuery, UpgradePoliciesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UpgradePoliciesQuery, UpgradePoliciesQueryVariables>(UpgradePoliciesDocument, options);
+        }
+export type UpgradePoliciesQueryHookResult = ReturnType<typeof useUpgradePoliciesQuery>;
+export type UpgradePoliciesLazyQueryHookResult = ReturnType<typeof useUpgradePoliciesLazyQuery>;
+export type UpgradePoliciesQueryResult = Apollo.QueryResult<UpgradePoliciesQuery, UpgradePoliciesQueryVariables>;
+export const CreateUpgradePolicyDocument = gql`
+    mutation CreateUpgradePolicy($attributes: UpgradePolicyAttributes!) {
+  createUpgradePolicy(attributes: $attributes) {
+    ...UpgradePolicy
+  }
+}
+    ${UpgradePolicyFragmentDoc}`;
+export type CreateUpgradePolicyMutationFn = Apollo.MutationFunction<CreateUpgradePolicyMutation, CreateUpgradePolicyMutationVariables>;
+
+/**
+ * __useCreateUpgradePolicyMutation__
+ *
+ * To run a mutation, you first call `useCreateUpgradePolicyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateUpgradePolicyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createUpgradePolicyMutation, { data, loading, error }] = useCreateUpgradePolicyMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateUpgradePolicyMutation(baseOptions?: Apollo.MutationHookOptions<CreateUpgradePolicyMutation, CreateUpgradePolicyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateUpgradePolicyMutation, CreateUpgradePolicyMutationVariables>(CreateUpgradePolicyDocument, options);
+      }
+export type CreateUpgradePolicyMutationHookResult = ReturnType<typeof useCreateUpgradePolicyMutation>;
+export type CreateUpgradePolicyMutationResult = Apollo.MutationResult<CreateUpgradePolicyMutation>;
+export type CreateUpgradePolicyMutationOptions = Apollo.BaseMutationOptions<CreateUpgradePolicyMutation, CreateUpgradePolicyMutationVariables>;
+export const DeleteUpgradePolicyDocument = gql`
+    mutation DeleteUpgradePolicy($id: ID!) {
+  deleteUpgradePolicy(id: $id) {
+    ...UpgradePolicy
+  }
+}
+    ${UpgradePolicyFragmentDoc}`;
+export type DeleteUpgradePolicyMutationFn = Apollo.MutationFunction<DeleteUpgradePolicyMutation, DeleteUpgradePolicyMutationVariables>;
+
+/**
+ * __useDeleteUpgradePolicyMutation__
+ *
+ * To run a mutation, you first call `useDeleteUpgradePolicyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteUpgradePolicyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteUpgradePolicyMutation, { data, loading, error }] = useDeleteUpgradePolicyMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteUpgradePolicyMutation(baseOptions?: Apollo.MutationHookOptions<DeleteUpgradePolicyMutation, DeleteUpgradePolicyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteUpgradePolicyMutation, DeleteUpgradePolicyMutationVariables>(DeleteUpgradePolicyDocument, options);
+      }
+export type DeleteUpgradePolicyMutationHookResult = ReturnType<typeof useDeleteUpgradePolicyMutation>;
+export type DeleteUpgradePolicyMutationResult = Apollo.MutationResult<DeleteUpgradePolicyMutation>;
+export type DeleteUpgradePolicyMutationOptions = Apollo.BaseMutationOptions<DeleteUpgradePolicyMutation, DeleteUpgradePolicyMutationVariables>;
+export const CreateBuildDocument = gql`
+    mutation CreateBuild($attributes: BuildAttributes!) {
+  createBuild(attributes: $attributes) {
+    ...Build
+  }
+}
+    ${BuildFragmentDoc}`;
+export type CreateBuildMutationFn = Apollo.MutationFunction<CreateBuildMutation, CreateBuildMutationVariables>;
+
+/**
+ * __useCreateBuildMutation__
+ *
+ * To run a mutation, you first call `useCreateBuildMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateBuildMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createBuildMutation, { data, loading, error }] = useCreateBuildMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateBuildMutation(baseOptions?: Apollo.MutationHookOptions<CreateBuildMutation, CreateBuildMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateBuildMutation, CreateBuildMutationVariables>(CreateBuildDocument, options);
+      }
+export type CreateBuildMutationHookResult = ReturnType<typeof useCreateBuildMutation>;
+export type CreateBuildMutationResult = Apollo.MutationResult<CreateBuildMutation>;
+export type CreateBuildMutationOptions = Apollo.BaseMutationOptions<CreateBuildMutation, CreateBuildMutationVariables>;
+export const CancelBuildDocument = gql`
+    mutation CancelBuild($id: ID!) {
+  cancelBuild(id: $id) {
+    ...Build
+  }
+}
+    ${BuildFragmentDoc}`;
+export type CancelBuildMutationFn = Apollo.MutationFunction<CancelBuildMutation, CancelBuildMutationVariables>;
+
+/**
+ * __useCancelBuildMutation__
+ *
+ * To run a mutation, you first call `useCancelBuildMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCancelBuildMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [cancelBuildMutation, { data, loading, error }] = useCancelBuildMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCancelBuildMutation(baseOptions?: Apollo.MutationHookOptions<CancelBuildMutation, CancelBuildMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CancelBuildMutation, CancelBuildMutationVariables>(CancelBuildDocument, options);
+      }
+export type CancelBuildMutationHookResult = ReturnType<typeof useCancelBuildMutation>;
+export type CancelBuildMutationResult = Apollo.MutationResult<CancelBuildMutation>;
+export type CancelBuildMutationOptions = Apollo.BaseMutationOptions<CancelBuildMutation, CancelBuildMutationVariables>;
+export const ApproveBuildDocument = gql`
+    mutation ApproveBuild($id: ID!) {
+  approveBuild(id: $id) {
+    ...Build
+  }
+}
+    ${BuildFragmentDoc}`;
+export type ApproveBuildMutationFn = Apollo.MutationFunction<ApproveBuildMutation, ApproveBuildMutationVariables>;
+
+/**
+ * __useApproveBuildMutation__
+ *
+ * To run a mutation, you first call `useApproveBuildMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveBuildMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveBuildMutation, { data, loading, error }] = useApproveBuildMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useApproveBuildMutation(baseOptions?: Apollo.MutationHookOptions<ApproveBuildMutation, ApproveBuildMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ApproveBuildMutation, ApproveBuildMutationVariables>(ApproveBuildDocument, options);
+      }
+export type ApproveBuildMutationHookResult = ReturnType<typeof useApproveBuildMutation>;
+export type ApproveBuildMutationResult = Apollo.MutationResult<ApproveBuildMutation>;
+export type ApproveBuildMutationOptions = Apollo.BaseMutationOptions<ApproveBuildMutation, ApproveBuildMutationVariables>;
+export const RestartBuildDocument = gql`
+    mutation RestartBuild($id: ID!) {
+  restartBuild(id: $id) {
+    ...Build
+  }
+}
+    ${BuildFragmentDoc}`;
+export type RestartBuildMutationFn = Apollo.MutationFunction<RestartBuildMutation, RestartBuildMutationVariables>;
+
+/**
+ * __useRestartBuildMutation__
+ *
+ * To run a mutation, you first call `useRestartBuildMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRestartBuildMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [restartBuildMutation, { data, loading, error }] = useRestartBuildMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useRestartBuildMutation(baseOptions?: Apollo.MutationHookOptions<RestartBuildMutation, RestartBuildMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RestartBuildMutation, RestartBuildMutationVariables>(RestartBuildDocument, options);
+      }
+export type RestartBuildMutationHookResult = ReturnType<typeof useRestartBuildMutation>;
+export type RestartBuildMutationResult = Apollo.MutationResult<RestartBuildMutation>;
+export type RestartBuildMutationOptions = Apollo.BaseMutationOptions<RestartBuildMutation, RestartBuildMutationVariables>;
+export const BuildSubDocument = gql`
+    subscription BuildSub($buildId: ID) {
+  buildDelta(buildId: $buildId) {
+    delta
+    payload {
+      ...Build
+      changelogs {
+        ...Changelog
+      }
+    }
+  }
+}
+    ${BuildFragmentDoc}
+${ChangelogFragmentDoc}`;
+
+/**
+ * __useBuildSubSubscription__
+ *
+ * To run a query within a React component, call `useBuildSubSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useBuildSubSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useBuildSubSubscription({
+ *   variables: {
+ *      buildId: // value for 'buildId'
+ *   },
+ * });
+ */
+export function useBuildSubSubscription(baseOptions?: Apollo.SubscriptionHookOptions<BuildSubSubscription, BuildSubSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<BuildSubSubscription, BuildSubSubscriptionVariables>(BuildSubDocument, options);
+      }
+export type BuildSubSubscriptionHookResult = ReturnType<typeof useBuildSubSubscription>;
+export type BuildSubSubscriptionResult = Apollo.SubscriptionResult<BuildSubSubscription>;
+export const CommandSubsDocument = gql`
+    subscription CommandSubs($buildId: ID!) {
+  commandDelta(buildId: $buildId) {
+    delta
+    payload {
+      ...Command
+    }
+  }
+}
+    ${CommandFragmentDoc}`;
+
+/**
+ * __useCommandSubsSubscription__
+ *
+ * To run a query within a React component, call `useCommandSubsSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useCommandSubsSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCommandSubsSubscription({
+ *   variables: {
+ *      buildId: // value for 'buildId'
+ *   },
+ * });
+ */
+export function useCommandSubsSubscription(baseOptions: Apollo.SubscriptionHookOptions<CommandSubsSubscription, CommandSubsSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<CommandSubsSubscription, CommandSubsSubscriptionVariables>(CommandSubsDocument, options);
+      }
+export type CommandSubsSubscriptionHookResult = ReturnType<typeof useCommandSubsSubscription>;
+export type CommandSubsSubscriptionResult = Apollo.SubscriptionResult<CommandSubsSubscription>;
+export const DashboardsDocument = gql`
+    query Dashboards($repo: String!) {
+  dashboards(repo: $repo) {
+    id
+    spec {
+      name
+      description
+    }
+  }
+}
+    `;
+
+/**
+ * __useDashboardsQuery__
+ *
+ * To run a query within a React component, call `useDashboardsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDashboardsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDashboardsQuery({
+ *   variables: {
+ *      repo: // value for 'repo'
+ *   },
+ * });
+ */
+export function useDashboardsQuery(baseOptions: Apollo.QueryHookOptions<DashboardsQuery, DashboardsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DashboardsQuery, DashboardsQueryVariables>(DashboardsDocument, options);
+      }
+export function useDashboardsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DashboardsQuery, DashboardsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DashboardsQuery, DashboardsQueryVariables>(DashboardsDocument, options);
+        }
+export type DashboardsQueryHookResult = ReturnType<typeof useDashboardsQuery>;
+export type DashboardsLazyQueryHookResult = ReturnType<typeof useDashboardsLazyQuery>;
+export type DashboardsQueryResult = Apollo.QueryResult<DashboardsQuery, DashboardsQueryVariables>;
+export const DashboardDocument = gql`
+    query Dashboard($repo: String!, $name: String!, $step: String, $offset: Int, $labels: [LabelInput]) {
+  dashboard(
+    repo: $repo
+    name: $name
+    step: $step
+    offset: $offset
+    labels: $labels
+  ) {
+    ...Dashboard
+  }
+}
+    ${DashboardFragmentDoc}`;
+
+/**
+ * __useDashboardQuery__
+ *
+ * To run a query within a React component, call `useDashboardQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDashboardQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDashboardQuery({
+ *   variables: {
+ *      repo: // value for 'repo'
+ *      name: // value for 'name'
+ *      step: // value for 'step'
+ *      offset: // value for 'offset'
+ *      labels: // value for 'labels'
+ *   },
+ * });
+ */
+export function useDashboardQuery(baseOptions: Apollo.QueryHookOptions<DashboardQuery, DashboardQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DashboardQuery, DashboardQueryVariables>(DashboardDocument, options);
+      }
+export function useDashboardLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DashboardQuery, DashboardQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DashboardQuery, DashboardQueryVariables>(DashboardDocument, options);
+        }
+export type DashboardQueryHookResult = ReturnType<typeof useDashboardQuery>;
+export type DashboardLazyQueryHookResult = ReturnType<typeof useDashboardLazyQuery>;
+export type DashboardQueryResult = Apollo.QueryResult<DashboardQuery, DashboardQueryVariables>;
+export const LogsDocument = gql`
+    query Logs($query: String!, $start: Long, $limit: Int!) {
+  logs(query: $query, start: $start, limit: $limit) {
+    ...LogStream
+  }
+}
+    ${LogStreamFragmentDoc}`;
+
+/**
+ * __useLogsQuery__
+ *
+ * To run a query within a React component, call `useLogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLogsQuery({
+ *   variables: {
+ *      query: // value for 'query'
+ *      start: // value for 'start'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useLogsQuery(baseOptions: Apollo.QueryHookOptions<LogsQuery, LogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<LogsQuery, LogsQueryVariables>(LogsDocument, options);
+      }
+export function useLogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LogsQuery, LogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<LogsQuery, LogsQueryVariables>(LogsDocument, options);
+        }
+export type LogsQueryHookResult = ReturnType<typeof useLogsQuery>;
+export type LogsLazyQueryHookResult = ReturnType<typeof useLogsLazyQuery>;
+export type LogsQueryResult = Apollo.QueryResult<LogsQuery, LogsQueryVariables>;
+export const MetricsDocument = gql`
+    query Metrics($query: String!, $offset: Int) {
+  metric(query: $query, offset: $offset) {
+    ...MetricResponse
+  }
+}
+    ${MetricResponseFragmentDoc}`;
+
+/**
+ * __useMetricsQuery__
+ *
+ * To run a query within a React component, call `useMetricsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMetricsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMetricsQuery({
+ *   variables: {
+ *      query: // value for 'query'
+ *      offset: // value for 'offset'
+ *   },
+ * });
+ */
+export function useMetricsQuery(baseOptions: Apollo.QueryHookOptions<MetricsQuery, MetricsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MetricsQuery, MetricsQueryVariables>(MetricsDocument, options);
+      }
+export function useMetricsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MetricsQuery, MetricsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MetricsQuery, MetricsQueryVariables>(MetricsDocument, options);
+        }
+export type MetricsQueryHookResult = ReturnType<typeof useMetricsQuery>;
+export type MetricsLazyQueryHookResult = ReturnType<typeof useMetricsLazyQuery>;
+export type MetricsQueryResult = Apollo.QueryResult<MetricsQuery, MetricsQueryVariables>;
+export const GroupsDocument = gql`
+    query Groups($q: String, $cursor: String) {
+  groups(q: $q, first: 20, after: $cursor) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Group
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${GroupFragmentDoc}`;
 
 /**
  * __useGroupsQuery__
@@ -2540,17 +4164,17 @@ export const SearchGroupsDocument = gql`
     query SearchGroups($q: String, $cursor: String) {
   groups(q: $q, after: $cursor, first: 5) {
     pageInfo {
-      ...PageInfoFragment
+      ...PageInfo
     }
     edges {
       node {
-        ...GroupFragment
+        ...Group
       }
     }
   }
 }
-    ${PageInfoFragmentFragmentDoc}
-${GroupFragmentFragmentDoc}`;
+    ${PageInfoFragmentDoc}
+${GroupFragmentDoc}`;
 
 /**
  * __useSearchGroupsQuery__
@@ -2584,17 +4208,17 @@ export const GroupMembersDocument = gql`
     query GroupMembers($cursor: String, $id: ID!) {
   groupMembers(groupId: $id, after: $cursor, first: 20) {
     pageInfo {
-      ...PageInfoFragment
+      ...PageInfo
     }
     edges {
       node {
-        ...GroupMemberFragment
+        ...GroupMember
       }
     }
   }
 }
-    ${PageInfoFragmentFragmentDoc}
-${GroupMemberFragmentFragmentDoc}`;
+    ${PageInfoFragmentDoc}
+${GroupMemberFragmentDoc}`;
 
 /**
  * __useGroupMembersQuery__
@@ -2627,10 +4251,10 @@ export type GroupMembersQueryResult = Apollo.QueryResult<GroupMembersQuery, Grou
 export const CreateGroupMemberDocument = gql`
     mutation CreateGroupMember($groupId: ID!, $userId: ID!) {
   createGroupMember(groupId: $groupId, userId: $userId) {
-    ...GroupMemberFragment
+    ...GroupMember
   }
 }
-    ${GroupMemberFragmentFragmentDoc}`;
+    ${GroupMemberFragmentDoc}`;
 export type CreateGroupMemberMutationFn = Apollo.MutationFunction<CreateGroupMemberMutation, CreateGroupMemberMutationVariables>;
 
 /**
@@ -2661,10 +4285,10 @@ export type CreateGroupMemberMutationOptions = Apollo.BaseMutationOptions<Create
 export const DeleteMemberDocument = gql`
     mutation DeleteMember($groupId: ID!, $userId: ID!) {
   deleteGroupMember(groupId: $groupId, userId: $userId) {
-    ...GroupMemberFragment
+    ...GroupMember
   }
 }
-    ${GroupMemberFragmentFragmentDoc}`;
+    ${GroupMemberFragmentDoc}`;
 export type DeleteMemberMutationFn = Apollo.MutationFunction<DeleteMemberMutation, DeleteMemberMutationVariables>;
 
 /**
@@ -2695,10 +4319,10 @@ export type DeleteMemberMutationOptions = Apollo.BaseMutationOptions<DeleteMembe
 export const CreateGroupDocument = gql`
     mutation CreateGroup($attributes: GroupAttributes!) {
   createGroup(attributes: $attributes) {
-    ...GroupFragment
+    ...Group
   }
 }
-    ${GroupFragmentFragmentDoc}`;
+    ${GroupFragmentDoc}`;
 export type CreateGroupMutationFn = Apollo.MutationFunction<CreateGroupMutation, CreateGroupMutationVariables>;
 
 /**
@@ -2728,10 +4352,10 @@ export type CreateGroupMutationOptions = Apollo.BaseMutationOptions<CreateGroupM
 export const UpdateGroupDocument = gql`
     mutation UpdateGroup($id: ID!, $attributes: GroupAttributes!) {
   updateGroup(groupId: $id, attributes: $attributes) {
-    ...GroupFragment
+    ...Group
   }
 }
-    ${GroupFragmentFragmentDoc}`;
+    ${GroupFragmentDoc}`;
 export type UpdateGroupMutationFn = Apollo.MutationFunction<UpdateGroupMutation, UpdateGroupMutationVariables>;
 
 /**
@@ -2762,10 +4386,10 @@ export type UpdateGroupMutationOptions = Apollo.BaseMutationOptions<UpdateGroupM
 export const DeleteGroupDocument = gql`
     mutation DeleteGroup($id: ID!) {
   deleteGroup(groupId: $id) {
-    ...GroupFragment
+    ...Group
   }
 }
-    ${GroupFragmentFragmentDoc}`;
+    ${GroupFragmentDoc}`;
 export type DeleteGroupMutationFn = Apollo.MutationFunction<DeleteGroupMutation, DeleteGroupMutationVariables>;
 
 /**
@@ -2792,3 +4416,930 @@ export function useDeleteGroupMutation(baseOptions?: Apollo.MutationHookOptions<
 export type DeleteGroupMutationHookResult = ReturnType<typeof useDeleteGroupMutation>;
 export type DeleteGroupMutationResult = Apollo.MutationResult<DeleteGroupMutation>;
 export type DeleteGroupMutationOptions = Apollo.BaseMutationOptions<DeleteGroupMutation, DeleteGroupMutationVariables>;
+export const SearchDocument = gql`
+    query Search($query: String!) {
+  repositories(query: $query, first: 20) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Repository
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${RepositoryFragmentDoc}`;
+
+/**
+ * __useSearchQuery__
+ *
+ * To run a query within a React component, call `useSearchQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchQuery({
+ *   variables: {
+ *      query: // value for 'query'
+ *   },
+ * });
+ */
+export function useSearchQuery(baseOptions: Apollo.QueryHookOptions<SearchQuery, SearchQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchQuery, SearchQueryVariables>(SearchDocument, options);
+      }
+export function useSearchLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchQuery, SearchQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchQuery, SearchQueryVariables>(SearchDocument, options);
+        }
+export type SearchQueryHookResult = ReturnType<typeof useSearchQuery>;
+export type SearchLazyQueryHookResult = ReturnType<typeof useSearchLazyQuery>;
+export type SearchQueryResult = Apollo.QueryResult<SearchQuery, SearchQueryVariables>;
+export const RecipesDocument = gql`
+    query Recipes($id: ID!, $cursor: String) {
+  recipes(id: $id, after: $cursor, first: 20) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Recipe
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${RecipeFragmentDoc}`;
+
+/**
+ * __useRecipesQuery__
+ *
+ * To run a query within a React component, call `useRecipesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRecipesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRecipesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useRecipesQuery(baseOptions: Apollo.QueryHookOptions<RecipesQuery, RecipesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<RecipesQuery, RecipesQueryVariables>(RecipesDocument, options);
+      }
+export function useRecipesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RecipesQuery, RecipesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<RecipesQuery, RecipesQueryVariables>(RecipesDocument, options);
+        }
+export type RecipesQueryHookResult = ReturnType<typeof useRecipesQuery>;
+export type RecipesLazyQueryHookResult = ReturnType<typeof useRecipesLazyQuery>;
+export type RecipesQueryResult = Apollo.QueryResult<RecipesQuery, RecipesQueryVariables>;
+export const RecipeDocument = gql`
+    query Recipe($id: ID!) {
+  recipe(id: $id) {
+    ...Recipe
+    recipeSections {
+      ...RecipeSection
+    }
+  }
+  context {
+    repository
+    context
+  }
+}
+    ${RecipeFragmentDoc}
+${RecipeSectionFragmentDoc}`;
+
+/**
+ * __useRecipeQuery__
+ *
+ * To run a query within a React component, call `useRecipeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRecipeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRecipeQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useRecipeQuery(baseOptions: Apollo.QueryHookOptions<RecipeQuery, RecipeQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<RecipeQuery, RecipeQueryVariables>(RecipeDocument, options);
+      }
+export function useRecipeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RecipeQuery, RecipeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<RecipeQuery, RecipeQueryVariables>(RecipeDocument, options);
+        }
+export type RecipeQueryHookResult = ReturnType<typeof useRecipeQuery>;
+export type RecipeLazyQueryHookResult = ReturnType<typeof useRecipeLazyQuery>;
+export type RecipeQueryResult = Apollo.QueryResult<RecipeQuery, RecipeQueryVariables>;
+export const InstallDocument = gql`
+    mutation Install($id: ID!, $context: Map!, $oidc: Boolean) {
+  installRecipe(id: $id, context: $context, oidc: $oidc) {
+    ...Build
+  }
+}
+    ${BuildFragmentDoc}`;
+export type InstallMutationFn = Apollo.MutationFunction<InstallMutation, InstallMutationVariables>;
+
+/**
+ * __useInstallMutation__
+ *
+ * To run a mutation, you first call `useInstallMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useInstallMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [installMutation, { data, loading, error }] = useInstallMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      context: // value for 'context'
+ *      oidc: // value for 'oidc'
+ *   },
+ * });
+ */
+export function useInstallMutation(baseOptions?: Apollo.MutationHookOptions<InstallMutation, InstallMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<InstallMutation, InstallMutationVariables>(InstallDocument, options);
+      }
+export type InstallMutationHookResult = ReturnType<typeof useInstallMutation>;
+export type InstallMutationResult = Apollo.MutationResult<InstallMutation>;
+export type InstallMutationOptions = Apollo.BaseMutationOptions<InstallMutation, InstallMutationVariables>;
+export const InstallationsDocument = gql`
+    query Installations($cursor: String) {
+  installations(first: 20, after: $cursor) {
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      node {
+        ...Installation
+      }
+    }
+  }
+}
+    ${InstallationFragmentDoc}`;
+
+/**
+ * __useInstallationsQuery__
+ *
+ * To run a query within a React component, call `useInstallationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useInstallationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useInstallationsQuery({
+ *   variables: {
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useInstallationsQuery(baseOptions?: Apollo.QueryHookOptions<InstallationsQuery, InstallationsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<InstallationsQuery, InstallationsQueryVariables>(InstallationsDocument, options);
+      }
+export function useInstallationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<InstallationsQuery, InstallationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<InstallationsQuery, InstallationsQueryVariables>(InstallationsDocument, options);
+        }
+export type InstallationsQueryHookResult = ReturnType<typeof useInstallationsQuery>;
+export type InstallationsLazyQueryHookResult = ReturnType<typeof useInstallationsLazyQuery>;
+export type InstallationsQueryResult = Apollo.QueryResult<InstallationsQuery, InstallationsQueryVariables>;
+export const ConfigurationsDocument = gql`
+    query Configurations($cursor: String) {
+  installations(first: 20, after: $cursor) {
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      node {
+        id
+        repository {
+          ...Repository
+          configuration {
+            ...Configuration
+          }
+          grafanaDns
+        }
+      }
+    }
+  }
+}
+    ${RepositoryFragmentDoc}
+${ConfigurationFragmentDoc}`;
+
+/**
+ * __useConfigurationsQuery__
+ *
+ * To run a query within a React component, call `useConfigurationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useConfigurationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useConfigurationsQuery({
+ *   variables: {
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useConfigurationsQuery(baseOptions?: Apollo.QueryHookOptions<ConfigurationsQuery, ConfigurationsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ConfigurationsQuery, ConfigurationsQueryVariables>(ConfigurationsDocument, options);
+      }
+export function useConfigurationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ConfigurationsQuery, ConfigurationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ConfigurationsQuery, ConfigurationsQueryVariables>(ConfigurationsDocument, options);
+        }
+export type ConfigurationsQueryHookResult = ReturnType<typeof useConfigurationsQuery>;
+export type ConfigurationsLazyQueryHookResult = ReturnType<typeof useConfigurationsLazyQuery>;
+export type ConfigurationsQueryResult = Apollo.QueryResult<ConfigurationsQuery, ConfigurationsQueryVariables>;
+export const UpdateConfigurationDocument = gql`
+    mutation UpdateConfiguration($repository: String!, $content: String!, $type: Tool) {
+  updateConfiguration(repository: $repository, content: $content, tool: $type) {
+    helm
+    terraform
+  }
+}
+    `;
+export type UpdateConfigurationMutationFn = Apollo.MutationFunction<UpdateConfigurationMutation, UpdateConfigurationMutationVariables>;
+
+/**
+ * __useUpdateConfigurationMutation__
+ *
+ * To run a mutation, you first call `useUpdateConfigurationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateConfigurationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateConfigurationMutation, { data, loading, error }] = useUpdateConfigurationMutation({
+ *   variables: {
+ *      repository: // value for 'repository'
+ *      content: // value for 'content'
+ *      type: // value for 'type'
+ *   },
+ * });
+ */
+export function useUpdateConfigurationMutation(baseOptions?: Apollo.MutationHookOptions<UpdateConfigurationMutation, UpdateConfigurationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateConfigurationMutation, UpdateConfigurationMutationVariables>(UpdateConfigurationDocument, options);
+      }
+export type UpdateConfigurationMutationHookResult = ReturnType<typeof useUpdateConfigurationMutation>;
+export type UpdateConfigurationMutationResult = Apollo.MutationResult<UpdateConfigurationMutation>;
+export type UpdateConfigurationMutationOptions = Apollo.BaseMutationOptions<UpdateConfigurationMutation, UpdateConfigurationMutationVariables>;
+export const ApplicationsDocument = gql`
+    query Applications {
+  applications {
+    ...Application
+    license {
+      ...License
+    }
+  }
+}
+    ${ApplicationFragmentDoc}
+${LicenseFragmentDoc}`;
+
+/**
+ * __useApplicationsQuery__
+ *
+ * To run a query within a React component, call `useApplicationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useApplicationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useApplicationsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useApplicationsQuery(baseOptions?: Apollo.QueryHookOptions<ApplicationsQuery, ApplicationsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ApplicationsQuery, ApplicationsQueryVariables>(ApplicationsDocument, options);
+      }
+export function useApplicationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ApplicationsQuery, ApplicationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ApplicationsQuery, ApplicationsQueryVariables>(ApplicationsDocument, options);
+        }
+export type ApplicationsQueryHookResult = ReturnType<typeof useApplicationsQuery>;
+export type ApplicationsLazyQueryHookResult = ReturnType<typeof useApplicationsLazyQuery>;
+export type ApplicationsQueryResult = Apollo.QueryResult<ApplicationsQuery, ApplicationsQueryVariables>;
+export const ApplicationSubDocument = gql`
+    subscription ApplicationSub {
+  applicationDelta {
+    delta
+    payload {
+      ...Application
+    }
+  }
+}
+    ${ApplicationFragmentDoc}`;
+
+/**
+ * __useApplicationSubSubscription__
+ *
+ * To run a query within a React component, call `useApplicationSubSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useApplicationSubSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useApplicationSubSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useApplicationSubSubscription(baseOptions?: Apollo.SubscriptionHookOptions<ApplicationSubSubscription, ApplicationSubSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<ApplicationSubSubscription, ApplicationSubSubscriptionVariables>(ApplicationSubDocument, options);
+      }
+export type ApplicationSubSubscriptionHookResult = ReturnType<typeof useApplicationSubSubscription>;
+export type ApplicationSubSubscriptionResult = Apollo.SubscriptionResult<ApplicationSubSubscription>;
+export const LogFiltersDocument = gql`
+    query LogFilters($namespace: String!) {
+  logFilters(namespace: $namespace) {
+    ...LogFilter
+  }
+}
+    ${LogFilterFragmentDoc}`;
+
+/**
+ * __useLogFiltersQuery__
+ *
+ * To run a query within a React component, call `useLogFiltersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLogFiltersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLogFiltersQuery({
+ *   variables: {
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function useLogFiltersQuery(baseOptions: Apollo.QueryHookOptions<LogFiltersQuery, LogFiltersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<LogFiltersQuery, LogFiltersQueryVariables>(LogFiltersDocument, options);
+      }
+export function useLogFiltersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LogFiltersQuery, LogFiltersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<LogFiltersQuery, LogFiltersQueryVariables>(LogFiltersDocument, options);
+        }
+export type LogFiltersQueryHookResult = ReturnType<typeof useLogFiltersQuery>;
+export type LogFiltersLazyQueryHookResult = ReturnType<typeof useLogFiltersLazyQuery>;
+export type LogFiltersQueryResult = Apollo.QueryResult<LogFiltersQuery, LogFiltersQueryVariables>;
+export const SmtpDocument = gql`
+    query Smtp {
+  smtp {
+    ...Smtp
+  }
+}
+    ${SmtpFragmentDoc}`;
+
+/**
+ * __useSmtpQuery__
+ *
+ * To run a query within a React component, call `useSmtpQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSmtpQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSmtpQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSmtpQuery(baseOptions?: Apollo.QueryHookOptions<SmtpQuery, SmtpQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SmtpQuery, SmtpQueryVariables>(SmtpDocument, options);
+      }
+export function useSmtpLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SmtpQuery, SmtpQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SmtpQuery, SmtpQueryVariables>(SmtpDocument, options);
+        }
+export type SmtpQueryHookResult = ReturnType<typeof useSmtpQuery>;
+export type SmtpLazyQueryHookResult = ReturnType<typeof useSmtpLazyQuery>;
+export type SmtpQueryResult = Apollo.QueryResult<SmtpQuery, SmtpQueryVariables>;
+export const UpdateSmtpDocument = gql`
+    mutation UpdateSmtp($smtp: SmtpInput!) {
+  updateSmtp(smtp: $smtp) {
+    ...Smtp
+  }
+}
+    ${SmtpFragmentDoc}`;
+export type UpdateSmtpMutationFn = Apollo.MutationFunction<UpdateSmtpMutation, UpdateSmtpMutationVariables>;
+
+/**
+ * __useUpdateSmtpMutation__
+ *
+ * To run a mutation, you first call `useUpdateSmtpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateSmtpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateSmtpMutation, { data, loading, error }] = useUpdateSmtpMutation({
+ *   variables: {
+ *      smtp: // value for 'smtp'
+ *   },
+ * });
+ */
+export function useUpdateSmtpMutation(baseOptions?: Apollo.MutationHookOptions<UpdateSmtpMutation, UpdateSmtpMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateSmtpMutation, UpdateSmtpMutationVariables>(UpdateSmtpDocument, options);
+      }
+export type UpdateSmtpMutationHookResult = ReturnType<typeof useUpdateSmtpMutation>;
+export type UpdateSmtpMutationResult = Apollo.MutationResult<UpdateSmtpMutation>;
+export type UpdateSmtpMutationOptions = Apollo.BaseMutationOptions<UpdateSmtpMutation, UpdateSmtpMutationVariables>;
+export const MeDocument = gql`
+    query Me {
+  me {
+    ...User
+    boundRoles {
+      ...Role
+    }
+    unreadNotifications
+  }
+  externalToken
+  clusterInfo {
+    version
+    platform
+    gitCommit
+  }
+  configuration {
+    gitCommit
+    isDemoProject
+    isSandbox
+    pluralLogin
+    manifest {
+      ...Manifest
+    }
+    gitStatus {
+      cloned
+      output
+    }
+  }
+}
+    ${UserFragmentDoc}
+${RoleFragmentDoc}
+${ManifestFragmentDoc}`;
+
+/**
+ * __useMeQuery__
+ *
+ * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMeQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMeQuery(baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+      }
+export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+        }
+export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
+export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
+export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const SignInDocument = gql`
+    mutation signIn($email: String!, $password: String!) {
+  signIn(email: $email, password: $password) {
+    ...User
+    jwt
+  }
+}
+    ${UserFragmentDoc}`;
+export type SignInMutationFn = Apollo.MutationFunction<SignInMutation, SignInMutationVariables>;
+
+/**
+ * __useSignInMutation__
+ *
+ * To run a mutation, you first call `useSignInMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignInMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signInMutation, { data, loading, error }] = useSignInMutation({
+ *   variables: {
+ *      email: // value for 'email'
+ *      password: // value for 'password'
+ *   },
+ * });
+ */
+export function useSignInMutation(baseOptions?: Apollo.MutationHookOptions<SignInMutation, SignInMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SignInMutation, SignInMutationVariables>(SignInDocument, options);
+      }
+export type SignInMutationHookResult = ReturnType<typeof useSignInMutation>;
+export type SignInMutationResult = Apollo.MutationResult<SignInMutation>;
+export type SignInMutationOptions = Apollo.BaseMutationOptions<SignInMutation, SignInMutationVariables>;
+export const UpdateUserDocument = gql`
+    mutation UpdateUser($attributes: UserAttributes!) {
+  updateUser(attributes: $attributes) {
+    ...User
+  }
+}
+    ${UserFragmentDoc}`;
+export type UpdateUserMutationFn = Apollo.MutationFunction<UpdateUserMutation, UpdateUserMutationVariables>;
+
+/**
+ * __useUpdateUserMutation__
+ *
+ * To run a mutation, you first call `useUpdateUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateUserMutation, { data, loading, error }] = useUpdateUserMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateUserMutation(baseOptions?: Apollo.MutationHookOptions<UpdateUserMutation, UpdateUserMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateUserMutation, UpdateUserMutationVariables>(UpdateUserDocument, options);
+      }
+export type UpdateUserMutationHookResult = ReturnType<typeof useUpdateUserMutation>;
+export type UpdateUserMutationResult = Apollo.MutationResult<UpdateUserMutation>;
+export type UpdateUserMutationOptions = Apollo.BaseMutationOptions<UpdateUserMutation, UpdateUserMutationVariables>;
+export const UsersDocument = gql`
+    query Users($cursor: String) {
+  users(first: 20, after: $cursor) {
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      node {
+        ...User
+      }
+    }
+  }
+}
+    ${UserFragmentDoc}`;
+
+/**
+ * __useUsersQuery__
+ *
+ * To run a query within a React component, call `useUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUsersQuery({
+ *   variables: {
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useUsersQuery(baseOptions?: Apollo.QueryHookOptions<UsersQuery, UsersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UsersQuery, UsersQueryVariables>(UsersDocument, options);
+      }
+export function useUsersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UsersQuery, UsersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UsersQuery, UsersQueryVariables>(UsersDocument, options);
+        }
+export type UsersQueryHookResult = ReturnType<typeof useUsersQuery>;
+export type UsersLazyQueryHookResult = ReturnType<typeof useUsersLazyQuery>;
+export type UsersQueryResult = Apollo.QueryResult<UsersQuery, UsersQueryVariables>;
+export const InviteUserDocument = gql`
+    mutation InviteUser($email: String) {
+  createInvite(attributes: {email: $email}) {
+    ...Invite
+  }
+}
+    ${InviteFragmentDoc}`;
+export type InviteUserMutationFn = Apollo.MutationFunction<InviteUserMutation, InviteUserMutationVariables>;
+
+/**
+ * __useInviteUserMutation__
+ *
+ * To run a mutation, you first call `useInviteUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useInviteUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [inviteUserMutation, { data, loading, error }] = useInviteUserMutation({
+ *   variables: {
+ *      email: // value for 'email'
+ *   },
+ * });
+ */
+export function useInviteUserMutation(baseOptions?: Apollo.MutationHookOptions<InviteUserMutation, InviteUserMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<InviteUserMutation, InviteUserMutationVariables>(InviteUserDocument, options);
+      }
+export type InviteUserMutationHookResult = ReturnType<typeof useInviteUserMutation>;
+export type InviteUserMutationResult = Apollo.MutationResult<InviteUserMutation>;
+export type InviteUserMutationOptions = Apollo.BaseMutationOptions<InviteUserMutation, InviteUserMutationVariables>;
+export const InviteDocument = gql`
+    query Invite($id: String!) {
+  invite(id: $id) {
+    email
+  }
+}
+    `;
+
+/**
+ * __useInviteQuery__
+ *
+ * To run a query within a React component, call `useInviteQuery` and pass it any options that fit your needs.
+ * When your component renders, `useInviteQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useInviteQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useInviteQuery(baseOptions: Apollo.QueryHookOptions<InviteQuery, InviteQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<InviteQuery, InviteQueryVariables>(InviteDocument, options);
+      }
+export function useInviteLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<InviteQuery, InviteQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<InviteQuery, InviteQueryVariables>(InviteDocument, options);
+        }
+export type InviteQueryHookResult = ReturnType<typeof useInviteQuery>;
+export type InviteLazyQueryHookResult = ReturnType<typeof useInviteLazyQuery>;
+export type InviteQueryResult = Apollo.QueryResult<InviteQuery, InviteQueryVariables>;
+export const SignUpDocument = gql`
+    mutation SignUp($inviteId: String!, $attributes: UserAttributes!) {
+  signup(inviteId: $inviteId, attributes: $attributes) {
+    ...User
+    jwt
+  }
+}
+    ${UserFragmentDoc}`;
+export type SignUpMutationFn = Apollo.MutationFunction<SignUpMutation, SignUpMutationVariables>;
+
+/**
+ * __useSignUpMutation__
+ *
+ * To run a mutation, you first call `useSignUpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignUpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signUpMutation, { data, loading, error }] = useSignUpMutation({
+ *   variables: {
+ *      inviteId: // value for 'inviteId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useSignUpMutation(baseOptions?: Apollo.MutationHookOptions<SignUpMutation, SignUpMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SignUpMutation, SignUpMutationVariables>(SignUpDocument, options);
+      }
+export type SignUpMutationHookResult = ReturnType<typeof useSignUpMutation>;
+export type SignUpMutationResult = Apollo.MutationResult<SignUpMutation>;
+export type SignUpMutationOptions = Apollo.BaseMutationOptions<SignUpMutation, SignUpMutationVariables>;
+export const LinkDocument = gql`
+    mutation Link($key: String!) {
+  loginLink(key: $key) {
+    ...User
+    jwt
+  }
+}
+    ${UserFragmentDoc}`;
+export type LinkMutationFn = Apollo.MutationFunction<LinkMutation, LinkMutationVariables>;
+
+/**
+ * __useLinkMutation__
+ *
+ * To run a mutation, you first call `useLinkMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLinkMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [linkMutation, { data, loading, error }] = useLinkMutation({
+ *   variables: {
+ *      key: // value for 'key'
+ *   },
+ * });
+ */
+export function useLinkMutation(baseOptions?: Apollo.MutationHookOptions<LinkMutation, LinkMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LinkMutation, LinkMutationVariables>(LinkDocument, options);
+      }
+export type LinkMutationHookResult = ReturnType<typeof useLinkMutation>;
+export type LinkMutationResult = Apollo.MutationResult<LinkMutation>;
+export type LinkMutationOptions = Apollo.BaseMutationOptions<LinkMutation, LinkMutationVariables>;
+export const NotifsDocument = gql`
+    query Notifs($all: Boolean, $cursor: String) {
+  notifications(all: $all, after: $cursor, first: 50) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Notification
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${NotificationFragmentDoc}`;
+
+/**
+ * __useNotifsQuery__
+ *
+ * To run a query within a React component, call `useNotifsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNotifsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNotifsQuery({
+ *   variables: {
+ *      all: // value for 'all'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useNotifsQuery(baseOptions?: Apollo.QueryHookOptions<NotifsQuery, NotifsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NotifsQuery, NotifsQueryVariables>(NotifsDocument, options);
+      }
+export function useNotifsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NotifsQuery, NotifsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NotifsQuery, NotifsQueryVariables>(NotifsDocument, options);
+        }
+export type NotifsQueryHookResult = ReturnType<typeof useNotifsQuery>;
+export type NotifsLazyQueryHookResult = ReturnType<typeof useNotifsLazyQuery>;
+export type NotifsQueryResult = Apollo.QueryResult<NotifsQuery, NotifsQueryVariables>;
+export const WebhooksDocument = gql`
+    query Webhooks($cursor: String) {
+  webhooks(first: 20, after: $cursor) {
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+    edges {
+      node {
+        ...Webhook
+      }
+    }
+  }
+}
+    ${WebhookFragmentDoc}`;
+
+/**
+ * __useWebhooksQuery__
+ *
+ * To run a query within a React component, call `useWebhooksQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWebhooksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWebhooksQuery({
+ *   variables: {
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useWebhooksQuery(baseOptions?: Apollo.QueryHookOptions<WebhooksQuery, WebhooksQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WebhooksQuery, WebhooksQueryVariables>(WebhooksDocument, options);
+      }
+export function useWebhooksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WebhooksQuery, WebhooksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WebhooksQuery, WebhooksQueryVariables>(WebhooksDocument, options);
+        }
+export type WebhooksQueryHookResult = ReturnType<typeof useWebhooksQuery>;
+export type WebhooksLazyQueryHookResult = ReturnType<typeof useWebhooksLazyQuery>;
+export type WebhooksQueryResult = Apollo.QueryResult<WebhooksQuery, WebhooksQueryVariables>;
+export const CreateWebhookDocument = gql`
+    mutation CreateWebhook($attributes: WebhookAttributes!) {
+  createWebhook(attributes: $attributes) {
+    ...Webhook
+  }
+}
+    ${WebhookFragmentDoc}`;
+export type CreateWebhookMutationFn = Apollo.MutationFunction<CreateWebhookMutation, CreateWebhookMutationVariables>;
+
+/**
+ * __useCreateWebhookMutation__
+ *
+ * To run a mutation, you first call `useCreateWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createWebhookMutation, { data, loading, error }] = useCreateWebhookMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateWebhookMutation(baseOptions?: Apollo.MutationHookOptions<CreateWebhookMutation, CreateWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateWebhookMutation, CreateWebhookMutationVariables>(CreateWebhookDocument, options);
+      }
+export type CreateWebhookMutationHookResult = ReturnType<typeof useCreateWebhookMutation>;
+export type CreateWebhookMutationResult = Apollo.MutationResult<CreateWebhookMutation>;
+export type CreateWebhookMutationOptions = Apollo.BaseMutationOptions<CreateWebhookMutation, CreateWebhookMutationVariables>;
+export const DeleteWebhookDocument = gql`
+    mutation DeleteWebhook($id: ID!) {
+  deleteWebhook(id: $id) {
+    ...Webhook
+  }
+}
+    ${WebhookFragmentDoc}`;
+export type DeleteWebhookMutationFn = Apollo.MutationFunction<DeleteWebhookMutation, DeleteWebhookMutationVariables>;
+
+/**
+ * __useDeleteWebhookMutation__
+ *
+ * To run a mutation, you first call `useDeleteWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteWebhookMutation, { data, loading, error }] = useDeleteWebhookMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteWebhookMutation(baseOptions?: Apollo.MutationHookOptions<DeleteWebhookMutation, DeleteWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteWebhookMutation, DeleteWebhookMutationVariables>(DeleteWebhookDocument, options);
+      }
+export type DeleteWebhookMutationHookResult = ReturnType<typeof useDeleteWebhookMutation>;
+export type DeleteWebhookMutationResult = Apollo.MutationResult<DeleteWebhookMutation>;
+export type DeleteWebhookMutationOptions = Apollo.BaseMutationOptions<DeleteWebhookMutation, DeleteWebhookMutationVariables>;

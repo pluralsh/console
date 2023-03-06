@@ -1,11 +1,138 @@
-fragment UserFragment on User {
+fragment User on User {
   id
   name
   email
   profile
   backgroundColor
   readTimestamp
-  roles {
-    admin
+  roles { admin }
+}
+
+fragment Invite on Invite {
+  secureId
+}
+
+fragment Group on Group {
+  id
+  name
+  description
+  insertedAt
+}
+
+fragment RoleBinding on RoleBinding {
+  id
+  user { ...User }
+  group { ...Group }
+}
+
+fragment Role on Role {
+  id
+  name
+  description
+  repositories
+  permissions
+  roleBindings { ...RoleBinding }
+}
+
+fragment GroupMember on GroupMember {
+  user { ...User }
+  group { ...Group }
+}
+
+fragment Manifest on PluralManifest {
+  network { 
+    pluralDns
+    subdomain
+  }
+  cluster
+  bucketPrefix
+}
+
+fragment Notification on Notification {
+  id
+  title
+  description
+  repository
+  severity
+  labels
+  annotations
+  seenAt
+}
+
+query Me{
+  me {
+    ...User
+    boundRoles { ...Role }
+    unreadNotifications
+  }
+  externalToken
+  clusterInfo { version platform gitCommit }
+  configuration { 
+    gitCommit
+    isDemoProject
+    isSandbox
+    pluralLogin
+    manifest { ...Manifest }
+    gitStatus { cloned output }
+  }
+}
+
+mutation signIn($email: String!, $password: String!) {
+  signIn(email: $email, password: $password) {
+    ...User
+    jwt
+  }
+}
+
+mutation UpdateUser($attributes: UserAttributes!) {
+  updateUser(attributes: $attributes) {
+    ...User
+  }
+}
+
+query Users($cursor: String) {
+  users(first: 20, after: $cursor) {
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      node {
+        ...User
+      }
+    }
+  }
+}
+
+mutation InviteUser($email: String) {
+  createInvite(attributes: {email: $email}) {
+    ...Invite
+  }
+}
+
+query Invite($id: String!) {
+  invite(id: $id) {
+    email
+  }
+}
+
+mutation SignUp($inviteId: String!, $attributes: UserAttributes!) {
+  signup(inviteId: $inviteId, attributes: $attributes) {
+    ...User
+    jwt
+  }
+}
+
+mutation Link($key: String!) {
+  loginLink(key: $key) {
+    ...User
+    jwt
+  }
+}
+
+query Notifs($all: Boolean, $cursor: String) {
+  notifications(all: $all, after: $cursor, first: 50) {
+    pageInfo { ...PageInfo }
+    edges { node { ...Notification } }
   }
 }

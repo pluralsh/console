@@ -1,0 +1,128 @@
+fragment Build on Build {
+  id
+  repository
+  type
+  sha
+  status
+  message
+  insertedAt
+  completedAt
+  creator {
+    ...User
+  }
+  approver {
+    ...User
+  }
+}
+
+fragment Command on Command {
+  id
+  command
+  exitCode
+  stdout
+  completedAt
+  insertedAt
+}
+
+fragment Changelog on Changelog {
+  id
+  repo
+  tool
+  content
+}
+
+fragment UpgradePolicy on UpgradePolicy {
+  id
+  name
+  type
+  target
+  weight
+  description
+}
+
+query Builds($cursor: String) {
+  builds(first: 15, after: $cursor) {
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+    edges {
+      node {
+        ...Build
+      }
+    }
+  }
+}
+
+query Build($buildId: ID!) {
+  build(id: $buildId) {
+    ...Build
+    commands(first: 100) {
+      edges {
+        node {
+          ...Command
+        }
+      }
+    }
+    changelogs {
+      ...Changelog
+    }
+  }
+}
+
+query UpgradePolicies {
+  upgradePolicies { ...UpgradePolicy }
+}
+
+mutation CreateUpgradePolicy($attributes: UpgradePolicyAttributes!) {
+  createUpgradePolicy(attributes: $attributes) {
+    ...UpgradePolicy
+  }
+}
+
+mutation DeleteUpgradePolicy($id: ID!) {
+  deleteUpgradePolicy(id: $id) { ...UpgradePolicy }
+}
+
+mutation CreateBuild($attributes: BuildAttributes!) {
+  createBuild(attributes: $attributes) {
+    ...Build
+  }
+}
+
+mutation CancelBuild($id: ID!) {
+  cancelBuild(id: $id) {
+    ...Build
+  }
+}
+
+mutation ApproveBuild($id: ID!) {
+  approveBuild(id: $id) {
+    ...Build
+  }
+}
+
+mutation RestartBuild($id: ID!) {
+  restartBuild(id: $id) { ...Build }
+}
+
+subscription BuildSub($buildId: ID) {
+  buildDelta(buildId: $buildId) {
+    delta
+    payload {
+      ...Build
+      changelogs {
+        ...Changelog
+      }
+    }
+  }
+}
+
+subscription CommandSubs($buildId: ID!) {
+  commandDelta(buildId: $buildId) {
+    delta
+    payload {
+      ...Command
+    }
+  }
+}

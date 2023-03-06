@@ -1,0 +1,32 @@
+fragment Webhook on Webhook {
+  id
+  url
+  health
+  insertedAt
+}
+
+query Webhooks($cursor: String) {
+  webhooks(first: 20, after: $cursor) {
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+    edges {
+      node {
+        ...Webhook
+      }
+    }
+  }
+}
+
+mutation CreateWebhook($attributes: WebhookAttributes!) {
+  createWebhook(attributes: $attributes) {
+    ...Webhook
+  }
+}
+
+mutation DeleteWebhook($id: ID!) {
+  deleteWebhook(id: $id) {
+    ...Webhook
+  }
+}

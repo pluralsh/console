@@ -1,0 +1,44 @@
+fragment RunbookAlertStatus on RunbookAlertStatus {
+  name
+  startsAt
+  labels
+  annotations
+  fingerprint
+}
+
+fragment RunbookExecution on RunbookExecution {
+  id
+  name
+  namespace
+  context
+  user { ...User }
+  insertedAt
+}
+
+fragment Runbook on Runbook {
+  name
+  status { alerts { ...RunbookAlertStatus } }
+  spec {
+    name
+    description
+  }
+}
+
+fragment RunbookDatasource on RunbookDatasource {
+  name
+  type
+  prometheus { query format legend }
+  kubernetes { resource name }
+}
+
+fragment RunbookData on RunbookData {
+  name
+  source { ...RunbookDatasource }
+  prometheus { ...MetricResponse }
+  nodes { ...Node }
+  kubernetes {
+    __typename
+    ... on StatefulSet { ...StatefulSet }
+    ... on Deployment { ...Deployment }
+  }
+}
