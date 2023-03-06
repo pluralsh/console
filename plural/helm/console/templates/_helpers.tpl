@@ -48,7 +48,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 console-migration-{{ .Release.Revision }}
 {{- end -}}
 
-{{- define "plural-config" -}}
+{{- define "console.plural-config" -}}
 apiVersion: platform.plural.sh/v1alpha1
 kind: Config
 metadata:
