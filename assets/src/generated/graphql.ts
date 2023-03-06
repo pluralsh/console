@@ -25,6 +25,18 @@ export type Scalars = {
   Map: Map<string, unknown>;
 };
 
+export type ActionItem = {
+  __typename?: 'ActionItem';
+  link: Scalars['String'];
+  type: ActionItemType;
+};
+
+export enum ActionItemType {
+  Blog = 'BLOG',
+  Issue = 'ISSUE',
+  Pull = 'PULL'
+}
+
 export type Application = {
   __typename?: 'Application';
   configuration?: Maybe<Configuration>;
@@ -256,6 +268,16 @@ export type ClusterInfo = {
   version?: Maybe<Scalars['String']>;
 };
 
+export type ClusterInformation = {
+  __typename?: 'ClusterInformation';
+  gitCommit?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  insertedAt?: Maybe<Scalars['DateTime']>;
+  platform?: Maybe<Scalars['String']>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  version?: Maybe<Scalars['String']>;
+};
+
 export type Command = {
   __typename?: 'Command';
   build?: Maybe<Build>;
@@ -344,6 +366,12 @@ export type ConfigurationValidation = {
   message?: Maybe<Scalars['String']>;
   regex?: Maybe<Scalars['String']>;
   type?: Maybe<Scalars['String']>;
+};
+
+export type ConsentRequest = {
+  __typename?: 'ConsentRequest';
+  requestedScope?: Maybe<Array<Maybe<Scalars['String']>>>;
+  skip?: Maybe<Scalars['Boolean']>;
 };
 
 export type ConsoleConfiguration = {
@@ -531,10 +559,59 @@ export type Event = {
   type?: Maybe<Scalars['String']>;
 };
 
+export type File = {
+  __typename?: 'File';
+  blob: Scalars['String'];
+  contentType?: Maybe<Scalars['String']>;
+  filename?: Maybe<Scalars['String']>;
+  filesize?: Maybe<Scalars['Int']>;
+  height?: Maybe<Scalars['Int']>;
+  id: Scalars['ID'];
+  insertedAt?: Maybe<Scalars['DateTime']>;
+  mediaType?: Maybe<MediaType>;
+  message: IncidentMessage;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  width?: Maybe<Scalars['Int']>;
+};
+
+export type FileConnection = {
+  __typename?: 'FileConnection';
+  edges?: Maybe<Array<Maybe<FileEdge>>>;
+  pageInfo: PageInfo;
+};
+
 export type FileContent = {
   __typename?: 'FileContent';
   content?: Maybe<Scalars['String']>;
   path?: Maybe<Scalars['String']>;
+};
+
+export type FileEdge = {
+  __typename?: 'FileEdge';
+  cursor?: Maybe<Scalars['String']>;
+  node?: Maybe<File>;
+};
+
+export type Follower = {
+  __typename?: 'Follower';
+  id: Scalars['ID'];
+  incident?: Maybe<Incident>;
+  insertedAt?: Maybe<Scalars['DateTime']>;
+  preferences?: Maybe<NotificationPreferences>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  user: User;
+};
+
+export type FollowerConnection = {
+  __typename?: 'FollowerConnection';
+  edges?: Maybe<Array<Maybe<FollowerEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type FollowerEdge = {
+  __typename?: 'FollowerEdge';
+  cursor?: Maybe<Scalars['String']>;
+  node?: Maybe<Follower>;
 };
 
 export type GitStatus = {
@@ -594,6 +671,134 @@ export type HttpIngressRule = {
   __typename?: 'HttpIngressRule';
   paths?: Maybe<Array<Maybe<IngressPath>>>;
 };
+
+export type Incident = {
+  __typename?: 'Incident';
+  clusterInformation?: Maybe<ClusterInformation>;
+  creator: User;
+  description?: Maybe<Scalars['String']>;
+  files?: Maybe<FileConnection>;
+  follower?: Maybe<Follower>;
+  followers?: Maybe<FollowerConnection>;
+  history?: Maybe<IncidentHistoryConnection>;
+  id: Scalars['ID'];
+  insertedAt?: Maybe<Scalars['DateTime']>;
+  messages?: Maybe<IncidentMessageConnection>;
+  nextResponseAt?: Maybe<Scalars['DateTime']>;
+  notificationCount?: Maybe<Scalars['Int']>;
+  owner?: Maybe<User>;
+  postmortem?: Maybe<Postmortem>;
+  repository: Repository;
+  severity: Scalars['Int'];
+  status: IncidentStatus;
+  subscription?: Maybe<SlimSubscription>;
+  tags?: Maybe<Array<Maybe<Tag>>>;
+  title: Scalars['String'];
+  updatedAt?: Maybe<Scalars['DateTime']>;
+};
+
+
+export type IncidentFilesArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+};
+
+
+export type IncidentFollowersArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+};
+
+
+export type IncidentHistoryArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+};
+
+
+export type IncidentMessagesArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  before?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  last?: InputMaybe<Scalars['Int']>;
+};
+
+export enum IncidentAction {
+  Accept = 'ACCEPT',
+  Complete = 'COMPLETE',
+  Create = 'CREATE',
+  Edit = 'EDIT',
+  Severity = 'SEVERITY',
+  Status = 'STATUS'
+}
+
+export type IncidentChange = {
+  __typename?: 'IncidentChange';
+  key: Scalars['String'];
+  next?: Maybe<Scalars['String']>;
+  prev?: Maybe<Scalars['String']>;
+};
+
+export type IncidentHistory = {
+  __typename?: 'IncidentHistory';
+  action: IncidentAction;
+  actor: User;
+  changes?: Maybe<Array<Maybe<IncidentChange>>>;
+  id: Scalars['ID'];
+  incident: Incident;
+  insertedAt?: Maybe<Scalars['DateTime']>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+};
+
+export type IncidentHistoryConnection = {
+  __typename?: 'IncidentHistoryConnection';
+  edges?: Maybe<Array<Maybe<IncidentHistoryEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type IncidentHistoryEdge = {
+  __typename?: 'IncidentHistoryEdge';
+  cursor?: Maybe<Scalars['String']>;
+  node?: Maybe<IncidentHistory>;
+};
+
+export type IncidentMessage = {
+  __typename?: 'IncidentMessage';
+  creator: User;
+  entities?: Maybe<Array<Maybe<MessageEntity>>>;
+  file?: Maybe<File>;
+  id: Scalars['ID'];
+  incident: Incident;
+  insertedAt?: Maybe<Scalars['DateTime']>;
+  reactions?: Maybe<Array<Maybe<Reaction>>>;
+  text: Scalars['String'];
+  updatedAt?: Maybe<Scalars['DateTime']>;
+};
+
+export type IncidentMessageConnection = {
+  __typename?: 'IncidentMessageConnection';
+  edges?: Maybe<Array<Maybe<IncidentMessageEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type IncidentMessageEdge = {
+  __typename?: 'IncidentMessageEdge';
+  cursor?: Maybe<Scalars['String']>;
+  node?: Maybe<IncidentMessage>;
+};
+
+export enum IncidentStatus {
+  Complete = 'COMPLETE',
+  InProgress = 'IN_PROGRESS',
+  Open = 'OPEN',
+  Resolved = 'RESOLVED'
+}
 
 export type Ingress = {
   __typename?: 'Ingress';
@@ -747,6 +952,21 @@ export type LicenseStatus = {
   secrets?: Maybe<Scalars['Map']>;
 };
 
+export type Limit = {
+  __typename?: 'Limit';
+  dimension: Scalars['String'];
+  quantity: Scalars['Int'];
+};
+
+export type LineItem = {
+  __typename?: 'LineItem';
+  cost: Scalars['Int'];
+  dimension: Scalars['String'];
+  name: Scalars['String'];
+  period?: Maybe<Scalars['String']>;
+  type?: Maybe<PlanType>;
+};
+
 export type LoadBalancerIngressStatus = {
   __typename?: 'LoadBalancerIngressStatus';
   hostname?: Maybe<Scalars['String']>;
@@ -794,6 +1014,31 @@ export type ManifestNetwork = {
   pluralDns?: Maybe<Scalars['Boolean']>;
   subdomain?: Maybe<Scalars['String']>;
 };
+
+export enum MediaType {
+  Audio = 'AUDIO',
+  Image = 'IMAGE',
+  Other = 'OTHER',
+  Pdf = 'PDF',
+  Video = 'VIDEO'
+}
+
+export type MessageEntity = {
+  __typename?: 'MessageEntity';
+  endIndex?: Maybe<Scalars['Int']>;
+  id: Scalars['ID'];
+  insertedAt?: Maybe<Scalars['DateTime']>;
+  startIndex?: Maybe<Scalars['Int']>;
+  text?: Maybe<Scalars['String']>;
+  type: MessageEntityType;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  user?: Maybe<User>;
+};
+
+export enum MessageEntityType {
+  Emoji = 'EMOJI',
+  Mention = 'MENTION'
+}
 
 export type Metadata = {
   __typename?: 'Metadata';
@@ -915,10 +1160,55 @@ export type NotificationEdge = {
   node?: Maybe<Notification>;
 };
 
+export type NotificationPreferences = {
+  __typename?: 'NotificationPreferences';
+  incidentUpdate?: Maybe<Scalars['Boolean']>;
+  mention?: Maybe<Scalars['Boolean']>;
+  message?: Maybe<Scalars['Boolean']>;
+};
+
 export enum NotificationStatus {
   Firing = 'FIRING',
   Resolved = 'RESOLVED'
 }
+
+/** Supported OIDC authentication methods. */
+export enum OidcAuthMethod {
+  Basic = 'BASIC',
+  Post = 'POST'
+}
+
+export type OidcProvider = {
+  __typename?: 'OidcProvider';
+  authMethod: OidcAuthMethod;
+  bindings?: Maybe<Array<Maybe<OidcProviderBinding>>>;
+  clientId: Scalars['String'];
+  clientSecret: Scalars['String'];
+  configuration?: Maybe<OuathConfiguration>;
+  consent?: Maybe<ConsentRequest>;
+  id: Scalars['ID'];
+  insertedAt?: Maybe<Scalars['DateTime']>;
+  redirectUris?: Maybe<Array<Maybe<Scalars['String']>>>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+};
+
+export type OidcProviderBinding = {
+  __typename?: 'OidcProviderBinding';
+  group?: Maybe<Group>;
+  id: Scalars['ID'];
+  insertedAt?: Maybe<Scalars['DateTime']>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  user?: Maybe<User>;
+};
+
+export type OuathConfiguration = {
+  __typename?: 'OuathConfiguration';
+  authorizationEndpoint?: Maybe<Scalars['String']>;
+  issuer?: Maybe<Scalars['String']>;
+  jwksUri?: Maybe<Scalars['String']>;
+  tokenEndpoint?: Maybe<Scalars['String']>;
+  userinfoEndpoint?: Maybe<Scalars['String']>;
+};
 
 export type OverlayUpdate = {
   __typename?: 'OverlayUpdate';
@@ -948,6 +1238,51 @@ export enum Permission {
   Deploy = 'DEPLOY',
   Operate = 'OPERATE',
   Read = 'READ'
+}
+
+export type Plan = {
+  __typename?: 'Plan';
+  cost: Scalars['Int'];
+  default?: Maybe<Scalars['Boolean']>;
+  id: Scalars['ID'];
+  insertedAt?: Maybe<Scalars['DateTime']>;
+  lineItems?: Maybe<PlanLineItems>;
+  metadata?: Maybe<PlanMetadata>;
+  name: Scalars['String'];
+  period?: Maybe<Scalars['String']>;
+  serviceLevels?: Maybe<Array<Maybe<ServiceLevel>>>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  visible: Scalars['Boolean'];
+};
+
+export type PlanFeature = {
+  __typename?: 'PlanFeature';
+  description: Scalars['String'];
+  name: Scalars['String'];
+};
+
+export type PlanFeatures = {
+  __typename?: 'PlanFeatures';
+  audit?: Maybe<Scalars['Boolean']>;
+  userManagement?: Maybe<Scalars['Boolean']>;
+  vpn?: Maybe<Scalars['Boolean']>;
+};
+
+export type PlanLineItems = {
+  __typename?: 'PlanLineItems';
+  included?: Maybe<Array<Maybe<Limit>>>;
+  items?: Maybe<Array<Maybe<LineItem>>>;
+};
+
+export type PlanMetadata = {
+  __typename?: 'PlanMetadata';
+  features?: Maybe<Array<Maybe<PlanFeature>>>;
+  freeform?: Maybe<Scalars['Map']>;
+};
+
+export enum PlanType {
+  Licensed = 'LICENSED',
+  Metered = 'METERED'
 }
 
 export type PluralContext = {
@@ -1028,11 +1363,30 @@ export type Port = {
   protocol?: Maybe<Scalars['String']>;
 };
 
+export type Postmortem = {
+  __typename?: 'Postmortem';
+  actionItems?: Maybe<Array<Maybe<ActionItem>>>;
+  content: Scalars['String'];
+  creator: User;
+  id: Scalars['ID'];
+  insertedAt?: Maybe<Scalars['DateTime']>;
+  updatedAt?: Maybe<Scalars['DateTime']>;
+};
+
 export type PrometheusDatasource = {
   __typename?: 'PrometheusDatasource';
   format?: Maybe<Scalars['String']>;
   legend?: Maybe<Scalars['String']>;
   query: Scalars['String'];
+};
+
+export type Reaction = {
+  __typename?: 'Reaction';
+  creator: User;
+  insertedAt?: Maybe<Scalars['DateTime']>;
+  message: IncidentMessage;
+  name: Scalars['String'];
+  updatedAt?: Maybe<Scalars['DateTime']>;
 };
 
 export enum ReadType {
@@ -1875,6 +2229,13 @@ export type Service = {
   status: ServiceStatus;
 };
 
+export type ServiceLevel = {
+  __typename?: 'ServiceLevel';
+  maxSeverity?: Maybe<Scalars['Int']>;
+  minSeverity?: Maybe<Scalars['Int']>;
+  responseTime?: Maybe<Scalars['Int']>;
+};
+
 export type ServicePort = {
   __typename?: 'ServicePort';
   name?: Maybe<Scalars['String']>;
@@ -1903,6 +2264,13 @@ export enum Severity {
   Medium = 'MEDIUM',
   None = 'NONE'
 }
+
+export type SlimSubscription = {
+  __typename?: 'SlimSubscription';
+  id: Scalars['ID'];
+  lineItems?: Maybe<SubscriptionLineItems>;
+  plan?: Maybe<Plan>;
+};
 
 export type Smtp = {
   __typename?: 'Smtp';
@@ -1978,6 +2346,17 @@ export type StatusCondition = {
   reason: Scalars['String'];
   status: Scalars['String'];
   type: Scalars['String'];
+};
+
+export type SubscriptionLineItems = {
+  __typename?: 'SubscriptionLineItems';
+  items?: Maybe<Array<Maybe<Limit>>>;
+};
+
+export type Tag = {
+  __typename?: 'Tag';
+  id: Scalars['ID'];
+  tag: Scalars['String'];
 };
 
 export type TerminatedState = {
@@ -2314,6 +2693,54 @@ export type MetricsQueryVariables = Exact<{
 
 export type MetricsQuery = { __typename?: 'RootQueryType', metric?: Array<{ __typename?: 'MetricResponse', metric?: Map<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: number | null, value?: string | null } | null> | null } | null> | null };
 
+export type IncidentUserFragment = { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null };
+
+export type ClusterInformationFragment = { __typename?: 'ClusterInformation', gitCommit?: string | null, version?: string | null, platform?: string | null };
+
+export type RepoFragment = { __typename?: 'Repository', id: string, name: string, description?: string | null, icon?: string | null };
+
+export type PlanFragment = { __typename?: 'Plan', id: string, name: string, cost: number, period?: string | null, lineItems?: { __typename?: 'PlanLineItems', included?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null, items?: Array<{ __typename?: 'LineItem', name: string, dimension: string, cost: number, period?: string | null } | null> | null } | null, serviceLevels?: Array<{ __typename?: 'ServiceLevel', minSeverity?: number | null, maxSeverity?: number | null, responseTime?: number | null } | null> | null, metadata?: { __typename?: 'PlanMetadata', features?: Array<{ __typename?: 'PlanFeature', name: string, description: string } | null> | null } | null };
+
+export type PostmortemFragment = { __typename?: 'Postmortem', id: string, content: string, actionItems?: Array<{ __typename?: 'ActionItem', type: ActionItemType, link: string } | null> | null };
+
+export type FollowerFragment = { __typename?: 'Follower', id: string, incident?: { __typename?: 'Incident', id: string } | null, user: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null }, preferences?: { __typename?: 'NotificationPreferences', message?: boolean | null, incidentUpdate?: boolean | null } | null };
+
+export type SubscriptionFragment = { __typename?: 'SlimSubscription', id: string, lineItems?: { __typename?: 'SubscriptionLineItems', items?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null } | null, plan?: { __typename?: 'Plan', id: string, name: string, cost: number, period?: string | null, lineItems?: { __typename?: 'PlanLineItems', included?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null, items?: Array<{ __typename?: 'LineItem', name: string, dimension: string, cost: number, period?: string | null } | null> | null } | null, serviceLevels?: Array<{ __typename?: 'ServiceLevel', minSeverity?: number | null, maxSeverity?: number | null, responseTime?: number | null } | null> | null, metadata?: { __typename?: 'PlanMetadata', features?: Array<{ __typename?: 'PlanFeature', name: string, description: string } | null> | null } | null } | null };
+
+export type IncidentFragment = { __typename?: 'Incident', id: string, title: string, description?: string | null, severity: number, status: IncidentStatus, notificationCount?: number | null, nextResponseAt?: Date | null, insertedAt?: Date | null, creator: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null }, owner?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null } | null, repository: { __typename?: 'Repository', id: string, name: string, description?: string | null, icon?: string | null }, subscription?: { __typename?: 'SlimSubscription', id: string, lineItems?: { __typename?: 'SubscriptionLineItems', items?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null } | null, plan?: { __typename?: 'Plan', id: string, name: string, cost: number, period?: string | null, lineItems?: { __typename?: 'PlanLineItems', included?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null, items?: Array<{ __typename?: 'LineItem', name: string, dimension: string, cost: number, period?: string | null } | null> | null } | null, serviceLevels?: Array<{ __typename?: 'ServiceLevel', minSeverity?: number | null, maxSeverity?: number | null, responseTime?: number | null } | null> | null, metadata?: { __typename?: 'PlanMetadata', features?: Array<{ __typename?: 'PlanFeature', name: string, description: string } | null> | null } | null } | null } | null, clusterInformation?: { __typename?: 'ClusterInformation', gitCommit?: string | null, version?: string | null, platform?: string | null } | null, tags?: Array<{ __typename?: 'Tag', tag: string } | null> | null };
+
+export type IncidentHistoryFragment = { __typename?: 'IncidentHistory', id: string, action: IncidentAction, insertedAt?: Date | null, changes?: Array<{ __typename?: 'IncidentChange', key: string, prev?: string | null, next?: string | null } | null> | null, actor: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null } };
+
+export type FileFragment = { __typename?: 'File', id: string, blob: string, mediaType?: MediaType | null, contentType?: string | null, filesize?: number | null, filename?: string | null };
+
+export type IncidentMessageFragment = { __typename?: 'IncidentMessage', id: string, text: string, insertedAt?: Date | null, creator: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null }, reactions?: Array<{ __typename?: 'Reaction', name: string, creator: { __typename?: 'User', id: string, email: string } } | null> | null, file?: { __typename?: 'File', id: string, blob: string, mediaType?: MediaType | null, contentType?: string | null, filesize?: number | null, filename?: string | null } | null, entities?: Array<{ __typename?: 'MessageEntity', type: MessageEntityType, text?: string | null, startIndex?: number | null, endIndex?: number | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null } | null } | null> | null };
+
+export type IncidentNotificationFragment = { __typename?: 'Notification', id: string, insertedAt?: Date | null };
+
+export type IncidentUserFragment = { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null };
+
+export type ClusterInformationFragment = { __typename?: 'ClusterInformation', gitCommit?: string | null, version?: string | null, platform?: string | null };
+
+export type RepoFragment = { __typename?: 'Repository', id: string, name: string, description?: string | null, icon?: string | null };
+
+export type PlanFragment = { __typename?: 'Plan', id: string, name: string, cost: number, period?: string | null, lineItems?: { __typename?: 'PlanLineItems', included?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null, items?: Array<{ __typename?: 'LineItem', name: string, dimension: string, cost: number, period?: string | null } | null> | null } | null, serviceLevels?: Array<{ __typename?: 'ServiceLevel', minSeverity?: number | null, maxSeverity?: number | null, responseTime?: number | null } | null> | null, metadata?: { __typename?: 'PlanMetadata', features?: Array<{ __typename?: 'PlanFeature', name: string, description: string } | null> | null } | null };
+
+export type PostmortemFragment = { __typename?: 'Postmortem', id: string, content: string, actionItems?: Array<{ __typename?: 'ActionItem', type: ActionItemType, link: string } | null> | null };
+
+export type FollowerFragment = { __typename?: 'Follower', id: string, incident?: { __typename?: 'Incident', id: string } | null, user: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null }, preferences?: { __typename?: 'NotificationPreferences', message?: boolean | null, incidentUpdate?: boolean | null } | null };
+
+export type SubscriptionFragment = { __typename?: 'SlimSubscription', id: string, lineItems?: { __typename?: 'SubscriptionLineItems', items?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null } | null, plan?: { __typename?: 'Plan', id: string, name: string, cost: number, period?: string | null, lineItems?: { __typename?: 'PlanLineItems', included?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null, items?: Array<{ __typename?: 'LineItem', name: string, dimension: string, cost: number, period?: string | null } | null> | null } | null, serviceLevels?: Array<{ __typename?: 'ServiceLevel', minSeverity?: number | null, maxSeverity?: number | null, responseTime?: number | null } | null> | null, metadata?: { __typename?: 'PlanMetadata', features?: Array<{ __typename?: 'PlanFeature', name: string, description: string } | null> | null } | null } | null };
+
+export type IncidentFragment = { __typename?: 'Incident', id: string, title: string, description?: string | null, severity: number, status: IncidentStatus, notificationCount?: number | null, nextResponseAt?: Date | null, insertedAt?: Date | null, creator: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null }, owner?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null } | null, repository: { __typename?: 'Repository', id: string, name: string, description?: string | null, icon?: string | null }, subscription?: { __typename?: 'SlimSubscription', id: string, lineItems?: { __typename?: 'SubscriptionLineItems', items?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null } | null, plan?: { __typename?: 'Plan', id: string, name: string, cost: number, period?: string | null, lineItems?: { __typename?: 'PlanLineItems', included?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null, items?: Array<{ __typename?: 'LineItem', name: string, dimension: string, cost: number, period?: string | null } | null> | null } | null, serviceLevels?: Array<{ __typename?: 'ServiceLevel', minSeverity?: number | null, maxSeverity?: number | null, responseTime?: number | null } | null> | null, metadata?: { __typename?: 'PlanMetadata', features?: Array<{ __typename?: 'PlanFeature', name: string, description: string } | null> | null } | null } | null } | null, clusterInformation?: { __typename?: 'ClusterInformation', gitCommit?: string | null, version?: string | null, platform?: string | null } | null, tags?: Array<{ __typename?: 'Tag', tag: string } | null> | null };
+
+export type IncidentHistoryFragment = { __typename?: 'IncidentHistory', id: string, action: IncidentAction, insertedAt?: Date | null, changes?: Array<{ __typename?: 'IncidentChange', key: string, prev?: string | null, next?: string | null } | null> | null, actor: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null } };
+
+export type FileFragment = { __typename?: 'File', id: string, blob: string, mediaType?: MediaType | null, contentType?: string | null, filesize?: number | null, filename?: string | null };
+
+export type IncidentMessageFragment = { __typename?: 'IncidentMessage', id: string, text: string, insertedAt?: Date | null, creator: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null }, reactions?: Array<{ __typename?: 'Reaction', name: string, creator: { __typename?: 'User', id: string, email: string } } | null> | null, file?: { __typename?: 'File', id: string, blob: string, mediaType?: MediaType | null, contentType?: string | null, filesize?: number | null, filename?: string | null } | null, entities?: Array<{ __typename?: 'MessageEntity', type: MessageEntityType, text?: string | null, startIndex?: number | null, endIndex?: number | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null } | null } | null> | null };
+
+export type IncidentNotificationFragment = { __typename?: 'Notification', id: string, insertedAt?: Date | null };
+
 export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null };
 
 export type GroupFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null };
@@ -2419,6 +2846,10 @@ export type CertificateFragment = { __typename?: 'Certificate', raw: string, met
 export type ContainerResourcesFragment = { __typename?: 'ContainerResources', cpu?: string | null, memory?: string | null };
 
 export type VerticalPodAutoscalerFragment = { __typename?: 'VerticalPodAutoscaler', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status?: { __typename?: 'VerticalPodAutoscalerStatus', recommendation?: { __typename?: 'Recommendation', containerRecommendations?: Array<{ __typename?: 'ContainerRecommendation', containerName?: string | null, lowerBound?: { __typename?: 'ContainerResources', cpu?: string | null, memory?: string | null } | null, upperBound?: { __typename?: 'ContainerResources', cpu?: string | null, memory?: string | null } | null, uncappedTarget?: { __typename?: 'ContainerResources', cpu?: string | null, memory?: string | null } | null } | null> | null } | null } | null };
+
+export type OidcProviderFragment = { __typename?: 'OidcProvider', id: string, clientId: string, authMethod: OidcAuthMethod, clientSecret: string, redirectUris?: Array<string | null> | null, bindings?: Array<{ __typename?: 'OidcProviderBinding', id: string, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null } | null> | null };
+
+export type RepositoryFragment = { __typename?: 'Repository', id: string, name: string, description?: string | null, icon?: string | null };
 
 export type SmtpFragment = { __typename?: 'Smtp', server?: string | null, port?: number | null, sender?: string | null, user?: string | null, password?: string | null };
 
@@ -2833,6 +3264,382 @@ export const LogStreamFragmentDoc = gql`
   }
 }
     `;
+export const PostmortemFragmentDoc = gql`
+    fragment Postmortem on Postmortem {
+  id
+  content
+  actionItems {
+    type
+    link
+  }
+}
+    `;
+export const IncidentUserFragmentDoc = gql`
+    fragment IncidentUser on User {
+  id
+  name
+  email
+  profile
+  backgroundColor
+}
+    `;
+export const FollowerFragmentDoc = gql`
+    fragment Follower on Follower {
+  id
+  incident {
+    id
+  }
+  user {
+    ...IncidentUser
+  }
+  preferences {
+    message
+    incidentUpdate
+  }
+}
+    ${IncidentUserFragmentDoc}`;
+export const RepoFragmentDoc = gql`
+    fragment Repo on Repository {
+  id
+  name
+  description
+  icon
+}
+    `;
+export const PlanFragmentDoc = gql`
+    fragment Plan on Plan {
+  id
+  name
+  cost
+  period
+  lineItems {
+    included {
+      dimension
+      quantity
+    }
+    items {
+      name
+      dimension
+      cost
+      period
+    }
+  }
+  serviceLevels {
+    minSeverity
+    maxSeverity
+    responseTime
+  }
+  metadata {
+    features {
+      name
+      description
+    }
+  }
+}
+    `;
+export const SubscriptionFragmentDoc = gql`
+    fragment Subscription on SlimSubscription {
+  id
+  lineItems {
+    items {
+      dimension
+      quantity
+    }
+  }
+  plan {
+    ...Plan
+  }
+}
+    ${PlanFragmentDoc}`;
+export const ClusterInformationFragmentDoc = gql`
+    fragment ClusterInformation on ClusterInformation {
+  gitCommit
+  version
+  platform
+}
+    `;
+export const IncidentFragmentDoc = gql`
+    fragment Incident on Incident {
+  id
+  title
+  description
+  severity
+  status
+  notificationCount
+  nextResponseAt
+  creator {
+    ...IncidentUser
+  }
+  owner {
+    ...IncidentUser
+  }
+  repository {
+    ...Repo
+  }
+  subscription {
+    ...Subscription
+  }
+  clusterInformation {
+    ...ClusterInformation
+  }
+  tags {
+    tag
+  }
+  insertedAt
+}
+    ${IncidentUserFragmentDoc}
+${RepoFragmentDoc}
+${SubscriptionFragmentDoc}
+${ClusterInformationFragmentDoc}`;
+export const IncidentHistoryFragmentDoc = gql`
+    fragment IncidentHistory on IncidentHistory {
+  id
+  action
+  changes {
+    key
+    prev
+    next
+  }
+  actor {
+    ...IncidentUser
+  }
+  insertedAt
+}
+    ${IncidentUserFragmentDoc}`;
+export const FileFragmentDoc = gql`
+    fragment File on File {
+  id
+  blob
+  mediaType
+  contentType
+  filesize
+  filename
+}
+    `;
+export const IncidentMessageFragmentDoc = gql`
+    fragment IncidentMessage on IncidentMessage {
+  id
+  text
+  creator {
+    ...IncidentUser
+  }
+  reactions {
+    name
+    creator {
+      id
+      email
+    }
+  }
+  file {
+    ...File
+  }
+  entities {
+    type
+    user {
+      ...IncidentUser
+    }
+    text
+    startIndex
+    endIndex
+  }
+  insertedAt
+}
+    ${IncidentUserFragmentDoc}
+${FileFragmentDoc}`;
+export const IncidentNotificationFragmentDoc = gql`
+    fragment IncidentNotification on Notification {
+  id
+  insertedAt
+}
+    `;
+export const PostmortemFragmentDoc = gql`
+    fragment Postmortem on Postmortem {
+  id
+  content
+  actionItems {
+    type
+    link
+  }
+}
+    `;
+export const IncidentUserFragmentDoc = gql`
+    fragment IncidentUser on User {
+  id
+  name
+  email
+  profile
+  backgroundColor
+}
+    `;
+export const FollowerFragmentDoc = gql`
+    fragment Follower on Follower {
+  id
+  incident {
+    id
+  }
+  user {
+    ...IncidentUser
+  }
+  preferences {
+    message
+    incidentUpdate
+  }
+}
+    ${IncidentUserFragmentDoc}`;
+export const RepoFragmentDoc = gql`
+    fragment Repo on Repository {
+  id
+  name
+  description
+  icon
+}
+    `;
+export const PlanFragmentDoc = gql`
+    fragment Plan on Plan {
+  id
+  name
+  cost
+  period
+  lineItems {
+    included {
+      dimension
+      quantity
+    }
+    items {
+      name
+      dimension
+      cost
+      period
+    }
+  }
+  serviceLevels {
+    minSeverity
+    maxSeverity
+    responseTime
+  }
+  metadata {
+    features {
+      name
+      description
+    }
+  }
+}
+    `;
+export const SubscriptionFragmentDoc = gql`
+    fragment Subscription on SlimSubscription {
+  id
+  lineItems {
+    items {
+      dimension
+      quantity
+    }
+  }
+  plan {
+    ...Plan
+  }
+}
+    ${PlanFragmentDoc}`;
+export const ClusterInformationFragmentDoc = gql`
+    fragment ClusterInformation on ClusterInformation {
+  gitCommit
+  version
+  platform
+}
+    `;
+export const IncidentFragmentDoc = gql`
+    fragment Incident on Incident {
+  id
+  title
+  description
+  severity
+  status
+  notificationCount
+  nextResponseAt
+  creator {
+    ...IncidentUser
+  }
+  owner {
+    ...IncidentUser
+  }
+  repository {
+    ...Repo
+  }
+  subscription {
+    ...Subscription
+  }
+  clusterInformation {
+    ...ClusterInformation
+  }
+  tags {
+    tag
+  }
+  insertedAt
+}
+    ${IncidentUserFragmentDoc}
+${RepoFragmentDoc}
+${SubscriptionFragmentDoc}
+${ClusterInformationFragmentDoc}`;
+export const IncidentHistoryFragmentDoc = gql`
+    fragment IncidentHistory on IncidentHistory {
+  id
+  action
+  changes {
+    key
+    prev
+    next
+  }
+  actor {
+    ...IncidentUser
+  }
+  insertedAt
+}
+    ${IncidentUserFragmentDoc}`;
+export const FileFragmentDoc = gql`
+    fragment File on File {
+  id
+  blob
+  mediaType
+  contentType
+  filesize
+  filename
+}
+    `;
+export const IncidentMessageFragmentDoc = gql`
+    fragment IncidentMessage on IncidentMessage {
+  id
+  text
+  creator {
+    ...IncidentUser
+  }
+  reactions {
+    name
+    creator {
+      id
+      email
+    }
+  }
+  file {
+    ...File
+  }
+  entities {
+    type
+    user {
+      ...IncidentUser
+    }
+    text
+    startIndex
+    endIndex
+  }
+  insertedAt
+}
+    ${IncidentUserFragmentDoc}
+${FileFragmentDoc}`;
+export const IncidentNotificationFragmentDoc = gql`
+    fragment IncidentNotification on Notification {
+  id
+  insertedAt
+}
+    `;
 export const GroupFragmentDoc = gql`
     fragment Group on Group {
   id
@@ -3177,6 +3984,33 @@ export const VerticalPodAutoscalerFragmentDoc = gql`
 }
     ${MetadataFragmentDoc}
 ${ContainerResourcesFragmentDoc}`;
+export const GroupFragmentDoc = gql`
+    fragment Group on Group {
+  id
+  name
+  description
+  insertedAt
+}
+    `;
+export const OidcProviderFragmentDoc = gql`
+    fragment OIDCProvider on OidcProvider {
+  id
+  clientId
+  authMethod
+  clientSecret
+  redirectUris
+  bindings {
+    id
+    user {
+      ...User
+    }
+    group {
+      ...Group
+    }
+  }
+}
+    ${UserFragmentDoc}
+${GroupFragmentDoc}`;
 export const SmtpFragmentDoc = gql`
     fragment Smtp on Smtp {
   server

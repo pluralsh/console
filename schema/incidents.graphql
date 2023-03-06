@@ -1,0 +1,271 @@
+type ClusterInformation {
+  gitCommit: String
+  id: ID!
+  insertedAt: DateTime
+  platform: String
+  updatedAt: DateTime
+  version: String
+}
+
+type Plan {
+  cost: Int!
+  default: Boolean
+  id: ID!
+  insertedAt: DateTime
+  lineItems: PlanLineItems
+  metadata: PlanMetadata
+  name: String!
+  period: String
+  serviceLevels: [ServiceLevel]
+  updatedAt: DateTime
+  visible: Boolean!
+}
+
+type PlanLineItems {
+  included: [Limit]
+  items: [LineItem]
+}
+
+type LineItem {
+  cost: Int!
+  dimension: String!
+  name: String!
+  period: String
+  type: PlanType
+}
+
+enum PlanType {
+  LICENSED
+  METERED
+}
+
+type Limit {
+  dimension: String!
+  quantity: Int!
+}
+
+type PlanMetadata {
+  features: [PlanFeature]
+  freeform: Map
+}
+
+type PlanFeature {
+  description: String!
+  name: String!
+}
+
+type PlanFeatures {
+  audit: Boolean
+  userManagement: Boolean
+  vpn: Boolean
+}
+
+type ServiceLevel {
+  maxSeverity: Int
+  minSeverity: Int
+  responseTime: Int
+}
+
+type Postmortem {
+  actionItems: [ActionItem]
+  content: String!
+  creator: User!
+  id: ID!
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type ActionItem {
+  link: String!
+  type: ActionItemType!
+}
+
+enum ActionItemType {
+  BLOG
+  ISSUE
+  PULL
+}
+
+type Follower {
+  id: ID!
+  incident: Incident
+  insertedAt: DateTime
+  preferences: NotificationPreferences
+  updatedAt: DateTime
+  user: User!
+}
+
+type NotificationPreferences {
+  incidentUpdate: Boolean
+  mention: Boolean
+  message: Boolean
+}
+
+type Incident {
+  clusterInformation: ClusterInformation
+  creator: User!
+  description: String
+  files(after: String, before: String, first: Int, last: Int): FileConnection
+  follower: Follower
+  followers(after: String, before: String, first: Int, last: Int): FollowerConnection
+  history(after: String, before: String, first: Int, last: Int): IncidentHistoryConnection
+  id: ID!
+  insertedAt: DateTime
+  messages(after: String, before: String, first: Int, last: Int): IncidentMessageConnection
+  nextResponseAt: DateTime
+  notificationCount: Int
+  owner: User
+  postmortem: Postmortem
+  repository: Repository!
+  severity: Int!
+  status: IncidentStatus!
+  subscription: SlimSubscription
+  tags: [Tag]
+  title: String!
+  updatedAt: DateTime
+}
+
+type FileConnection {
+  edges: [FileEdge]
+  pageInfo: PageInfo!
+}
+
+type FileEdge {
+  cursor: String
+  node: File
+}
+
+type File {
+  blob: String!
+  contentType: String
+  filename: String
+  filesize: Int
+  height: Int
+  id: ID!
+  insertedAt: DateTime
+  mediaType: MediaType
+  message: IncidentMessage!
+  updatedAt: DateTime
+  width: Int
+}
+
+type FollowerConnection {
+  edges: [FollowerEdge]
+  pageInfo: PageInfo!
+}
+
+type FollowerEdge {
+  cursor: String
+  node: Follower
+}
+
+type IncidentHistory {
+  action: IncidentAction!
+  actor: User!
+  changes: [IncidentChange]
+  id: ID!
+  incident: Incident!
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+enum IncidentAction {
+  ACCEPT
+  COMPLETE
+  CREATE
+  EDIT
+  SEVERITY
+  STATUS
+}
+
+type IncidentChange {
+  key: String!
+  next: String
+  prev: String
+}
+
+type IncidentHistoryConnection {
+  edges: [IncidentHistoryEdge]
+  pageInfo: PageInfo!
+}
+
+type IncidentHistoryEdge {
+  cursor: String
+  node: IncidentHistory
+}
+
+type IncidentMessage {
+  creator: User!
+  entities: [MessageEntity]
+  file: File
+  id: ID!
+  incident: Incident!
+  insertedAt: DateTime
+  reactions: [Reaction]
+  text: String!
+  updatedAt: DateTime
+}
+
+type Reaction {
+  creator: User!
+  insertedAt: DateTime
+  message: IncidentMessage!
+  name: String!
+  updatedAt: DateTime
+}
+
+type MessageEntity {
+  endIndex: Int
+  id: ID!
+  insertedAt: DateTime
+  startIndex: Int
+  text: String
+  type: MessageEntityType!
+  updatedAt: DateTime
+  user: User
+}
+
+enum MessageEntityType {
+  EMOJI
+  MENTION
+}
+
+type IncidentMessageConnection {
+  edges: [IncidentMessageEdge]
+  pageInfo: PageInfo!
+}
+
+type IncidentMessageEdge {
+  cursor: String
+  node: IncidentMessage
+}
+
+enum IncidentStatus {
+  COMPLETE
+  IN_PROGRESS
+  OPEN
+  RESOLVED
+}
+
+type SlimSubscription {
+  id: ID!
+  lineItems: SubscriptionLineItems
+  plan: Plan
+}
+
+type SubscriptionLineItems {
+  items: [Limit]
+}
+
+type Tag {
+  id: ID!
+  tag: String!
+}
+
+enum MediaType {
+  AUDIO
+  IMAGE
+  OTHER
+  PDF
+  VIDEO
+}

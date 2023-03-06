@@ -1,0 +1,39 @@
+type OidcProvider {
+  authMethod: OidcAuthMethod!
+  bindings: [OidcProviderBinding]
+  clientId: String!
+  clientSecret: String!
+  configuration: OuathConfiguration
+  consent: ConsentRequest
+  id: ID!
+  insertedAt: DateTime
+  redirectUris: [String]
+  updatedAt: DateTime
+}
+
+"""Supported OIDC authentication methods."""
+enum OidcAuthMethod {
+  BASIC
+  POST
+}
+
+type OidcProviderBinding {
+  group: Group
+  id: ID!
+  insertedAt: DateTime
+  updatedAt: DateTime
+  user: User
+}
+
+type OuathConfiguration {
+  authorizationEndpoint: String
+  issuer: String
+  jwksUri: String
+  tokenEndpoint: String
+  userinfoEndpoint: String
+}
+
+type ConsentRequest {
+  requestedScope: [String]
+  skip: Boolean
+}
