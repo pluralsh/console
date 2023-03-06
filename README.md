@@ -1,6 +1,6 @@
 # Plural Console
 
-![Console](assets/public/console-lockup-dark.png)
+![Console](assets/public/PluralConsole-background.png)
 
 The Plural Console is the administrative hub of the plural platform.  It has a number of key features:
 
