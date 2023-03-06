@@ -251,7 +251,7 @@ defmodule Console.Plural.Queries do
   @account_q """
     query {
       account {
-        availableFeatures { vpn }
+        availableFeatures { vpn userManagement }
       }
     }
   """
