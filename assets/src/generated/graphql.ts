@@ -2693,54 +2693,6 @@ export type MetricsQueryVariables = Exact<{
 
 export type MetricsQuery = { __typename?: 'RootQueryType', metric?: Array<{ __typename?: 'MetricResponse', metric?: Map<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: number | null, value?: string | null } | null> | null } | null> | null };
 
-export type IncidentUserFragment = { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null };
-
-export type ClusterInformationFragment = { __typename?: 'ClusterInformation', gitCommit?: string | null, version?: string | null, platform?: string | null };
-
-export type RepoFragment = { __typename?: 'Repository', id: string, name: string, description?: string | null, icon?: string | null };
-
-export type PlanFragment = { __typename?: 'Plan', id: string, name: string, cost: number, period?: string | null, lineItems?: { __typename?: 'PlanLineItems', included?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null, items?: Array<{ __typename?: 'LineItem', name: string, dimension: string, cost: number, period?: string | null } | null> | null } | null, serviceLevels?: Array<{ __typename?: 'ServiceLevel', minSeverity?: number | null, maxSeverity?: number | null, responseTime?: number | null } | null> | null, metadata?: { __typename?: 'PlanMetadata', features?: Array<{ __typename?: 'PlanFeature', name: string, description: string } | null> | null } | null };
-
-export type PostmortemFragment = { __typename?: 'Postmortem', id: string, content: string, actionItems?: Array<{ __typename?: 'ActionItem', type: ActionItemType, link: string } | null> | null };
-
-export type FollowerFragment = { __typename?: 'Follower', id: string, incident?: { __typename?: 'Incident', id: string } | null, user: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null }, preferences?: { __typename?: 'NotificationPreferences', message?: boolean | null, incidentUpdate?: boolean | null } | null };
-
-export type SubscriptionFragment = { __typename?: 'SlimSubscription', id: string, lineItems?: { __typename?: 'SubscriptionLineItems', items?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null } | null, plan?: { __typename?: 'Plan', id: string, name: string, cost: number, period?: string | null, lineItems?: { __typename?: 'PlanLineItems', included?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null, items?: Array<{ __typename?: 'LineItem', name: string, dimension: string, cost: number, period?: string | null } | null> | null } | null, serviceLevels?: Array<{ __typename?: 'ServiceLevel', minSeverity?: number | null, maxSeverity?: number | null, responseTime?: number | null } | null> | null, metadata?: { __typename?: 'PlanMetadata', features?: Array<{ __typename?: 'PlanFeature', name: string, description: string } | null> | null } | null } | null };
-
-export type IncidentFragment = { __typename?: 'Incident', id: string, title: string, description?: string | null, severity: number, status: IncidentStatus, notificationCount?: number | null, nextResponseAt?: Date | null, insertedAt?: Date | null, creator: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null }, owner?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null } | null, repository: { __typename?: 'Repository', id: string, name: string, description?: string | null, icon?: string | null }, subscription?: { __typename?: 'SlimSubscription', id: string, lineItems?: { __typename?: 'SubscriptionLineItems', items?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null } | null, plan?: { __typename?: 'Plan', id: string, name: string, cost: number, period?: string | null, lineItems?: { __typename?: 'PlanLineItems', included?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null, items?: Array<{ __typename?: 'LineItem', name: string, dimension: string, cost: number, period?: string | null } | null> | null } | null, serviceLevels?: Array<{ __typename?: 'ServiceLevel', minSeverity?: number | null, maxSeverity?: number | null, responseTime?: number | null } | null> | null, metadata?: { __typename?: 'PlanMetadata', features?: Array<{ __typename?: 'PlanFeature', name: string, description: string } | null> | null } | null } | null } | null, clusterInformation?: { __typename?: 'ClusterInformation', gitCommit?: string | null, version?: string | null, platform?: string | null } | null, tags?: Array<{ __typename?: 'Tag', tag: string } | null> | null };
-
-export type IncidentHistoryFragment = { __typename?: 'IncidentHistory', id: string, action: IncidentAction, insertedAt?: Date | null, changes?: Array<{ __typename?: 'IncidentChange', key: string, prev?: string | null, next?: string | null } | null> | null, actor: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null } };
-
-export type FileFragment = { __typename?: 'File', id: string, blob: string, mediaType?: MediaType | null, contentType?: string | null, filesize?: number | null, filename?: string | null };
-
-export type IncidentMessageFragment = { __typename?: 'IncidentMessage', id: string, text: string, insertedAt?: Date | null, creator: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null }, reactions?: Array<{ __typename?: 'Reaction', name: string, creator: { __typename?: 'User', id: string, email: string } } | null> | null, file?: { __typename?: 'File', id: string, blob: string, mediaType?: MediaType | null, contentType?: string | null, filesize?: number | null, filename?: string | null } | null, entities?: Array<{ __typename?: 'MessageEntity', type: MessageEntityType, text?: string | null, startIndex?: number | null, endIndex?: number | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null } | null } | null> | null };
-
-export type IncidentNotificationFragment = { __typename?: 'Notification', id: string, insertedAt?: Date | null };
-
-export type IncidentUserFragment = { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null };
-
-export type ClusterInformationFragment = { __typename?: 'ClusterInformation', gitCommit?: string | null, version?: string | null, platform?: string | null };
-
-export type RepoFragment = { __typename?: 'Repository', id: string, name: string, description?: string | null, icon?: string | null };
-
-export type PlanFragment = { __typename?: 'Plan', id: string, name: string, cost: number, period?: string | null, lineItems?: { __typename?: 'PlanLineItems', included?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null, items?: Array<{ __typename?: 'LineItem', name: string, dimension: string, cost: number, period?: string | null } | null> | null } | null, serviceLevels?: Array<{ __typename?: 'ServiceLevel', minSeverity?: number | null, maxSeverity?: number | null, responseTime?: number | null } | null> | null, metadata?: { __typename?: 'PlanMetadata', features?: Array<{ __typename?: 'PlanFeature', name: string, description: string } | null> | null } | null };
-
-export type PostmortemFragment = { __typename?: 'Postmortem', id: string, content: string, actionItems?: Array<{ __typename?: 'ActionItem', type: ActionItemType, link: string } | null> | null };
-
-export type FollowerFragment = { __typename?: 'Follower', id: string, incident?: { __typename?: 'Incident', id: string } | null, user: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null }, preferences?: { __typename?: 'NotificationPreferences', message?: boolean | null, incidentUpdate?: boolean | null } | null };
-
-export type SubscriptionFragment = { __typename?: 'SlimSubscription', id: string, lineItems?: { __typename?: 'SubscriptionLineItems', items?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null } | null, plan?: { __typename?: 'Plan', id: string, name: string, cost: number, period?: string | null, lineItems?: { __typename?: 'PlanLineItems', included?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null, items?: Array<{ __typename?: 'LineItem', name: string, dimension: string, cost: number, period?: string | null } | null> | null } | null, serviceLevels?: Array<{ __typename?: 'ServiceLevel', minSeverity?: number | null, maxSeverity?: number | null, responseTime?: number | null } | null> | null, metadata?: { __typename?: 'PlanMetadata', features?: Array<{ __typename?: 'PlanFeature', name: string, description: string } | null> | null } | null } | null };
-
-export type IncidentFragment = { __typename?: 'Incident', id: string, title: string, description?: string | null, severity: number, status: IncidentStatus, notificationCount?: number | null, nextResponseAt?: Date | null, insertedAt?: Date | null, creator: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null }, owner?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null } | null, repository: { __typename?: 'Repository', id: string, name: string, description?: string | null, icon?: string | null }, subscription?: { __typename?: 'SlimSubscription', id: string, lineItems?: { __typename?: 'SubscriptionLineItems', items?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null } | null, plan?: { __typename?: 'Plan', id: string, name: string, cost: number, period?: string | null, lineItems?: { __typename?: 'PlanLineItems', included?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null, items?: Array<{ __typename?: 'LineItem', name: string, dimension: string, cost: number, period?: string | null } | null> | null } | null, serviceLevels?: Array<{ __typename?: 'ServiceLevel', minSeverity?: number | null, maxSeverity?: number | null, responseTime?: number | null } | null> | null, metadata?: { __typename?: 'PlanMetadata', features?: Array<{ __typename?: 'PlanFeature', name: string, description: string } | null> | null } | null } | null } | null, clusterInformation?: { __typename?: 'ClusterInformation', gitCommit?: string | null, version?: string | null, platform?: string | null } | null, tags?: Array<{ __typename?: 'Tag', tag: string } | null> | null };
-
-export type IncidentHistoryFragment = { __typename?: 'IncidentHistory', id: string, action: IncidentAction, insertedAt?: Date | null, changes?: Array<{ __typename?: 'IncidentChange', key: string, prev?: string | null, next?: string | null } | null> | null, actor: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null } };
-
-export type FileFragment = { __typename?: 'File', id: string, blob: string, mediaType?: MediaType | null, contentType?: string | null, filesize?: number | null, filename?: string | null };
-
-export type IncidentMessageFragment = { __typename?: 'IncidentMessage', id: string, text: string, insertedAt?: Date | null, creator: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null }, reactions?: Array<{ __typename?: 'Reaction', name: string, creator: { __typename?: 'User', id: string, email: string } } | null> | null, file?: { __typename?: 'File', id: string, blob: string, mediaType?: MediaType | null, contentType?: string | null, filesize?: number | null, filename?: string | null } | null, entities?: Array<{ __typename?: 'MessageEntity', type: MessageEntityType, text?: string | null, startIndex?: number | null, endIndex?: number | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null } | null } | null> | null };
-
-export type IncidentNotificationFragment = { __typename?: 'Notification', id: string, insertedAt?: Date | null };
-
 export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null };
 
 export type GroupFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null };
@@ -2807,6 +2759,30 @@ export type DeleteGroupMutationVariables = Exact<{
 
 export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null };
 
+export type IncidentUserFragment = { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null };
+
+export type ClusterInformationFragment = { __typename?: 'ClusterInformation', gitCommit?: string | null, version?: string | null, platform?: string | null };
+
+export type RepoFragment = { __typename?: 'Repository', id: string, name: string, description?: string | null, icon?: string | null };
+
+export type PlanFragment = { __typename?: 'Plan', id: string, name: string, cost: number, period?: string | null, lineItems?: { __typename?: 'PlanLineItems', included?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null, items?: Array<{ __typename?: 'LineItem', name: string, dimension: string, cost: number, period?: string | null } | null> | null } | null, serviceLevels?: Array<{ __typename?: 'ServiceLevel', minSeverity?: number | null, maxSeverity?: number | null, responseTime?: number | null } | null> | null, metadata?: { __typename?: 'PlanMetadata', features?: Array<{ __typename?: 'PlanFeature', name: string, description: string } | null> | null } | null };
+
+export type PostmortemFragment = { __typename?: 'Postmortem', id: string, content: string, actionItems?: Array<{ __typename?: 'ActionItem', type: ActionItemType, link: string } | null> | null };
+
+export type FollowerFragment = { __typename?: 'Follower', id: string, incident?: { __typename?: 'Incident', id: string } | null, user: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null }, preferences?: { __typename?: 'NotificationPreferences', message?: boolean | null, incidentUpdate?: boolean | null } | null };
+
+export type SubscriptionFragment = { __typename?: 'SlimSubscription', id: string, lineItems?: { __typename?: 'SubscriptionLineItems', items?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null } | null, plan?: { __typename?: 'Plan', id: string, name: string, cost: number, period?: string | null, lineItems?: { __typename?: 'PlanLineItems', included?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null, items?: Array<{ __typename?: 'LineItem', name: string, dimension: string, cost: number, period?: string | null } | null> | null } | null, serviceLevels?: Array<{ __typename?: 'ServiceLevel', minSeverity?: number | null, maxSeverity?: number | null, responseTime?: number | null } | null> | null, metadata?: { __typename?: 'PlanMetadata', features?: Array<{ __typename?: 'PlanFeature', name: string, description: string } | null> | null } | null } | null };
+
+export type IncidentFragment = { __typename?: 'Incident', id: string, title: string, description?: string | null, severity: number, status: IncidentStatus, notificationCount?: number | null, nextResponseAt?: Date | null, insertedAt?: Date | null, creator: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null }, owner?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null } | null, repository: { __typename?: 'Repository', id: string, name: string, description?: string | null, icon?: string | null }, subscription?: { __typename?: 'SlimSubscription', id: string, lineItems?: { __typename?: 'SubscriptionLineItems', items?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null } | null, plan?: { __typename?: 'Plan', id: string, name: string, cost: number, period?: string | null, lineItems?: { __typename?: 'PlanLineItems', included?: Array<{ __typename?: 'Limit', dimension: string, quantity: number } | null> | null, items?: Array<{ __typename?: 'LineItem', name: string, dimension: string, cost: number, period?: string | null } | null> | null } | null, serviceLevels?: Array<{ __typename?: 'ServiceLevel', minSeverity?: number | null, maxSeverity?: number | null, responseTime?: number | null } | null> | null, metadata?: { __typename?: 'PlanMetadata', features?: Array<{ __typename?: 'PlanFeature', name: string, description: string } | null> | null } | null } | null } | null, clusterInformation?: { __typename?: 'ClusterInformation', gitCommit?: string | null, version?: string | null, platform?: string | null } | null, tags?: Array<{ __typename?: 'Tag', tag: string } | null> | null };
+
+export type IncidentHistoryFragment = { __typename?: 'IncidentHistory', id: string, action: IncidentAction, insertedAt?: Date | null, changes?: Array<{ __typename?: 'IncidentChange', key: string, prev?: string | null, next?: string | null } | null> | null, actor: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null } };
+
+export type FileFragment = { __typename?: 'File', id: string, blob: string, mediaType?: MediaType | null, contentType?: string | null, filesize?: number | null, filename?: string | null };
+
+export type IncidentMessageFragment = { __typename?: 'IncidentMessage', id: string, text: string, insertedAt?: Date | null, creator: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null }, reactions?: Array<{ __typename?: 'Reaction', name: string, creator: { __typename?: 'User', id: string, email: string } } | null> | null, file?: { __typename?: 'File', id: string, blob: string, mediaType?: MediaType | null, contentType?: string | null, filesize?: number | null, filename?: string | null } | null, entities?: Array<{ __typename?: 'MessageEntity', type: MessageEntityType, text?: string | null, startIndex?: number | null, endIndex?: number | null, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null } | null } | null> | null };
+
+export type IncidentNotificationFragment = { __typename?: 'Notification', id: string, insertedAt?: Date | null };
+
 export type EventFragment = { __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null };
 
 export type PodConditionFragment = { __typename?: 'PodCondition', message?: string | null, reason?: string | null, status?: string | null };
@@ -2848,8 +2824,6 @@ export type ContainerResourcesFragment = { __typename?: 'ContainerResources', cp
 export type VerticalPodAutoscalerFragment = { __typename?: 'VerticalPodAutoscaler', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status?: { __typename?: 'VerticalPodAutoscalerStatus', recommendation?: { __typename?: 'Recommendation', containerRecommendations?: Array<{ __typename?: 'ContainerRecommendation', containerName?: string | null, lowerBound?: { __typename?: 'ContainerResources', cpu?: string | null, memory?: string | null } | null, upperBound?: { __typename?: 'ContainerResources', cpu?: string | null, memory?: string | null } | null, uncappedTarget?: { __typename?: 'ContainerResources', cpu?: string | null, memory?: string | null } | null } | null> | null } | null } | null };
 
 export type OidcProviderFragment = { __typename?: 'OidcProvider', id: string, clientId: string, authMethod: OidcAuthMethod, clientSecret: string, redirectUris?: Array<string | null> | null, bindings?: Array<{ __typename?: 'OidcProviderBinding', id: string, user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null } | null> | null };
-
-export type RepositoryFragment = { __typename?: 'Repository', id: string, name: string, description?: string | null, icon?: string | null };
 
 export type SmtpFragment = { __typename?: 'Smtp', server?: string | null, port?: number | null, sender?: string | null, user?: string | null, password?: string | null };
 
@@ -3264,382 +3238,6 @@ export const LogStreamFragmentDoc = gql`
   }
 }
     `;
-export const PostmortemFragmentDoc = gql`
-    fragment Postmortem on Postmortem {
-  id
-  content
-  actionItems {
-    type
-    link
-  }
-}
-    `;
-export const IncidentUserFragmentDoc = gql`
-    fragment IncidentUser on User {
-  id
-  name
-  email
-  profile
-  backgroundColor
-}
-    `;
-export const FollowerFragmentDoc = gql`
-    fragment Follower on Follower {
-  id
-  incident {
-    id
-  }
-  user {
-    ...IncidentUser
-  }
-  preferences {
-    message
-    incidentUpdate
-  }
-}
-    ${IncidentUserFragmentDoc}`;
-export const RepoFragmentDoc = gql`
-    fragment Repo on Repository {
-  id
-  name
-  description
-  icon
-}
-    `;
-export const PlanFragmentDoc = gql`
-    fragment Plan on Plan {
-  id
-  name
-  cost
-  period
-  lineItems {
-    included {
-      dimension
-      quantity
-    }
-    items {
-      name
-      dimension
-      cost
-      period
-    }
-  }
-  serviceLevels {
-    minSeverity
-    maxSeverity
-    responseTime
-  }
-  metadata {
-    features {
-      name
-      description
-    }
-  }
-}
-    `;
-export const SubscriptionFragmentDoc = gql`
-    fragment Subscription on SlimSubscription {
-  id
-  lineItems {
-    items {
-      dimension
-      quantity
-    }
-  }
-  plan {
-    ...Plan
-  }
-}
-    ${PlanFragmentDoc}`;
-export const ClusterInformationFragmentDoc = gql`
-    fragment ClusterInformation on ClusterInformation {
-  gitCommit
-  version
-  platform
-}
-    `;
-export const IncidentFragmentDoc = gql`
-    fragment Incident on Incident {
-  id
-  title
-  description
-  severity
-  status
-  notificationCount
-  nextResponseAt
-  creator {
-    ...IncidentUser
-  }
-  owner {
-    ...IncidentUser
-  }
-  repository {
-    ...Repo
-  }
-  subscription {
-    ...Subscription
-  }
-  clusterInformation {
-    ...ClusterInformation
-  }
-  tags {
-    tag
-  }
-  insertedAt
-}
-    ${IncidentUserFragmentDoc}
-${RepoFragmentDoc}
-${SubscriptionFragmentDoc}
-${ClusterInformationFragmentDoc}`;
-export const IncidentHistoryFragmentDoc = gql`
-    fragment IncidentHistory on IncidentHistory {
-  id
-  action
-  changes {
-    key
-    prev
-    next
-  }
-  actor {
-    ...IncidentUser
-  }
-  insertedAt
-}
-    ${IncidentUserFragmentDoc}`;
-export const FileFragmentDoc = gql`
-    fragment File on File {
-  id
-  blob
-  mediaType
-  contentType
-  filesize
-  filename
-}
-    `;
-export const IncidentMessageFragmentDoc = gql`
-    fragment IncidentMessage on IncidentMessage {
-  id
-  text
-  creator {
-    ...IncidentUser
-  }
-  reactions {
-    name
-    creator {
-      id
-      email
-    }
-  }
-  file {
-    ...File
-  }
-  entities {
-    type
-    user {
-      ...IncidentUser
-    }
-    text
-    startIndex
-    endIndex
-  }
-  insertedAt
-}
-    ${IncidentUserFragmentDoc}
-${FileFragmentDoc}`;
-export const IncidentNotificationFragmentDoc = gql`
-    fragment IncidentNotification on Notification {
-  id
-  insertedAt
-}
-    `;
-export const PostmortemFragmentDoc = gql`
-    fragment Postmortem on Postmortem {
-  id
-  content
-  actionItems {
-    type
-    link
-  }
-}
-    `;
-export const IncidentUserFragmentDoc = gql`
-    fragment IncidentUser on User {
-  id
-  name
-  email
-  profile
-  backgroundColor
-}
-    `;
-export const FollowerFragmentDoc = gql`
-    fragment Follower on Follower {
-  id
-  incident {
-    id
-  }
-  user {
-    ...IncidentUser
-  }
-  preferences {
-    message
-    incidentUpdate
-  }
-}
-    ${IncidentUserFragmentDoc}`;
-export const RepoFragmentDoc = gql`
-    fragment Repo on Repository {
-  id
-  name
-  description
-  icon
-}
-    `;
-export const PlanFragmentDoc = gql`
-    fragment Plan on Plan {
-  id
-  name
-  cost
-  period
-  lineItems {
-    included {
-      dimension
-      quantity
-    }
-    items {
-      name
-      dimension
-      cost
-      period
-    }
-  }
-  serviceLevels {
-    minSeverity
-    maxSeverity
-    responseTime
-  }
-  metadata {
-    features {
-      name
-      description
-    }
-  }
-}
-    `;
-export const SubscriptionFragmentDoc = gql`
-    fragment Subscription on SlimSubscription {
-  id
-  lineItems {
-    items {
-      dimension
-      quantity
-    }
-  }
-  plan {
-    ...Plan
-  }
-}
-    ${PlanFragmentDoc}`;
-export const ClusterInformationFragmentDoc = gql`
-    fragment ClusterInformation on ClusterInformation {
-  gitCommit
-  version
-  platform
-}
-    `;
-export const IncidentFragmentDoc = gql`
-    fragment Incident on Incident {
-  id
-  title
-  description
-  severity
-  status
-  notificationCount
-  nextResponseAt
-  creator {
-    ...IncidentUser
-  }
-  owner {
-    ...IncidentUser
-  }
-  repository {
-    ...Repo
-  }
-  subscription {
-    ...Subscription
-  }
-  clusterInformation {
-    ...ClusterInformation
-  }
-  tags {
-    tag
-  }
-  insertedAt
-}
-    ${IncidentUserFragmentDoc}
-${RepoFragmentDoc}
-${SubscriptionFragmentDoc}
-${ClusterInformationFragmentDoc}`;
-export const IncidentHistoryFragmentDoc = gql`
-    fragment IncidentHistory on IncidentHistory {
-  id
-  action
-  changes {
-    key
-    prev
-    next
-  }
-  actor {
-    ...IncidentUser
-  }
-  insertedAt
-}
-    ${IncidentUserFragmentDoc}`;
-export const FileFragmentDoc = gql`
-    fragment File on File {
-  id
-  blob
-  mediaType
-  contentType
-  filesize
-  filename
-}
-    `;
-export const IncidentMessageFragmentDoc = gql`
-    fragment IncidentMessage on IncidentMessage {
-  id
-  text
-  creator {
-    ...IncidentUser
-  }
-  reactions {
-    name
-    creator {
-      id
-      email
-    }
-  }
-  file {
-    ...File
-  }
-  entities {
-    type
-    user {
-      ...IncidentUser
-    }
-    text
-    startIndex
-    endIndex
-  }
-  insertedAt
-}
-    ${IncidentUserFragmentDoc}
-${FileFragmentDoc}`;
-export const IncidentNotificationFragmentDoc = gql`
-    fragment IncidentNotification on Notification {
-  id
-  insertedAt
-}
-    `;
 export const GroupFragmentDoc = gql`
     fragment Group on Group {
   id
@@ -3659,6 +3257,194 @@ export const GroupMemberFragmentDoc = gql`
 }
     ${UserFragmentDoc}
 ${GroupFragmentDoc}`;
+export const PostmortemFragmentDoc = gql`
+    fragment Postmortem on Postmortem {
+  id
+  content
+  actionItems {
+    type
+    link
+  }
+}
+    `;
+export const IncidentUserFragmentDoc = gql`
+    fragment IncidentUser on User {
+  id
+  name
+  email
+  profile
+  backgroundColor
+}
+    `;
+export const FollowerFragmentDoc = gql`
+    fragment Follower on Follower {
+  id
+  incident {
+    id
+  }
+  user {
+    ...IncidentUser
+  }
+  preferences {
+    message
+    incidentUpdate
+  }
+}
+    ${IncidentUserFragmentDoc}`;
+export const RepoFragmentDoc = gql`
+    fragment Repo on Repository {
+  id
+  name
+  description
+  icon
+}
+    `;
+export const PlanFragmentDoc = gql`
+    fragment Plan on Plan {
+  id
+  name
+  cost
+  period
+  lineItems {
+    included {
+      dimension
+      quantity
+    }
+    items {
+      name
+      dimension
+      cost
+      period
+    }
+  }
+  serviceLevels {
+    minSeverity
+    maxSeverity
+    responseTime
+  }
+  metadata {
+    features {
+      name
+      description
+    }
+  }
+}
+    `;
+export const SubscriptionFragmentDoc = gql`
+    fragment Subscription on SlimSubscription {
+  id
+  lineItems {
+    items {
+      dimension
+      quantity
+    }
+  }
+  plan {
+    ...Plan
+  }
+}
+    ${PlanFragmentDoc}`;
+export const ClusterInformationFragmentDoc = gql`
+    fragment ClusterInformation on ClusterInformation {
+  gitCommit
+  version
+  platform
+}
+    `;
+export const IncidentFragmentDoc = gql`
+    fragment Incident on Incident {
+  id
+  title
+  description
+  severity
+  status
+  notificationCount
+  nextResponseAt
+  creator {
+    ...IncidentUser
+  }
+  owner {
+    ...IncidentUser
+  }
+  repository {
+    ...Repo
+  }
+  subscription {
+    ...Subscription
+  }
+  clusterInformation {
+    ...ClusterInformation
+  }
+  tags {
+    tag
+  }
+  insertedAt
+}
+    ${IncidentUserFragmentDoc}
+${RepoFragmentDoc}
+${SubscriptionFragmentDoc}
+${ClusterInformationFragmentDoc}`;
+export const IncidentHistoryFragmentDoc = gql`
+    fragment IncidentHistory on IncidentHistory {
+  id
+  action
+  changes {
+    key
+    prev
+    next
+  }
+  actor {
+    ...IncidentUser
+  }
+  insertedAt
+}
+    ${IncidentUserFragmentDoc}`;
+export const FileFragmentDoc = gql`
+    fragment File on File {
+  id
+  blob
+  mediaType
+  contentType
+  filesize
+  filename
+}
+    `;
+export const IncidentMessageFragmentDoc = gql`
+    fragment IncidentMessage on IncidentMessage {
+  id
+  text
+  creator {
+    ...IncidentUser
+  }
+  reactions {
+    name
+    creator {
+      id
+      email
+    }
+  }
+  file {
+    ...File
+  }
+  entities {
+    type
+    user {
+      ...IncidentUser
+    }
+    text
+    startIndex
+    endIndex
+  }
+  insertedAt
+}
+    ${IncidentUserFragmentDoc}
+${FileFragmentDoc}`;
+export const IncidentNotificationFragmentDoc = gql`
+    fragment IncidentNotification on Notification {
+  id
+  insertedAt
+}
+    `;
 export const EventFragmentDoc = gql`
     fragment Event on Event {
   action
@@ -3984,14 +3770,6 @@ export const VerticalPodAutoscalerFragmentDoc = gql`
 }
     ${MetadataFragmentDoc}
 ${ContainerResourcesFragmentDoc}`;
-export const GroupFragmentDoc = gql`
-    fragment Group on Group {
-  id
-  name
-  description
-  insertedAt
-}
-    `;
 export const OidcProviderFragmentDoc = gql`
     fragment OIDCProvider on OidcProvider {
   id
