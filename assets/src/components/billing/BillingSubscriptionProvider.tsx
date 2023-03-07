@@ -1,12 +1,11 @@
-import { ReactNode, useContext, useMemo } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import moment from 'moment'
-import posthog from 'posthog-js'
+// import posthog from 'posthog-js'
 
-import PlatformPlansContext from 'components/contexts/PlatformPlansContext'
 import SubscriptionContext, { SubscriptionContextType } from 'components/contexts//SubscriptionContext'
 
-import { PlatformSubscription } from '../../generated/graphql'
+import { PluralApi } from 'components/PluralApi'
 
 import BillingError from './BillingError'
 import BillingLoading from './BillingLoading'
@@ -16,19 +15,32 @@ type BillingSubscriptionProviderPropsType = {
   children: ReactNode
 }
 
-function BillingSubscriptionProvider({ children }: BillingSubscriptionProviderPropsType) {
+export default function BillingSubscriptionProvider({ children }: BillingSubscriptionProviderPropsType) {
+  return (
+    <PluralApi>
+      <BillingSubscriptionProviderInternal>
+        {children}
+      </BillingSubscriptionProviderInternal>
+    </PluralApi>
+  )
+}
+
+function BillingSubscriptionProviderInternal({ children }: BillingSubscriptionProviderPropsType) {
   const {
     data,
     loading,
     error,
     refetch,
   } = useQuery(SUBSCRIPTION_QUERY, { fetchPolicy: 'network-only', pollInterval: 60_000 })
-  const { proPlatformPlan, proYearlyPlatformPlan, enterprisePlatformPlan } = useContext(PlatformPlansContext)
 
-  const pricingFeaturesEnabled = useMemo(() => posthog.isFeatureEnabled('pricing'), [])
-  const subscription = useMemo(() => data?.account?.subscription as PlatformSubscription | null, [data])
+  // const { proPlatformPlan, proYearlyPlatformPlan, enterprisePlatformPlan } = useContext(PlatformPlansContext)
+  const proPlatformPlan = { id: '' }
+  const proYearlyPlatformPlan = { id: '' }
+  const enterprisePlatformPlan = { id: '' }
+
+  const pricingFeaturesEnabled = useMemo(() => true, []) // posthog.isFeatureEnabled('pricing'), [])
+  const subscription = useMemo(() => data?.account?.subscription, [data])
   const billingAddress = useMemo(() => data?.account?.billingAddress ?? null, [data])
-  const billingCustomerId = useMemo(() => data?.account?.billingCustomerId, [data])
   const isProPlan = useMemo(() => !!subscription?.plan?.id && (subscription.plan.id === proPlatformPlan?.id || subscription.plan.id === proYearlyPlatformPlan?.id), [subscription, proPlatformPlan, proYearlyPlatformPlan])
   const isEnterprisePlan = useMemo(() => !!subscription?.plan?.id && subscription.plan.id === enterprisePlatformPlan?.id, [subscription, enterprisePlatformPlan])
   const isPaidPlan = useMemo(() => isProPlan || isEnterprisePlan, [isProPlan, isEnterprisePlan])
@@ -37,7 +49,6 @@ function BillingSubscriptionProvider({ children }: BillingSubscriptionProviderPr
     pricingFeaturesEnabled,
     subscription,
     billingAddress,
-    billingCustomerId,
     isProPlan,
     isEnterprisePlan,
     isPaidPlan,
@@ -49,7 +60,6 @@ function BillingSubscriptionProvider({ children }: BillingSubscriptionProviderPr
     pricingFeaturesEnabled,
     subscription,
     billingAddress,
-    billingCustomerId,
     isProPlan,
     isEnterprisePlan,
     isPaidPlan,
@@ -67,5 +77,3 @@ function BillingSubscriptionProvider({ children }: BillingSubscriptionProviderPr
     </SubscriptionContext.Provider>
   )
 }
-
-export default BillingSubscriptionProvider

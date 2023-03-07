@@ -1,9 +1,17 @@
 import { useContext } from 'react'
-import { Link } from 'react-router-dom'
-import { A, P } from 'honorable'
-
 import moment from 'moment'
-import SubscriptionContext from 'components/contexts/SubscriptionContext'
+import styled from 'styled-components'
+
+import SubscriptionContext from '../contexts/SubscriptionContext'
+
+const Message = styled.p(({ theme }) => ({
+  ...theme.partials.text.overline,
+  color: theme.colors['text-xlight'],
+}))
+
+const MessageLink = styled.a(({ theme }) => ({
+  ...theme.partials.text.inlineLink,
+}))
 
 function BillingLegacyUserMessage() {
   const {
@@ -16,20 +24,18 @@ function BillingLegacyUserMessage() {
   if (!open) return null
 
   return (
-    <P
-      overline
-      color="text-xlight"
-    >
-      Legacy user access {expired ? 'expired' : `until ${moment(account?.grandfatheredUntil).format('MMM DD, YYYY')}`}
+    <Message>
+      Legacy user access
+      {expired ? ' expired' : ` until ${moment(account?.grandfatheredUntil).format('MMM DD, YYYY')}`}
       {' '}
-      <A
-        inline
-        as={Link}
-        to="/account/billing"
+      <MessageLink
+        href="https://app.plural.sh/account/billing"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         upgrade now
-      </A>
-    </P>
+      </MessageLink>
+    </Message>
   )
 }
 
