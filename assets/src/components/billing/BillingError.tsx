@@ -1,15 +1,7 @@
-import { Flex } from 'honorable'
+import styled from 'styled-components'
 
-function BillingError() {
-  return (
-    <Flex
-      flexGrow={1}
-      align="center"
-      justify="center"
-    >
-      An error occured, please reload the page or contact support.
-    </Flex>
-  )
+const Wrapper = styled.div({ textAlign: 'center' })
+
+export default function BillingError() {
+  return <Wrapper>An error occured, please reload the page or contact support.</Wrapper>
 }
-
-export default BillingError
