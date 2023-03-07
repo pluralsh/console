@@ -31,7 +31,8 @@ export default function BillingFeatureBlockBanner({
       direction="column"
       borderRadius="medium"
       padding="xxlarge"
-      background={placeholderImageURL ? `url(${placeholderImageURL}) no-repeat top center / contain` : undefined}
+      background={placeholderImageURL ? `url(${placeholderImageURL}) no-repeat top center` : undefined}
+      backgroundSize="100% auto"
       backgroundColor="fill-zero"
       zIndex={10}
     >

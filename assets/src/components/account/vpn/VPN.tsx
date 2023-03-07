@@ -9,6 +9,8 @@ import { useQuery } from '@apollo/client'
 import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
 
+import { Flex } from 'honorable'
+
 import VPNClientList from '../../vpn/VPNClientList'
 import {
   ColumnActions,
@@ -61,16 +63,21 @@ function VPN() {
         />
       )}
     >
-      <BillingLegacyUserBanner feature="VPN clients" />
-      <VPNClientList
-        columns={columns}
-        data={filteredClientList}
-      /> {/* TODO: Fix height. */}
-      <BillingFeatureBlockBanner
-        feature="VPN clients"
-        description="" // TODO: Add.
-        placeholderImageURL="/placeholder-vpn.png"
-      />
+      <Flex
+        direction="column"
+        height="100%"
+      >
+        <BillingLegacyUserBanner feature="VPN clients" />
+        <VPNClientList
+          columns={columns}
+          data={filteredClientList}
+        />
+        <BillingFeatureBlockBanner
+          feature="VPN clients"
+          description="" // TODO: Add.
+          placeholderImageURL="/placeholder-vpn.png"
+        />
+      </Flex>
     </ResponsivePageFullWidth>
   )
 }
