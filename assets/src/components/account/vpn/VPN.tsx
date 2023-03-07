@@ -74,6 +74,7 @@ function VPN() {
         />
         <BillingFeatureBlockBanner
           feature="VPN clients"
+          planFeature="vpn"
           description="" // TODO: Add.
           placeholderImageURL="/placeholder-vpn.png"
         />

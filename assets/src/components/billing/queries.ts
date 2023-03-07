@@ -26,10 +26,7 @@ export const SUBSCRIPTION_QUERY = gql`
   query Subscription {
     account {
       grandfatheredUntil
-      delinquentAt
-      userCount
-      clusterCount
-      availableFeatures { userManagement audit }
+      availableFeatures { userManagement audit vpn }
       subscription {
         id
         plan {
@@ -37,15 +34,6 @@ export const SUBSCRIPTION_QUERY = gql`
           period
           lineItems { dimension cost }
         }
-      }
-      billingAddress {
-        name
-        line1
-        line2
-        zip
-        state
-        city
-        country
       }
     }
   }
