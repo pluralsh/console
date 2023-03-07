@@ -1,15 +1,11 @@
-import { Flex, Spinner } from 'honorable'
+import { Spinner } from 'honorable'
+import styled from 'styled-components'
 
-function BillingLoading() {
-  return (
-    <Flex
-      flexGrow={1}
-      align="center"
-      justify="center"
-    >
-      <Spinner />
-    </Flex>
-  )
+const Wrapper = styled.div({
+  display: 'flex',
+  justifyContent: 'center',
+})
+
+export default function BillingLoading() {
+  return <Wrapper><Spinner /></Wrapper>
 }
-
-export default BillingLoading
