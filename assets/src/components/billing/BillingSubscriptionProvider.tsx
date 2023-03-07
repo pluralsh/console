@@ -1,11 +1,11 @@
 import { ReactNode, useMemo } from 'react'
-import { useQuery } from '@apollo/client'
+import { ApolloProvider, useQuery } from '@apollo/client'
 import moment from 'moment'
 // import posthog from 'posthog-js'
 
 import SubscriptionContext, { SubscriptionContextType } from 'components/contexts//SubscriptionContext'
-
 import { PluralApi } from 'components/PluralApi'
+import { client } from 'helpers/client'
 
 import BillingError from './BillingError'
 import BillingLoading from './BillingLoading'
@@ -17,9 +17,11 @@ type BillingSubscriptionProviderPropsType = {
 
 export default function BillingSubscriptionProvider({ children }: BillingSubscriptionProviderPropsType) {
   return (
-    <PluralApi>
+    <PluralApi> {/* Switch to Plural API. */}
       <BillingSubscriptionProviderInternal>
-        {children}
+        <ApolloProvider client={client}> {/* Switch back to Console API. */}
+          {children}
+        </ApolloProvider>
       </BillingSubscriptionProviderInternal>
     </PluralApi>
   )
