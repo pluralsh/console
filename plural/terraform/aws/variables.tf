@@ -56,7 +56,7 @@ variable "node_groups_defaults" {
 
 variable "create_node_group" {
   type = bool
-  default = true
+  default = false
   description = "whether you want to create the dedicated node group for complex console builds" 
 }
 

@@ -673,6 +673,7 @@ type ApplicationSpec {
 
 type AvailableFeatures {
   vpn: Boolean
+  userManagement: Boolean
 }
 
 type WireguardPeer {

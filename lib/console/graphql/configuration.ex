@@ -31,6 +31,10 @@ defmodule Console.GraphQl.Configuration do
 
   object :available_features do
     field :vpn, :boolean
+    field :user_management, :boolean, resolve: fn
+      %{userManagement: val}, _, _ -> {:ok, val}
+      features, _, _ -> {:ok, Map.get(features, :user_management)}
+    end
   end
 
   object :console_configuration do
