@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
+import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
 
 import { List } from '../../utils/List'
 
@@ -25,6 +26,11 @@ export function Groups() {
         />
         <GroupsList q={q} />
       </List>
+      <BillingFeatureBlockBanner
+        feature="groups"
+        description="Organize your users into groups to more easily apply permissions to sub-sections of your team. e.g. ops, end-users, and admins."
+        placeholderImageURL="/placeholder-groups.png"
+      />
     </ScrollablePage>
   )
 }

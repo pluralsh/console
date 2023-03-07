@@ -6,8 +6,8 @@ import {
   useState,
 } from 'react'
 import { useQuery } from '@apollo/client'
-
 import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
+import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
 
 import VPNClientList from '../../vpn/VPNClientList'
 import {
@@ -66,6 +66,11 @@ function VPN() {
         columns={columns}
         data={filteredClientList}
       /> {/* TODO: Fix height. */}
+      <BillingFeatureBlockBanner
+        feature="VPN clients"
+        description="" // TODO: Add.
+        placeholderImageURL="" // TODO: Add.
+      />
     </ResponsivePageFullWidth>
   )
 }

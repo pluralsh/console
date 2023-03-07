@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
+import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
 
 import { List } from '../../utils/List'
 
@@ -25,6 +26,11 @@ export default function Roles() {
         />
         <RolesList q={q} />
       </List>
+      <BillingFeatureBlockBanner
+        feature="roles"
+        description="Define granular permissions for your organization's users and apply them to groups or individuals."
+        placeholderImageURL="/placeholder-roles.png"
+      />
     </ScrollablePage>
   )
 }
