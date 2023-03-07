@@ -1,6 +1,6 @@
 import { useState } from 'react'
-
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 
 import { List } from '../../utils/List'
 
@@ -17,7 +17,8 @@ export default function Roles() {
       heading="Roles"
       headingContent={<RoleCreate q={q} />}
     >
-      <List height="100%">
+      <BillingLegacyUserBanner feature="Roles" />
+      <List height="100%"> {/* TODO: Fix height. */}
         <RolesSearchHeader
           q={q}
           setQ={setQ}

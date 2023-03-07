@@ -5,7 +5,7 @@ import styled from 'styled-components'
 
 const Link = styled.a({ textDecoration: 'none' })
 
-function BillingSubscriptionChip() {
+export default function BillingSubscriptionChip() {
   const { isProPlan, isEnterprisePlan } = useContext(SubscriptionContext)
 
   return (
@@ -23,5 +23,3 @@ function BillingSubscriptionChip() {
     </Link>
   )
 }
-
-export default BillingSubscriptionChip

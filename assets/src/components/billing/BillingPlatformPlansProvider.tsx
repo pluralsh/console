@@ -1,8 +1,6 @@
 import { ReactNode, useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 
-import { PlatformPlan } from '../../generated/graphql'
-
 import PlatformPlansContext, { PlatformPlansContextType } from '../contexts/PlatformPlansContext'
 
 import { PLATFORM_PLANS_QUERY } from './queries'
@@ -19,13 +17,13 @@ const errorPricing = {
   userMonthlyPricing: 0,
 }
 
-function BillingPlatformPlansProvider({ children }: BillingPlatformPlansProviderPropsType) {
+export default function BillingPlatformPlansProvider({ children }: BillingPlatformPlansProviderPropsType) {
   const { data, loading, error } = useQuery(PLATFORM_PLANS_QUERY)
 
-  const platformPlans = useMemo(() => data?.platformPlans as PlatformPlan[], [data])
-  const proPlatformPlan = useMemo(() => (platformPlans ? platformPlans.find(p => p.name === 'Pro' && p.period === 'MONTHLY')! : {} as PlatformPlan), [platformPlans])
-  const proYearlyPlatformPlan = useMemo(() => (platformPlans ? platformPlans.find(p => p.name === 'Pro' && p.period === 'YEARLY')! : {} as PlatformPlan), [platformPlans])
-  const enterprisePlatformPlan = useMemo(() => (platformPlans ? platformPlans.find(p => p.name === 'Enterprise')! : {} as PlatformPlan), [platformPlans])
+  const platformPlans = useMemo(() => data?.platformPlans, [data])
+  const proPlatformPlan = useMemo(() => (platformPlans ? platformPlans.find(p => p.name === 'Pro' && p.period === 'MONTHLY')! : {}), [platformPlans])
+  const proYearlyPlatformPlan = useMemo(() => (platformPlans ? platformPlans.find(p => p.name === 'Pro' && p.period === 'YEARLY')! : {}), [platformPlans])
+  const enterprisePlatformPlan = useMemo(() => (platformPlans ? platformPlans.find(p => p.name === 'Enterprise')! : {}), [platformPlans])
 
   const { clusterMonthlyPricing, userMonthlyPricing } = useMemo(() => {
     if (!proPlatformPlan) return errorPricing
@@ -66,5 +64,3 @@ function BillingPlatformPlansProvider({ children }: BillingPlatformPlansProvider
     </PlatformPlansContext.Provider>
   )
 }
-
-export default BillingPlatformPlansProvider

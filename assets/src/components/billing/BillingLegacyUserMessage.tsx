@@ -11,7 +11,7 @@ const Message = styled.p(({ theme }) => ({
 
 const MessageLink = styled.a(({ theme }) => ({ ...theme.partials.text.inlineLink }))
 
-function BillingLegacyUserMessage() {
+export default function BillingLegacyUserMessage() {
   const {
     isProPlan, isEnterprisePlan, isGrandfathered, account,
   } = useContext(SubscriptionContext)
@@ -36,5 +36,3 @@ function BillingLegacyUserMessage() {
     </Message>
   )
 }
-
-export default BillingLegacyUserMessage
