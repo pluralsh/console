@@ -3,9 +3,7 @@ import { Chip } from '@pluralsh/design-system'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
 import styled from 'styled-components'
 
-const Link = styled.a(() => ({
-  textDecoration: 'none',
-}))
+const Link = styled.a({ textDecoration: 'none' })
 
 function BillingSubscriptionChip() {
   const { isProPlan, isEnterprisePlan } = useContext(SubscriptionContext)
