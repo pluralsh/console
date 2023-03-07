@@ -1,15 +1,13 @@
 import {
   PropsWithChildren,
-  ReactElement,
   ReactNode,
   Ref,
-  createElement,
   forwardRef,
   useCallback,
   useState,
 } from 'react'
 import PropTypes from 'prop-types'
-import { Input, InputProps, Span } from 'honorable'
+import { Input, InputProps } from 'honorable'
 
 import FormField from './FormField'
 
@@ -19,7 +17,6 @@ export type CaptionProps = {caption: string, color: string}
 export type ValidatedInputProps = InputProps & PropsWithChildren<{
   label?: ReactNode
   hint?: ReactNode
-  caption?: (props: CaptionProps) => ReactElement
   validation?: (val: string) => ValidationResponse
 }>
 
@@ -30,14 +27,8 @@ const propTypes = {
   validation: PropTypes.func,
 }
 
-function defaultCaption({ caption, color }: CaptionProps) : ReactElement {
-  return (
-    <Span color={color}>{caption}</Span>
-  )
-}
-
 function ValidatedInputRef({
-  label, hint, validation, onChange, width, caption, ...input
+  label, hint, validation, onChange, width, ...input
 } : ValidatedInputProps, ref: Ref<any>) {
   const [error, setError] = useState(null)
   const wrappedOnChange = useCallback((e: any) => {
@@ -45,14 +36,12 @@ function ValidatedInputRef({
     setError((validation && e.target?.value) ? validation(e.target.value) : undefined)
   }, [onChange, validation])
 
-  const captionComp = caption || defaultCaption
-
   return (
     <FormField
       ref={ref}
       label={label}
-      hint={hint}
-      caption={error ? createElement(captionComp, { caption: error.message, color: error.error ? 'text-danger' : 'text-success' }) : null}
+      hint={error?.error ? error.message : hint}
+      error={!!error?.error}
       width={width}
     >
       <Input

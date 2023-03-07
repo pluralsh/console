@@ -15,8 +15,9 @@ function Template() {
       value={value}
       onChange={(e: any) => setValue(e.target.value)}
       width="500px"
-      label="input needs to be looong"
-      validation={(v: string) : ValidationResponse => (v.length < 4 ? { error: true, message: 'too short' } : { error: false, message: 'long enough!' })}
+      label="Name"
+      hint="Name needs to be at least 5 characters long."
+      validation={(v: string) : ValidationResponse => (v.length < 5 ? { error: true, message: 'Provided name is too short. Name needs to be at least 5 characters long.' } : null)}
     />
   )
 }
