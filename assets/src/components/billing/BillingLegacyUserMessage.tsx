@@ -9,9 +9,7 @@ const Message = styled.p(({ theme }) => ({
   color: theme.colors['text-xlight'],
 }))
 
-const MessageLink = styled.a(({ theme }) => ({
-  ...theme.partials.text.inlineLink,
-}))
+const MessageLink = styled.a(({ theme }) => ({ ...theme.partials.text.inlineLink }))
 
 function BillingLegacyUserMessage() {
   const {
