@@ -17,7 +17,6 @@ function BillingSubscriptionChip() {
       <Chip
         severity={isEnterprisePlan || isProPlan ? 'info' : 'neutral'}
         fillLevel={2}
-        height={32}
       >
         {isEnterprisePlan ? 'Enterprise' : isProPlan ? 'Professional' : 'Open-source'}
       </Chip>
