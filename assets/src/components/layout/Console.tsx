@@ -1,28 +1,19 @@
 import { Outlet } from 'react-router-dom'
-
 import { Toast } from '@pluralsh/design-system'
-
 import { A, Flex, Span } from 'honorable'
 import { MarkdocContextProvider } from 'markdoc/MarkdocContext'
-
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
-
 import { ReactNode } from 'react'
-
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
 
 import { EnsureLogin } from '../login/Login'
 import { InstallationsProvider } from '../Installations'
-
 import TerminalThemeProvider from '../terminal/TerminalThemeProvider'
-
 import { CursorPositionProvider } from '../utils/CursorPosition'
 
 import BreadcrumbProvider from './Breadcrumbs'
-
 import Header from './Header'
 import Subheader from './Subheader'
-
 import Sidebar from './Sidebar'
 import WithApplicationUpdate from './WithApplicationUpdate'
 import { ContentOverlay } from './Overlay'
