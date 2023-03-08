@@ -2,11 +2,9 @@ import { ReactNode, useContext, useMemo } from 'react'
 import { ApolloProvider, useQuery } from '@apollo/client'
 import moment from 'moment'
 // import posthog from 'posthog-js'
-
 import SubscriptionContext, { SubscriptionContextType } from 'components/contexts//SubscriptionContext'
 import { PluralApi } from 'components/PluralApi'
 import { client } from 'helpers/client'
-
 import PlatformPlansContext from 'components/contexts/PlatformPlansContext'
 
 import BillingError from './BillingError'
@@ -35,16 +33,40 @@ function BillingSubscriptionProviderInternal({ children }: BillingSubscriptionPr
     loading,
     error,
     refetch,
-  } = useQuery(SUBSCRIPTION_QUERY, { fetchPolicy: 'network-only', pollInterval: 60_000 })
+  } = useQuery(SUBSCRIPTION_QUERY, {
+    fetchPolicy: 'network-only',
+    pollInterval: 60_000,
+  })
 
-  const { proPlatformPlan, proYearlyPlatformPlan, enterprisePlatformPlan } = useContext(PlatformPlansContext)
+  const {
+    proPlatformPlan,
+    proYearlyPlatformPlan,
+    enterprisePlatformPlan,
+  } = useContext(PlatformPlansContext)
 
   const pricingFeaturesEnabled = useMemo(() => true, []) // posthog.isFeatureEnabled('pricing'), [])
+
   const subscription = useMemo(() => data?.account?.subscription, [data])
-  const isProPlan = useMemo(() => !!subscription?.plan?.id && (subscription.plan.id === proPlatformPlan?.id || subscription.plan.id === proYearlyPlatformPlan?.id), [subscription, proPlatformPlan, proYearlyPlatformPlan])
-  const isEnterprisePlan = useMemo(() => !!subscription?.plan?.id && subscription.plan.id === enterprisePlatformPlan?.id, [subscription, enterprisePlatformPlan])
-  const isPaidPlan = useMemo(() => isProPlan || isEnterprisePlan, [isProPlan, isEnterprisePlan])
-  const isGrandfathered = useMemo(() => moment().isBefore(moment(data?.account?.grandfatheredUntil)), [data])
+
+  const isProPlan = useMemo(() => {
+    const planId = !!subscription?.plan?.id
+
+    return !!planId && (planId === proPlatformPlan?.id || planId === proYearlyPlatformPlan?.id)
+  }, [subscription, proPlatformPlan, proYearlyPlatformPlan])
+
+  const isEnterprisePlan = useMemo(() => {
+    const planId = !!subscription?.plan?.id
+
+    return !!planId && planId === enterprisePlatformPlan?.id
+  },
+  [subscription, enterprisePlatformPlan])
+
+  const isPaidPlan = useMemo(() => isProPlan || isEnterprisePlan,
+    [isProPlan, isEnterprisePlan])
+
+  const isGrandfathered = useMemo(() => moment().isBefore(moment(data?.account?.grandfatheredUntil)),
+    [data])
+
   const subscriptionContextValue = useMemo<SubscriptionContextType>(() => ({
     pricingFeaturesEnabled,
     subscription,

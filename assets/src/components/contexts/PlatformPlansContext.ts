@@ -1,25 +1,17 @@
 import { createContext } from 'react'
 
-import { PlatformPlan } from '../../generated/graphql'
-
 export type PlatformPlansContextType = {
-  platformPlans: PlatformPlan[]
-  proPlatformPlan: PlatformPlan
-  proYearlyPlatformPlan: PlatformPlan
-  enterprisePlatformPlan: PlatformPlan
-  clusterMonthlyPricing: number
-  userMonthlyPricing: number
-  annualDiscount: number
+  platformPlans: any[]
+  proPlatformPlan: any
+  proYearlyPlatformPlan: any
+  enterprisePlatformPlan: any
 }
 
 const PlatformPlansContext = createContext<PlatformPlansContextType>({
   platformPlans: [],
-  proPlatformPlan: {} as PlatformPlan,
-  proYearlyPlatformPlan: {} as PlatformPlan,
-  enterprisePlatformPlan: {} as PlatformPlan,
-  clusterMonthlyPricing: 0,
-  userMonthlyPricing: 0,
-  annualDiscount: 0,
+  proPlatformPlan: {},
+  proYearlyPlatformPlan: {},
+  enterprisePlatformPlan: {},
 })
 
 export default PlatformPlansContext
