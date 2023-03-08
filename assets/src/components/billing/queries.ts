@@ -12,12 +12,6 @@ export const PLATFORM_PLANS_QUERY = gql`
       features {
         vpn
       }
-      lineItems {
-        name
-        dimension
-        cost
-        period
-      }
     }
   }
 `
@@ -32,7 +26,6 @@ export const SUBSCRIPTION_QUERY = gql`
         plan {
           id
           period
-          lineItems { dimension cost }
         }
       }
     }
