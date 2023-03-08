@@ -11,7 +11,7 @@ export type SubscriptionContextType = {
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType>({
-  pricingFeaturesEnabled: false, // TODO: Put everything behind feature flag?
+  pricingFeaturesEnabled: false,
   account: null,
   isPaidPlan: false,
   isProPlan: false,
