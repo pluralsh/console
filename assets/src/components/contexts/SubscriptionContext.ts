@@ -1,7 +1,6 @@
 import { createContext } from 'react'
 
 export type SubscriptionContextType = {
-  pricingFeaturesEnabled: boolean
   account: any | null
   isPaidPlan: boolean
   isProPlan: boolean
@@ -11,7 +10,6 @@ export type SubscriptionContextType = {
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType>({
-  pricingFeaturesEnabled: false,
   account: null,
   isPaidPlan: false,
   isProPlan: false,

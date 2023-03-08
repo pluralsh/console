@@ -43,8 +43,6 @@ function BillingSubscriptionProviderInternal({ children }: BillingSubscriptionPr
     enterprisePlatformPlan,
   } = useContext(PlatformPlansContext)
 
-  const pricingFeaturesEnabled = true // TODO: useMemo(() => posthog.isFeatureEnabled('pricing'), [])
-
   const subscription = useMemo(() => data?.account?.subscription, [data])
 
   const planId = useMemo(() => subscription?.plan?.id, [subscription])
@@ -62,7 +60,6 @@ function BillingSubscriptionProviderInternal({ children }: BillingSubscriptionPr
     [data])
 
   const subscriptionContextValue = useMemo<SubscriptionContextType>(() => ({
-    pricingFeaturesEnabled,
     subscription,
     isProPlan,
     isEnterprisePlan,
@@ -72,7 +69,6 @@ function BillingSubscriptionProviderInternal({ children }: BillingSubscriptionPr
     availableFeatures: data?.account?.availableFeatures,
     refetch,
   }), [
-    pricingFeaturesEnabled,
     subscription,
     isProPlan,
     isEnterprisePlan,
