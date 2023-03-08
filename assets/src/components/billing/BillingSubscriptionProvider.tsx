@@ -1,7 +1,6 @@
 import { ReactNode, useContext, useMemo } from 'react'
 import { ApolloProvider, useQuery } from '@apollo/client'
 import moment from 'moment'
-// import posthog from 'posthog-js'
 import SubscriptionContext, { SubscriptionContextType } from 'components/contexts//SubscriptionContext'
 import { PluralApi } from 'components/PluralApi'
 import { client } from 'helpers/client'
@@ -44,7 +43,7 @@ function BillingSubscriptionProviderInternal({ children }: BillingSubscriptionPr
     enterprisePlatformPlan,
   } = useContext(PlatformPlansContext)
 
-  const pricingFeaturesEnabled = useMemo(() => true, []) // posthog.isFeatureEnabled('pricing'), [])
+  const pricingFeaturesEnabled = true // TODO: useMemo(() => posthog.isFeatureEnabled('pricing'), [])
 
   const subscription = useMemo(() => data?.account?.subscription, [data])
 
