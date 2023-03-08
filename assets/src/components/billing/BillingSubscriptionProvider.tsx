@@ -49,13 +49,13 @@ function BillingSubscriptionProviderInternal({ children }: BillingSubscriptionPr
   const subscription = useMemo(() => data?.account?.subscription, [data])
 
   const isProPlan = useMemo(() => {
-    const planId = !!subscription?.plan?.id
+    const planId = subscription?.plan?.id
 
     return !!planId && (planId === proPlatformPlan?.id || planId === proYearlyPlatformPlan?.id)
   }, [subscription, proPlatformPlan, proYearlyPlatformPlan])
 
   const isEnterprisePlan = useMemo(() => {
-    const planId = !!subscription?.plan?.id
+    const planId = subscription?.plan?.id
 
     return !!planId && planId === enterprisePlatformPlan?.id
   },
