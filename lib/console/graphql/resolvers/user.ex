@@ -110,6 +110,9 @@ defmodule Console.GraphQl.Resolvers.User do
     |> with_jwt()
   end
 
+  def temporary_token(_, %{context: %{current_user: user}}),
+    do: Users.temporary_token(user)
+
   def update_user(%{id: id, attributes: attrs}, %{context: %{current_user: user}})
     when is_binary(id), do: Users.update_user(attrs, id, user)
   def update_user(%{attributes: attrs}, %{context: %{current_user: user}}),

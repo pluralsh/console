@@ -68,3 +68,16 @@ defimpl Console.PubSub.Auditable, for: [Console.PubSub.UpgradePolicyCreated, Con
   def action(Console.PubSub.UpgradePolicyCreated), do: :create
   def action(Console.PubSub.UpgradePolicyDeleted), do: :delete
 end
+
+defimpl Console.PubSub.Auditable, for: [Console.PubSub.TemporaryTokenCreated] do
+  alias Console.Schema.Audit
+
+  def audit(%{item: user}) do
+    %Audit{
+      type: :temp_token,
+      action: :create,
+      data: user,
+      actor_id: user.id
+    }
+  end
+end

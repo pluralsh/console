@@ -90,6 +90,13 @@ defmodule Console.Services.Users do
     |> execute(extract: :user)
   end
 
+  def temporary_token(%User{} = user) do
+    with {:ok, token, _} <- Console.Guardian.encode_and_sign(user, %{}, ttl: {1, :hour}) do
+      handle_notify(PubSub.TemporaryTokenCreated, user)
+      {:ok, token}
+    end
+  end
+
   defp hydrate_groups(transaction, %{"groups" => [_ | _] = groups}) do
     Enum.reduce(groups, transaction, fn group, xaction ->
       xaction
