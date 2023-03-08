@@ -1,7 +1,6 @@
-import { Link } from 'react-router-dom'
 import { Button, Card } from '@pluralsh/design-system'
-import { Div, Flex, P } from 'honorable'
 import { useContext } from 'react'
+import styled from 'styled-components'
 
 import SubscriptionContext from '../contexts/SubscriptionContext'
 
@@ -12,6 +11,40 @@ type BillingFeatureBlockBannerPropsType = {
   placeholderImageURL?: string
 }
 
+const Wrapper = styled.div<{backgroundImage?: string}>(({ theme, backgroundImage }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyItems: 'flex-start',
+  position: 'absolute',
+  top: 15,
+  bottom: 0,
+  left: 0,
+  right: 0,
+  padding: theme.spacing.xxlarge,
+  borderRadius: theme.borderRadiuses.medium,
+  backgroundColor: theme.colors['fill-zero'],
+  zIndex: 10,
+
+  ...(backgroundImage && {
+    backgroundImage: `url(${backgroundImage})`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'top center',
+    backgroundSize: '100% auto',
+  }),
+}))
+
+const Header = styled.div(({ theme }) => ({
+  ...theme.partials.text.body1,
+  fontWeight: '600',
+}))
+
+const Description = styled.div(({ theme }) => ({
+  ...theme.partials.text.body2,
+  color: theme.colors['text-light'],
+  marginTop: theme.spacing.medium,
+}))
+
 export default function BillingFeatureBlockBanner({
   feature, description, planFeature, placeholderImageURL,
 }: BillingFeatureBlockBannerPropsType) {
@@ -20,48 +53,24 @@ export default function BillingFeatureBlockBanner({
   if ((account?.availableFeatures || {})[planFeature] || isPaidPlan) return null
 
   return (
-    <Flex
-      position="absolute"
-      top={15}
-      left={0}
-      right={0}
-      bottom={0}
-      align="center"
-      justify="flex-start"
-      direction="column"
-      borderRadius="medium"
-      padding="xxlarge"
-      background={placeholderImageURL ? `url(${placeholderImageURL}) no-repeat top center` : undefined}
-      backgroundSize="100% auto"
-      backgroundColor="fill-zero"
-      zIndex={10}
-    >
+    <Wrapper backgroundImage={placeholderImageURL}>
       <Card
         padding="large"
         fillLevel={2}
       >
-        <Div
-          body1
-          fontWeight="bold"
+        <Header>Upgrade your plan to access {feature}.</Header>
+        <Description>{description}</Description>
+        <Button
+          as="a"
+          href="https://app.plural.sh/account/billing"
+          target="_blank"
+          rel="noopener noreferrer"
+          width="max-content"
+          marginTop="large"
         >
-          Upgrade your plan to access {feature}.
-        </Div>
-        <P
-          body2
-          color="text-light"
-          marginTop="medium"
-        >
-          {description}
-        </P>
-        <Flex marginTop="large">
-          <Button
-            as={Link}
-            to="/account/billing"
-          >
-            Review plans
-          </Button>
-        </Flex>
+          Review plans
+        </Button>
       </Card>
-    </Flex>
+    </Wrapper>
   )
 }
