@@ -2186,11 +2186,11 @@ export type RepositoryQueryVariables = Exact<{
 
 export type RepositoryQuery = { __typename?: 'RootQueryType', repository?: { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null } | null };
 
-export type PageInfoFragmentFragment = { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null };
+export type PageInfoFragment = { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null };
 
-export type GroupMemberFragmentFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null };
+export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
 
-export type GroupFragmentFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null };
+export type GroupFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null };
 
 export type GroupsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']>;
@@ -2198,7 +2198,7 @@ export type GroupsQueryVariables = Exact<{
 }>;
 
 
-export type GroupsQuery = { __typename?: 'RootQueryType', groups?: { __typename?: 'GroupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupEdge', node?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null } | null> | null } | null };
+export type GroupsQuery = { __typename?: 'RootQueryType', groups?: { __typename?: 'GroupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupEdge', node?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null> | null } | null };
 
 export type SearchGroupsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']>;
@@ -2206,7 +2206,7 @@ export type SearchGroupsQueryVariables = Exact<{
 }>;
 
 
-export type SearchGroupsQuery = { __typename?: 'RootQueryType', groups?: { __typename?: 'GroupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupEdge', node?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null } | null> | null } | null };
+export type SearchGroupsQuery = { __typename?: 'RootQueryType', groups?: { __typename?: 'GroupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupEdge', node?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null> | null } | null };
 
 export type GroupMembersQueryVariables = Exact<{
   cursor?: InputMaybe<Scalars['String']>;
@@ -2214,7 +2214,7 @@ export type GroupMembersQueryVariables = Exact<{
 }>;
 
 
-export type GroupMembersQuery = { __typename?: 'RootQueryType', groupMembers?: { __typename?: 'GroupMemberConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupMemberEdge', node?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null } | null } | null> | null } | null };
+export type GroupMembersQuery = { __typename?: 'RootQueryType', groupMembers?: { __typename?: 'GroupMemberConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupMemberEdge', node?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null } | null> | null } | null };
 
 export type CreateGroupMemberMutationVariables = Exact<{
   groupId: Scalars['ID'];
@@ -2222,22 +2222,22 @@ export type CreateGroupMemberMutationVariables = Exact<{
 }>;
 
 
-export type CreateGroupMemberMutation = { __typename?: 'RootMutationType', createGroupMember?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null } | null };
+export type CreateGroupMemberMutation = { __typename?: 'RootMutationType', createGroupMember?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null };
 
-export type DeleteMemberMutationVariables = Exact<{
+export type DeleteGroupMemberMutationVariables = Exact<{
   groupId: Scalars['ID'];
   userId: Scalars['ID'];
 }>;
 
 
-export type DeleteMemberMutation = { __typename?: 'RootMutationType', deleteGroupMember?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null } | null };
+export type DeleteGroupMemberMutation = { __typename?: 'RootMutationType', deleteGroupMember?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null };
 
 export type CreateGroupMutationVariables = Exact<{
   attributes: GroupAttributes;
 }>;
 
 
-export type CreateGroupMutation = { __typename?: 'RootMutationType', createGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null };
+export type CreateGroupMutation = { __typename?: 'RootMutationType', createGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
 
 export type UpdateGroupMutationVariables = Exact<{
   id: Scalars['ID'];
@@ -2245,14 +2245,14 @@ export type UpdateGroupMutationVariables = Exact<{
 }>;
 
 
-export type UpdateGroupMutation = { __typename?: 'RootMutationType', updateGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null };
+export type UpdateGroupMutation = { __typename?: 'RootMutationType', updateGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
 
 export type DeleteGroupMutationVariables = Exact<{
   id: Scalars['ID'];
 }>;
 
 
-export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null } | null };
+export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
 
 export type UserFragmentFragment = { __typename?: 'User', id: string, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null };
 
@@ -2376,8 +2376,8 @@ export const RepositoryFragmentFragmentDoc = gql`
 }
     ${ConfigurationFragmentFragmentDoc}
 ${FileContentFragmentFragmentDoc}`;
-export const PageInfoFragmentFragmentDoc = gql`
-    fragment PageInfoFragment on PageInfo {
+export const PageInfoFragmentDoc = gql`
+    fragment PageInfo on PageInfo {
   hasNextPage
   endCursor
 }
@@ -2395,25 +2395,26 @@ export const UserFragmentFragmentDoc = gql`
   }
 }
     `;
-export const GroupFragmentFragmentDoc = gql`
-    fragment GroupFragment on Group {
+export const GroupFragmentDoc = gql`
+    fragment Group on Group {
   id
   name
   description
   insertedAt
+  updatedAt
 }
     `;
-export const GroupMemberFragmentFragmentDoc = gql`
-    fragment GroupMemberFragment on GroupMember {
+export const GroupMemberFragmentDoc = gql`
+    fragment GroupMember on GroupMember {
   user {
     ...UserFragment
   }
   group {
-    ...GroupFragment
+    ...Group
   }
 }
     ${UserFragmentFragmentDoc}
-${GroupFragmentFragmentDoc}`;
+${GroupFragmentDoc}`;
 export const AppDocument = gql`
     query App($name: String!) {
   application(name: $name) {
@@ -2496,17 +2497,17 @@ export const GroupsDocument = gql`
     query Groups($q: String, $cursor: String) {
   groups(q: $q, first: 20, after: $cursor) {
     pageInfo {
-      ...PageInfoFragment
+      ...PageInfo
     }
     edges {
       node {
-        ...GroupFragment
+        ...Group
       }
     }
   }
 }
-    ${PageInfoFragmentFragmentDoc}
-${GroupFragmentFragmentDoc}`;
+    ${PageInfoFragmentDoc}
+${GroupFragmentDoc}`;
 
 /**
  * __useGroupsQuery__
@@ -2540,17 +2541,17 @@ export const SearchGroupsDocument = gql`
     query SearchGroups($q: String, $cursor: String) {
   groups(q: $q, after: $cursor, first: 5) {
     pageInfo {
-      ...PageInfoFragment
+      ...PageInfo
     }
     edges {
       node {
-        ...GroupFragment
+        ...Group
       }
     }
   }
 }
-    ${PageInfoFragmentFragmentDoc}
-${GroupFragmentFragmentDoc}`;
+    ${PageInfoFragmentDoc}
+${GroupFragmentDoc}`;
 
 /**
  * __useSearchGroupsQuery__
@@ -2584,17 +2585,17 @@ export const GroupMembersDocument = gql`
     query GroupMembers($cursor: String, $id: ID!) {
   groupMembers(groupId: $id, after: $cursor, first: 20) {
     pageInfo {
-      ...PageInfoFragment
+      ...PageInfo
     }
     edges {
       node {
-        ...GroupMemberFragment
+        ...GroupMember
       }
     }
   }
 }
-    ${PageInfoFragmentFragmentDoc}
-${GroupMemberFragmentFragmentDoc}`;
+    ${PageInfoFragmentDoc}
+${GroupMemberFragmentDoc}`;
 
 /**
  * __useGroupMembersQuery__
@@ -2627,10 +2628,10 @@ export type GroupMembersQueryResult = Apollo.QueryResult<GroupMembersQuery, Grou
 export const CreateGroupMemberDocument = gql`
     mutation CreateGroupMember($groupId: ID!, $userId: ID!) {
   createGroupMember(groupId: $groupId, userId: $userId) {
-    ...GroupMemberFragment
+    ...GroupMember
   }
 }
-    ${GroupMemberFragmentFragmentDoc}`;
+    ${GroupMemberFragmentDoc}`;
 export type CreateGroupMemberMutationFn = Apollo.MutationFunction<CreateGroupMemberMutation, CreateGroupMemberMutationVariables>;
 
 /**
@@ -2658,47 +2659,47 @@ export function useCreateGroupMemberMutation(baseOptions?: Apollo.MutationHookOp
 export type CreateGroupMemberMutationHookResult = ReturnType<typeof useCreateGroupMemberMutation>;
 export type CreateGroupMemberMutationResult = Apollo.MutationResult<CreateGroupMemberMutation>;
 export type CreateGroupMemberMutationOptions = Apollo.BaseMutationOptions<CreateGroupMemberMutation, CreateGroupMemberMutationVariables>;
-export const DeleteMemberDocument = gql`
-    mutation DeleteMember($groupId: ID!, $userId: ID!) {
+export const DeleteGroupMemberDocument = gql`
+    mutation DeleteGroupMember($groupId: ID!, $userId: ID!) {
   deleteGroupMember(groupId: $groupId, userId: $userId) {
-    ...GroupMemberFragment
+    ...GroupMember
   }
 }
-    ${GroupMemberFragmentFragmentDoc}`;
-export type DeleteMemberMutationFn = Apollo.MutationFunction<DeleteMemberMutation, DeleteMemberMutationVariables>;
+    ${GroupMemberFragmentDoc}`;
+export type DeleteGroupMemberMutationFn = Apollo.MutationFunction<DeleteGroupMemberMutation, DeleteGroupMemberMutationVariables>;
 
 /**
- * __useDeleteMemberMutation__
+ * __useDeleteGroupMemberMutation__
  *
- * To run a mutation, you first call `useDeleteMemberMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteMemberMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useDeleteGroupMemberMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteGroupMemberMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [deleteMemberMutation, { data, loading, error }] = useDeleteMemberMutation({
+ * const [deleteGroupMemberMutation, { data, loading, error }] = useDeleteGroupMemberMutation({
  *   variables: {
  *      groupId: // value for 'groupId'
  *      userId: // value for 'userId'
  *   },
  * });
  */
-export function useDeleteMemberMutation(baseOptions?: Apollo.MutationHookOptions<DeleteMemberMutation, DeleteMemberMutationVariables>) {
+export function useDeleteGroupMemberMutation(baseOptions?: Apollo.MutationHookOptions<DeleteGroupMemberMutation, DeleteGroupMemberMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteMemberMutation, DeleteMemberMutationVariables>(DeleteMemberDocument, options);
+        return Apollo.useMutation<DeleteGroupMemberMutation, DeleteGroupMemberMutationVariables>(DeleteGroupMemberDocument, options);
       }
-export type DeleteMemberMutationHookResult = ReturnType<typeof useDeleteMemberMutation>;
-export type DeleteMemberMutationResult = Apollo.MutationResult<DeleteMemberMutation>;
-export type DeleteMemberMutationOptions = Apollo.BaseMutationOptions<DeleteMemberMutation, DeleteMemberMutationVariables>;
+export type DeleteGroupMemberMutationHookResult = ReturnType<typeof useDeleteGroupMemberMutation>;
+export type DeleteGroupMemberMutationResult = Apollo.MutationResult<DeleteGroupMemberMutation>;
+export type DeleteGroupMemberMutationOptions = Apollo.BaseMutationOptions<DeleteGroupMemberMutation, DeleteGroupMemberMutationVariables>;
 export const CreateGroupDocument = gql`
     mutation CreateGroup($attributes: GroupAttributes!) {
   createGroup(attributes: $attributes) {
-    ...GroupFragment
+    ...Group
   }
 }
-    ${GroupFragmentFragmentDoc}`;
+    ${GroupFragmentDoc}`;
 export type CreateGroupMutationFn = Apollo.MutationFunction<CreateGroupMutation, CreateGroupMutationVariables>;
 
 /**
@@ -2728,10 +2729,10 @@ export type CreateGroupMutationOptions = Apollo.BaseMutationOptions<CreateGroupM
 export const UpdateGroupDocument = gql`
     mutation UpdateGroup($id: ID!, $attributes: GroupAttributes!) {
   updateGroup(groupId: $id, attributes: $attributes) {
-    ...GroupFragment
+    ...Group
   }
 }
-    ${GroupFragmentFragmentDoc}`;
+    ${GroupFragmentDoc}`;
 export type UpdateGroupMutationFn = Apollo.MutationFunction<UpdateGroupMutation, UpdateGroupMutationVariables>;
 
 /**
@@ -2762,10 +2763,10 @@ export type UpdateGroupMutationOptions = Apollo.BaseMutationOptions<UpdateGroupM
 export const DeleteGroupDocument = gql`
     mutation DeleteGroup($id: ID!) {
   deleteGroup(groupId: $id) {
-    ...GroupFragment
+    ...Group
   }
 }
-    ${GroupFragmentFragmentDoc}`;
+    ${GroupFragmentDoc}`;
 export type DeleteGroupMutationFn = Apollo.MutationFunction<DeleteGroupMutation, DeleteGroupMutationVariables>;
 
 /**

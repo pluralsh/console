@@ -1,27 +1,28 @@
-fragment GroupMemberFragment on GroupMember {
+fragment GroupMember on GroupMember {
   user {
     ...UserFragment
   }
   group {
-    ...GroupFragment
+    ...Group
   }
 }
 
-fragment GroupFragment on Group {
+fragment Group on Group {
   id
   name
   description
   insertedAt
+  updatedAt
 }
 
 query Groups($q: String, $cursor: String) {
   groups(q: $q, first: 20, after: $cursor) {
     pageInfo {
-      ...PageInfoFragment
+      ...PageInfo
     }
     edges {
       node {
-        ...GroupFragment
+        ...Group
       }
     }
   }
@@ -30,11 +31,11 @@ query Groups($q: String, $cursor: String) {
 query SearchGroups($q: String, $cursor: String) {
   groups(q: $q, after: $cursor, first: 5) {
     pageInfo {
-      ...PageInfoFragment
+      ...PageInfo
     }
     edges {
       node {
-        ...GroupFragment
+        ...Group
       }
     }
   }
@@ -43,11 +44,11 @@ query SearchGroups($q: String, $cursor: String) {
 query GroupMembers($cursor: String, $id: ID!) {
   groupMembers(groupId: $id, after: $cursor, first: 20) {
     pageInfo {
-      ...PageInfoFragment
+      ...PageInfo
     }
     edges {
       node {
-        ...GroupMemberFragment
+        ...GroupMember
       }
     }
   }
@@ -55,30 +56,30 @@ query GroupMembers($cursor: String, $id: ID!) {
 
 mutation CreateGroupMember($groupId: ID!, $userId: ID!) {
   createGroupMember(groupId: $groupId, userId: $userId) {
-    ...GroupMemberFragment
+    ...GroupMember
   }
 }
 
-mutation DeleteMember($groupId: ID!, $userId: ID!) {
+mutation DeleteGroupMember($groupId: ID!, $userId: ID!) {
   deleteGroupMember(groupId: $groupId, userId: $userId) {
-    ...GroupMemberFragment
+    ...GroupMember
   }
 }
 
 mutation CreateGroup($attributes: GroupAttributes!) {
   createGroup(attributes: $attributes) {
-    ...GroupFragment
+    ...Group
   }
 }
 
 mutation UpdateGroup($id: ID!, $attributes: GroupAttributes!) {
   updateGroup(groupId: $id, attributes: $attributes) {
-    ...GroupFragment
+    ...Group
   }
 }
 
 mutation DeleteGroup($id: ID!) {
   deleteGroup(groupId: $id) {
-    ...GroupFragment
+    ...Group
   }
 }

@@ -9,11 +9,11 @@ import {
   PersonIcon,
 } from '@pluralsh/design-system'
 import { useEffect, useState } from 'react'
-import { useApolloClient } from '@apollo/client'
+import { ApolloClient, useApolloClient } from '@apollo/client'
 import styled from 'styled-components'
 
-import { SEARCH_GROUPS } from 'components/account/groups/queries'
 import { SEARCH_USERS } from 'components/account/users/queries'
+import { SearchGroupsDocument, SearchGroupsQuery, SearchGroupsQueryVariables } from 'generated/graphql'
 
 const ICONS = {
   user: <PersonIcon size={14} />,
@@ -31,14 +31,26 @@ const FETCHER = {
 }
 
 export function fetchUsers(client, query, setSuggestions) {
-  client.query({ query: SEARCH_USERS, variables: { q: query, all: true } })
-    .then(({ data: { users: { edges } } }) => edges.map(({ node }) => ({ value: node, label: userSuggestion(node) })))
+  client
+    .query({ query: SEARCH_USERS, variables: { q: query, all: true } })
+    .then(({
+      data: {
+        users: { edges },
+      },
+    }) => edges.map(({ node }) => ({ value: node, label: userSuggestion(node) })))
     .then(setSuggestions)
 }
 
-export function fetchGroups(client, query, setSuggestions) {
-  client.query({ query: SEARCH_GROUPS, variables: { q: query } })
-    .then(({ data: { groups: { edges } } }) => edges.map(({ node }) => ({ value: node, label: groupSuggestion(node) })))
+export function fetchGroups(client: ApolloClient<any>, query, setSuggestions) {
+  client
+    .query<SearchGroupsQuery, SearchGroupsQueryVariables>({
+      query: SearchGroupsDocument,
+      variables: { q: query },
+    })
+    .then(({ data }) => data?.groups?.edges?.map(edge => ({
+      value: edge?.node,
+      label: groupSuggestion(edge?.node),
+    })))
     .then(setSuggestions)
 }
 
