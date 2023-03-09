@@ -1,9 +1,4 @@
-import {
-  GearTrainIcon,
-  GlobeIcon,
-  IconFrame,
-  PeopleIcon,
-} from '@pluralsh/design-system'
+import { GearTrainIcon, IconFrame, PeopleIcon } from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
 
 import { Confirm } from 'components/utils/Confirm'
@@ -12,7 +7,7 @@ import { LoginContext } from 'components/contexts'
 
 import { Button, Flex, Modal } from 'honorable'
 
-import { GroupsDocument, useDeleteGroupMutation } from 'generated/graphql'
+import { Group as GroupT, GroupsDocument, useDeleteGroupMutation } from 'generated/graphql'
 
 import { DeleteIconButton } from 'components/utils/IconButtons'
 
@@ -25,7 +20,7 @@ import { Permissions, hasRbac } from '../misc'
 import { EditGroupAttributes, EditGroupMembers } from './GroupEdit'
 import GroupView from './GroupView'
 
-export default function Group({ group, q }: any) {
+export default function Group({ group, q }: { group: GroupT; q: any }) {
   const { me } = useContext<any>(LoginContext)
   const editable = !!me.roles?.admin || hasRbac(me, Permissions.USERS)
   const [dialogKey, setDialogKey] = useState<
@@ -58,7 +53,6 @@ export default function Group({ group, q }: any) {
         gap="large"
         align="center"
       >
-        {group.global && <GlobeIcon size={20} />}
         {!editable && (
           <Button
             secondary
@@ -113,7 +107,13 @@ export default function Group({ group, q }: any) {
         />
         <Confirm
           open={dialogKey === 'confirmDelete'}
-          text={<>Are you sure you want to delete the <b>{group.name}</b> group? This could have downstream effects on a large number of users and their roles.</>}
+          text={(
+            <>
+              Are you sure you want to delete the <b>{group.name}</b> group?
+              This could have downstream effects on a large number of users and
+              their roles.
+            </>
+          )}
           close={() => dialogKey === 'confirmDelete' && setDialogKey('')}
           label="Delete group"
           submit={() => mutation()}
