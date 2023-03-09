@@ -35,7 +35,7 @@ export default function Roles() {
         <BillingFeatureBlockBanner
           feature="roles"
           planFeature="userManagement"
-          description="Define granular permissions for your organization's users and apply them to groups or individuals."
+          description="Define granular permissions for your organization’s users and apply them to groups or individuals."
           placeholderImageURL="/placeholder-roles.png"
         />
       </Flex>
