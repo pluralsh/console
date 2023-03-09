@@ -33,6 +33,7 @@ const APPS: Array<AppProps & CardProps> = [
       </Button>
     ),
     actions: [{ label: 'Rebuild', onSelect: () => {} }],
+    isAlive: true,
   }, {
     name: 'GitLab',
     description: 'v2.11',

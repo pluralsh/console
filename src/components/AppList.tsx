@@ -19,6 +19,8 @@ import {
   Input,
   ListBoxItem,
   Select,
+  Tooltip,
+  WrapWithIf,
 } from '../index'
 
 import { useWindowSize } from './wizard/hooks'
@@ -244,6 +246,7 @@ type AppProps = {
   primaryAction?: JSX.Element
   actions?: Array<AppMenuAction>
   promoted?: boolean
+  isAlive?: boolean
 } & CardProps
 
 interface AppMenuAction {
@@ -255,7 +258,7 @@ interface AppMenuAction {
 }
 
 function AppUnstyled({
-  logoUrl, icon, name, description, primaryAction, actions, ...props
+  logoUrl, icon, name, description, primaryAction, actions, isAlive, ...props
 }: AppProps): JSX.Element {
   return (
     <Card {...props}>
@@ -282,33 +285,40 @@ function AppUnstyled({
 
       {actions && (
         <div className="actions">
-          <Select
-            aria-label="moreMenu"
-            selectedKey={null}
-            onSelectionChange={key => actions.find(action => action.label === key)?.onSelect()}
-            width="max-content"
-            maxHeight={197}
-            triggerButton={(
-              <Button
-                secondary
-                width={32}
-                minHeight={32}
-              ><MoreIcon />
-              </Button>
-            )}
+          <WrapWithIf
+            condition={!isAlive}
+            wrapper={<Tooltip label="Application not ready" />}
           >
-            {actions.map(action => (
-              <ListBoxItem
-                key={action.label}
-                label={action.label}
-                textValue={action.label}
-                leftContent={action.leftContent}
-                rightContent={action.rightContent}
-                destructive={action.destructive}
-              />
-            ))}
-          </Select>
-
+            <div>
+              <Select
+                aria-label="moreMenu"
+                selectedKey={null}
+                onSelectionChange={key => actions.find(action => action.label === key)?.onSelect()}
+                isDisabled={!isAlive}
+                width="max-content"
+                maxHeight={197}
+                triggerButton={(
+                  <Button
+                    secondary
+                    width={32}
+                    minHeight={32}
+                  ><MoreIcon />
+                  </Button>
+                )}
+              >
+                {actions.map(action => (
+                  <ListBoxItem
+                    key={action.label}
+                    label={action.label}
+                    textValue={action.label}
+                    leftContent={action.leftContent}
+                    rightContent={action.rightContent}
+                    destructive={action.destructive}
+                  />
+                ))}
+              </Select>
+            </div>
+          </WrapWithIf>
         </div>
       )}
     </Card>
