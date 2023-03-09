@@ -96,6 +96,7 @@ function ConfigurationField({
     >
       {isFile ? (
         <ConfigurationFileInput
+          value={local ?? ''}
           onChange={val => {
             setLocal(val?.text ?? '')
           }}
