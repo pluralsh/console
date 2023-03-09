@@ -50,7 +50,7 @@ export default function BillingFeatureBlockBanner({
 }: BillingFeatureBlockBannerPropsType) {
   const { account, isPaidPlan } = useContext(SubscriptionContext)
 
-  if ((account?.availableFeatures || {})[planFeature] || isPaidPlan) return null
+  if (account?.availableFeatures?.[planFeature] || isPaidPlan) return null
 
   return (
     <Wrapper backgroundImage={placeholderImageURL}>
