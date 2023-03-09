@@ -75,7 +75,7 @@ function VPN() {
         <BillingFeatureBlockBanner
           feature="VPN clients"
           planFeature="vpn"
-          description="Create and manage VPN clients for a configured Wireguard server."
+          description="Create and manage VPN clients for a configured WireGuard server."
           placeholderImageURL="/placeholder-vpn.png"
         />
       </Flex>
