@@ -29,6 +29,7 @@ export enum ConfigurationType {
   DOMAIN = 'DOMAIN',
   BUCKET = 'BUCKET',
   PASSWORD = 'PASSWORD',
+  FILE = 'FILE',
 }
 
 export enum OperationType {
