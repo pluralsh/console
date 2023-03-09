@@ -176,6 +176,28 @@ defmodule Console.GraphQl.UserQueriesTest do
     end
   end
 
+  describe "temporaryToken" do
+    test "admins can issue temp tokens" do
+      user = insert(:user, roles: %{admin: true})
+
+      {:ok, %{data: %{"temporaryToken" => token}}} = run_query("""
+        query { temporaryToken }
+      """, %{}, %{current_user: user})
+
+      {:ok, found, _} = Console.Guardian.resource_from_token(token)
+
+      assert found.id == user.id
+    end
+
+    test "non-admins cannot issue temp tokens" do
+      user = insert(:user)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query { temporaryToken }
+      """, %{}, %{current_user: user})
+    end
+  end
+
   describe "notifications" do
     test "it will list notifications for this instance" do
       notifs = insert_list(3, :notification)

@@ -208,6 +208,13 @@ defmodule Console.GraphQl.Users do
 
       resolve &User.list_notifications/2
     end
+
+    field :temporary_token, :string do
+      middleware Authenticated
+      middleware AdminRequired
+
+      resolve &User.temporary_token/2
+    end
   end
 
   object :user_mutations do
