@@ -84,6 +84,8 @@ export { default as LoopingLogo } from './components/LoopingLogo'
 export { ComboBox } from './components/ComboBox'
 export { Toast, GraphQLToast } from './components/Toast'
 export { default as WrapWithIf } from './components/WrapWithIf'
+export type { AppProps, AppListProps, AppMenuAction } from './components/AppList'
+export { AppList } from './components/AppList'
 
 // Hooks
 export { default as usePrevious } from './hooks/usePrevious'

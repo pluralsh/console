@@ -50,7 +50,7 @@ const parentFillLevelToHue: Record<FillLevel, Hue> = {
 
 const sizeToWidth: Record<Size, number> = {
   xxsmall: 32,
-  xsmall: 40,
+  xsmall: 48,
   small: 64,
   medium: 96,
   large: 140,
@@ -59,7 +59,7 @@ const sizeToWidth: Record<Size, number> = {
 
 const sizeToIconWidth: Record<Size, number> = {
   xxsmall: 16,
-  xsmall: 24,
+  xsmall: 32,
   small: 48,
   medium: 64,
   large: 76,

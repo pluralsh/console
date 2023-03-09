@@ -1,7 +1,6 @@
 import { CSSObject } from 'styled-components'
 
 import { fontFamilies } from './fonts'
-
 import { semanticColors } from './colors'
 
 export const INLINE_CODE_EMS = 0.8
