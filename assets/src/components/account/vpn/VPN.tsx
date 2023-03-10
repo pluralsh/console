@@ -6,6 +6,10 @@ import {
   useState,
 } from 'react'
 import { useQuery } from '@apollo/client'
+import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
+import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
+
+import { Flex } from 'honorable'
 
 import VPNClientList from '../../vpn/VPNClientList'
 import {
@@ -59,10 +63,22 @@ function VPN() {
         />
       )}
     >
-      <VPNClientList
-        columns={columns}
-        data={filteredClientList}
-      />
+      <Flex
+        direction="column"
+        height="100%"
+      >
+        <BillingLegacyUserBanner feature="VPN clients" />
+        <VPNClientList
+          columns={columns}
+          data={filteredClientList}
+        />
+        <BillingFeatureBlockBanner
+          feature="VPN clients"
+          planFeature="vpn"
+          description="Create and manage VPN clients for a configured WireGuard server."
+          placeholderImageURL="/placeholder-vpn.png"
+        />
+      </Flex>
     </ResponsivePageFullWidth>
   )
 }

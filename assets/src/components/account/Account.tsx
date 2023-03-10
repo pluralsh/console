@@ -18,6 +18,7 @@ const getDirectory = (me, configuration) => [
   { path: 'webhooks', label: 'Webhooks', enabled: true },
   { path: 'vpn', label: 'VPN clients', enabled: configuration?.vpnEnabled ?? false },
   { path: 'email', label: 'Email settings', enabled: me?.roles?.admin && configuration?.gitStatus?.cloned },
+  { path: 'settings', label: 'Account settings', enabled: true },
 ]
 
 export default function Account() {

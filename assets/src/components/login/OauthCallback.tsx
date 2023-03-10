@@ -46,7 +46,6 @@ export function OAuthCallback() {
   const [mutation, { error, loading }] = useMutation(CALLBACK, {
     variables: { code, redirect: localized('/oauth/callback') },
     onCompleted: result => {
-      console.log(result)
       setToken(result.oauthCallback.jwt)
       window.location.href = '/'
     },
