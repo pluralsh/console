@@ -8,6 +8,7 @@ import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionP
 import BillingPlatformPlansProvider from 'components/billing/BillingPlatformPlansProvider'
 
 import { EnsureLogin } from '../login/Login'
+import { Posthog } from '../utils/Posthog'
 import { InstallationsProvider } from '../Installations'
 import TerminalThemeProvider from '../terminal/TerminalThemeProvider'
 import { CursorPositionProvider } from '../utils/CursorPosition'
@@ -51,6 +52,7 @@ export default function Console() {
 
   return (
     <ContextProviders>
+      <Posthog />
       <Flex
         position="relative"
         width="100vw"

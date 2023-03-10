@@ -37,6 +37,7 @@ import {
 } from 'honorable'
 
 import { wipeToken } from 'helpers/auth'
+import posthog from 'posthog-js'
 
 import { ME_Q } from 'components/graphql/users'
 
@@ -167,6 +168,7 @@ export default function Sidebar() {
   const handleLogout = useCallback(() => {
     setIsMenuOpened(false)
     wipeToken()
+    posthog.reset()
     const w: Window = window
 
     w.location = '/login'
