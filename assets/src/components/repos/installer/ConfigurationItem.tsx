@@ -12,6 +12,8 @@ import { LoginContext } from '../../contexts'
 import { deepFetch } from '../../../utils/graphql'
 import { ConfigurationType } from '../constants'
 
+import ConfigurationFileInput from './ConfigurationFileInput'
+
 type ModifierFunction = (value: string, trim?: boolean) => string
 
 const modifierFactory = (type: ConfigurationType, configuration): ModifierFunction => {
@@ -57,10 +59,10 @@ const createValidator = (regex: RegExp, optional: boolean, error: string) => (va
 })
 
 function ConfigurationField({
-  config, type, ctx, setValue,
+  config, ctx, setValue,
 }) {
   const {
-    name, default: defaultValue, placeholder, documentation, validation, optional,
+    name, default: defaultValue, placeholder, documentation, validation, optional, type,
   } = config
   const { configuration } = useContext(LoginContext)
 
@@ -73,6 +75,18 @@ function ConfigurationField({
 
   useEffect(() => (local ? setValue(name, modifier(local), valid) : setValue(name, local, valid)), [local, setValue, modifier, name, valid, config])
 
+  const isInt = type === ConfigurationType.INT
+  const isPassword
+      = type === ConfigurationType.PASSWORD
+      || ['private_key', 'public_key'].includes(config.name)
+  const isFile = type === ConfigurationType.FILE
+
+  const inputFieldType = isInt
+    ? 'number'
+    : isPassword
+      ? 'password'
+      : 'text'
+
   return (
     <FormField
       label={StartCase(name)}
@@ -80,15 +94,32 @@ function ConfigurationField({
       error={!valid}
       required={!optional}
     >
-      <Input
-        placeholder={placeholder}
-        value={local}
-        type={type}
-        error={!valid}
-        prefix={config.type === ConfigurationType.BUCKET ? `${deepFetch(configuration, 'manifest.bucketPrefix')}-` : ''}
-        suffix={config.type === ConfigurationType.DOMAIN ? `.${deepFetch(configuration, 'manifest.network.subdomain')}` : ''}
-        onChange={({ target: { value } }) => setLocal(value)}
-      />
+      {isFile ? (
+        <ConfigurationFileInput
+          value={local ?? ''}
+          onChange={val => {
+            setLocal(val?.text ?? '')
+          }}
+        />
+      ) : (
+        <Input
+          placeholder={placeholder}
+          value={local}
+          type={inputFieldType}
+          error={!valid}
+          prefix={
+            config.type === ConfigurationType.BUCKET
+              ? `${deepFetch(configuration, 'manifest.bucketPrefix')}-`
+              : ''
+          }
+          suffix={
+            config.type === ConfigurationType.DOMAIN
+              ? `.${deepFetch(configuration, 'manifest.network.subdomain')}`
+              : ''
+          }
+          onChange={({ target: { value } }) => setLocal(value)}
+        />
+      )}
     </FormField>
   )
 }
@@ -112,13 +143,7 @@ function BoolConfiguration({
   )
 }
 
-export function ConfigurationItem({
-  config, ctx, setValue,
-}) {
-  const isInt = config.type === ConfigurationType.INT
-  const renderAsPassword = ['private_key', 'public_key']
-  const isPassword = config.type === ConfigurationType.PASSWORD || renderAsPassword.includes(config.name)
-
+export function ConfigurationItem({ config, ctx, setValue }) {
   switch (config.type) {
   case ConfigurationType.BOOL:
     return (
@@ -134,8 +159,8 @@ export function ConfigurationItem({
         config={config}
         ctx={ctx}
         setValue={setValue}
-        type={isInt ? 'number' : isPassword ? 'password' : 'text'}
       />
     )
   }
 }
+
