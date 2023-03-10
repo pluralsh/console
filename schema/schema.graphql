@@ -847,6 +847,7 @@ type RootQueryType {
   role: Role
   roles(after: String, first: Int, before: String, last: Int, q: String): RoleConnection
   notifications(after: String, first: Int, before: String, last: Int, all: Boolean): NotificationConnection
+  temporaryToken: String
   dashboards(repo: String!): [Dashboard]
   dashboard(repo: String!, name: String!, step: String, offset: Int, labels: [LabelInput]): Dashboard
   metric(query: String!, offset: Int, step: String): [MetricResponse]
@@ -915,6 +916,7 @@ enum AuditType {
   ROLE
   GROUP_MEMBER
   POLICY
+  TEMP_TOKEN
 }
 
 type MetricResponse {
@@ -1415,6 +1417,7 @@ type User {
   email: String!
   deletedAt: DateTime
   profile: String
+  pluralId: String
   roles: UserRoles
   readTimestamp: DateTime
   buildTimestamp: DateTime

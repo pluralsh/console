@@ -54,12 +54,14 @@ defmodule Console.Services.UsersTest do
         "email" => "someone@example.com",
         "name" => "Some User",
         "profile" => "https://some.image.com",
-        "groups" => ["general"]
+        "groups" => ["general"],
+        "plural_id" => "abcdef-123456789-ghijkl"
       })
 
       assert user.name == "Some User"
       assert user.email == "someone@example.com"
       assert user.profile == "https://some.image.com"
+      assert user.plural_id == "abcdef-123456789-ghijkl"
 
       group = Users.get_group_by_name("general")
       assert group.description == "synced from Plural"
@@ -73,11 +75,13 @@ defmodule Console.Services.UsersTest do
       {:ok, found} = Users.bootstrap_user(%{
         "email" => user.email,
         "name" => user.name,
-        "profile" => "some.profile.com"
+        "profile" => "some.profile.com",
+        "plural_id" => "abcdef-123456789-ghijkl"
       })
 
       assert found.id == user.id
       assert found.profile == "some.profile.com"
+      assert found.plural_id == "abcdef-123456789-ghijkl"
     end
   end
 

@@ -5,6 +5,7 @@ import { PageInfo } from './base'
 export const UserFragment = gql`
   fragment UserFragment on User {
     id
+    pluralId
     name
     email
     profile

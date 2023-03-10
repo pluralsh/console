@@ -53,6 +53,7 @@ defmodule Console.GraphQl.Users do
     field :email,           non_null(:string)
     field :deleted_at,      :datetime
     field :profile,         :string
+    field :plural_id,       :string
     field :roles,           :user_roles
     field :read_timestamp,  :datetime
     field :build_timestamp, :datetime
