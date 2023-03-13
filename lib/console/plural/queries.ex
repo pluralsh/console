@@ -251,7 +251,13 @@ defmodule Console.Plural.Queries do
   @account_q """
     query {
       account {
-        availableFeatures { vpn userManagement }
+        grandfatheredUntil
+        delinquentAt
+        availableFeatures { vpn userManagement audit }
+        subscription {
+          id
+          plan { id name period }
+        }
       }
     }
   """

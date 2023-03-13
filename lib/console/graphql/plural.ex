@@ -117,11 +117,35 @@ defmodule Console.GraphQl.Plural do
     field :configuration, non_null(:map)
   end
 
+  object :account do
+    key_func :delinquent_at, :datetime, :delinquentAt
+    key_func :grandfathered_until, :datetime, :grandfatheredUntil
+    key_func :available_features, :available_features, :availableFeatures
+    field :subscription, :plural_subscription
+  end
+
+  object :plural_subscription do
+    field :id,   :id
+    field :plan, :plan
+  end
+
+  object :plan do
+    field :id,     :id
+    field :name,   :string
+    field :period, :string
+  end
+
   connection node_type: :installation
   connection node_type: :repository
   connection node_type: :recipe
 
   object :plural_queries do
+    field :account, :account do
+      middleware Authenticated
+
+      resolve &Plural.account/2
+    end
+
     connection field :installations, node_type: :installation do
       middleware Authenticated
 
