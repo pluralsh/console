@@ -1,16 +1,16 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useContext, useState } from 'react'
 import { Box } from 'grommet'
 import { Button, Modal, ValidatedInput } from '@pluralsh/design-system'
-
 import isEmpty from 'lodash/isEmpty'
-
 import { GroupsDocument, useCreateGroupMutation } from 'generated/graphql'
+import SubscriptionContext from 'components/contexts/SubscriptionContext'
 
 import { appendConnection, updateCache } from '../../../utils/graphql'
-
 import { GqlError } from '../../utils/Alert'
 
 export default function GroupCreate({ q }: {q: string}) {
+  const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
+  const isAvailable = !!availableFeatures?.userManagement || isPaidPlan
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -34,6 +34,7 @@ export default function GroupCreate({ q }: {q: string}) {
   return (
     <>
       <Button
+        disabled={!isAvailable}
         secondary
         onClick={() => setOpen(true)}
       >

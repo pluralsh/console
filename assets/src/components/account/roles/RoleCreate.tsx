@@ -1,16 +1,20 @@
-import { useCallback, useMemo, useState } from 'react'
+import {
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react'
 import { useMutation } from '@apollo/client'
 import { Button } from 'honorable'
 import { Modal } from '@pluralsh/design-system'
 import uniqWith from 'lodash/uniqWith'
 import isEqual from 'lodash/isEqual'
+import SubscriptionContext from 'components/contexts/SubscriptionContext'
 
 import { appendConnection, updateCache } from '../../../utils/graphql'
 
 import { sanitize } from './misc'
-
 import { CREATE_ROLE, ROLES_Q } from './queries'
-
 import RoleForm from './RoleForm'
 
 const defaultAttributes = {
@@ -21,6 +25,8 @@ const defaultAttributes = {
 }
 
 export default function RoleCreate({ q }: any) {
+  const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
+  const isAvailable = !!availableFeatures?.userManagement || isPaidPlan
   const [open, setOpen] = useState(false)
   const [attributes, setAttributes] = useState(defaultAttributes)
   const [roleBindings, setRoleBindings] = useState([])
@@ -46,6 +52,7 @@ export default function RoleCreate({ q }: any) {
   return (
     <>
       <Button
+        disabled={!isAvailable}
         secondary
         onClick={() => setOpen(true)}
       >
