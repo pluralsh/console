@@ -118,8 +118,8 @@ defmodule Console.GraphQl.Plural do
   end
 
   object :account do
-    key_func :delinquent_at, :datetime, :delinquentAt
-    key_func :grandfathered_until, :datetime, :grandfatheredUntil
+    datetime_func :delinquent_at, :delinquentAt
+    datetime_func :grandfathered_until, :grandfatheredUntil
     key_func :available_features, :available_features, :availableFeatures
     field :subscription, :plural_subscription
   end
