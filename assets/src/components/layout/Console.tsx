@@ -5,7 +5,6 @@ import { MarkdocContextProvider } from 'markdoc/MarkdocContext'
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
 import { ReactNode } from 'react'
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
-import BillingPlatformPlansProvider from 'components/billing/BillingPlatformPlansProvider'
 
 import { EnsureLogin } from '../login/Login'
 import { InstallationsProvider } from '../Installations'
@@ -29,15 +28,13 @@ function ContextProviders({ children }: { children: ReactNode }) {
         <ConsoleNavContextProvider>
           <EnsureLogin>
             <InstallationsProvider>
-              <BillingPlatformPlansProvider>
-                <BillingSubscriptionProvider>
-                  <BreadcrumbProvider>
-                    <TerminalThemeProvider>
-                      {children}
-                    </TerminalThemeProvider>
-                  </BreadcrumbProvider>
-                </BillingSubscriptionProvider>
-              </BillingPlatformPlansProvider>
+              <BillingSubscriptionProvider>
+                <BreadcrumbProvider>
+                  <TerminalThemeProvider>
+                    {children}
+                  </TerminalThemeProvider>
+                </BreadcrumbProvider>
+              </BillingSubscriptionProvider>
             </InstallationsProvider>
           </EnsureLogin>
         </ConsoleNavContextProvider>

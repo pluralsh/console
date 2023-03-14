@@ -1,32 +1,13 @@
 import { gql } from '@apollo/client'
 
-export const PLATFORM_PLANS_QUERY = gql`
-  query PlatformPlans {
-    platformPlans {
-      id
-      name
-      cost
-      period
-      visible
-      enterprise
-      features {
-        vpn
-      }
-    }
-  }
-`
-
+// TODO: Add grandfatheredUntil delinquentAt back once API will be fixed.
 export const SUBSCRIPTION_QUERY = gql`
-  query Subscription {
+  query {
     account {
-      grandfatheredUntil
-      availableFeatures { userManagement audit vpn }
+      availableFeatures { audits userManagement  vpn }
       subscription {
         id
-        plan {
-          id
-          period
-        }
+        plan { id name period }
       }
     }
   }
