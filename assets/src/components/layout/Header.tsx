@@ -2,6 +2,10 @@ import { Div, Flex, Img } from 'honorable'
 import { Button, theme } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 
+import BillingSubscriptionChip from 'components/billing/BillingSubscriptionChip'
+
+import BillingLegacyUserMessage from 'components/billing/BillingLegacyUserMessage'
+
 import { InstallerModal } from '../repos/installer/Modal'
 
 import DemoBanner from './DemoBanner'
@@ -33,8 +37,8 @@ export default function Header() {
           onClick={() => navigate('/')}
         />
         <Flex grow={1} />
-        {/* <BillingLegacyUserMessage />
-        <BillingSubscriptionChip /> */}
+        <BillingLegacyUserMessage />
+        <BillingSubscriptionChip />
         <Button
           small
           tertiary
