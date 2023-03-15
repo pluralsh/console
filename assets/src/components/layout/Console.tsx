@@ -4,6 +4,7 @@ import { A, Flex, Span } from 'honorable'
 import { MarkdocContextProvider } from 'markdoc/MarkdocContext'
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
 import { ReactNode } from 'react'
+import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
 
 import { EnsureLogin } from '../login/Login'
 import { InstallationsProvider } from '../Installations'
@@ -27,11 +28,13 @@ function ContextProviders({ children }: { children: ReactNode }) {
         <ConsoleNavContextProvider>
           <EnsureLogin>
             <InstallationsProvider>
-              <BreadcrumbProvider>
-                <TerminalThemeProvider>
-                  {children}
-                </TerminalThemeProvider>
-              </BreadcrumbProvider>
+              <BillingSubscriptionProvider>
+                <BreadcrumbProvider>
+                  <TerminalThemeProvider>
+                    {children}
+                  </TerminalThemeProvider>
+                </BreadcrumbProvider>
+              </BillingSubscriptionProvider>
             </InstallationsProvider>
           </EnsureLogin>
         </ConsoleNavContextProvider>

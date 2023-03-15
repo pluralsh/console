@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-
 import { Flex } from 'honorable'
+import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
+import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
 
 import { List } from '../../utils/List'
 
@@ -22,6 +23,7 @@ export function Groups() {
         direction="column"
         height="100%"
       >
+        <BillingLegacyUserBanner feature="Groups" />
         <List height="100%">
           <GroupSearchHeader
             q={q}
@@ -29,6 +31,12 @@ export function Groups() {
           />
           <GroupsList q={q} />
         </List>
+        <BillingFeatureBlockBanner
+          feature="groups"
+          planFeature="userManagement"
+          description="Organize your users into groups to more easily apply permissions to sub-sections of your team. e.g. ops, end-users, and admins."
+          placeholderImageURL="/placeholder-groups.png"
+        />
       </Flex>
     </ScrollablePage>
   )

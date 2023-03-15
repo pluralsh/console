@@ -2,6 +2,7 @@ import styled from 'styled-components'
 import {
   Dispatch,
   Key,
+  useContext,
   useEffect,
   useMemo,
   useState,
@@ -14,6 +15,7 @@ import {
   PeopleIcon,
   Select,
 } from '@pluralsh/design-system'
+import SubscriptionContext from 'components/contexts/SubscriptionContext'
 
 import { CreateClient } from '../../vpn/actions/Create'
 import { User } from '../../../generated/graphql'
@@ -65,6 +67,8 @@ interface HeaderActionsProps {
 function HeaderActionsUnstyled({
   users, refetch, onFilter, ...props
 }: HeaderActionsProps) {
+  const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
+  const isAvailable = !!availableFeatures?.vpn || isPaidPlan
   const [visible, setVisible] = useState(false)
   const [open, setOpen] = useState(false)
   const [selectedKeys, setSelectedKeys] = useState(new Set<Key>())
@@ -87,6 +91,7 @@ function HeaderActionsUnstyled({
     <div {...props}>
       <div className="selectWrapper">
         <Select
+          isDisabled={!isAvailable}
           label="All users"
           selectionMode="multiple"
           selectedKeys={selectedKeys}
@@ -113,9 +118,11 @@ function HeaderActionsUnstyled({
       </div>
 
       <Button
+        disabled={!isAvailable}
         secondary
         onClick={() => setVisible(true)}
-      >Create VPN client
+      >
+        Create VPN client
       </Button>
 
       {/* Modals */}
