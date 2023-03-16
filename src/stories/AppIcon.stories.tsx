@@ -81,14 +81,18 @@ function Template({ onFillLevel, ...args }: any) {
                 url={args.icon}
                 {...args}
               />
-
               <AppIcon
                 size={size}
                 url="photo.png"
                 spacing="none"
                 {...args}
               />
-
+              <AppIcon
+                size={size}
+                url="photo2.jpg"
+                spacing="none"
+                {...args}
+              />
               <AppIcon
                 size={size}
                 name={args.name || undefined}

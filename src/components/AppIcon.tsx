@@ -151,6 +151,7 @@ ref: Ref<any>) {
           alt={alt}
           width={iconSize}
           height={iconSize}
+          objectFit="cover"
           {...props}
         />
       ) : icon || (
