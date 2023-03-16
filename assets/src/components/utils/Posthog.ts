@@ -1,54 +1,39 @@
 import { LoginContext } from 'components/contexts'
 import { useCookieSettings } from 'components/tracking/CookieSettings'
 import posthog from 'posthog-js'
-import { useCallback, useContext, useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 export default function usePosthogIdentify() {
   const { me } = useContext(LoginContext)
   const { consent } = useCookieSettings()
 
-  return useCallback(() => {
-    if (consent.statistics) {
-      console.log('posthog opt in')
-      posthog.opt_in_capturing()
+  // Set posthog identity when user or consent changes
+  useEffect(() => {
+    if (consent?.statistics) {
       if (me?.pluralId) {
-        console.log('posthog identify', me.id, me.pluralId)
         posthog.identify(me.pluralId)
         if (me?.id) {
           posthog.alias(me.pluralId, me.id)
         }
       }
     }
-    else {
-      console.log('posthog opt out')
-      posthog.opt_out_capturing()
-    }
-  }, [consent.statistics, me?.id, me?.pluralId])
+  }, [consent, me?.id, me?.pluralId])
 }
 
 export function usePosthog() {
-  const { me } = useContext(LoginContext)
   const location = useLocation()
-  const { addListener, removeListener } = useCookieSettings()
-  const posthogIdentify = usePosthogIdentify()
+  const { consent } = useCookieSettings()
 
+  // Opt in/out when consent changes
   useEffect(() => {
-    posthogIdentify()
-  }, [posthogIdentify])
-
-  // Detect cookie preference change
-  useEffect(() => {
-    const onPrefChange = () => {
-      posthogIdentify()
+    if (consent.statistics) {
+      posthog.opt_in_capturing()
     }
-
-    addListener(onPrefChange)
-
-    return () => {
-      removeListener(onPrefChange)
+    else {
+      posthog.opt_out_capturing()
     }
-  }, [addListener, removeListener, me, posthogIdentify])
+  }, [consent.statistics])
 
   // Track route change events
   useEffect(() => {

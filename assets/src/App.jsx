@@ -13,7 +13,6 @@ import { ThemeProvider as StyledThemeProvider } from 'styled-components'
 
 import { OverlayContextProvider } from 'components/layout/Overlay'
 import { CookieSettingsProvider } from 'components/tracking/CookieSettings'
-import { usePosthog } from 'components/utils/Posthog'
 
 import { DEFAULT_THEME } from './theme'
 import 'react-toggle/style.css'

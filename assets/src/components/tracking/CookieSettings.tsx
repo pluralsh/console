@@ -20,8 +20,6 @@ type CookieSettingsContextT = {
   show: () => void
   hide: () => void
   setConsent: typeof setConsent
-  addListener: typeof addPrefChangeListener
-  removeListener: typeof removePrefChangeListener
 } & ReturnType<typeof getPrefs>
 
 const CookieSettingsContext = createContext<CookieSettingsContextT | null>(null)
@@ -32,9 +30,6 @@ export function CookieSettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const listener = e => {
-      console.log('listener event', e)
-      console.log('listener event.detail', e.detail)
-
       setPrefs(e.detail)
     }
 
@@ -47,8 +42,6 @@ export function CookieSettingsProvider({ children }: { children: ReactNode }) {
     show: () => setShowPrefs(true),
     hide: () => setShowPrefs(false),
     setConsent,
-    addListener: addPrefChangeListener,
-    removeListener: removePrefChangeListener,
     ...prefs,
   }),
   [prefs])

@@ -18,25 +18,28 @@ function Root() {
 }
 
 export const rootRoutes = (
-  <>
+  <Route
+    path="/"
+    element={<Root />}
+  >
     <Route
-      path="/login"
+      path="login"
       element={<Login />}
     />
     <Route
-      path="/quick-login/:key"
+      path="quick-login/:key"
       element={<LinkLogin />}
     />
     <Route
-      path="/access"
+      path="access"
       element={<GrantAccess />}
     />
     <Route
-      path="/oauth/callback"
+      path="oauth/callback"
       element={<OAuthCallback />}
     />
     <Route
-      path="/invite/:inviteId"
+      path="invite/:inviteId"
       element={<Invite />}
     />
     <Route
@@ -45,5 +48,5 @@ export const rootRoutes = (
     >
       {consoleRoutes}
     </Route>
-  </>
+  </Route>
 )
