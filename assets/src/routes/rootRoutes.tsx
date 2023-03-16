@@ -1,4 +1,6 @@
-import { Route } from 'react-router-dom'
+import { Outlet, Route } from 'react-router-dom'
+
+import { usePosthog } from 'components/utils/Posthog'
 
 import { LinkLogin } from '../components/login/LinkLogin'
 import Console from '../components/layout/Console'
@@ -8,6 +10,12 @@ import Invite from '../components/login/Invite'
 import { OAuthCallback } from '../components/login/OauthCallback'
 
 import { consoleRoutes } from './consoleRoutes'
+
+function Root() {
+  usePosthog()
+
+  return <Outlet />
+}
 
 export const rootRoutes = (
   <>

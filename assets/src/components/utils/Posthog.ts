@@ -1,47 +1,54 @@
 import { LoginContext } from 'components/contexts'
+import { useCookieSettings } from 'components/tracking/CookieSettings'
 import posthog from 'posthog-js'
-import { useContext, useEffect } from 'react'
+import { useCallback, useContext, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
-import { User } from '../../generated/graphql'
+export default function usePosthogIdentify() {
+  const { me } = useContext(LoginContext)
+  const { consent } = useCookieSettings()
 
-import { addPrefChangeListener, getPrefs, removePrefChangeListener } from '../../utils/cookiePrefs'
-
-export default function PosthogIdentify(me?: User) {
-  if (getPrefs().statistics) {
-    console.log('posthog opt in')
-    posthog.opt_in_capturing()
-    if (me?.pluralId) {
-      posthog.identify(me.pluralId)
-      if (me?.id) {
-        posthog.alias(me.pluralId, me.id)
+  return useCallback(() => {
+    if (consent.statistics) {
+      console.log('posthog opt in')
+      posthog.opt_in_capturing()
+      if (me?.pluralId) {
+        console.log('posthog identify', me.id, me.pluralId)
+        posthog.identify(me.pluralId)
+        if (me?.id) {
+          posthog.alias(me.pluralId, me.id)
+        }
       }
     }
-  }
-  else {
-    console.log('posthog opt out')
-    posthog.opt_out_capturing()
-  }
+    else {
+      console.log('posthog opt out')
+      posthog.opt_out_capturing()
+    }
+  }, [consent.statistics, me?.id, me?.pluralId])
 }
 
-export function Posthog() {
-  const { me } = useContext<any>(LoginContext)
+export function usePosthog() {
+  const { me } = useContext(LoginContext)
   const location = useLocation()
+  const { addListener, removeListener } = useCookieSettings()
+  const posthogIdentify = usePosthogIdentify()
 
-  PosthogIdentify(me)
+  useEffect(() => {
+    posthogIdentify()
+  }, [posthogIdentify])
 
   // Detect cookie preference change
   useEffect(() => {
     const onPrefChange = () => {
-      PosthogIdentify(me)
+      posthogIdentify()
     }
 
-    addPrefChangeListener(onPrefChange)
+    addListener(onPrefChange)
 
     return () => {
-      removePrefChangeListener(onPrefChange)
+      removeListener(onPrefChange)
     }
-  }, [me])
+  }, [addListener, removeListener, me, posthogIdentify])
 
   // Track route change events
   useEffect(() => {

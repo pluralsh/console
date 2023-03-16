@@ -23,6 +23,8 @@ import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 
 import { isValidEmail } from 'utils/email'
 
+import { useMeQuery } from 'generated/graphql'
+
 import { GqlError } from '../utils/Alert'
 
 import { setToken, wipeToken } from '../../helpers/auth'
@@ -31,7 +33,7 @@ import { localized } from '../../helpers/hostname'
 import { ME_Q, SIGNIN } from '../graphql/users'
 import { IncidentContext } from '../incidents/context'
 import { LabelledInput } from '../utils/LabelledInput'
-import { LoginContext } from '../contexts'
+import { LoginContextProvider } from '../contexts'
 import { LoginPortal } from '../login/LoginPortal'
 
 // 30 seconds
@@ -143,7 +145,7 @@ function intercomAttributes({ email, name }) {
 
 export function EnsureLogin({ children }) {
   const location = useLocation()
-  const { data, error, loading } = useQuery(ME_Q, {
+  const { data, error, loading } = useMeQuery({
     pollInterval: POLL_INTERVAL,
     errorPolicy: 'ignore',
   })
@@ -164,7 +166,7 @@ export function EnsureLogin({ children }) {
   const loginContextValue = useMemo(() => ({ me, configuration, token: externalToken }),
     [configuration, externalToken, me])
 
-  if (error || (!loading && !data.clusterInfo)) {
+  if (error || (!loading && !data?.clusterInfo)) {
     console.log(error)
 
     return <LoginError error={error} />
@@ -176,9 +178,9 @@ export function EnsureLogin({ children }) {
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     <IncidentContext.Provider value={{ clusterInformation }}>
-      <LoginContext.Provider value={loginContextValue}>
+      <LoginContextProvider value={loginContextValue}>
         {children}
-      </LoginContext.Provider>
+      </LoginContextProvider>
     </IncidentContext.Provider>
   )
 }

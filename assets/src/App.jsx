@@ -1,6 +1,5 @@
 import { RouterProvider, createBrowserRouter, createRoutesFromElements } from 'react-router-dom'
 import { Grommet } from 'grommet'
-import { useEffect } from 'react'
 
 import { IntercomProvider } from 'react-use-intercom'
 
@@ -11,12 +10,10 @@ import { mergeDeep } from '@apollo/client/utilities'
 import { GlobalStyle, styledTheme, theme } from '@pluralsh/design-system'
 import { CssBaseline, ThemeProvider } from 'honorable'
 import { ThemeProvider as StyledThemeProvider } from 'styled-components'
-import posthog from 'posthog-js'
 
 import { OverlayContextProvider } from 'components/layout/Overlay'
 import { CookieSettingsProvider } from 'components/tracking/CookieSettings'
-
-import { addPrefChangeListener, getPrefs, removePrefChangeListener } from './utils/cookiePrefs'
+import { usePosthog } from 'components/utils/Posthog'
 
 import { DEFAULT_THEME } from './theme'
 import 'react-toggle/style.css'
@@ -28,40 +25,11 @@ const INTERCOM_APP_ID = 'p127zb9y'
 
 const router = createBrowserRouter(createRoutesFromElements(rootRoutes))
 
-export function PosthogOptInOut() {
-  // Detect cookie preference change
-  useEffect(() => {
-    if (getPrefs().statistics) {
-      console.log('posthog opt in')
-      posthog.opt_in_capturing()
-    }
-    const onPrefChange = () => {
-      if (getPrefs().statistics) {
-        console.log('posthog opt in')
-        posthog.opt_in_capturing()
-      }
-      else {
-        console.log('posthog opt out')
-        posthog.opt_out_capturing()
-      }
-    }
-
-    addPrefChangeListener(onPrefChange)
-
-    return () => {
-      removePrefChangeListener(onPrefChange)
-    }
-  }, [])
-
-  return null
-}
-
 export default function App() {
   const mergedStyledTheme = mergeDeep(DEFAULT_THEME, styledTheme)
 
   return (
     <ApolloProvider client={client}>
-      <PosthogOptInOut />
       <IntercomProvider appId={INTERCOM_APP_ID}>
         <ThemeProvider theme={theme}>
           <StyledThemeProvider theme={mergedStyledTheme}>
@@ -84,3 +52,4 @@ export default function App() {
     </ApolloProvider>
   )
 }
+
