@@ -86,7 +86,7 @@ export { Toast, GraphQLToast } from './components/Toast'
 export { default as WrapWithIf } from './components/WrapWithIf'
 export type { AppProps, AppListProps, AppMenuAction } from './components/AppList'
 export { AppList } from './components/AppList'
-
+export { default as Layer } from './components/Layer'
 // Hooks
 export { default as usePrevious } from './hooks/usePrevious'
 export { default as useUnmount } from './hooks/useUnmount'

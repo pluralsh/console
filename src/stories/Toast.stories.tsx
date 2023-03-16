@@ -12,18 +12,24 @@ export default {
       options: ['info', 'success', 'error'],
       control: { type: 'radio' },
     },
+    closeTimeout: {
+      control: {
+        type: 'number',
+      },
+    },
   },
 }
 
 type Args = {
   severity: Severity,
+  closeTimeout?: number,
 }
 
 function Template(args: Args) {
-  const [visible, setVisible] = useState(false)
+  const [showToast, setShowToast] = useState(false)
   const [position, setPosition] = useState('' as LayerPositionType)
   const handleClick = (visible: boolean, position: LayerPositionType) => {
-    setVisible(visible)
+    setShowToast(visible)
     setPosition(position)
   }
 
@@ -60,17 +66,16 @@ function Template(args: Args) {
         <Button onClick={() => handleClick(true, 'bottom-right')}>Bottom Right</Button>
       </Flex>
 
-      {visible
-        && (
-          <Toast
-            position={position}
-            onClose={() => setVisible(false)}
-            margin="large"
-            severity={args.severity}
-          >
-            Hello
-          </Toast>
-        )}
+      <Toast
+        show={showToast}
+        position={position}
+        onClose={() => setShowToast(false)}
+        margin="large"
+        severity={args.severity}
+        closeTimeout={args.closeTimeout}
+      >
+        Hello
+      </Toast>
     </Flex>
   )
 }
@@ -84,20 +89,17 @@ function GraphQLTemplate() {
   return (
     <Flex>
       <Button onClick={() => handleClick(true)}>Show</Button>
-
-      {visible
-        && (
-          <GraphQLToast
-            margin="large"
-            onClose={() => setVisible(false)}
-            error={{
-              graphQLErrors: [{
-                message: 'XYZ could not be found',
-              }],
-            }}
-            header="404 Not Found"
-          />
-        )}
+      <GraphQLToast
+        show={visible}
+        margin="large"
+        onClose={() => setVisible(false)}
+        error={{
+          graphQLErrors: [{
+            message: 'XYZ could not be found',
+          }],
+        }}
+        header="404 Not Found"
+      />
     </Flex>
   )
 }
@@ -106,6 +108,7 @@ export const Default = Template.bind({})
 
 Default.args = {
   severity: 'success',
+  closeTimeout: undefined,
 }
 
 export const GraphQL = GraphQLTemplate.bind({})
