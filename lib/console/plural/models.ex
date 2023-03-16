@@ -163,17 +163,32 @@ defmodule Console.Plural.Incident do
 end
 
 defmodule Console.Plural.Features do
-  defstruct [:vpn, :userManagement]
+  defstruct [:vpn, :userManagement, :audit]
 end
 
-defmodule Console.Plural.Account do
-  alias Console.Plural.Features
+defmodule Console.Plural.Plan do
+  defstruct [:id, :name, :period]
+end
 
-  defstruct [:availableFeatures]
+defmodule Console.Plural.Subscription do
+  defstruct [:id, :plan]
 
   def spec() do
     %__MODULE__{
-      availableFeatures: %Features{}
+      plan: %Console.Plural.Plan{}
+    }
+  end
+end
+
+defmodule Console.Plural.Account do
+  alias Console.Plural.{Features, Subscription}
+
+  defstruct [:availableFeatures, :grandfatheredUntil, :delinquentAt, :subscription]
+
+  def spec() do
+    %__MODULE__{
+      availableFeatures: %Features{},
+      subscription: Subscription.spec()
     }
   end
 end

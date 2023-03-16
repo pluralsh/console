@@ -7,6 +7,8 @@ defmodule Console.GraphQl.Resolvers.Plural do
 
   @ttl :timer.hours(24)
 
+  def account(_, _), do: {:ok, Console.Features.account()}
+
   @decorate cacheable(cache: Console.Cache, key: :external_token, opts: [ttl: @ttl])
   def resolve_external_token(_, _),
     do: ExternalToken.fetch()

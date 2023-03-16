@@ -4,7 +4,6 @@ import { A, Flex, Span } from 'honorable'
 import { MarkdocContextProvider } from 'markdoc/MarkdocContext'
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
-import BillingPlatformPlansProvider from 'components/billing/BillingPlatformPlansProvider'
 
 import usePosthogIdentify from 'components/utils/Posthog'
 
@@ -30,15 +29,13 @@ export default function Console() {
         <ConsoleNavContextProvider>
           <EnsureLogin>
             <InstallationsProvider>
-              <BillingPlatformPlansProvider>
-                <BillingSubscriptionProvider>
-                  <BreadcrumbProvider>
-                    <TerminalThemeProvider>
-                      <ConsoleContent />
-                    </TerminalThemeProvider>
-                  </BreadcrumbProvider>
-                </BillingSubscriptionProvider>
-              </BillingPlatformPlansProvider>
+              <BillingSubscriptionProvider>
+                <BreadcrumbProvider>
+                  <TerminalThemeProvider>
+                    <ConsoleContent />
+                  </TerminalThemeProvider>
+                </BreadcrumbProvider>
+              </BillingSubscriptionProvider>
             </InstallationsProvider>
           </EnsureLogin>
         </ConsoleNavContextProvider>

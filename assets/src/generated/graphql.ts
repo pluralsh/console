@@ -25,6 +25,14 @@ export type Scalars = {
   Map: Map<string, unknown>;
 };
 
+export type Account = {
+  __typename?: 'Account';
+  availableFeatures?: Maybe<AvailableFeatures>;
+  delinquentAt?: Maybe<Scalars['DateTime']>;
+  grandfatheredUntil?: Maybe<Scalars['DateTime']>;
+  subscription?: Maybe<PluralSubscription>;
+};
+
 export type Application = {
   __typename?: 'Application';
   configuration?: Maybe<Configuration>;
@@ -138,6 +146,7 @@ export enum AutoscalingTarget {
 
 export type AvailableFeatures = {
   __typename?: 'AvailableFeatures';
+  audits?: Maybe<Scalars['Boolean']>;
   userManagement?: Maybe<Scalars['Boolean']>;
   vpn?: Maybe<Scalars['Boolean']>;
 };
@@ -951,6 +960,13 @@ export enum Permission {
   Read = 'READ'
 }
 
+export type Plan = {
+  __typename?: 'Plan';
+  id?: Maybe<Scalars['ID']>;
+  name?: Maybe<Scalars['String']>;
+  period?: Maybe<Scalars['String']>;
+};
+
 export type PluralContext = {
   __typename?: 'PluralContext';
   buckets?: Maybe<Array<Maybe<Scalars['String']>>>;
@@ -963,6 +979,12 @@ export type PluralManifest = {
   bucketPrefix?: Maybe<Scalars['String']>;
   cluster?: Maybe<Scalars['String']>;
   network?: Maybe<ManifestNetwork>;
+};
+
+export type PluralSubscription = {
+  __typename?: 'PluralSubscription';
+  id?: Maybe<Scalars['ID']>;
+  plan?: Maybe<Plan>;
 };
 
 export type Pod = {
@@ -1404,6 +1426,7 @@ export type RootMutationTypeUpdateUserArgs = {
 
 export type RootQueryType = {
   __typename?: 'RootQueryType';
+  account?: Maybe<Account>;
   application?: Maybe<Application>;
   applications?: Maybe<Array<Maybe<Application>>>;
   auditMetrics?: Maybe<Array<Maybe<AuditMetric>>>;

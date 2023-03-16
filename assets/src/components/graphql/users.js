@@ -188,3 +188,9 @@ export const NOTIFICATIONS_Q = gql`
   ${PageInfo}
   ${NotificationFragment}
 `
+
+export const TEMP_TOKEN_Q = gql`
+  query {
+    temporaryToken
+  }
+`

@@ -95,10 +95,18 @@ const install = async (client: ApolloClient<unknown>, apps: Array<WizardStepConf
   for (const installableApp of installableApps) {
     const dependencies = apps.filter(app => app.dependencyOf?.has(installableApp.label!))
     const context = [...dependencies, installableApp].reduce((acc, app) => ({ ...acc, [app.label!]: app.data.context || {} }), {})
+    const toAPIAppContext = context => ({
+      ...Object.keys(context || {})
+        .reduce((acc, key) => ({ ...acc, [key]: context[key].value }), {}),
+    })
+    const toAPIContext = context => ({
+      ...Object.entries(context || {})
+        .reduce((acc, [key, appContext]) => ({ ...acc, [key]: toAPIAppContext(appContext) }), {}),
+    })
 
     const promise = client.mutate({
       mutation: INSTALL_RECIPE,
-      variables: { id: installableApp.data.id, oidc: installableApp.data.oidc, context: JSON.stringify(context) },
+      variables: { id: installableApp.data.id, oidc: installableApp.data.oidc, context: JSON.stringify(toAPIContext(context)) },
     })
 
     promises.push(promise)

@@ -1,7 +1,10 @@
+import { Account, AvailableFeatures, PluralSubscription } from 'generated/graphql'
 import { createContext } from 'react'
 
 export type SubscriptionContextType = {
-  account: any | null
+  account?: Account
+  availableFeatures?: AvailableFeatures
+  subscription?: PluralSubscription
   isPaidPlan: boolean
   isProPlan: boolean
   isEnterprisePlan: boolean
@@ -10,7 +13,6 @@ export type SubscriptionContextType = {
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType>({
-  account: null,
   isPaidPlan: false,
   isProPlan: false,
   isEnterprisePlan: false,

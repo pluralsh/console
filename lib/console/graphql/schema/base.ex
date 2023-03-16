@@ -54,6 +54,24 @@ defmodule Console.GraphQl.Schema.Base do
     end
   end
 
+  defmacro key_func(name, type, key) do
+    quote do
+      field unquote(name), unquote(type), resolve: fn
+        obj, _, _ -> {:ok, Map.get(obj, unquote(key))}
+      end
+    end
+  end
+
+  defmacro datetime_func(name, key) do
+    quote do
+      field unquote(name), :datetime, resolve: fn
+        %{unquote(key) => val}, _, _ when is_binary(val) -> Timex.parse(val, "{ISO:Extended}")
+        %{unquote(key) => %{} = val}, _, _ -> {:ok, val}
+        _, _, _ -> {:ok, nil}
+      end
+    end
+  end
+
   defmacro enum_from_list(name, m, f, a) do
     module = Macro.expand(m, __CALLER__)
     values = apply(module, f, a) |> Enum.map(fn key ->

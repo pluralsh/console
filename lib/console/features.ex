@@ -16,7 +16,7 @@ defmodule Console.Features do
       send self(), :poll
     end
 
-    {:ok, %Features{}}
+    {:ok, {%Features{}, nil}}
   end
 
   def available?(feature) do
@@ -28,11 +28,15 @@ defmodule Console.Features do
 
   def fetch(), do: GenServer.call(__MODULE__, :fetch)
 
-  def handle_call(:fetch, _, state), do: {:reply, state, state}
+  def account(), do: GenServer.call(__MODULE__, :account)
+
+  def handle_call(:fetch, _, {feats, _} = state), do: {:reply, feats, state}
+
+  def handle_call(:account, _, {_, account} = state), do: {:reply, account, state}
 
   def handle_info(:poll, state) do
     case Accounts.account() do
-      {:ok, %Account{availableFeatures: %Features{} = feats}} -> {:noreply, feats}
+      {:ok, %Account{availableFeatures: %Features{} = feats} = account} -> {:noreply, {feats, account}}
       _ -> {:noreply, state}
     end
   end

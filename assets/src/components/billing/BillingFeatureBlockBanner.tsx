@@ -48,9 +48,9 @@ const Description = styled.div(({ theme }) => ({
 export default function BillingFeatureBlockBanner({
   feature, description, planFeature, placeholderImageURL,
 }: BillingFeatureBlockBannerPropsType) {
-  const { account, isPaidPlan } = useContext(SubscriptionContext)
+  const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
 
-  if (account?.availableFeatures?.[planFeature] || isPaidPlan) return null
+  if (availableFeatures?.[planFeature] || isPaidPlan) return null
 
   return (
     <Wrapper backgroundImage={placeholderImageURL}>

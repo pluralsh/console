@@ -51,6 +51,12 @@ type UserConnection {
   edges: [UserEdge]
 }
 
+type Plan {
+  id: ID
+  name: String
+  period: String
+}
+
 type Application {
   name: String!
   spec: ApplicationSpec!
@@ -154,6 +160,13 @@ type StatefulSet {
 type FileContent {
   path: String
   content: String
+}
+
+type Account {
+  delinquentAt: DateTime
+  grandfatheredUntil: DateTime
+  availableFeatures: AvailableFeatures
+  subscription: PluralSubscription
 }
 
 type MetricResult {
@@ -673,6 +686,7 @@ type ApplicationSpec {
 
 type AvailableFeatures {
   vpn: Boolean
+  audits: Boolean
   userManagement: Boolean
 }
 
@@ -876,6 +890,7 @@ type RootQueryType {
   configurationOverlays(namespace: String!): [ConfigurationOverlay]
   audits(after: String, first: Int, before: String, last: Int, repo: String): AuditConnection
   auditMetrics: [AuditMetric]
+  account: Account
   installations(after: String, first: Int, before: String, last: Int): InstallationConnection
   applications: [Application]
   application(name: String!): Application
@@ -1139,6 +1154,11 @@ type RunbookExecutionConnection {
   edges: [RunbookExecutionEdge]
 }
 
+type PluralSubscription {
+  id: ID
+  plan: Plan
+}
+
 type ConsoleConfiguration {
   gitCommit: String
   isDemoProject: Boolean
@@ -1294,6 +1314,24 @@ type Dashboard {
   spec: DashboardSpec!
 }
 
+type VerticalPodAutoscalerStatus {
+  recommendation: Recommendation
+}
+
+type Resources {
+  limits: ResourceSpec
+  requests: ResourceSpec
+}
+
+enum NotificationStatus {
+  FIRING
+  RESOLVED
+}
+
+type UserRoles {
+  admin: Boolean
+}
+
 type WireguardPeerStatus {
   ready: Boolean
   conditions: [StatusCondition]
@@ -1393,22 +1431,9 @@ type ServiceSpec {
   ports: [ServicePort]
 }
 
-type VerticalPodAutoscalerStatus {
-  recommendation: Recommendation
-}
-
-type Resources {
-  limits: ResourceSpec
-  requests: ResourceSpec
-}
-
-enum NotificationStatus {
-  FIRING
-  RESOLVED
-}
-
-type UserRoles {
-  admin: Boolean
+type SecretKeySelector {
+  name: String!
+  key: String
 }
 
 type User {
@@ -1438,11 +1463,6 @@ type VerticalPodAutoscaler {
   metadata: Metadata!
   spec: VerticalPodAutoscalerSpec!
   status: VerticalPodAutoscalerStatus
-}
-
-type SecretKeySelector {
-  name: String!
-  key: String
 }
 
 type RunbookData {

@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import { Flex } from 'honorable'
 import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
-
-import { Flex } from 'honorable'
 
 import { List } from '../../utils/List'
 
