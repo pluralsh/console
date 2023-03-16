@@ -19,13 +19,13 @@ export function User({ user }: any) {
     variables: { id: user.id },
     onCompleted: () => setConfirm(false),
   })
-  const editable = !!me.roles?.admin || hasRbac(me, Permissions.USERS)
+  const editable = !!me?.roles?.admin || hasRbac(me as any, Permissions.USERS)
   const isAdmin = !!user.roles?.admin
   const setAdmin = useCallback(() => mutation({ variables: { attributes: { roles: { admin: !isAdmin } } } }),
     [mutation, isAdmin])
   const [confirm, setConfirm] = useState(false)
 
-  const isSelf = user.id === me.id
+  const isSelf = user.id === me?.id
 
   const confirmModal = confirm && (
     <Confirm

@@ -3,8 +3,9 @@ import { Toast } from '@pluralsh/design-system'
 import { A, Flex, Span } from 'honorable'
 import { MarkdocContextProvider } from 'markdoc/MarkdocContext'
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
-import { ReactNode } from 'react'
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
+
+import usePosthogIdentify from 'components/utils/Posthog'
 
 import { EnsureLogin } from '../login/Login'
 import { InstallationsProvider } from '../Installations'
@@ -21,7 +22,7 @@ import { ContentOverlay } from './Overlay'
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
 
-function ContextProviders({ children }: { children: ReactNode }) {
+export default function Console() {
   return (
     <CursorPositionProvider>
       <MarkdocContextProvider value={{ variant: 'console' }}>
@@ -31,7 +32,7 @@ function ContextProviders({ children }: { children: ReactNode }) {
               <BillingSubscriptionProvider>
                 <BreadcrumbProvider>
                   <TerminalThemeProvider>
-                    {children}
+                    <ConsoleContent />
                   </TerminalThemeProvider>
                 </BreadcrumbProvider>
               </BillingSubscriptionProvider>
@@ -43,62 +44,62 @@ function ContextProviders({ children }: { children: ReactNode }) {
   )
 }
 
-export default function Console() {
+function ConsoleContent() {
   const isProduction = import.meta.env.MODE === 'production'
 
+  usePosthogIdentify()
+
   return (
-    <ContextProviders>
-      <Flex
-        position="relative"
-        width="100vw"
-        maxWidth="100vw"
-        height="100vh"
-        minWidth="0"
-        minHeight="0"
-        maxHeight="100vh"
-        overflow="hidden"
-        flexDirection="column"
-      >
-        {isProduction && (
-          <WithApplicationUpdate>
-            {({ reloadApplication }) => (
-              <Toast
-                severity="info"
-                marginBottom="medium"
-                marginRight="xxxxlarge"
+    <Flex
+      position="relative"
+      width="100vw"
+      maxWidth="100vw"
+      height="100vh"
+      minWidth="0"
+      minHeight="0"
+      maxHeight="100vh"
+      overflow="hidden"
+      flexDirection="column"
+    >
+      {isProduction && (
+        <WithApplicationUpdate>
+          {({ reloadApplication }) => (
+            <Toast
+              severity="info"
+              marginBottom="medium"
+              marginRight="xxxxlarge"
+            >
+              <Span marginRight="small">Time for a new update!</Span>
+              <A
+                onClick={() => reloadApplication()}
+                style={{ textDecoration: 'none' }}
+                color="action-link-inline"
               >
-                <Span marginRight="small">Time for a new update!</Span>
-                <A
-                  onClick={() => reloadApplication()}
-                  style={{ textDecoration: 'none' }}
-                  color="action-link-inline"
-                >
-                  Update now
-                </A>
-              </Toast>
-            )}
-          </WithApplicationUpdate>
-        )}
-        <Header />
+                Update now
+              </A>
+            </Toast>
+          )}
+        </WithApplicationUpdate>
+      )}
+      <Header />
+      <Flex
+        width="100%"
+        minWidth={0}
+        minHeight={0}
+        flexGrow={1}
+      >
+        <Sidebar />
         <Flex
-          width="100%"
-          minWidth={0}
-          minHeight={0}
+          direction="column"
           flexGrow={1}
+          overflowX="hidden"
+          position="relative"
         >
-          <Sidebar />
-          <Flex
-            direction="column"
-            flexGrow={1}
-            overflowX="hidden"
-            position="relative"
-          >
-            <ContentOverlay />
-            <Subheader />
-            <Outlet />
-          </Flex>
+          <ContentOverlay />
+          <Subheader />
+          <Outlet />
         </Flex>
       </Flex>
-    </ContextProviders>
+    </Flex>
   )
 }

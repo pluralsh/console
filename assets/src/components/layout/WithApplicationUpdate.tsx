@@ -20,23 +20,23 @@ function WithApplicationUpdate({ children }: any) {
   const { configuration: config } = useContext(LoginContext)
   const commit = getCommit()
 
-  const [stale, setStale] = useState(commit !== config.gitCommit)
+  const [stale, setStale] = useState(commit !== config?.gitCommit)
   const reloadApplication = useCallback(() => {
     const promise = serviceWorker.unregister() || Promise.resolve('done')
 
     setStale(false)
     promise.then(() => {
-      setCommit(config.gitCommit)
+      setCommit(config?.gitCommit)
       window.location.reload()
     })
-  }, [config.gitCommit])
+  }, [config?.gitCommit])
   const reloadOnStale = () => (stale ? reloadApplication() : null)
 
   // force rerender every 60s to check if version hasn't changed
   useEffect(() => {
     const interval = setInterval(() => setTime(Date.now()), 60000)
 
-    setStale(commit !== config.gitCommit)
+    setStale(commit !== config?.gitCommit)
 
     return () => clearInterval(interval)
   }, [time, setStale, commit, config])
@@ -49,7 +49,7 @@ function WithApplicationUpdate({ children }: any) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  if (commit === DEFAULT_COMMIT) setCommit(config.gitCommit)
+  if (commit === DEFAULT_COMMIT) setCommit(config?.gitCommit)
 
   if (stale) return children({ reloadApplication })
 

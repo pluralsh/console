@@ -22,7 +22,7 @@ import ComponentRaw from '../components/apps/app/components/component/ComponentR
 
 export const appsRoutes = [
   <Route
-    path=""
+    index
     element={<Apps />}
   />,
   <Route

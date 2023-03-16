@@ -1442,6 +1442,7 @@ type User {
   email: String!
   deletedAt: DateTime
   profile: String
+  pluralId: String
   roles: UserRoles
   readTimestamp: DateTime
   buildTimestamp: DateTime

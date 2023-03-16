@@ -30,6 +30,7 @@ import Users from 'components/account/users/Users'
 import EmailSettings from 'components/account/email/EmailSettings'
 
 import AccountSettings from 'components/account/settings/AccountSettings'
+import CookieSettings from 'components/account/settings/CookieSettings'
 
 import { ProfileVPN } from '../components/profile/VPN'
 
@@ -166,6 +167,10 @@ const accountRoutes = [
     <Route
       path="settings"
       element={<AccountSettings />}
+    />
+    <Route
+      path="cookies"
+      element={<CookieSettings />}
     />
   </Route>,
 ]

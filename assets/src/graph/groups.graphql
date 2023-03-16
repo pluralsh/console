@@ -1,6 +1,6 @@
 fragment GroupMember on GroupMember {
   user {
-    ...UserFragment
+    ...User
   }
   group {
     ...Group

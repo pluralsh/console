@@ -12,6 +12,7 @@ import { CssBaseline, ThemeProvider } from 'honorable'
 import { ThemeProvider as StyledThemeProvider } from 'styled-components'
 
 import { OverlayContextProvider } from 'components/layout/Overlay'
+import { CookieSettingsProvider } from 'components/tracking/CookieSettings'
 
 import { DEFAULT_THEME } from './theme'
 import 'react-toggle/style.css'
@@ -32,15 +33,17 @@ export default function App() {
         <ThemeProvider theme={theme}>
           <StyledThemeProvider theme={mergedStyledTheme}>
             <OverlayContextProvider>
-              <CssBaseline />
-              <GlobalStyle />
-              <Grommet
-                full
-                theme={mergedStyledTheme}
-                themeMode="dark"
-              >
-                <RouterProvider router={router} />
-              </Grommet>
+              <CookieSettingsProvider>
+                <CssBaseline />
+                <GlobalStyle />
+                <Grommet
+                  full
+                  theme={mergedStyledTheme}
+                  themeMode="dark"
+                >
+                  <RouterProvider router={router} />
+                </Grommet>
+              </CookieSettingsProvider>
             </OverlayContextProvider>
           </StyledThemeProvider>
         </ThemeProvider>
@@ -48,3 +51,4 @@ export default function App() {
     </ApolloProvider>
   )
 }
+

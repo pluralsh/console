@@ -19,6 +19,7 @@ const getDirectory = (me, configuration) => [
   { path: 'vpn', label: 'VPN clients', enabled: configuration?.vpnEnabled ?? false },
   { path: 'email', label: 'Email settings', enabled: me?.roles?.admin && configuration?.gitStatus?.cloned },
   { path: 'settings', label: 'Account settings', enabled: true },
+  { path: 'cookies', label: 'Cookie settings', enabled: true },
 ]
 
 export default function Account() {
