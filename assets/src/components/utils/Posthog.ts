@@ -5,10 +5,10 @@ import { useLocation } from 'react-router-dom'
 
 import { User } from '../../generated/graphql'
 
-import { addPrefChangeListener, getCookiePrefs, removePrefChangeListener } from '../../utils/cookiePrefs'
+import { addPrefChangeListener, getPrefs, removePrefChangeListener } from '../../utils/cookiePrefs'
 
 export default function PosthogIdentify(me?: User) {
-  if (getCookiePrefs().statistics) {
+  if (getPrefs().statistics) {
     console.log('posthog opt in')
     posthog.opt_in_capturing()
     if (me?.pluralId) {

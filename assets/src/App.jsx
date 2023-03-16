@@ -14,8 +14,9 @@ import { ThemeProvider as StyledThemeProvider } from 'styled-components'
 import posthog from 'posthog-js'
 
 import { OverlayContextProvider } from 'components/layout/Overlay'
+import { CookieSettingsProvider } from 'components/tracking/CookieSettings'
 
-import { addPrefChangeListener, getCookiePrefs, removePrefChangeListener } from './utils/cookiePrefs'
+import { addPrefChangeListener, getPrefs, removePrefChangeListener } from './utils/cookiePrefs'
 
 import { DEFAULT_THEME } from './theme'
 import 'react-toggle/style.css'
@@ -30,12 +31,12 @@ const router = createBrowserRouter(createRoutesFromElements(rootRoutes))
 export function PosthogOptInOut() {
   // Detect cookie preference change
   useEffect(() => {
-    if (getCookiePrefs().statistics) {
+    if (getPrefs().statistics) {
       console.log('posthog opt in')
       posthog.opt_in_capturing()
     }
     const onPrefChange = () => {
-      if (getCookiePrefs().statistics) {
+      if (getPrefs().statistics) {
         console.log('posthog opt in')
         posthog.opt_in_capturing()
       }
@@ -65,15 +66,17 @@ export default function App() {
         <ThemeProvider theme={theme}>
           <StyledThemeProvider theme={mergedStyledTheme}>
             <OverlayContextProvider>
-              <CssBaseline />
-              <GlobalStyle />
-              <Grommet
-                full
-                theme={mergedStyledTheme}
-                themeMode="dark"
-              >
-                <RouterProvider router={router} />
-              </Grommet>
+              <CookieSettingsProvider>
+                <CssBaseline />
+                <GlobalStyle />
+                <Grommet
+                  full
+                  theme={mergedStyledTheme}
+                  themeMode="dark"
+                >
+                  <RouterProvider router={router} />
+                </Grommet>
+              </CookieSettingsProvider>
             </OverlayContextProvider>
           </StyledThemeProvider>
         </ThemeProvider>

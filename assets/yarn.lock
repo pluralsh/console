@@ -3485,9 +3485,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:1.320.0":
-  version: 1.320.0
-  resolution: "@pluralsh/design-system@npm:1.320.0"
+"@pluralsh/design-system@file:.yalc/@pluralsh/design-system::locator=console%40workspace%3A.":
+  version: 0.1.0
+  resolution: "@pluralsh/design-system@file:.yalc/@pluralsh/design-system#.yalc/@pluralsh/design-system::hash=73f5ed&locator=console%40workspace%3A."
   dependencies:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@monaco-editor/react": 4.4.6
@@ -3541,7 +3541,7 @@ __metadata:
     react-dom: ">=16.0.0"
     react-transition-group: ">=4.4.2"
     styled-components: ">=5.3.5"
-  checksum: 3e2daeaebafbd4bd63ecf0f69445c3422221449333accc33c82288ac647327dd826ad8d18c080189c963bd795e38d1384f1086b6b0799dfcc962084c1a8583eb
+  checksum: 3bfaf3ef81fdd0b4287b8b573f7c3031f07a6e613fb25358cd20da99e175fe262a87362fea2d23325c90e8feff8188390bc5900db78050c4a6348cce8e4a4447
   languageName: node
   linkType: hard
 
@@ -7442,7 +7442,7 @@ __metadata:
     "@nivo/pie": 0.80.0
     "@nivo/radial-bar": 0.80.0
     "@nivo/tooltip": 0.80.0
-    "@pluralsh/design-system": 1.320.0
+    "@pluralsh/design-system": "file:.yalc/@pluralsh/design-system"
     "@pluralsh/eslint-config-typescript": 2.5.40
     "@pluralsh/stylelint-config": 1.1.3
     "@tanstack/react-table": 8.7.9
