@@ -4,9 +4,9 @@ import { useContext } from 'react'
 import { LoginContext } from '../contexts'
 
 export default function DemoBanner() {
-  const { configuration: { isDemoProject } } = useContext(LoginContext)
+  const { configuration } = useContext(LoginContext)
 
-  if (!isDemoProject) return null
+  if (!configuration?.isDemoProject) return null
 
   return (
     <Div
