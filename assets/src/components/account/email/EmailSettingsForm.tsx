@@ -35,7 +35,7 @@ export default function EmailSettingsForm({ smtp }) {
           placeholder="smtp.sendrid.net"
           width="100%"
           value={form.server || ''}
-          oonChange={({ target: { value } }) => setForm({ ...form, server: value })}
+          onChange={({ target: { value } }) => setForm({ ...form, server: value })}
         />
         <ValidatedInput
           label="Port"
