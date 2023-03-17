@@ -1,6 +1,7 @@
 name: console-equinix
 description: Deploys console on an Equinix Kubernetes cluster
 provider: EQUINIX
+primary: true
 oidcSettings:
   uriFormat: https://{domain}/oauth/callback
   authMethod: POST

@@ -19,6 +19,7 @@ jobs:
     - name: installing plural
       uses: pluralsh/setup-plural@v0.1.5
       with:
+        vsn: 0.6.11
         config: ${{ secrets.PLURAL_CONF }}
     - run: make deploy
     - uses: 8398a7/action-slack@v3

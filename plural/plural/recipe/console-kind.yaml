@@ -1,6 +1,7 @@
 name: console-kind
 description: Deploys console on a KinD Kubernetes cluster
 provider: KIND
+primary: true
 oidcSettings:
   uriFormat: https://{domain}/oauth/callback
   authMethod: POST

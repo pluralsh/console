@@ -1,6 +1,7 @@
 name: console-azure
 description: Deploys console on an AKS cluster
 provider: AZURE
+primary: true
 oidcSettings:
   uriFormat: https://{domain}/oauth/callback
   authMethod: POST
