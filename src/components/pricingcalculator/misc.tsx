@@ -108,9 +108,9 @@ export const PricingCalculatorWrap = styled.div(({ theme }) => ({
     flexShrink: 1,
     gap: theme.spacing.xxxlarge,
 
-    '@media (max-width: 768px)': {
+    '@media (max-width: 780px)': {
       flexDirection: 'column',
-      gap: theme.spacing.medium,
+      gap: theme.spacing.xlarge,
     },
 
     '&.with-padding': {
@@ -131,5 +131,9 @@ export const PricingCalculatorWrap = styled.div(({ theme }) => ({
     color: theme.colors['text-xlight'],
     marginBottom: theme.spacing.medium,
     fontStyle: 'italic',
+
+    '@media (max-width: 780px)': {
+      marginBottom: 0,
+    },
   },
 }))
