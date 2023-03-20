@@ -148,7 +148,7 @@ ref) => {
             display="flex"
           />
         </div>
-        <div>
+        <div className="content">
           <h6 className={classNames({ visuallyHidden: !title, expandable })}>
             <span className="visuallyHidden">{`${text}: `}</span>
             {title}
@@ -225,6 +225,9 @@ const CalloutWrap = styled.div<{
       marginBottom: $expanded ? theme.spacing.small : 0,
       transition: 'margin-bottom .5s',
     },
+  },
+  '.content': {
+    width: '100%',
   },
   '.children *:first-child': {
     marginTop: '0',

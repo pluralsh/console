@@ -1,17 +1,12 @@
-import {
-  ComponentProps,
-  PropsWithChildren,
-  createContext,
-  forwardRef,
-} from 'react'
-import { Div } from 'honorable'
+import { PropsWithChildren, createContext, forwardRef } from 'react'
+import { Div, DivProps } from 'honorable'
 import { AriaRadioGroupProps, useRadioGroup } from '@react-aria/radio'
 import { useRadioGroupState } from '@react-stately/radio'
 
 export const RadioContext = createContext(null)
 
 type RadioGroupProps = AriaRadioGroupProps &
-  PropsWithChildren<ComponentProps<'div'>>
+  PropsWithChildren<DivProps>
 
 function RadioGroup({
   name,
