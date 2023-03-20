@@ -1,6 +1,9 @@
 import { ComponentType } from 'react'
 import styled from 'styled-components'
 
+// @ts-ignore
+import styledContainerQuery from 'styled-container-query'
+
 import AwsLogoIcon from '../icons/AwsLogoIcon'
 import AzureLogoIcon from '../icons/AzureLogoIcon'
 import { IconProps } from '../icons/createIcon'
@@ -108,11 +111,6 @@ export const PricingCalculatorWrap = styled.div(({ theme }) => ({
     flexShrink: 1,
     gap: theme.spacing.xxxlarge,
 
-    '@media (max-width: 780px)': {
-      flexDirection: 'column',
-      gap: theme.spacing.xlarge,
-    },
-
     '&.with-padding': {
       paddingBottom: theme.spacing.medium,
     },
@@ -131,9 +129,20 @@ export const PricingCalculatorWrap = styled.div(({ theme }) => ({
     color: theme.colors['text-xlight'],
     marginBottom: theme.spacing.medium,
     fontStyle: 'italic',
-
-    '@media (max-width: 780px)': {
-      marginBottom: 0,
-    },
   },
 }))
+
+// If https://github.com/styled-components/styled-components/issues/416
+// will be fixed then we can remove it and use above wrapper.
+export const PricingCalculatorContainerQuery = styledContainerQuery.div`
+  &:container(max-width: 620px) {
+    .content {
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .hint {
+      margin-bottom: 0;
+    }
+},
+`

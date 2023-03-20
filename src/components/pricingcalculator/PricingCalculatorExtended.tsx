@@ -10,6 +10,7 @@ import Card, { CardProps } from '../Card'
 
 import {
   PROVIDERS,
+  PricingCalculatorContainerQuery,
   PricingCalculatorWrap,
   estimatePluralCost,
   estimateProviderCost,
@@ -50,81 +51,83 @@ const PricingCalculatorExtended = forwardRef<HTMLDivElement, CardProps>((props, 
       {...props}
       ref={ref}
     >
-      <PricingCalculatorWrap>
-        <div className="content">
-          <div className="column">
-            <ProviderControl
-              header="What cloud provider will you use?"
-              providerId={providerId}
-              setProviderId={setProviderId}
-            />
-            <ClustersControl
-              clusters={clusters}
-              setClusters={setClusters}
-            />
-            <AppsControl
-              header="How many applications do you plan to install?"
-              caption="The default deployment includes headroom for a few applications, but will scale as necessary to accommodate more."
-              apps={apps}
-              setApps={setApps}
-            />
-            <UsersControl
-              users={users}
-              setUsers={setUsers}
-            />
-            <div className="hint">
-              *Accounts requiring {'>'}6 clusters or {'>'}60 users should reach out
-              to discuss our Enterprise option to optimize plan costs to your specific needs.
+      <PricingCalculatorContainerQuery>
+        <PricingCalculatorWrap>
+          <div className="content">
+            <div className="column">
+              <ProviderControl
+                header="What cloud provider will you use?"
+                providerId={providerId}
+                setProviderId={setProviderId}
+              />
+              <ClustersControl
+                clusters={clusters}
+                setClusters={setClusters}
+              />
+              <AppsControl
+                header="How many applications do you plan to install?"
+                caption="The default deployment includes headroom for a few applications, but will scale as necessary to accommodate more."
+                apps={apps}
+                setApps={setApps}
+              />
+              <UsersControl
+                users={users}
+                setUsers={setUsers}
+              />
+              <div className="hint">
+                *Accounts requiring {'>'}6 clusters or {'>'}60 users should reach out
+                to discuss our Enterprise option to optimize plan costs to your specific needs.
+              </div>
+            </div>
+            <div className="column">
+              <Switch
+                disabled={users > 5}
+                checked={professional}
+                onChange={({ target: { checked } }) => setProfessional(checked)}
+                marginBottom="xlarge"
+              >
+                Professional plan
+              </Switch>
+              <Costs header="Cloud costs">
+                <Cost
+                  cost={providerCost?.k8s}
+                  label={`${provider?.name} Kubernetes cost`}
+                  tooltip="Cost to deploy this provider's managed version of Kubernetes."
+                />
+                <Cost
+                  cost={providerCost?.infra}
+                  label={`${provider?.name} infrastructure price`}
+                  tooltip="Cost to provision and run standard instances on this provider."
+                />
+                <Cost
+                  cost={providerCost?.app}
+                  label="Application infrastructure"
+                  tooltip="Cost to deploy and run selected number of applications. Default setup includes headroom for a few applications and will scale to meet additional needs."
+                />
+              </Costs>
+              <Costs
+                header="Plural costs"
+                marginTop={48}
+              >
+                <Cost
+                  cost={pluralCost?.clusters}
+                  label={`for ${clusters} clusters`}
+                />
+                <Cost
+                  cost={pluralCost?.users}
+                  label={`for ${users} users`}
+                />
+              </Costs>
+              <TotalCost
+                providerCost={providerCost?.total}
+                provider={provider?.name}
+                proPlan={professional}
+                pluralCost={pluralCost?.total}
+              />
             </div>
           </div>
-          <div className="column">
-            <Switch
-              disabled={users > 5}
-              checked={professional}
-              onChange={({ target: { checked } }) => setProfessional(checked)}
-              marginBottom="xlarge"
-            >
-              Professional plan
-            </Switch>
-            <Costs header="Cloud costs">
-              <Cost
-                cost={providerCost?.k8s}
-                label={`${provider?.name} Kubernetes cost`}
-                tooltip="Cost to deploy this provider's managed version of Kubernetes."
-              />
-              <Cost
-                cost={providerCost?.infra}
-                label={`${provider?.name} infrastructure price`}
-                tooltip="Cost to provision and run standard instances on this provider."
-              />
-              <Cost
-                cost={providerCost?.app}
-                label="Application infrastructure"
-                tooltip="Cost to deploy and run selected number of applications. Default setup includes headroom for a few applications and will scale to meet additional needs."
-              />
-            </Costs>
-            <Costs
-              header="Plural costs"
-              marginTop={48}
-            >
-              <Cost
-                cost={pluralCost?.clusters}
-                label={`for ${clusters} clusters`}
-              />
-              <Cost
-                cost={pluralCost?.users}
-                label={`for ${users} users`}
-              />
-            </Costs>
-            <TotalCost
-              providerCost={providerCost?.total}
-              provider={provider?.name}
-              proPlan={professional}
-              pluralCost={pluralCost?.total}
-            />
-          </div>
-        </div>
-      </PricingCalculatorWrap>
+        </PricingCalculatorWrap>
+      </PricingCalculatorContainerQuery>
     </Card>
   )
 })
