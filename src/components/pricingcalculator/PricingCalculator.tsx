@@ -15,13 +15,14 @@ import Costs from './costs/Costs'
 import TotalCost from './costs/TotalCost'
 
 export type PricingCalculatorProps = {
+  appsDefault?: number
   expandedDefault?: boolean
 }
 
-const PricingCalculator = forwardRef<HTMLDivElement, PricingCalculatorProps>(({ expandedDefault = false }, ref) => {
+const PricingCalculator = forwardRef<HTMLDivElement, PricingCalculatorProps>(({ appsDefault = 5, expandedDefault = false }, ref) => {
   const [expanded, setExpanded] = useState(expandedDefault)
   const [providerId, setProviderId] = useState(PROVIDERS[0].id)
-  const [apps, setApps] = useState(10)
+  const [apps, setApps] = useState(appsDefault)
   const provider = useMemo(() => PROVIDERS.find(({ id }) => id === providerId), [providerId])
   const providerCost = useMemo(() => estimateProviderCost(provider, apps), [provider, apps])
 

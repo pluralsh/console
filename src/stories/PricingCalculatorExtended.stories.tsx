@@ -16,5 +16,9 @@ function Template(args: any) {
 export const Default = Template.bind({})
 
 Default.args = {
+  appsDefault: 5,
+  clustersDefault: 1,
+  usersDefault: 0,
+  professionalDefualt: false,
   fillLevel: 2,
 }

@@ -23,13 +23,22 @@ import ClustersControl from './controls/ClustersControl'
 import Costs from './costs/Costs'
 import TotalCost from './costs/TotalCost'
 
-const PricingCalculatorExtended = forwardRef<HTMLDivElement, CardProps>((props, ref) => {
+export type PricingCalculatorProps = {
+  appsDefault?: number
+  clustersDefault?: number
+  usersDefault?: number
+  professionalDefault?: boolean
+} & CardProps
+
+const PricingCalculatorExtended = forwardRef<HTMLDivElement, PricingCalculatorProps>(({
+  appsDefault = 5, clustersDefault = 1, usersDefault = 0, professionalDefault = false, ...props
+}, ref) => {
   const [providerId, setProviderId] = useState(PROVIDERS[0].id)
-  const [clusters, setClusters] = useState(3)
-  const [apps, setApps] = useState(10)
-  const [users, setUsers] = useState(0)
-  const [professional, setProfessional] = useState(false)
-  const [enforcedPro, setEnforcedPro] = useState(false)
+  const [clusters, setClusters] = useState(clustersDefault)
+  const [apps, setApps] = useState(appsDefault)
+  const [users, setUsers] = useState(usersDefault)
+  const [enforcedPro, setEnforcedPro] = useState(users > 5)
+  const [professional, setProfessional] = useState(professionalDefault || enforcedPro)
   const provider = useMemo(() => PROVIDERS.find(({ id }) => id === providerId), [providerId])
   const providerCost = useMemo(() => estimateProviderCost(provider, apps, clusters), [provider, apps, clusters])
   const pluralCost = useMemo(() => estimatePluralCost(professional, clusters, users), [professional, clusters, users])
@@ -111,11 +120,11 @@ const PricingCalculatorExtended = forwardRef<HTMLDivElement, CardProps>((props, 
               >
                 <Cost
                   cost={pluralCost?.clusters}
-                  label={`for ${clusters} clusters`}
+                  label={`for ${clusters} cluster${clusters !== 1 ? 's' : ''}`}
                 />
                 <Cost
                   cost={pluralCost?.users}
-                  label={`for ${users} users`}
+                  label={`for ${users === 0 ? '0-5' : users} users`}
                 />
               </Costs>
               <TotalCost

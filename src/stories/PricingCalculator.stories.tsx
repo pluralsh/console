@@ -16,5 +16,6 @@ function Template(args: any) {
 export const Default = Template.bind({})
 
 Default.args = {
+  appsDefault: 15,
   expandedDefault: true,
 }
