@@ -49,7 +49,6 @@ export default function BillingFeatureBlockModal({ message = 'Upgrade to Plural 
           Review plans
         </Button>
       </ActionsWrap>
-
     </Modal>
   )
 }
