@@ -12,6 +12,8 @@ import { Flex } from 'honorable'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
+import { isEmpty } from 'lodash'
+
 import VPNClientList from '../../vpn/VPNClientList'
 import {
   ColumnActions,
@@ -76,6 +78,7 @@ function VPN() {
           planFeature="vpn"
           description="Create and manage VPN clients for a configured WireGuard server."
           placeholderImageURL="/placeholder-vpn.png"
+          additionalCondition={isEmpty(clientList)}
         />
       </Flex>
     </ResponsivePageFullWidth>

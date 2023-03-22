@@ -17,6 +17,8 @@ import {
 } from '@pluralsh/design-system'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
 
+import BillingFeatureBlockModal from 'components/billing/BillingFeatureBlockModal'
+
 import { CreateClient } from '../../vpn/actions/Create'
 import { User } from '../../../generated/graphql'
 
@@ -69,7 +71,8 @@ function HeaderActionsUnstyled({
 }: HeaderActionsProps) {
   const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
   const isAvailable = !!availableFeatures?.vpn || isPaidPlan
-  const [visible, setVisible] = useState(false)
+  const [createModalVisible, setCreateModalVisible] = useState(false)
+  const [blockModalVisible, setBlockModalVisible] = useState(false)
   const [open, setOpen] = useState(false)
   const [selectedKeys, setSelectedKeys] = useState(new Set<Key>())
   const userItems = useMemo(() => users.map(user => ({
@@ -118,19 +121,21 @@ function HeaderActionsUnstyled({
       </div>
 
       <Button
-        disabled={!isAvailable}
         secondary
-        onClick={() => setVisible(true)}
+        onClick={() => (isAvailable ? setCreateModalVisible(true) : setBlockModalVisible(true))}
       >
         Create VPN client
       </Button>
 
       {/* Modals */}
-      {visible && (
+      {createModalVisible && (
         <CreateClient
-          onClose={() => setVisible(false)}
+          onClose={() => setCreateModalVisible(false)}
           refetch={refetch}
         />
+      )}
+      {blockModalVisible && (
+        <BillingFeatureBlockModal onClose={() => setBlockModalVisible(false)} />
       )}
     </div>
   )
