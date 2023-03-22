@@ -5,6 +5,8 @@ import { useContext, useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import { legacyUrl } from 'helpers/url'
+
 import { ActionPortal } from '../Runbook'
 
 import { DisplayContext } from '../RunbookDisplay'
@@ -29,7 +31,7 @@ export function DisplayButton({ attributes: { action, headline, ...rest } }) {
   const [mutation, { loading }] = useMutation(EXECUTE_RUNBOOK, {
     variables: { name: runbookName, namespace: appName, input: { context: JSON.stringify(context), action } },
     onCompleted: ({ executeRunbook: { redirectTo } }) => {
-      if (redirectTo) navigate(redirectTo)
+      if (redirectTo) navigate(legacyUrl(redirectTo))
     },
     onError: error => {
       setError(error)
