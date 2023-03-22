@@ -135,7 +135,10 @@ function HeaderActionsUnstyled({
         />
       )}
       {blockModalVisible && (
-        <BillingFeatureBlockModal onClose={() => setBlockModalVisible(false)} />
+        <BillingFeatureBlockModal
+          message="Upgrade to Plural Professional to create a VPN client."
+          onClose={() => setBlockModalVisible(false)}
+        />
       )}
     </div>
   )
