@@ -19,7 +19,6 @@ export default function BuildCancel({ build }) {
     <>
       <Button
         destructive
-        fontWeight={600}
         startIcon={<CloseIcon />}
         onClick={() => setOpen(true)}
         width={200}

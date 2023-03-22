@@ -18,7 +18,6 @@ export default function AccountSettings() {
         target="_blank"
         rel="noopener noreferrer"
         endIcon={<ArrowTopRightIcon />}
-        fontWeight={600}
         width="max-content"
         marginTop="small"
       >

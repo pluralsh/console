@@ -90,7 +90,6 @@ function ReadyEmptyState() {
         target="_blank"
         rel="noopener noreferrer"
         marginTop="medium"
-        fontWeight={600}
       >
         <DiscordIcon paddingRight="small" />
         Ping us on Discord

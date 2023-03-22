@@ -237,7 +237,6 @@ function AppWithoutContext() {
         {validLinks?.length > 0 && (
           <Button
             secondary
-            fontWeight={600}
             marginBottom="medium"
             as="a"
             href={ensureURLValidity(links[0].url)}
