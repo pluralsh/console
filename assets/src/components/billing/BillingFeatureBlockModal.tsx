@@ -12,6 +12,11 @@ const Header = styled.div({
   justifyContent: 'center',
 })
 
+const ActionsWrap = styled.div({
+  display: 'flex',
+  justifyContent: 'end',
+})
+
 export default function BillingFeatureBlockModal({ message = 'Upgrade to Plural Professional to use this feature.', onClose }: BillingFeatureBlockModalProps) {
   return (
     <Modal
@@ -31,17 +36,20 @@ export default function BillingFeatureBlockModal({ message = 'Upgrade to Plural 
       style={{ padding: 0 }}
     >
       {message}
-      <Button
-        as="a"
-        href="https://app.plural.sh/account/billing"
-        target="_blank"
-        rel="noopener noreferrer"
-        width="max-content"
-        marginTop="large"
-        onClick={() => onClose()}
-      >
-        Review plans
-      </Button>
+      <ActionsWrap>
+        <Button
+          as="a"
+          href="https://app.plural.sh/account/billing"
+          target="_blank"
+          rel="noopener noreferrer"
+          width="max-content"
+          marginTop="large"
+          onClick={() => onClose()}
+        >
+          Review plans
+        </Button>
+      </ActionsWrap>
+
     </Modal>
   )
 }
