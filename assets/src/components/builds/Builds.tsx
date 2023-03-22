@@ -6,10 +6,12 @@ import React, {
 } from 'react'
 import { useQuery } from '@apollo/client'
 import { Flex } from 'honorable'
-import { Card, LoopingLogo } from '@pluralsh/design-system'
+import { Card } from '@pluralsh/design-system'
 import { ReturnToBeginning } from 'components/utils/ReturnToBeginning'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { appendConnection, extendConnection } from '../../utils/graphql'
 import { BUILDS_Q, BUILD_SUB } from '../graphql/builds'
@@ -52,16 +54,7 @@ export default function Builds() {
   const returnToBeginning = useCallback(() => listRef.scrollToItem(0),
     [listRef])
 
-  if (loading && !data) {
-    return (
-      <Flex
-        grow={1}
-        justify="center"
-      >
-        <LoopingLogo />
-      </Flex>
-    )
-  }
+  if (loading && !data) return <LoadingIndicator />
 
   const { edges, pageInfo } = data.builds
 

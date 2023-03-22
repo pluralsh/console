@@ -1,16 +1,11 @@
-import {
-  AppIcon,
-  Date,
-  LoopingLogo,
-  Table,
-} from '@pluralsh/design-system'
+import { AppIcon, Date, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { Flex } from 'honorable'
 import { useCallback, useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { extendConnection } from 'utils/graphql'
-
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { AUDITS_Q } from '../queries'
 
@@ -96,16 +91,7 @@ export default function AuditsTable() {
     }
   }, [fetchMore, loading, pageInfo])
 
-  if (!data) {
-    return (
-      <Flex
-        grow={1}
-        justify="center"
-      >
-        <LoopingLogo />
-      </Flex>
-    )
-  }
+  if (!data) return <LoadingIndicator />
 
   return (
     <FullHeightTableWrap>

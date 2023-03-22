@@ -1,4 +1,3 @@
-import { LoopingLogo } from '@pluralsh/design-system'
 import {
   Key,
   useCallback,
@@ -10,6 +9,8 @@ import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
 
 import { Flex } from 'honorable'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import VPNClientList from '../../vpn/VPNClientList'
 import {
@@ -47,9 +48,7 @@ function VPN() {
     : clientList.filter(client => selectedUsers.has(client.user?.id ?? ''))), [selectedUsers, clientList])
   const onFilter = useCallback(selectedUsers => setSelectedUsers(selectedUsers), [])
 
-  if (loading) {
-    return <LoopingLogo />
-  }
+  if (loading) return <LoadingIndicator />
 
   return (
     <ResponsivePageFullWidth

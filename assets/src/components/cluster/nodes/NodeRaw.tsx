@@ -1,9 +1,8 @@
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
 import { stringify } from 'yaml'
-import { LoopingLogo } from '@pluralsh/design-system'
-
-import { Flex } from 'honorable/dist/components/Flex/Flex'
+import { Flex } from 'honorable'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { POLL_INTERVAL } from '../constants'
 import { NODE_RAW_Q } from '../queries'
@@ -21,7 +20,7 @@ export default function NodeEvents() {
     fetchPolicy: 'cache-and-network',
   })
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoadingIndicator />
 
   const {
     node: { raw },

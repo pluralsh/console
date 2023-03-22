@@ -1,13 +1,10 @@
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
-
 import type { Event } from 'generated/graphql'
-import { LoopingLogo } from '@pluralsh/design-system'
-
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { POD_EVENTS_Q } from '../queries'
-
 import EventsTable from '../../utils/EventsTable'
 
 export default function NodeEvents() {
@@ -17,7 +14,7 @@ export default function NodeEvents() {
     fetchPolicy: 'cache-and-network',
   })
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoadingIndicator />
 
   const {
     pod: { events },

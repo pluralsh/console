@@ -9,7 +9,6 @@ import React, {
 } from 'react'
 import {
   GraphQLToast,
-  LoopingLogo,
   Wizard,
   WizardNavigation,
   WizardStepConfig,
@@ -18,6 +17,7 @@ import {
 import { Box } from 'grommet'
 import { ApolloError, useApolloClient, useQuery } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { InstallationContext } from '../../Installations'
 import { BUILDS_Q } from '../../graphql/builds'
@@ -92,17 +92,7 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
 
   useEffect(() => setDefaultSteps(toDefaultSteps(installableApplications)), [installableApplications])
 
-  if (loading || defaultSteps.length === 0) {
-    return (
-      <Box
-        overflow="hidden"
-        fill="vertical"
-        justify="center"
-      >
-        <LoopingLogo />
-      </Box>
-    )
-  }
+  if (loading || defaultSteps.length === 0) return <Box fill="vertical"><LoadingIndicator /></Box>
 
   return (
     <>

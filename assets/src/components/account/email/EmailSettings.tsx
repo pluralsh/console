@@ -1,10 +1,7 @@
-import { LoopingLogo } from '@pluralsh/design-system'
-
 import { SMTP_Q } from 'components/graphql/plural'
-
 import { useQuery } from '@apollo/client'
-
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import EmailSettingsForm from './EmailSettingsForm'
 
@@ -16,7 +13,7 @@ export default function EmailSettings() {
       scrollable={false}
       heading="Email settings"
     >
-      {data ? <EmailSettingsForm smtp={data.smtp} /> : <LoopingLogo />}
+      {data ? <EmailSettingsForm smtp={data.smtp} /> : <LoadingIndicator />}
     </ScrollablePage>
   )
 }

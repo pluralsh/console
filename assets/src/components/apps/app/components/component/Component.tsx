@@ -1,10 +1,5 @@
 import { Flex } from 'honorable'
-import {
-  LoopingLogo,
-  SubTab,
-  TabList,
-  TabPanel,
-} from '@pluralsh/design-system'
+import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 
 import {
   useContext,
@@ -37,6 +32,8 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 import { LinkTabWrap } from 'components/utils/Tabs'
 
 import { ScalingRecommenderModal } from 'components/cluster/ScalingRecommender'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { ViewLogsButton } from './ViewLogsButton'
 
@@ -92,16 +89,7 @@ export default function Component() {
     = useMatch('/apps/:appName/components/:componentKind/:componentName/:subpath')
       ?.params?.subpath || ''
 
-  if (!me || !currentApp || !data) {
-    return (
-      <Flex
-        grow={1}
-        justify="center"
-      >
-        <LoopingLogo />
-      </Flex>
-    )
-  }
+  if (!me || !currentApp || !data) return <LoadingIndicator />
 
   const component = currentApp.status.components.find(({ name, kind }) => name === componentName && kind.toLowerCase() === componentKind)
   const filteredDirectory = directory.filter(({ onlyFor }) => !onlyFor || onlyFor.includes(componentKind))

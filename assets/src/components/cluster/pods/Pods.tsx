@@ -14,25 +14,19 @@ import {
   Input,
   ListBoxFooter,
   ListBoxItem,
-  LoopingLogo,
   SearchIcon,
 } from '@pluralsh/design-system'
 import Fuse from 'fuse.js'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ListBoxFooterProps } from '@pluralsh/design-system/dist/components/ListBoxItem'
 import styled, { useTheme } from 'styled-components'
-
 import type { RootQueryType } from 'generated/graphql'
-
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
-
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-
 import { isEqual } from 'utils/kubernetes'
-
 import { isEmpty, uniqBy } from 'lodash'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { PODS_Q, PODS_SUB } from '../queries'
 import { SHORT_POLL_INTERVAL } from '../constants'
@@ -230,7 +224,7 @@ export default function AllPods() {
       }
     >
       {!data ? (
-        <LoopingLogo />
+        <LoadingIndicator />
       ) : (
         <Flex
           direction="column"

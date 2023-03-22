@@ -2,9 +2,9 @@ import { ReactNode, useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import moment from 'moment'
 import SubscriptionContext, { SubscriptionContextType } from 'components/contexts//SubscriptionContext'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import BillingError from './BillingError'
-import BillingLoading from './BillingLoading'
 import { SUBSCRIPTION_QUERY } from './queries'
 
 type BillingSubscriptionProviderPropsType = {
@@ -45,7 +45,7 @@ export default function BillingSubscriptionProvider({ children }: BillingSubscri
   }, [data, refetch])
 
   if (error) return <BillingError />
-  if (loading) return <BillingLoading />
+  if (loading) return <LoadingIndicator />
 
   return (
     <SubscriptionContext.Provider value={subscriptionContextValue}>

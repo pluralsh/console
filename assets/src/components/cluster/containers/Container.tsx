@@ -9,7 +9,6 @@ import {
 import {
   EmptyState,
   ListBoxItem,
-  LoopingLogo,
   Select,
   SelectButton,
   SubTab,
@@ -29,6 +28,8 @@ import {
 import { useBreadcrumbs } from 'components/layout/Breadcrumbs'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import { LinkTabWrap } from 'components/utils/Tabs'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { POD_INFO_Q } from '../queries'
 import { POLL_INTERVAL } from '../constants'
@@ -145,7 +146,7 @@ export default function Container() {
       <EmptyState message={`Could not find container "${containerName}"`} />
     )
   }
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoadingIndicator />
 
   return (
     <ResponsivePageFullWidth

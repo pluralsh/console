@@ -1,15 +1,13 @@
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
 import { stringify } from 'yaml'
-import { LoopingLogo } from '@pluralsh/design-system'
-
 import { Pod } from 'generated/graphql'
-
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { POLL_INTERVAL } from '../constants'
 import { POD_RAW_Q } from '../queries'
-
 import { RawPageCode } from '../RawPageCode'
 
 export default function NodeEvents() {
@@ -22,7 +20,7 @@ export default function NodeEvents() {
     fetchPolicy: 'cache-and-network',
   })
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoadingIndicator />
 
   const {
     pod: { raw },

@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
 
-import { Card, LoopingLogo } from '@pluralsh/design-system'
+import { Card } from '@pluralsh/design-system'
 import { Flex } from 'honorable'
 
 import {
@@ -11,6 +11,8 @@ import {
   Node as NodeT,
   Pod,
 } from 'generated/graphql'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { POLL_INTERVAL } from '../constants'
 import {
@@ -58,7 +60,7 @@ export default function NodeInfo() {
   ],
   [refetch])
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoadingIndicator />
 
   const { node, nodeMetric } = data
 

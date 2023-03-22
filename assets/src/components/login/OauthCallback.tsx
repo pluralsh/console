@@ -5,9 +5,8 @@ import { Alert, AlertStatus } from 'forge-core'
 import { useLocation } from 'react-router'
 import qs from 'query-string'
 import { useMutation } from '@apollo/client'
-import { LoopingLogo } from '@pluralsh/design-system'
-
 import { GqlError } from 'components/utils/Alert'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { setToken } from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
@@ -60,20 +59,19 @@ export function OAuthCallback() {
 
   if (!code) return <OAuthError error={oauthError} />
 
-  return (
+  if (loading) return <LoadingIndicator />
+
+  return error ? (
     <Box
       height="100vh"
       width="100vw"
       align="center"
       justify="center"
     >
-      {loading && <LoopingLogo />}
-      {error && (
-        <GqlError
-          error={error}
-          header="Failed to log in"
-        />
-      )}
+      <GqlError
+        error={error}
+        header="Failed to log in"
+      />
     </Box>
-  )
+  ) : null
 }

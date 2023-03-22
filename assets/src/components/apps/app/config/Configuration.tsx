@@ -1,5 +1,5 @@
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
-import { LoopingLogo, SubTab, TabList } from '@pluralsh/design-system'
+import { SubTab, TabList } from '@pluralsh/design-system'
 import {
   Key,
   useContext,
@@ -14,6 +14,8 @@ import { COMPONENT_LABEL } from 'components/cluster/constants'
 import { useQuery } from '@apollo/client'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { ConfigType } from './misc'
 import { ConfigurationEditor } from './ConfigurationEditor'
@@ -38,18 +40,7 @@ export default function Configuration() {
 
   if (error) return <ScrollablePage heading="Configuration">Cannot access configuration for this app.</ScrollablePage>
 
-  if (!data) {
-    return (
-      <ScrollablePage heading="Configuration">
-        <Flex
-          grow={1}
-          justify="center"
-        >
-          <LoopingLogo />
-        </Flex>
-      </ScrollablePage>
-    )
-  }
+  if (!data) return <LoadingIndicator />
 
   const { application, configurationOverlays } = data
   const overlays = configurationOverlays?.map(({ metadata, ...rest }) => {

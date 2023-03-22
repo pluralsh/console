@@ -1,16 +1,13 @@
 import { useContext, useEffect, useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { sumBy } from 'lodash'
-
 import { Flex } from 'honorable'
-import { Card, LoopingLogo } from '@pluralsh/design-system'
-
+import { Card } from '@pluralsh/design-system'
 import type { Node, NodeMetric } from 'generated/graphql'
 import { cpuParser, memoryParser } from 'utils/kubernetes'
-
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { SHORT_POLL_INTERVAL } from '../constants'
 import { NODES_Q } from '../queries'
@@ -52,7 +49,7 @@ export default function Nodes() {
   return (
     <ResponsivePageFullWidth heading="Nodes">
       {!data ? (
-        <LoopingLogo />
+        <LoadingIndicator />
       ) : (
         <Flex
           direction="column"

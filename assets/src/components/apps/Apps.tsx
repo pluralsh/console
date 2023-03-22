@@ -9,7 +9,6 @@ import {
   EmptyState,
   Input,
   LifePreserverIcon,
-  LoopingLogo,
   MagnifyingGlassIcon,
   SourcererIcon,
   SubTab,
@@ -30,6 +29,8 @@ import { Readiness, readinessToLabel } from 'utils/status'
 import { isEmpty } from 'lodash'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import App from './AppCard'
 import { appState } from './misc'
@@ -173,7 +174,7 @@ export default function Apps() {
   }, [appsByState, filter, query])
   const noFilteredApps = filteredApps?.length < 1
 
-  if (isEmpty(applications)) return <LoopingLogo />
+  if (isEmpty(applications)) return <LoadingIndicator />
 
   return (
     <ResponsivePageFullWidth

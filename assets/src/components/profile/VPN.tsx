@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
-import { LoopingLogo } from '@pluralsh/design-system'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import VPNClientList from '../vpn/VPNClientList'
 import {
@@ -23,9 +23,7 @@ function VPN() {
   const columns = useMemo(() => [ColumnName, ColumnAddress, ColumnPublicKey, ColumnStatus, ColumnDownload, ColumnDelete(refetch)], [refetch])
   const clientList = useMemo(() => myWireguardPeers?.map(peer => toVPNClientRow(peer)) ?? [], [myWireguardPeers])
 
-  if (loading) {
-    return <LoopingLogo />
-  }
+  if (loading) return <LoadingIndicator />
 
   return (
     <ResponsivePageFullWidth

@@ -23,7 +23,6 @@ import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/Respon
 import {
   AppIcon,
   InstallIcon,
-  LoopingLogo,
   Tab,
   TabList,
   TabPanel,
@@ -45,6 +44,8 @@ import { InstallationContext } from 'components/Installations'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
 import { deepUpdate } from 'utils/graphql'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { BUILD_TYPE_DISPLAY_NAMES } from '../Build'
 
@@ -102,16 +103,7 @@ export default function Build() {
   const app = useMemo(() => applications?.find(app => app.name === data?.build?.repository),
     [applications, data?.build?.repository])
 
-  if (!data) {
-    return (
-      <Flex
-        grow={1}
-        justify="center"
-      >
-        <LoopingLogo />
-      </Flex>
-    )
-  }
+  if (!data) return <LoadingIndicator />
 
   const {
     commands: { edges }, creator, approver, ...build

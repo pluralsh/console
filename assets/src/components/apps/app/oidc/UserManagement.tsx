@@ -1,5 +1,5 @@
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
-import { Button, Card, LoopingLogo } from '@pluralsh/design-system'
+import { Button, Card } from '@pluralsh/design-system'
 import {
   useContext,
   useEffect,
@@ -17,6 +17,8 @@ import { PluralApi } from 'components/PluralApi'
 import { useNavBlocker } from 'components/hooks/useNavBlocker'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { BindingInput, groupSuggestion, userSuggestion } from '../../../utils/BindingInput'
 
@@ -208,16 +210,7 @@ function UserManagementContent() {
     )
   }
 
-  if (!data) {
-    return (
-      <Flex
-        grow={1}
-        justify="center"
-      >
-        <LoopingLogo />
-      </Flex>
-    )
-  }
+  if (!data) return <LoadingIndicator />
 
   const { installation } = data
 
