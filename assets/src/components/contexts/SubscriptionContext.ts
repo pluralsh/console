@@ -8,7 +8,9 @@ export type SubscriptionContextType = {
   isPaidPlan: boolean
   isProPlan: boolean
   isEnterprisePlan: boolean
+  isLegacyUser: boolean
   isGrandfathered: boolean
+  isGrandfathetingExpired: boolean
   refetch: () => void
 }
 
@@ -16,7 +18,9 @@ const SubscriptionContext = createContext<SubscriptionContextType>({
   isPaidPlan: false,
   isProPlan: false,
   isEnterprisePlan: false,
+  isLegacyUser: false,
   isGrandfathered: false,
+  isGrandfathetingExpired: false,
   refetch: () => {},
 })
 

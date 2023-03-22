@@ -13,18 +13,15 @@ const MessageLink = styled.a(({ theme }) => ({ ...theme.partials.text.inlineLink
 
 export default function BillingLegacyUserMessage() {
   const {
-    isProPlan, isEnterprisePlan, isGrandfathered, account,
+    isPaidPlan, isGrandfathered, isGrandfathetingExpired, account,
   } = useContext(SubscriptionContext)
 
-  const open = !(isProPlan || isEnterprisePlan) && isGrandfathered
-  const expired = !isGrandfathered
-
-  if (!open) return null
+  if (isPaidPlan || !(isGrandfathered || isGrandfathetingExpired)) return null
 
   return (
     <Message>
       Legacy user access
-      {expired ? ' expired' : ` until ${moment(account?.grandfatheredUntil).format('MMM DD, YYYY')}`}
+      {isGrandfathetingExpired ? ' expired' : ` until ${moment(account?.grandfatheredUntil).format('MMM DD, YYYY')}`}
       {' '}
       <MessageLink
         href="https://app.plural.sh/account/billing"
