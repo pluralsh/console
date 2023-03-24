@@ -1,6 +1,7 @@
 import {
   Key,
   useCallback,
+  useContext,
   useMemo,
   useState,
 } from 'react'
@@ -13,6 +14,8 @@ import { Flex } from 'honorable'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { isEmpty } from 'lodash'
+
+import SubscriptionContext from 'components/contexts/SubscriptionContext'
 
 import VPNClientList from '../../vpn/VPNClientList'
 import {
@@ -49,6 +52,8 @@ function VPN() {
     ? clientList
     : clientList.filter(client => selectedUsers.has(client.user?.id ?? ''))), [selectedUsers, clientList])
   const onFilter = useCallback(selectedUsers => setSelectedUsers(selectedUsers), [])
+  const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
+  const isAvailable = !!availableFeatures?.vpn || isPaidPlan || !isEmpty(clientList)
 
   if (loading) return <LoadingIndicator />
 
@@ -69,17 +74,18 @@ function VPN() {
         height="100%"
       >
         <BillingLegacyUserBanner feature="VPN clients" />
-        <VPNClientList
-          columns={columns}
-          data={filteredClientList}
-        />
-        <BillingFeatureBlockBanner
-          feature="VPN clients"
-          planFeature="vpn"
-          description="Create and manage VPN clients for a configured WireGuard server."
-          placeholderImageURL="/placeholder-vpn.png"
-          additionalCondition={isEmpty(clientList)}
-        />
+        {isAvailable ? (
+          <VPNClientList
+            columns={columns}
+            data={filteredClientList}
+          />
+        ) : (
+          <BillingFeatureBlockBanner
+            feature="VPN clients"
+            description="Create and manage VPN clients for a configured WireGuard server."
+            placeholderImageURL="/placeholder-vpn.png"
+          />
+        )}
       </Flex>
     </ResponsivePageFullWidth>
   )

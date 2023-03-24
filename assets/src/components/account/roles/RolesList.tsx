@@ -1,4 +1,3 @@
-import { useQuery } from '@apollo/client'
 import { Box } from 'grommet'
 import isEmpty from 'lodash/isEmpty'
 import { Div } from 'honorable'
@@ -11,12 +10,12 @@ import { extendConnection } from '../../../utils/graphql'
 import { StandardScroller } from '../../utils/SmoothScroller'
 import RoleCreate from '../roles/RoleCreate'
 
-import { ROLES_Q } from './queries'
 import Role from './Role'
 
-export default function RolesList({ q }: any) {
+export default function RolesList({
+  q, data, loading, fetchMore,
+}: any) {
   const [listRef, setListRef] = useState<any>(null)
-  const { data, loading, fetchMore } = useQuery(ROLES_Q, { variables: { q } })
 
   if (!data) return <LoadingIndicator />
 
