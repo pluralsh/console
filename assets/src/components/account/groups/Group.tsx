@@ -18,7 +18,7 @@ export default function Group({ group, q }: { group: GroupT; q: any }) {
   const { me } = useContext<any>(LoginContext)
   const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
   const isAvailable = !!availableFeatures?.userManagement || isPaidPlan
-  const editable = (!!me.roles?.admin || hasRbac(me, Permissions.USERS)) && isAvailable
+  const editable = !!me.roles?.admin || hasRbac(me, Permissions.USERS)
   const [dialogKey, setDialogKey] = useState<
     'confirmDelete' | 'editAttrs' | 'editMembers' | 'viewGroup' | ''
   >('')
@@ -62,17 +62,17 @@ export default function Group({ group, q }: { group: GroupT; q: any }) {
           <Flex gap="xsmall">
             <>
               <IconFrame
-                clickable
+                clickable={isAvailable}
                 size="medium"
-                onClick={() => dialogKey === '' && setDialogKey('editAttrs')}
-                tooltip="Edit attributes"
+                onClick={() => isAvailable && dialogKey === '' && setDialogKey('editAttrs')}
+                tooltip={isAvailable ? 'Edit attributes' : 'Upgrade to Plural Professional to manage roles.'}
                 icon={<GearTrainIcon />}
               />
               <IconFrame
-                clickable
+                clickable={isAvailable}
                 size="medium"
-                onClick={() => dialogKey === '' && setDialogKey('editMembers')}
-                tooltip="Edit members"
+                onClick={() => isAvailable && dialogKey === '' && setDialogKey('editMembers')}
+                tooltip={isAvailable ? 'Edit members' : 'Upgrade to Plural Professional to manage roles.'}
                 icon={<PeopleIcon />}
               />
               <DeleteIconButton
