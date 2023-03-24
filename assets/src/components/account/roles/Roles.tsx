@@ -3,8 +3,6 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Flex } from 'honorable'
 import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
-import { useQuery } from '@apollo/client'
-import isEmpty from 'lodash/isEmpty'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
 
 import { List } from '../../utils/List'
@@ -12,13 +10,11 @@ import { List } from '../../utils/List'
 import RoleCreate from './RoleCreate'
 import RolesList from './RolesList'
 import RolesSearchHeader from './RolesSearchHeader'
-import { ROLES_Q } from './queries'
 
 export default function Roles() {
   const [q, setQ] = useState('')
-  const { data, loading, fetchMore } = useQuery(ROLES_Q, { variables: { q } })
-  const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
-  const isAvailable = !!availableFeatures?.userManagement || isPaidPlan || !isEmpty(data?.roles?.edges)
+  const { availableFeatures } = useContext(SubscriptionContext)
+  const isAvailable = !!availableFeatures?.userManagement
 
   return (
     <ScrollablePage
@@ -37,12 +33,7 @@ export default function Roles() {
               q={q}
               setQ={setQ}
             />
-            <RolesList
-              q={q}
-              data={data}
-              loading={loading}
-              fetchMore={fetchMore}
-            />
+            <RolesList q={q} />
           </List>
         ) : (
           <BillingFeatureBlockBanner

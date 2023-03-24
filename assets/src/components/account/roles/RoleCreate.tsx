@@ -26,8 +26,8 @@ const defaultAttributes = {
 }
 
 export default function RoleCreate({ q }: any) {
-  const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
-  const isAvailable = !!availableFeatures?.userManagement || isPaidPlan
+  const { availableFeatures } = useContext(SubscriptionContext)
+  const isAvailable = !!availableFeatures?.userManagement
   const [createModalVisible, setCreateModalVisible] = useState(false)
   const [blockModalVisible, setBlockModalVisible] = useState(false)
   const [attributes, setAttributes] = useState(defaultAttributes)

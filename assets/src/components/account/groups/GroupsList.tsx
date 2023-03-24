@@ -3,6 +3,7 @@ import { EmptyState } from '@pluralsh/design-system'
 import { useState } from 'react'
 import { Div } from 'honorable'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useGroupsQuery } from 'generated/graphql'
 
 import { extendConnection } from '../../../utils/graphql'
 import { ListItem } from '../../utils/List'
@@ -11,9 +12,8 @@ import { StandardScroller } from '../../utils/SmoothScroller'
 import GroupCreate from './GroupCreate'
 import Group from './Group'
 
-export function GroupsList({
-  q, data, loading, fetchMore,
-}: any) {
+export function GroupsList({ q }: any) {
+  const { data, loading, fetchMore } = useGroupsQuery({ variables: { q } })
   const [listRef, setListRef] = useState<any>(null)
 
   if (!data?.groups) return <LoadingIndicator />

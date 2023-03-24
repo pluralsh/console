@@ -52,8 +52,8 @@ function VPN() {
     ? clientList
     : clientList.filter(client => selectedUsers.has(client.user?.id ?? ''))), [selectedUsers, clientList])
   const onFilter = useCallback(selectedUsers => setSelectedUsers(selectedUsers), [])
-  const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
-  const isAvailable = !!availableFeatures?.vpn || isPaidPlan || !isEmpty(clientList)
+  const { availableFeatures } = useContext(SubscriptionContext)
+  const isAvailable = !!availableFeatures?.vpn || !isEmpty(clientList)
 
   if (loading) return <LoadingIndicator />
 

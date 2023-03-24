@@ -4,6 +4,7 @@ import { Div } from 'honorable'
 import { EmptyState } from '@pluralsh/design-system'
 import { useState } from 'react'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useQuery } from '@apollo/client'
 
 import { ListItem } from '../../utils/List'
 import { extendConnection } from '../../../utils/graphql'
@@ -11,10 +12,10 @@ import { StandardScroller } from '../../utils/SmoothScroller'
 import RoleCreate from '../roles/RoleCreate'
 
 import Role from './Role'
+import { ROLES_Q } from './queries'
 
-export default function RolesList({
-  q, data, loading, fetchMore,
-}: any) {
+export default function RolesList({ q }: any) {
+  const { data, loading, fetchMore } = useQuery(ROLES_Q, { variables: { q } })
   const [listRef, setListRef] = useState<any>(null)
 
   if (!data) return <LoadingIndicator />

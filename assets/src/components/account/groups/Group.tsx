@@ -5,7 +5,6 @@ import { LoginContext } from 'components/contexts'
 import { Button, Flex } from 'honorable'
 import { Group as GroupT, GroupsDocument, useDeleteGroupMutation } from 'generated/graphql'
 import { DeleteIconButton } from 'components/utils/IconButtons'
-import SubscriptionContext from 'components/contexts/SubscriptionContext'
 
 import { removeConnection, updateCache } from '../../../utils/graphql'
 import { Info } from '../../utils/Info'
@@ -16,8 +15,6 @@ import GroupView from './GroupView'
 
 export default function Group({ group, q }: { group: GroupT; q: any }) {
   const { me } = useContext<any>(LoginContext)
-  const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
-  const isAvailable = !!availableFeatures?.userManagement || isPaidPlan
   const editable = !!me.roles?.admin || hasRbac(me, Permissions.USERS)
   const [dialogKey, setDialogKey] = useState<
     'confirmDelete' | 'editAttrs' | 'editMembers' | 'viewGroup' | ''
@@ -62,17 +59,17 @@ export default function Group({ group, q }: { group: GroupT; q: any }) {
           <Flex gap="xsmall">
             <>
               <IconFrame
-                clickable={isAvailable}
+                clickable
                 size="medium"
-                onClick={() => isAvailable && dialogKey === '' && setDialogKey('editAttrs')}
-                tooltip={isAvailable ? 'Edit attributes' : 'Upgrade to Plural Professional to manage roles.'}
+                onClick={() => dialogKey === '' && setDialogKey('editAttrs')}
+                tooltip="Edit attributes"
                 icon={<GearTrainIcon />}
               />
               <IconFrame
-                clickable={isAvailable}
+                clickable
                 size="medium"
-                onClick={() => isAvailable && dialogKey === '' && setDialogKey('editMembers')}
-                tooltip={isAvailable ? 'Edit members' : 'Upgrade to Plural Professional to manage roles.'}
+                onClick={() => dialogKey === '' && setDialogKey('editMembers')}
+                tooltip="Edit members"
                 icon={<PeopleIcon />}
               />
               <DeleteIconButton

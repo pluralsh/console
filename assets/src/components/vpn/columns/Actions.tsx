@@ -66,8 +66,8 @@ const DisabledItem = styled.div(() => ({
 }))
 
 function VPNColumnActions({ disabled, refetch, name }) {
-  const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
-  const isAvailable = !!availableFeatures?.vpn || isPaidPlan
+  const { availableFeatures } = useContext(SubscriptionContext)
+  const isAvailable = !!availableFeatures?.vpn
   const [selected, setSelected] = useState<MenuItemSelection | undefined>()
   const dialog = useMemo(() => {
     switch (selected) {

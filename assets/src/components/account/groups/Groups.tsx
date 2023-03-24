@@ -3,9 +3,7 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Flex } from 'honorable'
 import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
-import { useGroupsQuery } from 'generated/graphql'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
-import { isEmpty } from 'lodash'
 
 import { List } from '../../utils/List'
 
@@ -15,9 +13,8 @@ import GroupSearchHeader from './GroupsSearchHeader'
 
 export function Groups() {
   const [q, setQ] = useState('')
-  const { data, loading, fetchMore } = useGroupsQuery({ variables: { q } })
-  const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
-  const isAvailable = !!availableFeatures?.userManagement || isPaidPlan || !isEmpty(data?.groups?.edges)
+  const { availableFeatures } = useContext(SubscriptionContext)
+  const isAvailable = !!availableFeatures?.userManagement
 
   return (
     <ScrollablePage
@@ -36,12 +33,7 @@ export function Groups() {
               q={q}
               setQ={setQ}
             />
-            <GroupsList
-              q={q}
-              data={data}
-              loading={loading}
-              fetchMore={fetchMore}
-            />
+            <GroupsList q={q} />
           </List>
         ) : (
           <BillingFeatureBlockBanner

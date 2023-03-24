@@ -69,8 +69,8 @@ interface HeaderActionsProps {
 function HeaderActionsUnstyled({
   users, refetch, onFilter, ...props
 }: HeaderActionsProps) {
-  const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
-  const isAvailable = !!availableFeatures?.vpn || isPaidPlan
+  const { availableFeatures } = useContext(SubscriptionContext)
+  const isAvailable = !!availableFeatures?.vpn
   const [createModalVisible, setCreateModalVisible] = useState(false)
   const [blockModalVisible, setBlockModalVisible] = useState(false)
   const [open, setOpen] = useState(false)
