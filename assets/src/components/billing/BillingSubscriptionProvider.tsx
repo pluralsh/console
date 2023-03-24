@@ -3,9 +3,11 @@ import { useQuery } from '@apollo/client'
 import moment from 'moment'
 import SubscriptionContext, { SubscriptionContextType } from 'components/contexts//SubscriptionContext'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import styled from 'styled-components'
 
-import BillingError from './BillingError'
 import { SUBSCRIPTION_QUERY } from './queries'
+
+const Error = styled.div({ textAlign: 'center' })
 
 type BillingSubscriptionProviderPropsType = {
   children: ReactNode
@@ -53,7 +55,7 @@ export default function BillingSubscriptionProvider({ children }: BillingSubscri
     }
   }, [data, refetch])
 
-  if (error) return <BillingError />
+  if (error) return <Error>An error occured, please reload the page or contact support.</Error>
   if (loading) return <LoadingIndicator />
 
   return (
