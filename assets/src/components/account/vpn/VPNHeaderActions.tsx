@@ -134,12 +134,11 @@ function HeaderActionsUnstyled({
           refetch={refetch}
         />
       )}
-      {blockModalVisible && (
-        <BillingFeatureBlockModal
-          message="Upgrade to Plural Professional to create a VPN client."
-          onClose={() => setBlockModalVisible(false)}
-        />
-      )}
+      <BillingFeatureBlockModal
+        open={blockModalVisible}
+        message="Upgrade to Plural Professional to create a VPN client."
+        onClose={() => setBlockModalVisible(false)}
+      />
     </div>
   )
 }

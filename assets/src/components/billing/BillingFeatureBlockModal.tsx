@@ -4,6 +4,7 @@ import styled from 'styled-components'
 
 type BillingFeatureBlockModalProps = {
   message?: string
+  open: boolean
   onClose: Dispatch<void>
 }
 
@@ -17,7 +18,7 @@ const ActionsWrap = styled.div({
   justifyContent: 'end',
 })
 
-export default function BillingFeatureBlockModal({ message = 'Upgrade to Plural Professional to use this feature.', onClose }: BillingFeatureBlockModalProps) {
+export default function BillingFeatureBlockModal({ message = 'Upgrade to Plural Professional to use this feature.', open = false, onClose }: BillingFeatureBlockModalProps) {
   return (
     <Modal
       BackdropProps={{ zIndex: 20 }}
@@ -30,7 +31,7 @@ export default function BillingFeatureBlockModal({ message = 'Upgrade to Plural 
           Upgrade needed
         </Header>
       )}
-      open
+      open={open}
       onClose={() => onClose()}
       size="large"
       style={{ padding: 0 }}
