@@ -46,7 +46,7 @@ function cell(refetch): ColumnDefTemplate<CellContext<VPNClientRow, unknown>> {
 
 interface MenuItem {
   label: string
-  disableTooltip?: string
+  disabledTooltip?: string
   onSelect: Dispatch<void>
   props?: Record<string, unknown>
 }
@@ -99,7 +99,7 @@ function VPNColumnActions({ disabled, refetch, name }) {
       onSelect: () => {
         if (isAvailable) setSelected(MenuItemSelection.DeleteClient)
       },
-      disableTooltip: !isAvailable ? 'Upgrade to Plural Professional to manage VPN clients.' : undefined,
+      disabledTooltip: !isAvailable ? 'Upgrade to Plural Professional to manage VPN clients.' : undefined,
       props: {
         destructive: true,
         disabled: !isAvailable,
@@ -116,7 +116,7 @@ function VPNColumnActions({ disabled, refetch, name }) {
         onSelectionChange={selected => menuItems[selected]?.onSelect()}
         disabled={disabled}
       >
-        {Object.entries(menuItems).map(([key, { label, props = {}, disableTooltip }]) => {
+        {Object.entries(menuItems).map(([key, { label, props = {}, disabledTooltip }]) => {
           const item = (
             <ListBoxItem
               key={key}
@@ -126,9 +126,9 @@ function VPNColumnActions({ disabled, refetch, name }) {
             />
           )
 
-          return disableTooltip ? (
+          return disabledTooltip ? (
             <DisabledItem>
-              <Tooltip label={disableTooltip}>{item}</Tooltip>
+              <Tooltip label={disabledTooltip}>{item}</Tooltip>
             </DisabledItem>
           ) : item
         })}
