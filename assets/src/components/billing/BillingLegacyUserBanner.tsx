@@ -14,16 +14,15 @@ const Wrapper = styled.div(({ theme }) => ({ marginBottom: theme.spacing.medium 
 const Link = styled.a({ textDecoration: 'none' })
 
 export default function BillingLegacyUserBanner({ feature, ...props }: BillingLegacyUserBannerPropsType) {
-  const { isProPlan, isEnterprisePlan, isGrandfathered } = useContext(SubscriptionContext)
-  const open = !(isProPlan || isEnterprisePlan) && isGrandfathered
+  const { isPaidPlan, isGrandfathered, isGrandfathetingExpired } = useContext(SubscriptionContext)
 
-  if (!open) return null
+  if (isPaidPlan || !(isGrandfathered || isGrandfathetingExpired)) return null
 
   return (
     <Wrapper>
       <Callout
-        severity="warning"
-        title="Legacy user access ends soon."
+        severity={isGrandfathetingExpired ? 'danger' : 'warning'}
+        title={isGrandfathetingExpired ? 'Legacy user access expired.' : 'Legacy user access ends soon.'}
         {...props}
       >
         {!!feature && (
