@@ -30,7 +30,7 @@ export default function Roles() {
         direction="column"
         height="100%"
       >
-        <BillingLegacyUserBanner feature="Roles" />
+        <BillingLegacyUserBanner feature="roles" />
         {isAvailable ? (
           <List height="100%">
             <RolesSearchHeader

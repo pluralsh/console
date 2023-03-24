@@ -29,7 +29,7 @@ export function Groups() {
         direction="column"
         height="100%"
       >
-        <BillingLegacyUserBanner feature="Groups" />
+        <BillingLegacyUserBanner feature="groups" />
         {isAvailable ? (
           <List height="100%">
             <GroupSearchHeader

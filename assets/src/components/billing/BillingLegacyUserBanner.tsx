@@ -6,7 +6,7 @@ import styled from 'styled-components'
 import SubscriptionContext from '../contexts/SubscriptionContext'
 
 type BillingLegacyUserBannerPropsType = DivProps & {
-  feature?: string
+  feature: string
 }
 
 const Wrapper = styled.div(({ theme }) => ({ marginBottom: theme.spacing.medium }))
@@ -25,21 +25,26 @@ export default function BillingLegacyUserBanner({ feature, ...props }: BillingLe
         title={isGrandfathetingExpired ? 'Legacy user access expired.' : 'Legacy user access ends soon.'}
         {...props}
       >
-        {!!feature && (
-          <>
-            {feature} are a Professional plan feature.
-            {' '}
-            <Link
-              href="https://app.plural.sh/account/billing"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Upgrade now
-            </Link>
-            .
-          </>
-        )}
-        {!feature && 'You have access to Professional features for a short period of time.'}
+        {isGrandfathetingExpired
+          ? (
+            <>
+              You may still use existing {feature} but creating new
+              and editing existing {feature} requires a Plural Professional Plan.
+            </>
+          )
+          : (
+            <>
+              {feature.charAt(0).toUpperCase() + feature.slice(1)} are a Professional plan feature.
+            </>
+          )}
+        {' '}
+        <Link
+          href="https://app.plural.sh/account/billing"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Upgrade now.
+        </Link>
       </Callout>
     </Wrapper>
   )
