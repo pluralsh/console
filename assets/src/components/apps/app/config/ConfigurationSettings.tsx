@@ -39,7 +39,7 @@ function organizeOverlays(overlays) {
 
 export function ConfigurationSettings({ overlays, application: { name, configuration: { helm } } }) {
   const navigate = useNavigate()
-  const onCompleted = useCallback(() => navigate('/'), [navigate])
+  const onCompleted = useCallback(() => navigate('/builds'), [navigate])
   const [ctx, setCtx] = useState({})
   const [init, setInit] = useState({})
   const [mutation, { loading }] = useMutation(EXECUTE_OVERLAY, {
