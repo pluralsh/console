@@ -85,7 +85,6 @@ export default function Group({ group, q }: { group: GroupT; q: any }) {
           onClose={() => dialogKey === 'viewGroup' && setDialogKey('')}
           group={group}
         />
-        {/* </Modal> */}
         <EditGroupAttributes
           group={group}
           open={dialogKey === 'editAttrs'}
