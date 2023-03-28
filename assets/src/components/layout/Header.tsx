@@ -42,7 +42,6 @@ export default function Header() {
         <Button
           small
           tertiary
-          fontWeight={600}
           as="a"
           href="https://app.plural.sh/account/edit"
           target="_blank"

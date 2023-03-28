@@ -1,6 +1,5 @@
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
-import { LoopingLogo } from '@pluralsh/design-system'
 import { Flex } from 'honorable'
 import {
   Event,
@@ -8,9 +7,10 @@ import {
   Node as NodeT,
   Pod,
 } from 'generated/graphql'
-
 import { nodeStatusToReadiness } from 'utils/status'
 import { MetadataGrid, MetadataItem } from 'components/utils/Metadata'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { POLL_INTERVAL } from '../constants'
 import { NODE_Q } from '../queries'
@@ -38,7 +38,7 @@ export default function NodeInfo() {
     fetchPolicy: 'cache-and-network',
   })
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoadingIndicator />
 
   const { node } = data
   const readiness = nodeStatusToReadiness(node?.status)

@@ -28,7 +28,6 @@ export default function WebhookCreate() {
       <div>
         <Button
           small
-          fontWeight={600}
           onClick={() => setOpen(true)}
         >
           Add Slack webhook

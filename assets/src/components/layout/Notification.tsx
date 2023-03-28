@@ -92,7 +92,6 @@ export default function Notification({ notification, closePanel }: any) {
           </P>
           <div>
             <Button
-              fontWeight={600}
               onClick={() => {
                 closePanel()
                 navigate(`/apps/${app.name}`)

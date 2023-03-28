@@ -1,7 +1,7 @@
 import { Dispatch, ReactElement, useEffect } from 'react'
 import { Layer } from 'grommet'
-import { LoopingLogo } from '@pluralsh/design-system'
 import { useQuery } from '@apollo/client'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { WireguardPeer } from '../graphql/queries'
 import { RootQueryType, RootQueryTypeWireguardPeerArgs } from '../../../generated/graphql'
@@ -24,7 +24,7 @@ function DownloadConfig({ name, onClose }: DownloadConfigProps): ReactElement {
 
   return (
     <Layer background="transparent">
-      <LoopingLogo />
+      <LoadingIndicator />
     </Layer>
   )
 }

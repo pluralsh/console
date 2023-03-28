@@ -10,6 +10,7 @@ import { Modal } from '@pluralsh/design-system'
 import uniqWith from 'lodash/uniqWith'
 import isEqual from 'lodash/isEqual'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
+import BillingFeatureBlockModal from 'components/billing/BillingFeatureBlockModal'
 
 import { appendConnection, updateCache } from '../../../utils/graphql'
 
@@ -25,9 +26,10 @@ const defaultAttributes = {
 }
 
 export default function RoleCreate({ q }: any) {
-  const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
-  const isAvailable = !!availableFeatures?.userManagement || isPaidPlan
-  const [open, setOpen] = useState(false)
+  const { availableFeatures } = useContext(SubscriptionContext)
+  const isAvailable = !!availableFeatures?.userManagement
+  const [createModalVisible, setCreateModalVisible] = useState(false)
+  const [blockModalVisible, setBlockModalVisible] = useState(false)
   const [attributes, setAttributes] = useState(defaultAttributes)
   const [roleBindings, setRoleBindings] = useState([])
   const uniqueRoleBindings = useMemo(() => uniqWith(roleBindings, isEqual),
@@ -35,7 +37,7 @@ export default function RoleCreate({ q }: any) {
   const resetAndClose = useCallback(() => {
     setAttributes(defaultAttributes)
     setRoleBindings([])
-    setOpen(false)
+    setCreateModalVisible(false)
   }, [])
   const [mutation, { loading, error }] = useMutation(CREATE_ROLE, {
     variables: {
@@ -52,14 +54,15 @@ export default function RoleCreate({ q }: any) {
   return (
     <>
       <Button
-        disabled={!isAvailable}
         secondary
-        onClick={() => setOpen(true)}
+        onClick={() => (isAvailable ? setCreateModalVisible(true) : setBlockModalVisible(true))}
       >
         Create role
       </Button>
+
+      {/* Modals */}
       <Modal
-        open={open}
+        open={createModalVisible}
         onClose={() => resetAndClose()}
         marginVertical={16}
         size="large"
@@ -76,6 +79,11 @@ export default function RoleCreate({ q }: any) {
           error={error}
         />
       </Modal>
+      <BillingFeatureBlockModal
+        open={blockModalVisible}
+        message="Upgrade to Plural Professional to create a role."
+        onClose={() => setBlockModalVisible(false)}
+      />
     </>
   )
 }

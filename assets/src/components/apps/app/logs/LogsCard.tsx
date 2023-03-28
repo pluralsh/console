@@ -1,8 +1,9 @@
-import { Card, LoopingLogo } from '@pluralsh/design-system'
+import { Card } from '@pluralsh/design-system'
 import { LOGS_Q } from 'components/graphql/dashboards'
 import { Flex } from 'honorable'
 import { useCallback, useState } from 'react'
 import { useQuery } from '@apollo/client'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import LogContent from './LogContent'
 import LogsScrollIndicator from './LogsScrollIndicator'
@@ -58,14 +59,7 @@ export function LogsCard({
             addLabel={addLabel}
             fullscreen={fullscreen}
           />
-        ) : (
-          <Flex
-            grow={1}
-            justify="center"
-          >
-            <LoopingLogo />
-          </Flex>
-        )}
+        ) : <LoadingIndicator />}
       </Flex>
       {data && (
         <LogsScrollIndicator

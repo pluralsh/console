@@ -1,20 +1,16 @@
 import { useQuery } from '@apollo/client'
 import { Link, useParams } from 'react-router-dom'
 import { Flex } from 'honorable'
-
-import { Button, LogsIcon, LoopingLogo } from '@pluralsh/design-system'
-
+import { Button, LogsIcon } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-
 import { ContainerStatus, Maybe, Pod } from 'generated/graphql'
-
 import { asQuery } from 'components/utils/query'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { POLL_INTERVAL } from '../constants'
 import { POD_INFO_Q } from '../queries'
-
 import { SubTitle } from '../nodes/SubTitle'
-
 import { ContainersList } from '../containers/ContainersList'
 
 import PodMetadata from './PodMetadata'
@@ -60,7 +56,7 @@ export default function PodInfo() {
   if (!name || !namespace) {
     return null
   }
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoadingIndicator />
 
   const { pod } = data
   const containers = pod.spec.containers || []

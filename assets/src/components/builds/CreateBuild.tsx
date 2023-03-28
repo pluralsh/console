@@ -95,10 +95,7 @@ export default function CreateBuild() {
 
   return (
     <>
-      <Button
-        fontWeight={600}
-        onClick={() => setOpen(true)}
-      >
+      <Button onClick={() => setOpen(true)}>
         Create build
       </Button>
       {open && (

@@ -1,14 +1,10 @@
-import { Card, LoopingLogo } from '@pluralsh/design-system'
-
+import { Card } from '@pluralsh/design-system'
 import { extendConnection } from 'utils/graphql'
-
 import SmoothScroller from 'components/utils/SmoothScroller'
-
 import { useQuery } from '@apollo/client'
-
 import { useState } from 'react'
-
 import { WEBHOOKS_Q } from 'components/graphql/webhooks'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import Webhook from './Webhook'
 
@@ -16,7 +12,7 @@ export default function WebhooksList() {
   const [listRef, setListRef] = useState<any>(null)
   const { data, loading, fetchMore } = useQuery(WEBHOOKS_Q)
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoadingIndicator />
   const { edges, pageInfo } = data.webhooks
 
   if (edges?.length < 1) return null

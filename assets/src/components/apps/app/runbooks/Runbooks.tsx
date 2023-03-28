@@ -1,5 +1,5 @@
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
-import { EmptyState, LoopingLogo, RunBookIcon } from '@pluralsh/design-system'
+import { EmptyState, RunBookIcon } from '@pluralsh/design-system'
 import { useContext, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { POLL_INTERVAL } from 'components/runbooks/constants'
@@ -7,6 +7,7 @@ import { RUNBOOKS_Q } from 'components/runbooks/queries'
 import { useQuery } from '@apollo/client'
 import { A, Flex } from 'honorable'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { ListItem } from '../misc'
 
@@ -29,16 +30,7 @@ export default function Runbooks() {
     { text: 'runbooks', url: `/apps/${appName}/runbooks` },
   ]), [appName, setBreadcrumbs])
 
-  if (!data) {
-    return (
-      <Flex
-        grow={1}
-        justify="center"
-      >
-        <LoopingLogo />
-      </Flex>
-    )
-  }
+  if (!data) return <LoadingIndicator />
 
   const { runbooks } = data
 

@@ -71,7 +71,6 @@ export function ScalingButton({ ...props }: ComponentProps<typeof Button>) {
   return (
     <Button
       secondary
-      fontWeight={600}
       startIcon={<InfoIcon />}
       {...props}
     >

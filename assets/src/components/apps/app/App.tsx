@@ -1,7 +1,6 @@
 import { A, Div, Flex } from 'honorable'
 import {
   Button,
-  LoopingLogo,
   TreeNav,
   TreeNavEntry,
   getBarePathFromPath,
@@ -33,6 +32,8 @@ import capitalize from 'lodash/capitalize'
 import collectHeadings from 'markdoc/utils/collectHeadings'
 
 import { useTheme } from 'styled-components'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { LoginContext } from '../../contexts'
 
@@ -149,9 +150,7 @@ function AppWithoutContext() {
   if (repoError) {
     return <GqlError error={repoError} />
   }
-  if (!repoData?.repository) {
-    return <LoopingLogo />
-  }
+  if (!repoData?.repository) return <LoadingIndicator />
 
   const renderDirectory = directory => directory.map(({
     label, path, subpaths, type, ...props
@@ -238,7 +237,6 @@ function AppWithoutContext() {
         {validLinks?.length > 0 && (
           <Button
             secondary
-            fontWeight={600}
             marginBottom="medium"
             as="a"
             href={ensureURLValidity(links[0].url)}

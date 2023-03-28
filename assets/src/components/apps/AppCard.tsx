@@ -116,7 +116,6 @@ export default function AppCard({ app }: any) {
           <Button
             small
             secondary
-            fontWeight={600}
             as="a"
             href={ensureURLValidity(links[0].url)}
             target="_blank"

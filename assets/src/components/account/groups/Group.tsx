@@ -1,20 +1,13 @@
 import { GearTrainIcon, IconFrame, PeopleIcon } from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
-
 import { Confirm } from 'components/utils/Confirm'
-
 import { LoginContext } from 'components/contexts'
-
-import { Button, Flex, Modal } from 'honorable'
-
+import { Button, Flex } from 'honorable'
 import { Group as GroupT, GroupsDocument, useDeleteGroupMutation } from 'generated/graphql'
-
 import { DeleteIconButton } from 'components/utils/IconButtons'
 
 import { removeConnection, updateCache } from '../../../utils/graphql'
-
 import { Info } from '../../utils/Info'
-
 import { Permissions, hasRbac } from '../misc'
 
 import { EditGroupAttributes, EditGroupMembers } from './GroupEdit'
@@ -87,14 +80,11 @@ export default function Group({ group, q }: { group: GroupT; q: any }) {
         )}
       </Flex>
       <>
-        <Modal
-          portal
-          header="View group"
+        <GroupView
           open={dialogKey === 'viewGroup'}
           onClose={() => dialogKey === 'viewGroup' && setDialogKey('')}
-        >
-          <GroupView group={group} />
-        </Modal>
+          group={group}
+        />
         <EditGroupAttributes
           group={group}
           open={dialogKey === 'editAttrs'}

@@ -1,9 +1,15 @@
-import { ListBoxItem } from '@pluralsh/design-system'
+import { ListBoxItem, Tooltip } from '@pluralsh/design-system'
 import { CellContext } from '@tanstack/react-table'
 import { Div } from 'honorable'
-import { Dispatch, useMemo, useState } from 'react'
-
+import {
+  Dispatch,
+  useContext,
+  useMemo,
+  useState,
+} from 'react'
 import { ColumnDefTemplate } from '@tanstack/table-core/src/types'
+import SubscriptionContext from 'components/contexts/SubscriptionContext'
+import styled from 'styled-components'
 
 import { MoreMenu } from '../../utils/MoreMenu'
 import { DeleteClient } from '../actions/Delete'
@@ -40,6 +46,7 @@ function cell(refetch): ColumnDefTemplate<CellContext<VPNClientRow, unknown>> {
 
 interface MenuItem {
   label: string
+  disabledTooltip?: string
   onSelect: Dispatch<void>
   props?: Record<string, unknown>
 }
@@ -51,7 +58,16 @@ enum MenuItemSelection {
 
 type MenuItems = {[key in MenuItemSelection]: MenuItem}
 
+const DisabledItem = styled.div(() => ({
+  '&:focus, &:focus-visible': {
+    outline: 'none',
+    boxShadow: 'none',
+  },
+}))
+
 function VPNColumnActions({ disabled, refetch, name }) {
+  const { availableFeatures } = useContext(SubscriptionContext)
+  const isAvailable = !!availableFeatures?.vpn
   const [selected, setSelected] = useState<MenuItemSelection | undefined>()
   const dialog = useMemo(() => {
     switch (selected) {
@@ -80,9 +96,13 @@ function VPNColumnActions({ disabled, refetch, name }) {
     },
     [MenuItemSelection.DeleteClient]: {
       label: 'Delete VPN client',
-      onSelect: () => setSelected(MenuItemSelection.DeleteClient),
+      onSelect: () => {
+        if (isAvailable) setSelected(MenuItemSelection.DeleteClient)
+      },
+      disabledTooltip: !isAvailable ? 'Upgrade to Plural Professional to manage VPN clients.' : undefined,
       props: {
         destructive: true,
+        disabled: !isAvailable,
       },
     },
   }
@@ -96,14 +116,22 @@ function VPNColumnActions({ disabled, refetch, name }) {
         onSelectionChange={selected => menuItems[selected]?.onSelect()}
         disabled={disabled}
       >
-        {Object.entries(menuItems).map(([key, { label, props = {} }]) => (
-          <ListBoxItem
-            key={key}
-            textValue={label}
-            label={label}
-            {...props}
-          />
-        ))}
+        {Object.entries(menuItems).map(([key, { label, props = {}, disabledTooltip }]) => {
+          const item = (
+            <ListBoxItem
+              key={key}
+              textValue={label}
+              label={label}
+              {...props}
+            />
+          )
+
+          return disabledTooltip ? (
+            <DisabledItem>
+              <Tooltip label={disabledTooltip}>{item}</Tooltip>
+            </DisabledItem>
+          ) : item
+        })}
       </MoreMenu>
 
       {!!selected && dialog}

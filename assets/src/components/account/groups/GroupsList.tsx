@@ -1,13 +1,11 @@
 import isEmpty from 'lodash/isEmpty'
-import { EmptyState, LoopingLogo } from '@pluralsh/design-system'
+import { EmptyState } from '@pluralsh/design-system'
 import { useState } from 'react'
-
 import { Div } from 'honorable'
-
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useGroupsQuery } from 'generated/graphql'
 
 import { extendConnection } from '../../../utils/graphql'
-
 import { ListItem } from '../../utils/List'
 import { StandardScroller } from '../../utils/SmoothScroller'
 
@@ -15,10 +13,10 @@ import GroupCreate from './GroupCreate'
 import Group from './Group'
 
 export function GroupsList({ q }: any) {
-  const [listRef, setListRef] = useState<any>(null)
   const { data, loading, fetchMore } = useGroupsQuery({ variables: { q } })
+  const [listRef, setListRef] = useState<any>(null)
 
-  if (!data?.groups) return <LoopingLogo />
+  if (!data?.groups) return <LoadingIndicator />
 
   const { edges, pageInfo } = data.groups
 

@@ -1,10 +1,11 @@
 import { useQuery } from '@apollo/client'
 import { Div } from 'honorable'
-import { EmptyState, LoopingLogo, SearchIcon } from '@pluralsh/design-system'
+import { EmptyState, SearchIcon } from '@pluralsh/design-system'
 import { useContext, useEffect, useState } from 'react'
 import { StandardScroller } from 'components/utils/SmoothScroller'
 import { isEmpty } from 'lodash'
 import { LoginContext } from 'components/contexts'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { List, ListItem } from '../../utils/List'
 import ListInput from '../../utils/ListInput'
@@ -25,7 +26,7 @@ export default function UsersList() {
     if (data) setDataCache(data)
   }, [data])
 
-  if (!data && !dataCache) return <LoopingLogo />
+  if (!data && !dataCache) return <LoadingIndicator />
 
   const { edges, pageInfo } = data?.users || dataCache?.users || {}
 

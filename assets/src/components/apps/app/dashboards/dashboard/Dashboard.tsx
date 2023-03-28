@@ -1,10 +1,5 @@
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
-import {
-  Card,
-  ListBoxItem,
-  LoopingLogo,
-  Select,
-} from '@pluralsh/design-system'
+import { Card, ListBoxItem, Select } from '@pluralsh/design-system'
 import {
   Key,
   useCallback,
@@ -21,6 +16,8 @@ import { Flex } from 'honorable'
 import { DURATIONS } from 'utils/time'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import RangePicker from '../../../../utils/RangePicker'
 
@@ -69,16 +66,7 @@ export default function Dashboard() {
   }, [data, labelMap, setLabelMap])
   const setLabel = useCallback((label, value) => setLabelMap({ ...labelMap, [label]: value }), [labelMap, setLabelMap])
 
-  if (!data || !dashboardsData) {
-    return (
-      <Flex
-        grow={1}
-        justify="center"
-      >
-        <LoopingLogo />
-      </Flex>
-    )
-  }
+  if (!data || !dashboardsData) return <LoadingIndicator />
 
   const { dashboard } = data
   const { dashboards } = dashboardsData

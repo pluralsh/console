@@ -41,18 +41,15 @@ export default function UpgradePoliciesList() {
         marginTop="large"
       >
         <Button
-          fontWeight={600}
           onClick={() => setModal(null)}
           secondary
         >
           Cancel
         </Button>
         <Button
-          fontWeight={600}
           onClick={() => setModal({
             header: (
               <Button
-                fontWeight={600}
                 onClick={() => setModal({
                   header: 'Upgrade Policies',
                   content: <UpgradePoliciesList />,

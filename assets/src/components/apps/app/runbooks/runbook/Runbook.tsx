@@ -1,7 +1,6 @@
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import {
   ListBoxItem,
-  LoopingLogo,
   Select,
   SubTab,
   TabList,
@@ -31,6 +30,8 @@ import { Portal } from 'react-portal'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { useTheme } from 'styled-components'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import RangePicker from '../../../../utils/RangePicker'
 import { PageTitleSelectButton } from '../../../../utils/PageTitleSelectButton'
@@ -113,16 +114,7 @@ export default function Runbook() {
 
   useEffect(() => setSelectedKey(data?.runbook?.spec?.name || ''), [data])
 
-  if (!data || !runbooksData) {
-    return (
-      <Flex
-        grow={1}
-        justify="center"
-      >
-        <LoopingLogo />
-      </Flex>
-    )
-  }
+  if (!data || !runbooksData) return <LoadingIndicator />
 
   const { runbook } = data
   const { runbooks } = runbooksData

@@ -1,22 +1,31 @@
 import { useMutation } from '@apollo/client'
 import { Box } from 'grommet'
 import { ListBoxItem } from '@pluralsh/design-system'
-import { useContext, useState } from 'react'
-
+import { Dispatch, useContext, useState } from 'react'
 import { LoginContext } from 'components/contexts'
-
 import { Confirm } from 'components/utils/Confirm'
-
 import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { removeConnection, updateCache } from '../../../utils/graphql'
-
 import { Info } from '../../utils/Info'
 import RoleEdit from '../roles/RoleEdit'
-
 import { Permissions, hasRbac } from '../misc'
 
 import { DELETE_ROLE, ROLES_Q } from './queries'
+
+interface MenuItem {
+  label: string
+  disabledTooltip?: string
+  onSelect: Dispatch<void>
+  props?: Record<string, unknown>
+}
+
+enum MenuItemSelection {
+  Edit = 'edit',
+  Delete = 'delete',
+}
+
+type MenuItems = {[key in MenuItemSelection]: MenuItem}
 
 export default function Role({ role, q }: any) {
   const [edit, setEdit] = useState(false)
@@ -33,16 +42,17 @@ export default function Role({ role, q }: any) {
     onCompleted: () => setConfirm(false),
   })
 
-  const menuItems = {
-    edit: {
+  const menuItems: MenuItems = {
+    [MenuItemSelection.Edit]: {
       label: 'Edit role',
       onSelect: () => setEdit(true),
-      destructive: false,
     },
-    delete: {
+    [MenuItemSelection.Delete]: {
       label: 'Delete role',
       onSelect: () => setConfirm(true),
-      destructive: true,
+      props: {
+        destructive: true,
+      },
     },
   }
 
@@ -59,13 +69,12 @@ export default function Role({ role, q }: any) {
       {editable
       && (
         <MoreMenu onSelectionChange={selectedKey => menuItems[selectedKey]?.onSelect()}>
-          {Object.entries(menuItems).map(([key, { label, destructive }]) => (
+          {Object.entries(menuItems).map(([key, { label, props = {} }]) => (
             <ListBoxItem
               key={key}
               textValue={label}
               label={label}
-              destructive={destructive}
-              color="blue"
+              {...props}
             />
           ))}
         </MoreMenu>

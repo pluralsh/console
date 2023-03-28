@@ -31,7 +31,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import styled, { keyframes } from 'styled-components'
 import { pulse } from 'react-animations'
 import { normalizeColor } from 'grommet/utils'
-import { LoopingLogo } from '@pluralsh/design-system'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { BreadcrumbsContext } from '../layout/Breadcrumbs'
 import { RepoIcon } from '../repos/Repositories'
@@ -526,7 +526,7 @@ export function Incidents() {
     setBreadcrumbs([{ url: '/incidents', text: 'incidents' }])
   }, [setBreadcrumbs])
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoadingIndicator />
 
   const { incidents: { edges, pageInfo } } = data
 

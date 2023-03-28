@@ -11,7 +11,6 @@ export default function BuildApproval({ build }) {
   return (
     <Button
       startIcon={<CheckIcon />}
-      fontWeight={600}
       loading={loading}
       onClick={() => mutation()}
       width={200}

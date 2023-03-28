@@ -1,26 +1,24 @@
-import { useQuery } from '@apollo/client'
 import { Box } from 'grommet'
 import isEmpty from 'lodash/isEmpty'
 import { Div } from 'honorable'
-import { EmptyState, LoopingLogo } from '@pluralsh/design-system'
+import { EmptyState } from '@pluralsh/design-system'
 import { useState } from 'react'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useQuery } from '@apollo/client'
 
 import { ListItem } from '../../utils/List'
 import { extendConnection } from '../../../utils/graphql'
-
 import { StandardScroller } from '../../utils/SmoothScroller'
-
 import RoleCreate from '../roles/RoleCreate'
 
+import Role from './Role'
 import { ROLES_Q } from './queries'
 
-import Role from './Role'
-
 export default function RolesList({ q }: any) {
-  const [listRef, setListRef] = useState<any>(null)
   const { data, loading, fetchMore } = useQuery(ROLES_Q, { variables: { q } })
+  const [listRef, setListRef] = useState<any>(null)
 
-  if (!data) return <LoopingLogo />
+  if (!data) return <LoadingIndicator />
 
   const { edges, pageInfo } = data.roles
 

@@ -1,27 +1,19 @@
 import { Button, Card } from '@pluralsh/design-system'
-import { useContext } from 'react'
 import styled from 'styled-components'
-
-import SubscriptionContext from '../contexts/SubscriptionContext'
 
 type BillingFeatureBlockBannerPropsType = {
   feature: string
   description?: string
-  planFeature: string
   placeholderImageURL?: string
 }
 
 const Wrapper = styled.div<{backgroundImage?: string}>(({ theme, backgroundImage }) => ({
   display: 'flex',
   flexDirection: 'column',
+  flexGrow: 1,
   alignItems: 'center',
   justifyItems: 'flex-start',
-  position: 'absolute',
-  top: 15,
-  bottom: 0,
-  left: 0,
-  right: 0,
-  padding: theme.spacing.xxlarge,
+  padding: theme.spacing.large,
   borderRadius: theme.borderRadiuses.medium,
   backgroundColor: theme.colors['fill-zero'],
   zIndex: 10,
@@ -46,17 +38,14 @@ const Description = styled.div(({ theme }) => ({
 }))
 
 export default function BillingFeatureBlockBanner({
-  feature, description, planFeature, placeholderImageURL,
+  feature, description, placeholderImageURL,
 }: BillingFeatureBlockBannerPropsType) {
-  const { availableFeatures, isPaidPlan } = useContext(SubscriptionContext)
-
-  if (availableFeatures?.[planFeature] || isPaidPlan) return null
-
   return (
     <Wrapper backgroundImage={placeholderImageURL}>
       <Card
         padding="large"
         fillLevel={2}
+        width="100%"
       >
         <Header>Upgrade your plan to access {feature}.</Header>
         <Description>{description}</Description>

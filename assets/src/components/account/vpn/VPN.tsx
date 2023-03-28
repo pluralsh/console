@@ -1,7 +1,7 @@
-import { LoopingLogo } from '@pluralsh/design-system'
 import {
   Key,
   useCallback,
+  useContext,
   useMemo,
   useState,
 } from 'react'
@@ -10,6 +10,12 @@ import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
 
 import { Flex } from 'honorable'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+
+import { isEmpty } from 'lodash'
+
+import SubscriptionContext from 'components/contexts/SubscriptionContext'
 
 import VPNClientList from '../../vpn/VPNClientList'
 import {
@@ -46,10 +52,10 @@ function VPN() {
     ? clientList
     : clientList.filter(client => selectedUsers.has(client.user?.id ?? ''))), [selectedUsers, clientList])
   const onFilter = useCallback(selectedUsers => setSelectedUsers(selectedUsers), [])
+  const { availableFeatures } = useContext(SubscriptionContext)
+  const isAvailable = !!availableFeatures?.vpn || !isEmpty(clientList)
 
-  if (loading) {
-    return <LoopingLogo />
-  }
+  if (loading) return <LoadingIndicator />
 
   return (
     <ResponsivePageFullWidth
@@ -68,16 +74,18 @@ function VPN() {
         height="100%"
       >
         <BillingLegacyUserBanner feature="VPN clients" />
-        <VPNClientList
-          columns={columns}
-          data={filteredClientList}
-        />
-        <BillingFeatureBlockBanner
-          feature="VPN clients"
-          planFeature="vpn"
-          description="Create and manage VPN clients for a configured WireGuard server."
-          placeholderImageURL="/placeholder-vpn.png"
-        />
+        {isAvailable ? (
+          <VPNClientList
+            columns={columns}
+            data={filteredClientList}
+          />
+        ) : (
+          <BillingFeatureBlockBanner
+            feature="VPN clients"
+            description="Create and manage VPN clients for a configured WireGuard server."
+            placeholderImageURL="/placeholder-vpn.png"
+          />
+        )}
       </Flex>
     </ResponsivePageFullWidth>
   )

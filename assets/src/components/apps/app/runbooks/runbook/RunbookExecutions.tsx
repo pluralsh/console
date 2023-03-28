@@ -2,7 +2,6 @@ import {
   Avatar,
   Date,
   EmptyState,
-  LoopingLogo,
   Table,
 } from '@pluralsh/design-system'
 
@@ -14,6 +13,7 @@ import { RUNBOOK_EXECUTIONS_Q } from 'components/runbooks/queries'
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
 import { isEmpty } from 'lodash'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { FullHeightTableWrap } from '../../../../utils/layout/FullHeightTableWrap'
 
@@ -92,16 +92,7 @@ export function RunbookExecutions() {
   },
   [fetchMore, loading, pageInfo])
 
-  if (!data) {
-    return (
-      <Flex
-        grow={1}
-        justify="center"
-      >
-        <LoopingLogo />
-      </Flex>
-    )
-  }
+  if (!data) return <LoadingIndicator />
 
   if (isEmpty(executions)) {
     return <EmptyState message="No executions available." />

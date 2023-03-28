@@ -1,4 +1,4 @@
-import { Card, LoopingLogo } from '@pluralsh/design-system'
+import { Card } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
@@ -8,6 +8,7 @@ import { Flex } from 'honorable'
 import { Graph } from 'components/utils/Graph'
 import { filesize } from 'filesize'
 import GraphHeader from 'components/utils/GraphHeader'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { POLL_INTERVAL } from '../../../../cluster/constants'
 import { USAGE_Q } from '../../../../cluster/queries'
@@ -107,16 +108,7 @@ function Metric({
     pollInterval: POLL_INTERVAL,
   })
 
-  if (!data) {
-    return (
-      <Flex
-        grow={1}
-        justify="center"
-      >
-        <LoopingLogo />
-      </Flex>
-    )
-  }
+  if (!data) return <LoadingIndicator />
 
   const {
     cpu, mem, podCpu, podMem,
