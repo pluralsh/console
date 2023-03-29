@@ -145,8 +145,8 @@ export function Graph({
         tickRotation: tickRotation || 45,
         tickSize: 0,
         legend: hasData
-          ? /* @ts-expect-error */
-            `${dateFormat(data[0].data[0].x)} — ${dateFormat(
+          ? `${dateFormat(data[0].data[0].x)} — ${dateFormat(
+              /* @ts-expect-error */
               last(data?.[0]?.data).x
             )}`
           : null,
