@@ -11,14 +11,18 @@ export default function CostAnalysis() {
   const { appName } = useParams()
   const { applications } = useContext<any>(InstallationContext)
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
-  const currentApp = applications.find(app => app.name === appName)
+  const currentApp = applications.find((app) => app.name === appName)
   const { cost } = currentApp
 
-  useEffect(() => setBreadcrumbs([
-    { text: 'apps', url: '/' },
-    { text: appName, url: `/apps/${appName}` },
-    { text: 'cost analysis', url: `/apps/${appName}/cost` },
-  ]), [appName, setBreadcrumbs])
+  useEffect(
+    () =>
+      setBreadcrumbs([
+        { text: 'apps', url: '/' },
+        { text: appName, url: `/apps/${appName}` },
+        { text: 'cost analysis', url: `/apps/${appName}/cost` },
+      ]),
+    [appName, setBreadcrumbs]
+  )
 
   return (
     <ScrollablePage

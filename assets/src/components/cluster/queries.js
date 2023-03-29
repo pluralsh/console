@@ -285,7 +285,9 @@ export const PODS_Q = gql`
 export const PODS_SUB = gql`
   subscription PodsSub {
     podDelta {
-      payload { ...PodFragment }
+      payload {
+        ...PodFragment
+      }
       delta
     }
   }

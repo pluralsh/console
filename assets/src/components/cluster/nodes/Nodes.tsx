@@ -23,8 +23,10 @@ export type ResourceUsage = {
 export default function Nodes() {
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
 
-  useEffect(() => setBreadcrumbs([{ text: 'nodes', url: '/nodes' }]),
-    [setBreadcrumbs])
+  useEffect(
+    () => setBreadcrumbs([{ text: 'nodes', url: '/nodes' }]),
+    [setBreadcrumbs]
+  )
 
   const { data, refetch } = useQuery<{
     nodes: Node[]
@@ -38,10 +40,14 @@ export default function Nodes() {
     if (!data) {
       return null
     }
-    const cpu = sumBy(data.nodeMetrics,
-      metrics => cpuParser(metrics?.usage?.cpu) ?? 0)
-    const mem = sumBy(data.nodeMetrics,
-      metrics => memoryParser((metrics as any)?.usage?.memory) ?? 0)
+    const cpu = sumBy(
+      data.nodeMetrics,
+      (metrics) => cpuParser(metrics?.usage?.cpu) ?? 0
+    )
+    const mem = sumBy(
+      data.nodeMetrics,
+      (metrics) => memoryParser((metrics as any)?.usage?.memory) ?? 0
+    )
 
     return { cpu, mem }
   }, [data])

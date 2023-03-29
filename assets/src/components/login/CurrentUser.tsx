@@ -12,8 +12,14 @@ const ME_Q = gql`
       name
       email
       avatar
-      account { id name }
-      publisher { id  name }
+      account {
+        id
+        name
+      }
+      publisher {
+        id
+        name
+      }
     }
   }
 `

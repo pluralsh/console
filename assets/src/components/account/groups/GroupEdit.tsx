@@ -6,12 +6,7 @@ import {
   Modal,
   ValidatedInput,
 } from '@pluralsh/design-system'
-import {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Flex, usePrevious } from 'honorable'
 
 import { fetchUsers } from 'components/utils/BindingInput'
@@ -42,7 +37,9 @@ export function EditGroupMembers({
 }) {
   const client = useApolloClient()
   const [userFilter, setUserFilter] = useState('')
-  const [suggestions, setSuggestions] = useState<{ label: any; value: any }[]>([])
+  const [suggestions, setSuggestions] = useState<{ label: any; value: any }[]>(
+    []
+  )
 
   const [errorMsg, setErrorMsg] = useState<ReactNode>()
   const prevOpen = usePrevious(open)
@@ -70,19 +67,21 @@ export function EditGroupMembers({
 
   useEffect(() => {
     if (
-      error?.graphQLErrors[0].message === 'group_id has already been taken'
-      || error?.graphQLErrors[0].message.startsWith('constraint error')
+      error?.graphQLErrors[0].message === 'group_id has already been taken' ||
+      error?.graphQLErrors[0].message.startsWith('constraint error')
     ) {
       setErrorMsg(undefined)
 
       return
     }
-    setErrorMsg(error && (
-      <GqlError
-        header="Problem editing group members"
-        error={error}
-      />
-    ))
+    setErrorMsg(
+      error && (
+        <GqlError
+          header="Problem editing group members"
+          error={error}
+        />
+      )
+    )
   }, [error])
 
   return (
@@ -92,14 +91,14 @@ export function EditGroupMembers({
       open={open}
       size="large"
       onClose={onClose}
-      actions={(
+      actions={
         <Button
           onClick={onClose}
           loading={loading}
         >
           Done
         </Button>
-      )}
+      }
     >
       <Flex
         flexDirection="column"
@@ -124,14 +123,14 @@ export function EditGroupMembers({
             inputValue={userFilter}
             // @ts-expect-error
             placeholder="Search a user"
-            onSelectionChange={key => {
+            onSelectionChange={(key) => {
               setUserFilter('')
               if (key && typeof key === 'string') {
                 // @ts-expect-error
                 addMut({ variables: { userId: key } })
               }
             }}
-            onInputChange={value => {
+            onInputChange={(value) => {
               setUserFilter(value)
             }}
           >
@@ -179,12 +178,14 @@ export function EditGroupAttributes({ group, open, onClose }: any) {
     }
   })
   useEffect(() => {
-    setErrorMsg(error && (
-      <GqlError
-        header="Problem editing group attributes"
-        error={error}
-      />
-    ))
+    setErrorMsg(
+      error && (
+        <GqlError
+          header="Problem editing group attributes"
+          error={error}
+        />
+      )
+    )
   }, [error])
 
   return (
@@ -194,14 +195,14 @@ export function EditGroupAttributes({ group, open, onClose }: any) {
       open={open}
       size="large"
       onClose={onClose}
-      actions={(
+      actions={
         <Actions
           cancel={onClose}
           submit={hasUpdates ? () => mutation() : undefined}
           loading={loading}
           action="Update"
         />
-      )}
+      }
     >
       <Flex
         flexDirection="column"

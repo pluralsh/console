@@ -54,17 +54,19 @@ export const CaptionText = styled.div(({ theme }) => ({
   color: theme.colors['text-xlight'],
 }))
 
-export const ContainerStatusChip = styled(({ readiness }: { readiness: ReadinessT }) => (
-  <Chip severity={readinessToSeverity[readiness]}>
-    {readinessToContainerLabel[readiness]}
-  </Chip>
-))(_ => ({}))
+export const ContainerStatusChip = styled(
+  ({ readiness }: { readiness: ReadinessT }) => (
+    <Chip severity={readinessToSeverity[readiness]}>
+      {readinessToContainerLabel[readiness]}
+    </Chip>
+  )
+)((_) => ({}))
 
 export const StatusChip = styled(({ readiness }: { readiness: ReadinessT }) => (
   <Chip severity={readinessToSeverity[readiness]}>
     {readinessToLabel[readiness]}
   </Chip>
-))(_ => ({}))
+))((_) => ({}))
 
 export function UsageUnstyled({
   used,
@@ -82,14 +84,14 @@ export function UsageUnstyled({
       {isNullishIsh(used)
         ? '—'
         : typeof used === 'number'
-          ? roundToTwoPlaces(used)
-          : used}
+        ? roundToTwoPlaces(used)
+        : used}
       {' / '}
       {isNullishIsh(total)
         ? '—'
         : typeof total === 'number'
-          ? roundToTwoPlaces(total)
-          : total}
+        ? roundToTwoPlaces(total)
+        : total}
       {units && ` ${units}`}
     </div>
   )

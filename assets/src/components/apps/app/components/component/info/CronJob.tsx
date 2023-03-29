@@ -10,21 +10,21 @@ import { DeleteJob } from './Job'
 const columnHelper = createColumnHelper<any>()
 
 const columns = (namespace, refetch) => [
-  columnHelper.accessor(row => row?.metadata?.name, {
+  columnHelper.accessor((row) => row?.metadata?.name, {
     id: 'name',
-    cell: (props => (
+    cell: (props) => (
       <Tooltip
         label={props.getValue()}
         placement="top-start"
       >
         <TableText>{props.getValue()}</TableText>
       </Tooltip>
-    )),
+    ),
     header: 'Name',
   }),
-  columnHelper.accessor(row => row?.status, {
+  columnHelper.accessor((row) => row?.status, {
     id: 'startEnd',
-    cell: props => {
+    cell: (props) => {
       const status = props.getValue()
 
       return (
@@ -41,24 +41,24 @@ const columns = (namespace, refetch) => [
     },
     header: 'Start / Completion time',
   }),
-  columnHelper.accessor(row => row?.status?.active || 0, {
+  columnHelper.accessor((row) => row?.status?.active || 0, {
     id: 'active',
-    cell: props => props.getValue(),
+    cell: (props) => props.getValue(),
     header: 'Active',
   }),
-  columnHelper.accessor(row => row?.status?.failed || 0, {
+  columnHelper.accessor((row) => row?.status?.failed || 0, {
     id: 'failed',
-    cell: props => props.getValue(),
+    cell: (props) => props.getValue(),
     header: 'Failed',
   }),
-  columnHelper.accessor(row => row?.status?.succeeded || 0, {
+  columnHelper.accessor((row) => row?.status?.succeeded || 0, {
     id: 'succeeded',
-    cell: props => props.getValue(),
+    cell: (props) => props.getValue(),
     header: 'Succeeded',
   }),
-  columnHelper.accessor(row => row?.metadata?.name, {
+  columnHelper.accessor((row) => row?.metadata?.name, {
     id: 'delete',
-    cell: props => (
+    cell: (props) => (
       <DeleteJob
         name={props.getValue()}
         namespace={namespace}
@@ -76,7 +76,11 @@ function CronJobJobs({ jobs, namespace, refetch }) {
     <Table
       data={jobs}
       columns={columns(namespace, refetch)}
-      onRowClick={(_e, { original }: Row<any>) => navigate(`/apps/${namespace}/components/job/${original?.metadata?.name}`)}
+      onRowClick={(_e, { original }: Row<any>) =>
+        navigate(
+          `/apps/${namespace}/components/job/${original?.metadata?.name}`
+        )
+      }
     />
   )
 }

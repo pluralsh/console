@@ -12,8 +12,8 @@ import {
 } from '@pluralsh/design-system'
 
 interface Duration {
-    text: string
-    value: number
+  text: string
+  value: number
 }
 
 const DURATIONS: Duration[] = [
@@ -25,14 +25,16 @@ const DURATIONS: Duration[] = [
 function downloadUrl(q, end, repo) {
   const url = `/v1/logs/${repo}/download`
   const params = Object.entries({ q, end })
-    .map(kv => kv.map(encodeURIComponent).join('='))
+    .map((kv) => kv.map(encodeURIComponent).join('='))
     .join('&')
 
   return `${url}?${params}`
 }
 
 async function download(url, name) {
-  const resp = await fetch(url, { headers: { Authorization: `Bearer ${fetchToken()}` } })
+  const resp = await fetch(url, {
+    headers: { Authorization: `Bearer ${fetchToken()}` },
+  })
   const blob = await resp.blob()
 
   fileDownload(blob, name)
@@ -59,7 +61,7 @@ export default function LogsDownloader({ query, repo }) {
         header="Download logs"
         open={open}
         onClose={() => setOpen(false)}
-        actions={(
+        actions={
           <>
             <Button
               secondary
@@ -69,7 +71,10 @@ export default function LogsDownloader({ query, repo }) {
             </Button>
             <Button
               onClick={() => {
-                download(downloadUrl(query, selectedKey, repo), `${repo}_logs.txt`)
+                download(
+                  downloadUrl(query, selectedKey, repo),
+                  `${repo}_logs.txt`
+                )
                 setOpen(false)
               }}
               marginLeft="medium"
@@ -77,7 +82,7 @@ export default function LogsDownloader({ query, repo }) {
               Download
             </Button>
           </>
-        )}
+        }
       >
         <FormField label="Time frame">
           <Select

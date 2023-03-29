@@ -1,17 +1,16 @@
 import { Flex } from 'honorable'
 import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 
-import {
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-} from 'react'
+import { useContext, useEffect, useMemo, useRef } from 'react'
 import { Outlet, useMatch, useParams } from 'react-router-dom'
 
 import { InstallationContext } from 'components/Installations'
 import { useQuery } from '@apollo/client'
-import { POLL_INTERVAL, ScalingType, ScalingTypes } from 'components/cluster/constants'
+import {
+  POLL_INTERVAL,
+  ScalingType,
+  ScalingTypes,
+} from 'components/cluster/constants'
 
 import {
   CERTIFICATE_Q,
@@ -60,49 +59,61 @@ export default function Component() {
   const { me } = useContext<any>(LoginContext)
   const { appName, componentKind = '', componentName } = useParams()
   const { applications } = useContext<any>(InstallationContext)
-  const currentApp = applications.find(app => app.name === appName)
+  const currentApp = applications.find((app) => app.name === appName)
   const { data, loading, refetch } = useQuery(kindToQuery[componentKind], {
     variables: { name: componentName, namespace: appName },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
 
-  useEffect(() => setBreadcrumbs([
-    { text: 'apps', url: '/' },
-    { text: appName, url: `/apps/${appName}` },
-    { text: 'components', url: `/apps/${appName}/components` },
-    {
-      text: componentName,
-      url: `/apps/${appName}/components/${componentKind}/${componentName}`,
-    },
-  ]),
-  [appName, componentKind, componentName, setBreadcrumbs])
+  useEffect(
+    () =>
+      setBreadcrumbs([
+        { text: 'apps', url: '/' },
+        { text: appName, url: `/apps/${appName}` },
+        { text: 'components', url: `/apps/${appName}/components` },
+        {
+          text: componentName,
+          url: `/apps/${appName}/components/${componentKind}/${componentName}`,
+        },
+      ]),
+    [appName, componentKind, componentName, setBreadcrumbs]
+  )
 
-  const kind: ScalingType
-    = ScalingTypes[componentKind.toUpperCase()] ?? ScalingTypes.DEPLOYMENT
+  const kind: ScalingType =
+    ScalingTypes[componentKind.toUpperCase()] ?? ScalingTypes.DEPLOYMENT
 
   // To avoid mapping between component types and fields of data returned by API
   // we are picking first available value from API object for now.
-  const value: any = useMemo(() => (data ? Object.values(data).find(value => value !== undefined) : null),
-    [data])
-  const subpath
-    = useMatch('/apps/:appName/components/:componentKind/:componentName/:subpath')
+  const value: any = useMemo(
+    () =>
+      data ? Object.values(data).find((value) => value !== undefined) : null,
+    [data]
+  )
+  const subpath =
+    useMatch('/apps/:appName/components/:componentKind/:componentName/:subpath')
       ?.params?.subpath || ''
 
   if (!me || !currentApp || !data) return <LoadingIndicator />
 
-  const component = currentApp.status.components.find(({ name, kind }) => name === componentName && kind.toLowerCase() === componentKind)
-  const filteredDirectory = directory.filter(({ onlyFor }) => !onlyFor || onlyFor.includes(componentKind))
+  const component = currentApp.status.components.find(
+    ({ name, kind }) =>
+      name === componentName && kind.toLowerCase() === componentKind
+  )
+  const filteredDirectory = directory.filter(
+    ({ onlyFor }) => !onlyFor || onlyFor.includes(componentKind)
+  )
   const currentTab = filteredDirectory.find(({ path }) => path === subpath)
 
   return (
     <ResponsivePageFullWidth
       scrollable={
-        currentTab?.path === '' || currentTab?.path === 'info'
-        || currentTab?.path === 'metadata'
+        currentTab?.path === '' ||
+        currentTab?.path === 'info' ||
+        currentTab?.path === 'metadata'
       }
       heading={componentName}
-      headingContent={(
+      headingContent={
         <Flex
           gap="medium"
           className="DELETE"
@@ -137,10 +148,10 @@ export default function Component() {
             kind={componentKind}
           />
         </Flex>
-      )}
+      }
     >
       <TabPanel
-        as={(
+        as={
           <Outlet
             context={{
               component,
@@ -149,7 +160,7 @@ export default function Component() {
               refetch,
             }}
           />
-        )}
+        }
         stateRef={tabStateRef}
       />
     </ResponsivePageFullWidth>

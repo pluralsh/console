@@ -1,12 +1,7 @@
 import { ComponentProps, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@apollo/client'
-import {
-  Div,
-  Flex,
-  Form,
-  P,
-} from 'honorable'
+import { Div, Flex, Form, P } from 'honorable'
 import { Button } from '@pluralsh/design-system'
 
 import { GqlError } from 'components/utils/Alert'
@@ -116,13 +111,15 @@ export default function Invite() {
 
   const email = data?.invite?.email
 
-  const { disabled: passwordDisabled, error: passwordError } = validatePassword(attributes.password,
-    confirm)
+  const { disabled: passwordDisabled, error: passwordError } = validatePassword(
+    attributes.password,
+    confirm
+  )
 
   const isNameValid = attributes.name.length > 0
   const submitEnabled = isNameValid && !passwordDisabled && email
 
-  const onSubmit = e => {
+  const onSubmit = (e) => {
     e.preventDefault()
     if (!submitEnabled) {
       return
@@ -145,9 +142,7 @@ export default function Invite() {
           to join.
         </P>
       </Div>
-      <Form
-        onSubmit={onSubmit}
-      >
+      <Form onSubmit={onSubmit}>
         {signupError && (
           <Div marginBottom="large">
             <GqlError
@@ -170,13 +165,13 @@ export default function Invite() {
             label="Username"
             value={attributes.name}
             placeholder="Enter username"
-            onChange={name => setAttributes({ ...attributes, name })}
+            onChange={(name) => setAttributes({ ...attributes, name })}
             required
           />
 
           <SetPasswordField
             value={attributes.password}
-            onChange={password => setAttributes({ ...attributes, password })}
+            onChange={(password) => setAttributes({ ...attributes, password })}
             errorCode={passwordError}
           />
           <ConfirmPasswordField

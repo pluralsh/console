@@ -34,10 +34,18 @@ export default function Dashboard() {
   const [selectedKey, setSelectedKey] = useState<Key>('')
   const [duration, setDuration] = useState(DURATIONS[0])
   const [labelMap, setLabelMap] = useState({})
-  const labels = useMemo(() => Object.entries(labelMap || {}).map(([name, value]) => ({ name, value })), [labelMap])
+  const labels = useMemo(
+    () =>
+      Object.entries(labelMap || {}).map(([name, value]) => ({ name, value })),
+    [labelMap]
+  )
   const { data } = useQuery(DASHBOARD_Q, {
     variables: {
-      repo: appName, name: id, labels, step: duration.step, offset: duration.offset,
+      repo: appName,
+      name: id,
+      labels,
+      step: duration.step,
+      offset: duration.offset,
     },
     pollInterval: 1000 * 30,
     fetchPolicy: 'no-cache',
@@ -48,23 +56,36 @@ export default function Dashboard() {
     fetchPolicy: 'cache-and-network',
   })
 
-  useEffect(() => setBreadcrumbs([
-    { text: 'apps', url: '/' },
-    { text: appName, url: `/apps/${appName}` },
-    { text: 'dashboards', url: `/apps/${appName}/dashboards` },
-    { text: data?.dashboard?.spec?.name, url: `/apps/${appName}/dashboards/${data?.dashboard?.id}` },
-  ]), [appName, data, setBreadcrumbs])
+  useEffect(
+    () =>
+      setBreadcrumbs([
+        { text: 'apps', url: '/' },
+        { text: appName, url: `/apps/${appName}` },
+        { text: 'dashboards', url: `/apps/${appName}/dashboards` },
+        {
+          text: data?.dashboard?.spec?.name,
+          url: `/apps/${appName}/dashboards/${data?.dashboard?.id}`,
+        },
+      ]),
+    [appName, data, setBreadcrumbs]
+  )
 
   useEffect(() => setSelectedKey(data?.dashboard?.spec?.name || ''), [data])
 
   useEffect(() => {
     if (!labelMap && data && data.dashboard) {
-      const map = data.dashboard.spec.labels.reduce((acc, { name, values }) => ({ ...acc, [name]: values[0] }), {})
+      const map = data.dashboard.spec.labels.reduce(
+        (acc, { name, values }) => ({ ...acc, [name]: values[0] }),
+        {}
+      )
 
       setLabelMap(map)
     }
   }, [data, labelMap, setLabelMap])
-  const setLabel = useCallback((label, value) => setLabelMap({ ...labelMap, [label]: value }), [labelMap, setLabelMap])
+  const setLabel = useCallback(
+    (label, value) => setLabelMap({ ...labelMap, [label]: value }),
+    [labelMap, setLabelMap]
+  )
 
   if (!data || !dashboardsData) return <LoadingIndicator />
 
@@ -72,44 +93,49 @@ export default function Dashboard() {
   const { dashboards } = dashboardsData
 
   setDashboard(dashboard)
-  const filteredLabels = dashboard.spec.labels.filter(({ values }) => values.length > 0)
+  const filteredLabels = dashboard.spec.labels.filter(
+    ({ values }) => values.length > 0
+  )
 
   return (
-    <ScrollablePage heading={(
-      <div>
-        <Select
-          aria-label="dashboards"
-          selectedKey={selectedKey}
-          onSelectionChange={id => navigate(`/apps/${appName}/dashboards/${id}`)}
-          triggerButton={(
-            <PageTitleSelectButton
-              title="Dashboards"
-              label={selectedKey}
-            />
-          )}
-          width={240}
-        >
-          {dashboards.map(({ id, spec: { name } }) => (
-            <ListBoxItem
-              key={id}
-              label={name}
-              textValue={id}
-            />
-          ))}
-        </Select>
-      </div>
-    )}
+    <ScrollablePage
+      heading={
+        <div>
+          <Select
+            aria-label="dashboards"
+            selectedKey={selectedKey}
+            onSelectionChange={(id) =>
+              navigate(`/apps/${appName}/dashboards/${id}`)
+            }
+            triggerButton={
+              <PageTitleSelectButton
+                title="Dashboards"
+                label={selectedKey}
+              />
+            }
+            width={240}
+          >
+            {dashboards.map(({ id, spec: { name } }) => (
+              <ListBoxItem
+                key={id}
+                label={name}
+                textValue={id}
+              />
+            ))}
+          </Select>
+        </div>
+      }
     >
       <Flex
         direction="row"
         gap="medium"
         wrap="wrap"
       >
-        {filteredLabels.map(label => (
+        {filteredLabels.map((label) => (
           <LabelSelect
             key={`${label.name}:${id}:${appName}`}
             label={label}
-            onSelect={value => setLabel(label.name, value)}
+            onSelect={(value) => setLabel(label.name, value)}
           />
         ))}
         <Flex grow={1} />
@@ -120,7 +146,7 @@ export default function Dashboard() {
       </Flex>
       <Card marginVertical="large">
         <Flex wrap="wrap">
-          {dashboard.spec.graphs.map(graph => (
+          {dashboard.spec.graphs.map((graph) => (
             <DashboardGraph
               key={graph.name}
               graph={graph}

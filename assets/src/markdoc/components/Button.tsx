@@ -1,6 +1,9 @@
 import type { ComponentProps, ReactNode } from 'react'
 
-import { Button as PluralButton, useNavigationContext } from '@pluralsh/design-system'
+import {
+  Button as PluralButton,
+  useNavigationContext,
+} from '@pluralsh/design-system'
 
 import * as icons from '@pluralsh/design-system/dist/icons'
 import styled from 'styled-components'
@@ -50,13 +53,13 @@ function Button({
         href={href}
         {...(isExternalUrl(href)
           ? {
-            as: 'a',
-            target: '_blank',
-            rel: 'nofollow noopener',
-          }
+              as: 'a',
+              target: '_blank',
+              rel: 'nofollow noopener',
+            }
           : {
-            as: LinkComponent,
-          })}
+              as: LinkComponent,
+            })}
       >
         {children}
       </PluralButton>

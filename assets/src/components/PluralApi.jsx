@@ -17,9 +17,12 @@ export function PluralApi({ children }) {
   const { client, socket } = useMemo(() => {
     if (API_CACHE[token]) return API_CACHE[token]
     const res = buildClient(
-      PLURAL_GQL, PLURAL_WSS, () => {
+      PLURAL_GQL,
+      PLURAL_WSS,
+      () => {
         window.location = '/'
-      }, () => token
+      },
+      () => token
     )
 
     API_CACHE[token] = res
@@ -31,9 +34,7 @@ export function PluralApi({ children }) {
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     <PluralApiContext.Provider value={{ socket }}>
       <ApolloProvider client={client}>
-        <CurrentUser>
-          {children}
-        </CurrentUser>
+        <CurrentUser>{children}</CurrentUser>
       </ApolloProvider>
     </PluralApiContext.Provider>
   )

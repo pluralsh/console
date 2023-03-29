@@ -3,7 +3,7 @@ import { Tag } from '@markdoc/markdoc'
 import { FigCaption, Figure } from '../components/Figure'
 import unwrapParagraphs from '../utils/unwrapParagraphs'
 
-const makeBareImage = node => {
+const makeBareImage = (node) => {
   if (node?.name !== 'Image') {
     return node
   }
@@ -25,7 +25,7 @@ export const figure = {
   transform(node, config) {
     const children = node
       .transformChildren(config)
-      .map(child => {
+      .map((child) => {
         if (child?.name === 'Paragraph') {
           return child.children.map(makeBareImage)
         }

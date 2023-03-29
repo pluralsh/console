@@ -9,21 +9,28 @@ import { Dispatch, useEffect } from 'react'
 import Notification from './Notification'
 import { NOTIFS_SUB } from './queries'
 
-export function NotificationsPanel({ closePanel, all }: {closePanel: Dispatch<void>, all: boolean}) {
+export function NotificationsPanel({
+  closePanel,
+  all,
+}: {
+  closePanel: Dispatch<void>
+  all: boolean
+}) {
   const client = useApolloClient()
 
   useSubscription(NOTIFS_SUB, {
     onSubscriptionData: () => {
       updateCache(client, {
         query: ME_Q,
-        update: ({ me, ...rest }) => ({ ...rest, me: { ...me, unreadNotifications: me.unreadNotifications + 1 } }),
+        update: ({ me, ...rest }) => ({
+          ...rest,
+          me: { ...me, unreadNotifications: me.unreadNotifications + 1 },
+        }),
       })
     },
   })
 
-  const {
-    data, loading, refetch, fetchMore,
-  } = useQuery(NOTIFICATIONS_Q, {
+  const { data, loading, refetch, fetchMore } = useQuery(NOTIFICATIONS_Q, {
     variables: { all },
     fetchPolicy: 'cache-and-network',
   })
@@ -51,7 +58,8 @@ export function NotificationsPanel({ closePanel, all }: {closePanel: Dispatch<vo
         loadMore={fetchMore}
         loadMoreArgs={{
           variables: { cursor: pageInfo.endCursor },
-          updateQuery: (prev, { fetchMoreResult: { notifications } }) => extendConnection(prev, notifications, 'notifications'),
+          updateQuery: (prev, { fetchMoreResult: { notifications } }) =>
+            extendConnection(prev, notifications, 'notifications'),
         }}
         // Allow for scrolling in a flexbox layout
         flexGrow={1}
@@ -68,4 +76,3 @@ export function NotificationsPanel({ closePanel, all }: {closePanel: Dispatch<vo
     </Flex>
   )
 }
-

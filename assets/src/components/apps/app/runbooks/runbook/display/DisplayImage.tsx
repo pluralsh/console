@@ -1,7 +1,5 @@
 export function DisplayImage({
-  attributes: {
-    url, width = 250, height = 250, ...rest
-  },
+  attributes: { url, width = 250, height = 250, ...rest },
 }) {
   return (
     <img

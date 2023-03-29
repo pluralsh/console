@@ -1,9 +1,4 @@
-import {
-  Key,
-  useContext,
-  useMemo,
-  useState,
-} from 'react'
+import { Key, useContext, useMemo, useState } from 'react'
 import { ResponsiveLine } from '@nivo/line'
 import moment from 'moment'
 import { last } from 'lodash'
@@ -150,8 +145,10 @@ export function Graph({
         tickRotation: tickRotation || 45,
         tickSize: 0,
         legend: hasData
-            /* @ts-expect-error */
-          ? `${dateFormat(data[0].data[0].x)} — ${dateFormat(last(data?.[0]?.data).x)}`
+          ? /* @ts-expect-error */
+            `${dateFormat(data[0].data[0].x)} — ${dateFormat(
+              last(data?.[0]?.data).x
+            )}`
           : null,
         legendOffset: 70,
         legendPosition: 'middle',

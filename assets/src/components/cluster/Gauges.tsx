@@ -48,50 +48,52 @@ export function ResourceGauge({
   const hoverLabel = type === 'cpu' ? 'CPU' : 'Memory'
   const barLabel = type === 'cpu' ? 'CPU' : 'Mem.'
 
-  const data = useMemo(() => [
-    {
-      id: `${barLabel} usage`,
-      data: [
-        {
-          x: `${hoverLabel} used`,
-          y: used,
-        },
-        {
-          x: `${hoverLabel} available`,
-          y: total - used,
-        },
-      ],
-    },
-    {
-      id: `${barLabel} lim.`,
-      data: [
-        {
-          x: `${hoverLabel} limits`,
-          y: limits,
-        },
-      ],
-    },
-    {
-      id: `${barLabel} req.`,
-      data: [
-        {
-          x: `${hoverLabel} requests`,
-          y: requests,
-        },
-      ],
-    },
-  ],
-  [barLabel, hoverLabel, limits, requests, total, used])
+  const data = useMemo(
+    () => [
+      {
+        id: `${barLabel} usage`,
+        data: [
+          {
+            x: `${hoverLabel} used`,
+            y: used,
+          },
+          {
+            x: `${hoverLabel} available`,
+            y: total - used,
+          },
+        ],
+      },
+      {
+        id: `${barLabel} lim.`,
+        data: [
+          {
+            x: `${hoverLabel} limits`,
+            y: limits,
+          },
+        ],
+      },
+      {
+        id: `${barLabel} req.`,
+        data: [
+          {
+            x: `${hoverLabel} requests`,
+            y: requests,
+          },
+        ],
+      },
+    ],
+    [barLabel, hoverLabel, limits, requests, total, used]
+  )
 
   return (
     <RadialBarChart
       data={data}
       valueFormat={
         type === 'cpu'
-          ? val => cpuFmt(roundToTwoPlaces(val))
+          ? (val) => cpuFmt(roundToTwoPlaces(val))
           : type === 'memory'
-            ? val => filesize(roundToTwoPlaces(val)) as string
-            : undefined
+          ? (val) => filesize(roundToTwoPlaces(val)) as string
+          : undefined
       }
       centerVal={`${Math.round((used / total) * 100)}%`}
       centerLabel="used"

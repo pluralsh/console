@@ -62,9 +62,7 @@ export default function Service() {
             >
               Ports
             </H3>
-            {ports.map(({
-              name, protocol, port, targetPort,
-            }, i) => (
+            {ports.map(({ name, protocol, port, targetPort }, i) => (
               <PropWide
                 key={i}
                 gap="small"
@@ -72,7 +70,9 @@ export default function Service() {
                 title={name || '-'}
               >
                 <span>{protocol}</span>
-                <span>{port} {'->'} {targetPort}</span>
+                <span>
+                  {port} {'->'} {targetPort}
+                </span>
               </PropWide>
             ))}
           </>

@@ -1,12 +1,6 @@
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import { SubTab, TabList } from '@pluralsh/design-system'
-import {
-  Key,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { Key, useContext, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { APPLICATION_Q } from 'components/graphql/plural'
 import { Flex, Span } from 'honorable'
@@ -32,25 +26,40 @@ export default function Configuration() {
     onError: console.error,
   })
 
-  useEffect(() => setBreadcrumbs([
-    { text: 'apps', url: '/' },
-    { text: appName, url: `/apps/${appName}` },
-    { text: 'configuration', url: `/apps/${appName}/config` },
-  ]), [appName, setBreadcrumbs])
+  useEffect(
+    () =>
+      setBreadcrumbs([
+        { text: 'apps', url: '/' },
+        { text: appName, url: `/apps/${appName}` },
+        { text: 'configuration', url: `/apps/${appName}/config` },
+      ]),
+    [appName, setBreadcrumbs]
+  )
 
-  if (error) return <ScrollablePage heading="Configuration">Cannot access configuration for this app.</ScrollablePage>
+  if (error)
+    return (
+      <ScrollablePage heading="Configuration">
+        Cannot access configuration for this app.
+      </ScrollablePage>
+    )
 
   if (!data) return <LoadingIndicator />
 
   const { application, configurationOverlays } = data
-  const overlays = configurationOverlays?.map(({ metadata, ...rest }) => {
-    const labels = metadata.labels.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {})
+  const overlays = configurationOverlays
+    ?.map(({ metadata, ...rest }) => {
+      const labels = metadata.labels.reduce(
+        (acc, { name, value }) => ({ ...acc, [name]: value }),
+        {}
+      )
 
-    return { ...rest, metadata: { ...metadata, labels } }
-  }).filter(({ metadata: { labels } }) => !labels[COMPONENT_LABEL])
-  const views = overlays?.length > 0
-    ? Object.keys(ConfigType)
-    : Object.keys(ConfigType).filter(key => key !== ConfigType.SETTINGS)
+      return { ...rest, metadata: { ...metadata, labels } }
+    })
+    .filter(({ metadata: { labels } }) => !labels[COMPONENT_LABEL])
+  const views =
+    overlays?.length > 0
+      ? Object.keys(ConfigType)
+      : Object.keys(ConfigType).filter((key) => key !== ConfigType.SETTINGS)
 
   if (!view) setView(views[0])
 
@@ -58,7 +67,7 @@ export default function Configuration() {
     <ScrollablePage
       scrollable={view === ConfigType.SETTINGS}
       heading="Configuration"
-      headingContent={(
+      headingContent={
         <>
           <Flex grow={1} />
           <TabList
@@ -71,7 +80,7 @@ export default function Configuration() {
               onSelectionChange: setView,
             }}
           >
-            {views.map(view => (
+            {views.map((view) => (
               <SubTab
                 key={view}
                 textValue={view}
@@ -86,7 +95,7 @@ export default function Configuration() {
             ))}
           </TabList>
         </>
-      )}
+      }
     >
       {view === ConfigType.SETTINGS && (
         <ConfigurationSettings

@@ -6,13 +6,7 @@ import {
   Select,
   SelectButton,
 } from '@pluralsh/design-system'
-import {
-  Key,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { Key, useContext, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
 
@@ -38,12 +32,12 @@ function FilterFooter({ allSelected = true, ...props }) {
 
   return (
     <FilterFooterInner
-      leftContent={(
+      leftContent={
         <ComponentsIcon
           size={16}
           color={theme.colors['text-primary-accent'] as string}
         />
-      )}
+      }
       {...props}
     >
       {allSelected ? 'Clear all' : 'Select all'}
@@ -71,10 +65,10 @@ const ORDER = {
   job: 7,
 }
 
-const kindInd = kind => ORDER[kind.toLowerCase()] || 7
+const kindInd = (kind) => ORDER[kind.toLowerCase()] || 7
 
 function orderBy({ kind: k1, name: n1 }, { kind: k2, name: n2 }) {
-  if (k1 === k2) return (n1 > n2) ? 1 : ((n1 === n2) ? 0 : -1)
+  if (k1 === k2) return n1 > n2 ? 1 : n1 === n2 ? 0 : -1
 
   return kindInd(k1) - kindInd(k2)
 }
@@ -83,25 +77,38 @@ export default function Components() {
   const { appName } = useParams()
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { applications } = useContext<any>(InstallationContext)
-  const currentApp = applications.find(app => app.name === appName)
+  const currentApp = applications.find((app) => app.name === appName)
 
-  useEffect(() => setBreadcrumbs([
-    { text: 'apps', url: '/' },
-    { text: appName, url: `/apps/${appName}` },
-    { text: 'components', url: `/apps/${appName}/components` },
-  ]),
-  [appName, setBreadcrumbs])
+  useEffect(
+    () =>
+      setBreadcrumbs([
+        { text: 'apps', url: '/' },
+        { text: appName, url: `/apps/${appName}` },
+        { text: 'components', url: `/apps/${appName}/components` },
+      ]),
+    [appName, setBreadcrumbs]
+  )
 
-  const componentKinds = Array.from((currentApp?.status?.components as ComponentT[])?.reduce((kinds, component) => {
-    kinds.add(component.kind)
+  const componentKinds = Array.from(
+    (currentApp?.status?.components as ComponentT[])?.reduce(
+      (kinds, component) => {
+        kinds.add(component.kind)
 
-    return kinds
-  },
-  new Set<string>([]))).sort()
-  const [selectedKinds, setSelectedKinds] = useState<Set<Key>>(new Set(componentKinds))
-  const filteredComponents = useMemo(() => (
-    currentApp?.status?.components.filter(comp => selectedKinds.has(comp.kind)).sort(orderBy)
-  ), [currentApp, selectedKinds])
+        return kinds
+      },
+      new Set<string>([])
+    )
+  ).sort()
+  const [selectedKinds, setSelectedKinds] = useState<Set<Key>>(
+    new Set(componentKinds)
+  )
+  const filteredComponents = useMemo(
+    () =>
+      currentApp?.status?.components
+        .filter((comp) => selectedKinds.has(comp.kind))
+        .sort(orderBy),
+    [currentApp, selectedKinds]
+  )
   const sortedSelectedKinds = Array.from(selectedKinds).sort()
   const allSelected = sortedSelectedKinds.length >= componentKinds.length
 
@@ -109,33 +116,37 @@ export default function Components() {
     <ScrollablePage
       scrollable
       heading="Components"
-      headingContent={(
+      headingContent={
         <Select
           label="All components"
-          triggerButton={(
+          triggerButton={
             <FilterTrigger>
               {allSelected
                 ? 'All components'
                 : sortedSelectedKinds.length === 0
-                  ? 'Select types'
-                  : sortedSelectedKinds.join(', ')}
+                ? 'Select types'
+                : sortedSelectedKinds.join(', ')}
             </FilterTrigger>
-          )}
+          }
           selectionMode="multiple"
           selectedKeys={selectedKinds}
-          onSelectionChange={keys => {
+          onSelectionChange={(keys) => {
             setSelectedKinds(keys)
           }}
           placement="right"
-          dropdownFooterFixed={(
+          dropdownFooterFixed={
             <FilterFooter
               allSelected={allSelected}
-              onClick={() => setSelectedKinds(new Set(allSelected ? undefined : componentKinds))}
+              onClick={() =>
+                setSelectedKinds(
+                  new Set(allSelected ? undefined : componentKinds)
+                )
+              }
             />
-          )}
+          }
           maxHeight={300}
         >
-          {componentKinds.map(kind => (
+          {componentKinds.map((kind) => (
             <ListBoxItem
               key={kind}
               leftContent={<ComponentIcon kind={kind} />}
@@ -143,7 +154,7 @@ export default function Components() {
             />
           ))}
         </Select>
-      )}
+      }
     >
       {(filteredComponents || []).length === 0 ? (
         <EmptyState message="No components match your selection" />

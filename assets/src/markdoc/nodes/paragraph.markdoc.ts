@@ -19,8 +19,8 @@ export const paragraph = {
     // Unwrap images from paragraphs to avoid react rehydration errors
     // Since <figures> aren't "supposed" to be in <p> tags
     if (containsImage(children)) {
-      const newChildren:any[] = []
-      let childAcc:any[] = []
+      const newChildren: any[] = []
+      let childAcc: any[] = []
 
       for (const c of children) {
         if (c?.name === 'Image' || c?.name === 'Paragraph') {
@@ -29,8 +29,7 @@ export const paragraph = {
             childAcc = []
           }
           newChildren.push(c)
-        }
-        else if (!(typeof c === 'string' && !c.trim())) {
+        } else if (!(typeof c === 'string' && !c.trim())) {
           childAcc.push(c)
         }
       }

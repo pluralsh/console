@@ -2,12 +2,12 @@ import { Flex } from 'honorable'
 import { Chip } from '@pluralsh/design-system'
 
 interface ComponentProgressProps {
-    app: any;
-    label?: boolean;
-    suffix?: string;
+  app: any
+  label?: boolean
+  suffix?: string
 }
 
-function ComponentProgress({ app, label, suffix } : ComponentProgressProps) {
+function ComponentProgress({ app, label, suffix }: ComponentProgressProps) {
   const componentsReady = app?.status?.componentsReady
   const split = componentsReady?.split('/')
   const ready = split?.length > 1 && split[0] === split[1]

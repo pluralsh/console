@@ -17,17 +17,17 @@ const FETCH_MARGIN = 30
 const COLUMN_HELPER = createColumnHelper<any>()
 
 const columns = [
-  COLUMN_HELPER.accessor(audit => audit, {
+  COLUMN_HELPER.accessor((audit) => audit, {
     id: 'action',
     cell: (audit: any) => <AuditAction audit={audit.getValue()} />,
     header: 'Action / Type',
   }),
-  COLUMN_HELPER.accessor(audit => audit.repository, {
+  COLUMN_HELPER.accessor((audit) => audit.repository, {
     id: 'repository',
     cell: (repository: any) => repository.getValue(),
     header: 'Application',
   }),
-  COLUMN_HELPER.accessor(audit => audit.actor, {
+  COLUMN_HELPER.accessor((audit) => audit.actor, {
     id: 'actor',
     cell: (actor: any) => {
       const a = actor.getValue()
@@ -49,12 +49,12 @@ const columns = [
     },
     header: 'Creator',
   }),
-  COLUMN_HELPER.accessor(audit => audit.insertedAt, {
+  COLUMN_HELPER.accessor((audit) => audit.insertedAt, {
     id: 'insertedAt',
     cell: (insertedAt: any) => <Date date={insertedAt.getValue()} />,
     header: 'Timestamp',
   }),
-  COLUMN_HELPER.accessor(audit => audit, {
+  COLUMN_HELPER.accessor((audit) => audit, {
     id: 'locationIp',
     cell: (audit: any) => {
       const a = audit.getValue()
@@ -72,24 +72,34 @@ const columns = [
 ]
 
 export default function AuditsTable() {
-  const { data, loading, fetchMore } = useQuery(AUDITS_Q, { fetchPolicy: 'cache-and-network' })
+  const { data, loading, fetchMore } = useQuery(AUDITS_Q, {
+    fetchPolicy: 'cache-and-network',
+  })
   const pageInfo = data?.audits?.pageInfo
   const edges = data?.audits?.edges
   const audits = useMemo(() => edges?.map(({ node }) => node), [edges])
 
-  const fetchMoreOnBottomReached = useCallback((element?: HTMLDivElement | undefined) => {
-    if (!element) return
+  const fetchMoreOnBottomReached = useCallback(
+    (element?: HTMLDivElement | undefined) => {
+      if (!element) return
 
-    const { scrollHeight, scrollTop, clientHeight } = element
+      const { scrollHeight, scrollTop, clientHeight } = element
 
-        // Once scrolled within FETCH_MARGIN of the bottom of the table, fetch more data if there is any.
-    if (scrollHeight - scrollTop - clientHeight < FETCH_MARGIN && !loading && pageInfo.hasNextPage) {
-      fetchMore({
-        variables: { cursor: pageInfo.endCursor },
-        updateQuery: (prev, { fetchMoreResult: { audits } }) => extendConnection(prev, audits, 'audits'),
-      })
-    }
-  }, [fetchMore, loading, pageInfo])
+      // Once scrolled within FETCH_MARGIN of the bottom of the table, fetch more data if there is any.
+      if (
+        scrollHeight - scrollTop - clientHeight < FETCH_MARGIN &&
+        !loading &&
+        pageInfo.hasNextPage
+      ) {
+        fetchMore({
+          variables: { cursor: pageInfo.endCursor },
+          updateQuery: (prev, { fetchMoreResult: { audits } }) =>
+            extendConnection(prev, audits, 'audits'),
+        })
+      }
+    },
+    [fetchMore, loading, pageInfo]
+  )
 
   if (!data) return <LoadingIndicator />
 
@@ -98,7 +108,7 @@ export default function AuditsTable() {
       <Table
         data={audits}
         columns={columns}
-        onScrollCapture={e => fetchMoreOnBottomReached(e?.target)}
+        onScrollCapture={(e) => fetchMoreOnBottomReached(e?.target)}
         maxHeight="100%"
       />
     </FullHeightTableWrap>

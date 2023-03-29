@@ -1,4 +1,4 @@
-export const ignoreEvent = (e:Event) => {
+export const ignoreEvent = (e: Event) => {
   e.stopPropagation()
   e.preventDefault()
 }

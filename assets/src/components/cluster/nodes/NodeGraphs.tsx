@@ -29,10 +29,12 @@ export function NodeGraphs({
     return getPodResources(allContainers)
   }, [pods])
 
-  const localize = useCallback(metric => metric.replaceAll('{instance}', name),
-    [name])
-  const capacity
-    = (status?.capacity as unknown as { cpu?: string; memory?: string }) ?? {}
+  const localize = useCallback(
+    (metric) => metric.replaceAll('{instance}', name),
+    [name]
+  )
+  const capacity =
+    (status?.capacity as unknown as { cpu?: string; memory?: string }) ?? {}
 
   const chartData = useMemo(() => {
     const cpuTotal = cpuParser(capacity.cpu)
@@ -42,20 +44,20 @@ export function NodeGraphs({
     const memUsed = memoryParser(usage?.memory) ?? undefined
 
     return {
-      cpu: cpuUsed !== undefined
-        && cpuTotal !== undefined && {
-        used: cpuUsed,
-        total: cpuTotal,
-        remainder: cpuTotal - cpuUsed || 0,
-        ...cpuReservations,
-      },
-      memory: memUsed !== undefined
-        && memTotal !== undefined && {
-        used: memUsed,
-        total: memTotal,
-        remainder: memTotal - memUsed,
-        ...memoryReservations,
-      },
+      cpu: cpuUsed !== undefined &&
+        cpuTotal !== undefined && {
+          used: cpuUsed,
+          total: cpuTotal,
+          remainder: cpuTotal - cpuUsed || 0,
+          ...cpuReservations,
+        },
+      memory: memUsed !== undefined &&
+        memTotal !== undefined && {
+          used: memUsed,
+          total: memTotal,
+          remainder: memTotal - memUsed,
+          ...memoryReservations,
+        },
     }
   }, [
     capacity.cpu,

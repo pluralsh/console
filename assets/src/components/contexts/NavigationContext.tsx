@@ -1,5 +1,12 @@
-import { Link as ReactRouterLink, useLocation, useNavigate } from 'react-router-dom'
-import { type LinkProps, NavigationContextProvider } from '@pluralsh/design-system'
+import {
+  Link as ReactRouterLink,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom'
+import {
+  type LinkProps,
+  NavigationContextProvider,
+} from '@pluralsh/design-system'
 import { ReactNode } from 'react'
 
 function Link({ href, ...props }: LinkProps) {
@@ -30,7 +37,7 @@ export default function ConsoleNavContextProvider({
         useNavigate: () => {
           const navigate = useNavigate()
 
-          return loc => {
+          return (loc) => {
             navigate(loc ?? '')
           }
         },

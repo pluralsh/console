@@ -3,10 +3,11 @@ import { Flex, H3 } from 'honorable'
 import { LabelPair, Maybe } from 'generated/graphql'
 
 export function LabelPairsSection({
-  vals, title,
+  vals,
+  title,
 }: {
-  vals?: Maybe<Maybe<LabelPair>[]>;
-  title: string;
+  vals?: Maybe<Maybe<LabelPair>[]>
+  title: string
 }) {
   return (
     <div>
@@ -23,14 +24,14 @@ export function LabelPairsSection({
       >
         {!vals || vals.length === 0
           ? `There are no ${title.toLowerCase()}.`
-          : vals.map((pair, i) => (
-            pair
-            && (
-              <Chip key={i}>
-                {pair.name && `${pair.name}: `} {pair.value}
-              </Chip>
-            )
-          ))}
+          : vals.map(
+              (pair, i) =>
+                pair && (
+                  <Chip key={i}>
+                    {pair.name && `${pair.name}: `} {pair.value}
+                  </Chip>
+                )
+            )}
       </Flex>
     </div>
   )

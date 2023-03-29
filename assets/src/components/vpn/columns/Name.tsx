@@ -5,7 +5,7 @@ import { TableText } from '../../cluster/TableElements'
 
 import { ColumnBuilder, VPNClientRow } from './types'
 
-const ColumnName = ColumnBuilder.accessor(row => row.name, {
+const ColumnName = ColumnBuilder.accessor((row) => row.name, {
   id: 'name',
   header: 'Name',
   enableGlobalFilter: true,
@@ -13,7 +13,9 @@ const ColumnName = ColumnBuilder.accessor(row => row.name, {
   cell,
 })
 
-function cell(props: CellContext<VPNClientRow, string | undefined>): JSX.Element {
+function cell(
+  props: CellContext<VPNClientRow, string | undefined>
+): JSX.Element {
   const name = props.getValue()
 
   return (

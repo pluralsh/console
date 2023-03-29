@@ -5,7 +5,7 @@ const COOKIE_LISTENER_NAME = 'cookiePrefsChanged'
 
 const CONSENT_KEYS = ['statistics', 'marketing'] as const
 
-export type ConsentType = typeof CONSENT_KEYS[number]
+export type ConsentType = (typeof CONSENT_KEYS)[number]
 export type Consent = Record<ConsentType, boolean>
 export type SetConsent = Partial<Consent> & { all?: boolean }
 export type CookiePrefs = {
@@ -28,7 +28,9 @@ const setConsent = (consent: SetConsent) => {
   nextPrefs.consent = mergeConsent(originalPrefs.consent, consent)
 
   localStorage.setItem(COOKIE_PREF_STORAGE_KEY, JSON.stringify(nextPrefs))
-  window.dispatchEvent(new CustomEvent<CookiePrefs>(COOKIE_LISTENER_NAME, { detail: getPrefs() }))
+  window.dispatchEvent(
+    new CustomEvent<CookiePrefs>(COOKIE_LISTENER_NAME, { detail: getPrefs() })
+  )
 }
 
 const getPrefs = () => {
@@ -37,8 +39,7 @@ const getPrefs = () => {
 
   try {
     parsedPrefs = storedPrefs ? JSON.parse(storedPrefs) : {}
-  }
-  catch (e) {
+  } catch (e) {
     parsedPrefs = {}
   }
 
@@ -65,8 +66,8 @@ const mergeConsent = (prev: Partial<Consent>, next: unknown) => {
   for (const key of CONSENT_KEYS) {
     const nextVal = nextConsent[key]
 
-    newConsent[key]
-      = typeof nextVal === 'boolean'
+    newConsent[key] =
+      typeof nextVal === 'boolean'
         ? nextVal
         : prev[key] ?? DEFAULT_PREFS.consent[key]
   }
@@ -74,14 +75,16 @@ const mergeConsent = (prev: Partial<Consent>, next: unknown) => {
   return newConsent
 }
 
-function addPrefChangeListener(listener: (e: CustomEvent<CookiePrefs>) => void) {
+function addPrefChangeListener(
+  listener: (e: CustomEvent<CookiePrefs>) => void
+) {
   window.addEventListener(COOKIE_LISTENER_NAME, listener as EventListener)
 }
 
-function removePrefChangeListener(listener: (e: CustomEvent<CookiePrefs>) => void) {
+function removePrefChangeListener(
+  listener: (e: CustomEvent<CookiePrefs>) => void
+) {
   window.removeEventListener(COOKIE_LISTENER_NAME, listener as EventListener)
 }
 
-export {
-  setConsent, getPrefs, addPrefChangeListener, removePrefChangeListener,
-}
+export { setConsent, getPrefs, addPrefChangeListener, removePrefChangeListener }

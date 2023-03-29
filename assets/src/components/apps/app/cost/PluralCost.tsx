@@ -23,7 +23,7 @@ export default function PluralCost({ license }) {
       </Text>
       {plural.features && (
         <Box gap="xsmall">
-          {plural.features.map(feature => (
+          {plural.features.map((feature) => (
             <PlanFeature
               key={feature.name}
               feature={feature}
@@ -49,7 +49,9 @@ function PlanFeature({ feature: { name, description } }) {
       />
       <Box>
         <Text size="small">{name}</Text>
-        <Text size="small"><i>{description}</i></Text>
+        <Text size="small">
+          <i>{description}</i>
+        </Text>
       </Box>
     </Box>
   )
@@ -80,4 +82,3 @@ function PlanLimits({ limits }) {
     </Box>
   )
 }
-

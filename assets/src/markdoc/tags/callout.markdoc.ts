@@ -24,10 +24,10 @@ export const callout = {
     const children = node.transformChildren(config)
     const attributes = node.transformAttributes(config)
 
-    const finalChildren = children.filter(child => child?.name !== 'Cta')
+    const finalChildren = children.filter((child) => child?.name !== 'Cta')
     const ctas = children
-      .filter(child => child?.name === 'Cta')
-      .map(cta => ({
+      .filter((child) => child?.name === 'Cta')
+      .map((cta) => ({
         title: cta?.attributes?.title,
         href: cta?.attributes?.href,
       }))

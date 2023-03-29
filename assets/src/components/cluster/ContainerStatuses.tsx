@@ -47,21 +47,26 @@ export const readinessToTooltipColor = {
   [Readiness.Complete]: 'text-xlight',
 } as const satisfies Record<ReadinessT, string>
 
-export function ContainerStatuses({ statuses = [] }: {statuses: ContainerStatus[]}) {
+export function ContainerStatuses({
+  statuses = [],
+}: {
+  statuses: ContainerStatus[]
+}) {
   return (
     <Flex gap="xxxsmall">
       {statuses.map(({ name, readiness }) => (
-        <Tooltip label={(
-          <>
-            <span>{name}:&nbsp;</span>
-            <Span
-              color={readinessToTooltipColor[readiness]}
-              fontWeight={600}
-            >
-              {readinessToContainerLabel[readiness]}
-            </Span>
-          </>
-        )}
+        <Tooltip
+          label={
+            <>
+              <span>{name}:&nbsp;</span>
+              <Span
+                color={readinessToTooltipColor[readiness]}
+                fontWeight={600}
+              >
+                {readinessToContainerLabel[readiness]}
+              </Span>
+            </>
+          }
         >
           <Div
             borderRadius={3}

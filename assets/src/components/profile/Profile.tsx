@@ -40,9 +40,11 @@ export function Profile() {
             width="100%"
             value={email}
             onChange={({ target: { value } }) => setEmail(value)}
-            validation={(email: string): ValidationResponse => (isValidEmail(email)
-              ? { error: false, message: '' }
-              : { error: true, message: 'Invalid email address' })}
+            validation={(email: string): ValidationResponse =>
+              isValidEmail(email)
+                ? { error: false, message: '' }
+                : { error: true, message: 'Invalid email address' }
+            }
           />
         </Box>
         <Flex

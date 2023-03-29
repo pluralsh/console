@@ -8,4 +8,5 @@ export const Level = {
   FATAL: 'f',
 }
 
-export const ts = timestamp => moment(new Date(Math.round(timestamp / (1000 * 1000)))).format()
+export const ts = (timestamp) =>
+  moment(new Date(Math.round(timestamp / (1000 * 1000)))).format()

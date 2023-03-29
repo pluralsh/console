@@ -1,16 +1,6 @@
-import {
-  useCallback,
-  useContext,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useContext, useRef, useState } from 'react'
 import { Box, Drop, Text } from 'grommet'
-import {
-  Edit,
-  Emoji,
-  TooltipContent,
-  Trash,
-} from 'forge-core'
+import { Edit, Emoji, TooltipContent, Trash } from 'forge-core'
 
 import { useMutation } from '@apollo/client'
 
@@ -34,12 +24,13 @@ const CONTROL_ATTRS = {
 }
 const PAD = '2px'
 const OUTER = {
-  height: SIZE, width: SIZE, align: 'center', justify: 'center',
+  height: SIZE,
+  width: SIZE,
+  align: 'center',
+  justify: 'center',
 }
 
-export function Control({
-  children, tooltip, pad, closed, ...rest
-}) {
+export function Control({ children, tooltip, pad, closed, ...rest }) {
   const ref = useRef()
   const [hover, setHover] = useState(false)
 
@@ -67,16 +58,19 @@ export function Control({
   )
 }
 
-export function Reaction({
-  message, setHover, align, width, label, ...props
-}) {
+export function Reaction({ message, setHover, align, width, label, ...props }) {
   const ref = useRef()
   const [open, setOpen] = useState(false)
-  const toggleOpen = useCallback(value => {
-    if (setHover) setHover(value)
-    setOpen(value)
-  }, [setOpen, setHover])
-  const [mutation] = useMutation(CREATE_REACTION, { variables: { id: message.id } })
+  const toggleOpen = useCallback(
+    (value) => {
+      if (setHover) setHover(value)
+      setOpen(value)
+    },
+    [setOpen, setHover]
+  )
+  const [mutation] = useMutation(CREATE_REACTION, {
+    variables: { id: message.id },
+  })
 
   return (
     <>
@@ -91,7 +85,7 @@ export function Reaction({
           {...props}
         >
           <Emoji size="small" />
-          {label && (<Text size="xsmall">{label}</Text>)}
+          {label && <Text size="xsmall">{label}</Text>}
         </Box>
       </Control>
       {open && (
@@ -101,9 +95,10 @@ export function Reaction({
           onClickOutside={() => toggleOpen(false)}
           onEsc={() => toggleOpen(false)}
         >
-          <EmojiPicker onSelect={emoji => {
-            mutation({ variables: { name: emoji.id } })
-          }}
+          <EmojiPicker
+            onSelect={(emoji) => {
+              mutation({ variables: { name: emoji.id } })
+            }}
           />
         </Drop>
       )}
@@ -128,21 +123,23 @@ function Delete({ message }) {
   const { incidentId } = useParams()
   const [mutation] = useMutation(DELETE_MESSAGE, {
     variables: { id: message.id },
-    update: cache => updateCache(cache, {
-      query: INCIDENT_Q,
-      variables: { id: incidentId },
-      update: ({ incident: { messages, ...incident }, ...prev }) => (
-        {
+    update: (cache) =>
+      updateCache(cache, {
+        query: INCIDENT_Q,
+        variables: { id: incidentId },
+        update: ({ incident: { messages, ...incident }, ...prev }) => ({
           ...prev,
           incident: {
             ...incident,
             messages: {
-              ...messages, edges: messages.edges.filter(({ node }) => node.id !== message.id),
+              ...messages,
+              edges: messages.edges.filter(
+                ({ node }) => node.id !== message.id
+              ),
             },
           },
-        }
-      ),
-    }),
+        }),
+      }),
   })
 
   return (

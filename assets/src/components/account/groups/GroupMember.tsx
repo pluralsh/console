@@ -1,16 +1,19 @@
 import { IconFrame, TrashCanIcon } from '@pluralsh/design-system'
 import { ListItem } from 'components/utils/List'
-import { GroupMembersDocument, useDeleteGroupMemberMutation } from 'generated/graphql'
+import {
+  GroupMembersDocument,
+  useDeleteGroupMemberMutation,
+} from 'generated/graphql'
 import { Box } from 'grommet'
 
 import UserInfo from '../../utils/UserInfo'
 
-export default function GroupMember({
-  user, group, last, edit,
-}: any) {
+export default function GroupMember({ user, group, last, edit }: any) {
   const [mutation] = useDeleteGroupMemberMutation({
     variables: { groupId: group.id, userId: user.id },
-    refetchQueries: [{ query: GroupMembersDocument, variables: { id: group.id } }],
+    refetchQueries: [
+      { query: GroupMembersDocument, variables: { id: group.id } },
+    ],
   })
 
   return (

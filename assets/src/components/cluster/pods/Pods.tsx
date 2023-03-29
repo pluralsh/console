@@ -1,10 +1,4 @@
-import {
-  forwardRef,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { forwardRef, useContext, useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { Div, Flex, useDebounce } from 'honorable'
 import {
@@ -82,12 +76,12 @@ const searchOptions = {
 export default function AllPods() {
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
 
-  useEffect(() => setBreadcrumbs([{ text: 'pods', url: '/pods' }]),
-    [setBreadcrumbs])
+  useEffect(
+    () => setBreadcrumbs([{ text: 'pods', url: '/pods' }]),
+    [setBreadcrumbs]
+  )
 
-  const {
-    data, refetch, error, subscribeToMore,
-  } = useQuery<{
+  const { data, refetch, error, subscribeToMore } = useQuery<{
     cachedPods: RootQueryType['cachedPods']
     applications: RootQueryType['applications']
     namespaces: RootQueryType['namespaces']
@@ -99,33 +93,52 @@ export default function AllPods() {
   /*
     TODO: Add subscription when subscription actually starts returning values.
   */
-  useEffect(() => subscribeToMore({
-    document: PODS_SUB,
-    updateQuery: (prev, { subscriptionData: { data } } : any) => {
-      if (!data?.podDelta) return prev
-      const { podDelta: { delta, payload } } = data
+  useEffect(
+    () =>
+      subscribeToMore({
+        document: PODS_SUB,
+        updateQuery: (prev, { subscriptionData: { data } }: any) => {
+          if (!data?.podDelta) return prev
+          const {
+            podDelta: { delta, payload },
+          } = data
 
-      if (delta === 'CREATE') return { ...prev, cachedPods: uniqBy([payload, ...prev.cachedPods ?? []], p => `${p.metadata.name}:${p.metadata.namespace}`) }
-      if (delta === 'DELETE') return { ...prev, cachedPods: prev.cachedPods?.filter(p => !isEqual(p!, payload)) }
+          if (delta === 'CREATE')
+            return {
+              ...prev,
+              cachedPods: uniqBy(
+                [payload, ...(prev.cachedPods ?? [])],
+                (p) => `${p.metadata.name}:${p.metadata.namespace}`
+              ),
+            }
+          if (delta === 'DELETE')
+            return {
+              ...prev,
+              cachedPods: prev.cachedPods?.filter((p) => !isEqual(p!, payload)),
+            }
 
-      return prev
-    },
-    onError: e => {
-      console.error('subscribe error msg', e.message)
-    },
-  }), [subscribeToMore])
+          return prev
+        },
+        onError: (e) => {
+          console.error('subscribe error msg', e.message)
+        },
+      }),
+    [subscribeToMore]
+  )
 
-  const columns = useMemo(() => [
-    ColNamespace,
-    ColName,
-    ColMemoryReservation,
-    ColCpuReservation,
-    ColRestarts,
-    ColContainers,
-    ColImages,
-    ColActions(refetch),
-  ],
-  [refetch])
+  const columns = useMemo(
+    () => [
+      ColNamespace,
+      ColName,
+      ColMemoryReservation,
+      ColCpuReservation,
+      ColRestarts,
+      ColContainers,
+      ColImages,
+      ColActions(refetch),
+    ],
+    [refetch]
+  )
   const theme = useTheme()
   const namespace = useParams().namespace || null
   const navigate = useNavigate()
@@ -147,7 +160,9 @@ export default function AllPods() {
     }
 
     return (
-      data?.namespaces?.filter(ns => ns?.metadata?.name && namespaceSet.has(ns.metadata.name)) || []
+      data?.namespaces?.filter(
+        (ns) => ns?.metadata?.name && namespaceSet.has(ns.metadata.name)
+      ) || []
     )
   }, [data?.namespaces, data?.cachedPods])
 
@@ -155,7 +170,9 @@ export default function AllPods() {
   const filteredNamespaces = useMemo(() => {
     const fuse = new Fuse(namespaces, searchOptions)
 
-    return inputValue ? fuse.search(inputValue).map(({ item }) => item) : namespaces
+    return inputValue
+      ? fuse.search(inputValue).map(({ item }) => item)
+      : namespaces
   }, [namespaces, inputValue])
 
   const pods = useMemo(() => {
@@ -163,20 +180,22 @@ export default function AllPods() {
       return undefined
     }
     let pods = data.cachedPods
-      .map(pod => ({ id: pod?.metadata?.namespace, ...pod } as PodWithId))
+      .map((pod) => ({ id: pod?.metadata?.namespace, ...pod } as PodWithId))
       .filter((pod?: PodWithId): pod is PodWithId => !!pod) as PodWithId[]
 
     if (namespace) {
-      pods = pods?.filter(pod => pod?.metadata?.namespace === namespace)
+      pods = pods?.filter((pod) => pod?.metadata?.namespace === namespace)
     }
 
     return pods || []
   }, [data, namespace])
 
-  const reactTableOptions = useMemo(() => ({
-    state: { globalFilter: debouncedFilterString },
-  }),
-  [debouncedFilterString])
+  const reactTableOptions = useMemo(
+    () => ({
+      state: { globalFilter: debouncedFilterString },
+    }),
+    [debouncedFilterString]
+  )
 
   if (error) {
     return <>Sorry, something went wrong</>
@@ -194,20 +213,20 @@ export default function AllPods() {
               inputValue={inputValue}
               onInputChange={setInputValue}
               selectedKey={namespace}
-              onSelectionChange={ns => {
+              onSelectionChange={(ns) => {
                 setInputValue(`${ns}`)
                 navigate(`/pods/${ns}`)
               }}
               // Close combobox panel once footer is clicked.
               // It does not work with isOpen and onOpenChange at the moment.
-              dropdownFooterFixed={(
+              dropdownFooterFixed={
                 <NamespaceListFooter
                   onClick={() => {
                     setInputValue('')
                     navigate('/pods')
                   }}
                 />
-              )}
+              }
               aria-label="namespace"
               width={320}
             >
@@ -234,7 +253,7 @@ export default function AllPods() {
             startIcon={<SearchIcon />}
             placeholder="Filter pods"
             value={filterString}
-            onChange={e => setFilterString(e.currentTarget.value)}
+            onChange={(e) => setFilterString(e.currentTarget.value)}
             marginBottom={theme.spacing.medium}
           />
           {!pods || pods.length === 0 ? (

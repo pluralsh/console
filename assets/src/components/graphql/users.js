@@ -11,7 +11,9 @@ export const UserFragment = gql`
     profile
     backgroundColor
     readTimestamp
-    roles { admin }
+    roles {
+      admin
+    }
   }
 `
 export const InviteFragment = gql`
@@ -32,8 +34,12 @@ export const GroupFragment = gql`
 export const RoleBindingFragment = gql`
   fragment RoleBindingFragment on RoleBinding {
     id
-    user { ...UserFragment }
-    group { ...GroupFragment }
+    user {
+      ...UserFragment
+    }
+    group {
+      ...GroupFragment
+    }
   }
   ${UserFragment}
   ${GroupFragment}
@@ -46,15 +52,21 @@ export const RoleFragment = gql`
     description
     repositories
     permissions
-    roleBindings { ...RoleBindingFragment }
+    roleBindings {
+      ...RoleBindingFragment
+    }
   }
   ${RoleBindingFragment}
 `
 
 export const GroupMemberFragment = gql`
   fragment GroupMemberFragment on GroupMember {
-    user { ...UserFragment }
-    group { ...GroupFragment }
+    user {
+      ...UserFragment
+    }
+    group {
+      ...GroupFragment
+    }
   }
   ${GroupFragment}
   ${UserFragment}
@@ -62,7 +74,7 @@ export const GroupMemberFragment = gql`
 
 export const ManifestFragment = gql`
   fragment ManifestFragment on PluralManifest {
-    network { 
+    network {
       pluralDns
       subdomain
     }
@@ -83,22 +95,33 @@ export const NotificationFragment = gql`
   }
 `
 export const ME_Q = gql`
-  query Me{
+  query Me {
     me {
       ...UserFragment
-      boundRoles { ...RoleFragment }
+      boundRoles {
+        ...RoleFragment
+      }
       unreadNotifications
     }
     externalToken
-    clusterInfo { version platform gitCommit }
-    configuration { 
+    clusterInfo {
+      version
+      platform
+      gitCommit
+    }
+    configuration {
       vpnEnabled
       gitCommit
       isDemoProject
       isSandbox
       pluralLogin
-      manifest { ...ManifestFragment }
-      gitStatus { cloned output }
+      manifest {
+        ...ManifestFragment
+      }
+      gitStatus {
+        cloned
+        output
+      }
     }
   }
   ${UserFragment}
@@ -144,7 +167,7 @@ export const USERS_Q = gql`
 
 export const INVITE_USER = gql`
   mutation InviteUser($email: String) {
-    createInvite(attributes: {email: $email}) {
+    createInvite(attributes: { email: $email }) {
       ...InviteFragment
     }
   }
@@ -181,8 +204,14 @@ export const LOGIN_LINK = gql`
 export const NOTIFICATIONS_Q = gql`
   query Notifs($all: Boolean, $cursor: String) {
     notifications(all: $all, after: $cursor, first: 50) {
-      pageInfo { ...PageInfo }
-      edges { node { ...NotificationFragment } }
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...NotificationFragment
+        }
+      }
     }
   }
   ${PageInfo}

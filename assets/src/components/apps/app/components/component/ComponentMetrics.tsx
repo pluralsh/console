@@ -13,11 +13,20 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { POLL_INTERVAL } from '../../../../cluster/constants'
 import { USAGE_Q } from '../../../../cluster/queries'
 
-const convertVals = values => values.map(({ timestamp, value }) => ({ x: new Date(timestamp * 1000), y: parseFloat(value) }))
+const convertVals = (values) =>
+  values.map(({ timestamp, value }) => ({
+    x: new Date(timestamp * 1000),
+    y: parseFloat(value),
+  }))
 
 function Graphs({ cpu: [cpu], mem: [mem] }) {
-  const { cpuValues, memValues } = useMemo(() => (
-    { cpuValues: convertVals(cpu.values), memValues: convertVals(mem.values) }), [cpu, mem])
+  const { cpuValues, memValues } = useMemo(
+    () => ({
+      cpuValues: convertVals(cpu.values),
+      memValues: convertVals(mem.values),
+    }),
+    [cpu, mem]
+  )
 
   return (
     <Flex
@@ -54,8 +63,14 @@ function Graphs({ cpu: [cpu], mem: [mem] }) {
 
 function PodGraphs({ cpu, mem }) {
   const { cpuGraph, memGraph } = useMemo(() => {
-    const cpuGraph = cpu.map(({ metric: { pod }, values }) => ({ id: pod, data: convertVals(values) }))
-    const memGraph = mem.map(({ metric: { pod }, values }) => ({ id: pod, data: convertVals(values) }))
+    const cpuGraph = cpu.map(({ metric: { pod }, values }) => ({
+      id: pod,
+      data: convertVals(values),
+    }))
+    const memGraph = mem.map(({ metric: { pod }, values }) => ({
+      id: pod,
+      data: convertVals(values),
+    }))
 
     return { cpuGraph, memGraph }
   }, [cpu, mem])
@@ -94,7 +109,11 @@ function PodGraphs({ cpu, mem }) {
 }
 
 function Metric({
-  name, namespace, regex, duration: { step, offset }, ...props
+  name,
+  namespace,
+  regex,
+  duration: { step, offset },
+  ...props
 }) {
   const { data } = useQuery(USAGE_Q, {
     variables: {
@@ -110,9 +129,7 @@ function Metric({
 
   if (!data) return <LoadingIndicator />
 
-  const {
-    cpu, mem, podCpu, podMem,
-  } = data
+  const { cpu, mem, podCpu, podMem } = data
 
   return (
     <Card

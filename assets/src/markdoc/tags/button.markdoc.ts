@@ -35,7 +35,9 @@ export const buttonGroup = {
   children: ['Button'],
   attributes: {},
   transform(node, config) {
-    const children = unwrapParagraphs(node.transformChildren(config)).filter(child => child?.name === 'Button')
+    const children = unwrapParagraphs(node.transformChildren(config)).filter(
+      (child) => child?.name === 'Button'
+    )
     const attributes = node.transformAttributes(config)
 
     return new Tag(this.render as any, attributes, children)

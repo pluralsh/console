@@ -1,9 +1,4 @@
-import {
-  ReactElement,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { ReactElement, useEffect, useMemo, useState } from 'react'
 import {
   Chip,
   LoopingLogo,
@@ -21,30 +16,41 @@ import { Recipe, RepositoryContext } from '../../../generated/graphql'
 import { Configuration } from './Configuration'
 
 interface StepData {
-  id: string | undefined,
-  oidc: boolean,
-  skipped?: boolean,
+  id: string | undefined
+  oidc: boolean
+  skipped?: boolean
   context: Record<string, unknown>
 }
 
-const findContext = (contexts: Array<RepositoryContext>, repository: string): Record<string, unknown> => contexts
-  .filter(ctx => ctx.repository === repository)
-  .map(ctx => ctx.context)
-  .reduce((acc, ctx) => ({ ...acc, ...ctx }), {})
+const findContext = (
+  contexts: Array<RepositoryContext>,
+  repository: string
+): Record<string, unknown> =>
+  contexts
+    .filter((ctx) => ctx.repository === repository)
+    .map((ctx) => ctx.context)
+    .reduce((acc, ctx) => ({ ...acc, ...ctx }), {})
 
 export function Application({ ...props }: any): ReactElement {
   const { active, setData } = useActive<StepData>()
-  const [context, setContext] = useState<Record<string, unknown>>(active.data?.context || {})
+  const [context, setContext] = useState<Record<string, unknown>>(
+    active.data?.context || {}
+  )
   const [oidc, setOIDC] = useState(active.data?.oidc ?? false)
   const [valid, setValid] = useState(true)
-  const { data: { recipes: { edges: recipeEdges } = { edges: undefined } } = {} } = useQuery(RECIPES_Q, {
+  const {
+    data: { recipes: { edges: recipeEdges } = { edges: undefined } } = {},
+  } = useQuery(RECIPES_Q, {
     variables: { id: active.key },
   })
 
   // There should only be a single bundle available on the list
   const recipeBase = recipeEdges?.at(0)?.node
 
-  const { data: recipe } = useQuery<{ recipe: Recipe, context: Array<RepositoryContext> }>(RECIPE_Q, {
+  const { data: recipe } = useQuery<{
+    recipe: Recipe
+    context: Array<RepositoryContext>
+  }>(RECIPE_Q, {
     variables: { id: recipeBase?.id },
     skip: !recipeBase,
   })
@@ -53,15 +59,23 @@ export function Application({ ...props }: any): ReactElement {
     const context = findContext(recipe?.context || [], active.label!)
 
     return Object.keys(context)
-      .map(key => ({ [key]: { value: context[key], valid: true } }))
+      .map((key) => ({ [key]: { value: context[key], valid: true } }))
       .reduce((acc, entry) => ({ ...acc, ...entry }), {})
-  },
-  [recipe?.context, active.label])
+  }, [recipe?.context, active.label])
 
-  const mergedContext = useMemo<Record<string, unknown>>(() => ({ ...recipeContext, ...context }), [recipeContext, context])
-  const stepData = useMemo(() => ({
-    ...active.data, ...{ id: recipe?.recipe.id }, ...{ oidc }, ...{ context: mergedContext },
-  }), [active.data, mergedContext, oidc, recipe?.recipe.id])
+  const mergedContext = useMemo<Record<string, unknown>>(
+    () => ({ ...recipeContext, ...context }),
+    [recipeContext, context]
+  )
+  const stepData = useMemo(
+    () => ({
+      ...active.data,
+      ...{ id: recipe?.recipe.id },
+      ...{ oidc },
+      ...{ context: mergedContext },
+    }),
+    [active.data, mergedContext, oidc, recipe?.recipe.id]
+  )
 
   useEffect(() => {
     const valid = Object.values<any>(context).every(({ valid }) => valid)
@@ -103,13 +117,16 @@ export function Application({ ...props }: any): ReactElement {
           <Span
             color="text-xlight"
             overline
-          >Cannot install app
+          >
+            Cannot install app
           </Span>
           <Span
             color="text-light"
             body2
-          >This application has been marked restricted because it requires configuration, like ssh keys, that are only
-            able to be securely configured locally.
+          >
+            This application has been marked restricted because it requires
+            configuration, like ssh keys, that are only able to be securely
+            configured locally.
           </Span>
         </Div>
       </WizardStep>
@@ -140,7 +157,8 @@ export function Application({ ...props }: any): ReactElement {
             size="small"
             hue="lighter"
             marginLeft="xsmall"
-          >Dependency
+          >
+            Dependency
           </Chip>
         )}
       </Div>

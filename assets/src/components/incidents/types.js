@@ -69,7 +69,14 @@ export const IncidentFilter = {
   TAG: 'TAG',
 }
 
-export const SeverityColorMap = ['critical', 'high', 'medium', 'low', 'light-4', 'dark-6']
+export const SeverityColorMap = [
+  'critical',
+  'high',
+  'medium',
+  'low',
+  'light-4',
+  'dark-6',
+]
 
 export const StatusColorMap = {
   OPEN: 'red',

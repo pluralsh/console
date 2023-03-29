@@ -13,15 +13,29 @@ import { UPDATE_ROLE } from './queries'
 import RoleForm from './RoleForm'
 
 export default function RoleEdit({ role, open, setOpen }: any) {
-  const [attributes, setAttributes] = useState(pick(role, ['name', 'description', 'repositories', 'permissions']))
+  const [attributes, setAttributes] = useState(
+    pick(role, ['name', 'description', 'repositories', 'permissions'])
+  )
   const [roleBindings, setRoleBindings] = useState(role.roleBindings || [])
-  const uniqueRoleBindings = useMemo(() => uniqWith(roleBindings, isEqual), [roleBindings])
+  const uniqueRoleBindings = useMemo(
+    () => uniqWith(roleBindings, isEqual),
+    [roleBindings]
+  )
   const [mutation, { loading, error }] = useMutation(UPDATE_ROLE, {
-    variables: { id: role.id, attributes: { ...attributes, roleBindings: roleBindings.map(sanitize) } },
+    variables: {
+      id: role.id,
+      attributes: { ...attributes, roleBindings: roleBindings.map(sanitize) },
+    },
     onCompleted: () => setOpen(false),
   })
 
-  useEffect(() => setAttributes(pick(role, ['name', 'description', 'repositories', 'permissions'])), [role])
+  useEffect(
+    () =>
+      setAttributes(
+        pick(role, ['name', 'description', 'repositories', 'permissions'])
+      ),
+    [role]
+  )
 
   return (
     <Modal

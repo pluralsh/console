@@ -15,15 +15,15 @@ type Phase = 'Running' | 'Succeeded' | 'Pending' | 'Failed'
 
 function phaseToReadiness(phase?: string | null) {
   switch (phase as Phase | null | undefined) {
-  case 'Running':
-  case 'Succeeded':
-    return Readiness.Ready
-  case 'Pending':
-    return Readiness.InProgress
-  case 'Failed':
-    return Readiness.Failed
-  default:
-    return null
+    case 'Running':
+    case 'Succeeded':
+      return Readiness.Ready
+    case 'Pending':
+      return Readiness.InProgress
+    case 'Failed':
+      return Readiness.Failed
+    default:
+      return null
   }
 }
 

@@ -3,7 +3,12 @@ import { Layer } from 'grommet'
 import { Div, Flex, Span } from 'honorable'
 
 export function LogsInfoPanel({
-  title, subtitle, onClose = _ => {}, contentHeight = 300, children, marginTop = '0',
+  title,
+  subtitle,
+  onClose = (_) => {},
+  contentHeight = 300,
+  children,
+  marginTop = '0',
 }) {
   return (
     <Layer
@@ -33,7 +38,7 @@ export function LogsInfoPanel({
             </Span>
             <CloseIcon
               cursor="pointer"
-              onClick={e => onClose(e)}
+              onClick={(e) => onClose(e)}
             />
           </Flex>
           <Div

@@ -22,10 +22,12 @@ export function UpgradePolicies() {
           height={40}
           width={40}
           clickable
-          onClick={() => setModal({
-            header: 'Upgrade Policies',
-            content: <UpgradePoliciesList />,
-          })}
+          onClick={() =>
+            setModal({
+              header: 'Upgrade Policies',
+              content: <UpgradePoliciesList />,
+            })
+          }
         />
         <Modal
           header={modal?.header}

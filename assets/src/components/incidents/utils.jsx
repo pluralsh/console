@@ -12,12 +12,11 @@ export function Attribute({ name, children, size }) {
         <Text
           size="small"
           weight="bold"
-        >{name}
+        >
+          {name}
         </Text>
       </Box>
-      <Box fill="horizontal">
-        {children}
-      </Box>
+      <Box fill="horizontal">{children}</Box>
     </Box>
   )
 }

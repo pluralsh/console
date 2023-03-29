@@ -1,10 +1,5 @@
 import { useCallback, useState } from 'react'
-import {
-  Anchor,
-  Box,
-  Layer,
-  Text,
-} from 'grommet'
+import { Anchor, Box, Layer, Text } from 'grommet'
 import {
   Button,
   Check as Checkmark,
@@ -67,12 +62,17 @@ function AcceptIncident({ incident: { id } }) {
 function CompleteIncident({ incident: { id } }) {
   const [open, setOpen] = useState(false)
   const [attributes, setAttributes] = useState({ content: '' })
-  const [editorState, setEditorState] = useState(plainDeserialize(attributes.content))
+  const [editorState, setEditorState] = useState(
+    plainDeserialize(attributes.content)
+  )
   const editor = useEditor()
-  const setContent = useCallback(editorState => {
-    setEditorState(editorState)
-    setAttributes({ ...attributes, content: plainSerialize(editorState) })
-  }, [setAttributes, attributes, setEditorState])
+  const setContent = useCallback(
+    (editorState) => {
+      setEditorState(editorState)
+      setAttributes({ ...attributes, content: plainSerialize(editorState) })
+    },
+    [setAttributes, attributes, setEditorState]
+  )
   const [mutation, { loading }] = useMutation(COMPLETE_INCIDENT, {
     variables: { id, attributes },
     onCompleted: () => setOpen(false),
@@ -100,7 +100,13 @@ function CompleteIncident({ incident: { id } }) {
               pad="small"
               gap="small"
             >
-              <Box style={{ minHeight: '30vh', overflow: 'auto', maxHeight: '80vh' }}>
+              <Box
+                style={{
+                  minHeight: '30vh',
+                  overflow: 'auto',
+                  maxHeight: '80vh',
+                }}
+              >
                 <Slate
                   editor={editor}
                   value={editorState}
@@ -137,7 +143,7 @@ function CompleteIncident({ incident: { id } }) {
   )
 }
 
-const followerPreferences = follower => {
+const followerPreferences = (follower) => {
   if (!follower) return { message: true, incidentUpdate: true, mention: true }
   const { message, incidentUpdate, mention } = follower.preferences
 
@@ -149,19 +155,27 @@ function Follower({ incident: { id, follower } }) {
   const [preferences, setPreferences] = useState(followerPreferences(follower))
   const [mutation, { loading }] = useMutation(FOLLOW, {
     variables: { id, attributes: { preferences } },
-    update: (cache, { data: { followIncident } }) => updateCache(cache, {
-      query: INCIDENT_Q,
-      variables: { id },
-      update: ({ incident, ...prev }) => ({ ...prev, incident: { ...incident, follower: followIncident } }),
-    }),
+    update: (cache, { data: { followIncident } }) =>
+      updateCache(cache, {
+        query: INCIDENT_Q,
+        variables: { id },
+        update: ({ incident, ...prev }) => ({
+          ...prev,
+          incident: { ...incident, follower: followIncident },
+        }),
+      }),
   })
   const [unfollow, { loading: unfollowing }] = useMutation(UNFOLLOW, {
     variables: { id },
-    update: cache => updateCache(cache, {
-      query: INCIDENT_Q,
-      variables: { id },
-      update: ({ incident, ...prev }) => ({ ...prev, incident: { ...incident, follower: null } }),
-    }),
+    update: (cache) =>
+      updateCache(cache, {
+        query: INCIDENT_Q,
+        variables: { id },
+        update: ({ incident, ...prev }) => ({
+          ...prev,
+          incident: { ...incident, follower: null },
+        }),
+      }),
     onCompleted: () => setOpen(false),
   })
 
@@ -179,7 +193,11 @@ function Follower({ incident: { id, follower } }) {
         >
           <Box width="40vw">
             <ModalHeader
-              text={follower ? 'Update subscription settings' : 'Subscribe to this incident'}
+              text={
+                follower
+                  ? 'Update subscription settings'
+                  : 'Subscribe to this incident'
+              }
               setOpen={setOpen}
             />
             <Box
@@ -280,7 +298,9 @@ export function IncidentControls({ incident }) {
       align="center"
     >
       <ZoomMeeting incident={incident} />
-      {incident.status === IncidentStatus.RESOLVED && <CompleteIncident incident={incident} />}
+      {incident.status === IncidentStatus.RESOLVED && (
+        <CompleteIncident incident={incident} />
+      )}
       {!incident.owner && <AcceptIncident incident={incident} />}
       <Follower incident={incident} />
     </Box>

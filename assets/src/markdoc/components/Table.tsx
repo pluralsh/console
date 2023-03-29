@@ -16,11 +16,13 @@ function Table({ thead, tbody }: TableProps) {
 
   // const data = tbody.map(tr => Object.fromEntries(tr.map((td, idx) => [`x${idx}`, td])))
 
-  const columns = thead.map((th, idx) => columnHelper.accessor(row => row[idx], {
-    id: th,
-    cell: (info: any) => info.getValue(),
-    header: () => <span>{th}</span>,
-  }))
+  const columns = thead.map((th, idx) =>
+    columnHelper.accessor((row) => row[idx], {
+      id: th,
+      cell: (info: any) => info.getValue(),
+      header: () => <span>{th}</span>,
+    })
+  )
 
   return (
     <PluralTable

@@ -19,22 +19,9 @@ import {
 
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-import {
-  ReactElement,
-  useCallback,
-  useContext,
-  useRef,
-  useState,
-} from 'react'
+import { ReactElement, useCallback, useContext, useRef, useState } from 'react'
 
-import {
-  Avatar,
-  Flex,
-  Menu,
-  MenuItem,
-  Span,
-  useOutsideClick,
-} from 'honorable'
+import { Avatar, Flex, Menu, MenuItem, Span, useOutsideClick } from 'honorable'
 
 import { wipeToken } from 'helpers/auth'
 import posthog from 'posthog-js'
@@ -122,11 +109,13 @@ function SidebarMenuItem({
   )
 }
 
-function isActiveMenuItem({ path, pathRegexp }: Pick<MenuItem, 'path' | 'pathRegexp'>,
-  currentPath) {
+function isActiveMenuItem(
+  { path, pathRegexp }: Pick<MenuItem, 'path' | 'pathRegexp'>,
+  currentPath
+) {
   return (
-    (path === '/' ? currentPath === path : currentPath.startsWith(path))
-    || (pathRegexp && (currentPath.match(pathRegexp)?.length ?? 0 > 0))
+    (path === '/' ? currentPath === path : currentPath.startsWith(path)) ||
+    (pathRegexp && (currentPath.match(pathRegexp)?.length ?? 0 > 0))
   )
 }
 
@@ -135,14 +124,17 @@ export default function Sidebar() {
   const menuRef = useRef<HTMLDivElement>(null)
   const notificationsPanelRef = useRef<HTMLDivElement>(null)
   const [isMenuOpen, setIsMenuOpened] = useState<boolean>(false)
-  const [isNotificationsPanelOpen, setIsNotificationsPanelOpen]
-    = useState(false)
+  const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] =
+    useState(false)
   const sidebarWidth = 64
   const { me, configuration } = useContext<any>(LoginContext)
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const active = useCallback((menuItem: Parameters<typeof isActiveMenuItem>[0]) => isActiveMenuItem(menuItem, pathname),
-    [pathname])
+  const active = useCallback(
+    (menuItem: Parameters<typeof isActiveMenuItem>[0]) =>
+      isActiveMenuItem(menuItem, pathname),
+    [pathname]
+  )
   const menuItems = configuration.isSandbox
     ? MENU_ITEMS.filter(({ sandboxed }) => !sandboxed)
     : MENU_ITEMS
@@ -150,20 +142,23 @@ export default function Sidebar() {
   const theme = useTheme()
 
   const [mutation] = useMutation(MARK_READ, {
-    update: cache => updateCache(cache, {
-      query: ME_Q,
-      update: ({ me, ...rest }) => ({
-        ...rest,
-        me: { ...me, unreadNotifications: 0 },
+    update: (cache) =>
+      updateCache(cache, {
+        query: ME_Q,
+        update: ({ me, ...rest }) => ({
+          ...rest,
+          me: { ...me, unreadNotifications: 0 },
+        }),
       }),
-    }),
   })
 
-  const toggleNotificationPanel = useCallback(open => {
-    if (!open) mutation()
-    setIsNotificationsPanelOpen(open)
-  },
-  [mutation, setIsNotificationsPanelOpen])
+  const toggleNotificationPanel = useCallback(
+    (open) => {
+      if (!open) mutation()
+      setIsNotificationsPanelOpen(open)
+    },
+    [mutation, setIsNotificationsPanelOpen]
+  )
 
   const handleLogout = useCallback(() => {
     setIsMenuOpened(false)
@@ -174,7 +169,7 @@ export default function Sidebar() {
     w.location = '/login'
   }, [])
 
-  useOutsideClick(menuRef, event => {
+  useOutsideClick(menuRef, (event) => {
     if (!menuItemRef.current?.contains(event.target as any)) {
       setIsMenuOpened(false)
     }
@@ -231,7 +226,7 @@ export default function Sidebar() {
             label="Notifications"
             tooltip="Notifications"
             className="sidebar-notifications"
-            onClick={event => {
+            onClick={(event) => {
               event.stopPropagation()
               toggleNotificationPanel(!isNotificationsPanelOpen)
             }}
@@ -271,7 +266,7 @@ export default function Sidebar() {
             active={isMenuOpen}
             clickable
             collapsed
-            onClick={() => setIsMenuOpened(x => !x)}
+            onClick={() => setIsMenuOpened((x) => !x)}
           >
             <Avatar
               name={me.name}

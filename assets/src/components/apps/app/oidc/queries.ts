@@ -5,14 +5,18 @@ import { GroupFragment, OIDCProvider } from 'components/graphql/oauth'
 export const SEARCH_USERS = gql`
   query SearchUsers($q: String, $cursor: String) {
     users(q: $q, after: $cursor, first: 5, all: true) {
-      pageInfo { ...PageInfo }
+      pageInfo {
+        ...PageInfo
+      }
       edges {
-        node { 
+        node {
           id
           name
           email
-          roles { admin }
-         }
+          roles {
+            admin
+          }
+        }
       }
     }
   }
@@ -22,9 +26,13 @@ export const SEARCH_USERS = gql`
 export const SEARCH_GROUPS = gql`
   query SearchGroups($q: String, $cursor: String) {
     groups(q: $q, after: $cursor, first: 5) {
-      pageInfo { ...PageInfo }
+      pageInfo {
+        ...PageInfo
+      }
       edges {
-        node { ...GroupFragment }
+        node {
+          ...GroupFragment
+        }
       }
     }
   }
@@ -36,7 +44,9 @@ export const INSTALLATION = gql`
   query Inst($name: String) {
     installation(name: $name) {
       id
-      oidcProvider { ...OIDCProvider }
+      oidcProvider {
+        ...OIDCProvider
+      }
     }
   }
   ${OIDCProvider}

@@ -14,13 +14,7 @@ import {
 import { appState, getIcon, hasIcons } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
 import sortBy from 'lodash/sortBy'
-import {
-  useCallback,
-  useContext,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useContext, useMemo, useRef, useState } from 'react'
 import { Readiness, ReadinessT } from 'utils/status'
 import styled, { useTheme } from 'styled-components'
 import { useNavigate } from 'react-router-dom'
@@ -38,14 +32,14 @@ const CARD_WIDTH = 420
 
 function readinessOrder(readiness: ReadinessT) {
   switch (readiness) {
-  case Readiness.Failed:
-    return 0
-  case Readiness.InProgress:
-    return 1
-  case Readiness.Ready:
-    return 2
-  default:
-    return 3
+    case Readiness.Failed:
+      return 0
+    case Readiness.InProgress:
+      return 1
+    case Readiness.Ready:
+      return 2
+    default:
+      return 3
   }
 }
 
@@ -53,27 +47,27 @@ function StatusIcon({ readiness }: { readiness: ReadinessT }) {
   if (!readiness) return null
 
   switch (readiness) {
-  case Readiness.Failed:
-    return (
-      <IconFrame
-        size="xsmall"
-        icon={<ErrorIcon color="icon-danger" />}
-      />
-    )
-  case Readiness.InProgress:
-    return (
-      <IconFrame
-        size="xsmall"
-        icon={<StatusIpIcon color="icon-warning" />}
-      />
-    )
-  default:
-    return (
-      <IconFrame
-        size="xsmall"
-        icon={<SuccessIcon color="icon-success" />}
-      />
-    )
+    case Readiness.Failed:
+      return (
+        <IconFrame
+          size="xsmall"
+          icon={<ErrorIcon color="icon-danger" />}
+        />
+      )
+    case Readiness.InProgress:
+      return (
+        <IconFrame
+          size="xsmall"
+          icon={<StatusIpIcon color="icon-warning" />}
+        />
+      )
+    default:
+      return (
+        <IconFrame
+          size="xsmall"
+          icon={<SuccessIcon color="icon-success" />}
+        />
+      )
   }
 }
 
@@ -97,16 +91,18 @@ const StatusPanelHeader = styled.div({
   lineHeight: '24px',
 })
 
-const AppStatusWrap = styled.div<{ last: boolean }>(({ theme, last = false }) => ({
-  alignItems: 'center',
-  cursor: 'pointer',
-  borderBottom: !last ? theme.borders['fill-two'] : undefined,
-  display: 'flex',
-  padding: '12px 16px',
-  '&:hover': {
-    backgroundColor: theme.colors['fill-two-hover'],
-  },
-}))
+const AppStatusWrap = styled.div<{ last: boolean }>(
+  ({ theme, last = false }) => ({
+    alignItems: 'center',
+    cursor: 'pointer',
+    borderBottom: !last ? theme.borders['fill-two'] : undefined,
+    display: 'flex',
+    padding: '12px 16px',
+    '&:hover': {
+      backgroundColor: theme.colors['fill-two-hover'],
+    },
+  })
+)
 
 const AppIcon = styled.img({
   height: 16,
@@ -138,16 +134,16 @@ const getTransitionProps = (isOpen: boolean) => ({
   leave: { opacity: 0, translateX: `${CARD_WIDTH + 24}px` },
   config: isOpen
     ? {
-      mass: 0.6,
-      tension: 280,
-      velocity: 0.02,
-    }
+        mass: 0.6,
+        tension: 280,
+        velocity: 0.02,
+      }
     : {
-      mass: 0.6,
-      tension: 400,
-      velocity: 0.02,
-      restVelocity: 0.1,
-    },
+        mass: 0.6,
+        tension: 400,
+        velocity: 0.02,
+        restVelocity: 0.1,
+      },
 })
 
 export function StatusPanel({ statuses, open, onClose }) {
@@ -192,7 +188,7 @@ export function StatusPanel({ statuses, open, onClose }) {
             <IconFrame
               clickable
               icon={<CloseIcon />}
-              onClick={e => onClose(e)}
+              onClick={(e) => onClose(e)}
             />
           </StatusPanelHeaderWrap>
           <Input
@@ -200,7 +196,7 @@ export function StatusPanel({ statuses, open, onClose }) {
             placeholder="Filter applications"
             startIcon={<MagnifyingGlassIcon size={14} />}
             value={query}
-            onChange={event => setQuery(event.target.value)}
+            onChange={(event) => setQuery(event.target.value)}
           />
         </StatusPanelTopContainer>
         {apps.map((app, i) => (
@@ -229,7 +225,7 @@ export function StatusPanel({ statuses, open, onClose }) {
     </Div>
   )
 
-  content = transitions(styles => (
+  content = transitions((styles) => (
     <animated.div
       style={{
         position: 'fixed',
@@ -257,7 +253,7 @@ export default function AppNav() {
   }, [])
 
   const statuses = useMemo(() => {
-    const unsorted = applications.map(app => ({ app, ...appState(app) }))
+    const unsorted = applications.map((app) => ({ app, ...appState(app) }))
 
     return sortBy(unsorted, [
       ({ readiness }) => readinessOrder(readiness),

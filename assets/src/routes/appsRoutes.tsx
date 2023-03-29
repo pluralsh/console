@@ -31,12 +31,12 @@ export const appsRoutes = [
   >
     <Route
       index
-      element={(
+      element={
         <Navigate
           replace
           to="dashboards"
         />
-      )}
+      }
     />
     <Route
       path="dashboards"
@@ -92,12 +92,12 @@ export const appsRoutes = [
   >
     <Route
       index
-      element={(
+      element={
         <Navigate
           replace
           to="info"
         />
-      )}
+      }
     />
     <Route
       path="info"

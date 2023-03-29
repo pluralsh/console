@@ -3,4 +3,3 @@ export const ConfigType = {
   HELM: 'HELM',
   TERRAFORM: 'TERRAFORM',
 }
-

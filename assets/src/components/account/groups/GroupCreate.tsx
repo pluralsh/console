@@ -10,7 +10,7 @@ import BillingFeatureBlockModal from 'components/billing/BillingFeatureBlockModa
 import { appendConnection, updateCache } from '../../../utils/graphql'
 import { GqlError } from '../../utils/Alert'
 
-export default function GroupCreate({ q }: {q: string}) {
+export default function GroupCreate({ q }: { q: string }) {
   const { availableFeatures } = useContext(SubscriptionContext)
   const isAvailable = !!availableFeatures?.userManagement
   const [createModalVisible, setCreateModalVisible] = useState(false)
@@ -27,18 +27,21 @@ export default function GroupCreate({ q }: {q: string}) {
   const [mutation, { loading, error }] = useCreateGroupMutation({
     variables: { attributes: { name, description } },
     onCompleted: () => resetAndClose(),
-    update: (cache, { data }) => updateCache(cache, {
-      query: GroupsDocument,
-      variables: { q },
-      update: prev => appendConnection(prev, data?.createGroup, 'groups'),
-    }),
+    update: (cache, { data }) =>
+      updateCache(cache, {
+        query: GroupsDocument,
+        variables: { q },
+        update: (prev) => appendConnection(prev, data?.createGroup, 'groups'),
+      }),
   })
 
   return (
     <>
       <Button
         secondary
-        onClick={() => (isAvailable ? setCreateModalVisible(true) : setBlockModalVisible(true))}
+        onClick={() =>
+          isAvailable ? setCreateModalVisible(true) : setBlockModalVisible(true)
+        }
       >
         Create group
       </Button>
@@ -48,7 +51,7 @@ export default function GroupCreate({ q }: {q: string}) {
         header="Create group"
         open={createModalVisible}
         onClose={() => resetAndClose()}
-        actions={(
+        actions={
           <>
             <Button
               secondary
@@ -66,7 +69,7 @@ export default function GroupCreate({ q }: {q: string}) {
               Create
             </Button>
           </>
-        )}
+        }
       >
         <Box
           width="50vw"

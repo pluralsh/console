@@ -2,7 +2,11 @@ import { Box } from 'grommet'
 import { Span } from 'honorable'
 import { AppIcon } from '@pluralsh/design-system'
 
-export default function UserInfo({ user: { email, name, avatar }, hue = 'lighter', ...box }: any) {
+export default function UserInfo({
+  user: { email, name, avatar },
+  hue = 'lighter',
+  ...box
+}: any) {
   return (
     <Box
       {...box}

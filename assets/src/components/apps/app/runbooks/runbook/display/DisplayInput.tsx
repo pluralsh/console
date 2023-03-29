@@ -8,7 +8,9 @@ import { convertType, valueFrom } from './misc'
 
 export default function DisplayInput({ attributes, children }) {
   const { context, setContext, ...rest } = useContext(DisplayContext)
-  const [value, setValue] = useState(children?.length > 0 ? valueFrom(children[0], rest) : '')
+  const [value, setValue] = useState(
+    children?.length > 0 ? valueFrom(children[0], rest) : ''
+  )
 
   useEffect(() => {
     const { name } = attributes
@@ -27,11 +29,11 @@ export default function DisplayInput({ attributes, children }) {
         marginBottom="xxsmall"
         whiteSpace="nowrap"
       >
-        { attributes.label }
+        {attributes.label}
       </Span>
       <Input
         value={value || ''}
-        onChange={(({ target: { value } }) => setValue(value))}
+        onChange={({ target: { value } }) => setValue(value)}
         width="100%"
         maxWidth={attributes.width || 150}
         {...attributes}

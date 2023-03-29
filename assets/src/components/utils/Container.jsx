@@ -5,11 +5,14 @@ import { normalizeColor } from 'grommet/utils'
 
 import { alpha } from '../../utils/color'
 
-export const boxShadow = theme => ({ boxShadow: `2px 2px 2px ${alpha(normalizeColor('backgroundDark', theme), 0.3)}` })
+export const boxShadow = (theme) => ({
+  boxShadow: `2px 2px 2px ${alpha(
+    normalizeColor('backgroundDark', theme),
+    0.3
+  )}`,
+})
 
-export function Container({
-  onClick, gap, children, ...rest
-}) {
+export function Container({ onClick, gap, children, ...rest }) {
   const theme = useContext(ThemeContext)
 
   return (

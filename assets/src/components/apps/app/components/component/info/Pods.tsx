@@ -16,21 +16,23 @@ import { useOutletContext } from 'react-router-dom'
 export default function Pods({ pods }) {
   const { refetch } = useOutletContext<any>()
 
-  const columns = useMemo(() => [
-    ColName,
-    {
-      ...ColMemoryReservation,
-      meta: {
-        truncate: true,
+  const columns = useMemo(
+    () => [
+      ColName,
+      {
+        ...ColMemoryReservation,
+        meta: {
+          truncate: true,
+        },
       },
-    },
-    ColCpuReservation,
-    ColRestarts,
-    ColContainers,
-    ColImages,
-    ColDelete(refetch),
-  ],
-  [refetch])
+      ColCpuReservation,
+      ColRestarts,
+      ColContainers,
+      ColImages,
+      ColDelete(refetch),
+    ],
+    [refetch]
+  )
 
   return (
     <Flex

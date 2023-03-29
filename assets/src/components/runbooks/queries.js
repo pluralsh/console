@@ -18,16 +18,26 @@ export const RUNBOOKS_Q = gql`
 `
 
 export const RUNBOOK_Q = gql`
-  query Runbooks($namespace: String!, $name: String!, $context: RunbookContext) {
+  query Runbooks(
+    $namespace: String!
+    $name: String!
+    $context: RunbookContext
+  ) {
     runbook(namespace: $namespace, name: $name) {
       name
-      status { alerts { ...RunbookAlertStatus } }
+      status {
+        alerts {
+          ...RunbookAlertStatus
+        }
+      }
       spec {
         name
         description
         display
       }
-      data(context: $context) { ...RunbookDataFragment }
+      data(context: $context) {
+        ...RunbookDataFragment
+      }
     }
   }
   ${RunbookAlertStatus}
@@ -38,8 +48,14 @@ export const RUNBOOK_EXECUTIONS_Q = gql`
   query Runbooks($namespace: String!, $name: String!, $cursor: String) {
     runbook(namespace: $namespace, name: $name) {
       executions(first: 20, after: $cursor) {
-        pageInfo { ...PageInfo }
-        edges { node { ...RunbookExecutionFragment } }
+        pageInfo {
+          ...PageInfo
+        }
+        edges {
+          node {
+            ...RunbookExecutionFragment
+          }
+        }
       }
     }
   }
@@ -48,7 +64,11 @@ export const RUNBOOK_EXECUTIONS_Q = gql`
 `
 
 export const EXECUTE_RUNBOOK = gql`
-  mutation Execute($name: String!, $namespace: String!, $input: RunbookActionInput!) {
+  mutation Execute(
+    $name: String!
+    $namespace: String!
+    $input: RunbookActionInput!
+  ) {
     executeRunbook(name: $name, namespace: $namespace, input: $input) {
       redirectTo
     }

@@ -1,12 +1,6 @@
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import { Input, SearchIcon } from '@pluralsh/design-system'
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
 import { toMap, useQueryParams } from 'components/utils/query'
@@ -28,32 +22,49 @@ export default function Logs() {
   const [search, setSearch] = useState('')
   const [labels, setLabels] = useState(toMap(query))
 
-  const addLabel = useCallback((name, value) => setLabels({ ...labels, [name]: value }), [labels, setLabels])
-  const removeLabel = useCallback(name => {
-    const { [name]: _val, ...rest } = labels
+  const addLabel = useCallback(
+    (name, value) => setLabels({ ...labels, [name]: value }),
+    [labels, setLabels]
+  )
+  const removeLabel = useCallback(
+    (name) => {
+      const { [name]: _val, ...rest } = labels
 
-    setLabels(rest)
-  }, [labels, setLabels])
+      setLabels(rest)
+    },
+    [labels, setLabels]
+  )
 
-  const currentApp = applications.find(app => app.name === appName)
+  const currentApp = applications.find((app) => app.name === appName)
   const searchQuery = search.length > 0 ? ` |~ "${search}"` : ''
-  const labelList = Object.entries(labels).map(([name, value]) => ({ name, value }))
-  const labelQuery = useMemo(() => (
-    [...labelList, { name: 'namespace', value: appName }].map(({ name, value }) => `${name}="${value}"`).join(',')
-  ), [labelList, appName])
+  const labelList = Object.entries(labels).map(([name, value]) => ({
+    name,
+    value,
+  }))
+  const labelQuery = useMemo(
+    () =>
+      [...labelList, { name: 'namespace', value: appName }]
+        .map(({ name, value }) => `${name}="${value}"`)
+        .join(','),
+    [labelList, appName]
+  )
   const logQuery = `{${labelQuery}}${searchQuery}`
 
-  useEffect(() => setBreadcrumbs([
-    { text: 'apps', url: '/' },
-    { text: appName, url: `/apps/${appName}` },
-    { text: 'logs', url: `/apps/${appName}/logs` },
-  ]), [appName, setBreadcrumbs])
+  useEffect(
+    () =>
+      setBreadcrumbs([
+        { text: 'apps', url: '/' },
+        { text: appName, url: `/apps/${appName}` },
+        { text: 'logs', url: `/apps/${appName}/logs` },
+      ]),
+    [appName, setBreadcrumbs]
+  )
 
   return (
     <ScrollablePage
       heading="Logs"
       scrollable={false}
-      headingContent={(
+      headingContent={
         <Flex
           justify="end"
           gap="medium"
@@ -81,7 +92,7 @@ export default function Logs() {
             setLabels={setLabels}
           />
         </Flex>
-      )}
+      }
     >
       <Flex
         height="100%"
@@ -90,7 +101,7 @@ export default function Logs() {
         <Input
           marginBottom={labelList?.length > 0 ? '' : 'medium'}
           placeholder="Filter logs"
-          startIcon={(<SearchIcon size={14} />)}
+          startIcon={<SearchIcon size={14} />}
           value={search}
           onChange={({ target: { value } }) => setSearch(value)}
         />

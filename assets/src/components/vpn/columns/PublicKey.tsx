@@ -3,7 +3,7 @@ import { CellContext } from '@tanstack/react-table'
 
 import { ColumnBuilder, VPNClientRow } from './types'
 
-const ColumnPublicKey = ColumnBuilder.accessor(row => row.publicKey, {
+const ColumnPublicKey = ColumnBuilder.accessor((row) => row.publicKey, {
   id: 'publicKey',
   header: 'Public key',
   enableGlobalFilter: true,
@@ -14,7 +14,9 @@ const ColumnPublicKey = ColumnBuilder.accessor(row => row.publicKey, {
   cell,
 })
 
-function cell(props: CellContext<VPNClientRow, string | undefined>): JSX.Element {
+function cell(
+  props: CellContext<VPNClientRow, string | undefined>
+): JSX.Element {
   const publicKey = props.getValue()
 
   return (

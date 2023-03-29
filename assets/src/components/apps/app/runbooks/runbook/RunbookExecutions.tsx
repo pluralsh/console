@@ -1,9 +1,4 @@
-import {
-  Avatar,
-  Date,
-  EmptyState,
-  Table,
-} from '@pluralsh/design-system'
+import { Avatar, Date, EmptyState, Table } from '@pluralsh/design-system'
 
 import { createColumnHelper } from '@tanstack/react-table'
 import { Flex } from 'honorable'
@@ -20,12 +15,12 @@ import { FullHeightTableWrap } from '../../../../utils/layout/FullHeightTableWra
 const columnHelper = createColumnHelper<any>()
 
 const columns = [
-  columnHelper.accessor(row => row.insertedAt, {
+  columnHelper.accessor((row) => row.insertedAt, {
     id: 'insertedAt',
     cell: (insertedAt: any) => <Date date={insertedAt.getValue()} />,
     header: 'Date',
   }),
-  columnHelper.accessor(row => row.user, {
+  columnHelper.accessor((row) => row.user, {
     id: 'user',
     cell: (user: any) => (
       <Flex
@@ -42,7 +37,7 @@ const columns = [
     ),
     header: 'Actor',
   }),
-  columnHelper.accessor(row => row.context, {
+  columnHelper.accessor((row) => row.context, {
     id: 'context',
     cell: (context: any) => JSON.stringify(context.getValue()),
     header: 'Context',
@@ -63,34 +58,39 @@ export function RunbookExecutions() {
   const edges = runbook?.executions?.edges
   const executions = useMemo(() => edges?.map(({ node }) => node), [edges])
 
-  const fetchMoreOnBottomReached = useCallback((element?: HTMLDivElement | undefined) => {
-    if (!element) return
+  const fetchMoreOnBottomReached = useCallback(
+    (element?: HTMLDivElement | undefined) => {
+      if (!element) return
 
-    const { scrollHeight, scrollTop, clientHeight } = element
+      const { scrollHeight, scrollTop, clientHeight } = element
 
       // Once scrolled within FETCH_MARGIN of the bottom of the table, fetch more data if there is any.
-    if (
-      scrollHeight - scrollTop - clientHeight < FETCH_MARGIN
-        && !loading
-        && pageInfo.hasNextPage
-    ) {
-      fetchMore({
-        variables: { cursor: pageInfo.endCursor },
-        updateQuery: (prev,
-          {
-            fetchMoreResult: {
-              runbook: {
-                executions: { edges, pageInfo },
+      if (
+        scrollHeight - scrollTop - clientHeight < FETCH_MARGIN &&
+        !loading &&
+        pageInfo.hasNextPage
+      ) {
+        fetchMore({
+          variables: { cursor: pageInfo.endCursor },
+          updateQuery: (
+            prev,
+            {
+              fetchMoreResult: {
+                runbook: {
+                  executions: { edges, pageInfo },
+                },
               },
-            },
-          }) => update(prev, 'runbook.executions', executions => ({
-          edges: [...executions.edges, ...edges],
-          pageInfo,
-        })),
-      })
-    }
-  },
-  [fetchMore, loading, pageInfo])
+            }
+          ) =>
+            update(prev, 'runbook.executions', (executions) => ({
+              edges: [...executions.edges, ...edges],
+              pageInfo,
+            })),
+        })
+      }
+    },
+    [fetchMore, loading, pageInfo]
+  )
 
   if (!data) return <LoadingIndicator />
 
@@ -103,7 +103,7 @@ export function RunbookExecutions() {
       <Table
         data={executions}
         columns={columns}
-        onScrollCapture={e => fetchMoreOnBottomReached(e?.target)}
+        onScrollCapture={(e) => fetchMoreOnBottomReached(e?.target)}
         maxHeight="100%"
       />
     </FullHeightTableWrap>

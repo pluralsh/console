@@ -18,7 +18,11 @@ function selectedFilter(labels, search, spec) {
 }
 
 export default function LogsFilters({
-  labels, search, setSearch, setLabels, fullscreen = false,
+  labels,
+  search,
+  setSearch,
+  setLabels,
+  fullscreen = false,
 }) {
   const { appName } = useParams()
   const [open, setOpen] = useState<boolean>(false)
@@ -29,10 +33,19 @@ export default function LogsFilters({
     setLabels({})
   }, [setSearch, setLabels])
 
-  const select = useCallback(({ query, labels }) => {
-    if (labels) setLabels(labels.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {}))
-    setSearch(query || '')
-  }, [setSearch, setLabels])
+  const select = useCallback(
+    ({ query, labels }) => {
+      if (labels)
+        setLabels(
+          labels.reduce(
+            (acc, { name, value }) => ({ ...acc, [name]: value }),
+            {}
+          )
+        )
+      setSearch(query || '')
+    },
+    [setSearch, setLabels]
+  )
 
   if (!data?.logFilters) return null
 

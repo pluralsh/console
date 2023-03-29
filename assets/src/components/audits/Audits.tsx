@@ -1,10 +1,4 @@
-import {
-  Key,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { Key, useContext, useEffect, useRef, useState } from 'react'
 import { Box, Text } from 'grommet'
 import { SubTab, TabList } from '@pluralsh/design-system'
 import { Flex, Span } from 'honorable'
@@ -45,19 +39,21 @@ export default function Audits() {
   const { pathname } = useLocation()
   const tabStateRef = useRef<any>(null)
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
-  const currentView
-    = DIRECTORY.find(tab => pathname?.startsWith(`/audits/${tab.path}`))?.path
-    || DIRECTORY[0].path
+  const currentView =
+    DIRECTORY.find((tab) => pathname?.startsWith(`/audits/${tab.path}`))
+      ?.path || DIRECTORY[0].path
   const [view, setView] = useState<Key>(currentView)
 
-  useEffect(() => setBreadcrumbs([{ text: 'audits', url: '/audits' }]),
-    [setBreadcrumbs])
+  useEffect(
+    () => setBreadcrumbs([{ text: 'audits', url: '/audits' }]),
+    [setBreadcrumbs]
+  )
 
   return (
     <ResponsivePageFullWidth
       scrollable={false}
       heading="Audits"
-      headingContent={(
+      headingContent={
         <>
           <Flex grow={1} />
           <TabList
@@ -67,7 +63,7 @@ export default function Audits() {
             stateProps={{
               orientation: 'horizontal',
               selectedKey: view,
-              onSelectionChange: view => {
+              onSelectionChange: (view) => {
                 setView(view)
                 navigate(view as string)
               },
@@ -83,7 +79,7 @@ export default function Audits() {
             ))}
           </TabList>
         </>
-      )}
+      }
     >
       <Outlet />
     </ResponsivePageFullWidth>

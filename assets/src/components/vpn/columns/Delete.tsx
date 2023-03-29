@@ -8,17 +8,18 @@ import { DeleteClient } from '../actions/Delete'
 
 import { ColumnBuilder, VPNClientRow } from './types'
 
-const ColumnDelete = refetch => ColumnBuilder.display({
-  id: 'delete',
-  header: '',
-  enableGlobalFilter: false,
-  enableSorting: false,
-  meta: {
-    center: true,
-    gridTemplate: '48px',
-  },
-  cell: cell(refetch),
-})
+const ColumnDelete = (refetch) =>
+  ColumnBuilder.display({
+    id: 'delete',
+    header: '',
+    enableGlobalFilter: false,
+    enableSorting: false,
+    meta: {
+      center: true,
+      gridTemplate: '48px',
+    },
+    cell: cell(refetch),
+  })
 
 function cell(refetch): ColumnDefTemplate<CellContext<VPNClientRow, unknown>> {
   const context = (props: CellContext<VPNClientRow, unknown>): JSX.Element => {
@@ -29,7 +30,6 @@ function cell(refetch): ColumnDefTemplate<CellContext<VPNClientRow, unknown>> {
         disabled={!isReady}
         name={name ?? ''}
         refetch={refetch}
-
       />
     )
   }
@@ -38,7 +38,7 @@ function cell(refetch): ColumnDefTemplate<CellContext<VPNClientRow, unknown>> {
 }
 
 interface DeleteActionsProps {
-  disabled: boolean,
+  disabled: boolean
   name: string
   refetch: Dispatch<void>
 }
@@ -53,7 +53,10 @@ function DeleteAction({ disabled, name, refetch }: DeleteActionsProps) {
           disabled={disabled}
           tertiary
           style={{
-            padding: 0, width: 32, height: 32, minHeight: 32,
+            padding: 0,
+            width: 32,
+            height: 32,
+            minHeight: 32,
           }}
           onClick={() => setOpen(true)}
         >

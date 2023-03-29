@@ -8,10 +8,18 @@ function CommandLogLine({ line, number, follow }) {
   const mounted = useRef<any>()
   const lineRef = useRef<any>()
 
-  const blocks = useMemo(() => ansiToJson(escapeCarriageReturn(line), { json: true, remove_empty: true }), [line])
+  const blocks = useMemo(
+    () =>
+      ansiToJson(escapeCarriageReturn(line), {
+        json: true,
+        remove_empty: true,
+      }),
+    [line]
+  )
 
   useEffect(() => {
-    if (!mounted.current && follow && lineRef && lineRef.current) lineRef.current.scrollIntoView(true)
+    if (!mounted.current && follow && lineRef && lineRef.current)
+      lineRef.current.scrollIntoView(true)
     mounted.current = true
   }, [follow, lineRef, line])
 
@@ -59,4 +67,3 @@ export default function CommandLog({ text, follow }) {
     </Flex>
   )
 }
-

@@ -5,11 +5,14 @@ import { Flex, H2 } from 'honorable'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
-function StatusChart({ ready, notReady }: {ready: number, notReady: number}) {
-  const data = useMemo(() => [
-    { id: 'Ready', value: ready, color: '#99F5D5' },
-    { id: 'Not ready', value: notReady, color: '#F599A8' },
-  ], [ready, notReady])
+function StatusChart({ ready, notReady }: { ready: number; notReady: number }) {
+  const data = useMemo(
+    () => [
+      { id: 'Ready', value: ready, color: '#99F5D5' },
+      { id: 'Not ready', value: notReady, color: '#F599A8' },
+    ],
+    [ready, notReady]
+  )
 
   return <PieChart data={data} />
 }
@@ -21,9 +24,8 @@ export default function StatefulSet() {
 
   const {
     statefulSet: {
-      spec, status: {
-        replicas, currentReplicas, updatedReplicas, readyReplicas,
-      },
+      spec,
+      status: { replicas, currentReplicas, updatedReplicas, readyReplicas },
     },
   } = data
 

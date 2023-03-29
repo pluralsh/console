@@ -5,12 +5,23 @@ import { Flex, H2 } from 'honorable'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
-function StatusChart({ available, unavailable, pending }: {available: number, unavailable: number, pending: number}) {
-  const data = useMemo(() => [
-    { id: 'Available', value: available, color: '#99F5D5' },
-    { id: 'Unavailable', value: unavailable, color: '#F599A8' },
-    { id: 'Pending', value: pending, color: '#FFF9C2' },
-  ], [available, unavailable, pending])
+function StatusChart({
+  available,
+  unavailable,
+  pending,
+}: {
+  available: number
+  unavailable: number
+  pending: number
+}) {
+  const data = useMemo(
+    () => [
+      { id: 'Available', value: available, color: '#99F5D5' },
+      { id: 'Unavailable', value: unavailable, color: '#F599A8' },
+      { id: 'Pending', value: pending, color: '#FFF9C2' },
+    ],
+    [available, unavailable, pending]
+  )
 
   return <PieChart data={data} />
 }
@@ -20,7 +31,12 @@ export default function Deployment() {
 
   if (!data?.deployment) return null
 
-  const { deployment: { spec, status: { availableReplicas, replicas, unavailableReplicas } } } = data
+  const {
+    deployment: {
+      spec,
+      status: { availableReplicas, replicas, unavailableReplicas },
+    },
+  } = data
 
   return (
     <Flex

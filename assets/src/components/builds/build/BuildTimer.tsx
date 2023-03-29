@@ -12,9 +12,11 @@ export function Timer({ insertedAt, completedAt }) {
   }, [completedAt, tick, setTick])
 
   const end = completedAt ? moment(completedAt) : moment()
-  const fromBeginning = dt => moment.duration(dt.diff(moment(insertedAt)))
+  const fromBeginning = (dt) => moment.duration(dt.diff(moment(insertedAt)))
 
-  return <>{moment.utc(fromBeginning(end).as('milliseconds')).format('HH:mm:ss')}</>
+  return (
+    <>{moment.utc(fromBeginning(end).as('milliseconds')).format('HH:mm:ss')}</>
+  )
 }
 
 export function BuildTimer({ insertedAt, completedAt, status }) {

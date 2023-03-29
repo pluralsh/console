@@ -39,14 +39,16 @@ function RunbookItem({ runbook, namespace, width }) {
         <Text
           size="small"
           weight={500}
-        >{name}
+        >
+          {name}
         </Text>
       </Box>
       <Text
         size="small"
         color="dark-3"
         truncate
-      >{description}
+      >
+        {description}
       </Text>
     </Container>
   )
@@ -90,7 +92,7 @@ export function PinnedRunbooks({ border }) {
             gap="small"
             align="center"
           >
-            {books.map(book => (
+            {books.map((book) => (
               <RunbookItem
                 key={book.name}
                 runbook={book}

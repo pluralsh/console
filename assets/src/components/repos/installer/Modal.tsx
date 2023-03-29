@@ -1,11 +1,6 @@
 import { useState } from 'react'
 import { Box, LayerPositionType } from 'grommet'
-import {
-  Button,
-  DownloadIcon,
-  Modal,
-  Toast,
-} from '@pluralsh/design-system'
+import { Button, DownloadIcon, Modal, Toast } from '@pluralsh/design-system'
 import { Modal as HonorableModal } from 'honorable/dist/components/Modal/Modal'
 
 import { Installer } from './Installer'
@@ -48,12 +43,13 @@ export function InstallerModal() {
       <Modal
         header="confirm cancellation"
         open={confirmClose}
-        actions={(
+        actions={
           <>
             <Button
               secondary
               onClick={() => setConfirmClose(false)}
-            >Cancel
+            >
+              Cancel
             </Button>
             <Button
               destructive
@@ -62,29 +58,32 @@ export function InstallerModal() {
                 setConfirmClose(false)
                 setOpen(false)
               }}
-            >Continue
+            >
+              Continue
             </Button>
           </>
-        )}
+        }
         style={{
           padding: 0,
         }}
       >
-        <p>Are you sure you want to cancel installation? You will lose all progress.</p>
+        <p>
+          Are you sure you want to cancel installation? You will lose all
+          progress.
+        </p>
       </Modal>
 
-      {visible
-        && (
-          <Toast
-            position={'bottom-right' as LayerPositionType}
-            onClose={() => setVisible(false)}
-            margin="large"
-            marginRight="xxxxlarge"
-            severity="success"
-          >
-            Successfully installed selected applications.
-          </Toast>
-        )}
+      {visible && (
+        <Toast
+          position={'bottom-right' as LayerPositionType}
+          onClose={() => setVisible(false)}
+          margin="large"
+          marginRight="xxxxlarge"
+          severity="success"
+        >
+          Successfully installed selected applications.
+        </Toast>
+      )}
     </Box>
   )
 }

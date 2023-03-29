@@ -11,7 +11,9 @@ type Reservations = {
   remainder?: number
 }
 
-export function getPodResources(containers: Maybe<Maybe<Container>[]> | undefined) {
+export function getPodResources(
+  containers: Maybe<Maybe<Container>[]> | undefined
+) {
   const cpuSum: Reservations = {
     requests: undefined,
     limits: undefined,
@@ -52,8 +54,8 @@ export function getPodResources(containers: Maybe<Maybe<Container>[]> | undefine
       memorySum.requests = (memorySum.requests || 0) + requests.memory
     }
     if (isValidNum(requests?.memory) && isValidNum(limits.memory)) {
-      memorySum.remainder
-        = (memorySum.remainder || 0) + (limits.memory - requests.memory)
+      memorySum.remainder =
+        (memorySum.remainder || 0) + (limits.memory - requests.memory)
     }
     if (isValidNum(requests?.cpu) && isValidNum(limits.cpu)) {
       cpuSum.remainder = (cpuSum.remainder || 0) + (limits.cpu - requests.cpu)

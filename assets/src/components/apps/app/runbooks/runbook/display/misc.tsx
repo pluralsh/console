@@ -20,7 +20,10 @@ function ValueFrom(props) {
   return valueFrom(props, display)
 }
 
-export function valueFrom({ attributes: { datasource, path, doc } }, { datasources }) {
+export function valueFrom(
+  { attributes: { datasource, path, doc } },
+  { datasources }
+) {
   const object = extract(datasources[datasource], doc)
 
   if (!object) return null
@@ -48,29 +51,29 @@ export function parse(struct, index, theme) {
   const props = { ...struct, key: index, theme }
 
   switch (struct._type) {
-  case 'box':
-    return <DisplayBox {...props} />
-  case 'attachment':
-    return <DisplayAttachment {...props} />
-  case 'text':
-    return <DisplayText {...props} />
-  case 'markdown':
-    return <DisplayMarkdown {...props} />
-  case 'image':
-    return <DisplayImage {...props} />
-  case 'link':
-    return <DisplayLink {...props} />
-  case 'input':
-    return <DisplayInput {...props} />
-  case 'button':
-    return <DisplayButton {...props} />
-  case 'valueFrom':
-    return <ValueFrom {...props} />
-  case 'timeseries':
-    return <DisplayGraph {...props} />
-  case 'table':
-    return <DisplayTable {...props} />
-  default:
-    return null
+    case 'box':
+      return <DisplayBox {...props} />
+    case 'attachment':
+      return <DisplayAttachment {...props} />
+    case 'text':
+      return <DisplayText {...props} />
+    case 'markdown':
+      return <DisplayMarkdown {...props} />
+    case 'image':
+      return <DisplayImage {...props} />
+    case 'link':
+      return <DisplayLink {...props} />
+    case 'input':
+      return <DisplayInput {...props} />
+    case 'button':
+      return <DisplayButton {...props} />
+    case 'valueFrom':
+      return <ValueFrom {...props} />
+    case 'timeseries':
+      return <DisplayGraph {...props} />
+    case 'table':
+      return <DisplayTable {...props} />
+    default:
+      return null
   }
 }
