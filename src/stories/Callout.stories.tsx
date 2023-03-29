@@ -3,7 +3,12 @@ import { Div, Flex } from 'honorable'
 import { useState } from 'react'
 
 import { FillLevel } from '../components/contexts/FillLevelContext'
-import { Callout, CalloutProps, Card } from '..'
+import {
+  Button,
+  Callout,
+  CalloutProps,
+  Card,
+} from '..'
 
 export default {
   title: 'Callout',
@@ -120,6 +125,40 @@ function ExpandableTemplate({ title }: CalloutProps) {
   )
 }
 
+function CloseableTemplate({ title }: CalloutProps) {
+  const [closed, setClosed] = useState(false)
+
+  return (
+    <Flex
+      flexDirection="column"
+      gap="large"
+      maxWidth={600}
+    >
+      {styles.map(style => (
+        <Callout
+          key={style}
+          severity={style}
+          title={title}
+          buttonProps={{ children: 'Learn more' }}
+          closeable
+          closed={closed}
+          onClose={setClosed}
+        >
+          {fullContent}
+        </Callout>
+      ))}
+      {closed && (
+        <Button
+          secondary
+          onClick={() => setClosed(false)}
+        >
+          Reset
+        </Button>
+      )}
+    </Flex>
+  )
+}
+
 export const Default = Template.bind({})
 Default.args = {
   title: '',
@@ -153,6 +192,11 @@ WithButton.args = {
 }
 
 export const Expandable = ExpandableTemplate.bind({})
+Expandable.args = {
+  title: 'Why do I need to authenticate with GitHub/GitLab?',
+}
+
+export const Closeable = CloseableTemplate.bind({})
 Expandable.args = {
   title: 'Why do I need to authenticate with GitHub/GitLab?',
 }
