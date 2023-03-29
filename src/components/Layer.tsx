@@ -10,7 +10,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { UseTransitionProps, animated, useTransition } from 'react-spring'
-
+import isNil from 'lodash/isNil'
 import styled, { useTheme } from 'styled-components'
 
 import usePrevious from '../hooks/usePrevious'
@@ -23,7 +23,7 @@ type TransitionType = 'slide' | 'fade' | 'scale'
 type GetTransitionProps = {
   isOpen: boolean
   type: TransitionType
-  direction: Direction
+  direction?: Direction
 }
 
 type AnimationType =
@@ -134,10 +134,10 @@ const LayerWrapper = styled.div<{
   left: 0,
   right: 0,
   bottom: 0,
-  paddingLeft: margin.left,
-  paddingRight: margin.right,
-  paddingTop: margin.top,
-  paddingBottom: margin.bottom,
+  paddingLeft: margin.left ?? undefined,
+  paddingRight: margin.right ?? undefined,
+  paddingTop: margin.top ?? undefined,
+  paddingBottom: margin.bottom ?? undefined,
 }))
 
 function LayerRef({
@@ -219,7 +219,7 @@ ref: MutableRefObject<HTMLDivElement>) {
     margin = {}
   }
   for (const [key, value] of Object.entries(margin)) {
-    margin[key] = theme.spacing[value] || value
+    margin[key] = (!isNil(value) && theme.spacing[value]) || value
   }
   let transitionDirection: GetTransitionProps['direction'] = DEFAULT_DIRECTION
   let transitionType: GetTransitionProps['type'] = DEFAULT_TRANSITION_TYPE

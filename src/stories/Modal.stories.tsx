@@ -2,6 +2,7 @@ import { Button, H3, P } from 'honorable'
 import { useState } from 'react'
 
 import { FormField, Input, Modal } from '..'
+import { SEVERITIES } from '../components/Modal'
 
 export default {
   title: 'Modal',
@@ -9,6 +10,12 @@ export default {
   argTypes: {
     size: {
       options: ['medium', 'large'],
+      control: {
+        type: 'select',
+      },
+    },
+    severity: {
+      options: [undefined, ...SEVERITIES],
       control: {
         type: 'select',
       },

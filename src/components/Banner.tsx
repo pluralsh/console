@@ -73,8 +73,8 @@ const BannerOuter = styled.div<{
   backgroundColor: theme.colors['fill-three'],
   borderRadius: theme.borderRadiuses.medium,
   borderLeft: `4px solid ${theme.colors[$borderColorKey]}`,
-  maxWidth: $fullWidth ? null : 480,
-  width: $fullWidth ? '100%' : null,
+  maxWidth: $fullWidth ? undefined : 480,
+  width: $fullWidth ? '100%' : undefined,
 }))
 
 const BannerInner = styled.div(({ theme }) => ({

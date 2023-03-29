@@ -2,17 +2,50 @@ import { ReactNode, Ref, forwardRef } from 'react'
 import {
   Div,
   Flex,
+  H1,
   Modal as HonorableModal,
   ModalProps,
-  P,
 } from 'honorable'
 import PropTypes from 'prop-types'
+import { ColorKey, Severity } from 'src/types'
+
+import CheckRoundedIcon from './icons/CheckRoundedIcon'
+import createIcon from './icons/createIcon'
+import ErrorIcon from './icons/ErrorIcon'
+import WarningIcon from './icons/WarningIcon'
+import InfoIcon from './icons/InfoIcon'
+
+export const SEVERITIES = ['info', 'warning', 'success', 'danger'] as const
+
+type ModalSeverity = Extract<Severity, typeof SEVERITIES[number]>
 
 type ModalPropsType = ModalProps & {
   form?: boolean
   size?: 'medium' | 'large' | string
   header?: ReactNode
   actions?: ReactNode
+  severity?: ModalSeverity
+}
+
+const severityToIconColorKey: Readonly<
+  Record<ModalSeverity | 'default', ColorKey>
+> = {
+  default: 'icon-default',
+  info: 'icon-info',
+  danger: 'icon-danger',
+  warning: 'icon-warning',
+  success: 'icon-success',
+}
+
+const severityToIcon: Record<
+  ModalSeverity | 'default',
+  ReturnType<typeof createIcon> | null | undefined
+> = {
+  default: null,
+  info: InfoIcon,
+  danger: ErrorIcon,
+  warning: WarningIcon,
+  success: CheckRoundedIcon,
 }
 
 const propTypes = {
@@ -35,9 +68,13 @@ function ModalRef({
   open = false,
   size = form ? 'large' : 'medium',
   onClose,
+  severity,
   ...props
 }: ModalPropsType,
 ref: Ref<any>) {
+  const HeaderIcon = severityToIcon[severity ?? 'default']
+  const iconColorKey = severityToIconColorKey[severity ?? 'default']
+
   return (
     <HonorableModal
       open={open}
@@ -52,20 +89,28 @@ ref: Ref<any>) {
       <Div
         margin="large"
         marginBottom={actions ? 0 : 'large'}
+        body1
       >
         {!!header && (
           <Flex
             ref={ref}
             align="center"
-            justify="space-between"
+            justify="start"
             marginBottom="large"
+            gap="xsmall"
           >
-            <P
+            {HeaderIcon && (
+              <HeaderIcon
+                marginTop={-2} // optically center icon
+                color={iconColorKey}
+              />
+            )}
+            <H1
               overline
               color="text-xlight"
             >
               {header}
-            </P>
+            </H1>
           </Flex>
         )}
         {children}
