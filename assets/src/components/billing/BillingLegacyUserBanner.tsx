@@ -17,8 +17,8 @@ const Link = styled.a({ textDecoration: 'none' })
 
 export default function BillingLegacyUserBanner({ feature }: BillingLegacyUserBannerPropsType) {
   const { isPaidPlan, isGrandfathered, isGrandfathetingExpired } = useContext(SubscriptionContext)
-  const featureId = feature?.replace(/\s+/g, '-').toLowerCase()
-  const localStorageId = `${isGrandfathetingExpired ? 'expired' : ''}-legacy-banner-${featureId}-closed`
+  const featureId = feature ? `${feature.replace(/\s+/g, '-').toLowerCase()}-` : ''
+  const localStorageId = `${isGrandfathetingExpired ? 'expired-' : ''}legacy-banner-${featureId}closed`
   const [closed, setClosed] = usePersistedState(localStorageId, false)
 
   if (isPaidPlan || !(isGrandfathered || isGrandfathetingExpired)) return null
