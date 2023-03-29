@@ -11,7 +11,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
-    "lint": "run-s lint:format lint:js lint:css",
+    "lint": "run-p lint:format lint:js lint:css",
     "lint:format": "prettier --check ./src",
     "lint:js": "eslint ./src",
     "lint:css": "stylelint src/**/*.css",
