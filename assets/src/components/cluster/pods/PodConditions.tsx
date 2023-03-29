@@ -9,35 +9,42 @@ import { TableText } from '../TableElements'
 const COLUMN_HELPER = createColumnHelper<PodConditionT>()
 
 const columns = [
-  COLUMN_HELPER.accessor(condition => condition.lastTransitionTime, {
+  COLUMN_HELPER.accessor((condition) => condition.lastTransitionTime, {
     id: 'timestamp',
-    cell: lastTransitionTime => <TableText><Date date={lastTransitionTime.getValue()} /></TableText>,
+    cell: (lastTransitionTime) => (
+      <TableText>
+        <Date date={lastTransitionTime.getValue()} />
+      </TableText>
+    ),
     header: 'Timestamp',
   }),
-  COLUMN_HELPER.accessor(condition => condition.type, {
+  COLUMN_HELPER.accessor((condition) => condition.type, {
     id: 'type',
-    cell: type => <TableText>{type.getValue()}</TableText>,
+    cell: (type) => <TableText>{type.getValue()}</TableText>,
     header: 'Type',
   }),
-  COLUMN_HELPER.accessor(condition => condition.status, {
+  COLUMN_HELPER.accessor((condition) => condition.status, {
     id: 'status',
-    cell: status => <TableText>{status.getValue()}</TableText>,
+    cell: (status) => <TableText>{status.getValue()}</TableText>,
     header: 'Status',
   }),
-  COLUMN_HELPER.accessor(condition => condition.reason, {
+  COLUMN_HELPER.accessor((condition) => condition.reason, {
     id: 'reason',
-    cell: reason => <TableText>{reason.getValue() ?? '-'}</TableText>,
+    cell: (reason) => <TableText>{reason.getValue() ?? '-'}</TableText>,
     header: 'Reason',
   }),
-  COLUMN_HELPER.accessor(condition => condition.message, {
+  COLUMN_HELPER.accessor((condition) => condition.message, {
     id: 'message',
-    cell: message => <TableText>{message.getValue() ?? '-'}</TableText>,
+    cell: (message) => <TableText>{message.getValue() ?? '-'}</TableText>,
     header: 'Message',
   }),
-
 ]
 
-export default function PodConditions({ conditions }: { conditions?: Maybe<PodConditionT>[] }) {
+export default function PodConditions({
+  conditions,
+}: {
+  conditions?: Maybe<PodConditionT>[]
+}) {
   if (!conditions || isEmpty(conditions)) {
     return <>No conditions available.</>
   }

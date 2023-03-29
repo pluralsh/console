@@ -40,8 +40,21 @@ const RightContainer = styled.div(({ theme }) => ({
 }))
 
 export function ListItem({
-  title, description, icon, borderColor, chips, onClick, ...props
-}: CardProps & {title: string, description?: string, icon?: any, borderColor?: string, chips?: any, onClick?: () => any},) {
+  title,
+  description,
+  icon,
+  borderColor,
+  chips,
+  onClick,
+  ...props
+}: CardProps & {
+  title: string
+  description?: string
+  icon?: any
+  borderColor?: string
+  chips?: any
+  onClick?: () => any
+}) {
   return (
     <Card
       clickable
@@ -71,7 +84,9 @@ export function ListItem({
           <Description>{description}</Description>
         </div>
       </LeftContainer>
-      <RightContainer><CaretRightIcon /></RightContainer>
+      <RightContainer>
+        <CaretRightIcon />
+      </RightContainer>
     </Card>
   )
 }

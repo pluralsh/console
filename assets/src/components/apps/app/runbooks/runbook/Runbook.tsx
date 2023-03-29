@@ -1,10 +1,5 @@
 import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
-import {
-  ListBoxItem,
-  Select,
-  SubTab,
-  TabList,
-} from '@pluralsh/design-system'
+import { ListBoxItem, Select, SubTab, TabList } from '@pluralsh/design-system'
 import {
   Key,
   createContext,
@@ -101,16 +96,19 @@ export default function Runbook() {
   const [selectedKey, setSelectedKey] = useState<Key>('')
   const [selectedTab, setSelectedTab] = useState<any>('audit-logs')
 
-  useEffect(() => setBreadcrumbs([
-    { text: 'apps', url: '/' },
-    { text: appName, url: `/apps/${appName}` },
-    { text: 'runbooks', url: `/apps/${appName}/runbooks` },
-    {
-      text: data?.runbook?.spec?.name,
-      url: `/apps/${appName}/runbooks/${data?.runbook?.name}`,
-    },
-  ]),
-  [appName, data, setBreadcrumbs])
+  useEffect(
+    () =>
+      setBreadcrumbs([
+        { text: 'apps', url: '/' },
+        { text: appName, url: `/apps/${appName}` },
+        { text: 'runbooks', url: `/apps/${appName}/runbooks` },
+        {
+          text: data?.runbook?.spec?.name,
+          url: `/apps/${appName}/runbooks/${data?.runbook?.name}`,
+        },
+      ]),
+    [appName, data, setBreadcrumbs]
+  )
 
   useEffect(() => setSelectedKey(data?.runbook?.spec?.name || ''), [data])
 
@@ -124,21 +122,23 @@ export default function Runbook() {
   return (
     <ScrollablePage
       scrollable={selectedTab !== 'executions'}
-      heading={(
+      heading={
         <div>
           <Select
             aria-label="dashboards"
             selectedKey={selectedKey}
-            onSelectionChange={name => navigate(`/apps/${appName}/runbooks/${name}`)}
-            triggerButton={(
+            onSelectionChange={(name) =>
+              navigate(`/apps/${appName}/runbooks/${name}`)
+            }
+            triggerButton={
               <PageTitleSelectButton
                 title="Runbooks"
                 label={selectedKey}
               />
-            )}
+            }
             width={240}
           >
-            {runbooks.map(runbook => (
+            {runbooks.map((runbook) => (
               <ListBoxItem
                 key={runbook.name}
                 label={runbook.spec.name}
@@ -147,15 +147,15 @@ export default function Runbook() {
             ))}
           </Select>
         </div>
-      )}
-      headingContent={(
+      }
+      headingContent={
         <TabList
           gap="xxsmall"
           stateRef={tabStateRef}
           stateProps={{
             orientation: 'horizontal',
             selectedKey: selectedTab,
-            onSelectionChange: key => {
+            onSelectionChange: (key) => {
               setSelectedTab(key)
               refetch()
             },
@@ -170,7 +170,7 @@ export default function Runbook() {
             </SubTab>
           ))}
         </TabList>
-      )}
+      }
     >
       {selectedTab === 'runbook' && (
         // eslint-disable-next-line react/jsx-no-constructed-context-values

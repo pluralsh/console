@@ -1,12 +1,7 @@
 import { ListBoxItem, Tooltip } from '@pluralsh/design-system'
 import { CellContext } from '@tanstack/react-table'
 import { Div } from 'honorable'
-import {
-  Dispatch,
-  useContext,
-  useMemo,
-  useState,
-} from 'react'
+import { Dispatch, useContext, useMemo, useState } from 'react'
 import { ColumnDefTemplate } from '@tanstack/table-core/src/types'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
 import styled from 'styled-components'
@@ -17,16 +12,17 @@ import { DownloadConfig } from '../actions/Download'
 
 import { ColumnBuilder, VPNClientRow } from './types'
 
-const ColumnActions = refetch => ColumnBuilder.display({
-  id: 'actions',
-  header: '',
-  enableGlobalFilter: false,
-  enableSorting: false,
-  meta: {
-    gridTemplate: '48px',
-  },
-  cell: cell(refetch),
-})
+const ColumnActions = (refetch) =>
+  ColumnBuilder.display({
+    id: 'actions',
+    header: '',
+    enableGlobalFilter: false,
+    enableSorting: false,
+    meta: {
+      gridTemplate: '48px',
+    },
+    cell: cell(refetch),
+  })
 
 function cell(refetch): ColumnDefTemplate<CellContext<VPNClientRow, unknown>> {
   const context = (props: CellContext<VPNClientRow, unknown>): JSX.Element => {
@@ -56,7 +52,7 @@ enum MenuItemSelection {
   DeleteClient = 'deleteClient',
 }
 
-type MenuItems = {[key in MenuItemSelection]: MenuItem}
+type MenuItems = { [key in MenuItemSelection]: MenuItem }
 
 const DisabledItem = styled.div(() => ({
   '&:focus, &:focus-visible': {
@@ -71,21 +67,21 @@ function VPNColumnActions({ disabled, refetch, name }) {
   const [selected, setSelected] = useState<MenuItemSelection | undefined>()
   const dialog = useMemo(() => {
     switch (selected) {
-    case MenuItemSelection.DownloadConfig:
-      return (
-        <DownloadConfig
-          name={name}
-          onClose={() => setSelected(undefined)}
-        />
-      )
-    case MenuItemSelection.DeleteClient:
-      return (
-        <DeleteClient
-          name={name}
-          onClose={() => setSelected(undefined)}
-          refetch={refetch}
-        />
-      )
+      case MenuItemSelection.DownloadConfig:
+        return (
+          <DownloadConfig
+            name={name}
+            onClose={() => setSelected(undefined)}
+          />
+        )
+      case MenuItemSelection.DeleteClient:
+        return (
+          <DeleteClient
+            name={name}
+            onClose={() => setSelected(undefined)}
+            refetch={refetch}
+          />
+        )
     }
   }, [name, refetch, selected])
 
@@ -99,7 +95,9 @@ function VPNColumnActions({ disabled, refetch, name }) {
       onSelect: () => {
         if (isAvailable) setSelected(MenuItemSelection.DeleteClient)
       },
-      disabledTooltip: !isAvailable ? 'Upgrade to Plural Professional to manage VPN clients.' : undefined,
+      disabledTooltip: !isAvailable
+        ? 'Upgrade to Plural Professional to manage VPN clients.'
+        : undefined,
       props: {
         destructive: true,
         disabled: !isAvailable,
@@ -113,25 +111,29 @@ function VPNColumnActions({ disabled, refetch, name }) {
       marginRight="small"
     >
       <MoreMenu
-        onSelectionChange={selected => menuItems[selected]?.onSelect()}
+        onSelectionChange={(selected) => menuItems[selected]?.onSelect()}
         disabled={disabled}
       >
-        {Object.entries(menuItems).map(([key, { label, props = {}, disabledTooltip }]) => {
-          const item = (
-            <ListBoxItem
-              key={key}
-              textValue={label}
-              label={label}
-              {...props}
-            />
-          )
+        {Object.entries(menuItems).map(
+          ([key, { label, props = {}, disabledTooltip }]) => {
+            const item = (
+              <ListBoxItem
+                key={key}
+                textValue={label}
+                label={label}
+                {...props}
+              />
+            )
 
-          return disabledTooltip ? (
-            <DisabledItem>
-              <Tooltip label={disabledTooltip}>{item}</Tooltip>
-            </DisabledItem>
-          ) : item
-        })}
+            return disabledTooltip ? (
+              <DisabledItem>
+                <Tooltip label={disabledTooltip}>{item}</Tooltip>
+              </DisabledItem>
+            ) : (
+              item
+            )
+          }
+        )}
       </MoreMenu>
 
       {!!selected && dialog}

@@ -15,13 +15,16 @@ export default function UpgradePolicy({ policy, last = false }) {
   const [open, setOpen] = useState<boolean>(false)
   const [mutation] = useMutation(DELETE_POLICY, {
     variables: { id: policy.id },
-    update: (cache, { data: { deleteUpgradePolicy } }) => updateCache(cache, {
-      query: UPGRADE_POLICIES,
-      update: prev => ({
-        ...prev,
-        upgradePolicies: prev.upgradePolicies.filter(({ id }) => id !== deleteUpgradePolicy.id),
+    update: (cache, { data: { deleteUpgradePolicy } }) =>
+      updateCache(cache, {
+        query: UPGRADE_POLICIES,
+        update: (prev) => ({
+          ...prev,
+          upgradePolicies: prev.upgradePolicies.filter(
+            ({ id }) => id !== deleteUpgradePolicy.id
+          ),
+        }),
       }),
-    }),
   })
 
   return (
@@ -65,15 +68,19 @@ export default function UpgradePolicy({ policy, last = false }) {
         <CollapseIcon
           marginLeft="8px"
           size={8}
-          style={open ? {
-            transform: 'rotate(270deg)',
-            transitionDuration: '.2s',
-            transitionProperty: 'transform',
-          } : {
-            transform: 'rotate(180deg)',
-            transitionDuration: '.2s',
-            transitionProperty: 'transform',
-          }}
+          style={
+            open
+              ? {
+                  transform: 'rotate(270deg)',
+                  transitionDuration: '.2s',
+                  transitionProperty: 'transform',
+                }
+              : {
+                  transform: 'rotate(180deg)',
+                  transitionDuration: '.2s',
+                  transitionProperty: 'transform',
+                }
+          }
         />
       </Flex>
       <Collapsible

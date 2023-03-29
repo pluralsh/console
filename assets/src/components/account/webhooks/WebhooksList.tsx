@@ -30,10 +30,14 @@ export default function WebhooksList() {
         items={edges}
         mapper={({ node }) => <Webhook hook={node} />}
         loading={loading}
-        loadNextPage={() => pageInfo.hasNextPage && fetchMore({
-          variables: { cursor: pageInfo.endCursor },
-          updateQuery: (prev, { fetchMoreResult: { webhooks } }) => extendConnection(prev, webhooks, 'webhooks'),
-        })}
+        loadNextPage={() =>
+          pageInfo.hasNextPage &&
+          fetchMore({
+            variables: { cursor: pageInfo.endCursor },
+            updateQuery: (prev, { fetchMoreResult: { webhooks } }) =>
+              extendConnection(prev, webhooks, 'webhooks'),
+          })
+        }
         hasNextPage={pageInfo.hasNextPage}
         placeholder={undefined}
         handleScroll={undefined}

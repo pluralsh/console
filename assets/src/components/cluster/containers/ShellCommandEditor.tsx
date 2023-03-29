@@ -76,7 +76,7 @@ const CodeLine = styled(({ children, ...props }) => (
   },
 }))
 
-const CodeWrap = styled.div<{ $isEditing: boolean; }>(({ $isEditing }) => ({
+const CodeWrap = styled.div<{ $isEditing: boolean }>(({ $isEditing }) => ({
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'stretch',
@@ -85,12 +85,15 @@ const CodeWrap = styled.div<{ $isEditing: boolean; }>(({ $isEditing }) => ({
 }))
 
 export function ShellCommandEditor({
-  command, setCommand, isDefault, defaultCommand,
+  command,
+  setCommand,
+  isDefault,
+  defaultCommand,
 }: {
-  command: string;
-  setCommand: (arg: string | null) => void;
-  isDefault: boolean;
-  defaultCommand: string;
+  command: string
+  setCommand: (arg: string | null) => void
+  isDefault: boolean
+  defaultCommand: string
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [inputVal, setInputVal] = useState(command)
@@ -120,7 +123,7 @@ export function ShellCommandEditor({
     <Form
       display="flex"
       gap="medium"
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault()
         setCommand(inputVal)
         setIsEditing(false)
@@ -146,15 +149,12 @@ export function ShellCommandEditor({
           <CodeInput
             placeholder={defaultCommand}
             value={inputVal}
-            prefix={(
+            prefix={
               <div className="prefix">
                 <div className="firstHalf">{commandLeft1}</div>
-                <div
-                  className="secondHalf"
-                >{commandLeft2}
-                </div>
+                <div className="secondHalf">{commandLeft2}</div>
               </div>
-            )}
+            }
             onChange={({ target: { value } }) => {
               setInputVal(value)
             }}

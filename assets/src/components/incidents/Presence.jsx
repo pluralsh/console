@@ -1,9 +1,4 @@
-import React, {
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
 
 import { Presence } from 'phoenix'
 import { Box } from 'grommet'
@@ -41,16 +36,18 @@ export function PresenceProvider({ incidentId, children }) {
 
     setChannel(channel)
     channel.join()
-    channel.on('typing', msg => cache.add(msg.name))
+    channel.on('typing', (msg) => cache.add(msg.name))
 
     const presence = new Presence(channel)
 
     presence.onSync(() => {
-      const ids = presence.list(id => id).reduce((prev, id) => ({ ...prev, [id]: true }), {})
+      const ids = presence
+        .list((id) => id)
+        .reduce((prev, id) => ({ ...prev, [id]: true }), {})
 
       setPresent({ ...present, ...ids })
     })
-    presence.onJoin(id => setPresent({ ...present, [id]: true }))
+    presence.onJoin((id) => setPresent({ ...present, [id]: true }))
     presence.onLeave((id, current) => {
       if (current.metas.length === 0) {
         setPresent({ ...present, [id]: false })
@@ -61,7 +58,7 @@ export function PresenceProvider({ incidentId, children }) {
       channel.leave()
       setPresent({})
     }
-// eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [incidentId])
 
   return (

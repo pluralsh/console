@@ -13,7 +13,9 @@ export const AuditFragment = gql`
     country
     latitude
     longitude
-    actor { ...UserFragment }
+    actor {
+      ...UserFragment
+    }
     insertedAt
   }
   ${UserFragment}

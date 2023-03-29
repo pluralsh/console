@@ -17,8 +17,10 @@ export default function AccountSideNav({
   return (
     <Select
       selectedKey={containerName}
-      onSelectionChange={toContainerName => {
-        navigate(`/pods/${pod?.metadata.namespace}/${pod?.metadata.name}/shell/${toContainerName}`)
+      onSelectionChange={(toContainerName) => {
+        navigate(
+          `/pods/${pod?.metadata.namespace}/${pod?.metadata.name}/shell/${toContainerName}`
+        )
       }}
     >
       {[

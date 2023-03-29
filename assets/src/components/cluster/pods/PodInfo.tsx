@@ -16,13 +16,16 @@ import { ContainersList } from '../containers/ContainersList'
 import PodMetadata from './PodMetadata'
 import PodConditions from './PodConditions'
 
-export const statusesToRecord = (statuses?: Maybe<Maybe<ContainerStatus>[]>) => (statuses || []).reduce((acc, container) => ({
-  ...acc,
-  ...(typeof container?.name === 'string'
-    ? { [container.name]: container }
-    : {}),
-}),
-    {} as Record<string, Maybe<ContainerStatus>>)
+export const statusesToRecord = (statuses?: Maybe<Maybe<ContainerStatus>[]>) =>
+  (statuses || []).reduce(
+    (acc, container) => ({
+      ...acc,
+      ...(typeof container?.name === 'string'
+        ? { [container.name]: container }
+        : {}),
+    }),
+    {} as Record<string, Maybe<ContainerStatus>>
+  )
 
 function getLogUrl({ name, namespace }) {
   return `/apps/${namespace}/logs?${asQuery({ pod: name })}`
@@ -62,7 +65,9 @@ export default function PodInfo() {
   const containers = pod.spec.containers || []
   const initContainers = pod.spec.initContainers || []
   const containerStatuses = statusesToRecord(pod.status?.containerStatuses)
-  const initContainerStatuses = statusesToRecord(pod.status?.initContainerStatuses)
+  const initContainerStatuses = statusesToRecord(
+    pod.status?.initContainerStatuses
+  )
   const conditions = pod?.status?.conditions || []
 
   return (

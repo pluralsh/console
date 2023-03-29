@@ -12,7 +12,7 @@ export const embed = {
     },
     aspectRatio: {
       type: String,
-      description: 'The aspect ratio of the media file (e.g. \'16 / 9\')',
+      description: "The aspect ratio of the media file (e.g. '16 / 9')",
     },
     width: {
       type: Number,

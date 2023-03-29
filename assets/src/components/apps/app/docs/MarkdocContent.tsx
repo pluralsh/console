@@ -14,7 +14,7 @@ export default function MarkdocComponent({
   raw?: string | null
   content?: RenderableTreeNode
   components?: any
-  }) {
+}) {
   content = content || getMdContent(raw)
 
   if (!content) {

@@ -40,23 +40,25 @@ function ThemeOption({ name, theme }) {
       <Text
         size="small"
         weight={500}
-      >{name}
+      >
+        {name}
       </Text>
     </Box>
   )
 }
 
-const filterThemes = value => Object.entries(normalizedThemes)
-  .filter(([key]) => key.includes(value))
-  .map(([key, theme]) => (
-    {
+const filterThemes = (value) =>
+  Object.entries(normalizedThemes)
+    .filter(([key]) => key.includes(value))
+    .map(([key, theme]) => ({
       value: key,
-      label: <ThemeOption
-        name={key}
-        theme={theme}
-      />,
-    }
-  ))
+      label: (
+        <ThemeOption
+          name={key}
+          theme={theme}
+        />
+      ),
+    }))
 
 export function ThemeSelector({ theme }) {
   const [value, setValue] = useState(theme)

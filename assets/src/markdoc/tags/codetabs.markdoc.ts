@@ -12,16 +12,20 @@ export const codetabs = {
   transform(node, config) {
     const tabs = node
       .transformChildren(config)
-      .filter(child => child?.name === 'Fence')
-      .map(fence => (typeof fence === 'object'
-        ? {
-          ...fence.attributes,
-          children: fence.children,
-        }
-        : {}))
+      .filter((child) => child?.name === 'Fence')
+      .map((fence) =>
+        typeof fence === 'object'
+          ? {
+              ...fence.attributes,
+              children: fence.children,
+            }
+          : {}
+      )
 
-    return new Tag(this.render as any,
+    return new Tag(
+      this.render as any,
       { ...node.transformAttributes(config), tabs },
-      node.transformChildren(config))
+      node.transformChildren(config)
+    )
   },
 }

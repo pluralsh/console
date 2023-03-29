@@ -11,13 +11,7 @@ import { AnsiText } from 'components/utils/AnsiText'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Flex, Span } from 'honorable'
 import { groupBy } from 'lodash'
-import {
-  Key,
-  useContext,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { Key, useContext, useMemo, useRef, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
 export default function Changelog() {
@@ -26,26 +20,30 @@ export default function Changelog() {
   const {
     build: { changelogs },
   } = useOutletContext<any>()
-  const { repo: initialRepo, tool: initialTool }: any
-    = changelogs?.length > 0 ? changelogs[0] : {}
+  const { repo: initialRepo, tool: initialTool }: any =
+    changelogs?.length > 0 ? changelogs[0] : {}
 
   const [repo, setRepo] = useState<Key>(initialRepo)
   const grouped = groupBy(changelogs, ({ repo }) => repo)
   const repoNames = Object.keys(grouped)
   const repos = applications.filter(({ name }) => repoNames.includes(name))
-  const currentRepo = useMemo(() => repos.find(r => r.name === repo),
-    [repos, repo])
+  const currentRepo = useMemo(
+    () => repos.find((r) => r.name === repo),
+    [repos, repo]
+  )
 
   const [tool, setTool] = useState<Key>(initialTool)
   const tools = useMemo(() => grouped[repo] || [], [grouped, repo])
-  const currentTool = useMemo(() => tools.find(({ tool: t }) => t === tool),
-    [tools, tool])
+  const currentTool = useMemo(
+    () => tools.find(({ tool: t }) => t === tool),
+    [tools, tool]
+  )
 
   return (
     <ScrollablePage
       scrollable={false}
       heading="Changelog"
-      headingContent={(
+      headingContent={
         <Select
           aria-label="app"
           label="Choose an app"
@@ -60,7 +58,7 @@ export default function Changelog() {
           selectedKey={repo}
           onSelectionChange={setRepo}
         >
-          {repos.map(r => (
+          {repos.map((r) => (
             <ListBoxItem
               key={r.name}
               label={r.name}
@@ -76,7 +74,7 @@ export default function Changelog() {
             />
           ))}
         </Select>
-      )}
+      }
     >
       <Flex
         direction="column"

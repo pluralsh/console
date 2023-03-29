@@ -14,7 +14,15 @@ import { LogsCard } from './LogsCard'
 import LogsFilters from './LogsFilters'
 
 export default function LogsFullScreen({
-  application, query, search, setSearch, labelList, labels, setLabels, addLabel, removeLabel,
+  application,
+  query,
+  search,
+  setSearch,
+  labelList,
+  labels,
+  setLabels,
+  addLabel,
+  removeLabel,
 }) {
   const [open, setOpen] = useState<boolean>(false)
 
@@ -64,7 +72,7 @@ export default function LogsFullScreen({
               backgroundColor="fill-one"
               marginBottom={labelList?.length > 0 ? '' : 'medium'}
               placeholder="Filter logs"
-              startIcon={(<SearchIcon size={14} />)}
+              startIcon={<SearchIcon size={14} />}
               value={search}
               onChange={({ target: { value } }) => setSearch(value)}
               width="100%"

@@ -10,15 +10,19 @@ export default function AppSelector({ applications, currentApp, directory }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
 
-  const paths = directory.map(({ path }) => path).filter(path => !!path)
+  const paths = directory.map(({ path }) => path).filter((path) => !!path)
 
-  const switchApp = useCallback(appName => {
-    const matches = paths.filter(path => pathname.endsWith(path) || pathname.includes(`/${path}/`))
-    const match = isEmpty(matches) ? '' : matches[0]
+  const switchApp = useCallback(
+    (appName) => {
+      const matches = paths.filter(
+        (path) => pathname.endsWith(path) || pathname.includes(`/${path}/`)
+      )
+      const match = isEmpty(matches) ? '' : matches[0]
 
-    navigate(`/apps/${appName}/${match}`)
-  },
-  [navigate, pathname, paths])
+      navigate(`/apps/${appName}/${match}`)
+    },
+    [navigate, pathname, paths]
+  )
 
   return (
     <Div
@@ -40,10 +44,10 @@ export default function AppSelector({ applications, currentApp, directory }) {
         selectedKey={currentApp.name}
         onSelectionChange={switchApp}
       >
-        {applications.map(app => (
+        {applications.map((app) => (
           <ListBoxItem
             key={app.name}
-            label={(
+            label={
               <P
                 overflow="hidden"
                 textOverflow="ellipsis"
@@ -61,17 +65,18 @@ export default function AppSelector({ applications, currentApp, directory }) {
                   </Span>
                 )}
               </P>
-            )}
+            }
             textValue={app.name}
-            leftContent={hasIcons(app) ? (
-              <img
-                style={{ display: 'block' }}
-                src={getIcon(app)}
-                height={16}
-                width={16}
-              />
-            ) : undefined}
-
+            leftContent={
+              hasIcons(app) ? (
+                <img
+                  style={{ display: 'block' }}
+                  src={getIcon(app)}
+                  height={16}
+                  width={16}
+                />
+              ) : undefined
+            }
           />
         ))}
       </Select>

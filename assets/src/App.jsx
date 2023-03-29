@@ -1,4 +1,8 @@
-import { RouterProvider, createBrowserRouter, createRoutesFromElements } from 'react-router-dom'
+import {
+  RouterProvider,
+  createBrowserRouter,
+  createRoutesFromElements,
+} from 'react-router-dom'
 import { Grommet } from 'grommet'
 
 import { IntercomProvider } from 'react-use-intercom'
@@ -51,4 +55,3 @@ export default function App() {
     </ApolloProvider>
   )
 }
-

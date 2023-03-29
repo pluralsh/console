@@ -7,10 +7,11 @@ const MULTIPLES = {
   n: 1000 ** 3,
 }
 
-const nanToUndef = val => (typeof val !== 'number' || Number.isNaN(val) ? undefined : val)
+const nanToUndef = (val) =>
+  typeof val !== 'number' || Number.isNaN(val) ? undefined : val
 
 export function isEqual({ metadata: first }, { metadata: second }) {
-  return (first.namespace === second.namespace && first.name === second.name)
+  return first.namespace === second.namespace && first.name === second.name
 }
 
 export function cpuParser(input?: string | null) {

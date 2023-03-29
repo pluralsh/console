@@ -3,7 +3,10 @@ import { Dispatch, ReactElement } from 'react'
 import { Button, GraphQLToast, Modal } from '@pluralsh/design-system'
 import { ServerError, useMutation } from '@apollo/client'
 
-import { RootMutationTypeDeletePeerArgs, WireguardPeer } from '../../../generated/graphql'
+import {
+  RootMutationTypeDeletePeerArgs,
+  WireguardPeer,
+} from '../../../generated/graphql'
 import { DeleteWireguardPeer } from '../graphql/mutations'
 
 interface DeleteClientProps {
@@ -24,7 +27,10 @@ const DeleteClient = styled(DeleteClientUnstyled)(() => ({
 }))
 
 function DeleteClientUnstyled({
-  name, onClose, refetch, ...props
+  name,
+  onClose,
+  refetch,
+  ...props
 }: DeleteClientProps): ReactElement {
   return (
     <div {...props}>
@@ -65,9 +71,15 @@ const ModalContent = styled(ModalContentUnstyled)(({ theme }) => ({
 }))
 
 function ModalContentUnstyled({
-  name, onClose, refetch, ...props
+  name,
+  onClose,
+  refetch,
+  ...props
 }: DeleteClientProps): ReactElement {
-  const [deletePeer, { loading, error }] = useMutation<WireguardPeer, RootMutationTypeDeletePeerArgs>(DeleteWireguardPeer, {
+  const [deletePeer, { loading, error }] = useMutation<
+    WireguardPeer,
+    RootMutationTypeDeletePeerArgs
+  >(DeleteWireguardPeer, {
     variables: {
       name,
     },
@@ -85,20 +97,25 @@ function ModalContentUnstyled({
         <Button
           secondary
           onClick={() => onClose()}
-        >Cancel
+        >
+          Cancel
         </Button>
         <Button
           destructive
           onClick={() => deletePeer()}
           loading={loading}
-        >Delete
+        >
+          Delete
         </Button>
       </div>
 
       {error && (
         <GraphQLToast
-          header={(error?.networkError as ServerError)?.statusCode?.toString() ?? 'Error'}
-          error={{ graphQLErrors: [...error?.graphQLErrors ?? []] }}
+          header={
+            (error?.networkError as ServerError)?.statusCode?.toString() ??
+            'Error'
+          }
+          error={{ graphQLErrors: [...(error?.graphQLErrors ?? [])] }}
           margin="medium"
           marginHorizontal="xxxxlarge"
         />

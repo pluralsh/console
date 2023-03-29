@@ -12,8 +12,10 @@ type ContentType = RenderableTreeNode & {
   children?: unknown
 }
 
-export default function collectHeadings(content: RenderableTreeNode,
-  headings: MarkdocHeading[] = []) {
+export default function collectHeadings(
+  content: RenderableTreeNode,
+  headings: MarkdocHeading[] = []
+) {
   const c = content as ContentType
 
   if (c) {

@@ -13,7 +13,11 @@ import { ApolloClient, useApolloClient } from '@apollo/client'
 import styled from 'styled-components'
 
 import { SEARCH_USERS } from 'components/account/users/queries'
-import { SearchGroupsDocument, SearchGroupsQuery, SearchGroupsQueryVariables } from 'generated/graphql'
+import {
+  SearchGroupsDocument,
+  SearchGroupsQuery,
+  SearchGroupsQueryVariables,
+} from 'generated/graphql'
 
 const ICONS = {
   user: <PersonIcon size={14} />,
@@ -33,11 +37,14 @@ const FETCHER = {
 export function fetchUsers(client, query, setSuggestions) {
   client
     .query({ query: SEARCH_USERS, variables: { q: query, all: true } })
-    .then(({
-      data: {
-        users: { edges },
-      },
-    }) => edges.map(({ node }) => ({ value: node, label: userSuggestion(node) })))
+    .then(
+      ({
+        data: {
+          users: { edges },
+        },
+      }) =>
+        edges.map(({ node }) => ({ value: node, label: userSuggestion(node) }))
+    )
     .then(setSuggestions)
 }
 
@@ -47,23 +54,23 @@ export function fetchGroups(client: ApolloClient<any>, query, setSuggestions) {
       query: SearchGroupsDocument,
       variables: { q: query },
     })
-    .then(({ data }) => data?.groups?.edges?.map(edge => ({
-      value: edge?.node,
-      label: groupSuggestion(edge?.node),
-    })))
+    .then(({ data }) =>
+      data?.groups?.edges?.map((edge) => ({
+        value: edge?.node,
+        label: groupSuggestion(edge?.node),
+      }))
+    )
     .then(setSuggestions)
 }
 
-export function userSuggestion({
-  name, email, avatar, id,
-}: any) {
+export function userSuggestion({ name, email, avatar, id }: any) {
   return (
     <ListBoxItem
       key={id}
       label={name}
       textValue={`${name} - ${email}`}
       description={email}
-      leftContent={(
+      leftContent={
         <AppIcon
           spacing={avatar ? 'none' : undefined}
           hue="lightest"
@@ -71,7 +78,7 @@ export function userSuggestion({
           name={name}
           url={avatar}
         />
-      )}
+      }
     />
   )
 }
@@ -155,12 +162,12 @@ function TagInput({
         <ComboBox
           aria-label={label}
           inputValue={inputValue}
-          onSelectionChange={key => {
-            const selection = suggestions.find(s => s?.value?.id === key)
+          onSelectionChange={(key) => {
+            const selection = suggestions.find((s) => s?.value?.id === key)
 
             if (selection) onAdd(selection)
           }}
-          onInputChange={value => {
+          onInputChange={(value) => {
             setInputValue(value)
             onChange({ target: { value } })
           }}
@@ -174,7 +181,7 @@ function TagInput({
         {items?.length > 0 && (
           <ChipList
             maxVisible={Infinity}
-            chips={items.map(key => (
+            chips={items.map((key) => (
               <Chip
                 size="small"
                 clickable

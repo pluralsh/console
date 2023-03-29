@@ -17,7 +17,7 @@ export function Dropzone({ children }) {
   const [{ canDrop, isOver }, drop] = useDrop({
     accept: [NativeTypes.FILE],
     drop: ({ files }) => setAttachment(files[0]),
-    collect: monitor => ({
+    collect: (monitor) => ({
       isOver: monitor.isOver(),
       canDrop: monitor.canDrop(),
     }),
@@ -41,9 +41,7 @@ export function AttachmentProvider({ children }) {
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     <AttachmentContext.Provider value={{ attachment, setAttachment }}>
-      <DndProvider backend={HTML5Backend}>
-        {children}
-      </DndProvider>
+      <DndProvider backend={HTML5Backend}>{children}</DndProvider>
     </AttachmentContext.Provider>
   )
 }

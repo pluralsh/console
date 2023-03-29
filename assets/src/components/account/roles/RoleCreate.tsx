@@ -1,9 +1,4 @@
-import {
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react'
+import { useCallback, useContext, useMemo, useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { Button } from 'honorable'
 import { Modal } from '@pluralsh/design-system'
@@ -32,8 +27,10 @@ export default function RoleCreate({ q }: any) {
   const [blockModalVisible, setBlockModalVisible] = useState(false)
   const [attributes, setAttributes] = useState(defaultAttributes)
   const [roleBindings, setRoleBindings] = useState([])
-  const uniqueRoleBindings = useMemo(() => uniqWith(roleBindings, isEqual),
-    [roleBindings])
+  const uniqueRoleBindings = useMemo(
+    () => uniqWith(roleBindings, isEqual),
+    [roleBindings]
+  )
   const resetAndClose = useCallback(() => {
     setAttributes(defaultAttributes)
     setRoleBindings([])
@@ -43,11 +40,12 @@ export default function RoleCreate({ q }: any) {
     variables: {
       attributes: { ...attributes, roleBindings: roleBindings.map(sanitize) },
     },
-    update: (cache, { data: { createRole } }) => updateCache(cache, {
-      query: ROLES_Q,
-      variables: { q },
-      update: prev => appendConnection(prev, createRole, 'roles'),
-    }),
+    update: (cache, { data: { createRole } }) =>
+      updateCache(cache, {
+        query: ROLES_Q,
+        variables: { q },
+        update: (prev) => appendConnection(prev, createRole, 'roles'),
+      }),
     onCompleted: () => resetAndClose(),
   })
 
@@ -55,7 +53,9 @@ export default function RoleCreate({ q }: any) {
     <>
       <Button
         secondary
-        onClick={() => (isAvailable ? setCreateModalVisible(true) : setBlockModalVisible(true))}
+        onClick={() =>
+          isAvailable ? setCreateModalVisible(true) : setBlockModalVisible(true)
+        }
       >
         Create role
       </Button>

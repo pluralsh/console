@@ -4,7 +4,7 @@ import { UPDATE_SMTP } from 'components/graphql/plural'
 import { Div, Flex } from 'honorable'
 import { useState } from 'react'
 
-const clean = smtp => {
+const clean = (smtp) => {
   const { __typename, ...vals } = smtp || {}
 
   return vals
@@ -35,28 +35,36 @@ export default function EmailSettingsForm({ smtp }) {
           placeholder="smtp.sendrid.net"
           width="100%"
           value={form.server || ''}
-          onChange={({ target: { value } }) => setForm({ ...form, server: value })}
+          onChange={({ target: { value } }) =>
+            setForm({ ...form, server: value })
+          }
         />
         <ValidatedInput
           label="Port"
           placeholder="587"
           width="100%"
           value={form.port || ''}
-          onChange={({ target: { value } }) => setForm({ ...form, port: parseInt(value) })}
+          onChange={({ target: { value } }) =>
+            setForm({ ...form, port: parseInt(value) })
+          }
         />
         <ValidatedInput
           label="Sender"
           hint="From address for outgoing emails"
           width="100%"
           value={form.sender || ''}
-          onChange={({ target: { value } }) => setForm({ ...form, sender: value })}
+          onChange={({ target: { value } }) =>
+            setForm({ ...form, sender: value })
+          }
         />
         <ValidatedInput
           label="User"
           hint="Username for SMTP authentication"
           width="100%"
           value={form.user || ''}
-          onChange={({ target: { value } }) => setForm({ ...form, user: value })}
+          onChange={({ target: { value } }) =>
+            setForm({ ...form, user: value })
+          }
         />
         <ValidatedInput
           label="Password"
@@ -64,7 +72,9 @@ export default function EmailSettingsForm({ smtp }) {
           type="password"
           width="100%"
           value={form.password || ''}
-          onChange={({ target: { value } }) => setForm({ ...form, password: value })}
+          onChange={({ target: { value } }) =>
+            setForm({ ...form, password: value })
+          }
         />
       </Div>
       <Flex

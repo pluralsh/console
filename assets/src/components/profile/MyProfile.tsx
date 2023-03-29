@@ -1,9 +1,4 @@
-import {
-  PageCard,
-  Tab,
-  TabList,
-  TabPanel,
-} from '@pluralsh/design-system'
+import { PageCard, Tab, TabList, TabPanel } from '@pluralsh/design-system'
 
 import { useContext, useEffect, useRef } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
@@ -20,7 +15,11 @@ const getDirectory = (me, configuration) => [
   { path: 'me', label: 'Profile', enabled: true },
   { path: 'security', label: 'Security', enabled: true },
   { path: 'permissions', label: 'Permissions', enabled: true },
-  { path: 'vpn', label: 'VPN clients', enabled: configuration?.vpnEnabled ?? false },
+  {
+    path: 'vpn',
+    label: 'VPN clients',
+    enabled: configuration?.vpnEnabled ?? false,
+  },
 ]
 
 export default function MyProfile() {
@@ -29,13 +28,20 @@ export default function MyProfile() {
   const { me, configuration } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
   const pathPrefix = '/profile'
-  const directory = getDirectory(me, configuration).filter(({ enabled }) => enabled)
+  const directory = getDirectory(me, configuration).filter(
+    ({ enabled }) => enabled
+  )
 
-  useEffect(() => setBreadcrumbs([{ text: 'profile', url: '/profile' }]), [setBreadcrumbs])
+  useEffect(
+    () => setBreadcrumbs([{ text: 'profile', url: '/profile' }]),
+    [setBreadcrumbs]
+  )
 
   if (!me) return null
 
-  const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
+  const currentTab = directory.find((tab) =>
+    pathname?.startsWith(`${pathPrefix}/${tab.path}`)
+  )
 
   return (
     <ResponsiveLayoutPage>

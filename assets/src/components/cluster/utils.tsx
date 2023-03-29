@@ -18,7 +18,7 @@ export function Container({ header, children, ...props }) {
   )
 }
 
-export function roundToTwoPlaces(x:number) {
+export function roundToTwoPlaces(x: number) {
   return roundTo(x, 2)
 }
 
@@ -36,9 +36,10 @@ export const datum = ({ timestamp, value }) => ({
   y: roundToTwoPlaces(parseFloat(value)),
 })
 
-export const cpuFmt = cpu => `${cpu}vcpu`
+export const cpuFmt = (cpu) => `${cpu}vcpu`
 
-export const getAllContainersFromPods = pods => pods
-  .filter(({ status: { phase } }) => phase !== 'Succeeded')
-  .map(({ spec: { containers } }) => containers)
-  .flat()
+export const getAllContainersFromPods = (pods) =>
+  pods
+    .filter(({ status: { phase } }) => phase !== 'Succeeded')
+    .map(({ spec: { containers } }) => containers)
+    .flat()

@@ -8,21 +8,24 @@ export default function RolePermissionToggle({
   setAttributes,
   last,
 }: any) {
-  const toggle = useCallback(enable => {
-    if (enable) {
-      setAttributes({
-        ...attributes,
-        permissions: [permission, ...attributes.permissions],
-      })
-    }
-    else {
-      setAttributes({
-        ...attributes,
-        permissions: attributes.permissions.filter(perm => perm !== permission),
-      })
-    }
-  },
-  [permission, attributes, setAttributes])
+  const toggle = useCallback(
+    (enable) => {
+      if (enable) {
+        setAttributes({
+          ...attributes,
+          permissions: [permission, ...attributes.permissions],
+        })
+      } else {
+        setAttributes({
+          ...attributes,
+          permissions: attributes.permissions.filter(
+            (perm) => perm !== permission
+          ),
+        })
+      }
+    },
+    [permission, attributes, setAttributes]
+  )
 
   return (
     <Flex
@@ -46,7 +49,7 @@ export default function RolePermissionToggle({
         </P>
       </div>
       <Switch
-        checked={!!attributes.permissions.find(perm => perm === permission)}
+        checked={!!attributes.permissions.find((perm) => perm === permission)}
         onChange={({ target: { checked } }) => toggle(checked)}
       />
     </Flex>

@@ -30,7 +30,10 @@ enum ChannelEvent {
   OnResponse = 'stdo',
 }
 
-const onConnectionError = err => console.error(`Unknown error during booting into your shell: ${JSON.stringify(err)}`)
+const onConnectionError = (err) =>
+  console.error(
+    `Unknown error during booting into your shell: ${JSON.stringify(err)}`
+  )
 
 const resize = (fitAddon: FitAddon, channel: any, terminal: Terminal) => {
   let { cols = 0, rows = 0 } = fitAddon.proposeDimensions() || {}
@@ -44,24 +47,26 @@ const resize = (fitAddon: FitAddon, channel: any, terminal: Terminal) => {
   }
 }
 
-const TerminalWrapper = styled.div<{ $backgroundColor: string }>(({ theme, $backgroundColor }) => ({
-  backgroundColor: $backgroundColor,
-  display: 'flex',
-  flexGrow: 1,
-  alignItems: 'center',
-  justifyContent: 'center',
-  overflow: 'hidden',
-  borderRadius: theme.borderRadiuses.large,
-  border: theme.borders.default,
-  padding: theme.spacing.medium,
-  '.terminal': {
-    height: '100%',
-    width: '100%',
-  },
-  '.xterm-screen': {
-    width: 'auto !important',
-  },
-}))
+const TerminalWrapper = styled.div<{ $backgroundColor: string }>(
+  ({ theme, $backgroundColor }) => ({
+    backgroundColor: $backgroundColor,
+    display: 'flex',
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    borderRadius: theme.borderRadiuses.large,
+    border: theme.borders.default,
+    padding: theme.spacing.medium,
+    '.terminal': {
+      height: '100%',
+      width: '100%',
+    },
+    '.xterm-screen': {
+      width: 'auto !important',
+    },
+  })
+)
 
 /* Stolen and adapted from app.plural.sh */
 export function TerminalScreen({
@@ -82,11 +87,14 @@ export function TerminalScreen({
   const [channel, setChannel] = useState()
   const [loaded, setLoaded] = useState(false)
 
-  const terminal = useMemo(() => new Terminal({
-    cursorBlink: true,
-    theme: normalizedThemes[terminalTheme],
-  }),
-  [terminalTheme])
+  const terminal = useMemo(
+    () =>
+      new Terminal({
+        cursorBlink: true,
+        theme: normalizedThemes[terminalTheme],
+      }),
+    [terminalTheme]
+  )
   const fitAddon = useMemo(() => new FitAddon(), [])
 
   const onResize = useCallback(() => {
@@ -141,7 +149,7 @@ export function TerminalScreen({
     const channel = socket.channel(room, params)
 
     // Handle input
-    terminal.onData(text => channel.push(ChannelEvent.OnData, { cmd: text }))
+    terminal.onData((text) => channel.push(ChannelEvent.OnData, { cmd: text }))
 
     channel.onError(onConnectionError)
     channel.on(ChannelEvent.OnResponse, ({ message }) => {

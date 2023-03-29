@@ -16,7 +16,8 @@ export function ModalHeader({ text, setOpen }) {
         <Text
           size="16px"
           weight={500}
-        >{text}
+        >
+          {text}
         </Text>
       </Box>
       <Box

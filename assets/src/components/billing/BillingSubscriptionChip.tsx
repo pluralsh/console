@@ -18,7 +18,11 @@ export default function BillingSubscriptionChip() {
         severity={isEnterprisePlan || isProPlan ? 'info' : 'neutral'}
         fillLevel={2}
       >
-        {isEnterprisePlan ? 'Enterprise' : isProPlan ? 'Professional' : 'Open-source'}
+        {isEnterprisePlan
+          ? 'Enterprise'
+          : isProPlan
+          ? 'Professional'
+          : 'Open-source'}
       </Chip>
     </Link>
   )

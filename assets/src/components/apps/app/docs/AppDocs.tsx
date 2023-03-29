@@ -53,7 +53,7 @@ export default function AppDocs() {
     }
   }
 
-  const currentDoc = docs?.find(doc => doc.id === docName)
+  const currentDoc = docs?.find((doc) => doc.id === docName)
 
   const location = useLocation()
 

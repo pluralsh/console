@@ -36,7 +36,8 @@ function Recipe({ recipe, setRecipe }) {
         <Text
           weight="bold"
           size="small"
-        >{recipe.name}
+        >
+          {recipe.name}
         </Text>
         <Text size="small">{recipe.description}</Text>
       </Box>

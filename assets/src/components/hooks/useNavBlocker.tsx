@@ -1,6 +1,10 @@
 import { Button, Modal } from '@pluralsh/design-system'
 import { ComponentProps, useEffect, useState } from 'react'
-import { unstable_BlockerFunction as BlockerFunction, unstable_useBlocker as useBlocker, useNavigate } from 'react-router-dom'
+import {
+  unstable_BlockerFunction as BlockerFunction,
+  unstable_useBlocker as useBlocker,
+  useNavigate,
+} from 'react-router-dom'
 import { P } from 'honorable'
 
 type NavProps = Parameters<BlockerFunction>[0]
@@ -15,7 +19,7 @@ function NavBlockerModal({
       header="Unsaved changes"
       open={open}
       onClose={onClose}
-      actions={(
+      actions={
         <>
           <Button
             secondary
@@ -33,7 +37,7 @@ function NavBlockerModal({
             Leave without saving
           </Button>
         </>
-      )}
+      }
       {...props}
     >
       <P>Are you sure you want to leave without saving?</P>
@@ -54,7 +58,7 @@ export const useNavBlocker = (shouldBlock: boolean) => {
     }
   }, [go, navigate, nextLoc])
 
-  useBlocker(props => {
+  useBlocker((props) => {
     if (go || !shouldBlock) {
       setGo(false)
 

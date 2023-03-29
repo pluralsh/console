@@ -1,14 +1,13 @@
-import {
-  Div,
-  Flex,
-  Img,
-  ImgProps,
-} from 'honorable'
+import { Div, Flex, Img, ImgProps } from 'honorable'
 
 import { ComponentPropsWithoutRef } from 'react'
 
 import { Footer, FooterBalancer } from './LoginFooter'
-import { LOGIN_SIDEBAR_IMAGE, RIGHT_CONTENT_MAX_WIDTH, RIGHT_CONTENT_PAD } from './constants'
+import {
+  LOGIN_SIDEBAR_IMAGE,
+  RIGHT_CONTENT_MAX_WIDTH,
+  RIGHT_CONTENT_PAD,
+} from './constants'
 
 export type PictureProps = {
   sources: ComponentPropsWithoutRef<'source'>[]

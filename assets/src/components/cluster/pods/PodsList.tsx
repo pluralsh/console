@@ -1,17 +1,7 @@
-import {
-  A,
-  Div,
-  Flex,
-  Span,
-} from 'honorable'
+import { A, Div, Flex, Span } from 'honorable'
 import { Link, useNavigate } from 'react-router-dom'
 import { Row, createColumnHelper } from '@tanstack/react-table'
-import {
-  ComponentProps,
-  memo,
-  useMemo,
-  useState,
-} from 'react'
+import { ComponentProps, memo, useMemo, useState } from 'react'
 import { filesize } from 'filesize'
 
 import type { Application, Maybe, Pod } from 'generated/graphql'
@@ -56,7 +46,7 @@ function DeletePod({ name, namespace, refetch }) {
   })
 
   return (
-    <Div onClick={e => e.stopPropagation()}>
+    <Div onClick={(e) => e.stopPropagation()}>
       <IconFrame
         clickable
         icon={<TrashCanIcon color="icon-danger" />}
@@ -105,11 +95,11 @@ type PodTableRow = {
 }
 const columnHelper = createColumnHelper<PodTableRow>()
 
-export const ColName = columnHelper.accessor(row => row.name, {
+export const ColName = columnHelper.accessor((row) => row.name, {
   id: 'name',
   enableGlobalFilter: true,
   enableSorting: true,
-  cell: props => (
+  cell: (props) => (
     <Tooltip
       label={props.getValue()}
       placement="top-start"
@@ -120,7 +110,7 @@ export const ColName = columnHelper.accessor(row => row.name, {
   header: 'Name',
 })
 
-export const ColNamespace = columnHelper.accessor(row => row.namespace, {
+export const ColNamespace = columnHelper.accessor((row) => row.namespace, {
   id: 'namespace',
   enableGlobalFilter: true,
   enableSorting: true,
@@ -133,7 +123,7 @@ export const ColNamespace = columnHelper.accessor(row => row.namespace, {
   header: 'Namespace',
 })
 
-export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
+export const ColNodeName = columnHelper.accessor((pod) => pod.nodeName, {
   id: 'nodeName',
   enableSorting: true,
   cell: ({ row: { original }, ...props }) => (
@@ -156,7 +146,8 @@ export const ColNodeName = columnHelper.accessor(pod => pod.nodeName, {
   header: 'Node name',
 })
 
-export const ColMemoryReservation = columnHelper.accessor(row => row.memory.requests,
+export const ColMemoryReservation = columnHelper.accessor(
+  (row) => row.memory.requests,
   {
     id: 'memory',
     enableSorting: true,
@@ -176,9 +167,11 @@ export const ColMemoryReservation = columnHelper.accessor(row => row.memory.requ
       />
     ),
     header: 'Memory',
-  })
+  }
+)
 
-export const ColCpuReservation = columnHelper.accessor(row => (row?.cpu?.requests),
+export const ColCpuReservation = columnHelper.accessor(
+  (row) => row?.cpu?.requests,
   {
     id: 'cpu-reservations',
     enableSorting: true,
@@ -190,17 +183,19 @@ export const ColCpuReservation = columnHelper.accessor(row => (row?.cpu?.request
       />
     ),
     header: 'CPU',
-  })
+  }
+)
 
-export const ColRestarts = columnHelper.accessor(row => row.restarts, {
+export const ColRestarts = columnHelper.accessor((row) => row.restarts, {
   id: 'restarts',
   enableSorting: true,
   sortingFn: numishSort,
-  cell: props => <TableText>{props.getValue()}</TableText>,
+  cell: (props) => <TableText>{props.getValue()}</TableText>,
   header: 'Restarts',
 })
 
-export const ColContainers = columnHelper.accessor(row => row?.containers?.statuses?.length,
+export const ColContainers = columnHelper.accessor(
+  (row) => row?.containers?.statuses?.length,
   {
     id: 'containers',
     enableSorting: true,
@@ -209,68 +204,70 @@ export const ColContainers = columnHelper.accessor(row => row?.containers?.statu
       <ContainerStatuses statuses={original?.containers?.statuses || []} />
     ),
     header: 'Containers',
-  })
+  }
+)
 
-export const ColImages = columnHelper.accessor(row => row?.images || [],
-  {
-    id: 'images',
-    cell: props => {
-      const images = props.getValue()
+export const ColImages = columnHelper.accessor((row) => row?.images || [], {
+  id: 'images',
+  cell: (props) => {
+    const images = props.getValue()
 
-      return images.map(image => (
-        <Tooltip
-          label={image}
-          placement="left-start"
+    return images.map((image) => (
+      <Tooltip
+        label={image}
+        placement="left-start"
+      >
+        <Span
+          color="text-light"
+          direction="rtl"
+          textAlign="left"
+          whiteSpace="nowrap"
         >
-          <Span
-            color="text-light"
-            direction="rtl"
-            textAlign="left"
-            whiteSpace="nowrap"
-          >
-            {image}
-          </Span>
-        </Tooltip>
-      ))
-    },
-    header: 'Images',
-    meta: {
-      truncate: true,
-    },
+          {image}
+        </Span>
+      </Tooltip>
+    ))
+  },
+  header: 'Images',
+  meta: {
+    truncate: true,
+  },
+})
+
+export const ColActions = (refetch) =>
+  columnHelper.display({
+    id: 'actions',
+    cell: ({ row: { original } }: any) => (
+      <Flex
+        flexDirection="row"
+        gap="xxsmall"
+      >
+        <DeletePod
+          name={original.name}
+          namespace={original.namespace}
+          refetch={refetch}
+        />
+        <TableCaretLink
+          to={`/pods/${original.namespace}/${original.name}`}
+          textValue={`View node ${original?.name}`}
+        />
+      </Flex>
+    ),
+    header: '',
   })
 
-export const ColActions = refetch => columnHelper.display({
-  id: 'actions',
-  cell: ({ row: { original } }: any) => (
-    <Flex
-      flexDirection="row"
-      gap="xxsmall"
-    >
+export const ColDelete = (refetch) =>
+  columnHelper.accessor((row) => row.name, {
+    id: 'delete',
+    cell: ({ row: { original } }) => (
       <DeletePod
         name={original.name}
         namespace={original.namespace}
         refetch={refetch}
       />
-      <TableCaretLink
-        to={`/pods/${original.namespace}/${original.name}`}
-        textValue={`View node ${original?.name}`}
-      />
-    </Flex>
-  ),
-  header: '',
-})
-
-export const ColDelete = refetch => columnHelper.accessor(row => row.name, {
-  id: 'delete',
-  cell: ({ row: { original } }) => (
-    <DeletePod
-      name={original.name}
-      namespace={original.namespace}
-      refetch={refetch}
-    />
-  ),
-  header: '',
-})
+    ),
+    header: '',
+  })
 
 export type PodWithId = Pod & {
   id?: Maybe<string>
@@ -282,68 +279,84 @@ type PodListProps = Omit<ComponentProps<typeof Table>, 'data'> & {
 }
 
 function getRestarts(status: Pod['status']) {
-  return (status.containerStatuses || []).reduce((count, status) => count + ((status as any)?.restartCount || 0),
-    0)
+  return (status.containerStatuses || []).reduce(
+    (count, status) => count + ((status as any)?.restartCount || 0),
+    0
+  )
 }
 
 function getImages(containers): string[] {
-  return containers?.map(container => container?.image).filter(image => !isEmpty(image)) || []
+  return (
+    containers
+      ?.map((container) => container?.image)
+      .filter((image) => !isEmpty(image)) || []
+  )
 }
 
 function getPodImages(spec: Pod['spec']) {
-  return [...new Set([...getImages(spec?.containers), ...getImages(spec?.initContainers)])]
+  return [
+    ...new Set([
+      ...getImages(spec?.containers),
+      ...getImages(spec?.initContainers),
+    ]),
+  ]
 }
 
-export const PodsList = memo(({
-  pods, applications, columns, ...props
-}: PodListProps) => {
-  const navigate = useNavigate()
-  const tableData: PodTableRow[] = useMemo(() => (pods || [])
-    .filter((pod): pod is Pod => !!pod)
-    .map(pod => {
-      const { containers } = pod.spec
+export const PodsList = memo(
+  ({ pods, applications, columns, ...props }: PodListProps) => {
+    const navigate = useNavigate()
+    const tableData: PodTableRow[] = useMemo(
+      () =>
+        (pods || [])
+          .filter((pod): pod is Pod => !!pod)
+          .map((pod) => {
+            const { containers } = pod.spec
 
-      const {
-        cpu: { requests: cpuRequests, limits: cpuLimits },
-        memory: { requests: memoryRequests, limits: memoryLimits },
-      } = getPodResources(containers)
+            const {
+              cpu: { requests: cpuRequests, limits: cpuLimits },
+              memory: { requests: memoryRequests, limits: memoryLimits },
+            } = getPodResources(containers)
 
-      const namespaceIcon
-              = pod?.metadata?.namespace
-              && applications?.find(app => app?.name === pod.metadata.namespace)
+            const namespaceIcon =
+              pod?.metadata?.namespace &&
+              applications?.find((app) => app?.name === pod.metadata.namespace)
                 ?.spec?.descriptor?.icons?.[0]
 
-      return {
-        name: pod?.metadata?.name,
-        nodeName: pod?.spec?.nodeName || undefined,
-        namespace: pod?.metadata?.namespace || undefined,
-        namespaceIcon: namespaceIcon || undefined,
-        memory: {
-          requests: memoryRequests,
-          limits: memoryLimits,
-        },
-        cpu: {
-          requests: cpuRequests,
-          limits: cpuLimits,
-        },
-        restarts: getRestarts(pod.status),
-        containers: getPodContainersStats(pod.status),
-        images: getPodImages(pod.spec),
-      }
-    }),
-  [applications, pods])
+            return {
+              name: pod?.metadata?.name,
+              nodeName: pod?.spec?.nodeName || undefined,
+              namespace: pod?.metadata?.namespace || undefined,
+              namespaceIcon: namespaceIcon || undefined,
+              memory: {
+                requests: memoryRequests,
+                limits: memoryLimits,
+              },
+              cpu: {
+                requests: cpuRequests,
+                limits: cpuLimits,
+              },
+              restarts: getRestarts(pod.status),
+              containers: getPodContainersStats(pod.status),
+              images: getPodImages(pod.spec),
+            }
+          }),
+      [applications, pods]
+    )
 
-  if (!pods || pods.length === 0) {
-    return <>No pods available.</>
+    if (!pods || pods.length === 0) {
+      return <>No pods available.</>
+    }
+
+    return (
+      <Table
+        data={tableData}
+        columns={columns}
+        virtualizeRows
+        {...props}
+        onRowClick={(_e, { original }: Row<PodTableRow>) =>
+          navigate(`/pods/${original.namespace}/${original.name}`)
+        }
+      />
+    )
   }
-
-  return (
-    <Table
-      data={tableData}
-      columns={columns}
-      virtualizeRows
-      {...props}
-      onRowClick={(_e, { original }: Row<PodTableRow>) => navigate(`/pods/${original.namespace}/${original.name}`)}
-    />
-  )
-})
+)

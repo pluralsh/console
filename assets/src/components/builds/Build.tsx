@@ -23,12 +23,13 @@ export const BUILD_TYPE_DISPLAY_NAMES = {
 }
 
 export default function Build({ build }) {
-  const {
-    id, repository, status, insertedAt, message, type,
-  } = build
+  const { id, repository, status, insertedAt, message, type } = build
   const navigate = useNavigate()
   const { applications } = useContext<any>(InstallationContext)
-  const app = useMemo(() => applications?.find(app => app.name === repository), [applications, repository])
+  const app = useMemo(
+    () => applications?.find((app) => app.name === repository),
+    [applications, repository]
+  )
 
   return (
     <Flex

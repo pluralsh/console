@@ -1,12 +1,5 @@
 import styled from 'styled-components'
-import {
-  Dispatch,
-  Key,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { Dispatch, Key, useContext, useEffect, useMemo, useState } from 'react'
 import {
   AppIcon,
   Button,
@@ -22,23 +15,26 @@ import BillingFeatureBlockModal from 'components/billing/BillingFeatureBlockModa
 import { CreateClient } from '../../vpn/actions/Create'
 import { User } from '../../../generated/graphql'
 
-const SelectAllFooterButton = styled(SelectAllFooterButtonUnstyled)(({ theme }) => ({
-  ...theme.partials.text.body2,
-  color: theme.colors['text-primary-accent'],
-}))
+const SelectAllFooterButton = styled(SelectAllFooterButtonUnstyled)(
+  ({ theme }) => ({
+    ...theme.partials.text.body2,
+    color: theme.colors['text-primary-accent'],
+  })
+)
 
 function SelectAllFooterButtonUnstyled({ onClick, ...props }) {
   return (
     <ListBoxFooter
       onClick={onClick}
-      leftContent={(
+      leftContent={
         <PeopleIcon
           color="text-primary-accent"
           size={16}
         />
-      )}
+      }
       {...props}
-    >Select All
+    >
+      Select All
     </ListBoxFooter>
   )
 }
@@ -67,7 +63,10 @@ interface HeaderActionsProps {
 }
 
 function HeaderActionsUnstyled({
-  users, refetch, onFilter, ...props
+  users,
+  refetch,
+  onFilter,
+  ...props
 }: HeaderActionsProps) {
   const { availableFeatures } = useContext(SubscriptionContext)
   const isAvailable = !!availableFeatures?.vpn
@@ -75,18 +74,24 @@ function HeaderActionsUnstyled({
   const [blockModalVisible, setBlockModalVisible] = useState(false)
   const [open, setOpen] = useState(false)
   const [selectedKeys, setSelectedKeys] = useState(new Set<Key>())
-  const userItems = useMemo(() => users.map(user => ({
-    key: user.id,
-    label: user.name,
-    description: user.email,
-    portrait: <AppIcon
-      key={user?.id}
-      name={user?.name}
-      url={user?.profile ?? ''}
-      spacing={user?.profile ? 'none' : undefined}
-      size="xxsmall"
-    />,
-  })), [users])
+  const userItems = useMemo(
+    () =>
+      users.map((user) => ({
+        key: user.id,
+        label: user.name,
+        description: user.email,
+        portrait: (
+          <AppIcon
+            key={user?.id}
+            name={user?.name}
+            url={user?.profile ?? ''}
+            spacing={user?.profile ? 'none' : undefined}
+            size="xxsmall"
+          />
+        ),
+      })),
+    [users]
+  )
 
   useEffect(() => onFilter(selectedKeys), [onFilter, selectedKeys])
 
@@ -99,17 +104,18 @@ function HeaderActionsUnstyled({
           selectionMode="multiple"
           selectedKeys={selectedKeys}
           isOpen={open}
-          onOpenChange={open => setOpen(open)}
-          onSelectionChange={selectedKeys => setSelectedKeys(selectedKeys)}
-          dropdownFooterFixed={(
-            <SelectAllFooterButton onClick={() => {
-              setOpen(false)
-              setSelectedKeys(new Set<Key>())
-            }}
+          onOpenChange={(open) => setOpen(open)}
+          onSelectionChange={(selectedKeys) => setSelectedKeys(selectedKeys)}
+          dropdownFooterFixed={
+            <SelectAllFooterButton
+              onClick={() => {
+                setOpen(false)
+                setSelectedKeys(new Set<Key>())
+              }}
             />
-          )}
+          }
         >
-          {userItems.map(user => (
+          {userItems.map((user) => (
             <ListBoxItem
               key={user.key}
               label={user.label}
@@ -122,7 +128,9 @@ function HeaderActionsUnstyled({
 
       <Button
         secondary
-        onClick={() => (isAvailable ? setCreateModalVisible(true) : setBlockModalVisible(true))}
+        onClick={() =>
+          isAvailable ? setCreateModalVisible(true) : setBlockModalVisible(true)
+        }
       >
         Create VPN client
       </Button>

@@ -6,7 +6,7 @@ import { User } from '../../../generated/graphql'
 
 import { ColumnBuilder, VPNClientRow } from './types'
 
-const ColumnUser = ColumnBuilder.accessor(row => row.user, {
+const ColumnUser = ColumnBuilder.accessor((row) => row.user, {
   id: 'user',
   header: 'User',
   enableGlobalFilter: false,
@@ -23,7 +23,8 @@ function cell(props: CellContext<VPNClientRow, User | undefined>): JSX.Element {
         <Span
           body2
           color="text-light"
-        >N/A
+        >
+          N/A
         </Span>
       )}
       {user && (
@@ -39,13 +40,15 @@ function cell(props: CellContext<VPNClientRow, User | undefined>): JSX.Element {
               body2
               color="text-light"
               lineHeight="18px"
-            >{user?.name}
+            >
+              {user?.name}
             </Span>
             <Span
               caption
               color="text-xlight"
               lineHeight="14px"
-            >{user?.email}
+            >
+              {user?.email}
             </Span>
           </Flex>
         </>

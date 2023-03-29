@@ -17,19 +17,16 @@ import { DELETE_WEBHOOK, WEBHOOKS_Q } from '../../graphql/webhooks'
 
 import WebhookHealth from './WebhookHealth'
 
-export default function Webhook({
-  hook: {
-    id, url, health, insertedAt,
-  },
-}) {
+export default function Webhook({ hook: { id, url, health, insertedAt } }) {
   const [confirm, setConfirm] = useState(false)
   const [mutation, { loading }] = useMutation(DELETE_WEBHOOK, {
     variables: { id },
-    update: (cache, { data: { deleteWebhook } }) => updateCache(cache, {
-      variables: {},
-      query: WEBHOOKS_Q,
-      update: prev => removeConnection(prev, deleteWebhook, 'webhooks'),
-    }),
+    update: (cache, { data: { deleteWebhook } }) =>
+      updateCache(cache, {
+        variables: {},
+        query: WEBHOOKS_Q,
+        update: (prev) => removeConnection(prev, deleteWebhook, 'webhooks'),
+      }),
     onCompleted: () => setConfirm(false),
   })
 
@@ -98,4 +95,3 @@ export default function Webhook({
     </>
   )
 }
-

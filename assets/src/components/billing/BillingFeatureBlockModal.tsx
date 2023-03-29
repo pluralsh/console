@@ -18,11 +18,15 @@ const ActionsWrap = styled.div({
   justifyContent: 'end',
 })
 
-export default function BillingFeatureBlockModal({ message = 'Upgrade to Plural Professional to use this feature.', open = false, onClose }: BillingFeatureBlockModalProps) {
+export default function BillingFeatureBlockModal({
+  message = 'Upgrade to Plural Professional to use this feature.',
+  open = false,
+  onClose,
+}: BillingFeatureBlockModalProps) {
   return (
     <Modal
       BackdropProps={{ zIndex: 20 }}
-      header={(
+      header={
         <Header>
           <WarningIcon
             color="icon-warning"
@@ -30,7 +34,7 @@ export default function BillingFeatureBlockModal({ message = 'Upgrade to Plural 
           />
           Upgrade needed
         </Header>
-      )}
+      }
       open={open}
       onClose={() => onClose()}
       size="large"

@@ -22,15 +22,20 @@ const BOX_ATTRS = {
   justify: 'center',
 }
 
-function Reaction({
-  name, reactions, me, messageId,
-}) {
+function Reaction({ name, reactions, me, messageId }) {
   const prolog = reactions.slice(0, 3).map(({ creator: { email } }) => email)
-  const text = prolog.length > 2 ? `${prolog.join(', ')} and ${reactions.length - prolog.length} more`
-    : prolog.length === 2 ? `${prolog[0]} and ${prolog[1]}` : prolog[0]
-  const mutationQuery = reactions.find(r => r.creator.id === me.id)
-    ? DELETE_REACTION : CREATE_REACTION
-  const [mutation] = useMutation(mutationQuery, { variables: { id: messageId } })
+  const text =
+    prolog.length > 2
+      ? `${prolog.join(', ')} and ${reactions.length - prolog.length} more`
+      : prolog.length === 2
+      ? `${prolog[0]} and ${prolog[1]}`
+      : prolog[0]
+  const mutationQuery = reactions.find((r) => r.creator.id === me.id)
+    ? DELETE_REACTION
+    : CREATE_REACTION
+  const [mutation] = useMutation(mutationQuery, {
+    variables: { id: messageId },
+  })
 
   return (
     <Tooltip>
@@ -52,27 +57,32 @@ function Reaction({
           size="10px"
           margin={{ left: '3px' }}
           color="brand"
-        >{reactions.length}
+        >
+          {reactions.length}
         </Text>
       </Box>
-      <Text size="xsmall">{text} reacted with :{name}:</Text>
+      <Text size="xsmall">
+        {text} reacted with :{name}:
+      </Text>
     </Tooltip>
   )
 }
 
 export default function MessageReactions({ message, setHover }) {
   const me = useContext(CurrentUserContext)
-  const grouped = groupBy(message.reactions, reaction => reaction.name)
+  const grouped = groupBy(message.reactions, (reaction) => reaction.name)
   // eslint-disable-next-line camelcase
-  const sorted = Object.entries(grouped).sort(([name, reactions], [other_name, other_reactions]) => {
-    // eslint-disable-next-line camelcase
-    const byLength = other_reactions.length - reactions.length
+  const sorted = Object.entries(grouped).sort(
+    ([name, reactions], [other_name, other_reactions]) => {
+      // eslint-disable-next-line camelcase
+      const byLength = other_reactions.length - reactions.length
 
-    // eslint-disable-next-line camelcase
-    if (byLength === 0) return other_name.localeCompare(name)
+      // eslint-disable-next-line camelcase
+      if (byLength === 0) return other_name.localeCompare(name)
 
-    return byLength
-  })
+      return byLength
+    }
+  )
 
   return (
     <Box

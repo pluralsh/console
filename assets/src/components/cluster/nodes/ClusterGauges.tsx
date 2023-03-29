@@ -17,7 +17,8 @@ import { ResourceUsage } from './Nodes'
 
 type Capacity = { cpu?: string; pods?: string; memory?: string } | undefined
 
-const datum = (data: MetricResponse[]) => (data[0]?.values?.[0]?.value ? parseFloat(data[0].values[0].value) : undefined)
+const datum = (data: MetricResponse[]) =>
+  data[0]?.values?.[0]?.value ? parseFloat(data[0].values[0].value) : undefined
 
 export function ClusterGauges({
   nodes,
@@ -55,10 +56,14 @@ export function ClusterGauges({
     const memLimits = datum(data.memLimits)
     const podsUsed = datum(data.pods)
 
-    const cpuTotal = sumBy(nodes,
-      n => cpuParser((n?.status?.capacity as Capacity)?.cpu) ?? 0)
-    const memTotal = sumBy(nodes, n => memoryParser((n?.status?.capacity as Capacity)?.memory))
-    const podsTotal = sumBy(nodes, n => {
+    const cpuTotal = sumBy(
+      nodes,
+      (n) => cpuParser((n?.status?.capacity as Capacity)?.cpu) ?? 0
+    )
+    const memTotal = sumBy(nodes, (n) =>
+      memoryParser((n?.status?.capacity as Capacity)?.memory)
+    )
+    const podsTotal = sumBy(nodes, (n) => {
       const pods = (n?.status?.capacity as Capacity)?.pods
 
       return pods ? parseInt(pods) ?? 0 : 0
@@ -134,7 +139,9 @@ export function ClusterGauges({
             },
           ]}
           centerLabel="Used"
-          centerVal={`${Math.round((chartData.pods.used / chartData.pods.total) * 100)}%`}
+          centerVal={`${Math.round(
+            (chartData.pods.used / chartData.pods.total) * 100
+          )}%`}
         />
       </GaugeWrap>
     </>

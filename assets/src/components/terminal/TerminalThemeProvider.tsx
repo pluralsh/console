@@ -5,8 +5,13 @@ import TerminalThemeContext from './TerminalThemeContext'
 import { getTheme, setTheme } from './themes'
 
 function TerminalThemeProvider({ children }: any) {
-  const [terminalTheme, setTerminalTheme] = useState(getTheme() || 'dark_pastel')
-  const terminalThemeValue = useMemo(() => [terminalTheme, setTerminalTheme], [terminalTheme])
+  const [terminalTheme, setTerminalTheme] = useState(
+    getTheme() || 'dark_pastel'
+  )
+  const terminalThemeValue = useMemo(
+    () => [terminalTheme, setTerminalTheme],
+    [terminalTheme]
+  )
 
   // If the theme change, persist in localstorage
   useEffect(() => {

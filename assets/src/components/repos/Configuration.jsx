@@ -1,17 +1,6 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery } from '@apollo/client'
-import {
-  Box,
-  Text,
-  TextInput,
-  ThemeContext,
-} from 'grommet'
+import { Box, Text, TextInput, ThemeContext } from 'grommet'
 import {
   Alert,
   AlertStatus,
@@ -47,16 +36,18 @@ function ValidationMessage({ message }) {
       <Text
         size="small"
         color="error"
-      >{message}
+      >
+        {message}
       </Text>
     </Box>
   )
 }
 
 function StringConfiguration({
-  config: {
-    name, default: def, placeholder, documentation, validation,
-  }, type, ctx, setValue,
+  config: { name, default: def, placeholder, documentation, validation },
+  type,
+  ctx,
+  setValue,
 }) {
   const value = ctx[name]
 
@@ -82,12 +73,13 @@ function StringConfiguration({
         type={type}
         value={value || ''}
         placeholder={placeholder}
-        onChange={val => setValue(name, val)}
+        onChange={(val) => setValue(name, val)}
       />
       <Text
         size="small"
         color="dark-6"
-      ><i>{documentation}</i>
+      >
+        <i>{documentation}</i>
       </Text>
     </Box>
   )
@@ -105,9 +97,9 @@ function PasswordConfiguration({ config, ctx, setValue }) {
 }
 
 function BucketConfiguration({
-  config: {
-    name, default: def, placeholder, documentation,
-  }, ctx, setValue,
+  config: { name, default: def, placeholder, documentation },
+  ctx,
+  setValue,
 }) {
   const { configuration } = useContext(LoginContext)
   const { prefix, cluster } = useMemo(() => {
@@ -121,13 +113,19 @@ function BucketConfiguration({
     return {}
   }, [configuration])
 
-  const format = useCallback(val => {
-    if (prefix) return `${prefix}-${cluster}-${val}`
+  const format = useCallback(
+    (val) => {
+      if (prefix) return `${prefix}-${cluster}-${val}`
 
-    return val
-  }, [prefix, cluster])
+      return val
+    },
+    [prefix, cluster]
+  )
 
-  const trim = useCallback(val => val.replace(`${prefix}-${cluster}-`, ''), [prefix, cluster])
+  const trim = useCallback(
+    (val) => val.replace(`${prefix}-${cluster}-`, ''),
+    [prefix, cluster]
+  )
 
   const [local, setLocal] = useState(trim(ctx[name] || def || ''))
 
@@ -145,7 +143,8 @@ function BucketConfiguration({
       <Text
         size="small"
         weight={500}
-      >{name}
+      >
+        {name}
       </Text>
       <Box
         direction="row"
@@ -163,7 +162,8 @@ function BucketConfiguration({
           <Text
             size="small"
             weight={500}
-          >{prefix}-{cluster}-
+          >
+            {prefix}-{cluster}-
           </Text>
         </Box>
         <TextInput
@@ -179,16 +179,17 @@ function BucketConfiguration({
       <Text
         size="small"
         color="dark-6"
-      ><i>{documentation}</i>
+      >
+        <i>{documentation}</i>
       </Text>
     </Box>
   )
 }
 
 function DomainConfiguration({
-  config: {
-    name, default: def, placeholder, documentation,
-  }, ctx, setValue,
+  config: { name, default: def, placeholder, documentation },
+  ctx,
+  setValue,
 }) {
   const { configuration } = useContext(LoginContext)
   const suffix = useMemo(() => {
@@ -199,7 +200,10 @@ function DomainConfiguration({
 
   const [local, setLocal] = useState(trimSuffix(ctx[name] || '', suffix))
 
-  const suffixed = useCallback(value => `${trimSuffix(value, suffix)}${suffix}`, [suffix])
+  const suffixed = useCallback(
+    (value) => `${trimSuffix(value, suffix)}${suffix}`,
+    [suffix]
+  )
 
   useEffect(() => {
     if (!ctx[name] && def) {
@@ -215,7 +219,8 @@ function DomainConfiguration({
       <Text
         size="small"
         weight={500}
-      >{name}
+      >
+        {name}
       </Text>
       <Box
         direction="row"
@@ -242,23 +247,25 @@ function DomainConfiguration({
           <Text
             size="small"
             weight={500}
-          >{suffix}
+          >
+            {suffix}
           </Text>
         </Box>
       </Box>
       <Text
         size="small"
         color="dark-6"
-      ><i>{documentation}</i>
+      >
+        <i>{documentation}</i>
       </Text>
     </Box>
   )
 }
 
 function IntConfiguration({
-  config: {
-    name, default: def, placeholder, documentation,
-  }, ctx, setValue,
+  config: { name, default: def, placeholder, documentation },
+  ctx,
+  setValue,
 }) {
   const value = ctx[name]
   const [err, setErr] = useState(null)
@@ -281,20 +288,22 @@ function IntConfiguration({
         label={name}
         value={value || ''}
         placeholder={placeholder}
-        modifier={err && (
-          <Text
-            size="small"
-            color="error"
-          >{err}
-          </Text>
-        )}
-        onChange={val => {
+        modifier={
+          err && (
+            <Text
+              size="small"
+              color="error"
+            >
+              {err}
+            </Text>
+          )
+        }
+        onChange={(val) => {
           const parsed = parseInt(val)
 
           if (!parsed) {
             setErr(`${val} is not an integer`)
-          }
-          else {
+          } else {
             setErr(null)
             setValue(name, parsed)
           }
@@ -303,7 +312,8 @@ function IntConfiguration({
       <Text
         size="small"
         color="dark-6"
-      ><i>{documentation}</i>
+      >
+        <i>{documentation}</i>
       </Text>
     </Box>
   )
@@ -336,54 +346,54 @@ function BoolConfiguration({ config: { name, default: def }, ctx, setValue }) {
 
 function ConfigurationItem({ config, ctx, setValue }) {
   switch (config.type) {
-  case ConfigurationType.BOOL:
-    return (
-      <BoolConfiguration
-        config={config}
-        ctx={ctx}
-        setValue={setValue}
-      />
-    )
-  case ConfigurationType.INT:
-    return (
-      <IntConfiguration
-        config={config}
-        ctx={ctx}
-        setValue={setValue}
-      />
-    )
-  case ConfigurationType.DOMAIN:
-    return (
-      <DomainConfiguration
-        config={config}
-        ctx={ctx}
-        setValue={setValue}
-      />
-    )
-  case ConfigurationType.BUCKET:
-    return (
-      <BucketConfiguration
-        config={config}
-        ctx={ctx}
-        setValue={setValue}
-      />
-    )
-  case ConfigurationType.PASSWORD:
-    return (
-      <PasswordConfiguration
-        config={config}
-        ctx={ctx}
-        setValue={setValue}
-      />
-    )
-  default:
-    return (
-      <StringConfiguration
-        config={config}
-        ctx={ctx}
-        setValue={setValue}
-      />
-    )
+    case ConfigurationType.BOOL:
+      return (
+        <BoolConfiguration
+          config={config}
+          ctx={ctx}
+          setValue={setValue}
+        />
+      )
+    case ConfigurationType.INT:
+      return (
+        <IntConfiguration
+          config={config}
+          ctx={ctx}
+          setValue={setValue}
+        />
+      )
+    case ConfigurationType.DOMAIN:
+      return (
+        <DomainConfiguration
+          config={config}
+          ctx={ctx}
+          setValue={setValue}
+        />
+      )
+    case ConfigurationType.BUCKET:
+      return (
+        <BucketConfiguration
+          config={config}
+          ctx={ctx}
+          setValue={setValue}
+        />
+      )
+    case ConfigurationType.PASSWORD:
+      return (
+        <PasswordConfiguration
+          config={config}
+          ctx={ctx}
+          setValue={setValue}
+        />
+      )
+    default:
+      return (
+        <StringConfiguration
+          config={config}
+          ctx={ctx}
+          setValue={setValue}
+        />
+      )
   }
 }
 
@@ -393,8 +403,8 @@ function available(config, context) {
   const { condition } = config
 
   switch (condition.operation) {
-  case OperationType.NOT:
-    return !context[condition.field]
+    case OperationType.NOT:
+      return !context[condition.field]
   }
 
   return true
@@ -407,7 +417,9 @@ function findIndex(ind, context, sections) {
     const ctx = context[sections[nextInd].repository.name]
 
     if (!ctx && sections[nextInd].configuration.length > 0) break
-    const canConfigure = sections[nextInd].configuration.some(conf => !ctx[conf.name] && available(conf, ctx))
+    const canConfigure = sections[nextInd].configuration.some(
+      (conf) => !ctx[conf.name] && available(conf, ctx)
+    )
 
     if (canConfigure) break
     nextInd++
@@ -423,28 +435,37 @@ function RecipeConfiguration({ recipe, context: ctx, setOpen }) {
   const [ind, setInd] = useState(findIndex(0, ctx, sections))
   const { repository } = sections[ind]
   const hasNext = sections.length > ind + 1
-  const configuration = useMemo(() => sections[ind].configuration.reduce((acc, conf) => (
-    { ...acc, [conf.name]: conf }
-  ), {}), [sections, ind])
+  const configuration = useMemo(
+    () =>
+      sections[ind].configuration.reduce(
+        (acc, conf) => ({ ...acc, [conf.name]: conf }),
+        {}
+      ),
+    [sections, ind]
+  )
 
   const [mutation, { loading, error }] = useMutation(INSTALL_RECIPE, {
     variables: { id: recipe.id, oidc, context: JSON.stringify(context) },
-    update: (cache, { data: { installRecipe } }) => updateCache(cache, {
-      query: BUILDS_Q,
-      update: prev => appendConnection(prev, installRecipe, 'builds'),
-    }),
+    update: (cache, { data: { installRecipe } }) =>
+      updateCache(cache, {
+        query: BUILDS_Q,
+        update: (prev) => appendConnection(prev, installRecipe, 'builds'),
+      }),
     onCompleted: () => setOpen(false),
   })
 
-  const setValue = useCallback((name, val) => (
-    setContext({
-      ...context,
-      [repository.name]: { ...(context[repository.name] || {}), [name]: val },
-    })
-  ), [setContext, context, repository, ind])
+  const setValue = useCallback(
+    (name, val) =>
+      setContext({
+        ...context,
+        [repository.name]: { ...(context[repository.name] || {}), [name]: val },
+      }),
+    [setContext, context, repository, ind]
+  )
 
   useEffect(() => {
-    if (!(repository.name in context)) setContext({ ...context, [repository.name]: {} })
+    if (!(repository.name in context))
+      setContext({ ...context, [repository.name]: {} })
   }, [setContext, repository, context])
 
   const next = useCallback(() => {
@@ -479,8 +500,8 @@ function RecipeConfiguration({ recipe, context: ctx, setOpen }) {
             gap="12px"
           >
             {Object.values(configuration)
-              .filter(conf => available(conf, context[repository.name] || {}))
-              .map(conf => (
+              .filter((conf) => available(conf, context[repository.name] || {}))
+              .map((conf) => (
                 <ConfigurationItem
                   key={`${repository.name}-${conf.name}`}
                   config={conf}
@@ -508,7 +529,9 @@ function RecipeConfiguration({ recipe, context: ctx, setOpen }) {
                 checked={oidc}
                 onChange={({ target: { checked } }) => setOidc(checked)}
               />
-              <Text size="small">{oidc ? 'oidc enabled' : 'oidc disabled'}</Text>
+              <Text size="small">
+                {oidc ? 'oidc enabled' : 'oidc disabled'}
+              </Text>
             </Box>
           )}
           {ind > 0 && (
@@ -528,7 +551,11 @@ function RecipeConfiguration({ recipe, context: ctx, setOpen }) {
   )
 }
 
-const buildContext = contexts => contexts.reduce((acc, { repository, context }) => ({ ...acc, [repository]: context }), {})
+const buildContext = (contexts) =>
+  contexts.reduce(
+    (acc, { repository, context }) => ({ ...acc, [repository]: context }),
+    {}
+  )
 
 function RestrictedRecipe() {
   return (

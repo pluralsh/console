@@ -50,12 +50,12 @@ const buildsRoutes = [
   >
     <Route
       index
-      element={(
+      element={
         <Navigate
           replace
           to="progress"
         />
-      )}
+      }
     />
     <Route
       path="progress"
@@ -75,12 +75,12 @@ const auditsRoutes = [
   >
     <Route
       index
-      element={(
+      element={
         <Navigate
           replace
           to="table"
         />
-      )}
+      }
     />
     <Route
       path="table"
@@ -100,12 +100,12 @@ const profileRoutes = [
   >
     <Route
       index
-      element={(
+      element={
         <Navigate
           replace
           to="me"
         />
-      )}
+      }
     />
     <Route
       path="me"
@@ -133,12 +133,12 @@ const accountRoutes = [
   >
     <Route
       index
-      element={(
+      element={
         <Navigate
           replace
           to="users"
         />
-      )}
+      }
     />
     <Route
       path="users"
@@ -211,7 +211,7 @@ export const consoleRoutes = [
   /* AUDITS */
   ...auditsRoutes,
 
-    /* ACCOUNT */
+  /* ACCOUNT */
   ...accountRoutes,
 
   /* PROFILE */

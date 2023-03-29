@@ -1,7 +1,9 @@
 import { ReactNode, useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import moment from 'moment'
-import SubscriptionContext, { SubscriptionContextType } from 'components/contexts//SubscriptionContext'
+import SubscriptionContext, {
+  SubscriptionContextType,
+} from 'components/contexts//SubscriptionContext'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import styled from 'styled-components'
 
@@ -13,13 +15,10 @@ type BillingSubscriptionProviderPropsType = {
   children: ReactNode
 }
 
-export default function BillingSubscriptionProvider({ children }: BillingSubscriptionProviderPropsType) {
-  const {
-    data,
-    loading,
-    error,
-    refetch,
-  } = useQuery(SUBSCRIPTION_QUERY, {
+export default function BillingSubscriptionProvider({
+  children,
+}: BillingSubscriptionProviderPropsType) {
+  const { data, loading, error, refetch } = useQuery(SUBSCRIPTION_QUERY, {
     fetchPolicy: 'network-only',
     pollInterval: 60_000,
   })
@@ -34,12 +33,17 @@ export default function BillingSubscriptionProvider({ children }: BillingSubscri
     const isPaidPlan = isProPlan || isEnterprisePlan
     const grandfatheredUntil = account?.grandfatheredUntil
     const isLegacyUser = !!grandfatheredUntil
-    const isGrandfathered = isLegacyUser && moment().isBefore(moment(grandfatheredUntil))
+    const isGrandfathered =
+      isLegacyUser && moment().isBefore(moment(grandfatheredUntil))
 
     // Marking grandfathering as expired only for a month after expiry date.
     // Afterwards expiry banners will not be visible and UI will be the same as for open-source users.
-    const isGrandfathetingExpired = isLegacyUser
-      && moment().isBetween(moment(grandfatheredUntil), moment(grandfatheredUntil).add(1, 'M'))
+    const isGrandfathetingExpired =
+      isLegacyUser &&
+      moment().isBetween(
+        moment(grandfatheredUntil),
+        moment(grandfatheredUntil).add(1, 'M')
+      )
 
     return {
       account,
@@ -55,7 +59,12 @@ export default function BillingSubscriptionProvider({ children }: BillingSubscri
     }
   }, [data, refetch])
 
-  if (error) return <Error>An error occured, please reload the page or contact support.</Error>
+  if (error)
+    return (
+      <Error>
+        An error occured, please reload the page or contact support.
+      </Error>
+    )
   if (loading) return <LoadingIndicator />
 
   return (

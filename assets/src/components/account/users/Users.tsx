@@ -29,7 +29,7 @@ export default function Users() {
     <ScrollablePage
       scrollable={false}
       heading="Users"
-      headingContent={(
+      headingContent={
         <Flex
           alignItems="flex-end"
           gap="medium"
@@ -55,15 +55,15 @@ export default function Users() {
           {/* Invites are only available when not using login with Plural. */}
           {configuration && !configuration?.pluralLogin && <UserInvite />}
         </Flex>
-      )}
+      }
     >
       <TabPanel
-        as={(
+        as={
           <Flex
             direction="column"
             height="100%"
           />
-        )}
+        }
         stateRef={tabStateRef}
       >
         {/* {selectedKey === 'Invites' && <Invites />} Add it once API will be ready. */}

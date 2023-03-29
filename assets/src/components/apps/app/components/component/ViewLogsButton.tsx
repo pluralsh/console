@@ -9,7 +9,9 @@ function hasLogs(kind: string): boolean {
 }
 
 function getLogUrl({ name, namespace, labels }) {
-  const appLabel = labels.find(({ name }) => name === 'app' || name === 'app.kubernetes.io/name')
+  const appLabel = labels.find(
+    ({ name }) => name === 'app' || name === 'app.kubernetes.io/name'
+  )
 
   return `/apps/${namespace}/logs?${asQuery({
     job: `${namespace}/${appLabel ? appLabel.value : name}`,

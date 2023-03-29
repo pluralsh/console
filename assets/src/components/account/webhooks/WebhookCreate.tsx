@@ -1,9 +1,4 @@
-import {
-  Button,
-  FormField,
-  Input,
-  Modal,
-} from '@pluralsh/design-system'
+import { Button, FormField, Input, Modal } from '@pluralsh/design-system'
 import { useState } from 'react'
 import { appendConnection, updateCache } from 'utils/graphql'
 import { useMutation } from '@apollo/client'
@@ -15,11 +10,12 @@ export default function WebhookCreate() {
   const [attributes, setAttributes] = useState({ url: '' })
   const [mutation, { loading }] = useMutation(CREATE_WEBHOOK, {
     variables: { attributes },
-    update: (cache, { data: { createWebhook } }) => updateCache(cache, {
-      variables: {},
-      query: WEBHOOKS_Q,
-      update: prev => appendConnection(prev, createWebhook, 'webhooks'),
-    }),
+    update: (cache, { data: { createWebhook } }) =>
+      updateCache(cache, {
+        variables: {},
+        query: WEBHOOKS_Q,
+        update: (prev) => appendConnection(prev, createWebhook, 'webhooks'),
+      }),
     onCompleted: () => setOpen(false),
   })
 
@@ -38,7 +34,7 @@ export default function WebhookCreate() {
         header="Create webhook"
         open={open}
         onClose={() => setOpen(false)}
-        actions={(
+        actions={
           <>
             <Button
               secondary
@@ -56,11 +52,13 @@ export default function WebhookCreate() {
               Create
             </Button>
           </>
-        )}
+        }
       >
         <FormField label="URL">
           <Input
-            onChange={({ target: { value } }) => setAttributes({ ...attributes, url: value })}
+            onChange={({ target: { value } }) =>
+              setAttributes({ ...attributes, url: value })
+            }
             placeholder="https://hooks.slack.com/services/..."
             value={attributes.url}
           />

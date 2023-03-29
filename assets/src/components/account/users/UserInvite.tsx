@@ -15,7 +15,8 @@ import { GqlError } from '../../utils/Alert'
 
 import { CREATE_INVITE } from './queries'
 
-export const inviteLink = invite => `https://${apiHost()}/invite/${invite.secureId}`
+export const inviteLink = (invite) =>
+  `https://${apiHost()}/invite/${invite.secureId}`
 
 export default function UserInvite() {
   const [open, setOpen] = useState(false)
@@ -23,7 +24,7 @@ export default function UserInvite() {
   const [invite, setInvite] = useState<any>(null)
   const [mutation, { loading, error, reset }] = useMutation(CREATE_INVITE, {
     variables: { attributes: { email } },
-    onCompleted: data => setInvite(data?.createInvite),
+    onCompleted: (data) => setInvite(data?.createInvite),
   })
   const resetAndClose = useCallback(() => {
     setEmail('')
@@ -47,26 +48,28 @@ export default function UserInvite() {
         open={open}
         onClose={() => resetAndClose()}
         width="100%"
-        actions={invite ? (
-          <Button onClick={() => resetAndClose()}>Done</Button>
-        ) : (
-          <>
-            <Button
-              secondary
-              onClick={() => resetAndClose()}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => mutation()}
-              loading={loading}
-              disabled={email.length === 0}
-              marginLeft="medium"
-            >
-              Invite
-            </Button>
-          </>
-        )}
+        actions={
+          invite ? (
+            <Button onClick={() => resetAndClose()}>Done</Button>
+          ) : (
+            <>
+              <Button
+                secondary
+                onClick={() => resetAndClose()}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => mutation()}
+                loading={loading}
+                disabled={email.length === 0}
+                marginLeft="medium"
+              >
+                Invite
+              </Button>
+            </>
+          )
+        }
       >
         <ValidatedInput
           disabled={!!invite}
@@ -81,8 +84,12 @@ export default function UserInvite() {
             header="Failed to invite user"
           />
         )}
-        {invite?.secureId && <Codeline marginTop="small">{inviteLink(invite)}</Codeline>}
-        {invite && !invite.secureId && <span>An email was sent to {email} to accept the invite</span>}
+        {invite?.secureId && (
+          <Codeline marginTop="small">{inviteLink(invite)}</Codeline>
+        )}
+        {invite && !invite.secureId && (
+          <span>An email was sent to {email} to accept the invite</span>
+        )}
       </Modal>
     </>
   )

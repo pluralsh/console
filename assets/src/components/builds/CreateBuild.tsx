@@ -12,13 +12,7 @@ import { BUILDS_Q, CREATE_BUILD } from 'components/graphql/builds'
 import { InstallationContext } from 'components/Installations'
 import { BuildTypes } from 'components/types'
 import { A, Flex } from 'honorable'
-import {
-  Key,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react'
+import { Key, useCallback, useContext, useMemo, useState } from 'react'
 import { ApolloError, useMutation } from '@apollo/client'
 import { appendConnection, updateCache } from 'utils/graphql'
 import Fuse from 'fuse.js'
@@ -43,7 +37,10 @@ export default function CreateBuild() {
   const [success, setSuccess] = useState<string>()
   const [error, setError] = useState<ApolloError>()
 
-  const currentApp = useMemo(() => applications.find(app => app.name === inputValue), [applications, inputValue])
+  const currentApp = useMemo(
+    () => applications.find((app) => app.name === inputValue),
+    [applications, inputValue]
+  )
 
   const filteredApps = useMemo(() => {
     const fuse = new Fuse(applications, searchOptions)
@@ -61,49 +58,56 @@ export default function CreateBuild() {
   }, [])
 
   const [mutation, { loading }] = useMutation(CREATE_BUILD, {
-    onCompleted: result => {
+    onCompleted: (result) => {
       reset()
       setSuccess(result?.createBuild?.id)
       setTimeout(() => setSuccess(undefined), 3000)
     },
-    onError: error => {
+    onError: (error) => {
       setError(error)
       setTimeout(() => setError(undefined), 3000)
     },
-    update: (cache, { data: { createBuild } }) => updateCache(cache, {
-      query: BUILDS_Q,
-      update: prev => appendConnection(prev, createBuild, 'builds'),
-      variables: {},
-    }),
+    update: (cache, { data: { createBuild } }) =>
+      updateCache(cache, {
+        query: BUILDS_Q,
+        update: (prev) => appendConnection(prev, createBuild, 'builds'),
+        variables: {},
+      }),
   })
 
   const deploy = useCallback(() => {
-    mutation({ variables: { attributes: { type: selectedType, repository: selectedApp, message: 'Deployed from console' } } })
+    mutation({
+      variables: {
+        attributes: {
+          type: selectedType,
+          repository: selectedApp,
+          message: 'Deployed from console',
+        },
+      },
+    })
   }, [mutation, selectedApp, selectedType])
 
-  const onSelectionChange = key => {
+  const onSelectionChange = (key) => {
     if (key) {
       setSelectedApp(key)
       setInputValue(key)
     }
   }
 
-  const onInputChange = value => {
+  const onInputChange = (value) => {
     setSelectedApp(undefined)
     setInputValue(value)
   }
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
-        Create build
-      </Button>
+      <Button onClick={() => setOpen(true)}>Create build</Button>
       {open && (
         <Modal
           header="Create build"
           open={open}
           onClose={reset}
-          actions={(
+          actions={
             <>
               <Button
                 secondary
@@ -120,7 +124,7 @@ export default function CreateBuild() {
                 Create build
               </Button>
             </>
-          )}
+          }
         >
           <Flex
             direction="column"
@@ -133,26 +137,30 @@ export default function CreateBuild() {
                 onSelectionChange={onSelectionChange}
                 onInputChange={onInputChange}
                 inputProps={{ placeholder: 'Choose an app' }}
-                startIcon={(!!currentApp && hasIcons(currentApp)) ? (
-                  <img
-                    src={getIcon(currentApp)}
-                    height={16}
-                  />
-                ) : undefined}
+                startIcon={
+                  !!currentApp && hasIcons(currentApp) ? (
+                    <img
+                      src={getIcon(currentApp)}
+                      height={16}
+                    />
+                  ) : undefined
+                }
                 selectedKey={selectedApp}
                 maxHeight={200}
               >
-                {filteredApps.map(app => (
+                {filteredApps.map((app) => (
                   <ListBoxItem
                     key={app.name}
                     label={app.name}
                     textValue={app.name}
-                    leftContent={hasIcons(app) ? (
-                      <img
-                        src={getIcon(app)}
-                        height={16}
-                      />
-                    ) : undefined}
+                    leftContent={
+                      hasIcons(app) ? (
+                        <img
+                          src={getIcon(app)}
+                          height={16}
+                        />
+                      ) : undefined
+                    }
                   />
                 ))}
               </ComboBox>

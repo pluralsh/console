@@ -9,33 +9,39 @@ import { useOutletContext } from 'react-router-dom'
 const COLUMN_HELPER = createColumnHelper<any>()
 
 const columns = [
-  COLUMN_HELPER.accessor(row => row.host, {
+  COLUMN_HELPER.accessor((row) => row.host, {
     id: 'host',
-    cell: prop => prop.getValue(),
+    cell: (prop) => prop.getValue(),
     header: 'Host',
   }),
-  COLUMN_HELPER.accessor(row => row.path, {
+  COLUMN_HELPER.accessor((row) => row.path, {
     id: 'path',
-    cell: prop => prop.getValue(),
+    cell: (prop) => prop.getValue(),
     header: 'Path',
   }),
-  COLUMN_HELPER.accessor(row => row.backend, {
+  COLUMN_HELPER.accessor((row) => row.backend, {
     id: 'backend',
-    cell: prop => prop.getValue(),
+    cell: (prop) => prop.getValue(),
     header: 'Backend',
   }),
 ]
 
 function Routes({ rules }) {
-  const data = useMemo(() => rules.reduce((accumulator, rule) => {
-    const paths = rule.http?.paths
+  const data = useMemo(
+    () =>
+      rules.reduce((accumulator, rule) => {
+        const paths = rule.http?.paths
 
-    return accumulator.concat(paths?.map(({ path, backend: { serviceName, servicePort } }) => ({
-      host: rule.host,
-      path: path || '*',
-      backend: `${serviceName || '-'}:${servicePort || '-'}`,
-    })))
-  }, []), [rules])
+        return accumulator.concat(
+          paths?.map(({ path, backend: { serviceName, servicePort } }) => ({
+            host: rule.host,
+            path: path || '*',
+            backend: `${serviceName || '-'}:${servicePort || '-'}`,
+          }))
+        )
+      }, []),
+    [rules]
+  )
 
   return (
     <>
@@ -76,7 +82,9 @@ export default function Ingress() {
               title={loadBalancer.ingress[0].ip ? 'IP' : 'Hostname'}
               fontWeight={600}
             >
-              {loadBalancer.ingress[0].ip || loadBalancer.ingress[0].hostname || '-'}
+              {loadBalancer.ingress[0].ip ||
+                loadBalancer.ingress[0].hostname ||
+                '-'}
             </PropWide>
           </Card>
         </>

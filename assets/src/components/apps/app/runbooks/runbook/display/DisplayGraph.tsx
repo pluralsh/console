@@ -5,9 +5,19 @@ import { useContext, useMemo } from 'react'
 
 import { DisplayContext } from '../RunbookDisplay'
 
-const convertVals = v => v.map(({ timestamp, value }) => ({ x: new Date(timestamp * 1000), y: parseFloat(value) }))
+const convertVals = (v) =>
+  v.map(({ timestamp, value }) => ({
+    x: new Date(timestamp * 1000),
+    y: parseFloat(value),
+  }))
 
-const formatLegend = (legend, props) => (!props ? legend : Object.entries(props).reduce((leg, [k, v]) => leg.replace(`$${k}`, v), legend))
+const formatLegend = (legend, props) =>
+  !props
+    ? legend
+    : Object.entries(props).reduce(
+        (leg, [k, v]) => leg.replace(`$${k}`, v),
+        legend
+      )
 
 export function DisplayGraph({ attributes: { datasource, label } }) {
   const { datasources } = useContext(DisplayContext)
@@ -20,7 +30,7 @@ export function DisplayGraph({ attributes: { datasource, label } }) {
       data: convertVals(values),
     }))
 
-    return { metrics, format: ValueFormats[format] || (v => v) }
+    return { metrics, format: ValueFormats[format] || ((v) => v) }
   }, [datasources, datasource])
 
   return (

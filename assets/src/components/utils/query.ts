@@ -10,7 +10,7 @@ export function toMap(params) {
   return [...params.entries()].reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {})
 }
 
-export function asQuery(params:Record<string, string>) {
+export function asQuery(params: Record<string, string>) {
   const search = new URLSearchParams()
 
   for (const [k, v] of Object.entries(params)) {

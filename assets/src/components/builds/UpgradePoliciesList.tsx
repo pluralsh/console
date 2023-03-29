@@ -12,7 +12,9 @@ import UpgradePolicyCreate from './UpgradePolicyCreate'
 
 export default function UpgradePoliciesList() {
   const { setModal } = useContext<any>(PolicyContext)
-  const { data } = useQuery(UPGRADE_POLICIES, { fetchPolicy: 'cache-and-network' })
+  const { data } = useQuery(UPGRADE_POLICIES, {
+    fetchPolicy: 'cache-and-network',
+  })
 
   if (!data) return null
 
@@ -34,7 +36,9 @@ export default function UpgradePoliciesList() {
             />
           ))}
         </Card>
-      ) : 'No upgrade policies available.'}
+      ) : (
+        'No upgrade policies available.'
+      )}
       <Flex
         gap="medium"
         justify="end"
@@ -47,20 +51,25 @@ export default function UpgradePoliciesList() {
           Cancel
         </Button>
         <Button
-          onClick={() => setModal({
-            header: (
-              <Button
-                onClick={() => setModal({
-                  header: 'Upgrade Policies',
-                  content: <UpgradePoliciesList />,
-                })}
-                startIcon={<ArrowLeftIcon />}
-                tertiary
-              >
-                Back to policies
-              </Button>),
-            content: <UpgradePolicyCreate />,
-          })}
+          onClick={() =>
+            setModal({
+              header: (
+                <Button
+                  onClick={() =>
+                    setModal({
+                      header: 'Upgrade Policies',
+                      content: <UpgradePoliciesList />,
+                    })
+                  }
+                  startIcon={<ArrowLeftIcon />}
+                  tertiary
+                >
+                  Back to policies
+                </Button>
+              ),
+              content: <UpgradePolicyCreate />,
+            })
+          }
         >
           New policy
         </Button>

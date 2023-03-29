@@ -37,9 +37,12 @@ export function Repository({ repo, setRepo }) {
         <Text
           size="small"
           weight={500}
-        >{repo.name}
+        >
+          {repo.name}
         </Text>
-        <Text size="small"><i>{repo.description}</i></Text>
+        <Text size="small">
+          <i>{repo.description}</i>
+        </Text>
       </Box>
     </Box>
   )
@@ -71,12 +74,12 @@ export function SearchRepos({ setOpen, setRepo }) {
           pad="small"
         >
           <TextInput
-            icon={(
+            icon={
               <SearchIcon
                 size={16}
                 border="tone-medium"
               />
-            )}
+            }
             reverse
             value={query}
             placeholder="search for a repo by name"
@@ -88,13 +91,15 @@ export function SearchRepos({ setOpen, setRepo }) {
           style={{ overflow: 'auto' }}
         >
           <Box flex={false}>
-            {data && data.repositories && data.repositories.edges.map(({ node: repo }) => (
-              <Repository
-                key={repo.id}
-                repo={repo}
-                setRepo={setRepo}
-              />
-            ))}
+            {data &&
+              data.repositories &&
+              data.repositories.edges.map(({ node: repo }) => (
+                <Repository
+                  key={repo.id}
+                  repo={repo}
+                  setRepo={setRepo}
+                />
+              ))}
           </Box>
         </Box>
       </Box>

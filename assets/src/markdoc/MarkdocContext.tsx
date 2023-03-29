@@ -27,7 +27,9 @@ export function useMarkdocContext() {
   const context = useContext(MarkdocContext)
 
   if (!context) {
-    throw Error('You must wrap your content in a MarkdocContextProvider to use useMarkdocContext()')
+    throw Error(
+      'You must wrap your content in a MarkdocContextProvider to use useMarkdocContext()'
+    )
   }
 
   return context

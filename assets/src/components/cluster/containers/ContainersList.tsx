@@ -1,12 +1,7 @@
 import { Row, createColumnHelper } from '@tanstack/react-table'
 import { ComponentProps, useMemo } from 'react'
 import { filesize } from 'filesize'
-import type {
-  Container,
-  ContainerStatus,
-  Maybe,
-  Port,
-} from 'generated/graphql'
+import type { Container, ContainerStatus, Maybe, Port } from 'generated/graphql'
 import {
   Readiness,
   ReadinessT,
@@ -50,16 +45,20 @@ type ContainerTableRow = {
 }
 const columnHelper = createColumnHelper<ContainerTableRow>()
 
-const ColStatus = columnHelper.accessor(row => (row?.readiness ? readinessToLabel[row.readiness] : ''),
+const ColStatus = columnHelper.accessor(
+  (row) => (row?.readiness ? readinessToLabel[row.readiness] : ''),
   {
     id: 'status',
     cell: ({ row: { original } }) => (
-      <div><ContainerStatusChip readiness={original?.readiness} /></div>
+      <div>
+        <ContainerStatusChip readiness={original?.readiness} />
+      </div>
     ),
     header: 'Status',
-  })
+  }
+)
 
-const ColName = columnHelper.accessor(row => row.name, {
+const ColName = columnHelper.accessor((row) => row.name, {
   id: 'name',
   cell: ({ row: { original }, ...props }) => (
     <TableText>
@@ -77,9 +76,9 @@ const ColName = columnHelper.accessor(row => row.name, {
   },
 })
 
-const ColImage = columnHelper.accessor(row => row.image, {
+const ColImage = columnHelper.accessor((row) => row.image, {
   id: 'image',
-  cell: props => (
+  cell: (props) => (
     <Tooltip
       label={props.getValue()}
       placement="top-start"
@@ -99,18 +98,20 @@ const ColImage = columnHelper.accessor(row => row.image, {
   },
 })
 
-const ColPorts = columnHelper.accessor(row => row.ports, {
+const ColPorts = columnHelper.accessor((row) => row.ports, {
   id: 'ports',
-  cell: props => {
+  cell: (props) => {
     const content = props
       .getValue()
-      ?.map(port => (port ? (
-        <div>
-          {port.protocol ? `${port.protocol} ` : ''}
-          {port.containerPort}
-        </div>
-      ) : undefined))
-      .filter(port => !!port)
+      ?.map((port) =>
+        port ? (
+          <div>
+            {port.protocol ? `${port.protocol} ` : ''}
+            {port.containerPort}
+          </div>
+        ) : undefined
+      )
+      .filter((port) => !!port)
 
     return (
       <TableText>{!content || content.length === 0 ? '—' : content}</TableText>
@@ -119,30 +120,29 @@ const ColPorts = columnHelper.accessor(row => row.ports, {
   header: 'Ports',
 })
 
-const ColMemoryReservation = columnHelper.accessor(row => row?.memory?.requests, {
-  id: 'memory',
-  cell: ({ row: { original }, ...props }) => {
-    const requests = props.getValue()
+const ColMemoryReservation = columnHelper.accessor(
+  (row) => row?.memory?.requests,
+  {
+    id: 'memory',
+    cell: ({ row: { original }, ...props }) => {
+      const requests = props.getValue()
 
-    return (
-      <Usage
-        used={
-          requests === undefined
-            ? undefined
-            : filesize(requests)
-        }
-        total={
-          original.memory.limits === undefined
-            ? undefined
-            : filesize(original.memory.limits)
-        }
-      />
-    )
-  },
-  header: 'Memory',
-})
+      return (
+        <Usage
+          used={requests === undefined ? undefined : filesize(requests)}
+          total={
+            original.memory.limits === undefined
+              ? undefined
+              : filesize(original.memory.limits)
+          }
+        />
+      )
+    },
+    header: 'Memory',
+  }
+)
 
-const ColCpuReservation = columnHelper.accessor(row => row?.cpu?.requests, {
+const ColCpuReservation = columnHelper.accessor((row) => row?.cpu?.requests, {
   id: 'cpu-reservations',
   cell: ({ row: { original }, ...props }) => (
     <Usage
@@ -185,23 +185,28 @@ export const ColActions = ({
 }: {
   podName?: string
   namespace?: string
-}) => columnHelper.display({
-  id: 'actions',
-  cell: ({ row: { original: { name, readiness } } }: any) => (
-    readiness && readiness === Readiness.Ready && (
-      <Flex
-        flexDirection="row"
-        gap="xxsmall"
-      >
-        <ShellLink
-          to={`/pods/${namespace}/${podName}/shell/${name}`}
-          textValue={`Launch ${name} shell`}
-        />
-      </Flex>
-    )
-  ),
-  header: '',
-})
+}) =>
+  columnHelper.display({
+    id: 'actions',
+    cell: ({
+      row: {
+        original: { name, readiness },
+      },
+    }: any) =>
+      readiness &&
+      readiness === Readiness.Ready && (
+        <Flex
+          flexDirection="row"
+          gap="xxsmall"
+        >
+          <ShellLink
+            to={`/pods/${namespace}/${podName}/shell/${name}`}
+            textValue={`Launch ${name} shell`}
+          />
+        </Flex>
+      ),
+    header: '',
+  })
 
 type ContainersListProps = {
   containers?: Maybe<Container>[]
@@ -214,11 +219,13 @@ type ContainersListProps = {
   columns?: any[]
 }
 
-function toTableData(container: Container,
+function toTableData(
+  container: Container,
   {
     statuses,
     isInit = false,
-  }: { isInit: boolean; statuses?: Record<string, Maybe<ContainerStatus>> }) {
+  }: { isInit: boolean; statuses?: Record<string, Maybe<ContainerStatus>> }
+) {
   const requests = container?.resources?.requests
   const limits = container?.resources?.limits
   const memoryRequests = memoryParser(requests?.memory)
@@ -258,27 +265,34 @@ export function ContainersList({
   const tableData: ContainerTableRow[] = useMemo(() => {
     const initContainerData = (initContainers || [])
       .filter((container): container is Container => !!container)
-      .map(container => toTableData(container, {
-        isInit: true,
-        statuses: initContainerStatuses,
-      }))
+      .map((container) =>
+        toTableData(container, {
+          isInit: true,
+          statuses: initContainerStatuses,
+        })
+      )
     const containerData = (containers || [])
       .filter((container): container is Container => !!container)
-      .map(container => toTableData(container, { isInit: false, statuses: containerStatuses }))
+      .map((container) =>
+        toTableData(container, { isInit: false, statuses: containerStatuses })
+      )
 
     return [...initContainerData, ...containerData]
   }, [containerStatuses, containers, initContainerStatuses, initContainers])
 
-  columns = useMemo(() => columns ?? [
-    ColName,
-    ColImage,
-    ColMemoryReservation,
-    ColCpuReservation,
-    ColPorts,
-    ColStatus,
-    ColActions({ podName, namespace }),
-  ],
-  [columns, namespace, podName])
+  columns = useMemo(
+    () =>
+      columns ?? [
+        ColName,
+        ColImage,
+        ColMemoryReservation,
+        ColCpuReservation,
+        ColPorts,
+        ColStatus,
+        ColActions({ podName, namespace }),
+      ],
+    [columns, namespace, podName]
+  )
 
   if (!containers || containers.length === 0) {
     return <>No containers available.</>
@@ -290,7 +304,10 @@ export function ContainersList({
       data={tableData}
       columns={columns}
       enableColumnResizing
-      onRowClick={(_e, { original }: Row<ContainerTableRow>) => original?.readiness === Readiness.Ready && navigate(`/pods/${namespace}/${podName}/shell/${original?.name}`)}
+      onRowClick={(_e, { original }: Row<ContainerTableRow>) =>
+        original?.readiness === Readiness.Ready &&
+        navigate(`/pods/${namespace}/${podName}/shell/${original?.name}`)
+      }
       {...TABLE_HEIGHT}
     />
   )

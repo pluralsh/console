@@ -31,7 +31,7 @@ export default function BuildRestart({ build: { id } }) {
           header="Restart build"
           open={open}
           onClose={() => setOpen(false)}
-          actions={(
+          actions={
             <>
               <Button
                 secondary
@@ -47,7 +47,7 @@ export default function BuildRestart({ build: { id } }) {
                 Restart build
               </Button>
             </>
-          )}
+          }
         >
           <p>Are you sure you want to restart this build?</p>
         </Modal>

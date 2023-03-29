@@ -14,7 +14,7 @@ export const Readiness = {
   Failed: 'Failed',
   Complete: 'Complete',
 } as const satisfies Record<ReadinessI, ReadinessI>
-export type ReadinessT = typeof Readiness[ReadinessI]
+export type ReadinessT = (typeof Readiness)[ReadinessI]
 
 export const readinessToLabel = {
   [Readiness.Ready]: 'Ready',
@@ -45,7 +45,9 @@ export const readinessToColor = {
 } as const satisfies Record<ReadinessT, string>
 
 export function nodeStatusToReadiness(status: NodeStatus): ReadinessT {
-  const ready = status?.conditions?.find(condition => condition?.type === 'Ready')
+  const ready = status?.conditions?.find(
+    (condition) => condition?.type === 'Ready'
+  )
 
   if (ready?.status === 'True') return Readiness.Ready
 
@@ -53,7 +55,9 @@ export function nodeStatusToReadiness(status: NodeStatus): ReadinessT {
 }
 
 export function podStatusToReadiness(status: PodStatus): ReadinessT {
-  const ready = status?.conditions?.find(condition => condition?.type === 'Ready')
+  const ready = status?.conditions?.find(
+    (condition) => condition?.type === 'Ready'
+  )
 
   if (ready?.status === 'True') return Readiness.Ready
 
@@ -62,17 +66,16 @@ export function podStatusToReadiness(status: PodStatus): ReadinessT {
 
 export function containerStatusToReadiness(status?: Maybe<ContainerStatus>) {
   if (!status) return Readiness.InProgress
-  const {
-    ready,
-    state,
-  } = status
+  const { ready, state } = status
 
   if (ready && state?.terminated) return Readiness.Complete
   if (ready) return Readiness.Ready
   if (!state?.terminated) return Readiness.InProgress
 
   if (state?.terminated) {
-    return state?.terminated?.exitCode === 0 ? Readiness.Complete : Readiness.Failed
+    return state?.terminated?.exitCode === 0
+      ? Readiness.Complete
+      : Readiness.Failed
   }
 
   return Readiness.Failed

@@ -13,7 +13,9 @@ export function DisplayAttachment({ children, attributes, theme }) {
       backgroundColor="white"
     >
       <Div
-        borderLeft={`2px solid ${accent ? normalizeColor(accent, theme) : 'rgba(35, 137, 215, 0.5)'}`}
+        borderLeft={`2px solid ${
+          accent ? normalizeColor(accent, theme) : 'rgba(35, 137, 215, 0.5)'
+        }`}
         {...rest}
       >
         {recurse(children)}

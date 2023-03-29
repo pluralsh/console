@@ -21,12 +21,7 @@ import { ensureURLValidity } from 'utils/url'
 
 import { Readiness } from 'utils/status'
 
-import {
-  ListItemBorder,
-  appState,
-  getIcon,
-  hasIcons,
-} from './misc'
+import { ListItemBorder, appState, getIcon, hasIcons } from './misc'
 import AppStatus from './AppStatus'
 
 const SHORTCUTS = [
@@ -39,21 +34,21 @@ const SHORTCUTS = [
   { url: 'config', label: 'Configuration', icon: <GearTrainIcon /> },
 ]
 
-const SHORTCUT_URLS = SHORTCUTS.map(shortcut => shortcut.url)
+const SHORTCUT_URLS = SHORTCUTS.map((shortcut) => shortcut.url)
 
-const isShortcut = url => SHORTCUT_URLS.indexOf(url) > -1
+const isShortcut = (url) => SHORTCUT_URLS.indexOf(url) > -1
 
-export const getBorderColor = app => {
+export const getBorderColor = (app) => {
   const { readiness } = appState(app)
 
   switch (readiness) {
-  case Readiness.Failed:
-    return 'border-danger'
-  case Readiness.InProgress:
-    return 'border-warning'
-  case Readiness.Ready:
-  default:
-    return ''
+    case Readiness.Failed:
+      return 'border-danger'
+    case Readiness.InProgress:
+      return 'border-warning'
+    case Readiness.Ready:
+    default:
+      return ''
   }
 }
 
@@ -62,7 +57,12 @@ export default function AppCard({ app }: any) {
 
   if (!app?.spec?.descriptor) return null
 
-  const { name, spec: { descriptor: { links, version } } } = app
+  const {
+    name,
+    spec: {
+      descriptor: { links, version },
+    },
+  } = app
   const borderColor = getBorderColor(app)
   const validLinks = links?.filter(({ url }) => !!url)
 
@@ -120,7 +120,7 @@ export default function AppCard({ app }: any) {
             href={ensureURLValidity(links[0].url)}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             Launch
           </Button>
@@ -130,7 +130,7 @@ export default function AppCard({ app }: any) {
           width="max-content"
           maxHeight={300}
           placement="right"
-          triggerButton={(
+          triggerButton={
             <Button
               secondary
               small
@@ -138,19 +138,22 @@ export default function AppCard({ app }: any) {
             >
               <MoreIcon />
             </Button>
-          )}
-          onSelectionChange={url => (isShortcut(url)
-            ? navigate(`apps/${name}/${url}`)
-            : window.open(ensureURLValidity(`${url}`), '_blank')?.focus())}
+          }
+          onSelectionChange={(url) =>
+            isShortcut(url)
+              ? navigate(`apps/${name}/${url}`)
+              : window.open(ensureURLValidity(`${url}`), '_blank')?.focus()
+          }
         >
-          {validLinks?.length > 1 && validLinks.slice(1).map(({ url }) => (
-            <ListBoxItem
-              key={`${url}`}
-              label={url}
-              textValue={`${url}`}
-              leftContent={<ArrowTopRightIcon />}
-            />
-          ))}
+          {validLinks?.length > 1 &&
+            validLinks.slice(1).map(({ url }) => (
+              <ListBoxItem
+                key={`${url}`}
+                label={url}
+                textValue={`${url}`}
+                leftContent={<ArrowTopRightIcon />}
+              />
+            ))}
           {SHORTCUTS.map(({ url, label, icon }) => (
             <ListBoxItem
               key={url}

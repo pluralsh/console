@@ -93,7 +93,9 @@ export const BUILD_Q = gql`
 
 export const UPGRADE_POLICIES = gql`
   query {
-    upgradePolicies { ...UpgradePolicy }
+    upgradePolicies {
+      ...UpgradePolicy
+    }
   }
   ${UpgradePolicy}
 `
@@ -109,7 +111,9 @@ export const CREATE_POLICY = gql`
 
 export const DELETE_POLICY = gql`
   mutation Delete($id: ID!) {
-    deleteUpgradePolicy(id: $id) { ...UpgradePolicy }
+    deleteUpgradePolicy(id: $id) {
+      ...UpgradePolicy
+    }
   }
   ${UpgradePolicy}
 `
@@ -143,7 +147,9 @@ export const APPROVE_BUILD = gql`
 
 export const RESTART_BUILD = gql`
   mutation Restart($id: ID!) {
-    restartBuild(id: $id) { ...BuildFragment }
+    restartBuild(id: $id) {
+      ...BuildFragment
+    }
   }
   ${BuildFragment}
 `

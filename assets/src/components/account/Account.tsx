@@ -16,8 +16,16 @@ const getDirectory = (me, configuration) => [
   { path: 'groups', label: 'Groups', enabled: true },
   { path: 'roles', label: 'Roles', enabled: true },
   { path: 'webhooks', label: 'Webhooks', enabled: true },
-  { path: 'vpn', label: 'VPN clients', enabled: configuration?.vpnEnabled ?? false },
-  { path: 'email', label: 'Email settings', enabled: me?.roles?.admin && configuration?.gitStatus?.cloned },
+  {
+    path: 'vpn',
+    label: 'VPN clients',
+    enabled: configuration?.vpnEnabled ?? false,
+  },
+  {
+    path: 'email',
+    label: 'Email settings',
+    enabled: me?.roles?.admin && configuration?.gitStatus?.cloned,
+  },
   { path: 'settings', label: 'Account settings', enabled: true },
   { path: 'cookies', label: 'Cookie settings', enabled: true },
 ]
@@ -30,12 +38,19 @@ export default function Account() {
   const { pathname } = useLocation()
   const pathPrefix = '/account'
 
-  useEffect(() => setBreadcrumbs([{ text: 'account', url: '/account' }]), [setBreadcrumbs])
+  useEffect(
+    () => setBreadcrumbs([{ text: 'account', url: '/account' }]),
+    [setBreadcrumbs]
+  )
 
   if (!me) return null
 
-  const directory = getDirectory(me, configuration).filter(({ enabled }) => enabled)
-  const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
+  const directory = getDirectory(me, configuration).filter(
+    ({ enabled }) => enabled
+  )
+  const currentTab = directory.find((tab) =>
+    pathname?.startsWith(`${pathPrefix}/${tab.path}`)
+  )
 
   return (
     <ResponsiveLayoutPage>

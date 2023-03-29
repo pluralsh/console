@@ -54,10 +54,14 @@ export default function UsersList() {
                 <User user={user} />
               </ListItem>
             )}
-            loadNextPage={() => pageInfo.hasNextPage && fetchMore({
-              variables: { cursor: pageInfo.endCursor },
-              updateQuery: (prev, { fetchMoreResult: { users } }) => extendConnection(prev, users, 'users'),
-            })}
+            loadNextPage={() =>
+              pageInfo.hasNextPage &&
+              fetchMore({
+                variables: { cursor: pageInfo.endCursor },
+                updateQuery: (prev, { fetchMoreResult: { users } }) =>
+                  extendConnection(prev, users, 'users'),
+              })
+            }
             hasNextPage={pageInfo.hasNextPage}
             loading={loading}
             placeholder={() => (
@@ -73,9 +77,11 @@ export default function UsersList() {
           />
         ) : (
           <EmptyState
-            message={isEmpty(q)
-              ? "Looks like you don't have any groups yet."
-              : `No users found for ${q}`}
+            message={
+              isEmpty(q)
+                ? "Looks like you don't have any groups yet."
+                : `No users found for ${q}`
+            }
           >
             {/* Invites are only available when not using login with Plural. */}
             {configuration && !configuration?.pluralLogin && <UserInvite />}

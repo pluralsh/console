@@ -29,11 +29,15 @@ export function DisplayButton({ attributes: { action, headline, ...rest } }) {
   const { context } = useContext(DisplayContext)
   const [error, setError] = useState<ApolloError>()
   const [mutation, { loading }] = useMutation(EXECUTE_RUNBOOK, {
-    variables: { name: runbookName, namespace: appName, input: { context: JSON.stringify(context), action } },
+    variables: {
+      name: runbookName,
+      namespace: appName,
+      input: { context: JSON.stringify(context), action },
+    },
     onCompleted: ({ executeRunbook: { redirectTo } }) => {
       if (redirectTo) navigate(legacyUrl(redirectTo))
     },
-    onError: error => {
+    onError: (error) => {
       setError(error)
       setTimeout(() => setError(undefined), 3000)
     },
@@ -57,11 +61,13 @@ export function DisplayButton({ attributes: { action, headline, ...rest } }) {
         </Banner>
       )}
       {getButton({
-        ...rest, loading, fontWeight: headline ? 600 : 400, onClick: mutation,
+        ...rest,
+        loading,
+        fontWeight: headline ? 600 : 400,
+        onClick: mutation,
       })}
     </>
   )
 
   return headline ? <ActionPortal>{children}</ActionPortal> : children
 }
-

@@ -50,47 +50,48 @@ const chartColors = {
   track: 'transparent',
 } as const satisfies Record<string, string>
 
-export const createCenteredMetric = (val, label, { fontSize = 25 } = {}) => function CenteredMetric({ center }: any) {
-  const theme = useTheme()
-  const percentFontSize = fontSize * 0.85
-  let showPercent = false
-  let displayVal = typeof val === 'string' ? val.trim() : ''
+export const createCenteredMetric = (val, label, { fontSize = 25 } = {}) =>
+  function CenteredMetric({ center }: any) {
+    const theme = useTheme()
+    const percentFontSize = fontSize * 0.85
+    let showPercent = false
+    let displayVal = typeof val === 'string' ? val.trim() : ''
 
-  if (displayVal[displayVal.length - 1] === '%') {
-    showPercent = true
-    displayVal = displayVal.substring(0, displayVal.length - 1)
+    if (displayVal[displayVal.length - 1] === '%') {
+      showPercent = true
+      displayVal = displayVal.substring(0, displayVal.length - 1)
+    }
+
+    return (
+      <g transform={`translate(${center[0]},${center[1] + 1})`}>
+        <text
+          fill={theme.colors['text-light']}
+          x="0"
+          y="0"
+          textAnchor="middle"
+          dominantBaseline="alphabetic"
+          style={{ ...theme.partials.text.h4, display: 'block', fontSize: 27 }}
+        >
+          {displayVal}
+          {showPercent && <tspan fontSize={percentFontSize}>%</tspan>}
+        </text>
+        <text
+          fill={theme.colors['text-xlight']}
+          x="0"
+          y="5.5"
+          textAnchor="middle"
+          dominantBaseline="hanging"
+          style={{
+            ...theme.partials.text.overline,
+            display: 'block',
+            fontSize: 10,
+          }}
+        >
+          {label}
+        </text>
+      </g>
+    )
   }
-
-  return (
-    <g transform={`translate(${center[0]},${center[1] + 1})`}>
-      <text
-        fill={theme.colors['text-light']}
-        x="0"
-        y="0"
-        textAnchor="middle"
-        dominantBaseline="alphabetic"
-        style={{ ...theme.partials.text.h4, display: 'block', fontSize: 27 }}
-      >
-        {displayVal}
-        {showPercent && <tspan fontSize={percentFontSize}>%</tspan>}
-      </text>
-      <text
-        fill={theme.colors['text-xlight']}
-        x="0"
-        y="5.5"
-        textAnchor="middle"
-        dominantBaseline="hanging"
-        style={{
-          ...theme.partials.text.overline,
-          display: 'block',
-          fontSize: 10,
-        }}
-      >
-        {label}
-      </text>
-    </g>
-  )
-}
 
 function RadialBarChartUnstyled({
   data /* see data tab */,
@@ -108,8 +109,10 @@ function RadialBarChartUnstyled({
   centerLabel?: string
   data: ComponentProps<typeof ResponsiveRadialBar>['data']
 } & Omit<Partial<ComponentProps<typeof ResponsiveRadialBar>>, 'data'>) {
-  const CenteredMetric = useMemo(() => (true ? createCenteredMetric(centerVal, centerLabel) : () => null),
-    [centerLabel, centerVal])
+  const CenteredMetric = useMemo(
+    () => (true ? createCenteredMetric(centerVal, centerLabel) : () => null),
+    [centerLabel, centerVal]
+  )
 
   return (
     <Div
@@ -140,7 +143,7 @@ function RadialBarChartUnstyled({
         theme={CHART_THEME}
         enableCircularGrid={false}
         enableRadialGrid
-        tooltip={props => (
+        tooltip={(props) => (
           <ChartTooltip
             color={props.bar.color}
             value={props.bar.formattedValue}
@@ -154,7 +157,7 @@ function RadialBarChartUnstyled({
   )
 }
 
-const RadialBarChart = styled(RadialBarChartUnstyled)(_ => ({
+const RadialBarChart = styled(RadialBarChartUnstyled)((_) => ({
   // Hide radial tick labels without hiding bar labels
   'text[text-anchor="middle"]': {
     display: 'none',

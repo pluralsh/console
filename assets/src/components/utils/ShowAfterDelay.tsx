@@ -22,8 +22,8 @@ function ShowAfterDelayUnstyled({
   const child: ReactElement<any> = Children.only(children) as ReactElement
   const clone = child
     ? cloneElement(child, {
-      className: `${className}${transitionIn ? ' transitionIn' : ''}`,
-    })
+        className: `${className}${transitionIn ? ' transitionIn' : ''}`,
+      })
     : null
 
   useEffect(() => {
@@ -44,7 +44,7 @@ function ShowAfterDelayUnstyled({
   return show ? clone : null
 }
 
-const ShowAfterDelay = styled(ShowAfterDelayUnstyled)(_ => ({
+const ShowAfterDelay = styled(ShowAfterDelayUnstyled)((_) => ({
   opacity: 0,
   '&.transitionIn': {
     opacity: 1,

@@ -13,7 +13,7 @@ function Link({
 }: {
   href: string
   children?: ReactNode
-  }) {
+}) {
   href = useNormalizeHref(href)
   const { Link: LinkComponent } = useNavigationContext()
 

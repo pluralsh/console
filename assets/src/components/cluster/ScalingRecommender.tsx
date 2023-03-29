@@ -31,13 +31,7 @@ import {
   usePrevious,
 } from '@pluralsh/design-system'
 
-import {
-  Div,
-  Flex,
-  Modal,
-  ModalBaseProps,
-  P,
-} from 'honorable'
+import { Div, Flex, Modal, ModalBaseProps, P } from 'honorable'
 
 import { useTheme } from 'styled-components'
 
@@ -58,11 +52,10 @@ import { CONFIGURATION_OVERLAYS, SCALING_RECOMMENDATION } from './queries'
 
 const POLL_INTERVAL = 10000
 
-const mem = memory => {
+const mem = (memory) => {
   try {
     return filesize(parseInt(memory))
-  }
-  catch {
+  } catch {
     return 0
   }
 }
@@ -161,7 +154,7 @@ function ContainerRecommendations({
         body2LooseLineHeight
         {...{ ':nth-child(2n) > *': { backgroundColor: 'fill-two' } }}
       >
-        {recos.map(r => (
+        {recos.map((r) => (
           <RecommendationComp {...r} />
         ))}
       </Card>
@@ -181,17 +174,17 @@ function ContainerRecommendations({
 }
 
 export function ScalingEdit({ rec }: { rec: ContainerResources }) {
-  const {
-    namespace, overlays, setIsModifying, setSuccess,
-  }
-    = useScalingContext()
+  const { namespace, overlays, setIsModifying, setSuccess } =
+    useScalingContext()
   const { cpu, memory } = rec || {}
 
-  const byResource = overlays?.reduce((acc, overlay) => ({
-    ...acc,
-    [overlay?.metadata?.labels?.[RESOURCE_LABEL]]: overlay,
-  }),
-    {} as Maybe<{ cpu?: Maybe<string>; memory?: Maybe<string> }>)
+  const byResource = overlays?.reduce(
+    (acc, overlay) => ({
+      ...acc,
+      [overlay?.metadata?.labels?.[RESOURCE_LABEL]]: overlay,
+    }),
+    {} as Maybe<{ cpu?: Maybe<string>; memory?: Maybe<string> }>
+  )
 
   const [ctx, setCtx] = useState({
     [(byResource as any)?.cpu.spec.name]: cpu,
@@ -292,10 +285,8 @@ export function SuccessConfirm() {
 }
 
 export function ScalingRecommender() {
-  const {
-    success, namespace, recommendations, isModifying, setIsModifying,
-  }
-    = useScalingContext()
+  const { success, namespace, recommendations, isModifying, setIsModifying } =
+    useScalingContext()
 
   const tabStateRef = useRef<any>()
   const [recoIndex, setRecoIndex] = useState<number>(0)
@@ -316,7 +307,7 @@ export function ScalingRecommender() {
         stateProps={{
           orientation: 'horizontal',
           selectedKey: recoIndex,
-          onSelectionChange: index => {
+          onSelectionChange: (index) => {
             setRecoIndex(index as typeof recoIndex)
           },
         }}
@@ -348,7 +339,7 @@ export function ScalingRecommender() {
 }
 
 const ScalingContext = createContext<
-  |(ScalingModalProps & {
+  | (ScalingModalProps & {
       closeModal: () => void
       setIsModifying: (arg: boolean) => void
       isModifying: boolean
@@ -358,8 +349,8 @@ const ScalingContext = createContext<
       configurationOverlays?: Maybe<Maybe<ConfigurationOverlay>[]>
       overlays?: OverlaysType
     })
-    | undefined
-    >(undefined)
+  | undefined
+>(undefined)
 
 function useScalingContext() {
   const context = useContext(ScalingContext)
@@ -422,26 +413,31 @@ export function ScalingRecommenderModal({
     variables: { namespace },
   })
 
-  const recommendations
-    = data?.scalingRecommendation?.status?.recommendation
+  const recommendations =
+    data?.scalingRecommendation?.status?.recommendation
       ?.containerRecommendations
   const configurationOverlays = overlayData?.configurationOverlays
 
   const contextVal = useMemo(() => {
     const overlays = configurationOverlays
-      ?.map(overlay => {
+      ?.map((overlay) => {
         const { metadata, ...rest } = overlay || {}
 
-        const labels = metadata?.labels?.reduce((acc, label) => ({
-          ...acc,
-          ...(label ? { [label?.name || '']: label?.value } : {}),
-        }),
-        {})
+        const labels = metadata?.labels?.reduce(
+          (acc, label) => ({
+            ...acc,
+            ...(label ? { [label?.name || '']: label?.value } : {}),
+          }),
+          {}
+        )
 
         return { ...rest, metadata: { ...metadata, labels } }
       })
-      .filter(({ metadata: { labels } }) => labels?.[COMPONENT_LABEL] === componentName
-          && labels?.[KIND_LABEL] === kind?.toLowerCase())
+      .filter(
+        ({ metadata: { labels } }) =>
+          labels?.[COMPONENT_LABEL] === componentName &&
+          labels?.[KIND_LABEL] === kind?.toLowerCase()
+      )
 
     return {
       kind,

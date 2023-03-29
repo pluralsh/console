@@ -1,4 +1,4 @@
-const unwrapParagraph = child => {
+const unwrapParagraph = (child) => {
   if (child?.name === 'Paragraph') {
     return child?.children
   }
@@ -6,7 +6,7 @@ const unwrapParagraph = child => {
   return child
 }
 
-const unwrapParagraphs = children => {
+const unwrapParagraphs = (children) => {
   if (!Array.isArray(children)) {
     return unwrapParagraph(children)
   }

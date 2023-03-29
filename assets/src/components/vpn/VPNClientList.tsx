@@ -10,7 +10,11 @@ interface VPNClientListProps {
   data: Array<VPNClientRow>
 }
 
-export default function VPNClientList({ columns, data, ...props }: VPNClientListProps) {
+export default function VPNClientList({
+  columns,
+  data,
+  ...props
+}: VPNClientListProps) {
   if (!data || data.length === 0) {
     return <>No VPN clients available.</>
   }

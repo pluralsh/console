@@ -1,9 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useMemo,
-  useState,
-} from 'react'
+import { createContext, useContext, useMemo, useState } from 'react'
 import { ThemeContext } from 'grommet'
 
 import { Card } from '@pluralsh/design-system'
@@ -14,11 +9,19 @@ import { recurse } from './display/misc'
 
 export const DisplayContext = createContext<any>({})
 
-export function RunbookDisplay({ data, root: { children, attributes }, ...props }) {
+export function RunbookDisplay({
+  data,
+  root: { children, attributes },
+  ...props
+}) {
   const theme = useContext(ThemeContext)
-  const datasources = useMemo(() => (
-    data.filter(d => !!d).reduce((acc, entry) => ({ ...acc, [entry.name]: entry }), {})
-  ), [data])
+  const datasources = useMemo(
+    () =>
+      data
+        .filter((d) => !!d)
+        .reduce((acc, entry) => ({ ...acc, [entry.name]: entry }), {}),
+    [data]
+  )
   const [context, setContext] = useState({})
 
   return (

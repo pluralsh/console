@@ -4,7 +4,9 @@ import { BuildStatus } from 'components/types'
 import { useMutation } from '@apollo/client'
 
 export default function BuildApproval({ build }) {
-  const [mutation, { loading }] = useMutation(APPROVE_BUILD, { variables: { id: build.id } })
+  const [mutation, { loading }] = useMutation(APPROVE_BUILD, {
+    variables: { id: build.id },
+  })
 
   if (!!build?.approver || build.status !== BuildStatus.PENDING) return null
 

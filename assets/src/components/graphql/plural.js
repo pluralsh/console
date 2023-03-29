@@ -46,25 +46,39 @@ export const RecipeFragment = gql`
 
 export const ConfigurationItemFragment = gql`
   fragment ConfigurationItemFragment on ConfigurationItem {
-    name 
-    default 
-    documentation 
-    type 
-    placeholder 
+    name
+    default
+    documentation
+    type
+    placeholder
     optional
-    condition { operation field value }
-    validation { type regex message }
+    condition {
+      operation
+      field
+      value
+    }
+    validation {
+      type
+      regex
+      message
+    }
   }
 `
 
 export const RecipeSectionFragment = gql`
   fragment RecipeSectionFragment on RecipeSection {
     id
-    repository { ...RepositoryFragment }
-    configuration { ...ConfigurationItemFragment }
+    repository {
+      ...RepositoryFragment
+    }
+    configuration {
+      ...ConfigurationItemFragment
+    }
     recipeItems {
       id
-      configuration { ...ConfigurationItemFragment }
+      configuration {
+        ...ConfigurationItemFragment
+      }
     }
   }
   ${ConfigurationItemFragment}
@@ -74,8 +88,14 @@ export const RecipeSectionFragment = gql`
 export const SEARCH_REPOS = gql`
   query Search($query: String!) {
     repositories(query: $query, first: 20) {
-      pageInfo { ...PageInfo }
-      edges { node { ...RepositoryFragment } }
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...RepositoryFragment
+        }
+      }
     }
   }
   ${PageInfo}
@@ -85,8 +105,14 @@ export const SEARCH_REPOS = gql`
 export const RECIPES_Q = gql`
   query Recipes($id: ID!, $cursor: String) {
     recipes(id: $id, after: $cursor, first: 20) {
-      pageInfo { ...PageInfo }
-      edges { node { ...RecipeFragment } }
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...RecipeFragment
+        }
+      }
     }
   }
   ${PageInfo}
@@ -97,7 +123,9 @@ export const RECIPE_Q = gql`
   query Recipe($id: ID!) {
     recipe(id: $id) {
       ...RecipeFragment
-      recipeSections { ...RecipeSectionFragment }
+      recipeSections {
+        ...RecipeSectionFragment
+      }
     }
     context {
       repository
@@ -168,10 +196,15 @@ export const CostAnalysisFragment = gql`
 
 export const LicenseFragment = gql`
   fragment LicenseFragment on License {
-    metadata { name }
-    status { 
+    metadata {
+      name
+    }
+    status {
       free
-      features { name description }
+      features {
+        name
+        description
+      }
       limits
       plan
     }
@@ -187,9 +220,15 @@ export const ApplicationFragment = gql`
         icons
         description
         version
-        links { description url }
+        links {
+          description
+          url
+        }
       }
-      components { group kind }
+      components {
+        group
+        kind
+      }
     }
     status {
       components {
@@ -206,14 +245,24 @@ export const ApplicationFragment = gql`
       }
       componentsReady
     }
-    cost { ...CostAnalysisFragment }
+    cost {
+      ...CostAnalysisFragment
+    }
   }
   ${CostAnalysisFragment}
 `
 
 export const UPDATE_CONFIGURATION = gql`
-  mutation UpdateConfiguration($repository: String!, $content: String!, $type: Tool) {
-    updateConfiguration(repository: $repository, content: $content, tool: $type) {
+  mutation UpdateConfiguration(
+    $repository: String!
+    $content: String!
+    $type: Tool
+  ) {
+    updateConfiguration(
+      repository: $repository
+      content: $content
+      tool: $type
+    ) {
       helm
       terraform
     }
@@ -224,7 +273,9 @@ export const APPLICATIONS_Q = gql`
   query {
     applications {
       ...ApplicationFragment
-      license { ...LicenseFragment }
+      license {
+        ...LicenseFragment
+      }
     }
   }
   ${ApplicationFragment}
@@ -234,7 +285,10 @@ export const APPLICATIONS_Q = gql`
 export const APPLICATION_Q = gql`
   query App($name: String!) {
     application(name: $name) {
-      configuration { helm terraform }
+      configuration {
+        helm
+        terraform
+      }
       ...ApplicationFragment
     }
     configurationOverlays(namespace: $name) {
@@ -268,14 +322,18 @@ export const LOG_FILTER_Q = gql`
 
 export const SMTP_Q = gql`
   query {
-    smtp { ...SmtpFragment }
+    smtp {
+      ...SmtpFragment
+    }
   }
   ${SmtpFragment}
 `
 
 export const UPDATE_SMTP = gql`
   mutation UpdateSmtp($smtp: SmtpInput!) {
-    updateSmtp(smtp: $smtp) { ...SmtpFragment }
+    updateSmtp(smtp: $smtp) {
+      ...SmtpFragment
+    }
   }
   ${SmtpFragment}
 `

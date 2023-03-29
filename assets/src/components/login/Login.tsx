@@ -1,17 +1,6 @@
-import {
-  RefObject,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { RefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, LoopingLogo } from '@pluralsh/design-system'
-import {
-  Div,
-  Flex,
-  Form,
-  P,
-} from 'honorable'
+import { Div, Flex, Form, P } from 'honorable'
 import { useMutation, useQuery } from '@apollo/client'
 import { Box } from 'grommet'
 import { v4 as uuidv4 } from 'uuid'
@@ -118,8 +107,7 @@ function fudgedUser(name) {
 
     try {
       item = JSON.parse(localStorage.getItem(FUDGED_USER) || '')
-    }
-    catch (e) {
+    } catch (e) {
       console.error('Error retrieving fudged user: ', e)
     }
 
@@ -163,8 +151,10 @@ export function EnsureLogin({ children }) {
 
   const { me, externalToken, configuration } = data || {}
 
-  const loginContextValue = useMemo(() => ({ me, configuration, token: externalToken }),
-    [configuration, externalToken, me])
+  const loginContextValue = useMemo(
+    () => ({ me, configuration, token: externalToken }),
+    [configuration, externalToken, me]
+  )
 
   if (error || (!loading && !data?.clusterInfo)) {
     console.log(error)
@@ -232,8 +222,8 @@ export default function Login() {
   const { data: loginData } = useQuery(LOGIN_INFO, {
     variables: { redirect: localized('/oauth/callback') },
   })
-  const [loginMutation, { loading: loginMLoading, error: loginMError }]
-    = useMutation(SIGNIN, {
+  const [loginMutation, { loading: loginMLoading, error: loginMError }] =
+    useMutation(SIGNIN, {
       variables: form,
       onCompleted: ({ signIn: { jwt } }) => {
         setToken(jwt)
@@ -251,15 +241,15 @@ export default function Login() {
   }
 
   const disabled = form.password.length === 0 || !isValidEmail(form.email)
-  const onSubmit = e => {
+  const onSubmit = (e) => {
     e.preventDefault()
     if (disabled) {
       return
     }
     loginMutation()
   }
-  const passwordErrorMsg
-    = loginMError?.message === 'invalid password' ? 'Invalid password' : undefined
+  const passwordErrorMsg =
+    loginMError?.message === 'invalid password' ? 'Invalid password' : undefined
   const loginError = !passwordErrorMsg && loginMError
 
   return (
@@ -287,7 +277,7 @@ export default function Login() {
               ref={emailRef}
               label="Email address"
               value={form.email}
-              onChange={email => setForm({ ...form, email })}
+              onChange={(email) => setForm({ ...form, email })}
               placeholder="Enter email address"
             />
             <LabelledInput
@@ -296,7 +286,7 @@ export default function Login() {
               hint={passwordErrorMsg}
               error={!!passwordErrorMsg}
               value={form.password}
-              onChange={password => setForm({ ...form, password })}
+              onChange={(password) => setForm({ ...form, password })}
               placeholder="Enter password"
             />
           </Flex>

@@ -12,11 +12,12 @@ import { Flex, H3 } from 'honorable'
 import { useContext, useMemo, useState } from 'react'
 import { stringify } from 'yaml'
 
-function sanitize({
-  name, repositories, permissions, roleBindings,
-}) {
+function sanitize({ name, repositories, permissions, roleBindings }) {
   return {
-    name, repositories, permissions, roleBindings: roleBindings.map(sanitizeBinding),
+    name,
+    repositories,
+    permissions,
+    roleBindings: roleBindings.map(sanitizeBinding),
   }
 }
 
@@ -42,7 +43,7 @@ export function Permissions() {
             Roles
           </H3>
           <Flex>
-            {me.boundRoles?.map(role => (
+            {me.boundRoles?.map((role) => (
               <Tooltip label={role.description}>
                 <Chip
                   clickable
@@ -59,14 +60,14 @@ export function Permissions() {
         header="Role permissions"
         open={role}
         onClose={() => setRole(undefined)}
-        actions={(
+        actions={
           <Button
             secondary
             onClick={() => setRole(undefined)}
           >
             Okay
           </Button>
-        )}
+        }
         size="large"
       >
         <Code

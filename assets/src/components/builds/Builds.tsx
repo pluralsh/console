@@ -1,9 +1,4 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { Flex } from 'honorable'
 import { Card } from '@pluralsh/design-system'
@@ -28,31 +23,39 @@ export default function Builds() {
   const [listRef, setListRef] = useState<any>(null)
   const [scrolled, setScrolled] = useState(false)
   const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
-  const {
-    data, loading, subscribeToMore, fetchMore,
-  } = useQuery(BUILDS_Q, {
+  const { data, loading, subscribeToMore, fetchMore } = useQuery(BUILDS_Q, {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
 
-  useEffect(() => setBreadcrumbs([{ text: 'builds', url: '/builds' }]),
-    [setBreadcrumbs])
+  useEffect(
+    () => setBreadcrumbs([{ text: 'builds', url: '/builds' }]),
+    [setBreadcrumbs]
+  )
 
-  useEffect(() => subscribeToMore({
-    document: BUILD_SUB,
-    updateQuery: (prev,
-      {
-        subscriptionData: {
-          data: {
-            buildDelta: { delta, payload },
-          },
-        },
-      }) => (delta === 'CREATE' ? appendConnection(prev, payload, 'builds') : prev),
-  }),
-  [subscribeToMore])
+  useEffect(
+    () =>
+      subscribeToMore({
+        document: BUILD_SUB,
+        updateQuery: (
+          prev,
+          {
+            subscriptionData: {
+              data: {
+                buildDelta: { delta, payload },
+              },
+            },
+          }
+        ) =>
+          delta === 'CREATE' ? appendConnection(prev, payload, 'builds') : prev,
+      }),
+    [subscribeToMore]
+  )
 
-  const returnToBeginning = useCallback(() => listRef.scrollToItem(0),
-    [listRef])
+  const returnToBeginning = useCallback(
+    () => listRef.scrollToItem(0),
+    [listRef]
+  )
 
   if (loading && !data) return <LoadingIndicator />
 
@@ -63,13 +66,13 @@ export default function Builds() {
       scrollable={false}
       heading="Builds"
       gap="small"
-      headingContent={(
+      headingContent={
         <>
           <Flex grow={1} />
           <UpgradePolicies />
           <CreateBuild />
         </>
-      )}
+      }
     >
       {/* <PinnedRunbooks border={undefined} /> */}
       <Card height="100%">
@@ -92,10 +95,14 @@ export default function Builds() {
               build={node}
             />
           )}
-          loadNextPage={() => pageInfo.hasNextPage && fetchMore({
-            variables: { cursor: pageInfo.endCursor },
-            updateQuery: (prev, { fetchMoreResult: { builds } }) => extendConnection(prev, builds, 'builds'),
-          })}
+          loadNextPage={() =>
+            pageInfo.hasNextPage &&
+            fetchMore({
+              variables: { cursor: pageInfo.endCursor },
+              updateQuery: (prev, { fetchMoreResult: { builds } }) =>
+                extendConnection(prev, builds, 'builds'),
+            })
+          }
           refreshKey={undefined}
           setLoader={undefined}
         />

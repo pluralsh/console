@@ -22,7 +22,9 @@ export default function NodeEvents() {
 
   if (!data) return <LoadingIndicator />
 
-  const { node: { events } } = data
+  const {
+    node: { events },
+  } = data
 
   return (
     <Flex

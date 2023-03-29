@@ -17,11 +17,28 @@ import { RootQueryType } from '../../generated/graphql'
 import { ResponsivePageFullWidth } from '../utils/layout/ResponsivePageFullWidth'
 
 function VPN() {
-  const { data: { myWireguardPeers } = {}, loading, refetch } = useQuery<Pick<RootQueryType, 'myWireguardPeers'>>(MyWireguardPeers, {
+  const {
+    data: { myWireguardPeers } = {},
+    loading,
+    refetch,
+  } = useQuery<Pick<RootQueryType, 'myWireguardPeers'>>(MyWireguardPeers, {
     fetchPolicy: 'network-only',
   })
-  const columns = useMemo(() => [ColumnName, ColumnAddress, ColumnPublicKey, ColumnStatus, ColumnDownload, ColumnDelete(refetch)], [refetch])
-  const clientList = useMemo(() => myWireguardPeers?.map(peer => toVPNClientRow(peer)) ?? [], [myWireguardPeers])
+  const columns = useMemo(
+    () => [
+      ColumnName,
+      ColumnAddress,
+      ColumnPublicKey,
+      ColumnStatus,
+      ColumnDownload,
+      ColumnDelete(refetch),
+    ],
+    [refetch]
+  )
+  const clientList = useMemo(
+    () => myWireguardPeers?.map((peer) => toVPNClientRow(peer)) ?? [],
+    [myWireguardPeers]
+  )
 
   if (loading) return <LoadingIndicator />
 

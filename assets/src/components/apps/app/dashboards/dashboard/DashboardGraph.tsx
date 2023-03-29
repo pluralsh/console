@@ -7,14 +7,17 @@ import GraphHeader from 'components/utils/GraphHeader'
 import { format } from './misc'
 
 export default function DashboardGraph({ graph, tick }) {
-  const data = useMemo(() => (
-    graph.queries.map(({ legend, results }) => (
-      {
+  const data = useMemo(
+    () =>
+      graph.queries.map(({ legend, results }) => ({
         id: legend,
-        data: results.map(({ timestamp, value }) => ({ x: new Date(timestamp * 1000), y: parseFloat(value) })),
-      }
-    ))
-  ), [graph])
+        data: results.map(({ timestamp, value }) => ({
+          x: new Date(timestamp * 1000),
+          y: parseFloat(value),
+        })),
+      })),
+    [graph]
+  )
 
   return (
     <Div
@@ -26,7 +29,7 @@ export default function DashboardGraph({ graph, tick }) {
       <GraphHeader title={graph.name} />
       <Graph
         data={data}
-        yFormat={v => format(v, graph.format)}
+        yFormat={(v) => format(v, graph.format)}
         // @ts-ignore
         tick={tick}
         tickRotation={45}

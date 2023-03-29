@@ -23,13 +23,12 @@ function MarkdocCallout({
     const { title, newTab = true } = ctas[0]
 
     buttonProps = {
-      onClick: e => {
+      onClick: (e) => {
         e.preventDefault()
         if (href) {
           if (isExternalUrl(href)) {
             window?.open(href, newTab ? '_blank' : undefined)
-          }
-          else {
+          } else {
             navigate(href)
           }
         }
@@ -55,9 +54,9 @@ const StyledCallout = styled(MarkdocCallout)`
 
   ${Paragraph}, ${ListItem} {
     ${({ theme }) => ({
-    ...theme.partials.text.body2,
-    color: theme.colors['text-light'],
-  })}
+      ...theme.partials.text.body2,
+      color: theme.colors['text-light'],
+    })}
   }
 `
 
