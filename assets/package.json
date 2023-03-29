@@ -23,8 +23,7 @@
     "e2e:open": "concurrently -kill-others --success first \"yarn start\" \"wait-on -c waitOnConfig.json -v https-get://localhost:3000 && cd e2e/ && npx cypress open\"",
     "graphql:codegen": "graphql-codegen --config codegen.yml",
     "prettier-write": "yarn prettier --write ./src",
-    "prettier-check": "yarn prettier --check ./src",
-    "postinstall": "cd .. && husky install assets/.husky"
+    "prettier-check": "yarn prettier --check ./src"
   },
   "engines": {
     "node": ">=16.15.0"
