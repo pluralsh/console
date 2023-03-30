@@ -17,9 +17,8 @@ const MessageLink = styled.a(({ theme }) => ({
 }))
 
 export default function BillingLegacyUserMessage() {
-  const {
-    isPaidPlan, isGrandfathered, isGrandfatheringExpired, account,
-  } = useContext(SubscriptionContext)
+  const { isPaidPlan, isGrandfathered, isGrandfatheringExpired, account } =
+    useContext(SubscriptionContext)
 
   if (isPaidPlan || !(isGrandfathered || isGrandfatheringExpired)) return null
 

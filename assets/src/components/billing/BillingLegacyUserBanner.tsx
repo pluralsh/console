@@ -17,10 +17,17 @@ const Wrapper = styled.div(({ theme }) => ({
 
 const Link = styled.a({ textDecoration: 'none' })
 
-export default function BillingLegacyUserBanner({ feature }: BillingLegacyUserBannerPropsType) {
-  const { isPaidPlan, isGrandfathered, isGrandfatheringExpired } = useContext(SubscriptionContext)
-  const featureId = feature ? `${feature.replace(/\s+/g, '-').toLowerCase()}-` : ''
-  const localStorageId = `${isGrandfatheringExpired ? 'expired-' : ''}legacy-banner-${featureId}closed`
+export default function BillingLegacyUserBanner({
+  feature,
+}: BillingLegacyUserBannerPropsType) {
+  const { isPaidPlan, isGrandfathered, isGrandfatheringExpired } =
+    useContext(SubscriptionContext)
+  const featureId = feature
+    ? `${feature.replace(/\s+/g, '-').toLowerCase()}-`
+    : ''
+  const localStorageId = `${
+    isGrandfatheringExpired ? 'expired-' : ''
+  }legacy-banner-${featureId}closed`
   const [closed, setClosed] = usePersistedState(localStorageId, false)
 
   if (isPaidPlan || !(isGrandfathered || isGrandfatheringExpired)) return null
@@ -29,20 +36,23 @@ export default function BillingLegacyUserBanner({ feature }: BillingLegacyUserBa
     <Wrapper>
       <Callout
         severity={isGrandfatheringExpired ? 'danger' : 'warning'}
-        title={isGrandfatheringExpired ? 'Legacy user access expired.' : 'Legacy user access ends soon.'}
+        title={
+          isGrandfatheringExpired
+            ? 'Legacy user access expired.'
+            : 'Legacy user access ends soon.'
+        }
         closeable
         closed={closed}
         onClose={setClosed}
       >
-        {isGrandfatheringExpired
-          ? (
-            <>
-              You may still use existing {feature} but creating new
-              and editing existing {feature} requires a Plural Professional Plan.
-            </>
-          )
-          : <> {upperFirst(feature)} are a Professional plan feature. </>}
-        {' '}
+        {isGrandfatheringExpired ? (
+          <>
+            You may still use existing {feature} but creating new and editing
+            existing {feature} requires a Plural Professional Plan.
+          </>
+        ) : (
+          <> {upperFirst(feature)} are a Professional plan feature. </>
+        )}{' '}
         <Link
           href="https://app.plural.sh/account/billing"
           target="_blank"
