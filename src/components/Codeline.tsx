@@ -1,4 +1,4 @@
-import { Ref, forwardRef, useEffect, useState } from 'react'
+import { Ref, forwardRef, useCallback, useEffect, useState } from 'react'
 import { CssProps, Div, Flex, FlexProps } from 'honorable'
 import { useTheme } from 'styled-components'
 
@@ -8,16 +8,29 @@ import CopyIcon from './icons/CopyIcon'
 
 type CodelineProps = FlexProps & {
   displayText?: string
+  onCopy: (text: string) => Promise<void>
 }
 
 const propTypes = {}
 
 function CodelineRef(
-  { children, displayText, ...props }: CodelineProps,
+  { children, displayText, onCopy, ...props }: CodelineProps,
   ref: Ref<any>
 ) {
   const [copied, setCopied] = useState(false)
   const theme = useTheme()
+
+  const handleCopy = useCallback(() => {
+    if (onCopy) {
+      onCopy(children as string).then(() => setCopied(true))
+
+      return
+    }
+
+    window.navigator.clipboard
+      .writeText(children as string)
+      .then(() => setCopied(true))
+  }, [children, onCopy])
 
   useEffect(() => {
     if (copied) {
@@ -26,11 +39,6 @@ function CodelineRef(
       return () => clearTimeout(timeout)
     }
   }, [copied])
-
-  const handleCopy = () =>
-    window.navigator.clipboard
-      .writeText(children as string)
-      .then(() => setCopied(true))
 
   return (
     <Flex
