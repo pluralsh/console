@@ -26,5 +26,4 @@ export default createIcon(({ size, color }) => (
       strokeMiterlimit="10"
     />
   </svg>
-
 ))

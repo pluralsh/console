@@ -1,6 +1,10 @@
 import { Grommet } from 'grommet'
 import { ComponentType } from 'react'
-import { CssBaseline, Div, ThemeProvider as HonorableThemeProvider } from 'honorable'
+import {
+  CssBaseline,
+  Div,
+  ThemeProvider as HonorableThemeProvider,
+} from 'honorable'
 import { ThemeProvider as StyledThemeProvider } from 'styled-components'
 
 import theme, { styledTheme } from './theme'

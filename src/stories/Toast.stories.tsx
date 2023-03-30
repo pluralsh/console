@@ -21,8 +21,8 @@ export default {
 }
 
 type Args = {
-  severity: Severity,
-  closeTimeout?: number,
+  severity: Severity
+  closeTimeout?: number
 }
 
 function Template(args: Args) {
@@ -45,7 +45,9 @@ function Template(args: Args) {
       >
         <Button onClick={() => handleClick(true, 'top-left')}>Top Left</Button>
         <Button onClick={() => handleClick(true, 'top')}>Top</Button>
-        <Button onClick={() => handleClick(true, 'top-right')}>Top Right</Button>
+        <Button onClick={() => handleClick(true, 'top-right')}>
+          Top Right
+        </Button>
       </Flex>
       <Flex
         gap="medium"
@@ -61,9 +63,13 @@ function Template(args: Args) {
         alignItems="center"
         justify="center"
       >
-        <Button onClick={() => handleClick(true, 'bottom-left')}>Bottom Left</Button>
+        <Button onClick={() => handleClick(true, 'bottom-left')}>
+          Bottom Left
+        </Button>
         <Button onClick={() => handleClick(true, 'bottom')}>Bottom</Button>
-        <Button onClick={() => handleClick(true, 'bottom-right')}>Bottom Right</Button>
+        <Button onClick={() => handleClick(true, 'bottom-right')}>
+          Bottom Right
+        </Button>
       </Flex>
 
       <Toast
@@ -94,9 +100,11 @@ function GraphQLTemplate() {
         margin="large"
         onClose={() => setVisible(false)}
         error={{
-          graphQLErrors: [{
-            message: 'XYZ could not be found',
-          }],
+          graphQLErrors: [
+            {
+              message: 'XYZ could not be found',
+            },
+          ],
         }}
         header="404 Not Found"
       />

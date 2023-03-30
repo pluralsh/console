@@ -19,8 +19,8 @@ const T = styled.span(({ theme }) => ({
   whiteSpace: 'nowrap',
 }))
 
-export default function Date({ date }: {date: moment.MomentInput}) {
-  if (!date) return (<Span>n/a</Span>)
+export default function Date({ date }: { date: moment.MomentInput }) {
+  if (!date) return <Span>n/a</Span>
 
   return (
     <Wrap>

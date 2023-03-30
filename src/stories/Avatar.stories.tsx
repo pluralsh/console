@@ -6,11 +6,7 @@ export default {
 }
 
 function Template(args: any) {
-  return (
-    <Avatar
-      {...args}
-    />
-  )
+  return <Avatar {...args} />
 }
 
 export const Default = Template.bind({})

@@ -9,9 +9,7 @@ export default {
 function Template(args: any) {
   return (
     <>
-      <RepositoryChip
-        {...args}
-      />
+      <RepositoryChip {...args} />
       <RepositoryChip
         checked
         marginTop="medium"
@@ -31,9 +29,7 @@ Default.args = {
 export const Icon = Template.bind({})
 
 Icon.args = {
-  icon: (
-    <StackIcon />
-  ),
+  icon: <StackIcon />,
   label: 'DevOps',
 }
 

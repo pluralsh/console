@@ -1,10 +1,4 @@
-import {
-  A,
-  Button,
-  Div,
-  Flex,
-  Span,
-} from 'honorable'
+import { A, Button, Div, Flex, Span } from 'honorable'
 import { useCallback, useState } from 'react'
 
 import { Checklist, ChecklistStateProps } from '../components/Checklist'
@@ -37,8 +31,14 @@ function Template() {
     isDismissed: dismiss,
   }
 
-  const isCompleted = useCallback(() => completed >= selected, [completed, selected])
-  const canComplete = useCallback(() => Math.abs(selected - completed) === 1, [selected, completed])
+  const isCompleted = useCallback(
+    () => completed >= selected,
+    [completed, selected]
+  )
+  const canComplete = useCallback(
+    () => Math.abs(selected - completed) === 1,
+    [selected, completed]
+  )
 
   const completeButton = (
     <Button
@@ -49,7 +49,8 @@ function Template() {
         setFocused(selected + 1)
       }}
       disabled={isCompleted() || !canComplete()}
-    >Mark as done
+    >
+      Mark as done
     </Button>
   )
 
@@ -65,26 +66,27 @@ function Template() {
       <Checklist
         label="Getting Started"
         stateProps={checklistStateProps}
-        footerChildren={(
-          <Flex
-            gap="small"
-          >
+        footerChildren={
+          <Flex gap="small">
             <Button
               secondary
               small
-            >Support
+            >
+              Support
             </Button>
 
             <Button
               secondary
               small
-            >Docs
+            >
+              Docs
             </Button>
 
             <Button
               secondary
               small
-            >GitHub
+            >
+              GitHub
             </Button>
 
             <Flex flex="1" />
@@ -94,11 +96,12 @@ function Template() {
               tertiary
               padding="none"
               onClick={() => setDismiss(true)}
-            >Dismiss
+            >
+              Dismiss
             </Button>
           </Flex>
-        )}
-        completeChildren={(
+        }
+        completeChildren={
           <Flex
             direction="column"
             gap="medium"
@@ -113,7 +116,9 @@ function Template() {
                 direction="column"
               >
                 <Span subtitle1>Congratulations!</Span>
-                <Span body2>You're well on your way to becoming an open-sourcerer.</Span>
+                <Span body2>
+                  You're well on your way to becoming an open-sourcerer.
+                </Span>
               </Flex>
             </Flex>
             <Div
@@ -128,7 +133,8 @@ function Template() {
                 small
                 secondary
                 startIcon={<GitHubLogoIcon />}
-              >Star us on GitHub
+              >
+                Star us on GitHub
               </Button>
               <Flex grow={1} />
               <Button
@@ -138,16 +144,18 @@ function Template() {
                   setCompleted(-1)
                   setSelected(0)
                 }}
-              >Restart
+              >
+                Restart
               </Button>
               <Button
                 small
                 onClick={() => setDismiss(true)}
-              >Complete
+              >
+                Complete
               </Button>
             </Flex>
           </Flex>
-        )}
+        }
       >
         <ChecklistItem title="Setup on your own cloud">
           <Flex
@@ -155,7 +163,8 @@ function Template() {
             gap="medium"
           >
             <Span>
-              If you'd prefer to use Plural on your local machine, get started with the <A inline>Plural CLI</A>.
+              If you'd prefer to use Plural on your local machine, get started
+              with the <A inline>Plural CLI</A>.
             </Span>
             <Flex gap="small">
               <Button
@@ -163,7 +172,8 @@ function Template() {
                 secondary
                 startIcon={<TerminalIcon />}
                 onClick={() => setOpen(false)}
-              >Launch Cloud Shell
+              >
+                Launch Cloud Shell
               </Button>
               {completeButton}
             </Flex>
@@ -175,13 +185,15 @@ function Template() {
             direction="column"
             gap="medium"
           >
-            This will enable out-of-the-box monitoring, scaling, and security for all your applications.
+            This will enable out-of-the-box monitoring, scaling, and security
+            for all your applications.
             <Flex gap="small">
               <Button
                 small
                 secondary
                 startIcon={<DownloadIcon />}
-              >Install
+              >
+                Install
               </Button>
 
               {completeButton}
@@ -189,14 +201,13 @@ function Template() {
           </Flex>
         </ChecklistItem>
         <ChecklistItem title="Install another app">
-          <Flex
-            gap="small"
-          >
+          <Flex gap="small">
             <Button
               small
               secondary
               startIcon={<MarketIcon />}
-            >View marketplace
+            >
+              View marketplace
             </Button>
 
             {completeButton}

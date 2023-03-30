@@ -12,7 +12,11 @@ import {
   useState,
 } from 'react'
 import { useComboBox } from '@react-aria/combobox'
-import { ComboBoxState, ComboBoxStateOptions, useComboBoxState } from '@react-stately/combobox'
+import {
+  ComboBoxState,
+  ComboBoxStateOptions,
+  useComboBoxState,
+} from '@react-stately/combobox'
 import { AriaButtonProps, useButton } from '@react-aria/button'
 import pick from 'lodash/pick'
 import omit from 'lodash/omit'
@@ -27,7 +31,10 @@ import { mergeRefs } from 'react-merge-refs'
 import { ListBoxItemBaseProps } from './ListBoxItem'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import Input, { InputProps } from './Input'
-import { setNextFocusedKey, useSelectComboStateProps } from './SelectComboShared'
+import {
+  setNextFocusedKey,
+  useSelectComboStateProps,
+} from './SelectComboShared'
 import { PopoverListBox } from './PopoverListBox'
 import SearchIcon from './icons/SearchIcon'
 import { SelectInner } from './Select'
@@ -56,19 +63,21 @@ type ComboBoxProps = Exclude<ComboBoxInputProps, 'children'> & {
     'onLoadMore' | 'isLoading' | 'validationState' | 'placeholder'
   >
 
-export const ComboBoxInputInner = styled.div<{ isOpen: boolean }>(({ theme, isOpen }) => ({
-  '.arrow': {
-    transition: 'transform 0.1s ease',
-    display: 'flex',
-    marginLeft: theme.spacing.medium,
-    alignItems: 'center',
-    ...(isOpen
-      ? {
-        transform: 'scaleY(-100%)',
-      }
-      : {}),
-  },
-}))
+export const ComboBoxInputInner = styled.div<{ isOpen: boolean }>(
+  ({ theme, isOpen }) => ({
+    '.arrow': {
+      transition: 'transform 0.1s ease',
+      display: 'flex',
+      marginLeft: theme.spacing.medium,
+      alignItems: 'center',
+      ...(isOpen
+        ? {
+            transform: 'scaleY(-100%)',
+          }
+        : {}),
+    },
+  })
+)
 
 type ComboBoxInputProps = {
   showArrow?: boolean
@@ -80,29 +89,33 @@ type ComboBoxInputProps = {
   buttonProps?: AriaButtonProps
 }
 
-const OpenButton = styled(({
-  isOpen: _isOpen,
-  buttonRef,
-  buttonProps,
-  ...props
-}: HTMLAttributes<HTMLDivElement> & {
+const OpenButton = styled(
+  ({
+    isOpen: _isOpen,
+    buttonRef,
+    buttonProps,
+    ...props
+  }: HTMLAttributes<HTMLDivElement> & {
     isOpen?: boolean
     buttonRef: RefObject<any>
     buttonProps: AriaButtonProps
   }) => {
-  const { buttonProps: useButtonProps } = useButton({ ...buttonProps, elementType: 'div' },
-    buttonRef)
+    const { buttonProps: useButtonProps } = useButton(
+      { ...buttonProps, elementType: 'div' },
+      buttonRef
+    )
 
-  return (
-    <div
-      ref={buttonRef}
-      {...props}
-      {...useButtonProps}
-    >
-      <DropdownArrowIcon />
-    </div>
-  )
-})(({ theme, isOpen }) => ({
+    return (
+      <div
+        ref={buttonRef}
+        {...props}
+        {...useButtonProps}
+      >
+        <DropdownArrowIcon />
+      </div>
+    )
+  }
+)(({ theme, isOpen }) => ({
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
@@ -156,8 +169,10 @@ function ComboBoxInput({
   const theme = useTheme()
   // Need to filter out undefined properties so they won't override
   // outerInputProps for honorable <Input> component
-  const innerInputProps = useMemo(() => omitBy(omit(inputProps, honorableInputPropNames), isUndefined),
-    [inputProps])
+  const innerInputProps = useMemo(
+    () => omitBy(omit(inputProps, honorableInputPropNames), isUndefined),
+    [inputProps]
+  )
 
   let themeExtension: any = {}
 
@@ -221,7 +236,7 @@ function ComboBoxInput({
   )
 }
 
-const ComboBoxInner = styled(SelectInner)(_p => ({}))
+const ComboBoxInner = styled(SelectInner)((_p) => ({}))
 
 function ComboBox({
   children,
@@ -255,51 +270,61 @@ function ComboBox({
     isOpen = isOpenUncontrolled
   }
 
-  const wrappedOnOpenChange: typeof onOpenChange = useCallback((nextIsOpen, menuTrigger) => {
-    setIsOpenUncontrolled(nextIsOpen)
-    if (nextIsOpen !== isOpen) {
-      if (onOpenChange) onOpenChange(nextIsOpen, menuTrigger)
-    }
-  },
-  [isOpen, onOpenChange])
+  const wrappedOnOpenChange: typeof onOpenChange = useCallback(
+    (nextIsOpen, menuTrigger) => {
+      setIsOpenUncontrolled(nextIsOpen)
+      if (nextIsOpen !== isOpen) {
+        if (onOpenChange) onOpenChange(nextIsOpen, menuTrigger)
+      }
+    },
+    [isOpen, onOpenChange]
+  )
 
-  const setIsOpen = useCallback((isOpen: boolean) => {
-    wrappedOnOpenChange(isOpen, 'manual')
-  },
-  [wrappedOnOpenChange])
+  const setIsOpen = useCallback(
+    (isOpen: boolean) => {
+      wrappedOnOpenChange(isOpen, 'manual')
+    },
+    [wrappedOnOpenChange]
+  )
 
-  const wrappedOnSelectionChange: typeof onSelectionChange = useCallback((newKey, ...args) => {
-    if (onSelectionChange) {
-      onSelectionChange.apply(this, [
-        typeof newKey === 'string' ? newKey : '',
-        ...args,
-      ])
-      setIsOpen(false)
-    }
-  },
-  [onSelectionChange, setIsOpen])
+  const wrappedOnSelectionChange: typeof onSelectionChange = useCallback(
+    (newKey, ...args) => {
+      if (onSelectionChange) {
+        onSelectionChange.apply(this, [
+          typeof newKey === 'string' ? newKey : '',
+          ...args,
+        ])
+        setIsOpen(false)
+      }
+    },
+    [onSelectionChange, setIsOpen]
+  )
 
-  const wrappedOnFocusChange: typeof onFocusChange = useCallback((isFocused, ...args) => {
+  const wrappedOnFocusChange: typeof onFocusChange = useCallback(
+    (isFocused, ...args) => {
       // Enforce open on focus
-    if (isFocused && !isOpen) {
-      setIsOpen(true)
-    }
-    if (onFocusChange) {
-      onFocusChange(isFocused, ...args)
-    }
-  },
-  [isOpen, onFocusChange, setIsOpen])
+      if (isFocused && !isOpen) {
+        setIsOpen(true)
+      }
+      if (onFocusChange) {
+        onFocusChange(isFocused, ...args)
+      }
+    },
+    [isOpen, onFocusChange, setIsOpen]
+  )
 
-  const wrappedOnInputChange: typeof onInputChange = useCallback((input, ...args) => {
-    if (input !== previousInputValue.current) {
-      previousInputValue.current = input
-      setIsOpen(true)
-    }
-    if (onInputChange) {
-      onInputChange(input, ...args)
-    }
-  },
-  [onInputChange, setIsOpen])
+  const wrappedOnInputChange: typeof onInputChange = useCallback(
+    (input, ...args) => {
+      if (input !== previousInputValue.current) {
+        previousInputValue.current = input
+        setIsOpen(true)
+      }
+      if (onInputChange) {
+        onInputChange(input, ...args)
+      }
+    },
+    [onInputChange, setIsOpen]
+  )
 
   const comboStateBaseProps = useSelectComboStateProps<ComboBoxProps>({
     dropdownHeader,
@@ -334,8 +359,7 @@ function ComboBox({
     if (isOpen !== state.isOpen) {
       if (isOpen) {
         state.open(null, 'manual')
-      }
-      else {
+      } else {
         state.close()
       }
     }
@@ -346,14 +370,16 @@ function ComboBox({
   const listBoxRef = useRef(null)
   const popoverRef = useRef(null)
 
-  const { buttonProps, inputProps, listBoxProps } = useComboBox({
-    ...comboStateProps,
-    inputRef,
-    buttonRef,
-    listBoxRef,
-    popoverRef,
-  },
-  state)
+  const { buttonProps, inputProps, listBoxProps } = useComboBox(
+    {
+      ...comboStateProps,
+      inputRef,
+      buttonRef,
+      listBoxRef,
+      popoverRef,
+    },
+    state
+  )
 
   if (startIcon === undefined) {
     startIcon = <SearchIcon />

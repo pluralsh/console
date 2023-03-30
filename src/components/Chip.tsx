@@ -68,18 +68,20 @@ const ChipCard = styled(Card)(({ theme }) => ({
   },
 }))
 
-function ChipRef({
-  children,
-  size = 'medium',
-  severity = 'neutral',
-  hue,
-  loading = false,
-  icon,
-  closeButton,
-  clickable,
-  ...props
-}: ChipProps,
-ref: Ref<any>) {
+function ChipRef(
+  {
+    children,
+    size = 'medium',
+    severity = 'neutral',
+    hue,
+    loading = false,
+    icon,
+    closeButton,
+    clickable,
+    ...props
+  }: ChipProps,
+  ref: Ref<any>
+) {
   const parentFillLevel = useFillLevel()
 
   hue = hue || parentFillLevelToHue[parentFillLevel]

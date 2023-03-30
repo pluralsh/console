@@ -99,52 +99,67 @@ export function terraform(hljs: any) {
     className: 'string',
     begin: '"',
     end: '"',
-    contains: [{
-      className: 'variable',
-      begin: '\\${',
-      end: '\\}',
-      relevance: 9,
-      contains: [{
-        className: 'string',
-        begin: '"',
-        end: '"',
-      }, {
-        className: 'meta',
-        begin: '[A-Za-z_0-9]*\\(',
-        end: '\\)',
+    contains: [
+      {
+        className: 'variable',
+        begin: '\\${',
+        end: '\\}',
+        relevance: 9,
         contains: [
-          NUMBERS, {
+          {
             className: 'string',
             begin: '"',
             end: '"',
-            contains: [{
-              className: 'variable',
-              begin: '\\${',
-              end: '\\}',
-              contains: [{
+          },
+          {
+            className: 'meta',
+            begin: '[A-Za-z_0-9]*\\(',
+            end: '\\)',
+            contains: [
+              NUMBERS,
+              {
                 className: 'string',
                 begin: '"',
                 end: '"',
-                contains: [{
-                  className: 'variable',
-                  begin: '\\${',
-                  end: '\\}',
-                }],
-              }, {
-                className: 'meta',
-                begin: '[A-Za-z_0-9]*\\(',
-                end: '\\)',
-              }],
-            }],
+                contains: [
+                  {
+                    className: 'variable',
+                    begin: '\\${',
+                    end: '\\}',
+                    contains: [
+                      {
+                        className: 'string',
+                        begin: '"',
+                        end: '"',
+                        contains: [
+                          {
+                            className: 'variable',
+                            begin: '\\${',
+                            end: '\\}',
+                          },
+                        ],
+                      },
+                      {
+                        className: 'meta',
+                        begin: '[A-Za-z_0-9]*\\(',
+                        end: '\\)',
+                      },
+                    ],
+                  },
+                ],
+              },
+              'self',
+            ],
           },
-          'self'],
-      }],
-    }],
+        ],
+      },
+    ],
   }
 
   return {
     aliases: ['tf', 'hcl'],
-    keywords: 'resource variable provider output locals module data terraform|10',
+    keywords:
+      'resource variable provider output locals module data terraform|10',
     literal: 'false true null',
     contains: [hljs.COMMENT('\\#', '$'), NUMBERS, STRINGS],
   }

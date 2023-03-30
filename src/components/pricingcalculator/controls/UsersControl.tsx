@@ -29,10 +29,7 @@ type UsersControlProps = {
   setUsers: Dispatch<number>
 }
 
-export default function UsersControl({
-  users,
-  setUsers,
-}: UsersControlProps) {
+export default function UsersControl({ users, setUsers }: UsersControlProps) {
   return (
     <Control
       header="How many users will access your clusters?"

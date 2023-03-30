@@ -1,11 +1,4 @@
-import {
-  Div,
-  DivProps,
-  Flex,
-  H1,
-  H3,
-  P,
-} from 'honorable'
+import { Div, DivProps, Flex, H1, H3, P } from 'honorable'
 import PropTypes from 'prop-types'
 import { Ref, forwardRef } from 'react'
 
@@ -38,27 +31,19 @@ const hueToColor = {
 const propTypes = {
   title: PropTypes.string,
   description: PropTypes.string,
-  apps: PropTypes.arrayOf(PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    imageUrl: PropTypes.string.isRequired,
-  }).isRequired).isRequired,
-  hue: PropTypes.oneOf([
-    'neutral',
-    'red',
-    'green',
-    'blue',
-    'yellow',
-  ]),
+  apps: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      imageUrl: PropTypes.string.isRequired,
+    }).isRequired
+  ).isRequired,
+  hue: PropTypes.oneOf(['neutral', 'red', 'green', 'blue', 'yellow']),
 }
 
-function StackCardRef({
-  title,
-  description,
-  apps = [],
-  hue = 'neutral',
-  ...props
-}: StackCardProps,
-ref: Ref<any>) {
+function StackCardRef(
+  { title, description, apps = [], hue = 'neutral', ...props }: StackCardProps,
+  ref: Ref<any>
+) {
   return (
     <Card
       ref={ref}
@@ -129,21 +114,20 @@ ref: Ref<any>) {
               gap="xsmall"
               flexWrap="wrap"
             >
-              {apps
-                .map((app, i) => (
-                  <Tooltip
-                    key={i}
-                    label={app.name}
-                    placement="bottom"
-                  >
-                    <AppIcon
-                      alt={app.name}
-                      url={app.imageUrl}
-                      size="xxsmall"
-                      hue="lighter"
-                    />
-                  </Tooltip>
-                ))}
+              {apps.map((app, i) => (
+                <Tooltip
+                  key={i}
+                  label={app.name}
+                  placement="bottom"
+                >
+                  <AppIcon
+                    alt={app.name}
+                    url={app.imageUrl}
+                    size="xxsmall"
+                    hue="lighter"
+                  />
+                </Tooltip>
+              ))}
             </Flex>
           )}
         </Flex>

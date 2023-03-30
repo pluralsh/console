@@ -1,9 +1,4 @@
-import {
-  Dispatch,
-  ReactElement,
-  SetStateAction,
-  createContext,
-} from 'react'
+import { Dispatch, ReactElement, SetStateAction, createContext } from 'react'
 
 import createIcon from '../icons/createIcon'
 

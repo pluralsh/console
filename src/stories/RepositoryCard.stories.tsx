@@ -14,9 +14,7 @@ function Template(args: any) {
       direction="column"
       maxWidth={697}
     >
-      <RepositoryCard
-        {...args}
-      />
+      <RepositoryCard {...args} />
       <RepositoryCard
         size="medium"
         mt={1}
@@ -37,14 +35,13 @@ function ListTemplate(args: any) {
       gap="small"
       wrap="wrap"
     >
-      <RepositoryCard
-        {...args}
-      />
+      <RepositoryCard {...args} />
       <RepositoryCard
         {...{
           ...args,
           ...{
-            description: 'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
+            description:
+              'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
           },
         }}
       />
@@ -52,7 +49,8 @@ function ListTemplate(args: any) {
         {...{
           ...args,
           ...{
-            description: 'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
+            description:
+              'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
             tags: null,
           },
         }}
@@ -80,9 +78,19 @@ Default.args = {
   verified: true,
   trending: true,
   publisher: 'Plural',
-  description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+  description:
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
   imageUrl: '/logos/plural-logomark-only-black.svg',
-  tags: ['Devops', 'Deployment', 'Fun', 'Turkey', 'Chickens', 'Handball', 'Cricket', 'Support'],
+  tags: [
+    'Devops',
+    'Deployment',
+    'Fun',
+    'Turkey',
+    'Chickens',
+    'Handball',
+    'Cricket',
+    'Support',
+  ],
 }
 
 export const List = ListTemplate.bind({})

@@ -1,15 +1,5 @@
-import {
-  Ref,
-  forwardRef,
-  useEffect,
-  useState,
-} from 'react'
-import {
-  CssProps,
-  Div,
-  Flex,
-  FlexProps,
-} from 'honorable'
+import { Ref, forwardRef, useEffect, useState } from 'react'
+import { CssProps, Div, Flex, FlexProps } from 'honorable'
 import { useTheme } from 'styled-components'
 
 import Tooltip from '../components/Tooltip'
@@ -22,7 +12,10 @@ type CodelineProps = FlexProps & {
 
 const propTypes = {}
 
-function CodelineRef({ children, displayText, ...props }: CodelineProps, ref: Ref<any>) {
+function CodelineRef(
+  { children, displayText, ...props }: CodelineProps,
+  ref: Ref<any>
+) {
   const [copied, setCopied] = useState(false)
   const theme = useTheme()
 
@@ -34,7 +27,10 @@ function CodelineRef({ children, displayText, ...props }: CodelineProps, ref: Re
     }
   }, [copied])
 
-  const handleCopy = () => window.navigator.clipboard.writeText(children as string).then(() => setCopied(true))
+  const handleCopy = () =>
+    window.navigator.clipboard
+      .writeText(children as string)
+      .then(() => setCopied(true))
 
   return (
     <Flex
@@ -53,7 +49,7 @@ function CodelineRef({ children, displayText, ...props }: CodelineProps, ref: Re
       >
         <Div
           body2
-          {...theme.partials.text.code as CssProps}
+          {...(theme.partials.text.code as CssProps)}
           color="text-light"
           flexGrow={1}
           whiteSpace="pre"
@@ -77,7 +73,7 @@ function CodelineRef({ children, displayText, ...props }: CodelineProps, ref: Re
           placement="top"
           displayOn="manual"
           dismissable
-          onOpenChange={open => {
+          onOpenChange={(open) => {
             if (!open && copied) setCopied(false)
           }}
           manualOpen={copied}

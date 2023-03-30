@@ -3,13 +3,13 @@ import { Div } from 'honorable'
 import { keyframes } from '@emotion/react'
 
 export type Props = {
-  mode?: 'indeterminate' | 'determinate',
-  paused?: boolean,
-  progress?: number,
-  complete?: boolean,
-  height?: number,
-  progressColor?: string,
-  completeColor?: string,
+  mode?: 'indeterminate' | 'determinate'
+  paused?: boolean
+  progress?: number
+  complete?: boolean
+  height?: number
+  progressColor?: string
+  completeColor?: string
 }
 
 const keyframesOuter = keyframes`
@@ -45,7 +45,7 @@ const keyframesInner = keyframes`
 `
 
 type IndeterminateFillProps = {
-  complete: boolean,
+  complete: boolean
   paused: boolean
 }
 
@@ -113,15 +113,16 @@ export default function ProgressBar({
         paused={paused}
       />
     )
-  }
-  else {
+  } else {
     fill = (
       <Div
         position="absolute"
         left={0}
         top={0}
         bottom={0}
-        backgroundColor={progress >= 1 || complete ? completeColor : progressColor}
+        backgroundColor={
+          progress >= 1 || complete ? completeColor : progressColor
+        }
         right={`${(1 - progress) * 100}%`}
       />
     )

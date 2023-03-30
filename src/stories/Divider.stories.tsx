@@ -6,11 +6,7 @@ export default {
 }
 
 function Template(args: any) {
-  return (
-    <Divider
-      {...args}
-    />
-  )
+  return <Divider {...args} />
 }
 
 export const Default = Template.bind({})
@@ -22,5 +18,5 @@ Default.args = {
 export const Text = Template.bind({})
 
 Text.args = {
-  text: 'That\'s division allright!',
+  text: "That's division allright!",
 }

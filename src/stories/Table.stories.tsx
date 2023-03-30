@@ -1,11 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import {
-  Div,
-  Flex,
-  Input,
-  InputProps,
-  P,
-} from 'honorable'
+import { Div, Flex, Input, InputProps, P } from 'honorable'
 import React, { ReactElement, useEffect } from 'react'
 import type { Row } from '@tanstack/react-table'
 
@@ -97,20 +91,20 @@ const data: Method[] = [
 const columnHelper = createColumnHelper<Method>()
 
 const columns = [
-  columnHelper.accessor(row => row.function, {
+  columnHelper.accessor((row) => row.function, {
     id: 'function',
     enableGlobalFilter: true,
     enableSorting: true,
     cell: (info: any) => info.getValue(),
     header: () => <span>Function</span>,
   }),
-  columnHelper.accessor(row => row.id, {
+  columnHelper.accessor((row) => row.id, {
     id: 'id',
     enableSorting: true,
     cell: (info: any) => info.getValue(),
     header: () => <span>ID</span>,
   }),
-  columnHelper.accessor(row => row.inputType, {
+  columnHelper.accessor((row) => row.inputType, {
     id: 'inputType',
     enableSorting: true,
     cell: (info: any) => (
@@ -127,12 +121,12 @@ const columns = [
       gridTemplate: 'minmax(150px, 1fr)',
     },
   }),
-  columnHelper.accessor(row => row.returnedValue, {
+  columnHelper.accessor((row) => row.returnedValue, {
     id: 'returnedValue',
     cell: (info: any) => <span>{info.getValue()}</span>,
     header: () => <span>Returned value</span>,
   }),
-  columnHelper.accessor(row => row.description, {
+  columnHelper.accessor((row) => row.description, {
     id: 'description',
     enableGlobalFilter: true,
     cell: (info: any) => <span>{info.getValue()}</span>,
@@ -158,43 +152,44 @@ const expandingColumns = [
   {
     id: 'expander',
     header: () => {},
-    cell: ({ row }: any) => row.getCanExpand() && (
-      <CollapseIcon
-        size={8}
-        cursor="pointer"
-        style={
-          row.getIsExpanded()
-            ? {
-              transform: 'rotate(270deg)',
-              transitionDuration: '.2s',
-              transitionProperty: 'transform',
-            }
-            : {
-              transform: 'rotate(180deg)',
-              transitionDuration: '.2s',
-              transitionProperty: 'transform',
-            }
-        }
-        onClick={row.getToggleExpandedHandler()}
-      />
-    ),
+    cell: ({ row }: any) =>
+      row.getCanExpand() && (
+        <CollapseIcon
+          size={8}
+          cursor="pointer"
+          style={
+            row.getIsExpanded()
+              ? {
+                  transform: 'rotate(270deg)',
+                  transitionDuration: '.2s',
+                  transitionProperty: 'transform',
+                }
+              : {
+                  transform: 'rotate(180deg)',
+                  transitionDuration: '.2s',
+                  transitionProperty: 'transform',
+                }
+          }
+          onClick={row.getToggleExpandedHandler()}
+        />
+      ),
   },
-  columnHelper.accessor(row => row.function, {
+  columnHelper.accessor((row) => row.function, {
     id: 'function',
     cell: (info: any) => info.getValue(),
     header: () => <span>Function</span>,
   }),
-  columnHelper.accessor(row => row.inputType, {
+  columnHelper.accessor((row) => row.inputType, {
     id: 'inputType',
     cell: (info: any) => <span>{info.getValue()}</span>,
     header: () => <span>Input (type)</span>,
   }),
-  columnHelper.accessor(row => row.returnedValue, {
+  columnHelper.accessor((row) => row.returnedValue, {
     id: 'returnedValue',
     cell: (info: any) => <span>{info.getValue()}</span>,
     header: () => <span>Returned value</span>,
   }),
-  columnHelper.accessor(row => row.description, {
+  columnHelper.accessor((row) => row.description, {
     id: 'description',
     cell: (info: any) => <span>{info.getValue()}</span>,
     header: () => <span>Description</span>,
@@ -235,7 +230,7 @@ function DebouncedInput({
     <Input
       {...props}
       value={value}
-      onChange={e => setValue(e.target.value)}
+      onChange={(e) => setValue(e.target.value)}
     />
   )
 }
@@ -247,7 +242,7 @@ function FilterableTemplate(args: any) {
     <Div maxWidth="900px">
       <DebouncedInput
         initialValue={globalFilter}
-        onChange={value => setGlobalFilter(String(value))}
+        onChange={(value) => setGlobalFilter(String(value))}
         marginBottom="small"
         placeholder="Filter by Function or Description'"
       />

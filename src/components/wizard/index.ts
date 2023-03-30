@@ -1,4 +1,7 @@
-export type { StepConfig as WizardStepConfig, ContextProps as WizardContextProps } from './context'
+export type {
+  StepConfig as WizardStepConfig,
+  ContextProps as WizardContextProps,
+} from './context'
 export { WizardContext } from './context'
 
 export { Wizard } from './Wizard'

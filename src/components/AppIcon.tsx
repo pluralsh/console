@@ -94,7 +94,7 @@ export function toInitials(name: string) {
   let initials = name
     .trim()
     .split(' ')
-    .map(n => n.charAt(0).toUpperCase())
+    .map((n) => n.charAt(0).toUpperCase())
 
   if (initials.length > 2) {
     initials = [initials[0], last(initials)]
@@ -103,26 +103,28 @@ export function toInitials(name: string) {
   return initials.join('')
 }
 
-function AppIconRef({
-  size = 'medium',
-  spacing = 'padding',
-  hue,
-  clickable = false,
-  url,
-  icon = null,
-  alt,
-  name,
-  initials,
-  onClose,
-  ...props
-}: AppIconProps,
-ref: Ref<any>) {
+function AppIconRef(
+  {
+    size = 'medium',
+    spacing = 'padding',
+    hue,
+    clickable = false,
+    url,
+    icon = null,
+    alt,
+    name,
+    initials,
+    onClose,
+    ...props
+  }: AppIconProps,
+  ref: Ref<any>
+) {
   const parentFillLevel = useFillLevel()
 
   hue = hue || parentFillLevelToHue[parentFillLevel]
   const boxSize = sizeToWidth[size]
-  const iconSize
-    = spacing === 'padding' ? sizeToIconWidth[size] : sizeToWidth[size] + 1
+  const iconSize =
+    spacing === 'padding' ? sizeToIconWidth[size] : sizeToWidth[size] + 1
   const color = hueToColor[hue]
   const borderColor = hueToBorderColor[hue]
   const hasBorder = spacing === 'padding'
@@ -154,18 +156,20 @@ ref: Ref<any>) {
           objectFit="cover"
           {...props}
         />
-      ) : icon || (
-        <Flex
-          width="100%"
-          height="100%"
-          alignItems="center"
-          justifyContent="center"
-          userSelect="none"
-          textTransform="uppercase"
-          {...sizeToFont[size]}
-        >
-          {initials || (name ? toInitials(name) : '')}
-        </Flex>
+      ) : (
+        icon || (
+          <Flex
+            width="100%"
+            height="100%"
+            alignItems="center"
+            justifyContent="center"
+            userSelect="none"
+            textTransform="uppercase"
+            {...sizeToFont[size]}
+          >
+            {initials || (name ? toInitials(name) : '')}
+          </Flex>
+        )
       )}
     </Flex>
   )

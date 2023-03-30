@@ -19,13 +19,13 @@ function Template(args: any) {
       <Div marginTop="medium">
         <Input
           startIcon={<MagnifyingGlassIcon />}
-          endIcon={(
+          endIcon={
             <CaretDownIcon
               size={10}
               mt={0.333}
               mx="3px"
             />
-          )}
+          }
           {...args}
         />
       </Div>
@@ -33,7 +33,7 @@ function Template(args: any) {
   )
 }
 
-function CustomInputTemplate(props:any) {
+function CustomInputTemplate(props: any) {
   return (
     <Flex
       direction="column"
@@ -65,8 +65,7 @@ function CustomInputTemplate(props:any) {
 
 export const Default = Template.bind({})
 
-Default.args = {
-}
+Default.args = {}
 
 export const Error = Template.bind({})
 

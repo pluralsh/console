@@ -54,13 +54,15 @@ const getDirectory = () => [
   },
 ]
 
-const loadSubEntriesOf = async (path: string): Promise<{ id: string; label: string }[] | null> => {
-  await new Promise(resolve => {
+const loadSubEntriesOf = async (
+  path: string
+): Promise<{ id: string; label: string }[] | null> => {
+  await new Promise((resolve) => {
     setTimeout(resolve, 500)
   })
 
-  const ret
-    = {
+  const ret =
+    {
       'docs/page1': [
         {
           id: '#id1',
@@ -128,7 +130,7 @@ function NavEntryDoc({
       let isSubscribed = true
 
       setSubPaths(null)
-      loadSubEntriesOf(path).then(subPaths => {
+      loadSubEntriesOf(path).then((subPaths) => {
         if (isSubscribed) {
           setSubPaths(subPaths)
           setLoadingSubPaths(false)
@@ -150,8 +152,7 @@ function NavEntryDoc({
       if (currentHash) {
         setCurrentHash(null)
       }
-    }
-    else if (subPaths.length > 0 && !currentHash) {
+    } else if (subPaths.length > 0 && !currentHash) {
       setCurrentHash(subPaths[0].id)
     }
   }, [currentHash, subPaths])
@@ -163,7 +164,7 @@ function NavEntryDoc({
       onClick={() => navigate(path)}
       {...props}
     >
-      {subPaths?.map(subEntry => (
+      {subPaths?.map((subEntry) => (
         <TreeNavEntry
           key={subEntry.id}
           label={subEntry.label}
@@ -185,7 +186,7 @@ function TemplateInner() {
   return (
     <Div maxWidth={200}>
       <TreeNav>
-        {getDirectory().map(entry => {
+        {getDirectory().map((entry) => {
           const isExactCurrentPath = currentPath === entry.path
 
           return (
@@ -199,7 +200,7 @@ function TemplateInner() {
               }}
               active={isExactCurrentPath}
             >
-              {entry.subPaths?.map(subEntry => (
+              {entry.subPaths?.map((subEntry) => (
                 <NavEntryDoc
                   key={subEntry.path}
                   path={subEntry.path}

@@ -42,9 +42,7 @@ const HonorableLabelStyled = styled(Label)<{
   $small: boolean
   $isFocusVisible: boolean
   $disabled: boolean
-}>(({
-  $small = false, $disabled = false, $isFocusVisible, theme,
-}) => ({
+}>(({ $small = false, $disabled = false, $isFocusVisible, theme }) => ({
   ...theme.partials.text.body2,
   gap: theme.spacing.small,
   alignItems: 'center',
@@ -76,8 +74,8 @@ const HonorableLabelStyled = styled(Label)<{
     backgroundColor: $disabled
       ? theme.colors['action-primary-disabled']
       : $isFocusVisible
-        ? theme.colors['action-input-hover']
-        : 'transparent',
+      ? theme.colors['action-input-hover']
+      : 'transparent',
     '.icon': {
       display: 'flex',
       alignItems: 'center',
@@ -85,40 +83,40 @@ const HonorableLabelStyled = styled(Label)<{
       color: $disabled
         ? theme.colors['action-primary-disabled']
         : $isFocusVisible
-          ? theme.colors['action-primary-hover']
-          : theme.colors['action-primary'],
+        ? theme.colors['action-primary-hover']
+        : theme.colors['action-primary'],
     },
   },
   ...(!$disabled
     ? {
-      ':hover': {
-        color: theme.colors.text,
-        ':not(.checked) .box': {
-          backgroundColor: theme.colors['action-input-hover'],
-        },
-        '.icon': {
-          color: theme.colors['action-primary-hover'],
-        },
-      },
-      ...($isFocusVisible
-        ? {
+        ':hover': {
           color: theme.colors.text,
           ':not(.checked) .box': {
             backgroundColor: theme.colors['action-input-hover'],
           },
-        }
-        : {}),
-      '&.checked': {
-        color: theme.colors.text,
-        ...(!$isFocusVisible
+          '.icon': {
+            color: theme.colors['action-primary-hover'],
+          },
+        },
+        ...($isFocusVisible
           ? {
-            '.box': {
-              borderColor: theme.colors['border-selected'],
-            },
-          }
+              color: theme.colors.text,
+              ':not(.checked) .box': {
+                backgroundColor: theme.colors['action-input-hover'],
+              },
+            }
           : {}),
-      },
-    }
+        '&.checked': {
+          color: theme.colors.text,
+          ...(!$isFocusVisible
+            ? {
+                '.box': {
+                  borderColor: theme.colors['border-selected'],
+                },
+              }
+            : {}),
+        },
+      }
     : {}),
 }))
 
@@ -131,22 +129,24 @@ export type RadioProps = AriaRadioProps & {
   onChange?: (e: { target: { checked: boolean } }) => any
 } & InputProps
 
-function Radio({
-  small,
-  value,
-  checked: checkedProp,
-  disabled,
-  defaultChecked,
-  'aria-describedby': ariaDescribedBy,
-  onChange,
-  onBlur,
-  onFocus,
-  onKeyDown,
-  onKeyUp,
-  name,
-  ...props
-}: RadioProps,
-ref: MutableRefObject<any>) {
+function Radio(
+  {
+    small,
+    value,
+    checked: checkedProp,
+    disabled,
+    defaultChecked,
+    'aria-describedby': ariaDescribedBy,
+    onChange,
+    onBlur,
+    onFocus,
+    onKeyDown,
+    onKeyUp,
+    name,
+    ...props
+  }: RadioProps,
+  ref: MutableRefObject<any>
+) {
   const [checked, setChecked] = useState(defaultChecked || checkedProp)
   const state = useContext(RadioContext) || {
     setSelectedValue: () => {},
@@ -160,18 +160,20 @@ ref: MutableRefObject<any>) {
   const labelId = useId()
   const inputRef = useRef<any>()
   const { isFocusVisible, focusProps } = useFocusRing()
-  const { inputProps, isSelected, isDisabled } = useRadio({
-    value,
-    'aria-describedby': ariaDescribedBy,
-    'aria-labelledby': labelId,
-    isDisabled: disabled,
-    onBlur,
-    onFocus,
-    onKeyDown,
-    onKeyUp,
-  },
-  state,
-  inputRef)
+  const { inputProps, isSelected, isDisabled } = useRadio(
+    {
+      value,
+      'aria-describedby': ariaDescribedBy,
+      'aria-labelledby': labelId,
+      isDisabled: disabled,
+      onBlur,
+      onFocus,
+      onKeyDown,
+      onKeyUp,
+    },
+    state,
+    inputRef
+  )
 
   const icon = isSelected ? <CheckedIcon small={small} /> : null
 
@@ -193,7 +195,7 @@ ref: MutableRefObject<any>) {
           {...inputProps}
           {...focusProps}
           name={inputProps.name || name}
-          onChange={e => {
+          onChange={(e) => {
             if (typeof onChange === 'function') {
               onChange(e)
             }

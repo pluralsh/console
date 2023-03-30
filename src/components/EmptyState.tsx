@@ -1,10 +1,5 @@
 import { ReactElement, Ref, forwardRef } from 'react'
-import {
-  Div,
-  Flex,
-  FlexProps,
-  Text,
-} from 'honorable'
+import { Div, Flex, FlexProps, Text } from 'honorable'
 import PropTypes from 'prop-types'
 
 type EmptyStateProps = FlexProps & {
@@ -19,14 +14,10 @@ const propTypes = {
   icon: PropTypes.element,
 }
 
-function EmptyStateRef({
-  message,
-  description,
-  icon = null,
-  children,
-  ...props
-}: EmptyStateProps,
-ref: Ref<any>) {
+function EmptyStateRef(
+  { message, description, icon = null, children, ...props }: EmptyStateProps,
+  ref: Ref<any>
+) {
   return (
     <Flex
       ref={ref}
@@ -36,7 +27,7 @@ ref: Ref<any>) {
       align="center"
       {...props}
     >
-      {icon && (<Div marginBottom="large">{icon}</Div>)}
+      {icon && <Div marginBottom="large">{icon}</Div>}
       <Text
         subtitle1
         textAlign="center"

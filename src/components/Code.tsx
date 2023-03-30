@@ -79,33 +79,35 @@ function CodeHeaderUnstyled({
   )
 }
 
-const CodeHeader = styled(CodeHeaderUnstyled)<{ $visuallyHidden?: boolean }>(({ $visuallyHidden = false, fillLevel, theme }) => ({
-  minHeight: theme.spacing.xlarge + theme.spacing.xsmall * 2,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
-  borderBottom:
+const CodeHeader = styled(CodeHeaderUnstyled)<{ $visuallyHidden?: boolean }>(
+  ({ $visuallyHidden = false, fillLevel, theme }) => ({
+    minHeight: theme.spacing.xlarge + theme.spacing.xsmall * 2,
+    padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+    borderBottom:
       fillLevel >= 1 ? theme.borders['fill-three'] : theme.borders['fill-two'],
-  backgroundColor:
+    backgroundColor:
       fillLevel >= 1 ? theme.colors['fill-three'] : theme.colors['fill-two'],
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: theme.spacing.medium,
-  borderTopLeftRadius: theme.borderRadiuses.medium + 2,
-  borderTopRightRadius: theme.borderRadiuses.medium + 2,
-  ...($visuallyHidden
-    ? {
-      pointerEvents: 'none',
-      height: 0,
-      opacity: 0,
-      overflow: 'hidden',
-      minHeight: 0,
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      left: 0,
-    }
-    : {}),
-}))
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: theme.spacing.medium,
+    borderTopLeftRadius: theme.borderRadiuses.medium + 2,
+    borderTopRightRadius: theme.borderRadiuses.medium + 2,
+    ...($visuallyHidden
+      ? {
+          pointerEvents: 'none',
+          height: 0,
+          opacity: 0,
+          overflow: 'hidden',
+          minHeight: 0,
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          left: 0,
+        }
+      : {}),
+  })
+)
 
 function CopyButtonBase({
   copied,
@@ -129,13 +131,15 @@ function CopyButtonBase({
     </Button>
   )
 }
-const CopyButton = styled(CopyButtonBase)<{ verticallyCenter: boolean }>(({ verticallyCenter, theme }) => ({
-  position: 'absolute',
-  right: theme.spacing.medium,
-  top: verticallyCenter ? '50%' : theme.spacing.medium,
-  transform: verticallyCenter ? 'translateY(-50%)' : 'none',
-  boxShadow: theme.boxShadows.slight,
-}))
+const CopyButton = styled(CopyButtonBase)<{ verticallyCenter: boolean }>(
+  ({ verticallyCenter, theme }) => ({
+    position: 'absolute',
+    right: theme.spacing.medium,
+    top: verticallyCenter ? '50%' : theme.spacing.medium,
+    transform: verticallyCenter ? 'translateY(-50%)' : 'none',
+    boxShadow: theme.boxShadows.slight,
+  })
+)
 
 type CodeTabData = {
   key: string
@@ -144,44 +148,50 @@ type CodeTabData = {
   content: string
 }
 
-const TitleArea = styled.div<{ $shrinkable: boolean }>(({ $shrinkable, theme }) => ({
-  display: 'flex',
-  flexShrink: $shrinkable ? 1 : 0,
-  flexGrow: 1,
-  gap: theme.spacing.xsmall,
-  ...theme.partials.text.overline,
-  color: 'text-light',
-}))
+const TitleArea = styled.div<{ $shrinkable: boolean }>(
+  ({ $shrinkable, theme }) => ({
+    display: 'flex',
+    flexShrink: $shrinkable ? 1 : 0,
+    flexGrow: 1,
+    gap: theme.spacing.xsmall,
+    ...theme.partials.text.overline,
+    color: 'text-light',
+  })
+)
 
 const tabsWrapMargin = 5
-const TabsWrap = styled.div<{ $isDisabled: boolean }>(({ $isDisabled, theme: _ }) => ({
-  flexShrink: 1,
-  overflow: 'hidden',
-  margin: -tabsWrapMargin,
-  padding: tabsWrapMargin,
-  ...($isDisabled ? { opacity: 0.0, height: 0 } : {}),
-}))
+const TabsWrap = styled.div<{ $isDisabled: boolean }>(
+  ({ $isDisabled, theme: _ }) => ({
+    flexShrink: 1,
+    overflow: 'hidden',
+    margin: -tabsWrapMargin,
+    padding: tabsWrapMargin,
+    ...($isDisabled ? { opacity: 0.0, height: 0 } : {}),
+  })
+)
 
-const TabsDropdownButton = styled(forwardRef<any, any>((props, ref) => {
-  const fillLevel = useFillLevel()
-  const theme = useTheme()
+const TabsDropdownButton = styled(
+  forwardRef<any, any>((props, ref) => {
+    const fillLevel = useFillLevel()
+    const theme = useTheme()
 
-  return (
-    <Button
-      ref={ref}
-      small
-      tertiary
-      endIcon={<DropdownArrowIcon className="dropdownIcon" />}
-      {...{
-        '&, &:hover, &:focus, &:focus-visible': {
-          backgroundColor:
+    return (
+      <Button
+        ref={ref}
+        small
+        tertiary
+        endIcon={<DropdownArrowIcon className="dropdownIcon" />}
+        {...{
+          '&, &:hover, &:focus, &:focus-visible': {
+            backgroundColor:
               theme.colors[`fill-${fillLevel > 2 ? 'three' : 'two'}-selected`],
-        },
-      }}
-      {...props}
-    />
-  )
-}))<{ isOpen?: boolean }>(({ isOpen = false, theme }) => ({
+          },
+        }}
+        {...props}
+      />
+    )
+  })
+)<{ isOpen?: boolean }>(({ isOpen = false, theme }) => ({
   '.dropdownIcon': {
     transform: isOpen ? 'scaleY(-1)' : 'scaleY(1)',
     transition: 'transform 0.1s ease',
@@ -209,7 +219,8 @@ function CodeTabs() {
     isDisabled: tabInterface !== 'tabs',
   }
 
-  useResizeObserver(tabsRef,
+  useResizeObserver(
+    tabsRef,
     useCallback(() => {
       const scrollWidth = tabsRef?.current?.scrollWidth
       const clientWidth = tabsRef?.current?.clientWidth
@@ -217,12 +228,12 @@ function CodeTabs() {
       if (typeof scrollWidth === 'number' && typeof clientWidth === 'number') {
         if (clientWidth - scrollWidth < 0) {
           setTabInterface('dropdown')
-        }
-        else {
+        } else {
           setTabInterface('tabs')
         }
       }
-    }, [setTabInterface]))
+    }, [setTabInterface])
+  )
 
   return (
     <TabsWrap
@@ -236,9 +247,11 @@ function CodeTabs() {
         ref={tabsRef}
         style={!tabInterface ? { opacity: 0 } : undefined}
       >
-        {tabs.map(tab => {
+        {tabs.map((tab) => {
           if (typeof tab.content !== 'string') {
-            throw new Error('Code component expects a string for tabs[].content')
+            throw new Error(
+              'Code component expects a string for tabs[].content'
+            )
           }
 
           return (
@@ -259,7 +272,7 @@ function CodeTabs() {
 function CodeSelectUnstyled({ className }: ComponentProps<'div'>) {
   const { tabs, selectedKey, onSelectionChange } = useContext(TabsContext)
 
-  const selectedTab = tabs.find(tab => tab.key === selectedKey) || tabs[0]
+  const selectedTab = tabs.find((tab) => tab.key === selectedKey) || tabs[0]
 
   return (
     <div className={className}>
@@ -268,9 +281,11 @@ function CodeSelectUnstyled({ className }: ComponentProps<'div'>) {
         onSelectionChange={onSelectionChange}
         width="max-content"
         placement="right"
-        triggerButton={<TabsDropdownButton>{selectedTab.label} </TabsDropdownButton>}
+        triggerButton={
+          <TabsDropdownButton>{selectedTab.label} </TabsDropdownButton>
+        }
       >
-        {tabs.map(tab => (
+        {tabs.map((tab) => (
           <ListBoxItem
             key={tab.key}
             label={tab.label || tab.language}
@@ -281,11 +296,13 @@ function CodeSelectUnstyled({ className }: ComponentProps<'div'>) {
     </div>
   )
 }
-const CodeSelect = styled(CodeSelectUnstyled)<{ $isDisabled?: boolean }>(({ $isDisabled: _, theme: _t }) => ({
-  display: 'flex',
-  flexGrow: 1,
-  justifyContent: 'right',
-}))
+const CodeSelect = styled(CodeSelectUnstyled)<{ $isDisabled?: boolean }>(
+  ({ $isDisabled: _, theme: _t }) => ({
+    display: 'flex',
+    flexGrow: 1,
+    justifyContent: 'right',
+  })
+)
 
 function CodeContent({
   children,
@@ -295,10 +312,13 @@ function CodeContent({
   const [copied, setCopied] = useState(false)
   const codeString = children?.trim() || ''
   const multiLine = !!codeString.match(/\r?\n/) || hasSetHeight
-  const handleCopy = useCallback(() => window.navigator.clipboard
-    .writeText(codeString)
-    .then(() => setCopied(true)),
-  [codeString])
+  const handleCopy = useCallback(
+    () =>
+      window.navigator.clipboard
+        .writeText(codeString)
+        .then(() => setCopied(true)),
+    [codeString]
+  )
 
   useEffect(() => {
     if (copied) {
@@ -333,20 +353,24 @@ function CodeContent({
   )
 }
 
-function CodeRef({
-  children,
-  language,
-  showLineNumbers,
-  showHeader,
-  tabs,
-  title,
-  onSelectedTabChange,
-  ...props
-}: CodeProps,
-ref: RefObject<any>) {
+function CodeRef(
+  {
+    children,
+    language,
+    showLineNumbers,
+    showHeader,
+    tabs,
+    title,
+    onSelectedTabChange,
+    ...props
+  }: CodeProps,
+  ref: RefObject<any>
+) {
   const parentFillLevel = useFillLevel()
   const tabStateRef = useRef()
-  const [selectedTabKey, setSelectedTabKey] = useState<string>((tabs && tabs[0]?.key) || '')
+  const [selectedTabKey, setSelectedTabKey] = useState<string>(
+    (tabs && tabs[0]?.key) || ''
+  )
   const theme = useTheme()
   const [tabInterface, setTabInterface] = useState<TabInterfaceT>()
 
@@ -355,23 +379,25 @@ ref: RefObject<any>) {
 
   showHeader = tabs ? true : showHeader === undefined ? !!language : showHeader
 
-  const uiContext: TabsContext = useMemo(() => ({
-    tabInterface,
-    setTabInterface,
-    tabs,
-    tabStateRef,
-    selectedKey: selectedTabKey,
-    onSelectionChange: (key: string) => {
-      setSelectedTabKey(key)
-      if (typeof onSelectedTabChange === 'function') {
-        onSelectedTabChange(key)
-      }
-    },
-  }),
-  [onSelectedTabChange, selectedTabKey, tabInterface, setTabInterface, tabs])
+  const uiContext: TabsContext = useMemo(
+    () => ({
+      tabInterface,
+      setTabInterface,
+      tabs,
+      tabStateRef,
+      selectedKey: selectedTabKey,
+      onSelectionChange: (key: string) => {
+        setSelectedTabKey(key)
+        if (typeof onSelectedTabChange === 'function') {
+          onSelectedTabChange(key)
+        }
+      },
+    }),
+    [onSelectedTabChange, selectedTabKey, tabInterface, setTabInterface, tabs]
+  )
 
-  const titleArea
-    = (tabs && title) || !tabs ? (
+  const titleArea =
+    (tabs && title) || !tabs ? (
       <TitleArea $shrinkable={tabInterface === 'dropdown' || !tabs}>
         <FileIcon />
         {(title || language) && <div>{title || language}</div>}
@@ -412,19 +438,19 @@ ref: RefObject<any>) {
           </>
         )}
         {tabs ? (
-          tabs.map(tab => (
+          tabs.map((tab) => (
             <TabPanel
               key={tab.key}
               tabKey={tab.key}
               mode="multipanel"
               stateRef={tabStateRef}
-              as={(
+              as={
                 <Div
                   position="relative"
                   height="100%"
                   overflow="hidden"
                 />
-              )}
+              }
             >
               <CodeContent
                 language={tab.language}
@@ -459,7 +485,7 @@ ref: RefObject<any>) {
   )
 }
 
-const Code = styled(forwardRef(CodeRef))(_ => ({
+const Code = styled(forwardRef(CodeRef))((_) => ({
   [CopyButton]: {
     opacity: 0,
     pointerEvents: 'none',

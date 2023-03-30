@@ -1,10 +1,4 @@
-import {
-  Div,
-  DivProps,
-  Flex,
-  FlexProps,
-  Img,
-} from 'honorable'
+import { Div, DivProps, Flex, FlexProps, Img } from 'honorable'
 import {
   Fragment,
   ReactNode,
@@ -68,7 +62,7 @@ type StepProps = DivProps &
 type StepConnectionProps = DivProps & {
   isActive: boolean
   vertical?: boolean
-  compact?: boolean,
+  compact?: boolean
 }
 
 export type StepperSteps = (StepBaseProps & { key: string })[]
@@ -84,11 +78,13 @@ type StepperProps = FlexProps & {
 
 const propTypes = {
   stepIndex: PropTypes.number.isRequired,
-  steps: PropTypes.arrayOf(PropTypes.shape({
-    stepTitle: PropTypes.node,
-    IconComponent: PropTypes.elementType,
-    iconSize: PropTypes.number,
-  }).isRequired).isRequired,
+  steps: PropTypes.arrayOf(
+    PropTypes.shape({
+      stepTitle: PropTypes.node,
+      IconComponent: PropTypes.elementType,
+      iconSize: PropTypes.number,
+    }).isRequired
+  ).isRequired,
 }
 
 function Step({
@@ -144,7 +140,9 @@ function Step({
           borderRadius="100%"
           backgroundColor={theme.colors[hueToBG[hue]]}
           border={`1px solid ${
-            isActive ? theme.colors['border-selected'] : theme.colors[hueToBorder[hue]]
+            isActive
+              ? theme.colors['border-selected']
+              : theme.colors[hueToBorder[hue]]
           }`}
           transition="all 0.2s ease"
           transitionDelay="0.1"
@@ -162,7 +160,11 @@ function Step({
             {IconComponent && (
               <IconComponent
                 size={iconSize}
-                color={isActive ? theme.colors['icon-default'] : theme.colors['icon-xlight']}
+                color={
+                  isActive
+                    ? theme.colors['icon-default']
+                    : theme.colors['icon-xlight']
+                }
               />
             )}
             {imageUrl && (
@@ -184,7 +186,11 @@ function Step({
             {...completeIconStyles}
           >
             <StatusOkIcon
-              color={compact ? theme.colors['text-xlight'] : theme.colors['icon-success']}
+              color={
+                compact
+                  ? theme.colors['text-xlight']
+                  : theme.colors['icon-success']
+              }
               size={iconSize}
             />
           </Flex>
@@ -240,15 +246,17 @@ function StepConnection({
   )
 }
 
-function StepperRef({
-  stepIndex,
-  steps,
-  vertical = false,
-  collapseAtWidth = 160,
-  forceCollapse = false,
-  compact = false,
-}: StepperProps,
-ref: Ref<any>) {
+function StepperRef(
+  {
+    stepIndex,
+    steps,
+    vertical = false,
+    collapseAtWidth = 160,
+    forceCollapse = false,
+    compact = false,
+  }: StepperProps,
+  ref: Ref<any>
+) {
   const eltRef = useRef<HTMLDivElement>()
   const mergedRef = mergeRefs(ref, eltRef)
   const [collapseTitles, setCollapseTitles] = useState(true)
@@ -259,9 +267,10 @@ ref: Ref<any>) {
 
       return
     }
-    setCollapseTitles(forceCollapse || eltRef?.current?.clientWidth < collapseAtWidth)
-  },
-  [forceCollapse, eltRef, collapseAtWidth, vertical])
+    setCollapseTitles(
+      forceCollapse || eltRef?.current?.clientWidth < collapseAtWidth
+    )
+  }, [forceCollapse, eltRef, collapseAtWidth, vertical])
 
   useEffect(attemptCollapse, [vertical, forceCollapse, attemptCollapse])
   useResizeObserver(eltRef, attemptCollapse)
@@ -285,7 +294,7 @@ ref: Ref<any>) {
             iconSize={step.iconSize || 24}
             circleSize={step.circleSize || 48}
             vertical={step.vertical || vertical}
-            collapseTitles={vertical && collapseTitles || step.collapseTitle}
+            collapseTitles={(vertical && collapseTitles) || step.collapseTitle}
             hue={step.hue}
             compact={compact}
             canComplete={step.canComplete}
@@ -294,7 +303,9 @@ ref: Ref<any>) {
             <StepConnection
               isActive={stepIndex > index}
               vertical={vertical}
-              marginTop={vertical ? 'small' : compact ? 0 : (step.circleSize || 48) / 2}
+              marginTop={
+                vertical ? 'small' : compact ? 0 : (step.circleSize || 48) / 2
+              }
               marginBottom={vertical ? 'small' : 'none'}
               marginLeft={vertical ? 'large' : 'none'}
               compact={compact}

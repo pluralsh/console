@@ -1,9 +1,4 @@
-import {
-  Button,
-  Div,
-  Flex,
-  FlexProps,
-} from 'honorable'
+import { Button, Div, Flex, FlexProps } from 'honorable'
 import { ComponentProps, useState } from 'react'
 
 import { IconFrame, InfoIcon, Modal } from '..'
@@ -48,7 +43,7 @@ function ModalExample({
       portal
       onClose={onClose}
       header="Hover the below buttons"
-      actions={(
+      actions={
         <>
           <Tooltip
             {...tipProps}
@@ -74,7 +69,7 @@ function ModalExample({
             </Button>
           </Tooltip>
         </>
-      )}
+      }
       {...props}
     >
       <>

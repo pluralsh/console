@@ -1,12 +1,7 @@
 import { Div, Flex, H1 } from 'honorable'
 import { Key, useRef, useState } from 'react'
 
-import {
-  SubTab,
-  TabList,
-  TabListStateProps,
-  TabPanel,
-} from '..'
+import { SubTab, TabList, TabListStateProps, TabPanel } from '..'
 
 export default {
   title: 'ButtonGroup',
@@ -79,29 +74,26 @@ function TemplateBasic(args: any) {
             </SubTab>
           ))}
         </TabList>
-        {
-          Object.entries(tabs).map(([key, tab]) => (
-            <TabPanel
-              key={key}
-              tabKey={key}
-              mode="multipanel"
-              stateRef={tabStateRef}
-              paddingTop="large"
-              paddingBottom="large"
-              borderTop="1px solid border"
-              borderBottom="1px solid border"
+        {Object.entries(tabs).map(([key, tab]) => (
+          <TabPanel
+            key={key}
+            tabKey={key}
+            mode="multipanel"
+            stateRef={tabStateRef}
+            paddingTop="large"
+            paddingBottom="large"
+            borderTop="1px solid border"
+            borderBottom="1px solid border"
+          >
+            <H1
+              title1
+              marginBottom="medium"
             >
-              <H1
-                title1
-                marginBottom="medium"
-              >
-                {tab?.label}
-              </H1>
-              {tab?.content}
-            </TabPanel>
-          ))
-
-        }
+              {tab?.label}
+            </H1>
+            {tab?.content}
+          </TabPanel>
+        ))}
       </Flex>
     </Div>
   )

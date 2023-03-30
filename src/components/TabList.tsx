@@ -61,24 +61,22 @@ type TabListProps = {
   as?: ReactElement & { ref?: MutableRefObject<any> }
   children?: ChildrenType
 }
-function TabListRef({
-  stateRef,
-  stateProps,
-  renderer,
-  as,
-  ...props
-}: TabListProps & FlexProps,
-incomingRef: RefObject<HTMLElement>) {
+function TabListRef(
+  { stateRef, stateProps, renderer, as, ...props }: TabListProps & FlexProps,
+  incomingRef: RefObject<HTMLElement>
+) {
   const wrappedChildren = useItemWrappedChildren(props.children)
-  const finalStateProps: AriaTabListProps<object> = useMemo(() => ({
-    ...{
-      keyboardActivation: 'manual',
-      orientation: 'horizontal',
-      children: [...wrappedChildren],
-    },
-    ...stateProps,
-  }),
-  [stateProps, wrappedChildren])
+  const finalStateProps: AriaTabListProps<object> = useMemo(
+    () => ({
+      ...{
+        keyboardActivation: 'manual',
+        orientation: 'horizontal',
+        children: [...wrappedChildren],
+      },
+      ...stateProps,
+    }),
+    [stateProps, wrappedChildren]
+  )
 
   const state = useTabListState(finalStateProps)
 
@@ -98,7 +96,7 @@ incomingRef: RefObject<HTMLElement>) {
   const ref = useRef<HTMLDivElement>(null)
   const mergedRef = mergeRefs(ref, incomingRef)
   const { tabListProps } = useTabList(finalStateProps, state, ref)
-  const tabChildren = [...state.collection].map(item => (
+  const tabChildren = [...state.collection].map((item) => (
     <TabRenderer
       key={item.key}
       item={item}
@@ -118,10 +116,12 @@ incomingRef: RefObject<HTMLElement>) {
   }
 
   if (renderer) {
-    // @ts-expect-error
-    return renderer({ ...props, ...tabListProps, ...{ children: tabChildren } },
+    return renderer(
+      // @ts-expect-error
+      { ...props, ...tabListProps, ...{ children: tabChildren } },
       mergedRef,
-      state)
+      state
+    )
   }
 
   return (
@@ -141,13 +141,13 @@ incomingRef: RefObject<HTMLElement>) {
 
 const TabList = forwardRef(TabListRef)
 
-const TabClone = styled(({
-  className, children, tabRef, ...props
-}) => cloneElement(Children.only(children), {
-  className: `${children.props.className || ''} ${className || ''}`.trim(),
-  ref: tabRef,
-  ...props,
-}))<{ vertical: boolean }>(({ theme, vertical }) => ({
+const TabClone = styled(({ className, children, tabRef, ...props }) =>
+  cloneElement(Children.only(children), {
+    className: `${children.props.className || ''} ${className || ''}`.trim(),
+    ref: tabRef,
+    ...props,
+  })
+)<{ vertical: boolean }>(({ theme, vertical }) => ({
   position: 'relative',
   '&:focus, &:focus-visible': {
     outline: 'none',
@@ -158,8 +158,8 @@ const TabClone = styled(({
   },
   ...(vertical
     ? {
-      width: '100%',
-    }
+        width: '100%',
+      }
     : {}),
 }))
 
@@ -169,14 +169,12 @@ type TabRendererProps = {
   stateProps: AriaTabListProps<object>
   stateRef: TabStateRef
 }
-function TabRenderer({
-  item, state, stateProps, stateRef,
-}: TabRendererProps) {
+function TabRenderer({ item, state, stateProps, stateRef }: TabRendererProps) {
   const ref = useRef(null)
   const { tabProps: props } = useTab({ key: item.key }, state, ref)
 
-  props['aria-controls']
-    = props['aria-controls'] || props.id.replace('-tab-', '-tabpanel-')
+  props['aria-controls'] =
+    props['aria-controls'] || props.id.replace('-tab-', '-tabpanel-')
 
   stateRef.current.tabProps = {
     ...stateRef.current.tabProps,
@@ -187,19 +185,21 @@ function TabRenderer({
   const theme = useTheme()
 
   if (item.props.renderer) {
-    return item.props.renderer({
-      ...{
-        cursor: 'pointer',
-        _focusVisible: { ...theme.partials.focus.default },
-        position: 'relative',
-        '&:focus, &:focus-visible': {
-          zIndex: theme.zIndexes.base + 1,
+    return item.props.renderer(
+      {
+        ...{
+          cursor: 'pointer',
+          _focusVisible: { ...theme.partials.focus.default },
+          position: 'relative',
+          '&:focus, &:focus-visible': {
+            zIndex: theme.zIndexes.base + 1,
+          },
         },
+        ...props,
       },
-      ...props,
-    },
-    ref,
-    state)
+      ref,
+      state
+    )
   }
 
   return (

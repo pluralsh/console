@@ -28,9 +28,7 @@ const SubTabBase = styled.div<{
   size: SubTabSize
   active: boolean
   parentFillLevel: FillLevel
-}>(({
-  theme, active, size, parentFillLevel,
-}) => ({
+}>(({ theme, active, size, parentFillLevel }) => ({
   ...(size === 'small'
     ? theme.partials.text.buttonSmall
     : theme.partials.text.buttonMedium),
@@ -46,24 +44,30 @@ const SubTabBase = styled.div<{
     zIndex: theme.zIndexes.base + 1,
     ...theme.partials.focus.default,
   },
-  padding: `${size === 'small' ? theme.spacing.xxsmall : theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+  padding: `${
+    size === 'small' ? theme.spacing.xxsmall : theme.spacing.xsmall
+  }px ${theme.spacing.medium}px`,
   align: 'center',
   ':hover': {
-    backgroundColor: !active ? theme.colors[parentFillLevelToHoverBG[parentFillLevel]] : undefined,
+    backgroundColor: !active
+      ? theme.colors[parentFillLevelToHoverBG[parentFillLevel]]
+      : undefined,
   },
   transition:
     'background-color 150ms ease, border-color 150ms ease, color 150ms ease',
   '.codeTabInner': {},
 }))
 
-function SubTabRef({
-  active,
-  children,
-  textValue: _textValue,
-  size = 'medium',
-  ...props
-}: SubtabProps,
-ref: Ref<any>) {
+function SubTabRef(
+  {
+    active,
+    children,
+    textValue: _textValue,
+    size = 'medium',
+    ...props
+  }: SubtabProps,
+  ref: Ref<any>
+) {
   const parentFillLevel = useFillLevel()
 
   return (

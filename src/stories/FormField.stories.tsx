@@ -44,7 +44,9 @@ function Template(args: any) {
     >
       <Input
         value={value}
-        onChange={event => setValue(event.target.value.substring(0, maxLength))}
+        onChange={(event) =>
+          setValue(event.target.value.substring(0, maxLength))
+        }
         valid={valid}
         error={error}
         large={large}
@@ -89,11 +91,13 @@ Full.args = {
   maxLength: 120,
   hint: 'Hint text',
   startIcon: <MagnifyingGlassIcon />,
-  endIcon: <CaretDownIcon
-    size={10}
-    mt={0.333}
-    mx="3px"
-  />,
+  endIcon: (
+    <CaretDownIcon
+      size={10}
+      mt={0.333}
+      mx="3px"
+    />
+  ),
 }
 
 export const FullError = AllSizesTemplate.bind({})
@@ -118,8 +122,7 @@ FullDisabled.args = {
 
 export const Default = AllSizesTemplate.bind({})
 
-Default.args = {
-}
+Default.args = {}
 
 export const Label = AllSizesTemplate.bind({})
 

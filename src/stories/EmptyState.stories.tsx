@@ -9,9 +9,7 @@ export default {
 }
 
 function Template(args: any) {
-  return (
-    <EmptyState {...args} />
-  )
+  return <EmptyState {...args} />
 }
 
 export const Default = Template.bind({})
@@ -19,12 +17,6 @@ export const Default = Template.bind({})
 Default.args = {
   message: 'This is an empty state',
   description: 'Some description.',
-  icon: (
-    <BellIcon />
-  ),
-  children: (
-    <Button>
-      Click me!
-    </Button>
-  ),
+  icon: <BellIcon />,
+  children: <Button>Click me!</Button>,
 }

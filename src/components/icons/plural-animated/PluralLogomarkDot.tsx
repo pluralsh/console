@@ -1,6 +1,8 @@
 import { LogomarkProps } from './PluralLogomarkBottomLeft'
 
-export default function PluralLogomarkDot({ color = 'black' }: LogomarkProps): JSX.Element {
+export default function PluralLogomarkDot({
+  color = 'black',
+}: LogomarkProps): JSX.Element {
   return (
     <svg
       width={100}

@@ -6,9 +6,7 @@ export default {
 }
 
 function Template(args: any) {
-  return (
-    <Switch {...args} />
-  )
+  return <Switch {...args} />
 }
 
 export const Default = Template.bind({})

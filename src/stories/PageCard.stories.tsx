@@ -27,7 +27,7 @@ function Template() {
       />
       <PageCard
         heading="Michael Guarino"
-        subheading={(
+        subheading={
           <>
             Admin at{' '}
             <A
@@ -37,7 +37,7 @@ function Template() {
               Plural
             </A>
           </>
-        )}
+        }
         icon={{
           url: 'photo.png',
           spacing: 'none',

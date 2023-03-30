@@ -1,12 +1,16 @@
 import { ComponentPropsWithRef } from 'react'
 
 export type SourcererIconProps = ComponentPropsWithRef<'svg'> & {
-  width?: number,
-  height?: number,
+  width?: number
+  height?: number
   color?: string
 }
 
-export default function SourcererIcon({ width = 40, height = 68, color = 'none' }: SourcererIconProps): JSX.Element {
+export default function SourcererIcon({
+  width = 40,
+  height = 68,
+  color = 'none',
+}: SourcererIconProps): JSX.Element {
   return (
     <svg
       width={width}

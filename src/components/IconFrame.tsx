@@ -1,9 +1,4 @@
-import {
-  ReactElement,
-  ReactNode,
-  cloneElement,
-  forwardRef,
-} from 'react'
+import { ReactElement, ReactNode, cloneElement, forwardRef } from 'react'
 import { ButtonBase, Flex, FlexProps } from 'honorable'
 import { useTheme } from 'styled-components'
 
@@ -56,76 +51,80 @@ type IconFrameProps = Omit<FlexProps, 'size'> & {
   type?: Type
 }
 
-const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(({
-  icon,
-  size = 'medium',
-  textValue = '',
-  clickable = false,
-  tooltip,
-  tooltipProps,
-  type = 'tertiary',
-  ...props
-},
-ref) => {
-  const theme = useTheme()
+const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(
+  (
+    {
+      icon,
+      size = 'medium',
+      textValue = '',
+      clickable = false,
+      tooltip,
+      tooltipProps,
+      type = 'tertiary',
+      ...props
+    },
+    ref
+  ) => {
+    const theme = useTheme()
 
-  icon = cloneElement(icon, { size: sizeToIconSize[size] })
-  if (tooltip && typeof tooltip === 'boolean') {
-    tooltip = textValue
-  }
+    icon = cloneElement(icon, { size: sizeToIconSize[size] })
+    if (tooltip && typeof tooltip === 'boolean') {
+      tooltip = textValue
+    }
 
-  let content = (
-    <Flex
-      ref={ref}
-      flex={false}
-      alignItems="center"
-      justifyContent="center"
-      width={sizeToFrameSize[size]}
-      height={sizeToFrameSize[size]}
-      backgroundColor={typeToBG[type]}
-      border={typeToBorder[type]}
-      borderRadius={theme.borderRadiuses.medium}
-      aria-label={textValue}
-      {...{ '&:focus,&:focus-visible': { outline: 'none' } }}
-      _focusVisible={{ ...theme.partials.focus.default }}
-      {...{
-        '&,&:any-link': {
-          textDecoration: 'none',
-          color: 'unset',
-          appearance: 'unset',
-        },
-      }}
-      {...(clickable && {
-        as: ButtonBase,
-        tabIndex: 0,
-        role: 'button',
-        cursor: 'pointer',
-        '&:hover': {
-          backgroundColor: clickable && theme.colors[typeToHoverBG[type]],
-        },
-      })}
-      {...props}
-    >
-      {icon}
-    </Flex>
-  )
-
-  if (tooltip) {
-    content = (
-      <Tooltip
-        displayOn="hover"
-        arrow
-        placement="top"
-        label={tooltip}
-        {...tooltipProps}
+    let content = (
+      <Flex
+        ref={ref}
+        flex={false}
+        alignItems="center"
+        justifyContent="center"
+        width={sizeToFrameSize[size]}
+        height={sizeToFrameSize[size]}
+        backgroundColor={typeToBG[type]}
+        border={typeToBorder[type]}
+        borderRadius={theme.borderRadiuses.medium}
+        aria-label={textValue}
+        {...{ '&:focus,&:focus-visible': { outline: 'none' } }}
+        _focusVisible={{ ...theme.partials.focus.default }}
+        {...{
+          '&,&:any-link': {
+            textDecoration: 'none',
+            color: 'unset',
+            appearance: 'unset',
+          },
+        }}
+        {...(clickable && {
+          as: ButtonBase,
+          tabIndex: 0,
+          role: 'button',
+          cursor: 'pointer',
+          '&:hover': {
+            backgroundColor: clickable && theme.colors[typeToHoverBG[type]],
+          },
+        })}
+        {...props}
       >
-        {content}
-      </Tooltip>
+        {icon}
+      </Flex>
     )
-  }
 
-  return content
-})
+    if (tooltip) {
+      content = (
+        <Tooltip
+          displayOn="hover"
+          arrow
+          placement="top"
+          label={tooltip}
+          {...tooltipProps}
+        >
+          {content}
+        </Tooltip>
+      )
+    }
+
+    return content
+  }
+)
 
 export default IconFrame
 export type { IconFrameProps }

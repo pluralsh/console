@@ -30,7 +30,7 @@ export default function ClustersControl({
           { value: 5 },
           { value: 6, label: '6*' },
         ]}
-        onChange={v => setClusters(v)}
+        onChange={(v) => setClusters(v)}
       />
     </Control>
   )

@@ -16,59 +16,67 @@ type ChipListProps = HTMLAttributes<HTMLDivElement> & {
   showExtra?: boolean
 }
 
-const ChipListUnstyled = forwardRef<HTMLDivElement, ChipListProps>(({
-  chips, maxVisible = 3, showExtra = true, ...props
-}, ref) => {
-  const chipHue = 'lightest'
+const ChipListUnstyled = forwardRef<HTMLDivElement, ChipListProps>(
+  ({ chips, maxVisible = 3, showExtra = true, ...props }, ref) => {
+    const chipHue = 'lightest'
 
-  if (!Array.isArray(chips)) {
-    chips = []
-  }
-  chips = chips.filter(chip => !!chip)
-  const firstChips = useMemo(() => chips
-    .slice(0, maxVisible)
-    .map((chip, i) => cloneElement(chip, { hue: chipHue, key: i })),
-  [chips, maxVisible])
-  const restChips = useMemo(() => chips.slice(maxVisible),
-    [chips, maxVisible])
+    if (!Array.isArray(chips)) {
+      chips = []
+    }
+    chips = chips.filter((chip) => !!chip)
+    const firstChips = useMemo(
+      () =>
+        chips
+          .slice(0, maxVisible)
+          .map((chip, i) => cloneElement(chip, { hue: chipHue, key: i })),
+      [chips, maxVisible]
+    )
+    const restChips = useMemo(
+      () => chips.slice(maxVisible),
+      [chips, maxVisible]
+    )
 
-  const extra = useMemo(() => (showExtra && restChips.length > 0 ? (
-    <Tooltip
-      key="extra"
-      placement="top"
-      label={(
-        <>
-          {restChips.map((n, i) => (
-            <div
-              key={i}
-              className="tooltip"
+    const extra = useMemo(
+      () =>
+        showExtra && restChips.length > 0 ? (
+          <Tooltip
+            key="extra"
+            placement="top"
+            label={
+              <>
+                {restChips.map((n, i) => (
+                  <div
+                    key={i}
+                    className="tooltip"
+                  >
+                    {n?.props?.children}
+                    <br />
+                  </div>
+                ))}
+              </>
+            }
+          >
+            <Chip
+              size="small"
+              hue={chipHue}
             >
-              {n?.props?.children}
-              <br />
-            </div>
-          ))}
-        </>
-      )}
-    >
-      <Chip
-        size="small"
-        hue={chipHue}
-      >
-        {`+${restChips.length}`}
-      </Chip>
-    </Tooltip>
-  ) : null),
-  [restChips, showExtra])
+              {`+${restChips.length}`}
+            </Chip>
+          </Tooltip>
+        ) : null,
+      [restChips, showExtra]
+    )
 
-  return (
-    <div
-      ref={ref}
-      {...props}
-    >
-      {[...firstChips, extra]}
-    </div>
-  )
-})
+    return (
+      <div
+        ref={ref}
+        {...props}
+      >
+        {[...firstChips, extra]}
+      </div>
+    )
+  }
+)
 
 const ChipList = styled(ChipListUnstyled)(({ theme }) => ({
   display: 'flex',

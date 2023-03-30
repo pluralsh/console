@@ -25,11 +25,7 @@ export type CostProps = {
   tooltip?: string
 }
 
-export default function Cost({
-  cost,
-  label,
-  tooltip,
-}: CostProps) {
+export default function Cost({ cost, label, tooltip }: CostProps) {
   return (
     <CostWrap>
       <div className="value">${cost}</div>

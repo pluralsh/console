@@ -1,15 +1,5 @@
-import {
-  Button,
-  Div,
-  Flex,
-  H1,
-} from 'honorable'
-import {
-  Key,
-  forwardRef,
-  useRef,
-  useState,
-} from 'react'
+import { Button, Div, Flex, H1 } from 'honorable'
+import { Key, forwardRef, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import {
@@ -104,34 +94,40 @@ function TemplateBasic(args: any) {
   )
 }
 
-const CustomLinkWrappedTab = styled(forwardRef<HTMLAnchorElement, TabBaseProps>(({
-  vertical,
-  active,
-  children,
-  textValue: _textValue,
-  renderer: _renderer,
-  ...props
-},
-ref) => {
-  const theme = useTheme()
+const CustomLinkWrappedTab = styled(
+  forwardRef<HTMLAnchorElement, TabBaseProps>(
+    (
+      {
+        vertical,
+        active,
+        children,
+        textValue: _textValue,
+        renderer: _renderer,
+        ...props
+      },
+      ref
+    ) => {
+      const theme = useTheme()
 
-  return (
-    <a
-      ref={ref}
-      target="_blank"
-      rel="noreferrer"
-      {...props}
-    >
-      <Tab
-        vertical={vertical}
-        active={active}
-        color={active ? theme.colors['text-success'] : 'red'}
-      >
-        {children}
-      </Tab>
-    </a>
+      return (
+        <a
+          ref={ref}
+          target="_blank"
+          rel="noreferrer"
+          {...props}
+        >
+          <Tab
+            vertical={vertical}
+            active={active}
+            color={active ? theme.colors['text-success'] : 'red'}
+          >
+            {children}
+          </Tab>
+        </a>
+      )
+    }
   )
-}))(({ active, theme }) => ({
+)(({ active, theme }) => ({
   display: 'block',
   backgroundColor: active
     ? theme.colors['fill-one']
@@ -157,8 +153,8 @@ const MyCustomTab2 = forwardRef<any, any>(({ selectedKey, ...props }, ref) => (
         selectedKey === 'bears'
           ? 'action-primary'
           : selectedKey === 'tigers'
-            ? 'icon-danger'
-            : 'fill-two'
+          ? 'icon-danger'
+          : 'fill-two'
       }
     >
       Com&shy;plete&shy;ly custom bears
@@ -183,7 +179,7 @@ function TemplateComplex() {
         <TabList
           stateRef={tabStateRef}
           stateProps={tabListStateProps}
-          as={(
+          as={
             <Div
               flexShrink={0}
               marginRight={orientation === 'vertical' ? 'large' : 0}
@@ -195,13 +191,13 @@ function TemplateComplex() {
                 selectedKey === 'lions'
                   ? 'border.primary'
                   : selectedKey === 'tigers'
-                    ? 'border-warning'
-                    : selectedKey === 'bears'
-                      ? 'border-success'
-                      : 'border-danger'
+                  ? 'border-warning'
+                  : selectedKey === 'bears'
+                  ? 'border-success'
+                  : 'border-danger'
               }
             />
-          )}
+          }
         >
           <CustomLinkWrappedTab
             key="lions"

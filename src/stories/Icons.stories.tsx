@@ -28,35 +28,37 @@ export default {
   },
 }
 
-const AppIcon = styled.div<{ $backgroundColor: string }>(({ theme, $backgroundColor = 'transparent' }) => ({
-  margin: theme.spacing.xxxsmall,
-  paddingTop: theme.spacing.medium,
-  paddingBottom: theme.spacing.xsmall,
-  paddingRight: theme.spacing.xsmall,
-  paddingLeft: theme.spacing.xsmall,
-  border: `1px solid ${theme.colors.border}`,
-  borderRadius: theme.borderRadiuses.medium,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xsmall,
-  alignItems: 'center',
-  justifyContent: 'flex-start',
-  width: theme.spacing.xxxlarge,
-  hyphens: 'none',
-  wordBreak: 'break-all',
-  fontSize: '0.75rem',
-  minWidth: '8em',
-  textAlign: 'center',
-  ...theme.partials.text.caption,
-  backgroundColor: $backgroundColor,
-}))
+const AppIcon = styled.div<{ $backgroundColor: string }>(
+  ({ theme, $backgroundColor = 'transparent' }) => ({
+    margin: theme.spacing.xxxsmall,
+    paddingTop: theme.spacing.medium,
+    paddingBottom: theme.spacing.xsmall,
+    paddingRight: theme.spacing.xsmall,
+    paddingLeft: theme.spacing.xsmall,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: theme.borderRadiuses.medium,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.xsmall,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    width: theme.spacing.xxxlarge,
+    hyphens: 'none',
+    wordBreak: 'break-all',
+    fontSize: '0.75rem',
+    minWidth: '8em',
+    textAlign: 'center',
+    ...theme.partials.text.caption,
+    backgroundColor: $backgroundColor,
+  })
+)
 
 function Template({ backgroundColor, ...args }: any) {
   const theme = useTheme()
-  const bgColor
-    = (typeof theme.colors[backgroundColor] === 'string'
-      && theme.colors[backgroundColor])
-    || backgroundColor
+  const bgColor =
+    (typeof theme.colors[backgroundColor] === 'string' &&
+      theme.colors[backgroundColor]) ||
+    backgroundColor
 
   return (
     <div

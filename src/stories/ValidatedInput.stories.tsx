@@ -1,6 +1,8 @@
 import { useState } from 'react'
 
-import ValidatedInput, { ValidationResponse } from '../components/ValidatedInput'
+import ValidatedInput, {
+  ValidationResponse,
+} from '../components/ValidatedInput'
 
 export default {
   title: 'ValidatedInput',
@@ -17,7 +19,15 @@ function Template() {
       width="500px"
       label="Name"
       hint="Name needs to be at least 5 characters long."
-      validation={(v: string) : ValidationResponse => (v.length < 5 ? { error: true, message: 'Provided name is too short. Name needs to be at least 5 characters long.' } : null)}
+      validation={(v: string): ValidationResponse =>
+        v.length < 5
+          ? {
+              error: true,
+              message:
+                'Provided name is too short. Name needs to be at least 5 characters long.',
+            }
+          : null
+      }
     />
   )
 }

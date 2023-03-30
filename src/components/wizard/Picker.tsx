@@ -44,7 +44,7 @@ const Picker = styled(PickerUnstyled)(({ theme }) => ({
     flexDirection: 'column',
 
     '.empty-message': {
-      ...(theme.partials.text.body2),
+      ...theme.partials.text.body2,
       color: theme.colors['text-light'],
       paddingBottom: theme.spacing.small,
     },
@@ -62,27 +62,43 @@ function PickerUnstyled({ items, ...props }: PickerProps): JSX.Element {
   const [search, setSearch] = useState<string>(undefined)
   const [scrollable, setScrollable] = useState(false)
   const scrollRef = createRef<HTMLDivElement>()
-  const isScrollbarVisible = (el: HTMLDivElement) => el?.scrollHeight > el?.clientHeight
-  const filtered = useMemo(() => items.filter(item => (search ? item.label.toLowerCase().includes(search) : true)), [items, search])
+  const isScrollbarVisible = (el: HTMLDivElement) =>
+    el?.scrollHeight > el?.clientHeight
+  const filtered = useMemo(
+    () =>
+      items.filter((item) =>
+        search ? item.label.toLowerCase().includes(search) : true
+      ),
+    [items, search]
+  )
 
-  const isSelected = useCallback((item: StepConfig) => !!selected.find(i => i.key === item.key), [selected])
-  const isDisabled = useCallback((item: StepConfig) => {
-    if (item.isRequired) return true
-    if (isSelected(item)) return false
+  const isSelected = useCallback(
+    (item: StepConfig) => !!selected.find((i) => i.key === item.key),
+    [selected]
+  )
+  const isDisabled = useCallback(
+    (item: StepConfig) => {
+      if (item.isRequired) return true
+      if (isSelected(item)) return false
 
-    return selectedCount >= limit
-  }, [isSelected, limit, selectedCount])
+      return selectedCount >= limit
+    },
+    [isSelected, limit, selectedCount]
+  )
 
-  const select = useCallback((item: StepConfig) => {
-    const itemSelected = isSelected(item)
-    const isMax = selectedCount >= limit
+  const select = useCallback(
+    (item: StepConfig) => {
+      const itemSelected = isSelected(item)
+      const isMax = selectedCount >= limit
 
-    // Select
-    if (!itemSelected && !isMax) onSelect(item)
+      // Select
+      if (!itemSelected && !isMax) onSelect(item)
 
-    // Un-select
-    if (itemSelected && !item.isRequired) onSelect(item)
-  }, [isSelected, selectedCount, limit, onSelect])
+      // Un-select
+      if (itemSelected && !item.isRequired) onSelect(item)
+    },
+    [isSelected, selectedCount, limit, onSelect]
+  )
 
   useEffect(() => {
     if (!scrollRef.current) return
@@ -91,7 +107,11 @@ function PickerUnstyled({ items, ...props }: PickerProps): JSX.Element {
   }, [scrollRef, size])
 
   // Select required items
-  useEffect(() => items.filter(item => item.isRequired).forEach(item => select(item)), [items, select])
+  useEffect(
+    () =>
+      items.filter((item) => item.isRequired).forEach((item) => select(item)),
+    [items, select]
+  )
 
   return (
     <div {...props}>
@@ -101,33 +121,39 @@ function PickerUnstyled({ items, ...props }: PickerProps): JSX.Element {
         value={search}
         onChange={({ target: { value } }) => setSearch(value.toLowerCase())}
       />
-      {filtered.length > 0
-      && (
+      {filtered.length > 0 && (
         <div
           className={scrollable ? 'grid scrollable' : 'grid'}
           ref={scrollRef}
         >
-          {filtered.map(item => (
+          {filtered.map((item) => (
             <RepositoryChip
               key={item.key}
               label={item.label}
               imageUrl={item.imageUrl}
               icon={item.Icon && <item.Icon />}
               onClick={() => select(item)}
-              checked={selected.findIndex(s => s.label === item.label) > -1}
+              checked={selected.findIndex((s) => s.label === item.label) > -1}
               disabled={isDisabled(item)}
-              tooltip={item.isRequired ? item.tooltip || 'This is a required application.' : undefined}
+              tooltip={
+                item.isRequired
+                  ? item.tooltip || 'This is a required application.'
+                  : undefined
+              }
             />
           ))}
         </div>
       )}
       {filtered.length === 0 && (
         <div className="empty">
-          <span className="empty-message">No applications found for "{search}".</span>
+          <span className="empty-message">
+            No applications found for "{search}".
+          </span>
           <Button
             secondary
             onClick={() => setSearch('')}
-          >Clear search
+          >
+            Clear search
           </Button>
         </div>
       )}

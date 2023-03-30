@@ -1,15 +1,12 @@
 import { Div, Flex, H4 } from 'honorable'
-import {
-  ComponentProps,
-  Key,
-  forwardRef,
-  useState,
-} from 'react'
+import { ComponentProps, Key, forwardRef, useState } from 'react'
 import styled from 'styled-components'
 
 import {
   AppIcon,
+  BrowseAppsIcon,
   Button,
+  Card,
   CheckIcon,
   Chip,
   DropdownArrowIcon,
@@ -155,17 +152,19 @@ const items = [
 
 // Make sure any custom trigger button forwards ref to outermost element,
 // otherwise it'll error
-const CustomTriggerButton = styled(forwardRef<any, any>((props, ref) => (
-  <Button
-    ref={ref}
-    medium
-    primary
-    endIcon={<DropdownArrowIcon className="dropdownIcon" />}
-    {...props}
-  >
-    Click me!
-  </Button>
-)))<{ isOpen?: boolean }>(({ isOpen = false }) => ({
+const CustomTriggerButton = styled(
+  forwardRef<any, any>((props, ref) => (
+    <Button
+      ref={ref}
+      medium
+      primary
+      endIcon={<DropdownArrowIcon className="dropdownIcon" />}
+      {...props}
+    >
+      Click me!
+    </Button>
+  ))
+)<{ isOpen?: boolean }>(({ isOpen = false }) => ({
   '.dropdownIcon': {
     transform: isOpen ? 'scaleY(-1)' : 'scaleY(1)',
     transition: 'transform 0.1s ease',
@@ -177,17 +176,19 @@ function Template() {
   const shownStep = 4
   const [shownLimit, setShownLimit] = useState<number>(shownStep)
 
-  const [selectedKeys, setSelectedKeys] = useState(new Set<Key>(['pizza', 'sushi']))
+  const [selectedKeys, setSelectedKeys] = useState(
+    new Set<Key>(['pizza', 'sushi'])
+  )
 
-  const curItem = items.find(item => item.key === selectedKey)
+  const curItem = items.find((item) => item.key === selectedKey)
   const customLabel = curItem
     ? `You have selected ${curItem.label}`
     : 'Select an item please'
 
-  const curItems = items.filter(item => selectedKeys.has(item.key))
-  const customLabelMultiple
-    = curItems.length > 0
-      ? `Selections: ${curItems.map(item => item.label).join(', ')}`
+  const curItems = items.filter((item) => selectedKeys.has(item.key))
+  const customLabelMultiple =
+    curItems.length > 0
+      ? `Selections: ${curItems.map((item) => item.label).join(', ')}`
       : 'Select items'
 
   return (
@@ -203,9 +204,15 @@ function Template() {
           defaultOpen={false}
           label="Pick something"
           selectedKey={selectedKey}
-          onSelectionChange={key => {
+          onSelectionChange={(key) => {
             setSelectedKey(key)
           }}
+          titleContent={
+            <>
+              <BrowseAppsIcon marginRight="small" />
+              Marketplace
+            </>
+          }
         >
           {items.slice(0, 4).map(({ key, label }) => (
             <ListBoxItem
@@ -221,7 +228,7 @@ function Template() {
         <Select
           label="Pick something"
           selectedKey={selectedKey}
-          onSelectionChange={key => {
+          onSelectionChange={(key) => {
             setSelectedKey(key)
           }}
           defaultOpen={false}
@@ -231,9 +238,7 @@ function Template() {
             <ListBoxFooterPlus>Create new</ListBoxFooterPlus>
           }
         >
-          {items.map(({
-            key, label, description, chips,
-          }) => (
+          {items.map(({ key, label, description, chips }) => (
             <ListBoxItem
               key={key}
               label={label}
@@ -250,22 +255,20 @@ function Template() {
         <Select
           label="Pick something"
           selectedKey={selectedKey}
-          onSelectionChange={key => {
+          onSelectionChange={(key) => {
             setSelectedKey(key)
           }}
           defaultOpen={false}
           dropdownFooterFixed={
             <ListBoxFooterPlus>Create new</ListBoxFooterPlus>
           }
-          triggerButton={(
+          triggerButton={
             <SelectButton leftContent={curItem ? <CheckIcon /> : <InfoIcon />}>
               {customLabel}
             </SelectButton>
-          )}
+          }
         >
-          {items.map(({
-            key, label, description, chips,
-          }) => (
+          {items.map(({ key, label, description, chips }) => (
             <ListBoxItem
               key={key}
               label={label}
@@ -286,11 +289,11 @@ function Template() {
           width="max-content"
           maxHeight={197}
           placement="right"
-          onSelectionChange={key => {
+          onSelectionChange={(key) => {
             setSelectedKey(key)
           }}
           onFooterClick={() => setShownLimit(shownLimit + shownStep)}
-          onOpenChange={open => {
+          onOpenChange={(open) => {
             if (!open) setShownLimit(shownStep)
           }}
           rightContent={
@@ -313,24 +316,17 @@ function Template() {
               key={key}
               label={version}
               textValue={version}
-              rightContent={(
+              rightContent={
                 <ListBoxItemChipList
                   maxVisible={1}
                   showExtra
                   chips={chips}
                 />
-              )}
+              }
             />
           ))}
         </Select>
       </Flex>
-
-      {/*  */}
-      {/*  */}
-      {/*  */}
-      {/*  */}
-      {/*  */}
-      {/*  */}
 
       {/* MULTIPLE SELECT */}
       <H4
@@ -340,15 +336,27 @@ function Template() {
       >
         Multiple select
       </H4>
-      <Div>
+      <Card
+        display="flex"
+        flexDirection="column"
+        gap="large"
+        padding="large"
+        fillLevel={2}
+      >
         <Select
           defaultOpen={false}
           label="Pick something"
           selectionMode="multiple"
           selectedKeys={selectedKeys}
-          onSelectionChange={keys => {
+          onSelectionChange={(keys) => {
             setSelectedKeys(keys)
           }}
+          titleContent={
+            <>
+              <BrowseAppsIcon marginRight="small" />
+              Marketplace
+            </>
+          }
         >
           {items.slice(0, 4).map(({ key, label }) => (
             <ListBoxItem
@@ -359,14 +367,11 @@ function Template() {
             />
           ))}
         </Select>
-      </Div>
-
-      <Div>
         <Select
           label="Pick something"
           selectionMode="multiple"
           selectedKeys={selectedKeys}
-          onSelectionChange={keys => {
+          onSelectionChange={(keys) => {
             setSelectedKeys(keys)
           }}
           defaultOpen={false}
@@ -376,9 +381,7 @@ function Template() {
             <ListBoxFooterPlus>Create new</ListBoxFooterPlus>
           }
         >
-          {items.map(({
-            key, label, description, chips,
-          }) => (
+          {items.map(({ key, label, description, chips }) => (
             <ListBoxItem
               key={key}
               label={label}
@@ -389,29 +392,24 @@ function Template() {
             />
           ))}
         </Select>
-      </Div>
-
-      <Div>
         <Select
           label="Pick something"
           selectionMode="multiple"
           selectedKeys={selectedKeys}
-          onSelectionChange={keys => {
+          onSelectionChange={(keys) => {
             setSelectedKeys(keys)
           }}
           defaultOpen={false}
           dropdownFooterFixed={
             <ListBoxFooterPlus>Create new</ListBoxFooterPlus>
           }
-          triggerButton={(
+          triggerButton={
             <SelectButton leftContent={curItem ? <CheckIcon /> : <InfoIcon />}>
               {customLabelMultiple}
             </SelectButton>
-          )}
+          }
         >
-          {items.map(({
-            key, label, description, chips,
-          }) => (
+          {items.map(({ key, label, description, chips }) => (
             <ListBoxItem
               key={key}
               label={label}
@@ -422,48 +420,47 @@ function Template() {
             />
           ))}
         </Select>
-      </Div>
-
-      <Flex justifyContent="right">
-        <Select
-          label="Version"
-          selectionMode="multiple"
-          selectedKeys={selectedKeys}
-          onSelectionChange={keys => {
-            setSelectedKeys(keys)
-          }}
-          triggerButton={<CustomTriggerButton />}
-          width="max-content"
-          maxHeight={197}
-          placement="right"
-          onFooterClick={() => {
-            setShownLimit(shownLimit + shownStep)
-          }}
-          onOpenChange={open => {
-            if (!open) setShownLimit(shownStep)
-          }}
-          dropdownFooter={
-            shownLimit < items.length && (
-              <ListBoxFooterPlus>View more</ListBoxFooterPlus>
-            )
-          }
-        >
-          {items.slice(0, shownLimit).map(({ key, chips, version }) => (
-            <ListBoxItem
-              key={key}
-              label={version}
-              textValue={version}
-              rightContent={(
-                <ListBoxItemChipList
-                  maxVisible={1}
-                  showExtra
-                  chips={chips}
-                />
-              )}
-            />
-          ))}
-        </Select>
-      </Flex>
+        <Flex justifyContent="right">
+          <Select
+            label="Version"
+            selectionMode="multiple"
+            selectedKeys={selectedKeys}
+            onSelectionChange={(keys) => {
+              setSelectedKeys(keys)
+            }}
+            triggerButton={<CustomTriggerButton />}
+            width="max-content"
+            maxHeight={197}
+            placement="right"
+            onFooterClick={() => {
+              setShownLimit(shownLimit + shownStep)
+            }}
+            onOpenChange={(open) => {
+              if (!open) setShownLimit(shownStep)
+            }}
+            dropdownFooter={
+              shownLimit < items.length && (
+                <ListBoxFooterPlus>View more</ListBoxFooterPlus>
+              )
+            }
+          >
+            {items.slice(0, shownLimit).map(({ key, chips, version }) => (
+              <ListBoxItem
+                key={key}
+                label={version}
+                textValue={version}
+                rightContent={
+                  <ListBoxItemChipList
+                    maxVisible={1}
+                    showExtra
+                    chips={chips}
+                  />
+                }
+              />
+            ))}
+          </Select>
+        </Flex>
+      </Card>
     </Flex>
   )
 }

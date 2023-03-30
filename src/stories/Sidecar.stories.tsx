@@ -19,9 +19,12 @@ export default {
   component: Sidecar,
 }
 
-const wordWrapOnSlashes = (url: string) => url
-  .split(/\/(?!\/)/g)
-  .flatMap((str, i, arr) => (i >= arr.length - 1 ? str : [`${str}/`, <wbr />]))
+const wordWrapOnSlashes = (url: string) =>
+  url
+    .split(/\/(?!\/)/g)
+    .flatMap((str, i, arr) =>
+      i >= arr.length - 1 ? str : [`${str}/`, <wbr />]
+    )
 
 function Template({ heading, ...props }: SidecarProps) {
   return (
@@ -73,7 +76,9 @@ function Template({ heading, ...props }: SidecarProps) {
               noopener
               href="http://github.com/pluralsh/plural"
             >
-              {wordWrapOnSlashes('github.com/areallylongstringwithnohyphens/plural/anotherlongstring')}
+              {wordWrapOnSlashes(
+                'github.com/areallylongstringwithnohyphens/plural/anotherlongstring'
+              )}
             </A>
           </SidecarItem>
           <SidecarItem heading="Acked">

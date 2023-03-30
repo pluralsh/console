@@ -1,10 +1,4 @@
-import {
-  MutableRefObject,
-  forwardRef,
-  memo,
-  useId,
-  useRef,
-} from 'react'
+import { MutableRefObject, forwardRef, memo, useId, useRef } from 'react'
 import { InputProps, Label } from 'honorable'
 import classNames from 'classnames'
 import styled from 'styled-components'
@@ -63,9 +57,7 @@ const HonorableLabelStyled = styled(Label)<{
   $small: boolean
   $isFocusVisible: boolean
   $disabled: boolean
-}>(({
-  $small = false, $disabled = false, $isFocusVisible, theme,
-}) => ({
+}>(({ $small = false, $disabled = false, $isFocusVisible, theme }) => ({
   ...theme.partials.text.body2,
   gap: theme.spacing.small,
   alignItems: 'center',
@@ -102,9 +94,9 @@ const HonorableLabelStyled = styled(Label)<{
       border: theme.borders.input,
       ...($disabled
         ? {
-          borderColor: theme.colors['border-disabled'],
-          backgroundColor: theme.colors['action-primary-disabled'],
-        }
+            borderColor: theme.colors['border-disabled'],
+            backgroundColor: theme.colors['action-primary-disabled'],
+          }
         : {}),
     },
     '.icon': {
@@ -121,28 +113,28 @@ const HonorableLabelStyled = styled(Label)<{
   },
   ...(!$disabled
     ? {
-      ':hover': {
-        color: theme.colors.text,
-        '> span': {
-          backgroundColor: theme.colors['action-input-hover'],
+        ':hover': {
+          color: theme.colors.text,
+          '> span': {
+            backgroundColor: theme.colors['action-input-hover'],
+          },
         },
-      },
-      '&.checked': {
-        color: theme.colors.text,
-      },
-      '&.checked, &.indeterminate': {
-        '.box::before': {
-          border: 'none',
-          backgroundColor: theme.colors['action-primary'],
+        '&.checked': {
+          color: theme.colors.text,
         },
-      },
-      ':hover.checked, :hover.indeterminate': {
-        '.box::before': {
-          border: 'none',
-          backgroundColor: theme.colors['action-primary-hover'],
+        '&.checked, &.indeterminate': {
+          '.box::before': {
+            border: 'none',
+            backgroundColor: theme.colors['action-primary'],
+          },
         },
-      },
-    }
+        ':hover.checked, :hover.indeterminate': {
+          '.box::before': {
+            border: 'none',
+            backgroundColor: theme.colors['action-primary-hover'],
+          },
+        },
+      }
     : {}),
 }))
 
@@ -157,21 +149,23 @@ export type CheckboxProps = {
   onFocusChange?: (isFocused: boolean) => void
 } & Omit<InputProps, 'onChange'>
 
-function Checkbox({
-  small,
-  onChange,
-  checked: checkedProp,
-  indeterminate,
-  disabled,
-  defaultSelected,
-  onFocus,
-  onBlur,
-  onFocusChange,
-  onKeyDown,
-  onKeyUp,
-  ...props
-}: CheckboxProps,
-ref: MutableRefObject<any>) {
+function Checkbox(
+  {
+    small,
+    onChange,
+    checked: checkedProp,
+    indeterminate,
+    disabled,
+    defaultSelected,
+    onFocus,
+    onBlur,
+    onFocusChange,
+    onKeyDown,
+    onKeyUp,
+    ...props
+  }: CheckboxProps,
+  ref: MutableRefObject<any>
+) {
   const toggleStateProps = {
     ...(checkedProp !== undefined ? { isSelected: checkedProp } : {}),
     defaultSelected: !!defaultSelected,
@@ -180,20 +174,22 @@ ref: MutableRefObject<any>) {
   const toggleState = useToggleState(toggleStateProps)
   const inputRef = useRef<any>()
   const { isFocusVisible, focusProps } = useFocusRing()
-  const { inputProps } = useCheckbox({
-    ...toggleStateProps,
-    isDisabled: disabled,
-    onFocus,
-    onBlur,
-    onFocusChange,
-    onKeyDown,
-    onKeyUp,
-    'aria-labelledby': labelId,
-    value: props.value,
-    name: props.name,
-  },
-  toggleState,
-  inputRef)
+  const { inputProps } = useCheckbox(
+    {
+      ...toggleStateProps,
+      isDisabled: disabled,
+      onFocus,
+      onBlur,
+      onFocusChange,
+      onKeyDown,
+      onKeyUp,
+      'aria-labelledby': labelId,
+      value: props.value,
+      name: props.name,
+    },
+    toggleState,
+    inputRef
+  )
 
   const icon = indeterminate ? (
     <IndeterminateIcon small={small} />
@@ -221,7 +217,7 @@ ref: MutableRefObject<any>) {
         <input
           {...inputProps}
           {...focusProps}
-          onChange={e => {
+          onChange={(e) => {
             if (typeof onChange === 'function') {
               onChange(e)
             }

@@ -11,14 +11,15 @@ import { Input, InputProps } from 'honorable'
 
 import FormField from './FormField'
 
-export type ValidationResponse = {error: boolean, message: string} | null
-export type CaptionProps = {caption: string, color: string}
+export type ValidationResponse = { error: boolean; message: string } | null
+export type CaptionProps = { caption: string; color: string }
 
-export type ValidatedInputProps = InputProps & PropsWithChildren<{
-  label?: ReactNode
-  hint?: ReactNode
-  validation?: (val: string) => ValidationResponse
-}>
+export type ValidatedInputProps = InputProps &
+  PropsWithChildren<{
+    label?: ReactNode
+    hint?: ReactNode
+    validation?: (val: string) => ValidationResponse
+  }>
 
 const propTypes = {
   label: PropTypes.node,
@@ -27,14 +28,20 @@ const propTypes = {
   validation: PropTypes.func,
 }
 
-function ValidatedInputRef({
-  label, hint, validation, onChange, width, ...input
-} : ValidatedInputProps, ref: Ref<any>) {
+function ValidatedInputRef(
+  { label, hint, validation, onChange, width, ...input }: ValidatedInputProps,
+  ref: Ref<any>
+) {
   const [error, setError] = useState(null)
-  const wrappedOnChange = useCallback((e: any) => {
-    if (onChange) onChange(e)
-    setError((validation && e.target?.value) ? validation(e.target.value) : undefined)
-  }, [onChange, validation])
+  const wrappedOnChange = useCallback(
+    (e: any) => {
+      if (onChange) onChange(e)
+      setError(
+        validation && e.target?.value ? validation(e.target.value) : undefined
+      )
+    },
+    [onChange, validation]
+  )
 
   return (
     <FormField

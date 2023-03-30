@@ -6,11 +6,7 @@ export default {
 }
 
 function Template(args: any) {
-  return (
-    <PricingCalculatorExtended
-      {...args}
-    />
-  )
+  return <PricingCalculatorExtended {...args} />
 }
 
 export const Default = Template.bind({})

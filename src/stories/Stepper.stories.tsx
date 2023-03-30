@@ -19,18 +19,32 @@ function Template(args: any) {
       background={args.showContainer ? 'rgba(255, 255, 255, 0.05)' : undefined}
       overflow="auto"
     >
-      <Stepper
-        {...args}
-      />
+      <Stepper {...args} />
     </Flex>
   )
 }
 
 const steps: StepperSteps = [
-  { key: 'create-repo', stepTitle: 'Create a repository', IconComponent: GitHubIcon },
-  { key: 'choose-cloud', stepTitle: <>Choose a&nbsp;cloud</>, IconComponent: CloudIcon },
-  { key: 'configure-repo', stepTitle: 'Configure repository', IconComponent: GearTrainIcon },
-  { key: 'launch-app', stepTitle: <>Launch the&nbsp;app</>, IconComponent: BrowserIcon },
+  {
+    key: 'create-repo',
+    stepTitle: 'Create a repository',
+    IconComponent: GitHubIcon,
+  },
+  {
+    key: 'choose-cloud',
+    stepTitle: <>Choose a&nbsp;cloud</>,
+    IconComponent: CloudIcon,
+  },
+  {
+    key: 'configure-repo',
+    stepTitle: 'Configure repository',
+    IconComponent: GearTrainIcon,
+  },
+  {
+    key: 'launch-app',
+    stepTitle: <>Launch the&nbsp;app</>,
+    IconComponent: BrowserIcon,
+  },
 ]
 
 export const Default = Template.bind({})

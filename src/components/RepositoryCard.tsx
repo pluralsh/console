@@ -1,13 +1,4 @@
-import {
-  Div,
-  DivProps,
-  Flex,
-  H1,
-  H3,
-  Img,
-  P,
-  Span,
-} from 'honorable'
+import { Div, DivProps, Flex, H1, H3, Img, P, Span } from 'honorable'
 import PropTypes from 'prop-types'
 import { Ref, forwardRef } from 'react'
 
@@ -26,7 +17,7 @@ type RepositoryCardProps = DivProps & {
   trending?: boolean
   description?: string
   imageUrl?: string
-  tags?: string[],
+  tags?: string[]
   size?: 'small' | 'medium' | 'large' | string
 }
 
@@ -43,20 +34,22 @@ const propTypes = {
   size: PropTypes.oneOf(['small', 'medium', 'large']),
 }
 
-function RepositoryCardRef({
-  title,
-  publisher,
-  priv,
-  installed,
-  verified,
-  trending,
-  description,
-  imageUrl,
-  tags = [],
-  size = 'small',
-  ...props
-}: RepositoryCardProps,
-ref: Ref<any>) {
+function RepositoryCardRef(
+  {
+    title,
+    publisher,
+    priv,
+    installed,
+    verified,
+    trending,
+    description,
+    imageUrl,
+    tags = [],
+    size = 'small',
+    ...props
+  }: RepositoryCardProps,
+  ref: Ref<any>
+) {
   const maxTags = trending ? 5 : 6
 
   return (
@@ -197,16 +190,18 @@ ref: Ref<any>) {
                   </Span>
                 </Chip>
               )}
-              {tags?.filter((_x, i) => i < maxTags).map(tag => (
-                <Chip
-                  size="small"
-                  hue="lighter"
-                  key={tag}
-                  _last={{ marginRight: 0 }}
-                >
-                  {tag}
-                </Chip>
-              ))}
+              {tags
+                ?.filter((_x, i) => i < maxTags)
+                .map((tag) => (
+                  <Chip
+                    size="small"
+                    hue="lighter"
+                    key={tag}
+                    _last={{ marginRight: 0 }}
+                  >
+                    {tag}
+                  </Chip>
+                ))}
             </Flex>
           )}
         </Flex>

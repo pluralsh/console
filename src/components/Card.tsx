@@ -72,52 +72,58 @@ function useDecideFillLevel({
 
   if (isFillLevel(fillLevel)) {
     fillLevel = toFillLevel(Math.max(1, fillLevel))
-  }
-  else {
+  } else {
     fillLevel = hueToFillLevel[hue]
   }
 
-  const ret = useMemo(() => (isFillLevel(fillLevel) ? fillLevel : toFillLevel(parentFillLevel + 1)),
-    [fillLevel, parentFillLevel])
+  const ret = useMemo(
+    () =>
+      isFillLevel(fillLevel) ? fillLevel : toFillLevel(parentFillLevel + 1),
+    [fillLevel, parentFillLevel]
+  )
 
   return ret
 }
 
-const Card = forwardRef<HTMLDivElement, CardProps>(({
-  cornerSize: size = 'large',
-  hue, // Deprecated, prefer fillLevel
-  fillLevel,
-  selected = false,
-  clickable = false,
-  ...props
-},
-ref) => {
-  fillLevel = useDecideFillLevel({ hue, fillLevel })
+const Card = forwardRef<HTMLDivElement, CardProps>(
+  (
+    {
+      cornerSize: size = 'large',
+      hue, // Deprecated, prefer fillLevel
+      fillLevel,
+      selected = false,
+      clickable = false,
+      ...props
+    },
+    ref
+  ) => {
+    fillLevel = useDecideFillLevel({ hue, fillLevel })
 
-  return (
-    <FillLevelProvider value={fillLevel}>
-      <Div
-        ref={ref}
-        border={`1px solid ${fillLevelToBorderColor[fillLevel]}`}
-        borderRadius={cornerSizeToBorderRadius[size]}
-        backgroundColor={
-          selected
-            ? fillLevelToSelectedBGColor[fillLevel]
-            : fillLevelToBGColor[fillLevel]
-        }
-        {...(clickable && {
-          cursor: 'pointer',
-        })}
-        {...(clickable
-            && !selected && {
-          _hover: { backgroundColor: fillLevelToHoverBGColor[fillLevel] },
-        })}
-        {...theme.partials.scrollBar({ fillLevel })}
-        {...props}
-      />
-    </FillLevelProvider>
-  )
-})
+    return (
+      <FillLevelProvider value={fillLevel}>
+        <Div
+          ref={ref}
+          border={`1px solid ${fillLevelToBorderColor[fillLevel]}`}
+          borderRadius={cornerSizeToBorderRadius[size]}
+          backgroundColor={
+            selected
+              ? fillLevelToSelectedBGColor[fillLevel]
+              : fillLevelToBGColor[fillLevel]
+          }
+          {...(clickable && {
+            cursor: 'pointer',
+          })}
+          {...(clickable &&
+            !selected && {
+              _hover: { backgroundColor: fillLevelToHoverBGColor[fillLevel] },
+            })}
+          {...theme.partials.scrollBar({ fillLevel })}
+          {...props}
+        />
+      </FillLevelProvider>
+    )
+  }
+)
 
 export default Card
 export type { CardProps, CornerSize as CardSize, CardHue }

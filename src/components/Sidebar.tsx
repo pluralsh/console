@@ -1,21 +1,22 @@
 import { Flex, FlexProps } from 'honorable'
-import {
-  Children,
-  Ref,
-  cloneElement,
-  forwardRef,
-  isValidElement,
-} from 'react'
+import { Children, Ref, cloneElement, forwardRef, isValidElement } from 'react'
 
 type SidebarLayout = 'vertical' | 'horizontal'
 type SidebarProps = {
   layout?: SidebarLayout
 } & FlexProps
 
-function SidebarRef({ layout = 'vertical', children, ...props }: SidebarProps, ref: Ref<any>) {
+function SidebarRef(
+  { layout = 'vertical', children, ...props }: SidebarProps,
+  ref: Ref<any>
+) {
   const isHorizontal = layout === 'horizontal'
   const size = isHorizontal ? '56px' : '64px'
-  const childrenWithProps = Children.map(children, child => (isValidElement(child) ? cloneElement(child, { layout, ...(child as any).props }) : child))
+  const childrenWithProps = Children.map(children, (child) =>
+    isValidElement(child)
+      ? cloneElement(child, { layout, ...(child as any).props })
+      : child
+  )
 
   return (
     <Flex

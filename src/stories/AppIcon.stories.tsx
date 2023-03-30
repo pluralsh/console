@@ -65,12 +65,12 @@ function Template({ onFillLevel, ...args }: any) {
           <H3>{label}</H3>
           <WrapWithIf
             condition={onFillLevel > 0}
-            wrapper={(
+            wrapper={
               <Card
                 fillLevel={onFillLevel}
                 padding="small"
               />
-            )}
+            }
           >
             <Flex
               direction="row"

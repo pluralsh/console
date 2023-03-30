@@ -26,14 +26,12 @@ type ControlProps = {
   children: ReactElement | ReactElement[] | string
 }
 
-export default function Control({
-  header,
-  caption,
-  children,
-}: ControlProps) {
+export default function Control({ header, caption, children }: ControlProps) {
   return (
     <ControlWrap>
-      <div className={`header ${caption ? 'with-caption' : 'without-caption'}`}>{header}</div>
+      <div className={`header ${caption ? 'with-caption' : 'without-caption'}`}>
+        {header}
+      </div>
       <div className="caption">{caption}</div>
       {children}
     </ControlWrap>

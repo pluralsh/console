@@ -13,8 +13,7 @@ import {
 export default {
   title: 'AppList',
   component: AppList,
-  argTypes: {
-  },
+  argTypes: {},
 }
 
 const APPS: Array<AppProps & CardProps> = [
@@ -34,7 +33,8 @@ const APPS: Array<AppProps & CardProps> = [
     ),
     actions: [{ label: 'Rebuild', onSelect: () => {} }],
     isAlive: true,
-  }, {
+  },
+  {
     name: 'GitLab',
     description: 'v2.11',
     icon: <GitLabLogoIcon />,
@@ -48,9 +48,11 @@ const APPS: Array<AppProps & CardProps> = [
         <ArrowTopRightIcon />
       </Button>
     ),
-  }, {
+  },
+  {
     name: 'Airbyte',
-    description: 'Very looooong looong looong application description. Very looooong looong looong application description.',
+    description:
+      'Very looooong looong looong application description. Very looooong looong looong application description.',
   },
   {
     name: 'Clickhouse',
@@ -58,7 +60,8 @@ const APPS: Array<AppProps & CardProps> = [
   },
 ]
 
-const Container = styled(ContainerUnstyled)(({ theme }) => `
+const Container = styled(ContainerUnstyled)(
+  ({ theme }) => `
   display: flex;
   width: 700px;
   height: 600px;
@@ -66,7 +69,8 @@ const Container = styled(ContainerUnstyled)(({ theme }) => `
   background: ${theme.colors['fill-one']};
   border-radius: ${theme.borderRadiuses.large}px;
   padding: 24px;
-`)
+`
+)
 
 function ContainerUnstyled({ children, ...props }: any) {
   return <Card {...props}>{children}</Card>
@@ -75,9 +79,7 @@ function ContainerUnstyled({ children, ...props }: any) {
 function Template() {
   return (
     <Container>
-      <AppList
-        apps={APPS}
-      />
+      <AppList apps={APPS} />
     </Container>
   )
 }
@@ -85,9 +87,7 @@ function Template() {
 function ScrollableTemplate() {
   return (
     <Container height={400}>
-      <AppList
-        apps={APPS}
-      />
+      <AppList apps={APPS} />
     </Container>
   )
 }

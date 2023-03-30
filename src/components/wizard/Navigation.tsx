@@ -1,10 +1,5 @@
 import styled from 'styled-components'
-import {
-  Dispatch,
-  ReactElement,
-  useContext,
-  useEffect,
-} from 'react'
+import { Dispatch, ReactElement, useContext, useEffect } from 'react'
 
 import Button from '../Button'
 import InstallIcon from '../icons/InstallIcon'
@@ -12,12 +7,7 @@ import { ReturnIcon } from '../../icons'
 import InfoOutlineIcon from '../icons/InfoOutlineIcon'
 import Tooltip from '../Tooltip'
 
-import {
-  useActive,
-  useNavigation,
-  usePicker,
-  useStepper,
-} from './hooks'
+import { useActive, useNavigation, usePicker, useStepper } from './hooks'
 import { ContextProps, StepConfig, WizardContext } from './context'
 
 const Navigation = styled(NavigationUnstyled)(({ theme }) => ({
@@ -47,19 +37,24 @@ type NavigationProps<T = unknown> = {
   tooltip?: string
 }
 
-function NavigationUnstyled<T = unknown>({ onInstall, tooltip, ...props }: NavigationProps<T>): ReactElement<NavigationProps<T>> {
+function NavigationUnstyled<T = unknown>({
+  onInstall,
+  tooltip,
+  ...props
+}: NavigationProps<T>): ReactElement<NavigationProps<T>> {
+  const { completed, setCompleted, limit } =
+    useContext<ContextProps<T>>(WizardContext)
   const {
-    completed, setCompleted, limit,
-  } = useContext<ContextProps<T>>(WizardContext)
-  const { setCompleted: setStepCompleted, valid, completed: stepCompleted } = useActive()
-  const {
-    isLast, isFirst, onReset, onBack, onNext, onReturn,
-  } = useNavigation()
+    setCompleted: setStepCompleted,
+    valid,
+    completed: stepCompleted,
+  } = useActive()
+  const { isLast, isFirst, onReset, onBack, onNext, onReturn } = useNavigation()
   const { selected: stepperSteps } = useStepper<T>()
   const { selected: pickerSteps, selectedCount } = usePicker()
 
   useEffect(() => {
-    const stepsCompleted = stepperSteps.every(s => s.isCompleted)
+    const stepsCompleted = stepperSteps.every((s) => s.isCompleted)
 
     if (!stepsCompleted) {
       setCompleted(false)
@@ -76,12 +71,15 @@ function NavigationUnstyled<T = unknown>({ onInstall, tooltip, ...props }: Navig
         <Button
           secondary
           onClick={() => onReset()}
-        >Clear
+        >
+          Clear
         </Button>
       )}
       {isFirst && (
         <div className="textContainer">
-          <div className="text">{selectedCount}/{limit} selected</div>
+          <div className="text">
+            {selectedCount}/{limit} selected
+          </div>
           {tooltip && (
             <Tooltip label={tooltip}>
               <InfoOutlineIcon size={16} />
@@ -93,7 +91,8 @@ function NavigationUnstyled<T = unknown>({ onInstall, tooltip, ...props }: Navig
         <Button
           secondary
           onClick={() => onBack()}
-        >Back
+        >
+          Back
         </Button>
       )}
       <div className="spacer" />
@@ -103,7 +102,8 @@ function NavigationUnstyled<T = unknown>({ onInstall, tooltip, ...props }: Navig
           startIcon={<ReturnIcon />}
           disabled={!valid}
           onClick={() => onReturn()}
-        >Return to install
+        >
+          Return to install
         </Button>
       )}
       {!isLast && (
@@ -113,14 +113,16 @@ function NavigationUnstyled<T = unknown>({ onInstall, tooltip, ...props }: Navig
             setStepCompleted(true)
             onNext()
           }}
-        >Continue
+        >
+          Continue
         </Button>
       )}
       {isLast && (
         <Button
           startIcon={<InstallIcon />}
           onClick={() => onInstall(stepperSteps)}
-        >Install
+        >
+          Install
         </Button>
       )}
     </div>

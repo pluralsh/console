@@ -52,7 +52,7 @@ const CARD_FILL_LEVEL: FillLevel = 2
 const ListBoxCard = styled(Card).attrs(() => ({
   cornerSize: 'medium',
   fillLevel: CARD_FILL_LEVEL,
-}))(_p => ({
+}))((_p) => ({
   display: 'flex',
   flexDirection: 'column',
   flexShrink: 1,
@@ -63,24 +63,28 @@ const ListBoxCard = styled(Card).attrs(() => ({
 type ScrollContainerProps = {
   extendStyle?: CSSObject
 }
-const ScrollContainer = styled.div<ScrollContainerProps>(({ theme, extendStyle }) => ({
-  ...theme.partials.scrollBar({ fillLevel: CARD_FILL_LEVEL }),
-  position: 'relative',
-  overflow: 'auto',
-  flexShrink: 1,
-  flexGrow: 1,
-  '&:focus': {
-    outline: 'none',
-  },
-  '&:focus-visible::after': {
-    ...theme.partials.focus.insetAbsolute,
-  },
-  ...extendStyle,
-}))
+const ScrollContainer = styled.div<ScrollContainerProps>(
+  ({ theme, extendStyle }) => ({
+    ...theme.partials.scrollBar({ fillLevel: CARD_FILL_LEVEL }),
+    position: 'relative',
+    overflow: 'auto',
+    flexShrink: 1,
+    flexGrow: 1,
+    '&:focus': {
+      outline: 'none',
+    },
+    '&:focus-visible::after': {
+      ...theme.partials.focus.insetAbsolute,
+    },
+    ...extendStyle,
+  })
+)
 
-function useItemWrappedChildren(children: ReactElement | ReactElement[],
+function useItemWrappedChildren(
+  children: ReactElement | ReactElement[],
   header?: ReactElement,
-  footer?: ReactElement) {
+  footer?: ReactElement
+) {
   return useMemo(() => {
     // Children.map() prefixes the key props in an undocumented and possibly
     // unstable way, so using Children.forEach() to maintain original key values
@@ -89,7 +93,7 @@ function useItemWrappedChildren(children: ReactElement | ReactElement[],
     if (header) {
       wrapped.push(<Item key={HEADER_KEY}>{header}</Item>)
     }
-    Children.forEach(children, child => {
+    Children.forEach(children, (child) => {
       const { textValue, ...childProps } = child?.props || {}
 
       if (child) {
@@ -127,26 +131,26 @@ function ListBox({
 }: ListBoxProps) {
   const nextFocusedKeyRef = useRef<Key>(null)
   const stateRef = useRef<ListState<object> | null>(null)
-  const selected = useMemo(() => new Set(selectedKey ? [selectedKey] : null),
-    [selectedKey])
+  const selected = useMemo(
+    () => new Set(selectedKey ? [selectedKey] : null),
+    [selectedKey]
+  )
   const listStateProps: AriaListBoxProps<string> = {
     disallowEmptySelection,
     selectionMode: 'single',
     selectedKeys: selected,
-    onSelectionChange: selection => {
+    onSelectionChange: (selection) => {
       const [newKey] = selection
 
       if (newKey === HEADER_KEY && onHeaderClick) {
         onHeaderClick()
-      }
-      else if (newKey === FOOTER_KEY && onFooterClick) {
+      } else if (newKey === FOOTER_KEY && onFooterClick) {
         onFooterClick()
         if (stateRef.current) {
-          nextFocusedKeyRef.current
-            = stateRef?.current?.collection?.getKeyBefore(FOOTER_KEY)
+          nextFocusedKeyRef.current =
+            stateRef?.current?.collection?.getKeyBefore(FOOTER_KEY)
         }
-      }
-      else if (onSelectionChange) {
+      } else if (onSelectionChange) {
         onSelectionChange(newKey)
       }
     },
@@ -158,9 +162,9 @@ function ListBox({
   stateRef.current = state
 
   if (nextFocusedKeyRef.current) {
-    const focusedKey
-      = state.collection.getKeyAfter(nextFocusedKeyRef.current)
-      || nextFocusedKeyRef.current
+    const focusedKey =
+      state.collection.getKeyAfter(nextFocusedKeyRef.current) ||
+      nextFocusedKeyRef.current
 
     state.selectionManager.setFocusedKey(focusedKey)
     nextFocusedKeyRef.current = null
@@ -208,7 +212,7 @@ function ListBoxUnmanaged({
         }}
         {...listBoxProps}
       >
-        {[...state.collection].map(item => (
+        {[...state.collection].map((item) => (
           <Option
             key={item.key}
             item={item}

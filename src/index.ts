@@ -1,6 +1,4 @@
-export {
-  Avatar, Menu, MenuItem, Switch,
-} from 'honorable'
+export { Avatar, Menu, MenuItem, Switch } from 'honorable'
 
 // Icons
 export * from './icons'
@@ -84,7 +82,11 @@ export { default as LoopingLogo } from './components/LoopingLogo'
 export { ComboBox } from './components/ComboBox'
 export { Toast, GraphQLToast } from './components/Toast'
 export { default as WrapWithIf } from './components/WrapWithIf'
-export type { AppProps, AppListProps, AppMenuAction } from './components/AppList'
+export type {
+  AppProps,
+  AppListProps,
+  AppMenuAction,
+} from './components/AppList'
 export { AppList } from './components/AppList'
 export { default as SelectItem } from './components/SelectItem'
 export { default as Slider } from './components/Slider'

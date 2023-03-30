@@ -47,25 +47,26 @@ function InstallerUnstyled({ ...props }: StyledProps<unknown>): ReactElement {
         selectedKey={null}
         onSelectionChange={() => {}}
       >
-        {apps.map(app => (
+        {apps.map((app) => (
           <ListBoxItem
             key={app.key}
             label={app.label}
-            leftContent={(
+            leftContent={
               <AppIcon
                 size="xsmall"
                 url={app.imageUrl}
                 icon={app.Icon && <app.Icon />}
               />
-            )}
-            rightContent={(
+            }
+            rightContent={
               <div className="item-right-content">
                 {app.isDependency && (
                   <Chip
                     marginRight="medium"
                     hue="lightest"
                     size="small"
-                  >Dependency
+                  >
+                    Dependency
                   </Chip>
                 )}
                 {app.isRequired && (
@@ -88,7 +89,7 @@ function InstallerUnstyled({ ...props }: StyledProps<unknown>): ReactElement {
                   onClick={() => onEdit(app)}
                 />
               </div>
-            )}
+            }
           />
         ))}
       </ListBox>

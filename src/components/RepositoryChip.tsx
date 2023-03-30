@@ -1,15 +1,5 @@
-import {
-  ReactNode,
-  Ref,
-  forwardRef,
-  useState,
-} from 'react'
-import {
-  Flex,
-  FlexProps,
-  Img,
-  P,
-} from 'honorable'
+import { ReactNode, Ref, forwardRef, useState } from 'react'
+import { Flex, FlexProps, Img, P } from 'honorable'
 
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
 import PlusIcon from './icons/PlusIcon'
@@ -20,7 +10,7 @@ type TagProps = FlexProps & {
   label: string
   imageUrl?: string
   checked?: boolean
-  disabled? : boolean
+  disabled?: boolean
   icon?: ReactNode
   tooltip?: string
 }
@@ -34,15 +24,18 @@ const iconProps = {
   height: 24,
 }
 
-function RepositoryChipRef({
-  label,
-  imageUrl = '',
-  checked = false,
-  disabled = false,
-  icon = null,
-  tooltip,
-  ...props
-}: TagProps, ref: Ref<any>) {
+function RepositoryChipRef(
+  {
+    label,
+    imageUrl = '',
+    checked = false,
+    disabled = false,
+    icon = null,
+    tooltip,
+    ...props
+  }: TagProps,
+  ref: Ref<any>
+) {
   const [hovered, setHovered] = useState(false)
 
   return (
@@ -58,7 +51,9 @@ function RepositoryChipRef({
         cursor={disabled ? 'not-allowed' : 'pointer'}
         opacity={disabled ? 0.5 : 1}
         borderRadius="large"
-        border={`1px solid ${checked ? 'border-outline-focused' : 'border-fill-two'}`}
+        border={`1px solid ${
+          checked ? 'border-outline-focused' : 'border-fill-two'
+        }`}
         backgroundColor="fill-two"
         _hover={disabled ? {} : { backgroundColor: 'fill-two-hover' }}
         transition="background-color 200ms ease"

@@ -5,26 +5,27 @@ import { useRadioGroupState } from '@react-stately/radio'
 
 export const RadioContext = createContext(null)
 
-type RadioGroupProps = AriaRadioGroupProps &
-  PropsWithChildren<DivProps>
+type RadioGroupProps = AriaRadioGroupProps & PropsWithChildren<DivProps>
 
-function RadioGroup({
-  name,
-  label,
-  description,
-  errorMessage,
-  orientation,
-  isDisabled = false,
-  isReadOnly = false,
-  value,
-  defaultValue,
-  onChange,
-  validationState,
-  isRequired,
-  children,
-  ...props
-}: RadioGroupProps,
-ref: any) {
+function RadioGroup(
+  {
+    name,
+    label,
+    description,
+    errorMessage,
+    orientation,
+    isDisabled = false,
+    isReadOnly = false,
+    value,
+    defaultValue,
+    onChange,
+    validationState,
+    isRequired,
+    children,
+    ...props
+  }: RadioGroupProps,
+  ref: any
+) {
   const stateProps = {
     name,
     label,

@@ -16,11 +16,18 @@ const Step = styled(UnstyledStep)(() => ({
 }))
 
 function UnstyledStep<T = unknown>({
-  valid, data, children, ...props
+  valid,
+  data,
+  children,
+  ...props
 }: StepProps<T>): ReactElement<StepProps<T>> {
   const { active, setValid, setData } = useActive()
 
-  useEffect(() => (!active.isDefault && !active.isPlaceholder ? setValid(valid) : undefined), [valid, setValid, active])
+  useEffect(
+    () =>
+      !active.isDefault && !active.isPlaceholder ? setValid(valid) : undefined,
+    [valid, setValid, active]
+  )
   useEffect(() => setData(data), [data, setData])
 
   return <div {...props}>{children}</div>

@@ -64,4 +64,3 @@ Default.args = {
   ],
   width: '420px',
 }
-

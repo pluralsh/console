@@ -11,7 +11,7 @@ import { FillLevel, useFillLevel } from './contexts/FillLevelContext'
 // Investigate replacing Spacer with 'margin-trim' css property when browser
 // support exists
 //
-const Spacer = styled.span(_ => ({
+const Spacer = styled.span((_) => ({
   fontSize: 1.5,
   display: 'inline',
   lineHeight: 0,
@@ -40,42 +40,46 @@ const parentFillLevelToBorderColor: {
 // consistent when INLINE_CODE_MIN_PX changes.
 const PADDING_EMS = 0.1669
 
-const Code = styled.code<{ parentFillLevel: FillLevel }>(({ theme, parentFillLevel }) => ({
-  ...theme.partials.text.inlineCode,
-  border: theme.borders.default,
-  borderRadius: theme.borderRadiuses.large,
-  paddingRight: theme.spacing.xxsmall,
-  paddingLeft: theme.spacing.xxsmall,
-  paddingTop: `${PADDING_EMS}em`,
-  paddingBottom: `${PADDING_EMS}em`,
-  color: theme.colors['text-light'],
-  borderColor: theme.colors[parentFillLevelToBorderColor[parentFillLevel]],
-  backgroundColor: theme.colors['fill-one'],
-  'a:any-link &': {
-    color: theme.colors['action-link-inline'],
-  },
-  'a:hover &': {
-    color: theme.colors['action-link-inline-hover'],
-  },
-  'a:visited &, a:active &': {
-    color: theme.colors['action-link-inline-visited'],
-  },
-}))
+const Code = styled.code<{ parentFillLevel: FillLevel }>(
+  ({ theme, parentFillLevel }) => ({
+    ...theme.partials.text.inlineCode,
+    border: theme.borders.default,
+    borderRadius: theme.borderRadiuses.large,
+    paddingRight: theme.spacing.xxsmall,
+    paddingLeft: theme.spacing.xxsmall,
+    paddingTop: `${PADDING_EMS}em`,
+    paddingBottom: `${PADDING_EMS}em`,
+    color: theme.colors['text-light'],
+    borderColor: theme.colors[parentFillLevelToBorderColor[parentFillLevel]],
+    backgroundColor: theme.colors['fill-one'],
+    'a:any-link &': {
+      color: theme.colors['action-link-inline'],
+    },
+    'a:hover &': {
+      color: theme.colors['action-link-inline-hover'],
+    },
+    'a:visited &, a:active &': {
+      color: theme.colors['action-link-inline-visited'],
+    },
+  })
+)
 
-const InlineCode = forwardRef<HTMLElement, ComponentPropsWithRef<'code'>>(({ ...props }, ref) => {
-  const parentFillLevel = useFillLevel()
+const InlineCode = forwardRef<HTMLElement, ComponentPropsWithRef<'code'>>(
+  ({ ...props }, ref) => {
+    const parentFillLevel = useFillLevel()
 
-  return (
-    <>
-      <Spacer />
-      <Code
-        ref={ref}
-        parentFillLevel={parentFillLevel}
-        {...props}
-      />
-      <Spacer />
-    </>
-  )
-})
+    return (
+      <>
+        <Spacer />
+        <Code
+          ref={ref}
+          parentFillLevel={parentFillLevel}
+          {...props}
+        />
+        <Spacer />
+      </>
+    )
+  }
+)
 
 export default InlineCode

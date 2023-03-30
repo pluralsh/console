@@ -183,9 +183,15 @@ function SubTabTemplate(args: any) {
       gap="large"
     >
       <SubTabs {...args} />
-      <ContentCard><SubTabs {...args} /></ContentCard>
-      <ContentCard fillLevel={2}><SubTabs {...args} /></ContentCard>
-      <ContentCard fillLevel={3}><SubTabs {...args} /></ContentCard>
+      <ContentCard>
+        <SubTabs {...args} />
+      </ContentCard>
+      <ContentCard fillLevel={2}>
+        <SubTabs {...args} />
+      </ContentCard>
+      <ContentCard fillLevel={3}>
+        <SubTabs {...args} />
+      </ContentCard>
     </Flex>
   )
 }

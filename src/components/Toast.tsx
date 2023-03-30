@@ -1,11 +1,5 @@
 import { FlexProps } from 'honorable'
-import {
-  Ref,
-  forwardRef,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react'
+import { Ref, forwardRef, useCallback, useEffect, useState } from 'react'
 
 import Banner from './Banner'
 import Layer, { LayerPositionType } from './Layer'
@@ -29,65 +23,69 @@ const defaults = {
   severity: 'info' as Severity,
 }
 
-const Toast = forwardRef(({
-  position = defaults.position,
-  closeTimeout: closeTimeoutProp = defaults.closeTimeout,
-  onClose = defaults.onClose,
-  onCloseComplete = defaults.onCloseComplete,
-  severity = defaults.severity,
-  children,
-  show = true,
-  ...props
-}: ToastProps,
-ref: Ref<any>): JSX.Element => {
-  const [open, setOpen] = useState(show)
-  const close = useCallback(() => {
-    setOpen(false)
-  }, [setOpen])
+const Toast = forwardRef(
+  (
+    {
+      position = defaults.position,
+      closeTimeout: closeTimeoutProp = defaults.closeTimeout,
+      onClose = defaults.onClose,
+      onCloseComplete = defaults.onCloseComplete,
+      severity = defaults.severity,
+      children,
+      show = true,
+      ...props
+    }: ToastProps,
+    ref: Ref<any>
+  ): JSX.Element => {
+    const [open, setOpen] = useState(show)
+    const close = useCallback(() => {
+      setOpen(false)
+    }, [setOpen])
 
-  const closeTimeout: 'none' | number
-      = closeTimeoutProp === 'none' || closeTimeoutProp <= 0
+    const closeTimeout: 'none' | number =
+      closeTimeoutProp === 'none' || closeTimeoutProp <= 0
         ? 'none'
-        : typeof closeTimeoutProp === 'number'
-          && !Number.isNaN(closeTimeoutProp)
-          ? closeTimeoutProp
-          : defaults.closeTimeout
+        : typeof closeTimeoutProp === 'number' &&
+          !Number.isNaN(closeTimeoutProp)
+        ? closeTimeoutProp
+        : defaults.closeTimeout
 
-  useEffect(() => {
-    setOpen(show)
-  }, [show])
+    useEffect(() => {
+      setOpen(show)
+    }, [show])
 
-  useEffect(() => {
-    if (closeTimeout === 'none') {
-      return
-    }
-    const timer = open ? setTimeout(() => close(), closeTimeout) : null
+    useEffect(() => {
+      if (closeTimeout === 'none') {
+        return
+      }
+      const timer = open ? setTimeout(() => close(), closeTimeout) : null
 
-    return () => clearTimeout(timer)
-  }, [close, closeTimeout, open])
+      return () => clearTimeout(timer)
+    }, [close, closeTimeout, open])
 
-  return (
-    <Layer
-      open={open}
-      position={position}
-      onClose={() => {
-        onClose()
-      }}
-      onCloseComplete={() => {
-        onCloseComplete()
-      }}
-      ref={ref}
-    >
-      <Banner
-        onClose={() => setOpen(false)}
-        severity={severity}
-        {...props}
+    return (
+      <Layer
+        open={open}
+        position={position}
+        onClose={() => {
+          onClose()
+        }}
+        onCloseComplete={() => {
+          onCloseComplete()
+        }}
+        ref={ref}
       >
-        {children}
-      </Banner>
-    </Layer>
-  )
-})
+        <Banner
+          onClose={() => setOpen(false)}
+          severity={severity}
+          {...props}
+        >
+          {children}
+        </Banner>
+      </Layer>
+    )
+  }
+)
 
 type GraphQLToastProps = {
   error: { graphQLErrors: Array<{ message: string }> }

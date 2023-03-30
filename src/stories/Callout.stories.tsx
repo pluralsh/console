@@ -3,12 +3,7 @@ import { Div, Flex } from 'honorable'
 import { useState } from 'react'
 
 import { FillLevel } from '../components/contexts/FillLevelContext'
-import {
-  Button,
-  Callout,
-  CalloutProps,
-  Card,
-} from '..'
+import { Button, Callout, CalloutProps, Card } from '..'
 
 export default {
   title: 'Callout',
@@ -43,14 +38,17 @@ const styles: CalloutProps['severity'][] = [
 const fullContent = (
   <>
     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-    tempor <a href="">incididunt ut labore</a> et dolore magna aliqua. Ut enim ad minim veniam,
-    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-    consequat.
+    tempor <a href="">incididunt ut labore</a> et dolore magna aliqua. Ut enim
+    ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
+    ex ea commodo consequat.
   </>
 )
 
 const compactContent = (
-  <>Lorem ipsum dolor sit amet, consectetur <a href="">adipiscing elit</a>, sed do.</>
+  <>
+    Lorem ipsum dolor sit amet, consectetur <a href="">adipiscing elit</a>, sed
+    do.
+  </>
 )
 
 function Template({
@@ -83,7 +81,7 @@ function Template({
       maxWidth={600}
       {...wrapperProps}
     >
-      {styles.map(style => (
+      {styles.map((style) => (
         <Callout
           severity={style}
           size={size}
@@ -108,7 +106,7 @@ function ExpandableTemplate({ title }: CalloutProps) {
       gap="large"
       maxWidth={600}
     >
-      {styles.map(style => (
+      {styles.map((style) => (
         <Callout
           key={style}
           severity={style}
@@ -134,7 +132,7 @@ function CloseableTemplate({ title }: CalloutProps) {
       gap="large"
       maxWidth={600}
     >
-      {styles.map(style => (
+      {styles.map((style) => (
         <Callout
           key={style}
           severity={style}

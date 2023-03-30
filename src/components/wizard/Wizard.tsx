@@ -20,12 +20,7 @@ import LoopingLogo from '../LoopingLogo'
 
 import { NavigationProps } from './Navigation'
 import { StepConfig } from './Picker'
-import {
-  useActive,
-  useNavigation,
-  usePicker,
-  useWizard,
-} from './hooks'
+import { useActive, useNavigation, usePicker, useWizard } from './hooks'
 import { WizardContext } from './context'
 
 const Wizard = styled(WizardUnstyled)(({ theme }) => ({
@@ -90,13 +85,21 @@ type WizardProps = {
   onResetRef?: MutableRefObject<{ onReset: Dispatch<void> }>
   ref?: Ref<HTMLDivElement>
   children?: {
-    stepper?: ReactElement,
+    stepper?: ReactElement
     navigation?: ReactElement<NavigationProps>
   }
 }
 
 function WizardUnstyled({
-  dependencySteps, loading, onClose, onComplete, onSelect, onResetRef, ref, children, ...props
+  dependencySteps,
+  loading,
+  onClose,
+  onComplete,
+  onSelect,
+  onResetRef,
+  ref,
+  children,
+  ...props
 }: WizardProps): ReactElement<WizardProps> {
   const { steps, setSteps, completed } = useContext(WizardContext)
   const { active } = useActive()
@@ -105,20 +108,31 @@ function WizardUnstyled({
   const { stepper, navigation } = children
   const hasHeader = useCallback(() => stepper || onClose, [stepper, onClose])
 
-  useImperativeHandle(onResetRef, () => ({ onReset: () => onReset() }), [onReset])
+  useImperativeHandle(onResetRef, () => ({ onReset: () => onReset() }), [
+    onReset,
+  ])
 
-  useEffect(() => onComplete && onComplete(completed || steps.filter(s => !s.isDefault && !s.isPlaceholder).some(s => s.isCompleted)),
-    [steps, completed, onComplete])
+  useEffect(
+    () =>
+      onComplete &&
+      onComplete(
+        completed ||
+          steps
+            .filter((s) => !s.isDefault && !s.isPlaceholder)
+            .some((s) => s.isCompleted)
+      ),
+    [steps, completed, onComplete]
+  )
   useEffect(() => onSelect && onSelect(selected), [onSelect, selected])
   useEffect(() => {
-    setSteps(steps => {
+    setSteps((steps) => {
       if (IsEmpty(dependencySteps)) {
-        if (steps.some(s => s.isDependency)) onReset()
+        if (steps.some((s) => s.isDependency)) onReset()
 
         return steps
       }
 
-      const arr = steps.filter(step => !step.isDependency)
+      const arr = steps.filter((step) => !step.isDependency)
 
       arr.splice(1, 0, ...dependencySteps)
 
@@ -170,9 +184,10 @@ type WizardContextProps = {
   limit?: number
 } & WizardProps
 
-function ContextAwareWizard({
-  defaultSteps, limit, ...props
-}: WizardContextProps, ref: Ref<HTMLDivElement>): ReactElement<WizardContextProps> {
+function ContextAwareWizard(
+  { defaultSteps, limit, ...props }: WizardContextProps,
+  ref: Ref<HTMLDivElement>
+): ReactElement<WizardContextProps> {
   const context = useWizard(defaultSteps, limit)
   const memo = useMemo(() => context, [context])
 

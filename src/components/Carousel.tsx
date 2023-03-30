@@ -98,14 +98,19 @@ const transitionStyles = {
   },
 }
 
-function CarouselRef({ autoAdvanceTime = 10000, children, ...props }: CarouselProps, ref: Ref<any>) {
+function CarouselRef(
+  { autoAdvanceTime = 10000, children, ...props }: CarouselProps,
+  ref: Ref<any>
+) {
   const [activeIndex, setActiveIndex] = useState(0)
 
   useEffect(() => {
     if (autoAdvanceTime <= 0) return
 
     const timer = setTimeout(() => {
-      setActiveIndex(activeIndex >= Children.count(children) - 1 ? 0 : activeIndex + 1)
+      setActiveIndex(
+        activeIndex >= Children.count(children) - 1 ? 0 : activeIndex + 1
+      )
     }, autoAdvanceTime)
 
     return () => {

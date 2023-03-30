@@ -40,27 +40,32 @@ function Template() {
           <SidebarItem
             clickable
             tooltip="Marketplace"
-          ><MarketIcon />
+          >
+            <MarketIcon />
           </SidebarItem>
           <SidebarItem
             clickable
             tooltip="Cloud Shell"
-          ><TerminalIcon />
+          >
+            <TerminalIcon />
           </SidebarItem>
           <SidebarItem
             clickable
             tooltip="Clusters"
-          ><ClusterIcon />
+          >
+            <ClusterIcon />
           </SidebarItem>
           <SidebarItem
             clickable
             tooltip="Audits"
-          ><ChecklistIcon />
+          >
+            <ChecklistIcon />
           </SidebarItem>
           <SidebarItem
             clickable
             tooltip="Account"
-          ><PeopleIcon />
+          >
+            <PeopleIcon />
           </SidebarItem>
         </SidebarSection>
 
@@ -85,9 +90,12 @@ function Template() {
           <SidebarItem
             clickable
             tooltip="Notifications"
-          ><BellIcon />
+          >
+            <BellIcon />
           </SidebarItem>
-          <SidebarItem clickable><Avatar size={32} /></SidebarItem>
+          <SidebarItem clickable>
+            <Avatar size={32} />
+          </SidebarItem>
         </SidebarSection>
       </Sidebar>
     </Div>
@@ -143,7 +151,8 @@ function HorizontalTemplate() {
             <Button
               small
               secondary
-            >Restart onboarding
+            >
+              Restart onboarding
             </Button>
           </SidebarItem>
         </SidebarSection>

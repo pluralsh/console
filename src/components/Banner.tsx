@@ -1,16 +1,5 @@
-import {
-  ReactNode,
-  Ref,
-  forwardRef,
-  useMemo,
-} from 'react'
-import {
-  Div,
-  Flex,
-  FlexProps,
-  Span,
-  SpanProps,
-} from 'honorable'
+import { ReactNode, Ref, forwardRef, useMemo } from 'react'
+import { Div, Flex, FlexProps, Span, SpanProps } from 'honorable'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
@@ -27,7 +16,7 @@ import IconFrame from './IconFrame'
 
 const SEVERITIES = ['info', 'error', 'warning', 'success', 'danger'] as const
 
-type BannerSeverity = Extract<Severity, typeof SEVERITIES[number]>
+type BannerSeverity = Extract<Severity, (typeof SEVERITIES)[number]>
 const DEFAULT_SEVERITY: BannerSeverity = 'success'
 
 type BannerProps = FlexProps & {
@@ -84,7 +73,7 @@ const BannerInner = styled.div(({ theme }) => ({
   alignItems: 'flex-start',
 }))
 
-const IconWrap = styled.div(_ => ({
+const IconWrap = styled.div((_) => ({
   display: 'flex',
   paddingTop: 2,
   paddingBottom: 2,
@@ -104,15 +93,17 @@ const BannerAction = styled(Span)(({ theme }) => ({
   },
 }))
 
-const Content = styled.p<{ $hasHeading: boolean }>(({ $hasHeading: $heading, theme }) => ({
-  ...theme.partials.text.body2LooseLineHeight,
-  marginTop: $heading ? theme.spacing.xxsmall : theme.spacing.xxxsmall,
-  marginBottom: 0,
-  color: theme.colors['text-light'],
-  '& a, & a:any-link': {
-    ...theme.partials.text.inlineLink,
-  },
-}))
+const Content = styled.p<{ $hasHeading: boolean }>(
+  ({ $hasHeading: $heading, theme }) => ({
+    ...theme.partials.text.body2LooseLineHeight,
+    marginTop: $heading ? theme.spacing.xxsmall : theme.spacing.xxxsmall,
+    marginBottom: 0,
+    color: theme.colors['text-light'],
+    '& a, & a:any-link': {
+      ...theme.partials.text.inlineLink,
+    },
+  })
+)
 
 const CloseButton = styled(IconFrame).attrs({
   size: 'medium',
@@ -122,20 +113,26 @@ const CloseButton = styled(IconFrame).attrs({
   marginLeft: theme.spacing.medium,
 }))
 
-function BannerRef({
-  heading,
-  action,
-  actionProps,
-  children,
-  severity = 'success',
-  fullWidth = false,
-  onClose,
-  ...props
-}: BannerProps,
-ref: Ref<any>) {
+function BannerRef(
+  {
+    heading,
+    action,
+    actionProps,
+    children,
+    severity = 'success',
+    fullWidth = false,
+    onClose,
+    ...props
+  }: BannerProps,
+  ref: Ref<any>
+) {
   severity = useMemo(() => {
     if (!severityToIcon[severity]) {
-      console.warn(`Banner: Incorrect severity (${severity}) specified. Valid values are ${SEVERITIES.map(s => `"${s}"`).join(', ')}. Defaulting to "${DEFAULT_SEVERITY}".`)
+      console.warn(
+        `Banner: Incorrect severity (${severity}) specified. Valid values are ${SEVERITIES.map(
+          (s) => `"${s}"`
+        ).join(', ')}. Defaulting to "${DEFAULT_SEVERITY}".`
+      )
 
       return DEFAULT_SEVERITY
     }
@@ -167,18 +164,14 @@ ref: Ref<any>) {
           {heading && (
             <Heading $bold={!!children}>
               {heading}
-              {action && (
-                <BannerAction {...actionProps}>{action}</BannerAction>
-              )}
+              {action && <BannerAction {...actionProps}>{action}</BannerAction>}
             </Heading>
           )}
           {children && <Content $hasHeading={!!heading}>{children}</Content>}
         </div>
       </BannerInner>
       <Div flexGrow={1} />
-      {typeof onClose === 'function' && (
-        <CloseButton onClick={onClose} />
-      )}
+      {typeof onClose === 'function' && <CloseButton onClick={onClose} />}
     </BannerOuter>
   )
 

@@ -1,10 +1,5 @@
 import { Flex, Span } from 'honorable'
-import {
-  ComponentProps,
-  ReactElement,
-  useMemo,
-  useState,
-} from 'react'
+import { ComponentProps, ReactElement, useMemo, useState } from 'react'
 
 import { HamburgerMenuCollapseIcon } from '../icons'
 
@@ -31,14 +26,14 @@ function ChipList<TValue = string>({
   const parentFillLevel = useFillLevel()
   const fillLevelClassName = useMemo(() => {
     switch (parentFillLevel) {
-    case 3:
-      return 'fill-three'
-    case 2:
-      return 'fill-two'
-    case 1:
-      return 'fill-one'
-    default:
-      return 'fill-zero'
+      case 3:
+        return 'fill-three'
+      case 2:
+        return 'fill-two'
+      case 1:
+        return 'fill-one'
+      default:
+        return 'fill-zero'
     }
   }, [parentFillLevel])
 

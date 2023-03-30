@@ -18,12 +18,7 @@ https://github.com/adobe/react-spectrum/blob/main/packages/%40react-stately/sele
 import { useMenuTriggerState } from '@react-stately/menu'
 import { AriaSelectProps } from '@react-types/select'
 import { ListProps, useListState } from '@react-stately/list'
-import {
-  Key,
-  useCallback,
-  useRef,
-  useState,
-} from 'react'
+import { Key, useCallback, useRef, useState } from 'react'
 import { useControlledState } from '@react-stately/utils'
 import { Node } from '@react-types/shared'
 import type { SelectState } from '@react-stately/select'
@@ -55,42 +50,50 @@ function useBimodalSelectState<T extends object>({
   selectionMode = 'single',
   onSelectionChange: onSelectChangeProp,
   ...props
-}: BimodalSelectProps<T> & { onSelectionChange: (arg: any) => any }): BimodalSelectState<T> {
-  const [selectedKey, setSelectedKey] = useControlledState<Key>(selectionMode === 'single' ? props.selectedKey : undefined,
+}: BimodalSelectProps<T> & {
+  onSelectionChange: (arg: any) => any
+}): BimodalSelectState<T> {
+  const [selectedKey, setSelectedKey] = useControlledState<Key>(
+    selectionMode === 'single' ? props.selectedKey : undefined,
     props.defaultSelectedKey ?? null,
-    selectionMode === 'single' ? onSelectChangeProp : undefined)
+    selectionMode === 'single' ? onSelectChangeProp : undefined
+  )
   const listStateRef = useRef<ReturnType<typeof useListState>>()
-  const getAllKeys = useCallback(() => new Set<Key>(listStateRef.current?.collection?.getKeys() ?? []),
-    [])
-  const selectedKeys
-    = selectionMode === 'multiple' ? props.selectedKeys : new Set([selectedKey])
+  const getAllKeys = useCallback(
+    () => new Set<Key>(listStateRef.current?.collection?.getKeys() ?? []),
+    []
+  )
+  const selectedKeys =
+    selectionMode === 'multiple' ? props.selectedKeys : new Set([selectedKey])
   const triggerState = useMenuTriggerState(props)
 
-  const onSelectionChange = useCallback<ListProps<object>['onSelectionChange']>(keys => {
-    if (selectionMode === 'single' && keys !== 'all') {
-      const key = keys.values().next().value
+  const onSelectionChange = useCallback<ListProps<object>['onSelectionChange']>(
+    (keys) => {
+      if (selectionMode === 'single' && keys !== 'all') {
+        const key = keys.values().next().value
 
-      // Always fire onSelectionChange, even if the key is the same
-      // as the current key (useControlledState does not).
-      if (key === selectedKey && onSelectChangeProp) {
-        onSelectChangeProp(key)
+        // Always fire onSelectionChange, even if the key is the same
+        // as the current key (useControlledState does not).
+        if (key === selectedKey && onSelectChangeProp) {
+          onSelectChangeProp(key)
+        }
+
+        setSelectedKey(key)
+        triggerState.close()
       }
-
-      setSelectedKey(key)
-      triggerState.close()
-    }
-    if (selectionMode === 'multiple') {
-      onSelectChangeProp(keys === 'all' ? getAllKeys() : keys)
-    }
-  },
-  [
-    getAllKeys,
-    onSelectChangeProp,
-    selectedKey,
-    selectionMode,
-    setSelectedKey,
-    triggerState,
-  ])
+      if (selectionMode === 'multiple') {
+        onSelectChangeProp(keys === 'all' ? getAllKeys() : keys)
+      }
+    },
+    [
+      getAllKeys,
+      onSelectChangeProp,
+      selectedKey,
+      selectionMode,
+      setSelectedKey,
+      triggerState,
+    ]
+  )
 
   const listState = useListState({
     disallowEmptySelection: selectionMode === 'single',
@@ -103,10 +106,12 @@ function useBimodalSelectState<T extends object>({
 
   listStateRef.current = listState
 
-  const selectedItem
-    = selectedKey != null ? listState.collection.getItem(selectedKey) : null
+  const selectedItem =
+    selectedKey != null ? listState.collection.getItem(selectedKey) : null
 
-  const selectedItems = Array.from(selectedKeys).map(key => listState.collection.getItem(key))
+  const selectedItems = Array.from(selectedKeys).map((key) =>
+    listState.collection.getItem(key)
+  )
 
   const [isFocused, setFocused] = useState(false)
 

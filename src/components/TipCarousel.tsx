@@ -1,9 +1,4 @@
-import {
-  Children,
-  ReactElement,
-  Ref,
-  forwardRef,
-} from 'react'
+import { Children, ReactElement, Ref, forwardRef } from 'react'
 import { Div, P } from 'honorable'
 
 import Carousel, { CarouselProps } from './Carousel'

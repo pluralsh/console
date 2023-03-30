@@ -58,13 +58,13 @@ function TextTemplate({ onFillLevel, ...args }: any) {
   return (
     <WrapWithIf
       condition={onFillLevel > 0}
-      wrapper={(
+      wrapper={
         <Card
           width="600px"
           padding="medium"
           fillLevel={onFillLevel}
         />
-      )}
+      }
     >
       <ChipList
         values={VALUES}
@@ -91,17 +91,17 @@ function LabelTemplate({ onFillLevel, ...args }: any) {
   return (
     <WrapWithIf
       condition={onFillLevel > 0}
-      wrapper={(
+      wrapper={
         <Card
           width="600px"
           padding="medium"
           fillLevel={onFillLevel}
         />
-      )}
+      }
     >
       <ChipList<Label>
         values={VALUES}
-        transformValue={v => `${v.key?.concat(':') ?? ''} ${v.value}`}
+        transformValue={(v) => `${v.key?.concat(':') ?? ''} ${v.value}`}
         {...args}
       />
     </WrapWithIf>
@@ -112,13 +112,13 @@ function EmptyTemplate({ onFillLevel, ...args }: any) {
   return (
     <WrapWithIf
       condition={onFillLevel > 0}
-      wrapper={(
+      wrapper={
         <Card
           width="600px"
           padding="medium"
           fillLevel={onFillLevel}
         />
-      )}
+      }
     >
       <ChipList
         values={[]}

@@ -13,25 +13,25 @@ type MarkdownProps = {
   mainBranch?: string
 }
 
-const render = ({ component: Component, props: extraProps }: any) => function renderComponent({ node: _, ...props }: any) {
-  return (
-    <Component
-      {...{
-        ...props,
-        ...extraProps,
-      }}
-    />
-  )
-}
+const render = ({ component: Component, props: extraProps }: any) =>
+  function renderComponent({ node: _, ...props }: any) {
+    return (
+      <Component
+        {...{
+          ...props,
+          ...extraProps,
+        }}
+      />
+    )
+  }
 
 function getLastStringChild(children: any, depth = 0): any {
   let lastChild = null
 
-  Children.forEach(children, child => {
+  Children.forEach(children, (child) => {
     if (typeof child === 'string') {
       lastChild = child
-    }
-    else if (child.props && child.props.children && depth < 3) {
+    } else if (child.props && child.props.children && depth < 3) {
       lastChild = getLastStringChild(child.props.children, depth + 1)
     }
   })
@@ -142,7 +142,7 @@ const MdA = styled.a.withConfig(commonCfg)(({ theme }) => ({
   display: 'inline',
   ...theme.partials.text.inlineLink,
 }))
-const MdSpan = styled.span.withConfig(commonCfg)(_p => ({
+const MdSpan = styled.span.withConfig(commonCfg)((_p) => ({
   verticalAlign: 'bottom',
 }))
 const MdHr = styled.hr.withConfig(commonCfg)(({ theme }) => ({
@@ -187,40 +187,42 @@ function MarkdownImage({
 }
 
 function Markdown({ text, gitUrl, mainBranch }: MarkdownProps) {
-  return useMemo(() => (
-    <ReactMarkdown
-      rehypePlugins={[rehypeRaw]}
-      components={{
-        blockquote: render({ component: MdBlockquote }),
-        ul: render({ component: MdUl }),
-        ol: render({ component: MdOl }),
-        li: render({ component: MdLi }),
-        h1: render({ component: MdH1 }),
-        h2: render({ component: MdH2 }),
-        h3: render({ component: MdH3 }),
-        h4: render({ component: MdH4 }),
-        h5: render({ component: MdH5 }),
-        h6: render({ component: MdH6 }),
-        img: render({
-          component: MarkdownImage,
-          props: { gitUrl, mainBranch },
-        }),
-        p: render({ component: MdP }),
-        div: render({ component: MdDiv }),
-        a: render({ component: MdA, props: { target: '_blank' } }),
-        span: render({ component: MdSpan }),
-        code: render({ component: InlineCode }),
-        pre: render({
-          component: MarkdownPreformatted,
-          props: { marginBottom: 'medium' },
-        }),
-        hr: render({ component: MdHr }),
-      }}
-    >
-      {text}
-    </ReactMarkdown>
-  ),
-  [text, gitUrl, mainBranch])
+  return useMemo(
+    () => (
+      <ReactMarkdown
+        rehypePlugins={[rehypeRaw]}
+        components={{
+          blockquote: render({ component: MdBlockquote }),
+          ul: render({ component: MdUl }),
+          ol: render({ component: MdOl }),
+          li: render({ component: MdLi }),
+          h1: render({ component: MdH1 }),
+          h2: render({ component: MdH2 }),
+          h3: render({ component: MdH3 }),
+          h4: render({ component: MdH4 }),
+          h5: render({ component: MdH5 }),
+          h6: render({ component: MdH6 }),
+          img: render({
+            component: MarkdownImage,
+            props: { gitUrl, mainBranch },
+          }),
+          p: render({ component: MdP }),
+          div: render({ component: MdDiv }),
+          a: render({ component: MdA, props: { target: '_blank' } }),
+          span: render({ component: MdSpan }),
+          code: render({ component: InlineCode }),
+          pre: render({
+            component: MarkdownPreformatted,
+            props: { marginBottom: 'medium' },
+          }),
+          hr: render({ component: MdHr }),
+        }}
+      >
+        {text}
+      </ReactMarkdown>
+    ),
+    [text, gitUrl, mainBranch]
+  )
 }
 
 export default Markdown

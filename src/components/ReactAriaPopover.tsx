@@ -12,19 +12,19 @@ type PopoverProps = {
 
 function Popover({ ...props }: PopoverProps) {
   const ref = useRef()
-  const {
-    popoverRef = ref, isOpen, onClose, children,
-  } = props
+  const { popoverRef = ref, isOpen, onClose, children } = props
 
   // Handle events that should cause the popup to close,
   // e.g. blur, clicking outside, or pressing the escape key.
-  const { overlayProps } = useOverlay({
-    isOpen,
-    onClose,
-    shouldCloseOnBlur: true,
-    isDismissable: true,
-  },
-  popoverRef)
+  const { overlayProps } = useOverlay(
+    {
+      isOpen,
+      onClose,
+      shouldCloseOnBlur: true,
+      isDismissable: true,
+    },
+    popoverRef
+  )
 
   // Need to remove ref and change key when closed so react-aria thinks the
   // Popover has unmounted when animating out
@@ -50,16 +50,18 @@ function Popover({ ...props }: PopoverProps) {
   return content
 }
 
-const PopoverStyled = styled.div<{ $isOpen: boolean }>(({ $isOpen: isOpen }) => ({
-  display: 'flex',
-  width: '100%',
-  maxHeight: '100%',
-  pointerEvents: 'auto',
-  '> *': {
-    flexGrow: 1,
-  },
-  ...(!isOpen ? { pointerEvents: 'none' } : {}),
-}))
+const PopoverStyled = styled.div<{ $isOpen: boolean }>(
+  ({ $isOpen: isOpen }) => ({
+    display: 'flex',
+    width: '100%',
+    maxHeight: '100%',
+    pointerEvents: 'auto',
+    '> *': {
+      flexGrow: 1,
+    },
+    ...(!isOpen ? { pointerEvents: 'none' } : {}),
+  })
+)
 
 export type { PopoverProps }
 export { Popover }

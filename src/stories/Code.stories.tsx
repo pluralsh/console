@@ -54,12 +54,12 @@ function Template({ onFillLevel, ...args }: any) {
   return (
     <WrapWithIf
       condition={onFillLevel > 0}
-      wrapper={(
+      wrapper={
         <Card
           fillLevel={onFillLevel}
           padding="medium"
         />
-      )}
+      }
     >
       <Flex
         direction="column"
@@ -174,7 +174,6 @@ const tabs = [
     language: 'rust',
     content: rustCode,
   },
-
 ]
 
 function WithTabsTemplate({ onFillLevel, title, ...args }: any) {
@@ -183,12 +182,12 @@ function WithTabsTemplate({ onFillLevel, title, ...args }: any) {
   return (
     <WrapWithIf
       condition={onFillLevel > 0}
-      wrapper={(
+      wrapper={
         <Card
           fillLevel={onFillLevel}
           padding="medium"
         />
-      )}
+      }
     >
       {' '}
       <Flex
@@ -228,7 +227,6 @@ function WithTabsTemplate({ onFillLevel, title, ...args }: any) {
             {...args}
           />
         </Flex>
-
       </Flex>
     </WrapWithIf>
   )

@@ -1,10 +1,4 @@
-import {
-  Ref,
-  forwardRef,
-  useEffect,
-  useMemo,
-  useRef,
-} from 'react'
+import { Ref, forwardRef, useEffect, useMemo, useRef } from 'react'
 import hljs from 'highlight.js/lib/core'
 import '../hljs'
 
@@ -31,7 +25,8 @@ const LineNumbers = styled(StyledPre)(({ theme }) => ({
   textAlign: 'right',
 }))
 
-const StyledHighlight = styled.div(_ => `
+const StyledHighlight = styled.div(
+  (_) => `
 pre code.hljs {
   display: block;
   overflow-x: auto;
@@ -137,7 +132,8 @@ code.hljs {
 .hljs-meta .hljs-keyword,
 .hljs-meta-keyword {
   font-weight: 700;
-}`)
+}`
+)
 
 type HighlightProps = Omit<ComponentPropsWithoutRef<'pre'>, 'children'> & {
   language?: string
@@ -147,10 +143,10 @@ type HighlightProps = Omit<ComponentPropsWithoutRef<'pre'>, 'children'> & {
 
 const propTypes = {}
 
-function HighlightRef({
-  language, children, showLineNumbers, ...props
-}: HighlightProps,
-ref: Ref<any>) {
+function HighlightRef(
+  { language, children, showLineNumbers, ...props }: HighlightProps,
+  ref: Ref<any>
+) {
   if (typeof children !== 'string') {
     throw new Error('Highlight component expects a string as its children')
   }
@@ -169,7 +165,9 @@ ref: Ref<any>) {
     <MainWrap ref={ref}>
       {showLineNumbers && (
         <LineNumbers aria-hidden>
-          {lines.map((line, idx) => `${idx + 1}${idx < lines.length - 1 ? '\n' : ''}`)}
+          {lines.map(
+            (line, idx) => `${idx + 1}${idx < lines.length - 1 ? '\n' : ''}`
+          )}
         </LineNumbers>
       )}
       <StyledHighlight>

@@ -93,17 +93,24 @@ const honorableTheme = mergeTheme(defaultTheme, {
   global: [
     /* Spacing */
     mapperRecipe('gap', spacing),
-    ...Object.entries(spacers).map(([key, nextKeys]) => (props: any) => props[key] !== null
-      && typeof props[key] !== 'undefined'
-      && Object.fromEntries(nextKeys.map(nextKey => [
-        nextKey,
-        spacing[props[key]] || props[key],
-      ]))),
-    ({ fill }: any) => fill === true && {
-      // === true to prevent the `fill` css property to apply here
-      width: '100%',
-      height: '100%',
-    },
+    ...Object.entries(spacers).map(
+      ([key, nextKeys]) =>
+        (props: any) =>
+          props[key] !== null &&
+          typeof props[key] !== 'undefined' &&
+          Object.fromEntries(
+            nextKeys.map((nextKey) => [
+              nextKey,
+              spacing[props[key]] || props[key],
+            ])
+          )
+    ),
+    ({ fill }: any) =>
+      fill === true && {
+        // === true to prevent the `fill` css property to apply here
+        width: '100%',
+        height: '100%',
+      },
     /* Border radiuses */
     mapperRecipe('borderRadius', borderRadiuses),
     /* Shadows */
@@ -134,22 +141,25 @@ const honorableTheme = mergeTheme(defaultTheme, {
     ({ overline }: any) => overline && textPartials.overline,
     ({ truncate }: any) => truncate && textPartials.truncate,
     /* Deprecated */
-    ({ body0 }: any) => body0 && {
-      fontSize: 18,
-      lineHeight: '28px',
-    },
-    /* Deprecated */
-    ({ font }: any) => font === 'action' && {
-      fontFamily: 'Monument',
-      letterSpacing: 1,
-      fontWeight: 500,
-    },
-    /* deprecated in favor of _hover */
-    ({ hoverIndicator }: any) => hoverIndicator && {
-      '&:hover': {
-        backgroundColor: hoverIndicator,
+    ({ body0 }: any) =>
+      body0 && {
+        fontSize: 18,
+        lineHeight: '28px',
       },
-    },
+    /* Deprecated */
+    ({ font }: any) =>
+      font === 'action' && {
+        fontFamily: 'Monument',
+        letterSpacing: 1,
+        fontWeight: 500,
+      },
+    /* deprecated in favor of _hover */
+    ({ hoverIndicator }: any) =>
+      hoverIndicator && {
+        '&:hover': {
+          backgroundColor: hoverIndicator,
+        },
+      },
   ],
   A: {
     Root: [
@@ -161,11 +171,12 @@ const honorableTheme = mergeTheme(defaultTheme, {
   },
   Accordion: {
     Root: [
-      ({ ghost }: any) => ghost && {
-        border: 'none',
-        elevation: 0,
-        backgroundColor: 'inherit',
-      },
+      ({ ghost }: any) =>
+        ghost && {
+          border: 'none',
+          elevation: 0,
+          backgroundColor: 'inherit',
+        },
     ],
   },
   Avatar: {
@@ -213,175 +224,187 @@ const honorableTheme = mergeTheme(defaultTheme, {
           },
         },
       },
-      ({ secondary }: any) => secondary && {
-        color: 'text-light',
-        backgroundColor: 'transparent',
-        border: '1px solid border-input',
-        ':hover': {
-          color: 'text',
-          backgroundColor: 'action-input-hover',
-          border: '1px solid border-input',
-        },
-        ':active': {
-          color: 'text',
-          backgroundColor: 'transparent',
-          border: '1px solid border-input',
-        },
-        ':focus-visible': {
-          color: 'text',
-          backgroundColor: 'action-input-hover',
-        },
-        ':disabled': {
-          color: 'text-disabled',
+      ({ secondary }: any) =>
+        secondary && {
+          color: 'text-light',
           backgroundColor: 'transparent',
           border: '1px solid border-input',
           ':hover': {
+            color: 'text',
+            backgroundColor: 'action-input-hover',
+            border: '1px solid border-input',
+          },
+          ':active': {
+            color: 'text',
             backgroundColor: 'transparent',
             border: '1px solid border-input',
           },
+          ':focus-visible': {
+            color: 'text',
+            backgroundColor: 'action-input-hover',
+          },
+          ':disabled': {
+            color: 'text-disabled',
+            backgroundColor: 'transparent',
+            border: '1px solid border-input',
+            ':hover': {
+              backgroundColor: 'transparent',
+              border: '1px solid border-input',
+            },
+          },
         },
-      },
-      ({ tertiary }: any) => tertiary && {
-        color: 'text-light',
-        backgroundColor: 'transparent',
-        border: '1px solid transparent',
-        ':hover': {
-          color: 'text',
-          backgroundColor: 'action-input-hover',
-          border: '1px solid transparent',
-        },
-        ':active': {
-          color: 'text',
-          backgroundColor: 'transparent',
-          border: '1px solid transparent',
-        },
-        ':focus-visible': {
-          color: 'text',
-          backgroundColor: 'action-input-hover',
-        },
-        ':disabled': {
-          color: 'text-disabled',
+      ({ tertiary }: any) =>
+        tertiary && {
+          color: 'text-light',
           backgroundColor: 'transparent',
           border: '1px solid transparent',
           ':hover': {
+            color: 'text',
+            backgroundColor: 'action-input-hover',
+            border: '1px solid transparent',
+          },
+          ':active': {
+            color: 'text',
             backgroundColor: 'transparent',
             border: '1px solid transparent',
           },
+          ':focus-visible': {
+            color: 'text',
+            backgroundColor: 'action-input-hover',
+          },
+          ':disabled': {
+            color: 'text-disabled',
+            backgroundColor: 'transparent',
+            border: '1px solid transparent',
+            ':hover': {
+              backgroundColor: 'transparent',
+              border: '1px solid transparent',
+            },
+          },
         },
-      },
-      ({ tertiary, padding }: any) => tertiary && padding === 'none' && {
-        color: 'text-light',
-        backgroundColor: 'transparent',
-        border: '1px solid transparent',
-        paddingHorizontal: '0',
-        ':hover': {
+      ({ tertiary, padding }: any) =>
+        tertiary &&
+        padding === 'none' && {
+          color: 'text-light',
           backgroundColor: 'transparent',
-          textDecoration: 'underline',
-        },
-        ':active': {
-          textDecoration: 'underline',
-        },
-        ':focus-visible': {
-          backgroundColor: 'transparent',
-          textDecoration: 'underline',
-        },
-      },
-      ({ destructive }: any) => destructive && {
-        color: 'text-danger',
-        backgroundColor: 'transparent',
-        border: '1px solid border-danger',
-        ':hover': {
-          backgroundColor: 'action-input-hover',
-          border: '1px solid border-danger',
-        },
-        ':active': {
-          backgroundColor: 'transparent',
-          border: '1px solid border-danger',
-        },
-        ':focus-visible': {
-          backgroundColor: 'action-input-hover',
-        },
-        ':disabled': {
-          color: 'text-disabled',
-          backgroundColor: 'transparent',
-          border: '1px solid border-disabled',
+          border: '1px solid transparent',
+          paddingHorizontal: '0',
           ':hover': {
+            backgroundColor: 'transparent',
+            textDecoration: 'underline',
+          },
+          ':active': {
+            textDecoration: 'underline',
+          },
+          ':focus-visible': {
+            backgroundColor: 'transparent',
+            textDecoration: 'underline',
+          },
+        },
+      ({ destructive }: any) =>
+        destructive && {
+          color: 'text-danger',
+          backgroundColor: 'transparent',
+          border: '1px solid border-danger',
+          ':hover': {
+            backgroundColor: 'action-input-hover',
+            border: '1px solid border-danger',
+          },
+          ':active': {
+            backgroundColor: 'transparent',
+            border: '1px solid border-danger',
+          },
+          ':focus-visible': {
+            backgroundColor: 'action-input-hover',
+          },
+          ':disabled': {
+            color: 'text-disabled',
             backgroundColor: 'transparent',
             border: '1px solid border-disabled',
+            ':hover': {
+              backgroundColor: 'transparent',
+              border: '1px solid border-disabled',
+            },
           },
         },
-      },
-      ({ floating }: any) => floating && {
-        color: 'text-light',
-        backgroundColor: 'fill-two',
-        border: '1px solid border-input',
-        // boxShadow isn't getting set when placed in the root here,
-        // but using the '&' prop gets around it
-        '&': {
-          boxShadow: boxShadows.slight,
-        },
-        ':hover': {
-          color: 'text',
-          backgroundColor: 'fill-two-hover',
+      ({ floating }: any) =>
+        floating && {
+          color: 'text-light',
+          backgroundColor: 'fill-two',
           border: '1px solid border-input',
-          boxShadow: boxShadows.moderate,
-        },
-        ':active': {
-          color: 'text',
-          backgroundColor: 'fill-two-hover',
-          border: '1px solid border-input',
-        },
-        ':focus-visible': {
-          color: 'text',
-          backgroundColor: 'fill-two-selected',
-        },
-        ':disabled': {
-          color: 'text-disabled',
-          backgroundColor: 'transparent',
-          border: '1px solid border-input',
+          // boxShadow isn't getting set when placed in the root here,
+          // but using the '&' prop gets around it
+          '&': {
+            boxShadow: boxShadows.slight,
+          },
           ':hover': {
-            backgroundColor: 'transparent',
+            color: 'text',
+            backgroundColor: 'fill-two-hover',
+            border: '1px solid border-input',
+            boxShadow: boxShadows.moderate,
+          },
+          ':active': {
+            color: 'text',
+            backgroundColor: 'fill-two-hover',
             border: '1px solid border-input',
           },
+          ':focus-visible': {
+            color: 'text',
+            backgroundColor: 'fill-two-selected',
+          },
+          ':disabled': {
+            color: 'text-disabled',
+            backgroundColor: 'transparent',
+            border: '1px solid border-input',
+            ':hover': {
+              backgroundColor: 'transparent',
+              border: '1px solid border-input',
+            },
+          },
         },
-      },
-      ({ large }: any) => large && {
-        buttonLarge: true,
-        paddingTop: spacing.small - 1,
-        paddingBottom: spacing.small - 1,
-        paddingRight: spacing.large - 1,
-        paddingLeft: spacing.large - 1,
-      },
-      ({ small }: any) => small && {
-        buttonSmall: true,
-        paddingTop: spacing.xxsmall - 1,
-        paddingBottom: spacing.xxsmall - 1,
-        paddingRight: spacing.medium - 1,
-        paddingLeft: spacing.medium - 1,
-        minHeight: 32,
-      },
+      ({ large }: any) =>
+        large && {
+          buttonLarge: true,
+          paddingTop: spacing.small - 1,
+          paddingBottom: spacing.small - 1,
+          paddingRight: spacing.large - 1,
+          paddingLeft: spacing.large - 1,
+        },
+      ({ small }: any) =>
+        small && {
+          buttonSmall: true,
+          paddingTop: spacing.xxsmall - 1,
+          paddingBottom: spacing.xxsmall - 1,
+          paddingRight: spacing.medium - 1,
+          paddingLeft: spacing.medium - 1,
+          minHeight: 32,
+        },
     ],
     StartIcon: [
       {
         margin: '0 12px 0 0 !important',
       },
-      ({ large }: any) => large && {
-        margin: '0 16px 0 0 !important',
-      },
-      ({ small }: any) => small && {
-        margin: '0 12px 0 0 !important',
-      },
+      ({ large }: any) =>
+        large && {
+          margin: '0 16px 0 0 !important',
+        },
+      ({ small }: any) =>
+        small && {
+          margin: '0 12px 0 0 !important',
+        },
     ],
     EndIcon: [
       {
         margin: '0 0 0 12px !important',
       },
-      ({ large }: any) => large && {
-        margin: '0 0 0 16px !important',
-      },
-      ({ small }: any) => small && {
-        margin: '0 0 0 12px !important',
-      },
+      ({ large }: any) =>
+        large && {
+          margin: '0 0 0 16px !important',
+        },
+      ({ small }: any) =>
+        small && {
+          margin: '0 0 0 12px !important',
+        },
     ],
   },
   ButtonGroup: {
@@ -394,32 +417,34 @@ const honorableTheme = mergeTheme(defaultTheme, {
         },
         overflow: 'hidden',
       },
-      ({ direction }: any) => direction === 'row' && {
-        '& > button': {
-          borderLeft: '1px solid border',
-          '&:first-of-type': {
-            borderLeft: '1px solid transparent',
+      ({ direction }: any) =>
+        direction === 'row' && {
+          '& > button': {
+            borderLeft: '1px solid border',
+            '&:first-of-type': {
+              borderLeft: '1px solid transparent',
+            },
           },
         },
-      },
-      ({ direction }: any) => direction === 'column' && {
-        '& > button': {
-          borderTop: '1px solid border',
-          '&:first-of-type': {
-            borderTop: '1px solid transparent',
+      ({ direction }: any) =>
+        direction === 'column' && {
+          '& > button': {
+            borderTop: '1px solid border',
+            '&:first-of-type': {
+              borderTop: '1px solid transparent',
+            },
           },
         },
-      },
     ],
   },
   Checkbox: {
     Root: [
-
-      ({ small }: any) => small && {
-        '> span': {
-          borderWidth: '.75px',
+      ({ small }: any) =>
+        small && {
+          '> span': {
+            borderWidth: '.75px',
+          },
         },
-      },
     ],
     Control: [
       {
@@ -427,10 +452,11 @@ const honorableTheme = mergeTheme(defaultTheme, {
         height: 24,
         borderRadius: 'normal',
       },
-      ({ small }: any) => small && {
-        width: 16,
-        height: 16,
-      },
+      ({ small }: any) =>
+        small && {
+          width: 16,
+          height: 16,
+        },
     ],
   },
   H1: {
@@ -495,20 +521,24 @@ const honorableTheme = mergeTheme(defaultTheme, {
           borderColor: 'border-outline-focused',
         },
       },
-      ({ valid }: any) => valid && {
-        borderColor: 'border-outline',
-      },
-      ({ error }: any) => error && {
-        borderColor: 'border-danger',
-      },
-      ({ small }: any) => small && {
-        caption: true,
-      },
-      ({ disabled }: any) => disabled && {
-        backgroundColor: 'transparent',
-        color: 'text-disabled',
-        borderColor: 'border-disabled',
-      },
+      ({ valid }: any) =>
+        valid && {
+          borderColor: 'border-outline',
+        },
+      ({ error }: any) =>
+        error && {
+          borderColor: 'border-danger',
+        },
+      ({ small }: any) =>
+        small && {
+          caption: true,
+        },
+      ({ disabled }: any) =>
+        disabled && {
+          backgroundColor: 'transparent',
+          color: 'text-disabled',
+          borderColor: 'border-disabled',
+        },
     ],
     InputBase: [
       {
@@ -521,41 +551,46 @@ const honorableTheme = mergeTheme(defaultTheme, {
           color: 'text-xlight',
         },
       },
-      ({ small }: any) => small && {
-        height: '30px',
-        lineHeight: '30px',
-      },
-      ({ large }: any) => large && {
-        height: '46px',
-        lineHeight: '46px',
-      },
-      ({ disabled }: any) => disabled && {
-        backgroundColor: 'transparent',
-        color: 'text-disabled',
-        _placeholder: {
-          color: 'text-disabled',
+      ({ small }: any) =>
+        small && {
+          height: '30px',
+          lineHeight: '30px',
         },
-      },
+      ({ large }: any) =>
+        large && {
+          height: '46px',
+          lineHeight: '46px',
+        },
+      ({ disabled }: any) =>
+        disabled && {
+          backgroundColor: 'transparent',
+          color: 'text-disabled',
+          _placeholder: {
+            color: 'text-disabled',
+          },
+        },
     ],
     StartIcon: [
       {
         marginRight: 'xsmall',
       },
-      ({ disabled }: any) => disabled && {
-        '& *': {
-          color: 'text-disabled',
+      ({ disabled }: any) =>
+        disabled && {
+          '& *': {
+            color: 'text-disabled',
+          },
         },
-      },
     ],
     EndIcon: [
       {
         marginLeft: 'small',
       },
-      ({ disabled }: any) => disabled && {
-        '& *': {
-          color: 'text-disabled',
+      ({ disabled }: any) =>
+        disabled && {
+          '& *': {
+            color: 'text-disabled',
+          },
         },
-      },
     ],
   },
   Menu: {
@@ -586,10 +621,11 @@ const honorableTheme = mergeTheme(defaultTheme, {
       {
         padding: '8px 16px',
       },
-      ({ active }: any) => active && {
-        backgroundColor: 'fill-two-hover',
-        borderColor: 'fill-two-hover',
-      },
+      ({ active }: any) =>
+        active && {
+          backgroundColor: 'fill-two-hover',
+          borderColor: 'fill-two-hover',
+        },
     ],
   },
   Modal: {

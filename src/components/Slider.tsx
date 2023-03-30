@@ -30,119 +30,122 @@ export type SliderProps = AriaSliderProps & {
 }
 
 type SliderWrapProps = {
-  percent: number,
+  percent: number
   size: number | string
   thumbRadius?: number
 }
 
-const SliderWrap = styled.div<SliderWrapProps>(({
-  theme, percent, size, thumbRadius = 12,
-}) => ({
-  '.slider': {
-    display: 'flex',
+const SliderWrap = styled.div<SliderWrapProps>(
+  ({ theme, percent, size, thumbRadius = 12 }) => ({
+    '.slider': {
+      display: 'flex',
 
-    // Additional padding to make sure that slider does not go outside parent element.
-    paddingLeft: thumbRadius,
-    paddingRight: thumbRadius,
+      // Additional padding to make sure that slider does not go outside parent element.
+      paddingLeft: thumbRadius,
+      paddingRight: thumbRadius,
 
-    '&.horizontal': {
-      flexDirection: 'column',
-      width: size || '100%',
+      '&.horizontal': {
+        flexDirection: 'column',
+        width: size || '100%',
 
-      '.track': {
-        height: 30,
-        width: '100%',
+        '.track': {
+          height: 30,
+          width: '100%',
 
-        '&:before': {
-          height: thumbRadius,
+          '&:before': {
+            height: thumbRadius,
+            top: '50%',
+            transform: 'translateY(-50%)',
+
+            // Additional padding inside track to align ticks with correct points on track.
+            marginLeft: -thumbRadius,
+            marginRight: thumbRadius,
+            width: `calc(100% + ${thumbRadius * 2}px)`,
+          },
+        },
+
+        '.thumb': {
           top: '50%',
-          transform: 'translateY(-50%)',
-
-          // Additional padding inside track to align ticks with correct points on track.
-          marginLeft: -thumbRadius,
-          marginRight: thumbRadius,
-          width: `calc(100% + ${thumbRadius * 2}px)`,
         },
       },
 
-      '.thumb': {
-        top: '50%',
-      },
-    },
+      '.&.vertical': {
+        height: size || 300,
 
-    '.&.vertical': {
-      height: size || 300,
-
-      '.track': {
-        width: 30,
-        height: '100%',
-
-        '&:before': {
-          width: thumbRadius,
+        '.track': {
+          width: 30,
           height: '100%',
+
+          '&:before': {
+            width: thumbRadius,
+            height: '100%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+          },
+        },
+
+        '.thumb': {
           left: '50%',
-          transform: 'translateX(-50%)',
         },
       },
-
-      '.thumb': {
-        left: '50%',
-      },
     },
-  },
 
-  '.track:before': {
-    content: 'attr(x)',
-    display: 'block',
-    position: 'absolute',
-    background: theme.colors['fill-one'],
-    backgroundImage: `linear-gradient(90deg, transparent 0%, rgba(74, 81, 242, calc(0.85 * ${percent / 100})) ${percent}%, transparent ${percent}%)`,
-    borderRadius: theme.borderRadiuses.large,
-    boxShadow: 'inset 0px 0.5px 2px rgba(0, 0, 0, 0.25), inset 0px -0.5px 1.5px rgba(255, 255, 255, 0.16)',
-  },
+    '.track:before': {
+      content: 'attr(x)',
+      display: 'block',
+      position: 'absolute',
+      background: theme.colors['fill-one'],
+      backgroundImage: `linear-gradient(90deg, transparent 0%, rgba(74, 81, 242, calc(0.85 * ${
+        percent / 100
+      })) ${percent}%, transparent ${percent}%)`,
+      borderRadius: theme.borderRadiuses.large,
+      boxShadow:
+        'inset 0px 0.5px 2px rgba(0, 0, 0, 0.25), inset 0px -0.5px 1.5px rgba(255, 255, 255, 0.16)',
+    },
 
-  '.thumb': {
-    width: thumbRadius * 2,
-    height: thumbRadius * 2,
-    borderRadius: '50%',
-    background: `radial-gradient(${theme.colors['border-selected']} 37%, ${theme.colors['fill-primary']} 40%)`,
-    boxShadow: `
+    '.thumb': {
+      width: thumbRadius * 2,
+      height: thumbRadius * 2,
+      borderRadius: '50%',
+      background: `radial-gradient(${theme.colors['border-selected']} 37%, ${theme.colors['fill-primary']} 40%)`,
+      boxShadow: `
       3px 3px 4px 0 rgba(255, 255, 255, 0.15) inset,
       -2px -2px 3px 0 rgba(0, 0, 0, .1) inset,
       ${theme.boxShadows.moderate}
     `,
 
-    '&.dragging': {
-      background: `radial-gradient(${theme.colors['border-selected']} 37%, ${theme.colors['fill-primary-hover']} 40%)`,
+      '&.dragging': {
+        background: `radial-gradient(${theme.colors['border-selected']} 37%, ${theme.colors['fill-primary-hover']} 40%)`,
+      },
+
+      '&.focus': {
+        background: `radial-gradient(${theme.colors['border-selected']} 37%, ${theme.colors['fill-primary-hover']} 40%)`,
+      },
+
+      '&.disabled': {
+        opacity: 0.4,
+      },
     },
 
-    '&.focus': {
-      background: `radial-gradient(${theme.colors['border-selected']} 37%, ${theme.colors['fill-primary-hover']} 40%)`,
+    '.tick-marks': {
+      ...theme.partials.text.caption,
+      color: theme.colors['text-xlight'],
+      display: 'flex',
+      flexGrow: 1,
+      marginTop: thumbRadius / 3,
+      position: 'relative',
     },
 
-    '&.disabled': {
-      opacity: 0.4,
+    '.label-container': {
+      display: 'flex',
+      justifyContent: 'space-between',
+      marginLeft: -thumbRadius,
+      marginRight: thumbRadius,
+      marginBottom: thumbRadius / 3,
+      width: `calc(100% + ${thumbRadius * 2}px)`,
     },
-  },
-
-  '.tick-marks': {
-    ...theme.partials.text.caption,
-    color: theme.colors['text-xlight'],
-    display: 'flex',
-    flexGrow: 1,
-    marginTop: thumbRadius / 3,
-    position: 'relative',
-  },
-
-  '.label-container': {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginLeft: -thumbRadius,
-    marginRight: thumbRadius,
-    marginBottom: thumbRadius / 3,
-    width: `calc(100% + ${thumbRadius * 2}px)`,
-  },
-}))
+  })
+)
 
 type TickMarkProps = {
   percent: number
@@ -150,37 +153,40 @@ type TickMarkProps = {
   thumbRadius?: number
 }
 
-const TickMark = styled.div<TickMarkProps>(({
-  theme, percent = 0, active = false, thumbRadius = 12,
-}) => ({
-  cursor: 'pointer',
-  left: `calc(${percent * 100}% - ${thumbRadius}px)`,
-  position: 'absolute',
-  width: thumbRadius * 2,
-  textAlign: 'center',
+const TickMark = styled.div<TickMarkProps>(
+  ({ theme, percent = 0, active = false, thumbRadius = 12 }) => ({
+    cursor: 'pointer',
+    left: `calc(${percent * 100}% - ${thumbRadius}px)`,
+    position: 'absolute',
+    width: thumbRadius * 2,
+    textAlign: 'center',
 
-  ...(active && {
-    color: theme.colors.text,
-    fontWeight: 600,
-  }),
+    ...(active && {
+      color: theme.colors.text,
+      fontWeight: 600,
+    }),
 
-  '&:hover': {
-    color: theme.colors['text-light'],
-  },
-}))
+    '&:hover': {
+      color: theme.colors['text-light'],
+    },
+  })
+)
 
 function Slider({
-  tooltip = true, size, tickMarks, thumbRadius, ...props
+  tooltip = true,
+  size,
+  tickMarks,
+  thumbRadius,
+  ...props
 }: SliderProps) {
   const trackRef = useRef(null)
   const numberFormatter = useNumberFormatter(props.formatOptions)
   const state = useSliderState({ ...props, numberFormatter })
-  const {
-    groupProps,
-    trackProps,
-    labelProps,
-    outputProps,
-  } = useSlider(props, state, trackRef)
+  const { groupProps, trackProps, labelProps, outputProps } = useSlider(
+    props,
+    state,
+    trackRef
+  )
 
   return (
     <SliderWrap
@@ -192,14 +198,11 @@ function Slider({
         {...groupProps}
         className={`slider ${state.orientation}`}
       >
-        {props.label
-        && (
+        {props.label && (
           <div className="label-container">
             {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
             <label {...labelProps}>{props.label}</label>
-            <output {...outputProps}>
-              {state.getThumbValueLabel(0)}
-            </output>
+            <output {...outputProps}>{state.getThumbValueLabel(0)}</output>
           </div>
         )}
         <div
@@ -233,15 +236,16 @@ function Slider({
   )
 }
 
-function Thumb({
-  state, trackRef, index, tooltip,
-}: any) {
+function Thumb({ state, trackRef, index, tooltip }: any) {
   const inputRef = useRef(null)
-  const { thumbProps, inputProps, isDragging } = useSliderThumb({
-    index,
-    trackRef,
-    inputRef,
-  }, state)
+  const { thumbProps, inputProps, isDragging } = useSliderThumb(
+    {
+      index,
+      trackRef,
+      inputRef,
+    },
+    state
+  )
 
   const { focusProps, isFocusVisible } = useFocusRing()
 
@@ -261,16 +265,16 @@ function Thumb({
     </div>
   )
 
-  return (!tooltip
-    ? thumb : (
-      <Tooltip
-        arrow
-        placement="top"
-        label={state.getThumbValueLabel(0) || 0}
-      >
-        {thumb}
-      </Tooltip>
-    )
+  return !tooltip ? (
+    thumb
+  ) : (
+    <Tooltip
+      arrow
+      placement="top"
+      label={state.getThumbValueLabel(0) || 0}
+    >
+      {thumb}
+    </Tooltip>
   )
 }
 

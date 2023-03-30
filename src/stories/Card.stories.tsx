@@ -28,12 +28,12 @@ function Template({
       flexWrap="wrap"
       gap="xxlarge"
     >
-      {cornerSizes.map(cornerSize => (
+      {cornerSizes.map((cornerSize) => (
         <Flex
           flexWrap="wrap"
           gap="xxlarge"
         >
-          {fillLevels.map(fillLevel => (
+          {fillLevels.map((fillLevel) => (
             <Card
               clickable={clickable}
               selected={selected}
@@ -70,7 +70,7 @@ function FillLevelTemplate({
       flexWrap="wrap"
       gap="xxlarge"
     >
-      {fillLevels.map(fillLevel => (
+      {fillLevels.map((fillLevel) => (
         <Card
           clickable={clickable}
           selected={selected}

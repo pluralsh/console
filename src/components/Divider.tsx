@@ -1,25 +1,26 @@
 import { Ref, forwardRef } from 'react'
-import {
-  Div,
-  Flex,
-  FlexProps,
-  P,
-} from 'honorable'
+import { Div, Flex, FlexProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 type DividerProps = FlexProps & {
   text?: string
-  color?: string;
-  backgroundColor?: string;
+  color?: string
+  backgroundColor?: string
 }
 
 const propTypes = {
   text: PropTypes.string,
 }
 
-function DividerRef({
-  text, color = 'text-light', backgroundColor = 'text-light', ...props
-}: DividerProps, ref: Ref<any>) {
+function DividerRef(
+  {
+    text,
+    color = 'text-light',
+    backgroundColor = 'text-light',
+    ...props
+  }: DividerProps,
+  ref: Ref<any>
+) {
   return (
     <Flex
       ref={ref}

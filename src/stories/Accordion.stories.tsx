@@ -6,9 +6,7 @@ export default {
 }
 
 function Template(args: any) {
-  return (
-    <Accordion {...args} />
-  )
+  return <Accordion {...args} />
 }
 
 export const Default = Template.bind({})

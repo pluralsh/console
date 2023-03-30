@@ -154,7 +154,7 @@ function Template() {
       <Div maxWidth={512}>
         <ListBox
           selectedKey={selectedKey}
-          onSelectionChange={key => {
+          onSelectionChange={(key) => {
             setSelectedKey(key)
           }}
           extendStyle={{
@@ -180,14 +180,14 @@ function Template() {
       >
         <ListBox
           selectedKey={selectedKey}
-          onSelectionChange={key => {
+          onSelectionChange={(key) => {
             setSelectedKey(key)
           }}
-          footerFixed={(
+          footerFixed={
             <ListBoxFooter onClick={() => alert('You clicked the footer')}>
               Fixed Footer - Default
             </ListBoxFooter>
-          )}
+          }
         >
           {items.map(({ key, label, description }) => (
             <ListBoxItem
@@ -209,18 +209,16 @@ function Template() {
       >
         <ListBox
           selectedKey={selectedKey}
-          onSelectionChange={key => {
+          onSelectionChange={(key) => {
             setSelectedKey(key)
           }}
-          footerFixed={(
+          footerFixed={
             <ListBoxFooterPlus onClick={() => alert('You clicked the footer')}>
               Fixed Footer - Add
             </ListBoxFooterPlus>
-          )}
+          }
         >
-          {items.map(({
-            key, label, description, chips,
-          }) => (
+          {items.map(({ key, label, description, chips }) => (
             <ListBoxItem
               key={key}
               label={label}
@@ -241,7 +239,7 @@ function Template() {
       >
         <ListBox
           selectedKey={selectedKey}
-          onSelectionChange={key => {
+          onSelectionChange={(key) => {
             setSelectedKey(key)
           }}
           footer={
@@ -257,13 +255,13 @@ function Template() {
             <ListBoxItem
               key={key}
               label={version}
-              rightContent={(
+              rightContent={
                 <ListBoxItemChipList
                   maxVisible={2}
                   showExtra
                   chips={chips}
                 />
-              )}
+              }
             />
           ))}
         </ListBox>
@@ -279,7 +277,7 @@ function Template() {
         <ListBox
           extendStyle={{ width: 'max-content' }}
           selectedKey={null}
-          onSelectionChange={key => {
+          onSelectionChange={(key) => {
             setSelectedKey(key)
           }}
         >
@@ -292,7 +290,6 @@ function Template() {
             key="modify-user"
             label="Modify user"
             textValue="Modify user"
-
           />
           <ListBoxItem
             key="delete-user"

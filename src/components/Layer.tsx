@@ -17,7 +17,7 @@ import usePrevious from '../hooks/usePrevious'
 
 const DIRECTIONS = ['up', 'down', 'left', 'right'] as const
 
-type Direction = typeof DIRECTIONS[number]
+type Direction = (typeof DIRECTIONS)[number]
 
 type TransitionType = 'slide' | 'fade' | 'scale'
 type GetTransitionProps = {
@@ -39,7 +39,9 @@ type AnimationType =
 
 const DEFAULT_DIRECTION: Direction = 'down' as const
 const DEFAULT_TRANSITION_TYPE: TransitionType = 'slide' as const
-const isDirection = (direction: string | null | undefined): direction is Direction => DIRECTIONS.includes(direction as any)
+const isDirection = (
+  direction: string | null | undefined
+): direction is Direction => DIRECTIONS.includes(direction as any)
 
 const getTransitionProps = ({
   isOpen,
@@ -72,16 +74,16 @@ const getTransitionProps = ({
     leave: { ...from, opacity: type === 'fade' ? 0 : -1.5 },
     config: isOpen
       ? {
-        mass: 0.6,
-        tension: 280,
-        velocity: 0.02,
-      }
+          mass: 0.6,
+          tension: 280,
+          velocity: 0.02,
+        }
       : {
-        mass: 0.6,
-        tension: 375,
-        velocity: 0.02,
-        restVelocity: 0.1,
-      },
+          mass: 0.6,
+          tension: 375,
+          velocity: 0.02,
+          restVelocity: 0.1,
+        },
   }
 }
 
@@ -104,10 +106,13 @@ type SimpleMarginType = {
   right?: string | number | undefined | null
 }
 
-export type MarginType = (SimpleMarginType & {
-  vertical?: string | number | undefined | null
-  horizontal?: string | number | undefined | null
-}) | string | number
+export type MarginType =
+  | (SimpleMarginType & {
+      vertical?: string | number | undefined | null
+      horizontal?: string | number | undefined | null
+    })
+  | string
+  | number
 
 const LayerWrapper = styled.div<{
   position: LayerPositionType
@@ -123,13 +128,13 @@ const LayerWrapper = styled.div<{
   alignItems: position.startsWith('top')
     ? 'start'
     : position.startsWith('bottom')
-      ? 'end'
-      : 'center',
+    ? 'end'
+    : 'center',
   justifyContent: position.endsWith('left')
     ? 'start'
     : position.endsWith('right')
-      ? 'end'
-      : 'center',
+    ? 'end'
+    : 'center',
   top: 0,
   left: 0,
   right: 0,
@@ -140,16 +145,17 @@ const LayerWrapper = styled.div<{
   paddingBottom: margin.bottom ?? undefined,
 }))
 
-function LayerRef({
-  position,
-  animation = 'slide',
-  margin,
-  children,
-  onClickOutside,
-  onClose,
-  onCloseComplete,
-  open,
-}: PropsWithChildren<{
+function LayerRef(
+  {
+    position,
+    animation = 'slide',
+    margin,
+    children,
+    onClickOutside,
+    onClose,
+    onCloseComplete,
+    open,
+  }: PropsWithChildren<{
     open: boolean
     position: LayerPositionType
     animation?: AnimationType
@@ -158,7 +164,8 @@ function LayerRef({
     onCloseComplete?: () => void | null | undefined
     onClickOutside?: () => void | null | undefined
   }>,
-ref: MutableRefObject<HTMLDivElement>) {
+  ref: MutableRefObject<HTMLDivElement>
+) {
   const theme = useTheme()
   const internalRef = useRef<HTMLDivElement>()
   const finalRef = ref || internalRef
@@ -203,19 +210,18 @@ ref: MutableRefObject<HTMLDivElement>) {
       ...(margin.right ? { right: margin.right } : {}),
       ...(margin.vertical
         ? {
-          top: margin.vertical,
-          bottom: margin.vertical,
-        }
+            top: margin.vertical,
+            bottom: margin.vertical,
+          }
         : {}),
       ...(margin.horizontal
         ? {
-          left: margin.horizontal,
-          right: margin.horizontal,
-        }
+            left: margin.horizontal,
+            right: margin.horizontal,
+          }
         : {}),
     }
-  }
-  else {
+  } else {
     margin = {}
   }
   for (const [key, value] of Object.entries(margin)) {
@@ -227,30 +233,26 @@ ref: MutableRefObject<HTMLDivElement>) {
   if (animation.startsWith('fade')) {
     transitionType = 'fade'
     transitionDirection = undefined
-  }
-  else if (animation === 'scale') {
+  } else if (animation === 'scale') {
     transitionType = 'scale'
     transitionDirection = undefined
-  }
-  else if (animation === 'slide') {
+  } else if (animation === 'slide') {
     if (position === 'center') {
       transitionType = 'scale'
       transitionDirection = undefined
-    }
-    else {
+    } else {
       transitionType = 'slide'
       transitionDirection = position.startsWith('top')
         ? 'down'
         : position.startsWith('bottom')
-          ? 'up'
-          : position.endsWith('left')
-            ? 'right'
-            : position.endsWith('right')
-              ? 'left'
-              : DEFAULT_DIRECTION
+        ? 'up'
+        : position.endsWith('left')
+        ? 'right'
+        : position.endsWith('right')
+        ? 'left'
+        : DEFAULT_DIRECTION
     }
-  }
-  else if (animation.startsWith('slide')) {
+  } else if (animation.startsWith('slide')) {
     transitionType = 'slide'
     const tempDirection = animation.split('-')[1]
 
@@ -259,8 +261,7 @@ ref: MutableRefObject<HTMLDivElement>) {
     }
     if (tempDirection === 'horizontal') {
       transitionDirection = position.endsWith('right') ? 'left' : 'right'
-    }
-    else if (tempDirection === 'vertical') {
+    } else if (tempDirection === 'vertical') {
       transitionDirection = position.endsWith('bottom') ? 'up' : 'down'
     }
   }
@@ -275,8 +276,8 @@ ref: MutableRefObject<HTMLDivElement>) {
   }
   const transitions = useTransition(open ? [true] : [], transitionProps)
 
-  const portalElt
-    = document?.getElementById(theme.portals.default.id) ?? document?.body
+  const portalElt =
+    document?.getElementById(theme.portals.default.id) ?? document?.body
 
   if (!visible || position === 'hidden' || !portalElt) {
     return null
@@ -287,7 +288,7 @@ ref: MutableRefObject<HTMLDivElement>) {
       position={position}
       margin={margin}
     >
-      {transitions(styles => (
+      {transitions((styles) => (
         <animated.div
           className="animated"
           ref={finalRef}

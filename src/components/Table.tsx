@@ -75,28 +75,32 @@ const propTypes = {}
 
 function getGridTemplateCols(columnDefs: ColumnDef<unknown>[] = []): string {
   return columnDefs
-    .reduce((val: string[], columnDef): string[] => [
-      ...val,
-      columnDef.meta?.gridTemplate
-        ? columnDef.meta?.gridTemplate
-        : columnDef.meta?.truncate
+    .reduce(
+      (val: string[], columnDef): string[] => [
+        ...val,
+        columnDef.meta?.gridTemplate
+          ? columnDef.meta?.gridTemplate
+          : columnDef.meta?.truncate
           ? 'minmax(100px, 1fr)'
           : 'auto',
-    ],
-      [] as string[])
+      ],
+      [] as string[]
+    )
     .join(' ')
 }
 
-const T = styled.table<{ gridTemplateColumns: string }>(({ theme, gridTemplateColumns }) => ({
-  gridTemplateColumns,
-  backgroundColor: theme.colors['fill-one'],
-  borderSpacing: 0,
-  display: 'grid',
-  borderCollapse: 'collapse',
-  minWidth: '100%',
-  width: '100%',
-  ...theme.partials.text.body2LooseLineHeight,
-}))
+const T = styled.table<{ gridTemplateColumns: string }>(
+  ({ theme, gridTemplateColumns }) => ({
+    gridTemplateColumns,
+    backgroundColor: theme.colors['fill-one'],
+    borderSpacing: 0,
+    display: 'grid',
+    borderCollapse: 'collapse',
+    minWidth: '100%',
+    width: '100%',
+    ...theme.partials.text.body2LooseLineHeight,
+  })
+)
 
 const TheadUnstyled = forwardRef<
   HTMLTableSectionElement,
@@ -135,20 +139,22 @@ const Tbody = styled(TbodyUnstyled)(({ theme }) => ({
   backgroundColor: theme.colors['fill-one'],
 }))
 
-const Tr = styled.tr<{ clickable?: boolean; lighter?: boolean }>(({ theme, clickable = false, lighter = false }) => ({
-  display: 'contents',
-  backgroundColor: lighter
-    ? theme.colors['fill-one']
-    : theme.colors['fill-one-hover'],
+const Tr = styled.tr<{ clickable?: boolean; lighter?: boolean }>(
+  ({ theme, clickable = false, lighter = false }) => ({
+    display: 'contents',
+    backgroundColor: lighter
+      ? theme.colors['fill-one']
+      : theme.colors['fill-one-hover'],
 
-  ...(clickable && {
-    cursor: 'pointer',
+    ...(clickable && {
+      cursor: 'pointer',
 
-    '&:hover': {
-      backgroundColor: theme.colors['fill-one-selected'],
-    },
-  }),
-}))
+      '&:hover': {
+        backgroundColor: theme.colors['fill-one-selected'],
+      },
+    }),
+  })
+)
 
 const Th = styled.th<{
   stickyColumn: boolean
@@ -176,7 +182,7 @@ const Th = styled.th<{
     },
   },
   '&:last-child': {
-   /* Hackery to hide unpredictable visible gap between columns */
+    /* Hackery to hide unpredictable visible gap between columns */
     zIndex: 3,
     '&::before': {
       content: '""',
@@ -192,15 +198,15 @@ const Th = styled.th<{
   '&:first-child': {
     ...(stickyColumn
       ? {
-        backgroundColor: 'inherit',
-        position: 'sticky',
-        left: 0,
-        zIndex: 5,
-        '.thOuterWrap': {
-          boxShadow: theme.boxShadows.slight,
+          backgroundColor: 'inherit',
+          position: 'sticky',
+          left: 0,
           zIndex: 5,
-        },
-      }
+          '.thOuterWrap': {
+            boxShadow: theme.boxShadows.slight,
+            zIndex: 5,
+          },
+        }
       : {}),
   },
 }))
@@ -212,40 +218,47 @@ const Td = styled.td<{
   stickyColumn: boolean
   truncateColumn: boolean
   center?: boolean
-}>(({
-  theme, firstRow, loose, stickyColumn, truncateColumn = false, center,
-}) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: center ? 'center' : 'flex-start',
-  height: 'auto',
-  minHeight: 52,
+}>(
+  ({
+    theme,
+    firstRow,
+    loose,
+    stickyColumn,
+    truncateColumn = false,
+    center,
+  }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: center ? 'center' : 'flex-start',
+    height: 'auto',
+    minHeight: 52,
 
-  backgroundColor: 'inherit',
-  borderTop: firstRow ? '' : theme.borders.default,
-  color: theme.colors.text,
+    backgroundColor: 'inherit',
+    borderTop: firstRow ? '' : theme.borders.default,
+    color: theme.colors.text,
 
-  padding: loose ? '16px 12px' : '8px 12px',
-  '&:first-child': stickyColumn
-    ? {
-      boxShadow: theme.boxShadows.slight,
-      position: 'sticky',
-      left: 0,
-      zIndex: 1,
-    }
-    : {},
-  ...(truncateColumn
-    ? {
-      '*': {
-        width: '100%',
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-      },
-    }
-    : {}),
-}))
+    padding: loose ? '16px 12px' : '8px 12px',
+    '&:first-child': stickyColumn
+      ? {
+          boxShadow: theme.boxShadows.slight,
+          position: 'sticky',
+          left: 0,
+          zIndex: 1,
+        }
+      : {},
+    ...(truncateColumn
+      ? {
+          '*': {
+            width: '100%',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          },
+        }
+      : {}),
+  })
+)
 
 const TdExpand = styled.td(({ theme }) => ({
   '&:last-child': {
@@ -283,14 +296,18 @@ const defaultGlobalFilterFn: FilterFn<any> = (
 }
 
 const sortDirToIcon = {
-  asc: <ArrowRightIcon
-    size={12}
-    transform="rotate(-90deg)"
-  />,
-  desc: <ArrowRightIcon
-    size={12}
-    transform="rotate(90deg)"
-  />,
+  asc: (
+    <ArrowRightIcon
+      size={12}
+      transform="rotate(-90deg)"
+    />
+  ),
+  desc: (
+    <ArrowRightIcon
+      size={12}
+      transform="rotate(90deg)"
+    />
+  ),
 }
 
 function SortIndicator({
@@ -376,8 +393,10 @@ function FillerRows({
   )
 }
 
-function useOnFirstScroll(ref: MutableRefObject<HTMLElement>,
-  onFirstScroll: () => void) {
+function useOnFirstScroll(
+  ref: MutableRefObject<HTMLElement>,
+  onFirstScroll: () => void
+) {
   const [hasScrolled, setHasScrolled] = useState(false)
 
   useEffect(() => {
@@ -399,23 +418,25 @@ function useOnFirstScroll(ref: MutableRefObject<HTMLElement>,
   }, [hasScrolled, onFirstScroll, ref])
 }
 
-function TableRef({
-  data,
-  columns,
-  getRowCanExpand,
-  renderExpanded,
-  loose = false,
-  stickyColumn = false,
-  scrollTopMargin = 500,
-  width,
-  virtualizeRows = false,
-  lockColumnsOnFirstScroll,
-  reactVirtualOptions: virtualizerOptions,
-  reactTableOptions,
-  onRowClick,
-  ...props
-}: TableProps,
-forwardRef: Ref<any>) {
+function TableRef(
+  {
+    data,
+    columns,
+    getRowCanExpand,
+    renderExpanded,
+    loose = false,
+    stickyColumn = false,
+    scrollTopMargin = 500,
+    width,
+    virtualizeRows = false,
+    lockColumnsOnFirstScroll,
+    reactVirtualOptions: virtualizerOptions,
+    reactTableOptions,
+    onRowClick,
+    ...props
+  }: TableProps,
+  forwardRef: Ref<any>
+) {
   const tableContainerRef = useRef<HTMLDivElement>()
   const [hover, setHover] = useState(false)
   const [scrollTop, setScrollTop] = useState(0)
@@ -453,7 +474,7 @@ forwardRef: Ref<any>) {
     overscan: 1,
     getScrollElement: () => tableContainerRef.current,
     estimateSize: () => 52,
-    measureElement: el => {
+    measureElement: (el) => {
       // Since <td>s are rendered with `display: contents`, we need to calculate
       // row height from contents using Range
       if (el?.getBoundingClientRect().height <= 0 && el?.hasChildNodes()) {
@@ -473,13 +494,14 @@ forwardRef: Ref<any>) {
   const virtualHeight = rowVirtualizer.getTotalSize()
 
   lockColumnsOnFirstScroll = lockColumnsOnFirstScroll ?? virtualizeRows
-  useOnFirstScroll(tableContainerRef,
+  useOnFirstScroll(
+    tableContainerRef,
     useCallback(() => {
       if (lockColumnsOnFirstScroll) {
         const thCells = tableContainerRef.current?.querySelectorAll('th')
 
         const columns = Array.from(thCells)
-          .map(th => {
+          .map((th) => {
             const { width } = th.getBoundingClientRect()
 
             return `${width}px`
@@ -488,30 +510,35 @@ forwardRef: Ref<any>) {
 
         setFixedGridTemplateColumns(columns)
       }
-    }, [lockColumnsOnFirstScroll]))
+    }, [lockColumnsOnFirstScroll])
+  )
   useEffect(() => {
     if (!lockColumnsOnFirstScroll) {
       setFixedGridTemplateColumns(null)
     }
   }, [lockColumnsOnFirstScroll])
 
-  const { paddingTop, paddingBottom } = useMemo(() => ({
-    paddingTop:
+  const { paddingTop, paddingBottom } = useMemo(
+    () => ({
+      paddingTop:
         virtualizeRows && virtualRows.length > 0
           ? virtualRows?.[0]?.start || 0
           : 0,
-    paddingBottom:
+      paddingBottom:
         virtualizeRows && virtualRows.length > 0
           ? virtualHeight - (virtualRows?.[virtualRows.length - 1]?.end || 0)
           : 0,
-  }),
-  [virtualHeight, virtualRows, virtualizeRows])
+    }),
+    [virtualHeight, virtualRows, virtualizeRows]
+  )
 
   const headerGroups = useMemo(() => table.getHeaderGroups(), [table])
 
   const rows = virtualizeRows ? virtualRows : tableRows
-  const gridTemplateColumns = useMemo(() => fixedGridTemplateColumns ?? getGridTemplateCols(columns),
-    [columns, fixedGridTemplateColumns])
+  const gridTemplateColumns = useMemo(
+    () => fixedGridTemplateColumns ?? getGridTemplateCols(columns),
+    [columns, fixedGridTemplateColumns]
+  )
 
   return (
     <Div
@@ -527,28 +554,30 @@ forwardRef: Ref<any>) {
         borderRadius="large"
         overflow="auto"
         ref={tableContainerRef}
-        onScroll={({ target }: { target: HTMLDivElement }) => setScrollTop(target?.scrollTop)}
+        onScroll={({ target }: { target: HTMLDivElement }) =>
+          setScrollTop(target?.scrollTop)
+        }
         width="100%"
         {...props}
       >
         <T gridTemplateColumns={gridTemplateColumns}>
           <Thead>
-            {headerGroups.map(headerGroup => (
+            {headerGroups.map((headerGroup) => (
               <Tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
+                {headerGroup.headers.map((header) => (
                   <Th
                     key={header.id}
                     stickyColumn={stickyColumn}
                     {...(header.column.getCanSort()
                       ? {
-                        cursor:
+                          cursor:
                             header.column.getIsSorted() === 'asc'
                               ? 's-resize'
                               : header.column.getIsSorted() === 'desc'
-                                ? 'ns-resize'
-                                : 'n-resize',
-                        onClick: header.column.getToggleSortingHandler(),
-                      }
+                              ? 'ns-resize'
+                              : 'n-resize',
+                          onClick: header.column.getToggleSortingHandler(),
+                        }
                       : {})}
                   >
                     <div className="thOuterWrap">
@@ -556,8 +585,10 @@ forwardRef: Ref<any>) {
                         <div>
                           {header.isPlaceholder
                             ? null
-                            : flexRender(header.column.columnDef.header,
-                              header.getContext())}
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
                         </div>
                         <SortIndicator
                           direction={header.column.getIsSorted()}
@@ -580,7 +611,7 @@ forwardRef: Ref<any>) {
                 clickable={!!onRowClick}
               />
             )}
-            {rows.map(maybeRow => {
+            {rows.map((maybeRow) => {
               const row: Row<unknown> = isRow(maybeRow)
                 ? maybeRow
                 : tableRows[maybeRow.index]
@@ -590,7 +621,7 @@ forwardRef: Ref<any>) {
                 <>
                   <Tr
                     key={row.id}
-                    onClick={e => onRowClick?.(e, row)}
+                    onClick={(e) => onRowClick?.(e, row)}
                     lighter={i % 2 === 0}
                     clickable={!!onRowClick}
                     // data-index is required for virtual scrolling to work
@@ -599,7 +630,7 @@ forwardRef: Ref<any>) {
                       ? { ref: rowVirtualizer.measureElement }
                       : {})}
                   >
-                    {row.getVisibleCells().map(cell => (
+                    {row.getVisibleCells().map((cell) => (
                       <Td
                         key={cell.id}
                         firstRow={i === 0}
@@ -608,8 +639,10 @@ forwardRef: Ref<any>) {
                         truncateColumn={cell.column?.columnDef?.meta?.truncate}
                         center={cell.column?.columnDef?.meta?.center}
                       >
-                        {flexRender(cell.column.columnDef.cell,
-                          cell.getContext())}
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
                       </Td>
                     ))}
                   </Tr>
@@ -645,10 +678,12 @@ forwardRef: Ref<any>) {
           width="140px"
           floating
           endIcon={<CaretUpIcon />}
-          onClick={() => tableContainerRef?.current?.scrollTo({
-            top: 0,
-            behavior: 'smooth',
-          })}
+          onClick={() =>
+            tableContainerRef?.current?.scrollTo({
+              top: 0,
+              behavior: 'smooth',
+            })
+          }
         >
           Back to top
         </Button>

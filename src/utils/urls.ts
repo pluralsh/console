@@ -3,7 +3,7 @@ export function removeTrailingSlashes(str: string | null | undefined) {
     return str
   }
 
-  return (str).replace(/\/+$/, '')
+  return str.replace(/\/+$/, '')
 }
 
 export function isRelativeUrl(str: string) {

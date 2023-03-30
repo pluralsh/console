@@ -38,7 +38,7 @@ type UseSelectComboStatePropsReturn<T extends TType> = Pick<
 >
 
 function setDifference<T>(a: Set<T>, b: Set<T>): Set<T> {
-  return new Set([...a].filter(x => !b.has(x)))
+  return new Set([...a].filter((x) => !b.has(x)))
 }
 
 function useSelectComboStateProps<T extends TType>({
@@ -54,8 +54,10 @@ function useSelectComboStateProps<T extends TType>({
   nextFocusedKeyRef,
 }: UseSelectComboStatePropsArgs<T>): UseSelectComboStatePropsReturn<T> {
   const temporarilyPreventClose = useRef(false)
-  const getCurrentKeys = useCallback(() => new Set<Key>(stateRef.current?.selectionManager.selectedKeys ?? []),
-    [stateRef])
+  const getCurrentKeys = useCallback(
+    () => new Set<Key>(stateRef.current?.selectionManager.selectedKeys ?? []),
+    [stateRef]
+  )
 
   return {
     onOpenChange: (open: boolean, ...args: any[]) => {
@@ -73,33 +75,32 @@ function useSelectComboStateProps<T extends TType>({
       let newKey: Key = ''
 
       if (
-        typeof newKeyOrKeys === 'string'
-        || typeof newKeyOrKeys === 'number'
+        typeof newKeyOrKeys === 'string' ||
+        typeof newKeyOrKeys === 'number'
       ) {
         newKey = newKeyOrKeys
-      }
-      else if (!isNil(newKeyOrKeys)) {
+      } else if (!isNil(newKeyOrKeys)) {
         const currentKeys = getCurrentKeys()
         const diff = setDifference(newKeyOrKeys, currentKeys)
 
         newKey = diff.keys().next().value || ''
       }
       switch (newKey) {
-      case HEADER_KEY:
-        temporarilyPreventClose.current = true
-        onHeaderClick?.()
-        break
-      case FOOTER_KEY:
-        temporarilyPreventClose.current = true
-        onFooterClick?.()
-        if (stateRef.current) {
-          nextFocusedKeyRef.current
-              = stateRef?.current?.collection?.getKeyBefore(FOOTER_KEY)
-        }
-        break
-      default:
-        onSelectionChange?.apply(this, [newKeyOrKeys, ...args])
-        break
+        case HEADER_KEY:
+          temporarilyPreventClose.current = true
+          onHeaderClick?.()
+          break
+        case FOOTER_KEY:
+          temporarilyPreventClose.current = true
+          onFooterClick?.()
+          if (stateRef.current) {
+            nextFocusedKeyRef.current =
+              stateRef?.current?.collection?.getKeyBefore(FOOTER_KEY)
+          }
+          break
+        default:
+          onSelectionChange?.apply(this, [newKeyOrKeys, ...args])
+          break
       }
     },
     children: useItemWrappedChildren(children, dropdownHeader, dropdownFooter),
@@ -119,8 +120,8 @@ const setNextFocusedKey = ({
 
   if (nextFocusedKeyRef.current) {
     const nextFocusedKey = nextFocusedKeyRef.current
-    const focusedKey
-      = state.collection.getKeyAfter(nextFocusedKey) || nextFocusedKey
+    const focusedKey =
+      state.collection.getKeyAfter(nextFocusedKey) || nextFocusedKey
 
     state.selectionManager.setFocusedKey(focusedKey)
     nextFocusedKeyRef.current = null

@@ -35,11 +35,10 @@ const bodyBold = {
   fontWeight: 600,
 } as const satisfies CSSObject
 
-const body2LooseLineHeight
-  = {
-    ...body2,
-    lineHeight: '22px',
-  } as const satisfies CSSObject
+const body2LooseLineHeight = {
+  ...body2,
+  lineHeight: '22px',
+} as const satisfies CSSObject
 
 const textPartials = {
   h1: {

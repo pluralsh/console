@@ -119,36 +119,45 @@ function ChecklistUnstyled({
   const finishedContainerRef = useRef<HTMLDivElement>(null)
 
   const [itemContainerHeight, setItemContainerHeight] = useState<number>(-1)
-  const [finishedContainerHeight, setFinishedContainerHeight]
-    = useState<number>(-1)
+  const [finishedContainerHeight, setFinishedContainerHeight] =
+    useState<number>(-1)
 
-  const onSelectionChangeWrapper = useCallback((idx: number) => (idx < children.length && idx > -1 ? onSelectionChange(idx) : undefined),
-    [children, onSelectionChange])
-  const onFocusChangeWrapper = useCallback((idx: number) => (idx < children.length && idx > -1 ? onFocusChange(idx) : undefined),
-    [children, onFocusChange])
+  const onSelectionChangeWrapper = useCallback(
+    (idx: number) =>
+      idx < children.length && idx > -1 ? onSelectionChange(idx) : undefined,
+    [children, onSelectionChange]
+  )
+  const onFocusChangeWrapper = useCallback(
+    (idx: number) =>
+      idx < children.length && idx > -1 ? onFocusChange(idx) : undefined,
+    [children, onFocusChange]
+  )
 
-  const checklistItemInnerWrapper = useMemo(() => children.map((child, index) => (
-    <ChecklistItemInner
-      {...child.props}
-      key={index}
-      index={index}
-      selected={selectedKey === index}
-      focused={focusedKey === index}
-      completed={completedKey >= index}
-      onSelectionChange={onSelectionChangeWrapper}
-      onFocusChange={onFocusChangeWrapper}
-    >
-      {child}
-    </ChecklistItemInner>
-  )),
-  [
-    children,
-    selectedKey,
-    focusedKey,
-    completedKey,
-    onSelectionChangeWrapper,
-    onFocusChangeWrapper,
-  ])
+  const checklistItemInnerWrapper = useMemo(
+    () =>
+      children.map((child, index) => (
+        <ChecklistItemInner
+          {...child.props}
+          key={index}
+          index={index}
+          selected={selectedKey === index}
+          focused={focusedKey === index}
+          completed={completedKey >= index}
+          onSelectionChange={onSelectionChangeWrapper}
+          onFocusChange={onFocusChangeWrapper}
+        >
+          {child}
+        </ChecklistItemInner>
+      )),
+    [
+      children,
+      selectedKey,
+      focusedKey,
+      completedKey,
+      onSelectionChangeWrapper,
+      onFocusChangeWrapper,
+    ]
+  )
 
   useEffect(() => {
     setFinished(completedKey === children.length - 1)
@@ -161,10 +170,14 @@ function ChecklistUnstyled({
   })
 
   useEffect(() => {
-    const maxItemContainerHeight = Math.max(itemContainerHeight,
-      itemsContainerRef.current.getBoundingClientRect().height)
-    const maxFinishedContainerHeight = Math.max(finishedContainerHeight,
-      finishedContainerRef.current.getBoundingClientRect().height)
+    const maxItemContainerHeight = Math.max(
+      itemContainerHeight,
+      itemsContainerRef.current.getBoundingClientRect().height
+    )
+    const maxFinishedContainerHeight = Math.max(
+      finishedContainerHeight,
+      finishedContainerRef.current.getBoundingClientRect().height
+    )
 
     setItemContainerHeight(maxItemContainerHeight)
     setFinishedContainerHeight(maxFinishedContainerHeight)

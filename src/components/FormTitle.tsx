@@ -12,8 +12,10 @@ const propTypes = {
   message: PropTypes.string,
 }
 
-function FormTitleRef({ title, message, ...props }: FormTitleProps,
-  ref: Ref<any>) {
+function FormTitleRef(
+  { title, message, ...props }: FormTitleProps,
+  ref: Ref<any>
+) {
   return (
     <H3
       ref={ref}

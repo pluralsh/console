@@ -13,42 +13,38 @@ const prefixSuffixIconStyle = {
   backgroundColor: 'fill-two',
 }
 
-const Input = forwardRef(({
-  startIcon,
-  endIcon,
-  suffix,
-  prefix,
-  ...props
-}: InputProps, ref) => {
-  let themeExtension: any = {}
+const Input = forwardRef(
+  ({ startIcon, endIcon, suffix, prefix, ...props }: InputProps, ref) => {
+    let themeExtension: any = {}
 
-  if (suffix) {
-    themeExtension = mergeTheme(themeExtension, {
-      Input: {
-        Root: [{ paddingRight: 0 }],
-        EndIcon: [prefixSuffixIconStyle],
-      },
-    })
-  }
-  if (prefix) {
-    themeExtension = mergeTheme(themeExtension, {
-      Input: {
-        Root: [{ paddingLeft: 0 }],
-        StartIcon: [prefixSuffixIconStyle],
-      },
-    })
-  }
+    if (suffix) {
+      themeExtension = mergeTheme(themeExtension, {
+        Input: {
+          Root: [{ paddingRight: 0 }],
+          EndIcon: [prefixSuffixIconStyle],
+        },
+      })
+    }
+    if (prefix) {
+      themeExtension = mergeTheme(themeExtension, {
+        Input: {
+          Root: [{ paddingLeft: 0 }],
+          StartIcon: [prefixSuffixIconStyle],
+        },
+      })
+    }
 
-  return (
-    <ExtendTheme theme={themeExtension}>
-      <HonorableInput
-        ref={ref}
-        endIcon={suffix || endIcon}
-        startIcon={prefix || startIcon}
-        {...props}
-      />
-    </ExtendTheme>
-  )
-})
+    return (
+      <ExtendTheme theme={themeExtension}>
+        <HonorableInput
+          ref={ref}
+          endIcon={suffix || endIcon}
+          startIcon={prefix || startIcon}
+          {...props}
+        />
+      </ExtendTheme>
+    )
+  }
+)
 
 export default Input

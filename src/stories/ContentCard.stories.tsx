@@ -1,9 +1,4 @@
-import {
-  Div,
-  H1,
-  H2,
-  P,
-} from 'honorable'
+import { Div, H1, H2, P } from 'honorable'
 import { ComponentProps } from 'react'
 
 import { ContentCard } from '../index'

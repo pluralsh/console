@@ -13,12 +13,12 @@ import { toFillLevel, useFillLevel } from './contexts/FillLevelContext'
 
 type CodeEditorProps = Omit<CardProps, 'children'> & {
   value?: string
-  onChange?: Dispatch<string>,
+  onChange?: Dispatch<string>
   language?: string
   options?: object
   save?: boolean
   saving?: boolean
-  onSave?: Dispatch<string>,
+  onSave?: Dispatch<string>
   saveLabel?: string
   height?: string | number
 }
@@ -87,7 +87,7 @@ export default function CodeEditor({
       <Editor
         language={language}
         value={value}
-        onChange={v => {
+        onChange={(v) => {
           setCurrent(v)
           if (onChange) onChange(v)
         }}

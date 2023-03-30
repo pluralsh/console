@@ -84,7 +84,7 @@ const ColorBox = styled(FilledBox)<{ color: string }>(({ theme, color }) => ({
 }))
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const ColorBoxWrap = styled.div(_p => ({
+const ColorBoxWrap = styled.div((_p) => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -120,7 +120,9 @@ function Colors() {
   )
 }
 
-const ShadowedBox = styled(FilledBox)<{ shadow: string }>(({ theme, shadow }) => ({ boxShadow: theme.boxShadows[shadow] }))
+const ShadowedBox = styled(FilledBox)<{ shadow: string }>(
+  ({ theme, shadow }) => ({ boxShadow: theme.boxShadows[shadow] })
+)
 
 const ShadowsWrap = styled(FlexWrap)(({ theme }) => ({
   backgroundColor: theme.colors['fill-three'],
@@ -130,7 +132,7 @@ const ShadowsWrap = styled(FlexWrap)(({ theme }) => ({
 function Shadows() {
   return (
     <ShadowsWrap>
-      {['slight', 'moderate', 'modal', 'focused'].map(key => (
+      {['slight', 'moderate', 'modal', 'focused'].map((key) => (
         <BlockWrapper key={key}>
           <ShadowedBox shadow={key} />
           <ItemLabel>{key}</ItemLabel>
@@ -140,16 +142,18 @@ function Shadows() {
   )
 }
 
-const RadiusedBox = styled(FilledBox)<{ radius: 'medium' | 'large' }>(({ theme, radius }) => ({
-  borderRadius: theme.borderRadiuses[radius],
-}))
+const RadiusedBox = styled(FilledBox)<{ radius: 'medium' | 'large' }>(
+  ({ theme, radius }) => ({
+    borderRadius: theme.borderRadiuses[radius],
+  })
+)
 
 function BoxRadiuses() {
   const radii: ('medium' | 'large')[] = ['medium', 'large']
 
   return (
     <FlexWrap>
-      {radii.map(key => (
+      {radii.map((key) => (
         <BlockWrapper key={key}>
           <RadiusedBox radius={key} />
           <ItemLabel>{key}</ItemLabel>
@@ -168,7 +172,7 @@ function BoxBorders() {
 
   return (
     <FlexWrap>
-      {Object.keys(borders).map(key => (
+      {Object.keys(borders).map((key) => (
         <BlockWrapper key={key}>
           <BorderedBox border={key} />
           <ItemLabel>{key}</ItemLabel>
@@ -201,17 +205,17 @@ const ScrollbarBox = styled(FilledBox)<{
       width: '600px',
     },
   },
-
 }))
 
 function Scrollbars() {
-  const fillLevels:FillLevel[] = [0, 1, 2, 3]
-  const exampleText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+  const fillLevels: FillLevel[] = [0, 1, 2, 3]
+  const exampleText =
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
 
   return (
     <>
       <FlexWrap>
-        {fillLevels.map(fillLevel => (
+        {fillLevels.map((fillLevel) => (
           <BlockWrapper key={fillLevel}>
             <ScrollbarBox
               className="vertical"
@@ -224,7 +228,7 @@ function Scrollbars() {
         ))}
       </FlexWrap>
       <FlexWrap>
-        {fillLevels.map(fillLevel => (
+        {fillLevels.map((fillLevel) => (
           <BlockWrapper key={fillLevel}>
             <ScrollbarBox
               className="horizontal"
@@ -237,7 +241,7 @@ function Scrollbars() {
         ))}
       </FlexWrap>
       <FlexWrap>
-        {fillLevels.map(fillLevel => (
+        {fillLevels.map((fillLevel) => (
           <BlockWrapper key={fillLevel}>
             <ScrollbarBox
               className="both"
@@ -277,7 +281,7 @@ function Spacing() {
         'xxxlarge',
         'xxxxlarge',
         'xxxxxlarge',
-      ].map(key => (
+      ].map((key) => (
         <BlockWrapper key={key}>
           <SpacingBox space={key} />
           <ItemLabel>{key}</ItemLabel>
@@ -313,7 +317,9 @@ function Typography({
       <SemanticText typeStyle="body1">Body 1 - {txt}</SemanticText>
       <SemanticText typeStyle="body2Bold">Body 2 (Bold) - {txt}</SemanticText>
       <SemanticText typeStyle="body2">Body 2 - {txt}</SemanticText>
-      <SemanticText typeStyle="body2LooseLineHeight">Body 2 Loose Line Height - {txt}</SemanticText>
+      <SemanticText typeStyle="body2LooseLineHeight">
+        Body 2 Loose Line Height - {txt}
+      </SemanticText>
       <SemanticText typeStyle="caption">Caption - {txt}</SemanticText>
       <SemanticText typeStyle="badgeLabel">Badge Label - {txt}</SemanticText>
       <SemanticText typeStyle="buttonLarge">Large Button - {txt}</SemanticText>

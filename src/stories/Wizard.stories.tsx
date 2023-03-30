@@ -1,16 +1,6 @@
-import {
-  Button,
-  Flex,
-  Modal as HonorableModal,
-  P,
-} from 'honorable'
+import { Button, Flex, Modal as HonorableModal, P } from 'honorable'
 
-import {
-  ReactElement,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { ReactElement, useEffect, useMemo, useState } from 'react'
 
 import { LayerPositionType } from 'grommet'
 
@@ -58,7 +48,8 @@ function Application({ ...props }: any): ReactElement {
         overline
         color="text-xlight"
         paddingBottom="medium"
-      >configure {active.label}
+      >
+        configure {active.label}
       </P>
       <FormField
         label="Domain"
@@ -67,7 +58,7 @@ function Application({ ...props }: any): ReactElement {
         <Input
           placeholder="https://{domain}.onplural.sh"
           value={domain}
-          onChange={event => setDomain(event.target.value)}
+          onChange={(event) => setDomain(event.target.value)}
         />
       </FormField>
     </Step>
@@ -148,9 +139,7 @@ function ModalTemplate() {
 
   return (
     <Flex>
-      <Button onClick={() => setOpen(true)}>
-        Open
-      </Button>
+      <Button onClick={() => setOpen(true)}>Open</Button>
 
       <HonorableModal
         open={open}
@@ -162,17 +151,20 @@ function ModalTemplate() {
       >
         <Wizard
           onClose={() => (inProgress ? setConfirmClose(true) : setOpen(false))}
-          onComplete={completed => setInProgress(completed)}
+          onComplete={(completed) => setInProgress(completed)}
           defaultSteps={DEFAULT_STEPS}
           limit={5}
         >
           {{
             stepper: <Stepper />,
-            navigation: <Navigation onInstall={() => {
-              setOpen(false)
-              setVisible(true)
-            }}
-            />,
+            navigation: (
+              <Navigation
+                onInstall={() => {
+                  setOpen(false)
+                  setVisible(true)
+                }}
+              />
+            ),
           }}
         </Wizard>
       </HonorableModal>
@@ -180,12 +172,13 @@ function ModalTemplate() {
       <Modal
         header="confirm cancellation"
         open={confirmClose}
-        actions={(
+        actions={
           <>
             <Button
               secondary
               onClick={() => setConfirmClose(false)}
-            >Cancel
+            >
+              Cancel
             </Button>
             <Button
               destructive
@@ -194,28 +187,31 @@ function ModalTemplate() {
                 setConfirmClose(false)
                 setOpen(false)
               }}
-            >Continue
+            >
+              Continue
             </Button>
           </>
-        )}
+        }
         style={{
           padding: 0,
         }}
       >
-        <P>Are you sure you want to cancel installation? You will lose all progress.</P>
+        <P>
+          Are you sure you want to cancel installation? You will lose all
+          progress.
+        </P>
       </Modal>
 
-      {visible
-        && (
-          <Toast
-            position={'bottom-right' as LayerPositionType}
-            onClose={() => setVisible(false)}
-            margin="large"
-            severity="success"
-          >
-            Successfully installed selected applications.
-          </Toast>
-        )}
+      {visible && (
+        <Toast
+          position={'bottom-right' as LayerPositionType}
+          onClose={() => setVisible(false)}
+          margin="large"
+          severity="success"
+        >
+          Successfully installed selected applications.
+        </Toast>
+      )}
     </Flex>
   )
 }
@@ -228,29 +224,29 @@ function StandaloneTemplate() {
       width="100%"
       height="750px"
     >
-      <Wizard
-        defaultSteps={DEFAULT_STEPS}
-      >
+      <Wizard defaultSteps={DEFAULT_STEPS}>
         {{
           stepper: <Stepper />,
-          navigation: <Navigation onInstall={() => {
-            setVisible(true)
-          }}
-          />,
+          navigation: (
+            <Navigation
+              onInstall={() => {
+                setVisible(true)
+              }}
+            />
+          ),
         }}
       </Wizard>
 
-      {visible
-        && (
-          <Toast
-            position={'bottom-right' as LayerPositionType}
-            onClose={() => setVisible(false)}
-            margin="large"
-            severity="success"
-          >
-            Successfully installed selected applications.
-          </Toast>
-        )}
+      {visible && (
+        <Toast
+          position={'bottom-right' as LayerPositionType}
+          onClose={() => setVisible(false)}
+          margin="large"
+          severity="success"
+        >
+          Successfully installed selected applications.
+        </Toast>
+      )}
     </Flex>
   )
 }

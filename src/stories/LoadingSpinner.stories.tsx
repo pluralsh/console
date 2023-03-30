@@ -1,6 +1,8 @@
 import { Div } from 'honorable'
 
-import LoadingSpinner, { LoadingSpinnerProps } from '../components/LoadingSpinner'
+import LoadingSpinner, {
+  LoadingSpinnerProps,
+} from '../components/LoadingSpinner'
 
 export default {
   title: 'LoadingSpinner',

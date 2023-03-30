@@ -1,11 +1,6 @@
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
-import {
-  Dispatch,
-  PropsWithChildren,
-  forwardRef,
-  useMemo,
-} from 'react'
+import { Dispatch, PropsWithChildren, forwardRef, useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { ColorKey, Severity } from 'src/types'
 import { Flex } from 'honorable'
@@ -29,7 +24,7 @@ import IconFrame from './IconFrame'
 
 const SEVERITIES = ['info', 'danger', 'warning', 'success'] as const
 
-export type CalloutSeverity = Extract<Severity, typeof SEVERITIES[number]>
+export type CalloutSeverity = Extract<Severity, (typeof SEVERITIES)[number]>
 const DEFAULT_SEVERITY: CalloutSeverity = 'info'
 
 export type CalloutSize = 'compact' | 'full'
@@ -91,122 +86,146 @@ export function CalloutButton(props: ButtonProps) {
   )
 }
 
-const Callout = forwardRef<HTMLDivElement, CalloutProps>(({
-  title,
-  severity = DEFAULT_SEVERITY,
-  size = 'full',
-  expandable = false,
-  expanded = false,
-  onExpand,
-  closeable = false,
-  closed = false,
-  onClose,
-  fillLevel,
-  className,
-  buttonProps,
-  children,
-},
-ref) => {
-  if (expandable && closeable) {
-    throw new Error('Callout component cannot be expandable and closable at the same time')
-  }
-
-  severity = useMemo(() => {
-    if (!severityToIconColorKey[severity]) {
-      console.warn(`Callout: Incorrect severity (${severity}) specified. Valid values are ${SEVERITIES.map(s => `"${s}"`).join(', ')}. Defaulting to "${DEFAULT_SEVERITY}".`)
-
-      return DEFAULT_SEVERITY
+const Callout = forwardRef<HTMLDivElement, CalloutProps>(
+  (
+    {
+      title,
+      severity = DEFAULT_SEVERITY,
+      size = 'full',
+      expandable = false,
+      expanded = false,
+      onExpand,
+      closeable = false,
+      closed = false,
+      onClose,
+      fillLevel,
+      className,
+      buttonProps,
+      children,
+    },
+    ref
+  ) => {
+    if (expandable && closeable) {
+      throw new Error(
+        'Callout component cannot be expandable and closable at the same time'
+      )
     }
 
-    return severity
-  }, [severity])
-  const theme = useTheme()
+    severity = useMemo(() => {
+      if (!severityToIconColorKey[severity]) {
+        console.warn(
+          `Callout: Incorrect severity (${severity}) specified. Valid values are ${SEVERITIES.map(
+            (s) => `"${s}"`
+          ).join(', ')}. Defaulting to "${DEFAULT_SEVERITY}".`
+        )
 
-  const text = severityToText[severity]
-  const iconColor = theme.colors[severityToIconColorKey[severity]]
-  const borderColorKey = severityToBorderColorKey[severity]
-  const Icon = severityToIcon[severity]
-  const parentFillLevel = useFillLevel()
+        return DEFAULT_SEVERITY
+      }
 
-  fillLevel = toFillLevel(Math.max(2,
-    isFillLevel(fillLevel) && fillLevel >= 0
-      ? fillLevel
-      : parentFillLevel + 1))
+      return severity
+    }, [severity])
+    const theme = useTheme()
 
-  let iconTopMargin = size === 'full' ? 0 : 2
+    const text = severityToText[severity]
+    const iconColor = theme.colors[severityToIconColorKey[severity]]
+    const borderColorKey = severityToBorderColorKey[severity]
+    const Icon = severityToIcon[severity]
+    const parentFillLevel = useFillLevel()
 
-  if (title) {
-    iconTopMargin += 2
-  }
+    fillLevel = toFillLevel(
+      Math.max(
+        2,
+        isFillLevel(fillLevel) && fillLevel >= 0
+          ? fillLevel
+          : parentFillLevel + 1
+      )
+    )
 
-  if (closed) {
-    return null
-  }
+    let iconTopMargin = size === 'full' ? 0 : 2
 
-  return (
-    <FillLevelProvider value={fillLevel}>
-      <CalloutWrap
-        className={`${className} ${classNames({ expandable })}`}
-        $borderColorKey={borderColorKey}
-        $fillLevel={fillLevel}
-        $size={size}
-        $expanded={expanded}
-        ref={ref}
-        onClick={expandable && !expanded ? () => onExpand && onExpand(!expanded) : null}
-      >
-        <div className="icon">
-          <Icon
-            marginTop={iconTopMargin}
-            size={sizeToIconSize[size]}
-            color={iconColor}
-            display="flex"
-          />
-        </div>
-        <div className="content">
-          <h6 className={classNames({ visuallyHidden: !title, expandable })}>
-            <span className="visuallyHidden">{`${text}: `}</span>
-            {title}
-          </h6>
-          <AnimateHeight height={(expandable && expanded) || !expandable ? 'auto' : 0}>
-            <div className="children">{children}</div>
-            {buttonProps && (
-              <div className="buttonArea">
-                <CalloutButton {...buttonProps} />
-              </div>
-            )}
-          </AnimateHeight>
-        </div>
-        {(expandable || closeable) && (
-          <Flex
-            grow={1}
-            justify="flex-end"
-          >
-            <IconFrame
-              textValue=""
+    if (title) {
+      iconTopMargin += 2
+    }
+
+    if (closed) {
+      return null
+    }
+
+    return (
+      <FillLevelProvider value={fillLevel}>
+        <CalloutWrap
+          className={`${className} ${classNames({ expandable })}`}
+          $borderColorKey={borderColorKey}
+          $fillLevel={fillLevel}
+          $size={size}
+          $expanded={expanded}
+          ref={ref}
+          onClick={
+            expandable && !expanded
+              ? () => onExpand && onExpand(!expanded)
+              : null
+          }
+        >
+          <div className="icon">
+            <Icon
+              marginTop={iconTopMargin}
+              size={sizeToIconSize[size]}
+              color={iconColor}
               display="flex"
-              size="small"
-              clickable
-              onClick={() => {
-                if (expandable && onExpand) onExpand(!expanded)
-                if (closeable && onClose) onClose(!closed)
-              }}
-              icon={expandable ? <CaretDownIcon className="expandIcon" /> : <CloseIcon />}
             />
-          </Flex>
-        )}
-      </CalloutWrap>
-    </FillLevelProvider>
-  )
-})
+          </div>
+          <div className="content">
+            <h6 className={classNames({ visuallyHidden: !title, expandable })}>
+              <span className="visuallyHidden">{`${text}: `}</span>
+              {title}
+            </h6>
+            <AnimateHeight
+              height={(expandable && expanded) || !expandable ? 'auto' : 0}
+            >
+              <div className="children">{children}</div>
+              {buttonProps && (
+                <div className="buttonArea">
+                  <CalloutButton {...buttonProps} />
+                </div>
+              )}
+            </AnimateHeight>
+          </div>
+          {(expandable || closeable) && (
+            <Flex
+              grow={1}
+              justify="flex-end"
+            >
+              <IconFrame
+                textValue=""
+                display="flex"
+                size="small"
+                clickable
+                onClick={() => {
+                  if (expandable && onExpand) onExpand(!expanded)
+                  if (closeable && onClose) onClose(!closed)
+                }}
+                icon={
+                  expandable ? (
+                    <CaretDownIcon className="expandIcon" />
+                  ) : (
+                    <CloseIcon />
+                  )
+                }
+              />
+            </Flex>
+          )}
+        </CalloutWrap>
+      </FillLevelProvider>
+    )
+  }
+)
 
 const CalloutWrap = styled.div<{
   $borderColorKey: string
   $size: CalloutSize
   $fillLevel: FillLevel
   $expanded: boolean
-}>(({
-  theme, $size, $fillLevel, $borderColorKey, $expanded,
-}) => ({
+}>(({ theme, $size, $fillLevel, $borderColorKey, $expanded }) => ({
   position: 'relative',
   display: 'flex',
   gap: theme.spacing.small,
@@ -226,7 +245,10 @@ const CalloutWrap = styled.div<{
 
     ...(!$expanded && {
       '&:hover': {
-        backgroundColor: $fillLevel >= 3 ? theme.colors['fill-four'] : theme.colors['fill-three'],
+        backgroundColor:
+          $fillLevel >= 3
+            ? theme.colors['fill-four']
+            : theme.colors['fill-three'],
       },
     }),
   },

@@ -1,10 +1,5 @@
 import { ReactNode, Ref, forwardRef } from 'react'
-import {
-  Div,
-  DivProps,
-  Flex,
-  Icon,
-} from 'honorable'
+import { Div, DivProps, Flex, Icon } from 'honorable'
 import { useTheme } from 'styled-components'
 
 import { TabBaseProps } from './TabList'
@@ -17,17 +12,19 @@ type TabProps = DivProps &
 
 export const TAB_INDICATOR_THICKNESS = 2
 
-function TabRef({
-  startIcon,
-  active,
-  activeSecondary,
-  children,
-  vertical,
-  textValue: _textValue,
-  innerProps,
-  ...props
-}: TabProps,
-ref: Ref<any>) {
+function TabRef(
+  {
+    startIcon,
+    active,
+    activeSecondary,
+    children,
+    vertical,
+    textValue: _textValue,
+    innerProps,
+    ...props
+  }: TabProps,
+  ref: Ref<any>
+) {
   const theme = useTheme()
 
   const borderRadiuses = {
@@ -49,7 +46,15 @@ ref: Ref<any>) {
         vertical ? null : `1px solid ${active ? 'border-primary' : 'border'}`
       }
       borderRight={
-        vertical ? `1px solid ${active ? 'border-primary' : activeSecondary ? 'border-fill-two' : 'border'}` : null
+        vertical
+          ? `1px solid ${
+              active
+                ? 'border-primary'
+                : activeSecondary
+                ? 'border-fill-two'
+                : 'border'
+            }`
+          : null
       }
       {...borderRadiuses}
       _focusVisible={{
@@ -67,18 +72,18 @@ ref: Ref<any>) {
           vertical
             ? null
             : `${TAB_INDICATOR_THICKNESS - 1}px solid ${
-              active ? 'border-primary' : 'transparent'
-            }`
+                active ? 'border-primary' : 'transparent'
+              }`
         }
         borderRight={
           vertical
             ? `${TAB_INDICATOR_THICKNESS - 1}px solid ${
-              active
-                ? 'border-primary'
-                : activeSecondary
+                active
+                  ? 'border-primary'
+                  : activeSecondary
                   ? 'border-fill-two'
                   : 'transparent'
-            }`
+              }`
             : null
         }
         {...borderRadiuses}
@@ -88,7 +93,9 @@ ref: Ref<any>) {
         }
         _hover={{
           color: 'text',
-          ...(!(!active && activeSecondary) ? { backgroundColor: 'fill-zero-hover' } : { }),
+          ...(!(!active && activeSecondary)
+            ? { backgroundColor: 'fill-zero-hover' }
+            : {}),
         }}
         transition="background-color 150ms ease, border-color 150ms ease, color 150ms ease"
         {...innerProps}

@@ -14,136 +14,138 @@ import SuccessIcon from './icons/SuccessIcon'
 
 const heightAnimationDuration = 333 // 333ms
 
-const ChecklistItemInner = styled(ChecklistItemInnerUnstyled)(({ theme, completed, selected }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-
-  '.itemHeader': {
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.large}px`,
+const ChecklistItemInner = styled(ChecklistItemInnerUnstyled)(
+  ({ theme, completed, selected }) => ({
     display: 'flex',
-    gap: 12,
-    alignItems: 'center',
-    color: selected
-      ? theme.colors['action-link-active']
-      : theme.colors['action-link-inactive'],
-    cursor: 'pointer',
+    flexDirection: 'column',
 
-    ':hover': {
-      background: theme.colors['fill-two-hover'],
-    },
-
-    ':focus': {
-      outline: `${theme.colors['border-outline-focused']} solid 1px`,
-    },
-
-    '.itemCircle': {
-      position: 'relative',
+    '.itemHeader': {
+      padding: `${theme.spacing.xsmall}px ${theme.spacing.large}px`,
       display: 'flex',
+      gap: 12,
       alignItems: 'center',
-      justifyContent: 'center',
-      width: 32,
-      height: 32,
-      borderRadius: '100%',
-      background: theme.colors['fill-three'],
-      ...theme.partials.text.body2,
+      color: selected
+        ? theme.colors['action-link-active']
+        : theme.colors['action-link-inactive'],
+      cursor: 'pointer',
 
-      ...(!selected && {
-        border: theme.borders['fill-three'],
-      }),
-
-      '> span': {
-        position: 'absolute',
-        opacity: completed ? 1 : 0,
-        animation: completed ? 'overshoot 0.33s' : 'none',
+      ':hover': {
+        background: theme.colors['fill-two-hover'],
       },
 
-      '> div': {
-        opacity: completed ? 0 : 1,
+      ':focus': {
+        outline: `${theme.colors['border-outline-focused']} solid 1px`,
       },
 
-      '&::after, &::before': {
-        content: '""',
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        top: 0,
-        left: 0,
+      '.itemCircle': {
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 32,
+        height: 32,
         borderRadius: '100%',
-      },
+        background: theme.colors['fill-three'],
+        ...theme.partials.text.body2,
 
-      '&:before': {
-        border: '1px solid transparent',
+        ...(!selected && {
+          border: theme.borders['fill-three'],
+        }),
 
-        ...(selected && {
-          borderTopColor: theme.colors['action-link-active'],
-          borderRightColor: theme.colors['action-link-active'],
-          borderBottomColor: theme.colors['action-link-active'],
+        '> span': {
+          position: 'absolute',
+          opacity: completed ? 1 : 0,
+          animation: completed ? 'overshoot 0.33s' : 'none',
+        },
 
-          transition: `
+        '> div': {
+          opacity: completed ? 0 : 1,
+        },
+
+        '&::after, &::before': {
+          content: '""',
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          top: 0,
+          left: 0,
+          borderRadius: '100%',
+        },
+
+        '&:before': {
+          border: '1px solid transparent',
+
+          ...(selected && {
+            borderTopColor: theme.colors['action-link-active'],
+            borderRightColor: theme.colors['action-link-active'],
+            borderBottomColor: theme.colors['action-link-active'],
+
+            transition: `
             border-top-color 0.1s linear,
             border-right-color 0.1s linear 0.1s,
             border-bottom-color 0.1s linear 0.2s`,
-        }),
-      },
+          }),
+        },
 
-      '&:after': {
-        border: '0 solid transparent',
+        '&:after': {
+          border: '0 solid transparent',
 
-        ...(selected && {
-          borderTop: `1px solid ${theme.colors['action-link-active']}`,
-          borderLeftWidth: '1px',
-          borderRightWidth: '1px',
-          transform: 'rotate(270deg)',
-          transition: `
+          ...(selected && {
+            borderTop: `1px solid ${theme.colors['action-link-active']}`,
+            borderLeftWidth: '1px',
+            borderRightWidth: '1px',
+            transform: 'rotate(270deg)',
+            transition: `
             transform 0.3s linear 0s,
             border-left-width 0.1s linear 0.3s`,
-        }),
+          }),
+        },
+      },
+
+      '.itemTitle': {
+        flex: '1 1 auto',
       },
     },
 
-    '.itemTitle': {
-      flex: '1 1 auto',
-    },
-  },
+    '.itemContainer': {
+      padding: `0 ${theme.spacing.large}px`,
+      display: 'flex',
+      gap: 28,
+      color: theme.colors['text-light'],
 
-  '.itemContainer': {
-    padding: `0 ${theme.spacing.large}px`,
-    display: 'flex',
-    gap: 28,
-    color: theme.colors['text-light'],
+      '.itemLine': {
+        width: 1,
+        background: theme.colors['action-link-active'],
+        marginLeft: 16,
+      },
 
-    '.itemLine': {
-      width: 1,
-      background: theme.colors['action-link-active'],
-      marginLeft: 16,
+      '.itemContent': {
+        padding: `${theme.spacing.xsmall}px 0`,
+      },
     },
 
-    '.itemContent': {
-      padding: `${theme.spacing.xsmall}px 0`,
+    '@keyframes overshoot': {
+      '0%': {
+        transform: 'scale(0)',
+      },
+      '20%': {
+        transform: 'scale(0.3)',
+      },
+      '40%': {
+        transform: 'scale(0.6)',
+      },
+      '60%': {
+        transform: 'scale(0.9)',
+      },
+      '80%': {
+        transform: 'scale(1.2)',
+      },
+      '100%': {
+        transform: 'scale(1)',
+      },
     },
-  },
-
-  '@keyframes overshoot': {
-    '0%': {
-      transform: 'scale(0)',
-    },
-    '20%': {
-      transform: 'scale(0.3)',
-    },
-    '40%': {
-      transform: 'scale(0.6)',
-    },
-    '60%': {
-      transform: 'scale(0.9)',
-    },
-    '80%': {
-      transform: 'scale(1.2)',
-    },
-    '100%': {
-      transform: 'scale(1)',
-    },
-  },
-}))
+  })
+)
 
 type ChecklistItemProps = ComponentPropsWithRef<'div'> & {
   children?: ReactElement | ReactElement[] | string
@@ -186,23 +188,23 @@ function ChecklistItemInnerUnstyled({
 }: ChecklistItemInnerProps): JSX.Element {
   const headerRef = useRef<HTMLDivElement>()
   const { keyboardProps } = useKeyboard({
-    onKeyDown: e => {
+    onKeyDown: (e) => {
       switch (e.key) {
-      case KeyboardKey.ARROW_UP:
-        if (focused) {
-          onSelectionChange(index - 1)
-          onFocusChange(index - 1)
-        }
-        break
-      case KeyboardKey.ARROW_DOWN:
-        if (focused) {
-          onSelectionChange(index + 1)
-          onFocusChange(index + 1)
-        }
-        break
-      case KeyboardKey.ENTER:
-      case KeyboardKey.SPACE:
-        onSelectionChange(selected ? null : index)
+        case KeyboardKey.ARROW_UP:
+          if (focused) {
+            onSelectionChange(index - 1)
+            onFocusChange(index - 1)
+          }
+          break
+        case KeyboardKey.ARROW_DOWN:
+          if (focused) {
+            onSelectionChange(index + 1)
+            onFocusChange(index + 1)
+          }
+          break
+        case KeyboardKey.ENTER:
+        case KeyboardKey.SPACE:
+          onSelectionChange(selected ? null : index)
       }
     },
   })

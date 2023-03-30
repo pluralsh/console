@@ -3,7 +3,11 @@ import { AriaListBoxOptions } from '@react-aria/listbox'
 import styled, { useTheme } from 'styled-components'
 import { animated, to, useTransition } from 'react-spring'
 
-import { FloatingPortal, Placement, UseFloatingReturn } from '@floating-ui/react-dom-interactions'
+import {
+  FloatingPortal,
+  Placement,
+  UseFloatingReturn,
+} from '@floating-ui/react-dom-interactions'
 
 import { ListBoxUnmanaged, ListBoxUnmanagedProps } from './ListBox'
 import { Popover, PopoverProps } from './ReactAriaPopover'
@@ -37,14 +41,14 @@ export const PopoverWrapper = styled.div<{
   clipPath: placement.startsWith('top')
     ? `polygon(-100px calc(100% + ${theme.spacing.xxsmall}px), calc(100% + 100px) calc(100% + ${theme.spacing.xxsmall}px), calc(100% + 100px) -100px, -100px -100px)`
     : `polygon(-100px ${-theme.spacing
-      .xxsmall}px, -100px calc(100% + 100px), calc(100% + 100px) calc(100% + 100px), calc(100% + 100px) ${-theme
-      .spacing.xxsmall}px)`,
+        .xxsmall}px, -100px calc(100% + 100px), calc(100% + 100px) calc(100% + 100px), calc(100% + 100px) ${-theme
+        .spacing.xxsmall}px)`,
   '&.enter-done': {
     clipPath: 'none',
   },
 }))
 
-const Animated = styled(animated.div)(_ => ({
+const Animated = styled(animated.div)((_) => ({
   width: '100%',
   maxHeight: '100%',
   display: 'flex',
@@ -75,29 +79,29 @@ function PopoverListBox({
     leave: out,
     config: isOpen
       ? {
-        mass: 0.6,
-        tension: 280,
-        velocity: 0.02,
-      }
+          mass: 0.6,
+          tension: 280,
+          velocity: 0.02,
+        }
       : {
-        mass: 0.6,
-        tension: 400,
-        velocity: 0.02,
-        restVelocity: 0.1,
-      },
+          mass: 0.6,
+          tension: 400,
+          velocity: 0.02,
+          restVelocity: 0.1,
+        },
   })
 
   const portalProps = {}
 
-  return transitions(styles => (
+  return transitions((styles) => (
     <WrapWithIf
       condition
-      wrapper={(
+      wrapper={
         <FloatingPortal
           id={theme.portals.default.id}
           {...portalProps}
         />
-      )}
+      }
     >
       <PopoverWrapper
         $isOpen={isOpen}
@@ -116,8 +120,10 @@ function PopoverListBox({
             // Need to set translateY() here since flip() middleware might
             // change placement (and thus animation direction) right after
             // transition starts
-            transform: to(styles.yOffset,
-              value => `translateY(${direction * value}px)`),
+            transform: to(
+              styles.yOffset,
+              (value) => `translateY(${direction * value}px)`
+            ),
           }}
         >
           <Popover

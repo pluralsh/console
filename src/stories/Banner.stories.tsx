@@ -17,14 +17,14 @@ function Template(args: any) {
       <Banner
         heading="You have an error."
         severity="error"
-        action={(
+        action={
           <A
             href="#"
-            onClick={e => e.preventDefault()}
+            onClick={(e) => e.preventDefault()}
           >
             Fix it
           </A>
-        )}
+        }
         {...args}
       />
       <Banner
@@ -35,14 +35,14 @@ function Template(args: any) {
       <Banner
         heading="Success!"
         severity="success"
-        action={(
+        action={
           <A
             href="#"
-            onClick={e => e.preventDefault()}
+            onClick={(e) => e.preventDefault()}
           >
             Next
           </A>
-        )}
+        }
         {...args}
       />
       <Banner
@@ -56,7 +56,7 @@ function Template(args: any) {
         <A
           inline
           href="#"
-          onClick={e => e.preventDefault()}
+          onClick={(e) => e.preventDefault()}
         >
           incidents
         </A>
@@ -73,7 +73,7 @@ function Template(args: any) {
         <A
           inline
           href="#"
-          onClick={e => e.preventDefault()}
+          onClick={(e) => e.preventDefault()}
         >
           incidents
         </A>
@@ -90,7 +90,7 @@ function Template(args: any) {
         <A
           inline
           href="#"
-          onClick={e => e.preventDefault()}
+          onClick={(e) => e.preventDefault()}
         >
           incidents
         </A>

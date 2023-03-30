@@ -32,5 +32,4 @@ export default createIcon(({ size, color }) => (
       fill={color}
     />
   </svg>
-
 ))

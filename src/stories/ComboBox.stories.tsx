@@ -1,10 +1,5 @@
 import { Flex } from 'honorable'
-import {
-  ComponentProps,
-  Key,
-  useMemo,
-  useState,
-} from 'react'
+import { ComponentProps, Key, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import Fuse from 'fuse.js'
 
@@ -154,9 +149,11 @@ const items: Item[] = [
   },
 ]
 
-const itemsByKey = items.reduce((obj, item) => ({ ...obj, [item.key]: item }),
-  {})
-const itemKeys = items.map(item => item.key)
+const itemsByKey = items.reduce(
+  (obj, item) => ({ ...obj, [item.key]: item }),
+  {}
+)
+const itemKeys = items.map((item) => item.key)
 
 const TagPicker = styled.div(({ theme: _theme }) => ({}))
 
@@ -169,15 +166,18 @@ function Template() {
   const [selectedKeys, setSelectedKeys] = useState(new Set<Key>())
   const [inputValue, setInputValue] = useState('')
 
-  const filteredItems = items.filter(item => !selectedKeys.has(item.key))
+  const filteredItems = items.filter((item) => !selectedKeys.has(item.key))
 
-  const fuse = useMemo(() => new Fuse(filteredItems, {
-    includeScore: true,
-    shouldSort: true,
-    threshold: 0.3,
-    keys: ['label'],
-  }),
-  [filteredItems])
+  const fuse = useMemo(
+    () =>
+      new Fuse(filteredItems, {
+        includeScore: true,
+        shouldSort: true,
+        threshold: 0.3,
+        keys: ['label'],
+      }),
+    [filteredItems]
+  )
 
   const searchResults = useMemo(() => {
     if (inputValue) {
@@ -189,16 +189,16 @@ function Template() {
 
   const onSelectionChange: ComponentProps<
     typeof ComboBox
-  >['onSelectionChange'] = key => {
+  >['onSelectionChange'] = (key) => {
     if (key) {
       setSelectedKeys(new Set([...selectedKeys, key]))
       setInputValue('')
     }
   }
 
-  const onInputChange: ComponentProps<
-    typeof ComboBox
-  >['onInputChange'] = value => {
+  const onInputChange: ComponentProps<typeof ComboBox>['onInputChange'] = (
+    value
+  ) => {
     setInputValue(value)
   }
 
@@ -228,7 +228,7 @@ function Template() {
         </ComboBox>
         <ChipList
           maxVisible={Infinity}
-          chips={[...selectedKeys].map(key => (
+          chips={[...selectedKeys].map((key) => (
             <Chip
               size="small"
               clickable
@@ -265,16 +265,19 @@ function TagsTemplate() {
     }
   }
 
-  const filteredItems = allItems.filter(item => !selectedKeys.has(item.key))
+  const filteredItems = allItems.filter((item) => !selectedKeys.has(item.key))
   const allKeys = new Set([...selectedKeys, ...itemKeys])
 
-  const fuse = useMemo(() => new Fuse(filteredItems, {
-    includeScore: true,
-    shouldSort: true,
-    threshold: 0.3,
-    keys: ['key'],
-  }),
-  [filteredItems])
+  const fuse = useMemo(
+    () =>
+      new Fuse(filteredItems, {
+        includeScore: true,
+        shouldSort: true,
+        threshold: 0.3,
+        keys: ['key'],
+      }),
+    [filteredItems]
+  )
 
   const searchResults = useMemo(() => {
     if (inputValue) {
@@ -286,16 +289,16 @@ function TagsTemplate() {
 
   const onSelectionChange: ComponentProps<
     typeof ComboBox
-  >['onSelectionChange'] = key => {
+  >['onSelectionChange'] = (key) => {
     if (key) {
       setSelectedKeys(new Set([...selectedKeys, key]))
       setInputValue('')
     }
   }
 
-  const onInputChange: ComponentProps<
-    typeof ComboBox
-  >['onInputChange'] = value => {
+  const onInputChange: ComponentProps<typeof ComboBox>['onInputChange'] = (
+    value
+  ) => {
     setInputValue(value)
   }
 
@@ -318,13 +321,12 @@ function TagsTemplate() {
         <ComboBox
           isOpen={isOpen}
           inputValue={inputValue}
-          onSelectionChange={selectedKey => {
+          onSelectionChange={(selectedKey) => {
             if (selectedKey === '$$footer$$') {
               setSelectedKeys(new Set([...selectedKeys, newKey]))
               setInputValue('')
               setIsOpen(false)
-            }
-            else {
+            } else {
               onSelectionChange(selectedKey)
             }
           }}
@@ -352,7 +354,7 @@ function TagsTemplate() {
         </ComboBox>
         <ChipList
           maxVisible={Infinity}
-          chips={[...selectedKeys].map(key => (
+          chips={[...selectedKeys].map((key) => (
             <Chip
               size="small"
               clickable
