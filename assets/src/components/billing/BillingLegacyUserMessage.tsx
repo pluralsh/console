@@ -17,12 +17,12 @@ const MessageLink = styled.a(({ theme }) => ({
 }))
 
 export default function BillingLegacyUserMessage() {
-  const { isPaidPlan, isGrandfathered, isGrandfathetingExpired, account } =
+  const { isPaidPlan, isGrandfathered, isGrandfatheringExpired, account } =
     useContext(SubscriptionContext)
 
-  if (isPaidPlan || !(isGrandfathered || isGrandfathetingExpired)) return null
+  if (isPaidPlan || !(isGrandfathered || isGrandfatheringExpired)) return null
 
-  const message = isGrandfathetingExpired
+  const message = isGrandfatheringExpired
     ? 'Legacy user access expired. '
     : `Legacy user access until ${moment(account?.grandfatheredUntil).format(
         'MMM DD, YYYY'
@@ -30,7 +30,7 @@ export default function BillingLegacyUserMessage() {
 
   return (
     <Wrap>
-      {isGrandfathetingExpired && (
+      {isGrandfatheringExpired && (
         <IconFrame
           icon={<ErrorIcon color="icon-error" />}
           textValue={message}

@@ -1,6 +1,9 @@
 import { useContext } from 'react'
 import { Callout } from '@pluralsh/design-system'
 import styled from 'styled-components'
+import { upperFirst } from 'lodash'
+
+import usePersistedState from 'components/hooks/usePersistedState'
 
 import SubscriptionContext from '../contexts/SubscriptionContext'
 
@@ -17,31 +20,38 @@ const Link = styled.a({ textDecoration: 'none' })
 export default function BillingLegacyUserBanner({
   feature,
 }: BillingLegacyUserBannerPropsType) {
-  const { isPaidPlan, isGrandfathered, isGrandfathetingExpired } =
+  const { isPaidPlan, isGrandfathered, isGrandfatheringExpired } =
     useContext(SubscriptionContext)
+  const featureId = feature
+    ? `${feature.replace(/\s+/g, '-').toLowerCase()}-`
+    : ''
+  const localStorageId = `${
+    isGrandfatheringExpired ? 'expired-' : ''
+  }legacy-banner-${featureId}closed`
+  const [closed, setClosed] = usePersistedState(localStorageId, false)
 
-  if (isPaidPlan || !(isGrandfathered || isGrandfathetingExpired)) return null
+  if (isPaidPlan || !(isGrandfathered || isGrandfatheringExpired)) return null
 
   return (
     <Wrapper>
       <Callout
-        severity={isGrandfathetingExpired ? 'danger' : 'warning'}
+        severity={isGrandfatheringExpired ? 'danger' : 'warning'}
         title={
-          isGrandfathetingExpired
+          isGrandfatheringExpired
             ? 'Legacy user access expired.'
             : 'Legacy user access ends soon.'
         }
+        closeable
+        closed={closed}
+        onClose={setClosed}
       >
-        {isGrandfathetingExpired ? (
+        {isGrandfatheringExpired ? (
           <>
             You may still use existing {feature} but creating new and editing
             existing {feature} requires a Plural Professional Plan.
           </>
         ) : (
-          <>
-            {feature.charAt(0).toUpperCase() + feature.slice(1)} are a
-            Professional plan feature.
-          </>
+          <> {upperFirst(feature)} are a Professional plan feature. </>
         )}{' '}
         <Link
           href="https://app.plural.sh/account/billing"

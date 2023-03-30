@@ -38,7 +38,7 @@ export default function BillingSubscriptionProvider({
 
     // Marking grandfathering as expired only for a month after expiry date.
     // Afterwards expiry banners will not be visible and UI will be the same as for open-source users.
-    const isGrandfathetingExpired =
+    const isGrandfatheringExpired =
       isLegacyUser &&
       moment().isBetween(
         moment(grandfatheredUntil),
@@ -54,7 +54,7 @@ export default function BillingSubscriptionProvider({
       isPaidPlan,
       isLegacyUser,
       isGrandfathered,
-      isGrandfathetingExpired,
+      isGrandfatheringExpired,
       refetch,
     }
   }, [data, refetch])
