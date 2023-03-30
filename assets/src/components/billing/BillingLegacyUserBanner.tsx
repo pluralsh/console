@@ -11,7 +11,9 @@ type BillingLegacyUserBannerPropsType = {
   feature: string
 }
 
-const Wrapper = styled.div(({ theme }) => ({ marginBottom: theme.spacing.medium }))
+const Wrapper = styled.div(({ theme }) => ({
+  marginBottom: theme.spacing.medium,
+}))
 
 const Link = styled.a({ textDecoration: 'none' })
 

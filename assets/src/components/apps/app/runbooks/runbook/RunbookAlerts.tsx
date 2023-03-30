@@ -40,11 +40,13 @@ const ExpandedItemHeading = styled.h6(({ theme }) => ({
   paddingRight: theme.spacing.xsmall,
 }))
 
-const ExpandedItemDivider = styled.div.attrs(() => ({ 'aria-hidden': true }))(({ theme }) => ({
-  gridColumn: '1 / -1',
-  borderBottom: theme.borders['fill-two'],
-  ...{ ':last-child': { display: 'none' } },
-}))
+const ExpandedItemDivider = styled.div.attrs(() => ({ 'aria-hidden': true }))(
+  ({ theme }) => ({
+    gridColumn: '1 / -1',
+    borderBottom: theme.borders['fill-two'],
+    ...{ ':last-child': { display: 'none' } },
+  })
+)
 
 function ExpandedItem({
   heading,
@@ -69,57 +71,59 @@ const ChipList = styled.div(({ theme }) => ({
   gap: theme.spacing.xsmall,
 }))
 
-const RunbookAlertWrapper = styled.div<{ $isOpen: boolean }>(({ theme, $isOpen }) => ({
-  ...{
-    ':not(:last-child)': {
-      borderBottom: $isOpen
-        ? theme.borders['fill-two']
-        : theme.borders.default,
-      transition: 'border-bottom 0.2s ease-in-out',
+const RunbookAlertWrapper = styled.div<{ $isOpen: boolean }>(
+  ({ theme, $isOpen }) => ({
+    ...{
+      ':not(:last-child)': {
+        borderBottom: $isOpen
+          ? theme.borders['fill-two']
+          : theme.borders.default,
+        transition: 'border-bottom 0.2s ease-in-out',
+      },
     },
-  },
-  '.trigger': {
-    display: 'flex',
-    align: 'center',
-    color: 'inherit',
-    cursor: 'pointer',
-    padding: theme.spacing.medium,
-    textDecoration: 'none',
-    width: '100%',
-    ':hover': { backgroundColor: theme.colors['fill-one-hover'] },
-    '.info': {
-      flexGrow: 1,
-      marginLeft: theme.spacing.small,
-    },
-    '.nameDate': {
+    '.trigger': {
       display: 'flex',
-      alignItems: 'baseline',
-      gap: theme.spacing.xsmall,
+      align: 'center',
+      color: 'inherit',
+      cursor: 'pointer',
+      padding: theme.spacing.medium,
+      textDecoration: 'none',
+      width: '100%',
+      ':hover': { backgroundColor: theme.colors['fill-one-hover'] },
+      '.info': {
+        flexGrow: 1,
+        marginLeft: theme.spacing.small,
+      },
+      '.nameDate': {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: theme.spacing.xsmall,
+      },
+      '.name': {
+        ...theme.partials.text.body1Bold,
+        margin: 0,
+      },
+      '.date': {
+        ...theme.partials.text.caption,
+        color: theme.colors['text-xlight'],
+        whiteSpace: 'nowrap',
+      },
+      '.summary': {
+        ...theme.partials.text.body2,
+        color: theme.colors['text-xlight'],
+      },
+      '.severity': {
+        marginLeft: theme.spacing.xlarge,
+        marginRight: theme.spacing.xlarge,
+      },
     },
-    '.name': {
-      ...theme.partials.text.body1Bold,
-      margin: 0,
+    '.collapsible': {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      backgroundColor: theme.colors['fill-two'],
     },
-    '.date': {
-      ...theme.partials.text.caption,
-      color: theme.colors['text-xlight'],
-      whiteSpace: 'nowrap',
-    },
-    '.summary': {
-      ...theme.partials.text.body2,
-      color: theme.colors['text-xlight'],
-    },
-    '.severity': {
-      marginLeft: theme.spacing.xlarge,
-      marginRight: theme.spacing.xlarge,
-    },
-  },
-  '.collapsible': {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    backgroundColor: theme.colors['fill-two'],
-  },
-}))
+  })
+)
 
 function AlertSeverity({
   severity,
@@ -138,16 +142,14 @@ function AlertSeverity({
 export default function RunbookAlert({ alert }: { alert: RunbookAlertStatus }) {
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
-  const {
-    name, startsAt, fingerprint, labels,
-  } = alert
+  const { name, startsAt, fingerprint, labels } = alert
   const annotations = alert.annotations as Annotations
-  const severity
-    = (labels
-      && 'severity' in labels
-      && typeof labels.severity === 'string'
-      && labels.severity)
-    || null
+  const severity =
+    (labels &&
+      'severity' in labels &&
+      typeof labels.severity === 'string' &&
+      labels.severity) ||
+    null
 
   return (
     <RunbookAlertWrapper $isOpen={isOpen}>
@@ -156,12 +158,12 @@ export default function RunbookAlert({ alert }: { alert: RunbookAlertStatus }) {
         onClick={() => setIsOpen(!isOpen)}
       >
         <AppIcon
-          icon={(
+          icon={
             <WarningIcon
               size={16}
               color="icon-warning"
             />
-          )}
+          }
           hue="lighter"
           size="xxsmall"
         />
@@ -186,15 +188,15 @@ export default function RunbookAlert({ alert }: { alert: RunbookAlertStatus }) {
           style={
             isOpen
               ? {
-                transform: 'rotate(270deg)',
-                transitionDuration: '.2s',
-                transitionProperty: 'transform',
-              }
+                  transform: 'rotate(270deg)',
+                  transitionDuration: '.2s',
+                  transitionProperty: 'transform',
+                }
               : {
-                transform: 'rotate(180deg)',
-                transitionDuration: '.2s',
-                transitionProperty: 'transform',
-              }
+                  transform: 'rotate(180deg)',
+                  transitionDuration: '.2s',
+                  transitionProperty: 'transform',
+                }
           }
         />
       </div>
@@ -245,7 +247,7 @@ export function RunbookAlerts({
       direction="column"
       {...props}
     >
-      {alerts.map(alert => (
+      {alerts.map((alert) => (
         <RunbookAlert alert={alert} />
       ))}
     </Card>

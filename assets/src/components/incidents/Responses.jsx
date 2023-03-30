@@ -1,7 +1,11 @@
 import { useContext, useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { Box, Text, TextInput } from 'grommet'
-import { Incidents as IncidentsI, Scroller, Explore as Search } from 'forge-core'
+import {
+  Incidents as IncidentsI,
+  Scroller,
+  Explore as Search,
+} from 'forge-core'
 
 import { extendConnection } from '../../utils/graphql'
 
@@ -17,7 +21,9 @@ import {
 import { IncidentSort, Order } from './types'
 
 function Repositories({ repository, setRepository }) {
-  const { data, fetchMore } = useQuery(REPOS_Q, { fetchPolicy: 'cache-and-network' })
+  const { data, fetchMore } = useQuery(REPOS_Q, {
+    fetchPolicy: 'cache-and-network',
+  })
 
   useEffect(() => {
     if (!repository && data && data.repositories) {
@@ -44,10 +50,14 @@ function Repositories({ repository, setRepository }) {
           setRepository={setRepository}
         />
       )}
-      onLoadMore={() => pageInfo.hasNextPage && fetchMore({
-        variables: { cursor: pageInfo.endCursor },
-        updateQuery: (prev, { fetchMoreResult: { repositories } }) => extendConnection(prev, repositories, 'repositories'),
-      })}
+      onLoadMore={() =>
+        pageInfo.hasNextPage &&
+        fetchMore({
+          variables: { cursor: pageInfo.endCursor },
+          updateQuery: (prev, { fetchMoreResult: { repositories } }) =>
+            extendConnection(prev, repositories, 'repositories'),
+        })
+      }
     />
   )
 }
@@ -74,7 +84,8 @@ function EmptyState() {
         <Text
           size="small"
           weight={500}
-        >No incidents yet...
+        >
+          No incidents yet...
         </Text>
       </Box>
     </Box>
@@ -82,12 +93,14 @@ function EmptyState() {
 }
 
 function Incidents({ repository: { id } }) {
-  const {
-    q, setQ, sort, order, filters,
-  } = useContext(IncidentViewContext)
+  const { q, setQ, sort, order, filters } = useContext(IncidentViewContext)
   const { data, fetchMore } = useQuery(INCIDENTS_Q, {
     variables: {
-      repositoryId: id, q, sort, order, filters,
+      repositoryId: id,
+      q,
+      sort,
+      order,
+      filters,
     },
     fetchPolicy: 'cache-and-network',
   })
@@ -131,10 +144,14 @@ function Incidents({ repository: { id } }) {
               next={next.node}
             />
           )}
-          onLoadMore={() => pageInfo.hasNextPage && fetchMore({
-            variables: { cursor: pageInfo.endCursor },
-            updateQuery: (prev, { fetchMoreResult: { incidents } }) => extendConnection(prev, incidents, 'incidents'),
-          })}
+          onLoadMore={() =>
+            pageInfo.hasNextPage &&
+            fetchMore({
+              variables: { cursor: pageInfo.endCursor },
+              updateQuery: (prev, { fetchMoreResult: { incidents } }) =>
+                extendConnection(prev, incidents, 'incidents'),
+            })
+          }
         />
       </Box>
     </Box>
@@ -150,9 +167,17 @@ export function Responses() {
 
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <IncidentViewContext.Provider value={{
-      q, setQ, sort, setSort, order, setOrder, filters, setFilters,
-    }}
+    <IncidentViewContext.Provider
+      value={{
+        q,
+        setQ,
+        sort,
+        setSort,
+        order,
+        setOrder,
+        filters,
+        setFilters,
+      }}
     >
       <Box
         direction="row"

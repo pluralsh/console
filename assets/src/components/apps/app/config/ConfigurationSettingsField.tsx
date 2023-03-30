@@ -1,11 +1,6 @@
 import { createElement, useCallback, useEffect } from 'react'
 
-import {
-  FormField,
-  Input,
-  ListBoxItem,
-  Select,
-} from '@pluralsh/design-system'
+import { FormField, Input, ListBoxItem, Select } from '@pluralsh/design-system'
 
 import { Flex } from 'honorable'
 
@@ -22,13 +17,19 @@ function ConfigurationSettingsInput({ value = '', setValue }) {
   )
 }
 
-function ConfigurationSettingsSelect({ overlay: { spec: { inputValues } }, value, setValue }) {
+function ConfigurationSettingsSelect({
+  overlay: {
+    spec: { inputValues },
+  },
+  value,
+  setValue,
+}) {
   return (
     <Select
       selectedKey={value}
       onSelectionChange={setValue}
     >
-      {inputValues?.map(v => (
+      {inputValues?.map((v) => (
         <ListBoxItem
           key={v}
           label={v}
@@ -44,13 +45,23 @@ const INPUT_COMPONENTS = {
 }
 
 export default function ConfigurationSettingsField({
-  overlay, ctx, setCtx, init, setInit, values, ...props
+  overlay,
+  ctx,
+  setCtx,
+  init,
+  setInit,
+  values,
+  ...props
 }) {
-  const {
-    name, documentation, updates, inputType,
-  } = overlay.spec
-  const setValue = useCallback(val => setCtx({ ...ctx, [name]: convertType(val, inputType) }), [name, inputType, ctx, setCtx])
-  const setInitValue = useCallback(val => setInit({ ...init, [name]: convertType(val, inputType) }), [name, inputType, init, setInit])
+  const { name, documentation, updates, inputType } = overlay.spec
+  const setValue = useCallback(
+    (val) => setCtx({ ...ctx, [name]: convertType(val, inputType) }),
+    [name, inputType, ctx, setCtx]
+  )
+  const setInitValue = useCallback(
+    (val) => setInit({ ...init, [name]: convertType(val, inputType) }),
+    [name, inputType, init, setInit]
+  )
 
   useEffect(() => {
     const val = deepFetch(values, updates[0].path)

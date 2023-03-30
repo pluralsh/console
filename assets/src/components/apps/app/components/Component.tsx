@@ -5,16 +5,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { ComponentIcon, ComponentStatus } from './misc'
 
-export default function Component({
-  component,
-}: {
-  component: any
-}) {
+export default function Component({ component }: { component: any }) {
   const navigate = useNavigate()
   const { appName } = useParams()
-  const {
-    name, group, kind, status,
-  } = component
+  const { name, group, kind, status } = component
 
   const kindString = `${group || 'v1'}/${kind.toLowerCase()}`
 
@@ -28,7 +22,9 @@ export default function Component({
       grow={1}
       cursor="pointer"
       _hover={{ backgroundColor: 'fill-one-hover' }}
-      onClick={() => navigate(`/apps/${appName}/components/${kind.toLowerCase()}/${name}`)}
+      onClick={() =>
+        navigate(`/apps/${appName}/components/${kind.toLowerCase()}/${name}`)
+      }
       overflow="hidden"
     >
       <IconFrame

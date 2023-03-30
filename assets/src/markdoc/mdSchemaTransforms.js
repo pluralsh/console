@@ -8,7 +8,7 @@ function displayName(name) {
   // Pascal case
   return name
     .match(/[a-z]+/gi)
-    .map(word => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase())
+    .map((word) => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase())
     .join('')
 }
 
@@ -39,9 +39,13 @@ function transformRecord(config) {
 }
 
 export const getSchema = function getSchema(schema) {
-  const { output: tags, components: tagComponents } = transformRecord(schema.tags)
+  const { output: tags, components: tagComponents } = transformRecord(
+    schema.tags
+  )
 
-  const { output: nodes, components: nodeComponents } = transformRecord(schema.nodes)
+  const { output: nodes, components: nodeComponents } = transformRecord(
+    schema.nodes
+  )
 
   return {
     ...schema,

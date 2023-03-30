@@ -27,22 +27,22 @@ function hasPods(kind: string): boolean {
 
 function getInfo(kind: string): JSX.Element | undefined {
   switch (kind) {
-  case 'certificate':
-    return <Certificate />
-  case 'cronjob':
-    return <CronJob />
-  case 'deployment':
-    return <Deployment />
-  case 'ingress':
-    return <Ingress />
-  case 'job':
-    return <Job />
-  case 'service':
-    return <Service />
-  case 'statefulset':
-    return <StatefulSet />
-  default:
-    return undefined
+    case 'certificate':
+      return <Certificate />
+    case 'cronjob':
+      return <CronJob />
+    case 'deployment':
+      return <Deployment />
+    case 'ingress':
+      return <Ingress />
+    case 'job':
+      return <Job />
+    case 'service':
+      return <Service />
+    case 'statefulset':
+      return <StatefulSet />
+    default:
+      return undefined
   }
 }
 
@@ -52,8 +52,11 @@ export default function ComponentInfo() {
 
   // To avoid mapping between component types and fields of data returned by API
   // we are picking first available value from API object for now.
-  const value: any = useMemo(() => (data ? Object.values(data).find(value => value !== undefined) : null),
-    [data])
+  const value: any = useMemo(
+    () =>
+      data ? Object.values(data).find((value) => value !== undefined) : null,
+    [data]
+  )
 
   return (
     <Flex

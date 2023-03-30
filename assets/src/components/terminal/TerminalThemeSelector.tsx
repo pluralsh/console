@@ -21,7 +21,7 @@ function TerminalThemeSelector() {
   const [, setTerminalTheme] = useContext(TerminalThemeContext)
   const [search, setSearch] = useState('')
   const [, setOpen] = useState(false)
-  const results = fuse.search(search).map(x => x.item)
+  const results = fuse.search(search).map((x) => x.item)
   const displayedThemes = results.length ? results : themeNames
 
   return (
@@ -29,14 +29,14 @@ function TerminalThemeSelector() {
       aria-label="theme-selector"
       placement="right"
       width="460px"
-      onSelectionChange={t => setTerminalTheme(t)}
-      onOpenChange={o => setOpen(o)}
-      triggerButton={(
+      onSelectionChange={(t) => setTerminalTheme(t)}
+      onOpenChange={(o) => setOpen(o)}
+      triggerButton={
         <HeaderIconButton tooltipProps={{ label: 'Change theme' }}>
           <SprayIcon />
         </HeaderIconButton>
-      )}
-      dropdownFooterFixed={(
+      }
+      dropdownFooterFixed={
         <Flex
           width="458px"
           height="30px"
@@ -51,22 +51,22 @@ function TerminalThemeSelector() {
             startIcon={<MagnifyingGlassIcon />}
             placeholder="Filter themes"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </Flex>
-      )}
+      }
     >
-      {displayedThemes.map(t => (
+      {displayedThemes.map((t) => (
         <ListBoxItem
           key={t}
           label={t}
           textValue={t}
-          leftContent={(
+          leftContent={
             <TerminalThemePreview
               theme={normalizedThemes[t]}
               marginRight="small"
             />
-          )}
+          }
         />
       ))}
     </Select>

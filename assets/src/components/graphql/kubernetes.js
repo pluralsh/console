@@ -4,8 +4,14 @@ export const MetadataFragment = gql`
   fragment MetadataFragment on Metadata {
     name
     namespace
-    labels { name value }
-    annotations { name value }
+    labels {
+      name
+      value
+    }
+    annotations {
+      name
+      value
+    }
   }
 `
 
@@ -34,17 +40,32 @@ export const ContainerStatus = gql`
     ready
     name
     state {
-      running { startedAt }
-      terminated { exitCode message reason }
-      waiting { message reason }
+      running {
+        startedAt
+      }
+      terminated {
+        exitCode
+        message
+        reason
+      }
+      waiting {
+        message
+        reason
+      }
     }
   }
 `
 
 export const ResourcesFragment = gql`
   fragment ResourcesFragment on Resources {
-    limits { cpu memory }
-    requests { cpu memory }
+    limits {
+      cpu
+      memory
+    }
+    requests {
+      cpu
+      memory
+    }
   }
 `
 
@@ -52,51 +73,32 @@ export const Container = gql`
   fragment Container on Container {
     name
     image
-    ports { containerPort protocol }
-    resources { ...ResourcesFragment }
+    ports {
+      containerPort
+      protocol
+    }
+    resources {
+      ...ResourcesFragment
+    }
   }
   ${ResourcesFragment}
 `
 
 export const PodMiniFragment = gql`
-fragment PodMiniFragment on Pod {
-  metadata { ...MetadataFragment }
-  status {
-    phase
-    podIp
-    reason
-    containerStatuses { ...ContainerStatus }
-    initContainerStatuses { ...ContainerStatus }
-    conditions {
-      lastProbeTime
-      lastTransitionTime
-      message
-      reason
-      status
-      type
+  fragment PodMiniFragment on Pod {
+    metadata {
+      ...MetadataFragment
     }
-  }
-  spec {
-    nodeName
-    serviceAccountName
-    containers { ...Container }
-    initContainers { ...Container }
-  }
-}
-${Container}
-${ContainerStatus}
-${MetadataFragment}
-`
-
-export const PodFragment = gql`
-  fragment PodFragment on Pod {
-    metadata { ...MetadataFragment }
     status {
       phase
       podIp
       reason
-      containerStatuses { ...ContainerStatus }
-      initContainerStatuses { ...ContainerStatus }
+      containerStatuses {
+        ...ContainerStatus
+      }
+      initContainerStatuses {
+        ...ContainerStatus
+      }
       conditions {
         lastProbeTime
         lastTransitionTime
@@ -109,8 +111,52 @@ export const PodFragment = gql`
     spec {
       nodeName
       serviceAccountName
-      containers { ...Container }
-      initContainers { ...Container }
+      containers {
+        ...Container
+      }
+      initContainers {
+        ...Container
+      }
+    }
+  }
+  ${Container}
+  ${ContainerStatus}
+  ${MetadataFragment}
+`
+
+export const PodFragment = gql`
+  fragment PodFragment on Pod {
+    metadata {
+      ...MetadataFragment
+    }
+    status {
+      phase
+      podIp
+      reason
+      containerStatuses {
+        ...ContainerStatus
+      }
+      initContainerStatuses {
+        ...ContainerStatus
+      }
+      conditions {
+        lastProbeTime
+        lastTransitionTime
+        message
+        reason
+        status
+        type
+      }
+    }
+    spec {
+      nodeName
+      serviceAccountName
+      containers {
+        ...Container
+      }
+      initContainers {
+        ...Container
+      }
     }
     raw
   }
@@ -121,7 +167,9 @@ export const PodFragment = gql`
 
 export const DeploymentFragment = gql`
   fragment DeploymentFragment on Deployment {
-    metadata { ...MetadataFragment }
+    metadata {
+      ...MetadataFragment
+    }
     status {
       availableReplicas
       replicas
@@ -140,7 +188,9 @@ export const DeploymentFragment = gql`
 
 export const StatefulSetFragment = gql`
   fragment StatefulSetFragment on StatefulSet {
-    metadata { ...MetadataFragment }
+    metadata {
+      ...MetadataFragment
+    }
     status {
       replicas
       currentReplicas
@@ -158,10 +208,14 @@ export const StatefulSetFragment = gql`
 
 export const ServiceFragment = gql`
   fragment ServiceFragment on Service {
-    metadata { ...MetadataFragment }
+    metadata {
+      ...MetadataFragment
+    }
     status {
       loadBalancer {
-        ingress { ip }
+        ingress {
+          ip
+        }
       }
     }
     spec {
@@ -181,20 +235,30 @@ export const ServiceFragment = gql`
 
 export const IngressFragment = gql`
   fragment IngressFragment on Ingress {
-    metadata { ...MetadataFragment }
+    metadata {
+      ...MetadataFragment
+    }
     status {
       loadBalancer {
-        ingress { ip hostname }
+        ingress {
+          ip
+          hostname
+        }
       }
     }
     spec {
-      tls { hosts }
+      tls {
+        hosts
+      }
       rules {
         host
         http {
           paths {
             path
-            backend { serviceName servicePort }
+            backend {
+              serviceName
+              servicePort
+            }
           }
         }
       }
@@ -206,22 +270,36 @@ export const IngressFragment = gql`
 
 export const NodeFragment = gql`
   fragment NodeFragment on Node {
-    metadata { ...MetadataFragment }
+    metadata {
+      ...MetadataFragment
+    }
     status {
       phase
       allocatable
       capacity
-      conditions { type status message }
+      conditions {
+        type
+        status
+        message
+      }
     }
-    spec { podCidr providerId }
+    spec {
+      podCidr
+      providerId
+    }
   }
   ${MetadataFragment}
 `
 
 export const NodeMetricFragment = gql`
   fragment NodeMetricFragment on NodeMetric {
-    metadata { ...MetadataFragment }
-    usage { cpu memory }
+    metadata {
+      ...MetadataFragment
+    }
+    usage {
+      cpu
+      memory
+    }
     timestamp
     window
   }
@@ -229,9 +307,17 @@ export const NodeMetricFragment = gql`
 
 export const CronJobFragment = gql`
   fragment CronJobFragment on CronJob {
-    metadata { ...MetadataFragment }
-    status { lastScheduleTime }
-    spec { schedule suspend concurrencyPolicy }
+    metadata {
+      ...MetadataFragment
+    }
+    status {
+      lastScheduleTime
+    }
+    spec {
+      schedule
+      suspend
+      concurrencyPolicy
+    }
     raw
   }
   ${MetadataFragment}
@@ -249,10 +335,20 @@ export const JobStatus = gql`
 
 export const JobFragment = gql`
   fragment JobFragment on Job {
-    metadata { ...MetadataFragment }
-    status { ...JobStatus }
-    spec { backoffLimit parallelism activeDeadlineSeconds }
-    pods { ...PodFragment }
+    metadata {
+      ...MetadataFragment
+    }
+    status {
+      ...JobStatus
+    }
+    spec {
+      backoffLimit
+      parallelism
+      activeDeadlineSeconds
+    }
+    pods {
+      ...PodFragment
+    }
     raw
   }
   ${MetadataFragment}
@@ -262,12 +358,17 @@ export const JobFragment = gql`
 
 export const LogFilterFragment = gql`
   fragment LogFilterFragment on LogFilter {
-    metadata {  ...MetadataFragment }
+    metadata {
+      ...MetadataFragment
+    }
     spec {
       name
       description
       query
-      labels { name value }
+      labels {
+        name
+        value
+      }
     }
   }
   ${MetadataFragment}
@@ -275,12 +376,22 @@ export const LogFilterFragment = gql`
 
 export const CertificateFragment = gql`
   fragment CertificateFragment on Certificate {
-    metadata { ...MetadataFragment }
-    status { renewalTime notBefore notAfter }
-    spec { 
-      dnsNames 
-      secretName 
-      issuerRef { group kind name }
+    metadata {
+      ...MetadataFragment
+    }
+    status {
+      renewalTime
+      notBefore
+      notAfter
+    }
+    spec {
+      dnsNames
+      secretName
+      issuerRef {
+        group
+        kind
+        name
+      }
     }
     raw
   }
@@ -289,7 +400,9 @@ export const CertificateFragment = gql`
 
 export const ConfigurationOverlayFragment = gql`
   fragment ConfigurationOverlayFragment on ConfigurationOverlay {
-    metadata { ...MetadataFragment }
+    metadata {
+      ...MetadataFragment
+    }
     spec {
       name
       folder
@@ -297,7 +410,9 @@ export const ConfigurationOverlayFragment = gql`
       documentation
       inputType
       inputValues
-      updates { path }
+      updates {
+        path
+      }
     }
   }
   ${MetadataFragment}
@@ -312,14 +427,22 @@ export const ContainerResourcesFragment = gql`
 
 export const VerticalPodAutoscalerFragment = gql`
   fragment VerticalPodAutoscalerFragment on VerticalPodAutoscaler {
-    metadata { ...MetadataFragment }
+    metadata {
+      ...MetadataFragment
+    }
     status {
       recommendation {
         containerRecommendations {
           containerName
-          lowerBound { ...ContainerResourcesFragment }
-          upperBound { ...ContainerResourcesFragment }
-          uncappedTarget { ...ContainerResourcesFragment }
+          lowerBound {
+            ...ContainerResourcesFragment
+          }
+          upperBound {
+            ...ContainerResourcesFragment
+          }
+          uncappedTarget {
+            ...ContainerResourcesFragment
+          }
         }
       }
     }

@@ -1,11 +1,13 @@
-export function* reverse<T>(array: T[], mapper: (val: T) => T = i => i) {
+export function* reverse<T>(array: T[], mapper: (val: T) => T = (i) => i) {
   for (let i = array.length - 1; i >= 0; i--) {
     yield mapper(array[i])
   }
 }
 
-export function* lookahead<T extends object, R>(array: T[],
-  mapper: (val: T, nextVal: T) => R) {
+export function* lookahead<T extends object, R>(
+  array: T[],
+  mapper: (val: T, nextVal: T) => R
+) {
   const len = array.length
 
   for (let i = 0; i < len; i++) {
@@ -22,8 +24,10 @@ export function* chunk<T>(array: T[], chunkSize: number) {
   }
 }
 
-export function groupBy<T extends { id?: any }>(list: Iterable<T>,
-  key: (val: T) => string = (i: T) => i.id) {
+export function groupBy<T extends { id?: any }>(
+  list: Iterable<T>,
+  key: (val: T) => string = (i: T) => i.id
+) {
   const grouped: Record<string, T[]> = {}
 
   for (const item of list) {

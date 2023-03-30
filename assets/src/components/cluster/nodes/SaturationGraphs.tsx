@@ -12,7 +12,11 @@ import { datum } from '../utils'
 
 export function SaturationGraphs({ cpu, mem }) {
   const { data } = useQuery(CLUSTER_SATURATION, {
-    variables: { cpuUtilization: cpu, memUtilization: mem, offset: 2 * 60 * 60 },
+    variables: {
+      cpuUtilization: cpu,
+      memUtilization: mem,
+      offset: 2 * 60 * 60,
+    },
     fetchPolicy: 'network-only',
     pollInterval: 10000,
   })
@@ -28,10 +32,10 @@ export function SaturationGraphs({ cpu, mem }) {
       return null
     }
 
-    return ([
+    return [
       { id: 'CPU usage', data: cpuUtilization[0].values.map(datum) },
       { id: 'Memory usage', data: memUtilization[0].values.map(datum) },
-    ])
+    ]
   }, [data])
 
   if (!result) {
@@ -46,7 +50,7 @@ export function SaturationGraphs({ cpu, mem }) {
     >
       <Graph
         data={result}
-        yFormat={v => format(v, 'percent')}
+        yFormat={(v) => format(v, 'percent')}
       />
     </Div>
   )

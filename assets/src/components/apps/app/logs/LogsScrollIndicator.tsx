@@ -22,6 +22,5 @@ export default function LogsScrollIndicator({ live, returnToTop }) {
     >
       {live ? 'Live' : 'Back to top'}
     </Button>
-
   )
 }

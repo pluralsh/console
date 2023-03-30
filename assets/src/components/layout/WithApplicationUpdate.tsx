@@ -1,9 +1,4 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 
 import { LoginContext } from 'components/contexts'
 
@@ -12,8 +7,9 @@ import * as serviceWorker from '../../serviceWorkerRegistration'
 const COMMIT_KEY = 'git-commit'
 
 export const DEFAULT_COMMIT = 'plural-default-commit'
-export const getCommit = () => sessionStorage.getItem(COMMIT_KEY) || DEFAULT_COMMIT
-export const setCommit = sha => sessionStorage.setItem(COMMIT_KEY, sha)
+export const getCommit = () =>
+  sessionStorage.getItem(COMMIT_KEY) || DEFAULT_COMMIT
+export const setCommit = (sha) => sessionStorage.setItem(COMMIT_KEY, sha)
 
 function WithApplicationUpdate({ children }: any) {
   const [time, setTime] = useState(Date.now())
@@ -46,7 +42,7 @@ function WithApplicationUpdate({ children }: any) {
   // Empty deps array is intentional here as it allows to run this effect only once.
   useEffect(() => {
     reloadOnStale()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (commit === DEFAULT_COMMIT) setCommit(config?.gitCommit)

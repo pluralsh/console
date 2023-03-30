@@ -7,8 +7,14 @@ import { RepositoryFragment } from '../../graphql/plural'
 export const QUERY_REPOS = gql`
   query Repositories {
     repositories(query: "", first: 1000) {
-      pageInfo { ...PageInfo }
-      edges { node { ...RepositoryFragment } }
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...RepositoryFragment
+        }
+      }
     }
   }
   ${PageInfo}

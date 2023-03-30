@@ -13,42 +13,42 @@ const StyledH = styled.h1.withConfig({ shouldForwardProp: () => true })<{
   const { variant } = useMarkdocContext()
 
   switch ($level) {
-  case 1:
-  case 2:
-    style = {
-      ...(variant === 'docs'
-        ? theme.partials.marketingText.title1
-        : theme.partials.text.title2),
-    }
-    break
-  case 3:
-    style = {
-      ...(variant === 'docs'
-        ? theme.partials.marketingText.title2
-        : theme.partials.text.subtitle1),
-    }
-    break
-  case 4:
-    style = {
-      ...(variant === 'docs'
-        ? theme.partials.marketingText.subtitle1
-        : theme.partials.text.subtitle2),
-    }
-    break
-  case 5:
-    style = {
-      ...(variant === 'docs'
-        ? theme.partials.marketingText.subtitle2
-        : theme.partials.text.body1Bold),
-    }
-    break
-  case 6:
-    style = {
-      ...(variant === 'docs'
-        ? theme.partials.marketingText.body1Bold
-        : theme.partials.text.body1Bold),
-    }
-    break
+    case 1:
+    case 2:
+      style = {
+        ...(variant === 'docs'
+          ? theme.partials.marketingText.title1
+          : theme.partials.text.title2),
+      }
+      break
+    case 3:
+      style = {
+        ...(variant === 'docs'
+          ? theme.partials.marketingText.title2
+          : theme.partials.text.subtitle1),
+      }
+      break
+    case 4:
+      style = {
+        ...(variant === 'docs'
+          ? theme.partials.marketingText.subtitle1
+          : theme.partials.text.subtitle2),
+      }
+      break
+    case 5:
+      style = {
+        ...(variant === 'docs'
+          ? theme.partials.marketingText.subtitle2
+          : theme.partials.text.body1Bold),
+      }
+      break
+    case 6:
+      style = {
+        ...(variant === 'docs'
+          ? theme.partials.marketingText.body1Bold
+          : theme.partials.text.body1Bold),
+      }
+      break
   }
 
   return {
@@ -59,10 +59,10 @@ const StyledH = styled.h1.withConfig({ shouldForwardProp: () => true })<{
     ...(variant === 'docs'
       ? {}
       : {
-        '&:first-child': {
-          marginTop: 0,
-        },
-      }),
+          '&:first-child': {
+            marginTop: 0,
+          },
+        }),
     marginBottom: theme.spacing.small,
     ...style,
     '.link': {

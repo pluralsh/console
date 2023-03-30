@@ -29,21 +29,25 @@ const springConfig = {
 }
 
 export function ChartTooltip({
-  color, label, value,
+  color,
+  label,
+  value,
 }: {
-  color: string;
-  label: ReactNode;
-  value: ReactNode;
+  color: string
+  label: ReactNode
+  value: ReactNode
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const cursorPos = useCursorPosition()
   const theme = useTheme()
 
-  const [springProps] = useSpring(() => ({
-    ...cursorPos,
-    config: springConfig,
-  }),
-  [cursorPos])
+  const [springProps] = useSpring(
+    () => ({
+      ...cursorPos,
+      config: springConfig,
+    }),
+    [cursorPos]
+  )
 
   const content = (
     <animated.div
@@ -63,7 +67,9 @@ export function ChartTooltip({
           backgroundColor={color}
           aria-hidden
         />
-        <div>{label}: <b>{value}</b></div>
+        <div>
+          {label}: <b>{value}</b>
+        </div>
       </ChartTooltipWrap>
     </animated.div>
   )

@@ -13,11 +13,11 @@ export default function Notification({ notification, closePanel }: any) {
   const navigate = useNavigate()
   const [open, setOpen] = useState<boolean>(false)
   const { applications } = useContext<any>(InstallationContext)
-  const app = useMemo(() => applications.find(({ name }) => name === notification.repository),
-    [applications, notification])
-  const {
-    title, description, severity, seenAt,
-  } = notification
+  const app = useMemo(
+    () => applications.find(({ name }) => name === notification.repository),
+    [applications, notification]
+  )
+  const { title, description, severity, seenAt } = notification
 
   return (
     <>
@@ -60,15 +60,19 @@ export default function Notification({ notification, closePanel }: any) {
         <CollapseIcon
           marginLeft="8px"
           size={8}
-          style={open ? {
-            transform: 'rotate(270deg)',
-            transitionDuration: '.2s',
-            transitionProperty: 'transform',
-          } : {
-            transform: 'rotate(180deg)',
-            transitionDuration: '.2s',
-            transitionProperty: 'transform',
-          }}
+          style={
+            open
+              ? {
+                  transform: 'rotate(270deg)',
+                  transitionDuration: '.2s',
+                  transitionProperty: 'transform',
+                }
+              : {
+                  transform: 'rotate(180deg)',
+                  transitionDuration: '.2s',
+                  transitionProperty: 'transform',
+                }
+          }
         />
       </Flex>
       <Collapsible
@@ -106,4 +110,3 @@ export default function Notification({ notification, closePanel }: any) {
     </>
   )
 }
-

@@ -12,7 +12,7 @@ export default function ComponentEvents() {
   // To avoid mapping between component types and fields of data returned by API
   // we are picking first available value from API object for now.
   const value = data
-    ? Object.values(data).find(value => value !== undefined)
+    ? Object.values(data).find((value) => value !== undefined)
     : null
   const events: EventT[] = value?.events || []
 

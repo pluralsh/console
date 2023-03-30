@@ -8,13 +8,17 @@ function generateID(children: any[], attributes: { id?: unknown } = {}) {
     return attributes.id
   }
 
-  return toHtmlId(children
-    .map(child => (typeof child === 'string'
-      ? child
-      : Array.isArray(child?.children)
-        ? generateID(child.children)
-        : ''))
-    .join(' '))
+  return toHtmlId(
+    children
+      .map((child) =>
+        typeof child === 'string'
+          ? child
+          : Array.isArray(child?.children)
+          ? generateID(child.children)
+          : ''
+      )
+      .join(' ')
+  )
 }
 
 export const heading = {

@@ -1,1 +1,1 @@
-export const legacyUrl = url => (url === '/' ? '/builds' : '/')
+export const legacyUrl = (url) => (url === '/' ? '/builds' : '/')

@@ -22,10 +22,22 @@ export default function LogsLegend() {
   return (
     <PropsContainer>
       <Prop title="Log legend">
-        <LegendWrap><LegendColor color={borderColor(Level.OTHER)} />Unknown</LegendWrap>
-        <LegendWrap><LegendColor color={borderColor(Level.INFO)} />Info</LegendWrap>
-        <LegendWrap><LegendColor color={borderColor(Level.WARN)} />Warning</LegendWrap>
-        <LegendWrap><LegendColor color={borderColor(Level.ERROR)} />Error</LegendWrap>
+        <LegendWrap>
+          <LegendColor color={borderColor(Level.OTHER)} />
+          Unknown
+        </LegendWrap>
+        <LegendWrap>
+          <LegendColor color={borderColor(Level.INFO)} />
+          Info
+        </LegendWrap>
+        <LegendWrap>
+          <LegendColor color={borderColor(Level.WARN)} />
+          Warning
+        </LegendWrap>
+        <LegendWrap>
+          <LegendColor color={borderColor(Level.ERROR)} />
+          Error
+        </LegendWrap>
       </Prop>
     </PropsContainer>
   )

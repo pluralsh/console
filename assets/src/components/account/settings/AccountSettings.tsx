@@ -3,7 +3,9 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
-const Description = styled.div(({ theme }) => ({ ...theme.partials.text.body2Bold }))
+const Description = styled.div(({ theme }) => ({
+  ...theme.partials.text.body2Bold,
+}))
 
 export default function AccountSettings() {
   return (
@@ -11,7 +13,9 @@ export default function AccountSettings() {
       scrollable={false}
       heading="Account settings"
     >
-      <Description>Manage your account settings from app.plural.sh.</Description>
+      <Description>
+        Manage your account settings from app.plural.sh.
+      </Description>
       <Button
         as={Link}
         to="https://app.plural.sh/account/edit"

@@ -5,10 +5,18 @@ export const SUBSCRIPTION_QUERY = gql`
     account {
       grandfatheredUntil
       delinquentAt
-      availableFeatures { audits userManagement  vpn }
+      availableFeatures {
+        audits
+        userManagement
+        vpn
+      }
       subscription {
         id
-        plan { id name period }
+        plan {
+          id
+          name
+          period
+        }
       }
     }
   }

@@ -9,7 +9,9 @@ export default function RoleFormBindings({
   bindings,
   setBindings,
 }: any) {
-  const [repositories, setRepositories] = useState(attributes?.repositories?.join(', '))
+  const [repositories, setRepositories] = useState(
+    attributes?.repositories?.join(', ')
+  )
 
   return (
     <Box
@@ -31,8 +33,12 @@ export default function RoleFormBindings({
         bindings={bindings
           .filter(({ user }) => !!user)
           .map(({ user: { email } }) => email)}
-        add={user => setBindings([...bindings, { user }])}
-        remove={email => setBindings(bindings.filter(({ user }) => !user || user.email !== email))}
+        add={(user) => setBindings([...bindings, { user }])}
+        remove={(email) =>
+          setBindings(
+            bindings.filter(({ user }) => !user || user.email !== email)
+          )
+        }
       />
       <BindingInput
         type="group"
@@ -40,8 +46,12 @@ export default function RoleFormBindings({
         bindings={bindings
           .filter(({ group }) => !!group)
           .map(({ group: { name } }) => name)}
-        add={group => setBindings([...bindings, { group }])}
-        remove={name => setBindings(bindings.filter(({ group }) => !group || group.name !== name))}
+        add={(group) => setBindings([...bindings, { group }])}
+        remove={(name) =>
+          setBindings(
+            bindings.filter(({ group }) => !group || group.name !== name)
+          )
+        }
       />
     </Box>
   )

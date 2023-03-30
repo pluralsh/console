@@ -10,7 +10,8 @@ const DIRECTORY = [
 ]
 
 function NodesTabList({ tabStateRef }: any) {
-  const subpath = useMatch('/pods/:namespace/:name/:subpath')?.params?.subpath || ''
+  const subpath =
+    useMatch('/pods/:namespace/:name/:subpath')?.params?.subpath || ''
 
   const currentTab = DIRECTORY.find(({ path }) => path === subpath)
 
@@ -36,7 +37,5 @@ function NodesTabList({ tabStateRef }: any) {
 }
 
 export default function AccountSideNav({ tabStateRef = {} }: any) {
-  return (
-    <NodesTabList tabStateRef={tabStateRef} />
-  )
+  return <NodesTabList tabStateRef={tabStateRef} />
 }

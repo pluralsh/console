@@ -13,7 +13,9 @@ describe('URL utils', () => {
   })
 
   it('should ensure validity of URL paths', () => {
-    expect(ensureURLValidity('https://growthbook.plural.sh')).toBe('https://growthbook.plural.sh')
+    expect(ensureURLValidity('https://growthbook.plural.sh')).toBe(
+      'https://growthbook.plural.sh'
+    )
     const valid = 'https://growthbook.plural.sh'
     const transformedValid = ensureURLValidity(valid)
 

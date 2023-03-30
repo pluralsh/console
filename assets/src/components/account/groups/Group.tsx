@@ -3,7 +3,11 @@ import { useContext, useState } from 'react'
 import { Confirm } from 'components/utils/Confirm'
 import { LoginContext } from 'components/contexts'
 import { Button, Flex } from 'honorable'
-import { Group as GroupT, GroupsDocument, useDeleteGroupMutation } from 'generated/graphql'
+import {
+  Group as GroupT,
+  GroupsDocument,
+  useDeleteGroupMutation,
+} from 'generated/graphql'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 
 import { removeConnection, updateCache } from '../../../utils/graphql'
@@ -23,11 +27,12 @@ export default function Group({ group, q }: { group: GroupT; q: any }) {
   const [mutation, { loading, error }] = useDeleteGroupMutation({
     variables: { id: group.id },
     onCompleted: () => dialogKey === 'confirmDelete' && setDialogKey(''),
-    update: (cache, { data }) => updateCache(cache, {
-      query: GroupsDocument,
-      variables: { q },
-      update: prev => removeConnection(prev, data?.deleteGroup, 'groups'),
-    }),
+    update: (cache, { data }) =>
+      updateCache(cache, {
+        query: GroupsDocument,
+        variables: { q },
+        update: (prev) => removeConnection(prev, data?.deleteGroup, 'groups'),
+      }),
   })
 
   return (
@@ -73,7 +78,9 @@ export default function Group({ group, q }: { group: GroupT; q: any }) {
                 icon={<PeopleIcon />}
               />
               <DeleteIconButton
-                onClick={() => dialogKey === '' && setDialogKey('confirmDelete')}
+                onClick={() =>
+                  dialogKey === '' && setDialogKey('confirmDelete')
+                }
               />
             </>
           </Flex>
@@ -97,13 +104,13 @@ export default function Group({ group, q }: { group: GroupT; q: any }) {
         />
         <Confirm
           open={dialogKey === 'confirmDelete'}
-          text={(
+          text={
             <>
               Are you sure you want to delete the <b>{group.name}</b> group?
               This could have downstream effects on a large number of users and
               their roles.
             </>
-          )}
+          }
           close={() => dialogKey === 'confirmDelete' && setDialogKey('')}
           label="Delete group"
           submit={() => mutation()}

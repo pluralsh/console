@@ -17,29 +17,29 @@ const StatusToColor = {
 
 function AlertIcon({ status, color }: any) {
   switch (status) {
-  case AlertStatus.SUCCESS:
-    return (
-      <CheckIcon
-        color={color}
-        size={16}
-      />
-    )
-  case AlertStatus.ERROR:
-    return (
-      <ErrorIcon
-        color={color}
-        size={16}
-      />
-    )
-  case AlertStatus.INFO:
-    return (
-      <InfoIcon
-        color={color}
-        size={16}
-      />
-    )
-  default:
-    return null
+    case AlertStatus.SUCCESS:
+      return (
+        <CheckIcon
+          color={color}
+          size={16}
+        />
+      )
+    case AlertStatus.ERROR:
+      return (
+        <ErrorIcon
+          color={color}
+          size={16}
+        />
+      )
+    case AlertStatus.INFO:
+      return (
+        <InfoIcon
+          color={color}
+          size={16}
+        />
+      )
+    default:
+      return null
   }
 }
 

@@ -1,11 +1,5 @@
 import styled from 'styled-components'
-import {
-  Dispatch,
-  ReactElement,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react'
+import { Dispatch, ReactElement, useCallback, useMemo, useState } from 'react'
 import {
   AppIcon,
   Button,
@@ -74,7 +68,11 @@ enum UserSelectionMode {
   Input,
 }
 
-function ModalContentUnstyled({ onClose, refetch, ...props }: CreateClientProps): ReactElement {
+function ModalContentUnstyled({
+  onClose,
+  refetch,
+  ...props
+}: CreateClientProps): ReactElement {
   const [name, setName] = useState<string>('')
   const [email, setEmail] = useState<string>()
   const [mode, setMode] = useState<UserSelectionMode>(UserSelectionMode.Select)
@@ -82,8 +80,14 @@ function ModalContentUnstyled({ onClose, refetch, ...props }: CreateClientProps)
   const [inputValue, setInputValue] = useState<string>()
 
   // Queries & Mutations
-  const { data: { users: userList } = {}, fetchMore } = useQuery<Pick<RootQueryType, 'users'>, RootQueryTypeUsersArgs>(USERS_Q)
-  const [createPeer, { loading, error }] = useMutation<WireguardPeer, RootMutationTypeCreatePeerArgs>(CreateWireguardPeer, {
+  const { data: { users: userList } = {}, fetchMore } = useQuery<
+    Pick<RootQueryType, 'users'>,
+    RootQueryTypeUsersArgs
+  >(USERS_Q)
+  const [createPeer, { loading, error }] = useMutation<
+    WireguardPeer,
+    RootMutationTypeCreatePeerArgs
+  >(CreateWireguardPeer, {
     variables: {
       name,
       email,
@@ -96,33 +100,45 @@ function ModalContentUnstyled({ onClose, refetch, ...props }: CreateClientProps)
   })
 
   // Memo
-  const { pageInfo, users } = useMemo(() => ({
-    pageInfo: userList?.pageInfo ?? {} as PageInfo,
-    users: userList?.edges?.map(edge => edge?.node) ?? [],
-  }), [userList])
-  const fuse = useMemo(() => new Fuse(users, {
-    includeScore: true,
-    shouldSort: true,
-    threshold: 0.3,
-    keys: ['name'],
-  }),
-  [users])
+  const { pageInfo, users } = useMemo(
+    () => ({
+      pageInfo: userList?.pageInfo ?? ({} as PageInfo),
+      users: userList?.edges?.map((edge) => edge?.node) ?? [],
+    }),
+    [userList]
+  )
+  const fuse = useMemo(
+    () =>
+      new Fuse(users, {
+        includeScore: true,
+        shouldSort: true,
+        threshold: 0.3,
+        keys: ['name'],
+      }),
+    [users]
+  )
   const searchResults = useMemo(() => {
     if (inputValue) {
-      return fuse.search(inputValue)?.map(res => res.item)
+      return fuse.search(inputValue)?.map((res) => res.item)
     }
 
     return users
   }, [fuse, inputValue, users])
   const isEmailValid = useMemo(() => isValidEmail(email ?? ''), [email])
-  const isValid = useMemo(() => name && (isEmailValid || selectedKey), [isEmailValid, name, selectedKey])
+  const isValid = useMemo(
+    () => name && (isEmailValid || selectedKey),
+    [isEmailValid, name, selectedKey]
+  )
 
   // Callbacks
-  const onSelectionChange = useCallback(key => {
-    setSelectedKey(key)
-    setInputValue(users?.find(user => user?.id === key)?.name)
-  }, [users])
-  const onInputChange = useCallback(value => {
+  const onSelectionChange = useCallback(
+    (key) => {
+      setSelectedKey(key)
+      setInputValue(users?.find((user) => user?.id === key)?.name)
+    },
+    [users]
+  )
+  const onInputChange = useCallback((value) => {
     setInputValue(value)
     setSelectedKey(undefined)
   }, [])
@@ -145,18 +161,23 @@ function ModalContentUnstyled({ onClose, refetch, ...props }: CreateClientProps)
         required
         error={!isEmailValid}
         hint={email && !isEmailValid ? 'Invalid email address' : undefined}
-        caption={(
+        caption={
           <A
             inline
             onClick={() => {
-              setMode(mode === UserSelectionMode.Input ? UserSelectionMode.Select : UserSelectionMode.Input)
+              setMode(
+                mode === UserSelectionMode.Input
+                  ? UserSelectionMode.Select
+                  : UserSelectionMode.Input
+              )
               setSelectedKey(undefined)
               setInputValue(undefined)
               setEmail(undefined)
             }}
-          >{mode === UserSelectionMode.Input ? 'Go back' : 'Input email'}
+          >
+            {mode === UserSelectionMode.Input ? 'Go back' : 'Input email'}
           </A>
-        )}
+        }
       >
         {mode === UserSelectionMode.Select && (
           <ComboBox
@@ -167,21 +188,28 @@ function ModalContentUnstyled({ onClose, refetch, ...props }: CreateClientProps)
             selectedKey={selectedKey}
             onSelectionChange={onSelectionChange}
             allowsEmptyCollection
-            dropdownFooterFixed={pageInfo?.hasNextPage && (
-              <ListBoxFooterPlus onClick={() => fetchMore({
-                variables: { cursor: pageInfo?.endCursor },
-                updateQuery: (prev, { fetchMoreResult: { users } }) => extendConnection(prev, users, 'users'),
-              })}
-              >Load more
-              </ListBoxFooterPlus>
-            )}
+            dropdownFooterFixed={
+              pageInfo?.hasNextPage && (
+                <ListBoxFooterPlus
+                  onClick={() =>
+                    fetchMore({
+                      variables: { cursor: pageInfo?.endCursor },
+                      updateQuery: (prev, { fetchMoreResult: { users } }) =>
+                        extendConnection(prev, users, 'users'),
+                    })
+                  }
+                >
+                  Load more
+                </ListBoxFooterPlus>
+              )
+            }
           >
-            {searchResults?.map(user => (
+            {searchResults?.map((user) => (
               <ListBoxItem
                 key={user?.id}
                 textValue={user?.name}
                 label={user?.name}
-                leftContent={(
+                leftContent={
                   <AppIcon
                     key={user?.id}
                     name={user?.name}
@@ -189,7 +217,7 @@ function ModalContentUnstyled({ onClose, refetch, ...props }: CreateClientProps)
                     spacing={user?.profile ? 'none' : undefined}
                     size="xxsmall"
                   />
-                )}
+                }
               />
             ))}
           </ComboBox>
@@ -208,20 +236,25 @@ function ModalContentUnstyled({ onClose, refetch, ...props }: CreateClientProps)
         <Button
           secondary
           onClick={() => onClose()}
-        >Cancel
+        >
+          Cancel
         </Button>
         <Button
           loading={loading}
           onClick={() => createPeer()}
           disabled={!isValid}
-        >Create
+        >
+          Create
         </Button>
       </div>
 
       {error && (
         <GraphQLToast
-          header={(error?.networkError as ServerError)?.statusCode?.toString() ?? 'Error'}
-          error={{ graphQLErrors: [...error?.graphQLErrors ?? []] }}
+          header={
+            (error?.networkError as ServerError)?.statusCode?.toString() ??
+            'Error'
+          }
+          error={{ graphQLErrors: [...(error?.graphQLErrors ?? [])] }}
           margin="medium"
           marginHorizontal="xxxxlarge"
         />

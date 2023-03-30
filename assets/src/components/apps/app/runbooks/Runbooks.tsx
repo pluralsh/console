@@ -24,11 +24,15 @@ export default function Runbooks() {
     pollInterval: POLL_INTERVAL,
   })
 
-  useEffect(() => setBreadcrumbs([
-    { text: 'apps', url: '/' },
-    { text: appName, url: `/apps/${appName}` },
-    { text: 'runbooks', url: `/apps/${appName}/runbooks` },
-  ]), [appName, setBreadcrumbs])
+  useEffect(
+    () =>
+      setBreadcrumbs([
+        { text: 'apps', url: '/' },
+        { text: appName, url: `/apps/${appName}` },
+        { text: 'runbooks', url: `/apps/${appName}/runbooks` },
+      ]),
+    [appName, setBreadcrumbs]
+  )
 
   if (!data) return <LoadingIndicator />
 
@@ -36,19 +40,19 @@ export default function Runbooks() {
 
   return (
     <ScrollablePage heading="Runbooks">
-      {runbooks.map(runbook => (
+      {runbooks.map((runbook) => (
         <ListItem
           key={runbook.name}
           title={runbook.spec.name}
           description={runbook.spec.description}
           icon={<RunBookIcon />}
           borderColor={getBorderColor(runbook)}
-          chips={(
+          chips={
             <RunbookStatus
               runbook={runbook}
               fontWeight={600}
             />
-          )}
+          }
           onClick={() => navigate(`/apps/${appName}/runbooks/${runbook.name}`)}
         />
       ))}
@@ -59,20 +63,23 @@ export default function Runbooks() {
             width={600}
             icon={<RunBookIcon size={64} />}
             message="No runbooks available"
-            description={(
-              <div>
-                If you're interested in adding runbooks to this application,&nbsp;
-                <A
-                  inline
-                  href="https://www.plural.sh/community"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  visit our docs
-                </A>
-                &nbsp;for more details.
-              </div> as any // Workaround as JSX elements are not allowed here.
-            )}
+            description={
+              (
+                <div>
+                  If you're interested in adding runbooks to this
+                  application,&nbsp;
+                  <A
+                    inline
+                    href="https://www.plural.sh/community"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    visit our docs
+                  </A>
+                  &nbsp;for more details.
+                </div>
+              ) as any // Workaround as JSX elements are not allowed here.
+            }
           />
         </Flex>
       )}

@@ -13,9 +13,9 @@ export function ResponsivePageFullWidth({
       flexDirection="column"
       {...(scrollable
         ? {
-          paddingRight: 0,
-          paddingBottom: 0,
-        }
+            paddingRight: 0,
+            paddingBottom: 0,
+          }
         : {})}
     >
       <ScrollablePage

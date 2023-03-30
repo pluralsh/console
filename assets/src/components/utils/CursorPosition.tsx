@@ -12,7 +12,7 @@ function useCursorPosInner() {
   const [cursorPos, setCursorPos] = useState<CursorPos>()
 
   useEffect(() => {
-    const listener = e => {
+    const listener = (e) => {
       setCursorPos({ x: e.clientX, y: e.clientY })
     }
 

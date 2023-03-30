@@ -20,8 +20,8 @@ export function makeGrid({
     gap,
     ...(maxColWidth
       ? {
-        maxWidth: maxCols * maxColWidth + totalGapWidth,
-      }
+          maxWidth: maxCols * maxColWidth + totalGapWidth,
+        }
       : {}),
   }
 }

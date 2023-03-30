@@ -8,29 +8,29 @@ import { ComponentProps } from 'react'
 const COLUMN_HELPER = createColumnHelper<EventT>()
 
 const columns = [
-  COLUMN_HELPER.accessor(event => event.type, {
+  COLUMN_HELPER.accessor((event) => event.type, {
     id: 'type',
-    cell: type => type.getValue(),
+    cell: (type) => type.getValue(),
     header: 'Type',
   }),
-  COLUMN_HELPER.accessor(event => event.reason, {
+  COLUMN_HELPER.accessor((event) => event.reason, {
     id: 'reason',
-    cell: reason => reason.getValue(),
+    cell: (reason) => reason.getValue(),
     header: 'Reason',
   }),
-  COLUMN_HELPER.accessor(event => event.message, {
+  COLUMN_HELPER.accessor((event) => event.message, {
     id: 'message',
-    cell: message => message.getValue(),
+    cell: (message) => message.getValue(),
     header: 'Message',
   }),
-  COLUMN_HELPER.accessor(event => event.count, {
+  COLUMN_HELPER.accessor((event) => event.count, {
     id: 'count',
-    cell: count => count.getValue(),
+    cell: (count) => count.getValue(),
     header: 'Count',
   }),
-  COLUMN_HELPER.accessor(event => event.lastTimestamp, {
+  COLUMN_HELPER.accessor((event) => event.lastTimestamp, {
     id: 'lastTimestamp',
-    cell: lastTimestamp => <Date date={lastTimestamp.getValue()} />,
+    cell: (lastTimestamp) => <Date date={lastTimestamp.getValue()} />,
     header: 'Last seen',
   }),
 ]

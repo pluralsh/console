@@ -18,5 +18,4 @@ export const CHART_THEME = {
       stroke: theme.colors['border-fill-three'],
     },
   },
-
 }

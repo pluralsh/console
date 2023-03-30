@@ -15,11 +15,13 @@ import { LoginPortal } from './LoginPortal'
 
 const CALLBACK = gql`
   mutation Callback($code: String!, $redirect: String) {
-    oauthCallback(code: $code, redirect: $redirect) { jwt }
+    oauthCallback(code: $code, redirect: $redirect) {
+      jwt
+    }
   }
 `
 
-function OAuthError({ error: { error, error_description: description } }:any) {
+function OAuthError({ error: { error, error_description: description } }: any) {
   return (
     <LoginPortal>
       <Box gap="medium">
@@ -30,7 +32,10 @@ function OAuthError({ error: { error, error_description: description } }:any) {
           <Alert
             status={AlertStatus.ERROR}
             header={error}
-            description={description || 'You cannot log into this console instance, make sure your Plural user was added to its OIDC provider'}
+            description={
+              description ||
+              'You cannot log into this console instance, make sure your Plural user was added to its OIDC provider'
+            }
           />
         </Box>
       </Box>
@@ -44,7 +49,7 @@ export function OAuthCallback() {
   const prevCode = useRef<any>()
   const [mutation, { error, loading }] = useMutation(CALLBACK, {
     variables: { code, redirect: localized('/oauth/callback') },
-    onCompleted: result => {
+    onCompleted: (result) => {
       setToken(result.oauthCallback.jwt)
       window.location.href = '/'
     },

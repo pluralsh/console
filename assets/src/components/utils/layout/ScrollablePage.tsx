@@ -9,9 +9,7 @@ const ScrollablePageContent = styled.div<{
   extraStyles?: CSSProperties
   maxContentWidth?: number
   fullWidth?: boolean
-}>(({
-  theme, scrollable, extraStyles, maxContentWidth, fullWidth,
-}) => ({
+}>(({ theme, scrollable, extraStyles, maxContentWidth, fullWidth }) => ({
   position: 'relative',
   height: '100%',
   maxHeight: '100%',
@@ -22,8 +20,8 @@ const ScrollablePageContent = styled.div<{
   ...(scrollable ? { scrollbarGutter: 'stable' } : {}),
   ...(scrollable && fullWidth
     ? {
-      paddingRight: theme.spacing.large - 6,
-    }
+        paddingRight: theme.spacing.large - 6,
+      }
     : {}),
   '& > .widthLimiter': {
     width: '100%',
@@ -31,8 +29,8 @@ const ScrollablePageContent = styled.div<{
     paddingBottom: scrollable ? theme.spacing.xxlarge : theme.spacing.large,
     ...(!scrollable
       ? {
-        height: '100%',
-      }
+          height: '100%',
+        }
       : {}),
     ...(maxContentWidth
       ? { maxWidth: maxContentWidth, marginLeft: 'auto', marginRight: 'auto' }
@@ -105,4 +103,3 @@ export function ScrollablePage({
     </>
   )
 }
-

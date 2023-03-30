@@ -12,7 +12,12 @@ export const MARK_READ = gql`
 
 export const NOTIFS_SUB = gql`
   subscription {
-    notificationDelta { delta payload { ...NotificationFragment } }
+    notificationDelta {
+      delta
+      payload {
+        ...NotificationFragment
+      }
+    }
   }
   ${NotificationFragment}
 `

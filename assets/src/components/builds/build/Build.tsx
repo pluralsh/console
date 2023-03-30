@@ -1,15 +1,5 @@
-import {
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-} from 'react'
-import {
-  Link,
-  Outlet,
-  useLocation,
-  useParams,
-} from 'react-router-dom'
+import { useContext, useEffect, useMemo, useRef } from 'react'
+import { Link, Outlet, useLocation, useParams } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 
 import { appendEdge } from 'components/graphql/utils'
@@ -58,10 +48,14 @@ const UPDATE_PATH = 'build.commands.edges'.split('.')
 
 function updateQuery(prev, { subscriptionData: { data } }) {
   if (!data) return prev
-  const { commandDelta: { delta, payload } } = data
+  const {
+    commandDelta: { delta, payload },
+  } = data
 
   if (delta === 'CREATE') {
-    return deepUpdate(prev, UPDATE_PATH, edges => appendEdge(edges, payload, 'append'))
+    return deepUpdate(prev, UPDATE_PATH, (edges) =>
+      appendEdge(edges, payload, 'append')
+    )
   }
 
   return prev
@@ -91,8 +85,15 @@ export default function Build() {
       { text: buildId, url: `/builds/${buildId}` },
     ])
 
-    const first = subscribeToMore({ document: COMMAND_SUB, variables: { buildId }, updateQuery })
-    const second = subscribeToMore({ document: BUILD_SUB, variables: { buildId } })
+    const first = subscribeToMore({
+      document: COMMAND_SUB,
+      variables: { buildId },
+      updateQuery,
+    })
+    const second = subscribeToMore({
+      document: BUILD_SUB,
+      variables: { buildId },
+    })
 
     return () => {
       first()
@@ -100,18 +101,26 @@ export default function Build() {
     }
   }, [buildId, subscribeToMore, setBreadcrumbs])
 
-  const app = useMemo(() => applications?.find(app => app.name === data?.build?.repository),
-    [applications, data?.build?.repository])
+  const app = useMemo(
+    () => applications?.find((app) => app.name === data?.build?.repository),
+    [applications, data?.build?.repository]
+  )
 
   if (!data) return <LoadingIndicator />
 
   const {
-    commands: { edges }, creator, approver, ...build
+    commands: { edges },
+    creator,
+    approver,
+    ...build
   } = data.build
-  const directory = build.changelogs?.length > 0
-    ? DIRECTORY
-    : DIRECTORY.filter(({ path }) => path !== 'changelog')
-  const currentTab = directory.find(tab => pathname?.startsWith(`${pathPrefix}/${tab.path}`))
+  const directory =
+    build.changelogs?.length > 0
+      ? DIRECTORY
+      : DIRECTORY.filter(({ path }) => path !== 'changelog')
+  const currentTab = directory.find((tab) =>
+    pathname?.startsWith(`${pathPrefix}/${tab.path}`)
+  )
 
   return (
     <ResponsiveLayoutPage>
@@ -199,7 +208,9 @@ export default function Build() {
               />
             </Prop>
             <Prop title="App">{build.repository}</Prop>
-            <Prop title="Build type">{BUILD_TYPE_DISPLAY_NAMES[build.type] || build.type}</Prop>
+            <Prop title="Build type">
+              {BUILD_TYPE_DISPLAY_NAMES[build.type] || build.type}
+            </Prop>
             <Prop title="ID">{buildId}</Prop>
             {creator && (
               <Prop

@@ -101,19 +101,19 @@ function ReadyEmptyState() {
 function PendingFailedEmptyState({ filter }) {
   return (
     <EmptyState
-      icon={(
+      icon={
         <SourcererIcon
           width={64}
           height={100}
         />
-      )}
+      }
       message="Woah."
       description={
         (
           <>
             <div>
               There are no{' '}
-              {FILTERS.find(f => f.key === filter)?.label.toLowerCase()} apps.
+              {FILTERS.find((f) => f.key === filter)?.label.toLowerCase()} apps.
             </div>
             <div>
               You may be ready to become an&nbsp;
@@ -147,19 +147,25 @@ export default function Apps() {
   const [filter, setFilter] = useState<any>(ALL_FILTER)
   const tabStateRef = useRef<any>(null)
 
-  useEffect(() => setBreadcrumbs([{ text: 'apps', url: '/' }]),
-    [setBreadcrumbs])
+  useEffect(
+    () => setBreadcrumbs([{ text: 'apps', url: '/' }]),
+    [setBreadcrumbs]
+  )
 
-  const handleFilter = useCallback(f => applications.filter(app => !f || appState(app).readiness === f),
-    [applications])
+  const handleFilter = useCallback(
+    (f) => applications.filter((app) => !f || appState(app).readiness === f),
+    [applications]
+  )
 
-  const appsByState = useMemo(() => ({
-    [ALL_FILTER]: applications,
-    [Readiness.Ready]: handleFilter(Readiness.Ready),
-    [Readiness.InProgress]: handleFilter(Readiness.InProgress),
-    [Readiness.Failed]: handleFilter(Readiness.Failed),
-  }),
-  [applications, handleFilter])
+  const appsByState = useMemo(
+    () => ({
+      [ALL_FILTER]: applications,
+      [Readiness.Ready]: handleFilter(Readiness.Ready),
+      [Readiness.InProgress]: handleFilter(Readiness.InProgress),
+      [Readiness.Failed]: handleFilter(Readiness.Failed),
+    }),
+    [applications, handleFilter]
+  )
 
   const filteredApps = useMemo(() => {
     const filteredByState = appsByState[filter]
@@ -180,7 +186,7 @@ export default function Apps() {
       heading="Apps"
       // 1528 is magic number for content width when screen is 1640px wide
       maxContentWidth={1528}
-      headingContent={(
+      headingContent={
         <>
           <Flex grow={1} />
           <TabList
@@ -220,11 +226,11 @@ export default function Apps() {
             placeholder="Filter applications"
             startIcon={<MagnifyingGlassIcon size={14} />}
             value={query}
-            onChange={event => setQuery(event.target.value)}
+            onChange={(event) => setQuery(event.target.value)}
             width={320}
           />
         </>
-      )}
+      }
     >
       {!noFilteredApps ? (
         <Div
@@ -232,8 +238,8 @@ export default function Apps() {
           gap="small"
           gridTemplateColumns="repeat(auto-fit, minmax(450px, 1fr))"
         >
-          {!noFilteredApps
-            && filteredApps.map(app => (
+          {!noFilteredApps &&
+            filteredApps.map((app) => (
               <App
                 key={app.name}
                 app={app}
@@ -254,10 +260,10 @@ export default function Apps() {
             />
           )}
           {!query && filter === Readiness.Ready && <ReadyEmptyState />}
-          {!query
-            && [Readiness.InProgress, Readiness.Failed].includes(filter) && (
-            <PendingFailedEmptyState filter={filter} />
-          )}
+          {!query &&
+            [Readiness.InProgress, Readiness.Failed].includes(filter) && (
+              <PendingFailedEmptyState filter={filter} />
+            )}
         </Flex>
       )}
     </ResponsivePageFullWidth>

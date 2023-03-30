@@ -5,12 +5,7 @@ import { useParams } from 'react-router-dom'
 import { Card } from '@pluralsh/design-system'
 import { Flex } from 'honorable'
 
-import {
-  Event,
-  NodeMetric,
-  Node as NodeT,
-  Pod,
-} from 'generated/graphql'
+import { Event, NodeMetric, Node as NodeT, Pod } from 'generated/graphql'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
@@ -29,10 +24,11 @@ import { NODE_Q } from '../queries'
 import { NodeGraphs } from './NodeGraphs'
 import { SubTitle } from './SubTitle'
 
-export const podContainers = pods => pods
-  .filter(({ status: { phase } }) => phase !== 'Succeeded')
-  .map(({ spec: { containers } }) => containers)
-  .flat()
+export const podContainers = (pods) =>
+  pods
+    .filter(({ status: { phase } }) => phase !== 'Succeeded')
+    .map(({ spec: { containers } }) => containers)
+    .flat()
 
 export default function NodeInfo() {
   const { name } = useParams()
@@ -50,15 +46,17 @@ export default function NodeInfo() {
     fetchPolicy: 'cache-and-network',
   })
 
-  const columns = useMemo(() => [
-    ColName,
-    ColMemoryReservation,
-    ColCpuReservation,
-    ColRestarts,
-    ColContainers,
-    ColActions(refetch),
-  ],
-  [refetch])
+  const columns = useMemo(
+    () => [
+      ColName,
+      ColMemoryReservation,
+      ColCpuReservation,
+      ColRestarts,
+      ColContainers,
+      ColActions(refetch),
+    ],
+    [refetch]
+  )
 
   if (!data) return <LoadingIndicator />
 

@@ -1,9 +1,11 @@
 import { Readiness } from 'utils/status'
 import styled from 'styled-components'
 
-export const ListItemBorder = styled.div<{color?: string, width?: number, radius?: number}>(({
-  theme, color, radius = 4, width = 3,
-}) => ({
+export const ListItemBorder = styled.div<{
+  color?: string
+  width?: number
+  radius?: number
+}>(({ theme, color, radius = 4, width = 3 }) => ({
   backgroundColor: color ? theme.colors[color] : undefined,
   borderBottomLeftRadius: radius,
   borderTopLeftRadius: radius,
@@ -12,10 +14,13 @@ export const ListItemBorder = styled.div<{color?: string, width?: number, radius
   width,
 }))
 
-export const hasIcons = ({ spec: { descriptor } }) => descriptor?.icons?.length > 0
+export const hasIcons = ({ spec: { descriptor } }) =>
+  descriptor?.icons?.length > 0
 
 export const getIcon = (app, dark = true) => {
-  const { spec: { descriptor } } = app
+  const {
+    spec: { descriptor },
+  } = app
 
   if (!hasIcons(app)) return undefined
 
@@ -27,7 +32,12 @@ export const getIcon = (app, dark = true) => {
 export function appState({ status: { conditions } }) {
   const ready = conditions.find(({ type }) => type === 'Ready')
   const error = conditions.find(({ type }) => type === 'Error')
-  const readiness = error.status === 'True' ? Readiness.Failed : (ready.status === 'True' ? Readiness.Ready : Readiness.InProgress)
+  const readiness =
+    error.status === 'True'
+      ? Readiness.Failed
+      : ready.status === 'True'
+      ? Readiness.Ready
+      : Readiness.InProgress
 
   return { ready, error, readiness }
 }

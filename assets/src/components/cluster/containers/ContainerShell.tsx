@@ -5,7 +5,11 @@ import { useParams } from 'react-router-dom'
 
 import TerminalThemeSelector from 'components/terminal/TerminalThemeSelector'
 
-import { ShellContext, TerminalActions, TerminalScreen } from '../../terminal/Terminal'
+import {
+  ShellContext,
+  TerminalActions,
+  TerminalScreen,
+} from '../../terminal/Terminal'
 
 import { CODELINE_HEIGHT, ShellCommandEditor } from './ShellCommandEditor'
 
@@ -29,7 +33,7 @@ export function HeaderIconButton({ tooltipProps, ...props }) {
 
 const useCommand = (initialCommand?: string | null) => {
   const [command, setCommand] = useState(initialCommand || DEFAULT_COMMAND)
-  const setCommandSafe: (arg: string | null) => void = newCmd => {
+  const setCommandSafe: (arg: string | null) => void = (newCmd) => {
     if (typeof newCmd === 'string') {
       newCmd = newCmd.trim()
     }
@@ -45,9 +49,7 @@ const useCommand = (initialCommand?: string | null) => {
 }
 
 function ShellWithContext() {
-  const {
-    command, setCommand, defaultCommand, isDefault,
-  } = useCommand(null)
+  const { command, setCommand, defaultCommand, isDefault } = useCommand(null)
   const { namespace, name, container } = useParams()
   const shellContext = useContext(ShellContext)
 

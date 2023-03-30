@@ -36,11 +36,28 @@ export const PlanFragment = gql`
     cost
     period
     lineItems {
-      included { dimension quantity }
-      items { name dimension cost period }
+      included {
+        dimension
+        quantity
+      }
+      items {
+        name
+        dimension
+        cost
+        period
+      }
     }
-    serviceLevels { minSeverity maxSeverity responseTime }
-    metadata { features { name description } }
+    serviceLevels {
+      minSeverity
+      maxSeverity
+      responseTime
+    }
+    metadata {
+      features {
+        name
+        description
+      }
+    }
   }
 `
 
@@ -48,15 +65,25 @@ export const PostmortemFragment = gql`
   fragment PostmortemFragment on Postmortem {
     id
     content
-    actionItems { type link }
+    actionItems {
+      type
+      link
+    }
   }
 `
 export const FollowerFragment = gql`
   fragment FollowerFragment on Follower {
     id
-    incident { id }
-    user { ...UserFragment }
-    preferences { message incidentUpdate }
+    incident {
+      id
+    }
+    user {
+      ...UserFragment
+    }
+    preferences {
+      message
+      incidentUpdate
+    }
   }
   ${UserFragment}
 `
@@ -64,8 +91,15 @@ export const FollowerFragment = gql`
 export const SubscriptionFragment = gql`
   fragment SubscriptionFragment on SlimSubscription {
     id
-    lineItems { items { dimension quantity } }
-    plan { ...PlanFragment }
+    lineItems {
+      items {
+        dimension
+        quantity
+      }
+    }
+    plan {
+      ...PlanFragment
+    }
   }
   ${PlanFragment}
 `
@@ -79,12 +113,24 @@ export const IncidentFragment = gql`
     status
     notificationCount
     nextResponseAt
-    creator { ...UserFragment }
-    owner { ...UserFragment }
-    repository { ...RepoFragment }
-    subscription { ...SubscriptionFragment }
-    clusterInformation { ...ClusterInformation }
-    tags { tag }
+    creator {
+      ...UserFragment
+    }
+    owner {
+      ...UserFragment
+    }
+    repository {
+      ...RepoFragment
+    }
+    subscription {
+      ...SubscriptionFragment
+    }
+    clusterInformation {
+      ...ClusterInformation
+    }
+    tags {
+      tag
+    }
     insertedAt
   }
   ${UserFragment}
@@ -97,8 +143,14 @@ export const IncidentHistoryFragment = gql`
   fragment IncidentHistoryFragment on IncidentHistory {
     id
     action
-    changes { key prev next }
-    actor { ...UserFragment }
+    changes {
+      key
+      prev
+      next
+    }
+    actor {
+      ...UserFragment
+    }
     insertedAt
   }
   ${UserFragment}
@@ -119,10 +171,28 @@ export const IncidentMessageFragment = gql`
   fragment IncidentMessageFragment on IncidentMessage {
     id
     text
-    creator { ...UserFragment }
-    reactions { name creator { id email } }
-    file { ...FileFragment }
-    entities { type user { ...UserFragment } text startIndex endIndex }
+    creator {
+      ...UserFragment
+    }
+    reactions {
+      name
+      creator {
+        id
+        email
+      }
+    }
+    file {
+      ...FileFragment
+    }
+    entities {
+      type
+      user {
+        ...UserFragment
+      }
+      text
+      startIndex
+      endIndex
+    }
     insertedAt
   }
   ${UserFragment}
@@ -133,9 +203,21 @@ export const NotificationFragment = gql`
   fragment NotificationFragment on Notification {
     id
     type
-    actor { ...UserFragment }
-    incident { id title repository { id name icon } }
-    message { text }
+    actor {
+      ...UserFragment
+    }
+    incident {
+      id
+      title
+      repository {
+        id
+        name
+        icon
+      }
+    }
+    message {
+      text
+    }
     insertedAt
   }
   ${UserFragment}

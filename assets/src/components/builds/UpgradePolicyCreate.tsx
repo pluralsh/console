@@ -41,15 +41,20 @@ export default function UpgradePolicyCreate() {
 
   const [mutation, { loading }] = useMutation(CREATE_POLICY, {
     variables: { attributes },
-    update: (cache, { data: { createUpgradePolicy } }) => updateCache(cache, {
-      query: UPGRADE_POLICIES,
-      update: prev => ({ ...prev, upgradePolicies: [...prev.upgradePolicies, createUpgradePolicy] }),
-    }),
-    onCompleted: () => setModal({
-      header: 'Upgrade Policies',
-      content: <UpgradePoliciesList />,
-    }),
-    onError: error => {
+    update: (cache, { data: { createUpgradePolicy } }) =>
+      updateCache(cache, {
+        query: UPGRADE_POLICIES,
+        update: (prev) => ({
+          ...prev,
+          upgradePolicies: [...prev.upgradePolicies, createUpgradePolicy],
+        }),
+      }),
+    onCompleted: () =>
+      setModal({
+        header: 'Upgrade Policies',
+        content: <UpgradePoliciesList />,
+      }),
+    onError: (error) => {
       setError(error)
       setTimeout(() => setError(undefined), 3000)
     },
@@ -64,13 +69,17 @@ export default function UpgradePolicyCreate() {
         <FormField label="Name">
           <Input
             placeholder="New upgrade policy"
-            onChange={({ target: { value } }) => setAttributes({ ...attributes, name: value })}
+            onChange={({ target: { value } }) =>
+              setAttributes({ ...attributes, name: value })
+            }
             value={attributes.name}
           />
         </FormField>
         <FormField label="Description">
           <Input
-            onChange={({ target: { value } }) => setAttributes({ ...attributes, description: value })}
+            onChange={({ target: { value } }) =>
+              setAttributes({ ...attributes, description: value })
+            }
             value={attributes.description}
           />
         </FormField>
@@ -79,9 +88,11 @@ export default function UpgradePolicyCreate() {
             aria-label="type"
             label="Choose type"
             selectedKey={attributes.type}
-            onSelectionChange={type => setAttributes({ ...attributes, type: `${type}` })}
+            onSelectionChange={(type) =>
+              setAttributes({ ...attributes, type: `${type}` })
+            }
           >
-            {Object.values(UpgradePolicyType).map(v => (
+            {Object.values(UpgradePolicyType).map((v) => (
               <ListBoxItem
                 key={v}
                 label={v}
@@ -92,7 +103,7 @@ export default function UpgradePolicyCreate() {
         </FormField>
         <FormField
           label="App bindings"
-          caption={(
+          caption={
             <A
               inline
               href="https://www.sitepoint.com/learn-regex/"
@@ -101,12 +112,14 @@ export default function UpgradePolicyCreate() {
             >
               Regex guide
             </A>
-          )}
+          }
           hint="Target applications using a regex expression, e.g. “*” to select all."
         >
           <Input
             placeholder="*"
-            onChange={({ target: { value } }) => setAttributes({ ...attributes, target: value })}
+            onChange={({ target: { value } }) =>
+              setAttributes({ ...attributes, target: value })
+            }
             value={attributes.target}
           />
         </FormField>
@@ -116,7 +129,9 @@ export default function UpgradePolicyCreate() {
         >
           <Input
             placeholder="0"
-            onChange={({ target: { value } }) => setAttributes({ ...attributes, weight: parseInt(value) })}
+            onChange={({ target: { value } }) =>
+              setAttributes({ ...attributes, weight: parseInt(value) })
+            }
             value={attributes.weight}
           />
         </FormField>
@@ -126,10 +141,12 @@ export default function UpgradePolicyCreate() {
         >
           <Button
             secondary
-            onClick={() => setModal({
-              header: 'Upgrade Policies',
-              content: <UpgradePoliciesList />,
-            })}
+            onClick={() =>
+              setModal({
+                header: 'Upgrade Policies',
+                content: <UpgradePoliciesList />,
+              })
+            }
           >
             Cancel
           </Button>

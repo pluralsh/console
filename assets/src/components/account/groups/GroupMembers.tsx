@@ -50,11 +50,14 @@ export default function GroupMembers({ group, edit = false }: any) {
               edit={edit}
             />
           )}
-          loadNextPage={() => pageInfo.hasNextPage
-            && fetchMore({
+          loadNextPage={() =>
+            pageInfo.hasNextPage &&
+            fetchMore({
               variables: { cursor: pageInfo.endCursor },
-              updateQuery: (prev, { fetchMoreResult: { groupMembers } }) => extendConnection(prev, groupMembers, 'groupMembers'),
-            })}
+              updateQuery: (prev, { fetchMoreResult: { groupMembers } }) =>
+                extendConnection(prev, groupMembers, 'groupMembers'),
+            })
+          }
           handleScroll={undefined}
           refreshKey={undefined}
           setLoader={undefined}

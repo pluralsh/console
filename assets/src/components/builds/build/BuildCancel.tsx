@@ -4,7 +4,11 @@ import { BuildStatus } from 'components/types'
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'
 
-const noncancelable = [BuildStatus.CANCELLED, BuildStatus.FAILED, BuildStatus.SUCCESSFUL]
+const noncancelable = [
+  BuildStatus.CANCELLED,
+  BuildStatus.FAILED,
+  BuildStatus.SUCCESSFUL,
+]
 
 export default function BuildCancel({ build }) {
   const [open, setOpen] = useState<boolean>(false)
@@ -30,7 +34,7 @@ export default function BuildCancel({ build }) {
           header="Cancel build"
           open={open}
           onClose={() => setOpen(false)}
-          actions={(
+          actions={
             <>
               <Button
                 secondary
@@ -48,7 +52,7 @@ export default function BuildCancel({ build }) {
                 Cancel build
               </Button>
             </>
-          )}
+          }
         >
           <p>Are you sure you want to cancel this build?</p>
         </Modal>

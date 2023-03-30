@@ -12,7 +12,9 @@ const Message = styled.p(({ theme }) => ({
   color: theme.colors['text-xlight'],
 }))
 
-const MessageLink = styled.a(({ theme }) => ({ ...theme.partials.text.inlineLink }))
+const MessageLink = styled.a(({ theme }) => ({
+  ...theme.partials.text.inlineLink,
+}))
 
 export default function BillingLegacyUserMessage() {
   const {
@@ -23,7 +25,9 @@ export default function BillingLegacyUserMessage() {
 
   const message = isGrandfatheringExpired
     ? 'Legacy user access expired. '
-    : `Legacy user access until ${moment(account?.grandfatheredUntil).format('MMM DD, YYYY')}. `
+    : `Legacy user access until ${moment(account?.grandfatheredUntil).format(
+        'MMM DD, YYYY'
+      )}. `
 
   return (
     <Wrap>

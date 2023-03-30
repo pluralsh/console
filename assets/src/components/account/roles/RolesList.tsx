@@ -40,11 +40,14 @@ export default function RolesList({ q }: any) {
               />
             </ListItem>
           )}
-          loadNextPage={() => pageInfo.hasNextPage
-            && fetchMore({
+          loadNextPage={() =>
+            pageInfo.hasNextPage &&
+            fetchMore({
               variables: { cursor: pageInfo.endCursor },
-              updateQuery: (prev, { fetchMoreResult: { roles } }) => extendConnection(prev, roles, 'roles'),
-            })}
+              updateQuery: (prev, { fetchMoreResult: { roles } }) =>
+                extendConnection(prev, roles, 'roles'),
+            })
+          }
           hasNextPage={pageInfo.hasNextPage}
           loading={loading}
           placeholder={() => (

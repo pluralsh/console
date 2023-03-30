@@ -1,10 +1,5 @@
 import React, { useContext, useState } from 'react'
-import {
-  A,
-  Div,
-  Flex,
-  Span,
-} from 'honorable'
+import { A, Div, Flex, Span } from 'honorable'
 import { useTheme } from 'styled-components'
 import { Link } from 'react-router-dom'
 
@@ -19,11 +14,11 @@ type Breadcrumb = {
 
 export const BreadcrumbsContext = React.createContext<{
   breadcrumbs: Breadcrumb[]
-  setBreadcrumbs:(arg: Breadcrumb[]) => void
-    }>({
-      breadcrumbs: [],
-      setBreadcrumbs: () => {},
-    })
+  setBreadcrumbs: (arg: Breadcrumb[]) => void
+}>({
+  breadcrumbs: [],
+  setBreadcrumbs: () => {},
+})
 
 export const useBreadcrumbs = () => useContext(BreadcrumbsContext)
 
@@ -33,39 +28,41 @@ export function Breadcrumbs() {
   const cluster = configuration?.manifest?.cluster
   const theme = useTheme()
 
-  const children = Array.from(lookahead(breadcrumbs, (crumb: Breadcrumb, next: Breadcrumb) => {
-    if (next.text) {
-      return (
-        <Flex
-          direction="row"
-          gap="small"
-          key={`${crumb.text}-${crumb.url}`}
-        >
-          <Span color="text-xlight">
-            {typeof crumb.url !== 'string' ? (
-              crumb.text
-            ) : (
-              <A
-                as={Link}
-                color="text-xlight"
-                to={crumb.url}
-                _hover={{
-                  cursor: 'pointer',
-                  color: 'text',
-                  textDecoration: 'underline',
-                }}
-              >
-                {crumb.text}
-              </A>
-            )}
-          </Span>
-          <Div color={theme.colors.grey[700]}>/</Div>
-        </Flex>
-      )
-    }
+  const children = Array.from(
+    lookahead(breadcrumbs, (crumb: Breadcrumb, next: Breadcrumb) => {
+      if (next.text) {
+        return (
+          <Flex
+            direction="row"
+            gap="small"
+            key={`${crumb.text}-${crumb.url}`}
+          >
+            <Span color="text-xlight">
+              {typeof crumb.url !== 'string' ? (
+                crumb.text
+              ) : (
+                <A
+                  as={Link}
+                  color="text-xlight"
+                  to={crumb.url}
+                  _hover={{
+                    cursor: 'pointer',
+                    color: 'text',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  {crumb.text}
+                </A>
+              )}
+            </Span>
+            <Div color={theme.colors.grey[700]}>/</Div>
+          </Flex>
+        )
+      }
 
-    return crumb.text
-  }))
+      return crumb.text
+    })
+  )
 
   return (
     <Flex
@@ -97,4 +94,3 @@ export default function BreadcrumbProvider({ children }) {
     </BreadcrumbsContext.Provider>
   )
 }
-

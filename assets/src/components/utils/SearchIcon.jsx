@@ -14,7 +14,8 @@ export function SearchIcon({ border, size }) {
       <Text
         size={`${size}px`}
         color={border}
-      >/
+      >
+        /
       </Text>
     </Box>
   )

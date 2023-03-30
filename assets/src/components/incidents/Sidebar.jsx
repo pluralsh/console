@@ -33,16 +33,22 @@ function NotificationIcon({ incident, ...props }) {
 }
 
 function SmallSidebar({ incident, setOpen, setView }) {
-  const doOpen = useCallback(view => {
-    setView(view)
-    setOpen(true)
-  }, [setOpen, setView])
-  const WrappedNotification = useCallback(props => (
-    <NotificationIcon
-      {...props}
-      incident={incident}
-    />
-  ), [incident])
+  const doOpen = useCallback(
+    (view) => {
+      setView(view)
+      setOpen(true)
+    },
+    [setOpen, setView]
+  )
+  const WrappedNotification = useCallback(
+    (props) => (
+      <NotificationIcon
+        {...props}
+        incident={incident}
+      />
+    ),
+    [incident]
+  )
 
   return (
     <Box
@@ -92,9 +98,7 @@ function SmallSidebar({ incident, setOpen, setView }) {
   )
 }
 
-function SidebarContent({
-  view, setView, incident, fetchMore, setOpen,
-}) {
+function SidebarContent({ view, setView, incident, fetchMore, setOpen }) {
   return (
     <Box fill>
       <Box
@@ -128,7 +132,8 @@ function SidebarContent({
           <Text
             size="small"
             weight={500}
-          >{view}
+          >
+            {view}
           </Text>
         </Box>
         <ViewOption
@@ -198,8 +203,12 @@ function SidebarContent({
             fetchMore={fetchMore}
           />
         )}
-        {view === SidebarView.SUBSCRIPTION && <Subscription incident={incident} />}
-        {view === SidebarView.CLUSTER && <ClusterInformation incident={incident} />}
+        {view === SidebarView.SUBSCRIPTION && (
+          <Subscription incident={incident} />
+        )}
+        {view === SidebarView.CLUSTER && (
+          <ClusterInformation incident={incident} />
+        )}
       </Box>
     </Box>
   )

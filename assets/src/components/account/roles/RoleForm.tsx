@@ -53,7 +53,7 @@ export default function RoleForm({
   bindings,
   setBindings,
 }): any {
-  const [step, setStep] = useState<0|1>(0)
+  const [step, setStep] = useState<0 | 1>(0)
   const permissions = Object.entries(PermissionTypes)
   const len = permissions.length
 
@@ -80,13 +80,17 @@ export default function RoleForm({
             label="Name"
             placeholder="Role name"
             value={attributes.name}
-            onChange={({ target: { value } }) => setAttributes({ ...attributes, name: value })}
+            onChange={({ target: { value } }) =>
+              setAttributes({ ...attributes, name: value })
+            }
           />
           <ValidatedInput
             label="Description"
             placeholder="Role description"
             value={attributes.description}
-            onChange={({ target: { value } }) => setAttributes({ ...attributes, description: value })}
+            onChange={({ target: { value } }) =>
+              setAttributes({ ...attributes, description: value })
+            }
           />
           <P
             body1

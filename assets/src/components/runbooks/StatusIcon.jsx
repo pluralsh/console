@@ -1,18 +1,16 @@
 import React, { useContext, useRef, useState } from 'react'
 import { Previous } from 'grommet-icons'
 import { Check } from 'forge-core'
-import {
-  Box,
-  Drop,
-  Text,
-  ThemeContext,
-} from 'grommet'
+import { Box, Drop, Text, ThemeContext } from 'grommet'
 import { normalizeColor } from 'grommet/utils'
 import moment from 'moment'
 
 import { ignoreEvent } from 'components/utils/events'
 
-import { LabelsAnnotationsRow, LabelsAnnotationsTag } from 'components/cluster/LabelsAnnotations'
+import {
+  LabelsAnnotationsRow,
+  LabelsAnnotationsTag,
+} from 'components/cluster/LabelsAnnotations'
 
 import { SEVERITY_COLORS } from './constants'
 
@@ -21,7 +19,8 @@ function Warning({ size, color }) {
     <Text
       size={size}
       color={color}
-    >!!
+    >
+      !!
     </Text>
   )
 }
@@ -31,7 +30,9 @@ const ICON_DATA = {
   Alert: { icon: Warning, color: 'orange' },
 }
 
-const shadow = (color, theme) => ({ boxShadow: `0 0 10px ${normalizeColor(color, theme)}` })
+const shadow = (color, theme) => ({
+  boxShadow: `0 0 10px ${normalizeColor(color, theme)}`,
+})
 
 export function SeverityNub({ sev }) {
   return (
@@ -44,7 +45,8 @@ export function SeverityNub({ sev }) {
       <Text
         size="small"
         color="plrl-white"
-      >{sev}
+      >
+        {sev}
       </Text>
     </Box>
   )
@@ -70,8 +72,9 @@ function AlertDetail({ alert, setAlert }) {
           pad="xsmall"
           round="xsmall"
           hoverIndicator="tone-light"
-          onClick={e => {
-            ignoreEvent(e); setAlert(null)
+          onClick={(e) => {
+            ignoreEvent(e)
+            setAlert(null)
           }}
         >
           <Previous
@@ -83,7 +86,8 @@ function AlertDetail({ alert, setAlert }) {
         <Text
           size="small"
           weight={500}
-        >{alert.name}
+        >
+          {alert.name}
         </Text>
       </Box>
       <Box>
@@ -131,8 +135,9 @@ function Alert({ alert, setAlert }) {
       align="center"
       pad="small"
       round="xsmall"
-      onClick={e => {
-        ignoreEvent(e); setAlert(alert)
+      onClick={(e) => {
+        ignoreEvent(e)
+        setAlert(alert)
       }}
       hoverIndicator="tone-light"
     >
@@ -141,7 +146,8 @@ function Alert({ alert, setAlert }) {
         <Text
           size="small"
           weight={500}
-        >{alert.name}
+        >
+          {alert.name}
         </Text>
         <Box
           direction="row"
@@ -151,13 +157,15 @@ function Alert({ alert, setAlert }) {
           <Text
             size="small"
             truncate
-          >{alert.annotations && alert.annotations.summary}
+          >
+            {alert.annotations && alert.annotations.summary}
           </Text>
           <Box flex={false}>
             <Text
               size="small"
               color="dark-3"
-            >-- {moment(alert.startsAt).format('lll')}
+            >
+              -- {moment(alert.startsAt).format('lll')}
             </Text>
           </Box>
         </Box>
@@ -217,7 +225,7 @@ export function StatusIcon({ status, size, innerSize }) {
         align="center"
         justify="center"
         background={color}
-        onClick={e => {
+        onClick={(e) => {
           ignoreEvent(e)
           if (!healthy) setOpen(true)
         }}
@@ -225,7 +233,10 @@ export function StatusIcon({ status, size, innerSize }) {
         onMouseLeave={() => setHover(false)}
         style={hover && !healthy ? null : shadow(color, theme)}
       >
-        {React.createElement(icon, { size: `${innerSize}px`, color: 'plrl-white' })}
+        {React.createElement(icon, {
+          size: `${innerSize}px`,
+          color: 'plrl-white',
+        })}
       </Box>
       {open && !healthy && (
         <Drop

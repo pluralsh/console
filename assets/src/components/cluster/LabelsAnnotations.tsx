@@ -5,7 +5,8 @@ import type { LabelPair, Maybe, Metadata as MetadataT } from 'generated/graphql'
 import { CARD_CONTENT_MAX_WIDTH, MetadataCard } from 'components/utils/Metadata'
 import { useTheme } from 'styled-components'
 
-export const mapify = tags => tags.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {})
+export const mapify = (tags) =>
+  tags.reduce((acc, { name, value }) => ({ ...acc, [name]: value }), {})
 
 export function LabelsAnnotationsRow({
   name,

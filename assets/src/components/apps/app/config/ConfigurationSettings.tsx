@@ -1,19 +1,9 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@apollo/client'
 import yaml from 'js-yaml'
 
-import {
-  Button,
-  Card,
-  ListBoxItem,
-  Select,
-} from '@pluralsh/design-system'
+import { Button, Card, ListBoxItem, Select } from '@pluralsh/design-system'
 
 import { Div, Flex, P } from 'honorable'
 
@@ -37,7 +27,13 @@ function organizeOverlays(overlays) {
   }, {})
 }
 
-export function ConfigurationSettings({ overlays, application: { name, configuration: { helm } } }) {
+export function ConfigurationSettings({
+  overlays,
+  application: {
+    name,
+    configuration: { helm },
+  },
+}) {
   const navigate = useNavigate()
   const onCompleted = useCallback(() => navigate('/builds'), [navigate])
   const [ctx, setCtx] = useState({})
@@ -50,8 +46,13 @@ export function ConfigurationSettings({ overlays, application: { name, configura
   const values = useMemo(() => yaml.load(helm), [helm])
   const folders = useMemo(() => organizeOverlays(overlays), [overlays])
   const [folder, setFolder] = useState<any>(Object.keys(folders)[0])
-  const [subfolder, setSubfolder] = useState<any>(Object.keys(folders[folder] || ['all'])[0])
-  const changed = !isEqualWith(omitBy(ctx, v => v === ''), init)
+  const [subfolder, setSubfolder] = useState<any>(
+    Object.keys(folders[folder] || ['all'])[0]
+  )
+  const changed = !isEqualWith(
+    omitBy(ctx, (v) => v === ''),
+    init
+  )
 
   useEffect(() => {
     if (!folders[folder]) {
@@ -59,8 +60,7 @@ export function ConfigurationSettings({ overlays, application: { name, configura
 
       setFolder(f)
       setSubfolder(Object.keys(folders[f] || ['all'])[0])
-    }
-    else if (!folders[folder][subfolder]) {
+    } else if (!folders[folder][subfolder]) {
       setSubfolder(Object.keys(folders[folder] || ['all'])[0])
     }
   }, [folders, folder, subfolder])
@@ -83,7 +83,7 @@ export function ConfigurationSettings({ overlays, application: { name, configura
             selectedKey={folder}
             onSelectionChange={setFolder}
           >
-            {Object.keys(folders).map(f => (
+            {Object.keys(folders).map((f) => (
               <ListBoxItem
                 key={f}
                 label={f}
@@ -99,7 +99,7 @@ export function ConfigurationSettings({ overlays, application: { name, configura
             selectedKey={subfolder}
             onSelectionChange={setSubfolder}
           >
-            {Object.keys(folders[folder]).map(s => (
+            {Object.keys(folders[folder]).map((s) => (
               <ListBoxItem
                 key={s}
                 label={s}
@@ -155,4 +155,3 @@ export function ConfigurationSettings({ overlays, application: { name, configura
     </Flex>
   )
 }
-

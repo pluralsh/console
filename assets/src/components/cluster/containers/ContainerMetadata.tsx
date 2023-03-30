@@ -31,7 +31,7 @@ export default function ContainerMetadata() {
       </MetadataItem>
       {container?.ports && container?.ports?.length > 0 && (
         <MetadataItem heading="Ports">
-          {container.ports.map(port => (
+          {container.ports.map((port) => (
             <div>
               {port?.protocol ? `${port.protocol} ` : ''}
               {port?.containerPort}

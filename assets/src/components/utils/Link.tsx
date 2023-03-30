@@ -4,7 +4,7 @@ import styled from 'styled-components'
 
 export function SafeLink({ children, ...props }: ComponentProps<typeof Link>) {
   return (
-    <span onClick={e => e.stopPropagation()}>
+    <span onClick={(e) => e.stopPropagation()}>
       <Link {...props}>{children}</Link>
     </span>
   )

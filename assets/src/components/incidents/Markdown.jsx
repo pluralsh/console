@@ -1,12 +1,5 @@
 import React, { useContext, useRef, useState } from 'react'
-import {
-  Anchor,
-  Box,
-  Drop,
-  Markdown,
-  Text,
-  ThemeContext,
-} from 'grommet'
+import { Anchor, Box, Drop, Markdown, Text, ThemeContext } from 'grommet'
 import { Copy, TooltipContent, WithCopy } from 'forge-core'
 import Highlight from 'react-highlight.js'
 import hljs from 'highlight.js'
@@ -57,12 +50,14 @@ export function Code({ children, className, multiline }) {
               size="small"
               weight={500}
               color="dark-3"
-            >language:
+            >
+              language:
             </Text>
             <Text
               size="small"
               color="dark-3"
-            >{lang}
+            >
+              {lang}
             </Text>
             <WithCopy
               text={children}
@@ -84,7 +79,10 @@ export function Code({ children, className, multiline }) {
     <span>
       <Box
         flex={false}
-        style={{ display: 'inline-block', color: multiline ? null : normalizeColor('notif', theme) }}
+        style={{
+          display: 'inline-block',
+          color: multiline ? null : normalizeColor('notif', theme),
+        }}
         pad={multiline ? 'xsmall' : { horizontal: 'xxsmall' }}
         round="xxsmall"
         border={{ color: 'light-6' }}
@@ -128,7 +126,8 @@ function Mention({ text, user }) {
         <Text
           size="small"
           weight={500}
-        >@{text}
+        >
+          @{text}
         </Text>
       </Box>
       {open && (
@@ -150,12 +149,14 @@ function Mention({ text, user }) {
             <Text
               size="small"
               weight={500}
-            >{user.name}
+            >
+              {user.name}
             </Text>
             <Text
               size="small"
               color="dark-5"
-            >-- {user.email}
+            >
+              -- {user.email}
             </Text>
           </Box>
         </Drop>
@@ -204,17 +205,17 @@ function Emoji({ name }) {
 
 function MessageEntity({ entity }) {
   switch (entity.type) {
-  case EntityType.MENTION:
-    return (
-      <Mention
-        text={entity.text}
-        user={entity.user}
-      />
-    )
-  case EntityType.EMOJI:
-    return <Emoji name={entity.text} />
-  default:
-    return null
+    case EntityType.MENTION:
+      return (
+        <Mention
+          text={entity.text}
+          user={entity.user}
+        />
+      )
+    case EntityType.EMOJI:
+      return <Emoji name={entity.text} />
+    default:
+      return null
   }
 }
 
@@ -239,7 +240,10 @@ function* splitText(text, entities) {
 
 export default React.memo(({ text, entities }) => {
   const parsed = [...splitText(text, entities || [])].join('')
-  const entityMap = (entities || []).reduce((map, entity) => ({ ...map, [entity.id]: entity }), {})
+  const entityMap = (entities || []).reduce(
+    (map, entity) => ({ ...map, [entity.id]: entity }),
+    {}
+  )
 
   function Entity({ id }) {
     return <MessageEntity entity={entityMap[id]} />
@@ -249,7 +253,13 @@ export default React.memo(({ text, entities }) => {
     <Markdown
       components={{
         blockquote: { component: Blockquote },
-        p: { props: { size: 'small', margin: { top: 'xsmall', bottom: 'xsmall' }, style: { maxWidth: '100%' } } },
+        p: {
+          props: {
+            size: 'small',
+            margin: { top: 'xsmall', bottom: 'xsmall' },
+            style: { maxWidth: '100%' },
+          },
+        },
         a: { props: { size: 'small', target: '_blank' }, component: Anchor },
         span: { props: { style: { verticalAlign: 'bottom' } } },
         code: { component: Code },

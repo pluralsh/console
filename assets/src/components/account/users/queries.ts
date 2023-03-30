@@ -54,4 +54,3 @@ export const CREATE_INVITE = gql`
   }
   ${InviteFragment}
 `
-

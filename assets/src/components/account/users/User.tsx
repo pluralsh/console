@@ -21,8 +21,11 @@ export function User({ user }: any) {
   })
   const editable = !!me?.roles?.admin || hasRbac(me as any, Permissions.USERS)
   const isAdmin = !!user.roles?.admin
-  const setAdmin = useCallback(() => mutation({ variables: { attributes: { roles: { admin: !isAdmin } } } }),
-    [mutation, isAdmin])
+  const setAdmin = useCallback(
+    () =>
+      mutation({ variables: { attributes: { roles: { admin: !isAdmin } } } }),
+    [mutation, isAdmin]
+  )
   const [confirm, setConfirm] = useState(false)
 
   const isSelf = user.id === me?.id
@@ -63,8 +66,7 @@ export function User({ user }: any) {
           onChange={() => {
             if (isAdmin) {
               setConfirm(true)
-            }
-            else {
+            } else {
               setAdmin()
             }
           }}

@@ -12,7 +12,14 @@ export function textStyle({ bg, fg, decoration }): any {
 }
 
 export function AnsiLine({ line }) {
-  const blocks = useMemo(() => Anser.ansiToJson(escapeCarriageReturn(line), { json: true, remove_empty: true }), [line])
+  const blocks = useMemo(
+    () =>
+      Anser.ansiToJson(escapeCarriageReturn(line), {
+        json: true,
+        remove_empty: true,
+      }),
+    [line]
+  )
 
   return (
     <>

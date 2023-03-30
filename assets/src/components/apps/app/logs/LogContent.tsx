@@ -22,7 +22,11 @@ function determineLevel(line) {
 }
 
 function* crossStreams(streams) {
-  const q = new TinyQueue<any>([], ({ head: { timestamp: left } }, { head: { timestamp: right } }) => right - left)
+  const q = new TinyQueue<any>(
+    [],
+    ({ head: { timestamp: left } }, { head: { timestamp: right } }) =>
+      right - left
+  )
 
   for (const stream of streams) {
     if (!stream.values || !stream.values[0]) continue
@@ -32,7 +36,11 @@ function* crossStreams(streams) {
   while (q.length) {
     const { head, stream, ind } = q.pop()
 
-    yield { line: head, level: determineLevel(head.value), stream: stream.stream }
+    yield {
+      line: head,
+      level: determineLevel(head.value),
+      stream: stream.stream,
+    }
     if (stream.values[ind + 1]) {
       q.push({ head: stream.values[ind + 1], stream, ind: ind + 1 })
     }
@@ -59,7 +67,17 @@ function Placeholder() {
 }
 
 export default function LogContent({
-  listRef, setListRef, logs, name, loading, fetchMore, onScroll, search, setLoader, addLabel, fullscreen = false,
+  listRef,
+  setListRef,
+  logs,
+  name,
+  loading,
+  fetchMore,
+  onScroll,
+  search,
+  setLoader,
+  addLabel,
+  fullscreen = false,
 }) {
   const [open, setOpen] = useState<any>(null)
   const [timestamp, setTimestamp] = useState<any>()
@@ -67,7 +85,10 @@ export default function LogContent({
   const [done, setDone] = useState(false)
   const end = useMemo<any>(() => last(logs), [logs])
   const lines = useMemo(() => [...crossStreams(logs)], [logs])
-  const start = useMemo(() => (lines.length > 0 ? `${last(lines)?.line?.timestamp}` : null), [lines])
+  const start = useMemo(
+    () => (lines.length > 0 ? `${last(lines)?.line?.timestamp}` : null),
+    [lines]
+  )
 
   useEffect(() => {
     if (!end?.values) {
@@ -98,10 +119,16 @@ export default function LogContent({
         handleScroll={onScroll}
         loading={loading}
         placeholder={Placeholder}
-        loadNextPage={() => !done && fetchMore({
-          variables: { start },
-          updateQuery: (prev, { fetchMoreResult: { logs } }) => ({ ...prev, logs: [...prev.logs, ...logs] }),
-        })}
+        loadNextPage={() =>
+          !done &&
+          fetchMore({
+            variables: { start },
+            updateQuery: (prev, { fetchMoreResult: { logs } }) => ({
+              ...prev,
+              logs: [...prev.logs, ...logs],
+            }),
+          })
+        }
         hasNextPage={!done}
       />
       {open && (

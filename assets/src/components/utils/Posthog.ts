@@ -29,8 +29,7 @@ export function usePosthog() {
   useEffect(() => {
     if (consent.statistics) {
       posthog.opt_in_capturing()
-    }
-    else {
+    } else {
       posthog.opt_out_capturing()
     }
   }, [consent.statistics])

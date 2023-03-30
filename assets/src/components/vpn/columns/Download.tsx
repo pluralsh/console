@@ -39,7 +39,10 @@ function DownloadAction({ name, disabled }) {
           disabled={disabled}
           tertiary
           style={{
-            padding: 0, width: 32, height: 32, minHeight: 32,
+            padding: 0,
+            width: 32,
+            height: 32,
+            minHeight: 32,
           }}
           onClick={() => setOpen(true)}
         >

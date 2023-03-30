@@ -1,7 +1,11 @@
 import { gql } from 'apollo-boost'
 
 import { MetricResponseFragment } from './dashboards'
-import { DeploymentFragment, NodeFragment, StatefulSetFragment } from './kubernetes'
+import {
+  DeploymentFragment,
+  NodeFragment,
+  StatefulSetFragment,
+} from './kubernetes'
 import { UserFragment } from './users'
 
 export const RunbookAlertStatus = gql`
@@ -20,7 +24,9 @@ export const RunbookExecutionFragment = gql`
     name
     namespace
     context
-    user { ...UserFragment }
+    user {
+      ...UserFragment
+    }
     insertedAt
   }
   ${UserFragment}
@@ -29,7 +35,11 @@ export const RunbookExecutionFragment = gql`
 export const RunbookFragment = gql`
   fragment RunbookFragment on Runbook {
     name
-    status { alerts { ...RunbookAlertStatus } }
+    status {
+      alerts {
+        ...RunbookAlertStatus
+      }
+    }
     spec {
       name
       description
@@ -42,21 +52,38 @@ export const RunbookDatasourceFragment = gql`
   fragment RunbookDatasourceFragment on RunbookDatasource {
     name
     type
-    prometheus { query format legend }
-    kubernetes { resource name }
+    prometheus {
+      query
+      format
+      legend
+    }
+    kubernetes {
+      resource
+      name
+    }
   }
 `
 
 export const RunbookDataFragment = gql`
   fragment RunbookDataFragment on RunbookData {
     name
-    source { ...RunbookDatasourceFragment }
-    prometheus { ...MetricResponseFragment }
-    nodes { ...NodeFragment }
+    source {
+      ...RunbookDatasourceFragment
+    }
+    prometheus {
+      ...MetricResponseFragment
+    }
+    nodes {
+      ...NodeFragment
+    }
     kubernetes {
       __typename
-      ... on StatefulSet { ...StatefulSetFragment }
-      ... on Deployment { ...DeploymentFragment }
+      ... on StatefulSet {
+        ...StatefulSetFragment
+      }
+      ... on Deployment {
+        ...DeploymentFragment
+      }
     }
   }
   ${RunbookDatasourceFragment}

@@ -6,13 +6,18 @@ import { UPDATE_USER } from 'components/graphql/users'
 import { useMutation } from '@apollo/client'
 import { LoginContext } from 'components/contexts'
 
-const validPassword = pass => (pass.length < 8 ? { error: true, message: 'password is too short' } : { error: false, message: 'valid password!' })
+const validPassword = (pass) =>
+  pass.length < 8
+    ? { error: true, message: 'password is too short' }
+    : { error: false, message: 'valid password!' }
 
 function UpdatePassword({ cancel }: any) {
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [second, setSecond] = useState('')
-  const [mutation, { loading }] = useMutation(UPDATE_USER, { variables: { attributes: { password } } })
+  const [mutation, { loading }] = useMutation(UPDATE_USER, {
+    variables: { attributes: { password } },
+  })
 
   return (
     <Box gap="small">
@@ -31,7 +36,7 @@ function UpdatePassword({ cancel }: any) {
         type="password"
         value={password}
         onChange={({ target: { value } }) => setPassword(value)}
-        validation={pass => (!pass ? null : validPassword(pass))}
+        validation={(pass) => (!pass ? null : validPassword(pass))}
       />
       <ValidatedInput
         width="100%"
@@ -40,7 +45,13 @@ function UpdatePassword({ cancel }: any) {
         type="password"
         value={second}
         onChange={({ target: { value } }) => setSecond(value)}
-        validation={pass => (!pass ? null : (pass !== password ? { error: true, message: 'passwords do not match' } : { error: false, message: 'passwords match!' }))}
+        validation={(pass) =>
+          !pass
+            ? null
+            : pass !== password
+            ? { error: true, message: 'passwords do not match' }
+            : { error: false, message: 'passwords match!' }
+        }
       />
       <Box
         direction="row"

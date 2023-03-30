@@ -1,4 +1,8 @@
-import { Account, AvailableFeatures, PluralSubscription } from 'generated/graphql'
+import {
+  Account,
+  AvailableFeatures,
+  PluralSubscription,
+} from 'generated/graphql'
 import { createContext } from 'react'
 
 export type SubscriptionContextType = {

@@ -1,37 +1,38 @@
 import isString from 'lodash/isString'
 import uniqWith from 'lodash/uniqWith'
 
-export function updateFragment(cache, {
-  fragment, id, update, fragmentName,
-}) {
+export function updateFragment(cache, { fragment, id, update, fragmentName }) {
   const current = cache.readFragment({ id, fragment, fragmentName })
 
   if (!current) return
 
   cache.writeFragment({
-    id, fragment, data: update(current), fragmentName,
+    id,
+    fragment,
+    data: update(current),
+    fragmentName,
   })
 }
 
 export function extendConnection(prev, next, key) {
   const { edges, pageInfo } = next
-  const uniq = uniqWith([...prev[key].edges, ...edges], (a, b) => (a.node?.id ? a.node?.id === b.node?.id : false))
+  const uniq = uniqWith([...prev[key].edges, ...edges], (a, b) =>
+    a.node?.id ? a.node?.id === b.node?.id : false
+  )
 
   return {
     ...prev,
     [key]: {
-      ...prev[key], pageInfo, edges: uniq,
+      ...prev[key],
+      pageInfo,
+      edges: uniq,
     },
   }
 }
 
-export function deepUpdate(
-  prev, path, update, ind = 0
-) {
+export function deepUpdate(prev, path, update, ind = 0) {
   if (isString(path)) {
-    return deepUpdate(
-      prev, path.split('.'), update, ind
-    )
+    return deepUpdate(prev, path.split('.'), update, ind)
   }
 
   const key = path[ind]
@@ -42,9 +43,7 @@ export function deepUpdate(
 
   return {
     ...prev,
-    [key]: deepUpdate(
-      prev[key], path, update, ind + 1
-    ),
+    [key]: deepUpdate(prev[key], path, update, ind + 1),
   }
 }
 
@@ -56,13 +55,21 @@ export function appendConnection(prev, next, key) {
   return {
     ...prev,
     [key]: {
-      ...prev[key], pageInfo, edges: [{ __typename: `${next.__typename}Edge`, node: next }, ...edges],
+      ...prev[key],
+      pageInfo,
+      edges: [{ __typename: `${next.__typename}Edge`, node: next }, ...edges],
     },
   }
 }
 
 export function removeConnection(prev, val, key) {
-  return { ...prev, [key]: { ...prev[key], edges: prev[key].edges.filter(({ node }) => node.id !== val.id) } }
+  return {
+    ...prev,
+    [key]: {
+      ...prev[key],
+      edges: prev[key].edges.filter(({ node }) => node.id !== val.id),
+    },
+  }
 }
 
 export function updateCache(cache, { query, variables, update }: any) {
@@ -85,4 +92,3 @@ export function deepFetch(map, path) {
 
   return deepFetch(map[key], path.slice(1))
 }
-

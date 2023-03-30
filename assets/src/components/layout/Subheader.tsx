@@ -56,6 +56,5 @@ export default function Subheader() {
       <ResponsiveLayoutSpacer />
       <AppNav />
     </Flex>
-
   )
 }

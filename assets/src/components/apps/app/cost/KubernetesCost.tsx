@@ -5,7 +5,7 @@ import { ProgressBar } from '@pluralsh/design-system'
 
 const MINUTES_MONTH = 60 * 24 * 30
 
-const round = v => Math.round(v * 100) / 100
+const round = (v) => Math.round(v * 100) / 100
 
 const scale = (amount, scalar) => round(amount * scalar)
 
@@ -13,7 +13,8 @@ export default function KubernetesCost({ cost }) {
   const scalar = cost ? Math.max(MINUTES_MONTH / cost.minutes, 1) : 1
 
   const data = useMemo(() => {
-    const miscCost = cost.totalCost - (cost.cpuCost + cost.ramCost + cost.pvCost)
+    const miscCost =
+      cost.totalCost - (cost.cpuCost + cost.ramCost + cost.pvCost)
 
     return [
       { dim: 'cpu', cost: scale(cost.cpuCost, scalar) },
@@ -44,7 +45,7 @@ export default function KubernetesCost({ cost }) {
         </Span>
         <Span color="text-light">${total}</Span>
       </Flex>
-      {data.map(entry => (
+      {data.map((entry) => (
         <Flex
           align="center"
           justify="space-between"
@@ -72,7 +73,10 @@ export default function KubernetesCost({ cost }) {
             color="text-light"
             justify="end"
           >
-            ${Number(entry.cost).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            $
+            {Number(entry.cost).toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+            })}
           </Flex>
         </Flex>
       ))}

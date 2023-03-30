@@ -1,10 +1,5 @@
 import { Box } from 'grommet'
-import {
-  A,
-  Button,
-  Div,
-  P,
-} from 'honorable'
+import { A, Button, Div, P } from 'honorable'
 import { Code, ContentCard } from '@pluralsh/design-system'
 import { localized } from 'helpers/hostname'
 import { useLazyQuery } from '@apollo/client'
@@ -33,7 +28,9 @@ export default function SecurityAccess() {
         >
           Grant access
         </Div>
-        <P color="text-light">1. Copy the code below and send it to whoever needs access.</P>
+        <P color="text-light">
+          1. Copy the code below and send it to whoever needs access.
+        </P>
         {!data?.temporaryToken && (
           <Button
             alignSelf="start"
@@ -44,7 +41,9 @@ export default function SecurityAccess() {
             Generate temporary access token
           </Button>
         )}
-        {data?.temporaryToken && <Code showLineNumbers={false}>{data.temporaryToken}</Code>}
+        {data?.temporaryToken && (
+          <Code showLineNumbers={false}>{data.temporaryToken}</Code>
+        )}
         <P color="text-light">
           <span>2. Have the recipent enter the code into&nbsp;</span>
           <A

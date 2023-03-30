@@ -117,18 +117,20 @@ export default function Container() {
     const { pod } = data
 
     const containerStatuses = statusesToRecord(pod?.status?.containerStatuses)
-    const initContainerStatuses = statusesToRecord(pod?.status?.initContainerStatuses)
+    const initContainerStatuses = statusesToRecord(
+      pod?.status?.initContainerStatuses
+    )
     const containers = pod.spec.containers || []
     const initContainers = pod.spec.initContainers || []
 
-    const container
-      = containers?.find(cont => cont?.name === containerName)
-      || initContainers?.find(cont => cont?.name === containerName)
+    const container =
+      containers?.find((cont) => cont?.name === containerName) ||
+      initContainers?.find((cont) => cont?.name === containerName)
 
     const containerStatus = !container?.name
       ? null
-      : containerStatuses[container?.name]
-        || initContainerStatuses[container?.name]
+      : containerStatuses[container?.name] ||
+        initContainerStatuses[container?.name]
 
     return {
       container,
@@ -152,7 +154,7 @@ export default function Container() {
     <ResponsivePageFullWidth
       scrollable={currentTab?.path === 'metadata'}
       heading={containerName}
-      headingContent={(
+      headingContent={
         <Flex gap="medium">
           <HeadingTabList
             subpath={subpath}
@@ -163,10 +165,12 @@ export default function Container() {
               width="100%"
               placement="right"
               selectedKey={containerName}
-              onSelectionChange={toContainerName => {
-                navigate(`/pods/${pod?.metadata.namespace}/${
-                  pod?.metadata.name
-                }/shell/${toContainerName}${subpath ? `/${subpath}` : ''}`)
+              onSelectionChange={(toContainerName) => {
+                navigate(
+                  `/pods/${pod?.metadata.namespace}/${
+                    pod?.metadata.name
+                  }/shell/${toContainerName}${subpath ? `/${subpath}` : ''}`
+                )
               }}
               triggerButton={<SelectTrigger>{containerName}</SelectTrigger>}
             >
@@ -191,7 +195,7 @@ export default function Container() {
             </Select>
           )}
         </Flex>
-      )}
+      }
     >
       <TabPanel
         stateRef={tabStateRef}

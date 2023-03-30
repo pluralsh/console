@@ -11,36 +11,36 @@ export default function AppStatus({ app }) {
   const { readiness, error } = appState(app)
 
   switch (readiness) {
-  case Readiness.Ready:
-    return (
-      <Chip
-        size="small"
-        severity="success"
-      >
-        Ready
-      </Chip>
-    )
-  case Readiness.Failed:
-    return (
-      <Tooltip label={error.message}>
+    case Readiness.Ready:
+      return (
         <Chip
           size="small"
-          severity="error"
+          severity="success"
         >
-          Failed ({componentsReady})
+          Ready
         </Chip>
-      </Tooltip>
-    )
-  case Readiness.InProgress:
-    return (
-      <Chip
-        size="small"
-        severity="warning"
-      >
-        Pending ({componentsReady})
-      </Chip>
-    )
-  default:
-    return <Chip size="small">Unknown</Chip>
+      )
+    case Readiness.Failed:
+      return (
+        <Tooltip label={error.message}>
+          <Chip
+            size="small"
+            severity="error"
+          >
+            Failed ({componentsReady})
+          </Chip>
+        </Tooltip>
+      )
+    case Readiness.InProgress:
+      return (
+        <Chip
+          size="small"
+          severity="warning"
+        >
+          Pending ({componentsReady})
+        </Chip>
+      )
+    default:
+      return <Chip size="small">Unknown</Chip>
   }
 }

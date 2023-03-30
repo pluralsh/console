@@ -3,7 +3,7 @@ import { CellContext } from '@tanstack/react-table'
 
 import { ColumnBuilder, VPNClientRow } from './types'
 
-const ColumnStatus = ColumnBuilder.accessor(row => row.isReady, {
+const ColumnStatus = ColumnBuilder.accessor((row) => row.isReady, {
   id: 'status',
   header: 'Status',
   enableGlobalFilter: true,
@@ -11,7 +11,9 @@ const ColumnStatus = ColumnBuilder.accessor(row => row.isReady, {
   cell,
 })
 
-function cell(props: CellContext<VPNClientRow, boolean | undefined>): JSX.Element {
+function cell(
+  props: CellContext<VPNClientRow, boolean | undefined>
+): JSX.Element {
   const isReady = props.getValue()
   const label = isReady ? 'Ready' : 'Pending'
   const severity = isReady ? 'success' : 'info'
@@ -24,7 +26,8 @@ function cell(props: CellContext<VPNClientRow, boolean | undefined>): JSX.Elemen
       <Chip
         severity={severity}
         loading={!isReady}
-      >{label}
+      >
+        {label}
       </Chip>
     </Tooltip>
   )

@@ -2,21 +2,23 @@ import styled from 'styled-components'
 
 export const commonCfg = { shouldForwardProp: () => true }
 
-export const MdBlockquote = styled.blockquote.withConfig(commonCfg)(({ theme }) => ({
-  position: 'relative',
-  ...theme.partials.text.body1,
-  color: theme.colors['text-light'],
-  margin: 0,
-  marginLeft: theme.spacing.xlarge - 1,
-  borderLeft: `2px solid ${theme.colors.border}`,
-  padding: '0',
-  paddingLeft: theme.spacing.xlarge - 1,
-  boxShadow: 'none',
-  '& p': {
+export const MdBlockquote = styled.blockquote.withConfig(commonCfg)(
+  ({ theme }) => ({
+    position: 'relative',
     ...theme.partials.text.body1,
     color: theme.colors['text-light'],
-  },
-}))
+    margin: 0,
+    marginLeft: theme.spacing.xlarge - 1,
+    borderLeft: `2px solid ${theme.colors.border}`,
+    padding: '0',
+    paddingLeft: theme.spacing.xlarge - 1,
+    boxShadow: 'none',
+    '& p': {
+      ...theme.partials.text.body1,
+      color: theme.colors['text-light'],
+    },
+  })
+)
 export const MdUl = styled.ul.withConfig(commonCfg)(({ theme }) => ({
   paddingLeft: theme.spacing.xlarge,
   marginBottom: theme.spacing.small,
@@ -43,7 +45,7 @@ export const MdA = styled.a.withConfig(commonCfg)(({ theme }) => ({
   display: 'inline',
   ...theme.partials.text.inlineLink,
 }))
-export const MdSpan = styled.span.withConfig(commonCfg)(_p => ({
+export const MdSpan = styled.span.withConfig(commonCfg)((_p) => ({
   verticalAlign: 'bottom',
 }))
 export const MdCode = styled.code.withConfig(commonCfg)(({ theme }) => ({

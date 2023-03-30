@@ -29,7 +29,7 @@ export function CookieSettingsProvider({ children }: { children: ReactNode }) {
   const [showPrefs, setShowPrefs] = useState(!prefs.hasResponse)
 
   useEffect(() => {
-    const listener = e => {
+    const listener = (e) => {
       setPrefs(e.detail)
     }
 
@@ -38,13 +38,15 @@ export function CookieSettingsProvider({ children }: { children: ReactNode }) {
     return () => removePrefChangeListener(listener)
   }, [])
 
-  const value: CookieSettingsContextT = useMemo(() => ({
-    show: () => setShowPrefs(true),
-    hide: () => setShowPrefs(false),
-    setConsent,
-    ...prefs,
-  }),
-  [prefs])
+  const value: CookieSettingsContextT = useMemo(
+    () => ({
+      show: () => setShowPrefs(true),
+      hide: () => setShowPrefs(false),
+      setConsent,
+      ...prefs,
+    }),
+    [prefs]
+  )
 
   return (
     <CookieSettingsContext.Provider value={value}>
@@ -61,7 +63,9 @@ export function useCookieSettings() {
   const context = useContext(CookieSettingsContext)
 
   if (!context) {
-    throw new Error('useCookieSettings() must be used inside of a CookieSettingsProvider')
+    throw new Error(
+      'useCookieSettings() must be used inside of a CookieSettingsProvider'
+    )
   }
 
   return context

@@ -21,11 +21,15 @@ export default function Dashboards() {
     fetchPolicy: 'cache-and-network',
   })
 
-  useEffect(() => setBreadcrumbs([
-    { text: 'apps', url: '/' },
-    { text: appName, url: `/apps/${appName}` },
-    { text: 'dashboards', url: `/apps/${appName}/dashboards` },
-  ]), [appName, setBreadcrumbs])
+  useEffect(
+    () =>
+      setBreadcrumbs([
+        { text: 'apps', url: '/' },
+        { text: appName, url: `/apps/${appName}` },
+        { text: 'dashboards', url: `/apps/${appName}/dashboards` },
+      ]),
+    [appName, setBreadcrumbs]
+  )
 
   if (!data) return null
 
@@ -49,21 +53,23 @@ export default function Dashboards() {
             width={500}
             icon={<DashboardIcon size={64} />}
             message="No dashboards available"
-            description={(
-              <div>
-                If you're interested in adding your dashboards to this
-                application,&nbsp;
-                <A
-                  inline
-                  href="https://www.plural.sh/community"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  visit our docs
-                </A>
-                &nbsp;for more details.
-              </div> as any // Workaround as JSX elements are not allowed here.
-            )}
+            description={
+              (
+                <div>
+                  If you're interested in adding your dashboards to this
+                  application,&nbsp;
+                  <A
+                    inline
+                    href="https://www.plural.sh/community"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    visit our docs
+                  </A>
+                  &nbsp;for more details.
+                </div>
+              ) as any // Workaround as JSX elements are not allowed here.
+            }
           />
         </Flex>
       )}

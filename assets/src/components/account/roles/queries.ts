@@ -6,9 +6,13 @@ import { RoleFragment } from '../../graphql/users'
 export const ROLES_Q = gql`
   query Roles($q: String, $cursor: String) {
     roles(q: $q, first: 20, after: $cursor) {
-      pageInfo { ...PageInfo }
+      pageInfo {
+        ...PageInfo
+      }
       edges {
-        node { ...RoleFragment }
+        node {
+          ...RoleFragment
+        }
       }
     }
   }

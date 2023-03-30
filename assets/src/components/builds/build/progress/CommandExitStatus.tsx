@@ -5,20 +5,19 @@ export default function CommandExitStatus({ exitCode }) {
     return <Spinner size={16} />
   }
 
-  return exitCode === 0
-    ? (
-      <P
-        color="text-success"
-        whiteSpace="pre"
-      >✓ OK
-      </P>
-    )
-    : (
-      <P
-        color="text-error"
-        whiteSpace="pre"
-      >
-        ✗ Exit code: {exitCode}
-      </P>
-    )
+  return exitCode === 0 ? (
+    <P
+      color="text-success"
+      whiteSpace="pre"
+    >
+      ✓ OK
+    </P>
+  ) : (
+    <P
+      color="text-error"
+      whiteSpace="pre"
+    >
+      ✗ Exit code: {exitCode}
+    </P>
+  )
 }

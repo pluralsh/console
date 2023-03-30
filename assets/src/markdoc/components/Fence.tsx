@@ -18,8 +18,8 @@ export function toCodeString({
     ? typeof children === 'string'
       ? children
       : Array.isArray(children)
-        ? children.join('')
-        : ''
+      ? children.join('')
+      : ''
     : content || ''
 }
 
@@ -37,12 +37,14 @@ export default function Fence({
   process,
   ...props
 }) {
-  const codeString = useMemo(() => toCodeString({ process, children, content }),
-    [process, children, content])
+  const codeString = useMemo(
+    () => toCodeString({ process, children, content }),
+    [process, children, content]
+  )
 
   if (
-    showHeader === undefined
-    && (language === 'sh' || language === 'shell' || language === 'bash')
+    showHeader === undefined &&
+    (language === 'sh' || language === 'shell' || language === 'bash')
   ) {
     showHeader = false
   }

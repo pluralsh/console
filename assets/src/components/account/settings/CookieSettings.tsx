@@ -36,7 +36,8 @@ export default function AccountSettings() {
             setConsent({ statistics: !consent.statistics })
           }}
           marginTop="xlarge"
-        >Allow
+        >
+          Allow
         </Switch>
       </Card>
     </ScrollablePage>
