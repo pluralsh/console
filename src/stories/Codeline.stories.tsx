@@ -39,7 +39,7 @@ function CustomCopyTemplate(args: any) {
         This codeline copy uses a custom onCopy function that returns a promise!
       </span>
       <Codeline
-        onCopy={onCopy}
+        onCopyClick={onCopy}
         {...args}
       />
     </Flex>

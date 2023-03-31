@@ -8,21 +8,21 @@ import CopyIcon from './icons/CopyIcon'
 
 type CodelineProps = FlexProps & {
   displayText?: string
-  onCopy: (text: string) => Promise<void>
+  onCopyClick?: (text: string) => Promise<void>
 }
 
 const propTypes = {}
 
 function CodelineRef(
-  { children, displayText, onCopy, ...props }: CodelineProps,
+  { children, displayText, onCopyClick, ...props }: CodelineProps,
   ref: Ref<any>
 ) {
   const [copied, setCopied] = useState(false)
   const theme = useTheme()
 
   const handleCopy = useCallback(() => {
-    if (onCopy) {
-      onCopy(children as string).then(() => setCopied(true))
+    if (onCopyClick) {
+      onCopyClick(children as string).then(() => setCopied(true))
 
       return
     }
@@ -30,7 +30,7 @@ function CodelineRef(
     window.navigator.clipboard
       .writeText(children as string)
       .then(() => setCopied(true))
-  }, [children, onCopy])
+  }, [children, onCopyClick])
 
   useEffect(() => {
     if (copied) {
