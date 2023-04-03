@@ -144,7 +144,7 @@ function PickerUnstyled({ items, ...props }: PickerProps): JSX.Element {
           ))}
         </div>
       )}
-      {filtered.length === 0 && (
+      {filtered.length === 0 && search?.length > 0 && (
         <div className="empty">
           <span className="empty-message">
             No applications found for "{search}".
@@ -155,6 +155,13 @@ function PickerUnstyled({ items, ...props }: PickerProps): JSX.Element {
           >
             Clear search
           </Button>
+        </div>
+      )}
+      {filtered.length === 0 && !search && (
+        <div className="empty">
+          <span className="empty-message">
+            No applications available to install.
+          </span>
         </div>
       )}
     </div>
