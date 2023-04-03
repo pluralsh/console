@@ -11,25 +11,19 @@ import {
   useState,
 } from 'react'
 import type { ComponentProps, Key, MutableRefObject, ReactElement } from 'react'
-
 import classNames from 'classnames'
 import { animated, useSpring } from 'react-spring'
 import useMeasure from 'react-use-measure'
 import styled, { useTheme } from 'styled-components'
 import { type ImmerReducer, useImmerReducer } from 'use-immer'
-
 import { Div } from 'honorable'
 
+import usePrevious from '../hooks/usePrevious'
 import useUnmount from '../hooks/useUnmount'
+import { CaretRightIcon } from '../icons'
 
-import {
-  CaretRightIcon,
-  Tab,
-  useNavigationContext,
-  usePrevious,
-} from '../index'
-
-import { TAB_INDICATOR_THICKNESS } from './Tab'
+import { useNavigationContext } from './contexts/NavigationContext'
+import Tab, { TAB_INDICATOR_THICKNESS } from './Tab'
 
 export type SideNavProps = {
   desktop: boolean

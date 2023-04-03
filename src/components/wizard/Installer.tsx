@@ -1,14 +1,12 @@
 import styled, { StyledProps } from 'styled-components'
 import { ReactElement } from 'react'
 
+import AppIcon from '../AppIcon'
 import { ListBox } from '../ListBox'
 import { ListBoxItem } from '../ListBoxItem'
-import { AppIcon } from '../../index'
 import PencilIcon from '../icons/PencilIcon'
 import Chip from '../Chip'
-
 import Tooltip from '../Tooltip'
-
 import InfoOutlineIcon from '../icons/InfoOutlineIcon'
 
 import { useNavigation, useStepper } from './hooks'

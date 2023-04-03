@@ -11,19 +11,16 @@ import {
 import IsEmpty from 'lodash/isEmpty'
 
 import { MoreIcon, SearchIcon } from '../icons'
-import {
-  AppIcon,
-  Button,
-  Card,
-  CardProps,
-  Input,
-  ListBoxItem,
-  Select,
-  Tooltip,
-  WrapWithIf,
-} from '../index'
 
+import AppIcon from './AppIcon'
+import Button from './Button'
+import Card, { CardProps } from './Card'
+import Input from './Input'
+import { ListBoxItem } from './ListBoxItem'
+import { Select } from './Select'
+import Tooltip from './Tooltip'
 import { useWindowSize } from './wizard/hooks'
+import WrapWithIf from './WrapWithIf'
 
 const AppList = styled(AppListUnstyled)(({ theme }) => ({
   width: '100%',
