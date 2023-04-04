@@ -65,6 +65,14 @@ function ListTemplate(args: any) {
           },
         }}
       />
+      <RepositoryCard
+        {...args}
+        releaseStatus="BETA"
+      />
+      <RepositoryCard
+        {...args}
+        releaseStatus="ALPHA"
+      />
     </Flex>
   )
 }

@@ -18,6 +18,7 @@ type RepositoryCardProps = DivProps & {
   description?: string
   imageUrl?: string
   tags?: string[]
+  releaseStatus?: 'ALPHA' | 'BETA' | string
   size?: 'small' | 'medium' | 'large' | string
 }
 
@@ -30,9 +31,12 @@ const propTypes = {
   trending: PropTypes.bool,
   description: PropTypes.string,
   imageUrl: PropTypes.string,
+  releaseStatus: PropTypes.oneOf(['ALPHA', 'BETA']),
   tags: PropTypes.arrayOf(PropTypes.string),
   size: PropTypes.oneOf(['small', 'medium', 'large']),
 }
+
+const prerelease = (status?: string) => status === 'ALPHA' || status === 'BETA'
 
 function RepositoryCardRef(
   {
@@ -46,11 +50,13 @@ function RepositoryCardRef(
     imageUrl,
     tags = [],
     size = 'small',
+    releaseStatus,
     ...props
   }: RepositoryCardProps,
   ref: Ref<any>
 ) {
   const maxTags = trending ? 5 : 6
+  const showRelease = prerelease(releaseStatus)
 
   return (
     <Card
@@ -129,7 +135,16 @@ function RepositoryCardRef(
                 flexGrow={1}
                 marginLeft="medium"
               >
-                {!!installed && (
+                {showRelease && (
+                  <Chip
+                    severity={releaseStatus === 'BETA' ? 'info' : 'warning'}
+                    size="large"
+                    hue="lighter"
+                  >
+                    <Span fontWeight={600}>{releaseStatus}</Span>
+                  </Chip>
+                )}
+                {!!installed && !showRelease && (
                   <Chip
                     severity="success"
                     size="large"
