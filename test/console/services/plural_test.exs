@@ -24,6 +24,21 @@ defmodule Console.Services.PluralTest do
     end
   end
 
+  describe "#merge_config/2" do
+    test "it can apply path updates appropriately" do
+      {:ok, formatted} = Console.Utils.Yaml.format(%{"a" => %{"b" => [1, %{"c" => 2}]}})
+      expect(File, :read, fn _ -> {:ok, formatted} end)
+      expect(File, :write, fn _, _ -> :ok end)
+
+      {:ok, res} = Plural.merge_config("console", [
+        %{path: ".a.b[1].c", value: "3", type: :int},
+        %{path: ".a.b[0]", value: "0", type: :int},
+        %{path: ".d", value: "hey", type: :string},
+      ])
+      {:ok, %{"a" => %{"b" => [0, %{"c" => 3}]}, "d" => "hey"}} = YamlElixir.read_from_string(res)
+    end
+  end
+
   describe "#install_recipe/4" do
     test "a user can install a recipe" do
       get_body = Jason.encode!(%{

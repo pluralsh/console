@@ -4,8 +4,9 @@ defmodule Console.Schema.Build do
 
   @expiry 30
 
-  defenum Type, deploy: 0, bounce: 1, approval: 2, install: 3, destroy: 4, dedicated: 5
+  defenum Type, deploy: 0, bounce: 1, approval: 2, install: 3, destroy: 4, dedicated: 5, config: 6
   defenum Status, queued: 0, running: 1, successful: 2, failed: 3, cancelled: 4, pending: 5
+  defenum ValueType, int: 0, string: 1, float: 2, bool: 3
 
   schema "builds" do
     field :repository,   :string
@@ -19,6 +20,14 @@ defmodule Console.Schema.Build do
     field :pinged_at,    :utc_datetime_usec
     field :context,      :map
     field :deployer,     :string, virtual: true
+
+    embeds_one :config, UpgradeConfig, on_replace: :update do
+      embeds_many :paths, UpgradePath, on_replace: :delete do
+        field :path,  :string
+        field :value, :string
+        field :type,  Console.Schema.Build.ValueType
+      end
+    end
 
     has_many :commands, Command
     has_many :changelogs, Changelog
@@ -83,7 +92,22 @@ defmodule Console.Schema.Build do
   def changeset(schema, attrs \\ %{}) do
     schema
     |> cast(attrs, @valid)
+    |> cast_embed(:config, with: &config_changeset/2)
     |> validate_required([:repository, :type, :status])
     |> validate_length(:message, max: 10_000)
+  end
+
+  def config_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:paths, with: &path_changeset/2)
+  end
+
+  @path_valid ~w(path value type)a
+
+  def path_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, @path_valid)
+    |> validate_required(@path_valid)
   end
 end

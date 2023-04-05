@@ -120,6 +120,7 @@ defmodule Console.MixProject do
       {:websockex, "~> 0.4"},
       {:phoenix_client, "~> 0.11", git: "https://github.com/michaeljguarino/phoenix_client.git", branch: "mguarino/channel-listen"},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
+      {:elixpath, "~> 0.1.1", git: "https://github.com/mtannaan/elixpath.git"},
       {:mimic, "~> 1.1", only: :test}
     ]
   end

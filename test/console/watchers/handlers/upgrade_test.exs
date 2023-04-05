@@ -48,6 +48,27 @@ defmodule Console.Watchers.Handlers.UpgradeTest do
       assert build.type == :dedicated
     end
 
+    test "it will handle config upgrades" do
+      bot = insert(:user, bot_name: "console")
+      Console.Cache.delete(:upgrade_policies)
+      expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{metadata: %{name: "plural"}}} end)
+
+      {:ok, build} = Upgrade.create_build(%{
+        "message" => "a message",
+        "repository" => %{"name" => "plural"},
+        "config" => %{"paths" => [%{"path" => ".a.b", "value" => "1", "type" => "int"}]},
+        "type" => "config"
+      })
+
+      assert build.creator_id == bot.id
+      assert build.repository == "plural"
+      assert build.type == :config
+      [path] = build.config.paths
+      assert path.type == :int
+      assert path.path == ".a.b"
+      assert path.value == "1"
+    end
+
     test "it can recognize upgrade policies" do
       bot = insert(:user, bot_name: "console")
       expect(Kazan, :run, fn _ -> {:ok, %Kube.Application{metadata: %{name: "plural"}}} end)
