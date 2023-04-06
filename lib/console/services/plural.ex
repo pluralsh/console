@@ -2,10 +2,15 @@ defmodule Console.Services.Plural do
   use Console.Services.Base
   alias Console.Deployer
   alias Console.Schema.{User, Manifest}
+  alias Console.Utils
   alias Console.Services.{Builds}
   alias Console.Plural.{Repositories, Users, Recipe, Installation, OIDCProvider, Manifest, Context}
   alias Kube.Application
   use Nebulex.Caching
+
+  @type error :: {:error, term}
+  @type bin_resp :: {:ok, binary} | error
+  @type tool :: :helm | :terraform
 
   @ttl :timer.hours(1)
 
@@ -21,22 +26,81 @@ defmodule Console.Services.Plural do
   defp allow({:ok, _}), do: true
   defp allow(_), do: false
 
+
+  @doc """
+  Gets the current cluster name
+  """
+  @spec cluster_name() :: binary
+  def cluster_name() do
+    case Manifest.get() do
+      {:ok, %Manifest{cluster: cluster}} -> cluster
+      _ -> ""
+    end
+  end
+
+  @doc """
+  Fetches the current project manifest file
+  """
+  @spec project_manifest() :: Manifest.t
+  def project_manifest(), do: Manifest.get()
+
+  @doc """
+  Gets the full filename for `tool`
+  """
+  @spec filename(binary, tool) :: binary
+  def filename(repo, :helm), do: vals_filename(repo)
+  def filename(repo, :terraform), do: terraform_filename(repo)
+
+  @doc "fetch the contents of the main.tf file of `repository`"
+  @spec terraform_file(binary) :: bin_resp
   def terraform_file(repository) do
     terraform_filename(repository)
     |> Deployer.file()
   end
 
+  @doc "fetches the contents of the helm values.yaml file for `repository`"
+  @spec values_file(binary) :: bin_resp
   def values_file(repository) do
     vals_filename(repository)
     |> Deployer.file()
   end
 
+  @doc """
+  Performs a sequence of path updates for the helm values.yaml file for `repository`
+  """
+  @spec merge_config(binary, [%{path: binary, value: binary, type: atom}]) :: bin_resp
+  def merge_config(repository, paths) do
+    with {:ok, vals} <- File.read(filename(repository, :helm)),
+         {:ok, map} <- YamlElixir.read_from_string(vals),
+         {:ok, map} <- make_updates(map, paths),
+         {:ok, doc} <- Utils.Yaml.format(map),
+      do: update_configuration(repository, doc, :helm)
+  end
+
+  defp make_updates(map, paths) do
+    Enum.reduce_while(paths, {:ok, map}, fn %{path: p, value: v, type: t}, {:ok, map} ->
+      case Utils.Path.update(map, p, {v, t}) do
+        {:ok, map} -> {:cont, {:ok, map}}
+        err -> {:halt, err}
+      end
+    end)
+  end
+
+
+  @doc """
+  Updates either the main.tf or values.yaml file for `repository`, depending on the value of `tool`
+  """
+  @spec update_configuration(binary, binary, tool) :: bin_resp
   def update_configuration(repository, update, tool) do
     with {:ok, _} <- validate(update, tool),
          :ok <- File.write(filename(repository, tool), update),
       do: {:ok, update}
   end
 
+  @doc """
+  Updates global smtp configuration
+  """
+  @spec update_smtp(map) :: {:ok, map} | error
   def update_smtp(smtp) do
     with {:ok, context} <- Context.get() do
       Console.Deployer.exec(fn storage ->
@@ -48,6 +112,10 @@ defmodule Console.Services.Plural do
     end
   end
 
+  @doc """
+  Calls plural api to install a recipe, enable oidc if relevant, and trigger a build to deploy it
+  """
+  @spec install_recipe(binary, map, boolean, User.t) :: Builds.build_resp
   def install_recipe(id, context, oidc, %User{} = user) do
     with {:ok, recipe} <- Repositories.get_recipe(id),
          {:ok, _} <- Repositories.install_recipe(id),
@@ -65,6 +133,10 @@ defmodule Console.Services.Plural do
     end
   end
 
+  @doc """
+  Similar to #install_recipe/4, except does the same process for the stack with `name`
+  """
+  @spec install_stack(binary, %{configuration: map}, boolean, User.t) :: Builds.build_resp
   def install_stack(name, %{configuration: ctx} = context, oidc, %User{} = user) do
     with {:ok, [recipe | _] = recipes} <- Repositories.install_stack(name),
          {:ok, _} <- oidc_for_stack(recipes, ctx, oidc) do
@@ -83,7 +155,7 @@ defmodule Console.Services.Plural do
     end
   end
 
-  def oidc_for_stack([_ | _] = recipes, context, oidc) do
+  defp oidc_for_stack([_ | _] = recipes, context, oidc) do
     Enum.reduce(recipes, short_circuit(), fn recipe, circuit ->
       short(circuit, recipe.id, fn ->
         with :ok <- configure_oidc(recipe, context, oidc),
@@ -93,7 +165,7 @@ defmodule Console.Services.Plural do
     |> execute()
   end
 
-  def configure_oidc(
+  defp configure_oidc(
     %Recipe{
       repository: %{name: name},
       oidcSettings: %{authMethod: method} = oidc_settings
@@ -110,7 +182,7 @@ defmodule Console.Services.Plural do
          }, installation)),
       do: :ok
   end
-  def configure_oidc(_, _, _), do: :ok
+  defp configure_oidc(_, _, _), do: :ok
 
   defp format_urls(%{uriFormats: [_ | _] = uris} = settings, ctx, man),
     do: Enum.map(uris, &format_url(&1, settings, ctx, man))
@@ -128,13 +200,13 @@ defmodule Console.Services.Plural do
     do: String.replace(uri, "{subdomain}", sub)
   defp format_oidc(_, uri, _, _), do: uri
 
-  def oidc_dependencies([recipe | rest], context, true) do
+  defp oidc_dependencies([recipe | rest], context, true) do
     case configure_oidc(recipe, context, true) do
       :ok -> oidc_dependencies(rest, context, true)
       err -> err
     end
   end
-  def oidc_dependencies(_, _, _), do: :ok
+  defp oidc_dependencies(_, _, _), do: :ok
 
   defp merge_provider(attrs, %Installation{oidcProvider: %OIDCProvider{redirectUris: uris, bindings: bindings}}) do
     bindings = Enum.map(bindings, fn
@@ -148,20 +220,9 @@ defmodule Console.Services.Plural do
   end
   defp merge_provider(attrs, _), do: attrs
 
-  def cluster_name() do
-    case Manifest.get() do
-      {:ok, %Manifest{cluster: cluster}} -> cluster
-      _ -> ""
-    end
-  end
 
-  def project_manifest(), do: Manifest.get()
-
-  def filename(repo, :helm), do: vals_filename(repo)
-  def filename(repo, :terraform), do: terraform_filename(repo)
-
-  def validate(str, :helm), do: YamlElixir.read_from_string(str)
-  def validate(_, _), do: {:ok, nil}
+  defp validate(str, :helm), do: YamlElixir.read_from_string(str)
+  defp validate(_, _), do: {:ok, nil}
 
   defp vals_filename(repository) do
     Path.join([Console.workspace(), repository, "helm", repository, "values.yaml"])

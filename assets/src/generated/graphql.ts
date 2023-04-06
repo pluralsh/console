@@ -218,6 +218,7 @@ export type BuildInfo = {
 export enum BuildType {
   Approval = 'APPROVAL',
   Bounce = 'BOUNCE',
+  Config = 'CONFIG',
   Dedicated = 'DEDICATED',
   Deploy = 'DEPLOY',
   Destroy = 'DESTROY',

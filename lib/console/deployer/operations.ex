@@ -73,6 +73,20 @@ defmodule Console.Deployer.Operations do
     ], storage)
   end
 
+  def perform(storage, %Build{type: :config, config: %Build.UpgradeConfig{paths: [_ | _] = paths}, message: msg, repository: repo} = build) do
+    with_build(build, [
+      {storage, :init, []},
+      {Console.Services.Plural, :merge_config, [repo, paths]},
+      {Plural, :build, [repo]},
+      {Plural, :diff, [repo]},
+      {Plural, :deploy, [repo]},
+      {storage, :revise, [commit_message(msg, repo)]},
+      {storage, :push, []}
+    ], storage)
+  end
+
+  def perform(storage, %Build{type: :config} = build), do: perform(storage, %{build | type: :deploy})
+
   def with_build(%Build{} = build, operations, storage) do
     {:ok, pid} = Console.Runner.start_link(build, operations, storage)
     Swarm.register_name(build.id, pid)

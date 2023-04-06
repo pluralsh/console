@@ -38,8 +38,8 @@ defmodule Console.Services.Policies do
     end
   end
 
-  defp resolve_type(type) when type in ~w(deploy bounce approval dedicated)a, do: type
-  defp resolve_type(type) when type in ~w(deploy bounce approval dedicated),
+  defp resolve_type(type) when type in ~w(deploy bounce approval dedicated config)a, do: type
+  defp resolve_type(type) when type in ~w(deploy bounce approval dedicated config),
     do: String.to_existing_atom(type)
   defp resolve_type(_), do: :deploy
 

@@ -490,6 +490,7 @@ enum BuildType {
   INSTALL
   DESTROY
   DEDICATED
+  CONFIG
 }
 
 type AuditEdge {
