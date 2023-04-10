@@ -389,6 +389,7 @@ function ComboBox({
     triggerRef: inputRef,
     width,
     maxHeight,
+    placement,
   })
 
   outerInputProps = {
@@ -426,7 +427,6 @@ function ComboBox({
         dropdownHeaderFixed={dropdownHeaderFixed}
         dropdownFooterFixed={dropdownFooterFixed}
         width={width}
-        placement={placement}
         floating={floating}
       />
     </ComboBoxInner>

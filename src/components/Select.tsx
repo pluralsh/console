@@ -35,7 +35,7 @@ const parentFillLevelToBackground = {
   1: 'fill-two',
   2: 'fill-three',
   3: 'fill-three',
-}
+} as const satisfies Record<FillLevel, string>
 
 type Placement = 'left' | 'right'
 type Size = 'small' | 'medium' | 'large'
@@ -319,6 +319,7 @@ function Select({
     triggerRef: ref,
     width,
     maxHeight,
+    placement,
   })
 
   return (
@@ -343,7 +344,6 @@ function Select({
         dropdownHeaderFixed={dropdownHeaderFixed}
         dropdownFooterFixed={dropdownFooterFixed}
         width={width}
-        placement={placement}
         floating={floating}
       />
     </SelectInner>

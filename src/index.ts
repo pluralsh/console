@@ -93,6 +93,8 @@ export { default as Slider } from './components/Slider'
 export { default as PricingCalculator } from './components/pricingcalculator/PricingCalculator'
 export { default as PricingCalculatorExtended } from './components/pricingcalculator/PricingCalculatorExtended'
 export { default as Layer } from './components/Layer'
+export { Breadcrumbs } from './components/Breadcrumbs'
+
 // Hooks
 export { default as usePrevious } from './hooks/usePrevious'
 export { default as useUnmount } from './hooks/useUnmount'
@@ -107,6 +109,12 @@ export {
 } from './components/contexts/FillLevelContext'
 export * from './components/contexts/NavigationContext'
 export * from './components/TreeNavigation'
+export {
+  BreadcrumbsProvider,
+  useBreadcrumbs,
+  useSetBreadcrumbs,
+  type Breadcrumb,
+} from './components/contexts/BreadcrumbsContext'
 
 // Theme
 export { default as theme, styledTheme } from './theme'

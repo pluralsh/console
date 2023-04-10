@@ -16,5 +16,5 @@
     "resolveJsonModule": true,
     "suppressImplicitAnyIndexErrors": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*"]
 }
