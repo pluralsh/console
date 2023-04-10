@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import React, { useCallback, useContext, useRef, useState } from 'react'
 import { Box, Drop, Text, TextInput, ThemeContext } from 'grommet'
 import {
   SortAsc as Ascend,
@@ -27,7 +21,8 @@ import { pulse } from 'react-animations'
 import { normalizeColor } from 'grommet/utils'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { BreadcrumbsContext } from '../layout/Breadcrumbs'
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
 import { RepoIcon } from '../repos/Repositories'
 import { extendConnection } from '../../utils/graphql'
 import { AlternatingBox } from '../utils/AlternatingBox'
@@ -516,6 +511,8 @@ function Placeholder() {
   )
 }
 
+const breadcrumbs = [{ url: '/incidents', label: 'incidents' }]
+
 export function Incidents() {
   const [open, setOpen] = useState(false)
   const { incidentId } = useParams()
@@ -533,11 +530,7 @@ export function Incidents() {
     fetchPolicy: 'cache-and-network',
   })
 
-  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
-
-  useEffect(() => {
-    setBreadcrumbs([{ url: '/incidents', text: 'incidents' }])
-  }, [setBreadcrumbs])
+  useSetBreadcrumbs(breadcrumbs)
 
   if (!data) return <LoadingIndicator />
 

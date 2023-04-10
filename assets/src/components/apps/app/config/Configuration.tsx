@@ -1,6 +1,10 @@
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
-import { SubTab, TabList } from '@pluralsh/design-system'
-import { Key, useContext, useEffect, useRef, useState } from 'react'
+import {
+  Breadcrumb,
+  SubTab,
+  TabList,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
+import { Key, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { APPLICATION_Q } from 'components/graphql/plural'
 import { Flex, Span } from 'honorable'
@@ -19,22 +23,21 @@ export default function Configuration() {
   const tabStateRef = useRef<any>(null)
   const [view, setView] = useState<Key>()
   const { appName } = useParams()
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { data, error } = useQuery(APPLICATION_Q, {
     variables: { name: appName },
     fetchPolicy: 'network-only',
     onError: console.error,
   })
-
-  useEffect(
-    () =>
-      setBreadcrumbs([
-        { text: 'apps', url: '/' },
-        { text: appName, url: `/apps/${appName}` },
-        { text: 'configuration', url: `/apps/${appName}/config` },
-      ]),
-    [appName, setBreadcrumbs]
+  const breadcrumbs: Breadcrumb[] = useMemo(
+    () => [
+      { label: 'apps', url: '/' },
+      { label: appName ?? '', url: `/apps/${appName}` },
+      { label: 'configuration', url: `/apps/${appName}/config` },
+    ],
+    [appName]
   )
+
+  useSetBreadcrumbs(breadcrumbs)
 
   if (error)
     return (

@@ -1,8 +1,8 @@
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import { InstallationContext } from 'components/Installations'
 import { A, Div, Flex } from 'honorable'
 import {
   AppsIcon,
+  type Breadcrumb,
   Button,
   Chip,
   DiscordIcon,
@@ -13,15 +13,9 @@ import {
   SourcererIcon,
   SubTab,
   TabList,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useContext, useMemo, useRef, useState } from 'react'
 import Fuse from 'fuse.js'
 
 import { Readiness, readinessToLabel } from 'utils/status'
@@ -140,17 +134,15 @@ const searchOptions = {
   threshold: 0.25,
 }
 
+const breadcrumbs: Breadcrumb[] = [{ label: 'apps', url: '/' }]
+
 export default function Apps() {
   const { applications = [] } = useContext<any>(InstallationContext)
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const [query, setQuery] = useState<string>('')
   const [filter, setFilter] = useState<any>(ALL_FILTER)
   const tabStateRef = useRef<any>(null)
 
-  useEffect(
-    () => setBreadcrumbs([{ text: 'apps', url: '/' }]),
-    [setBreadcrumbs]
-  )
+  useSetBreadcrumbs(breadcrumbs)
 
   const handleFilter = useCallback(
     (f) => applications.filter((app) => !f || appState(app).readiness === f),

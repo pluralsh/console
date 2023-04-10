@@ -1,13 +1,11 @@
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
-import { Card, ListBoxItem, Select } from '@pluralsh/design-system'
 import {
-  Key,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+  Breadcrumb,
+  Card,
+  ListBoxItem,
+  Select,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
+import { Key, useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import { DASHBOARDS_Q, DASHBOARD_Q } from 'components/graphql/dashboards'
@@ -30,7 +28,6 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const { appName, dashboardId: id } = useParams()
   const { setDashboard } = useOutletContext<any>()
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const [selectedKey, setSelectedKey] = useState<Key>('')
   const [duration, setDuration] = useState(DURATIONS[0])
   const [labelMap, setLabelMap] = useState({})
@@ -56,19 +53,20 @@ export default function Dashboard() {
     fetchPolicy: 'cache-and-network',
   })
 
-  useEffect(
-    () =>
-      setBreadcrumbs([
-        { text: 'apps', url: '/' },
-        { text: appName, url: `/apps/${appName}` },
-        { text: 'dashboards', url: `/apps/${appName}/dashboards` },
-        {
-          text: data?.dashboard?.spec?.name,
-          url: `/apps/${appName}/dashboards/${data?.dashboard?.id}`,
-        },
-      ]),
-    [appName, data, setBreadcrumbs]
+  const breadcrumbs: Breadcrumb[] = useMemo(
+    () => [
+      { label: 'apps', url: '/' },
+      { label: appName ?? '', url: `/apps/${appName}` },
+      { label: 'dashboards', url: `/apps/${appName}/dashboards` },
+      {
+        label: data?.dashboard?.spec?.name ?? '',
+        url: `/apps/${appName}/dashboards/${data?.dashboard?.id}`,
+      },
+    ],
+    [appName, data?.dashboard]
   )
+
+  useSetBreadcrumbs(breadcrumbs)
 
   useEffect(() => setSelectedKey(data?.dashboard?.spec?.name || ''), [data])
 

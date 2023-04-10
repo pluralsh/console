@@ -1,6 +1,12 @@
-import { PageCard, Tab, TabList, TabPanel } from '@pluralsh/design-system'
+import {
+  PageCard,
+  Tab,
+  TabList,
+  TabPanel,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 
-import { useContext, useEffect, useRef } from 'react'
+import { useContext, useRef } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
@@ -8,7 +14,6 @@ import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayout
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { LoginContext } from 'components/contexts'
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
 const getDirectory = (me, configuration) => [
@@ -22,9 +27,10 @@ const getDirectory = (me, configuration) => [
   },
 ]
 
+const breadcrumbs = [{ label: 'profile', url: '/profile' }]
+
 export default function MyProfile() {
   const tabStateRef = useRef<any>(null)
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { me, configuration } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
   const pathPrefix = '/profile'
@@ -32,10 +38,7 @@ export default function MyProfile() {
     ({ enabled }) => enabled
   )
 
-  useEffect(
-    () => setBreadcrumbs([{ text: 'profile', url: '/profile' }]),
-    [setBreadcrumbs]
-  )
+  useSetBreadcrumbs(breadcrumbs)
 
   if (!me) return null
 

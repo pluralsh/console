@@ -1,6 +1,9 @@
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
-import { DashboardIcon, EmptyState } from '@pluralsh/design-system'
-import { useContext, useEffect } from 'react'
+import {
+  DashboardIcon,
+  EmptyState,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
+import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { DASHBOARDS_Q } from 'components/graphql/dashboards'
 
@@ -15,21 +18,21 @@ import { ListItem } from '../misc'
 export default function Dashboards() {
   const navigate = useNavigate()
   const { appName } = useParams()
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { data } = useQuery(DASHBOARDS_Q, {
     variables: { repo: appName },
     fetchPolicy: 'cache-and-network',
   })
 
-  useEffect(
-    () =>
-      setBreadcrumbs([
-        { text: 'apps', url: '/' },
-        { text: appName, url: `/apps/${appName}` },
-        { text: 'dashboards', url: `/apps/${appName}/dashboards` },
-      ]),
-    [appName, setBreadcrumbs]
+  const breadcrumbs = useMemo(
+    () => [
+      { label: 'apps', url: '/' },
+      { label: appName ?? '', url: `/apps/${appName}` },
+      { label: 'dashboards', url: `/apps/${appName}/dashboards` },
+    ],
+    [appName]
   )
+
+  useSetBreadcrumbs(breadcrumbs)
 
   if (!data) return null
 

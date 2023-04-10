@@ -1,8 +1,11 @@
-import { useContext, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Outlet, useMatch, useParams } from 'react-router-dom'
-import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
-
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
+import {
+  SubTab,
+  TabList,
+  TabPanel,
+  useBreadcrumbs,
+} from '@pluralsh/design-system'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
@@ -45,13 +48,13 @@ export default function Node() {
   const subpath = useMatch('/nodes/:name/:subpath')?.params?.subpath || ''
 
   const currentTab = DIRECTORY.find(({ path }) => path === subpath)
-  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
+  const { setBreadcrumbs } = useBreadcrumbs()
 
   useEffect(() => {
     if (name) {
       setBreadcrumbs([
-        { text: 'nodes', url: '/nodes' },
-        { text: name || '', url: `/nodes/${name}` },
+        { label: 'nodes', url: '/nodes' },
+        { label: name || '', url: `/nodes/${name}` },
       ])
     }
   }, [name, setBreadcrumbs])

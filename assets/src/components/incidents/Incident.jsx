@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import {
   Button,
   Close,
@@ -19,6 +19,8 @@ import moment from 'moment'
 
 import { Editable, Slate } from 'slate-react'
 
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
 import { CurrentUserContext } from '../login/CurrentUser'
 
 import { dateFormat } from '../../utils/date'
@@ -26,8 +28,6 @@ import { dateFormat } from '../../utils/date'
 import SmoothScroller from '../utils/SmoothScroller'
 
 import { extendConnection } from '../../utils/graphql'
-
-import { BreadcrumbsContext } from '../layout/Breadcrumbs'
 
 import { plainDeserialize, plainSerialize } from '../../utils/slate'
 
@@ -612,14 +612,15 @@ export function Incident({ editing }) {
     }) => delta === 'DELETE' && setDeleted(true),
   })
 
-  const { setBreadcrumbs } = useContext(BreadcrumbsContext)
+  const breadcrumbs = useMemo(
+    () => [
+      { url: '/incidents', label: 'incidents' },
+      { url: `/incidents/${incidentId}`, label: incidentId },
+    ],
+    [incidentId]
+  )
 
-  useEffect(() => {
-    setBreadcrumbs([
-      { url: '/incidents', text: 'incidents' },
-      { url: `/incidents/${incidentId}`, text: incidentId },
-    ])
-  }, [setBreadcrumbs, incidentId])
+  useSetBreadcrumbs(breadcrumbs)
 
   if (!data) return null
 

@@ -1,5 +1,11 @@
-import { Tab, TabList, TabPanel } from '@pluralsh/design-system'
-import { useContext, useEffect, useRef } from 'react'
+import {
+  type Breadcrumb,
+  Tab,
+  TabList,
+  TabPanel,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
+import { useContext, useRef } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
@@ -7,7 +13,6 @@ import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayout
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { LoginContext } from 'components/contexts'
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import { useTheme } from 'styled-components'
 
@@ -30,18 +35,16 @@ const getDirectory = (me, configuration) => [
   { path: 'cookies', label: 'Cookie settings', enabled: true },
 ]
 
+const breadcrumbs: Breadcrumb[] = [{ label: 'account', url: '/account' }]
+
 export default function Account() {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const { me, configuration } = useContext<any>(LoginContext)
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { pathname } = useLocation()
   const pathPrefix = '/account'
 
-  useEffect(
-    () => setBreadcrumbs([{ text: 'account', url: '/account' }]),
-    [setBreadcrumbs]
-  )
+  useSetBreadcrumbs(breadcrumbs)
 
   if (!me) return null
 

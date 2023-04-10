@@ -1,6 +1,5 @@
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
-import { Input, SearchIcon } from '@pluralsh/design-system'
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { Input, SearchIcon, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useCallback, useContext, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
 import { toMap, useQueryParams } from 'components/utils/query'
@@ -18,7 +17,6 @@ export default function Logs() {
   const { appName } = useParams()
   const query = useQueryParams()
   const { applications } = useContext<any>(InstallationContext)
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const [search, setSearch] = useState('')
   const [labels, setLabels] = useState(toMap(query))
 
@@ -50,15 +48,16 @@ export default function Logs() {
   )
   const logQuery = `{${labelQuery}}${searchQuery}`
 
-  useEffect(
-    () =>
-      setBreadcrumbs([
-        { text: 'apps', url: '/' },
-        { text: appName, url: `/apps/${appName}` },
-        { text: 'logs', url: `/apps/${appName}/logs` },
-      ]),
-    [appName, setBreadcrumbs]
+  const breadcrumbs = useMemo(
+    () => [
+      { label: 'apps', url: '/' },
+      { label: appName ?? '', url: `/apps/${appName}` },
+      { label: 'logs', url: `/apps/${appName}/logs` },
+    ],
+    [appName]
   )
+
+  useSetBreadcrumbs(breadcrumbs)
 
   return (
     <ScrollablePage

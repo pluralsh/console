@@ -1,7 +1,7 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { Flex } from 'honorable'
-import { Card } from '@pluralsh/design-system'
+import { Card, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { ReturnToBeginning } from 'components/utils/ReturnToBeginning'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
@@ -10,7 +10,6 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { appendConnection, extendConnection } from '../../utils/graphql'
 import { BUILDS_Q, BUILD_SUB } from '../graphql/builds'
-import { BreadcrumbsContext } from '../layout/Breadcrumbs'
 import { StandardScroller } from '../utils/SmoothScroller'
 
 import { UpgradePolicies } from './UpgradePolicies'
@@ -19,19 +18,17 @@ import Build from './Build'
 
 const POLL_INTERVAL = 1000 * 30
 
+const breadcrumbs = [{ label: 'builds', url: '/builds' }]
+
 export default function Builds() {
   const [listRef, setListRef] = useState<any>(null)
   const [scrolled, setScrolled] = useState(false)
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { data, loading, subscribeToMore, fetchMore } = useQuery(BUILDS_Q, {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
 
-  useEffect(
-    () => setBreadcrumbs([{ text: 'builds', url: '/builds' }]),
-    [setBreadcrumbs]
-  )
+  useSetBreadcrumbs(breadcrumbs)
 
   useEffect(
     () =>

@@ -14,6 +14,7 @@ import {
   SubTab,
   TabList,
   TabPanel,
+  useBreadcrumbs,
 } from '@pluralsh/design-system'
 import { Flex } from 'honorable'
 import styled from 'styled-components'
@@ -25,7 +26,6 @@ import {
   Pod,
 } from 'generated/graphql'
 
-import { useBreadcrumbs } from 'components/layout/Breadcrumbs'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import { LinkTabWrap } from 'components/utils/Tabs'
 
@@ -99,11 +99,11 @@ export default function Container() {
   useEffect(() => {
     if (name && namespace && containerName) {
       setBreadcrumbs([
-        { text: 'pods', url: '/pods' }, // Add filter param here later maybe?
-        { text: name, url: `/pods/${namespace}/${name}` },
-        { text: 'containers' }, // Add filter param here later maybe?
+        { label: 'pods', url: '/pods' }, // Add filter param here later maybe?
+        { label: name, url: `/pods/${namespace}/${name}` },
+        { label: 'containers' }, // Add filter param here later maybe?
         {
-          text: containerName,
+          label: containerName,
           url: `/pods/${namespace}/${name}/shell/${containerName}`,
         },
       ])

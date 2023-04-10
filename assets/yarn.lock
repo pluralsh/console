@@ -3194,6 +3194,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@internationalized/date@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "@internationalized/date@npm:3.2.0"
+  dependencies:
+    "@swc/helpers": ^0.4.14
+  checksum: 5267e8f58a22074975daafa20d3014067e46f86e1f477e7fc63afb110d34a63de87dddb81ad6535d5f8803ecd28d20207ba21b03a6d3f4a329875d4acedf3302
+  languageName: node
+  linkType: hard
+
 "@internationalized/message@npm:^3.1.0":
   version: 3.1.0
   resolution: "@internationalized/message@npm:3.1.0"
@@ -3729,9 +3738,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:1.326.0":
-  version: 1.326.0
-  resolution: "@pluralsh/design-system@npm:1.326.0"
+"@pluralsh/design-system@file:.yalc/@pluralsh/design-system::locator=console%40workspace%3A.":
+  version: 0.1.0
+  resolution: "@pluralsh/design-system@file:.yalc/@pluralsh/design-system#.yalc/@pluralsh/design-system::hash=465d7b&locator=console%40workspace%3A."
   dependencies:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@monaco-editor/react": 4.4.6
@@ -3788,7 +3797,7 @@ __metadata:
     react-dom: ">=16.0.0"
     react-transition-group: ">=4.4.2"
     styled-components: ">=5.3.5"
-  checksum: cad6f103d6283bb25a95d77e8128895b0fee0913835b1b523511b5b36c68b2af521042438f6305dbbddcb4484dc50f4d95df0ae5b49a479252a5f3a8eed9889d
+  checksum: f1306a99fdba0790d9c311f311d95ccd9e022381d2e78e58f26703d846f9fd98d3e64080cc50bede62797d13933ee7ee1b10009e8a790842d209f70e0fe80920
   languageName: node
   linkType: hard
 
@@ -3945,6 +3954,24 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
   checksum: cdbfe335f66964b08111743b6e575a364f1cdac26c357ed134356448fd99d0e4810156992cca7e63de2d9abf536e879169586df88d0bb6491e31efd9f5ad6fc3
+  languageName: node
+  linkType: hard
+
+"@react-aria/i18n@npm:^3.7.1":
+  version: 3.7.1
+  resolution: "@react-aria/i18n@npm:3.7.1"
+  dependencies:
+    "@internationalized/date": ^3.2.0
+    "@internationalized/message": ^3.1.0
+    "@internationalized/number": ^3.2.0
+    "@internationalized/string": ^3.1.0
+    "@react-aria/ssr": ^3.6.0
+    "@react-aria/utils": ^3.16.0
+    "@react-types/shared": ^3.18.0
+    "@swc/helpers": ^0.4.14
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: 14cc797048425544c1b64ce29ea3f5bcac9a38202a927d04f0947a906dd9953aa30942f41028994cde1a6e6cad304db87410c82f332931bbae280cf26f7fb1a8
   languageName: node
   linkType: hard
 
@@ -4162,6 +4189,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-aria/ssr@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "@react-aria/ssr@npm:3.6.0"
+  dependencies:
+    "@swc/helpers": ^0.4.14
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: fab5cf0efb6eea28ae27a74a1ae1724536731f6ea556f7e22f1100e809af5a27c7bfcf6898a0b4d880b374e4b11b782aeadb19b34e26ec10e4e75beb820293e1
+  languageName: node
+  linkType: hard
+
 "@react-aria/tabs@npm:3.4.0":
   version: 3.4.0
   resolution: "@react-aria/tabs@npm:3.4.0"
@@ -4228,6 +4266,21 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
   checksum: 9d852b3a8ca492b5e8c733f6258437430d050950d4cbdb99ab221d1a076ebca2625d45384bfb7b651072adc93368462445061c83ceac079418c8deafca2b47c3
+  languageName: node
+  linkType: hard
+
+"@react-aria/utils@npm:^3.16.0":
+  version: 3.16.0
+  resolution: "@react-aria/utils@npm:3.16.0"
+  dependencies:
+    "@react-aria/ssr": ^3.6.0
+    "@react-stately/utils": ^3.6.0
+    "@react-types/shared": ^3.18.0
+    "@swc/helpers": ^0.4.14
+    clsx: ^1.1.1
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: e2ad55088d77fad425cb812eef77171cebba128759e12d85dba3bcf57fdb635a52075410238561ded049393744f0e7deac5bd0faf1db3a043663c202012c3a69
   languageName: node
   linkType: hard
 
@@ -4628,7 +4681,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-stately/slider@npm:3.3.0, @react-stately/slider@npm:^3.3.0":
+"@react-stately/slider@npm:3.3.0":
   version: 3.3.0
   resolution: "@react-stately/slider@npm:3.3.0"
   dependencies:
@@ -4641,6 +4694,22 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
   checksum: 07f4c7e367cc5f1a017c5acb84fef11e6468528289c58003a9629c9c2a12b31d1800b766b46729fcfa9ad6d428b931ea05231f2782f3b357f873b5a6df158bed
+  languageName: node
+  linkType: hard
+
+"@react-stately/slider@npm:^3.3.0":
+  version: 3.3.1
+  resolution: "@react-stately/slider@npm:3.3.1"
+  dependencies:
+    "@react-aria/i18n": ^3.7.1
+    "@react-aria/utils": ^3.16.0
+    "@react-stately/utils": ^3.6.0
+    "@react-types/shared": ^3.18.0
+    "@react-types/slider": ^3.5.0
+    "@swc/helpers": ^0.4.14
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: c8e9f1df38edf7ea73516ee034c92f7f32c99b433c9c5a60a7c859bd48c0a22a8a527a1ac90befac1bb8e859f0a00a91c43550212325fd29423edc0df88924b6
   languageName: node
   linkType: hard
 
@@ -4848,14 +4917,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-types/slider@npm:^3.4.0":
-  version: 3.4.0
-  resolution: "@react-types/slider@npm:3.4.0"
-  dependencies:
-    "@react-types/shared": ^3.17.0
+"@react-types/shared@npm:^3.18.0":
+  version: 3.18.0
+  resolution: "@react-types/shared@npm:3.18.0"
   peerDependencies:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
-  checksum: df6bc5b3713984d8f8416ad4f4f7e86388e72cb1a40b1d860dcf23bc52787e3044690b29ee3633510b85471b8336be8f0b7b7a4b2bc16128078865779bbdf521
+  checksum: 8fc56701e91f4f943f5b7c7cf968f103527c8dd5803430bd46e9210c24d3b410132fb3ded63841cf3c5cb20558385746b2705ba61204ff425c30fb1f0a64e342
+  languageName: node
+  linkType: hard
+
+"@react-types/slider@npm:^3.4.0, @react-types/slider@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "@react-types/slider@npm:3.5.0"
+  dependencies:
+    "@react-types/shared": ^3.18.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: 826444c97815cc19436c4eb24884ff798330910c10b40d06265b21182e48499e887cc2fcd8b95d7e7065d2e017722635ab7e6e6fc33e41e808cb87109f1183aa
   languageName: node
   linkType: hard
 
@@ -7735,7 +7813,7 @@ __metadata:
     "@nivo/pie": 0.80.0
     "@nivo/radial-bar": 0.80.0
     "@nivo/tooltip": 0.80.0
-    "@pluralsh/design-system": 1.326.0
+    "@pluralsh/design-system": "file:.yalc/@pluralsh/design-system"
     "@pluralsh/eslint-config-typescript": 2.5.40
     "@pluralsh/stylelint-config": 1.1.3
     "@tanstack/react-table": 8.7.9

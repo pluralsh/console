@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom'
-import { Toast } from '@pluralsh/design-system'
+import { BreadcrumbsProvider, Toast } from '@pluralsh/design-system'
 import { A, Flex, Span } from 'honorable'
 import { MarkdocContextProvider } from 'markdoc/MarkdocContext'
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
@@ -12,7 +12,6 @@ import { InstallationsProvider } from '../Installations'
 import TerminalThemeProvider from '../terminal/TerminalThemeProvider'
 import { CursorPositionProvider } from '../utils/CursorPosition'
 
-import BreadcrumbProvider from './Breadcrumbs'
 import Header from './Header'
 import Subheader from './Subheader'
 import Sidebar from './Sidebar'
@@ -30,11 +29,11 @@ export default function Console() {
           <EnsureLogin>
             <InstallationsProvider>
               <BillingSubscriptionProvider>
-                <BreadcrumbProvider>
+                <BreadcrumbsProvider>
                   <TerminalThemeProvider>
                     <ConsoleContent />
                   </TerminalThemeProvider>
-                </BreadcrumbProvider>
+                </BreadcrumbsProvider>
               </BillingSubscriptionProvider>
             </InstallationsProvider>
           </EnsureLogin>

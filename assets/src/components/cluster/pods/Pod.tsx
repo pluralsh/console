@@ -1,14 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
-import { TabPanel } from '@pluralsh/design-system'
+import { TabPanel, useBreadcrumbs } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-
-import { useBreadcrumbs } from 'components/layout/Breadcrumbs'
 
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
@@ -27,8 +25,8 @@ export default function Node() {
   useEffect(() => {
     if (name && namespace) {
       setBreadcrumbs([
-        { text: 'pods', url: '/pods' }, // Add filter param here later maybe?
-        { text: name, url: name },
+        { label: 'pods', url: '/pods' }, // Add filter param here later maybe?
+        { label: name, url: name },
       ])
     }
   }, [name, namespace, setBreadcrumbs])

@@ -16,6 +16,7 @@ import {
   Tab,
   TabList,
   TabPanel,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
@@ -25,7 +26,6 @@ import { Flex, H2, P } from 'honorable'
 
 import { PropsContainer } from 'components/utils/PropsContainer'
 import Prop from 'components/utils/Prop'
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
 import { getIcon, hasIcons } from 'components/apps/misc'
 
@@ -77,14 +77,17 @@ export default function Build() {
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'ignore',
   })
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
+  const breadcrumbs = useMemo(
+    () => [
+      { label: 'builds', url: '/builds' },
+      { label: buildId ?? '', url: `/builds/${buildId}` },
+    ],
+    [buildId]
+  )
+
+  useSetBreadcrumbs(breadcrumbs)
 
   useEffect(() => {
-    setBreadcrumbs([
-      { text: 'builds', url: '/builds' },
-      { text: buildId, url: `/builds/${buildId}` },
-    ])
-
     const first = subscribeToMore({
       document: COMMAND_SUB,
       variables: { buildId },
@@ -99,7 +102,7 @@ export default function Build() {
       first()
       second()
     }
-  }, [buildId, subscribeToMore, setBreadcrumbs])
+  }, [buildId, subscribeToMore])
 
   const app = useMemo(
     () => applications?.find((app) => app.name === data?.build?.repository),

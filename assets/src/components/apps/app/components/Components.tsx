@@ -1,16 +1,16 @@
 import {
+  type Breadcrumb,
   ComponentsIcon,
   EmptyState,
   ListBoxFooter,
   ListBoxItem,
   Select,
   SelectButton,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { Key, useContext, useEffect, useMemo, useState } from 'react'
+import { Key, useContext, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { InstallationContext } from 'components/Installations'
-
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
 import styled, { useTheme } from 'styled-components'
 import { Component as ComponentT } from 'generated/graphql'
@@ -75,19 +75,19 @@ function orderBy({ kind: k1, name: n1 }, { kind: k2, name: n2 }) {
 
 export default function Components() {
   const { appName } = useParams()
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { applications } = useContext<any>(InstallationContext)
   const currentApp = applications.find((app) => app.name === appName)
 
-  useEffect(
-    () =>
-      setBreadcrumbs([
-        { text: 'apps', url: '/' },
-        { text: appName, url: `/apps/${appName}` },
-        { text: 'components', url: `/apps/${appName}/components` },
-      ]),
-    [appName, setBreadcrumbs]
+  const breadcrumbs: Breadcrumb[] = useMemo(
+    () => [
+      { label: 'apps', url: '/' },
+      { label: appName ?? '', url: `/apps/${appName}` },
+      { label: 'components', url: `/apps/${appName}/components` },
+    ],
+    [appName]
   )
+
+  useSetBreadcrumbs(breadcrumbs)
 
   const componentKinds = Array.from(
     (currentApp?.status?.components as ComponentT[])?.reduce(
