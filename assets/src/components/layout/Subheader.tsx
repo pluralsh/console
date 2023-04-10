@@ -49,8 +49,11 @@ export default function Subheader() {
         />
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutContentContainer>
-        <Breadcrumbs />
+      <ResponsiveLayoutContentContainer justifyContent="center">
+        <Breadcrumbs
+          paddingTop="small"
+          paddingBottom="small"
+        />
       </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSidecarContainer />
       <ResponsiveLayoutSpacer />
