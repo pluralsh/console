@@ -1,11 +1,13 @@
 import { Outlet } from 'react-router-dom'
-import { BreadcrumbsProvider, Toast } from '@pluralsh/design-system'
+import { Toast } from '@pluralsh/design-system'
 import { A, Flex, Span } from 'honorable'
 import { MarkdocContextProvider } from 'markdoc/MarkdocContext'
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
 
 import usePosthogIdentify from 'components/utils/Posthog'
+
+import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
 
 import { EnsureLogin } from '../login/Login'
 import { InstallationsProvider } from '../Installations'

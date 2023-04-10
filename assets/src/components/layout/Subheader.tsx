@@ -53,6 +53,7 @@ export default function Subheader() {
         <Breadcrumbs
           paddingTop="small"
           paddingBottom="small"
+          marginRight="medium"
         />
       </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSidecarContainer />

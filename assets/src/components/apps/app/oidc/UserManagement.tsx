@@ -1,5 +1,5 @@
 import { Button, Card, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@apollo/client'
 import { Flex, P } from 'honorable'
