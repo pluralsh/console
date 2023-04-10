@@ -3,6 +3,7 @@ import React, {
   ReactNode,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react'
 
@@ -28,14 +29,31 @@ export type Breadcrumb = BreadcrumbBase &
       }
   )
 
-const BreadcrumbsContext = React.createContext<BreadcrumbsContextT | null>(null)
+export const BreadcrumbsContext =
+  React.createContext<BreadcrumbsContextT | null>(null)
 
-export function BreadcrumbsProvider({ children }: PropsWithChildren) {
+export function BreadcrumbsProvider({
+  children,
+  breadcrumbsTransform,
+}: PropsWithChildren<{
+  breadcrumbsTransform?: (breadcrumbs: Breadcrumb[]) => Breadcrumb[]
+}>) {
   const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([])
+
+  const contextVal = useMemo(
+    () => ({
+      breadcrumbs:
+        typeof breadcrumbsTransform === 'function'
+          ? breadcrumbsTransform(breadcrumbs)
+          : breadcrumbs,
+      setBreadcrumbs,
+    }),
+    [breadcrumbsTransform, breadcrumbs]
+  )
 
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <BreadcrumbsContext.Provider value={{ breadcrumbs, setBreadcrumbs }}>
+    <BreadcrumbsContext.Provider value={contextVal}>
       {children}
     </BreadcrumbsContext.Provider>
   )

@@ -3,6 +3,7 @@ import React, {
   ReactNode,
   forwardRef,
   useCallback,
+  useContext,
   useEffect,
   useId,
   useRef,
@@ -19,7 +20,7 @@ import usePrevious from '../hooks/usePrevious'
 import { Select } from './Select'
 import { ListBoxItem } from './ListBoxItem'
 import { useNavigationContext } from './contexts/NavigationContext'
-import { Breadcrumb, useBreadcrumbs } from './contexts/BreadcrumbsContext'
+import { Breadcrumb, BreadcrumbsContext } from './contexts/BreadcrumbsContext'
 
 function getCrumbKey(crumb: Breadcrumb) {
   const maybeKey = crumb?.key
@@ -239,6 +240,7 @@ type BreadcrumbsProps = {
   minLength?: number
   maxLength?: number
   collapsible?: boolean
+  breadcrumbs?: Breadcrumb[]
 } & FlexProps
 
 export function BreadcrumbsInside({
@@ -338,9 +340,17 @@ export function Breadcrumbs({
   minLength = 0,
   maxLength = Infinity,
   collapsible = true,
+  breadcrumbs: propsCrumbs,
   ...props
 }: BreadcrumbsProps) {
-  const { breadcrumbs } = useBreadcrumbs()
+  const { breadcrumbs: contextCrumbs } = useContext(BreadcrumbsContext)
+  const breadcrumbs = propsCrumbs || contextCrumbs
+
+  if (!breadcrumbs) {
+    throw Error(
+      "<Breadcrumbs> must be provided a 'breadcrumbs' prop or used inside a <BreadcrumbProvider>"
+    )
+  }
   const prevBreadcrumbs = usePrevious(breadcrumbs)
   const transitionKey = useRef<number>(0)
 
