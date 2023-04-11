@@ -58,6 +58,7 @@ const baseTheme = {
   mode: 'dark',
   breakpoints: {
     // We'll add mobile breakpoints later
+    desktopSmall: 1000,
     desktop: 1280,
     desktopLarge: 1440,
   },
