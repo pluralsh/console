@@ -7,12 +7,13 @@ import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionP
 
 import usePosthogIdentify from 'components/utils/Posthog'
 
+import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
+
 import { EnsureLogin } from '../login/Login'
 import { InstallationsProvider } from '../Installations'
 import TerminalThemeProvider from '../terminal/TerminalThemeProvider'
 import { CursorPositionProvider } from '../utils/CursorPosition'
 
-import BreadcrumbProvider from './Breadcrumbs'
 import Header from './Header'
 import Subheader from './Subheader'
 import Sidebar from './Sidebar'
@@ -30,11 +31,11 @@ export default function Console() {
           <EnsureLogin>
             <InstallationsProvider>
               <BillingSubscriptionProvider>
-                <BreadcrumbProvider>
+                <BreadcrumbsProvider>
                   <TerminalThemeProvider>
                     <ConsoleContent />
                   </TerminalThemeProvider>
-                </BreadcrumbProvider>
+                </BreadcrumbsProvider>
               </BillingSubscriptionProvider>
             </InstallationsProvider>
           </EnsureLogin>

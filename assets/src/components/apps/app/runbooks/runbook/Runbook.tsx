@@ -1,10 +1,16 @@
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
-import { ListBoxItem, Select, SubTab, TabList } from '@pluralsh/design-system'
+import {
+  ListBoxItem,
+  Select,
+  SubTab,
+  TabList,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import {
   Key,
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -63,7 +69,6 @@ export default function Runbook() {
   const { appName, runbookName } = useParams()
   const [duration, setDuration] = useState(DURATIONS[0])
   const { setRunbook } = useOutletContext<any>()
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const theme = useTheme()
   const prevData = useRef()
 
@@ -96,19 +101,20 @@ export default function Runbook() {
   const [selectedKey, setSelectedKey] = useState<Key>('')
   const [selectedTab, setSelectedTab] = useState<any>('audit-logs')
 
-  useEffect(
-    () =>
-      setBreadcrumbs([
-        { text: 'apps', url: '/' },
-        { text: appName, url: `/apps/${appName}` },
-        { text: 'runbooks', url: `/apps/${appName}/runbooks` },
-        {
-          text: data?.runbook?.spec?.name,
-          url: `/apps/${appName}/runbooks/${data?.runbook?.name}`,
-        },
-      ]),
-    [appName, data, setBreadcrumbs]
+  const breadcrumbs = useMemo(
+    () => [
+      { label: 'apps', url: '/' },
+      { label: appName ?? '', url: `/apps/${appName}` },
+      { label: 'runbooks', url: `/apps/${appName}/runbooks` },
+      {
+        label: data?.runbook?.spec?.name ?? '',
+        url: `/apps/${appName}/runbooks/${data?.runbook?.name}`,
+      },
+    ],
+    [appName, data?.runbook]
   )
+
+  useSetBreadcrumbs(breadcrumbs)
 
   useEffect(() => setSelectedKey(data?.runbook?.spec?.name || ''), [data])
 

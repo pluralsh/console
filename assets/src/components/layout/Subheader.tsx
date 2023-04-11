@@ -2,6 +2,7 @@ import { Flex } from 'honorable'
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
+  Breadcrumbs,
   IconFrame,
   theme,
 } from '@pluralsh/design-system'
@@ -12,7 +13,6 @@ import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayo
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from '../utils/layout/ResponsiveLayoutSpacer'
 
-import { Breadcrumbs } from './Breadcrumbs'
 import AppNav from './AppNav'
 
 export default function Subheader() {
@@ -49,8 +49,12 @@ export default function Subheader() {
         />
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutContentContainer>
-        <Breadcrumbs />
+      <ResponsiveLayoutContentContainer justifyContent="center">
+        <Breadcrumbs
+          paddingTop="small"
+          paddingBottom="small"
+          marginRight="medium"
+        />
       </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSidecarContainer />
       <ResponsiveLayoutSpacer />

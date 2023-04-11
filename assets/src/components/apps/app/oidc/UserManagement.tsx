@@ -1,6 +1,5 @@
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
-import { Button, Card } from '@pluralsh/design-system'
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { Button, Card, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@apollo/client'
 import { Flex, P } from 'honorable'
@@ -259,17 +258,16 @@ function UserManagementContent() {
 
 export default function UserManagement() {
   const { appName } = useParams()
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
-
-  useEffect(
-    () =>
-      setBreadcrumbs([
-        { text: 'apps', url: '/' },
-        { text: appName, url: `/apps/${appName}` },
-        { text: 'user management', url: `/apps/${appName}/oidc` },
-      ]),
-    [appName, setBreadcrumbs]
+  const breadcrumbs = useMemo(
+    () => [
+      { label: 'apps', url: '/' },
+      { label: appName ?? '', url: `/apps/${appName}` },
+      { label: 'user management', url: `/apps/${appName}/oidc` },
+    ],
+    [appName]
   )
+
+  useSetBreadcrumbs(breadcrumbs)
 
   return (
     <ScrollablePage

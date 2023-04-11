@@ -1,4 +1,4 @@
-import { forwardRef, useContext, useEffect, useMemo, useState } from 'react'
+import { forwardRef, useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { Div, Flex, useDebounce } from 'honorable'
 import {
@@ -9,6 +9,7 @@ import {
   ListBoxFooter,
   ListBoxItem,
   SearchIcon,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import Fuse from 'fuse.js'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -16,7 +17,6 @@ import { ListBoxFooterProps } from '@pluralsh/design-system/dist/components/List
 import styled, { useTheme } from 'styled-components'
 import type { RootQueryType } from 'generated/graphql'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { isEqual } from 'utils/kubernetes'
 import { isEmpty, uniqBy } from 'lodash'
@@ -73,13 +73,10 @@ const searchOptions = {
   threshold: 0.25,
 }
 
-export default function AllPods() {
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
+const breadcrumbs = [{ label: 'pods', url: '/pods' }]
 
-  useEffect(
-    () => setBreadcrumbs([{ text: 'pods', url: '/pods' }]),
-    [setBreadcrumbs]
-  )
+export default function AllPods() {
+  useSetBreadcrumbs(breadcrumbs)
 
   const { data, refetch, error, subscribeToMore } = useQuery<{
     cachedPods: RootQueryType['cachedPods']

@@ -1,12 +1,11 @@
-import { useContext, useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { sumBy } from 'lodash'
 import { Flex } from 'honorable'
-import { Card } from '@pluralsh/design-system'
+import { Card, useSetBreadcrumbs } from '@pluralsh/design-system'
 import type { Node, NodeMetric } from 'generated/graphql'
 import { cpuParser, memoryParser } from 'utils/kubernetes'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { SHORT_POLL_INTERVAL } from '../constants'
@@ -20,13 +19,10 @@ export type ResourceUsage = {
   mem: number
 } | null
 
-export default function Nodes() {
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
+const breadcrumbs = [{ label: 'nodes', url: '/nodes' }]
 
-  useEffect(
-    () => setBreadcrumbs([{ text: 'nodes', url: '/nodes' }]),
-    [setBreadcrumbs]
-  )
+export default function Nodes() {
+  useSetBreadcrumbs(breadcrumbs)
 
   const { data, refetch } = useQuery<{
     nodes: Node[]

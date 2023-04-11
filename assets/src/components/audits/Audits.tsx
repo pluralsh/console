@@ -1,9 +1,8 @@
-import { Key, useContext, useEffect, useRef, useState } from 'react'
+import { Key, useRef, useState } from 'react'
 import { Box, Text } from 'grommet'
-import { SubTab, TabList } from '@pluralsh/design-system'
+import { SubTab, TabList, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { Flex, Span } from 'honorable'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
@@ -34,20 +33,18 @@ const DIRECTORY = [
   { path: 'graph', label: 'Graph view' },
 ]
 
+const breadcrumbs = [{ label: 'audits', url: '/audits' }]
+
 export default function Audits() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const tabStateRef = useRef<any>(null)
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const currentView =
     DIRECTORY.find((tab) => pathname?.startsWith(`/audits/${tab.path}`))
       ?.path || DIRECTORY[0].path
   const [view, setView] = useState<Key>(currentView)
 
-  useEffect(
-    () => setBreadcrumbs([{ text: 'audits', url: '/audits' }]),
-    [setBreadcrumbs]
-  )
+  useSetBreadcrumbs(breadcrumbs)
 
   return (
     <ResponsivePageFullWidth

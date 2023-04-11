@@ -1,7 +1,13 @@
 import { Flex } from 'honorable'
-import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
+import {
+  Breadcrumb,
+  SubTab,
+  TabList,
+  TabPanel,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 
-import { useContext, useEffect, useMemo, useRef } from 'react'
+import { useContext, useMemo, useRef } from 'react'
 import { Outlet, useMatch, useParams } from 'react-router-dom'
 
 import { InstallationContext } from 'components/Installations'
@@ -23,8 +29,6 @@ import {
 } from 'components/cluster/queries'
 
 import { LoginContext } from 'components/contexts'
-
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
@@ -55,7 +59,6 @@ const kindToQuery = {
 
 export default function Component() {
   const tabStateRef = useRef<any>(null)
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { me } = useContext<any>(LoginContext)
   const { appName, componentKind = '', componentName } = useParams()
   const { applications } = useContext<any>(InstallationContext)
@@ -66,19 +69,20 @@ export default function Component() {
     fetchPolicy: 'cache-and-network',
   })
 
-  useEffect(
-    () =>
-      setBreadcrumbs([
-        { text: 'apps', url: '/' },
-        { text: appName, url: `/apps/${appName}` },
-        { text: 'components', url: `/apps/${appName}/components` },
-        {
-          text: componentName,
-          url: `/apps/${appName}/components/${componentKind}/${componentName}`,
-        },
-      ]),
-    [appName, componentKind, componentName, setBreadcrumbs]
+  const breadcrumbs: Breadcrumb[] = useMemo(
+    () => [
+      { label: 'apps', url: '/' },
+      { label: appName ?? '', url: `/apps/${appName}` },
+      { label: 'components', url: `/apps/${appName}/components` },
+      {
+        label: componentName ?? '',
+        url: `/apps/${appName}/components/${componentKind}/${componentName}`,
+      },
+    ],
+    [appName, componentKind, componentName]
   )
+
+  useSetBreadcrumbs(breadcrumbs)
 
   const kind: ScalingType =
     ScalingTypes[componentKind.toUpperCase()] ?? ScalingTypes.DEPLOYMENT

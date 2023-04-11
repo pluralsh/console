@@ -1,6 +1,9 @@
-import { BreadcrumbsContext } from 'components/layout/Breadcrumbs'
-import { EmptyState, RunBookIcon } from '@pluralsh/design-system'
-import { useContext, useEffect } from 'react'
+import {
+  EmptyState,
+  RunBookIcon,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
+import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { POLL_INTERVAL } from 'components/runbooks/constants'
 import { RUNBOOKS_Q } from 'components/runbooks/queries'
@@ -17,22 +20,22 @@ import RunbookStatus from './runbook/RunbookStatus'
 export default function Runbooks() {
   const navigate = useNavigate()
   const { appName } = useParams()
-  const { setBreadcrumbs } = useContext<any>(BreadcrumbsContext)
   const { data } = useQuery(RUNBOOKS_Q, {
     variables: { namespace: appName },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
 
-  useEffect(
-    () =>
-      setBreadcrumbs([
-        { text: 'apps', url: '/' },
-        { text: appName, url: `/apps/${appName}` },
-        { text: 'runbooks', url: `/apps/${appName}/runbooks` },
-      ]),
-    [appName, setBreadcrumbs]
+  const breadcrumbs = useMemo(
+    () => [
+      { label: 'apps', url: '/' },
+      { label: appName ?? '', url: `/apps/${appName}` },
+      { label: 'runbooks', url: `/apps/${appName}/runbooks` },
+    ],
+    [appName]
   )
+
+  useSetBreadcrumbs(breadcrumbs)
 
   if (!data) return <LoadingIndicator />
 
