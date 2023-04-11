@@ -50,7 +50,10 @@ export default function UsersList() {
             setListRef={setListRef}
             items={edges}
             mapper={({ node: user }, { next }) => (
-              <ListItem last={!next.node}>
+              <ListItem
+                key={user.id}
+                last={!next.node}
+              >
                 <User user={user} />
               </ListItem>
             )}

@@ -60,7 +60,12 @@ export default function LogLine({
       >
         {ts(timestamp)}
         {blocks.map((json) => (
-          <Span {...textStyle(json)}>&nbsp;{json.content}</Span>
+          <Span
+            key={json.content}
+            {...textStyle(json)}
+          >
+            &nbsp;{json.content}
+          </Span>
         ))}
       </Flex>
       <Flex

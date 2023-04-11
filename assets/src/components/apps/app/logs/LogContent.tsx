@@ -106,6 +106,7 @@ export default function LogContent({
         items={lines}
         mapper={({ line, level, stream }, o) => (
           <LogLine
+            key={line.timestamp}
             line={line}
             level={level}
             open={open === o}
