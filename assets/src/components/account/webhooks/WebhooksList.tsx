@@ -28,7 +28,12 @@ export default function WebhooksList() {
         listRef={listRef}
         setListRef={setListRef}
         items={edges}
-        mapper={({ node }) => <Webhook hook={node} />}
+        mapper={({ node }) => (
+          <Webhook
+            key={node.id}
+            hook={node}
+          />
+        )}
         loading={loading}
         loadNextPage={() =>
           pageInfo.hasNextPage &&

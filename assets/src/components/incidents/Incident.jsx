@@ -305,9 +305,13 @@ export function Messages({ incident, loading, fetchMore, subscribeToMore }) {
       items={[...edges, 'end']}
       mapper={(e, { next, prev }, props) =>
         e === 'end' ? (
-          <LastMessage date={prev.node.insertedAt} />
+          <LastMessage
+            key={e.node.id}
+            date={prev.node.insertedAt}
+          />
         ) : (
           <Message
+            key={e.node.id}
             message={e.node}
             next={next.node}
             prev={prev.node}
@@ -371,6 +375,7 @@ function Files({ incident, fetchMore }) {
         emptyState={<NoFiles />}
         mapper={({ node }, { node: next }) => (
           <FileEntry
+            key={node.id}
             file={node}
             next={next}
           />
