@@ -3,6 +3,7 @@ import { Div, Flex } from 'honorable'
 import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
 import BrowseAppsIcon from '../components/icons/BrowseAppsIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'
+import SearchIcon from '../components/icons/SearchIcon'
 import Input from '../components/Input'
 
 export default {
@@ -104,10 +105,12 @@ Multiline.args = {
 export const TitleContent = CustomInputTemplate.bind({})
 
 TitleContent.args = {
+  startIcon: <SearchIcon />,
   titleContent: (
     <>
       <BrowseAppsIcon marginRight="small" />
       Marketplace
     </>
   ),
+  placeholder: 'Search the marketplace',
 }

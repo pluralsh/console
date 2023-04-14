@@ -95,15 +95,10 @@ function Trigger({ buttonElt, isOpen, ...props }: TriggerProps) {
   })
 }
 
-export const titleContentStyles = ({
-  theme,
-  parentFillLevel,
-  size = 'medium',
-}: {
-  theme: any
-  parentFillLevel: FillLevel
-  size?: Size
-}) => {
+export const TitleContent = styled.div<{
+  $size: Size
+  $parentFillLevel: FillLevel
+}>(({ theme, $size: size, $parentFillLevel: parentFillLevel }) => {
   const hPad = theme.spacing.small
   const vPad = size === 'small' ? 5 : 9
 
@@ -122,7 +117,7 @@ export const titleContentStyles = ({
     paddingLeft: hPad,
     paddingRight: hPad,
   }
-}
+})
 
 const SelectButtonInner = styled.div<{
   $isOpen: boolean
@@ -145,11 +140,6 @@ const SelectButtonInner = styled.div<{
     color: theme.colors['text-light'],
     border: theme.borders.input,
     borderRadius: theme.borderRadiuses.medium,
-    '.titleContent': titleContentStyles({
-      theme,
-      size,
-      parentFillLevel,
-    }),
     '.content': {
       alignItems: 'center',
       display: 'flex',
@@ -212,7 +202,14 @@ const SelectButton = forwardRef<
         $parentFillLevel={parentFillLevel}
         {...props}
       >
-        {titleContent && <div className="titleContent">{titleContent}</div>}
+        {titleContent && (
+          <TitleContent
+            $size={size}
+            $parentFillLevel={parentFillLevel}
+          >
+            {titleContent}
+          </TitleContent>
+        )}
         <div className="content">
           {leftContent && <div className="leftContent">{leftContent}</div>}
           <div className="children">{children}</div>

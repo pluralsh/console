@@ -199,8 +199,6 @@ function CrumbListRef(
     breadcrumbs.length
   )
 
-  console.log('ariaOnly', ariaOnly, visuallyHiddenProps)
-
   return (
     <Ol
       id={id}
