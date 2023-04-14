@@ -95,6 +95,35 @@ function Trigger({ buttonElt, isOpen, ...props }: TriggerProps) {
   })
 }
 
+export const titleContentStyles = ({
+  theme,
+  parentFillLevel,
+  size = 'medium',
+}: {
+  theme: any
+  parentFillLevel: FillLevel
+  size?: Size
+}) => {
+  const hPad = theme.spacing.small
+  const vPad = size === 'small' ? 5 : 9
+
+  return {
+    ...theme.partials.text.caption,
+    alignItems: 'center',
+    backgroundColor:
+      theme.colors[parentFillLevel < 2 ? 'fill-three' : 'fill-three-selected'],
+    color: theme.colors.text,
+    display: 'flex',
+    flexDirection: 'row',
+    fontWeight: 600,
+    // Must specify individual padding to override Honorable styles on <Input>
+    paddingTop: vPad,
+    paddingBottom: vPad,
+    paddingLeft: hPad,
+    paddingRight: hPad,
+  }
+}
+
 const SelectButtonInner = styled.div<{
   $isOpen: boolean
   $size: Size
@@ -116,19 +145,11 @@ const SelectButtonInner = styled.div<{
     color: theme.colors['text-light'],
     border: theme.borders.input,
     borderRadius: theme.borderRadiuses.medium,
-    '.titleContent': {
-      ...theme.partials.text.caption,
-      alignItems: 'center',
-      backgroundColor:
-        theme.colors[
-          parentFillLevel < 2 ? 'fill-three' : 'fill-three-selected'
-        ],
-      color: theme.colors.text,
-      display: 'flex',
-      flexDirection: 'row',
-      fontWeight: 600,
-      padding: `${size === 'medium' ? 9 : 5}px ${theme.spacing.small}px`,
-    },
+    '.titleContent': titleContentStyles({
+      theme,
+      size,
+      parentFillLevel,
+    }),
     '.content': {
       alignItems: 'center',
       display: 'flex',

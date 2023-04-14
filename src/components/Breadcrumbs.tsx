@@ -9,10 +9,11 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import { Div, Flex, FlexProps } from 'honorable'
-import styled from 'styled-components'
+import { Flex, FlexProps, Nav, Ol } from 'honorable'
+import styled, { useTheme } from 'styled-components'
 import classNames from 'classnames'
 import { SwitchTransition, Transition } from 'react-transition-group'
+import { useVisuallyHidden } from '@react-aria/visually-hidden'
 
 import useResizeObserver from '../hooks/useResizeObserver'
 import usePrevious from '../hooks/usePrevious'
@@ -33,7 +34,12 @@ function getCrumbKey(crumb: Breadcrumb) {
 }
 
 const CrumbSeparator = styled(({ className }: { className?: string }) => (
-  <div className={className}>/</div>
+  <div
+    className={className}
+    aria-hidden
+  >
+    /
+  </div>
 ))(({ theme }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-input-disabled'],
@@ -62,7 +68,8 @@ function CrumbLink({
   )
 }
 
-const CrumbLinkWrap = styled.div(({ theme }) => ({
+const CrumbLinkWrap = styled.li(({ theme }) => ({
+  ...theme.partials.reset.li,
   display: 'flex',
   flexDirection: 'row',
   gap: theme.spacing.small,
@@ -163,21 +170,24 @@ function CrumbListRef(
     breadcrumbs,
     maxLength,
     visibleListId,
-    ...props
+    ariaOnly = false,
   }: {
     breadcrumbs: Breadcrumb[]
     maxLength: number
-    visibleListId: string
-  } & FlexProps,
+    visibleListId?: string
+    ariaOnly?: boolean
+  },
   ref: MutableRefObject<HTMLDivElement>
 ) {
   const id = useId()
+  const { visuallyHiddenProps } = useVisuallyHidden()
+  const theme = useTheme()
 
   if (breadcrumbs?.length < 1) {
     return null
   }
   maxLength = Math.min(maxLength, breadcrumbs.length)
-  const hidden = visibleListId !== id
+  const heightlessHidden = visibleListId !== id
 
   const head = maxLength > 1 ? [breadcrumbs[0]] : []
   const middle = breadcrumbs.slice(
@@ -189,18 +199,22 @@ function CrumbListRef(
     breadcrumbs.length
   )
 
+  console.log('ariaOnly', ariaOnly, visuallyHiddenProps)
+
   return (
-    <Flex
+    <Ol
       id={id}
       ref={ref}
-      {...(hidden
-        ? { height: 0, opacity: 0, overflow: 'hidden', 'aria-visible': 'false' }
-        : {})}
-      className="crumbList"
+      display="flex"
+      {...theme.partials.reset.list}
+      className={ariaOnly ? '' : 'crumbList'}
       direction="row"
       gap="small"
       maxWidth="max-content"
-      {...props}
+      {...(heightlessHidden && !ariaOnly
+        ? { height: 0, opacity: 0, overflow: 'hidden' }
+        : {})}
+      {...(ariaOnly ? visuallyHiddenProps : {})}
     >
       {head.map((headCrumb) => (
         <CrumbLink
@@ -223,7 +237,7 @@ function CrumbListRef(
           isLast={i === tail.length - 1}
         />
       ))}
-    </Flex>
+    </Ol>
   )
 }
 
@@ -243,13 +257,12 @@ type BreadcrumbsProps = {
   breadcrumbs?: Breadcrumb[]
 } & FlexProps
 
-export function BreadcrumbsInside({
+export function DynamicBreadcrumbs({
   minLength = 0,
   maxLength = Infinity,
   collapsible = true,
   breadcrumbs,
   wrapperRef: transitionRef,
-  ...props
 }: BreadcrumbsProps & {
   breadcrumbs: Breadcrumb[]
   wrapperRef?: MutableRefObject<HTMLDivElement>
@@ -324,12 +337,14 @@ export function BreadcrumbsInside({
 
   return (
     <Flex
+      // Hide dynamic breadcrumb list from screen readers.
+      // A screen reader-only list is provided in root component.
+      aria-hidden
       direction="column"
       ref={(elt: any) => {
         wrapperRef.current = elt
         if (transitionRef) transitionRef.current = elt
       }}
-      {...props}
     >
       {children}
     </Flex>
@@ -359,18 +374,25 @@ export function Breadcrumbs({
   }
 
   return (
-    <Div {...props}>
+    <Nav
+      aria-label="breadcrumbs"
+      {...props}
+    >
+      {/* Prevent flashing by swapping in new hidden component every time breadcrumbs
+      change and waiting for refit before making visible and removing old breadcrumbs */}
       <SwitchTransition mode="in-out">
         <Transition
           key={String(transitionKey.current)}
           timeout={200}
+          // Typing for 'addEndListener' on <Transition> component is incorrect
+          // when not providing 'ref' prop
           // @ts-expect-error
           addEndListener={(node, done) => {
             node?.addEventListener('refitdone', done, false)
           }}
         >
           {(state) => (
-            <BreadcrumbsInside
+            <DynamicBreadcrumbs
               minLength={minLength}
               maxLength={maxLength}
               collapsible={collapsible}
@@ -380,6 +402,12 @@ export function Breadcrumbs({
           )}
         </Transition>
       </SwitchTransition>
-    </Div>
+      {/* Provide stable, but visually hidden crumb list for screen readers */}
+      <CrumbList
+        ariaOnly
+        breadcrumbs={breadcrumbs}
+        maxLength={Infinity}
+      />
+    </Nav>
   )
 }

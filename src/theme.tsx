@@ -507,6 +507,7 @@ const honorableTheme = mergeTheme(defaultTheme, {
       {
         body2: true,
         display: 'flex',
+        overflow: 'hidden',
         justifyContent: 'space-between',
         align: 'center',
         height: 'auto',

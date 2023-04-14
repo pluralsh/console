@@ -2,6 +2,7 @@ import { Div, DivProps } from 'honorable'
 import {
   CSSProperties,
   ComponentProps,
+  Fragment,
   MouseEvent,
   MutableRefObject,
   Ref,
@@ -618,7 +619,7 @@ function TableRef(
               const i = row.index
 
               return (
-                <>
+                <Fragment key={row.id}>
                   <Tr
                     key={row.id}
                     onClick={(e) => onRowClick?.(e, row)}
@@ -654,7 +655,7 @@ function TableRef(
                       </TdExpand>
                     </Tr>
                   )}
-                </>
+                </Fragment>
               )
             })}
             {paddingBottom > 0 && (

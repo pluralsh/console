@@ -11,4 +11,13 @@ export const resetPartials = {
     cursor: 'pointer',
     outline: 'inherit',
   },
+  list: {
+    margin: 0,
+    padding: 0,
+    listStyle: 'none',
+  },
+  li: {
+    margin: 0,
+    padding: 0,
+  },
 } as const satisfies Record<string, CSSObject>

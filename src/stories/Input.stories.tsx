@@ -1,6 +1,7 @@
 import { Div, Flex } from 'honorable'
 
 import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
+import BrowseAppsIcon from '../components/icons/BrowseAppsIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'
 import Input from '../components/Input'
 
@@ -98,4 +99,15 @@ export const Multiline = CustomInputTemplate.bind({})
 Multiline.args = {
   multiline: true,
   minRows: 3,
+}
+
+export const TitleContent = CustomInputTemplate.bind({})
+
+TitleContent.args = {
+  titleContent: (
+    <>
+      <BrowseAppsIcon marginRight="small" />
+      Marketplace
+    </>
+  ),
 }
