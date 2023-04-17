@@ -261,6 +261,7 @@ export function DynamicBreadcrumbs({
   collapsible = true,
   breadcrumbs,
   wrapperRef: transitionRef,
+  ...props
 }: BreadcrumbsProps & {
   breadcrumbs: Breadcrumb[]
   wrapperRef?: MutableRefObject<HTMLDivElement>
@@ -343,6 +344,7 @@ export function DynamicBreadcrumbs({
         wrapperRef.current = elt
         if (transitionRef) transitionRef.current = elt
       }}
+      {...props}
     >
       {children}
     </Flex>
