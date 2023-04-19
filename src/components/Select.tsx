@@ -320,6 +320,7 @@ function Select({
       leftContent={leftContent}
       rightContent={rightContent}
       isOpen={state.isOpen}
+      showArrow={!props.isDisabled}
       size={size}
     >
       {(props.selectionMode === 'multiple' &&
