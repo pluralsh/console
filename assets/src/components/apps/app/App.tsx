@@ -6,40 +6,31 @@ import {
   getBarePathFromPath,
   removeTrailingSlashes,
 } from '@pluralsh/design-system'
-
 import { useContext, useMemo, useState } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router-dom'
-
 import { ensureURLValidity } from 'utils/url'
 import { InstallationContext } from 'components/Installations'
-
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-
 import { PropsContainer } from 'components/utils/PropsContainer'
 import Prop from 'components/utils/Prop'
-
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
-
 import { Application, Repository, useRepositoryQuery } from 'generated/graphql'
-
 import { GqlError } from 'components/utils/Alert'
-
 import capitalize from 'lodash/capitalize'
-
-import collectHeadings from 'markdoc/utils/collectHeadings'
-
+import {
+  collectHeadings,
+  getMdContent,
+} from '@pluralsh/design-system/dist/markdoc'
 import { useTheme } from 'styled-components'
-
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
+import { config } from 'markdoc/mdSchema'
+
 import { LoginContext } from '../../contexts'
-
 import AppStatus from '../AppStatus'
-
-import { getMdContent } from '../../../markdoc/utils/getMdContent'
 
 import AppSelector from './AppSelector'
 import RunbookStatus from './runbooks/runbook/RunbookStatus'
@@ -52,8 +43,7 @@ import {
 
 export function getDocsData(docs: Repository['docs']) {
   return docs?.map((doc, i) => {
-    const content = getMdContent(doc?.content)
-
+    const content = getMdContent(doc?.content, config)
     const headings = collectHeadings(content)
     const id = headings?.[0]?.id || `page-${i}`
     const label = headings?.[0]?.title || `Page ${i}`

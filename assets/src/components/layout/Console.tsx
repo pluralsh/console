@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import { Toast } from '@pluralsh/design-system'
 import { A, Flex, Span } from 'honorable'
-import { MarkdocContextProvider } from 'markdoc/MarkdocContext'
+import { MarkdocContextProvider } from '@pluralsh/design-system/dist/markdoc/MarkdocContext'
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
 

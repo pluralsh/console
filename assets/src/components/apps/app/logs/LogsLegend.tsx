@@ -2,7 +2,7 @@ import Prop from 'components/utils/Prop'
 import { PropsContainer } from 'components/utils/PropsContainer'
 import styled from 'styled-components'
 
-import { borderColor } from './LogLine'
+import { useBorderColor } from './LogLine'
 import { Level } from './misc'
 
 export const LegendColor = styled.div(({ theme, color = '#ffffff' }) => ({
@@ -19,6 +19,8 @@ export const LegendWrap = styled.div(({ theme }) => ({
 }))
 
 export default function LogsLegend() {
+  const borderColor = useBorderColor()
+
   return (
     <PropsContainer>
       <Prop title="Log legend">
