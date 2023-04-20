@@ -26,7 +26,7 @@ import {
 } from '@pluralsh/design-system/dist/markdoc'
 import { useTheme } from 'styled-components'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-
+import isEmpty from 'lodash/isEmpty'
 import { config } from 'markdoc/mdSchema'
 
 import { LoginContext } from '../../contexts'
@@ -112,7 +112,7 @@ export const getDirectory = ({
     {
       path: 'docs',
       label: `${capitalize(app?.name)} docs`,
-      enabled: (docs?.length ?? 0) > 0,
+      enabled: !isEmpty(docs),
       ...(docs ? { subpaths: docs } : {}),
     },
   ]
@@ -139,7 +139,10 @@ function AppWithoutContext() {
   )
 
   const directory = useMemo(
-    () => getDirectory({ app: currentApp, docs, config: configuration }),
+    () =>
+      getDirectory({ app: currentApp, docs, config: configuration }).filter(
+        (entry) => entry.enabled
+      ),
     [configuration, currentApp, docs]
   )
 
