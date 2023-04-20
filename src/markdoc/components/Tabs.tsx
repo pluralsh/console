@@ -3,6 +3,7 @@ import {
   type PropsWithChildren,
   type ReactNode,
   createContext,
+  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -28,6 +29,9 @@ type TabProps = {
   children: ReactNode
 }
 
+const getTabKey = (tab: TabProps, index: number) =>
+  `${tab.title ?? ''}-${index}`
+
 export function Tabs({ tabs }: { tabs: TabProps[] }) {
   const tabStateRef = useRef<any>()
   const [selectedKey, setSelectedKey] = useState<Key>(tabs[0].title || '')
@@ -37,6 +41,10 @@ export function Tabs({ tabs }: { tabs: TabProps[] }) {
     selectedKey,
     onSelectionChange: setSelectedKey,
   }
+  const keyedTabs = useMemo(
+    () => tabs.map((tab, i) => ({ key: getTabKey(tab, i), ...tab })),
+    [tabs]
+  )
 
   return (
     <TabContext.Provider value={selectedKey}>
@@ -44,19 +52,19 @@ export function Tabs({ tabs }: { tabs: TabProps[] }) {
         stateRef={tabStateRef}
         stateProps={tabListStateProps}
       >
-        {tabs.map(({ title }) => (
+        {keyedTabs.map(({ key, title }) => (
           <TabComponent
-            key={title}
+            key={key}
             textValue={title}
           >
             {title}
           </TabComponent>
         ))}
       </TabListStyled>
-      {tabs.map(({ children, title }) => (
+      {keyedTabs.map(({ key, children }) => (
         <TabPanel
-          key={title}
-          tabKey={title}
+          key={key}
+          tabKey={key}
           mode="multipanel"
           stateRef={tabStateRef}
         >

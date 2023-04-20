@@ -66,7 +66,7 @@ const crumbList: Breadcrumb[] = [
 
 const crumbLists = crumbList.map((_, i) => crumbList.slice(0, i + 1))
 
-function CrumbSetter() {
+function CrumbContextSetter() {
   const [selectedList, setSelectedList] = useState<string>(
     (crumbLists.length - 1).toString()
   )
@@ -96,7 +96,7 @@ function CrumbSetter() {
   )
 }
 
-function Template(args: any) {
+function WithContextTemplate(args: any) {
   return (
     <NavContextProviderStub>
       <BreadcrumbsProvider>
@@ -109,16 +109,67 @@ function Template(args: any) {
             {...args}
             marginBottom="xlarge"
           />
-          <CrumbSetter />
+          <CrumbContextSetter />
         </Flex>
       </BreadcrumbsProvider>
     </NavContextProviderStub>
   )
 }
 
-export const Default = Template.bind({})
+function ManualTemplate(args: any) {
+  const [selectedList, setSelectedList] = useState<string>(
+    (crumbLists.length - 1).toString()
+  )
 
-Default.args = {
+  const crumbList = crumbLists[selectedList]
+
+  return (
+    <NavContextProviderStub>
+      <Flex
+        flexDirection="column"
+        gap="large"
+      >
+        {/* SINGLE SELECT */}
+        <Breadcrumbs
+          {...args}
+          breadcrumbs={crumbList}
+          marginBottom="xlarge"
+        />
+        <FormField label="Select a page">
+          <Select
+            label="..."
+            selectedKey={selectedList}
+            onSelectionChange={(key) => setSelectedList(key as string)}
+          >
+            {crumbLists.map((crumbs, i) => {
+              const lastCrumb = crumbs[crumbs.length - 1]
+
+              return (
+                <ListBoxItem
+                  key={i.toString()}
+                  textValue={lastCrumb.textValue}
+                  label={lastCrumb.label}
+                />
+              )
+            })}
+          </Select>
+        </FormField>
+      </Flex>
+    </NavContextProviderStub>
+  )
+}
+
+export const UsingContext = WithContextTemplate.bind({})
+
+UsingContext.args = {
+  minLength: undefined,
+  maxLength: undefined,
+  collapsible: true,
+}
+
+export const Manual = ManualTemplate.bind({})
+
+Manual.args = {
   minLength: undefined,
   maxLength: undefined,
   collapsible: true,

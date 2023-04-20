@@ -58,7 +58,7 @@ function CrumbLink({
   const { Link } = useNavigationContext()
 
   return (
-    <CrumbLinkWrap>
+    <CrumbLinkWrap {...(isLast ? { 'aria-current': 'page' } : {})}>
       <CrumbLinkText className={classNames({ isLast })}>
         {isLast || typeof crumb.url !== 'string' ? (
           crumb.label
@@ -361,7 +361,7 @@ export function Breadcrumbs({
   breadcrumbs: propsCrumbs,
   ...props
 }: BreadcrumbsProps) {
-  const { breadcrumbs: contextCrumbs } = useContext(BreadcrumbsContext)
+  const contextCrumbs = useContext(BreadcrumbsContext)?.breadcrumbs
   const breadcrumbs = propsCrumbs || contextCrumbs
 
   if (!breadcrumbs) {

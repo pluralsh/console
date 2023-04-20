@@ -21,7 +21,7 @@ import { type MakeOptional, type Renderer, type TabStateRef } from './TabList'
 
 /*
 mode='multipanel'
-  Use when you all tab content visible in the DOM at all time (such as for
+  Use when you want all tab content visible in the DOM at all times (such as for
   search indexing the docs site, etc).
   In this mode, each tab will need it's own TabPanel with the `tabKey` prop set
   to the same key as the tab associated with it.

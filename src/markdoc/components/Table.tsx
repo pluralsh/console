@@ -1,5 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table'
 
+import { Fragment } from 'react'
+
 import { Table as PluralTable } from '../../index'
 
 type TableProps = {
@@ -14,12 +16,10 @@ function Table({ thead, tbody }: TableProps) {
     return null
   }
 
-  // const data = tbody.map(tr => Object.fromEntries(tr.map((td, idx) => [`x${idx}`, td])))
-
   const columns = thead.map((th, idx) =>
     columnHelper.accessor((row) => row[idx], {
       id: th,
-      cell: (info: any) => info.getValue(),
+      cell: (info) => <Fragment key={idx}>{info.getValue()}</Fragment>,
       header: () => <span>{th}</span>,
     })
   )
