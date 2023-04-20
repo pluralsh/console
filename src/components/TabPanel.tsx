@@ -1,9 +1,9 @@
-import { Div, DivProps } from 'honorable'
+import { Div, type DivProps } from 'honorable'
 import { useTabPanel } from '@react-aria/tabs'
 import {
-  Key,
-  MutableRefObject,
-  ReactElement,
+  type Key,
+  type MutableRefObject,
+  type ReactElement,
   cloneElement,
   forwardRef,
   useCallback,
@@ -17,7 +17,7 @@ import styled from 'styled-components'
 
 import { useVisuallyHidden } from '@react-aria/visually-hidden'
 
-import { MakeOptional, Renderer, TabStateRef } from './TabList'
+import { type MakeOptional, type Renderer, type TabStateRef } from './TabList'
 
 /*
 mode='multipanel'

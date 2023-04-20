@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useMemo, useState } from 'react'
 import { Switch } from 'honorable'
 
-import Card, { CardProps } from '../Card'
+import Card, { type CardProps } from '../Card'
 
 import {
   PROVIDERS,

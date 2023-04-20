@@ -1,11 +1,11 @@
-import { Div, DivProps } from 'honorable'
+import { Div, type DivProps } from 'honorable'
 import {
-  CSSProperties,
-  ComponentProps,
+  type CSSProperties,
+  type ComponentProps,
   Fragment,
-  MouseEvent,
-  MutableRefObject,
-  Ref,
+  type MouseEvent,
+  type MutableRefObject,
+  type Ref,
   forwardRef,
   useCallback,
   useEffect,

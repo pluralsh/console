@@ -1,4 +1,4 @@
-import { ReactNode, RefObject, useRef } from 'react'
+import { type ReactNode, type RefObject, useRef } from 'react'
 import { DismissButton, useOverlay } from '@react-aria/overlays'
 import { FocusScope } from '@react-aria/focus'
 import styled from 'styled-components'

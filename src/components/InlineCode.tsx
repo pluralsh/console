@@ -1,8 +1,8 @@
-import { ComponentPropsWithRef, forwardRef } from 'react'
+import { type ComponentPropsWithRef, forwardRef } from 'react'
 
 import styled from 'styled-components'
 
-import { FillLevel, useFillLevel } from './contexts/FillLevelContext'
+import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 
 // This nonsense is to reduce the chance of there being
 // a left margin when a <code> block is the first item in a line of text.

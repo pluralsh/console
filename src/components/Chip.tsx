@@ -1,10 +1,10 @@
-import { Flex, FlexProps, Spinner } from 'honorable'
+import { Flex, type FlexProps, Spinner } from 'honorable'
 import PropTypes from 'prop-types'
-import { ReactElement, Ref, forwardRef } from 'react'
+import { type ReactElement, type Ref, forwardRef } from 'react'
 import styled from 'styled-components'
 
-import Card, { CardProps } from './Card'
-import { FillLevel, useFillLevel } from './contexts/FillLevelContext'
+import Card, { type CardProps } from './Card'
+import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 import CloseIcon from './icons/CloseIcon'
 
 type Hue = 'default' | 'lighter' | 'lightest'

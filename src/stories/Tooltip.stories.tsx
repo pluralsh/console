@@ -1,5 +1,5 @@
-import { Button, Div, Flex, FlexProps } from 'honorable'
-import { ComponentProps, useState } from 'react'
+import { Button, Div, Flex, type FlexProps } from 'honorable'
+import { type ComponentProps, useState } from 'react'
 
 import { IconFrame, InfoIcon, Modal } from '..'
 

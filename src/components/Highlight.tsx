@@ -1,9 +1,9 @@
-import { Ref, forwardRef, useEffect, useMemo, useRef } from 'react'
+import { type Ref, forwardRef, useEffect, useMemo, useRef } from 'react'
 import hljs from 'highlight.js/lib/core'
 import '../hljs'
 
 import styled from 'styled-components'
-import { ComponentPropsWithoutRef } from 'react-markdown/lib/ast-to-react'
+import { type ComponentPropsWithoutRef } from 'react-markdown/lib/ast-to-react'
 
 const MainWrap = styled.div(({ theme }) => ({
   display: 'flex',

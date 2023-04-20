@@ -1,9 +1,9 @@
-import { ReactNode, Ref, forwardRef, useMemo } from 'react'
-import { Div, Flex, FlexProps, Span, SpanProps } from 'honorable'
+import { type ReactNode, type Ref, forwardRef, useMemo } from 'react'
+import { Div, Flex, type FlexProps, Span, type SpanProps } from 'honorable'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
-import { ColorKey, Severity } from '../types'
+import { type ColorKey, type Severity } from '../types'
 
 import { FillLevelProvider } from './contexts/FillLevelContext'
 import ErrorIcon from './icons/ErrorIcon'
@@ -11,7 +11,7 @@ import CloseIcon from './icons/CloseIcon'
 import InfoIcon from './icons/InfoIcon'
 import WarningIcon from './icons/WarningIcon'
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
-import createIcon from './icons/createIcon'
+import type createIcon from './icons/createIcon'
 import IconFrame from './IconFrame'
 
 const SEVERITIES = ['info', 'error', 'warning', 'success', 'danger'] as const

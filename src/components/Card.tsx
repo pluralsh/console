@@ -1,10 +1,10 @@
-import { Div, DivProps } from 'honorable'
+import { Div, type DivProps } from 'honorable'
 import { forwardRef, useMemo } from 'react'
 
 import { styledTheme as theme } from '../theme'
 
 import {
-  FillLevel,
+  type FillLevel,
   FillLevelProvider,
   isFillLevel,
   toFillLevel,

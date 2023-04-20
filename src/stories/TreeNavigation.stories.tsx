@@ -1,5 +1,5 @@
 import { Div } from 'honorable'
-import { ComponentProps, useEffect, useState } from 'react'
+import { type ComponentProps, useEffect, useState } from 'react'
 
 import { useNavigationContext } from '../components/contexts/NavigationContext'
 

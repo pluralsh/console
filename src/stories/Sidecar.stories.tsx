@@ -9,7 +9,7 @@ import {
   Sidecar,
   SidecarButton,
   SidecarItem,
-  SidecarProps,
+  type SidecarProps,
   SlackLogoIcon,
   TwitterIcon,
 } from '../index'

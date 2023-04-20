@@ -1,6 +1,6 @@
 import { Button, Div, Flex, P } from 'honorable'
 
-import PageTitle, { PageTitleProps } from '../components/PageTitle'
+import PageTitle, { type PageTitleProps } from '../components/PageTitle'
 
 export default {
   title: 'Page Title',

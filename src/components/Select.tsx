@@ -1,9 +1,9 @@
 import {
-  HTMLAttributes,
-  Key,
-  ReactElement,
-  ReactNode,
-  RefObject,
+  type HTMLAttributes,
+  type Key,
+  type ReactElement,
+  type ReactNode,
+  type RefObject,
   cloneElement,
   forwardRef,
   useRef,
@@ -12,15 +12,15 @@ import {
 import { HiddenSelect, useSelect } from '@react-aria/select'
 import { useButton } from '@react-aria/button'
 import styled, { useTheme } from 'styled-components'
-import { AriaSelectProps } from '@react-types/select'
+import { type AriaSelectProps } from '@react-types/select'
 
 import {
-  BimodalSelectProps,
-  BimodalSelectState,
+  type BimodalSelectProps,
+  type BimodalSelectState,
   useBimodalSelectState,
 } from '../utils/useBimodalSelectState'
 
-import { ListBoxItemBaseProps } from './ListBoxItem'
+import { type ListBoxItemBaseProps } from './ListBoxItem'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import { PopoverListBox } from './PopoverListBox'
 import {
@@ -28,7 +28,7 @@ import {
   useSelectComboStateProps,
 } from './SelectComboShared'
 import { useFloatingDropdown } from './useFloatingDropdown'
-import { FillLevel, useFillLevel } from './contexts/FillLevelContext'
+import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 
 const parentFillLevelToBackground = {
   0: 'fill-one',

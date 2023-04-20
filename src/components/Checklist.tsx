@@ -1,7 +1,7 @@
 import {
-  ComponentPropsWithRef,
-  Dispatch,
-  ReactElement,
+  type ComponentPropsWithRef,
+  type Dispatch,
+  type ReactElement,
   useCallback,
   useEffect,
   useMemo,
@@ -11,8 +11,8 @@ import {
 import AnimateHeight from 'react-animate-height'
 import styled from 'styled-components'
 
-import { ChecklistFooter, ChecklistFooterProps } from './ChecklistFooter'
-import { ChecklistItemInner, ChecklistItemProps } from './ChecklistItem'
+import { ChecklistFooter, type ChecklistFooterProps } from './ChecklistFooter'
+import { ChecklistItemInner, type ChecklistItemProps } from './ChecklistItem'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
 
 const heightAnimationDuration = 333 // 333ms

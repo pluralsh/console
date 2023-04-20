@@ -1,10 +1,10 @@
 import styled from 'styled-components'
 import {
-  Dispatch,
-  MouseEventHandler,
-  MutableRefObject,
-  ReactElement,
-  Ref,
+  type Dispatch,
+  type MouseEventHandler,
+  type MutableRefObject,
+  type ReactElement,
+  type Ref,
   forwardRef,
   useCallback,
   useContext,
@@ -18,8 +18,8 @@ import IconFrame from '../IconFrame'
 import { CloseIcon } from '../../icons'
 import LoopingLogo from '../LoopingLogo'
 
-import { NavigationProps } from './Navigation'
-import { StepConfig } from './Picker'
+import { type NavigationProps } from './Navigation'
+import { type StepConfig } from './Picker'
 import { useActive, useNavigation, usePicker, useWizard } from './hooks'
 import { WizardContext } from './context'
 

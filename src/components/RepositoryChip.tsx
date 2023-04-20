@@ -1,5 +1,5 @@
-import { ReactNode, Ref, forwardRef, useState } from 'react'
-import { Flex, FlexProps, Img, P } from 'honorable'
+import { type ReactNode, type Ref, forwardRef, useState } from 'react'
+import { Flex, type FlexProps, Img, P } from 'honorable'
 
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
 import PlusIcon from './icons/PlusIcon'

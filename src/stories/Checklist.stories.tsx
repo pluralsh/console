@@ -1,7 +1,7 @@
 import { A, Button, Div, Flex, Span } from 'honorable'
 import { useCallback, useState } from 'react'
 
-import { Checklist, ChecklistStateProps } from '../components/Checklist'
+import { Checklist, type ChecklistStateProps } from '../components/Checklist'
 import { ChecklistItem } from '../components/ChecklistItem'
 import DownloadIcon from '../components/icons/DownloadIcon'
 import GitHubLogoIcon from '../components/icons/GitHubLogoIcon'

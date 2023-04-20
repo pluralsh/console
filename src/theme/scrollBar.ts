@@ -1,7 +1,8 @@
-import { StringObj } from 'src/theme'
-import { CSSObject } from 'styled-components'
+import { type CSSObject } from 'styled-components'
 
-import { FillLevel } from '../components/contexts/FillLevelContext'
+import { type StringObj } from '../theme'
+
+import { type FillLevel } from '../components/contexts/FillLevelContext'
 
 import { semanticColors } from './colors'
 

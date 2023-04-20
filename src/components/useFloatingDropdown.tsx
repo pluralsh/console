@@ -1,4 +1,4 @@
-import { MutableRefObject, useMemo } from 'react'
+import { type MutableRefObject, useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import {
   autoUpdate,
@@ -9,7 +9,7 @@ import {
 } from '@floating-ui/react-dom-interactions'
 import { mergeRefs } from 'react-merge-refs'
 
-import { SelectProps } from './Select'
+import { type SelectProps } from './Select'
 
 const DEFAULT_MAX_HEIGHT = 230
 

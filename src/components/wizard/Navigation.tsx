@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Dispatch, ReactElement, useContext, useEffect } from 'react'
+import { type Dispatch, type ReactElement, useContext, useEffect } from 'react'
 
 import Button from '../Button'
 import InstallIcon from '../icons/InstallIcon'
@@ -8,7 +8,7 @@ import InfoOutlineIcon from '../icons/InfoOutlineIcon'
 import Tooltip from '../Tooltip'
 
 import { useActive, useNavigation, usePicker, useStepper } from './hooks'
-import { ContextProps, StepConfig, WizardContext } from './context'
+import { type ContextProps, type StepConfig, WizardContext } from './context'
 
 const Navigation = styled(NavigationUnstyled)(({ theme }) => ({
   display: 'flex',

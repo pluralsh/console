@@ -6,10 +6,5 @@
     "noEmit": true,
     "allowJs": true
   },
-  "include": [
-    "src/**/*",
-    ".storybook/**/*",
-    "vite.config.ts",
-    ".eslintrc.js"
-  ]
+  "include": ["src/**/*", ".storybook/**/*", "vite.config.ts", ".eslintrc.cjs"]
 }

@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import {
-  Dispatch,
-  ReactNode,
+  type Dispatch,
+  type ReactNode,
   createRef,
   useCallback,
   useEffect,
@@ -14,7 +14,7 @@ import { MoreIcon, SearchIcon } from '../icons'
 
 import AppIcon from './AppIcon'
 import Button from './Button'
-import Card, { CardProps } from './Card'
+import Card, { type CardProps } from './Card'
 import Input from './Input'
 import { ListBoxItem } from './ListBoxItem'
 import { Select } from './Select'

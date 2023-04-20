@@ -1,10 +1,10 @@
 import {
-  HTMLAttributes,
-  Key,
-  MouseEventHandler,
-  ReactElement,
-  ReactNode,
-  RefObject,
+  type HTMLAttributes,
+  type Key,
+  type MouseEventHandler,
+  type ReactElement,
+  type ReactNode,
+  type RefObject,
   useCallback,
   useEffect,
   useMemo,
@@ -13,11 +13,11 @@ import {
 } from 'react'
 import { useComboBox } from '@react-aria/combobox'
 import {
-  ComboBoxState,
-  ComboBoxStateOptions,
+  type ComboBoxState,
+  type ComboBoxStateOptions,
   useComboBoxState,
 } from '@react-stately/combobox'
-import { AriaButtonProps, useButton } from '@react-aria/button'
+import { type AriaButtonProps, useButton } from '@react-aria/button'
 import pick from 'lodash/pick'
 import omit from 'lodash/omit'
 import isUndefined from 'lodash/isUndefined'
@@ -28,9 +28,9 @@ import { omitBy } from 'lodash'
 
 import { mergeRefs } from 'react-merge-refs'
 
-import { ListBoxItemBaseProps } from './ListBoxItem'
+import { type ListBoxItemBaseProps } from './ListBoxItem'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
-import Input, { InputProps } from './Input'
+import Input, { type InputProps } from './Input'
 import {
   setNextFocusedKey,
   useSelectComboStateProps,

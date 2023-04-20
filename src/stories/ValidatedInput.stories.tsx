@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import ValidatedInput, {
-  ValidationResponse,
+  type ValidationResponse,
 } from '../components/ValidatedInput'
 
 export default {

@@ -1,4 +1,4 @@
-import { ComponentPropsWithRef } from 'react'
+import { type ComponentPropsWithRef } from 'react'
 import styled from 'styled-components'
 
 const ChecklistFooter = styled(ChecklistFooterUnstyled)(({ theme }) => ({

@@ -1,4 +1,8 @@
-import { ComponentPropsWithRef, HTMLAttributes, forwardRef } from 'react'
+import {
+  type ComponentPropsWithRef,
+  type HTMLAttributes,
+  forwardRef,
+} from 'react'
 
 import PluralLogomarkBottomLeft from './icons/plural-animated/PluralLogomarkBottomLeft'
 import PluralLogomarkBottomRight from './icons/plural-animated/PluralLogomarkBottomRight'

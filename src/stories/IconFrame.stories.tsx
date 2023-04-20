@@ -1,6 +1,6 @@
 import { Div, Flex, H1, Text } from 'honorable'
 
-import { IconFrame, IconFrameProps, TrashCanIcon } from '../index'
+import { IconFrame, type IconFrameProps, TrashCanIcon } from '../index'
 
 export default {
   title: 'Icon Frame',

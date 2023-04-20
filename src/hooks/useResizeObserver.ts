@@ -1,4 +1,4 @@
-import { RefObject, useCallback, useLayoutEffect } from 'react'
+import { type RefObject, useCallback, useLayoutEffect } from 'react'
 import ResizeObserver from 'resize-observer-polyfill'
 
 const useResizeObserver = (

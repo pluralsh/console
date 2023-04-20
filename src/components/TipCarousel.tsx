@@ -1,7 +1,7 @@
-import { Children, ReactElement, Ref, forwardRef } from 'react'
+import { Children, type ReactElement, type Ref, forwardRef } from 'react'
 import { Div, P } from 'honorable'
 
-import Carousel, { CarouselProps } from './Carousel'
+import Carousel, { type CarouselProps } from './Carousel'
 
 const propTypes = {}
 

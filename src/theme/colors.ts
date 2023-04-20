@@ -1,5 +1,5 @@
 import chroma from 'chroma-js'
-import { CSSProperties } from 'styled-components'
+import { type CSSProperties } from 'styled-components'
 
 export const grey = {
   950: '#0E1015',

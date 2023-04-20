@@ -1,21 +1,28 @@
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
-import { Dispatch, PropsWithChildren, forwardRef, useMemo } from 'react'
+import {
+  type Dispatch,
+  type PropsWithChildren,
+  forwardRef,
+  useMemo,
+} from 'react'
 import styled, { useTheme } from 'styled-components'
-import { ColorKey, Severity } from 'src/types'
+
 import { Flex } from 'honorable'
 import AnimateHeight from 'react-animate-height'
+
+import { type ColorKey, type Severity } from '../types'
 
 import { CaretDownIcon, CloseIcon } from '../icons'
 
 import {
-  FillLevel,
+  type FillLevel,
   FillLevelProvider,
   isFillLevel,
   toFillLevel,
   useFillLevel,
 } from './contexts/FillLevelContext'
-import Button, { ButtonProps } from './Button'
+import Button, { type ButtonProps } from './Button'
 import ErrorIcon from './icons/ErrorIcon'
 import InfoIcon from './icons/InfoIcon'
 import StatusOkIcon from './icons/StatusOkIcon'

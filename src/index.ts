@@ -37,7 +37,7 @@ export { default as AppIcon } from './components/AppIcon'
 export { default as RepositoryCard } from './components/RepositoryCard'
 export { default as RepositoryChip } from './components/RepositoryChip'
 export { default as StackCard } from './components/StackCard'
-export { default as Stepper } from './components/Stepper'
+export { default as Stepper, type StepperSteps } from './components/Stepper'
 export type { SidecarProps } from './components/Sidecar'
 export {
   default as Sidecar,
@@ -51,7 +51,10 @@ export { TabList } from './components/TabList'
 export { default as TabPanel } from './components/TabPanel'
 export { default as Table } from './components/Table'
 export { default as TipCarousel } from './components/TipCarousel'
-export { default as ValidatedInput } from './components/ValidatedInput'
+export {
+  type ValidationResponse,
+  default as ValidatedInput,
+} from './components/ValidatedInput'
 export type { TooltipProps } from './components/Tooltip'
 export { default as Tooltip } from './components/Tooltip'
 export { default as FormTitle } from './components/FormTitle'
@@ -74,6 +77,10 @@ export {
   ListBoxItem,
   ListBoxFooter,
   ListBoxFooterPlus,
+  type ListBoxItemBaseProps,
+  type ListBoxItemProps,
+  type ListBoxFooterProps,
+  type ListBoxFooterProps as ListBoxFooterPlusProps,
 } from './components/ListBoxItem'
 export { default as ListBoxItemChipList } from './components/ListBoxItemChipList'
 export { Select, SelectButton } from './components/Select'

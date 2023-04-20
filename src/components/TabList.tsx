@@ -1,17 +1,17 @@
-import { Flex, FlexProps } from 'honorable'
-import { AriaTabListProps } from '@react-types/tabs'
+import { Flex, type FlexProps } from 'honorable'
+import { type AriaTabListProps } from '@react-types/tabs'
 import { useTab, useTabList } from '@react-aria/tabs'
-import { TabListState, useTabListState } from '@react-stately/tabs'
-import { Node } from '@react-types/shared'
+import { type TabListState, useTabListState } from '@react-stately/tabs'
+import { type Node } from '@react-types/shared'
 import {
   Children,
-  ForwardedRef,
-  HTMLAttributes,
-  Key,
-  MutableRefObject,
-  ReactElement,
-  ReactNode,
-  RefObject,
+  type ForwardedRef,
+  type HTMLAttributes,
+  type Key,
+  type MutableRefObject,
+  type ReactElement,
+  type ReactNode,
+  type RefObject,
   cloneElement,
   forwardRef,
   useEffect,

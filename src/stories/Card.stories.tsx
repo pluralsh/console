@@ -1,7 +1,7 @@
 import { Flex } from 'honorable'
-import { ComponentProps } from 'react'
+import { type ComponentProps } from 'react'
 
-import { FillLevel } from '../components/contexts/FillLevelContext'
+import { type FillLevel } from '../components/contexts/FillLevelContext'
 
 import { Card } from '../index'
 import type { CardProps } from '../components/Card'

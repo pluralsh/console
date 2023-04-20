@@ -1,13 +1,13 @@
-import { ReactNode, Ref, forwardRef } from 'react'
+import { type ReactNode, type Ref, forwardRef } from 'react'
 import {
   Icon as HonorableIcon,
-  IconProps as HonorableIconProps,
+  type IconProps as HonorableIconProps,
   useTheme,
 } from 'honorable'
 import PropTypes from 'prop-types'
 
 type IconBaseProps = {
-  size?: number
+  size?: number | string
   color?: string
   fullColor?: boolean
 }
@@ -15,7 +15,7 @@ type IconBaseProps = {
 export type IconProps = HonorableIconProps & IconBaseProps
 
 const propTypes = {
-  size: PropTypes.number,
+  size: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   color: PropTypes.string,
   fullColor: PropTypes.bool,
 }

@@ -16,11 +16,11 @@ https://github.com/adobe/react-spectrum/blob/main/packages/%40react-stately/sele
  */
 
 import { useMenuTriggerState } from '@react-stately/menu'
-import { AriaSelectProps } from '@react-types/select'
-import { ListProps, useListState } from '@react-stately/list'
-import { Key, useCallback, useRef, useState } from 'react'
+import { type AriaSelectProps } from '@react-types/select'
+import { type ListProps, useListState } from '@react-stately/list'
+import { type Key, useCallback, useRef, useState } from 'react'
 import { useControlledState } from '@react-stately/utils'
-import { Node } from '@react-types/shared'
+import { type Node } from '@react-types/shared'
 import type { SelectState } from '@react-stately/select'
 
 export type BimodalSelectState<T = object> = SelectState<T> & {

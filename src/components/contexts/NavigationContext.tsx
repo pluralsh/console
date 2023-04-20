@@ -1,19 +1,27 @@
-import { ComponentProps, ReactElement, createContext, useContext } from 'react'
+import {
+  type ComponentProps,
+  type ComponentType,
+  type RefAttributes,
+  createContext,
+  useContext,
+} from 'react'
 
-export type LinkProps = Omit<ComponentProps<'a'>, 'ref'> & { ref?: any }
+export type NavigationContextLinkProps = Omit<ComponentProps<'a'>, 'ref'> & {
+  ref?: any
+}
 
-export type NavigationContextT = {
-  Link: (props: LinkProps) => ReactElement
-  usePathname: (href?: string) => string
+export type NavigationContextValue = {
+  Link: ComponentType<NavigationContextLinkProps & RefAttributes<any>>
+  usePathname: () => string
   useNavigate: () => (location?: string) => void
 }
 
-const NavigationContext = createContext<NavigationContextT | null>(null)
+const NavigationContext = createContext<NavigationContextValue | null>(null)
 
 export function NavigationContextProvider({
   value,
   ...props
-}: { value: NavigationContextT } & Omit<
+}: { value: NavigationContextValue } & Omit<
   ComponentProps<typeof NavigationContext.Provider>,
   'value'
 >) {

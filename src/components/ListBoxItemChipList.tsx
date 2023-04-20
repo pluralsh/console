@@ -1,6 +1,6 @@
 import {
-  HTMLAttributes,
-  ReactElement,
+  type HTMLAttributes,
+  type ReactElement,
   cloneElement,
   forwardRef,
   useMemo,

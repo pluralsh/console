@@ -1,5 +1,5 @@
 import { Flex } from 'honorable'
-import { ComponentProps, Key, useMemo, useState } from 'react'
+import { type ComponentProps, type Key, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import Fuse from 'fuse.js'
 

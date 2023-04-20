@@ -1,6 +1,6 @@
 import React, {
-  MutableRefObject,
-  ReactNode,
+  type MutableRefObject,
+  type ReactNode,
   forwardRef,
   useCallback,
   useContext,
@@ -9,7 +9,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import { Flex, FlexProps, Nav, Ol } from 'honorable'
+import { Flex, type FlexProps, Nav, Ol } from 'honorable'
 import styled, { useTheme } from 'styled-components'
 import classNames from 'classnames'
 import { SwitchTransition, Transition } from 'react-transition-group'
@@ -21,7 +21,10 @@ import usePrevious from '../hooks/usePrevious'
 import { Select } from './Select'
 import { ListBoxItem } from './ListBoxItem'
 import { useNavigationContext } from './contexts/NavigationContext'
-import { Breadcrumb, BreadcrumbsContext } from './contexts/BreadcrumbsContext'
+import {
+  type Breadcrumb,
+  BreadcrumbsContext,
+} from './contexts/BreadcrumbsContext'
 
 function getCrumbKey(crumb: Breadcrumb) {
   const maybeKey = crumb?.key

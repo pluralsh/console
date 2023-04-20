@@ -1,5 +1,5 @@
 import { Div, Flex, H1 } from 'honorable'
-import { ComponentProps } from 'react'
+import { type ComponentProps } from 'react'
 
 import { StatusOkIcon, WrapWithIf } from '..'
 import Chip from '../components/Chip'

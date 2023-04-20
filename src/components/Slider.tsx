@@ -1,5 +1,9 @@
 import { useSliderState } from '@react-stately/slider'
-import { AriaSliderProps, useSlider, useSliderThumb } from '@react-aria/slider'
+import {
+  type AriaSliderProps,
+  useSlider,
+  useSliderThumb,
+} from '@react-aria/slider'
 import { useNumberFormatter } from '@react-aria/i18n'
 import { mergeProps } from '@react-aria/utils'
 import { VisuallyHidden } from '@react-aria/visually-hidden'

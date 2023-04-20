@@ -1,15 +1,15 @@
 import {
   Button,
-  ButtonProps,
+  type ButtonProps,
   Div,
-  DivProps,
-  FlexProps,
+  type DivProps,
+  type FlexProps,
   H1,
-  H1Props,
+  type H1Props,
   H2,
   Section,
 } from 'honorable'
-import { ReactNode, forwardRef } from 'react'
+import { type ReactNode, forwardRef } from 'react'
 
 export type SidecarProps = {
   heading?: ReactNode

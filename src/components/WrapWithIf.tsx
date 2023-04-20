@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, cloneElement } from 'react'
+import { type ReactElement, type ReactNode, cloneElement } from 'react'
 
 type WrapWithIfProps = {
   condition: boolean

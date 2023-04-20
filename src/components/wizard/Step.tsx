@@ -1,4 +1,4 @@
-import { ReactElement, useEffect } from 'react'
+import { type ReactElement, useEffect } from 'react'
 import styled from 'styled-components'
 
 import { useActive } from './hooks'

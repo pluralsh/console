@@ -1,5 +1,5 @@
-import styled, { StyledProps } from 'styled-components'
-import { ReactElement } from 'react'
+import styled, { type StyledProps } from 'styled-components'
+import { type ReactElement } from 'react'
 
 import AppIcon from '../AppIcon'
 import { ListBox } from '../ListBox'

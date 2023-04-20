@@ -1,6 +1,6 @@
 import React, {
-  PropsWithChildren,
-  ReactNode,
+  type PropsWithChildren,
+  type ReactNode,
   useContext,
   useEffect,
   useMemo,

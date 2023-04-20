@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import IsEqual from 'lodash/isEqual'
 import IsEmpty from 'lodash/isEmpty'
 
-import { ContextProps, StepConfig, WizardContext } from './context'
+import { type ContextProps, type StepConfig, WizardContext } from './context'
 
 const useActive = <T = unknown>() => {
   const {

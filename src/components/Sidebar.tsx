@@ -1,5 +1,11 @@
-import { Flex, FlexProps } from 'honorable'
-import { Children, Ref, cloneElement, forwardRef, isValidElement } from 'react'
+import { Flex, type FlexProps } from 'honorable'
+import {
+  Children,
+  type Ref,
+  cloneElement,
+  forwardRef,
+  isValidElement,
+} from 'react'
 
 type SidebarLayout = 'vertical' | 'horizontal'
 type SidebarProps = {

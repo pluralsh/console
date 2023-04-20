@@ -1,6 +1,6 @@
 import { Flex } from 'honorable'
 
-import LoopingLogo, { LoopingLogoProps } from '../components/LoopingLogo'
+import LoopingLogo, { type LoopingLogoProps } from '../components/LoopingLogo'
 
 export default {
   title: 'LoopingLogo',

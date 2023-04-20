@@ -1,7 +1,15 @@
-import { Div, DivProps, Flex, H1, H1Props, H2, H2Props } from 'honorable'
-import { ReactNode, forwardRef } from 'react'
+import {
+  Div,
+  type DivProps,
+  Flex,
+  H1,
+  type H1Props,
+  H2,
+  type H2Props,
+} from 'honorable'
+import { type ReactNode, forwardRef } from 'react'
 
-import AppIcon, { AppIconProps } from './AppIcon'
+import AppIcon, { type AppIconProps } from './AppIcon'
 
 type PageCardProps = {
   icon: Omit<AppIconProps, 'size'>

@@ -1,8 +1,8 @@
-import { Div, DivProps, Flex, FlexProps, Img } from 'honorable'
+import { Div, type DivProps, Flex, type FlexProps, Img } from 'honorable'
 import {
   Fragment,
-  ReactNode,
-  Ref,
+  type ReactNode,
+  type Ref,
   forwardRef,
   useCallback,
   useEffect,

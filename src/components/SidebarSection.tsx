@@ -1,7 +1,13 @@
-import { Flex, FlexProps } from 'honorable'
-import { Children, Ref, cloneElement, forwardRef, isValidElement } from 'react'
+import { Flex, type FlexProps } from 'honorable'
+import {
+  Children,
+  type Ref,
+  cloneElement,
+  forwardRef,
+  isValidElement,
+} from 'react'
 
-import { SidebarLayout } from './Sidebar'
+import { type SidebarLayout } from './Sidebar'
 
 type SidebarSectionProps = FlexProps & {
   grow?: number

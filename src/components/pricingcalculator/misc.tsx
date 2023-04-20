@@ -1,4 +1,4 @@
-import { ComponentType } from 'react'
+import { type ComponentType } from 'react'
 import styled from 'styled-components'
 
 // @ts-ignore
@@ -6,7 +6,7 @@ import styledContainerQuery from 'styled-container-query'
 
 import AwsLogoIcon from '../icons/AwsLogoIcon'
 import AzureLogoIcon from '../icons/AzureLogoIcon'
-import { IconProps } from '../icons/createIcon'
+import { type IconProps } from '../icons/createIcon'
 import GoogleCloudLogoIcon from '../icons/GoogleCloudLogoIcon'
 
 export const CLUSTER_PRICE = 399

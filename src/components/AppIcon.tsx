@@ -1,12 +1,12 @@
-import { DivProps, Flex, Img } from 'honorable'
+import { type DivProps, Flex, Img } from 'honorable'
 import PropTypes from 'prop-types'
-import { ReactNode, Ref, forwardRef } from 'react'
-import { CSSObject } from 'styled-components'
+import { type ReactNode, type Ref, forwardRef } from 'react'
+import { type CSSObject } from 'styled-components'
 import last from 'lodash/last'
 
 import { styledTheme as theme } from '../theme'
 
-import { FillLevel, useFillLevel } from './contexts/FillLevelContext'
+import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 
 type Hue = 'default' | 'lighter' | 'lightest'
 type Size = 'xxsmall' | 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'

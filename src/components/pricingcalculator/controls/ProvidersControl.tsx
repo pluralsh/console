@@ -1,4 +1,4 @@
-import { Dispatch, createElement } from 'react'
+import { type Dispatch, createElement } from 'react'
 import styled from 'styled-components'
 
 import SelectItem from '../../SelectItem'

@@ -1,5 +1,5 @@
 import {
-  MutableRefObject,
+  type MutableRefObject,
   forwardRef,
   memo,
   useContext,
@@ -8,10 +8,10 @@ import {
   useRef,
   useState,
 } from 'react'
-import { InputProps, Label } from 'honorable'
+import { type InputProps, Label } from 'honorable'
 import classNames from 'classnames'
 import styled from 'styled-components'
-import { AriaRadioProps, useRadio } from '@react-aria/radio'
+import { type AriaRadioProps, useRadio } from '@react-aria/radio'
 import { VisuallyHidden } from '@react-aria/visually-hidden'
 import { useFocusRing } from '@react-aria/focus'
 

@@ -1,5 +1,5 @@
 import { Div, Flex, H4 } from 'honorable'
-import { ComponentProps, Key, forwardRef, useState } from 'react'
+import { type ComponentProps, type Key, forwardRef, useState } from 'react'
 import styled from 'styled-components'
 
 import {

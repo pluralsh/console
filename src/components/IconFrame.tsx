@@ -1,8 +1,13 @@
-import { ReactElement, ReactNode, cloneElement, forwardRef } from 'react'
-import { ButtonBase, Flex, FlexProps } from 'honorable'
+import {
+  type ReactElement,
+  type ReactNode,
+  cloneElement,
+  forwardRef,
+} from 'react'
+import { ButtonBase, Flex, type FlexProps } from 'honorable'
 import { useTheme } from 'styled-components'
 
-import Tooltip, { TooltipProps } from './Tooltip'
+import Tooltip, { type TooltipProps } from './Tooltip'
 
 type Size = 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'
 type Type = 'secondary' | 'tertiary' | 'floating'

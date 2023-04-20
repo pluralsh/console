@@ -1,7 +1,7 @@
 import styled, { useTheme } from 'styled-components'
 
-import { FillLevel } from '../components/contexts/FillLevelContext'
-import { styledTheme } from '..'
+import { type FillLevel } from '../components/contexts/FillLevelContext'
+import { type styledTheme } from '..'
 import Divider from '../components/Divider'
 
 const fillLevelToBGColor: Record<FillLevel, string> = {

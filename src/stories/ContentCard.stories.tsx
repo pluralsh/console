@@ -1,5 +1,5 @@
 import { Div, H1, H2, P } from 'honorable'
-import { ComponentProps } from 'react'
+import { type ComponentProps } from 'react'
 
 import { ContentCard } from '../index'
 

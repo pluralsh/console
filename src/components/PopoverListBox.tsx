@@ -1,17 +1,17 @@
-import { ListState } from '@react-stately/list'
-import { AriaListBoxOptions } from '@react-aria/listbox'
+import { type ListState } from '@react-stately/list'
+import { type AriaListBoxOptions } from '@react-aria/listbox'
 import styled, { useTheme } from 'styled-components'
 import { animated, to, useTransition } from 'react-spring'
 
 import {
   FloatingPortal,
-  Placement,
-  UseFloatingReturn,
+  type Placement,
+  type UseFloatingReturn,
 } from '@floating-ui/react-dom-interactions'
 
-import { ListBoxUnmanaged, ListBoxUnmanagedProps } from './ListBox'
-import { Popover, PopoverProps } from './ReactAriaPopover'
-import { SelectProps } from './Select'
+import { ListBoxUnmanaged, type ListBoxUnmanagedProps } from './ListBox'
+import { Popover, type PopoverProps } from './ReactAriaPopover'
+import { type SelectProps } from './Select'
 import WrapWithIf from './WrapWithIf'
 
 type PopoverListBoxProps = {

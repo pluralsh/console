@@ -1,7 +1,7 @@
 import { Div, Flex, H1 } from 'honorable'
-import { Key, useRef, useState } from 'react'
+import { type Key, useRef, useState } from 'react'
 
-import { SubTab, TabList, TabListStateProps, TabPanel } from '..'
+import { SubTab, TabList, type TabListStateProps, TabPanel } from '..'
 
 export default {
   title: 'ButtonGroup',

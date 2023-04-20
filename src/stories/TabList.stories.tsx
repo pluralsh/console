@@ -1,12 +1,12 @@
 import { Button, Div, Flex, H1 } from 'honorable'
-import { Key, forwardRef, useRef, useState } from 'react'
+import { type Key, forwardRef, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import {
   Tab,
-  TabBaseProps,
+  type TabBaseProps,
   TabList,
-  TabListStateProps,
+  type TabListStateProps,
   TabPanel,
 } from '../index'
 

@@ -1,4 +1,4 @@
-import { Dispatch, useEffect, useState } from 'react'
+import { type Dispatch, useEffect, useState } from 'react'
 import { Button, Flex, P } from 'honorable'
 import { useTheme } from 'styled-components'
 
@@ -8,7 +8,7 @@ import { merge } from 'lodash'
 
 import { editorTheme } from '../theme/editor'
 
-import Card, { CardProps } from './Card'
+import Card, { type CardProps } from './Card'
 import { toFillLevel, useFillLevel } from './contexts/FillLevelContext'
 
 type CodeEditorProps = Omit<CardProps, 'children'> & {

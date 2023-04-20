@@ -1,10 +1,10 @@
-import { Div, DivProps, Flex, P } from 'honorable'
+import { Div, type DivProps, Flex, P } from 'honorable'
 import PropTypes from 'prop-types'
 import {
-  HTMLAttributes,
-  PropsWithChildren,
-  ReactNode,
-  Ref,
+  type HTMLAttributes,
+  type PropsWithChildren,
+  type ReactNode,
+  type Ref,
   forwardRef,
 } from 'react'
 

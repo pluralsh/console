@@ -1,5 +1,5 @@
 import chroma from 'chroma-js'
-import { CSSProperties } from 'react'
+import { type CSSProperties } from 'react'
 
 import { borderWidths } from './borders'
 

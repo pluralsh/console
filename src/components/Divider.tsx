@@ -1,5 +1,5 @@
-import { Ref, forwardRef } from 'react'
-import { Div, Flex, FlexProps, P } from 'honorable'
+import { type Ref, forwardRef } from 'react'
+import { Div, Flex, type FlexProps, P } from 'honorable'
 import PropTypes from 'prop-types'
 
 type DividerProps = FlexProps & {

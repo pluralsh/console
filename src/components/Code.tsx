@@ -1,9 +1,9 @@
 import {
-  ComponentProps,
-  MutableRefObject,
-  PropsWithChildren,
-  ReactNode,
-  RefObject,
+  type ComponentProps,
+  type MutableRefObject,
+  type PropsWithChildren,
+  type ReactNode,
+  type RefObject,
   createContext,
   forwardRef,
   useCallback,
@@ -20,17 +20,17 @@ import styled, { useTheme } from 'styled-components'
 import useResizeObserver from '../hooks/useResizeObserver'
 
 import CopyIcon from './icons/CopyIcon'
-import Card, { CardProps } from './Card'
+import Card, { type CardProps } from './Card'
 import CheckIcon from './icons/CheckIcon'
 import Highlight from './Highlight'
 import {
-  FillLevel,
+  type FillLevel,
   FillLevelProvider,
   toFillLevel,
   useFillLevel,
 } from './contexts/FillLevelContext'
 import FileIcon from './icons/FileIcon'
-import { TabList, TabListStateProps } from './TabList'
+import { TabList, type TabListStateProps } from './TabList'
 import { SubTab } from './SubTab'
 import TabPanel from './TabPanel'
 import { Select } from './Select'
@@ -44,7 +44,7 @@ type CodeProps = Omit<CardProps, 'children'> & {
   showHeader?: boolean
   tabs?: CodeTabData[]
   title?: ReactNode
-  onSelectedTabChange: (key: string) => void
+  onSelectedTabChange?: (key: string) => void
 }
 
 const propTypes = {

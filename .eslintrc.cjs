@@ -12,6 +12,10 @@ module.exports = {
   },
   rules: {
     '@typescript-eslint/consistent-type-exports': 'error',
+    '@typescript-eslint/consistent-type-imports': [
+      'error',
+      { fixStyle: 'inline-type-imports' },
+    ],
     'import-newlines/enforce': 'off',
   },
 }

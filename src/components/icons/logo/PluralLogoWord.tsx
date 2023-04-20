@@ -1,4 +1,4 @@
-import { PluralLogoProps } from './PluralLogoFull'
+import { type PluralLogoProps } from './PluralLogoFull'
 
 export default function PluralLogoMark({
   width,

@@ -14,7 +14,7 @@ import { SearchIcon } from '../../icons'
 import RepositoryChip from '../RepositoryChip'
 import Button from '../Button'
 
-import { StepConfig, WizardContext } from './context'
+import { type StepConfig, WizardContext } from './context'
 import { usePicker, useWindowSize } from './hooks'
 
 const Picker = styled(PickerUnstyled)(({ theme }) => ({

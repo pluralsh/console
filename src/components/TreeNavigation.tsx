@@ -1,6 +1,10 @@
 import {
   Children,
-  PropsWithChildren,
+  type ComponentProps,
+  type Key,
+  type MutableRefObject,
+  type PropsWithChildren,
+  type ReactElement,
   createContext,
   forwardRef,
   useCallback,
@@ -10,7 +14,6 @@ import {
   useMemo,
   useState,
 } from 'react'
-import type { ComponentProps, Key, MutableRefObject, ReactElement } from 'react'
 import classNames from 'classnames'
 import { animated, useSpring } from 'react-spring'
 import useMeasure from 'react-use-measure'

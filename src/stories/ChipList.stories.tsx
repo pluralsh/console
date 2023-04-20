@@ -1,6 +1,6 @@
-import { ComponentProps } from 'react'
+import { type ComponentProps } from 'react'
 
-import Chip from '../components/Chip'
+import type Chip from '../components/Chip'
 import Card from '../components/Card'
 import ChipList from '../components/ChipList'
 import WrapWithIf from '../components/WrapWithIf'

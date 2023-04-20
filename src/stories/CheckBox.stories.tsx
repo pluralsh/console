@@ -1,5 +1,5 @@
 import { Div } from 'honorable'
-import { Key, useState } from 'react'
+import { type Key, useState } from 'react'
 
 import { Button, Checkbox } from '..'
 

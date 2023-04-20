@@ -1,11 +1,11 @@
 import { Button, Flex, Modal as HonorableModal, P } from 'honorable'
 
-import { ReactElement, useEffect, useMemo, useState } from 'react'
+import { type ReactElement, useEffect, useMemo, useState } from 'react'
 
-import { LayerPositionType } from 'grommet'
+import { type LayerPositionType } from 'grommet'
 
 import { Wizard } from '../components/wizard/Wizard'
-import { Picker, StepConfig } from '../components/wizard/Picker'
+import { Picker, type StepConfig } from '../components/wizard/Picker'
 import { Stepper } from '../components/wizard/Stepper'
 import AppsIcon from '../components/icons/AppsIcon'
 import InstallIcon from '../components/icons/InstallIcon'

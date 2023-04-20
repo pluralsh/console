@@ -1,5 +1,5 @@
 import { Div, Flex } from 'honorable'
-import { Key, useState } from 'react'
+import { type Key, useState } from 'react'
 
 import {
   AppIcon,

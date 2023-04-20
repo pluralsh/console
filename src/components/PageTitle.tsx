@@ -1,5 +1,5 @@
-import { DivProps, Flex, FlexProps, H1 } from 'honorable'
-import { ReactNode, forwardRef } from 'react'
+import { type DivProps, Flex, type FlexProps, H1 } from 'honorable'
+import { type ReactNode, forwardRef } from 'react'
 
 export type PageTitleProps = {
   heading?: ReactNode

@@ -1,6 +1,6 @@
 import { ExtendTheme, Input as HonorableInput, mergeTheme } from 'honorable'
 import type { InputProps as HonorableInputProps } from 'honorable'
-import { ReactNode, forwardRef } from 'react'
+import { type ReactNode, forwardRef } from 'react'
 import styled from 'styled-components'
 
 import { useFillLevel } from './contexts/FillLevelContext'

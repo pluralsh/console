@@ -1,5 +1,5 @@
 import { Grommet } from 'grommet'
-import { ComponentType } from 'react'
+import { type ComponentType } from 'react'
 import {
   CssBaseline,
   Div,

@@ -3,7 +3,7 @@ import { Flex, Span } from 'honorable'
 import { useState } from 'react'
 
 import {
-  Breadcrumb,
+  type Breadcrumb,
   BreadcrumbsProvider,
   useSetBreadcrumbs,
 } from '../components/contexts/BreadcrumbsContext'

@@ -1,9 +1,14 @@
 import { Flex, Span } from 'honorable'
-import { ComponentProps, ReactElement, useMemo, useState } from 'react'
+import {
+  type ComponentProps,
+  type ReactElement,
+  useMemo,
+  useState,
+} from 'react'
 
 import { HamburgerMenuCollapseIcon } from '../icons'
 
-import Chip, { ChipProps } from './Chip'
+import Chip, { type ChipProps } from './Chip'
 import { useFillLevel } from './contexts/FillLevelContext'
 
 type TransformFn<TValue> = (

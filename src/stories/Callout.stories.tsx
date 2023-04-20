@@ -2,8 +2,8 @@ import { Div, Flex } from 'honorable'
 
 import { useState } from 'react'
 
-import { FillLevel } from '../components/contexts/FillLevelContext'
-import { Button, Callout, CalloutProps, Card } from '..'
+import { type FillLevel } from '../components/contexts/FillLevelContext'
+import { Button, Callout, type CalloutProps, Card } from '..'
 
 export default {
   title: 'Callout',

@@ -1,8 +1,8 @@
-import { ReactNode, Ref, forwardRef } from 'react'
-import { Div, DivProps, Flex, Icon } from 'honorable'
+import { type ReactNode, type Ref, forwardRef } from 'react'
+import { Div, type DivProps, Flex, Icon } from 'honorable'
 import { useTheme } from 'styled-components'
 
-import { TabBaseProps } from './TabList'
+import { type TabBaseProps } from './TabList'
 
 type TabProps = DivProps &
   TabBaseProps & {

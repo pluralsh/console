@@ -1,10 +1,17 @@
-import { ReactNode, Ref, forwardRef } from 'react'
-import { Div, Flex, H1, Modal as HonorableModal, ModalProps } from 'honorable'
+import { type ReactNode, type Ref, forwardRef } from 'react'
+import {
+  Div,
+  Flex,
+  H1,
+  Modal as HonorableModal,
+  type ModalProps,
+} from 'honorable'
 import PropTypes from 'prop-types'
-import { ColorKey, Severity } from 'src/types'
+
+import { type ColorKey, type Severity } from '../types'
 
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
-import createIcon from './icons/createIcon'
+import type createIcon from './icons/createIcon'
 import ErrorIcon from './icons/ErrorIcon'
 import WarningIcon from './icons/WarningIcon'
 import InfoIcon from './icons/InfoIcon'

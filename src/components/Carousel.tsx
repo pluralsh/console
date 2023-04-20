@@ -1,8 +1,8 @@
-import { Div, DivProps, Flex } from 'honorable'
+import { Div, type DivProps, Flex } from 'honorable'
 import {
   Children,
-  ReactElement,
-  Ref,
+  type ReactElement,
+  type Ref,
   forwardRef,
   useEffect,
   useState,

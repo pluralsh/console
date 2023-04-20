@@ -1,11 +1,11 @@
 import {
-  ComponentPropsWithRef,
-  ComponentPropsWithoutRef,
-  ElementType,
-  ReactNode,
+  type ComponentPropsWithRef,
+  type ComponentPropsWithoutRef,
+  type ElementType,
+  type ReactNode,
   forwardRef,
 } from 'react'
-import { ItemProps } from '@react-types/shared'
+import { type ItemProps } from '@react-types/shared'
 import styled from 'styled-components'
 
 import theme from 'honorable-theme-default'

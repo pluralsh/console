@@ -1,4 +1,4 @@
-import { StorybookConfig } from '@storybook/builder-vite'
+import { type StorybookConfig } from '@storybook/builder-vite'
 import { mergeConfig } from 'vite'
 
 import viteConfig from '../vite.config'

@@ -1,4 +1,4 @@
-import { LogomarkProps } from './PluralLogomarkBottomLeft'
+import { type LogomarkProps } from './PluralLogomarkBottomLeft'
 
 export default function PluralLogomarkBottomRight({
   color = 'currentColor',

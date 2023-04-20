@@ -1,8 +1,8 @@
-import { FlexProps } from 'honorable'
-import { Ref, forwardRef, useCallback, useEffect, useState } from 'react'
+import { type FlexProps } from 'honorable'
+import { type Ref, forwardRef, useCallback, useEffect, useState } from 'react'
 
 import Banner from './Banner'
-import Layer, { LayerPositionType } from './Layer'
+import Layer, { type LayerPositionType } from './Layer'
 
 export type Severity = 'info' | 'success' | 'error'
 

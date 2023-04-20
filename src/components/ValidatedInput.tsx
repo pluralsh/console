@@ -1,13 +1,13 @@
 import {
-  PropsWithChildren,
-  ReactNode,
-  Ref,
+  type PropsWithChildren,
+  type ReactNode,
+  type Ref,
   forwardRef,
   useCallback,
   useState,
 } from 'react'
 import PropTypes from 'prop-types'
-import { Input, InputProps } from 'honorable'
+import { Input, type InputProps } from 'honorable'
 
 import FormField from './FormField'
 

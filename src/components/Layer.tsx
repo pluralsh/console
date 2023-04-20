@@ -1,7 +1,7 @@
 import { useOutsideClick } from 'honorable'
 import {
-  MutableRefObject,
-  PropsWithChildren,
+  type MutableRefObject,
+  type PropsWithChildren,
   forwardRef,
   useCallback,
   useEffect,
@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { UseTransitionProps, animated, useTransition } from 'react-spring'
+import { type UseTransitionProps, animated, useTransition } from 'react-spring'
 import isNil from 'lodash/isNil'
 import styled, { useTheme } from 'styled-components'
 

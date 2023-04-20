@@ -1,8 +1,8 @@
 import { useContext } from 'react'
 
-import Stepper, { StepperSteps } from '../Stepper'
+import Stepper, { type StepperSteps } from '../Stepper'
 
-import { StepConfig } from './Picker'
+import { type StepConfig } from './Picker'
 import { useActive, useNavigation, usePicker } from './hooks'
 import { WizardContext } from './context'
 

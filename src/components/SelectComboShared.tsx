@@ -1,19 +1,19 @@
 import {
-  Dispatch,
-  Key,
-  MutableRefObject,
-  RefObject,
-  SetStateAction,
+  type Dispatch,
+  type Key,
+  type MutableRefObject,
+  type RefObject,
+  type SetStateAction,
   useCallback,
   useRef,
 } from 'react'
-import { ListState } from '@react-stately/list'
-import { Selection } from '@react-types/shared'
+import { type ListState } from '@react-stately/list'
+import { type Selection } from '@react-types/shared'
 import isNil from 'lodash/isNil'
 
 import { FOOTER_KEY, HEADER_KEY, useItemWrappedChildren } from './ListBox'
-import { ComboBoxProps } from './ComboBox'
-import { SelectProps } from './Select'
+import { type ComboBoxProps } from './ComboBox'
+import { type SelectProps } from './Select'
 
 type TType = SelectProps | ComboBoxProps
 

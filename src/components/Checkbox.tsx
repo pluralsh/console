@@ -1,5 +1,5 @@
-import { MutableRefObject, forwardRef, memo, useId, useRef } from 'react'
-import { InputProps, Label } from 'honorable'
+import { type MutableRefObject, forwardRef, memo, useId, useRef } from 'react'
+import { type InputProps, Label } from 'honorable'
 import classNames from 'classnames'
 import styled from 'styled-components'
 import { useToggleState } from '@react-stately/toggle'

@@ -2,11 +2,11 @@ import styled from 'styled-components'
 
 import {
   AppList,
-  AppProps,
+  type AppProps,
   ArrowTopRightIcon,
   Button,
   Card,
-  CardProps,
+  type CardProps,
   GitLabLogoIcon,
 } from '..'
 

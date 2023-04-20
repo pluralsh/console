@@ -1,4 +1,4 @@
-import { Dispatch } from 'react'
+import { type Dispatch } from 'react'
 
 import Radio from '../../Radio'
 import RadioGroup from '../../RadioGroup'

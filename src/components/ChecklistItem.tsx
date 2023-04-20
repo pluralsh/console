@@ -1,8 +1,8 @@
 import { useKeyboard } from '@react-aria/interactions'
 import {
-  ComponentPropsWithRef,
-  Dispatch,
-  ReactElement,
+  type ComponentPropsWithRef,
+  type Dispatch,
+  type ReactElement,
   useEffect,
   useRef,
 } from 'react'

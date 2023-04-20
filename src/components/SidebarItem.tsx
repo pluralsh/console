@@ -1,9 +1,9 @@
-import { Flex, FlexProps } from 'honorable'
-import { Ref, forwardRef } from 'react'
+import { Flex, type FlexProps } from 'honorable'
+import { type Ref, forwardRef } from 'react'
 
 import Tooltip from '../components/Tooltip'
 
-import { SidebarLayout } from './Sidebar'
+import { type SidebarLayout } from './Sidebar'
 
 type SidebarItemProps = FlexProps & {
   clickable?: boolean

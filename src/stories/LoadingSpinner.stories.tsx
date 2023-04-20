@@ -1,7 +1,7 @@
 import { Div } from 'honorable'
 
 import LoadingSpinner, {
-  LoadingSpinnerProps,
+  type LoadingSpinnerProps,
 } from '../components/LoadingSpinner'
 
 export default {

@@ -1,8 +1,8 @@
-import { ComponentProps, Ref, forwardRef } from 'react'
+import { type ComponentProps, type Ref, forwardRef } from 'react'
 import styled from 'styled-components'
 
-import { FillLevel, useFillLevel } from './contexts/FillLevelContext'
-import { TabBaseProps } from './TabList'
+import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
+import { type TabBaseProps } from './TabList'
 
 type SubTabSize = 'small' | 'medium'
 type SubtabProps = TabBaseProps &

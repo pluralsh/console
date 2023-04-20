@@ -1,6 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { Div, Flex, Input, InputProps, P } from 'honorable'
-import React, { ReactElement, useEffect } from 'react'
+import { Div, Flex, Input, type InputProps, P } from 'honorable'
+import React, { type ReactElement, useEffect } from 'react'
 import type { Row } from '@tanstack/react-table'
 
 import {

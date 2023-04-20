@@ -1,8 +1,8 @@
 // Tooltip Library docs: https://floating-ui.com/docs/react-dom
-import { ReactNode, cloneElement, useMemo, useRef, useState } from 'react'
+import { type ReactNode, cloneElement, useMemo, useRef, useState } from 'react'
 import {
   FloatingPortal,
-  Placement,
+  type Placement,
   arrow,
   autoUpdate,
   flip,
@@ -17,7 +17,7 @@ import {
   useRole,
 } from '@floating-ui/react-dom-interactions'
 import { mergeRefs } from 'react-merge-refs'
-import { Div, DivProps } from 'honorable'
+import { Div, type DivProps } from 'honorable'
 import { CSSTransition } from 'react-transition-group'
 import styled, { useTheme } from 'styled-components'
 

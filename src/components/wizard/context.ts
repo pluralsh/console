@@ -1,10 +1,15 @@
-import { Dispatch, ReactElement, SetStateAction, createContext } from 'react'
+import {
+  type Dispatch,
+  type ReactElement,
+  type SetStateAction,
+  createContext,
+} from 'react'
 
-import createIcon from '../icons/createIcon'
+import type createIcon from '../icons/createIcon'
 
-import { Step } from './Step'
-import { Picker } from './Picker'
-import { Installer } from './Installer'
+import { type Step } from './Step'
+import { type Picker } from './Picker'
+import { type Installer } from './Installer'
 
 type ContextProps<T = unknown> = {
   steps: Array<StepConfig<T>>

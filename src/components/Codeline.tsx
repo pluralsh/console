@@ -1,5 +1,5 @@
-import { Ref, forwardRef, useCallback, useEffect, useState } from 'react'
-import { CssProps, Div, Flex, FlexProps } from 'honorable'
+import { type Ref, forwardRef, useCallback, useEffect, useState } from 'react'
+import { type CssProps, Div, Flex, type FlexProps } from 'honorable'
 import { useTheme } from 'styled-components'
 
 import Tooltip from '../components/Tooltip'

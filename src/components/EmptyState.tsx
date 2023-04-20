@@ -1,5 +1,5 @@
-import { ReactElement, Ref, forwardRef } from 'react'
-import { Div, Flex, FlexProps, Text } from 'honorable'
+import { type ReactElement, type Ref, forwardRef } from 'react'
+import { Div, Flex, type FlexProps, Text } from 'honorable'
 import PropTypes from 'prop-types'
 
 type EmptyStateProps = FlexProps & {
