@@ -369,7 +369,7 @@ function CodeRef(
   const parentFillLevel = useFillLevel()
   const tabStateRef = useRef()
   const [selectedTabKey, setSelectedTabKey] = useState<string>(
-    (tabs && tabs[0]?.key) || ''
+    tabs?.[0]?.key || ''
   )
   const theme = useTheme()
   const [tabInterface, setTabInterface] = useState<TabInterfaceT>()

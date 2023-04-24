@@ -1,26 +1,30 @@
 import { useMemo } from 'react'
 import { type RenderableTreeNode } from '@markdoc/markdoc'
 
-import { isTag } from '../types'
-
 import { FenceInner, toCodeString } from './Fence'
+
+type CodeTabsTab = {
+  content: string
+  language?: string
+  process: boolean
+  showHeader?: boolean
+  title?: string
+  children?: RenderableTreeNode[] | RenderableTreeNode
+}
 
 function CodeTabs({
   tabs,
   ...props
 }: {
-  tabs: (RenderableTreeNode & {
-    content: string
-    language?: string
-    process: boolean
-    showHeader?: boolean
-    title?: string
-  })[]
+  tabs: (CodeTabsTab | null | undefined)[]
 }) {
   const codeTabs = useMemo(
     () =>
-      tabs.map((tab) => {
-        if (isTag(tab)) {
+      tabs
+        .filter(
+          (tab: CodeTabsTab | null | undefined): tab is CodeTabsTab => !!tab
+        )
+        .map((tab) => {
           const { content, children, process, ...props } = tab
 
           return {
@@ -29,10 +33,7 @@ function CodeTabs({
             label: props?.title || props?.language || '',
             content: toCodeString({ process, children, content }),
           }
-        }
-
-        return null
-      }),
+        }),
     [tabs]
   )
 
