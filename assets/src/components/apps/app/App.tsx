@@ -157,7 +157,7 @@ function AppWithoutContext() {
       const currentPath =
         removeTrailingSlashes(getBarePathFromPath(pathname)) || ''
 
-      const fullPath = `/apps/${appName}/${removeTrailingSlashes(path) || ''}`
+      const fullPath = `${pathPrefix}/${removeTrailingSlashes(path) || ''}`
       const hashlessPath = fullPath.split('#')[0]
 
       const isInCurrentPath = currentPath.startsWith(hashlessPath)
@@ -187,7 +187,6 @@ function AppWithoutContext() {
             : type === 'docPage'
             ? {
                 onClick: () => {
-                  console.log('docPageRootHash', docPageRootHash)
                   docPageContext.scrollToHash(docPageRootHash)
                 },
               }
