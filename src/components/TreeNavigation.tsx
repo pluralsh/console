@@ -397,7 +397,6 @@ export function TreeNavEntry({
       </NavLink>
       {Children.count(children) > 0 && (
         <animated.div
-          className="sturf"
           style={{
             ...(prevHeight ? expand : { height: isOpen ? 'auto' : '0' }),
             overflow: 'hidden',
