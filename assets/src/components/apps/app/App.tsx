@@ -3,6 +3,7 @@ import {
   Button,
   TreeNav,
   TreeNavEntry,
+  WrapWithIf,
   getBarePathFromPath,
   removeTrailingSlashes,
 } from '@pluralsh/design-system'
@@ -118,6 +119,75 @@ export const getDirectory = ({
   ]
 }
 
+function SideNavEntries({
+  directory,
+  pathname,
+  pathPrefix,
+  root = true,
+}: {
+  directory: any[]
+  pathname: string
+  pathPrefix: string
+  root?: boolean
+}) {
+  const docPageContext = useDocPageContext()
+
+  return (
+    <WrapWithIf
+      condition={root}
+      wrapper={<TreeNav />}
+    >
+      {directory.map(({ label, path, subpaths, type, ...props }) => {
+        const currentPath =
+          removeTrailingSlashes(getBarePathFromPath(pathname)) || ''
+        const fullPath = `${pathPrefix}/${removeTrailingSlashes(path) || ''}`
+        const hashlessPath = fullPath.split('#')[0]
+        const isInCurrentPath = currentPath.startsWith(hashlessPath)
+        const docPageRootHash = props?.headings?.[0]?.id || ''
+        const active =
+          type === 'docPage'
+            ? isInCurrentPath &&
+              (docPageContext.selectedHash === docPageRootHash ||
+                !docPageContext.selectedHash)
+            : type === 'docPageHash'
+            ? isInCurrentPath && docPageContext.selectedHash === props.id
+            : isInCurrentPath
+
+        return (
+          <TreeNavEntry
+            key={fullPath}
+            href={path === 'docs' ? undefined : fullPath}
+            label={label}
+            active={active}
+            {...(type === 'docPageHash' && props.id
+              ? {
+                  onClick: () => {
+                    docPageContext.scrollToHash(props.id)
+                  },
+                }
+              : type === 'docPage'
+              ? {
+                  onClick: () => {
+                    docPageContext.scrollToHash(docPageRootHash)
+                  },
+                }
+              : {})}
+          >
+            {subpaths ? (
+              <SideNavEntries
+                directory={subpaths}
+                pathname={pathname}
+                pathPrefix={pathPrefix}
+                root={false}
+              />
+            ) : null}
+          </TreeNavEntry>
+        )
+      })}
+    </WrapWithIf>
+  )
+}
+
 function AppWithoutContext() {
   const theme = useTheme()
   const { me, configuration } = useContext<any>(LoginContext)
@@ -131,7 +201,6 @@ function AppWithoutContext() {
   const { data: repoData, error: repoError } = useRepositoryQuery({
     variables: { name: appName ?? '' },
   })
-  const docPageContext = useDocPageContext()
 
   const docs = useMemo(
     () => getDocsData(repoData?.repository?.docs),
@@ -151,51 +220,6 @@ function AppWithoutContext() {
     return <GqlError error={repoError} />
   }
   if (!repoData?.repository) return <LoadingIndicator />
-
-  const renderDirectory = (directory) =>
-    directory.map(({ label, path, subpaths, type, ...props }) => {
-      const currentPath =
-        removeTrailingSlashes(getBarePathFromPath(pathname)) || ''
-
-      const fullPath = `${pathPrefix}/${removeTrailingSlashes(path) || ''}`
-      const hashlessPath = fullPath.split('#')[0]
-
-      const isInCurrentPath = currentPath.startsWith(hashlessPath)
-
-      const docPageRootHash = props?.headings?.[0]?.id || ''
-      const active =
-        type === 'docPage'
-          ? isInCurrentPath &&
-            (docPageContext.selectedHash === docPageRootHash ||
-              !docPageContext.selectedHash)
-          : type === 'docPageHash'
-          ? isInCurrentPath && docPageContext.selectedHash === props.id
-          : isInCurrentPath
-
-      return (
-        <TreeNavEntry
-          key={fullPath}
-          href={path === 'docs' ? undefined : fullPath}
-          label={label}
-          active={active}
-          {...(type === 'docPageHash' && props.id
-            ? {
-                onClick: () => {
-                  docPageContext.scrollToHash(props.id)
-                },
-              }
-            : type === 'docPage'
-            ? {
-                onClick: () => {
-                  docPageContext.scrollToHash(docPageRootHash)
-                },
-              }
-            : {})}
-        >
-          {subpaths ? renderDirectory(subpaths) : undefined}
-        </TreeNavEntry>
-      )
-    })
 
   const currentTab = directory.find((tab) =>
     pathname?.startsWith(`${pathPrefix}/${tab.path}`)
@@ -225,7 +249,11 @@ function AppWithoutContext() {
             overflowY="auto"
             paddingBottom={theme.spacing.medium}
           >
-            <TreeNav>{renderDirectory(directory)}</TreeNav>
+            <SideNavEntries
+              directory={directory}
+              pathname={pathname}
+              pathPrefix={pathPrefix}
+            />
           </Div>
         </Flex>
       </ResponsiveLayoutSidenavContainer>
