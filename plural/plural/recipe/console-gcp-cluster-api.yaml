@@ -2,6 +2,7 @@ name: console-gcp-cluster-api
 description: Deploys console on a GKE cluster
 provider: GCP
 primary: false
+private: true
 oidcSettings:
   uriFormat: https://{domain}/oauth/callback
   authMethod: POST

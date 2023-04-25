@@ -1,6 +1,8 @@
 name: console-aws-cluster-api
 description: Deploys console on an EKS cluster
 provider: AWS
+primary: false
+private: true
 oidcSettings:
   uriFormat: https://{domain}/oauth/callback
   authMethod: POST
