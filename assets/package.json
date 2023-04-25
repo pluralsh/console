@@ -116,7 +116,7 @@
     "xterm": "5.1.0",
     "xterm-addon-fit": "0.7.0",
     "xterm-theme": "1.1.0",
-    "yaml": "2.2.1"
+    "yaml": "2.2.2"
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "5.12.2",
