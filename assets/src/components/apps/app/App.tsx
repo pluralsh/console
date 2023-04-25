@@ -3,43 +3,35 @@ import {
   Button,
   TreeNav,
   TreeNavEntry,
+  WrapWithIf,
   getBarePathFromPath,
   removeTrailingSlashes,
 } from '@pluralsh/design-system'
-
 import { useContext, useMemo, useState } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router-dom'
-
 import { ensureURLValidity } from 'utils/url'
 import { InstallationContext } from 'components/Installations'
-
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-
 import { PropsContainer } from 'components/utils/PropsContainer'
 import Prop from 'components/utils/Prop'
-
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
-
 import { Application, Repository, useRepositoryQuery } from 'generated/graphql'
-
 import { GqlError } from 'components/utils/Alert'
-
 import capitalize from 'lodash/capitalize'
-
-import collectHeadings from 'markdoc/utils/collectHeadings'
-
+import {
+  collectHeadings,
+  getMdContent,
+} from '@pluralsh/design-system/dist/markdoc'
 import { useTheme } from 'styled-components'
-
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import isEmpty from 'lodash/isEmpty'
+import { config } from 'markdoc/mdSchema'
 
 import { LoginContext } from '../../contexts'
-
 import AppStatus from '../AppStatus'
-
-import { getMdContent } from '../../../markdoc/utils/getMdContent'
 
 import AppSelector from './AppSelector'
 import RunbookStatus from './runbooks/runbook/RunbookStatus'
@@ -52,8 +44,7 @@ import {
 
 export function getDocsData(docs: Repository['docs']) {
   return docs?.map((doc, i) => {
-    const content = getMdContent(doc?.content)
-
+    const content = getMdContent(doc?.content, config)
     const headings = collectHeadings(content)
     const id = headings?.[0]?.id || `page-${i}`
     const label = headings?.[0]?.title || `Page ${i}`
@@ -122,10 +113,79 @@ export const getDirectory = ({
     {
       path: 'docs',
       label: `${capitalize(app?.name)} docs`,
-      enabled: (docs?.length ?? 0) > 0,
+      enabled: !isEmpty(docs),
       ...(docs ? { subpaths: docs } : {}),
     },
   ]
+}
+
+function SideNavEntries({
+  directory,
+  pathname,
+  pathPrefix,
+  root = true,
+}: {
+  directory: any[]
+  pathname: string
+  pathPrefix: string
+  root?: boolean
+}) {
+  const docPageContext = useDocPageContext()
+
+  return (
+    <WrapWithIf
+      condition={root}
+      wrapper={<TreeNav />}
+    >
+      {directory.map(({ label, path, subpaths, type, ...props }) => {
+        const currentPath =
+          removeTrailingSlashes(getBarePathFromPath(pathname)) || ''
+        const fullPath = `${pathPrefix}/${removeTrailingSlashes(path) || ''}`
+        const hashlessPath = fullPath.split('#')[0]
+        const isInCurrentPath = currentPath.startsWith(hashlessPath)
+        const docPageRootHash = props?.headings?.[0]?.id || ''
+        const active =
+          type === 'docPage'
+            ? isInCurrentPath &&
+              (docPageContext.selectedHash === docPageRootHash ||
+                !docPageContext.selectedHash)
+            : type === 'docPageHash'
+            ? isInCurrentPath && docPageContext.selectedHash === props.id
+            : isInCurrentPath
+
+        return (
+          <TreeNavEntry
+            key={fullPath}
+            href={path === 'docs' ? undefined : fullPath}
+            label={label}
+            active={active}
+            {...(type === 'docPageHash' && props.id
+              ? {
+                  onClick: () => {
+                    docPageContext.scrollToHash(props.id)
+                  },
+                }
+              : type === 'docPage'
+              ? {
+                  onClick: () => {
+                    docPageContext.scrollToHash(docPageRootHash)
+                  },
+                }
+              : {})}
+          >
+            {subpaths ? (
+              <SideNavEntries
+                directory={subpaths}
+                pathname={pathname}
+                pathPrefix={pathPrefix}
+                root={false}
+              />
+            ) : null}
+          </TreeNavEntry>
+        )
+      })}
+    </WrapWithIf>
+  )
 }
 
 function AppWithoutContext() {
@@ -141,7 +201,6 @@ function AppWithoutContext() {
   const { data: repoData, error: repoError } = useRepositoryQuery({
     variables: { name: appName ?? '' },
   })
-  const docPageContext = useDocPageContext()
 
   const docs = useMemo(
     () => getDocsData(repoData?.repository?.docs),
@@ -149,7 +208,10 @@ function AppWithoutContext() {
   )
 
   const directory = useMemo(
-    () => getDirectory({ app: currentApp, docs, config: configuration }),
+    () =>
+      getDirectory({ app: currentApp, docs, config: configuration }).filter(
+        (entry) => entry.enabled
+      ),
     [configuration, currentApp, docs]
   )
 
@@ -158,52 +220,6 @@ function AppWithoutContext() {
     return <GqlError error={repoError} />
   }
   if (!repoData?.repository) return <LoadingIndicator />
-
-  const renderDirectory = (directory) =>
-    directory.map(({ label, path, subpaths, type, ...props }) => {
-      const currentPath =
-        removeTrailingSlashes(getBarePathFromPath(pathname)) || ''
-
-      const fullPath = `/apps/${appName}/${removeTrailingSlashes(path) || ''}`
-      const hashlessPath = fullPath.split('#')[0]
-
-      const isInCurrentPath = currentPath.startsWith(hashlessPath)
-
-      const docPageRootHash = props?.headings?.[0]?.id || ''
-      const active =
-        type === 'docPage'
-          ? isInCurrentPath &&
-            (docPageContext.selectedHash === docPageRootHash ||
-              !docPageContext.selectedHash)
-          : type === 'docPageHash'
-          ? isInCurrentPath && docPageContext.selectedHash === props.id
-          : isInCurrentPath
-
-      return (
-        <TreeNavEntry
-          key={fullPath}
-          href={path === 'docs' ? undefined : fullPath}
-          label={label}
-          active={active}
-          {...(type === 'docPageHash' && props.id
-            ? {
-                onClick: () => {
-                  docPageContext.scrollToHash(props.id)
-                },
-              }
-            : type === 'docPage'
-            ? {
-                onClick: () => {
-                  console.log('docPageRootHash', docPageRootHash)
-                  docPageContext.scrollToHash(docPageRootHash)
-                },
-              }
-            : {})}
-        >
-          {subpaths ? renderDirectory(subpaths) : undefined}
-        </TreeNavEntry>
-      )
-    })
 
   const currentTab = directory.find((tab) =>
     pathname?.startsWith(`${pathPrefix}/${tab.path}`)
@@ -233,7 +249,11 @@ function AppWithoutContext() {
             overflowY="auto"
             paddingBottom={theme.spacing.medium}
           >
-            <TreeNav>{renderDirectory(directory)}</TreeNav>
+            <SideNavEntries
+              directory={directory}
+              pathname={pathname}
+              pathPrefix={pathPrefix}
+            />
           </Div>
         </Flex>
       </ResponsiveLayoutSidenavContainer>
