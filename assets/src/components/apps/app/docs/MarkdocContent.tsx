@@ -1,10 +1,8 @@
 import React from 'react'
+import { getMdContent } from '@pluralsh/design-system/dist/markdoc'
+import { type RenderableTreeNode, renderers } from '@markdoc/markdoc'
 
-import { RenderableTreeNode, renderers } from '@markdoc/markdoc'
-
-import { components } from 'markdoc/mdSchema'
-
-import { getMdContent } from '../../../../markdoc/utils/getMdContent'
+import { components, config } from 'markdoc/mdSchema'
 
 export default function MarkdocComponent({
   raw,
@@ -15,7 +13,7 @@ export default function MarkdocComponent({
   content?: RenderableTreeNode
   components?: any
 }) {
-  content = content || getMdContent(raw)
+  content = content || getMdContent(raw, config)
 
   if (!content) {
     return null

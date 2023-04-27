@@ -1,30 +1,33 @@
-import {
-  green,
-  grey,
-  red,
-  yellow,
-} from '@pluralsh/design-system/dist/theme/colors'
 import { ansiToJson } from 'anser'
 import { textStyle } from 'components/utils/AnsiText'
 import escapeCarriageReturn from 'escape-carriage'
 import { Flex, Span } from 'honorable'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
+
+import { useTheme } from 'styled-components'
 
 import { Level, ts } from './misc'
 
-export function borderColor(lvl) {
-  switch (lvl) {
-    case Level.FATAL:
-      return red[300]
-    case Level.ERROR:
-      return red[200]
-    case Level.WARN:
-      return yellow[200]
-    case Level.INFO:
-      return green[300]
-    default:
-      return grey[750]
-  }
+export function useBorderColor() {
+  const { green, red, yellow, grey } = useTheme().colors
+
+  return useCallback(
+    (lvl) => {
+      switch (lvl) {
+        case Level.FATAL:
+          return red[300]
+        case Level.ERROR:
+          return red[200]
+        case Level.WARN:
+          return yellow[200]
+        case Level.INFO:
+          return green[300]
+        default:
+          return grey[750]
+      }
+    },
+    [green, grey, red, yellow]
+  )
 }
 
 export default function LogLine({
@@ -41,6 +44,7 @@ export default function LogLine({
       }),
     [value]
   )
+  const borderColor = useBorderColor()
 
   return (
     <>

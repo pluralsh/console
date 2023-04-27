@@ -1,7 +1,7 @@
 import { scrollIntoContainerView } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { capitalize } from 'lodash'
-import { MutableRefObject, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
 import {
   useLocation,
@@ -10,20 +10,16 @@ import {
   useParams,
 } from 'react-router-dom'
 
-import { useTheme } from 'styled-components'
-
 import { getDocsData } from '../App'
 
 import { useDocPageContext } from './AppDocsContext'
-
 import MarkdocComponent from './MarkdocContent'
 
 export default function AppDocs() {
   const scrollRef = useRef<HTMLElement>()
   const { appName, docName } = useParams()
-  const { docs, scrollToId = { current: null } } = useOutletContext() as {
+  const { docs } = useOutletContext() as {
     docs: ReturnType<typeof getDocsData>
-    scrollToId: MutableRefObject<(id: string) => void>
   }
   const { scrollHash, scrollToHash } = useDocPageContext()
 
@@ -34,30 +30,8 @@ export default function AppDocs() {
     // Only want to run this on first render
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  scrollToId.current = (id: string) => {
-    if (scrollRef.current) {
-      const scrollToElt = id
-        ? scrollRef.current.querySelector(`#${id}`)
-        : Array.from(scrollRef.current.children)[0]
-
-      if (!scrollToElt) {
-        return
-      }
-      scrollIntoContainerView(scrollToElt, scrollRef.current, {
-        behavior: 'smooth',
-        block: 'start',
-        blockOffset: theme.spacing.xlarge,
-        preventIfVisible: false,
-      })
-    }
-  }
-
   const currentDoc = docs?.find((doc) => doc.id === docName)
-
   const location = useLocation()
-
-  const theme = useTheme()
 
   useEffect(() => {
     if (scrollHash.value && scrollRef.current) {

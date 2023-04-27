@@ -2,10 +2,7 @@ module.exports = {
   parserOptions: {
     project: './tsconfig.eslint.json',
   },
-  extends: [
-    '@pluralsh/eslint-config-typescript',
-    'prettier',
-  ],
+  extends: ['@pluralsh/eslint-config-typescript', 'prettier'],
   globals: {
     JSX: true,
   },
