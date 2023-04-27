@@ -6,6 +6,7 @@ import Pod from 'components/cluster/pods/Pod'
 import PodInfo from 'components/cluster/pods/PodInfo'
 import PodEvents from 'components/cluster/pods/PodEvents'
 import PodRaw from 'components/cluster/pods/PodRaw'
+import PodLogs from 'components/cluster/pods/PodLogs'
 import Node from 'components/cluster/nodes/Node'
 import Nodes from 'components/cluster/nodes/Nodes'
 import NodeEvents from 'components/cluster/nodes/NodeEvents'
@@ -39,6 +40,10 @@ export const clusterRoutes = [
     <Route
       path="raw"
       element={<PodRaw />}
+    />
+    <Route
+      path="logs"
+      element={<PodLogs />}
     />
   </Route>,
 

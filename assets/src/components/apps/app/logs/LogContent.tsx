@@ -70,7 +70,7 @@ export default function LogContent({
   listRef,
   setListRef,
   logs,
-  name,
+  namespace,
   loading,
   fetchMore,
   onScroll,
@@ -102,7 +102,7 @@ export default function LogContent({
         listRef={listRef}
         setListRef={setListRef}
         setLoader={setLoader}
-        refreshKey={`${name}:${search}`}
+        refreshKey={`${namespace}:${search}`}
         items={lines}
         mapper={({ line, level, stream }, o) => (
           <LogLine

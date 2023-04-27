@@ -12,7 +12,7 @@ const POLL_INTERVAL = 10 * 1000
 const LIMIT = 1000
 
 export function LogsCard({
-  application: { name },
+  namespace,
   query,
   addLabel,
   fullscreen = false,
@@ -51,7 +51,7 @@ export function LogsCard({
           <LogContent
             listRef={listRef}
             setListRef={setListRef}
-            name={name}
+            namespace={namespace}
             logs={data.logs}
             setLoader={setLoader}
             search={query}

@@ -14,7 +14,7 @@ import { LogsCard } from './LogsCard'
 import LogsFilters from './LogsFilters'
 
 export default function LogsFullScreen({
-  application,
+  namespace,
   query,
   search,
   setSearch,
@@ -90,7 +90,7 @@ export default function LogsFullScreen({
             removeLabel={removeLabel}
           />
           <LogsCard
-            application={application}
+            namespace={namespace}
             query={query}
             addLabel={addLabel}
             height="100%"
