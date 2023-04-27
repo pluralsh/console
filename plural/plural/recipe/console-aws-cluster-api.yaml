@@ -82,6 +82,6 @@ sections:
       field: access_token
   items:
   - type: TERRAFORM
-    name: aws
+    name: aws-cluster-api
   - type: HELM
     name: console

@@ -1,0 +1,9 @@
+dependencies:
+- name: gcp-bootstrap-cluster-api
+  repo: bootstrap
+  type: terraform
+  version: '>= 0.1.1'
+providers:
+- gcp
+description: console gcp bootstrapping
+version: 0.1.2

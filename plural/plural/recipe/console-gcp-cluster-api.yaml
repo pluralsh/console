@@ -83,6 +83,6 @@ sections:
       field: access_token
   items:
   - type: TERRAFORM
-    name: gcp
+    name: gcp-cluster-api
   - type: HELM
     name: console
