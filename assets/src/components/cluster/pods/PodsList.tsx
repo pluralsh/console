@@ -214,6 +214,7 @@ export const ColImages = columnHelper.accessor((row) => row?.images || [], {
 
     return images.map((image) => (
       <Tooltip
+        key={image}
         label={image}
         placement="left-start"
       >
