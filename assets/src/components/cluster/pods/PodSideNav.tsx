@@ -1,19 +1,33 @@
 import { Tab, TabList } from '@pluralsh/design-system'
-import { useMatch } from 'react-router-dom'
-
+import { useMatch, useParams } from 'react-router-dom'
 import { LinkTabWrap } from 'components/utils/Tabs'
+import { useMemo } from 'react'
 
-const DIRECTORY = [
-  { path: '', label: 'Info' },
-  { path: 'events', label: 'Events' },
-  { path: 'raw', label: 'Raw' },
-]
+import { useNamespaceIsApp } from '../../hooks/useNamespaceIsApp'
+
+const useGetDirectory = (namespace = '') => {
+  const namespaceIsApp = useNamespaceIsApp(namespace)
+
+  return useMemo(() => {
+    const showLogs = !namespaceIsApp
+
+    return [
+      { path: '', label: 'Info' },
+      { path: 'events', label: 'Events' },
+      { path: 'raw', label: 'Raw' },
+      ...(showLogs ? [{ path: 'logs', label: 'Logs' }] : []),
+    ]
+  }, [namespaceIsApp])
+}
 
 function NodesTabList({ tabStateRef }: any) {
+  const { namespace } = useParams()
+
   const subpath =
     useMatch('/pods/:namespace/:name/:subpath')?.params?.subpath || ''
+  const directory = useGetDirectory(namespace)
 
-  const currentTab = DIRECTORY.find(({ path }) => path === subpath)
+  const currentTab = directory.find(({ path }) => path === subpath)
 
   return (
     <TabList
@@ -23,7 +37,7 @@ function NodesTabList({ tabStateRef }: any) {
         selectedKey: currentTab?.path,
       }}
     >
-      {DIRECTORY.map(({ label, path }) => (
+      {directory.map(({ label, path }) => (
         <LinkTabWrap
           key={path}
           textValue={label}

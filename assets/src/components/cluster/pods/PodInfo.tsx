@@ -13,6 +13,8 @@ import { POD_INFO_Q } from '../queries'
 import { SubTitle } from '../nodes/SubTitle'
 import { ContainersList } from '../containers/ContainersList'
 
+import { useNamespaceIsApp } from '../../hooks/useNamespaceIsApp'
+
 import PodMetadata from './PodMetadata'
 import PodConditions from './PodConditions'
 
@@ -27,14 +29,30 @@ export const statusesToRecord = (statuses?: Maybe<Maybe<ContainerStatus>[]>) =>
     {} as Record<string, Maybe<ContainerStatus>>
   )
 
-function getLogUrl({ name, namespace }) {
-  return `/apps/${namespace}/logs?${asQuery({ pod: name })}`
+function useGetLogUrl({
+  name,
+  namespace,
+}: {
+  name?: string
+  namespace?: string
+}) {
+  const isApp = useNamespaceIsApp(namespace)
+
+  if (!namespace) {
+    return null
+  }
+
+  return isApp
+    ? `/apps/${namespace}/logs${name ? `?${asQuery({ pod: name })}` : ''}`
+    : name
+    ? `/pods/${namespace}/${name}/logs`
+    : null
 }
 
 function ViewLogsButton({ metadata }: any) {
-  if (!metadata) return null
+  const url = useGetLogUrl(metadata)
 
-  const url = getLogUrl(metadata)
+  if (!url) return null
 
   return (
     <Button

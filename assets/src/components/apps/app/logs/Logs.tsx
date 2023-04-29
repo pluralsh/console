@@ -1,7 +1,6 @@
 import { Input, SearchIcon, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useCallback, useContext, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { InstallationContext } from 'components/Installations'
 import { toMap, useQueryParams } from 'components/utils/query'
 import { Flex } from 'honorable'
 
@@ -13,10 +12,29 @@ import LogsFilters from './LogsFilters'
 import { LogsCard } from './LogsCard'
 import LogsFullScreen from './LogsFullScreen'
 
-export default function Logs() {
+export default function AppLogs() {
   const { appName } = useParams()
+
+  const breadcrumbs = useMemo(
+    () => [
+      { label: 'apps', url: '/' },
+      { label: appName ?? '', url: `/apps/${appName}` },
+      { label: 'logs', url: `/apps/${appName}/logs` },
+    ],
+    [appName]
+  )
+
+  useSetBreadcrumbs(breadcrumbs)
+
+  if (!appName) {
+    return null
+  }
+
+  return <LogsBase namespace={appName} />
+}
+
+export function LogsBase({ namespace }: { namespace: string }) {
   const query = useQueryParams()
-  const { applications } = useContext<any>(InstallationContext)
   const [search, setSearch] = useState('')
   const [labels, setLabels] = useState(toMap(query))
 
@@ -33,7 +51,6 @@ export default function Logs() {
     [labels, setLabels]
   )
 
-  const currentApp = applications.find((app) => app.name === appName)
   const searchQuery = search.length > 0 ? ` |~ "${search}"` : ''
   const labelList = Object.entries(labels).map(([name, value]) => ({
     name,
@@ -41,23 +58,12 @@ export default function Logs() {
   }))
   const labelQuery = useMemo(
     () =>
-      [...labelList, { name: 'namespace', value: appName }]
+      [...labelList, { name: 'namespace', value: namespace }]
         .map(({ name, value }) => `${name}="${value}"`)
         .join(','),
-    [labelList, appName]
+    [labelList, namespace]
   )
   const logQuery = `{${labelQuery}}${searchQuery}`
-
-  const breadcrumbs = useMemo(
-    () => [
-      { label: 'apps', url: '/' },
-      { label: appName ?? '', url: `/apps/${appName}` },
-      { label: 'logs', url: `/apps/${appName}/logs` },
-    ],
-    [appName]
-  )
-
-  useSetBreadcrumbs(breadcrumbs)
 
   return (
     <ScrollablePage
@@ -70,7 +76,7 @@ export default function Logs() {
           grow={1}
         >
           <LogsFullScreen
-            application={currentApp}
+            namespace={namespace}
             query={logQuery}
             search={search}
             setSearch={setSearch}
@@ -82,7 +88,7 @@ export default function Logs() {
           />
           <LogsDownloader
             query={logQuery}
-            repo={appName}
+            repo={namespace}
           />
           <LogsFilters
             search={search}
@@ -103,13 +109,14 @@ export default function Logs() {
           startIcon={<SearchIcon size={14} />}
           value={search}
           onChange={({ target: { value } }) => setSearch(value)}
+          flexShrink={0}
         />
         <LogsLabels
           labels={labelList}
           removeLabel={removeLabel}
         />
         <LogsCard
-          application={currentApp}
+          namespace={namespace}
           query={logQuery}
           addLabel={addLabel}
         />

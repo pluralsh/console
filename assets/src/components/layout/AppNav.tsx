@@ -201,6 +201,7 @@ export function StatusPanel({ statuses, open, onClose }) {
         </StatusPanelTopContainer>
         {apps.map((app, i) => (
           <AppStatusWrap
+            key={app?.name}
             onClick={() => {
               onClose()
               navigate(`/apps/${app.name}`)

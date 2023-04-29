@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react'
-import { Outlet, useParams } from 'react-router-dom'
-import { TabPanel, useBreadcrumbs } from '@pluralsh/design-system'
+import { useMemo, useRef } from 'react'
+import { Outlet, useMatch, useParams } from 'react-router-dom'
+import { TabPanel, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
@@ -17,19 +17,23 @@ export default function Node() {
   const tabStateRef = useRef<any>()
   const theme = useTheme()
   const { name, namespace } = useParams()
-  const { setBreadcrumbs } = useBreadcrumbs()
+  const { tab } = useMatch('/pods/:namespace/:name/:tab')?.params || {}
 
-  // TODO: Investigate whether these links could more specific,
-  // based on where they navigated from, perhaps the `namespace` crumb
-  // could navigate to the Pods view already filtered for that namespace
-  useEffect(() => {
-    if (name && namespace) {
-      setBreadcrumbs([
-        { label: 'pods', url: '/pods' }, // Add filter param here later maybe?
-        { label: name, url: name },
-      ])
-    }
-  }, [name, namespace, setBreadcrumbs])
+  const breadcrumbs = useMemo(
+    () => [
+      { label: 'pods', url: '/pods' },
+      ...(namespace ? [{ label: namespace, url: `/pods/${namespace}` }] : []),
+      ...(namespace && name
+        ? [{ label: name, url: `/pods/${namespace}/${name}` }]
+        : []),
+      ...(tab && namespace && name
+        ? [{ label: tab, url: `/pods/${namespace}/${name}/${tab}` }]
+        : []),
+    ],
+    [name, namespace, tab]
+  )
+
+  useSetBreadcrumbs(breadcrumbs)
 
   return (
     <ResponsiveLayoutPage>
