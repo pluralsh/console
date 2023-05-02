@@ -70,7 +70,7 @@ ENV HELM_VERSION=v3.10.3
 ENV TERRAFORM_VERSION=v1.2.9
 
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
-ENV CLI_VERSION=v0.6.17
+ENV CLI_VERSION=v0.6.20
 
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
 ENV KUBECTL_VERSION=v1.25.5
@@ -89,8 +89,6 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
     chmod +x /usr/local/bin/helm && \
     chmod +x /usr/local/bin/terraform
 
-FROM docker:17.12.1-ce as static-docker-source
-
 # From this line onwards, we're in a new image, which will be the image used in production
 FROM erlang:23.3.4.18-alpine
 
@@ -98,7 +96,6 @@ ARG CLOUD_SDK_VERSION=273.0.0
 ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION
 ENV PATH /google-cloud-sdk/bin:$PATH
 
-COPY --from=static-docker-source /usr/local/bin/docker /usr/local/bin/docker
 COPY --from=tools /usr/local/bin/helm /usr/local/bin/helm
 COPY --from=tools /usr/local/bin/terraform /usr/local/bin/terraform
 COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
@@ -106,7 +103,6 @@ COPY --from=tools /usr/local/bin/kubectl /usr/local/bin/kubectl
 
 RUN apk --no-cache add \
         ca-certificates \
-        curl \
         # python3 \
         # py3-pip \
         # py-crcmod \
@@ -129,7 +125,6 @@ ENV REPLACE_OS_VARS=true \
 
 WORKDIR /opt/app
 
-RUN helm plugin install https://github.com/databus23/helm-diff --version 3.5.0
 RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh
 RUN mkdir -p /root/.plural && mkdir -p /root/.creds && mkdir /root/bin
 RUN ln -s /usr/local/bin/plural /usr/local/bin/forge
