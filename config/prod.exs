@@ -3,7 +3,7 @@ use Mix.Config
 config :console, :initialize, true
 
 config :console, ConsoleWeb.Endpoint,
-  http: [port: 4000, compress: true],
+  http: [port: 4000, compress: true, protocol_options: [max_header_value_length: 8192]],
   # force_ssl: [hsts: true, rewrite_on: [:x_forwarded_proto]],
   cache_static_manifest: "priv/static/cache_manifest.json",
   server: true
