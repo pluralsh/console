@@ -104,7 +104,14 @@ const CrumbLinkText = styled.span(({ theme }) => ({
 }))
 
 const CrumbSelectTriggerUnstyled = forwardRef<any, any>(
-  ({ className, ...props }: { className?: string }, ref) => (
+  (
+    {
+      className,
+      isOpen: _isOpen,
+      ...props
+    }: { className?: string; isOpen?: boolean },
+    ref
+  ) => (
     <div
       className={className}
       ref={ref}
@@ -115,9 +122,7 @@ const CrumbSelectTriggerUnstyled = forwardRef<any, any>(
   )
 )
 
-const CrumbSelectTrigger = styled(CrumbSelectTriggerUnstyled)<{
-  isOpen?: boolean
-}>(({ theme }) => ({
+const CrumbSelectTrigger = styled(CrumbSelectTriggerUnstyled)(({ theme }) => ({
   ...theme.partials.text.caption,
   cursor: 'pointer',
   color: theme.colors['text-xlight'],
