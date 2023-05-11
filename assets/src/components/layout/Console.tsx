@@ -18,6 +18,7 @@ import { ContentOverlay } from './Overlay'
 import Sidebar from './Sidebar'
 import Subheader from './Subheader'
 import WithApplicationUpdate from './WithApplicationUpdate'
+import { CommandPalette } from 'components/CommandPalette'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -30,13 +31,15 @@ export default function Console() {
           <EnsureLogin>
             <InstallationsProvider>
               <PluralProvider>
-                <BillingSubscriptionProvider>
-                  <BreadcrumbsProvider>
-                    <TerminalThemeProvider>
-                      <ConsoleContent />
-                    </TerminalThemeProvider>
-                  </BreadcrumbsProvider>
-                </BillingSubscriptionProvider>
+                <CommandPalette>
+                  <BillingSubscriptionProvider>
+                    <BreadcrumbsProvider>
+                      <TerminalThemeProvider>
+                        <ConsoleContent />
+                      </TerminalThemeProvider>
+                    </BreadcrumbsProvider>
+                  </BillingSubscriptionProvider>
+                </CommandPalette>
               </PluralProvider>
             </InstallationsProvider>
           </EnsureLogin>

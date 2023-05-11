@@ -67,6 +67,7 @@
     "js-file-download": "0.4.12",
     "js-yaml": "4.1.0",
     "jsonpath": "1.1.1",
+    "kbar": "^0.1.0-beta.40",
     "kubernetes-resource-parser": "0.1.0",
     "lodash": "4.17.21",
     "moment": "2.29.4",
