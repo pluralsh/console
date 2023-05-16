@@ -61,4 +61,29 @@ defmodule Console.Services.PoliciesTest do
       :approval = Policies.upgrade_type("repo")
     end
   end
+
+  describe "#matches?/2" do
+    test "if a policy has non-empty repositories, it will use those for a match" do
+      policy = insert(:upgrade_policy, target: "*", repositories: ["console"])
+
+      refute Policies.matches?("airbyte", policy)
+      assert Policies.matches?("console", policy)
+    end
+
+    test "if a policy includes a wildcard, it will match anything" do
+      policy = insert(:upgrade_policy, target: "*")
+
+      for r <- ~w(any repository name) do
+        assert Policies.matches?(r, policy)
+      end
+    end
+
+    test "if a policy target is prefixed with ~ it will evaluate a regex" do
+      policy = insert(:upgrade_policy, target: "~con.*ole")
+
+      assert Policies.matches?("console", policy)
+      assert Policies.matches?("conbogusole", policy)
+      refute Policies.matches?("airbyte", policy)
+    end
+  end
 end

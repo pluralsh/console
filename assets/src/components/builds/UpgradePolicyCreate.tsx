@@ -113,7 +113,7 @@ export default function UpgradePolicyCreate() {
               Regex guide
             </A>
           }
-          hint="Target applications using a regex expression, e.g. “*” to select all."
+          hint="Target applications using a glob expression, e.g. “*” to select all, or prefix with `~` to use a full regex."
         >
           <Input
             placeholder="*"
