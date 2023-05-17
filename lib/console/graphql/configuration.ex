@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Configuration do
   use Console.GraphQl.Schema.Base
+  require Logger
   alias Console.Middleware.{Authenticated, Sandboxed}
   alias Console.GraphQl.Resolvers.Plural
 
@@ -47,7 +48,9 @@ defmodule Console.GraphQl.Configuration do
       _, _, _ ->
         case Console.Plural.Manifest.get() do
           {:ok, _} = res -> res
-          _ -> {:ok, %{}}
+          error ->
+            Logger.error "could not fetch manifest: #{inspect(error)}"
+            {:ok, %{}}
         end
     end
 
