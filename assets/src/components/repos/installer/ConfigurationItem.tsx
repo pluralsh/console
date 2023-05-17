@@ -132,7 +132,7 @@ function ConfigurationField({ config, ctx, setValue }) {
               ctx,
               name,
               active.label!,
-              new Set<string>((context.domains as Array<string>) || []),
+              new Set<string>((context?.domains as Array<string>) ?? []),
               domains
             ),
           ]

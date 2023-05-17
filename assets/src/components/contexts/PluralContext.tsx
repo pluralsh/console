@@ -22,7 +22,7 @@ function PluralProvider({ children }): ReactElement {
     [data]
   )
 
-  if (loading || !data) {
+  if (loading) {
     return (
       <ShowAfterDelay>
         <LoadingIndicator />
