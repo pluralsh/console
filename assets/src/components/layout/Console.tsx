@@ -1,24 +1,23 @@
-import { Outlet } from 'react-router-dom'
 import { Toast } from '@pluralsh/design-system'
-import { A, Flex, Span } from 'honorable'
 import { MarkdocContextProvider } from '@pluralsh/design-system/dist/markdoc/MarkdocContext'
-import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
-
-import usePosthogIdentify from 'components/utils/Posthog'
-
 import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
+import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
+import usePosthogIdentify from 'components/utils/Posthog'
+import { A, Flex, Span } from 'honorable'
+import { Outlet } from 'react-router-dom'
 
-import { EnsureLogin } from '../login/Login'
+import { PluralProvider } from '../contexts/PluralContext'
 import { InstallationsProvider } from '../Installations'
+import { EnsureLogin } from '../login/Login'
 import TerminalThemeProvider from '../terminal/TerminalThemeProvider'
 import { CursorPositionProvider } from '../utils/CursorPosition'
 
 import Header from './Header'
-import Subheader from './Subheader'
-import Sidebar from './Sidebar'
-import WithApplicationUpdate from './WithApplicationUpdate'
 import { ContentOverlay } from './Overlay'
+import Sidebar from './Sidebar'
+import Subheader from './Subheader'
+import WithApplicationUpdate from './WithApplicationUpdate'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'
@@ -30,13 +29,15 @@ export default function Console() {
         <ConsoleNavContextProvider>
           <EnsureLogin>
             <InstallationsProvider>
-              <BillingSubscriptionProvider>
-                <BreadcrumbsProvider>
-                  <TerminalThemeProvider>
-                    <ConsoleContent />
-                  </TerminalThemeProvider>
-                </BreadcrumbsProvider>
-              </BillingSubscriptionProvider>
+              <PluralProvider>
+                <BillingSubscriptionProvider>
+                  <BreadcrumbsProvider>
+                    <TerminalThemeProvider>
+                      <ConsoleContent />
+                    </TerminalThemeProvider>
+                  </BreadcrumbsProvider>
+                </BillingSubscriptionProvider>
+              </PluralProvider>
             </InstallationsProvider>
           </EnsureLogin>
         </ConsoleNavContextProvider>

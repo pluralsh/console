@@ -14,7 +14,7 @@ function ShowAfterDelayUnstyled({
   className,
 }: {
   className?: string
-  delay: number
+  delay?: number
   children: ReactNode
 }) {
   const [show, setShow] = useState(false)
