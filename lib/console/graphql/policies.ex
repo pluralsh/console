@@ -6,20 +6,22 @@ defmodule Console.GraphQl.Policies do
   ecto_enum :upgrade_policy_type, Console.Schema.UpgradePolicy.Type
 
   input_object :upgrade_policy_attributes do
-    field :name,        non_null(:string)
-    field :description, :string
-    field :type,        non_null(:upgrade_policy_type)
-    field :target,      non_null(:string)
-    field :weight,      :integer
+    field :name,         non_null(:string)
+    field :description,  :string
+    field :target,       non_null(:string)
+    field :type,         non_null(:upgrade_policy_type)
+    field :repositories, list_of(:string)
+    field :weight,       :integer
   end
 
   object :upgrade_policy do
-    field :id,          non_null(:id)
-    field :name,        non_null(:string)
-    field :description, :string
-    field :type,        non_null(:upgrade_policy_type)
-    field :target,      non_null(:string)
-    field :weight,      :integer
+    field :id,           non_null(:id)
+    field :name,         non_null(:string)
+    field :description,  :string
+    field :repositories, list_of(:string)
+    field :type,         non_null(:upgrade_policy_type)
+    field :target,       non_null(:string)
+    field :weight,       :integer
 
     timestamps()
   end
