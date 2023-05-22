@@ -9,7 +9,7 @@ oidcSettings:
   domainKey: console_dns
 dependencies:
   - repo: bootstrap
-    name: azure-cluster-api
+    name: azure-cluster-capi
   - repo: monitoring
     name: monitoring-azure-capi
   - repo: ingress-nginx
