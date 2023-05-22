@@ -11,11 +11,11 @@ dependencies:
   - repo: bootstrap
     name: azure-cluster-api
   - repo: monitoring
-    name: monitoring-azure
+    name: monitoring-azure-capi
   - repo: ingress-nginx
-    name: ingress-nginx-azure
+    name: ingress-nginx-azure-capi
   - repo: postgres
-    name: azure-postgres
+    name: azure-postgres-capi
 tests:
   - name: git access
     type: GIT

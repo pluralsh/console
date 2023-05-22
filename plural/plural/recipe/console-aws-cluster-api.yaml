@@ -11,11 +11,11 @@ dependencies:
   - repo: bootstrap
     name: aws-cluster-api
   - repo: monitoring
-    name: monitoring-aws
+    name: monitoring-aws-capi
   - repo: ingress-nginx
-    name: ingress-nginx-aws
+    name: ingress-nginx-aws-capi
   - repo: postgres
-    name: aws-postgres
+    name: aws-postgres-capi
 tests:
 - name: git access
   type: GIT
