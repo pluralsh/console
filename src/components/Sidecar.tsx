@@ -72,17 +72,20 @@ const SidecarItem = forwardRef<HTMLDivElement, SidecarProps>(
   )
 )
 
-const SidecarButton = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ ...props }, ref) => (
-    <Button
-      ref={ref}
-      tertiary
-      padding="none"
-      width="100%"
-      {...props}
-    />
-  )
-)
+const SidecarButton = forwardRef<any, ButtonProps>(({ ...props }, ref) => (
+  <Button
+    ref={ref}
+    tertiary
+    {...{
+      width: '100%',
+      [`> :nth-child(${props.startIcon ? '2' : '1'})`]: {
+        flexGrow: 1,
+        justifyContent: 'start',
+      },
+    }}
+    {...props}
+  />
+))
 
 export default Sidecar
 export { SidecarItem, SidecarButton }

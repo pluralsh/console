@@ -1,8 +1,10 @@
 import { A, Div } from 'honorable'
 
 import {
+  AzureLogoIcon,
   BrowserIcon,
   CertificateIcon,
+  CopyIcon,
   DiscordIcon,
   GitHubLogoIcon,
   ScrollIcon,
@@ -32,8 +34,7 @@ function Template({ heading, ...props }: SidecarProps) {
       <Div
         marginBottom="xxlarge"
         _last={{ marginBottom: 0 }}
-        width="min-content"
-        maxWidth="176px"
+        width="200px"
       >
         <Sidecar
           heading={heading}
@@ -54,6 +55,14 @@ function Template({ heading, ...props }: SidecarProps) {
           <SidecarButton startIcon={<DiscordIcon />}>Discord</SidecarButton>
           <SidecarButton startIcon={<SlackLogoIcon />}>Slack</SidecarButton>
           <SidecarButton startIcon={<GitHubLogoIcon />}>Github</SidecarButton>
+          <SidecarButton
+            startIcon={<AzureLogoIcon fullColor />}
+            endIcon={<CopyIcon />}
+          >
+            Azure
+          </SidecarButton>
+          <SidecarButton>No icons</SidecarButton>
+          <SidecarButton endIcon={<CopyIcon />}>End icon</SidecarButton>
         </Sidecar>
       </Div>
       <Div

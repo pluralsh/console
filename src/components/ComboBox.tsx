@@ -28,6 +28,8 @@ import { omitBy } from 'lodash'
 
 import { mergeRefs } from 'react-merge-refs'
 
+import { useFloatingDropdown } from '../hooks/useFloatingDropdown'
+
 import { type ListBoxItemBaseProps } from './ListBoxItem'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import Input, { type InputProps } from './Input'
@@ -38,7 +40,6 @@ import {
 import { PopoverListBox } from './PopoverListBox'
 import SearchIcon from './icons/SearchIcon'
 import { SelectInner } from './Select'
-import { useFloatingDropdown } from './useFloatingDropdown'
 
 type Placement = 'left' | 'right'
 

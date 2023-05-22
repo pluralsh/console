@@ -89,6 +89,7 @@ Default.args = {
   small: false,
   disabled: false,
   defaultSelected: false,
+  tabIndex: 0,
 }
 
 export const Small = Template.bind({})
@@ -96,4 +97,5 @@ Small.args = {
   small: true,
   disabled: false,
   defaultSelected: false,
+  tabIndex: 0,
 }

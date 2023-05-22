@@ -147,6 +147,7 @@ export type CheckboxProps = {
   defaultSelected?: boolean
   onChange?: (e: { target: { checked: boolean } }) => any
   onFocusChange?: (isFocused: boolean) => void
+  tabIndex?: number | string
 } & Omit<InputProps, 'onChange'>
 
 function Checkbox(
@@ -162,6 +163,7 @@ function Checkbox(
     onFocusChange,
     onKeyDown,
     onKeyUp,
+    tabIndex,
     ...props
   }: CheckboxProps,
   ref: MutableRefObject<any>
@@ -217,6 +219,7 @@ function Checkbox(
         <input
           {...inputProps}
           {...focusProps}
+          tabIndex={tabIndex}
           onChange={(e) => {
             if (typeof onChange === 'function') {
               onChange(e)

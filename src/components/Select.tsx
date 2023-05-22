@@ -20,6 +20,8 @@ import {
   useBimodalSelectState,
 } from '../utils/useBimodalSelectState'
 
+import { useFloatingDropdown } from '../hooks/useFloatingDropdown'
+
 import { type ListBoxItemBaseProps } from './ListBoxItem'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import { PopoverListBox } from './PopoverListBox'
@@ -27,7 +29,6 @@ import {
   setNextFocusedKey,
   useSelectComboStateProps,
 } from './SelectComboShared'
-import { useFloatingDropdown } from './useFloatingDropdown'
 import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 
 const parentFillLevelToBackground = {
