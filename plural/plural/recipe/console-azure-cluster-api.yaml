@@ -84,6 +84,6 @@ sections:
           field: access_token
     items:
       - type: TERRAFORM
-        name: azure
+        name: azure-cluster-api
       - type: HELM
         name: console

@@ -1,0 +1,20 @@
+dependencies:
+  - name: azure-bootstrap-cluster-api
+    repo: bootstrap
+    type: terraform
+    version: ">= 0.1.1"
+  - type: terraform
+    name: azure
+    repo: minio
+    version: ">= 0.1.0"
+    optional: true
+
+providers:
+  - azure
+
+outputs:
+  console_msi_client_id: console_msi_client_id
+  console_msi_id: console_msi_id
+
+description: console azure bootstrapping
+version: 0.1.2
