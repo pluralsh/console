@@ -30,7 +30,9 @@ defmodule Console.Plural.Context do
     %__MODULE__{
       configuration: config,
       smtp: Smtp.new(spec["smtp"]),
-      bundles: bundles(spec)
+      bundles: bundles(spec),
+      domains: spec["domains"],
+      buckets: spec["buckets"]
     }
   end
 
@@ -62,14 +64,16 @@ defmodule Console.Plural.Context do
   defp merge_list(new, bundles) when is_list(new), do: Enum.uniq(new ++ bundles)
   defp merge_list(b, bundles), do: merge_list([b], bundles)
 
-  def write(%__MODULE__{bundles: bundles, configuration: conf, smtp: smtp} = context) do
+  def write(%__MODULE__{bundles: bundles, configuration: conf, smtp: smtp, domains: d, buckets: b} = context) do
     sanitized = %{
       apiVersion: "plural.sh/v1alpha1",
       kind: "Context",
       spec: %{
         bundles: Enum.map(bundles, &Map.from_struct/1),
         configuration: conf,
-        smtp: Smtp.to_map(smtp)
+        smtp: Smtp.to_map(smtp),
+        domains: d,
+        buckets: b
       }
     }
 

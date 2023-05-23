@@ -25,6 +25,7 @@ import { appendConnection } from '../../../utils/graphql'
 
 import { buildSteps, install, toDefaultSteps } from './helpers'
 import { QUERY_REPOS } from './query'
+import { InstallerContext } from './context'
 
 const ERROR_MESSAGE_MAP = {
   forbidden: 'Insufficient permissions to install applications',
@@ -47,6 +48,8 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
   const [stepsLoading, setStepsLoading] = useState(false)
   const [error, setError] = useState()
   const [defaultSteps, setDefaultSteps] = useState<Array<WizardStepConfig>>([])
+  const [domains, setDomains] = useState<Record<string, string>>({})
+
   const { applications: installedApplications } = useContext(
     InstallationContext as React.Context<any>
   )
@@ -57,6 +60,7 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
     loading,
   } = useQuery(QUERY_REPOS)
 
+  const context = useMemo(() => ({ domains, setDomains }), [domains])
   const applications = useMemo(
     () => applicationNodes?.map(({ node }) => node),
     [applicationNodes]
@@ -66,7 +70,8 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
       applications?.filter(
         (app) => !installedApplications?.find((s) => s.name === app.name)
       ),
-    [applications, installedApplications]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [applications]
   )
 
   const onInstall = useCallback(
@@ -138,21 +143,23 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
           marginHorizontal="xxxxlarge"
         />
       )}
-      <Wizard
-        onClose={() => (inProgress ? setConfirmClose(true) : setOpen(false))}
-        onComplete={(completed) => setInProgress(completed)}
-        onSelect={onSelect}
-        defaultSteps={defaultSteps}
-        dependencySteps={steps}
-        limit={5}
-        loading={stepsLoading}
-        onResetRef={onResetRef}
-      >
-        {{
-          stepper: <WizardStepper />,
-          navigation: <WizardNavigation onInstall={onInstall} />,
-        }}
-      </Wizard>
+      <InstallerContext.Provider value={context}>
+        <Wizard
+          onClose={() => (inProgress ? setConfirmClose(true) : setOpen(false))}
+          onComplete={(completed) => setInProgress(completed)}
+          onSelect={onSelect}
+          defaultSteps={defaultSteps}
+          dependencySteps={steps}
+          limit={5}
+          loading={stepsLoading}
+          onResetRef={onResetRef}
+        >
+          {{
+            stepper: <WizardStepper />,
+            navigation: <WizardNavigation onInstall={onInstall} />,
+          }}
+        </Wizard>
+      </InstallerContext.Provider>
     </>
   )
 }

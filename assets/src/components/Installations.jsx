@@ -1,6 +1,5 @@
 import { createContext, useEffect } from 'react'
 import { useQuery } from '@apollo/client'
-import { LoopingLogo } from '@pluralsh/design-system'
 
 import { APPLICATIONS_Q, APPLICATION_SUB } from './graphql/plural'
 import ShowAfterDelay from './utils/ShowAfterDelay'
