@@ -1,12 +1,20 @@
-import { Div, type DivProps, Flex, H1, H3, Img, P, Span } from 'honorable'
-import PropTypes from 'prop-types'
-import { type Ref, forwardRef } from 'react'
+import { Div, type DivProps, Flex, H1, H3, P, Span } from 'honorable'
+import {
+  type ComponentProps,
+  type ReactNode,
+  type Ref,
+  forwardRef,
+} from 'react'
+
+import styled, { useTheme } from 'styled-components'
 
 import Chip from './Chip'
 import PadlockLockedIcon from './icons/PadlockLockedIcon'
 import VerifiedIcon from './icons/VerifiedIcon'
 import Card from './Card'
 import RocketIcon from './icons/RocketIcon'
+
+import AppIcon from './AppIcon'
 
 type RepositoryCardProps = DivProps & {
   title?: string
@@ -20,23 +28,52 @@ type RepositoryCardProps = DivProps & {
   tags?: string[]
   releaseStatus?: 'ALPHA' | 'BETA' | string
   size?: 'small' | 'medium' | 'large' | string
-}
-
-const propTypes = {
-  title: PropTypes.string,
-  publisher: PropTypes.string,
-  priv: PropTypes.bool,
-  installed: PropTypes.bool,
-  verified: PropTypes.bool,
-  trending: PropTypes.bool,
-  description: PropTypes.string,
-  imageUrl: PropTypes.string,
-  releaseStatus: PropTypes.oneOf(['ALPHA', 'BETA']),
-  tags: PropTypes.arrayOf(PropTypes.string),
-  size: PropTypes.oneOf(['small', 'medium', 'large']),
+  variant?: 'app' | 'marketing'
+  featuredLabel?: ReactNode
 }
 
 const prerelease = (status?: string) => status === 'ALPHA' || status === 'BETA'
+
+const FeaturedBorder = styled(
+  ({ children, ...props }: ComponentProps<'div'>) => (
+    <div {...props}>
+      <div>{children}</div>
+    </div>
+  )
+)(({ theme }) => {
+  const borderThickness = 4
+  const color = theme.colors['border-fill-two']
+
+  return {
+    '&, &::before': {
+      overflow: 'hidden',
+      position: 'absolute',
+      top: -1,
+      left: -1,
+      right: -1,
+      bottom: -1,
+      borderRadius: theme.borderRadiuses.large,
+      display: 'flex',
+      alignItems: 'start',
+      justifyContent: 'start',
+      pointerEvents: 'none',
+    },
+    '&::before': {
+      content: '""',
+      outline: `${borderThickness}px solid ${color}`,
+      outlineOffset: -borderThickness,
+    },
+    '& > div': {
+      ...theme.partials.text.caption,
+      color: theme.colors.blue['200'],
+      padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
+      borderEndEndRadius: theme.borderRadiuses.large,
+      pointerEvents: 'auto',
+      backgroundColor: color,
+      zIndex: 1,
+    },
+  }
+})
 
 function RepositoryCardRef(
   {
@@ -46,10 +83,12 @@ function RepositoryCardRef(
     installed,
     verified,
     trending,
+    featuredLabel,
     description,
     imageUrl,
     tags = [],
     size = 'small',
+    variant = 'app',
     releaseStatus,
     ...props
   }: RepositoryCardProps,
@@ -57,47 +96,52 @@ function RepositoryCardRef(
 ) {
   const maxTags = trending ? 5 : 6
   const showRelease = prerelease(releaseStatus)
+  const mainChipProps = {
+    size: variant === 'marketing' ? 'small' : 'large',
+    hue: 'lighter',
+  } as const
+
+  const theme = useTheme()
 
   return (
     <Card
       ref={ref}
       clickable
       flexDirection="column"
-      padding="large"
+      paddingTop={
+        featuredLabel ? theme.spacing.large + theme.spacing.medium : 'large'
+      }
+      paddingRight="large"
+      paddingBottom="large"
+      paddingLeft="large"
       width="100%"
+      position="relative"
       {...props}
     >
+      {featuredLabel && <FeaturedBorder>{featuredLabel}</FeaturedBorder>}
       <Flex
         height="100%"
         align="flex-start"
+        gap="large"
       >
-        <Img
-          src={imageUrl}
-          width={size === 'medium' ? 140 : 160}
-          height={size === 'medium' ? 140 : 160}
-          display={size === 'small' ? 'none' : 'block'}
-          padding="xlarge"
-          backgroundColor="fill-two"
-          borderRadius="medium"
-          border="1px solid border-fill-two"
-          marginRight="large"
-        />
+        {(size === 'medium' || size === 'large') && (
+          <AppIcon
+            size={size === 'large' ? 'xlarge' : 'large'}
+            url={imageUrl}
+          />
+        )}
         <Flex
           flexGrow={1}
           direction="column"
           height="100%"
         >
           <Flex align="center">
-            <Img
-              src={imageUrl}
-              width={64}
-              height={64}
-              padding="xsmall"
-              display={size === 'small' ? 'block' : 'none'}
-              backgroundColor="fill-two"
-              borderRadius="medium"
-              border="1px solid border-fill-two"
-            />
+            {size === 'small' && (
+              <AppIcon
+                size="small"
+                url={imageUrl}
+              />
+            )}
             <Flex
               direction="row"
               marginLeft={size === 'small' ? 'small' : 0}
@@ -108,8 +152,13 @@ function RepositoryCardRef(
               <Flex direction="column">
                 <H1
                   color="text"
-                  title2={size !== 'large'}
-                  title1={size === 'large'}
+                  {...(variant === 'marketing'
+                    ? featuredLabel
+                      ? { title2: true }
+                      : { subtitle1: true }
+                    : size === 'large'
+                    ? { title1: true }
+                    : { title2: true })}
                 >
                   {title}
                   {!!verified && (
@@ -124,6 +173,9 @@ function RepositoryCardRef(
                 </H1>
                 <H3
                   body2
+                  {...(variant === 'marketing' && !featuredLabel
+                    ? { caption: true }
+                    : { body2: true })}
                   color="text-xlight"
                   marginBottom={size === 'large' ? 'small' : 0}
                 >
@@ -134,38 +186,26 @@ function RepositoryCardRef(
                 justifyContent="end"
                 flexGrow={1}
                 marginLeft="medium"
+                gap="small"
+                alignItems="center"
               >
                 {showRelease && (
                   <Chip
                     severity={releaseStatus === 'BETA' ? 'info' : 'warning'}
-                    size="large"
-                    hue="lighter"
+                    {...mainChipProps}
                   >
-                    <Span fontWeight={600}>{releaseStatus}</Span>
+                    {releaseStatus}
                   </Chip>
                 )}
                 {!!installed && !showRelease && (
                   <Chip
                     severity="success"
-                    size="large"
-                    hue="lighter"
+                    {...mainChipProps}
                   >
-                    <Span fontWeight={600}>Installed</Span>
+                    Installed
                   </Chip>
                 )}
-                {!!priv && (
-                  <Chip
-                    size="large"
-                    hue="lighter"
-                    marginLeft={8}
-                    paddingHorizontal={8}
-                    paddingVertical={8}
-                    backgroundColor="transparent"
-                    border="none"
-                  >
-                    <PadlockLockedIcon />
-                  </Chip>
-                )}
+                {!!priv && <PadlockLockedIcon paddingHorizontal={8} />}
               </Flex>
             </Flex>
           </Flex>
@@ -226,7 +266,5 @@ function RepositoryCardRef(
 }
 
 const RepositoryCard = forwardRef(RepositoryCardRef)
-
-RepositoryCard.propTypes = propTypes
 
 export default RepositoryCard

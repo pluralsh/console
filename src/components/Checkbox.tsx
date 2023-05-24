@@ -58,6 +58,9 @@ const HonorableLabelStyled = styled(Label)<{
   $isFocusVisible: boolean
   $disabled: boolean
 }>(({ $small = false, $disabled = false, $isFocusVisible, theme }) => ({
+  // Makes sure visually hidden <input> is positioned relative to <label> as to
+  // avoid overflow issues when cropped by Accordions, etc.
+  position: 'relative',
   ...theme.partials.text.body2,
   gap: theme.spacing.small,
   alignItems: 'center',
