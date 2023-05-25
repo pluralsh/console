@@ -2,3 +2,11 @@ fragment PageInfo on PageInfo {
   hasNextPage
   endCursor
 }
+
+query PluralContext {
+  pluralContext {
+    buckets
+    configuration
+    domains
+  }
+}

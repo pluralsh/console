@@ -8,13 +8,17 @@ defmodule Console.Plural.ContextTest do
 
       {:ok, _} = Context.merge(
         %{"airflow" => %{"merged" => "value"}},
-        %Context.Bundle{repository: "airflow", name: "test"}
+        %Context.Bundle{repository: "airflow", name: "test"},
+        ["plural-airbyte"],
+        ["airbyte.plural.sh"]
       )
 
       {:ok, new} = Context.get()
 
       assert new.configuration["airflow"]["merged"] == "value"
       assert new.configuration["airflow"]["example"] == "key"
+      assert length(new.domains) == 1
+      assert length(new.buckets) == 1
 
       assert Enum.find(new.bundles, fn %{repository: r, name: n} ->
         r == "airflow" && n == "test"

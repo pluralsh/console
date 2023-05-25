@@ -2215,6 +2215,11 @@ export type RepositoryQuery = { __typename?: 'RootQueryType', repository?: { __t
 
 export type PageInfoFragment = { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null };
 
+export type PluralContextQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PluralContextQuery = { __typename?: 'RootQueryType', pluralContext?: { __typename?: 'PluralContext', buckets?: Array<string | null> | null, configuration: Map<string, unknown>, domains?: Array<string | null> | null } | null };
+
 export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
 
 export type GroupFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null };
@@ -2573,6 +2578,42 @@ export function useRepositoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions
 export type RepositoryQueryHookResult = ReturnType<typeof useRepositoryQuery>;
 export type RepositoryLazyQueryHookResult = ReturnType<typeof useRepositoryLazyQuery>;
 export type RepositoryQueryResult = Apollo.QueryResult<RepositoryQuery, RepositoryQueryVariables>;
+export const PluralContextDocument = gql`
+    query PluralContext {
+  pluralContext {
+    buckets
+    configuration
+    domains
+  }
+}
+    `;
+
+/**
+ * __usePluralContextQuery__
+ *
+ * To run a query within a React component, call `usePluralContextQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePluralContextQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePluralContextQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function usePluralContextQuery(baseOptions?: Apollo.QueryHookOptions<PluralContextQuery, PluralContextQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PluralContextQuery, PluralContextQueryVariables>(PluralContextDocument, options);
+      }
+export function usePluralContextLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PluralContextQuery, PluralContextQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PluralContextQuery, PluralContextQueryVariables>(PluralContextDocument, options);
+        }
+export type PluralContextQueryHookResult = ReturnType<typeof usePluralContextQuery>;
+export type PluralContextLazyQueryHookResult = ReturnType<typeof usePluralContextLazyQuery>;
+export type PluralContextQueryResult = Apollo.QueryResult<PluralContextQuery, PluralContextQueryVariables>;
 export const GroupsDocument = gql`
     query Groups($q: String, $cursor: String) {
   groups(q: $q, first: 20, after: $cursor) {
