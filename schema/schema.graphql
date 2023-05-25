@@ -840,6 +840,7 @@ type UpgradePolicy {
   id: ID!
   name: String!
   description: String
+  repositories: [String]
   type: UpgradePolicyType!
   target: String!
   weight: Int
@@ -1073,8 +1074,9 @@ type DashboardSpec {
 input UpgradePolicyAttributes {
   name: String!
   description: String
-  type: UpgradePolicyType!
   target: String!
+  type: UpgradePolicyType!
+  repositories: [String]
   weight: Int
 }
 

@@ -2026,6 +2026,7 @@ export type UpgradePolicy = {
   id: Scalars['ID'];
   insertedAt?: Maybe<Scalars['DateTime']>;
   name: Scalars['String'];
+  repositories?: Maybe<Array<Maybe<Scalars['String']>>>;
   target: Scalars['String'];
   type: UpgradePolicyType;
   updatedAt?: Maybe<Scalars['DateTime']>;
@@ -2035,6 +2036,7 @@ export type UpgradePolicy = {
 export type UpgradePolicyAttributes = {
   description?: InputMaybe<Scalars['String']>;
   name: Scalars['String'];
+  repositories?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   target: Scalars['String'];
   type: UpgradePolicyType;
   weight?: InputMaybe<Scalars['Int']>;
