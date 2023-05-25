@@ -98,7 +98,13 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
   const onSelect = useCallback(
     (selectedApplications) => {
       const build = async () => {
-        const steps = await buildSteps(client, selectedApplications)
+        const steps = await buildSteps(
+          client,
+          selectedApplications,
+          new Set<string>(
+            installedApplications.map((repository) => repository.name)
+          )
+        )
 
         setSteps(steps)
       }
@@ -112,7 +118,7 @@ export function Installer({ setOpen, setConfirmClose, setVisible }) {
           onResetRef?.current?.onReset()
         })
     },
-    [client]
+    [client, installedApplications]
   )
 
   useEffect(

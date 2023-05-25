@@ -1,3 +1,4 @@
+import { ApolloClient, FetchResult } from '@apollo/client'
 import {
   AppsIcon,
   InstallIcon,
@@ -5,10 +6,10 @@ import {
   WizardPicker,
   WizardStepConfig,
 } from '@pluralsh/design-system'
-import { ApolloClient, FetchResult } from '@apollo/client'
 import React from 'react'
 
 import {
+  Installation,
   Recipe,
   RecipeSection,
   RepositoryContext,
@@ -61,7 +62,8 @@ const toDependencySteps = (
 
 const buildSteps = async (
   client: ApolloClient<unknown>,
-  selectedApplications: Array<WizardStepConfig>
+  selectedApplications: Array<WizardStepConfig>,
+  installedApplications: Set<string>
 ) => {
   const dependencyMap = new Map<
     string,
@@ -88,9 +90,13 @@ const buildSteps = async (
       variables: { id: recipeBase?.id },
     })
 
-    const sections = recipe.recipe.recipeSections!.filter(
-      (section) => section!.repository!.name !== app.label
-    )
+    const sections = recipe.recipe
+      .recipeSections!.filter(
+        (section) => section!.repository!.name !== app.label
+      )
+      .filter(
+        (section) => !installedApplications.has(section!.repository!.name)
+      )
 
     sections.forEach((section) => {
       if (
