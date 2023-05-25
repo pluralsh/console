@@ -9,7 +9,6 @@ import {
 import React from 'react'
 
 import {
-  Installation,
   Recipe,
   RecipeSection,
   RepositoryContext,
