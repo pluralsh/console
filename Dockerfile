@@ -61,7 +61,7 @@ RUN \
 
 FROM alpine:3.17.1 as tools
 
-ARG TARGETARCH
+ARG TARGETARCH=amd64
 
 # renovate: datasource=github-releases depName=helm/helm
 ENV HELM_VERSION=v3.10.3
@@ -70,7 +70,7 @@ ENV HELM_VERSION=v3.10.3
 ENV TERRAFORM_VERSION=v1.2.9
 
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
-ENV CLI_VERSION=v0.6.17
+ENV CLI_VERSION=v0.6.23
 
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
 ENV KUBECTL_VERSION=v1.25.5
@@ -80,7 +80,7 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
     mv linux-${TARGETARCH}/helm /usr/local/bin/helm && \
     wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION/v/}/terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip && \
     unzip terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip -d /usr/local/bin && \
-    curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_${CLI_VERSION/v/}_Linux_${TARGETARCH}.tar.gz | tar xvz plural && \
+    curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_console_${CLI_VERSION/v/}_Linux_${TARGETARCH}.tar.gz | tar xvz plural && \
     mv plural /usr/local/bin/plural && \
     curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl && \
     mv kubectl /usr/local/bin/kubectl && \
