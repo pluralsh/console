@@ -15,7 +15,6 @@ import { getIcon, hasIcons } from './apps/misc'
 import {
   ApiIcon,
   AppIcon,
-  BuildIcon,
   ComponentsIcon,
   DashboardIcon,
   DocumentIcon,
@@ -25,6 +24,7 @@ import {
   ServersIcon,
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
+import { Flex, Span } from 'honorable'
 
 const animatorStyle = {
   maxWidth: '600px',
@@ -56,7 +56,6 @@ const groupNameStyle = {
 }
 
 function buildActions(applications, nav) {
-  console.log(applications)
   return applications
     .map((app) => [
       {
@@ -154,49 +153,33 @@ const ResultItem = forwardRef(
     }, [action.ancestors, currentRootActionId])
 
     return (
-      <div
+      <Flex
         ref={ref}
-        style={{
-          padding: '12px 16px',
-          background: active ? 'rgb(53 53 54)' : 'transparent',
-          borderLeft: `2px solid ${
-            active ? 'rgba(252 252 252 / 0.9)' : 'transparent'
-          }`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          cursor: 'pointer',
-        }}
+        alignItems="center"
+        padding="12px 16px"
+        background={active ? 'fill-one-hover' : 'transparent'}
+        borderLeft={active ? 'border-primary' : 'transparent'}
+        justifyContent="space-between"
+        cursor="pointer"
       >
-        <div
-          style={{
-            display: 'flex',
-            gap: '8px',
-            alignItems: 'center',
-            fontSize: 14,
-          }}
+        <Flex
+          gap="8px"
+          fontSize={14}
+          alignItems="center"
         >
           {action.icon && action.icon}
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <Flex flexDirection="column">
             <div>
               {ancestors.length > 0 &&
                 ancestors.map((ancestor) => (
                   <Fragment key={ancestor.id}>
-                    <span
-                      style={{
-                        opacity: 0.5,
-                        marginRight: 8,
-                      }}
+                    <Span
+                      opacity={0.5}
+                      marginRight={8}
                     >
                       {ancestor.name}
-                    </span>
-                    <span
-                      style={{
-                        marginRight: 8,
-                      }}
-                    >
-                      &rsaquo;
-                    </span>
+                    </Span>
+                    <Span marginRight={8}>&rsaquo;</Span>
                   </Fragment>
                 ))}
               <span>{action.name}</span>
@@ -204,8 +187,8 @@ const ResultItem = forwardRef(
             {action.subtitle && (
               <span style={{ fontSize: 12 }}>{action.subtitle}</span>
             )}
-          </div>
-        </div>
+          </Flex>
+        </Flex>
         {action.shortcut?.length ? (
           <div
             aria-hidden
@@ -226,7 +209,7 @@ const ResultItem = forwardRef(
             ))}
           </div>
         ) : null}
-      </div>
+      </Flex>
     )
   }
 )
@@ -294,13 +277,6 @@ export function CommandPalette({ children }) {
         section: 'Cluster',
         perform: () => navigate('/pods'),
       }),
-      //   createAction({
-      //     name: 'Builds',
-      //     shortcuts: ['B'],
-      //     icon: <BuildIcon />,
-      //     section: 'Cluster',
-      //     perform: () => navigate('/builds'),
-      //   }),
       createAction({
         name: 'Temporary Token',
         shortcuts: ['N'],
@@ -319,12 +295,6 @@ export function CommandPalette({ children }) {
         section: 'Account',
         perform: () => navigate('/account/users'),
       }),
-      //   createAction({
-      //     name: 'Webhooks',
-      //     shortcuts: [],
-      //     section: 'Account',
-      //     perform: () => navigate('/account/webhooks'),
-      //   }),
     ],
     [navigate]
   )
