@@ -1428,6 +1428,7 @@ export type RootMutationTypeUpdateUserArgs = {
 export type RootQueryType = {
   __typename?: 'RootQueryType';
   account?: Maybe<Account>;
+  ai?: Maybe<Scalars['String']>;
   application?: Maybe<Application>;
   applications?: Maybe<Array<Maybe<Application>>>;
   auditMetrics?: Maybe<Array<Maybe<AuditMetric>>>;
@@ -1486,6 +1487,11 @@ export type RootQueryType = {
   webhooks?: Maybe<WebhookConnection>;
   wireguardPeer?: Maybe<WireguardPeer>;
   wireguardPeers?: Maybe<Array<Maybe<WireguardPeer>>>;
+};
+
+
+export type RootQueryTypeAiArgs = {
+  prompt: Scalars['String'];
 };
 
 

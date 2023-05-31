@@ -14,7 +14,6 @@ import { InstallationContext } from './Installations'
 import { getIcon, hasIcons } from './apps/misc'
 import {
   ApiIcon,
-  AppIcon,
   ComponentsIcon,
   DashboardIcon,
   DocumentIcon,
@@ -25,35 +24,8 @@ import {
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 import { Flex, Span } from 'honorable'
-
-const animatorStyle = {
-  maxWidth: '600px',
-  width: '100%',
-  background: 'rgb(28 28 29)',
-  color: 'rgba(252 252 252 / 0.9)',
-  borderRadius: '8px',
-  overflow: 'hidden',
-  zIndex: 10000,
-  boxShadow: 'rgb(0 0 0 / 50%) 0px 16px 70px',
-}
-
-const searchStyle = {
-  padding: '12px 16px',
-  fontSize: '16px',
-  width: '100%',
-  boxSizing: 'border-box',
-  outline: 'none',
-  border: 'none',
-  background: 'rgb(28 28 29)',
-  color: 'rgba(252 252 252 / 0.9)',
-}
-
-const groupNameStyle = {
-  padding: '8px 16px',
-  fontSize: '10px',
-  textTransform: 'uppercase',
-  opacity: 0.5,
-}
+import styled, { createGlobalStyle } from 'styled-components'
+import AppStatus from './apps/AppStatus'
 
 function buildActions(applications, nav) {
   return applications
@@ -61,10 +33,11 @@ function buildActions(applications, nav) {
       {
         id: app.name,
         name: app.name,
+        app: app,
         icon: hasIcons(app) ? (
           <AppIcon
             url={getIcon(app)}
-            size="xsmall"
+            size="xxsmall"
           />
         ) : null,
         shortcut: [],
@@ -138,6 +111,94 @@ function buildActions(applications, nav) {
     .flat()
 }
 
+function ItemInner({ action, ancestors }) {
+  return (
+    <>
+      <Flex
+        gap="8px"
+        fontSize={14}
+        alignItems="center"
+      >
+        {action.icon && action.icon}
+        <Flex flexDirection="column">
+          <Flex flexDirection={'row'}>
+            <Flex fill="horizontal">
+              {ancestors.length > 0 &&
+                ancestors.map((ancestor) => (
+                  <Fragment key={ancestor.id}>
+                    <Span
+                      opacity={0.5}
+                      marginRight={8}
+                    >
+                      {ancestor.name}
+                    </Span>
+                    <Span marginRight={8}>&rsaquo;</Span>
+                  </Fragment>
+                ))}
+              <span>{action.name}</span>
+            </Flex>
+            {action.suffix}
+          </Flex>
+          {action.subtitle && (
+            <span style={{ fontSize: 12 }}>{action.subtitle}</span>
+          )}
+        </Flex>
+      </Flex>
+      {action.shortcut?.length ? (
+        <div
+          aria-hidden
+          style={{ display: 'grid', gridAutoFlow: 'column', gap: '4px' }}
+        >
+          {action.shortcut.map((sc) => (
+            <kbd
+              key={sc}
+              style={{
+                padding: '4px 6px',
+                background: 'rgba(0 0 0 / .1)',
+                borderRadius: '4px',
+                fontSize: 14,
+              }}
+            >
+              {sc}
+            </kbd>
+          ))}
+        </div>
+      ) : null}
+    </>
+  )
+}
+
+const AppName = styled.div(({ theme }) => ({
+  ...theme.partials.text.body2,
+  marginLeft: 8,
+}))
+
+const AppVersion = styled.div(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  display: 'flex',
+  flexGrow: 1,
+  marginLeft: 8,
+}))
+
+const AppIcon = styled.img({
+  height: 26,
+  width: 26,
+})
+
+function AppItem({ app }) {
+  return (
+    <>
+      {hasIcons(app) && <AppIcon src={getIcon(app)} />}
+      <AppName>{app.name}</AppName>
+      {app.spec?.descriptor?.version && (
+        <AppVersion>v{app.spec.descriptor.version}</AppVersion>
+      )}
+      <AppStatus app={app} />
+    </>
+  )
+}
+
 const ResultItem = forwardRef(
   ({ action, active, currentRootActionId }, ref) => {
     const ancestors = useMemo(() => {
@@ -156,59 +217,22 @@ const ResultItem = forwardRef(
       <Flex
         ref={ref}
         alignItems="center"
-        padding="12px 16px"
+        padding="xsmall"
         background={active ? 'fill-one-hover' : 'transparent'}
-        borderLeft={active ? 'border-primary' : 'transparent'}
+        borderLeftColor={active ? 'border-primary' : 'transparent'}
+        borderLeftWidth={'3px'}
+        borderLeftStyle={'solid'}
         justifyContent="space-between"
         cursor="pointer"
       >
-        <Flex
-          gap="8px"
-          fontSize={14}
-          alignItems="center"
-        >
-          {action.icon && action.icon}
-          <Flex flexDirection="column">
-            <div>
-              {ancestors.length > 0 &&
-                ancestors.map((ancestor) => (
-                  <Fragment key={ancestor.id}>
-                    <Span
-                      opacity={0.5}
-                      marginRight={8}
-                    >
-                      {ancestor.name}
-                    </Span>
-                    <Span marginRight={8}>&rsaquo;</Span>
-                  </Fragment>
-                ))}
-              <span>{action.name}</span>
-            </div>
-            {action.subtitle && (
-              <span style={{ fontSize: 12 }}>{action.subtitle}</span>
-            )}
-          </Flex>
-        </Flex>
-        {action.shortcut?.length ? (
-          <div
-            aria-hidden
-            style={{ display: 'grid', gridAutoFlow: 'column', gap: '4px' }}
-          >
-            {action.shortcut.map((sc) => (
-              <kbd
-                key={sc}
-                style={{
-                  padding: '4px 6px',
-                  background: 'rgba(0 0 0 / .1)',
-                  borderRadius: '4px',
-                  fontSize: 14,
-                }}
-              >
-                {sc}
-              </kbd>
-            ))}
-          </div>
-        ) : null}
+        {action.app ? (
+          <AppItem app={action.app} />
+        ) : (
+          <ItemInner
+            action={action}
+            ancestors={ancestors}
+          />
+        )}
       </Flex>
     )
   }
@@ -222,7 +246,7 @@ function RenderResults() {
       items={results}
       onRender={({ item, active }) =>
         typeof item === 'string' ? (
-          <div style={groupNameStyle}>{item}</div>
+          <div className="group-name">{item}</div>
         ) : (
           <ResultItem
             action={item}
@@ -247,15 +271,52 @@ function useAppActions() {
 
 function Palette() {
   useAppActions()
+  const Provider = createGlobalStyle(({ theme }) => ({
+    '.cmdbar': {
+      maxWidth: '600px',
+      width: '100%',
+      overflow: 'hidden',
+      zIndex: 10000,
+      background: theme.colors['fill-one'],
+      border: theme.borders['fill-one'],
+      boxShadow: theme.boxShadows.modal,
+      borderRadius: theme.borderRadiuses.medium,
+      ...theme.partials.text.body1,
+      '.group-name': {
+        padding: `${theme.spacing.small}px`,
+        textTransform: 'uppercase',
+        opacity: 0.5,
+        ...theme.partials.text.overline,
+      },
+      '.search': {
+        ...theme.partials.text.body2,
+        padding: `${theme.spacing['medium']}px ${theme.spacing['small']}px`,
+        fontSize: '16px',
+        width: '100%',
+        background: theme.colors['fill-one'],
+        color: theme.colors['text-xlight'],
+        border: 'none',
+        borderBottom: theme.borders['fill-two'],
+        outlineOffset: '-1px',
+      },
+      '.search:focus-visible': {
+        color: theme.colors.text,
+        ...theme.partials.focus.outline,
+      },
+    },
+  }))
   return (
-    <KBarPortal style={{ zIndex: 10000 }}>
-      <KBarPositioner style={{ zIndex: 10000 }}>
-        <KBarAnimator style={animatorStyle}>
-          <KBarSearch style={searchStyle} />
-          <RenderResults />
-        </KBarAnimator>
-      </KBarPositioner>
-    </KBarPortal>
+    <>
+      <Provider />
+      <KBarPortal style={{ zIndex: 10000 }}>
+        <KBarPositioner style={{ zIndex: 10000 }}>
+          <KBarAnimator className="cmdbar">
+            <KBarSearch className="search" />
+            <RenderResults />
+          </KBarAnimator>
+        </KBarPositioner>
+      </KBarPortal>
+    </>
   )
 }
 

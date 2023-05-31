@@ -7,6 +7,8 @@ import usePosthogIdentify from 'components/utils/Posthog'
 import { A, Flex, Span } from 'honorable'
 import { Outlet } from 'react-router-dom'
 
+import { CommandPalette } from 'components/CommandPalette'
+
 import { PluralProvider } from '../contexts/PluralContext'
 import { InstallationsProvider } from '../Installations'
 import { EnsureLogin } from '../login/Login'
@@ -18,7 +20,6 @@ import { ContentOverlay } from './Overlay'
 import Sidebar from './Sidebar'
 import Subheader from './Subheader'
 import WithApplicationUpdate from './WithApplicationUpdate'
-import { CommandPalette } from 'components/CommandPalette'
 
 export const TOOLBAR_HEIGHT = '55px'
 export const SIDEBAR_WIDTH = '200px'

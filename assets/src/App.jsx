@@ -30,7 +30,6 @@ const router = createBrowserRouter(createRoutesFromElements(rootRoutes))
 
 export default function App() {
   const mergedStyledTheme = mergeDeep(DEFAULT_THEME, styledTheme)
-
   return (
     <ApolloProvider client={client}>
       <IntercomProvider appId={INTERCOM_APP_ID}>

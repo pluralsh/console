@@ -892,6 +892,7 @@ type RootQueryType {
   configurationOverlays(namespace: String!): [ConfigurationOverlay]
   audits(after: String, first: Int, before: String, last: Int, repo: String): AuditConnection
   auditMetrics: [AuditMetric]
+  ai(prompt: String!): String
   account: Account
   installations(after: String, first: Int, before: String, last: Int): InstallationConnection
   applications: [Application]
