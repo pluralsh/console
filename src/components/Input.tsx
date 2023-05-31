@@ -1,15 +1,22 @@
 import { ExtendTheme, Input as HonorableInput, mergeTheme } from 'honorable'
 import type { InputProps as HonorableInputProps } from 'honorable'
-import { type ReactNode, forwardRef } from 'react'
+import { type ReactNode, forwardRef, useRef } from 'react'
 import styled from 'styled-components'
+import { mergeRefs } from 'react-merge-refs'
+
+import { simulateInputChange } from '../utils/simulateInputChange'
 
 import { useFillLevel } from './contexts/FillLevelContext'
 import { TitleContent } from './Select'
+import Tooltip from './Tooltip'
+import IconFrame from './IconFrame'
+import CloseIcon from './icons/CloseIcon'
 
 export type InputProps = HonorableInputProps & {
   suffix?: ReactNode
   prefix?: ReactNode
   titleContent?: ReactNode
+  showClearButton?: boolean
 }
 
 const PrefixSuffix = styled.div(({ theme }) => ({
@@ -31,15 +38,51 @@ const startEndStyles = {
   paddingLeft: 0,
 }
 
+const ClearButton = styled(({ className, ...props }) => (
+  <div className={className}>
+    <Tooltip
+      placement="top"
+      label="Clear"
+    >
+      <IconFrame
+        clickable
+        icon={<CloseIcon />}
+        size="small"
+        {...props}
+      />
+    </Tooltip>
+  </div>
+))(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  alignSelf: 'stretch',
+  paddingRight: theme.spacing.xsmall,
+}))
+
 const InputTitleContent = styled(TitleContent)((_) => ({
   alignSelf: 'stretch',
 }))
 
 const Input = forwardRef(
   (
-    { startIcon, endIcon, suffix, prefix, titleContent, ...props }: InputProps,
+    {
+      startIcon,
+      endIcon,
+      suffix,
+      prefix,
+      showClearButton,
+      titleContent,
+      inputProps,
+      ...props
+    }: InputProps,
     ref
   ) => {
+    const inputRef = useRef<HTMLInputElement>(null)
+
+    inputProps = {
+      ...(inputProps ?? {}),
+      ref: mergeRefs([inputRef, ...(inputProps?.ref ? [inputProps.ref] : [])]),
+    }
     let themeExtension: any = {}
     const parentFillLevel = useFillLevel()
     const size = (props as any).large
@@ -48,11 +91,13 @@ const Input = forwardRef(
       ? 'small'
       : 'medium'
 
-    if (suffix) {
+    if (suffix || showClearButton) {
       themeExtension = mergeTheme(themeExtension, {
         Input: {
           Root: [{ paddingRight: 0 }],
-          EndIcon: [{ ...startEndStyles, ...{ paddingLeft: 'xsmall' } }],
+          EndIcon: [
+            { ...startEndStyles, ...{ paddingLeft: 'xsmall', gap: 0 } },
+          ],
         },
       })
     }
@@ -77,12 +122,25 @@ const Input = forwardRef(
         <HonorableInput
           ref={ref}
           endIcon={
-            endIcon || suffix ? (
-              <>
-                {endIcon}
-                {suffix && <PrefixSuffix>{suffix}</PrefixSuffix>}
-              </>
-            ) : undefined
+            <>
+              {showClearButton && props.value && (
+                <ClearButton
+                  onClick={() => {
+                    const input = inputRef?.current
+
+                    if (input) {
+                      simulateInputChange(input, '')
+                    }
+                  }}
+                />
+              )}
+              {endIcon || suffix ? (
+                <>
+                  {endIcon}
+                  {suffix && <PrefixSuffix>{suffix}</PrefixSuffix>}
+                </>
+              ) : undefined}
+            </>
           }
           startIcon={
             startIcon || prefix || titleContent ? (
@@ -100,6 +158,7 @@ const Input = forwardRef(
               </>
             ) : undefined
           }
+          inputProps={inputProps}
           {...props}
         />
       </ExtendTheme>

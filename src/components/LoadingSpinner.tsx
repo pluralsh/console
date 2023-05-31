@@ -14,12 +14,13 @@ import {
   forwardRef,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react'
 import { CSSTransition } from 'react-transition-group'
+
+import { useIsomorphicLayoutEffect } from 'react-spring'
 
 import useResizeObserver from '../hooks/useResizeObserver'
 
@@ -171,7 +172,7 @@ function CenteringWrapper({ children, ...props }: FlexProps) {
   }, [top, windowHeight])
 
   useResizeObserver(ref, onSizeChange)
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     window.addEventListener('resize', onSizeChange)
     window.addEventListener('scroll', onSizeChange)
 

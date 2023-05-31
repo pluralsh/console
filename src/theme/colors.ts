@@ -99,7 +99,7 @@ export const red = {
   50: '#FFF0F2',
 } as const satisfies Record<number, CSSProperties['color']>
 
-export const semanticColors = {
+const baseColors = {
   // Fill
   'fill-zero': grey[900],
   'fill-zero-hover': grey[875],
@@ -175,4 +175,10 @@ export const semanticColors = {
   // Marketing
   'marketing-white': '#FFFFFF',
   'marketing-black': '#000000',
+} as const satisfies Record<string, CSSProperties['color']>
+
+export const semanticColors = {
+  ...baseColors,
+  // Modals
+  'modal-backdrop': `${chroma(baseColors['fill-zero']).alpha(0.6)}`,
 } as const satisfies Record<string, CSSProperties['color']>

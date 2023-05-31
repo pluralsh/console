@@ -1,5 +1,7 @@
 import { Div, Flex } from 'honorable'
 
+import { type ChangeEvent, useState } from 'react'
+
 import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
 import BrowseAppsIcon from '../components/icons/BrowseAppsIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'
@@ -12,12 +14,22 @@ export default {
 }
 
 function Template(args: any) {
+  const [inputVal, setInputVal] = useState('')
+
+  const props = {
+    value: inputVal,
+    onChange: (e: ChangeEvent<HTMLInputElement>) => {
+      setInputVal(e.target.value)
+    },
+    ...args,
+  }
+
   return (
     <Flex
       direction="column"
       maxWidth="400px"
     >
-      <Input {...args} />
+      <Input {...props} />
       <Div marginTop="medium">
         <Input
           startIcon={<MagnifyingGlassIcon />}
@@ -28,14 +40,24 @@ function Template(args: any) {
               mx="3px"
             />
           }
-          {...args}
+          {...props}
         />
       </Div>
     </Flex>
   )
 }
 
-function CustomInputTemplate(props: any) {
+function CustomInputTemplate(args: any) {
+  const [inputVal, setInputVal] = useState('')
+
+  const props = {
+    value: inputVal,
+    onChange: (e: ChangeEvent<HTMLInputElement>) => {
+      setInputVal(e.target.value)
+    },
+    ...args,
+  }
+
   return (
     <Flex
       direction="column"
@@ -51,6 +73,7 @@ function CustomInputTemplate(props: any) {
       <Div marginTop="medium">
         <Input
           width="100%"
+          value={inputVal}
           {...props}
         />
       </Div>
@@ -58,6 +81,7 @@ function CustomInputTemplate(props: any) {
         <Input
           small
           width="100%"
+          value={inputVal}
           {...props}
         />
       </Div>
@@ -113,4 +137,6 @@ TitleContent.args = {
     </>
   ),
   placeholder: 'Search the marketplace',
+  showClearButton: true,
+  suffix: '',
 }

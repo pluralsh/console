@@ -1,4 +1,5 @@
-import { type RefObject, useCallback, useLayoutEffect } from 'react'
+import { type RefObject, useCallback } from 'react'
+import { useIsomorphicLayoutEffect } from 'react-spring'
 import ResizeObserver from 'resize-observer-polyfill'
 
 const useResizeObserver = (
@@ -20,7 +21,7 @@ const useResizeObserver = (
     [callback]
   )
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!ref.current) {
       return
     }

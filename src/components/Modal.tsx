@@ -1,4 +1,4 @@
-import { type ReactNode, type Ref, forwardRef } from 'react'
+import { type ReactNode, type Ref, forwardRef, useEffect } from 'react'
 import {
   Div,
   Flex,
@@ -9,6 +9,8 @@ import {
 import PropTypes from 'prop-types'
 
 import { type ColorKey, type Severity } from '../types'
+
+import useLockedBody from '../hooks/useLockedBody'
 
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
 import type createIcon from './icons/createIcon'
@@ -26,6 +28,7 @@ type ModalPropsType = ModalProps & {
   header?: ReactNode
   actions?: ReactNode
   severity?: ModalSeverity
+  lockBody?: boolean
 }
 
 const severityToIconColorKey: Readonly<
@@ -71,12 +74,19 @@ function ModalRef(
     size = form ? 'large' : 'medium',
     onClose,
     severity,
+    lockBody = true,
     ...props
   }: ModalPropsType,
   ref: Ref<any>
 ) {
   const HeaderIcon = severityToIcon[severity ?? 'default']
   const iconColorKey = severityToIconColorKey[severity ?? 'default']
+
+  const [, setBodyLocked] = useLockedBody(open && lockBody)
+
+  useEffect(() => {
+    setBodyLocked(lockBody && open)
+  }, [lockBody, open, setBodyLocked])
 
   return (
     <HonorableModal

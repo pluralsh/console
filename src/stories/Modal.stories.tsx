@@ -1,7 +1,7 @@
-import { Button, H3, P } from 'honorable'
+import { Button, Div, H3, P } from 'honorable'
 import { useState } from 'react'
 
-import { FormField, Input, Modal } from '..'
+import { Card, FormField, Input, Modal } from '..'
 import { SEVERITIES } from '../components/Modal'
 
 export default {
@@ -105,6 +105,83 @@ function Template(args: any) {
           </>
         )}
       </Modal>
+      <Card
+        marginTop="xlarge"
+        width="100%"
+        padding="medium"
+      >
+        <Div maxWidth={500}>
+          <P marginBottom="medium">
+            Some extra content to check that body scroll is disabled when Modal
+            is open.
+          </P>
+          <P marginBottom="medium">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
+            tempor, mi pulvinar vestibulum viverra, magnan ipsum suscipit
+            turpis, molestie imperdiet nisi lorem id erat. Vestibulum
+            pellentesque vel odio et consequat. Sed lacinia leo sit amet velit
+            consequat lobortis. Vivamus facilisis sagittis est vel pellentesque.
+            Sed quis ipsum ullamcorper, posuere ipsum a, tincidunt tellus. Cras
+            tortor purus, dictum sit amet facilisis vitae, commodo vitae elit.
+            Duis a diam blandit, hendrerit velit non, tincidunt turpis. Ut at
+            lectus ornare, volutpat elit interdum, placerat dolor. Pellentesque
+            et semper massa. Aliquam nec nisl eu nibh fringilla vehicula.
+            Suspendisse a purus quam.
+          </P>
+          <P marginBottom="medium">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
+            tempor, mi pulvinar vestibulum viverra, magnan ipsum suscipit
+            turpis, molestie imperdiet nisi lorem id erat. Vestibulum
+            pellentesque vel odio et consequat. Sed lacinia leo sit amet velit
+            consequat lobortis. Vivamus facilisis sagittis est vel pellentesque.
+            Sed quis ipsum ullamcorper, posuere ipsum a, tincidunt tellus. Cras
+            tortor purus, dictum sit amet facilisis vitae, commodo vitae elit.
+            Duis a diam blandit, hendrerit velit non, tincidunt turpis. Ut at
+            lectus ornare, volutpat elit interdum, placerat dolor. Pellentesque
+            et semper massa. Aliquam nec nisl eu nibh fringilla vehicula.
+            Suspendisse a purus quam.
+          </P>
+          <P marginBottom="medium">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
+            tempor, mi pulvinar vestibulum viverra, magnan ipsum suscipit
+            turpis, molestie imperdiet nisi lorem id erat. Vestibulum
+            pellentesque vel odio et consequat. Sed lacinia leo sit amet velit
+            consequat lobortis. Vivamus facilisis sagittis est vel pellentesque.
+            Sed quis ipsum ullamcorper, posuere ipsum a, tincidunt tellus. Cras
+            tortor purus, dictum sit amet facilisis vitae, commodo vitae elit.
+            Duis a diam blandit, hendrerit velit non, tincidunt turpis. Ut at
+            lectus ornare, volutpat elit interdum, placerat dolor. Pellentesque
+            et semper massa. Aliquam nec nisl eu nibh fringilla vehicula.
+            Suspendisse a purus quam.
+          </P>
+          <P marginBottom="medium">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
+            tempor, mi pulvinar vestibulum viverra, magnan ipsum suscipit
+            turpis, molestie imperdiet nisi lorem id erat. Vestibulum
+            pellentesque vel odio et consequat. Sed lacinia leo sit amet velit
+            consequat lobortis. Vivamus facilisis sagittis est vel pellentesque.
+            Sed quis ipsum ullamcorper, posuere ipsum a, tincidunt tellus. Cras
+            tortor purus, dictum sit amet facilisis vitae, commodo vitae elit.
+            Duis a diam blandit, hendrerit velit non, tincidunt turpis. Ut at
+            lectus ornare, volutpat elit interdum, placerat dolor. Pellentesque
+            et semper massa. Aliquam nec nisl eu nibh fringilla vehicula.
+            Suspendisse a purus quam.
+          </P>
+          <P marginBottom="medium">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus
+            tempor, mi pulvinar vestibulum viverra, magnan ipsum suscipit
+            turpis, molestie imperdiet nisi lorem id erat. Vestibulum
+            pellentesque vel odio et consequat. Sed lacinia leo sit amet velit
+            consequat lobortis. Vivamus facilisis sagittis est vel pellentesque.
+            Sed quis ipsum ullamcorper, posuere ipsum a, tincidunt tellus. Cras
+            tortor purus, dictum sit amet facilisis vitae, commodo vitae elit.
+            Duis a diam blandit, hendrerit velit non, tincidunt turpis. Ut at
+            lectus ornare, volutpat elit interdum, placerat dolor. Pellentesque
+            et semper massa. Aliquam nec nisl eu nibh fringilla vehicula.
+            Suspendisse a purus quam.
+          </P>
+        </Div>
+      </Card>
     </>
   )
 }

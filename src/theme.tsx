@@ -644,7 +644,7 @@ const honorableTheme = mergeTheme(defaultTheme, {
     ],
     Backdrop: [
       {
-        backgroundColor: 'transparency(#171A21, 40)',
+        backgroundColor: 'modal-backdrop',
         zIndex: zIndexes.modal,
       },
     ],
