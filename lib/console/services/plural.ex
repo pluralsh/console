@@ -4,7 +4,7 @@ defmodule Console.Services.Plural do
   alias Console.Schema.{User, Manifest}
   alias Console.Utils
   alias Console.Services.{Builds}
-  alias Console.Plural.{Repositories, Users, Recipe, Installation, OIDCProvider, Manifest, Context}
+  alias Console.Plural.{Repositories, Users, Recipe, Installation, OIDCProvider, Manifest, Context, Accounts}
   alias Kube.Application
   use Nebulex.Caching
 
@@ -18,6 +18,8 @@ defmodule Console.Services.Plural do
   def application(name) do
     Kube.Client.get_application(name)
   end
+
+  def ai(prompt), do: Accounts.ai(prompt)
 
   def app_icon(%Application{spec: %Application.Spec{descriptor: %{icons: [%{src: src} | _]}}}),
     do: src

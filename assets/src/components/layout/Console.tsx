@@ -7,6 +7,8 @@ import usePosthogIdentify from 'components/utils/Posthog'
 import { A, Flex, Span } from 'honorable'
 import { Outlet } from 'react-router-dom'
 
+import { CommandPalette } from 'components/CommandPalette'
+
 import { PluralProvider } from '../contexts/PluralContext'
 import { InstallationsProvider } from '../Installations'
 import { EnsureLogin } from '../login/Login'
@@ -30,13 +32,15 @@ export default function Console() {
           <EnsureLogin>
             <InstallationsProvider>
               <PluralProvider>
-                <BillingSubscriptionProvider>
-                  <BreadcrumbsProvider>
-                    <TerminalThemeProvider>
-                      <ConsoleContent />
-                    </TerminalThemeProvider>
-                  </BreadcrumbsProvider>
-                </BillingSubscriptionProvider>
+                <CommandPalette>
+                  <BillingSubscriptionProvider>
+                    <BreadcrumbsProvider>
+                      <TerminalThemeProvider>
+                        <ConsoleContent />
+                      </TerminalThemeProvider>
+                    </BreadcrumbsProvider>
+                  </BillingSubscriptionProvider>
+                </CommandPalette>
               </PluralProvider>
             </InstallationsProvider>
           </EnsureLogin>

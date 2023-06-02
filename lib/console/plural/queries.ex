@@ -272,6 +272,14 @@ defmodule Console.Plural.Queries do
     #{@repository_fragment}
   """
 
+  @ai_q """
+    query Ai($prompt: String!) {
+      helpQuestion(prompt: $prompt)
+    }
+  """
+
+  def ai_query(), do: @ai_q
+
   def installation_query(), do: @installation_query
 
   def get_installation_query(), do: @get_installation_q

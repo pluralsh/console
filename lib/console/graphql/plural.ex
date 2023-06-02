@@ -140,6 +140,13 @@ defmodule Console.GraphQl.Plural do
   connection node_type: :recipe
 
   object :plural_queries do
+    field :ai, :string do
+      middleware Authenticated
+      arg :prompt, non_null(:string)
+
+      resolve &Plural.ai/2
+    end
+
     field :account, :account do
       middleware Authenticated
 

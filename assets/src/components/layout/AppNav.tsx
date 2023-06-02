@@ -1,8 +1,8 @@
 import {
-  AppsIcon,
   Card,
   Chip,
   CloseIcon,
+  CommandIcon,
   EmptyState,
   ErrorIcon,
   IconFrame,
@@ -266,13 +266,14 @@ export default function AppNav() {
     <>
       <Chip
         backgroundColor={open ? 'fill-one-selected' : 'fill-one'}
-        icon={<AppsIcon />}
+        icon={<CommandIcon />}
         clickable
         onClick={() => setOpen(true)}
         size="small"
         userSelect="none"
+        whiteSpace="nowrap"
       >
-        Apps
+        Cmd + K
         <StatusIcon readiness={statuses.length > 0 && statuses[0].readiness} />
       </Chip>
       <StatusPanel

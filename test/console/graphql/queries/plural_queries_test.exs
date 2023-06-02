@@ -139,6 +139,22 @@ defmodule Console.GraphQl.PluralQueriesTest do
     end
   end
 
+  describe "ai" do
+    test "it can query the plural ai api" do
+      body = Jason.encode!(%{query: Queries.ai_query(), variables: %{prompt: "p"}})
+
+      expect(HTTPoison, :post, fn _, ^body, _ ->
+        {:ok, %{body: Jason.encode!(%{data: %{helpQuestion: "result"}})}}
+      end)
+
+      {:ok, %{data: %{"ai" => "result"}}} = run_query("""
+        query Ai($prompt: String!) {
+          ai(prompt: $prompt)
+        }
+      """, %{"prompt" => "p"}, %{current_user: insert(:user)})
+    end
+  end
+
   describe "recipe" do
     test "it can get a recipe by id" do
       body = Jason.encode!(%{
