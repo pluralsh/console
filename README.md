@@ -35,7 +35,7 @@ Checklist for creating a new component:
 
 ## Contributing
 
-Yes, thank you!
+We use semantic pr conventions for all prs, if you want a commit to be present in a release, be sure to prefix its commit message with either `feat:` or `fix:`
 
 ## License
 
