@@ -5,6 +5,7 @@ defmodule Console.Services.Plural do
   alias Console.Utils
   alias Console.Services.{Builds}
   alias Console.Plural.{Repositories, Users, Recipe, Installation, OIDCProvider, Manifest, Context, Accounts}
+  alias Console.Commands
   alias Kube.Application
   use Nebulex.Caching
 

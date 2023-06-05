@@ -14,6 +14,11 @@ defmodule Console.Commands.Command do
       do: complete(output, exit_code)
   end
 
+  def cmd_raw(exec, args, dir \\ conf(:workspace_root)) do
+    {output, exit_code} = System.cmd(exec, args, env: [{"ENABLE_COLOR", "1"}], cd: dir, stderr_to_stdout: true)
+    complete(output, exit_code)
+  end
+
   defp make_command(exec, args) do
     case Process.get(@build_key) do
       %Build{} = build ->

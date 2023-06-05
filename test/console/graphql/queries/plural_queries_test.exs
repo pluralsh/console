@@ -489,6 +489,43 @@ defmodule Console.GraphQl.PluralQueriesTest do
         }
       """, %{"name" => "app"}, %{current_user: user})
     end
+
+    test "users w/ rbac can sideload info by name" do
+      user = insert(:user)
+      setup_rbac(user, ["app"], operate: true)
+      expect(Console.Commands.Plural, :info, fn "app" -> {:ok, "application info"} end)
+      expect(Kazan, :run, fn _ -> {:ok, application("app")} end)
+
+      {:ok, %{data: %{"application" => app}}} = run_query("""
+        query App($name: String!) {
+          application(name: $name) {
+            name
+            spec { descriptor { type } }
+            info
+          }
+        }
+      """, %{"name" => "app"}, %{current_user: user})
+
+      assert app["name"] == "app"
+      assert app["spec"]["descriptor"]["type"] == "app"
+      assert app["info"] == "application info"
+    end
+
+    test "users w/o rbac cannot query info by name" do
+      user = insert(:user)
+      setup_rbac(user, ["other-app"], oerate: true)
+      expect(Kazan, :run, fn _ -> {:ok, application("app")} end)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query App($name: String!) {
+          application(name: $name) {
+            name
+            spec { descriptor { type } }
+            info
+          }
+        }
+      """, %{"name" => "app"}, %{current_user: user})
+    end
   end
 
   defp as_connection(nodes) do
