@@ -61,7 +61,7 @@ RUN \
 
 FROM alpine:3.17.1 as tools
 
-ARG TARGETARCH
+ARG TARGETARCH=amd64
 
 # renovate: datasource=github-releases depName=helm/helm
 ENV HELM_VERSION=v3.10.3
@@ -80,7 +80,7 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
     mv linux-${TARGETARCH}/helm /usr/local/bin/helm && \
     wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION/v/}/terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip && \
     unzip terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip -d /usr/local/bin && \
-    curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_${CLI_VERSION/v/}_Linux_${TARGETARCH}.tar.gz | tar xvz plural && \
+    curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_console_${CLI_VERSION/v/}_Linux_${TARGETARCH}.tar.gz | tar xvz plural && \
     mv plural /usr/local/bin/plural && \
     curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl && \
     mv kubectl /usr/local/bin/kubectl && \
@@ -129,6 +129,7 @@ WORKDIR /opt/app
 RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh
 RUN mkdir -p /root/.plural && mkdir -p /root/.creds && mkdir /root/bin
 RUN ln -s /usr/local/bin/plural /usr/local/bin/forge
+RUN plural --help
 
 # add common repos to known hosts
 COPY bin /root/bin
