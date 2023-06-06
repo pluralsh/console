@@ -3738,7 +3738,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:^1.341.2":
+"@pluralsh/design-system@npm:1.341.2":
   version: 1.341.2
   resolution: "@pluralsh/design-system@npm:1.341.2"
   dependencies:
@@ -8160,7 +8160,7 @@ __metadata:
     "@nivo/pie": 0.80.0
     "@nivo/radial-bar": 0.80.0
     "@nivo/tooltip": 0.80.0
-    "@pluralsh/design-system": ^1.341.2
+    "@pluralsh/design-system": 1.341.2
     "@pluralsh/eslint-config-typescript": 2.5.40
     "@pluralsh/stylelint-config": 1.1.3
     "@tanstack/react-table": 8.9.1
