@@ -64,6 +64,7 @@ type Application {
   cost: CostAnalysis
   license: License
   configuration: Configuration
+  info: String
 }
 
 type ConfigurationAction {

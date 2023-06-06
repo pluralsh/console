@@ -1,6 +1,6 @@
 defmodule Console.Commands.Plural do
   import Console
-  import Console.Commands.Command, only: [cmd: 3]
+  import Console.Commands.Command, only: [cmd: 3, cmd_raw: 3]
 
   def unlock() do
     with {:ok, _} <- plural("crypto", ["init"]),
@@ -25,6 +25,8 @@ defmodule Console.Commands.Plural do
   def destroy(repo), do: plural("destroy", ["--force", repo])
 
   def terminate(node), do: plural("ops", ["terminate", node])
+
+  def info(repo), do: cmd_raw("plural", ["info", repo], workspace())
 
   def repair(), do: plural("repair", [])
 

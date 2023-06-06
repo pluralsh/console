@@ -30,6 +30,12 @@ defmodule Console.GraphQl.Kubernetes.Application do
       middleware Rbac, perm: :configure, field: [:metadata, :name]
       resolve &Plural.resolve_configuration/3
     end
+
+    @doc "query `plural info` for this application, this is a heavy operation and shouldn't be performed in list endpoints"
+    field :info, :string do
+      middleware Rbac, perm: :operate, field: [:metadata, :name]
+      resolve &Plural.info/3
+    end
   end
 
   object :cost_analysis do

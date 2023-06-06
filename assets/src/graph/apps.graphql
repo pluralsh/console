@@ -105,6 +105,13 @@ query App($name: String!) {
   }
 }
 
+query AppInfo($name: String!) {
+  application(name: $name) {
+    ...ApplicationFragment
+    info
+  }
+}
+
 fragment RepositoryFragment on Repository {
   id
   name

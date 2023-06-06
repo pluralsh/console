@@ -106,6 +106,11 @@ export const getDirectory = ({
     },
     { path: 'oidc', label: 'User management', enabled: true },
     {
+      path: 'credentials',
+      label: 'Credentials',
+      enabled: true,
+    },
+    {
       path: 'config',
       label: 'Configuration',
       enabled: config?.gitStatus?.cloned,

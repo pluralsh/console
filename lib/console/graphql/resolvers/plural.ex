@@ -74,6 +74,8 @@ defmodule Console.GraphQl.Resolvers.Plural do
 
   def ai(%{prompt: p}, _), do: Plural.ai(p)
 
+  def info(%{metadata: %{name: name}}, _, _), do: Console.Commands.Plural.info(name)
+
   def resolve_configuration(%{metadata: %{name: name}}, first, second),
     do: resolve_configuration(%{name: name}, first, second)
   def resolve_configuration(%{name: name}, _, _) do
