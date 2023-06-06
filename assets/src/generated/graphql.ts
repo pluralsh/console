@@ -37,6 +37,7 @@ export type Application = {
   __typename?: 'Application';
   configuration?: Maybe<Configuration>;
   cost?: Maybe<CostAnalysis>;
+  info?: Maybe<Scalars['String']>;
   license?: Maybe<License>;
   name: Scalars['String'];
   spec: ApplicationSpec;
