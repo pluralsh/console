@@ -4,6 +4,8 @@ import ComponentMetrics from 'components/apps/app/components/component/Component
 
 import AppDocs from 'components/apps/app/docs/AppDocs'
 
+import Credentials from 'components/apps/app/credentials/Credentials'
+
 import Apps from '../components/apps/Apps'
 import App from '../components/apps/app/App'
 import Dashboards from '../components/apps/app/dashboards/Dashboards'
@@ -49,6 +51,10 @@ export const appsRoutes = [
     <Route
       path="runbooks"
       element={<Runbooks />}
+    />
+    <Route
+      path="credentials"
+      element={<Credentials />}
     />
     <Route
       path="runbooks/:runbookName"
