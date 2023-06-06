@@ -129,7 +129,6 @@ WORKDIR /opt/app
 RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh
 RUN mkdir -p /root/.plural && mkdir -p /root/.creds && mkdir /root/bin
 RUN ln -s /usr/local/bin/plural /usr/local/bin/forge
-RUN plural --help
 
 # add common repos to known hosts
 COPY bin /root/bin
