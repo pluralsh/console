@@ -16,7 +16,7 @@ const colorsToCSSVars: (colors: unknown) => any = (colors) => {
   function inner(colors: unknown, prefix = '') {
     Object.entries(colors).forEach(([key, value]) => {
       if (typeof value === 'string') {
-        cssVars[`--color-${prefix}${key}`] = value
+        ;(cssVars as any)[`--color-${prefix}${key}`] = value
       } else if (typeof value === 'object') {
         inner(value, `${prefix}${key}-`)
       }

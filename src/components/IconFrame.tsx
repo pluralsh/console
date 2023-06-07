@@ -7,6 +7,8 @@ import {
 import { ButtonBase, Flex, type FlexProps } from 'honorable'
 import { useTheme } from 'styled-components'
 
+import { type styledTheme } from '../theme'
+
 import Tooltip, { type TooltipProps } from './Tooltip'
 
 type Size = 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'
@@ -18,7 +20,7 @@ const typeToBG: Record<Type, string> = {
   floating: 'fill-two',
 }
 
-const typeToHoverBG: Record<Type, string> = {
+const typeToHoverBG: Record<Type, keyof typeof styledTheme.colors> = {
   secondary: 'action-input-hover',
   tertiary: 'action-input-hover',
   floating: 'fill-two-hover',

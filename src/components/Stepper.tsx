@@ -16,6 +16,8 @@ import { useTheme } from 'styled-components'
 
 import useResizeObserver from '../hooks/useResizeObserver'
 
+import { type styledTheme } from '../theme'
+
 import StatusOkIcon from './icons/StatusOkIcon'
 import type createIcon from './icons/createIcon'
 import Tooltip from './Tooltip'
@@ -23,14 +25,14 @@ import WrapWithIf from './WrapWithIf'
 
 type Hue = 'none' | 'default' | 'lighter' | 'lightest'
 
-const hueToBorder: Record<Hue, string> = {
+const hueToBorder: Record<Hue, keyof typeof styledTheme.colors> = {
   none: 'border-disabled',
   default: 'border',
   lighter: 'border-fill-two',
   lightest: 'border-fill-three',
 }
 
-const hueToBG: Record<Hue, string> = {
+const hueToBG: Record<Hue, keyof typeof styledTheme.colors> = {
   none: 'fill-zero',
   default: 'fill-one',
   lighter: 'fill-two',

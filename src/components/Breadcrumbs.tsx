@@ -13,7 +13,7 @@ import { Flex, type FlexProps, Nav, Ol } from 'honorable'
 import styled, { useTheme } from 'styled-components'
 import classNames from 'classnames'
 import { SwitchTransition, Transition } from 'react-transition-group'
-import { useVisuallyHidden } from '@react-aria/visually-hidden'
+import { useVisuallyHidden } from 'react-aria'
 
 import useResizeObserver from '../hooks/useResizeObserver'
 import usePrevious from '../hooks/usePrevious'
@@ -405,7 +405,7 @@ export function Breadcrumbs({
               maxLength={maxLength}
               collapsible={collapsible}
               breadcrumbs={breadcrumbs}
-              style={transitionStyles[state]}
+              style={(transitionStyles as any)[state]}
             />
           )}
         </Transition>

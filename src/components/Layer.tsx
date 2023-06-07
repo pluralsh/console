@@ -10,7 +10,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { type UseTransitionProps, animated, useTransition } from 'react-spring'
-import isNil from 'lodash/isNil'
+import { isNil } from 'lodash-es'
 import styled, { useTheme } from 'styled-components'
 
 import usePrevious from '../hooks/usePrevious'
@@ -225,7 +225,8 @@ function LayerRef(
     margin = {}
   }
   for (const [key, value] of Object.entries(margin)) {
-    margin[key] = (!isNil(value) && theme.spacing[value]) || value
+    margin[key as keyof typeof margin] =
+      (!isNil(value) && (theme.spacing as any)[value]) || value
   }
   let transitionDirection: GetTransitionProps['direction'] = DEFAULT_DIRECTION
   let transitionType: GetTransitionProps['type'] = DEFAULT_TRANSITION_TYPE

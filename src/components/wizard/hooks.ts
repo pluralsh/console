@@ -1,6 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import IsEqual from 'lodash/isEqual'
-import IsEmpty from 'lodash/isEmpty'
+import { isEmpty, isEqual } from 'lodash-es'
 
 import { type ContextProps, type StepConfig, WizardContext } from './context'
 
@@ -65,7 +64,7 @@ const useActive = <T = unknown>() => {
       setSteps((steps) => {
         const active = steps.at(activeIdx)
 
-        if (IsEmpty(data) || IsEqual(data, active.data)) {
+        if (isEmpty(data) || isEqual(data, active.data)) {
           return steps
         }
 

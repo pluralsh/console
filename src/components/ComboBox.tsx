@@ -11,16 +11,14 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useComboBox } from '@react-aria/combobox'
+import { useComboBox } from 'react-aria'
 import {
   type ComboBoxState,
   type ComboBoxStateOptions,
   useComboBoxState,
-} from '@react-stately/combobox'
-import { type AriaButtonProps, useButton } from '@react-aria/button'
-import pick from 'lodash/pick'
-import omit from 'lodash/omit'
-import isUndefined from 'lodash/isUndefined'
+} from 'react-stately'
+import { type AriaButtonProps, useButton } from 'react-aria'
+import { isUndefined, omit, pick } from 'lodash-es'
 import styled, { useTheme } from 'styled-components'
 import { ExtendTheme, mergeTheme } from 'honorable'
 

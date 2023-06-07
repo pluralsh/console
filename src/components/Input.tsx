@@ -1,6 +1,6 @@
 import { ExtendTheme, Input as HonorableInput, mergeTheme } from 'honorable'
 import type { InputProps as HonorableInputProps } from 'honorable'
-import { type ReactNode, forwardRef, useRef } from 'react'
+import { type ComponentProps, type ReactNode, forwardRef, useRef } from 'react'
 import styled from 'styled-components'
 import { mergeRefs } from 'react-merge-refs'
 
@@ -38,21 +38,26 @@ const startEndStyles = {
   paddingLeft: 0,
 }
 
-const ClearButton = styled(({ className, ...props }) => (
-  <div className={className}>
-    <Tooltip
-      placement="top"
-      label="Clear"
-    >
-      <IconFrame
-        clickable
-        icon={<CloseIcon />}
-        size="small"
-        {...props}
-      />
-    </Tooltip>
-  </div>
-))(({ theme }) => ({
+const ClearButton = styled(
+  ({
+    className,
+    ...props
+  }: Omit<ComponentProps<typeof IconFrame>, 'clickable' | 'icon' | 'size'>) => (
+    <div className={className}>
+      <Tooltip
+        placement="top"
+        label="Clear"
+      >
+        <IconFrame
+          clickable
+          icon={<CloseIcon />}
+          size="small"
+          {...props}
+        />
+      </Tooltip>
+    </div>
+  )
+)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   alignSelf: 'stretch',

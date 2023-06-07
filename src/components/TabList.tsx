@@ -1,16 +1,19 @@
 import { Flex, type FlexProps } from 'honorable'
 import { type AriaTabListProps } from '@react-types/tabs'
-import { useTab, useTabList } from '@react-aria/tabs'
-import { type TabListState, useTabListState } from '@react-stately/tabs'
+import { useTab, useTabList } from 'react-aria'
+import { mergeRefs } from '@react-aria/utils'
+import { type TabListState, useTabListState } from 'react-stately'
 import { type Node } from '@react-types/shared'
 import {
   Children,
+  type ComponentProps,
   type ForwardedRef,
   type HTMLAttributes,
   type Key,
   type MutableRefObject,
   type ReactElement,
   type ReactNode,
+  type Ref,
   type RefObject,
   cloneElement,
   forwardRef,
@@ -19,8 +22,6 @@ import {
   useRef,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
-
-import { mergeRefs } from '@react-aria/utils'
 
 import { useItemWrappedChildren } from './ListBox'
 
@@ -141,12 +142,21 @@ function TabListRef(
 
 const TabList = forwardRef(TabListRef)
 
-const TabClone = styled(({ className, children, tabRef, ...props }) =>
-  cloneElement(Children.only(children), {
-    className: `${children.props.className || ''} ${className || ''}`.trim(),
-    ref: tabRef,
-    ...props,
-  })
+const TabClone = styled(
+  ({
+    className,
+    children,
+    tabRef,
+    ...props
+  }: ComponentProps<any> & {
+    children: ReactElement
+    tabRef: Ref<any>
+  }) =>
+    cloneElement(Children.only(children), {
+      className: `${children.props.className || ''} ${className || ''}`.trim(),
+      ref: tabRef,
+      ...props,
+    })
 )<{ vertical: boolean }>(({ theme, vertical }) => ({
   position: 'relative',
   '&:focus, &:focus-visible': {

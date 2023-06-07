@@ -240,7 +240,7 @@ function Template() {
               }}
               closeButton
             >
-              {itemsByKey[key]?.label}
+              {(itemsByKey as any)[key]?.label}
             </Chip>
           ))}
         />
@@ -260,7 +260,7 @@ function TagsTemplate() {
     if (typeof key === 'number') {
       key = String(key)
     }
-    if (!itemsByKey[key]) {
+    if (!(itemsByKey as any)[key]) {
       allItems.push({ key })
     }
   }

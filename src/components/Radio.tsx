@@ -11,9 +11,8 @@ import {
 import { type InputProps, Label } from 'honorable'
 import classNames from 'classnames'
 import styled from 'styled-components'
-import { type AriaRadioProps, useRadio } from '@react-aria/radio'
-import { VisuallyHidden } from '@react-aria/visually-hidden'
-import { useFocusRing } from '@react-aria/focus'
+import { type AriaRadioProps, useRadio } from 'react-aria'
+import { VisuallyHidden, useFocusRing } from 'react-aria'
 
 import { RadioContext } from './RadioGroup'
 

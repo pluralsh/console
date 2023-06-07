@@ -80,7 +80,7 @@ function Template({ exampleText }: { exampleText?: string }) {
 
 const ColorBox = styled(FilledBox)<{ color: string }>(({ theme, color }) => ({
   boxShadow: theme.boxShadows.moderate,
-  backgroundColor: theme.colors[color],
+  backgroundColor: (theme.colors as any)[color],
 }))
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -121,7 +121,7 @@ function Colors() {
 }
 
 const ShadowedBox = styled(FilledBox)<{ shadow: string }>(
-  ({ theme, shadow }) => ({ boxShadow: theme.boxShadows[shadow] })
+  ({ theme, shadow }) => ({ boxShadow: (theme.boxShadows as any)[shadow] })
 )
 
 const ShadowsWrap = styled(FlexWrap)(({ theme }) => ({
@@ -163,9 +163,11 @@ function BoxRadiuses() {
   )
 }
 
-const BorderedBox = styled(RadiusedBox).attrs(() => ({ radius: 'medium' }))<{
+const BorderedBox = styled(RadiusedBox).attrs(
+  () => ({ radius: 'medium' } as any)
+)<{
   border?: string
-}>(({ theme, border }) => ({ border: theme.borders[border] }))
+}>(({ theme, border }) => ({ border: (theme.borders as any)[border] }))
 
 function BoxBorders() {
   const { borders } = useTheme()
@@ -187,7 +189,7 @@ const ScrollbarBox = styled(FilledBox)<{
 }>(({ theme, fillLevel }) => ({
   ...theme.partials.scrollBar({ fillLevel }),
   ...theme.partials.text.caption,
-  backgroundColor: theme.colors[fillLevelToBGColor[fillLevel]],
+  backgroundColor: (theme.colors as any)[fillLevelToBGColor[fillLevel]],
   width: '100%',
   height: 'auto',
   padding: theme.spacing.medium,
@@ -261,8 +263,8 @@ const SpacingBox = styled.div<{ space: string }>(({ theme, space }) => ({
   borderRadius: 0,
   backgroundColor: theme.colors['action-primary'],
   margin: 0,
-  paddingRight: theme.spacing[space],
-  paddingTop: theme.spacing[space],
+  paddingRight: (theme.spacing as any)[space],
+  paddingTop: (theme.spacing as any)[space],
   width: 'min-content',
 }))
 

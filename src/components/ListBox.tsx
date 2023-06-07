@@ -9,18 +9,16 @@ import {
   useMemo,
   useRef,
 } from 'react'
-import {
-  type AriaListBoxOptions,
-  useListBox,
-  useOption,
-} from '@react-aria/listbox'
-import { type ListState, useListState } from '@react-stately/list'
-import { mergeProps } from '@react-aria/utils'
+import { type AriaListBoxOptions, useListBox, useOption } from 'react-aria'
+import { type ListState, useListState } from 'react-stately'
+import { mergeProps } from 'react-aria'
 import { type AriaListBoxProps } from '@react-types/listbox'
 import { mergeRefs } from 'react-merge-refs'
-import styled, { type CSSObject, useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
-import { Item } from '@react-stately/collections'
+import { Item } from 'react-stately'
+
+import { type CSSObject } from '../types'
 
 import Card from './Card'
 import { type FillLevel } from './contexts/FillLevelContext'

@@ -18,8 +18,8 @@ type Severity =
   | 'critical'
 
 export type ChipProps = FlexProps & {
-  size?: 'small' | 'medium' | 'large' | string
-  severity?: Severity | string
+  size?: 'small' | 'medium' | 'large'
+  severity?: Severity
   icon?: ReactElement
   loading?: boolean
   closeButton?: boolean

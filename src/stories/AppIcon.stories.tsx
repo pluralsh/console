@@ -52,9 +52,10 @@ const sizes = [
   { label: 'Medium', size: 'medium' },
   { label: 'Small', size: 'small' },
   { label: 'Extra Small', size: 'xsmall' },
+  { label: 'XX Small', size: 'xxsmall' },
 ]
 
-function Template({ onFillLevel, ...args }: any) {
+function Template({ onFillLevel, icon, ...args }: any) {
   return (
     <Flex
       gap={16}
@@ -78,7 +79,7 @@ function Template({ onFillLevel, ...args }: any) {
             >
               <AppIcon
                 size={size}
-                url={args.icon}
+                url={icon}
                 {...args}
               />
               <AppIcon

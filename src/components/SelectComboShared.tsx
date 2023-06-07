@@ -7,9 +7,9 @@ import {
   useCallback,
   useRef,
 } from 'react'
-import { type ListState } from '@react-stately/list'
+import { type ListState } from 'react-stately'
 import { type Selection } from '@react-types/shared'
-import isNil from 'lodash/isNil'
+import { isNil } from 'lodash-es'
 
 import { FOOTER_KEY, HEADER_KEY, useItemWrappedChildren } from './ListBox'
 import { type ComboBoxProps } from './ComboBox'

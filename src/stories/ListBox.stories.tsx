@@ -28,7 +28,8 @@ const smallIcon = <PersonIcon size={16} />
 
 const chipProps = {
   size: 'small',
-}
+} as const
+
 const chips = [
   <Chip
     severity="success"

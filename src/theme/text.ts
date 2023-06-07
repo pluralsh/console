@@ -1,4 +1,4 @@
-import { type CSSObject } from 'styled-components'
+import { type CSSObject } from '../types'
 
 import { fontFamilies } from './fonts'
 import { semanticColors } from './colors'

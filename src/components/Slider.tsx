@@ -1,13 +1,11 @@
-import { useSliderState } from '@react-stately/slider'
+import { useSliderState } from 'react-stately'
+import { type AriaSliderProps, useSlider, useSliderThumb } from 'react-aria'
 import {
-  type AriaSliderProps,
-  useSlider,
-  useSliderThumb,
-} from '@react-aria/slider'
-import { useNumberFormatter } from '@react-aria/i18n'
-import { mergeProps } from '@react-aria/utils'
-import { VisuallyHidden } from '@react-aria/visually-hidden'
-import { useFocusRing } from '@react-aria/focus'
+  VisuallyHidden,
+  mergeProps,
+  useFocusRing,
+  useNumberFormatter,
+} from 'react-aria'
 import { useRef } from 'react'
 import styled from 'styled-components'
 

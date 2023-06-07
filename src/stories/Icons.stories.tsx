@@ -56,8 +56,8 @@ const AppIcon = styled.div<{ $backgroundColor: string }>(
 function Template({ backgroundColor, ...args }: any) {
   const theme = useTheme()
   const bgColor =
-    (typeof theme.colors[backgroundColor] === 'string' &&
-      theme.colors[backgroundColor]) ||
+    (typeof (theme.colors as any)[backgroundColor] === 'string' &&
+      (theme.colors as any)[backgroundColor]) ||
     backgroundColor
 
   return (

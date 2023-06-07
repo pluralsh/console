@@ -1,6 +1,8 @@
 import { type ComponentProps, type Ref, forwardRef } from 'react'
 import styled from 'styled-components'
 
+import { type styledTheme } from '../theme'
+
 import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 import { type TabBaseProps } from './TabList'
 
@@ -10,14 +12,20 @@ type SubtabProps = TabBaseProps &
     size?: SubTabSize
   }
 
-const parentFillLevelToActiveBG: Record<FillLevel, string> = {
+const parentFillLevelToActiveBG: Record<
+  FillLevel,
+  keyof typeof styledTheme.colors
+> = {
   0: 'fill-zero-selected',
   1: 'fill-one-selected',
   2: 'fill-two-selected',
   3: 'fill-three-selected',
 }
 
-const parentFillLevelToHoverBG: Record<FillLevel, string> = {
+const parentFillLevelToHoverBG: Record<
+  FillLevel,
+  keyof typeof styledTheme.colors
+> = {
   0: 'fill-zero-hover',
   1: 'fill-one-hover',
   2: 'fill-two-hover',

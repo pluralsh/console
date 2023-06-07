@@ -1,4 +1,4 @@
-import { type CSSObject } from 'styled-components'
+import { type CSSObject } from '../types'
 
 export const resetPartials = {
   button: {

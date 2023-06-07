@@ -1,6 +1,5 @@
-import { useFocusRing } from '@react-aria/focus'
-import { type AriaRadioProps, useRadio } from '@react-aria/radio'
-import { VisuallyHidden } from '@react-aria/visually-hidden'
+import { VisuallyHidden, useFocusRing } from 'react-aria'
+import { type AriaRadioProps, useRadio } from 'react-aria'
 import {
   type ReactElement,
   cloneElement,

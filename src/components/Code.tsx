@@ -13,7 +13,6 @@ import {
   useRef,
   useState,
 } from 'react'
-import PropTypes from 'prop-types'
 import { Button, Div, Flex } from 'honorable'
 import styled, { useTheme } from 'styled-components'
 
@@ -45,12 +44,6 @@ type CodeProps = Omit<CardProps, 'children'> & {
   tabs?: CodeTabData[]
   title?: ReactNode
   onSelectedTabChange?: (key: string) => void
-}
-
-const propTypes = {
-  language: PropTypes.string,
-  showLineNumbers: PropTypes.bool,
-  showHeader: PropTypes.bool,
 }
 
 type TabInterfaceT = 'tabs' | 'dropdown'
@@ -486,7 +479,7 @@ function CodeRef(
 }
 
 const Code = styled(forwardRef(CodeRef))((_) => ({
-  [CopyButton]: {
+  [`${CopyButton}`]: {
     opacity: 0,
     pointerEvents: 'none',
     transition: 'opacity 0.2s ease',
@@ -497,8 +490,6 @@ const Code = styled(forwardRef(CodeRef))((_) => ({
     transition: 'opacity 0.2s ease',
   },
 }))
-
-Code.propTypes = propTypes
 
 export default Code
 export type { CodeProps }

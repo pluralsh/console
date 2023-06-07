@@ -12,7 +12,7 @@ import {
   useImperativeHandle,
   useMemo,
 } from 'react'
-import IsEmpty from 'lodash/isEmpty'
+import { isEmpty } from 'lodash-es'
 
 import IconFrame from '../IconFrame'
 import { CloseIcon } from '../../icons'
@@ -126,7 +126,7 @@ function WizardUnstyled({
   useEffect(() => onSelect && onSelect(selected), [onSelect, selected])
   useEffect(() => {
     setSteps((steps) => {
-      if (IsEmpty(dependencySteps)) {
+      if (isEmpty(dependencySteps)) {
         if (steps.some((s) => s.isDependency)) onReset()
 
         return steps

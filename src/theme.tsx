@@ -102,7 +102,7 @@ const honorableTheme = mergeTheme(defaultTheme, {
           Object.fromEntries(
             nextKeys.map((nextKey) => [
               nextKey,
-              spacing[props[key]] || props[key],
+              (spacing as any)[props[key]] || props[key],
             ])
           )
     ),

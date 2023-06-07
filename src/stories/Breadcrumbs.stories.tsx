@@ -71,7 +71,7 @@ function CrumbContextSetter() {
     (crumbLists.length - 1).toString()
   )
 
-  useSetBreadcrumbs(crumbLists[selectedList])
+  useSetBreadcrumbs((crumbLists as any)[selectedList])
 
   return (
     <FormField label="Select a page">
@@ -121,7 +121,7 @@ function ManualTemplate(args: any) {
     (crumbLists.length - 1).toString()
   )
 
-  const crumbList = crumbLists[selectedList]
+  const crumbList = (crumbLists as any)[selectedList]
 
   return (
     <NavContextProviderStub>

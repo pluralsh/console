@@ -43,7 +43,7 @@ const Toast = forwardRef(
     }, [setOpen])
 
     const closeTimeout: 'none' | number =
-      closeTimeoutProp === 'none' || closeTimeoutProp <= 0
+      closeTimeoutProp === 'none' || +closeTimeoutProp <= 0
         ? 'none'
         : typeof closeTimeoutProp === 'number' &&
           !Number.isNaN(closeTimeoutProp)

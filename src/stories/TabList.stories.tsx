@@ -77,7 +77,7 @@ function TemplateBasic(args: any) {
             title1
             marginBottom="medium"
           >
-            {tabs[selectedKey]?.label}
+            {(tabs as any)[selectedKey]?.label}
           </H1>
           <TabPanel
             stateRef={tabStateRef}
@@ -86,7 +86,7 @@ function TemplateBasic(args: any) {
             borderTop="1px solid border"
             borderBottom="1px solid border"
           >
-            {tabs[selectedKey]?.content}
+            {(tabs as any)[selectedKey]?.content}
           </TabPanel>
         </Div>
       </Flex>
@@ -239,7 +239,7 @@ function TemplateComplex() {
             title1
             marginBottom="medium"
           >
-            {tabs[selectedKey]?.label}
+            {(tabs as any)[selectedKey]?.label}
           </H1>
           <TabPanel
             stateRef={tabStateRef}
@@ -249,7 +249,7 @@ function TemplateComplex() {
             borderBottom="1px solid border"
             as={<Button />}
           >
-            {tabs[selectedKey]?.content}
+            {(tabs as any)[selectedKey]?.content}
           </TabPanel>
         </Div>
       </Flex>

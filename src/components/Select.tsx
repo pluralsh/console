@@ -9,8 +9,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { HiddenSelect, useSelect } from '@react-aria/select'
-import { useButton } from '@react-aria/button'
+import { HiddenSelect, useButton, useSelect } from 'react-aria'
 import styled, { useTheme } from 'styled-components'
 import { type AriaSelectProps } from '@react-types/select'
 

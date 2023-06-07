@@ -1,4 +1,4 @@
-import styled, { type StyledProps } from 'styled-components'
+import styled from 'styled-components'
 import { type ReactElement } from 'react'
 
 import AppIcon from '../AppIcon'
@@ -8,6 +8,8 @@ import PencilIcon from '../icons/PencilIcon'
 import Chip from '../Chip'
 import Tooltip from '../Tooltip'
 import InfoOutlineIcon from '../icons/InfoOutlineIcon'
+
+import { type CSSObject } from '../../types'
 
 import { useNavigation, useStepper } from './hooks'
 
@@ -34,7 +36,7 @@ const Installer = styled(InstallerUnstyled)(({ theme }) => ({
   },
 }))
 
-function InstallerUnstyled({ ...props }: StyledProps<unknown>): ReactElement {
+function InstallerUnstyled({ ...props }: CSSObject): ReactElement {
   const { onEdit } = useNavigation()
   const { selected: apps } = useStepper()
 

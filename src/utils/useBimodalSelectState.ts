@@ -15,13 +15,12 @@ https://github.com/adobe/react-spectrum/blob/main/packages/%40react-stately/sele
  * governing permissions and limitations under the License.
  */
 
-import { useMenuTriggerState } from '@react-stately/menu'
+import { useMenuTriggerState } from 'react-stately'
 import { type AriaSelectProps } from '@react-types/select'
-import { type ListProps, useListState } from '@react-stately/list'
+import { type ListProps, type SelectState, useListState } from 'react-stately'
 import { type Key, useCallback, useRef, useState } from 'react'
 import { useControlledState } from '@react-stately/utils'
 import { type Node } from '@react-types/shared'
-import type { SelectState } from '@react-stately/select'
 
 export type BimodalSelectState<T = object> = SelectState<T> & {
   selectedKeys: Set<Key>

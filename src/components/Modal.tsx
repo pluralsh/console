@@ -24,7 +24,7 @@ type ModalSeverity = Extract<Severity, (typeof SEVERITIES)[number]>
 
 type ModalPropsType = ModalProps & {
   form?: boolean
-  size?: 'medium' | 'large' | string
+  size?: 'medium' | 'large'
   header?: ReactNode
   actions?: ReactNode
   severity?: ModalSeverity
@@ -154,6 +154,6 @@ function ModalRef(
 
 const Modal = forwardRef(ModalRef)
 
-Modal.propTypes = propTypes
+Modal.propTypes = propTypes as any
 
 export default Modal

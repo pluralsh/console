@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from 'react'
-import IsEmpty from 'lodash/isEmpty'
+import { isEmpty } from 'lodash-es'
 
 import { MoreIcon, SearchIcon } from '../icons'
 
@@ -111,7 +111,7 @@ function AppListUnstyled({
 
   return (
     <div {...props}>
-      {!IsEmpty(apps) && (
+      {!isEmpty(apps) && (
         <Input
           prefix={<SearchIcon />}
           placeholder="Filter applications"
@@ -139,7 +139,7 @@ function AppListUnstyled({
           />
         ))}
 
-        {IsEmpty(filteredApps) && !IsEmpty(filter) && (
+        {isEmpty(filteredApps) && !isEmpty(filter) && (
           <div className="empty">
             <span className="empty-message">
               No applications found for "{filter}".
@@ -153,7 +153,7 @@ function AppListUnstyled({
           </div>
         )}
 
-        {IsEmpty(apps) && (
+        {isEmpty(apps) && (
           <div className="empty">
             <span className="empty-message">No applications found.</span>
           </div>

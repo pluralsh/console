@@ -20,7 +20,7 @@ export default function collectHeadings(
 
   if (c) {
     if (c?.name === 'Heading') {
-      const title = c.children?.[0]
+      const title = (c.children as unknown[])?.[0]
 
       if (typeof title === 'string') {
         headings.push({

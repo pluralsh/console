@@ -254,8 +254,8 @@ const CalloutWrap = styled.div<{
       '&:hover': {
         backgroundColor:
           $fillLevel >= 3
-            ? theme.colors['fill-four']
-            : theme.colors['fill-three'],
+            ? theme.colors['fill-three-hover']
+            : theme.colors['fill-two-hover'],
       },
     }),
   },
@@ -301,7 +301,7 @@ const CalloutWrap = styled.div<{
     borderBottomLeftRadius: theme.borderRadiuses.medium,
     right: 'unset',
     width: 3,
-    background: theme.colors[$borderColorKey],
+    background: (theme.colors as any)[$borderColorKey],
     zIndex: 2,
   },
   '&::after': {

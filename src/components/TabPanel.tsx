@@ -1,9 +1,12 @@
 import { Div, type DivProps } from 'honorable'
-import { useTabPanel } from '@react-aria/tabs'
+import { mergeProps, useTabPanel, useVisuallyHidden } from 'react-aria'
+import { mergeRefs } from '@react-aria/utils'
 import {
+  type ComponentProps,
   type Key,
   type MutableRefObject,
   type ReactElement,
+  type Ref,
   cloneElement,
   forwardRef,
   useCallback,
@@ -11,11 +14,8 @@ import {
   useReducer,
   useRef,
 } from 'react'
-import { mergeProps, mergeRefs } from '@react-aria/utils'
 
 import styled from 'styled-components'
-
-import { useVisuallyHidden } from '@react-aria/visually-hidden'
 
 import { type MakeOptional, type Renderer, type TabStateRef } from './TabList'
 
@@ -48,7 +48,15 @@ export type WrappedTabPanelProps = DivProps & {
 type TabPanelProps = MakeOptional<WrappedTabPanelProps, 'as'>
 
 export const TabPanelClone = styled(
-  ({ className, cloneAs, tabRef, ...props }) =>
+  ({
+    className,
+    cloneAs,
+    tabRef,
+    ...props
+  }: ComponentProps<any> & {
+    children: ReactElement
+    tabRef: Ref<any>
+  }) =>
     cloneElement(cloneAs, {
       className: `${cloneAs.props.className || ''} ${className || ''}`.trim(),
       ref: tabRef,

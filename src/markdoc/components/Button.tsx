@@ -21,7 +21,7 @@ function Button({
   children?: ReactNode
   className?: string
   type?: 'floating'
-  icon?: 'string'
+  icon?: string
   renderLink: (props: ComponentProps<'a'>) => ReactNode
   useCurrentPath: () => string
 }) {
@@ -39,7 +39,7 @@ function Button({
   if (iconName && !iconName?.match(/Icon$/gi)) {
     iconName = `${iconName}Icon`
   }
-  const Icon = icons[iconName]
+  const Icon = (icons as any)[iconName]
 
   return (
     /* Needs to be <span> to prevent "<div> cannot appear as a descendant of <p>."

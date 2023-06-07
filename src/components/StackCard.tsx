@@ -12,7 +12,7 @@ type StackCardProps = DivProps & {
   title?: string
   description?: string
   apps?: App[]
-  hue?: 'neutral' | 'red' | 'green' | 'blue' | 'yellow' | string
+  hue?: 'neutral' | 'red' | 'green' | 'blue' | 'yellow'
 }
 
 type App = {
@@ -138,6 +138,6 @@ function StackCardRef(
 
 const StackCard = forwardRef(StackCardRef)
 
-StackCard.propTypes = propTypes
+StackCard.propTypes = propTypes as any
 
 export default StackCard

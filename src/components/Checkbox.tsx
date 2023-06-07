@@ -2,10 +2,8 @@ import { type MutableRefObject, forwardRef, memo, useId, useRef } from 'react'
 import { type InputProps, Label } from 'honorable'
 import classNames from 'classnames'
 import styled from 'styled-components'
-import { useToggleState } from '@react-stately/toggle'
-import { useCheckbox } from '@react-aria/checkbox'
-import { VisuallyHidden } from '@react-aria/visually-hidden'
-import { useFocusRing } from '@react-aria/focus'
+import { useToggleState } from 'react-stately'
+import { VisuallyHidden, useCheckbox, useFocusRing } from 'react-aria'
 
 const CheckedIcon = memo(({ small }: { small: boolean }) => {
   const width = small ? 16 : 24

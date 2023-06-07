@@ -50,7 +50,9 @@ const Code = styled.code<{ parentFillLevel: FillLevel }>(
     paddingTop: `${PADDING_EMS}em`,
     paddingBottom: `${PADDING_EMS}em`,
     color: theme.colors['text-light'],
-    borderColor: theme.colors[parentFillLevelToBorderColor[parentFillLevel]],
+    borderColor: (theme.colors as any)[
+      parentFillLevelToBorderColor[parentFillLevel]
+    ],
     backgroundColor: theme.colors['fill-one'],
     'a:any-link &': {
       color: theme.colors['action-link-inline'],

@@ -9,3 +9,5 @@ export type UserType = {
 export type Severity = 'info' | 'warning' | 'success' | 'error' | 'danger'
 
 export type ColorKey = keyof DefaultTheme['colors']
+
+export type CSSObject = Record<string, any>
