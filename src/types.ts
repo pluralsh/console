@@ -10,4 +10,4 @@ export type Severity = 'info' | 'warning' | 'success' | 'error' | 'danger'
 
 export type ColorKey = keyof DefaultTheme['colors']
 
-export type CSSObject = Record<string, any>
+export { type CSSObject } from 'styled-components'

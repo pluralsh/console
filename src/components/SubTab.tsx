@@ -12,25 +12,19 @@ type SubtabProps = TabBaseProps &
     size?: SubTabSize
   }
 
-const parentFillLevelToActiveBG: Record<
-  FillLevel,
-  keyof typeof styledTheme.colors
-> = {
+const parentFillLevelToActiveBG = {
   0: 'fill-zero-selected',
   1: 'fill-one-selected',
   2: 'fill-two-selected',
   3: 'fill-three-selected',
-}
+} as const satisfies Record<FillLevel, keyof typeof styledTheme.colors>
 
-const parentFillLevelToHoverBG: Record<
-  FillLevel,
-  keyof typeof styledTheme.colors
-> = {
+const parentFillLevelToHoverBG = {
   0: 'fill-zero-hover',
   1: 'fill-one-hover',
   2: 'fill-two-hover',
   3: 'fill-three-hover',
-}
+} as const satisfies Record<FillLevel, keyof typeof styledTheme.colors>
 
 const SubTabBase = styled.div<{
   size: SubTabSize
