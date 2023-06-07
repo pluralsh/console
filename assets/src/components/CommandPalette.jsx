@@ -1,17 +1,16 @@
 import {
-  KBarProvider,
+  KBarAnimator,
   KBarPortal,
   KBarPositioner,
-  KBarAnimator,
-  KBarSearch,
-  useMatches,
+  KBarProvider,
   KBarResults,
+  KBarSearch,
   createAction,
+  useMatches,
   useRegisterActions,
 } from 'kbar'
 import { Fragment, forwardRef, useContext, useMemo } from 'react'
-import { InstallationContext } from './Installations'
-import { getIcon, hasIcons } from './apps/misc'
+
 import {
   ApiIcon,
   ComponentsIcon,
@@ -25,6 +24,9 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { Flex, Span } from 'honorable'
 import styled, { createGlobalStyle } from 'styled-components'
+
+import { getIcon, hasIcons } from './apps/misc'
+import { InstallationContext } from './Installations'
 import AppStatus from './apps/AppStatus'
 
 function buildActions(applications, nav) {
@@ -33,7 +35,7 @@ function buildActions(applications, nav) {
       {
         id: app.name,
         name: app.name,
-        app: app,
+        app,
         icon: hasIcons(app) ? (
           <AppIcon
             url={getIcon(app)}
@@ -121,7 +123,7 @@ function ItemInner({ action, ancestors }) {
       >
         {action.icon && action.icon}
         <Flex flexDirection="column">
-          <Flex flexDirection={'row'}>
+          <Flex flexDirection="row">
             <Flex fill="horizontal">
               {ancestors.length > 0 &&
                 ancestors.map((ancestor) => (
@@ -206,6 +208,7 @@ const ResultItem = forwardRef(
       const index = action.ancestors.findIndex(
         (ancestor) => ancestor.id === currentRootActionId
       )
+
       // +1 removes the currentRootAction; e.g.
       // if we are on the "Set theme" parent action,
       // the UI should not display "Set theme… > Dark"
@@ -220,8 +223,8 @@ const ResultItem = forwardRef(
         padding="xsmall"
         background={active ? 'fill-one-hover' : 'transparent'}
         borderLeftColor={active ? 'border-primary' : 'transparent'}
-        borderLeftWidth={'3px'}
-        borderLeftStyle={'solid'}
+        borderLeftWidth="3px"
+        borderLeftStyle="solid"
         justifyContent="space-between"
         cursor="pointer"
       >
@@ -266,6 +269,7 @@ function useAppActions() {
     () => buildActions(applications, navigate),
     [applications, navigate]
   )
+
   useRegisterActions(actions)
 }
 
@@ -290,7 +294,7 @@ function Palette() {
       },
       '.search': {
         ...theme.partials.text.body2,
-        padding: `${theme.spacing['medium']}px ${theme.spacing['small']}px`,
+        padding: `${theme.spacing.medium}px ${theme.spacing.small}px`,
         fontSize: '16px',
         width: '100%',
         background: theme.colors['fill-one'],
@@ -305,6 +309,7 @@ function Palette() {
       },
     },
   }))
+
   return (
     <>
       <Provider />
