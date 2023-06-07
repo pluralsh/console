@@ -1,5 +1,6 @@
 // import original module declarations
 import 'styled-components'
+
 import { type styledTheme } from '@pluralsh/design-system'
 
 type StyledTheme = typeof styledTheme
@@ -8,4 +9,5 @@ type StyledTheme = typeof styledTheme
 declare module 'styled-components' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   export interface DefaultTheme extends StyledTheme {}
+  export declare function useTheme(): DefaultTheme
 }
