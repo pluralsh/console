@@ -7,8 +7,10 @@ import { Queries } from '@ctypes/queries'
 import { GQLInterceptor } from '@intercept/graphql'
 
 export class LoginPage extends BasePage {
-  static login(email: string = Config.EMAIL,
-    password: string = Config.PASSWORD): void {
+  static login(
+    email: string = Config.EMAIL,
+    password: string = Config.PASSWORD
+  ): void {
     cy.session([email, password], () => {
       RootPage.visit()
 
@@ -45,13 +47,12 @@ export class LoginPage extends BasePage {
   }
 
   private static dismissCookieConsent() {
-    cy.getCookie('CookieConsent').then(cookie => {
+    cy.getCookie('CookieConsent').then((cookie) => {
       let valObj
 
       try {
         valObj = JSON.parse(cookie.value)
-      }
-      catch {
+      } catch {
         valObj = null
       }
       if (!valObj) {

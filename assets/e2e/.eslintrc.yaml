@@ -1,4 +1,7 @@
 root: true
-extends: '@pluralsh/eslint-config-typescript'
+extends:
+  - '@pluralsh/eslint-config-typescript'
+  - 'prettier'
 rules:
   max-classes-per-file: 0
+  'import-newlines/enforce': 'off'

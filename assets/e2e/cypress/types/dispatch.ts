@@ -1,1 +1,1 @@
-export type Dispatch<T = void> = (v?: T) => void;
+export type Dispatch<T = void> = (v?: T) => void

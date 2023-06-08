@@ -4,7 +4,7 @@ import { Queries } from './queries'
 export type GQLOperation = keyof typeof Mutations | keyof typeof Queries
 
 export interface GQLResponseHandler {
-  handle(res?: unknown): void;
+  handle(res?: unknown): void
 }
 
 export class NoOpGQLResponseHandler implements GQLResponseHandler {

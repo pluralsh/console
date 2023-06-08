@@ -9,7 +9,7 @@ import { BasePage } from '@pages/base'
 enum BuildStatus {
   Running = 'Running',
   Failed = 'Failed',
-  Passed = 'Passed'
+  Passed = 'Passed',
 }
 
 export class BuildsPage extends BasePage {
@@ -37,7 +37,9 @@ export class BuildsPage extends BasePage {
 
   private static _ensure(): void {
     GQLInterceptor.wait(Mutations.CreateBuild, () => {
-      const { id } = GQLInterceptor.response<CreateBuildQueryResponse>(Mutations.CreateBuild)
+      const { id } = GQLInterceptor.response<CreateBuildQueryResponse>(
+        Mutations.CreateBuild
+      )
 
       cy.wrap(id).should(Condition.NotBeEmpty)
       this.visit(id)
@@ -47,7 +49,9 @@ export class BuildsPage extends BasePage {
     GQLInterceptor.wait(Queries.Build)
 
     // ensure the deployment was successful
-    this._buildStatus(BuildStatus.Passed, 4 * Time.Minute).should(Condition.Exist)
+    this._buildStatus(BuildStatus.Passed, 4 * Time.Minute).should(
+      Condition.Exist
+    )
   }
 
   private static _bounceButton(): Cypress.Chainable {
@@ -58,11 +62,18 @@ export class BuildsPage extends BasePage {
     return this._contains('div', 'Deploy')
   }
 
-  private static _buildStatus(status: BuildStatus | RegExp, timeout?: number): Cypress.Chainable {
+  private static _buildStatus(
+    status: BuildStatus | RegExp,
+    timeout?: number
+  ): Cypress.Chainable {
     if (status === BuildStatus.Running) {
       status = /^\d{2}:\d{2}:\d{2}$/
     }
 
-    return this._contains('#build-status', status, timeout ? { timeout } : undefined)
+    return this._contains(
+      '#build-status',
+      status,
+      timeout ? { timeout } : undefined
+    )
   }
 }

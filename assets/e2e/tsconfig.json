@@ -11,10 +11,7 @@
     "noImplicitAny": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "lib": [
-      "ES2019",
-      "dom"
-    ],
+    "lib": ["ES2019", "dom"],
     "types": ["cypress", "node"],
     "paths": {
       "@ctypes/*": ["types/*"],
@@ -24,10 +21,6 @@
       "@intercept/*": ["intercept/*"]
     }
   },
-  "include": [
-    "**/*.ts",
-  ],
-  "exclude": [
-    "../node_modules/**"
-  ]
+  "include": ["**/*.ts"],
+  "exclude": ["../node_modules/**"]
 }
