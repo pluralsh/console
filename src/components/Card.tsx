@@ -14,13 +14,15 @@ import {
 type CornerSize = 'medium' | 'large'
 type CardHue = 'default' | 'lighter' | 'lightest'
 
-type CardProps = {
+type BaseCardProps = {
   hue?: CardHue // Deprecated, prefer fillLevel
   fillLevel?: FillLevel
   cornerSize?: CornerSize
   clickable?: boolean
   selected?: boolean
-} & DivProps
+}
+
+type CardProps = DivProps & BaseCardProps
 
 const fillLevelToBGColor: Record<FillLevel, string> = {
   0: 'fill-one',
@@ -126,4 +128,4 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
 )
 
 export default Card
-export type { CardProps, CornerSize as CardSize, CardHue }
+export type { BaseCardProps, CardProps, CornerSize as CardSize, CardHue }

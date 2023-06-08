@@ -19,50 +19,54 @@ import WarningIcon from './icons/WarningIcon'
 import InfoIcon from './icons/InfoIcon'
 
 export const SEVERITIES = ['info', 'warning', 'success', 'danger'] as const
+const SIZES = ['medium', 'large'] as const
 
 type ModalSeverity = Extract<Severity, (typeof SEVERITIES)[number]>
 
-type ModalPropsType = ModalProps & {
+type ModalSize = (typeof SIZES)[number]
+
+type ModalPropsType = Omit<ModalProps, 'size'> & {
   form?: boolean
-  size?: 'medium' | 'large'
+  size?: ModalSize
   header?: ReactNode
   actions?: ReactNode
   severity?: ModalSeverity
   lockBody?: boolean
+  [x: string]: unknown
 }
 
-const severityToIconColorKey: Readonly<
-  Record<ModalSeverity | 'default', ColorKey>
-> = {
+const propTypes = {
+  form: PropTypes.bool,
+  size: PropTypes.oneOf(SIZES),
+  header: PropTypes.node,
+  actions: PropTypes.node,
+  severity: PropTypes.oneOf(SEVERITIES),
+  lockBody: PropTypes.bool,
+} as const
+
+const severityToIconColorKey = {
   default: 'icon-default',
   info: 'icon-info',
   danger: 'icon-danger',
   warning: 'icon-warning',
   success: 'icon-success',
-}
+} as const satisfies Readonly<Record<ModalSeverity | 'default', ColorKey>>
 
-const severityToIcon: Record<
-  ModalSeverity | 'default',
-  ReturnType<typeof createIcon> | null | undefined
-> = {
-  default: null,
+const severityToIcon = {
+  default: null as null,
   info: InfoIcon,
   danger: ErrorIcon,
   warning: WarningIcon,
   success: CheckRoundedIcon,
-}
+} as const satisfies Record<
+  ModalSeverity | 'default',
+  ReturnType<typeof createIcon> | null | undefined
+>
 
-const propTypes = {
-  form: PropTypes.bool,
-  size: PropTypes.oneOf(['medium', 'large']),
-  header: PropTypes.node,
-  actions: PropTypes.node,
-}
-
-const sizeToWidth: { [key in 'medium' | 'large']: number } = {
+const sizeToWidth = {
   medium: 480,
   large: 608,
-}
+} as const satisfies Record<ModalSize, number>
 
 function ModalRef(
   {
@@ -154,6 +158,6 @@ function ModalRef(
 
 const Modal = forwardRef(ModalRef)
 
-Modal.propTypes = propTypes as any
+Modal.propTypes = propTypes
 
 export default Modal

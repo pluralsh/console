@@ -1,61 +1,76 @@
 import { Flex, type FlexProps, Spinner } from 'honorable'
 import PropTypes from 'prop-types'
 import { type ReactElement, type Ref, forwardRef } from 'react'
-import styled from 'styled-components'
+import styled, { type DefaultTheme } from 'styled-components'
 
-import Card, { type CardProps } from './Card'
+import Card, { type BaseCardProps } from './Card'
 import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 import CloseIcon from './icons/CloseIcon'
 
-type Hue = 'default' | 'lighter' | 'lightest'
-type Size = 'small' | 'medium' | 'large'
-type Severity =
-  | 'neutral'
-  | 'info'
-  | 'success'
-  | 'warning'
-  | 'error'
-  | 'critical'
+const HUES = ['default', 'lighter', 'lightest'] as const
+const SIZES = ['small', 'medium', 'large'] as const
+const SEVERITIES = [
+  'neutral',
+  'info',
+  'success',
+  'warning',
+  'error',
+  'critical',
+] as const
 
-export type ChipProps = FlexProps & {
-  size?: 'small' | 'medium' | 'large'
-  severity?: Severity
-  icon?: ReactElement
-  loading?: boolean
-  closeButton?: boolean
-  clickable?: boolean
-} & CardProps
+type ChipHue = (typeof HUES)[number]
+type ChipSize = (typeof SIZES)[number]
+type ChipSeverity = (typeof SEVERITIES)[number]
 
-const parentFillLevelToHue: Record<FillLevel, Hue> = {
+export type ChipProps = Omit<FlexProps, 'size'> &
+  BaseCardProps & {
+    size?: ChipSize
+    severity?: ChipSeverity
+    icon?: ReactElement
+    loading?: boolean
+    closeButton?: boolean
+    clickable?: boolean
+    [x: string]: unknown
+  }
+
+const propTypes = {
+  size: PropTypes.oneOf(SIZES),
+  severity: PropTypes.oneOf(SEVERITIES),
+  hue: PropTypes.oneOf(HUES),
+  icon: PropTypes.element,
+  loading: PropTypes.bool,
+} as const
+
+const parentFillLevelToHue = {
   0: 'default',
   1: 'lighter',
   2: 'lightest',
   3: 'lightest',
-}
+} as const satisfies Record<FillLevel, ChipHue>
 
-const severityToColor: Record<Severity, string> = {
+const severityToColor = {
   neutral: 'text',
   info: 'text-primary-accent',
   success: 'text-success-light',
   warning: 'text-warning-light',
   error: 'text-danger-light',
   critical: 'text-danger',
-}
+} as const satisfies Record<ChipSeverity, string>
 
-const severityToIconColor: Record<Severity, string> = {
+const severityToIconColor = {
   neutral: 'icon-default',
   info: 'icon-info',
   success: 'icon-success',
   warning: 'icon-warning',
   error: 'icon-danger',
   critical: 'icon-danger-critical',
-}
+} as const satisfies Record<ChipSeverity, keyof DefaultTheme['colors']>
 
-const sizeToCloseHeight: Record<Size, number> = {
+const sizeToCloseHeight = {
   small: 8,
   medium: 10,
   large: 12,
-}
+} as const satisfies Record<ChipSize, number>
 
 const ChipCard = styled(Card)(({ theme }) => ({
   '.closeIcon': {
@@ -138,19 +153,6 @@ function ChipRef(
 
 const Chip = forwardRef(ChipRef)
 
-Chip.propTypes = {
-  size: PropTypes.oneOf(['small', 'medium', 'large']),
-  severity: PropTypes.oneOf([
-    'neutral',
-    'info',
-    'success',
-    'warning',
-    'error',
-    'critical',
-  ]),
-  hue: PropTypes.oneOf(['default', 'lighter', 'lightest']),
-  icon: PropTypes.element,
-  loading: PropTypes.bool,
-}
+Chip.propTypes = propTypes
 
 export default Chip

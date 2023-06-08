@@ -3,19 +3,31 @@ import PropTypes from 'prop-types'
 import { type ReactNode, type Ref, forwardRef } from 'react'
 import { last } from 'lodash-es'
 
-import { styledTheme as theme } from '../theme'
+import { type DefaultTheme, useTheme } from 'styled-components'
 
-import { type CSSObject } from '../types'
+import { type styledTheme as theme } from '../theme'
 
 import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 
-type Hue = 'default' | 'lighter' | 'lightest'
-type Size = 'xxsmall' | 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'
+const HUES = ['default', 'lighter', 'lightest'] as const
+const SIZES = [
+  'xxsmall',
+  'xsmall',
+  'small',
+  'medium',
+  'large',
+  'xlarge',
+] as const
+const SPACINGS = ['none', 'padding'] as const
 
-type AppIconProps = DivProps & {
-  size?: Size
-  spacing?: 'none' | 'padding' | string
-  hue?: 'default' | 'lighter' | 'lightest'
+type AppIconHue = (typeof HUES)[number]
+type AppIconSize = (typeof SIZES)[number]
+type AppIconSpacing = (typeof SPACINGS)[number]
+
+type AppIconProps = Omit<DivProps, 'size'> & {
+  size?: AppIconSize
+  spacing?: AppIconSpacing
+  hue?: AppIconHue
   clickable?: boolean
   url?: string
   icon?: ReactNode
@@ -23,75 +35,68 @@ type AppIconProps = DivProps & {
   name?: string
   initials?: string
   onClose?: () => void
+  [x: string]: unknown
 }
 
 const propTypes = {
-  size: PropTypes.oneOf([
-    'xxsmall',
-    'xsmall',
-    'small',
-    'medium',
-    'large',
-    'xlarge',
-  ]),
-  spacing: PropTypes.oneOf(['none', 'padding']),
-  hue: PropTypes.oneOf(['default', 'lighter', 'lightest']),
+  size: PropTypes.oneOf(SIZES),
+  spacing: PropTypes.oneOf(SPACINGS),
+  hue: PropTypes.oneOf(HUES),
   clickable: PropTypes.bool,
   url: PropTypes.string,
   IconComponent: PropTypes.elementType,
   alt: PropTypes.string,
-}
+} as const
 
-const parentFillLevelToHue: Record<FillLevel, Hue> = {
+const parentFillLevelToHue = {
   0: 'default',
   1: 'lighter',
   2: 'lightest',
   3: 'lightest',
-}
+} as const satisfies Record<FillLevel, AppIconHue>
 
-const sizeToWidth: Record<Size, number> = {
+const sizeToWidth = {
   xxsmall: 32,
   xsmall: 48,
   small: 64,
   medium: 96,
   large: 140,
   xlarge: 160,
-}
+} as const satisfies Record<AppIconSize, number>
 
-const sizeToIconWidth: Record<Size, number> = {
+const sizeToIconWidth = {
   xxsmall: 16,
   xsmall: 32,
   small: 48,
   medium: 64,
   large: 76,
   xlarge: 96,
-}
+} as const satisfies Record<AppIconSize, number>
 
-const hueToColor: Record<Hue, string> = {
+const hueToColor = {
   default: 'fill-one',
   lighter: 'fill-two',
   lightest: 'fill-three',
-}
+} as const satisfies Record<AppIconHue, string>
 
-const hueToBorderColor: {
-  [key in 'default' | 'lighter' | 'lightest']: string
-} = {
+const hueToBorderColor = {
   default: 'border',
   lighter: 'border-fill-two',
   lightest: 'border-fill-three',
-}
+} as const satisfies Record<AppIconHue, keyof typeof theme.colors>
 
-const sizeToFont: Record<Size, CSSObject> = {
-  xxsmall: {
-    ...theme.partials.text.body2Bold,
-    fontSize: 12,
-  },
-  xsmall: theme.partials.text.body2Bold,
-  small: theme.partials.text.subtitle2,
-  medium: theme.partials.text.subtitle1,
-  large: theme.partials.text.title2,
-  xlarge: theme.partials.text.title2,
-}
+const sizeToFont = (size: AppIconSize, theme: DefaultTheme) =>
+  ({
+    xxsmall: {
+      ...theme.partials.text.body2Bold,
+      fontSize: 12,
+    },
+    xsmall: theme.partials.text.body2Bold,
+    small: theme.partials.text.subtitle2,
+    medium: theme.partials.text.subtitle1,
+    large: theme.partials.text.title2,
+    xlarge: theme.partials.text.title2,
+  }[size])
 
 export function toInitials(name: string) {
   let initials = name
@@ -131,6 +136,7 @@ function AppIconRef(
   const color = hueToColor[hue]
   const borderColor = hueToBorderColor[hue]
   const hasBorder = spacing === 'padding'
+  const theme = useTheme()
 
   return (
     <Flex
@@ -168,7 +174,7 @@ function AppIconRef(
             justifyContent="center"
             userSelect="none"
             textTransform="uppercase"
-            {...sizeToFont[size]}
+            {...sizeToFont(size, theme)}
           >
             {initials || (name ? toInitials(name) : '')}
           </Flex>
@@ -180,7 +186,7 @@ function AppIconRef(
 
 const AppIcon = forwardRef(AppIconRef)
 
-AppIcon.propTypes = propTypes as any
+AppIcon.propTypes = propTypes
 
 export default AppIcon
 export type { AppIconProps }

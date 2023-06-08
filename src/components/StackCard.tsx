@@ -8,11 +8,13 @@ import Tooltip from './Tooltip'
 import Chip from './Chip'
 import StackIcon from './icons/StackIcon'
 
+const HUES = ['neutral', 'red', 'green', 'blue', 'yellow'] as const
+
 type StackCardProps = DivProps & {
   title?: string
   description?: string
   apps?: App[]
-  hue?: 'neutral' | 'red' | 'green' | 'blue' | 'yellow'
+  hue?: (typeof HUES)[number]
 }
 
 type App = {
@@ -37,8 +39,8 @@ const propTypes = {
       imageUrl: PropTypes.string.isRequired,
     }).isRequired
   ).isRequired,
-  hue: PropTypes.oneOf(['neutral', 'red', 'green', 'blue', 'yellow']),
-}
+  hue: PropTypes.oneOf(HUES),
+} as const
 
 function StackCardRef(
   { title, description, apps = [], hue = 'neutral', ...props }: StackCardProps,
@@ -138,6 +140,6 @@ function StackCardRef(
 
 const StackCard = forwardRef(StackCardRef)
 
-StackCard.propTypes = propTypes as any
+StackCard.propTypes = propTypes
 
 export default StackCard
