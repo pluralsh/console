@@ -12,7 +12,6 @@ export default defineConfig({
     baseUrl: 'https://localhost:3000',
     chromeWebSecurity: false,
     supportFile: 'cypress/support/index.ts',
-    experimentalSessionAndOrigin: true,
     setupNodeEvents(on) {
       on('file:preprocessor', webpack(options))
     },
