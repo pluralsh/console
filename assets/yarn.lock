@@ -8539,6 +8539,7 @@ __metadata:
     stylelint: 15.7.0
     stylelint-config-prettier: 9.0.5
     tinyqueue: 2.0.3
+    type-fest: 3.11.1
     typescript: 5.1.3
     use-immer: 0.9.0
     usehooks-ts: ^2.9.1
@@ -17927,6 +17928,13 @@ __metadata:
   version: 4.0.8
   resolution: "type-detect@npm:4.0.8"
   checksum: 62b5628bff67c0eb0b66afa371bd73e230399a8d2ad30d852716efcc4656a7516904570cd8631a49a3ce57c10225adf5d0cbdcb47f6b0255fe6557c453925a15
+  languageName: node
+  linkType: hard
+
+"type-fest@npm:3.11.1":
+  version: 3.11.1
+  resolution: "type-fest@npm:3.11.1"
+  checksum: 33be49e3b671c2ff3b5e320ef8c160c488205b08ab7631369116909a1baf2aebfcf45234c045e6902b8aa35730ac2bfd0655ea9e0fe3f8d26af9d99a16b07abd
   languageName: node
   linkType: hard
 

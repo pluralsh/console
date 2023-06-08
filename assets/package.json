@@ -108,6 +108,7 @@
     "slate-react": "0.95.0",
     "styled-components": "5.3.11",
     "tinyqueue": "2.0.3",
+    "type-fest": "3.11.1",
     "use-immer": "0.9.0",
     "uuid": "9.0.0",
     "workbox-core": "7.0.0",

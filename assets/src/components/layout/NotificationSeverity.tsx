@@ -1,6 +1,6 @@
 import { Chip } from '@pluralsh/design-system'
 
-function getChipSeverity(severity: string): string {
+function getChipSeverity(severity: string) {
   switch (severity) {
     case 'critical':
       return 'error'
