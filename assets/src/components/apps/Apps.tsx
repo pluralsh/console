@@ -48,7 +48,7 @@ const FILTERS = [
     label: readinessToLabel[Readiness.Failed],
     color: 'error',
   },
-]
+] as const
 
 function QueryEmptyState({ query, setQuery }) {
   return (

@@ -194,7 +194,7 @@ export default function Runbook() {
                 paddingTop="medium"
                 paddingBottom="medium"
                 position="sticky"
-                top={-theme.spacing.large}
+                top={-theme.spacing.xxxsmall}
                 backgroundColor="fill-zero"
                 zIndex={10}
               >

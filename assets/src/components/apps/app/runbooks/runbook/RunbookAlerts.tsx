@@ -11,6 +11,7 @@ import capitalize from 'lodash/capitalize'
 import moment from 'moment'
 import { ComponentProps, PropsWithChildren, useState } from 'react'
 import styled from 'styled-components'
+import { type SetRequired } from 'type-fest'
 
 import { Maybe, RunbookAlertStatus } from 'generated/graphql'
 
@@ -128,7 +129,7 @@ const RunbookAlertWrapper = styled.div<{ $isOpen: boolean }>(
 function AlertSeverity({
   severity,
   ...props
-}: { severity: string; className?: string } & ComponentProps<typeof Chip>) {
+}: SetRequired<ComponentProps<typeof Chip>, 'severity'>) {
   return (
     <Chip
       severity={severity}
@@ -179,7 +180,7 @@ export default function RunbookAlert({ alert }: { alert: RunbookAlertStatus }) {
         {severity && (
           <AlertSeverity
             className="severity"
-            severity={severity}
+            severity={severity as any}
           />
         )}
         <CollapseIcon

@@ -4,7 +4,12 @@ import { ComponentProps } from 'react'
 import { CHART_THEME } from './charts'
 import { ChartTooltip } from './ChartTooltip'
 
-export type PieChartData = { id: string; value: number; color: string }[]
+export type PieChartData = {
+  label?: string
+  id: string
+  value: number
+  color: string
+}[]
 export function PieChart({
   data,
   ...props
