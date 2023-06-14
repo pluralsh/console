@@ -130,27 +130,8 @@ test-base:
   enabled: false
   application: console
   testName: console-integration
-  promoteTag: warm
+  promoteTag: stable
   secret:
     CYPRESS_EMAIL: ""
     CYPRESS_PASSWORD: ""
     CYPRESS_BASE_URL: ""
-  steps:
-  - name: watch
-    description: it wait until the console app crd is ready
-    template:
-      container:
-        image: gcr.io/pluralsh/test-base:0.1.6
-        args: ["console"]
-  - name: cypress
-    description: runs cypress E2E tests for the console
-    template:
-      container:
-        args: ["--browser=chromium"]
-        image: dkr.plural.sh/console/console-cypress:v0.2.5-5-g5d88b72
-        envFrom:
-        - secretRef:
-            name: console-test-base-env
-          requests:
-            cpu: 1.8
-            memory: 7.9Gi

@@ -1,6 +1,6 @@
 dependencies:
 - name: test-base
   repository: https://pluralsh.github.io/module-library
-  version: 0.1.5
-digest: sha256:3f26cde94279968f94b0650b52785e5c9a257298d1e96f110f735bb0b41d89f8
-generated: "2022-08-10T16:36:19.429156439+02:00"
+  version: 0.1.10
+digest: sha256:c06b16641a45c3fb3c429b1d8cb5e61a860a58976b87b02b6e01c1826b10f13c
+generated: "2023-06-14T16:25:44.06288-04:00"
