@@ -6,6 +6,8 @@ import AppDocs from 'components/apps/app/docs/AppDocs'
 
 import Credentials from 'components/apps/app/credentials/Credentials'
 
+import Uninstall from 'components/apps/app/uninstall/Uninstall'
+
 import Apps from '../components/apps/Apps'
 import App from '../components/apps/app/App'
 import Dashboards from '../components/apps/app/dashboards/Dashboards'
@@ -75,6 +77,10 @@ export const appsRoutes = [
     <Route
       path="oidc"
       element={<UserManagement />}
+    />
+    <Route
+      path="uninstall"
+      element={<Uninstall />}
     />
     <Route
       path="config"

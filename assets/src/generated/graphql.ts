@@ -2236,6 +2236,13 @@ export type PluralContextQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type PluralContextQuery = { __typename?: 'RootQueryType', pluralContext?: { __typename?: 'PluralContext', buckets?: Array<string | null> | null, configuration: Map<string, unknown>, domains?: Array<string | null> | null } | null };
 
+export type CreateBuildMutationVariables = Exact<{
+  attributes: BuildAttributes;
+}>;
+
+
+export type CreateBuildMutation = { __typename?: 'RootMutationType', createBuild?: { __typename?: 'Build', id: string } | null };
+
 export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
 
 export type GroupFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null };
@@ -2666,6 +2673,39 @@ export function usePluralContextLazyQuery(baseOptions?: Apollo.LazyQueryHookOpti
 export type PluralContextQueryHookResult = ReturnType<typeof usePluralContextQuery>;
 export type PluralContextLazyQueryHookResult = ReturnType<typeof usePluralContextLazyQuery>;
 export type PluralContextQueryResult = Apollo.QueryResult<PluralContextQuery, PluralContextQueryVariables>;
+export const CreateBuildDocument = gql`
+    mutation CreateBuild($attributes: BuildAttributes!) {
+  createBuild(attributes: $attributes) {
+    id
+  }
+}
+    `;
+export type CreateBuildMutationFn = Apollo.MutationFunction<CreateBuildMutation, CreateBuildMutationVariables>;
+
+/**
+ * __useCreateBuildMutation__
+ *
+ * To run a mutation, you first call `useCreateBuildMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateBuildMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createBuildMutation, { data, loading, error }] = useCreateBuildMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateBuildMutation(baseOptions?: Apollo.MutationHookOptions<CreateBuildMutation, CreateBuildMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateBuildMutation, CreateBuildMutationVariables>(CreateBuildDocument, options);
+      }
+export type CreateBuildMutationHookResult = ReturnType<typeof useCreateBuildMutation>;
+export type CreateBuildMutationResult = Apollo.MutationResult<CreateBuildMutation>;
+export type CreateBuildMutationOptions = Apollo.BaseMutationOptions<CreateBuildMutation, CreateBuildMutationVariables>;
 export const GroupsDocument = gql`
     query Groups($q: String, $cursor: String) {
   groups(q: $q, first: 20, after: $cursor) {
