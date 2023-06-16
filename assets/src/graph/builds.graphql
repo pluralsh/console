@@ -1,0 +1,5 @@
+mutation CreateBuild($attributes: BuildAttributes!) {
+  createBuild(attributes: $attributes) {
+    id
+  }
+}

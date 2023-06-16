@@ -77,6 +77,14 @@ export function getDocsData(docs: Repository['docs']) {
   })
 }
 
+const SYSTEM_APPS = [
+  'bootstrap',
+  'ingress-nginx',
+  'monitoring',
+  'postgres',
+  'mysql',
+]
+
 export const getDirectory = ({
   app = null,
   docs = null,
@@ -114,6 +122,11 @@ export const getDirectory = ({
       path: 'config',
       label: 'Configuration',
       enabled: config?.gitStatus?.cloned,
+    },
+    {
+      path: 'uninstall',
+      label: 'Uninstall',
+      enabled: !SYSTEM_APPS.includes(app.name),
     },
     {
       path: 'docs',
