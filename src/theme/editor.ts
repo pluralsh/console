@@ -1,4 +1,4 @@
-import { semanticColors } from './colors'
+import { semanticColorsDark as semanticColors } from './colors-semantic-dark'
 
 export const editorTheme = {
   inherit: true,

@@ -26,7 +26,7 @@ const LineNumbers = styled(StyledPre)(({ theme }) => ({
 }))
 
 const StyledHighlight = styled.div(
-  (_) => `
+  ({ theme }) => `
 pre code.hljs {
   display: block;
   overflow-x: auto;
@@ -40,21 +40,21 @@ code.hljs {
 .hljs ::selection,
 .hljs::selection {
   background-color: #383a62;
-  color: #ebeff0;
+  color: ${theme.colors['code-block-light-grey']};
 }
 
 .hljs-comment {
-  color: #747b8b;
+  color: ${theme.colors['code-block-dark-grey']};
 }
 
 .hljs-tag {
-  color: #c5c9d3;
+  color: ${theme.colors['code-block-mid-grey']};
 }
 
 .hljs-operator,
 .hljs-punctuation,
 .hljs-subst {
-  color: #ebeff0;
+  color: ${theme.colors['code-block-light-grey']};
 }
 
 .hljs-operator {
@@ -67,7 +67,7 @@ code.hljs {
 .hljs-selector-tag,
 .hljs-template-variable,
 .hljs-variable {
-  color: #c5c9d3;
+  color: ${theme.colors['code-block-mid-grey']};
 }
 
 .hljs-attr,
@@ -77,30 +77,36 @@ code.hljs {
 .hljs-symbol,
 .hljs-variable.constant_ {
   color: #969af8;
+  color: ${theme.colors['code-block-purple']};
+
 }
 
 .hljs-class .hljs-title,
 .hljs-title,
 .hljs-title.class_ {
-  color: #7075f5;
+  color: ${theme.colors['code-block-dark-purple']};
+
 }
 
 .hljs-strong {
   font-weight: 700;
-  color: #7075f5;
+  color: ${theme.colors['code-block-dark-purple']};
+
 }
 .hljs-addition,
 .hljs-code,
 .hljs-string,
 .hljs-title.class_.inherited__ {
   color: #8fd6ff;
+  color: ${theme.colors['code-block-mid-blue']};
+
 }
 .hljs-built_in,
 .hljs-doctag,
 .hljs-keyword.hljs-atrule,
 .hljs-quote,
 .hljs-regexp {
-  color: #c2e9ff;
+  color: ${theme.colors['code-block-light-blue']};
 }
 
 .hljs-attribute,
@@ -108,7 +114,7 @@ code.hljs {
 .hljs-section,
 .hljs-title.function_,
 .ruby .hljs-property {
-  color: #3cecaf;
+  color: ${theme.colors[`code-block-dark-green`]};
 }
 
 .diff .hljs-meta,
@@ -116,6 +122,7 @@ code.hljs {
 .hljs-template-tag,
 .hljs-type {
   color: #fff48f;
+  color: ${theme.colors[`code-block-yellow`]};
 }
 
 .hljs-emphasis {
@@ -127,6 +134,7 @@ code.hljs {
 .hljs-meta .hljs-keyword,
 .hljs-meta .hljs-string {
   color: #99f5d5;
+  color: ${theme.colors[`code-block-light-green`]};
 }
 
 .hljs-meta .hljs-keyword,

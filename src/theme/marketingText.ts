@@ -1,7 +1,7 @@
 import { type CSSObject } from '../types'
 
 import { fontFamilies } from './fonts'
-import { semanticColors } from './colors'
+import { semanticColorCssVars } from './colors'
 
 const body1 = {
   fontFamily: fontFamilies.sans,
@@ -9,7 +9,7 @@ const body1 = {
   lineHeight: '140%',
   fontWeight: 300,
   letterSpacing: '0.25px',
-  color: semanticColors['text-xlight'],
+  color: semanticColorCssVars['text-xlight'],
 } as const satisfies CSSObject
 
 const body2 = {
@@ -18,12 +18,12 @@ const body2 = {
   lineHeight: '160%',
   fontWeight: 300,
   letterSpacing: '0.5px',
-  color: semanticColors['text-xlight'],
+  color: semanticColorCssVars['text-xlight'],
 } as const satisfies CSSObject
 
 const bodyBold = {
   fontWeight: 700,
-  color: semanticColors['text-light'],
+  color: semanticColorCssVars['text-light'],
 } as const satisfies CSSObject
 
 const marketingTextPartials = {
@@ -33,7 +33,7 @@ const marketingTextPartials = {
     lineHeight: '120%',
     fontWeight: 500,
     letterSpacing: 0,
-    color: semanticColors.text,
+    color: semanticColorCssVars.text,
   },
   hero1: {
     fontFamily: fontFamilies.sansHero,
@@ -41,7 +41,7 @@ const marketingTextPartials = {
     lineHeight: '120%',
     fontWeight: 700,
     letterSpacing: 0,
-    color: semanticColors.text,
+    color: semanticColorCssVars.text,
   },
   hero2: {
     fontFamily: fontFamilies.sansHero,
@@ -49,7 +49,7 @@ const marketingTextPartials = {
     lineHeight: '125%',
     fontWeight: 500,
     letterSpacing: 0,
-    color: semanticColors.text,
+    color: semanticColorCssVars.text,
   },
   title1: {
     fontFamily: fontFamilies.sansHero,
@@ -57,7 +57,7 @@ const marketingTextPartials = {
     lineHeight: '140%',
     fontWeight: 500,
     letterSpacing: '0.25px',
-    color: semanticColors.text,
+    color: semanticColorCssVars.text,
   },
   title2: {
     fontFamily: fontFamilies.sansHero,
@@ -65,7 +65,7 @@ const marketingTextPartials = {
     lineHeight: '140%',
     fontWeight: 500,
     letterSpacing: '0.25px',
-    color: semanticColors.text,
+    color: semanticColorCssVars.text,
   },
   subtitle1: {
     fontFamily: fontFamilies.sans,
@@ -73,7 +73,7 @@ const marketingTextPartials = {
     lineHeight: '140%',
     fontWeight: 600,
     letterSpacing: '0.25px',
-    color: semanticColors.text,
+    color: semanticColorCssVars.text,
   },
   subtitle2: {
     fontFamily: fontFamilies.sans,
@@ -81,7 +81,7 @@ const marketingTextPartials = {
     lineHeight: '150%',
     fontWeight: 600,
     letterSpacing: '0.25px',
-    color: semanticColors.text,
+    color: semanticColorCssVars.text,
   },
   body1,
   body2,
@@ -95,13 +95,13 @@ const marketingTextPartials = {
     ...bodyBold,
   },
   inlineLink: {
-    color: semanticColors['action-link-inline'],
+    color: semanticColorCssVars['action-link-inline'],
     textDecoration: 'underline',
     '&:hover': {
-      color: semanticColors['action-link-inline-hover'],
+      color: semanticColorCssVars['action-link-inline-hover'],
     },
     '&:visited, &:active': {
-      color: semanticColors['action-link-inline-visited'],
+      color: semanticColorCssVars['action-link-inline-visited'],
     },
   },
   navLink: {
@@ -110,9 +110,9 @@ const marketingTextPartials = {
     lineHeight: '150%',
     fontWeight: '300',
     letterSpacing: '0.5px',
-    color: semanticColors['text-light'],
+    color: semanticColorCssVars['text-light'],
     '&:hover': {
-      color: semanticColors.text,
+      color: semanticColorCssVars.text,
       textDecoration: 'underline',
     },
   },
@@ -122,7 +122,7 @@ const marketingTextPartials = {
     lineHeight: '150%',
     fontWeight: 500,
     letterSpacing: '0.5px',
-    color: semanticColors.text,
+    color: semanticColorCssVars.text,
     cursor: 'pointer',
     '&:hover': {
       textDecoration: 'underline',
@@ -134,7 +134,7 @@ const marketingTextPartials = {
     lineHeight: '150%',
     fontWeight: 300,
     letterSpacing: '0.5px',
-    color: semanticColors['text-xlight'],
+    color: semanticColorCssVars['text-xlight'],
   },
   componentLink: {
     fontFamily: fontFamilies.sans,
@@ -142,7 +142,7 @@ const marketingTextPartials = {
     lineHeight: '150%',
     fontWeight: 600,
     letterSpacing: '0.25px',
-    color: semanticColors['text-light'],
+    color: semanticColorCssVars['text-light'],
     cursor: 'pointer',
     '&:hover': {
       textDecoration: 'underline',
@@ -154,7 +154,7 @@ const marketingTextPartials = {
     lineHeight: '150%',
     fontWeight: 400,
     letterSpacing: '0.25px',
-    color: semanticColors['text-light'],
+    color: semanticColorCssVars['text-light'],
     cursor: 'pointer',
     '&:hover': {
       textDecoration: 'underline',
@@ -166,7 +166,7 @@ const marketingTextPartials = {
     lineHeight: '150%',
     fontWeight: 300,
     letterSpacing: '1px',
-    color: semanticColors['text-xlight'],
+    color: semanticColorCssVars['text-xlight'],
     textTransform: 'uppercase',
   },
 } as const satisfies Record<string, CSSObject>

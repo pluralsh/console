@@ -112,12 +112,14 @@ function AppListUnstyled({
   return (
     <div {...props}>
       {!isEmpty(apps) && (
-        <Input
-          prefix={<SearchIcon />}
-          placeholder="Filter applications"
-          value={filter}
-          onChange={({ target: { value } }) => setFilter(value)}
-        />
+        <div>
+          <Input
+            prefix={<SearchIcon />}
+            placeholder="Filter applications"
+            value={filter}
+            onChange={({ target: { value } }) => setFilter(value)}
+          />
+        </div>
       )}
 
       <div
@@ -309,7 +311,7 @@ function AppUnstyled({
               <Select
                 aria-label="moreMenu"
                 selectedKey={null}
-                onSelectionChange={(key) =>
+                onSelectionChange={(key: any) =>
                   actions.find((action) => action.label === key)?.onSelect()
                 }
                 isDisabled={!isAlive}

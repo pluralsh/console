@@ -4,15 +4,17 @@ import { type StringObj } from '../theme'
 
 import { type FillLevel } from '../components/contexts/FillLevelContext'
 
-import { semanticColors } from './colors'
+import { semanticColorCssVars } from './colors'
 
 export const scrollBar = ({ fillLevel }: { fillLevel: FillLevel }) => {
   const trackColor =
-    fillLevel >= 2 ? semanticColors['fill-three'] : semanticColors['fill-two']
+    fillLevel >= 2
+      ? semanticColorCssVars['fill-three']
+      : semanticColorCssVars['fill-two']
   const barColor =
     fillLevel >= 2
-      ? semanticColors['text-xlight']
-      : semanticColors['fill-three']
+      ? semanticColorCssVars['text-xlight']
+      : semanticColorCssVars['fill-three']
   const barWidth = 6
   const barRadius = barWidth / 2
 

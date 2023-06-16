@@ -1,7 +1,7 @@
 import { type CSSObject } from '../types'
 
 import { fontFamilies } from './fonts'
-import { semanticColors } from './colors'
+import { semanticColorCssVars } from './colors'
 
 export const INLINE_CODE_EMS = 0.8
 export const INLINE_CODE_MIN_PX = 12
@@ -156,15 +156,15 @@ const textPartials = {
     textOverflow: 'ellipsis',
   },
   inlineLink: {
-    color: semanticColors['action-link-inline'],
+    color: semanticColorCssVars['action-link-inline'],
     textDecoration: 'underline',
     '&:hover': {
-      color: semanticColors['action-link-inline-hover'],
+      color: semanticColorCssVars['action-link-inline-hover'],
     },
     '&:visited, &:active': {
-      color: semanticColors['action-link-inline-visited'],
+      color: semanticColorCssVars['action-link-inline-visited'],
       '&:hover': {
-        color: semanticColors['action-link-inline-visited-hover'],
+        color: semanticColorCssVars['action-link-inline-visited-hover'],
       },
     },
   },

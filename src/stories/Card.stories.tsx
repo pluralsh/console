@@ -1,6 +1,8 @@
 import { Flex } from 'honorable'
 import { type ComponentProps } from 'react'
 
+import { useTheme } from 'styled-components'
+
 import { type FillLevel } from '../components/contexts/FillLevelContext'
 
 import { Card } from '../index'
@@ -65,38 +67,45 @@ function FillLevelTemplate({
   selected,
   width,
 }: { width: number } & CardProps) {
+  const theme = useTheme()
+
   return (
-    <Flex
-      flexWrap="wrap"
-      gap="xxlarge"
-    >
-      {fillLevels.map((fillLevel) => (
-        <Card
-          clickable={clickable}
-          selected={selected}
-          width={width}
-          padding="medium"
-          fillLevel={fillLevel}
-        >
-          fillLevel="{fillLevel}"
-          <br />
-          <br />
+    <div>
+      <div style={{ marginBottom: theme.spacing.medium }}>fill-zero</div>
+      <Flex
+        flexWrap="wrap"
+        gap="xxlarge"
+      >
+        {fillLevels.map((fillLevel) => (
           <Card
             clickable={clickable}
             selected={selected}
+            width={width}
             padding="medium"
+            fillLevel={fillLevel}
           >
-            <Card padding="medium">
-              <br />
-              Each Card background should be one level lighter than its parent,
-              but not exceed fill-three
-              <br />
-              <br />
+            fillLevel=
+            {fillLevel === undefined ? 'undefined' : `"${fillLevel}"`}
+            {!fillLevel && ` (1-3 determined by context)`}
+            <br />
+            <br />
+            <Card
+              clickable={clickable}
+              selected={selected}
+              padding="medium"
+            >
+              <Card padding="medium">
+                <br />
+                Each Card background should be one level lighter than its
+                parent, but not exceed fill-three
+                <br />
+                <br />
+              </Card>
             </Card>
           </Card>
-        </Card>
-      ))}
-    </Flex>
+        ))}
+      </Flex>
+    </div>
   )
 }
 

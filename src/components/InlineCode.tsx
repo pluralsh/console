@@ -40,8 +40,8 @@ const parentFillLevelToBorderColor: {
 // consistent when INLINE_CODE_MIN_PX changes.
 const PADDING_EMS = 0.1669
 
-const Code = styled.code<{ parentFillLevel: FillLevel }>(
-  ({ theme, parentFillLevel }) => ({
+const CodeElt = styled.code<{ $parentFillLevel: FillLevel }>(
+  ({ theme, $parentFillLevel: parentFillLevel }) => ({
     ...theme.partials.text.inlineCode,
     border: theme.borders.default,
     borderRadius: theme.borderRadiuses.large,
@@ -73,9 +73,9 @@ const InlineCode = forwardRef<HTMLElement, ComponentPropsWithRef<'code'>>(
     return (
       <>
         <Spacer />
-        <Code
+        <CodeElt
           ref={ref}
-          parentFillLevel={parentFillLevel}
+          $parentFillLevel={parentFillLevel}
           {...props}
         />
         <Spacer />

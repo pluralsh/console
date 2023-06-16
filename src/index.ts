@@ -125,9 +125,18 @@ export {
   useSetBreadcrumbs,
   type Breadcrumb,
 } from './components/contexts/BreadcrumbsContext'
+export { ColorModeProvider } from './components/contexts/ColorModeProvider'
 
 // Theme
-export { default as theme, styledTheme } from './theme'
+export {
+  honorableThemeDark as theme,
+  styledTheme,
+  styledThemeLight,
+  honorableThemeLight,
+  styledThemeDark,
+} from './theme'
+export type { SemanticColorKey, SemanticColorCssVar } from './theme/colors'
+export { semanticColorKeys, semanticColorCssVars } from './theme/colors'
 export { default as GlobalStyle } from './GlobalStyle'
 
 // Utils
