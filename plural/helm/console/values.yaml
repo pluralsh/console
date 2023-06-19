@@ -6,7 +6,7 @@ replicaCount: 2
 
 image:
   repository: dkr.plural.sh/console/console
-  tag: '0.4.15' ## PLRL-REPLACE[  tag: '%s']
+  tag: '0.4.16' ## PLRL-REPLACE[  tag: '%s']
   imagePullPolicy: Always
 
 serviceAccount:
@@ -131,6 +131,8 @@ test-base:
   application: console
   testName: console-integration
   promoteTag: stable
+  tags:
+  - 0.4.16
   secret:
     CYPRESS_EMAIL: ""
     CYPRESS_PASSWORD: ""
