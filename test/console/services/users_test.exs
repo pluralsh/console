@@ -55,6 +55,7 @@ defmodule Console.Services.UsersTest do
         "name" => "Some User",
         "profile" => "https://some.image.com",
         "groups" => ["general"],
+        "admin" => true,
         "plural_id" => "abcdef-123456789-ghijkl"
       })
 
@@ -62,6 +63,7 @@ defmodule Console.Services.UsersTest do
       assert user.email == "someone@example.com"
       assert user.profile == "https://some.image.com"
       assert user.plural_id == "abcdef-123456789-ghijkl"
+      assert user.roles.admin
 
       group = Users.get_group_by_name("general")
       assert group.description == "synced from Plural"

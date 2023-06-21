@@ -79,6 +79,7 @@ defmodule Console.Services.Users do
 
   @spec bootstrap_user(map) :: user_resp
   def bootstrap_user(%{"email" => email} = attrs) do
+    attrs = token_attrs(attrs)
     start_transaction()
     |> add_operation(:user, fn _ ->
       case get_user_by_email(email) do
@@ -89,6 +90,10 @@ defmodule Console.Services.Users do
     |> hydrate_groups(attrs)
     |> execute(extract: :user)
   end
+
+  defp token_attrs(%{"admin" => true} = attrs), do: Map.put(attrs, "roles", %{"admin" => true})
+  defp token_attrs(%{"admin" => false} = attrs), do: Map.put(attrs, "roles", %{"admin" => false})
+  defp token_attrs(attrs), do: attrs
 
   def temporary_token(%User{} = user) do
     with {:ok, token, _} <- Console.Guardian.encode_and_sign(user, %{}, ttl: {1, :hour}) do
