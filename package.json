@@ -86,6 +86,7 @@
     "@typescript-eslint/eslint-plugin": "5.59.9",
     "@typescript-eslint/parser": "5.59.9",
     "babel-loader": "9.1.2",
+    "conventional-changelog-conventionalcommits": "6.1.0",
     "eslint": "8.42.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-plugin-import": "2.27.5",
