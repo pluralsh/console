@@ -6802,12 +6802,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/mdx2-csf@npm:0.1.0-next.6":
-  version: 0.1.0-next.6
-  resolution: "@storybook/mdx2-csf@npm:0.1.0-next.6"
+"@storybook/mdx2-csf@npm:0.1.0-next.8":
+  version: 0.1.0-next.8
+  resolution: "@storybook/mdx2-csf@npm:0.1.0-next.8"
   dependencies:
     loader-utils: ^2.0.4
-  checksum: 3a7f252620ffc0bd2a83ba4e9c01645c1c9aae0f3922699d4e84b1343f0c79d77b631b658b9acc0de79bc29af71551d5ba616bd7c534a8a5e092d6141cf26a0c
+  checksum: ad6e3841cc4cf140dd7a3027f83e0223fc05350a5b75ed0788f5c6337479d73a2e08eb2d2a09e889f275eef04cc88dc0aaed9bf87abf5cde2e24f4d3a5e99494
   languageName: node
   linkType: hard
 
