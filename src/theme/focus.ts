@@ -16,12 +16,12 @@ export const getFocusPartials = ({ mode }: { mode: ColorMode }) => {
       boxShadow: boxShadows.focused,
     },
     outline: {
-      '--outlineC': semanticColorCssVars['border-outline-focused'],
-      outline: `${borderWidths.focus}px solid var(--outlineC)`,
+      '--outline-c': semanticColorCssVars['border-outline-focused'],
+      outline: `${borderWidths.focus}px solid var(--outline-c)`,
     },
     button: {
-      '--outlineC': semanticColorCssVars['border-outline-focused'],
-      outline: `1px solid var(--outlineC)}`,
+      '--outline-c': semanticColorCssVars['border-outline-focused'],
+      outline: `1px solid var(--outline-c)}`,
       outlineOffset: '-1px',
     },
     insetAbsolute: {
