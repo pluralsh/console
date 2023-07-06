@@ -8,6 +8,7 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import UserList from './UsersList'
 import UserInvite from './UserInvite'
+import { OIDCInvite } from './OIDCInvite'
 
 // const directory = [
 //   {
@@ -52,8 +53,8 @@ export default function Users() {
             </SubTab>
           ))}
         </TabList> */}
-          {/* Invites are only available when not using login with Plural. */}
           {configuration && !configuration?.pluralLogin && <UserInvite />}
+          {configuration?.pluralLogin && <OIDCInvite />}
         </Flex>
       }
     >
