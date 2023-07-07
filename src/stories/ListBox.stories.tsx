@@ -147,6 +147,10 @@ function Template() {
   const shownStep = 4
   const [shownLimit, setShownLimit] = useState<number>(shownStep)
 
+  const onFooterClick = () => {
+    alert('You selected the footer')
+  }
+
   return (
     <Flex
       flexDirection="column"
@@ -185,7 +189,7 @@ function Template() {
             setSelectedKey(key)
           }}
           footerFixed={
-            <ListBoxFooter onClick={() => alert('You clicked the footer')}>
+            <ListBoxFooter onClick={onFooterClick}>
               Fixed Footer - Default
             </ListBoxFooter>
           }
@@ -214,7 +218,7 @@ function Template() {
             setSelectedKey(key)
           }}
           footerFixed={
-            <ListBoxFooterPlus onClick={() => alert('You clicked the footer')}>
+            <ListBoxFooterPlus onClick={onFooterClick}>
               Fixed Footer - Add
             </ListBoxFooterPlus>
           }

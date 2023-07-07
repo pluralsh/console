@@ -191,6 +191,10 @@ function Template() {
       ? `Selections: ${curItems.map((item) => item.label).join(', ')}`
       : 'Select items'
 
+  const createNewHandler = () => {
+    alert('You selected "Create new."')
+  }
+
   return (
     <Flex
       flexDirection="column"
@@ -235,7 +239,9 @@ function Template() {
           leftContent={<SearchIcon />}
           rightContent={<ListBoxItemChipList chips={curItem?.chips} />}
           dropdownFooterFixed={
-            <ListBoxFooterPlus>Create new</ListBoxFooterPlus>
+            <ListBoxFooterPlus onClick={createNewHandler}>
+              Create new
+            </ListBoxFooterPlus>
           }
         >
           {items.map(({ key, label, description, chips }) => (
@@ -260,8 +266,11 @@ function Template() {
           }}
           defaultOpen={false}
           dropdownFooterFixed={
-            <ListBoxFooterPlus>Create new</ListBoxFooterPlus>
+            <ListBoxFooterPlus onClick={createNewHandler}>
+              Create new
+            </ListBoxFooterPlus>
           }
+          onFooterClick={createNewHandler}
           triggerButton={
             <SelectButton leftContent={curItem ? <CheckIcon /> : <InfoIcon />}>
               {customLabel}
@@ -378,7 +387,9 @@ function Template() {
           leftContent={<SearchIcon />}
           rightContent={<ListBoxItemChipList chips={curItem?.chips} />}
           dropdownFooterFixed={
-            <ListBoxFooterPlus>Create new</ListBoxFooterPlus>
+            <ListBoxFooterPlus onClick={createNewHandler}>
+              Create new
+            </ListBoxFooterPlus>
           }
         >
           {items.map(({ key, label, description, chips }) => (
@@ -401,7 +412,9 @@ function Template() {
           }}
           defaultOpen={false}
           dropdownFooterFixed={
-            <ListBoxFooterPlus>Create new</ListBoxFooterPlus>
+            <ListBoxFooterPlus onClick={createNewHandler}>
+              Create new
+            </ListBoxFooterPlus>
           }
           triggerButton={
             <SelectButton leftContent={curItem ? <CheckIcon /> : <InfoIcon />}>

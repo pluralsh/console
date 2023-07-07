@@ -321,14 +321,11 @@ function TagsTemplate() {
         <ComboBox
           isOpen={isOpen}
           inputValue={inputValue}
-          onSelectionChange={(selectedKey) => {
-            if (selectedKey === '$$footer$$') {
-              setSelectedKeys(new Set([...selectedKeys, newKey]))
-              setInputValue('')
-              setIsOpen(false)
-            } else {
-              onSelectionChange(selectedKey)
-            }
+          onSelectionChange={onSelectionChange}
+          onFooterClick={() => {
+            setSelectedKeys(new Set([...selectedKeys, newKey]))
+            setInputValue('')
+            setIsOpen(false)
           }}
           onInputChange={onInputChange}
           inputProps={{ placeholder: 'Pick something' }}

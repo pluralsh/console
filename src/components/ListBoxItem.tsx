@@ -155,12 +155,12 @@ const ListBoxItem = forwardRef<HTMLDivElement, ListBoxItemProps>(
   )
 )
 
-type ListBoxFooterProps = ComponentPropsWithRef<'div'> & {
+type ListBoxFooterProps = ComponentPropsWithRef<typeof ListBoxFooterInner> & {
   children: ReactNode
   leftContent?: ReactNode
   rightContent?: ReactNode
 }
-const ListBoxFooterInner = styled.div<{ focused?: boolean }>(
+const ListBoxFooterInner = styled.button<{ focused?: boolean }>(
   ({ theme, focused = false }) => ({
     ...theme.partials.reset.button,
     display: 'flex',
@@ -193,7 +193,7 @@ const ListBoxFooterInner = styled.div<{ focused?: boolean }>(
       : {}),
   })
 )
-const ListBoxFooter = forwardRef<HTMLDivElement, ListBoxFooterProps>(
+const ListBoxFooter = forwardRef<HTMLButtonElement, ListBoxFooterProps>(
   ({ leftContent, rightContent, children, ...props }, ref) => (
     <ListBoxFooterInner
       tabIndex={0}
