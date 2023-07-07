@@ -88,7 +88,12 @@ function areEquivalentBindings(bindings1, bindings2) {
   return true
 }
 
-function UserManagementCard({ id, provider }) {
+export function UserManagementCard({
+  id,
+  provider,
+  header = 'OpenID Connect',
+  description = 'Control which users and groups have access to this application with OIDC.',
+}) {
   const { authMethod, redirectUris, bindings: initialBindings } = provider
   const [bindings, setBindings] = useState(initialBindings)
   const [mutation, { loading, error }] = useMutation(UPDATE_PROVIDER, {
@@ -128,12 +133,7 @@ function UserManagementCard({ id, provider }) {
   const navBlocker = useNavBlocker(changed)
 
   return (
-    <Card
-      paddingHorizontal={100}
-      paddingVertical="large"
-      maxHeight="100%"
-      overflowY="auto"
-    >
+    <>
       {navBlocker}
       <Flex
         direction="column"
@@ -144,14 +144,13 @@ function UserManagementCard({ id, provider }) {
           body1
           fontWeight={600}
         >
-          OpenID Connect
+          {header}
         </P>
         <P
           body2
           color="text-light"
         >
-          Control which users and groups have access to this application with
-          OIDC.
+          {description}
         </P>
       </Flex>
       <Flex
@@ -217,7 +216,7 @@ function UserManagementCard({ id, provider }) {
           </Button>
         </Flex>
       </Flex>
-    </Card>
+    </>
   )
 }
 
@@ -232,7 +231,7 @@ function UserManagementContent() {
     return (
       <GqlError
         error={error}
-        header="Could not update provider"
+        header="Could not find provider"
       />
     )
   }
@@ -242,10 +241,17 @@ function UserManagementContent() {
   const { installation } = data
 
   return installation && installation.oidcProvider ? (
-    <UserManagementCard
-      id={installation.id}
-      provider={installation.oidcProvider}
-    />
+    <Card
+      paddingHorizontal={100}
+      paddingVertical="large"
+      maxHeight="100%"
+      overflowY="auto"
+    >
+      <UserManagementCard
+        id={installation.id}
+        provider={installation.oidcProvider}
+      />
+    </Card>
   ) : (
     <Flex
       maxHeight="100%"
