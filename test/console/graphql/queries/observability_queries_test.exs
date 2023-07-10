@@ -126,7 +126,7 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
 
   describe "logs" do
     test "it can fetch logs for a loki query" do
-      expect(HTTPoison, :get, fn _ ->
+      expect(HTTPoison, :get, fn _, _ ->
         {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
             %{stream: %{"var" => "val"}, values: [["1", "hello"]]},
             %{stream: %{"var" => "val2"}, values: [["1", "world"]]}

@@ -1,4 +1,5 @@
 defmodule Loki.Client do
+  import Prometheus.Client, only: [headers: 0]
   alias Loki.{Response, Data, Result, Value}
 
   def host(), do: Application.get_env(:console, :loki)
@@ -8,7 +9,7 @@ defmodule Loki.Client do
 
     host()
     |> Path.join("/loki/api/v1/query_range?#{query}")
-    |> HTTPoison.get()
+    |> HTTPoison.get(headers())
     |> case do
       {:ok, %{body: body, status_code: 200}} ->
         {:ok, body
