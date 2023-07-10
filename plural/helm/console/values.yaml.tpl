@@ -25,11 +25,17 @@ consoleIdentityId: {{ importValue "Terraform" "console_msi_id" }}
 consoleIdentityClientId: {{ importValue "Terraform" "console_msi_client_id" }}
 {{ end }}
 
-{{- if or (eq .Provider "azure") .Configuration.loki }}
+{{- if or (eq .Provider "azure") .Configuration.loki .Configuration.mimir }}
 extraEnv:
 {{- if .Configuration.loki }}
 - name: LOKI_HOST
-  value: http://loki-loki-distributed-gateway.loki
+  value: http://loki-loki-distributed-gateway.{{ namespace "loki" }}
+{{- end }}
+{{- if .Configuration.mimir }}
+- name: PROMETHEUS_HOST
+  value: http://mimir-nginx.{{ namespace "mimir" }}/prometheus
+- name: GRAFANA_TENANT
+  value: {{ .Cluster }}
 {{- end }}
 {{ if eq .Provider "azure" }}
 - name: ARM_USE_MSI
