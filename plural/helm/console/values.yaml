@@ -9,6 +9,11 @@ image:
   tag: ~
   imagePullPolicy: IfNotPresent
 
+initContainer:
+  image:
+    repository: gcr.io/pluralsh/library/busybox
+    tag: 1.35.0
+
 serviceAccount:
   create: true
   annotations: {}
