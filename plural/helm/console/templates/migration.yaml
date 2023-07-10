@@ -14,12 +14,12 @@ spec:
       {{- end }}
       initContainers:
       - name: wait-for-pg
-        image: gcr.io/pluralsh/busybox:latest
+        image: {{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}
         imagePullPolicy: IfNotPresent
         command: [ "/bin/sh", "-c", "until nc -zv plural-console 5432 -w1; do echo 'waiting for db'; sleep 1; done" ]
       containers:
       - name: migrator
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         command: ["/opt/app/bin/console",  "migrate"]
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         envFrom:
