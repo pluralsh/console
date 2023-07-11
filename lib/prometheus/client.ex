@@ -14,7 +14,7 @@ defmodule Prometheus.Client do
         {"start", DateTime.to_iso8601(start)},
         {"step", step}
       ]},
-      @headers
+      headers(@headers)
     )
     |> case do
       {:ok, %{body: body, status_code: 200}} ->
@@ -43,5 +43,12 @@ defmodule Prometheus.Client do
         String.replace(str, "$#{key}", value)
       _, str -> str
     end)
+  end
+
+  def headers(base \\ []) do
+    case Console.conf(:grafana_tenant) do
+      nil -> base
+      tenant -> [{"X-Scope-OrgID", tenant} | base]
+    end
   end
 end

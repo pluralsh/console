@@ -5,7 +5,7 @@ defmodule ConsoleWeb.LogControllerTest do
   describe "#download/2" do
     test "it will download logs for a permitted user", %{conn: conn} do
       admin = insert(:user, roles: %{admin: true})
-      expect(HTTPoison, :get, 2, fn url ->
+      expect(HTTPoison, :get, 2, fn url, _ ->
         URI.parse(url)
         |> Map.get(:query)
         |> URI.decode_query()
