@@ -16,7 +16,7 @@ import {
   TabPanel,
   useBreadcrumbs,
 } from '@pluralsh/design-system'
-import { Flex } from 'honorable'
+import { Div, Flex } from 'honorable'
 import styled from 'styled-components'
 import { useQuery } from '@apollo/client'
 import {
@@ -161,38 +161,39 @@ export default function Container() {
             tabStateRef={tabStateRef}
           />
           {(initContainers || containers) && (
-            <Select
-              width="100%"
-              placement="right"
-              selectedKey={containerName}
-              onSelectionChange={(toContainerName) => {
-                navigate(
-                  `/pods/${pod?.metadata.namespace}/${
-                    pod?.metadata.name
-                  }/shell/${toContainerName}${subpath ? `/${subpath}` : ''}`
-                )
-              }}
-              triggerButton={<SelectTrigger>{containerName}</SelectTrigger>}
-            >
-              {[
-                ...(initContainers || []).map((container, i) => (
-                  <ListBoxItem
-                    key={`init: ${container?.name || i}`}
-                    label={container?.name ? `init: ${container?.name}` : ''}
-                    textValue={
-                      container?.name ? `init: ${container?.name}` : ''
-                    }
-                  />
-                )),
-                ...(containers || []).map((container, i) => (
-                  <ListBoxItem
-                    key={container?.name || `${i}`}
-                    label={container?.name || ''}
-                    textValue={container?.name || ''}
-                  />
-                )),
-              ]}
-            </Select>
+            <Div minWidth={260}>
+              <Select
+                placement="right"
+                selectedKey={containerName}
+                onSelectionChange={(toContainerName) => {
+                  navigate(
+                    `/pods/${pod?.metadata.namespace}/${
+                      pod?.metadata.name
+                    }/shell/${toContainerName}${subpath ? `/${subpath}` : ''}`
+                  )
+                }}
+                triggerButton={<SelectTrigger>{containerName}</SelectTrigger>}
+              >
+                {[
+                  ...(initContainers || []).map((container, i) => (
+                    <ListBoxItem
+                      key={`init: ${container?.name || i}`}
+                      label={container?.name ? `init: ${container?.name}` : ''}
+                      textValue={
+                        container?.name ? `init: ${container?.name}` : ''
+                      }
+                    />
+                  )),
+                  ...(containers || []).map((container, i) => (
+                    <ListBoxItem
+                      key={container?.name || `${i}`}
+                      label={container?.name || ''}
+                      textValue={container?.name || ''}
+                    />
+                  )),
+                ]}
+              </Select>
+            </Div>
           )}
         </Flex>
       }
