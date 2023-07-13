@@ -102,6 +102,9 @@ const marketingTextPartials = {
     },
     '&:visited, &:active': {
       color: semanticColorCssVars['action-link-inline-visited'],
+      '&:hover': {
+        color: semanticColorCssVars['action-link-inline-visited-hover'],
+      },
     },
   },
   navLink: {

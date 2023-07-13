@@ -156,17 +156,23 @@ const textPartials = {
     textOverflow: 'ellipsis',
   },
   inlineLink: {
+    // Intermediate variables needed to avoid mangling by Honorable
+    // Must declare all intermediate color variables at style root due to
+    // security restritions on setting properties for :visited pseudo-class
     '--inline-link-c': semanticColorCssVars['action-link-inline'],
+    '--inline-link-c-h': semanticColorCssVars['action-link-inline-hover'],
+    '--inline-link-c-v': semanticColorCssVars['action-link-inline-visited'],
+    '--inline-link-c-v-h':
+      semanticColorCssVars['action-link-inline-visited-hover'],
     color: `var(--inline-link-c)`,
     textDecoration: 'underline',
     '&:hover': {
-      '--inline-link-c': semanticColorCssVars['action-link-inline-hover'],
+      color: 'var(--inline-link-c-h)',
     },
     '&:visited, &:active': {
-      '--inline-link-c': semanticColorCssVars['action-link-inline-visited'],
+      color: 'var(--inline-link-c-v)',
       '&:hover': {
-        '--inline-link-c':
-          semanticColorCssVars['action-link-inline-visited-hover'],
+        color: 'var(--inline-link-c-v-h)',
       },
     },
   },

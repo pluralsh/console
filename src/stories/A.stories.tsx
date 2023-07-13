@@ -8,7 +8,10 @@ export default {
 function Template(args: any) {
   return (
     <Flex gap="medium">
-      <A {...args} />
+      <A
+        href="#"
+        {...args}
+      />
       <A
         href="https://github.com"
         {...args}
@@ -16,6 +19,7 @@ function Template(args: any) {
         Github
       </A>
       <A
+        href="#"
         inline
         {...args}
       >
