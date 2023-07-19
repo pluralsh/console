@@ -1,3 +1,6 @@
+import { ExtendTheme, Spinner, mergeTheme } from 'honorable'
+import { omitBy } from 'lodash'
+import { isUndefined, omit, pick } from 'lodash-es'
 import {
   type HTMLAttributes,
   type Key,
@@ -11,33 +14,28 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useComboBox } from 'react-aria'
+import { type AriaButtonProps, useButton, useComboBox } from 'react-aria'
+import { mergeRefs } from 'react-merge-refs'
 import {
   type ComboBoxState,
   type ComboBoxStateOptions,
   useComboBoxState,
 } from 'react-stately'
-import { type AriaButtonProps, useButton } from 'react-aria'
-import { isUndefined, omit, pick } from 'lodash-es'
 import styled, { useTheme } from 'styled-components'
-import { ExtendTheme, mergeTheme } from 'honorable'
-
-import { omitBy } from 'lodash'
-
-import { mergeRefs } from 'react-merge-refs'
 
 import { useFloatingDropdown } from '../hooks/useFloatingDropdown'
 
-import { type ListBoxItemBaseProps } from './ListBoxItem'
 import DropdownArrowIcon from './icons/DropdownArrowIcon'
+import SearchIcon from './icons/SearchIcon'
 import Input, { type InputProps } from './Input'
+
+import { type ListBoxItemBaseProps } from './ListBoxItem'
+import { PopoverListBox } from './PopoverListBox'
+import { SelectInner } from './Select'
 import {
   setNextFocusedKey,
   useSelectComboStateProps,
 } from './SelectComboShared'
-import { PopoverListBox } from './PopoverListBox'
-import SearchIcon from './icons/SearchIcon'
-import { SelectInner } from './Select'
 
 type Placement = 'left' | 'right'
 
@@ -57,6 +55,7 @@ type ComboBoxProps = Exclude<ComboBoxInputProps, 'children'> & {
   maxHeight?: string | number
   inputProps?: InputProps
   filter?: ComboBoxStateOptions<object>['defaultFilter']
+  loading?: boolean
 } & Omit<
     ComboBoxStateOptions<object>,
     'onLoadMore' | 'isLoading' | 'validationState' | 'placeholder'
@@ -86,6 +85,7 @@ type ComboBoxInputProps = {
   inputRef?: RefObject<HTMLInputElement>
   buttonRef?: RefObject<HTMLDivElement>
   buttonProps?: AriaButtonProps
+  loading?: boolean
 }
 
 const OpenButton = styled(
@@ -157,6 +157,7 @@ function ComboBoxInput({
   showArrow = true,
   isOpen,
   onInputClick,
+  loading,
 }: ComboBoxInputProps & InputProps) {
   outerInputProps = {
     ...outerInputProps,
@@ -214,7 +215,15 @@ function ComboBoxInput({
   return (
     <ExtendTheme theme={themeExtension}>
       <Input
-        startIcon={startIcon && <StartIconButton>{startIcon}</StartIconButton>}
+        startIcon={
+          loading ? (
+            <StartIconButton>
+              <Spinner />
+            </StartIconButton>
+          ) : (
+            startIcon && <StartIconButton>{startIcon}</StartIconButton>
+          )
+        }
         endIcon={
           showArrow ? (
             <OpenButton
@@ -258,6 +267,7 @@ function ComboBox({
   width,
   maxHeight,
   inputProps: outerInputProps = {},
+  loading,
   ...props
 }: ComboBoxProps) {
   const nextFocusedKeyRef = useRef<Key>(null)
@@ -409,6 +419,7 @@ function ComboBox({
         setIsOpen={setIsOpen}
         startIcon={startIcon}
         outerInputProps={outerInputProps}
+        loading={loading}
         onInputClick={() => {
           setIsOpen(true)
           // Need to also manually open with state to override
