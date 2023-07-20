@@ -1,4 +1,5 @@
 defmodule Console.Commands.Plural do
+  require Logger
   import Console
   import Console.Commands.Command, only: [cmd: 3, cmd_raw: 3]
 
@@ -18,7 +19,12 @@ defmodule Console.Commands.Plural do
 
   def unlock_repo(repo), do: plural("repos", ["unlock", repo])
 
-  def diff(_repo \\ :ignore), do: plural("diff", [])
+  def diff(_repo \\ :ignore) do
+    case plural("diff", []) do
+      {:ok, _} = ok -> ok
+      {:error, error} -> {:ok, error} # swallow diff errors to prevent it from jamming builds
+    end
+  end
 
   def bounce(repo), do: plural("bounce", [repo])
 
