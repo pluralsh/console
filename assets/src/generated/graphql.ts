@@ -1,4 +1,5 @@
 /* eslint-disable */
+/* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
@@ -1217,6 +1218,7 @@ export type RootMutationType = {
   deletePod?: Maybe<Pod>;
   deleteRole?: Maybe<Role>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
+  deleteUser?: Maybe<User>;
   deleteWebhook?: Maybe<Webhook>;
   executeRunbook?: Maybe<RunbookActionResponse>;
   installRecipe?: Maybe<Build>;
@@ -1329,6 +1331,11 @@ export type RootMutationTypeDeleteRoleArgs = {
 
 
 export type RootMutationTypeDeleteUpgradePolicyArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteUserArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -3068,3 +3075,42 @@ export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const namedOperations = {
+  Query: {
+    App: 'App',
+    AppInfo: 'AppInfo',
+    Repository: 'Repository',
+    PluralContext: 'PluralContext',
+    Groups: 'Groups',
+    SearchGroups: 'SearchGroups',
+    GroupMembers: 'GroupMembers',
+    Me: 'Me'
+  },
+  Mutation: {
+    CreateBuild: 'CreateBuild',
+    CreateGroupMember: 'CreateGroupMember',
+    DeleteGroupMember: 'DeleteGroupMember',
+    CreateGroup: 'CreateGroup',
+    UpdateGroup: 'UpdateGroup',
+    DeleteGroup: 'DeleteGroup'
+  },
+  Fragment: {
+    CostAnalysisFragment: 'CostAnalysisFragment',
+    FileContentFragment: 'FileContentFragment',
+    ConfigurationFragment: 'ConfigurationFragment',
+    ApplicationSpecFragment: 'ApplicationSpecFragment',
+    ApplicationStatusFragment: 'ApplicationStatusFragment',
+    ApplicationFragment: 'ApplicationFragment',
+    MetadataFragment: 'MetadataFragment',
+    ConfigurationOverlayFragment: 'ConfigurationOverlayFragment',
+    RepositoryFragment: 'RepositoryFragment',
+    PageInfo: 'PageInfo',
+    GroupMember: 'GroupMember',
+    Group: 'Group',
+    User: 'User',
+    Invite: 'Invite',
+    RoleBinding: 'RoleBinding',
+    Role: 'Role',
+    Manifest: 'Manifest'
+  }
+}

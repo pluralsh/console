@@ -77,6 +77,13 @@ defmodule Console.Services.Users do
     |> notify(:create)
   end
 
+  @spec delete_user(binary, User.t) :: user_resp
+  def delete_user(id, %User{id: id}), do: {:error, "you cannot delete yourself"}
+  def delete_user(id, %User{}) do
+    get_user!(id)
+    |> Repo.delete()
+  end
+
   @spec bootstrap_user(map) :: user_resp
   def bootstrap_user(%{"email" => email} = attrs) do
     attrs = token_attrs(attrs)

@@ -777,6 +777,7 @@ type RootMutationType {
   oauthCallback(code: String!, redirect: String): User
   createInvite(attributes: InviteAttributes!): Invite
   updateUser(id: ID, attributes: UserAttributes!): User
+  deleteUser(id: ID!): User
   markRead(type: ReadType): User
   createGroup(attributes: GroupAttributes!): Group
   deleteGroup(groupId: ID!): Group
