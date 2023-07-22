@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Configuration do
   use Console.GraphQl.Schema.Base
   require Logger
-  alias Console.Middleware.{Authenticated, Sandboxed}
+  alias Console.Middleware.{Sandboxed}
   alias Console.GraphQl.Resolvers.Plural
 
   object :configuration do

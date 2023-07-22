@@ -1,6 +1,5 @@
 defmodule Console.GraphQl.Policies do
   use Console.GraphQl.Schema.Base
-  alias Console.Middleware.{Authenticated, AdminRequired}
   alias Console.GraphQl.Resolvers.Policy
 
   ecto_enum :upgrade_policy_type, Console.Schema.UpgradePolicy.Type

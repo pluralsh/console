@@ -612,6 +612,7 @@ export type HttpIngressRule = {
 
 export type Ingress = {
   __typename?: 'Ingress';
+  certificates?: Maybe<Array<Maybe<Certificate>>>;
   events?: Maybe<Array<Maybe<Event>>>;
   metadata: Metadata;
   raw: Scalars['String']['output'];
@@ -1210,6 +1211,7 @@ export type RootMutationType = {
   createRole?: Maybe<Role>;
   createUpgradePolicy?: Maybe<UpgradePolicy>;
   createWebhook?: Maybe<Webhook>;
+  deleteCertificate?: Maybe<Scalars['Boolean']['output']>;
   deleteGroup?: Maybe<Group>;
   deleteGroupMember?: Maybe<GroupMember>;
   deleteJob?: Maybe<Job>;
@@ -1289,6 +1291,12 @@ export type RootMutationTypeCreateUpgradePolicyArgs = {
 
 export type RootMutationTypeCreateWebhookArgs = {
   attributes: WebhookAttributes;
+};
+
+
+export type RootMutationTypeDeleteCertificateArgs = {
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
 };
 
 

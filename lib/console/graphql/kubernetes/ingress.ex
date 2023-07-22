@@ -8,6 +8,8 @@ defmodule Console.GraphQl.Kubernetes.Ingress do
     field :status,   non_null(:service_status)
     field :spec,     non_null(:ingress_spec)
 
+    field :certificates, list_of(:certificate), resolve: fn model, _, _ -> Kubernetes.ingress_certificates(model) end
+
     field :raw,    non_null(:string), resolve: fn model, _, _ -> encode(model) end
     field :events, list_of(:event), resolve: fn model, _, _ -> Kubernetes.list_events(model) end
   end

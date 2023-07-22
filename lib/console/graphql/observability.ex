@@ -1,7 +1,6 @@
 defmodule Console.GraphQl.Observability do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Observability
-  alias Console.Middleware.{Authenticated, Rbac}
 
   enum :autoscaling_target do
     value :statefulset

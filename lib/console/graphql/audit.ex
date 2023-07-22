@@ -1,7 +1,6 @@
 defmodule Console.GraphQl.Audit do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.{User, Audit}
-  alias Console.Middleware.{Authenticated}
   alias Console.Schema
 
   ecto_enum :audit_type, Schema.Audit.Type

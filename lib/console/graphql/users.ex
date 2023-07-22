@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Users do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.User
-  alias Console.Middleware.{Authenticated, AdminRequired, AllowJwt, Sandboxed}
+  alias Console.Middleware.{AllowJwt, Sandboxed}
   alias Console.Schema.Notification.{Severity, Status}
 
   enum_from_list :permission, Console.Schema.Role, :permissions, []

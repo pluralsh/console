@@ -80,6 +80,14 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     Client.get_certificate(ns, name)
   end
 
+  def ingress_certificates(%{metadata: %{namespace: ns}, spec: %{tls: [_ | _] = tls}}) do
+    names = MapSet.new(tls, & &1.secret_name)
+    with {:ok, %{items: certs}} <- Client.list_certificate(ns) do
+      {:ok, %{items: Enum.filter(certs, &MapSet.member?(names, &1.metadata.name))}}
+    end
+  end
+  def ingress_certificates(_), do: {:ok, []}
+
   def list_nodes(_, _) do
     Core.list_node!()
     |> Kazan.run()
@@ -121,6 +129,11 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
       response_model: BatchV1.Job
     }
     |> Kazan.run()
+  end
+
+  def delete_certificate(%{namespace: ns, name: name}, _) do
+    with {:ok, _} <- Client.delete_certificate(ns, name),
+      do: {:ok, true}
   end
 
   def list_events(%{metadata: %{uid: uid, namespace: ns}}) do
