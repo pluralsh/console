@@ -1,6 +1,6 @@
 defmodule Console.GraphQl.Runbooks do
   use Console.GraphQl.Schema.Base
-  alias Console.Middleware.{Authenticated, RequiresGit, Rbac}
+  alias Console.Middleware.{RequiresGit}
   alias Console.GraphQl.Resolvers.{Runbooks, User}
   alias Kazan.Apis.Apps.V1, as: AppsV1
 

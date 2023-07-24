@@ -112,7 +112,7 @@ export const getDirectory = ({
       label: 'Cost analysis',
       enabled: app?.cost || app?.license,
     },
-    { path: 'oidc', label: 'User management', enabled: true },
+    { path: 'oidc', label: 'OpenID user management', enabled: true },
     {
       path: 'credentials',
       label: 'Credentials',

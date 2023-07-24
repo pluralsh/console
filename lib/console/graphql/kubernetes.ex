@@ -283,6 +283,8 @@ defmodule Console.GraphQl.Kubernetes do
 
       safe_resolve &VPN.delete_peer/2
     end
+
+    import_fields :certificate_mutations
   end
 
   object :kubernetes_subscriptions do

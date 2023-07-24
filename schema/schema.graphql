@@ -777,6 +777,7 @@ type RootMutationType {
   oauthCallback(code: String!, redirect: String): User
   createInvite(attributes: InviteAttributes!): Invite
   updateUser(id: ID, attributes: UserAttributes!): User
+  deleteUser(id: ID!): User
   markRead(type: ReadType): User
   createGroup(attributes: GroupAttributes!): Group
   deleteGroup(groupId: ID!): Group
@@ -786,6 +787,7 @@ type RootMutationType {
   createRole(attributes: RoleAttributes!): Role
   updateRole(id: ID!, attributes: RoleAttributes!): Role
   deleteRole(id: ID!): Role
+  deleteCertificate(name: String!, namespace: String!): Boolean
   deletePod(namespace: String!, name: String!): Pod
   deleteJob(namespace: String!, name: String!): Job
   deleteNode(name: String!): Node
@@ -1057,6 +1059,7 @@ type Ingress {
   metadata: Metadata!
   status: ServiceStatus!
   spec: IngressSpec!
+  certificates: [Certificate]
   raw: String!
   events: [Event]
 }
@@ -1284,11 +1287,6 @@ type ContainerState {
   waiting: WaitingState
 }
 
-input RunbookActionInput {
-  action: String!
-  context: Map!
-}
-
 type RepositoryContext {
   repository: String!
   context: Map
@@ -1312,6 +1310,11 @@ type Audit {
 input LabelInput {
   name: String
   value: String
+}
+
+input RunbookActionInput {
+  action: String!
+  context: Map!
 }
 
 type Dashboard {

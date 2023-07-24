@@ -278,7 +278,7 @@ export default function UserManagement() {
   return (
     <ScrollablePage
       scrollable={false}
-      heading="User management"
+      heading="OpenID User management"
     >
       <PluralApi>
         <UserManagementContent />

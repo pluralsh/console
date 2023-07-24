@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Build do
   use Console.GraphQl.Schema.Base
   alias Console.Schema
-  alias Console.Middleware.{Authenticated, RequiresGit, Rbac}
+  alias Console.Middleware.{RequiresGit}
   alias Console.GraphQl.Resolvers.{Build, User}
 
   ecto_enum :status, Schema.Build.Status

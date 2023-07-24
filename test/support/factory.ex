@@ -138,4 +138,8 @@ defmodule Console.Factory do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)
   end
+
+  def admin_user() do
+    insert(:user, roles: %{admin: true})
+  end
 end

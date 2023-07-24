@@ -9,6 +9,7 @@ defmodule Kube.Client do
   list_request :list_runbooks, Kube.RunbookList, "platform.plural.sh", "v1alpha1", "runbooks"
   list_request :list_vertical_pod_autoscalers, Kube.VerticalPodAutoscalerList, "autoscaling.k8s.io", "v1", "verticalpodautoscalers"
   list_request :list_wireguard_peers, Kube.WireguardPeerList, "vpn.plural.sh", "v1alpha1", "wireguardpeers"
+  list_request :list_certificate, Kube.Certificate, "cert-manager.io", "v1", "certificates"
 
   get_request :get_dashboard, Kube.Dashboard, "platform.plural.sh", "v1alpha1", "dashboards"
   get_request :get_slashcommand, Kube.SlashCommand, "platform.plural.sh", "v1alpha1", "slashcommands"
@@ -21,6 +22,7 @@ defmodule Kube.Client do
   get_request :get_wireguard_server, Kube.WireguardServer, "vpn.plural.sh", "v1alpha1", "wireguardservers"
 
   delete_request :delete_wireguard_peer, "vpn.plural.sh", "v1alpha1", "wireguardpeers"
+  delete_request :delete_certificate, "cert-manager.io", "v1", "certificates"
 
   def get_application(name), do: get_application(name, name)
 

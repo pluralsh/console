@@ -113,6 +113,29 @@ defmodule Console.GraphQl.KubernetesMutationsTest do
     end
   end
 
+  describe "deleteCertificate" do
+    test "admins can delete certificates" do
+      admin = admin_user()
+      expect(Kazan, :run, fn _ -> {:ok, certificate("test")} end)
+
+      {:ok, %{data: %{"deleteCertificate" => true}}} = run_query("""
+        mutation Delete($name: String!, $namespace: String!) {
+          deleteCertificate(name: $name, namespace: $namespace)
+        }
+      """, %{"name" => "test", "namespace" => "ns"}, %{current_user: admin})
+    end
+
+    test "nonadmins cannot delete certificates" do
+      user = insert(:user)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Delete($name: String!, $namespace: String!) {
+          deleteCertificate(name: $name, namespace: $namespace)
+        }
+      """, %{"name" => "test", "namespace" => "ns"}, %{current_user: user})
+    end
+  end
+
   describe "deletePeer" do
     test "admins can delete wireguard peers" do
       admin = insert(:user, roles: %{admin: true})

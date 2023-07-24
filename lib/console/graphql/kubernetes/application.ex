@@ -1,6 +1,5 @@
 defmodule Console.GraphQl.Kubernetes.Application do
   use Console.GraphQl.Schema.Base
-  alias Console.Middleware.{Rbac}
   alias Console.GraphQl.Resolvers.{Plural, Kubecost, License}
 
   object :application do

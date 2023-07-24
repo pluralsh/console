@@ -118,6 +118,46 @@ defmodule Console.GraphQl.UserMutationsTest do
     end
   end
 
+  describe "deleteUser" do
+    test "admins can delete other users" do
+      admin = admin_user()
+      user = insert(:user)
+
+      {:ok, %{data: %{"deleteUser" => del}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteUser(id: $id) { id }
+        }
+      """, %{"id" => user.id}, %{current_user: admin})
+
+      assert del["id"] == user.id
+      refute refetch(user)
+    end
+
+    test "admins cannot delete themselves" do
+      admin = admin_user()
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteUser(id: $id) { id }
+        }
+      """, %{"id" => admin.id}, %{current_user: admin})
+
+      assert refetch(admin)
+    end
+
+    test "nonadmins cannot delete users" do
+      [user, other] = insert_list(2, :user)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteUser(id: $id) { id }
+        }
+      """, %{"id" => other.id}, %{current_user: user})
+
+      assert refetch(user)
+    end
+  end
+
   describe "createGroup" do
     test "it can create a group" do
       admin = insert(:user, roles: %{admin: true})

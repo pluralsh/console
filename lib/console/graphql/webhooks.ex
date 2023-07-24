@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Webhooks do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Webhook
-  alias Console.Middleware.{Authenticated, Sandboxed}
+  alias Console.Middleware.{Sandboxed}
   alias Console.Schema
 
   ecto_enum :webhook_type, Schema.Webhook.Type

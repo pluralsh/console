@@ -30,4 +30,16 @@ defmodule Console.GraphQl.Kubernetes.Certificate do
     field :kind,  :string
     field :name,  :string
   end
+
+  object :certificate_mutations do
+    field :delete_certificate, :boolean do
+      middleware Authenticated
+      middleware AdminRequired
+
+      arg :name,      non_null(:string)
+      arg :namespace, non_null(:string)
+
+      safe_resolve &Kubernetes.delete_certificate/2
+    end
+  end
 end
