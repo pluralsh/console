@@ -1,10 +1,10 @@
 apiVersion: v2
-appVersion: 0.4.18
-description: A chart for plural console
 name: console
-version: 0.7.67
+description: A chart for plural console
+appVersion: 0.4.19
+version: 0.7.68
 dependencies:
-- name: test-base
-  repository: https://pluralsh.github.io/module-library
-  version: 0.1.10
-  condition: test-base.enabled
+  - name: test-base
+    version: 0.1.10
+    repository: https://pluralsh.github.io/module-library
+    condition: test-base.enabled
