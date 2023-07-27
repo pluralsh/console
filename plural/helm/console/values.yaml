@@ -137,7 +137,7 @@ test-base:
   testName: console-integration
   promoteTag: stable
   tags:
-  - 0.4.17
+  - 0.4.19
   secret:
     CYPRESS_EMAIL: ""
     CYPRESS_PASSWORD: ""
