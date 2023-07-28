@@ -1,3 +1,7 @@
+require Kube.Parser
+
+Kube.Parser.parse(path: "crds/postgresql.yaml", module: Kube.Postgresql)
+
 defmodule Kube.Dashboard do
   use Kazan.Model
 

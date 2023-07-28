@@ -9,13 +9,15 @@ defmodule Kube.Client do
   list_request :list_runbooks, Kube.RunbookList, "platform.plural.sh", "v1alpha1", "runbooks"
   list_request :list_vertical_pod_autoscalers, Kube.VerticalPodAutoscalerList, "autoscaling.k8s.io", "v1", "verticalpodautoscalers"
   list_request :list_wireguard_peers, Kube.WireguardPeerList, "vpn.plural.sh", "v1alpha1", "wireguardpeers"
-  list_request :list_certificate, Kube.Certificate, "cert-manager.io", "v1", "certificates"
+  list_request :list_certificate, Kube.CertificateList, "cert-manager.io", "v1", "certificates"
+  list_request :list_postgresqls, Kube.Postgresql.List, "acid.zalan.do", "v1", "postgresqls"
 
   get_request :get_dashboard, Kube.Dashboard, "platform.plural.sh", "v1alpha1", "dashboards"
   get_request :get_slashcommand, Kube.SlashCommand, "platform.plural.sh", "v1alpha1", "slashcommands"
   get_request :get_application, Kube.Application, "app.k8s.io", "v1beta1", "applications"
   get_request :get_certificate, Kube.Certificate, "cert-manager.io", "v1", "certificates"
   get_request :get_runbook, Kube.Runbook, "platform.plural.sh", "v1alpha1", "runbooks"
+  get_request :get_postgresql, Kube.Postgresql, "acid.zalan.do", "v1", "postgresqls"
   get_request :get_statefulset_resize, Kube.StatefulSetResize, "platform.plural.sh", "v1alpha1", "statefulsetresizes"
   get_request :get_vertical_pod_autoscaler, Kube.VerticalPodAutoscaler, "autoscaling.k8s.io", "v1", "verticalpodautoscalers"
   get_request :get_wireguard_peer, Kube.WireguardPeer, "vpn.plural.sh", "v1alpha1", "wireguardpeers"
@@ -23,8 +25,15 @@ defmodule Kube.Client do
 
   delete_request :delete_wireguard_peer, "vpn.plural.sh", "v1alpha1", "wireguardpeers"
   delete_request :delete_certificate, "cert-manager.io", "v1", "certificates"
+  delete_request :delete_postgresql, "acid.zalan.do", "v1", "postgresqls"
+
+  create_request :create_postgresql, Kube.Postgresql, "acid.zalan.do", "v1", "postgresqls"
 
   def get_application(name), do: get_application(name, name)
+
+  def list_postgresqls() do
+    make_request("/apis/acid.zalan.do/v1/postgresqls", "get", Kube.Postgresql.List)
+  end
 
   def list_slashcommands() do
     make_request("/apis/platform.plural.sh/v1alpha1/slashcommands", "get", Kube.SlashCommandList)

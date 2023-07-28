@@ -18,7 +18,7 @@ defmodule Console.Schema.RoleBinding do
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:role_id)
     |> foreign_key_constraint(:group_id)
-    |> unique_constraint(:user_id, name: index_name(:role_bindings, [:role_id, :user_id]))
-    |> unique_constraint(:group_id, name: index_name(:role_bindings, [:role_id, :group_id]))
+    |> unique_constraint([:role_id, :user_id])
+    |> unique_constraint([:role_id, :group_id])
   end
 end

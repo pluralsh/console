@@ -41,9 +41,11 @@ defmodule Console.GraphQl.Kubernetes do
 
   object :resource_spec do
     field :cpu,    :string, resolve: fn
+      %{cpu: cpu}, _, _ -> {:ok, cpu}
       resources, _, _ -> {:ok, resources["cpu"]}
     end
     field :memory, :string, resolve: fn
+      %{memory: memory}, _, _ -> {:ok, memory}
       resources, _, _ -> {:ok, resources["memory"]}
     end
   end

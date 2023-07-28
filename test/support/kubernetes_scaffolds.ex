@@ -262,4 +262,16 @@ defmodule KubernetesScaffolds do
       status: %Kube.WireguardServer.Status{ready: true}
     }
   end
+
+  def postgres(name) do
+    %Kube.Postgresql{
+      metadata: %ObjectMeta{name: name, namespace: name, uid: Ecto.UUID.generate()},
+      spec: %Kube.Postgresql.Spec{
+        team_id: "plural",
+        postgresql: %Kube.Postgresql.Spec.Postgresql{version: "13"},
+        resources: %Kube.Postgresql.Spec.Resources{requests: %{cpu: "1", memory: "1Gi"}}
+      },
+      status: %{"PostgresClusterStatus" => "Running"}
+    }
+  end
 end

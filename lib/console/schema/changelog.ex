@@ -18,7 +18,7 @@ defmodule Console.Schema.Changelog do
     model
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:build_id)
-    |> unique_constraint(:tool, name: index_name(:changelog, [:build_id, :repo, :tool]))
+    |> unique_constraint([:build_id, :repo, :tool])
     |> validate_required([:repo, :tool, :build_id])
   end
 end

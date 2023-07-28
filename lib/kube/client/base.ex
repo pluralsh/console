@@ -17,6 +17,7 @@ defmodule Kube.Client.Base do
     |> Kazan.run()
   end
 
+  def path_builder(g, v, k), do: "/apis/#{g}/#{v}/#{k}"
   def path_builder(g, v, k, namespace), do: "/apis/#{g}/#{v}/namespaces/#{Console.namespace(namespace)}/#{k}"
   def path_builder(g, v, k, namespace, name), do: "#{path_builder(g, v, k, namespace)}/#{name}"
 
@@ -28,6 +29,23 @@ defmodule Kube.Client.Base do
           path: path_builder(unquote(g), unquote(v), unquote(k), namespace, name),
           query_params: params,
           response_model: unquote(model)
+        }
+        |> Kazan.run()
+      end
+    end
+  end
+
+  defmacro create_request(name, model, g, v, k) do
+    quote do
+      def unquote(name)(resource, namespace, params \\ %{}) do
+        {:ok, encoded} = unquote(model).encode(resource)
+        %Kazan.Request{
+          method: "post",
+          path: path_builder(unquote(g), unquote(v), unquote(k), namespace),
+          response_model: unquote(model),
+          query_params: params,
+          body: Jason.encode!(encoded),
+          content_type: "application/json",
         }
         |> Kazan.run()
       end

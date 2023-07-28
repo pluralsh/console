@@ -93,3 +93,9 @@ if !!get_env("CONSOLE_LOGIN_KEY") and get_env("CONSOLE_LOGIN_EMAIL") do
     key: get_env("CONSOLE_LOGIN_KEY"),
     email: get_env("CONSOLE_LOGIN_EMAIL")
 end
+
+if !!get_env("BACKUP_ACCESS_KEY") and !!get_env("BACKUP_SECRET_ACCESS_KEY") do
+  config :console, :backup_keys,
+    s3_access_key_id: get_env("BACKUP_ACCESS_KEY"),
+    s3_secret_access_key: get_env("BACKUP_SECRET_ACCESS_KEY")
+end
