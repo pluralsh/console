@@ -1,4 +1,5 @@
 defmodule Console.Services.Observability do
+  import Kube.Utils, only: [metadata: 1]
   alias Kube.{Client, Dashboard, VerticalPodAutoscaler}
   alias Prometheus.Client, as: PrometheusClient
   alias Loki.Client, as: LokiClient
@@ -25,12 +26,15 @@ defmodule Console.Services.Observability do
     vpa_name = vpa_name(kind, namespace, name)
     case Client.get_vertical_pod_autoscaler(namespace, vpa_name) do
       {:ok, result} -> {:ok, result}
-      _ -> Client.create_vertical_pod_autoscaler(namespace, vpa_name, vpa_template(kind, name))
+      _ ->
+        vpa_template(kind, name, vpa_name)
+        |> Client.create_vertical_pod_autoscaler(namespace)
     end
   end
 
-  defp vpa_template(kind, name) do
+  defp vpa_template(kind, name, vpa_name) do
     %VerticalPodAutoscaler{
+      metadata: metadata(vpa_name),
       spec: %VerticalPodAutoscaler.Spec{
         update_policy: %VerticalPodAutoscaler.Spec.UpdatePolicy{update_mode: "Off"},
         target_ref: %CrossVersionObjectReference{

@@ -1,5 +1,6 @@
 import Config
 import System, only: [get_env: 1, get_env: 2]
+import Console, only: [is_set: 1]
 
 config :ra,
   data_dir: '/data/ra'
@@ -94,7 +95,7 @@ if !!get_env("CONSOLE_LOGIN_KEY") and get_env("CONSOLE_LOGIN_EMAIL") do
     email: get_env("CONSOLE_LOGIN_EMAIL")
 end
 
-if !!get_env("BACKUP_ACCESS_KEY") and !!get_env("BACKUP_SECRET_ACCESS_KEY") do
+if is_set("BACKUP_ACCESS_KEY") and is_set("BACKUP_SECRET_ACCESS_KEY") do
   config :console, :backup_keys,
     s3_access_key_id: get_env("BACKUP_ACCESS_KEY"),
     s3_secret_access_key: get_env("BACKUP_SECRET_ACCESS_KEY")

@@ -268,6 +268,7 @@ export type CloneAttributes = {
   s3Endpoint?: InputMaybe<Scalars['String']['input']>;
   s3SecretAccessKey?: InputMaybe<Scalars['String']['input']>;
   s3WalPath?: InputMaybe<Scalars['String']['input']>;
+  uid?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ClusterInfo = {

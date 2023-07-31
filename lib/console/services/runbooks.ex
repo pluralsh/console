@@ -30,7 +30,7 @@ defmodule Console.Services.Runbooks do
   @spec execute(Runbook.t, binary, binary, map, User.t) :: {:ok | :error, term}
   def execute(%Runbook{spec: %{actions: actions}} = book, action, repo, ctx, %User{} = user) do
     actor = Runbooks.Actor.build(repo, ctx, user)
-    with %Runbook.Action{} = act <- Enum.find(actions, & &1.name == action) do
+    with %Runbook.Spec.Actions{} = act <- Enum.find(actions, & &1.name == action) do
       start_transaction()
       |> add_operation(:enact, fn _ -> Runbooks.Actor.enact(act, actor) end)
       |> add_operation(:record, fn _ ->
@@ -69,7 +69,7 @@ defmodule Console.Services.Runbooks do
     end)
   end
 
-  defp action_response(%Runbook.Action{redirect_to: redirect}) when is_binary(redirect),
+  defp action_response(%Runbook.Spec.Actions{redirect_to: redirect}) when is_binary(redirect),
     do: {:ok, %{redirect_to: redirect}}
   defp action_response(_), do: {:ok, %{}}
 end

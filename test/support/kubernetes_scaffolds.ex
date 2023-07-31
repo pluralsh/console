@@ -167,11 +167,11 @@ defmodule KubernetesScaffolds do
       spec: %Kube.Runbook.Spec{
         name: name,
         datasources: datasources,
-        actions: [%Kube.Runbook.Action{
+        actions: [%Kube.Runbook.Spec.Actions{
           name: "action",
-          configuration: %Kube.Runbook.ConfigurationAction{
+          configuration: %Kube.Runbook.Spec.Actions.Configuration{
             updates: [
-              %Kube.Runbook.PathUpdate{
+              %Kube.Runbook.Spec.Actions.Configuration.Updates{
                 path: ["some", "path"],
                 value_from: "path"
               }
@@ -191,21 +191,21 @@ defmodule KubernetesScaffolds do
 
   def runbook_datasource(type, name, opts \\ [])
   def runbook_datasource(:prometheus, name, _) do
-    %Kube.Runbook.Datasource{
+    %Kube.Runbook.Spec.Datasources{
       name: name,
-      prometheus: %Kube.Runbook.Prometheus{query: "query"},
+      prometheus: %Kube.Runbook.Spec.Datasources.Prometheus{query: "query"},
     }
   end
 
   def runbook_datasource(:kubernetes, name, opts) do
-    %Kube.Runbook.Datasource{
+    %Kube.Runbook.Spec.Datasources{
       name: name,
-      kubernetes: struct(Kube.Runbook.Kubernetes, opts),
+      kubernetes: struct(Kube.Runbook.Spec.Datasources.Kubernetes, opts),
     }
   end
 
   def runbook_datasource(:nodes, name, _) do
-    %Kube.Runbook.Datasource{type: "nodes", name: name}
+    %Kube.Runbook.Spec.Datasources{type: "nodes", name: name}
   end
 
   def license(name) do

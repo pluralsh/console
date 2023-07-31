@@ -7,6 +7,9 @@ defmodule Kube.Utils do
   @type secret_resp :: {:ok, CoreV1.Secret.t} | error
   @type statefulset_resp :: {:ok, AppsV1.StatefulSet.t} | error
 
+  @spec metadata(binary) :: MetaV1.ObjectMeta.t
+  def metadata(name, other \\ %{}), do: struct(MetaV1.ObjectMeta, Map.merge(%{name: name}, other))
+
   @spec get_secret(binary, binary) :: secret_resp
   def get_secret(ns, name) do
     CoreV1.read_namespaced_secret!(ns, name)

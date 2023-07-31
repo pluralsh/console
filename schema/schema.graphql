@@ -1131,6 +1131,7 @@ input CloneAttributes {
   s3SecretAccessKey: String
   s3WalPath: String
   s3Endpoint: String
+  uid: String
 }
 
 input WebhookAttributes {

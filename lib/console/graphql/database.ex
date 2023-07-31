@@ -7,6 +7,7 @@ defmodule Console.GraphQl.Database do
     field :s3_secret_access_key, :string
     field :s3_wal_path,          :string
     field :s3_endpoint,          :string
+    field :uid,                  :string
   end
 
   object :postgresql do
