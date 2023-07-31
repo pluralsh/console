@@ -8,7 +8,7 @@ defmodule Kube.WireguardPeer do
     defmodel "WireguardPeerStatus", "vpn.plural.sh", "v1alpha1" do
       property :config_ref, "configRef",  CoreV1.SecretKeySelector
       property :ready,      "ready",      :boolean
-      property :conditions, "conditions", {:array, Kube.Application.Condition}
+      property :conditions, "conditions", {:array, Kube.Application.Status.Conditions}
     end
   end
 
@@ -16,7 +16,7 @@ defmodule Kube.WireguardPeer do
     use Kazan.Model
 
     defmodel  "WireguardPeerSpec", "vpn.plural.sh", "v1alpha1" do
-      property :wireguard_ref,"wireguardRef", :string
+      property :wireguard_ref, "wireguardRef", :string
       property :address, "address", :string
       property :public_key, "publicKey", :string
     end
@@ -46,7 +46,7 @@ defmodule Kube.WireguardServer do
 
     defmodel  "WireguardServerStatus", "vpn.plural.sh", "v1alpha1" do
       property :ready,      "ready", :boolean
-      property :conditions, "conditions", {:array, Kube.Application.Condition}
+      property :conditions, "conditions", {:array, Kube.Application.Status.Conditions}
     end
   end
 

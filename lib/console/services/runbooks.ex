@@ -62,7 +62,7 @@ defmodule Console.Services.Runbooks do
       case Map.get(map, from, :ignore) do
         :ignore -> acc
         val ->
-          Enum.reduce(updates, acc, fn %ConfigurationOverlay.OverlayUpdate{path: path}, acc ->
+          Enum.reduce(updates, acc, fn %ConfigurationOverlay.Spec.Updates{path: path}, acc ->
             Console.put_path(acc, path, val)
           end)
       end

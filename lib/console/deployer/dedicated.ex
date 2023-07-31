@@ -1,5 +1,5 @@
 defmodule Console.Deployer.Dedicated do
-  use Kube.Builder
+  use Kube.Client.Builder
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Kazan.Watcher
 

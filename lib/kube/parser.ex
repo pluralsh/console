@@ -5,12 +5,13 @@ defmodule Kube.Parser do
   defmacro parse(opts) do
     path = Keyword.get(opts, :path)
     module = Keyword.get(opts, :module)
+    overrides = Keyword.get(opts, :override, []) |> Map.new()
     {:ok, crd} = YamlElixir.read_from_file(path)
     {group, version, kind, spec} = metadata(crd)
     resource_id = %Kazan.Models.ResourceId{group: group, version: version, kind: kind}
     module = Macro.to_string(module) |> String.split(".") |> Module.concat()
 
-    model = model(spec, module) |> add_metadata()
+    model = model(spec, module, overrides) |> add_metadata()
     props = Map.keys(model.properties)
     submodels = submodels(model) |> Enum.map(&submodel(&1, module))
 
@@ -104,19 +105,25 @@ defmodule Kube.Parser do
   defp fixup(%PropertyDesc{type: {:array, t}} = prop, submodule), do: %{prop | type: {:array, Module.concat(submodule, t)}}
   defp fixup(%PropertyDesc{type: t} = prop, submodule), do: %{prop | type: Module.concat(submodule, t)}
 
-  defp prop(f, %{"type" => t}) when t in ~w(string boolean integer number),
+  defp prop(f, spec, overrides) when is_map(overrides) do
+    case overrides do
+      %{^f => name} -> %PropertyDesc{type: name, field: f}
+      _ -> prop(f, spec, {:pass, overrides})
+    end
+  end
+  defp prop(f, %{"type" => t}, _) when t in ~w(string boolean integer number),
     do: %PropertyDesc{type: type(t), field: f}
-  defp prop(f, %{"type" => "object", "properties" => %{}} = model) do
+  defp prop(f, %{"type" => "object", "properties" => %{}} = model, {:pass, ovr}) do
     module = mod_name(f)
-    {%PropertyDesc{type: module, field: f}, model(model, module)}
+    {%PropertyDesc{type: module, field: f}, model(model, module, ovr)}
   end
-  defp prop(f, %{"type" => "array", "items" => %{"type" => "object", "properties" => %{}} = props}) do
+  defp prop(f, %{"type" => "array", "items" => %{"type" => "object", "properties" => %{}} = props}, {:pass, ovr}) do
     module = mod_name(f)
-    {%PropertyDesc{type: {:array, module}, field: f}, model(props, module)}
+    {%PropertyDesc{type: {:array, module}, field: f}, model(props, module, ovr)}
   end
-  defp prop(f, %{"type" => "array", "items" => %{"type" => t}}),
+  defp prop(f, %{"type" => "array", "items" => %{"type" => t}}, _),
     do: %PropertyDesc{type: {:array, type(t)}, field: f}
-  defp prop(f, _), do: %PropertyDesc{type: :object, field: f}
+  defp prop(f, _, _), do: %PropertyDesc{type: :object, field: f}
 
   defp add_metadata(%ModelDesc{properties: props} = model) do
     props = Map.put(props, :metadata, %PropertyDesc{field: "metadata", type: MetaV1.ObjectMeta})
@@ -130,10 +137,10 @@ defmodule Kube.Parser do
   defp type("object"), do: :object
   defp type("array"), do: :array
 
-  def model(%{"properties" => props}, module) do
+  def model(%{"properties" => props}, module, overrides) do
     %ModelDesc{
       module_name: module,
-      properties: Enum.into(props, %{}, fn {n, d} -> {prop_name(n), prop(n, d)} end)
+      properties: Enum.into(props, %{}, fn {n, d} -> {prop_name(n), prop(n, d, overrides)} end)
     }
   end
 
@@ -151,16 +158,8 @@ defmodule Kube.Parser do
   defp metadata(%{
     "spec" => %{
       "group" => group,
-      "versions" => [
-        %{
-          "name" => v,
-          "schema" => %{
-            "openAPIV3Schema" => %{
-              "properties" => %{"kind" => %{"enum" => [k | _]}}
-            } = schema
-          }
-        } | _
-      ]
+      "names" => %{"plural" => k},
+      "versions" => [%{"name" => v, "schema" => %{"openAPIV3Schema" => schema}} | _]
     }
   }) do
     {group, v, k, schema}

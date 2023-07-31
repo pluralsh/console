@@ -126,7 +126,7 @@ defmodule KubernetesScaffolds do
       metadata: %{name: name, namespace: name},
       spec: %Kube.LogFilter.Spec{
         query: "query",
-        labels: [%Kube.LogFilter.Label{name: "l", value: "v"}]
+        labels: [%Kube.LogFilter.Spec.Labels{name: "l", value: "v"}]
       }
     }
   end
@@ -212,8 +212,10 @@ defmodule KubernetesScaffolds do
     %Kube.License{
       metadata: %{name: name, namespace: name},
       status: %Kube.License.Status{
-        free: true,
-        features: [%Kube.License.Feature{name: "feature", description: "description"}]
+        policy: %Kube.License.Status.Policy{
+          free: true,
+          features: [%Kube.License.Status.Policy.Features{name: "feature", description: "description"}]
+        }
       }
     }
   end

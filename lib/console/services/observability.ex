@@ -32,7 +32,7 @@ defmodule Console.Services.Observability do
   defp vpa_template(kind, name) do
     %VerticalPodAutoscaler{
       spec: %VerticalPodAutoscaler.Spec{
-        update_policy: %VerticalPodAutoscaler.UpdatePolicy{update_mode: "Off"},
+        update_policy: %VerticalPodAutoscaler.Spec.UpdatePolicy{update_mode: "Off"},
         target_ref: %CrossVersionObjectReference{
           api_version: "apps/v1",
           kind: to_string(kind),
@@ -63,8 +63,8 @@ defmodule Console.Services.Observability do
   defp hydrate_labels(labels) do
     labels
     |> Task.async_stream(fn
-      %Dashboard.Label{values: [_ | _]} = l -> l
-      %Dashboard.Label{query: %{query: query, label: label}} = l ->
+      %Dashboard.Spec.Labels{values: [_ | _]} = l -> l
+      %Dashboard.Spec.Labels{query: %{query: query, label: label}} = l ->
         labels = PrometheusClient.extract_labels(query, label)
         %{l | values: labels}
     end, max_concurrency: 10)
@@ -73,7 +73,7 @@ defmodule Console.Services.Observability do
 
   defp hydrate_graphs(graphs, variables, start, now, step) do
     graphs
-    |> Task.async_stream(fn %Dashboard.Graph{queries: queries} = graph ->
+    |> Task.async_stream(fn %Dashboard.Spec.Graphs{queries: queries} = graph ->
       %{graph | queries: hydrate_queries(queries, variables, start, now, step)}
     end, max_concurrency: 5)
     |> Enum.map(fn {:ok, res} -> res end)
@@ -82,9 +82,9 @@ defmodule Console.Services.Observability do
   defp hydrate_queries(queries, variables, start, now, step) do
     queries
     |> Task.async_stream(fn
-      %Dashboard.Query{legend_format: f} = query when is_binary(f) ->
+      %Dashboard.Spec.Graphs.Queries{legend_format: f} = query when is_binary(f) ->
         format_query(query, start, now, step, variables)
-      %Dashboard.Query{} = query ->
+      %Dashboard.Spec.Graphs.Queries{} = query ->
         [single_query(query, start, now, step, variables)]
     end, max_concurrency: 5)
     |> Enum.flat_map(fn {:ok, res} -> res end)

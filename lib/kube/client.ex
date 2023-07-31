@@ -3,13 +3,13 @@ defmodule Kube.Client do
   alias Kube
   alias Kazan.Models.Apimachinery.Meta.V1.{ObjectMeta}
 
-  list_request :list_dashboards, Kube.DashboardList, "platform.plural.sh", "v1alpha1", "dashboards"
-  list_request :list_log_filters, Kube.LogFilterList, "platform.plural.sh", "v1alpha1", "logfilters"
-  list_request :list_configuration_overlays, Kube.ConfigurationOverlayList, "platform.plural.sh", "v1alpha1", "configurationoverlays"
+  list_request :list_dashboards, Kube.Dashboard.List, "platform.plural.sh", "v1alpha1", "dashboards"
+  list_request :list_log_filters, Kube.LogFilter.List, "platform.plural.sh", "v1alpha1", "logfilters"
+  list_request :list_configuration_overlays, Kube.ConfigurationOverlay.List, "platform.plural.sh", "v1alpha1", "configurationoverlays"
   list_request :list_runbooks, Kube.RunbookList, "platform.plural.sh", "v1alpha1", "runbooks"
   list_request :list_vertical_pod_autoscalers, Kube.VerticalPodAutoscalerList, "autoscaling.k8s.io", "v1", "verticalpodautoscalers"
   list_request :list_wireguard_peers, Kube.WireguardPeerList, "vpn.plural.sh", "v1alpha1", "wireguardpeers"
-  list_request :list_certificate, Kube.CertificateList, "cert-manager.io", "v1", "certificates"
+  list_request :list_certificate, Kube.Certificate.List, "cert-manager.io", "v1", "certificates"
   list_request :list_postgresqls, Kube.Postgresql.List, "acid.zalan.do", "v1", "postgresqls"
 
   get_request :get_dashboard, Kube.Dashboard, "platform.plural.sh", "v1alpha1", "dashboards"
@@ -36,15 +36,15 @@ defmodule Kube.Client do
   end
 
   def list_slashcommands() do
-    make_request("/apis/platform.plural.sh/v1alpha1/slashcommands", "get", Kube.SlashCommandList)
+    make_request("/apis/platform.plural.sh/v1alpha1/slashcommands", "get", Kube.SlashCommand.List)
   end
 
   def list_licenses() do
-    make_request("/apis/platform.plural.sh/v1alpha1/licenses", "get", Kube.LicenseList)
+    make_request("/apis/platform.plural.sh/v1alpha1/licenses", "get", Kube.License.List)
   end
 
   def list_applications() do
-    make_request("/apis/app.k8s.io/v1beta1/applications", "get", Kube.ApplicationList)
+    make_request("/apis/app.k8s.io/v1beta1/applications", "get", Kube.Application.List)
   end
 
   def list_metrics() do
