@@ -67,6 +67,7 @@ defmodule Console.GraphQl.Kubernetes do
   import_types Console.GraphQl.Kubernetes.VerticalPodAutoscaler
   import_types Console.GraphQl.Kubernetes.Namespace
   import_types Console.GraphQl.Kubernetes.VPN
+  import_types Console.GraphQl.Kubernetes.Config
 
   delta :application
 
@@ -228,6 +229,8 @@ defmodule Console.GraphQl.Kubernetes do
 
       safe_resolve &Kubernetes.list_configuration_overlays/2
     end
+
+    import_fields :config_queries
   end
 
   object :kubernetes_mutations do

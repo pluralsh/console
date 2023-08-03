@@ -315,6 +315,13 @@ export type Component = {
   kind: Scalars['String']['output'];
 };
 
+export type ConfigMap = {
+  __typename?: 'ConfigMap';
+  data: Scalars['Map']['output'];
+  metadata: Metadata;
+  raw: Scalars['String']['output'];
+};
+
 export type Configuration = {
   __typename?: 'Configuration';
   helm?: Maybe<Scalars['String']['output']>;
@@ -1508,6 +1515,8 @@ export type RootQueryType = {
   cachedPods?: Maybe<Array<Maybe<Pod>>>;
   certificate?: Maybe<Certificate>;
   clusterInfo?: Maybe<ClusterInfo>;
+  configMap?: Maybe<ConfigMap>;
+  configMaps?: Maybe<Array<Maybe<ConfigMap>>>;
   configuration?: Maybe<ConsoleConfiguration>;
   configurationOverlays?: Maybe<Array<Maybe<ConfigurationOverlay>>>;
   context?: Maybe<Array<Maybe<RepositoryContext>>>;
@@ -1548,6 +1557,8 @@ export type RootQueryType = {
   runbook?: Maybe<Runbook>;
   runbooks?: Maybe<Array<Maybe<Runbook>>>;
   scalingRecommendation?: Maybe<VerticalPodAutoscaler>;
+  secret?: Maybe<Secret>;
+  secrets?: Maybe<Array<Maybe<Secret>>>;
   service?: Maybe<Service>;
   smtp?: Maybe<Smtp>;
   stack?: Maybe<Stack>;
@@ -1600,6 +1611,17 @@ export type RootQueryTypeCachedPodsArgs = {
 
 export type RootQueryTypeCertificateArgs = {
   name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeConfigMapArgs = {
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeConfigMapsArgs = {
   namespace: Scalars['String']['input'];
 };
 
@@ -1799,6 +1821,17 @@ export type RootQueryTypeScalingRecommendationArgs = {
 };
 
 
+export type RootQueryTypeSecretArgs = {
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeSecretsArgs = {
+  namespace: Scalars['String']['input'];
+};
+
+
 export type RootQueryTypeServiceArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -1966,6 +1999,13 @@ export type RunbookStatus = {
 export type RunningState = {
   __typename?: 'RunningState';
   startedAt?: Maybe<Scalars['String']['output']>;
+};
+
+export type Secret = {
+  __typename?: 'Secret';
+  data: Scalars['Map']['output'];
+  metadata: Metadata;
+  type?: Maybe<Scalars['String']['output']>;
 };
 
 export type SecretKeySelector = {

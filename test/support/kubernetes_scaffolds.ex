@@ -245,6 +245,21 @@ defmodule KubernetesScaffolds do
     }
   end
 
+  def config_map(name) do
+    %Core.ConfigMap{
+      metadata: %{namespace: name, name: name},
+      data: %{"some" => "config"}
+    }
+  end
+
+  def secret(name) do
+    %Core.Secret{
+      metadata: %{namespace: name, name: name},
+      data: %{"some" => "secret"},
+      type: "Opaque"
+    }
+  end
+
   def wireguard_peer(name) do
     %Kube.WireguardPeer{
       metadata: %{name: name, namespace: "wireguard", annotations: %{}},

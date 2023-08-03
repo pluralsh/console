@@ -467,4 +467,106 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       """, %{"name" => "test"}, %{current_user: user})
     end
   end
+
+  describe "configMap" do
+    test "users can view config maps" do
+      user = insert(:user)
+      expect(Kazan, :run, fn _ -> {:ok, config_map("name")} end)
+
+      {:ok, %{data: %{"configMap" => conf}}} = run_query("""
+        query Conf($name: String!) {
+          configMap(namespace: $name, name: $name) {
+            metadata { name }
+            data
+          }
+        }
+      """, %{"name" => "name"}, %{current_user: user})
+
+      assert conf["metadata"]["name"] == "name"
+      assert conf["data"]["some"] == "config"
+    end
+  end
+
+  describe "configMaps" do
+    test "users can list config maps" do
+      user = insert(:user)
+      expect(Kazan, :run, fn _ -> {:ok, %{items: [config_map("name")]}} end)
+
+      {:ok, %{data: %{"configMaps" => [conf]}}} = run_query("""
+        query Confs($name: String!) {
+          configMaps(namespace: $name) {
+            metadata { name }
+            data
+          }
+        }
+      """, %{"name" => "name"}, %{current_user: user})
+
+      assert conf["metadata"]["name"] == "name"
+      assert conf["data"]["some"] == "config"
+    end
+  end
+
+  describe "secret" do
+    test "admins can view secrets" do
+      user = admin_user()
+      expect(Kazan, :run, fn _ -> {:ok, secret("name")} end)
+
+      {:ok, %{data: %{"secret" => conf}}} = run_query("""
+        query Conf($name: String!) {
+          secret(namespace: $name, name: $name) {
+            metadata { name }
+            data
+          }
+        }
+      """, %{"name" => "name"}, %{current_user: user})
+
+      assert conf["metadata"]["name"] == "name"
+      assert conf["data"]["some"] == "secret"
+    end
+
+    test "nonadmins cannot view secrets" do
+      user = insert(:user)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Conf($name: String!) {
+          secret(namespace: $name, name: $name) {
+            metadata { name }
+            data
+          }
+        }
+      """, %{"name" => "name"}, %{current_user: user})
+    end
+  end
+
+  describe "secrets" do
+    test "admins can list secrets" do
+      user = admin_user()
+      expect(Kazan, :run, fn _ -> {:ok, %{items: [secret("name")]}} end)
+
+      {:ok, %{data: %{"secrets" => [secret]}}} = run_query("""
+        query Confs($name: String!) {
+          secrets(namespace: $name) {
+            metadata { name }
+            data
+          }
+        }
+      """, %{"name" => "name"}, %{current_user: user})
+
+      assert secret["metadata"]["name"] == "name"
+      assert secret["data"]["some"] == "secret"
+    end
+
+    test "nonadmins cannot list secrets" do
+      user = insert(:user)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Conf($name: String!) {
+          secrets(namespace: $name) {
+            metadata { name }
+            data
+          }
+        }
+      """, %{"name" => "name"}, %{current_user: user})
+    end
+  end
 end

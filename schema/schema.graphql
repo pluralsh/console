@@ -894,6 +894,10 @@ type RootQueryType {
   metric(query: String!, offset: Int, step: String): [MetricResponse]
   logs(query: String!, start: Long, end: Long, limit: Int!): [LogStream]
   scalingRecommendation(kind: AutoscalingTarget!, namespace: String!, name: String!): VerticalPodAutoscaler
+  configMap(namespace: String!, name: String!): ConfigMap
+  secret(namespace: String!, name: String!): Secret
+  configMaps(namespace: String!): [ConfigMap]
+  secrets(namespace: String!): [Secret]
   service(namespace: String!, name: String!): Service
   clusterInfo: ClusterInfo
   deployment(namespace: String!, name: String!): Deployment
@@ -1186,6 +1190,15 @@ type BuildInfo {
   successful: Int
 }
 
+type ContainerRecommendation {
+  name: String
+  containerName: String
+  target: ContainerResources
+  lowerBound: ContainerResources
+  upperBound: ContainerResources
+  uncappedTarget: ContainerResources
+}
+
 enum Permission {
   READ
   CONFIGURE
@@ -1234,15 +1247,6 @@ type GroupMemberConnection {
 type RecipeConnection {
   pageInfo: PageInfo!
   edges: [RecipeEdge]
-}
-
-type ContainerRecommendation {
-  name: String
-  containerName: String
-  target: ContainerResources
-  lowerBound: ContainerResources
-  upperBound: ContainerResources
-  uncappedTarget: ContainerResources
 }
 
 type BuildConnection {
@@ -1351,6 +1355,12 @@ input LabelInput {
 input RunbookActionInput {
   action: String!
   context: Map!
+}
+
+type Secret {
+  metadata: Metadata!
+  type: String
+  data: Map!
 }
 
 type Dashboard {
@@ -1534,6 +1544,12 @@ type CommandDelta {
 type NotificationDelta {
   delta: Delta
   payload: Notification
+}
+
+type ConfigMap {
+  metadata: Metadata!
+  data: Map!
+  raw: String!
 }
 
 type Group {
