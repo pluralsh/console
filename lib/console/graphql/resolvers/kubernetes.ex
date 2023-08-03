@@ -76,6 +76,18 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> Kazan.run()
   end
 
+  def resolve_config_map(%{namespace: ns, name: name}, _) do
+    Console.namespace(ns)
+    |> Core.read_namespaced_config_map!(name)
+    |> Kazan.run()
+  end
+
+  def resolve_secret(%{namespace: ns, name: name}, _) do
+    Console.namespace(ns)
+    |> Core.read_namespaced_secret!(name)
+    |> Kazan.run()
+  end
+
   def resolve_certificate(%{namespace: ns, name: name}, _) do
     Client.get_certificate(ns, name)
   end
@@ -160,6 +172,20 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   def list_jobs(%{namespace: ns}) do
     Console.namespace(ns)
     |> BatchV1.list_namespaced_job!()
+    |> Kazan.run()
+    |> items_response()
+  end
+
+  def list_config_maps(%{namespace: ns}, _) do
+    Console.namespace(ns)
+    |> Core.list_namespaced_config_map!()
+    |> Kazan.run()
+    |> items_response()
+  end
+
+  def list_secrets(%{namespace: ns}, _) do
+    Console.namespace(ns)
+    |> Core.list_namespaced_secret!()
     |> Kazan.run()
     |> items_response()
   end
