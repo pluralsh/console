@@ -11,7 +11,7 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       user = insert(:user)
       role = insert(:role, repositories: ["*"], permissions: %{read: true})
       insert(:role_binding, role: role, user: user)
-      expect(Kazan, :run, fn _ -> {:ok, %Kube.DashboardList{items: [dashboard()]}} end)
+      expect(Kazan, :run, fn _ -> {:ok, %Kube.Dashboard.List{items: [dashboard()]}} end)
 
       {:ok, %{data: %{"dashboards" => [found]}}} = run_query("""
         query Dashboards($repo: String!) {
@@ -206,23 +206,23 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
         description: "description",
         timeslices: ["10m"],
         labels: [
-          %Dashboard.Label{name: "label", values: ["value"]},
-          %Dashboard.Label{name: "other", query: %{query: "label-q", label: "other"}}
+          %Dashboard.Spec.Labels{name: "label", values: ["value"]},
+          %Dashboard.Spec.Labels{name: "other", query: %{query: "label-q", label: "other"}}
         ],
         graphs: [
-          %Dashboard.Graph{
+          %Dashboard.Spec.Graphs{
             name: "queries",
             queries: [
-              %Dashboard.Query{
+              %Dashboard.Spec.Graphs.Queries{
                 query: "some-query",
                 legend: "legend"
               }
             ]
           },
-          %Dashboard.Graph{
+          %Dashboard.Spec.Graphs{
             name: "formatted",
             queries: [
-              %Dashboard.Query{
+              %Dashboard.Spec.Graphs.Queries{
                 query: "formatted-query",
                 legend_format: "legend-$var"
               }

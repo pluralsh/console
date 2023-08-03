@@ -28,7 +28,7 @@ defmodule Console.Schema.GroupMember do
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:group_id)
-    |> unique_constraint(:user_id, name: index_name(:group_members, [:group_id, :user_id]))
+    |> unique_constraint([:group_id, :user_id])
     |> validate_required([:group_id, :user_id])
   end
 end

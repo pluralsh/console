@@ -15,6 +15,7 @@ ingress:
     external-dns.alpha.kubernetes.io/target: "127.0.0.1"
   {{- end }}
 
+postgresNamespace: {{ namespace "postgres" }}
 provider: {{ .Provider }}
 
 {{ if eq .Provider "azure" }}
@@ -25,8 +26,19 @@ consoleIdentityId: {{ importValue "Terraform" "console_msi_id" }}
 consoleIdentityClientId: {{ importValue "Terraform" "console_msi_client_id" }}
 {{ end }}
 
-{{- if or (eq .Provider "azure") .Configuration.loki .Configuration.mimir }}
 extraEnv:
+{{ if eq .Provider "aws" }}
+- name: BACKUP_ACCESS_KEY
+  valueFrom:
+    secretKeyRef: 
+      name: postgres-user-auth
+      key: ACCESS_KEY_ID
+- name: BACKUP_SECRET_ACCESS_KEY
+  valueFrom:
+    secretKeyRef: 
+      name: postgres-user-auth
+      key: SECRET_ACCESS_KEY
+{{ end }}
 {{- if .Configuration.loki }}
 - name: LOKI_HOST
   value: http://loki-loki-distributed-gateway.{{ namespace "loki" }}
@@ -44,7 +56,6 @@ extraEnv:
   value: {{ .Context.SubscriptionId }}
 - name: ARM_TENANT_ID
   value: {{ .Context.TenantId }}
-{{- end }}
 {{- end }}
 
 serviceAccount:

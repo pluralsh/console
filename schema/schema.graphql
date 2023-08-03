@@ -95,6 +95,10 @@ type Changelog {
   updatedAt: DateTime
 }
 
+type PostgresInstance {
+  uid: String!
+}
+
 type RoleEdge {
   node: Role
   cursor: String
@@ -210,6 +214,16 @@ input ContextAttributes {
 
 type IngressTls {
   hosts: [String]
+}
+
+type PostgresqlSpec {
+  teamId: String
+  users: Map
+  resources: Resources
+  postgresql: PostgresSettings
+  numberOfInstances: Int
+  databases: Map
+  pods: [Pod]
 }
 
 type NodeStatus {
@@ -803,6 +817,7 @@ type RootMutationType {
   executeRunbook(namespace: String!, name: String!, input: RunbookActionInput!): RunbookActionResponse
   createWebhook(attributes: WebhookAttributes!): Webhook
   deleteWebhook(id: ID!): Webhook
+  restorePostgres(namespace: String!, name: String!, timestamp: DateTime!, clone: CloneAttributes): Postgresql
 }
 
 type ConfigurationCondition {
@@ -818,6 +833,13 @@ type Recommendation {
 type PodConnection {
   pageInfo: PageInfo!
   edges: [PodEdge]
+}
+
+type Postgresql {
+  metadata: Metadata!
+  spec: PostgresqlSpec!
+  status: PostgresqlStatus!
+  instances: [PostgresInstance]
 }
 
 enum Tool {
@@ -912,6 +934,8 @@ type RootQueryType {
   runbook(namespace: String!, name: String!): Runbook
   runbooks(namespace: String!, pinned: Boolean): [Runbook]
   webhooks(after: String, first: Int, before: String, last: Int): WebhookConnection
+  postgresDatabases: [Postgresql]
+  postgresDatabase(namespace: String!, name: String!): Postgresql
 }
 
 type RoleBinding {
@@ -1047,6 +1071,10 @@ type Event {
   type: String
 }
 
+type PostgresSettings {
+  version: String
+}
+
 type RunbookSpec {
   name: String!
   description: String
@@ -1096,6 +1124,14 @@ type LicenseStatus {
   features: [LicenseFeature]
   limits: Map
   secrets: Map
+}
+
+input CloneAttributes {
+  s3AccessKeyId: String
+  s3SecretAccessKey: String
+  s3WalPath: String
+  s3Endpoint: String
+  uid: String
 }
 
 input WebhookAttributes {
@@ -1230,6 +1266,19 @@ enum WebhookHealth {
 
 scalar Long
 
+enum WebhookType {
+  PIAZZA
+  SLACK
+}
+
+type Certificate {
+  metadata: Metadata!
+  status: CertificateStatus!
+  spec: CertificateSpec!
+  raw: String!
+  events: [Event]
+}
+
 type RollingUpdate {
   maxSurge: Int
   maxUnavailable: Int
@@ -1266,19 +1315,6 @@ enum UpgradePolicyType {
 type UserEdge {
   node: User
   cursor: String
-}
-
-enum WebhookType {
-  PIAZZA
-  SLACK
-}
-
-type Certificate {
-  metadata: Metadata!
-  status: CertificateStatus!
-  spec: CertificateSpec!
-  raw: String!
-  events: [Event]
 }
 
 type ContainerState {
@@ -1320,6 +1356,10 @@ input RunbookActionInput {
 type Dashboard {
   id: String!
   spec: DashboardSpec!
+}
+
+type PostgresqlStatus {
+  clusterStatus: String
 }
 
 type VerticalPodAutoscalerStatus {

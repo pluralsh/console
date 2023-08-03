@@ -1,6 +1,18 @@
 defmodule Console do
   @chars String.codepoints("abcdefghijklmnopqrstuvwxyz")
 
+  def is_set(var) do
+    case System.get_env(var) do
+      "" -> false
+      nil -> false
+      _ -> true
+    end
+  end
+
+  def merge(list) when is_list(list) do
+    Enum.reduce(list, %{}, &Map.merge(&2, &1))
+  end
+
   def conf(key, default \\ nil), do: Application.get_env(:console, key, default)
 
   def sandbox?(), do: conf(:is_sandbox, false)

@@ -31,7 +31,8 @@ config :console, :watchers, [
   Console.Watchers.Application,
   # Console.Watchers.Plural,
   Console.Watchers.Upgrade,
-  Console.Watchers.Pod
+  Console.Watchers.Pod,
+  Console.Watchers.Postgres
 ]
 
 config :console,

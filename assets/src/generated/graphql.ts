@@ -263,6 +263,14 @@ export type Changelog = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+export type CloneAttributes = {
+  s3AccessKeyId?: InputMaybe<Scalars['String']['input']>;
+  s3Endpoint?: InputMaybe<Scalars['String']['input']>;
+  s3SecretAccessKey?: InputMaybe<Scalars['String']['input']>;
+  s3WalPath?: InputMaybe<Scalars['String']['input']>;
+  uid?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type ClusterInfo = {
   __typename?: 'ClusterInfo';
   gitCommit?: Maybe<Scalars['String']['output']>;
@@ -1057,6 +1065,40 @@ export type Port = {
   protocol?: Maybe<Scalars['String']['output']>;
 };
 
+export type PostgresInstance = {
+  __typename?: 'PostgresInstance';
+  uid: Scalars['String']['output'];
+};
+
+export type PostgresSettings = {
+  __typename?: 'PostgresSettings';
+  version?: Maybe<Scalars['String']['output']>;
+};
+
+export type Postgresql = {
+  __typename?: 'Postgresql';
+  instances?: Maybe<Array<Maybe<PostgresInstance>>>;
+  metadata: Metadata;
+  spec: PostgresqlSpec;
+  status: PostgresqlStatus;
+};
+
+export type PostgresqlSpec = {
+  __typename?: 'PostgresqlSpec';
+  databases?: Maybe<Scalars['Map']['output']>;
+  numberOfInstances?: Maybe<Scalars['Int']['output']>;
+  pods?: Maybe<Array<Maybe<Pod>>>;
+  postgresql?: Maybe<PostgresSettings>;
+  resources?: Maybe<Resources>;
+  teamId?: Maybe<Scalars['String']['output']>;
+  users?: Maybe<Scalars['Map']['output']>;
+};
+
+export type PostgresqlStatus = {
+  __typename?: 'PostgresqlStatus';
+  clusterStatus?: Maybe<Scalars['String']['output']>;
+};
+
 export type PrometheusDatasource = {
   __typename?: 'PrometheusDatasource';
   format?: Maybe<Scalars['String']['output']>;
@@ -1231,6 +1273,7 @@ export type RootMutationType = {
   overlayConfiguration?: Maybe<Build>;
   readNotifications?: Maybe<User>;
   restartBuild?: Maybe<Build>;
+  restorePostgres?: Maybe<Postgresql>;
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
   updateConfiguration?: Maybe<Configuration>;
@@ -1401,6 +1444,14 @@ export type RootMutationTypeRestartBuildArgs = {
 };
 
 
+export type RootMutationTypeRestorePostgresArgs = {
+  clone?: InputMaybe<CloneAttributes>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  timestamp: Scalars['DateTime']['input'];
+};
+
+
 export type RootMutationTypeSignInArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -1486,6 +1537,8 @@ export type RootQueryType = {
   pluralContext?: Maybe<PluralContext>;
   pod?: Maybe<Pod>;
   pods?: Maybe<PodConnection>;
+  postgresDatabase?: Maybe<Postgresql>;
+  postgresDatabases?: Maybe<Array<Maybe<Postgresql>>>;
   recipe?: Maybe<Recipe>;
   recipes?: Maybe<RecipeConnection>;
   repositories?: Maybe<RepositoryConnection>;
@@ -1681,6 +1734,12 @@ export type RootQueryTypePodsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+
+export type RootQueryTypePostgresDatabaseArgs = {
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
 };
 
 

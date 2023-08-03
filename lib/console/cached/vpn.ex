@@ -5,7 +5,7 @@ defmodule Console.Cached.VPN do
   """
   use Console.Cached.Base
   import Kube.Client.Base, only: [path_builder: 4]
-  alias Kube.{WireguardServer, WireguardServerList}
+  alias Kube.WireguardServer
 
   def start_link(), do: Console.Cached.Kubernetes.start_link(__MODULE__, vpn_request(), WireguardServer)
 
@@ -22,7 +22,7 @@ defmodule Console.Cached.VPN do
       body: "",
       query_params: %{},
       content_type: "application/json",
-      response_model: WireguardServerList
+      response_model: WireguardServer.List
     }
   end
 end

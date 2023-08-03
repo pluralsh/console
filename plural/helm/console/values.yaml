@@ -112,6 +112,7 @@ affinity:
       topologyKey: "kubernetes.io/hostname"
 
 provider: google
+postgresNamespace: postgres
 
 postgresql:
   image:

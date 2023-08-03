@@ -1,68 +1,60 @@
-defmodule Kube.Dashboard do
+require Kube.Parser
+
+# external crds
+Kube.Parser.parse(path: "crds/postgresql.yaml", module: Kube.Postgresql)
+Kube.Parser.parse(path: "crds/cert-manager.yaml", module: Kube.Certificate)
+Kube.Parser.parse(path: "crds/application.yaml", module: Kube.Application)
+
+# plural crds
+Kube.Parser.parse(path: "crds/license.yaml", module: Kube.License)
+Kube.Parser.parse(path: "crds/config-overlay.yaml", module: Kube.ConfigurationOverlay)
+Kube.Parser.parse(path: "crds/logfilter.yaml", module: Kube.LogFilter)
+Kube.Parser.parse(path: "crds/slashcommand.yaml", module: Kube.SlashCommand)
+Kube.Parser.parse(path: "crds/ss-resize.yaml", module: Kube.StatefulSetResize)
+Kube.Parser.parse(path: "crds/dashboard.yaml", module: Kube.Dashboard)
+Kube.Parser.parse(path: "crds/runbook.yaml", module: Kube.Runbook)
+
+Kube.Parser.parse(path: "crds/wireguardserver.yaml", module: Kube.WireguardServer)
+Kube.Parser.parse(path: "crds/wireguardpeer.yaml", module: Kube.WireguardPeer, ovveride: [
+  {"configRef", Kazan.Apis.Core.V1.SecretKeySelector}
+])
+
+# overridden crds
+
+Kube.Parser.parse(path: "crds/vpa.yaml", module: Kube.VerticalPodAutoscaler, override: [
+  {"targetRef", Kazan.Apis.Autoscaling.V1.CrossVersionObjectReference}
+])
+
+## this cannot be read from a CRD as its actually piped through a dedicated API service
+
+defmodule Kube.NodeMetric do
   use Kazan.Model
 
-  defmodule Query do
+  defmodule Usage do
     use Kazan.Model
 
-    defmodel "Query", "platform.plural.sh", "v1alpha1" do
-      property :query,         "query",  :string
-      property :legend,        "legend", :string
-      property :legend_format, "legendFormat", :string
+    defmodel "Usage", "metrics.k8s.io", "v1beta1" do
+      property :cpu,    "cpu",    :string
+      property :memory, "memory", :string
     end
   end
 
-  defmodule Graph do
-    use Kazan.Model
-
-    defmodel "Query", "platform.plural.sh", "v1alpha1" do
-      property :queries, "queries", {:array, Kube.Dashboard.Query}
-      property :name,    "name",    :string
-      property :format,  "format",  :string
-    end
+  defmodel "NodeMetric", "metrics.k8s.io", "v1beta1" do
+    property :timestamp, "timestamp", :string
+    property :window,    "window",    :string
+    property :usage,     "usage",     Usage
   end
 
-  defmodule Label do
-    use Kazan.Model
-
-    defmodel "Label", "platform.plural.sh", "v1alpha1" do
-      property :query,  "query",  Kube.Dashboard.LabelQuery
-      property :name,   "name",   :string
-      property :values, "values", {:array, :string}
-    end
-  end
-
-  defmodule LabelQuery do
-    use Kazan.Model
-
-    defmodel "Label", "platform.plural.sh", "v1alpha1" do
-      property :query, "query", :string
-      property :label, "label", :string
-    end
-  end
-
-  defmodule Spec do
-    use Kazan.Model
-
-    defmodel "DashboardSpec", "platform.plural.sh", "v1alpha1" do
-      property :name,         "name",        :string
-      property :description,  "description", :string
-      property :default_time, "defaultTime", :string
-      property :timeslices,   "timeslices",  {:array, :string}
-      property :labels,       "labels",      {:array, Kube.Dashboard.Label}
-      property :graphs,       "graphs",      {:array, Kube.Dashboard.Graph}
-    end
-  end
-
-  defmodel "Dashboard", "platform.plural.sh", "v1alpha1" do
-    property :spec, "spec", Spec
-  end
+  def gvk(), do: {"metrics.k8s.io", "v1beta1", "nodes"}
 end
 
-defmodule Kube.DashboardList do
+defmodule Kube.NodeMetric.List do
   use Kazan.Model
 
-  defmodellist "DashboardList",
-               "platform.plural.sh",
-               "v1alpha1",
-               Kube.Dashboard
+  def item_model(), do: Kube.NodeMetric
+
+  defmodellist "NodeMetricList",
+               "metrics.k8s.io",
+               "v1beta1",
+               Kube.NodeMetric
 end

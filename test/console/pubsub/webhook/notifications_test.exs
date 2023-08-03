@@ -20,7 +20,7 @@ defmodule Console.Webhook.NotificationTest do
       end)
 
       expect(Kazan, :run, fn _ ->
-        {:ok, %Application{spec: %Application.Spec{descriptor: %Application.Descriptor{icons: [%Application.Icon{src: "img"}]}}}}
+        {:ok, %Application{spec: %Application.Spec{descriptor: %Application.Spec.Descriptor{icons: [%Application.Spec.Descriptor.Icons{src: "img"}]}}}}
       end)
 
       event = %PubSub.NotificationCreated{item: notif}

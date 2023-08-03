@@ -4,7 +4,10 @@ defmodule Console.GraphQl.Kubernetes.License do
   object :license do
     field :metadata, non_null(:metadata)
     field :spec,     non_null(:license_spec)
-    field :status,   :license_status
+    field :status,   :license_status, resolve: fn
+      %{status: %{policy: policy}}, _, _ -> {:ok, policy}
+      _, _, _ -> {:ok, nil}
+    end
   end
 
   object :license_spec do

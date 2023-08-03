@@ -29,7 +29,7 @@ spec:
   - type: terraform
     name: aws
     repo: console
-    version: '>= 0.1.1'
+    version: '>= 0.1.4'
     optional: true
   - type: terraform
     name: azure

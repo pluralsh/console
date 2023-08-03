@@ -5,9 +5,10 @@ end
 
 defmodule Console.Runbooks.Data do
   alias Console.Runbooks.Datasource, as: DataImpl
-  alias Kube.Runbook.{Datasource, Prometheus, Kubernetes}
+  alias Kube.Runbook.Spec.Datasources
+  alias Kube.Runbook.Spec.Datasources.{Prometheus, Kubernetes}
 
-  def extract(%Datasource{name: name} = datasource, runbook) do
+  def extract(%Datasources{name: name} = datasource, runbook) do
     {key, data} = inputs(datasource)
 
     case DataImpl.fetch(data, runbook) do
@@ -16,10 +17,10 @@ defmodule Console.Runbooks.Data do
     end
   end
 
-  def inputs(%Datasource{type: "nodes"}), do: {:nodes, :nodes}
-  def inputs(%Datasource{prometheus: %Prometheus{} = prom}),
+  def inputs(%Datasources{type: "nodes"}), do: {:nodes, :nodes}
+  def inputs(%Datasources{prometheus: %Prometheus{} = prom}),
     do: {:prometheus, prom}
-  def inputs(%Datasource{kubernetes: %Kubernetes{} = kube}),
+  def inputs(%Datasources{kubernetes: %Kubernetes{} = kube}),
     do: {:kubernetes, kube}
 end
 
@@ -36,7 +37,7 @@ defimpl Console.Runbooks.Datasource, for: Atom do
   end
 end
 
-defimpl Console.Runbooks.Datasource, for: Kube.Runbook.Prometheus do
+defimpl Console.Runbooks.Datasource, for: Kube.Runbook.Spec.Datasources.Prometheus do
   alias Console.Services.Observability
 
   def fetch(%{query: query}, %{context: ctx}) do
@@ -46,7 +47,7 @@ defimpl Console.Runbooks.Datasource, for: Kube.Runbook.Prometheus do
   end
 end
 
-defimpl Console.Runbooks.Datasource, for: Kube.Runbook.Kubernetes do
+defimpl Console.Runbooks.Datasource, for: Kube.Runbook.Spec.Datasources.Kubernetes do
   alias Kazan.Apis.Apps.V1, as: AppsV1
 
   def fetch(%{resource: "statefulset", name: name}, %{metadata: %{namespace: namespace}}) do

@@ -134,6 +134,13 @@ defmodule Console.Factory do
     }
   end
 
+  def postgres_instance_factory do
+    %Schema.PostgresInstance{
+      name: sequence(:pg_name, & "pg-#{&1}"),
+      uid: Ecto.UUID.generate()
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

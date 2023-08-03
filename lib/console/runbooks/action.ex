@@ -4,8 +4,8 @@ defprotocol Console.Runbooks.Action do
 end
 
 defmodule Console.Runbooks.Actor do
-  alias Console.Runbooks.Action, as: ActionImpl
-  alias Kube.Runbook.{Action, ConfigurationAction}
+  alias Console.Runbooks.Action
+  alias Kube.Runbook.Spec.{Actions}
 
   defstruct [:ctx, :repo, :actor]
 
@@ -13,13 +13,14 @@ defmodule Console.Runbooks.Actor do
 
   def build(repo, ctx, actor), do: %__MODULE__{ctx: ctx, repo: repo, actor: actor}
 
-  def enact(%Action{configuration: %ConfigurationAction{} = act}, actor) do
-    ActionImpl.enact(act, actor)
+  def enact(%Actions{configuration: %Actions.Configuration{} = act}, actor) do
+    Action.enact(act, actor)
   end
 end
 
 
-defimpl Console.Runbooks.Action, for: Kube.Runbook.ConfigurationAction do
+defimpl Console.Runbooks.Action, for: Kube.Runbook.Spec.Actions.Configuration do
+  import Kube.Utils, only: [metadata: 1]
   alias Console.Services.Plural
   alias Console.Runbooks.Actor
   alias Kube.{Runbook, StatefulSetResize}
@@ -35,7 +36,7 @@ defimpl Console.Runbooks.Action, for: Kube.Runbook.ConfigurationAction do
   end
 
   defp make_updates(updates, values, map) do
-    Enum.reduce(updates, values, fn %Runbook.PathUpdate{path: path, value_from: from}, acc ->
+    Enum.reduce(updates, values, fn %Runbook.Spec.Actions.Configuration.Updates{path: path, value_from: from}, acc ->
       case map[from] do
         nil -> acc
         val -> Console.put_path(acc, path, val)
@@ -44,7 +45,10 @@ defimpl Console.Runbooks.Action, for: Kube.Runbook.ConfigurationAction do
   end
 
   defp maybe_resize([statefulset | rest], repo, ctx) do
+    name = "resize-#{statefulset.name}-#{statefulset.persistent_volume}"
+    namespace = Console.namespace(repo)
     resize = %StatefulSetResize{
+      metadata: metadata(name),
       spec: %StatefulSetResize.Spec{
         name: statefulset.name,
         persistent_volume: statefulset.persistent_volume,
@@ -52,11 +56,8 @@ defimpl Console.Runbooks.Action, for: Kube.Runbook.ConfigurationAction do
       }
     }
 
-    namespace = Console.namespace(repo)
-    name = "resize-#{statefulset.name}-#{statefulset.persistent_volume}"
-
     with {:val, val} when not is_nil(val) <- {:val, ctx[statefulset.value_from]},
-         {:ok, _} <- Kube.Client.create_statefulset_resize(namespace, name, resize),
+         {:ok, _} <- Kube.Client.create_statefulset_resize(resize, namespace),
          :ok <- poll_resize(namespace, name) do
       maybe_resize(rest, repo, ctx)
     else

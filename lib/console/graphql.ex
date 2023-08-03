@@ -18,6 +18,7 @@ defmodule Console.GraphQl do
   import_types Console.GraphQl.Policies
   import_types Console.GraphQl.Runbooks
   import_types Console.GraphQl.Webhooks
+  import_types Console.GraphQl.Database
 
   @sources [
     Build,
@@ -53,6 +54,7 @@ defmodule Console.GraphQl do
     import_fields :policy_queries
     import_fields :runbook_queries
     import_fields :webhook_queries
+    import_fields :database_queries
   end
 
   mutation do
@@ -63,6 +65,7 @@ defmodule Console.GraphQl do
     import_fields :policy_mutations
     import_fields :runbook_mutations
     import_fields :webhook_mutations
+    import_fields :database_mutations
   end
 
   subscription do

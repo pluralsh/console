@@ -126,7 +126,7 @@ defmodule KubernetesScaffolds do
       metadata: %{name: name, namespace: name},
       spec: %Kube.LogFilter.Spec{
         query: "query",
-        labels: [%Kube.LogFilter.Label{name: "l", value: "v"}]
+        labels: [%Kube.LogFilter.Spec.Labels{name: "l", value: "v"}]
       }
     }
   end
@@ -167,11 +167,11 @@ defmodule KubernetesScaffolds do
       spec: %Kube.Runbook.Spec{
         name: name,
         datasources: datasources,
-        actions: [%Kube.Runbook.Action{
+        actions: [%Kube.Runbook.Spec.Actions{
           name: "action",
-          configuration: %Kube.Runbook.ConfigurationAction{
+          configuration: %Kube.Runbook.Spec.Actions.Configuration{
             updates: [
-              %Kube.Runbook.PathUpdate{
+              %Kube.Runbook.Spec.Actions.Configuration.Updates{
                 path: ["some", "path"],
                 value_from: "path"
               }
@@ -191,29 +191,31 @@ defmodule KubernetesScaffolds do
 
   def runbook_datasource(type, name, opts \\ [])
   def runbook_datasource(:prometheus, name, _) do
-    %Kube.Runbook.Datasource{
+    %Kube.Runbook.Spec.Datasources{
       name: name,
-      prometheus: %Kube.Runbook.Prometheus{query: "query"},
+      prometheus: %Kube.Runbook.Spec.Datasources.Prometheus{query: "query"},
     }
   end
 
   def runbook_datasource(:kubernetes, name, opts) do
-    %Kube.Runbook.Datasource{
+    %Kube.Runbook.Spec.Datasources{
       name: name,
-      kubernetes: struct(Kube.Runbook.Kubernetes, opts),
+      kubernetes: struct(Kube.Runbook.Spec.Datasources.Kubernetes, opts),
     }
   end
 
   def runbook_datasource(:nodes, name, _) do
-    %Kube.Runbook.Datasource{type: "nodes", name: name}
+    %Kube.Runbook.Spec.Datasources{type: "nodes", name: name}
   end
 
   def license(name) do
     %Kube.License{
       metadata: %{name: name, namespace: name},
       status: %Kube.License.Status{
-        free: true,
-        features: [%Kube.License.Feature{name: "feature", description: "description"}]
+        policy: %Kube.License.Status.Policy{
+          free: true,
+          features: [%Kube.License.Status.Policy.Features{name: "feature", description: "description"}]
+        }
       }
     }
   end
@@ -260,6 +262,18 @@ defmodule KubernetesScaffolds do
     %Kube.WireguardServer{
       metadata: %{name: "wireguard", namespage: "wireguard"},
       status: %Kube.WireguardServer.Status{ready: true}
+    }
+  end
+
+  def postgres(name) do
+    %Kube.Postgresql{
+      metadata: %ObjectMeta{name: name, namespace: name, uid: Ecto.UUID.generate()},
+      spec: %Kube.Postgresql.Spec{
+        team_id: "plural",
+        postgresql: %Kube.Postgresql.Spec.Postgresql{version: "13"},
+        resources: %Kube.Postgresql.Spec.Resources{requests: %{cpu: "1", memory: "1Gi"}}
+      },
+      status: %{"PostgresClusterStatus" => "Running"}
     }
   end
 end

@@ -1,0 +1,80 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: "2021-04-14T00:12:00Z"
+  generation: 7
+  name: slashcommands.platform.plural.sh
+  resourceVersion: "1419172787"
+  uid: 7ef2d98c-0c74-40ad-b101-2520eb141ab7
+spec:
+  conversion:
+    strategy: None
+  group: platform.plural.sh
+  names:
+    kind: SlashCommand
+    listKind: SlashCommandList
+    plural: slashcommands
+    singular: slashcommand
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: SlashCommand is the Schema for the slashcommands API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: SlashCommandSpec a slack-type slash command for use in incident
+              chats
+            properties:
+              help:
+                description: a markdown help doc for this command
+                type: string
+              type:
+                description: the slash command to type
+                enum:
+                - deploy
+                type: string
+            required:
+            - help
+            type: object
+          status:
+            description: SlashCommandStatus defines the observed state of SlashCommand
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: SlashCommand
+    listKind: SlashCommandList
+    plural: slashcommands
+    singular: slashcommand
+  conditions:
+  - lastTransitionTime: "2021-04-14T00:12:00Z"
+    message: no conflicts found
+    reason: NoConflicts
+    status: "True"
+    type: NamesAccepted
+  - lastTransitionTime: "2021-04-14T00:12:00Z"
+    message: the initial names have been accepted
+    reason: InitialNamesAccepted
+    status: "True"
+    type: Established
+  storedVersions:
+  - v1alpha1

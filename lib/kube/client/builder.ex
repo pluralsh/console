@@ -1,4 +1,4 @@
-defmodule Kube.Builder do
+defmodule Kube.Client.Builder do
   alias Kazan.Apis.Core.V1, as: CoreV1
   alias Kazan.Models.Apimachinery.Meta.V1, as: MetaV1
 
@@ -6,7 +6,7 @@ defmodule Kube.Builder do
     quote do
       alias Kazan.Apis.Core.V1, as: CoreV1
       alias Kazan.Models.Apimachinery.Meta.V1, as: MetaV1
-      import Kube.Builder
+      import Kube.Client.Builder
     end
   end
 
