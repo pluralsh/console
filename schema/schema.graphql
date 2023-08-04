@@ -704,6 +704,7 @@ type AvailableFeatures {
   vpn: Boolean
   audits: Boolean
   userManagement: Boolean
+  databaseManagement: Boolean
 }
 
 type WireguardPeer {
