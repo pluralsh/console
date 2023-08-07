@@ -7,13 +7,15 @@ export function removeTrailingSlashes(str: string | null | undefined) {
 }
 
 export function isRelativeUrl(str: string) {
-  return !str.match(/^\/.*$|^[^:/]*?:\/\/.*?$/giu)
+  if (str.startsWith('/')) {
+    return false
+  }
+
+  return !isExternalUrl(str)
 }
 
-export function isExternalUrl(url?: string | null) {
-  if (!url) return false
-
-  return url.substr(0, 4) === 'http' || url.substr(0, 2) === '//'
+export function isExternalUrl(str?: string | null) {
+  return !!str.match(/^(\/\/|[a-z\d+-.]+?:)/i)
 }
 
 export function getBarePathFromPath(url: string) {
@@ -25,8 +27,12 @@ export function isSubrouteOf(route: string, compareRoute: string) {
 }
 
 export function toHtmlId(str: string) {
-  const id = str.replace(/\W+/g, ' ').trim().replace(/\s/g, '-').toLowerCase()
+  const id = str
+    .replace(/\W+/g, ' ') //
+    .trim()
+    .replace(/\s/g, '-')
+    .toLowerCase()
 
   // make sure the id starts with a letter or underscore
-  return id.match(/^[A-Za-z]/) ? id : `_${id}`
+  return id.match(/^($|[A-Za-z_])/) ? id : `_${id}`
 }
