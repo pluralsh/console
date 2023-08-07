@@ -163,7 +163,7 @@ defmodule Console.Plural.Incident do
 end
 
 defmodule Console.Plural.Features do
-  defstruct [:vpn, :userManagement, :audit]
+  defstruct [:vpn, :userManagement, :audit, :databaseManagement]
 end
 
 defmodule Console.Plural.Plan do

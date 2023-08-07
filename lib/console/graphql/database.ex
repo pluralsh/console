@@ -51,12 +51,15 @@ defmodule Console.GraphQl.Database do
   object :database_queries do
     field :postgres_databases, list_of(:postgresql) do
       middleware Authenticated
+      middleware Feature, :databaseManagement
 
       safe_resolve &Databases.list_postgres/2
     end
 
     field :postgres_database, :postgresql do
       middleware Authenticated
+      middleware Feature, :databaseManagement
+
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
 
@@ -68,6 +71,8 @@ defmodule Console.GraphQl.Database do
     field :restore_postgres, :postgresql do
       middleware Authenticated
       middleware AdminRequired
+      middleware Feature, :databaseManagement
+
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
       arg :timestamp, non_null(:datetime)
