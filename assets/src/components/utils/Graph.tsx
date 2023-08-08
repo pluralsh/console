@@ -3,39 +3,39 @@ import { ResponsiveLine } from '@nivo/line'
 import moment from 'moment'
 import { last } from 'lodash'
 import { Box, Text, ThemeContext } from 'grommet'
-import { semanticColors } from '@pluralsh/design-system/dist/theme/colors'
 import { Card } from '@pluralsh/design-system'
 import { useColorMap } from 'utils/color'
 import { Flex, Span } from 'honorable'
 import { DEFAULT_THEME } from 'theme'
+import { DefaultTheme, useTheme } from 'styled-components'
 
 export function dateFormat(date) {
   return moment(date).format('MM/DD h:mm:ss a')
 }
 
-const graphTheme = {
+const graphTheme = (theme: DefaultTheme) => ({
   ...DEFAULT_THEME,
   axis: {
     ticks: {
       text: {
-        fill: semanticColors['text-xlight'],
+        fill: theme.colors['text-xlight'],
       },
       line: {
-        stroke: semanticColors.border,
+        stroke: theme.colors.border,
       },
     },
     legend: {
       text: {
-        fill: semanticColors['text-light'],
+        fill: theme.colors['text-light'],
       },
     },
   },
   grid: {
     line: {
-      stroke: semanticColors.border,
+      stroke: theme.colors.border,
     },
   },
-}
+})
 
 export function GraphHeader({ text }) {
   return (
@@ -89,6 +89,7 @@ export function Graph({
   yFormat: any
   tickRotation?: number
 }) {
+  const styledTheme = useTheme()
   const theme = useContext(ThemeContext)
   const colors = useColorMap(theme)
   const [selected, setSelected] = useState<Key | null>(null)
@@ -168,19 +169,19 @@ export function Graph({
           itemHeight: 20,
           symbolSize: 12,
           symbolShape: 'circle',
-          itemTextColor: semanticColors['text-xlight'],
+          itemTextColor: styledTheme.colors['text-xlight'],
           effects: [
             {
               on: 'hover',
               style: {
                 itemBackground: 'rgba(0, 0, 0, .03)',
-                itemTextColor: semanticColors['text-light'],
+                itemTextColor: styledTheme.colors['text-light'],
               },
             },
           ],
         },
       ]}
-      theme={graphTheme}
+      theme={graphTheme(styledTheme)}
     />
   )
 }

@@ -1,0 +1,11 @@
+fragment ChatMessage on ChatMessage {
+  content
+  name
+  role
+}
+
+query Chat($history: [ChatMessageAttributes]) {
+  chat(history: $history) {
+    ...ChatMessage
+  }
+}

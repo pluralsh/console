@@ -5,20 +5,16 @@ import { useMutation, useQuery } from '@apollo/client'
 import { Box } from 'grommet'
 import { v4 as uuidv4 } from 'uuid'
 import gql from 'graphql-tag'
-import { useIntercom } from 'react-use-intercom'
+import { IntercomProps, useIntercom } from 'react-use-intercom'
 import { useLocation } from 'react-router-dom'
-
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
-
 import { isValidEmail } from 'utils/email'
-
 import { useMeQuery } from 'generated/graphql'
+import { useHelpSpacing } from 'components/help/HelpLauncher'
 
 import { GqlError } from '../utils/Alert'
-
 import { setToken, wipeToken } from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
-
 import { ME_Q, SIGNIN } from '../graphql/users'
 import { IncidentContext } from '../incidents/context'
 import { LabelledInput } from '../utils/LabelledInput'
@@ -101,34 +97,67 @@ export function GrantAccess() {
 
 const FUDGED_USER = 'plrl-fudged-user'
 
-function fudgedUser(name) {
+function fudgedUser(name): IntercomUser {
+  let user: IntercomUser = {}
+
   if (localStorage.getItem(FUDGED_USER)) {
-    let item = {}
+    let storedUser:
+      | { email?: unknown; name?: unknown; userId?: unknown }
+      | undefined
+      | null = {}
 
     try {
-      item = JSON.parse(localStorage.getItem(FUDGED_USER) || '')
+      storedUser = JSON.parse(localStorage.getItem(FUDGED_USER) || '')
     } catch (e) {
       console.error('Error retrieving fudged user: ', e)
+      storedUser = {}
     }
+    const { name, email, userId } = storedUser || {}
 
-    return item
+    user = {
+      ...(name && typeof name === 'string' ? { name } : {}),
+      ...(email && typeof email === 'string' ? { email } : {}),
+      ...(userId && typeof userId === 'string' ? { userId } : {}),
+    }
   }
 
   const id = uuidv4()
   const randstr = Math.random().toString(36).slice(2)
-  const user = { email: `sandbox+${randstr}@plural.sh`, name, userId: id }
+
+  user = {
+    email: user.email || `sandbox+${randstr}@plural.sh`,
+    name: user.name || name,
+    userId: user.userId || id,
+  }
 
   localStorage.setItem(FUDGED_USER, JSON.stringify(user))
 
   return user
 }
 
-function intercomAttributes({ email, name }) {
-  if (email === 'demo-user@plural.sh') {
-    return fudgedUser(name)
+type IntercomUser = Pick<IntercomProps, 'email' | 'name' | 'userId'>
+
+function useIntercomAttributes(
+  user: IntercomUser | null | undefined
+): IntercomProps | null | undefined {
+  const helpSpacing = useHelpSpacing()
+
+  if (!user) {
+    return null
+  }
+  if (user.email === 'demo-user@plural.sh') {
+    return (user = fudgedUser(user.name))
   }
 
-  return { email, name }
+  return {
+    hideDefaultLauncher: true,
+    horizontalPadding: helpSpacing.padding.right,
+    verticalPadding:
+      helpSpacing.padding.bottom +
+      helpSpacing.icon.height +
+      helpSpacing.gap.vertical,
+    ...user,
+  }
 }
 
 export function EnsureLogin({ children }) {
@@ -138,10 +167,13 @@ export function EnsureLogin({ children }) {
     errorPolicy: 'ignore',
   })
   const { boot, update } = useIntercom()
+  const intercomAttrs = useIntercomAttributes(data?.me)
 
   useEffect(() => {
-    if (data?.me) boot(intercomAttributes(data.me))
-  }, [boot, data])
+    if (intercomAttrs) {
+      boot(intercomAttrs)
+    }
+  }, [boot, intercomAttrs])
 
   useEffect(() => {
     if (data?.me) {

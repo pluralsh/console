@@ -10,3 +10,9 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/*  Undo mysterious global :focus-visible styles set by (probably) honorable */
+html :focus-visible {
+  color: unset;
+  background-color: unset;
+}

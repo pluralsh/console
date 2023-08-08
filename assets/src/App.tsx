@@ -42,6 +42,7 @@ export default function App() {
                 <GlobalStyle />
                 <Grommet
                   full
+                  // @ts-ignore
                   theme={mergedStyledTheme}
                   themeMode="dark"
                 >
