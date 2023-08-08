@@ -3909,15 +3909,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:1.343.1":
-  version: 1.343.1
-  resolution: "@pluralsh/design-system@npm:1.343.1"
+"@pluralsh/design-system@npm:2.1.1":
+  version: 2.1.1
+  resolution: "@pluralsh/design-system@npm:2.1.1"
   dependencies:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@loomhq/loom-embed": 1.5.0
     "@markdoc/markdoc": 0.3.0
     "@monaco-editor/react": 4.5.1
     "@react-aria/utils": 3.17.0
+    "@react-hooks-library/core": 0.5.1
     "@react-stately/utils": 3.6.0
     "@react-types/shared": 3.18.1
     "@tanstack/match-sorter-utils": 8.8.4
@@ -3946,6 +3947,7 @@ __metadata:
     rehype-raw: 6.1.1
     resize-observer-polyfill: 1.5.1
     styled-container-query: 1.3.5
+    type-fest: 3.11.1
     use-immer: 0.9.0
     usehooks-ts: 2.9.1
   peerDependencies:
@@ -3957,7 +3959,7 @@ __metadata:
     react-dom: ">=18.2.0"
     react-transition-group: ">=4.4.5"
     styled-components: ">=5.3.11"
-  checksum: 4a2b5e81d95e62af3de17789ee88b64b267f2ab885a91423e4613e68d7f5ac0a7575a0cc02f1425244ae8e01308b0682dcc7ecee7b72b7fc1951c7573448d7c2
+  checksum: b143aac3a39e5c71c3ec981c73b1c72ece3d7ea554f0cf741391a3e6fdab89106c865056ca9b703702f1c0c250fecd694f86b23da6b67d4b4932bf4bb1b996db
   languageName: node
   linkType: hard
 
@@ -4808,6 +4810,24 @@ __metadata:
   version: 4.0.2
   resolution: "@react-dnd/shallowequal@npm:4.0.2"
   checksum: 7f21d691bddbfd4d2830948cbeefecca1600b2b46bcb1934926795f07ae8a1fa60a3dfd3a2112be5ef682c3820c80a99711e9fa15843f7e300acb25a4ecb70ab
+  languageName: node
+  linkType: hard
+
+"@react-hooks-library/core@npm:0.5.1":
+  version: 0.5.1
+  resolution: "@react-hooks-library/core@npm:0.5.1"
+  dependencies:
+    "@react-hooks-library/shared": 0.5.1
+  peerDependencies:
+    react: ">=16.9.0"
+  checksum: d334e5705cf2a12ce6344cb31489c40ae891529f121c558730908aec86a43658b03b8ec4c94ace408ad88f640b0ca760365cbca2966369429f349c9102011a4c
+  languageName: node
+  linkType: hard
+
+"@react-hooks-library/shared@npm:0.5.1":
+  version: 0.5.1
+  resolution: "@react-hooks-library/shared@npm:0.5.1"
+  checksum: 8c1271d440c7e1cff32bda700e230223c6f7e1c9cbc0784fa641ab0b29fafccb2c539f37705a24d55b3db758da491d55b23dd63d27f4c7469eff99553a3812e7
   languageName: node
   linkType: hard
 
@@ -8460,7 +8480,7 @@ __metadata:
     "@nivo/pie": 0.83.0
     "@nivo/radial-bar": 0.83.0
     "@nivo/tooltip": 0.83.0
-    "@pluralsh/design-system": 1.343.1
+    "@pluralsh/design-system": 2.1.1
     "@pluralsh/eslint-config-typescript": 2.5.41
     "@pluralsh/stylelint-config": 1.1.3
     "@tanstack/react-table": 8.9.1
@@ -8554,7 +8574,7 @@ __metadata:
     stylelint: 15.7.0
     stylelint-config-prettier: 9.0.5
     tinyqueue: 2.0.3
-    type-fest: 3.11.1
+    type-fest: 4.2.0
     typescript: 5.1.3
     use-immer: 0.9.0
     usehooks-ts: ^2.9.1
@@ -17950,6 +17970,13 @@ __metadata:
   version: 3.11.1
   resolution: "type-fest@npm:3.11.1"
   checksum: 33be49e3b671c2ff3b5e320ef8c160c488205b08ab7631369116909a1baf2aebfcf45234c045e6902b8aa35730ac2bfd0655ea9e0fe3f8d26af9d99a16b07abd
+  languageName: node
+  linkType: hard
+
+"type-fest@npm:4.2.0":
+  version: 4.2.0
+  resolution: "type-fest@npm:4.2.0"
+  checksum: 76c5dfde9293b1b185b266a07df669f68d58ae3e19c06e33f0ff0dd0ba68628f05389bc26bcee8476e29a79ab7da054653670b9778399ceb079c4c259bac29f0
   languageName: node
   linkType: hard
 
