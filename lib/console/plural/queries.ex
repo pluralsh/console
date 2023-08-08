@@ -253,7 +253,7 @@ defmodule Console.Plural.Queries do
       account {
         grandfatheredUntil
         delinquentAt
-        availableFeatures { vpn userManagement audit }
+        availableFeatures { vpn userManagement audit databaseManagement }
         subscription {
           id
           plan { id name period }

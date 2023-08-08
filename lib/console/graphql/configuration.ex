@@ -31,9 +31,11 @@ defmodule Console.GraphQl.Configuration do
   end
 
   object :available_features do
-    field :vpn, :boolean
+    field :vpn,    :boolean
     field :audits, :boolean
-    key_func :user_management, :boolean, :userManagement
+
+    key_func :user_management,     :boolean, :userManagement
+    key_func :database_management, :boolean, :databaseManagement
   end
 
   object :console_configuration do

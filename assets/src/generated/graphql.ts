@@ -151,6 +151,7 @@ export enum AutoscalingTarget {
 export type AvailableFeatures = {
   __typename?: 'AvailableFeatures';
   audits?: Maybe<Scalars['Boolean']['output']>;
+  databaseManagement?: Maybe<Scalars['Boolean']['output']>;
   userManagement?: Maybe<Scalars['Boolean']['output']>;
   vpn?: Maybe<Scalars['Boolean']['output']>;
 };
