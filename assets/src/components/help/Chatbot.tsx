@@ -1,5 +1,11 @@
 import { PluralApi } from 'components/PluralApi'
-import { ComponentProps, useCallback, useEffect, useState } from 'react'
+import {
+  ComponentProps,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import styled from 'styled-components'
 import {
   ChatMessageAttributes,
@@ -7,7 +13,9 @@ import {
 } from 'generated/graphql-plural'
 import { Card, Input, usePrevious } from '@pluralsh/design-system'
 import { useLogin } from 'components/contexts'
-import { useApolloClient } from '@apollo/client'
+
+import { testMd } from './testMd'
+import ChatbotMarkdown from './ChatbotMarkdown'
 
 const INTRO =
   'What can we do to help you with Plural, using open source, or kubernetes?' as const
@@ -26,9 +34,7 @@ const ChatMessageSC = styled.div(({ theme }) => {
       fontWeight: (theme.partials.text as any).fontWeight || 'normal',
       margin: 0,
     },
-    'p:not(:last-child)': {
-      marginBottom: theme.partials.text.code.lineHeight,
-    },
+
     '.name-user': {
       color: theme.colors['code-block-mid-blue'] || 'green',
     },
@@ -38,9 +44,23 @@ const ChatMessageSC = styled.div(({ theme }) => {
   }
 })
 
-function ChatMessage(props: ChatMessageAttributes) {
-  const content = props.content.split('\n\n')
-  const { name, role } = props
+function ChatMessage({ content, name, role }: ChatMessageAttributes) {
+  let finalContent: ReactNode
+
+  if (role === Role.assistant) {
+    finalContent = <ChatbotMarkdown text={content} />
+  } else {
+    finalContent = content.split('\n\n').map((str) => (
+      <p>
+        {str.split('\n').map((line, i, arr) => (
+          <>
+            {line}
+            {i !== arr.length - 1 ? <br /> : null}
+          </>
+        ))}
+      </p>
+    ))
+  }
 
   return (
     <ChatMessageSC>
@@ -50,16 +70,7 @@ function ChatMessage(props: ChatMessageAttributes) {
           <span className={`name-${role}`}>{name}</span>
         </h6>
       )}
-      {content.map((str) => (
-        <p>
-          {str.split('\n').map((line, i, arr) => (
-            <>
-              {line}
-              {i !== arr.length - 1 ? <br /> : null}
-            </>
-          ))}
-        </p>
-      ))}
+      {finalContent}
     </ChatMessageSC>
   )
 }
@@ -138,7 +149,19 @@ function ChatbotContent({ ...props }: ComponentProps<typeof ChatbotContentSC>) {
       {...props}
     >
       <div className="history">
-        {history.map((msg) => {
+        {testMd.map((msg) => {
+          const role = Role.assistant
+          const name = 'Plural AI'
+
+          return (
+            <ChatMessage
+              content={msg}
+              role={role}
+              name={name}
+            />
+          )
+        })}
+        {/* {history.map((msg) => {
           const { role } = msg
           const name = msg.name
             ? msg.name
@@ -152,7 +175,7 @@ function ChatbotContent({ ...props }: ComponentProps<typeof ChatbotContentSC>) {
               name={name}
             />
           )
-        })}
+        })} */}
       </div>
       <form onSubmit={sendMessage}>
         <Input

@@ -196,6 +196,7 @@ const HelpLauncherSC = styled.div(({ theme }) => {
 
   return {
     position: 'fixed',
+    zIndex: theme.zIndexes.tooltip,
     display: 'flex',
     alignItems: 'end',
     justifyContent: 'end',
