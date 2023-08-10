@@ -10,6 +10,8 @@ const markdown = `# Plural Console
   </div>
 </div>
 
+![Console](/assets/public/PluralConsole-background.png)
+
 # H1 - Some un-ordered lists
 
 * Reception of over-the-air application updates
@@ -47,13 +49,32 @@ Lorem <i>italic</i> dolor sit <em>em</em>, consectetur adipiscing elit, sed do e
 
 > Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-###### H6 - A code block
+###### H6 - A code block without a language
 
-\`\`\`sh
+\`\`\`
 brew install erlang@23
 cp -r /opt/homebrew/opt/erlang@23/lib/erlang ~/.asdf/installs/erlang/23.1.5
 asdf reshim erlang 23.1.5
 \`\`\`
+
+###### H6 - A code block with a language
+
+\`\`\`javascript
+function sum(x,y) {
+  return x + y;
+}
+
+const num1 = 12;
+const num2 = 24;
+
+console.log(sum(num1, num2));
+\`\`\`
+
+###### Links
+[Absolute url](https://google.com)  
+[Absolute url - no protocol](//google.com)  
+[Relative url – Console Readme](README.md)  
+[Root relative url – Console Security](/SECURITY.md)  
 
 ___
 

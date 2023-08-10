@@ -4,6 +4,8 @@ import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import styled from 'styled-components'
 
+import { isExternalUrl, removeTrailingSlashes } from '../utils/urls'
+
 import MultilineCode from './Code'
 import InlineCode from './InlineCode'
 
@@ -42,8 +44,10 @@ function getLastStringChild(children: any, depth = 0): any {
 function MarkdownPreformatted({ children, ...props }: any) {
   let lang
 
-  if (children.props?.className?.startsWith('lang-')) {
-    lang = children.props.className.slice(5)
+  const className = children?.[0]?.props?.className
+
+  if (className && typeof className === 'string') {
+    lang = /language-(\w+)/.exec(className)?.[1] || ''
   }
   const stringChild = getLastStringChild(children) || ''
 
@@ -170,9 +174,9 @@ function MarkdownImage({
   ...props
 }: any) {
   // Convert local image paths to full path on github
-  // Only works if primary git branch is named "master"
-  if (gitUrl && src && !src.match(/^https*/)) {
-    src = `${gitUrl}/raw/${mainBranch}/${src}`
+  if (gitUrl && src && !isExternalUrl(src)) {
+    src = src.replace(/^\//, '')
+    src = `${removeTrailingSlashes(gitUrl)}/raw/${mainBranch}/${src}`
   }
 
   return (
@@ -182,6 +186,33 @@ function MarkdownImage({
       display="inline"
       {...props}
       style={{ ...style, maxWidth: '100%' }}
+    />
+  )
+}
+
+function MarkdownLink({
+  href,
+  gitUrl,
+  mainBranch,
+  ...props
+}: {
+  href: string
+  gitUrl: string
+  mainBranch: string
+}) {
+  // Convert local readme hrefs to full path on github
+  if (gitUrl && href && !isExternalUrl(href)) {
+    // Remove potential starting slash
+    href = href.replace(/^\//, '')
+    href = `${removeTrailingSlashes(gitUrl)}/blob/${mainBranch}/${href}`
+  }
+
+  return (
+    <MdA
+      {...props}
+      target="_blank"
+      rel="noopener noreferrer"
+      href={href}
     />
   )
 }
@@ -208,7 +239,10 @@ function Markdown({ text, gitUrl, mainBranch }: MarkdownProps) {
           }),
           p: render({ component: MdP }),
           div: render({ component: MdDiv }),
-          a: render({ component: MdA, props: { target: '_blank' } }),
+          a: render({
+            component: MarkdownLink,
+            props: { gitUrl, mainBranch },
+          }),
           span: render({ component: MdSpan }),
           code: render({ component: InlineCode }),
           pre: render({
