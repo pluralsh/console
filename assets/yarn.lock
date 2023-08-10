@@ -8500,6 +8500,7 @@ __metadata:
     apollo-link-context: 1.0.20
     apollo-link-error: 1.1.13
     apollo-link-retry: 2.2.16
+    classnames: 2.3.2
     concurrently: 8.1.0
     country-code-lookup: 0.0.23
     customize-cra: 1.0.0

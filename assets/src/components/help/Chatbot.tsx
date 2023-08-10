@@ -18,6 +18,7 @@ import {
   CloseIcon,
   FillLevelProvider,
   IconFrame,
+  ProgressBar,
   usePrevious,
 } from '@pluralsh/design-system'
 import { useLogin } from 'components/contexts'
@@ -28,6 +29,8 @@ import { Merge } from 'type-fest'
 import { textAreaInsert } from 'components/utils/textAreaInsert'
 
 // import { testMd } from './testMd'
+import classNames from 'classnames'
+
 import ChatbotMarkdown from './ChatbotMarkdown'
 import ChatIcon from './ChatIcon'
 
@@ -257,15 +260,26 @@ function ChatbotFrame({
       </ChatbotHistorySC>
       <FillLevelProvider value={2}>
         <ChatbotForm onSubmit={sendMessage}>
-          <ChatbotTextArea
-            rows={2}
-            value={message}
-            onChange={(e) => {
-              console.log('text changed', e.currentTarget.value)
-              setMessage(e.currentTarget.value)
-            }}
-            disabled={disabled}
-          />
+          <div className="textareaWrap">
+            <ChatbotTextArea
+              rows={2}
+              value={message}
+              onChange={(e) => {
+                console.log('text changed', e.currentTarget.value)
+                setMessage(e.currentTarget.value)
+              }}
+              // disabled={disabled}
+            >
+              {loading && (
+                <ProgressBar
+                  // @ts-expect-error
+                  className="progressBar"
+                  mode="indeterminate"
+                  complete={false}
+                />
+              )}
+            </ChatbotTextArea>
+          </div>
         </ChatbotForm>
       </FillLevelProvider>
     </ChatbotFrameSC>
@@ -276,6 +290,21 @@ const ChatbotForm = styled.form(({ theme }) => ({
   backgroundColor: theme.colors['fill-two'],
   padding: theme.spacing.medium,
   borderTop: theme.borders['fill-two'],
+  '.textareaWrap': {
+    position: 'relative',
+  },
+  '.progressBar': {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    borderRadius: 0,
+    height: 2,
+    background: 'none',
+    '.show': {
+      opacity: 1,
+    },
+  },
 }))
 
 const ChatbotTextAreaSC = styled.div(({ theme }) => ({
@@ -300,6 +329,7 @@ const ChatbotTextAreaSC = styled.div(({ theme }) => ({
     textarea: {},
   },
   textarea: {
+    display: 'block',
     width: '100%',
     padding: theme.spacing.small - 1,
     overflowY: 'auto',
@@ -314,7 +344,11 @@ const ChatbotTextAreaSC = styled.div(({ theme }) => ({
   },
 }))
 
-function ChatbotTextArea({ className, ...props }: ComponentProps<'textarea'>) {
+function ChatbotTextArea({
+  className,
+  children,
+  ...props
+}: ComponentProps<'textarea'>) {
   const { isMac } = usePlatform()
 
   const onKeyDown = useCallback(
@@ -343,6 +377,7 @@ function ChatbotTextArea({ className, ...props }: ComponentProps<'textarea'>) {
         {...props}
         onKeyDown={onKeyDown}
       />
+      {children}
     </ChatbotTextAreaSC>
   )
 }
