@@ -236,14 +236,23 @@ function HelpLauncher() {
   )
   // const prevOpenState = usePrevious(openState)
 
-  const closeIntercom = useCallback(() => {
+  const closeHelp = useCallback(() => {
     setHelpState(HelpState.menu)
     setOpenState(HelpOpenState.closed)
   }, [])
+
+  const minHelp = useCallback(() => {
+    setOpenState(HelpOpenState.min)
+  }, [])
   const contentOpts = {
-    [HelpState.chatBot]: <Chatbot />,
-    [HelpState.docSearch]: <Chatbot />,
-    [HelpState.intercom]: <IntercomChat onClose={closeIntercom} />,
+    [HelpState.chatBot]: (
+      <Chatbot
+        onClose={closeHelp}
+        onMin={minHelp}
+      />
+    ),
+    [HelpState.docSearch]: <HelpMenu setHelpState={setHelpState} />,
+    [HelpState.intercom]: <IntercomChat onClose={closeHelp} />,
     [HelpState.menu]: <HelpMenu setHelpState={setHelpState} />,
   }
 

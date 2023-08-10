@@ -7,20 +7,29 @@ import {
   useEffect,
   useState,
 } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import {
   ChatMessageAttributes,
   useChatLazyQuery,
 } from 'generated/graphql-plural'
-import { Card, FillLevelProvider, usePrevious } from '@pluralsh/design-system'
+import {
+  Card,
+  CaretDownIcon,
+  CloseIcon,
+  FillLevelProvider,
+  IconFrame,
+  usePrevious,
+} from '@pluralsh/design-system'
 import { useLogin } from 'components/contexts'
 import { usePlatform } from 'components/hooks/usePlatform'
 import { submitForm } from 'components/utils/submitForm'
+import { Merge } from 'type-fest'
 
 import { textAreaInsert } from 'components/utils/textAreaInsert'
 
-import { testMd } from './testMd'
+// import { testMd } from './testMd'
 import ChatbotMarkdown from './ChatbotMarkdown'
+import ChatIcon from './ChatIcon'
 
 const INTRO =
   'What can we do to help you with Plural, using open source, or kubernetes?' as const
@@ -28,6 +37,56 @@ const INTRO =
 enum Role {
   user = 'user',
   assistant = 'assistant',
+}
+
+const ChatbotHeaderSC = styled.div(({ theme }) => ({
+  backgroundColor: theme.colors['fill-two'],
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xsmall,
+  h5: {
+    ...theme.partials.text.body2Bold,
+    margin: 0,
+    flexGrow: 1,
+  },
+  '.icon': {
+    display: 'flex',
+    alignItems: 'center',
+    width: theme.spacing.large,
+    height: theme.spacing.large,
+  },
+}))
+
+function ChatbotHeader({
+  onClose,
+  onMin,
+}: {
+  onClose: () => void
+  onMin: () => void
+}) {
+  const theme = useTheme()
+
+  return (
+    <ChatbotHeaderSC>
+      <div className="icon">
+        <ChatIcon color={theme.colors['icon-primary']} />
+      </div>
+      <h5>Ask Plural AI</h5>
+      <IconFrame
+        clickable
+        size="small"
+        icon={<CloseIcon />}
+        onClick={onClose}
+      />
+      <IconFrame
+        clickable
+        size="small"
+        icon={<CaretDownIcon />}
+        onClick={onMin}
+      />
+    </ChatbotHeaderSC>
+  )
 }
 
 const ChatMessageSC = styled.div(({ theme }) => {
@@ -101,7 +160,14 @@ const ChatbotHistorySC = styled.div(({ theme }) => ({
   },
 }))
 
-function ChatbotFrame({ ...props }: ComponentProps<typeof ChatbotFrameSC>) {
+function ChatbotFrame({
+  onClose,
+  onMin,
+  ...props
+}: Merge<
+  ComponentProps<typeof ChatbotFrameSC>,
+  { onClose: () => void; onMin: () => void }
+>) {
   const [lazyQ, { called, loading, data, error }] = useChatLazyQuery()
   const wasLoading = usePrevious(loading)
 
@@ -154,6 +220,10 @@ function ChatbotFrame({ ...props }: ComponentProps<typeof ChatbotFrameSC>) {
       fillLevel={1}
       {...props}
     >
+      <ChatbotHeader
+        onClose={onClose}
+        onMin={onMin}
+      />
       <ChatbotHistorySC>
         <div className="content">
           {/* {testMd.map((msg) => {
@@ -208,7 +278,7 @@ const ChatbotForm = styled.form(({ theme }) => ({
   borderTop: theme.borders['fill-two'],
 }))
 
-const ChatbotInputSC = styled.div(({ theme }) => ({
+const ChatbotTextAreaSC = styled.div(({ theme }) => ({
   position: 'relative',
   overflow: 'hidden',
   width: '100%',
@@ -245,39 +315,19 @@ const ChatbotInputSC = styled.div(({ theme }) => ({
 }))
 
 function ChatbotTextArea({ className, ...props }: ComponentProps<'textarea'>) {
-  const { isMac, ...ps } = usePlatform()
+  const { isMac } = usePlatform()
 
-  console.log('platform', isMac, ps)
   const onKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Enter') {
         e.preventDefault()
-        const modKeyPressed = isMac ? e.metaKey : e.ctrlKey
+        let modKeyPressed = e.shiftKey || e.ctrlKey || e.altKey
 
+        if (isMac) {
+          modKeyPressed = modKeyPressed || e.metaKey
+        }
         if (modKeyPressed) {
           textAreaInsert(e.currentTarget, '\n')
-          // // Add newline
-          // const tArea = e.currentTarget
-          // let curVal = e.currentTarget.value
-
-          // if (typeof document.execCommand === 'function') {
-          //   console.log('execCommand')
-          //   document.execCommand('insertText', false, '\n')
-          // } else {
-          //   const startPos = tArea.selectionStart
-          //   const endPos = tArea.selectionEnd
-
-          //   curVal = `${tArea.value.substring(
-          //     0,
-          //     startPos
-          //   )}${'\n'}${curVal.substring(endPos, curVal.length)}`
-
-          //   tArea.value = curVal
-          //   tArea.selectionStart = startPos + 1
-          //   tArea.selectionEnd = tArea.selectionStart
-          // }
-
-          // e.currentTarget.dispatchEvent(new Event('change', { bubbles: true }))
         } else {
           // Simulate form submit
           submitForm(e.currentTarget?.form)
@@ -288,12 +338,12 @@ function ChatbotTextArea({ className, ...props }: ComponentProps<'textarea'>) {
   )
 
   return (
-    <ChatbotInputSC className={className}>
+    <ChatbotTextAreaSC className={className}>
       <textarea
         {...props}
         onKeyDown={onKeyDown}
       />
-    </ChatbotInputSC>
+    </ChatbotTextAreaSC>
   )
 }
 
