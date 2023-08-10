@@ -45,7 +45,7 @@ function getLastStringChild(children: any, depth = 0): any {
 const MarkdownInlineCodeSC = styled.code(({ theme }) => ({
   ...theme.partials.text.code,
   fontWeight: 500,
-  backgroundColor: theme.colors['fill-one'],
+  backgroundColor: theme.colors['fill-two'],
   paddingLeft: '1em',
   paddingRight: '1em',
   'paddingLeft ': '1ch',
@@ -72,7 +72,7 @@ const MarkdownPreSC = styled.pre(({ theme }) => {
   return {
     ...theme.partials.text.code,
     fontWeight: 500,
-    backgroundColor: theme.colors['fill-one'],
+    backgroundColor: theme.colors['fill-two'],
     borderRadius: theme.borderRadiuses.medium,
     paddingTop: lineHeight / 2,
     paddingBottom: lineHeight / 2,
@@ -190,9 +190,8 @@ function ChatbotMarkdown({ text }: MarkdownProps) {
   return useMemo(
     () => (
       <ReactMarkdown
-        allowedElements={['ul', 'ol', 'li', 'p', 'pre', 'code']}
+        allowedElements={['ul', 'ol', 'li', 'p', 'pre', 'code', 'pre', 'a']}
         unwrapDisallowed
-        // allowedElements={['ul', 'ol', 'li', 'p', 'a', 'code', 'pre']}
         components={{
           ul: MdList,
           ol: MdList,
@@ -200,6 +199,7 @@ function ChatbotMarkdown({ text }: MarkdownProps) {
           p: render({ component: MdP }),
           a: MdA,
           pre: MdPre,
+          code: MdInlineCode,
         }}
       >
         {text}

@@ -1,6 +1,7 @@
 import { PluralApi } from 'components/PluralApi'
 import {
   ComponentProps,
+  KeyboardEvent,
   ReactNode,
   useCallback,
   useEffect,
@@ -11,8 +12,12 @@ import {
   ChatMessageAttributes,
   useChatLazyQuery,
 } from 'generated/graphql-plural'
-import { Card, Input, usePrevious } from '@pluralsh/design-system'
+import { Card, FillLevelProvider, usePrevious } from '@pluralsh/design-system'
 import { useLogin } from 'components/contexts'
+import { usePlatform } from 'components/hooks/usePlatform'
+import { submitForm } from 'components/utils/submitForm'
+
+import { textAreaInsert } from 'components/utils/textAreaInsert'
 
 import { testMd } from './testMd'
 import ChatbotMarkdown from './ChatbotMarkdown'
@@ -34,7 +39,6 @@ const ChatMessageSC = styled.div(({ theme }) => {
       fontWeight: (theme.partials.text as any).fontWeight || 'normal',
       margin: 0,
     },
-
     '.name-user': {
       color: theme.colors['code-block-mid-blue'] || 'green',
     },
@@ -75,27 +79,29 @@ function ChatMessage({ content, name, role }: ChatMessageAttributes) {
   )
 }
 
-const ChatbotContentSC = styled(Card)(({ theme }) => ({
+const ChatbotFrameSC = styled(Card)(({ theme }) => ({
   display: 'flex',
-  padding: theme.spacing.medium,
   flexDirection: 'column',
-  rowGap: theme.spacing.small,
   maxWidth: 420,
   maxHeight: '100%',
   '.heading': {
     margin: 0,
     ...theme.partials.text.overline,
   },
-  '.history': {
+}))
+
+const ChatbotHistorySC = styled.div(({ theme }) => ({
+  overflowY: 'auto',
+  '.content': {
     display: 'flex',
     flexDirection: 'column',
+    padding: theme.spacing.medium,
     rowGap: theme.spacing.medium,
     flexGrow: 1,
-    overflowY: 'auto',
   },
 }))
 
-function ChatbotContent({ ...props }: ComponentProps<typeof ChatbotContentSC>) {
+function ChatbotFrame({ ...props }: ComponentProps<typeof ChatbotFrameSC>) {
   const [lazyQ, { called, loading, data, error }] = useChatLazyQuery()
   const wasLoading = usePrevious(loading)
 
@@ -144,54 +150,157 @@ function ChatbotContent({ ...props }: ComponentProps<typeof ChatbotContentSC>) {
   )
 
   return (
-    <ChatbotContentSC
-      fillLevel={2}
+    <ChatbotFrameSC
+      fillLevel={1}
       {...props}
     >
-      <div className="history">
-        {testMd.map((msg) => {
-          const role = Role.assistant
-          const name = 'Plural AI'
+      <ChatbotHistorySC>
+        <div className="content">
+          {/* {testMd.map((msg) => {
+            const role = Role.assistant
+            const name = 'Plural AI'
 
-          return (
-            <ChatMessage
-              content={msg}
-              role={role}
-              name={name}
-            />
-          )
-        })}
-        {/* {history.map((msg) => {
-          const { role } = msg
-          const name = msg.name
-            ? msg.name
-            : role === Role.assistant
-            ? 'Plural AI'
-            : userName
+            return (
+              <ChatMessage
+                content={msg}
+                role={role}
+                name={name}
+              />
+            )
+          })} */}
+          {history.map((msg) => {
+            const { role } = msg
+            const name = msg.name
+              ? msg.name
+              : role === Role.assistant
+              ? 'Plural AI'
+              : userName
 
-          return (
-            <ChatMessage
-              {...msg}
-              name={name}
-            />
-          )
-        })} */}
-      </div>
-      <form onSubmit={sendMessage}>
-        <Input
-          value={message}
-          onChange={(e) => setMessage(e.currentTarget.value)}
-          disabled={disabled}
-        />
-      </form>
-    </ChatbotContentSC>
+            return (
+              <ChatMessage
+                {...msg}
+                name={name}
+              />
+            )
+          })}
+        </div>
+      </ChatbotHistorySC>
+      <FillLevelProvider value={2}>
+        <ChatbotForm onSubmit={sendMessage}>
+          <ChatbotTextArea
+            rows={2}
+            value={message}
+            onChange={(e) => {
+              console.log('text changed', e.currentTarget.value)
+              setMessage(e.currentTarget.value)
+            }}
+            disabled={disabled}
+          />
+        </ChatbotForm>
+      </FillLevelProvider>
+    </ChatbotFrameSC>
   )
 }
 
-export default function Chatbot(props: ComponentProps<typeof ChatbotContent>) {
+const ChatbotForm = styled.form(({ theme }) => ({
+  backgroundColor: theme.colors['fill-two'],
+  padding: theme.spacing.medium,
+  borderTop: theme.borders['fill-two'],
+}))
+
+const ChatbotInputSC = styled.div(({ theme }) => ({
+  position: 'relative',
+  overflow: 'hidden',
+  width: '100%',
+  height: 'auto',
+  // height: 40 + theme.spacing.small * 2,
+  borderRadius: theme.borderRadiuses.large,
+  border: theme.borders['outline-focused'],
+  borderColor: theme.colors['fill-two-selected'],
+  backgroundColor: theme.colors['fill-two-selected'],
+  boxShadow: 'none',
+
+  '&:focus, &:focus-visible, &:focus-within': {
+    outline: 'none',
+    boxShadow: 'none',
+  },
+  '&:focus-within': {
+    border: theme.borders['outline-focused'],
+    backgroundColor: theme.colors['fill-two-selected'],
+    textarea: {},
+  },
+  textarea: {
+    width: '100%',
+    padding: theme.spacing.small - 1,
+    overflowY: 'auto',
+    backgroundColor: 'transparent',
+    ...theme.partials.text.body2,
+    color: theme.colors.text,
+    resize: 'none',
+    '&, &:focus, &:focus-within, &:focus-visible': {
+      outline: 'none',
+      border: 'none',
+    },
+  },
+}))
+
+function ChatbotTextArea({ className, ...props }: ComponentProps<'textarea'>) {
+  const { isMac, ...ps } = usePlatform()
+
+  console.log('platform', isMac, ps)
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        const modKeyPressed = isMac ? e.metaKey : e.ctrlKey
+
+        if (modKeyPressed) {
+          textAreaInsert(e.currentTarget, '\n')
+          // // Add newline
+          // const tArea = e.currentTarget
+          // let curVal = e.currentTarget.value
+
+          // if (typeof document.execCommand === 'function') {
+          //   console.log('execCommand')
+          //   document.execCommand('insertText', false, '\n')
+          // } else {
+          //   const startPos = tArea.selectionStart
+          //   const endPos = tArea.selectionEnd
+
+          //   curVal = `${tArea.value.substring(
+          //     0,
+          //     startPos
+          //   )}${'\n'}${curVal.substring(endPos, curVal.length)}`
+
+          //   tArea.value = curVal
+          //   tArea.selectionStart = startPos + 1
+          //   tArea.selectionEnd = tArea.selectionStart
+          // }
+
+          // e.currentTarget.dispatchEvent(new Event('change', { bubbles: true }))
+        } else {
+          // Simulate form submit
+          submitForm(e.currentTarget?.form)
+        }
+      }
+    },
+    [isMac]
+  )
+
+  return (
+    <ChatbotInputSC className={className}>
+      <textarea
+        {...props}
+        onKeyDown={onKeyDown}
+      />
+    </ChatbotInputSC>
+  )
+}
+
+export default function Chatbot(props: ComponentProps<typeof ChatbotFrame>) {
   return (
     <PluralApi>
-      <ChatbotContent {...props} />
+      <ChatbotFrame {...props} />
     </PluralApi>
   )
 }

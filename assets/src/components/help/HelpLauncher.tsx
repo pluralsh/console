@@ -218,9 +218,7 @@ const HelpLauncherContentSC = styled.div(({ theme }) => {
     right: 0,
     left: 0,
     top: 0,
-    bottom:
-      // helpSpacing.padding.bottom +
-      helpSpacing.icon.height + helpSpacing.gap.vertical,
+    bottom: helpSpacing.icon.height + helpSpacing.gap.vertical,
     display: 'flex',
     alignItems: 'end',
     justifyContent: 'end',
