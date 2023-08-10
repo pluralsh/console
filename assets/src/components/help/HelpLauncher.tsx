@@ -210,24 +210,26 @@ const HelpLauncherSC = styled.div(({ theme }) => {
     },
   }
 })
-const HelpLauncherContentSC = styled.div(({ theme }) => {
-  const helpSpacing = getHelpSpacing(theme)
+const HelpLauncherContentSC = styled.div<{ $isOpen: boolean }>(
+  ({ $isOpen, theme }) => {
+    const helpSpacing = getHelpSpacing(theme)
 
-  return {
-    position: 'absolute',
-    right: 0,
-    left: 0,
-    top: 0,
-    bottom: helpSpacing.icon.height + helpSpacing.gap.vertical,
-    display: 'flex',
-    alignItems: 'end',
-    justifyContent: 'end',
-    pointerEvents: 'none',
-    '& > *': {
-      pointerEvents: 'auto',
-    },
+    return {
+      display: $isOpen ? 'flex' : 'none',
+      position: 'absolute',
+      right: 0,
+      left: 0,
+      top: 0,
+      bottom: helpSpacing.icon.height + helpSpacing.gap.vertical,
+      alignItems: 'end',
+      justifyContent: 'end',
+      pointerEvents: 'none',
+      '& > *': {
+        pointerEvents: 'auto',
+      },
+    }
   }
-})
+)
 
 function HelpLauncher() {
   const [helpState, setHelpState] = useState<HelpState>(HelpState.menu)
@@ -265,14 +267,16 @@ function HelpLauncher() {
   }, [openState])
   let content: ReactNode = null
 
-  if (openState === 'open') {
-    content = contentOpts[helpState]
-  }
+  // if (openState === HelpOpenState.open || openState === HelpOpenState.min) {
+  content = contentOpts[helpState]
+  // }
 
   return (
     <HelpLauncherSC>
       <HelpLauncherBtn onClick={onLauncherClick} />
-      <HelpLauncherContentSC>{content}</HelpLauncherContentSC>
+      <HelpLauncherContentSC $isOpen={openState === HelpOpenState.open}>
+        {content}
+      </HelpLauncherContentSC>
     </HelpLauncherSC>
   )
 }
