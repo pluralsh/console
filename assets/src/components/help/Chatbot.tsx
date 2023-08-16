@@ -3,8 +3,11 @@ import {
   ComponentProps,
   KeyboardEvent,
   ReactNode,
+  forwardRef,
   useCallback,
   useEffect,
+  useId,
+  useRef,
   useState,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -19,6 +22,7 @@ import {
   FillLevelProvider,
   IconFrame,
   ProgressBar,
+  scrollIntoContainerView,
   usePrevious,
 } from '@pluralsh/design-system'
 import { useLogin } from 'components/contexts'
@@ -29,7 +33,6 @@ import { Merge } from 'type-fest'
 import { textAreaInsert } from 'components/utils/textAreaInsert'
 
 // import { testMd } from './testMd'
-import classNames from 'classnames'
 
 import ChatbotMarkdown from './ChatbotMarkdown'
 import ChatIcon from './ChatIcon'
@@ -92,60 +95,71 @@ function ChatbotHeader({
   )
 }
 
-const ChatMessageSC = styled.div(({ theme }) => {
-  console.log()
+const ChatMessageSC = styled.li(({ theme }) => ({
+  ...theme.partials.reset.li,
+  '&, .name, p': {
+    ...theme.partials.text.code,
+    fontWeight: (theme.partials.text as any).fontWeight || 'normal',
+    margin: 0,
+  },
+  '.name-user': {
+    color: theme.colors['code-block-mid-blue'] || 'green',
+  },
+  '.name-assistant': {
+    color: theme.colors['code-block-purple'] || 'green',
+  },
+}))
 
-  return {
-    '&, .name, p': {
-      ...theme.partials.text.code,
-      fontWeight: (theme.partials.text as any).fontWeight || 'normal',
-      margin: 0,
-    },
-    '.name-user': {
-      color: theme.colors['code-block-mid-blue'] || 'green',
-    },
-    '.name-assistant': {
-      color: theme.colors['code-block-purple'] || 'green',
-    },
+const ChatMessage = forwardRef(
+  (
+    {
+      content,
+      name,
+      role,
+      ...props
+    }: ChatMessageAttributes & ComponentProps<typeof ChatMessageSC>,
+    ref
+  ) => {
+    let finalContent: ReactNode
+
+    if (role === Role.assistant) {
+      finalContent = <ChatbotMarkdown text={content} />
+    } else {
+      finalContent = content.split('\n\n').map((str, i) => (
+        <p key={i}>
+          {str.split('\n').map((line, i, arr) => (
+            <>
+              {line}
+              {i !== arr.length - 1 ? <br /> : null}
+            </>
+          ))}
+        </p>
+      ))
+    }
+
+    return (
+      <ChatMessageSC
+        ref={ref}
+        {...props}
+      >
+        {name && (
+          <h6 className="name">
+            {`> `}
+            <span className={`name-${role}`}>{name}</span>
+          </h6>
+        )}
+        {finalContent}
+      </ChatMessageSC>
+    )
   }
-})
-
-function ChatMessage({ content, name, role }: ChatMessageAttributes) {
-  let finalContent: ReactNode
-
-  if (role === Role.assistant) {
-    finalContent = <ChatbotMarkdown text={content} />
-  } else {
-    finalContent = content.split('\n\n').map((str) => (
-      <p>
-        {str.split('\n').map((line, i, arr) => (
-          <>
-            {line}
-            {i !== arr.length - 1 ? <br /> : null}
-          </>
-        ))}
-      </p>
-    ))
-  }
-
-  return (
-    <ChatMessageSC>
-      {name && (
-        <h6 className="name">
-          {`> `}
-          <span className={`name-${role}`}>{name}</span>
-        </h6>
-      )}
-      {finalContent}
-    </ChatMessageSC>
-  )
-}
+)
 
 const ChatbotFrameSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   maxWidth: 420,
   maxHeight: '100%',
+  boxShadow: theme.boxShadows.modal,
   '.heading': {
     margin: 0,
     ...theme.partials.text.overline,
@@ -155,6 +169,7 @@ const ChatbotFrameSC = styled(Card)(({ theme }) => ({
 const ChatbotHistorySC = styled.div(({ theme }) => ({
   overflowY: 'auto',
   '.content': {
+    ...theme.partials.reset.list,
     display: 'flex',
     flexDirection: 'column',
     padding: theme.spacing.medium,
@@ -173,50 +188,101 @@ function ChatbotFrame({
 >) {
   const [lazyQ, { called, loading, data, error }] = useChatLazyQuery()
   const wasLoading = usePrevious(loading)
+  const historyScrollRef = useRef<HTMLDivElement>(null)
+  const msgIdPrefix = useId()
+  const lastUserMsgRef = useRef<HTMLLIElement>(null)
+  const lastAsstMsgRef = useRef<HTMLLIElement>(null)
 
   const [message, setMessage] = useState<string>('')
-  const [history, setHistory] = useState<ChatMessageAttributes[]>([
+  const [history, setHistory] = useState<
+    (ChatMessageAttributes & { timestamp: number })[]
+  >([
     {
       content: INTRO,
       role: Role.assistant,
+      timestamp: Date.now(),
     },
   ])
   const { name: userName } = useLogin()?.me || {}
   const chatResponse = data?.chat
 
-  console.log({ data, error })
-  console.log({ chatResponse, called, loading })
+  // console.log({ data, error })
+  // console.log({ chatResponse, called, loading })
+  console.log({ history })
 
   useEffect(() => {
     if (!loading && wasLoading && chatResponse) {
       // And maybe double-check content doesn't match latest history content
       const { content, role } = chatResponse || {}
 
-      setHistory([...history, { content, role }])
+      setHistory([...history, { content, role, timestamp: Date.now() }])
     }
   }, [chatResponse, history, loading, wasLoading])
+
+  const lastUserMsgIdx = history.findLastIndex((msg) => msg.role === Role.user)
+  const lastAsstMsgIdx = history.findLastIndex(
+    (msg) => msg.role === Role.assistant
+  )
+
+  useEffect(() => {
+    console.log('history changed', lastUserMsgRef.current)
+    const scrollOpts: Parameters<typeof scrollIntoContainerView>[2] = {
+      behavior: 'smooth',
+      block: 'end',
+      blockOffset: 16,
+      preventIfVisible: false,
+    }
+    let scrollToElt = lastUserMsgRef.current
+
+    if (lastAsstMsgIdx > lastUserMsgIdx) {
+      console.log('scroll asst into view')
+      scrollOpts.block = 'start'
+      scrollToElt = lastAsstMsgRef.current
+    }
+    if (scrollToElt && historyScrollRef.current) {
+      scrollIntoContainerView(scrollToElt, historyScrollRef.current, scrollOpts)
+    }
+  }, [history, lastAsstMsgIdx, lastUserMsgIdx])
+  // useEffect(() => {
+  //   if (history[history.length - 1].role === Role.user) {
+  //     historyRef.current?.scrollTo({ behavior: 'smooth', top: 999 })
+  //   } else {
+  //   }
+  // }, [history])
 
   const disabled = called && loading
 
   const sendMessage = useCallback(
     (e) => {
       console.log('sendmessage', message)
+
       e.preventDefault()
       if (message && !disabled) {
-        const nextHistory = [...history, { content: message, role: Role.user }]
+        const nextHistory = [
+          ...history,
+          { content: message, role: Role.user, timestamp: Date.now() },
+        ]
 
         setMessage('')
         setHistory(nextHistory)
         console.log('query with history', nextHistory)
         lazyQ({
           variables: {
-            history: nextHistory,
+            // Remove initial message since that will be added automatically
+            // on the server-side
+            // Only include properties expected by the API
+            history: nextHistory.slice(1).map(({ content, role }) => ({
+              content,
+              role,
+            })),
           },
         })
       }
     },
     [disabled, history, lazyQ, message]
   )
+
+  console.log({ lastUserMsgIdx, lastAsstMsgIdx })
 
   return (
     <ChatbotFrameSC
@@ -227,8 +293,8 @@ function ChatbotFrame({
         onClose={onClose}
         onMin={onMin}
       />
-      <ChatbotHistorySC>
-        <div className="content">
+      <ChatbotHistorySC ref={historyScrollRef}>
+        <ul className="content">
           {/* {testMd.map((msg) => {
             const role = Role.assistant
             const name = 'Plural AI'
@@ -241,22 +307,33 @@ function ChatbotFrame({
               />
             )
           })} */}
-          {history.map((msg) => {
+          {history.map((msg, i) => {
             const { role } = msg
             const name = msg.name
               ? msg.name
               : role === Role.assistant
               ? 'Plural AI'
               : userName
+            const ref =
+              i === lastAsstMsgIdx
+                ? lastAsstMsgRef
+                : i === lastUserMsgIdx
+                ? lastUserMsgRef
+                : undefined
+
+            console.log({ i, ref })
 
             return (
               <ChatMessage
+                key={msg.timestamp}
+                id={`${msgIdPrefix}-${msg.timestamp}`}
                 {...msg}
                 name={name}
+                ref={ref}
               />
             )
           })}
-        </div>
+        </ul>
       </ChatbotHistorySC>
       <FillLevelProvider value={2}>
         <ChatbotForm onSubmit={sendMessage}>

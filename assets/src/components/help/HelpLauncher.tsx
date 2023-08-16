@@ -55,6 +55,7 @@ const HelpLauncherBtnSC = styled.button(({ theme }) => {
 
   return {
     ...theme.partials.reset.button,
+    zIndex: 1,
     width: helpSpacing.icon.width,
     height: helpSpacing.icon.height + BTN_OVERSHOOT,
     paddingBottom: BTN_OVERSHOOT,
@@ -117,11 +118,11 @@ const HelpMenuSC = styled(Card)(({ theme }) => {
   console.log('')
 
   return {
-    // background: theme.colors['fill-one'],
     display: 'flex',
     padding: theme.spacing.medium,
     flexDirection: 'column',
     rowGap: theme.spacing.medium,
+    boxShadow: theme.boxShadows.modal,
     '.heading': {
       margin: 0,
       ...theme.partials.text.overline,
@@ -267,9 +268,7 @@ function HelpLauncher() {
   }, [openState])
   let content: ReactNode = null
 
-  // if (openState === HelpOpenState.open || openState === HelpOpenState.min) {
   content = contentOpts[helpState]
-  // }
 
   return (
     <HelpLauncherSC>
