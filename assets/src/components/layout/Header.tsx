@@ -6,6 +6,8 @@ import BillingSubscriptionChip from 'components/billing/BillingSubscriptionChip'
 
 import BillingLegacyUserMessage from 'components/billing/BillingLegacyUserMessage'
 
+import CommandPaletteLauncher from 'components/CommandPaletteLauncher'
+
 import { InstallerModal } from '../repos/installer/Modal'
 
 import DemoBanner from './DemoBanner'
@@ -49,6 +51,7 @@ export default function Header() {
         >
           Plural Account
         </Button>
+        <CommandPaletteLauncher />
         <InstallerModal />
       </Flex>
     </Div>

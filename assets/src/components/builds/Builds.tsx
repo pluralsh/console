@@ -72,7 +72,10 @@ export default function Builds() {
       }
     >
       {/* <PinnedRunbooks border={undefined} /> */}
-      <Card height="100%">
+      <Card
+        height="100%"
+        position="relative"
+      >
         <StandardScroller
           listRef={listRef}
           setListRef={setListRef}

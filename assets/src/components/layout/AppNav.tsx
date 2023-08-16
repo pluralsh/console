@@ -20,7 +20,6 @@ import { useNavigate } from 'react-router-dom'
 import AppStatus from 'components/apps/AppStatus'
 import Fuse from 'fuse.js'
 import isEmpty from 'lodash/isEmpty'
-import upperFirst from 'lodash/upperFirst'
 import { useOnClickOutside } from 'components/hooks/useOnClickOutside'
 import { Div } from 'honorable'
 import { animated, useTransition } from 'react-spring'
@@ -264,7 +263,7 @@ export default function AppNav() {
     ])
   }, [applications])
 
-  const { modKeyString } = usePlatform()
+  const { modKeyString, keyCombinerString } = usePlatform()
 
   return (
     <>
@@ -276,7 +275,8 @@ export default function AppNav() {
         userSelect="none"
         whiteSpace="nowrap"
       >
-        {upperFirst(modKeyString)} K
+        {modKeyString}
+        {keyCombinerString}K
         <StatusIcon readiness={statuses.length > 0 && statuses[0].readiness} />
       </Chip>
       <StatusPanel

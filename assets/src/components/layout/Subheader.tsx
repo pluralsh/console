@@ -13,7 +13,7 @@ import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayo
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from '../utils/layout/ResponsiveLayoutSpacer'
 
-import AppNav from './AppNav'
+// import AppNav from './AppNav'
 
 export default function Subheader() {
   const navigate = useNavigate()
@@ -58,7 +58,7 @@ export default function Subheader() {
       </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSidecarContainer />
       <ResponsiveLayoutSpacer />
-      <AppNav />
+      {/* <AppNav /> */}
     </Flex>
   )
 }

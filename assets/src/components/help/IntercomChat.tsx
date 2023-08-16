@@ -9,7 +9,6 @@ export function IntercomChat({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     if (!isOpen && wasOpen) {
-      console.log('closed')
       onClose()
     }
   }, [isOpen, wasOpen, onClose])

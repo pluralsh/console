@@ -6,7 +6,6 @@ import { useVisuallyHidden } from 'react-aria'
 import {
   ComponentProps,
   Dispatch,
-  ReactNode,
   SetStateAction,
   useCallback,
   useState,
@@ -18,13 +17,14 @@ import {
   CaretDownIcon,
   CaretUpIcon,
   DocumentIcon,
-  helpStateIcon,
+  LifePreserverIcon,
 } from '@pluralsh/design-system'
 
 import HelpIcon from './HelpIcon'
 
 import Chatbot from './Chatbot'
 import { IntercomChat } from './IntercomChat'
+import ChatIcon from './ChatIcon'
 
 const getHelpSpacing = (theme: DefaultTheme) => ({
   gap: {
@@ -34,14 +34,14 @@ const getHelpSpacing = (theme: DefaultTheme) => ({
   // Intercom has a hard-minimum horizontal padding of 20px
   // So padding.right must be 20px or larger
   padding: {
-    right: theme.spacing.large,
+    right: theme.spacing.large + theme.spacing.medium,
     left: theme.spacing.large,
     top: theme.spacing.large,
     bottom: 0,
   },
   icon: {
     width: theme.spacing.xxlarge,
-    height: theme.spacing.xxlarge,
+    height: theme.spacing.xxlarge - theme.spacing.xxsmall,
   },
 })
 
@@ -57,15 +57,17 @@ export const HELP_BOTTOM_PAD = 32
 
 const BTN_OVERSHOOT = 20
 
-const HelpLauncherButtonsSC = styled.div(({ theme }) => {
-  const helpSpacing = getHelpSpacing(theme)
-
-  return {
-    zIndex: 1,
-    display: 'flex',
-    gap: theme.spacing.small,
-  }
-})
+const HelpLauncherButtonsSC = styled.div(({ theme }) => ({
+  zIndex: 1,
+  display: 'flex',
+  gap: theme.spacing.small,
+  '&&': {
+    pointerEvents: 'none',
+  },
+  '& > *': {
+    pointerEvents: 'auto',
+  },
+}))
 
 const HelpLauncherBtnSC = styled.button(({ theme }) => {
   const helpSpacing = getHelpSpacing(theme)
@@ -88,6 +90,7 @@ const HelpLauncherBtnSC = styled.button(({ theme }) => {
     alignItems: 'center',
     justifyContent: 'center',
     padding: 0,
+    boxShadow: theme.boxShadows.moderate,
     transition: 'transform 0.2s ease',
 
     '&:hover': {
@@ -127,22 +130,18 @@ function HelpLauncherBtn({
   )
 }
 
-const HelpMaximizeBtnSC = styled(HelpLauncherBtnSC)(({ theme }) => {
-  const helpSpacing = getHelpSpacing(theme)
-
-  return {
+const HelpMaximizeBtnSC = styled(HelpLauncherBtnSC)(({ theme }) => ({
+  background: theme.colors['fill-two'],
+  border: theme.borders['fill-two'],
+  '&:hover': {
+    background: theme.colors['fill-two-hover'],
+    transform: `translateY(${BTN_OVERSHOOT - theme.spacing.xsmall / 2}px)`,
+  },
+  '&:focus-visible': {
     background: theme.colors['fill-two'],
-    border: theme.borders['fill-two'],
-    '&:hover': {
-      background: theme.colors['fill-two-hover'],
-      transform: `translateY(${BTN_OVERSHOOT - theme.spacing.xsmall / 2}px)`,
-    },
-    '&:focus-visible': {
-      background: theme.colors['fill-two'],
-      border: theme.borders['outline-focused'],
-    },
-  }
-})
+    border: theme.borders['outline-focused'],
+  },
+}))
 
 function HelpMaximizeBtn(props: ComponentProps<typeof HelpLauncherBtnSC>) {
   const { visuallyHiddenProps } = useVisuallyHidden()
@@ -159,7 +158,7 @@ function HelpMaximizeBtn(props: ComponentProps<typeof HelpLauncherBtnSC>) {
   )
 }
 
-enum HelpState {
+enum HelpMenuState {
   menu = 'menu',
   docSearch = 'docSearch',
   chatBot = 'chatBot',
@@ -172,29 +171,28 @@ export enum HelpOpenState {
   min = 'min',
 }
 
-const HelpMenuSC = styled(Card)(({ theme }) => {
-  // const helpSpacing = getHelpSpacing(theme)
-  console.log('')
-
-  return {
-    display: 'flex',
-    padding: theme.spacing.medium,
-    flexDirection: 'column',
-    rowGap: theme.spacing.medium,
-    boxShadow: theme.boxShadows.modal,
-    '.heading': {
-      margin: 0,
-      ...theme.partials.text.overline,
-    },
-  }
-})
+const HelpMenuSC = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  padding: theme.spacing.medium,
+  flexDirection: 'column',
+  rowGap: theme.spacing.medium,
+  boxShadow: theme.boxShadows.modal,
+  '.heading': {
+    margin: 0,
+    ...theme.partials.text.overline,
+  },
+}))
 
 function HelpMenu({
-  setHelpState,
+  setHelpMenuState,
+  setHelpOpenState,
   ...props
 }: Merge<
   ComponentProps<typeof HelpMenuSC>,
-  { setHelpState: Dispatch<SetStateAction<HelpState>> }
+  {
+    setHelpMenuState: Dispatch<SetStateAction<HelpMenuState>>
+    setHelpOpenState: Dispatch<SetStateAction<HelpOpenState>>
+  }
 >) {
   const theme = useTheme()
 
@@ -207,13 +205,13 @@ function HelpMenu({
       <Button
         secondary
         startIcon={
-          <DocumentIcon
+          <LifePreserverIcon
             size={16}
             color={theme.colors['icon-info']}
           />
         }
         onClick={() => {
-          setHelpState(HelpState.intercom)
+          setHelpMenuState(HelpMenuState.intercom)
         }}
       >
         Contact support
@@ -221,13 +219,13 @@ function HelpMenu({
       <Button
         secondary
         startIcon={
-          <DocumentIcon
+          <ChatIcon
             size={16}
             color={theme.colors['icon-primary']}
           />
         }
         onClick={() => {
-          setHelpState(HelpState.chatBot)
+          setHelpMenuState(HelpMenuState.chatBot)
         }}
       >
         Ask Plural AI
@@ -241,8 +239,8 @@ function HelpMenu({
           />
         }
         onClick={() => {
-          setHelpState(HelpState.menu)
-          setHelpState(HelpState.closed)
+          setHelpMenuState(HelpMenuState.menu)
+          setHelpOpenState(HelpOpenState.closed)
         }}
       >
         Search docs
@@ -293,14 +291,14 @@ const HelpLauncherContentSC = styled.div<{ $isOpen: boolean }>(
 )
 
 function HelpLauncher() {
-  const [helpState, setHelpState] = useState<HelpState>(HelpState.menu)
+  const [menuState, setMenuState] = useState<HelpMenuState>(HelpMenuState.menu)
   const [openState, setOpenState] = useState<HelpOpenState>(
     HelpOpenState.closed
   )
   // const prevOpenState = usePrevious(openState)
 
   const closeHelp = useCallback(() => {
-    setHelpState(HelpState.menu)
+    setMenuState(HelpMenuState.menu)
     setOpenState(HelpOpenState.closed)
   }, [])
 
@@ -308,28 +306,35 @@ function HelpLauncher() {
     setOpenState(HelpOpenState.min)
   }, [])
   const contentOpts = {
-    [HelpState.chatBot]: (
+    [HelpMenuState.chatBot]: (
       <Chatbot
         onClose={closeHelp}
         onMin={minHelp}
       />
     ),
-    [HelpState.docSearch]: <HelpMenu setHelpState={setHelpState} />,
-    [HelpState.intercom]: <IntercomChat onClose={closeHelp} />,
-    [HelpState.menu]: <HelpMenu setHelpState={setHelpState} />,
+    [HelpMenuState.docSearch]: (
+      <HelpMenu
+        setHelpMenuState={setMenuState}
+        setHelpOpenState={setOpenState}
+      />
+    ),
+    [HelpMenuState.intercom]: <IntercomChat onClose={closeHelp} />,
+    [HelpMenuState.menu]: (
+      <HelpMenu
+        setHelpMenuState={setMenuState}
+        setHelpOpenState={setOpenState}
+      />
+    ),
   }
 
   const onLauncherClick = useCallback(() => {
-    console.log('launcher click')
-    console.log({ helpState, openState })
-    if (openState === HelpOpenState.open && helpState === HelpState.menu) {
+    if (openState === HelpOpenState.open && menuState === HelpMenuState.menu) {
       setOpenState(HelpOpenState.closed)
     } else {
-      console.log('try to open')
       setOpenState(HelpOpenState.open)
-      setHelpState(HelpState.menu)
+      setMenuState(HelpMenuState.menu)
     }
-  }, [helpState, openState])
+  }, [menuState, openState])
 
   const onMaximizeClick = useCallback(() => {
     if (openState === 'closed' || openState === 'min') {
@@ -347,7 +352,7 @@ function HelpLauncher() {
         )}
         <HelpLauncherBtn
           variant={
-            helpState === HelpState.menu && openState === HelpOpenState.open
+            menuState === HelpMenuState.menu && openState === HelpOpenState.open
               ? 'minimize'
               : 'help'
           }
@@ -355,7 +360,7 @@ function HelpLauncher() {
         />
       </HelpLauncherButtonsSC>
       <HelpLauncherContentSC $isOpen={openState === HelpOpenState.open}>
-        {contentOpts[helpState]}
+        {contentOpts[menuState]}
       </HelpLauncherContentSC>
     </HelpLauncherSC>
   )
