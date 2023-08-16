@@ -34,6 +34,8 @@ import { textAreaInsert } from 'components/utils/textAreaInsert'
 
 // import { testMd } from './testMd'
 
+import classNames from 'classnames'
+
 import ChatbotMarkdown from './ChatbotMarkdown'
 import ChatIcon from './ChatIcon'
 
@@ -154,6 +156,48 @@ const ChatMessage = forwardRef(
   }
 )
 
+const ChatbotLoadingBarSC = styled(ProgressBar)(({ theme }) => ({
+  '&&': {
+    position: 'absolute',
+    top: -theme.borderWidths.default,
+    left: 0,
+    right: 0,
+    borderRadius: 0,
+    height: theme.borderWidths.default,
+    background: 'none',
+    transition: '0.2s opacity ease',
+    opacity: 0,
+    '&.show': {
+      opacity: 1,
+    },
+  },
+}))
+
+const ChatbotHistorySC = styled.div(({ theme }) => ({
+  position: 'relative',
+  overflowY: 'auto',
+  '.content': {
+    ...theme.partials.reset.list,
+    display: 'flex',
+    flexDirection: 'column',
+    padding: theme.spacing.medium,
+    rowGap: theme.spacing.medium,
+    flexGrow: 1,
+  },
+  '.progressBar': {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    borderRadius: 0,
+    height: 2,
+    background: 'none',
+    '.show': {
+      opacity: 1,
+    },
+  },
+}))
+
 const ChatbotFrameSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
@@ -163,18 +207,6 @@ const ChatbotFrameSC = styled(Card)(({ theme }) => ({
   '.heading': {
     margin: 0,
     ...theme.partials.text.overline,
-  },
-}))
-
-const ChatbotHistorySC = styled.div(({ theme }) => ({
-  overflowY: 'auto',
-  '.content': {
-    ...theme.partials.reset.list,
-    display: 'flex',
-    flexDirection: 'column',
-    padding: theme.spacing.medium,
-    rowGap: theme.spacing.medium,
-    flexGrow: 1,
   },
 }))
 
@@ -206,10 +238,6 @@ function ChatbotFrame({
   const { name: userName } = useLogin()?.me || {}
   const chatResponse = data?.chat
 
-  // console.log({ data, error })
-  // console.log({ chatResponse, called, loading })
-  console.log({ history })
-
   useEffect(() => {
     if (!loading && wasLoading && chatResponse) {
       // And maybe double-check content doesn't match latest history content
@@ -225,7 +253,6 @@ function ChatbotFrame({
   )
 
   useEffect(() => {
-    console.log('history changed', lastUserMsgRef.current)
     const scrollOpts: Parameters<typeof scrollIntoContainerView>[2] = {
       behavior: 'smooth',
       block: 'end',
@@ -235,7 +262,6 @@ function ChatbotFrame({
     let scrollToElt = lastUserMsgRef.current
 
     if (lastAsstMsgIdx > lastUserMsgIdx) {
-      console.log('scroll asst into view')
       scrollOpts.block = 'start'
       scrollToElt = lastAsstMsgRef.current
     }
@@ -243,19 +269,11 @@ function ChatbotFrame({
       scrollIntoContainerView(scrollToElt, historyScrollRef.current, scrollOpts)
     }
   }, [history, lastAsstMsgIdx, lastUserMsgIdx])
-  // useEffect(() => {
-  //   if (history[history.length - 1].role === Role.user) {
-  //     historyRef.current?.scrollTo({ behavior: 'smooth', top: 999 })
-  //   } else {
-  //   }
-  // }, [history])
 
   const disabled = called && loading
 
   const sendMessage = useCallback(
     (e) => {
-      console.log('sendmessage', message)
-
       e.preventDefault()
       if (message && !disabled) {
         const nextHistory = [
@@ -265,7 +283,6 @@ function ChatbotFrame({
 
         setMessage('')
         setHistory(nextHistory)
-        console.log('query with history', nextHistory)
         lazyQ({
           variables: {
             // Remove initial message since that will be added automatically
@@ -281,8 +298,6 @@ function ChatbotFrame({
     },
     [disabled, history, lazyQ, message]
   )
-
-  console.log({ lastUserMsgIdx, lastAsstMsgIdx })
 
   return (
     <ChatbotFrameSC
@@ -321,8 +336,6 @@ function ChatbotFrame({
                 ? lastUserMsgRef
                 : undefined
 
-            console.log({ i, ref })
-
             return (
               <ChatMessage
                 key={msg.timestamp}
@@ -336,52 +349,33 @@ function ChatbotFrame({
         </ul>
       </ChatbotHistorySC>
       <FillLevelProvider value={2}>
-        <ChatbotForm onSubmit={sendMessage}>
+        <ChatbotFormSC onSubmit={sendMessage}>
           <div className="textareaWrap">
             <ChatbotTextArea
               rows={2}
               value={message}
               onChange={(e) => {
-                console.log('text changed', e.currentTarget.value)
                 setMessage(e.currentTarget.value)
               }}
               // disabled={disabled}
-            >
-              {loading && (
-                <ProgressBar
-                  // @ts-expect-error
-                  className="progressBar"
-                  mode="indeterminate"
-                  complete={false}
-                />
-              )}
-            </ChatbotTextArea>
+            />
           </div>
-        </ChatbotForm>
+          <ChatbotLoadingBarSC
+            // @ts-expect-error
+            className={classNames({ show: loading })}
+            complete={false}
+          />
+        </ChatbotFormSC>
       </FillLevelProvider>
     </ChatbotFrameSC>
   )
 }
 
-const ChatbotForm = styled.form(({ theme }) => ({
+const ChatbotFormSC = styled.form(({ theme }) => ({
+  position: 'relative',
   backgroundColor: theme.colors['fill-two'],
   padding: theme.spacing.medium,
   borderTop: theme.borders['fill-two'],
-  '.textareaWrap': {
-    position: 'relative',
-  },
-  '.progressBar': {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    borderRadius: 0,
-    height: 2,
-    background: 'none',
-    '.show': {
-      opacity: 1,
-    },
-  },
 }))
 
 const ChatbotTextAreaSC = styled.div(({ theme }) => ({
