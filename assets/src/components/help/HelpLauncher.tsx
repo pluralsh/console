@@ -197,7 +197,8 @@ const HelpLauncherSC = styled.div(({ theme }) => {
 
   return {
     position: 'fixed',
-    zIndex: theme.zIndexes.tooltip,
+    // Must be greater than 2147483000 to appear above Intercom iframe
+    zIndex: 2147483000 + 100,
     display: 'flex',
     alignItems: 'end',
     justifyContent: 'end',
@@ -266,15 +267,12 @@ function HelpLauncher() {
       setOpenState(HelpOpenState.min)
     }
   }, [openState])
-  let content: ReactNode = null
-
-  content = contentOpts[helpState]
 
   return (
     <HelpLauncherSC>
       <HelpLauncherBtn onClick={onLauncherClick} />
       <HelpLauncherContentSC $isOpen={openState === HelpOpenState.open}>
-        {content}
+        {contentOpts[helpState]}
       </HelpLauncherContentSC>
     </HelpLauncherSC>
   )
