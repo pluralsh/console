@@ -12,7 +12,14 @@ import {
   useState,
 } from 'react'
 
-import { Button, Card, DocumentIcon } from '@pluralsh/design-system'
+import {
+  Button,
+  Card,
+  CaretDownIcon,
+  CaretUpIcon,
+  DocumentIcon,
+  helpStateIcon,
+} from '@pluralsh/design-system'
 
 import HelpIcon from './HelpIcon'
 
@@ -50,12 +57,21 @@ export const HELP_BOTTOM_PAD = 32
 
 const BTN_OVERSHOOT = 20
 
+const HelpLauncherButtonsSC = styled.div(({ theme }) => {
+  const helpSpacing = getHelpSpacing(theme)
+
+  return {
+    zIndex: 1,
+    display: 'flex',
+    gap: theme.spacing.small,
+  }
+})
+
 const HelpLauncherBtnSC = styled.button(({ theme }) => {
   const helpSpacing = getHelpSpacing(theme)
 
   return {
     ...theme.partials.reset.button,
-    zIndex: 1,
     width: helpSpacing.icon.width,
     height: helpSpacing.icon.height + BTN_OVERSHOOT,
     paddingBottom: BTN_OVERSHOOT,
@@ -76,7 +92,7 @@ const HelpLauncherBtnSC = styled.button(({ theme }) => {
 
     '&:hover': {
       background: theme.colors['action-primary-hover'],
-      transform: `translateY(${BTN_OVERSHOOT - theme.spacing.xsmall / 2}px)`,
+      transform: `translateY(${BTN_OVERSHOOT - theme.spacing.xsmall / 4}px)`,
     },
     '&:focus-visible': {
       background: theme.colors['action-primary-hover'],
@@ -85,18 +101,61 @@ const HelpLauncherBtnSC = styled.button(({ theme }) => {
   }
 })
 
-function HelpLauncherBtn(props: ComponentProps<typeof HelpLauncherBtnSC>) {
+function HelpLauncherBtn({
+  variant,
+  ...props
+}: Merge<
+  ComponentProps<typeof HelpLauncherBtnSC>,
+  { variant: 'help' | 'minimize' }
+>) {
+  const { visuallyHiddenProps } = useVisuallyHidden()
+  const theme = useTheme()
+  const iconProps = {
+    size: 24,
+    color: theme.colors['icon-light'],
+  }
+
+  return (
+    <HelpLauncherBtnSC {...props}>
+      {variant === 'minimize' ? (
+        <CaretDownIcon {...iconProps} />
+      ) : (
+        <HelpIcon {...iconProps} />
+      )}
+      <span {...visuallyHiddenProps}>Help</span>
+    </HelpLauncherBtnSC>
+  )
+}
+
+const HelpMaximizeBtnSC = styled(HelpLauncherBtnSC)(({ theme }) => {
+  const helpSpacing = getHelpSpacing(theme)
+
+  return {
+    background: theme.colors['fill-two'],
+    border: theme.borders['fill-two'],
+    '&:hover': {
+      background: theme.colors['fill-two-hover'],
+      transform: `translateY(${BTN_OVERSHOOT - theme.spacing.xsmall / 2}px)`,
+    },
+    '&:focus-visible': {
+      background: theme.colors['fill-two'],
+      border: theme.borders['outline-focused'],
+    },
+  }
+})
+
+function HelpMaximizeBtn(props: ComponentProps<typeof HelpLauncherBtnSC>) {
   const { visuallyHiddenProps } = useVisuallyHidden()
   const theme = useTheme()
 
   return (
-    <HelpLauncherBtnSC {...props}>
-      <HelpIcon
+    <HelpMaximizeBtnSC {...props}>
+      <CaretUpIcon
         size={24}
         color={theme.colors['icon-light']}
       />
-      <span {...visuallyHiddenProps}>Help</span>
-    </HelpLauncherBtnSC>
+      <span {...visuallyHiddenProps}>Maximize help</span>
+    </HelpMaximizeBtnSC>
   )
 }
 
@@ -182,12 +241,12 @@ function HelpMenu({
           />
         }
         onClick={() => {
-          setHelpState(HelpState.docSearch)
+          setHelpState(HelpState.menu)
+          setHelpState(HelpState.closed)
         }}
       >
         Search docs
       </Button>
-      <Button>Search docs</Button>
     </HelpMenuSC>
   )
 }
@@ -261,6 +320,18 @@ function HelpLauncher() {
   }
 
   const onLauncherClick = useCallback(() => {
+    console.log('launcher click')
+    console.log({ helpState, openState })
+    if (openState === HelpOpenState.open && helpState === HelpState.menu) {
+      setOpenState(HelpOpenState.closed)
+    } else {
+      console.log('try to open')
+      setOpenState(HelpOpenState.open)
+      setHelpState(HelpState.menu)
+    }
+  }, [helpState, openState])
+
+  const onMaximizeClick = useCallback(() => {
     if (openState === 'closed' || openState === 'min') {
       setOpenState(HelpOpenState.open)
     } else {
@@ -270,7 +341,19 @@ function HelpLauncher() {
 
   return (
     <HelpLauncherSC>
-      <HelpLauncherBtn onClick={onLauncherClick} />
+      <HelpLauncherButtonsSC>
+        {openState === HelpOpenState.min && (
+          <HelpMaximizeBtn onClick={onMaximizeClick} />
+        )}
+        <HelpLauncherBtn
+          variant={
+            helpState === HelpState.menu && openState === HelpOpenState.open
+              ? 'minimize'
+              : 'help'
+          }
+          onClick={onLauncherClick}
+        />
+      </HelpLauncherButtonsSC>
       <HelpLauncherContentSC $isOpen={openState === HelpOpenState.open}>
         {contentOpts[helpState]}
       </HelpLauncherContentSC>
