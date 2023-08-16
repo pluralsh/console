@@ -36,6 +36,8 @@ import { textAreaInsert } from 'components/utils/textAreaInsert'
 
 import classNames from 'classnames'
 
+import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
+
 import ChatbotMarkdown from './ChatbotMarkdown'
 import ChatIcon from './ChatIcon'
 
@@ -218,17 +220,20 @@ function ChatbotFrame({
   ComponentProps<typeof ChatbotFrameSC>,
   { onClose: () => void; onMin: () => void }
 >) {
-  const [lazyQ, { called, loading, data, error }] = useChatLazyQuery()
+  const [lazyQ, { called, loading, data, error: _error }] = useChatLazyQuery()
   const wasLoading = usePrevious(loading)
   const historyScrollRef = useRef<HTMLDivElement>(null)
   const msgIdPrefix = useId()
   const lastUserMsgRef = useRef<HTMLLIElement>(null)
   const lastAsstMsgRef = useRef<HTMLLIElement>(null)
 
-  const [message, setMessage] = useState<string>('')
-  const [history, setHistory] = useState<
+  const [message, setMessage] = usePersistedSessionState<string>(
+    'aiChatMessage',
+    ''
+  )
+  const [history, setHistory] = usePersistedSessionState<
     (ChatMessageAttributes & { timestamp: number })[]
-  >([
+  >('aiChatHistory', [
     {
       content: INTRO,
       role: Role.assistant,
