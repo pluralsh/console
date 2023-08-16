@@ -362,15 +362,14 @@ export function CommandPalette({ children }) {
     alert('launch docs search')
   }, [])
   const launchAiChat = useCallback(() => {
-    alert('ai')
+    alert('launch ai chatbot')
   }, [])
   const launchIntercom = useCallback(() => {
-    alert('launch docs')
+    alert('launch intercom support')
   }, [])
 
   const baseActions = useMemo(
     () => [
-      createAction({ name: 'Help', shortcut: ['?'] }),
       createAction({
         name: 'Nodes',
         shortcut: ['N'],
@@ -408,7 +407,7 @@ export function CommandPalette({ children }) {
       }),
       createAction({
         name: 'Temporary Token',
-        shortcut: ['N'],
+        shortcut: ['Ts'],
         section: 'Security',
         perform: () => navigate('/profile/security'),
       }),

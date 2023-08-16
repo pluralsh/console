@@ -7,8 +7,8 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
-  useState,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 import {
@@ -221,6 +221,7 @@ function ChatbotFrame({
   { onClose: () => void; onMin: () => void }
 >) {
   const [lazyQ, { called, loading, data, error: _error }] = useChatLazyQuery()
+  const hasMounted = useRef(false)
   const wasLoading = usePrevious(loading)
   const historyScrollRef = useRef<HTMLDivElement>(null)
   const msgIdPrefix = useId()
@@ -240,6 +241,8 @@ function ChatbotFrame({
       timestamp: Date.now(),
     },
   ])
+  const lastHistoryLength = usePrevious(history.length)
+
   const { name: userName } = useLogin()?.me || {}
   const chatResponse = data?.chat
 
@@ -250,20 +253,36 @@ function ChatbotFrame({
 
       setHistory([...history, { content, role, timestamp: Date.now() }])
     }
-  }, [chatResponse, history, loading, wasLoading])
+  }, [chatResponse, history, loading, setHistory, wasLoading])
 
   const lastUserMsgIdx = history.findLastIndex((msg) => msg.role === Role.user)
   const lastAsstMsgIdx = history.findLastIndex(
     (msg) => msg.role === Role.assistant
   )
 
+  // Scroll to bottom on initial mount
+  useLayoutEffect(() => {
+    historyScrollRef.current?.scrollTo({ top: 9999999999999 })
+  }, [])
+
   useEffect(() => {
+    if (!hasMounted.current) {
+      // Prevent smooth scrolling on first render
+      // Instant scroll to bottom handled above
+      hasMounted.current = true
+
+      return
+    }
+    if (history.length === lastHistoryLength) {
+      return
+    }
     const scrollOpts: Parameters<typeof scrollIntoContainerView>[2] = {
       behavior: 'smooth',
       block: 'end',
       blockOffset: 16,
       preventIfVisible: false,
     }
+
     let scrollToElt = lastUserMsgRef.current
 
     if (lastAsstMsgIdx > lastUserMsgIdx) {
@@ -273,7 +292,7 @@ function ChatbotFrame({
     if (scrollToElt && historyScrollRef.current) {
       scrollIntoContainerView(scrollToElt, historyScrollRef.current, scrollOpts)
     }
-  }, [history, lastAsstMsgIdx, lastUserMsgIdx])
+  }, [history, lastAsstMsgIdx, lastHistoryLength, lastUserMsgIdx])
 
   const disabled = called && loading
 
@@ -301,7 +320,7 @@ function ChatbotFrame({
         })
       }
     },
-    [disabled, history, lazyQ, message]
+    [disabled, history, lazyQ, message, setHistory, setMessage]
   )
 
   return (

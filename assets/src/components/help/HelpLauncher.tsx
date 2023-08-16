@@ -2,12 +2,14 @@
 import { Merge } from 'type-fest'
 import styled, { DefaultTheme, useTheme } from 'styled-components'
 import { useVisuallyHidden } from 'react-aria'
+import { animated, useTransition } from 'react-spring'
 
 import {
   ComponentProps,
   Dispatch,
   SetStateAction,
   useCallback,
+  useMemo,
   useState,
 } from 'react'
 
@@ -269,26 +271,42 @@ const HelpLauncherSC = styled.div(({ theme }) => {
     },
   }
 })
-const HelpLauncherContentSC = styled.div<{ $isOpen: boolean }>(
-  ({ $isOpen, theme }) => {
-    const helpSpacing = getHelpSpacing(theme)
+const HelpLauncherContentSC = styled(animated.div)(({ theme }) => {
+  const helpSpacing = getHelpSpacing(theme)
 
-    return {
-      display: $isOpen ? 'flex' : 'none',
-      position: 'absolute',
-      right: 0,
-      left: 0,
-      top: 0,
-      bottom: helpSpacing.icon.height + helpSpacing.gap.vertical,
-      alignItems: 'end',
-      justifyContent: 'end',
-      pointerEvents: 'none',
-      '& > *': {
-        pointerEvents: 'auto',
-      },
-    }
+  return {
+    display: 'flex',
+    position: 'absolute',
+    right: 0,
+    left: 0,
+    top: 0,
+    bottom: helpSpacing.icon.height + helpSpacing.gap.vertical,
+    alignItems: 'end',
+    justifyContent: 'end',
+    pointerEvents: 'none',
+    '& > *': {
+      pointerEvents: 'auto',
+    },
   }
-)
+})
+
+const getTransitionProps = (isOpen: boolean) => ({
+  from: { opacity: 0, scale: `65%` },
+  enter: { opacity: 1, scale: '100%' },
+  leave: { opacity: 0, scale: `65%` },
+  config: isOpen
+    ? {
+        mass: 0.6,
+        tension: 280,
+        velocity: 0.02,
+      }
+    : {
+        mass: 0.6,
+        tension: 600,
+        velocity: 0.04,
+        restVelocity: 0.1,
+      },
+})
 
 function HelpLauncher() {
   const [menuState, setMenuState] = useState<HelpMenuState>(HelpMenuState.menu)
@@ -344,6 +362,29 @@ function HelpLauncher() {
     }
   }, [openState])
 
+  const isOpen = openState === HelpOpenState.open
+  // const contentItem = contentOpts[menuState]
+  const transitionProps = useMemo(() => getTransitionProps(isOpen), [isOpen])
+  const transitions = useTransition(isOpen ? [menuState] : [], transitionProps)
+
+  const content = transitions((styles, menuState) => (
+    <HelpLauncherContentSC
+      style={{
+        // position: 'absolute',
+        // top: 0,
+        // right: 0,
+        // bottom: 0,
+        // left: 0,
+        // zIndex: theme.zIndexes.selectPopover - 1,
+        // pointerEvents: 'none',
+        transformOrigin: 'bottom right',
+        ...styles,
+      }}
+    >
+      {contentOpts[menuState]}
+    </HelpLauncherContentSC>
+  ))
+
   return (
     <HelpLauncherSC>
       <HelpLauncherButtonsSC>
@@ -359,9 +400,7 @@ function HelpLauncher() {
           onClick={onLauncherClick}
         />
       </HelpLauncherButtonsSC>
-      <HelpLauncherContentSC $isOpen={openState === HelpOpenState.open}>
-        {contentOpts[menuState]}
-      </HelpLauncherContentSC>
+      {content}
     </HelpLauncherSC>
   )
 }
