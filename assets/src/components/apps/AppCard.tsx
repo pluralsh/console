@@ -52,6 +52,8 @@ export const getBorderColor = (app) => {
   }
 }
 
+const versionName = (vsn: string) => (vsn.startsWith('v') ? vsn : `v${vsn}`)
+
 export default function AppCard({ app }: any) {
   const navigate = useNavigate()
 
@@ -103,7 +105,7 @@ export default function AppCard({ app }: any) {
             </P>
             <AppStatus app={app} />
           </Flex>
-          {version && <Flex>v{version}</Flex>}
+          {version && <Flex>{versionName(version)}</Flex>}
         </Flex>
       </Flex>
       <Flex grow={1} />
