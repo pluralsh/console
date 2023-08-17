@@ -2,9 +2,8 @@ import { Merge } from 'type-fest'
 import styled, { useTheme } from 'styled-components'
 import { useVisuallyHidden } from 'react-aria'
 import { ComponentProps } from 'react'
-import { CaretDownIcon } from '@pluralsh/design-system'
+import { CaretDownIcon, HelpIcon } from '@pluralsh/design-system'
 
-import HelpIcon from './HelpIcon'
 import { BTN_OVERSHOOT, getHelpSpacing } from './HelpLauncher'
 import { CountBadge } from './CountBadge'
 

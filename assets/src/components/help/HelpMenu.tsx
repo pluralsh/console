@@ -4,11 +4,11 @@ import { ComponentProps } from 'react'
 import {
   Button,
   Card,
+  ChatIcon,
   DocumentIcon,
   LifePreserverIcon,
 } from '@pluralsh/design-system'
 
-import ChatIcon from './ChatIcon'
 import { CountBadge } from './CountBadge'
 import { HelpMenuState, HelpOpenState } from './HelpLauncher'
 

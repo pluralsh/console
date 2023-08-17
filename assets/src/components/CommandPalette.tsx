@@ -26,11 +26,13 @@ import {
 
 import {
   ApiIcon,
+  ChatIcon,
   Chip,
   ComponentsIcon,
   DashboardIcon,
   DocumentIcon,
   GearTrainIcon,
+  HelpIcon,
   LifePreserverIcon,
   LogsIcon,
   RunBookIcon,
@@ -43,7 +45,6 @@ import styled, { createGlobalStyle, useTheme } from 'styled-components'
 import { getIcon, hasIcons } from './apps/misc'
 import { InstallationContext } from './Installations'
 import AppStatus from './apps/AppStatus'
-import ChatIcon from './help/ChatIcon'
 import { usePlatform } from './hooks/usePlatform'
 import { HelpMenuState, launchHelp } from './help/HelpLauncher'
 

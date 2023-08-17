@@ -19,6 +19,7 @@ import {
 import {
   Card,
   CaretDownIcon,
+  ChatIcon,
   CloseIcon,
   FillLevelProvider,
   IconFrame,
@@ -40,7 +41,6 @@ import classNames from 'classnames'
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
 
 import ChatbotMarkdown from './ChatbotMarkdown'
-import ChatIcon from './ChatIcon'
 
 const INTRO =
   'What can we do to help you with Plural, using open source, or kubernetes?' as const
