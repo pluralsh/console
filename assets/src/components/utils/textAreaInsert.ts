@@ -7,7 +7,6 @@ export function textAreaInsert(
     let curVal = tArea.value
 
     if (typeof document.execCommand === 'function') {
-      console.log('execCommand')
       document.execCommand('insertText', false, text)
     } else {
       const startPos = tArea.selectionStart
