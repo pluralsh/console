@@ -18,6 +18,7 @@ import { ThemeProvider as StyledThemeProvider } from 'styled-components'
 import DocSearchStyles from 'components/help/DocSearchStyles'
 import { OverlayContextProvider } from 'components/layout/Overlay'
 import { CookieSettingsProvider } from 'components/tracking/CookieSettings'
+import { updateIntercomUnread } from 'components/help/HelpLauncher'
 
 import { DEFAULT_THEME } from './theme'
 import 'react-toggle/style.css'
@@ -34,7 +35,10 @@ export default function App() {
 
   return (
     <ApolloProvider client={client}>
-      <IntercomProvider appId={INTERCOM_APP_ID}>
+      <IntercomProvider
+        appId={INTERCOM_APP_ID}
+        onUnreadCountChange={updateIntercomUnread}
+      >
         <ThemeProvider theme={theme}>
           <StyledThemeProvider theme={mergedStyledTheme}>
             <OverlayContextProvider>
