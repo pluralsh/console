@@ -1,29 +1,25 @@
 import { useEffect, useState } from 'react'
 
 const getPlatform = () => {
-  let modKeyString = 'Ctrl'
-  let altKeyString = 'Alt'
-  let shiftKeyString = 'Shift'
-  let isMac = false
-  let keyCombinerString = '+'
-
   if (
     window?.navigator?.platform.indexOf('Mac') === 0 ||
     window?.navigator?.platform === 'iPhone'
   ) {
-    modKeyString = '⌘' // command key
-    altKeyString = '⌥' // command key
-    shiftKeyString = '⇧' // command key
-    isMac = true // command key
-    keyCombinerString = ' ' // thin space
+    return {
+      modKeyString: '⌘', // command key
+      altKeyString: '⌥', // option key
+      shiftKeyString: '⇧', // shift key
+      isMac: true,
+      keyCombinerString: ' ', // thin space
+    }
   }
 
   return {
-    isMac,
-    modKeyString,
-    keyCombinerString,
-    altKeyString,
-    shiftKeyString,
+    modKeyString: 'Ctrl',
+    altKeyString: 'Alt',
+    shiftKeyString: 'Shift',
+    isMac: false,
+    keyCombinerString: '+',
   }
 }
 
