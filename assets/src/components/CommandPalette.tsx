@@ -464,7 +464,7 @@ export function CommandPalette({ children }) {
       }),
       createAction({
         name: 'Temporary Token',
-        shortcut: ['Ts'],
+        shortcut: ['T'],
         section: 'Security',
         perform: () => navigate('/profile/security'),
       }),
