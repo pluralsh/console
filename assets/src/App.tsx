@@ -15,6 +15,7 @@ import { GlobalStyle, styledTheme, theme } from '@pluralsh/design-system'
 import { CssBaseline, ThemeProvider } from 'honorable'
 import { ThemeProvider as StyledThemeProvider } from 'styled-components'
 
+import DocSearchStyles from 'components/help/DocSearchStyles'
 import { OverlayContextProvider } from 'components/layout/Overlay'
 import { CookieSettingsProvider } from 'components/tracking/CookieSettings'
 
@@ -40,6 +41,7 @@ export default function App() {
               <CookieSettingsProvider>
                 <CssBaseline />
                 <GlobalStyle />
+                <DocSearchStyles />
                 <Grommet
                   full
                   // @ts-ignore

@@ -3,6 +3,7 @@ import {
   ComponentProps,
   KeyboardEvent,
   ReactNode,
+  Ref,
   forwardRef,
   useCallback,
   useEffect,
@@ -224,6 +225,7 @@ function ChatbotFrame({
   const hasMounted = useRef(false)
   const wasLoading = usePrevious(loading)
   const historyScrollRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const msgIdPrefix = useId()
   const lastUserMsgRef = useRef<HTMLLIElement>(null)
   const lastAsstMsgRef = useRef<HTMLLIElement>(null)
@@ -263,6 +265,7 @@ function ChatbotFrame({
   // Scroll to bottom on initial mount
   useLayoutEffect(() => {
     historyScrollRef.current?.scrollTo({ top: 9999999999999 })
+    inputRef.current?.focus()
   }, [])
 
   useEffect(() => {
@@ -376,6 +379,7 @@ function ChatbotFrame({
         <ChatbotFormSC onSubmit={sendMessage}>
           <div className="textareaWrap">
             <ChatbotTextArea
+              ref={inputRef}
               rows={2}
               value={message}
               onChange={(e) => {
@@ -439,43 +443,53 @@ const ChatbotTextAreaSC = styled.div(({ theme }) => ({
   },
 }))
 
-function ChatbotTextArea({
-  className,
-  children,
-  ...props
-}: ComponentProps<'textarea'>) {
-  const { isMac } = usePlatform()
+const ChatbotTextArea = forwardRef(
+  (
+    {
+      className,
+      children,
+      onKeyDown: onKeydownProp,
+      ...props
+    }: ComponentProps<'textarea'>,
+    ref: Ref<HTMLTextAreaElement>
+  ) => {
+    const { isMac } = usePlatform()
 
-  const onKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === 'Enter') {
-        e.preventDefault()
-        let modKeyPressed = e.shiftKey || e.ctrlKey || e.altKey
-
-        if (isMac) {
-          modKeyPressed = modKeyPressed || e.metaKey
+    const onKeyDown = useCallback(
+      (e: KeyboardEvent<HTMLTextAreaElement>) => {
+        if (onKeydownProp) {
+          onKeydownProp(e)
         }
-        if (modKeyPressed) {
-          textAreaInsert(e.currentTarget, '\n')
-        } else {
-          // Simulate form submit
-          submitForm(e.currentTarget?.form)
-        }
-      }
-    },
-    [isMac]
-  )
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          let modKeyPressed = e.shiftKey || e.ctrlKey || e.altKey
 
-  return (
-    <ChatbotTextAreaSC className={className}>
-      <textarea
-        {...props}
-        onKeyDown={onKeyDown}
-      />
-      {children}
-    </ChatbotTextAreaSC>
-  )
-}
+          if (isMac) {
+            modKeyPressed = modKeyPressed || e.metaKey
+          }
+          if (modKeyPressed) {
+            textAreaInsert(e.currentTarget, '\n')
+          } else {
+            // Simulate form submit
+            submitForm(e.currentTarget?.form)
+          }
+        }
+      },
+      [isMac, onKeydownProp]
+    )
+
+    return (
+      <ChatbotTextAreaSC className={className}>
+        <textarea
+          ref={ref}
+          {...props}
+          onKeyDown={onKeyDown}
+        />
+        {children}
+      </ChatbotTextAreaSC>
+    )
+  }
+)
 
 export default function Chatbot(props: ComponentProps<typeof ChatbotFrame>) {
   return (

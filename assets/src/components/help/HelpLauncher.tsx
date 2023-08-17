@@ -9,6 +9,7 @@ import {
   Dispatch,
   SetStateAction,
   useCallback,
+  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -27,6 +28,7 @@ import HelpIcon from './HelpIcon'
 import Chatbot from './Chatbot'
 import { IntercomChat } from './IntercomChat'
 import ChatIcon from './ChatIcon'
+import { DocSearch } from './DocSearch'
 
 const getHelpSpacing = (theme: DefaultTheme) => ({
   gap: {
@@ -160,7 +162,7 @@ function HelpMaximizeBtn(props: ComponentProps<typeof HelpLauncherBtnSC>) {
   )
 }
 
-enum HelpMenuState {
+export enum HelpMenuState {
   menu = 'menu',
   docSearch = 'docSearch',
   chatBot = 'chatBot',
@@ -241,7 +243,7 @@ function HelpMenu({
           />
         }
         onClick={() => {
-          setHelpMenuState(HelpMenuState.menu)
+          setHelpMenuState(HelpMenuState.docSearch)
           setHelpOpenState(HelpOpenState.closed)
         }}
       >
@@ -308,12 +310,46 @@ const getTransitionProps = (isOpen: boolean) => ({
       },
 })
 
+const HELP_LAUNCH_EVENT_TYPE = 'pluralHelpLaunchEvent'
+
+type HelpLaunchEvent = CustomEvent<{ menu: HelpMenuState }>
+const HelpLaunchEvent = CustomEvent<{ menu: HelpMenuState }>
+
+export function launchHelp(section: HelpMenuState) {
+  const event = new HelpLaunchEvent(HELP_LAUNCH_EVENT_TYPE, {
+    detail: { menu: section },
+  })
+
+  window.dispatchEvent(event)
+}
+
 function HelpLauncher() {
   const [menuState, setMenuState] = useState<HelpMenuState>(HelpMenuState.menu)
   const [openState, setOpenState] = useState<HelpOpenState>(
     HelpOpenState.closed
   )
   // const prevOpenState = usePrevious(openState)
+
+  useEffect(() => {
+    const listener: (e: HelpLaunchEvent) => void = (e) => {
+      console.log('listened', e)
+      const { menu } = e.detail
+
+      if (Object.values(HelpMenuState).includes(menu)) {
+        setMenuState(menu)
+        setOpenState(HelpOpenState.open)
+      }
+    }
+
+    window.addEventListener(HELP_LAUNCH_EVENT_TYPE, listener as EventListener)
+
+    return () => {
+      window.removeEventListener(
+        HELP_LAUNCH_EVENT_TYPE,
+        listener as EventListener
+      )
+    }
+  }, [])
 
   const closeHelp = useCallback(() => {
     setMenuState(HelpMenuState.menu)
@@ -323,6 +359,13 @@ function HelpLauncher() {
   const minHelp = useCallback(() => {
     setOpenState(HelpOpenState.min)
   }, [])
+
+  const helpMenu = (
+    <HelpMenu
+      setHelpMenuState={setMenuState}
+      setHelpOpenState={setOpenState}
+    />
+  )
   const contentOpts = {
     [HelpMenuState.chatBot]: (
       <Chatbot
@@ -330,19 +373,9 @@ function HelpLauncher() {
         onMin={minHelp}
       />
     ),
-    [HelpMenuState.docSearch]: (
-      <HelpMenu
-        setHelpMenuState={setMenuState}
-        setHelpOpenState={setOpenState}
-      />
-    ),
+    [HelpMenuState.docSearch]: null,
     [HelpMenuState.intercom]: <IntercomChat onClose={closeHelp} />,
-    [HelpMenuState.menu]: (
-      <HelpMenu
-        setHelpMenuState={setMenuState}
-        setHelpOpenState={setOpenState}
-      />
-    ),
+    [HelpMenuState.menu]: helpMenu,
   }
 
   const onLauncherClick = useCallback(() => {
@@ -363,20 +396,12 @@ function HelpLauncher() {
   }, [openState])
 
   const isOpen = openState === HelpOpenState.open
-  // const contentItem = contentOpts[menuState]
   const transitionProps = useMemo(() => getTransitionProps(isOpen), [isOpen])
   const transitions = useTransition(isOpen ? [menuState] : [], transitionProps)
 
   const content = transitions((styles, menuState) => (
     <HelpLauncherContentSC
       style={{
-        // position: 'absolute',
-        // top: 0,
-        // right: 0,
-        // bottom: 0,
-        // left: 0,
-        // zIndex: theme.zIndexes.selectPopover - 1,
-        // pointerEvents: 'none',
         transformOrigin: 'bottom right',
         ...styles,
       }}
@@ -401,6 +426,15 @@ function HelpLauncher() {
         />
       </HelpLauncherButtonsSC>
       {content}
+      <DocSearch
+        isOpen={menuState === HelpMenuState.docSearch}
+        onClose={() => {
+          if (menuState === HelpMenuState.docSearch) {
+            setMenuState(HelpMenuState.menu)
+            setOpenState(HelpOpenState.closed)
+          }
+        }}
+      />
     </HelpLauncherSC>
   )
 }

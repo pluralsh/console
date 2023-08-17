@@ -6,6 +6,7 @@ import {
   KBarResults,
   KBarSearch,
   createAction,
+  useKBar,
   useMatches,
   useRegisterActions,
 } from 'kbar'
@@ -44,6 +45,7 @@ import { InstallationContext } from './Installations'
 import AppStatus from './apps/AppStatus'
 import ChatIcon from './help/ChatIcon'
 import { usePlatform } from './hooks/usePlatform'
+import { HelpMenuState, launchHelp } from './help/HelpLauncher'
 
 function buildActions(applications, nav) {
   return applications
@@ -334,8 +336,64 @@ const CommandPaletteStyles = createGlobalStyle(({ theme }) => ({
   },
 }))
 
-function Palette({ footerContent }: { footerContent: ReactNode }) {
+function Palette() {
   useAppActions()
+  const theme = useTheme()
+  const {
+    isOpen: kbarIsOpen,
+    query: { toggle: toggleKbar },
+  } = useKBar((state) => {
+    console.log('kbar visualState', state.visualState)
+
+    return {
+      isOpen:
+        state.visualState === 'animating-in' || state.visualState === 'showing',
+    }
+  })
+  const closeKBar = useCallback(() => {
+    if (kbarIsOpen) {
+      toggleKbar()
+    }
+  }, [kbarIsOpen, toggleKbar])
+
+  const { modKeyString, altKeyString, keyCombinerString, isMac } = usePlatform()
+
+  let aiChatCmd = `${modKeyString}${keyCombinerString}${altKeyString}${keyCombinerString}A`
+  let searchDocsCmd = `${modKeyString}${keyCombinerString}${altKeyString}${keyCombinerString}D`
+
+  if (isMac) {
+    aiChatCmd = `${altKeyString}${keyCombinerString}${modKeyString}${keyCombinerString}A`
+    searchDocsCmd = `${altKeyString}${keyCombinerString}${modKeyString}${keyCombinerString}D`
+  }
+
+  aiChatCmd = 'A'
+  searchDocsCmd = 'D'
+
+  const footerContent = (
+    <>
+      <LauncherButton
+        icon={<ChatIcon color={theme.colors['icon-primary']} />}
+        cmd={aiChatCmd}
+        onClick={() => {
+          closeKBar()
+          launchAiChat()
+        }}
+        tabIndex={0}
+      >
+        Ask Plural AI
+      </LauncherButton>
+      <LauncherButton
+        icon={<DocumentIcon color={theme.colors['icon-success']} />}
+        cmd={searchDocsCmd}
+        onClick={() => {
+          closeKBar()
+          launchDocSearch()
+        }}
+      >
+        Search docs
+      </LauncherButton>
+    </>
+  )
 
   return (
     <>
@@ -354,19 +412,18 @@ function Palette({ footerContent }: { footerContent: ReactNode }) {
   )
 }
 
-export function CommandPalette({ children }) {
-  const theme = useTheme()
-  const navigate = useNavigate()
+const launchDocSearch = () => {
+  launchHelp(HelpMenuState.docSearch)
+}
+const launchAiChat = () => {
+  launchHelp(HelpMenuState.chatBot)
+}
+const launchIntercom = () => {
+  launchHelp(HelpMenuState.intercom)
+}
 
-  const launchDocSearch = useCallback(() => {
-    alert('launch docs search')
-  }, [])
-  const launchAiChat = useCallback(() => {
-    alert('launch ai chatbot')
-  }, [])
-  const launchIntercom = useCallback(() => {
-    alert('launch intercom support')
-  }, [])
+export function CommandPalette({ children }) {
+  const navigate = useNavigate()
 
   const baseActions = useMemo(
     () => [
@@ -424,41 +481,12 @@ export function CommandPalette({ children }) {
         perform: () => navigate('/account/users'),
       }),
     ],
-    [launchAiChat, launchDocSearch, launchIntercom, navigate]
-  )
-
-  const { modKeyString, altKeyString, keyCombinerString, isMac } = usePlatform()
-
-  let aiChatCmd = `${modKeyString}${keyCombinerString}${altKeyString}${keyCombinerString}A`
-  let searchDocsCmd = `${modKeyString}${keyCombinerString}${altKeyString}${keyCombinerString}D`
-
-  if (isMac) {
-    aiChatCmd = `${altKeyString}${keyCombinerString}${modKeyString}${keyCombinerString}A`
-    searchDocsCmd = `${altKeyString}${keyCombinerString}${modKeyString}${keyCombinerString}D`
-  }
-  const footerContent = (
-    <>
-      <LauncherButton
-        icon={<ChatIcon color={theme.colors['icon-primary']} />}
-        cmd={aiChatCmd}
-        onClick={launchAiChat}
-        tabIndex={0}
-      >
-        Ask Plural AI
-      </LauncherButton>
-      <LauncherButton
-        icon={<DocumentIcon color={theme.colors['icon-success']} />}
-        cmd={searchDocsCmd}
-        onClick={launchDocSearch}
-      >
-        Search docs
-      </LauncherButton>
-    </>
+    [navigate]
   )
 
   return (
     <KBarProvider actions={baseActions}>
-      <Palette footerContent={footerContent} />
+      <Palette />
       {children}
     </KBarProvider>
   )
