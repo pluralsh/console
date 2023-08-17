@@ -1,6 +1,8 @@
 import styled, { DefaultTheme, useTheme } from 'styled-components'
 import { animated, useTransition } from 'react-spring'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
 
 import Chatbot from './Chatbot'
 import { DocSearch } from './DocSearch'
@@ -252,8 +254,14 @@ function HelpLauncher() {
     </HelpLauncherContentSC>
   ))
 
+  // Close affordances
+  const ref = useRef<HTMLDivElement>(null)
+
+  useKeyDown(['Escape'], () => changeState(undefined, HelpOpenState.closed))
+  useClickOutside(ref, () => changeState(undefined, HelpOpenState.closed))
+
   return (
-    <HelpLauncherSC>
+    <HelpLauncherSC ref={ref}>
       <HelpLauncherButtonsSC>
         {openState === HelpOpenState.min && (
           <HelpMaximizeBtn onClick={onMaximizeClick} />
