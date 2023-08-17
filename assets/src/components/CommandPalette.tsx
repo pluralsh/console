@@ -342,14 +342,10 @@ function Palette() {
   const {
     isOpen: kbarIsOpen,
     query: { toggle: toggleKbar },
-  } = useKBar((state) => {
-    console.log('kbar visualState', state.visualState)
-
-    return {
-      isOpen:
-        state.visualState === 'animating-in' || state.visualState === 'showing',
-    }
-  })
+  } = useKBar((state) => ({
+    isOpen:
+      state.visualState === 'animating-in' || state.visualState === 'showing',
+  }))
   const closeKBar = useCallback(() => {
     if (kbarIsOpen) {
       toggleKbar()

@@ -1,6 +1,6 @@
 import { Merge } from 'type-fest'
 import styled, { useTheme } from 'styled-components'
-import { ComponentProps, Dispatch, SetStateAction } from 'react'
+import { ComponentProps } from 'react'
 import {
   Button,
   Card,
@@ -49,15 +49,13 @@ const HelpMenuSC = styled(Card)(({ theme }) => ({
 }))
 
 export function HelpMenu({
-  setHelpMenuState,
-  setHelpOpenState,
+  changeState,
   intercomProps,
   ...props
 }: Merge<
   ComponentProps<typeof HelpMenuSC>,
   {
-    setHelpMenuState: Dispatch<SetStateAction<HelpMenuState>>
-    setHelpOpenState: Dispatch<SetStateAction<HelpOpenState>>
+    changeState: (menuState?: HelpMenuState, openState?: HelpOpenState) => void
     intercomProps: { unreadCount: number }
   }
 >) {
@@ -77,7 +75,7 @@ export function HelpMenu({
           />
         }
         onClick={() => {
-          setHelpMenuState(HelpMenuState.intercom)
+          changeState(HelpMenuState.intercom)
         }}
         count={intercomProps.unreadCount}
       >
@@ -91,7 +89,7 @@ export function HelpMenu({
           />
         }
         onClick={() => {
-          setHelpMenuState(HelpMenuState.chatBot)
+          changeState(HelpMenuState.chatBot)
         }}
       >
         Ask Plural AI
@@ -104,8 +102,7 @@ export function HelpMenu({
           />
         }
         onClick={() => {
-          setHelpMenuState(HelpMenuState.docSearch)
-          setHelpOpenState(HelpOpenState.closed)
+          changeState(HelpMenuState.docSearch, HelpOpenState.closed)
         }}
       >
         Search docs

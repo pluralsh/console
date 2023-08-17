@@ -1,7 +1,6 @@
-// import { Button, usePrevious } from '@pluralsh/design-system'
 import styled, { DefaultTheme, useTheme } from 'styled-components'
 import { animated, useTransition } from 'react-spring'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import Chatbot from './Chatbot'
 import { DocSearch } from './DocSearch'
@@ -11,6 +10,7 @@ import { HelpMenu } from './HelpMenu'
 import { HelpMaximizeBtn } from './HelpMaximizeBtn'
 import { useIntercomUpdateUnread } from './IntercomUpdateUnread'
 import { useCustomEventListener } from './useCustomEventListener'
+import { useIntercomMini as useIntercomMiniChat } from './useIntercomMini'
 
 export const getHelpSpacing = (theme: DefaultTheme) => ({
   gap: {
@@ -48,6 +48,7 @@ export enum HelpMenuState {
   docSearch = 'docSearch',
   chatBot = 'chatBot',
   intercom = 'intercom',
+  intercomMini = 'intercomMini',
 }
 
 export enum HelpOpenState {
@@ -143,8 +144,6 @@ function useLaunchEventListener(cb: (menu: HelpMenuState) => void) {
   )
 }
 
-const useWatchIntercomMiniChat = () => {}
-
 function HelpLauncher() {
   const [menuState, setMenuState] = useState<HelpMenuState>(HelpMenuState.menu)
   const [openState, setOpenState] = useState<HelpOpenState>(
@@ -152,36 +151,60 @@ function HelpLauncher() {
   )
   const [intercomUnreadCount, setIntercomUnreadCount] = useState(0)
   const chatbotUnreadCount = 0
+  const { isOpen: intercomMiniIsOpen, close: closeIntercomMini } =
+    useIntercomMiniChat()
 
-  useWatchIntercomMiniChat()
+  const changeState = useCallback(
+    (menuState?: HelpMenuState, openState?: HelpOpenState) => {
+      if (
+        intercomMiniIsOpen &&
+        // menuState !== HelpMenuState.intercom &&
+        menuState !== HelpMenuState.intercomMini
+      ) {
+        closeIntercomMini()
+      }
+      if (menuState !== undefined) {
+        setMenuState(menuState)
+      }
+      if (openState !== undefined) {
+        setOpenState(openState)
+        if (!openState) {
+          setMenuState(HelpMenuState.menu)
+        }
+      }
+    },
+    [closeIntercomMini, intercomMiniIsOpen]
+  )
+
+  useEffect(() => {
+    if (intercomMiniIsOpen) {
+      changeState(HelpMenuState.intercomMini, HelpOpenState.open)
+    }
+  }, [changeState, intercomMiniIsOpen])
 
   const closeHelp = useCallback(() => {
-    setMenuState(HelpMenuState.menu)
-    setOpenState(HelpOpenState.closed)
-  }, [])
+    changeState(HelpMenuState.menu, HelpOpenState.closed)
+  }, [changeState])
 
   const minHelp = useCallback(() => {
-    setOpenState(HelpOpenState.min)
-  }, [])
+    changeState(undefined, HelpOpenState.min)
+  }, [changeState])
 
   useHandleIntercom({
     menuState,
     openState,
-    setMenuState,
-    setOpenState,
+    changeState,
     closeHelp,
   })
   useIntercomUpdateUnread(setIntercomUnreadCount)
 
   useLaunchEventListener((menu) => {
-    setMenuState(menu)
-    setOpenState(HelpOpenState.open)
+    changeState(menu, HelpOpenState.open)
   })
 
   const helpMenu = (
     <HelpMenu
-      setHelpMenuState={setMenuState}
-      setHelpOpenState={setOpenState}
+      changeState={changeState}
       intercomProps={{ unreadCount: intercomUnreadCount }}
     />
   )
@@ -194,25 +217,25 @@ function HelpLauncher() {
     ),
     [HelpMenuState.docSearch]: null,
     [HelpMenuState.intercom]: null,
+    [HelpMenuState.intercomMini]: null,
     [HelpMenuState.menu]: helpMenu,
   }
 
   const onLauncherClick = useCallback(() => {
     if (openState === HelpOpenState.open && menuState === HelpMenuState.menu) {
-      setOpenState(HelpOpenState.closed)
+      changeState(undefined, HelpOpenState.closed)
     } else {
-      setOpenState(HelpOpenState.open)
-      setMenuState(HelpMenuState.menu)
+      changeState(HelpMenuState.menu, HelpOpenState.open)
     }
-  }, [menuState, openState])
+  }, [changeState, menuState, openState])
 
   const onMaximizeClick = useCallback(() => {
     if (openState === 'closed' || openState === 'min') {
-      setOpenState(HelpOpenState.open)
+      changeState(undefined, HelpOpenState.open)
     } else {
-      setOpenState(HelpOpenState.min)
+      changeState(undefined, HelpOpenState.min)
     }
-  }, [openState])
+  }, [changeState, openState])
 
   const isOpen = openState === HelpOpenState.open
   const transitionProps = useMemo(() => getTransitionProps(isOpen), [isOpen])
@@ -250,8 +273,7 @@ function HelpLauncher() {
         isOpen={menuState === HelpMenuState.docSearch}
         onClose={() => {
           if (menuState === HelpMenuState.docSearch) {
-            setMenuState(HelpMenuState.menu)
-            setOpenState(HelpOpenState.closed)
+            changeState(HelpMenuState.menu, HelpOpenState.closed)
           }
         }}
       />

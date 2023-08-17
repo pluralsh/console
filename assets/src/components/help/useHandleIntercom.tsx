@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect } from 'react'
+import { useEffect } from 'react'
 import { usePrevious } from '@pluralsh/design-system'
 import { useIntercom } from 'react-use-intercom'
 
@@ -7,14 +7,12 @@ import { HelpMenuState, HelpOpenState } from './HelpLauncher'
 export function useHandleIntercom({
   menuState,
   openState,
-  setMenuState,
-  setOpenState,
+  changeState,
   closeHelp,
 }: {
   menuState: HelpMenuState
   openState: HelpOpenState
-  setMenuState: Dispatch<SetStateAction<HelpMenuState>>
-  setOpenState: Dispatch<SetStateAction<HelpOpenState>>
+  changeState: (menuState?: HelpMenuState, openState?: HelpOpenState) => void
   closeHelp: () => void
 }) {
   const prevMenuState = usePrevious(menuState)
@@ -48,8 +46,7 @@ export function useHandleIntercom({
 
   useEffect(() => {
     if (intercomIsOpen && !intercomWasOpen) {
-      setMenuState(HelpMenuState.intercom)
-      setOpenState(HelpOpenState.open)
+      changeState(HelpMenuState.intercom, HelpOpenState.open)
     }
     if (
       !intercomIsOpen &&
@@ -59,12 +56,11 @@ export function useHandleIntercom({
       closeHelp()
     }
   }, [
+    changeState,
     closeHelp,
     intercomIsOpen,
     intercomWasOpen,
     menuState,
     openState,
-    setMenuState,
-    setOpenState,
   ])
 }
