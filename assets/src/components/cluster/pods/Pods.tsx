@@ -211,8 +211,10 @@ export default function AllPods() {
               onInputChange={setInputValue}
               selectedKey={namespace}
               onSelectionChange={(ns) => {
-                setInputValue(`${ns}`)
-                navigate(`/pods/${ns}`)
+                if (ns) {
+                  setInputValue(`${ns}`)
+                  navigate(`/pods/${ns}`)
+                }
               }}
               // Close combobox panel once footer is clicked.
               // It does not work with isOpen and onOpenChange at the moment.
