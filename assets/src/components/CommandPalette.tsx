@@ -32,7 +32,6 @@ import {
   DashboardIcon,
   DocumentIcon,
   GearTrainIcon,
-  HelpIcon,
   LifePreserverIcon,
   LogsIcon,
   RunBookIcon,
@@ -55,12 +54,7 @@ function buildActions(applications, nav) {
         id: app.name,
         name: app.name,
         app,
-        icon: hasIcons(app) ? (
-          <AppIcon
-            src={getIcon(app)}
-            // size="xxsmall"
-          />
-        ) : null,
+        icon: hasIcons(app) ? <AppIcon src={getIcon(app)} /> : null,
         shortcut: [],
         section: 'Apps',
       },
