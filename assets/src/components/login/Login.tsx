@@ -9,7 +9,7 @@ import { IntercomProps, useIntercom } from 'react-use-intercom'
 import { useLocation } from 'react-router-dom'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 import { isValidEmail } from 'utils/email'
-import { useMeQuery } from 'generated/graphql'
+import { User, useMeQuery } from 'generated/graphql'
 import { useHelpSpacing } from 'components/help/HelpLauncher'
 
 import { GqlError } from '../utils/Alert'
@@ -138,15 +138,22 @@ function fudgedUser(name): IntercomUser {
 type IntercomUser = Pick<IntercomProps, 'email' | 'name' | 'userId'>
 
 function useIntercomAttributes(
-  user: IntercomUser | null | undefined
+  pluralUser: User | null | undefined
 ): IntercomProps | null | undefined {
   const helpSpacing = useHelpSpacing()
 
-  if (!user) {
+  if (!pluralUser) {
     return null
   }
-  if (user.email === 'demo-user@plural.sh') {
-    return (user = fudgedUser(user.name))
+  const { email, name, pluralId, id } = pluralUser
+  let intercomUser: IntercomUser = {
+    email,
+    name,
+    userId: pluralId || id,
+  }
+
+  if (intercomUser.email === 'demo-user@plural.sh') {
+    return (intercomUser = fudgedUser(name))
   }
 
   return {
@@ -156,7 +163,7 @@ function useIntercomAttributes(
       helpSpacing.padding.bottom +
       helpSpacing.icon.height +
       helpSpacing.gap.vertical,
-    ...user,
+    ...intercomUser,
   }
 }
 
