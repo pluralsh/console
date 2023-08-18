@@ -2,7 +2,6 @@ import {
   Card,
   Chip,
   CloseIcon,
-  CommandIcon,
   EmptyState,
   ErrorIcon,
   IconFrame,
@@ -20,11 +19,13 @@ import styled, { useTheme } from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import AppStatus from 'components/apps/AppStatus'
 import Fuse from 'fuse.js'
-import { isEmpty } from 'lodash'
+import isEmpty from 'lodash/isEmpty'
 import { useOnClickOutside } from 'components/hooks/useOnClickOutside'
 import { Div } from 'honorable'
 import { animated, useTransition } from 'react-spring'
 import { createPortal } from 'react-dom'
+
+import { usePlatform } from 'components/hooks/usePlatform'
 
 import { useContentOverlay } from './Overlay'
 
@@ -262,18 +263,20 @@ export default function AppNav() {
     ])
   }, [applications])
 
+  const { modKeyString, keyCombinerString } = usePlatform()
+
   return (
     <>
       <Chip
         backgroundColor={open ? 'fill-one-selected' : 'fill-one'}
-        icon={<CommandIcon />}
         clickable
         onClick={() => setOpen(true)}
         size="small"
         userSelect="none"
         whiteSpace="nowrap"
       >
-        Cmd + K
+        {modKeyString}
+        {keyCombinerString}K
         <StatusIcon readiness={statuses.length > 0 && statuses[0].readiness} />
       </Chip>
       <StatusPanel

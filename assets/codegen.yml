@@ -1,8 +1,20 @@
 overwrite: true
-schema: '../schema/schema.graphql'
-documents: './src/graph/**/*.graphql'
 generates:
   src/generated/graphql.ts:
+    schema: '../schema/schema.graphql'
+    documents: './src/graph/**/*.graphql'
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
+      - 'named-operations-object'
+      - add:
+          content:
+            - '/* eslint-disable */'
+            - '/* prettier-ignore */'
+  src/generated/graphql-plural.ts:
+    schema: 'https://raw.githubusercontent.com/pluralsh/plural/master/schema/schema.graphql'
+    documents: './src/graph-plural/**/*.graphql'
     plugins:
       - 'typescript'
       - 'typescript-operations'
