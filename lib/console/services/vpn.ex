@@ -51,7 +51,7 @@ defmodule Console.Services.VPN do
     metadata: %{namespace: ns},
     status: %WireguardPeer.Status{
       ready: true,
-      config_ref: %CoreV1.SecretKeySelector{key: k, name: n}
+      config_ref: %WireguardPeer.Status.ConfigRef{key: k, name: n}
     }
   }) do
     CoreV1.read_namespaced_secret!(ns, n)

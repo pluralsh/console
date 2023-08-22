@@ -16,7 +16,7 @@ interface DownloadConfigProps {
 }
 
 function DownloadConfig({ name, onClose }: DownloadConfigProps): ReactElement {
-  const { data: { wireguardPeer } = {}, loading } = useQuery<
+  const { data: { wireguardPeer } = {} } = useQuery<
     Pick<RootQueryType, 'wireguardPeer'>,
     RootQueryTypeWireguardPeerArgs
   >(WireguardPeer, {
@@ -24,10 +24,11 @@ function DownloadConfig({ name, onClose }: DownloadConfigProps): ReactElement {
   })
 
   useEffect(() => {
-    if (wireguardPeer?.config)
+    if (wireguardPeer?.config) {
       downloadAsFile(wireguardPeer?.config, `${name}.conf`)
-    if (!loading) onClose()
-  }, [loading, name, onClose, wireguardPeer?.config])
+      onClose()
+    }
+  }, [name, wireguardPeer?.config])
 
   return (
     <Layer background="transparent">

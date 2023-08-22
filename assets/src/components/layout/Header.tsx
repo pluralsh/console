@@ -1,5 +1,5 @@
 import { Div, Flex, Img } from 'honorable'
-import { Button, theme } from '@pluralsh/design-system'
+import { theme } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 
 import BillingSubscriptionChip from 'components/billing/BillingSubscriptionChip'
@@ -41,16 +41,6 @@ export default function Header() {
         <Flex grow={1} />
         <BillingLegacyUserMessage />
         <BillingSubscriptionChip />
-        <Button
-          small
-          tertiary
-          as="a"
-          href="https://app.plural.sh/account/edit"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Plural Account
-        </Button>
         <CommandPaletteLauncher />
         <InstallerModal />
       </Flex>
