@@ -14,16 +14,29 @@ import Tooltip, { type TooltipProps } from './Tooltip'
 type Size = 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'
 type Type = 'secondary' | 'tertiary' | 'floating'
 
-const typeToBG: Record<Type, string> = {
-  secondary: 'transparent',
-  tertiary: 'transparent',
-  floating: 'fill-two',
-}
+const typeToBG: Record<Type, keyof typeof styledTheme.colors | 'transparent'> =
+  {
+    secondary: 'transparent',
+    tertiary: 'transparent',
+    floating: 'fill-two',
+  }
 
 const typeToHoverBG: Record<Type, keyof typeof styledTheme.colors> = {
   secondary: 'action-input-hover',
   tertiary: 'action-input-hover',
   floating: 'fill-two-hover',
+}
+
+const typeToSelectedBG: Record<Type, keyof typeof styledTheme.colors> = {
+  secondary: undefined,
+  tertiary: undefined,
+  floating: 'fill-two-selected',
+}
+
+const typeToFocusBG: Record<Type, keyof typeof styledTheme.colors> = {
+  secondary: undefined,
+  tertiary: undefined,
+  floating: 'fill-two-selected',
 }
 
 const typeToBorder: Record<Type, string> = {
@@ -56,6 +69,7 @@ type IconFrameProps = Omit<FlexProps, 'size'> & {
   tooltip?: boolean | ReactNode
   tooltipProps?: Partial<TooltipProps>
   type?: Type
+  selected?: boolean
 }
 
 const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(
@@ -65,6 +79,7 @@ const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(
       size = 'medium',
       textValue = '',
       clickable = false,
+      selected = false,
       tooltip,
       tooltipProps,
       type = 'tertiary',
@@ -87,13 +102,18 @@ const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(
         justifyContent="center"
         width={sizeToFrameSize[size]}
         height={sizeToFrameSize[size]}
-        backgroundColor={typeToBG[type]}
+        backgroundColor={selected ? typeToSelectedBG[type] : typeToBG[type]}
         border={typeToBorder[type]}
         borderRadius={theme.borderRadiuses.medium}
         aria-label={textValue}
-        {...{ '&:focus,&:focus-visible': { outline: 'none' } }}
-        _focusVisible={{ ...theme.partials.focus.default }}
         {...{
+          '&:focus,&:focus-visible': { outline: 'none' },
+          '&:focus-visible,&:hover:focus-visible': {
+            ...theme.partials.focus.default,
+            ...(typeToFocusBG[type]
+              ? { backgroundColor: theme.colors[typeToFocusBG[type]] }
+              : {}),
+          },
           '&,&:any-link': {
             textDecoration: 'none',
             color: 'unset',
@@ -106,7 +126,9 @@ const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(
           role: 'button',
           cursor: 'pointer',
           '&:hover': {
-            backgroundColor: clickable && theme.colors[typeToHoverBG[type]],
+            backgroundColor: selected
+              ? theme.colors[typeToSelectedBG[type]]
+              : clickable && theme.colors[typeToHoverBG[type]],
           },
         })}
         {...props}

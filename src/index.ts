@@ -101,6 +101,7 @@ export { default as PricingCalculator } from './components/pricingcalculator/Pri
 export { default as PricingCalculatorExtended } from './components/pricingcalculator/PricingCalculatorExtended'
 export { default as Layer } from './components/Layer'
 export { Breadcrumbs } from './components/Breadcrumbs'
+export { DatePicker } from './components/DatePicker'
 
 // Hooks
 export { default as usePrevious } from './hooks/usePrevious'

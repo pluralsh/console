@@ -81,7 +81,7 @@ const getBaseTheme = ({ mode }: { mode: ColorMode }) =>
 
 const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
   const boxShadows = getBoxShadows({ mode })
-  const focusPartials = getFocusPartials({ mode })
+  const focusPartials = getFocusPartials()
 
   return {
     stylesheet: {
@@ -788,7 +788,7 @@ const getStyledTheme = ({ mode }: { mode: ColorMode }) =>
       partials: {
         text: textPartials,
         marketingText: marketingTextPartials,
-        focus: getFocusPartials({ mode }),
+        focus: getFocusPartials(),
         scrollBar,
         reset: resetPartials,
         dropdown: {

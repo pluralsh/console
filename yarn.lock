@@ -4321,10 +4321,10 @@ __metadata:
     "@markdoc/markdoc": 0.3.0
     "@monaco-editor/react": 4.5.1
     "@pluralsh/eslint-config-typescript": 2.5.41
-    "@react-aria/utils": 3.17.0
+    "@react-aria/utils": 3.19.0
     "@react-hooks-library/core": 0.5.1
-    "@react-stately/utils": 3.6.0
-    "@react-types/shared": 3.18.1
+    "@react-stately/utils": 3.7.0
+    "@react-types/shared": 3.19.0
     "@storybook/addon-actions": 7.0.22
     "@storybook/addon-docs": 7.0.22
     "@storybook/addon-essentials": 7.0.22
@@ -5103,6 +5103,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-aria/ssr@npm:^3.7.1":
+  version: 3.7.1
+  resolution: "@react-aria/ssr@npm:3.7.1"
+  dependencies:
+    "@swc/helpers": ^0.5.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: 2d388f9ced2e8822f1393f04418a8c783fa8b6577edca477fd517f2a43202038aba0117a92a1bc3fdc3a1360cf52bc0585290dc6861761b90130f37096f56791
+  languageName: node
+  linkType: hard
+
 "@react-aria/switch@npm:^3.5.1":
   version: 3.5.1
   resolution: "@react-aria/switch@npm:3.5.1"
@@ -5235,7 +5246,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-aria/utils@npm:3.17.0, @react-aria/utils@npm:^3.17.0":
+"@react-aria/utils@npm:3.19.0":
+  version: 3.19.0
+  resolution: "@react-aria/utils@npm:3.19.0"
+  dependencies:
+    "@react-aria/ssr": ^3.7.1
+    "@react-stately/utils": ^3.7.0
+    "@react-types/shared": ^3.19.0
+    "@swc/helpers": ^0.5.0
+    clsx: ^1.1.1
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: 90dbf8b859f2a2687de3de894971a2c28278b15e452480eb47707756e8c7743f7d102627b64d0a2e523f9d6112b348f48dca55207494467ddc08173bb516f9c0
+  languageName: node
+  linkType: hard
+
+"@react-aria/utils@npm:^3.17.0":
   version: 3.17.0
   resolution: "@react-aria/utils@npm:3.17.0"
   dependencies:
@@ -5758,7 +5784,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-stately/utils@npm:3.6.0, @react-stately/utils@npm:^3.6.0":
+"@react-stately/utils@npm:3.7.0, @react-stately/utils@npm:^3.7.0":
+  version: 3.7.0
+  resolution: "@react-stately/utils@npm:3.7.0"
+  dependencies:
+    "@swc/helpers": ^0.5.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: 91feaae770d38a644b9ba3f633afb0560a51fddd153f75c9e486fca86409cb1b6917366859e59d0f62eab3440e530af97452949671e0f90a8a7e5638ba15b263
+  languageName: node
+  linkType: hard
+
+"@react-stately/utils@npm:^3.6.0":
   version: 3.6.0
   resolution: "@react-stately/utils@npm:3.6.0"
   dependencies:
@@ -6000,7 +6037,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-types/shared@npm:3.18.1, @react-types/shared@npm:^3.18.1":
+"@react-types/shared@npm:3.19.0, @react-types/shared@npm:^3.19.0":
+  version: 3.19.0
+  resolution: "@react-types/shared@npm:3.19.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: e1cdabe05980be44b20d68e424f5891753f359c96bf151a17befa5a6e965dac315fd595657ed7c6572042078b5ca735735204175b020a8bdbb7dc11379a3be46
+  languageName: node
+  linkType: hard
+
+"@react-types/shared@npm:^3.18.1":
   version: 3.18.1
   resolution: "@react-types/shared@npm:3.18.1"
   peerDependencies:
@@ -7138,6 +7184,15 @@ __metadata:
   dependencies:
     tslib: ^2.4.0
   checksum: 273fd3f3fc461a92f3790cc551ea054745c6d6959afbe1232e6d7aa1c722bbc114d308aab96bef5c78fc0303c85c7b472ef00e2253251cc89737f3b1af56e5a5
+  languageName: node
+  linkType: hard
+
+"@swc/helpers@npm:^0.5.0":
+  version: 0.5.1
+  resolution: "@swc/helpers@npm:0.5.1"
+  dependencies:
+    tslib: ^2.4.0
+  checksum: 71e0e27234590435e4c62b97ef5e796f88e786841a38c7116a5e27a3eafa7b9ead7cdec5249b32165902076de78446945311c973e59bddf77c1e24f33a8f272a
   languageName: node
   linkType: hard
 
@@ -9393,17 +9448,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"caniuse-lite@npm:^1.0.30001400":
-  version: 1.0.30001434
-  resolution: "caniuse-lite@npm:1.0.30001434"
-  checksum: 7c9d2641e8e8f3ddf9af14c4ce47266a9d8fd1fc0243626049ff1b2eca4bf02938ff440813cc3feae3fa8d851ec8d1b9718044340c8d09bb4372d92d4f6b519c
-  languageName: node
-  linkType: hard
-
-"caniuse-lite@npm:^1.0.30001489":
-  version: 1.0.30001491
-  resolution: "caniuse-lite@npm:1.0.30001491"
-  checksum: ce8e1343dd2ba058902b58dffa7f3695fd251a7ef51a7f0903ab8e62b32becd9f7f590cbebb3f1966cdfff0c2fc8e7154ac116e0b39730bd2f2e17103f5e6c3b
+"caniuse-lite@npm:^1.0.30001400, caniuse-lite@npm:^1.0.30001489":
+  version: 1.0.30001522
+  resolution: "caniuse-lite@npm:1.0.30001522"
+  checksum: 56e3551c02ae595085114073cf242f7d9d54d32255c80893ca9098a44f44fc6eef353936f234f31c7f4cb894dd2b6c9c4626e30649ee29e04d70aa127eeefeb0
   languageName: node
   linkType: hard
 

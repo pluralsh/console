@@ -13,6 +13,8 @@ import { HiddenSelect, useButton, useSelect } from 'react-aria'
 import styled, { useTheme } from 'styled-components'
 import { type AriaSelectProps } from '@react-types/select'
 
+import { type Placement } from '@floating-ui/react-dom-interactions'
+
 import {
   type BimodalSelectProps,
   type BimodalSelectState,
@@ -37,7 +39,6 @@ const parentFillLevelToBackground = {
   3: 'fill-three',
 } as const satisfies Record<FillLevel, string>
 
-type Placement = 'left' | 'right'
 type Size = 'small' | 'medium' | 'large'
 
 type SelectButtonProps = {
