@@ -1,0 +1,96 @@
+fragment Metadata on Metadata {
+  name
+  namespace
+  labels {
+    name
+    value
+  }
+  annotations {
+    name
+    value
+  }
+}
+
+fragment PostgresSettings on PostgresSettings {
+  version
+}
+
+fragment ResourceSpec on ResourceSpec {
+  cpu
+  memory
+}
+
+fragment Resources on Resources {
+  limits {
+    ...ResourceSpec
+  }
+  requests {
+    ...ResourceSpec
+  }
+}
+
+fragment PostgresqlSpec on PostgresqlSpec {
+  databases
+  numberOfInstances
+  pods {
+    ...Pod
+  }
+  postgresql {
+    ...PostgresSettings
+  }
+  resources {
+    ...Resources
+  }
+  teamId
+  users
+}
+
+fragment PostgresqlStatus on PostgresqlStatus {
+  clusterStatus
+}
+
+fragment PostgresDB on Postgresql {
+  instances {
+    uid
+  }
+  metadata {
+    ...Metadata
+  }
+  spec {
+    ...PostgresqlSpec
+  }
+  status {
+    ...PostgresqlStatus
+  }
+}
+
+mutation RestorePostgres(
+  $clone: CloneAttributes
+  $name: String!
+  $namespace: String!
+  $timestamp: DateTime!
+) {
+  restorePostgres(
+    clone: $clone
+    name: $name
+    namespace: $namespace
+    timestamp: $timestamp
+  ) {
+    status {
+      ...PostgresqlStatus
+    }
+    # ...PostgresDB
+  }
+}
+
+query PostgresDatabases {
+  postgresDatabases {
+    ...PostgresDB
+  }
+}
+
+query PostgresDatabase($name: String!, $namespace: String!) {
+  postgresDatabase(name: $name, namespace: $namespace) {
+    ...PostgresDB
+  }
+}
