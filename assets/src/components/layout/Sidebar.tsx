@@ -5,6 +5,7 @@ import {
   BellIcon,
   BuildIcon,
   Sidebar as DSSidebar,
+  DatabaseIcon,
   DiscordIcon,
   GitHubLogoIcon,
   ListIcon,
@@ -70,6 +71,11 @@ const MENU_ITEMS: MenuItem[] = [
     text: 'Pods',
     icon: <ApiIcon />,
     path: '/pods',
+  },
+  {
+    text: 'Database management',
+    icon: <DatabaseIcon />,
+    path: '/database-management',
   },
   // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents', sandboxed: true },
   {

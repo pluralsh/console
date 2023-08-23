@@ -15,6 +15,7 @@ import NodeMetadata from 'components/cluster/nodes/NodeMetadata'
 import Container from 'components/cluster/containers/Container'
 import ContainerShell from 'components/cluster/containers/ContainerShell'
 import ContainerMetadata from 'components/cluster/containers/ContainerMetadata'
+import DatabaseManagement from 'components/db-management/DatabaseManagement'
 
 export const clusterRoutes = [
   /* Pods */
@@ -97,5 +98,12 @@ export const clusterRoutes = [
     loader={async ({ params: { namespace, name, container } }) => {
       redirect(`/pods/${namespace}/${name}/shell/${container}`)
     }}
+  />,
+
+  /* Database Management */
+  <Route
+    path="database-management/:namespace?"
+    index
+    element={<DatabaseManagement />}
   />,
 ]

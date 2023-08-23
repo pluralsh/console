@@ -4124,18 +4124,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:2.2.0":
-  version: 2.2.0
-  resolution: "@pluralsh/design-system@npm:2.2.0"
+"@pluralsh/design-system@npm:2.4.0":
+  version: 2.4.0
+  resolution: "@pluralsh/design-system@npm:2.4.0"
   dependencies:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@loomhq/loom-embed": 1.5.0
     "@markdoc/markdoc": 0.3.0
     "@monaco-editor/react": 4.5.1
-    "@react-aria/utils": 3.17.0
+    "@react-aria/utils": 3.19.0
     "@react-hooks-library/core": 0.5.1
-    "@react-stately/utils": 3.6.0
-    "@react-types/shared": 3.18.1
+    "@react-stately/utils": 3.7.0
+    "@react-types/shared": 3.19.0
     "@tanstack/match-sorter-utils": 8.8.4
     "@tanstack/react-table": 8.9.1
     "@tanstack/react-virtual": 3.0.0-beta.54
@@ -4174,7 +4174,7 @@ __metadata:
     react-dom: ">=18.2.0"
     react-transition-group: ">=4.4.5"
     styled-components: ">=5.3.11"
-  checksum: 3a454027cc6cafdd67e5cb4de0c3d3d3fa00bfb6235fb0158e5a7bf181cb5056e8d2c903050b272ab9831798718518486639ada9e4d6f62891bd27356f407ccc
+  checksum: 4a90bd551d9c0c5e6a95b6d02965d775bc29ad47e6212caf4d2d7a6b8395f8e9a32bdda803ed75704058f8453a193c4dd6b21f0cd4157733c7fb1c3f47e11c9f
   languageName: node
   linkType: hard
 
@@ -4845,6 +4845,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-aria/ssr@npm:^3.7.1":
+  version: 3.7.1
+  resolution: "@react-aria/ssr@npm:3.7.1"
+  dependencies:
+    "@swc/helpers": ^0.5.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: 2d388f9ced2e8822f1393f04418a8c783fa8b6577edca477fd517f2a43202038aba0117a92a1bc3fdc3a1360cf52bc0585290dc6861761b90130f37096f56791
+  languageName: node
+  linkType: hard
+
 "@react-aria/switch@npm:^3.5.1":
   version: 3.5.1
   resolution: "@react-aria/switch@npm:3.5.1"
@@ -4977,7 +4988,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-aria/utils@npm:3.17.0, @react-aria/utils@npm:^3.17.0":
+"@react-aria/utils@npm:3.19.0":
+  version: 3.19.0
+  resolution: "@react-aria/utils@npm:3.19.0"
+  dependencies:
+    "@react-aria/ssr": ^3.7.1
+    "@react-stately/utils": ^3.7.0
+    "@react-types/shared": ^3.19.0
+    "@swc/helpers": ^0.5.0
+    clsx: ^1.1.1
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: 90dbf8b859f2a2687de3de894971a2c28278b15e452480eb47707756e8c7743f7d102627b64d0a2e523f9d6112b348f48dca55207494467ddc08173bb516f9c0
+  languageName: node
+  linkType: hard
+
+"@react-aria/utils@npm:^3.17.0":
   version: 3.17.0
   resolution: "@react-aria/utils@npm:3.17.0"
   dependencies:
@@ -5521,7 +5547,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-stately/utils@npm:3.6.0, @react-stately/utils@npm:^3.6.0":
+"@react-stately/utils@npm:3.7.0, @react-stately/utils@npm:^3.7.0":
+  version: 3.7.0
+  resolution: "@react-stately/utils@npm:3.7.0"
+  dependencies:
+    "@swc/helpers": ^0.5.0
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: 91feaae770d38a644b9ba3f633afb0560a51fddd153f75c9e486fca86409cb1b6917366859e59d0f62eab3440e530af97452949671e0f90a8a7e5638ba15b263
+  languageName: node
+  linkType: hard
+
+"@react-stately/utils@npm:^3.6.0":
   version: 3.6.0
   resolution: "@react-stately/utils@npm:3.6.0"
   dependencies:
@@ -5763,7 +5800,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-types/shared@npm:3.18.1, @react-types/shared@npm:^3.18.1":
+"@react-types/shared@npm:3.19.0, @react-types/shared@npm:^3.19.0":
+  version: 3.19.0
+  resolution: "@react-types/shared@npm:3.19.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0
+  checksum: e1cdabe05980be44b20d68e424f5891753f359c96bf151a17befa5a6e965dac315fd595657ed7c6572042078b5ca735735204175b020a8bdbb7dc11379a3be46
+  languageName: node
+  linkType: hard
+
+"@react-types/shared@npm:^3.18.1":
   version: 3.18.1
   resolution: "@react-types/shared@npm:3.18.1"
   peerDependencies:
@@ -5961,6 +6007,15 @@ __metadata:
   dependencies:
     tslib: ^2.4.0
   checksum: 273fd3f3fc461a92f3790cc551ea054745c6d6959afbe1232e6d7aa1c722bbc114d308aab96bef5c78fc0303c85c7b472ef00e2253251cc89737f3b1af56e5a5
+  languageName: node
+  linkType: hard
+
+"@swc/helpers@npm:^0.5.0":
+  version: 0.5.1
+  resolution: "@swc/helpers@npm:0.5.1"
+  dependencies:
+    tslib: ^2.4.0
+  checksum: 71e0e27234590435e4c62b97ef5e796f88e786841a38c7116a5e27a3eafa7b9ead7cdec5249b32165902076de78446945311c973e59bddf77c1e24f33a8f272a
   languageName: node
   linkType: hard
 
@@ -8726,7 +8781,7 @@ __metadata:
     "@nivo/pie": 0.83.0
     "@nivo/radial-bar": 0.83.0
     "@nivo/tooltip": 0.83.0
-    "@pluralsh/design-system": 2.2.0
+    "@pluralsh/design-system": 2.4.0
     "@pluralsh/eslint-config-typescript": 2.5.41
     "@pluralsh/stylelint-config": 1.1.3
     "@react-hooks-library/core": 0.5.1
