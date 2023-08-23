@@ -97,7 +97,7 @@ export function GrantAccess() {
 
 const FUDGED_USER = 'plrl-fudged-user'
 
-function fudgedUser(name): IntercomUser {
+function fudgedUser(name?: string): IntercomUser {
   let user: IntercomUser = {}
 
   if (localStorage.getItem(FUDGED_USER)) {
@@ -126,7 +126,7 @@ function fudgedUser(name): IntercomUser {
 
   user = {
     email: user.email || `sandbox+${randstr}@plural.sh`,
-    name: user.name || name,
+    name: user.name || name || 'Demo User',
     userId: user.userId || id,
   }
 
@@ -153,7 +153,7 @@ function useIntercomAttributes(
   }
 
   if (intercomUser.email === 'demo-user@plural.sh') {
-    return (intercomUser = fudgedUser(name))
+    intercomUser = fudgedUser(name)
   }
 
   return {
