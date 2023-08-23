@@ -35,7 +35,7 @@ export default function CurrentUser({ children }) {
   if (loading) return null
 
   if (error || !data || !data.me || !data.me.id) {
-    return null
+    return children
   }
 
   return (
