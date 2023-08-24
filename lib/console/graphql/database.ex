@@ -28,9 +28,15 @@ defmodule Console.GraphQl.Database do
     field :number_of_instances, :integer
     field :databases,           :map
 
+    field :volume,              :database_volume
+
     field :pods, list_of(:pod), resolve: fn
       pg, _, _ -> Databases.list_postgres_pods(pg)
     end
+  end
+
+  object :database_volume do
+    field :size, :string
   end
 
   object :postgres_settings do
