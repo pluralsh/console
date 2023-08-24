@@ -223,6 +223,7 @@ type PostgresqlSpec {
   postgresql: PostgresSettings
   numberOfInstances: Int
   databases: Map
+  volume: DatabaseVolume
   pods: [Pod]
 }
 
@@ -1181,6 +1182,7 @@ type Metadata {
   annotations: [LabelPair]
   name: String!
   namespace: String
+  creationTimestamp: String
 }
 
 type BuildInfo {
@@ -1270,6 +1272,10 @@ enum WebhookHealth {
 }
 
 scalar Long
+
+type DatabaseVolume {
+  size: String
+}
 
 enum WebhookType {
   PIAZZA

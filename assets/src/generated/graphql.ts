@@ -515,6 +515,11 @@ export type DashboardSpec = {
   timeslices?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
 };
 
+export type DatabaseVolume = {
+  __typename?: 'DatabaseVolume';
+  size?: Maybe<Scalars['String']['output']>;
+};
+
 export enum Delta {
   Create = 'CREATE',
   Delete = 'DELETE',
@@ -830,6 +835,7 @@ export type ManifestNetwork = {
 export type Metadata = {
   __typename?: 'Metadata';
   annotations?: Maybe<Array<Maybe<LabelPair>>>;
+  creationTimestamp?: Maybe<Scalars['String']['output']>;
   labels?: Maybe<Array<Maybe<LabelPair>>>;
   name: Scalars['String']['output'];
   namespace?: Maybe<Scalars['String']['output']>;
@@ -1100,6 +1106,7 @@ export type PostgresqlSpec = {
   resources?: Maybe<Resources>;
   teamId?: Maybe<Scalars['String']['output']>;
   users?: Maybe<Scalars['Map']['output']>;
+  volume?: Maybe<DatabaseVolume>;
 };
 
 export type PostgresqlStatus = {

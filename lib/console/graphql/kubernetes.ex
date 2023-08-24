@@ -5,10 +5,11 @@ defmodule Console.GraphQl.Kubernetes do
   alias Console.Middleware.{Authenticated, AdminRequired, Rbac, Feature}
 
   object :metadata do
-    field :labels,      list_of(:label_pair), resolve: fn %{labels: labels}, _, _ -> {:ok, make_labels(labels)} end
-    field :annotations, list_of(:label_pair), resolve: fn %{annotations: labels}, _, _ -> {:ok, make_labels(labels)} end
-    field :name,        non_null(:string)
-    field :namespace,   :string
+    field :labels,             list_of(:label_pair), resolve: fn %{labels: labels}, _, _ -> {:ok, make_labels(labels)} end
+    field :annotations,        list_of(:label_pair), resolve: fn %{annotations: labels}, _, _ -> {:ok, make_labels(labels)} end
+    field :name,               non_null(:string)
+    field :namespace,          :string
+    field :creation_timestamp, :string
   end
 
   object :result_status do
