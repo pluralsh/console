@@ -49,7 +49,7 @@ export const PopoverWrapper = styled.div<{
 }))
 
 const Animated = styled(animated.div)((_) => ({
-  maxWidth: '100%',
+  width: '100%',
   maxHeight: '100%',
   display: 'flex',
 }))
