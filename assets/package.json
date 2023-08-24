@@ -44,7 +44,7 @@
     "@nivo/pie": "0.83.0",
     "@nivo/radial-bar": "0.83.0",
     "@nivo/tooltip": "0.83.0",
-    "@pluralsh/design-system": "2.4.0",
+    "@pluralsh/design-system": "2.4.1",
     "@react-hooks-library/core": "0.5.1",
     "@tanstack/react-table": "8.9.1",
     "@testing-library/jest-dom": "5.16.5",

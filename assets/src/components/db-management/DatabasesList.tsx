@@ -1,14 +1,13 @@
 import { Div, Flex } from 'honorable'
 import { createColumnHelper } from '@tanstack/react-table'
 import { ComponentProps, memo, useMemo, useState } from 'react'
-import { filesize } from 'filesize'
-import { cpuParser, memoryParser } from 'utils/kubernetes'
+import { cpuParser, memoryFormat, memoryParser } from 'utils/kubernetes'
 
 import {
   DatabaseTableRowFragment,
   useRestorePostgresMutation,
 } from 'generated/graphql'
-import { ReadinessT, readinessToSeverity } from 'utils/status'
+import { ReadinessT } from 'utils/status'
 
 import {
   Button,
@@ -18,12 +17,10 @@ import {
   Table,
   Tooltip,
 } from '@pluralsh/design-system'
-
 import { Confirm } from 'components/utils/Confirm'
-
 import { useTheme } from 'styled-components'
-
 import { isNil } from 'lodash'
+import moment from 'moment'
 
 import { TableText, Usage, numishSort } from '../cluster/TableElements'
 
@@ -126,13 +123,70 @@ export const ColInstances = columnHelper.accessor(
   }
 )
 
-export const ColAge = columnHelper.accessor((_) => '???', {
-  id: 'age',
-  enableGlobalFilter: false,
-  enableSorting: true,
-  cell: (props) => <TableText>{props.getValue()}</TableText>,
-  header: 'Age',
+// Custom locale for minimal relative time units
+moment.defineLocale('en-min', {
+  parentLocale: 'en',
+  relativeTime: {
+    s: '1 s',
+    ss: '%d s',
+    d: '1 d',
+    dd: '%dd',
+    m: '1 min',
+    mm: '%d min',
+    h: '1 h',
+    hh: '%d h',
+    M: '1 mo',
+    MM: '%d mo',
+    y: '1 y',
+    yy: '%d y',
+  },
 })
+
+export const ColAge = columnHelper.accessor(
+  (row) => moment().diff(moment(row.metadata.creationTimestamp), 'days', true),
+  {
+    id: 'age',
+    enableGlobalFilter: false,
+    enableSorting: true,
+    cell: ({ row: { original } }) => {
+      // Set locale to get minimal time units
+      moment.locale('en-min')
+      const age = moment(original.metadata.creationTimestamp).fromNow(true)
+
+      // Make sure to reset locale to default
+      moment.locale('en')
+
+      return <TableText>{age}</TableText>
+    },
+    header: 'Age',
+  }
+)
+
+export const ColVolume = columnHelper.accessor(
+  (row) => memoryParser(row.spec.volume?.size),
+  {
+    id: 'volume',
+    enableGlobalFilter: false,
+    enableSorting: true,
+    cell: ({ getValue }) => {
+      const size = memoryFormat(getValue())
+
+      return <TableText>{typeof size === 'string' ? size : '–'}</TableText>
+    },
+    header: 'Volume',
+  }
+)
+
+const statusToSeverity = (status: string) => {
+  if (status.match(/fail/m)) {
+    return 'error'
+  }
+  if (status.match(/running/i)) {
+    return 'success'
+  }
+
+  return 'warning'
+}
 
 export const ColStatus = columnHelper.accessor(
   (row) => row.status.clusterStatus,
@@ -142,8 +196,9 @@ export const ColStatus = columnHelper.accessor(
     enableSorting: true,
     cell: ({ getValue }) => {
       const val = getValue()
+      const severity = statusToSeverity(val || '')
 
-      return !!val && <Chip severity={readinessToSeverity[val]}>{val}</Chip>
+      return !!val && <Chip severity={severity}>{val}</Chip>
     },
     header: 'Status',
   }
@@ -161,8 +216,8 @@ export const ColMemoryReservation = columnHelper.accessor(
 
       return (
         <Usage
-          used={isNil(requests) ? undefined : filesize(requests ?? 0)}
-          total={isNil(limits) ? undefined : filesize(limits ?? 0)}
+          used={isNil(requests) ? undefined : memoryFormat(requests ?? 0)}
+          total={isNil(limits) ? undefined : memoryFormat(limits ?? 0)}
         />
       )
     },

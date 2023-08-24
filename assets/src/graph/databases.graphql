@@ -56,13 +56,11 @@ fragment DatabaseTableRow on Postgresql {
   metadata {
     name
     namespace
+    creationTimestamp
   }
   spec {
     numberOfInstances
     databases
-    # pods {
-    #   raw
-    # }
     postgresql {
       version
     }
@@ -70,6 +68,9 @@ fragment DatabaseTableRow on Postgresql {
       ...Resources
     }
     databases
+    volume {
+      size
+    }
   }
   status {
     clusterStatus
@@ -112,7 +113,6 @@ query PostgresDatabases {
     name
     spec {
       descriptor {
-        type
         icons
       }
     }

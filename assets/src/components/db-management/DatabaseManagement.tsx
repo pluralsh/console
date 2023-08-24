@@ -1,4 +1,4 @@
-import { forwardRef, useContext, useMemo, useState } from 'react'
+import { ReactNode, forwardRef, useContext, useMemo, useState } from 'react'
 import { Div, Flex, useDebounce } from 'honorable'
 import {
   AppsIcon,
@@ -9,6 +9,7 @@ import {
   ListBoxFooter,
   ListBoxItem,
   SearchIcon,
+  Select,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import Fuse from 'fuse.js'
@@ -39,6 +40,7 @@ import {
   // ColNamespace,
   ColStatus,
   ColVersion,
+  ColVolume,
   DatabasesList,
 } from './DatabasesList'
 
@@ -72,11 +74,6 @@ const NamespaceListFooter = forwardRef<
   )
 })
 
-const searchOptions = {
-  keys: ['metadata.name'],
-  threshold: 0.25,
-}
-
 const breadcrumbs: Breadcrumb[] = [
   { label: 'plural-cluster' },
   { label: 'database-management', url: `/${DB_MANAGEMENT_PATH}` },
@@ -98,17 +95,13 @@ export default function DatabaseManagement() {
 
   const { applications, namespaces, postgresDatabases } = data || {}
 
-  console.log('apps', applications)
-  console.log('dbs', postgresDatabases?.[0])
-  console.log('error', error)
-  console.log('loading', loading)
-
   const columns = useMemo(
     () => [
       // ColNamespace,
       ColName,
-      ColInstances,
       ColVersion,
+      ColInstances,
+      ColVolume,
       ColCpuReservation,
       ColMemoryReservation,
       ColAge,
@@ -119,13 +112,11 @@ export default function DatabaseManagement() {
   )
   const theme = useTheme()
   const namespace = useParams().namespace || null
-  const navigate = useNavigate()
-  const [inputValue, setInputValue] = useState<string>(namespace || '')
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 300)
 
   // Filter out namespaces that don't exist in the dbs list
-  let filteredNamespaces = useMemo(() => {
+  const filteredNamespaces = useMemo(() => {
     if (!postgresDatabases || !namespaces) {
       return []
     }
@@ -137,22 +128,16 @@ export default function DatabaseManagement() {
       }
     }
 
-    return (
-      namespaces?.filter(
-        (ns: Maybe<NamespaceMetaFragment>): ns is NamespaceMetaFragment =>
-          !!ns?.metadata?.name && namespaceSet.has(ns.metadata.name)
-      ) || []
-    )
-  }, [postgresDatabases, namespaces])
+    return Array.from(namespaceSet).map((name) => {
+      const icons = applications?.find((app) => app?.name === name)?.spec
+        .descriptor.icons
 
-  // Filter out names that don't match search criteria
-  filteredNamespaces = useMemo(() => {
-    const fuse = new Fuse(filteredNamespaces, searchOptions)
-
-    return inputValue
-      ? fuse.search(inputValue).map(({ item }) => item)
-      : filteredNamespaces
-  }, [filteredNamespaces, inputValue])
+      return {
+        name,
+        icon: icons?.[1] || icons?.[0],
+      }
+    })
+  }, [postgresDatabases, namespaces, applications])
 
   const filteredDbs = useMemo(() => {
     if (!postgresDatabases) {
@@ -184,7 +169,7 @@ export default function DatabaseManagement() {
     [debouncedFilterString]
   )
 
-  console.log('availalbe features', availableFeatures)
+  console.log('available features', availableFeatures)
   if (!availableFeatures?.databaseManagement) {
     // Temporary -Klink
     console.log('not available')
@@ -198,48 +183,8 @@ export default function DatabaseManagement() {
 
   return (
     <ResponsivePageFullWidth
-      heading="Databases"
+      heading="Database management"
       scrollable={false}
-      headingContent={
-        isEmpty(filteredNamespaces) ? null : (
-          <Div width={320}>
-            <ComboBox
-              inputProps={{ placeholder: 'Filter by namespace' }}
-              inputValue={inputValue}
-              onInputChange={setInputValue}
-              selectedKey={namespace}
-              onSelectionChange={(ns) => {
-                if (ns) {
-                  setInputValue(`${ns}`)
-                  navigate(`/${DB_MANAGEMENT_PATH}/${ns}`)
-                }
-              }}
-              // Close combobox panel once footer is clicked.
-              // It does not work with isOpen and onOpenChange at the moment.
-              dropdownFooterFixed={
-                <NamespaceListFooter
-                  onClick={() => {
-                    setInputValue('')
-                    navigate('/pods')
-                  }}
-                />
-              }
-              aria-label="namespace"
-              width={320}
-            >
-              {filteredNamespaces?.map((namespace, i) => (
-                <ListBoxItem
-                  key={`${namespace?.metadata?.name || i}`}
-                  textValue={`${namespace?.metadata?.name}`}
-                  label={`${namespace?.metadata?.name}`}
-                >
-                  Hello {namespace.metadata.name}
-                </ListBoxItem>
-              )) || []}
-            </ComboBox>
-          </Div>
-        )
-      }
     >
       {!data ? (
         <LoadingIndicator />
@@ -248,13 +193,24 @@ export default function DatabaseManagement() {
           direction="column"
           height="100%"
         >
-          <Input
-            startIcon={<SearchIcon />}
-            placeholder="Filter pods"
-            value={filterString}
-            onChange={(e) => setFilterString(e.currentTarget.value)}
-            marginBottom={theme.spacing.medium}
-          />
+          <Flex
+            direction="row"
+            gap="medium"
+          >
+            <NamespaceSelect
+              namespaces={filteredNamespaces}
+              namespace={namespace}
+            />
+            <Input
+              startIcon={<SearchIcon />}
+              placeholder="Filter by name"
+              value={filterString}
+              onChange={(e) => setFilterString(e.currentTarget.value)}
+              marginBottom={theme.spacing.medium}
+              flexGrow={1}
+            />
+          </Flex>
+
           {!filteredDbs || filteredDbs.length === 0 ? (
             <EmptyState message="No pods match your selection" />
           ) : (
@@ -272,5 +228,64 @@ export default function DatabaseManagement() {
         </Flex>
       )}
     </ResponsivePageFullWidth>
+  )
+}
+
+const NamespaceIcon = styled.img(({ theme }) => ({
+  width: theme.spacing.medium,
+}))
+
+const NamespaceSelectItem = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.medium,
+}))
+
+function NamespaceSelect({
+  namespaces,
+  namespace,
+}: {
+  namespaces: { name: string; icon: string | null | undefined }[]
+  namespace: string | null
+}) {
+  const navigate = useNavigate()
+  const [isOpen, setIsOpen] = useState(false)
+
+  return isEmpty(namespaces) ? null : (
+    <Div width={340}>
+      <Select
+        isOpen={isOpen}
+        onOpenChange={setIsOpen}
+        label="All apps"
+        selectedKey={namespace}
+        onSelectionChange={(ns) => {
+          if (ns) {
+            navigate(`/${DB_MANAGEMENT_PATH}/${ns}`)
+          }
+        }}
+        dropdownFooterFixed={
+          <NamespaceListFooter
+            onClick={() => {
+              setIsOpen(false)
+              navigate(`/${DB_MANAGEMENT_PATH}`)
+            }}
+          />
+        }
+        titleContent={
+          <>
+            <AppsIcon marginRight="small" /> Apps
+          </>
+        }
+        aria-label="namespace"
+      >
+        {namespaces?.map((namespace, i) => (
+          <ListBoxItem
+            key={`${namespace?.name || i}`}
+            textValue={`${namespace?.name}`}
+            label={namespace?.name}
+            leftContent={<NamespaceIcon src={namespace.icon} />}
+          />
+        )) || []}
+      </Select>
+    </Div>
   )
 }

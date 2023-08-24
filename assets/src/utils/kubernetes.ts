@@ -1,6 +1,7 @@
 import { isString } from 'lodash'
 
 import { memoryParser as mParser } from 'kubernetes-resource-parser'
+import { filesize } from 'filesize'
 
 const MULTIPLES = {
   m: 1000,
@@ -49,4 +50,8 @@ export function cpuFormat(value?: string | number | null) {
   }
 
   return `${value}`
+}
+
+export function memoryFormat(value?: number | null | undefined) {
+  return filesize(value, { base: 2 })
 }
