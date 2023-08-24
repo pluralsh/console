@@ -2385,8 +2385,6 @@ export type RestorePostgresMutationVariables = Exact<{
 
 export type RestorePostgresMutation = { __typename?: 'RootMutationType', restorePostgres?: { __typename?: 'Postgresql', status: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } } | null };
 
-export type NamespaceMetaFragment = { __typename?: 'Namespace', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } };
-
 export type PostgresDatabasesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -2657,13 +2655,6 @@ export const DatabaseTableRowFragmentDoc = gql`
   }
 }
     ${ResourcesFragmentDoc}`;
-export const NamespaceMetaFragmentDoc = gql`
-    fragment NamespaceMeta on Namespace {
-  metadata {
-    ...MetadataFragment
-  }
-}
-    ${MetadataFragmentFragmentDoc}`;
 export const UserFragmentDoc = gql`
     fragment User on User {
   id
@@ -3438,7 +3429,6 @@ export const namedOperations = {
     Resources: 'Resources',
     PostgresqlStatus: 'PostgresqlStatus',
     DatabaseTableRow: 'DatabaseTableRow',
-    NamespaceMeta: 'NamespaceMeta',
     GroupMember: 'GroupMember',
     Group: 'Group',
     User: 'User',

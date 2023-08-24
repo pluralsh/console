@@ -111,7 +111,7 @@ export default function DatabaseManagement() {
       heading="Database management"
       scrollable={false}
     >
-      {!availableFeatures?.databaseManagement ? (
+      {availableFeatures?.databaseManagement ? (
         <RealDatabaseManagement />
       ) : (
         <DemoDatabaseManagement />
@@ -132,8 +132,6 @@ function DemoDatabaseManagement() {
     <DatabaseManagementContent
       applications={[]}
       postgresDatabases={demoDbs as any}
-      // error={error}
-      // refetch={refetch}
       isDemo
     />
   )

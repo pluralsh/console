@@ -1,20 +1,3 @@
-# fragment PostgresDatabaseMeta on Metadata {
-#   name
-#   namespace
-#   labels {
-#     name
-#     value
-#   }
-#   annotations {
-#     name
-#     value
-#   }
-# }
-
-# fragment PostgresSettings on PostgresSettings {
-#   version
-# }
-
 fragment ResourceSpec on ResourceSpec {
   cpu
   memory
@@ -27,26 +10,6 @@ fragment Resources on Resources {
   requests {
     ...ResourceSpec
   }
-}
-
-# fragment PostgresqlSpec on PostgresqlSpec {
-#   databases
-#   numberOfInstances
-#   pods {
-#     ...Pod
-#   }
-#   postgresql {
-#     ...PostgresSettings
-#   }
-#   resources {
-#     ...Resources
-#   }
-#   teamId
-#   users
-# }
-
-fragment PostgresqlStatus on PostgresqlStatus {
-  clusterStatus
 }
 
 fragment DatabaseTableRow on Postgresql {
@@ -92,22 +55,6 @@ mutation RestorePostgres(
     status {
       ...PostgresqlStatus
     }
-    # ...PostgresDB
-  }
-}
-
-fragment NamespaceMeta on Namespace {
-  metadata {
-    ...MetadataFragment
-  }
-}
-
-fragment DatabaseTableApp on Application {
-  name
-  spec {
-    descriptor {
-      icons
-    }
   }
 }
 
@@ -116,7 +63,12 @@ query PostgresDatabases {
     ...DatabaseTableRow
   }
   applications {
-    ...DatabaseTableApp
+    name
+    spec {
+      descriptor {
+        icons
+      }
+    }
   }
 }
 
