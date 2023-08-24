@@ -1,5 +1,4 @@
-import { forwardRef, useContext, useEffect, useMemo, useState } from 'react'
-import { useQuery } from '@apollo/client'
+import { forwardRef, useContext, useMemo, useState } from 'react'
 import { Div, Flex, useDebounce } from 'honorable'
 import {
   AppsIcon,
@@ -17,20 +16,31 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ListBoxFooterProps } from '@pluralsh/design-system/dist/components/ListBoxItem'
 import styled, { useTheme } from 'styled-components'
 import {
-  type RootQueryType,
+  DatabaseTableRowFragment,
+  Maybe,
+  NamespaceMetaFragment,
   usePostgresDatabasesQuery,
 } from 'generated/graphql'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { isEqual } from 'utils/kubernetes'
-import { isEmpty, uniqBy } from 'lodash'
+import { isEmpty } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
+import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
+import { SHORT_POLL_INTERVAL } from 'components/cluster/constants'
 
-import { SHORT_POLL_INTERVAL } from '../cluster/constants'
-
-import { ColName } from './DatabasesList'
+import {
+  ColActions,
+  ColAge,
+  ColCpuReservation,
+  ColInstances,
+  ColMemoryReservation,
+  ColName,
+  // ColNamespace,
+  ColStatus,
+  ColVersion,
+  DatabasesList,
+} from './DatabasesList'
 
 const ListBoxFooterPlusInner = styled(ListBoxFooter)(({ theme }) => ({
   color: theme.colors['text-primary-accent'],
@@ -69,69 +79,40 @@ const searchOptions = {
 
 const breadcrumbs: Breadcrumb[] = [
   { label: 'plural-cluster' },
-  { label: 'database-management', url: '/database-management' },
+  { label: 'database-management', url: `/${DB_MANAGEMENT_PATH}` },
 ]
+
+export type DatabaseWithId = DatabaseTableRowFragment & {
+  id?: string | null | undefined
+}
 
 export default function DatabaseManagement() {
   const { availableFeatures } = useContext(SubscriptionContext)
 
   useSetBreadcrumbs(breadcrumbs)
 
-  const { data, refetch, error, subscribeToMore } = usePostgresDatabasesQuery()
+  const { data, refetch, error, loading } = usePostgresDatabasesQuery({
+    pollInterval: SHORT_POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
+  })
 
-  const dbs = data?.postgresDatabases
+  const { applications, namespaces, postgresDatabases } = data || {}
 
-  console.log('dbs', dbs)
-
-  return <div>hi</div>
-
-  //   /*
-  //     TODO: Add subscription when subscription actually starts returning values.
-  //   */
-  //   useEffect(
-  //     () =>
-  //       subscribeToMore({
-  //         document: PODS_SUB,
-  //         updateQuery: (prev, { subscriptionData: { data } }: any) => {
-  //           if (!data?.podDelta) return prev
-  //           const {
-  //             podDelta: { delta, payload },
-  //           } = data
-
-  //           if (delta === 'CREATE')
-  //             return {
-  //               ...prev,
-  //               cachedDatabases: uniqBy(
-  //                 [payload, ...(prev.cachedDatabases ?? [])],
-  //                 (p) => `${p.metadata.name}:${p.metadata.namespace}`
-  //               ),
-  //             }
-  //           if (delta === 'DELETE')
-  //             return {
-  //               ...prev,
-  //               cachedDatabases: prev.cachedDatabases?.filter(
-  //                 (p) => !isEqual(p!, payload)
-  //               ),
-  //             }
-
-  //           return prev
-  //         },
-  //         onError: (e) => {
-  //           console.error('subscribe error msg', e.message)
-  //         },
-  //       }),
-  //     [subscribeToMore]
-  //   )
+  console.log('apps', applications)
+  console.log('dbs', postgresDatabases?.[0])
+  console.log('error', error)
+  console.log('loading', loading)
 
   const columns = useMemo(
     () => [
-      ColNamespace,
+      // ColNamespace,
       ColName,
-      ColMemoryReservation,
+      ColInstances,
+      ColVersion,
       ColCpuReservation,
-      ColRestarts,
-      ColContainers,
-      ColImages,
+      ColMemoryReservation,
+      ColAge,
+      ColStatus,
       ColActions(refetch),
     ],
     [refetch]
@@ -143,53 +124,58 @@ export default function DatabaseManagement() {
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 300)
 
-  // Filter out namespaces that don't exist in the pods list
-  const namespaces = useMemo(() => {
-    if (!data?.cachedDatabases) {
+  // Filter out namespaces that don't exist in the dbs list
+  let filteredNamespaces = useMemo(() => {
+    if (!postgresDatabases || !namespaces) {
       return []
     }
     const namespaceSet = new Set<string>()
 
-    for (const pod of data?.cachedDatabases || []) {
-      if (pod?.metadata?.namespace) {
-        namespaceSet.add(pod.metadata.namespace)
+    for (const db of postgresDatabases || []) {
+      if (db?.metadata?.namespace) {
+        namespaceSet.add(db.metadata.namespace)
       }
     }
 
     return (
-      data?.namespaces?.filter(
-        (ns) => ns?.metadata?.name && namespaceSet.has(ns.metadata.name)
+      namespaces?.filter(
+        (ns: Maybe<NamespaceMetaFragment>): ns is NamespaceMetaFragment =>
+          !!ns?.metadata?.name && namespaceSet.has(ns.metadata.name)
       ) || []
     )
-  }, [data?.namespaces, data?.cachedDatabases])
+  }, [postgresDatabases, namespaces])
 
-  //  Filter out namespaces that don't match search criteria
-  const filteredNamespaces = useMemo(() => {
-    const fuse = new Fuse(namespaces, searchOptions)
+  // Filter out names that don't match search criteria
+  filteredNamespaces = useMemo(() => {
+    const fuse = new Fuse(filteredNamespaces, searchOptions)
 
     return inputValue
       ? fuse.search(inputValue).map(({ item }) => item)
-      : namespaces
-  }, [namespaces, inputValue])
+      : filteredNamespaces
+  }, [filteredNamespaces, inputValue])
 
-  const pods = useMemo(() => {
-    if (!data?.cachedDatabases) {
+  const filteredDbs = useMemo(() => {
+    if (!postgresDatabases) {
       return undefined
     }
-    let pods = data.cachedDatabases
-      .map(
-        (pod) => ({ id: pod?.metadata?.namespace, ...pod } as DatabaseWithId)
-      )
+    let dbs = postgresDatabases
       .filter(
-        (pod?: DatabaseWithId): pod is DatabaseWithId => !!pod
-      ) as DatabaseWithId[]
+        (db: Maybe<DatabaseTableRowFragment>): db is DatabaseTableRowFragment =>
+          !!db
+      )
+      .map(
+        (db): DatabaseWithId => ({
+          id: `${db.metadata.name}-${db?.metadata?.namespace}`,
+          ...db,
+        })
+      )
 
     if (namespace) {
-      pods = pods?.filter((pod) => pod?.metadata?.namespace === namespace)
+      dbs = dbs?.filter((pod) => pod?.metadata?.namespace === namespace)
     }
 
-    return pods || []
-  }, [data, namespace])
+    return dbs || []
+  }, [namespace, postgresDatabases])
 
   const reactTableOptions = useMemo(
     () => ({
@@ -198,6 +184,7 @@ export default function DatabaseManagement() {
     [debouncedFilterString]
   )
 
+  console.log('availalbe features', availableFeatures)
   if (!availableFeatures?.databaseManagement) {
     // Temporary -Klink
     console.log('not available')
@@ -214,7 +201,7 @@ export default function DatabaseManagement() {
       heading="Databases"
       scrollable={false}
       headingContent={
-        isEmpty(namespaces) ? null : (
+        isEmpty(filteredNamespaces) ? null : (
           <Div width={320}>
             <ComboBox
               inputProps={{ placeholder: 'Filter by namespace' }}
@@ -224,7 +211,7 @@ export default function DatabaseManagement() {
               onSelectionChange={(ns) => {
                 if (ns) {
                   setInputValue(`${ns}`)
-                  navigate(`/pods/${ns}`)
+                  navigate(`/${DB_MANAGEMENT_PATH}/${ns}`)
                 }
               }}
               // Close combobox panel once footer is clicked.
@@ -245,7 +232,9 @@ export default function DatabaseManagement() {
                   key={`${namespace?.metadata?.name || i}`}
                   textValue={`${namespace?.metadata?.name}`}
                   label={`${namespace?.metadata?.name}`}
-                />
+                >
+                  Hello {namespace.metadata.name}
+                </ListBoxItem>
               )) || []}
             </ComboBox>
           </Div>
@@ -266,13 +255,13 @@ export default function DatabaseManagement() {
             onChange={(e) => setFilterString(e.currentTarget.value)}
             marginBottom={theme.spacing.medium}
           />
-          {!pods || pods.length === 0 ? (
+          {!filteredDbs || filteredDbs.length === 0 ? (
             <EmptyState message="No pods match your selection" />
           ) : (
             <FullHeightTableWrap>
               <DatabasesList
-                pods={pods}
-                applications={data?.applications}
+                databases={filteredDbs}
+                // applications={data?.applications}
                 columns={columns}
                 reactTableOptions={reactTableOptions}
                 maxHeight="unset"

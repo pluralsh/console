@@ -2367,19 +2367,13 @@ export type CreateBuildMutationVariables = Exact<{
 
 export type CreateBuildMutation = { __typename?: 'RootMutationType', createBuild?: { __typename?: 'Build', id: string } | null };
 
-export type MetadataFragment = { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null };
-
-export type PostgresSettingsFragment = { __typename?: 'PostgresSettings', version?: string | null };
-
 export type ResourceSpecFragment = { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null };
 
 export type ResourcesFragment = { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null };
 
-export type PostgresqlSpecFragment = { __typename?: 'PostgresqlSpec', databases?: Map<string, unknown> | null, numberOfInstances?: number | null, teamId?: string | null, users?: Map<string, unknown> | null, pods?: Array<{ __typename?: 'Pod', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, eventTime?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', serviceAccountName?: string | null, nodeName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null } | null> | null }, status: { __typename?: 'PodStatus', hostIp?: string | null, message?: string | null, phase?: string | null, podIp?: string | null, reason?: string | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null } } | null> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null };
-
 export type PostgresqlStatusFragment = { __typename?: 'PostgresqlStatus', clusterStatus?: string | null };
 
-export type PostgresDbFragment = { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'PostgresqlSpec', databases?: Map<string, unknown> | null, numberOfInstances?: number | null, teamId?: string | null, users?: Map<string, unknown> | null, pods?: Array<{ __typename?: 'Pod', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, eventTime?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', serviceAccountName?: string | null, nodeName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null } | null> | null }, status: { __typename?: 'PodStatus', hostIp?: string | null, message?: string | null, phase?: string | null, podIp?: string | null, reason?: string | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null } } | null> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null }, status: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } };
+export type DatabaseTableRowFragment = { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Map<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null }, status: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } };
 
 export type RestorePostgresMutationVariables = Exact<{
   clone?: InputMaybe<CloneAttributes>;
@@ -2391,10 +2385,12 @@ export type RestorePostgresMutationVariables = Exact<{
 
 export type RestorePostgresMutation = { __typename?: 'RootMutationType', restorePostgres?: { __typename?: 'Postgresql', status: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } } | null };
 
+export type NamespaceMetaFragment = { __typename?: 'Namespace', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } };
+
 export type PostgresDatabasesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PostgresDatabasesQuery = { __typename?: 'RootQueryType', postgresDatabases?: Array<{ __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'PostgresqlSpec', databases?: Map<string, unknown> | null, numberOfInstances?: number | null, teamId?: string | null, users?: Map<string, unknown> | null, pods?: Array<{ __typename?: 'Pod', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, eventTime?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', serviceAccountName?: string | null, nodeName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null } | null> | null }, status: { __typename?: 'PodStatus', hostIp?: string | null, message?: string | null, phase?: string | null, podIp?: string | null, reason?: string | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null } } | null> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null }, status: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } } | null> | null };
+export type PostgresDatabasesQuery = { __typename?: 'RootQueryType', postgresDatabases?: Array<{ __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Map<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null }, status: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } } | null> | null, namespaces?: Array<{ __typename?: 'Namespace', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, applications?: Array<{ __typename?: 'Application', name: string, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', type: string, icons?: Array<string | null> | null } } } | null> | null };
 
 export type PostgresDatabaseQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -2402,7 +2398,7 @@ export type PostgresDatabaseQueryVariables = Exact<{
 }>;
 
 
-export type PostgresDatabaseQuery = { __typename?: 'RootQueryType', postgresDatabase?: { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'PostgresqlSpec', databases?: Map<string, unknown> | null, numberOfInstances?: number | null, teamId?: string | null, users?: Map<string, unknown> | null, pods?: Array<{ __typename?: 'Pod', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, eventTime?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', serviceAccountName?: string | null, nodeName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null } | null> | null }, status: { __typename?: 'PodStatus', hostIp?: string | null, message?: string | null, phase?: string | null, podIp?: string | null, reason?: string | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null } } | null> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null }, status: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } } | null };
+export type PostgresDatabaseQuery = { __typename?: 'RootQueryType', postgresDatabase?: { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Map<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null }, status: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } } | null };
 
 export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
 
@@ -2469,20 +2465,6 @@ export type DeleteGroupMutationVariables = Exact<{
 
 
 export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
-
-export type ContainerStateFragment = { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null };
-
-export type ContainerStatusFragment = { __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null };
-
-export type PodConditionFragment = { __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null };
-
-export type PodStatusFragment = { __typename?: 'PodStatus', hostIp?: string | null, message?: string | null, phase?: string | null, podIp?: string | null, reason?: string | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null };
-
-export type EventFragment = { __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, eventTime?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null };
-
-export type PodSpecFragment = { __typename?: 'PodSpec', serviceAccountName?: string | null, nodeName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null } | null> | null };
-
-export type PodFragment = { __typename?: 'Pod', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, eventTime?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', serviceAccountName?: string | null, nodeName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null } | null> | null }, status: { __typename?: 'PodStatus', hostIp?: string | null, message?: string | null, phase?: string | null, podIp?: string | null, reason?: string | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null } };
 
 export type UserFragment = { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null };
 
@@ -2625,121 +2607,9 @@ export const PageInfoFragmentDoc = gql`
   endCursor
 }
     `;
-export const MetadataFragmentDoc = gql`
-    fragment Metadata on Metadata {
-  name
-  namespace
-  labels {
-    name
-    value
-  }
-  annotations {
-    name
-    value
-  }
-}
-    `;
-export const EventFragmentDoc = gql`
-    fragment Event on Event {
-  action
-  lastTimestamp
-  eventTime
-  count
-  message
-  reason
-  type
-}
-    `;
-export const PodSpecFragmentDoc = gql`
-    fragment PodSpec on PodSpec {
-  serviceAccountName
-  nodeName
-  containers {
-    name
-  }
-  initContainers {
-    name
-  }
-}
-    `;
-export const PodConditionFragmentDoc = gql`
-    fragment PodCondition on PodCondition {
-  lastProbeTime
-  lastTransitionTime
-  message
-  reason
-  status
-  type
-}
-    `;
-export const ContainerStateFragmentDoc = gql`
-    fragment ContainerState on ContainerState {
-  running {
-    startedAt
-  }
-  terminated {
-    exitCode
-    message
-    reason
-  }
-  waiting {
-    message
-    reason
-  }
-}
-    `;
-export const ContainerStatusFragmentDoc = gql`
-    fragment ContainerStatus on ContainerStatus {
-  restartCount
-  ready
-  name
-  state {
-    ...ContainerState
-  }
-}
-    ${ContainerStateFragmentDoc}`;
-export const PodStatusFragmentDoc = gql`
-    fragment PodStatus on PodStatus {
-  conditions {
-    ...PodCondition
-  }
-  containerStatuses {
-    ...ContainerStatus
-  }
-  hostIp
-  initContainerStatuses {
-    ...ContainerStatus
-  }
-  message
-  phase
-  podIp
-  reason
-}
-    ${PodConditionFragmentDoc}
-${ContainerStatusFragmentDoc}`;
-export const PodFragmentDoc = gql`
-    fragment Pod on Pod {
-  events {
-    ...Event
-  }
-  metadata {
-    ...Metadata
-  }
-  raw
-  spec {
-    ...PodSpec
-  }
-  status {
-    ...PodStatus
-  }
-}
-    ${EventFragmentDoc}
-${MetadataFragmentDoc}
-${PodSpecFragmentDoc}
-${PodStatusFragmentDoc}`;
-export const PostgresSettingsFragmentDoc = gql`
-    fragment PostgresSettings on PostgresSettings {
-  version
+export const PostgresqlStatusFragmentDoc = gql`
+    fragment PostgresqlStatus on PostgresqlStatus {
+  clusterStatus
 }
     `;
 export const ResourceSpecFragmentDoc = gql`
@@ -2758,48 +2628,38 @@ export const ResourcesFragmentDoc = gql`
   }
 }
     ${ResourceSpecFragmentDoc}`;
-export const PostgresqlSpecFragmentDoc = gql`
-    fragment PostgresqlSpec on PostgresqlSpec {
-  databases
-  numberOfInstances
-  pods {
-    ...Pod
-  }
-  postgresql {
-    ...PostgresSettings
-  }
-  resources {
-    ...Resources
-  }
-  teamId
-  users
-}
-    ${PodFragmentDoc}
-${PostgresSettingsFragmentDoc}
-${ResourcesFragmentDoc}`;
-export const PostgresqlStatusFragmentDoc = gql`
-    fragment PostgresqlStatus on PostgresqlStatus {
-  clusterStatus
-}
-    `;
-export const PostgresDbFragmentDoc = gql`
-    fragment PostgresDB on Postgresql {
+export const DatabaseTableRowFragmentDoc = gql`
+    fragment DatabaseTableRow on Postgresql {
   instances {
     uid
   }
   metadata {
-    ...Metadata
+    name
+    namespace
   }
   spec {
-    ...PostgresqlSpec
+    numberOfInstances
+    databases
+    postgresql {
+      version
+    }
+    resources {
+      ...Resources
+    }
+    databases
   }
   status {
-    ...PostgresqlStatus
+    clusterStatus
   }
 }
-    ${MetadataFragmentDoc}
-${PostgresqlSpecFragmentDoc}
-${PostgresqlStatusFragmentDoc}`;
+    ${ResourcesFragmentDoc}`;
+export const NamespaceMetaFragmentDoc = gql`
+    fragment NamespaceMeta on Namespace {
+  metadata {
+    ...MetadataFragment
+  }
+}
+    ${MetadataFragmentFragmentDoc}`;
 export const UserFragmentDoc = gql`
     fragment User on User {
   id
@@ -3102,10 +2962,23 @@ export type RestorePostgresMutationOptions = Apollo.BaseMutationOptions<RestoreP
 export const PostgresDatabasesDocument = gql`
     query PostgresDatabases {
   postgresDatabases {
-    ...PostgresDB
+    ...DatabaseTableRow
+  }
+  namespaces {
+    ...NamespaceMeta
+  }
+  applications {
+    name
+    spec {
+      descriptor {
+        type
+        icons
+      }
+    }
   }
 }
-    ${PostgresDbFragmentDoc}`;
+    ${DatabaseTableRowFragmentDoc}
+${NamespaceMetaFragmentDoc}`;
 
 /**
  * __usePostgresDatabasesQuery__
@@ -3136,10 +3009,10 @@ export type PostgresDatabasesQueryResult = Apollo.QueryResult<PostgresDatabasesQ
 export const PostgresDatabaseDocument = gql`
     query PostgresDatabase($name: String!, $namespace: String!) {
   postgresDatabase(name: $name, namespace: $namespace) {
-    ...PostgresDB
+    ...DatabaseTableRow
   }
 }
-    ${PostgresDbFragmentDoc}`;
+    ${DatabaseTableRowFragmentDoc}`;
 
 /**
  * __usePostgresDatabaseQuery__
@@ -3562,22 +3435,13 @@ export const namedOperations = {
     ConfigurationOverlayFragment: 'ConfigurationOverlayFragment',
     RepositoryFragment: 'RepositoryFragment',
     PageInfo: 'PageInfo',
-    Metadata: 'Metadata',
-    PostgresSettings: 'PostgresSettings',
     ResourceSpec: 'ResourceSpec',
     Resources: 'Resources',
-    PostgresqlSpec: 'PostgresqlSpec',
     PostgresqlStatus: 'PostgresqlStatus',
-    PostgresDB: 'PostgresDB',
+    DatabaseTableRow: 'DatabaseTableRow',
+    NamespaceMeta: 'NamespaceMeta',
     GroupMember: 'GroupMember',
     Group: 'Group',
-    ContainerState: 'ContainerState',
-    ContainerStatus: 'ContainerStatus',
-    PodCondition: 'PodCondition',
-    PodStatus: 'PodStatus',
-    Event: 'Event',
-    PodSpec: 'PodSpec',
-    Pod: 'Pod',
     User: 'User',
     Invite: 'Invite',
     RoleBinding: 'RoleBinding',

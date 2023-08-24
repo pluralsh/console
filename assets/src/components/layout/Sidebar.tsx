@@ -35,6 +35,8 @@ import { updateCache } from 'utils/graphql'
 
 import { useTheme } from 'styled-components'
 
+import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
+
 import { LoginContext } from '../contexts'
 
 import { MARK_READ } from './queries'
@@ -75,7 +77,7 @@ const MENU_ITEMS: MenuItem[] = [
   {
     text: 'Database management',
     icon: <DatabaseIcon />,
-    path: '/database-management',
+    path: `/${DB_MANAGEMENT_PATH}`,
   },
   // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents', sandboxed: true },
   {

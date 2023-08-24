@@ -2,16 +2,17 @@ import { Div, Flex } from 'honorable'
 import { createColumnHelper } from '@tanstack/react-table'
 import { ComponentProps, memo, useMemo, useState } from 'react'
 import { filesize } from 'filesize'
+import { cpuParser, memoryParser } from 'utils/kubernetes'
 
 import {
-  type Maybe,
-  PostgresDbFragment,
+  DatabaseTableRowFragment,
   useRestorePostgresMutation,
 } from 'generated/graphql'
-import { ReadinessT } from 'utils/status'
+import { ReadinessT, readinessToSeverity } from 'utils/status'
 
 import {
   Button,
+  Chip,
   EmptyState,
   RestoreIcon,
   Table,
@@ -22,11 +23,15 @@ import { Confirm } from 'components/utils/Confirm'
 
 import { useTheme } from 'styled-components'
 
+import { isNil } from 'lodash'
+
 import { TableText, Usage, numishSort } from '../cluster/TableElements'
+
+import { DatabaseWithId } from './DatabaseManagement'
 
 function RestoreDatabase({ name, namespace, refetch }) {
   const [confirm, setConfirm] = useState(false)
-  const [timestamp, setTimestamp] = useState('')
+  const [timestamp, _] = useState('')
   const theme = useTheme()
 
   const [mutation, { loading }] = useRestorePostgresMutation({
@@ -43,9 +48,9 @@ function RestoreDatabase({ name, namespace, refetch }) {
         floating
         startIcon={<RestoreIcon color={theme.colors['icon-default']} />}
         onClick={() => setConfirm(true)}
-        textValue="Delete"
-        tooltip
-      />
+      >
+        Restore
+      </Button>
       <Confirm
         close={() => setConfirm(false)}
         destructive
@@ -64,25 +69,9 @@ function RestoreDatabase({ name, namespace, refetch }) {
 
 export type ContainerStatus = { name: string; readiness: ReadinessT }
 
-type DatabaseTableRow = {
-  name?: string
-  version?: string
-  databases?: number
-  volume: unknown
-  cpu: {
-    requests?: number
-    limits?: number
-  }
-  memory: {
-    requests?: number
-    limits?: any
-  }
-  age: number
-  status?: ContainerStatus
-}
-const columnHelper = createColumnHelper<DatabaseTableRow>()
+const columnHelper = createColumnHelper<DatabaseWithId>()
 
-export const ColName = columnHelper.accessor((row) => row.name, {
+export const ColName = columnHelper.accessor((row) => row.metadata.name, {
   id: 'name',
   enableGlobalFilter: true,
   enableSorting: true,
@@ -97,42 +86,107 @@ export const ColName = columnHelper.accessor((row) => row.name, {
   header: 'Name',
 })
 
+export const ColNamespace = columnHelper.accessor(
+  (row) => row.metadata.namespace,
+  {
+    id: 'namespace',
+    enableGlobalFilter: false,
+    enableSorting: true,
+    cell: (props) => (
+      <Tooltip
+        label={props.getValue()}
+        placement="top-start"
+      >
+        <TableText>{props.getValue()}</TableText>
+      </Tooltip>
+    ),
+    header: 'Namespace',
+  }
+)
+
+export const ColVersion = columnHelper.accessor(
+  (row) => row.spec.postgresql?.version,
+  {
+    id: 'version',
+    enableGlobalFilter: false,
+    enableSorting: true,
+    cell: (props) => <TableText>{props.getValue()}</TableText>,
+    header: 'Version',
+  }
+)
+
+export const ColInstances = columnHelper.accessor(
+  (row) => row.spec.numberOfInstances,
+  {
+    id: 'numberOfInstances',
+    enableGlobalFilter: false,
+    enableSorting: true,
+    cell: (props) => <TableText>{props.getValue()}</TableText>,
+    header: 'Instances',
+  }
+)
+
+export const ColAge = columnHelper.accessor((_) => '???', {
+  id: 'age',
+  enableGlobalFilter: false,
+  enableSorting: true,
+  cell: (props) => <TableText>{props.getValue()}</TableText>,
+  header: 'Age',
+})
+
+export const ColStatus = columnHelper.accessor(
+  (row) => row.status.clusterStatus,
+  {
+    id: 'status',
+    enableGlobalFilter: false,
+    enableSorting: true,
+    cell: ({ getValue }) => {
+      const val = getValue()
+
+      return !!val && <Chip severity={readinessToSeverity[val]}>{val}</Chip>
+    },
+    header: 'Status',
+  }
+)
+
 export const ColMemoryReservation = columnHelper.accessor(
-  (row) => row.memory.requests,
+  (row) => memoryParser(row?.spec?.resources?.requests?.memory) || 0,
   {
     id: 'memory',
     enableSorting: true,
     sortingFn: numishSort,
-    cell: ({ row: { original } }) => (
-      <Usage
-        used={
-          original?.memory?.requests === undefined
-            ? undefined
-            : filesize(original.memory.requests ?? 0)
-        }
-        total={
-          original.memory.limits === undefined
-            ? undefined
-            : filesize(original.memory.limits ?? 0)
-        }
-      />
-    ),
+    cell: ({ row: { original }, getValue }) => {
+      const requests = getValue()
+      const limits = memoryParser(original.spec.resources?.limits?.memory)
+
+      return (
+        <Usage
+          used={isNil(requests) ? undefined : filesize(requests ?? 0)}
+          total={isNil(limits) ? undefined : filesize(limits ?? 0)}
+        />
+      )
+    },
     header: 'Memory',
   }
 )
 
 export const ColCpuReservation = columnHelper.accessor(
-  (row) => row?.cpu?.requests,
+  (row) => cpuParser(row.spec.resources?.requests?.cpu),
   {
     id: 'cpu-reservations',
     enableSorting: true,
     sortingFn: numishSort,
-    cell: ({ row: { original }, getValue }) => (
-      <Usage
-        used={getValue()}
-        total={original?.cpu?.limits}
-      />
-    ),
+    cell: ({ row: { original }, getValue }) => {
+      const requests = getValue()
+      const limits = cpuParser(original.spec.resources?.limits?.cpu)
+
+      return (
+        <Usage
+          used={requests}
+          total={limits}
+        />
+      )
+    },
     header: 'CPU',
   }
 )
@@ -147,6 +201,7 @@ export const ColActions = (refetch) =>
       >
         <RestoreDatabase
           name={original.name}
+          namespace={original.namespace}
           refetch={refetch}
         />
       </Flex>
@@ -155,7 +210,7 @@ export const ColActions = (refetch) =>
   })
 
 type DatabaseListProps = Omit<ComponentProps<typeof Table>, 'data'> & {
-  databases?: Maybe<Maybe<PostgresDbFragment>[]>
+  databases?: DatabaseTableRowFragment[]
   columns: any[]
 }
 
@@ -164,7 +219,7 @@ export const DatabasesList = memo(
     const filteredDbs = useMemo(
       () =>
         (databases || []).filter(
-          (database): database is PostgresDbFragment => !!database
+          (database): database is DatabaseTableRowFragment => !!database
         ),
       [databases]
     )
@@ -177,7 +232,7 @@ export const DatabasesList = memo(
       <Table
         data={filteredDbs}
         columns={columns}
-        virtualizeRows
+        // virtualizeRows
         {...props}
       />
     )

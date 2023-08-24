@@ -16,6 +16,7 @@ import Container from 'components/cluster/containers/Container'
 import ContainerShell from 'components/cluster/containers/ContainerShell'
 import ContainerMetadata from 'components/cluster/containers/ContainerMetadata'
 import DatabaseManagement from 'components/db-management/DatabaseManagement'
+import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 
 export const clusterRoutes = [
   /* Pods */
@@ -102,7 +103,7 @@ export const clusterRoutes = [
 
   /* Database Management */
   <Route
-    path="database-management/:namespace?"
+    path={`${DB_MANAGEMENT_PATH}/:namespace?`}
     index
     element={<DatabaseManagement />}
   />,

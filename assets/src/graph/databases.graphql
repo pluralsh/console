@@ -1,19 +1,19 @@
-fragment Metadata on Metadata {
-  name
-  namespace
-  labels {
-    name
-    value
-  }
-  annotations {
-    name
-    value
-  }
-}
+# fragment PostgresDatabaseMeta on Metadata {
+#   name
+#   namespace
+#   labels {
+#     name
+#     value
+#   }
+#   annotations {
+#     name
+#     value
+#   }
+# }
 
-fragment PostgresSettings on PostgresSettings {
-  version
-}
+# fragment PostgresSettings on PostgresSettings {
+#   version
+# }
 
 fragment ResourceSpec on ResourceSpec {
   cpu
@@ -29,38 +29,50 @@ fragment Resources on Resources {
   }
 }
 
-fragment PostgresqlSpec on PostgresqlSpec {
-  databases
-  numberOfInstances
-  pods {
-    ...Pod
-  }
-  postgresql {
-    ...PostgresSettings
-  }
-  resources {
-    ...Resources
-  }
-  teamId
-  users
-}
+# fragment PostgresqlSpec on PostgresqlSpec {
+#   databases
+#   numberOfInstances
+#   pods {
+#     ...Pod
+#   }
+#   postgresql {
+#     ...PostgresSettings
+#   }
+#   resources {
+#     ...Resources
+#   }
+#   teamId
+#   users
+# }
 
 fragment PostgresqlStatus on PostgresqlStatus {
   clusterStatus
 }
 
-fragment PostgresDB on Postgresql {
+fragment DatabaseTableRow on Postgresql {
   instances {
     uid
   }
   metadata {
-    ...Metadata
+    name
+    namespace
   }
   spec {
-    ...PostgresqlSpec
+    numberOfInstances
+    databases
+    # pods {
+    #   raw
+    # }
+    postgresql {
+      version
+    }
+    resources {
+      ...Resources
+    }
+    databases
   }
   status {
-    ...PostgresqlStatus
+    clusterStatus
   }
 }
 
@@ -83,14 +95,32 @@ mutation RestorePostgres(
   }
 }
 
+fragment NamespaceMeta on Namespace {
+  metadata {
+    ...MetadataFragment
+  }
+}
+
 query PostgresDatabases {
   postgresDatabases {
-    ...PostgresDB
+    ...DatabaseTableRow
+  }
+  namespaces {
+    ...NamespaceMeta
+  }
+  applications {
+    name
+    spec {
+      descriptor {
+        type
+        icons
+      }
+    }
   }
 }
 
 query PostgresDatabase($name: String!, $namespace: String!) {
   postgresDatabase(name: $name, namespace: $namespace) {
-    ...PostgresDB
+    ...DatabaseTableRow
   }
 }
