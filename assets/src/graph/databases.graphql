@@ -102,20 +102,21 @@ fragment NamespaceMeta on Namespace {
   }
 }
 
+fragment DatabaseTableApp on Application {
+  name
+  spec {
+    descriptor {
+      icons
+    }
+  }
+}
+
 query PostgresDatabases {
   postgresDatabases {
     ...DatabaseTableRow
   }
-  namespaces {
-    ...NamespaceMeta
-  }
   applications {
-    name
-    spec {
-      descriptor {
-        icons
-      }
-    }
+    ...DatabaseTableApp
   }
 }
 
