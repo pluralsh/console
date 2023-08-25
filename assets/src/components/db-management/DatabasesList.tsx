@@ -145,7 +145,7 @@ function RestoreDatabaseModal({
     >
       <Flex
         direction="column"
-        gap="medium"
+        gap="large"
       >
         <FormField label="Location">
           <TimezoneComboBox
