@@ -170,7 +170,10 @@ export const ColVolume = columnHelper.accessor(
   }
 )
 
-const statusToSeverity = (status: string) => {
+const statusToSeverity = (status: string | null | undefined) => {
+  if (!status) {
+    return 'warning'
+  }
   if (status.match(/fail/m)) {
     return 'error'
   }
@@ -182,14 +185,14 @@ const statusToSeverity = (status: string) => {
 }
 
 export const ColStatus = columnHelper.accessor(
-  (row) => row.status.clusterStatus,
+  (row) => row.status?.clusterStatus,
   {
     id: 'status',
     enableGlobalFilter: false,
     enableSorting: true,
     cell: ({ getValue }) => {
-      const val = getValue()
-      const severity = statusToSeverity(val || '')
+      const val = getValue() || 'Creating'
+      const severity = statusToSeverity(val)
 
       return !!val && <Chip severity={severity}>{val}</Chip>
     },
