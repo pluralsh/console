@@ -1,7 +1,21 @@
 import { Div, Flex } from 'honorable'
 import { createColumnHelper } from '@tanstack/react-table'
-import { ComponentProps, memo, useMemo, useState } from 'react'
+import {
+  ComponentProps,
+  FormEvent,
+  MouseEvent,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { cpuParser, memoryFormat, memoryParser } from 'utils/kubernetes'
+import {
+  type ZonedDateTime,
+  // getLocalTimeZone,
+  now,
+} from '@internationalized/date'
 
 import {
   DatabaseTableRowFragment,
@@ -12,56 +26,195 @@ import { ReadinessT } from 'utils/status'
 import {
   Button,
   Chip,
+  ComboBox,
+  DatePicker,
   EmptyState,
+  FormField,
+  ListBoxItem,
+  Modal,
   RestoreIcon,
   Table,
   Tooltip,
+  usePrevious,
 } from '@pluralsh/design-system'
-import { Confirm } from 'components/utils/Confirm'
 import { useTheme } from 'styled-components'
-import { isNil } from 'lodash'
-import moment from 'moment'
+import { isNil, memoize } from 'lodash'
+// import moment from 'moment'
+import moment from 'moment-timezone'
+
+import Fuse from 'fuse.js'
 
 import { TableText, Usage, numishSort } from '../cluster/TableElements'
 
 import { DatabaseWithId } from './DatabaseManagement'
 
 function RestoreDatabase({ name, namespace, refetch }) {
-  const [confirm, setConfirm] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
   const [timestamp, _] = useState('')
   const theme = useTheme()
+  const localTz = moment.tz.guess()
+
+  const [date, setDate] = useState<ZonedDateTime>(now(localTz))
+
+  const [selectedTz, setSelectedTz] = useState(localTz)
+  const prevSelectedTz = usePrevious(selectedTz)
+
+  const allTzs = getTimezones()
+
+  console.log('all tzs', allTzs.length)
+
+  useEffect(() => {
+    if (selectedTz !== prevSelectedTz) {
+      setDate(date.set({ timeZone: selectedTz }))
+    }
+  }, [date, prevSelectedTz, selectedTz])
 
   const [mutation, { loading }] = useRestorePostgresMutation({
     variables: { name, namespace, timestamp: timestamp as unknown as Date },
     onCompleted: () => {
-      setConfirm(false)
+      setIsOpen(false)
       refetch()
     },
   })
+
+  const onSubmit = useCallback(
+    (e?: MouseEvent | FormEvent) => {
+      e?.preventDefault()
+      // mutation()
+    },
+    [mutation]
+  )
+  const onClose = useCallback(() => {
+    setIsOpen(false)
+  }, [])
 
   return (
     <Div onClick={(e) => e.stopPropagation()}>
       <Button
         floating
         startIcon={<RestoreIcon color={theme.colors['icon-default']} />}
-        onClick={() => setConfirm(true)}
+        onClick={() => setIsOpen(true)}
       >
         Restore
       </Button>
-      <Confirm
-        close={() => setConfirm(false)}
-        destructive
-        label="Delete"
-        loading={loading}
-        open={confirm}
-        submit={() => mutation()}
-        title="Delete database"
-        text={`The database "${name}"${
-          namespace ? ` in namespace "${namespace}"` : ''
-        } will be replaced by it's managing controller.`}
-      />
+      {isOpen && (
+        <Modal
+          header="Restore database from point in time"
+          open={isOpen}
+          onClose={onClose}
+          size="medium"
+          portal
+          actions={
+            <>
+              <Button
+                secondary
+                onClick={onClose}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={onSubmit}
+                type="submit"
+                loading={loading}
+                marginLeft="medium"
+              >
+                Restore
+              </Button>
+            </>
+          }
+        >
+          <Flex
+            direction="column"
+            gap="medium"
+          >
+            <FormField label="Location">
+              <TimezoneComboBox
+                selectedTz={selectedTz}
+                setSelectedTz={setSelectedTz}
+              />
+            </FormField>
+            <FormField
+              label="Date and time"
+              action="Limited to past 5 days"
+            >
+              <DatePicker
+                value={date}
+                onChange={(date) => {
+                  setDate(date as ZonedDateTime)
+                }}
+                minValue={now(localTz).subtract({ days: 5 })}
+                maxValue={now(localTz)}
+                elementProps={{}}
+              />
+            </FormField>
+          </Flex>
+        </Modal>
+      )}
     </Div>
   )
+}
+
+function TimezoneComboBox({
+  selectedTz,
+  setSelectedTz,
+}: {
+  selectedTz: string
+  setSelectedTz: (tz: string) => void
+}) {
+  const [comboInputTz, setComboInputTz] = useState('')
+  const timezones = getTimezones()
+  const fuse = useMemo(
+    () =>
+      new Fuse(timezones, {
+        includeScore: true,
+        shouldSort: true,
+        threshold: !comboInputTz ? 0.3 : 1,
+        keys: ['friendlyName'],
+      }),
+    [comboInputTz, timezones]
+  )
+
+  const searchResults = useMemo(() => {
+    if (comboInputTz) {
+      return fuse.search(comboInputTz)
+    }
+
+    return timezones.map(
+      (item, i): Fuse.FuseResult<(typeof timezones)[number]> => ({
+        item,
+        score: 1,
+        refIndex: i,
+      })
+    )
+  }, [comboInputTz, fuse, timezones])
+
+  const currentZone = timezones.find((z) => z.name === selectedTz)
+
+  const placeholder = currentZone
+    ? `${currentZone.friendlyName} (${currentZone.offset})`
+    : 'Select a timezone'
+
+  const comboBox = (
+    <ComboBox
+      inputValue={comboInputTz}
+      onInputChange={setComboInputTz}
+      selectedKey={selectedTz}
+      inputProps={{ placeholder }}
+      onSelectionChange={(key) => {
+        setSelectedTz(key as string)
+        setComboInputTz('')
+      }}
+    >
+      {searchResults.map((zone) => (
+        <ListBoxItem
+          key={zone.item.name}
+          label={`${zone.item.friendlyName} (${zone.item.offset})`}
+        />
+      ))}
+    </ComboBox>
+  )
+
+  return comboBox
 }
 
 export type ContainerStatus = { name: string; readiness: ReadinessT }
@@ -293,3 +446,46 @@ export const DatabasesList = memo(
     )
   }
 )
+
+const getTimezones = memoize(() => {
+  const all = moment.tz.names()
+  const x: Record<
+    string,
+    {
+      population: number
+      name: string
+      friendlyName: string
+      offset: string
+      otherOffset: string
+    }[]
+  > = {}
+
+  const POP_THRESHOLD = 7000000
+
+  for (const zoneName of all) {
+    const z = moment.tz(zoneName)
+    const offset = z.format('Z')
+    // @ts-ignore
+    const zone = z._z
+    const newZone = {
+      name: zoneName,
+      population:
+        typeof zone.population === 'number' ? (zone.population as number) : 0,
+      friendlyName: zoneName.replaceAll('_', ' ').replaceAll('/', ' – '),
+      offset,
+      otherOffset: z.format('ZZ'),
+    }
+
+    if (
+      !x[offset] ||
+      (x[offset][0].population < POP_THRESHOLD &&
+        x[offset][0].population < newZone.population)
+    ) {
+      x[offset] = [newZone]
+    } else if (newZone.population > POP_THRESHOLD) {
+      x[offset].push(newZone)
+    }
+  }
+
+  return Object.values(x).flatMap((z) => z)
+})
