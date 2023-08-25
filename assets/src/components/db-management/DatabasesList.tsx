@@ -50,37 +50,7 @@ import { DatabaseWithId } from './DatabaseManagement'
 
 function RestoreDatabase({ name, namespace, refetch }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [timestamp, _] = useState('')
   const theme = useTheme()
-  const [dateError, setDateError] = useState('')
-  const [selectedTz, setSelectedTz] = useState(moment.tz.guess())
-  const [dateTime, setDateTime] = useState<ZonedDateTime>(now(selectedTz))
-  const prevSelectedTz = usePrevious(selectedTz)
-
-  useEffect(() => {
-    if (selectedTz !== prevSelectedTz) {
-      setDateTime(toZoned(toCalendarDateTime(dateTime), selectedTz))
-    }
-  }, [dateTime, prevSelectedTz, selectedTz])
-
-  const [mutation, { loading }] = useRestorePostgresMutation({
-    variables: { name, namespace, timestamp: timestamp as unknown as Date },
-    onCompleted: () => {
-      setIsOpen(false)
-      refetch()
-    },
-  })
-
-  const onSubmit = useCallback(
-    (e?: MouseEvent | FormEvent) => {
-      e?.preventDefault()
-      // mutation()
-    },
-    [mutation]
-  )
-  const onClose = useCallback(() => {
-    setIsOpen(false)
-  }, [])
 
   return (
     <Div onClick={(e) => e.stopPropagation()}>
@@ -92,67 +62,122 @@ function RestoreDatabase({ name, namespace, refetch }) {
         Restore
       </Button>
       {isOpen && (
-        <Modal
-          header="Restore database from point in time"
-          open={isOpen}
-          onClose={onClose}
-          size="medium"
-          portal
-          actions={
-            <>
-              <Button
-                secondary
-                onClick={onClose}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={onSubmit}
-                type="submit"
-                loading={loading}
-                disabled={!!dateError}
-                marginLeft="medium"
-              >
-                Restore
-              </Button>
-            </>
-          }
-        >
-          <Flex
-            direction="column"
-            gap="medium"
-          >
-            <FormField label="Location">
-              <TimezoneComboBox
-                selectedTz={selectedTz}
-                setSelectedTz={setSelectedTz}
-              />
-            </FormField>
-            <FormField
-              label="Date and time"
-              hint={dateError || 'Limited to past 5 days'}
-              error={!!dateError}
-            >
-              <DatePicker
-                value={dateTime}
-                onChange={(date) => {
-                  setDateTime(date as ZonedDateTime)
-                }}
-                onValidationChange={(v) => {
-                  setDateError(
-                    v === 'invalid' ? 'Date is not within the last 5 days' : ''
-                  )
-                }}
-                minValue={now(selectedTz).subtract({ days: 5 })}
-                maxValue={now(selectedTz)}
-                elementProps={{}}
-              />
-            </FormField>
-          </Flex>
-        </Modal>
+        <RestoreDatabaseModal
+          name={name}
+          namespace={namespace}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          refetch={refetch}
+        />
       )}
     </Div>
   )
+}
+
+function RestoreDatabaseModal({
+  name,
+  namespace,
+  setIsOpen,
+  refetch,
+  isOpen,
+}: {
+  name: any
+  namespace: any
+  setIsOpen
+  refetch: any
+  isOpen: boolean
+}) {
+  const [timestamp, _] = useState('')
+  const [dateError, setDateError] = useState('')
+  const [selectedTz, setSelectedTz] = useState(moment.tz.guess())
+  const [dateTime, setDateTime] = useState<ZonedDateTime>(now(selectedTz))
+  const prevSelectedTz = usePrevious(selectedTz)
+
+  useEffect(() => {
+    if (selectedTz !== prevSelectedTz) {
+      setDateTime(toZoned(toCalendarDateTime(dateTime), selectedTz))
+    }
+  }, [dateTime, prevSelectedTz, selectedTz])
+
+  const [_mutation, { loading }] = useRestorePostgresMutation({
+    variables: { name, namespace, timestamp: timestamp as unknown as Date },
+    onCompleted: () => {
+      setIsOpen(false)
+      refetch()
+    },
+  })
+
+  const onSubmit = useCallback((e?: MouseEvent | FormEvent) => {
+    e?.preventDefault()
+    // mutation()
+  }, [])
+
+  const onClose = useCallback(() => {
+    setIsOpen(false)
+  }, [setIsOpen])
+
+  const modal = (
+    <Modal
+      header="Restore database from point in time"
+      open={isOpen}
+      onClose={onClose}
+      size="medium"
+      portal
+      actions={
+        <>
+          <Button
+            secondary
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={onSubmit}
+            type="submit"
+            loading={loading}
+            disabled={!!dateError}
+            marginLeft="medium"
+          >
+            Restore
+          </Button>
+        </>
+      }
+    >
+      <Flex
+        direction="column"
+        gap="medium"
+      >
+        <FormField label="Location">
+          <TimezoneComboBox
+            selectedTz={selectedTz}
+            setSelectedTz={setSelectedTz}
+          />
+        </FormField>
+        <FormField
+          label="Date and time"
+          hint={dateError || 'Limited to past 5 days'}
+          error={!!dateError}
+        >
+          <DatePicker
+            value={dateTime}
+            onChange={(date) => {
+              setDateTime(date as ZonedDateTime)
+            }}
+            onValidationChange={(v) => {
+              setDateError(
+                v === 'invalid' ? 'Date is not within the last 5 days' : ''
+              )
+            }}
+            minValue={now(selectedTz).subtract({ days: 5 })}
+            maxValue={now(selectedTz)}
+            elementProps={{}}
+          />
+        </FormField>
+      </Flex>
+    </Modal>
+  )
+
+  return modal
 }
 
 function TimezoneComboBox({
