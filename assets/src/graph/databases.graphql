@@ -53,7 +53,7 @@ mutation RestorePostgres(
     timestamp: $timestamp
   ) {
     status {
-      ...PostgresqlStatus
+      clusterStatus
     }
   }
 }
