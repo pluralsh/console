@@ -13,8 +13,9 @@ import {
 import { cpuParser, memoryFormat, memoryParser } from 'utils/kubernetes'
 import {
   type ZonedDateTime,
-  // getLocalTimeZone,
   now,
+  toCalendarDateTime,
+  toZoned,
 } from '@internationalized/date'
 
 import {
@@ -39,7 +40,6 @@ import {
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { isNil, memoize } from 'lodash'
-// import moment from 'moment'
 import moment from 'moment-timezone'
 
 import Fuse from 'fuse.js'
@@ -52,22 +52,16 @@ function RestoreDatabase({ name, namespace, refetch }) {
   const [isOpen, setIsOpen] = useState(false)
   const [timestamp, _] = useState('')
   const theme = useTheme()
-  const localTz = moment.tz.guess()
-
-  const [date, setDate] = useState<ZonedDateTime>(now(localTz))
-
-  const [selectedTz, setSelectedTz] = useState(localTz)
+  const [dateError, setDateError] = useState('')
+  const [selectedTz, setSelectedTz] = useState(moment.tz.guess())
+  const [dateTime, setDateTime] = useState<ZonedDateTime>(now(selectedTz))
   const prevSelectedTz = usePrevious(selectedTz)
-
-  const allTzs = getTimezones()
-
-  console.log('all tzs', allTzs.length)
 
   useEffect(() => {
     if (selectedTz !== prevSelectedTz) {
-      setDate(date.set({ timeZone: selectedTz }))
+      setDateTime(toZoned(toCalendarDateTime(dateTime), selectedTz))
     }
-  }, [date, prevSelectedTz, selectedTz])
+  }, [dateTime, prevSelectedTz, selectedTz])
 
   const [mutation, { loading }] = useRestorePostgresMutation({
     variables: { name, namespace, timestamp: timestamp as unknown as Date },
@@ -135,15 +129,21 @@ function RestoreDatabase({ name, namespace, refetch }) {
             </FormField>
             <FormField
               label="Date and time"
-              action="Limited to past 5 days"
+              hint={dateError || 'Limited to past 5 days'}
+              error={!!dateError}
             >
               <DatePicker
-                value={date}
+                value={dateTime}
                 onChange={(date) => {
-                  setDate(date as ZonedDateTime)
+                  setDateTime(date as ZonedDateTime)
                 }}
-                minValue={now(localTz).subtract({ days: 5 })}
-                maxValue={now(localTz)}
+                onValidationChange={(v) => {
+                  setDateError(
+                    v === 'invalid' ? 'Date is not within the last 5 days' : ''
+                  )
+                }}
+                minValue={now(selectedTz).subtract({ days: 5 })}
+                maxValue={now(selectedTz)}
                 elementProps={{}}
               />
             </FormField>
