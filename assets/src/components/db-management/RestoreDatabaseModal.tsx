@@ -86,15 +86,9 @@ export function RestoreDatabaseModal({
     },
   })
 
-  if (error) {
-    console.log(`error: ${error}`)
-  }
-
   const onClickRestore = useCallback(
     (e?: MouseEvent | FormEvent) => {
       e?.preventDefault()
-
-      console.log({ timestamp })
 
       if (!dateRangeError && timestamp) {
         restoreMutation()

@@ -7,7 +7,6 @@ import Fuse from 'fuse.js'
 const POP_THRESHOLD = 7000000
 
 const getTimezones = memoize(() => {
-  console.log('getTimezones running')
   const all = moment.tz.names()
   const x: Record<
     string,
