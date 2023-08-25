@@ -456,7 +456,7 @@ const getTimezones = memoize(() => {
       name: string
       friendlyName: string
       offset: string
-      otherOffset: string
+      numericalOffset: number
     }[]
   > = {}
 
@@ -473,7 +473,7 @@ const getTimezones = memoize(() => {
         typeof zone.population === 'number' ? (zone.population as number) : 0,
       friendlyName: zoneName.replaceAll('_', ' ').replaceAll('/', ' – '),
       offset,
-      otherOffset: z.format('ZZ'),
+      numericalOffset: Number(z.format('ZZ')),
     }
 
     if (
@@ -487,5 +487,7 @@ const getTimezones = memoize(() => {
     }
   }
 
-  return Object.values(x).flatMap((z) => z)
+  return Object.values(x)
+    .flatMap((z) => z)
+    .sort((a, b) => a.numericalOffset - b.numericalOffset)
 })
