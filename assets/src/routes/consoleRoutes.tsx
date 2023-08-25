@@ -175,13 +175,6 @@ const accountRoutes = [
   </Route>,
 ]
 
-const databaseRoutes = [
-  <Route
-    path="vpn"
-    element={<AccountVPN />}
-  />,
-]
-
 /*
 const incidentsRoutes = [
   <Route
@@ -217,9 +210,6 @@ export const consoleRoutes = [
 
   /* AUDITS */
   ...auditsRoutes,
-
-  /* DATABASE */
-  ...databaseRoutes,
 
   /* ACCOUNT */
   ...accountRoutes,
