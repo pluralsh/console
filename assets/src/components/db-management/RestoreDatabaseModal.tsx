@@ -13,7 +13,10 @@ import {
   toCalendarDateTime,
   toZoned,
 } from '@internationalized/date'
-import { useRestorePostgresMutation } from 'generated/graphql'
+import {
+  usePostgresDatabasesQuery,
+  useRestorePostgresMutation,
+} from 'generated/graphql'
 import {
   Button,
   DatePicker,
@@ -23,6 +26,8 @@ import {
 } from '@pluralsh/design-system'
 import moment from 'moment-timezone'
 import styled from 'styled-components'
+
+import { GqlError } from 'components/utils/Alert'
 
 import { TimezoneComboBox } from './TimezoneComboBox'
 
@@ -43,13 +48,12 @@ export function RestoreDatabaseModal({
   refetch,
   isOpen,
 }: {
-  name: any
-  namespace: any
-  setIsOpen
-  refetch: any
+  name: string
+  namespace: string
+  setIsOpen: (open: boolean) => void
+  refetch?: ReturnType<typeof usePostgresDatabasesQuery>['refetch']
   isOpen: boolean
 }) {
-  const [timestamp, _] = useState('')
   const [dateRangeError, setDateRangeError] = useState<ReactNode>(null)
   const [selectedTz, setSelectedTz] = useState(moment.tz.guess())
   const roundedNow = now(selectedTz).set({
@@ -62,6 +66,7 @@ export function RestoreDatabaseModal({
     days: RESTORE_LIMIT_DAYS,
   })
   const maxDateTime = roundedNow
+  const timestamp = dateTime.toAbsoluteString()
 
   useEffect(() => {
     if (selectedTz !== prevSelectedTz) {
@@ -69,18 +74,34 @@ export function RestoreDatabaseModal({
     }
   }, [dateTime, prevSelectedTz, selectedTz])
 
-  const [_mutation, { loading }] = useRestorePostgresMutation({
-    variables: { name, namespace, timestamp: timestamp as unknown as Date },
+  const [restoreMutation, { loading, error }] = useRestorePostgresMutation({
+    variables: {
+      name: name || '',
+      namespace: namespace || '',
+      timestamp: timestamp as any,
+    },
     onCompleted: () => {
       setIsOpen(false)
-      refetch()
+      refetch?.()
     },
   })
 
-  const onSubmit = useCallback((e?: MouseEvent | FormEvent) => {
-    e?.preventDefault()
-    // mutation()
-  }, [])
+  if (error) {
+    console.log(`error: ${error}`)
+  }
+
+  const onClickRestore = useCallback(
+    (e?: MouseEvent | FormEvent) => {
+      e?.preventDefault()
+
+      console.log({ timestamp })
+
+      if (!dateRangeError && timestamp) {
+        restoreMutation()
+      }
+    },
+    [dateRangeError, restoreMutation, timestamp]
+  )
 
   const onClose = useCallback(() => {
     setIsOpen(false)
@@ -97,7 +118,7 @@ export function RestoreDatabaseModal({
 
   const modal = (
     <Modal
-      header="Restore database from point in time"
+      header={`Restore ${name} database from point in time`}
       open={isOpen}
       onClose={onClose}
       size="medium"
@@ -111,7 +132,7 @@ export function RestoreDatabaseModal({
             Cancel
           </Button>
           <Button
-            onClick={onSubmit}
+            onClick={onClickRestore}
             type="submit"
             loading={loading}
             disabled={!!dateRangeError}
@@ -165,6 +186,12 @@ export function RestoreDatabaseModal({
             elementProps={{}}
           />
         </FormField>
+        {error && (
+          <GqlError
+            header="Problem restoring database"
+            error={error}
+          />
+        )}
       </Flex>
     </Modal>
   )

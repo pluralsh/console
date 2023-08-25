@@ -3,7 +3,10 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { ComponentProps, memo, useMemo, useState } from 'react'
 import { cpuParser, memoryFormat, memoryParser } from 'utils/kubernetes'
 
-import { DatabaseTableRowFragment } from 'generated/graphql'
+import {
+  DatabaseTableRowFragment,
+  usePostgresDatabasesQuery,
+} from 'generated/graphql'
 
 import {
   Button,
@@ -22,7 +25,15 @@ import { TableText, Usage, numishSort } from '../cluster/TableElements'
 import { DatabaseWithId } from './DatabaseManagement'
 import { RestoreDatabaseModal } from './RestoreDatabaseModal'
 
-function RestoreDatabase({ name, namespace, refetch }) {
+function RestoreDatabase({
+  name,
+  namespace,
+  refetch,
+}: {
+  name: string
+  namespace: string
+  refetch?: ReturnType<typeof usePostgresDatabasesQuery>['refetch']
+}) {
   const [isOpen, setIsOpen] = useState(false)
   const theme = useTheme()
 
@@ -228,21 +239,31 @@ export const ColCpuReservation = columnHelper.accessor(
   }
 )
 
-export const ColActions = (refetch) =>
+export const ColActions = (
+  refetch?: ReturnType<typeof usePostgresDatabasesQuery>['refetch']
+) =>
   columnHelper.display({
     id: 'actions',
-    cell: ({ row: { original } }: any) => (
-      <Flex
-        flexDirection="row"
-        gap="xxsmall"
-      >
-        <RestoreDatabase
-          name={original.name}
-          namespace={original.namespace}
-          refetch={refetch}
-        />
-      </Flex>
-    ),
+    cell: ({ row: { original } }) => {
+      const { name } = original.metadata
+      const { namespace } = original.metadata
+
+      return (
+        name &&
+        namespace && (
+          <Flex
+            flexDirection="row"
+            gap="xxsmall"
+          >
+            <RestoreDatabase
+              name={name}
+              namespace={namespace}
+              refetch={refetch}
+            />
+          </Flex>
+        )
+      )
+    },
     header: '',
   })
 
