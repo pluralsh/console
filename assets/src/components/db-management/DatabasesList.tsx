@@ -4,6 +4,7 @@ import {
   ComponentProps,
   FormEvent,
   MouseEvent,
+  ReactNode,
   memo,
   useCallback,
   useEffect,
@@ -27,26 +28,25 @@ import { ReadinessT } from 'utils/status'
 import {
   Button,
   Chip,
-  ComboBox,
   DatePicker,
   EmptyState,
   FormField,
-  ListBoxItem,
   Modal,
   RestoreIcon,
   Table,
   Tooltip,
   usePrevious,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
-import { isNil, memoize } from 'lodash'
+import styled, { useTheme } from 'styled-components'
+import { isNil } from 'lodash'
 import moment from 'moment-timezone'
-
-import Fuse from 'fuse.js'
 
 import { TableText, Usage, numishSort } from '../cluster/TableElements'
 
 import { DatabaseWithId } from './DatabaseManagement'
+import { TimezoneComboBox } from './TimezoneComboBox'
+
+const RESTORE_LIMIT_DAYS = 3
 
 function RestoreDatabase({ name, namespace, refetch }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -74,6 +74,14 @@ function RestoreDatabase({ name, namespace, refetch }) {
   )
 }
 
+const CorrectDateTimeLink = styled.a(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-danger'],
+  a: {
+    ...theme.partials.text.inlineLink,
+  },
+}))
+
 function RestoreDatabaseModal({
   name,
   namespace,
@@ -88,10 +96,18 @@ function RestoreDatabaseModal({
   isOpen: boolean
 }) {
   const [timestamp, _] = useState('')
-  const [dateError, setDateError] = useState('')
+  const [dateRangeError, setDateRangeError] = useState<ReactNode>(null)
   const [selectedTz, setSelectedTz] = useState(moment.tz.guess())
-  const [dateTime, setDateTime] = useState<ZonedDateTime>(now(selectedTz))
+  const roundedNow = now(selectedTz).set({
+    second: 0,
+    millisecond: 0,
+  })
+  const [dateTime, setDateTime] = useState<ZonedDateTime>(roundedNow)
   const prevSelectedTz = usePrevious(selectedTz)
+  const minDateTime = roundedNow.subtract({
+    days: RESTORE_LIMIT_DAYS,
+  })
+  const maxDateTime = roundedNow
 
   useEffect(() => {
     if (selectedTz !== prevSelectedTz) {
@@ -116,6 +132,15 @@ function RestoreDatabaseModal({
     setIsOpen(false)
   }, [setIsOpen])
 
+  const correctDateTime = (e) => {
+    e.preventDefault?.()
+    if (dateTime.compare(maxDateTime) > 0) {
+      setDateTime(maxDateTime)
+    } else if (dateTime.compare(minDateTime) < 0) {
+      setDateTime(minDateTime)
+    }
+  }
+
   const modal = (
     <Modal
       header="Restore database from point in time"
@@ -135,7 +160,7 @@ function RestoreDatabaseModal({
             onClick={onSubmit}
             type="submit"
             loading={loading}
-            disabled={!!dateError}
+            disabled={!!dateRangeError}
             marginLeft="medium"
           >
             Restore
@@ -155,8 +180,23 @@ function RestoreDatabaseModal({
         </FormField>
         <FormField
           label="Date and time"
-          hint={dateError || 'Limited to past 5 days'}
-          error={!!dateError}
+          hint={
+            dateRangeError ? (
+              <CorrectDateTimeLink>
+                Selection is not within the last {RESTORE_LIMIT_DAYS * 24}{' '}
+                hours.{' '}
+                <a
+                  onClick={correctDateTime}
+                  href="#"
+                >
+                  Fix
+                </a>
+              </CorrectDateTimeLink>
+            ) : (
+              `Limited to past ${RESTORE_LIMIT_DAYS * 24} hours`
+            )
+          }
+          error={!!dateRangeError}
         >
           <DatePicker
             value={dateTime}
@@ -164,12 +204,10 @@ function RestoreDatabaseModal({
               setDateTime(date as ZonedDateTime)
             }}
             onValidationChange={(v) => {
-              setDateError(
-                v === 'invalid' ? 'Date is not within the last 5 days' : ''
-              )
+              setDateRangeError(v === 'invalid')
             }}
-            minValue={now(selectedTz).subtract({ days: 5 })}
-            maxValue={now(selectedTz)}
+            minValue={minDateTime}
+            maxValue={maxDateTime}
             elementProps={{}}
           />
         </FormField>
@@ -178,69 +216,6 @@ function RestoreDatabaseModal({
   )
 
   return modal
-}
-
-function TimezoneComboBox({
-  selectedTz,
-  setSelectedTz,
-}: {
-  selectedTz: string
-  setSelectedTz: (tz: string) => void
-}) {
-  const [comboInputTz, setComboInputTz] = useState('')
-  const timezones = getTimezones()
-  const fuse = useMemo(
-    () =>
-      new Fuse(timezones, {
-        includeScore: true,
-        shouldSort: true,
-        threshold: !comboInputTz ? 0.3 : 1,
-        keys: ['friendlyName'],
-      }),
-    [comboInputTz, timezones]
-  )
-
-  const searchResults = useMemo(() => {
-    if (comboInputTz) {
-      return fuse.search(comboInputTz)
-    }
-
-    return timezones.map(
-      (item, i): Fuse.FuseResult<(typeof timezones)[number]> => ({
-        item,
-        score: 1,
-        refIndex: i,
-      })
-    )
-  }, [comboInputTz, fuse, timezones])
-
-  const currentZone = timezones.find((z) => z.name === selectedTz)
-
-  const placeholder = currentZone
-    ? `${currentZone.friendlyName} (${currentZone.offset})`
-    : 'Select a timezone'
-
-  const comboBox = (
-    <ComboBox
-      inputValue={comboInputTz}
-      onInputChange={setComboInputTz}
-      selectedKey={selectedTz}
-      inputProps={{ placeholder }}
-      onSelectionChange={(key) => {
-        setSelectedTz(key as string)
-        setComboInputTz('')
-      }}
-    >
-      {searchResults.map((zone) => (
-        <ListBoxItem
-          key={zone.item.name}
-          label={`${zone.item.friendlyName} (${zone.item.offset})`}
-        />
-      ))}
-    </ComboBox>
-  )
-
-  return comboBox
 }
 
 export type ContainerStatus = { name: string; readiness: ReadinessT }
@@ -472,48 +447,3 @@ export const DatabasesList = memo(
     )
   }
 )
-
-const getTimezones = memoize(() => {
-  const all = moment.tz.names()
-  const x: Record<
-    string,
-    {
-      population: number
-      name: string
-      friendlyName: string
-      offset: string
-      numericalOffset: number
-    }[]
-  > = {}
-
-  const POP_THRESHOLD = 7000000
-
-  for (const zoneName of all) {
-    const z = moment.tz(zoneName)
-    const offset = z.format('Z')
-    // @ts-ignore
-    const zone = z._z
-    const newZone = {
-      name: zoneName,
-      population:
-        typeof zone.population === 'number' ? (zone.population as number) : 0,
-      friendlyName: zoneName.replaceAll('_', ' ').replaceAll('/', ' – '),
-      offset,
-      numericalOffset: Number(z.format('ZZ')),
-    }
-
-    if (
-      !x[offset] ||
-      (x[offset][0].population < POP_THRESHOLD &&
-        x[offset][0].population < newZone.population)
-    ) {
-      x[offset] = [newZone]
-    } else if (newZone.population > POP_THRESHOLD) {
-      x[offset].push(newZone)
-    }
-  }
-
-  return Object.values(x)
-    .flatMap((z) => z)
-    .sort((a, b) => a.numericalOffset - b.numericalOffset)
-})
