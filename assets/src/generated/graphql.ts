@@ -1094,7 +1094,7 @@ export type Postgresql = {
   instances?: Maybe<Array<Maybe<PostgresInstance>>>;
   metadata: Metadata;
   spec: PostgresqlSpec;
-  status: PostgresqlStatus;
+  status?: Maybe<PostgresqlStatus>;
 };
 
 export type PostgresqlSpec = {

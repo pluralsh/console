@@ -840,7 +840,7 @@ type PodConnection {
 type Postgresql {
   metadata: Metadata!
   spec: PostgresqlSpec!
-  status: PostgresqlStatus!
+  status: PostgresqlStatus
   instances: [PostgresInstance]
 }
 

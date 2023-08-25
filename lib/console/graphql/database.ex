@@ -13,7 +13,7 @@ defmodule Console.GraphQl.Database do
   object :postgresql do
     field :metadata, non_null(:metadata)
     field :spec,     non_null(:postgresql_spec)
-    field :status,   non_null(:postgresql_status)
+    field :status,   :postgresql_status
 
     field :instances, list_of(:postgres_instance), resolve: fn
       pg, _, _ -> {:ok, Databases.list_postgres_instances(pg)}
