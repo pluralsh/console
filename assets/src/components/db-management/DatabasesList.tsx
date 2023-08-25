@@ -110,6 +110,7 @@ function RestoreDatabase({ name, namespace, refetch }) {
                 onClick={onSubmit}
                 type="submit"
                 loading={loading}
+                disabled={!!dateError}
                 marginLeft="medium"
               >
                 Restore
