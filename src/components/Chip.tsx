@@ -1,6 +1,11 @@
 import { Flex, type FlexProps, Spinner } from 'honorable'
 import PropTypes from 'prop-types'
-import { type ReactElement, type Ref, forwardRef } from 'react'
+import {
+  type ComponentProps,
+  type ReactElement,
+  type Ref,
+  forwardRef,
+} from 'react'
 import styled, { type DefaultTheme } from 'styled-components'
 
 import Card, { type BaseCardProps } from './Card'
@@ -93,8 +98,9 @@ function ChipRef(
     icon,
     closeButton,
     clickable,
+    as,
     ...props
-  }: ChipProps,
+  }: ChipProps & { as?: ComponentProps<typeof ChipCard>['forwardedAs'] },
   ref: Ref<any>
 ) {
   const parentFillLevel = useFillLevel()
@@ -113,6 +119,8 @@ function ChipRef(
       paddingHorizontal={size === 'small' ? 'xsmall' : 'small'}
       alignItems="center"
       display="inline-flex"
+      textDecoration="none"
+      {...(as ? { forwardedAs: as } : {})}
       {...props}
     >
       {loading && (

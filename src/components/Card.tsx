@@ -1,7 +1,6 @@
 import { Div, type DivProps } from 'honorable'
 import { forwardRef, useMemo } from 'react'
-
-import { styledTheme as theme } from '../theme'
+import { useTheme } from 'styled-components'
 
 import {
   type FillLevel,
@@ -100,11 +99,13 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
     ref
   ) => {
     fillLevel = useDecideFillLevel({ hue, fillLevel })
+    const theme = useTheme()
 
     return (
       <FillLevelProvider value={fillLevel}>
         <Div
           ref={ref}
+          {...theme.partials.reset.button}
           border={`1px solid ${fillLevelToBorderColor[fillLevel]}`}
           borderRadius={cornerSizeToBorderRadius[size]}
           backgroundColor={
@@ -112,8 +113,17 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
               ? fillLevelToSelectedBGColor[fillLevel]
               : fillLevelToBGColor[fillLevel]
           }
+          {...{
+            '&:focus, &:focus-visible': {
+              outline: 'none',
+            },
+            '&:focus-visible': {
+              borderColor: theme.colors['border-outline-focused'],
+            },
+          }}
           {...(clickable && {
             cursor: 'pointer',
+            as: 'button',
           })}
           {...(clickable &&
             !selected && {
