@@ -19,6 +19,7 @@ import {
 import { useTheme } from 'styled-components'
 import { isNil } from 'lodash'
 import moment from 'moment-timezone'
+import { fromNowMin } from 'utils/time'
 
 import { TableText, Usage, numishSort } from '../cluster/TableElements'
 
@@ -116,25 +117,6 @@ export const ColInstances = columnHelper.accessor(
   }
 )
 
-// Custom locale for minimal relative time units
-moment.defineLocale('en-min', {
-  parentLocale: 'en',
-  relativeTime: {
-    s: '1 s',
-    ss: '%d s',
-    d: '1 d',
-    dd: '%dd',
-    m: '1 min',
-    mm: '%d min',
-    h: '1 h',
-    hh: '%d h',
-    M: '1 mo',
-    MM: '%d mo',
-    y: '1 y',
-    yy: '%d y',
-  },
-})
-
 export const ColAge = columnHelper.accessor(
   (row) => moment().diff(moment(row.metadata.creationTimestamp), 'days', true),
   {
@@ -142,12 +124,7 @@ export const ColAge = columnHelper.accessor(
     enableGlobalFilter: false,
     enableSorting: true,
     cell: ({ row: { original } }) => {
-      // Set locale to get minimal time units
-      moment.locale('en-min')
-      const age = moment(original.metadata.creationTimestamp).fromNow(true)
-
-      // Make sure to reset locale to default
-      moment.locale('en')
+      const age = fromNowMin(moment(original.metadata.creationTimestamp), true)
 
       return <TableText>{age}</TableText>
     },
