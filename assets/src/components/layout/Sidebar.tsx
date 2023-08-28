@@ -5,6 +5,7 @@ import {
   BellIcon,
   BuildIcon,
   Sidebar as DSSidebar,
+  DatabaseIcon,
   DiscordIcon,
   GitHubLogoIcon,
   ListIcon,
@@ -33,6 +34,8 @@ import { useMutation } from '@apollo/client'
 import { updateCache } from 'utils/graphql'
 
 import { useTheme } from 'styled-components'
+
+import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 
 import { LoginContext } from '../contexts'
 
@@ -70,6 +73,11 @@ const MENU_ITEMS: MenuItem[] = [
     text: 'Pods',
     icon: <ApiIcon />,
     path: '/pods',
+  },
+  {
+    text: 'Database management',
+    icon: <DatabaseIcon />,
+    path: `/${DB_MANAGEMENT_PATH}`,
   },
   // { text: 'Incidents', icon: <SirenIcon />, path: '/incidents', sandboxed: true },
   {

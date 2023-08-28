@@ -8,6 +8,7 @@ export const SUBSCRIPTION_QUERY = gql`
       availableFeatures {
         audits
         userManagement
+        databaseManagement
         vpn
       }
       subscription {

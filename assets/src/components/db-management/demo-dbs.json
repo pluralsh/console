@@ -1,0 +1,1137 @@
+[
+  {
+    "instances": [
+      {
+        "uid": "40c1d314-f667-421e-a059-f4521e8eb811"
+      }
+    ],
+    "metadata": {
+      "name": "plural-airbyte",
+      "namespace": "airbyte",
+      "creationTimestamp": "2022-10-31T23:53:27Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "airbyte": "airbyte"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "60m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "27Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "7a9ea011-7fcf-4cf5-a73f-77f3bc2cfed1"
+      }
+    ],
+    "metadata": {
+      "name": "plural-airflow",
+      "namespace": "airflow",
+      "creationTimestamp": "2023-07-25T14:31:28Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "airflow": "airflow"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "9202a869-beb5-406f-9698-9dd18bd8bb78"
+      }
+    ],
+    "metadata": {
+      "name": "plural-postgres-chatwoot",
+      "namespace": "chatwoot",
+      "creationTimestamp": "2023-03-22T15:27:29Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "chatwoot": "chatwoot"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "b4ef4112-fdb9-4aad-b9ac-b611780bbfa8"
+      }
+    ],
+    "metadata": {
+      "name": "plural-console",
+      "namespace": "console",
+      "creationTimestamp": "2021-06-11T03:17:30Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "console": "console"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "120m",
+          "memory": "1Gi"
+        }
+      },
+      "volume": {
+        "size": "30Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "b406daaf-f35b-4254-a657-219af9135ec5"
+      }
+    ],
+    "metadata": {
+      "name": "plural-dagster",
+      "namespace": "dagster",
+      "creationTimestamp": "2022-01-30T05:41:53Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "dagster": "dagster"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "40m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "aa3d1626-8668-4ddc-9015-056c272a8319"
+      }
+    ],
+    "metadata": {
+      "name": "plural-postgres-datahub",
+      "namespace": "datahub",
+      "creationTimestamp": "2022-11-01T23:32:03Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "datahub": "datahub"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "6ebe78d1-cc4b-4d75-ab9f-0440428ba963"
+      }
+    ],
+    "metadata": {
+      "name": "plural-postgres-directus",
+      "namespace": "directus",
+      "creationTimestamp": "2023-04-15T18:52:14Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "directus": "directus"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "cf2d2df1-9458-40fe-b591-5c7d2589897a"
+      }
+    ],
+    "metadata": {
+      "name": "plural-gitlab",
+      "namespace": "gitlab",
+      "creationTimestamp": "2021-06-10T22:51:54Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "gitlabhq_production": "gitlab"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "25m",
+          "memory": "500Mi"
+        }
+      },
+      "volume": {
+        "size": "50Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "fde0a88a-7771-40a6-9df0-f5b6147fa46a"
+      }
+    ],
+    "metadata": {
+      "name": "plural-postgres-grafana",
+      "namespace": "grafana",
+      "creationTimestamp": "2022-11-03T18:16:51Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "grafana": "grafana"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "5Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "0c1534f9-ca12-4777-b289-9c6fb3cb90b9"
+      }
+    ],
+    "metadata": {
+      "name": "plural-hasura",
+      "namespace": "hasura",
+      "creationTimestamp": "2022-06-09T04:50:59Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "hasura": "hasura"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "a34cec6c-e774-44a1-9d34-76cf12c8c6f2"
+      }
+    ],
+    "metadata": {
+      "name": "plural-postgres-hydra",
+      "namespace": "hydra",
+      "creationTimestamp": "2022-02-16T20:32:33Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "hydra": "hydra"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "51e8b06f-08b2-4912-a49e-c150503f084b"
+      }
+    ],
+    "metadata": {
+      "name": "plural-postgres-jupyter",
+      "namespace": "jupyterhub",
+      "creationTimestamp": "2023-04-10T19:53:24Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "jupyter": "jupyter"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "64553275-3ded-41a5-b7a4-0a03e7c3c9cb"
+      }
+    ],
+    "metadata": {
+      "name": "plural-postgres-lightdash",
+      "namespace": "lightdash",
+      "creationTimestamp": "2023-01-23T20:51:10Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "lightdash": "lightdash"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "01e63ae6-782c-4050-92e1-b397aad92d3f"
+      }
+    ],
+    "metadata": {
+      "name": "plural-postgres-mage",
+      "namespace": "mage",
+      "creationTimestamp": "2023-07-01T18:41:03Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "mage": "mage"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": null,
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "a711a020-454d-4019-923b-9bde98bb337c"
+      },
+      {
+        "uid": "818dead5-6a63-4b28-94f5-649641793baa"
+      },
+      {
+        "uid": "a3752c42-e1ef-420e-9db3-b5c1a1a04e78"
+      },
+      {
+        "uid": "26778fc8-db3a-47c3-bdd8-41ab6fed6046"
+      },
+      {
+        "uid": "8f08ac93-72f2-4bab-8316-753e32aae51b"
+      },
+      {
+        "uid": "b2f9eaa0-3200-43a6-ac77-948255d2cba6"
+      }
+    ],
+    "metadata": {
+      "name": "plural-metabase",
+      "namespace": "metabase",
+      "creationTimestamp": "2023-07-29T14:17:57Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "metabase": "metabase"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "00940af1-c6ca-4259-bafc-2f12a157a2f8"
+      }
+    ],
+    "metadata": {
+      "name": "plural-mlflow",
+      "namespace": "mlflow",
+      "creationTimestamp": "2022-08-05T19:35:07Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "mlflow": "mlflow"
+      },
+      "postgresql": {
+        "version": "14"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "a8b4982c-f5cc-472f-b3cd-6d498cde6159"
+      }
+    ],
+    "metadata": {
+      "name": "plural-n8n",
+      "namespace": "n8n",
+      "creationTimestamp": "2022-06-23T15:43:19Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "n8n": "n8n"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "20m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "ff632557-20e5-4a05-b6e6-7849905c2b3f"
+      }
+    ],
+    "metadata": {
+      "name": "plural-nocodb",
+      "namespace": "nocodb",
+      "creationTimestamp": "2022-01-03T22:54:22Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "nocodb": "nocodb"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "50m",
+          "memory": "350Mi"
+        }
+      },
+      "volume": {
+        "size": "30Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "d89baff3-2514-4549-bca0-df666f1782c4"
+      }
+    ],
+    "metadata": {
+      "name": "plural-postgres-oncall",
+      "namespace": "oncall",
+      "creationTimestamp": "2022-11-03T18:17:20Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "oncall": "oncall"
+      },
+      "postgresql": {
+        "version": "14"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "5cdd5b5b-59c0-40d5-b519-0468fcf6096f"
+      }
+    ],
+    "metadata": {
+      "name": "plural-hydra",
+      "namespace": "plural",
+      "creationTimestamp": "2023-01-25T01:01:49Z"
+    },
+    "spec": {
+      "numberOfInstances": 2,
+      "databases": {
+        "hydra": "hydra"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "50m",
+          "memory": "650Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "26afb978-6d90-4358-b001-32c3fd951b9b"
+      }
+    ],
+    "metadata": {
+      "name": "plural-plural",
+      "namespace": "plural",
+      "creationTimestamp": "2023-01-25T00:49:33Z"
+    },
+    "spec": {
+      "numberOfInstances": 2,
+      "databases": {
+        "plural": "plural"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "400m",
+          "memory": "1Gi"
+        }
+      },
+      "volume": {
+        "size": "75Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "e97a6a6a-6242-4417-a371-30dae9ba03ee"
+      }
+    ],
+    "metadata": {
+      "name": "plural-postgres-posthog",
+      "namespace": "posthog",
+      "creationTimestamp": "2023-01-18T15:46:29Z"
+    },
+    "spec": {
+      "numberOfInstances": 2,
+      "databases": {
+        "posthog": "posthog"
+      },
+      "postgresql": {
+        "version": "14"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "72ddff9e-7ac6-43c6-90ad-56931a857e1e"
+      }
+    ],
+    "metadata": {
+      "name": "plural-postgres-prefect",
+      "namespace": "prefect",
+      "creationTimestamp": "2023-01-25T00:02:14Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "prefect": "prefect"
+      },
+      "postgresql": {
+        "version": "14"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "eb5a4567-e09e-4630-aceb-9b5c025e0c12"
+      }
+    ],
+    "metadata": {
+      "name": "plural-postgres-retool",
+      "namespace": "retool",
+      "creationTimestamp": "2023-04-16T14:42:33Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "retool": "retool"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": null,
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "cb71ec3b-001c-41aa-a999-b64efad2ead5"
+      }
+    ],
+    "metadata": {
+      "name": "plural-sentry",
+      "namespace": "sentry",
+      "creationTimestamp": "2023-01-28T16:46:29Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "sentry": "sentry"
+      },
+      "postgresql": {
+        "version": "15"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "80355881-574e-4316-95de-fd0acc1f3891"
+      }
+    ],
+    "metadata": {
+      "name": "plural-postgres-sonarqube",
+      "namespace": "sonarqube",
+      "creationTimestamp": "2023-06-17T22:41:46Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "sonarqube": "sonarqube"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "2fbc0b61-1032-4d11-8de7-16c9398fb174"
+      }
+    ],
+    "metadata": {
+      "name": "plural-postgres-strapi",
+      "namespace": "strapi",
+      "creationTimestamp": "2022-12-21T06:13:25Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "strapi": "strapi"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "20m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "18c9b4f5-d4a5-4a8d-b430-6263b8080233"
+      }
+    ],
+    "metadata": {
+      "name": "plural-dw",
+      "namespace": "superset",
+      "creationTimestamp": "2022-07-20T22:40:09Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "dw": "dwuser"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "5",
+          "memory": "4Gi"
+        },
+        "requests": {
+          "cpu": "3",
+          "memory": "3Gi"
+        }
+      },
+      "volume": {
+        "size": "1000Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "e121767e-f8ad-42ee-abef-a0a7bf992105"
+      }
+    ],
+    "metadata": {
+      "name": "plural-superset",
+      "namespace": "superset",
+      "creationTimestamp": "2022-12-08T05:45:41Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "superset": "superset"
+      },
+      "postgresql": {
+        "version": "14"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "500Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "ce46b07f-0dc3-44c6-891f-4d489a89c076"
+      }
+    ],
+    "metadata": {
+      "name": "plural-postgres-unleash",
+      "namespace": "unleash",
+      "creationTimestamp": "2023-06-17T22:00:38Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "unleash": "unleash"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "100m",
+          "memory": "100Mi"
+        }
+      },
+      "volume": {
+        "size": "25Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  },
+  {
+    "instances": [
+      {
+        "uid": "8298073a-bb58-4e33-8fbe-eb71088f87c5"
+      }
+    ],
+    "metadata": {
+      "name": "plural-vaultwarden-postgres",
+      "namespace": "vaultwarden",
+      "creationTimestamp": "2021-11-09T18:52:17Z"
+    },
+    "spec": {
+      "numberOfInstances": 1,
+      "databases": {
+        "vaultwarden": "vaultwarden"
+      },
+      "postgresql": {
+        "version": "13"
+      },
+      "resources": null,
+      "volume": {
+        "size": "5Gi"
+      }
+    },
+    "status": {
+      "clusterStatus": "Running"
+    }
+  }
+]

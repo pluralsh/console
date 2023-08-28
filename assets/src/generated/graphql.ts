@@ -2367,6 +2367,35 @@ export type CreateBuildMutationVariables = Exact<{
 
 export type CreateBuildMutation = { __typename?: 'RootMutationType', createBuild?: { __typename?: 'Build', id: string } | null };
 
+export type ResourceSpecFragment = { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null };
+
+export type ResourcesFragment = { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null };
+
+export type DatabaseTableRowFragment = { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Map<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null };
+
+export type RestorePostgresMutationVariables = Exact<{
+  clone?: InputMaybe<CloneAttributes>;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  timestamp: Scalars['DateTime']['input'];
+}>;
+
+
+export type RestorePostgresMutation = { __typename?: 'RootMutationType', restorePostgres?: { __typename?: 'Postgresql', status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null } | null };
+
+export type PostgresDatabasesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PostgresDatabasesQuery = { __typename?: 'RootQueryType', postgresDatabases?: Array<{ __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Map<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null } | null> | null, applications?: Array<{ __typename?: 'Application', name: string, spec: { __typename?: 'ApplicationSpec', descriptor: { __typename?: 'ApplicationDescriptor', icons?: Array<string | null> | null } } } | null> | null };
+
+export type PostgresDatabaseQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+}>;
+
+
+export type PostgresDatabaseQuery = { __typename?: 'RootQueryType', postgresDatabase?: { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Map<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null } | null };
+
 export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
 
 export type GroupFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null };
@@ -2574,6 +2603,51 @@ export const PageInfoFragmentDoc = gql`
   endCursor
 }
     `;
+export const ResourceSpecFragmentDoc = gql`
+    fragment ResourceSpec on ResourceSpec {
+  cpu
+  memory
+}
+    `;
+export const ResourcesFragmentDoc = gql`
+    fragment Resources on Resources {
+  limits {
+    ...ResourceSpec
+  }
+  requests {
+    ...ResourceSpec
+  }
+}
+    ${ResourceSpecFragmentDoc}`;
+export const DatabaseTableRowFragmentDoc = gql`
+    fragment DatabaseTableRow on Postgresql {
+  instances {
+    uid
+  }
+  metadata {
+    name
+    namespace
+    creationTimestamp
+  }
+  spec {
+    numberOfInstances
+    databases
+    postgresql {
+      version
+    }
+    resources {
+      ...Resources
+    }
+    databases
+    volume {
+      size
+    }
+  }
+  status {
+    clusterStatus
+  }
+}
+    ${ResourcesFragmentDoc}`;
 export const UserFragmentDoc = gql`
     fragment User on User {
   id
@@ -2830,6 +2904,127 @@ export function useCreateBuildMutation(baseOptions?: Apollo.MutationHookOptions<
 export type CreateBuildMutationHookResult = ReturnType<typeof useCreateBuildMutation>;
 export type CreateBuildMutationResult = Apollo.MutationResult<CreateBuildMutation>;
 export type CreateBuildMutationOptions = Apollo.BaseMutationOptions<CreateBuildMutation, CreateBuildMutationVariables>;
+export const RestorePostgresDocument = gql`
+    mutation RestorePostgres($clone: CloneAttributes, $name: String!, $namespace: String!, $timestamp: DateTime!) {
+  restorePostgres(
+    clone: $clone
+    name: $name
+    namespace: $namespace
+    timestamp: $timestamp
+  ) {
+    status {
+      clusterStatus
+    }
+  }
+}
+    `;
+export type RestorePostgresMutationFn = Apollo.MutationFunction<RestorePostgresMutation, RestorePostgresMutationVariables>;
+
+/**
+ * __useRestorePostgresMutation__
+ *
+ * To run a mutation, you first call `useRestorePostgresMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRestorePostgresMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [restorePostgresMutation, { data, loading, error }] = useRestorePostgresMutation({
+ *   variables: {
+ *      clone: // value for 'clone'
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      timestamp: // value for 'timestamp'
+ *   },
+ * });
+ */
+export function useRestorePostgresMutation(baseOptions?: Apollo.MutationHookOptions<RestorePostgresMutation, RestorePostgresMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RestorePostgresMutation, RestorePostgresMutationVariables>(RestorePostgresDocument, options);
+      }
+export type RestorePostgresMutationHookResult = ReturnType<typeof useRestorePostgresMutation>;
+export type RestorePostgresMutationResult = Apollo.MutationResult<RestorePostgresMutation>;
+export type RestorePostgresMutationOptions = Apollo.BaseMutationOptions<RestorePostgresMutation, RestorePostgresMutationVariables>;
+export const PostgresDatabasesDocument = gql`
+    query PostgresDatabases {
+  postgresDatabases {
+    ...DatabaseTableRow
+  }
+  applications {
+    name
+    spec {
+      descriptor {
+        icons
+      }
+    }
+  }
+}
+    ${DatabaseTableRowFragmentDoc}`;
+
+/**
+ * __usePostgresDatabasesQuery__
+ *
+ * To run a query within a React component, call `usePostgresDatabasesQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePostgresDatabasesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePostgresDatabasesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function usePostgresDatabasesQuery(baseOptions?: Apollo.QueryHookOptions<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>(PostgresDatabasesDocument, options);
+      }
+export function usePostgresDatabasesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>(PostgresDatabasesDocument, options);
+        }
+export type PostgresDatabasesQueryHookResult = ReturnType<typeof usePostgresDatabasesQuery>;
+export type PostgresDatabasesLazyQueryHookResult = ReturnType<typeof usePostgresDatabasesLazyQuery>;
+export type PostgresDatabasesQueryResult = Apollo.QueryResult<PostgresDatabasesQuery, PostgresDatabasesQueryVariables>;
+export const PostgresDatabaseDocument = gql`
+    query PostgresDatabase($name: String!, $namespace: String!) {
+  postgresDatabase(name: $name, namespace: $namespace) {
+    ...DatabaseTableRow
+  }
+}
+    ${DatabaseTableRowFragmentDoc}`;
+
+/**
+ * __usePostgresDatabaseQuery__
+ *
+ * To run a query within a React component, call `usePostgresDatabaseQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePostgresDatabaseQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePostgresDatabaseQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function usePostgresDatabaseQuery(baseOptions: Apollo.QueryHookOptions<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>(PostgresDatabaseDocument, options);
+      }
+export function usePostgresDatabaseLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>(PostgresDatabaseDocument, options);
+        }
+export type PostgresDatabaseQueryHookResult = ReturnType<typeof usePostgresDatabaseQuery>;
+export type PostgresDatabaseLazyQueryHookResult = ReturnType<typeof usePostgresDatabaseLazyQuery>;
+export type PostgresDatabaseQueryResult = Apollo.QueryResult<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>;
 export const GroupsDocument = gql`
     query Groups($q: String, $cursor: String) {
   groups(q: $q, first: 20, after: $cursor) {
@@ -3196,6 +3391,8 @@ export const namedOperations = {
     AppInfo: 'AppInfo',
     Repository: 'Repository',
     PluralContext: 'PluralContext',
+    PostgresDatabases: 'PostgresDatabases',
+    PostgresDatabase: 'PostgresDatabase',
     Groups: 'Groups',
     SearchGroups: 'SearchGroups',
     GroupMembers: 'GroupMembers',
@@ -3203,6 +3400,7 @@ export const namedOperations = {
   },
   Mutation: {
     CreateBuild: 'CreateBuild',
+    RestorePostgres: 'RestorePostgres',
     CreateGroupMember: 'CreateGroupMember',
     DeleteGroupMember: 'DeleteGroupMember',
     CreateGroup: 'CreateGroup',
@@ -3220,6 +3418,9 @@ export const namedOperations = {
     ConfigurationOverlayFragment: 'ConfigurationOverlayFragment',
     RepositoryFragment: 'RepositoryFragment',
     PageInfo: 'PageInfo',
+    ResourceSpec: 'ResourceSpec',
+    Resources: 'Resources',
+    DatabaseTableRow: 'DatabaseTableRow',
     GroupMember: 'GroupMember',
     Group: 'Group',
     User: 'User',

@@ -1,0 +1,79 @@
+fragment ResourceSpec on ResourceSpec {
+  cpu
+  memory
+}
+
+fragment Resources on Resources {
+  limits {
+    ...ResourceSpec
+  }
+  requests {
+    ...ResourceSpec
+  }
+}
+
+fragment DatabaseTableRow on Postgresql {
+  instances {
+    uid
+  }
+  metadata {
+    name
+    namespace
+    creationTimestamp
+  }
+  spec {
+    numberOfInstances
+    databases
+    postgresql {
+      version
+    }
+    resources {
+      ...Resources
+    }
+    databases
+    volume {
+      size
+    }
+  }
+  status {
+    clusterStatus
+  }
+}
+
+mutation RestorePostgres(
+  $clone: CloneAttributes
+  $name: String!
+  $namespace: String!
+  $timestamp: DateTime!
+) {
+  restorePostgres(
+    clone: $clone
+    name: $name
+    namespace: $namespace
+    timestamp: $timestamp
+  ) {
+    status {
+      clusterStatus
+    }
+  }
+}
+
+query PostgresDatabases {
+  postgresDatabases {
+    ...DatabaseTableRow
+  }
+  applications {
+    name
+    spec {
+      descriptor {
+        icons
+      }
+    }
+  }
+}
+
+query PostgresDatabase($name: String!, $namespace: String!) {
+  postgresDatabase(name: $name, namespace: $namespace) {
+    ...DatabaseTableRow
+  }
+}
