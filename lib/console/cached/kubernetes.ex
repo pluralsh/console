@@ -4,22 +4,22 @@ defmodule Console.Cached.Kubernetes do
   alias ETS.KeyValueSet
   require Logger
 
-  defmodule State, do: defstruct [:table, :model, :pid]
+  defmodule State, do: defstruct [:table, :model, :pid, :callback]
 
-  def start_link(name, request, model) do
-    GenServer.start_link(__MODULE__, {request, name, model}, name: name)
+  def start_link(name, request, model, callback \\ nil) do
+    GenServer.start_link(__MODULE__, {request, name, model, callback}, name: name)
   end
 
-  def start(name, request, model) do
-    GenServer.start(__MODULE__, {request, name, model}, name: name)
+  def start(name, request, model, callback \\ nil) do
+    GenServer.start(__MODULE__, {request, name, model, callback}, name: name)
   end
 
-  def init({request, name, model}) do
+  def init({request, name, model, callback}) do
     if Console.conf(:initialize) do
       send self(), {:start, request}
     end
     {:ok, table} = KeyValueSet.new(name: name, read_concurrency: true, ordered: true)
-    {:ok, %State{table: table, model: model}}
+    {:ok, %State{table: table, model: model, callback: callback}}
   end
 
   def fetch(name) do
@@ -51,13 +51,18 @@ defmodule Console.Cached.Kubernetes do
     {:noreply, state}
   end
 
-  def handle_info(%Watcher.Event{object: o, type: event}, %{table: table} = state) when event in [:added, :modified] do
+  def handle_info(%Watcher.Event{object: o, type: event} = e, %{table: table} = state) when event in [:added, :modified] do
+    callback(e, state)
     {:noreply, %{state | table: KeyValueSet.put!(table, o.metadata.name, o)}}
   end
 
-  def handle_info(%Watcher.Event{object: o, type: :deleted}, %{table: table} = state) do
+  def handle_info(%Watcher.Event{object: o, type: :deleted} = e, %{table: table} = state) do
+    callback(e, state)
     {:noreply, %{state | table: KeyValueSet.delete!(table, o.metadata.name)}}
   end
 
   def handle_info(_, state), do: {:noreply, state}
+
+  defp callback(event, %State{callback: back}) when is_function(back), do: back.(event)
+  defp callback(_, _), do: :ok
 end

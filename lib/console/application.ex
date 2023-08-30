@@ -22,6 +22,7 @@ defmodule Console.Application do
       Console.Cached.Namespace,
       Console.Cached.Pod,
       Console.Cached.VPN,
+      Console.Cached.Node,
       {OpenIDConnect.Worker, Application.get_env(:console, :oidc_providers)},
     ] ++ consumers() ++ [
       Piazza.GracefulShutdown

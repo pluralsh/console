@@ -12,7 +12,7 @@ defmodule Console.Watchers.Base do
       defmodule State, do: defstruct unquote(state_keys)
 
       def start_link(opts \\ :ok) do
-        GenServer.start_link(__MODULE__, opts)
+        GenServer.start_link(__MODULE__, opts, name: __MODULE__)
       end
 
       def init(_) do
@@ -68,6 +68,8 @@ defmodule Console.Watchers.Base do
       def handle_info({:DOWN, _, :process, _, _}, state) do
         {:noreply, state}
       end
+
+      defoverridable [handle_call: 3]
     end
   end
 
