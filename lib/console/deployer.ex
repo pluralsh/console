@@ -53,6 +53,14 @@ defmodule Console.Deployer do
     end
   end
 
+  def leader?() do
+    case {me(), leader()} do
+      {l, l} -> true
+      {_, __MODULE__} -> true
+      _ -> false
+    end
+  end
+
   def file(path), do: GenServer.call(leader(), {:file, path}, @call_timeout)
 
   def wake(), do: GenServer.call(leader(), :poll, @call_timeout)
