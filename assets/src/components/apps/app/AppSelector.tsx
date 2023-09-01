@@ -5,6 +5,7 @@ import { useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { getIcon, hasIcons } from '../misc'
+import { versionName } from '../AppCard'
 
 export default function AppSelector({ applications, currentApp, directory }) {
   const navigate = useNavigate()
@@ -61,7 +62,7 @@ export default function AppSelector({ applications, currentApp, directory }) {
                     color="text-xlight"
                     marginLeft="small"
                   >
-                    v{app.spec.descriptor.version}
+                    {versionName(app.spec.descriptor.version)}
                   </Span>
                 )}
               </P>

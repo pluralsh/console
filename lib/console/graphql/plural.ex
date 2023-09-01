@@ -15,6 +15,7 @@ defmodule Console.GraphQl.Plural do
     field :buckets,       list_of(:string)
     field :domain,        list_of(:string)
     field :configuration, non_null(:map)
+    field :protect,       list_of(:string)
   end
 
   object :smtp do

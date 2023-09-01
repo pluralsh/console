@@ -83,6 +83,7 @@ const SYSTEM_APPS = [
   'monitoring',
   'postgres',
   'mysql',
+  'console',
 ]
 
 export const getDirectory = ({

@@ -433,6 +433,7 @@ export type ContextAttributes = {
   buckets?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   configuration: Scalars['Map']['input'];
   domain?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  protect?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
 export type CostAnalysis = {
