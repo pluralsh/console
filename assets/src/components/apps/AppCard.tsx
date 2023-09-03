@@ -52,7 +52,8 @@ export const getBorderColor = (app) => {
   }
 }
 
-const versionName = (vsn: string) => (vsn.startsWith('v') ? vsn : `v${vsn}`)
+export const versionName = (vsn: string) =>
+  vsn.startsWith('v') ? vsn : `v${vsn}`
 
 export default function AppCard({ app }: any) {
   const navigate = useNavigate()
