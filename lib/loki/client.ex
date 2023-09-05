@@ -1,5 +1,4 @@
 defmodule Loki.Client do
-  import Prometheus.Client, only: [headers: 0]
   alias Loki.{Response, Data, Result, Value}
 
   def host(), do: Application.get_env(:console, :loki)
@@ -26,4 +25,11 @@ defmodule Loki.Client do
     put_in(resp.data.result, results)
   end
   defp convert(error), do: error
+
+  def headers(base \\ []) do
+    case Console.conf(:grafana_tenant) do
+      nil -> base
+      tenant -> [{"X-Scope-OrgID", tenant} | base]
+    end
+  end
 end
