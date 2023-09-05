@@ -42,10 +42,6 @@ extraEnv:
 {{- if .Configuration.loki }}
 - name: LOKI_HOST
   value: http://loki-loki-distributed-gateway.{{ namespace "loki" }}
-{{- end }}
-{{- if .Configuration.mimir }}
-- name: PROMETHEUS_HOST
-  value: http://mimir-nginx.{{ namespace "mimir" }}/prometheus
 - name: GRAFANA_TENANT
   value: {{ .Cluster }}
 {{- end }}
