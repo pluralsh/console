@@ -1,3 +1,4 @@
+{{ $isGcp := or (eq .Provider "google") (eq .Provider "gcp") }}
 global:
   application:
     links:
@@ -18,34 +19,34 @@ ingress:
 postgresNamespace: {{ namespace "postgres" }}
 provider: {{ .Provider }}
 
-{{ if eq .Provider "azure" }}
+{{- if eq .Provider "azure" }}
 podLabels:
   aadpodidbinding: console
 
 consoleIdentityId: {{ importValue "Terraform" "console_msi_id" }}
 consoleIdentityClientId: {{ importValue "Terraform" "console_msi_client_id" }}
-{{ end }}
+{{- end }}
 
 extraEnv:
-{{ if eq .Provider "aws" }}
+{{- if eq .Provider "aws" }}
 - name: BACKUP_ACCESS_KEY
   valueFrom:
-    secretKeyRef: 
+    secretKeyRef:
       name: postgres-user-auth
       key: ACCESS_KEY_ID
 - name: BACKUP_SECRET_ACCESS_KEY
   valueFrom:
-    secretKeyRef: 
+    secretKeyRef:
       name: postgres-user-auth
       key: SECRET_ACCESS_KEY
-{{ end }}
+{{- end }}
 {{- if .Configuration.loki }}
 - name: LOKI_HOST
   value: http://loki-loki-distributed-gateway.{{ namespace "loki" }}
 - name: GRAFANA_TENANT
   value: {{ .Cluster }}
 {{- end }}
-{{ if eq .Provider "azure" }}
+{{- if eq .Provider "azure" }}
 - name: ARM_USE_MSI
   value: 'true'
 - name: ARM_SUBSCRIPTION_ID
@@ -55,36 +56,38 @@ extraEnv:
 {{- end }}
 
 serviceAccount:
-{{ if eq .Provider "google" }}
+  {{- if $isGcp }}
   create: false
-{{ end }}
+  {{- end }}
+  {{- if eq .Provider "aws" }}
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Project }}:role/{{ .Cluster }}-console
+  {{- end }}
 
 secrets:
   jwt: {{ dedupe . "console.secrets.jwt" (randAlphaNum 20) }}
   admin_name: {{ .Values.admin_name }}
   admin_email: {{ dedupe . "console.secrets.admin_email" (default "someone@example.com" .Config.Email) }}
   admin_password: {{ dedupe . "console.secrets.admin_password" (randAlphaNum 20) }}
-{{ if .Values.console_dns  }}
+{{- if .Values.console_dns  }}
   git_url: {{ ternary .Values.repo_url repoUrl (hasKey .Values "repo_url") | quote }}
   repo_root: {{ repoName }}
   branch_name: {{ branchName }}
   config: {{ toYaml .Config | nindent 4 }}
 {{ $identity := pathJoin repoRoot ".plural-crypt" "identity" }}
-{{ if fileExists $identity }}
+{{- if fileExists $identity }}
   identity: {{ readFile $identity | quote }}
-{{ else if ne (dig "console" "secrets" "identity" "default" .) "default" }}
+{{- else if ne (dig "console" "secrets" "identity" "default" .) "default" }}
   identity: {{ .console.secrets.identity | quote }}
-{{ end }}
+{{- end }}
   key: {{ dedupe . "console.secrets.key" (readFile (homeDir ".plural" "key")) | quote }}
-{{ else }}
+{{- else }}
   git_url: ''
   repo_root: ''
   branch_name: ''
   config: ''
   key: ''
-{{ end }}
+{{- end }}
   cluster_name: {{ .Cluster }}
   erlang: {{ dedupe . "console.secrets.erlang" (randAlphaNum 14) }}
   id_rsa: {{ ternary .Values.private_key (dedupe . "console.secrets.id_rsa" "") (hasKey .Values "private_key") | quote }}
@@ -93,13 +96,13 @@ secrets:
   git_access_token: {{ ternary .Values.access_token (dedupe . "console.secrets.git_access_token" "") (hasKey .Values "access_token") | quote }}
   git_user: {{ default "console" .Values.git_user }}
   git_email: {{ default "console@plural.sh" .Values.git_email }}
-{{ if .OIDC }}
+{{- if .OIDC }}
   plural_client_id: {{ .OIDC.ClientId }}
   plural_client_secret: {{ .OIDC.ClientSecret }}
-{{ end }}
-{{ if .Values.is_demo }}
+{{- end }}
+{{- if .Values.is_demo }}
   is_demo: {{ .Values.is_demo }}
-{{ end }}
+{{- end }}
 
 license: {{ .License | quote }}
 
