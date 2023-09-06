@@ -112,7 +112,8 @@ defmodule Console.Services.Users do
   end
 
   defp hydrate_groups(transaction, %{"groups" => [_ | _] = groups}) do
-    Enum.reduce(groups, transaction, fn group, xaction ->
+    Enum.uniq(groups)
+    |> Enum.reduce(transaction, fn group, xaction ->
       xaction
       |> add_operation({:group, group}, fn _ ->
         case get_group_by_name(group) do
