@@ -55,6 +55,7 @@ extraEnv:
   value: {{ .Context.TenantId }}
 {{- end }}
 
+{{- if or (eq .Provider "aws") $isGcp }}
 serviceAccount:
   {{- if $isGcp }}
   create: false
@@ -63,6 +64,7 @@ serviceAccount:
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Project }}:role/{{ .Cluster }}-console
   {{- end }}
+{{- end }}
 
 secrets:
   jwt: {{ dedupe . "console.secrets.jwt" (randAlphaNum 20) }}
