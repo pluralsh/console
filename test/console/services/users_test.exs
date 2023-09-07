@@ -71,6 +71,28 @@ defmodule Console.Services.UsersTest do
       assert Users.get_group_member(group.id, user.id)
     end
 
+    test "it is robust to duplicate group names" do
+      {:ok, user} = Users.bootstrap_user(%{
+        "email" => "someone@example.com",
+        "name" => "Some User",
+        "profile" => "https://some.image.com",
+        "groups" => ["general", "general"],
+        "admin" => true,
+        "plural_id" => "abcdef-123456789-ghijkl"
+      })
+
+      assert user.name == "Some User"
+      assert user.email == "someone@example.com"
+      assert user.profile == "https://some.image.com"
+      assert user.plural_id == "abcdef-123456789-ghijkl"
+      assert user.roles.admin
+
+      group = Users.get_group_by_name("general")
+      assert group.description == "synced from Plural"
+
+      assert Users.get_group_member(group.id, user.id)
+    end
+
     test "If the user already exists, they will be returned" do
       user = insert(:user)
 
