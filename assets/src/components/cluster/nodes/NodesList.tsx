@@ -122,7 +122,7 @@ const ColZone = columnHelper.accessor((row) => row.zone, {
   header: 'Zone',
 })
 
-const ColCpuUsage = columnHelper.accessor((row) => row?.cpu.used, {
+const ColCpuUsage = columnHelper.accessor((row) => row?.cpu.used / row?.cpu.total, {
   id: 'cpu-usage',
   enableSorting: true,
   sortingFn: numishSort,
