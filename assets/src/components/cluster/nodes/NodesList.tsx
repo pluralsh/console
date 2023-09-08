@@ -122,25 +122,28 @@ const ColZone = columnHelper.accessor((row) => row.zone, {
   header: 'Zone',
 })
 
-const ColCpuUsage = columnHelper.accessor((row) => row?.cpu.used / row?.cpu.total, {
-  id: 'cpu-usage',
-  enableSorting: true,
-  sortingFn: numishSort,
-  cell: (props) => (
-    <Tooltip
-      label={`${rounded(props.getValue())}%`}
-      placement="top"
-    >
-      <TableText>
-        <UsageBar
-          usage={props.getValue()}
-          width={120}
-        />
-      </TableText>
-    </Tooltip>
-  ),
-  header: 'CPU usage',
-})
+const ColCpuUsage = columnHelper.accessor(
+  (row) => (row?.cpu?.used ?? 0) / (row?.cpu?.total ?? 1),
+  {
+    id: 'cpu-usage',
+    enableSorting: true,
+    sortingFn: numishSort,
+    cell: (props) => (
+      <Tooltip
+        label={`${rounded(props.getValue())}%`}
+        placement="top"
+      >
+        <TableText>
+          <UsageBar
+            usage={props.getValue()}
+            width={120}
+          />
+        </TableText>
+      </Tooltip>
+    ),
+    header: 'CPU usage',
+  }
+)
 
 const ColMemoryUsage = columnHelper.accessor(
   (row) => (row?.memory?.used ?? 0) / (row?.memory?.total ?? 1),
