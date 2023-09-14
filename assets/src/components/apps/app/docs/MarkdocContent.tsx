@@ -14,7 +14,6 @@ export default function MarkdocComponent({
   components?: any
 }) {
   content = content || getMdContent(raw, config)
-
   if (!content) {
     return null
   }

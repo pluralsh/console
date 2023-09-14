@@ -33,6 +33,8 @@ import { config } from 'markdoc/mdSchema'
 import { LoginContext } from '../../contexts'
 import AppStatus from '../AppStatus'
 
+import { versionName } from '../AppCard'
+
 import AppSelector from './AppSelector'
 import RunbookStatus from './runbooks/runbook/RunbookStatus'
 import LogsLegend from './logs/LogsLegend'
@@ -300,7 +302,7 @@ function AppWithoutContext() {
           marginTop={validLinks?.length > 0 ? 0 : 56}
         >
           <PropsContainer title="App">
-            <Prop title="Current version">v{version}</Prop>
+            <Prop title="Current version">{versionName(version)}</Prop>
             <Prop title="Status">
               <AppStatus app={currentApp} />
             </Prop>
