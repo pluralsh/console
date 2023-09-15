@@ -26,6 +26,8 @@ config :console, ConsoleWeb.Endpoint,
   server: true
 
 config :console,
+  secret_store: Console.Deployments.Secrets.Database,
+  revision_history_max: 10,
   prometheus: "prometheus",
   loki: "loki",
   git_user_name: "forge",

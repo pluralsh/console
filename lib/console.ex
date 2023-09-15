@@ -1,4 +1,6 @@
 defmodule Console do
+  @type error :: {:error, term}
+
   @chars String.codepoints("abcdefghijklmnopqrstuvwxyz")
 
   def is_set(var) do

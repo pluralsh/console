@@ -1,4 +1,9 @@
 defmodule Console.TestHelpers do
+  alias Console.Schema.Cluster
+  alias Console.Deployments.Services
+
+  def create_service(%Cluster{id: id}, user, attrs), do: Services.create_service(Map.new(attrs), id, user)
+
   def ids_equal(found, expected) do
     found = MapSet.new(ids(found))
     expected = MapSet.new(ids(expected))

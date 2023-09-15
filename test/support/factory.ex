@@ -141,6 +141,48 @@ defmodule Console.Factory do
     }
   end
 
+  def cluster_provider_factory do
+    %Schema.ClusterProvider{
+      name: sequence(:provider_name, & "provider-#{&1}"),
+      namespace: sequence(:provider_namespace, & "ns-#{&1}")
+    }
+  end
+
+  def cluster_factory do
+    %Schema.Cluster{
+      provider: build(:cluster_provider),
+      name: sequence(:cluster_name, & "cluster-#{&1}")
+    }
+  end
+
+  def git_repository_factory do
+    %Schema.GitRepository{
+      url: sequence(:git_repo, & "https://github.com/pluralsh/repo-#{&1}.git")
+    }
+  end
+
+  def service_factory do
+    %Schema.Service{
+      name: sequence(:service, & "service-#{&1}"),
+      version: "0.0.1",
+      cluster: build(:cluster),
+      repository: build(:git_repository),
+    }
+  end
+
+  def service_component_factory do
+    %Schema.ServiceComponent{
+      group: "networking.k8s.io",
+      version: "v1",
+      kind: "ingress",
+      namespace: "name",
+      name: "name",
+      synced: true,
+      state: :running,
+      service: build(:service)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

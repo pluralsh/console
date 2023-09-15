@@ -2,7 +2,7 @@ defmodule Console.GraphQl do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
   import Console.GraphQl.Helpers
-  alias Console.GraphQl.Resolvers.{Build, User, Kubecost, License, UserLoader}
+  alias Console.GraphQl.Resolvers.{Build, User, Kubecost, License, UserLoader, Deployments}
 
   import_types Absinthe.Type.Custom
   import_types Absinthe.Plug.Types
@@ -19,12 +19,14 @@ defmodule Console.GraphQl do
   import_types Console.GraphQl.Runbooks
   import_types Console.GraphQl.Webhooks
   import_types Console.GraphQl.Database
+  import_types Console.GraphQl.Deployments
 
   @sources [
     Build,
     User,
     Kubecost,
     License,
+    Deployments,
     UserLoader
   ]
 
@@ -55,6 +57,7 @@ defmodule Console.GraphQl do
     import_fields :runbook_queries
     import_fields :webhook_queries
     import_fields :database_queries
+    import_fields :deployment_queries
   end
 
   mutation do
@@ -66,6 +69,7 @@ defmodule Console.GraphQl do
     import_fields :runbook_mutations
     import_fields :webhook_mutations
     import_fields :database_mutations
+    import_fields :deployment_mutations
   end
 
   subscription do
