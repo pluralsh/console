@@ -1,19 +1,35 @@
 defmodule Console.Services.Users do
   use Console.Services.Base
+  use Nebulex.Caching
+
   alias Console.PubSub
-  alias Console.Schema.{User, Invite, Group, GroupMember, Role, Notification}
+  alias Console.Schema.{User, Invite, Group, GroupMember, Role, Notification, AccessToken}
   alias Console.Repo
 
-  @type user_resp :: {:ok, User.t} | {:error, term}
-  @type group_resp :: {:ok, Group.t} | {:error, term}
-  @type role_resp :: {:ok, Role.t} | {:error, term}
-  @type group_member_resp :: {:ok, GroupMember.t} | {:error, term}
+  @ttl :timer.minutes(30)
+
+  @type error :: Console.error
+  @type user_resp :: {:ok, User.t} | error
+  @type group_resp :: {:ok, Group.t} | error
+  @type role_resp :: {:ok, Role.t} | error
+  @type group_member_resp :: {:ok, GroupMember.t} | error
+  @type token_resp :: {:ok, AccessToken.t} | error
 
   @spec get_user(binary) :: User.t | nil
   def get_user(id), do: Repo.get(User, id)
 
   @spec get_user!(binary) :: User.t
   def get_user!(id), do: Repo.get!(User, id)
+
+  @decorate cacheable(cache: Console.Cache, key: {:access, token}, opts: [ttl: @ttl])
+  def get_by_token(token) do
+    Repo.get_by(AccessToken, token: token)
+    |> Repo.preload([:user])
+    |> case do
+      %AccessToken{user: %User{} = user} = token -> %{user | token: token}
+      _ -> nil
+    end
+  end
 
   def get_user_by_email(email), do: Repo.get_by(User, email: email)
 
@@ -98,6 +114,22 @@ defmodule Console.Services.Users do
     end)
     |> hydrate_groups(attrs)
     |> execute(extract: :user)
+  end
+
+  @spec create_access_token(User.t) :: token_resp
+  def create_access_token(%User{id: id}) do
+    %AccessToken{user_id: id}
+    |> AccessToken.changeset()
+    |> Repo.insert()
+  end
+
+  @spec delete_access_token(binary, User.t) :: token_resp
+  @decorate cache_evict(cache: Console.Cache, keys: [{:access, token}])
+  def delete_access_token(token, %User{id: id}) do
+    case Repo.get_by!(AccessToken, token: token) do
+      %AccessToken{user_id: ^id} = token -> Repo.delete(token)
+      _ -> {:error, "not found"}
+    end
   end
 
   defp token_attrs(%{"admin" => true} = attrs), do: Map.put(attrs, "roles", %{"admin" => true})

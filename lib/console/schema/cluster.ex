@@ -1,8 +1,6 @@
 defmodule Console.Schema.Cluster do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Service, ClusterNodePool, NamespacedName, ClusterProvider}
-
-  defenum Provider, aws: 0, azure: 1, gcp: 2
+  alias Console.Schema.{Service, ClusterNodePool, NamespacedName, ClusterProvider, PolicyBinding}
 
   schema "clusters" do
     field :name,            :string
@@ -21,6 +19,15 @@ defmodule Console.Schema.Cluster do
     belongs_to :provider, ClusterProvider
     belongs_to :service,  Service
     has_many :node_pools, ClusterNodePool
+
+    has_many :read_bindings, PolicyBinding,
+      on_replace: :delete,
+      foreign_key: :policy_id,
+      references: :read_policy_id
+    has_many :write_bindings, PolicyBinding,
+      on_replace: :delete,
+      foreign_key: :policy_id,
+      references: :write_policy_id
 
     timestamps()
   end
@@ -41,6 +48,8 @@ defmodule Console.Schema.Cluster do
     |> cast_embed(:kubeconfig)
     |> cast_embed(:resource)
     |> cast_assoc(:node_pools)
+    |> cast_assoc(:read_bindings)
+    |> cast_assoc(:write_bindings)
     |> foreign_key_constraint(:provider_id)
     |> put_new_change(:deploy_token, fn -> "deploy-#{Console.rand_alphanum(20)}" end)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
@@ -49,13 +58,20 @@ defmodule Console.Schema.Cluster do
     |> validate_required(~w(name version)a)
   end
 
+  def rbac_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, [])
+    |> cast_assoc(:read_bindings)
+    |> cast_assoc(:write_bindings)
+  end
+
   defp update_vsn(cs) do
     with current when is_binary(current) <- get_field(cs, :current_version),
          vsn when is_binary(vsn) <- get_field(cs, :version),
-         {:ok, current} <- Version.parse(current),
+         {:ok, current_parsed} <- Version.parse(current),
          {:ok, vsn} <- Version.parse(vsn),
-         :gt <- Version.compare(current, vsn) do
-      put_change(cs, :version, Version.to_string(vsn))
+         :gt <- Version.compare(current_parsed, vsn) do
+      put_change(cs, :version, to_string(current))
     else
       _ -> cs
     end

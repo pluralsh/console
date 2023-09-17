@@ -7,7 +7,6 @@ defmodule ConsoleWeb.Router do
 
   pipeline :auth do
     plug ConsoleWeb.GuardianPipeline
-    plug ConsoleWeb.Plugs.DeployToken
     plug ConsoleWeb.Plugs.AbsintheContext
     plug ConsoleWeb.Plugs.Authorized
   end

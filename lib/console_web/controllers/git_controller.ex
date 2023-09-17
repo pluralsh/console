@@ -4,7 +4,7 @@ defmodule ConsoleWeb.GitController do
   alias Console.Schema.Cluster
 
   def tarball(conn, %{"id" => service_id}) do
-    with %Cluster{} = cluster <- ConsoleWeb.Plugs.DeployToken.get_cluster(conn),
+    with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, svc} <- Services.authorized(service_id, cluster),
          {:ok, f} <- Discovery.fetch(svc) do
       conn =

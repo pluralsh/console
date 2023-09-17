@@ -6,6 +6,7 @@ defmodule Console.Repo.Migrations.ContinuousDeployments do
       add :id,             :uuid, primary_key: true
       add :name,           :string
       add :namespace,      :string
+      add :cloud,          :string
       add :cloud_settings, :map
 
       timestamps()
@@ -131,6 +132,21 @@ defmodule Console.Repo.Migrations.ContinuousDeployments do
       timestamps()
     end
 
+    create table(:deployment_settings, primary_key: false) do
+      add :id,                      :uuid,  primary_key: true
+      add :name,                    :string
+      add :write_policy_id,         :uuid
+      add :read_policy_id,          :uuid
+      add :create_policy_id,        :uuid
+      add :git_policy_id,           :uuid
+
+      add :artifact_repository_id, references(:git_repositories, type: :uuid)
+      add :deployer_repository_id,  references(:git_repositories, type: :uuid)
+
+      timestamps()
+    end
+
+    create unique_index(:deployment_settings, [:name])
     create unique_index(:cluster_providers, [:name])
     create index(:cluster_node_pools, [:cluster_id])
     create unique_index(:cluster_node_pools, [:cluster_id, :name])

@@ -1,6 +1,13 @@
 defmodule Console.Schema.Service do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Cluster, GitRepository, Revision, ServiceComponent}
+  alias Console.Schema.{
+    Cluster,
+    ClusterProvider,
+    GitRepository,
+    Revision,
+    ServiceComponent,
+    PolicyBinding
+  }
 
   defmodule Git do
     use Piazza.Ecto.Schema
@@ -31,7 +38,18 @@ defmodule Console.Schema.Service do
     belongs_to :cluster, Cluster
     belongs_to :repository, GitRepository
 
+    has_one :reference_cluster, Cluster
+    has_one :provider, ClusterProvider
+
     has_many :components, ServiceComponent, on_replace: :delete
+    has_many :read_bindings, PolicyBinding,
+      on_replace: :delete,
+      foreign_key: :policy_id,
+      references: :read_policy_id
+    has_many :write_bindings, PolicyBinding,
+      on_replace: :delete,
+      foreign_key: :policy_id,
+      references: :write_policy_id
 
     timestamps()
   end
@@ -51,10 +69,19 @@ defmodule Console.Schema.Service do
     |> cast(attrs, @valid)
     |> cast_embed(:git)
     |> cast_assoc(:components)
+    |> cast_assoc(:read_bindings)
+    |> cast_assoc(:write_bindings)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:repository_id)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name, :version, :cluster_id, :repository_id])
+  end
+
+  def rbac_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, [])
+    |> cast_assoc(:read_bindings)
+    |> cast_assoc(:write_bindings)
   end
 end

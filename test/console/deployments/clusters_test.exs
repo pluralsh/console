@@ -6,6 +6,7 @@ defmodule Console.Deployments.ClustersTest do
     test "it can create a new cluster record" do
       user = insert(:user)
       provider = insert(:cluster_provider)
+      self = insert(:cluster, self: true)
       git = insert(:git_repository, url: "https://github.com/pluralsh/deploy-operator.git")
 
       {:ok, cluster} = Clusters.create_cluster(%{
@@ -27,6 +28,21 @@ defmodule Console.Deployments.ClustersTest do
       assert pool.min_size == 1
       assert pool.max_size == 5
       assert pool.instance_type == "t5.large"
+
+      %{service: svc} = Console.Repo.preload(cluster, [:service])
+      assert svc.repository_id == provider.repository_id
+      assert svc.name == "cluster-#{cluster.name}"
+      assert svc.namespace == provider.namespace
+      assert svc.cluster_id == self.id
+
+      {:ok, %{"version" => vsn, "node-pools" => pools, "cluster-name" => name}} = Services.configuration(svc)
+      assert name == cluster.name
+      assert vsn == cluster.version
+      [node_pool] = Jason.decode!(pools)
+      assert node_pool["name"] == pool.name
+      assert node_pool["min_size"] == pool.min_size
+      assert node_pool["max_size"] == pool.max_size
+      assert node_pool["instance_type"] == "t5.large"
 
       [svc] = Clusters.services(cluster)
 

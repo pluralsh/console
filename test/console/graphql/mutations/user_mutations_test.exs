@@ -338,4 +338,46 @@ defmodule Console.GraphQl.UserMutationsTest do
       assert read["buildTimestamp"]
     end
   end
+
+  describe "createAccessToken" do
+    test "it can create a new access token" do
+      user = insert(:user)
+
+      {:ok, %{data: %{"createAccessToken" => token}}} = run_query("""
+        mutation {
+          createAccessToken { id token }
+        }
+      """, %{}, %{current_user: user})
+
+      assert token["id"]
+      assert token["token"]
+    end
+  end
+
+  describe "deleteAccessToken" do
+    test "it can delete a user's access token" do
+      token = insert(:access_token)
+
+      {:ok, %{data: %{"deleteAccessToken" => deleted}}} = run_query("""
+        mutation delete($token: String!) {
+          deleteAccessToken(token: $token) { id }
+        }
+      """, %{"token" => token.token}, %{current_user: token.user})
+
+      assert deleted["id"] == token.id
+      refute refetch(token)
+    end
+
+    test "it cannot delete other user's access token" do
+      token = insert(:access_token)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation delete($token: String!) {
+          deleteAccessToken(token: $token) { id }
+        }
+      """, %{"token" => token.token}, %{current_user: insert(:user)})
+
+      assert refetch(token)
+    end
+  end
 end

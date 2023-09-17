@@ -1,7 +1,7 @@
 defmodule Console.Deployments.Services do
   use Console.Services.Base
-  alias Console.Schema.{Service, Revision, User, Cluster}
-  alias Console.Deployments.{Secrets.Store, Git}
+  alias Console.Schema.{Service, Revision, User, Cluster, ClusterProvider}
+  alias Console.Deployments.{Secrets.Store, Git, Clusters}
 
   @type service_resp :: {:ok, Service.t} | Console.error
   @type revision_resp :: {:ok, Revision.t} | Console.error
@@ -28,6 +28,16 @@ defmodule Console.Deployments.Services do
     |> execute(extract: :service)
   end
 
+  @doc """
+  modifies rbac settings for this service
+  """
+  @spec rbac(map, binary, User.t) :: service_resp
+  def rbac(attrs, service_id, %User{}) do
+    get_service!(service_id)
+    |> Service.rbac_changeset(attrs)
+    |> Console.Repo.update()
+  end
+
   def operator_service(deploy_token, cluster_id, %User{} = user) do
     repo = Git.deploy_repo!()
     create_service(%{
@@ -37,6 +47,34 @@ defmodule Console.Deployments.Services do
       git: %{ref: "main", folder: "helm"},
       configuration: [%{name: "deploy-token", value: deploy_token}, %{name: "url", value: Console.conf(:url)}]
     }, cluster_id, user)
+  end
+
+  def cluster_service(%Cluster{service_id: nil, provider: %ClusterProvider{} = provider} = cluster, %User{} = user) do
+    local = Clusters.local_cluster()
+    Console.Repo.preload(cluster, [:node_pools])
+    |> cluster_attributes()
+    |> Map.merge(%{
+      repository_id: provider.repository_id,
+      name: "cluster-#{cluster.name}",
+      namespace: provider.namespace,
+      git: Map.take(provider.git, ~w(ref folder)a),
+    })
+    |> create_service(local.id, user)
+  end
+  def cluster_service(%Cluster{service_id: id} = cluster, %User{} = user) do
+    Console.Repo.preload(cluster, [:node_pools])
+    |> cluster_attributes()
+    |> update_service(id, user)
+  end
+
+  def cluster_attributes(%{node_pools: node_pools} = cluster) do
+    %{
+      configuration: [
+        %{name: "cluster-name", value: cluster.name},
+        %{name: "version", value: cluster.version},
+        %{name: "node-pools", value: Jason.encode!(node_pools)}
+      ]
+    }
   end
 
   @spec authorized(binary, Cluster.t) :: service_resp

@@ -27,5 +27,20 @@ defmodule ConsoleWeb.GqlTest do
       assert from_connection(found)
              |> ids_equal(builds)
     end
+
+    test "it can handle access tokens", %{conn: conn} do
+      user = insert(:user)
+      token = insert(:access_token, user: user)
+      builds = insert_list(3, :build)
+
+      %{"data" => %{"builds" => found}} =
+        conn
+        |> add_auth_headers(token)
+        |> post("/gql", %{query: @document, variables: %{}})
+        |> json_response(200)
+
+      assert from_connection(found)
+             |> ids_equal(builds)
+    end
   end
 end

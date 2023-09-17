@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Git do
   use Console.Services.Base
-  alias Console.Schema.{GitRepository, User}
+  alias Console.Deployments.Settings
+  alias Console.Schema.{GitRepository, User, DeploymentSettings}
 
   @type repository_resp :: {:ok, GitRepository.t} | Console.error
 
@@ -12,9 +13,19 @@ defmodule Console.Deployments.Git do
 
   def artifacts_url(), do: "https://github.com/pluralsh/plural-artifacts.git"
 
-  def deploy_repo!(), do: get_by_url!(deploy_url())
+  def deploy_repo!() do
+    case Settings.fetch() do
+      %DeploymentSettings{deployer_repository: %GitRepository{} = repo} -> repo
+      _ -> get_by_url!(deploy_url())
+    end
+  end
 
-  def artifacts_repo!(), do: get_by_url!(artifacts_url())
+  def artifacts_repo!() do
+    case Settings.fetch() do
+      %DeploymentSettings{artifact_repository: %GitRepository{} = repo} -> repo
+      _ -> get_by_url!(artifacts_url())
+    end
+  end
 
   @doc """
   Creates a new git repository and spawns a sync agent on the relevant node

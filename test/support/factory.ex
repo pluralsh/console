@@ -144,13 +144,17 @@ defmodule Console.Factory do
   def cluster_provider_factory do
     %Schema.ClusterProvider{
       name: sequence(:provider_name, & "provider-#{&1}"),
-      namespace: sequence(:provider_namespace, & "ns-#{&1}")
+      namespace: sequence(:provider_namespace, & "ns-#{&1}"),
+      repository: build(:git_repository),
+      git: %{ref: "master", folder: "providers"}
     }
   end
 
   def cluster_factory do
     %Schema.Cluster{
       provider: build(:cluster_provider),
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
       name: sequence(:cluster_name, & "cluster-#{&1}"),
       deploy_token: sequence(:deploy_token, & "deploy-#{&1}"),
     }
@@ -166,6 +170,8 @@ defmodule Console.Factory do
     %Schema.Service{
       name: sequence(:service, & "service-#{&1}"),
       version: "0.0.1",
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
       cluster: build(:cluster),
       repository: build(:git_repository),
     }
@@ -181,6 +187,19 @@ defmodule Console.Factory do
       synced: true,
       state: :running,
       service: build(:service)
+    }
+  end
+
+  def access_token_factory do
+    %Schema.AccessToken{
+      token: sequence(:access_token, & "console-#{&1}"),
+      user: build(:user)
+    }
+  end
+
+  def access_token_audit_factory do
+    %Schema.AccessTokenAudit{
+      token: build(:access_token)
     }
   end
 

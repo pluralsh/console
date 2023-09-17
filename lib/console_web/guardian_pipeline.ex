@@ -3,6 +3,7 @@ defmodule ConsoleWeb.GuardianPipeline do
                               module: Console.Guardian,
                               error_handler: ConsoleWeb.Plug.AuthErrorHandler
 
+  plug ConsoleWeb.Plugs.Token
   plug Guardian.Plug.VerifySession
   plug Guardian.Plug.VerifyHeader, realm: "Bearer"
   # plug Guardian.Plug.EnsureAuthenticated

@@ -8,6 +8,8 @@ defmodule Console.Deployments.Clusters do
 
   def get_cluster(id), do: Console.Repo.get(Cluster, id)
 
+  def get_cluster!(id), do: Console.Repo.get!(Cluster, id)
+
   def get_by_deploy_token(token), do: Console.Repo.get_by(Cluster, deploy_token: token)
 
   def local_cluster(), do: Console.Repo.get_by!(Cluster, self: true)
@@ -31,7 +33,29 @@ defmodule Console.Deployments.Clusters do
     |> add_operation(:service, fn %{cluster: cluster} ->
       Services.operator_service(cluster.deploy_token, cluster.id, user)
     end)
-    |> execute(extract: :cluster)
+    |> add_operation(:cluster_service, fn %{cluster: cluster} ->
+      case Console.Repo.preload(cluster, [:provider]) do
+        %{provider: %ClusterProvider{}} = cluster -> Services.cluster_service(cluster, user)
+        _ -> {:ok, cluster}
+      end
+    end)
+    |> add_operation(:rewire, fn
+      %{cluster_service: %Cluster{} = cluster} -> {:ok, cluster}
+      %{cluster_service: %Service{id: id}, cluster: cluster} ->
+        Ecto.Changeset.change(cluster, %{service_id: id})
+        |> Console.Repo.update()
+    end)
+    |> execute(extract: :rewire)
+  end
+
+  @doc """
+  modifies rbac settings for this cluster
+  """
+  @spec rbac(map, binary, User.t) :: cluster_resp
+  def rbac(attrs, cluster_id, %User{}) do
+    get_cluster!(cluster_id)
+    |> Cluster.rbac_changeset(attrs)
+    |> Console.Repo.update()
   end
 
   @spec create_provider(map, User.t) :: cluster_provider_resp

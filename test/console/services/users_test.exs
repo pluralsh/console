@@ -286,4 +286,32 @@ defmodule Console.Services.UsersTest do
       assert updated.read_timestamp
     end
   end
+
+  describe "#create_access_token/1" do
+    test "a user can create an access token for themselves" do
+      user = insert(:user)
+
+      {:ok, token} = Users.create_access_token(user)
+
+      assert token.token
+      assert token.user_id == user.id
+    end
+  end
+
+  describe "#delete_access_token/2" do
+    test "a user can delete their token" do
+      token = insert(:access_token)
+
+      {:ok, deleted} = Users.delete_access_token(token.token, token.user)
+
+      assert deleted.id == token.id
+      refute refetch(token)
+    end
+
+    test "you cannot delete others tokens" do
+      token = insert(:access_token)
+
+      {:error, _} = Users.delete_access_token(token.token, insert(:user))
+    end
+  end
 end

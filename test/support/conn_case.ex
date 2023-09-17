@@ -15,7 +15,7 @@ defmodule ConsoleWeb.ConnCase do
 
   use ExUnit.CaseTemplate
   import Plug.Conn
-  alias Console.Schema.{User, Cluster}
+  alias Console.Schema.{User, Cluster, AccessToken}
 
   using do
     quote do
@@ -46,5 +46,7 @@ defmodule ConsoleWeb.ConnCase do
     put_req_header(conn, "authorization", "Bearer #{token}")
   end
   def add_auth_headers(conn, %Cluster{deploy_token: token}),
+    do: put_req_header(conn, "authorization", "Token #{token}")
+  def add_auth_headers(conn, %AccessToken{token: token}),
     do: put_req_header(conn, "authorization", "Token #{token}")
 end
