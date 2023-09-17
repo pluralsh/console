@@ -146,6 +146,8 @@ defmodule Console.Factory do
       name: sequence(:provider_name, & "provider-#{&1}"),
       namespace: sequence(:provider_namespace, & "ns-#{&1}"),
       repository: build(:git_repository),
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
       git: %{ref: "master", folder: "providers"}
     }
   end
@@ -200,6 +202,18 @@ defmodule Console.Factory do
   def access_token_audit_factory do
     %Schema.AccessTokenAudit{
       token: build(:access_token)
+    }
+  end
+
+  def deployment_settings_factory do
+    %Schema.DeploymentSettings{
+      name: "global",
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
+      git_policy_id: Ecto.UUID.generate(),
+      create_policy_id: Ecto.UUID.generate(),
+      artifact_repository: build(:git_repository),
+      deployer_repository: build(:git_repository)
     }
   end
 

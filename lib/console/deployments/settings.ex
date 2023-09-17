@@ -1,8 +1,10 @@
 defmodule Console.Deployments.Settings do
+  use Console.Services.Base
   use Nebulex.Caching
+  import Console.Deployments.Policies
   alias Console.Schema.{DeploymentSettings, User}
 
-  @ttl :timer.minutes(45)
+  # @ttl :timer.minutes(45)
 
   @type settings_resp :: {:ok, DeploymentSettings.t} | Console.error
 
@@ -12,7 +14,7 @@ defmodule Console.Deployments.Settings do
   Fetches and caches the global deployment settings object, preloads also fetched along the way
   """
   @spec fetch() :: DeploymentSettings.t | nil
-  @decorate cacheable(cache: Console.Cache, key: :deployment_settings, opts: [ttl: @ttl])
+  # @decorate cacheable(cache: Console.Cache, key: :deployment_settings, opts: [ttl: @ttl])
   def fetch() do
     Console.Repo.get_by(DeploymentSettings, name: "global")
     |> Console.Repo.preload(@preloads)
@@ -33,9 +35,10 @@ defmodule Console.Deployments.Settings do
   """
   @spec update(map, User.t) :: settings_resp
   @decorate cache_evict(cache: Console.Cache, keys: [:deployment_settings])
-  def update(attrs, %User{}) do
+  def update(attrs, %User{} = user) do
     fetch()
     |> DeploymentSettings.changeset(attrs)
-    |> Console.Repo.update()
+    |> allow(user, :write)
+    |> when_ok(:update)
   end
 end

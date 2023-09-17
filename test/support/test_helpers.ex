@@ -1,6 +1,12 @@
 defmodule Console.TestHelpers do
+  import Console.Factory
   alias Console.Schema.Cluster
   alias Console.Deployments.Services
+
+  def deployment_settings(args \\ []) do
+    Console.Cache.flush()
+    insert(:deployment_settings, args)
+  end
 
   def create_service(%Cluster{id: id}, user, attrs), do: Services.create_service(Map.new(attrs), id, user)
 

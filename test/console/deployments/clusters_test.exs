@@ -4,7 +4,7 @@ defmodule Console.Deployments.ClustersTest do
 
   describe "#create_cluster/2" do
     test "it can create a new cluster record" do
-      user = insert(:user)
+      user = admin_user()
       provider = insert(:cluster_provider)
       self = insert(:cluster, self: true)
       git = insert(:git_repository, url: "https://github.com/pluralsh/deploy-operator.git")
@@ -53,6 +53,31 @@ defmodule Console.Deployments.ClustersTest do
       {:ok, %{"deploy-token" => token, "url" => url}} = Services.configuration(svc)
       assert token == cluster.deploy_token
       assert url == Console.conf(:url)
+    end
+
+    test "it will respect rbac" do
+      user = insert(:user)
+      deployment_settings(create_bindings: [%{user_id: user.id}])
+      provider = insert(:cluster_provider)
+      insert(:cluster, self: true)
+
+      {:ok, _} = Clusters.create_cluster(%{
+        name: "test",
+        version: "1.25",
+        provider_id: provider.id,
+        node_pools: [
+          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, user)
+
+      {:error, _} = Clusters.create_cluster(%{
+        name: "another-test",
+        version: "1.25",
+        provider_id: provider.id,
+        node_pools: [
+          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, insert(:user))
     end
   end
 end

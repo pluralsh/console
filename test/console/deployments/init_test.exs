@@ -4,7 +4,7 @@ defmodule Console.Deployments.InitTest do
 
   describe "#setup/0" do
     test "it will setup some initial resources" do
-      insert(:user, bot_name: "console")
+      insert(:user, bot_name: "console", roles: %{admin: true})
       {:ok, res} = Init.setup()
 
       assert res.provider.name == "aws"
@@ -15,6 +15,10 @@ defmodule Console.Deployments.InitTest do
 
       assert res.cluster.name == Console.conf(:cluster_name)
       assert res.cluster.self
+
+      assert res.settings.name == "global"
+      assert res.settings.deployer_repository_id == res.deploy_repo.id
+      assert res.settings.artifact_repository_id == res.artifacts_repo.id
     end
   end
 end

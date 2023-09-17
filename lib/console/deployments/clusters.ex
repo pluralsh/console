@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Clusters do
   use Console.Services.Base
+  import Console.Deployments.Policies
   alias Console.Deployments.Services
   alias Console.Schema.{Cluster, User, ClusterProvider, Service}
 
@@ -9,6 +10,8 @@ defmodule Console.Deployments.Clusters do
   def get_cluster(id), do: Console.Repo.get(Cluster, id)
 
   def get_cluster!(id), do: Console.Repo.get!(Cluster, id)
+
+  def get_provider!(id), do: Console.Repo.get!(ClusterProvider, id)
 
   def get_by_deploy_token(token), do: Console.Repo.get_by(Cluster, deploy_token: token)
 
@@ -28,14 +31,16 @@ defmodule Console.Deployments.Clusters do
     |> add_operation(:cluster, fn _ ->
       %Cluster{}
       |> Cluster.changeset(attrs)
-      |> Console.Repo.insert()
+      |> allow(user, :create)
+      |> when_ok(:insert)
     end)
     |> add_operation(:service, fn %{cluster: cluster} ->
-      Services.operator_service(cluster.deploy_token, cluster.id, user)
+      Services.operator_service(cluster.deploy_token, cluster.id, tmp_admin(user))
     end)
     |> add_operation(:cluster_service, fn %{cluster: cluster} ->
       case Console.Repo.preload(cluster, [:provider]) do
-        %{provider: %ClusterProvider{}} = cluster -> Services.cluster_service(cluster, user)
+        %{provider: %ClusterProvider{}} = cluster ->
+          Services.cluster_service(cluster, tmp_admin(user))
         _ -> {:ok, cluster}
       end
     end)
@@ -52,10 +57,22 @@ defmodule Console.Deployments.Clusters do
   modifies rbac settings for this cluster
   """
   @spec rbac(map, binary, User.t) :: cluster_resp
-  def rbac(attrs, cluster_id, %User{}) do
+  def rbac(attrs, cluster_id, %User{} = user) do
     get_cluster!(cluster_id)
     |> Cluster.rbac_changeset(attrs)
-    |> Console.Repo.update()
+    |> allow(user, :write)
+    |> when_ok(:update)
+  end
+
+  @doc """
+  modifies rbac settings for this provider
+  """
+  @spec provider_rbac(map, binary, User.t) :: cluster_resp
+  def provider_rbac(attrs, provider_id, %User{} = user) do
+    get_provider!(provider_id)
+    |> ClusterProvider.rbac_changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
   end
 
   @spec create_provider(map, User.t) :: cluster_provider_resp
@@ -64,4 +81,6 @@ defmodule Console.Deployments.Clusters do
     |> ClusterProvider.changeset(attrs)
     |> Console.Repo.insert()
   end
+
+  defp tmp_admin(%User{} = user), do: %{user | roles: %{admin: true}}
 end

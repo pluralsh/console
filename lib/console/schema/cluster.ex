@@ -1,6 +1,7 @@
 defmodule Console.Schema.Cluster do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Service, ClusterNodePool, NamespacedName, ClusterProvider, PolicyBinding}
+  alias Console.Deployments.Policies.Rbac
+  alias Console.Schema.{Service, ClusterNodePool, NamespacedName, ClusterProvider, PolicyBinding, User}
 
   schema "clusters" do
     field :name,            :string
@@ -30,6 +31,17 @@ defmodule Console.Schema.Cluster do
       references: :write_policy_id
 
     timestamps()
+  end
+
+  def for_user(query \\ __MODULE__, %User{} = user) do
+    Rbac.globally_readable(query, user, fn query, id, groups ->
+      from(c in query,
+        left_join: b in PolicyBinding,
+          on: b.policy_id == c.read_policy_id or b.policy_id == c.write_policy_id,
+        where: b.user_id == ^id or b.group_id in ^groups,
+        distinct: true
+      )
+    end)
   end
 
   def for_provider(query \\ __MODULE__, provider_id) do

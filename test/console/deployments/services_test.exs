@@ -37,6 +37,36 @@ defmodule Console.Deployments.ServicesTest do
 
       assert secrets["name"] == "value"
     end
+
+    test "it respects rbac" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      git = insert(:git_repository)
+
+      {:ok, _} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+
+      {:error, _} = Services.create_service(%{
+        name: "another-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, insert(:user))
+    end
   end
 
   describe "#update_service/3" do
@@ -88,6 +118,40 @@ defmodule Console.Deployments.ServicesTest do
       assert first.id == revision.id
       assert second.git.ref == "main"
       assert second.git.folder == "k8s"
+    end
+
+    test "it will respect rbac" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      git = insert(:git_repository)
+
+      {:ok, service} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+
+      {:ok, _} = Services.update_service(%{
+        git: %{
+          ref: "master",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "other-value"}, %{name: "name2", value: "value"}]
+      }, service.id, user)
+
+      {:error, _} = Services.update_service(%{
+        git: %{
+          ref: "master",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "other-value"}, %{name: "name2", value: "value"}]
+      }, service.id, insert(:user))
     end
   end
 

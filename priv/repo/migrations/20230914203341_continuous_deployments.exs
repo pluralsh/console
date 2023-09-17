@@ -3,11 +3,13 @@ defmodule Console.Repo.Migrations.ContinuousDeployments do
 
   def change do
     create table(:cluster_providers, primary_key: false) do
-      add :id,             :uuid, primary_key: true
-      add :name,           :string
-      add :namespace,      :string
-      add :cloud,          :string
-      add :cloud_settings, :map
+      add :id,              :uuid, primary_key: true
+      add :name,            :string
+      add :namespace,       :string
+      add :cloud,           :string
+      add :cloud_settings,  :map
+      add :write_policy_id, :uuid
+      add :read_policy_id,  :uuid
 
       timestamps()
     end

@@ -4,7 +4,7 @@ defmodule Console.Deployments.Init do
   """
   use Console.Services.Base
   alias Console.Services.Users
-  alias Console.Deployments.{Clusters, Git}
+  alias Console.Deployments.{Clusters, Git, Settings}
 
   def setup() do
     bot = Users.get_bot!("console")
@@ -27,6 +27,13 @@ defmodule Console.Deployments.Init do
         self: true,
         version: "1.24"
       }, bot)
+    end)
+    |> add_operation(:settings, fn %{deploy_repo: drepo, artifacts_repo: arepo} ->
+      Settings.create(%{
+        name: "global",
+        artifact_repository_id: arepo.id,
+        deployer_repository_id: drepo.id,
+      })
     end)
     |> execute()
   end

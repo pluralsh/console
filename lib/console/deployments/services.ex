@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Services do
   use Console.Services.Base
+  import Console.Deployments.Policies
   alias Console.Schema.{Service, Revision, User, Cluster, ClusterProvider}
   alias Console.Deployments.{Secrets.Store, Git, Clusters}
 
@@ -16,8 +17,12 @@ defmodule Console.Deployments.Services do
   Creates a new service in a cluster, alongside an initial revision for the service
   """
   @spec create_service(map, binary, User.t) :: service_resp
-  def create_service(attrs, cluster_id, %User{}) do
+  def create_service(attrs, cluster_id, %User{} = user) do
     start_transaction()
+    |> add_operation(:check, fn _ ->
+      Clusters.get_cluster(cluster_id)
+      |> allow(user, :write)
+    end)
     |> add_operation(:base, fn _ ->
       %Service{cluster_id: cluster_id}
       |> Service.changeset(add_version(attrs, "0.0.1"))
@@ -32,10 +37,11 @@ defmodule Console.Deployments.Services do
   modifies rbac settings for this service
   """
   @spec rbac(map, binary, User.t) :: service_resp
-  def rbac(attrs, service_id, %User{}) do
+  def rbac(attrs, service_id, %User{} = user) do
     get_service!(service_id)
     |> Service.rbac_changeset(attrs)
-    |> Console.Repo.update()
+    |> allow(user, :write)
+    |> when_ok(:update)
   end
 
   def operator_service(deploy_token, cluster_id, %User{} = user) do
@@ -89,7 +95,15 @@ defmodule Console.Deployments.Services do
   Updates a service and creates a new revision
   """
   @spec update_service(map, binary, User.t) :: service_resp
-  def update_service(attrs, service_id, %User{}), do: update_service(attrs, service_id)
+  def update_service(attrs, service_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:check, fn _ ->
+      get_service!(service_id)
+      |> allow(user, :write)
+    end)
+    |> add_operation(:update, fn %{check: svc} -> update_service(attrs, svc) end)
+    |> execute(extract: :update)
+  end
 
   @doc """
   Updates the sha of a service if relevant
@@ -98,11 +112,12 @@ defmodule Console.Deployments.Services do
   def update_sha(%Service{sha: sha} = svc, sha), do: {:ok, svc}
   def update_sha(%Service{id: id}, sha), do: update_service(%{sha: sha}, id)
 
-  def update_service(attrs, service_id) do
+  def update_service(attrs, svc_id) when is_binary(svc_id),
+    do: update_service(attrs, get_service!(svc_id))
+  def update_service(attrs, %Service{} = svc) do
     start_transaction()
     |> add_operation(:base, fn _ ->
-      get_service!(service_id)
-      |> Service.changeset(attrs)
+      Service.changeset(svc, attrs)
       |> Console.Repo.update()
     end)
     |> add_operation(:revision, fn %{base: base} ->
@@ -143,10 +158,11 @@ defmodule Console.Deployments.Services do
   Schedules a service to be cleaned up and ultimately deleted
   """
   @spec delete_service(binary, User.t) :: service_resp
-  def delete_service(service_id, %User{}) do
+  def delete_service(service_id, %User{} = user) do
     get_service!(service_id)
     |> Ecto.Changeset.change(%{deleted_at: Timex.now()})
-    |> Console.Repo.update()
+    |> allow(user, :write)
+    |> when_ok(:delete)
   end
 
   @doc """

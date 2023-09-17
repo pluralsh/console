@@ -37,9 +37,77 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert ids_equal(found, clusters)
       assert Enum.all?(found, & &1["name"])
     end
+
+    test "it will respect rbac" do
+      user = insert(:user)
+      %{group: group} = insert(:group_member, user: user)
+      clusters = insert_list(3, :cluster, read_bindings: [%{group_id: group.id}])
+      other = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      insert_list(3, :cluster)
+
+      {:ok, %{data: %{"clusters" => found}}} = run_query("""
+        query {
+          clusters(first: 10) { edges { node { id } } }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([other | clusters])
+
+      {:ok, %{data: %{"clusters" => found}}} = run_query("""
+        query {
+          clusters(first: 10) { edges { node { id } } }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert from_connection(found) == []
+    end
   end
 
-  describe "services" do
+  describe "cluster" do
+    test "it can fetch a cluster by id" do
+      cluster = insert(:cluster)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) { id }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin_user()})
+
+      assert found["id"] == cluster.id
+    end
+
+    test "it can fetch by deploy token" do
+      cluster = insert(:cluster)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query { cluster { id } }
+      """, %{"id" => cluster.id}, %{cluster: cluster})
+
+      assert found["id"] == cluster.id
+    end
+
+    test "it respects rbac" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) { id }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert found["id"] == cluster.id
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) { id }
+        }
+      """, %{"id" => cluster.id}, %{current_user: insert(:user)})
+    end
+  end
+
+  describe "serviceDeployments" do
     test "it can list services in the system" do
       cluster = insert(:cluster)
       services = insert_list(3, :service, cluster: cluster)
@@ -56,6 +124,32 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
 
       assert ids_equal(found, services)
       assert Enum.all?(found, & &1["name"])
+    end
+
+    test "it will respect rbac" do
+      user = insert(:user)
+      %{group: group} = insert(:group_member, user: user)
+      cluster = insert(:cluster, write_bindings: [%{group_id: group.id}])
+      svcs  = insert_list(3, :service, cluster: cluster)
+      other = insert(:service, read_bindings: [%{user_id: user.id}])
+      insert_list(3, :service)
+
+      {:ok, %{data: %{"serviceDeployments" => found}}} = run_query("""
+        query {
+          serviceDeployments(first: 10) { edges { node { id } } }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([other | svcs])
+
+      {:ok, %{data: %{"serviceDeployments" => found}}} = run_query("""
+        query {
+          serviceDeployments(first: 10) { edges { node { id } } }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert from_connection(found) == []
     end
   end
 
@@ -119,6 +213,111 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert Enum.all?(found["components"], & &1["synced"])
       assert Enum.all?(found["components"], & &1["group"] == "networking.k8s.io")
       assert Enum.all?(found["components"], & &1["state"] == "RUNNING")
+    end
+
+    test "it respects rbac" do
+      user = insert(:user)
+      service = insert(:service, read_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
+        query serviceDeployment($id: ID!) {
+          serviceDeployment(id: $id) { id }
+        }
+      """, %{"id" => service.id}, %{current_user: user})
+
+      assert found["id"] == service.id
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query serviceDeployment($id: ID!) {
+          serviceDeployment(id: $id) { id }
+        }
+      """, %{"id" => service.id}, %{current_user: insert(:user)})
+    end
+  end
+
+  describe "deploymentSettings" do
+    test "users can fetch settings" do
+      admin = insert(:user)
+      settings = deployment_settings()
+
+      {:ok, %{data: %{"deploymentSettings" => updated}}} = run_query("""
+        query {
+          deploymentSettings {
+            id
+            deployerRepository { id }
+          }
+        }
+      """, %{}, %{current_user: admin})
+
+      assert updated["id"] == settings.id
+      assert updated["deployerRepository"]["id"] == settings.deployer_repository_id
+    end
+  end
+
+  describe "clusterProviders" do
+    test "it will list cluster providers" do
+      user = admin_user()
+      providers = insert_list(3, :cluster_provider)
+
+      {:ok, %{data: %{"clusterProviders" => found}}} = run_query("""
+        query {
+          clusterProviders(first: 5) { edges { node { id } } }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(providers)
+    end
+
+    test "it will respect rbac" do
+      user = insert(:user)
+      %{group: group} = insert(:group_member, user: user)
+      providers = insert_list(3, :cluster_provider, write_bindings: [%{group_id: group.id}])
+      other = insert(:cluster_provider, read_bindings: [%{user_id: user.id}])
+      insert_list(3, :cluster_provider)
+
+      {:ok, %{data: %{"clusterProviders" => found}}} = run_query("""
+        query {
+          clusterProviders(first: 10) { edges { node { id } } }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([other | providers])
+
+      {:ok, %{data: %{"clusterProviders" => found}}} = run_query("""
+        query {
+          clusterProviders(first: 10) { edges { node { id } } }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert from_connection(found) == []
+    end
+  end
+
+  describe "clusterProvider" do
+    test "it can fetch a cluster provider by id" do
+      admin = admin_user()
+      provider = insert(:cluster_provider)
+
+      {:ok, %{data: %{"clusterProvider" => updated}}} = run_query("""
+        query provider($id: ID!) {
+          clusterProvider(id: $id) { id }
+        }
+      """, %{"id" => provider.id}, %{current_user: admin})
+
+      assert updated["id"] == provider.id
+    end
+
+    test "it respects rbac" do
+      admin = insert(:user)
+      provider = insert(:cluster_provider)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query provider($id: ID!) {
+          clusterProvider(id: $id) { id }
+        }
+      """, %{"id" => provider.id}, %{current_user: admin})
     end
   end
 end

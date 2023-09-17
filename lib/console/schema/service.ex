@@ -1,6 +1,8 @@
 defmodule Console.Schema.Service do
   use Piazza.Ecto.Schema
+  alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{
+    User,
     Cluster,
     ClusterProvider,
     GitRepository,
@@ -52,6 +54,26 @@ defmodule Console.Schema.Service do
       references: :write_policy_id
 
     timestamps()
+  end
+
+  def for_user(query \\ __MODULE__, %User{} = user) do
+    Rbac.globally_readable(query, user, fn query, id, groups ->
+      from(s in query,
+        join: c in assoc(s, :cluster),
+        left_join: b in PolicyBinding,
+          on: b.policy_id == c.read_policy_id or b.policy_id == c.write_policy_id
+                or b.policy_id == s.read_policy_id or b.policy_id == s.write_policy_id,
+        where: b.user_id == ^id or b.group_id in ^groups,
+        distinct: true
+      )
+    end)
+  end
+
+  def for_provider(query \\ __MODULE__, provider_id) do
+    from(s in query,
+      join: c in assoc(s, :cluster),
+      where: c.provider_id == ^provider_id
+    )
   end
 
   def for_cluster(query \\ __MODULE__, cluster_id) do

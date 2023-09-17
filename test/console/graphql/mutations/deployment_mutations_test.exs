@@ -18,7 +18,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
 
   describe "createCluster" do
     test "it will create a new cluster" do
-      user = insert(:user)
+      user = admin_user()
       provider = insert(:cluster_provider)
       insert(:cluster, self: true)
       insert(:git_repository, url: "https://github.com/pluralsh/deploy-operator.git")
@@ -160,6 +160,26 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
 
       for {k, v} <- attrs,
         do: assert component[k] == v
+    end
+  end
+
+  describe "updateDeploymentSettings" do
+    test "admins can update settings" do
+      admin = admin_user()
+      settings = deployment_settings()
+      git = insert(:git_repository)
+
+      {:ok, %{data: %{"updateDeploymentSettings" => updated}}} = run_query("""
+        mutation Update($attrs: DeploymentSettingsAttributes!) {
+          updateDeploymentSettings(attributes: $attrs) {
+            id
+            deployerRepository { id }
+          }
+        }
+      """, %{"attrs" => %{"deployerRepositoryId" => git.id}}, %{current_user: admin})
+
+      assert updated["id"] == settings.id
+      assert updated["deployerRepository"]["id"] == git.id
     end
   end
 end

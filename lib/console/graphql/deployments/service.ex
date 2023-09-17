@@ -12,6 +12,8 @@ defmodule Console.GraphQl.Deployments.Service do
     field :repository_id, non_null(:id)
     field :git,           non_null(:git_ref_attributes)
     field :configuration, list_of(:config_attributes)
+    field :read_bindings, list_of(:policy_binding_attributes)
+    field :write_bindings, list_of(:policy_binding_attributes)
   end
 
   input_object :service_update_attributes do
@@ -50,6 +52,9 @@ defmodule Console.GraphQl.Deployments.Service do
     field :tarball,   :string, resolve: &Deployments.tarball/3
 
     field :repository, :git_repository, resolve: dataloader(Deployments)
+
+    field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
+    field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
 
     field :configuration, list_of(:service_configuration), resolve: &Deployments.service_configuration/3
     field :components, list_of(:service_component), resolve: dataloader(Deployments)
@@ -97,7 +102,7 @@ defmodule Console.GraphQl.Deployments.Service do
   object :service_queries do
     connection field :service_deployments, node_type: :service_deployment do
       middleware Authenticated
-      arg :cluster_id, non_null(:id)
+      arg :cluster_id, :id
 
       resolve &Deployments.list_services/2
     end

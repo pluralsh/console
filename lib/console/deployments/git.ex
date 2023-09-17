@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Git do
   use Console.Services.Base
+  import Console.Deployments.Policies
   alias Console.Deployments.Settings
   alias Console.Schema.{GitRepository, User, DeploymentSettings}
 
@@ -31,10 +32,11 @@ defmodule Console.Deployments.Git do
   Creates a new git repository and spawns a sync agent on the relevant node
   """
   @spec create_repository(map, User.t) :: repository_resp
-  def create_repository(attrs, %User{}) do
+  def create_repository(attrs, %User{} = user) do
     %GitRepository{}
     |> GitRepository.changeset(attrs)
-    |> Console.Repo.insert()
+    |> allow(user, :git)
+    |> when_ok(:insert)
   end
 
   def status(%GitRepository{} = repo, status) do
