@@ -26,6 +26,7 @@ defmodule Console.Deployments.Init do
       Clusters.create_provider(%{
         name: "#{Console.conf(:provider)}",
         namespace: "bootstrap",
+        self: true,
         cloud: "#{Console.conf(:provider)}"
       }, bot)
     end)

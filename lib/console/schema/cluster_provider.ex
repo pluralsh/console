@@ -101,6 +101,12 @@ defmodule Console.Schema.ClusterProvider do
     |> validate_required([:name, :namespace])
   end
 
+  def update_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:cloud_settings)
+  end
+
   def rbac_changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, [])

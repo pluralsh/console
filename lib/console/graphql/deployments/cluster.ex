@@ -11,6 +11,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :write_bindings, list_of(:policy_binding_attributes)
   end
 
+  input_object :cluster_update_attributes do
+    field :version,       non_null(:string)
+    field :node_pools,    list_of(:node_pool_attributes)
+    field :read_bindings, list_of(:policy_binding_attributes)
+    field :write_bindings, list_of(:policy_binding_attributes)
+  end
+
   input_object :node_pool_attributes do
     field :name,           non_null(:string)
     field :min_size,       non_null(:integer)
@@ -39,6 +46,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :name,           non_null(:string)
     field :namespace,      :string
     field :cloud,          :string
+    field :cloud_settings, :cloud_provider_settings_attributes
+  end
+
+  input_object :cluster_provider_update_attributes do
     field :cloud_settings, :cloud_provider_settings_attributes
   end
 
@@ -155,6 +166,22 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :attributes, non_null(:cluster_provider_attributes)
 
       safe_resolve &Deployments.create_provider/2
+    end
+
+    field :update_cluster, :cluster do
+      middleware Authenticated
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:cluster_update_attributes)
+
+      safe_resolve &Deployments.update_cluster/2
+    end
+
+    field :update_cluster_provider, :cluster_provider do
+      middleware Authenticated
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:cluster_provider_update_attributes)
+
+      safe_resolve &Deployments.update_provider/2
     end
   end
 end

@@ -92,6 +92,12 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def create_provider(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Clusters.create_provider(attrs, user)
 
+  def update_cluster(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Clusters.update_cluster(attrs, id, user)
+
+  def update_provider(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Clusters.update_provider(attrs, id, user)
+
   def create_service(%{attributes: attrs, cluster_id: id}, %{context: %{current_user: user}}),
     do: Services.create_service(attrs, id, user)
 

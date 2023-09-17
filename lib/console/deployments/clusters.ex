@@ -54,27 +54,29 @@ defmodule Console.Deployments.Clusters do
   end
 
   @doc """
-  modifies rbac settings for this cluster
+  It will update cluster settings
   """
-  @spec rbac(map, binary, User.t) :: cluster_resp
-  def rbac(attrs, cluster_id, %User{} = user) do
-    get_cluster!(cluster_id)
-    |> Cluster.rbac_changeset(attrs)
-    |> allow(user, :write)
-    |> when_ok(:update)
+  @spec update_cluster(map, binary, User.t) :: cluster_resp
+  def update_cluster(attrs, id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:cluster, fn _ ->
+      get_cluster!(id)
+      |> Console.Repo.preload([:node_pools])
+      |> Cluster.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:svc, fn
+      %{cluster: %{service_id: id} = cluster} when is_binary(id) ->
+        cluster_service(cluster, user)
+      %{cluster: cluster} -> {:ok, cluster}
+    end)
+    |> execute(extract: :cluster)
   end
 
   @doc """
-  modifies rbac settings for this provider
+  Creates a new capi provider and configures deployment into the management cluster
   """
-  @spec provider_rbac(map, binary, User.t) :: cluster_resp
-  def provider_rbac(attrs, provider_id, %User{} = user) do
-    get_provider!(provider_id)
-    |> ClusterProvider.rbac_changeset(attrs)
-    |> allow(user, :write)
-    |> when_ok(:update)
-  end
-
   @spec create_provider(map, User.t) :: cluster_provider_resp
   def create_provider(attrs, %User{} = user) do
     start_transaction()
@@ -95,6 +97,48 @@ defmodule Console.Deployments.Clusters do
         |> Console.Repo.update()
     end)
     |> execute(extract: :rewire)
+  end
+
+  @doc """
+  It will update capi provider settings
+  """
+  @spec update_provider(map, binary, User.t) :: cluster_provider_resp
+  def update_provider(attrs, id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:provider, fn _ ->
+      get_provider!(id)
+      |> ClusterProvider.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:svc, fn
+      %{provider: %{service_id: id} = provider} when is_binary(id) ->
+        provider_service(provider, user)
+      %{provider: provider} -> {:ok, provider}
+    end)
+    |> execute(extract: :provider)
+  end
+
+  @doc """
+  modifies rbac settings for this cluster
+  """
+  @spec rbac(map, binary, User.t) :: cluster_resp
+  def rbac(attrs, cluster_id, %User{} = user) do
+    get_cluster!(cluster_id)
+    |> Cluster.rbac_changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+  end
+
+  @doc """
+  modifies rbac settings for this provider
+  """
+  @spec provider_rbac(map, binary, User.t) :: cluster_resp
+  def provider_rbac(attrs, provider_id, %User{} = user) do
+    get_provider!(provider_id)
+    |> ClusterProvider.rbac_changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
   end
 
   defp cluster_service(%Cluster{service_id: nil, provider: %ClusterProvider{} = provider} = cluster, %User{} = user) do

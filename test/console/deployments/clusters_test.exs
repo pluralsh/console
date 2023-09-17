@@ -81,6 +81,51 @@ defmodule Console.Deployments.ClustersTest do
     end
   end
 
+  describe "#update_cluster/2" do
+    test "it can create a new cluster record" do
+      user = admin_user()
+      provider = insert(:cluster_provider)
+      insert(:cluster, self: true)
+      insert(:git_repository, url: "https://github.com/pluralsh/deploy-operator.git")
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        version: "1.25",
+        provider_id: provider.id,
+        node_pools: [
+          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, user)
+
+      {:ok, cluster} = Clusters.update_cluster(%{
+        version: "1.25",
+        node_pools: [
+          %{name: "pool", min_size: 2, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, cluster.id, user)
+
+      [pool] = cluster.node_pools
+      assert pool.min_size == 2
+      %{service: svc} = Console.Repo.preload(cluster, [:service])
+
+      {:ok, %{"version" => vsn, "node-pools" => pools, "cluster-name" => name}} = Services.configuration(svc)
+      assert name == cluster.name
+      assert vsn == cluster.version
+      [node_pool] = Jason.decode!(pools)
+      assert node_pool["name"] == pool.name
+      assert node_pool["min_size"] == pool.min_size
+      assert node_pool["max_size"] == pool.max_size
+      assert node_pool["instance_type"] == "t5.large"
+
+      {:error, _} = Clusters.update_cluster(%{
+        version: "1.25",
+        node_pools: [
+          %{name: "pool", min_size: 2, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, cluster.id, insert(:user))
+    end
+  end
+
   describe "#create_provider/2" do
     test "it will create a new capi provider deployment" do
       user = insert(:user)
@@ -114,6 +159,32 @@ defmodule Console.Deployments.ClustersTest do
         name: "aws-sandbox-two",
         cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
       }, insert(:user))
+    end
+  end
+
+  describe "#update_provider/3" do
+    test "it can update a cluster provider" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+
+      {:ok, provider} = Clusters.create_provider(%{
+        name: "aws-sandbox",
+        cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
+      }, user)
+
+      {:ok, updated} = Clusters.update_provider(%{
+        cloud_settings: %{aws: %{access_key_id: "aid2", secret_access_key: "sak2"}}
+      }, provider.id, user)
+
+      %{service: svc} = Console.Repo.preload(updated, [:service])
+      {:ok, secrets} = Services.configuration(svc)
+      assert secrets["access-key-id"] == "aid2"
+      assert secrets["secret-access-key"] == "sak2"
+
+      {:error, _} = Clusters.update_provider(%{
+        cloud_settings: %{aws: %{access_key_id: "aid2", secret_access_key: "sak2"}}
+      }, provider.id, insert(:user))
     end
   end
 end

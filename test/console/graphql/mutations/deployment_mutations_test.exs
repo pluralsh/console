@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.DeploymentMutationsTest do
   use Console.DataCase, async: true
+  alias Console.Deployments.Clusters
 
   describe "createGitRepository" do
     test "it will create a new git repo" do
@@ -52,6 +53,42 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
+  describe "updateCluster" do
+    test "it can update a cluster" do
+      user = admin_user()
+      provider = insert(:cluster_provider)
+      insert(:cluster, self: true)
+      insert(:git_repository, url: "https://github.com/pluralsh/deploy-operator.git")
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        version: "1.25",
+        provider_id: provider.id,
+        node_pools: [
+          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, user)
+
+      {:ok, %{data: %{"updateCluster" => updated}}} = run_query("""
+        mutation Create($id: ID!, $attributes: ClusterUpdateAttributes!) {
+          updateCluster(id: $id, attributes: $attributes) {
+            id
+            version
+            nodePools { id name minSize maxSize instanceType }
+          }
+        }
+      """, %{"id" => cluster.id, "attributes" => %{
+        "version" => "1.25",
+        "nodePools" => [%{"name" => "pool", "minSize" => 2, "maxSize" => 10, "instanceType" => "t5.large"}]
+      }}, %{current_user: user})
+
+      assert updated["id"] == cluster.id
+      assert updated["version"] == "1.25"
+      [pool] = updated["nodePools"]
+      assert pool["minSize"] == 2
+    end
+  end
+
   describe "createClusterProvider" do
     test "it can create a new provider" do
       user = insert(:user)
@@ -68,6 +105,29 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       }}, %{current_user: user})
 
       assert created["id"]
+    end
+  end
+
+  describe "updateClusterProvider" do
+    test "it can update a cluster provider" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+
+      {:ok, provider} = Clusters.create_provider(%{
+        name: "aws-sandbox",
+        cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
+      }, user)
+
+      {:ok, %{data: %{"updateClusterProvider" => update}}} = run_query("""
+        mutation create($id: ID!, $attrs: ClusterProviderUpdateAttributes!) {
+          updateClusterProvider(id: $id, attributes: $attrs) { id }
+        }
+      """, %{"id" => provider.id, "attrs" => %{
+        "cloudSettings" => %{"aws" => %{"accessKeyId" => "aid", "secretAccessKey" => "sak"}}
+      }}, %{current_user: user})
+
+      assert update["id"] == provider.id
     end
   end
 

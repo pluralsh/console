@@ -9,6 +9,7 @@ defmodule Console.Deployments.InitTest do
 
       assert res.provider.name == "aws"
       assert res.provider.namespace == "bootstrap"
+      assert res.provider.self
 
       assert res.deploy_repo.url == Git.deploy_url()
       assert res.artifacts_repo.url == Git.artifacts_url()

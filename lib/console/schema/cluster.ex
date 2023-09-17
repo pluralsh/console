@@ -19,7 +19,7 @@ defmodule Console.Schema.Cluster do
 
     belongs_to :provider, ClusterProvider
     belongs_to :service,  Service
-    has_many :node_pools, ClusterNodePool
+    has_many :node_pools, ClusterNodePool, on_replace: :delete
 
     has_many :read_bindings, PolicyBinding,
       on_replace: :delete,
@@ -68,6 +68,12 @@ defmodule Console.Schema.Cluster do
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> update_vsn()
     |> validate_required(~w(name version)a)
+  end
+
+  def update_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, ~w(version)a)
+    |> cast_assoc(:node_pools)
   end
 
   def rbac_changeset(model, attrs \\ %{}) do
