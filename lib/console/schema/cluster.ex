@@ -45,6 +45,6 @@ defmodule Console.Schema.Cluster do
     |> put_new_change(:deploy_token, fn -> "deploy-#{Console.rand_alphanum(20)}" end)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
-    |> validate_required(~w(provider_id name version)a)
+    |> validate_required(~w(name version)a)
   end
 end

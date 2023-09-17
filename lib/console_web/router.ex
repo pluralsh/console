@@ -7,6 +7,7 @@ defmodule ConsoleWeb.Router do
 
   pipeline :auth do
     plug ConsoleWeb.GuardianPipeline
+    plug ConsoleWeb.Plugs.DeployToken
     plug ConsoleWeb.Plugs.AbsintheContext
     plug ConsoleWeb.Plugs.Authorized
   end
@@ -30,6 +31,7 @@ defmodule ConsoleWeb.Router do
 
     scope "/v1", ConsoleWeb do
       get "/logs/:repo/download", LogController, :download
+      get "/git/tarballs", GitController, :tarball
     end
 
     forward "/gql", Absinthe.Plug,

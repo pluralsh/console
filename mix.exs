@@ -118,6 +118,8 @@ defmodule Console.MixProject do
       {:remote_ip, "~> 0.2.0"},
       {:erlsom, "~> 1.4"},
       {:websockex, "~> 0.4"},
+      {:briefly, "~> 0.4.0"},
+      {:libring, "~> 1.0"},
       {:phoenix_client, "~> 0.11", git: "https://github.com/michaeljguarino/phoenix_client.git", branch: "mguarino/channel-listen"},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
       {:elixpath, "~> 0.1.1", git: "https://github.com/mtannaan/elixpath.git"},

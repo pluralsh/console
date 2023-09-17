@@ -16,6 +16,7 @@ defmodule Console.Application do
       Console.Cron,
       Console.Cache,
       Console.ReplicatedCache,
+      {Registry, [keys: :unique, name: Console.Deployments.Git.Agent.registry()]},
       {Cluster.Supervisor, [topologies, [name: Console.ClusterSupervisor]]},
       Console.Bootstrapper,
       {Absinthe.Subscription, [ConsoleWeb.Endpoint]},
@@ -23,6 +24,8 @@ defmodule Console.Application do
       Console.Cached.Pod,
       Console.Cached.VPN,
       Console.Cached.Node,
+      Console.Deployments.Git.Supervisor,
+      Console.Deployments.Git.Kick,
       {OpenIDConnect.Worker, Application.get_env(:console, :oidc_providers)},
     ] ++ consumers() ++ [
       Piazza.GracefulShutdown

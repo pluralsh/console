@@ -15,4 +15,9 @@ defmodule Console.Deployments.Git do
     |> GitRepository.changeset(attrs)
     |> Console.Repo.insert()
   end
+
+  def status(%GitRepository{} = repo, status) do
+    GitRepository.status_changeset(repo, status)
+    |> Console.Repo.update()
+  end
 end

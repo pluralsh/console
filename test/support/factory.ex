@@ -151,7 +151,8 @@ defmodule Console.Factory do
   def cluster_factory do
     %Schema.Cluster{
       provider: build(:cluster_provider),
-      name: sequence(:cluster_name, & "cluster-#{&1}")
+      name: sequence(:cluster_name, & "cluster-#{&1}"),
+      deploy_token: sequence(:deploy_token, & "deploy-#{&1}"),
     }
   end
 

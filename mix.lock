@@ -11,6 +11,7 @@
   "aten": {:hex, :aten, "0.5.5", "25f619b171f673bbf35be7de2323102fff731bf832d7f2eade4db6e43d48226f", [:rebar3], [], "hexpm", "ac1d4143b06ee547efada2eac57efe744362a35a9ab5d52ef61d054af8028117"},
   "botanist": {:git, "https://github.com/michaeljguarino/botanist.git", "10244d96a88c3a5aa4f77f343bbb59643c623986", [branch: "ecto3"]},
   "bourne": {:hex, :bourne, "1.1.0", "60a8bb3d5ad533a3a18257de9304e70e6bb2f4d7f354a529ef3f47c327c2dd97", [:mix], [{:ecto, "~> 2.1", [hex: :ecto, repo: "hexpm", optional: false]}], "hexpm", "81a389611ad067dc305d5ba4674280ea2b99ef012bca5e7de48357545edc05bc"},
+  "briefly": {:hex, :briefly, "0.4.1", "c90c0511e64bde1fe8da7e244e14acf5bc78c3f6d033db778205e1fa2feafa5c", [:mix], [], "hexpm", "fc0cafcd19c4ed0d0906ae5cf627cc6ce76b8652a160c6bde0ab9d77304ebb0a"},
   "castore": {:hex, :castore, "0.1.7", "1ca19eee705cde48c9e809e37fdd0730510752cc397745e550f6065a56a701e9", [:mix], [], "hexpm", "a2ae2c13d40e9c308387f1aceb14786dca019ebc2a11484fb2a9f797ea0aa0d8"},
   "certifi": {:hex, :certifi, "2.9.0", "6f2a475689dd47f19fb74334859d460a2dc4e3252a3324bd2111b8f0429e7e21", [:rebar3], [], "hexpm", "266da46bdb06d6c6d35fde799bcb28d36d985d424ad7c08b5bb48f5b5cdd4641"},
   "combine": {:hex, :combine, "0.10.0", "eff8224eeb56498a2af13011d142c5e7997a80c8f5b97c499f84c841032e429f", [:mix], [], "hexpm", "1b1dbc1790073076580d0d1d64e42eae2366583e7aecd455d1215b0d16f2451b"},

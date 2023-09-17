@@ -131,6 +131,33 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
   end
 
   describe "updateServiceComponents" do
+    test "it will post updates to the components of the service in a cluster" do
+      cluster = insert(:cluster)
+      service = insert(:service, cluster: cluster)
+      attrs = %{
+        "name" => "name",
+        "namespace" => "namespace",
+        "group" => "networking.k8s.io",
+        "version" => "v1",
+        "kind" => "ingress",
+        "synced" => true,
+        "state" => "RUNNING"
+      }
 
+      {:ok, %{data: %{"updateServiceComponents" => svc}}} = run_query("""
+        mutation Update($components: [ServiceComponents], $id: ID!) {
+          updateServiceComponents(id: $id, components: $components) {
+            id
+            components { name kind namespace group version kind synced state }
+          }
+        }
+      """, %{"id" => service.id, "components" => [attrs]}, %{cluster: cluster})
+
+      assert svc["id"] == service.id
+      [component] = svc["components"]
+
+      for {k, v} <- attrs,
+        do: assert component[k] == v
+    end
   end
 end

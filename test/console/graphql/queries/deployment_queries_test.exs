@@ -59,6 +59,23 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
     end
   end
 
+  describe "clusterServices" do
+    test "it can fetch the services for a cluster" do
+      cluster = insert(:cluster)
+      services = insert_list(3, :service, cluster: cluster)
+      insert_list(3, :service)
+
+      {:ok, %{data: %{"clusterServices" => svcs}}} = run_query("""
+        query {
+          clusterServices { id tarball }
+        }
+      """, %{}, %{cluster: cluster})
+
+      assert ids_equal(svcs, services)
+      assert Enum.all?(svcs, & &1["tarball"])
+    end
+  end
+
   describe "serviceDeployment" do
     test "it can fetch a services configuration and revisions" do
       user = admin_user()

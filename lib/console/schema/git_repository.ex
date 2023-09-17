@@ -13,6 +13,10 @@ defmodule Console.Schema.GitRepository do
     field :passphrase,   :string
     field :username,     :string
     field :password,     Piazza.Ecto.EncryptedString
+    field :error,        :string
+
+    field :dir,              :string, virtual: true
+    field :private_key_file, :string, virtual: true
 
     timestamps()
   end
@@ -27,6 +31,11 @@ defmodule Console.Schema.GitRepository do
     model
     |> cast(attrs, @valid)
     |> add_auth_method()
+  end
+
+  def status_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, ~w(pulled_at error health)a)
   end
 
   defp add_auth_method(cs) do

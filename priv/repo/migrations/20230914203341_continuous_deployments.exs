@@ -52,6 +52,7 @@ defmodule Console.Repo.Migrations.ContinuousDeployments do
       add :passphrase,   :string
       add :username,     :string
       add :password,     :string
+      add :error,        :binary
 
       timestamps()
     end

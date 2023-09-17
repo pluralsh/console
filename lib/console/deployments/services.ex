@@ -1,12 +1,16 @@
 defmodule Console.Deployments.Services do
   use Console.Services.Base
-  alias Console.Schema.{Service, Revision, User}
+  alias Console.Schema.{Service, Revision, User, Cluster}
   alias Console.Deployments.Secrets.Store
 
   @type service_resp :: {:ok, Service.t} | Console.error
   @type revision_resp :: {:ok, Revision.t} | Console.error
 
   def get_service!(id), do: Console.Repo.get!(Service, id)
+
+  def get_service(id), do: Console.Repo.get(Service, id)
+
+  def tarball(%Service{id: id}), do: Console.url("/v1/git/tarballs?id=#{id}")
 
   @doc """
   Creates a new service in a cluster, alongside an initial revision for the service
@@ -24,11 +28,28 @@ defmodule Console.Deployments.Services do
     |> execute(extract: :service)
   end
 
+  @spec authorized(binary, Cluster.t) :: service_resp
+  def authorized(service_id, %Cluster{id: id}) do
+    case get_service(service_id) do
+      %Service{cluster_id: ^id} = svc -> {:ok, svc}
+      _ -> {:error, "could not find #{service_id} in cluster #{id}"}
+    end
+  end
+
   @doc """
   Updates a service and creates a new revision
   """
   @spec update_service(map, binary, User.t) :: service_resp
-  def update_service(attrs, service_id, %User{}) do
+  def update_service(attrs, service_id, %User{}), do: update_service(attrs, service_id)
+
+  @doc """
+  Updates the sha of a service if relevant
+  """
+  @spec update_sha(Service.t, binary) :: service_resp
+  def update_sha(%Service{sha: sha} = svc, sha), do: {:ok, svc}
+  def update_sha(%Service{id: id}, sha), do: update_service(%{sha: sha}, id)
+
+  def update_service(attrs, service_id) do
     start_transaction()
     |> add_operation(:base, fn _ ->
       get_service!(service_id)
@@ -37,14 +58,18 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:revision, fn %{base: base} ->
       add_version(attrs, base.version)
-      |> Map.put_new(:git, Map.take(base.git, ~w(ref folder)a))
+      |> Console.dedupe(:git, Map.take(base.git, ~w(ref folder)a))
+      |> Console.dedupe(:configuration, fn ->
+        {:ok, secrets} = configuration(base)
+        Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)
+      end)
       |> create_revision(base)
     end)
     |> add_revision()
     |> execute(extract: :service)
   end
 
-  defp add_version(attrs, vsn), do: Map.put_new(attrs, :version, vsn)
+  defp add_version(attrs, vsn), do: Console.dedupe(attrs, :version, vsn)
 
   @doc """
   Updates the list of service components, separate operation to avoid creating a no-op revision
@@ -58,6 +83,12 @@ defmodule Console.Deployments.Services do
   end
   def update_components(attrs, service_id) when is_binary(service_id),
     do: update_components(attrs, get_service!(service_id))
+
+  @spec update_components([map], binary, Cluster.t) :: service_resp
+  def update_components(components, service_id, %Cluster{} = cluster) do
+    with {:ok, svc} <- authorized(service_id, cluster),
+      do: update_components(%{components: components}, svc)
+  end
 
   @doc """
   Schedules a service to be cleaned up and ultimately deleted
@@ -73,6 +104,7 @@ defmodule Console.Deployments.Services do
   Fetches a service's configuration from the configured store
   """
   @spec configuration(Service.t) :: Store.secrets_resp
+  def configuration(%Service{revision_id: nil}), do: {:ok, %{}}
   def configuration(%Service{revision_id: revision_id}), do: secret_store().fetch(revision_id)
 
   @doc """

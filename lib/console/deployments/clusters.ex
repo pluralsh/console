@@ -6,6 +6,8 @@ defmodule Console.Deployments.Clusters do
 
   def get_cluster(id), do: Console.Repo.get(Cluster, id)
 
+  def get_by_deploy_token(token), do: Console.Repo.get_by(Cluster, deploy_token: token)
+
   @doc """
   creates a new cluster and a service alongside to deploy the cluster via CAPI
   """

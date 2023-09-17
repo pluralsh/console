@@ -22,6 +22,12 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> paginate(args)
   end
 
+  def cluster_services(_, %{context: %{cluster: %{id: id}}}) do
+    Service.for_cluster(id)
+    |> Service.ordered()
+    |> all()
+  end
+
   def list_revisions(%{id: id}, args, _) do
     Revision.for_service(id)
     |> Revision.ordered()
@@ -57,6 +63,11 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def delete_service(%{id: id}, %{context: %{current_user: user}}),
     do: Services.delete_service(id, user)
 
+  def update_service_components(%{components: components, id: id}, %{context: %{cluster: cluster}}),
+    do: Services.update_components(components, id, cluster)
+
   def create_git_repository(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Git.create_repository(attrs, user)
+
+  def tarball(svc, _, _), do: {:ok, Services.tarball(svc)}
 end

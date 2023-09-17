@@ -3,6 +3,8 @@ defmodule Console do
 
   @chars String.codepoints("abcdefghijklmnopqrstuvwxyz")
 
+  def url(path), do: Path.join(Console.conf(:url), path)
+
   def is_set(var) do
     case System.get_env(var) do
       "" -> false
@@ -10,6 +12,30 @@ defmodule Console do
       _ -> true
     end
   end
+
+  def dedupe(attrs, key, val) do
+    as_string = Atom.to_string(key)
+    case attrs do
+      %{^key => _} -> attrs
+      %{^as_string => _} -> attrs
+      _ -> put_new(attrs, key, val)
+    end
+  end
+
+  def ls_r(path \\ ".") do
+    cond do
+      File.regular?(path) -> [path]
+      File.dir?(path) ->
+        File.ls!(path)
+        |> Enum.map(&Path.join(path, &1))
+        |> Enum.map(&ls_r/1)
+        |> Enum.concat()
+      true -> []
+    end
+  end
+
+  def put_new(attrs, key, val) when is_function(val), do: Map.put_new_lazy(attrs, key, val)
+  def put_new(attrs, key, val), do: Map.put_new(attrs, key, val)
 
   def merge(list) when is_list(list) do
     Enum.reduce(list, %{}, &Map.merge(&2, &1))

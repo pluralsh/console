@@ -30,6 +30,16 @@ defmodule Console.GraphQl.Deployments.Service do
     field :value, non_null(:string)
   end
 
+  input_object :component_attributes do
+    field :state,      :component_state
+    field :synced,     non_null(:boolean)
+    field :group,      non_null(:string)
+    field :version,    non_null(:string)
+    field :kind,       non_null(:string)
+    field :namespace,  non_null(:string)
+    field :name,       non_null(:string)
+  end
+
   object :service_deployment do
     field :id,        non_null(:id)
     field :name,      non_null(:string)
@@ -37,6 +47,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :version,   non_null(:string)
     field :git,       non_null(:git_ref)
     field :sha,       :string
+    field :tarball,   :string, resolve: &Deployments.tarball/3
 
     field :repository, :git_repository, resolve: dataloader(Deployments)
 
@@ -97,6 +108,12 @@ defmodule Console.GraphQl.Deployments.Service do
 
       resolve &Deployments.resolve_service/2
     end
+
+    field :cluster_services, list_of(:service_deployment) do
+      middleware ClusterAuthenticated
+
+      resolve &Deployments.cluster_services/2
+    end
   end
 
   object :service_mutations do
@@ -114,6 +131,14 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :attributes, non_null(:service_update_attributes)
 
       safe_resolve &Deployments.update_service/2
+    end
+
+    field :update_service_components, :service_deployment do
+      middleware ClusterAuthenticated
+      arg :id, non_null(:id)
+      arg :components, list_of(:component_attributes)
+
+      safe_resolve &Deployments.update_service_components/2
     end
   end
 end
