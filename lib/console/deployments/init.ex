@@ -9,12 +9,6 @@ defmodule Console.Deployments.Init do
   def setup() do
     bot = Users.get_bot!("console")
     start_transaction()
-    |> add_operation(:provider, fn _ ->
-      Clusters.create_provider(%{
-        name: "#{Console.conf(:provider)}",
-        namespace: "bootstrap"
-      }, bot)
-    end)
     |> add_operation(:deploy_repo, fn _ ->
       Git.create_repository(%{url: Git.deploy_url()}, bot)
     end)
@@ -26,6 +20,13 @@ defmodule Console.Deployments.Init do
         name: Console.conf(:cluster_name),
         self: true,
         version: "1.24"
+      }, bot)
+    end)
+    |> add_operation(:provider, fn _ ->
+      Clusters.create_provider(%{
+        name: "#{Console.conf(:provider)}",
+        namespace: "bootstrap",
+        cloud: "#{Console.conf(:provider)}"
       }, bot)
     end)
     |> add_operation(:settings, fn %{deploy_repo: drepo, artifacts_repo: arepo} ->

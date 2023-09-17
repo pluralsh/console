@@ -48,7 +48,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :aws_settings_attributes do
-    field :acccess_key_id,    non_null(:string)
+    field :access_key_id,    non_null(:string)
     field :secret_access_key, non_null(:string)
   end
 
@@ -150,7 +150,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
       safe_resolve &Deployments.create_cluster/2
     end
 
-    field :create_provider, :cluster_provider do
+    field :create_cluster_provider, :cluster_provider do
       middleware Authenticated
       arg :attributes, non_null(:cluster_provider_attributes)
 

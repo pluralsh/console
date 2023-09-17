@@ -8,6 +8,7 @@ defmodule Console.Repo.Migrations.ContinuousDeployments do
       add :namespace,       :string
       add :cloud,           :string
       add :cloud_settings,  :map
+      add :self,            :boolean
       add :write_policy_id, :uuid
       add :read_policy_id,  :uuid
 

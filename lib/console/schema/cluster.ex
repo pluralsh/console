@@ -52,7 +52,7 @@ defmodule Console.Schema.Cluster do
     from(c in query, order_by: ^order)
   end
 
-  @valid ~w(provider_id self version current_version name)a
+  @valid ~w(provider_id service_id self version current_version name)a
 
   def changeset(model, attrs \\ %{}) do
     model

@@ -44,6 +44,7 @@ defmodule Console.Schema.ClusterProvider do
     field :name,            :string
     field :namespace,       :string
     field :cloud,           :string
+    field :self,            :boolean
     field :write_policy_id, :binary_id
     field :read_policy_id,  :binary_id
 
@@ -80,7 +81,7 @@ defmodule Console.Schema.ClusterProvider do
     from(p in query, order_by: ^order)
   end
 
-  @valid ~w(name namespace cloud repository_id service_id)a
+  @valid ~w(name namespace cloud repository_id service_id self)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -96,6 +97,7 @@ defmodule Console.Schema.ClusterProvider do
     |> unique_constraint(:name)
     |> backfill_namespace()
     |> backfill_cloud()
+    |> backfill_git()
     |> validate_required([:name, :namespace])
   end
 
@@ -108,7 +110,7 @@ defmodule Console.Schema.ClusterProvider do
 
   defp backfill_namespace(cs) do
     name = get_field(cs, :name)
-    put_new_change(cs, :namespace, fn -> "plrl-provider-#{name}" end)
+    put_new_change(cs, :namespace, fn -> "plrl-capi-#{name}" end)
   end
 
   defp backfill_cloud(cs) do
@@ -122,5 +124,10 @@ defmodule Console.Schema.ClusterProvider do
         put_new_change(cs, :cloud, fn -> "azure" end)
       true -> cs
     end
+  end
+
+  defp backfill_git(cs) do
+    cloud = get_field(cs, :cloud)
+    put_new_change(cs, :git, fn -> %{ref: "main", folder: "capi/clusters/#{cloud}"} end)
   end
 end

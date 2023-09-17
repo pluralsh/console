@@ -52,6 +52,25 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
+  describe "createClusterProvider" do
+    test "it can create a new provider" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings(create_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"createClusterProvider" => created}}} = run_query("""
+        mutation create($attrs: ClusterProviderAttributes!) {
+          createClusterProvider(attributes: $attrs) { id }
+        }
+      """, %{"attrs" => %{
+        "name" => "aws-sandbox",
+        "cloudSettings" => %{"aws" => %{"accessKeyId" => "aid", "secretAccessKey" => "sak"}}
+      }}, %{current_user: user})
+
+      assert created["id"]
+    end
+  end
+
   describe "createService" do
     test "it can create a new service" do
       cluster = insert(:cluster)

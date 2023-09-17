@@ -80,4 +80,40 @@ defmodule Console.Deployments.ClustersTest do
       }, insert(:user))
     end
   end
+
+  describe "#create_provider/2" do
+    test "it will create a new capi provider deployment" do
+      user = insert(:user)
+      self = insert(:cluster, self: true)
+      settings = deployment_settings(write_bindings: [%{user_id: user.id}])
+
+      {:ok, provider} = Clusters.create_provider(%{
+        name: "aws-sandbox",
+        cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
+      }, user)
+
+      assert provider.name == "aws-sandbox"
+      assert provider.namespace == "plrl-capi-aws-sandbox"
+      assert provider.repository_id == settings.artifact_repository_id
+      assert provider.git.folder == "capi/clusters/aws"
+      assert provider.git.ref == "main"
+
+      %{service: svc} = Console.Repo.preload(provider, [:service])
+      assert svc.repository_id == settings.artifact_repository_id
+      assert svc.name == "capi-#{provider.name}"
+      assert svc.git.folder == "capi/providers/aws"
+      assert svc.git.ref == "main"
+      assert svc.namespace == provider.namespace
+      assert svc.cluster_id == self.id
+
+      {:ok, secrets} = Services.configuration(svc)
+      assert secrets["access-key-id"] == "aid"
+      assert secrets["secret-access-key"] == "sak"
+
+      {:error, _} = Clusters.create_provider(%{
+        name: "aws-sandbox-two",
+        cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
+      }, insert(:user))
+    end
+  end
 end

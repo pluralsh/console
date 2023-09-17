@@ -1,7 +1,7 @@
 defmodule Console.Deployments.Services do
   use Console.Services.Base
   import Console.Deployments.Policies
-  alias Console.Schema.{Service, Revision, User, Cluster, ClusterProvider}
+  alias Console.Schema.{Service, Revision, User, Cluster}
   alias Console.Deployments.{Secrets.Store, Git, Clusters}
 
   @type service_resp :: {:ok, Service.t} | Console.error
@@ -53,34 +53,6 @@ defmodule Console.Deployments.Services do
       git: %{ref: "main", folder: "helm"},
       configuration: [%{name: "deploy-token", value: deploy_token}, %{name: "url", value: Console.conf(:url)}]
     }, cluster_id, user)
-  end
-
-  def cluster_service(%Cluster{service_id: nil, provider: %ClusterProvider{} = provider} = cluster, %User{} = user) do
-    local = Clusters.local_cluster()
-    Console.Repo.preload(cluster, [:node_pools])
-    |> cluster_attributes()
-    |> Map.merge(%{
-      repository_id: provider.repository_id,
-      name: "cluster-#{cluster.name}",
-      namespace: provider.namespace,
-      git: Map.take(provider.git, ~w(ref folder)a),
-    })
-    |> create_service(local.id, user)
-  end
-  def cluster_service(%Cluster{service_id: id} = cluster, %User{} = user) do
-    Console.Repo.preload(cluster, [:node_pools])
-    |> cluster_attributes()
-    |> update_service(id, user)
-  end
-
-  def cluster_attributes(%{node_pools: node_pools} = cluster) do
-    %{
-      configuration: [
-        %{name: "cluster-name", value: cluster.name},
-        %{name: "version", value: cluster.version},
-        %{name: "node-pools", value: Jason.encode!(node_pools)}
-      ]
-    }
   end
 
   @spec authorized(binary, Cluster.t) :: service_resp
