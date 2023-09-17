@@ -45,6 +45,19 @@ defmodule Console.Schema.Cluster do
     |> put_new_change(:deploy_token, fn -> "deploy-#{Console.rand_alphanum(20)}" end)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
+    |> update_vsn()
     |> validate_required(~w(name version)a)
+  end
+
+  defp update_vsn(cs) do
+    with current when is_binary(current) <- get_field(cs, :current_version),
+         vsn when is_binary(vsn) <- get_field(cs, :version),
+         {:ok, current} <- Version.parse(current),
+         {:ok, vsn} <- Version.parse(vsn),
+         :gt <- Version.compare(current, vsn) do
+      put_change(cs, :version, Version.to_string(vsn))
+    else
+      _ -> cs
+    end
   end
 end

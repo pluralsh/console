@@ -20,6 +20,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     test "it will create a new cluster" do
       user = insert(:user)
       provider = insert(:cluster_provider)
+      insert(:git_repository, url: "https://github.com/pluralsh/deploy-operator.git")
 
       {:ok, %{data: %{"createCluster" => cluster}}} = run_query("""
         mutation Create($attributes: ClusterAttributes!) {

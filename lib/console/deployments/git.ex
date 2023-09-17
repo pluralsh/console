@@ -6,6 +6,16 @@ defmodule Console.Deployments.Git do
 
   def get_repository(id), do: Console.Repo.get(GitRepository, id)
 
+  def get_by_url!(url), do: Console.Repo.get_by!(GitRepository, url: url)
+
+  def deploy_url(), do: "https://github.com/pluralsh/deploy-operator.git"
+
+  def artifacts_url(), do: "https://github.com/pluralsh/plural-artifacts.git"
+
+  def deploy_repo!(), do: get_by_url!(deploy_url())
+
+  def artifacts_repo!(), do: get_by_url!(artifacts_url())
+
   @doc """
   Creates a new git repository and spawns a sync agent on the relevant node
   """

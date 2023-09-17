@@ -38,6 +38,7 @@ config :console,
   incoming_webhook: "https://some.piazza.webhook",
   cluster_name: "default",
   git_commit: "abd132",
+  provider: :aws,
   version: Mix.Project.config[:version]
 
 config :logger, :console,

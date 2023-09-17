@@ -22,6 +22,6 @@ defmodule Console.Schema.ClusterProvider do
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:repository_id)
     |> unique_constraint(:name)
-    |> validate_required([:name])
+    |> validate_required([:name, :namespace])
   end
 end

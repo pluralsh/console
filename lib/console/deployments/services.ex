@@ -1,7 +1,7 @@
 defmodule Console.Deployments.Services do
   use Console.Services.Base
   alias Console.Schema.{Service, Revision, User, Cluster}
-  alias Console.Deployments.Secrets.Store
+  alias Console.Deployments.{Secrets.Store, Git}
 
   @type service_resp :: {:ok, Service.t} | Console.error
   @type revision_resp :: {:ok, Revision.t} | Console.error
@@ -26,6 +26,17 @@ defmodule Console.Deployments.Services do
     |> add_operation(:revision, fn %{base: base} -> create_revision(add_version(attrs, "0.0.1"), base) end)
     |> add_revision()
     |> execute(extract: :service)
+  end
+
+  def operator_service(deploy_token, cluster_id, %User{} = user) do
+    repo = Git.deploy_repo!()
+    create_service(%{
+      repository_id: repo.id,
+      name: "deploy-operator",
+      namespace: "plrl-deploy-operator",
+      git: %{ref: "main", folder: "helm"},
+      configuration: [%{name: "deploy-token", value: deploy_token}, %{name: "url", value: Console.conf(:url)}]
+    }, cluster_id, user)
   end
 
   @spec authorized(binary, Cluster.t) :: service_resp
