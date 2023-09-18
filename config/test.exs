@@ -28,6 +28,7 @@ config :console,
   webhook_secret: "webhook_secret",
   piazza_secret: "webhook_secret",
   git_ssh_key: :pass,
+  cache_adapter: Console.TestCache,
   grafana_dns: "grafana.example.com"
 
 config :console, :login_link,

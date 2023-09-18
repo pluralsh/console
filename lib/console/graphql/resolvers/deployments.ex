@@ -127,6 +127,14 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def ping(%{attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Clusters.ping(attrs, cluster)
 
+  def editable(resource, _, %{context: %{current_user: user}}) do
+    case allow(resource, user, :write) do
+      {:ok, _} -> {:ok, true}
+      _ -> {:ok, false}
+    end
+  end
+  def editable(_, _, _), do: {:ok, false}
+
   def rbac(%{rbac: rbac} = args, %{context: %{current_user: user}}) do
     {fun, id} = rbac_args(args)
     case fun.(rbac, id, user) do

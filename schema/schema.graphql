@@ -165,9 +165,11 @@ type ServiceDeployment {
   repository: GitRepository
   readBindings: [PolicyBinding]
   writeBindings: [PolicyBinding]
+  revision: Revision
   configuration: [ServiceConfiguration]
   components: [ServiceComponent]
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
+  editable: Boolean
   insertedAt: DateTime
   updatedAt: DateTime
 }
@@ -380,6 +382,7 @@ type ClusterProvider {
   git: GitRef!
   repository: GitRepository
   service: Service
+  editable: Boolean
   insertedAt: DateTime
   updatedAt: DateTime
 }
@@ -560,6 +563,10 @@ type DashboardGraph {
 type IngressPath {
   backend: IngressBackend
   path: String
+}
+
+input ClusterPing {
+  currentVersion: String!
 }
 
 type PolicyBinding {
@@ -864,12 +871,15 @@ type Cluster {
   id: ID!
   name: String!
   version: String!
+  currentVersion: String
   deletedAt: DateTime
+  pingedAt: DateTime
   readBindings: [PolicyBinding]
   writeBindings: [PolicyBinding]
   nodePools: [NodePool]
   provider: ClusterProvider
   service: Service
+  editable: Boolean
   insertedAt: DateTime
   updatedAt: DateTime
 }
@@ -961,12 +971,14 @@ type RootMutationType {
   createGitRepository(attributes: GitAttributes!): GitRepository
   createCluster(attributes: ClusterAttributes!): Cluster
   updateCluster(id: ID!, attributes: ClusterUpdateAttributes!): Cluster
+  pingCluster(attributes: ClusterPing!): Cluster
   deleteCluster(id: ID!): Cluster
   createClusterProvider(attributes: ClusterProviderAttributes!): ClusterProvider
   updateClusterProvider(id: ID!, attributes: ClusterProviderUpdateAttributes!): ClusterProvider
   createServiceDeployment(clusterId: ID!, attributes: ServiceDeploymentAttributes!): ServiceDeployment
   updateServiceDeployment(id: ID!, attributes: ServiceUpdateAttributes!): ServiceDeployment
   deleteServiceDeployment(id: ID!): ServiceDeployment
+  rollbackService(id: ID!, revisionId: ID!): ServiceDeployment
   updateServiceComponents(id: ID!, components: [ComponentAttributes]): ServiceDeployment
   updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
   updateDeploymentSettings(attributes: DeploymentSettingsAttributes!): DeploymentSettings
@@ -1498,11 +1510,6 @@ input RoleAttributes {
   permissions: [Permission]
 }
 
-type LogFilter {
-  metadata: Metadata!
-  spec: LogFilterSpec!
-}
-
 type Job {
   metadata: Metadata!
   status: JobStatus!
@@ -1510,6 +1517,11 @@ type Job {
   raw: String!
   events: [Event]
   pods: [Pod]
+}
+
+type LogFilter {
+  metadata: Metadata!
+  spec: LogFilterSpec!
 }
 
 type Metadata {
@@ -1635,6 +1647,7 @@ type GitRepository {
   authMethod: AuthMethod
   health: GitHealth
   pulledAt: DateTime
+  editable: Boolean
   insertedAt: DateTime
   updatedAt: DateTime
 }

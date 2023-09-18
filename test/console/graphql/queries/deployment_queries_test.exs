@@ -221,11 +221,15 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
 
       {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
         query serviceDeployment($id: ID!) {
-          serviceDeployment(id: $id) { id }
+          serviceDeployment(id: $id) {
+            id
+            editable
+          }
         }
       """, %{"id" => service.id}, %{current_user: user})
 
       assert found["id"] == service.id
+      refute found["editable"]
 
       {:ok, %{errors: [_ | _]}} = run_query("""
         query serviceDeployment($id: ID!) {

@@ -223,6 +223,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
             git { ref folder }
             repository { id }
             configuration { name value }
+            editable
           }
         }
       """, %{
@@ -236,6 +237,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert updated["git"]["ref"] == "main"
       assert updated["git"]["folder"] == "k8s"
       assert updated["repository"]["id"] == git.id
+      assert updated["editable"]
 
       [conf] = updated["configuration"]
       assert conf["name"] == "new-name"

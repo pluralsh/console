@@ -80,6 +80,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :repository, :git_repository, resolve: dataloader(Deployments)
     field :service,    :service, resolve: dataloader(Deployments)
 
+    field :editable,   :boolean, resolve: &Deployments.editable/3
+
     timestamps()
   end
 
@@ -98,6 +100,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :node_pools,  list_of(:node_pool), resolve: dataloader(Deployments)
     field :provider,    :cluster_provider, resolve: dataloader(Deployments)
     field :service,     :service, resolve: dataloader(Deployments)
+
+    field :editable,   :boolean, resolve: &Deployments.editable/3
 
     timestamps()
   end

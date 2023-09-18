@@ -5,7 +5,8 @@ defmodule Console.Deployments.Settings do
   alias Console.PubSub
   alias Console.Schema.{DeploymentSettings, User}
 
-  # @ttl :timer.minutes(45)
+  @cache_adapter Console.conf(:cache_adapter)
+  @ttl :timer.minutes(45)
 
   @type settings_resp :: {:ok, DeploymentSettings.t} | Console.error
 
@@ -15,7 +16,7 @@ defmodule Console.Deployments.Settings do
   Fetches and caches the global deployment settings object, preloads also fetched along the way
   """
   @spec fetch() :: DeploymentSettings.t | nil
-  # @decorate cacheable(cache: Console.Cache, key: :deployment_settings, opts: [ttl: @ttl])
+  @decorate cacheable(cache: @cache_adapter, key: :deployment_settings, opts: [ttl: @ttl])
   def fetch() do
     Console.Repo.get_by(DeploymentSettings, name: "global")
     |> Console.Repo.preload(@preloads)
@@ -35,7 +36,7 @@ defmodule Console.Deployments.Settings do
   Updates global deployment settings and busts cache
   """
   @spec update(map, User.t) :: settings_resp
-  @decorate cache_evict(cache: Console.Cache, keys: [:deployment_settings])
+  @decorate cache_evict(cache: @cache_adapter, keys: [:deployment_settings])
   def update(attrs, %User{} = user) do
     fetch()
     |> DeploymentSettings.changeset(attrs)

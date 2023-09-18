@@ -367,11 +367,14 @@ export type CloudSettingsAttributes = {
 
 export type Cluster = {
   __typename?: 'Cluster';
+  currentVersion?: Maybe<Scalars['String']['output']>;
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  editable?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
   nodePools?: Maybe<Array<Maybe<NodePool>>>;
+  pingedAt?: Maybe<Scalars['DateTime']['output']>;
   provider?: Maybe<ClusterProvider>;
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   service?: Maybe<Service>;
@@ -409,9 +412,14 @@ export type ClusterInfo = {
   version?: Maybe<Scalars['String']['output']>;
 };
 
+export type ClusterPing = {
+  currentVersion: Scalars['String']['input'];
+};
+
 export type ClusterProvider = {
   __typename?: 'ClusterProvider';
   cloud: Scalars['String']['output'];
+  editable?: Maybe<Scalars['Boolean']['output']>;
   git: GitRef;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -821,6 +829,7 @@ export type GitRefAttributes = {
 export type GitRepository = {
   __typename?: 'GitRepository';
   authMethod?: Maybe<AuthMethod>;
+  editable?: Maybe<Scalars['Boolean']['output']>;
   health?: Maybe<GitHealth>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -1626,9 +1635,11 @@ export type RootMutationType = {
   markRead?: Maybe<User>;
   oauthCallback?: Maybe<User>;
   overlayConfiguration?: Maybe<Build>;
+  pingCluster?: Maybe<Cluster>;
   readNotifications?: Maybe<User>;
   restartBuild?: Maybe<Build>;
   restorePostgres?: Maybe<Postgresql>;
+  rollbackService?: Maybe<ServiceDeployment>;
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
   updateCluster?: Maybe<Cluster>;
@@ -1836,6 +1847,11 @@ export type RootMutationTypeOverlayConfigurationArgs = {
 };
 
 
+export type RootMutationTypePingClusterArgs = {
+  attributes: ClusterPing;
+};
+
+
 export type RootMutationTypeRestartBuildArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1846,6 +1862,12 @@ export type RootMutationTypeRestorePostgresArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   timestamp: Scalars['DateTime']['input'];
+};
+
+
+export type RootMutationTypeRollbackServiceArgs = {
+  id: Scalars['ID']['input'];
+  revisionId: Scalars['ID']['input'];
 };
 
 
@@ -2546,6 +2568,7 @@ export type ServiceDeployment = {
   components?: Maybe<Array<Maybe<ServiceComponent>>>;
   configuration?: Maybe<Array<Maybe<ServiceConfiguration>>>;
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  editable?: Maybe<Scalars['Boolean']['output']>;
   git: GitRef;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -2553,6 +2576,7 @@ export type ServiceDeployment = {
   namespace: Scalars['String']['output'];
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   repository?: Maybe<GitRepository>;
+  revision?: Maybe<Revision>;
   revisions?: Maybe<RevisionConnection>;
   sha?: Maybe<Scalars['String']['output']>;
   tarball?: Maybe<Scalars['String']['output']>;

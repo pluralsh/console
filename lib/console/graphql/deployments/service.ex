@@ -66,6 +66,8 @@ defmodule Console.GraphQl.Deployments.Service do
       resolve &Deployments.list_revisions/3
     end
 
+    field :editable, :boolean, resolve: &Deployments.editable/3
+
     timestamps()
   end
 

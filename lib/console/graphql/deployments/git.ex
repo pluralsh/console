@@ -21,6 +21,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :health,       :git_health
     field :pulled_at,    :datetime
 
+    field :editable,   :boolean, resolve: &Deployments.editable/3
+
     timestamps()
   end
 
