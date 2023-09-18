@@ -51,6 +51,8 @@ defmodule Console.GraphQl.Deployments.Service do
     field :sha,       :string
     field :tarball,   :string, resolve: &Deployments.tarball/3
 
+    field :deleted_at, :datetime
+
     field :repository, :git_repository, resolve: dataloader(Deployments)
 
     field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
@@ -99,6 +101,8 @@ defmodule Console.GraphQl.Deployments.Service do
   connection node_type: :service_deployment
   connection node_type: :revision
 
+  delta :service_deployment
+
   object :service_queries do
     connection field :service_deployments, node_type: :service_deployment do
       middleware Authenticated
@@ -136,6 +140,13 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :attributes, non_null(:service_update_attributes)
 
       safe_resolve &Deployments.update_service/2
+    end
+
+    field :delete_service_deployment, :service_deployment do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.delete_service/2
     end
 
     field :update_service_components, :service_deployment do

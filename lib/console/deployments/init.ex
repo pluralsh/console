@@ -7,7 +7,7 @@ defmodule Console.Deployments.Init do
   alias Console.Deployments.{Clusters, Git, Settings}
 
   def setup() do
-    bot = Users.get_bot!("console")
+    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
     start_transaction()
     |> add_operation(:deploy_repo, fn _ ->
       Git.create_repository(%{url: Git.deploy_url()}, bot)

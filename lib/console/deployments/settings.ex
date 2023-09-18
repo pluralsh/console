@@ -2,6 +2,7 @@ defmodule Console.Deployments.Settings do
   use Console.Services.Base
   use Nebulex.Caching
   import Console.Deployments.Policies
+  alias Console.PubSub
   alias Console.Schema.{DeploymentSettings, User}
 
   # @ttl :timer.minutes(45)
@@ -40,5 +41,10 @@ defmodule Console.Deployments.Settings do
     |> DeploymentSettings.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:update)
+    |> notify(:update, user)
   end
+
+  defp notify({:ok, %DeploymentSettings{} = settings}, :update, user),
+    do: handle_notify(PubSub.DeploymentSettingsUpdated, settings, actor: user)
+  defp notify(pass, _, _), do: pass
 end

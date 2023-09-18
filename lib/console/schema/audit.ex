@@ -11,7 +11,12 @@ defmodule Console.Schema.Audit do
     role: 5,
     group_member: 6,
     policy: 7,
-    temp_token: 8
+    temp_token: 8,
+    service: 9,
+    cluster: 10,
+    cluster_provider: 11,
+    git_repository: 12,
+    deployment_settings: 13
 
   defenum Action,
     create: 0,

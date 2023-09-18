@@ -89,6 +89,22 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
+  describe "deleteCluster" do
+    test "it can mark a cluster for deletion" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"deleteCluster" => deleted}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteCluster(id: $id) { id deletedAt }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert deleted["id"] == cluster.id
+      assert deleted["deletedAt"]
+    end
+  end
+
   describe "createClusterProvider" do
     test "it can create a new provider" do
       user = insert(:user)
@@ -131,7 +147,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
-  describe "createService" do
+  describe "createServiceDeployment" do
     test "it can create a new service" do
       cluster = insert(:cluster)
       user = admin_user()
@@ -208,6 +224,22 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       [conf] = updated["configuration"]
       assert conf["name"] == "new-name"
       assert conf["value"] == "new-value"
+    end
+  end
+
+  describe "deleteServiceDeployment" do
+    test "it can mark a cluster for deletion" do
+      user = insert(:user)
+      service = insert(:service, write_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"deleteServiceDeployment" => deleted}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteServiceDeployment(id: $id) { id deletedAt }
+        }
+      """, %{"id" => service.id}, %{current_user: user})
+
+      assert deleted["id"] == service.id
+      assert deleted["deletedAt"]
     end
   end
 

@@ -56,6 +56,10 @@ defmodule Console.Schema.Service do
     timestamps()
   end
 
+  def drainable(query \\ __MODULE__) do
+    from(s in query, where: s.name != "deploy-operator")
+  end
+
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       from(s in query,

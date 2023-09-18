@@ -33,6 +33,10 @@ defmodule Console.Schema.Cluster do
     timestamps()
   end
 
+  def for_service(query \\ __MODULE__, service_id) do
+    from(c in query, where: c.service_id == ^service_id)
+  end
+
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       from(c in query,

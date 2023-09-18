@@ -80,10 +80,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   object :cluster do
-    field :id, non_null(:id)
+    field :id,      non_null(:id)
+    field :name,    non_null(:string)
+    field :version, non_null(:string)
 
-    field :name,        non_null(:string)
-    field :version,     non_null(:string)
+    field :deleted_at, :datetime
 
     field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
@@ -125,6 +126,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
   connection node_type: :cluster
   connection node_type: :cluster_provider
 
+  delta :cluster
+  delta :cluster_provider
+
   object :cluster_queries do
     connection field :clusters, node_type: :cluster do
       middleware Authenticated
@@ -161,19 +165,26 @@ defmodule Console.GraphQl.Deployments.Cluster do
       safe_resolve &Deployments.create_cluster/2
     end
 
-    field :create_cluster_provider, :cluster_provider do
-      middleware Authenticated
-      arg :attributes, non_null(:cluster_provider_attributes)
-
-      safe_resolve &Deployments.create_provider/2
-    end
-
     field :update_cluster, :cluster do
       middleware Authenticated
       arg :id, non_null(:id)
       arg :attributes, non_null(:cluster_update_attributes)
 
       safe_resolve &Deployments.update_cluster/2
+    end
+
+    field :delete_cluster, :cluster do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.delete_cluster/2
+    end
+
+    field :create_cluster_provider, :cluster_provider do
+      middleware Authenticated
+      arg :attributes, non_null(:cluster_provider_attributes)
+
+      safe_resolve &Deployments.create_provider/2
     end
 
     field :update_cluster_provider, :cluster_provider do

@@ -1,5 +1,6 @@
 defmodule Console.Deployments.ServicesTest do
   use Console.DataCase, async: true
+  alias Console.PubSub
   alias Console.Deployments.Services
 
   describe "#create_service/3" do
@@ -36,6 +37,8 @@ defmodule Console.Deployments.ServicesTest do
       {:ok, secrets} = Services.configuration(service)
 
       assert secrets["name"] == "value"
+
+      assert_receive {:event, %PubSub.ServiceCreated{item: ^service}}
     end
 
     test "it respects rbac" do
@@ -94,6 +97,8 @@ defmodule Console.Deployments.ServicesTest do
         },
         configuration: [%{name: "name", value: "other-value"}, %{name: "name2", value: "value"}]
       }, service.id, user)
+
+      assert_receive {:event, %PubSub.ServiceUpdated{item: ^updated}}
 
       assert updated.name == "my-service"
       assert updated.namespace == "my-service"
@@ -155,6 +160,33 @@ defmodule Console.Deployments.ServicesTest do
     end
   end
 
+  describe "#delete_service/2" do
+    test "users can delete services" do
+      user = insert(:user)
+      svc = insert(:service, write_bindings: [%{user_id: user.id}])
+
+      {:ok, service} = Services.delete_service(svc.id, user)
+
+      assert service.id == svc.id
+      assert service.deleted_at
+
+      assert_receive {:event, %PubSub.ServiceDeleted{item: ^service}}
+    end
+
+    test "it cannot delete a cluster service" do
+      user = insert(:user)
+      svc = insert(:service, write_bindings: [%{user_id: user.id}])
+      insert(:cluster, service: svc)
+      {:error, _} = Services.delete_service(svc.id, user)
+    end
+
+    test "it cannot delete a deploy operator" do
+      user = insert(:user)
+      svc = insert(:service, name: "deploy-operator", write_bindings: [%{user_id: user.id}])
+      {:error, _} = Services.delete_service(svc.id, user)
+    end
+  end
+
   describe "#update_components/2" do
     test "it will update the k8s components w/in the service" do
       service = insert(:service)
@@ -179,6 +211,8 @@ defmodule Console.Deployments.ServicesTest do
       assert component.kind == "Ingress"
       assert component.namespace == "my-app"
       assert component.name == "api"
+
+      assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
     end
   end
 end

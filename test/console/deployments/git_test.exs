@@ -1,5 +1,6 @@
 defmodule Console.Deployments.GitTest do
   use Console.DataCase, async: true
+  alias Console.PubSub
   alias Console.Deployments.Git
 
   describe "#create_repository/2" do
@@ -11,6 +12,8 @@ defmodule Console.Deployments.GitTest do
       }, user)
 
       assert git.url == "https://github.com/pluralsh/console.git"
+
+      assert_receive {:event, %PubSub.GitRepositoryCreated{item: ^git}}
     end
 
     test "it will respect rbac" do
@@ -23,6 +26,18 @@ defmodule Console.Deployments.GitTest do
       {:error, _} = Git.create_repository(%{
         url: "https://github.com/pluralsh/another.git",
       }, insert(:user))
+    end
+  end
+
+  describe "#update_repository/2" do
+    test "it can update a git repository" do
+      git = insert(:git_repository)
+
+      {:ok, update} = Git.update_repository(%{username: "uname"}, git.id, admin_user())
+
+      assert update.username == "uname"
+
+      assert_receive {:event, %PubSub.GitRepositoryUpdated{item: ^update}}
     end
   end
 end

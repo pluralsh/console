@@ -19,7 +19,7 @@ defmodule Console.Deployments.Git.Agent do
 
   def registry(), do: __MODULE__
 
-  def fetch(pid, %Service{} = svc), do: GenServer.call(pid, {:fetch, svc}, 10_000)
+  def fetch(pid, %Service{} = svc), do: GenServer.call(pid, {:fetch, svc}, 30_000)
 
   def start(%GitRepository{} = repo) do
     GenServer.start(__MODULE__, repo, name: via(repo))
@@ -52,12 +52,14 @@ defmodule Console.Deployments.Git.Agent do
   end
 
   def handle_info(:clone, %State{git: git} = state) do
-    clone(git)
-    |> save_status(git)
-    |> case do
+    with {:git, %GitRepository{} = git} <- refresh(git),
+         resp <- clone(git),
+         {:ok, %GitRepository{health: :pullable} = git} <- save_status(resp, git) do
+      {:noreply, %{state | git: git}}
+    else
+      {:git, nil} -> {:stop, {:shutdown, :normal}, state}
       {:ok, %GitRepository{health: :failed}} ->
         {:stop, {:shutdown, :credentials}, state}
-      {:ok, git} -> {:noreply, %{state | git: git}}
       err ->
         Logger.info "unknown git failure: #{inspect(err)}"
         {:stop, {:shutdown, :unknown}, state}
@@ -65,11 +67,13 @@ defmodule Console.Deployments.Git.Agent do
   end
 
   def handle_info(:pull, %State{git: git, cache: cache} = state) do
-    with res <- fetch(git),
+    with {:git, %GitRepository{} = git} <- {:git, refresh(git)},
+         res <- fetch(git),
          {:ok, git} <- save_status(res, git),
          cache <- refresh(git, cache) do
       {:noreply, %State{git: git, cache: cache}}
     else
+      {:git, nil} -> {:stop, {:shutdown, :normal}, state}
       err ->
         Logger.info "unknown failure: #{inspect(err)}"
         {:noreply, state}
@@ -81,6 +85,13 @@ defmodule Console.Deployments.Git.Agent do
       true -> {:noreply, state}
       false -> {:stop, {:shutdown, :moved}, state}
     end
+  end
+
+  def handle_info(_, state), do: {:noreply, state}
+
+  defp refresh(%GitRepository{} = repo) do
+    with %GitRepository{} = git <- Console.Repo.get(GitRepository, repo.id),
+      do: Map.merge(git, Map.take(repo, [:private_key_file, :dir]))
   end
 
   defp refresh(%GitRepository{health: :pullable} = git, cache), do: Cache.refresh(%{cache | git: git})

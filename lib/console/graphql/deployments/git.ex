@@ -26,6 +26,8 @@ defmodule Console.GraphQl.Deployments.Git do
 
   connection node_type: :git_repository
 
+  delta :git_repository
+
   object :git_queries do
     connection field :git_repositories, node_type: :git_repository do
       middleware Authenticated

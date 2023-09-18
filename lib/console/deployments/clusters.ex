@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Clusters do
   use Console.Services.Base
   import Console.Deployments.Policies
+  alias Console.PubSub
   alias Console.Deployments.{Services, Git}
   alias Console.Schema.{Cluster, User, ClusterProvider, Service}
 
@@ -20,6 +21,12 @@ defmodule Console.Deployments.Clusters do
   def services(%Cluster{id: id}) do
     Service.for_cluster(id)
     |> Console.Repo.all()
+  end
+
+  def draining?(%Cluster{id: id}) do
+    Service.for_cluster(id)
+    |> Service.drainable()
+    |> Console.Repo.exists?()
   end
 
   @doc """
@@ -51,6 +58,7 @@ defmodule Console.Deployments.Clusters do
         |> Console.Repo.update()
     end)
     |> execute(extract: :rewire)
+    |> notify(:create, user)
   end
 
   @doc """
@@ -72,7 +80,25 @@ defmodule Console.Deployments.Clusters do
       %{cluster: cluster} -> {:ok, cluster}
     end)
     |> execute(extract: :cluster)
+    |> notify(:update, user)
   end
+
+  @doc """
+  Marks a cluster to be deleted, with hard deletes following a successful drain
+  """
+  @spec delete_cluster(binary, User.t) :: cluster_resp
+  def delete_cluster(id, %User{} = user) do
+    get_cluster!(id)
+    |> Ecto.Changeset.change(%{deleted_at: Timex.now()})
+    |> allow(user, :delete)
+    |> when_ok(:update)
+    |> notify(:delete, user)
+  end
+
+  def drained(%Cluster{deleted_at: nil}), do: {:error, "not deleted"}
+  def drained(%Cluster{service_id: id}) when is_binary(id),
+    do: Services.delete_service(id)
+  def drained(%Cluster{} = cluster), do: Console.Repo.delete(cluster)
 
   @doc """
   Creates a new capi provider and configures deployment into the management cluster
@@ -97,6 +123,7 @@ defmodule Console.Deployments.Clusters do
         |> Console.Repo.update()
     end)
     |> execute(extract: :rewire)
+    |> notify(:create, user)
   end
 
   @doc """
@@ -117,6 +144,7 @@ defmodule Console.Deployments.Clusters do
       %{provider: provider} -> {:ok, provider}
     end)
     |> execute(extract: :provider)
+    |> notify(:update, user)
   end
 
   @doc """
@@ -128,6 +156,7 @@ defmodule Console.Deployments.Clusters do
     |> Cluster.rbac_changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:update)
+    |> notify(:update, user)
   end
 
   @doc """
@@ -139,6 +168,7 @@ defmodule Console.Deployments.Clusters do
     |> ClusterProvider.rbac_changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:update)
+    |> notify(:update, user)
   end
 
   defp cluster_service(%Cluster{service_id: nil, provider: %ClusterProvider{} = provider} = cluster, %User{} = user) do
@@ -161,6 +191,9 @@ defmodule Console.Deployments.Clusters do
   defp cluster_attributes(%{node_pools: node_pools} = cluster) do
     %{
       configuration: [
+        %{name: "console-url", value: Console.conf(:url)},
+        %{name: "deploy-token", value: cluster.deploy_token},
+        %{name: "operator-namespace", value: "plrl-deploy-operator"},
         %{name: "cluster-name", value: cluster.name},
         %{name: "version", value: cluster.version},
         %{name: "node-pools", value: Jason.encode!(node_pools)}
@@ -205,4 +238,18 @@ defmodule Console.Deployments.Clusters do
   defp provider_attributes(%ClusterProvider{name: name}), do: %{configuration: [%{name: "provider-name", value: name}]}
 
   defp tmp_admin(%User{} = user), do: %{user | roles: %{admin: true}}
+
+  defp notify({:ok, %Cluster{} = cluster}, :create, user),
+    do: handle_notify(PubSub.ClusterCreated, cluster, actor: user)
+  defp notify({:ok, %Cluster{} = cluster}, :update, user),
+    do: handle_notify(PubSub.ClusterUpdated, cluster, actor: user)
+  defp notify({:ok, %Cluster{} = cluster}, :delete, user),
+    do: handle_notify(PubSub.ClusterDeleted, cluster, actor: user)
+
+  defp notify({:ok, %ClusterProvider{} = prov}, :create, user),
+    do: handle_notify(PubSub.ProviderCreated, prov, actor: user)
+  defp notify({:ok, %ClusterProvider{} = prov}, :update, user),
+    do: handle_notify(PubSub.ProviderUpdated, prov, actor: user)
+
+  defp notify(pass, _, _), do: pass
 end

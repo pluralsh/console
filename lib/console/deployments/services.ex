@@ -1,7 +1,8 @@
 defmodule Console.Deployments.Services do
   use Console.Services.Base
   import Console.Deployments.Policies
-  alias Console.Schema.{Service, Revision, User, Cluster}
+  alias Console.PubSub
+  alias Console.Schema.{Service, Revision, User, Cluster, ClusterProvider}
   alias Console.Deployments.{Secrets.Store, Git, Clusters}
 
   @type service_resp :: {:ok, Service.t} | Console.error
@@ -12,6 +13,11 @@ defmodule Console.Deployments.Services do
   def get_service(id), do: Console.Repo.get(Service, id)
 
   def tarball(%Service{id: id}), do: Console.url("/v1/git/tarballs?id=#{id}")
+
+  def referenced?(id) do
+    Enum.map([Cluster.for_service(id), ClusterProvider.for_service(id)], &Console.Repo.exists?/1)
+    |> Enum.any?(& &1)
+  end
 
   @doc """
   Creates a new service in a cluster, alongside an initial revision for the service
@@ -31,6 +37,7 @@ defmodule Console.Deployments.Services do
     |> add_operation(:revision, fn %{base: base} -> create_revision(add_version(attrs, "0.0.1"), base) end)
     |> add_revision()
     |> execute(extract: :service)
+    |> notify(:create, user)
   end
 
   @doc """
@@ -42,6 +49,7 @@ defmodule Console.Deployments.Services do
     |> Service.rbac_changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:update)
+    |> notify(:update, user)
   end
 
   def operator_service(deploy_token, cluster_id, %User{} = user) do
@@ -75,6 +83,7 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:update, fn %{check: svc} -> update_service(attrs, svc) end)
     |> execute(extract: :update)
+    |> notify(:update, user)
   end
 
   @doc """
@@ -82,7 +91,10 @@ defmodule Console.Deployments.Services do
   """
   @spec update_sha(Service.t, binary) :: service_resp
   def update_sha(%Service{sha: sha} = svc, sha), do: {:ok, svc}
-  def update_sha(%Service{id: id}, sha), do: update_service(%{sha: sha}, id)
+  def update_sha(%Service{id: id}, sha) do
+    update_service(%{sha: sha}, id)
+    |> notify(:update)
+  end
 
   def update_service(attrs, svc_id) when is_binary(svc_id),
     do: update_service(attrs, get_service!(svc_id))
@@ -116,6 +128,7 @@ defmodule Console.Deployments.Services do
     |> Console.Repo.preload([:components])
     |> Service.changeset(attrs)
     |> Console.Repo.update()
+    |> notify(:components)
   end
   def update_components(attrs, service_id) when is_binary(service_id),
     do: update_components(attrs, get_service!(service_id))
@@ -133,8 +146,29 @@ defmodule Console.Deployments.Services do
   def delete_service(service_id, %User{} = user) do
     get_service!(service_id)
     |> Ecto.Changeset.change(%{deleted_at: Timex.now()})
-    |> allow(user, :write)
-    |> when_ok(:delete)
+    |> allow(user, :delete)
+    |> when_ok(:update)
+    |> notify(:delete, user)
+  end
+
+  @doc """
+  permissionless service delete for internal usage
+  """
+  @spec delete_service(binary) :: service_resp
+  def delete_service(service_id) do
+    get_service!(service_id)
+    |> Ecto.Changeset.change(%{deleted_at: Timex.now()})
+    |> Console.Repo.update()
+    |> notify(:delete)
+  end
+
+  @doc """
+  Permanently removes a service from the db along w/ all secrets
+  """
+  @spec hard_delete(Service.t) :: service_resp
+  def hard_delete(%Service{} = svc) do
+    Console.Repo.delete(svc)
+    |> notify(:hard_delete)
   end
 
   @doc """
@@ -176,4 +210,20 @@ defmodule Console.Deployments.Services do
   end
 
   defp secret_store(), do: Console.conf(:secret_store)
+
+  defp notify({:ok, %Service{} = svc}, :create, user),
+    do: handle_notify(PubSub.ServiceCreated, svc, actor: user)
+  defp notify({:ok, %Service{} = svc}, :update, user),
+    do: handle_notify(PubSub.ServiceUpdated, svc, actor: user)
+  defp notify({:ok, %Service{} = svc}, :delete, user),
+    do: handle_notify(PubSub.ServiceDeleted, svc, actor: user)
+  defp notify(pass, _, _), do: pass
+
+  defp notify({:ok, %Service{} = svc}, :components),
+    do: handle_notify(PubSub.ServiceComponentsUpdated, svc)
+  defp notify({:ok, %Service{} = svc}, :update),
+    do: handle_notify(PubSub.ServiceUpdated, svc)
+  defp notify({:ok, %Service{} = svc}, :hard_delete),
+    do: handle_notify(PubSub.ServiceHardDeleted, svc)
+  defp notify(pass, _), do: pass
 end
