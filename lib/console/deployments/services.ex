@@ -210,10 +210,29 @@ defmodule Console.Deployments.Services do
   fetches all revisions of a service
   """
   @spec revisions(Service.t) :: [Revision.t]
-  def revisions(%Service{id: id}) do
+  def revisions(%Service{id: id}, limit \\ :none) do
     Revision.for_service(id)
     |> Revision.ordered()
+    |> add_limit(limit)
     |> Console.Repo.all()
+  end
+
+  defp add_limit(q, :none), do: q
+  defp add_limit(q, limit) when is_integer(limit), do: Revision.limit(q, limit)
+
+  @doc """
+  Prunes expired revisions for a service, and guarantees current revision remains (even if older)
+  """
+  @spec prune_revisions(Service.t) :: {:ok, integer}
+  def prune_revisions(%Service{revision_id: rid} = service) do
+    to_keep = revisions(service, Console.conf(:revision_history_limit))
+    to_keep = MapSet.new([rid | Enum.map(to_keep, & &1.id)])
+              |> MapSet.to_list()
+
+    Revision.ignore_ids(to_keep)
+    |> Repo.delete_all()
+    |> elem(0)
+    |> ok()
   end
 
   defp create_revision(attrs, %Service{id: id}) do

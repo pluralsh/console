@@ -194,6 +194,8 @@ defmodule Console.Deployments.ServicesTest do
 
       {:ok, secrets} = Services.configuration(rollback)
       assert secrets["name"] == "value"
+
+      assert_receive {:event, %PubSub.ServiceUpdated{item: ^rollback}}
     end
 
     test "it will not allow irrelevant revisions" do
@@ -271,6 +273,37 @@ defmodule Console.Deployments.ServicesTest do
       user = insert(:user)
       svc = insert(:service, name: "deploy-operator", write_bindings: [%{user_id: user.id}])
       {:error, _} = Services.delete_service(svc.id, user)
+    end
+  end
+
+  describe "#prune_revisions/1" do
+    test "it will prune old revisions" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      git = insert(:git_repository)
+
+      {:ok, service} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+
+      to_keep = Console.conf(:revision_history_limit) |> insert_list(:revision, service: service)
+      to_kill = insert_list(3, :revision, service: service, inserted_at: Timex.now() |> Timex.shift(hours: -1))
+
+      {:ok, 3} = Services.prune_revisions(service)
+
+      for r <- to_keep,
+        do: assert refetch(r)
+
+      for r <- to_kill,
+        do: refute refetch(r)
     end
   end
 

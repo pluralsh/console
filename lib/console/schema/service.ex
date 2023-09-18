@@ -88,6 +88,10 @@ defmodule Console.Schema.Service do
     from(s in query, order_by: ^order)
   end
 
+  def deleted(query \\ __MODULE__) do
+    from(s in query, where: not is_nil(s.deleted_at))
+  end
+
   @valid ~w(name version sha cluster_id repository_id namespace)a
 
   def changeset(model, attrs \\ %{}) do

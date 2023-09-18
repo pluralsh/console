@@ -57,6 +57,10 @@ defmodule Console.Schema.Cluster do
     from(c in query, order_by: ^order)
   end
 
+  def deleted(query \\ __MODULE__) do
+    from(c in query, where: not is_nil(c.deleted_at))
+  end
+
   @valid ~w(provider_id service_id self version current_version name)a
 
   def changeset(model, attrs \\ %{}) do

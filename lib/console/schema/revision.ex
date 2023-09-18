@@ -21,6 +21,14 @@ defmodule Console.Schema.Revision do
     from(r in query, order_by: ^order)
   end
 
+  def limit(query \\ __MODULE__, limit) do
+    from(r in query, limit: ^limit)
+  end
+
+  def ignore_ids(query \\ __MODULE__, ids) do
+    from(r in query, where: r.id not in ^ids)
+  end
+
   @valid ~w(version sha)a
 
   def changeset(model, attrs \\ %{}) do
