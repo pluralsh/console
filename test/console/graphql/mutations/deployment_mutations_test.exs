@@ -22,7 +22,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       user = admin_user()
       provider = insert(:cluster_provider)
       insert(:cluster, self: true)
-      insert(:git_repository, url: "https://github.com/pluralsh/deploy-operator.git")
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
 
       {:ok, %{data: %{"createCluster" => cluster}}} = run_query("""
         mutation Create($attributes: ClusterAttributes!) {
@@ -58,7 +58,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       user = admin_user()
       provider = insert(:cluster_provider)
       insert(:cluster, self: true)
-      insert(:git_repository, url: "https://github.com/pluralsh/deploy-operator.git")
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
 
       {:ok, cluster} = Clusters.create_cluster(%{
         name: "test",

@@ -51,7 +51,7 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       user = admin_user()
       provider = insert(:cluster_provider)
       insert(:cluster, self: true)
-      insert(:git_repository, url: "https://github.com/pluralsh/deploy-operator.git")
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
 
       {:ok, cluster} = Clusters.create_cluster(%{
         name: "test",
@@ -77,7 +77,7 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       user = admin_user()
       provider = insert(:cluster_provider)
       insert(:cluster, self: true)
-      insert(:git_repository, url: "https://github.com/pluralsh/deploy-operator.git")
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
 
       {:ok, cluster} = Clusters.create_cluster(%{
         name: "test",
@@ -101,7 +101,7 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       user = admin_user()
       provider = insert(:cluster_provider)
       insert(:cluster, self: true)
-      insert(:git_repository, url: "https://github.com/pluralsh/deploy-operator.git")
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
 
       {:ok, cluster} = Clusters.create_cluster(%{
         name: "test",

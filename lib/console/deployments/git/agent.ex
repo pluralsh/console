@@ -52,7 +52,7 @@ defmodule Console.Deployments.Git.Agent do
   end
 
   def handle_info(:clone, %State{git: git} = state) do
-    with {:git, %GitRepository{} = git} <- refresh(git),
+    with {:git, %GitRepository{} = git} <- {:git, refresh(git)},
          resp <- clone(git),
          {:ok, %GitRepository{health: :pullable} = git} <- save_status(resp, git) do
       {:noreply, %{state | git: git}}

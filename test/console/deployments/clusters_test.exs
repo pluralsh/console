@@ -8,7 +8,7 @@ defmodule Console.Deployments.ClustersTest do
       user = admin_user()
       provider = insert(:cluster_provider)
       self = insert(:cluster, self: true)
-      git = insert(:git_repository, url: "https://github.com/pluralsh/deploy-operator.git")
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
 
       {:ok, cluster} = Clusters.create_cluster(%{
         name: "test",
@@ -92,7 +92,7 @@ defmodule Console.Deployments.ClustersTest do
       user = admin_user()
       provider = insert(:cluster_provider)
       insert(:cluster, self: true)
-      insert(:git_repository, url: "https://github.com/pluralsh/deploy-operator.git")
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
 
       {:ok, cluster} = Clusters.create_cluster(%{
         name: "test",

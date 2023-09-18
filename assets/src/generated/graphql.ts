@@ -28,6 +28,61 @@ export type Scalars = {
   Map: { input: Map<string, unknown>; output: Map<string, unknown>; }
 };
 
+export type AccessToken = {
+  __typename?: 'AccessToken';
+  audits?: Maybe<AccessTokenAuditConnection>;
+  id?: Maybe<Scalars['ID']['output']>;
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  token?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type AccessTokenAuditsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type AccessTokenAudit = {
+  __typename?: 'AccessTokenAudit';
+  city?: Maybe<Scalars['String']['output']>;
+  count?: Maybe<Scalars['Int']['output']>;
+  country?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['ID']['output']>;
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  ip?: Maybe<Scalars['String']['output']>;
+  latitude?: Maybe<Scalars['String']['output']>;
+  longitude?: Maybe<Scalars['String']['output']>;
+  timestamp?: Maybe<Scalars['DateTime']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type AccessTokenAuditConnection = {
+  __typename?: 'AccessTokenAuditConnection';
+  edges?: Maybe<Array<Maybe<AccessTokenAuditEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AccessTokenAuditEdge = {
+  __typename?: 'AccessTokenAuditEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AccessTokenAudit>;
+};
+
+export type AccessTokenConnection = {
+  __typename?: 'AccessTokenConnection';
+  edges?: Maybe<Array<Maybe<AccessTokenEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AccessTokenEdge = {
+  __typename?: 'AccessTokenEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AccessToken>;
+};
+
 export type Account = {
   __typename?: 'Account';
   availableFeatures?: Maybe<AvailableFeatures>;
@@ -133,14 +188,24 @@ export type AuditMetric = {
 
 export enum AuditType {
   Build = 'BUILD',
+  Cluster = 'CLUSTER',
+  ClusterProvider = 'CLUSTER_PROVIDER',
   Configuration = 'CONFIGURATION',
+  DeploymentSettings = 'DEPLOYMENT_SETTINGS',
+  GitRepository = 'GIT_REPOSITORY',
   Group = 'GROUP',
   GroupMember = 'GROUP_MEMBER',
   Pod = 'POD',
   Policy = 'POLICY',
   Role = 'ROLE',
+  Service = 'SERVICE',
   TempToken = 'TEMP_TOKEN',
   User = 'USER'
+}
+
+export enum AuthMethod {
+  Basic = 'BASIC',
+  Ssh = 'SSH'
 }
 
 export enum AutoscalingTarget {
@@ -154,6 +219,20 @@ export type AvailableFeatures = {
   databaseManagement?: Maybe<Scalars['Boolean']['output']>;
   userManagement?: Maybe<Scalars['Boolean']['output']>;
   vpn?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type AwsCloud = {
+  __typename?: 'AwsCloud';
+  launchTemplateId?: Maybe<Scalars['String']['output']>;
+};
+
+export type AwsCloudAttributes = {
+  launchTemplateId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AwsSettingsAttributes = {
+  accessKeyId: Scalars['String']['input'];
+  secretAccessKey: Scalars['String']['input'];
 };
 
 export type BindingAttributes = {
@@ -272,12 +351,105 @@ export type CloneAttributes = {
   uid?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type CloudProviderSettingsAttributes = {
+  aws?: InputMaybe<AwsSettingsAttributes>;
+  gcp?: InputMaybe<GcpSettingsAttributes>;
+};
+
+export type CloudSettings = {
+  __typename?: 'CloudSettings';
+  aws?: Maybe<AwsCloud>;
+};
+
+export type CloudSettingsAttributes = {
+  aws?: InputMaybe<AwsCloudAttributes>;
+};
+
+export type Cluster = {
+  __typename?: 'Cluster';
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  nodePools?: Maybe<Array<Maybe<NodePool>>>;
+  provider?: Maybe<ClusterProvider>;
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  service?: Maybe<Service>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  version: Scalars['String']['output'];
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+export type ClusterAttributes = {
+  name: Scalars['String']['input'];
+  nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
+  providerId?: InputMaybe<Scalars['ID']['input']>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  version: Scalars['String']['input'];
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type ClusterConnection = {
+  __typename?: 'ClusterConnection';
+  edges?: Maybe<Array<Maybe<ClusterEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterEdge = {
+  __typename?: 'ClusterEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Cluster>;
+};
+
 export type ClusterInfo = {
   __typename?: 'ClusterInfo';
   gitCommit?: Maybe<Scalars['String']['output']>;
   gitVersion?: Maybe<Scalars['String']['output']>;
   platform?: Maybe<Scalars['String']['output']>;
   version?: Maybe<Scalars['String']['output']>;
+};
+
+export type ClusterProvider = {
+  __typename?: 'ClusterProvider';
+  cloud: Scalars['String']['output'];
+  git: GitRef;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  namespace: Scalars['String']['output'];
+  repository?: Maybe<GitRepository>;
+  service?: Maybe<Service>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ClusterProviderAttributes = {
+  cloud?: InputMaybe<Scalars['String']['input']>;
+  cloudSettings?: InputMaybe<CloudProviderSettingsAttributes>;
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ClusterProviderConnection = {
+  __typename?: 'ClusterProviderConnection';
+  edges?: Maybe<Array<Maybe<ClusterProviderEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterProviderEdge = {
+  __typename?: 'ClusterProviderEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ClusterProvider>;
+};
+
+export type ClusterProviderUpdateAttributes = {
+  cloudSettings?: InputMaybe<CloudProviderSettingsAttributes>;
+};
+
+export type ClusterUpdateAttributes = {
+  nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  version: Scalars['String']['input'];
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export type Command = {
@@ -314,6 +486,27 @@ export type Component = {
   __typename?: 'Component';
   group: Scalars['String']['output'];
   kind: Scalars['String']['output'];
+};
+
+export type ComponentAttributes = {
+  group: Scalars['String']['input'];
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  state?: InputMaybe<ComponentState>;
+  synced: Scalars['Boolean']['input'];
+  version: Scalars['String']['input'];
+};
+
+export enum ComponentState {
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Running = 'RUNNING'
+}
+
+export type ConfigAttributes = {
+  name: Scalars['String']['input'];
+  value: Scalars['String']['input'];
 };
 
 export type ConfigMap = {
@@ -537,6 +730,29 @@ export type Deployment = {
   status: DeploymentStatus;
 };
 
+export type DeploymentSettings = {
+  __typename?: 'DeploymentSettings';
+  artifactRepository?: Maybe<GitRepository>;
+  createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  deployerRepository?: Maybe<GitRepository>;
+  gitBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+export type DeploymentSettingsAttributes = {
+  artifactRepositoryId?: InputMaybe<Scalars['ID']['input']>;
+  createBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  deployerRepositoryId?: InputMaybe<Scalars['ID']['input']>;
+  gitBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
 export type DeploymentSpec = {
   __typename?: 'DeploymentSpec';
   replicas?: Maybe<Scalars['Int']['output']>;
@@ -572,6 +788,57 @@ export type FileContent = {
   __typename?: 'FileContent';
   content?: Maybe<Scalars['String']['output']>;
   path?: Maybe<Scalars['String']['output']>;
+};
+
+export type GcpSettingsAttributes = {
+  applicationCredentials: Scalars['String']['input'];
+};
+
+export type GitAttributes = {
+  passphrase?: InputMaybe<Scalars['String']['input']>;
+  password?: InputMaybe<Scalars['String']['input']>;
+  privateKey?: InputMaybe<Scalars['String']['input']>;
+  url: Scalars['String']['input'];
+  username?: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum GitHealth {
+  Failed = 'FAILED',
+  Pullable = 'PULLABLE'
+}
+
+export type GitRef = {
+  __typename?: 'GitRef';
+  folder: Scalars['String']['output'];
+  ref: Scalars['String']['output'];
+};
+
+export type GitRefAttributes = {
+  folder: Scalars['String']['input'];
+  ref: Scalars['String']['input'];
+};
+
+export type GitRepository = {
+  __typename?: 'GitRepository';
+  authMethod?: Maybe<AuthMethod>;
+  health?: Maybe<GitHealth>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  pulledAt?: Maybe<Scalars['DateTime']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  url: Scalars['String']['output'];
+};
+
+export type GitRepositoryConnection = {
+  __typename?: 'GitRepositoryConnection';
+  edges?: Maybe<Array<Maybe<GitRepositoryEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type GitRepositoryEdge = {
+  __typename?: 'GitRepositoryEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<GitRepository>;
 };
 
 export type GitStatus = {
@@ -899,6 +1166,30 @@ export type NodeMetric = {
   window?: Maybe<Scalars['String']['output']>;
 };
 
+export type NodePool = {
+  __typename?: 'NodePool';
+  cloudSettings?: Maybe<CloudSettings>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  instanceType: Scalars['String']['output'];
+  labels?: Maybe<Scalars['Map']['output']>;
+  maxSize: Scalars['Int']['output'];
+  minSize: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+  taints?: Maybe<Array<Maybe<Taint>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type NodePoolAttributes = {
+  cloudSettings?: InputMaybe<CloudSettingsAttributes>;
+  instanceType: Scalars['String']['input'];
+  labels?: InputMaybe<Scalars['Map']['input']>;
+  maxSize: Scalars['Int']['input'];
+  minSize: Scalars['Int']['input'];
+  name: Scalars['String']['input'];
+  taints?: InputMaybe<Array<InputMaybe<TaintAttributes>>>;
+};
+
 export type NodeSpec = {
   __typename?: 'NodeSpec';
   podCidr?: Maybe<Scalars['String']['output']>;
@@ -1073,6 +1364,19 @@ export type PodStatus = {
   reason?: Maybe<Scalars['String']['output']>;
 };
 
+export type PolicyBinding = {
+  __typename?: 'PolicyBinding';
+  group?: Maybe<Group>;
+  id?: Maybe<Scalars['ID']['output']>;
+  user?: Maybe<User>;
+};
+
+export type PolicyBindingAttributes = {
+  groupId?: InputMaybe<Scalars['ID']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 export type Port = {
   __typename?: 'Port';
   containerPort?: Maybe<Scalars['Int']['output']>;
@@ -1120,6 +1424,11 @@ export type PrometheusDatasource = {
   format?: Maybe<Scalars['String']['output']>;
   legend?: Maybe<Scalars['String']['output']>;
   query: Scalars['String']['output'];
+};
+
+export type RbacAttributes = {
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export enum ReadType {
@@ -1210,6 +1519,28 @@ export type Resources = {
   requests?: Maybe<ResourceSpec>;
 };
 
+export type Revision = {
+  __typename?: 'Revision';
+  git: GitRef;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  sha?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  version: Scalars['String']['output'];
+};
+
+export type RevisionConnection = {
+  __typename?: 'RevisionConnection';
+  edges?: Maybe<Array<Maybe<RevisionEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type RevisionEdge = {
+  __typename?: 'RevisionEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Revision>;
+};
+
 export type Role = {
   __typename?: 'Role';
   description?: Maybe<Scalars['String']['output']>;
@@ -1261,15 +1592,22 @@ export type RootMutationType = {
   __typename?: 'RootMutationType';
   approveBuild?: Maybe<Build>;
   cancelBuild?: Maybe<Build>;
+  createAccessToken?: Maybe<AccessToken>;
   createBuild?: Maybe<Build>;
+  createCluster?: Maybe<Cluster>;
+  createClusterProvider?: Maybe<ClusterProvider>;
+  createGitRepository?: Maybe<GitRepository>;
   createGroup?: Maybe<Group>;
   createGroupMember?: Maybe<GroupMember>;
   createInvite?: Maybe<Invite>;
   createPeer?: Maybe<WireguardPeer>;
   createRole?: Maybe<Role>;
+  createServiceDeployment?: Maybe<ServiceDeployment>;
   createUpgradePolicy?: Maybe<UpgradePolicy>;
   createWebhook?: Maybe<Webhook>;
+  deleteAccessToken?: Maybe<AccessToken>;
   deleteCertificate?: Maybe<Scalars['Boolean']['output']>;
+  deleteCluster?: Maybe<Cluster>;
   deleteGroup?: Maybe<Group>;
   deleteGroupMember?: Maybe<GroupMember>;
   deleteJob?: Maybe<Job>;
@@ -1277,6 +1615,7 @@ export type RootMutationType = {
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePod?: Maybe<Pod>;
   deleteRole?: Maybe<Role>;
+  deleteServiceDeployment?: Maybe<ServiceDeployment>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
   deleteUser?: Maybe<User>;
   deleteWebhook?: Maybe<Webhook>;
@@ -1292,9 +1631,15 @@ export type RootMutationType = {
   restorePostgres?: Maybe<Postgresql>;
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
+  updateCluster?: Maybe<Cluster>;
+  updateClusterProvider?: Maybe<ClusterProvider>;
   updateConfiguration?: Maybe<Configuration>;
+  updateDeploymentSettings?: Maybe<DeploymentSettings>;
   updateGroup?: Maybe<Group>;
+  updateRbac?: Maybe<Scalars['Boolean']['output']>;
   updateRole?: Maybe<Role>;
+  updateServiceComponents?: Maybe<ServiceDeployment>;
+  updateServiceDeployment?: Maybe<ServiceDeployment>;
   updateSmtp?: Maybe<Smtp>;
   updateUser?: Maybe<User>;
 };
@@ -1312,6 +1657,21 @@ export type RootMutationTypeCancelBuildArgs = {
 
 export type RootMutationTypeCreateBuildArgs = {
   attributes: BuildAttributes;
+};
+
+
+export type RootMutationTypeCreateClusterArgs = {
+  attributes: ClusterAttributes;
+};
+
+
+export type RootMutationTypeCreateClusterProviderArgs = {
+  attributes: ClusterProviderAttributes;
+};
+
+
+export type RootMutationTypeCreateGitRepositoryArgs = {
+  attributes: GitAttributes;
 };
 
 
@@ -1343,6 +1703,12 @@ export type RootMutationTypeCreateRoleArgs = {
 };
 
 
+export type RootMutationTypeCreateServiceDeploymentArgs = {
+  attributes: ServiceDeploymentAttributes;
+  clusterId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCreateUpgradePolicyArgs = {
   attributes: UpgradePolicyAttributes;
 };
@@ -1353,9 +1719,19 @@ export type RootMutationTypeCreateWebhookArgs = {
 };
 
 
+export type RootMutationTypeDeleteAccessTokenArgs = {
+  token: Scalars['String']['input'];
+};
+
+
 export type RootMutationTypeDeleteCertificateArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeDeleteClusterArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1393,6 +1769,11 @@ export type RootMutationTypeDeletePodArgs = {
 
 
 export type RootMutationTypeDeleteRoleArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteServiceDeploymentArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -1480,11 +1861,28 @@ export type RootMutationTypeSignupArgs = {
 };
 
 
+export type RootMutationTypeUpdateClusterArgs = {
+  attributes: ClusterUpdateAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateClusterProviderArgs = {
+  attributes: ClusterProviderUpdateAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateConfigurationArgs = {
   content: Scalars['String']['input'];
   message?: InputMaybe<Scalars['String']['input']>;
   repository: Scalars['String']['input'];
   tool?: InputMaybe<Tool>;
+};
+
+
+export type RootMutationTypeUpdateDeploymentSettingsArgs = {
+  attributes: DeploymentSettingsAttributes;
 };
 
 
@@ -1494,8 +1892,28 @@ export type RootMutationTypeUpdateGroupArgs = {
 };
 
 
+export type RootMutationTypeUpdateRbacArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  providerId?: InputMaybe<Scalars['ID']['input']>;
+  rbac: RbacAttributes;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type RootMutationTypeUpdateRoleArgs = {
   attributes: RoleAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateServiceComponentsArgs = {
+  components?: InputMaybe<Array<InputMaybe<ComponentAttributes>>>;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateServiceDeploymentArgs = {
+  attributes: ServiceUpdateAttributes;
   id: Scalars['ID']['input'];
 };
 
@@ -1512,6 +1930,8 @@ export type RootMutationTypeUpdateUserArgs = {
 
 export type RootQueryType = {
   __typename?: 'RootQueryType';
+  accessToken?: Maybe<AccessToken>;
+  accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
   ai?: Maybe<Scalars['String']['output']>;
   application?: Maybe<Application>;
@@ -1523,7 +1943,12 @@ export type RootQueryType = {
   builds?: Maybe<BuildConnection>;
   cachedPods?: Maybe<Array<Maybe<Pod>>>;
   certificate?: Maybe<Certificate>;
+  cluster?: Maybe<Cluster>;
   clusterInfo?: Maybe<ClusterInfo>;
+  clusterProvider?: Maybe<ClusterProvider>;
+  clusterProviders?: Maybe<ClusterProviderConnection>;
+  clusterServices?: Maybe<Array<Maybe<ServiceDeployment>>>;
+  clusters?: Maybe<ClusterConnection>;
   configMap?: Maybe<ConfigMap>;
   configMaps?: Maybe<Array<Maybe<ConfigMap>>>;
   configuration?: Maybe<ConsoleConfiguration>;
@@ -1533,7 +1958,9 @@ export type RootQueryType = {
   dashboard?: Maybe<Dashboard>;
   dashboards?: Maybe<Array<Maybe<Dashboard>>>;
   deployment?: Maybe<Deployment>;
+  deploymentSettings?: Maybe<DeploymentSettings>;
   externalToken?: Maybe<Scalars['String']['output']>;
+  gitRepositories?: Maybe<GitRepositoryConnection>;
   groupMembers?: Maybe<GroupMemberConnection>;
   groups?: Maybe<GroupConnection>;
   ingress?: Maybe<Ingress>;
@@ -1569,6 +1996,8 @@ export type RootQueryType = {
   secret?: Maybe<Secret>;
   secrets?: Maybe<Array<Maybe<Secret>>>;
   service?: Maybe<Service>;
+  serviceDeployment?: Maybe<ServiceDeployment>;
+  serviceDeployments?: Maybe<ServiceDeploymentConnection>;
   smtp?: Maybe<Smtp>;
   stack?: Maybe<Stack>;
   statefulSet?: Maybe<StatefulSet>;
@@ -1578,6 +2007,19 @@ export type RootQueryType = {
   webhooks?: Maybe<WebhookConnection>;
   wireguardPeer?: Maybe<WireguardPeer>;
   wireguardPeers?: Maybe<Array<Maybe<WireguardPeer>>>;
+};
+
+
+export type RootQueryTypeAccessTokenArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeAccessTokensArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1624,6 +2066,32 @@ export type RootQueryTypeCertificateArgs = {
 };
 
 
+export type RootQueryTypeClusterArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeClusterProviderArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeClusterProvidersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeClustersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type RootQueryTypeConfigMapArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -1663,6 +2131,14 @@ export type RootQueryTypeDashboardsArgs = {
 export type RootQueryTypeDeploymentArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeGitRepositoriesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1844,6 +2320,20 @@ export type RootQueryTypeSecretsArgs = {
 export type RootQueryTypeServiceArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeServiceDeploymentArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeServiceDeploymentsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -2033,6 +2523,75 @@ export type Service = {
   status: ServiceStatus;
 };
 
+export type ServiceComponent = {
+  __typename?: 'ServiceComponent';
+  group: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  kind: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  namespace: Scalars['String']['output'];
+  state?: Maybe<ComponentState>;
+  synced: Scalars['Boolean']['output'];
+  version: Scalars['String']['output'];
+};
+
+export type ServiceConfiguration = {
+  __typename?: 'ServiceConfiguration';
+  name: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+export type ServiceDeployment = {
+  __typename?: 'ServiceDeployment';
+  components?: Maybe<Array<Maybe<ServiceComponent>>>;
+  configuration?: Maybe<Array<Maybe<ServiceConfiguration>>>;
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  git: GitRef;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  namespace: Scalars['String']['output'];
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  repository?: Maybe<GitRepository>;
+  revisions?: Maybe<RevisionConnection>;
+  sha?: Maybe<Scalars['String']['output']>;
+  tarball?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  version: Scalars['String']['output'];
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+export type ServiceDeploymentRevisionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ServiceDeploymentAttributes = {
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  git: GitRefAttributes;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  repositoryId: Scalars['ID']['input'];
+  version?: InputMaybe<Scalars['String']['input']>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type ServiceDeploymentConnection = {
+  __typename?: 'ServiceDeploymentConnection';
+  edges?: Maybe<Array<Maybe<ServiceDeploymentEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ServiceDeploymentEdge = {
+  __typename?: 'ServiceDeploymentEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ServiceDeployment>;
+};
+
 export type ServicePort = {
   __typename?: 'ServicePort';
   name?: Maybe<Scalars['String']['output']>;
@@ -2052,6 +2611,12 @@ export type ServiceSpec = {
 export type ServiceStatus = {
   __typename?: 'ServiceStatus';
   loadBalancer?: Maybe<LoadBalancerStatus>;
+};
+
+export type ServiceUpdateAttributes = {
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  git: GitRefAttributes;
+  version?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum Severity {
@@ -2136,6 +2701,19 @@ export type StatusCondition = {
   reason: Scalars['String']['output'];
   status: Scalars['String']['output'];
   type: Scalars['String']['output'];
+};
+
+export type Taint = {
+  __typename?: 'Taint';
+  effect: Scalars['String']['output'];
+  key: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+export type TaintAttributes = {
+  effect: Scalars['String']['input'];
+  key: Scalars['String']['input'];
+  value: Scalars['String']['input'];
 };
 
 export type TerminatedState = {

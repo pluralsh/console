@@ -32,6 +32,16 @@ enum AuditAction {
   CANCEL
 }
 
+type AccessTokenConnection {
+  pageInfo: PageInfo!
+  edges: [AccessTokenEdge]
+}
+
+type RevisionConnection {
+  pageInfo: PageInfo!
+  edges: [RevisionEdge]
+}
+
 type RecipeSection {
   id: ID!
   repository: Repository
@@ -95,6 +105,10 @@ type Changelog {
   updatedAt: DateTime
 }
 
+type OverlayUpdate {
+  path: [String]
+}
+
 type PostgresInstance {
   uid: String!
 }
@@ -129,8 +143,49 @@ type RepositoryEdge {
   cursor: String
 }
 
-type OverlayUpdate {
-  path: [String]
+type ClusterEdge {
+  node: Cluster
+  cursor: String
+}
+
+type FileContent {
+  path: String
+  content: String
+}
+
+type ServiceDeployment {
+  id: ID!
+  name: String!
+  namespace: String!
+  version: String!
+  git: GitRef!
+  sha: String
+  tarball: String
+  deletedAt: DateTime
+  repository: GitRepository
+  readBindings: [PolicyBinding]
+  writeBindings: [PolicyBinding]
+  configuration: [ServiceConfiguration]
+  components: [ServiceComponent]
+  revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type ServiceComponent {
+  id: ID!
+  state: ComponentState
+  synced: Boolean!
+  group: String!
+  version: String!
+  kind: String!
+  namespace: String!
+  name: String!
+}
+
+enum AuthMethod {
+  BASIC
+  SSH
 }
 
 enum AutoscalingTarget {
@@ -162,11 +217,6 @@ type StatefulSet {
   events: [Event]
 }
 
-type FileContent {
-  path: String
-  content: String
-}
-
 type Account {
   delinquentAt: DateTime
   grandfatheredUntil: DateTime
@@ -182,6 +232,25 @@ type MetricResult {
 type Component {
   group: String!
   kind: String!
+}
+
+input CloudSettingsAttributes {
+  aws: AwsCloudAttributes
+}
+
+type DeploymentSpec {
+  replicas: Int
+  strategy: DeploymentStrategy
+}
+
+input RbacAttributes {
+  readBindings: [PolicyBindingAttributes]
+  writeBindings: [PolicyBindingAttributes]
+}
+
+input GitRefAttributes {
+  ref: String!
+  folder: String!
 }
 
 type ConfigurationOverlaySpec {
@@ -206,6 +275,22 @@ type ContainerStatus {
   state: ContainerState
 }
 
+input ServiceDeploymentAttributes {
+  name: String!
+  namespace: String!
+  version: String
+  repositoryId: ID!
+  git: GitRefAttributes!
+  configuration: [ConfigAttributes]
+  readBindings: [PolicyBindingAttributes]
+  writeBindings: [PolicyBindingAttributes]
+}
+
+input ConfigAttributes {
+  name: String!
+  value: String!
+}
+
 input ContextAttributes {
   buckets: [String]
   domain: [String]
@@ -215,6 +300,12 @@ input ContextAttributes {
 
 type IngressTls {
   hosts: [String]
+}
+
+input TaintAttributes {
+  key: String!
+  value: String!
+  effect: String!
 }
 
 type PostgresqlSpec {
@@ -263,9 +354,13 @@ input BuildAttributes {
   message: String
 }
 
-type DeploymentSpec {
-  replicas: Int
-  strategy: DeploymentStrategy
+input DeploymentSettingsAttributes {
+  artifactRepositoryId: ID
+  deployerRepositoryId: ID
+  readBindings: [PolicyBindingAttributes]
+  writeBindings: [PolicyBindingAttributes]
+  gitBindings: [PolicyBindingAttributes]
+  createBindings: [PolicyBindingAttributes]
 }
 
 type CronJob {
@@ -275,6 +370,18 @@ type CronJob {
   raw: String!
   events: [Event]
   jobs: [Job]
+}
+
+type ClusterProvider {
+  id: ID!
+  name: String!
+  namespace: String!
+  cloud: String!
+  git: GitRef!
+  repository: GitRepository
+  service: Service
+  insertedAt: DateTime
+  updatedAt: DateTime
 }
 
 type PodDelta {
@@ -293,6 +400,10 @@ type Smtp {
   user: String
 }
 
+type LoginInfo {
+  oidcUri: String
+}
+
 type ClusterInfo {
   gitCommit: String
   gitVersion: String
@@ -300,8 +411,9 @@ type ClusterInfo {
   version: String
 }
 
-type LoginInfo {
-  oidcUri: String
+type ServiceConfiguration {
+  name: String!
+  value: String!
 }
 
 type RootSubscriptionType {
@@ -310,6 +422,11 @@ type RootSubscriptionType {
   buildDelta(buildId: ID): BuildDelta
   commandDelta(buildId: ID!): CommandDelta
   notificationDelta: NotificationDelta
+}
+
+type ClusterConnection {
+  pageInfo: PageInfo!
+  edges: [ClusterEdge]
 }
 
 type RepositoryConnection {
@@ -411,6 +528,14 @@ type Runbook {
   executions(after: String, first: Int, before: String, last: Int): RunbookExecutionConnection
 }
 
+enum Severity {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 type Repository {
   id: ID!
   name: String!
@@ -426,14 +551,6 @@ type DeploymentStrategy {
   rollingUpdate: RollingUpdate
 }
 
-enum Severity {
-  NONE
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
 type DashboardGraph {
   name: String!
   queries: [DashboardMetric]
@@ -443,6 +560,22 @@ type DashboardGraph {
 type IngressPath {
   backend: IngressBackend
   path: String
+}
+
+type PolicyBinding {
+  id: ID
+  user: User
+  group: Group
+}
+
+type LicenseFeature {
+  name: String!
+  description: String
+}
+
+type ClusterProviderEdge {
+  node: ClusterProvider
+  cursor: String
 }
 
 type IngressRule {
@@ -524,11 +657,6 @@ type RunbookActionResponse {
   redirectTo: String
 }
 
-type LicenseFeature {
-  name: String!
-  description: String
-}
-
 type Role {
   id: ID!
   name: String!
@@ -573,6 +701,19 @@ type Deployment {
   events: [Event]
 }
 
+type AccessTokenAudit {
+  id: ID
+  ip: String
+  timestamp: DateTime
+  count: Int
+  city: String
+  country: String
+  latitude: String
+  longitude: String
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
 type Build {
   id: ID!
   repository: String!
@@ -598,6 +739,33 @@ type Command {
   build: Build
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+type CostAnalysis {
+  minutes: Float
+  cpuCost: Float
+  cpuEfficiency: Float
+  efficiency: Float
+  gpuCost: Float
+  networkCost: Float
+  pvCost: Float
+  ramCost: Float
+  ramEfficiency: Float
+  totalCost: Float
+  sharedCost: Float
+}
+
+type ApplicationSpec {
+  descriptor: ApplicationDescriptor!
+  components: [Component]
+  info: [ApplicationInfoItem]
+}
+
+type AvailableFeatures {
+  vpn: Boolean
+  audits: Boolean
+  userManagement: Boolean
+  databaseManagement: Boolean
 }
 
 type DashboardMetric {
@@ -652,6 +820,16 @@ type JobSpec {
   activeDeadlineSeconds: Int
 }
 
+input NodePoolAttributes {
+  name: String!
+  minSize: Int!
+  maxSize: Int!
+  instanceType: String!
+  labels: Map
+  taints: [TaintAttributes]
+  cloudSettings: CloudSettingsAttributes
+}
+
 type RunbookStatus {
   alerts: [RunbookAlertStatus]
 }
@@ -682,31 +860,18 @@ type CronSpec {
   concurrencyPolicy: String
 }
 
-type CostAnalysis {
-  minutes: Float
-  cpuCost: Float
-  cpuEfficiency: Float
-  efficiency: Float
-  gpuCost: Float
-  networkCost: Float
-  pvCost: Float
-  ramCost: Float
-  ramEfficiency: Float
-  totalCost: Float
-  sharedCost: Float
-}
-
-type ApplicationSpec {
-  descriptor: ApplicationDescriptor!
-  components: [Component]
-  info: [ApplicationInfoItem]
-}
-
-type AvailableFeatures {
-  vpn: Boolean
-  audits: Boolean
-  userManagement: Boolean
-  databaseManagement: Boolean
+type Cluster {
+  id: ID!
+  name: String!
+  version: String!
+  deletedAt: DateTime
+  readBindings: [PolicyBinding]
+  writeBindings: [PolicyBinding]
+  nodePools: [NodePool]
+  provider: ClusterProvider
+  service: Service
+  insertedAt: DateTime
+  updatedAt: DateTime
 }
 
 type WireguardPeer {
@@ -752,36 +917,6 @@ type ApplicationDelta {
   payload: Application
 }
 
-type Installation {
-  id: ID!
-  repository: Repository
-}
-
-type Configuration {
-  terraform: String
-  helm: String
-}
-
-type Notification {
-  id: ID!
-  title: String!
-  description: String
-  fingerprint: String!
-  status: NotificationStatus
-  labels: Map
-  annotations: Map
-  repository: String!
-  seenAt: DateTime
-  severity: Severity
-  insertedAt: DateTime
-  updatedAt: DateTime
-}
-
-type AuditConnection {
-  pageInfo: PageInfo!
-  edges: [AuditEdge]
-}
-
 type RootMutationType {
   createBuild(attributes: BuildAttributes!): Build
   restartBuild(id: ID!): Build
@@ -804,6 +939,8 @@ type RootMutationType {
   createRole(attributes: RoleAttributes!): Role
   updateRole(id: ID!, attributes: RoleAttributes!): Role
   deleteRole(id: ID!): Role
+  createAccessToken: AccessToken
+  deleteAccessToken(token: String!): AccessToken
   deleteCertificate(name: String!, namespace: String!): Boolean
   deletePod(namespace: String!, name: String!): Pod
   deleteJob(namespace: String!, name: String!): Job
@@ -821,6 +958,75 @@ type RootMutationType {
   createWebhook(attributes: WebhookAttributes!): Webhook
   deleteWebhook(id: ID!): Webhook
   restorePostgres(namespace: String!, name: String!, timestamp: DateTime!, clone: CloneAttributes): Postgresql
+  createGitRepository(attributes: GitAttributes!): GitRepository
+  createCluster(attributes: ClusterAttributes!): Cluster
+  updateCluster(id: ID!, attributes: ClusterUpdateAttributes!): Cluster
+  deleteCluster(id: ID!): Cluster
+  createClusterProvider(attributes: ClusterProviderAttributes!): ClusterProvider
+  updateClusterProvider(id: ID!, attributes: ClusterProviderUpdateAttributes!): ClusterProvider
+  createServiceDeployment(clusterId: ID!, attributes: ServiceDeploymentAttributes!): ServiceDeployment
+  updateServiceDeployment(id: ID!, attributes: ServiceUpdateAttributes!): ServiceDeployment
+  deleteServiceDeployment(id: ID!): ServiceDeployment
+  updateServiceComponents(id: ID!, components: [ComponentAttributes]): ServiceDeployment
+  updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
+  updateDeploymentSettings(attributes: DeploymentSettingsAttributes!): DeploymentSettings
+}
+
+type PodConnection {
+  pageInfo: PageInfo!
+  edges: [PodEdge]
+}
+
+type AccessToken {
+  id: ID
+  token: String
+  audits(after: String, first: Int, before: String, last: Int): AccessTokenAuditConnection
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type Revision {
+  id: ID!
+  version: String!
+  git: GitRef!
+  sha: String
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type Installation {
+  id: ID!
+  repository: Repository
+}
+
+type Configuration {
+  terraform: String
+  helm: String
+}
+
+type ClusterProviderConnection {
+  pageInfo: PageInfo!
+  edges: [ClusterProviderEdge]
+}
+
+type Notification {
+  id: ID!
+  title: String!
+  description: String
+  fingerprint: String!
+  status: NotificationStatus
+  labels: Map
+  annotations: Map
+  repository: String!
+  seenAt: DateTime
+  severity: Severity
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type AuditConnection {
+  pageInfo: PageInfo!
+  edges: [AuditEdge]
 }
 
 type ConfigurationCondition {
@@ -831,11 +1037,6 @@ type ConfigurationCondition {
 
 type Recommendation {
   containerRecommendations: [ContainerRecommendation]
-}
-
-type PodConnection {
-  pageInfo: PageInfo!
-  edges: [PodEdge]
 }
 
 type Postgresql {
@@ -892,6 +1093,8 @@ type RootQueryType {
   roles(after: String, first: Int, before: String, last: Int, q: String): RoleConnection
   notifications(after: String, first: Int, before: String, last: Int, all: Boolean): NotificationConnection
   temporaryToken: String
+  accessTokens(after: String, first: Int, before: String, last: Int): AccessTokenConnection
+  accessToken(id: ID!): AccessToken
   dashboards(repo: String!): [Dashboard]
   dashboard(repo: String!, name: String!, step: String, offset: Int, labels: [LabelInput]): Dashboard
   metric(query: String!, offset: Int, step: String): [MetricResponse]
@@ -943,6 +1146,15 @@ type RootQueryType {
   webhooks(after: String, first: Int, before: String, last: Int): WebhookConnection
   postgresDatabases: [Postgresql]
   postgresDatabase(namespace: String!, name: String!): Postgresql
+  gitRepositories(after: String, first: Int, before: String, last: Int): GitRepositoryConnection
+  clusters(after: String, first: Int, before: String, last: Int): ClusterConnection
+  clusterProviders(after: String, first: Int, before: String, last: Int): ClusterProviderConnection
+  cluster(id: ID): Cluster
+  clusterProvider(id: ID!): ClusterProvider
+  serviceDeployments(after: String, first: Int, before: String, last: Int, clusterId: ID): ServiceDeploymentConnection
+  serviceDeployment(id: ID!): ServiceDeployment
+  clusterServices: [ServiceDeployment]
+  deploymentSettings: DeploymentSettings
 }
 
 type RoleBinding {
@@ -953,10 +1165,28 @@ type RoleBinding {
   updatedAt: DateTime
 }
 
+type GitRef {
+  ref: String!
+  folder: String!
+}
+
 type IssuerRef {
   group: String
   kind: String
   name: String
+}
+
+type Namespace {
+  status: NamespaceStatus!
+  spec: NamespaceSpec!
+  metadata: Metadata!
+  raw: String!
+  events: [Event]
+}
+
+type GitRepositoryEdge {
+  node: GitRepository
+  cursor: String
 }
 
 enum AuditType {
@@ -969,6 +1199,11 @@ enum AuditType {
   GROUP_MEMBER
   POLICY
   TEMP_TOKEN
+  SERVICE
+  CLUSTER
+  CLUSTER_PROVIDER
+  GIT_REPOSITORY
+  DEPLOYMENT_SETTINGS
 }
 
 type MetricResponse {
@@ -989,6 +1224,12 @@ type BuildEdge {
 type RecipeEdge {
   node: Recipe
   cursor: String
+}
+
+enum ComponentState {
+  RUNNING
+  PENDING
+  FAILED
 }
 
 type RunningState {
@@ -1030,17 +1271,19 @@ type CommandEdge {
   cursor: String
 }
 
+type AccessTokenAuditEdge {
+  node: AccessTokenAudit
+  cursor: String
+}
+
 type RunbookExecutionEdge {
   node: RunbookExecution
   cursor: String
 }
 
-type Namespace {
-  status: NamespaceStatus!
-  spec: NamespaceSpec!
-  metadata: Metadata!
-  raw: String!
-  events: [Event]
+type ServiceDeploymentEdge {
+  node: ServiceDeployment
+  cursor: String
 }
 
 type PluralContext {
@@ -1053,6 +1296,16 @@ type Port {
   hostPort: Int
   containerPort: Int
   protocol: String
+}
+
+type Taint {
+  key: String!
+  value: String!
+  effect: String!
+}
+
+type AwsCloud {
+  launchTemplateId: String
 }
 
 type IngressBackend {
@@ -1076,6 +1329,44 @@ type Event {
   message: String
   reason: String
   type: String
+}
+
+input PolicyBindingAttributes {
+  id: ID
+  userId: ID
+  groupId: ID
+}
+
+type ApplicationStatus {
+  components: [StatusComponent]
+  conditions: [StatusCondition]
+  componentsReady: String!
+}
+
+type DeploymentSettings {
+  id: ID!
+  name: String!
+  artifactRepository: GitRepository
+  deployerRepository: GitRepository
+  readBindings: [PolicyBinding]
+  writeBindings: [PolicyBinding]
+  gitBindings: [PolicyBinding]
+  createBindings: [PolicyBinding]
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+input ClusterAttributes {
+  name: String!
+  providerId: ID
+  version: String!
+  nodePools: [NodePoolAttributes]
+  readBindings: [PolicyBindingAttributes]
+  writeBindings: [PolicyBindingAttributes]
+}
+
+type CloudSettings {
+  aws: AwsCloud
 }
 
 type PostgresSettings {
@@ -1103,12 +1394,55 @@ input UserRoleAttributes {
   admin: Boolean
 }
 
+input AwsCloudAttributes {
+  launchTemplateId: String
+}
+
+input GitAttributes {
+  url: String!
+  privateKey: String
+  passphrase: String
+  username: String
+  password: String
+}
+
 type DashboardSpec {
   name: String
   description: String
   timeslices: [String]
   labels: [DashboardLabel]
   graphs: [DashboardGraph]
+}
+
+input ComponentAttributes {
+  state: ComponentState
+  synced: Boolean!
+  group: String!
+  version: String!
+  kind: String!
+  namespace: String!
+  name: String!
+}
+
+input ClusterUpdateAttributes {
+  version: String!
+  nodePools: [NodePoolAttributes]
+  readBindings: [PolicyBindingAttributes]
+  writeBindings: [PolicyBindingAttributes]
+}
+
+input CloudProviderSettingsAttributes {
+  aws: AwsSettingsAttributes
+  gcp: GcpSettingsAttributes
+}
+
+input AwsSettingsAttributes {
+  accessKeyId: String!
+  secretAccessKey: String!
+}
+
+input GcpSettingsAttributes {
+  applicationCredentials: String!
 }
 
 input UpgradePolicyAttributes {
@@ -1133,6 +1467,12 @@ type LicenseStatus {
   secrets: Map
 }
 
+input ServiceUpdateAttributes {
+  version: String
+  git: GitRefAttributes!
+  configuration: [ConfigAttributes]
+}
+
 input CloneAttributes {
   s3AccessKeyId: String
   s3SecretAccessKey: String
@@ -1143,12 +1483,6 @@ input CloneAttributes {
 
 input WebhookAttributes {
   url: String!
-}
-
-type ApplicationStatus {
-  components: [StatusComponent]
-  conditions: [StatusCondition]
-  componentsReady: String!
 }
 
 input GroupAttributes {
@@ -1164,6 +1498,11 @@ input RoleAttributes {
   permissions: [Permission]
 }
 
+type LogFilter {
+  metadata: Metadata!
+  spec: LogFilterSpec!
+}
+
 type Job {
   metadata: Metadata!
   status: JobStatus!
@@ -1171,11 +1510,6 @@ type Job {
   raw: String!
   events: [Event]
   pods: [Pod]
-}
-
-type LogFilter {
-  metadata: Metadata!
-  spec: LogFilterSpec!
 }
 
 type Metadata {
@@ -1194,6 +1528,18 @@ type BuildInfo {
   successful: Int
 }
 
+type NodeCondition {
+  message: String
+  reason: String
+  status: String
+  type: String
+}
+
+type GroupMemberConnection {
+  pageInfo: PageInfo!
+  edges: [GroupMemberEdge]
+}
+
 type ContainerRecommendation {
   name: String
   containerName: String
@@ -1201,6 +1547,16 @@ type ContainerRecommendation {
   lowerBound: ContainerResources
   upperBound: ContainerResources
   uncappedTarget: ContainerResources
+}
+
+type ServiceDeploymentConnection {
+  pageInfo: PageInfo!
+  edges: [ServiceDeploymentEdge]
+}
+
+type GitRepositoryConnection {
+  pageInfo: PageInfo!
+  edges: [GitRepositoryEdge]
 }
 
 enum Permission {
@@ -1220,6 +1576,11 @@ type PluralSubscription {
   plan: Plan
 }
 
+type AccessTokenAuditConnection {
+  pageInfo: PageInfo!
+  edges: [AccessTokenAuditEdge]
+}
+
 type ConsoleConfiguration {
   gitCommit: String
   isDemoProject: Boolean
@@ -1236,18 +1597,6 @@ type CommandConnection {
   edges: [CommandEdge]
 }
 
-type NodeCondition {
-  message: String
-  reason: String
-  status: String
-  type: String
-}
-
-type GroupMemberConnection {
-  pageInfo: PageInfo!
-  edges: [GroupMemberEdge]
-}
-
 type RecipeConnection {
   pageInfo: PageInfo!
   edges: [RecipeEdge]
@@ -1256,6 +1605,19 @@ type RecipeConnection {
 type BuildConnection {
   pageInfo: PageInfo!
   edges: [BuildEdge]
+}
+
+type NodePool {
+  id: ID!
+  name: String!
+  minSize: Int!
+  maxSize: Int!
+  instanceType: String!
+  labels: Map
+  taints: [Taint]
+  cloudSettings: CloudSettings
+  insertedAt: DateTime
+  updatedAt: DateTime
 }
 
 type VerticalPodAutoscalerUpdatePolicy {
@@ -1267,12 +1629,38 @@ type ConfigurationOverlay {
   spec: ConfigurationOverlaySpec!
 }
 
+type GitRepository {
+  id: ID!
+  url: String!
+  authMethod: AuthMethod
+  health: GitHealth
+  pulledAt: DateTime
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+enum GitHealth {
+  PULLABLE
+  FAILED
+}
+
 enum WebhookHealth {
   HEALTHY
   UNHEALTHY
 }
 
 scalar Long
+
+enum UpgradePolicyType {
+  DEPLOY
+  APPROVAL
+  IGNORE
+}
+
+type RevisionEdge {
+  node: Revision
+  cursor: String
+}
 
 type DatabaseVolume {
   size: String
@@ -1289,6 +1677,11 @@ type Certificate {
   spec: CertificateSpec!
   raw: String!
   events: [Event]
+}
+
+type AccessTokenEdge {
+  node: AccessToken
+  cursor: String
 }
 
 type RollingUpdate {
@@ -1316,12 +1709,6 @@ type TerminatedState {
 type PathUpdate {
   path: [String]
   valueFrom: String!
-}
-
-enum UpgradePolicyType {
-  DEPLOY
-  APPROVAL
-  IGNORE
 }
 
 type UserEdge {
@@ -1376,6 +1763,11 @@ type Dashboard {
   spec: DashboardSpec!
 }
 
+type LoadBalancerIngressStatus {
+  hostname: String
+  ip: String
+}
+
 type PostgresqlStatus {
   clusterStatus: String
 }
@@ -1423,6 +1815,17 @@ enum Status {
   FAILED
   CANCELLED
   PENDING
+}
+
+input ClusterProviderAttributes {
+  name: String!
+  namespace: String
+  cloud: String
+  cloudSettings: CloudProviderSettingsAttributes
+}
+
+input ClusterProviderUpdateAttributes {
+  cloudSettings: CloudProviderSettingsAttributes
 }
 
 type RunbookAlertStatus {
@@ -1485,16 +1888,17 @@ type NodeMetric {
   usage: NodeUsage
 }
 
-type LoadBalancerIngressStatus {
-  hostname: String
-  ip: String
-}
-
 type ServiceSpec {
   type: String
   clusterIp: String
   selector: Map
   ports: [ServicePort]
+}
+
+type VerticalPodAutoscaler {
+  metadata: Metadata!
+  spec: VerticalPodAutoscalerSpec!
+  status: VerticalPodAutoscalerStatus
 }
 
 type SecretKeySelector {
@@ -1523,12 +1927,6 @@ type User {
 type LabelPair {
   name: String
   value: String
-}
-
-type VerticalPodAutoscaler {
-  metadata: Metadata!
-  spec: VerticalPodAutoscalerSpec!
-  status: VerticalPodAutoscalerStatus
 }
 
 type RunbookData {
