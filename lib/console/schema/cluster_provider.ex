@@ -1,5 +1,6 @@
 defmodule Console.Schema.ClusterProvider do
   use Piazza.Ecto.Schema
+  import Console.Deployments.Ecto.Validations
   alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{Service, GitRepository, PolicyBinding, User}
 
@@ -90,6 +91,7 @@ defmodule Console.Schema.ClusterProvider do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> kubernetes_names([:name, :namespace])
     |> cast_embed(:git)
     |> cast_embed(:cloud_settings)
     |> cast_assoc(:read_bindings)

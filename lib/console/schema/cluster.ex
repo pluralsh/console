@@ -1,5 +1,6 @@
 defmodule Console.Schema.Cluster do
   use Piazza.Ecto.Schema
+  import Console.Deployments.Ecto.Validations
   alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{Service, ClusterNodePool, NamespacedName, ClusterProvider, PolicyBinding, User}
 
@@ -66,6 +67,8 @@ defmodule Console.Schema.Cluster do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> kubernetes_name(:name)
+    |> semver(:version)
     |> cast_embed(:kubeconfig)
     |> cast_embed(:resource)
     |> cast_assoc(:node_pools)
@@ -100,10 +103,10 @@ defmodule Console.Schema.Cluster do
   defp update_vsn(cs) do
     with current when is_binary(current) <- get_field(cs, :current_version),
          vsn when is_binary(vsn) <- get_field(cs, :version),
-         {:ok, current_parsed} <- Version.parse(current),
-         {:ok, vsn} <- Version.parse(vsn),
+         {:ok, current_parsed} <- Version.parse(clean_version(current)),
+         {:ok, vsn} <- Version.parse(clean_version(vsn)),
          :gt <- Version.compare(current_parsed, vsn) do
-      put_change(cs, :version, to_string(current))
+      put_change(cs, :version, current)
     else
       _ -> cs
     end

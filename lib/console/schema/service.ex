@@ -1,5 +1,6 @@
 defmodule Console.Schema.Service do
   use Piazza.Ecto.Schema
+  import Console.Deployments.Ecto.Validations
   alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{
     User,
@@ -97,6 +98,8 @@ defmodule Console.Schema.Service do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> kubernetes_names([:name, :namespace])
+    |> semver(:version)
     |> cast_embed(:git)
     |> cast_assoc(:components)
     |> cast_assoc(:read_bindings)
