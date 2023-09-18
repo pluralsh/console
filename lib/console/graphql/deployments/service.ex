@@ -58,6 +58,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
 
+    field :revision, :revision, resolve: dataloader(Deployments)
     field :configuration, list_of(:service_configuration), resolve: &Deployments.service_configuration/3
     field :components, list_of(:service_component), resolve: dataloader(Deployments)
 
@@ -147,6 +148,14 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_service/2
+    end
+
+    field :rollback_service, :service_deployment do
+      middleware Authenticated
+      arg :id, non_null(:id)
+      arg :revision_id, non_null(:id)
+
+      safe_resolve &Deployments.rollback/2
     end
 
     field :update_service_components, :service_deployment do

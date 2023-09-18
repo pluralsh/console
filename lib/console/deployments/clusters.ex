@@ -84,6 +84,16 @@ defmodule Console.Deployments.Clusters do
   end
 
   @doc """
+  applies a ping to a cluster, to be issued by the deploy operator
+  """
+  @spec ping(map, Cluster.t) :: cluster_resp
+  def ping(attrs, %Cluster{id: id}) do
+    get_cluster(id)
+    |> Cluster.ping_changeset(Map.put(attrs, :pinged_at, Timex.now()))
+    |> Repo.update()
+  end
+
+  @doc """
   Marks a cluster to be deleted, with hard deletes following a successful drain
   """
   @spec delete_cluster(binary, User.t) :: cluster_resp

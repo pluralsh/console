@@ -27,6 +27,7 @@ defmodule Console.Repo.Migrations.ContinuousDeployments do
       add :deploy_token,    :string
       add :write_policy_id, :uuid
       add :read_policy_id,  :uuid
+      add :pinged_at,       :utc_datetime_usec
       add :deleted_at,      :utc_datetime_usec
 
       timestamps()

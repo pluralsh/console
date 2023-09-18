@@ -179,6 +179,12 @@ defmodule Console.Factory do
     }
   end
 
+  def revision_factory do
+    %Schema.Revision{
+      service: build(:service)
+    }
+  end
+
   def service_component_factory do
     %Schema.ServiceComponent{
       group: "networking.k8s.io",

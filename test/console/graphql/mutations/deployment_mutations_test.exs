@@ -89,6 +89,22 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
+  describe "pingCluster" do
+    test "it can mark a cluster as pinged" do
+      cluster = insert(:cluster)
+
+      {:ok, %{data: %{"pingCluster" => pinged}}} = run_query("""
+        mutation Ping($ping: ClusterPing!) {
+          pingCluster(attributes: $ping) { id pingedAt currentVersion }
+        }
+      """, %{"ping" => %{"currentVersion" => "1.25"}}, %{cluster: cluster})
+
+      assert pinged["id"] == cluster.id
+      assert pinged["currentVersion"] == "1.25"
+      assert pinged["pingedAt"]
+    end
+  end
+
   describe "deleteCluster" do
     test "it can mark a cluster for deletion" do
       user = insert(:user)
@@ -227,6 +243,46 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
+  describe "rollbackService" do
+    test "it can rollback a service to a prior revision" do
+      cluster = insert(:cluster)
+      user = admin_user()
+      git = insert(:git_repository)
+
+      {:ok, service} = create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster, user)
+
+      {:ok, _} = update_service(%{
+        git: %{
+          ref: "master",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "other-value"}, %{name: "name2", value: "value"}]
+      }, service, user)
+
+      {:ok, %{data: %{"rollbackService" => svc}}} = run_query("""
+        mutation Rollback($id: ID!, $rev: ID!) {
+          rollbackService(id: $id, revisionId: $rev) {
+            id
+            revision { id }
+          }
+        }
+      """, %{"id" => service.id, "rev" => service.revision_id}, %{current_user: user})
+
+      assert svc["id"] == service.id
+      assert svc["revision"]["id"] == service.revision_id
+    end
+  end
+
   describe "deleteServiceDeployment" do
     test "it can mark a cluster for deletion" do
       user = insert(:user)
@@ -242,6 +298,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert deleted["deletedAt"]
     end
   end
+
 
   describe "updateServiceComponents" do
     test "it will post updates to the components of the service in a cluster" do

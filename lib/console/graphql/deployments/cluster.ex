@@ -11,6 +11,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :write_bindings, list_of(:policy_binding_attributes)
   end
 
+  input_object :cluster_ping do
+    field :current_version, non_null(:string)
+  end
+
   input_object :cluster_update_attributes do
     field :version,       non_null(:string)
     field :node_pools,    list_of(:node_pool_attributes)
@@ -80,11 +84,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   object :cluster do
-    field :id,      non_null(:id)
-    field :name,    non_null(:string)
-    field :version, non_null(:string)
+    field :id,              non_null(:id)
+    field :name,            non_null(:string)
+    field :version,         non_null(:string)
+    field :current_version, :string
 
     field :deleted_at, :datetime
+    field :pinged_at,  :datetime
 
     field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
@@ -171,6 +177,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :attributes, non_null(:cluster_update_attributes)
 
       safe_resolve &Deployments.update_cluster/2
+    end
+
+    field :ping_cluster, :cluster do
+      middleware ClusterAuthenticated
+      arg :attributes, non_null(:cluster_ping)
+
+      safe_resolve &Deployments.ping/2
     end
 
     field :delete_cluster, :cluster do

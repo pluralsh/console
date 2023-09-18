@@ -104,6 +104,13 @@ defmodule Console.Schema.Service do
     |> validate_required([:name, :version, :cluster_id, :repository_id])
   end
 
+  def rollback_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, ~w(revision_id sha)a)
+    |> cast_embed(:git)
+    |> validate_required(~w(revision_id)a)
+  end
+
   def rbac_changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, [])

@@ -160,6 +160,93 @@ defmodule Console.Deployments.ServicesTest do
     end
   end
 
+  describe "#rollback/3" do
+    test "it will set the current revision to a previous one" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      git = insert(:git_repository)
+
+      {:ok, service} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+
+      {:ok, _} = Services.update_service(%{
+        git: %{
+          ref: "master",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "other-value"}, %{name: "name2", value: "value"}]
+      }, service.id, user)
+
+      {:ok, rollback} = Services.rollback(service.revision_id, service.id, user)
+
+      assert rollback.revision_id == service.revision_id
+      assert rollback.git.ref == "main"
+      assert rollback.git.folder == "k8s"
+
+      {:ok, secrets} = Services.configuration(rollback)
+      assert secrets["name"] == "value"
+    end
+
+    test "it will not allow irrelevant revisions" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      git = insert(:git_repository)
+
+      {:ok, service} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+
+      rev = insert(:revision)
+
+      {:error, _} = Services.rollback(rev.id, service.id, user)
+    end
+
+    test "it will respect rbac" do
+      user = insert(:user)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      git = insert(:git_repository)
+
+      {:ok, service} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+
+      {:ok, _} = Services.update_service(%{
+        git: %{
+          ref: "master",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "other-value"}, %{name: "name2", value: "value"}]
+      }, service.id, user)
+
+      {:error, _} = Services.rollback(service.revision_id, service.id, insert(:user))
+    end
+  end
+
   describe "#delete_service/2" do
     test "users can delete services" do
       user = insert(:user)

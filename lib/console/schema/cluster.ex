@@ -13,6 +13,7 @@ defmodule Console.Schema.Cluster do
     field :write_policy_id, :binary_id
     field :read_policy_id,  :binary_id
     field :deleted_at,      :utc_datetime_usec
+    field :pinged_at,       :utc_datetime_usec
 
     embeds_one :resource,   NamespacedName
     embeds_one :kubeconfig, NamespacedName
@@ -78,6 +79,11 @@ defmodule Console.Schema.Cluster do
     model
     |> cast(attrs, ~w(version)a)
     |> cast_assoc(:node_pools)
+  end
+
+  def ping_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, ~w(pinged_at current_version)a)
   end
 
   def rbac_changeset(model, attrs \\ %{}) do

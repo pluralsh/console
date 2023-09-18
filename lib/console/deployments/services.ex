@@ -12,6 +12,8 @@ defmodule Console.Deployments.Services do
 
   def get_service(id), do: Console.Repo.get(Service, id)
 
+  def get_revision!(id), do: Repo.get!(Revision, id)
+
   def tarball(%Service{id: id}), do: Console.url("/v1/git/tarballs?id=#{id}")
 
   def referenced?(id) do
@@ -118,6 +120,32 @@ defmodule Console.Deployments.Services do
   end
 
   defp add_version(attrs, vsn), do: Console.dedupe(attrs, :version, vsn)
+
+  @doc """
+  Rollbacks a service to a given revision id, all configuration will then be fetched via that revision
+  and modify the sha/git pointers as well.
+  """
+  @spec rollback(binary, binary, User.t) :: service_resp
+  def rollback(revision_id, service_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:service, fn _ ->
+      get_service!(service_id)
+      |> allow(user, :write)
+    end)
+    |> add_operation(:revision, fn %{service: %{id: id}} ->
+      case get_revision!(revision_id) do
+        %Revision{service_id: ^id} = r -> {:ok, r}
+        _ -> {:error, "revision does not belong to this service"}
+      end
+    end)
+    |> add_operation(:update, fn %{service: svc, revision: rev} ->
+      svc
+      |> Service.rollback_changeset(%{revision_id: rev.id, sha: rev.sha, git: Map.take(rev.git, [:ref, :folder])})
+      |> Repo.update()
+    end)
+    |> execute(extract: :update)
+    |> notify(:update, user)
+  end
 
   @doc """
   Updates the list of service components, separate operation to avoid creating a no-op revision

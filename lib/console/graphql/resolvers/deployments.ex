@@ -110,6 +110,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def delete_service(%{id: id}, %{context: %{current_user: user}}),
     do: Services.delete_service(id, user)
 
+  def rollback(%{id: id, revision_id: rev}, %{context: %{current_user: user}}),
+    do: Services.rollback(rev, id, user)
+
   def update_service_components(%{components: components, id: id}, %{context: %{cluster: cluster}}),
     do: Services.update_components(components, id, cluster)
 
@@ -120,6 +123,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     do: Settings.update(attrs, user)
 
   def tarball(svc, _, _), do: {:ok, Services.tarball(svc)}
+
+  def ping(%{attributes: attrs}, %{context: %{cluster: cluster}}),
+    do: Clusters.ping(attrs, cluster)
 
   def rbac(%{rbac: rbac} = args, %{context: %{current_user: user}}) do
     {fun, id} = rbac_args(args)
