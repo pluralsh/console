@@ -51,6 +51,7 @@ defmodule Console.GraphQl.Deployments do
     import_fields :git_queries
     import_fields :cluster_queries
     import_fields :service_queries
+    import_fields :public_service_queries
 
     field :deployment_settings, :deployment_settings do
       middleware Authenticated
@@ -63,6 +64,8 @@ defmodule Console.GraphQl.Deployments do
     import_fields :git_mutations
     import_fields :cluster_mutations
     import_fields :service_mutations
+    import_fields :public_cluster_mutations
+    import_fields :public_service_mutations
 
     field :update_rbac, :boolean do
       middleware Authenticateed

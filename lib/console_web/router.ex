@@ -21,6 +21,18 @@ defmodule ConsoleWeb.Router do
     post "/webhooks/piazza", WebhookController, :piazza
   end
 
+  scope "/ext" do
+    pipe_through [:auth]
+
+    forward "/gql", Console.ExternalGraphQl.Plug,
+      schema: Console.ExternalGraphQl,
+      document_providers: [Console.GraphQl.Apq, Absinthe.Plug.DocumentProvider.Default]
+
+    scope "/v1", ConsoleWeb do
+      get "/git/tarballs", GitController, :tarball
+    end
+  end
+
   forward "/graphiql", Absinthe.Plug.GraphiQL,
     schema: Console.GraphQl,
     interface: :advanced

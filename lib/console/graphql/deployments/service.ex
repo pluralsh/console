@@ -106,6 +106,24 @@ defmodule Console.GraphQl.Deployments.Service do
 
   delta :service_deployment
 
+  object :public_service_queries do
+    field :cluster_services, list_of(:service_deployment) do
+      middleware ClusterAuthenticated
+
+      resolve &Deployments.cluster_services/2
+    end
+  end
+
+  object :public_service_mutations do
+    field :update_service_components, :service_deployment do
+      middleware ClusterAuthenticated
+      arg :id, non_null(:id)
+      arg :components, list_of(:component_attributes)
+
+      safe_resolve &Deployments.update_service_components/2
+    end
+  end
+
   object :service_queries do
     connection field :service_deployments, node_type: :service_deployment do
       middleware Authenticated
@@ -119,12 +137,6 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_service/2
-    end
-
-    field :cluster_services, list_of(:service_deployment) do
-      middleware ClusterAuthenticated
-
-      resolve &Deployments.cluster_services/2
     end
   end
 
@@ -158,14 +170,6 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :revision_id, non_null(:id)
 
       safe_resolve &Deployments.rollback/2
-    end
-
-    field :update_service_components, :service_deployment do
-      middleware ClusterAuthenticated
-      arg :id, non_null(:id)
-      arg :components, list_of(:component_attributes)
-
-      safe_resolve &Deployments.update_service_components/2
     end
   end
 end

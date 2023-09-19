@@ -78,7 +78,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :cloud,      non_null(:string)
     field :git,        non_null(:git_ref)
     field :repository, :git_repository, resolve: dataloader(Deployments)
-    field :service,    :service, resolve: dataloader(Deployments)
+    field :service,    :service_deployment, resolve: dataloader(Deployments)
 
     field :editable,   :boolean, resolve: &Deployments.editable/3
 
@@ -99,7 +99,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :node_pools,  list_of(:node_pool), resolve: dataloader(Deployments)
     field :provider,    :cluster_provider, resolve: dataloader(Deployments)
-    field :service,     :service, resolve: dataloader(Deployments)
+    field :service,     :service_deployment, resolve: dataloader(Deployments)
 
     field :editable,   :boolean, resolve: &Deployments.editable/3
 
@@ -138,6 +138,15 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   delta :cluster
   delta :cluster_provider
+
+  object :public_cluster_mutations do
+    field :ping_cluster, :cluster do
+      middleware ClusterAuthenticated
+      arg :attributes, non_null(:cluster_ping)
+
+      safe_resolve &Deployments.ping/2
+    end
+  end
 
   object :cluster_queries do
     connection field :clusters, node_type: :cluster do
@@ -181,13 +190,6 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :attributes, non_null(:cluster_update_attributes)
 
       safe_resolve &Deployments.update_cluster/2
-    end
-
-    field :ping_cluster, :cluster do
-      middleware ClusterAuthenticated
-      arg :attributes, non_null(:cluster_ping)
-
-      safe_resolve &Deployments.ping/2
     end
 
     field :delete_cluster, :cluster do
