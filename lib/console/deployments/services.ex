@@ -2,8 +2,8 @@ defmodule Console.Deployments.Services do
   use Console.Services.Base
   import Console.Deployments.Policies
   alias Console.PubSub
-  alias Console.Schema.{Service, Revision, User, Cluster, ClusterProvider}
-  alias Console.Deployments.{Secrets.Store, Git, Clusters}
+  alias Console.Schema.{Service, Revision, User, Cluster, ClusterProvider, ApiDeprecation}
+  alias Console.Deployments.{Secrets.Store, Git, Clusters, Deprecations.Table}
 
   @type service_resp :: {:ok, Service.t} | Console.error
   @type revision_resp :: {:ok, Revision.t} | Console.error
@@ -69,12 +69,12 @@ defmodule Console.Deployments.Services do
   end
 
   @spec authorized(binary, Cluster.t) :: service_resp
-  def authorized(service_id, %Cluster{id: id}) do
-    case get_service(service_id) do
-      %Service{cluster_id: ^id} = svc -> {:ok, svc}
-      _ -> {:error, "could not find #{service_id} in cluster #{id}"}
-    end
+  def authorized(%Service{cluster_id: id} = svc, %Cluster{id: id}), do: {:ok, svc}
+  def authorized(service_id, %Cluster{} = cluster) when is_binary(service_id) do
+    get_service(service_id)
+    |> authorized(cluster)
   end
+  def authorized(_, _), do: {:error, "could not find service in cluster"}
 
   @doc """
   Updates a service and creates a new revision
@@ -155,10 +155,15 @@ defmodule Console.Deployments.Services do
   """
   @spec update_components(map, binary | Service.t) :: service_resp
   def update_components(attrs, %Service{} = service) do
-    service
-    |> Console.Repo.preload([:components])
-    |> Service.changeset(attrs)
-    |> Console.Repo.update()
+    start_transaction()
+    |> add_operation(:service, fn _ ->
+      service
+      |> Console.Repo.preload([:components])
+      |> Service.changeset(attrs)
+      |> Console.Repo.update()
+    end)
+    |> add_operation(:deprecations, fn %{service: svc} -> add_deprecations(svc) end)
+    |> execute(extract: :service)
     |> notify(:components)
   end
   def update_components(attrs, service_id) when is_binary(service_id),
@@ -168,6 +173,26 @@ defmodule Console.Deployments.Services do
   def update_components(components, service_id, %Cluster{} = cluster) do
     with {:ok, svc} <- authorized(service_id, cluster),
       do: update_components(%{components: components}, svc)
+  end
+
+  @doc """
+  Find and insert any deprecations for this service's components
+  """
+  @spec add_deprecations(Service.t) :: {:ok, map} | Console.error
+  def add_deprecations(%Service{} = service) do
+    %{components: components} = Repo.preload(service, [:components])
+    Enum.reduce(components, start_transaction(), fn component, xact ->
+      case Table.fetch(component) do
+        %Table.Entry{} = entry ->
+          add_operation(xact, component.id, fn _ ->
+            %ApiDeprecation{component_id: component.id}
+            |> ApiDeprecation.changeset(Map.from_struct(entry))
+            |> Repo.insert()
+          end)
+        _ -> xact
+      end
+    end)
+    |> execute()
   end
 
   @doc """

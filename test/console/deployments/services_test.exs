@@ -334,5 +334,30 @@ defmodule Console.Deployments.ServicesTest do
 
       assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
     end
+
+    test "it will persist api deprecations if found" do
+      service = insert(:service)
+
+      {:ok, service} = Services.update_components(%{
+        components: [%{
+          state: :running,
+          synced: true,
+          group: "extensions",
+          version: "v1beta1",
+          kind: "Ingress",
+          namespace: "my-app",
+          name: "api"
+        }]
+      }, service)
+
+      %{components: [component]} = Console.Repo.preload(service, [components: :api_deprecations])
+      assert component.group == "extensions"
+      assert component.version == "v1beta1"
+
+      [deprecation] = component.api_deprecations
+      assert deprecation.deprecated_in == "v1.14.0"
+      assert deprecation.removed_in == "v1.22.0"
+      assert deprecation.replacement == "networking.k8s.io/v1"
+    end
   end
 end

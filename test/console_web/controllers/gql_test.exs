@@ -45,7 +45,7 @@ defmodule ConsoleWeb.GqlTest do
   end
 
   describe "POST /ext/gql" do
-    test "it can serve deploy operator facing gql endpoints" do
+    test "it can serve deploy operator facing gql endpoints", %{conn: conn} do
       cluster = insert(:cluster)
 
       %{"data" => %{"clusterServices" => []}} =

@@ -1,9 +1,10 @@
 defmodule Console.GraphQl.Resolvers.Deployments do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.Cluster
   import Console.Deployments.Policies, only: [allow: 3]
-  alias Console.Schema.{Cluster, ClusterNodePool, Revision, ClusterProvider, Service, ServiceComponent, GitRepository, PolicyBinding}
+  alias Console.Schema.{Cluster, ClusterNodePool, Revision, ClusterProvider, Service, ServiceComponent, GitRepository, PolicyBinding, ApiDeprecation}
   alias Console.Deployments.{Clusters, Services, Git, Settings}
 
+  def query(ApiDeprecation, _), do: ApiDeprecation
   def query(ClusterNodePool, _), do: ClusterNodePool
   def query(ClusterProvider, _), do: ClusterProvider
   def query(PolicyBinding, _), do: PolicyBinding

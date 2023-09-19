@@ -28,6 +28,7 @@ defmodule Console.Application do
       Console.Cached.Node,
       Console.Deployments.Git.Supervisor,
       Console.Deployments.Git.Kick,
+      Console.Deployments.Deprecations.Table,
       {OpenIDConnect.Worker, Application.get_env(:console, :oidc_providers)},
     ] ++ consumers() ++ [
       Piazza.GracefulShutdown

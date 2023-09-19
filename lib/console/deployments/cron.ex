@@ -40,4 +40,14 @@ defmodule Console.Deployments.Cron do
       Services.prune_revisions(svc)
     end)
   end
+
+  def backfill_deprecations() do
+    Logger.info "backfilling missing deprecations for all services"
+
+    Repo.all(Service)
+    |> Enum.each(fn svc ->
+      Logger.info "checking deprecations for #{svc.id}"
+      Services.add_deprecations(svc)
+    end)
+  end
 end

@@ -100,6 +100,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :node_pools,  list_of(:node_pool), resolve: dataloader(Deployments)
     field :provider,    :cluster_provider, resolve: dataloader(Deployments)
     field :service,     :service_deployment, resolve: dataloader(Deployments)
+    field :api_deprecations, list_of(:api_deprecation), resolve: dataloader(Deployments)
 
     field :editable,   :boolean, resolve: &Deployments.editable/3
 

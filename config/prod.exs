@@ -26,6 +26,7 @@ config :console, Console.Cron,
     {"*/15 * * * *", {Console.Cron.Jobs, :fail_builds, []}},
     {"*/5 * * * *", {Console.Deployments.Cron, :prune_clusters, []}},
     {"*/5 * * * *", {Console.Deployments.Cron, :prune_services, []}},
+    {"0 0 1-31/2 * *", {Console.Deployments.Cron, :backfill_deprecations, []}},
     {"@daily", {Console.Deployments.Cron, :prune_revisions, []}},
     {"@daily", {Console.Cron.Jobs, :prune_notifications, []}},
   ]

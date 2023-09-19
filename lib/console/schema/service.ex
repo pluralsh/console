@@ -45,6 +45,7 @@ defmodule Console.Schema.Service do
     has_one :provider, ClusterProvider
 
     has_many :components, ServiceComponent, on_replace: :delete
+    has_many :api_deprecations, through: [:components, :api_deprecations]
     has_many :read_bindings, PolicyBinding,
       on_replace: :delete,
       foreign_key: :policy_id,

@@ -22,6 +22,8 @@ defmodule Console.Schema.Cluster do
     belongs_to :provider, ClusterProvider
     belongs_to :service,  Service
     has_many :node_pools, ClusterNodePool, on_replace: :delete
+    has_many :services, Service
+    has_many :api_deprecations, through: [:services, :api_deprecations]
 
     has_many :read_bindings, PolicyBinding,
       on_replace: :delete,

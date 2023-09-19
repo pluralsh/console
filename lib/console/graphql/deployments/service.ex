@@ -99,6 +99,18 @@ defmodule Console.GraphQl.Deployments.Service do
     field :kind,       non_null(:string)
     field :namespace,  non_null(:string)
     field :name,       non_null(:string)
+
+    field :service, :service_deployment, resolve: dataloader(Deployments)
+    field :api_deprecations, list_of(:api_deprecation), resolve: dataloader(Deployments)
+  end
+
+  object :api_deprecation do
+    field :deprecated_in, :string
+    field :removed_in,    :string
+    field :replacement,   :string
+    field :available_in,  :string
+
+    field :component, :service_component, resolve: dataloader(Deployments)
   end
 
   connection node_type: :service_deployment

@@ -1,6 +1,6 @@
 defmodule Console.Schema.ServiceComponent do
   use Piazza.Ecto.Schema
-  alias Console.Schema.Service
+  alias Console.Schema.{Service, ApiDeprecation}
 
   defenum State, running: 0, pending: 1, failed: 2
 
@@ -14,6 +14,7 @@ defmodule Console.Schema.ServiceComponent do
     field :name,       :string
 
     belongs_to :service, Service
+    has_many :api_deprecations, ApiDeprecation, foreign_key: :component_id
 
     timestamps()
   end
