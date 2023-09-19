@@ -37,6 +37,14 @@ type AccessTokenConnection {
   edges: [AccessTokenEdge]
 }
 
+type ApiDeprecation {
+  deprecatedIn: String
+  removedIn: String
+  replacement: String
+  availableIn: String
+  component: ServiceComponent
+}
+
 type RevisionConnection {
   pageInfo: PageInfo!
   edges: [RevisionEdge]
@@ -165,6 +173,7 @@ type ServiceDeployment {
   repository: GitRepository
   readBindings: [PolicyBinding]
   writeBindings: [PolicyBinding]
+  cluster: Cluster
   revision: Revision
   configuration: [ServiceConfiguration]
   components: [ServiceComponent]
@@ -183,6 +192,8 @@ type ServiceComponent {
   kind: String!
   namespace: String!
   name: String!
+  service: ServiceDeployment
+  apiDeprecations: [ApiDeprecation]
 }
 
 enum AuthMethod {
@@ -879,6 +890,7 @@ type Cluster {
   nodePools: [NodePool]
   provider: ClusterProvider
   service: ServiceDeployment
+  apiDeprecations: [ApiDeprecation]
   editable: Boolean
   insertedAt: DateTime
   updatedAt: DateTime
@@ -978,6 +990,7 @@ type RootMutationType {
   updateServiceDeployment(id: ID!, attributes: ServiceUpdateAttributes!): ServiceDeployment
   deleteServiceDeployment(id: ID!): ServiceDeployment
   rollbackService(id: ID!, revisionId: ID!): ServiceDeployment
+  cloneService(serviceId: ID!, clusterId: ID!, attributes: ServiceCloneAttributes!): ServiceDeployment
   pingCluster(attributes: ClusterPing!): Cluster
   updateServiceComponents(id: ID!, components: [ComponentAttributes]): ServiceDeployment
   updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
@@ -1801,6 +1814,12 @@ enum NotificationStatus {
 
 type UserRoles {
   admin: Boolean
+}
+
+input ServiceCloneAttributes {
+  name: String!
+  namespace: String
+  configuration: [ConfigAttributes]
 }
 
 type WireguardPeerStatus {

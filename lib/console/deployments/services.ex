@@ -92,6 +92,33 @@ defmodule Console.Deployments.Services do
   end
 
   @doc """
+  Will copy a service, and apply any user specified attributes on top.
+
+  This will also merge user specified configuration into the services base config (allowing you not to have to specify the full set)
+  """
+  @spec clone_service(map, binary, binary, User.t) :: service_resp
+  def clone_service(attrs, service_id, cluster_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:source, fn _ ->
+      get_service!(service_id)
+      |> allow(user, :read)
+    end)
+    |> add_operation(:config, fn %{source: source} ->
+      with {:ok, secrets} <- configuration(source),
+        do: {:ok, merge_configuration(secrets, attrs[:configuration])}
+    end)
+    |> add_operation(:create, fn %{source: source, config: config} ->
+      Map.take(source, [:repository_id, :sha])
+      |> Map.put(:git, Map.from_struct(source.git))
+      |> Map.merge(attrs)
+      |> Map.put(:configuration, config)
+      |> create_service(cluster_id, user)
+    end)
+    |> execute(extract: :create)
+    |> notify(:create, user)
+  end
+
+  @doc """
   Updates the sha of a service if relevant
   """
   @spec update_sha(Service.t, binary) :: service_resp
@@ -283,6 +310,12 @@ defmodule Console.Deployments.Services do
       |> Console.Repo.update()
     end)
   end
+
+  defp merge_configuration(secrets, [_ | _] = config) do
+    Enum.reduce(config, secrets, fn %{name: k, value: v}, acc -> Map.put(acc, k, v) end)
+    |> merge_configuration(nil)
+  end
+  defp merge_configuration(secrets, _), do: Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)
 
   defp secret_store(), do: Console.conf(:secret_store)
 

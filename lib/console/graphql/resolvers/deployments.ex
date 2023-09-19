@@ -111,6 +111,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def delete_service(%{id: id}, %{context: %{current_user: user}}),
     do: Services.delete_service(id, user)
 
+  def clone_service(%{service_id: sid, cluster_id: cid, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Services.clone_service(attrs, sid, cid, user)
+
   def rollback(%{id: id, revision_id: rev}, %{context: %{current_user: user}}),
     do: Services.rollback(rev, id, user)
 

@@ -249,6 +249,66 @@ defmodule Console.Deployments.ServicesTest do
     end
   end
 
+  describe "#clone_service/2" do
+    test "users can clone services" do
+      user = insert(:user)
+      git = insert(:git_repository)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      other = insert(:cluster, write_bindings: [%{user_id: user.id}])
+
+      {:ok, svc} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}, %{name: "name2", value: "value2"}]
+      }, other.id, user)
+
+
+      {:ok, clone} = Services.clone_service(%{
+        name: "clone",
+        namespace: "clone-namespace",
+        configuration: [%{name: "name", value: "overwrite"}]
+      }, svc.id, cluster.id, user)
+
+      assert clone.name == "clone"
+      assert clone.cluster_id == cluster.id
+      assert clone.repository_id == svc.repository_id
+      assert clone.git.ref == svc.git.ref
+      assert clone.git.folder == svc.git.folder
+
+      {:ok, secrets} = Services.configuration(clone)
+      assert secrets["name"] == "overwrite"
+      assert secrets["name2"] == "value2"
+    end
+
+    test "it respects rbac" do
+      user = insert(:user)
+      cluster = insert(:cluster)
+      git = insert(:git_repository)
+      other = insert(:cluster, write_bindings: [%{user_id: user.id}])
+
+      {:ok, svc} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "name", value: "value"}, %{name: "name2", value: "value2"}]
+      }, other.id, user)
+
+      {:error, _} = Services.clone_service(%{
+        name: "clone",
+        namespace: "clone-namespace",
+        configuration: [%{name: "name", value: "overwrite"}]
+      }, svc.id, cluster.id, user)
+    end
+  end
+
   describe "#delete_service/2" do
     test "users can delete services" do
       user = insert(:user)

@@ -22,6 +22,12 @@ defmodule Console.GraphQl.Deployments.Service do
     field :configuration, list_of(:config_attributes)
   end
 
+  input_object :service_clone_attributes do
+    field :name,          non_null(:string)
+    field :namespace,     :string
+    field :configuration, list_of(:config_attributes)
+  end
+
   input_object :git_ref_attributes do
     field :ref,    non_null(:string)
     field :folder, non_null(:string)
@@ -58,6 +64,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
 
+    field :cluster,  :cluster, resolve: dataloader(Deployments)
     field :revision, :revision, resolve: dataloader(Deployments)
     field :configuration, list_of(:service_configuration), resolve: &Deployments.service_configuration/3
     field :components, list_of(:service_component), resolve: dataloader(Deployments)
@@ -182,6 +189,15 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :revision_id, non_null(:id)
 
       safe_resolve &Deployments.rollback/2
+    end
+
+    field :clone_service, :service_deployment do
+      middleware Authenticated
+      arg :service_id, non_null(:id)
+      arg :cluster_id, non_null(:id)
+      arg :attributes, non_null(:service_clone_attributes)
+
+      safe_resolve &Deployments.clone_service/2
     end
   end
 end

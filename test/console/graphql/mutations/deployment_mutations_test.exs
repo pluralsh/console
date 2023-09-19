@@ -245,6 +245,50 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
+  describe "cloneService" do
+    test "it will clone a service" do
+      user = insert(:user)
+      git = insert(:git_repository)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      other = insert(:cluster, write_bindings: [%{user_id: user.id}])
+
+      {:ok, service} = create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}, %{name: "name2", value: "value2"}]
+      }, other, user)
+
+      {:ok, %{data: %{"cloneService" => clone}}} = run_query("""
+          mutation Clone($cid: ID!, $sid: ID!, $attrs: ServiceCloneAttributes!) {
+            cloneService(clusterId: $cid, serviceId: $sid, attributes: $attrs) {
+              cluster { id }
+              git { ref folder }
+              name
+              configuration { name value }
+            }
+          }
+      """, %{"sid" => service.id, "cid" => cluster.id, "attrs" => %{
+        "name" => "clone",
+        "configuration" => [%{"name" => "name", "value" => "overwrite"}]
+      }}, %{current_user: user})
+
+      assert clone["name"] == "clone"
+      assert clone["cluster"]["id"] == cluster.id
+      assert clone["git"]["ref"] == "main"
+      assert clone["git"]["folder"] == "k8s"
+
+      secrets = Map.new(clone["configuration"], & {&1["name"], &1["value"]})
+      assert secrets["name"] == "overwrite"
+      assert secrets["name2"] == "value2"
+    end
+  end
+
   describe "rollbackService" do
     test "it can rollback a service to a prior revision" do
       cluster = insert(:cluster)

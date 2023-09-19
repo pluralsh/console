@@ -91,6 +91,15 @@ export type Account = {
   subscription?: Maybe<PluralSubscription>;
 };
 
+export type ApiDeprecation = {
+  __typename?: 'ApiDeprecation';
+  availableIn?: Maybe<Scalars['String']['output']>;
+  component?: Maybe<ServiceComponent>;
+  deprecatedIn?: Maybe<Scalars['String']['output']>;
+  removedIn?: Maybe<Scalars['String']['output']>;
+  replacement?: Maybe<Scalars['String']['output']>;
+};
+
 export type Application = {
   __typename?: 'Application';
   configuration?: Maybe<Configuration>;
@@ -367,6 +376,7 @@ export type CloudSettingsAttributes = {
 
 export type Cluster = {
   __typename?: 'Cluster';
+  apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
   currentVersion?: Maybe<Scalars['String']['output']>;
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   editable?: Maybe<Scalars['Boolean']['output']>;
@@ -1601,6 +1611,7 @@ export type RootMutationType = {
   __typename?: 'RootMutationType';
   approveBuild?: Maybe<Build>;
   cancelBuild?: Maybe<Build>;
+  cloneService?: Maybe<ServiceDeployment>;
   createAccessToken?: Maybe<AccessToken>;
   createBuild?: Maybe<Build>;
   createCluster?: Maybe<Cluster>;
@@ -1663,6 +1674,13 @@ export type RootMutationTypeApproveBuildArgs = {
 
 export type RootMutationTypeCancelBuildArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCloneServiceArgs = {
+  attributes: ServiceCloneAttributes;
+  clusterId: Scalars['ID']['input'];
+  serviceId: Scalars['ID']['input'];
 };
 
 
@@ -2545,13 +2563,21 @@ export type Service = {
   status: ServiceStatus;
 };
 
+export type ServiceCloneAttributes = {
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type ServiceComponent = {
   __typename?: 'ServiceComponent';
+  apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
   group: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   kind: Scalars['String']['output'];
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
+  service?: Maybe<ServiceDeployment>;
   state?: Maybe<ComponentState>;
   synced: Scalars['Boolean']['output'];
   version: Scalars['String']['output'];
@@ -2565,6 +2591,7 @@ export type ServiceConfiguration = {
 
 export type ServiceDeployment = {
   __typename?: 'ServiceDeployment';
+  cluster?: Maybe<Cluster>;
   components?: Maybe<Array<Maybe<ServiceComponent>>>;
   configuration?: Maybe<Array<Maybe<ServiceConfiguration>>>;
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
