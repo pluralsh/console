@@ -42,7 +42,7 @@ defmodule Console.Deployments.ClustersTest do
       assert secrets["cluster-name"] == cluster.name
       assert secrets["version"] == cluster.version
       assert secrets["operator-namespace"] == "plrl-deploy-operator"
-      assert secrets["console-url"] == Console.conf(:url)
+      assert secrets["console-url"] == Path.join(Console.conf(:ext_url), "ext")
       assert secrets["deploy-token"] == cluster.deploy_token
       [node_pool] = Jason.decode!(secrets["node-pools"])
       assert node_pool["name"] == pool.name
@@ -58,7 +58,7 @@ defmodule Console.Deployments.ClustersTest do
 
       {:ok, %{"deploy-token" => token, "url" => url}} = Services.configuration(svc)
       assert token == cluster.deploy_token
-      assert url == Console.conf(:url)
+      assert url == Path.join(Console.conf(:ext_url), "ext")
     end
 
     test "it will respect rbac" do

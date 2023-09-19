@@ -39,7 +39,7 @@ config :console, Console.Guardian,
 
 config :console, ConsoleWeb.Endpoint,
   url: [host: get_env("HOST"), port: 80],
-  check_origin: ["//#{get_env("HOST")}", "//console"]
+  check_origin: ["//#{get_env("HOST")}", "//#{get_env("EXT_HOST") || get_env("HOST")}", "//console"]
 
 provider = case get_env("PROVIDER") do
   "google" -> :gcp
@@ -75,6 +75,7 @@ config :console,
   git_user_name: get_env("GIT_USER", "forge"),
   git_user_email: get_env("GIT_EMAIL", "forge@piazzaapp.com"),
   url: get_env("HOST"),
+  ext_url: get_env("EXT_HOST") || get_env("HOST"),
   incoming_webhook: get_env("PIAZZA_INCOMING_WEBHOOK"),
   grafana_dns: get_env("GRAFANA_DNS"),
   piazza_secret: get_env("PIAZZA_WEBHOOK_SECRET"),

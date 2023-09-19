@@ -201,7 +201,7 @@ defmodule Console.Deployments.Clusters do
   defp cluster_attributes(%{node_pools: node_pools} = cluster) do
     %{
       configuration: [
-        %{name: "console-url", value: Console.conf(:url)},
+        %{name: "console-url", value: Path.join(Console.conf(:ext_url), "ext")},
         %{name: "deploy-token", value: cluster.deploy_token},
         %{name: "operator-namespace", value: "plrl-deploy-operator"},
         %{name: "cluster-name", value: cluster.name},
