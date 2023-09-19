@@ -377,7 +377,7 @@ export type Cluster = {
   pingedAt?: Maybe<Scalars['DateTime']['output']>;
   provider?: Maybe<ClusterProvider>;
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
-  service?: Maybe<Service>;
+  service?: Maybe<ServiceDeployment>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   version: Scalars['String']['output'];
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
@@ -426,7 +426,7 @@ export type ClusterProvider = {
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
   repository?: Maybe<GitRepository>;
-  service?: Maybe<Service>;
+  service?: Maybe<ServiceDeployment>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
