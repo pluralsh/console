@@ -94,6 +94,7 @@ export type Account = {
 export type ApiDeprecation = {
   __typename?: 'ApiDeprecation';
   availableIn?: Maybe<Scalars['String']['output']>;
+  blocking?: Maybe<Scalars['Boolean']['output']>;
   component?: Maybe<ServiceComponent>;
   deprecatedIn?: Maybe<Scalars['String']['output']>;
   removedIn?: Maybe<Scalars['String']['output']>;
@@ -388,6 +389,7 @@ export type Cluster = {
   provider?: Maybe<ClusterProvider>;
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   service?: Maybe<ServiceDeployment>;
+  tags?: Maybe<Array<Maybe<Tag>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   version: Scalars['String']['output'];
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
@@ -398,6 +400,7 @@ export type ClusterAttributes = {
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
   providerId?: InputMaybe<Scalars['ID']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
   version: Scalars['String']['input'];
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
@@ -864,6 +867,23 @@ export type GitStatus = {
   __typename?: 'GitStatus';
   cloned?: Maybe<Scalars['Boolean']['output']>;
   output?: Maybe<Scalars['String']['output']>;
+};
+
+export type GlobalService = {
+  __typename?: 'GlobalService';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  provider?: Maybe<ClusterProvider>;
+  service?: Maybe<ServiceDeployment>;
+  tags?: Maybe<Array<Maybe<Tag>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type GlobalServiceAttributes = {
+  name: Scalars['String']['input'];
+  providerId?: InputMaybe<Scalars['ID']['input']>;
+  tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
 };
 
 export type Group = {
@@ -1617,6 +1637,7 @@ export type RootMutationType = {
   createCluster?: Maybe<Cluster>;
   createClusterProvider?: Maybe<ClusterProvider>;
   createGitRepository?: Maybe<GitRepository>;
+  createGlobalService?: Maybe<GlobalService>;
   createGroup?: Maybe<Group>;
   createGroupMember?: Maybe<GroupMember>;
   createInvite?: Maybe<Invite>;
@@ -1628,6 +1649,7 @@ export type RootMutationType = {
   deleteAccessToken?: Maybe<AccessToken>;
   deleteCertificate?: Maybe<Scalars['Boolean']['output']>;
   deleteCluster?: Maybe<Cluster>;
+  deleteGlobalService?: Maybe<GlobalService>;
   deleteGroup?: Maybe<Group>;
   deleteGroupMember?: Maybe<GroupMember>;
   deleteJob?: Maybe<Job>;
@@ -1704,6 +1726,12 @@ export type RootMutationTypeCreateGitRepositoryArgs = {
 };
 
 
+export type RootMutationTypeCreateGlobalServiceArgs = {
+  attributes: GlobalServiceAttributes;
+  serviceId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCreateGroupArgs = {
   attributes: GroupAttributes;
 };
@@ -1760,6 +1788,11 @@ export type RootMutationTypeDeleteCertificateArgs = {
 
 
 export type RootMutationTypeDeleteClusterArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteGlobalServiceArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -2597,10 +2630,12 @@ export type ServiceDeployment = {
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   editable?: Maybe<Scalars['Boolean']['output']>;
   git: GitRef;
+  globalService?: Maybe<GlobalService>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
   namespace: Scalars['String']['output'];
+  owner?: Maybe<GlobalService>;
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   repository?: Maybe<GitRepository>;
   revision?: Maybe<Revision>;
@@ -2752,6 +2787,17 @@ export type StatusCondition = {
   reason: Scalars['String']['output'];
   status: Scalars['String']['output'];
   type: Scalars['String']['output'];
+};
+
+export type Tag = {
+  __typename?: 'Tag';
+  name: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+export type TagAttributes = {
+  name: Scalars['String']['input'];
+  value: Scalars['String']['input'];
 };
 
 export type Taint = {

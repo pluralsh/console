@@ -42,6 +42,7 @@ type ApiDeprecation {
   removedIn: String
   replacement: String
   availableIn: String
+  blocking: Boolean
   component: ServiceComponent
 }
 
@@ -113,6 +114,11 @@ type Changelog {
   updatedAt: DateTime
 }
 
+type Tag {
+  name: String!
+  value: String!
+}
+
 type OverlayUpdate {
   path: [String]
 }
@@ -177,6 +183,8 @@ type ServiceDeployment {
   revision: Revision
   configuration: [ServiceConfiguration]
   components: [ServiceComponent]
+  globalService: GlobalService
+  owner: GlobalService
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
   editable: Boolean
   insertedAt: DateTime
@@ -890,6 +898,7 @@ type Cluster {
   nodePools: [NodePool]
   provider: ClusterProvider
   service: ServiceDeployment
+  tags: [Tag]
   apiDeprecations: [ApiDeprecation]
   editable: Boolean
   insertedAt: DateTime
@@ -993,6 +1002,8 @@ type RootMutationType {
   cloneService(serviceId: ID!, clusterId: ID!, attributes: ServiceCloneAttributes!): ServiceDeployment
   pingCluster(attributes: ClusterPing!): Cluster
   updateServiceComponents(id: ID!, components: [ComponentAttributes]): ServiceDeployment
+  createGlobalService(serviceId: ID!, attributes: GlobalServiceAttributes!): GlobalService
+  deleteGlobalService(id: ID!): GlobalService
   updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
   updateDeploymentSettings(attributes: DeploymentSettingsAttributes!): DeploymentSettings
 }
@@ -1218,6 +1229,16 @@ type RunbookExecutionEdge {
   cursor: String
 }
 
+type GlobalService {
+  id: ID!
+  name: String!
+  tags: [Tag]
+  service: ServiceDeployment
+  provider: ClusterProvider
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
 type Namespace {
   status: NamespaceStatus!
   spec: NamespaceSpec!
@@ -1422,6 +1443,12 @@ input ClusterAttributes {
   nodePools: [NodePoolAttributes]
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+  tags: [TagAttributes]
+}
+
+input TagAttributes {
+  name: String!
+  value: String!
 }
 
 type CloudSettings {
@@ -1792,6 +1819,12 @@ type Dashboard {
 type LoadBalancerIngressStatus {
   hostname: String
   ip: String
+}
+
+input GlobalServiceAttributes {
+  name: String!
+  tags: [TagAttributes]
+  providerId: ID
 }
 
 type PostgresqlStatus {
