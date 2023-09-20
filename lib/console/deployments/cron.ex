@@ -1,7 +1,7 @@
 defmodule Console.Deployments.Cron do
   use Console.Services.Base
-  alias Console.Deployments.{Services, Clusters}
-  alias Console.Schema.{Cluster, Service}
+  alias Console.Deployments.{Services, Clusters, Global}
+  alias Console.Schema.{Cluster, Service, GlobalService}
 
   require Logger
 
@@ -48,6 +48,16 @@ defmodule Console.Deployments.Cron do
     |> Enum.each(fn svc ->
       Logger.info "checking deprecations for #{svc.id}"
       Services.add_deprecations(svc)
+    end)
+  end
+
+  def backfill_global_services() do
+    Logger.info "backfilling global services into all clusters"
+
+    Repo.all(GlobalService)
+    |> Enum.each(fn global ->
+      Logger.info "syncing global service #{global.id}"
+      Global.sync_clusters(global)
     end)
   end
 end

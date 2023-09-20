@@ -44,6 +44,10 @@ defmodule Console.Deployments.Global do
     |> notify(:delete, user)
   end
 
+  @doc """
+  Determines if a global service is eligible for this cluster
+  """
+  @spec match?(GlobalService.t, Cluster.t) :: boolean
   def match?(%GlobalService{provider_id: gpid, tags: gtags}, %Cluster{provider_id: pid, tags: tags}) do
     case {gpid, pid, gtags, tags} do
       {nil, _, gtags, tags} -> matches_tags?(gtags, tags)
@@ -52,11 +56,19 @@ defmodule Console.Deployments.Global do
     end
   end
 
+  @doc """
+  Clones the global service directly into the target cluster
+  """
+  @spec add_to_cluster(GlobalService.t, Cluster.t) :: Services.service_resp
   def add_to_cluster(%GlobalService{id: gid, service_id: sid}, %Cluster{id: cid}) do
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
     Services.clone_service(%{owner_id: gid}, sid, cid, bot)
   end
 
+  @doc """
+  Adds the given global service to all target clusters
+  """
+  @spec sync_clusters(GlobalService.t) :: :ok
   def sync_clusters(%GlobalService{id: gid} = global) do
     %{service: svc} = Console.Repo.preload(global, [:service])
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
@@ -72,6 +84,10 @@ defmodule Console.Deployments.Global do
     end)
   end
 
+  @doc """
+  it can resync a service owned by a global service
+  """
+  @spec sync_service(Service.t, Service.t, User.t) :: Services.service_resp | :ok
   def sync_service(%Service{} = source, %Service{} = dest, %User{} = user) do
     Logger.info "attempting to resync service #{dest.id}"
     with {:ok, source_secrets} <- Services.configuration(source),
