@@ -2,7 +2,7 @@ defmodule Console.Deployments.PubSub.RecurseTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.PubSub
-  alias Console.Deployments.Clusters
+  alias Console.Deployments.{Clusters, Services, Global}
   alias Console.PubSub.Consumers.Recurse
 
   describe "ServiceComponentsUpdated" do
@@ -119,6 +119,54 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       {:cluster, found} = Recurse.handle_event(event)
 
       assert found.id == cluster.id
+    end
+  end
+
+  describe "ServiceUpdated" do
+    test "it will backfill sync all owned services" do
+      bot("console")
+      provider = insert(:cluster_provider)
+      source = insert(:service, name: "source")
+      global = insert(:global_service, service: source, provider: provider, tags: [%{name: "sync", value: "test"}])
+      sync = insert(:cluster, provider: provider, tags: [%{name: "sync", value: "test"}])
+      ignore1 = insert(:cluster, provider: provider)
+      ignore2 = insert(:cluster, tags: [%{name: "sync", value: "test"}])
+
+      event = %PubSub.ServiceUpdated{item: global.service, actor: insert(:user)}
+      {:global, _} = Recurse.handle_event(event)
+
+      refute Services.get_service_by_name(ignore1.id, "source")
+      refute Services.get_service_by_name(ignore2.id, "source")
+
+      synced = Services.get_service_by_name(sync.id, "source")
+      refute Global.diff?(source, synced)
+    end
+
+    test "it will ignore if not a global service" do
+      service = insert(:service)
+
+      event = %PubSub.ServiceUpdated{item: service}
+      :ok = Recurse.handle_event(event)
+    end
+  end
+
+  describe "ClusterCreated" do
+    test "it will apply global services" do
+      bot("console")
+      cluster = insert(:cluster, tags: [%{name: "test", value: "tag"}])
+      global  = insert(:global_service, provider: cluster.provider)
+      global2 = insert(:global_service, tags: [%{name: "test", value: "tag"}])
+      global3 = insert(:global_service)
+      ignore  = insert(:global_service, tags: [%{name: "ignore", value: "tag"}])
+      ignore1 = insert(:global_service, provider: insert(:cluster_provider))
+
+      event = %PubSub.ClusterCreated{item: cluster}
+      :ok = Recurse.handle_event(event)
+
+      for gs <- [global, global2, global3],
+        do: assert Services.get_service_by_name(cluster.id, gs.service.name)
+      for gs <- [ignore, ignore1],
+        do: refute Services.get_service_by_name(cluster.id, gs.service.name)
     end
   end
 end

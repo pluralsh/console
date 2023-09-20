@@ -7,13 +7,21 @@ defmodule Console.Schema.ApiDeprecation do
     field :removed_in,    :string
     field :replacement,   :string
     field :available_in,  :string
+    field :blocking,      :boolean
 
     belongs_to :component, ServiceComponent
 
     timestamps()
   end
 
-  @valid ~w(deprecated_in removed_in replacement available_in)a
+  def for_service(query \\ __MODULE__, service_id) do
+    from(d in query,
+      join: c in assoc(d, :component),
+      where: c.service_id == ^service_id
+    )
+  end
+
+  @valid ~w(deprecated_in removed_in replacement available_in blocking)a
 
   def changeset(model, attrs \\ %{}) do
     model

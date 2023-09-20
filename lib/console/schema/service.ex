@@ -9,7 +9,8 @@ defmodule Console.Schema.Service do
     GitRepository,
     Revision,
     ServiceComponent,
-    PolicyBinding
+    PolicyBinding,
+    GlobalService
   }
 
   defmodule Git do
@@ -40,9 +41,11 @@ defmodule Console.Schema.Service do
     belongs_to :revision, Revision
     belongs_to :cluster, Cluster
     belongs_to :repository, GitRepository
+    belongs_to :owner, GlobalService
 
     has_one :reference_cluster, Cluster
     has_one :provider, ClusterProvider
+    has_one :global_service, GlobalService
 
     has_many :components, ServiceComponent, on_replace: :delete
     has_many :api_deprecations, through: [:components, :api_deprecations]
@@ -86,6 +89,10 @@ defmodule Console.Schema.Service do
     from(s in query, where: s.cluster_id == ^cluster_id)
   end
 
+  def for_owner(query \\ __MODULE__, owner_id) do
+    from(s in query, where: s.owner_id == ^owner_id)
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(s in query, order_by: ^order)
   end
@@ -94,7 +101,7 @@ defmodule Console.Schema.Service do
     from(s in query, where: not is_nil(s.deleted_at))
   end
 
-  @valid ~w(name version sha cluster_id repository_id namespace)a
+  @valid ~w(name version sha cluster_id repository_id namespace owner_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -106,7 +113,10 @@ defmodule Console.Schema.Service do
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
     |> foreign_key_constraint(:cluster_id)
+    |> foreign_key_constraint(:owner_id)
     |> foreign_key_constraint(:repository_id)
+    |> unique_constraint([:cluster_id, :name])
+    |> unique_constraint([:cluster_id, :owner_id])
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name, :version, :cluster_id, :repository_id])

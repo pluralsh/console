@@ -3,12 +3,18 @@ defmodule Console.GraphQl.Deployments.Cluster do
   alias Console.GraphQl.Resolvers.{Deployments}
 
   input_object :cluster_attributes do
-    field :name,          non_null(:string)
-    field :provider_id,   :id
-    field :version,       non_null(:string)
-    field :node_pools,    list_of(:node_pool_attributes)
-    field :read_bindings, list_of(:policy_binding_attributes)
+    field :name,           non_null(:string)
+    field :provider_id,    :id
+    field :version,        non_null(:string)
+    field :node_pools,     list_of(:node_pool_attributes)
+    field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
+    field :tags,           list_of(:tag_attributes)
+  end
+
+  input_object :tag_attributes do
+    field :name,  non_null(:string)
+    field :value, non_null(:string)
   end
 
   input_object :cluster_ping do
@@ -94,12 +100,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :deleted_at, :datetime
     field :pinged_at,  :datetime
 
-    field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
+    field :read_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments)
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
 
     field :node_pools,  list_of(:node_pool), resolve: dataloader(Deployments)
     field :provider,    :cluster_provider, resolve: dataloader(Deployments)
     field :service,     :service_deployment, resolve: dataloader(Deployments)
+    field :tags,        list_of(:tag), resolve: dataloader(Deployments)
     field :api_deprecations, list_of(:api_deprecation), resolve: dataloader(Deployments)
 
     field :editable,   :boolean, resolve: &Deployments.editable/3
@@ -132,6 +139,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   object :aws_cloud do
     field :launch_template_id, :string
+  end
+
+  object :tag do
+    field :name,  non_null(:string)
+    field :value, non_null(:string)
   end
 
   connection node_type: :cluster

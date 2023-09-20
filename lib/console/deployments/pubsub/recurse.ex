@@ -16,6 +16,33 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.ServiceComponentsUpdated do
   def process(_), do: :ok
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.ServiceUpdated do
+  alias Console.Deployments.Global
+  alias Console.Schema.{User, Service, GlobalService}
+
+  def process(%{item: %Service{} = item, actor: %User{}}) do
+    case Console.Repo.preload(item, [:global_service]) do
+      %Service{global_service: %GlobalService{} = global} ->
+        {:global, Global.sync_clusters(global)}
+      _ -> :ok
+    end
+  end
+  def process(_), do: :ok
+end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterCreated do
+  alias Console.Repo
+  alias Console.Deployments.Global
+  alias Console.Schema.GlobalService
+
+  def process(%{item: cluster}) do
+    cluster = Repo.preload(cluster, [:tags])
+    Repo.all(GlobalService)
+    |> Enum.filter(&Global.match?(&1, cluster))
+    |> Enum.each(&Global.add_to_cluster(&1, cluster))
+  end
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.ServiceHardDeleted do
   alias Console.Schema.{Service, Cluster}
   alias Console.Deployments.Clusters

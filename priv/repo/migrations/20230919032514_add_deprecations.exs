@@ -9,6 +9,7 @@ defmodule Console.Repo.Migrations.AddDeprecations do
       add :removed_in,    :string
       add :replacement,   :string
       add :available_in,  :string
+      add :blocking,      :boolean
 
       timestamps()
     end

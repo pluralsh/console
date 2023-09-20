@@ -154,6 +154,7 @@ defmodule Console.Factory do
 
   def cluster_factory do
     %Schema.Cluster{
+      version: "1.24",
       provider: build(:cluster_provider),
       write_policy_id: Ecto.UUID.generate(),
       read_policy_id: Ecto.UUID.generate(),
@@ -172,6 +173,7 @@ defmodule Console.Factory do
     %Schema.Service{
       name: sequence(:service, & "service-#{&1}"),
       version: "0.0.1",
+      git: %{ref: "main", folder: "k8s"},
       write_policy_id: Ecto.UUID.generate(),
       read_policy_id: Ecto.UUID.generate(),
       cluster: build(:cluster),
@@ -223,6 +225,20 @@ defmodule Console.Factory do
     }
   end
 
+  def api_deprecation_factory do
+    %Schema.ApiDeprecation{
+      blocking: false,
+      component: build(:service_component)
+    }
+  end
+
+  def global_service_factory do
+    %Schema.GlobalService{
+      name: sequence(:global_service, & "gs-#{&1}"),
+      service: build(:service),
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)
@@ -230,5 +246,9 @@ defmodule Console.Factory do
 
   def admin_user() do
     insert(:user, roles: %{admin: true})
+  end
+
+  def bot(name) do
+    insert(:user, bot_name: name, roles: %{admin: true})
   end
 end

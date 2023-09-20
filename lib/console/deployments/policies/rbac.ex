@@ -7,7 +7,8 @@ defmodule Console.Deployments.Policies.Rbac do
     Service,
     DeploymentSettings,
     GitRepository,
-    User
+    User,
+    GlobalService
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -36,6 +37,8 @@ defmodule Console.Deployments.Policies.Rbac do
   def evaluate(%ClusterProvider{} = cluster, %User{} = user, action),
     do: recurse(cluster, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%GitRepository{}, %User{} = user, action),
+    do: recurse(Settings.fetch(), user, action)
+  def evaluate(%GlobalService{}, %User{} = user, action),
     do: recurse(Settings.fetch(), user, action)
   def evaluate(%DeploymentSettings{} = settings, %User{} = user, action),
     do: recurse(settings, user, action)

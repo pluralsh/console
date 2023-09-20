@@ -396,4 +396,45 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert updated["deployerRepository"]["id"] == git.id
     end
   end
+
+  describe "createGlobalService" do
+    test "it will make a service global" do
+      svc = insert(:service)
+
+      {:ok, %{data: %{"createGlobalService" => create}}} = run_query("""
+        mutation Create($sid: ID!, $attrs: GlobalServiceAttributes!) {
+          createGlobalService(serviceId: $sid, attributes: $attrs) {
+            service { id }
+            tags { name value }
+          }
+        }
+      """, %{
+        "sid" => svc.id,
+        "attrs" => %{
+          "name" => "test",
+          "tags" => [%{"name" => "name", "value" => "value"}]
+        }
+      }, %{current_user: admin_user()})
+
+      assert create["service"]["id"] == svc.id
+      [tag] = create["tags"]
+      assert tag["name"] == "name"
+      assert tag["value"] == "value"
+    end
+  end
+
+  describe "deleteGlobalService" do
+    test "it can delete a global service record" do
+      global = insert(:global_service)
+
+      {:ok, %{data: %{"deleteGlobalService" => deleted}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteGlobalService(id: $id) { id }
+        }
+      """, %{"id" => global.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == global.id
+      refute refetch(global)
+    end
+  end
 end

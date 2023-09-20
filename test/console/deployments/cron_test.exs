@@ -104,7 +104,7 @@ defmodule Console.Deployments.CronTest do
     test "it will backfill new api deprecations" do
       svc = insert(:service)
       component = insert(:service_component, service: svc, group: "extensions", version: "v1beta1", kind: "Ingress")
-
+      insert(:api_deprecation, component: component)
       :ok = Cron.backfill_deprecations()
 
       %{api_deprecations: [deprecation]} = Console.Repo.preload(component, [:api_deprecations])

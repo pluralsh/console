@@ -418,6 +418,29 @@ defmodule Console.Deployments.ServicesTest do
       assert deprecation.deprecated_in == "v1.14.0"
       assert deprecation.removed_in == "v1.22.0"
       assert deprecation.replacement == "networking.k8s.io/v1"
+      assert deprecation.blocking
+    end
+
+    test "it will ignore api deprecations if not yet relevant" do
+      cluster = insert(:cluster, version: "1.9")
+      service = insert(:service, cluster: cluster)
+
+      {:ok, service} = Services.update_components(%{
+        components: [%{
+          state: :running,
+          synced: true,
+          group: "extensions",
+          version: "v1beta1",
+          kind: "Ingress",
+          namespace: "my-app",
+          name: "api"
+        }]
+      }, service)
+
+      %{components: [component]} = Console.Repo.preload(service, [components: :api_deprecations])
+      assert component.group == "extensions"
+      assert component.version == "v1beta1"
+      assert component.api_deprecations == []
     end
   end
 end

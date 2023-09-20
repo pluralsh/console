@@ -48,6 +48,12 @@ defmodule Console.GraphQl.Deployments.Service do
     field :name,       non_null(:string)
   end
 
+  input_object :global_service_attributes do
+    field :name,        non_null(:string)
+    field :tags,        list_of(:tag_attributes)
+    field :provider_id, :id
+  end
+
   object :service_deployment do
     field :id,        non_null(:id)
     field :name,      non_null(:string)
@@ -68,6 +74,8 @@ defmodule Console.GraphQl.Deployments.Service do
     field :revision, :revision, resolve: dataloader(Deployments)
     field :configuration, list_of(:service_configuration), resolve: &Deployments.service_configuration/3
     field :components, list_of(:service_component), resolve: dataloader(Deployments)
+    field :global_service, :global_service, resolve: dataloader(Deployments)
+    field :owner, :global_service, resolve: dataloader(Deployments)
 
     connection field :revisions, node_type: :revision do
       resolve &Deployments.list_revisions/3
@@ -116,8 +124,20 @@ defmodule Console.GraphQl.Deployments.Service do
     field :removed_in,    :string
     field :replacement,   :string
     field :available_in,  :string
+    field :blocking,      :boolean
 
     field :component, :service_component, resolve: dataloader(Deployments)
+  end
+
+  object :global_service do
+    field :id,   non_null(:id)
+    field :name, non_null(:string)
+    field :tags, list_of(:tag)
+
+    field :service,  :service_deployment, resolve: dataloader(Deployments)
+    field :provider, :cluster_provider, resolve: dataloader(Deployments)
+
+    timestamps()
   end
 
   connection node_type: :service_deployment
@@ -140,6 +160,21 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :components, list_of(:component_attributes)
 
       safe_resolve &Deployments.update_service_components/2
+    end
+
+    field :create_global_service, :global_service do
+      middleware Authenticated
+      arg :service_id, non_null(:id)
+      arg :attributes, non_null(:global_service_attributes)
+
+      safe_resolve &Deployments.create_global_service/2
+    end
+
+    field :delete_global_service, :global_service do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.delete_global_service/2
     end
   end
 

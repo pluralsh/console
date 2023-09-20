@@ -3,7 +3,18 @@ defmodule Console.Deployments.Ecto.Validations do
 
   @semver ~r/^(0|[1-9]\d*)\.(0|[1-9]\d*)$/
 
+  def at_least(first, second) do
+    case Version.compare(first, second) do
+      :gt -> true
+      :eq -> true
+      _ -> false
+    end
+  end
+
+  def bump_minor(%Version{minor: minor} = vsn), do: %{vsn | minor: minor + 1, patch: 0, pre: []}
+
   def clean_version(vsn) do
+    vsn = String.trim_leading(vsn, "v")
     case Regex.match?(@semver, vsn) do
       true -> "#{vsn}.0"
       _ -> vsn

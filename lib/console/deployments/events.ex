@@ -16,3 +16,6 @@ defmodule Console.PubSub.GitRepositoryUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.GitRepositoryDeleted, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.DeploymentSettingsUpdated, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.GlobalServiceCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.GlobalServiceDeleted, do: use Piazza.PubSub.Event

@@ -1,9 +1,23 @@
 defmodule Console.GraphQl.Resolvers.Deployments do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.Cluster
   import Console.Deployments.Policies, only: [allow: 3]
-  alias Console.Schema.{Cluster, ClusterNodePool, Revision, ClusterProvider, Service, ServiceComponent, GitRepository, PolicyBinding, ApiDeprecation}
-  alias Console.Deployments.{Clusters, Services, Git, Settings}
+  alias Console.Deployments.{Clusters, Services, Git, Settings, Global}
+  alias Console.Schema.{
+    Cluster,
+    ClusterNodePool,
+    Revision,
+    ClusterProvider,
+    Service,
+    ServiceComponent,
+    GitRepository,
+    PolicyBinding,
+    ApiDeprecation,
+    Tag,
+    GlobalService
+  }
 
+  def query(Tag, _), do: Tag
+  def query(GlobalService, _), do: GlobalService
   def query(ApiDeprecation, _), do: ApiDeprecation
   def query(ClusterNodePool, _), do: ClusterNodePool
   def query(ClusterProvider, _), do: ClusterProvider
@@ -125,6 +139,12 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   def update_settings(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Settings.update(attrs, user)
+
+  def create_global_service(%{service_id: sid, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Global.create(attrs, sid, user)
+
+  def delete_global_service(%{id: id}, %{context: %{current_user: user}}),
+    do: Global.delete(id, user)
 
   def tarball(svc, _, _), do: {:ok, Services.tarball(svc)}
 

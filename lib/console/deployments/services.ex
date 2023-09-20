@@ -3,7 +3,7 @@ defmodule Console.Deployments.Services do
   import Console.Deployments.Policies
   alias Console.PubSub
   alias Console.Schema.{Service, Revision, User, Cluster, ClusterProvider, ApiDeprecation}
-  alias Console.Deployments.{Secrets.Store, Git, Clusters, Deprecations.Table}
+  alias Console.Deployments.{Secrets.Store, Git, Clusters, Deprecations.Checker}
 
   @type service_resp :: {:ok, Service.t} | Console.error
   @type revision_resp :: {:ok, Revision.t} | Console.error
@@ -11,6 +11,8 @@ defmodule Console.Deployments.Services do
   def get_service!(id), do: Console.Repo.get!(Service, id)
 
   def get_service(id), do: Console.Repo.get(Service, id)
+
+  def get_service_by_name(cid, name), do: Console.Repo.get_by(Service, name: name, cluster_id: cid)
 
   def get_revision!(id), do: Repo.get!(Revision, id)
 
@@ -97,7 +99,7 @@ defmodule Console.Deployments.Services do
   This will also merge user specified configuration into the services base config (allowing you not to have to specify the full set)
   """
   @spec clone_service(map, binary, binary, User.t) :: service_resp
-  def clone_service(attrs, service_id, cluster_id, %User{} = user) do
+  def clone_service(attrs \\ %{}, service_id, cluster_id, %User{} = user) do
     start_transaction()
     |> add_operation(:source, fn _ ->
       get_service!(service_id)
@@ -108,7 +110,7 @@ defmodule Console.Deployments.Services do
         do: {:ok, merge_configuration(secrets, attrs[:configuration])}
     end)
     |> add_operation(:create, fn %{source: source, config: config} ->
-      Map.take(source, [:repository_id, :sha])
+      Map.take(source, [:repository_id, :sha, :name, :namespace])
       |> Map.put(:git, Map.from_struct(source.git))
       |> Map.merge(attrs)
       |> Map.put(:configuration, config)
@@ -207,13 +209,20 @@ defmodule Console.Deployments.Services do
   """
   @spec add_deprecations(Service.t) :: {:ok, map} | Console.error
   def add_deprecations(%Service{} = service) do
-    %{components: components} = Repo.preload(service, [:components])
-    Enum.reduce(components, start_transaction(), fn component, xact ->
-      case Table.fetch(component) do
-        %Table.Entry{} = entry ->
+    %{components: components, cluster: cluster} = Repo.preload(service, [:components, :cluster])
+    xact = add_operation(start_transaction(), :wipe, fn _ ->
+      ApiDeprecation.for_service(service.id)
+      |> Repo.delete_all()
+      |> ok()
+    end)
+
+    Enum.reduce(components, xact, fn component, xact ->
+      case Checker.check(component, cluster) do
+        {entry, blocking} ->
           add_operation(xact, component.id, fn _ ->
+            attrs = Map.from_struct(entry) |> Map.put(:blocking, blocking)
             %ApiDeprecation{component_id: component.id}
-            |> ApiDeprecation.changeset(Map.from_struct(entry))
+            |> ApiDeprecation.changeset(attrs)
             |> Repo.insert()
           end)
         _ -> xact

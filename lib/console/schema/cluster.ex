@@ -2,7 +2,7 @@ defmodule Console.Schema.Cluster do
   use Piazza.Ecto.Schema
   import Console.Deployments.Ecto.Validations
   alias Console.Deployments.Policies.Rbac
-  alias Console.Schema.{Service, ClusterNodePool, NamespacedName, ClusterProvider, PolicyBinding, User}
+  alias Console.Schema.{Service, ClusterNodePool, NamespacedName, ClusterProvider, PolicyBinding, User, Tag, GlobalService}
 
   schema "clusters" do
     field :name,            :string
@@ -23,6 +23,7 @@ defmodule Console.Schema.Cluster do
     belongs_to :service,  Service
     has_many :node_pools, ClusterNodePool, on_replace: :delete
     has_many :services, Service
+    has_many :tags, Tag
     has_many :api_deprecations, through: [:services, :api_deprecations]
 
     has_many :read_bindings, PolicyBinding,
@@ -35,6 +36,28 @@ defmodule Console.Schema.Cluster do
       references: :write_policy_id
 
     timestamps()
+  end
+
+  def ignore_ids(query \\ __MODULE__, ids) do
+    from(c in query, where: c.id not in ^ids)
+  end
+
+  def target(query \\ __MODULE__, %GlobalService{} = global) do
+    Map.take(global, [:provider_id, :tags])
+    |> Enum.reduce(query, fn
+      {:provider_id, prov_id}, q -> for_provider(q, prov_id)
+      {:tags, [_ | _] = tags}, q -> for_tags(q, tags)
+      _, q -> q
+    end)
+  end
+
+  def without_global(query \\ __MODULE__, global_id) do
+    owned = Service.for_owner(global_id)
+    from(c in query,
+      left_join: s in subquery(owned),
+      where: is_nil(s.id),
+      distinct: true
+    )
   end
 
   def for_service(query \\ __MODULE__, service_id) do
@@ -54,6 +77,17 @@ defmodule Console.Schema.Cluster do
 
   def for_provider(query \\ __MODULE__, provider_id) do
     from(c in query, where: c.provider_id == ^provider_id)
+  end
+
+  def with_tag(query \\ __MODULE__, name, value) do
+    from(c in query,
+      join: t in assoc(c, :tags),
+      where: t.value == ^value and t.name == ^name
+    )
+  end
+
+  def for_tags(query \\ __MODULE__, tags) do
+    Enum.reduce(tags, query, fn %{name: n, value: v}, q -> with_tag(q, n, v) end)
   end
 
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
@@ -76,6 +110,7 @@ defmodule Console.Schema.Cluster do
     |> cast_assoc(:node_pools)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
+    |> cast_assoc(:tags)
     |> foreign_key_constraint(:provider_id)
     |> put_new_change(:deploy_token, fn -> "deploy-#{Console.rand_alphanum(20)}" end)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
