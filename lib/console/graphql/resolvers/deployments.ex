@@ -13,7 +13,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     PolicyBinding,
     ApiDeprecation,
     Tag,
-    GlobalService
+    GlobalService,
+    User
   }
 
   def query(Tag, _), do: Tag
@@ -82,10 +83,14 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> allow(user, :read)
   end
 
-  def resolve_service(%{id: id}, %{context: %{current_user: user}}) do
+  def resolve_service(%{id: id}, ctx) do
     Services.get_service!(id)
-    |> allow(user, :read)
+    |> allow(actor(ctx), :read)
   end
+
+  defp actor(%{context: %{current_user: %User{} = user}}), do: user
+  defp actor(%{context: %{cluster: %Cluster{} = cluster}}), do: cluster
+  defp actor(_), do: nil
 
   def resolve_provider(%{id: id}, %{context: %{current_user: user}}) do
     Clusters.get_provider!(id)
@@ -94,8 +99,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   def settings(_, _), do: {:ok, Settings.fetch()}
 
-  def service_configuration(service, _, %{context: ctx}) do
-    with {:ok, _} <- allow(service, ctx[:current_user] || ctx[:cluster], :secrets),
+  def service_configuration(service, _, ctx) do
+    with {:ok, _} <- allow(service, actor(ctx), :secrets),
          {:ok, secrets} <- Services.configuration(service) do
       {:ok, Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)}
     end

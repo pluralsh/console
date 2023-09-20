@@ -7,21 +7,22 @@ defmodule Console.GraphQl.Deployments.Git do
   ecto_enum :git_health, GitRepository.Health
 
   input_object :git_attributes do
-    field :url,         non_null(:string)
-    field :private_key, :string
-    field :passphrase,  :string
-    field :username,    :string
-    field :password,    :string
+    field :url,         non_null(:string), description: "the url of this repository"
+    field :private_key, :string, description: "an ssh private key to use with this repo if an ssh url was given"
+    field :passphrase,  :string, description: "a passphrase to decrypt the given private key"
+    field :username,    :string, description: "the http username for authenticated http repos, defaults to apiKey for github"
+    field :password,    :string, description: "the http password for http authenticated repos"
   end
 
+  @desc "a git repository available for deployments"
   object :git_repository do
-    field :id,           non_null(:id)
-    field :url,          non_null(:string)
-    field :auth_method,  :auth_method
-    field :health,       :git_health
-    field :pulled_at,    :datetime
+    field :id,           non_null(:id), description: "internal id of this repository"
+    field :url,          non_null(:string), description: "the git url of the repository, either https or ssh supported"
+    field :auth_method,  :auth_method, description: "whether its a http or ssh url"
+    field :health,       :git_health, description: "whether we can currently pull this repo with the provided credentials"
+    field :pulled_at,    :datetime, description: "the last successsful git pull timestamp"
 
-    field :editable,   :boolean, resolve: &Deployments.editable/3
+    field :editable,   :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this repo"
 
     timestamps()
   end

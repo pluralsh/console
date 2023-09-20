@@ -91,13 +91,20 @@ export type Account = {
   subscription?: Maybe<PluralSubscription>;
 };
 
+/** a representation of a kubernetes api deprecation */
 export type ApiDeprecation = {
   __typename?: 'ApiDeprecation';
+  /** the kubernetes version the replacement api was created in */
   availableIn?: Maybe<Scalars['String']['output']>;
+  /** whether you cannot safely upgrade to the next kubernetes version if this deprecation exists */
   blocking?: Maybe<Scalars['Boolean']['output']>;
+  /** the component of this deprecation */
   component?: Maybe<ServiceComponent>;
+  /** the kubernetes version the deprecation was posted */
   deprecatedIn?: Maybe<Scalars['String']['output']>;
+  /** the kubernetes version the api version will be removed and unusable in */
   removedIn?: Maybe<Scalars['String']['output']>;
+  /** the api you can replace this resource with */
   replacement?: Maybe<Scalars['String']['output']>;
 };
 
@@ -231,8 +238,10 @@ export type AvailableFeatures = {
   vpn?: Maybe<Scalars['Boolean']['output']>;
 };
 
+/** aws node customizations */
 export type AwsCloud = {
   __typename?: 'AwsCloud';
+  /** custom launch template for your nodes, useful for Golden AMI setups */
   launchTemplateId?: Maybe<Scalars['String']['output']>;
 };
 
@@ -366,6 +375,7 @@ export type CloudProviderSettingsAttributes = {
   gcp?: InputMaybe<GcpSettingsAttributes>;
 };
 
+/** cloud specific settings for a node pool */
 export type CloudSettings = {
   __typename?: 'CloudSettings';
   aws?: Maybe<AwsCloud>;
@@ -375,23 +385,38 @@ export type CloudSettingsAttributes = {
   aws?: InputMaybe<AwsCloudAttributes>;
 };
 
+/** a representation of a cluster you can deploy to */
 export type Cluster = {
   __typename?: 'Cluster';
+  /** all api deprecations for all services in this cluster */
   apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
+  /** current k8s version as told to us by the deployment operator */
   currentVersion?: Maybe<Scalars['String']['output']>;
+  /** when this cluster was scheduled for deletion */
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** whether the current user can edit this cluster */
   editable?: Maybe<Scalars['Boolean']['output']>;
+  /** internal id of this cluster */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** human readable name of this cluster, will also translate to cloud k8s name */
   name: Scalars['String']['output'];
+  /** list of node pool specs managed by CAPI */
   nodePools?: Maybe<Array<Maybe<NodePool>>>;
+  /** last time the deploy operator pinged this cluster */
   pingedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the provider we use to create this cluster (null if BYOK) */
   provider?: Maybe<ClusterProvider>;
+  /** read policy for this cluster */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** the service used to deploy the CAPI resources of this cluster */
   service?: Maybe<ServiceDeployment>;
+  /** key/value tags to filter clusters */
   tags?: Maybe<Array<Maybe<Tag>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** desired k8s version for the cluster */
   version: Scalars['String']['output'];
+  /** write policy for this cluster */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
@@ -429,16 +454,25 @@ export type ClusterPing = {
   currentVersion: Scalars['String']['input'];
 };
 
+/** a CAPI provider for a cluster, cloud is inferred from name if not provided manually */
 export type ClusterProvider = {
   __typename?: 'ClusterProvider';
+  /** the name of the cloud service for this provider */
   cloud: Scalars['String']['output'];
+  /** whether the current user can edit this resource */
   editable?: Maybe<Scalars['Boolean']['output']>;
+  /** the details of how cluster manifests will be synced from git when created with this provider */
   git: GitRef;
+  /** the id of this provider */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a human readable name for the provider, globally unique */
   name: Scalars['String']['output'];
+  /** the namespace the CAPI resources are deployed into */
   namespace: Scalars['String']['output'];
+  /** the repository used to serve cluster manifests */
   repository?: Maybe<GitRepository>;
+  /** the service of the CAPI controller itself */
   service?: Maybe<ServiceDeployment>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
@@ -751,17 +785,24 @@ export type Deployment = {
   status: DeploymentStatus;
 };
 
+/** global settings for CD, these specify global read/write policies and also allow for customization of the repos for CAPI resources and the deploy operator */
 export type DeploymentSettings = {
   __typename?: 'DeploymentSettings';
+  /** the repo to fetch CAPI manifests from, for both providers and clusters */
   artifactRepository?: Maybe<GitRepository>;
+  /** policy for creation of new clusters */
   createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** the repo to fetch the deploy operators manifests from */
   deployerRepository?: Maybe<GitRepository>;
+  /** policy for managing git repos */
   gitBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
+  /** read policy across all clusters */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** write policy across all clusters */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
@@ -816,10 +857,15 @@ export type GcpSettingsAttributes = {
 };
 
 export type GitAttributes = {
+  /** a passphrase to decrypt the given private key */
   passphrase?: InputMaybe<Scalars['String']['input']>;
+  /** the http password for http authenticated repos */
   password?: InputMaybe<Scalars['String']['input']>;
+  /** an ssh private key to use with this repo if an ssh url was given */
   privateKey?: InputMaybe<Scalars['String']['input']>;
+  /** the url of this repository */
   url: Scalars['String']['input'];
+  /** the http username for authenticated http repos, defaults to apiKey for github */
   username?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -828,9 +874,12 @@ export enum GitHealth {
   Pullable = 'PULLABLE'
 }
 
+/** a representation of where to pull manifests from git */
 export type GitRef = {
   __typename?: 'GitRef';
+  /** the folder manifests live under */
   folder: Scalars['String']['output'];
+  /** a general git ref, either a branch name or commit sha understandable by `git checkout <ref>` */
   ref: Scalars['String']['output'];
 };
 
@@ -839,15 +888,22 @@ export type GitRefAttributes = {
   ref: Scalars['String']['input'];
 };
 
+/** a git repository available for deployments */
 export type GitRepository = {
   __typename?: 'GitRepository';
+  /** whether its a http or ssh url */
   authMethod?: Maybe<AuthMethod>;
+  /** whether the current user can edit this repo */
   editable?: Maybe<Scalars['Boolean']['output']>;
+  /** whether we can currently pull this repo with the provided credentials */
   health?: Maybe<GitHealth>;
+  /** internal id of this repository */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the last successsful git pull timestamp */
   pulledAt?: Maybe<Scalars['DateTime']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the git url of the repository, either https or ssh supported */
   url: Scalars['String']['output'];
 };
 
@@ -869,13 +925,19 @@ export type GitStatus = {
   output?: Maybe<Scalars['String']['output']>;
 };
 
+/** a rules based mechanism to redeploy a service across a fleet of clusters */
 export type GlobalService = {
   __typename?: 'GlobalService';
+  /** internal id of this global service */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a human readable name for this global service */
   name: Scalars['String']['output'];
+  /** whether to only apply to clusters with this provider */
   provider?: Maybe<ClusterProvider>;
+  /** the service to replicate across clusters */
   service?: Maybe<ServiceDeployment>;
+  /** a set of tags to select clusters for this global service */
   tags?: Maybe<Array<Maybe<Tag>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
@@ -1205,16 +1267,25 @@ export type NodeMetric = {
   window?: Maybe<Scalars['String']['output']>;
 };
 
+/** a specification for a node pool to be created in this cluster */
 export type NodePool = {
   __typename?: 'NodePool';
+  /** cloud specific settings for the node groups */
   cloudSettings?: Maybe<CloudSettings>;
+  /** internal id for this node pool */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the type of node to use (usually cloud-specific) */
   instanceType: Scalars['String']['output'];
+  /** kubernetes labels to apply to the nodes in this pool, useful for node selectors */
   labels?: Maybe<Scalars['Map']['output']>;
+  /** maximum number of instances in this node pool */
   maxSize: Scalars['Int']['output'];
+  /** minimum number of instances in this node pool */
   minSize: Scalars['Int']['output'];
+  /** name of this node pool (must be unique) */
   name: Scalars['String']['output'];
+  /** any taints you'd want to apply to a node, for eg preventing scheduling on spot instances */
   taints?: Maybe<Array<Maybe<Taint>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
@@ -1558,13 +1629,18 @@ export type Resources = {
   requests?: Maybe<ResourceSpec>;
 };
 
+/** a representation of a past revision of a service */
 export type Revision = {
   __typename?: 'Revision';
+  /** git spec of the prior revision */
   git: GitRef;
+  /** id of this revision */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the sha this service was pulled from */
   sha?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the service's semver */
   version: Scalars['String']['output'];
 };
 
@@ -1631,6 +1707,7 @@ export type RootMutationType = {
   __typename?: 'RootMutationType';
   approveBuild?: Maybe<Build>;
   cancelBuild?: Maybe<Build>;
+  /** clones the spec of the given service to be deployed either into a new namespace or new cluster */
   cloneService?: Maybe<ServiceDeployment>;
   createAccessToken?: Maybe<AccessToken>;
   createBuild?: Maybe<Build>;
@@ -1668,10 +1745,12 @@ export type RootMutationType = {
   markRead?: Maybe<User>;
   oauthCallback?: Maybe<User>;
   overlayConfiguration?: Maybe<Build>;
+  /** a regular status ping to be sent by the deploy operator */
   pingCluster?: Maybe<Cluster>;
   readNotifications?: Maybe<User>;
   restartBuild?: Maybe<Build>;
   restorePostgres?: Maybe<Postgresql>;
+  /** rewires this service to use the given revision id */
   rollbackService?: Maybe<ServiceDeployment>;
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
@@ -1680,8 +1759,10 @@ export type RootMutationType = {
   updateConfiguration?: Maybe<Configuration>;
   updateDeploymentSettings?: Maybe<DeploymentSettings>;
   updateGroup?: Maybe<Group>;
+  /** a reusable mutation for updating rbac settings on core services */
   updateRbac?: Maybe<Scalars['Boolean']['output']>;
   updateRole?: Maybe<Role>;
+  /** updates only the components of a given service, to be sent after deploy operator syncs */
   updateServiceComponents?: Maybe<ServiceDeployment>;
   updateServiceDeployment?: Maybe<ServiceDeployment>;
   updateSmtp?: Maybe<Smtp>;
@@ -2016,11 +2097,16 @@ export type RootQueryType = {
   builds?: Maybe<BuildConnection>;
   cachedPods?: Maybe<Array<Maybe<Pod>>>;
   certificate?: Maybe<Certificate>;
+  /** fetches an individual cluster */
   cluster?: Maybe<Cluster>;
   clusterInfo?: Maybe<ClusterInfo>;
+  /** fetches an individual cluster provider */
   clusterProvider?: Maybe<ClusterProvider>;
+  /** a relay connection of all providers visible to the current user */
   clusterProviders?: Maybe<ClusterProviderConnection>;
+  /** the services deployed in the current cluster, to be polled by the deploy operator */
   clusterServices?: Maybe<Array<Maybe<ServiceDeployment>>>;
+  /** a relay connection of all clusters visible to the current user */
   clusters?: Maybe<ClusterConnection>;
   configMap?: Maybe<ConfigMap>;
   configMaps?: Maybe<Array<Maybe<ConfigMap>>>;
@@ -2069,6 +2155,7 @@ export type RootQueryType = {
   secret?: Maybe<Secret>;
   secrets?: Maybe<Array<Maybe<Secret>>>;
   service?: Maybe<Service>;
+  /** fetches details of this service deployment, and can be called by the deploy operator */
   serviceDeployment?: Maybe<ServiceDeployment>;
   serviceDeployments?: Maybe<ServiceDeploymentConnection>;
   smtp?: Maybe<Smtp>;
@@ -2602,52 +2689,85 @@ export type ServiceCloneAttributes = {
   namespace?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** representation of a kubernets component deployed by a service */
 export type ServiceComponent = {
   __typename?: 'ServiceComponent';
+  /** any api deprecations discovered from this component */
   apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
+  /** api group of this resource */
   group: Scalars['String']['output'];
+  /** internal id */
   id: Scalars['ID']['output'];
+  /** api kind of this resource */
   kind: Scalars['String']['output'];
+  /** kubernetes name of this resource */
   name: Scalars['String']['output'];
+  /** kubernetes namespace of this resource */
   namespace: Scalars['String']['output'];
+  /** the service this component belongs to */
   service?: Maybe<ServiceDeployment>;
+  /** kubernetes component health enum */
   state?: Maybe<ComponentState>;
+  /** whether this component has been applied to the k8s api */
   synced: Scalars['Boolean']['output'];
+  /** api version of this resource */
   version: Scalars['String']['output'];
 };
 
+/** a configuration item k/v pair */
 export type ServiceConfiguration = {
   __typename?: 'ServiceConfiguration';
   name: Scalars['String']['output'];
   value: Scalars['String']['output'];
 };
 
+/** a reference to a service deployed from a git repo into a cluster */
 export type ServiceDeployment = {
   __typename?: 'ServiceDeployment';
+  /** the cluster this service is deployed into */
   cluster?: Maybe<Cluster>;
+  /** the kubernetes component of a service */
   components?: Maybe<Array<Maybe<ServiceComponent>>>;
+  /** possibly secret configuration used to template the manifests of this service */
   configuration?: Maybe<Array<Maybe<ServiceConfiguration>>>;
+  /** the time this service was scheduled for deletion */
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** whether this service is editable */
   editable?: Maybe<Scalars['Boolean']['output']>;
+  /** description on where in git the service's manifests should be fetched */
   git: GitRef;
+  /** the global service this service is the source for */
   globalService?: Maybe<GlobalService>;
+  /** internal id of this service */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** human readable name of this service, must be unique per cluster */
   name: Scalars['String']['output'];
+  /** kubernetes namespace this service will be deployed to */
   namespace: Scalars['String']['output'];
+  /** whether this service is controlled by a global service */
   owner?: Maybe<GlobalService>;
+  /** read policy for this service */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** the git repo of this service */
   repository?: Maybe<GitRepository>;
+  /** the current revision of this service */
   revision?: Maybe<Revision>;
+  /** a relay connection of all revisions of this service, these are periodically pruned up to a history limit */
   revisions?: Maybe<RevisionConnection>;
+  /** latest git sha we pulled from */
   sha?: Maybe<Scalars['String']['output']>;
+  /** https url to fetch the latest tarball of kubernetes manifests */
   tarball?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** semver of this service */
   version: Scalars['String']['output'];
+  /** write policy of this service */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
 
+/** a reference to a service deployed from a git repo into a cluster */
 export type ServiceDeploymentRevisionsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2800,6 +2920,7 @@ export type TagAttributes = {
   value: Scalars['String']['input'];
 };
 
+/** a kubernetes node taint */
 export type Taint = {
   __typename?: 'Taint';
   effect: Scalars['String']['output'];

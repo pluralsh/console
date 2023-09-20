@@ -37,12 +37,24 @@ type AccessTokenConnection {
   edges: [AccessTokenEdge]
 }
 
+"a representation of a kubernetes api deprecation"
 type ApiDeprecation {
+  "the kubernetes version the deprecation was posted"
   deprecatedIn: String
+
+  "the kubernetes version the api version will be removed and unusable in"
   removedIn: String
+
+  "the api you can replace this resource with"
   replacement: String
+
+  "the kubernetes version the replacement api was created in"
   availableIn: String
+
+  "whether you cannot safely upgrade to the next kubernetes version if this deprecation exists"
   blocking: Boolean
+
+  "the component of this deprecation"
   component: ServiceComponent
 }
 
@@ -167,40 +179,100 @@ type FileContent {
   content: String
 }
 
+"a reference to a service deployed from a git repo into a cluster"
 type ServiceDeployment {
+  "internal id of this service"
   id: ID!
+
+  "human readable name of this service, must be unique per cluster"
   name: String!
+
+  "kubernetes namespace this service will be deployed to"
   namespace: String!
+
+  "semver of this service"
   version: String!
+
+  "description on where in git the service's manifests should be fetched"
   git: GitRef!
+
+  "latest git sha we pulled from"
   sha: String
+
+  "https url to fetch the latest tarball of kubernetes manifests"
   tarball: String
+
+  "the time this service was scheduled for deletion"
   deletedAt: DateTime
+
+  "the git repo of this service"
   repository: GitRepository
+
+  "read policy for this service"
   readBindings: [PolicyBinding]
+
+  "write policy of this service"
   writeBindings: [PolicyBinding]
+
+  "the cluster this service is deployed into"
   cluster: Cluster
+
+  "the current revision of this service"
   revision: Revision
+
+  "possibly secret configuration used to template the manifests of this service"
   configuration: [ServiceConfiguration]
+
+  "the kubernetes component of a service"
   components: [ServiceComponent]
+
+  "the global service this service is the source for"
   globalService: GlobalService
+
+  "whether this service is controlled by a global service"
   owner: GlobalService
+
+  "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
+
+  "whether this service is editable"
   editable: Boolean
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
+"representation of a kubernets component deployed by a service"
 type ServiceComponent {
+  "internal id"
   id: ID!
+
+  "kubernetes component health enum"
   state: ComponentState
+
+  "whether this component has been applied to the k8s api"
   synced: Boolean!
+
+  "api group of this resource"
   group: String!
+
+  "api version of this resource"
   version: String!
+
+  "api kind of this resource"
   kind: String!
+
+  "kubernetes namespace of this resource"
   namespace: String!
+
+  "kubernetes name of this resource"
   name: String!
+
+  "the service this component belongs to"
   service: ServiceDeployment
+
+  "any api deprecations discovered from this component"
   apiDeprecations: [ApiDeprecation]
 }
 
@@ -393,16 +465,34 @@ type CronJob {
   jobs: [Job]
 }
 
+"a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
 type ClusterProvider {
+  "the id of this provider"
   id: ID!
+
+  "a human readable name for the provider, globally unique"
   name: String!
+
+  "the namespace the CAPI resources are deployed into"
   namespace: String!
+
+  "the name of the cloud service for this provider"
   cloud: String!
+
+  "the details of how cluster manifests will be synced from git when created with this provider"
   git: GitRef!
+
+  "the repository used to serve cluster manifests"
   repository: GitRepository
+
+  "the service of the CAPI controller itself"
   service: ServiceDeployment
+
+  "whether the current user can edit this resource"
   editable: Boolean
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
@@ -433,6 +523,7 @@ type ClusterInfo {
   version: String
 }
 
+"a configuration item k/v pair"
 type ServiceConfiguration {
   name: String!
   value: String!
@@ -886,22 +977,52 @@ type CronSpec {
   concurrencyPolicy: String
 }
 
+"a representation of a cluster you can deploy to"
 type Cluster {
+  "internal id of this cluster"
   id: ID!
+
+  "human readable name of this cluster, will also translate to cloud k8s name"
   name: String!
+
+  "desired k8s version for the cluster"
   version: String!
+
+  "current k8s version as told to us by the deployment operator"
   currentVersion: String
+
+  "when this cluster was scheduled for deletion"
   deletedAt: DateTime
+
+  "last time the deploy operator pinged this cluster"
   pingedAt: DateTime
+
+  "read policy for this cluster"
   readBindings: [PolicyBinding]
+
+  "write policy for this cluster"
   writeBindings: [PolicyBinding]
+
+  "list of node pool specs managed by CAPI"
   nodePools: [NodePool]
+
+  "the provider we use to create this cluster (null if BYOK)"
   provider: ClusterProvider
+
+  "the service used to deploy the CAPI resources of this cluster"
   service: ServiceDeployment
+
+  "key/value tags to filter clusters"
   tags: [Tag]
+
+  "all api deprecations for all services in this cluster"
   apiDeprecations: [ApiDeprecation]
+
+  "whether the current user can edit this cluster"
   editable: Boolean
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
@@ -950,61 +1071,122 @@ type ApplicationDelta {
 
 type RootMutationType {
   createBuild(attributes: BuildAttributes!): Build
+
   restartBuild(id: ID!): Build
+
   cancelBuild(id: ID!): Build
+
   approveBuild(id: ID!): Build
+
   signIn(email: String!, password: String!): User
+
   loginLink(key: String!): User
+
   readNotifications: User
+
   signup(inviteId: String!, attributes: UserAttributes!): User
+
   oauthCallback(code: String!, redirect: String): User
+
   createInvite(attributes: InviteAttributes!): Invite
+
   updateUser(id: ID, attributes: UserAttributes!): User
+
   deleteUser(id: ID!): User
+
   markRead(type: ReadType): User
+
   createGroup(attributes: GroupAttributes!): Group
+
   deleteGroup(groupId: ID!): Group
+
   updateGroup(groupId: ID!, attributes: GroupAttributes!): Group
+
   createGroupMember(groupId: ID!, userId: ID!): GroupMember
+
   deleteGroupMember(groupId: ID!, userId: ID!): GroupMember
+
   createRole(attributes: RoleAttributes!): Role
+
   updateRole(id: ID!, attributes: RoleAttributes!): Role
+
   deleteRole(id: ID!): Role
+
   createAccessToken: AccessToken
+
   deleteAccessToken(token: String!): AccessToken
+
   deleteCertificate(name: String!, namespace: String!): Boolean
+
   deletePod(namespace: String!, name: String!): Pod
+
   deleteJob(namespace: String!, name: String!): Job
+
   deleteNode(name: String!): Node
+
   overlayConfiguration(namespace: String!, context: Map!): Build
+
   createPeer(userId: ID, email: String, name: String!): WireguardPeer
+
   deletePeer(name: String!): Boolean
+
   installRecipe(id: ID!, context: Map!, oidc: Boolean): Build
+
   installStack(name: String!, context: ContextAttributes!, oidc: Boolean): Build
+
   updateSmtp(smtp: SmtpInput!): Smtp
+
   updateConfiguration(repository: String!, content: String!, tool: Tool, message: String): Configuration
+
   createUpgradePolicy(attributes: UpgradePolicyAttributes!): UpgradePolicy
+
   deleteUpgradePolicy(id: ID!): UpgradePolicy
+
   executeRunbook(namespace: String!, name: String!, input: RunbookActionInput!): RunbookActionResponse
+
   createWebhook(attributes: WebhookAttributes!): Webhook
+
   deleteWebhook(id: ID!): Webhook
+
   restorePostgres(namespace: String!, name: String!, timestamp: DateTime!, clone: CloneAttributes): Postgresql
+
   createGitRepository(attributes: GitAttributes!): GitRepository
+
   createCluster(attributes: ClusterAttributes!): Cluster
+
   updateCluster(id: ID!, attributes: ClusterUpdateAttributes!): Cluster
+
   deleteCluster(id: ID!): Cluster
+
   createClusterProvider(attributes: ClusterProviderAttributes!): ClusterProvider
+
   updateClusterProvider(id: ID!, attributes: ClusterProviderUpdateAttributes!): ClusterProvider
+
   createServiceDeployment(clusterId: ID!, attributes: ServiceDeploymentAttributes!): ServiceDeployment
+
   updateServiceDeployment(id: ID!, attributes: ServiceUpdateAttributes!): ServiceDeployment
+
   deleteServiceDeployment(id: ID!): ServiceDeployment
+
+  "rewires this service to use the given revision id"
   rollbackService(id: ID!, revisionId: ID!): ServiceDeployment
+
+  "clones the spec of the given service to be deployed either into a new namespace or new cluster"
   cloneService(serviceId: ID!, clusterId: ID!, attributes: ServiceCloneAttributes!): ServiceDeployment
-  pingCluster(attributes: ClusterPing!): Cluster
-  updateServiceComponents(id: ID!, components: [ComponentAttributes]): ServiceDeployment
+
   createGlobalService(serviceId: ID!, attributes: GlobalServiceAttributes!): GlobalService
+
   deleteGlobalService(id: ID!): GlobalService
+
+  "a regular status ping to be sent by the deploy operator"
+  pingCluster(attributes: ClusterPing!): Cluster
+
+  "updates only the components of a given service, to be sent after deploy operator syncs"
+  updateServiceComponents(id: ID!, components: [ComponentAttributes]): ServiceDeployment
+
+  "a reusable mutation for updating rbac settings on core services"
   updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
+
   updateDeploymentSettings(attributes: DeploymentSettingsAttributes!): DeploymentSettings
 }
 
@@ -1021,12 +1203,22 @@ type AccessToken {
   updatedAt: DateTime
 }
 
+"a representation of a past revision of a service"
 type Revision {
+  "id of this revision"
   id: ID!
+
+  "the service's semver"
   version: String!
+
+  "git spec of the prior revision"
   git: GitRef!
+
+  "the sha this service was pulled from"
   sha: String
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
@@ -1115,81 +1307,163 @@ type UpgradePolicy {
 
 type RootQueryType {
   configuration: ConsoleConfiguration
+
   externalToken: String
+
   builds(after: String, first: Int, before: String, last: Int): BuildConnection
+
   build(id: ID!): Build
+
   buildInfo: BuildInfo
+
   users(after: String, first: Int, before: String, last: Int, q: String): UserConnection
+
   loginInfo(redirect: String): LoginInfo
+
   me: User
+
   invite(id: String!): Invite
+
   groups(after: String, first: Int, before: String, last: Int, q: String): GroupConnection
+
   groupMembers(after: String, first: Int, before: String, last: Int, groupId: ID!): GroupMemberConnection
+
   role: Role
+
   roles(after: String, first: Int, before: String, last: Int, q: String): RoleConnection
+
   notifications(after: String, first: Int, before: String, last: Int, all: Boolean): NotificationConnection
+
   temporaryToken: String
+
   accessTokens(after: String, first: Int, before: String, last: Int): AccessTokenConnection
+
   accessToken(id: ID!): AccessToken
+
   dashboards(repo: String!): [Dashboard]
+
   dashboard(repo: String!, name: String!, step: String, offset: Int, labels: [LabelInput]): Dashboard
+
   metric(query: String!, offset: Int, step: String): [MetricResponse]
+
   logs(query: String!, start: Long, end: Long, limit: Int!): [LogStream]
+
   scalingRecommendation(kind: AutoscalingTarget!, namespace: String!, name: String!): VerticalPodAutoscaler
+
   configMap(namespace: String!, name: String!): ConfigMap
+
   secret(namespace: String!, name: String!): Secret
+
   configMaps(namespace: String!): [ConfigMap]
+
   secrets(namespace: String!): [Secret]
+
   service(namespace: String!, name: String!): Service
+
   clusterInfo: ClusterInfo
+
   deployment(namespace: String!, name: String!): Deployment
+
   statefulSet(namespace: String!, name: String!): StatefulSet
+
   ingress(namespace: String!, name: String!): Ingress
+
   nodes: [Node]
+
   node(name: String!): Node
+
   cronJob(namespace: String!, name: String!): CronJob
+
   job(namespace: String!, name: String!): Job
+
   certificate(namespace: String!, name: String!): Certificate
+
   pod(namespace: String!, name: String!): Pod
+
   pods(after: String, first: Int, before: String, last: Int, namespaces: [String]): PodConnection
+
   wireguardPeers: [WireguardPeer]
+
   myWireguardPeers: [WireguardPeer]
+
   wireguardPeer(name: String!): WireguardPeer
+
   cachedPods(namespaces: [String]): [Pod]
+
   namespaces: [Namespace]
+
   logFilters(namespace: String!): [LogFilter]
+
   nodeMetrics: [NodeMetric]
+
   nodeMetric(name: String!): NodeMetric
+
   configurationOverlays(namespace: String!): [ConfigurationOverlay]
+
   audits(after: String, first: Int, before: String, last: Int, repo: String): AuditConnection
+
   auditMetrics: [AuditMetric]
+
   ai(prompt: String!): String
+
   account: Account
+
   installations(after: String, first: Int, before: String, last: Int): InstallationConnection
+
   applications: [Application]
+
   application(name: String!): Application
+
   repository(name: String!): Repository
+
   repositories(after: String, first: Int, before: String, last: Int, query: String!): RepositoryConnection
+
   recipes(after: String, first: Int, before: String, last: Int, id: ID!): RecipeConnection
+
   context: [RepositoryContext]
+
   pluralContext: PluralContext
+
   recipe(id: ID!): Recipe
+
   stack(name: String!): Stack
+
   smtp: Smtp
+
   upgradePolicies: [UpgradePolicy]
+
   runbook(namespace: String!, name: String!): Runbook
+
   runbooks(namespace: String!, pinned: Boolean): [Runbook]
+
   webhooks(after: String, first: Int, before: String, last: Int): WebhookConnection
+
   postgresDatabases: [Postgresql]
+
   postgresDatabase(namespace: String!, name: String!): Postgresql
+
   gitRepositories(after: String, first: Int, before: String, last: Int): GitRepositoryConnection
+
+  "a relay connection of all clusters visible to the current user"
   clusters(after: String, first: Int, before: String, last: Int): ClusterConnection
+
+  "a relay connection of all providers visible to the current user"
   clusterProviders(after: String, first: Int, before: String, last: Int): ClusterProviderConnection
+
+  "fetches an individual cluster"
   cluster(id: ID): Cluster
+
+  "fetches an individual cluster provider"
   clusterProvider(id: ID!): ClusterProvider
+
   serviceDeployments(after: String, first: Int, before: String, last: Int, clusterId: ID): ServiceDeploymentConnection
-  serviceDeployment(id: ID!): ServiceDeployment
+
+  "the services deployed in the current cluster, to be polled by the deploy operator"
   clusterServices: [ServiceDeployment]
+
+  "fetches details of this service deployment, and can be called by the deploy operator"
+  serviceDeployment(id: ID!): ServiceDeployment
+
   deploymentSettings: DeploymentSettings
 }
 
@@ -1201,8 +1475,12 @@ type RoleBinding {
   updatedAt: DateTime
 }
 
+"a representation of where to pull manifests from git"
 type GitRef {
+  "a general git ref, either a branch name or commit sha understandable by `git checkout <ref>`"
   ref: String!
+
+  "the folder manifests live under"
   folder: String!
 }
 
@@ -1229,13 +1507,25 @@ type RunbookExecutionEdge {
   cursor: String
 }
 
+"a rules based mechanism to redeploy a service across a fleet of clusters"
 type GlobalService {
+  "internal id of this global service"
   id: ID!
+
+  "a human readable name for this global service"
   name: String!
+
+  "a set of tags to select clusters for this global service"
   tags: [Tag]
+
+  "the service to replicate across clusters"
   service: ServiceDeployment
+
+  "whether to only apply to clusters with this provider"
   provider: ClusterProvider
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
@@ -1357,13 +1647,16 @@ type Port {
   protocol: String
 }
 
+"a kubernetes node taint"
 type Taint {
   key: String!
   value: String!
   effect: String!
 }
 
+"aws node customizations"
 type AwsCloud {
+  "custom launch template for your nodes, useful for Golden AMI setups"
   launchTemplateId: String
 }
 
@@ -1423,16 +1716,32 @@ type ApplicationStatus {
   componentsReady: String!
 }
 
+"global settings for CD, these specify global read/write policies and also allow for customization of the repos for CAPI resources and the deploy operator"
 type DeploymentSettings {
   id: ID!
+
   name: String!
+
+  "the repo to fetch CAPI manifests from, for both providers and clusters"
   artifactRepository: GitRepository
+
+  "the repo to fetch the deploy operators manifests from"
   deployerRepository: GitRepository
+
+  "read policy across all clusters"
   readBindings: [PolicyBinding]
+
+  "write policy across all clusters"
   writeBindings: [PolicyBinding]
+
+  "policy for managing git repos"
   gitBindings: [PolicyBinding]
+
+  "policy for creation of new clusters"
   createBindings: [PolicyBinding]
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
@@ -1451,6 +1760,7 @@ input TagAttributes {
   value: String!
 }
 
+"cloud specific settings for a node pool"
 type CloudSettings {
   aws: AwsCloud
 }
@@ -1485,10 +1795,19 @@ input AwsCloudAttributes {
 }
 
 input GitAttributes {
+  "the url of this repository"
   url: String!
+
+  "an ssh private key to use with this repo if an ssh url was given"
   privateKey: String
+
+  "a passphrase to decrypt the given private key"
   passphrase: String
+
+  "the http username for authenticated http repos, defaults to apiKey for github"
   username: String
+
+  "the http password for http authenticated repos"
   password: String
 }
 
@@ -1659,16 +1978,34 @@ type BuildConnection {
   edges: [BuildEdge]
 }
 
+"a specification for a node pool to be created in this cluster"
 type NodePool {
+  "internal id for this node pool"
   id: ID!
+
+  "name of this node pool (must be unique)"
   name: String!
+
+  "minimum number of instances in this node pool"
   minSize: Int!
+
+  "maximum number of instances in this node pool"
   maxSize: Int!
+
+  "the type of node to use (usually cloud-specific)"
   instanceType: String!
+
+  "kubernetes labels to apply to the nodes in this pool, useful for node selectors"
   labels: Map
+
+  "any taints you'd want to apply to a node, for eg preventing scheduling on spot instances"
   taints: [Taint]
+
+  "cloud specific settings for the node groups"
   cloudSettings: CloudSettings
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
@@ -1681,14 +2018,28 @@ type ConfigurationOverlay {
   spec: ConfigurationOverlaySpec!
 }
 
+"a git repository available for deployments"
 type GitRepository {
+  "internal id of this repository"
   id: ID!
+
+  "the git url of the repository, either https or ssh supported"
   url: String!
+
+  "whether its a http or ssh url"
   authMethod: AuthMethod
+
+  "whether we can currently pull this repo with the provided credentials"
   health: GitHealth
+
+  "the last successsful git pull timestamp"
   pulledAt: DateTime
+
+  "whether the current user can edit this repo"
   editable: Boolean
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 

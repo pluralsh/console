@@ -18,17 +18,18 @@ defmodule Console.GraphQl.Deployments do
   import_types Console.GraphQl.Deployments.Cluster
   import_types Console.GraphQl.Deployments.Service
 
+  @desc "global settings for CD, these specify global read/write policies and also allow for customization of the repos for CAPI resources and the deploy operator"
   object :deployment_settings do
     field :id,             non_null(:id)
     field :name,           non_null(:string)
 
-    field :artifact_repository, :git_repository, resolve: dataloader(Deployments)
-    field :deployer_repository, :git_repository, resolve: dataloader(Deployments)
+    field :artifact_repository, :git_repository, resolve: dataloader(Deployments), description: "the repo to fetch CAPI manifests from, for both providers and clusters"
+    field :deployer_repository, :git_repository, resolve: dataloader(Deployments), description: "the repo to fetch the deploy operators manifests from"
 
-    field :read_bindings,   list_of(:policy_binding), resolve: dataloader(Deployments)
-    field :write_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments)
-    field :git_bindings,    list_of(:policy_binding), resolve: dataloader(Deployments)
-    field :create_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
+    field :read_bindings,   list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy across all clusters"
+    field :write_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy across all clusters"
+    field :git_bindings,    list_of(:policy_binding), resolve: dataloader(Deployments), description: "policy for managing git repos"
+    field :create_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "policy for creation of new clusters"
 
     timestamps()
   end
@@ -67,6 +68,7 @@ defmodule Console.GraphQl.Deployments do
     import_fields :public_cluster_mutations
     import_fields :public_service_mutations
 
+    @desc "a reusable mutation for updating rbac settings on core services"
     field :update_rbac, :boolean do
       middleware Authenticateed
       arg :rbac,        non_null(:rbac_attributes)
