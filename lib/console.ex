@@ -1,7 +1,7 @@
 defmodule Console do
   @type error :: {:error, term}
 
-  @chars String.codepoints("abcdefghijklmnopqrstuvwxyz")
+  @chars String.codepoints("abcdefghijklmnopqrstuvwxyz0123456789")
 
   def url(path), do: Path.join(Console.conf(:url), path)
 

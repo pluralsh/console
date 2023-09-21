@@ -18,14 +18,14 @@ defmodule Console.Deployments.Git do
   def artifacts_url(), do: "https://github.com/pluralsh/plural-artifacts.git"
 
   def deploy_repo!() do
-    case Settings.fetch() do
+    case Settings.fetch_consistent() do
       %DeploymentSettings{deployer_repository: %GitRepository{} = repo} -> repo
       _ -> get_by_url!(deploy_url())
     end
   end
 
   def artifacts_repo!() do
-    case Settings.fetch() do
+    case Settings.fetch_consistent() do
       %DeploymentSettings{artifact_repository: %GitRepository{} = repo} -> repo
       _ -> get_by_url!(artifacts_url())
     end

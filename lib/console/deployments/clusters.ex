@@ -201,12 +201,13 @@ defmodule Console.Deployments.Clusters do
   defp cluster_attributes(%{node_pools: node_pools} = cluster) do
     %{
       configuration: [
-        %{name: "console-url", value: Path.join(Console.conf(:ext_url), "ext")},
-        %{name: "deploy-token", value: cluster.deploy_token},
-        %{name: "operator-namespace", value: "plrl-deploy-operator"},
-        %{name: "cluster-name", value: cluster.name},
+        %{name: "clusterId", value: cluster.id},
+        %{name: "consoleUrl", value: Path.join(Console.conf(:ext_url), "ext")},
+        %{name: "deployToken", value: cluster.deploy_token},
+        %{name: "operatorNamespace", value: "plrl-deploy-operator"},
+        %{name: "clusterName", value: cluster.name},
         %{name: "version", value: cluster.version},
-        %{name: "node-pools", value: Jason.encode!(node_pools)}
+        %{name: "nodePools", value: Jason.encode!(node_pools)}
       ]
     }
   end
@@ -229,9 +230,9 @@ defmodule Console.Deployments.Clusters do
   defp provider_attributes(%ClusterProvider{cloud_settings: %{aws: %{access_key_id: aid, secret_access_key: sak}}} = prov) do
     %{
       configuration: [
-        %{name: "provider-name", value: prov.name},
-        %{name: "access-key-id", value: aid},
-        %{name: "secret-access-key", value: sak}
+        %{name: "providerName", value: prov.name},
+        %{name: "accessKeyId", value: aid},
+        %{name: "secretAccessKey", value: sak}
       ]
     }
   end
@@ -239,13 +240,13 @@ defmodule Console.Deployments.Clusters do
   defp provider_attributes(%ClusterProvider{cloud_settings: %{gcp: %{application_credentials: ac}}} = prov) do
     %{
       configuration: [
-        %{name: "provider-name", value: prov.name},
-        %{name: "application-credentials", value: ac},
+        %{name: "providerName", value: prov.name},
+        %{name: "applicationCredentials", value: ac},
       ]
     }
   end
 
-  defp provider_attributes(%ClusterProvider{name: name}), do: %{configuration: [%{name: "provider-name", value: name}]}
+  defp provider_attributes(%ClusterProvider{name: name}), do: %{configuration: [%{name: "providerName", value: name}]}
 
   defp tmp_admin(%User{} = user), do: %{user | roles: %{admin: true}}
 

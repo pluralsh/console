@@ -112,7 +112,7 @@ defmodule Console.Schema.Cluster do
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:tags)
     |> foreign_key_constraint(:provider_id)
-    |> put_new_change(:deploy_token, fn -> "deploy-#{Console.rand_alphanum(20)}" end)
+    |> put_new_change(:deploy_token, fn -> "deploy-#{Console.rand_alphanum(30)}" end)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> update_vsn()

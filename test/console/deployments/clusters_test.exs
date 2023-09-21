@@ -39,12 +39,13 @@ defmodule Console.Deployments.ClustersTest do
       assert svc.cluster_id == self.id
 
       {:ok, secrets} = Services.configuration(svc)
-      assert secrets["cluster-name"] == cluster.name
+      assert secrets["clusterName"] == cluster.name
       assert secrets["version"] == cluster.version
-      assert secrets["operator-namespace"] == "plrl-deploy-operator"
-      assert secrets["console-url"] == Path.join(Console.conf(:ext_url), "ext")
-      assert secrets["deploy-token"] == cluster.deploy_token
-      [node_pool] = Jason.decode!(secrets["node-pools"])
+      assert secrets["operatorNamespace"] == "plrl-deploy-operator"
+      assert secrets["consoleUrl"] == Path.join(Console.conf(:ext_url), "ext")
+      assert secrets["deployToken"] == cluster.deploy_token
+      assert secrets["clusterId"] == cluster.id
+      [node_pool] = Jason.decode!(secrets["nodePools"])
       assert node_pool["name"] == pool.name
       assert node_pool["min_size"] == pool.min_size
       assert node_pool["max_size"] == pool.max_size
@@ -56,9 +57,10 @@ defmodule Console.Deployments.ClustersTest do
       assert svc.git.ref == "main"
       assert svc.git.folder == "helm"
 
-      {:ok, %{"deploy-token" => token, "url" => url}} = Services.configuration(svc)
+      {:ok, %{"deployToken" => token, "url" => url} = secrets} = Services.configuration(svc)
       assert token == cluster.deploy_token
       assert url == Path.join(Console.conf(:ext_url), "ext")
+      assert secrets["clusterId"] == cluster.id
     end
 
     test "it will respect rbac" do
@@ -116,7 +118,7 @@ defmodule Console.Deployments.ClustersTest do
       assert pool.min_size == 2
       %{service: svc} = Console.Repo.preload(cluster, [:service])
 
-      {:ok, %{"version" => vsn, "node-pools" => pools, "cluster-name" => name}} = Services.configuration(svc)
+      {:ok, %{"version" => vsn, "nodePools" => pools, "clusterName" => name}} = Services.configuration(svc)
       assert name == cluster.name
       assert vsn == cluster.version
       [node_pool] = Jason.decode!(pools)
@@ -181,8 +183,8 @@ defmodule Console.Deployments.ClustersTest do
       assert svc.cluster_id == self.id
 
       {:ok, secrets} = Services.configuration(svc)
-      assert secrets["access-key-id"] == "aid"
-      assert secrets["secret-access-key"] == "sak"
+      assert secrets["accessKeyId"] == "aid"
+      assert secrets["secretAccessKey"] == "sak"
 
       assert_receive {:event, %PubSub.ProviderCreated{item: ^provider}}
 
@@ -210,8 +212,8 @@ defmodule Console.Deployments.ClustersTest do
 
       %{service: svc} = Console.Repo.preload(updated, [:service])
       {:ok, secrets} = Services.configuration(svc)
-      assert secrets["access-key-id"] == "aid2"
-      assert secrets["secret-access-key"] == "sak2"
+      assert secrets["accessKeyId"] == "aid2"
+      assert secrets["secretAccessKey"] == "sak2"
 
       assert_receive {:event, %PubSub.ProviderUpdated{item: ^updated}}
 

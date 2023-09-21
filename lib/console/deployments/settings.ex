@@ -17,7 +17,10 @@ defmodule Console.Deployments.Settings do
   """
   @spec fetch() :: DeploymentSettings.t | nil
   @decorate cacheable(cache: @cache_adapter, key: :deployment_settings, opts: [ttl: @ttl])
-  def fetch() do
+  def fetch(), do: fetch_consistent()
+
+  @doc "same as fetch/0 but always reads from db"
+  def fetch_consistent() do
     Console.Repo.get_by(DeploymentSettings, name: "global")
     |> Console.Repo.preload(@preloads)
   end

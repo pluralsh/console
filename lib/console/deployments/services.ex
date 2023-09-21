@@ -64,7 +64,8 @@ defmodule Console.Deployments.Services do
       namespace: "plrl-deploy-operator",
       git: %{ref: "main", folder: "helm"},
       configuration: [
-        %{name: "deploy-token", value: deploy_token},
+        %{name: "clusterId", value: cluster_id},
+        %{name: "deployToken", value: deploy_token},
         %{name: "url", value: Path.join(Console.conf(:ext_url), "ext")}
       ]
     }, cluster_id, user)
