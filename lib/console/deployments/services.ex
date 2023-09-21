@@ -198,10 +198,10 @@ defmodule Console.Deployments.Services do
   def update_components(attrs, service_id) when is_binary(service_id),
     do: update_components(attrs, get_service!(service_id))
 
-  @spec update_components([map], binary, Cluster.t) :: service_resp
-  def update_components(components, service_id, %Cluster{} = cluster) do
+  @spec update_components(map, binary, Cluster.t) :: service_resp
+  def update_components(attrs, service_id, %Cluster{} = cluster) do
     with {:ok, svc} <- authorized(service_id, cluster),
-      do: update_components(%{components: components}, svc)
+      do: update_components(attrs, svc)
   end
 
   @doc """

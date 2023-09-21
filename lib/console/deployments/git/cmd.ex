@@ -19,7 +19,7 @@ defmodule Console.Deployments.Git.Cmd do
       do: {:ok, String.trim(sha)}
   end
 
-  def clone(%GitRepository{} = git), do: git(git, "clone", [url(git), git.dir])
+  def clone(%GitRepository{dir: dir} = git) when is_binary(dir), do: git(git, "clone", [url(git), git.dir])
 
   def git(%GitRepository{} = git, cmd, args \\ []) do
     case System.cmd("git", [cmd | args], opts(git)) do

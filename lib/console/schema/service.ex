@@ -10,7 +10,8 @@ defmodule Console.Schema.Service do
     Revision,
     ServiceComponent,
     PolicyBinding,
-    GlobalService
+    GlobalService,
+    ServiceError
   }
 
   defmodule Git do
@@ -47,6 +48,7 @@ defmodule Console.Schema.Service do
     has_one :provider, ClusterProvider
     has_one :global_service, GlobalService
 
+    has_many :errors, ServiceError, on_replace: :delete
     has_many :components, ServiceComponent, on_replace: :delete
     has_many :api_deprecations, through: [:components, :api_deprecations]
     has_many :read_bindings, PolicyBinding,
@@ -110,6 +112,7 @@ defmodule Console.Schema.Service do
     |> semver(:version)
     |> cast_embed(:git)
     |> cast_assoc(:components)
+    |> cast_assoc(:errors)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
     |> foreign_key_constraint(:cluster_id)

@@ -14,9 +14,11 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ApiDeprecation,
     Tag,
     GlobalService,
-    User
+    User,
+    ServiceError
   }
 
+  def query(ServiceError, _), do: ServiceError
   def query(Tag, _), do: Tag
   def query(GlobalService, _), do: GlobalService
   def query(ApiDeprecation, _), do: ApiDeprecation
@@ -136,8 +138,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def rollback(%{id: id, revision_id: rev}, %{context: %{current_user: user}}),
     do: Services.rollback(rev, id, user)
 
-  def update_service_components(%{components: components, id: id}, %{context: %{cluster: cluster}}),
-    do: Services.update_components(components, id, cluster)
+  def update_service_components(%{id: id} = args, %{context: %{cluster: cluster}}),
+    do: Services.update_components(Map.take(args, [:errors, :components]), id, cluster)
 
   def create_git_repository(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Git.create_repository(attrs, user)
