@@ -760,6 +760,7 @@ type Installation {
 type Configuration {
   terraform: String
   helm: String
+  readme: String
 }
 
 type Notification {
