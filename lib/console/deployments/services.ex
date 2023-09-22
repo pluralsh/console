@@ -56,19 +56,30 @@ defmodule Console.Deployments.Services do
     |> notify(:update, user)
   end
 
-  def operator_service(deploy_token, cluster_id, %User{} = user) do
+  def operator_service(%Cluster{id: cluster_id} = cluster, %User{} = user) do
     repo = Git.deploy_repo!()
     create_service(%{
       repository_id: repo.id,
       name: "deploy-operator",
       namespace: "plrl-deploy-operator",
       git: %{ref: "main", folder: "helm"},
-      configuration: [
-        %{name: "clusterId", value: cluster_id},
-        %{name: "deployToken", value: deploy_token},
-        %{name: "url", value: Path.join(Console.conf(:ext_url), "ext")}
-      ]
+      configuration: operator_configuration(cluster)
     }, cluster_id, user)
+  end
+
+  def update_operator_service(%Cluster{id: id} = cluster, %User{} = user) do
+    case get_service_by_name(id, "deploy-operator") do
+      %Service{} = svc -> update_service(%{configuration: operator_configuration(cluster)}, svc.id, user)
+      _ -> {:ok, nil}
+    end
+  end
+
+  defp operator_configuration(%Cluster{id: cluster_id, deploy_token: deploy_token}) do
+    [
+      %{name: "clusterId", value: cluster_id},
+      %{name: "deployToken", value: deploy_token},
+      %{name: "url", value: Path.join(Console.conf(:ext_url), "ext")}
+    ]
   end
 
   @spec authorized(binary, Cluster.t) :: service_resp
@@ -127,7 +138,22 @@ defmodule Console.Deployments.Services do
   @spec update_sha(Service.t, binary) :: service_resp
   def update_sha(%Service{sha: sha} = svc, sha), do: {:ok, svc}
   def update_sha(%Service{id: id}, sha) do
-    update_service(%{sha: sha}, id)
+    start_transaction()
+    |> add_operation(:base, fn _ ->
+      get_service!(id)
+      |> Service.changeset(%{sha: sha})
+      |> Repo.update()
+    end)
+    |> add_operation(:revision, fn %{base: base} ->
+      add_version(%{sha: sha}, base.version)
+      |> Console.dedupe(:git, %{ref: sha, folder: base.git.folder})
+      |> Console.dedupe(:configuration, fn ->
+        {:ok, secrets} = configuration(base)
+        Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)
+      end)
+      |> create_revision(base)
+    end)
+    |> execute(extract: :base)
     |> notify(:update)
   end
 

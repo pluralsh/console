@@ -60,4 +60,14 @@ defmodule Console.Deployments.Cron do
       Global.sync_clusters(global)
     end)
   end
+
+  def rotate_deploy_tokens() do
+    Clusters.purge_deploy_tokens()
+    Logger.info "rotating cluster deploy tokens"
+    Repo.all(Cluster)
+    |> Enum.each(fn cluster ->
+      Logger.info "rotating token for #{cluster.id}"
+      Clusters.rotate_deploy_token(cluster)
+    end)
+  end
 end

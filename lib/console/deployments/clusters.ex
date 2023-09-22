@@ -3,7 +3,8 @@ defmodule Console.Deployments.Clusters do
   import Console.Deployments.Policies
   alias Console.PubSub
   alias Console.Deployments.{Services, Git}
-  alias Console.Schema.{Cluster, User, ClusterProvider, Service}
+  alias Console.Services.Users
+  alias Console.Schema.{Cluster, User, ClusterProvider, Service, DeployToken}
 
   @type cluster_resp :: {:ok, Cluster.t} | Console.error
   @type cluster_provider_resp :: {:ok, ClusterProvider.t} | Console.error
@@ -14,7 +15,11 @@ defmodule Console.Deployments.Clusters do
 
   def get_provider!(id), do: Console.Repo.get!(ClusterProvider, id)
 
-  def get_by_deploy_token(token), do: Console.Repo.get_by(Cluster, deploy_token: token)
+  def get_by_deploy_token(token) do
+    with nil <- Repo.get_by(Cluster, deploy_token: token),
+         %DeployToken{cluster: cluster} <- Repo.get_by(DeployToken, token: token) |> Repo.preload([:cluster]),
+      do: cluster
+  end
 
   def local_cluster(), do: Console.Repo.get_by!(Cluster, self: true)
 
@@ -42,7 +47,7 @@ defmodule Console.Deployments.Clusters do
       |> when_ok(:insert)
     end)
     |> add_operation(:service, fn %{cluster: cluster} ->
-      Services.operator_service(cluster.deploy_token, cluster.id, tmp_admin(user))
+      Services.operator_service(cluster, tmp_admin(user))
     end)
     |> add_operation(:cluster_service, fn %{cluster: cluster} ->
       case Console.Repo.preload(cluster, [:provider]) do
@@ -81,6 +86,37 @@ defmodule Console.Deployments.Clusters do
     end)
     |> execute(extract: :cluster)
     |> notify(:update, user)
+  end
+
+  @doc """
+  Adds a new deploy token and saves the old one in the deploy tokens table for backwards compatibiility until purged
+  """
+  @spec rotate_deploy_token(Cluster.t) :: cluster_resp
+  def rotate_deploy_token(%Cluster{id: id, deploy_token: token} = cluster) do
+    user = Users.get_bot!("console")
+    start_transaction()
+    |> add_operation(:rotate, fn _ ->
+      Cluster.changeset(%{cluster | deploy_token: nil})
+      |> Repo.update()
+    end)
+    |> add_operation(:token, fn _ ->
+      %DeployToken{token: token, cluster_id: id}
+      |> DeployToken.changeset()
+      |> Repo.insert()
+    end)
+    |> add_operation(:operator, fn %{rotate: cluster} ->
+      Services.update_operator_service(cluster, tmp_admin(user))
+    end)
+    |> execute(extract: :rotate)
+  end
+
+  @doc """
+  removes all old deploy tokens outside the expiration window (default 7 days)
+  """
+  @spec purge_deploy_tokens() :: {integer, term}
+  def purge_deploy_tokens() do
+    DeployToken.expired()
+    |> Repo.delete_all()
   end
 
   @doc """

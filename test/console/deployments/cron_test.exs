@@ -111,4 +111,32 @@ defmodule Console.Deployments.CronTest do
       assert deprecation.replacement == "networking.k8s.io/v1"
     end
   end
+
+  describe "#rotate_deploy_tokens/0" do
+    test "it will remove old deploy tokens and rotate all current ones" do
+      bot("console")
+      user = admin_user()
+      provider = insert(:cluster_provider)
+      insert(:cluster, self: true)
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        version: "1.25",
+        provider_id: provider.id,
+        node_pools: [
+          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, user)
+
+      dt = insert(:deploy_token, cluster: cluster)
+      old = insert(:deploy_token, cluster: cluster, inserted_at: Timex.now() |> Timex.shift(days: -9))
+
+      :ok = Cron.rotate_deploy_tokens()
+
+      refute refetch(cluster).deploy_token == cluster.deploy_token
+      assert refetch(dt)
+      refute refetch(old)
+    end
+  end
 end

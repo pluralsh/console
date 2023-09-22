@@ -239,6 +239,13 @@ defmodule Console.Factory do
     }
   end
 
+  def deploy_token_factory do
+    %Schema.DeployToken{
+      token: sequence(:deploy_token, & "deploy-#{&1}"),
+      cluster: build(:cluster)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

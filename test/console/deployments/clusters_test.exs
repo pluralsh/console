@@ -136,6 +136,36 @@ defmodule Console.Deployments.ClustersTest do
     end
   end
 
+  describe "#rotate_deploy_token/1" do
+    test "it will add a new deploy token for the cluster" do
+      user = admin_user()
+      bot("console")
+      provider = insert(:cluster_provider)
+      insert(:cluster, self: true)
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        version: "1.25",
+        provider_id: provider.id,
+        node_pools: [
+          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, user)
+
+      {:ok, updated} = Clusters.rotate_deploy_token(cluster)
+
+      refute updated.deploy_token == cluster.deploy_token
+      assert Clusters.get_by_deploy_token(cluster.deploy_token).id == cluster.id
+
+      [svc] = Clusters.services(updated)
+      {:ok, secrets} = Services.configuration(svc)
+      assert secrets["deployToken"] == updated.deploy_token
+
+      assert_receive {:event, %PubSub.ServiceUpdated{}}
+    end
+  end
+
   describe "#delete_cluster/2" do
     test "users can delete clusters if they have write permissions" do
       user = insert(:user)

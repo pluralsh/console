@@ -25,7 +25,7 @@ defmodule Console.Schema.AccessToken do
     model
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:token_id)
-    |> put_new_change(:token, fn -> "console-#{Console.rand_alphanum(24)}" end)
+    |> put_new_change(:token, fn -> "console-#{Console.rand_alphanum(30)}" end)
     |> validate_required(~w(user_id token)a)
   end
 end
