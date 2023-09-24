@@ -238,7 +238,7 @@ defmodule Console.Deployments.Clusters do
     %{
       configuration: [
         %{name: "clusterId", value: cluster.id},
-        %{name: "consoleUrl", value: Path.join(Console.conf(:ext_url), "ext")},
+        %{name: "consoleUrl", value: Services.api_url("gql")},
         %{name: "deployToken", value: cluster.deploy_token},
         %{name: "operatorNamespace", value: "plrl-deploy-operator"},
         %{name: "clusterName", value: cluster.name},

@@ -16,7 +16,7 @@ defmodule Console.Deployments.Services do
 
   def get_revision!(id), do: Repo.get!(Revision, id)
 
-  def tarball(%Service{id: id}), do: Console.url("/v1/git/tarballs?id=#{id}")
+  def tarball(%Service{id: id}), do: api_url("v1/git/tarballs?id=#{id}")
 
   def referenced?(id) do
     Enum.map([Cluster.for_service(id), ClusterProvider.for_service(id)], &Console.Repo.exists?/1)
@@ -78,7 +78,7 @@ defmodule Console.Deployments.Services do
     [
       %{name: "clusterId", value: cluster_id},
       %{name: "deployToken", value: deploy_token},
-      %{name: "url", value: Path.join(Console.conf(:ext_url), "ext")}
+      %{name: "url", value: api_url("gql")}
     ]
   end
 
@@ -214,7 +214,7 @@ defmodule Console.Deployments.Services do
     start_transaction()
     |> add_operation(:service, fn _ ->
       service
-      |> Console.Repo.preload([:components])
+      |> Console.Repo.preload([:components, :errors])
       |> Service.changeset(attrs)
       |> Console.Repo.update()
     end)
@@ -345,6 +345,10 @@ defmodule Console.Deployments.Services do
       Ecto.Changeset.change(service, %{revision_id: id})
       |> Console.Repo.update()
     end)
+  end
+
+  def api_url(path) do
+    Path.join([Console.conf(:ext_url), "ext", path])
   end
 
   defp merge_configuration(secrets, [_ | _] = config) do

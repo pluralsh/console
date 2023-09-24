@@ -395,6 +395,19 @@ defmodule Console.Deployments.ServicesTest do
       assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
     end
 
+    test "it will persist errors if passed" do
+      service = insert(:service)
+
+      {:ok, service} = Services.update_components(%{
+        components: [],
+        errors: [%{message: "some error", source: "sync"}]
+      }, service)
+
+      %{errors: [error]} = Console.Repo.preload(service, [:errors])
+      assert error.message == "some error"
+      assert error.source == "sync"
+    end
+
     test "it will persist api deprecations if found" do
       service = insert(:service)
 

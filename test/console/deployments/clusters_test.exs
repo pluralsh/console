@@ -42,7 +42,7 @@ defmodule Console.Deployments.ClustersTest do
       assert secrets["clusterName"] == cluster.name
       assert secrets["version"] == cluster.version
       assert secrets["operatorNamespace"] == "plrl-deploy-operator"
-      assert secrets["consoleUrl"] == Path.join(Console.conf(:ext_url), "ext")
+      assert secrets["consoleUrl"] == Path.join(Console.conf(:ext_url), "ext/gql")
       assert secrets["deployToken"] == cluster.deploy_token
       assert secrets["clusterId"] == cluster.id
       [node_pool] = Jason.decode!(secrets["nodePools"])
@@ -59,7 +59,7 @@ defmodule Console.Deployments.ClustersTest do
 
       {:ok, %{"deployToken" => token, "url" => url} = secrets} = Services.configuration(svc)
       assert token == cluster.deploy_token
-      assert url == Path.join(Console.conf(:ext_url), "ext")
+      assert url == Path.join(Console.conf(:ext_url), "ext/gql")
       assert secrets["clusterId"] == cluster.id
     end
 

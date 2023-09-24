@@ -64,6 +64,11 @@ config :console, Console.Repo,
 
 git_url = get_env("GIT_URL")
 
+add_https = fn
+  "https://" <> _ = url -> url
+  url -> "https://#{url}"
+end
+
 config :console,
   workspace_root: "/root",
   git_url: get_env("GIT_URL"),
@@ -75,7 +80,7 @@ config :console,
   git_user_name: get_env("GIT_USER", "forge"),
   git_user_email: get_env("GIT_EMAIL", "forge@piazzaapp.com"),
   url: get_env("HOST"),
-  ext_url: get_env("EXT_HOST") || get_env("HOST"),
+  ext_url: add_https.(get_env("EXT_HOST") || get_env("HOST")),
   incoming_webhook: get_env("PIAZZA_INCOMING_WEBHOOK"),
   grafana_dns: get_env("GRAFANA_DNS"),
   piazza_secret: get_env("PIAZZA_WEBHOOK_SECRET"),

@@ -215,6 +215,50 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert Enum.all?(found["components"], & &1["state"] == "RUNNING")
     end
 
+    test "clusters can fetch a services configuration and revisions" do
+      user = admin_user()
+      cluster = insert(:cluster)
+      repository = insert(:git_repository)
+      {:ok, service} = create_service(cluster, user, [
+        name: "test",
+        namespace: "test",
+        git: %{ref: "master", folder: "k8s"},
+        repository_id: repository.id,
+        configuration: [%{name: "name", value: "value"}]
+      ])
+      components = insert_list(3, :service_component, service: service)
+
+      {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
+        query Service($id: ID!) {
+          serviceDeployment(id: $id) {
+            name
+            namespace
+            git { ref folder }
+            repository { id }
+            configuration { name value }
+            revisions(first: 5) { edges { node { id } } }
+            components { id group synced state}
+          }
+        }
+      """, %{"id" => service.id}, %{cluster: cluster})
+
+      assert found["name"] == "test"
+      assert found["namespace"] == "test"
+      assert found["git"]["ref"] == "master"
+      assert found["git"]["folder"] == "k8s"
+      [conf] = found["configuration"]
+      assert conf["name"] == "name"
+      assert conf["value"] == "value"
+
+      [revision] = from_connection(found["revisions"])
+      assert revision["id"] == service.revision_id
+
+      assert ids_equal(found["components"], components)
+      assert Enum.all?(found["components"], & &1["synced"])
+      assert Enum.all?(found["components"], & &1["group"] == "networking.k8s.io")
+      assert Enum.all?(found["components"], & &1["state"] == "RUNNING")
+    end
+
     test "it respects rbac" do
       user = insert(:user)
       service = insert(:service, read_bindings: [%{user_id: user.id}])

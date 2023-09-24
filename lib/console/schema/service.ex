@@ -25,6 +25,7 @@ defmodule Console.Schema.Service do
     def changeset(model, attrs \\ %{}) do
       model
       |> cast(attrs, ~w(ref folder)a)
+      |> validate_required(~w(ref folder)a)
     end
   end
 

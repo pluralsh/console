@@ -10,6 +10,7 @@ defmodule Console.Deployments.Policies do
   def can?(%User{} = user, %Service{} = svc, :secrets),
     do: can?(user, svc, :write)
   def can?(%Cluster{id: id}, %Service{cluster_id: id}, :secrets), do: :pass
+  def can?(%Cluster{id: id}, %Service{cluster_id: id}, :read), do: :pass
 
   def can?(_, %Cluster{self: true}, :delete), do: {:error, "cannot delete the management cluster"}
   def can?(_, %Service{name: "deploy-operator"}, :delete),
