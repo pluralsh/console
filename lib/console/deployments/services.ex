@@ -315,12 +315,13 @@ defmodule Console.Deployments.Services do
   Prunes expired revisions for a service, and guarantees current revision remains (even if older)
   """
   @spec prune_revisions(Service.t) :: {:ok, integer}
-  def prune_revisions(%Service{revision_id: rid} = service) do
+  def prune_revisions(%Service{id: id, revision_id: rid} = service) do
     to_keep = revisions(service, Console.conf(:revision_history_limit))
     to_keep = MapSet.new([rid | Enum.map(to_keep, & &1.id)])
               |> MapSet.to_list()
 
     Revision.ignore_ids(to_keep)
+    |> Revision.for_service(id)
     |> Repo.delete_all()
     |> elem(0)
     |> ok()

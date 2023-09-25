@@ -354,6 +354,18 @@ defmodule Console.Deployments.ServicesTest do
         configuration: [%{name: "name", value: "value"}]
       }, cluster.id, user)
 
+      {:ok, other} = Services.create_service(%{
+        name: "other-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+
       to_keep = Console.conf(:revision_history_limit) |> insert_list(:revision, service: service)
       to_kill = insert_list(3, :revision, service: service, inserted_at: Timex.now() |> Timex.shift(hours: -1))
 
@@ -364,6 +376,10 @@ defmodule Console.Deployments.ServicesTest do
 
       for r <- to_kill,
         do: refute refetch(r)
+
+      %{revision: revision} = Console.Repo.preload(other, [:revision])
+      assert refetch(other)
+      assert refetch(revision)
     end
   end
 

@@ -375,6 +375,40 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       for {k, v} <- attrs,
         do: assert component[k] == v
     end
+
+    test "it can update service errors as well" do
+      cluster = insert(:cluster)
+      service = insert(:service, cluster: cluster)
+      attrs = %{
+        "name" => "name",
+        "namespace" => "namespace",
+        "group" => "networking.k8s.io",
+        "version" => "v1",
+        "kind" => "ingress",
+        "synced" => true,
+        "state" => "RUNNING"
+      }
+
+      {:ok, %{data: %{"updateServiceComponents" => svc}}} = run_query("""
+        mutation Update($components: [ServiceComponents], $errors: [ServiceErrorAttributes], $id: ID!) {
+          updateServiceComponents(id: $id, components: $components, errors: $errors) {
+            id
+            components { name kind namespace group version kind synced state }
+            errors { source message }
+          }
+        }
+      """, %{"id" => service.id, "components" => [attrs], "errors" => [%{"source" => "sync", "message" => "wtf"}]}, %{cluster: cluster})
+
+      assert svc["id"] == service.id
+      [component] = svc["components"]
+
+      for {k, v} <- attrs,
+        do: assert component[k] == v
+
+      [error] = svc["errors"]
+      assert error["source"] == "sync"
+      assert error["message"] == "wtf"
+    end
   end
 
   describe "updateDeploymentSettings" do

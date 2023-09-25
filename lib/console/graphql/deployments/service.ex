@@ -121,10 +121,10 @@ defmodule Console.GraphQl.Deployments.Service do
     field :id,         non_null(:id), description: "internal id"
     field :state,      :component_state, description: "kubernetes component health enum"
     field :synced,     non_null(:boolean), description: "whether this component has been applied to the k8s api"
-    field :group,      non_null(:string), description: "api group of this resource"
-    field :version,    non_null(:string), description: "api version of this resource"
+    field :group,      :string, description: "api group of this resource"
+    field :version,    :string, description: "api version of this resource"
     field :kind,       non_null(:string), description: "api kind of this resource"
-    field :namespace,  non_null(:string), description: "kubernetes namespace of this resource"
+    field :namespace,  :string, description: "kubernetes namespace of this resource"
     field :name,       non_null(:string), description: "kubernetes name of this resource"
 
     field :service, :service_deployment, resolve: dataloader(Deployments), description: "the service this component belongs to"
