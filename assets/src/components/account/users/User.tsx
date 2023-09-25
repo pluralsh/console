@@ -1,9 +1,8 @@
 import { useMutation } from '@apollo/client'
 import { Box } from 'grommet'
-import { Switch } from 'honorable'
 import { useCallback, useContext, useState } from 'react'
 import { LoginContext } from 'components/contexts'
-import { Chip } from '@pluralsh/design-system'
+import { Chip, Switch } from '@pluralsh/design-system'
 
 import { Confirm } from 'components/utils/Confirm'
 

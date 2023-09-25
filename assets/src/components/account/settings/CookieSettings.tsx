@@ -1,10 +1,11 @@
 import { Card, Switch } from '@pluralsh/design-system'
-import { A, H2, P } from 'honorable'
 import { useCookieSettings } from 'components/tracking/CookieSettings'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import { useTheme } from 'styled-components'
 
 export default function AccountSettings() {
   const { consent, setConsent } = useCookieSettings()
+  const theme = useTheme()
 
   return (
     <ScrollablePage
@@ -12,33 +13,38 @@ export default function AccountSettings() {
       heading="Cookie settings"
     >
       <Card padding="xlarge">
-        <H2
-          subtitle2
-          marginBottom="xsmall"
+        <h2
+          css={{
+            margin: 0,
+            ...theme.partials.text.subtitle2,
+            marginBottom: theme.spacing.xsmall,
+          }}
         >
           We use cookies
-        </H2>
-        <P body2>
+        </h2>
+        <p css={{ margin: 0, ...theme.partials.text.body2 }}>
           We use cookies to improve your experience and make product updates and
           refinements. You can review our{' '}
-          <A
-            inline
+          <a
+            css={{ ...theme.partials.text.inlineLink }}
             href="https://www.plural.sh/legal/privacy-policy"
             target="_blank"
+            rel="noreferrer"
           >
             privacy policy here
-          </A>
+          </a>
           .
-        </P>
-        <Switch
-          checked={consent.statistics}
-          onChange={() => {
-            setConsent({ statistics: !consent.statistics })
-          }}
-          marginTop="xlarge"
-        >
-          Allow
-        </Switch>
+        </p>
+        <div css={{ marginTop: theme.spacing.xlarge }}>
+          <Switch
+            checked={consent.statistics}
+            onChange={() => {
+              setConsent({ statistics: !consent.statistics })
+            }}
+          >
+            Allow
+          </Switch>
+        </div>
       </Card>
     </ScrollablePage>
   )

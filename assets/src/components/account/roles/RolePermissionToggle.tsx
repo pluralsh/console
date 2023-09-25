@@ -1,5 +1,6 @@
-import { Flex, P, Switch } from 'honorable'
+import { Switch } from '@pluralsh/design-system'
 import { useCallback } from 'react'
+import { useTheme } from 'styled-components'
 
 export default function RolePermissionToggle({
   permission,
@@ -8,6 +9,7 @@ export default function RolePermissionToggle({
   setAttributes,
   last,
 }: any) {
+  const theme = useTheme()
   const toggle = useCallback(
     (enable) => {
       if (enable) {
@@ -28,30 +30,37 @@ export default function RolePermissionToggle({
   )
 
   return (
-    <Flex
-      borderBottom={!last && '1px solid border'}
-      justify="space-between"
-      paddingVertical="small"
+    <div
+      css={{
+        display: 'flex',
+        borderBottom: !last ? theme.borders.default : undefined,
+        justifyContent: 'space-between',
+        paddingTop: theme.spacing.small,
+        paddingBottom: theme.spacing.small,
+      }}
     >
       <div>
-        <P
-          body2
-          fontWeight={600}
-          textTransform="capitalize"
+        <p
+          css={{
+            ...theme.partials.text.body2Bold,
+            textTransform: 'capitalize',
+          }}
         >
           {permission.toLowerCase()}
-        </P>
-        <P
-          body2
-          color="text-light"
+        </p>
+        <p
+          css={{
+            ...theme.partials.text.body2,
+            color: theme.colors['text-light'],
+          }}
         >
           {description}
-        </P>
+        </p>
       </div>
       <Switch
         checked={!!attributes.permissions.find((perm) => perm === permission)}
-        onChange={({ target: { checked } }) => toggle(checked)}
+        onChange={(checked) => toggle(checked)}
       />
-    </Flex>
+    </div>
   )
 }
