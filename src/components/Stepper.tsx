@@ -16,28 +16,10 @@ import { useTheme } from 'styled-components'
 
 import useResizeObserver from '../hooks/useResizeObserver'
 
-import { type styledTheme } from '../theme'
-
 import StatusOkIcon from './icons/StatusOkIcon'
 import type createIcon from './icons/createIcon'
 import Tooltip from './Tooltip'
 import WrapWithIf from './WrapWithIf'
-
-type Hue = 'none' | 'default' | 'lighter' | 'lightest'
-
-const hueToBorder: Record<Hue, keyof typeof styledTheme.colors> = {
-  none: 'border-disabled',
-  default: 'border',
-  lighter: 'border-fill-two',
-  lightest: 'border-fill-three',
-}
-
-const hueToBG: Record<Hue, keyof typeof styledTheme.colors> = {
-  none: 'fill-zero',
-  default: 'fill-one',
-  lighter: 'fill-two',
-  lightest: 'fill-three',
-}
 
 type StepBaseProps = {
   stepTitle?: ReactNode
@@ -47,7 +29,6 @@ type StepBaseProps = {
   circleSize?: number
   collapseTitle?: boolean
   vertical?: boolean
-  hue?: Hue
   compact?: boolean
   canComplete?: boolean
 }
@@ -99,7 +80,6 @@ function Step({
   circleSize = 48,
   vertical = false,
   collapseTitles = false,
-  hue = 'default',
   compact = false,
   canComplete = true,
   ...props
@@ -140,11 +120,13 @@ function Step({
           marginLeft={vertical ? 'none' : 'auto'}
           marginRight={vertical ? 'none' : 'auto'}
           borderRadius="100%"
-          backgroundColor={theme.colors[hueToBG[hue]]}
+          backgroundColor={
+            theme.mode === 'light'
+              ? theme.colors['fill-zero']
+              : theme.colors['fill-one']
+          }
           border={`1px solid ${
-            isActive
-              ? theme.colors['border-selected']
-              : theme.colors[hueToBorder[hue]]
+            isActive ? theme.colors['border-selected'] : theme.colors.border
           }`}
           transition="all 0.2s ease"
           transitionDelay="0.1"
@@ -297,7 +279,6 @@ function StepperRef(
             circleSize={step.circleSize || 48}
             vertical={step.vertical || vertical}
             collapseTitles={(vertical && collapseTitles) || step.collapseTitle}
-            hue={step.hue}
             compact={compact}
             canComplete={step.canComplete}
           />

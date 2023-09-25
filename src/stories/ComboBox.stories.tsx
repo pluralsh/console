@@ -5,16 +5,32 @@ import Fuse from 'fuse.js'
 
 import {
   AppIcon,
+  Card,
   Chip,
   ComboBox,
   ListBoxFooterPlus,
   ListBoxItem,
   ListBoxItemChipList,
-} from '../index'
+  WrapWithIf,
+} from '..'
 
 export default {
   title: 'Combo Box',
   component: 'ComboBox',
+  argTypes: {
+    onFillLevel: {
+      options: [0, 1, 2, 3],
+      control: {
+        type: 'select',
+        labels: {
+          0: '0',
+          1: '1',
+          2: '2',
+          3: "3 - Shouldn't be used",
+        },
+      },
+    },
+  },
 }
 
 const portrait = (
@@ -162,7 +178,7 @@ const ChipList = styled(ListBoxItemChipList)(({ theme }) => ({
   justifyContent: 'start',
 }))
 
-function Template() {
+function Template({ onFillLevel }: { onFillLevel: any }) {
   const [selectedKeys, setSelectedKeys] = useState(new Set<Key>())
   const [inputValue, setInputValue] = useState('')
 
@@ -203,49 +219,64 @@ function Template() {
   }
 
   return (
-    <Flex
-      flexDirection="column"
-      gap="large"
-      maxWidth={512}
-    >
-      <TagPicker>
-        <ComboBox
-          inputValue={inputValue}
-          onSelectionChange={onSelectionChange}
-          onInputChange={onInputChange}
-          inputProps={{ placeholder: 'Pick something' }}
-        >
-          {searchResults.map(({ item, score: _score, refIndex: _refIndex }) => (
-            <ListBoxItem
-              key={item.key}
-              label={item.label}
-              textValue={`${item.label} – ${item.description}`}
-              description={item.description}
-              leftContent={portrait}
-              selected={selectedKeys.has(item.key)}
-            />
-          ))}
-        </ComboBox>
-        <ChipList
-          maxVisible={Infinity}
-          chips={[...selectedKeys].map((key) => (
-            <Chip
-              size="small"
-              clickable
-              onClick={() => {
-                const newKeys = new Set(selectedKeys)
-
-                newKeys.delete(key)
-                setSelectedKeys(newKeys)
-              }}
-              closeButton
-            >
-              {(itemsByKey as any)[key]?.label}
-            </Chip>
-          ))}
+    <WrapWithIf
+      condition={onFillLevel > 0}
+      wrapper={
+        <Card
+          display="flex"
+          flexDirection="column"
+          gap="large"
+          padding="large"
+          fillLevel={onFillLevel}
         />
-      </TagPicker>
-    </Flex>
+      }
+    >
+      <Flex
+        flexDirection="column"
+        gap="large"
+        maxWidth={512}
+      >
+        <TagPicker>
+          <ComboBox
+            inputValue={inputValue}
+            onSelectionChange={onSelectionChange}
+            onInputChange={onInputChange}
+            inputProps={{ placeholder: 'Pick something' }}
+          >
+            {searchResults.map(
+              ({ item, score: _score, refIndex: _refIndex }) => (
+                <ListBoxItem
+                  key={item.key}
+                  label={item.label}
+                  textValue={`${item.label} – ${item.description}`}
+                  description={item.description}
+                  leftContent={portrait}
+                  selected={selectedKeys.has(item.key)}
+                />
+              )
+            )}
+          </ComboBox>
+          <ChipList
+            maxVisible={Infinity}
+            chips={[...selectedKeys].map((key) => (
+              <Chip
+                size="small"
+                clickable
+                onClick={() => {
+                  const newKeys = new Set(selectedKeys)
+
+                  newKeys.delete(key)
+                  setSelectedKeys(newKeys)
+                }}
+                closeButton
+              >
+                {(itemsByKey as any)[key]?.label}
+              </Chip>
+            ))}
+          />
+        </TagPicker>
+      </Flex>
+    </WrapWithIf>
   )
 }
 

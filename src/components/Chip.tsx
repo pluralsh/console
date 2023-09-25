@@ -1,4 +1,4 @@
-import { Flex, type FlexProps, Spinner } from 'honorable'
+import { Flex, type FlexProps } from 'honorable'
 import PropTypes from 'prop-types'
 import {
   type ComponentProps,
@@ -6,8 +6,9 @@ import {
   type Ref,
   forwardRef,
 } from 'react'
-import styled, { type DefaultTheme } from 'styled-components'
+import styled, { type DefaultTheme, useTheme } from 'styled-components'
 
+import { Spinner } from './Spinner'
 import Card, { type BaseCardProps } from './Card'
 import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 import CloseIcon from './icons/CloseIcon'
@@ -53,6 +54,12 @@ const parentFillLevelToHue = {
   3: 'lightest',
 } as const satisfies Record<FillLevel, ChipHue>
 
+const hueToFillLevel: Record<ChipHue, FillLevel> = {
+  default: 1,
+  lighter: 2,
+  lightest: 3,
+}
+
 const severityToColor = {
   neutral: 'text',
   info: 'text-primary-accent',
@@ -77,7 +84,7 @@ const sizeToCloseHeight = {
   large: 12,
 } as const satisfies Record<ChipSize, number>
 
-const ChipCard = styled(Card)(({ theme }) => ({
+const ChipCardSC = styled(Card)(({ theme }) => ({
   '.closeIcon': {
     color: theme.colors['text-light'],
   },
@@ -100,20 +107,23 @@ function ChipRef(
     clickable,
     as,
     ...props
-  }: ChipProps & { as?: ComponentProps<typeof ChipCard>['forwardedAs'] },
+  }: ChipProps & { as?: ComponentProps<typeof ChipCardSC>['forwardedAs'] },
   ref: Ref<any>
 ) {
   const parentFillLevel = useFillLevel()
+  const theme = useTheme()
 
   hue = hue || parentFillLevelToHue[parentFillLevel]
-  const col = severityToColor[severity] || 'text'
+  const textColor =
+    theme.mode === 'light' ? 'text-light' : severityToColor[severity] || 'text'
   const iconCol = severityToIconColor[severity] || 'icon-default'
 
   return (
-    <ChipCard
+    <ChipCardSC
+      severity={severity}
       ref={ref}
       cornerSize="medium"
-      hue={hue}
+      fillLevel={hueToFillLevel[hue]}
       clickable={clickable}
       paddingVertical={size === 'large' ? '6px' : 'xxxsmall'}
       paddingHorizontal={size === 'small' ? 'xsmall' : 'small'}
@@ -125,7 +135,7 @@ function ChipRef(
     >
       {loading && (
         <Spinner
-          color={iconCol}
+          color={theme.colors[iconCol]}
           size={size === 'large' ? 15 : 13}
           marginRight="xsmall"
         />
@@ -134,12 +144,12 @@ function ChipRef(
         <icon.type
           size={size === 'large' ? 15 : 13}
           marginRight="xsmall"
-          color={iconCol}
+          color={theme.colors[iconCol]}
         />
       )}
       <Flex
         body2
-        color={col}
+        color={textColor}
         fontSize={size === 'small' ? 12 : 14}
         fontWeight={size === 'small' ? 400 : 600}
         lineHeight={size === 'small' ? '16px' : '20px'}
@@ -155,7 +165,7 @@ function ChipRef(
           _hover={{ color: 'blue' }}
         />
       )}
-    </ChipCard>
+    </ChipCardSC>
   )
 }
 

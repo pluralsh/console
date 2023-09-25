@@ -117,6 +117,7 @@ export const TitleContent = styled.div<{
     paddingBottom: vPad,
     paddingLeft: hPad,
     paddingRight: hPad,
+    borderRight: theme.borders.input,
   }
 })
 

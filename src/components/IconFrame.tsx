@@ -5,7 +5,7 @@ import {
   forwardRef,
 } from 'react'
 import { ButtonBase, Flex, type FlexProps } from 'honorable'
-import { useTheme } from 'styled-components'
+import styled from 'styled-components'
 
 import { type styledTheme } from '../theme'
 
@@ -14,35 +14,58 @@ import Tooltip, { type TooltipProps } from './Tooltip'
 type Size = 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'
 type Type = 'secondary' | 'tertiary' | 'floating'
 
-const typeToBG: Record<Type, keyof typeof styledTheme.colors | 'transparent'> =
-  {
+function typeToBG(theme: typeof styledTheme): Record<Type, string> {
+  return {
     secondary: 'transparent',
     tertiary: 'transparent',
-    floating: 'fill-two',
+    floating:
+      theme.mode === 'light'
+        ? theme.colors['fill-three']
+        : theme.colors['fill-two'],
   }
-
-const typeToHoverBG: Record<Type, keyof typeof styledTheme.colors> = {
-  secondary: 'action-input-hover',
-  tertiary: 'action-input-hover',
-  floating: 'fill-two-hover',
 }
 
-const typeToSelectedBG: Record<Type, keyof typeof styledTheme.colors> = {
-  secondary: undefined,
-  tertiary: undefined,
-  floating: 'fill-two-selected',
+function typeToHoverBG(theme: typeof styledTheme): Record<Type, string> {
+  return {
+    secondary: theme.colors['action-input-hover'],
+    tertiary: theme.colors['action-input-hover'],
+    floating:
+      theme.mode === 'light'
+        ? theme.colors['fill-three-hover']
+        : theme.colors['fill-two-hover'],
+  }
 }
 
-const typeToFocusBG: Record<Type, keyof typeof styledTheme.colors> = {
-  secondary: undefined,
-  tertiary: undefined,
-  floating: 'fill-two-selected',
+function typeToSelectedBG(theme: typeof styledTheme): Record<Type, string> {
+  return {
+    secondary: undefined,
+    tertiary: undefined,
+    floating:
+      theme.mode === 'light'
+        ? theme.colors['fill-three-selected']
+        : theme.colors['fill-two-selected'],
+  }
 }
 
-const typeToBorder: Record<Type, string> = {
-  secondary: '1px solid border-input',
-  tertiary: '1px solid transparent',
-  floating: '1px solid border-input',
+function typeToFocusBG(theme: typeof styledTheme): Record<Type, string> {
+  return {
+    secondary: undefined,
+    tertiary: undefined,
+    floating:
+      theme.mode === 'light'
+        ? theme.colors['fill-three-selected']
+        : theme.colors['fill-two-selected'],
+  }
+}
+
+function typeToBorder(theme: typeof styledTheme): Record<Type, string> {
+  return {
+    secondary:
+      theme.mode === 'light' ? theme.borders['fill-two'] : theme.borders.input,
+    tertiary: '1px solid transparent',
+    floating:
+      theme.mode === 'light' ? theme.borders['fill-two'] : theme.borders.input,
+  }
 }
 
 const sizeToIconSize: Record<Size, number> = {
@@ -72,6 +95,54 @@ type IconFrameProps = Omit<FlexProps, 'size'> & {
   selected?: boolean
 }
 
+const IconFrameSC = styled(Flex)<{
+  $type: Type
+  $clickable: boolean
+  $selected: boolean
+  $size: Size
+}>(({ theme, $type, $clickable, $selected, $size }) => ({
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: sizeToFrameSize[$size],
+  height: sizeToFrameSize[$size],
+  backgroundColor: $selected
+    ? typeToSelectedBG(theme)[$type]
+    : typeToBG(theme)[$type],
+  border: typeToBorder(theme)[$type],
+  borderRadius: theme.borderRadiuses.medium,
+
+  '&:focus,&:focus-visible': { outline: 'none' },
+  '&:focus-visible,&:hover:focus-visible': {
+    ...theme.partials.focus.default,
+    ...(typeToFocusBG(theme)[$type]
+      ? { backgroundColor: typeToFocusBG(theme)[$type] }
+      : {}),
+  },
+  '&,&:any-link': {
+    textDecoration: 'none',
+    color: 'unset',
+    appearance: 'unset',
+  },
+  ...($clickable
+    ? {
+        cursor: 'pointer',
+        '&:hover': {
+          backgroundColor: $selected
+            ? typeToSelectedBG(theme)[$type]
+            : $clickable && typeToHoverBG(theme)[$type],
+        },
+      }
+    : {}),
+  ...($type === 'floating'
+    ? {
+        boxShadow:
+          theme.mode === 'light'
+            ? theme.boxShadows.slight
+            : theme.boxShadows.moderate,
+      }
+    : {}),
+}))
+
 const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(
   (
     {
@@ -87,54 +158,30 @@ const IconFrame = forwardRef<HTMLDivElement, IconFrameProps>(
     },
     ref
   ) => {
-    const theme = useTheme()
-
     icon = cloneElement(icon, { size: sizeToIconSize[size] })
     if (tooltip && typeof tooltip === 'boolean') {
       tooltip = textValue
     }
 
     let content = (
-      <Flex
+      <IconFrameSC
+        $clickable={clickable}
+        $selected={selected}
+        $type={type}
+        $size={size}
         ref={ref}
         flex={false}
-        alignItems="center"
-        justifyContent="center"
-        width={sizeToFrameSize[size]}
-        height={sizeToFrameSize[size]}
-        backgroundColor={selected ? typeToSelectedBG[type] : typeToBG[type]}
-        border={typeToBorder[type]}
-        borderRadius={theme.borderRadiuses.medium}
         aria-label={textValue}
-        {...{
-          '&:focus,&:focus-visible': { outline: 'none' },
-          '&:focus-visible,&:hover:focus-visible': {
-            ...theme.partials.focus.default,
-            ...(typeToFocusBG[type]
-              ? { backgroundColor: theme.colors[typeToFocusBG[type]] }
-              : {}),
-          },
-          '&,&:any-link': {
-            textDecoration: 'none',
-            color: 'unset',
-            appearance: 'unset',
-          },
-        }}
+        forwardedAs={(props as any).as}
         {...(clickable && {
-          as: ButtonBase,
+          forwardedAs: (props as any).as || ButtonBase,
           tabIndex: 0,
           role: 'button',
-          cursor: 'pointer',
-          '&:hover': {
-            backgroundColor: selected
-              ? theme.colors[typeToSelectedBG[type]]
-              : clickable && theme.colors[typeToHoverBG[type]],
-          },
         })}
         {...props}
       >
         {icon}
-      </Flex>
+      </IconFrameSC>
     )
 
     if (tooltip) {

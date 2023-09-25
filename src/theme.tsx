@@ -77,11 +77,10 @@ const getBaseTheme = ({ mode }: { mode: ColorMode }) =>
       desktop: 1280,
       desktopLarge: 1440,
     },
-  } as const)
+  }) as const
 
 const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
   const boxShadows = getBoxShadows({ mode })
-  const focusPartials = getFocusPartials()
 
   return {
     stylesheet: {
@@ -202,17 +201,19 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
           buttonMedium: true,
           display: 'flex',
           borderRadius: 'normal',
+          color: 'text-always-white',
           backgroundColor: 'action-primary',
           border: '1px solid action-primary',
           paddingTop: spacing.xsmall - 1,
           paddingBottom: spacing.xsmall - 1,
           paddingRight: spacing.medium - 1,
           paddingLeft: spacing.medium - 1,
-          _focus: {
+          '&:focus, &:focus-visible': {
             outline: 'none',
           },
           _focusVisible: {
-            ...focusPartials.button,
+            borderColor: 'border-outline-focused',
+            // ...focusPartials.button,
           },
           ':hover': {
             backgroundColor: 'action-primary-hover',
@@ -347,7 +348,7 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
             },
             ':hover': {
               color: 'text',
-              backgroundColor: 'fill-two-hover',
+              backgroundColor: 'fill-two',
               border: '1px solid border-input',
               boxShadow: boxShadows.moderate,
             },
@@ -800,7 +801,7 @@ const getStyledTheme = ({ mode }: { mode: ColorMode }) =>
       },
       colors: mode === 'dark' ? colorsDark : colorsLight,
     },
-  } as const)
+  }) as const
 
 export const styledThemeDark = getStyledTheme({ mode: 'dark' })
 

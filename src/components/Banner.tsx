@@ -1,9 +1,9 @@
-import { type ReactNode, type Ref, forwardRef, useMemo } from 'react'
+import { type ReactNode, type Ref, forwardRef } from 'react'
 import { Div, Flex, type FlexProps, Span, type SpanProps } from 'honorable'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
-import { type ColorKey, type Severity } from '../types'
+import { type ColorKey, type SeverityExt, sanitizeSeverity } from '../types'
 
 import { FillLevelProvider } from './contexts/FillLevelContext'
 import ErrorIcon from './icons/ErrorIcon'
@@ -14,13 +14,18 @@ import CheckRoundedIcon from './icons/CheckRoundedIcon'
 import type createIcon from './icons/createIcon'
 import IconFrame from './IconFrame'
 
-const SEVERITIES = ['info', 'error', 'warning', 'success', 'danger'] as const
+export const BANNER_SEVERITIES = [
+  'info',
+  'warning',
+  'success',
+  'danger',
+] as const satisfies Readonly<SeverityExt[]>
 
-type BannerSeverity = Extract<Severity, (typeof SEVERITIES)[number]>
+type BannerSeverity = Extract<SeverityExt, (typeof BANNER_SEVERITIES)[number]>
 const DEFAULT_SEVERITY: BannerSeverity = 'success'
 
 type BannerProps = FlexProps & {
-  severity?: Severity
+  severity?: BannerSeverity | 'error'
   heading?: ReactNode
   action?: ReactNode
   actionProps?: SpanProps
@@ -30,7 +35,6 @@ type BannerProps = FlexProps & {
 
 const severityToIconColorKey: Readonly<Record<BannerSeverity, ColorKey>> = {
   info: 'icon-info',
-  error: 'icon-danger',
   danger: 'icon-danger',
   warning: 'icon-warning',
   success: 'icon-success',
@@ -38,7 +42,6 @@ const severityToIconColorKey: Readonly<Record<BannerSeverity, ColorKey>> = {
 
 const severityToBorderColorKey: Record<BannerSeverity, ColorKey> = {
   info: 'border-info',
-  error: 'border-danger',
   danger: 'border-danger',
   warning: 'border-warning',
   success: 'border-success',
@@ -46,7 +49,6 @@ const severityToBorderColorKey: Record<BannerSeverity, ColorKey> = {
 
 const severityToIcon: Record<BannerSeverity, ReturnType<typeof createIcon>> = {
   info: InfoIcon,
-  error: ErrorIcon,
   danger: ErrorIcon,
   warning: WarningIcon,
   success: CheckRoundedIcon,
@@ -59,11 +61,15 @@ const BannerOuter = styled.div<{
   display: 'inline-flex',
   align: 'flex-start',
   padding: theme.spacing.medium,
-  backgroundColor: theme.colors['fill-three'],
+  backgroundColor:
+    theme.mode === 'light'
+      ? theme.colors['fill-zero']
+      : theme.colors['fill-three'],
   borderRadius: theme.borderRadiuses.medium,
-  borderLeft: `4px solid ${theme.colors[$borderColorKey]}`,
+  borderTop: `3px solid ${theme.colors[$borderColorKey]}`,
   maxWidth: $fullWidth ? undefined : 480,
   width: $fullWidth ? '100%' : undefined,
+  boxShadow: theme.boxShadows.moderate,
 }))
 
 const BannerInner = styled.div(({ theme }) => ({
@@ -126,23 +132,14 @@ function BannerRef(
   }: BannerProps,
   ref: Ref<any>
 ) {
-  severity = useMemo(() => {
-    if (!severityToIcon[severity]) {
-      console.warn(
-        `Banner: Incorrect severity (${severity}) specified. Valid values are ${SEVERITIES.map(
-          (s) => `"${s}"`
-        ).join(', ')}. Defaulting to "${DEFAULT_SEVERITY}".`
-      )
+  const finalSeverity = sanitizeSeverity(severity, {
+    allowList: BANNER_SEVERITIES,
+    default: DEFAULT_SEVERITY,
+  })
 
-      return DEFAULT_SEVERITY
-    }
-
-    return severity
-  }, [severity])
-
-  const BannerIcon = severityToIcon[severity]
-  const iconColorKey = severityToIconColorKey[severity]
-  const borderColorKey = severityToBorderColorKey[severity]
+  const BannerIcon = severityToIcon[finalSeverity]
+  const iconColorKey = severityToIconColorKey[finalSeverity]
+  const borderColorKey = severityToBorderColorKey[finalSeverity]
 
   const content = (
     <BannerOuter
@@ -181,7 +178,7 @@ function BannerRef(
 const Banner = forwardRef(BannerRef)
 
 Banner.propTypes = {
-  severity: PropTypes.oneOf(SEVERITIES),
+  severity: PropTypes.oneOf(BANNER_SEVERITIES),
   onClose: PropTypes.func,
 }
 

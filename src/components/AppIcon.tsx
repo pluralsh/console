@@ -96,7 +96,7 @@ const sizeToFont = (size: AppIconSize, theme: DefaultTheme) =>
     medium: theme.partials.text.subtitle1,
     large: theme.partials.text.title2,
     xlarge: theme.partials.text.title2,
-  }[size])
+  })[size]
 
 export function toInitials(name: string) {
   let initials = name

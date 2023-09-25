@@ -166,16 +166,18 @@ function AppListUnstyled({
 }
 
 const App = styled(AppUnstyled)(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.small,
-  padding: theme.spacing.medium,
-  maxHeight: '80px',
-  minHeight: '80px',
-  minWidth: 0,
-
+  '&&': {
+    display: 'flex',
+    gap: theme.spacing.small,
+    padding: theme.spacing.medium,
+    maxHeight: '80px',
+    minHeight: '80px',
+    minWidth: 0,
+  },
   '&.promoted': {
     position: 'relative',
     border: 'none !important',
+    borderRadius: theme.borderRadiuses.large - 1,
 
     '&::after': {
       '--border-width': '1px',

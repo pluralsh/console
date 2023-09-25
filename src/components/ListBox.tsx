@@ -14,14 +14,13 @@ import { type ListState, useListState } from 'react-stately'
 import { mergeProps } from 'react-aria'
 import { type AriaListBoxProps } from '@react-types/listbox'
 import { mergeRefs } from 'react-merge-refs'
-import styled, { useTheme } from 'styled-components'
+import styled, { type DefaultTheme, useTheme } from 'styled-components'
 
 import { Item } from 'react-stately'
 
 import { type CSSObject } from '../types'
 
 import Card from './Card'
-import { type FillLevel } from './contexts/FillLevelContext'
 
 export const HEADER_KEY = '$$header$$'
 export const FOOTER_KEY = '$$footer$$'
@@ -49,17 +48,25 @@ type ListBoxProps = Omit<
   footer?: ReactElement
 }
 
-const CARD_FILL_LEVEL: FillLevel = 2
+function getCardFillLevel(theme: DefaultTheme) {
+  return theme.mode === 'light' ? 1 : 2
+}
 
-const ListBoxCard = styled(Card).attrs(() => ({
+const ListBoxCard = styled(Card).attrs(({ theme }) => ({
   cornerSize: 'medium',
-  fillLevel: CARD_FILL_LEVEL,
-}))((_p) => ({
+  fillLevel: getCardFillLevel(theme),
+}))(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   flexShrink: 1,
   overflowX: 'visible',
   overflowY: 'hidden',
+  '.footerFixed': {
+    borderTop:
+      theme.mode === 'light'
+        ? theme.borders['fill-one']
+        : theme.borders['fill-two'],
+  },
 }))
 
 type ScrollContainerProps = {
@@ -67,7 +74,7 @@ type ScrollContainerProps = {
 }
 const ScrollContainer = styled.div<ScrollContainerProps>(
   ({ theme, extendStyle }) => ({
-    ...theme.partials.scrollBar({ fillLevel: CARD_FILL_LEVEL }),
+    ...theme.partials.scrollBar({ fillLevel: getCardFillLevel(theme) }),
     position: 'relative',
     overflow: 'auto',
     flexShrink: 1,

@@ -1,120 +1,121 @@
-import { semanticColorsDark as semanticColors } from './colors-semantic-dark'
+import { semanticColorsLight as semanticColors } from './colors-semantic-light'
+import { red } from './colors-base'
 
-export const editorTheme = {
+export const editorThemeLight = {
   inherit: true,
-  base: 'vs-dark',
+  base: 'vs',
   rules: [
     {
-      background: '21242C',
+      background: semanticColors['fill-one'],
       token: '',
     },
     {
-      foreground: 'A1A5B0',
+      foreground: semanticColors['text-xlight'],
       token: 'comment',
     },
     {
-      foreground: '66C7FF',
+      foreground: semanticColors['code-block-mid-blue'],
       token: 'string',
     },
     {
-      foreground: '99F5D5',
+      foreground: semanticColors['code-block-light-green'],
       token: 'constant.numeric',
     },
     {
-      foreground: '3CECAF',
+      foreground: semanticColors['code-block-dark-green'],
       token: 'constant.language',
     },
     {
-      foreground: '969AF8',
+      foreground: semanticColors['code-block-purple'],
       token: 'keyword',
     },
     {
-      foreground: '969AF8',
+      foreground: semanticColors['code-block-purple'],
       token: 'support.constant.property-value',
     },
     {
-      foreground: '969AF8',
+      foreground: semanticColors['code-block-purple'],
       token: 'constant.other.color',
     },
     {
-      foreground: 'FFF9C2',
+      foreground: semanticColors['code-block-yellow'],
       token: 'keyword.other.unit',
     },
     {
-      foreground: 'D596F4',
+      foreground: semanticColors['code-block-light-lilac'],
       token: 'entity.other.attribute-name.html',
     },
     {
-      foreground: '454954',
+      foreground: semanticColors['text-disabled'],
       token: 'keyword.operator',
     },
     {
-      foreground: 'F599A8',
+      foreground: red[300],
       token: 'storage',
     },
     {
-      foreground: '747B8B',
+      foreground: semanticColors['code-block-dark-grey'],
       token: 'entity.other.inherited-class',
     },
     {
-      foreground: '747B8B',
+      foreground: semanticColors['code-block-dark-grey'],
       token: 'entity.name.tag',
     },
     {
-      foreground: 'BE5EEB',
+      foreground: semanticColors['code-block-dark-lilac'],
       token: 'constant.character.entity',
     },
     {
-      foreground: 'BE5EEB',
+      foreground: semanticColors['code-block-dark-lilac'],
       token: 'support.class.js',
     },
     {
-      foreground: '747B8B',
+      foreground: semanticColors['code-block-dark-grey'],
       token: 'entity.other.attribute-name',
     },
     {
-      foreground: 'F599A8',
+      foreground: red[300],
       token: 'meta.selector.css',
     },
     {
-      foreground: 'F599A8',
+      foreground: red[300],
       token: 'entity.name.tag.css',
     },
     {
-      foreground: 'F599A8',
+      foreground: red[300],
       token: 'entity.other.attribute-name.id.css',
     },
     {
-      foreground: 'F599A8',
+      foreground: red[300],
       token: 'entity.other.attribute-name.class.css',
     },
     {
-      foreground: '747B8B',
+      foreground: semanticColors['code-block-dark-grey'],
       token: 'meta.property-name.css',
     },
     {
-      foreground: 'F599A8',
+      foreground: red[300],
       token: 'support.function',
     },
     {
-      foreground: 'EBEFF0',
-      background: 'F599A8',
+      foreground: semanticColors['code-block-light-grey'],
+      background: red[300],
       token: 'invalid',
     },
     {
-      foreground: 'F599A8',
+      foreground: red[300],
       token: 'punctuation.section.embedded',
     },
     {
-      foreground: '747B8B',
+      foreground: semanticColors['code-block-dark-grey'],
       token: 'punctuation.definition.tag',
     },
     {
-      foreground: 'BE5EEB',
+      foreground: semanticColors['code-block-dark-lilac'],
       token: 'constant.other.color.rgb-value.css',
     },
     {
-      foreground: 'BE5EEB',
+      foreground: semanticColors['code-block-dark-lilac'],
       token: 'support.constant.property-value.css',
     },
   ],

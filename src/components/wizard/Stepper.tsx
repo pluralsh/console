@@ -18,7 +18,6 @@ const toStepperStep = (
   collapseTitle: true,
   iconSize: 16,
   circleSize: size,
-  hue: 'lighter',
   canComplete,
 })
 

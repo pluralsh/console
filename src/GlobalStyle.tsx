@@ -99,6 +99,17 @@ function cssSwapper(selPrimary: string, otherSel: string, limit = 6) {
   return ret
 }
 
+const darkSelector = `[data-${COLOR_THEME_KEY}=dark]`
+const lightSelector = `[data-${COLOR_THEME_KEY}=light]`
+const lightModeSelectors = `html${lightSelector}:root,\n${cssSwapper(
+  lightSelector,
+  darkSelector
+)}`
+const darkModeSelectors = `html${darkSelector}:root,\n${cssSwapper(
+  darkSelector,
+  lightSelector
+)}`
+
 const GlobalStyle = createGlobalStyle(({ theme }) => ({
   ':root': {
     ...baseColorCSSVars,
@@ -111,16 +122,10 @@ const GlobalStyle = createGlobalStyle(({ theme }) => ({
     ...borderWidthsToToCSSVars,
     ...bordersToCSSVars,
   },
-  [cssSwapper(
-    `[data-${COLOR_THEME_KEY}=dark]`,
-    `[data-${COLOR_THEME_KEY}=light]`
-  )]: {
+  [darkModeSelectors]: {
     ...getSemanticColorCSSVars({ mode: 'dark' }),
   },
-  [cssSwapper(
-    `[data-${COLOR_THEME_KEY}=light]`,
-    `[data-${COLOR_THEME_KEY}=dark]`
-  )]: {
+  [lightModeSelectors]: {
     ...getSemanticColorCSSVars({ mode: 'light' }),
   },
   '*': theme.partials.scrollBar({ fillLevel: 0 }),

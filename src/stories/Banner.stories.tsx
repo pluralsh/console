@@ -1,13 +1,27 @@
 import { A, Flex, H1 } from 'honorable'
 
-import Banner from '../components/Banner'
+import Banner, { BANNER_SEVERITIES } from '../components/Banner'
 
 export default {
-  title: 'Banner',
+  title: 'Banner (AKA Toast Content)',
   component: Banner,
+  argTypes: {
+    closeButton: {
+      type: 'boolean',
+    },
+    severity: {
+      type: 'select',
+      options: BANNER_SEVERITIES,
+      defaultValue: 'info',
+    },
+  },
 }
 
-function Template(args: any) {
+function Template({ closeButton, ...args }: any) {
+  if (closeButton) {
+    args.onClose = (e: any) => e.preventDefault()
+  }
+
   return (
     <Flex
       direction="column"
@@ -16,7 +30,6 @@ function Template(args: any) {
     >
       <Banner
         heading="You have an error."
-        severity="error"
         action={
           <A
             href="#"
@@ -29,12 +42,10 @@ function Template(args: any) {
       />
       <Banner
         heading="Here’s some info."
-        severity="info"
         {...args}
       />
       <Banner
         heading="Success!"
-        severity="success"
         action={
           <A
             href="#"
@@ -47,7 +58,6 @@ function Template(args: any) {
       />
       <Banner
         heading="You have an error"
-        severity="error"
         {...args}
       >
         {
@@ -64,7 +74,6 @@ function Template(args: any) {
       </Banner>
       <Banner
         heading="Here's some info"
-        severity="info"
         {...args}
       >
         {
@@ -81,7 +90,6 @@ function Template(args: any) {
       </Banner>
       <Banner
         heading="Success!"
-        severity="success"
         {...args}
       >
         {
@@ -103,10 +111,7 @@ function Template(args: any) {
       >
         Backwards compatibility only
       </H1>
-      <Banner
-        {...args}
-        severity="error"
-      >
+      <Banner {...args}>
         You really shouldn't have content here without a heading, but including
         to make sure old usage still looks good.{' '}
         <A color="action-link-inline">Now go do something</A>.
@@ -124,23 +129,13 @@ function Template(args: any) {
       >
         Having a full width Banner can sometimes be useful.
       </Banner>
-      <H1
-        marginTop="medium"
-        subtitle2
-      >
-        onClose=fn
-      </H1>
-      <Banner
-        {...args}
-        fullWidth
-        onClose={() => {}}
-      >
-        Having a full width Banner can sometimes be useful.
-      </Banner>
     </Flex>
   )
 }
 
 export const Default = Template.bind({})
 
-Default.args = {}
+Default.args = {
+  closeButton: false,
+  severity: 'info',
+}

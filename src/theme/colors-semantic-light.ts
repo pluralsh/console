@@ -1,30 +1,30 @@
 import chroma from 'chroma-js'
 import { type CSSProperties } from 'styled-components'
 
-import { blue, green, grey, purple, red, yellow } from './colors-base'
+import { blue, green, grey, purple, red } from './colors-base'
 import { colorsCloudShellLight } from './colors-cloudshell-light'
 import { colorsCodeBlockLight } from './colors-codeblock-light'
-import { type semanticColorsDark } from './colors-semantic-dark'
+import { semanticColorsDark } from './colors-semantic-dark'
 
 export const semanticColorsLight = {
   // Fill
   //
   // fill-zero
-  'fill-zero': '#F9FAFB',
-  'fill-zero-hover': grey[50],
-  'fill-zero-selected': grey[100],
+  'fill-zero': '#F3F5F7',
+  'fill-zero-hover': '#F5F5F5',
+  'fill-zero-selected': '#E5E6E7',
   // fill-one
-  'fill-one': '#FFFFFF',
-  'fill-one-hover': grey[100],
-  'fill-one-selected': grey[200],
+  'fill-one': '#F9FAFB',
+  'fill-one-hover': '#F3F5F7',
+  'fill-one-selected': '#EEF0F2',
   // fill-two
-  'fill-two': '#F0F4F5',
-  'fill-two-hover': grey[200],
-  'fill-two-selected': '#A9AFBC',
+  'fill-two': '#F5F5F5',
+  'fill-two-hover': '#EBEDEE',
+  'fill-two-selected': '#E6E8E9',
   // fill-three
-  'fill-three': grey[100],
-  'fill-three-hover': grey[400],
-  'fill-three-selected': grey[300],
+  'fill-three': '#E2E3E8',
+  'fill-three-hover': '#D6D6D8',
+  'fill-three-selected': '#D3D3D3',
   // primary
   'fill-primary': purple[400],
   'fill-primary-hover': purple[350],
@@ -37,50 +37,51 @@ export const semanticColorsLight = {
   'action-primary-disabled': grey[100],
   // link
   'action-link-inactive': '#A9AFBC',
-  'action-link-active': blue[600],
-  'action-link-inline': blue[700],
+  'action-link-active': '#CDD1D2',
   // link-inline
-
-  // Check with design team that this is correct
+  'action-link-inline': '#539AC3',
   'action-link-inline-hover': blue[600],
-
   'action-link-inline-visited': purple[300],
   'action-link-inline-visited-hover': purple[200],
   // input
-  'action-input-hover': `${chroma(grey[950]).alpha(0.04)}`, // text color w/ alpha
+  'action-input-hover': `${chroma('#C3C3C4').alpha(0.04)}`, // text color w/ alpha
+  // always white
+  'action-always-white': semanticColorsDark['action-always-white'],
 
   // Border
   //
-  border: grey[100],
-  'border-input': grey[300],
-  'border-fill-two': grey[200],
+  border: '#DFE2E7',
+  'border-fill-two': '#C5C9D3',
   'border-fill-three': grey[400],
+  'border-selected': grey[600],
+  'border-input': '#C6CBD7',
   'border-disabled': grey[200],
-  'border-outline-focused': blue[400],
   'border-primary': purple[400],
   'border-secondary': blue[400],
-  'border-success': green[500],
-  'border-warning': '#FFF175',
-  'border-danger': '#ED4578',
-  'border-selected': grey[100],
   'border-info': blue[300],
+  'border-success': green[700],
+  'border-warning': '#C3B853',
+  'border-danger': '#ED4578',
+  'border-danger-light': '#F599A8',
+  'border-outline-focused': blue[400],
 
   // Text
   //
   text: grey[950],
-  'text-light': '#5D626F',
-  'text-xlight': '#A9AFBC',
+  'text-light': grey[600],
+  'text-xlight': '#8B8F97',
   'text-long-form': grey[300],
   'text-disabled': grey[200],
   'text-input-disabled': grey[200],
   'text-primary-accent': '#38B6FF',
-  'text-primary-disabled': grey[500],
+  'text-primary-disabled': grey[400],
   'text-success': green[700],
   'text-success-light': green[600],
-  'text-warning': yellow[500],
-  'text-warning-light': '#FFE500',
-  'text-danger': '#ED4578',
+  'text-warning': '#FADA5E',
+  'text-warning-light': '#DCBC40',
+  'text-danger': '#E54064',
   'text-danger-light': red[300],
+  'text-always-white': semanticColorsDark['text-always-white'],
 
   // Icon
   //
@@ -90,11 +91,12 @@ export const semanticColorsLight = {
   'icon-disabled': grey[100],
   'icon-primary': purple[300],
   'icon-secondary': blue[400],
-  'icon-info': blue[200],
+  'icon-info': blue[350],
   'icon-success': green[700],
   'icon-warning': '#FF9900',
   'icon-danger': red[300],
   'icon-danger-critical': '#ED4578',
+  'icon-always-white': semanticColorsDark['icon-always-white'],
 
   // Marketing
   //
@@ -104,6 +106,7 @@ export const semanticColorsLight = {
   // Shadows
   //
   'shadow-default': grey[950],
+  'shadow-purple': purple[400],
 
   // Code-blocks
   //
@@ -112,6 +115,14 @@ export const semanticColorsLight = {
   // Cloud shell
   //
   ...colorsCloudShellLight,
+
+  // Semantic
+  semanticDefault: '#0E1015',
+  semanticBlue: '#539AC3',
+  semanticGreen: '#0F996A',
+  semanticYellow: '#C3B853',
+  semanticRedLight: '#F599A8',
+  semanticRedDark: '#E95374',
 
   // Deprecated (Remove after all 'error' colors converted to 'danger' in app)
   //

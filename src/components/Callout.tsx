@@ -1,19 +1,16 @@
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
-import {
-  type Dispatch,
-  type PropsWithChildren,
-  forwardRef,
-  useMemo,
-} from 'react'
+import { type Dispatch, type PropsWithChildren, forwardRef, useId } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { Flex } from 'honorable'
 import AnimateHeight from 'react-animate-height'
 
-import { type ColorKey, type Severity } from '../types'
+import { type ColorKey, type SeverityExt, sanitizeSeverity } from '../types'
 
 import { CaretDownIcon, CloseIcon } from '../icons'
+
+import { useDisclosure } from '../hooks/useDisclosure'
 
 import {
   type FillLevel,
@@ -29,9 +26,17 @@ import StatusOkIcon from './icons/StatusOkIcon'
 import WarningIcon from './icons/WarningIcon'
 import IconFrame from './IconFrame'
 
-const SEVERITIES = ['info', 'danger', 'warning', 'success'] as const
+const CALLOUT_SEVERITIES = [
+  'info',
+  'danger',
+  'warning',
+  'success',
+] as const satisfies Readonly<SeverityExt[]>
 
-export type CalloutSeverity = Extract<Severity, (typeof SEVERITIES)[number]>
+export type CalloutSeverity = Extract<
+  SeverityExt,
+  (typeof CALLOUT_SEVERITIES)[number]
+>
 const DEFAULT_SEVERITY: CalloutSeverity = 'info'
 
 export type CalloutSize = 'compact' | 'full'
@@ -78,10 +83,12 @@ export type CalloutProps = PropsWithChildren<{
   className?: string
   expandable?: boolean
   expanded?: boolean
+  defaultExpanded?: boolean
   onExpand?: Dispatch<boolean>
   closeable?: boolean
   closed?: boolean
   onClose?: Dispatch<boolean>
+  id?: string
 }>
 
 export function CalloutButton(props: ButtonProps) {
@@ -100,8 +107,9 @@ const Callout = forwardRef<HTMLDivElement, CalloutProps>(
       severity = DEFAULT_SEVERITY,
       size = 'full',
       expandable = false,
-      expanded = false,
-      onExpand,
+      expanded: expandedProp,
+      defaultExpanded = false,
+      onExpand: onExpandProp,
       closeable = false,
       closed = false,
       onClose,
@@ -109,6 +117,7 @@ const Callout = forwardRef<HTMLDivElement, CalloutProps>(
       className,
       buttonProps,
       children,
+      id,
     },
     ref
   ) => {
@@ -117,20 +126,24 @@ const Callout = forwardRef<HTMLDivElement, CalloutProps>(
         'Callout component cannot be expandable and closable at the same time'
       )
     }
+    const generatedId = useId()
 
-    severity = useMemo(() => {
-      if (!severityToIconColorKey[severity]) {
-        console.warn(
-          `Callout: Incorrect severity (${severity}) specified. Valid values are ${SEVERITIES.map(
-            (s) => `"${s}"`
-          ).join(', ')}. Defaulting to "${DEFAULT_SEVERITY}".`
-        )
+    id = id || generatedId
+    const {
+      triggerProps,
+      contentProps,
+      isOpen: expanded,
+    } = useDisclosure({
+      defaultOpen: defaultExpanded,
+      isOpen: expandedProp,
+      onOpenChange: onExpandProp,
+      id,
+    })
 
-        return DEFAULT_SEVERITY
-      }
-
-      return severity
-    }, [severity])
+    severity = sanitizeSeverity(severity, {
+      default: DEFAULT_SEVERITY,
+      allowList: CALLOUT_SEVERITIES,
+    })
     const theme = useTheme()
 
     const text = severityToText[severity]
@@ -160,18 +173,14 @@ const Callout = forwardRef<HTMLDivElement, CalloutProps>(
 
     return (
       <FillLevelProvider value={fillLevel}>
-        <CalloutWrap
+        <CalloutSC
           className={`${className} ${classNames({ expandable })}`}
           $borderColorKey={borderColorKey}
           $fillLevel={fillLevel}
           $size={size}
           $expanded={expanded}
           ref={ref}
-          onClick={
-            expandable && !expanded
-              ? () => onExpand && onExpand(!expanded)
-              : null
-          }
+          {...(expandable && !expanded ? triggerProps : {})}
         >
           <div className="icon">
             <Icon
@@ -181,13 +190,24 @@ const Callout = forwardRef<HTMLDivElement, CalloutProps>(
               display="flex"
             />
           </div>
-          <div className="content">
+          <div
+            className="content"
+            {...(expandable ? contentProps : {})}
+          >
             <h6 className={classNames({ visuallyHidden: !title, expandable })}>
               <span className="visuallyHidden">{`${text}: `}</span>
               {title}
             </h6>
             <AnimateHeight
-              height={(expandable && expanded) || !expandable ? 'auto' : 0}
+              contentClassName={classNames('body', { bodyWithTitle: !!title })}
+              duration={300}
+              height={
+                (expandable && expanded) || !expandable
+                  ? 'auto'
+                  : size === 'compact'
+                  ? theme.spacing.xsmall
+                  : theme.spacing.medium
+              }
             >
               <div className="children">{children}</div>
               {buttonProps && (
@@ -207,10 +227,14 @@ const Callout = forwardRef<HTMLDivElement, CalloutProps>(
                 display="flex"
                 size="small"
                 clickable
-                onClick={() => {
-                  if (expandable && onExpand) onExpand(!expanded)
-                  if (closeable && onClose) onClose(!closed)
-                }}
+                {...(closeable && onClose
+                  ? {
+                      onClick: () => {
+                        onClose(!closed)
+                      },
+                    }
+                  : {})}
+                {...(expandable && expanded ? triggerProps : {})}
                 icon={
                   expandable ? (
                     <CaretDownIcon className="expandIcon" />
@@ -221,13 +245,13 @@ const Callout = forwardRef<HTMLDivElement, CalloutProps>(
               />
             </Flex>
           )}
-        </CalloutWrap>
+        </CalloutSC>
       </FillLevelProvider>
     )
   }
 )
 
-const CalloutWrap = styled.div<{
+const CalloutSC = styled.div<{
   $borderColorKey: string
   $size: CalloutSize
   $fillLevel: FillLevel
@@ -246,10 +270,11 @@ const CalloutWrap = styled.div<{
   backgroundColor:
     $fillLevel >= 3 ? theme.colors['fill-three'] : theme.colors['fill-two'],
   color: theme.colors['text-light'],
+  transition: 'background-color 0.2s ease',
 
   '&.expandable': {
     cursor: $expanded ? 'inherit' : 'pointer',
-
+    paddingBottom: 0,
     ...(!$expanded && {
       '&:hover': {
         backgroundColor:
@@ -258,19 +283,22 @@ const CalloutWrap = styled.div<{
             : theme.colors['fill-two-hover'],
       },
     }),
+    '.body': {
+      paddingBottom:
+        $size === 'compact' ? theme.spacing.xsmall : theme.spacing.medium,
+    },
+    '.rah-static--height-specific': {
+      opacity: 0,
+    },
   },
-
   h6: {
     ...theme.partials.text.body1Bold,
     color: theme.colors.text,
     margin: 0,
     padding: 0,
-    marginBottom: theme.spacing.small,
-
-    '&.expandable': {
-      marginBottom: $expanded ? theme.spacing.small : 0,
-      transition: 'margin-bottom .5s',
-    },
+  },
+  '.bodyWithTitle': {
+    paddingTop: theme.spacing.small,
   },
   '.content': {
     width: '100%',
@@ -328,10 +356,25 @@ const CalloutWrap = styled.div<{
   '.expandIcon': {
     ...theme.partials.dropdown.arrowTransition({ isOpen: $expanded }),
   },
+  // Overrides for light mode
+  ...(theme.mode === 'light'
+    ? {
+        backgroundColor:
+          $fillLevel >= 3
+            ? theme.colors['fill-zero']
+            : theme.colors['fill-one'],
+        boxShadow: theme.boxShadows.moderate,
+        '&::after': {
+          borderRadius: theme.borderRadiuses.medium,
+          border:
+            $fillLevel >= 3 ? theme.borders['fill-two'] : theme.borders.default,
+        },
+      }
+    : {}),
 }))
 
 Callout.propTypes = {
-  severity: PropTypes.oneOf(SEVERITIES),
+  severity: PropTypes.oneOf(CALLOUT_SEVERITIES),
   title: PropTypes.string,
   size: PropTypes.oneOf(['compact', 'full']),
   fillLevel: PropTypes.oneOf([0, 1, 2, 3]),

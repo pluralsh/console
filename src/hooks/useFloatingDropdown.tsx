@@ -40,7 +40,7 @@ export function useFloatingDropdown({
       offset(theme.spacing.xxsmall),
       size({
         padding: sizePadding,
-        apply(args) {
+        apply(args: any) {
           const { elements, availableHeight, rects } = args
           const maxW =
             typeof width === 'string' && width

@@ -66,9 +66,19 @@ const ShadowsWrap = styled(FlexWrap)(({ theme }) => ({
 }))
 
 function Shadows() {
+  const theme = useTheme()
+
   return (
     <ShadowsWrap>
-      {['slight', 'moderate', 'modal', 'focused'].map((key) => (
+      {[
+        'slight',
+        'moderate',
+        'modal',
+        ...(theme.mode === 'light'
+          ? ['slightPurple', 'moderatePurple', 'modalPurple']
+          : []),
+        'focused',
+      ].map((key) => (
         <BlockWrapper key={key}>
           <ShadowedBox shadow={key} />
           <ItemLabel>{key}</ItemLabel>
@@ -104,7 +114,7 @@ function BoxRadiuses() {
 }
 
 const BorderedBox = styled(RadiusedBox).attrs(
-  () => ({ radius: 'medium' } as any)
+  () => ({ radius: 'medium' }) as any
 )<{
   border?: string
 }>(({ theme, border }) => ({ border: (theme.borders as any)[border] }))

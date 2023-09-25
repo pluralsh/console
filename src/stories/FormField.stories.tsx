@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Div, Input } from 'honorable'
+import { Div } from 'honorable'
 
+import Input from '../components/Input'
 import FormField from '../components/FormField'
 import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'

@@ -37,40 +37,36 @@ import CaretUpIcon from './icons/CaretUpIcon'
 import ArrowRightIcon from './icons/ArrowRightIcon'
 import { FillLevelProvider } from './contexts/FillLevelContext'
 
-export type TableProps =
-  | Omit<
-      DivProps,
-      | 'data'
-      | 'columns'
-      | 'getRowCanExpand'
-      | 'renderExpanded'
-      | 'loose'
-      | 'stickyColumn'
-      | 'scrollTopMargin'
-      | 'virtualizeRows'
-      | 'virtualizerOptions'
-      | 'reactTableOptions'
-      | 'onRowClick'
-    > & {
-      data: any[]
-      columns: any[]
-      getRowCanExpand?: any
-      renderExpanded?: any
-      loose?: boolean
-      stickyColumn?: boolean
-      scrollTopMargin?: number
-      virtualizeRows?: boolean
-      lockColumnsOnFirstScroll?: boolean
-      reactVirtualOptions?: Omit<
-        Parameters<typeof useVirtualizer>,
-        'parentRef' | 'size'
-      >
-      reactTableOptions?: Omit<
-        Parameters<typeof useReactTable>,
-        'data' | 'columns'
-      >
-      onRowClick?: (e: MouseEvent<HTMLTableRowElement>, row: Row<any>) => void
-    }
+export type TableProps = Omit<
+  DivProps,
+  | 'data'
+  | 'columns'
+  | 'getRowCanExpand'
+  | 'renderExpanded'
+  | 'loose'
+  | 'stickyColumn'
+  | 'scrollTopMargin'
+  | 'virtualizeRows'
+  | 'virtualizerOptions'
+  | 'reactTableOptions'
+  | 'onRowClick'
+> & {
+  data: any[]
+  columns: any[]
+  getRowCanExpand?: any
+  renderExpanded?: any
+  loose?: boolean
+  stickyColumn?: boolean
+  scrollTopMargin?: number
+  virtualizeRows?: boolean
+  lockColumnsOnFirstScroll?: boolean
+  reactVirtualOptions?: Omit<
+    Parameters<typeof useVirtualizer>,
+    'parentRef' | 'size'
+  >
+  reactTableOptions?: Omit<Parameters<typeof useReactTable>, 'data' | 'columns'>
+  onRowClick?: (e: MouseEvent<HTMLTableRowElement>, row: Row<any>) => void
+}
 
 const propTypes = {}
 

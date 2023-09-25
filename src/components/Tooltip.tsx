@@ -51,7 +51,8 @@ const Tip = styled(Div)`
     visibility: visible;
   }
   &.enter-active {
-    transition: transform 0.15s cubic-bezier(0.37, 1.4, 0.62, 1),
+    transition:
+      transform 0.15s cubic-bezier(0.37, 1.4, 0.62, 1),
       opacity 0.1s linear;
   }
   &.exit {
@@ -64,7 +65,9 @@ const Tip = styled(Div)`
     transform: scale(0.3);
   }
   &.exit-active {
-    transition: transform 0.05s ease-in, opacity 0.05s linear;
+    transition:
+      transform 0.05s ease-in,
+      opacity 0.05s linear;
   }
 `
 

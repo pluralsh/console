@@ -11,6 +11,8 @@ export const colorsCodeBlockDark = prefixKeys(
     [`yellow`]: '#FFF48F',
     [`mid-grey`]: '#C5C9D3',
     [`dark-green`]: '#3CECAF',
+    [`dark-lilac`]: '#BE5EEB',
+    [`light-lilac`]: '#D596F4',
     [`dark-purple`]: '#7075F5',
     [`light-grey`]: '#EBEFF0',
     [`light-blue`]: '#C2E9FF',

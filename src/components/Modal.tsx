@@ -8,7 +8,7 @@ import {
 } from 'honorable'
 import PropTypes from 'prop-types'
 
-import { type ColorKey, type Severity } from '../types'
+import { type ColorKey, type SeverityExt } from '../types'
 
 import useLockedBody from '../hooks/useLockedBody'
 
@@ -18,10 +18,15 @@ import ErrorIcon from './icons/ErrorIcon'
 import WarningIcon from './icons/WarningIcon'
 import InfoIcon from './icons/InfoIcon'
 
-export const SEVERITIES = ['info', 'warning', 'success', 'danger'] as const
+export const SEVERITIES = [
+  'info',
+  'warning',
+  'success',
+  'danger',
+] as const satisfies Readonly<SeverityExt[]>
 const SIZES = ['medium', 'large'] as const
 
-type ModalSeverity = Extract<Severity, (typeof SEVERITIES)[number]>
+type ModalSeverity = Extract<SeverityExt, (typeof SEVERITIES)[number]>
 
 type ModalSize = (typeof SIZES)[number]
 

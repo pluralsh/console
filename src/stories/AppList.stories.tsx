@@ -62,13 +62,14 @@ const APPS: Array<AppProps & CardProps> = [
 
 const Container = styled(ContainerUnstyled)(
   ({ theme }) => `
+&& { 
   display: flex;
   width: 700px;
-  height: 600px;
   border: 1px solid ${theme.colors.border};
   background: ${theme.colors['fill-one']};
   border-radius: ${theme.borderRadiuses.large}px;
   padding: 24px;
+}
 `
 )
 

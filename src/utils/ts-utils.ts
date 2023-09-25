@@ -1,6 +1,6 @@
 export type PrefixString<
   T extends string,
-  Prefix extends string
+  Prefix extends string,
 > = `${Prefix}${T}`
 
 export type PrefixKeys<T extends object, Prefix extends string, Val = void> = {
@@ -11,7 +11,7 @@ export type PrefixKeys<T extends object, Prefix extends string, Val = void> = {
 
 export type SuffixString<
   T extends string,
-  Suffix extends string
+  Suffix extends string,
 > = `${T}${Suffix}`
 
 export type SuffixKeys<T extends object, Suffix extends string, Val = void> = {
@@ -41,7 +41,7 @@ export function suffixKeys<T extends object, Suffix extends string>(
 export type AffixValues<
   T extends Record<any, string>,
   Prefix extends string = '',
-  Suffix extends string = ''
+  Suffix extends string = '',
 > = {
   [key in keyof T]: `${Prefix}${T[key]}${Suffix}`
 }
@@ -49,7 +49,7 @@ export type AffixValues<
 export function affixValues<
   T extends Record<any, string>,
   Prefix extends string = '',
-  Suffix extends string = ''
+  Suffix extends string = '',
 >(obj: T, { prefix, suffix }: { prefix?: Prefix; suffix?: Suffix }) {
   return Object.fromEntries(
     Object.entries(obj).map(([key, val]) => [
@@ -62,7 +62,7 @@ export function affixValues<
 export type AffixKeyToValue<
   T extends Record<string, string>,
   Prefix extends string = '',
-  Suffix extends string = ''
+  Suffix extends string = '',
 > = {
   [key in keyof T]: `${Prefix}${key & string}${Suffix}`
 }
@@ -70,7 +70,7 @@ export type AffixKeyToValue<
 export function affixKeysToValues<
   T extends Record<any, string>,
   Prefix extends string = '',
-  Suffix extends string = ''
+  Suffix extends string = '',
 >(obj: T, { prefix, suffix }: { prefix?: Prefix; suffix?: Suffix }) {
   return Object.fromEntries(
     Object.entries(obj).map(([key]) => [

@@ -1,17 +1,25 @@
-import { Div, type DivProps, Flex, P } from 'honorable'
+import { type AriaLabelingProps, type DOMProps } from '@react-types/shared'
+import { Div, type DivProps, Flex, Label, P } from 'honorable'
 import PropTypes from 'prop-types'
 import {
-  type HTMLAttributes,
+  type LabelHTMLAttributes,
   type PropsWithChildren,
   type ReactNode,
   type Ref,
+  createContext,
   forwardRef,
+  useContext,
+  useMemo,
 } from 'react'
+import { isNil } from 'lodash-es'
+
+import { useLabel } from 'react-aria'
 
 type FormFieldProps = DivProps &
   PropsWithChildren<{
     label?: ReactNode
-    labelProps?: HTMLAttributes<HTMLElement>
+    labelProps?: Omit<LabelHTMLAttributes<HTMLLabelElement>, 'id'>
+    labellingProps?: AriaLabelingProps
     caption?: ReactNode
     hint?: ReactNode
     length?: number
@@ -20,6 +28,22 @@ type FormFieldProps = DivProps &
     small?: boolean
     error?: boolean
   }>
+
+type FormFieldContextT =
+  | ({
+      fieldProps?: AriaLabelingProps & DOMProps
+    } & Partial<
+      Pick<FormFieldProps, 'label' | 'caption' | 'hint' | 'maxLength'>
+    >)
+  | null
+
+const FormFieldContext = createContext<FormFieldContextT>(null)
+
+export function useFormField() {
+  const context = useContext(FormFieldContext)
+
+  return context
+}
 
 const propTypes = {
   label: PropTypes.node,
@@ -35,7 +59,8 @@ function FormFieldRef(
   {
     children,
     label,
-    labelProps,
+    labelProps = {},
+    labellingProps = {},
     caption,
     hint,
     error,
@@ -47,73 +72,109 @@ function FormFieldRef(
   }: FormFieldProps,
   ref: Ref<any>
 ) {
-  return (
+  const hasLabel = label || required
+  const hasTopContent = hasLabel || caption
+  const hasBottomContent = !isNil(hint) || typeof maxLength === 'number'
+  const useLabelProps = useLabel({
+    label,
+    ...(labelProps.htmlFor ? { id: labelProps.htmlFor } : {}),
+    ...labellingProps,
+  })
+
+  labelProps = { ...labelProps, ...useLabelProps.labelProps }
+  const contextVal = useMemo(
+    () => ({
+      fieldProps: useLabelProps.fieldProps,
+      label,
+      caption,
+      hint,
+      error,
+      maxLength,
+    }),
+    [caption, error, hint, label, maxLength, useLabelProps.fieldProps]
+  )
+
+  const content = (
     <Div
       ref={ref}
       {...props}
     >
-      <Flex
-        align="center"
-        marginBottom="xsmall"
-      >
-        <P
-          caption={small}
-          body2={!small}
-          fontWeight="600"
-          flexShrink={0}
-          {...labelProps}
+      {hasTopContent && (
+        <Flex
+          align="center"
+          marginBottom="xsmall"
         >
-          {label}
-          {required ? '*' : ''}
-        </P>
-        <Div flexGrow={1} />
-        <P
-          caption={small}
-          body2={!small}
-          marginLeft="medium"
-          truncate
-          flexShrink={1}
-          color="text-light"
-        >
-          {caption}
-        </P>
-      </Flex>
+          {hasLabel && (
+            <Label
+              caption={small}
+              body2={!small}
+              fontWeight="600"
+              flexShrink={0}
+              flexGrow={1}
+              {...labelProps}
+            >
+              {label}
+              {required ? '*' : ''}
+            </Label>
+          )}
+          {caption && (
+            <P
+              caption={small}
+              body2={!small}
+              marginLeft="medium"
+              truncate
+              flexShrink={1}
+              color="text-light"
+            >
+              {caption}
+            </P>
+          )}
+        </Flex>
+      )}
       <Div
-        marginTop={label || caption ? 'xxsmall' : 0}
-        marginBottom={hint || maxLength ? 'xxsmall' : 0}
+        marginTop={hasTopContent ? 'xxsmall' : 0}
+        marginBottom={hasBottomContent ? 'xxsmall' : 0}
       >
         {children}
       </Div>
-      <Flex
-        align="flex-start"
-        color="text-light"
-        marginTop="xsmall"
-      >
-        {typeof hint === 'string' ? (
-          <P
-            flexGrow={1}
-            caption
-            color={error ? 'text-danger' : 'text-xlight'}
-          >
-            {hint}
-          </P>
-        ) : (
-          hint
-        )}
-        {typeof maxLength === 'number' && (
-          <P
-            caption
-            color="text-xlight"
-            marginLeft={hint ? 'medium' : 0}
-            whiteSpace="nowrap"
-            textAlign="right"
-            flexGrow={1}
-          >
-            {length} / {maxLength}
-          </P>
-        )}
-      </Flex>
+      {hasBottomContent && (
+        <Flex
+          align="flex-start"
+          color="text-light"
+          marginTop="xsmall"
+        >
+          {typeof hint === 'string' ? (
+            <P
+              flexGrow={1}
+              caption
+              color={error ? 'text-danger' : 'text-xlight'}
+            >
+              {hint}
+            </P>
+          ) : (
+            hint
+          )}
+          {typeof maxLength === 'number' && (
+            <P
+              caption
+              color="text-xlight"
+              marginLeft={hint ? 'medium' : 0}
+              whiteSpace="nowrap"
+              textAlign="right"
+              flexGrow={1}
+            >
+              {length} / {maxLength}
+            </P>
+          )}
+        </Flex>
+      )}
     </Div>
+  )
+
+  return (
+    <FormFieldContext.Provider value={contextVal}>
+      {content}
+    </FormFieldContext.Provider>
   )
 }
 

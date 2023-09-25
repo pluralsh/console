@@ -120,7 +120,15 @@ const OpenButton = styled(
   alignItems: 'center',
   paddingLeft: theme.spacing.medium,
   paddingRight: theme.spacing.medium,
+  height: '100%',
   ...theme.partials.dropdown.arrowTransition({ isOpen }),
+  '&:focus': {
+    outline: 'none',
+  },
+  borderRadius: theme.borderRadiuses.medium - theme.borderWidths.default,
+  '&:focus-visible': {
+    ...theme.partials.focus.outline,
+  },
 }))
 
 const StartIconButton = styled.div(({ theme }) => ({

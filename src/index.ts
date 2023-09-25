@@ -1,9 +1,10 @@
-export { Avatar, Menu, MenuItem, Switch } from 'honorable'
+export { Avatar, Menu, MenuItem } from 'honorable'
 
 // Icons
 export * from './icons'
 
 // Components
+export { default as Accordion } from './components/Accordion'
 export { default as Banner } from './components/Banner'
 export { default as Button } from './components/Button'
 export type { CardProps } from './components/Card'
@@ -102,6 +103,8 @@ export { default as PricingCalculatorExtended } from './components/pricingcalcul
 export { default as Layer } from './components/Layer'
 export { Breadcrumbs } from './components/Breadcrumbs'
 export { DatePicker } from './components/DatePicker'
+export { Switch } from './components/Switch'
+export { LightDarkSwitch } from './components/LightDarkSwitch'
 
 // Hooks
 export { default as usePrevious } from './hooks/usePrevious'

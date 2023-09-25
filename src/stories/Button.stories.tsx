@@ -15,7 +15,7 @@ export default {
           // Can't have empty string as key for labels
           // Breaks controls for every other component that appears after this
           // '': 'Enabled',
-          none: 'Disabled',
+          none: 'none',
         },
       },
     },
@@ -94,9 +94,18 @@ Primary.args = {
   children: 'Primary Button',
 }
 
-export const Secondary = Template.bind({})
+export const SecondaryFloating = Template.bind({})
 
-Secondary.args = {
+SecondaryFloating.args = {
+  disabled: false,
+  loading: false,
+  children: 'Floating Button',
+  floating: true,
+}
+
+export const SecondaryOutline = Template.bind({})
+
+SecondaryOutline.args = {
   disabled: false,
   loading: false,
   children: 'Secondary Button',
@@ -113,6 +122,16 @@ Tertiary.args = {
   padding: '',
 }
 
+export const TertiaryNoPadding = Template.bind({})
+
+TertiaryNoPadding.args = {
+  disabled: false,
+  loading: false,
+  children: 'Tertiary Button',
+  tertiary: true,
+  padding: 'none',
+}
+
 export const Destructive = Template.bind({})
 
 Destructive.args = {
@@ -120,13 +139,4 @@ Destructive.args = {
   loading: false,
   children: 'Destructive Button',
   destructive: true,
-}
-
-export const Floating = Template.bind({})
-
-Floating.args = {
-  disabled: false,
-  loading: false,
-  children: 'Floating Button',
-  floating: true,
 }

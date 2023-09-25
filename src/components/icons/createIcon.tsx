@@ -31,6 +31,7 @@ function createIcon(render: (props: IconBaseProps) => ReactNode) {
     return (
       <HonorableIcon
         ref={ref}
+        {...{ lineHeight: 0 }}
         {...{ '& *': { transition: 'stroke 150ms linear, fill 150ms linear' } }}
         {...props}
       >

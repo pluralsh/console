@@ -42,22 +42,25 @@ export const semanticColorsDark = {
   'action-link-inline-visited': purple[300],
   'action-link-inline-visited-hover': purple[200],
   'action-input-hover': `${chroma('#E9ECF0').alpha(0.04)}`,
+  // always-white
+  'action-always-white': grey[50],
 
   // Border
   //
   border: grey[800],
-  'border-input': grey[700],
   'border-fill-two': grey[750],
   'border-fill-three': grey[700],
+  'border-selected': grey[100],
+  'border-input': grey[700],
   'border-disabled': grey[700],
-  'border-outline-focused': blue[300],
   'border-primary': purple[300],
   'border-secondary': blue[400],
+  'border-info': blue[300],
   'border-success': green[300],
   'border-warning': yellow[200],
   'border-danger': red[300],
-  'border-selected': grey[100],
-  'border-info': blue[300],
+  'border-danger-light': red[300],
+  'border-outline-focused': blue[300],
 
   // Text
   //
@@ -75,6 +78,7 @@ export const semanticColorsDark = {
   'text-warning-light': yellow[100],
   'text-danger': red[400],
   'text-danger-light': red[200],
+  'text-always-white': grey[50],
 
   // Icon
   //
@@ -89,6 +93,7 @@ export const semanticColorsDark = {
   'icon-warning': yellow[100],
   'icon-danger': red[200],
   'icon-danger-critical': red[400],
+  'icon-always-white': grey[100],
 
   // Marketing
   //
@@ -98,6 +103,8 @@ export const semanticColorsDark = {
   // Shadows
   //
   'shadow-default': grey[950],
+  // Shouldn't actually be used in dark mode
+  'shadow-purple': purple[400],
 
   // Code blocks
   //
@@ -106,6 +113,14 @@ export const semanticColorsDark = {
   // Cloud shell
   //
   ...colorsCloudShellDark,
+
+  // Semantic
+  semanticDefault: '#EBEFF0',
+  semanticBlue: '#99DAFF',
+  semanticGreen: '#99F5D5',
+  semanticYellow: '#FFF9C2',
+  semanticRedLight: '#F599A8',
+  semanticRedDark: '#E95374',
 
   // Deprecated (Remove after all 'error' colors converted to 'danger' in app)
   //

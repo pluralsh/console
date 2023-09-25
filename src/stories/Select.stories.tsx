@@ -1,4 +1,4 @@
-import { Div, Flex, H4 } from 'honorable'
+import { Flex, H4 } from 'honorable'
 import { type ComponentProps, type Key, forwardRef, useState } from 'react'
 import styled from 'styled-components'
 
@@ -18,11 +18,26 @@ import {
   SearchIcon,
   Select,
   SelectButton,
+  WrapWithIf,
 } from '../index'
 
 export default {
   title: 'Select',
   component: 'Select',
+  argTypes: {
+    onFillLevel: {
+      options: [0, 1, 2, 3],
+      control: {
+        type: 'select',
+        labels: {
+          0: '0',
+          1: '1',
+          2: '2',
+          3: "3 - Shouldn't be used",
+        },
+      },
+    },
+  },
 }
 
 const portrait = (
@@ -171,7 +186,7 @@ const CustomTriggerButton = styled(
   },
 }))
 
-function Template() {
+function Template({ onFillLevel }: { onFillLevel: any }) {
   const [selectedKey, setSelectedKey] = useState<Key>()
   const shownStep = 4
   const [shownLimit, setShownLimit] = useState<number>(shownStep)
@@ -202,8 +217,25 @@ function Template() {
       maxWidth={512}
     >
       {/* SINGLE SELECT */}
-      <Div>
-        <h4>Single select</h4>
+      <H4
+        subtitle
+        margin="0"
+        marginBottom="small"
+      >
+        Single select
+      </H4>
+      <WrapWithIf
+        condition={onFillLevel > 0}
+        wrapper={
+          <Card
+            display="flex"
+            flexDirection="column"
+            gap="large"
+            padding="large"
+            fillLevel={onFillLevel}
+          />
+        }
+      >
         <Select
           defaultOpen={false}
           label="Pick something"
@@ -227,8 +259,7 @@ function Template() {
             />
           ))}
         </Select>
-      </Div>
-      <Div>
+
         <Select
           label="Pick something"
           selectedKey={selectedKey}
@@ -255,9 +286,7 @@ function Template() {
             />
           ))}
         </Select>
-      </Div>
 
-      <Div>
         <Select
           label="Pick something"
           selectedKey={selectedKey}
@@ -288,54 +317,54 @@ function Template() {
             />
           ))}
         </Select>
-      </Div>
 
-      <Flex justifyContent="right">
-        <Select
-          label="Version"
-          selectedKey={selectedKey}
-          triggerButton={<CustomTriggerButton />}
-          width="max-content"
-          maxHeight={197}
-          placement="right"
-          onSelectionChange={(key) => {
-            setSelectedKey(key)
-          }}
-          onFooterClick={() => setShownLimit(shownLimit + shownStep)}
-          onOpenChange={(open) => {
-            if (!open) setShownLimit(shownStep)
-          }}
-          rightContent={
-            curItem && (
-              <ListBoxItemChipList
-                maxVisible={0}
-                showExtra
-                chips={curItem.chips}
-              />
-            )
-          }
-          dropdownFooter={
-            shownLimit < items.length && (
-              <ListBoxFooterPlus>View more</ListBoxFooterPlus>
-            )
-          }
-        >
-          {items.slice(0, shownLimit).map(({ key, chips, version }) => (
-            <ListBoxItem
-              key={key}
-              label={version}
-              textValue={version}
-              rightContent={
+        <Flex justifyContent="right">
+          <Select
+            label="Version"
+            selectedKey={selectedKey}
+            triggerButton={<CustomTriggerButton />}
+            width="max-content"
+            maxHeight={197}
+            placement="right"
+            onSelectionChange={(key) => {
+              setSelectedKey(key)
+            }}
+            onFooterClick={() => setShownLimit(shownLimit + shownStep)}
+            onOpenChange={(open) => {
+              if (!open) setShownLimit(shownStep)
+            }}
+            rightContent={
+              curItem && (
                 <ListBoxItemChipList
-                  maxVisible={1}
+                  maxVisible={0}
                   showExtra
-                  chips={chips}
+                  chips={curItem.chips}
                 />
-              }
-            />
-          ))}
-        </Select>
-      </Flex>
+              )
+            }
+            dropdownFooter={
+              shownLimit < items.length && (
+                <ListBoxFooterPlus>View more</ListBoxFooterPlus>
+              )
+            }
+          >
+            {items.slice(0, shownLimit).map(({ key, chips, version }) => (
+              <ListBoxItem
+                key={key}
+                label={version}
+                textValue={version}
+                rightContent={
+                  <ListBoxItemChipList
+                    maxVisible={1}
+                    showExtra
+                    chips={chips}
+                  />
+                }
+              />
+            ))}
+          </Select>
+        </Flex>
+      </WrapWithIf>
 
       {/* MULTIPLE SELECT */}
       <H4
@@ -345,12 +374,17 @@ function Template() {
       >
         Multiple select
       </H4>
-      <Card
-        display="flex"
-        flexDirection="column"
-        gap="large"
-        padding="large"
-        fillLevel={2}
+      <WrapWithIf
+        condition={onFillLevel > 0}
+        wrapper={
+          <Card
+            display="flex"
+            flexDirection="column"
+            gap="large"
+            padding="large"
+            fillLevel={onFillLevel}
+          />
+        }
       >
         <Select
           defaultOpen={false}
@@ -473,7 +507,7 @@ function Template() {
             ))}
           </Select>
         </Flex>
-      </Card>
+      </WrapWithIf>
     </Flex>
   )
 }

@@ -108,7 +108,7 @@ const HonorableLabelStyled = styled(Label)<{
       alignItems: 'center',
       justifyContent: 'center',
       color: !$disabled
-        ? theme.colors['icon-default']
+        ? theme.colors['icon-always-white']
         : theme.colors['icon-disabled'],
     },
   },

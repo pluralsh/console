@@ -3,10 +3,10 @@ import { Button, Flex, P } from 'honorable'
 import { useTheme } from 'styled-components'
 
 import Editor, { useMonaco } from '@monaco-editor/react'
-
 import { merge } from 'lodash'
 
-import { editorTheme } from '../theme/editor'
+import { editorThemeDark } from '../theme/editorThemeDark'
+import { editorThemeLight } from '../theme/editorThemeLight'
 
 import Card, { type CardProps } from './Card'
 import { toFillLevel, useFillLevel } from './contexts/FillLevelContext'
@@ -65,9 +65,12 @@ export default function CodeEditor({
   }, [copied])
 
   useEffect(() => {
-    monaco?.editor?.defineTheme('plural', editorTheme)
-    monaco?.editor?.setTheme('plural')
-  }, [monaco])
+    monaco?.editor?.defineTheme('plural-dark', editorThemeDark)
+    monaco?.editor?.defineTheme('plural-light', editorThemeLight)
+    monaco?.editor.setTheme(
+      theme.mode === 'light' ? 'plural-light' : 'plural-dark'
+    )
+  }, [monaco, theme.mode])
 
   return (
     <Card
@@ -92,7 +95,7 @@ export default function CodeEditor({
           if (onChange) onChange(v)
         }}
         options={merge(defaultOptions, options)}
-        theme="plural"
+        theme={theme.mode === 'light' ? 'plural-light' : 'plural-dark'}
       />
       {save && (
         <Flex

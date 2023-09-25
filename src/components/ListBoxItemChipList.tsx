@@ -18,8 +18,6 @@ type ChipListProps = HTMLAttributes<HTMLDivElement> & {
 
 const ChipListUnstyled = forwardRef<HTMLDivElement, ChipListProps>(
   ({ chips, maxVisible = 3, showExtra = true, ...props }, ref) => {
-    const chipHue = 'lightest'
-
     if (!Array.isArray(chips)) {
       chips = []
     }
@@ -28,7 +26,7 @@ const ChipListUnstyled = forwardRef<HTMLDivElement, ChipListProps>(
       () =>
         chips
           .slice(0, maxVisible)
-          .map((chip, i) => cloneElement(chip, { hue: chipHue, key: i })),
+          .map((chip, i) => cloneElement(chip, { key: i })),
       [chips, maxVisible]
     )
     const restChips = useMemo(
@@ -56,12 +54,7 @@ const ChipListUnstyled = forwardRef<HTMLDivElement, ChipListProps>(
               </>
             }
           >
-            <Chip
-              size="small"
-              hue={chipHue}
-            >
-              {`+${restChips.length}`}
-            </Chip>
+            <Chip size="small">{`+${restChips.length}`}</Chip>
           </Tooltip>
         ) : null,
       [restChips, showExtra]

@@ -40,13 +40,19 @@ const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(
     alignItems: 'center',
     position: 'relative',
     width: 'auto',
-    borderBottom: theme.borders['fill-two'],
-
+    borderBottom:
+      theme.mode === 'light'
+        ? theme.borders.default
+        : theme.borders['fill-two'],
     padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
     backgroundColor: 'none',
     cursor: 'pointer',
     '&:hover': {
-      backgroundColor: !disabled ? theme.colors['fill-two-hover'] : 'none',
+      backgroundColor: !disabled
+        ? theme.mode === 'light'
+          ? theme.colors['fill-one-hover']
+          : theme.colors['fill-two-hover']
+        : 'none',
     },
     '&:focus, &:focus-visible': {
       outline: 'none',
@@ -55,13 +61,15 @@ const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(
       borderBottom: 'none',
     },
     '&:focus-visible::after': {
-      ...theme.partials.focus.insetAbsolute,
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      ...theme.partials.focus.outline,
     },
-    ...(focused
-      ? {
-          '&::after': { ...theme.partials.focus.insetAbsolute },
-        }
-      : {}),
+    ...(focused ? { '&': { ...theme.partials.focus.outline } } : {}),
     '.left-content': {
       marginRight: theme.spacing.small,
     },
@@ -98,7 +106,7 @@ const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(
         right: '2px',
         left: '2px',
         bottom: '2px',
-        backgroundColor: theme.colors.text,
+        backgroundColor: theme.colors['text-always-white'],
         borderRadius: '50%',
       },
     },
@@ -167,9 +175,11 @@ const ListBoxFooterInner = styled.button<{ focused?: boolean }>(
     position: 'relative',
     width: '100%',
     padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-    borderTop: theme.borders['fill-two'],
     '&:hover': {
-      backgroundColor: theme.colors['fill-two-hover'],
+      backgroundColor:
+        theme.mode === 'light'
+          ? theme.colors['fill-one-hover']
+          : theme.colors['fill-two-hover'],
     },
     '.children': {
       flexGrow: 1,

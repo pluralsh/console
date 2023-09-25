@@ -1,15 +1,9 @@
 import { Flex, Span } from 'honorable'
-import {
-  type ComponentProps,
-  type ReactElement,
-  useMemo,
-  useState,
-} from 'react'
+import { type ComponentProps, type ReactElement, useState } from 'react'
 
 import { HamburgerMenuCollapseIcon } from '../icons'
 
 import Chip, { type ChipProps } from './Chip'
-import { useFillLevel } from './contexts/FillLevelContext'
 
 type TransformFn<TValue> = (
   value: TValue
@@ -28,19 +22,6 @@ function ChipList<TValue = string>({
   ...props
 }: ChipListProps<TValue>): ReactElement {
   const [collapsed, setCollapsed] = useState(true)
-  const parentFillLevel = useFillLevel()
-  const fillLevelClassName = useMemo(() => {
-    switch (parentFillLevel) {
-      case 3:
-        return 'fill-three'
-      case 2:
-        return 'fill-two'
-      case 1:
-        return 'fill-one'
-      default:
-        return 'fill-zero'
-    }
-  }, [parentFillLevel])
 
   return (
     <Flex
@@ -65,7 +46,6 @@ function ChipList<TValue = string>({
               onClick={() => setCollapsed(false)}
               {...props}
               clickable
-              background={fillLevelClassName}
             >
               {`+${values.length - limit}`}
             </Chip>
@@ -75,7 +55,6 @@ function ChipList<TValue = string>({
               onClick={() => setCollapsed(true)}
               {...props}
               clickable
-              background={fillLevelClassName}
             >
               <HamburgerMenuCollapseIcon />
             </Chip>

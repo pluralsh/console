@@ -4,6 +4,8 @@ import { type ComponentProps, type ReactNode, forwardRef, useRef } from 'react'
 import styled from 'styled-components'
 import { mergeRefs } from 'react-merge-refs'
 
+import { mergeProps } from 'react-aria'
+
 import { simulateInputChange } from '../utils/simulateInputChange'
 
 import { useFillLevel } from './contexts/FillLevelContext'
@@ -11,6 +13,8 @@ import { TitleContent } from './Select'
 import Tooltip from './Tooltip'
 import IconFrame from './IconFrame'
 import CloseIcon from './icons/CloseIcon'
+
+import { useFormField } from './FormField'
 
 export type InputProps = HonorableInputProps & {
   suffix?: ReactNode
@@ -25,7 +29,10 @@ const PrefixSuffix = styled.div(({ theme }) => ({
   alignSelf: 'stretch',
   paddingLeft: theme.spacing.small,
   paddingRight: theme.spacing.small,
-  backgroundColor: theme.colors['fill-two'],
+  backgroundColor:
+    theme.mode === 'light'
+      ? theme.colors['fill-three']
+      : theme.colors['fill-two'],
 }))
 
 const startEndStyles = {
@@ -121,6 +128,7 @@ const Input = forwardRef(
         },
       })
     }
+    inputProps = mergeProps(useFormField()?.fieldProps ?? {}, inputProps)
 
     return (
       <ExtendTheme theme={themeExtension}>

@@ -11,6 +11,12 @@ import type { CardProps } from '../components/Card'
 export default {
   title: 'Card',
   component: null,
+  argTypes: {
+    severity: {
+      options: ['neutral', 'info', 'success', 'warning', 'danger', 'critical'],
+      control: { type: 'select' },
+    },
+  },
 }
 
 const fillLevels: (FillLevel | undefined)[] = [undefined, 1, 2, 3]
@@ -24,6 +30,7 @@ function Template({
   selected,
   width,
   height,
+  severity,
 }: { width: number; height: number } & CardProps) {
   return (
     <Flex
@@ -42,6 +49,7 @@ function Template({
               width={width}
               cornerSize={cornerSize}
               fillLevel={fillLevel}
+              severity={severity}
             >
               <Flex
                 caption
@@ -66,6 +74,7 @@ function FillLevelTemplate({
   clickable,
   selected,
   width,
+  severity,
 }: { width: number } & CardProps) {
   const theme = useTheme()
 
@@ -83,6 +92,7 @@ function FillLevelTemplate({
             width={width}
             padding="medium"
             fillLevel={fillLevel}
+            severity={severity}
           >
             fillLevel=
             {fillLevel === undefined ? 'undefined' : `"${fillLevel}"`}
@@ -93,8 +103,12 @@ function FillLevelTemplate({
               clickable={clickable}
               selected={selected}
               padding="medium"
+              severity={severity}
             >
-              <Card padding="medium">
+              <Card
+                padding="medium"
+                severity={severity}
+              >
                 <br />
                 Each Card background should be one level lighter than its
                 parent, but not exceed fill-three
@@ -115,6 +129,7 @@ Default.args = {
   clickable: false,
   width: 150,
   height: 150,
+  severity: 'neutral',
 }
 
 export const Clickable = Template.bind({})

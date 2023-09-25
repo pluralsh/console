@@ -137,10 +137,12 @@ interface DialogProps extends AriaDialogProps {
 }
 
 const CalendarDialogSC = styled(Card)(({ theme }) => ({
-  justifySelf: 'end',
-  flexGrow: 0,
-  backgroundColor: theme.colors['fill-one'],
-  padding: theme.spacing.medium,
+  '&&': {
+    justifySelf: 'end',
+    flexGrow: 0,
+    backgroundColor: theme.colors['fill-one'],
+    padding: theme.spacing.medium,
+  },
 }))
 
 function CalendarDialog({ title, children, ...props }: DialogProps) {
