@@ -41,7 +41,6 @@ export default function GroupMember({ user, group, last, edit }: any) {
             icon={<TrashCanIcon color="icon-danger" />}
             textValue="Delete"
             onClick={() => mutation()}
-            hue="lighter"
           />
         )}
       </Box>

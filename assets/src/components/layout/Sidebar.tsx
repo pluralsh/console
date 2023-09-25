@@ -189,7 +189,10 @@ export default function Sidebar() {
 
   return (
     <>
-      <DSSidebar backgroundColor={theme.colors?.grey[950]}>
+      <DSSidebar
+        variant="console"
+        backgroundColor={theme.colors?.grey[950]}
+      >
         <SidebarSection
           grow={1}
           shrink={1}

@@ -80,7 +80,6 @@ export default function Webhook({ hook: { id, url, health, insertedAt } }) {
             textValue="Delete"
             tooltip
             onClick={() => setConfirm(true)}
-            hue="lighter"
           />
         </Flex>
       </Flex>
