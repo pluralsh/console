@@ -20,7 +20,13 @@ export default mergeConfig(
   defineConfig({
     plugins: [
       basicSsl(),
-      react(),
+      react({
+        babel: {
+          plugins: ['styled-components'],
+          babelrc: false,
+          configFile: false,
+        },
+      }),
       VitePWA({
         injectRegister: null,
         filename: 'service-worker.ts',
