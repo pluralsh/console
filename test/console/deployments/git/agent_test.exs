@@ -24,9 +24,12 @@ defmodule Console.Deployments.Git.AgentTest do
   end
 
   defp fetch_and_check(pid, svc) do
-    {:ok, fstream} = Agent.fetch(pid, svc)
+    {:ok, f} = Agent.fetch(pid, svc)
     {:ok, tmp} = Briefly.create()
-    Enum.into(fstream, File.stream!(tmp))
+
+    IO.binstream(f, 1024)
+    |> Enum.into(File.stream!(tmp))
+    File.close(f)
 
     {:ok, res} = :erl_tar.extract(tmp, [:compressed, :memory])
     files = Enum.into(res, %{}, fn {name, content} -> {to_string(name), to_string(content)} end)

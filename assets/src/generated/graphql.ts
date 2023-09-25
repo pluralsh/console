@@ -2696,7 +2696,7 @@ export type ServiceComponent = {
   /** any api deprecations discovered from this component */
   apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
   /** api group of this resource */
-  group: Scalars['String']['output'];
+  group?: Maybe<Scalars['String']['output']>;
   /** internal id */
   id: Scalars['ID']['output'];
   /** api kind of this resource */
@@ -2704,7 +2704,7 @@ export type ServiceComponent = {
   /** kubernetes name of this resource */
   name: Scalars['String']['output'];
   /** kubernetes namespace of this resource */
-  namespace: Scalars['String']['output'];
+  namespace?: Maybe<Scalars['String']['output']>;
   /** the service this component belongs to */
   service?: Maybe<ServiceDeployment>;
   /** kubernetes component health enum */
@@ -2712,7 +2712,7 @@ export type ServiceComponent = {
   /** whether this component has been applied to the k8s api */
   synced: Scalars['Boolean']['output'];
   /** api version of this resource */
-  version: Scalars['String']['output'];
+  version?: Maybe<Scalars['String']['output']>;
 };
 
 /** a configuration item k/v pair */

@@ -258,16 +258,16 @@ type ServiceComponent {
   synced: Boolean!
 
   "api group of this resource"
-  group: String!
+  group: String
 
   "api version of this resource"
-  version: String!
+  version: String
 
   "api kind of this resource"
   kind: String!
 
   "kubernetes namespace of this resource"
-  namespace: String!
+  namespace: String
 
   "kubernetes name of this resource"
   name: String!
