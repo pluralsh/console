@@ -1,5 +1,5 @@
 import { Div, FlexProps } from 'honorable'
-import { ReactNode } from 'react'
+import { ReactNode, Ref } from 'react'
 import styled, { CSSProperties } from 'styled-components'
 
 import ConsolePageTitle from './ConsolePageTitle'
@@ -69,6 +69,7 @@ export function ScrollablePage({
   scrollable?: boolean
   maxContentWidth?: number
   fullWidth?: boolean
+  scrollRef?: Ref<any>
 } & FlexProps) {
   return (
     <>

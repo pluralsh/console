@@ -303,7 +303,6 @@ export function ContainersList({
       loose
       data={tableData}
       columns={columns}
-      enableColumnResizing
       onRowClick={(_e, { original }: Row<ContainerTableRow>) =>
         original?.readiness === Readiness.Ready &&
         navigate(`/pods/${namespace}/${podName}/shell/${original?.name}`)
