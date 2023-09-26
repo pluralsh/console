@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useMemo, useRef, useState } from 'react'
 import { Checkbox, Flex, P, useOutsideClick } from 'honorable'
-import { CloseIcon, IconFrame } from '@pluralsh/design-system'
-import { animated, useTransition } from 'react-spring'
+import { AnimatedDiv, CloseIcon, IconFrame } from '@pluralsh/design-system'
+import { useTransition } from 'react-spring'
 
 import styled from 'styled-components'
 
@@ -28,7 +28,7 @@ const getTransitionProps = (isOpen: boolean) => ({
       },
 })
 
-const Wrapper = styled(animated.div)<{ $leftOffset: number }>(
+const Wrapper = styled(AnimatedDiv)<{ $leftOffset: number }>(
   ({ $leftOffset, theme }) => ({
     position: 'fixed',
     display: 'flex',
@@ -39,7 +39,7 @@ const Wrapper = styled(animated.div)<{ $leftOffset: number }>(
   })
 )
 
-const Animated = styled(animated.div)(({ theme }) => ({
+const Animated = styled(AnimatedDiv)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   backgroundColor: theme.colors['fill-one'],
