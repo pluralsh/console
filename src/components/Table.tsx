@@ -18,6 +18,7 @@ import type {
   FilterFn,
   Row,
   SortDirection,
+  TableOptions,
 } from '@tanstack/react-table'
 import {
   flexRender,
@@ -64,7 +65,7 @@ export type TableProps = Omit<
     Parameters<typeof useVirtualizer>,
     'parentRef' | 'size'
   >
-  reactTableOptions?: Omit<Parameters<typeof useReactTable>, 'data' | 'columns'>
+  reactTableOptions?: Partial<Omit<TableOptions<any>, 'data' | 'columns'>>
   onRowClick?: (e: MouseEvent<HTMLTableRowElement>, row: Row<any>) => void
 }
 

@@ -1,6 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { Div, Flex, Input, type InputProps, P } from 'honorable'
-import React, { type ReactElement, useEffect } from 'react'
+import React, { type ComponentProps, type ReactElement, useEffect } from 'react'
 import type { Row } from '@tanstack/react-table'
 
 import {
@@ -235,7 +235,7 @@ function DebouncedInput({
   )
 }
 
-function FilterableTemplate(args: any) {
+function FilterableTemplate(args: ComponentProps<typeof Table>) {
   const [globalFilter, setGlobalFilter] = React.useState('')
 
   return (

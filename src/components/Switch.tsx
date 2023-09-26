@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { type ComponentProps, useMemo, useRef } from 'react'
 import { useToggleState } from 'react-stately'
 import {
   type AriaSwitchProps,
@@ -26,7 +26,7 @@ type UseSwitchProps = Omit<
 }
 
 export type SwitchProps = UseSwitchProps &
-  Pick<typeof SwitchSC, 'as' | 'className'>
+  Pick<ComponentProps<typeof SwitchSC>, 'as'> & { className?: string }
 
 const SwitchSC = styled.label<SwitchStyleProps>(
   ({ $checked, $disabled, $readOnly, theme }) => ({
