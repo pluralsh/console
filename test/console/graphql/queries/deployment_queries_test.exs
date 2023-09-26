@@ -79,12 +79,20 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
 
     test "it can fetch by deploy token" do
       cluster = insert(:cluster)
+      revision = insert(:cluster_revision, cluster: cluster)
 
       {:ok, %{data: %{"cluster" => found}}} = run_query("""
-        query { cluster { id } }
+        query {
+          cluster {
+            id
+            revisions(first: 5) { edges { node { id } } }
+          }
+        }
       """, %{"id" => cluster.id}, %{cluster: cluster})
 
       assert found["id"] == cluster.id
+      assert from_connection(found["revisions"])
+             |> ids_equal([revision])
     end
 
     test "it respects rbac" do

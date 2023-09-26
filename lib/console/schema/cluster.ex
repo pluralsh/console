@@ -4,6 +4,26 @@ defmodule Console.Schema.Cluster do
   alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{Service, ClusterNodePool, NamespacedName, ClusterProvider, PolicyBinding, User, Tag, GlobalService}
 
+  defmodule CloudSettings do
+    use Piazza.Ecto.Schema
+
+    embedded_schema do
+      # just temporary until we know what of these will actually matter
+      embeds_one :aws, Aws, on_replace: :update do
+        field :logging, :boolean
+      end
+    end
+
+    def changeset(model, attrs \\ %{}) do
+      cast(model, attrs, [])
+      |> cast_embed(:aws, with: &aws_changeset/2)
+    end
+
+    def aws_changeset(model, attrs) do
+      cast(model, attrs, ~w(logging)a)
+    end
+  end
+
   schema "clusters" do
     field :name,            :string
     field :self,            :boolean
@@ -16,8 +36,9 @@ defmodule Console.Schema.Cluster do
     field :deleted_at,      :utc_datetime_usec
     field :pinged_at,       :utc_datetime_usec
 
-    embeds_one :resource,   NamespacedName
-    embeds_one :kubeconfig, NamespacedName
+    embeds_one :resource,       NamespacedName
+    embeds_one :kubeconfig,     NamespacedName
+    embeds_one :cloud_settings, CloudSettings, on_replace: :update
 
     belongs_to :provider, ClusterProvider
     belongs_to :service,  Service

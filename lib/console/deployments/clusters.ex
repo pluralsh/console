@@ -4,7 +4,7 @@ defmodule Console.Deployments.Clusters do
   alias Console.PubSub
   alias Console.Deployments.{Services, Git}
   alias Console.Services.Users
-  alias Console.Schema.{Cluster, User, ClusterProvider, Service, DeployToken}
+  alias Console.Schema.{Cluster, User, ClusterProvider, Service, DeployToken, ClusterRevision}
 
   @type cluster_resp :: {:ok, Cluster.t} | Console.error
   @type cluster_provider_resp :: {:ok, ClusterProvider.t} | Console.error
@@ -14,6 +14,12 @@ defmodule Console.Deployments.Clusters do
   def get_cluster!(id), do: Console.Repo.get!(Cluster, id)
 
   def get_provider!(id), do: Console.Repo.get!(ClusterProvider, id)
+
+  def revisions(%Cluster{id: id}) do
+    ClusterRevision.for_cluster(id)
+    |> ClusterRevision.ordered()
+    |> Repo.all()
+  end
 
   def get_by_deploy_token(token) do
     with nil <- Repo.get_by(Cluster, deploy_token: token),
@@ -46,6 +52,7 @@ defmodule Console.Deployments.Clusters do
       |> allow(user, :create)
       |> when_ok(:insert)
     end)
+    |> add_revision()
     |> add_operation(:service, fn %{cluster: cluster} ->
       Services.operator_service(cluster, tmp_admin(user))
     end)
@@ -79,6 +86,7 @@ defmodule Console.Deployments.Clusters do
       |> allow(user, :write)
       |> when_ok(:update)
     end)
+    |> add_revision()
     |> add_operation(:svc, fn
       %{cluster: %{service_id: id} = cluster} when is_binary(id) ->
         cluster_service(cluster, user)
@@ -86,6 +94,19 @@ defmodule Console.Deployments.Clusters do
     end)
     |> execute(extract: :cluster)
     |> notify(:update, user)
+  end
+
+  defp add_revision(xact) do
+    add_operation(xact, :revision, fn %{cluster: cluster} ->
+      cluster = Repo.preload(cluster, [:node_pools])
+      %ClusterRevision{cluster_id: cluster.id}
+      |> ClusterRevision.changeset(%{
+        version: cluster.version,
+        cloud_settings: cluster.cloud_settings,
+        node_pools: Enum.map(cluster.node_pools, &Piazza.Ecto.Schema.mapify/1)
+      })
+      |> Repo.insert()
+    end)
   end
 
   @doc """

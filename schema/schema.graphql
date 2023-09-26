@@ -994,7 +994,7 @@ type Cluster {
   name: String!
 
   "desired k8s version for the cluster"
-  version: String!
+  version: String
 
   "current k8s version as told to us by the deployment operator"
   currentVersion: String
@@ -1025,6 +1025,9 @@ type Cluster {
 
   "all api deprecations for all services in this cluster"
   apiDeprecations: [ApiDeprecation]
+
+  "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
+  revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
 
   "whether the current user can edit this cluster"
   editable: Boolean

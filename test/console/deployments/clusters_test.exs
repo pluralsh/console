@@ -61,6 +61,10 @@ defmodule Console.Deployments.ClustersTest do
       assert token == cluster.deploy_token
       assert url == Path.join(Console.conf(:ext_url), "ext/gql")
       assert secrets["clusterId"] == cluster.id
+
+      [revision] = Clusters.revisions(cluster)
+      assert revision.version == cluster.version
+      assert length(revision.node_pools) == length(cluster.node_pools)
     end
 
     test "it will respect rbac" do
@@ -126,6 +130,15 @@ defmodule Console.Deployments.ClustersTest do
       assert node_pool["min_size"] == pool.min_size
       assert node_pool["max_size"] == pool.max_size
       assert node_pool["instance_type"] == "t5.large"
+
+      [revision, _] = Clusters.revisions(cluster)
+
+      assert revision.version == cluster.version
+      [np] = revision.node_pools
+      assert np.name == pool.name
+      assert np.min_size == pool.min_size
+      assert np.max_size == pool.max_size
+      assert np.instance_type == pool.instance_type
 
       {:error, _} = Clusters.update_cluster(%{
         version: "1.25",

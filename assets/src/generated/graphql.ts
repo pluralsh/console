@@ -409,15 +409,26 @@ export type Cluster = {
   provider?: Maybe<ClusterProvider>;
   /** read policy for this cluster */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** a relay connection of all revisions of this service, these are periodically pruned up to a history limit */
+  revisions?: Maybe<RevisionConnection>;
   /** the service used to deploy the CAPI resources of this cluster */
   service?: Maybe<ServiceDeployment>;
   /** key/value tags to filter clusters */
   tags?: Maybe<Array<Maybe<Tag>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** desired k8s version for the cluster */
-  version: Scalars['String']['output'];
+  version?: Maybe<Scalars['String']['output']>;
   /** write policy for this cluster */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterRevisionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type ClusterAttributes = {

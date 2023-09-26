@@ -96,7 +96,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   object :cluster do
     field :id,              non_null(:id), description: "internal id of this cluster"
     field :name,            non_null(:string), description: "human readable name of this cluster, will also translate to cloud k8s name"
-    field :version,         non_null(:string), description: "desired k8s version for the cluster"
+    field :version,         :string, description: "desired k8s version for the cluster"
     field :current_version, :string, description: "current k8s version as told to us by the deployment operator"
 
     field :deleted_at, :datetime, description: "when this cluster was scheduled for deletion"
@@ -111,7 +111,21 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :tags,        list_of(:tag), resolve: dataloader(Deployments), description: "key/value tags to filter clusters"
     field :api_deprecations, list_of(:api_deprecation), resolve: dataloader(Deployments), description: "all api deprecations for all services in this cluster"
 
+    @desc "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
+    connection field :revisions, node_type: :revision do
+      resolve &Deployments.list_cluster_revisions/3
+    end
+
     field :editable,   :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this cluster"
+
+    timestamps()
+  end
+
+  @desc "a historical revision of a cluster, including version, cloud and node group configuratino"
+  object :cluster_revision do
+    field :id,         non_null(:id)
+    field :version,    :string
+    field :node_pools, list_of(:node_pool)
 
     timestamps()
   end
@@ -154,6 +168,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   connection node_type: :cluster
   connection node_type: :cluster_provider
+  connection node_type: :cluster_revision
 
   delta :cluster
   delta :cluster_provider

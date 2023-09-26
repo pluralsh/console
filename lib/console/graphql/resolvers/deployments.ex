@@ -15,7 +15,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     Tag,
     GlobalService,
     User,
-    ServiceError
+    ServiceError,
+    ClusterRevision
   }
 
   def query(ServiceError, _), do: ServiceError
@@ -66,6 +67,12 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def list_revisions(%{id: id}, args, _) do
     Revision.for_service(id)
     |> Revision.ordered()
+    |> paginate(args)
+  end
+
+  def list_cluster_revisions(%{id: id}, args, _) do
+    ClusterRevision.for_cluster(id)
+    |> ClusterRevision.ordered()
     |> paginate(args)
   end
 
