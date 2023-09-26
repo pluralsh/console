@@ -248,7 +248,6 @@ function FilterableTemplate(args: any) {
       />
       <Table
         reactTableOptions={{
-          // globalFilterFn,
           state: { globalFilter },
         }}
         {...args}

@@ -1,14 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
-import { useToggleState } from 'react-stately'
-import {
-  type AriaSwitchProps,
-  VisuallyHidden,
-  useFocusRing,
-  useSwitch,
-} from 'react-aria'
+import { useEffect, useState } from 'react'
+import { VisuallyHidden } from 'react-aria'
 import styled, { keyframes, useTheme } from 'styled-components'
 
 import usePrevious from '../hooks/usePrevious'
+
+import { type SwitchProps, type SwitchStyleProps, useSwitch } from './Switch'
 
 const HANDLE_SIZE = 16
 const HANDLE_MARGIN = 4
@@ -49,7 +45,7 @@ const slideOffAnim = keyframes`
   }
 `
 
-const MoonSC = styled.svg<{ $selected: boolean }>(({ $selected }) => ({
+const MoonSC = styled.svg<SwitchStyleProps>(({ $checked }) => ({
   position: 'absolute',
   top: 6,
   left: 24,
@@ -59,21 +55,21 @@ const MoonSC = styled.svg<{ $selected: boolean }>(({ $selected }) => ({
     transition: 'all 0.15s ease 0.1s',
   },
   '.moonFill': {
-    opacity: $selected ? 1 : 0,
+    opacity: $checked ? 1 : 0,
     zIndex: 0,
   },
   '.moonOutline': {
-    opacity: $selected ? 0 : 1,
+    opacity: $checked ? 0 : 1,
     zIndex: 1,
   },
 }))
 
-function Moon({ selected }: { selected: boolean }) {
+function Moon(props: SwitchStyleProps) {
   const theme = useTheme()
 
   return (
     <MoonSC
-      $selected={selected}
+      {...props}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 12 12"
     >
@@ -91,7 +87,7 @@ function Moon({ selected }: { selected: boolean }) {
   )
 }
 
-const SunSC = styled.svg<{ $selected: boolean }>((_) => ({
+const SunSC = styled.svg<SwitchStyleProps>((_) => ({
   position: 'absolute',
   top: 6,
   left: 6,
@@ -102,15 +98,15 @@ const SunSC = styled.svg<{ $selected: boolean }>((_) => ({
   },
 }))
 
-function Sun({ selected }: { selected: boolean }) {
+function Sun(props: SwitchStyleProps) {
   const theme = useTheme()
-  const color = selected
+  const color = !props.$checked
     ? theme.colors.yellow[500]
     : theme.colors['text-primary-disabled']
 
   return (
     <SunSC
-      $selected={selected}
+      {...props}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 12 12"
     >
@@ -142,52 +138,48 @@ function Sun({ selected }: { selected: boolean }) {
   )
 }
 
-const SwitchSC = styled.label<{
-  $checked: boolean
-  $disabled: boolean
-  $readOnly: boolean
-}>(({ $disabled, $readOnly, theme }) => ({
-  display: 'flex',
-  columnGap: theme.spacing.xsmall,
-  alignItems: 'center',
-  ...theme.partials.text.body2,
-  cursor: $disabled ? 'not-allowed' : $readOnly ? 'default' : 'pointer',
-  color: theme.colors['text-light'],
-  ...($disabled || $readOnly
-    ? {}
-    : {
-        '&:hover': {
-          color: theme.colors.text,
-          [SwitchToggleSC]: {
-            backgroundColor: theme.colors['action-input-hover'],
+const SwitchSC = styled.label<SwitchStyleProps>(
+  ({ $disabled, $readOnly, theme }) => ({
+    display: 'flex',
+    columnGap: theme.spacing.xsmall,
+    alignItems: 'center',
+    ...theme.partials.text.body2,
+    cursor: $disabled ? 'not-allowed' : $readOnly ? 'default' : 'pointer',
+    color: theme.colors['text-light'],
+    ...($disabled || $readOnly
+      ? {}
+      : {
+          '&:hover': {
+            color: theme.colors.text,
+            [SwitchToggleSC]: {
+              backgroundColor: theme.colors['action-input-hover'],
+            },
           },
-        },
-      }),
-}))
+        }),
+  })
+)
 
-const SwitchToggleSC = styled.div<{
-  $disabled: boolean
-  $focused: boolean
-  $checked: boolean
-}>(({ $focused, $disabled, theme }) => ({
-  position: 'relative',
-  width: 42,
-  height: 24,
-  borderRadius: 12,
-  backgroundColor: 'transparent',
-  outlineWidth: 1,
-  outlineStyle: 'solid',
-  outlineOffset: -1,
-  outlineColor: $disabled
-    ? theme.colors['border-disabled']
-    : $focused
-    ? theme.colors['border-outline-focused']
-    : theme.colors['border-input'],
-  transition: 'all 0.15s ease',
-}))
+const SwitchToggleSC = styled.div<SwitchStyleProps>(
+  ({ $focused, $disabled, theme }) => ({
+    position: 'relative',
+    width: 42,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'transparent',
+    outlineWidth: 1,
+    outlineStyle: 'solid',
+    outlineOffset: -1,
+    outlineColor: $disabled
+      ? theme.colors['border-disabled']
+      : $focused
+      ? theme.colors['border-outline-focused']
+      : theme.colors['border-input'],
+    transition: 'all 0.15s ease',
+  })
+)
 
 const SwitchHandleSC = styled(
-  styled.div<{ $checked: boolean; $disabled: boolean; $animate: boolean }>(
+  styled.div<SwitchStyleProps & { $animate: boolean }>(
     ({ $checked, $disabled, theme }) => ({
       position: 'absolute',
       width: '100%',
@@ -222,29 +214,12 @@ const SwitchHandleSC = styled(
 
 export function LightDarkSwitch({
   children,
-  checked,
-  disabled,
-  readOnly,
+  as,
+  className,
   ...props
-}: Omit<
-  AriaSwitchProps & Parameters<typeof useToggleState>[0],
-  'isDisabled' | 'isReadonly' | 'isSelected'
-> & { checked?: boolean; disabled?: boolean; readOnly?: boolean }) {
-  const ariaProps: AriaSwitchProps = {
-    isSelected: checked,
-    isDisabled: disabled,
-    isReadOnly: readOnly,
-    ...props,
-  }
-
-  const state = useToggleState(ariaProps)
-  const ref = useRef<HTMLInputElement>(null)
-  const { inputProps, isSelected, isDisabled, isReadOnly } = useSwitch(
-    { ...ariaProps },
-    state,
-    ref
-  )
-  const { focusProps, isFocusVisible } = useFocusRing()
+}: SwitchProps) {
+  const { inputProps, styleProps, state } = useSwitch(props)
+  const { isSelected } = state
   const wasSelected = usePrevious(isSelected) ?? isSelected
   const [animate, setAnimate] = useState(false)
 
@@ -256,27 +231,18 @@ export function LightDarkSwitch({
 
   return (
     <SwitchSC
-      $disabled={isDisabled}
-      $checked={isSelected}
-      $readOnly={isReadOnly}
+      as={as}
+      className={className}
+      {...styleProps}
     >
       <VisuallyHidden>
-        <input
-          {...inputProps}
-          {...focusProps}
-          ref={ref}
-        />
+        <input {...inputProps} />
       </VisuallyHidden>
-      <SwitchToggleSC
-        $focused={isFocusVisible}
-        $disabled={isDisabled}
-        $checked={isSelected}
-      >
-        <Sun selected={!isSelected} />
-        <Moon selected={isSelected} />
+      <SwitchToggleSC {...styleProps}>
+        <Sun {...styleProps} />
+        <Moon {...styleProps} />
         <SwitchHandleSC
-          $disabled={isDisabled}
-          $checked={isSelected}
+          {...styleProps}
           $animate={animate}
         />
       </SwitchToggleSC>

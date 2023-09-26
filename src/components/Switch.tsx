@@ -1,77 +1,90 @@
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { useToggleState } from 'react-stately'
 import {
   type AriaSwitchProps,
   VisuallyHidden,
+  useSwitch as useAriaSwitch,
   useFocusRing,
-  useSwitch,
 } from 'react-aria'
 import styled from 'styled-components'
 
-const SwitchSC = styled.label<{
+export type SwitchStyleProps = {
   $checked: boolean
   $disabled: boolean
   $readOnly: boolean
-}>(({ $checked, $disabled, $readOnly, theme }) => ({
-  display: 'flex',
-  columnGap: theme.spacing.xsmall,
-  alignItems: 'center',
-  ...theme.partials.text.body2,
-  cursor: $disabled ? 'not-allowed' : $readOnly ? 'default' : 'pointer',
-  color: theme.colors['text-light'],
-  ...($disabled || $readOnly
-    ? {}
-    : {
-        '&:hover': {
-          color: theme.colors.text,
-          [SwitchToggleSC]: {
-            backgroundColor: $checked
-              ? theme.colors['action-primary-hover']
-              : theme.colors['action-input-hover'],
-            borderColor: $checked
-              ? theme.colors['action-primary-hover']
-              : theme.colors['action-input-hover'],
-          },
-          [SwitchHandleSC]: {
-            backgroundColor: $checked
-              ? theme.colors['action-always-white']
-              : theme.colors['action-link-active'],
-          },
-        },
-      }),
-}))
-
-const SwitchToggleSC = styled.div<{
-  $disabled: boolean
   $focused: boolean
-  $checked: boolean
-}>(({ $checked, $focused, $disabled, theme }) => ({
-  position: 'relative',
-  width: 42,
-  height: 24,
-  borderRadius: 12,
-  backgroundColor: $checked
-    ? $disabled
-      ? theme.colors['action-primary-disabled']
-      : theme.colors['action-primary']
-    : 'transparent',
-  outlineWidth: 1,
-  outlineStyle: 'solid',
-  outlineOffset: -1,
-  outlineColor:
-    $disabled && $checked
-      ? theme.colors['action-primary-disabled']
-      : $disabled
-      ? theme.colors['border-disabled']
-      : $focused
-      ? theme.colors['border-outline-focused']
-      : $checked
-      ? theme.colors['action-primary']
-      : theme.colors['border-input'],
-  transition: 'all 0.15s ease',
-}))
+}
 
-const SwitchHandleSC = styled.div<{ $checked: boolean; $disabled: boolean }>(
+type UseSwitchProps = Omit<
+  AriaSwitchProps & Parameters<typeof useToggleState>[0],
+  'isDisabled' | 'isReadOnly' | 'isSelected' | 'defaultSelected' | 'isRequired'
+> & {
+  checked?: boolean
+  defaultChecked?: boolean
+  disabled?: boolean
+  readOnly?: boolean
+}
+
+export type SwitchProps = UseSwitchProps &
+  Pick<typeof SwitchSC, 'as' | 'className'>
+
+const SwitchSC = styled.label<SwitchStyleProps>(
+  ({ $checked, $disabled, $readOnly, theme }) => ({
+    display: 'flex',
+    columnGap: theme.spacing.xsmall,
+    alignItems: 'center',
+    ...theme.partials.text.body2,
+    cursor: $disabled ? 'not-allowed' : $readOnly ? 'default' : 'pointer',
+    color: theme.colors['text-light'],
+    ...($disabled || $readOnly
+      ? {}
+      : {
+          '&:hover': {
+            color: theme.colors.text,
+            [SwitchToggleSC]: {
+              backgroundColor: $checked
+                ? theme.colors['action-primary-hover']
+                : theme.colors['action-input-hover'],
+            },
+            [SwitchHandleSC]: {
+              backgroundColor: $checked
+                ? theme.colors['action-always-white']
+                : theme.colors['action-link-active'],
+            },
+          },
+        }),
+  })
+)
+
+const SwitchToggleSC = styled.div<SwitchStyleProps>(
+  ({ $checked, $focused, $disabled, theme }) => ({
+    position: 'relative',
+    width: 42,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: $checked
+      ? $disabled
+        ? theme.colors['action-primary-disabled']
+        : theme.colors['action-primary']
+      : 'transparent',
+    outlineWidth: 1,
+    outlineStyle: 'solid',
+    outlineOffset: -1,
+    outlineColor:
+      $disabled && $checked
+        ? theme.colors['action-primary-disabled']
+        : $disabled
+        ? theme.colors['border-disabled']
+        : $focused
+        ? theme.colors['border-outline-focused']
+        : $checked
+        ? 'transparent'
+        : theme.colors['border-input'],
+    transition: 'all 0.15s ease',
+  })
+)
+
+const SwitchHandleSC = styled.div<SwitchStyleProps>(
   ({ $checked, $disabled, theme }) => ({
     backgroundColor: $disabled
       ? theme.colors['border-disabled']
@@ -89,53 +102,68 @@ const SwitchHandleSC = styled.div<{ $checked: boolean; $disabled: boolean }>(
   })
 )
 
-export function Switch({
-  children,
+export const useSwitch = ({
   checked,
+  defaultChecked,
   disabled,
   readOnly,
   ...props
-}: Omit<
-  AriaSwitchProps & Parameters<typeof useToggleState>[0],
-  'isDisabled' | 'isReadonly' | 'isSelected'
-> & { checked?: boolean; disabled?: boolean; readOnly?: boolean }) {
+}: UseSwitchProps) => {
   const ariaProps: AriaSwitchProps = {
     isSelected: checked,
     isDisabled: disabled,
     isReadOnly: readOnly,
+    defaultSelected: defaultChecked,
     ...props,
   }
-  const state = useToggleState(ariaProps)
+  const state = useToggleState({
+    ...ariaProps,
+  })
   const ref = useRef<HTMLInputElement>(null)
-  const { inputProps, isSelected, isDisabled, isReadOnly } = useSwitch(
+  const { inputProps, isSelected, isDisabled, isReadOnly } = useAriaSwitch(
     { ...ariaProps },
     state,
     ref
   )
   const { focusProps, isFocusVisible } = useFocusRing()
 
+  return useMemo(
+    () => ({
+      inputProps: { ...inputProps, ...focusProps, ref },
+      styleProps: {
+        $focused: isFocusVisible,
+        $disabled: isDisabled,
+        $checked: isSelected,
+        $readOnly: isReadOnly,
+      },
+      state,
+    }),
+    [
+      focusProps,
+      inputProps,
+      isDisabled,
+      isFocusVisible,
+      isReadOnly,
+      isSelected,
+      state,
+    ]
+  )
+}
+
+export function Switch({ children, as, className, ...props }: SwitchProps) {
+  const { inputProps, styleProps } = useSwitch(props)
+
   return (
     <SwitchSC
-      $disabled={isDisabled}
-      $checked={isSelected}
-      $readOnly={isReadOnly}
+      as={as}
+      className={className}
+      {...styleProps}
     >
       <VisuallyHidden>
-        <input
-          {...inputProps}
-          {...focusProps}
-          ref={ref}
-        />
+        <input {...inputProps} />
       </VisuallyHidden>
-      <SwitchToggleSC
-        $focused={isFocusVisible}
-        $disabled={isDisabled}
-        $checked={isSelected}
-      >
-        <SwitchHandleSC
-          $disabled={isDisabled}
-          $checked={isSelected}
-        />
+      <SwitchToggleSC {...styleProps}>
+        <SwitchHandleSC {...styleProps} />
       </SwitchToggleSC>
       <div className="label">{children}</div>
     </SwitchSC>

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "lib": ["ESNext", "DOM"],
+    "lib": ["ESNext", "ES2021", "DOM"],
     "jsx": "react-jsx",
     "allowJs": true,
     "module": "ESNext",

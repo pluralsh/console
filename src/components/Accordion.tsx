@@ -10,7 +10,7 @@ import {
   useState,
 } from 'react'
 import React from 'react'
-import { animated, useSpring } from 'react-spring'
+import { useSpring } from 'react-spring'
 import styled, { useTheme } from 'styled-components'
 
 import useResizeObserver from '../hooks/useResizeObserver'
@@ -18,6 +18,7 @@ import { type UseDisclosureProps, useDisclosure } from '../hooks/useDisclosure'
 import { CaretDownIcon } from '../icons'
 
 import Card from './Card'
+import { AnimatedDiv } from './AnimatedDiv'
 
 const paddingTransition = '0.2s ease'
 
@@ -133,17 +134,19 @@ function AccordionContentUnstyled({
   const mOffset = theme.spacing.medium - theme.spacing.small
 
   return (
-    <animated.div
-      style={{
-        overflow: 'hidden',
-        ...(!_unstyled
-          ? {
-              marginTop: -mOffset,
-              marginBottom: isOpen ? 0 : mOffset,
-            }
-          : {}),
-        ...springs,
-      }}
+    <AnimatedDiv
+      style={
+        {
+          overflow: 'hidden',
+          ...(!_unstyled
+            ? {
+                marginTop: -mOffset,
+                marginBottom: isOpen ? 0 : mOffset,
+              }
+            : {}),
+          ...springs,
+        } as any
+      }
     >
       <div
         className={className}
@@ -152,7 +155,7 @@ function AccordionContentUnstyled({
       >
         {children}
       </div>
-    </animated.div>
+    </AnimatedDiv>
   )
 }
 const AccordionContent = styled(AccordionContentUnstyled)(

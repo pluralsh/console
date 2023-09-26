@@ -15,7 +15,7 @@ import {
   useState,
 } from 'react'
 import classNames from 'classnames'
-import { animated, useSpring } from 'react-spring'
+import { useSpring } from 'react-spring'
 import useMeasure from 'react-use-measure'
 import styled, { useTheme } from 'styled-components'
 import { type ImmerReducer, useImmerReducer } from 'use-immer'
@@ -27,6 +27,7 @@ import { CaretRightIcon } from '../icons'
 
 import { useNavigationContext } from './contexts/NavigationContext'
 import Tab, { TAB_INDICATOR_THICKNESS } from './Tab'
+import { AnimatedDiv } from './AnimatedDiv'
 
 export type SideNavProps = {
   desktop: boolean
@@ -396,7 +397,7 @@ export function TreeNavEntry({
         {label}
       </NavLink>
       {Children.count(children) > 0 && (
-        <animated.div
+        <AnimatedDiv
           style={{
             ...(prevHeight ? expand : { height: isOpen ? 'auto' : '0' }),
             overflow: 'hidden',
@@ -409,7 +410,7 @@ export function TreeNavEntry({
               {children}
             </SubSectionsList>
           </KeyboardNavContext.Provider>
-        </animated.div>
+        </AnimatedDiv>
       )}
     </NavEntryContext.Provider>
   )

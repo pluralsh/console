@@ -1,18 +1,13 @@
-import { type StorybookConfig } from '@storybook/builder-vite'
-import { mergeConfig } from 'vite'
-
-import viteConfig from '../vite.config'
+import { type StorybookConfig } from '@storybook/react-vite'
 
 const config: StorybookConfig = {
   stories: ['../src/**/*.stories.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],
-  addons: ['@storybook/addon-links', '@storybook/addon-essentials', '@storybook/addon-interactions'],
-  framework: {
-    name: '@storybook/react-vite',
-  },
-  core: {
-    builder: '@storybook/builder-vite',
-  },
-  viteFinal: async config => (mergeConfig(config, viteConfig)),
+  addons: [
+    '@storybook/addon-links',
+    '@storybook/addon-essentials',
+    '@storybook/addon-interactions',
+  ],
+  framework: '@storybook/react-vite',
 }
 
 export default config

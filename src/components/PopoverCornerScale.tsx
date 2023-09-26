@@ -14,7 +14,7 @@ import { Popover, type PopoverProps } from './ReactAriaPopover'
 type PopoverCornerScaleProps = {
   floating: UseFloatingReturn<any>
   children: ReactNode
-} & Pick<PopoverProps, 'isOpen' | 'onClose' | 'popoverRef'> // &
+} & Pick<PopoverProps, 'isOpen' | 'onClose' | 'popoverRef'>
 
 export const PopoverWrapper = styled.div<{
   $isOpen: boolean
@@ -29,7 +29,7 @@ export const PopoverWrapper = styled.div<{
   },
 }))
 
-const Animated = styled(animated.div)((_) => ({
+const Animated = styled(animated.div)<any>((_) => ({
   display: 'flex',
 }))
 

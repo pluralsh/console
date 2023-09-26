@@ -9,11 +9,13 @@ import {
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { type UseTransitionProps, animated, useTransition } from 'react-spring'
+import { type UseTransitionProps, useTransition } from 'react-spring'
 import { isNil } from 'lodash-es'
 import styled, { useTheme } from 'styled-components'
 
 import usePrevious from '../hooks/usePrevious'
+
+import { AnimatedDiv } from './AnimatedDiv'
 
 const DIRECTIONS = ['up', 'down', 'left', 'right'] as const
 
@@ -290,13 +292,13 @@ function LayerRef(
       margin={margin}
     >
       {transitions((styles) => (
-        <animated.div
+        <AnimatedDiv
           className="animated"
           ref={finalRef}
           style={{ ...styles }}
         >
           {children}
-        </animated.div>
+        </AnimatedDiv>
       ))}
     </LayerWrapper>
   )
