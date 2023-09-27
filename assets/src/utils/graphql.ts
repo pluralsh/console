@@ -92,3 +92,21 @@ export function deepFetch(map, path) {
 
   return deepFetch(map[key], path.slice(1))
 }
+
+export type Edge<N> = { node?: N | null }
+export type Edges<N> = (Edge<N> | null)[]
+export type Connection<N> = {
+  edges?: Edges<N> | null
+}
+export type PaginatedResult<N> = Connection<N> & {
+  pageInfo: { endCursor?: string | null | undefined; hasNextPage: boolean }
+}
+
+export function mapExistingNodes<N>(connection?: Connection<N> | null) {
+  if (!connection?.edges) {
+    return undefined
+  }
+  const { edges } = connection
+
+  return (edges || []).filter((edge) => edge?.node, [] as N[])
+}

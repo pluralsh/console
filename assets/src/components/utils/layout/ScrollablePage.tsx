@@ -62,7 +62,7 @@ export function ScrollablePage({
   scrollRef,
   ...props
 }: {
-  heading: ReactNode
+  heading?: ReactNode
   headingContent?: ReactNode | undefined
   contentStyles?: CSSProperties
   children: ReactNode
@@ -73,7 +73,7 @@ export function ScrollablePage({
 } & FlexProps) {
   return (
     <>
-      {heading && (
+      {(heading || headingContent) && (
         <Div paddingRight={scrollable && fullWidth ? 'large' : undefined}>
           <Div
             position="relative"
