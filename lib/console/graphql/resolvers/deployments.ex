@@ -82,6 +82,10 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   end
 
   def resolve_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
+  def resolve_cluster(%{handle: handle}, %{context: %{current_user: user}}) do
+    Clusters.find!(handle)
+    |> allow(user, :read)
+  end
   def resolve_cluster(%{id: id}, %{context: %{current_user: user}}) do
     Clusters.get_cluster(id)
     |> allow(user, :read)
@@ -92,6 +96,10 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> allow(user, :read)
   end
 
+  def resolve_service(%{cluster: _, name: _} = args, ctx) do
+    fetch_service(args)
+    |> allow(actor(ctx), :name)
+  end
   def resolve_service(%{id: id}, ctx) do
     Services.get_service!(id)
     |> allow(actor(ctx), :read)
@@ -130,18 +138,34 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def update_provider(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Clusters.update_provider(attrs, id, user)
 
+  def create_service(%{attributes: attrs, cluster: cluster}, %{context: %{current_user: user}}) when is_binary(cluster) do
+    cluster = Clusters.find!(cluster)
+    Services.create_service(attrs, cluster.id, user)
+  end
   def create_service(%{attributes: attrs, cluster_id: id}, %{context: %{current_user: user}}),
     do: Services.create_service(attrs, id, user)
 
+  def update_service(%{attributes: attrs, cluster: _, name: _} = args, %{context: %{current_user: user}}) do
+    svc = fetch_service(args)
+    Services.update_service(attrs, svc.id, user)
+  end
   def update_service(%{attributes: attrs, id: id}, %{context: %{current_user: user}}),
     do: Services.update_service(attrs, id, user)
 
+  def delete_service(%{cluster: _, name: _} = args, %{context: %{current_user: user}}) do
+    svc = fetch_service(args)
+    Services.delete_service(svc.id, user)
+  end
   def delete_service(%{id: id}, %{context: %{current_user: user}}),
     do: Services.delete_service(id, user)
 
   def clone_service(%{service_id: sid, cluster_id: cid, attributes: attrs}, %{context: %{current_user: user}}),
     do: Services.clone_service(attrs, sid, cid, user)
 
+  def rollback(%{cluster: _, name: _, revision_id: rev} = args, %{context: %{current_user: user}}) do
+    svc = fetch_service(args)
+    Services.rollback(rev, svc.id, user)
+  end
   def rollback(%{id: id, revision_id: rev}, %{context: %{current_user: user}}),
     do: Services.rollback(rev, id, user)
 
@@ -154,6 +178,10 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def update_settings(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Settings.update(attrs, user)
 
+  def delete_service(%{cluster: _, name: _, attributes: attrs} = args, %{context: %{current_user: user}}) do
+    svc = fetch_service(args)
+    Global.create(attrs, svc.id, user)
+  end
   def create_global_service(%{service_id: sid, attributes: attrs}, %{context: %{current_user: user}}),
     do: Global.create(attrs, sid, user)
 
@@ -184,4 +212,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   defp rbac_args(%{provider_id: prov_id}), do: {&Clusters.provider_rbac/3, prov_id}
   defp rbac_args(%{cluster_id: prov_id}), do: {&Clusters.rbac/3, prov_id}
   defp rbac_args(%{service_id: prov_id}), do: {&Services.rbac/3, prov_id}
+
+  defp fetch_service(%{cluster: cluster, name: name}) do
+    cluster = Clusters.find!(cluster)
+    Services.get_service_by_name!(cluster.id, name)
+  end
 end

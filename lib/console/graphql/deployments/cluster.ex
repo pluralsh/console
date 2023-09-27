@@ -4,6 +4,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   input_object :cluster_attributes do
     field :name,           non_null(:string)
+    field :handle,         :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :provider_id,    :id
     field :version,        non_null(:string)
     field :node_pools,     list_of(:node_pool_attributes)
@@ -98,6 +99,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :name,            non_null(:string), description: "human readable name of this cluster, will also translate to cloud k8s name"
     field :version,         :string, description: "desired k8s version for the cluster"
     field :current_version, :string, description: "current k8s version as told to us by the deployment operator"
+    field :handle,          :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
 
     field :deleted_at, :datetime, description: "when this cluster was scheduled for deletion"
     field :pinged_at,  :datetime, description: "last time the deploy operator pinged this cluster"
@@ -202,8 +204,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :cluster, :cluster do
       middleware Authenticated, :cluster
       arg :id, :id
+      arg :handle, :string
 
-      resolve &Deployments.resolve_cluster/2
+      safe_resolve &Deployments.resolve_cluster/2
     end
 
     @desc "fetches an individual cluster provider"

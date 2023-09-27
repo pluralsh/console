@@ -19,6 +19,7 @@ defmodule Console.Deployments.Init do
       Clusters.create_cluster(%{
         name: Console.conf(:cluster_name),
         self: true,
+        handle: "mgmt",
         version: "1.24"
       }, bot)
     end)

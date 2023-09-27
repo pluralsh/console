@@ -11,6 +11,17 @@ defmodule Console.Deployments.Clusters do
 
   def get_cluster(id), do: Console.Repo.get(Cluster, id)
 
+  def get_cluster_by_handle(handle), do: Console.Repo.get_by(Cluster, handle: handle)
+
+  def get_cluster_by_handle!(handle), do: Console.Repo.get_by!(Cluster, handle: handle)
+
+  def find!(identifier) do
+    case Uniq.UUID.parse(identifier) do
+      {:ok, _} -> get_cluster!(identifier)
+      _ -> get_cluster_by_handle!(identifier)
+    end
+  end
+
   def get_cluster!(id), do: Console.Repo.get!(Cluster, id)
 
   def get_provider!(id), do: Console.Repo.get!(ClusterProvider, id)

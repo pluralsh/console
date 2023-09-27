@@ -223,6 +223,33 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert Enum.all?(found["components"], & &1["state"] == "RUNNING")
     end
 
+    test "it can fetch a service by handle/name" do
+      user = admin_user()
+      cluster = insert(:cluster, handle: "test")
+      repository = insert(:git_repository)
+      {:ok, service} = create_service(cluster, user, [
+        name: "test",
+        namespace: "test",
+        git: %{ref: "master", folder: "k8s"},
+        repository_id: repository.id,
+        configuration: [%{name: "name", value: "value"}]
+      ])
+
+      {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
+        query Service($cluster: String!, $name: String!) {
+          serviceDeployment(cluster: $cluster, name: $name) {
+            id
+            name
+            namespace
+          }
+        }
+      """, %{"cluster" => "test", "name" => "test"}, %{current_user: user})
+
+      assert found["id"] == service.id
+      assert found["name"] == "test"
+      assert found["namespace"] == "test"
+    end
+
     test "clusters can fetch a services configuration and revisions" do
       user = admin_user()
       cluster = insert(:cluster)

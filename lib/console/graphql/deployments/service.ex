@@ -176,9 +176,11 @@ defmodule Console.GraphQl.Deployments.Service do
     @desc "fetches details of this service deployment, and can be called by the deploy operator"
     field :service_deployment, :service_deployment do
       middleware Authenticated, :cluster
-      arg :id, non_null(:id)
+      arg :id,      :id
+      arg :cluster, :string, description: "the handle of the cluster for this service"
+      arg :name,    :string
 
-      resolve &Deployments.resolve_service/2
+      safe_resolve &Deployments.resolve_service/2
     end
   end
 
@@ -198,15 +200,17 @@ defmodule Console.GraphQl.Deployments.Service do
     connection field :service_deployments, node_type: :service_deployment do
       middleware Authenticated
       arg :cluster_id, :id
+      arg :cluster,    :string, description: "the handle of the cluster for this service"
 
-      resolve &Deployments.list_services/2
+      safe_resolve &Deployments.list_services/2
     end
   end
 
   object :service_mutations do
     field :create_service_deployment, :service_deployment do
       middleware Authenticated
-      arg :cluster_id, non_null(:id)
+      arg :cluster_id, :id
+      arg :cluster,    :string, description: "the handle of the cluster for this service"
       arg :attributes, non_null(:service_deployment_attributes)
 
       safe_resolve &Deployments.create_service/2
@@ -230,7 +234,9 @@ defmodule Console.GraphQl.Deployments.Service do
     @desc "rewires this service to use the given revision id"
     field :rollback_service, :service_deployment do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id,          :id
+      arg :cluster,     :string, description: "the handle of the cluster for this service"
+      arg :name,        :string
       arg :revision_id, non_null(:id)
 
       safe_resolve &Deployments.rollback/2
@@ -239,7 +245,9 @@ defmodule Console.GraphQl.Deployments.Service do
     @desc "clones the spec of the given service to be deployed either into a new namespace or new cluster"
     field :clone_service, :service_deployment do
       middleware Authenticated
-      arg :service_id, non_null(:id)
+      arg :service_id, :id
+      arg :cluster,    :string, description: "the handle of the cluster for this service"
+      arg :name,       :string
       arg :cluster_id, non_null(:id)
       arg :attributes, non_null(:service_clone_attributes)
 
@@ -248,7 +256,9 @@ defmodule Console.GraphQl.Deployments.Service do
 
     field :create_global_service, :global_service do
       middleware Authenticated
-      arg :service_id, non_null(:id)
+      arg :service_id, :id
+      arg :cluster,    :string, description: "the handle of the cluster for this service"
+      arg :name,       :string
       arg :attributes, non_null(:global_service_attributes)
 
       safe_resolve &Deployments.create_global_service/2

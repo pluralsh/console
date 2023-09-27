@@ -25,6 +25,7 @@ defmodule Console.Schema.Cluster do
   end
 
   schema "clusters" do
+    field :handle,          :string
     field :name,            :string
     field :self,            :boolean
 
@@ -119,7 +120,7 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: not is_nil(c.deleted_at))
   end
 
-  @valid ~w(provider_id service_id self version current_version name)a
+  @valid ~w(provider_id service_id self version current_version name handle)a
 
   def changeset(model, attrs \\ %{}) do
     model

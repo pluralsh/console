@@ -12,6 +12,7 @@ defmodule Console.Deployments.Services do
 
   def get_service(id), do: Console.Repo.get(Service, id)
 
+  def get_service_by_name!(cid, name), do: Console.Repo.get_by!(Service, name: name, cluster_id: cid)
   def get_service_by_name(cid, name), do: Console.Repo.get_by(Service, name: name, cluster_id: cid)
 
   def get_revision!(id), do: Repo.get!(Revision, id)
