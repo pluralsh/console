@@ -23,7 +23,7 @@ export type Scalars = {
    * string, including UTC timezone ("Z"). The parsed date and time string will
    * be converted to UTC if there is an offset.
    */
-  DateTime: { input: Date; output: Date; }
+  DateTime: { input: string; output: string; }
   Map: { input: Map<string, unknown>; output: Map<string, unknown>; }
   UploadOrUrl: { input: string; output: string; }
   Yaml: { input: unknown; output: unknown; }
@@ -2030,6 +2030,7 @@ export type PlanFeatureAttributes = {
 export type PlanFeatures = {
   __typename?: 'PlanFeatures';
   audit?: Maybe<Scalars['Boolean']['output']>;
+  cd?: Maybe<Scalars['Boolean']['output']>;
   databaseManagement?: Maybe<Scalars['Boolean']['output']>;
   userManagement?: Maybe<Scalars['Boolean']['output']>;
   vpn?: Maybe<Scalars['Boolean']['output']>;

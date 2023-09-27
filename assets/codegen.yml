@@ -28,7 +28,7 @@ config:
   scalars:
     Map: Map<string, unknown>
     UploadOrUrl: string
-    DateTime: Date
+    DateTime: string
     Yaml: unknown
 hooks:
   afterAllFileWrite:

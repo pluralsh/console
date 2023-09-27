@@ -8,6 +8,7 @@ import {
   DatabaseIcon,
   DiscordIcon,
   GitHubLogoIcon,
+  GitPullIcon,
   ListIcon,
   LogoutIcon,
   PeopleIcon,
@@ -27,6 +28,8 @@ import { useMutation } from '@apollo/client'
 import { updateCache } from 'utils/graphql'
 import styled from 'styled-components'
 import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
+
+import { CD_BASE_PATH as CD_PATH } from 'routes/cdRoutes'
 
 import { LoginContext } from '../contexts'
 
@@ -62,6 +65,11 @@ const MENU_ITEMS: MenuItem[] = [
     text: 'Pods',
     icon: <ApiIcon />,
     path: '/pods',
+  },
+  {
+    text: 'Continuous deployment',
+    icon: <GitPullIcon />,
+    path: `/${CD_PATH}`,
   },
   {
     text: 'Database management',

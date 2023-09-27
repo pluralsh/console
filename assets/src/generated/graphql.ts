@@ -17,15 +17,64 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  /**
-   * The `DateTime` scalar type represents a date and time in the UTC
-   * timezone. The DateTime appears in a JSON response as an ISO8601 formatted
-   * string, including UTC timezone ("Z"). The parsed date and time string will
-   * be converted to UTC if there is an offset.
-   */
-  DateTime: { input: Date; output: Date; }
+  DateTime: { input: string; output: string; }
   Long: { input: any; output: any; }
   Map: { input: Map<string, unknown>; output: Map<string, unknown>; }
+};
+
+export type AccessToken = {
+  __typename?: 'AccessToken';
+  audits?: Maybe<AccessTokenAuditConnection>;
+  id?: Maybe<Scalars['ID']['output']>;
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  token?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type AccessTokenAuditsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type AccessTokenAudit = {
+  __typename?: 'AccessTokenAudit';
+  city?: Maybe<Scalars['String']['output']>;
+  count?: Maybe<Scalars['Int']['output']>;
+  country?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['ID']['output']>;
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  ip?: Maybe<Scalars['String']['output']>;
+  latitude?: Maybe<Scalars['String']['output']>;
+  longitude?: Maybe<Scalars['String']['output']>;
+  timestamp?: Maybe<Scalars['DateTime']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type AccessTokenAuditConnection = {
+  __typename?: 'AccessTokenAuditConnection';
+  edges?: Maybe<Array<Maybe<AccessTokenAuditEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AccessTokenAuditEdge = {
+  __typename?: 'AccessTokenAuditEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AccessTokenAudit>;
+};
+
+export type AccessTokenConnection = {
+  __typename?: 'AccessTokenConnection';
+  edges?: Maybe<Array<Maybe<AccessTokenEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AccessTokenEdge = {
+  __typename?: 'AccessTokenEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AccessToken>;
 };
 
 export type Account = {
@@ -34,6 +83,23 @@ export type Account = {
   delinquentAt?: Maybe<Scalars['DateTime']['output']>;
   grandfatheredUntil?: Maybe<Scalars['DateTime']['output']>;
   subscription?: Maybe<PluralSubscription>;
+};
+
+/** a representation of a kubernetes api deprecation */
+export type ApiDeprecation = {
+  __typename?: 'ApiDeprecation';
+  /** the kubernetes version the replacement api was created in */
+  availableIn?: Maybe<Scalars['String']['output']>;
+  /** whether you cannot safely upgrade to the next kubernetes version if this deprecation exists */
+  blocking?: Maybe<Scalars['Boolean']['output']>;
+  /** the component of this deprecation */
+  component?: Maybe<ServiceComponent>;
+  /** the kubernetes version the deprecation was posted */
+  deprecatedIn?: Maybe<Scalars['String']['output']>;
+  /** the kubernetes version the api version will be removed and unusable in */
+  removedIn?: Maybe<Scalars['String']['output']>;
+  /** the api you can replace this resource with */
+  replacement?: Maybe<Scalars['String']['output']>;
 };
 
 export type Application = {
@@ -133,14 +199,24 @@ export type AuditMetric = {
 
 export enum AuditType {
   Build = 'BUILD',
+  Cluster = 'CLUSTER',
+  ClusterProvider = 'CLUSTER_PROVIDER',
   Configuration = 'CONFIGURATION',
+  DeploymentSettings = 'DEPLOYMENT_SETTINGS',
+  GitRepository = 'GIT_REPOSITORY',
   Group = 'GROUP',
   GroupMember = 'GROUP_MEMBER',
   Pod = 'POD',
   Policy = 'POLICY',
   Role = 'ROLE',
+  Service = 'SERVICE',
   TempToken = 'TEMP_TOKEN',
   User = 'USER'
+}
+
+export enum AuthMethod {
+  Basic = 'BASIC',
+  Ssh = 'SSH'
 }
 
 export enum AutoscalingTarget {
@@ -154,6 +230,22 @@ export type AvailableFeatures = {
   databaseManagement?: Maybe<Scalars['Boolean']['output']>;
   userManagement?: Maybe<Scalars['Boolean']['output']>;
   vpn?: Maybe<Scalars['Boolean']['output']>;
+};
+
+/** aws node customizations */
+export type AwsCloud = {
+  __typename?: 'AwsCloud';
+  /** custom launch template for your nodes, useful for Golden AMI setups */
+  launchTemplateId?: Maybe<Scalars['String']['output']>;
+};
+
+export type AwsCloudAttributes = {
+  launchTemplateId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AwsSettingsAttributes = {
+  accessKeyId: Scalars['String']['input'];
+  secretAccessKey: Scalars['String']['input'];
 };
 
 export type BindingAttributes = {
@@ -272,12 +364,141 @@ export type CloneAttributes = {
   uid?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type CloudProviderSettingsAttributes = {
+  aws?: InputMaybe<AwsSettingsAttributes>;
+  gcp?: InputMaybe<GcpSettingsAttributes>;
+};
+
+/** cloud specific settings for a node pool */
+export type CloudSettings = {
+  __typename?: 'CloudSettings';
+  aws?: Maybe<AwsCloud>;
+};
+
+export type CloudSettingsAttributes = {
+  aws?: InputMaybe<AwsCloudAttributes>;
+};
+
+/** a representation of a cluster you can deploy to */
+export type Cluster = {
+  __typename?: 'Cluster';
+  /** all api deprecations for all services in this cluster */
+  apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
+  /** current k8s version as told to us by the deployment operator */
+  currentVersion?: Maybe<Scalars['String']['output']>;
+  /** when this cluster was scheduled for deletion */
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** whether the current user can edit this cluster */
+  editable?: Maybe<Scalars['Boolean']['output']>;
+  /** internal id of this cluster */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** human readable name of this cluster, will also translate to cloud k8s name */
+  name: Scalars['String']['output'];
+  /** list of node pool specs managed by CAPI */
+  nodePools?: Maybe<Array<Maybe<NodePool>>>;
+  /** last time the deploy operator pinged this cluster */
+  pingedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the provider we use to create this cluster (null if BYOK) */
+  provider?: Maybe<ClusterProvider>;
+  /** read policy for this cluster */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** the service used to deploy the CAPI resources of this cluster */
+  service?: Maybe<ServiceDeployment>;
+  /** key/value tags to filter clusters */
+  tags?: Maybe<Array<Maybe<Tag>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** desired k8s version for the cluster */
+  version: Scalars['String']['output'];
+  /** write policy for this cluster */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+export type ClusterAttributes = {
+  name: Scalars['String']['input'];
+  nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
+  providerId?: InputMaybe<Scalars['ID']['input']>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
+  version: Scalars['String']['input'];
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type ClusterConnection = {
+  __typename?: 'ClusterConnection';
+  edges?: Maybe<Array<Maybe<ClusterEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterEdge = {
+  __typename?: 'ClusterEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Cluster>;
+};
+
 export type ClusterInfo = {
   __typename?: 'ClusterInfo';
   gitCommit?: Maybe<Scalars['String']['output']>;
   gitVersion?: Maybe<Scalars['String']['output']>;
   platform?: Maybe<Scalars['String']['output']>;
   version?: Maybe<Scalars['String']['output']>;
+};
+
+export type ClusterPing = {
+  currentVersion: Scalars['String']['input'];
+};
+
+/** a CAPI provider for a cluster, cloud is inferred from name if not provided manually */
+export type ClusterProvider = {
+  __typename?: 'ClusterProvider';
+  /** the name of the cloud service for this provider */
+  cloud: Scalars['String']['output'];
+  /** whether the current user can edit this resource */
+  editable?: Maybe<Scalars['Boolean']['output']>;
+  /** the details of how cluster manifests will be synced from git when created with this provider */
+  git: GitRef;
+  /** the id of this provider */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a human readable name for the provider, globally unique */
+  name: Scalars['String']['output'];
+  /** the namespace the CAPI resources are deployed into */
+  namespace: Scalars['String']['output'];
+  /** the repository used to serve cluster manifests */
+  repository?: Maybe<GitRepository>;
+  /** the service of the CAPI controller itself */
+  service?: Maybe<ServiceDeployment>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ClusterProviderAttributes = {
+  cloud?: InputMaybe<Scalars['String']['input']>;
+  cloudSettings?: InputMaybe<CloudProviderSettingsAttributes>;
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type ClusterProviderConnection = {
+  __typename?: 'ClusterProviderConnection';
+  edges?: Maybe<Array<Maybe<ClusterProviderEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterProviderEdge = {
+  __typename?: 'ClusterProviderEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ClusterProvider>;
+};
+
+export type ClusterProviderUpdateAttributes = {
+  cloudSettings?: InputMaybe<CloudProviderSettingsAttributes>;
+};
+
+export type ClusterUpdateAttributes = {
+  nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  version: Scalars['String']['input'];
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export type Command = {
@@ -314,6 +535,27 @@ export type Component = {
   __typename?: 'Component';
   group: Scalars['String']['output'];
   kind: Scalars['String']['output'];
+};
+
+export type ComponentAttributes = {
+  group: Scalars['String']['input'];
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  state?: InputMaybe<ComponentState>;
+  synced: Scalars['Boolean']['input'];
+  version: Scalars['String']['input'];
+};
+
+export enum ComponentState {
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Running = 'RUNNING'
+}
+
+export type ConfigAttributes = {
+  name: Scalars['String']['input'];
+  value: Scalars['String']['input'];
 };
 
 export type ConfigMap = {
@@ -538,6 +780,36 @@ export type Deployment = {
   status: DeploymentStatus;
 };
 
+/** global settings for CD, these specify global read/write policies and also allow for customization of the repos for CAPI resources and the deploy operator */
+export type DeploymentSettings = {
+  __typename?: 'DeploymentSettings';
+  /** the repo to fetch CAPI manifests from, for both providers and clusters */
+  artifactRepository?: Maybe<GitRepository>;
+  /** policy for creation of new clusters */
+  createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** the repo to fetch the deploy operators manifests from */
+  deployerRepository?: Maybe<GitRepository>;
+  /** policy for managing git repos */
+  gitBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  /** read policy across all clusters */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** write policy across all clusters */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+export type DeploymentSettingsAttributes = {
+  artifactRepositoryId?: InputMaybe<Scalars['ID']['input']>;
+  createBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  deployerRepositoryId?: InputMaybe<Scalars['ID']['input']>;
+  gitBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
 export type DeploymentSpec = {
   __typename?: 'DeploymentSpec';
   replicas?: Maybe<Scalars['Int']['output']>;
@@ -575,10 +847,100 @@ export type FileContent = {
   path?: Maybe<Scalars['String']['output']>;
 };
 
+export type GcpSettingsAttributes = {
+  applicationCredentials: Scalars['String']['input'];
+};
+
+export type GitAttributes = {
+  /** a passphrase to decrypt the given private key */
+  passphrase?: InputMaybe<Scalars['String']['input']>;
+  /** the http password for http authenticated repos */
+  password?: InputMaybe<Scalars['String']['input']>;
+  /** an ssh private key to use with this repo if an ssh url was given */
+  privateKey?: InputMaybe<Scalars['String']['input']>;
+  /** the url of this repository */
+  url: Scalars['String']['input'];
+  /** the http username for authenticated http repos, defaults to apiKey for github */
+  username?: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum GitHealth {
+  Failed = 'FAILED',
+  Pullable = 'PULLABLE'
+}
+
+/** a representation of where to pull manifests from git */
+export type GitRef = {
+  __typename?: 'GitRef';
+  /** the folder manifests live under */
+  folder: Scalars['String']['output'];
+  /** a general git ref, either a branch name or commit sha understandable by `git checkout <ref>` */
+  ref: Scalars['String']['output'];
+};
+
+export type GitRefAttributes = {
+  folder: Scalars['String']['input'];
+  ref: Scalars['String']['input'];
+};
+
+/** a git repository available for deployments */
+export type GitRepository = {
+  __typename?: 'GitRepository';
+  /** whether its a http or ssh url */
+  authMethod?: Maybe<AuthMethod>;
+  /** whether the current user can edit this repo */
+  editable?: Maybe<Scalars['Boolean']['output']>;
+  /** whether we can currently pull this repo with the provided credentials */
+  health?: Maybe<GitHealth>;
+  /** internal id of this repository */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the last successsful git pull timestamp */
+  pulledAt?: Maybe<Scalars['DateTime']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the git url of the repository, either https or ssh supported */
+  url: Scalars['String']['output'];
+};
+
+export type GitRepositoryConnection = {
+  __typename?: 'GitRepositoryConnection';
+  edges?: Maybe<Array<Maybe<GitRepositoryEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type GitRepositoryEdge = {
+  __typename?: 'GitRepositoryEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<GitRepository>;
+};
+
 export type GitStatus = {
   __typename?: 'GitStatus';
   cloned?: Maybe<Scalars['Boolean']['output']>;
   output?: Maybe<Scalars['String']['output']>;
+};
+
+/** a rules based mechanism to redeploy a service across a fleet of clusters */
+export type GlobalService = {
+  __typename?: 'GlobalService';
+  /** internal id of this global service */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a human readable name for this global service */
+  name: Scalars['String']['output'];
+  /** whether to only apply to clusters with this provider */
+  provider?: Maybe<ClusterProvider>;
+  /** the service to replicate across clusters */
+  service?: Maybe<ServiceDeployment>;
+  /** a set of tags to select clusters for this global service */
+  tags?: Maybe<Array<Maybe<Tag>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type GlobalServiceAttributes = {
+  name: Scalars['String']['input'];
+  providerId?: InputMaybe<Scalars['ID']['input']>;
+  tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
 };
 
 export type Group = {
@@ -900,6 +1262,39 @@ export type NodeMetric = {
   window?: Maybe<Scalars['String']['output']>;
 };
 
+/** a specification for a node pool to be created in this cluster */
+export type NodePool = {
+  __typename?: 'NodePool';
+  /** cloud specific settings for the node groups */
+  cloudSettings?: Maybe<CloudSettings>;
+  /** internal id for this node pool */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the type of node to use (usually cloud-specific) */
+  instanceType: Scalars['String']['output'];
+  /** kubernetes labels to apply to the nodes in this pool, useful for node selectors */
+  labels?: Maybe<Scalars['Map']['output']>;
+  /** maximum number of instances in this node pool */
+  maxSize: Scalars['Int']['output'];
+  /** minimum number of instances in this node pool */
+  minSize: Scalars['Int']['output'];
+  /** name of this node pool (must be unique) */
+  name: Scalars['String']['output'];
+  /** any taints you'd want to apply to a node, for eg preventing scheduling on spot instances */
+  taints?: Maybe<Array<Maybe<Taint>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type NodePoolAttributes = {
+  cloudSettings?: InputMaybe<CloudSettingsAttributes>;
+  instanceType: Scalars['String']['input'];
+  labels?: InputMaybe<Scalars['Map']['input']>;
+  maxSize: Scalars['Int']['input'];
+  minSize: Scalars['Int']['input'];
+  name: Scalars['String']['input'];
+  taints?: InputMaybe<Array<InputMaybe<TaintAttributes>>>;
+};
+
 export type NodeSpec = {
   __typename?: 'NodeSpec';
   podCidr?: Maybe<Scalars['String']['output']>;
@@ -1074,6 +1469,19 @@ export type PodStatus = {
   reason?: Maybe<Scalars['String']['output']>;
 };
 
+export type PolicyBinding = {
+  __typename?: 'PolicyBinding';
+  group?: Maybe<Group>;
+  id?: Maybe<Scalars['ID']['output']>;
+  user?: Maybe<User>;
+};
+
+export type PolicyBindingAttributes = {
+  groupId?: InputMaybe<Scalars['ID']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 export type Port = {
   __typename?: 'Port';
   containerPort?: Maybe<Scalars['Int']['output']>;
@@ -1121,6 +1529,11 @@ export type PrometheusDatasource = {
   format?: Maybe<Scalars['String']['output']>;
   legend?: Maybe<Scalars['String']['output']>;
   query: Scalars['String']['output'];
+};
+
+export type RbacAttributes = {
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export enum ReadType {
@@ -1211,6 +1624,33 @@ export type Resources = {
   requests?: Maybe<ResourceSpec>;
 };
 
+/** a representation of a past revision of a service */
+export type Revision = {
+  __typename?: 'Revision';
+  /** git spec of the prior revision */
+  git: GitRef;
+  /** id of this revision */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the sha this service was pulled from */
+  sha?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the service's semver */
+  version: Scalars['String']['output'];
+};
+
+export type RevisionConnection = {
+  __typename?: 'RevisionConnection';
+  edges?: Maybe<Array<Maybe<RevisionEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type RevisionEdge = {
+  __typename?: 'RevisionEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Revision>;
+};
+
 export type Role = {
   __typename?: 'Role';
   description?: Maybe<Scalars['String']['output']>;
@@ -1262,15 +1702,26 @@ export type RootMutationType = {
   __typename?: 'RootMutationType';
   approveBuild?: Maybe<Build>;
   cancelBuild?: Maybe<Build>;
+  /** clones the spec of the given service to be deployed either into a new namespace or new cluster */
+  cloneService?: Maybe<ServiceDeployment>;
+  createAccessToken?: Maybe<AccessToken>;
   createBuild?: Maybe<Build>;
+  createCluster?: Maybe<Cluster>;
+  createClusterProvider?: Maybe<ClusterProvider>;
+  createGitRepository?: Maybe<GitRepository>;
+  createGlobalService?: Maybe<GlobalService>;
   createGroup?: Maybe<Group>;
   createGroupMember?: Maybe<GroupMember>;
   createInvite?: Maybe<Invite>;
   createPeer?: Maybe<WireguardPeer>;
   createRole?: Maybe<Role>;
+  createServiceDeployment?: Maybe<ServiceDeployment>;
   createUpgradePolicy?: Maybe<UpgradePolicy>;
   createWebhook?: Maybe<Webhook>;
+  deleteAccessToken?: Maybe<AccessToken>;
   deleteCertificate?: Maybe<Scalars['Boolean']['output']>;
+  deleteCluster?: Maybe<Cluster>;
+  deleteGlobalService?: Maybe<GlobalService>;
   deleteGroup?: Maybe<Group>;
   deleteGroupMember?: Maybe<GroupMember>;
   deleteJob?: Maybe<Job>;
@@ -1278,6 +1729,7 @@ export type RootMutationType = {
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePod?: Maybe<Pod>;
   deleteRole?: Maybe<Role>;
+  deleteServiceDeployment?: Maybe<ServiceDeployment>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
   deleteUser?: Maybe<User>;
   deleteWebhook?: Maybe<Webhook>;
@@ -1288,14 +1740,26 @@ export type RootMutationType = {
   markRead?: Maybe<User>;
   oauthCallback?: Maybe<User>;
   overlayConfiguration?: Maybe<Build>;
+  /** a regular status ping to be sent by the deploy operator */
+  pingCluster?: Maybe<Cluster>;
   readNotifications?: Maybe<User>;
   restartBuild?: Maybe<Build>;
   restorePostgres?: Maybe<Postgresql>;
+  /** rewires this service to use the given revision id */
+  rollbackService?: Maybe<ServiceDeployment>;
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
+  updateCluster?: Maybe<Cluster>;
+  updateClusterProvider?: Maybe<ClusterProvider>;
   updateConfiguration?: Maybe<Configuration>;
+  updateDeploymentSettings?: Maybe<DeploymentSettings>;
   updateGroup?: Maybe<Group>;
+  /** a reusable mutation for updating rbac settings on core services */
+  updateRbac?: Maybe<Scalars['Boolean']['output']>;
   updateRole?: Maybe<Role>;
+  /** updates only the components of a given service, to be sent after deploy operator syncs */
+  updateServiceComponents?: Maybe<ServiceDeployment>;
+  updateServiceDeployment?: Maybe<ServiceDeployment>;
   updateSmtp?: Maybe<Smtp>;
   updateUser?: Maybe<User>;
 };
@@ -1311,8 +1775,36 @@ export type RootMutationTypeCancelBuildArgs = {
 };
 
 
+export type RootMutationTypeCloneServiceArgs = {
+  attributes: ServiceCloneAttributes;
+  clusterId: Scalars['ID']['input'];
+  serviceId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCreateBuildArgs = {
   attributes: BuildAttributes;
+};
+
+
+export type RootMutationTypeCreateClusterArgs = {
+  attributes: ClusterAttributes;
+};
+
+
+export type RootMutationTypeCreateClusterProviderArgs = {
+  attributes: ClusterProviderAttributes;
+};
+
+
+export type RootMutationTypeCreateGitRepositoryArgs = {
+  attributes: GitAttributes;
+};
+
+
+export type RootMutationTypeCreateGlobalServiceArgs = {
+  attributes: GlobalServiceAttributes;
+  serviceId: Scalars['ID']['input'];
 };
 
 
@@ -1344,6 +1836,12 @@ export type RootMutationTypeCreateRoleArgs = {
 };
 
 
+export type RootMutationTypeCreateServiceDeploymentArgs = {
+  attributes: ServiceDeploymentAttributes;
+  clusterId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCreateUpgradePolicyArgs = {
   attributes: UpgradePolicyAttributes;
 };
@@ -1354,9 +1852,24 @@ export type RootMutationTypeCreateWebhookArgs = {
 };
 
 
+export type RootMutationTypeDeleteAccessTokenArgs = {
+  token: Scalars['String']['input'];
+};
+
+
 export type RootMutationTypeDeleteCertificateArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeDeleteClusterArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteGlobalServiceArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1394,6 +1907,11 @@ export type RootMutationTypeDeletePodArgs = {
 
 
 export type RootMutationTypeDeleteRoleArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteServiceDeploymentArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -1456,6 +1974,11 @@ export type RootMutationTypeOverlayConfigurationArgs = {
 };
 
 
+export type RootMutationTypePingClusterArgs = {
+  attributes: ClusterPing;
+};
+
+
 export type RootMutationTypeRestartBuildArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1466,6 +1989,12 @@ export type RootMutationTypeRestorePostgresArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   timestamp: Scalars['DateTime']['input'];
+};
+
+
+export type RootMutationTypeRollbackServiceArgs = {
+  id: Scalars['ID']['input'];
+  revisionId: Scalars['ID']['input'];
 };
 
 
@@ -1481,11 +2010,28 @@ export type RootMutationTypeSignupArgs = {
 };
 
 
+export type RootMutationTypeUpdateClusterArgs = {
+  attributes: ClusterUpdateAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateClusterProviderArgs = {
+  attributes: ClusterProviderUpdateAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateConfigurationArgs = {
   content: Scalars['String']['input'];
   message?: InputMaybe<Scalars['String']['input']>;
   repository: Scalars['String']['input'];
   tool?: InputMaybe<Tool>;
+};
+
+
+export type RootMutationTypeUpdateDeploymentSettingsArgs = {
+  attributes: DeploymentSettingsAttributes;
 };
 
 
@@ -1495,8 +2041,29 @@ export type RootMutationTypeUpdateGroupArgs = {
 };
 
 
+export type RootMutationTypeUpdateRbacArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  providerId?: InputMaybe<Scalars['ID']['input']>;
+  rbac: RbacAttributes;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type RootMutationTypeUpdateRoleArgs = {
   attributes: RoleAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateServiceComponentsArgs = {
+  components?: InputMaybe<Array<InputMaybe<ComponentAttributes>>>;
+  errors?: InputMaybe<Array<InputMaybe<ServiceErrorAttributes>>>;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateServiceDeploymentArgs = {
+  attributes: ServiceUpdateAttributes;
   id: Scalars['ID']['input'];
 };
 
@@ -1513,6 +2080,8 @@ export type RootMutationTypeUpdateUserArgs = {
 
 export type RootQueryType = {
   __typename?: 'RootQueryType';
+  accessToken?: Maybe<AccessToken>;
+  accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
   ai?: Maybe<Scalars['String']['output']>;
   application?: Maybe<Application>;
@@ -1524,7 +2093,17 @@ export type RootQueryType = {
   builds?: Maybe<BuildConnection>;
   cachedPods?: Maybe<Array<Maybe<Pod>>>;
   certificate?: Maybe<Certificate>;
+  /** fetches an individual cluster */
+  cluster?: Maybe<Cluster>;
   clusterInfo?: Maybe<ClusterInfo>;
+  /** fetches an individual cluster provider */
+  clusterProvider?: Maybe<ClusterProvider>;
+  /** a relay connection of all providers visible to the current user */
+  clusterProviders?: Maybe<ClusterProviderConnection>;
+  /** the services deployed in the current cluster, to be polled by the deploy operator */
+  clusterServices?: Maybe<Array<Maybe<ServiceDeployment>>>;
+  /** a relay connection of all clusters visible to the current user */
+  clusters?: Maybe<ClusterConnection>;
   configMap?: Maybe<ConfigMap>;
   configMaps?: Maybe<Array<Maybe<ConfigMap>>>;
   configuration?: Maybe<ConsoleConfiguration>;
@@ -1534,7 +2113,9 @@ export type RootQueryType = {
   dashboard?: Maybe<Dashboard>;
   dashboards?: Maybe<Array<Maybe<Dashboard>>>;
   deployment?: Maybe<Deployment>;
+  deploymentSettings?: Maybe<DeploymentSettings>;
   externalToken?: Maybe<Scalars['String']['output']>;
+  gitRepositories?: Maybe<GitRepositoryConnection>;
   groupMembers?: Maybe<GroupMemberConnection>;
   groups?: Maybe<GroupConnection>;
   ingress?: Maybe<Ingress>;
@@ -1570,6 +2151,9 @@ export type RootQueryType = {
   secret?: Maybe<Secret>;
   secrets?: Maybe<Array<Maybe<Secret>>>;
   service?: Maybe<Service>;
+  /** fetches details of this service deployment, and can be called by the deploy operator */
+  serviceDeployment?: Maybe<ServiceDeployment>;
+  serviceDeployments?: Maybe<ServiceDeploymentConnection>;
   smtp?: Maybe<Smtp>;
   stack?: Maybe<Stack>;
   statefulSet?: Maybe<StatefulSet>;
@@ -1579,6 +2163,19 @@ export type RootQueryType = {
   webhooks?: Maybe<WebhookConnection>;
   wireguardPeer?: Maybe<WireguardPeer>;
   wireguardPeers?: Maybe<Array<Maybe<WireguardPeer>>>;
+};
+
+
+export type RootQueryTypeAccessTokenArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeAccessTokensArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1625,6 +2222,32 @@ export type RootQueryTypeCertificateArgs = {
 };
 
 
+export type RootQueryTypeClusterArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeClusterProviderArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeClusterProvidersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeClustersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type RootQueryTypeConfigMapArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -1664,6 +2287,14 @@ export type RootQueryTypeDashboardsArgs = {
 export type RootQueryTypeDeploymentArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeGitRepositoriesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1845,6 +2476,20 @@ export type RootQueryTypeSecretsArgs = {
 export type RootQueryTypeServiceArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeServiceDeploymentArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeServiceDeploymentsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -2034,6 +2679,135 @@ export type Service = {
   status: ServiceStatus;
 };
 
+export type ServiceCloneAttributes = {
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** representation of a kubernets component deployed by a service */
+export type ServiceComponent = {
+  __typename?: 'ServiceComponent';
+  /** any api deprecations discovered from this component */
+  apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
+  /** api group of this resource */
+  group?: Maybe<Scalars['String']['output']>;
+  /** internal id */
+  id: Scalars['ID']['output'];
+  /** api kind of this resource */
+  kind: Scalars['String']['output'];
+  /** kubernetes name of this resource */
+  name: Scalars['String']['output'];
+  /** kubernetes namespace of this resource */
+  namespace?: Maybe<Scalars['String']['output']>;
+  /** the service this component belongs to */
+  service?: Maybe<ServiceDeployment>;
+  /** kubernetes component health enum */
+  state?: Maybe<ComponentState>;
+  /** whether this component has been applied to the k8s api */
+  synced: Scalars['Boolean']['output'];
+  /** api version of this resource */
+  version?: Maybe<Scalars['String']['output']>;
+};
+
+/** a configuration item k/v pair */
+export type ServiceConfiguration = {
+  __typename?: 'ServiceConfiguration';
+  name: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+/** a reference to a service deployed from a git repo into a cluster */
+export type ServiceDeployment = {
+  __typename?: 'ServiceDeployment';
+  /** the cluster this service is deployed into */
+  cluster?: Maybe<Cluster>;
+  /** the kubernetes component of a service */
+  components?: Maybe<Array<Maybe<ServiceComponent>>>;
+  /** possibly secret configuration used to template the manifests of this service */
+  configuration?: Maybe<Array<Maybe<ServiceConfiguration>>>;
+  /** the time this service was scheduled for deletion */
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** whether this service is editable */
+  editable?: Maybe<Scalars['Boolean']['output']>;
+  /** a list of errors generated by the deployment operator */
+  errors?: Maybe<Array<Maybe<ServiceError>>>;
+  /** description on where in git the service's manifests should be fetched */
+  git: GitRef;
+  /** the global service this service is the source for */
+  globalService?: Maybe<GlobalService>;
+  /** internal id of this service */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** human readable name of this service, must be unique per cluster */
+  name: Scalars['String']['output'];
+  /** kubernetes namespace this service will be deployed to */
+  namespace: Scalars['String']['output'];
+  /** whether this service is controlled by a global service */
+  owner?: Maybe<GlobalService>;
+  /** read policy for this service */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** the git repo of this service */
+  repository?: Maybe<GitRepository>;
+  /** the current revision of this service */
+  revision?: Maybe<Revision>;
+  /** a relay connection of all revisions of this service, these are periodically pruned up to a history limit */
+  revisions?: Maybe<RevisionConnection>;
+  /** latest git sha we pulled from */
+  sha?: Maybe<Scalars['String']['output']>;
+  /** https url to fetch the latest tarball of kubernetes manifests */
+  tarball?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** semver of this service */
+  version: Scalars['String']['output'];
+  /** write policy of this service */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+/** a reference to a service deployed from a git repo into a cluster */
+export type ServiceDeploymentRevisionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ServiceDeploymentAttributes = {
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  git: GitRefAttributes;
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  repositoryId: Scalars['ID']['input'];
+  version?: InputMaybe<Scalars['String']['input']>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type ServiceDeploymentConnection = {
+  __typename?: 'ServiceDeploymentConnection';
+  edges?: Maybe<Array<Maybe<ServiceDeploymentEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ServiceDeploymentEdge = {
+  __typename?: 'ServiceDeploymentEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ServiceDeployment>;
+};
+
+/** an error sent from the deploy operator about sync progress */
+export type ServiceError = {
+  __typename?: 'ServiceError';
+  message: Scalars['String']['output'];
+  source: Scalars['String']['output'];
+};
+
+export type ServiceErrorAttributes = {
+  message: Scalars['String']['input'];
+  source: Scalars['String']['input'];
+};
+
 export type ServicePort = {
   __typename?: 'ServicePort';
   name?: Maybe<Scalars['String']['output']>;
@@ -2053,6 +2827,12 @@ export type ServiceSpec = {
 export type ServiceStatus = {
   __typename?: 'ServiceStatus';
   loadBalancer?: Maybe<LoadBalancerStatus>;
+};
+
+export type ServiceUpdateAttributes = {
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  git: GitRefAttributes;
+  version?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum Severity {
@@ -2137,6 +2917,31 @@ export type StatusCondition = {
   reason: Scalars['String']['output'];
   status: Scalars['String']['output'];
   type: Scalars['String']['output'];
+};
+
+export type Tag = {
+  __typename?: 'Tag';
+  name: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+export type TagAttributes = {
+  name: Scalars['String']['input'];
+  value: Scalars['String']['input'];
+};
+
+/** a kubernetes node taint */
+export type Taint = {
+  __typename?: 'Taint';
+  effect: Scalars['String']['output'];
+  key: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
+export type TaintAttributes = {
+  effect: Scalars['String']['input'];
+  key: Scalars['String']['input'];
+  value: Scalars['String']['input'];
 };
 
 export type TerminatedState = {
@@ -2398,9 +3203,9 @@ export type PostgresDatabaseQueryVariables = Exact<{
 
 export type PostgresDatabaseQuery = { __typename?: 'RootQueryType', postgresDatabase?: { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Map<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null } | null };
 
-export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
+export type GroupMemberFragment = { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
-export type GroupFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null };
+export type GroupFragment = { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null };
 
 export type GroupsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
@@ -2408,7 +3213,7 @@ export type GroupsQueryVariables = Exact<{
 }>;
 
 
-export type GroupsQuery = { __typename?: 'RootQueryType', groups?: { __typename?: 'GroupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupEdge', node?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null> | null } | null };
+export type GroupsQuery = { __typename?: 'RootQueryType', groups?: { __typename?: 'GroupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupEdge', node?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
 
 export type SearchGroupsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
@@ -2416,7 +3221,7 @@ export type SearchGroupsQueryVariables = Exact<{
 }>;
 
 
-export type SearchGroupsQuery = { __typename?: 'RootQueryType', groups?: { __typename?: 'GroupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupEdge', node?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null> | null } | null };
+export type SearchGroupsQuery = { __typename?: 'RootQueryType', groups?: { __typename?: 'GroupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupEdge', node?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
 
 export type GroupMembersQueryVariables = Exact<{
   cursor?: InputMaybe<Scalars['String']['input']>;
@@ -2424,7 +3229,7 @@ export type GroupMembersQueryVariables = Exact<{
 }>;
 
 
-export type GroupMembersQuery = { __typename?: 'RootQueryType', groupMembers?: { __typename?: 'GroupMemberConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupMemberEdge', node?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null } | null> | null } | null };
+export type GroupMembersQuery = { __typename?: 'RootQueryType', groupMembers?: { __typename?: 'GroupMemberConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GroupMemberEdge', node?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null } | null> | null } | null };
 
 export type CreateGroupMemberMutationVariables = Exact<{
   groupId: Scalars['ID']['input'];
@@ -2432,7 +3237,7 @@ export type CreateGroupMemberMutationVariables = Exact<{
 }>;
 
 
-export type CreateGroupMemberMutation = { __typename?: 'RootMutationType', createGroupMember?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null };
+export type CreateGroupMemberMutation = { __typename?: 'RootMutationType', createGroupMember?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null };
 
 export type DeleteGroupMemberMutationVariables = Exact<{
   groupId: Scalars['ID']['input'];
@@ -2440,14 +3245,14 @@ export type DeleteGroupMemberMutationVariables = Exact<{
 }>;
 
 
-export type DeleteGroupMemberMutation = { __typename?: 'RootMutationType', deleteGroupMember?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null };
+export type DeleteGroupMemberMutation = { __typename?: 'RootMutationType', deleteGroupMember?: { __typename?: 'GroupMember', user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null };
 
 export type CreateGroupMutationVariables = Exact<{
   attributes: GroupAttributes;
 }>;
 
 
-export type CreateGroupMutation = { __typename?: 'RootMutationType', createGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
+export type CreateGroupMutation = { __typename?: 'RootMutationType', createGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type UpdateGroupMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2455,29 +3260,58 @@ export type UpdateGroupMutationVariables = Exact<{
 }>;
 
 
-export type UpdateGroupMutation = { __typename?: 'RootMutationType', updateGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
+export type UpdateGroupMutation = { __typename?: 'RootMutationType', updateGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type DeleteGroupMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
+export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
-export type UserFragment = { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null };
+export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null };
+
+export type AccessTokenAuditFragment = { __typename?: 'AccessTokenAudit', id?: string | null, city?: string | null, count?: number | null, country?: string | null, insertedAt?: string | null, ip?: string | null, latitude?: string | null, longitude?: string | null, timestamp?: string | null, updatedAt?: string | null };
+
+export type AccessTokensQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AccessTokensQuery = { __typename?: 'RootQueryType', accessTokens?: { __typename?: 'AccessTokenConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'AccessTokenEdge', node?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
+
+export type TokenAuditsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  cursor?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type TokenAuditsQuery = { __typename?: 'RootQueryType', accessToken?: { __typename?: 'AccessToken', id?: string | null, audits?: { __typename?: 'AccessTokenAuditConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'AccessTokenAuditEdge', node?: { __typename?: 'AccessTokenAudit', id?: string | null, city?: string | null, count?: number | null, country?: string | null, insertedAt?: string | null, ip?: string | null, latitude?: string | null, longitude?: string | null, timestamp?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
+
+export type CreateAccessTokenMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreateAccessTokenMutation = { __typename?: 'RootMutationType', createAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null } | null };
+
+export type DeleteAccessTokenMutationVariables = Exact<{
+  token: Scalars['String']['input'];
+}>;
+
+
+export type DeleteAccessTokenMutation = { __typename?: 'RootMutationType', deleteAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null } | null };
+
+export type UserFragment = { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null };
 
 export type InviteFragment = { __typename?: 'Invite', secureId: string };
 
-export type RoleBindingFragment = { __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null };
+export type RoleBindingFragment = { __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
-export type RoleFragment = { __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null> | null };
+export type RoleFragment = { __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null };
 
 export type ManifestFragment = { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'RootQueryType', externalToken?: string | null, me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: Date | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: Date | null, updatedAt?: Date | null } | null } | null> | null } | null> | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, clusterInfo?: { __typename?: 'ClusterInfo', version?: string | null, platform?: string | null, gitCommit?: string | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', vpnEnabled?: boolean | null, gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null } | null };
+export type MeQuery = { __typename?: 'RootQueryType', externalToken?: string | null, me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null> | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null } | null, clusterInfo?: { __typename?: 'ClusterInfo', version?: string | null, platform?: string | null, gitCommit?: string | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', vpnEnabled?: boolean | null, gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null } | null };
 
 export const ApplicationSpecFragmentFragmentDoc = gql`
     fragment ApplicationSpecFragment on ApplicationSpec {
@@ -2684,6 +3518,28 @@ export const GroupMemberFragmentDoc = gql`
 }
     ${UserFragmentDoc}
 ${GroupFragmentDoc}`;
+export const AccessTokenFragmentDoc = gql`
+    fragment AccessToken on AccessToken {
+  id
+  insertedAt
+  token
+  updatedAt
+}
+    `;
+export const AccessTokenAuditFragmentDoc = gql`
+    fragment AccessTokenAudit on AccessTokenAudit {
+  id
+  city
+  count
+  country
+  insertedAt
+  ip
+  latitude
+  longitude
+  timestamp
+  updatedAt
+}
+    `;
 export const InviteFragmentDoc = gql`
     fragment Invite on Invite {
   secureId
@@ -3327,6 +4183,160 @@ export function useDeleteGroupMutation(baseOptions?: Apollo.MutationHookOptions<
 export type DeleteGroupMutationHookResult = ReturnType<typeof useDeleteGroupMutation>;
 export type DeleteGroupMutationResult = Apollo.MutationResult<DeleteGroupMutation>;
 export type DeleteGroupMutationOptions = Apollo.BaseMutationOptions<DeleteGroupMutation, DeleteGroupMutationVariables>;
+export const AccessTokensDocument = gql`
+    query AccessTokens {
+  accessTokens(first: 500) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AccessToken
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${AccessTokenFragmentDoc}`;
+
+/**
+ * __useAccessTokensQuery__
+ *
+ * To run a query within a React component, call `useAccessTokensQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAccessTokensQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAccessTokensQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAccessTokensQuery(baseOptions?: Apollo.QueryHookOptions<AccessTokensQuery, AccessTokensQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AccessTokensQuery, AccessTokensQueryVariables>(AccessTokensDocument, options);
+      }
+export function useAccessTokensLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AccessTokensQuery, AccessTokensQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AccessTokensQuery, AccessTokensQueryVariables>(AccessTokensDocument, options);
+        }
+export type AccessTokensQueryHookResult = ReturnType<typeof useAccessTokensQuery>;
+export type AccessTokensLazyQueryHookResult = ReturnType<typeof useAccessTokensLazyQuery>;
+export type AccessTokensQueryResult = Apollo.QueryResult<AccessTokensQuery, AccessTokensQueryVariables>;
+export const TokenAuditsDocument = gql`
+    query TokenAudits($id: ID!, $cursor: String) {
+  accessToken(id: $id) {
+    id
+    audits(first: 500, after: $cursor) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...AccessTokenAudit
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${AccessTokenAuditFragmentDoc}`;
+
+/**
+ * __useTokenAuditsQuery__
+ *
+ * To run a query within a React component, call `useTokenAuditsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTokenAuditsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTokenAuditsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useTokenAuditsQuery(baseOptions: Apollo.QueryHookOptions<TokenAuditsQuery, TokenAuditsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<TokenAuditsQuery, TokenAuditsQueryVariables>(TokenAuditsDocument, options);
+      }
+export function useTokenAuditsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TokenAuditsQuery, TokenAuditsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<TokenAuditsQuery, TokenAuditsQueryVariables>(TokenAuditsDocument, options);
+        }
+export type TokenAuditsQueryHookResult = ReturnType<typeof useTokenAuditsQuery>;
+export type TokenAuditsLazyQueryHookResult = ReturnType<typeof useTokenAuditsLazyQuery>;
+export type TokenAuditsQueryResult = Apollo.QueryResult<TokenAuditsQuery, TokenAuditsQueryVariables>;
+export const CreateAccessTokenDocument = gql`
+    mutation CreateAccessToken {
+  createAccessToken {
+    ...AccessToken
+  }
+}
+    ${AccessTokenFragmentDoc}`;
+export type CreateAccessTokenMutationFn = Apollo.MutationFunction<CreateAccessTokenMutation, CreateAccessTokenMutationVariables>;
+
+/**
+ * __useCreateAccessTokenMutation__
+ *
+ * To run a mutation, you first call `useCreateAccessTokenMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateAccessTokenMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createAccessTokenMutation, { data, loading, error }] = useCreateAccessTokenMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCreateAccessTokenMutation(baseOptions?: Apollo.MutationHookOptions<CreateAccessTokenMutation, CreateAccessTokenMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateAccessTokenMutation, CreateAccessTokenMutationVariables>(CreateAccessTokenDocument, options);
+      }
+export type CreateAccessTokenMutationHookResult = ReturnType<typeof useCreateAccessTokenMutation>;
+export type CreateAccessTokenMutationResult = Apollo.MutationResult<CreateAccessTokenMutation>;
+export type CreateAccessTokenMutationOptions = Apollo.BaseMutationOptions<CreateAccessTokenMutation, CreateAccessTokenMutationVariables>;
+export const DeleteAccessTokenDocument = gql`
+    mutation DeleteAccessToken($token: String!) {
+  deleteAccessToken(token: $token) {
+    ...AccessToken
+  }
+}
+    ${AccessTokenFragmentDoc}`;
+export type DeleteAccessTokenMutationFn = Apollo.MutationFunction<DeleteAccessTokenMutation, DeleteAccessTokenMutationVariables>;
+
+/**
+ * __useDeleteAccessTokenMutation__
+ *
+ * To run a mutation, you first call `useDeleteAccessTokenMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteAccessTokenMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteAccessTokenMutation, { data, loading, error }] = useDeleteAccessTokenMutation({
+ *   variables: {
+ *      token: // value for 'token'
+ *   },
+ * });
+ */
+export function useDeleteAccessTokenMutation(baseOptions?: Apollo.MutationHookOptions<DeleteAccessTokenMutation, DeleteAccessTokenMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteAccessTokenMutation, DeleteAccessTokenMutationVariables>(DeleteAccessTokenDocument, options);
+      }
+export type DeleteAccessTokenMutationHookResult = ReturnType<typeof useDeleteAccessTokenMutation>;
+export type DeleteAccessTokenMutationResult = Apollo.MutationResult<DeleteAccessTokenMutation>;
+export type DeleteAccessTokenMutationOptions = Apollo.BaseMutationOptions<DeleteAccessTokenMutation, DeleteAccessTokenMutationVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -3398,6 +4408,8 @@ export const namedOperations = {
     Groups: 'Groups',
     SearchGroups: 'SearchGroups',
     GroupMembers: 'GroupMembers',
+    AccessTokens: 'AccessTokens',
+    TokenAudits: 'TokenAudits',
     Me: 'Me'
   },
   Mutation: {
@@ -3407,7 +4419,9 @@ export const namedOperations = {
     DeleteGroupMember: 'DeleteGroupMember',
     CreateGroup: 'CreateGroup',
     UpdateGroup: 'UpdateGroup',
-    DeleteGroup: 'DeleteGroup'
+    DeleteGroup: 'DeleteGroup',
+    CreateAccessToken: 'CreateAccessToken',
+    DeleteAccessToken: 'DeleteAccessToken'
   },
   Fragment: {
     CostAnalysisFragment: 'CostAnalysisFragment',
@@ -3425,6 +4439,8 @@ export const namedOperations = {
     DatabaseTableRow: 'DatabaseTableRow',
     GroupMember: 'GroupMember',
     Group: 'Group',
+    AccessToken: 'AccessToken',
+    AccessTokenAudit: 'AccessTokenAudit',
     User: 'User',
     Invite: 'Invite',
     RoleBinding: 'RoleBinding',
