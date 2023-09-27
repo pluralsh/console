@@ -121,8 +121,8 @@ export default function Build() {
     build.changelogs?.length > 0
       ? DIRECTORY
       : DIRECTORY.filter(({ path }) => path !== 'changelog')
-  const currentTab = directory.find((tab) =>
-    pathname?.startsWith(`${pathPrefix}/${tab.path}`)
+  const currentTab = directory.find(
+    (tab) => pathname?.startsWith(`${pathPrefix}/${tab.path}`)
   )
 
   return (

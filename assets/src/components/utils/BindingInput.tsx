@@ -54,11 +54,12 @@ export function fetchGroups(client: ApolloClient<any>, query, setSuggestions) {
       query: SearchGroupsDocument,
       variables: { q: query },
     })
-    .then(({ data }) =>
-      data?.groups?.edges?.map((edge) => ({
-        value: edge?.node,
-        label: groupSuggestion(edge?.node),
-      }))
+    .then(
+      ({ data }) =>
+        data?.groups?.edges?.map((edge) => ({
+          value: edge?.node,
+          label: groupSuggestion(edge?.node),
+        }))
     )
     .then(setSuggestions)
 }

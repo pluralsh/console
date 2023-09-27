@@ -28,7 +28,7 @@ function DownloadConfig({ name, onClose }: DownloadConfigProps): ReactElement {
       downloadAsFile(wireguardPeer?.config, `${name}.conf`)
       onClose()
     }
-  }, [name, wireguardPeer?.config])
+  }, [name, wireguardPeer?.config, onClose])
 
   return (
     <Layer background="transparent">

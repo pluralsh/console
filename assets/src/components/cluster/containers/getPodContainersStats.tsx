@@ -37,7 +37,7 @@ export function getPodContainersStats(podStatus: Pod['status']): {
       ({
         name: status?.name,
         readiness: containerStatusToReadiness(status),
-      } as ContainerStatus)
+      }) as ContainerStatus
   )
 
   return { statuses, ...readyCount }

@@ -167,9 +167,10 @@ export default function Container() {
                 selectedKey={containerName}
                 onSelectionChange={(toContainerName) => {
                   navigate(
-                    `/pods/${pod?.metadata.namespace}/${
-                      pod?.metadata.name
-                    }/shell/${toContainerName}${subpath ? `/${subpath}` : ''}`
+                    `/pods/${pod?.metadata.namespace}/${pod?.metadata
+                      .name}/shell/${toContainerName}${
+                      subpath ? `/${subpath}` : ''
+                    }`
                   )
                 }}
                 triggerButton={<SelectTrigger>{containerName}</SelectTrigger>}
