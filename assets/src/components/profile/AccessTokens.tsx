@@ -116,7 +116,9 @@ function TokenAudits({ tokenId }: { tokenId: string }) {
     fetchPolicy: 'cache-and-network',
   })
 
-  if (!data) return null
+  if (!data) {
+    return <p css={{ ...theme.partials.text.body2 }}>...</p>
+  }
 
   const { pageInfo, edges } = data.accessToken?.audits || {}
 
