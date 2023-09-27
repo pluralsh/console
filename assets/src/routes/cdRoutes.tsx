@@ -1,6 +1,6 @@
 import ContinuousDeployment from 'components/cd/ContinuousDeployment'
 import Clusters from 'components/cd/Clusters'
-import Git from 'components/cd/Git'
+import GitRepositories from 'components/cd/GitRepositories'
 import Services from 'components/cd/Services'
 import Pipelines from 'components/cd/Pipelines'
 import Providers from 'components/cd/Providers'
@@ -42,7 +42,7 @@ export const cdRoutes = [
     />
     <Route
       path="git"
-      element={<Git />}
+      element={<GitRepositories />}
     />
     <Route
       path="providers"

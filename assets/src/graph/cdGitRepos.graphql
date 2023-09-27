@@ -1,0 +1,41 @@
+fragment NodePool on NodePool {
+  id
+  name
+}
+
+fragment GitRepositoriesRow on GitRepository {
+  id
+  url
+  health
+  authMethod
+  editable
+  error
+  insertedAt
+  pulledAt
+  updatedAt
+}
+
+query GitRepositories {
+  gitRepositories(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...GitRepositoriesRow
+      }
+    }
+  }
+}
+
+mutation CreateGitRepository($attributes: GitAttributes!) {
+  createGitRepository(attributes: $attributes) {
+    id
+  }
+}
+
+# mutation DeleteGitRepository($id: String!) {
+#   deleteGitRepository(id: $id) {
+#     id
+#   }
+# }

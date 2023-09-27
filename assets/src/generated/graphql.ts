@@ -3192,6 +3192,29 @@ export type CreateBuildMutationVariables = Exact<{
 
 export type CreateBuildMutation = { __typename?: 'RootMutationType', createBuild?: { __typename?: 'Build', id: string } | null };
 
+export type NodePoolFragment = { __typename?: 'NodePool', id: string, name: string };
+
+export type ClustersRowFragment = { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null };
+
+export type ClustersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null } | null } | null> | null } | null };
+
+export type GitRepositoriesRowFragment = { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null };
+
+export type GitRepositoriesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GitRepositoriesQuery = { __typename?: 'RootQueryType', gitRepositories?: { __typename?: 'GitRepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'GitRepositoryEdge', node?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
+
+export type CreateGitRepositoryMutationVariables = Exact<{
+  attributes: GitAttributes;
+}>;
+
+
+export type CreateGitRepositoryMutation = { __typename?: 'RootMutationType', createGitRepository?: { __typename?: 'GitRepository', id: string } | null };
+
 export type ResourceSpecFragment = { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null };
 
 export type ResourcesFragment = { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null };
@@ -3455,6 +3478,49 @@ export const PageInfoFragmentDoc = gql`
     fragment PageInfo on PageInfo {
   hasNextPage
   endCursor
+}
+    `;
+export const NodePoolFragmentDoc = gql`
+    fragment NodePool on NodePool {
+  id
+  name
+}
+    `;
+export const ClustersRowFragmentDoc = gql`
+    fragment ClustersRow on Cluster {
+  apiDeprecations {
+    blocking
+    availableIn
+    deprecatedIn
+    removedIn
+    replacement
+  }
+  id
+  name
+  currentVersion
+  provider {
+    id
+    cloud
+    name
+    namespace
+  }
+  version
+  nodePools {
+    ...NodePool
+  }
+}
+    ${NodePoolFragmentDoc}`;
+export const GitRepositoriesRowFragmentDoc = gql`
+    fragment GitRepositoriesRow on GitRepository {
+  id
+  url
+  health
+  authMethod
+  editable
+  error
+  insertedAt
+  pulledAt
+  updatedAt
 }
     `;
 export const ResourceSpecFragmentDoc = gql`
@@ -3780,6 +3846,123 @@ export function useCreateBuildMutation(baseOptions?: Apollo.MutationHookOptions<
 export type CreateBuildMutationHookResult = ReturnType<typeof useCreateBuildMutation>;
 export type CreateBuildMutationResult = Apollo.MutationResult<CreateBuildMutation>;
 export type CreateBuildMutationOptions = Apollo.BaseMutationOptions<CreateBuildMutation, CreateBuildMutationVariables>;
+export const ClustersDocument = gql`
+    query Clusters {
+  clusters(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClustersRow
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ClustersRowFragmentDoc}`;
+
+/**
+ * __useClustersQuery__
+ *
+ * To run a query within a React component, call `useClustersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClustersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClustersQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useClustersQuery(baseOptions?: Apollo.QueryHookOptions<ClustersQuery, ClustersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClustersQuery, ClustersQueryVariables>(ClustersDocument, options);
+      }
+export function useClustersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClustersQuery, ClustersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClustersQuery, ClustersQueryVariables>(ClustersDocument, options);
+        }
+export type ClustersQueryHookResult = ReturnType<typeof useClustersQuery>;
+export type ClustersLazyQueryHookResult = ReturnType<typeof useClustersLazyQuery>;
+export type ClustersQueryResult = Apollo.QueryResult<ClustersQuery, ClustersQueryVariables>;
+export const GitRepositoriesDocument = gql`
+    query GitRepositories {
+  gitRepositories(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...GitRepositoriesRow
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${GitRepositoriesRowFragmentDoc}`;
+
+/**
+ * __useGitRepositoriesQuery__
+ *
+ * To run a query within a React component, call `useGitRepositoriesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGitRepositoriesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGitRepositoriesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGitRepositoriesQuery(baseOptions?: Apollo.QueryHookOptions<GitRepositoriesQuery, GitRepositoriesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GitRepositoriesQuery, GitRepositoriesQueryVariables>(GitRepositoriesDocument, options);
+      }
+export function useGitRepositoriesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GitRepositoriesQuery, GitRepositoriesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GitRepositoriesQuery, GitRepositoriesQueryVariables>(GitRepositoriesDocument, options);
+        }
+export type GitRepositoriesQueryHookResult = ReturnType<typeof useGitRepositoriesQuery>;
+export type GitRepositoriesLazyQueryHookResult = ReturnType<typeof useGitRepositoriesLazyQuery>;
+export type GitRepositoriesQueryResult = Apollo.QueryResult<GitRepositoriesQuery, GitRepositoriesQueryVariables>;
+export const CreateGitRepositoryDocument = gql`
+    mutation CreateGitRepository($attributes: GitAttributes!) {
+  createGitRepository(attributes: $attributes) {
+    id
+  }
+}
+    `;
+export type CreateGitRepositoryMutationFn = Apollo.MutationFunction<CreateGitRepositoryMutation, CreateGitRepositoryMutationVariables>;
+
+/**
+ * __useCreateGitRepositoryMutation__
+ *
+ * To run a mutation, you first call `useCreateGitRepositoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateGitRepositoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createGitRepositoryMutation, { data, loading, error }] = useCreateGitRepositoryMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateGitRepositoryMutation(baseOptions?: Apollo.MutationHookOptions<CreateGitRepositoryMutation, CreateGitRepositoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateGitRepositoryMutation, CreateGitRepositoryMutationVariables>(CreateGitRepositoryDocument, options);
+      }
+export type CreateGitRepositoryMutationHookResult = ReturnType<typeof useCreateGitRepositoryMutation>;
+export type CreateGitRepositoryMutationResult = Apollo.MutationResult<CreateGitRepositoryMutation>;
+export type CreateGitRepositoryMutationOptions = Apollo.BaseMutationOptions<CreateGitRepositoryMutation, CreateGitRepositoryMutationVariables>;
 export const RestorePostgresDocument = gql`
     mutation RestorePostgres($clone: CloneAttributes, $name: String!, $namespace: String!, $timestamp: DateTime!) {
   restorePostgres(
@@ -4421,6 +4604,8 @@ export const namedOperations = {
     AppInfo: 'AppInfo',
     Repository: 'Repository',
     PluralContext: 'PluralContext',
+    Clusters: 'Clusters',
+    GitRepositories: 'GitRepositories',
     PostgresDatabases: 'PostgresDatabases',
     PostgresDatabase: 'PostgresDatabase',
     Groups: 'Groups',
@@ -4432,6 +4617,7 @@ export const namedOperations = {
   },
   Mutation: {
     CreateBuild: 'CreateBuild',
+    CreateGitRepository: 'CreateGitRepository',
     RestorePostgres: 'RestorePostgres',
     CreateGroupMember: 'CreateGroupMember',
     DeleteGroupMember: 'DeleteGroupMember',
@@ -4452,6 +4638,9 @@ export const namedOperations = {
     ConfigurationOverlayFragment: 'ConfigurationOverlayFragment',
     RepositoryFragment: 'RepositoryFragment',
     PageInfo: 'PageInfo',
+    NodePool: 'NodePool',
+    ClustersRow: 'ClustersRow',
+    GitRepositoriesRow: 'GitRepositoriesRow',
     ResourceSpec: 'ResourceSpec',
     Resources: 'Resources',
     DatabaseTableRow: 'DatabaseTableRow',
