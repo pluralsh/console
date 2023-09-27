@@ -906,6 +906,8 @@ export type GitRepository = {
   authMethod?: Maybe<AuthMethod>;
   /** whether the current user can edit this repo */
   editable?: Maybe<Scalars['Boolean']['output']>;
+  /** the error message if there were any pull errors */
+  error?: Maybe<Scalars['String']['output']>;
   /** whether we can currently pull this repo with the provided credentials */
   health?: Maybe<GitHealth>;
   /** internal id of this repository */

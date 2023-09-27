@@ -2046,6 +2046,9 @@ type GitRepository {
   "the last successsful git pull timestamp"
   pulledAt: DateTime
 
+  "the error message if there were any pull errors"
+  error: String
+
   "whether the current user can edit this repo"
   editable: Boolean
 

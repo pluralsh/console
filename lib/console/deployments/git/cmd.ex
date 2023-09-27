@@ -11,7 +11,8 @@ defmodule Console.Deployments.Git.Cmd do
 
   def fetch(%GitRepository{} = repo) do
     with {:ok, _} <- git(repo, "fetch", ["--all"]),
-      do: git(repo, "pull", ["--all", "--rebase"])
+         {:ok, _} <- git(repo, "remote", ~w(prune origin)),
+      do: git(repo, "pull", ~w(--all --rebase))
   end
 
   def sha(%GitRepository{} = repo) do

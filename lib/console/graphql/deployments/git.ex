@@ -21,6 +21,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :auth_method,  :auth_method, description: "whether its a http or ssh url"
     field :health,       :git_health, description: "whether we can currently pull this repo with the provided credentials"
     field :pulled_at,    :datetime, description: "the last successsful git pull timestamp"
+    field :error,        :string, description: "the error message if there were any pull errors"
 
     field :editable,   :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this repo"
 
