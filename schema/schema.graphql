@@ -190,6 +190,9 @@ type ServiceDeployment {
   "kubernetes namespace this service will be deployed to"
   namespace: String!
 
+  "A summary status enum for the health of this service"
+  status: ServiceDeploymentStatus!
+
   "semver of this service"
   version: String!
 
@@ -1876,6 +1879,13 @@ type Ingress {
 
 input UserRoleAttributes {
   admin: Boolean
+}
+
+enum ServiceDeploymentStatus {
+  STALE
+  SYNCED
+  HEALTHY
+  FAILED
 }
 
 input AwsCloudAttributes {

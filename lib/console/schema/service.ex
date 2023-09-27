@@ -14,6 +14,8 @@ defmodule Console.Schema.Service do
     ServiceError
   }
 
+  defenum Status, stale: 0, synced: 1, healthy: 2, failed: 3
+
   defmodule Git do
     use Piazza.Ecto.Schema
 
@@ -30,13 +32,15 @@ defmodule Console.Schema.Service do
   end
 
   schema "services" do
-    field :name,            :string
-    field :version,         :string
-    field :sha,             :string
-    field :namespace,       :string
-    field :write_policy_id, :binary_id
-    field :read_policy_id,  :binary_id
-    field :deleted_at,      :utc_datetime_usec
+    field :name,             :string
+    field :component_status, :string
+    field :version,          :string
+    field :sha,              :string
+    field :namespace,        :string
+    field :status,           Status, default: :stale
+    field :write_policy_id,  :binary_id
+    field :read_policy_id,   :binary_id
+    field :deleted_at,       :utc_datetime_usec
 
     embeds_one :git, Git, on_replace: :update
 
@@ -104,7 +108,7 @@ defmodule Console.Schema.Service do
     from(s in query, where: not is_nil(s.deleted_at))
   end
 
-  @valid ~w(name version sha cluster_id repository_id namespace owner_id)a
+  @valid ~w(name component_status status version sha cluster_id repository_id namespace owner_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -128,7 +132,7 @@ defmodule Console.Schema.Service do
 
   def rollback_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(revision_id sha)a)
+    |> cast(attrs, ~w(revision_id sha status)a)
     |> cast_embed(:git)
     |> validate_required(~w(revision_id)a)
   end

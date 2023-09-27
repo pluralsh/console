@@ -29,6 +29,7 @@ defmodule Console.Deployments.ServicesTest do
       assert service.git.ref == "main"
       assert service.git.folder == "k8s"
       assert service.revision_id
+      assert service.status == :stale
 
       %{revision: revision} = Console.Repo.preload(service, [:revision])
       assert revision.git.ref == service.git.ref
@@ -108,6 +109,7 @@ defmodule Console.Deployments.ServicesTest do
       assert updated.git.ref == "master"
       assert updated.git.folder == "k8s"
       assert updated.revision_id
+      assert updated.status == :stale
 
       %{revision: revision} = Console.Repo.preload(updated, [:revision])
       assert revision.git.ref == updated.git.ref
@@ -191,6 +193,7 @@ defmodule Console.Deployments.ServicesTest do
       assert rollback.revision_id == service.revision_id
       assert rollback.git.ref == "main"
       assert rollback.git.folder == "k8s"
+      assert rollback.status == :stale
 
       {:ok, secrets} = Services.configuration(rollback)
       assert secrets["name"] == "value"
@@ -407,6 +410,41 @@ defmodule Console.Deployments.ServicesTest do
       assert component.kind == "Ingress"
       assert component.namespace == "my-app"
       assert component.name == "api"
+
+      svc = refetch(service)
+      assert svc.status == :healthy
+      assert svc.component_status == "1 / 1"
+
+      assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
+    end
+
+    test "if a component is in error it will flag" do
+      service = insert(:service)
+
+      {:ok, service} = Services.update_components(%{
+        components: [%{
+          state: :failed,
+          synced: true,
+          group: "networking.k8s.io",
+          version: "v1",
+          kind: "Ingress",
+          namespace: "my-app",
+          name: "api"
+        }]
+      }, service)
+
+      %{components: [component]} = Console.Repo.preload(service, [:components])
+      assert component.state == :failed
+      assert component.synced
+      assert component.group == "networking.k8s.io"
+      assert component.version == "v1"
+      assert component.kind == "Ingress"
+      assert component.namespace == "my-app"
+      assert component.name == "api"
+
+      svc = refetch(service)
+      assert svc.status == :failed
+      assert svc.component_status == "0 / 1"
 
       assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
     end

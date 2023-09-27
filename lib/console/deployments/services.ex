@@ -142,7 +142,7 @@ defmodule Console.Deployments.Services do
     start_transaction()
     |> add_operation(:base, fn _ ->
       get_service!(id)
-      |> Service.changeset(%{sha: sha})
+      |> Service.changeset(%{sha: sha, status: :stale})
       |> Repo.update()
     end)
     |> add_operation(:revision, fn %{base: base} ->
@@ -163,7 +163,7 @@ defmodule Console.Deployments.Services do
   def update_service(attrs, %Service{} = svc) do
     start_transaction()
     |> add_operation(:base, fn _ ->
-      Service.changeset(svc, attrs)
+      Service.changeset(svc, Map.put(attrs, :status, :stale))
       |> Console.Repo.update()
     end)
     |> add_operation(:revision, fn %{base: base} ->
@@ -200,7 +200,12 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:update, fn %{service: svc, revision: rev} ->
       svc
-      |> Service.rollback_changeset(%{revision_id: rev.id, sha: rev.sha, git: Map.take(rev.git, [:ref, :folder])})
+      |> Service.rollback_changeset(%{
+        status: :stale,
+        revision_id: rev.id,
+        sha: rev.sha,
+        git: Map.take(rev.git, [:ref, :folder])
+      })
       |> Repo.update()
     end)
     |> execute(extract: :update)
@@ -220,7 +225,18 @@ defmodule Console.Deployments.Services do
       |> Console.Repo.update()
     end)
     |> add_operation(:deprecations, fn %{service: svc} -> add_deprecations(svc) end)
-    |> execute(extract: :service)
+    |> add_operation(:updated, fn %{service: %Service{components: components} = service} ->
+      running = Enum.all?(components, & &1.state == :running || is_nil(&1.state))
+      failed = Enum.any?(components, & &1.state == :failed)
+      num_healthy = Enum.count(components, & &1.state == :running || is_nil(&1.state))
+      component_status = "#{num_healthy} / #{length(components)}"
+      case {failed, running} do
+        {true, _} -> update_status(service, :failed, component_status)
+        {_, true} -> update_status(service, :healthy, component_status)
+        _ -> update_status(service, :stale, component_status)
+      end
+    end)
+    |> execute(extract: :updated)
     |> notify(:components)
   end
   def update_components(attrs, service_id) when is_binary(service_id),
@@ -347,6 +363,11 @@ defmodule Console.Deployments.Services do
       Ecto.Changeset.change(service, %{revision_id: id})
       |> Console.Repo.update()
     end)
+  end
+
+  defp update_status(%Service{} = svc, status, component_status \\ nil) do
+    Ecto.Changeset.change(svc, %{status: status, component_status: component_status})
+    |> Repo.update()
   end
 
   def api_url(path) do

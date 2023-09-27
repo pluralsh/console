@@ -2790,6 +2790,8 @@ export type ServiceDeployment = {
   revisions?: Maybe<RevisionConnection>;
   /** latest git sha we pulled from */
   sha?: Maybe<Scalars['String']['output']>;
+  /** A summary status enum for the health of this service */
+  status: ServiceDeploymentStatus;
   /** https url to fetch the latest tarball of kubernetes manifests */
   tarball?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -2830,6 +2832,13 @@ export type ServiceDeploymentEdge = {
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<ServiceDeployment>;
 };
+
+export enum ServiceDeploymentStatus {
+  Failed = 'FAILED',
+  Healthy = 'HEALTHY',
+  Stale = 'STALE',
+  Synced = 'SYNCED'
+}
 
 /** an error sent from the deploy operator about sync progress */
 export type ServiceError = {

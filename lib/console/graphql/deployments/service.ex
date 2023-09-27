@@ -1,9 +1,10 @@
 defmodule Console.GraphQl.Deployments.Service do
   use Console.GraphQl.Schema.Base
-  alias Console.Schema.ServiceComponent
+  alias Console.Schema.{ServiceComponent, Service}
   alias Console.GraphQl.Resolvers.{Deployments}
 
   ecto_enum :component_state, ServiceComponent.State
+  ecto_enum :service_deployment_status, Service.Status
 
   input_object :service_deployment_attributes do
     field :name,          non_null(:string)
@@ -64,10 +65,12 @@ defmodule Console.GraphQl.Deployments.Service do
     field :id,        non_null(:id), description: "internal id of this service"
     field :name,      non_null(:string), description: "human readable name of this service, must be unique per cluster"
     field :namespace, non_null(:string), description: "kubernetes namespace this service will be deployed to"
+    field :status,    non_null(:service_deployment_status), description: "A summary status enum for the health of this service"
     field :version,   non_null(:string), description: "semver of this service"
     field :git,       non_null(:git_ref), description: "description on where in git the service's manifests should be fetched"
     field :sha,       :string, description: "latest git sha we pulled from"
     field :tarball,   :string, resolve: &Deployments.tarball/3, description: "https url to fetch the latest tarball of kubernetes manifests"
+    field :component_status, :string, description: "a n / m representation of the number of healthy components of this service"
 
     field :deleted_at, :datetime, description: "the time this service was scheduled for deletion"
 
