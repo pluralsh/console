@@ -108,5 +108,7 @@ export function mapExistingNodes<N>(connection?: Connection<N> | null) {
   }
   const { edges } = connection
 
-  return (edges || []).filter((edge) => edge?.node, [] as N[])
+  return (edges || [])
+    .filter((edge) => edge?.node, [] as Edge<N>[])
+    .map((edge) => edge?.node)
 }

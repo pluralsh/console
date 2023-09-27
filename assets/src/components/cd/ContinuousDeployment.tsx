@@ -27,7 +27,6 @@ export default function Apps() {
 
   const path = `/${CD_BASE_PATH}/${tab}`
 
-  console.log('subpath', path)
   const currentTab = directory.find(({ path }) => path === tab)
   const crumbs = useMemo(
     () => (path ? [{ label: tab, path }] : []),

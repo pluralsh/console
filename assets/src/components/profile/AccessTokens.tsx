@@ -1,9 +1,7 @@
-// import { Box, Table as Table2, TableBody, TableCell } from '../utils/Ta'
 import { Button, Modal } from 'honorable'
 import moment from 'moment'
 import { useMemo, useState } from 'react'
 import {
-  Card,
   CopyIcon,
   EmptyState,
   IconFrame,
@@ -17,6 +15,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import CopyToClipboard from 'react-copy-to-clipboard'
 
 import {
+  AccessTokenAudit,
   AccessTokenFragment,
   AccessTokensDocument,
   useAccessTokensQuery,
@@ -33,31 +32,87 @@ import { Box } from 'grommet'
 
 import { useTheme } from 'styled-components'
 
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+
 import {
+  Edge,
   appendConnection,
-  deepUpdate,
-  extendConnection,
   mapExistingNodes,
   removeConnection,
   updateCache,
 } from '../../utils/graphql'
 
-import { StandardScroller } from '../utils/SmoothScroller'
 import { formatLocation } from '../../utils/geo'
 import { Confirm } from '../utils/Confirm'
 import { DeleteIconButton } from '../utils/IconButtons'
 
 import LoadingIndicator from '../utils/LoadingIndicator'
 
-export const obscureToken = (token) => token.substring(0, 9) + 'x'.repeat(15)
+export function ObscuredToken({ token }: { token: string | null | undefined }) {
+  const theme = useTheme()
+
+  if (typeof token !== 'string') {
+    return null
+  }
+  const prefix = token.substring(0, 13)
+
+  return (
+    <span css={{ ...theme.partials.text.code }}>
+      {prefix}
+      <span css={{ opacity: 0.5 }}>{'·'.repeat(25)}</span>
+    </span>
+  )
+}
 
 const TOOLTIP =
   'Access tokens allow you to access the Plural API for automation and active Plural clusters.'
 
-function TokenAudits({ token }: any) {
-  const [listRef, setListRef] = useState<any>(null)
-  const { data, loading, fetchMore } = useTokenAuditsQuery({
-    variables: { id: token.id },
+const auditColumnHelper = createColumnHelper<Edge<AccessTokenAudit>>()
+const auditColumns = [
+  auditColumnHelper.accessor(({ node }) => node?.ip, {
+    id: 'ip',
+    header: 'IP',
+    cell: ({ getValue }) => getValue(),
+    meta: { truncate: true },
+    enableSorting: true,
+  }),
+  auditColumnHelper.accessor(
+    ({ node }) => formatLocation(node?.country, node?.city),
+    {
+      id: 'location',
+      header: 'Location',
+      cell: ({ getValue }) => getValue(),
+      meta: { truncate: true },
+      enableSorting: true,
+    }
+  ),
+  auditColumnHelper.accessor(({ node }) => new Date(node?.timestamp || 0), {
+    id: 'timestamp',
+    header: 'Timestamp',
+    cell: ({
+      getValue,
+      row: {
+        original: { node },
+      },
+    }) => node?.timestamp && moment(getValue()).format('lll'),
+    meta: { truncate: true },
+    enableSorting: true,
+    sortingFn: 'datetime',
+  }),
+  auditColumnHelper.accessor(({ node }) => node?.count, {
+    id: 'count',
+    header: 'Count',
+    cell: ({ getValue }) => getValue(),
+    meta: { truncate: true },
+    enableSorting: true,
+    sortingFn: 'basic',
+  }),
+]
+
+function TokenAudits({ tokenId }: { tokenId: string }) {
+  const theme = useTheme()
+  const { data } = useTokenAuditsQuery({
+    variables: { id: tokenId },
     fetchPolicy: 'cache-and-network',
   })
 
@@ -66,59 +121,27 @@ function TokenAudits({ token }: any) {
   const { pageInfo, edges } = data.accessToken?.audits || {}
 
   if (isEmpty(edges) || !pageInfo || !edges) {
-    return <>Token has yet to be used</>
+    return (
+      <p css={{ ...theme.partials.text.body2 }}>Token has yet to be used</p>
+    )
   }
 
   return (
-    <div
-    // headers={['IP', 'Location', 'Timestamp', 'Count']}
-    // sizes={['25%', '25%', '25%', '25%']}
-    //   width="100%"
-    //   height="100%"
-    >
-      <Card fill>
-        <StandardScroller
-          listRef={listRef}
-          setListRef={setListRef}
-          hasNextPage={pageInfo.hasNextPage}
-          items={edges}
-          loading={loading}
-          placeholder={() => <>Placeholder</>}
-          mapper={({ node }, { next: _ }) => (
-            <div
-              key={node.id}
-              // last={!next.node}
-            >
-              <div>{node.ip}</div>
-              <div>{formatLocation(node.country, node.city)}</div>
-              <div>{moment(node.timestamp).format('lll')}</div>
-              <div>{node.count}</div>
-            </div>
-          )}
-          loadNextPage={() =>
-            pageInfo.hasNextPage &&
-            fetchMore({
-              variables: { cursor: pageInfo.endCursor },
-              updateQuery: (prev, { fetchMoreResult }) =>
-                deepUpdate(prev, 'token', (prevToken) =>
-                  extendConnection(
-                    prevToken,
-                    fetchMoreResult?.accessToken?.audits,
-                    'audits'
-                  )
-                ),
-            })
-          }
-          handleScroll={() => {}}
-          refreshKey={undefined}
-          setLoader={undefined}
-        />
-      </Card>
-    </div>
+    <FullHeightTableWrap>
+      <Table
+        css={{
+          maxHeight: 'unset',
+          height: '100%',
+        }}
+        data={edges}
+        columns={auditColumns}
+      />
+    </FullHeightTableWrap>
   )
 }
 
 function DeleteAccessToken({ token }: { token: AccessTokenFragment }) {
+  const theme = useTheme()
   const [confirm, setConfirm] = useState(false)
   const [mutation, { loading, error }] = useDeleteAccessTokenMutation({
     variables: { token: token.token ?? '' },
@@ -133,11 +156,27 @@ function DeleteAccessToken({ token }: { token: AccessTokenFragment }) {
 
   return (
     <>
-      <DeleteIconButton onClick={() => setConfirm(true)} />
+      <DeleteIconButton
+        onClick={() => setConfirm(true)}
+        tooltip
+      />
       <Confirm
         open={confirm}
         title="Delete Access Token"
-        text="Are you sure you want to delete this api access token?"
+        text={
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.medium,
+            }}
+          >
+            <p>Are you sure you want to delete this api access token?"</p>
+            <p>
+              <ObscuredToken token={token.token} />
+            </p>
+          </div>
+        }
         close={() => setConfirm(false)}
         submit={() => mutation()}
         loading={loading}
@@ -151,10 +190,15 @@ function DeleteAccessToken({ token }: { token: AccessTokenFragment }) {
 function AuditsButton({ token }: { token: AccessTokenFragment }) {
   const [audits, setAudits] = useState(false)
 
+  if (!token.id) {
+    return null
+  }
+
   return (
     <>
       <IconFrame
-        textValue=""
+        textValue="Audits"
+        tooltip
         clickable
         size="medium"
         icon={<ListIcon />}
@@ -166,7 +210,7 @@ function AuditsButton({ token }: { token: AccessTokenFragment }) {
         portal
         onClose={() => setAudits(false)}
       >
-        <TokenAudits token={token} />
+        <TokenAudits tokenId={token.id} />
       </Modal>
     </>
   )
@@ -197,7 +241,7 @@ function CopyButton({ token }: { token: AccessTokenFragment }) {
           secondary
           startIcon={<CopyIcon size={15} />}
         >
-          Copy key
+          Copy token
         </Button>
       </CopyToClipboard>
     </>
@@ -234,34 +278,28 @@ function DateTimeCol({
   )
 }
 
-const columnHelper = createColumnHelper<AccessTokenFragment>()
+const tokenColumnHelper = createColumnHelper<AccessTokenFragment>()
 const tokenColumns = [
-  columnHelper.accessor((row) => row.token, {
+  tokenColumnHelper.accessor((row) => row.token, {
     id: 'token',
     header: 'Token',
-    cell: ({ getValue }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const theme = useTheme()
-
-      return (
-        <span css={{ ...theme.partials.text.code, fontWeight: 'bold' }}>
-          {obscureToken(getValue())}
-        </span>
-      )
-    },
+    cell: ({ getValue }) => <ObscuredToken token={getValue()} />,
+    // maxSize: 30,
+    meta: { truncate: true },
   }),
-  columnHelper.accessor((row) => row.insertedAt, {
+  tokenColumnHelper.accessor((row) => row.insertedAt, {
     id: 'createdOn',
     header: 'Created on',
     cell: ({ getValue }) => <DateTimeCol dateString={getValue()} />,
   }),
-  columnHelper.accessor((row) => row.updatedAt, {
-    id: 'updatedAt',
-    header: 'Updated on',
-    cell: ({ getValue }) => <DateTimeCol dateString={getValue()} />,
-  }),
-  columnHelper.accessor((row) => row.id, {
+  // columnHelper.accessor((row) => row.updatedAt, {
+  //   id: 'updatedAt',
+  //   header: 'Updated on',
+  //   cell: ({ getValue }) => <DateTimeCol dateString={getValue()} />,
+  // }),
+  tokenColumnHelper.accessor((row) => row.id, {
     id: 'actions',
+    header: '',
     cell: ({ row: { original } }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const theme = useTheme()
@@ -284,7 +322,7 @@ const tokenColumns = [
 
 export function AccessTokens() {
   const [displayNewBanner, setDisplayNewBanner] = useState(false)
-  const { data, loading: loadingTokens, fetchMore: _ } = useAccessTokensQuery()
+  const { data } = useAccessTokensQuery()
   const [mutation, { loading }] = useCreateAccessTokenMutation({
     update: (cache, { data }) =>
       updateCache(cache, {
@@ -298,16 +336,12 @@ export function AccessTokens() {
     [data?.accessTokens]
   )
 
-  console.log({ loadingTokens })
-
   if (!data) return <LoadingIndicator />
-  //   const { pageInfo } = data?.accessTokens || {}
 
   return (
     <ResponsivePageFullWidth
       scrollable={false}
       heading="Access tokens"
-      gap="small"
       headingContent={
         <div
           css={{
@@ -320,14 +354,16 @@ export function AccessTokens() {
             width="315px"
             label={TOOLTIP}
           >
-            <Box
-              flex={false}
-              pad="6px"
-              round="xxsmall"
-              hoverIndicator="fill-two"
+            <div
+              css={{
+                display: 'flex',
+                padding: 6,
+                alignItems: 'center',
+                // borderRadius: '50%',
+              }}
             >
               <InfoIcon />
-            </Box>
+            </div>
           </Tooltip>
           <Box
             flex
@@ -339,7 +375,6 @@ export function AccessTokens() {
                 marginBottom="medium"
                 marginRight="xxxxlarge"
                 onClose={() => {
-                  alert('toast close')
                   setDisplayNewBanner(false)
                 }}
               >
@@ -350,7 +385,6 @@ export function AccessTokens() {
               secondary
               onClick={() => {
                 setDisplayNewBanner(true)
-                // setTimeout(() => setDisplayNewBanner(false), 1000)
                 mutation()
               }}
               loading={loading}
@@ -362,10 +396,16 @@ export function AccessTokens() {
       }
     >
       {tokensList ? (
-        <Table
-          data={tokensList}
-          columns={tokenColumns}
-        />
+        <FullHeightTableWrap>
+          <Table
+            data={tokensList}
+            columns={tokenColumns}
+            css={{
+              maxHeight: 'unset',
+              height: '100%',
+            }}
+          />
+        </FullHeightTableWrap>
       ) : (
         <EmptyState message="Looks like you don't have any access tokens yet.">
           <Button
