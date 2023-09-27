@@ -155,6 +155,7 @@ defmodule Console.Factory do
   def cluster_factory do
     %Schema.Cluster{
       version: "1.24",
+      handle: sequence(:cluster_handle, & "handle-#{&1}"),
       provider: build(:cluster_provider),
       write_policy_id: Ecto.UUID.generate(),
       read_policy_id: Ecto.UUID.generate(),

@@ -396,6 +396,8 @@ export type Cluster = {
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   /** whether the current user can edit this cluster */
   editable?: Maybe<Scalars['Boolean']['output']>;
+  /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
+  handle?: Maybe<Scalars['String']['output']>;
   /** internal id of this cluster */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -432,6 +434,8 @@ export type ClusterRevisionsArgs = {
 };
 
 export type ClusterAttributes = {
+  /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
+  handle?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
   providerId?: InputMaybe<Scalars['ID']['input']>;
@@ -1795,8 +1799,10 @@ export type RootMutationTypeCancelBuildArgs = {
 
 export type RootMutationTypeCloneServiceArgs = {
   attributes: ServiceCloneAttributes;
+  cluster?: InputMaybe<Scalars['String']['input']>;
   clusterId: Scalars['ID']['input'];
-  serviceId: Scalars['ID']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1822,7 +1828,9 @@ export type RootMutationTypeCreateGitRepositoryArgs = {
 
 export type RootMutationTypeCreateGlobalServiceArgs = {
   attributes: GlobalServiceAttributes;
-  serviceId: Scalars['ID']['input'];
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1856,7 +1864,8 @@ export type RootMutationTypeCreateRoleArgs = {
 
 export type RootMutationTypeCreateServiceDeploymentArgs = {
   attributes: ServiceDeploymentAttributes;
-  clusterId: Scalars['ID']['input'];
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2011,7 +2020,9 @@ export type RootMutationTypeRestorePostgresArgs = {
 
 
 export type RootMutationTypeRollbackServiceArgs = {
-  id: Scalars['ID']['input'];
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
   revisionId: Scalars['ID']['input'];
 };
 
@@ -2082,7 +2093,9 @@ export type RootMutationTypeUpdateServiceComponentsArgs = {
 
 export type RootMutationTypeUpdateServiceDeploymentArgs = {
   attributes: ServiceUpdateAttributes;
-  id: Scalars['ID']['input'];
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -2241,6 +2254,7 @@ export type RootQueryTypeCertificateArgs = {
 
 
 export type RootQueryTypeClusterArgs = {
+  handle?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -2498,13 +2512,16 @@ export type RootQueryTypeServiceArgs = {
 
 
 export type RootQueryTypeServiceDeploymentArgs = {
-  id: Scalars['ID']['input'];
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
 export type RootQueryTypeServiceDeploymentsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  cluster?: InputMaybe<Scalars['String']['input']>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;

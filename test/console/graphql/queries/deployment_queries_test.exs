@@ -134,6 +134,24 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert Enum.all?(found, & &1["name"])
     end
 
+    test "it can list services in the system by cluster handle" do
+      cluster = insert(:cluster, handle: "test")
+      services = insert_list(3, :service, cluster: cluster)
+
+      {:ok, %{data: %{"serviceDeployments" => found}}} = run_query("""
+        query Services($cluster: String!) {
+          serviceDeployments(cluster: $cluster, first: 5) {
+            edges { node { id name } }
+          }
+        }
+      """, %{"cluster" => cluster.handle}, %{current_user: admin_user()})
+
+      found = from_connection(found)
+
+      assert ids_equal(found, services)
+      assert Enum.all?(found, & &1["name"])
+    end
+
     test "it will respect rbac" do
       user = insert(:user)
       %{group: group} = insert(:group_member, user: user)

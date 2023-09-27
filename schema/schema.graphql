@@ -999,6 +999,9 @@ type Cluster {
   "current k8s version as told to us by the deployment operator"
   currentVersion: String
 
+  "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
+  handle: String
+
   "when this cluster was scheduled for deletion"
   deletedAt: DateTime
 
@@ -1173,19 +1176,64 @@ type RootMutationType {
 
   updateClusterProvider(id: ID!, attributes: ClusterProviderUpdateAttributes!): ClusterProvider
 
-  createServiceDeployment(clusterId: ID!, attributes: ServiceDeploymentAttributes!): ServiceDeployment
+  createServiceDeployment(
+    clusterId: ID
 
-  updateServiceDeployment(id: ID!, attributes: ServiceUpdateAttributes!): ServiceDeployment
+    "the handle of the cluster for this service"
+    cluster: String
+
+    attributes: ServiceDeploymentAttributes!
+  ): ServiceDeployment
+
+  updateServiceDeployment(
+    id: ID
+
+    "the handle of the cluster for this service"
+    cluster: String
+
+    name: String
+
+    attributes: ServiceUpdateAttributes!
+  ): ServiceDeployment
 
   deleteServiceDeployment(id: ID!): ServiceDeployment
 
   "rewires this service to use the given revision id"
-  rollbackService(id: ID!, revisionId: ID!): ServiceDeployment
+  rollbackService(
+    id: ID
+
+    "the handle of the cluster for this service"
+    cluster: String
+
+    name: String
+
+    revisionId: ID!
+  ): ServiceDeployment
 
   "clones the spec of the given service to be deployed either into a new namespace or new cluster"
-  cloneService(serviceId: ID!, clusterId: ID!, attributes: ServiceCloneAttributes!): ServiceDeployment
+  cloneService(
+    serviceId: ID
 
-  createGlobalService(serviceId: ID!, attributes: GlobalServiceAttributes!): GlobalService
+    "the handle of the cluster for this service"
+    cluster: String
+
+    name: String
+
+    clusterId: ID!
+
+    attributes: ServiceCloneAttributes!
+  ): ServiceDeployment
+
+  createGlobalService(
+    serviceId: ID
+
+    "the handle of the cluster for this service"
+    cluster: String
+
+    name: String
+
+    attributes: GlobalServiceAttributes!
+  ): GlobalService
 
   deleteGlobalService(id: ID!): GlobalService
 
@@ -1462,18 +1510,38 @@ type RootQueryType {
   clusterProviders(after: String, first: Int, before: String, last: Int): ClusterProviderConnection
 
   "fetches an individual cluster"
-  cluster(id: ID): Cluster
+  cluster(id: ID, handle: String): Cluster
 
   "fetches an individual cluster provider"
   clusterProvider(id: ID!): ClusterProvider
 
-  serviceDeployments(after: String, first: Int, before: String, last: Int, clusterId: ID): ServiceDeploymentConnection
+  serviceDeployments(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    clusterId: ID
+
+    "the handle of the cluster for this service"
+    cluster: String
+  ): ServiceDeploymentConnection
 
   "the services deployed in the current cluster, to be polled by the deploy operator"
   clusterServices: [ServiceDeployment]
 
   "fetches details of this service deployment, and can be called by the deploy operator"
-  serviceDeployment(id: ID!): ServiceDeployment
+  serviceDeployment(
+    id: ID
+
+    "the handle of the cluster for this service"
+    cluster: String
+
+    name: String
+  ): ServiceDeployment
 
   deploymentSettings: DeploymentSettings
 }
@@ -1758,11 +1826,20 @@ type DeploymentSettings {
 
 input ClusterAttributes {
   name: String!
+
+  "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
+  handle: String
+
   providerId: ID
+
   version: String!
+
   nodePools: [NodePoolAttributes]
+
   readBindings: [PolicyBindingAttributes]
+
   writeBindings: [PolicyBindingAttributes]
+
   tags: [TagAttributes]
 }
 

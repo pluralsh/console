@@ -200,6 +200,43 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert conf["name"] == "name"
       assert conf["value"] == "value"
     end
+
+    test "it can create a new service by handle" do
+      cluster = insert(:cluster, handle: "test")
+      user = admin_user()
+      git = insert(:git_repository)
+
+      {:ok, %{data: %{"createServiceDeployment" => service}}} = run_query("""
+        mutation Create($cluster: String!, $attributes: ServiceDeploymentAttributes!) {
+          createServiceDeployment(cluster: $cluster, attributes: $attributes) {
+            name
+            namespace
+            git { ref folder }
+            repository { id }
+            configuration { name value }
+          }
+        }
+      """, %{
+        "attributes" => %{
+          "name" => "test",
+          "namespace" => "test",
+          "git" => %{"ref" => "master", "folder" => "k8s"},
+          "repositoryId" => git.id,
+          "configuration" => [%{"name" => "name", "value" => "value"}],
+        },
+        "cluster" => cluster.handle,
+      }, %{current_user: user})
+
+      assert service["name"] == "test"
+      assert service["namespace"] == "test"
+      assert service["git"]["ref"] == "master"
+      assert service["git"]["folder"] == "k8s"
+      assert service["repository"]["id"] == git.id
+
+      [conf] = service["configuration"]
+      assert conf["name"] == "name"
+      assert conf["value"] == "value"
+    end
   end
 
   describe "updateServiceDeployment" do
@@ -232,6 +269,48 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
           "configuration" => [%{"name" => "new-name", "value" => "new-value"}],
         },
         "id" => service.id,
+      }, %{current_user: user})
+
+      assert updated["git"]["ref"] == "main"
+      assert updated["git"]["folder"] == "k8s"
+      assert updated["repository"]["id"] == git.id
+      assert updated["editable"]
+
+      [conf] = updated["configuration"]
+      assert conf["name"] == "new-name"
+      assert conf["value"] == "new-value"
+    end
+
+    test "updates the service by handle" do
+      cluster = insert(:cluster, handle: "test")
+      user = admin_user()
+      git = insert(:git_repository)
+      {:ok, service} = create_service(cluster, user, [
+        name: "test",
+        namespace: "test",
+        git_ref: %{ref: "master", folder: "k8s"},
+        repository_id: git.id,
+        configuration: [%{name: "name", value: "value"}]
+      ])
+
+      {:ok, %{data: %{"updateServiceDeployment" => updated}}} = run_query("""
+        mutation update($cluster: String!, $name: String!, $attributes: ServiceUpdateAttributes!) {
+          updateServiceDeployment(cluster: $cluster, name: $name, attributes: $attributes) {
+            name
+            namespace
+            git { ref folder }
+            repository { id }
+            configuration { name value }
+            editable
+          }
+        }
+      """, %{
+        "attributes" => %{
+          "git" => %{"ref" => "main", "folder" => "k8s"},
+          "configuration" => [%{"name" => "new-name", "value" => "new-value"}],
+        },
+        "cluster" => cluster.handle,
+        "name" => service.name,
       }, %{current_user: user})
 
       assert updated["git"]["ref"] == "main"
@@ -286,12 +365,36 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       secrets = Map.new(clone["configuration"], & {&1["name"], &1["value"]})
       assert secrets["name"] == "overwrite"
       assert secrets["name2"] == "value2"
+
+      {:ok, %{data: %{"cloneService" => clone}}} = run_query("""
+          mutation Clone($cid: ID!, $cluster: String!, $name: String!, $attrs: ServiceCloneAttributes!) {
+            cloneService(clusterId: $cid, cluster: $cluster, name: $name, attributes: $attrs) {
+              cluster { id }
+              git { ref folder }
+              name
+              configuration { name value }
+            }
+          }
+      """, %{
+        "cluster" => other.handle,
+        "name" => service.name,
+        "cid" => cluster.id,
+        "attrs" => %{
+          "name" => "clone2",
+          "configuration" => [%{"name" => "name", "value" => "overwrite"}]
+        }
+      }, %{current_user: user})
+
+      assert clone["name"] == "clone2"
+      assert clone["cluster"]["id"] == cluster.id
+      assert clone["git"]["ref"] == "main"
+      assert clone["git"]["folder"] == "k8s"
     end
   end
 
   describe "rollbackService" do
     test "it can rollback a service to a prior revision" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, handle: "test")
       user = admin_user()
       git = insert(:git_repository)
 
@@ -323,6 +426,18 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
           }
         }
       """, %{"id" => service.id, "rev" => service.revision_id}, %{current_user: user})
+
+      assert svc["id"] == service.id
+      assert svc["revision"]["id"] == service.revision_id
+
+      {:ok, %{data: %{"rollbackService" => svc}}} = run_query("""
+        mutation Rollback($cluster: String!, $name: String!, $rev: ID!) {
+          rollbackService(cluster: $cluster, name: $name, revisionId: $rev) {
+            id
+            revision { id }
+          }
+        }
+      """, %{"cluster" => cluster.handle, "name" => service.name, "rev" => service.revision_id}, %{current_user: user})
 
       assert svc["id"] == service.id
       assert svc["revision"]["id"] == service.revision_id
@@ -444,6 +559,32 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
         }
       """, %{
         "sid" => svc.id,
+        "attrs" => %{
+          "name" => "test",
+          "tags" => [%{"name" => "name", "value" => "value"}]
+        }
+      }, %{current_user: admin_user()})
+
+      assert create["service"]["id"] == svc.id
+      [tag] = create["tags"]
+      assert tag["name"] == "name"
+      assert tag["value"] == "value"
+    end
+
+    test "it will make a service global by handle" do
+      cluster = insert(:cluster, handle: "test")
+      svc = insert(:service, cluster: cluster)
+
+      {:ok, %{data: %{"createGlobalService" => create}}} = run_query("""
+        mutation Create($cluster: String!, $name: String!, $attrs: GlobalServiceAttributes!) {
+          createGlobalService(cluster: $cluster, name: $name, attributes: $attrs) {
+            service { id }
+            tags { name value }
+          }
+        }
+      """, %{
+        "cluster" => cluster.handle,
+        "name" => svc.name,
         "attrs" => %{
           "name" => "test",
           "tags" => [%{"name" => "name", "value" => "value"}]

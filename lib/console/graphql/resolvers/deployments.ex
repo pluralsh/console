@@ -159,6 +159,10 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def delete_service(%{id: id}, %{context: %{current_user: user}}),
     do: Services.delete_service(id, user)
 
+  def clone_service(%{cluster: _, name: _, cluster_id: cid, attributes: attrs} = args, %{context: %{current_user: user}}) do
+    svc = fetch_service(args)
+    Services.clone_service(attrs, svc.id, cid, user)
+  end
   def clone_service(%{service_id: sid, cluster_id: cid, attributes: attrs}, %{context: %{current_user: user}}),
     do: Services.clone_service(attrs, sid, cid, user)
 
@@ -178,7 +182,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def update_settings(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Settings.update(attrs, user)
 
-  def delete_service(%{cluster: _, name: _, attributes: attrs} = args, %{context: %{current_user: user}}) do
+  def create_global_service(%{cluster: _, name: _, attributes: attrs} = args, %{context: %{current_user: user}}) do
     svc = fetch_service(args)
     Global.create(attrs, svc.id, user)
   end

@@ -98,7 +98,9 @@ defmodule Console.GraphQl.Schema.Base do
           error -> error
         end
       rescue
-        error -> {:error, Exception.message(error)}
+        error ->
+          {_, msg} = Console.GraphQl.Exception.error(error)
+          {:error, msg}
       end
     end
   end
