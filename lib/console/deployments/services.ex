@@ -64,7 +64,7 @@ defmodule Console.Deployments.Services do
       repository_id: repo.id,
       name: "deploy-operator",
       namespace: "plrl-deploy-operator",
-      git: %{ref: "main", folder: "helm"},
+      git: %{ref: "main", folder: "charts/deployment-operator"},
       configuration: operator_configuration(cluster)
     }, cluster_id, user)
   end
