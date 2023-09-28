@@ -10,6 +10,7 @@ export const resetPartials = {
     font: 'inherit',
     cursor: 'pointer',
     outline: 'inherit',
+    alignItems: 'unset',
   },
   list: {
     margin: 0,
