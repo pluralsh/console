@@ -101,6 +101,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   @desc "a representation of a cluster you can deploy to"
   object :cluster do
     field :id,              non_null(:id), description: "internal id of this cluster"
+    field :self,            :boolean, description: "whether this is the management cluster itself"
     field :name,            non_null(:string), description: "human readable name of this cluster, will also translate to cloud k8s name"
     field :version,         :string, description: "desired k8s version for the cluster"
     field :current_version, :string, description: "current k8s version as told to us by the deployment operator"

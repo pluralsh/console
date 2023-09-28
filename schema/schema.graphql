@@ -999,6 +999,9 @@ type Cluster {
   "internal id of this cluster"
   id: ID!
 
+  "whether this is the management cluster itself"
+  self: Boolean
+
   "human readable name of this cluster, will also translate to cloud k8s name"
   name: String!
 

@@ -415,6 +415,8 @@ export type Cluster = {
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** a relay connection of all revisions of this service, these are periodically pruned up to a history limit */
   revisions?: Maybe<RevisionConnection>;
+  /** whether this is the management cluster itself */
+  self?: Maybe<Scalars['Boolean']['output']>;
   /** the service used to deploy the CAPI resources of this cluster */
   service?: Maybe<ServiceDeployment>;
   /** key/value tags to filter clusters */
