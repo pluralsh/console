@@ -811,6 +811,8 @@ export type DeploymentSettings = {
   createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the repo to fetch the deploy operators manifests from */
   deployerRepository?: Maybe<GitRepository>;
+  /** whether you've yet to enable CD for this instance */
+  enabled: Scalars['Boolean']['output'];
   /** policy for managing git repos */
   gitBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   id: Scalars['ID']['output'];
@@ -1764,6 +1766,7 @@ export type RootMutationType = {
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
   deleteUser?: Maybe<User>;
   deleteWebhook?: Maybe<Webhook>;
+  enableDeployments?: Maybe<DeploymentSettings>;
   executeRunbook?: Maybe<RunbookActionResponse>;
   installRecipe?: Maybe<Build>;
   installStack?: Maybe<Build>;

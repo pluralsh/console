@@ -17,6 +17,9 @@ defmodule Console.Commands.Plural do
   def install([_ | _] = repos), do: plural("deploy", ["--silence", "--ignore-console" | Enum.flat_map(repos, & ["--from", &1])])
   def install(repo), do: plural("deploy", ["--silence", "--ignore-console", "--from", repo])
 
+  def install_cd(url, token),
+    do: plural("deployments", ["install", "--url", url, "--token", token])
+
   def unlock_repo(repo), do: plural("repos", ["unlock", repo])
 
   def diff(_repo \\ :ignore) do

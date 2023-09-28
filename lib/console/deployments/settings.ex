@@ -3,6 +3,8 @@ defmodule Console.Deployments.Settings do
   use Nebulex.Caching
   import Console.Deployments.Policies
   alias Console.PubSub
+  alias Console.Commands.Plural
+  alias Console.Deployments.{Clusters, Services}
   alias Console.Schema.{DeploymentSettings, User}
 
   @cache_adapter Console.conf(:cache_adapter)
@@ -45,6 +47,31 @@ defmodule Console.Deployments.Settings do
     |> DeploymentSettings.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @spec enable(User.t) :: settings_resp
+  @decorate cache_evict(cache: @cache_adapter, keys: [:deployment_settings])
+  def enable(%User{} = user) do
+    case fetch() do
+      %DeploymentSettings{enabled: true} = enabled -> {:ok, enabled}
+      settings -> do_enable(settings, user)
+    end
+  end
+
+  defp do_enable(settings, user) do
+    start_transaction()
+    |> add_operation(:settings, fn _ ->
+      DeploymentSettings.changeset(settings, %{enabled: true})
+      |> allow(user, :write)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:installl, fn _ ->
+      cluster = Clusters.local_cluster()
+      Services.api_url("gql")
+      |> Plural.install_cd(cluster.deploy_token)
+    end)
+    |> execute(extract: :settings)
     |> notify(:update, user)
   end
 

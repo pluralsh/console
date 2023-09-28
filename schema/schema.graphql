@@ -1259,6 +1259,8 @@ type RootMutationType {
   updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
 
   updateDeploymentSettings(attributes: DeploymentSettingsAttributes!): DeploymentSettings
+
+  enableDeployments: DeploymentSettings
 }
 
 type PodConnection {
@@ -1810,6 +1812,9 @@ type ApplicationStatus {
 "global settings for CD, these specify global read/write policies and also allow for customization of the repos for CAPI resources and the deploy operator"
 type DeploymentSettings {
   id: ID!
+
+  "whether you've yet to enable CD for this instance"
+  enabled: Boolean!
 
   name: String!
 

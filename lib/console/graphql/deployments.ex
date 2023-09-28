@@ -21,6 +21,7 @@ defmodule Console.GraphQl.Deployments do
   @desc "global settings for CD, these specify global read/write policies and also allow for customization of the repos for CAPI resources and the deploy operator"
   object :deployment_settings do
     field :id,             non_null(:id)
+    field :enabled,        non_null(:boolean), description: "whether you've yet to enable CD for this instance"
     field :name,           non_null(:string)
 
     field :artifact_repository, :git_repository, resolve: dataloader(Deployments), description: "the repo to fetch CAPI manifests from, for both providers and clusters"
@@ -84,6 +85,12 @@ defmodule Console.GraphQl.Deployments do
       arg :attributes, non_null(:deployment_settings_attributes)
 
       safe_resolve &Deployments.update_settings/2
+    end
+
+    field :enable_deployments, :deployment_settings do
+      middleware Authenticated
+
+      safe_resolve &Deployments.enable/2
     end
   end
 end

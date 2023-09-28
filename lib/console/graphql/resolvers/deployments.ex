@@ -125,6 +125,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     end
   end
 
+  def enable(_, %{context: %{current_user: user}}), do: Settings.enable(user)
+
   def create_cluster(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Clusters.create_cluster(attrs, user)
 

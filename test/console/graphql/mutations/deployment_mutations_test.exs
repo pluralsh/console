@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.DeploymentMutationsTest do
   use Console.DataCase, async: true
+  use Mimic
   alias Console.Deployments.Clusters
 
   describe "createGitRepository" do
@@ -612,6 +613,23 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
 
       assert deleted["id"] == global.id
       refute refetch(global)
+    end
+  end
+
+  describe "enableDeployments" do
+    test "it will install cd" do
+      user = admin_user()
+      insert(:deployment_settings)
+      %{deploy_token: token} = insert(:cluster, self: true)
+      expect(Console.Commands.Plural, :install_cd, fn _, ^token -> {:ok, ""} end)
+
+      {:ok, %{data: %{"enableDeployments" => settings}}} = run_query("""
+        mutation {
+          enableDeployments { id enabled }
+        }
+      """, %{}, %{current_user: user})
+
+      assert settings["enabled"]
     end
   end
 end
