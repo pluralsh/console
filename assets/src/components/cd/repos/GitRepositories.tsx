@@ -32,8 +32,8 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { useCD } from '../ContinuousDeployment'
 
-import { columns } from './columns'
-import { ImportGit } from './ImportGit'
+import { columns } from './GitRepositoriesColumns'
+import { ImportGit } from './GitRepositoriesImportGit'
 // import { Confirm } from 'components/utils/Confirm'
 // import { DeleteIconButton } from 'components/utils/IconButtons'
 

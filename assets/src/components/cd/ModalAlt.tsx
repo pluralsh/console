@@ -61,3 +61,14 @@ export default function ModalAlt({
     </ModalAltSC>
   )
 }
+
+export const StepH = styled.h3(({ theme }) => ({
+  ...theme.partials.text.body2Bold,
+}))
+export const StepBody = styled.p(({ theme }) => ({
+  ...theme.partials.text.body2,
+  color: theme.colors['text-light'],
+}))
+export const StepLink = styled.a(({ theme }) => ({
+  ...theme.partials.text.inlineLink,
+}))

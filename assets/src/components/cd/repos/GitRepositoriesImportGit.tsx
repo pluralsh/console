@@ -6,21 +6,11 @@ import {
   usePrevious,
 } from '@pluralsh/design-system'
 import { useCreateGitRepositoryMutation } from 'generated/graphql'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { FormEvent, useCallback, useEffect, useState } from 'react'
 
-import ModalAlt from '../ModalAlt'
+import ModalAlt, { StepBody, StepH, StepLink } from '../ModalAlt'
 
-const StepH = styled.h3(({ theme }) => ({
-  ...theme.partials.text.body2Bold,
-}))
-const StepBody = styled.p(({ theme }) => ({
-  ...theme.partials.text.body2,
-  color: theme.colors['text-light'],
-}))
-const StepLink = styled.a(({ theme }) => ({
-  ...theme.partials.text.inlineLink,
-}))
 const scaffoldTabs = [
   {
     key: 'nodejs',

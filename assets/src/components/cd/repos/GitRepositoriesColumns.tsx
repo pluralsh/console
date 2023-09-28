@@ -34,12 +34,7 @@ export const columns = [
     id: 'authMethod',
     header: 'Auth method',
     enableSorting: true,
-    cell: ({
-      getValue,
-      row: {
-        original: { node },
-      },
-    }) => <AuthMethodChip authMethod={getValue()} />,
+    cell: ({ getValue }) => <AuthMethodChip authMethod={getValue()} />,
   }),
   columnHelper.accessor(({ node }) => gitHealthToLabel(node?.health), {
     id: 'status',

@@ -40,7 +40,7 @@ export const useCD = () => {
 const directory = [
   { path: 'clusters', label: 'Clusters' },
   { path: 'services', label: 'Services' },
-  { path: 'pipelines', label: 'Pipelines' },
+  // { path: 'pipelines', label: 'Pipelines' },
   { path: 'git', label: 'Git repositories' },
   { path: 'providers', label: 'Providers' },
 ] as const
