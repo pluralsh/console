@@ -20,13 +20,11 @@ export const DarkProviderIcons = {
 }
 
 export function providerToURL(provider: string, dark: boolean) {
-  let url = ProviderIcons[provider] || DEFAULT_CHART_ICON
+  const p = provider ? provider.toUpperCase() : ''
 
-  if (dark && DarkProviderIcons[provider]) {
-    url = DarkProviderIcons[provider]
-  }
-
-  return url
+  return dark && DarkProviderIcons[p]
+    ? DarkProviderIcons[p]
+    : ProviderIcons[p] || DEFAULT_CHART_ICON
 }
 
 export default function ProviderIcon({

@@ -15,7 +15,11 @@ import { A } from 'honorable'
 import { Link } from 'react-router-dom'
 
 import ProviderIcon from '../utils/ProviderIcon'
-import UserDetails from '../utils/UserDetails'
+
+export const CellCaption = styled.div(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+}))
 
 const ColWithIconSC = styled.div(({ theme }) => ({
   alignItems: 'center',
@@ -63,7 +67,7 @@ const columns = [
     ),
     meta: { truncate: true },
   }),
-  columnHelper.accessor(({ node }) => node?.provider?.name || 'GCP', {
+  columnHelper.accessor(({ node }) => node?.provider?.name || 'aws', {
     id: 'cloud',
     header: 'Cloud',
     cell: ({ getValue }) => (
@@ -80,46 +84,57 @@ const columns = [
     ),
     meta: { truncate: true },
   }),
-  columnHelper.accessor(({ node }) => node?.version, {
+  columnHelper.accessor(({ node }) => node, {
     id: 'version',
     header: 'Version',
-    cell: ({ getValue }) => <div css={{}}>v{getValue()}</div>,
-    meta: { truncate: true },
-  }),
-  columnHelper.accessor(({ node }) => node?.version, {
-    id: 'vpc',
-    header: 'VPC ID',
-    cell: ({ getValue }) => <div css={{}}>v{getValue()}</div>,
-    meta: { truncate: true },
-  }),
-  columnHelper.accessor(({ node }) => node?.version, {
-    id: 'owner',
-    header: 'Owner',
-    cell: ({ getValue }) => (
-      <UserDetails
-        name="Marcin Marcin"
-        avatar={null}
-        email="marcin@plural.sh"
-      />
+    cell: ({
+      row: {
+        original: { node },
+      },
+    }) => (
+      <div>
+        <div>Current: v{node?.currentVersion}</div>
+        <CellCaption>Desired: v{node?.version}</CellCaption>
+      </div>
     ),
     meta: { truncate: true },
   }),
+  // TODO: Add once VPC ID will be available.
+  // columnHelper.accessor(({ node }) => node?.version, {
+  //   id: 'vpc',
+  //   header: 'VPC ID',
+  //   cell: () => 'TODO',
+  //   meta: { truncate: true },
+  // }),
+  // TODO: Fill once owner data will be available.
+  // columnHelper.accessor(({ node }) => node?.version, {
+  //   id: 'owner',
+  //   header: 'Owner',
+  //   cell: () => (
+  //     <UserDetails
+  //       name="TODO"
+  //       avatar={null}
+  //       email="todo@todo.todo"
+  //     />
+  //   ),
+  //   meta: { truncate: true },
+  // }),
   columnHelper.accessor(({ node }) => node?.version, {
     id: 'cpu',
     header: 'CPU',
-    cell: ({ getValue }) => <div css={{}}>v{getValue()}</div>,
+    cell: () => <div>TODO</div>,
     meta: { truncate: true },
   }),
   columnHelper.accessor(({ node }) => node?.version, {
     id: 'memory',
     header: 'Memory',
-    cell: ({ getValue }) => <div css={{}}>v{getValue()}</div>,
+    cell: () => <div>TODO</div>,
     meta: { truncate: true },
   }),
   columnHelper.accessor(({ node }) => node?.version, {
     id: 'status',
     header: 'Status',
-    cell: ({ getValue }) => <div css={{}}>v{getValue()}</div>,
+    cell: () => <div>TODO</div>,
     meta: { truncate: true },
   }),
 ]
