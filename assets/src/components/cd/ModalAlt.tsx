@@ -18,7 +18,7 @@ const ModalAltSC = styled(Modal)(({ theme }) => ({
   },
   '.actions': {
     display: 'flex',
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     gap: theme.spacing.medium,
     justifyContent: 'flex-start',
     borderTop: theme.borders.default,

@@ -4,6 +4,8 @@ import { useClustersQuery } from 'generated/graphql'
 import { useEffect, useMemo } from 'react'
 import { isEmpty } from 'lodash'
 
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+
 import { useCD } from '../ContinuousDeployment'
 
 import { columns } from './columns'
@@ -17,7 +19,9 @@ export default function Clusters() {
 
   useEffect(() => cd.setActionsContent(headerActions), [cd, headerActions])
 
-  console.log('data', data)
+  if (!data) {
+    return <LoadingIndicator />
+  }
 
   return (
     <div>

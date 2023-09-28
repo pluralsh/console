@@ -73,6 +73,7 @@ export default function Apps() {
 
   return (
     <ResponsivePageFullWidth
+      scrollable={false}
       headingContent={
         <>
           <TabList
