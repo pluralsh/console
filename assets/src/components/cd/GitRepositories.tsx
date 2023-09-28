@@ -238,7 +238,7 @@ function ImportGit() {
   return (
     <>
       <Button
-        parimary
+        primary
         onClick={() => {
           setIsOpen(true)
         }}

@@ -35,10 +35,11 @@ export default function ProviderIcon({
   width: number
 }) {
   return (
-    <img
-      alt={provider}
-      width={width}
-      src={providerToURL(provider, true)}
-    />
+    <div css={{ display: 'flex', justifyContent: 'center', width }}>
+      <img
+        alt={provider}
+        src={providerToURL(provider, true)}
+      />
+    </div>
   )
 }

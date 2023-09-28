@@ -2,24 +2,112 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   AppIcon,
+  Button,
   ClusterIcon,
   EmptyState,
   Table,
+  usePrevious,
 } from '@pluralsh/design-system'
-import { type ClustersRowFragment, useClustersQuery } from 'generated/graphql'
+import {
+  type ClustersRowFragment,
+  useClustersQuery,
+  useCreateGitRepositoryMutation,
+} from 'generated/graphql'
 import { Edge } from 'utils/graphql'
-import styled from 'styled-components'
-import { ComponentProps } from 'react'
+import styled, { useTheme } from 'styled-components'
+import {
+  ComponentProps,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { isEmpty } from 'lodash'
 import { A } from 'honorable'
 import { Link } from 'react-router-dom'
 
 import ProviderIcon from '../utils/ProviderIcon'
 
-export const CellCaption = styled.div(({ theme }) => ({
-  ...theme.partials.text.caption,
-  color: theme.colors['text-xlight'],
-}))
+import ModalAlt from './ModalAlt'
+import { useCD } from './ContinuousDeployment'
+
+function CreateCluster() {
+  const theme = useTheme()
+  const [isOpen, setIsOpen] = useState(false)
+  const wasOpen = usePrevious(isOpen)
+  const closeModal = useCallback(() => setIsOpen(false), [])
+  const onClose = useCallback(() => setIsOpen(false), [])
+  const [gitUrl, setGitUrl] = useState('')
+  const [mutation, { loading, error }] = useCreateGitRepositoryMutation({
+    variables: { attributes: { url: gitUrl } },
+  })
+
+  console.log('error', error)
+
+  useEffect(() => {
+    if (isOpen && wasOpen) {
+      setGitUrl('')
+    }
+  }, [isOpen, wasOpen])
+  const disabled = !gitUrl
+  const onSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault()
+      if (gitUrl && !loading) {
+        mutation()
+      }
+    },
+    [gitUrl, loading, mutation]
+  )
+
+  return (
+    <>
+      <Button
+        primary
+        onClick={() => setIsOpen(true)}
+      >
+        Create cluster
+      </Button>
+      <ModalAlt
+        header="Create a cluster"
+        open={isOpen}
+        portal
+        onClose={onClose}
+        asForm
+        formProps={{ onSubmit }}
+        actions={
+          <>
+            <Button
+              type="submit"
+              disabled={disabled}
+              loading={loading}
+              primary
+            >
+              Import
+            </Button>
+            <Button
+              secondary
+              onClick={closeModal}
+            >
+              Cancel
+            </Button>
+          </>
+        }
+      >
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.xxsmall,
+          }}
+        >
+          ...
+        </div>
+      </ModalAlt>
+    </>
+  )
+}
 
 const ColWithIconSC = styled.div(({ theme }) => ({
   alignItems: 'center',
@@ -54,7 +142,6 @@ const columns = [
     id: 'cluster',
     header: 'Cluster',
     cell: ({ getValue }) => (
-      // TODO: Set ClusterIcon size.
       <ColWithIcon icon={<ClusterIcon width={16} />}>
         <A
           as={Link}
@@ -67,7 +154,7 @@ const columns = [
     ),
     meta: { truncate: true },
   }),
-  columnHelper.accessor(({ node }) => node?.provider?.name || 'aws', {
+  columnHelper.accessor(({ node }) => node?.provider?.name ?? '', {
     id: 'cloud',
     header: 'Cloud',
     cell: ({ getValue }) => (
@@ -91,22 +178,32 @@ const columns = [
       row: {
         original: { node },
       },
-    }) => (
-      <div>
-        <div>Current: v{node?.currentVersion}</div>
-        <CellCaption>Desired: v{node?.version}</CellCaption>
-      </div>
-    ),
+    }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const theme = useTheme()
+
+      return (
+        <div>
+          <div>Current: v{node?.currentVersion}</div>
+          <div
+            css={{
+              ...theme.partials.text.caption,
+              color: theme.colors['text-xlight'],
+            }}
+          >
+            Desired: v{node?.version}
+          </div>
+        </div>
+      )
+    },
     meta: { truncate: true },
   }),
-  // TODO: Add once VPC ID will be available.
   // columnHelper.accessor(({ node }) => node?.version, {
   //   id: 'vpc',
   //   header: 'VPC ID',
   //   cell: () => 'TODO',
   //   meta: { truncate: true },
   // }),
-  // TODO: Fill once owner data will be available.
   // columnHelper.accessor(({ node }) => node?.version, {
   //   id: 'owner',
   //   header: 'Owner',
@@ -141,6 +238,11 @@ const columns = [
 
 export default function Clusters() {
   const { data } = useClustersQuery()
+  const cd = useCD()
+
+  const headerActions = useMemo(() => <CreateCluster />, [])
+
+  useEffect(() => cd.setActionsContent(headerActions), [cd, headerActions])
 
   console.log('data', data)
 
