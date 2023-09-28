@@ -9,10 +9,11 @@ import {
   GitHubLogoIcon,
   Input,
   Table,
+  WrapWithIf,
   usePrevious,
 } from '@pluralsh/design-system'
 import {
-  type ClustersRowFragment,
+  type GitRepositoriesRowFragment,
   useCreateGitRepositoryMutation,
   useGitRepositoriesQuery,
 } from 'generated/graphql'
@@ -32,6 +33,10 @@ import {
 } from 'react'
 import { isEmpty } from 'lodash'
 
+// import classNames from 'classnames'
+
+import classNames from 'classnames'
+
 import { useCD } from './ContinuousDeployment'
 import ModalAlt from './ModalAlt'
 // import { Confirm } from 'components/utils/Confirm'
@@ -40,21 +45,51 @@ import ModalAlt from './ModalAlt'
 const ColWithIconSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.xsmall,
+  alignItems: 'center',
+  '.icon': {
+    '&, *': {
+      width: 'unset',
+      overflow: 'unset',
+      whiteSpace: 'unset',
+    },
+  },
+  '.content': {
+    '&.truncateLeft': {
+      direction: 'rtl',
+      textAlign: 'left',
+      span: {
+        direction: 'ltr',
+        unicodeBidi: 'bidi-override',
+      },
+    },
+  },
 }))
 
 export function ColWithIcon({
   icon,
   children,
+  truncateLeft = false,
   ...props
-}: ComponentProps<typeof ColWithIconSC>) {
+}: ComponentProps<typeof ColWithIconSC> & {
+  truncateLeft?: boolean
+}) {
   return (
     <ColWithIconSC {...props}>
       <div className="icon">
         <AppIcon
+          spacing="padding"
           size="xxsmall"
           icon={icon}
+          className="icon2"
         />
-        <div className="content">{children}</div>
+      </div>
+      <div className={classNames('content', { truncateLeft: 'truncateLeft' })}>
+        <WrapWithIf
+          condition={truncateLeft}
+          wrapper={<span />}
+        >
+          {children}
+        </WrapWithIf>
       </div>
     </ColWithIconSC>
   )
@@ -111,25 +146,27 @@ function DeleteGitRepository({
 }
 */
 
-const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
+const columnHelper = createColumnHelper<Edge<GitRepositoriesRowFragment>>()
 const columns = [
-  columnHelper.accessor(({ node }) => node?.name, {
-    id: 'cluster',
-    header: 'Cluster',
-    cell: ({ getValue }) => <div css={{}}>{getValue()}</div>,
+  columnHelper.accessor(({ node }) => node?.url, {
+    id: 'repository',
+    header: 'Repository',
+    cell: ({ getValue }) => (
+      <ColWithIcon
+        truncateLeft
+        icon={<ClusterIcon />}
+      >
+        {getValue()}
+      </ColWithIcon>
+    ),
     meta: { truncate: true },
   }),
-  columnHelper.accessor(({ node }) => node?.provider?.name, {
-    id: 'cloud',
-    header: 'Cloud',
-    cell: ({
-      getValue,
-      // row: {
-      //   original: { node },
-      // },
-    }) => <ColWithIcon icon={<ClusterIcon />}>{getValue()}</ColWithIcon>,
-    meta: { truncate: true },
-  }),
+  /* Add later when API is updated */
+  //   columnHelper.accessor(({ node }) => node?.owner, {
+  //     id: 'owner',
+  //     header: 'Owner',
+  //     cell: ({ getValue }) => getValue(),
+  //   }),
   columnHelper.accessor(({ node }) => node?.id, {
     id: 'actions',
     header: '',
@@ -145,6 +182,7 @@ const columns = [
           }}
         >
           <Button
+            secondary
             onClick={() => {
               alert(`Create ${original?.node?.id}`)
             }}
@@ -152,12 +190,14 @@ const columns = [
             Create
           </Button>
           <Button
+            secondary
             onClick={() => {
               alert(`Update ${original?.node?.id}`)
             }}
           >
             Update
           </Button>
+          {/* Add delete when supported in API */}
           {/* <DeleteGitRepository repo={original} /> */}
         </div>
       )
@@ -305,6 +345,7 @@ function ImportGit() {
             onChange={(e) => {
               setGitUrl(e.currentTarget.value)
             }}
+            placeholder="https://host.com/your-repo.git"
             titleContent={<GitHubLogoIcon />}
           />
         </div>
@@ -313,7 +354,7 @@ function ImportGit() {
   )
 }
 
-export default function Clusters() {
+export default function GitRepositories() {
   const { data } = useGitRepositoriesQuery()
   const cd = useCD()
 
@@ -326,7 +367,8 @@ export default function Clusters() {
   console.log('data', data)
 
   return (
-    <div>
+    // eslint-disable-next-line react/jsx-no-useless-fragment
+    <>
       {!isEmpty(data?.gitRepositories?.edges) ? (
         <FullHeightTableWrap>
           <Table
@@ -341,6 +383,6 @@ export default function Clusters() {
       ) : (
         <EmptyState message="Looks like you don't have any Git repositories yet." />
       )}
-    </div>
+    </>
   )
 }
