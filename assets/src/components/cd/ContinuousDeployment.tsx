@@ -8,6 +8,7 @@ import {
   ReactNode,
   createContext,
   useContext,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -65,6 +66,10 @@ export default function Apps() {
     }),
     []
   )
+
+  useLayoutEffect(() => {
+    setActionsContent(null)
+  }, [tab])
 
   return (
     <ResponsivePageFullWidth
