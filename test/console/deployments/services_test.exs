@@ -511,3 +511,18 @@ defmodule Console.Deployments.ServicesTest do
     end
   end
 end
+
+defmodule Console.Deployments.ServicesAsyncTest do
+  use Console.DataCase, async: false
+  alias Console.Deployments.Services
+
+  describe "#docs/1" do
+    test "it can fetch the docs for a given service" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      service = insert(:service, repository: git, git: %{ref: "cd-scaffolding", folder: "example"})
+
+      {:ok, [%{path: "test.md", content: content}]} = Services.docs(service)
+      assert content == "hello world"
+    end
+  end
+end

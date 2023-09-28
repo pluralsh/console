@@ -15,6 +15,15 @@ defmodule Console.Deployments.Git.Discovery do
     end
   end
 
+  def docs(%Service{} = svc) do
+    %{repository: repo} = Console.Repo.preload(svc, [:repository])
+    case start(repo) do
+      {:ok, pid} -> Agent.docs(pid, svc)
+      {:error, {:already_started, pid}} -> Agent.docs(pid, svc)
+      err -> err
+    end
+  end
+
   def start(%GitRepository{} = repo) do
     me = node()
     case agent_node(repo) do

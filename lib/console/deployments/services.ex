@@ -4,6 +4,7 @@ defmodule Console.Deployments.Services do
   alias Console.PubSub
   alias Console.Schema.{Service, Revision, User, Cluster, ClusterProvider, ApiDeprecation}
   alias Console.Deployments.{Secrets.Store, Git, Clusters, Deprecations.Checker}
+  require Logger
 
   @type service_resp :: {:ok, Service.t} | Console.error
   @type revision_resp :: {:ok, Revision.t} | Console.error
@@ -180,6 +181,36 @@ defmodule Console.Deployments.Services do
   end
 
   defp add_version(attrs, vsn), do: Console.dedupe(attrs, :version, vsn)
+
+  @doc """
+  fetches the docs for a given service out of git, and renders them as a list of file path/content pairs
+  """
+  @spec docs(Service.t) :: [%{path: string, content: string}]
+  def docs(%Service{} = svc) do
+    case Git.Discovery.docs(svc) do
+      {:ok, f} -> docs_inner(f)
+      err ->
+        Logger.info "failed to fetch docs tarball: #{inspect(err)}"
+        {:error, "could not fetch docs"}
+    end
+  end
+
+  defp docs_inner(tar_file) do
+    try do
+      with {:ok, tmp} <- Briefly.create(),
+          _ <- IO.binstream(tar_file, 1024) |> Enum.into(File.stream!(tmp)),
+          {:ok, res} <- :erl_tar.extract(tmp, [:compressed, :memory]) do
+        Enum.map(res, fn {name, content} -> %{path: to_string(name), content: to_string(content)} end)
+        |> ok()
+      else
+        err ->
+          Logger.error "could not fetch and untar docs: #{inspect(err)}"
+          {:error, "could not fetch docs"}
+      end
+    after
+      File.close(tar_file)
+    end
+  end
 
   @doc """
   Rollbacks a service to a given revision id, all configuration will then be fetched via that revision

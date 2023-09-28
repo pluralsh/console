@@ -21,6 +21,8 @@ defmodule Console.Deployments.Git.Agent do
 
   def fetch(pid, %Service{} = svc), do: GenServer.call(pid, {:fetch, svc}, 30_000)
 
+  def docs(pid, %Service{} = svc), do: GenServer.call(pid, {:docs, svc}, 30_000)
+
   def start(%GitRepository{} = repo) do
     GenServer.start(__MODULE__, repo, name: via(repo))
   end
@@ -42,10 +44,17 @@ defmodule Console.Deployments.Git.Agent do
     {:ok, %State{git: repo, cache: cache}}
   end
 
+  def handle_call({:docs, %Service{git: %{ref: ref, folder: path}} = svc}, _, %State{cache: cache} = state) do
+    case Cache.fetch(cache, ref, Path.join(path, "docs")) do
+      {:ok, _, f} -> {:reply, File.open(f), state}
+      err -> {:reply, err, state}
+    end
+  end
+
   def handle_call({:fetch, %Service{git: %{ref: ref, folder: path}} = svc}, _, %State{cache: cache} = state) do
     with {:ok, sha, f} <- Cache.fetch(cache, ref, path),
          {:ok, _} <- Services.update_sha(svc, sha) do
-      {:reply, {:ok, File.open!(f)}, state}
+      {:reply, File.open(f), state}
     else
       err -> {:reply, err, state}
     end
