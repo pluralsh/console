@@ -74,6 +74,9 @@ defmodule Console.GraphQl.Deployments.Service do
 
     field :deleted_at, :datetime, description: "the time this service was scheduled for deletion"
 
+    @desc "fetches the /docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries"
+    field :docs, list_of(:git_file), resolve: &Deployments.docs/3
+
     field :repository, :git_repository, resolve: dataloader(Deployments), description: "the git repo of this service"
 
     field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this service"
@@ -161,6 +164,12 @@ defmodule Console.GraphQl.Deployments.Service do
   object :service_error do
     field :source, non_null(:string)
     field :message, non_null(:string)
+  end
+
+  @desc "a file fetched from a git repository, eg a docs .md file"
+  object :git_file do
+    field :path,    non_null(:string)
+    field :content, non_null(:string)
   end
 
   connection node_type: :service_deployment

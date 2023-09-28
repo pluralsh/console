@@ -211,6 +211,9 @@ type ServiceDeployment {
   "the time this service was scheduled for deletion"
   deletedAt: DateTime
 
+  "fetches the /docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries"
+  docs: [GitFile]
+
   "the git repo of this service"
   repository: GitRepository
 
@@ -2193,6 +2196,12 @@ type Certificate {
 type AccessTokenEdge {
   node: AccessToken
   cursor: String
+}
+
+"a file fetched from a git repository, eg a docs .md file"
+type GitFile {
+  path: String!
+  content: String!
 }
 
 type RollingUpdate {

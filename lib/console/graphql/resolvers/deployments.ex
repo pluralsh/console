@@ -114,6 +114,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> allow(user, :read)
   end
 
+  def docs(svc, _, _), do: Services.docs(svc)
+
   def settings(_, _), do: {:ok, Settings.fetch()}
 
   def service_configuration(service, _, ctx) do

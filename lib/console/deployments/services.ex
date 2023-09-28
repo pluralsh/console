@@ -185,7 +185,7 @@ defmodule Console.Deployments.Services do
   @doc """
   fetches the docs for a given service out of git, and renders them as a list of file path/content pairs
   """
-  @spec docs(Service.t) :: [%{path: string, content: string}]
+  @spec docs(Service.t) :: [%{path: binary, content: binary}]
   def docs(%Service{} = svc) do
     case Git.Discovery.docs(svc) do
       {:ok, f} -> docs_inner(f)
@@ -396,7 +396,7 @@ defmodule Console.Deployments.Services do
     end)
   end
 
-  defp update_status(%Service{} = svc, status, component_status \\ nil) do
+  defp update_status(%Service{} = svc, status, component_status) do
     Ecto.Changeset.change(svc, %{status: status, component_status: component_status})
     |> Repo.update()
   end
