@@ -29,6 +29,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
           createCluster(attributes: $attributes) {
             name
             version
+            deployToken
             provider { name }
             nodePools { id name minSize maxSize instanceType }
           }
@@ -43,6 +44,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert cluster["name"] == "test"
       assert cluster["provider"]["name"] == provider.name
       assert cluster["version"] == "1.25"
+      assert cluster["deployToken"]
 
       [node_pool] = cluster["nodePools"]
 

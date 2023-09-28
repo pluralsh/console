@@ -23,6 +23,7 @@ defmodule Console.Deployments.ClustersTest do
       assert cluster.version == "1.25"
       assert cluster.provider_id == provider.id
       assert cluster.deploy_token
+      assert cluster.token_readable
 
       assert_receive {:event, %PubSub.ClusterCreated{item: ^cluster}}
 

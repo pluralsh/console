@@ -205,6 +205,9 @@ type ServiceDeployment {
   "https url to fetch the latest tarball of kubernetes manifests"
   tarball: String
 
+  "a n / m representation of the number of healthy components of this service"
+  componentStatus: String
+
   "the time this service was scheduled for deletion"
   deletedAt: DateTime
 
@@ -1004,6 +1007,9 @@ type Cluster {
 
   "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
   handle: String
+
+  "a auth token to be used by the deploy operator, only readable on create"
+  deployToken: String
 
   "when this cluster was scheduled for deletion"
   deletedAt: DateTime

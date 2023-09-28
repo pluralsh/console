@@ -101,6 +101,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :current_version, :string, description: "current k8s version as told to us by the deployment operator"
     field :handle,          :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
 
+    field :deploy_token, :string, description: "a auth token to be used by the deploy operator, only readable on create", resolve: fn
+      %{deploy_token: token, token_readable: true}, _, _ -> {:ok, token}
+      _, _, _ -> {:error, "cannot fetch deploy token"}
+    end
+
     field :deleted_at, :datetime, description: "when this cluster was scheduled for deletion"
     field :pinged_at,  :datetime, description: "last time the deploy operator pinged this cluster"
 

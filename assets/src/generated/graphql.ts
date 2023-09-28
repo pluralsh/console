@@ -394,6 +394,8 @@ export type Cluster = {
   currentVersion?: Maybe<Scalars['String']['output']>;
   /** when this cluster was scheduled for deletion */
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a auth token to be used by the deploy operator, only readable on create */
+  deployToken?: Maybe<Scalars['String']['output']>;
   /** whether the current user can edit this cluster */
   editable?: Maybe<Scalars['Boolean']['output']>;
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
@@ -2757,6 +2759,8 @@ export type ServiceDeployment = {
   __typename?: 'ServiceDeployment';
   /** the cluster this service is deployed into */
   cluster?: Maybe<Cluster>;
+  /** a n / m representation of the number of healthy components of this service */
+  componentStatus?: Maybe<Scalars['String']['output']>;
   /** the kubernetes component of a service */
   components?: Maybe<Array<Maybe<ServiceComponent>>>;
   /** possibly secret configuration used to template the manifests of this service */

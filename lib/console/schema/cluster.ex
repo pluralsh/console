@@ -37,6 +37,8 @@ defmodule Console.Schema.Cluster do
     field :deleted_at,      :utc_datetime_usec
     field :pinged_at,       :utc_datetime_usec
 
+    field :token_readable,  :boolean, default: false, virtual: true
+
     embeds_one :resource,       NamespacedName
     embeds_one :kubeconfig,     NamespacedName
     embeds_one :cloud_settings, CloudSettings, on_replace: :update

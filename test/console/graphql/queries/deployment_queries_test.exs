@@ -77,6 +77,16 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       assert found["id"] == cluster.id
     end
 
+    test "it cannot query deploy tokens" do
+      cluster = insert(:cluster)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) { deployToken }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin_user()})
+    end
+
     test "it can fetch by deploy token" do
       cluster = insert(:cluster)
       revision = insert(:cluster_revision, cluster: cluster)

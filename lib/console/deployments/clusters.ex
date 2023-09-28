@@ -81,6 +81,7 @@ defmodule Console.Deployments.Clusters do
         |> Console.Repo.update()
     end)
     |> execute(extract: :rewire)
+    |> when_ok(& %{&1 | token_readable: true})
     |> notify(:create, user)
   end
 
