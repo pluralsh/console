@@ -6,11 +6,14 @@ export const ListItemBorder = styled.div<{
   width?: number
   radius?: number
 }>(({ theme, color, radius = 4, width = 3 }) => ({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  bottom: 0,
   backgroundColor: color ? theme.colors[color] : undefined,
   borderBottomLeftRadius: radius,
   borderTopLeftRadius: radius,
   display: 'flex',
-  height: 'inherit',
   width,
 }))
 

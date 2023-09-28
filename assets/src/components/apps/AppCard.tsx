@@ -72,6 +72,7 @@ export default function AppCard({ app }: any) {
   return (
     <Card
       clickable
+      position="relative"
       display="flex"
       flexBasis="45%"
       flexGrow={1}
