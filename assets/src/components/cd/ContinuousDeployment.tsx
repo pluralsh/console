@@ -8,6 +8,7 @@ import {
   ReactNode,
   createContext,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -22,19 +23,43 @@ import { CD_BASE_PATH } from 'routes/cdRoutes'
 
 const CDContext = createContext<
   | {
-      setActionsContent: (content: ReactNode) => void
+      setHeaderContent: (content: ReactNode) => void
     }
   | undefined
 >(undefined)
 
-export const useCD = () => {
+export const useSetCDHeaderContent = (headerContent?: ReactNode) => {
   const ctx = useContext(CDContext)
 
   if (!ctx) {
-    throw Error('useCD() must be used within a CDContext')
+    throw Error('useSetCDHeaderContent() must be used within a CDContext')
   }
+  const { setHeaderContent } = ctx || {}
 
-  return ctx
+  useLayoutEffect(() => {
+    setHeaderContent?.(headerContent)
+
+    return () => {
+      setHeaderContent?.(null)
+    }
+  }, [setHeaderContent, headerContent])
+}
+
+export const useCDHeaderContent = (headerContent?: ReactNode) => {
+  const ctx = useContext(CDContext)
+
+  if (!ctx) {
+    throw Error('useCDHeaderContent() must be used within a CDContext')
+  }
+  const { setHeaderContent } = ctx || {}
+
+  useEffect(() => {
+    setHeaderContent?.(headerContent)
+
+    return () => {
+      setHeaderContent?.(null)
+    }
+  }, [setHeaderContent, headerContent])
 }
 
 const directory = [
@@ -45,9 +70,15 @@ const directory = [
   { path: 'providers', label: 'Providers' },
 ] as const
 
-export default function Apps() {
+export default function ContinuousDeployment() {
+  const [headerContent, setHeaderContent] = useState<ReactNode>()
+  const cdContext = useMemo(
+    () => ({
+      setHeaderContent,
+    }),
+    []
+  )
   const tabStateRef = useRef<any>(null)
-  const [actionsContent, setActionsContent] = useState<ReactNode>()
 
   const tab = useMatch(`/${CD_BASE_PATH}/:tab`)?.params?.tab || ''
 
@@ -60,16 +91,6 @@ export default function Apps() {
   )
 
   useSetBreadcrumbs(crumbs)
-  const cdContext = useMemo(
-    () => ({
-      setActionsContent,
-    }),
-    []
-  )
-
-  useLayoutEffect(() => {
-    setActionsContent(null)
-  }, [tab])
 
   return (
     <ResponsivePageFullWidth
@@ -100,11 +121,14 @@ export default function Apps() {
               </LinkTabWrap>
             ))}
           </TabList>
-          {actionsContent}
+          {headerContent}
         </>
       }
     >
-      <TabPanel stateRef={tabStateRef}>
+      <TabPanel
+        css={{ height: '100%' }}
+        stateRef={tabStateRef}
+      >
         <CDContext.Provider value={cdContext}>
           <Outlet />
         </CDContext.Provider>

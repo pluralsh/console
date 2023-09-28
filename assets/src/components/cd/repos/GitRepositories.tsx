@@ -13,24 +13,16 @@ import {
   useGitRepositoriesQuery,
 } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
-import { ComponentProps, useEffect, useMemo, useState } from 'react'
+import { ComponentProps, useMemo, useState } from 'react'
 import { isEmpty } from 'lodash'
-
-// import classNames from 'classnames'
-
 import classNames from 'classnames'
-
 import { Merge } from 'type-fest'
-
 import { Confirm } from 'components/utils/Confirm'
-
 import { DeleteIconButton } from 'components/utils/IconButtons'
-
 import { createMapperWithFallback } from 'utils/mapping'
-
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { useCD } from '../ContinuousDeployment'
+import { useSetCDHeaderContent } from '../ContinuousDeployment'
 
 import { columns } from './GitRepositoriesColumns'
 import { ImportGit } from './GitRepositoriesImportGit'
@@ -203,13 +195,8 @@ export function GitHealthChip({
 
 export default function GitRepositories() {
   const { data } = useGitRepositoriesQuery()
-  const cd = useCD()
 
-  const headerActions = useMemo(() => <ImportGit />, [])
-
-  useEffect(() => {
-    cd.setActionsContent(headerActions)
-  }, [cd, headerActions])
+  useSetCDHeaderContent(useMemo(() => <ImportGit />, []))
 
   console.log('data', data)
   if (!data) {
