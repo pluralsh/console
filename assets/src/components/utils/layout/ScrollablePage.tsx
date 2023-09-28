@@ -1,5 +1,5 @@
 import { Div, FlexProps } from 'honorable'
-import { ReactNode } from 'react'
+import { ReactNode, Ref } from 'react'
 import styled, { CSSProperties } from 'styled-components'
 
 import ConsolePageTitle from './ConsolePageTitle'
@@ -62,17 +62,18 @@ export function ScrollablePage({
   scrollRef,
   ...props
 }: {
-  heading: ReactNode
+  heading?: ReactNode
   headingContent?: ReactNode | undefined
   contentStyles?: CSSProperties
   children: ReactNode
   scrollable?: boolean
   maxContentWidth?: number
   fullWidth?: boolean
+  scrollRef?: Ref<any>
 } & FlexProps) {
   return (
     <>
-      {heading && (
+      {(heading || headingContent) && (
         <Div paddingRight={scrollable && fullWidth ? 'large' : undefined}>
           <Div
             position="relative"

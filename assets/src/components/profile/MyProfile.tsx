@@ -20,6 +20,7 @@ const getDirectory = (me, configuration) => [
   { path: 'me', label: 'Profile', enabled: true },
   { path: 'security', label: 'Security', enabled: true },
   { path: 'permissions', label: 'Permissions', enabled: true },
+  { path: 'access-tokens', label: 'Access tokens', enabled: true },
   {
     path: 'vpn',
     label: 'VPN clients',
@@ -42,8 +43,8 @@ export default function MyProfile() {
 
   if (!me) return null
 
-  const currentTab = directory.find((tab) =>
-    pathname?.startsWith(`${pathPrefix}/${tab.path}`)
+  const currentTab = directory.find(
+    (tab) => pathname?.startsWith(`${pathPrefix}/${tab.path}`)
   )
 
   return (

@@ -23,7 +23,7 @@ export type Scalars = {
    * string, including UTC timezone ("Z"). The parsed date and time string will
    * be converted to UTC if there is an offset.
    */
-  DateTime: { input: Date; output: Date; }
+  DateTime: { input: string; output: string; }
   Map: { input: Map<string, unknown>; output: Map<string, unknown>; }
   UploadOrUrl: { input: string; output: string; }
   Yaml: { input: unknown; output: unknown; }

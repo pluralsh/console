@@ -1,0 +1,40 @@
+fragment NodePool on NodePool {
+  id
+  name
+}
+
+fragment ClustersRow on Cluster {
+  apiDeprecations {
+    blocking
+    availableIn
+    deprecatedIn
+    removedIn
+    replacement
+  }
+  id
+  name
+  currentVersion
+  provider {
+    id
+    cloud
+    name
+    namespace
+  }
+  version
+  nodePools {
+    ...NodePool
+  }
+}
+
+query Clusters {
+  clusters(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClustersRow
+      }
+    }
+  }
+}

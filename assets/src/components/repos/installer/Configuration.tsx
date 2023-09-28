@@ -6,8 +6,8 @@ import {
   useEffect,
   useMemo,
 } from 'react'
-import { Flex, Span, Switch } from 'honorable'
-import { useActive, useNavigation } from '@pluralsh/design-system'
+import { Flex, Span } from 'honorable'
+import { Switch, useActive, useNavigation } from '@pluralsh/design-system'
 
 import {
   ConfigurationItem as ConfigurationItemType,
@@ -125,7 +125,7 @@ export function Configuration({
         <div>
           <Switch
             checked={oidc}
-            onChange={({ target: { checked } }) => setOIDC(checked)}
+            onChange={(checked) => setOIDC(checked)}
           >
             Enable OIDC
           </Switch>

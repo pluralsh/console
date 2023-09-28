@@ -51,8 +51,8 @@ export default function Account() {
   const directory = getDirectory(me, configuration).filter(
     ({ enabled }) => enabled
   )
-  const currentTab = directory.find((tab) =>
-    pathname?.startsWith(`${pathPrefix}/${tab.path}`)
+  const currentTab = directory.find(
+    (tab) => pathname?.startsWith(`${pathPrefix}/${tab.path}`)
   )
 
   return (

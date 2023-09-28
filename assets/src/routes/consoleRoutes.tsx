@@ -32,12 +32,15 @@ import EmailSettings from 'components/account/email/EmailSettings'
 import AccountSettings from 'components/account/settings/AccountSettings'
 import CookieSettings from 'components/account/settings/CookieSettings'
 
+import { AccessTokens } from 'components/profile/AccessTokens'
+
 import { ProfileVPN } from '../components/profile/VPN'
 
 import { AccountVPN } from '../components/account/vpn/VPN'
 
 import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
+import { cdRoutes } from './cdRoutes'
 
 const buildsRoutes = [
   <Route
@@ -122,6 +125,10 @@ const profileRoutes = [
     <Route
       path="vpn"
       element={<ProfileVPN />}
+    />
+    <Route
+      path="access-tokens"
+      element={<AccessTokens />}
     />
   </Route>,
 ]
@@ -216,4 +223,7 @@ export const consoleRoutes = [
 
   /* PROFILE */
   ...profileRoutes,
+
+  /* CONTINUOUS DEPLOYMENT */
+  ...cdRoutes,
 ]

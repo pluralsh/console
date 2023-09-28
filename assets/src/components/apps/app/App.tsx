@@ -240,8 +240,8 @@ function AppWithoutContext() {
   }
   if (!repoData?.repository) return <LoadingIndicator />
 
-  const currentTab = directory.find((tab) =>
-    pathname?.startsWith(`${pathPrefix}/${tab.path}`)
+  const currentTab = directory.find(
+    (tab) => pathname?.startsWith(`${pathPrefix}/${tab.path}`)
   )
   const {
     name,

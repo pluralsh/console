@@ -1,0 +1,60 @@
+fragment AccessToken on AccessToken {
+  id
+  insertedAt
+  token
+  updatedAt
+}
+
+fragment AccessTokenAudit on AccessTokenAudit {
+  id
+  city
+  count
+  country
+  insertedAt
+  ip
+  latitude
+  longitude
+  timestamp
+  updatedAt
+}
+
+query AccessTokens {
+  accessTokens(first: 500) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AccessToken
+      }
+    }
+  }
+}
+
+query TokenAudits($id: ID!, $cursor: String) {
+  accessToken(id: $id) {
+    id
+    audits(first: 500, after: $cursor) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...AccessTokenAudit
+        }
+      }
+    }
+  }
+}
+
+mutation CreateAccessToken {
+  createAccessToken {
+    ...AccessToken
+  }
+}
+
+mutation DeleteAccessToken($token: String!) {
+  deleteAccessToken(token: $token) {
+    ...AccessToken
+  }
+}

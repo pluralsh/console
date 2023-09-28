@@ -1,8 +1,10 @@
 import styled, { DefaultTheme, useTheme } from 'styled-components'
-import { animated, useTransition } from 'react-spring'
+import { useTransition } from 'react-spring'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
+
+import { AnimatedDiv } from '@pluralsh/design-system'
 
 import Chatbot from './Chatbot'
 import { DocSearch } from './DocSearch'
@@ -79,7 +81,7 @@ const HelpLauncherSC = styled.div(({ theme }) => {
     },
   }
 })
-const HelpLauncherContentSC = styled(animated.div)(({ theme }) => {
+const HelpLauncherContentSC = styled(AnimatedDiv)(({ theme }) => {
   const helpSpacing = getHelpSpacing(theme)
 
   return {
