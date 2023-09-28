@@ -1,5 +1,5 @@
 import ContinuousDeployment from 'components/cd/ContinuousDeployment'
-import Clusters from 'components/cd/Clusters'
+import Clusters from 'components/cd/clusters/Clusters'
 import GitRepositories from 'components/cd/GitRepositories'
 import Services from 'components/cd/Services'
 import Pipelines from 'components/cd/Pipelines'
