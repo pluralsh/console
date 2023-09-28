@@ -327,7 +327,7 @@ export default function Clusters() {
 
   return (
     <div>
-      {!isEmpty ? (
+      {!isEmpty(data?.gitRepositories?.edges) ? (
         <FullHeightTableWrap>
           <Table
             data={data?.gitRepositories?.edges || []}
