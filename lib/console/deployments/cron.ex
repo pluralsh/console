@@ -1,7 +1,7 @@
 defmodule Console.Deployments.Cron do
   use Console.Services.Base
   alias Console.Deployments.{Services, Clusters, Global}
-  alias Console.Schema.{Cluster, Service, GlobalService}
+  alias Console.Schema.{Cluster, Service, ServiceComponent, GlobalService}
 
   require Logger
 
@@ -9,10 +9,11 @@ defmodule Console.Deployments.Cron do
     Logger.info "attempting to prune dangling deleted services"
     Service.deleted()
     |> Repo.all()
-    |> Enum.each(fn svc ->
+    |> Enum.each(fn %{namespace: ns} = svc ->
       Logger.info "pruning service #{svc.id}"
       case Repo.preload(svc, [:components]) do
         %Service{components: []} -> Services.hard_delete(svc)
+        %Service{components: [%ServiceComponent{kind: "Namespace", name: ^ns}]} -> Services.hard_delete(svc)
         _ -> Logger.info "ignoring service #{svc.id}, not drained"
       end
     end)

@@ -4,12 +4,14 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.GitRepositoryCreated do
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.ServiceComponentsUpdated do
-  alias Console.Schema.Service
+  alias Console.Schema.{Service, ServiceComponent}
   alias Console.Deployments.Services
 
-  def process(%{item: %Service{deleted_at: del} = svc}) when not is_nil(del) do
+  def process(%{item: %Service{namespace: ns, deleted_at: del} = svc}) when not is_nil(del) do
     case Console.Repo.preload(svc, [:components]) do
       %Service{components: []} -> Services.hard_delete(svc)
+      %Service{components: [%ServiceComponent{kind: "Namespace", name: ^ns}]} ->
+        Services.hard_delete(svc)
       _ -> :ok
     end
   end

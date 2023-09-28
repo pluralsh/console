@@ -461,8 +461,20 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert deleted["id"] == service.id
       assert deleted["deletedAt"]
     end
-  end
 
+    test "it will fail gracefully if the service deployment was already deleted" do
+      user = insert(:user)
+      insert(:service, write_bindings: [%{user_id: user.id}])
+
+      {:ok, %{errors: [%{message: msg}]}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteServiceDeployment(id: $id) { id deletedAt }
+        }
+      """, %{"id" => Ecto.UUID.generate()}, %{current_user: user})
+
+      assert msg == "could not find resource"
+    end
+  end
 
   describe "updateServiceComponents" do
     test "it will post updates to the components of the service in a cluster" do

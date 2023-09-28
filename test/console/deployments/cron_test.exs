@@ -5,6 +5,8 @@ defmodule Console.Deployments.CronTest do
   describe "#prune_services/0" do
     test "it will wipe stale drained services" do
       svcs = insert_list(3, :service, deleted_at: Timex.now())
+      prune = insert(:service, deleted_at: Timex.now())
+      insert(:service_component, kind: "Namespace", namespace: prune.namespace)
       ignore = insert(:service, deleted_at: Timex.now())
       ignore2 = insert(:service)
       insert_list(3, :service_component, service: ignore)
@@ -13,6 +15,8 @@ defmodule Console.Deployments.CronTest do
 
       for svc <- svcs,
         do: refute refetch(svc)
+
+      refute refetch(prune)
 
       assert refetch(ignore)
       assert refetch(ignore2)
