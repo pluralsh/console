@@ -4,6 +4,22 @@ defmodule Console.Schema.Cluster do
   alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{Service, ClusterNodePool, NamespacedName, ClusterProvider, PolicyBinding, User, Tag, GlobalService}
 
+  defmodule Kubeconfig do
+    use Piazza.Ecto.Schema
+    alias Console.Schema.NamespacedName
+
+    embedded_schema do
+      field :raw, Piazza.Ecto.EncryptedString
+      embeds_one :secret_ref, NamespacedName, on_replace: :update
+    end
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, [:raw])
+      |> cast_embed(:secret_ref)
+    end
+  end
+
   defmodule CloudSettings do
     use Piazza.Ecto.Schema
 
@@ -40,7 +56,7 @@ defmodule Console.Schema.Cluster do
     field :token_readable,  :boolean, default: false, virtual: true
 
     embeds_one :resource,       NamespacedName
-    embeds_one :kubeconfig,     NamespacedName
+    embeds_one :kubeconfig,     Kubeconfig, on_replace: :update
     embeds_one :cloud_settings, CloudSettings, on_replace: :update
 
     belongs_to :provider, ClusterProvider

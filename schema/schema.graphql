@@ -875,6 +875,21 @@ type Command {
   updatedAt: DateTime
 }
 
+input NodePoolAttributes {
+  name: String!
+  minSize: Int!
+  maxSize: Int!
+  instanceType: String!
+  labels: Map
+  taints: [TaintAttributes]
+  cloudSettings: CloudSettingsAttributes
+}
+
+type GitStatus {
+  cloned: Boolean
+  output: String
+}
+
 type CostAnalysis {
   minutes: Float
   cpuCost: Float
@@ -954,16 +969,6 @@ type JobSpec {
   activeDeadlineSeconds: Int
 }
 
-input NodePoolAttributes {
-  name: String!
-  minSize: Int!
-  maxSize: Int!
-  instanceType: String!
-  labels: Map
-  taints: [TaintAttributes]
-  cloudSettings: CloudSettingsAttributes
-}
-
 type RunbookStatus {
   alerts: [RunbookAlertStatus]
 }
@@ -981,11 +986,6 @@ type PodStatus {
   conditions: [PodCondition]
   containerStatuses: [ContainerStatus]
   initContainerStatuses: [ContainerStatus]
-}
-
-type GitStatus {
-  cloned: Boolean
-  output: String
 }
 
 type CronSpec {
@@ -1851,6 +1851,8 @@ input ClusterAttributes {
 
   version: String!
 
+  kubeconfig: KubeconfigAttributes
+
   nodePools: [NodePoolAttributes]
 
   readBindings: [PolicyBindingAttributes]
@@ -2297,6 +2299,10 @@ input GlobalServiceAttributes {
   name: String!
   tags: [TagAttributes]
   providerId: ID
+}
+
+input KubeconfigAttributes {
+  raw: String
 }
 
 type PostgresqlStatus {

@@ -7,10 +7,15 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :handle,         :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :provider_id,    :id
     field :version,        non_null(:string)
+    field :kubeconfig,     :kubeconfig_attributes
     field :node_pools,     list_of(:node_pool_attributes)
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
     field :tags,           list_of(:tag_attributes)
+  end
+
+  input_object :kubeconfig_attributes do
+    field :raw, :string
   end
 
   input_object :tag_attributes do

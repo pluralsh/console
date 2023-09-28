@@ -438,6 +438,7 @@ export type ClusterRevisionsArgs = {
 export type ClusterAttributes = {
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
   handle?: InputMaybe<Scalars['String']['input']>;
+  kubeconfig?: InputMaybe<KubeconfigAttributes>;
   name: Scalars['String']['input'];
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
   providerId?: InputMaybe<Scalars['ID']['input']>;
@@ -1132,6 +1133,10 @@ export type JobStatus = {
   failed?: Maybe<Scalars['Int']['output']>;
   startTime?: Maybe<Scalars['String']['output']>;
   succeeded?: Maybe<Scalars['Int']['output']>;
+};
+
+export type KubeconfigAttributes = {
+  raw?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** supported kubernetes objects fetchable in runbooks */
