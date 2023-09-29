@@ -30,7 +30,7 @@ query GitRepositories {
 
 mutation CreateGitRepository($attributes: GitAttributes!) {
   createGitRepository(attributes: $attributes) {
-    id
+    ...GitRepositoriesRow
   }
 }
 

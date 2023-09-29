@@ -58,6 +58,7 @@ export function ListItem({
   return (
     <Card
       clickable
+      position="relative"
       display="flex"
       flexGrow={1}
       marginBottom="small"
