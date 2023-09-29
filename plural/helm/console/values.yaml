@@ -14,6 +14,12 @@ initContainer:
     repository: gcr.io/pluralsh/library/busybox
     tag: 1.35.0
 
+cliContainer:
+  enabled: false
+  image:
+    repository: ghcr.io/pluralsh/plural-cli
+    tag: latest
+
 serviceAccount:
   create: true
   annotations: {}
