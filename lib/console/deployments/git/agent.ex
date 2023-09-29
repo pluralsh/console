@@ -44,7 +44,7 @@ defmodule Console.Deployments.Git.Agent do
     {:ok, %State{git: repo, cache: cache}}
   end
 
-  def handle_call({:docs, %Service{git: %{ref: ref, folder: path}} = svc}, _, %State{cache: cache} = state) do
+  def handle_call({:docs, %Service{git: %{ref: ref, folder: path}}}, _, %State{cache: cache} = state) do
     case Cache.fetch(cache, ref, Path.join(path, "docs")) do
       {:ok, _, f} -> {:reply, File.open(f), state}
       err -> {:reply, err, state}

@@ -454,7 +454,11 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
 
       {:ok, %{data: %{"deleteServiceDeployment" => deleted}}} = run_query("""
         mutation Delete($id: ID!) {
-          deleteServiceDeployment(id: $id) { id deletedAt }
+          deleteServiceDeployment(id: $id) {
+            id
+            deletedAt
+            configuration { name value }
+          }
         }
       """, %{"id" => service.id}, %{current_user: user})
 

@@ -8,7 +8,7 @@ defmodule Console.Deployments.Policies do
     do: can?(user, apply_changes(cs), action)
 
   def can?(%User{} = user, %Service{} = svc, :secrets),
-    do: can?(user, svc, :write)
+    do: can?(user, %{svc | deleted_at: nil}, :write)
   def can?(%Cluster{id: id}, %Service{cluster_id: id}, :secrets), do: :pass
   def can?(%Cluster{id: id}, %Service{cluster_id: id}, :read), do: :pass
 
