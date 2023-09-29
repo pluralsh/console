@@ -183,6 +183,12 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def create_git_repository(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Git.create_repository(attrs, user)
 
+  def update_git_repository(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Git.update_repository(attrs, id, user)
+
+  def delete_git_repository(%{id: id}, %{context: %{current_user: user}}),
+    do: Git.delete_repository(id, user)
+
   def update_settings(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Settings.update(attrs, user)
 

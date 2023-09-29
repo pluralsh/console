@@ -55,6 +55,22 @@ defmodule Console.Deployments.Git do
     |> notify(:update, user)
   end
 
+  @doc """
+  It will delete a repository if it's not currently in use
+  """
+  @spec delete_repository(binary, User.t) :: repository_resp
+  def delete_repository(id, %User{} = user) do
+    try do
+      get_repository!(id)
+      |> allow(user, :git)
+      |> when_ok(:delete)
+      |> notify(:delete, user)
+    rescue
+      # foreign key constraint violated
+      _ -> {:error, "could not delete repository"}
+    end
+  end
+
   def status(%GitRepository{} = repo, status) do
     GitRepository.status_changeset(repo, status)
     |> Console.Repo.update()

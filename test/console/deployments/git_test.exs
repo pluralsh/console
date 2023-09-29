@@ -40,4 +40,22 @@ defmodule Console.Deployments.GitTest do
       assert_receive {:event, %PubSub.GitRepositoryUpdated{item: ^update}}
     end
   end
+
+  describe "#delete_repository" do
+    test "it will delete a git repository" do
+      git = insert(:git_repository)
+
+      {:ok, deleted} = Git.delete_repository(git.id, admin_user())
+
+      refute refetch(deleted)
+      assert_receive {:event, %PubSub.GitRepositoryDeleted{item: ^deleted}}
+    end
+
+    test "it will respect integrity constraints" do
+      git = insert(:git_repository)
+      insert(:service, repository: git)
+
+      {:error, _} = Git.delete_repository(git.id, admin_user())
+    end
+  end
 end

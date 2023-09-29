@@ -47,5 +47,20 @@ defmodule Console.GraphQl.Deployments.Git do
 
       safe_resolve &Deployments.create_git_repository/2
     end
+
+    field :update_git_repository, :git_repository do
+      middleware Authenticated
+      arg :id,         non_null(:id)
+      arg :attributes, non_null(:git_attributes)
+
+      safe_resolve &Deployments.update_git_repository/2
+    end
+
+    field :delete_git_repository, :git_repository do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.delete_git_repository/2
+    end
   end
 end
