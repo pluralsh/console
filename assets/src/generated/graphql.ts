@@ -1761,6 +1761,7 @@ export type RootMutationType = {
   deleteAccessToken?: Maybe<AccessToken>;
   deleteCertificate?: Maybe<Scalars['Boolean']['output']>;
   deleteCluster?: Maybe<Cluster>;
+  deleteGitRepository?: Maybe<GitRepository>;
   deleteGlobalService?: Maybe<GlobalService>;
   deleteGroup?: Maybe<Group>;
   deleteGroupMember?: Maybe<GroupMember>;
@@ -1794,6 +1795,7 @@ export type RootMutationType = {
   updateClusterProvider?: Maybe<ClusterProvider>;
   updateConfiguration?: Maybe<Configuration>;
   updateDeploymentSettings?: Maybe<DeploymentSettings>;
+  updateGitRepository?: Maybe<GitRepository>;
   updateGroup?: Maybe<Group>;
   /** a reusable mutation for updating rbac settings on core services */
   updateRbac?: Maybe<Scalars['Boolean']['output']>;
@@ -1910,6 +1912,11 @@ export type RootMutationTypeDeleteCertificateArgs = {
 
 
 export type RootMutationTypeDeleteClusterArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteGitRepositoryArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -2080,6 +2087,12 @@ export type RootMutationTypeUpdateConfigurationArgs = {
 
 export type RootMutationTypeUpdateDeploymentSettingsArgs = {
   attributes: DeploymentSettingsAttributes;
+};
+
+
+export type RootMutationTypeUpdateGitRepositoryArgs = {
+  attributes: GitAttributes;
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3262,7 +3275,7 @@ export type CreateGitRepositoryMutationVariables = Exact<{
 }>;
 
 
-export type CreateGitRepositoryMutation = { __typename?: 'RootMutationType', createGitRepository?: { __typename?: 'GitRepository', id: string } | null };
+export type CreateGitRepositoryMutation = { __typename?: 'RootMutationType', createGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null } | null };
 
 export type ResourceSpecFragment = { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null };
 
@@ -3982,10 +3995,10 @@ export type GitRepositoriesQueryResult = Apollo.QueryResult<GitRepositoriesQuery
 export const CreateGitRepositoryDocument = gql`
     mutation CreateGitRepository($attributes: GitAttributes!) {
   createGitRepository(attributes: $attributes) {
-    id
+    ...GitRepositoriesRow
   }
 }
-    `;
+    ${GitRepositoriesRowFragmentDoc}`;
 export type CreateGitRepositoryMutationFn = Apollo.MutationFunction<CreateGitRepositoryMutation, CreateGitRepositoryMutationVariables>;
 
 /**

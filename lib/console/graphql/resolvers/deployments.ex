@@ -116,6 +116,13 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   def docs(svc, _, _), do: Services.docs(svc)
 
+  def deploy_token(%{deploy_token: token} = cluster, _, %{context: %{current_user: user}}) do
+    case allow(cluster, user, :write) do
+      {:ok, _} -> {:ok, token}
+      error -> error
+    end
+  end
+
   def settings(_, _), do: {:ok, Settings.fetch()}
 
   def service_configuration(service, _, ctx) do

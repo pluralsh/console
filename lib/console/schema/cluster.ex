@@ -138,6 +138,8 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: not is_nil(c.deleted_at))
   end
 
+  def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
+
   @valid ~w(provider_id service_id self version current_version name handle)a
 
   def changeset(model, attrs \\ %{}) do

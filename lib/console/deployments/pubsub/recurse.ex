@@ -39,9 +39,11 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterCreated do
 
   def process(%{item: cluster}) do
     cluster = Repo.preload(cluster, [:tags])
-    Repo.all(GlobalService)
-    |> Enum.filter(&Global.match?(&1, cluster))
-    |> Enum.each(&Global.add_to_cluster(&1, cluster))
+    GlobalService.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.filter(&Global.match?(&1, cluster))
+    |> Stream.each(&Global.add_to_cluster(&1, cluster))
+    |> Stream.run()
   end
 end
 

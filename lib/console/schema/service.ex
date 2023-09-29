@@ -104,6 +104,8 @@ defmodule Console.Schema.Service do
     from(s in query, order_by: ^order)
   end
 
+  def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
+
   def deleted(query \\ __MODULE__) do
     from(s in query, where: not is_nil(s.deleted_at))
   end

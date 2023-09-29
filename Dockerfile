@@ -80,16 +80,14 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
     mv linux-${TARGETARCH}/helm /usr/local/bin/helm && \
     wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION/v/}/terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip && \
     unzip terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip -d /usr/local/bin && \
-    # curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_console_${CLI_VERSION/v/}_Linux_${TARGETARCH}.tar.gz | tar xvz plural && \
-    # mv plural /usr/local/bin/plural && \
+    curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_console_${CLI_VERSION/v/}_Linux_${TARGETARCH}.tar.gz | tar xvz plural && \
+    mv plural /usr/local/bin/plural && \
     curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl && \
     mv kubectl /usr/local/bin/kubectl && \
     chmod +x /usr/local/bin/kubectl && \
-    # chmod +x /usr/local/bin/plural && \
+    chmod +x /usr/local/bin/plural && \
     chmod +x /usr/local/bin/helm && \
     chmod +x /usr/local/bin/terraform
-
-FROM ghcr.io/pluralsh/plural-cli:pr-455 as plural
 
 # From this line onwards, we're in a new image, which will be the image used in production
 FROM erlang:23.3.4.18-alpine

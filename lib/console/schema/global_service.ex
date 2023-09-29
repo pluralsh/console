@@ -20,6 +20,8 @@ defmodule Console.Schema.GlobalService do
     from(g in query, order_by: ^order)
   end
 
+  def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
+
   @valid ~w(name service_id provider_id)a
 
   def changeset(model, attrs \\ %{}) do

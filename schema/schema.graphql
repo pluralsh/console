@@ -1181,6 +1181,10 @@ type RootMutationType {
 
   createGitRepository(attributes: GitAttributes!): GitRepository
 
+  updateGitRepository(id: ID!, attributes: GitAttributes!): GitRepository
+
+  deleteGitRepository(id: ID!): GitRepository
+
   createCluster(attributes: ClusterAttributes!): Cluster
 
   updateCluster(id: ID!, attributes: ClusterUpdateAttributes!): Cluster
