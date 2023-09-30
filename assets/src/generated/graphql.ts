@@ -857,6 +857,24 @@ export type DeploymentStrategy = {
   type?: Maybe<Scalars['String']['output']>;
 };
 
+/** specification for ignoring diffs for subfields of manifests, to avoid admission controllers and other mutations */
+export type DiffNormalizer = {
+  __typename?: 'DiffNormalizer';
+  group: Scalars['String']['output'];
+  jsonPatches?: Maybe<Array<Scalars['String']['output']>>;
+  kind: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  namespace: Scalars['String']['output'];
+};
+
+export type DiffNormalizerAttributes = {
+  group: Scalars['String']['input'];
+  jsonPatches?: InputMaybe<Array<Scalars['String']['input']>>;
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+};
+
 export type Event = {
   __typename?: 'Event';
   action?: Maybe<Scalars['String']['output']>;
@@ -1245,6 +1263,11 @@ export type Metadata = {
   namespace?: Maybe<Scalars['String']['output']>;
 };
 
+export type MetadataAttributes = {
+  annotations?: InputMaybe<Scalars['Map']['input']>;
+  labels?: InputMaybe<Scalars['Map']['input']>;
+};
+
 export type MetricResponse = {
   __typename?: 'MetricResponse';
   metric?: Maybe<Scalars['Map']['output']>;
@@ -1264,6 +1287,13 @@ export type Namespace = {
   raw: Scalars['String']['output'];
   spec: NamespaceSpec;
   status: NamespaceStatus;
+};
+
+/** metadata fields for created namespaces */
+export type NamespaceMetadata = {
+  __typename?: 'NamespaceMetadata';
+  annotations?: Maybe<Scalars['Map']['output']>;
+  labels?: Maybe<Scalars['Map']['output']>;
 };
 
 export type NamespaceSpec = {
@@ -2217,6 +2247,7 @@ export type RootQueryType = {
   /** fetches details of this service deployment, and can be called by the deploy operator */
   serviceDeployment?: Maybe<ServiceDeployment>;
   serviceDeployments?: Maybe<ServiceDeploymentConnection>;
+  serviceStatuses?: Maybe<Array<Maybe<ServiceStatusCount>>>;
   smtp?: Maybe<Smtp>;
   stack?: Maybe<Stack>;
   statefulSet?: Maybe<StatefulSet>;
@@ -2560,6 +2591,11 @@ export type RootQueryTypeServiceDeploymentsArgs = {
 };
 
 
+export type RootQueryTypeServiceStatusesArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type RootQueryTypeStackArgs = {
   name: Scalars['String']['input'];
 };
@@ -2752,7 +2788,7 @@ export type ServiceCloneAttributes = {
   namespace?: InputMaybe<Scalars['String']['input']>;
 };
 
-/** representation of a kubernets component deployed by a service */
+/** representation of a kubernetes component deployed by a service */
 export type ServiceComponent = {
   __typename?: 'ServiceComponent';
   /** any api deprecations discovered from this component */
@@ -2828,6 +2864,8 @@ export type ServiceDeployment = {
   sha?: Maybe<Scalars['String']['output']>;
   /** A summary status enum for the health of this service */
   status: ServiceDeploymentStatus;
+  /** settings for advanced tuning of the sync process */
+  syncConfig?: Maybe<SyncConfig>;
   /** https url to fetch the latest tarball of kubernetes manifests */
   tarball?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -2848,11 +2886,13 @@ export type ServiceDeploymentRevisionsArgs = {
 
 export type ServiceDeploymentAttributes = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  docsPath?: InputMaybe<Scalars['String']['input']>;
   git: GitRefAttributes;
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   repositoryId: Scalars['ID']['input'];
+  syncConfig?: InputMaybe<SyncConfigAttributes>;
   version?: InputMaybe<Scalars['String']['input']>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
@@ -2907,6 +2947,13 @@ export type ServiceSpec = {
 export type ServiceStatus = {
   __typename?: 'ServiceStatus';
   loadBalancer?: Maybe<LoadBalancerStatus>;
+};
+
+/** a rollup count of the statuses of services in a query */
+export type ServiceStatusCount = {
+  __typename?: 'ServiceStatusCount';
+  count: Scalars['Int']['output'];
+  status: ServiceDeploymentStatus;
 };
 
 export type ServiceUpdateAttributes = {
@@ -2997,6 +3044,18 @@ export type StatusCondition = {
   reason: Scalars['String']['output'];
   status: Scalars['String']['output'];
   type: Scalars['String']['output'];
+};
+
+/** Advanced configuration of how to sync resources */
+export type SyncConfig = {
+  __typename?: 'SyncConfig';
+  diffNormalizers?: Maybe<Array<Maybe<DiffNormalizer>>>;
+  namespaceMetadata?: Maybe<NamespaceMetadata>;
+};
+
+export type SyncConfigAttributes = {
+  diffNormalizer?: InputMaybe<DiffNormalizerAttributes>;
+  namespaceMetadata?: InputMaybe<MetadataAttributes>;
 };
 
 export type Tag = {

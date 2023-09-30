@@ -10,11 +10,31 @@ defmodule Console.GraphQl.Deployments.Service do
     field :name,          non_null(:string)
     field :namespace,     non_null(:string)
     field :version,       :string
+    field :docs_path,     :string
+    field :sync_config,   :sync_config_attributes
     field :repository_id, non_null(:id)
     field :git,           non_null(:git_ref_attributes)
     field :configuration, list_of(:config_attributes)
     field :read_bindings, list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
+  end
+
+  input_object :sync_config_attributes do
+    field :namespace_metadata, :metadata_attributes
+    field :diff_normalizer,    :diff_normalizer_attributes
+  end
+
+  input_object :metadata_attributes do
+    field :labels,      :map
+    field :annotations, :map
+  end
+
+  input_object :diff_normalizer_attributes do
+    field :group,        non_null(:string)
+    field :kind,         non_null(:string)
+    field :name,         non_null(:string)
+    field :namespace,    non_null(:string)
+    field :json_patches, list_of(non_null(:string))
   end
 
   input_object :service_update_attributes do
@@ -71,6 +91,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :sha,       :string, description: "latest git sha we pulled from"
     field :tarball,   :string, resolve: &Deployments.tarball/3, description: "https url to fetch the latest tarball of kubernetes manifests"
     field :component_status, :string, description: "a n / m representation of the number of healthy components of this service"
+    field :sync_config, :sync_config, description: "settings for advanced tuning of the sync process"
 
     field :deleted_at, :datetime, description: "the time this service was scheduled for deletion"
 
@@ -122,7 +143,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :value, non_null(:string)
   end
 
-  @desc "representation of a kubernets component deployed by a service"
+  @desc "representation of a kubernetes component deployed by a service"
   object :service_component do
     field :id,         non_null(:id), description: "internal id"
     field :state,      :component_state, description: "kubernetes component health enum"
@@ -176,6 +197,27 @@ defmodule Console.GraphQl.Deployments.Service do
   object :service_status_count do
     field :status, non_null(:service_deployment_status)
     field :count,  non_null(:integer)
+  end
+
+  @desc "Advanced configuration of how to sync resources"
+  object :sync_config do
+    field :namespace_metadata, :namespace_metadata
+    field :diff_normalizers, list_of(:diff_normalizer)
+  end
+
+  @desc "metadata fields for created namespaces"
+  object :namespace_metadata do
+    field :labels,      :map
+    field :annotations, :map
+  end
+
+  @desc "specification for ignoring diffs for subfields of manifests, to avoid admission controllers and other mutations"
+  object :diff_normalizer do
+    field :group,            non_null(:string)
+    field :kind,             non_null(:string)
+    field :name,             non_null(:string)
+    field :namespace,        non_null(:string)
+    field :json_patches, list_of(non_null(:string))
   end
 
   connection node_type: :service_deployment

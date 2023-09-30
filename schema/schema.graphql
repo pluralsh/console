@@ -208,6 +208,9 @@ type ServiceDeployment {
   "a n / m representation of the number of healthy components of this service"
   componentStatus: String
 
+  "settings for advanced tuning of the sync process"
+  syncConfig: SyncConfig
+
   "the time this service was scheduled for deletion"
   deletedAt: DateTime
 
@@ -255,7 +258,7 @@ type ServiceDeployment {
   updatedAt: DateTime
 }
 
-"representation of a kubernets component deployed by a service"
+"representation of a kubernetes component deployed by a service"
 type ServiceComponent {
   "internal id"
   id: ID!
@@ -353,6 +356,11 @@ input RbacAttributes {
   writeBindings: [PolicyBindingAttributes]
 }
 
+input SyncConfigAttributes {
+  namespaceMetadata: MetadataAttributes
+  diffNormalizer: DiffNormalizerAttributes
+}
+
 input GitRefAttributes {
   ref: String!
   folder: String!
@@ -389,11 +397,21 @@ input ServiceDeploymentAttributes {
   name: String!
   namespace: String!
   version: String
+  docsPath: String
+  syncConfig: SyncConfigAttributes
   repositoryId: ID!
   git: GitRefAttributes!
   configuration: [ConfigAttributes]
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+input DiffNormalizerAttributes {
+  group: String!
+  kind: String!
+  name: String!
+  namespace: String!
+  jsonPatches: [String!]
 }
 
 input ConfigAttributes {
@@ -520,6 +538,12 @@ type PodDelta {
 
 "supported kubernetes objects fetchable in runbooks"
 union KubernetesData = Deployment | StatefulSet
+
+"metadata fields for created namespaces"
+type NamespaceMetadata {
+  labels: Map
+  annotations: Map
+}
 
 type Smtp {
   server: String
@@ -702,6 +726,23 @@ type PolicyBinding {
   group: Group
 }
 
+"Advanced configuration of how to sync resources"
+type SyncConfig {
+  namespaceMetadata: NamespaceMetadata
+  diffNormalizers: [DiffNormalizer]
+}
+
+type PrometheusDatasource {
+  query: String!
+  format: String
+  legend: String
+}
+
+type AuditEdge {
+  node: Audit
+  cursor: String
+}
+
 type LicenseFeature {
   name: String!
   description: String
@@ -751,12 +792,6 @@ type PodEdge {
   cursor: String
 }
 
-type PrometheusDatasource {
-  query: String!
-  format: String
-  legend: String
-}
-
 type Recipe {
   id: ID!
   name: String!
@@ -775,11 +810,6 @@ enum BuildType {
   DESTROY
   DEDICATED
   CONFIG
-}
-
-type AuditEdge {
-  node: Audit
-  cursor: String
 }
 
 type KubernetesDatasource {
@@ -1551,6 +1581,8 @@ type RootQueryType {
     cluster: String
   ): ServiceDeploymentConnection
 
+  serviceStatuses(clusterId: ID): [ServiceStatusCount]
+
   "the services deployed in the current cluster, to be polled by the deploy operator"
   clusterServices: [ServiceDeployment]
 
@@ -1733,6 +1765,12 @@ type Pod {
   metadata: Metadata!
   raw: String!
   events: [Event]
+}
+
+"a rollup count of the statuses of services in a query"
+type ServiceStatusCount {
+  status: ServiceDeploymentStatus!
+  count: Int!
 }
 
 type PluralContext {
@@ -2367,6 +2405,11 @@ enum Status {
   PENDING
 }
 
+input MetadataAttributes {
+  labels: Map
+  annotations: Map
+}
+
 input ClusterProviderAttributes {
   name: String!
   namespace: String
@@ -2483,6 +2526,15 @@ type ServiceError {
 type LabelPair {
   name: String
   value: String
+}
+
+"specification for ignoring diffs for subfields of manifests, to avoid admission controllers and other mutations"
+type DiffNormalizer {
+  group: String!
+  kind: String!
+  name: String!
+  namespace: String!
+  jsonPatches: [String!]
 }
 
 type RunbookData {

@@ -11,7 +11,9 @@ defmodule Console.Schema.Service do
     ServiceComponent,
     PolicyBinding,
     GlobalService,
-    ServiceError
+    ServiceError,
+    DiffNormalizer,
+    Metadata
   }
 
   defenum Status, stale: 0, synced: 1, healthy: 2, failed: 3
@@ -37,21 +39,26 @@ defmodule Console.Schema.Service do
     field :version,          :string
     field :sha,              :string
     field :namespace,        :string
+    field :docs_path,        :string
     field :status,           Status, default: :stale
     field :write_policy_id,  :binary_id
     field :read_policy_id,   :binary_id
     field :deleted_at,       :utc_datetime_usec
 
     embeds_one :git, Git, on_replace: :update
+    embeds_one :sync_config, SyncConfig, on_replace: :update do
+      embeds_many :diff_normalizers, DiffNormalizer
+      embeds_one :namespace_metadata, Metadata
+    end
 
-    belongs_to :revision, Revision
-    belongs_to :cluster, Cluster
+    belongs_to :revision,   Revision
+    belongs_to :cluster,    Cluster
     belongs_to :repository, GitRepository
-    belongs_to :owner, GlobalService
+    belongs_to :owner,      GlobalService
 
     has_one :reference_cluster, Cluster
-    has_one :provider, ClusterProvider
-    has_one :global_service, GlobalService
+    has_one :provider,          ClusterProvider
+    has_one :global_service,    GlobalService
 
     has_many :errors, ServiceError, on_replace: :delete
     has_many :components, ServiceComponent, on_replace: :delete
@@ -114,7 +121,10 @@ defmodule Console.Schema.Service do
     from(s in query, group_by: s.status, select: %{status: s.status, count: count(s.id, :distinct)})
   end
 
-  @valid ~w(name component_status status version sha cluster_id repository_id namespace owner_id)a
+  def docs_path(%__MODULE__{docs_path: p}) when is_binary(p), do: p
+  def docs_path(%__MODULE__{git: %{folder: p}}), do: Path.join(p, "docs")
+
+  @valid ~w(name docs_path component_status status version sha cluster_id repository_id namespace owner_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -122,6 +132,7 @@ defmodule Console.Schema.Service do
     |> kubernetes_names([:name, :namespace])
     |> semver(:version)
     |> cast_embed(:git)
+    |> cast_embed(:sync_config, with: &sync_config_changeset/2)
     |> cast_assoc(:components)
     |> cast_assoc(:errors)
     |> cast_assoc(:read_bindings)
@@ -148,5 +159,12 @@ defmodule Console.Schema.Service do
     |> cast(attrs, [])
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
+  end
+
+  def sync_config_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:namespace_metadata)
+    |> cast_embed(:diff_normalizers)
   end
 end
