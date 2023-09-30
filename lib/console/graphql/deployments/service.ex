@@ -172,6 +172,12 @@ defmodule Console.GraphQl.Deployments.Service do
     field :content, non_null(:string)
   end
 
+  @desc "a rollup count of the statuses of services in a query"
+  object :service_status_count do
+    field :status, non_null(:service_deployment_status)
+    field :count,  non_null(:integer)
+  end
+
   connection node_type: :service_deployment
   connection node_type: :revision
 
@@ -215,6 +221,13 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :cluster,    :string, description: "the handle of the cluster for this service"
 
       safe_resolve &Deployments.list_services/2
+    end
+
+    field :service_statuses, list_of(:service_status_count) do
+      middleware Authenticated
+      arg :cluster_id, :id
+
+      safe_resolve &Deployments.service_statuses/2
     end
   end
 

@@ -51,6 +51,14 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> paginate(args)
   end
 
+  def service_statuses(args, %{context: %{current_user: user}}) do
+    Service.for_user(user)
+    |> service_filters(args)
+    |> Service.statuses()
+    |> Console.Repo.all()
+    |> ok()
+  end
+
   defp service_filters(query, args) do
     Enum.reduce(args, query, fn
       {:cluster_id, id}, q -> Service.for_cluster(q, id)

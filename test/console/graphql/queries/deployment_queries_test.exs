@@ -444,4 +444,22 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
       """, %{"id" => provider.id}, %{current_user: admin})
     end
   end
+
+  describe "serviceStatuses" do
+    test "it can list the statuses counts for a service query" do
+      cluster = insert(:cluster)
+      insert_list(3, :service, cluster: cluster, status: :stale)
+      insert_list(2, :service, cluster: cluster, status: :healthy)
+
+      {:ok, %{data: %{"serviceStatuses" => statuses}}} = run_query("""
+        query statuses($cluster: ID!) {
+          serviceStatuses(clusterId: $cluster) { status count }
+        }
+      """, %{"cluster" => cluster.id}, %{current_user: admin_user()})
+
+      statuses = Map.new(statuses, & {&1["status"], &1["count"]})
+      assert statuses["STALE"] == 3
+      assert statuses["HEALTHY"] == 2
+    end
+  end
 end

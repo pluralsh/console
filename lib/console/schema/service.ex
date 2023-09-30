@@ -110,6 +110,10 @@ defmodule Console.Schema.Service do
     from(s in query, where: not is_nil(s.deleted_at))
   end
 
+  def statuses(query \\ __MODULE__) do
+    from(s in query, group_by: s.status, select: %{status: s.status, count: count(s.id, :distinct)})
+  end
+
   @valid ~w(name component_status status version sha cluster_id repository_id namespace owner_id)a
 
   def changeset(model, attrs \\ %{}) do
