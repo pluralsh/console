@@ -38,7 +38,7 @@ defmodule Console.Deployments.Git.Agent do
     {:ok, dir} = Briefly.create(directory: true)
     {:ok, repo} = save_private_key(%{repo | dir: dir})
     cache = Cache.new(repo)
-    Process.send_after(self(), :pull, @poll)
+    :timer.send_interval(@poll, :pull)
     :timer.send_interval(@poll, :move)
     send self(), :clone
     {:ok, %State{git: repo, cache: cache}}
@@ -78,7 +78,6 @@ defmodule Console.Deployments.Git.Agent do
   def handle_info(:pull, %State{git: git, cache: cache} = state) do
     with {:git, %GitRepository{} = git} <- {:git, refresh(git)},
          res <- fetch(git),
-         _ <- Process.send_after(self(), :pull, @poll),
          {:ok, git} <- save_status(res, git),
          cache <- refresh(git, cache) do
       {:noreply, %State{git: git, cache: cache}}
