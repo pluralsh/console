@@ -38,7 +38,8 @@ defmodule Console.Deployments.Git.Agent do
     {:ok, dir} = Briefly.create(directory: true)
     {:ok, repo} = save_private_key(%{repo | dir: dir})
     cache = Cache.new(repo)
-    :timer.send_interval(@poll, :pull)
+    # :timer.send_interval(@poll, :pull)
+    schedule_pull()
     :timer.send_interval(@poll, :move)
     send self(), :clone
     {:ok, %State{git: repo, cache: cache}}
@@ -76,16 +77,20 @@ defmodule Console.Deployments.Git.Agent do
   end
 
   def handle_info(:pull, %State{git: git, cache: cache} = state) do
-    with {:git, %GitRepository{} = git} <- {:git, refresh(git)},
-         res <- fetch(git),
-         {:ok, git} <- save_status(res, git),
-         cache <- refresh(git, cache) do
-      {:noreply, %State{git: git, cache: cache}}
-    else
-      {:git, nil} -> {:stop, {:shutdown, :normal}, state}
-      err ->
-        Logger.info "unknown failure: #{inspect(err)}"
-        {:noreply, state}
+    try do
+      with {:git, %GitRepository{} = git} <- {:git, refresh(git)},
+          res <- fetch(git),
+          {:ok, git} <- save_status(res, git),
+          cache <- refresh(git, cache) do
+        {:noreply, %State{git: git, cache: cache}}
+      else
+        {:git, nil} -> {:stop, {:shutdown, :normal}, state}
+        err ->
+          Logger.info "unknown failure: #{inspect(err)}"
+          {:noreply, state}
+      end
+    after
+      schedule_pull()
     end
   end
 
@@ -108,4 +113,6 @@ defmodule Console.Deployments.Git.Agent do
 
   defp save_status({:ok, _}, git), do: Git.status(git, %{health: :pullable, pulled_at: Timex.now(), error: nil})
   defp save_status({:error, err}, git), do: Git.status(git, %{health: :failed, error: err})
+
+  defp schedule_pull(), do: Process.send_after(self(), :pull, @poll)
 end
