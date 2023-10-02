@@ -7,7 +7,7 @@ defmodule Console.Watchers.Upgrade do
   ]
   alias Console.Clustering.Info
   alias PhoenixClient.{Channel, Message}
-  alias Console.Plural.Upgrade
+  alias Console.Plural.Upgrades
   alias Console.Watchers.Handlers
 
   @socket_name Application.get_env(:console, :socket)
@@ -28,7 +28,7 @@ defmodule Console.Watchers.Upgrade do
     Logger.info "starting upgrades watcher"
     Logger.info "provider info: #{System.get_env("PROVIDER")}"
 
-    Upgrade.create_queue(%{
+    Upgrades.create_queue(%{
       git: Console.conf(:git_url),
       domain: Console.conf(:url),
       name: Console.conf(:cluster_name),

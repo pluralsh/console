@@ -1,4 +1,4 @@
-defmodule Console.Plural.Upgrade do
+defmodule Console.Plural.Upgrades do
   use Console.Plural.Base
   alias Console.Plural.{UpgradeQueue}
 
