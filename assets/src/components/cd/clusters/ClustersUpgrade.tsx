@@ -17,18 +17,18 @@ import isEmpty from 'lodash/isEmpty'
 import { ApiDeprecation, Cluster } from '../../../generated/graphql'
 import { ColWithIcon } from '../repos/GitRepositories'
 import CopyButton from '../../utils/CopyButton'
-import { ProviderIcons, providerToURL } from '../../utils/ProviderIcon'
+import { ProviderIcons } from '../../utils/ProviderIcon'
 
 const columnHelperDeprecations = createColumnHelper<ApiDeprecation>()
 
 const deprecationsColumns = [
-  columnHelperDeprecations.accessor(({ component: { name } }) => name, {
+  columnHelperDeprecations.accessor(({ component }) => component?.name, {
     id: 'deprecated',
     header: 'Deprecated',
     meta: { truncate: true },
     cell: ({ getValue }) => <div>{getValue()}</div>,
   }),
-  columnHelperDeprecations.accessor(({ component: { name } }) => name, {
+  columnHelperDeprecations.accessor(({ component }) => component?.name, {
     id: 'deprecatedCopy',
     header: '',
     cell: ({ getValue }) => <CopyButton text={getValue()} />,
