@@ -1177,9 +1177,9 @@ type RootMutationType {
 
   deleteCertificate(name: String!, namespace: String!): Boolean
 
-  deletePod(namespace: String!, name: String!): Pod
+  deletePod(namespace: String!, name: String!, serviceId: ID): Pod
 
-  deleteJob(namespace: String!, name: String!): Job
+  deleteJob(namespace: String!, name: String!, serviceId: ID): Job
 
   deleteNode(name: String!): Node
 
@@ -1460,35 +1460,35 @@ type RootQueryType {
 
   scalingRecommendation(kind: AutoscalingTarget!, namespace: String!, name: String!): VerticalPodAutoscaler
 
-  configMap(namespace: String!, name: String!): ConfigMap
+  configMap(serviceId: ID, namespace: String!, name: String!): ConfigMap
 
-  secret(namespace: String!, name: String!): Secret
+  secret(serviceId: ID, namespace: String!, name: String!): Secret
 
   configMaps(namespace: String!): [ConfigMap]
 
   secrets(namespace: String!): [Secret]
 
-  service(namespace: String!, name: String!): Service
+  service(namespace: String!, name: String!, serviceId: ID): Service
 
   clusterInfo: ClusterInfo
 
-  deployment(namespace: String!, name: String!): Deployment
+  deployment(namespace: String!, name: String!, serviceId: ID): Deployment
 
-  statefulSet(namespace: String!, name: String!): StatefulSet
+  statefulSet(namespace: String!, name: String!, serviceId: ID): StatefulSet
 
-  ingress(namespace: String!, name: String!): Ingress
+  ingress(namespace: String!, name: String!, serviceId: ID): Ingress
 
   nodes: [Node]
 
   node(name: String!): Node
 
-  cronJob(namespace: String!, name: String!): CronJob
+  cronJob(namespace: String!, name: String!, serviceId: ID): CronJob
 
-  job(namespace: String!, name: String!): Job
+  job(namespace: String!, name: String!, serviceId: ID): Job
 
-  certificate(namespace: String!, name: String!): Certificate
+  certificate(namespace: String!, name: String!, serviceId: ID): Certificate
 
-  pod(namespace: String!, name: String!): Pod
+  pod(namespace: String!, name: String!, serviceId: ID): Pod
 
   pods(after: String, first: Int, before: String, last: Int, namespaces: [String]): PodConnection
 
@@ -1820,8 +1820,14 @@ input ComponentAttributes {
 
 input ClusterUpdateAttributes {
   version: String!
+
+  "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
+  handle: String
+
   nodePools: [NodePoolAttributes]
+
   readBindings: [PolicyBindingAttributes]
+
   writeBindings: [PolicyBindingAttributes]
 }
 

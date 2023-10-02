@@ -28,9 +28,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :cluster_update_attributes do
-    field :version,       non_null(:string)
-    field :node_pools,    list_of(:node_pool_attributes)
-    field :read_bindings, list_of(:policy_binding_attributes)
+    field :version,        non_null(:string)
+    field :handle,         :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
+    field :node_pools,     list_of(:node_pool_attributes)
+    field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
   end
 

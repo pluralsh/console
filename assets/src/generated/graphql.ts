@@ -521,6 +521,8 @@ export type ClusterProviderUpdateAttributes = {
 };
 
 export type ClusterUpdateAttributes = {
+  /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
+  handle?: InputMaybe<Scalars['String']['input']>;
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   version: Scalars['String']['input'];
@@ -1970,6 +1972,7 @@ export type RootMutationTypeDeleteGroupMemberArgs = {
 export type RootMutationTypeDeleteJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1986,6 +1989,7 @@ export type RootMutationTypeDeletePeerArgs = {
 export type RootMutationTypeDeletePodArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2313,6 +2317,7 @@ export type RootQueryTypeCachedPodsArgs = {
 export type RootQueryTypeCertificateArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2346,6 +2351,7 @@ export type RootQueryTypeClustersArgs = {
 export type RootQueryTypeConfigMapArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2362,6 +2368,7 @@ export type RootQueryTypeConfigurationOverlaysArgs = {
 export type RootQueryTypeCronJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2382,6 +2389,7 @@ export type RootQueryTypeDashboardsArgs = {
 export type RootQueryTypeDeploymentArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2414,6 +2422,7 @@ export type RootQueryTypeGroupsArgs = {
 export type RootQueryTypeIngressArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2433,6 +2442,7 @@ export type RootQueryTypeInviteArgs = {
 export type RootQueryTypeJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2483,6 +2493,7 @@ export type RootQueryTypeNotificationsArgs = {
 export type RootQueryTypePodArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2560,6 +2571,7 @@ export type RootQueryTypeScalingRecommendationArgs = {
 export type RootQueryTypeSecretArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2571,6 +2583,7 @@ export type RootQueryTypeSecretsArgs = {
 export type RootQueryTypeServiceArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2604,6 +2617,7 @@ export type RootQueryTypeStackArgs = {
 export type RootQueryTypeStatefulSetArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
