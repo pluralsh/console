@@ -1,5 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { Button, ClusterIcon } from '@pluralsh/design-system'
+import { ClusterIcon } from '@pluralsh/design-system'
 import { type GitRepositoriesRowFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { useTheme } from 'styled-components'
@@ -12,6 +12,7 @@ import {
   GitHealthChip,
   gitHealthToLabel,
 } from './GitRepositories'
+import { UpdateGitRepository } from './GitRepositoriesUpdateGit'
 
 const columnHelper = createColumnHelper<Edge<GitRepositoriesRowFragment>>()
 
@@ -19,6 +20,7 @@ export const ColRepo = columnHelper.accessor(({ node }) => node?.url, {
   id: 'repository',
   header: 'Repository',
   enableSorting: true,
+  enableGlobalFilter: true,
   meta: { truncate: true },
   cell: ({ getValue }) => (
     <ColWithIcon
@@ -39,13 +41,14 @@ export const ColAuthMethod = columnHelper.accessor(
     cell: ({ getValue }) => <AuthMethodChip authMethod={getValue()} />,
   }
 )
-
 export const ColStatus = columnHelper.accessor(
   ({ node }) => gitHealthToLabel(node?.health),
   {
     id: 'status',
     header: 'Status',
     enableSorting: true,
+    enableColumnFilter: true,
+    filterFn: 'equalsString',
     cell: ({
       row: {
         original: { node },
@@ -119,7 +122,6 @@ export const getColActions = ({ refetch }: { refetch: any }) =>
   columnHelper.accessor(({ node }) => node?.id, {
     id: 'actions',
     header: '',
-    enableSorting: true,
     cell: ({
       row: {
         original: { node },
@@ -127,6 +129,10 @@ export const getColActions = ({ refetch }: { refetch: any }) =>
     }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const theme = useTheme()
+
+      if (!node?.editable) {
+        return null
+      }
 
       return (
         node && (
@@ -137,24 +143,10 @@ export const getColActions = ({ refetch }: { refetch: any }) =>
               alignItems: 'center',
             }}
           >
-            <Button
-              secondary
-              small
-              onClick={() => {
-                alert(`Create ${node?.id}`)
-              }}
-            >
-              Create
-            </Button>
-            <Button
-              secondary
-              small
-              onClick={() => {
-                alert(`Update ${node?.id}`)
-              }}
-            >
-              Update
-            </Button>
+            <UpdateGitRepository
+              repo={node}
+              refetch={refetch}
+            />
             <DeleteGitRepository
               repo={node}
               refetch={refetch}
