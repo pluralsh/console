@@ -3350,6 +3350,21 @@ export type CreateGitRepositoryMutationVariables = Exact<{
 
 export type CreateGitRepositoryMutation = { __typename?: 'RootMutationType', createGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null } | null };
 
+export type DeleteGitRepositoryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteGitRepositoryMutation = { __typename?: 'RootMutationType', deleteGitRepository?: { __typename?: 'GitRepository', id: string } | null };
+
+export type UpdateGitRepositoryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: GitAttributes;
+}>;
+
+
+export type UpdateGitRepositoryMutation = { __typename?: 'RootMutationType', updateGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null } | null };
+
 export type ResourceSpecFragment = { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null };
 
 export type ResourcesFragment = { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null };
@@ -4098,6 +4113,73 @@ export function useCreateGitRepositoryMutation(baseOptions?: Apollo.MutationHook
 export type CreateGitRepositoryMutationHookResult = ReturnType<typeof useCreateGitRepositoryMutation>;
 export type CreateGitRepositoryMutationResult = Apollo.MutationResult<CreateGitRepositoryMutation>;
 export type CreateGitRepositoryMutationOptions = Apollo.BaseMutationOptions<CreateGitRepositoryMutation, CreateGitRepositoryMutationVariables>;
+export const DeleteGitRepositoryDocument = gql`
+    mutation DeleteGitRepository($id: ID!) {
+  deleteGitRepository(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteGitRepositoryMutationFn = Apollo.MutationFunction<DeleteGitRepositoryMutation, DeleteGitRepositoryMutationVariables>;
+
+/**
+ * __useDeleteGitRepositoryMutation__
+ *
+ * To run a mutation, you first call `useDeleteGitRepositoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteGitRepositoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteGitRepositoryMutation, { data, loading, error }] = useDeleteGitRepositoryMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteGitRepositoryMutation(baseOptions?: Apollo.MutationHookOptions<DeleteGitRepositoryMutation, DeleteGitRepositoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteGitRepositoryMutation, DeleteGitRepositoryMutationVariables>(DeleteGitRepositoryDocument, options);
+      }
+export type DeleteGitRepositoryMutationHookResult = ReturnType<typeof useDeleteGitRepositoryMutation>;
+export type DeleteGitRepositoryMutationResult = Apollo.MutationResult<DeleteGitRepositoryMutation>;
+export type DeleteGitRepositoryMutationOptions = Apollo.BaseMutationOptions<DeleteGitRepositoryMutation, DeleteGitRepositoryMutationVariables>;
+export const UpdateGitRepositoryDocument = gql`
+    mutation UpdateGitRepository($id: ID!, $attributes: GitAttributes!) {
+  updateGitRepository(id: $id, attributes: $attributes) {
+    ...GitRepositoriesRow
+  }
+}
+    ${GitRepositoriesRowFragmentDoc}`;
+export type UpdateGitRepositoryMutationFn = Apollo.MutationFunction<UpdateGitRepositoryMutation, UpdateGitRepositoryMutationVariables>;
+
+/**
+ * __useUpdateGitRepositoryMutation__
+ *
+ * To run a mutation, you first call `useUpdateGitRepositoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateGitRepositoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateGitRepositoryMutation, { data, loading, error }] = useUpdateGitRepositoryMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateGitRepositoryMutation(baseOptions?: Apollo.MutationHookOptions<UpdateGitRepositoryMutation, UpdateGitRepositoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateGitRepositoryMutation, UpdateGitRepositoryMutationVariables>(UpdateGitRepositoryDocument, options);
+      }
+export type UpdateGitRepositoryMutationHookResult = ReturnType<typeof useUpdateGitRepositoryMutation>;
+export type UpdateGitRepositoryMutationResult = Apollo.MutationResult<UpdateGitRepositoryMutation>;
+export type UpdateGitRepositoryMutationOptions = Apollo.BaseMutationOptions<UpdateGitRepositoryMutation, UpdateGitRepositoryMutationVariables>;
 export const RestorePostgresDocument = gql`
     mutation RestorePostgres($clone: CloneAttributes, $name: String!, $namespace: String!, $timestamp: DateTime!) {
   restorePostgres(
@@ -4753,6 +4835,8 @@ export const namedOperations = {
   Mutation: {
     CreateBuild: 'CreateBuild',
     CreateGitRepository: 'CreateGitRepository',
+    DeleteGitRepository: 'DeleteGitRepository',
+    UpdateGitRepository: 'UpdateGitRepository',
     RestorePostgres: 'RestorePostgres',
     CreateGroupMember: 'CreateGroupMember',
     DeleteGroupMember: 'DeleteGroupMember',

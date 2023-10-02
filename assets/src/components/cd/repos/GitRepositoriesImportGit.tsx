@@ -7,7 +7,8 @@ import {
 } from '@pluralsh/design-system'
 import { useCreateGitRepositoryMutation } from 'generated/graphql'
 import { useTheme } from 'styled-components'
-import { FormEvent, useCallback, useEffect, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useRef, useState } from 'react'
+import { GqlError } from 'components/utils/Alert'
 
 import ModalAlt, { StepBody, StepH, StepLink } from '../ModalAlt'
 
@@ -38,24 +39,23 @@ const scaffoldTabs = [
   },
 ]
 
-export function ImportGit() {
+export function ImportGit({ refetch }: { refetch: () => void }) {
   const theme = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const wasOpen = usePrevious(isOpen)
   const closeModal = useCallback(() => setIsOpen(false), [])
-  const onClose = useCallback(() => {
-    console.log('onClose')
-    setIsOpen(false)
-  }, [])
+
   const [gitUrl, setGitUrl] = useState('')
   const [mutation, { loading, error }] = useCreateGitRepositoryMutation({
     variables: { attributes: { url: gitUrl } },
+    onCompleted: () => {
+      refetch?.()
+      closeModal()
+    },
   })
 
-  console.log('error', error)
-
   useEffect(() => {
-    if (isOpen && wasOpen) {
+    if (isOpen && !wasOpen) {
       setGitUrl('')
     }
   }, [isOpen, wasOpen])
@@ -69,6 +69,14 @@ export function ImportGit() {
     },
     [gitUrl, loading, mutation]
   )
+
+  const inputRef = useRef<HTMLInputElement>()
+
+  useEffect(() => {
+    if (isOpen) {
+      inputRef.current?.focus?.()
+    }
+  }, [isOpen])
 
   return (
     <>
@@ -84,7 +92,7 @@ export function ImportGit() {
         header="Import Git"
         open={isOpen}
         portal
-        onClose={onClose}
+        onClose={closeModal}
         asForm
         formProps={{ onSubmit }}
         actions={
@@ -136,6 +144,7 @@ export function ImportGit() {
         >
           <StepH>Step 2. Connect your repository</StepH>
           <Input
+            inputProps={{ ref: inputRef }}
             value={gitUrl}
             onChange={(e) => {
               setGitUrl(e.currentTarget.value)
@@ -144,6 +153,12 @@ export function ImportGit() {
             titleContent={<GitHubLogoIcon />}
           />
         </div>
+        {error && (
+          <GqlError
+            header="Problem importing repository"
+            error={error}
+          />
+        )}
       </ModalAlt>
     </>
   )

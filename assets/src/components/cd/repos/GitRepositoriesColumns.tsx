@@ -4,10 +4,10 @@ import { type GitRepositoriesRowFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { useTheme } from 'styled-components'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
+import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 
 import {
   AuthMethodChip,
-  ColWithIcon,
   DeleteGitRepository,
   GitHealthChip,
   gitHealthToLabel,
@@ -15,28 +15,34 @@ import {
 
 const columnHelper = createColumnHelper<Edge<GitRepositoriesRowFragment>>()
 
-export const columns = [
-  columnHelper.accessor(({ node }) => node?.url, {
-    id: 'repository',
-    header: 'Repository',
-    enableSorting: true,
-    meta: { truncate: true },
-    cell: ({ getValue }) => (
-      <ColWithIcon
-        truncateLeft
-        icon={<ClusterIcon />}
-      >
-        {getValue()}
-      </ColWithIcon>
-    ),
-  }),
-  columnHelper.accessor(({ node }) => node?.authMethod, {
+export const ColRepo = columnHelper.accessor(({ node }) => node?.url, {
+  id: 'repository',
+  header: 'Repository',
+  enableSorting: true,
+  meta: { truncate: true },
+  cell: ({ getValue }) => (
+    <ColWithIcon
+      truncateLeft
+      icon={<ClusterIcon />}
+    >
+      {getValue()}
+    </ColWithIcon>
+  ),
+})
+
+export const ColAuthMethod = columnHelper.accessor(
+  ({ node }) => node?.authMethod,
+  {
     id: 'authMethod',
     header: 'Auth method',
     enableSorting: true,
     cell: ({ getValue }) => <AuthMethodChip authMethod={getValue()} />,
-  }),
-  columnHelper.accessor(({ node }) => gitHealthToLabel(node?.health), {
+  }
+)
+
+export const ColStatus = columnHelper.accessor(
+  ({ node }) => gitHealthToLabel(node?.health),
+  {
     id: 'status',
     header: 'Status',
     enableSorting: true,
@@ -50,65 +56,66 @@ export const columns = [
         error={node?.error}
       />
     ),
-  }),
-  columnHelper.accessor(
-    ({ node }) => (node?.insertedAt ? new Date(node?.insertedAt) : undefined),
-    {
-      id: 'createdAt',
-      header: 'Created ',
-      enableSorting: true,
-      sortingFn: 'datetime',
-      cell: ({
-        row: {
-          original: { node },
-        },
-      }) => <DateTimeCol dateString={node?.insertedAt} />,
-    }
-  ),
-  columnHelper.accessor(
-    ({ node }) => (node?.updatedAt ? new Date(node?.updatedAt) : undefined),
-    {
-      id: 'updatedAt',
-      header: 'Updated',
-      enableSorting: true,
-      sortingFn: 'datetime',
-      cell: ({
-        row: {
-          original: { node },
-        },
-      }) => {
-        console.log('node', node)
+  }
+)
 
-        return <DateTimeCol dateString={node?.updatedAt} />
+export const ColCreatedAt = columnHelper.accessor(
+  ({ node }) => (node?.insertedAt ? new Date(node?.insertedAt) : undefined),
+  {
+    id: 'createdAt',
+    header: 'Created ',
+    enableSorting: true,
+    sortingFn: 'datetime',
+    cell: ({
+      row: {
+        original: { node },
       },
-    }
-  ),
-  columnHelper.accessor(
-    ({ node }) => (node?.pulledAt ? new Date(node?.pulledAt) : undefined),
-    {
-      id: 'pulledAt',
-      header: 'Last pull',
-      enableSorting: true,
-      sortingFn: 'datetime',
-      cell: ({
-        row: {
-          original: { node },
-        },
-      }) => {
-        console.log('node', node)
+    }) => <DateTimeCol dateString={node?.insertedAt} />,
+  }
+)
 
-        return <DateTimeCol dateString={node?.pulledAt || ''} />
+export const ColUpdatedAt = columnHelper.accessor(
+  ({ node }) => (node?.updatedAt ? new Date(node?.updatedAt) : undefined),
+  {
+    id: 'updatedAt',
+    header: 'Updated',
+    enableSorting: true,
+    sortingFn: 'datetime',
+    cell: ({
+      row: {
+        original: { node },
       },
-    }
-  ),
+    }) => <DateTimeCol dateString={node?.updatedAt} />,
+  }
+)
 
-  /* Update later when API is updated */
-  columnHelper.accessor(({ node }) => (node as any)?.owner, {
+export const ColPulledAt = columnHelper.accessor(
+  ({ node }) => (node?.pulledAt ? new Date(node?.pulledAt) : undefined),
+  {
+    id: 'pulledAt',
+    header: 'Last pull',
+    enableSorting: true,
+    sortingFn: 'datetime',
+    cell: ({
+      row: {
+        original: { node },
+      },
+    }) => <DateTimeCol dateString={node?.pulledAt || ''} />,
+  }
+)
+
+/* Update later when API is updated */
+export const ColOwner = columnHelper.accessor(
+  ({ node }) => (node as any)?.owner,
+  {
     id: 'owner',
     header: 'Owner',
     enableSorting: true,
     cell: ({ getValue }) => getValue() || 'Need API',
-  }),
+  }
+)
+
+export const getColActions = ({ refetch }: { refetch: any }) =>
   columnHelper.accessor(({ node }) => node?.id, {
     id: 'actions',
     header: '',
@@ -148,10 +155,12 @@ export const columns = [
             >
               Update
             </Button>
-            <DeleteGitRepository repo={node} />
+            <DeleteGitRepository
+              repo={node}
+              refetch={refetch}
+            />
           </div>
         )
       )
     },
-  }),
-]
+  })

@@ -15,11 +15,12 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { A } from 'honorable'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import { ColWithIcon } from 'components/utils/table/ColWithIcon'
+import { providerToURL } from 'components/utils/ProviderIcon'
 
-import { ColWithIcon } from '../repos/GitRepositories'
-import { Edge } from '../../../utils/graphql'
+import { Edge } from 'utils/graphql'
+
 import { useSetCDHeaderContent } from '../ContinuousDeployment'
-import { providerToURL } from '../../utils/ProviderIcon'
 
 import CreateCluster from './CreateCluster'
 import ClustersUpgrade from './ClustersUpgrade'

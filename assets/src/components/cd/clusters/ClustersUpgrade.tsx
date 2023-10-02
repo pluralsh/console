@@ -11,14 +11,13 @@ import {
 import { useCallback, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
-
 import isEmpty from 'lodash/isEmpty'
+import { ColWithIcon } from 'components/utils/table/ColWithIcon'
+import CopyButton from 'components/utils/CopyButton'
+import { Confirm } from 'components/utils/Confirm'
+import { ProviderIcons } from 'components/utils/ProviderIcon'
 
-import { ApiDeprecation, ClustersRowFragment } from '../../../generated/graphql'
-import { ColWithIcon } from '../repos/GitRepositories'
-import CopyButton from '../../utils/CopyButton'
-import { ProviderIcons } from '../../utils/ProviderIcon'
-import { Confirm } from '../../utils/Confirm'
+import { ApiDeprecation, ClustersRowFragment } from 'generated/graphql'
 
 function ClustersUpgradeNow({
   cluster,

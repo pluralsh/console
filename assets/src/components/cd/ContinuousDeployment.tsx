@@ -8,7 +8,6 @@ import {
   ReactNode,
   createContext,
   useContext,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -32,28 +31,11 @@ export const useSetCDHeaderContent = (headerContent?: ReactNode) => {
   const ctx = useContext(CDContext)
 
   if (!ctx) {
-    throw Error('useSetCDHeaderContent() must be used within a CDContext')
+    console.warn('useSetCDHeaderContent() must be used within a CDContext')
   }
   const { setHeaderContent } = ctx || {}
 
   useLayoutEffect(() => {
-    setHeaderContent?.(headerContent)
-
-    return () => {
-      setHeaderContent?.(null)
-    }
-  }, [setHeaderContent, headerContent])
-}
-
-export const useCDHeaderContent = (headerContent?: ReactNode) => {
-  const ctx = useContext(CDContext)
-
-  if (!ctx) {
-    throw Error('useCDHeaderContent() must be used within a CDContext')
-  }
-  const { setHeaderContent } = ctx || {}
-
-  useEffect(() => {
     setHeaderContent?.(headerContent)
 
     return () => {
