@@ -208,32 +208,14 @@ export default function ClustersUpgrade({
                 Before upgrading the Kubernetes version fix all deprecated
                 resources listed below:
               </div>
-              <div
+              <Table
+                data={apiDeprecations}
+                columns={deprecationsColumns}
                 css={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: theme.spacing.small,
+                  maxHeight: 310,
+                  height: '100%',
                 }}
-              >
-                <Table
-                  data={apiDeprecations}
-                  columns={deprecationsColumns}
-                  css={{
-                    maxHeight: 310,
-                    height: '100%',
-                  }}
-                />
-                <div css={{ display: 'flex', justifyContent: 'end' }}>
-                  <Button
-                    startIcon={<ReloadIcon />}
-                    small
-                    floating
-                    width="fit-content"
-                  >
-                    Refresh scan
-                  </Button>
-                </div>
-              </div>
+              />
             </>
           ) : (
             <div
