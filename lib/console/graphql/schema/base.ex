@@ -63,6 +63,13 @@ defmodule Console.GraphQl.Schema.Base do
     end
   end
 
+  defmacro service_authorized(perm) do
+    quote do
+      arg :service_id, :id
+      middleware Console.Middleware.CdAuthenticated, perm: unquote(perm)
+    end
+  end
+
   defmacro datetime_func(name, key) do
     quote do
       field unquote(name), :datetime, resolve: fn

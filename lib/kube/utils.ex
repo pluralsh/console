@@ -7,6 +7,18 @@ defmodule Kube.Utils do
   @type secret_resp :: {:ok, CoreV1.Secret.t} | error
   @type statefulset_resp :: {:ok, AppsV1.StatefulSet.t} | error
 
+  @kubeconf :kubeconfig
+
+  def save_kubeconfig(val), do: Process.put(@kubeconf, val)
+  def kubeconfig(), do: Process.get(@kubeconf)
+
+  def run(query) do
+    case kubeconfig() do
+      %Kazan.Server{} = server -> Kazan.run(query, server: server)
+      _ -> Kazan.run(query)
+    end
+  end
+
   @spec metadata(binary) :: MetaV1.ObjectMeta.t
   def metadata(name, other \\ %{}), do: struct(MetaV1.ObjectMeta, Map.merge(%{name: name}, other))
 

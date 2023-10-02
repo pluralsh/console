@@ -22,6 +22,7 @@ Mimic.copy(File)
 Mimic.copy(Console.Features)
 Mimic.copy(Kube.Client)
 Mimic.copy(Console.Cached.VPN)
+Mimic.copy(Kube.Utils)
 
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)

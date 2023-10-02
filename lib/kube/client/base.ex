@@ -14,7 +14,7 @@ defmodule Kube.Client.Base do
       content_type: "application/json",
       response_model: model
     }
-    |> Kazan.run()
+    |> Kube.Utils.run()
   end
 
   def path_builder(g, v, k), do: "/apis/#{g}/#{v}/#{k}"
@@ -31,7 +31,7 @@ defmodule Kube.Client.Base do
           query_params: params,
           response_model: unquote(model)
         }
-        |> Kazan.run()
+        |> Kube.Utils.run()
       end
     end
   end
@@ -49,7 +49,7 @@ defmodule Kube.Client.Base do
           body: Jason.encode!(encoded),
           content_type: "application/json",
         }
-        |> Kazan.run()
+        |> Kube.Utils.run()
       end
     end
   end
@@ -64,7 +64,7 @@ defmodule Kube.Client.Base do
           query_params: params,
           response_model: unquote(model)
         }
-        |> Kazan.run()
+        |> Kube.Utils.run()
       end
     end
   end
@@ -88,7 +88,7 @@ defmodule Kube.Client.Base do
           query_params: params,
           response_model: Kazan.Models.Apimachinery.Meta.V1.Status
         }
-        |> Kazan.run()
+        |> Kube.Utils.run()
       end
     end
   end

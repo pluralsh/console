@@ -77,7 +77,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      service_authorized :read
 
       safe_resolve &Kubernetes.resolve_service/2
     end
@@ -91,7 +91,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      service_authorized :read
 
       safe_resolve &Kubernetes.resolve_deployment/2
     end
@@ -100,7 +100,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      service_authorized :read
 
       safe_resolve &Kubernetes.resolve_stateful_set/2
     end
@@ -109,7 +109,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      service_authorized :read
 
       safe_resolve &Kubernetes.resolve_ingress/2
     end
@@ -131,7 +131,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name, non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      service_authorized :read
 
       safe_resolve &Kubernetes.resolve_cron_job/2
     end
@@ -140,7 +140,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name, non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      service_authorized :read
 
       safe_resolve &Kubernetes.resolve_job/2
     end
@@ -149,7 +149,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      service_authorized :read
 
       safe_resolve &Kubernetes.resolve_certificate/2
     end
@@ -158,7 +158,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name, non_null(:string)
-      middleware Rbac, perm: :read, arg: :namespace
+      service_authorized :read
 
       safe_resolve &Kubernetes.resolve_pod/2
     end
@@ -239,7 +239,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      middleware Rbac, perm: :operate, arg: :namespace
+      service_authorized :operate
 
       safe_resolve &Kubernetes.delete_pod/2
     end
@@ -248,7 +248,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name,      non_null(:string)
-      middleware Rbac, perm: :operate, arg: :namespace
+      service_authorized :operate
 
       safe_resolve &Kubernetes.delete_job/2
     end

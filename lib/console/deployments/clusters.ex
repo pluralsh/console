@@ -1,10 +1,15 @@
 defmodule Console.Deployments.Clusters do
   use Console.Services.Base
+  use Nebulex.Caching
   import Console.Deployments.Policies
   alias Console.PubSub
   alias Console.Deployments.{Services, Git}
   alias Console.Services.Users
   alias Console.Schema.{Cluster, User, ClusterProvider, Service, DeployToken, ClusterRevision}
+  require Logger
+
+  @cache_adapter Console.conf(:cache_adapter)
+  @ttl :timer.minutes(45)
 
   @type cluster_resp :: {:ok, Cluster.t} | Console.error
   @type cluster_provider_resp :: {:ok, ClusterProvider.t} | Console.error
@@ -14,6 +19,21 @@ defmodule Console.Deployments.Clusters do
   def get_cluster_by_handle(handle), do: Console.Repo.get_by(Cluster, handle: handle)
 
   def get_cluster_by_handle!(handle), do: Console.Repo.get_by!(Cluster, handle: handle)
+
+  @decorate cacheable(cache: @cache_adapter, key: {:control_plan, id}, opts: [ttl: @ttl])
+  def control_plane(%Cluster{id: id, self: true}), do: Kazan.Server.in_cluster()
+  def control_plane(%Cluster{id: id, kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
+  def control_plane(%Cluster{id: id, name: name} = cluster) do
+    with %{provider: %{namespace: ns}} <- Repo.preload(cluster, [:provider]),
+         {:ok, %{data: %{"value" => value}}} <- Kube.Utils.get_secret(ns, "#{name}-kubeconfig"),
+         {:ok, raw} <- Base.decode64(value) do
+      Kazan.Server.from_kubeconfig_raw(raw)
+    else
+      err ->
+        Logger.info "could not fetch kubeconfig for cluster #{id}: #{inspect(err)}"
+        :error
+    end
+  end
 
   def find!(identifier) do
     case Uniq.UUID.parse(identifier) do

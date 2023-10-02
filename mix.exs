@@ -103,7 +103,7 @@ defmodule Console.MixProject do
       {:mojito, "~> 0.3.0"},
       {:ets, "~> 0.9"},
       {:reverse_proxy_plug, "~> 1.2.1"},
-      {:kazan, "~> 0.11", github: "michaeljguarino/kazan", branch: "k8s-1.23"},
+      {:kazan, "~> 0.11", github: "michaeljguarino/kazan", ref: "42337ad83cc25476337ed1a48a2528055a2b47e9"},
       {:comeonin, "~> 5.1.2"},
       {:argon2_elixir, "~> 2.0"},
       {:prometheus_ex, "~> 3.0"},

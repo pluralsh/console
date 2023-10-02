@@ -1,7 +1,9 @@
 defmodule Console.Deployments.ClustersTest do
   use Console.DataCase, async: true
+  use Mimic
   alias Console.PubSub
   alias Console.Deployments.{Clusters, Services}
+  alias Kazan.Apis.Core.V1, as: CoreV1
 
   describe "#create_cluster/2" do
     test "it can create a new cluster record" do
@@ -236,6 +238,30 @@ defmodule Console.Deployments.ClustersTest do
         name: "aws-sandbox-two",
         cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
       }, insert(:user))
+    end
+  end
+
+  describe "#control_plane/1" do
+    test "it will use in-cluster config for self clusters" do
+      cluster = insert(:cluster, self: true)
+      expect(Kazan.Server, :in_cluster, fn -> %Kazan.Server{} end)
+
+      assert Clusters.control_plane(cluster) == %Kazan.Server{}
+    end
+
+    test "it can use an uploaded kubeconfig" do
+      cluster = insert(:cluster, kubeconfig: %{raw: Console.conf(:test_kubeconfig)})
+
+      assert Clusters.control_plane(cluster) == Kazan.Server.from_kubeconfig_raw(Console.conf(:test_kubeconfig))
+    end
+
+    test "it can use a kubeconfig in a CAPI cluster secret" do
+      cluster = insert(:cluster, name: "cluster", provider: build(:cluster_provider, namespace: "test-provider"))
+      expect(Kube.Utils, :get_secret, fn "test-provider", "cluster-kubeconfig" ->
+        {:ok, %CoreV1.Secret{data: %{"value" => Base.encode64(Console.conf(:test_kubeconfig))}}}
+      end)
+
+      assert Clusters.control_plane(cluster) == Kazan.Server.from_kubeconfig_raw(Console.conf(:test_kubeconfig))
     end
   end
 

@@ -84,11 +84,12 @@ defmodule Console.Deployments.Services do
     ]
   end
 
-  @spec authorized(binary, Cluster.t) :: service_resp
+  @spec authorized(binary, Cluster.t | User.t) :: service_resp
+  def authorized(%Service{} = svc, %User{} = user), do: allow(svc, user, :read)
   def authorized(%Service{cluster_id: id} = svc, %Cluster{id: id}), do: {:ok, svc}
-  def authorized(service_id, %Cluster{} = cluster) when is_binary(service_id) do
+  def authorized(service_id, actor) when is_binary(service_id) do
     get_service(service_id)
-    |> authorized(cluster)
+    |> authorized(actor)
   end
   def authorized(_, _), do: {:error, "could not find service in cluster"}
 

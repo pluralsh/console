@@ -38,3 +38,25 @@ config :console, :login_link,
 config :console, :consumers, [Console.EchoConsumer]
 
 config :kazan, :server, %{url: "kubernetes.default", auth: %{token: "your_token"}}
+
+config :console,
+  test_kubeconfig: """
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: DUMMY_CERT
+    server: https://my.kubernetes.endpoint
+  name: test-cluster
+contexts:
+- context:
+    cluster: test-cluster
+    user: test-cluster-user
+  name: test-cluster-user
+current-context: test-cluster-user
+kind: Config
+preferences: {}
+users:
+- name: test-cluster-user
+  user:
+    token: TEST
+"""

@@ -470,7 +470,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
 
   describe "configMap" do
     test "users can view config maps" do
-      user = insert(:user)
+      user = admin_user()
       expect(Kazan, :run, fn _ -> {:ok, config_map("name")} end)
 
       {:ok, %{data: %{"configMap" => conf}}} = run_query("""
