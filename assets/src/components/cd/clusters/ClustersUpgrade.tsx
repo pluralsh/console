@@ -18,6 +18,40 @@ import { ApiDeprecation, Cluster } from '../../../generated/graphql'
 import { ColWithIcon } from '../repos/GitRepositories'
 import CopyButton from '../../utils/CopyButton'
 import { ProviderIcons } from '../../utils/ProviderIcon'
+import { Confirm } from '../../utils/Confirm'
+
+function ClustersUpgradeNow({ cluster }: { cluster?: Cluster | null }) {
+  const [confirm, setConfirm] = useState(false)
+  const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
+  const upgrade = useCallback(() => console.log('TODO'), [])
+  const onClick = useCallback(
+    () => (!hasDeprecations ? upgrade() : setConfirm(true)),
+    [hasDeprecations, upgrade]
+  )
+
+  return (
+    <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
+      <Button
+        small
+        destructive={hasDeprecations}
+        floating={!hasDeprecations}
+        width="fit-content"
+        onClick={onClick}
+      >
+        Upgrade now
+      </Button>
+      <Confirm
+        open={confirm}
+        title="Confirm upgrade"
+        text="This could be a destructive action. Before updating your Kubernetes version check and fix all deprecated resources."
+        close={() => setConfirm(false)}
+        submit={upgrade}
+        loading={false}
+        destructive
+      />
+    </div>
+  )
+}
 
 const columnHelperDeprecations = createColumnHelper<ApiDeprecation>()
 
@@ -84,25 +118,10 @@ const upgradeColumns = [
     header: 'Target version',
     cell: () => <ColWithIcon icon={ProviderIcons.GENERIC}>TODO</ColWithIcon>,
   }),
-  columnHelperUpgrade.accessor((cluster) => cluster?.apiDeprecations, {
+  columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'actions',
     header: '',
-    cell: ({ getValue }) => {
-      const hasDeprecations = !isEmpty(getValue())
-
-      return (
-        <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
-          <Button
-            small
-            destructive={hasDeprecations}
-            floating={!hasDeprecations}
-            width="fit-content"
-          >
-            Upgrade now
-          </Button>
-        </div>
-      )
-    },
+    cell: ({ getValue }) => <ClustersUpgradeNow cluster={getValue()} />,
   }),
 ]
 
