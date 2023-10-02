@@ -31,6 +31,7 @@ defmodule Console.Schema.GitRepository do
     model
     |> cast(attrs, @valid)
     |> add_auth_method()
+    |> validate_required([:url])
   end
 
   def status_changeset(model, attrs \\ %{}) do

@@ -20,7 +20,7 @@ defmodule Console.Deployments.Clusters do
 
   def get_cluster_by_handle!(handle), do: Console.Repo.get_by!(Cluster, handle: handle)
 
-  @decorate cacheable(cache: @cache_adapter, key: {:control_plan, id}, opts: [ttl: @ttl])
+  @decorate cacheable(cache: @cache_adapter, key: {:control_plane, id}, opts: [ttl: @ttl])
   def control_plane(%Cluster{id: id, self: true}), do: Kazan.Server.in_cluster()
   def control_plane(%Cluster{id: id, kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
   def control_plane(%Cluster{id: id, name: name} = cluster) do
