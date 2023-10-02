@@ -1,37 +1,28 @@
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import {
-  Chip,
-  EmptyState,
-  Input,
-  SearchIcon,
-  SubTab,
-  TabList,
-  Table,
-} from '@pluralsh/design-system'
+import { Chip, EmptyState, Table } from '@pluralsh/design-system'
 import {
   AuthMethod,
-  GitHealth,
   GitRepositoriesDocument,
   type GitRepositoriesRowFragment,
   useDeleteGitRepositoryMutation,
   useGitRepositoriesQuery,
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
-import { ComponentProps, Key, useMemo, useRef, useState } from 'react'
+import { ComponentProps, useMemo, useState } from 'react'
+import { type TableState } from '@tanstack/react-table'
 import { isEmpty } from 'lodash'
 import { Confirm } from 'components/utils/Confirm'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 import { createMapperWithFallback } from 'utils/mapping'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { removeConnection, updateCache } from 'utils/graphql'
-import { useDebounce } from '@react-hooks-library/core'
 
 import { useSetCDHeaderContent } from '../ContinuousDeployment'
 
 import {
   ColAuthMethod,
   ColCreatedAt,
-  ColOwner,
+  // ColOwner,
   ColPulledAt,
   ColRepo,
   ColStatus,
@@ -39,6 +30,7 @@ import {
   getColActions,
 } from './GitRepositoriesColumns'
 import { ImportGit } from './GitRepositoriesImportGit'
+import { GitRepositoriesFilters } from './GitRepositoriesFilters'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -113,49 +105,6 @@ export function AuthMethodChip({
   return <Chip severity="neutral">{authMethodToLabel(authMethod)}</Chip>
 }
 
-export const gitHealthToLabel = createMapperWithFallback<GitHealth, string>(
-  {
-    PULLABLE: 'Pullable',
-    FAILED: 'Failed',
-  },
-  'Unknown'
-)
-
-const gitHealthToSeverity = createMapperWithFallback<
-  GitHealth,
-  ComponentProps<typeof Chip>['severity']
->(
-  {
-    PULLABLE: 'success',
-    FAILED: 'critical',
-  },
-  'neutral'
-)
-
-export function GitHealthChip({
-  health,
-  error,
-}: {
-  health: GitHealth | null | undefined
-  error?: string | null | undefined
-}) {
-  return (
-    <Chip
-      tooltip={error || undefined}
-      severity={gitHealthToSeverity(health)}
-    >
-      {gitHealthToLabel(health)}
-    </Chip>
-  )
-}
-
-type StatusTabKey = GitHealth | 'ALL'
-const statusTabs = Object.entries({
-  ALL: { label: 'All' },
-  [GitHealth.Failed]: { label: gitHealthToLabel(GitHealth.Failed) },
-  [GitHealth.Pullable]: { label: gitHealthToLabel(GitHealth.Pullable) },
-} as const satisfies Record<StatusTabKey, { label: string }>)
-
 export default function GitRepositories() {
   const theme = useTheme()
   const { data, error, refetch } = useGitRepositoriesQuery({
@@ -169,57 +118,31 @@ export default function GitRepositories() {
       ColCreatedAt,
       ColUpdatedAt,
       ColPulledAt,
-      ColOwner,
+      // ColOwner,
       getColActions({ refetch }),
     ],
     [refetch]
   )
 
-  const counts = useMemo(() => {
-    const c: Record<string, number | undefined> = {
-      ALL: data?.gitRepositories?.edges?.length,
-    }
-
-    data?.gitRepositories?.edges?.forEach((edge) => {
-      if (edge?.node?.health) {
-        c[edge?.node?.health] = (c[edge?.node?.health] ?? 0) + 1
-      }
-    })
-
-    return c
-  }, [data?.gitRepositories?.edges])
-
-  console.log('data', data, 'error', error?.extraInfo)
-
   useSetCDHeaderContent(
     useMemo(() => <ImportGit refetch={refetch} />, [refetch])
   )
-  const tabStateRef = useRef<any>(null)
-  const [filterString, setFilterString] = useState('')
-  const debouncedFilterString = useDebounce(filterString, 100)
-  const [statusFilterKey, setStatusTabKey] = useState<Key>('ALL')
+  const [tableFilters, setTableFilters] = useState<
+    Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
+  >({
+    globalFilter: '',
+  })
+
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
     useMemo(
       () => ({
         state: {
-          globalFilter: debouncedFilterString,
-          filterFns: [],
-          columnFilters: [
-            ...(statusFilterKey !== 'ALL'
-              ? [
-                  {
-                    id: 'status',
-                    value: statusFilterKey,
-                  },
-                ]
-              : []),
-          ],
+          ...tableFilters,
         },
       }),
-      [debouncedFilterString, statusFilterKey]
+      [tableFilters]
     )
 
-  console.log('data', data)
   if (error) {
     return (
       <EmptyState message="Looks like you don't have any Git repositories yet." />
@@ -230,7 +153,6 @@ export default function GitRepositories() {
   }
 
   return (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
     <div
       css={{
         display: 'flex',
@@ -239,54 +161,10 @@ export default function GitRepositories() {
         height: '100%',
       }}
     >
-      <div css={{ display: 'flex', columnGap: theme.spacing.medium }}>
-        <Input
-          placeholder="Search"
-          startIcon={
-            <SearchIcon
-              border={undefined}
-              size={undefined}
-            />
-          }
-          value={filterString}
-          onChange={(e) => {
-            setFilterString(e.currentTarget.value)
-          }}
-          css={{ flexGrow: 1 }}
-        />
-        <TabList
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: statusFilterKey,
-            onSelectionChange: (key) => {
-              setStatusTabKey(key)
-            },
-          }}
-        >
-          {statusTabs.map(([key, { label }]) => (
-            <SubTab
-              key={key}
-              textValue={label}
-              css={{
-                display: 'flex',
-                gap: theme.spacing.small,
-                alignItems: 'center',
-              }}
-            >
-              {label}
-              {counts[key] && (
-                <Chip
-                  size="small"
-                  severity={gitHealthToSeverity(key as any)}
-                >
-                  {counts[key]}
-                </Chip>
-              )}
-            </SubTab>
-          ))}
-        </TabList>
-      </div>
+      <GitRepositoriesFilters
+        data={data}
+        setTableFilters={setTableFilters}
+      />
       {!isEmpty(data?.gitRepositories?.edges) ? (
         <FullHeightTableWrap>
           <Table

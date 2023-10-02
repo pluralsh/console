@@ -6,12 +6,8 @@ import { useTheme } from 'styled-components'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 
-import {
-  AuthMethodChip,
-  DeleteGitRepository,
-  GitHealthChip,
-  gitHealthToLabel,
-} from './GitRepositories'
+import { AuthMethodChip, DeleteGitRepository } from './GitRepositories'
+import { GitHealthChip, gitHealthToLabel } from './GitHealthChip'
 import { UpdateGitRepository } from './GitRepositoriesUpdateGit'
 
 const columnHelper = createColumnHelper<Edge<GitRepositoriesRowFragment>>()
