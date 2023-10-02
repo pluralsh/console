@@ -3,7 +3,6 @@ import {
   Button,
   ClusterIcon,
   ErrorIcon,
-  GitHubIcon,
   GitHubLogoIcon,
   Modal,
   ReloadIcon,
@@ -14,8 +13,11 @@ import { useCallback, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 
+import isEmpty from 'lodash/isEmpty'
+
 import { ApiDeprecation, Cluster } from '../../../generated/graphql'
 import { ColWithIcon } from '../repos/GitRepositories'
+import CopyButton from '../../utils/CopyButton'
 
 const columnHelperDeprecations = createColumnHelper<ApiDeprecation>()
 
@@ -23,12 +25,24 @@ const deprecationsColumns = [
   columnHelperDeprecations.accessor(({ component }) => component, {
     id: 'deprecated',
     header: 'Deprecated',
+    meta: { truncate: true },
     cell: ({ getValue }) => <div>{getValue()}</div>,
+  }),
+  columnHelperDeprecations.accessor(({ component }) => component, {
+    id: 'deprecatedCopy',
+    header: '',
+    cell: ({ getValue }) => <CopyButton text={getValue()} />,
   }),
   columnHelperDeprecations.accessor(({ replacement }) => replacement, {
     id: 'fix',
     header: 'Fix',
-    cell: ({ getValue }) => <div>v{getValue()}</div>,
+    meta: { truncate: true },
+    cell: ({ getValue }) => <div>{getValue()}</div>,
+  }),
+  columnHelperDeprecations.accessor(({ replacement }) => replacement, {
+    id: 'fixCopy',
+    header: '',
+    cell: ({ getValue }) => <CopyButton text={getValue()} />,
   }),
   columnHelperDeprecations.accessor(() => undefined, {
     id: 'repository',
@@ -70,20 +84,25 @@ const upgradeColumns = [
     header: 'Target version',
     cell: () => <div>TODO</div>,
   }),
-  columnHelperUpgrade.accessor(() => undefined, {
+  columnHelperUpgrade.accessor((cluster) => cluster?.apiDeprecations, {
     id: 'actions',
     header: '',
-    cell: () => (
-      <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
-        <Button
-          small
-          destructive
-          width="fit-content"
-        >
-          Upgrade now
-        </Button>
-      </div>
-    ),
+    cell: ({ getValue }) => {
+      const hasDeprecations = !isEmpty(getValue())
+
+      return (
+        <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
+          <Button
+            small
+            destructive={hasDeprecations}
+            floating={!hasDeprecations}
+            width="fit-content"
+          >
+            Upgrade now
+          </Button>
+        </div>
+      )
+    },
   }),
 ]
 
@@ -99,6 +118,26 @@ export default function ClustersUpgrade({
   const hasDeprecations = true // TODO: !isEmpty(cluster?.apiDeprecations)
 
   const apiDeprecations: ApiDeprecation[] = [
+    {
+      component: 'networking.k8s/io/v1 Ingress <name>',
+      replacement: 'networking.k8s/io/v1 Ingress <name>',
+    },
+    {
+      component: 'networking.k8s/io/v1 Ingress <name>',
+      replacement: 'networking.k8s/io/v1 Ingress <name>',
+    },
+    {
+      component: 'networking.k8s/io/v1 Ingress <name>',
+      replacement: 'networking.k8s/io/v1 Ingress <name>',
+    },
+    {
+      component: 'networking.k8s/io/v1 Ingress <name>',
+      replacement: 'networking.k8s/io/v1 Ingress <name>',
+    },
+    {
+      component: 'networking.k8s/io/v1 Ingress <name>',
+      replacement: 'networking.k8s/io/v1 Ingress <name>',
+    },
     {
       component: 'networking.k8s/io/v1 Ingress <name>',
       replacement: 'networking.k8s/io/v1 Ingress <name>',
@@ -180,7 +219,7 @@ export default function ClustersUpgrade({
                   data={apiDeprecations}
                   columns={deprecationsColumns}
                   css={{
-                    maxHeight: 'unset',
+                    maxHeight: 310,
                     height: '100%',
                   }}
                 />
