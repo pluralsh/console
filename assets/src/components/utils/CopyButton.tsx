@@ -2,7 +2,7 @@ import { Ref, forwardRef, useCallback, useEffect, useState } from 'react'
 import { CheckIcon, CopyIcon, IconFrame } from '@pluralsh/design-system'
 
 type CopyButtonProps = {
-  text?: string
+  text?: string | null | undefined
   type?: 'secondary' | 'tertiary' | 'floating'
 }
 
@@ -34,7 +34,7 @@ function CopyButtonRef(
       icon={copied ? <CheckIcon /> : <CopyIcon />}
       onClick={() => handleCopy()}
       ref={ref}
-      textValue={text}
+      textValue={text ?? undefined}
       tooltip
       type={type}
     />

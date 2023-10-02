@@ -7,7 +7,7 @@ import {
   IconFrame,
   Table,
 } from '@pluralsh/design-system'
-import { Cluster, useClustersQuery } from 'generated/graphql'
+import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
 import { useMemo } from 'react'
 import { isEmpty } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -24,7 +24,7 @@ import { providerToURL } from '../../utils/ProviderIcon'
 import CreateCluster from './CreateCluster'
 import ClustersUpgrade from './ClustersUpgrade'
 
-const columnHelper = createColumnHelper<Edge<Cluster>>()
+const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
 export const columns = [
   columnHelper.accessor(({ node }) => node?.name, {
