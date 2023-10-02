@@ -115,18 +115,29 @@ export default function ClustersUpgrade({
   const [isOpen, setIsOpen] = useState(false)
   const closeModal = useCallback(() => setIsOpen(false), [])
   const onClose = useCallback(() => setIsOpen(false), [])
-  const hasDeprecations = true // TODO: !isEmpty(cluster?.apiDeprecations)
 
   const apiDeprecations: ApiDeprecation[] = [
     {
-      component: { name: 'networking.k8s/io/v1 Ingress <name>' },
+      component: {
+        id: '',
+        kind: '',
+        synced: false,
+        name: 'networking.k8s/io/v1 Ingress <name>',
+      },
       replacement: 'networking.k8s/io/v1 Ingress <name>',
     },
     {
-      component: { name: 'networking.k8s/io/v1 Ingress <name>' },
+      component: {
+        id: '',
+        kind: '',
+        synced: false,
+        name: 'networking.k8s/io/v1 Ingress <name>',
+      },
       replacement: 'networking.k8s/io/v1 Ingress <name>',
     },
   ] // TODO: Remove
+
+  const hasDeprecations = !isEmpty(apiDeprecations)
 
   return (
     <>
@@ -157,6 +168,8 @@ export default function ClustersUpgrade({
         onClose={onClose}
         portal
         size="large"
+        maxWidth={1024}
+        width={1024}
         actions={
           <Button
             primary
