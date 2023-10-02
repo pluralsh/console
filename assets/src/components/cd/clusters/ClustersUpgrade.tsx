@@ -5,7 +5,6 @@ import {
   ErrorIcon,
   GitHubLogoIcon,
   Modal,
-  ReloadIcon,
   Table,
   WarningIcon,
 } from '@pluralsh/design-system'
@@ -18,17 +17,18 @@ import isEmpty from 'lodash/isEmpty'
 import { ApiDeprecation, Cluster } from '../../../generated/graphql'
 import { ColWithIcon } from '../repos/GitRepositories'
 import CopyButton from '../../utils/CopyButton'
+import { ProviderIcons, providerToURL } from '../../utils/ProviderIcon'
 
 const columnHelperDeprecations = createColumnHelper<ApiDeprecation>()
 
 const deprecationsColumns = [
-  columnHelperDeprecations.accessor(({ component }) => component, {
+  columnHelperDeprecations.accessor(({ component: { name } }) => name, {
     id: 'deprecated',
     header: 'Deprecated',
     meta: { truncate: true },
     cell: ({ getValue }) => <div>{getValue()}</div>,
   }),
-  columnHelperDeprecations.accessor(({ component }) => component, {
+  columnHelperDeprecations.accessor(({ component: { name } }) => name, {
     id: 'deprecatedCopy',
     header: '',
     cell: ({ getValue }) => <CopyButton text={getValue()} />,
@@ -65,7 +65,7 @@ const deprecationsColumns = [
 const columnHelperUpgrade = createColumnHelper<Cluster>()
 
 const upgradeColumns = [
-  columnHelperUpgrade.accessor((cluster) => cluster?.name, {
+  columnHelperUpgrade.accessor(({ name }) => name, {
     id: 'cluster',
     header: 'Cluster',
     cell: ({ getValue }) => (
@@ -82,7 +82,7 @@ const upgradeColumns = [
   columnHelperUpgrade.accessor((cluster) => cluster?.currentVersion, {
     id: 'targetVersion',
     header: 'Target version',
-    cell: () => <div>TODO</div>,
+    cell: () => <ColWithIcon icon={ProviderIcons.GENERIC}>TODO</ColWithIcon>,
   }),
   columnHelperUpgrade.accessor((cluster) => cluster?.apiDeprecations, {
     id: 'actions',
@@ -119,35 +119,11 @@ export default function ClustersUpgrade({
 
   const apiDeprecations: ApiDeprecation[] = [
     {
-      component: 'networking.k8s/io/v1 Ingress <name>',
+      component: { name: 'networking.k8s/io/v1 Ingress <name>' },
       replacement: 'networking.k8s/io/v1 Ingress <name>',
     },
     {
-      component: 'networking.k8s/io/v1 Ingress <name>',
-      replacement: 'networking.k8s/io/v1 Ingress <name>',
-    },
-    {
-      component: 'networking.k8s/io/v1 Ingress <name>',
-      replacement: 'networking.k8s/io/v1 Ingress <name>',
-    },
-    {
-      component: 'networking.k8s/io/v1 Ingress <name>',
-      replacement: 'networking.k8s/io/v1 Ingress <name>',
-    },
-    {
-      component: 'networking.k8s/io/v1 Ingress <name>',
-      replacement: 'networking.k8s/io/v1 Ingress <name>',
-    },
-    {
-      component: 'networking.k8s/io/v1 Ingress <name>',
-      replacement: 'networking.k8s/io/v1 Ingress <name>',
-    },
-    {
-      component: 'networking.k8s/io/v1 Ingress <name>',
-      replacement: 'networking.k8s/io/v1 Ingress <name>',
-    },
-    {
-      component: 'networking.k8s/io/v1 Ingress <name>',
+      component: { name: 'networking.k8s/io/v1 Ingress <name>' },
       replacement: 'networking.k8s/io/v1 Ingress <name>',
     },
   ] // TODO: Remove
