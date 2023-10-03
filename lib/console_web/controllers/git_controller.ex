@@ -2,6 +2,7 @@ defmodule ConsoleWeb.GitController do
   use ConsoleWeb, :controller
   alias Console.Deployments.{Services, Git.Discovery}
   alias Console.Schema.Cluster
+  require Logger
 
   def tarball(conn, %{"id" => service_id}) do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
@@ -24,7 +25,9 @@ defmodule ConsoleWeb.GitController do
         File.close(f)
       end
     else
-      _ -> send_resp(conn, 403, "Forbidden")
+      err ->
+        Logger.error "could not fetch manifests, err: #{inspect(err)}"
+        send_resp(conn, 403, "Forbidden")
     end
   end
 end

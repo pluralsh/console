@@ -62,6 +62,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   defp service_filters(query, args) do
     Enum.reduce(args, query, fn
       {:cluster_id, id}, q -> Service.for_cluster(q, id)
+      {:cluster, handle}, q -> Service.for_cluster_handle(q, handle)
       _, q -> q
     end)
   end

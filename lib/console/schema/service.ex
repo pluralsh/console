@@ -103,6 +103,13 @@ defmodule Console.Schema.Service do
     from(s in query, where: s.cluster_id == ^cluster_id)
   end
 
+  def for_cluster_handle(query \\ __MODULE__, handle) do
+    from(s in query,
+      join: c in assoc(s, :cluster),
+      where: c.handle == ^handle
+    )
+  end
+
   def for_owner(query \\ __MODULE__, owner_id) do
     from(s in query, where: s.owner_id == ^owner_id)
   end
