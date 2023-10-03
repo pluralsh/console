@@ -75,7 +75,7 @@ export function DeleteGitRepository({
               gap: theme.spacing.medium,
             }}
           >
-            <p>Are you sure you want to delete this Git repository?"</p>
+            <p>Are you sure you want to delete this Git repository?</p>
             <p>{repo.url}</p>
           </div>
         }

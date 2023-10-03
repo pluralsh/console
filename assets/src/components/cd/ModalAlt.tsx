@@ -31,12 +31,12 @@ export default function ModalAlt({
   size = 'large',
   children,
   actions,
-  asForm,
-  formProps,
+  asForm = false,
+  formProps = {},
   ...props
 }: ComponentProps<typeof ModalAltSC> & {
-  asForm: boolean
-  formProps: ComponentProps<'form'>
+  asForm?: boolean
+  formProps?: ComponentProps<'form'>
 }) {
   return (
     <ModalAltSC

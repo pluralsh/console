@@ -1,5 +1,4 @@
 import {
-  Accordion,
   Button,
   ClusterIcon,
   ErrorIcon,
@@ -191,7 +190,10 @@ export default function ClusterUpgrade({
 }) {
   const theme = useTheme()
   const [isOpen, setIsOpen] = useState(false)
-  const closeModal = useCallback(() => setIsOpen(false), [])
+  const closeModal = useCallback((e?: Event) => {
+    e?.preventDefault?.()
+    setIsOpen(false)
+  }, [])
   const onClose = useCallback(() => setIsOpen(false), [])
 
   const apiDeprecations: ApiDeprecation[] = [

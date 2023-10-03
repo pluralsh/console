@@ -65,9 +65,13 @@ export function ModalForm({
       onClose()
     },
   })
-  const closeModal = useCallback(() => {
-    onClose()
-  }, [onClose])
+  const closeModal = useCallback(
+    (e?: Event) => {
+      e?.preventDefault?.()
+      onClose()
+    },
+    [onClose]
+  )
 
   const disabled = !gitUrl
   const onSubmit = useCallback(

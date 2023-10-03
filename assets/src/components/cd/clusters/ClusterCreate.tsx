@@ -9,7 +9,10 @@ export default function ClusterCreate() {
   const theme = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const wasOpen = usePrevious(isOpen)
-  const closeModal = useCallback(() => setIsOpen(false), [])
+  const closeModal = useCallback((e?: Event) => {
+    e?.preventDefault?.()
+    setIsOpen(false)
+  }, [])
   const onClose = useCallback(() => setIsOpen(false), [])
   const [gitUrl, setGitUrl] = useState('')
   const [mutation, { loading, error }] = useCreateGitRepositoryMutation({
