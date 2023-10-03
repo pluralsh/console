@@ -157,8 +157,8 @@ const upgradeColumns = [
     cell: ({ getValue }) => <div>v{getValue()}</div>,
   }),
   columnHelperUpgrade.accessor((cluster) => cluster?.version, {
-    id: 'targetVersion',
-    header: 'Target version',
+    id: 'nextK8sRelease',
+    header: 'Next K8s release',
     cell: ({ getValue }) => (
       <ColWithIcon icon={ProviderIcons.GENERIC}>
         {incPatchVersion(getValue())}
@@ -294,7 +294,6 @@ export default function ClusterUpgrade({
               height: '100%',
             }}
           />
-          <Accordion label="Helpful resources">TODO</Accordion>
         </div>
       </Modal>
     </>

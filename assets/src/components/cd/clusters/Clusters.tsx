@@ -130,8 +130,8 @@ export const columns = [
     },
   }),
   columnHelper.accessor(({ node }) => node?.pingedAt, {
-    id: 'condition',
-    header: 'Condition',
+    id: 'health',
+    header: 'Health',
     cell: ({ getValue }) => <ClusterHealthChip pingedAt={getValue()} />,
   }),
   columnHelper.accessor(({ node }) => node, {
