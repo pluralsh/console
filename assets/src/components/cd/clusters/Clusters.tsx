@@ -22,7 +22,7 @@ import { Edge } from 'utils/graphql'
 
 import { useSetCDHeaderContent } from '../ContinuousDeployment'
 
-import CreateCluster from './CreateCluster'
+import ClustersCreate from './ClustersCreate'
 import ClustersUpgrade from './ClustersUpgrade'
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
@@ -77,7 +77,7 @@ export const columns = [
               color: theme.colors['text-xlight'],
             }}
           >
-            Desired: v{node?.version}
+            Target: v{node?.version}
           </div>
         </div>
       )
@@ -164,7 +164,7 @@ export const columns = [
 
 export default function Clusters() {
   const { data } = useClustersQuery()
-  const headerActions = useMemo(() => <CreateCluster />, [])
+  const headerActions = useMemo(() => <ClustersCreate />, [])
 
   useSetCDHeaderContent(headerActions)
 

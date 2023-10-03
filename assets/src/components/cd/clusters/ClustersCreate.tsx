@@ -5,7 +5,7 @@ import { Button, usePrevious } from '@pluralsh/design-system'
 import { useCreateGitRepositoryMutation } from '../../../generated/graphql'
 import ModalAlt from '../ModalAlt'
 
-export default function CreateCluster() {
+export default function ClustersCreate() {
   const theme = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const wasOpen = usePrevious(isOpen)
