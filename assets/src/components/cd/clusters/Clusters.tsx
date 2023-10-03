@@ -6,9 +6,10 @@ import {
   EmptyState,
   IconFrame,
   Table,
+  Tooltip,
 } from '@pluralsh/design-system'
 import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { isEmpty } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -20,11 +21,43 @@ import { providerToURL } from 'components/utils/ProviderIcon'
 
 import { Edge } from 'utils/graphql'
 
+import moment from 'moment/moment'
+
 import { useSetCDHeaderContent } from '../ContinuousDeployment'
 
 import ClustersCreate from './ClustersCreate'
 import ClustersUpgrade from './ClustersUpgrade'
-import ClustersHealth from './ClustersHealth'
+
+function ClustersHealth({
+  pingedAt,
+  size = 'medium',
+}: {
+  pingedAt?: string | null
+  size?: 'small' | 'medium' | 'large'
+}) {
+  const [now, setNow] = useState(moment())
+
+  useEffect(() => {
+    const int = setInterval(() => setNow(moment()), 1000)
+
+    return () => clearInterval(int)
+  }, [])
+
+  const pinged = pingedAt !== null
+  const healthy =
+    pingedAt && now.clone().subtract(2, 'minutes').isBefore(pingedAt)
+
+  return (
+    <Tooltip label={`Pinged at ${moment(pingedAt).format('MMM D, h:mm')}`}>
+      <Chip
+        severity={pinged ? (healthy ? 'success' : 'error') : 'warning'}
+        size={size}
+      >
+        {pinged ? (healthy ? 'Healthy' : 'Unhealthy') : 'Pending'}
+      </Chip>
+    </Tooltip>
+  )
+}
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -44,7 +77,7 @@ export const columns = [
       </ColWithIcon>
     ),
   }),
-  columnHelper.accessor(({ node }) => node?.provider?.name || 'Unknown', {
+  columnHelper.accessor(({ node }) => node?.provider?.name || 'BYOK', {
     id: 'cloud',
     header: 'Cloud',
     cell: ({ getValue }) => {
