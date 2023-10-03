@@ -19,11 +19,14 @@ import { ProviderIcons } from 'components/utils/ProviderIcon'
 
 import { ApiDeprecation, ClustersRowFragment } from 'generated/graphql'
 
+import { incPatchVersion } from '../../../utils/semver'
+
 function ClustersUpgradeNow({
   cluster,
 }: {
   cluster?: ClustersRowFragment | null
 }) {
+  const targetVersion = incPatchVersion(cluster?.version)
   const [confirm, setConfirm] = useState(false)
   const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
   const upgrade = useCallback(() => console.log('TODO'), [])
@@ -31,6 +34,8 @@ function ClustersUpgradeNow({
     () => (!hasDeprecations ? upgrade() : setConfirm(true)),
     [hasDeprecations, upgrade]
   )
+
+  if (!targetVersion) return null
 
   return (
     <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
@@ -116,10 +121,14 @@ const upgradeColumns = [
     header: 'Version',
     cell: ({ getValue }) => <div>v{getValue()}</div>,
   }),
-  columnHelperUpgrade.accessor((cluster) => cluster?.currentVersion, {
+  columnHelperUpgrade.accessor((cluster) => cluster?.version, {
     id: 'targetVersion',
     header: 'Target version',
-    cell: () => <ColWithIcon icon={ProviderIcons.GENERIC}>TODO</ColWithIcon>,
+    cell: ({ getValue }) => (
+      <ColWithIcon icon={ProviderIcons.GENERIC}>
+        {incPatchVersion(getValue())}
+      </ColWithIcon>
+    ),
   }),
   columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'actions',

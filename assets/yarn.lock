@@ -10324,6 +10324,7 @@ __metadata:
     react-window-infinite-loader: 1.0.9
     react-window-reversed: 1.4.1
     regenerator-runtime: 0.13.11
+    semver: 7.5.4
     slate: 0.94.1
     slate-history: 0.93.0
     slate-react: 0.95.0
@@ -18595,6 +18596,17 @@ __metadata:
   bin:
     semver: ./bin/semver
   checksum: 57fd0acfd0bac382ee87cd52cd0aaa5af086a7dc8d60379dfe65fea491fb2489b6016400813930ecd61fd0952dae75c115287a1b16c234b1550887117744dfaf
+  languageName: node
+  linkType: hard
+
+"semver@npm:7.5.4":
+  version: 7.5.4
+  resolution: "semver@npm:7.5.4"
+  dependencies:
+    lru-cache: ^6.0.0
+  bin:
+    semver: bin/semver.js
+  checksum: 12d8ad952fa353b0995bf180cdac205a4068b759a140e5d3c608317098b3575ac2f1e09182206bf2eb26120e1c0ed8fb92c48c592f6099680de56bb071423ca3
   languageName: node
   linkType: hard
 
