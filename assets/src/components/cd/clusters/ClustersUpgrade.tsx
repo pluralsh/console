@@ -81,20 +81,26 @@ const deprecationsColumns = [
     meta: { truncate: true },
     cell: ({
       row: {
-        original: {
-          component: { group, kind, name },
-        },
+        original: { component },
       },
     }) => (
       <div>
-        {group} {kind} {name}
+        {component?.group} {component?.kind} {component?.name}
       </div>
     ),
   }),
-  columnHelperDeprecations.accessor(({ component }) => component?.name, {
+  columnHelperDeprecations.accessor(({ component }) => component, {
     id: 'deprecatedCopy',
     header: '',
-    cell: ({ getValue }) => <CopyButton text={getValue()} />,
+    cell: ({
+      row: {
+        original: { component },
+      },
+    }) => (
+      <CopyButton
+        text={`${component?.group} ${component?.kind} ${component?.name}`}
+      />
+    ),
   }),
   columnHelperDeprecations.accessor(({ replacement }) => replacement, {
     id: 'fix',

@@ -77,16 +77,19 @@ export const columns = [
       </ColWithIcon>
     ),
   }),
-  columnHelper.accessor(({ node }) => node?.provider?.name || 'BYOK', {
+  columnHelper.accessor(({ node }) => node?.provider, {
     id: 'cloud',
     header: 'Cloud',
     cell: ({ getValue }) => {
+      const provider = getValue()
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const theme = useTheme()
 
       return (
-        <ColWithIcon icon={providerToURL(getValue(), theme.mode === 'dark')}>
-          {getValue()}
+        <ColWithIcon
+          icon={providerToURL(provider?.cloud ?? '', theme.mode === 'dark')}
+        >
+          {provider?.name ?? 'BYOK'}
         </ColWithIcon>
       )
     },
