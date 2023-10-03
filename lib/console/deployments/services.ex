@@ -93,6 +93,13 @@ defmodule Console.Deployments.Services do
   end
   def authorized(_, _), do: {:error, "could not find service in cluster"}
 
+  def add_errors(%Service{id: svc_id}, errors) do
+    get_service(svc_id)
+    |> Repo.preload([:errors])
+    |> Service.changeset(%{errors: errors})
+    |> Repo.update()
+  end
+
   @doc """
   Updates a service and creates a new revision
   """
