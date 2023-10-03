@@ -1,22 +1,13 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import {
-  Button,
-  ClusterIcon,
-  IconFrame,
-  RestoreIcon,
-  usePrevious,
-} from '@pluralsh/design-system'
+import { ClusterIcon } from '@pluralsh/design-system'
 import { ServiceDeploymentsRowFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { useTheme } from 'styled-components'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import { useCallback, useEffect, useState } from 'react'
-
-import ModalAlt from '../ModalAlt'
-import { ModalMountTransition } from '../../utils/ModalMountTransition'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
+import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
@@ -129,92 +120,12 @@ export const getColActions = ({ refetch }: { refetch: () => void }) =>
               alignItems: 'center',
             }}
           >
-            <RollbackServiceDeployment refetch={refetch} />
+            <ServicesRollbackDeployment
+              refetch={refetch}
+              serviceDeployment={node}
+            />
           </div>
         )
       )
     },
   })
-
-export function RollbackServiceDeployment({
-  refetch,
-}: {
-  refetch: () => void
-}) {
-  const [modalIsOpen, setModalIsOpen] = useState(false)
-
-  const openModal = useCallback(() => {
-    setModalIsOpen(true)
-  }, [])
-  const closeModal = useCallback(() => {
-    setModalIsOpen(false)
-  }, [])
-
-  return (
-    <>
-      <IconFrame
-        clickable
-        type="floating"
-        tooltip="Rollback"
-        onClick={openModal}
-        icon={<RestoreIcon />}
-      />
-      <ModalMountTransition open={modalIsOpen}>
-        <RollbackModal
-          open={modalIsOpen}
-          onClose={closeModal}
-          refetch={refetch}
-        />
-      </ModalMountTransition>
-    </>
-  )
-}
-
-export function RollbackModal({
-  refetch,
-  open,
-  onClose,
-}: {
-  refetch: () => void
-  open: boolean
-  onClose: () => void
-}) {
-  const wasOpen = usePrevious(open)
-  const [counter, setCounter] = useState(0)
-
-  useEffect(() => {
-    if (wasOpen !== open) {
-      setCounter(counter + 1)
-    }
-  }, [counter, wasOpen, open])
-
-  return (
-    <ModalAlt
-      open={open}
-      onClose={onClose}
-      actions={
-        <>
-          <Button primary>Do a thing</Button>
-          <Button
-            type="button"
-            secondary
-            onClick={onClose}
-          >
-            Cancel
-          </Button>
-        </>
-      }
-      asForm={false}
-      formProps={{
-        onSubmit: (e) => {
-          e.preventDefault()
-          // Do mutation
-          refetch()
-          onClose()
-        },
-      }}
-    >
-      placeholder
-    </ModalAlt>
-  )
-}

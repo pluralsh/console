@@ -15,6 +15,30 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
   status
 }
 
+fragment ServiceDeploymentRevision on Revision {
+  id
+  version
+  updatedAt
+  insertedAt
+  git {
+    folder
+    ref
+  }
+}
+
+fragment ServiceDeploymentRevisions on ServiceDeployment {
+  revision {
+    ...ServiceDeploymentRevision
+  }
+  revisions(first: 100) {
+    edges {
+      node {
+        ...ServiceDeploymentRevision
+      }
+    }
+  }
+}
+
 query ServiceDeployments {
   serviceDeployments(first: 100) {
     pageInfo {
@@ -25,6 +49,12 @@ query ServiceDeployments {
         ...ServiceDeploymentsRow
       }
     }
+  }
+}
+
+query ServiceDeploymentRevisions($id: ID!) {
+  serviceDeployment(id: $id) {
+    ...ServiceDeploymentRevisions
   }
 }
 
@@ -53,6 +83,12 @@ mutation UpdateServiceDeployment(
   $attributes: ServiceUpdateAttributes!
 ) {
   updateServiceDeployment(id: $id, attributes: $attributes) {
+    ...ServiceDeploymentsRow
+  }
+}
+
+mutation RollbackService($id: ID, $revisionId: ID!) {
+  rollbackService(id: $id, revisionId: $revisionId) {
     ...ServiceDeploymentsRow
   }
 }

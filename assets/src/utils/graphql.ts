@@ -104,11 +104,11 @@ export type PaginatedResult<N> = Connection<N> & {
 
 export function mapExistingNodes<N>(connection?: Connection<N> | null) {
   if (!connection?.edges) {
-    return undefined
+    return [] as N[]
   }
   const { edges } = connection
 
   return (edges || [])
-    .filter((edge) => edge?.node, [] as Edge<N>[])
     .map((edge) => edge?.node)
+    .filter((node): node is N => !!node)
 }
