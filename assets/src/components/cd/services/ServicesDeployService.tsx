@@ -1,25 +1,34 @@
-import {
-  Button,
-  GitHubLogoIcon,
-  Input,
-  usePrevious,
-} from '@pluralsh/design-system'
-import { useCreateGitRepositoryMutation } from 'generated/graphql'
+import { Button, usePrevious } from '@pluralsh/design-system'
+import { useCreateServiceDeploymentMutation } from 'generated/graphql'
 import { useTheme } from 'styled-components'
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react'
 import { GqlError } from 'components/utils/Alert'
 
 import ModalAlt, { StepH } from '../ModalAlt'
+import { PrepareGitStep } from '../PrepareGitStep'
 
-export function ImportGit({ refetch }: { refetch: () => void }) {
+export function DeployService({ refetch }: { refetch: () => void }) {
   const theme = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const wasOpen = usePrevious(isOpen)
   const closeModal = useCallback(() => setIsOpen(false), [])
 
-  const [gitUrl, setGitUrl] = useState('')
-  const [mutation, { loading, error }] = useCreateGitRepositoryMutation({
-    variables: { attributes: { url: gitUrl } },
+  const [repoId, setRepoId] = useState('')
+  const [gitFolder, setGitFolder] = useState('')
+  const [gitRef, setGitRef] = useState('')
+  const [name, setName] = useState('')
+  const [namespace, setNamespace] = useState('')
+  const disabled = !repoId || !gitFolder || !gitRef || !name || !namespace
+
+  const [mutation, { loading, error }] = useCreateServiceDeploymentMutation({
+    variables: {
+      attributes: {
+        repositoryId: repoId,
+        name,
+        namespace,
+        git: { ref: gitRef, folder: gitFolder },
+      },
+    },
     onCompleted: () => {
       refetch?.()
       closeModal()
@@ -28,18 +37,22 @@ export function ImportGit({ refetch }: { refetch: () => void }) {
 
   useEffect(() => {
     if (isOpen && !wasOpen) {
-      setGitUrl('')
+      setRepoId('')
+      setGitFolder('')
+      setGitRef('')
+      setName('')
+      setNamespace('')
     }
   }, [isOpen, wasOpen])
-  const disabled = !gitUrl
+
   const onSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault()
-      if (gitUrl && !loading) {
+      if (!disabled && !loading) {
         mutation()
       }
     },
-    [gitUrl, loading, mutation]
+    [disabled, loading, mutation]
   )
 
   const inputRef = useRef<HTMLInputElement>()
@@ -58,7 +71,7 @@ export function ImportGit({ refetch }: { refetch: () => void }) {
           setIsOpen(true)
         }}
       >
-        Import Git
+        Deploy service{' '}
       </Button>
       <ModalAlt
         header="Import Git"
@@ -86,6 +99,7 @@ export function ImportGit({ refetch }: { refetch: () => void }) {
           </>
         }
       >
+        <PrepareGitStep />
         <div
           css={{
             display: 'flex',
@@ -94,19 +108,21 @@ export function ImportGit({ refetch }: { refetch: () => void }) {
           }}
         >
           <StepH>Step 2. Connect your repository</StepH>
-          <Input
-            inputProps={{ ref: inputRef }}
-            value={gitUrl}
-            onChange={(e) => {
-              setGitUrl(e.currentTarget.value)
-            }}
-            placeholder="https://host.com/your-repo.git"
-            titleContent={<GitHubLogoIcon />}
-          />
+          {/* <Select /> */}
+        </div>
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.xsmall,
+          }}
+        >
+          <StepH>Step 3. Connect your repository</StepH>
+          {/* <Select /> */}
         </div>
         {error && (
           <GqlError
-            header="Problem importing repository"
+            header="Problem deploying service"
             error={error}
           />
         )}

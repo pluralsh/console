@@ -9,7 +9,7 @@ import styled from 'styled-components'
 import { Key, useEffect, useMemo, useRef, useState } from 'react'
 import { type TableState } from '@tanstack/react-table'
 import { useDebounce } from '@react-hooks-library/core'
-import { GitHealth } from 'generated/graphql'
+import { GitHealth, useGitRepositoriesQuery } from 'generated/graphql'
 
 import { gitHealthToLabel, gitHealthToSeverity } from './GitHealthChip'
 
@@ -34,7 +34,7 @@ export function GitRepositoriesFilters({
   data,
   setTableFilters,
 }: {
-  data
+  data: ReturnType<typeof useGitRepositoriesQuery>['data']
   setTableFilters: (
     filters: Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
   ) => void
@@ -113,14 +113,12 @@ export function GitRepositoriesFilters({
             className="statusTab"
           >
             {label}
-            {counts[key] && (
-              <Chip
-                size="small"
-                severity={gitHealthToSeverity(key as any)}
-              >
-                {counts[key]}
-              </Chip>
-            )}
+            <Chip
+              size="small"
+              severity={gitHealthToSeverity(key as any)}
+            >
+              {counts[key] ?? 0}
+            </Chip>
           </SubTab>
         ))}
       </TabList>

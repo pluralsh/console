@@ -47,7 +47,9 @@ export default function Subheader() {
         />
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutContentContainer justifyContent="center">
+      <ResponsiveLayoutContentContainer
+        css={{ '&&': { justifyContent: 'center', overflow: 'hidden' } }}
+      >
         <Breadcrumbs
           paddingTop="small"
           paddingBottom="small"
