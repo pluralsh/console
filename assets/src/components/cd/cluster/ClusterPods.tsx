@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom'
 
-export default function Cluster() {
+export default function ClusterPods() {
   const { clusterId } = useParams()
 
-  return <>Cluster {clusterId}</>
+  return <>Pods of {clusterId} cluster</>
 }
