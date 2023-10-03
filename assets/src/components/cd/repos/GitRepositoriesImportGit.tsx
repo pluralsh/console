@@ -44,6 +44,9 @@ export function ImportGit({ refetch }: { refetch: () => void }) {
   )
 }
 
+export const getAuthMethodFromGitUrl = (gitUrl: string | null | undefined) =>
+  gitUrl?.match(/^https/) ? AuthMethod.Basic : AuthMethod.Ssh
+
 export function ImportGitModal({
   open,
   onClose,
@@ -56,7 +59,7 @@ export function ImportGitModal({
   const theme = useTheme()
   const [gitUrl, setGitUrl] = useState('')
   const [requireAuth, setRequireAuth] = useState(false)
-  const [authMethod, setAuthMethod] = useState<AuthMethod>(AuthMethod.Ssh)
+  const authMethod = getAuthMethodFromGitUrl(gitUrl)
   const [privateKey, setPrivateKey] = useState<GitAttributes['privateKey']>('')
   const [passphrase, setPassphrase] = useState<GitAttributes['passphrase']>('')
   const [username, setUsername] = useState<GitAttributes['username']>('')
@@ -78,10 +81,6 @@ export function ImportGitModal({
       onClose()
     },
   })
-
-  useEffect(() => {
-    setAuthMethod(gitUrl.match(/^https/) ? AuthMethod.Basic : AuthMethod.Ssh)
-  }, [gitUrl])
 
   const disabled =
     !gitUrl ||
