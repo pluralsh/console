@@ -5,8 +5,13 @@ fragment NodePool on NodePool {
 
 fragment ClustersRow on Cluster {
   apiDeprecations {
-    blocking
     availableIn
+    blocking
+    component {
+      group
+      kind
+      name
+    }
     deprecatedIn
     removedIn
     replacement
@@ -14,6 +19,7 @@ fragment ClustersRow on Cluster {
   id
   name
   currentVersion
+  pingedAt
   provider {
     id
     cloud
@@ -36,5 +42,11 @@ query Clusters {
         ...ClustersRow
       }
     }
+  }
+}
+
+mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
+  updateCluster(id: $id, attributes: $attributes) {
+    ...ClustersRow
   }
 }

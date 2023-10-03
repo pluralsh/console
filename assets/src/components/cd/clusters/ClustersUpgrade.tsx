@@ -17,25 +17,34 @@ import CopyButton from 'components/utils/CopyButton'
 import { Confirm } from 'components/utils/Confirm'
 import { ProviderIcons } from 'components/utils/ProviderIcon'
 
-import { ApiDeprecation, ClustersRowFragment } from 'generated/graphql'
+import {
+  ApiDeprecation,
+  ClustersRowFragment,
+  useUpdateClusterMutation,
+} from 'generated/graphql'
 
 import { incPatchVersion } from '../../../utils/semver'
 
 function ClustersUpgradeNow({
   cluster,
+  targetVersion,
 }: {
   cluster?: ClustersRowFragment | null
+  targetVersion: string
 }) {
-  const targetVersion = incPatchVersion(cluster?.version)
+  const [mutation, { loading, error }] = useUpdateClusterMutation({
+    variables: {
+      id: cluster?.id ?? '',
+      attributes: { version: targetVersion },
+    },
+    onCompleted: () => setConfirm(false),
+  })
   const [confirm, setConfirm] = useState(false)
   const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
-  const upgrade = useCallback(() => console.log('TODO'), [])
   const onClick = useCallback(
-    () => (!hasDeprecations ? upgrade() : setConfirm(true)),
-    [hasDeprecations, upgrade]
+    () => (!hasDeprecations ? mutation() : setConfirm(true)),
+    [hasDeprecations, mutation]
   )
-
-  if (!targetVersion) return null
 
   return (
     <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
@@ -44,6 +53,7 @@ function ClustersUpgradeNow({
         destructive={hasDeprecations}
         floating={!hasDeprecations}
         width="fit-content"
+        loading={!hasDeprecations && loading}
         onClick={onClick}
       >
         Upgrade now
@@ -53,8 +63,9 @@ function ClustersUpgradeNow({
         title="Confirm upgrade"
         text="This could be a destructive action. Before updating your Kubernetes version check and fix all deprecated resources."
         close={() => setConfirm(false)}
-        submit={upgrade}
-        loading={false}
+        submit={mutation}
+        loading={loading}
+        error={error}
         destructive
       />
     </div>
@@ -133,7 +144,17 @@ const upgradeColumns = [
   columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'actions',
     header: '',
-    cell: ({ getValue }) => <ClustersUpgradeNow cluster={getValue()} />,
+    cell: ({ getValue }) => {
+      const cluster = getValue()
+      const targetVersion = incPatchVersion(cluster?.version)
+
+      return targetVersion ? (
+        <ClustersUpgradeNow
+          cluster={cluster}
+          targetVersion={targetVersion}
+        />
+      ) : null
+    },
   }),
 ]
 
