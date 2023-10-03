@@ -34,8 +34,14 @@ mutation CreateGitRepository($attributes: GitAttributes!) {
   }
 }
 
-# mutation DeleteGitRepository($id: String!) {
-#   deleteGitRepository(id: $id) {
-#     id
-#   }
-# }
+mutation DeleteGitRepository($id: ID!) {
+  deleteGitRepository(id: $id) {
+    id
+  }
+}
+
+mutation UpdateGitRepository($id: ID!, $attributes: GitAttributes!) {
+  updateGitRepository(id: $id, attributes: $attributes) {
+    ...GitRepositoriesRow
+  }
+}

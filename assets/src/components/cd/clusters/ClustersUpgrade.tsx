@@ -11,16 +11,19 @@ import {
 import { useCallback, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
-
 import isEmpty from 'lodash/isEmpty'
+import { ColWithIcon } from 'components/utils/table/ColWithIcon'
+import CopyButton from 'components/utils/CopyButton'
+import { Confirm } from 'components/utils/Confirm'
+import { ProviderIcons } from 'components/utils/ProviderIcon'
 
-import { ApiDeprecation, Cluster } from '../../../generated/graphql'
-import { ColWithIcon } from '../repos/GitRepositories'
-import CopyButton from '../../utils/CopyButton'
-import { ProviderIcons } from '../../utils/ProviderIcon'
-import { Confirm } from '../../utils/Confirm'
+import { ApiDeprecation, ClustersRowFragment } from 'generated/graphql'
 
-function ClustersUpgradeNow({ cluster }: { cluster?: Cluster | null }) {
+function ClustersUpgradeNow({
+  cluster,
+}: {
+  cluster?: ClustersRowFragment | null
+}) {
   const [confirm, setConfirm] = useState(false)
   const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
   const upgrade = useCallback(() => console.log('TODO'), [])
@@ -96,7 +99,7 @@ const deprecationsColumns = [
   }),
 ]
 
-const columnHelperUpgrade = createColumnHelper<Cluster>()
+const columnHelperUpgrade = createColumnHelper<ClustersRowFragment>()
 
 const upgradeColumns = [
   columnHelperUpgrade.accessor(({ name }) => name, {
@@ -128,7 +131,7 @@ const upgradeColumns = [
 export default function ClustersUpgrade({
   cluster,
 }: {
-  cluster?: Cluster | null
+  cluster?: ClustersRowFragment | null
 }) {
   const theme = useTheme()
   const [isOpen, setIsOpen] = useState(false)

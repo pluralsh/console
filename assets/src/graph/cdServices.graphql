@@ -1,0 +1,58 @@
+fragment ServiceDeploymentsRow on ServiceDeployment {
+  id
+  name
+  cluster {
+    id
+    name
+  }
+  repository {
+    id
+    url
+  }
+  insertedAt
+  updatedAt
+  componentStatus
+  status
+}
+
+query ServiceDeployments {
+  serviceDeployments(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ServiceDeploymentsRow
+      }
+    }
+  }
+}
+
+mutation CreateServiceDeployment(
+  $attributes: ServiceDeploymentAttributes!
+  $cluster: String
+  $clusterId: ID
+) {
+  createServiceDeployment(
+    attributes: $attributes
+    cluster: $cluster
+    clusterId: $clusterId
+  ) {
+    ...ServiceDeploymentsRow
+  }
+}
+
+mutation DeleteServiceDeployment($id: ID!) {
+  deleteServiceDeployment(id: $id) {
+    id
+  }
+}
+
+mutation UpdateServiceDeployment(
+  $id: ID!
+  $attributes: ServiceUpdateAttributes!
+) {
+  updateServiceDeployment(id: $id, attributes: $attributes) {
+    ...ServiceDeploymentsRow
+  }
+}
