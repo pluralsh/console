@@ -194,10 +194,10 @@ export default function ClustersUpgrade({
         width={1024}
         actions={
           <Button
-            primary
+            secondary
             onClick={closeModal}
           >
-            Close
+            Cancel
           </Button>
         }
       >
