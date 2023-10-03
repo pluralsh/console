@@ -34,10 +34,6 @@ export const cdRoutes = [
       element={<Clusters />}
     />
     <Route
-      path="clusters/:clusterId/"
-      element={<Cluster />}
-    />
-    <Route
       path="services"
       element={<Services />}
     />
@@ -54,4 +50,8 @@ export const cdRoutes = [
       element={<Providers />}
     />
   </Route>,
+  <Route
+    path="cd/clusters/:clusterId/"
+    element={<Cluster />}
+  />,
 ]
