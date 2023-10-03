@@ -24,6 +24,7 @@ import { useSetCDHeaderContent } from '../ContinuousDeployment'
 
 import ClustersCreate from './ClustersCreate'
 import ClustersUpgrade from './ClustersUpgrade'
+import ClustersHealth from './ClustersHealth'
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -137,6 +138,16 @@ export const columns = [
         </div>
       )
     },
+  }),
+  columnHelper.accessor(({ node }) => node?.pingedAt, {
+    id: 'condition',
+    header: 'Condition',
+    cell: ({ getValue }) => (
+      <ClustersHealth
+        pingedAt={getValue()}
+        size="small"
+      />
+    ),
   }),
   columnHelper.accessor(({ node }) => node?.version, {
     id: 'actions',
