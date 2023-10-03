@@ -105,6 +105,7 @@ export function ModalForm({
             Update
           </Button>
           <Button
+            type="button"
             secondary
             onClick={closeModal}
           >

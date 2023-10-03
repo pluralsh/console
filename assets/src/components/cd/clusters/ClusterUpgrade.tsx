@@ -242,6 +242,7 @@ export default function ClusterUpgrade({
         width={1024}
         actions={
           <Button
+            type="button"
             secondary
             onClick={closeModal}
           >

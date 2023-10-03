@@ -60,6 +60,7 @@ export default function ClusterCreate() {
               Import
             </Button>
             <Button
+              type="button"
               secondary
               onClick={closeModal}
             >
