@@ -3329,12 +3329,20 @@ export type CreateBuildMutation = { __typename?: 'RootMutationType', createBuild
 
 export type NodePoolFragment = { __typename?: 'NodePool', id: string, name: string };
 
-export type ClustersRowFragment = { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null };
+export type ClustersRowFragment = { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, pingedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string } } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null };
 
 export type ClustersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null } | null } | null> | null } | null };
+export type ClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, pingedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string } } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null } | null } | null> | null } | null };
+
+export type UpdateClusterMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: ClusterUpdateAttributes;
+}>;
+
+
+export type UpdateClusterMutation = { __typename?: 'RootMutationType', updateCluster?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, pingedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string } } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null } | null };
 
 export type GitRepositoriesRowFragment = { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null };
 
@@ -3670,8 +3678,19 @@ export const NodePoolFragmentDoc = gql`
 export const ClustersRowFragmentDoc = gql`
     fragment ClustersRow on Cluster {
   apiDeprecations {
-    blocking
     availableIn
+    blocking
+    component {
+      group
+      kind
+      name
+      service {
+        git {
+          ref
+          folder
+        }
+      }
+    }
     deprecatedIn
     removedIn
     replacement
@@ -3679,6 +3698,7 @@ export const ClustersRowFragmentDoc = gql`
   id
   name
   currentVersion
+  pingedAt
   provider {
     id
     cloud
@@ -4087,6 +4107,40 @@ export function useClustersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<C
 export type ClustersQueryHookResult = ReturnType<typeof useClustersQuery>;
 export type ClustersLazyQueryHookResult = ReturnType<typeof useClustersLazyQuery>;
 export type ClustersQueryResult = Apollo.QueryResult<ClustersQuery, ClustersQueryVariables>;
+export const UpdateClusterDocument = gql`
+    mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
+  updateCluster(id: $id, attributes: $attributes) {
+    ...ClustersRow
+  }
+}
+    ${ClustersRowFragmentDoc}`;
+export type UpdateClusterMutationFn = Apollo.MutationFunction<UpdateClusterMutation, UpdateClusterMutationVariables>;
+
+/**
+ * __useUpdateClusterMutation__
+ *
+ * To run a mutation, you first call `useUpdateClusterMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateClusterMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateClusterMutation, { data, loading, error }] = useUpdateClusterMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateClusterMutation(baseOptions?: Apollo.MutationHookOptions<UpdateClusterMutation, UpdateClusterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateClusterMutation, UpdateClusterMutationVariables>(UpdateClusterDocument, options);
+      }
+export type UpdateClusterMutationHookResult = ReturnType<typeof useUpdateClusterMutation>;
+export type UpdateClusterMutationResult = Apollo.MutationResult<UpdateClusterMutation>;
+export type UpdateClusterMutationOptions = Apollo.BaseMutationOptions<UpdateClusterMutation, UpdateClusterMutationVariables>;
 export const GitRepositoriesDocument = gql`
     query GitRepositories {
   gitRepositories(first: 100) {
@@ -5032,6 +5086,7 @@ export const namedOperations = {
   },
   Mutation: {
     CreateBuild: 'CreateBuild',
+    UpdateCluster: 'UpdateCluster',
     CreateGitRepository: 'CreateGitRepository',
     DeleteGitRepository: 'DeleteGitRepository',
     UpdateGitRepository: 'UpdateGitRepository',

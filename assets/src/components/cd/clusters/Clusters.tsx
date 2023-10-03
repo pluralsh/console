@@ -1,7 +1,6 @@
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   CaretRightIcon,
-  Chip,
   ClusterIcon,
   EmptyState,
   IconFrame,
@@ -22,37 +21,45 @@ import { Edge } from 'utils/graphql'
 
 import { useSetCDHeaderContent } from '../ContinuousDeployment'
 
-import CreateCluster from './CreateCluster'
-import ClustersUpgrade from './ClustersUpgrade'
+import ClusterCreate from './ClusterCreate'
+import ClusterUpgrade from './ClusterUpgrade'
+import ClusterHealthChip from './ClusterHealthChip'
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
 export const columns = [
-  columnHelper.accessor(({ node }) => node?.name, {
+  columnHelper.accessor(({ node }) => node, {
     id: 'cluster',
     header: 'Cluster',
-    cell: ({ getValue }) => (
-      <ColWithIcon icon={<ClusterIcon width={16} />}>
-        <A
-          as={Link}
-          to="/cd/clusters/" // TODO: Update once details view is available.
-          whiteSpace="nowrap"
-        >
-          {getValue()}
-        </A>
-      </ColWithIcon>
-    ),
+    cell: ({ getValue }) => {
+      const cluster = getValue()
+
+      return (
+        <ColWithIcon icon={<ClusterIcon width={16} />}>
+          <A
+            as={Link}
+            to={`/cd/clusters/${cluster?.id}`}
+            whiteSpace="nowrap"
+          >
+            {cluster?.name}
+          </A>
+        </ColWithIcon>
+      )
+    },
   }),
-  columnHelper.accessor(({ node }) => node?.provider?.name || 'Unknown', {
+  columnHelper.accessor(({ node }) => node?.provider, {
     id: 'cloud',
     header: 'Cloud',
     cell: ({ getValue }) => {
+      const provider = getValue()
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const theme = useTheme()
 
       return (
-        <ColWithIcon icon={providerToURL(getValue(), theme.mode === 'dark')}>
-          {getValue()}
+        <ColWithIcon
+          icon={providerToURL(provider?.cloud ?? '', theme.mode === 'dark')}
+        >
+          {provider?.name ?? 'BYOK'}
         </ColWithIcon>
       )
     },
@@ -77,7 +84,7 @@ export const columns = [
               color: theme.colors['text-xlight'],
             }}
           >
-            Desired: v{node?.version}
+            Target: v{node?.version}
           </div>
         </div>
       )
@@ -116,40 +123,30 @@ export const columns = [
     id: 'status',
     header: 'Status',
     cell: ({ getValue }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const theme = useTheme()
       const cluster = getValue()
-      const hasUpgrade = true // TODO: Update it.
+      const hasUpgrade = true // TODO
 
-      return (
-        <div
-          css={{
-            alignItems: 'center',
-            display: 'flex',
-            gap: theme.spacing.xsmall,
-          }}
-        >
-          {hasUpgrade ? (
-            <ClustersUpgrade cluster={cluster} />
-          ) : (
-            <Chip severity="success">Healthy</Chip>
-          )}
-        </div>
-      )
+      return hasUpgrade && <ClusterUpgrade cluster={cluster} />
     },
   }),
-  columnHelper.accessor(({ node }) => node?.version, {
+  columnHelper.accessor(({ node }) => node?.pingedAt, {
+    id: 'health',
+    header: 'Health',
+    cell: ({ getValue }) => <ClusterHealthChip pingedAt={getValue()} />,
+  }),
+  columnHelper.accessor(({ node }) => node, {
     id: 'actions',
     header: '',
-    cell: () => {
+    cell: ({ getValue }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const navigate = useNavigate()
+      const cluster = getValue()
 
       return (
         <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
           <IconFrame
             clickable
-            onClick={() => navigate('/cd/clusters/')} // TODO: Update once details view is available.
+            onClick={() => navigate(`/cd/clusters/${cluster?.id}`)}
             size="medium"
             icon={<CaretRightIcon />}
             textValue="Go to cluster details"
@@ -164,7 +161,7 @@ export const columns = [
 
 export default function Clusters() {
   const { data } = useClustersQuery()
-  const headerActions = useMemo(() => <CreateCluster />, [])
+  const headerActions = useMemo(() => <ClusterCreate />, [])
 
   useSetCDHeaderContent(headerActions)
 

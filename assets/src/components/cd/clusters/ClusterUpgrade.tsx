@@ -16,20 +16,33 @@ import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import CopyButton from 'components/utils/CopyButton'
 import { Confirm } from 'components/utils/Confirm'
 import { ProviderIcons } from 'components/utils/ProviderIcon'
+import {
+  ApiDeprecation,
+  ClustersRowFragment,
+  useUpdateClusterMutation,
+} from 'generated/graphql'
 
-import { ApiDeprecation, ClustersRowFragment } from 'generated/graphql'
+import { incPatchVersion } from '../../../utils/semver'
 
 function ClustersUpgradeNow({
   cluster,
+  targetVersion,
 }: {
   cluster?: ClustersRowFragment | null
+  targetVersion: string
 }) {
+  const [mutation, { loading, error }] = useUpdateClusterMutation({
+    variables: {
+      id: cluster?.id ?? '',
+      attributes: { version: targetVersion },
+    },
+    onCompleted: () => setConfirm(false),
+  })
   const [confirm, setConfirm] = useState(false)
   const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
-  const upgrade = useCallback(() => console.log('TODO'), [])
   const onClick = useCallback(
-    () => (!hasDeprecations ? upgrade() : setConfirm(true)),
-    [hasDeprecations, upgrade]
+    () => (!hasDeprecations ? mutation() : setConfirm(true)),
+    [hasDeprecations, mutation]
   )
 
   return (
@@ -39,6 +52,7 @@ function ClustersUpgradeNow({
         destructive={hasDeprecations}
         floating={!hasDeprecations}
         width="fit-content"
+        loading={!hasDeprecations && loading}
         onClick={onClick}
       >
         Upgrade now
@@ -48,8 +62,9 @@ function ClustersUpgradeNow({
         title="Confirm upgrade"
         text="This could be a destructive action. Before updating your Kubernetes version check and fix all deprecated resources."
         close={() => setConfirm(false)}
-        submit={upgrade}
-        loading={false}
+        submit={mutation}
+        loading={loading}
+        error={error}
         destructive
       />
     </div>
@@ -59,16 +74,32 @@ function ClustersUpgradeNow({
 const columnHelperDeprecations = createColumnHelper<ApiDeprecation>()
 
 const deprecationsColumns = [
-  columnHelperDeprecations.accessor(({ component }) => component?.name, {
+  columnHelperDeprecations.accessor(({ component }) => component, {
     id: 'deprecated',
     header: 'Deprecated',
     meta: { truncate: true },
-    cell: ({ getValue }) => <div>{getValue()}</div>,
+    cell: ({
+      row: {
+        original: { component },
+      },
+    }) => (
+      <div>
+        {component?.group} {component?.kind} {component?.name}
+      </div>
+    ),
   }),
-  columnHelperDeprecations.accessor(({ component }) => component?.name, {
+  columnHelperDeprecations.accessor(({ component }) => component, {
     id: 'deprecatedCopy',
     header: '',
-    cell: ({ getValue }) => <CopyButton text={getValue()} />,
+    cell: ({
+      row: {
+        original: { component },
+      },
+    }) => (
+      <CopyButton
+        text={`${component?.group} ${component?.kind} ${component?.name}`}
+      />
+    ),
   }),
   columnHelperDeprecations.accessor(({ replacement }) => replacement, {
     id: 'fix',
@@ -81,21 +112,30 @@ const deprecationsColumns = [
     header: '',
     cell: ({ getValue }) => <CopyButton text={getValue()} />,
   }),
-  columnHelperDeprecations.accessor(() => undefined, {
+  columnHelperDeprecations.accessor(({ component }) => component?.service, {
     id: 'repository',
     header: 'Repository',
-    cell: () => (
-      <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
-        <Button
-          small
-          floating
-          width="fit-content"
-          startIcon={<GitHubLogoIcon />}
-        >
-          Fix now
-        </Button>
-      </div>
-    ),
+    cell: ({ getValue }) => {
+      const service = getValue()
+      const url = `${service?.repository?.url}/${service?.git?.folder}` // TODO
+
+      return (
+        <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
+          <Button
+            small
+            floating
+            width="fit-content"
+            startIcon={<GitHubLogoIcon />}
+            as="a"
+            href={url}
+            target="_blank"
+            rel="noopener noreferer"
+          >
+            Fix now
+          </Button>
+        </div>
+      )
+    },
   }),
 ]
 
@@ -111,24 +151,40 @@ const upgradeColumns = [
       </ColWithIcon>
     ),
   }),
-  columnHelperUpgrade.accessor((cluster) => cluster?.currentVersion, {
+  columnHelperUpgrade.accessor((cluster) => cluster?.version, {
     id: 'version',
     header: 'Version',
     cell: ({ getValue }) => <div>v{getValue()}</div>,
   }),
-  columnHelperUpgrade.accessor((cluster) => cluster?.currentVersion, {
-    id: 'targetVersion',
-    header: 'Target version',
-    cell: () => <ColWithIcon icon={ProviderIcons.GENERIC}>TODO</ColWithIcon>,
+  columnHelperUpgrade.accessor((cluster) => cluster?.version, {
+    id: 'nextK8sRelease',
+    header: 'Next K8s release',
+    cell: ({ getValue }) => (
+      <ColWithIcon icon={ProviderIcons.GENERIC}>
+        {incPatchVersion(getValue())}
+      </ColWithIcon>
+    ),
   }),
   columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'actions',
     header: '',
-    cell: ({ getValue }) => <ClustersUpgradeNow cluster={getValue()} />,
+    cell: ({ getValue }) => {
+      const cluster = getValue()
+      const targetVersion = incPatchVersion(cluster?.version)
+
+      return (
+        targetVersion && (
+          <ClustersUpgradeNow
+            cluster={cluster}
+            targetVersion={targetVersion}
+          />
+        )
+      )
+    },
   }),
 ]
 
-export default function ClustersUpgrade({
+export default function ClusterUpgrade({
   cluster,
 }: {
   cluster?: ClustersRowFragment | null
@@ -142,20 +198,12 @@ export default function ClustersUpgrade({
     {
       component: {
         id: '',
-        kind: '',
+        kind: 'Ingress',
+        group: 'networking.k8s/io/v1',
         synced: false,
-        name: 'networking.k8s/io/v1 Ingress <name>',
+        name: 'test',
       },
-      replacement: 'networking.k8s/io/v1 Ingress <name>',
-    },
-    {
-      component: {
-        id: '',
-        kind: '',
-        synced: false,
-        name: 'networking.k8s/io/v1 Ingress <name>',
-      },
-      replacement: 'networking.k8s/io/v1 Ingress <name>',
+      replacement: 'networking.k8s/io/v2 Ingress replacement',
     },
   ] // TODO: Remove
 
@@ -194,10 +242,10 @@ export default function ClustersUpgrade({
         width={1024}
         actions={
           <Button
-            primary
+            secondary
             onClick={closeModal}
           >
-            Close
+            Cancel
           </Button>
         }
       >
@@ -246,7 +294,6 @@ export default function ClustersUpgrade({
               height: '100%',
             }}
           />
-          <Accordion label="Helpful resources">TODO</Accordion>
         </div>
       </Modal>
     </>
