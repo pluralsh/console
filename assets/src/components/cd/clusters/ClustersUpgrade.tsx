@@ -75,11 +75,21 @@ function ClustersUpgradeNow({
 const columnHelperDeprecations = createColumnHelper<ApiDeprecation>()
 
 const deprecationsColumns = [
-  columnHelperDeprecations.accessor(({ component }) => component?.name, {
+  columnHelperDeprecations.accessor(({ component }) => component, {
     id: 'deprecated',
     header: 'Deprecated',
     meta: { truncate: true },
-    cell: ({ getValue }) => <div>{getValue()}</div>,
+    cell: ({
+      row: {
+        original: {
+          component: { group, kind, name },
+        },
+      },
+    }) => (
+      <div>
+        {group} {kind} {name}
+      </div>
+    ),
   }),
   columnHelperDeprecations.accessor(({ component }) => component?.name, {
     id: 'deprecatedCopy',
@@ -127,7 +137,7 @@ const upgradeColumns = [
       </ColWithIcon>
     ),
   }),
-  columnHelperUpgrade.accessor((cluster) => cluster?.currentVersion, {
+  columnHelperUpgrade.accessor((cluster) => cluster?.version, {
     id: 'version',
     header: 'Version',
     cell: ({ getValue }) => <div>v{getValue()}</div>,
@@ -148,12 +158,14 @@ const upgradeColumns = [
       const cluster = getValue()
       const targetVersion = incPatchVersion(cluster?.version)
 
-      return targetVersion ? (
-        <ClustersUpgradeNow
-          cluster={cluster}
-          targetVersion={targetVersion}
-        />
-      ) : null
+      return (
+        targetVersion && (
+          <ClustersUpgradeNow
+            cluster={cluster}
+            targetVersion={targetVersion}
+          />
+        )
+      )
     },
   }),
 ]
@@ -172,20 +184,22 @@ export default function ClustersUpgrade({
     {
       component: {
         id: '',
-        kind: '',
+        kind: 'Ingress',
+        group: 'networking.k8s/io/v1',
         synced: false,
-        name: 'networking.k8s/io/v1 Ingress <name>',
+        name: 'test',
       },
-      replacement: 'networking.k8s/io/v1 Ingress <name>',
+      replacement: 'networking.k8s/io/v2 Ingress <name>',
     },
     {
       component: {
         id: '',
-        kind: '',
+        kind: 'Ingress',
+        group: 'networking.k8s/io/v1',
         synced: false,
-        name: 'networking.k8s/io/v1 Ingress <name>',
+        name: 'test',
       },
-      replacement: 'networking.k8s/io/v1 Ingress <name>',
+      replacement: 'networking.k8s/io/v2 Ingress <name>',
     },
   ] // TODO: Remove
 
