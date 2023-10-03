@@ -69,7 +69,7 @@ export const columns = [
       <ColWithIcon icon={<ClusterIcon width={16} />}>
         <A
           as={Link}
-          to="/cd/clusters/" // TODO: Update once details view is available.
+          to="/cd/clusters/" // TODO
           whiteSpace="nowrap"
         >
           {getValue()}
@@ -156,7 +156,7 @@ export const columns = [
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const theme = useTheme()
       const cluster = getValue()
-      const hasUpgrade = true // TODO: Update it.
+      const hasUpgrade = true // TODO
 
       return (
         <div
@@ -196,7 +196,7 @@ export const columns = [
         <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
           <IconFrame
             clickable
-            onClick={() => navigate('/cd/clusters/')} // TODO: Update once details view is available.
+            onClick={() => navigate('/cd/clusters/')} // TODO
             size="medium"
             icon={<CaretRightIcon />}
             textValue="Go to cluster details"

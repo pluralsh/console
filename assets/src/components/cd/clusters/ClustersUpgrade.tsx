@@ -16,7 +16,6 @@ import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import CopyButton from 'components/utils/CopyButton'
 import { Confirm } from 'components/utils/Confirm'
 import { ProviderIcons } from 'components/utils/ProviderIcon'
-
 import {
   ApiDeprecation,
   ClustersRowFragment,
@@ -113,21 +112,30 @@ const deprecationsColumns = [
     header: '',
     cell: ({ getValue }) => <CopyButton text={getValue()} />,
   }),
-  columnHelperDeprecations.accessor(() => undefined, {
+  columnHelperDeprecations.accessor(({ component }) => component?.service, {
     id: 'repository',
     header: 'Repository',
-    cell: () => (
-      <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
-        <Button
-          small
-          floating
-          width="fit-content"
-          startIcon={<GitHubLogoIcon />}
-        >
-          Fix now
-        </Button>
-      </div>
-    ),
+    cell: ({ getValue }) => {
+      const service = getValue()
+      const url = `${service?.repository?.url}/${service?.git?.folder}` // TODO
+
+      return (
+        <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
+          <Button
+            small
+            floating
+            width="fit-content"
+            startIcon={<GitHubLogoIcon />}
+            as="a"
+            href={url}
+            target="_blank"
+            rel="noopener noreferer"
+          >
+            Fix now
+          </Button>
+        </div>
+      )
+    },
   }),
 ]
 
