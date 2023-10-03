@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react'
 import moment from 'moment'
 import { Chip, Tooltip } from '@pluralsh/design-system'
 
-export default function ClustersHealthChip({
+export default function ClusterHealthChip({
   pingedAt,
   size = 'medium',
 }: {
   pingedAt?: string | null
-  size: 'small' | 'medium' | 'large'
+  size?: 'small' | 'medium' | 'large'
 }) {
   const [now, setNow] = useState(moment())
 

@@ -184,7 +184,7 @@ const upgradeColumns = [
   }),
 ]
 
-export default function ClustersUpgrade({
+export default function ClusterUpgrade({
   cluster,
 }: {
   cluster?: ClustersRowFragment | null
@@ -203,17 +203,7 @@ export default function ClustersUpgrade({
         synced: false,
         name: 'test',
       },
-      replacement: 'networking.k8s/io/v2 Ingress <name>',
-    },
-    {
-      component: {
-        id: '',
-        kind: 'Ingress',
-        group: 'networking.k8s/io/v1',
-        synced: false,
-        name: 'test',
-      },
-      replacement: 'networking.k8s/io/v2 Ingress <name>',
+      replacement: 'networking.k8s/io/v2 Ingress replacement',
     },
   ] // TODO: Remove
 

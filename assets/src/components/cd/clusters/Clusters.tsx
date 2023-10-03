@@ -22,9 +22,9 @@ import { Edge } from 'utils/graphql'
 
 import { useSetCDHeaderContent } from '../ContinuousDeployment'
 
-import ClustersCreate from './ClustersCreate'
-import ClustersUpgrade from './ClustersUpgrade'
-import ClustersHealthChip from './ClustersHealthChip'
+import ClusterCreate from './ClusterCreate'
+import ClusterUpgrade from './ClusterUpgrade'
+import ClusterHealthChip from './ClusterHealthChip'
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -120,32 +120,16 @@ export const columns = [
     id: 'status',
     header: 'Status',
     cell: ({ getValue }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const theme = useTheme()
       const cluster = getValue()
       const hasUpgrade = true // TODO
 
-      return (
-        <div
-          css={{
-            alignItems: 'center',
-            display: 'flex',
-            gap: theme.spacing.xsmall,
-          }}
-        >
-          {hasUpgrade ? (
-            <ClustersUpgrade cluster={cluster} />
-          ) : (
-            <Chip severity="success">Healthy</Chip>
-          )}
-        </div>
-      )
+      return hasUpgrade && <ClusterUpgrade cluster={cluster} />
     },
   }),
   columnHelper.accessor(({ node }) => node?.pingedAt, {
     id: 'condition',
     header: 'Condition',
-    cell: ({ getValue }) => <ClustersHealthChip pingedAt={getValue()} />,
+    cell: ({ getValue }) => <ClusterHealthChip pingedAt={getValue()} />,
   }),
   columnHelper.accessor(({ node }) => node?.version, {
     id: 'actions',
@@ -173,7 +157,7 @@ export const columns = [
 
 export default function Clusters() {
   const { data } = useClustersQuery()
-  const headerActions = useMemo(() => <ClustersCreate />, [])
+  const headerActions = useMemo(() => <ClusterCreate />, [])
 
   useSetCDHeaderContent(headerActions)
 
