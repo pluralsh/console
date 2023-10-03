@@ -1,7 +1,6 @@
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   CaretRightIcon,
-  Chip,
   ClusterIcon,
   EmptyState,
   IconFrame,
@@ -29,20 +28,24 @@ import ClusterHealthChip from './ClusterHealthChip'
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
 export const columns = [
-  columnHelper.accessor(({ node }) => node?.name, {
+  columnHelper.accessor(({ node }) => node, {
     id: 'cluster',
     header: 'Cluster',
-    cell: ({ getValue }) => (
-      <ColWithIcon icon={<ClusterIcon width={16} />}>
-        <A
-          as={Link}
-          to="/cd/clusters/" // TODO
-          whiteSpace="nowrap"
-        >
-          {getValue()}
-        </A>
-      </ColWithIcon>
-    ),
+    cell: ({ getValue }) => {
+      const cluster = getValue()
+
+      return (
+        <ColWithIcon icon={<ClusterIcon width={16} />}>
+          <A
+            as={Link}
+            to={`/cd/clusters/${cluster?.id}`}
+            whiteSpace="nowrap"
+          >
+            {cluster?.name}
+          </A>
+        </ColWithIcon>
+      )
+    },
   }),
   columnHelper.accessor(({ node }) => node?.provider, {
     id: 'cloud',
@@ -131,18 +134,19 @@ export const columns = [
     header: 'Condition',
     cell: ({ getValue }) => <ClusterHealthChip pingedAt={getValue()} />,
   }),
-  columnHelper.accessor(({ node }) => node?.version, {
+  columnHelper.accessor(({ node }) => node, {
     id: 'actions',
     header: '',
-    cell: () => {
+    cell: ({ getValue }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const navigate = useNavigate()
+      const cluster = getValue()
 
       return (
         <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
           <IconFrame
             clickable
-            onClick={() => navigate('/cd/clusters/')} // TODO
+            onClick={() => navigate(`/cd/clusters/${cluster?.id}`)}
             size="medium"
             icon={<CaretRightIcon />}
             textValue="Go to cluster details"

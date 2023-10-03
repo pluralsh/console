@@ -2,9 +2,10 @@ import ContinuousDeployment from 'components/cd/ContinuousDeployment'
 import Clusters from 'components/cd/clusters/Clusters'
 import GitRepositories from 'components/cd/repos/GitRepositories'
 import Services from 'components/cd/services/Services'
-// import Pipelines from 'components/cd/pipelines/Pipelines'
 import Providers from 'components/cd/providers/Providers'
 import { Navigate, Route } from 'react-router-dom'
+
+import Cluster from '../components/cd/clusters/cluster/Cluster'
 
 export const CD_BASE_PATH = 'cd'
 
@@ -31,6 +32,10 @@ export const cdRoutes = [
     <Route
       path="clusters"
       element={<Clusters />}
+    />
+    <Route
+      path="clusters/:clusterId/"
+      element={<Cluster />}
     />
     <Route
       path="services"
