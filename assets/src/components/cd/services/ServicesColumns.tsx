@@ -7,6 +7,7 @@ import { useTheme } from 'styled-components'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
+import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
@@ -98,7 +99,7 @@ export const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
   ),
 })
 
-export const getColActions = ({ refetch: _ }: { refetch: any }) =>
+export const getColActions = ({ refetch }: { refetch: () => void }) =>
   columnHelper.accessor(({ node }) => node?.id, {
     id: 'actions',
     header: '',
@@ -119,7 +120,10 @@ export const getColActions = ({ refetch: _ }: { refetch: any }) =>
               alignItems: 'center',
             }}
           >
-            {null}
+            <ServicesRollbackDeployment
+              refetch={refetch}
+              serviceDeployment={node}
+            />
           </div>
         )
       )

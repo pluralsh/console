@@ -91,6 +91,7 @@ export function DeployService({ refetch }: { refetch: () => void }) {
               Import
             </Button>
             <Button
+              type="button"
               secondary
               onClick={closeModal}
             >

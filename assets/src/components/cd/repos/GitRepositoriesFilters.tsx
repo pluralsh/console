@@ -16,8 +16,8 @@ import { gitHealthToLabel, gitHealthToSeverity } from './GitHealthChip'
 type StatusTabKey = GitHealth | 'ALL'
 export const statusTabs = Object.entries({
   ALL: { label: 'All' },
-  [GitHealth.Failed]: { label: gitHealthToLabel(GitHealth.Failed) },
   [GitHealth.Pullable]: { label: gitHealthToLabel(GitHealth.Pullable) },
+  [GitHealth.Failed]: { label: gitHealthToLabel(GitHealth.Failed) },
 } as const satisfies Record<StatusTabKey, { label: string }>)
 
 const GitRepositoryFiltersSC = styled.div(({ theme }) => ({
