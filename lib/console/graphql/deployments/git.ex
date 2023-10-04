@@ -12,6 +12,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :passphrase,  :string, description: "a passphrase to decrypt the given private key"
     field :username,    :string, description: "the http username for authenticated http repos, defaults to apiKey for github"
     field :password,    :string, description: "the http password for http authenticated repos"
+    field :https_path,  :string, description: "a manually supplied https path for non standard git setups.  This is auto-inferred in many cases"
+    fiedl :url_format,  :string, description: "similar to https_path, a manually supplied url format for custom git.  Should be something like {url}/tree/{ref}/{folder}"
   end
 
   @desc "a git repository available for deployments"
@@ -22,6 +24,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :health,       :git_health, description: "whether we can currently pull this repo with the provided credentials"
     field :pulled_at,    :datetime, description: "the last successsful git pull timestamp"
     field :error,        :string, description: "the error message if there were any pull errors"
+    field :https_path,   :string, description: "the https url for this git repo"
+    field :url_format,   :string, description: "a format string to get the http url for a subfolder in a git repo"
 
     field :editable, :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this repo"
 
