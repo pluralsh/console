@@ -16,7 +16,8 @@ defmodule Console.Schema.Audit do
     cluster: 10,
     cluster_provider: 11,
     git_repository: 12,
-    deployment_settings: 13
+    deployment_settings: 13,
+    provider_credential: 14
 
   defenum Action,
     create: 0,

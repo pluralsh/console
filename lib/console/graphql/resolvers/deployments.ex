@@ -16,10 +16,12 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     GlobalService,
     User,
     ServiceError,
-    ClusterRevision
+    ClusterRevision,
+    ProviderCredential
   }
 
   def query(ServiceError, _), do: ServiceError
+  def query(ProviderCredential, _), do: ProviderCredential
   def query(Tag, _), do: Tag
   def query(GlobalService, _), do: GlobalService
   def query(ApiDeprecation, _), do: ApiDeprecation
@@ -157,6 +159,12 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   def update_provider(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Clusters.update_provider(attrs, id, user)
+
+  def create_provider_credential(%{attributes: attrs, name: name}, %{context: %{current_user: user}}),
+    do: Clusters.create_provider_credential(attrs, name, user)
+
+  def delete_provider_credential(%{id: id}, %{context: %{current_user: user}}),
+    do: Clusters.delete_provider_credential(id, user)
 
   def create_service(%{attributes: attrs, cluster: cluster}, %{context: %{current_user: user}}) when is_binary(cluster) do
     cluster = Clusters.find!(cluster)

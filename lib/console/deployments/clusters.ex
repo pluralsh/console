@@ -5,7 +5,7 @@ defmodule Console.Deployments.Clusters do
   alias Console.PubSub
   alias Console.Deployments.{Services, Git}
   alias Console.Services.Users
-  alias Console.Schema.{Cluster, User, ClusterProvider, Service, DeployToken, ClusterRevision}
+  alias Console.Schema.{Cluster, User, ClusterProvider, Service, DeployToken, ClusterRevision, ProviderCredential}
   require Logger
 
   @cache_adapter Console.conf(:cache_adapter)
@@ -13,8 +13,11 @@ defmodule Console.Deployments.Clusters do
 
   @type cluster_resp :: {:ok, Cluster.t} | Console.error
   @type cluster_provider_resp :: {:ok, ClusterProvider.t} | Console.error
+  @type credential_resp :: {:ok, ProviderCredential.t} | Console.error
 
   def get_cluster(id), do: Console.Repo.get(Cluster, id)
+
+  def get_provider_by_name(name), do: Console.Repo.get_by(ClusterProvider, name: name)
 
   def get_cluster_by_handle(handle), do: Console.Repo.get_by(Cluster, handle: handle)
 
@@ -226,6 +229,36 @@ defmodule Console.Deployments.Clusters do
   end
 
   @doc """
+  It can create a new provider credential to be used for multi-tenant capi creates.
+  """
+  @spec create_provider_credential(map, binary, User.t) :: credential_resp
+  def create_provider_credential(attrs, name, %User{} = user) do
+    start_transaction()
+    |> add_operation(:provider, fn _ ->
+      get_provider_by_name(name)
+      |> allow(user, :create)
+    end)
+    |> add_operation(:credential, fn %{provider: provider} ->
+      %ProviderCredential{provider_id: provider.id}
+      |> ProviderCredential.changeset(attrs, provider)
+      |> Repo.insert()
+    end)
+    |> execute(extract: :credential)
+    |> notify(:create, user)
+  end
+
+  @doc """
+  Deletes a provider credential by id
+  """
+  @spec delete_provider_credential(binary, User.t) :: credential_resp
+  def delete_provider_credential(id, %User{} = user) do
+    Repo.get(ProviderCredential, id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
+  @doc """
   It will update capi provider settings
   """
   @spec update_provider(map, binary, User.t) :: cluster_provider_resp
@@ -350,6 +383,11 @@ defmodule Console.Deployments.Clusters do
     do: handle_notify(PubSub.ProviderCreated, prov, actor: user)
   defp notify({:ok, %ClusterProvider{} = prov}, :update, user),
     do: handle_notify(PubSub.ProviderUpdated, prov, actor: user)
+
+  defp notify({:ok, %ProviderCredential{} = prov}, :create, user),
+    do: handle_notify(PubSub.ProviderCredentialCreated, prov, actor: user)
+  defp notify({:ok, %ProviderCredential{} = prov}, :delete, user),
+    do: handle_notify(PubSub.ProviderCredentialDeleted, prov, actor: user)
 
   defp notify(pass, _, _), do: pass
 end

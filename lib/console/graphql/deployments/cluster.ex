@@ -75,6 +75,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :gcp, :gcp_settings_attributes
   end
 
+  input_object :provider_credential_attributes do
+    field :namespace, :string
+    field :name,      non_null(:string)
+    field :kind,      :string
+  end
+
   input_object :aws_settings_attributes do
     field :access_key_id,    non_null(:string)
     field :secret_access_key, non_null(:string)
@@ -86,15 +92,16 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
-    field :id,         non_null(:id), description: "the id of this provider"
-    field :name,       non_null(:string), description: "a human readable name for the provider, globally unique"
-    field :namespace,  non_null(:string), description: "the namespace the CAPI resources are deployed into"
-    field :cloud,      non_null(:string), description: "the name of the cloud service for this provider"
-    field :git,        non_null(:git_ref), description: "the details of how cluster manifests will be synced from git when created with this provider"
-    field :repository, :git_repository, resolve: dataloader(Deployments), description: "the repository used to serve cluster manifests"
-    field :service,    :service_deployment, resolve: dataloader(Deployments), description: "the service of the CAPI controller itself"
+    field :id,          non_null(:id), description: "the id of this provider"
+    field :name,        non_null(:string), description: "a human readable name for the provider, globally unique"
+    field :namespace,   non_null(:string), description: "the namespace the CAPI resources are deployed into"
+    field :cloud,       non_null(:string), description: "the name of the cloud service for this provider"
+    field :git,         non_null(:git_ref), description: "the details of how cluster manifests will be synced from git when created with this provider"
+    field :repository,  :git_repository, resolve: dataloader(Deployments), description: "the repository used to serve cluster manifests"
+    field :service,     :service_deployment, resolve: dataloader(Deployments), description: "the service of the CAPI controller itself"
+    field :credentials, list_of(:provider_credential), resolve: dataloader(ProviderCredential), description: "a list of credentials eligible for this provider"
 
-    field :editable,   :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this resource"
+    field :editable,    :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this resource"
 
     timestamps()
   end
@@ -172,6 +179,16 @@ defmodule Console.GraphQl.Deployments.Cluster do
   @desc "aws node customizations"
   object :aws_cloud do
     field :launch_template_id, :string, description: "custom launch template for your nodes, useful for Golden AMI setups"
+  end
+
+  @desc "a cloud credential that can be used while creating new clusters"
+  object :provider_credential do
+    field :id,        non_null(:id)
+    field :name,      non_null(:string)
+    field :namespace, non_null(:string)
+    field :kind,      non_null(:string)
+
+    timestamps()
   end
 
   object :tag do
@@ -265,6 +282,21 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :attributes, non_null(:cluster_provider_update_attributes)
 
       safe_resolve &Deployments.update_provider/2
+    end
+
+    field :create_provider_credential, :provider_credential do
+      middleware Authenticated
+      arg :attributes, non_null(:provider_credential_attributes)
+      arg :name,       non_null(:string)
+
+      safe_resolve &Deployments.create_provider_credential/2
+    end
+
+    field :delete_provider_credential, :provider_credential do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.delete_provider_credential/2
     end
   end
 end

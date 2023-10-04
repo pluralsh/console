@@ -254,6 +254,15 @@ defmodule Console.Factory do
     }
   end
 
+  def provider_credential_factory do
+    %Schema.ProviderCredential{
+      name: sequence(:credential, & "cred-#{&1}"),
+      namespace: sequence(:credential_ns, & "plrl-capi-#{&1}"),
+      kind: "Secret",
+      provider: build(:cluster_provider)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

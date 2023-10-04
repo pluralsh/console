@@ -7,6 +7,8 @@ defimpl Console.PubSub.Auditable, for: [
   Console.PubSub.ClusterDeleted,
   Console.PubSub.ProviderCreated,
   Console.PubSub.ProviderUpdated,
+  Console.PubSub.ProviderCredentialCreated,
+  Console.PubSub.ProviderCredentialDeleted,
   Console.PubSub.GitRepositoryCreated,
   Console.PubSub.GitRepositoryUpdated,
   Console.PubSub.GitRepositoryDeleted,
@@ -33,6 +35,8 @@ defimpl Console.PubSub.Auditable, for: [
   def details(Console.PubSub.ClusterDeleted), do: {:cluster, :delete}
   def details(Console.PubSub.ProviderCreated), do: {:cluster_provider, :create}
   def details(Console.PubSub.ProviderUpdated), do: {:cluster_provider, :update}
+  def details(Console.PubSub.ProviderCredentialCreated), do: {:provider_credential, :create}
+  def details(Console.PubSub.ProviderCredentialDeleted), do: {:provider_credential, :delete}
   def details(Console.PubSub.GitRepositoryCreated), do: {:git_repository, :create}
   def details(Console.PubSub.GitRepositoryUpdated), do: {:git_repository, :create}
   def details(Console.PubSub.GitRepositoryDeleted), do: {:git_repository, :create}

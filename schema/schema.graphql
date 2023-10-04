@@ -371,6 +371,12 @@ input ServiceErrorAttributes {
   message: String!
 }
 
+input ProviderCredentialAttributes {
+  namespace: String
+  name: String!
+  kind: String
+}
+
 type ConfigurationOverlaySpec {
   name: String
   folder: String
@@ -522,6 +528,9 @@ type ClusterProvider {
 
   "the service of the CAPI controller itself"
   service: ServiceDeployment
+
+  "a list of credentials eligible for this provider"
+  credentials: [ProviderCredential]
 
   "whether the current user can edit this resource"
   editable: Boolean
@@ -1225,6 +1234,10 @@ type RootMutationType {
 
   updateClusterProvider(id: ID!, attributes: ClusterProviderUpdateAttributes!): ClusterProvider
 
+  createProviderCredential(attributes: ProviderCredentialAttributes!, name: String!): ProviderCredential
+
+  deleteProviderCredential(id: ID!): ProviderCredential
+
   createServiceDeployment(
     clusterId: ID
 
@@ -1387,6 +1400,16 @@ type Postgresql {
 enum Tool {
   HELM
   TERRAFORM
+}
+
+"a cloud credential that can be used while creating new clusters"
+type ProviderCredential {
+  id: ID!
+  name: String!
+  namespace: String!
+  kind: String!
+  insertedAt: DateTime
+  updatedAt: DateTime
 }
 
 type ApplicationLink {
@@ -1689,6 +1712,7 @@ enum AuditType {
   CLUSTER_PROVIDER
   GIT_REPOSITORY
   DEPLOYMENT_SETTINGS
+  PROVIDER_CREDENTIAL
 }
 
 type MetricResponse {
@@ -1974,6 +1998,12 @@ input GitAttributes {
 
   "the http password for http authenticated repos"
   password: String
+
+  "a manually supplied https path for non standard git setups.  This is auto-inferred in many cases"
+  httpsPath: String
+
+  "similar to https_path, a manually supplied url format for custom git.  Should be something like {url}/tree/{ref}/{folder}"
+  urlFormat: String
 }
 
 type DashboardSpec {
@@ -2202,6 +2232,12 @@ type GitRepository {
 
   "the error message if there were any pull errors"
   error: String
+
+  "the https url for this git repo"
+  httpsPath: String
+
+  "a format string to get the http url for a subfolder in a git repo"
+  urlFormat: String
 
   "whether the current user can edit this repo"
   editable: Boolean

@@ -292,4 +292,61 @@ defmodule Console.Deployments.ClustersTest do
       }, provider.id, insert(:user))
     end
   end
+
+  describe "#create_provider_credential/3" do
+    test "you can create credentials for a cluster provider if you have write access" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+
+      {:ok, provider} = Clusters.create_provider(%{
+        name: "aws-sandbox",
+        cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
+      }, user)
+
+      {:ok, cred} = Clusters.create_provider_credential(%{name: "cred", kind: "AwsStaticIdentity"}, provider.name, user)
+
+      assert cred.provider_id == provider.id
+      assert cred.namespace == "plrl-capi-#{provider.name}-#{cred.name}"
+
+      assert_receive {:event, %PubSub.ProviderCredentialCreated{item: ^cred}}
+    end
+
+    test "you cannot create credentials for a cluster provider if you do not have write access" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings()
+
+      {:ok, provider} = Clusters.create_provider(%{
+        name: "aws-sandbox",
+        cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
+      }, admin_user())
+
+      {:error, _} = Clusters.create_provider_credential(%{name: "cred", kind: "AwsStaticIdentity"}, provider.name, user)
+    end
+  end
+
+  describe "#delete_provider_credential/2" do
+    test "you can create credentials for a cluster provider if you have write access" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+      cred = insert(:provider_credential)
+
+      {:ok, deleted} = Clusters.delete_provider_credential(cred.id, user)
+
+      assert deleted.id == cred.id
+      refute refetch(deleted)
+
+      assert_receive {:event, %PubSub.ProviderCredentialDeleted{item: ^deleted}}
+    end
+
+    test "you cannot create credentials for a cluster provider if you do not have write access" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      cred = insert(:provider_credential)
+
+      {:error, _} = Clusters.delete_provider_credential(cred.id, user)
+    end
+  end
 end

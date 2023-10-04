@@ -13,7 +13,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :username,    :string, description: "the http username for authenticated http repos, defaults to apiKey for github"
     field :password,    :string, description: "the http password for http authenticated repos"
     field :https_path,  :string, description: "a manually supplied https path for non standard git setups.  This is auto-inferred in many cases"
-    fiedl :url_format,  :string, description: "similar to https_path, a manually supplied url format for custom git.  Should be something like {url}/tree/{ref}/{folder}"
+    field :url_format,  :string, description: "similar to https_path, a manually supplied url format for custom git.  Should be something like {url}/tree/{ref}/{folder}"
   end
 
   @desc "a git repository available for deployments"

@@ -214,6 +214,7 @@ export enum AuditType {
   GroupMember = 'GROUP_MEMBER',
   Pod = 'POD',
   Policy = 'POLICY',
+  ProviderCredential = 'PROVIDER_CREDENTIAL',
   Role = 'ROLE',
   Service = 'SERVICE',
   TempToken = 'TEMP_TOKEN',
@@ -479,6 +480,8 @@ export type ClusterProvider = {
   __typename?: 'ClusterProvider';
   /** the name of the cloud service for this provider */
   cloud: Scalars['String']['output'];
+  /** a list of credentials eligible for this provider */
+  credentials?: Maybe<Array<Maybe<ProviderCredential>>>;
   /** whether the current user can edit this resource */
   editable?: Maybe<Scalars['Boolean']['output']>;
   /** the details of how cluster manifests will be synced from git when created with this provider */
@@ -899,6 +902,8 @@ export type GcpSettingsAttributes = {
 };
 
 export type GitAttributes = {
+  /** a manually supplied https path for non standard git setups.  This is auto-inferred in many cases */
+  httpsPath?: InputMaybe<Scalars['String']['input']>;
   /** a passphrase to decrypt the given private key */
   passphrase?: InputMaybe<Scalars['String']['input']>;
   /** the http password for http authenticated repos */
@@ -907,6 +912,8 @@ export type GitAttributes = {
   privateKey?: InputMaybe<Scalars['String']['input']>;
   /** the url of this repository */
   url: Scalars['String']['input'];
+  /** similar to https_path, a manually supplied url format for custom git.  Should be something like {url}/tree/{ref}/{folder} */
+  urlFormat?: InputMaybe<Scalars['String']['input']>;
   /** the http username for authenticated http repos, defaults to apiKey for github */
   username?: InputMaybe<Scalars['String']['input']>;
 };
@@ -948,6 +955,8 @@ export type GitRepository = {
   error?: Maybe<Scalars['String']['output']>;
   /** whether we can currently pull this repo with the provided credentials */
   health?: Maybe<GitHealth>;
+  /** the https url for this git repo */
+  httpsPath?: Maybe<Scalars['String']['output']>;
   /** internal id of this repository */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -956,6 +965,8 @@ export type GitRepository = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the git url of the repository, either https or ssh supported */
   url: Scalars['String']['output'];
+  /** a format string to get the http url for a subfolder in a git repo */
+  urlFormat?: Maybe<Scalars['String']['output']>;
 };
 
 export type GitRepositoryConnection = {
@@ -1603,6 +1614,23 @@ export type PrometheusDatasource = {
   query: Scalars['String']['output'];
 };
 
+/** a cloud credential that can be used while creating new clusters */
+export type ProviderCredential = {
+  __typename?: 'ProviderCredential';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  kind: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  namespace: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ProviderCredentialAttributes = {
+  kind?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type RbacAttributes = {
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
@@ -1786,6 +1814,7 @@ export type RootMutationType = {
   createGroupMember?: Maybe<GroupMember>;
   createInvite?: Maybe<Invite>;
   createPeer?: Maybe<WireguardPeer>;
+  createProviderCredential?: Maybe<ProviderCredential>;
   createRole?: Maybe<Role>;
   createServiceDeployment?: Maybe<ServiceDeployment>;
   createUpgradePolicy?: Maybe<UpgradePolicy>;
@@ -1801,6 +1830,7 @@ export type RootMutationType = {
   deleteNode?: Maybe<Node>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePod?: Maybe<Pod>;
+  deleteProviderCredential?: Maybe<ProviderCredential>;
   deleteRole?: Maybe<Role>;
   deleteServiceDeployment?: Maybe<ServiceDeployment>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
@@ -1910,6 +1940,12 @@ export type RootMutationTypeCreatePeerArgs = {
 };
 
 
+export type RootMutationTypeCreateProviderCredentialArgs = {
+  attributes: ProviderCredentialAttributes;
+  name: Scalars['String']['input'];
+};
+
+
 export type RootMutationTypeCreateRoleArgs = {
   attributes: RoleAttributes;
 };
@@ -1990,6 +2026,11 @@ export type RootMutationTypeDeletePodArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeDeleteProviderCredentialArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
