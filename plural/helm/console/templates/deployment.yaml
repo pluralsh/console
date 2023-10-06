@@ -59,10 +59,10 @@ spec:
         volumeMounts:
         {{ if .Values.secrets.id_rsa }}
         - name: console-ssh
-          mountPath: "/root/.ssh"
+          mountPath: "{{ .Values.homeDir }}/.ssh"
         {{ end }}
         - name: console-conf
-          mountPath: "/root/.plural"
+          mountPath: "{{ .Values.homeDir }}/.plural"
         {{ if .Values.cliContainer.enabled }}
         - name: cli-override
           mountPath: /usr/local/bin/plural

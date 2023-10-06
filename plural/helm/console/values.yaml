@@ -4,6 +4,8 @@
 
 replicaCount: 2
 
+homeDir: /root
+
 image:
   repository: dkr.plural.sh/console/console
   tag: ~
