@@ -1,11 +1,10 @@
 import { Readiness, ReadinessT } from 'utils/status'
 import {
-  ArrowRightIcon,
   BriefcaseIcon,
   CertificateIcon,
   Chip,
   DeploymentIcon,
-  FiltersIcon,
+  HelpIcon,
   HistoryIcon,
   NetworkInIcon,
   NetworkInterfaceIcon,
@@ -13,6 +12,7 @@ import {
 } from '@pluralsh/design-system'
 import { ComponentState } from 'generated/graphql'
 import { ComponentProps } from 'react'
+import { useTheme } from 'styled-components'
 
 export const statusToBorder = {
   [Readiness.Ready]: '',
@@ -103,6 +103,8 @@ export function ComponentIcon({
   kind: string | undefined
   size?: number | undefined
 }) {
+  const theme = useTheme()
+
   switch (kind?.toLowerCase()) {
     case 'service':
       return <NetworkInterfaceIcon size={size} />
@@ -118,11 +120,12 @@ export function ComponentIcon({
       return <BriefcaseIcon size={size} />
     case 'certificate':
       return <CertificateIcon size={size} />
-    case 'rollout':
-      return <ArrowRightIcon size={size} />
-    case 'configmap':
-      return <FiltersIcon size={size} />
     default:
-      return null
+      return (
+        <HelpIcon
+          size={size}
+          color={theme.colors['icon-disabled']}
+        />
+      )
   }
 }
