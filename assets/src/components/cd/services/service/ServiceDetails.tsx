@@ -6,14 +6,12 @@ import {
   removeTrailingSlashes,
 } from '@pluralsh/design-system'
 import { useMemo } from 'react'
-import { Link, Outlet, useLocation, useParams } from 'react-router-dom'
+import { Outlet, useLocation, useParams } from 'react-router-dom'
 // import { ensureURLValidity } from 'utils/url'
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import { PropsContainer } from 'components/utils/PropsContainer'
-import Prop from 'components/utils/Prop'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import {
   ServiceDeploymentDetailsFragment,
@@ -32,20 +30,14 @@ import {
 } from 'components/contexts/DocPageContext'
 
 import { getDocsData } from 'components/apps/app/App'
-import {
-  CD_BASE_PATH,
-  CLUSTERS_PATH,
-  SERVICE_PARAM_NAME,
-} from 'routes/cdRoutes'
+import { CD_BASE_PATH, SERVICE_PARAM_NAME } from 'routes/cdRoutes'
 import ComponentProgress from 'components/apps/app/components/ComponentProgress'
-import { versionName } from 'components/apps/AppCard'
-
-import { InlineLink } from 'components/utils/typography/InlineLink'
 
 import { mapExistingNodes } from 'utils/graphql'
 
-import { ServiceStatusChip } from '../ServiceStatusChip'
 import ServiceSelector from '../ServiceSelector'
+
+import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 
 export const getServiceDetailsBreadcrumbs = ({
   serviceId,
@@ -157,37 +149,6 @@ function SideNavEntries({
         )
       })}
     </WrapWithIf>
-  )
-}
-
-function ServiceDetailsSidecar({
-  serviceDeployment,
-}: {
-  serviceDeployment?: ServiceDeploymentDetailsFragment | null | undefined
-}) {
-  if (!serviceDeployment) {
-    return null
-  }
-  const { name, version, status, cluster } = serviceDeployment
-
-  return (
-    <PropsContainer>
-      {name && <Prop title="Service name"> {name}</Prop>}
-      {version && <Prop title="Current version">{versionName(version)}</Prop>}
-      <Prop title="App status">
-        <ServiceStatusChip status={status} />
-      </Prop>
-      {cluster?.name && (
-        <Prop title="Cluster name">
-          <InlineLink
-            as={Link}
-            to={`/${CD_BASE_PATH}/${CLUSTERS_PATH}/${cluster.id}`}
-          >
-            {cluster.name}
-          </InlineLink>
-        </Prop>
-      )}
-    </PropsContainer>
   )
 }
 
