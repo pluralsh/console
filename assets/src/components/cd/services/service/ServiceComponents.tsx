@@ -4,7 +4,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useMemo } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { CD_BASE_PATH, SERVICE_PARAM_NAME } from 'routes/cdRoutes'
 import LoadingIndicator from 'components/utils/LoadingIndicator'

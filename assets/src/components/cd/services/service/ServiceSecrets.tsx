@@ -3,6 +3,10 @@ import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { CD_BASE_PATH, SERVICE_PARAM_NAME } from 'routes/cdRoutes'
 
+import { GqlError } from 'components/utils/Alert'
+
+import { useServiceDeploymentSecretsQuery } from 'generated/graphql'
+
 import { getServiceDetailsBreadcrumbs } from './ServiceDetails'
 
 export default function ServiceSecrets() {
@@ -20,6 +24,20 @@ export default function ServiceSecrets() {
   )
 
   useSetBreadcrumbs(breadcrumbs)
+  const { data, error } = useServiceDeploymentSecretsQuery({
+    variables: { id: serviceId || '' },
+  })
 
-  return <div>Secrets</div>
+  if (error) {
+    return <GqlError error={error} />
+  }
+  console.log('secrets', data?.serviceDeployment?.configuration)
+
+  return (
+    <div>
+      {data?.serviceDeployment?.configuration?.map((secret) => (
+        <div>{secret?.name}</div>
+      ))}
+    </div>
+  )
 }
