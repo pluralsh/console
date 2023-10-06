@@ -65,14 +65,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: deps
-          key: ${{ runner.os }}-mix-1-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-1
+          key: ${{ runner.os }}-mix-2-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-2
       - name: Restore _build
         uses: actions/cache@v3
         with:
           path: _build
-          key: ${{ runner.os }}-mix-1-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-1
+          key: ${{ runner.os }}-mix-2-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-2
       - run: mix deps.get
       - run: mix test
       - uses: 8398a7/action-slack@v3
@@ -95,14 +95,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: deps
-          key: ${{ runner.os }}-mix-1-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-1
+          key: ${{ runner.os }}-mix-2-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-2
       - name: Restore _build
         uses: actions/cache@v3
         with:
           path: _build
-          key: ${{ runner.os }}-mix-1-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-1
+          key: ${{ runner.os }}-mix-2-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-2
       - name: get dependencies
         run: mix deps.get
       - name: update schema
