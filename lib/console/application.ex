@@ -11,7 +11,6 @@ defmodule Console.Application do
       {Phoenix.PubSub, [name: Console.PubSub, adapter: Phoenix.PubSub.PG2]},
       ConsoleWeb.Endpoint,
       Console.Clustering.Connect,
-      Console.Commands.Configuration,
       Console.Plural.Config,
       Console.Features,
       Console.Cron,
