@@ -41,6 +41,15 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
     content
     path
   }
+  git {
+    folder
+    ref
+  }
+  components {
+    apiDeprecations {
+      blocking
+    }
+  }
 }
 
 fragment ServiceDeploymentComponent on ServiceComponent {
@@ -51,6 +60,9 @@ fragment ServiceDeploymentComponent on ServiceComponent {
   state
   synced
   version
+  apiDeprecations {
+    blocking
+  }
 }
 
 fragment ServiceDeploymentRevisions on ServiceDeployment {

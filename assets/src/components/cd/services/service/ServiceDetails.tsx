@@ -7,7 +7,6 @@ import {
 } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router-dom'
-// import { ensureURLValidity } from 'utils/url'
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
