@@ -128,6 +128,7 @@ WORKDIR /opt/app
 
 RUN addgroup -S --gid 10001 app
 RUN adduser -u 10001 -S console -G app
+RUN chown console:app /opt/app 
 
 RUN mkdir -p /home/console/.ssh && chmod 0700 /home/console/.ssh
 RUN mkdir -p /home/console/.plural && mkdir -p /home/console/.creds && mkdir /home/console/bin
@@ -141,8 +142,8 @@ RUN chmod +x /home/console/bin/.git-askpass && \
 
 ENV GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet"
 
-COPY --from=builder /opt/built .
-
 USER console
+
+COPY --from=builder /opt/built .
 
 CMD trap 'exit' INT; eval $(ssh-agent -s); /opt/app/bin/${APP_NAME} foreground
