@@ -1532,7 +1532,7 @@ type DashboardMetric {
 }
 
 type MetricResult {
-  timestamp: Int
+  timestamp: Long
   value: String
 }
 

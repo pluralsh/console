@@ -1292,7 +1292,7 @@ export type MetricResponse = {
 
 export type MetricResult = {
   __typename?: 'MetricResult';
-  timestamp?: Maybe<Scalars['Int']['output']>;
+  timestamp?: Maybe<Scalars['Long']['output']>;
   value?: Maybe<Scalars['String']['output']>;
 };
 

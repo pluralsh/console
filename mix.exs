@@ -91,7 +91,7 @@ defmodule Console.MixProject do
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.8", only: [:dev, :test]},
       {:porcelain, "~> 2.0"},
-      {:absinthe, "~> 1.7.5", git: "https://github.com/prosapient/absinthe"},
+      {:absinthe, "~> 1.7.5", git: "https://github.com/prosapient/absinthe", override: true},
       {:absinthe_relay, "~> 1.5.2"},
       {:absinthe_plug, "~> 1.5"},
       {:absinthe_phoenix, "~> 2.0"},
