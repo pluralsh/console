@@ -29,6 +29,9 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
 fragment ServiceDeploymentDetails on ServiceDeployment {
   id
   name
+  namespace
+  componentStatus
+  status
   cluster {
     id
     name
@@ -76,6 +79,20 @@ query ServiceDeployments {
   }
 }
 
+query ServiceDeploymentsTiny {
+  serviceDeployments(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+
 query ServiceDeployment($id: ID!) {
   serviceDeployment(id: $id) {
     ...ServiceDeploymentDetails
@@ -86,6 +103,15 @@ query ServiceDeploymentComponents($id: ID!) {
   serviceDeployment(id: $id) {
     components {
       ...ServiceDeploymentComponent
+    }
+  }
+}
+
+query ServiceDeploymentSecrets($id: ID!) {
+  serviceDeployment(id: $id) {
+    configuration {
+      name
+      value
     }
   }
 }

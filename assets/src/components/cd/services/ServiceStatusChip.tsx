@@ -34,11 +34,12 @@ export function ServiceStatusChip({
   componentStatus,
 }: {
   status: ServiceDeploymentStatus | null | undefined
-  componentStatus: string | null | undefined
+  componentStatus?: string | null | undefined
 }) {
   return (
     <Chip severity={serviceStatusToSeverity(status)}>
-      {componentStatus} {serviceStatusToLabel(status)}
+      {componentStatus && <>{componentStatus} </>}
+      {serviceStatusToLabel(status)}
     </Chip>
   )
 }

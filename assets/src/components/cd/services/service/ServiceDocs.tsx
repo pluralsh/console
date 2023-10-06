@@ -52,7 +52,9 @@ export default function AppDocs() {
   const navigate = useNavigate()
 
   if (!currentDoc) {
-    navigate(location.pathname.split('/').slice(0, -1).join('/'))
+    navigate(
+      `${location.pathname.split('/').slice(0, -1).join('/')}/components`
+    )
 
     return null
   }

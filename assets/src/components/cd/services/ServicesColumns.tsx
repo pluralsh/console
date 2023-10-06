@@ -3,21 +3,19 @@ import { ClusterIcon } from '@pluralsh/design-system'
 import { ServiceDeploymentsRowFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
 import { Link } from 'react-router-dom'
 
 import { CD_BASE_PATH } from 'routes/cdRoutes'
 
+import { InlineLink } from '../../utils/typography/InlineLink'
+
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
-
-const InlineLink = styled.a(({ theme }) => ({
-  ...theme.partials.text.inlineLink,
-}))
 
 export const ColServiceDeployment = columnHelper.accessor(
   ({ node }) => node?.name,

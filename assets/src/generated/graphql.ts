@@ -3421,7 +3421,7 @@ export type ServiceDeploymentRevisionFragment = { __typename?: 'Revision', id: s
 
 export type ServiceDeploymentsRowFragment = { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null };
 
-export type ServiceDeploymentDetailsFragment = { __typename?: 'ServiceDeployment', id: string, name: string, version: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, docs?: Array<{ __typename?: 'GitFile', content: string, path: string } | null> | null };
+export type ServiceDeploymentDetailsFragment = { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, componentStatus?: string | null, status: ServiceDeploymentStatus, version: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, docs?: Array<{ __typename?: 'GitFile', content: string, path: string } | null> | null };
 
 export type ServiceDeploymentComponentFragment = { __typename?: 'ServiceComponent', id: string, name: string, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null };
 
@@ -3432,12 +3432,17 @@ export type ServiceDeploymentsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type ServiceDeploymentsQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null } | null } | null> | null } | null };
 
+export type ServiceDeploymentsTinyQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ServiceDeploymentsTinyQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null> | null } | null };
+
 export type ServiceDeploymentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type ServiceDeploymentQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, version: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, docs?: Array<{ __typename?: 'GitFile', content: string, path: string } | null> | null } | null };
+export type ServiceDeploymentQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, componentStatus?: string | null, status: ServiceDeploymentStatus, version: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, docs?: Array<{ __typename?: 'GitFile', content: string, path: string } | null> | null } | null };
 
 export type ServiceDeploymentComponentsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3445,6 +3450,13 @@ export type ServiceDeploymentComponentsQueryVariables = Exact<{
 
 
 export type ServiceDeploymentComponentsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', components?: Array<{ __typename?: 'ServiceComponent', id: string, name: string, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null } | null> | null } | null };
+
+export type ServiceDeploymentSecretsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ServiceDeploymentSecretsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null };
 
 export type ServiceDeploymentRevisionsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3829,6 +3841,9 @@ export const ServiceDeploymentDetailsFragmentDoc = gql`
     fragment ServiceDeploymentDetails on ServiceDeployment {
   id
   name
+  namespace
+  componentStatus
+  status
   cluster {
     id
     name
@@ -4460,6 +4475,48 @@ export function useServiceDeploymentsLazyQuery(baseOptions?: Apollo.LazyQueryHoo
 export type ServiceDeploymentsQueryHookResult = ReturnType<typeof useServiceDeploymentsQuery>;
 export type ServiceDeploymentsLazyQueryHookResult = ReturnType<typeof useServiceDeploymentsLazyQuery>;
 export type ServiceDeploymentsQueryResult = Apollo.QueryResult<ServiceDeploymentsQuery, ServiceDeploymentsQueryVariables>;
+export const ServiceDeploymentsTinyDocument = gql`
+    query ServiceDeploymentsTiny {
+  serviceDeployments(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}`;
+
+/**
+ * __useServiceDeploymentsTinyQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentsTinyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentsTinyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentsTinyQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useServiceDeploymentsTinyQuery(baseOptions?: Apollo.QueryHookOptions<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>(ServiceDeploymentsTinyDocument, options);
+      }
+export function useServiceDeploymentsTinyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>(ServiceDeploymentsTinyDocument, options);
+        }
+export type ServiceDeploymentsTinyQueryHookResult = ReturnType<typeof useServiceDeploymentsTinyQuery>;
+export type ServiceDeploymentsTinyLazyQueryHookResult = ReturnType<typeof useServiceDeploymentsTinyLazyQuery>;
+export type ServiceDeploymentsTinyQueryResult = Apollo.QueryResult<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>;
 export const ServiceDeploymentDocument = gql`
     query ServiceDeployment($id: ID!) {
   serviceDeployment(id: $id) {
@@ -4532,6 +4589,44 @@ export function useServiceDeploymentComponentsLazyQuery(baseOptions?: Apollo.Laz
 export type ServiceDeploymentComponentsQueryHookResult = ReturnType<typeof useServiceDeploymentComponentsQuery>;
 export type ServiceDeploymentComponentsLazyQueryHookResult = ReturnType<typeof useServiceDeploymentComponentsLazyQuery>;
 export type ServiceDeploymentComponentsQueryResult = Apollo.QueryResult<ServiceDeploymentComponentsQuery, ServiceDeploymentComponentsQueryVariables>;
+export const ServiceDeploymentSecretsDocument = gql`
+    query ServiceDeploymentSecrets($id: ID!) {
+  serviceDeployment(id: $id) {
+    configuration {
+      name
+      value
+    }
+  }
+}
+    `;
+
+/**
+ * __useServiceDeploymentSecretsQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentSecretsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentSecretsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentSecretsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useServiceDeploymentSecretsQuery(baseOptions: Apollo.QueryHookOptions<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>(ServiceDeploymentSecretsDocument, options);
+      }
+export function useServiceDeploymentSecretsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>(ServiceDeploymentSecretsDocument, options);
+        }
+export type ServiceDeploymentSecretsQueryHookResult = ReturnType<typeof useServiceDeploymentSecretsQuery>;
+export type ServiceDeploymentSecretsLazyQueryHookResult = ReturnType<typeof useServiceDeploymentSecretsLazyQuery>;
+export type ServiceDeploymentSecretsQueryResult = Apollo.QueryResult<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>;
 export const ServiceDeploymentRevisionsDocument = gql`
     query ServiceDeploymentRevisions($id: ID!) {
   serviceDeployment(id: $id) {
@@ -5351,8 +5446,10 @@ export const namedOperations = {
     Clusters: 'Clusters',
     GitRepositories: 'GitRepositories',
     ServiceDeployments: 'ServiceDeployments',
+    ServiceDeploymentsTiny: 'ServiceDeploymentsTiny',
     ServiceDeployment: 'ServiceDeployment',
     ServiceDeploymentComponents: 'ServiceDeploymentComponents',
+    ServiceDeploymentSecrets: 'ServiceDeploymentSecrets',
     ServiceDeploymentRevisions: 'ServiceDeploymentRevisions',
     PostgresDatabases: 'PostgresDatabases',
     PostgresDatabase: 'PostgresDatabase',
