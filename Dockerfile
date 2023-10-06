@@ -139,10 +139,10 @@ RUN chmod +x /home/console/bin/.git-askpass && \
       chmod +x /home/console/bin/.ssh-askpass && \
       chmod +x /home/console/bin/ssh-add
 
-ENV GIT_SSH_COMMAND="ssh -i /home/console/.ssh/id_rsa -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet"
+ENV GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet"
 
 COPY --from=builder /opt/built .
 
 USER console
 
-CMD trap 'exit' INT; /opt/app/bin/${APP_NAME} foreground
+CMD trap 'exit' INT; eval $(ssh-agent -s); /opt/app/bin/${APP_NAME} foreground
