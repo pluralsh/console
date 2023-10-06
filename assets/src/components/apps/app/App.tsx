@@ -111,7 +111,9 @@ export const getDirectory = ({
     { path: 'runbooks', label: 'Runbooks', enabled: true },
     {
       path: 'components',
-      label: <ComponentProgress app={app} />,
+      label: (
+        <ComponentProgress componentsReady={app?.status?.componentsReady} />
+      ),
       enabled: true,
     },
     { path: 'logs', label: 'Logs', enabled: true },

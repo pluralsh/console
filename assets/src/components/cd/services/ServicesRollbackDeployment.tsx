@@ -43,7 +43,11 @@ export function ServicesRollbackDeployment({
   const closeModal = useCallback(() => setIsOpen(false), [])
 
   return (
-    <>
+    <div
+      onClick={(e) => {
+        e.stopPropagation()
+      }}
+    >
       <IconFrame
         clickable
         type="floating"
@@ -62,7 +66,7 @@ export function ServicesRollbackDeployment({
           onClose={closeModal}
         />
       </ModalMountTransition>
-    </>
+    </div>
   )
 }
 

@@ -1,4 +1,8 @@
-import { type Breadcrumb, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  type Breadcrumb,
+  Callout,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
@@ -8,16 +12,18 @@ import { useComponentKindSelect } from 'components/apps/app/components/Component
 import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
 import { ComponentList } from 'components/apps/app/components/ComponentList'
 
+import { useTheme } from 'styled-components'
+
+import { getServiceDetailsBreadcrumbs } from './ServiceDetails'
+import { countDeprecations } from './countDeprecations'
+
 export default function ServiceComponents() {
+  const theme = useTheme()
   const serviceId = useParams()[SERVICE_PARAM_NAME]
 
   const breadcrumbs: Breadcrumb[] = useMemo(
     () => [
-      { label: 'services', url: `${CD_BASE_PATH}/services` },
-      {
-        label: serviceId ?? '',
-        url: `${CD_BASE_PATH}/services/${serviceId}`,
-      },
+      ...getServiceDetailsBreadcrumbs({ serviceId }),
       {
         label: 'components',
         url: `${CD_BASE_PATH}/services/${serviceId}/components`,
@@ -34,9 +40,10 @@ export default function ServiceComponents() {
   const { kindSelector, selectedKinds } = useComponentKindSelect(
     data?.serviceDeployment?.components
   )
-
-  console.log('service components data', data)
-  console.log('service components error', error)
+  const deprecationCount = useMemo(
+    () => countDeprecations(data?.serviceDeployment?.components),
+    [data?.serviceDeployment?.components]
+  )
 
   if (error) {
     return null
@@ -51,17 +58,44 @@ export default function ServiceComponents() {
       heading="Components"
       headingContent={kindSelector}
     >
-      <ComponentList
-        setUrl={(c) =>
-          c?.name && c?.kind
-            ? `${CD_BASE_PATH}/services/${serviceId}/components/${c.kind.toLowerCase()}/${
-                c.name
-              }`
-            : undefined
-        }
-        components={data.serviceDeployment?.components || []}
-        selectedKinds={selectedKinds}
-      />
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          rowGap: theme.spacing.large,
+        }}
+      >
+        {deprecationCount > 0 && (
+          <Callout
+            severity="danger"
+            title={`Using ${
+              deprecationCount > 1 ? '' : 'an '
+            } outdated k8s version${deprecationCount > 1 ? 's' : ''}`}
+            // TODO: Add link to review deprecations once the url scheme is known
+            // buttonProps={{
+            //   as: Link,
+            //   to: '{{deprecations-link}}',
+            //   children: 'Review deprecations',
+            // }}
+          >
+            This service is using {deprecationCount > 1 ? '' : 'a '}deprecated
+            k8s resource{deprecationCount > 1 ? 's' : ''}.{' '}
+            {deprecationCount > 1 ? 'These are' : 'This is'} incompatible with
+            the k8s cluster version you are using.
+          </Callout>
+        )}
+        <ComponentList
+          setUrl={(c) =>
+            c?.name && c?.kind
+              ? `${CD_BASE_PATH}/services/${serviceId}/components/${c.kind.toLowerCase()}/${
+                  c.name
+                }`
+              : undefined
+          }
+          components={data.serviceDeployment?.components || []}
+          selectedKinds={selectedKinds}
+        />
+      </div>
     </ScrollablePage>
   )
 }

@@ -1,4 +1,3 @@
-import { A, Div, Flex } from 'honorable'
 import {
   TreeNav,
   TreeNavEntry,
@@ -8,15 +7,16 @@ import {
 } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router-dom'
-import { ensureURLValidity } from 'utils/url'
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import { PropsContainer } from 'components/utils/PropsContainer'
-import Prop from 'components/utils/Prop'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
-import { useServiceDeploymentQuery } from 'generated/graphql'
+import {
+  ServiceDeploymentDetailsFragment,
+  useServiceDeploymentQuery,
+  useServiceDeploymentsTinyQuery,
+} from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
 import capitalize from 'lodash/capitalize'
 import { useTheme } from 'styled-components'
@@ -30,28 +30,49 @@ import {
 
 import { getDocsData } from 'components/apps/app/App'
 import { CD_BASE_PATH, SERVICE_PARAM_NAME } from 'routes/cdRoutes'
+import ComponentProgress from 'components/apps/app/components/ComponentProgress'
 
-// import AppSelector from './AppSelector'
+import { mapExistingNodes } from 'utils/graphql'
+
+import ServiceSelector from '../ServiceSelector'
+
+import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
+
+export const getServiceDetailsBreadcrumbs = ({
+  serviceId,
+}: {
+  serviceId: string | null | undefined
+}) => [
+  { label: 'services', url: `${CD_BASE_PATH}/services` },
+  ...(serviceId
+    ? [
+        {
+          label: serviceId ?? '',
+          url: `${CD_BASE_PATH}/services/${serviceId}`,
+        },
+      ]
+    : []),
+]
 
 export const getDirectory = ({
-  name,
+  serviceDeployment,
   docs = null,
 }: {
-  name?: string
+  serviceDeployment?: ServiceDeploymentDetailsFragment | null | undefined
   docs?: ReturnType<typeof getDocsData> | null
 }) => {
-  if (!name) {
+  if (!serviceDeployment) {
     return []
   }
+  const { name, componentStatus } = serviceDeployment
 
   return [
     {
       path: 'components',
-      label: 'Component x/x',
+      label: <ComponentProgress componentsReady={componentStatus} />,
       enabled: true,
     },
     { path: 'secrets', label: 'Secrets', enabled: true },
-
     {
       path: 'docs',
       label: name ? `${capitalize(name)} docs` : 'Docs',
@@ -131,136 +152,75 @@ function SideNavEntries({
 }
 
 function ServiceDetailsBase() {
-  console.log('Service Details')
   const theme = useTheme()
   const { pathname } = useLocation()
   const serviceId = useParams()[SERVICE_PARAM_NAME] as string
   const pathPrefix = `/${CD_BASE_PATH}/services/${serviceId}`
+
+  const { data: serviceListData } = useServiceDeploymentsTinyQuery()
+  const serviceList = useMemo(
+    () => mapExistingNodes(serviceListData?.serviceDeployments),
+    [serviceListData?.serviceDeployments]
+  )
+
   const { data: serviceData, error: serviceError } = useServiceDeploymentQuery({
     variables: { id: serviceId },
   })
-
-  console.log('serviceName', serviceId)
-  console.log('data', serviceData)
-
+  const { serviceDeployment } = serviceData || {}
   const docs = useMemo(
     () => getDocsData(serviceData?.serviceDeployment?.docs),
     [serviceData?.serviceDeployment?.docs]
   )
-  const { name, version } = serviceData?.serviceDeployment || {}
 
   const directory = useMemo(
     () =>
       getDirectory({
-        name,
-        docs,
+        serviceDeployment,
       }).filter((entry) => entry.enabled),
-    [docs, name]
+    [serviceDeployment]
   )
-
-  if (serviceError) {
-    return (
-      <>
-        serviceName:{serviceId}
-        <GqlError error={serviceError} />
-      </>
-    )
-  }
-  if (!serviceData?.serviceDeployment) return <LoadingIndicator />
-
-  //   const currentTab = directory.find(
-  //     (tab) => pathname?.startsWith(`${pathPrefix}/${tab.path}`)
-  //   )
-  //   const validLinks = links?.filter(({ url }) => !!url)
-  const validLinks = []
 
   return (
     <ResponsiveLayoutPage>
       <ResponsiveLayoutSidenavContainer>
-        <Flex
-          flexDirection="column"
-          maxHeight="100%"
-          overflow="hidden"
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            rowGap: theme.spacing.medium,
+            overflow: 'hidden',
+            maxHeight: '100%',
+          }}
         >
-          {/* <AppSelector
-            directory={directory}
-            applications={applications}
-            currentApp={currentApp}
-          /> */}
-          <Div
-            overflowY="auto"
-            paddingBottom={theme.spacing.medium}
+          {serviceList?.length > 1 && (
+            <ServiceSelector serviceDeployments={serviceList} />
+          )}
+          <div
+            css={{
+              overflowY: 'auto',
+              paddingBottom: theme.spacing.medium,
+            }}
           >
             <SideNavEntries
               directory={directory}
               pathname={pathname}
               pathPrefix={pathPrefix}
             />
-          </Div>
-        </Flex>
+          </div>
+        </div>
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer role="main">
-        <Outlet context={{ docs }} />
+        {serviceError ? (
+          <GqlError error={serviceError} />
+        ) : serviceDeployment ? (
+          <Outlet context={{ docs }} />
+        ) : (
+          <LoadingIndicator />
+        )}
       </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSidecarContainer>
-        {/* {validLinks?.length > 0 && (
-          <Button
-            secondary
-            marginBottom="medium"
-            as="a"
-            href={ensureURLValidity(links[0].url)}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-          >
-            Launch {name}
-          </Button>
-        )} */}
-        <Flex
-          gap="medium"
-          direction="column"
-          marginTop={validLinks?.length > 0 ? 0 : 56}
-        >
-          <PropsContainer title="App">
-            {version && (
-              <Prop title="Current version">
-                {version.startsWith('v') ? '' : 'v'}
-                {version}
-              </Prop>
-            )}
-            <Prop title="Status">{/* <AppStatus app={currentApp} /> */}</Prop>
-            {validLinks?.length > 1 && (
-              <Prop title="Other links">
-                {validLinks.slice(1).map(({ url }) => (
-                  <A
-                    inline
-                    href={ensureURLValidity(url)}
-                    as="a"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {url}
-                  </A>
-                ))}
-              </Prop>
-            )}
-          </PropsContainer>
-          {/* {dashboardId && dashboard && (
-            <PropsContainer title="Dashboard">
-              <Prop title="Description">{dashboard.spec?.description}</Prop>
-            </PropsContainer>
-          )} */}
-          {/* {runbookName && runbook && (
-            <PropsContainer title="Runbook">
-              <Prop title="Description">{runbook.spec?.description}</Prop>
-              <Prop title="Status">
-                <RunbookStatus runbook={runbook} />
-              </Prop>
-            </PropsContainer>
-          )} */}
-          {/* {currentTab?.path === 'logs' && <LogsLegend />} */}
-        </Flex>
+        <ServiceDetailsSidecar serviceDeployment={serviceDeployment} />
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
     </ResponsiveLayoutPage>

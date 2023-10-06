@@ -18,13 +18,13 @@ import ClusterNodes from '../components/cd/cluster/ClusterNodes'
 import ClusterPods from '../components/cd/cluster/ClusterPods'
 
 export const CD_BASE_PATH = 'cd'
-const CLUSTERS_PATH = 'clusters'
-const SERVICES_PATH = 'services'
+export const CLUSTERS_PATH = 'clusters'
+export const SERVICES_PATH = 'services'
 
 export const CLUSTER_BASE_PATH = `${CD_BASE_PATH}/${CLUSTERS_PATH}/:clusterId`
 const CLUSTER_SERVICES_PATH = 'services'
 
-export const SERVICE_PARAM_NAME = 'serviceId'
+export const SERVICE_PARAM_NAME = 'serviceId' as const
 export const SERVICE_BASE_PATH = `${CD_BASE_PATH}/${SERVICES_PATH}/:${SERVICE_PARAM_NAME}`
 const SERVICE_COMPONENTS_PATH = 'components'
 
