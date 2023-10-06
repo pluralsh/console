@@ -1925,6 +1925,9 @@ input ClusterAttributes {
 
   providerId: ID
 
+  "a cloud credential to use when provisioning this cluster"
+  credentialId: ID
+
   version: String!
 
   kubeconfig: KubeconfigAttributes
