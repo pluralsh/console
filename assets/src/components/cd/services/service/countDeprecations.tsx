@@ -1,9 +1,8 @@
 export function countDeprecations(
-  components: (
-    | { apiDeprecations?: unknown[] | null | undefined }
+  components:
+    | ({ apiDeprecations?: unknown[] | null | undefined } | null | undefined)[]
     | null
     | undefined
-  )[]
 ) {
   return (
     components?.reduce(
