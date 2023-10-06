@@ -27,6 +27,7 @@ defmodule Console.Application do
       Console.Cached.Pod,
       Console.Cached.VPN,
       Console.Cached.Node,
+      Console.Watchers.Supervisor,
       Console.Deployments.Git.Supervisor,
       Console.Deployments.Git.Kick,
       Console.Deployments.Deprecations.Table,
@@ -34,7 +35,6 @@ defmodule Console.Application do
     ] ++ consumers() ++ [
       Piazza.GracefulShutdown
     ] ++ socket()
-      ++ Console.conf(:watchers)
       ++ deployer()
 
     opts = [strategy: :one_for_one, name: Console.Supervisor]
