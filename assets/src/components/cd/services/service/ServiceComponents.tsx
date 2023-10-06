@@ -8,16 +8,14 @@ import { useComponentKindSelect } from 'components/apps/app/components/Component
 import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
 import { ComponentList } from 'components/apps/app/components/ComponentList'
 
+import { getServiceDetailsBreadcrumbs } from './ServiceDetails'
+
 export default function ServiceComponents() {
   const serviceId = useParams()[SERVICE_PARAM_NAME]
 
   const breadcrumbs: Breadcrumb[] = useMemo(
     () => [
-      { label: 'services', url: `${CD_BASE_PATH}/services` },
-      {
-        label: serviceId ?? '',
-        url: `${CD_BASE_PATH}/services/${serviceId}`,
-      },
+      ...getServiceDetailsBreadcrumbs({ serviceId }),
       {
         label: 'components',
         url: `${CD_BASE_PATH}/services/${serviceId}/components`,

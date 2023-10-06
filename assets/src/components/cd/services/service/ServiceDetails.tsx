@@ -47,6 +47,22 @@ import { mapExistingNodes } from 'utils/graphql'
 import { ServiceStatusChip } from '../ServiceStatusChip'
 import ServiceSelector from '../ServiceSelector'
 
+export const getServiceDetailsBreadcrumbs = ({
+  serviceId,
+}: {
+  serviceId: string | null | undefined
+}) => [
+  { label: 'services', url: `${CD_BASE_PATH}/services` },
+  ...(serviceId
+    ? [
+        {
+          label: serviceId ?? '',
+          url: `${CD_BASE_PATH}/services/${serviceId}`,
+        },
+      ]
+    : []),
+]
+
 export const getDirectory = ({
   serviceDeployment,
   docs = null,
@@ -181,8 +197,7 @@ function ServiceDetailsBase() {
   const serviceId = useParams()[SERVICE_PARAM_NAME] as string
   const pathPrefix = `/${CD_BASE_PATH}/services/${serviceId}`
 
-  const { data: serviceListData, error: serviceListError } =
-    useServiceDeploymentsTinyQuery()
+  const { data: serviceListData } = useServiceDeploymentsTinyQuery()
   const serviceList = useMemo(
     () => mapExistingNodes(serviceListData?.serviceDeployments),
     [serviceListData?.serviceDeployments]
