@@ -7,6 +7,7 @@ defmodule Console.GraphQl.Configuration do
   object :configuration do
     field :terraform, :string
     field :helm,      :string
+    field :readme,    :string
   end
 
   object :log_label do

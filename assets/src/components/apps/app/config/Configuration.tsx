@@ -12,8 +12,8 @@ import { COMPONENT_LABEL } from 'components/cluster/constants'
 import { useQuery } from '@apollo/client'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import MarkdocComponent from 'components/utils/MarkdocContent'
 
 import { ConfigType } from './misc'
 import { ConfigurationEditor } from './ConfigurationEditor'
@@ -61,8 +61,14 @@ export default function Configuration() {
     .filter(({ metadata: { labels } }) => !labels[COMPONENT_LABEL])
   const views =
     overlays?.length > 0
-      ? Object.keys(ConfigType)
-      : Object.keys(ConfigType).filter((key) => key !== ConfigType.SETTINGS)
+      ? Object.keys(ConfigType).filter(
+          (key) => key !== ConfigType.README || application.configuration.readme
+        )
+      : Object.keys(ConfigType).filter(
+          (key) =>
+            (key !== ConfigType.README || application.configuration.readme) &&
+            key !== ConfigType.SETTINGS
+        )
 
   if (!view) setView(views[0])
 
@@ -100,6 +106,11 @@ export default function Configuration() {
         </>
       }
     >
+      {view === ConfigType.README && (
+        <ScrollablePage heading="">
+          <MarkdocComponent raw={application.configuration.readme} />
+        </ScrollablePage>
+      )}
       {view === ConfigType.SETTINGS && (
         <ConfigurationSettings
           application={application}
