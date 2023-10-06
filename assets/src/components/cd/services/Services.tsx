@@ -9,14 +9,18 @@ import {
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
 import { ComponentProps, useMemo, useState } from 'react'
-import { type TableState } from '@tanstack/react-table'
+import type { Row, TableState } from '@tanstack/react-table'
 import uniqBy from 'lodash/uniqBy'
 import isEmpty from 'lodash/isEmpty'
 import { Confirm } from 'components/utils/Confirm'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 import { createMapperWithFallback } from 'utils/mapping'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { removeConnection, updateCache } from 'utils/graphql'
+import { Edge, removeConnection, updateCache } from 'utils/graphql'
+
+import { useNavigate } from 'react-router'
+
+import { CD_BASE_PATH, SERVICES_PATH } from 'routes/cdRoutes'
 
 import { useSetCDHeaderContent } from '../ContinuousDeployment'
 
@@ -115,6 +119,7 @@ export function AuthMethodChip({
 
 export default function Services() {
   const theme = useTheme()
+  const navigate = useNavigate()
   const { data, error, refetch } = useServiceDeploymentsQuery({
     pollInterval: POLL_INTERVAL,
   })
@@ -192,6 +197,14 @@ export default function Services() {
               maxHeight: 'unset',
               height: '100%',
             }}
+            onRowClick={(
+              _e,
+              { original }: Row<Edge<ServiceDeploymentsRowFragment>>
+            ) =>
+              navigate(
+                `/${CD_BASE_PATH}/${SERVICES_PATH}/${original?.node?.id}`
+              )
+            }
             reactTableOptions={reactTableOptions}
           />
         </FullHeightTableWrap>

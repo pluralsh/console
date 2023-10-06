@@ -6,12 +6,6 @@ import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { useTheme } from 'styled-components'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
-import { Link } from 'react-router-dom'
-
-import { CD_BASE_PATH } from 'routes/cdRoutes'
-
-import { InlineLink } from '../../utils/typography/InlineLink'
-
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
 
@@ -24,14 +18,7 @@ export const ColServiceDeployment = columnHelper.accessor(
     header: 'Deployment',
     enableSorting: true,
     enableGlobalFilter: true,
-    cell: ({ getValue, row: { original } }) => (
-      <InlineLink
-        as={Link}
-        to={`/${CD_BASE_PATH}/services/${original?.node?.id}`}
-      >
-        {getValue()}
-      </InlineLink>
-    ),
+    cell: ({ getValue }) => getValue(),
   }
 )
 
