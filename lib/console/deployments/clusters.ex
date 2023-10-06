@@ -91,7 +91,7 @@ defmodule Console.Deployments.Clusters do
       Services.operator_service(cluster, tmp_admin(user))
     end)
     |> add_operation(:cluster_service, fn %{cluster: cluster} ->
-      case Console.Repo.preload(cluster, [:provider]) do
+      case Console.Repo.preload(cluster, [:provider, :credential]) do
         %{provider: %ClusterProvider{}} = cluster -> cluster_service(cluster, tmp_admin(user))
         _ -> {:ok, cluster}
       end
@@ -304,21 +304,26 @@ defmodule Console.Deployments.Clusters do
   end
 
   defp cluster_service(%Cluster{service_id: nil, provider: %ClusterProvider{} = provider} = cluster, %User{} = user) do
+    {ns, name} = namespace_name(cluster)
     Console.Repo.preload(cluster, [:node_pools])
     |> cluster_attributes()
     |> Map.merge(%{
       repository_id: provider.repository_id,
-      name: "cluster-#{cluster.name}",
-      namespace: provider.namespace,
+      name: name,
+      namespace: ns,
       git: Map.take(provider.git, ~w(ref folder)a),
     })
     |> Services.create_service(local_cluster().id, user)
   end
   defp cluster_service(%Cluster{service_id: id} = cluster, %User{} = user) do
-    Console.Repo.preload(cluster, [:node_pools])
+    Console.Repo.preload(cluster, [:node_pools, :credential])
     |> cluster_attributes()
     |> Services.update_service(id, user)
   end
+
+  defp namespace_name(%Cluster{name: n, provider: %ClusterProvider{} = provider, credential: %ProviderCredential{} = cred}),
+    do: {cred.namespace, "cluster-#{provider.name}-#{cred.name}-#{n}"}
+  defp namespace_name(%Cluster{name: n, provider: %ClusterProvider{} = provider}), do: {provider.namespace, "cluster-#{provider.name}-#{n}"}
 
   defp cluster_attributes(%{node_pools: node_pools} = cluster) do
     %{
@@ -330,9 +335,13 @@ defmodule Console.Deployments.Clusters do
         %{name: "clusterName", value: cluster.name},
         %{name: "version", value: cluster.version},
         %{name: "nodePools", value: Jason.encode!(node_pools)}
+        | credential_config(cluster)
       ]
     }
   end
+
+  defp credential_config(%{credential: %ProviderCredential{} = cred}), do: [%{name: "credential", value: Jason.encode!(cred)}]
+  defp credential_config(_), do: []
 
   defp provider_service(%ClusterProvider{service_id: nil, name: name} = provider, %User{} = user) do
     provider_attributes(provider)

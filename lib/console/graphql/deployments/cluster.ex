@@ -6,6 +6,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :name,           non_null(:string)
     field :handle,         :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :provider_id,    :id
+    field :credential_id,  :id, description: "a cloud credential to use when provisioning this cluster"
     field :version,        non_null(:string)
     field :kubeconfig,     :kubeconfig_attributes
     field :node_pools,     list_of(:node_pool_attributes)
