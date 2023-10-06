@@ -15,6 +15,8 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import MarkdocComponent from 'components/utils/MarkdocContent'
 
+import MarkdocComponent from '../docs/MarkdocContent'
+
 import { ConfigType } from './misc'
 import { ConfigurationEditor } from './ConfigurationEditor'
 import { ConfigurationSettings } from './ConfigurationSettings'
