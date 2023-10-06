@@ -309,6 +309,11 @@ const CalloutSC = styled.div<{
   '.children *:last-child': {
     marginBottom: '0',
   },
+  '.children': {
+    '& a, & a:any-link': {
+      ...theme.partials.text.inlineLink,
+    },
+  },
   '.buttonArea': {
     display: 'flex',
     gap: theme.spacing.xsmall,
@@ -349,9 +354,6 @@ const CalloutSC = styled.div<{
     opacity: 0,
     width: 0,
     height: 0,
-  },
-  '& a, & a:any-link': {
-    ...theme.partials.text.inlineLink,
   },
   '.expandIcon': {
     ...theme.partials.dropdown.arrowTransition({ isOpen: $expanded }),

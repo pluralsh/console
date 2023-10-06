@@ -117,7 +117,7 @@ function ExpandableTemplate({
           key={style}
           severity={style}
           title={title}
-          buttonProps={{ children: 'Learn more' }}
+          buttonProps={{ children: 'Learn more', as: 'a' }}
           expandable
           defaultExpanded
           expanded={controlled ? expanded[i] : undefined}
@@ -156,7 +156,7 @@ function CloseableTemplate({ title }: CalloutProps) {
           key={style}
           severity={style}
           title={title}
-          buttonProps={{ children: 'Learn more' }}
+          buttonProps={{ children: 'Learn more', as: 'a' }}
           closeable
           closed={closed}
           onClose={setClosed}
