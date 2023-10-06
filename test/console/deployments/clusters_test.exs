@@ -37,7 +37,7 @@ defmodule Console.Deployments.ClustersTest do
 
       %{service: svc} = Console.Repo.preload(cluster, [:service])
       assert svc.repository_id == provider.repository_id
-      assert svc.name == "cluster-#{cluster.name}"
+      assert svc.name == "cluster-#{provider.name}-#{cluster.name}"
       assert svc.namespace == provider.namespace
       assert svc.cluster_id == self.id
 
@@ -68,6 +68,58 @@ defmodule Console.Deployments.ClustersTest do
       [revision] = Clusters.revisions(cluster)
       assert revision.version == cluster.version
       assert length(revision.node_pools) == length(cluster.node_pools)
+    end
+
+    test "it can create a new cluster record with a provider credential" do
+      user = admin_user()
+      provider = insert(:cluster_provider)
+      cred = insert(:provider_credential, provider: provider)
+      self = insert(:cluster, self: true)
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        version: "1.25",
+        provider_id: provider.id,
+        credential_id: cred.id,
+        node_pools: [
+          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, user)
+
+      assert cluster.name == "test"
+      assert cluster.version == "1.25"
+      assert cluster.provider_id == provider.id
+      assert cluster.deploy_token
+      assert cluster.token_readable
+
+      assert_receive {:event, %PubSub.ClusterCreated{item: ^cluster}}
+
+      [pool] = cluster.node_pools
+      assert pool.name == "pool"
+      assert pool.min_size == 1
+      assert pool.max_size == 5
+      assert pool.instance_type == "t5.large"
+
+      %{service: svc} = Console.Repo.preload(cluster, [:service])
+      assert svc.repository_id == provider.repository_id
+      assert svc.name == "cluster-#{provider.name}-#{cred.name}-#{cluster.name}"
+      assert svc.namespace == cred.namespace
+      assert svc.cluster_id == self.id
+
+      {:ok, secrets} = Services.configuration(svc)
+      assert secrets["clusterName"] == cluster.name
+      assert secrets["version"] == cluster.version
+      assert secrets["operatorNamespace"] == "plrl-deploy-operator"
+      assert secrets["consoleUrl"] == Path.join(Console.conf(:ext_url), "ext/gql")
+      assert secrets["deployToken"] == cluster.deploy_token
+      assert secrets["clusterId"] == cluster.id
+      assert Jason.decode!(secrets["credential"])["name"] == cred.name
+      [node_pool] = Jason.decode!(secrets["nodePools"])
+      assert node_pool["name"] == pool.name
+      assert node_pool["min_size"] == pool.min_size
+      assert node_pool["max_size"] == pool.max_size
+      assert node_pool["instance_type"] == "t5.large"
     end
 
     test "it will respect rbac" do
