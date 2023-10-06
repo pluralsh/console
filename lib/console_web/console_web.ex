@@ -30,7 +30,7 @@ defmodule ConsoleWeb do
   def view do
     quote do
       use Phoenix.View,
-        root: "lib/watchman_web/templates",
+        root: "lib/console_web/templates",
         namespace: ConsoleWeb
 
       # Import convenience functions from controllers

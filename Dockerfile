@@ -120,24 +120,29 @@ ARG GIT_COMMIT
 
 ENV REPLACE_OS_VARS=true \
     APP_NAME=${APP_NAME} \
-    GIT_ASKPASS=/root/bin/.git-askpass \
-    SSH_ASKPASS=/root/bin/.ssh-askpass \
+    GIT_ASKPASS=/home/console/bin/.git-askpass \
+    SSH_ASKPASS=/home/console/bin/.ssh-askpass \
     GIT_COMMIT=${GIT_COMMIT}
 
 WORKDIR /opt/app
 
-RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh
-RUN mkdir -p /root/.plural && mkdir -p /root/.creds && mkdir /root/bin
+RUN addgroup -S --gid 10001 app
+RUN adduser -u 10001 -S console -G app
+
+RUN mkdir -p /home/console/.ssh && chmod 0700 /home/console/.ssh
+RUN mkdir -p /home/console/.plural && mkdir -p /home/console/.creds && mkdir /home/console/bin
 RUN ln -s /usr/local/bin/plural /usr/local/bin/forge
 
 # add common repos to known hosts
-COPY bin /root/bin
-RUN chmod +x /root/bin/.git-askpass && \ 
-      chmod +x /root/bin/.ssh-askpass && \
-      chmod +x /root/bin/ssh-add
+COPY bin /home/console/bin
+RUN chmod +x /home/console/bin/.git-askpass && \ 
+      chmod +x /home/console/bin/.ssh-askpass && \
+      chmod +x /home/console/bin/ssh-add
 
 ENV GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet"
 
 COPY --from=builder /opt/built .
+
+USER console
 
 CMD trap 'exit' INT; eval $(ssh-agent -s); /opt/app/bin/${APP_NAME} foreground
