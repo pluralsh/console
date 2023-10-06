@@ -76,15 +76,11 @@ spec:
           containerPort: 4369
           protocol: TCP
         livenessProbe:
-          httpGet:
-            path: /health
-            port: http
+        {{ toYaml .Values.livenessProbe | nindent 10 }}
         readinessProbe:
-          httpGet:
-            path: /health
-            port: http
+        {{ toYaml .Values.readinessProbe | nindent 10 }}
         resources:
-          {{- toYaml .Values.resources | nindent 12 }}
+        {{- toYaml .Values.resources | nindent 10 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
