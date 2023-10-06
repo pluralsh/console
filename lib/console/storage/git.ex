@@ -6,11 +6,10 @@ defmodule Console.Storage.Git do
   def init() do
     unless File.exists?(workspace()) do
       with {:ok, _} <- maybe_add_username(conf(:git_url)),
-           {:ok, _} <- cmd("git", ["clone", conf(:git_url), workspace()]),
+           {:ok, _} <- cmd("git", ["clone", "-b", branch(), conf(:git_url), workspace()]),
            {:ok, _} <- git("config", ["user.name", conf(:git_user_name)]),
            {:ok, _} <- git("config", ["user.email", conf(:git_user_email)]),
-           {:ok, _} <- Plural.unlock(),
-        do: git("checkout", [branch()])
+        do: Plural.unlock()
     else
       pull()
     end

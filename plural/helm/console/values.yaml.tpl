@@ -69,6 +69,7 @@ serviceAccount:
 secrets:
   jwt: {{ dedupe . "console.secrets.jwt" (randAlphaNum 20) }}
   admin_name: {{ .Values.admin_name }}
+  aes_key: {{ dedupe . "console.secrets.aes_key" genAESKey }}
   admin_email: {{ dedupe . "console.secrets.admin_email" (default "someone@example.com" .Config.Email) }}
   admin_password: {{ dedupe . "console.secrets.admin_password" (randAlphaNum 20) }}
 {{- if .Values.console_dns  }}

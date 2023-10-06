@@ -288,6 +288,7 @@ export const APPLICATION_Q = gql`
       configuration {
         helm
         terraform
+        readme
       }
       ...ApplicationFragment
     }

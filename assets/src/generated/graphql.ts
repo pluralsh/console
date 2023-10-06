@@ -599,6 +599,7 @@ export type ConfigMap = {
 export type Configuration = {
   __typename?: 'Configuration';
   helm?: Maybe<Scalars['String']['output']>;
+  readme?: Maybe<Scalars['String']['output']>;
   terraform?: Maybe<Scalars['String']['output']>;
 };
 

@@ -37,6 +37,7 @@ import {
   DocPageContextProvider,
   useDocPageContext,
 } from '../../contexts/DocPageContext'
+import { versionName } from '../AppCard'
 
 import AppSelector from './AppSelector'
 import RunbookStatus from './runbooks/runbook/RunbookStatus'
@@ -306,10 +307,7 @@ function AppWithoutContext() {
           marginTop={validLinks?.length > 0 ? 0 : 56}
         >
           <PropsContainer title="App">
-            <Prop title="Current version">
-              {version.startsWith('v') ? '' : 'v'}
-              {version}
-            </Prop>
+            <Prop title="Current version">{versionName(version)}</Prop>
             <Prop title="Status">
               <AppStatus app={currentApp} />
             </Prop>

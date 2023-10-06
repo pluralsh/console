@@ -78,6 +78,7 @@ defmodule Console.Watchers.Upgrade do
     end
   end
 
+  def handle_info(:usage, %{upgrades: nil} = state), do: {:noreply, state}
   def handle_info(:usage, %{upgrades: upgrades} = state) do
     Logger.info "Collecting resource usage"
     with true <- Console.Deployer.leader?(),
