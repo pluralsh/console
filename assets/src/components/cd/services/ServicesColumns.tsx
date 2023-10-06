@@ -3,13 +3,21 @@ import { ClusterIcon } from '@pluralsh/design-system'
 import { ServiceDeploymentsRowFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
+
+import { Link } from 'react-router-dom'
+
+import { CD_BASE_PATH } from 'routes/cdRoutes'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
+
+const InlineLink = styled.a(({ theme }) => ({
+  ...theme.partials.text.inlineLink,
+}))
 
 export const ColServiceDeployment = columnHelper.accessor(
   ({ node }) => node?.name,
@@ -18,7 +26,14 @@ export const ColServiceDeployment = columnHelper.accessor(
     header: 'Deployment',
     enableSorting: true,
     enableGlobalFilter: true,
-    cell: ({ getValue }) => getValue(),
+    cell: ({ getValue, row: { original } }) => (
+      <InlineLink
+        as={Link}
+        to={`/${CD_BASE_PATH}/services/${original?.node?.id}`}
+      >
+        {getValue()}
+      </InlineLink>
+    ),
   }
 )
 
