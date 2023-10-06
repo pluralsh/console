@@ -9,4 +9,4 @@ export const Level = {
 }
 
 export const ts = (timestamp) =>
-  moment(new Date(Math.round(timestamp / (1000 * 1000)))).format()
+  moment(new Date(Math.round(parseInt(timestamp) / (1000 * 1000)))).format()
