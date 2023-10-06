@@ -5,6 +5,13 @@ import Services from 'components/cd/services/Services'
 import Providers from 'components/cd/providers/Providers'
 import { Navigate, Route } from 'react-router-dom'
 
+import ServiceDetails from 'components/cd/services/service/ServiceDetails'
+import ServiceDocs from 'components/cd/services/service/ServiceDocs'
+
+import ServiceComponents from 'components/cd/services/service/ServiceComponents'
+
+import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -12,19 +19,19 @@ import ClusterPods from '../components/cd/cluster/ClusterPods'
 
 export const CD_BASE_PATH = 'cd'
 const CLUSTERS_PATH = 'clusters'
+const SERVICES_PATH = 'services'
 
 export const CLUSTER_BASE_PATH = `${CD_BASE_PATH}/${CLUSTERS_PATH}/:clusterId`
 const CLUSTER_SERVICES_PATH = 'services'
+
+export const SERVICE_PARAM_NAME = 'serviceId'
+export const SERVICE_BASE_PATH = `${CD_BASE_PATH}/${SERVICES_PATH}/:${SERVICE_PARAM_NAME}`
+const SERVICE_COMPONENTS_PATH = 'components'
 
 export const cdRoutes = [
   /* Root */
   <Route
     path={CD_BASE_PATH}
-    loader={() => {
-      console.log('plural wrapper loader')
-
-      return {}
-    }}
     element={<ContinuousDeployment />}
   >
     <Route
@@ -44,6 +51,7 @@ export const cdRoutes = [
       path="services"
       element={<Services />}
     />
+
     {/* <Route
       path="pipelines"
       element={<Pipelines />}
@@ -84,5 +92,38 @@ export const cdRoutes = [
       path="pods"
       element={<ClusterPods />}
     />
+  </Route>,
+
+  // Service details
+  <Route
+    path={SERVICE_BASE_PATH}
+    element={<ServiceDetails />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to={SERVICE_COMPONENTS_PATH}
+        />
+      }
+    />
+    <Route
+      element={<ServiceComponents />}
+      path={SERVICE_COMPONENTS_PATH}
+    />
+    <Route
+      element={<ServiceSecrets />}
+      path="secrets"
+    />
+    <Route
+      element={<ServiceDocs />}
+      path="docs"
+    >
+      <Route
+        path=":docName"
+        element={<ServiceDocs />}
+      />
+    </Route>
   </Route>,
 ]

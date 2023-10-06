@@ -1,16 +1,14 @@
 import { A, Div, Flex } from 'honorable'
 import {
-  Button,
   TreeNav,
   TreeNavEntry,
   WrapWithIf,
   getBarePathFromPath,
   removeTrailingSlashes,
 } from '@pluralsh/design-system'
-import { useContext, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Outlet, useLocation, useParams } from 'react-router-dom'
 import { ensureURLValidity } from 'utils/url'
-import { InstallationContext } from 'components/Installations'
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
@@ -18,126 +16,45 @@ import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/Respon
 import { PropsContainer } from 'components/utils/PropsContainer'
 import Prop from 'components/utils/Prop'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
-import { Application, FileContent, useRepositoryQuery } from 'generated/graphql'
+import { useServiceDeploymentQuery } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
 import capitalize from 'lodash/capitalize'
-import {
-  collectHeadings,
-  getMdContent,
-} from '@pluralsh/design-system/dist/markdoc'
 import { useTheme } from 'styled-components'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import isEmpty from 'lodash/isEmpty'
-import { config } from 'markdoc/mdSchema'
-
-import { LoginContext } from '../../contexts'
-import AppStatus from '../AppStatus'
 
 import {
   DocPageContextProvider,
   useDocPageContext,
-} from '../../contexts/DocPageContext'
+} from 'components/contexts/DocPageContext'
 
-import AppSelector from './AppSelector'
-import RunbookStatus from './runbooks/runbook/RunbookStatus'
-import LogsLegend from './logs/LogsLegend'
-import ComponentProgress from './components/ComponentProgress'
+import { getDocsData } from 'components/apps/app/App'
+import { CD_BASE_PATH, SERVICE_PARAM_NAME } from 'routes/cdRoutes'
 
-export function getDocsData(
-  docs:
-    | (Pick<FileContent, 'content' | 'path'> | null | undefined)[]
-    | null
-    | undefined
-) {
-  return docs?.map((doc, i) => {
-    const content = getMdContent(doc?.content, config)
-    const headings = collectHeadings(content)
-    const id = headings?.[0]?.id || `page-${i}`
-    const label = headings?.[0]?.title || `Page ${i}`
-    const path = `docs/${id}`
-
-    const subpaths = headings
-      .map((heading) => {
-        if (heading.level === 3 && heading.id && heading.title) {
-          return {
-            path: `${path}#${heading.id}`,
-            label: `${heading.title}`,
-            id: heading.id,
-            type: 'docPageHash',
-          }
-        }
-
-        return null
-      })
-      .filter((heading) => !!heading)
-
-    return {
-      path,
-      id,
-      label,
-      subpaths,
-      content,
-      headings,
-      type: 'docPage',
-    }
-  })
-}
-
-const SYSTEM_APPS = [
-  'bootstrap',
-  'ingress-nginx',
-  'monitoring',
-  'postgres',
-  'mysql',
-  'console',
-]
+// import AppSelector from './AppSelector'
 
 export const getDirectory = ({
-  app = null,
+  name,
   docs = null,
-  config = null,
 }: {
-  app: Application | null
+  name?: string
   docs?: ReturnType<typeof getDocsData> | null
-  config: any
 }) => {
-  if (!app || !docs) {
+  if (!name) {
     return []
   }
 
   return [
-    { path: 'dashboards', label: 'Dashboards', enabled: true },
-    { path: 'runbooks', label: 'Runbooks', enabled: true },
     {
       path: 'components',
-      label: <ComponentProgress app={app} />,
+      label: 'Component x/x',
       enabled: true,
     },
-    { path: 'logs', label: 'Logs', enabled: true },
-    {
-      path: 'cost',
-      label: 'Cost analysis',
-      enabled: app?.cost || app?.license,
-    },
-    { path: 'oidc', label: 'OpenID user management', enabled: true },
-    {
-      path: 'credentials',
-      label: 'Credentials',
-      enabled: true,
-    },
-    {
-      path: 'config',
-      label: 'Configuration',
-      enabled: config?.gitStatus?.cloned,
-    },
-    {
-      path: 'uninstall',
-      label: 'Uninstall',
-      enabled: !SYSTEM_APPS.includes(app.name),
-    },
+    { path: 'secrets', label: 'Secrets', enabled: true },
+
     {
       path: 'docs',
-      label: `${capitalize(app?.name)} docs`,
+      label: name ? `${capitalize(name)} docs` : 'Docs',
       enabled: !isEmpty(docs),
       ...(docs ? { subpaths: docs } : {}),
     },
@@ -213,49 +130,49 @@ function SideNavEntries({
   )
 }
 
-function AppWithoutContext() {
+function ServiceDetailsBase() {
+  console.log('Service Details')
   const theme = useTheme()
-  const { me, configuration } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
-  const { appName, dashboardId, runbookName } = useParams()
-  const { applications } = useContext<any>(InstallationContext)
-  const [dashboard, setDashboard] = useState<any>()
-  const [runbook, setRunbook] = useState<any>()
-  const pathPrefix = `/apps/${appName}`
-  const currentApp = applications.find((app) => app.name === appName)
-  const { data: repoData, error: repoError } = useRepositoryQuery({
-    variables: { name: appName ?? '' },
+  const serviceId = useParams()[SERVICE_PARAM_NAME] as string
+  const pathPrefix = `/${CD_BASE_PATH}/services/${serviceId}`
+  const { data: serviceData, error: serviceError } = useServiceDeploymentQuery({
+    variables: { id: serviceId },
   })
 
+  console.log('serviceName', serviceId)
+  console.log('data', serviceData)
+
   const docs = useMemo(
-    () => getDocsData(repoData?.repository?.docs),
-    [repoData?.repository?.docs]
+    () => getDocsData(serviceData?.serviceDeployment?.docs),
+    [serviceData?.serviceDeployment?.docs]
   )
+  const { name, version } = serviceData?.serviceDeployment || {}
 
   const directory = useMemo(
     () =>
-      getDirectory({ app: currentApp, docs, config: configuration }).filter(
-        (entry) => entry.enabled
-      ),
-    [configuration, currentApp, docs]
+      getDirectory({
+        name,
+        docs,
+      }).filter((entry) => entry.enabled),
+    [docs, name]
   )
 
-  if (!me || !currentApp) return null
-  if (repoError) {
-    return <GqlError error={repoError} />
+  if (serviceError) {
+    return (
+      <>
+        serviceName:{serviceId}
+        <GqlError error={serviceError} />
+      </>
+    )
   }
-  if (!repoData?.repository) return <LoadingIndicator />
+  if (!serviceData?.serviceDeployment) return <LoadingIndicator />
 
-  const currentTab = directory.find(
-    (tab) => pathname?.startsWith(`${pathPrefix}/${tab.path}`)
-  )
-  const {
-    name,
-    spec: {
-      descriptor: { links, version },
-    },
-  } = currentApp
-  const validLinks = links?.filter(({ url }) => !!url)
+  //   const currentTab = directory.find(
+  //     (tab) => pathname?.startsWith(`${pathPrefix}/${tab.path}`)
+  //   )
+  //   const validLinks = links?.filter(({ url }) => !!url)
+  const validLinks = []
 
   return (
     <ResponsiveLayoutPage>
@@ -265,11 +182,11 @@ function AppWithoutContext() {
           maxHeight="100%"
           overflow="hidden"
         >
-          <AppSelector
+          {/* <AppSelector
             directory={directory}
             applications={applications}
             currentApp={currentApp}
-          />
+          /> */}
           <Div
             overflowY="auto"
             paddingBottom={theme.spacing.medium}
@@ -284,10 +201,10 @@ function AppWithoutContext() {
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer role="main">
-        <Outlet context={{ setDashboard, setRunbook, docs }} />
+        <Outlet context={{ docs }} />
       </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSidecarContainer>
-        {validLinks?.length > 0 && (
+        {/* {validLinks?.length > 0 && (
           <Button
             secondary
             marginBottom="medium"
@@ -299,20 +216,20 @@ function AppWithoutContext() {
           >
             Launch {name}
           </Button>
-        )}
+        )} */}
         <Flex
           gap="medium"
           direction="column"
           marginTop={validLinks?.length > 0 ? 0 : 56}
         >
           <PropsContainer title="App">
-            <Prop title="Current version">
-              {version.startsWith('v') ? '' : 'v'}
-              {version}
-            </Prop>
-            <Prop title="Status">
-              <AppStatus app={currentApp} />
-            </Prop>
+            {version && (
+              <Prop title="Current version">
+                {version.startsWith('v') ? '' : 'v'}
+                {version}
+              </Prop>
+            )}
+            <Prop title="Status">{/* <AppStatus app={currentApp} /> */}</Prop>
             {validLinks?.length > 1 && (
               <Prop title="Other links">
                 {validLinks.slice(1).map(({ url }) => (
@@ -329,20 +246,20 @@ function AppWithoutContext() {
               </Prop>
             )}
           </PropsContainer>
-          {dashboardId && dashboard && (
+          {/* {dashboardId && dashboard && (
             <PropsContainer title="Dashboard">
               <Prop title="Description">{dashboard.spec?.description}</Prop>
             </PropsContainer>
-          )}
-          {runbookName && runbook && (
+          )} */}
+          {/* {runbookName && runbook && (
             <PropsContainer title="Runbook">
               <Prop title="Description">{runbook.spec?.description}</Prop>
               <Prop title="Status">
                 <RunbookStatus runbook={runbook} />
               </Prop>
             </PropsContainer>
-          )}
-          {currentTab?.path === 'logs' && <LogsLegend />}
+          )} */}
+          {/* {currentTab?.path === 'logs' && <LogsLegend />} */}
         </Flex>
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
@@ -350,10 +267,10 @@ function AppWithoutContext() {
   )
 }
 
-export default function App({ ...props }) {
+export default function ServiceDetails({ ...props }) {
   return (
     <DocPageContextProvider>
-      <AppWithoutContext {...props} />
+      <ServiceDetailsBase {...props} />
     </DocPageContextProvider>
   )
 }

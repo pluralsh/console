@@ -1,3 +1,14 @@
+fragment ServiceDeploymentRevision on Revision {
+  id
+  version
+  updatedAt
+  insertedAt
+  git {
+    folder
+    ref
+  }
+}
+
 fragment ServiceDeploymentsRow on ServiceDeployment {
   id
   name
@@ -15,15 +26,28 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
   status
 }
 
-fragment ServiceDeploymentRevision on Revision {
+fragment ServiceDeploymentDetails on ServiceDeployment {
   id
-  version
-  updatedAt
-  insertedAt
-  git {
-    folder
-    ref
+  name
+  cluster {
+    id
+    name
   }
+  version
+  docs {
+    content
+    path
+  }
+}
+
+fragment ServiceDeploymentComponent on ServiceComponent {
+  id
+  name
+  kind
+  namespace
+  state
+  synced
+  version
 }
 
 fragment ServiceDeploymentRevisions on ServiceDeployment {
@@ -48,6 +72,20 @@ query ServiceDeployments {
       node {
         ...ServiceDeploymentsRow
       }
+    }
+  }
+}
+
+query ServiceDeployment($id: ID!) {
+  serviceDeployment(id: $id) {
+    ...ServiceDeploymentDetails
+  }
+}
+
+query ServiceDeploymentComponents($id: ID!) {
+  serviceDeployment(id: $id) {
+    components {
+      ...ServiceDeploymentComponent
     }
   }
 }

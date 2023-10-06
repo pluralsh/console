@@ -10,11 +10,10 @@ import {
   useParams,
 } from 'react-router-dom'
 
-import { getDocsData } from '../App'
+import { useDocPageContext } from 'components/contexts/DocPageContext'
 
-import { useDocPageContext } from '../../../contexts/DocPageContext'
-
-import MarkdocComponent from '../../../utils/MarkdocContent'
+import { getDocsData } from 'components/apps/app/App'
+import MarkdocComponent from 'components/utils/MarkdocContent'
 
 export default function AppDocs() {
   const scrollRef = useRef<HTMLElement>()

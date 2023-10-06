@@ -61,11 +61,10 @@ export default function ContinuousDeployment() {
     []
   )
   const tabStateRef = useRef<any>(null)
-
-  const tab = useMatch(`/${CD_BASE_PATH}/:tab`)?.params?.tab || ''
-
+  const pathMatch = useMatch(`/${CD_BASE_PATH}/:tab*`)
+  // @ts-expect-error
+  const tab = pathMatch?.params?.tab || ''
   const path = `/${CD_BASE_PATH}/${tab}`
-
   const currentTab = directory.find(({ path }) => path === tab)
   const crumbs = useMemo(
     () => (path ? [{ label: tab, path }] : []),
