@@ -6,7 +6,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
   describe "createGitRepository" do
     test "it will create a new git repo" do
       {:ok, %{data: %{"createGitRepository" => git}}} = run_query("""
-        mutation Create($attrs: GitRepositoryAttributes!) {
+        mutation Create($attrs: GitAttributes!) {
           createGitRepository(attributes: $attrs) {
             id
             url
@@ -23,7 +23,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       git = insert(:git_repository)
 
       {:ok, %{data: %{"updateGitRepository" => updated}}} = run_query("""
-        mutation Create($id: ID!, $attrs: GitRepositoryAttributes!) {
+        mutation Create($id: ID!, $attrs: GitAttributes!) {
           updateGitRepository(id: $id, attributes: $attrs) {
             id
             url
@@ -578,7 +578,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       }
 
       {:ok, %{data: %{"updateServiceComponents" => svc}}} = run_query("""
-        mutation Update($components: [ServiceComponents], $id: ID!) {
+        mutation Update($components: [ComponentAttributes], $id: ID!) {
           updateServiceComponents(id: $id, components: $components) {
             id
             components { name kind namespace group version kind synced state }
@@ -607,7 +607,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       }
 
       {:ok, %{data: %{"updateServiceComponents" => svc}}} = run_query("""
-        mutation Update($components: [ServiceComponents], $errors: [ServiceErrorAttributes], $id: ID!) {
+        mutation Update($components: [ComponentAttributes], $errors: [ServiceErrorAttributes], $id: ID!) {
           updateServiceComponents(id: $id, components: $components, errors: $errors) {
             id
             components { name kind namespace group version kind synced state }

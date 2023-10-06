@@ -78,7 +78,10 @@ defmodule Console.Watchers.Base do
   def to_delta(:deleted), do: :delete
 
   def publish(resource, type) do
-    broadcast(resource, to_delta(type))
+    case Absinthe.Subscription.extract_pubsub(%{pubsub: Console.PubSub}) do
+      {:ok, _} -> broadcast(resource, to_delta(type))
+      _ -> :ok
+    end
   end
 
   def group_broadcast(group, msg) do

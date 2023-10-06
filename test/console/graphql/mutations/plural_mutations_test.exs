@@ -67,7 +67,7 @@ defmodule Console.GraphQl.PluralMutationsTest do
       user = insert(:user, roles: %{admin: true})
 
       {:ok, %{data: %{"installStack" => build}}} = run_query("""
-        mutation Install($name: Name!, $context: ContextAttributes!) {
+        mutation Install($name: String!, $context: ContextAttributes!) {
           installStack(name: $name, context: $context) {
             id
             type

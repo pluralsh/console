@@ -8,6 +8,7 @@ defmodule Console.Application do
     children = [
       Console.PubSub.Broadcaster,
       Console.Repo,
+      {Phoenix.PubSub, [name: Console.PubSub, adapter: Phoenix.PubSub.PG2]},
       ConsoleWeb.Endpoint,
       Console.Clustering.Connect,
       Console.Commands.Configuration,
@@ -21,7 +22,7 @@ defmodule Console.Application do
       {Registry, [keys: :unique, name: Console.Deployments.Git.Agent.registry()]},
       {Cluster.Supervisor, [topologies, [name: Console.ClusterSupervisor]]},
       Console.Bootstrapper,
-      {Absinthe.Subscription, [ConsoleWeb.Endpoint]},
+      {Absinthe.Subscription, ConsoleWeb.Endpoint},
       Console.Cached.Namespace,
       Console.Cached.Pod,
       Console.Cached.VPN,
