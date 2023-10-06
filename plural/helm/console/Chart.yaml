@@ -2,7 +2,7 @@ apiVersion: v2
 name: console
 description: A chart for plural console
 appVersion: 0.5.4
-version: 0.7.82
+version: 0.7.83
 dependencies:
   - name: test-base
     version: 0.1.10
