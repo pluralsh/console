@@ -267,11 +267,13 @@ defmodule Console.Deployments.Services do
     |> add_operation(:updated, fn %{service: %Service{components: components} = service} ->
       running = Enum.all?(components, & &1.state == :running || is_nil(&1.state))
       failed = Enum.any?(components, & &1.state == :failed)
-      num_healthy = Enum.count(components, & &1.state == :running || is_nil(&1.state))
+      unsynced = Enum.any?(components, & !&1.synced)
+      num_healthy = Enum.count(components, & (&1.state == :running || is_nil(&1.state)) && &1.synced)
       component_status = "#{num_healthy} / #{length(components)}"
-      case {failed, running} do
-        {true, _} -> update_status(service, :failed, component_status)
-        {_, true} -> update_status(service, :healthy, component_status)
+      case {failed, running, unsynced} do
+        {true, _, _} -> update_status(service, :failed, component_status)
+        {_, _, true} -> update_status(service, :stale, component_status)
+        {_, true, _} -> update_status(service, :healthy, component_status)
         _ -> update_status(service, :stale, component_status)
       end
     end)

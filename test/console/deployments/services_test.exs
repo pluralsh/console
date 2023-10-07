@@ -449,6 +449,36 @@ defmodule Console.Deployments.ServicesTest do
       assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
     end
 
+    test "if a component is not synced it will remain stale" do
+      service = insert(:service)
+
+      {:ok, service} = Services.update_components(%{
+        components: [%{
+          state: nil,
+          synced: false,
+          group: "networking.k8s.io",
+          version: "v1",
+          kind: "Ingress",
+          namespace: "my-app",
+          name: "api"
+        }]
+      }, service)
+
+      %{components: [component]} = Console.Repo.preload(service, [:components])
+      refute component.synced
+      assert component.group == "networking.k8s.io"
+      assert component.version == "v1"
+      assert component.kind == "Ingress"
+      assert component.namespace == "my-app"
+      assert component.name == "api"
+
+      svc = refetch(service)
+      assert svc.status == :stale
+      assert svc.component_status == "0 / 1"
+
+      assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
+    end
+
     test "it will persist errors if passed" do
       service = insert(:service)
 
