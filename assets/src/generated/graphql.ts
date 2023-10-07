@@ -1735,6 +1735,8 @@ export type Revision = {
   /** id of this revision */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the commit message for this revision */
+  message?: Maybe<Scalars['String']['output']>;
   /** the sha this service was pulled from */
   sha?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -2904,6 +2906,8 @@ export type ServiceDeployment = {
   /** internal id of this service */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the commit message currently in use */
+  message?: Maybe<Scalars['String']['output']>;
   /** human readable name of this service, must be unique per cluster */
   name: Scalars['String']['output'];
   /** kubernetes namespace this service will be deployed to */

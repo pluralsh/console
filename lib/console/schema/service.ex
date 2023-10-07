@@ -40,6 +40,7 @@ defmodule Console.Schema.Service do
     field :sha,              :string
     field :namespace,        :string
     field :docs_path,        :string
+    field :message,          :string
     field :status,           Status, default: :stale
     field :write_policy_id,  :binary_id
     field :read_policy_id,   :binary_id
@@ -131,7 +132,7 @@ defmodule Console.Schema.Service do
   def docs_path(%__MODULE__{docs_path: p}) when is_binary(p), do: p
   def docs_path(%__MODULE__{git: %{folder: p}}), do: Path.join(p, "docs")
 
-  @valid ~w(name docs_path component_status status version sha cluster_id repository_id namespace owner_id)a
+  @valid ~w(name docs_path component_status status version sha cluster_id repository_id namespace owner_id message)a
 
   def changeset(model, attrs \\ %{}) do
     model

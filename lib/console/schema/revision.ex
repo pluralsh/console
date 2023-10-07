@@ -5,6 +5,7 @@ defmodule Console.Schema.Revision do
   schema "revisions" do
     field :version, :string
     field :sha,     :string
+    field :message, :string
 
     embeds_one :git, Service.Git, on_replace: :update
     belongs_to :service, Service
@@ -29,7 +30,7 @@ defmodule Console.Schema.Revision do
     from(r in query, where: r.id not in ^ids)
   end
 
-  @valid ~w(version sha)a
+  @valid ~w(version sha message)a
 
   def changeset(model, attrs \\ %{}) do
     model

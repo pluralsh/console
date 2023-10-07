@@ -145,17 +145,17 @@ defmodule Console.Deployments.Services do
   @doc """
   Updates the sha of a service if relevant
   """
-  @spec update_sha(Service.t, binary) :: service_resp
-  def update_sha(%Service{sha: sha} = svc, sha), do: {:ok, svc}
-  def update_sha(%Service{id: id}, sha) do
+  @spec update_sha(Service.t, binary, binary) :: service_resp
+  def update_sha(%Service{sha: sha} = svc, sha, _), do: {:ok, svc}
+  def update_sha(%Service{id: id}, sha, msg) do
     start_transaction()
     |> add_operation(:base, fn _ ->
       get_service!(id)
-      |> Service.changeset(%{sha: sha, status: :stale})
+      |> Service.changeset(%{sha: sha, status: :stale, message: msg})
       |> Repo.update()
     end)
     |> add_operation(:revision, fn %{base: base} ->
-      add_version(%{sha: sha}, base.version)
+      add_version(%{sha: sha, message: msg}, base.version)
       |> Console.dedupe(:git, %{ref: sha, folder: base.git.folder})
       |> Console.dedupe(:configuration, fn ->
         {:ok, secrets} = configuration(base)

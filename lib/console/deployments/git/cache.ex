@@ -20,8 +20,9 @@ defmodule Console.Deployments.Git.Cache do
   def fetch(%__MODULE__{git: repo} = cache, ref, path) do
     with {:ok, _} <- git(repo, "checkout", [ref]),
          {:ok, sha} <- sha(repo),
+         {:ok, msg} <- msg(repo),
          {:ok, f} <- tarball(cache, sha, path),
-      do: {:ok, sha, f}
+      do: {:ok, sha, msg, f}
   end
 
   def refresh(%__MODULE__{dir: dir} = cache) do

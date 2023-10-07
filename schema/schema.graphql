@@ -549,6 +549,9 @@ type ServiceDeployment {
   "settings for advanced tuning of the sync process"
   syncConfig: SyncConfig
 
+  "the commit message currently in use"
+  message: String
+
   "the time this service was scheduled for deletion"
   deletedAt: DateTime
 
@@ -609,6 +612,9 @@ type Revision {
 
   "the sha this service was pulled from"
   sha: String
+
+  "the commit message for this revision"
+  message: String
 
   insertedAt: DateTime
 
