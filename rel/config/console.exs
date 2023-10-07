@@ -70,7 +70,7 @@ add_https = fn
 end
 
 config :console,
-  workspace_root: "/home/console",
+  workspace_root: "/root",
   git_url: get_env("GIT_URL"),
   branch: get_env("BRANCH_NAME") || "master",
   repo_root: get_env("REPO_ROOT"),
