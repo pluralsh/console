@@ -1,6 +1,7 @@
 defmodule Console.ExternalGraphQl do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
+  alias Console.Middleware.{SafeResolution, ErrorHandler}
   alias Console.GraphQl.Resolvers.{Deployments}
 
   defmodule Plug do
@@ -32,6 +33,11 @@ defmodule Console.ExternalGraphQl do
   def plugins do
     [Absinthe.Middleware.Dataloader] ++ Absinthe.Plugin.defaults()
   end
+
+  def middleware(middleware, _field, %{identifier: type}) when type in [:query, :mutation] do
+    SafeResolution.apply(middleware) ++ [ErrorHandler]
+  end
+  def middleware(middleware, _field, _object), do: middleware
 
   query do
     import_fields :public_service_queries
