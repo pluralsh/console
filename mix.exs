@@ -44,7 +44,7 @@ defmodule Console.MixProject do
       config_path: "config/config.exs",
       deps_path: "deps",
       lockfile: "mix.lock",
-      elixir: "~> 1.9",
+      elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
@@ -67,7 +67,7 @@ defmodule Console.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ecto, "~> 3.4.3", override: true},
+      {:ecto, "~> 3.9.0", override: true},
       {:ex_machina, "~> 2.3", only: :test},
       {:distillery, "~> 2.1"},
       {:libcluster, "~> 3.2"},
@@ -78,8 +78,8 @@ defmodule Console.MixProject do
       {:openid_connect, "~> 0.2.2", git: "https://github.com/pluralsh/openid_connect", commit: "c3b2701b9adbe01fd89bbd09816ffa6c9e4a825e"},
       {:phoenix_pubsub, "~> 2.0"},
       {:phoenix_ecto, "~>4.0"},
-      {:ecto_sql, "~> 3.4.5"},
-      {:piazza_core, "~> 0.3.1"},
+      {:ecto_sql, "~> 3.10.0"},
+      {:piazza_core, "~> 0.3.8", git: "https://github.com/michaeljguarino/piazza_core"},
       {:flow, "~> 0.15.0"},
       {:bourne, "~> 1.1"},
       {:phoenix_html, "~> 2.11"},
@@ -100,7 +100,7 @@ defmodule Console.MixProject do
       {:timex, "~> 3.7"},
       {:quantum, "~> 2.3"},
       {:yaml_elixir, "~> 2.9"},
-      {:poison, "~> 3.1"},
+      {:poison, "~> 5.0", override: true},
       {:mojito, "~> 0.3.0"},
       {:ets, "~> 0.9"},
       {:reverse_proxy_plug, "~> 1.2.1"},

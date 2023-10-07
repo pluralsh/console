@@ -14,7 +14,7 @@ COPY assets/ ./
 
 RUN yarn run build
 
-FROM bitwalker/alpine-elixir:1.11.4 AS builder
+FROM bitwalker/alpine-elixir:1.12.3 AS builder
 
 # The following are build arguments used to change variable parts of the image.
 # The name of your application/release (required)
@@ -90,7 +90,7 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
     chmod +x /usr/local/bin/terraform
 
 # From this line onwards, we're in a new image, which will be the image used in production
-FROM erlang:23.3.4.18-alpine
+FROM erlang:24.3.4.6-alpine
 
 ARG CLOUD_SDK_VERSION=273.0.0
 ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION

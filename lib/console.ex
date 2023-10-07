@@ -97,7 +97,7 @@ defmodule Console do
   def workspace(), do: Path.join(conf(:workspace_root), conf(:repo_root))
 
   def hmac(secret, payload) do
-    :crypto.hmac(:sha, secret, payload)
+    :crypto.mac(:hmac, :sha1, secret, payload)
     |> Base.encode16(case: :lower)
   end
 

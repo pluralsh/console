@@ -6,6 +6,10 @@ defmodule Console.Application do
     ConsoleWeb.Plugs.MetricsExporter.setup()
 
     children = [
+      %{
+        id: :pg,
+        start: {:pg, :start_link, []}
+      },
       Console.PubSub.Broadcaster,
       Console.Repo,
       {Phoenix.PubSub, [name: Console.PubSub, adapter: Phoenix.PubSub.PG2]},

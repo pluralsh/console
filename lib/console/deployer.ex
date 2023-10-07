@@ -29,8 +29,8 @@ defmodule Console.Deployer do
   def init(storage) do
     Process.flag(:trap_exit, true)
     Logger.info "Starting deployer"
-    :pg2.create(@group)
-    :pg2.join(@group, self())
+    :pg.start(@group)
+    :pg.join(@group, self())
     {:ok, _} = :timer.send_interval(@poll_interval, :poll)
     send self(), :init
     if Console.conf(:initialize) do
@@ -232,7 +232,7 @@ defmodule Console.Deployer do
   defp ping(state), do: state
 
   def broadcast(msg \\ :sync) do
-    :pg2.get_members(@group)
+    :pg.get_members(@group)
     |> Enum.filter(& &1 != self())
     |> Enum.each(&GenServer.cast(&1, msg))
   end
