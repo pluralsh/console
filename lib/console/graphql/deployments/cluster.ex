@@ -31,9 +31,15 @@ defmodule Console.GraphQl.Deployments.Cluster do
   input_object :cluster_update_attributes do
     field :version,        non_null(:string)
     field :handle,         :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
+    field :service,        :cluster_service_attributes, description: "if you optionally want to reconfigure the git repository for the cluster service"
     field :node_pools,     list_of(:node_pool_attributes)
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
+  end
+
+  input_object :cluster_service_attributes do
+    field :id,  non_null(:id)
+    field :git, non_null(:git_ref_attributes)
   end
 
   input_object :node_pool_attributes do
@@ -132,6 +138,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :tags,        list_of(:tag), resolve: dataloader(Deployments), description: "key/value tags to filter clusters"
     field :api_deprecations, list_of(:api_deprecation), resolve: dataloader(Deployments), description: "all api deprecations for all services in this cluster"
 
+    field :status, :cluster_status,
+      description: "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null",
+      resolve: &Deployments.resolve_cluster_status/3
+
     @desc "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
     connection field :revisions, node_type: :revision do
       resolve &Deployments.list_cluster_revisions/3
@@ -190,6 +200,25 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :kind,      non_null(:string)
 
     timestamps()
+  end
+
+  @desc "the crd status of the cluster as seen by the CAPI operator"
+  object :cluster_status do
+    field :phase,               :string
+    field :control_plane_ready, :boolean
+    field :failure_message,     :string
+    field :failure_reason,      :string
+    field :conditions,          list_of(:cluster_condition)
+  end
+
+  @desc "a single condition struct for various phases of the cluster provisionining process"
+  object :cluster_condition do
+    field :last_transition_time, :string
+    field :status,               :string
+    field :type,                 :string
+    field :message,              :string
+    field :reason,               :string
+    field :severity,             :string
   end
 
   object :tag do

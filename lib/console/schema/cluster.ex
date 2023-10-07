@@ -152,6 +152,8 @@ defmodule Console.Schema.Cluster do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
+  def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
+
   @valid ~w(provider_id service_id credential_id self version current_version name handle)a
 
   def changeset(model, attrs \\ %{}) do

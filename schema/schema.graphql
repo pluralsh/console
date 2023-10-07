@@ -804,11 +804,19 @@ input ClusterUpdateAttributes {
   "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
   handle: String
 
+  "if you optionally want to reconfigure the git repository for the cluster service"
+  service: ClusterServiceAttributes
+
   nodePools: [NodePoolAttributes]
 
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
+}
+
+input ClusterServiceAttributes {
+  id: ID!
+  git: GitRefAttributes!
 }
 
 input NodePoolAttributes {
@@ -950,6 +958,9 @@ type Cluster {
   "all api deprecations for all services in this cluster"
   apiDeprecations: [ApiDeprecation]
 
+  "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null"
+  status: ClusterStatus
+
   "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
 
@@ -1018,6 +1029,25 @@ type ProviderCredential {
   kind: String!
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+"the crd status of the cluster as seen by the CAPI operator"
+type ClusterStatus {
+  phase: String
+  controlPlaneReady: Boolean
+  failureMessage: String
+  failureReason: String
+  conditions: [ClusterCondition]
+}
+
+"a single condition struct for various phases of the cluster provisionining process"
+type ClusterCondition {
+  lastTransitionTime: String
+  status: String
+  type: String
+  message: String
+  reason: String
+  severity: String
 }
 
 type Tag {

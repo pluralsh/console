@@ -37,6 +37,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def list_clusters(args, %{context: %{current_user: user}}) do
     Cluster.ordered()
     |> Cluster.for_user(user)
+    |> Cluster.preloaded()
     |> paginate(args)
   end
 
@@ -100,6 +101,13 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def resolve_cluster(%{id: id}, %{context: %{current_user: user}}) do
     Clusters.get_cluster(id)
     |> allow(user, :read)
+  end
+
+  def resolve_cluster_status(cluster, _, _) do
+    case Clusters.cluster_crd(cluster) do
+      {:ok, %{status: status}} -> {:ok, status}
+      _ -> {:ok, nil}
+    end
   end
 
   def resolve_git(%{id: id}, %{context: %{current_user: user}}) do

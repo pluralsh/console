@@ -420,6 +420,8 @@ export type Cluster = {
   self?: Maybe<Scalars['Boolean']['output']>;
   /** the service used to deploy the CAPI resources of this cluster */
   service?: Maybe<ServiceDeployment>;
+  /** the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null */
+  status?: Maybe<ClusterStatus>;
   /** key/value tags to filter clusters */
   tags?: Maybe<Array<Maybe<Tag>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -451,6 +453,17 @@ export type ClusterAttributes = {
   tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
   version: Scalars['String']['input'];
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+/** a single condition struct for various phases of the cluster provisionining process */
+export type ClusterCondition = {
+  __typename?: 'ClusterCondition';
+  lastTransitionTime?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  reason?: Maybe<Scalars['String']['output']>;
+  severity?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<Scalars['String']['output']>;
+  type?: Maybe<Scalars['String']['output']>;
 };
 
 export type ClusterConnection = {
@@ -525,11 +538,28 @@ export type ClusterProviderUpdateAttributes = {
   cloudSettings?: InputMaybe<CloudProviderSettingsAttributes>;
 };
 
+export type ClusterServiceAttributes = {
+  git: GitRefAttributes;
+  id: Scalars['ID']['input'];
+};
+
+/** the crd status of the cluster as seen by the CAPI operator */
+export type ClusterStatus = {
+  __typename?: 'ClusterStatus';
+  conditions?: Maybe<Array<Maybe<ClusterCondition>>>;
+  controlPlaneReady?: Maybe<Scalars['Boolean']['output']>;
+  failureMessage?: Maybe<Scalars['String']['output']>;
+  failureReason?: Maybe<Scalars['String']['output']>;
+  phase?: Maybe<Scalars['String']['output']>;
+};
+
 export type ClusterUpdateAttributes = {
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
   handle?: InputMaybe<Scalars['String']['input']>;
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  /** if you optionally want to reconfigure the git repository for the cluster service */
+  service?: InputMaybe<ClusterServiceAttributes>;
   version: Scalars['String']['input'];
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };

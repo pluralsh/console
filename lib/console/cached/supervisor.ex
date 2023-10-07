@@ -11,7 +11,8 @@ defmodule Console.Cached.Supervisor do
       Console.Cached.Namespace,
       Console.Cached.Pod,
       Console.Cached.VPN,
-      Console.Cached.Node
+      Console.Cached.Node,
+      Console.Cached.Cluster
     ]
 
     Supervisor.init(children, strategy: :one_for_one, max_restarts: 15)

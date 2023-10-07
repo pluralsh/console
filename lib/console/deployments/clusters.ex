@@ -27,7 +27,7 @@ defmodule Console.Deployments.Clusters do
   def control_plane(%Cluster{id: id, self: true}), do: Kazan.Server.in_cluster()
   def control_plane(%Cluster{id: id, kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
   def control_plane(%Cluster{id: id, name: name} = cluster) do
-    with %{provider: %{namespace: ns}} <- Repo.preload(cluster, [:provider]),
+    with ns when is_binary(ns) <- namespace(cluster),
          {:ok, %{data: %{"value" => value}}} <- Kube.Utils.get_secret(ns, "#{name}-kubeconfig"),
          {:ok, raw} <- Base.decode64(value) do
       Kazan.Server.from_kubeconfig_raw(raw)
@@ -35,6 +35,29 @@ defmodule Console.Deployments.Clusters do
       err ->
         Logger.info "could not fetch kubeconfig for cluster #{id}: #{inspect(err)}"
         :error
+    end
+  end
+
+  @doc """
+  Fetches the current instance of the cluster CRD for this cluster record
+  """
+  @spec cluster_crd(Cluster.t) :: {:ok, Kube.Cluster.t} | Console.error
+  def cluster_crd(%Cluster{name: name} = cluster) do
+    case namespace(cluster) do
+      ns when is_binary(ns) -> {:ok, Console.Cached.Cluster.get(ns, name)}
+      nil -> {:ok, nil}
+    end
+  end
+
+  @doc """
+  Get the namespace this cluster will reside in
+  """
+  @spec namespace(Cluster.t) :: binary | nil
+  def namespace(%Cluster{} = cluster) do
+    case Repo.preload(cluster, [:provider, :credential]) do
+      %Cluster{credential: %ProviderCredential{namespace: ns}} -> ns
+      %Cluster{provider: %ClusterProvider{namespace: ns}} -> ns
+      _ -> nil
     end
   end
 
@@ -116,7 +139,7 @@ defmodule Console.Deployments.Clusters do
     start_transaction()
     |> add_operation(:cluster, fn _ ->
       get_cluster!(id)
-      |> Console.Repo.preload([:node_pools])
+      |> Console.Repo.preload([:node_pools, :service])
       |> Cluster.changeset(attrs)
       |> allow(user, :write)
       |> when_ok(:update)
@@ -127,7 +150,11 @@ defmodule Console.Deployments.Clusters do
         cluster_service(cluster, user)
       %{cluster: cluster} -> {:ok, cluster}
     end)
-    |> execute(extract: :cluster)
+    |> execute()
+    |> when_ok(fn
+      %{cluster: cluster, svc: %Service{} = svc} -> %{cluster | service: svc}
+      %{cluster: cluster} -> cluster
+    end)
     |> notify(:update, user)
   end
 

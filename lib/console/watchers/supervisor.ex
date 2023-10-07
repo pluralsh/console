@@ -7,7 +7,8 @@ defmodule Console.Watchers.Supervisor do
 
   @impl true
   def init(_init_arg) do
-    maybe_plural(Console.conf(:watchers))
+    Console.conf(:watchers)
+    |> maybe_plural()
     |> Supervisor.init(strategy: :one_for_one, max_restarts: 15)
   end
 
