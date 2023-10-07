@@ -14,7 +14,6 @@ defmodule Console.Application do
       Console.Repo,
       {Phoenix.PubSub, [name: Console.PubSub, adapter: Phoenix.PubSub.PG2]},
       ConsoleWeb.Endpoint,
-      Console.Clustering.Connect,
       Console.Commands.Configuration,
       Console.Plural.Config,
       Console.Features,
@@ -28,14 +27,14 @@ defmodule Console.Application do
       Console.Bootstrapper,
       {Absinthe.Subscription, ConsoleWeb.Endpoint},
       Console.Cached.Supervisor,
+      Console.Watchers.Supervisor,
       Console.Deployments.Git.Supervisor,
       Console.Deployments.Git.Kick,
       Console.Deployments.Deprecations.Table,
       {OpenIDConnect.Worker, Application.get_env(:console, :oidc_providers)},
     ] ++ consumers() ++ [
       Piazza.GracefulShutdown
-    ] ++ socket()
-      ++ deployer()
+    ] ++ deployer()
 
     opts = [strategy: :one_for_one, name: Console.Supervisor]
     Supervisor.start_link(children, opts)
@@ -53,13 +52,6 @@ defmodule Console.Application do
       build_id when is_binary(build_id) ->
         [{Console.Runner.Harakiri, [Console.storage(), build_id]}]
       _ -> [Console.Deployer]
-    end
-  end
-
-  defp socket() do
-    case Console.conf(:initialize) do
-      true -> [Console.Watchers.Plural.worker()]
-      _ -> []
     end
   end
 end
