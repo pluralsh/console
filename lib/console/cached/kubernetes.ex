@@ -36,18 +36,23 @@ defmodule Console.Cached.Kubernetes do
   end
 
   def handle_info({:start, request}, %State{table: table, model: model, key: key} = state) do
-    Logger.info "starting namespace watcher"
-    {:ok, %{items: instances, metadata: %{resource_version: vsn}}} = Kazan.run(request)
-    {:ok, pid} = Watcher.start_link(%{request | response_model: model}, send_to: self(), resource_vsn: vsn)
-
-    :timer.send_interval(5000, :watcher_ping)
-    Process.link(pid)
-    table = Enum.reduce(instances, table, &KeyValueSet.put!(&2, key.(&1), &1))
-    {:noreply, %{state | pid: pid, table: table}}
+    Logger.info "starting #{model} watcher"
+    with {:ok, %{items: instances, metadata: %{resource_version: vsn}}} <- Kazan.run(request),
+         {:ok, pid} <- Watcher.start_link(%{request | response_model: model}, send_to: self(), resource_vsn: vsn) do
+      :timer.send_interval(5000, :watcher_ping)
+      Process.link(pid)
+      table = Enum.reduce(instances, table, &KeyValueSet.put!(&2, key.(&1), &1))
+      {:noreply, %{state | pid: pid, table: table}}
+    else
+      err ->
+        Logger.warn "failed to start #{model} watcher for cache: #{inspect(err)}"
+        Process.send_after(self(), {:start, request}, :timer.seconds(120))
+        {:noreply, state}
+    end
   end
 
-  def handle_info(:watcher_ping, %{pid: pid} = state) do
-    Logger.info "namespace k8s watcher alive at pid=#{inspect(pid)}"
+  def handle_info(:watcher_ping, %{pid: pid, model: model} = state) do
+    Logger.info "#{model} k8s watcher alive at pid=#{inspect(pid)}"
     {:noreply, state}
   end
 

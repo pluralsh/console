@@ -4,6 +4,7 @@ defmodule Console.Deployments.ClustersTest do
   alias Console.PubSub
   alias Console.Deployments.{Clusters, Services}
   alias Kazan.Apis.Core.V1, as: CoreV1
+  import KubernetesScaffolds
 
   describe "#create_cluster/2" do
     test "it can create a new cluster record" do
@@ -399,6 +400,23 @@ defmodule Console.Deployments.ClustersTest do
       cred = insert(:provider_credential)
 
       {:error, _} = Clusters.delete_provider_credential(cred.id, user)
+    end
+  end
+
+  describe "#install/1" do
+    test "it can install the operator in a ready cluster" do
+      %{name: n, provider: %{namespace: ns}, deploy_token: t} = cluster =
+          insert(:cluster, provider: insert(:cluster_provider))
+      kubeconf_secret = "#{n}-kubeconfig"
+      expect(Console.Cached.Cluster, :get, fn ^ns, ^n -> cluster(n) end)
+      expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
+        {:ok, %{data: %{"value" => Base.encode64("kubeconfig")}}}
+      end)
+      expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" -> {:ok, "yay"} end)
+
+      {:ok, installed} = Clusters.install(cluster)
+
+      assert installed.installed
     end
   end
 end

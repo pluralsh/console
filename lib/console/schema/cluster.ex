@@ -53,7 +53,8 @@ defmodule Console.Schema.Cluster do
   schema "clusters" do
     field :handle,          :string
     field :name,            :string
-    field :self,            :boolean
+    field :self,            :boolean, default: false
+    field :installed,       :boolean, default: false
 
     field :version,         :string
     field :current_version, :string
@@ -148,6 +149,10 @@ defmodule Console.Schema.Cluster do
 
   def deleted(query \\ __MODULE__) do
     from(c in query, where: not is_nil(c.deleted_at))
+  end
+
+  def uninstalled(query \\ __MODULE__) do
+    from(c in query, where: not is_nil(c.provider_id) and not c.installed and not c.self and is_nil(c.deleted_at))
   end
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)

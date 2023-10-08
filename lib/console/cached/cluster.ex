@@ -1,7 +1,7 @@
 defmodule Console.Cached.Cluster do
   @moduledoc """
-  This genserver will query and poll all pods then cache them in-memory.  This is to accelerate pod lookups since
-  it's pretty damn slow currently
+  This genserver will query and poll all cluster crds then cache them in-memory.  This will help make sideloading
+  cluster crds in list requests highly performant and just will be generally useful.
   """
   use Console.Cached.Base
   import Kube.Client.Base, only: [path_builder: 3]

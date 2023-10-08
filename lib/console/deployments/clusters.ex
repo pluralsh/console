@@ -26,16 +26,20 @@ defmodule Console.Deployments.Clusters do
   @decorate cacheable(cache: @cache_adapter, key: {:control_plane, id}, opts: [ttl: @ttl])
   def control_plane(%Cluster{id: id, self: true}), do: Kazan.Server.in_cluster()
   def control_plane(%Cluster{id: id, kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
-  def control_plane(%Cluster{id: id, name: name} = cluster) do
-    with ns when is_binary(ns) <- namespace(cluster),
-         {:ok, %{data: %{"value" => value}}} <- Kube.Utils.get_secret(ns, "#{name}-kubeconfig"),
-         {:ok, raw} <- Base.decode64(value) do
+  def control_plane(%Cluster{id: id} = cluster) do
+    with {:ok, raw} <- kubeconfig(cluster) do
       Kazan.Server.from_kubeconfig_raw(raw)
     else
       err ->
         Logger.info "could not fetch kubeconfig for cluster #{id}: #{inspect(err)}"
         :error
     end
+  end
+
+  defp kubeconfig(%Cluster{name: name} = cluster) do
+    with ns when is_binary(ns) <- namespace(cluster),
+         {:ok, %{data: %{"value" => value}}} <- Kube.Utils.get_secret(ns, "#{name}-kubeconfig"),
+      do: Base.decode64(value)
   end
 
   @doc """
@@ -46,6 +50,28 @@ defmodule Console.Deployments.Clusters do
     case namespace(cluster) do
       ns when is_binary(ns) -> {:ok, Console.Cached.Cluster.get(ns, name)}
       nil -> {:ok, nil}
+    end
+  end
+
+  @doc """
+  Installs the operator on this cluster using the plural cd command
+  """
+  @spec install(Cluster.t) :: cluster_resp
+  def install(%Cluster{id: id, deploy_token: token} = cluster) do
+    url = Services.api_url("gql")
+    cluster = Repo.preload(cluster, [:provider, :credential])
+    with {:ok, %Kube.Cluster{status: %Kube.Cluster.Status{control_plane_ready: true}}} <- cluster_crd(cluster),
+         {:ok, kubeconfig} <- kubeconfig(cluster),
+         {:ok, _} <- Console.Commands.Plural.install_cd(url, token, kubeconfig) do
+      get_cluster(id)
+      |> Ecto.Changeset.change(%{installed: true})
+      |> Repo.update()
+    else
+      {:error, _} = err -> err
+      pass ->
+        IO.inspect(pass)
+        Logger.info "could not install operator to cluster: #{inspect(pass)}"
+        {:error, :unready}
     end
   end
 
