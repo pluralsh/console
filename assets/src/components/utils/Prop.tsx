@@ -1,8 +1,7 @@
 import { Div } from 'honorable'
-import { ReactElement } from 'react'
 
 // TODO: Export to design system?
-export default function Prop({ children, title, ...props }: ReactElement) {
+export default function Prop({ children, title, ...props }: any) {
   return (
     <Div margin="medium">
       <Div
