@@ -1,8 +1,5 @@
-import moment from 'moment'
-import { Tooltip } from '@pluralsh/design-system'
 import { Dispatch, ReactElement } from 'react'
 
-import Prop from '../../utils/Prop'
 import { InfoPanel } from '../../utils/InfoPanel'
 import { Cluster } from '../../../generated/graphql'
 

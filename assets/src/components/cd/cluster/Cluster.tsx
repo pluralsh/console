@@ -30,7 +30,6 @@ import {
 
 import ClusterPermissions from './ClusterPermissions'
 import ClusterMetadata from './ClusterMetadata'
-import ClusterMetadataPanel from './ClusterMetadataPanel'
 
 const ClusterContext = createContext<
   { setHeaderContent: (content: ReactNode) => void } | undefined
