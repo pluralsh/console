@@ -205,21 +205,7 @@ export default function ClusterUpgrade({
     setIsOpen(false)
   }, [])
   const onClose = useCallback(() => setIsOpen(false), [])
-
-  const apiDeprecations: ApiDeprecation[] = [
-    {
-      component: {
-        id: '',
-        kind: 'Ingress',
-        group: 'networking.k8s/io/v1',
-        synced: false,
-        name: 'test',
-      },
-      replacement: 'networking.k8s/io/v2 Ingress replacement',
-    },
-  ] // TODO: Remove
-
-  const hasDeprecations = !isEmpty(apiDeprecations)
+  const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
 
   return (
     <>
@@ -281,7 +267,7 @@ export default function ClusterUpgrade({
                 resources listed below:
               </div>
               <Table
-                data={apiDeprecations}
+                data={cluster?.apiDeprecations || []}
                 columns={deprecationsColumns}
                 css={{
                   maxHeight: 310,
