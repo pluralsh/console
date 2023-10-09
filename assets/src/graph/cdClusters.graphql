@@ -13,10 +13,12 @@ fragment ClustersRow on Cluster {
       name
       service {
         git {
+          ref
           folder
         }
         repository {
-          url
+          httpsPath
+          urlFormat
         }
       }
     }

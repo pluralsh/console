@@ -116,7 +116,17 @@ const deprecationsColumns = [
     header: 'Repository',
     cell: ({ getValue }) => {
       const service = getValue()
-      const url = `${service?.repository?.url}/${service?.git?.folder}` // TODO
+      const urlFormat = service?.repository?.urlFormat
+      const httpsPath = service?.repository?.httpsPath
+      const ref = service?.git?.ref
+      const folder = service?.git?.folder
+
+      if (!urlFormat || !httpsPath || !ref) return null
+
+      const url = urlFormat
+        .replace(`{url}`, httpsPath)
+        .replace('{ref}', ref)
+        .replace('{folder}', folder || '')
 
       return (
         <div css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}>
