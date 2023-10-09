@@ -211,6 +211,15 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> maybe_filter_pods(args)
   end
 
+  def raw_resource(%{group: g, version: v, kind: k, namespace: ns, name: n}, _) do
+    Kube.Client.Base.path(g, v, k, ns, n)
+    |> Kube.Client.raw()
+    |> case do
+      {:ok, res} -> {:ok, %{raw: res}}
+      err -> err
+    end
+  end
+
   defp maybe_filter_pods(pods, %{namespaces: [_ | _] = namespaces}) do
     namespaces = MapSet.new(namespaces)
     {:ok, Enum.filter(pods, &MapSet.member?(namespaces, &1.metadata.namespace))}

@@ -57,6 +57,8 @@ type RootQueryType {
 
   secrets(namespace: String!): [Secret]
 
+  kubernetesRaw(group: String!, version: String!, kind: String!, namespace: String!, name: String!, serviceId: ID): KubernetesRaw
+
   service(namespace: String!, name: String!, serviceId: ID): Service
 
   clusterInfo: ClusterInfo
@@ -958,6 +960,9 @@ type Cluster {
   "all api deprecations for all services in this cluster"
   apiDeprecations: [ApiDeprecation]
 
+  "any errors which might have occurred during the bootstrap process"
+  servicErrors: [ServiceError]
+
   "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null"
   status: ClusterStatus
 
@@ -1610,6 +1615,11 @@ type LabelPair {
 type ResourceSpec {
   cpu: String
   memory: String
+}
+
+type KubernetesRaw {
+  raw: Map
+  events: [Event]
 }
 
 type ApplicationDelta {

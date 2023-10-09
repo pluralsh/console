@@ -39,6 +39,16 @@ defmodule Kube.Client do
   list_all_request :list_applications, Kube.Application.List
   list_all_request :list_metrics, Kube.NodeMetric.List
 
+  def raw(path) do
+    %Kazan.Request{
+      method: "get",
+      path: path,
+      query_params: %{},
+      response_model: Kube.Client.EchoModel
+    }
+    |> Kube.Utils.run()
+  end
+
   def get_application(name), do: get_application(name, name)
 
   def get_metrics(node) do

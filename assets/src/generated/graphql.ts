@@ -418,6 +418,8 @@ export type Cluster = {
   revisions?: Maybe<RevisionConnection>;
   /** whether this is the management cluster itself */
   self?: Maybe<Scalars['Boolean']['output']>;
+  /** any errors which might have occurred during the bootstrap process */
+  servicErrors?: Maybe<Array<Maybe<ServiceError>>>;
   /** the service used to deploy the CAPI resources of this cluster */
   service?: Maybe<ServiceDeployment>;
   /** the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null */
@@ -1212,6 +1214,12 @@ export type KubernetesDatasource = {
   __typename?: 'KubernetesDatasource';
   name: Scalars['String']['output'];
   resource: Scalars['String']['output'];
+};
+
+export type KubernetesRaw = {
+  __typename?: 'KubernetesRaw';
+  events?: Maybe<Array<Maybe<Event>>>;
+  raw?: Maybe<Scalars['Map']['output']>;
 };
 
 export type LabelInput = {
@@ -2295,6 +2303,7 @@ export type RootQueryType = {
   installations?: Maybe<InstallationConnection>;
   invite?: Maybe<Invite>;
   job?: Maybe<Job>;
+  kubernetesRaw?: Maybe<KubernetesRaw>;
   logFilters?: Maybe<Array<Maybe<LogFilter>>>;
   loginInfo?: Maybe<LoginInfo>;
   logs?: Maybe<Array<Maybe<LogStream>>>;
@@ -2519,6 +2528,16 @@ export type RootQueryTypeJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeKubernetesRawArgs = {
+  group: Scalars['String']['input'];
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  version: Scalars['String']['input'];
 };
 
 

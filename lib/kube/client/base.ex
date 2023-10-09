@@ -17,6 +17,10 @@ defmodule Kube.Client.Base do
     |> Kube.Utils.run()
   end
 
+  def path("", v, k, "", name), do: "/api/#{v}/#{k}/#{name}"
+  def path("", v, k, ns, name), do: "/api/#{v}/namespaces/#{ns}/#{k}/#{name}"
+  def path(g, v, k, ns, name), do: path_builder(g, v, k, ns, name)
+
   def path_builder(g, v, k), do: "/apis/#{g}/#{v}/#{k}"
   def path_builder(g, v, k, namespace), do: "/apis/#{g}/#{v}/namespaces/#{Console.namespace(namespace)}/#{k}"
   def path_builder(g, v, k, namespace, name), do: "#{path_builder(g, v, k, namespace)}/#{name}"
