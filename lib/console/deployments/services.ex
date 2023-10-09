@@ -2,7 +2,7 @@ defmodule Console.Deployments.Services do
   use Console.Services.Base
   import Console.Deployments.Policies
   alias Console.PubSub
-  alias Console.Schema.{Service, Revision, User, Cluster, ClusterProvider, ApiDeprecation}
+  alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation}
   alias Console.Deployments.{Secrets.Store, Git, Clusters, Deprecations.Checker}
   require Logger
 
@@ -114,6 +114,21 @@ defmodule Console.Deployments.Services do
     |> execute(extract: :update)
     |> notify(:update, user)
   end
+
+  def accessible(%Service{} = svc, k8s_resource) do
+    %{components: components} = Repo.preload(svc, [:components])
+    {g, v, k, ns, n} = Kube.Utils.identifier(k8s_resource)
+
+    Enum.any?(components, fn
+      %ServiceComponent{group: ^g, version: ^v, kind: ^k, namespace: ^ns, name: ^n} -> true
+      _ -> false
+    end)
+    |> case do
+      true -> {:ok, k8s_resource}
+      _ -> {:error, "forbidden"}
+    end
+  end
+  def accessible(_, _), do: {:error, "forbidden"}
 
   @doc """
   Will copy a service, and apply any user specified attributes on top.

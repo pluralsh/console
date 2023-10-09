@@ -211,15 +211,14 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> maybe_filter_pods(args)
   end
 
-  def raw_resource(%{group: g, version: v, kind: k, namespace: ns, name: n}, _) do
+  def raw_resource(%{group: g, version: v, kind: k, namespace: ns, name: n}, %{context: %{service: svc}}) do
     kind = String.downcase(k) |> Inflex.pluralize()
-    Kube.Client.Base.path(g, v, kind, ns, n)
-    |> Kube.Client.raw()
-    |> case do
-      {:ok, res} -> {:ok, %{raw: res}}
-      err -> err
-    end
+    path = Kube.Client.Base.path(g, v, kind, ns, n)
+    with {:ok, res} <- Kube.Client.raw(path),
+         {:ok, res} <- Console.Deployments.Services.accessible(svc, res),
+      do: {:ok, %{raw: res}}
   end
+  def raw_resource(_, _), do: {:error, "forbidden"}
 
   defp maybe_filter_pods(pods, %{namespaces: [_ | _] = namespaces}) do
     namespaces = MapSet.new(namespaces)

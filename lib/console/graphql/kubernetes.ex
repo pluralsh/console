@@ -54,7 +54,7 @@ defmodule Console.GraphQl.Kubernetes do
   object :kubernetes_raw do
     field :raw, :map
     field :events, list_of(:event), resolve: fn
-      %{raw: %{"metadata" => %{"namespace" => ns, "uid" => uid}}}, _, _ when byte_size(ns) > 0 ->
+      %{raw: %{"metadata" => %{"namespace" => ns, "uid" => uid}}}, _, _ ->
         Kubernetes.list_events(%{metadata: %{uid: uid, namespace: ns}})
       %{raw: %{"metadata" => %{"uid" => uid}}}, _, _ ->
         Kubernetes.list_all_events(%{metadata: %{uid: uid}})

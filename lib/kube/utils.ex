@@ -9,6 +9,22 @@ defmodule Kube.Utils do
 
   @kubeconf :kubeconfig
 
+  def identifier(%{"apiVersion" => gv, "kind" => k, "metadata" => %{"name" => n} = meta}) do
+    {g, v} = group_version(gv)
+    {g, v, k, Map.get(meta, "namespace"), n}
+  end
+  def identifier(%{api_version: gv, kind: k, metadata: %{name: n} = meta}) do
+    {g, v} = group_version(gv)
+    {g, v, k, Map.get(meta, :namespace), n}
+  end
+
+  def group_version(api_version) do
+    case String.split(api_version, "/") do
+      [g, v] -> {g, v}
+      [v] -> {nil, v}
+    end
+  end
+
   def save_kubeconfig(val), do: Process.put(@kubeconf, val)
   def kubeconfig(), do: Process.get(@kubeconf)
 
