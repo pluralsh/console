@@ -168,3 +168,16 @@ mutation RollbackService($id: ID, $revisionId: ID!) {
     ...ServiceDeploymentsRow
   }
 }
+
+query ClusterServiceDeployments($id: ID!) {
+  serviceDeployments(first: 100, clusterId: $id) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ServiceDeploymentsRow
+      }
+    }
+  }
+}

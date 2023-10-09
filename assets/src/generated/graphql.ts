@@ -3531,6 +3531,13 @@ export type RollbackServiceMutationVariables = Exact<{
 
 export type RollbackServiceMutation = { __typename?: 'RootMutationType', rollbackService?: { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null } | null };
 
+export type ClusterServiceDeploymentsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ClusterServiceDeploymentsQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null } | null } | null> | null } | null };
+
 export type ResourceSpecFragment = { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null };
 
 export type ResourcesFragment = { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null };
@@ -4850,6 +4857,49 @@ export function useRollbackServiceMutation(baseOptions?: Apollo.MutationHookOpti
 export type RollbackServiceMutationHookResult = ReturnType<typeof useRollbackServiceMutation>;
 export type RollbackServiceMutationResult = Apollo.MutationResult<RollbackServiceMutation>;
 export type RollbackServiceMutationOptions = Apollo.BaseMutationOptions<RollbackServiceMutation, RollbackServiceMutationVariables>;
+export const ClusterServiceDeploymentsDocument = gql`
+    query ClusterServiceDeployments($id: ID!) {
+  serviceDeployments(first: 100, clusterId: $id) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ServiceDeploymentsRow
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ServiceDeploymentsRowFragmentDoc}`;
+
+/**
+ * __useClusterServiceDeploymentsQuery__
+ *
+ * To run a query within a React component, call `useClusterServiceDeploymentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterServiceDeploymentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterServiceDeploymentsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useClusterServiceDeploymentsQuery(baseOptions: Apollo.QueryHookOptions<ClusterServiceDeploymentsQuery, ClusterServiceDeploymentsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterServiceDeploymentsQuery, ClusterServiceDeploymentsQueryVariables>(ClusterServiceDeploymentsDocument, options);
+      }
+export function useClusterServiceDeploymentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterServiceDeploymentsQuery, ClusterServiceDeploymentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterServiceDeploymentsQuery, ClusterServiceDeploymentsQueryVariables>(ClusterServiceDeploymentsDocument, options);
+        }
+export type ClusterServiceDeploymentsQueryHookResult = ReturnType<typeof useClusterServiceDeploymentsQuery>;
+export type ClusterServiceDeploymentsLazyQueryHookResult = ReturnType<typeof useClusterServiceDeploymentsLazyQuery>;
+export type ClusterServiceDeploymentsQueryResult = Apollo.QueryResult<ClusterServiceDeploymentsQuery, ClusterServiceDeploymentsQueryVariables>;
 export const RestorePostgresDocument = gql`
     mutation RestorePostgres($clone: CloneAttributes, $name: String!, $namespace: String!, $timestamp: DateTime!) {
   restorePostgres(
@@ -5499,6 +5549,7 @@ export const namedOperations = {
     ServiceDeploymentComponents: 'ServiceDeploymentComponents',
     ServiceDeploymentSecrets: 'ServiceDeploymentSecrets',
     ServiceDeploymentRevisions: 'ServiceDeploymentRevisions',
+    ClusterServiceDeployments: 'ClusterServiceDeployments',
     PostgresDatabases: 'PostgresDatabases',
     PostgresDatabase: 'PostgresDatabase',
     Groups: 'Groups',
