@@ -44,6 +44,7 @@ export const statusTabs = Object.entries({
 
 const ServiceFiltersSC = styled.div(({ theme }) => ({
   display: 'flex',
+  flexGrow: 1,
   columnGap: theme.spacing.medium,
   '.statusTab': {
     display: 'flex',
@@ -58,7 +59,7 @@ export function ServicesFilters({
   setTableFilters,
 }: {
   data: ReturnType<typeof useServiceDeploymentsQuery>['data']
-  clusters: ServicesCluster[]
+  clusters?: ServicesCluster[]
   setTableFilters: (
     filters: Partial<Pick<TableState, 'globalFilter' | 'columnFilters'>>
   ) => void
@@ -119,11 +120,9 @@ export function ServicesFilters({
     setTableFilters(tableFilters)
   }, [setTableFilters, tableFilters])
 
-  console.log('clusters', clusters)
-
   return (
     <ServiceFiltersSC>
-      {!isEmpty(clusters) && (
+      {clusters && !isEmpty(clusters) && (
         <div css={{ width: 360 }}>
           <Select
             isOpen={clusterSelectIsOpen}
@@ -162,12 +161,7 @@ export function ServicesFilters({
       )}
       <Input
         placeholder="Search"
-        startIcon={
-          <SearchIcon
-            border={undefined}
-            size={undefined}
-          />
-        }
+        startIcon={<SearchIcon />}
         value={filterString}
         onChange={(e) => {
           setFilterString(e.currentTarget.value)

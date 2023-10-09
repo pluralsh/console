@@ -23,7 +23,13 @@ import { CLUSTER_BASE_PATH } from 'routes/cdRoutes'
 import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
 
-import { useClustersQuery } from '../../../generated/graphql'
+import {
+  useClusterQuery,
+  useClustersTinyQuery,
+} from '../../../generated/graphql'
+
+import ClusterPermissions from './ClusterPermissions'
+import ClusterMetadata from './ClusterMetadata'
 
 const ClusterContext = createContext<
   { setHeaderContent: (content: ReactNode) => void } | undefined
@@ -54,15 +60,10 @@ const directory = [
   { path: 'pods', label: 'Pods' },
 ] as const
 
+const POLL_INTERVAL = 10 * 1000
+
 export default function Cluster() {
   const theme = useTheme()
-  const [headerContent, setHeaderContent] = useState<ReactNode>()
-  const clusterContext = useMemo(
-    () => ({
-      setHeaderContent,
-    }),
-    []
-  )
   const tabStateRef = useRef<any>(null)
   const tab = useMatch(`/${CLUSTER_BASE_PATH}/:tab`)?.params?.tab || ''
   const path = `/${CLUSTER_BASE_PATH}/${tab}`
@@ -74,10 +75,16 @@ export default function Cluster() {
     () => (path ? [{ label: tab, path }] : []),
     [path, tab]
   )
-  const { data } = useClustersQuery()
-  const clusterEdges = data?.clusters?.edges
 
   useSetBreadcrumbs(crumbs)
+
+  const { data: clustersData } = useClustersTinyQuery()
+  const clusterEdges = clustersData?.clusters?.edges
+
+  const { data } = useClusterQuery({
+    variables: { id: clusterId || '' },
+    pollInterval: POLL_INTERVAL,
+  })
 
   return (
     <ResponsivePageFullWidth
@@ -136,7 +143,17 @@ export default function Cluster() {
               </LinkTabWrap>
             ))}
           </TabList>
-          {headerContent}
+          <div
+            css={{
+              justifyContent: 'end',
+              display: 'flex',
+              flexGrow: 1,
+              gap: theme.spacing.large,
+            }}
+          >
+            <ClusterPermissions />
+            <ClusterMetadata cluster={data?.cluster} />
+          </div>
         </>
       }
     >
@@ -144,9 +161,7 @@ export default function Cluster() {
         css={{ height: '100%' }}
         stateRef={tabStateRef}
       >
-        <ClusterContext.Provider value={clusterContext}>
-          <Outlet />
-        </ClusterContext.Provider>
+        <Outlet />
       </TabPanel>
     </ResponsivePageFullWidth>
   )

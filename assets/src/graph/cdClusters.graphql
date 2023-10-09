@@ -13,10 +13,12 @@ fragment ClustersRow on Cluster {
       name
       service {
         git {
+          ref
           folder
         }
         repository {
-          url
+          httpsPath
+          urlFormat
         }
       }
     }
@@ -50,6 +52,23 @@ query Clusters {
         ...ClustersRow
       }
     }
+  }
+}
+
+query ClustersTiny {
+  clusters(first: 100) {
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+
+query Cluster($id: ID!) {
+  cluster(id: $id) {
+    ...ClustersRow
   }
 }
 
