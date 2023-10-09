@@ -417,6 +417,24 @@ defmodule Console.Deployments.ClustersTest do
       {:ok, installed} = Clusters.install(cluster)
 
       assert installed.installed
+
+      %{service_errors: []} = Repo.preload(installed, [:service_errors])
+    end
+
+    test "it will persist errors if any" do
+      %{name: n, provider: %{namespace: ns}, deploy_token: t} = cluster =
+        insert(:cluster, provider: insert(:cluster_provider))
+      kubeconf_secret = "#{n}-kubeconfig"
+      expect(Console.Cached.Cluster, :get, fn ^ns, ^n -> cluster(n) end)
+      expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
+        {:ok, %{data: %{"value" => Base.encode64("kubeconfig")}}}
+      end)
+      expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" -> {:error, "helm failure"} end)
+
+      {:error, _} = Clusters.install(cluster)
+
+      %{service_errors: [%{source: "bootstrap", message: msg}]} = Repo.preload(cluster, [:service_errors])
+      assert msg == "helm failure"
     end
   end
 end

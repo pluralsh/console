@@ -64,12 +64,14 @@ defmodule Console.Deployments.Clusters do
          {:ok, kubeconfig} <- kubeconfig(cluster),
          {:ok, _} <- Console.Commands.Plural.install_cd(url, token, kubeconfig) do
       get_cluster(id)
-      |> Ecto.Changeset.change(%{installed: true})
+      |> Repo.preload([:service_errors])
+      |> Cluster.changeset(%{installed: true, service_errors: []})
       |> Repo.update()
     else
-      {:error, _} = err -> err
+      {:error, msg} = err ->
+        add_errors(cluster, [%{source: "bootstrap", message: msg}])
+        err
       pass ->
-        IO.inspect(pass)
         Logger.info "could not install operator to cluster: #{inspect(pass)}"
         {:error, :unready}
     end
@@ -433,6 +435,12 @@ defmodule Console.Deployments.Clusters do
   defp provider_attributes(%ClusterProvider{name: name}), do: %{configuration: [%{name: "providerName", value: name}]}
 
   defp tmp_admin(%User{} = user), do: %{user | roles: %{admin: true}}
+
+  defp add_errors(%Cluster{} = cluster, errors) when is_list(errors) do
+    Repo.preload(cluster, [:service_errors])
+    |> Cluster.changeset(%{service_errors: errors})
+    |> Repo.update()
+  end
 
   defp notify({:ok, %Cluster{} = cluster}, :create, user),
     do: handle_notify(PubSub.ClusterCreated, cluster, actor: user)

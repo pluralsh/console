@@ -11,7 +11,8 @@ defmodule Console.Schema.Cluster do
     User,
     Tag,
     GlobalService,
-    ProviderCredential
+    ProviderCredential,
+    ServiceError
   }
 
   defmodule Kubeconfig do
@@ -75,6 +76,7 @@ defmodule Console.Schema.Cluster do
     belongs_to :credential, ProviderCredential
 
     has_many :node_pools, ClusterNodePool, on_replace: :delete
+    has_many :service_errors, ServiceError, on_replace: :delete
     has_many :services, Service
     has_many :tags, Tag
     has_many :api_deprecations, through: [:services, :api_deprecations]
@@ -159,7 +161,7 @@ defmodule Console.Schema.Cluster do
 
   def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
 
-  @valid ~w(provider_id service_id credential_id self version current_version name handle)a
+  @valid ~w(provider_id service_id credential_id self version current_version name handle installed)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -171,6 +173,7 @@ defmodule Console.Schema.Cluster do
     |> cast_assoc(:node_pools)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
+    |> cast_assoc(:service_errors)
     |> cast_assoc(:tags)
     |> cast_assoc(:service)
     |> foreign_key_constraint(:provider_id)
