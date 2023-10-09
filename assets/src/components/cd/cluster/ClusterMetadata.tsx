@@ -1,12 +1,26 @@
 import { Button, ErrorIcon } from '@pluralsh/design-system'
+import { useState } from 'react'
 
-export default function ClusterMetadata() {
+import ClusterMetadataPanel from './ClusterMetadataPanel'
+
+// TODO: Replace any.
+export default function ClusterMetadata({ cluster }: { cluster?: any }) {
+  const [metadataOpen, setMetadataOpen] = useState(false)
+
   return (
-    <Button
-      secondary
-      endIcon={<ErrorIcon color="icon-danger" />}
-    >
-      Metadata
-    </Button>
+    <>
+      <Button
+        secondary
+        endIcon={<ErrorIcon color="icon-danger" />}
+        onClick={() => setMetadataOpen(true)}
+      >
+        Metadata
+      </Button>
+      <ClusterMetadataPanel
+        cluster={cluster}
+        open={metadataOpen}
+        setOpen={setMetadataOpen}
+      />
+    </>
   )
 }

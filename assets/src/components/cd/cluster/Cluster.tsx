@@ -23,10 +23,14 @@ import { CLUSTER_BASE_PATH } from 'routes/cdRoutes'
 import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
 
-import { useClustersQuery } from '../../../generated/graphql'
+import {
+  useClusterQuery,
+  useClustersTinyQuery,
+} from '../../../generated/graphql'
 
 import ClusterPermissions from './ClusterPermissions'
 import ClusterMetadata from './ClusterMetadata'
+import ClusterMetadataPanel from './ClusterMetadataPanel'
 
 const ClusterContext = createContext<
   { setHeaderContent: (content: ReactNode) => void } | undefined
@@ -57,6 +61,8 @@ const directory = [
   { path: 'pods', label: 'Pods' },
 ] as const
 
+const POLL_INTERVAL = 10 * 1000
+
 export default function Cluster() {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
@@ -70,10 +76,16 @@ export default function Cluster() {
     () => (path ? [{ label: tab, path }] : []),
     [path, tab]
   )
-  const { data } = useClustersQuery()
-  const clusterEdges = data?.clusters?.edges
 
   useSetBreadcrumbs(crumbs)
+
+  const { data: clustersData } = useClustersTinyQuery()
+  const clusterEdges = clustersData?.clusters?.edges
+
+  const { data } = useClusterQuery({
+    variables: { id: clusterId || '' },
+    pollInterval: POLL_INTERVAL,
+  })
 
   return (
     <ResponsivePageFullWidth
@@ -141,7 +153,7 @@ export default function Cluster() {
             }}
           >
             <ClusterPermissions />
-            <ClusterMetadata />
+            <ClusterMetadata cluster={data?.cluster} />
           </div>
         </>
       }

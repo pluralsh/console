@@ -55,6 +55,23 @@ query Clusters {
   }
 }
 
+query ClustersTiny {
+  clusters(first: 100) {
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+
+query Cluster($id: ID!) {
+  cluster(id: $id) {
+    ...ClustersRow
+  }
+}
+
 mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
   updateCluster(id: $id, attributes: $attributes) {
     ...ClustersRow
