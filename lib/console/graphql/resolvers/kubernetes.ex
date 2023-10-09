@@ -212,7 +212,8 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   end
 
   def raw_resource(%{group: g, version: v, kind: k, namespace: ns, name: n}, _) do
-    Kube.Client.Base.path(g, v, k, ns, n)
+    kind = String.downcase(k) |> Inflex.pluralize()
+    Kube.Client.Base.path(g, v, kind, ns, n)
     |> Kube.Client.raw()
     |> case do
       {:ok, res} -> {:ok, %{raw: res}}

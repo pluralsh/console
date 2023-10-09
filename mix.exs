@@ -121,6 +121,7 @@ defmodule Console.MixProject do
       {:ymlr, "~> 2.0"},
       {:remote_ip, "~> 0.2.0"},
       {:erlsom, "~> 1.4"},
+      {:inflex, "~> 2.0.0"},
       {:websockex, "~> 0.4.3"},
       {:briefly, "~> 0.4.0"},
       {:libring, "~> 1.0"},
