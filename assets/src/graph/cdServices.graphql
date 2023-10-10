@@ -148,18 +148,35 @@ mutation CreateServiceDeployment(
   }
 }
 
-mutation DeleteServiceDeployment($id: ID!) {
-  deleteServiceDeployment(id: $id) {
-    id
-  }
-}
-
 mutation UpdateServiceDeployment(
   $id: ID!
   $attributes: ServiceUpdateAttributes!
 ) {
   updateServiceDeployment(id: $id, attributes: $attributes) {
-    ...ServiceDeploymentsRow
+    configuration {
+      name
+      value
+    }
+    git {
+      folder
+      ref
+    }
+    version
+  }
+}
+
+mutation MergeService($id: ID!, $configuration: [ConfigAttributes]) {
+  mergeService(id: $id, configuration: $configuration) {
+    configuration {
+      name
+      value
+    }
+  }
+}
+
+mutation DeleteServiceDeployment($id: ID!) {
+  deleteServiceDeployment(id: $id) {
+    id
   }
 }
 
