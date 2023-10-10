@@ -2,7 +2,18 @@ defmodule Console.Schema.Cluster do
   use Piazza.Ecto.Schema
   import Console.Deployments.Ecto.Validations
   alias Console.Deployments.Policies.Rbac
-  alias Console.Schema.{Service, ClusterNodePool, NamespacedName, ClusterProvider, PolicyBinding, User, Tag, GlobalService}
+  alias Console.Schema.{
+    Service,
+    ClusterNodePool,
+    NamespacedName,
+    ClusterProvider,
+    PolicyBinding,
+    User,
+    Tag,
+    GlobalService,
+    ProviderCredential,
+    ServiceError
+  }
 
   defmodule Kubeconfig do
     use Piazza.Ecto.Schema
@@ -43,7 +54,8 @@ defmodule Console.Schema.Cluster do
   schema "clusters" do
     field :handle,          :string
     field :name,            :string
-    field :self,            :boolean
+    field :self,            :boolean, default: false
+    field :installed,       :boolean, default: false
 
     field :version,         :string
     field :current_version, :string
@@ -59,9 +71,12 @@ defmodule Console.Schema.Cluster do
     embeds_one :kubeconfig,     Kubeconfig, on_replace: :update
     embeds_one :cloud_settings, CloudSettings, on_replace: :update
 
-    belongs_to :provider, ClusterProvider
-    belongs_to :service,  Service
+    belongs_to :provider,   ClusterProvider
+    belongs_to :service,    Service
+    belongs_to :credential, ProviderCredential
+
     has_many :node_pools, ClusterNodePool, on_replace: :delete
+    has_many :service_errors, ServiceError, on_replace: :delete
     has_many :services, Service
     has_many :tags, Tag
     has_many :api_deprecations, through: [:services, :api_deprecations]
@@ -138,9 +153,15 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: not is_nil(c.deleted_at))
   end
 
+  def uninstalled(query \\ __MODULE__) do
+    from(c in query, where: not is_nil(c.provider_id) and not c.installed and not c.self and is_nil(c.deleted_at))
+  end
+
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(provider_id service_id self version current_version name handle)a
+  def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
+
+  @valid ~w(provider_id service_id credential_id self version current_version name handle installed)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -152,8 +173,12 @@ defmodule Console.Schema.Cluster do
     |> cast_assoc(:node_pools)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
+    |> cast_assoc(:service_errors)
     |> cast_assoc(:tags)
+    |> cast_assoc(:service)
     |> foreign_key_constraint(:provider_id)
+    |> foreign_key_constraint(:credential_id)
+    |> unique_constraint([:name, :provider_id, :credential_id])
     |> put_new_change(:deploy_token, fn -> "deploy-#{Console.rand_alphanum(30)}" end)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)

@@ -8,7 +8,8 @@ defmodule Console.Deployments.Policies.Rbac do
     DeploymentSettings,
     GitRepository,
     User,
-    GlobalService
+    GlobalService,
+    ProviderCredential
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -36,6 +37,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(cluster, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%ClusterProvider{} = cluster, %User{} = user, action),
     do: recurse(cluster, user, action, fn _ -> Settings.fetch() end)
+  def evaluate(%ProviderCredential{} = cred, %User{} = user, action),
+    do: recurse(cred, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%GitRepository{}, %User{} = user, action),
     do: recurse(Settings.fetch(), user, action)
   def evaluate(%GlobalService{}, %User{} = user, action),
@@ -50,6 +53,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(cluster, [:read_bindings, :write_bindings])
   def preload(%ClusterProvider{} = cluster),
     do: Repo.preload(cluster, [:read_bindings, :write_bindings])
+  def preload(%ProviderCredential{} = cred),
+    do: Repo.preload(cred, [provider: [:read_bindings, :write_bindings]])
   def preload(%DeploymentSettings{} = settings),
     do: Repo.preload(settings, [:read_bindings, :write_bindings, :git_bindings, :create_bindings])
   def preload(pass), do: pass

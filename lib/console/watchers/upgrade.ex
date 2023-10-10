@@ -14,7 +14,11 @@ defmodule Console.Watchers.Upgrade do
   @poll_interval 60 * 1000
   @resource_interval 60 * 60 * 1000
 
-  def record_usage(), do: GenServer.call(__MODULE__, :usage)
+  def record_usage() do
+    with pid when is_pid(pid) <- Process.whereis(__MODULE__),
+         true <- Process.alive?(pid),
+      do: GenServer.call(__MODULE__, :usage)
+  end
 
   def handle_call(:state, _, state), do: {:reply, state, state}
   def handle_call(:ping, _, state), do: {:reply, :pong, state}
@@ -78,6 +82,7 @@ defmodule Console.Watchers.Upgrade do
     end
   end
 
+  def handle_info(:usage, %{upgrades: nil} = state), do: {:noreply, state}
   def handle_info(:usage, %{upgrades: upgrades} = state) do
     Logger.info "Collecting resource usage"
     with true <- Console.Deployer.leader?(),

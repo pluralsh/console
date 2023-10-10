@@ -291,4 +291,11 @@ defmodule KubernetesScaffolds do
       status: %{"PostgresClusterStatus" => "Running"}
     }
   end
+
+  def cluster(name, ready \\ true) do
+    %Kube.Cluster{
+      metadata: %ObjectMeta{name: name, namespace: name},
+      status: %Kube.Cluster.Status{control_plane_ready: ready}
+    }
+  end
 end

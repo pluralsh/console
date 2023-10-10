@@ -81,7 +81,8 @@ defmodule Console.GraphQl.Resolvers.Plural do
   def resolve_configuration(%{name: name}, _, _) do
     {:ok, %{
       helm: Plural.values_file(name) |> extract_content(),
-      terraform: Plural.terraform_file(name) |> extract_content()
+      terraform: Plural.terraform_file(name) |> extract_content(),
+      readme: Plural.readme_file(name) |> extract_content(),
     }}
   end
 

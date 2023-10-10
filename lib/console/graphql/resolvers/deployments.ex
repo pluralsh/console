@@ -16,10 +16,12 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     GlobalService,
     User,
     ServiceError,
-    ClusterRevision
+    ClusterRevision,
+    ProviderCredential
   }
 
   def query(ServiceError, _), do: ServiceError
+  def query(ProviderCredential, _), do: ProviderCredential
   def query(Tag, _), do: Tag
   def query(GlobalService, _), do: GlobalService
   def query(ApiDeprecation, _), do: ApiDeprecation
@@ -35,6 +37,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def list_clusters(args, %{context: %{current_user: user}}) do
     Cluster.ordered()
     |> Cluster.for_user(user)
+    |> Cluster.preloaded()
     |> paginate(args)
   end
 
@@ -62,6 +65,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   defp service_filters(query, args) do
     Enum.reduce(args, query, fn
       {:cluster_id, id}, q -> Service.for_cluster(q, id)
+      {:cluster, handle}, q -> Service.for_cluster_handle(q, handle)
       _, q -> q
     end)
   end
@@ -97,6 +101,13 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def resolve_cluster(%{id: id}, %{context: %{current_user: user}}) do
     Clusters.get_cluster(id)
     |> allow(user, :read)
+  end
+
+  def resolve_cluster_status(cluster, _, _) do
+    case Clusters.cluster_crd(cluster) do
+      {:ok, %{status: status}} -> {:ok, status}
+      _ -> {:ok, nil}
+    end
   end
 
   def resolve_git(%{id: id}, %{context: %{current_user: user}}) do
@@ -156,6 +167,12 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   def update_provider(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Clusters.update_provider(attrs, id, user)
+
+  def create_provider_credential(%{attributes: attrs, name: name}, %{context: %{current_user: user}}),
+    do: Clusters.create_provider_credential(attrs, name, user)
+
+  def delete_provider_credential(%{id: id}, %{context: %{current_user: user}}),
+    do: Clusters.delete_provider_credential(id, user)
 
   def create_service(%{attributes: attrs, cluster: cluster}, %{context: %{current_user: user}}) when is_binary(cluster) do
     cluster = Clusters.find!(cluster)

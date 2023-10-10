@@ -2,6 +2,7 @@ defmodule Console.GraphQl do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
   import Console.GraphQl.Helpers
+  alias Console.Middleware.{SafeResolution, ErrorHandler}
   alias Console.GraphQl.Resolvers.{Build, User, Kubecost, License, UserLoader, Deployments}
 
   import_types Absinthe.Type.Custom
@@ -44,6 +45,11 @@ defmodule Console.GraphQl do
   def plugins do
     [Absinthe.Middleware.Dataloader] ++ Absinthe.Plugin.defaults()
   end
+
+  def middleware(middleware, _field, %{identifier: type}) when type in [:query, :mutation] do
+    SafeResolution.apply(middleware) ++ [ErrorHandler]
+  end
+  def middleware(middleware, _field, _object), do: middleware
 
   query do
     import_fields :configuration_queries

@@ -16,8 +16,8 @@ defmodule Console.Watchers.Base do
       end
 
       def init(_) do
-        :pg2.create(__MODULE__)
-        :pg2.join(__MODULE__, self())
+        :pg.start(__MODULE__)
+        :pg.join(__MODULE__, self())
         send self(), :elect
         {:ok, %State{}}
       end
@@ -78,11 +78,14 @@ defmodule Console.Watchers.Base do
   def to_delta(:deleted), do: :delete
 
   def publish(resource, type) do
-    broadcast(resource, to_delta(type))
+    case Absinthe.Subscription.extract_pubsub(%{pubsub: Console.PubSub}) do
+      {:ok, _} -> broadcast(resource, to_delta(type))
+      _ -> :ok
+    end
   end
 
   def group_broadcast(group, msg) do
-    :pg2.get_members(group)
+    :pg.get_members(group)
     |> Enum.filter(& &1 != self())
     |> Enum.each(&send(&1, msg))
   end

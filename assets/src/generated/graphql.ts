@@ -214,6 +214,7 @@ export enum AuditType {
   GroupMember = 'GROUP_MEMBER',
   Pod = 'POD',
   Policy = 'POLICY',
+  ProviderCredential = 'PROVIDER_CREDENTIAL',
   Role = 'ROLE',
   Service = 'SERVICE',
   TempToken = 'TEMP_TOKEN',
@@ -417,8 +418,12 @@ export type Cluster = {
   revisions?: Maybe<RevisionConnection>;
   /** whether this is the management cluster itself */
   self?: Maybe<Scalars['Boolean']['output']>;
+  /** any errors which might have occurred during the bootstrap process */
+  servicErrors?: Maybe<Array<Maybe<ServiceError>>>;
   /** the service used to deploy the CAPI resources of this cluster */
   service?: Maybe<ServiceDeployment>;
+  /** the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null */
+  status?: Maybe<ClusterStatus>;
   /** key/value tags to filter clusters */
   tags?: Maybe<Array<Maybe<Tag>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -438,6 +443,8 @@ export type ClusterRevisionsArgs = {
 };
 
 export type ClusterAttributes = {
+  /** a cloud credential to use when provisioning this cluster */
+  credentialId?: InputMaybe<Scalars['ID']['input']>;
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
   handle?: InputMaybe<Scalars['String']['input']>;
   kubeconfig?: InputMaybe<KubeconfigAttributes>;
@@ -448,6 +455,17 @@ export type ClusterAttributes = {
   tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
   version: Scalars['String']['input'];
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+/** a single condition struct for various phases of the cluster provisionining process */
+export type ClusterCondition = {
+  __typename?: 'ClusterCondition';
+  lastTransitionTime?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  reason?: Maybe<Scalars['String']['output']>;
+  severity?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<Scalars['String']['output']>;
+  type?: Maybe<Scalars['String']['output']>;
 };
 
 export type ClusterConnection = {
@@ -479,6 +497,8 @@ export type ClusterProvider = {
   __typename?: 'ClusterProvider';
   /** the name of the cloud service for this provider */
   cloud: Scalars['String']['output'];
+  /** a list of credentials eligible for this provider */
+  credentials?: Maybe<Array<Maybe<ProviderCredential>>>;
   /** whether the current user can edit this resource */
   editable?: Maybe<Scalars['Boolean']['output']>;
   /** the details of how cluster manifests will be synced from git when created with this provider */
@@ -520,9 +540,28 @@ export type ClusterProviderUpdateAttributes = {
   cloudSettings?: InputMaybe<CloudProviderSettingsAttributes>;
 };
 
+export type ClusterServiceAttributes = {
+  git: GitRefAttributes;
+  id: Scalars['ID']['input'];
+};
+
+/** the crd status of the cluster as seen by the CAPI operator */
+export type ClusterStatus = {
+  __typename?: 'ClusterStatus';
+  conditions?: Maybe<Array<Maybe<ClusterCondition>>>;
+  controlPlaneReady?: Maybe<Scalars['Boolean']['output']>;
+  failureMessage?: Maybe<Scalars['String']['output']>;
+  failureReason?: Maybe<Scalars['String']['output']>;
+  phase?: Maybe<Scalars['String']['output']>;
+};
+
 export type ClusterUpdateAttributes = {
+  /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
+  handle?: InputMaybe<Scalars['String']['input']>;
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  /** if you optionally want to reconfigure the git repository for the cluster service */
+  service?: InputMaybe<ClusterServiceAttributes>;
   version: Scalars['String']['input'];
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
@@ -594,6 +633,7 @@ export type ConfigMap = {
 export type Configuration = {
   __typename?: 'Configuration';
   helm?: Maybe<Scalars['String']['output']>;
+  readme?: Maybe<Scalars['String']['output']>;
   terraform?: Maybe<Scalars['String']['output']>;
 };
 
@@ -897,6 +937,8 @@ export type GcpSettingsAttributes = {
 };
 
 export type GitAttributes = {
+  /** a manually supplied https path for non standard git setups.  This is auto-inferred in many cases */
+  httpsPath?: InputMaybe<Scalars['String']['input']>;
   /** a passphrase to decrypt the given private key */
   passphrase?: InputMaybe<Scalars['String']['input']>;
   /** the http password for http authenticated repos */
@@ -905,6 +947,8 @@ export type GitAttributes = {
   privateKey?: InputMaybe<Scalars['String']['input']>;
   /** the url of this repository */
   url: Scalars['String']['input'];
+  /** similar to https_path, a manually supplied url format for custom git.  Should be something like {url}/tree/{ref}/{folder} */
+  urlFormat?: InputMaybe<Scalars['String']['input']>;
   /** the http username for authenticated http repos, defaults to apiKey for github */
   username?: InputMaybe<Scalars['String']['input']>;
 };
@@ -946,6 +990,8 @@ export type GitRepository = {
   error?: Maybe<Scalars['String']['output']>;
   /** whether we can currently pull this repo with the provided credentials */
   health?: Maybe<GitHealth>;
+  /** the https url for this git repo */
+  httpsPath?: Maybe<Scalars['String']['output']>;
   /** internal id of this repository */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -954,6 +1000,8 @@ export type GitRepository = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the git url of the repository, either https or ssh supported */
   url: Scalars['String']['output'];
+  /** a format string to get the http url for a subfolder in a git repo */
+  urlFormat?: Maybe<Scalars['String']['output']>;
 };
 
 export type GitRepositoryConnection = {
@@ -1168,6 +1216,12 @@ export type KubernetesDatasource = {
   resource: Scalars['String']['output'];
 };
 
+export type KubernetesRaw = {
+  __typename?: 'KubernetesRaw';
+  events?: Maybe<Array<Maybe<Event>>>;
+  raw?: Maybe<Scalars['Map']['output']>;
+};
+
 export type LabelInput = {
   name?: InputMaybe<Scalars['String']['input']>;
   value?: InputMaybe<Scalars['String']['input']>;
@@ -1276,7 +1330,7 @@ export type MetricResponse = {
 
 export type MetricResult = {
   __typename?: 'MetricResult';
-  timestamp?: Maybe<Scalars['Int']['output']>;
+  timestamp?: Maybe<Scalars['Long']['output']>;
   value?: Maybe<Scalars['String']['output']>;
 };
 
@@ -1601,6 +1655,23 @@ export type PrometheusDatasource = {
   query: Scalars['String']['output'];
 };
 
+/** a cloud credential that can be used while creating new clusters */
+export type ProviderCredential = {
+  __typename?: 'ProviderCredential';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  kind: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  namespace: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ProviderCredentialAttributes = {
+  kind?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type RbacAttributes = {
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
@@ -1702,6 +1773,8 @@ export type Revision = {
   /** id of this revision */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the commit message for this revision */
+  message?: Maybe<Scalars['String']['output']>;
   /** the sha this service was pulled from */
   sha?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -1784,6 +1857,7 @@ export type RootMutationType = {
   createGroupMember?: Maybe<GroupMember>;
   createInvite?: Maybe<Invite>;
   createPeer?: Maybe<WireguardPeer>;
+  createProviderCredential?: Maybe<ProviderCredential>;
   createRole?: Maybe<Role>;
   createServiceDeployment?: Maybe<ServiceDeployment>;
   createUpgradePolicy?: Maybe<UpgradePolicy>;
@@ -1799,6 +1873,7 @@ export type RootMutationType = {
   deleteNode?: Maybe<Node>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePod?: Maybe<Pod>;
+  deleteProviderCredential?: Maybe<ProviderCredential>;
   deleteRole?: Maybe<Role>;
   deleteServiceDeployment?: Maybe<ServiceDeployment>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
@@ -1908,6 +1983,12 @@ export type RootMutationTypeCreatePeerArgs = {
 };
 
 
+export type RootMutationTypeCreateProviderCredentialArgs = {
+  attributes: ProviderCredentialAttributes;
+  name: Scalars['String']['input'];
+};
+
+
 export type RootMutationTypeCreateRoleArgs = {
   attributes: RoleAttributes;
 };
@@ -1970,6 +2051,7 @@ export type RootMutationTypeDeleteGroupMemberArgs = {
 export type RootMutationTypeDeleteJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1986,6 +2068,12 @@ export type RootMutationTypeDeletePeerArgs = {
 export type RootMutationTypeDeletePodArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeDeleteProviderCredentialArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -2215,6 +2303,7 @@ export type RootQueryType = {
   installations?: Maybe<InstallationConnection>;
   invite?: Maybe<Invite>;
   job?: Maybe<Job>;
+  kubernetesRaw?: Maybe<KubernetesRaw>;
   logFilters?: Maybe<Array<Maybe<LogFilter>>>;
   loginInfo?: Maybe<LoginInfo>;
   logs?: Maybe<Array<Maybe<LogStream>>>;
@@ -2313,6 +2402,7 @@ export type RootQueryTypeCachedPodsArgs = {
 export type RootQueryTypeCertificateArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2346,6 +2436,7 @@ export type RootQueryTypeClustersArgs = {
 export type RootQueryTypeConfigMapArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2362,6 +2453,7 @@ export type RootQueryTypeConfigurationOverlaysArgs = {
 export type RootQueryTypeCronJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2382,6 +2474,7 @@ export type RootQueryTypeDashboardsArgs = {
 export type RootQueryTypeDeploymentArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2414,6 +2507,7 @@ export type RootQueryTypeGroupsArgs = {
 export type RootQueryTypeIngressArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2433,6 +2527,17 @@ export type RootQueryTypeInviteArgs = {
 export type RootQueryTypeJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeKubernetesRawArgs = {
+  group: Scalars['String']['input'];
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  version: Scalars['String']['input'];
 };
 
 
@@ -2483,6 +2588,7 @@ export type RootQueryTypeNotificationsArgs = {
 export type RootQueryTypePodArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2560,6 +2666,7 @@ export type RootQueryTypeScalingRecommendationArgs = {
 export type RootQueryTypeSecretArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2571,6 +2678,7 @@ export type RootQueryTypeSecretsArgs = {
 export type RootQueryTypeServiceArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2604,6 +2712,7 @@ export type RootQueryTypeStackArgs = {
 export type RootQueryTypeStatefulSetArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2846,6 +2955,8 @@ export type ServiceDeployment = {
   /** internal id of this service */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the commit message currently in use */
+  message?: Maybe<Scalars['String']['output']>;
   /** human readable name of this service, must be unique per cluster */
   name: Scalars['String']['output'];
   /** kubernetes namespace this service will be deployed to */
@@ -3315,12 +3426,32 @@ export type CreateBuildMutation = { __typename?: 'RootMutationType', createBuild
 
 export type NodePoolFragment = { __typename?: 'NodePool', id: string, name: string };
 
-export type ClustersRowFragment = { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null };
+export type ClustersRowFragment = { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, pingedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null };
 
 export type ClustersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null, availableIn?: string | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null } | null } | null> | null } | null };
+export type ClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, pingedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null } | null } | null> | null } | null };
+
+export type ClustersTinyQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ClustersTinyQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string } | null } | null> | null } | null };
+
+export type ClusterQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ClusterQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, pingedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null } | null };
+
+export type UpdateClusterMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: ClusterUpdateAttributes;
+}>;
+
+
+export type UpdateClusterMutation = { __typename?: 'RootMutationType', updateCluster?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, pingedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null } | null };
 
 export type GitRepositoriesRowFragment = { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null };
 
@@ -3335,6 +3466,108 @@ export type CreateGitRepositoryMutationVariables = Exact<{
 
 
 export type CreateGitRepositoryMutation = { __typename?: 'RootMutationType', createGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null } | null };
+
+export type DeleteGitRepositoryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteGitRepositoryMutation = { __typename?: 'RootMutationType', deleteGitRepository?: { __typename?: 'GitRepository', id: string } | null };
+
+export type UpdateGitRepositoryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: GitAttributes;
+}>;
+
+
+export type UpdateGitRepositoryMutation = { __typename?: 'RootMutationType', updateGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null } | null };
+
+export type ServiceDeploymentRevisionFragment = { __typename?: 'Revision', id: string, version: string, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } };
+
+export type ServiceDeploymentsRowFragment = { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null };
+
+export type ServiceDeploymentDetailsFragment = { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, componentStatus?: string | null, status: ServiceDeploymentStatus, version: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, docs?: Array<{ __typename?: 'GitFile', content: string, path: string } | null> | null, git: { __typename?: 'GitRef', folder: string, ref: string }, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null };
+
+export type ServiceDeploymentComponentFragment = { __typename?: 'ServiceComponent', id: string, name: string, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null };
+
+export type ServiceDeploymentRevisionsFragment = { __typename?: 'ServiceDeployment', revision?: { __typename?: 'Revision', id: string, version: string, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null, revisions?: { __typename?: 'RevisionConnection', edges?: Array<{ __typename?: 'RevisionEdge', node?: { __typename?: 'Revision', id: string, version: string, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null } | null> | null } | null };
+
+export type ServiceDeploymentsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ServiceDeploymentsQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null } | null } | null> | null } | null };
+
+export type ServiceDeploymentsTinyQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ServiceDeploymentsTinyQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null> | null } | null };
+
+export type ServiceDeploymentQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ServiceDeploymentQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, componentStatus?: string | null, status: ServiceDeploymentStatus, version: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, docs?: Array<{ __typename?: 'GitFile', content: string, path: string } | null> | null, git: { __typename?: 'GitRef', folder: string, ref: string }, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null } | null };
+
+export type ServiceDeploymentComponentsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ServiceDeploymentComponentsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', components?: Array<{ __typename?: 'ServiceComponent', id: string, name: string, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null } | null };
+
+export type ServiceDeploymentSecretsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ServiceDeploymentSecretsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null };
+
+export type ServiceDeploymentRevisionsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ServiceDeploymentRevisionsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', revision?: { __typename?: 'Revision', id: string, version: string, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null, revisions?: { __typename?: 'RevisionConnection', edges?: Array<{ __typename?: 'RevisionEdge', node?: { __typename?: 'Revision', id: string, version: string, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null } | null> | null } | null } | null };
+
+export type CreateServiceDeploymentMutationVariables = Exact<{
+  attributes: ServiceDeploymentAttributes;
+  cluster?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CreateServiceDeploymentMutation = { __typename?: 'RootMutationType', createServiceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null } | null };
+
+export type DeleteServiceDeploymentMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteServiceDeploymentMutation = { __typename?: 'RootMutationType', deleteServiceDeployment?: { __typename?: 'ServiceDeployment', id: string } | null };
+
+export type UpdateServiceDeploymentMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: ServiceUpdateAttributes;
+}>;
+
+
+export type UpdateServiceDeploymentMutation = { __typename?: 'RootMutationType', updateServiceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null } | null };
+
+export type RollbackServiceMutationVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  revisionId: Scalars['ID']['input'];
+}>;
+
+
+export type RollbackServiceMutation = { __typename?: 'RootMutationType', rollbackService?: { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null } | null };
+
+export type ClusterServiceDeploymentsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ClusterServiceDeploymentsQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null } | null } | null> | null } | null };
 
 export type ResourceSpecFragment = { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null };
 
@@ -3610,8 +3843,23 @@ export const NodePoolFragmentDoc = gql`
 export const ClustersRowFragmentDoc = gql`
     fragment ClustersRow on Cluster {
   apiDeprecations {
-    blocking
     availableIn
+    blocking
+    component {
+      group
+      kind
+      name
+      service {
+        git {
+          ref
+          folder
+        }
+        repository {
+          httpsPath
+          urlFormat
+        }
+      }
+    }
     deprecatedIn
     removedIn
     replacement
@@ -3619,6 +3867,7 @@ export const ClustersRowFragmentDoc = gql`
   id
   name
   currentVersion
+  pingedAt
   provider {
     id
     cloud
@@ -3644,6 +3893,91 @@ export const GitRepositoriesRowFragmentDoc = gql`
   updatedAt
 }
     `;
+export const ServiceDeploymentsRowFragmentDoc = gql`
+    fragment ServiceDeploymentsRow on ServiceDeployment {
+  id
+  name
+  cluster {
+    id
+    name
+  }
+  repository {
+    id
+    url
+  }
+  insertedAt
+  updatedAt
+  componentStatus
+  status
+}
+    `;
+export const ServiceDeploymentDetailsFragmentDoc = gql`
+    fragment ServiceDeploymentDetails on ServiceDeployment {
+  id
+  name
+  namespace
+  componentStatus
+  status
+  cluster {
+    id
+    name
+  }
+  version
+  docs {
+    content
+    path
+  }
+  git {
+    folder
+    ref
+  }
+  components {
+    apiDeprecations {
+      blocking
+    }
+  }
+}
+    `;
+export const ServiceDeploymentComponentFragmentDoc = gql`
+    fragment ServiceDeploymentComponent on ServiceComponent {
+  id
+  name
+  kind
+  namespace
+  state
+  synced
+  version
+  apiDeprecations {
+    blocking
+  }
+}
+    `;
+export const ServiceDeploymentRevisionFragmentDoc = gql`
+    fragment ServiceDeploymentRevision on Revision {
+  id
+  version
+  updatedAt
+  insertedAt
+  git {
+    folder
+    ref
+  }
+}
+    `;
+export const ServiceDeploymentRevisionsFragmentDoc = gql`
+    fragment ServiceDeploymentRevisions on ServiceDeployment {
+  revision {
+    ...ServiceDeploymentRevision
+  }
+  revisions(first: 100) {
+    edges {
+      node {
+        ...ServiceDeploymentRevision
+      }
+    }
+  }
+}
+    ${ServiceDeploymentRevisionFragmentDoc}`;
 export const ResourceSpecFragmentDoc = gql`
     fragment ResourceSpec on ResourceSpec {
   cpu
@@ -4009,6 +4343,114 @@ export function useClustersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<C
 export type ClustersQueryHookResult = ReturnType<typeof useClustersQuery>;
 export type ClustersLazyQueryHookResult = ReturnType<typeof useClustersLazyQuery>;
 export type ClustersQueryResult = Apollo.QueryResult<ClustersQuery, ClustersQueryVariables>;
+export const ClustersTinyDocument = gql`
+    query ClustersTiny {
+  clusters(first: 100) {
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useClustersTinyQuery__
+ *
+ * To run a query within a React component, call `useClustersTinyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClustersTinyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClustersTinyQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useClustersTinyQuery(baseOptions?: Apollo.QueryHookOptions<ClustersTinyQuery, ClustersTinyQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClustersTinyQuery, ClustersTinyQueryVariables>(ClustersTinyDocument, options);
+      }
+export function useClustersTinyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClustersTinyQuery, ClustersTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClustersTinyQuery, ClustersTinyQueryVariables>(ClustersTinyDocument, options);
+        }
+export type ClustersTinyQueryHookResult = ReturnType<typeof useClustersTinyQuery>;
+export type ClustersTinyLazyQueryHookResult = ReturnType<typeof useClustersTinyLazyQuery>;
+export type ClustersTinyQueryResult = Apollo.QueryResult<ClustersTinyQuery, ClustersTinyQueryVariables>;
+export const ClusterDocument = gql`
+    query Cluster($id: ID!) {
+  cluster(id: $id) {
+    ...ClustersRow
+  }
+}
+    ${ClustersRowFragmentDoc}`;
+
+/**
+ * __useClusterQuery__
+ *
+ * To run a query within a React component, call `useClusterQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useClusterQuery(baseOptions: Apollo.QueryHookOptions<ClusterQuery, ClusterQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterQuery, ClusterQueryVariables>(ClusterDocument, options);
+      }
+export function useClusterLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterQuery, ClusterQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterQuery, ClusterQueryVariables>(ClusterDocument, options);
+        }
+export type ClusterQueryHookResult = ReturnType<typeof useClusterQuery>;
+export type ClusterLazyQueryHookResult = ReturnType<typeof useClusterLazyQuery>;
+export type ClusterQueryResult = Apollo.QueryResult<ClusterQuery, ClusterQueryVariables>;
+export const UpdateClusterDocument = gql`
+    mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
+  updateCluster(id: $id, attributes: $attributes) {
+    ...ClustersRow
+  }
+}
+    ${ClustersRowFragmentDoc}`;
+export type UpdateClusterMutationFn = Apollo.MutationFunction<UpdateClusterMutation, UpdateClusterMutationVariables>;
+
+/**
+ * __useUpdateClusterMutation__
+ *
+ * To run a mutation, you first call `useUpdateClusterMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateClusterMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateClusterMutation, { data, loading, error }] = useUpdateClusterMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateClusterMutation(baseOptions?: Apollo.MutationHookOptions<UpdateClusterMutation, UpdateClusterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateClusterMutation, UpdateClusterMutationVariables>(UpdateClusterDocument, options);
+      }
+export type UpdateClusterMutationHookResult = ReturnType<typeof useUpdateClusterMutation>;
+export type UpdateClusterMutationResult = Apollo.MutationResult<UpdateClusterMutation>;
+export type UpdateClusterMutationOptions = Apollo.BaseMutationOptions<UpdateClusterMutation, UpdateClusterMutationVariables>;
 export const GitRepositoriesDocument = gql`
     query GitRepositories {
   gitRepositories(first: 100) {
@@ -4084,6 +4526,485 @@ export function useCreateGitRepositoryMutation(baseOptions?: Apollo.MutationHook
 export type CreateGitRepositoryMutationHookResult = ReturnType<typeof useCreateGitRepositoryMutation>;
 export type CreateGitRepositoryMutationResult = Apollo.MutationResult<CreateGitRepositoryMutation>;
 export type CreateGitRepositoryMutationOptions = Apollo.BaseMutationOptions<CreateGitRepositoryMutation, CreateGitRepositoryMutationVariables>;
+export const DeleteGitRepositoryDocument = gql`
+    mutation DeleteGitRepository($id: ID!) {
+  deleteGitRepository(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteGitRepositoryMutationFn = Apollo.MutationFunction<DeleteGitRepositoryMutation, DeleteGitRepositoryMutationVariables>;
+
+/**
+ * __useDeleteGitRepositoryMutation__
+ *
+ * To run a mutation, you first call `useDeleteGitRepositoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteGitRepositoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteGitRepositoryMutation, { data, loading, error }] = useDeleteGitRepositoryMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteGitRepositoryMutation(baseOptions?: Apollo.MutationHookOptions<DeleteGitRepositoryMutation, DeleteGitRepositoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteGitRepositoryMutation, DeleteGitRepositoryMutationVariables>(DeleteGitRepositoryDocument, options);
+      }
+export type DeleteGitRepositoryMutationHookResult = ReturnType<typeof useDeleteGitRepositoryMutation>;
+export type DeleteGitRepositoryMutationResult = Apollo.MutationResult<DeleteGitRepositoryMutation>;
+export type DeleteGitRepositoryMutationOptions = Apollo.BaseMutationOptions<DeleteGitRepositoryMutation, DeleteGitRepositoryMutationVariables>;
+export const UpdateGitRepositoryDocument = gql`
+    mutation UpdateGitRepository($id: ID!, $attributes: GitAttributes!) {
+  updateGitRepository(id: $id, attributes: $attributes) {
+    ...GitRepositoriesRow
+  }
+}
+    ${GitRepositoriesRowFragmentDoc}`;
+export type UpdateGitRepositoryMutationFn = Apollo.MutationFunction<UpdateGitRepositoryMutation, UpdateGitRepositoryMutationVariables>;
+
+/**
+ * __useUpdateGitRepositoryMutation__
+ *
+ * To run a mutation, you first call `useUpdateGitRepositoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateGitRepositoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateGitRepositoryMutation, { data, loading, error }] = useUpdateGitRepositoryMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateGitRepositoryMutation(baseOptions?: Apollo.MutationHookOptions<UpdateGitRepositoryMutation, UpdateGitRepositoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateGitRepositoryMutation, UpdateGitRepositoryMutationVariables>(UpdateGitRepositoryDocument, options);
+      }
+export type UpdateGitRepositoryMutationHookResult = ReturnType<typeof useUpdateGitRepositoryMutation>;
+export type UpdateGitRepositoryMutationResult = Apollo.MutationResult<UpdateGitRepositoryMutation>;
+export type UpdateGitRepositoryMutationOptions = Apollo.BaseMutationOptions<UpdateGitRepositoryMutation, UpdateGitRepositoryMutationVariables>;
+export const ServiceDeploymentsDocument = gql`
+    query ServiceDeployments {
+  serviceDeployments(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ServiceDeploymentsRow
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ServiceDeploymentsRowFragmentDoc}`;
+
+/**
+ * __useServiceDeploymentsQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useServiceDeploymentsQuery(baseOptions?: Apollo.QueryHookOptions<ServiceDeploymentsQuery, ServiceDeploymentsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentsQuery, ServiceDeploymentsQueryVariables>(ServiceDeploymentsDocument, options);
+      }
+export function useServiceDeploymentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentsQuery, ServiceDeploymentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentsQuery, ServiceDeploymentsQueryVariables>(ServiceDeploymentsDocument, options);
+        }
+export type ServiceDeploymentsQueryHookResult = ReturnType<typeof useServiceDeploymentsQuery>;
+export type ServiceDeploymentsLazyQueryHookResult = ReturnType<typeof useServiceDeploymentsLazyQuery>;
+export type ServiceDeploymentsQueryResult = Apollo.QueryResult<ServiceDeploymentsQuery, ServiceDeploymentsQueryVariables>;
+export const ServiceDeploymentsTinyDocument = gql`
+    query ServiceDeploymentsTiny {
+  serviceDeployments(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}`;
+
+/**
+ * __useServiceDeploymentsTinyQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentsTinyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentsTinyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentsTinyQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useServiceDeploymentsTinyQuery(baseOptions?: Apollo.QueryHookOptions<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>(ServiceDeploymentsTinyDocument, options);
+      }
+export function useServiceDeploymentsTinyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>(ServiceDeploymentsTinyDocument, options);
+        }
+export type ServiceDeploymentsTinyQueryHookResult = ReturnType<typeof useServiceDeploymentsTinyQuery>;
+export type ServiceDeploymentsTinyLazyQueryHookResult = ReturnType<typeof useServiceDeploymentsTinyLazyQuery>;
+export type ServiceDeploymentsTinyQueryResult = Apollo.QueryResult<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>;
+export const ServiceDeploymentDocument = gql`
+    query ServiceDeployment($id: ID!) {
+  serviceDeployment(id: $id) {
+    ...ServiceDeploymentDetails
+  }
+}
+    ${ServiceDeploymentDetailsFragmentDoc}`;
+
+/**
+ * __useServiceDeploymentQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useServiceDeploymentQuery(baseOptions: Apollo.QueryHookOptions<ServiceDeploymentQuery, ServiceDeploymentQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentQuery, ServiceDeploymentQueryVariables>(ServiceDeploymentDocument, options);
+      }
+export function useServiceDeploymentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentQuery, ServiceDeploymentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentQuery, ServiceDeploymentQueryVariables>(ServiceDeploymentDocument, options);
+        }
+export type ServiceDeploymentQueryHookResult = ReturnType<typeof useServiceDeploymentQuery>;
+export type ServiceDeploymentLazyQueryHookResult = ReturnType<typeof useServiceDeploymentLazyQuery>;
+export type ServiceDeploymentQueryResult = Apollo.QueryResult<ServiceDeploymentQuery, ServiceDeploymentQueryVariables>;
+export const ServiceDeploymentComponentsDocument = gql`
+    query ServiceDeploymentComponents($id: ID!) {
+  serviceDeployment(id: $id) {
+    components {
+      ...ServiceDeploymentComponent
+    }
+  }
+}
+    ${ServiceDeploymentComponentFragmentDoc}`;
+
+/**
+ * __useServiceDeploymentComponentsQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentComponentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentComponentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentComponentsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useServiceDeploymentComponentsQuery(baseOptions: Apollo.QueryHookOptions<ServiceDeploymentComponentsQuery, ServiceDeploymentComponentsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentComponentsQuery, ServiceDeploymentComponentsQueryVariables>(ServiceDeploymentComponentsDocument, options);
+      }
+export function useServiceDeploymentComponentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentComponentsQuery, ServiceDeploymentComponentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentComponentsQuery, ServiceDeploymentComponentsQueryVariables>(ServiceDeploymentComponentsDocument, options);
+        }
+export type ServiceDeploymentComponentsQueryHookResult = ReturnType<typeof useServiceDeploymentComponentsQuery>;
+export type ServiceDeploymentComponentsLazyQueryHookResult = ReturnType<typeof useServiceDeploymentComponentsLazyQuery>;
+export type ServiceDeploymentComponentsQueryResult = Apollo.QueryResult<ServiceDeploymentComponentsQuery, ServiceDeploymentComponentsQueryVariables>;
+export const ServiceDeploymentSecretsDocument = gql`
+    query ServiceDeploymentSecrets($id: ID!) {
+  serviceDeployment(id: $id) {
+    configuration {
+      name
+      value
+    }
+  }
+}
+    `;
+
+/**
+ * __useServiceDeploymentSecretsQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentSecretsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentSecretsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentSecretsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useServiceDeploymentSecretsQuery(baseOptions: Apollo.QueryHookOptions<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>(ServiceDeploymentSecretsDocument, options);
+      }
+export function useServiceDeploymentSecretsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>(ServiceDeploymentSecretsDocument, options);
+        }
+export type ServiceDeploymentSecretsQueryHookResult = ReturnType<typeof useServiceDeploymentSecretsQuery>;
+export type ServiceDeploymentSecretsLazyQueryHookResult = ReturnType<typeof useServiceDeploymentSecretsLazyQuery>;
+export type ServiceDeploymentSecretsQueryResult = Apollo.QueryResult<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>;
+export const ServiceDeploymentRevisionsDocument = gql`
+    query ServiceDeploymentRevisions($id: ID!) {
+  serviceDeployment(id: $id) {
+    ...ServiceDeploymentRevisions
+  }
+}
+    ${ServiceDeploymentRevisionsFragmentDoc}`;
+
+/**
+ * __useServiceDeploymentRevisionsQuery__
+ *
+ * To run a query within a React component, call `useServiceDeploymentRevisionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceDeploymentRevisionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceDeploymentRevisionsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useServiceDeploymentRevisionsQuery(baseOptions: Apollo.QueryHookOptions<ServiceDeploymentRevisionsQuery, ServiceDeploymentRevisionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceDeploymentRevisionsQuery, ServiceDeploymentRevisionsQueryVariables>(ServiceDeploymentRevisionsDocument, options);
+      }
+export function useServiceDeploymentRevisionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceDeploymentRevisionsQuery, ServiceDeploymentRevisionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceDeploymentRevisionsQuery, ServiceDeploymentRevisionsQueryVariables>(ServiceDeploymentRevisionsDocument, options);
+        }
+export type ServiceDeploymentRevisionsQueryHookResult = ReturnType<typeof useServiceDeploymentRevisionsQuery>;
+export type ServiceDeploymentRevisionsLazyQueryHookResult = ReturnType<typeof useServiceDeploymentRevisionsLazyQuery>;
+export type ServiceDeploymentRevisionsQueryResult = Apollo.QueryResult<ServiceDeploymentRevisionsQuery, ServiceDeploymentRevisionsQueryVariables>;
+export const CreateServiceDeploymentDocument = gql`
+    mutation CreateServiceDeployment($attributes: ServiceDeploymentAttributes!, $cluster: String, $clusterId: ID) {
+  createServiceDeployment(
+    attributes: $attributes
+    cluster: $cluster
+    clusterId: $clusterId
+  ) {
+    ...ServiceDeploymentsRow
+  }
+}
+    ${ServiceDeploymentsRowFragmentDoc}`;
+export type CreateServiceDeploymentMutationFn = Apollo.MutationFunction<CreateServiceDeploymentMutation, CreateServiceDeploymentMutationVariables>;
+
+/**
+ * __useCreateServiceDeploymentMutation__
+ *
+ * To run a mutation, you first call `useCreateServiceDeploymentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateServiceDeploymentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createServiceDeploymentMutation, { data, loading, error }] = useCreateServiceDeploymentMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *      cluster: // value for 'cluster'
+ *      clusterId: // value for 'clusterId'
+ *   },
+ * });
+ */
+export function useCreateServiceDeploymentMutation(baseOptions?: Apollo.MutationHookOptions<CreateServiceDeploymentMutation, CreateServiceDeploymentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateServiceDeploymentMutation, CreateServiceDeploymentMutationVariables>(CreateServiceDeploymentDocument, options);
+      }
+export type CreateServiceDeploymentMutationHookResult = ReturnType<typeof useCreateServiceDeploymentMutation>;
+export type CreateServiceDeploymentMutationResult = Apollo.MutationResult<CreateServiceDeploymentMutation>;
+export type CreateServiceDeploymentMutationOptions = Apollo.BaseMutationOptions<CreateServiceDeploymentMutation, CreateServiceDeploymentMutationVariables>;
+export const DeleteServiceDeploymentDocument = gql`
+    mutation DeleteServiceDeployment($id: ID!) {
+  deleteServiceDeployment(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteServiceDeploymentMutationFn = Apollo.MutationFunction<DeleteServiceDeploymentMutation, DeleteServiceDeploymentMutationVariables>;
+
+/**
+ * __useDeleteServiceDeploymentMutation__
+ *
+ * To run a mutation, you first call `useDeleteServiceDeploymentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteServiceDeploymentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteServiceDeploymentMutation, { data, loading, error }] = useDeleteServiceDeploymentMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteServiceDeploymentMutation(baseOptions?: Apollo.MutationHookOptions<DeleteServiceDeploymentMutation, DeleteServiceDeploymentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteServiceDeploymentMutation, DeleteServiceDeploymentMutationVariables>(DeleteServiceDeploymentDocument, options);
+      }
+export type DeleteServiceDeploymentMutationHookResult = ReturnType<typeof useDeleteServiceDeploymentMutation>;
+export type DeleteServiceDeploymentMutationResult = Apollo.MutationResult<DeleteServiceDeploymentMutation>;
+export type DeleteServiceDeploymentMutationOptions = Apollo.BaseMutationOptions<DeleteServiceDeploymentMutation, DeleteServiceDeploymentMutationVariables>;
+export const UpdateServiceDeploymentDocument = gql`
+    mutation UpdateServiceDeployment($id: ID!, $attributes: ServiceUpdateAttributes!) {
+  updateServiceDeployment(id: $id, attributes: $attributes) {
+    ...ServiceDeploymentsRow
+  }
+}
+    ${ServiceDeploymentsRowFragmentDoc}`;
+export type UpdateServiceDeploymentMutationFn = Apollo.MutationFunction<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>;
+
+/**
+ * __useUpdateServiceDeploymentMutation__
+ *
+ * To run a mutation, you first call `useUpdateServiceDeploymentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateServiceDeploymentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateServiceDeploymentMutation, { data, loading, error }] = useUpdateServiceDeploymentMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateServiceDeploymentMutation(baseOptions?: Apollo.MutationHookOptions<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>(UpdateServiceDeploymentDocument, options);
+      }
+export type UpdateServiceDeploymentMutationHookResult = ReturnType<typeof useUpdateServiceDeploymentMutation>;
+export type UpdateServiceDeploymentMutationResult = Apollo.MutationResult<UpdateServiceDeploymentMutation>;
+export type UpdateServiceDeploymentMutationOptions = Apollo.BaseMutationOptions<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>;
+export const RollbackServiceDocument = gql`
+    mutation RollbackService($id: ID, $revisionId: ID!) {
+  rollbackService(id: $id, revisionId: $revisionId) {
+    ...ServiceDeploymentsRow
+  }
+}
+    ${ServiceDeploymentsRowFragmentDoc}`;
+export type RollbackServiceMutationFn = Apollo.MutationFunction<RollbackServiceMutation, RollbackServiceMutationVariables>;
+
+/**
+ * __useRollbackServiceMutation__
+ *
+ * To run a mutation, you first call `useRollbackServiceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRollbackServiceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [rollbackServiceMutation, { data, loading, error }] = useRollbackServiceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      revisionId: // value for 'revisionId'
+ *   },
+ * });
+ */
+export function useRollbackServiceMutation(baseOptions?: Apollo.MutationHookOptions<RollbackServiceMutation, RollbackServiceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RollbackServiceMutation, RollbackServiceMutationVariables>(RollbackServiceDocument, options);
+      }
+export type RollbackServiceMutationHookResult = ReturnType<typeof useRollbackServiceMutation>;
+export type RollbackServiceMutationResult = Apollo.MutationResult<RollbackServiceMutation>;
+export type RollbackServiceMutationOptions = Apollo.BaseMutationOptions<RollbackServiceMutation, RollbackServiceMutationVariables>;
+export const ClusterServiceDeploymentsDocument = gql`
+    query ClusterServiceDeployments($id: ID!) {
+  serviceDeployments(first: 100, clusterId: $id) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ServiceDeploymentsRow
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ServiceDeploymentsRowFragmentDoc}`;
+
+/**
+ * __useClusterServiceDeploymentsQuery__
+ *
+ * To run a query within a React component, call `useClusterServiceDeploymentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterServiceDeploymentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterServiceDeploymentsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useClusterServiceDeploymentsQuery(baseOptions: Apollo.QueryHookOptions<ClusterServiceDeploymentsQuery, ClusterServiceDeploymentsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterServiceDeploymentsQuery, ClusterServiceDeploymentsQueryVariables>(ClusterServiceDeploymentsDocument, options);
+      }
+export function useClusterServiceDeploymentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterServiceDeploymentsQuery, ClusterServiceDeploymentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterServiceDeploymentsQuery, ClusterServiceDeploymentsQueryVariables>(ClusterServiceDeploymentsDocument, options);
+        }
+export type ClusterServiceDeploymentsQueryHookResult = ReturnType<typeof useClusterServiceDeploymentsQuery>;
+export type ClusterServiceDeploymentsLazyQueryHookResult = ReturnType<typeof useClusterServiceDeploymentsLazyQuery>;
+export type ClusterServiceDeploymentsQueryResult = Apollo.QueryResult<ClusterServiceDeploymentsQuery, ClusterServiceDeploymentsQueryVariables>;
 export const RestorePostgresDocument = gql`
     mutation RestorePostgres($clone: CloneAttributes, $name: String!, $namespace: String!, $timestamp: DateTime!) {
   restorePostgres(
@@ -4726,7 +5647,16 @@ export const namedOperations = {
     Repository: 'Repository',
     PluralContext: 'PluralContext',
     Clusters: 'Clusters',
+    ClustersTiny: 'ClustersTiny',
+    Cluster: 'Cluster',
     GitRepositories: 'GitRepositories',
+    ServiceDeployments: 'ServiceDeployments',
+    ServiceDeploymentsTiny: 'ServiceDeploymentsTiny',
+    ServiceDeployment: 'ServiceDeployment',
+    ServiceDeploymentComponents: 'ServiceDeploymentComponents',
+    ServiceDeploymentSecrets: 'ServiceDeploymentSecrets',
+    ServiceDeploymentRevisions: 'ServiceDeploymentRevisions',
+    ClusterServiceDeployments: 'ClusterServiceDeployments',
     PostgresDatabases: 'PostgresDatabases',
     PostgresDatabase: 'PostgresDatabase',
     Groups: 'Groups',
@@ -4738,7 +5668,14 @@ export const namedOperations = {
   },
   Mutation: {
     CreateBuild: 'CreateBuild',
+    UpdateCluster: 'UpdateCluster',
     CreateGitRepository: 'CreateGitRepository',
+    DeleteGitRepository: 'DeleteGitRepository',
+    UpdateGitRepository: 'UpdateGitRepository',
+    CreateServiceDeployment: 'CreateServiceDeployment',
+    DeleteServiceDeployment: 'DeleteServiceDeployment',
+    UpdateServiceDeployment: 'UpdateServiceDeployment',
+    RollbackService: 'RollbackService',
     RestorePostgres: 'RestorePostgres',
     CreateGroupMember: 'CreateGroupMember',
     DeleteGroupMember: 'DeleteGroupMember',
@@ -4762,6 +5699,11 @@ export const namedOperations = {
     NodePool: 'NodePool',
     ClustersRow: 'ClustersRow',
     GitRepositoriesRow: 'GitRepositoriesRow',
+    ServiceDeploymentRevision: 'ServiceDeploymentRevision',
+    ServiceDeploymentsRow: 'ServiceDeploymentsRow',
+    ServiceDeploymentDetails: 'ServiceDeploymentDetails',
+    ServiceDeploymentComponent: 'ServiceDeploymentComponent',
+    ServiceDeploymentRevisions: 'ServiceDeploymentRevisions',
     ResourceSpec: 'ResourceSpec',
     Resources: 'Resources',
     DatabaseTableRow: 'DatabaseTableRow',

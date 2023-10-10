@@ -6,7 +6,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
   describe "createGitRepository" do
     test "it will create a new git repo" do
       {:ok, %{data: %{"createGitRepository" => git}}} = run_query("""
-        mutation Create($attrs: GitRepositoryAttributes!) {
+        mutation Create($attrs: GitAttributes!) {
           createGitRepository(attributes: $attrs) {
             id
             url
@@ -23,7 +23,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       git = insert(:git_repository)
 
       {:ok, %{data: %{"updateGitRepository" => updated}}} = run_query("""
-        mutation Create($id: ID!, $attrs: GitRepositoryAttributes!) {
+        mutation Create($id: ID!, $attrs: GitAttributes!) {
           updateGitRepository(id: $id, attributes: $attrs) {
             id
             url
@@ -276,6 +276,52 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       [conf] = service["configuration"]
       assert conf["name"] == "name"
       assert conf["value"] == "value"
+    end
+  end
+
+  describe "createProviderCredential" do
+    test "it can create a new provider credential" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+
+      {:ok, provider} = Clusters.create_provider(%{
+        name: "aws-sandbox",
+        cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
+      }, user)
+
+      {:ok, %{data: %{"createProviderCredential" => cred}}} = run_query("""
+        mutation Create($attributes: ProviderCredentialAttributes!, $name: String!) {
+          createProviderCredential(name: $name, attributes: $attributes) {
+            id
+            name
+            kind
+          }
+        }
+      """, %{"attributes" => %{"name" => "test", "kind" => "AwsStaticIdentity"}, "name" => provider.name}, %{current_user: user})
+
+      assert cred["name"] == "test"
+      assert cred["kind"] == "AwsStaticIdentity"
+    end
+  end
+
+  describe "deleteProviderCredential" do
+    test "it can create a new provider credential" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+      cred = insert(:provider_credential)
+
+      {:ok, %{data: %{"deleteProviderCredential" => del}}} = run_query("""
+        mutation Create($id: ID!) {
+          deleteProviderCredential(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => cred.id}, %{current_user: user})
+
+      assert del["id"] == cred.id
+      refute refetch(cred)
     end
   end
 
@@ -532,7 +578,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       }
 
       {:ok, %{data: %{"updateServiceComponents" => svc}}} = run_query("""
-        mutation Update($components: [ServiceComponents], $id: ID!) {
+        mutation Update($components: [ComponentAttributes], $id: ID!) {
           updateServiceComponents(id: $id, components: $components) {
             id
             components { name kind namespace group version kind synced state }
@@ -561,7 +607,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       }
 
       {:ok, %{data: %{"updateServiceComponents" => svc}}} = run_query("""
-        mutation Update($components: [ServiceComponents], $errors: [ServiceErrorAttributes], $id: ID!) {
+        mutation Update($components: [ComponentAttributes], $errors: [ServiceErrorAttributes], $id: ID!) {
           updateServiceComponents(id: $id, components: $components, errors: $errors) {
             id
             components { name kind namespace group version kind synced state }

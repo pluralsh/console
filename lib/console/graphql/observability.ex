@@ -43,7 +43,7 @@ defmodule Console.GraphQl.Observability do
   end
 
   object :metric_result do
-    field :timestamp, :integer, resolve: fn %{timestamp: ts}, _, _ -> {:ok, ceil(ts)} end
+    field :timestamp, :long, resolve: fn %{timestamp: ts}, _, _ -> {:ok, ceil(ts)} end
     field :value,     :string
   end
 

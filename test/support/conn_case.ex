@@ -20,7 +20,8 @@ defmodule ConsoleWeb.ConnCase do
   using do
     quote do
       # Import conveniences for testing with connections
-      use Phoenix.ConnTest
+      import Plug.Conn
+      import Phoenix.ConnTest
       alias ConsoleWeb.Router.Helpers, as: Routes
       import Console.Factory
       import Console.TestHelpers

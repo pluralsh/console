@@ -4,6 +4,7 @@ require Kube.Parser
 Kube.Parser.parse(path: "crds/postgresql.yaml", module: Kube.Postgresql)
 Kube.Parser.parse(path: "crds/cert-manager.yaml", module: Kube.Certificate)
 Kube.Parser.parse(path: "crds/application.yaml", module: Kube.Application)
+Kube.Parser.parse(path: "crds/clusters.cluster.x-k8s.io.yaml", module: Kube.Cluster)
 
 # plural crds
 Kube.Parser.parse(path: "crds/license.yaml", module: Kube.License)

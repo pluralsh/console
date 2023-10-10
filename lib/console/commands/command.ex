@@ -8,14 +8,14 @@ defmodule Console.Commands.Command do
 
   def set_build(build), do: Process.put(@build_key, build)
 
-  def cmd(exec, args, dir \\ conf(:workspace_root)) do
+  def cmd(exec, args, dir \\ conf(:workspace_root), env \\ []) do
     with {:ok, collectible} <- make_command(exec, args),
-         {output, exit_code} <- System.cmd(exec, args, into: collectible, env: [{"ENABLE_COLOR", "1"}], cd: dir, stderr_to_stdout: true),
+         {output, exit_code} <- System.cmd(exec, args, into: collectible, env: [{"ENABLE_COLOR", "1"} | env], cd: dir, stderr_to_stdout: true),
       do: complete(output, exit_code)
   end
 
-  def cmd_raw(exec, args, dir \\ conf(:workspace_root)) do
-    {output, exit_code} = System.cmd(exec, args, env: [{"ENABLE_COLOR", "1"}], cd: dir, stderr_to_stdout: true)
+  def cmd_raw(exec, args, dir \\ conf(:workspace_root), env \\ []) do
+    {output, exit_code} = System.cmd(exec, args, env: [{"ENABLE_COLOR", "1"} | env], cd: dir, stderr_to_stdout: true)
     complete(output, exit_code)
   end
 

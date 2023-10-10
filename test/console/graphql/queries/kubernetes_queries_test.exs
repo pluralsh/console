@@ -1,6 +1,7 @@
 defmodule Console.GraphQl.KubernetesQueriesTest do
   use Console.DataCase, async: true
   use Mimic
+  alias Console.Deployments.Clusters
   alias Kazan.Apis.Core.V1, as: CoreV1
   import KubernetesScaffolds
 
@@ -567,6 +568,48 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
           }
         }
       """, %{"name" => "name"}, %{current_user: user})
+    end
+  end
+
+  describe "unstructuredResource" do
+    test "it can fetch from a service" do
+      user = insert(:user)
+      cluster = insert(:cluster, self: true)
+      svc = insert(:service, cluster: cluster, read_bindings: [%{user_id: user.id}])
+      insert(:service_component, group: nil, namespace: nil, service: svc, kind: "Namespace", name: "test", version: "v1")
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+      expect(Kube.Utils, :run, fn
+        %{path: "/api/v1/namespaces/test"} ->
+          {:ok, %{"apiVersion" => "v1", "kind" => "Namespace", "metadata" => %{"name" => "test"}}}
+      end)
+
+      {:ok, %{data: %{"unstructuredResource" => found}}} = run_query("""
+        query Unstructured($svc: ID!) {
+          unstructuredResource(name: "test", kind: "Namespace", version: "v1", serviceId: $svc) {
+            raw
+          }
+        }
+      """, %{"svc" => svc.id}, %{current_user: user})
+
+      assert found["raw"]["apiVersion"] == "v1"
+    end
+
+    test "it cannot fetch if the component is missing" do
+      user = insert(:user)
+      cluster = insert(:cluster, self: true)
+      svc = insert(:service, cluster: cluster, read_bindings: [%{user_id: user.id}])
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+      expect(Kube.Utils, :run, fn %{path: "/api/v1/namespaces/test"} ->
+        {:ok, %{"apiVersion" => "v1", "kind" => "Namespace", "metadata" => %{"name" => "test"}}}
+      end)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Unstructured($svc: ID!) {
+          unstructuredResource(name: "test", kind: "Namespace", version: "v1", serviceId: $svc) {
+            raw
+          }
+        }
+      """, %{"svc" => svc.id}, %{current_user: user})
     end
   end
 end

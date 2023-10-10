@@ -47,14 +47,14 @@ defmodule Console.Deployments.Git.Agent do
 
   def handle_call({:docs, %Service{git: %{ref: ref}} = svc}, _, %State{cache: cache} = state) do
     case Cache.fetch(cache, ref, Service.docs_path(svc)) do
-      {:ok, _, f} -> {:reply, File.open(f), state}
+      {:ok, _, _, f} -> {:reply, File.open(f), state}
       err -> {:reply, err, state}
     end
   end
 
   def handle_call({:fetch, %Service{git: %{ref: ref, folder: path}} = svc}, _, %State{cache: cache} = state) do
-    with {:ok, sha, f} <- Cache.fetch(cache, ref, path),
-         {:ok, _} <- Services.update_sha(svc, sha) do
+    with {:ok, sha, msg, f} <- Cache.fetch(cache, ref, path),
+         {:ok, _} <- Services.update_sha(svc, sha, msg) do
       {:reply, File.open(f), state}
     else
       err -> {:reply, err, state}

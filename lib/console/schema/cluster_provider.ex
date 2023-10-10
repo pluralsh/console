@@ -2,7 +2,7 @@ defmodule Console.Schema.ClusterProvider do
   use Piazza.Ecto.Schema
   import Console.Deployments.Ecto.Validations
   alias Console.Deployments.Policies.Rbac
-  alias Console.Schema.{Service, GitRepository, PolicyBinding, User}
+  alias Console.Schema.{Service, GitRepository, PolicyBinding, User, ProviderCredential}
 
   defmodule CloudSettings do
     use Piazza.Ecto.Schema
@@ -60,6 +60,7 @@ defmodule Console.Schema.ClusterProvider do
       on_replace: :delete,
       foreign_key: :policy_id,
       references: :write_policy_id
+    has_many :credentials, ProviderCredential, foreign_key: :provider_id
 
     belongs_to :repository, GitRepository
     belongs_to :service, Service

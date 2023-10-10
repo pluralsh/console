@@ -8,7 +8,12 @@ defmodule Console.Commands.Configuration do
   end
 
   def run() do
-    {:ok, _} = register_ssh_keys()
+    case register_ssh_keys() do
+      {:ok, _} -> :ok
+      err ->
+        Logger.error "Failed to register ssh keys: #{inspect(err)}"
+        err
+    end
   end
 
   def ssh_path(), do: mkpath(conf(:git_ssh_key))

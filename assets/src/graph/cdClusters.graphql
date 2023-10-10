@@ -5,8 +5,23 @@ fragment NodePool on NodePool {
 
 fragment ClustersRow on Cluster {
   apiDeprecations {
-    blocking
     availableIn
+    blocking
+    component {
+      group
+      kind
+      name
+      service {
+        git {
+          ref
+          folder
+        }
+        repository {
+          httpsPath
+          urlFormat
+        }
+      }
+    }
     deprecatedIn
     removedIn
     replacement
@@ -14,6 +29,7 @@ fragment ClustersRow on Cluster {
   id
   name
   currentVersion
+  pingedAt
   provider {
     id
     cloud
@@ -36,5 +52,28 @@ query Clusters {
         ...ClustersRow
       }
     }
+  }
+}
+
+query ClustersTiny {
+  clusters(first: 100) {
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+
+query Cluster($id: ID!) {
+  cluster(id: $id) {
+    ...ClustersRow
+  }
+}
+
+mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
+  updateCluster(id: $id, attributes: $attributes) {
+    ...ClustersRow
   }
 }

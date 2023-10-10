@@ -67,6 +67,13 @@ defmodule Console.Services.Plural do
     |> Deployer.file()
   end
 
+  @doc "fetches the chart readme if present"
+  @spec readme_file(binary) :: bin_resp
+  def readme_file(repository) do
+    chart_readme_filename(repository)
+    |> Deployer.file()
+  end
+
   @doc """
   Performs a sequence of path updates for the helm values.yaml file for `repository`
   """
@@ -225,6 +232,10 @@ defmodule Console.Services.Plural do
 
   defp validate(str, :helm), do: YamlElixir.read_from_string(str)
   defp validate(_, _), do: {:ok, nil}
+
+  defp chart_readme_filename(repository) do
+    Path.join([Console.workspace(), repository, "helm", repository, "README.md"])
+  end
 
   defp vals_filename(repository) do
     Path.join([Console.workspace(), repository, "helm", repository, "values.yaml"])

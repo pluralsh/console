@@ -2,7 +2,7 @@ defmodule Console.Deployments.Services do
   use Console.Services.Base
   import Console.Deployments.Policies
   alias Console.PubSub
-  alias Console.Schema.{Service, Revision, User, Cluster, ClusterProvider, ApiDeprecation}
+  alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation}
   alias Console.Deployments.{Secrets.Store, Git, Clusters, Deprecations.Checker}
   require Logger
 
@@ -93,6 +93,13 @@ defmodule Console.Deployments.Services do
   end
   def authorized(_, _), do: {:error, "could not find service in cluster"}
 
+  def add_errors(%Service{id: svc_id}, errors) do
+    get_service(svc_id)
+    |> Repo.preload([:errors])
+    |> Service.changeset(%{errors: errors})
+    |> Repo.update()
+  end
+
   @doc """
   Updates a service and creates a new revision
   """
@@ -107,6 +114,21 @@ defmodule Console.Deployments.Services do
     |> execute(extract: :update)
     |> notify(:update, user)
   end
+
+  def accessible(%Service{} = svc, k8s_resource) do
+    %{components: components} = Repo.preload(svc, [:components])
+    {g, v, k, ns, n} = Kube.Utils.identifier(k8s_resource)
+
+    Enum.any?(components, fn
+      %ServiceComponent{group: ^g, version: ^v, kind: ^k, namespace: ^ns, name: ^n} -> true
+      _ -> false
+    end)
+    |> case do
+      true -> {:ok, k8s_resource}
+      _ -> {:error, "forbidden"}
+    end
+  end
+  def accessible(_, _), do: {:error, "forbidden"}
 
   @doc """
   Will copy a service, and apply any user specified attributes on top.
@@ -138,17 +160,17 @@ defmodule Console.Deployments.Services do
   @doc """
   Updates the sha of a service if relevant
   """
-  @spec update_sha(Service.t, binary) :: service_resp
-  def update_sha(%Service{sha: sha} = svc, sha), do: {:ok, svc}
-  def update_sha(%Service{id: id}, sha) do
+  @spec update_sha(Service.t, binary, binary) :: service_resp
+  def update_sha(%Service{sha: sha} = svc, sha, _), do: {:ok, svc}
+  def update_sha(%Service{id: id}, sha, msg) do
     start_transaction()
     |> add_operation(:base, fn _ ->
       get_service!(id)
-      |> Service.changeset(%{sha: sha, status: :stale})
+      |> Service.changeset(%{sha: sha, status: :stale, message: msg})
       |> Repo.update()
     end)
     |> add_operation(:revision, fn %{base: base} ->
-      add_version(%{sha: sha}, base.version)
+      add_version(%{sha: sha, message: msg}, base.version)
       |> Console.dedupe(:git, %{ref: sha, folder: base.git.folder})
       |> Console.dedupe(:configuration, fn ->
         {:ok, secrets} = configuration(base)
@@ -260,11 +282,13 @@ defmodule Console.Deployments.Services do
     |> add_operation(:updated, fn %{service: %Service{components: components} = service} ->
       running = Enum.all?(components, & &1.state == :running || is_nil(&1.state))
       failed = Enum.any?(components, & &1.state == :failed)
-      num_healthy = Enum.count(components, & &1.state == :running || is_nil(&1.state))
+      unsynced = Enum.any?(components, & !&1.synced)
+      num_healthy = Enum.count(components, & (&1.state == :running || is_nil(&1.state)) && &1.synced)
       component_status = "#{num_healthy} / #{length(components)}"
-      case {failed, running} do
-        {true, _} -> update_status(service, :failed, component_status)
-        {_, true} -> update_status(service, :healthy, component_status)
+      case {failed, running, unsynced} do
+        {true, _, _} -> update_status(service, :failed, component_status)
+        {_, _, true} -> update_status(service, :stale, component_status)
+        {_, true, _} -> update_status(service, :healthy, component_status)
         _ -> update_status(service, :stale, component_status)
       end
     end)

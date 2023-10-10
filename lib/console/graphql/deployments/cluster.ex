@@ -6,6 +6,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :name,           non_null(:string)
     field :handle,         :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :provider_id,    :id
+    field :credential_id,  :id, description: "a cloud credential to use when provisioning this cluster"
     field :version,        non_null(:string)
     field :kubeconfig,     :kubeconfig_attributes
     field :node_pools,     list_of(:node_pool_attributes)
@@ -28,10 +29,17 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :cluster_update_attributes do
-    field :version,       non_null(:string)
-    field :node_pools,    list_of(:node_pool_attributes)
-    field :read_bindings, list_of(:policy_binding_attributes)
+    field :version,        non_null(:string)
+    field :handle,         :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
+    field :service,        :cluster_service_attributes, description: "if you optionally want to reconfigure the git repository for the cluster service"
+    field :node_pools,     list_of(:node_pool_attributes)
+    field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
+  end
+
+  input_object :cluster_service_attributes do
+    field :id,  non_null(:id)
+    field :git, non_null(:git_ref_attributes)
   end
 
   input_object :node_pool_attributes do
@@ -74,6 +82,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :gcp, :gcp_settings_attributes
   end
 
+  input_object :provider_credential_attributes do
+    field :namespace, :string
+    field :name,      non_null(:string)
+    field :kind,      :string
+  end
+
   input_object :aws_settings_attributes do
     field :access_key_id,    non_null(:string)
     field :secret_access_key, non_null(:string)
@@ -85,15 +99,16 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
-    field :id,         non_null(:id), description: "the id of this provider"
-    field :name,       non_null(:string), description: "a human readable name for the provider, globally unique"
-    field :namespace,  non_null(:string), description: "the namespace the CAPI resources are deployed into"
-    field :cloud,      non_null(:string), description: "the name of the cloud service for this provider"
-    field :git,        non_null(:git_ref), description: "the details of how cluster manifests will be synced from git when created with this provider"
-    field :repository, :git_repository, resolve: dataloader(Deployments), description: "the repository used to serve cluster manifests"
-    field :service,    :service_deployment, resolve: dataloader(Deployments), description: "the service of the CAPI controller itself"
+    field :id,          non_null(:id), description: "the id of this provider"
+    field :name,        non_null(:string), description: "a human readable name for the provider, globally unique"
+    field :namespace,   non_null(:string), description: "the namespace the CAPI resources are deployed into"
+    field :cloud,       non_null(:string), description: "the name of the cloud service for this provider"
+    field :git,         non_null(:git_ref), description: "the details of how cluster manifests will be synced from git when created with this provider"
+    field :repository,  :git_repository, resolve: dataloader(Deployments), description: "the repository used to serve cluster manifests"
+    field :service,     :service_deployment, resolve: dataloader(Deployments), description: "the service of the CAPI controller itself"
+    field :credentials, list_of(:provider_credential), resolve: dataloader(ProviderCredential), description: "a list of credentials eligible for this provider"
 
-    field :editable,   :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this resource"
+    field :editable,    :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this resource"
 
     timestamps()
   end
@@ -122,6 +137,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :service,     :service_deployment, resolve: dataloader(Deployments), description: "the service used to deploy the CAPI resources of this cluster"
     field :tags,        list_of(:tag), resolve: dataloader(Deployments), description: "key/value tags to filter clusters"
     field :api_deprecations, list_of(:api_deprecation), resolve: dataloader(Deployments), description: "all api deprecations for all services in this cluster"
+    field :servic_errors, list_of(:service_error), resolve: dataloader(Deployments), description: "any errors which might have occurred during the bootstrap process"
+
+    field :status, :cluster_status,
+      description: "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null",
+      resolve: &Deployments.resolve_cluster_status/3
 
     @desc "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
     connection field :revisions, node_type: :revision do
@@ -171,6 +191,35 @@ defmodule Console.GraphQl.Deployments.Cluster do
   @desc "aws node customizations"
   object :aws_cloud do
     field :launch_template_id, :string, description: "custom launch template for your nodes, useful for Golden AMI setups"
+  end
+
+  @desc "a cloud credential that can be used while creating new clusters"
+  object :provider_credential do
+    field :id,        non_null(:id)
+    field :name,      non_null(:string)
+    field :namespace, non_null(:string)
+    field :kind,      non_null(:string)
+
+    timestamps()
+  end
+
+  @desc "the crd status of the cluster as seen by the CAPI operator"
+  object :cluster_status do
+    field :phase,               :string
+    field :control_plane_ready, :boolean
+    field :failure_message,     :string
+    field :failure_reason,      :string
+    field :conditions,          list_of(:cluster_condition)
+  end
+
+  @desc "a single condition struct for various phases of the cluster provisionining process"
+  object :cluster_condition do
+    field :last_transition_time, :string
+    field :status,               :string
+    field :type,                 :string
+    field :message,              :string
+    field :reason,               :string
+    field :severity,             :string
   end
 
   object :tag do
@@ -264,6 +313,21 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :attributes, non_null(:cluster_provider_update_attributes)
 
       safe_resolve &Deployments.update_provider/2
+    end
+
+    field :create_provider_credential, :provider_credential do
+      middleware Authenticated
+      arg :attributes, non_null(:provider_credential_attributes)
+      arg :name,       non_null(:string)
+
+      safe_resolve &Deployments.create_provider_credential/2
+    end
+
+    field :delete_provider_credential, :provider_credential do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.delete_provider_credential/2
     end
   end
 end

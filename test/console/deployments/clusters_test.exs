@@ -4,6 +4,7 @@ defmodule Console.Deployments.ClustersTest do
   alias Console.PubSub
   alias Console.Deployments.{Clusters, Services}
   alias Kazan.Apis.Core.V1, as: CoreV1
+  import KubernetesScaffolds
 
   describe "#create_cluster/2" do
     test "it can create a new cluster record" do
@@ -37,7 +38,7 @@ defmodule Console.Deployments.ClustersTest do
 
       %{service: svc} = Console.Repo.preload(cluster, [:service])
       assert svc.repository_id == provider.repository_id
-      assert svc.name == "cluster-#{cluster.name}"
+      assert svc.name == "cluster-#{provider.name}-#{cluster.name}"
       assert svc.namespace == provider.namespace
       assert svc.cluster_id == self.id
 
@@ -68,6 +69,58 @@ defmodule Console.Deployments.ClustersTest do
       [revision] = Clusters.revisions(cluster)
       assert revision.version == cluster.version
       assert length(revision.node_pools) == length(cluster.node_pools)
+    end
+
+    test "it can create a new cluster record with a provider credential" do
+      user = admin_user()
+      provider = insert(:cluster_provider)
+      cred = insert(:provider_credential, provider: provider)
+      self = insert(:cluster, self: true)
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        version: "1.25",
+        provider_id: provider.id,
+        credential_id: cred.id,
+        node_pools: [
+          %{name: "pool", min_size: 1, max_size: 5, instance_type: "t5.large"}
+        ]
+      }, user)
+
+      assert cluster.name == "test"
+      assert cluster.version == "1.25"
+      assert cluster.provider_id == provider.id
+      assert cluster.deploy_token
+      assert cluster.token_readable
+
+      assert_receive {:event, %PubSub.ClusterCreated{item: ^cluster}}
+
+      [pool] = cluster.node_pools
+      assert pool.name == "pool"
+      assert pool.min_size == 1
+      assert pool.max_size == 5
+      assert pool.instance_type == "t5.large"
+
+      %{service: svc} = Console.Repo.preload(cluster, [:service])
+      assert svc.repository_id == provider.repository_id
+      assert svc.name == "cluster-#{provider.name}-#{cred.name}-#{cluster.name}"
+      assert svc.namespace == cred.namespace
+      assert svc.cluster_id == self.id
+
+      {:ok, secrets} = Services.configuration(svc)
+      assert secrets["clusterName"] == cluster.name
+      assert secrets["version"] == cluster.version
+      assert secrets["operatorNamespace"] == "plrl-deploy-operator"
+      assert secrets["consoleUrl"] == Path.join(Console.conf(:ext_url), "ext/gql")
+      assert secrets["deployToken"] == cluster.deploy_token
+      assert secrets["clusterId"] == cluster.id
+      assert Jason.decode!(secrets["credential"])["name"] == cred.name
+      [node_pool] = Jason.decode!(secrets["nodePools"])
+      assert node_pool["name"] == pool.name
+      assert node_pool["min_size"] == pool.min_size
+      assert node_pool["max_size"] == pool.max_size
+      assert node_pool["instance_type"] == "t5.large"
     end
 
     test "it will respect rbac" do
@@ -290,6 +343,98 @@ defmodule Console.Deployments.ClustersTest do
       {:error, _} = Clusters.update_provider(%{
         cloud_settings: %{aws: %{access_key_id: "aid2", secret_access_key: "sak2"}}
       }, provider.id, insert(:user))
+    end
+  end
+
+  describe "#create_provider_credential/3" do
+    test "you can create credentials for a cluster provider if you have write access" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+
+      {:ok, provider} = Clusters.create_provider(%{
+        name: "aws-sandbox",
+        cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
+      }, user)
+
+      {:ok, cred} = Clusters.create_provider_credential(%{name: "cred", kind: "AwsStaticIdentity"}, provider.name, user)
+
+      assert cred.provider_id == provider.id
+      assert cred.namespace == "plrl-capi-#{provider.name}-#{cred.name}"
+
+      assert_receive {:event, %PubSub.ProviderCredentialCreated{item: ^cred}}
+    end
+
+    test "you cannot create credentials for a cluster provider if you do not have write access" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings()
+
+      {:ok, provider} = Clusters.create_provider(%{
+        name: "aws-sandbox",
+        cloud_settings: %{aws: %{access_key_id: "aid", secret_access_key: "sak"}}
+      }, admin_user())
+
+      {:error, _} = Clusters.create_provider_credential(%{name: "cred", kind: "AwsStaticIdentity"}, provider.name, user)
+    end
+  end
+
+  describe "#delete_provider_credential/2" do
+    test "you can create credentials for a cluster provider if you have write access" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+      cred = insert(:provider_credential)
+
+      {:ok, deleted} = Clusters.delete_provider_credential(cred.id, user)
+
+      assert deleted.id == cred.id
+      refute refetch(deleted)
+
+      assert_receive {:event, %PubSub.ProviderCredentialDeleted{item: ^deleted}}
+    end
+
+    test "you cannot create credentials for a cluster provider if you do not have write access" do
+      user = insert(:user)
+      insert(:cluster, self: true)
+      cred = insert(:provider_credential)
+
+      {:error, _} = Clusters.delete_provider_credential(cred.id, user)
+    end
+  end
+
+  describe "#install/1" do
+    test "it can install the operator in a ready cluster" do
+      %{name: n, provider: %{namespace: ns}, deploy_token: t} = cluster =
+          insert(:cluster, provider: insert(:cluster_provider))
+      kubeconf_secret = "#{n}-kubeconfig"
+      expect(Console.Cached.Cluster, :get, fn ^ns, ^n -> cluster(n) end)
+      expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
+        {:ok, %{data: %{"value" => Base.encode64("kubeconfig")}}}
+      end)
+      expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" -> {:ok, "yay"} end)
+
+      {:ok, installed} = Clusters.install(cluster)
+
+      assert installed.installed
+
+      %{service_errors: []} = Repo.preload(installed, [:service_errors])
+    end
+
+    test "it will persist errors if any" do
+      %{name: n, provider: %{namespace: ns}, deploy_token: t} = cluster =
+        insert(:cluster, provider: insert(:cluster_provider))
+      kubeconf_secret = "#{n}-kubeconfig"
+      expect(Console.Cached.Cluster, :get, fn ^ns, ^n -> cluster(n) end)
+      expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
+        {:ok, %{data: %{"value" => Base.encode64("kubeconfig")}}}
+      end)
+      expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" -> {:error, "helm failure"} end)
+
+      {:error, _} = Clusters.install(cluster)
+
+      %{service_errors: [%{source: "bootstrap", message: msg}]} = Repo.preload(cluster, [:service_errors])
+      assert msg == "helm failure"
     end
   end
 end

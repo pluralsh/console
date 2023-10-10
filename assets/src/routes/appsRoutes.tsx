@@ -8,6 +8,8 @@ import Credentials from 'components/apps/app/credentials/Credentials'
 
 import Uninstall from 'components/apps/app/uninstall/Uninstall'
 
+import AppComponents from 'components/apps/app/components/AppComponents'
+
 import Apps from '../components/apps/Apps'
 import App from '../components/apps/app/App'
 import Dashboards from '../components/apps/app/dashboards/Dashboards'
@@ -18,7 +20,6 @@ import Runbook from '../components/apps/app/runbooks/runbook/Runbook'
 import Logs from '../components/apps/app/logs/Logs'
 import UserManagement from '../components/apps/app/oidc/UserManagement'
 import Configuration from '../components/apps/app/config/Configuration'
-import Components from '../components/apps/app/components/Components'
 import Component from '../components/apps/app/components/component/Component'
 import ComponentInfo from '../components/apps/app/components/component/ComponentInfo'
 import ComponentEvents from '../components/apps/app/components/component/ComponentEvents'
@@ -64,7 +65,7 @@ export const appsRoutes = [
     />
     <Route
       path="components"
-      element={<Components />}
+      element={<AppComponents />}
     />
     <Route
       path="logs"

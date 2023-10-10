@@ -40,6 +40,7 @@ defmodule Console.Schema.Service do
     field :sha,              :string
     field :namespace,        :string
     field :docs_path,        :string
+    field :message,          :string
     field :status,           Status, default: :stale
     field :write_policy_id,  :binary_id
     field :read_policy_id,   :binary_id
@@ -103,6 +104,13 @@ defmodule Console.Schema.Service do
     from(s in query, where: s.cluster_id == ^cluster_id)
   end
 
+  def for_cluster_handle(query \\ __MODULE__, handle) do
+    from(s in query,
+      join: c in assoc(s, :cluster),
+      where: c.handle == ^handle
+    )
+  end
+
   def for_owner(query \\ __MODULE__, owner_id) do
     from(s in query, where: s.owner_id == ^owner_id)
   end
@@ -124,7 +132,7 @@ defmodule Console.Schema.Service do
   def docs_path(%__MODULE__{docs_path: p}) when is_binary(p), do: p
   def docs_path(%__MODULE__{git: %{folder: p}}), do: Path.join(p, "docs")
 
-  @valid ~w(name docs_path component_status status version sha cluster_id repository_id namespace owner_id)a
+  @valid ~w(name docs_path component_status status version sha cluster_id repository_id namespace owner_id message)a
 
   def changeset(model, attrs \\ %{}) do
     model

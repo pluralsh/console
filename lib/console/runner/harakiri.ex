@@ -53,7 +53,6 @@ defmodule Console.Runner.Harakiri do
   def handle_info(_, state), do: {:noreply, state}
 
   defp disconnect() do
-    Console.Clustering.Connect.isolate()
     Logger.info "disconnecting from cluster"
     Node.list()
     |> Enum.each(&Node.disconnect/1)

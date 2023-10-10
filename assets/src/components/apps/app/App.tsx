@@ -18,7 +18,7 @@ import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/Respon
 import { PropsContainer } from 'components/utils/PropsContainer'
 import Prop from 'components/utils/Prop'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
-import { Application, Repository, useRepositoryQuery } from 'generated/graphql'
+import { Application, FileContent, useRepositoryQuery } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
 import capitalize from 'lodash/capitalize'
 import {
@@ -33,16 +33,23 @@ import { config } from 'markdoc/mdSchema'
 import { LoginContext } from '../../contexts'
 import AppStatus from '../AppStatus'
 
+import {
+  DocPageContextProvider,
+  useDocPageContext,
+} from '../../contexts/DocPageContext'
+import { versionName } from '../AppCard'
+
 import AppSelector from './AppSelector'
 import RunbookStatus from './runbooks/runbook/RunbookStatus'
 import LogsLegend from './logs/LogsLegend'
 import ComponentProgress from './components/ComponentProgress'
-import {
-  DocPageContextProvider,
-  useDocPageContext,
-} from './docs/AppDocsContext'
 
-export function getDocsData(docs: Repository['docs']) {
+export function getDocsData(
+  docs:
+    | (Pick<FileContent, 'content' | 'path'> | null | undefined)[]
+    | null
+    | undefined
+) {
   return docs?.map((doc, i) => {
     const content = getMdContent(doc?.content, config)
     const headings = collectHeadings(content)
@@ -104,7 +111,9 @@ export const getDirectory = ({
     { path: 'runbooks', label: 'Runbooks', enabled: true },
     {
       path: 'components',
-      label: <ComponentProgress app={app} />,
+      label: (
+        <ComponentProgress componentsReady={app?.status?.componentsReady} />
+      ),
       enabled: true,
     },
     { path: 'logs', label: 'Logs', enabled: true },
@@ -300,7 +309,7 @@ function AppWithoutContext() {
           marginTop={validLinks?.length > 0 ? 0 : 56}
         >
           <PropsContainer title="App">
-            <Prop title="Current version">v{version}</Prop>
+            <Prop title="Current version">{versionName(version)}</Prop>
             <Prop title="Status">
               <AppStatus app={currentApp} />
             </Prop>

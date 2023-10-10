@@ -35,6 +35,15 @@ spec:
         image: {{ .Values.initContainer.image.repository }}:{{ .Values.initContainer.image.tag }}
         imagePullPolicy: IfNotPresent
         command: [ "/bin/sh", "-c", "until nc -zv plural-console 5432 -w1; do echo 'waiting for db'; sleep 1; done" ]
+      {{ if .Values.cliContainer.enabled }}
+      - name: cli-override
+        image: {{ .Values.cliContainer.image.repository }}:{{ .Values.cliContainer.image.tag }}
+        imagePullPolicy: IfNotPresent
+        command: [ "/bin/sh", "-c", "cp /go/bin/plural /shared/plural"]
+        volumeMounts:
+          - name: cli-override
+            mountPath: /shared
+      {{- end }}
       containers:
       - name: console
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -50,10 +59,15 @@ spec:
         volumeMounts:
         {{ if .Values.secrets.id_rsa }}
         - name: console-ssh
-          mountPath: "/root/.ssh"
+          mountPath: "{{ .Values.homeDir }}/.ssh"
         {{ end }}
         - name: console-conf
-          mountPath: "/root/.plural"
+          mountPath: "{{ .Values.homeDir }}/.plural"
+        {{ if .Values.cliContainer.enabled }}
+        - name: cli-override
+          mountPath: /usr/local/bin/plural
+          subPath: plural
+        {{- end }}
         ports:
         - name: http
           containerPort: {{ .Values.service.port }}
@@ -62,15 +76,11 @@ spec:
           containerPort: 4369
           protocol: TCP
         livenessProbe:
-          httpGet:
-            path: /health
-            port: http
+        {{ toYaml .Values.livenessProbe | nindent 10 }}
         readinessProbe:
-          httpGet:
-            path: /health
-            port: http
+        {{ toYaml .Values.readinessProbe | nindent 10 }}
         resources:
-          {{- toYaml .Values.resources | nindent 12 }}
+        {{- toYaml .Values.resources | nindent 10 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -93,3 +103,7 @@ spec:
       - name: console-conf
         secret:
           secretName: console-conf
+      {{ if .Values.cliContainer.enabled }}
+      - name: cli-override
+        emptyDir: {}
+      {{- end }}

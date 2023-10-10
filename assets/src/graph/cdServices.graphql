@@ -1,0 +1,183 @@
+fragment ServiceDeploymentRevision on Revision {
+  id
+  version
+  updatedAt
+  insertedAt
+  git {
+    folder
+    ref
+  }
+}
+
+fragment ServiceDeploymentsRow on ServiceDeployment {
+  id
+  name
+  cluster {
+    id
+    name
+  }
+  repository {
+    id
+    url
+  }
+  insertedAt
+  updatedAt
+  componentStatus
+  status
+}
+
+fragment ServiceDeploymentDetails on ServiceDeployment {
+  id
+  name
+  namespace
+  componentStatus
+  status
+  cluster {
+    id
+    name
+  }
+  version
+  docs {
+    content
+    path
+  }
+  git {
+    folder
+    ref
+  }
+  components {
+    apiDeprecations {
+      blocking
+    }
+  }
+}
+
+fragment ServiceDeploymentComponent on ServiceComponent {
+  id
+  name
+  kind
+  namespace
+  state
+  synced
+  version
+  apiDeprecations {
+    blocking
+  }
+}
+
+fragment ServiceDeploymentRevisions on ServiceDeployment {
+  revision {
+    ...ServiceDeploymentRevision
+  }
+  revisions(first: 100) {
+    edges {
+      node {
+        ...ServiceDeploymentRevision
+      }
+    }
+  }
+}
+
+query ServiceDeployments {
+  serviceDeployments(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ServiceDeploymentsRow
+      }
+    }
+  }
+}
+
+query ServiceDeploymentsTiny {
+  serviceDeployments(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+
+query ServiceDeployment($id: ID!) {
+  serviceDeployment(id: $id) {
+    ...ServiceDeploymentDetails
+  }
+}
+
+query ServiceDeploymentComponents($id: ID!) {
+  serviceDeployment(id: $id) {
+    components {
+      ...ServiceDeploymentComponent
+    }
+  }
+}
+
+query ServiceDeploymentSecrets($id: ID!) {
+  serviceDeployment(id: $id) {
+    configuration {
+      name
+      value
+    }
+  }
+}
+
+query ServiceDeploymentRevisions($id: ID!) {
+  serviceDeployment(id: $id) {
+    ...ServiceDeploymentRevisions
+  }
+}
+
+mutation CreateServiceDeployment(
+  $attributes: ServiceDeploymentAttributes!
+  $cluster: String
+  $clusterId: ID
+) {
+  createServiceDeployment(
+    attributes: $attributes
+    cluster: $cluster
+    clusterId: $clusterId
+  ) {
+    ...ServiceDeploymentsRow
+  }
+}
+
+mutation DeleteServiceDeployment($id: ID!) {
+  deleteServiceDeployment(id: $id) {
+    id
+  }
+}
+
+mutation UpdateServiceDeployment(
+  $id: ID!
+  $attributes: ServiceUpdateAttributes!
+) {
+  updateServiceDeployment(id: $id, attributes: $attributes) {
+    ...ServiceDeploymentsRow
+  }
+}
+
+mutation RollbackService($id: ID, $revisionId: ID!) {
+  rollbackService(id: $id, revisionId: $revisionId) {
+    ...ServiceDeploymentsRow
+  }
+}
+
+query ClusterServiceDeployments($id: ID!) {
+  serviceDeployments(first: 100, clusterId: $id) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ServiceDeploymentsRow
+      }
+    }
+  }
+}

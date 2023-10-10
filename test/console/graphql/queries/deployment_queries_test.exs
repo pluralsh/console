@@ -160,6 +160,7 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
     test "it can list services in the system by cluster handle" do
       cluster = insert(:cluster, handle: "test")
       services = insert_list(3, :service, cluster: cluster)
+      insert_list(3, :service)
 
       {:ok, %{data: %{"serviceDeployments" => found}}} = run_query("""
         query Services($cluster: String!) {

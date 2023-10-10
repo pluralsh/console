@@ -1,5 +1,7 @@
 defmodule Console.Deployments.CronTest do
   use Console.DataCase, async: true
+  use Mimic
+  import KubernetesScaffolds
   alias Console.Deployments.{Cron, Clusters}
 
   describe "#prune_services/0" do
@@ -141,6 +143,24 @@ defmodule Console.Deployments.CronTest do
       refute refetch(cluster).deploy_token == cluster.deploy_token
       assert refetch(dt)
       refute refetch(old)
+    end
+  end
+
+  describe "#install_clusters/0" do
+    test "it can install the operator into a provisioned cluster" do
+      %{name: n, provider: %{namespace: ns}, deploy_token: t} = cluster =
+        insert(:cluster, provider: insert(:cluster_provider))
+      insert(:cluster, installed: true)
+      kubeconf_secret = "#{n}-kubeconfig"
+      expect(Console.Cached.Cluster, :get, fn ^ns, ^n -> cluster(n) end)
+      expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
+        {:ok, %{data: %{"value" => Base.encode64("kubeconfig")}}}
+      end)
+      expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" -> {:ok, "yay"} end)
+
+      :ok = Cron.install_clusters()
+
+      assert refetch(cluster).installed
     end
   end
 end

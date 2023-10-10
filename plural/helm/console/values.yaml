@@ -4,6 +4,8 @@
 
 replicaCount: 2
 
+homeDir: /root
+
 image:
   repository: dkr.plural.sh/console/console
   tag: ~
@@ -14,11 +16,37 @@ initContainer:
     repository: gcr.io/pluralsh/library/busybox
     tag: 1.35.0
 
+cliContainer:
+  enabled: false
+  image:
+    repository: ghcr.io/pluralsh/plural-cli
+    tag: latest
+
 serviceAccount:
   create: true
   annotations: {}
 
 extraSecretEnv: []
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 1
+  failureThreshold: 3
+  successThreshold: 1
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 1
+  failureThreshold: 3
+  successThreshold: 1
 
 configOverlays:
 - name: console-cpu

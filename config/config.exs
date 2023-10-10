@@ -22,7 +22,7 @@ config :console, ConsoleWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "1rkd5+lxJbdTadyxW7qF/n1fNzKPV010PKf8SEGmUrXwMw0iAZyoyZgWEwr6nmCJ",
   render_errors: [view: ConsoleWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: Console.PubSub, adapter: Phoenix.PubSub.PG2],
+  pubsub_server: Console.PubSub,
   server: true
 
 config :console,

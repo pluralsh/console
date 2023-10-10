@@ -36,6 +36,19 @@ defmodule Console.Deployments.Cron do
     |> Stream.run()
   end
 
+  def install_clusters() do
+    Logger.info "attempting to install operator on dangling clusters"
+    Cluster.uninstalled()
+    |> Cluster.stream()
+    |> Cluster.preloaded()
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(fn cluster ->
+      Logger.info "installing operator on #{cluster.id}"
+      Clusters.install(cluster)
+    end)
+    |> Stream.run()
+  end
+
   def prune_revisions() do
     Logger.info "pruning stale revisions for all services"
 
@@ -64,6 +77,7 @@ defmodule Console.Deployments.Cron do
     Logger.info "backfilling global services into all clusters"
 
     GlobalService.stream()
+    |> Repo.stream(method: :keyset)
     |> Stream.each(fn global ->
       Logger.info "syncing global service #{global.id}"
       Global.sync_clusters(global)

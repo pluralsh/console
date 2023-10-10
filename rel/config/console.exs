@@ -20,7 +20,6 @@ config :libcluster,
   topologies: [
     console: [
       strategy: Cluster.Strategy.Kubernetes,
-      connect: {Console.Clustering.Connect, :connect, []},
       config: [
         mode: :ip,
         kubernetes_node_basename: "console",

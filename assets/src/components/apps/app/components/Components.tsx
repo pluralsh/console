@@ -1,25 +1,13 @@
 import {
-  type Breadcrumb,
   ComponentsIcon,
-  EmptyState,
   ListBoxFooter,
   ListBoxItem,
   Select,
   SelectButton,
-  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { Key, useContext, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { InstallationContext } from 'components/Installations'
+import { ReactElement, useEffect, useMemo, useState } from 'react'
 
 import styled, { useTheme } from 'styled-components'
-import { Component as ComponentT } from 'generated/graphql'
-
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-
-import { Div } from 'honorable'
-
-import Component from './Component'
 
 import { ComponentIcon } from './misc'
 
@@ -67,111 +55,111 @@ const ORDER = {
 
 const kindInd = (kind) => ORDER[kind.toLowerCase()] || 7
 
-function orderBy({ kind: k1, name: n1 }, { kind: k2, name: n2 }) {
+export function orderBy(
+  { kind: k1, name: n1 }: any,
+  { kind: k2, name: n2 }: any
+) {
   if (k1 === k2) return n1 > n2 ? 1 : n1 === n2 ? 0 : -1
 
   return kindInd(k1) - kindInd(k2)
 }
 
-export default function Components() {
-  const { appName } = useParams()
-  const { applications } = useContext<any>(InstallationContext)
-  const currentApp = applications.find((app) => app.name === appName)
-
-  const breadcrumbs: Breadcrumb[] = useMemo(
-    () => [
-      { label: 'apps', url: '/' },
-      { label: appName ?? '', url: `/apps/${appName}` },
-      { label: 'components', url: `/apps/${appName}/components` },
-    ],
-    [appName]
+export function useComponentKindSelect(
+  components:
+    | ({ kind: string | null | undefined } | null | undefined)[]
+    | null
+    | undefined
+): {
+  selectedKinds: Set<string>
+  kindSelector: ReactElement
+} {
+  const kinds = useMemo(() => getUniqueKinds(components || []), [components])
+  const [selectedKinds, setSelectedKinds] = useState<Set<string>>(
+    new Set<string>(kinds)
   )
 
-  useSetBreadcrumbs(breadcrumbs)
+  useEffect(() => {
+    setSelectedKinds(new Set(kinds))
+  }, [kinds])
 
-  const componentKinds = Array.from(
-    (currentApp?.status?.components as ComponentT[])?.reduce(
-      (kinds, component) => {
+  return useMemo(
+    () => ({
+      selectedKinds,
+      kindSelector: (
+        <ComponentKindSelect
+          {...{
+            selectedKinds,
+            setSelectedKinds,
+            kinds,
+          }}
+        />
+      ),
+    }),
+    [kinds, selectedKinds]
+  )
+}
+
+function getUniqueKinds(
+  components: ({ kind: string | null | undefined } | null | undefined)[]
+) {
+  return Array.from(
+    (components || []).reduce((kinds, component) => {
+      if (component?.kind) {
         kinds.add(component.kind)
+      }
 
-        return kinds
-      },
-      new Set<string>([])
-    )
+      return kinds
+    }, new Set<string>([])) || []
   ).sort()
-  const [selectedKinds, setSelectedKinds] = useState<Set<Key>>(
-    new Set(componentKinds)
-  )
-  const filteredComponents = useMemo(
-    () =>
-      currentApp?.status?.components
-        .filter((comp) => selectedKinds.has(comp.kind))
-        .sort(orderBy),
-    [currentApp, selectedKinds]
-  )
+}
+
+function ComponentKindSelect({
+  selectedKinds,
+  setSelectedKinds,
+  kinds,
+}: {
+  selectedKinds: Set<string>
+  setSelectedKinds: (kinds: Set<string>) => void
+  kinds: string[]
+}) {
   const sortedSelectedKinds = Array.from(selectedKinds).sort()
-  const allSelected = sortedSelectedKinds.length >= componentKinds.length
+  const allSelected = sortedSelectedKinds.length >= kinds.length
 
   return (
-    <ScrollablePage
-      scrollable
-      heading="Components"
-      headingContent={
-        <Select
-          label="All components"
-          triggerButton={
-            <FilterTrigger>
-              {allSelected
-                ? 'All components'
-                : sortedSelectedKinds.length === 0
-                ? 'Select types'
-                : sortedSelectedKinds.join(', ')}
-            </FilterTrigger>
-          }
-          selectionMode="multiple"
-          selectedKeys={selectedKinds}
-          onSelectionChange={(keys) => {
-            setSelectedKinds(keys)
-          }}
-          placement="right"
-          dropdownFooterFixed={
-            <FilterFooter
-              allSelected={allSelected}
-              onClick={() =>
-                setSelectedKinds(
-                  new Set(allSelected ? undefined : componentKinds)
-                )
-              }
-            />
-          }
-          maxHeight={300}
-        >
-          {componentKinds.map((kind) => (
-            <ListBoxItem
-              key={kind}
-              leftContent={<ComponentIcon kind={kind} />}
-              label={kind}
-            />
-          ))}
-        </Select>
+    <Select
+      label="All components"
+      triggerButton={
+        <FilterTrigger>
+          {allSelected
+            ? 'All components'
+            : sortedSelectedKinds.length === 0
+            ? 'Select types'
+            : sortedSelectedKinds.join(', ')}
+        </FilterTrigger>
       }
+      selectionMode="multiple"
+      selectedKeys={selectedKinds}
+      onSelectionChange={(keys) => {
+        setSelectedKinds(keys as Set<string>)
+      }}
+      placement="right"
+      dropdownFooterFixed={
+        <FilterFooter
+          allSelected={allSelected}
+          onClick={() =>
+            setSelectedKinds(new Set(allSelected ? undefined : kinds))
+          }
+        />
+      }
+      maxHeight={300}
     >
-      {(filteredComponents || []).length === 0 ? (
-        <EmptyState message="No components match your selection" />
-      ) : (
-        <Div
-          display="grid"
-          gap="xsmall"
-          gridTemplateColumns="1fr 1fr"
-        >
-          {filteredComponents?.map((component, i) => (
-            <Component
-              key={i}
-              component={component}
-            />
-          ))}
-        </Div>
-      )}
-    </ScrollablePage>
+      {kinds.map((kind) => (
+        <ListBoxItem
+          key={kind}
+          leftContent={<ComponentIcon kind={kind} />}
+          label={kind}
+        />
+      ))}
+    </Select>
   )
 }
