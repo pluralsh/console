@@ -16,14 +16,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { providerToURL } from 'components/utils/ProviderIcon'
-
 import { Edge } from 'utils/graphql'
 
 import { useSetCDHeaderContent } from '../ContinuousDeployment'
 
-import { columns } from './columns'
 import CreateCluster from './create/CreateCluster'
-import ClusterCreate from './ClusterCreate'
 import ClusterUpgrade from './ClusterUpgrade'
 import ClusterHealthChip from './ClusterHealthChip'
 
