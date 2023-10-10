@@ -211,9 +211,9 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> maybe_filter_pods(args)
   end
 
-  def raw_resource(%{group: g, version: v, kind: k, namespace: ns, name: n}, %{context: %{service: svc}}) do
+  def raw_resource(%{version: v, kind: k, name: n} = args, %{context: %{service: svc}}) do
     kind = String.downcase(k) |> Inflex.pluralize()
-    path = Kube.Client.Base.path(g, v, kind, ns, n)
+    path = Kube.Client.Base.path(args[:group], v, kind, args[:namespace], n)
     with {:ok, res} <- Kube.Client.raw(path),
          {:ok, res} <- Console.Deployments.Services.accessible(svc, res),
       do: {:ok, %{raw: res}}
