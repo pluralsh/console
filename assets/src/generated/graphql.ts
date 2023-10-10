@@ -1216,8 +1216,8 @@ export type KubernetesDatasource = {
   resource: Scalars['String']['output'];
 };
 
-export type KubernetesRaw = {
-  __typename?: 'KubernetesRaw';
+export type KubernetesUnstructured = {
+  __typename?: 'KubernetesUnstructured';
   events?: Maybe<Array<Maybe<Event>>>;
   raw?: Maybe<Scalars['Map']['output']>;
 };
@@ -2303,7 +2303,6 @@ export type RootQueryType = {
   installations?: Maybe<InstallationConnection>;
   invite?: Maybe<Invite>;
   job?: Maybe<Job>;
-  kubernetesRaw?: Maybe<KubernetesRaw>;
   logFilters?: Maybe<Array<Maybe<LogFilter>>>;
   loginInfo?: Maybe<LoginInfo>;
   logs?: Maybe<Array<Maybe<LogStream>>>;
@@ -2341,6 +2340,7 @@ export type RootQueryType = {
   stack?: Maybe<Stack>;
   statefulSet?: Maybe<StatefulSet>;
   temporaryToken?: Maybe<Scalars['String']['output']>;
+  unstructuredResource?: Maybe<KubernetesUnstructured>;
   upgradePolicies?: Maybe<Array<Maybe<UpgradePolicy>>>;
   users?: Maybe<UserConnection>;
   webhooks?: Maybe<WebhookConnection>;
@@ -2531,16 +2531,6 @@ export type RootQueryTypeJobArgs = {
 };
 
 
-export type RootQueryTypeKubernetesRawArgs = {
-  group: Scalars['String']['input'];
-  kind: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-  namespace: Scalars['String']['input'];
-  serviceId?: InputMaybe<Scalars['ID']['input']>;
-  version: Scalars['String']['input'];
-};
-
-
 export type RootQueryTypeLogFiltersArgs = {
   namespace: Scalars['String']['input'];
 };
@@ -2713,6 +2703,16 @@ export type RootQueryTypeStatefulSetArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeUnstructuredResourceArgs = {
+  group?: InputMaybe<Scalars['String']['input']>;
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  version: Scalars['String']['input'];
 };
 
 

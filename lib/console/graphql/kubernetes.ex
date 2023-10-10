@@ -51,7 +51,7 @@ defmodule Console.GraphQl.Kubernetes do
     end
   end
 
-  object :kubernetes_raw do
+  object :kubernetes_unstructured do
     field :raw, :map
     field :events, list_of(:event), resolve: fn
       %{raw: %{"metadata" => %{"namespace" => ns, "uid" => uid}}}, _, _ ->
@@ -83,12 +83,12 @@ defmodule Console.GraphQl.Kubernetes do
   delta :application
 
   object :kubernetes_queries do
-    field :kubernetes_raw, :kubernetes_raw do
+    field :unstructured_resource, :kubernetes_unstructured do
       middleware Authenticated
-      arg :group,     non_null(:string)
+      arg :group,     :string
       arg :version,   non_null(:string)
       arg :kind,      non_null(:string)
-      arg :namespace, non_null(:string)
+      arg :namespace, :string
       arg :name,      non_null(:string)
       service_authorized :read
 

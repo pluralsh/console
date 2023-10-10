@@ -57,7 +57,7 @@ type RootQueryType {
 
   secrets(namespace: String!): [Secret]
 
-  kubernetesRaw(group: String!, version: String!, kind: String!, namespace: String!, name: String!, serviceId: ID): KubernetesRaw
+  unstructuredResource(group: String, version: String!, kind: String!, namespace: String, name: String!, serviceId: ID): KubernetesUnstructured
 
   service(namespace: String!, name: String!, serviceId: ID): Service
 
@@ -1617,7 +1617,7 @@ type ResourceSpec {
   memory: String
 }
 
-type KubernetesRaw {
+type KubernetesUnstructured {
   raw: Map
   events: [Event]
 }
