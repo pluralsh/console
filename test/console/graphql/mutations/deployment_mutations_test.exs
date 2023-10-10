@@ -478,6 +478,39 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
     end
   end
 
+  describe "mergeService" do
+    test "it can merge configuration for a service" do
+      user = insert(:user)
+      git = insert(:git_repository)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+
+      {:ok, svc} = create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}, %{name: "name2", value: "value2"}]
+      }, cluster, user)
+
+      {:ok, %{data: %{"mergeService" => merged}}} = run_query("""
+        mutation Merge($id: ID!, $config: [ConfigAttributes]) {
+          mergeService(id: $id, configuration: $config) {
+            id
+            configuration { name value }
+          }
+        }
+      """, %{"id" => svc.id, "config" => [%{"name" => "name", "value" => "overwrite"}]}, %{current_user: user})
+
+      assert merged["id"] == svc.id
+      %{"name" => v} = Map.new(merged["configuration"], & {&1["name"], &1["value"]})
+      assert v == "overwrite"
+    end
+  end
+
   describe "rollbackService" do
     test "it can rollback a service to a prior revision" do
       cluster = insert(:cluster, handle: "test")

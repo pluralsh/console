@@ -234,6 +234,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def delete_global_service(%{id: id}, %{context: %{current_user: user}}),
     do: Global.delete(id, user)
 
+  def merge_service(%{id: id, configuration: config}, %{context: %{current_user: user}}),
+    do: Services.merge_service(config, id, user)
+
   def tarball(svc, _, _), do: {:ok, Services.tarball(svc)}
 
   def ping(%{attributes: attrs}, %{context: %{cluster: cluster}}),

@@ -313,6 +313,9 @@ type RootMutationType {
 
   deleteServiceDeployment(id: ID!): ServiceDeployment
 
+  "merges configuration for a service"
+  mergeService(id: ID!, configuration: [ConfigAttributes]): ServiceDeployment
+
   "rewires this service to use the given revision id"
   rollbackService(
     id: ID

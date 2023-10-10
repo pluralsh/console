@@ -339,6 +339,55 @@ defmodule Console.Deployments.ServicesTest do
     end
   end
 
+  describe "#merge_service/3" do
+    test "it can merge config for a service" do
+      user = insert(:user)
+      git = insert(:git_repository)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+
+      {:ok, svc} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}, %{name: "name2", value: "value2"}]
+      }, cluster.id, user)
+
+
+      {:ok, merge} = Services.merge_service([%{name: "name", value: "overwrite"}], svc.id, user)
+
+      assert merge.id == svc.id
+      {:ok, secrets} = Services.configuration(merge)
+      assert secrets["name"] == "overwrite"
+      assert secrets["name2"] == "value2"
+    end
+
+    test "those without access cannot merge" do
+      user = insert(:user)
+      git = insert(:git_repository)
+      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+
+      {:ok, svc} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}, %{name: "name2", value: "value2"}]
+      }, cluster.id, user)
+
+
+      {:error, _} = Services.merge_service([%{name: "name", value: "overwrite"}], svc.id, insert(:user))
+    end
+  end
+
   describe "#prune_revisions/1" do
     test "it will prune old revisions" do
       user = insert(:user)

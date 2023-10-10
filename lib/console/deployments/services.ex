@@ -131,6 +131,27 @@ defmodule Console.Deployments.Services do
   def accessible(_, _), do: {:error, "forbidden"}
 
   @doc """
+  It will merge in new configuration for a service (and nothing else)
+  """
+  @spec merge_service(list, binary, User.t) :: service_resp
+  def merge_service(config, service_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:source, fn _ ->
+      get_service!(service_id)
+      |> allow(user, :write)
+    end)
+    |> add_operation(:config, fn %{source: source} ->
+      with {:ok, secrets} <- configuration(source),
+        do: {:ok, merge_configuration(secrets, config)}
+    end)
+    |> add_operation(:update, fn %{source: source, config: config} ->
+      update_service(%{configuration: config}, source)
+    end)
+    |> execute(extract: :update)
+    |> notify(:update, user)
+  end
+
+  @doc """
   Will copy a service, and apply any user specified attributes on top.
 
   This will also merge user specified configuration into the services base config (allowing you not to have to specify the full set)
@@ -140,7 +161,7 @@ defmodule Console.Deployments.Services do
     start_transaction()
     |> add_operation(:source, fn _ ->
       get_service!(service_id)
-      |> allow(user, :read)
+      |> allow(user, :write)
     end)
     |> add_operation(:config, fn %{source: source} ->
       with {:ok, secrets} <- configuration(source),

@@ -1885,6 +1885,8 @@ export type RootMutationType = {
   installStack?: Maybe<Build>;
   loginLink?: Maybe<User>;
   markRead?: Maybe<User>;
+  /** merges configuration for a service */
+  mergeService?: Maybe<ServiceDeployment>;
   oauthCallback?: Maybe<User>;
   overlayConfiguration?: Maybe<Build>;
   /** a regular status ping to be sent by the deploy operator */
@@ -2130,6 +2132,12 @@ export type RootMutationTypeLoginLinkArgs = {
 
 export type RootMutationTypeMarkReadArgs = {
   type?: InputMaybe<ReadType>;
+};
+
+
+export type RootMutationTypeMergeServiceArgs = {
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
+  id: Scalars['ID']['input'];
 };
 
 
