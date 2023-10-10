@@ -3069,7 +3069,7 @@ export type ServiceStatusCount = {
 
 export type ServiceUpdateAttributes = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
-  git: GitRefAttributes;
+  git?: InputMaybe<GitRefAttributes>;
   version?: InputMaybe<Scalars['String']['input']>;
 };
 

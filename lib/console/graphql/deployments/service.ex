@@ -39,7 +39,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
   input_object :service_update_attributes do
     field :version,       :string
-    field :git,           non_null(:git_ref_attributes)
+    field :git,           :git_ref_attributes
     field :configuration, list_of(:config_attributes)
   end
 

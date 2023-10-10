@@ -478,7 +478,7 @@ input DiffNormalizerAttributes {
 
 input ServiceUpdateAttributes {
   version: String
-  git: GitRefAttributes!
+  git: GitRefAttributes
   configuration: [ConfigAttributes]
 }
 
