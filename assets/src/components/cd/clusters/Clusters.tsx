@@ -9,7 +9,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useSetCDHeaderContent } from '../ContinuousDeployment'
 
 import { columns } from './columns'
-import CreateCluster from './CreateCluster'
+import CreateCluster from './create/CreateCluster'
 
 export default function Clusters() {
   const { data } = useClustersQuery()
