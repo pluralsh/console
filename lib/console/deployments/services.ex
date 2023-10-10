@@ -452,7 +452,10 @@ defmodule Console.Deployments.Services do
   end
 
   defp merge_configuration(secrets, [_ | _] = config) do
-    Enum.reduce(config, secrets, fn %{name: k, value: v}, acc -> Map.put(acc, k, v) end)
+    Enum.reduce(config, secrets, fn
+      %{name: k, value: nil}, acc -> Map.delete(acc, k)
+      %{name: k, value: v}, acc -> Map.put(acc, k, v)
+    end)
     |> merge_configuration(nil)
   end
   defp merge_configuration(secrets, _), do: Enum.map(secrets, fn {k, v} -> %{name: k, value: v} end)

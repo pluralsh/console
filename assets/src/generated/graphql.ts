@@ -620,7 +620,7 @@ export enum ComponentState {
 
 export type ConfigAttributes = {
   name: Scalars['String']['input'];
-  value: Scalars['String']['input'];
+  value?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ConfigMap = {

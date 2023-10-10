@@ -358,12 +358,15 @@ defmodule Console.Deployments.ServicesTest do
       }, cluster.id, user)
 
 
-      {:ok, merge} = Services.merge_service([%{name: "name", value: "overwrite"}], svc.id, user)
+      {:ok, merge} = Services.merge_service([
+        %{name: "name", value: "overwrite"},
+        %{name: "name2", value: nil}
+      ], svc.id, user)
 
       assert merge.id == svc.id
       {:ok, secrets} = Services.configuration(merge)
       assert secrets["name"] == "overwrite"
-      assert secrets["name2"] == "value2"
+      refute secrets["name2"]
     end
 
     test "those without access cannot merge" do

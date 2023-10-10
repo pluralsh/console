@@ -56,7 +56,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
   input_object :config_attributes do
     field :name,  non_null(:string)
-    field :value, non_null(:string)
+    field :value, :string
   end
 
   input_object :component_attributes do
