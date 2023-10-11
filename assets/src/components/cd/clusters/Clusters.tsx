@@ -9,7 +9,7 @@ import {
 } from '@pluralsh/design-system'
 import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
 import { useMemo } from 'react'
-import { isEmpty } from 'lodash'
+import { isEmpty, round } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { createColumnHelper } from '@tanstack/react-table'
 import { A } from 'honorable'
@@ -28,6 +28,10 @@ import {
   memoryFormat,
   memoryParser,
 } from '../../../utils/kubernetes'
+
+import { UsageBar } from '../../cluster/nodes/UsageBar'
+
+import { rounded } from '../../../utils/number'
 
 import ClusterCreate from './ClusterCreate'
 import ClusterUpgrade from './ClusterUpgrade'
@@ -135,7 +139,15 @@ export const columns = [
 
       return (
         <div>
-          {cpuFormat(usage)} of {cpuFormat(capacity)}{' '}
+          {!!usage && !!capacity && (
+            <UsageBar
+              usage={usage / capacity}
+              width={120}
+            />
+          )}
+          {usage ? cpuFormat(usage) : '-'}
+          {' / '}
+          {capacity ? cpuFormat(capacity) : '-'}
         </div>
       )
     },
@@ -159,7 +171,15 @@ export const columns = [
 
       return (
         <div>
-          {memoryFormat(usage)} of {memoryFormat(capacity)}
+          {!!usage && !!capacity && (
+            <UsageBar
+              usage={usage / capacity}
+              width={120}
+            />
+          )}
+          {usage ? memoryFormat(usage) : '-'}
+          {' / '}
+          {capacity ? memoryFormat(capacity) : '-'}
         </div>
       )
     },
