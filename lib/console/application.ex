@@ -21,6 +21,7 @@ defmodule Console.Application do
       Console.Cache,
       Console.ReplicatedCache,
       Console.TestCache,
+      Console.LocalCache,
       Console.Buffers.Supervisor,
       {Registry, [keys: :unique, name: Console.Deployments.Git.Agent.registry()]},
       {Cluster.Supervisor, [topologies, [name: Console.ClusterSupervisor]]},
