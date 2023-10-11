@@ -13,7 +13,7 @@ const ComponentCardSC = styled(Card)(({ theme }) => ({
     alignItems: 'center',
     overflow: 'hidden',
     padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
-    gap: theme.spacing.small,
+    gap: theme.spacing.xsmall,
     textDecoration: 'none',
     '&:any-link': {
       textDecoration: 'none',
@@ -79,6 +79,7 @@ export default function ComponentCard({
         size="medium"
         textValue={name}
         type="tertiary"
+        css={{ flexShrink: 0 }}
       />
       <div className="content">
         <Tooltip
