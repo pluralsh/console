@@ -17,7 +17,7 @@ export default function PropsContainer({
   title,
   ...props
 }: {
-  title: string
+  title?: string
 } & DivProps) {
   return (
     <PropsContainerSC {...props}>
