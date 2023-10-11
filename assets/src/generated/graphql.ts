@@ -3547,20 +3547,28 @@ export type CreateServiceDeploymentMutationVariables = Exact<{
 
 export type CreateServiceDeploymentMutation = { __typename?: 'RootMutationType', createServiceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null } | null };
 
-export type DeleteServiceDeploymentMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type DeleteServiceDeploymentMutation = { __typename?: 'RootMutationType', deleteServiceDeployment?: { __typename?: 'ServiceDeployment', id: string } | null };
-
 export type UpdateServiceDeploymentMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   attributes: ServiceUpdateAttributes;
 }>;
 
 
-export type UpdateServiceDeploymentMutation = { __typename?: 'RootMutationType', updateServiceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null } | null };
+export type UpdateServiceDeploymentMutation = { __typename?: 'RootMutationType', updateServiceDeployment?: { __typename?: 'ServiceDeployment', version: string, configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null };
+
+export type MergeServiceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>> | InputMaybe<ConfigAttributes>>;
+}>;
+
+
+export type MergeServiceMutation = { __typename?: 'RootMutationType', mergeService?: { __typename?: 'ServiceDeployment', configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null };
+
+export type DeleteServiceDeploymentMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteServiceDeploymentMutation = { __typename?: 'RootMutationType', deleteServiceDeployment?: { __typename?: 'ServiceDeployment', id: string } | null };
 
 export type RollbackServiceMutationVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -4869,6 +4877,85 @@ export function useCreateServiceDeploymentMutation(baseOptions?: Apollo.Mutation
 export type CreateServiceDeploymentMutationHookResult = ReturnType<typeof useCreateServiceDeploymentMutation>;
 export type CreateServiceDeploymentMutationResult = Apollo.MutationResult<CreateServiceDeploymentMutation>;
 export type CreateServiceDeploymentMutationOptions = Apollo.BaseMutationOptions<CreateServiceDeploymentMutation, CreateServiceDeploymentMutationVariables>;
+export const UpdateServiceDeploymentDocument = gql`
+    mutation UpdateServiceDeployment($id: ID!, $attributes: ServiceUpdateAttributes!) {
+  updateServiceDeployment(id: $id, attributes: $attributes) {
+    configuration {
+      name
+      value
+    }
+    git {
+      folder
+      ref
+    }
+    version
+  }
+}
+    `;
+export type UpdateServiceDeploymentMutationFn = Apollo.MutationFunction<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>;
+
+/**
+ * __useUpdateServiceDeploymentMutation__
+ *
+ * To run a mutation, you first call `useUpdateServiceDeploymentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateServiceDeploymentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateServiceDeploymentMutation, { data, loading, error }] = useUpdateServiceDeploymentMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateServiceDeploymentMutation(baseOptions?: Apollo.MutationHookOptions<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>(UpdateServiceDeploymentDocument, options);
+      }
+export type UpdateServiceDeploymentMutationHookResult = ReturnType<typeof useUpdateServiceDeploymentMutation>;
+export type UpdateServiceDeploymentMutationResult = Apollo.MutationResult<UpdateServiceDeploymentMutation>;
+export type UpdateServiceDeploymentMutationOptions = Apollo.BaseMutationOptions<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>;
+export const MergeServiceDocument = gql`
+    mutation MergeService($id: ID!, $configuration: [ConfigAttributes]) {
+  mergeService(id: $id, configuration: $configuration) {
+    configuration {
+      name
+      value
+    }
+  }
+}
+    `;
+export type MergeServiceMutationFn = Apollo.MutationFunction<MergeServiceMutation, MergeServiceMutationVariables>;
+
+/**
+ * __useMergeServiceMutation__
+ *
+ * To run a mutation, you first call `useMergeServiceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMergeServiceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [mergeServiceMutation, { data, loading, error }] = useMergeServiceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      configuration: // value for 'configuration'
+ *   },
+ * });
+ */
+export function useMergeServiceMutation(baseOptions?: Apollo.MutationHookOptions<MergeServiceMutation, MergeServiceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<MergeServiceMutation, MergeServiceMutationVariables>(MergeServiceDocument, options);
+      }
+export type MergeServiceMutationHookResult = ReturnType<typeof useMergeServiceMutation>;
+export type MergeServiceMutationResult = Apollo.MutationResult<MergeServiceMutation>;
+export type MergeServiceMutationOptions = Apollo.BaseMutationOptions<MergeServiceMutation, MergeServiceMutationVariables>;
 export const DeleteServiceDeploymentDocument = gql`
     mutation DeleteServiceDeployment($id: ID!) {
   deleteServiceDeployment(id: $id) {
@@ -4902,40 +4989,6 @@ export function useDeleteServiceDeploymentMutation(baseOptions?: Apollo.Mutation
 export type DeleteServiceDeploymentMutationHookResult = ReturnType<typeof useDeleteServiceDeploymentMutation>;
 export type DeleteServiceDeploymentMutationResult = Apollo.MutationResult<DeleteServiceDeploymentMutation>;
 export type DeleteServiceDeploymentMutationOptions = Apollo.BaseMutationOptions<DeleteServiceDeploymentMutation, DeleteServiceDeploymentMutationVariables>;
-export const UpdateServiceDeploymentDocument = gql`
-    mutation UpdateServiceDeployment($id: ID!, $attributes: ServiceUpdateAttributes!) {
-  updateServiceDeployment(id: $id, attributes: $attributes) {
-    ...ServiceDeploymentsRow
-  }
-}
-    ${ServiceDeploymentsRowFragmentDoc}`;
-export type UpdateServiceDeploymentMutationFn = Apollo.MutationFunction<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>;
-
-/**
- * __useUpdateServiceDeploymentMutation__
- *
- * To run a mutation, you first call `useUpdateServiceDeploymentMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateServiceDeploymentMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [updateServiceDeploymentMutation, { data, loading, error }] = useUpdateServiceDeploymentMutation({
- *   variables: {
- *      id: // value for 'id'
- *      attributes: // value for 'attributes'
- *   },
- * });
- */
-export function useUpdateServiceDeploymentMutation(baseOptions?: Apollo.MutationHookOptions<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>(UpdateServiceDeploymentDocument, options);
-      }
-export type UpdateServiceDeploymentMutationHookResult = ReturnType<typeof useUpdateServiceDeploymentMutation>;
-export type UpdateServiceDeploymentMutationResult = Apollo.MutationResult<UpdateServiceDeploymentMutation>;
-export type UpdateServiceDeploymentMutationOptions = Apollo.BaseMutationOptions<UpdateServiceDeploymentMutation, UpdateServiceDeploymentMutationVariables>;
 export const RollbackServiceDocument = gql`
     mutation RollbackService($id: ID, $revisionId: ID!) {
   rollbackService(id: $id, revisionId: $revisionId) {
@@ -5681,8 +5734,9 @@ export const namedOperations = {
     DeleteGitRepository: 'DeleteGitRepository',
     UpdateGitRepository: 'UpdateGitRepository',
     CreateServiceDeployment: 'CreateServiceDeployment',
-    DeleteServiceDeployment: 'DeleteServiceDeployment',
     UpdateServiceDeployment: 'UpdateServiceDeployment',
+    MergeService: 'MergeService',
+    DeleteServiceDeployment: 'DeleteServiceDeployment',
     RollbackService: 'RollbackService',
     RestorePostgres: 'RestorePostgres',
     CreateGroupMember: 'CreateGroupMember',
