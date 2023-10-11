@@ -21,7 +21,7 @@ defmodule Console.Commands.Plural do
     with conf when is_binary(conf) <- kubeconfig,
          {:ok, f} <- Briefly.create(),
          :ok <- File.write(f, conf) do
-      plural("deployments", ["install", "--url", url, "--token", token], [{"KUBCONFIG", f}])
+      plural("deployments", ["install", "--url", url, "--token", token], [{"KUBECONFIG", f}])
     else
       nil -> plural("deployments", ["install", "--url", url, "--token", token])
       err -> err

@@ -412,7 +412,12 @@ defmodule Console.Deployments.ClustersTest do
       expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
         {:ok, %{data: %{"value" => Base.encode64("kubeconfig")}}}
       end)
-      expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" -> {:ok, "yay"} end)
+      expect(Console.Commands.Command, :cmd, fn "plural", ["deployments", "install", "--url", _, "--token", ^t], _, [{"KUBECONFIG", f}] ->
+        case File.read(f) do
+          {:ok, "kubeconfig"} -> {:ok, "yay"}
+          err -> {:error, err}
+        end
+      end)
 
       {:ok, installed} = Clusters.install(cluster)
 
