@@ -1,7 +1,6 @@
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   CaretRightIcon,
-  CheckIcon,
   CheckRoundedIcon,
   ClusterIcon,
   EmptyState,
