@@ -132,8 +132,8 @@ query ServiceDeploymentSecrets($cluster: String!, $name: String!) {
   }
 }
 
-query ServiceDeploymentRevisions($cluster: String!, $name: String!) {
-  serviceDeployment(cluster: $cluster, name: $name) {
+query ServiceDeploymentRevisions($id: ID!) {
+  serviceDeployment(id: $id) {
     ...ServiceDeploymentRevisions
   }
 }

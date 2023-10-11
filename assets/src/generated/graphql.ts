@@ -3542,8 +3542,7 @@ export type ServiceDeploymentSecretsQueryVariables = Exact<{
 export type ServiceDeploymentSecretsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null };
 
 export type ServiceDeploymentRevisionsQueryVariables = Exact<{
-  cluster: Scalars['String']['input'];
-  name: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
 }>;
 
 
@@ -4841,8 +4840,8 @@ export type ServiceDeploymentSecretsQueryHookResult = ReturnType<typeof useServi
 export type ServiceDeploymentSecretsLazyQueryHookResult = ReturnType<typeof useServiceDeploymentSecretsLazyQuery>;
 export type ServiceDeploymentSecretsQueryResult = Apollo.QueryResult<ServiceDeploymentSecretsQuery, ServiceDeploymentSecretsQueryVariables>;
 export const ServiceDeploymentRevisionsDocument = gql`
-    query ServiceDeploymentRevisions($cluster: String!, $name: String!) {
-  serviceDeployment(cluster: $cluster, name: $name) {
+    query ServiceDeploymentRevisions($id: ID!) {
+  serviceDeployment(id: $id) {
     ...ServiceDeploymentRevisions
   }
 }
@@ -4860,8 +4859,7 @@ export const ServiceDeploymentRevisionsDocument = gql`
  * @example
  * const { data, loading, error } = useServiceDeploymentRevisionsQuery({
  *   variables: {
- *      cluster: // value for 'cluster'
- *      name: // value for 'name'
+ *      id: // value for 'id'
  *   },
  * });
  */
