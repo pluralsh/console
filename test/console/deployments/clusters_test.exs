@@ -269,7 +269,7 @@ defmodule Console.Deployments.ClustersTest do
 
       assert provider.name == "aws-sandbox"
       assert provider.namespace == "plrl-capi-aws-sandbox"
-      assert provider.repository_id == settings.artifact_repository_id
+      refute provider.repository_id
       assert provider.git.folder == "capi/clusters/aws"
       assert provider.git.ref == "main"
 

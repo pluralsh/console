@@ -562,6 +562,7 @@ export type ClusterStatus = {
 export type ClusterUpdateAttributes = {
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
   handle?: InputMaybe<Scalars['String']['input']>;
+  kubeconfig?: InputMaybe<KubeconfigAttributes>;
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   /** if you optionally want to reconfigure the git repository for the cluster service */
@@ -2919,9 +2920,9 @@ export type ServiceComponent = {
   /** internal id */
   id: Scalars['ID']['output'];
   /** api kind of this resource */
-  kind: Scalars['String']['output'];
+  kind?: Maybe<Scalars['String']['output']>;
   /** kubernetes name of this resource */
-  name: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
   /** kubernetes namespace of this resource */
   namespace?: Maybe<Scalars['String']['output']>;
   /** the service this component belongs to */
@@ -3438,12 +3439,12 @@ export type CreateBuildMutation = { __typename?: 'RootMutationType', createBuild
 
 export type NodePoolFragment = { __typename?: 'NodePool', id: string, name: string };
 
-export type ClustersRowFragment = { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, pingedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null };
+export type ClustersRowFragment = { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, pingedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind?: string | null, name?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null };
 
 export type ClustersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, pingedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null } | null } | null> | null } | null };
+export type ClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, pingedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind?: string | null, name?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null } | null } | null> | null } | null };
 
 export type ClustersTinyQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3455,7 +3456,7 @@ export type ClusterQueryVariables = Exact<{
 }>;
 
 
-export type ClusterQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, pingedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null } | null };
+export type ClusterQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, pingedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind?: string | null, name?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null } | null };
 
 export type UpdateClusterMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3463,7 +3464,7 @@ export type UpdateClusterMutationVariables = Exact<{
 }>;
 
 
-export type UpdateClusterMutation = { __typename?: 'RootMutationType', updateCluster?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, pingedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null } | null };
+export type UpdateClusterMutation = { __typename?: 'RootMutationType', updateCluster?: { __typename?: 'Cluster', id: string, name: string, currentVersion?: string | null, pingedAt?: string | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind?: string | null, name?: string | null, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, nodePools?: Array<{ __typename?: 'NodePool', id: string, name: string } | null> | null } | null };
 
 export type GitRepositoriesRowFragment = { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null };
 
@@ -3500,7 +3501,7 @@ export type ServiceDeploymentsRowFragment = { __typename?: 'ServiceDeployment', 
 
 export type ServiceDeploymentDetailsFragment = { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, componentStatus?: string | null, status: ServiceDeploymentStatus, version: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, docs?: Array<{ __typename?: 'GitFile', content: string, path: string } | null> | null, git: { __typename?: 'GitRef', folder: string, ref: string }, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null };
 
-export type ServiceDeploymentComponentFragment = { __typename?: 'ServiceComponent', id: string, name: string, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null };
+export type ServiceDeploymentComponentFragment = { __typename?: 'ServiceComponent', id: string, name?: string | null, kind?: string | null, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null };
 
 export type ServiceDeploymentRevisionsFragment = { __typename?: 'ServiceDeployment', revision?: { __typename?: 'Revision', id: string, version: string, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null, revisions?: { __typename?: 'RevisionConnection', edges?: Array<{ __typename?: 'RevisionEdge', node?: { __typename?: 'Revision', id: string, version: string, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } } | null } | null> | null } | null };
 
@@ -3526,7 +3527,7 @@ export type ServiceDeploymentComponentsQueryVariables = Exact<{
 }>;
 
 
-export type ServiceDeploymentComponentsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', components?: Array<{ __typename?: 'ServiceComponent', id: string, name: string, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null } | null };
+export type ServiceDeploymentComponentsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', components?: Array<{ __typename?: 'ServiceComponent', id: string, name?: string | null, kind?: string | null, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null } | null };
 
 export type ServiceDeploymentSecretsQueryVariables = Exact<{
   id: Scalars['ID']['input'];

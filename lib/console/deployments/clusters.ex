@@ -18,6 +18,17 @@ defmodule Console.Deployments.Clusters do
   @type cluster_provider_resp :: {:ok, ClusterProvider.t} | Console.error
   @type credential_resp :: {:ok, ProviderCredential.t} | Console.error
 
+  def find!(identifier) do
+    case Uniq.UUID.parse(identifier) do
+      {:ok, _} -> get_cluster!(identifier)
+      _ -> get_cluster_by_handle!(identifier)
+    end
+  end
+
+  def get_cluster!(id), do: Console.Repo.get!(Cluster, id)
+
+  def get_provider!(id), do: Console.Repo.get!(ClusterProvider, id)
+
   def get_cluster(id), do: Console.Repo.get(Cluster, id)
 
   def get_provider_by_name(name), do: Console.Repo.get_by(ClusterProvider, name: name)
@@ -121,17 +132,6 @@ defmodule Console.Deployments.Clusters do
       _ -> nil
     end
   end
-
-  def find!(identifier) do
-    case Uniq.UUID.parse(identifier) do
-      {:ok, _} -> get_cluster!(identifier)
-      _ -> get_cluster_by_handle!(identifier)
-    end
-  end
-
-  def get_cluster!(id), do: Console.Repo.get!(Cluster, id)
-
-  def get_provider!(id), do: Console.Repo.get!(ClusterProvider, id)
 
   def revisions(%Cluster{id: id}) do
     ClusterRevision.for_cluster(id)
@@ -298,7 +298,7 @@ defmodule Console.Deployments.Clusters do
     start_transaction()
     |> add_operation(:create, fn _ ->
       %ClusterProvider{}
-      |> ClusterProvider.changeset(Console.dedupe(attrs, :repository_id, fn -> Git.artifacts_repo!().id end))
+      |> ClusterProvider.changeset(attrs)
       |> allow(user, :create)
       |> when_ok(:insert)
     end)
@@ -314,6 +314,17 @@ defmodule Console.Deployments.Clusters do
     end)
     |> execute(extract: :rewire)
     |> notify(:create, user)
+  end
+
+  @doc """
+  It can delete a CAPI provider, will throw if there are clusters still attached
+  """
+  @spec delete_provider(binary, User.t) :: cluster_provider_resp
+  def delete_provider(id, %User{} = user) do
+    get_provider!(id)
+    |> allow(user, :create)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
   end
 
   @doc """
@@ -396,7 +407,7 @@ defmodule Console.Deployments.Clusters do
     Console.Repo.preload(cluster, [:node_pools])
     |> cluster_attributes()
     |> Map.merge(%{
-      repository_id: provider.repository_id,
+      repository_id: provider.repository_id || Git.artifacts_repo!().id,
       name: name,
       namespace: ns,
       git: Map.take(provider.git, ~w(ref folder)a),
@@ -486,6 +497,8 @@ defmodule Console.Deployments.Clusters do
     do: handle_notify(PubSub.ProviderCreated, prov, actor: user)
   defp notify({:ok, %ClusterProvider{} = prov}, :update, user),
     do: handle_notify(PubSub.ProviderUpdated, prov, actor: user)
+  defp notify({:ok, %ClusterProvider{} = prov}, :delete, user),
+    do: handle_notify(PubSub.ProviderDeleted, prov, actor: user)
 
   defp notify({:ok, %ProviderCredential{} = prov}, :create, user),
     do: handle_notify(PubSub.ProviderCredentialCreated, prov, actor: user)
