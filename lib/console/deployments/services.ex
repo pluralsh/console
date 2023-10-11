@@ -71,7 +71,8 @@ defmodule Console.Deployments.Services do
 
   def update_operator_service(%Cluster{id: id} = cluster, %User{} = user) do
     case get_service_by_name(id, "deploy-operator") do
-      %Service{} = svc -> update_service(%{configuration: operator_configuration(cluster)}, svc.id, user)
+      %Service{} = svc ->
+        merge_service(operator_configuration(cluster), svc.id, user)
       _ -> {:ok, nil}
     end
   end
