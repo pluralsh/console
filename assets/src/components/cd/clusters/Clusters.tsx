@@ -127,7 +127,9 @@ export const columns = [
       )
       const capacity = cluster?.nodes?.reduce(
         (acc, current) =>
-          acc + (memoryParser(current?.status?.capacity.memory) ?? 0),
+          // TODO
+          // @ts-ignore
+          acc + (memoryParser(current?.status?.capacity?.memory) ?? 0),
         0
       )
 
