@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ServiceDeploymentDetailsFragment } from 'generated/graphql'
-import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutes'
+import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
 import { versionName } from 'components/apps/AppCard'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 

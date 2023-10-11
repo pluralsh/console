@@ -36,7 +36,7 @@ const ComponentCardSC = styled(Card)(({ theme }) => ({
       ...TRUNCATE,
       color: theme.colors['text-xlight'],
       marginRight: theme.spacing.xsmall,
-      flexShrink: 0,
+      flexShrink: 1,
       flexGrow: 1,
     },
   },
@@ -81,15 +81,19 @@ export default function ComponentCard<C extends Component>({
         css={{ flexShrink: 0 }}
       />
       <div className="content">
-        <Tooltip
-          label={name}
-          placement="bottom"
-        >
-          <p className="name">{name}</p>
-        </Tooltip>
-        <Tooltip label={kindString}>
-          <p className="kind">{kindString}</p>
-        </Tooltip>
+        <p className="name">
+          <Tooltip
+            label={name}
+            placement="bottom"
+          >
+            <span>{name}</span>
+          </Tooltip>
+        </p>
+        <p className="kind">
+          <Tooltip label={kindString}>
+            <span>{kindString}</span>
+          </Tooltip>
+        </p>
       </div>
       {state || state === null ? (
         <ComponentStateChip

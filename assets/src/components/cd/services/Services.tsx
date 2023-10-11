@@ -24,7 +24,7 @@ import {
   SERVICES_PATH,
   SERVICE_PARAM_CLUSTER,
   getServiceDetailsPath,
-} from 'routes/cdRoutes'
+} from 'routes/cdRoutesConsts'
 
 import { createMapperWithFallback } from 'utils/mapping'
 import { Edge, removeConnection, updateCache } from 'utils/graphql'
@@ -36,7 +36,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { useParams } from 'react-router-dom'
 
-import { useSetCDHeaderContent } from '../ContinuousDeployment'
+import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 
 import {
   ColCluster,
@@ -164,6 +164,7 @@ export default function Services() {
   useSetBreadcrumbs(
     useMemo(
       () => [
+        ...CD_BASE_CRUMBS,
         {
           label: 'services',
           ...(clusterName ? { url: `/${CD_BASE_PATH}/${SERVICES_PATH}` } : {}),
@@ -232,7 +233,7 @@ export default function Services() {
               navigate(
                 getServiceDetailsPath({
                   clusterName: original.node?.cluster?.name,
-                  serviceName: original.node?.name,
+                  serviceId: original.node?.id,
                 })
               )
             }

@@ -19,60 +19,26 @@ import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
 import ClusterPods from '../components/cd/cluster/ClusterPods'
 
-export const CD_BASE_PATH = 'cd' as const
-export const CLUSTERS_PATH = 'clusters' as const
-export const SERVICES_PATH = 'services' as const
-
-export const CLUSTER_BASE_PATH = `${CD_BASE_PATH}/${CLUSTERS_PATH}/:clusterId`
-const CLUSTER_SERVICES_PATH = 'services' as const
-
-export const SERVICE_PARAM_NAME = 'serviceName' as const
-export const SERVICE_PARAM_CLUSTER = 'clusterName' as const
-export const SERVICE_BASE_PATH = getServiceDetailsPath({
-  isRelative: true,
-  clusterName: `:${SERVICE_PARAM_CLUSTER}`,
-  serviceName: `:${SERVICE_PARAM_NAME}`,
-})
-
-console.log('SERVICE_BASE_PATH', SERVICE_BASE_PATH)
-export const SERVICE_COMPONENTS_PATH = 'components'
-
-export const COMPONENT_PARAM_KIND = `componentKind` as const
-export const COMPONENT_PARAM_NAME = `componentName` as const
-
-export function getServiceDetailsPath({
-  clusterName,
-  serviceName,
-  isRelative = false,
-}: {
-  clusterName: string | null | undefined
-  serviceName: string | null | undefined
-  isRelative?: boolean
-}) {
-  return `${
-    isRelative ? '' : '/'
-  }${CD_BASE_PATH}/${SERVICES_PATH}/${clusterName}/${serviceName}`
-}
-
-export function getServiceComponentPath({
-  componentKind,
-  componentName,
-  ...props
-}: Parameters<typeof getServiceDetailsPath>[0] & {
-  componentKind: string | null | undefined
-  componentName: string | null | undefined
-}) {
-  return `${getServiceDetailsPath({
-    ...props,
-  })}/${SERVICE_COMPONENTS_PATH}/${componentKind}/${componentName}`
-}
+import {
+  CD_BASE_PATH,
+  CLUSTERS_PATH,
+  CLUSTER_BASE_PATH,
+  CLUSTER_SERVICES_PATH,
+  COMPONENT_PARAM_KIND,
+  COMPONENT_PARAM_NAME,
+  SERVICE_BASE_PATH,
+  SERVICE_COMPONENTS_PATH,
+  SERVICE_PARAM_CLUSTER,
+  SERVICE_PARAM_ID,
+  getServiceComponentPath,
+} from './cdRoutesConsts'
 
 export const componentRoutes = [
   <Route
     path={getServiceComponentPath({
       isRelative: true,
       clusterName: `:${SERVICE_PARAM_CLUSTER}`,
-      serviceName: `:${SERVICE_PARAM_NAME}`,
+      serviceId: `:${SERVICE_PARAM_ID}`,
       componentKind: `:${COMPONENT_PARAM_KIND}`,
       componentName: `:${COMPONENT_PARAM_NAME}`,
     })}

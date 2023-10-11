@@ -29,12 +29,13 @@ import {
 } from 'components/contexts/DocPageContext'
 
 import { getDocsData } from 'components/apps/app/App'
+
 import {
   CD_BASE_PATH,
   SERVICE_PARAM_CLUSTER,
-  SERVICE_PARAM_NAME,
+  SERVICE_PARAM_ID,
   getServiceDetailsPath,
-} from 'routes/cdRoutes'
+} from 'routes/cdRoutesConsts'
 import ComponentProgress from 'components/apps/app/components/ComponentProgress'
 
 import { mapExistingNodes } from 'utils/graphql'
@@ -45,21 +46,21 @@ import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 
 export const getServiceDetailsBreadcrumbs = ({
   clusterName,
-  serviceName,
+  serviceId,
 }: {
   clusterName: string | null | undefined
-  serviceName: string | null | undefined
+  serviceId: string | null | undefined
 }) => [
   { label: 'services', url: `${CD_BASE_PATH}/services` },
-  ...(clusterName && serviceName
+  ...(clusterName && serviceId
     ? [
         {
           label: clusterName,
           url: `/${CD_BASE_PATH}/services/${clusterName}`,
         },
         {
-          label: serviceName,
-          url: getServiceDetailsPath({ clusterName, serviceName }),
+          label: serviceId,
+          url: getServiceDetailsPath({ clusterName, serviceId }),
         },
       ]
     : []),
@@ -166,9 +167,12 @@ function ServiceDetailsBase() {
   const theme = useTheme()
   const { pathname } = useLocation()
   const params = useParams()
-  const serviceName = params[SERVICE_PARAM_NAME] as string
+  const serviceName = params[SERVICE_PARAM_ID] as string
   const clusterName = params[SERVICE_PARAM_CLUSTER] as string
-  const pathPrefix = getServiceDetailsPath({ clusterName, serviceName })
+  const pathPrefix = getServiceDetailsPath({
+    clusterName,
+    serviceId: serviceName,
+  })
 
   const { data: serviceListData } = useServiceDeploymentsTinyQuery()
   const serviceList = useMemo(
@@ -177,7 +181,7 @@ function ServiceDetailsBase() {
   )
 
   const { data: serviceData, error: serviceError } = useServiceDeploymentQuery({
-    variables: { cluster: clusterName, name: serviceName },
+    variables: { id: serviceName },
   })
   const { serviceDeployment } = serviceData || {}
   const docs = useMemo(

@@ -110,22 +110,22 @@ query ServiceDeploymentsTiny {
   }
 }
 
-query ServiceDeployment($cluster: String!, $name: String!) {
-  serviceDeployment(cluster: $cluster, name: $name) {
+query ServiceDeployment($id: ID!) {
+  serviceDeployment(id: $id) {
     ...ServiceDeploymentDetails
   }
 }
 
-query ServiceDeploymentComponents($cluster: String!, $name: String!) {
-  serviceDeployment(cluster: $cluster, name: $name) {
+query ServiceDeploymentComponents($id: ID!) {
+  serviceDeployment(id: $id) {
     components {
       ...ServiceDeploymentComponent
     }
   }
 }
 
-query ServiceDeploymentSecrets($cluster: String!, $name: String!) {
-  serviceDeployment(cluster: $cluster, name: $name) {
+query ServiceDeploymentSecrets($id: ID!) {
+  serviceDeployment(id: $id) {
     configuration {
       name
       value

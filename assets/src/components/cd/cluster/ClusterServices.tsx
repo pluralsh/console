@@ -6,6 +6,8 @@ import { Row, TableState } from '@tanstack/react-table'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
+
 import {
   ServiceDeploymentsRowFragment,
   useClusterServiceDeploymentsQuery,
@@ -20,7 +22,6 @@ import {
 } from '../services/ServicesColumns'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import { Edge } from '../../../utils/graphql'
-import { CD_BASE_PATH, SERVICES_PATH } from '../../../routes/cdRoutes'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ServicesFilters } from '../services/ServicesFilters'
 import { DeployService } from '../services/ServicesDeployService'
@@ -107,7 +108,10 @@ export default function ClusterServices() {
               { original }: Row<Edge<ServiceDeploymentsRowFragment>>
             ) =>
               navigate(
-                `/${CD_BASE_PATH}/${SERVICES_PATH}/${original?.node?.id}`
+                getServiceDetailsPath({
+                  clusterName: original.node?.cluster?.name,
+                  serviceId: original.node?.id,
+                })
               )
             }
             reactTableOptions={reactTableOptions}

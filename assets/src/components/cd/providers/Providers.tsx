@@ -1,6 +1,8 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-const crumbs = [{ label: 'providers' }]
+import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
+
+const crumbs = [...CD_BASE_CRUMBS, { label: 'providers' }]
 
 export default function Providers() {
   useSetBreadcrumbs(crumbs)

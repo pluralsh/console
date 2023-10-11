@@ -3,48 +3,67 @@ import { Key, useCallback } from 'react'
 import { ServiceDeployment } from 'generated/graphql'
 import {
   SERVICE_BASE_PATH,
-  SERVICE_PARAM_CLUSTER,
-  SERVICE_PARAM_NAME,
+  SERVICE_PARAM_ID,
   getServiceDetailsPath,
-} from 'routes/cdRoutes'
+} from 'routes/cdRoutesConsts'
 import { useMatch, useNavigate } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
 export default function ServiceSelector({
   serviceDeployments,
 }: {
   serviceDeployments: Pick<ServiceDeployment, 'id' | 'name' | 'cluster'>[]
 }) {
+  const theme = useTheme()
   const navigate = useNavigate()
   const pathMatch = useMatch(`/${SERVICE_BASE_PATH}*`)
   const urlSuffix = pathMatch?.params['*'] ? `/${pathMatch?.params['*']}` : ''
-  const currentServiceName = pathMatch?.params[SERVICE_PARAM_NAME]
-  const currentClusterName = pathMatch?.params[SERVICE_PARAM_CLUSTER]
-  const selectedKey = `${currentClusterName}/${currentServiceName}`
+  const currentServiceId = pathMatch?.params[SERVICE_PARAM_ID]
+  const selectedKey = currentServiceId
 
   const switchService = useCallback(
     (newKey: Key) => {
       if (typeof newKey === 'string' && newKey !== selectedKey) {
-        const [clusterName, serviceName] = newKey.split('/')
+        const service = serviceDeployments.find(
+          (deployment) => deployment.id === newKey
+        )
+
+        console.log('service', service)
 
         navigate(
-          `${getServiceDetailsPath({ clusterName, serviceName })}${urlSuffix}`
+          `${getServiceDetailsPath({
+            clusterName: service?.cluster?.name,
+            serviceId: service?.id,
+          })}${urlSuffix}`
         )
       }
     },
-    [navigate, selectedKey, urlSuffix]
+    [navigate, selectedKey, serviceDeployments, urlSuffix]
   )
 
   return (
     <Select
       aria-label="app"
-      selectedKey={selectedKey}
+      selectedKey={currentServiceId}
       onSelectionChange={switchService}
     >
       {serviceDeployments.map((serviceDeployment) => (
         <ListBoxItem
-          key={`${serviceDeployment?.cluster?.name}/${serviceDeployment.name}`}
-          label={serviceDeployment.name}
-          textValue={serviceDeployment.name}
+          key={serviceDeployment.id}
+          label={
+            <>
+              {serviceDeployment.name}{' '}
+              <span
+                css={{
+                  ...theme.partials.text.caption,
+                  color: theme.colors['text-xlight'],
+                }}
+              >
+                ({serviceDeployment.cluster?.name})
+              </span>
+            </>
+          }
+          textValue={`${serviceDeployment.name} (${serviceDeployment.cluster?.name})`}
         />
       ))}
     </Select>

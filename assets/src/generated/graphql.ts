@@ -3530,24 +3530,21 @@ export type ServiceDeploymentsTinyQueryVariables = Exact<{ [key: string]: never;
 export type ServiceDeploymentsTinyQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null } | null> | null } | null };
 
 export type ServiceDeploymentQueryVariables = Exact<{
-  cluster: Scalars['String']['input'];
-  name: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
 }>;
 
 
 export type ServiceDeploymentQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, componentStatus?: string | null, status: ServiceDeploymentStatus, version: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, docs?: Array<{ __typename?: 'GitFile', content: string, path: string } | null> | null, git: { __typename?: 'GitRef', folder: string, ref: string }, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null } | null };
 
 export type ServiceDeploymentComponentsQueryVariables = Exact<{
-  cluster: Scalars['String']['input'];
-  name: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
 }>;
 
 
 export type ServiceDeploymentComponentsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', components?: Array<{ __typename?: 'ServiceComponent', id: string, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null } | null };
 
 export type ServiceDeploymentSecretsQueryVariables = Exact<{
-  cluster: Scalars['String']['input'];
-  name: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
 }>;
 
 
@@ -4796,8 +4793,8 @@ export type ServiceDeploymentsTinyQueryHookResult = ReturnType<typeof useService
 export type ServiceDeploymentsTinyLazyQueryHookResult = ReturnType<typeof useServiceDeploymentsTinyLazyQuery>;
 export type ServiceDeploymentsTinyQueryResult = Apollo.QueryResult<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>;
 export const ServiceDeploymentDocument = gql`
-    query ServiceDeployment($cluster: String!, $name: String!) {
-  serviceDeployment(cluster: $cluster, name: $name) {
+    query ServiceDeployment($id: ID!) {
+  serviceDeployment(id: $id) {
     ...ServiceDeploymentDetails
   }
 }
@@ -4815,8 +4812,7 @@ export const ServiceDeploymentDocument = gql`
  * @example
  * const { data, loading, error } = useServiceDeploymentQuery({
  *   variables: {
- *      cluster: // value for 'cluster'
- *      name: // value for 'name'
+ *      id: // value for 'id'
  *   },
  * });
  */
@@ -4832,8 +4828,8 @@ export type ServiceDeploymentQueryHookResult = ReturnType<typeof useServiceDeplo
 export type ServiceDeploymentLazyQueryHookResult = ReturnType<typeof useServiceDeploymentLazyQuery>;
 export type ServiceDeploymentQueryResult = Apollo.QueryResult<ServiceDeploymentQuery, ServiceDeploymentQueryVariables>;
 export const ServiceDeploymentComponentsDocument = gql`
-    query ServiceDeploymentComponents($cluster: String!, $name: String!) {
-  serviceDeployment(cluster: $cluster, name: $name) {
+    query ServiceDeploymentComponents($id: ID!) {
+  serviceDeployment(id: $id) {
     components {
       ...ServiceDeploymentComponent
     }
@@ -4853,8 +4849,7 @@ export const ServiceDeploymentComponentsDocument = gql`
  * @example
  * const { data, loading, error } = useServiceDeploymentComponentsQuery({
  *   variables: {
- *      cluster: // value for 'cluster'
- *      name: // value for 'name'
+ *      id: // value for 'id'
  *   },
  * });
  */
@@ -4870,8 +4865,8 @@ export type ServiceDeploymentComponentsQueryHookResult = ReturnType<typeof useSe
 export type ServiceDeploymentComponentsLazyQueryHookResult = ReturnType<typeof useServiceDeploymentComponentsLazyQuery>;
 export type ServiceDeploymentComponentsQueryResult = Apollo.QueryResult<ServiceDeploymentComponentsQuery, ServiceDeploymentComponentsQueryVariables>;
 export const ServiceDeploymentSecretsDocument = gql`
-    query ServiceDeploymentSecrets($cluster: String!, $name: String!) {
-  serviceDeployment(cluster: $cluster, name: $name) {
+    query ServiceDeploymentSecrets($id: ID!) {
+  serviceDeployment(id: $id) {
     configuration {
       name
       value
@@ -4892,8 +4887,7 @@ export const ServiceDeploymentSecretsDocument = gql`
  * @example
  * const { data, loading, error } = useServiceDeploymentSecretsQuery({
  *   variables: {
- *      cluster: // value for 'cluster'
- *      name: // value for 'name'
+ *      id: // value for 'id'
  *   },
  * });
  */

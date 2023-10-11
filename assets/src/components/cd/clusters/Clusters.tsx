@@ -21,7 +21,9 @@ import { providerToURL } from 'components/utils/ProviderIcon'
 
 import { Edge } from 'utils/graphql'
 
-import { useSetCDHeaderContent } from '../ContinuousDeployment'
+import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
+
+import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 
 import {
   cpuFormat,
@@ -234,14 +236,17 @@ export const columns = [
   }),
 ]
 
-const crumbs = [{ label: 'clusters' }]
+export const CLUSTERS_CRUMBS = [
+  ...CD_BASE_CRUMBS,
+  { label: 'clusters', url: `/${CD_BASE_PATH}/${CLUSTERS_PATH}` },
+]
 
 export default function Clusters() {
   const { data } = useClustersQuery()
   const headerActions = useMemo(() => <ClusterCreate />, [])
 
   useSetCDHeaderContent(headerActions)
-  useSetBreadcrumbs(crumbs)
+  useSetBreadcrumbs(CLUSTERS_CRUMBS)
 
   if (!data) {
     return <LoadingIndicator />

@@ -24,8 +24,8 @@ import {
 import {
   CD_BASE_PATH,
   SERVICE_PARAM_CLUSTER,
-  SERVICE_PARAM_NAME,
-} from 'routes/cdRoutes'
+  SERVICE_PARAM_ID,
+} from 'routes/cdRoutesConsts'
 
 import { GqlError } from 'components/utils/Alert'
 import { DeleteIconButton } from 'components/utils/IconButtons'
@@ -299,25 +299,25 @@ const ColActions = ({
 
 export default function ServiceSecrets() {
   const theme = useTheme()
-  const serviceName = useParams()[SERVICE_PARAM_NAME]
+  const serviceId = useParams()[SERVICE_PARAM_ID]
   const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
 
   const [createOpen, setCreateOpen] = useState(false)
 
   const breadcrumbs: Breadcrumb[] = useMemo(
     () => [
-      ...getServiceDetailsBreadcrumbs({ clusterName, serviceName }),
+      ...getServiceDetailsBreadcrumbs({ clusterName, serviceId }),
       {
         label: 'secrets',
-        url: `${CD_BASE_PATH}/services/${serviceName}/secrets`,
+        url: `${CD_BASE_PATH}/services/${serviceId}/secrets`,
       },
     ],
-    [clusterName, serviceName]
+    [clusterName, serviceId]
   )
 
   useSetBreadcrumbs(breadcrumbs)
   const { data, error, refetch } = useServiceDeploymentSecretsQuery({
-    variables: { cluster: clusterName || '', name: serviceName || '' },
+    variables: { id: serviceId || '' },
   })
 
   const [filterString, setFilterString] = useState('')
@@ -326,9 +326,9 @@ export default function ServiceSecrets() {
     () => [
       ColName,
       ColValue,
-      ColActions({ serviceDeploymentId: serviceName, refetch }),
+      ColActions({ serviceDeploymentId: serviceId, refetch }),
     ],
-    [refetch, serviceName]
+    [refetch, serviceId]
   )
 
   if (error) {
@@ -349,7 +349,7 @@ export default function ServiceSecrets() {
       <ModalMountTransition open={createOpen}>
         <SecretEditModal
           open={createOpen}
-          serviceDeploymentId={serviceName}
+          serviceDeploymentId={serviceId}
           refetch={refetch}
           onClose={() => setCreateOpen(false)}
         />

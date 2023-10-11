@@ -21,7 +21,7 @@ import isEmpty from 'lodash/isEmpty'
 
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { SERVICE_PARAM_CLUSTER } from 'routes/cdRoutes'
+import { SERVICE_PARAM_CLUSTER } from 'routes/cdRoutesConsts'
 
 import {
   serviceStatusToLabel,

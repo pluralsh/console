@@ -31,10 +31,11 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   COMPONENT_PARAM_KIND,
   COMPONENT_PARAM_NAME,
+  COMPONENT_PARAM_VERSION,
   SERVICE_PARAM_CLUSTER,
-  SERVICE_PARAM_NAME,
+  SERVICE_PARAM_ID,
   getServiceComponentPath,
-} from 'routes/cdRoutes'
+} from 'routes/cdRoutesConsts'
 
 import { ViewLogsButton } from 'components/apps/app/components/component/ViewLogsButton'
 
@@ -43,14 +44,17 @@ import {
   kindToQuery,
 } from 'components/apps/app/components/component/Component'
 
-import { useUnstructuredResourceQuery } from 'generated/graphql'
+import {
+  useServiceDeploymentComponentsQuery,
+  useUnstructuredResourceQuery,
+} from 'generated/graphql'
 
 import { GqlError } from 'components/utils/Alert'
 
 import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
 
 export const getServiceComponentBreadcrumbs = ({
-  serviceName,
+  serviceId,
   clusterName,
   componentKind,
   componentName,
@@ -58,19 +62,20 @@ export const getServiceComponentBreadcrumbs = ({
   componentKind: string | null | undefined
   componentName: string | null | undefined
 }) => [
-  ...getServiceComponentsBreadcrumbs({ clusterName, serviceName }),
+  ...getServiceComponentsBreadcrumbs({ clusterName, serviceId }),
   {
     label: componentName ?? '',
     url: getServiceComponentPath({
       clusterName,
-      serviceName,
+      serviceId,
       componentKind,
       componentName,
     }),
   },
 ]
 
-export default function Component() {
+function V1Component({ query, ...props }: any) {
+  console.log('v1 props', props)
   const tabStateRef = useRef<any>(null)
   const { me } = useContext<any>(LoginContext)
   const params = useParams()
@@ -82,52 +87,14 @@ export default function Component() {
   const componentKind = params[COMPONENT_PARAM_KIND]
   const componentName = params[COMPONENT_PARAM_NAME]
   const clusterName = params[SERVICE_PARAM_CLUSTER]
-  const serviceName = params[SERVICE_PARAM_NAME]
-  const version = searchParams.get('version')
-  const group = searchParams.get('group')
-  const namespace = searchParams.get('namespace')
-
-  const { applications } = useContext<any>(InstallationContext)
-  const currentApp = applications.find((app) => app.name === serviceName)
-  const query = kindToQuery[componentKind ?? '']
+  const serviceId = params[SERVICE_PARAM_ID]
 
   console.log({ query })
-  const { data, loading, refetch } = useQuery(query, {
+  const { data, loading, refetch, error } = useQuery(query, {
     variables: { name: componentName, namespace: clusterName },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
-
-  //   const variables = {
-  //     //   namespace: 'hello',
-  //     //   serviceId: 'hello',
-  //     kind: componentKind || '',
-  //     name: componentName || '',
-  //     version,
-  //     ...(group ? { group } : {}),
-  //   }
-
-  //   console.log('variables', variables)
-  //   const { data, loading, refetch, error } = useUnstructuredResourceQuery({
-  //     variables,
-  //   })
-
-  console.log({ data, loading, refetch, error })
-
-  console.log('unstructuredResource', data?.unstructuredResource)
-
-  const breadcrumbs: Breadcrumb[] = useMemo(
-    () =>
-      getServiceComponentBreadcrumbs({
-        clusterName,
-        serviceName,
-        componentKind,
-        componentName,
-      }),
-    [clusterName, serviceName, componentKind, componentName]
-  )
-
-  useSetBreadcrumbs(breadcrumbs)
 
   const kind: ScalingType =
     ScalingTypes[(componentKind ?? '')?.toUpperCase()] ??
@@ -141,8 +108,14 @@ export default function Component() {
     [data]
   )
   const subpath =
-    useMatch('/apps/:appName/components/:componentKind/:componentName/:subpath')
-      ?.params?.subpath || ''
+    useMatch(
+      `${getServiceComponentPath({
+        serviceId: ':serviceId',
+        clusterName: ':clusterName',
+        componentKind: ':componentKind',
+        componentName: ':componentName',
+      })}/:subpath`
+    )?.params?.subpath || ''
 
   if (error) {
     return <GqlError error={error} />
@@ -195,7 +168,7 @@ export default function Component() {
           <ScalingRecommenderModal
             kind={kind}
             componentName={componentName}
-            namespace={serviceName}
+            namespace={serviceId}
           />
           <ViewLogsButton
             metadata={value?.metadata}
@@ -219,4 +192,91 @@ export default function Component() {
       />
     </ResponsivePageFullWidth>
   )
+}
+
+function UnstructuredComponent() {
+  console.log('v1 props', props)
+  const tabStateRef = useRef<any>(null)
+  const { me } = useContext<any>(LoginContext)
+  const params = useParams()
+  const [searchParams] = useSearchParams()
+
+  console.log('params', params)
+  console.log('searchParams', searchParams)
+
+  const componentKind = params[COMPONENT_PARAM_KIND]
+  const componentName = params[COMPONENT_PARAM_NAME]
+  const clusterName = params[SERVICE_PARAM_CLUSTER]
+  const serviceId = params[SERVICE_PARAM_ID]
+
+  const variables = {
+    //   namespace: 'hello',
+    //   serviceId: 'hello',
+    kind: componentKind || '',
+    name: componentName || '',
+    version,
+    ...(group ? { group } : {}),
+  }
+
+  console.log('variables', variables)
+  const { data, loading, refetch, error } = useUnstructuredResourceQuery({
+    variables,
+  })
+
+  console.log({ data, loading, refetch, error })
+
+  console.log('unstructuredResource', data?.unstructuredResource)
+
+  return <div>Unstructured</div>
+}
+
+export default function Component() {
+  const tabStateRef = useRef<any>(null)
+  const { me } = useContext<any>(LoginContext)
+  const params = useParams()
+  const [searchParams] = useSearchParams()
+
+  console.log('params', params)
+  console.log('searchParams', searchParams)
+
+  const componentKind = params[COMPONENT_PARAM_KIND]
+  const componentName = params[COMPONENT_PARAM_NAME]
+  const version = params[COMPONENT_PARAM_VERSION]
+  const clusterName = params[SERVICE_PARAM_CLUSTER]
+  const serviceId = params[SERVICE_PARAM_ID]
+
+  const namespace = searchParams.get('namespace')
+
+  const { applications } = useContext<any>(InstallationContext)
+  const currentApp = applications.find((app) => app.name === serviceId)
+
+  const {
+    data: serviceData,
+    loading: serviceLoading,
+    error: serviceError,
+  } = useServiceDeploymentComponentsQuery({
+    variables: {
+      serviceId: serviceId || '',
+    },
+  })
+
+  const v1ComponentQuery = kindToQuery[componentKind ?? '']
+
+  const breadcrumbs: Breadcrumb[] = useMemo(
+    () =>
+      getServiceComponentBreadcrumbs({
+        clusterName,
+        serviceId,
+        componentKind,
+        componentName,
+      }),
+    [clusterName, serviceId, componentKind, componentName]
+  )
+
+  useSetBreadcrumbs(breadcrumbs)
+  if (v1ComponentQuery) {
+    return <V1Component query={v1ComponentQuery} />
+  }
+
+  return <UnstructuredComponent />
 }

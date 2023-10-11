@@ -8,10 +8,10 @@ import { useParams } from 'react-router-dom'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import {
   SERVICE_PARAM_CLUSTER,
-  SERVICE_PARAM_NAME,
+  SERVICE_PARAM_ID,
   getServiceComponentPath,
   getServiceDetailsPath,
-} from 'routes/cdRoutes'
+} from 'routes/cdRoutesConsts'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useComponentKindSelect } from 'components/apps/app/components/Components'
 import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
@@ -25,33 +25,37 @@ import { getServiceDetailsBreadcrumbs } from './ServiceDetails'
 import { countDeprecations } from './countDeprecations'
 
 export const getServiceComponentsBreadcrumbs = ({
-  serviceName,
+  serviceId,
   clusterName,
 }: Parameters<typeof getServiceDetailsBreadcrumbs>[0]) => [
-  ...getServiceDetailsBreadcrumbs({ clusterName, serviceName }),
+  ...getServiceDetailsBreadcrumbs({ clusterName, serviceId }),
   {
     label: 'components',
-    url: `${getServiceDetailsPath({ clusterName, serviceName })}/components`,
+    url: `${getServiceDetailsPath({
+      clusterName,
+      serviceId,
+    })}/components`,
   },
 ]
 
 export default function ServiceComponents() {
   const theme = useTheme()
-  const serviceName = useParams()[SERVICE_PARAM_NAME]
+  const serviceId = useParams()[SERVICE_PARAM_ID]
   const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
 
   const breadcrumbs: Breadcrumb[] = useMemo(
-    () => getServiceComponentsBreadcrumbs({ clusterName, serviceName }),
-    [clusterName, serviceName]
+    () => getServiceComponentsBreadcrumbs({ clusterName, serviceId }),
+    [clusterName, serviceId]
   )
 
   const { data, error } = useServiceDeploymentComponentsQuery({
-    variables: { cluster: clusterName || '', name: serviceName || '' },
+    variables: { id: serviceId || '' },
   })
 
   useSetBreadcrumbs(breadcrumbs)
   const { kindSelector, selectedKinds } = useComponentKindSelect(
-    data?.serviceDeployment?.components
+    data?.serviceDeployment?.components,
+    { width: 320 }
   )
   const deprecationCount = useMemo(
     () => countDeprecations(data?.serviceDeployment?.components),
@@ -113,7 +117,7 @@ export default function ServiceComponents() {
             return c?.name && c?.kind
               ? `${getServiceComponentPath({
                   clusterName,
-                  serviceName,
+                  serviceId,
                   componentKind: c.kind.toLocaleLowerCase(),
                   componentName: c.name.toLowerCase(),
                 })}?${params.toString()}`
