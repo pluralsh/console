@@ -415,9 +415,9 @@ defmodule Console.Deployments.Clusters do
     |> Services.create_service(local_cluster().id, user)
   end
   defp cluster_service(%Cluster{service_id: id} = cluster, %User{} = user) do
-    Console.Repo.preload(cluster, [:node_pools, :credential])
-    |> cluster_attributes()
-    |> Services.update_service(id, user)
+    %{configuration: config} = Console.Repo.preload(cluster, [:node_pools, :credential])
+                               |> cluster_attributes()
+    Services.merge_service(config, id, user)
   end
 
   defp namespace_name(%Cluster{name: n, provider: %ClusterProvider{} = provider, credential: %ProviderCredential{} = cred}),
