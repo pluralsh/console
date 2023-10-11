@@ -41,6 +41,7 @@ config :console,
   git_commit: "abd132",
   provider: :aws,
   cache_adapter: Console.Cache,
+  local_cache: Console.LocalCache,
   version: Mix.Project.config[:version]
 
 config :logger, :console,

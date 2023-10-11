@@ -5,11 +5,14 @@ defmodule Console.Deployments.Clusters do
   alias Console.PubSub
   alias Console.Deployments.{Services, Git}
   alias Console.Services.Users
+  alias Kazan.Apis.Core.V1, as: Core
   alias Console.Schema.{Cluster, User, ClusterProvider, Service, DeployToken, ClusterRevision, ProviderCredential}
   require Logger
 
   @cache_adapter Console.conf(:cache_adapter)
+  @local_adapter Console.conf(:local_cache)
   @ttl :timer.minutes(45)
+  @node_ttl :timer.minutes(5)
 
   @type cluster_resp :: {:ok, Cluster.t} | Console.error
   @type cluster_provider_resp :: {:ok, ClusterProvider.t} | Console.error
@@ -50,6 +53,36 @@ defmodule Console.Deployments.Clusters do
     case namespace(cluster) do
       ns when is_binary(ns) -> {:ok, Console.Cached.Cluster.get(ns, name)}
       nil -> {:ok, nil}
+    end
+  end
+
+  @doc """
+  Fetches the nodes for a cluster, this query is heavily cached for performance
+  """
+  @spec nodes(Cluster.t) :: {:ok, term} | Console.error
+  @decorate cacheable(cache: @local_adapter, key: {:nodes, id}, ttl: @node_ttl)
+  def nodes(%Cluster{id: id} = cluster) do
+    with %Kazan.Server{} = server <- control_plane(cluster),
+         _ <- Kube.Utils.save_kubeconfig(server),
+         {:ok, %{items: items}} <- Core.list_node!() |> Kube.Utils.run() do
+      {:ok, items}
+    else
+      _ -> {:ok, []}
+    end
+  end
+
+  @doc """
+  Fetches the node metrics for a cluster, this query is heavily cached for performance
+  """
+  @spec node_metrics(Cluster.t) :: {:ok, term} | Console.error
+  @decorate cacheable(cache: @local_adapter, key: {:node_metrics, id}, ttl: @node_ttl)
+  def node_metrics(%Cluster{id: id} = cluster) do
+    with %Kazan.Server{} = server <- control_plane(cluster),
+         _ <- Kube.Utils.save_kubeconfig(server),
+         {:ok, %{items: items}} <- Kube.Client.list_metrics() do
+      {:ok, items}
+    else
+      _ -> {:ok, []}
     end
   end
 
