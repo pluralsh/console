@@ -13,6 +13,8 @@ import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/Respon
 import {
   AppIcon,
   InstallIcon,
+  Prop,
+  PropsContainer,
   Tab,
   TabList,
   TabPanel,
@@ -23,9 +25,6 @@ import { ResponsiveLayoutContentContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 
 import { Flex, H2, P } from 'honorable'
-
-import { PropsContainer } from 'components/utils/PropsContainer'
-import Prop from 'components/utils/Prop'
 
 import { getIcon, hasIcons } from 'components/apps/misc'
 

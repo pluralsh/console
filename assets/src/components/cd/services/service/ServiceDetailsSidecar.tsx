@@ -1,13 +1,11 @@
 import { Link } from 'react-router-dom'
-import { PropsContainer } from 'components/utils/PropsContainer'
-import Prop from 'components/utils/Prop'
 import { ServiceDeploymentDetailsFragment } from 'generated/graphql'
 import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutes'
 import { versionName } from 'components/apps/AppCard'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 
 import { useMemo } from 'react'
-import { Chip, ErrorIcon } from '@pluralsh/design-system'
+import { Chip, ErrorIcon, Prop, PropsContainer } from '@pluralsh/design-system'
 
 import { ServiceStatusChip } from '../ServiceStatusChip'
 

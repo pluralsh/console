@@ -1,7 +1,11 @@
-import { Card, IconFrame, TrashCanIcon } from '@pluralsh/design-system'
+import {
+  Card,
+  IconFrame,
+  PropWide,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 import { DELETE_JOB } from 'components/cluster/queries'
 import { Confirm } from 'components/utils/Confirm'
-import PropWide from 'components/utils/PropWide'
 import { Flex, H2 } from 'honorable'
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'

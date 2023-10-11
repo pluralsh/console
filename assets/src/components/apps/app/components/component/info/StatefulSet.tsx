@@ -1,6 +1,5 @@
-import { Card } from '@pluralsh/design-system'
+import { Card, PropWide } from '@pluralsh/design-system'
 import { PieChart } from 'components/utils/PieChart'
-import PropWide from 'components/utils/PropWide'
 import { Flex, H2 } from 'honorable'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'

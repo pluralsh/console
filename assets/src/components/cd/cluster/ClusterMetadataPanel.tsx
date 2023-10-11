@@ -1,6 +1,7 @@
 import { Dispatch, ReactElement } from 'react'
+import { InfoPanel, Prop, Tooltip } from '@pluralsh/design-system'
+import moment from 'moment'
 
-import { InfoPanel } from '../../utils/InfoPanel'
 import { Cluster } from '../../../generated/graphql'
 
 export default function ClusterMetadataPanel({
@@ -24,38 +25,27 @@ export default function ClusterMetadataPanel({
       contentGap={16}
       onClose={() => setOpen(false)}
     >
-      {cluster.name}
-      {/* <Prop */}
-      {/*  title="Cluster name" */}
-      {/*  margin={0} */}
-      {/* > */}
-      {/*  {cluster.name} */}
-      {/* </Prop> */}
-      {/* <Prop */}
-      {/*  title="Owner" */}
-      {/*  margin={0} */}
-      {/* > */}
-      {/*  <ClusterOwner */}
-      {/*    name={cluster.owner?.name} */}
-      {/*    email={cluster.owner?.email} */}
-      {/*    avatar={cluster.owner?.avatar} */}
-      {/*  /> */}
-      {/* </Prop> */}
-      {/* <Prop */}
-      {/*  title="Last pinged" */}
-      {/*  margin={0} */}
-      {/* > */}
-      {/*  {cluster.pingedAt ? ( */}
-      {/*    <Tooltip */}
-      {/*      label={moment(cluster.pingedAt).format('lll')} */}
-      {/*      placement="top" */}
-      {/*    > */}
-      {/*      <span>{moment(cluster.pingedAt).fromNow()}</span> */}
-      {/*    </Tooltip> */}
-      {/*  ) : ( */}
-      {/*    '-' */}
-      {/*  )} */}
-      {/* </Prop> */}
+      <Prop
+        title="Cluster name"
+        margin={0}
+      >
+        {cluster.name}
+      </Prop>
+      <Prop
+        title="Last pinged"
+        margin={0}
+      >
+        {cluster.pingedAt ? (
+          <Tooltip
+            label={moment(cluster.pingedAt).format('lll')}
+            placement="top"
+          >
+            <span>{moment(cluster.pingedAt).fromNow()}</span>
+          </Tooltip>
+        ) : (
+          '-'
+        )}
+      </Prop>
     </InfoPanel>
   )
 }

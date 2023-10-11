@@ -1,8 +1,7 @@
-import { Card } from '@pluralsh/design-system'
+import { Card, PropWide } from '@pluralsh/design-system'
 
 import { Flex } from 'honorable'
 
-import PropWide from 'components/utils/PropWide'
 import { ComponentStatusChip } from 'components/apps/app/components/misc'
 import { Pod } from 'generated/graphql'
 import { LabelPairsSection } from 'components/utils/LabelPairsSection'
