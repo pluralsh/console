@@ -4,7 +4,7 @@ import moment from 'moment'
 
 import { useTheme } from 'styled-components'
 
-import { Cluster } from '../../../generated/graphql'
+import { ClustersRowFragment } from '../../../generated/graphql'
 import CopyButton from '../../utils/CopyButton'
 import ProviderIcon from '../../utils/ProviderIcon'
 
@@ -13,7 +13,7 @@ export default function ClusterMetadataPanel({
   open,
   setOpen,
 }: {
-  cluster: Cluster
+  cluster?: ClustersRowFragment | null
   open: boolean
   setOpen: Dispatch<boolean>
 }): ReactElement | null {
@@ -35,7 +35,7 @@ export default function ClusterMetadataPanel({
         title="Cluster name"
         margin={0}
       >
-        {cluster.name}
+        {cluster?.name}
       </Prop>
       <Prop
         title="Warnings"
@@ -47,7 +47,7 @@ export default function ClusterMetadataPanel({
         title="K8s version"
         margin={0}
       >
-        v{cluster.currentVersion}
+        v{cluster?.currentVersion}
       </Prop>
       <div css={{ display: 'flex', gap: theme.spacing.large }}>
         <Prop
@@ -58,7 +58,7 @@ export default function ClusterMetadataPanel({
             type="secondary"
             icon={
               <ProviderIcon
-                provider={cluster.provider?.cloud || 'BYOK'}
+                provider={cluster?.provider?.cloud || 'BYOK'}
                 width={16}
               />
             }
@@ -69,7 +69,7 @@ export default function ClusterMetadataPanel({
           margin={0}
         >
           <CopyButton
-            text={cluster.service?.repository?.url || ''}
+            text={cluster?.service?.repository?.url || ''}
             type="secondary"
           />
         </Prop>
@@ -78,12 +78,12 @@ export default function ClusterMetadataPanel({
         title="Last pinged"
         margin={0}
       >
-        {cluster.pingedAt ? (
+        {cluster?.pingedAt ? (
           <Tooltip
-            label={moment(cluster.pingedAt).format('lll')}
+            label={moment(cluster?.pingedAt).format('lll')}
             placement="top"
           >
-            <span>{moment(cluster.pingedAt).fromNow()}</span>
+            <span>{moment(cluster?.pingedAt).fromNow()}</span>
           </Tooltip>
         ) : (
           '-'

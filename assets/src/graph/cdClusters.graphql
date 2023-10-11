@@ -36,6 +36,11 @@ fragment ClustersRow on Cluster {
     name
     namespace
   }
+  service {
+    repository {
+      url
+    }
+  }
   version
   nodePools {
     ...NodePool

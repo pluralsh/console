@@ -1,10 +1,15 @@
 import { Button, ErrorIcon } from '@pluralsh/design-system'
 import { useState } from 'react'
 
+import { ClustersRowFragment } from '../../../generated/graphql'
+
 import ClusterMetadataPanel from './ClusterMetadataPanel'
 
-// TODO: Replace any.
-export default function ClusterMetadata({ cluster }: { cluster?: any }) {
+export default function ClusterMetadata({
+  cluster,
+}: {
+  cluster?: ClustersRowFragment | null
+}) {
   const [metadataOpen, setMetadataOpen] = useState(false)
 
   return (
