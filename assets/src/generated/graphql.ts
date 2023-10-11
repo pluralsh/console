@@ -406,8 +406,12 @@ export type Cluster = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** human readable name of this cluster, will also translate to cloud k8s name */
   name: Scalars['String']['output'];
+  /** list the cached node metrics for a cluster, can also be stale up to 5m */
+  nodeMetrics?: Maybe<Array<Maybe<NodeMetric>>>;
   /** list of node pool specs managed by CAPI */
   nodePools?: Maybe<Array<Maybe<NodePool>>>;
+  /** list cached nodes for a cluster, this can be stale up to 5m */
+  nodes?: Maybe<Array<Maybe<Node>>>;
   /** last time the deploy operator pinged this cluster */
   pingedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the provider we use to create this cluster (null if BYOK) */

@@ -966,6 +966,12 @@ type Cluster {
   "any errors which might have occurred during the bootstrap process"
   servicErrors: [ServiceError]
 
+  "list cached nodes for a cluster, this can be stale up to 5m"
+  nodes: [Node]
+
+  "list the cached node metrics for a cluster, can also be stale up to 5m"
+  nodeMetrics: [NodeMetric]
+
   "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null"
   status: ClusterStatus
 

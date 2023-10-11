@@ -54,6 +54,10 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> paginate(args)
   end
 
+  def list_nodes(cluster, _, _), do: Clusters.nodes(cluster)
+
+  def list_node_metrics(cluster, _, _), do: Clusters.node_metrics(cluster)
+
   def service_statuses(args, %{context: %{current_user: user}}) do
     Service.for_user(user)
     |> service_filters(args)

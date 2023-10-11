@@ -11,6 +11,12 @@ defmodule Console.ReplicatedCache do
     adapter: Nebulex.Adapters.Replicated
 end
 
+defmodule Console.LocalCache do
+  use Nebulex.Cache,
+    otp_app: :console,
+    adapter: Nebulex.Adapters.Local
+end
+
 defmodule Console.TestCache do
   use Nebulex.Cache,
     otp_app: :console,
