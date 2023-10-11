@@ -100,7 +100,7 @@ export const cdRoutes = [
       element={<Clusters />}
     />
     <Route
-      path="services"
+      path={`services/:${SERVICE_PARAM_CLUSTER}?`}
       element={<Services />}
     />
 

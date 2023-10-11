@@ -1,5 +1,16 @@
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { Chip, EmptyState, Table } from '@pluralsh/design-system'
+import { ComponentProps, useMemo, useState } from 'react'
+import {
+  Chip,
+  EmptyState,
+  Table,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
+import { useNavigate } from 'react-router'
+import { useTheme } from 'styled-components'
+import type { Row, TableState } from '@tanstack/react-table'
+import uniqBy from 'lodash/uniqBy'
+import isEmpty from 'lodash/isEmpty'
+
 import {
   AuthMethod,
   ServiceDeploymentsDocument,
@@ -7,20 +18,23 @@ import {
   useDeleteServiceDeploymentMutation,
   useServiceDeploymentsQuery,
 } from 'generated/graphql'
-import { useTheme } from 'styled-components'
-import { ComponentProps, useMemo, useState } from 'react'
-import type { Row, TableState } from '@tanstack/react-table'
-import uniqBy from 'lodash/uniqBy'
-import isEmpty from 'lodash/isEmpty'
-import { Confirm } from 'components/utils/Confirm'
-import { DeleteIconButton } from 'components/utils/IconButtons'
+
+import {
+  CD_BASE_PATH,
+  SERVICES_PATH,
+  SERVICE_PARAM_CLUSTER,
+  getServiceDetailsPath,
+} from 'routes/cdRoutes'
+
 import { createMapperWithFallback } from 'utils/mapping'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { Edge, removeConnection, updateCache } from 'utils/graphql'
 
-import { useNavigate } from 'react-router'
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import { Confirm } from 'components/utils/Confirm'
+import { DeleteIconButton } from 'components/utils/IconButtons'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { getServiceDetailsPath } from 'routes/cdRoutes'
+import { useParams } from 'react-router-dom'
 
 import { useSetCDHeaderContent } from '../ContinuousDeployment'
 
@@ -120,6 +134,7 @@ export function AuthMethodChip({
 export default function Services() {
   const theme = useTheme()
   const navigate = useNavigate()
+  const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
   const { data, error, refetch } = useServiceDeploymentsQuery({
     pollInterval: POLL_INTERVAL,
   })
@@ -144,6 +159,19 @@ export default function Services() {
           ): cluster is ServicesCluster => !!cluster
         ),
     [data?.serviceDeployments?.edges]
+  )
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        {
+          label: 'services',
+          ...(clusterName ? { url: `/${CD_BASE_PATH}/${SERVICES_PATH}` } : {}),
+        },
+        ...(clusterName ? [{ label: clusterName }] : []),
+      ],
+      [clusterName]
+    )
   )
 
   useSetCDHeaderContent(

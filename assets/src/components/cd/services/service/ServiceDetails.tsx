@@ -55,6 +55,7 @@ export const getServiceDetailsBreadcrumbs = ({
     ? [
         {
           label: clusterName,
+          url: `/${CD_BASE_PATH}/services/${clusterName}`,
         },
         {
           label: serviceName,

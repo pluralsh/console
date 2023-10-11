@@ -24,10 +24,7 @@ export default function ServiceSelector({
   const switchService = useCallback(
     (newKey: Key) => {
       if (typeof newKey === 'string' && newKey !== selectedKey) {
-        console.log('newKey', newKey)
         const [clusterName, serviceName] = newKey.split('/')
-
-        console.log({ clusterName, serviceName })
 
         navigate(
           `${getServiceDetailsPath({ clusterName, serviceName })}${urlSuffix}`

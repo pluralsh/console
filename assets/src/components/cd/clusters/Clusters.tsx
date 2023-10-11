@@ -6,10 +6,11 @@ import {
   EmptyState,
   IconFrame,
   Table,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
 import { useMemo } from 'react'
-import { isEmpty, round } from 'lodash'
+import { isEmpty } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { createColumnHelper } from '@tanstack/react-table'
 import { A } from 'honorable'
@@ -30,8 +31,6 @@ import {
 } from '../../../utils/kubernetes'
 
 import { UsageBar } from '../../cluster/nodes/UsageBar'
-
-import { rounded } from '../../../utils/number'
 
 import ClusterCreate from './ClusterCreate'
 import ClusterUpgrade from './ClusterUpgrade'
@@ -235,11 +234,14 @@ export const columns = [
   }),
 ]
 
+const crumbs = [{ label: 'clusters' }]
+
 export default function Clusters() {
   const { data } = useClustersQuery()
   const headerActions = useMemo(() => <ClusterCreate />, [])
 
   useSetCDHeaderContent(headerActions)
+  useSetBreadcrumbs(crumbs)
 
   if (!data) {
     return <LoadingIndicator />

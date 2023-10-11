@@ -1,9 +1,4 @@
-import {
-  SubTab,
-  TabList,
-  TabPanel,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import {
   ReactNode,
   createContext,
@@ -64,14 +59,7 @@ export default function ContinuousDeployment() {
   const pathMatch = useMatch(`/${CD_BASE_PATH}/:tab*`)
   // @ts-expect-error
   const tab = pathMatch?.params?.tab || ''
-  const path = `/${CD_BASE_PATH}/${tab}`
   const currentTab = directory.find(({ path }) => path === tab)
-  const crumbs = useMemo(
-    () => (path ? [{ label: tab, path }] : []),
-    [path, tab]
-  )
-
-  useSetBreadcrumbs(crumbs)
 
   return (
     <ResponsivePageFullWidth
