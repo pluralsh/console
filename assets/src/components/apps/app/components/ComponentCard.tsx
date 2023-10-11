@@ -45,24 +45,23 @@ const ComponentCardSC = styled(Card)(({ theme }) => ({
   },
 }))
 
-export default function ComponentCard({
+export type Component = {
+  name: string
+  group?: string | null | undefined
+  kind: string
+  status?: string | null | undefined
+  state?: ComponentState | null | undefined
+}
+
+export default function ComponentCard<C extends Component>({
   component,
   url,
 }: {
-  component: {
-    name: string
-    group?: string
-    kind: string
-    status?: string
-    state?: ComponentState | null | undefined
-  }
+  component: C
   url?: string
 }) {
   const { name, group, kind, status, state } = component
-
   const kindString = `${group || 'v1'}/${kind.toLowerCase()}`
-
-  console.log('status', status)
 
   return (
     <ComponentCardSC

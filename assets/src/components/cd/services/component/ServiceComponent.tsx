@@ -8,7 +8,7 @@ import {
 } from '@pluralsh/design-system'
 
 import { useContext, useMemo, useRef } from 'react'
-import { Outlet, useMatch, useParams } from 'react-router-dom'
+import { Outlet, useMatch, useParams, useSearchParams } from 'react-router-dom'
 
 import { InstallationContext } from 'components/Installations'
 import { useQuery } from '@apollo/client'
@@ -43,6 +43,10 @@ import {
   kindToQuery,
 } from 'components/apps/app/components/component/Component'
 
+import { useUnstructuredResourceQuery } from 'generated/graphql'
+
+import { GqlError } from 'components/utils/Alert'
+
 import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
 
 export const getServiceComponentBreadcrumbs = ({
@@ -70,11 +74,18 @@ export default function Component() {
   const tabStateRef = useRef<any>(null)
   const { me } = useContext<any>(LoginContext)
   const params = useParams()
+  const [searchParams] = useSearchParams()
+
+  console.log('params', params)
+  console.log('searchParams', searchParams)
 
   const componentKind = params[COMPONENT_PARAM_KIND]
   const componentName = params[COMPONENT_PARAM_NAME]
   const clusterName = params[SERVICE_PARAM_CLUSTER]
   const serviceName = params[SERVICE_PARAM_NAME]
+  const version = searchParams.get('version')
+  const group = searchParams.get('group')
+  const namespace = searchParams.get('namespace')
 
   const { applications } = useContext<any>(InstallationContext)
   const currentApp = applications.find((app) => app.name === serviceName)
@@ -86,6 +97,24 @@ export default function Component() {
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
+
+  //   const variables = {
+  //     //   namespace: 'hello',
+  //     //   serviceId: 'hello',
+  //     kind: componentKind || '',
+  //     name: componentName || '',
+  //     version,
+  //     ...(group ? { group } : {}),
+  //   }
+
+  //   console.log('variables', variables)
+  //   const { data, loading, refetch, error } = useUnstructuredResourceQuery({
+  //     variables,
+  //   })
+
+  console.log({ data, loading, refetch, error })
+
+  console.log('unstructuredResource', data?.unstructuredResource)
 
   const breadcrumbs: Breadcrumb[] = useMemo(
     () =>
@@ -115,6 +144,9 @@ export default function Component() {
     useMatch('/apps/:appName/components/:componentKind/:componentName/:subpath')
       ?.params?.subpath || ''
 
+  if (error) {
+    return <GqlError error={error} />
+  }
   if (!me || !currentApp || !data) return <LoadingIndicator />
 
   const component = currentApp.status.components.find(

@@ -55,6 +55,7 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
 fragment ServiceDeploymentComponent on ServiceComponent {
   id
   name
+  group
   kind
   namespace
   state

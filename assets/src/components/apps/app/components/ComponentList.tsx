@@ -1,26 +1,18 @@
 import { EmptyState } from '@pluralsh/design-system'
-import { type ComponentProps, useMemo } from 'react'
+import { useMemo } from 'react'
 import { Div } from 'honorable'
 
-import ComponentCard from './ComponentCard'
+import ComponentCard, { type Component } from './ComponentCard'
 import { orderBy } from './Components'
 
-export function ComponentList({
+export function ComponentList<C extends Component>({
   components,
   selectedKinds,
   setUrl,
 }: {
-  components:
-    | (ComponentProps<typeof ComponentCard>['component'] | null | undefined)[]
-    | null
-    | undefined
+  components: C[] | null | undefined
   selectedKinds: any
-  setUrl: (
-    component:
-      | ComponentProps<typeof ComponentCard>['component']
-      | null
-      | undefined
-  ) => string | undefined
+  setUrl: (component: C) => string | undefined
 }) {
   const filteredComponents = useMemo(
     () =>

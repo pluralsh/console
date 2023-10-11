@@ -19,6 +19,8 @@ import { ComponentList } from 'components/apps/app/components/ComponentList'
 
 import { useTheme } from 'styled-components'
 
+import { isNonNullable } from 'utils/isNonNullable'
+
 import { getServiceDetailsBreadcrumbs } from './ServiceDetails'
 import { countDeprecations } from './countDeprecations'
 
@@ -53,6 +55,10 @@ export default function ServiceComponents() {
   )
   const deprecationCount = useMemo(
     () => countDeprecations(data?.serviceDeployment?.components),
+    [data?.serviceDeployment?.components]
+  )
+  const components = useMemo(
+    () => data?.serviceDeployment?.components?.filter(isNonNullable) || [],
     [data?.serviceDeployment?.components]
   )
 
@@ -96,17 +102,24 @@ export default function ServiceComponents() {
           </Callout>
         )}
         <ComponentList
-          setUrl={(c) =>
-            c?.name && c?.kind
-              ? getServiceComponentPath({
+          setUrl={(c) => {
+            const params = new URLSearchParams()
+
+            if (c.version) params.set('version', c.version)
+            if (c.group) params.set('group', c.group)
+            if (c.id) params.set('id', c.id)
+            if (c.namespace) params.set('namespace', c.namespace)
+
+            return c?.name && c?.kind
+              ? `${getServiceComponentPath({
                   clusterName,
                   serviceName,
                   componentKind: c.kind.toLocaleLowerCase(),
                   componentName: c.name.toLowerCase(),
-                })
+                })}?${params.toString()}`
               : undefined
-          }
-          components={data.serviceDeployment?.components || []}
+          }}
+          components={components}
           selectedKinds={selectedKinds}
         />
       </div>
