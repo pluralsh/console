@@ -39,6 +39,7 @@ export default function ProviderIcon({
       <img
         alt={provider}
         src={providerToURL(provider, true)}
+        width={width}
       />
     </div>
   )
