@@ -20,7 +20,7 @@ defmodule Console.Commands.Plural do
   def install_cd(url, token, kubeconfig \\ nil) do
     with conf when is_binary(conf) <- kubeconfig,
          {:ok, f} <- Briefly.create(),
-         {:ok, _} <- File.write(f, conf) do
+         :ok <- File.write(f, conf) do
       plural("deployments", ["install", "--url", url, "--token", token], [{"KUBCONFIG", f}])
     else
       nil -> plural("deployments", ["install", "--url", url, "--token", token])

@@ -3,7 +3,7 @@ defmodule Console.Deployments.Git.Cmd do
 
   def save_private_key(%GitRepository{private_key: pk} = git) when is_binary(pk) do
     with {:ok, path} <- Briefly.create(),
-         {:ok, _} <- File.write(path, pk),
+         :ok <- File.write(path, pk),
          :ok <- File.chmod(path, 0o400),
       do: {:ok, %{git | private_key_file: path}}
   end
