@@ -69,6 +69,8 @@ export function ServicesFilters({
   ) => void
 }) {
   const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
+
+  console.log('clusterName', clusterName)
   const navigate = useNavigate()
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
@@ -139,17 +141,22 @@ export function ServicesFilters({
                 Cluster
               </div>
             }
-            dropdownFooterFixed={
-              <ListBoxFooter
-                onClick={() => {
-                  setClusterSelectIsOpen(false)
-                  navigate(`/cd/services`)
-                }}
-              >
-                Show all
-              </ListBoxFooter>
-            }
-            selectedKey={clusterName}
+            {...(clusterName
+              ? {
+                  dropdownFooterFixed: (
+                    <ListBoxFooter
+                      onClick={() => {
+                        setClusterSelectIsOpen(false)
+                        navigate(`/cd/services`)
+                      }}
+                      leftContent={<ClusterIcon />}
+                    >
+                      Show all clusters
+                    </ListBoxFooter>
+                  ),
+                }
+              : {})}
+            selectedKey={clusterName || ''}
             onSelectionChange={(key) => {
               navigate(`/cd/services${key ? `/${key}` : ''}`)
             }}
