@@ -22,6 +22,8 @@ import { Edge } from 'utils/graphql'
 
 import { useSetCDHeaderContent } from '../ContinuousDeployment'
 
+import { memoryFormat, memoryParser } from '../../../utils/kubernetes'
+
 import ClusterCreate from './ClusterCreate'
 import ClusterUpgrade from './ClusterUpgrade'
 import ClusterHealthChip from './ClusterHealthChip'
@@ -109,17 +111,33 @@ export const columns = [
   //     />
   //   ),
   // }),
-  // TODO: Add both once resource data is available.
-  // columnHelper.accessor(({ node }) => node?.nodePools, {
-  //   id: 'cpu',
-  //   header: 'CPU',
-  //   cell: () => <div>TODO</div>,
-  // }),
-  // columnHelper.accessor(({ node }) => node?.nodePools, {
-  //   id: 'memory',
-  //   header: 'Memory',
-  //   cell: () => <div>TODO</div>,
-  // }),
+  columnHelper.accessor(({ node }) => node, {
+    id: 'cpu',
+    header: 'CPU',
+    cell: () => <div>TODO</div>,
+  }),
+  columnHelper.accessor(({ node }) => node, {
+    id: 'memory',
+    header: 'Memory',
+    cell: ({ getValue }) => {
+      const cluster = getValue()
+      const usage = cluster?.nodeMetrics?.reduce(
+        (acc, current) => acc + (memoryParser(current?.usage?.memory) ?? 0),
+        0
+      )
+      const capacity = cluster?.nodes?.reduce(
+        (acc, current) =>
+          acc + (memoryParser(current?.status?.capacity.memory) ?? 0),
+        0
+      )
+
+      return (
+        <div>
+          {memoryFormat(usage)} of {memoryFormat(capacity)}
+        </div>
+      )
+    },
+  }),
   columnHelper.accessor(({ node }) => node?.self, {
     id: 'mgmt',
     header: 'Mgmt',
@@ -180,6 +198,8 @@ export default function Clusters() {
   if (!data) {
     return <LoadingIndicator />
   }
+
+  console.log(data)
 
   return !isEmpty(data?.clusters?.edges) ? (
     <FullHeightTableWrap>
