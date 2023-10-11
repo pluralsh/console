@@ -659,13 +659,13 @@ type ServiceComponent {
   version: String
 
   "api kind of this resource"
-  kind: String
+  kind: String!
 
   "kubernetes namespace of this resource"
   namespace: String
 
   "kubernetes name of this resource"
-  name: String
+  name: String!
 
   "the service this component belongs to"
   service: ServiceDeployment

@@ -151,9 +151,9 @@ defmodule Console.GraphQl.Deployments.Service do
     field :synced,     non_null(:boolean), description: "whether this component has been applied to the k8s api"
     field :group,      :string, description: "api group of this resource"
     field :version,    :string, description: "api version of this resource"
-    field :kind,       :string, description: "api kind of this resource"
+    field :kind,       non_null(:string), description: "api kind of this resource"
     field :namespace,  :string, description: "kubernetes namespace of this resource"
-    field :name,       :string, description: "kubernetes name of this resource"
+    field :name,       non_null(:string), description: "kubernetes name of this resource"
 
     field :service, :service_deployment, resolve: dataloader(Deployments), description: "the service this component belongs to"
     field :api_deprecations, list_of(:api_deprecation), resolve: dataloader(Deployments), description: "any api deprecations discovered from this component"
