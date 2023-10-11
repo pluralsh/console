@@ -22,7 +22,12 @@ import { Edge } from 'utils/graphql'
 
 import { useSetCDHeaderContent } from '../ContinuousDeployment'
 
-import { memoryFormat, memoryParser } from '../../../utils/kubernetes'
+import {
+  cpuFormat,
+  cpuParser,
+  memoryFormat,
+  memoryParser,
+} from '../../../utils/kubernetes'
 
 import ClusterCreate from './ClusterCreate'
 import ClusterUpgrade from './ClusterUpgrade'
@@ -114,7 +119,26 @@ export const columns = [
   columnHelper.accessor(({ node }) => node, {
     id: 'cpu',
     header: 'CPU',
-    cell: () => <div>TODO</div>,
+    cell: ({ getValue }) => {
+      const cluster = getValue()
+      const usage = cluster?.nodeMetrics?.reduce(
+        (acc, current) => acc + (cpuParser(current?.usage?.cpu) ?? 0),
+        0
+      )
+      const capacity = cluster?.nodes?.reduce(
+        (acc, current) =>
+          // TODO
+          // @ts-ignore
+          acc + (cpuParser(current?.status?.capacity?.cpu) ?? 0),
+        0
+      )
+
+      return (
+        <div>
+          {cpuFormat(usage)} of {cpuFormat(capacity)}{' '}
+        </div>
+      )
+    },
   }),
   columnHelper.accessor(({ node }) => node, {
     id: 'memory',
