@@ -51,6 +51,7 @@ defmodule Console.Bootstrapper do
       {:ok, _} ->
         {:noreply, %{state | cloned: true, output: "", table: flush(table, %{cloned: true, output: ""})}}
       {:error, out} ->
+        Process.send_after(self(), :init, 10_000)
         table = flush(table, %{cloned: false, output: Tee.output(out)})
         {:noreply, %{state | cloned: false, output: Tee.output(out), table: table}}
     end
