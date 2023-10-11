@@ -1,34 +1,44 @@
-fragment NodePool on NodePool {
-  id
-  name
+fragment ApiDeprecation on ApiDeprecation {
+  availableIn
+  blocking
+  component {
+    group
+    kind
+    name
+    service {
+      git {
+        ref
+        folder
+      }
+      repository {
+        httpsPath
+        urlFormat
+      }
+    }
+  }
+  deprecatedIn
+  removedIn
+  replacement
 }
 
 fragment ClustersRow on Cluster {
   apiDeprecations {
-    availableIn
-    blocking
-    component {
-      group
-      kind
-      name
-      service {
-        git {
-          ref
-          folder
-        }
-        repository {
-          httpsPath
-          urlFormat
-        }
-      }
-    }
-    deprecatedIn
-    removedIn
-    replacement
+    ...ApiDeprecation
   }
+  currentVersion
   id
   name
-  currentVersion
+  nodes {
+    status {
+      capacity
+    }
+  }
+  nodeMetrics {
+    usage {
+      cpu
+      memory
+    }
+  }
   pingedAt
   provider {
     id
@@ -36,10 +46,13 @@ fragment ClustersRow on Cluster {
     name
     namespace
   }
-  version
-  nodePools {
-    ...NodePool
+  self
+  service {
+    repository {
+      url
+    }
   }
+  version
 }
 
 query Clusters {

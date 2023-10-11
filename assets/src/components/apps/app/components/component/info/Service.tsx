@@ -1,5 +1,4 @@
-import { Card } from '@pluralsh/design-system'
-import PropWide from 'components/utils/PropWide'
+import { Card, PropWide } from '@pluralsh/design-system'
 import { Flex, H2, H3 } from 'honorable'
 import isEmpty from 'lodash/isEmpty'
 import { useOutletContext } from 'react-router-dom'

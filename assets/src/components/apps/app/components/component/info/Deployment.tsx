@@ -1,5 +1,4 @@
-import { Card } from '@pluralsh/design-system'
-import PropWide from 'components/utils/PropWide'
+import { Card, PropWide } from '@pluralsh/design-system'
 import { PieChart } from 'components/utils/PieChart'
 import { Flex, H2 } from 'honorable'
 import { useMemo } from 'react'

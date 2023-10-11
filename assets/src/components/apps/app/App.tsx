@@ -1,6 +1,8 @@
 import { A, Div, Flex } from 'honorable'
 import {
   Button,
+  Prop,
+  PropsContainer,
   TreeNav,
   TreeNavEntry,
   WrapWithIf,
@@ -15,8 +17,6 @@ import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import { PropsContainer } from 'components/utils/PropsContainer'
-import Prop from 'components/utils/Prop'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import { Application, FileContent, useRepositoryQuery } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'

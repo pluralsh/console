@@ -7,15 +7,7 @@ import {
   TabPanel,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import {
-  ReactNode,
-  createContext,
-  useContext,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import { Outlet, useMatch, useParams } from 'react-router-dom'
 import { LinkTabWrap } from 'components/utils/Tabs'
@@ -29,30 +21,7 @@ import {
 } from '../../../generated/graphql'
 
 import ClusterPermissions from './ClusterPermissions'
-import ClusterMetadata from './ClusterMetadata'
-
-const ClusterContext = createContext<
-  { setHeaderContent: (content: ReactNode) => void } | undefined
->(undefined)
-
-export const useSetClusterHeaderContent = (headerContent?: ReactNode) => {
-  const ctx = useContext(ClusterContext)
-
-  if (!ctx) {
-    console.warn(
-      'useSetClusterHeaderContent() must be used within a ClusterContext'
-    )
-  }
-  const { setHeaderContent } = ctx || {}
-
-  useLayoutEffect(() => {
-    setHeaderContent?.(headerContent)
-
-    return () => {
-      setHeaderContent?.(null)
-    }
-  }, [setHeaderContent, headerContent])
-}
+import ClusterMetadataPanel from './ClusterMetadataPanel'
 
 const directory = [
   { path: 'services', label: 'Services' },
@@ -152,7 +121,7 @@ export default function Cluster() {
             }}
           >
             <ClusterPermissions />
-            <ClusterMetadata cluster={data?.cluster} />
+            <ClusterMetadataPanel cluster={data?.cluster} />
           </div>
         </>
       }

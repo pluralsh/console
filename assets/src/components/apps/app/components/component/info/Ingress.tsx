@@ -1,6 +1,5 @@
-import { Card, Table } from '@pluralsh/design-system'
+import { Card, PropWide, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import PropWide from 'components/utils/PropWide'
 import { Flex, H2, H3 } from 'honorable'
 import isEmpty from 'lodash/isEmpty'
 import { useMemo } from 'react'

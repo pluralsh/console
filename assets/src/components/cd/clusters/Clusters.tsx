@@ -1,6 +1,7 @@
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   CaretRightIcon,
+  CheckRoundedIcon,
   ClusterIcon,
   EmptyState,
   IconFrame,
@@ -8,7 +9,7 @@ import {
 } from '@pluralsh/design-system'
 import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
 import { useMemo } from 'react'
-import { isEmpty } from 'lodash'
+import { isEmpty, round } from 'lodash'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { createColumnHelper } from '@tanstack/react-table'
 import { A } from 'honorable'
@@ -20,6 +21,17 @@ import { providerToURL } from 'components/utils/ProviderIcon'
 import { Edge } from 'utils/graphql'
 
 import { useSetCDHeaderContent } from '../ContinuousDeployment'
+
+import {
+  cpuFormat,
+  cpuParser,
+  memoryFormat,
+  memoryParser,
+} from '../../../utils/kubernetes'
+
+import { UsageBar } from '../../cluster/nodes/UsageBar'
+
+import { rounded } from '../../../utils/number'
 
 import ClusterCreate from './ClusterCreate'
 import ClusterUpgrade from './ClusterUpgrade'
@@ -108,17 +120,81 @@ export const columns = [
   //     />
   //   ),
   // }),
-  // TODO: Add both once resource data is available.
-  // columnHelper.accessor(({ node }) => node?.nodePools, {
-  //   id: 'cpu',
-  //   header: 'CPU',
-  //   cell: () => <div>TODO</div>,
-  // }),
-  // columnHelper.accessor(({ node }) => node?.nodePools, {
-  //   id: 'memory',
-  //   header: 'Memory',
-  //   cell: () => <div>TODO</div>,
-  // }),
+  columnHelper.accessor(({ node }) => node, {
+    id: 'cpu',
+    header: 'CPU',
+    cell: ({ getValue }) => {
+      const cluster = getValue()
+      const usage = cluster?.nodeMetrics?.reduce(
+        (acc, current) => acc + (cpuParser(current?.usage?.cpu) ?? 0),
+        0
+      )
+      const capacity = cluster?.nodes?.reduce(
+        (acc, current) =>
+          // TODO
+          // @ts-ignore
+          acc + (cpuParser(current?.status?.capacity?.cpu) ?? 0),
+        0
+      )
+
+      return (
+        <div>
+          {!!usage && !!capacity && (
+            <UsageBar
+              usage={usage / capacity}
+              width={120}
+            />
+          )}
+          {usage ? cpuFormat(usage) : '-'}
+          {' / '}
+          {capacity ? cpuFormat(capacity) : '-'}
+        </div>
+      )
+    },
+  }),
+  columnHelper.accessor(({ node }) => node, {
+    id: 'memory',
+    header: 'Memory',
+    cell: ({ getValue }) => {
+      const cluster = getValue()
+      const usage = cluster?.nodeMetrics?.reduce(
+        (acc, current) => acc + (memoryParser(current?.usage?.memory) ?? 0),
+        0
+      )
+      const capacity = cluster?.nodes?.reduce(
+        (acc, current) =>
+          // TODO
+          // @ts-ignore
+          acc + (memoryParser(current?.status?.capacity?.memory) ?? 0),
+        0
+      )
+
+      return (
+        <div>
+          {!!usage && !!capacity && (
+            <UsageBar
+              usage={usage / capacity}
+              width={120}
+            />
+          )}
+          {usage ? memoryFormat(usage) : '-'}
+          {' / '}
+          {capacity ? memoryFormat(capacity) : '-'}
+        </div>
+      )
+    },
+  }),
+  columnHelper.accessor(({ node }) => node?.self, {
+    id: 'mgmt',
+    header: 'Mgmt',
+    cell: ({ getValue }) =>
+      getValue() && (
+        <IconFrame
+          icon={<CheckRoundedIcon color="icon-success" />}
+          type="floating"
+        />
+      ),
+  }),
   columnHelper.accessor(({ node }) => node, {
     id: 'status',
     header: 'Status',
@@ -168,6 +244,8 @@ export default function Clusters() {
   if (!data) {
     return <LoadingIndicator />
   }
+
+  console.log(data)
 
   return !isEmpty(data?.clusters?.edges) ? (
     <FullHeightTableWrap>

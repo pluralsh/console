@@ -193,11 +193,7 @@ const upgradeColumns = [
   }),
 ]
 
-export default function ClusterUpgrade({
-  cluster,
-}: {
-  cluster?: ClustersRowFragment | null
-}) {
+export default function ClusterUpgrade({ cluster }: { cluster?: v | null }) {
   const theme = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const closeModal = useCallback((e?: Event) => {

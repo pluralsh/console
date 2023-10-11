@@ -1,7 +1,6 @@
-import { Card, Table, Tooltip } from '@pluralsh/design-system'
+import { Card, PropWide, Table, Tooltip } from '@pluralsh/design-system'
 import { Row, createColumnHelper } from '@tanstack/react-table'
 import { TableText } from 'components/cluster/TableElements'
-import PropWide from 'components/utils/PropWide'
 import { Div, Flex, H2 } from 'honorable'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 
