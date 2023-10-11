@@ -19,12 +19,11 @@ export default function ServiceSelector({
   const urlSuffix = pathMatch?.params['*'] ? `/${pathMatch?.params['*']}` : ''
   const currentServiceId = pathMatch?.params[SERVICE_PARAM_NAME]
 
-  console.log('pathMatch', pathMatch)
-
   const switchService = useCallback(
     (serviceId) => {
-      if (serviceId !== currentServiceId)
+      if (serviceId !== currentServiceId) {
         navigate(`/${CD_BASE_PATH}/${SERVICES_PATH}/${serviceId}${urlSuffix}`)
+      }
     },
     [currentServiceId, navigate, urlSuffix]
   )
