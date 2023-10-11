@@ -20,7 +20,7 @@ import { Edge, removeConnection, updateCache } from 'utils/graphql'
 
 import { useNavigate } from 'react-router'
 
-import { CD_BASE_PATH, SERVICES_PATH } from 'routes/cdRoutes'
+import { getServiceDetailsPath } from 'routes/cdRoutes'
 
 import { useSetCDHeaderContent } from '../ContinuousDeployment'
 
@@ -202,7 +202,10 @@ export default function Services() {
               { original }: Row<Edge<ServiceDeploymentsRowFragment>>
             ) =>
               navigate(
-                `/${CD_BASE_PATH}/${SERVICES_PATH}/${original?.node?.id}`
+                getServiceDetailsPath({
+                  clusterName: original.node?.cluster?.name,
+                  serviceName: original.node?.name,
+                })
               )
             }
             reactTableOptions={reactTableOptions}

@@ -100,27 +100,31 @@ query ServiceDeploymentsTiny {
       node {
         id
         name
+        cluster {
+          id
+          name
+        }
       }
     }
   }
 }
 
-query ServiceDeployment($id: ID!) {
-  serviceDeployment(id: $id) {
+query ServiceDeployment($cluster: String!, $name: String!) {
+  serviceDeployment(cluster: $cluster, name: $name) {
     ...ServiceDeploymentDetails
   }
 }
 
-query ServiceDeploymentComponents($id: ID!) {
-  serviceDeployment(id: $id) {
+query ServiceDeploymentComponents($cluster: String!, $name: String!) {
+  serviceDeployment(cluster: $cluster, name: $name) {
     components {
       ...ServiceDeploymentComponent
     }
   }
 }
 
-query ServiceDeploymentSecrets($id: ID!) {
-  serviceDeployment(id: $id) {
+query ServiceDeploymentSecrets($cluster: String!, $name: String!) {
+  serviceDeployment(cluster: $cluster, name: $name) {
     configuration {
       name
       value
@@ -128,8 +132,8 @@ query ServiceDeploymentSecrets($id: ID!) {
   }
 }
 
-query ServiceDeploymentRevisions($id: ID!) {
-  serviceDeployment(id: $id) {
+query ServiceDeploymentRevisions($cluster: String!, $name: String!) {
+  serviceDeployment(cluster: $cluster, name: $name) {
     ...ServiceDeploymentRevisions
   }
 }

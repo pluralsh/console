@@ -126,9 +126,6 @@ export function ModalForm({
     inputRef.current?.focus?.()
   }, [])
 
-  console.log('data', data)
-  console.log('data', loading)
-
   const actions = useMemo(
     () => (
       <>

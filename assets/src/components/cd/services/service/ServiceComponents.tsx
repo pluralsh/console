@@ -6,7 +6,12 @@ import {
 import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { CD_BASE_PATH, SERVICE_PARAM_NAME } from 'routes/cdRoutes'
+import {
+  SERVICE_PARAM_CLUSTER,
+  SERVICE_PARAM_NAME,
+  getServiceComponentPath,
+  getServiceDetailsPath,
+} from 'routes/cdRoutes'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useComponentKindSelect } from 'components/apps/app/components/Components'
 import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
@@ -17,23 +22,29 @@ import { useTheme } from 'styled-components'
 import { getServiceDetailsBreadcrumbs } from './ServiceDetails'
 import { countDeprecations } from './countDeprecations'
 
+export const getServiceComponentsBreadcrumbs = ({
+  serviceName,
+  clusterName,
+}: Parameters<typeof getServiceDetailsBreadcrumbs>[0]) => [
+  ...getServiceDetailsBreadcrumbs({ clusterName, serviceName }),
+  {
+    label: 'components',
+    url: `${getServiceDetailsPath({ clusterName, serviceName })}/components`,
+  },
+]
+
 export default function ServiceComponents() {
   const theme = useTheme()
-  const serviceId = useParams()[SERVICE_PARAM_NAME]
+  const serviceName = useParams()[SERVICE_PARAM_NAME]
+  const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
 
   const breadcrumbs: Breadcrumb[] = useMemo(
-    () => [
-      ...getServiceDetailsBreadcrumbs({ serviceId }),
-      {
-        label: 'components',
-        url: `${CD_BASE_PATH}/services/${serviceId}/components`,
-      },
-    ],
-    [serviceId]
+    () => getServiceComponentsBreadcrumbs({ clusterName, serviceName }),
+    [clusterName, serviceName]
   )
 
   const { data, error } = useServiceDeploymentComponentsQuery({
-    variables: { id: serviceId || '' },
+    variables: { cluster: clusterName || '', name: serviceName || '' },
   })
 
   useSetBreadcrumbs(breadcrumbs)
@@ -87,9 +98,12 @@ export default function ServiceComponents() {
         <ComponentList
           setUrl={(c) =>
             c?.name && c?.kind
-              ? `${CD_BASE_PATH}/services/${serviceId}/components/${c.kind.toLowerCase()}/${
-                  c.name
-                }`
+              ? getServiceComponentPath({
+                  clusterName,
+                  serviceName,
+                  componentKind: c.kind.toLocaleLowerCase(),
+                  componentName: c.name.toLowerCase(),
+                })
               : undefined
           }
           components={data.serviceDeployment?.components || []}

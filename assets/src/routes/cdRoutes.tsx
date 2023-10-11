@@ -12,21 +12,73 @@ import ServiceComponents from 'components/cd/services/service/ServiceComponents'
 
 import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
 
+import ServiceComponent from 'components/cd/services/component/ServiceComponent'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
 import ClusterPods from '../components/cd/cluster/ClusterPods'
 
-export const CD_BASE_PATH = 'cd'
-export const CLUSTERS_PATH = 'clusters'
-export const SERVICES_PATH = 'services'
+export const CD_BASE_PATH = 'cd' as const
+export const CLUSTERS_PATH = 'clusters' as const
+export const SERVICES_PATH = 'services' as const
 
 export const CLUSTER_BASE_PATH = `${CD_BASE_PATH}/${CLUSTERS_PATH}/:clusterId`
-const CLUSTER_SERVICES_PATH = 'services'
+const CLUSTER_SERVICES_PATH = 'services' as const
 
-export const SERVICE_PARAM_NAME = 'serviceId' as const
-export const SERVICE_BASE_PATH = `${CD_BASE_PATH}/${SERVICES_PATH}/:${SERVICE_PARAM_NAME}`
-const SERVICE_COMPONENTS_PATH = 'components'
+export const SERVICE_PARAM_NAME = 'serviceName' as const
+export const SERVICE_PARAM_CLUSTER = 'clusterName' as const
+export const SERVICE_BASE_PATH = getServiceDetailsPath({
+  isRelative: true,
+  clusterName: `:${SERVICE_PARAM_CLUSTER}`,
+  serviceName: `:${SERVICE_PARAM_NAME}`,
+})
+
+console.log('SERVICE_BASE_PATH', SERVICE_BASE_PATH)
+export const SERVICE_COMPONENTS_PATH = 'components'
+
+export const COMPONENT_PARAM_KIND = `componentKind` as const
+export const COMPONENT_PARAM_NAME = `componentName` as const
+
+export function getServiceDetailsPath({
+  clusterName,
+  serviceName,
+  isRelative = false,
+}: {
+  clusterName: string | null | undefined
+  serviceName: string | null | undefined
+  isRelative?: boolean
+}) {
+  return `${
+    isRelative ? '' : '/'
+  }${CD_BASE_PATH}/${SERVICES_PATH}/${clusterName}/${serviceName}`
+}
+
+export function getServiceComponentPath({
+  componentKind,
+  componentName,
+  ...props
+}: Parameters<typeof getServiceDetailsPath>[0] & {
+  componentKind: string | null | undefined
+  componentName: string | null | undefined
+}) {
+  return `${getServiceDetailsPath({
+    ...props,
+  })}/${SERVICE_COMPONENTS_PATH}/${componentKind}/${componentName}`
+}
+
+export const componentRoutes = [
+  <Route
+    path={getServiceComponentPath({
+      isRelative: true,
+      clusterName: `:${SERVICE_PARAM_CLUSTER}`,
+      serviceName: `:${SERVICE_PARAM_NAME}`,
+      componentKind: `:${COMPONENT_PARAM_KIND}`,
+      componentName: `:${COMPONENT_PARAM_NAME}`,
+    })}
+    element={<ServiceComponent />}
+  />,
+]
 
 export const cdRoutes = [
   /* Root */
@@ -126,4 +178,7 @@ export const cdRoutes = [
       />
     </Route>
   </Route>,
+
+  // Service component
+  ...componentRoutes,
 ]

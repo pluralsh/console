@@ -21,7 +21,11 @@ import {
   useServiceDeploymentSecretsQuery,
 } from 'generated/graphql'
 
-import { CD_BASE_PATH, SERVICE_PARAM_NAME } from 'routes/cdRoutes'
+import {
+  CD_BASE_PATH,
+  SERVICE_PARAM_CLUSTER,
+  SERVICE_PARAM_NAME,
+} from 'routes/cdRoutes'
 
 import { GqlError } from 'components/utils/Alert'
 import { DeleteIconButton } from 'components/utils/IconButtons'
@@ -295,24 +299,25 @@ const ColActions = ({
 
 export default function ServiceSecrets() {
   const theme = useTheme()
-  const serviceId = useParams()[SERVICE_PARAM_NAME]
+  const serviceName = useParams()[SERVICE_PARAM_NAME]
+  const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
 
   const [createOpen, setCreateOpen] = useState(false)
 
   const breadcrumbs: Breadcrumb[] = useMemo(
     () => [
-      ...getServiceDetailsBreadcrumbs({ serviceId }),
+      ...getServiceDetailsBreadcrumbs({ clusterName, serviceName }),
       {
         label: 'secrets',
-        url: `${CD_BASE_PATH}/services/${serviceId}/secrets`,
+        url: `${CD_BASE_PATH}/services/${serviceName}/secrets`,
       },
     ],
-    [serviceId]
+    [clusterName, serviceName]
   )
 
   useSetBreadcrumbs(breadcrumbs)
   const { data, error, refetch } = useServiceDeploymentSecretsQuery({
-    variables: { id: serviceId || '' },
+    variables: { cluster: clusterName || '', name: serviceName || '' },
   })
 
   const [filterString, setFilterString] = useState('')
@@ -321,9 +326,9 @@ export default function ServiceSecrets() {
     () => [
       ColName,
       ColValue,
-      ColActions({ serviceDeploymentId: serviceId, refetch }),
+      ColActions({ serviceDeploymentId: serviceName, refetch }),
     ],
-    [refetch, serviceId]
+    [refetch, serviceName]
   )
 
   if (error) {
@@ -344,7 +349,7 @@ export default function ServiceSecrets() {
       <ModalMountTransition open={createOpen}>
         <SecretEditModal
           open={createOpen}
-          serviceDeploymentId={serviceId}
+          serviceDeploymentId={serviceName}
           refetch={refetch}
           onClose={() => setCreateOpen(false)}
         />
