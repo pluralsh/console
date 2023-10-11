@@ -1,6 +1,8 @@
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   CaretRightIcon,
+  CheckIcon,
+  CheckRoundedIcon,
   ClusterIcon,
   EmptyState,
   IconFrame,
@@ -119,6 +121,17 @@ export const columns = [
   //   header: 'Memory',
   //   cell: () => <div>TODO</div>,
   // }),
+  columnHelper.accessor(({ node }) => node?.self, {
+    id: 'mgmt',
+    header: 'Mgmt',
+    cell: ({ getValue }) =>
+      getValue() && (
+        <IconFrame
+          icon={<CheckRoundedIcon color="icon-success" />}
+          type="floating"
+        />
+      ),
+  }),
   columnHelper.accessor(({ node }) => node, {
     id: 'status',
     header: 'Status',

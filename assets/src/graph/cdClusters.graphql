@@ -26,9 +26,12 @@ fragment ClustersRow on Cluster {
     removedIn
     replacement
   }
+  currentVersion
   id
   name
-  currentVersion
+  nodePools {
+    ...NodePool
+  }
   pingedAt
   provider {
     id
@@ -36,15 +39,13 @@ fragment ClustersRow on Cluster {
     name
     namespace
   }
+  self
   service {
     repository {
       url
     }
   }
   version
-  nodePools {
-    ...NodePool
-  }
 }
 
 query Clusters {
