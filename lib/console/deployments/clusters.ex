@@ -3,6 +3,7 @@ defmodule Console.Deployments.Clusters do
   use Nebulex.Caching
   import Console.Deployments.Policies
   alias Console.PubSub
+  alias Console.Commands.{Tee, Command}
   alias Console.Deployments.{Services, Git}
   alias Console.Services.Users
   alias Kazan.Apis.Core.V1, as: Core
@@ -102,6 +103,8 @@ defmodule Console.Deployments.Clusters do
   """
   @spec install(Cluster.t) :: cluster_resp
   def install(%Cluster{id: id, deploy_token: token} = cluster) do
+    tee = Tee.new()
+    Command.set_build(tee)
     url = Services.api_url("gql")
     cluster = Repo.preload(cluster, [:provider, :credential])
     with {:ok, %Kube.Cluster{status: %Kube.Cluster.Status{control_plane_ready: true}}} <- cluster_crd(cluster),
@@ -112,8 +115,8 @@ defmodule Console.Deployments.Clusters do
       |> Cluster.changeset(%{installed: true, service_errors: []})
       |> Repo.update()
     else
-      {:error, msg} = err ->
-        add_errors(cluster, [%{source: "bootstrap", message: msg}])
+      {:error, out} = err ->
+        add_errors(cluster, [%{source: "bootstrap", message: Tee.output(out)}])
         err
       pass ->
         Logger.info "could not install operator to cluster: #{inspect(pass)}"

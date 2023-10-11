@@ -434,7 +434,9 @@ defmodule Console.Deployments.ClustersTest do
       expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
         {:ok, %{data: %{"value" => Base.encode64("kubeconfig")}}}
       end)
-      expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" -> {:error, "helm failure"} end)
+      expect(Console.Commands.Plural, :install_cd, fn _, ^t, "kubeconfig" ->
+        {:error, %Console.Commands.Tee{stdo: ["helm failure"]}}
+      end)
 
       {:error, _} = Clusters.install(cluster)
 
