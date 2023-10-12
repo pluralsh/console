@@ -60,7 +60,7 @@ export default function ComponentInfo() {
     [data]
   )
 
-  const info = getInfo(componentKind)
+  const info = useMemo(() => getInfo(componentKind), [componentKind])
 
   return (
     <div
@@ -81,7 +81,7 @@ export default function ComponentInfo() {
               flexGrow: 1,
             }}
           >
-            {getInfo(componentKind)}
+            info
           </div>
         )}
         <div
