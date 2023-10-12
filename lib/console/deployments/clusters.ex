@@ -125,6 +125,18 @@ defmodule Console.Deployments.Clusters do
   end
 
   @doc """
+  checks if a user can access a given cluster
+  """
+  @spec authorized(binary, Cluster.t | User.t) :: cluster_resp
+  def authorized(%Cluster{} = cluster, %User{} = user), do: allow(cluster, user, :read)
+  def authorized(cluster_id, actor) when is_binary(cluster_id) do
+    get_cluster(cluster_id)
+    |> Repo.preload([:provider, :credential])
+    |> authorized(actor)
+  end
+  def authorized(_, _), do: {:error, "could not find cluster"}
+
+  @doc """
   Get the namespace this cluster will reside in
   """
   @spec namespace(Cluster.t) :: binary | nil
