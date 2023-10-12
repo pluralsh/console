@@ -16,7 +16,7 @@ import isEmpty from 'lodash/isEmpty'
 
 import { ClustersRowFragment } from '../../../generated/graphql'
 import CopyButton from '../../utils/CopyButton'
-import ProviderIcon from '../../utils/ProviderIcon'
+import ProviderIcon from '../../utils/Provider'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
 
 export default function ClusterMetadataPanel({

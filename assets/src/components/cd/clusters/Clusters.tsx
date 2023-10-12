@@ -18,7 +18,7 @@ import { A } from 'honorable'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-import { providerToURL } from 'components/utils/ProviderIcon'
+import { providerName, providerToURL } from 'components/utils/Provider'
 
 import { Edge } from 'utils/graphql'
 
@@ -75,7 +75,7 @@ export const columns = [
         <ColWithIcon
           icon={providerToURL(provider?.cloud ?? '', theme.mode === 'dark')}
         >
-          {provider?.name ?? 'BYOK'}
+          {providerName(provider?.name)}
         </ColWithIcon>
       )
     },
