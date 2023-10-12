@@ -78,7 +78,7 @@ export default function ClusterNodes() {
       css={{
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.xlarge,
+        gap: theme.spacing.medium,
       }}
     >
       <Card padding="xlarge">

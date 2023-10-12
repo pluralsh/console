@@ -78,7 +78,7 @@ export default function ClusterServices() {
       css={{
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.small,
+        gap: theme.spacing.medium,
         height: '100%',
       }}
     >
