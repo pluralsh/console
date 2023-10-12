@@ -88,7 +88,7 @@ export function ModalForm({
   const theme = useTheme()
   const [revisionId, setRevisionId] = useState('')
 
-  const { data, loading, error } = useServiceDeploymentRevisionsQuery({
+  const { data, error } = useServiceDeploymentRevisionsQuery({
     variables: { id: serviceDeployment.id },
   })
   const [mutation, { loading: mutationLoading, error: mutationError }] =
