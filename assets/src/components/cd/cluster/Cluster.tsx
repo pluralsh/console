@@ -81,7 +81,7 @@ export default function Cluster() {
 
   return (
     <ResponsivePageFullWidth
-      scrollable={false}
+      scrollable
       headingContent={
         <>
           {clusterEdges && !isEmpty(clusterEdges) && (

@@ -251,7 +251,10 @@ export const CLUSTERS_CRUMBS = [
 ]
 
 export default function Clusters() {
-  const { data } = useClustersQuery({ pollInterval: POLL_INTERVAL })
+  const { data } = useClustersQuery({
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
+  })
   const headerActions = useMemo(() => <ClusterCreate />, [])
 
   useSetCDHeaderContent(headerActions)
