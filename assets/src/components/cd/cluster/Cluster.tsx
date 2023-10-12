@@ -27,6 +27,8 @@ import {
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
+import ProviderIcon from '../../utils/Provider'
+
 import ClusterPermissions from './ClusterPermissions'
 import ClusterMetadataPanel from './ClusterMetadataPanel'
 
@@ -94,6 +96,12 @@ export default function Cluster() {
                     Cluster
                   </div>
                 }
+                leftContent={
+                  <ProviderIcon
+                    provider={data?.cluster?.provider?.cloud || ''}
+                    width={16}
+                  />
+                }
                 selectedKey={clusterId}
                 onSelectionChange={(key) => navigate(`/cd/clusters/${key}`)}
               >
@@ -102,6 +110,12 @@ export default function Cluster() {
                     key={edge?.node?.id}
                     label={edge?.node?.name}
                     textValue={edge?.node?.name}
+                    leftContent={
+                      <ProviderIcon
+                        provider={edge?.node?.provider?.cloud || ''}
+                        width={16}
+                      />
+                    }
                   />
                 ))}
               </Select>

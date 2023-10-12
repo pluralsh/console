@@ -148,6 +148,9 @@ query ClustersTiny {
       node {
         id
         name
+        provider {
+          cloud
+        }
       }
     }
   }

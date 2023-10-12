@@ -3455,7 +3455,7 @@ export type ClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typen
 export type ClustersTinyQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ClustersTinyQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string } | null } | null> | null } | null };
+export type ClustersTinyQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null };
 
 export type ClusterQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -4477,6 +4477,9 @@ export const ClustersTinyDocument = gql`
       node {
         id
         name
+        provider {
+          cloud
+        }
       }
     }
   }
