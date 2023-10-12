@@ -15,13 +15,17 @@ export default function ComponentRaw() {
     [data]
   )
 
+  console.log('rawData.value', value)
+
   return (
     <Code
       language="yaml"
       maxHeight="100%"
       overflowY="auto"
     >
-      {stringify(JSON.parse(value?.raw))}
+      {stringify(
+        typeof value.raw === 'string' ? JSON.parse(value?.raw) : value?.raw
+      )}
     </Code>
   )
 }

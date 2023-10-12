@@ -3480,18 +3480,6 @@ export type UpdateClusterMutationVariables = Exact<{
 
 export type UpdateClusterMutation = { __typename?: 'RootMutationType', updateCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, pingedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Map<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', repository?: { __typename?: 'GitRepository', url: string } | null } | null } | null };
 
-export type UnstructuredResourceQueryVariables = Exact<{
-  group?: InputMaybe<Scalars['String']['input']>;
-  kind: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-  namespace?: InputMaybe<Scalars['String']['input']>;
-  serviceId?: InputMaybe<Scalars['ID']['input']>;
-  version: Scalars['String']['input'];
-}>;
-
-
-export type UnstructuredResourceQuery = { __typename?: 'RootQueryType', unstructuredResource?: { __typename?: 'KubernetesUnstructured', raw?: Map<string, unknown> | null, events?: Array<{ __typename?: 'Event', action?: string | null, count?: number | null, eventTime?: string | null, lastTimestamp?: string | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null };
-
 export type MetricResponseFragment = { __typename?: 'MetricResponse', metric?: Map<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null };
 
 export type UsageQueryVariables = Exact<{
@@ -3815,6 +3803,20 @@ export type StatefulSetQueryVariables = Exact<{
 
 
 export type StatefulSetQuery = { __typename?: 'RootQueryType', statefulSet?: { __typename?: 'StatefulSet', raw: string, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'StatefulSetStatus', replicas?: number | null, currentReplicas?: number | null, readyReplicas?: number | null, updatedReplicas?: number | null }, spec: { __typename?: 'StatefulSetSpec', replicas?: number | null, serviceName?: string | null } } | null };
+
+export type UnstructuredResourceFragment = { __typename?: 'KubernetesUnstructured', raw?: Map<string, unknown> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null };
+
+export type UnstructuredResourceQueryVariables = Exact<{
+  group?: InputMaybe<Scalars['String']['input']>;
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  serviceId: Scalars['ID']['input'];
+  version: Scalars['String']['input'];
+}>;
+
+
+export type UnstructuredResourceQuery = { __typename?: 'RootQueryType', unstructuredResource?: { __typename?: 'KubernetesUnstructured', raw?: Map<string, unknown> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null };
 
 export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null };
 
@@ -4511,16 +4513,6 @@ export const JobFragmentDoc = gql`
     ${MetadataFragmentDoc}
 ${JobStatusFragmentDoc}
 ${PodFragmentDoc}`;
-export const EventFragmentDoc = gql`
-    fragment Event on Event {
-  action
-  lastTimestamp
-  count
-  message
-  reason
-  type
-}
-    `;
 export const ServiceFragmentDoc = gql`
     fragment Service on Service {
   metadata {
@@ -4564,6 +4556,24 @@ export const StatefulSetFragmentDoc = gql`
   raw
 }
     ${MetadataFragmentFragmentDoc}`;
+export const EventFragmentDoc = gql`
+    fragment Event on Event {
+  action
+  lastTimestamp
+  count
+  message
+  reason
+  type
+}
+    `;
+export const UnstructuredResourceFragmentDoc = gql`
+    fragment UnstructuredResource on KubernetesUnstructured {
+  raw
+  events {
+    ...Event
+  }
+}
+    ${EventFragmentDoc}`;
 export const AccessTokenFragmentDoc = gql`
     fragment AccessToken on AccessToken {
   id
@@ -4961,62 +4971,6 @@ export function useUpdateClusterMutation(baseOptions?: Apollo.MutationHookOption
 export type UpdateClusterMutationHookResult = ReturnType<typeof useUpdateClusterMutation>;
 export type UpdateClusterMutationResult = Apollo.MutationResult<UpdateClusterMutation>;
 export type UpdateClusterMutationOptions = Apollo.BaseMutationOptions<UpdateClusterMutation, UpdateClusterMutationVariables>;
-export const UnstructuredResourceDocument = gql`
-    query UnstructuredResource($group: String, $kind: String!, $name: String!, $namespace: String, $serviceId: ID, $version: String!) {
-  unstructuredResource(
-    group: $group
-    kind: $kind
-    name: $name
-    namespace: $namespace
-    serviceId: $serviceId
-    version: $version
-  ) {
-    raw
-    events {
-      action
-      count
-      eventTime
-      lastTimestamp
-      message
-      reason
-      type
-    }
-  }
-}
-    `;
-
-/**
- * __useUnstructuredResourceQuery__
- *
- * To run a query within a React component, call `useUnstructuredResourceQuery` and pass it any options that fit your needs.
- * When your component renders, `useUnstructuredResourceQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useUnstructuredResourceQuery({
- *   variables: {
- *      group: // value for 'group'
- *      kind: // value for 'kind'
- *      name: // value for 'name'
- *      namespace: // value for 'namespace'
- *      serviceId: // value for 'serviceId'
- *      version: // value for 'version'
- *   },
- * });
- */
-export function useUnstructuredResourceQuery(baseOptions: Apollo.QueryHookOptions<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>(UnstructuredResourceDocument, options);
-      }
-export function useUnstructuredResourceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>(UnstructuredResourceDocument, options);
-        }
-export type UnstructuredResourceQueryHookResult = ReturnType<typeof useUnstructuredResourceQuery>;
-export type UnstructuredResourceLazyQueryHookResult = ReturnType<typeof useUnstructuredResourceLazyQuery>;
-export type UnstructuredResourceQueryResult = Apollo.QueryResult<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>;
 export const UsageDocument = gql`
     query Usage($cpu: String!, $mem: String!, $podCpu: String!, $podMem: String!, $step: String!, $offset: Int!) {
   cpu: metric(query: $cpu, offset: $offset, step: $step) {
@@ -6399,6 +6353,53 @@ export function useStatefulSetLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type StatefulSetQueryHookResult = ReturnType<typeof useStatefulSetQuery>;
 export type StatefulSetLazyQueryHookResult = ReturnType<typeof useStatefulSetLazyQuery>;
 export type StatefulSetQueryResult = Apollo.QueryResult<StatefulSetQuery, StatefulSetQueryVariables>;
+export const UnstructuredResourceDocument = gql`
+    query UnstructuredResource($group: String, $kind: String!, $name: String!, $namespace: String, $serviceId: ID!, $version: String!) {
+  unstructuredResource(
+    group: $group
+    kind: $kind
+    name: $name
+    namespace: $namespace
+    serviceId: $serviceId
+    version: $version
+  ) {
+    ...UnstructuredResource
+  }
+}
+    ${UnstructuredResourceFragmentDoc}`;
+
+/**
+ * __useUnstructuredResourceQuery__
+ *
+ * To run a query within a React component, call `useUnstructuredResourceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUnstructuredResourceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUnstructuredResourceQuery({
+ *   variables: {
+ *      group: // value for 'group'
+ *      kind: // value for 'kind'
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *      version: // value for 'version'
+ *   },
+ * });
+ */
+export function useUnstructuredResourceQuery(baseOptions: Apollo.QueryHookOptions<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>(UnstructuredResourceDocument, options);
+      }
+export function useUnstructuredResourceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>(UnstructuredResourceDocument, options);
+        }
+export type UnstructuredResourceQueryHookResult = ReturnType<typeof useUnstructuredResourceQuery>;
+export type UnstructuredResourceLazyQueryHookResult = ReturnType<typeof useUnstructuredResourceLazyQuery>;
+export type UnstructuredResourceQueryResult = Apollo.QueryResult<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>;
 export const AccessTokensDocument = gql`
     query AccessTokens {
   accessTokens(first: 500) {
@@ -6622,7 +6623,6 @@ export const namedOperations = {
     Clusters: 'Clusters',
     ClustersTiny: 'ClustersTiny',
     Cluster: 'Cluster',
-    UnstructuredResource: 'UnstructuredResource',
     Usage: 'Usage',
     GitRepositories: 'GitRepositories',
     ServiceDeployments: 'ServiceDeployments',
@@ -6644,6 +6644,7 @@ export const namedOperations = {
     Job: 'Job',
     Service: 'Service',
     StatefulSet: 'StatefulSet',
+    UnstructuredResource: 'UnstructuredResource',
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
     Me: 'Me'
@@ -6710,6 +6711,7 @@ export const namedOperations = {
     JobStatus: 'JobStatus',
     Service: 'Service',
     StatefulSet: 'StatefulSet',
+    UnstructuredResource: 'UnstructuredResource',
     AccessToken: 'AccessToken',
     AccessTokenAudit: 'AccessTokenAudit',
     User: 'User',

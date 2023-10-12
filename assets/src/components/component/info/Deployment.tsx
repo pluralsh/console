@@ -1,8 +1,10 @@
-import { Card, PropWide } from '@pluralsh/design-system'
 import { PieChart } from 'components/utils/PieChart'
-import { Flex, H2 } from 'honorable'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
+
+import { useTheme } from 'styled-components'
+
+import { InfoSectionH2, PaddedCard, PropWideBold } from './common'
 
 function StatusChart({
   available,
@@ -26,6 +28,7 @@ function StatusChart({
 }
 
 export default function Deployment() {
+  const theme = useTheme()
   const { data } = useOutletContext<any>()
 
   if (!data?.deployment) return null
@@ -38,63 +41,67 @@ export default function Deployment() {
   } = data
 
   return (
-    <Flex
-      direction="column"
-      grow={1}
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        flexGrow: 1,
+      }}
     >
-      <H2 marginBottom="medium">Status</H2>
-      <Card padding="large">
-        <Flex gap="xlarge">
-          <Flex
-            width={180}
-            height={180}
+      <InfoSectionH2 css={{ marginBottom: theme.spacing.medium }}>
+        Status
+      </InfoSectionH2>
+      <PaddedCard>
+        <div
+          css={{
+            display: 'flex',
+            gap: theme.spacing.xlarge,
+          }}
+        >
+          <div
+            css={{
+              display: 'flex',
+              width: 180,
+              height: 180,
+            }}
           >
             <StatusChart
               available={availableReplicas}
               unavailable={unavailableReplicas}
               pending={replicas - availableReplicas - unavailableReplicas}
             />
-          </Flex>
-          <Flex
-            direction="column"
-            grow={1}
-            justify="center"
+          </div>
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              flexGrow: 1,
+              justifyContent: 'center',
+            }}
           >
-            <PropWide
-              title="Replicas"
-              fontWeight={600}
-            >
-              {replicas || 0}
-            </PropWide>
-            <PropWide
-              title="Available"
-              fontWeight={600}
-            >
+            <PropWideBold title="Replicas">{replicas || 0}</PropWideBold>
+            <PropWideBold title="Available">
               {availableReplicas || 0}
-            </PropWide>
-            <PropWide
-              title="Unavailable"
-              fontWeight={600}
-            >
+            </PropWideBold>
+            <PropWideBold title="Unavailable">
               {unavailableReplicas || 0}
-            </PropWide>
-          </Flex>
-        </Flex>
-      </Card>
-      <H2
-        marginBottom="medium"
-        marginTop="large"
+            </PropWideBold>
+          </div>
+        </div>
+      </PaddedCard>
+      <InfoSectionH2
+        css={{
+          marginBottom: theme.spacing.medium,
+          marginTop: theme.spacing.large,
+        }}
       >
         Spec
-      </H2>
-      <Card padding="large">
-        <PropWide
-          title="Strategy"
-          fontWeight={600}
-        >
+      </InfoSectionH2>
+      <PaddedCard>
+        <PropWideBold title="Strategy">
           {spec?.strategy?.type || '-'}
-        </PropWide>
-      </Card>
-    </Flex>
+        </PropWideBold>
+      </PaddedCard>
+    </div>
   )
 }

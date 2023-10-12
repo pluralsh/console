@@ -1,15 +1,12 @@
-import {
-  Card,
-  IconFrame,
-  PropWide,
-  TrashCanIcon,
-} from '@pluralsh/design-system'
+import { IconFrame, TrashCanIcon } from '@pluralsh/design-system'
 import { DELETE_JOB } from 'components/cluster/queries'
 import { Confirm } from 'components/utils/Confirm'
-import { Flex, H2 } from 'honorable'
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { useOutletContext } from 'react-router-dom'
+import { useTheme } from 'styled-components'
+
+import { InfoSectionH2, PaddedCard, PropWideBold } from './common'
 
 export function DeleteJob({ name, namespace, refetch }) {
   const [confirm, setConfirm] = useState(false)
@@ -45,6 +42,7 @@ export function DeleteJob({ name, namespace, refetch }) {
 }
 
 export default function Job() {
+  const theme = useTheme()
   const { data } = useOutletContext<any>()
 
   if (!data?.job) return null
@@ -52,69 +50,48 @@ export default function Job() {
   const { job } = data
 
   return (
-    <Flex
-      direction="column"
-      grow={1}
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        flexGrow: 1,
+      }}
     >
-      <H2 marginBottom="medium">Status</H2>
-      <Card padding="large">
-        <PropWide
-          title="Active"
-          fontWeight={600}
-        >
-          {job.status?.active || 0}
-        </PropWide>
-        <PropWide
-          title="Succeeded"
-          fontWeight={600}
-        >
+      <InfoSectionH2 css={{ marginBottom: theme.spacing.medium }}>
+        Status
+      </InfoSectionH2>
+      <PaddedCard>
+        <PropWideBold title="Active">{job.status?.active || 0}</PropWideBold>
+        <PropWideBold title="Succeeded">
           {job.status?.succeeded || 0}
-        </PropWide>
-        <PropWide
-          title="Failed"
-          fontWeight={600}
-        >
-          {job.status?.failed || 0}
-        </PropWide>
-        <PropWide
-          title="Completion time"
-          fontWeight={600}
-        >
+        </PropWideBold>
+        <PropWideBold title="Failed">{job.status?.failed || 0}</PropWideBold>
+        <PropWideBold title="Completion time">
           {job.status?.completionTime || '-'}
-        </PropWide>
-        <PropWide
-          title="Start time"
-          fontWeight={600}
-        >
+        </PropWideBold>
+        <PropWideBold title="Start time">
           {job.status?.startTime || '-'}
-        </PropWide>
-      </Card>
-      <H2
-        marginBottom="medium"
-        marginTop="large"
+        </PropWideBold>
+      </PaddedCard>
+      <InfoSectionH2
+        css={{
+          marginBottom: theme.spacing.medium,
+          marginTop: theme.spacing.large,
+        }}
       >
         Spec
-      </H2>
-      <Card padding="large">
-        <PropWide
-          title="Backoff limit"
-          fontWeight={600}
-        >
+      </InfoSectionH2>
+      <PaddedCard>
+        <PropWideBold title="Backoff limit">
           {job.spec?.backoffLimit || 0}
-        </PropWide>
-        <PropWide
-          title="Parallelism"
-          fontWeight={600}
-        >
+        </PropWideBold>
+        <PropWideBold title="Parallelism">
           {job.spec?.parallelism || 0}
-        </PropWide>
-        <PropWide
-          title="Deadline"
-          fontWeight={600}
-        >
+        </PropWideBold>
+        <PropWideBold title="Deadline">
           {job.spec?.activeDeadlineSeconds || 0}
-        </PropWide>
-      </Card>
-    </Flex>
+        </PropWideBold>
+      </PaddedCard>
+    </div>
   )
 }

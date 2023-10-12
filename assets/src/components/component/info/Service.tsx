@@ -1,9 +1,16 @@
-import { Card, PropWide } from '@pluralsh/design-system'
-import { Flex, H2, H3 } from 'honorable'
 import isEmpty from 'lodash/isEmpty'
 import { useOutletContext } from 'react-router-dom'
+import { useTheme } from 'styled-components'
+
+import {
+  InfoSectionH2,
+  InfoSectionH4,
+  PaddedCard,
+  PropWideBold,
+} from './common'
 
 export default function Service() {
+  const theme = useTheme()
   const { data } = useOutletContext<any>()
 
   if (!data?.service) return null
@@ -15,68 +22,55 @@ export default function Service() {
   const hasPorts = !isEmpty(ports)
 
   return (
-    <Flex
-      direction="column"
-      grow={1}
-    >
+    <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
       {hasIngress && (
         <>
-          <H2 marginBottom="medium">Status</H2>
-          <Card padding="large">
-            <PropWide
-              title="IP"
-              fontWeight={600}
-            >
-              {loadBalancer.ingress[0].ip}
-            </PropWide>
-          </Card>
+          <InfoSectionH2 css={{ marginBottom: theme.spacing.medium }}>
+            Status
+          </InfoSectionH2>
+          <PaddedCard>
+            <PropWideBold title="IP">{loadBalancer.ingress[0].ip}</PropWideBold>
+          </PaddedCard>
         </>
       )}
-      <H2
-        marginBottom="medium"
-        marginTop={hasIngress ? 'large' : 0}
+      <InfoSectionH2
+        css={{
+          marginBottom: theme.spacing.medium,
+          marginTop: hasIngress ? theme.spacing.large : 0,
+        }}
       >
         Spec
-      </H2>
-      <Card padding="large">
-        <PropWide
-          title="Type"
-          fontWeight={600}
-        >
-          {service.spec?.type}
-        </PropWide>
-        <PropWide
-          title="Cluster IP"
-          fontWeight={600}
-        >
+      </InfoSectionH2>
+      <PaddedCard>
+        <PropWideBold title="Type">{service.spec?.type}</PropWideBold>
+        <PropWideBold title="Cluster IP">
           {service.spec?.clusterIp || '-'}
-        </PropWide>
+        </PropWideBold>
         {hasPorts && (
           <>
-            <H3
-              body1
-              fontWeight={600}
-              marginBottom="medium"
-              marginTop="xlarge"
+            <InfoSectionH4
+              css={{
+                marginBottom: theme.spacing.medium,
+                marginTop: theme.spacing.xlarge,
+              }}
             >
               Ports
-            </H3>
+            </InfoSectionH4>
             {ports.map(({ name, protocol, port, targetPort }, i) => (
-              <PropWide
+              <PropWideBold
                 key={i}
                 gap="small"
-                fontWeight={600}
                 title={name || '-'}
               >
                 <span>{protocol}</span>
                 <span>
                   {port} {'->'} {targetPort}
                 </span>
-              </PropWide>
+              </PropWideBold>
             ))}
           </>
         )}
-      </Card>
-    </Flex>
+      </PaddedCard>
+    </div>
   )
 }

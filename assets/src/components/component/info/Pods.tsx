@@ -1,5 +1,3 @@
-import { Flex, H2 } from 'honorable'
-
 import {
   ColContainers,
   ColCpuReservation,
@@ -12,10 +10,13 @@ import {
 } from 'components/cluster/pods/PodsList'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
+import { useTheme } from 'styled-components'
+
+import { InfoSectionH2 } from './common'
 
 export default function Pods({ pods }) {
   const { refetch } = useOutletContext<any>()
-
+  const theme = useTheme()
   const columns = useMemo(
     () => [
       ColName,
@@ -35,20 +36,20 @@ export default function Pods({ pods }) {
   )
 
   return (
-    <Flex
-      direction="column"
-      grow={1}
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        flexGrow: 1,
+      }}
     >
-      <H2
-        subtitle1
-        marginBottom="medium"
-      >
+      <InfoSectionH2 css={{ marginBottom: theme.spacing.medium }}>
         Pods
-      </H2>
+      </InfoSectionH2>
       <PodsList
         pods={pods}
         columns={columns}
       />
-    </Flex>
+    </div>
   )
 }

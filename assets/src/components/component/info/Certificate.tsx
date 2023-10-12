@@ -1,8 +1,10 @@
-import { Card, PropWide } from '@pluralsh/design-system'
-import { Flex, H2 } from 'honorable'
 import { useOutletContext } from 'react-router-dom'
+import { useTheme } from 'styled-components'
+
+import { InfoSectionH2, PaddedCard, PropWideBold } from './common'
 
 export default function Certificate() {
+  const theme = useTheme()
   const { data } = useOutletContext<any>()
 
   if (!data?.certificate) return null
@@ -11,57 +13,40 @@ export default function Certificate() {
   const issuer = certificate.spec?.issuerRef
 
   return (
-    <Flex
-      direction="column"
-      grow={1}
-    >
-      <H2 marginBottom="medium">Status</H2>
-      <Card padding="large">
-        <PropWide
-          title="Renewal date"
-          fontWeight={600}
-        >
+    <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+      <InfoSectionH2 css={{ marginBottom: theme.spacing.medium }}>
+        Status
+      </InfoSectionH2>
+      <PaddedCard>
+        <PropWideBold title="Renewal date">
           {certificate.status?.renewalTime || '-'}
-        </PropWide>
-        <PropWide
-          title="Not before"
-          fontWeight={600}
-        >
+        </PropWideBold>
+        <PropWideBold title="Not before">
           {certificate.status?.notBefore || '-'}
-        </PropWide>
-        <PropWide
-          title="Not after"
-          fontWeight={600}
-        >
+        </PropWideBold>
+        <PropWideBold title="Not after">
           {certificate.status?.notAfter || '-'}
-        </PropWide>
-      </Card>
-      <H2
-        marginBottom="medium"
-        marginTop="large"
+        </PropWideBold>
+      </PaddedCard>
+      <InfoSectionH2
+        css={{
+          marginBottom: theme.spacing.medium,
+          marginTop: theme.spacing.large,
+        }}
       >
         Spec
-      </H2>
-      <Card padding="large">
-        <PropWide
-          title="Secret name"
-          fontWeight={600}
-        >
+      </InfoSectionH2>
+      <PaddedCard>
+        <PropWideBold title="Secret name">
           {certificate.spec?.secretName || 0}
-        </PropWide>
-        <PropWide
-          title="DNS names"
-          fontWeight={600}
-        >
+        </PropWideBold>
+        <PropWideBold title="DNS names">
           {certificate.spec?.dnsNames?.join(', ')}
-        </PropWide>
-        <PropWide
-          title="Issuer"
-          fontWeight={600}
-        >
+        </PropWideBold>
+        <PropWideBold title="Issuer">
           {issuer?.group}/{issuer?.kind?.toLowerCase()} {issuer?.name}
-        </PropWide>
-      </Card>
-    </Flex>
+        </PropWideBold>
+      </PaddedCard>
+    </div>
   )
 }

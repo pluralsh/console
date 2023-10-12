@@ -41,6 +41,7 @@ import { kindToQuery } from 'components/component/kindToQuery'
 
 import {
   ServiceDeploymentComponentFragment,
+  UnstructuredResourceDocument,
   useServiceDeploymentComponentsQuery,
   useUnstructuredResourceQuery,
 } from 'generated/graphql'
@@ -81,25 +82,28 @@ function V1Component({
   serviceId,
 }: {
   query: any
-  serviceId: string
+  serviceId?: string
   component: ServiceDeploymentComponentFragment
 }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const { me } = useContext<any>(LoginContext)
-  const params = useParams()
-  const [searchParams] = useSearchParams()
   const componentKind = component.kind
   const componentName = component.name
 
-  console.log('params', params)
-  console.log('searchParams', searchParams)
-
-  console.log({ query })
   const vars = {
     name: component.name,
     namespace: component.namespace,
-    serviceId,
+    ...(serviceId ? { serviceId } : {}),
+    ...(query === UnstructuredResourceDocument
+      ? {
+          kind: component.kind,
+          version: component.version,
+          namespace: component.namespace,
+          group: component.group,
+          name: component.name,
+        }
+      : {}),
   }
 
   console.log('vars: ', vars)
@@ -282,7 +286,8 @@ export default function Component() {
 
   console.log('component', component)
 
-  const v1ComponentQuery = kindToQuery[componentKind ?? '']
+  const v1ComponentQuery =
+    kindToQuery[componentKind ?? ''] || UnstructuredResourceDocument
 
   useSetBreadcrumbs(
     useMemo(

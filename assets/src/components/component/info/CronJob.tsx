@@ -1,10 +1,12 @@
-import { Card, PropWide, Table, Tooltip } from '@pluralsh/design-system'
+import { Table, Tooltip } from '@pluralsh/design-system'
 import { Row, createColumnHelper } from '@tanstack/react-table'
 import { TableText } from 'components/cluster/TableElements'
-import { Div, Flex, H2 } from 'honorable'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 
+import { useTheme } from 'styled-components'
+
 import { DeleteJob } from './Job'
+import { InfoSectionH2, PaddedCard, PropWideBold } from './common'
 
 const columnHelper = createColumnHelper<any>()
 
@@ -24,17 +26,21 @@ const columns = (namespace, refetch) => [
   columnHelper.accessor((row) => row?.status, {
     id: 'startEnd',
     cell: (props) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const theme = useTheme()
       const status = props.getValue()
 
       return (
         <div>
           <div>{status?.startTime}</div>
-          <Div
-            caption
-            color="text-xlight"
+          <div
+            css={{
+              ...theme.partials.text.caption,
+              color: theme.colors['text-xlight'],
+            }}
           >
             {status.completionTime}
-          </Div>
+          </div>
         </div>
       )
     },
@@ -85,6 +91,7 @@ function CronJobJobs({ jobs, namespace, refetch }) {
 }
 
 export default function CronJob() {
+  const theme = useTheme()
   const { appName } = useParams()
   const { data, refetch } = useOutletContext<any>()
 
@@ -93,57 +100,47 @@ export default function CronJob() {
   const { cronJob } = data
 
   return (
-    <Flex
-      direction="column"
-      grow={1}
-    >
-      <H2 marginBottom="medium">Jobs</H2>
+    <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+      <InfoSectionH2 css={{ marginBottom: theme.spacing.medium }}>
+        Jobs
+      </InfoSectionH2>
       <CronJobJobs
         jobs={cronJob.jobs}
         namespace={appName}
         refetch={refetch}
       />
-      <H2
-        marginBottom="medium"
-        marginTop="large"
+      <InfoSectionH2
+        css={{
+          marginBottom: theme.spacing.medium,
+          marginTop: theme.spacing.large,
+        }}
       >
         Status
-      </H2>
-      <Card padding="large">
-        <PropWide
-          title="Last scheduled"
-          fontWeight={600}
-        >
+      </InfoSectionH2>
+      <PaddedCard>
+        <PropWideBold title="Last scheduled">
           {cronJob.status?.lastScheduleTime || 0}
-        </PropWide>
-      </Card>
-      <H2
-        marginBottom="medium"
-        marginTop="large"
+        </PropWideBold>
+      </PaddedCard>
+      <InfoSectionH2
+        css={{
+          marginBottom: theme.spacing.medium,
+          marginTop: theme.spacing.large,
+        }}
       >
         Spec
-      </H2>
-      <Card padding="large">
-        <PropWide
-          title="Schedule"
-          fontWeight={600}
-        >
+      </InfoSectionH2>
+      <PaddedCard>
+        <PropWideBold title="Schedule">
           {cronJob.spec?.schedule || '-'}
-        </PropWide>
-        <PropWide
-          title="Concurrency"
-          fontWeight={600}
-        >
+        </PropWideBold>
+        <PropWideBold title="Concurrency">
           {cronJob.spec?.concurrencyPolicy || '-'}
-        </PropWide>
-
-        <PropWide
-          title="Suspended"
-          fontWeight={600}
-        >
+        </PropWideBold>
+        <PropWideBold title="Suspended">
           {cronJob.spec?.suspend ? 'Yes' : 'No'}
-        </PropWide>
-      </Card>
-    </Flex>
+        </PropWideBold>
+      </PaddedCard>
+    </div>
   )
 }

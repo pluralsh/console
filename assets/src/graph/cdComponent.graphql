@@ -1,32 +1,3 @@
-query UnstructuredResource(
-  $group: String
-  $kind: String!
-  $name: String!
-  $namespace: String
-  $serviceId: ID
-  $version: String!
-) {
-  unstructuredResource(
-    group: $group
-    kind: $kind
-    name: $name
-    namespace: $namespace
-    serviceId: $serviceId
-    version: $version
-  ) {
-    raw
-    events {
-      action
-      count
-      eventTime
-      lastTimestamp
-      message
-      reason
-      type
-    }
-  }
-}
-
 fragment MetricResponse on MetricResponse {
   metric
   values {

@@ -1,17 +1,17 @@
 import { useOutletContext } from 'react-router-dom'
-import { Flex, H2 } from 'honorable'
-
 import { useMemo } from 'react'
-
 import { LabelsAnnotations } from 'components/cluster/LabelsAnnotations'
-
 import { MetadataGrid, MetadataItem } from 'components/utils/Metadata'
+import { useTheme } from 'styled-components'
 
 import { ComponentStatusChip } from '../../apps/app/components/misc'
+
+import { InfoSectionH2 } from './common'
 
 export const componentsWithLogs: string[] = ['deployment', 'statefulset']
 
 export default function Metadata() {
+  const theme = useTheme()
   const { component, data } = useOutletContext<any>()
 
   // To avoid mapping between component types and fields of data returned by API
@@ -22,46 +22,44 @@ export default function Metadata() {
     [data]
   )
 
-  const { metadata } = value
+  const metadata: Record<string, any> | null | undefined = value?.metadata
 
   return (
-    <Flex
-      direction="column"
-      grow={1}
+    <div
+      css={{
+        flexDirection: 'column',
+        flexGrow: 1,
+      }}
     >
-      <H2 marginBottom="medium">Metadata</H2>
+      <InfoSectionH2 css={{ marginBottom: theme.spacing.medium }}>
+        Metadata
+      </InfoSectionH2>
       <MetadataGrid>
-        <MetadataItem
-          heading="Name"
-          fontWeight={600}
-        >
-          {metadata.name}
-        </MetadataItem>
-        <MetadataItem
-          heading="Namespace"
-          fontWeight={600}
-        >
-          {metadata.namespace}
-        </MetadataItem>
-        <MetadataItem
-          heading="Kind"
-          fontWeight={600}
-        >
+        {(metadata?.name || component.name) && (
+          <MetadataItem heading="Name">
+            {metadata?.name || component?.name}
+          </MetadataItem>
+        )}
+        {(metadata?.namespace || component.namespace) && (
+          <MetadataItem heading="Namespace">
+            {metadata?.namespace || component?.namespace}
+          </MetadataItem>
+        )}
+        <MetadataItem heading="Kind">
           <>
             {component?.group || 'v1'}/{component?.kind}
           </>
         </MetadataItem>
-        <MetadataItem
-          heading="Status"
-          fontWeight={600}
-        >
+        <MetadataItem heading="Status">
           <ComponentStatusChip status={component?.status} />
         </MetadataItem>
       </MetadataGrid>
-      <LabelsAnnotations
-        metadata={value?.metadata}
-        marginTop="large"
-      />
-    </Flex>
+      {metadata && (
+        <LabelsAnnotations
+          metadata={metadata as any}
+          marginTop="large"
+        />
+      )}
+    </div>
   )
 }
