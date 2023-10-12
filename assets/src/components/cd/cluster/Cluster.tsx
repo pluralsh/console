@@ -10,7 +10,7 @@ import {
 } from '@pluralsh/design-system'
 import { useMemo, useRef, useState } from 'react'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import { Outlet, useMatch, useParams } from 'react-router-dom'
+import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
 import { LinkTabWrap } from 'components/utils/Tabs'
 import {
   CD_BASE_PATH,
@@ -40,12 +40,12 @@ const POLL_INTERVAL = 10 * 1000
 
 export default function Cluster() {
   const theme = useTheme()
+  const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
   const { clusterId }: { clusterId?: string } = useParams()
   const tab = useMatch(`/${CLUSTER_BASE_PATH}/:tab`)?.params?.tab || ''
 
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
-  const [selectedClusterId, setSelectedClusterId] = useState(clusterId)
   const currentTab = directory.find(({ path }) => path === tab)
   const crumbs: Breadcrumb[] = useMemo(() => {
     const clustersPath = `/${CD_BASE_PATH}/${CLUSTERS_PATH}`
@@ -94,8 +94,8 @@ export default function Cluster() {
                     Cluster
                   </div>
                 }
-                selectedKey={selectedClusterId}
-                onSelectionChange={(key) => setSelectedClusterId(key as any)}
+                selectedKey={clusterId}
+                onSelectionChange={(key) => navigate(`/cd/clusters/${key}`)}
               >
                 {clusterEdges.map((edge) => (
                   <ListBoxItem
