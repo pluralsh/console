@@ -21,8 +21,8 @@ import {
 } from 'components/graphql/kubernetes'
 
 export const SERVICE_Q = gql`
-  query Service($name: String!, $namespace: String!) {
-    service(name: $name, namespace: $namespace) {
+  query Service($name: String!, $namespace: String!, $serviceId: ID!) {
+    service(name: $name, namespace: $namespace, serviceId: $serviceId) {
       ...ServiceFragment
       pods {
         ...PodFragment
@@ -55,8 +55,8 @@ export const DEPLOYMENT_Q = gql`
 `
 
 export const INGRESS_Q = gql`
-  query Ingress($name: String!, $namespace: String!) {
-    ingress(name: $name, namespace: $namespace) {
+  query Ingress($name: String!, $namespace: String!, $serviceId: ID!) {
+    ingress(name: $name, namespace: $namespace, serviceId: $serviceId) {
       ...IngressFragment
       events {
         ...EventFragment
@@ -68,8 +68,8 @@ export const INGRESS_Q = gql`
 `
 
 export const STATEFUL_SET_Q = gql`
-  query StatefulSet($name: String!, $namespace: String!) {
-    statefulSet(name: $name, namespace: $namespace) {
+  query StatefulSet($name: String!, $namespace: String!, $serviceId: ID!) {
+    statefulSet(name: $name, namespace: $namespace, serviceId: $serviceId) {
       ...StatefulSetFragment
       pods {
         ...PodFragment
@@ -210,8 +210,8 @@ export const CLUSTER_SATURATION = gql`
 `
 
 export const CRON_JOB_Q = gql`
-  query Cron($name: String!, $namespace: String!) {
-    cronJob(name: $name, namespace: $namespace) {
+  query Cron($name: String!, $namespace: String!, $serviceId: ID!) {
+    cronJob(name: $name, namespace: $namespace, serviceId: $serviceId) {
       ...CronJobFragment
       events {
         ...EventFragment
@@ -233,8 +233,8 @@ export const CRON_JOB_Q = gql`
 `
 
 export const JOB_Q = gql`
-  query Job($name: String!, $namespace: String!) {
-    job(name: $name, namespace: $namespace) {
+  query Job($name: String!, $namespace: String!, $serviceId: ID!) {
+    job(name: $name, namespace: $namespace, serviceId: $serviceId) {
       ...JobFragment
       events {
         ...EventFragment
@@ -246,8 +246,8 @@ export const JOB_Q = gql`
 `
 
 export const CERTIFICATE_Q = gql`
-  query Certificate($name: String!, $namespace: String!) {
-    certificate(name: $name, namespace: $namespace) {
+  query Certificate($name: String!, $namespace: String!, $serviceId: ID!) {
+    certificate(name: $name, namespace: $namespace, serviceId: $serviceId) {
       ...CertificateFragment
       events {
         ...EventFragment
