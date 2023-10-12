@@ -9,7 +9,7 @@ import {
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 import { ColumnDef, Row, createColumnHelper } from '@tanstack/react-table'
-import { Container, Node, NodeMetric } from 'generated/graphql'
+import { Node, NodeMetric } from 'generated/graphql'
 import {
   ReadinessT,
   nodeStatusToReadiness,
@@ -35,7 +35,7 @@ import { UsageBar } from './UsageBar'
 
 type Capacity = { memory?: string; cpu?: string }
 
-type TableData = {
+export type TableData = {
   name: string
   memory: {
     used?: number
@@ -50,7 +50,7 @@ type TableData = {
   readiness: ReadinessT
 }
 
-const columnHelper = createColumnHelper<TableData>()
+export const columnHelper = createColumnHelper<TableData>()
 
 const zoneKey = 'failure-domain.beta.kubernetes.io/zone'
 const regionKey = 'failure-domain.beta.kubernetes.io/region'
@@ -92,7 +92,7 @@ function DeleteNode({ name, refetch }) {
   )
 }
 
-const ColName = columnHelper.accessor((row) => row.name, {
+export const ColName = columnHelper.accessor((row) => row.name, {
   id: 'name',
   enableSorting: true,
   cell: (props) => (
@@ -108,21 +108,21 @@ const ColName = columnHelper.accessor((row) => row.name, {
   meta: { truncate: true },
 })
 
-const ColRegion = columnHelper.accessor((row) => row.region, {
+export const ColRegion = columnHelper.accessor((row) => row.region, {
   id: 'region',
   enableSorting: true,
   cell: ({ getValue }) => <TableText>{getValue()}</TableText>,
   header: 'Region',
 })
 
-const ColZone = columnHelper.accessor((row) => row.zone, {
+export const ColZone = columnHelper.accessor((row) => row.zone, {
   id: 'zone',
   enableSorting: true,
   cell: ({ getValue }) => <TableText>{getValue()}</TableText>,
   header: 'Zone',
 })
 
-const ColCpuUsage = columnHelper.accessor(
+export const ColCpuUsage = columnHelper.accessor(
   (row) => (row?.cpu?.used ?? 0) / (row?.cpu?.total ?? 1),
   {
     id: 'cpu-usage',
@@ -145,7 +145,7 @@ const ColCpuUsage = columnHelper.accessor(
   }
 )
 
-const ColMemoryUsage = columnHelper.accessor(
+export const ColMemoryUsage = columnHelper.accessor(
   (row) => (row?.memory?.used ?? 0) / (row?.memory?.total ?? 1),
   {
     id: 'memory-usage',
@@ -168,25 +168,31 @@ const ColMemoryUsage = columnHelper.accessor(
   }
 )
 
-const ColCpuTotal = columnHelper.accessor((row) => row?.cpu?.total ?? 0, {
-  id: 'cpu-total',
-  enableSorting: true,
-  sortingFn: numishSort,
-  cell: (props) => <UsageText>{props.getValue()}</UsageText>,
-  header: 'CPU',
-})
+export const ColCpuTotal = columnHelper.accessor(
+  (row) => row?.cpu?.total ?? 0,
+  {
+    id: 'cpu-total',
+    enableSorting: true,
+    sortingFn: numishSort,
+    cell: (props) => <UsageText>{props.getValue()}</UsageText>,
+    header: 'CPU',
+  }
+)
 
-const ColMemoryTotal = columnHelper.accessor((row) => row?.memory?.total ?? 0, {
-  id: 'memory-total',
-  enableSorting: true,
-  sortingFn: numishSort,
-  cell: (props: any) => (
-    <UsageText>{filesize(props.getValue())?.toString()}</UsageText>
-  ),
-  header: 'Memory',
-})
+export const ColMemoryTotal = columnHelper.accessor(
+  (row) => row?.memory?.total ?? 0,
+  {
+    id: 'memory-total',
+    enableSorting: true,
+    sortingFn: numishSort,
+    cell: (props: any) => (
+      <UsageText>{filesize(props.getValue())?.toString()}</UsageText>
+    ),
+    header: 'Memory',
+  }
+)
 
-const ColStatus = columnHelper.accessor(
+export const ColStatus = columnHelper.accessor(
   (row) => (row?.readiness ? readinessToLabel[row.readiness] : ''),
   {
     id: 'status',
@@ -200,7 +206,7 @@ const ColStatus = columnHelper.accessor(
   }
 )
 
-const ColActions = (refetch) =>
+export const ColActions = (refetch) =>
   columnHelper.accessor(() => null, {
     id: 'actions',
     cell: ({ row: { original } }) => (
@@ -224,11 +230,11 @@ const ColActions = (refetch) =>
 export function NodesList({
   nodes,
   nodeMetrics,
-  refetch,
+  columns,
 }: {
   nodes: (Node | null)[]
   nodeMetrics: (NodeMetric | null)[]
-  refetch: any
+  columns: ColumnDef<TableData, any>[]
 }) {
   const navigate = useNavigate()
   const metrics: Record<string, { cpu?: number; memory?: number }> =
@@ -276,22 +282,6 @@ export function NodesList({
           }
         }),
     [metrics, nodes]
-  )
-
-  // Memoize columns to prevent rerendering entire table
-  const columns: ColumnDef<TableData, any>[] = useMemo(
-    () => [
-      ColName,
-      ColRegion,
-      ColZone,
-      ColCpuUsage,
-      ColMemoryUsage,
-      ColCpuTotal,
-      ColMemoryTotal,
-      ColStatus,
-      ColActions(refetch),
-    ],
-    [refetch]
   )
 
   if (!tableData || tableData.length === 0) {
