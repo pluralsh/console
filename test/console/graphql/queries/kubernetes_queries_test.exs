@@ -319,7 +319,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
 
   describe "nodeMetrics" do
     test "it can list metrics" do
-      user = insert(:user)
+      user = admin_user()
       expect(Kazan, :run, fn _ -> {:ok, %{items: [node_metrics("node-1")]}} end)
 
       {:ok, %{data: %{"nodeMetrics" => [node]}}} = run_query("""
@@ -333,7 +333,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
 
   describe "nodeMetric" do
     test "it can fetch metrics for a node" do
-      user = insert(:user)
+      user = admin_user()
       expect(Kazan, :run, fn _ -> {:ok, node_metrics("node-1")} end)
 
       {:ok, %{data: %{"nodeMetric" => node}}} = run_query("""
