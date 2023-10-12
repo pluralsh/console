@@ -1,11 +1,8 @@
 import { useOutletContext } from 'react-router-dom'
 import { ColumnDef } from '@tanstack/react-table'
 import { useMemo } from 'react'
-
 import { Card } from '@pluralsh/design-system'
-
-import { sumBy } from 'lodash'
-
+import sumBy from 'lodash/sumBy'
 import { useTheme } from 'styled-components'
 
 import { Cluster, Node } from '../../../generated/graphql'
