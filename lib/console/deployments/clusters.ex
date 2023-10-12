@@ -98,6 +98,12 @@ defmodule Console.Deployments.Clusters do
     end
   end
 
+  @spec flush_cache(Cluster.t) :: :ok
+  def flush_cache(%Cluster{id: id}) do
+    @local_adapter.delete({:node_metrics, id})
+    @local_adapter.delete({:nodes, id})
+  end
+
   @doc """
   Installs the operator on this cluster using the plural cd command
   """
