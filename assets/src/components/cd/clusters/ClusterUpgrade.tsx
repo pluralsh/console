@@ -14,7 +14,7 @@ import isEmpty from 'lodash/isEmpty'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import CopyButton from 'components/utils/CopyButton'
 import { Confirm } from 'components/utils/Confirm'
-import { ProviderIcons } from 'components/utils/ProviderIcon'
+import { ProviderIcons } from 'components/utils/Provider'
 import {
   ApiDeprecation,
   ClustersRowFragment,

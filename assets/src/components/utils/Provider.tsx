@@ -6,6 +6,20 @@ export const DEFAULT_EQUINIX_ICON = '/equinix-metal.png'
 export const DEFAULT_KIND_ICON = '/kind.png'
 export const DARK_AWS_ICON = '/aws-icon.png'
 
+const ProviderNames = {
+  aws: 'AWS',
+  azure: 'Azure',
+  equinix: 'Equinix',
+  gcp: 'GCP',
+  kind: 'kind',
+}
+
+export function providerName(provider?: string | null) {
+  const p = provider?.toLowerCase()
+
+  return p && ProviderNames[p] ? ProviderNames[p] : 'BYOK'
+}
+
 export const ProviderIcons = {
   GCP: DEFAULT_GCP_ICON,
   AWS: DEFAULT_AWS_ICON,

@@ -6,6 +6,7 @@ import {
   EmptyState,
   IconFrame,
   Table,
+  Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
@@ -17,26 +18,25 @@ import { A } from 'honorable'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-import { providerToURL } from 'components/utils/ProviderIcon'
-
+import { providerName, providerToURL } from 'components/utils/Provider'
 import { Edge } from 'utils/graphql'
-
 import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
 
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
-
 import {
   cpuFormat,
   cpuParser,
   memoryFormat,
   memoryParser,
 } from '../../../utils/kubernetes'
-
 import { UsageBar } from '../../cluster/nodes/UsageBar'
+import { TableText } from '../../cluster/TableElements'
 
 import ClusterCreate from './ClusterCreate'
 import ClusterUpgrade from './ClusterUpgrade'
 import ClusterHealthChip from './ClusterHealthChip'
+
+const POLL_INTERVAL = 10 * 1000
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -72,7 +72,7 @@ export const columns = [
         <ColWithIcon
           icon={providerToURL(provider?.cloud ?? '', theme.mode === 'dark')}
         >
-          {provider?.name ?? 'BYOK'}
+          {providerName(provider?.name)}
         </ColWithIcon>
       )
     },
@@ -132,24 +132,28 @@ export const columns = [
       )
       const capacity = cluster?.nodes?.reduce(
         (acc, current) =>
-          // TODO
           // @ts-ignore
           acc + (cpuParser(current?.status?.capacity?.cpu) ?? 0),
         0
       )
+      const display = `${usage ? cpuFormat(usage) : '-'} / ${
+        capacity ? cpuFormat(capacity) : '-'
+      }`
 
-      return (
-        <div>
-          {!!usage && !!capacity && (
+      return usage !== undefined && !!capacity ? (
+        <Tooltip
+          label={display}
+          placement="top"
+        >
+          <TableText>
             <UsageBar
               usage={usage / capacity}
               width={120}
             />
-          )}
-          {usage ? cpuFormat(usage) : '-'}
-          {' / '}
-          {capacity ? cpuFormat(capacity) : '-'}
-        </div>
+          </TableText>
+        </Tooltip>
+      ) : (
+        display
       )
     },
   }),
@@ -164,24 +168,29 @@ export const columns = [
       )
       const capacity = cluster?.nodes?.reduce(
         (acc, current) =>
-          // TODO
           // @ts-ignore
           acc + (memoryParser(current?.status?.capacity?.memory) ?? 0),
         0
       )
 
-      return (
-        <div>
-          {!!usage && !!capacity && (
+      const display = `${usage ? memoryFormat(usage) : '-'} / ${
+        capacity ? memoryFormat(capacity) : '-'
+      }`
+
+      return usage !== undefined && !!capacity ? (
+        <Tooltip
+          label={display}
+          placement="top"
+        >
+          <TableText>
             <UsageBar
               usage={usage / capacity}
               width={120}
             />
-          )}
-          {usage ? memoryFormat(usage) : '-'}
-          {' / '}
-          {capacity ? memoryFormat(capacity) : '-'}
-        </div>
+          </TableText>
+        </Tooltip>
+      ) : (
+        display
       )
     },
   }),
@@ -242,7 +251,7 @@ export const CLUSTERS_CRUMBS = [
 ]
 
 export default function Clusters() {
-  const { data } = useClustersQuery()
+  const { data } = useClustersQuery({ pollInterval: POLL_INTERVAL })
   const headerActions = useMemo(() => <ClusterCreate />, [])
 
   useSetCDHeaderContent(headerActions)
@@ -252,11 +261,10 @@ export default function Clusters() {
     return <LoadingIndicator />
   }
 
-  console.log(data)
-
   return !isEmpty(data?.clusters?.edges) ? (
     <FullHeightTableWrap>
       <Table
+        loose
         data={data?.clusters?.edges || []}
         columns={columns}
         css={{

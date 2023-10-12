@@ -10,7 +10,7 @@ import {
 } from '@pluralsh/design-system'
 import { useMemo, useRef, useState } from 'react'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import { Outlet, useMatch, useParams } from 'react-router-dom'
+import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
 import { LinkTabWrap } from 'components/utils/Tabs'
 import {
   CD_BASE_PATH,
@@ -27,6 +27,8 @@ import {
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
+import ProviderIcon from '../../utils/Provider'
+
 import ClusterPermissions from './ClusterPermissions'
 import ClusterMetadataPanel from './ClusterMetadataPanel'
 
@@ -40,12 +42,12 @@ const POLL_INTERVAL = 10 * 1000
 
 export default function Cluster() {
   const theme = useTheme()
+  const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
   const { clusterId }: { clusterId?: string } = useParams()
   const tab = useMatch(`/${CLUSTER_BASE_PATH}/:tab`)?.params?.tab || ''
 
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
-  const [selectedClusterId, setSelectedClusterId] = useState(clusterId)
   const currentTab = directory.find(({ path }) => path === tab)
   const crumbs: Breadcrumb[] = useMemo(() => {
     const clustersPath = `/${CD_BASE_PATH}/${CLUSTERS_PATH}`
@@ -94,14 +96,26 @@ export default function Cluster() {
                     Cluster
                   </div>
                 }
-                selectedKey={selectedClusterId}
-                onSelectionChange={(key) => setSelectedClusterId(key as any)}
+                leftContent={
+                  <ProviderIcon
+                    provider={data?.cluster?.provider?.cloud || ''}
+                    width={16}
+                  />
+                }
+                selectedKey={clusterId}
+                onSelectionChange={(key) => navigate(`/cd/clusters/${key}`)}
               >
                 {clusterEdges.map((edge) => (
                   <ListBoxItem
                     key={edge?.node?.id}
                     label={edge?.node?.name}
                     textValue={edge?.node?.name}
+                    leftContent={
+                      <ProviderIcon
+                        provider={edge?.node?.provider?.cloud || ''}
+                        width={16}
+                      />
+                    }
                   />
                 ))}
               </Select>
@@ -152,7 +166,7 @@ export default function Cluster() {
         css={{ height: '100%' }}
         stateRef={tabStateRef}
       >
-        <Outlet />
+        <Outlet context={{ cluster: data?.cluster }} />
       </TabPanel>
     </ResponsivePageFullWidth>
   )

@@ -1,3 +1,48 @@
+fragment MetadataFragment on Metadata {
+  name
+  namespace
+  labels {
+    name
+    value
+  }
+  annotations {
+    name
+    value
+  }
+}
+
+fragment NodeFragment on Node {
+  metadata {
+    ...MetadataFragment
+  }
+  status {
+    phase
+    allocatable
+    capacity
+    conditions {
+      type
+      status
+      message
+    }
+  }
+  spec {
+    podCidr
+    providerId
+  }
+}
+
+fragment NodeMetricFragment on NodeMetric {
+  metadata {
+    ...MetadataFragment
+  }
+  usage {
+    cpu
+    memory
+  }
+  timestamp
+  window
+}
+
 fragment ApiDeprecation on ApiDeprecation {
   availableIn
   blocking
@@ -55,6 +100,35 @@ fragment ClustersRow on Cluster {
   version
 }
 
+fragment Cluster on Cluster {
+  apiDeprecations {
+    ...ApiDeprecation
+  }
+  currentVersion
+  id
+  name
+  nodes {
+    ...NodeFragment
+  }
+  nodeMetrics {
+    ...NodeMetricFragment
+  }
+  pingedAt
+  provider {
+    id
+    cloud
+    name
+    namespace
+  }
+  self
+  service {
+    repository {
+      url
+    }
+  }
+  version
+}
+
 query Clusters {
   clusters(first: 100) {
     pageInfo {
@@ -74,6 +148,9 @@ query ClustersTiny {
       node {
         id
         name
+        provider {
+          cloud
+        }
       }
     }
   }
@@ -81,7 +158,7 @@ query ClustersTiny {
 
 query Cluster($id: ID!) {
   cluster(id: $id) {
-    ...ClustersRow
+    ...Cluster
   }
 }
 
