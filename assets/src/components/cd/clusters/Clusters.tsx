@@ -149,7 +149,6 @@ export const columns = [
             <UsageBar
               usage={usage / capacity}
               width={120}
-              height={6}
             />
           </TableText>
         </Tooltip>
@@ -187,7 +186,6 @@ export const columns = [
             <UsageBar
               usage={usage / capacity}
               width={120}
-              height={6}
             />
           </TableText>
         </Tooltip>

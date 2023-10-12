@@ -12,7 +12,7 @@ function UsageBarUnstyled({ usage, ...props }: { usage: number }) {
 
   return (
     <ProgressBar
-      height={3}
+      height={6}
       mode="determinate"
       progress={usage}
       progressColor={color}
