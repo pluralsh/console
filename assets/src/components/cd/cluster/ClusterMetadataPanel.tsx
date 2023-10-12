@@ -77,7 +77,7 @@ export default function ClusterMetadataPanel({
             )}
           </Prop>
           <Prop
-            title="K8s version"
+            title="Current K8s version"
             margin={0}
           >
             v{cluster?.currentVersion}
