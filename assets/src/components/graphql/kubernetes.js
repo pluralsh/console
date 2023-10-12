@@ -233,41 +233,6 @@ export const ServiceFragment = gql`
   ${MetadataFragment}
 `
 
-export const IngressFragment = gql`
-  fragment IngressFragment on Ingress {
-    metadata {
-      ...MetadataFragment
-    }
-    status {
-      loadBalancer {
-        ingress {
-          ip
-          hostname
-        }
-      }
-    }
-    spec {
-      tls {
-        hosts
-      }
-      rules {
-        host
-        http {
-          paths {
-            path
-            backend {
-              serviceName
-              servicePort
-            }
-          }
-        }
-      }
-    }
-    raw
-  }
-  ${MetadataFragment}
-`
-
 export const NodeFragment = gql`
   fragment NodeFragment on Node {
     metadata {
@@ -370,30 +335,6 @@ export const LogFilterFragment = gql`
         value
       }
     }
-  }
-  ${MetadataFragment}
-`
-
-export const CertificateFragment = gql`
-  fragment CertificateFragment on Certificate {
-    metadata {
-      ...MetadataFragment
-    }
-    status {
-      renewalTime
-      notBefore
-      notAfter
-    }
-    spec {
-      dnsNames
-      secretName
-      issuerRef {
-        group
-        kind
-        name
-      }
-    }
-    raw
   }
   ${MetadataFragment}
 `

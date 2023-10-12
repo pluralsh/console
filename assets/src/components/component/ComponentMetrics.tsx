@@ -1,17 +1,19 @@
 import { Card } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useQuery } from '@apollo/client'
 import { DURATIONS } from 'utils/time'
-import RangePicker from 'components/utils/RangePicker'
-import { Flex } from 'honorable'
-import { Graph } from 'components/utils/Graph'
 import { filesize } from 'filesize'
+import { isNonNullable } from 'utils/isNonNullable'
+import { useTheme } from 'styled-components'
+
+import { MetricResponseFragment, useUsageQuery } from 'generated/graphql'
+
+import RangePicker from 'components/utils/RangePicker'
+import { Graph } from 'components/utils/Graph'
 import GraphHeader from 'components/utils/GraphHeader'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { POLL_INTERVAL } from '../../../../cluster/constants'
-import { USAGE_Q } from '../../../../cluster/queries'
+import { POLL_INTERVAL } from '../cluster/constants'
 
 const convertVals = (values) =>
   values.map(({ timestamp, value }) => ({
@@ -19,7 +21,14 @@ const convertVals = (values) =>
     y: parseFloat(value),
   }))
 
-function Graphs({ cpu: [cpu], mem: [mem] }) {
+function Graphs({
+  cpu: [cpu],
+  mem: [mem],
+}: {
+  cpu: MetricResponseFragment[]
+  mem: MetricResponseFragment[]
+}) {
+  const theme = useTheme()
   const { cpuValues, memValues } = useMemo(
     () => ({
       cpuValues: convertVals(cpu.values),
@@ -29,15 +38,21 @@ function Graphs({ cpu: [cpu], mem: [mem] }) {
   )
 
   return (
-    <Flex
-      gap="large"
-      grow={1}
-      height={320}
-      padding="large"
+    <div
+      css={{
+        display: 'flex',
+        gap: theme.spacing.large,
+        flexGrow: 1,
+        height: 320,
+        padding: theme.spacing.large,
+      }}
     >
-      <Flex
-        direction="column"
-        grow={1}
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+        }}
       >
         <GraphHeader title="Overall CPU Usage" />
         <Graph
@@ -45,10 +60,13 @@ function Graphs({ cpu: [cpu], mem: [mem] }) {
           yFormat={undefined}
           tickRotation={undefined}
         />
-      </Flex>
-      <Flex
-        direction="column"
-        grow={1}
+      </div>
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+        }}
       >
         <GraphHeader title="Overall Memory Usage" />
         <Graph
@@ -56,19 +74,26 @@ function Graphs({ cpu: [cpu], mem: [mem] }) {
           yFormat={filesize}
           tickRotation={undefined}
         />
-      </Flex>
-    </Flex>
+      </div>
+    </div>
   )
 }
 
-function PodGraphs({ cpu, mem }) {
+function PodGraphs({
+  cpu,
+  mem,
+}: {
+  cpu: MetricResponseFragment[]
+  mem: MetricResponseFragment[]
+}) {
+  const theme = useTheme()
   const { cpuGraph, memGraph } = useMemo(() => {
-    const cpuGraph = cpu.map(({ metric: { pod }, values }) => ({
-      id: pod,
+    const cpuGraph = cpu.map(({ metric, values }) => ({
+      id: (metric as any)?.pod,
       data: convertVals(values),
     }))
-    const memGraph = mem.map(({ metric: { pod }, values }) => ({
-      id: pod,
+    const memGraph = mem.map(({ metric, values }) => ({
+      id: (metric as any)?.pod,
       data: convertVals(values),
     }))
 
@@ -76,15 +101,21 @@ function PodGraphs({ cpu, mem }) {
   }, [cpu, mem])
 
   return (
-    <Flex
-      gap="large"
-      grow={1}
-      height={320}
-      padding="large"
+    <div
+      css={{
+        display: 'flex',
+        gap: theme.spacing.large,
+        flexGrow: 1,
+        height: 320,
+        padding: theme.spacing.large,
+      }}
     >
-      <Flex
-        direction="column"
-        grow={1}
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+        }}
       >
         <GraphHeader title="Pod CPU Usage" />
         <Graph
@@ -92,10 +123,13 @@ function PodGraphs({ cpu, mem }) {
           yFormat={undefined}
           tickRotation={undefined}
         />
-      </Flex>
-      <Flex
-        direction="column"
-        grow={1}
+      </div>
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+        }}
       >
         <GraphHeader title="Pod Memory Usage" />
         <Graph
@@ -103,8 +137,8 @@ function PodGraphs({ cpu, mem }) {
           yFormat={filesize}
           tickRotation={undefined}
         />
-      </Flex>
-    </Flex>
+      </div>
+    </div>
   )
 }
 
@@ -115,7 +149,7 @@ function Metric({
   duration: { step, offset },
   ...props
 }) {
-  const { data } = useQuery(USAGE_Q, {
+  const { data } = useUsageQuery({
     variables: {
       cpu: `sum(rate(container_cpu_usage_seconds_total{namespace="${namespace}",pod=~"${name}${regex}"}[5m]))`,
       mem: `sum(container_memory_working_set_bytes{namespace="${namespace}",pod=~"${name}${regex}"})`,
@@ -127,9 +161,18 @@ function Metric({
     pollInterval: POLL_INTERVAL,
   })
 
-  if (!data) return <LoadingIndicator />
+  const { cpu, mem, podCpu, podMem } = useMemo(() => {
+    const { cpu, mem, podCpu, podMem } = data || {}
 
-  const { cpu, mem, podCpu, podMem } = data
+    return {
+      cpu: (cpu || []).filter(isNonNullable),
+      mem: (mem || []).filter(isNonNullable),
+      podCpu: (podCpu || []).filter(isNonNullable),
+      podMem: (podMem || []).filter(isNonNullable),
+    }
+  }, [data])
+
+  if (!data) return <LoadingIndicator />
 
   return (
     <Card
@@ -156,15 +199,19 @@ const kindToRegex = {
 }
 
 export default function ComponentMetrics() {
+  const theme = useTheme()
   const { appName, componentKind = '', componentName } = useParams()
   const [duration, setDuration] = useState<any>(DURATIONS[0])
 
   return (
-    <Flex
-      direction="column"
-      gap="medium"
-      height="100%"
-      overflow="hidden"
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.medium,
+        height: '100%',
+        overflow: 'hidden',
+      }}
     >
       <RangePicker
         duration={duration}
@@ -180,6 +227,6 @@ export default function ComponentMetrics() {
         maxHeight="100%"
         overflowY="auto"
       />
-    </Flex>
+    </div>
   )
 }

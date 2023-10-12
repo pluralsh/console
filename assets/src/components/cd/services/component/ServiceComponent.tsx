@@ -28,17 +28,16 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   COMPONENT_PARAM_KIND,
   COMPONENT_PARAM_NAME,
+  COMPONENT_PARAM_VERSION,
   SERVICE_PARAM_CLUSTER,
   SERVICE_PARAM_ID,
   getServiceComponentPath,
 } from 'routes/cdRoutesConsts'
 
-import { ViewLogsButton } from 'components/apps/app/components/component/ViewLogsButton'
+import { ViewLogsButton } from 'components/component/ViewLogsButton'
 
-import {
-  directory,
-  kindToQuery,
-} from 'components/apps/app/components/component/Component'
+import { directory } from 'components/component/directory'
+import { kindToQuery } from 'components/component/kindToQuery'
 
 import {
   ServiceDeploymentComponentFragment,
@@ -57,9 +56,11 @@ export const getServiceComponentBreadcrumbs = ({
   clusterName,
   componentKind,
   componentName,
+  componentVersion,
 }: Parameters<typeof getServiceComponentsBreadcrumbs>[0] & {
   componentKind: string | null | undefined
   componentName: string | null | undefined
+  componentVersion: string | null | undefined
 }) => [
   ...getServiceComponentsBreadcrumbs({ clusterName, serviceId }),
   {
@@ -69,6 +70,7 @@ export const getServiceComponentBreadcrumbs = ({
       serviceId,
       componentKind,
       componentName,
+      componentVersion,
     }),
   },
 ]
@@ -128,13 +130,13 @@ function V1Component({
         clusterName: ':clusterName',
         componentKind: ':componentKind',
         componentName: ':componentName',
+        componentVersion: ':componentVersion',
       })}/:subpath`
     )?.params?.subpath || ''
 
   if (error) {
     return <GqlError error={error} />
   }
-  console.log('me', me)
   if (!me || !data) return <LoadingIndicator />
 
   const filteredDirectory = directory.filter(
@@ -222,13 +224,15 @@ function UnstructuredComponent({
 
   console.log('params', params)
   console.log('searchParams', searchParams)
-  const { kind, name, version } = component
+  const { kind, name, version, namespace, group } = component
 
   const variables = {
     name,
     version: version || '',
     kind,
     serviceId,
+    namespace,
+    group,
   }
 
   console.log('variables', variables)
@@ -252,7 +256,7 @@ export default function Component() {
   const componentKind = params[COMPONENT_PARAM_KIND]!
   const componentName = params[COMPONENT_PARAM_NAME]!
   const clusterName = params[SERVICE_PARAM_CLUSTER]!
-  // const componentVersion = params[COMPONENT_PARAM_VERSION]
+  const componentVersion = params[COMPONENT_PARAM_VERSION]!
   const serviceId = params[SERVICE_PARAM_ID]!
 
   const { data, loading, error } = useServiceDeploymentComponentsQuery({
@@ -288,8 +292,9 @@ export default function Component() {
           serviceId,
           componentKind,
           componentName,
+          componentVersion,
         }),
-      [clusterName, serviceId, componentKind, componentName]
+      [clusterName, serviceId, componentKind, componentName, componentVersion]
     )
   )
 

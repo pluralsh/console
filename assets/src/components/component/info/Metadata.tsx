@@ -7,7 +7,7 @@ import { LabelsAnnotations } from 'components/cluster/LabelsAnnotations'
 
 import { MetadataGrid, MetadataItem } from 'components/utils/Metadata'
 
-import { ComponentStatusChip } from '../../misc'
+import { ComponentStatusChip } from '../../apps/app/components/misc'
 
 export const componentsWithLogs: string[] = ['deployment', 'statefulset']
 

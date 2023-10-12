@@ -1,0 +1,28 @@
+fragment StatefulSet on StatefulSet {
+  metadata {
+    ...MetadataFragment
+  }
+  status {
+    replicas
+    currentReplicas
+    readyReplicas
+    updatedReplicas
+  }
+  spec {
+    replicas
+    serviceName
+  }
+  raw
+}
+
+query StatefulSet($name: String!, $namespace: String!, $serviceId: ID) {
+  statefulSet(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...StatefulSet
+    pods {
+      ...Pod
+    }
+    events {
+      ...Event
+    }
+  }
+}

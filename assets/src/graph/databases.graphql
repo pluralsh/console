@@ -1,17 +1,3 @@
-fragment ResourceSpec on ResourceSpec {
-  cpu
-  memory
-}
-
-fragment Resources on Resources {
-  limits {
-    ...ResourceSpec
-  }
-  requests {
-    ...ResourceSpec
-  }
-}
-
 fragment DatabaseTableRow on Postgresql {
   instances {
     uid
