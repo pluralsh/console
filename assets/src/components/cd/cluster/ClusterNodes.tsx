@@ -2,7 +2,13 @@ import { useOutletContext } from 'react-router-dom'
 import { ColumnDef } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
-import { Cluster } from '../../../generated/graphql'
+import { Card } from '@pluralsh/design-system'
+
+import { sumBy } from 'lodash'
+
+import { useTheme } from 'styled-components'
+
+import { Cluster, Node } from '../../../generated/graphql'
 import {
   ColCpuTotal,
   ColCpuUsage,
@@ -17,6 +23,9 @@ import {
   columnHelper,
 } from '../../cluster/nodes/NodesList'
 import { TableCaretLink } from '../../cluster/TableElements'
+import { ClusterMetrics } from '../../cluster/nodes/ClusterMetrics'
+import { cpuParser, memoryParser } from '../../../utils/kubernetes'
+import { ResourceUsage } from '../../cluster/nodes/Nodes'
 
 export const ColActions = columnHelper.accessor(() => null, {
   id: 'actions',
@@ -30,7 +39,9 @@ export const ColActions = columnHelper.accessor(() => null, {
 })
 
 export default function ClusterNodes() {
+  const theme = useTheme()
   const { cluster } = useOutletContext() as { cluster: Cluster }
+
   const columns: ColumnDef<TableData, any>[] = useMemo(
     () => [
       ColName,
@@ -46,12 +57,42 @@ export default function ClusterNodes() {
     []
   )
 
+  const usage: ResourceUsage = useMemo(() => {
+    if (!cluster) {
+      return null
+    }
+    const cpu = sumBy(
+      cluster.nodeMetrics,
+      (metrics) => cpuParser(metrics?.usage?.cpu) ?? 0
+    )
+    const mem = sumBy(
+      cluster.nodeMetrics,
+      (metrics) => memoryParser((metrics as any)?.usage?.memory) ?? 0
+    )
+
+    return { cpu, mem }
+  }, [cluster])
+
   return (
-    // TODO: Replace row link.
-    <NodesList
-      nodes={cluster?.nodes || []}
-      nodeMetrics={cluster?.nodeMetrics || []}
-      columns={columns}
-    />
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.xlarge,
+      }}
+    >
+      <Card padding="xlarge">
+        <ClusterMetrics
+          nodes={cluster?.nodes?.filter((node): node is Node => !!node) || []}
+          usage={usage}
+        />
+      </Card>
+      {/* TODO: Replace row link. */}
+      <NodesList
+        nodes={cluster?.nodes || []}
+        nodeMetrics={cluster?.nodeMetrics || []}
+        columns={columns}
+      />
+    </div>
   )
 }
