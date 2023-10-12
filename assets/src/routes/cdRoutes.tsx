@@ -14,6 +14,11 @@ import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
 
 import ServiceComponent from 'components/cd/services/component/ServiceComponent'
 
+import ComponentInfo from 'components/apps/app/components/component/ComponentInfo'
+import ComponentEvents from 'components/apps/app/components/component/ComponentEvents'
+import ComponentRaw from 'components/apps/app/components/component/ComponentRaw'
+import ComponentMetrics from 'components/apps/app/components/component/ComponentMetrics'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -45,7 +50,34 @@ export const componentRoutes = [
       componentVersion: `:${COMPONENT_PARAM_VERSION}?`,
     })}
     element={<ServiceComponent />}
-  />,
+  >
+    {' '}
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to="info"
+        />
+      }
+    />
+    <Route
+      path="info"
+      element={<ComponentInfo />}
+    />
+    <Route
+      path="metrics"
+      element={<ComponentMetrics />}
+    />
+    <Route
+      path="events"
+      element={<ComponentEvents />}
+    />
+    <Route
+      path="raw"
+      element={<ComponentRaw />}
+    />
+  </Route>,
 ]
 
 export const cdRoutes = [
@@ -71,7 +103,6 @@ export const cdRoutes = [
       path={`services/:${SERVICE_PARAM_CLUSTER}?`}
       element={<Services />}
     />
-
     {/* <Route
       path="pipelines"
       element={<Pipelines />}

@@ -38,8 +38,8 @@ export const SERVICE_Q = gql`
 `
 
 export const DEPLOYMENT_Q = gql`
-  query Deployment($name: String!, $namespace: String!) {
-    deployment(name: $name, namespace: $namespace) {
+  query Deployment($name: String!, $namespace: String!, $serviceId: ID) {
+    deployment(name: $name, namespace: $namespace, serviceId: $serviceId) {
       ...DeploymentFragment
       pods {
         ...PodFragment

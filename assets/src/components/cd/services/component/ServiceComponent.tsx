@@ -1,6 +1,4 @@
-import { Flex } from 'honorable'
 import {
-  Breadcrumb,
   SubTab,
   TabList,
   TabPanel,
@@ -10,7 +8,6 @@ import {
 import { useContext, useMemo, useRef } from 'react'
 import { Outlet, useMatch, useParams, useSearchParams } from 'react-router-dom'
 
-import { InstallationContext } from 'components/Installations'
 import { useQuery } from '@apollo/client'
 import {
   POLL_INTERVAL,
@@ -31,7 +28,6 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   COMPONENT_PARAM_KIND,
   COMPONENT_PARAM_NAME,
-  COMPONENT_PARAM_VERSION,
   SERVICE_PARAM_CLUSTER,
   SERVICE_PARAM_ID,
   getServiceComponentPath,
@@ -51,6 +47,8 @@ import {
 } from 'generated/graphql'
 
 import { GqlError } from 'components/utils/Alert'
+
+import { useTheme } from 'styled-components'
 
 import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
 
@@ -75,27 +73,42 @@ export const getServiceComponentBreadcrumbs = ({
   },
 ]
 
-function V1Component({ query, ...props }: any) {
-  console.log('v1 props', props)
+function V1Component({
+  query,
+  component,
+  serviceId,
+}: {
+  query: any
+  serviceId: string
+  component: ServiceDeploymentComponentFragment
+}) {
+  const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const { me } = useContext<any>(LoginContext)
   const params = useParams()
   const [searchParams] = useSearchParams()
+  const componentKind = component.kind
+  const componentName = component.name
 
   console.log('params', params)
   console.log('searchParams', searchParams)
 
-  const componentKind = params[COMPONENT_PARAM_KIND]
-  const componentName = params[COMPONENT_PARAM_NAME]
-  const clusterName = params[SERVICE_PARAM_CLUSTER]
-  const serviceId = params[SERVICE_PARAM_ID]
-
   console.log({ query })
+  const vars = {
+    name: component.name,
+    namespace: component.namespace,
+    serviceId,
+  }
+
+  console.log('vars: ', vars)
+
   const { data, loading, refetch, error } = useQuery(query, {
-    variables: { name: componentName, namespace: clusterName },
+    variables: vars,
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
+
+  console.log('v1 component', { data, loading, error })
 
   const kind: ScalingType =
     ScalingTypes[(componentKind ?? '')?.toUpperCase()] ??
@@ -121,12 +134,9 @@ function V1Component({ query, ...props }: any) {
   if (error) {
     return <GqlError error={error} />
   }
-  if (!me || !currentApp || !data) return <LoadingIndicator />
+  console.log('me', me)
+  if (!me || !data) return <LoadingIndicator />
 
-  const component = currentApp.status.components.find(
-    ({ name, kind }) =>
-      name === componentName && kind.toLowerCase() === componentKind
-  )
   const filteredDirectory = directory.filter(
     ({ onlyFor }) =>
       !onlyFor || (componentKind && onlyFor.includes(componentKind))
@@ -142,10 +152,13 @@ function V1Component({ query, ...props }: any) {
       }
       heading={componentName}
       headingContent={
-        <Flex
-          gap="medium"
-          className="DELETE"
-          marginVertical={1}
+        <div
+          css={{
+            display: 'flex',
+            gap: theme.spacing.medium,
+            className: 'DELETE',
+            margin: `${theme.spacing.medium}px 0`,
+          }}
         >
           <TabList
             gap="xxsmall"
@@ -175,7 +188,7 @@ function V1Component({ query, ...props }: any) {
             metadata={value?.metadata}
             kind={componentKind}
           />
-        </Flex>
+        </div>
       }
     >
       <TabPanel
@@ -204,7 +217,6 @@ function UnstructuredComponent({
   component: ServiceDeploymentComponentFragment
 }) {
   console.log('UnstructuredComponent props', props)
-  const tabStateRef = useRef<any>(null)
   const params = useParams()
   const [searchParams] = useSearchParams()
 
@@ -214,7 +226,7 @@ function UnstructuredComponent({
 
   const variables = {
     name,
-    version,
+    version: version || '',
     kind,
     serviceId,
   }
@@ -237,17 +249,19 @@ function UnstructuredComponent({
 
 export default function Component() {
   const params = useParams()
-  const componentKind = params[COMPONENT_PARAM_KIND]
-  const componentName = params[COMPONENT_PARAM_NAME]
-  const clusterName = params[SERVICE_PARAM_CLUSTER]
-  const componentVersion = params[COMPONENT_PARAM_VERSION]
-  const serviceId = params[SERVICE_PARAM_ID]
+  const componentKind = params[COMPONENT_PARAM_KIND]!
+  const componentName = params[COMPONENT_PARAM_NAME]!
+  const clusterName = params[SERVICE_PARAM_CLUSTER]!
+  // const componentVersion = params[COMPONENT_PARAM_VERSION]
+  const serviceId = params[SERVICE_PARAM_ID]!
 
   const { data, loading, error } = useServiceDeploymentComponentsQuery({
     variables: {
       id: serviceId || '',
     },
   })
+
+  console.log('getting compoent', { data, loading, error })
 
   const components = data?.serviceDeployment?.components
 
@@ -258,9 +272,8 @@ export default function Component() {
   const component = components?.find(
     (component) =>
       component?.name?.toLowerCase() === componentName?.toLowerCase() &&
-      component?.kind?.toLowerCase() === componentKind?.toLowerCase() &&
-      // (component?.version ?? undefined === componentVersion ?? undefined) &&
-      true
+      component?.kind?.toLowerCase() === componentKind?.toLowerCase()
+    // (component?.version || '') === (componentVersion || '')
   )
 
   console.log('component', component)
@@ -292,6 +305,7 @@ export default function Component() {
       <V1Component
         query={v1ComponentQuery}
         component={component}
+        serviceId={serviceId}
       />
     )
   }

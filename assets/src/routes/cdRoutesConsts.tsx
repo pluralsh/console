@@ -35,7 +35,7 @@ export function getServiceDetailsPath({
 export function getServiceComponentPath({
   componentKind,
   componentName,
-  componentVersion,
+  // componentVersion,
   ...props
 }: Parameters<typeof getServiceDetailsPath>[0] & {
   componentKind: string | null | undefined
@@ -44,7 +44,10 @@ export function getServiceComponentPath({
 }) {
   return `${getServiceDetailsPath({
     ...props,
-  })}/${SERVICE_COMPONENTS_PATH}/${componentKind}/${componentName}${
-    componentVersion ? `/${componentVersion}` : ''
-  }`
+  })}/${SERVICE_COMPONENTS_PATH}/${componentKind}/${componentName}`
+  // return `${getServiceDetailsPath({
+  //   ...props,
+  // })}/${SERVICE_COMPONENTS_PATH}/${componentKind}/${componentName}${
+  //   componentVersion ? `/${componentVersion}` : ''
+  // }`
 }
