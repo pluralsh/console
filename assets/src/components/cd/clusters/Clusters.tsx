@@ -19,27 +19,24 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { providerName, providerToURL } from 'components/utils/Provider'
-
 import { Edge } from 'utils/graphql'
-
 import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
 
 import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
-
 import {
   cpuFormat,
   cpuParser,
   memoryFormat,
   memoryParser,
 } from '../../../utils/kubernetes'
-
 import { UsageBar } from '../../cluster/nodes/UsageBar'
-
 import { TableText } from '../../cluster/TableElements'
 
 import ClusterCreate from './ClusterCreate'
 import ClusterUpgrade from './ClusterUpgrade'
 import ClusterHealthChip from './ClusterHealthChip'
+
+export const POLL_INTERVAL = 10 * 1000
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -256,7 +253,7 @@ export const CLUSTERS_CRUMBS = [
 ]
 
 export default function Clusters() {
-  const { data } = useClustersQuery()
+  const { data } = useClustersQuery({ pollInterval: POLL_INTERVAL })
   const headerActions = useMemo(() => <ClusterCreate />, [])
 
   useSetCDHeaderContent(headerActions)
