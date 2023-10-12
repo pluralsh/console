@@ -6,6 +6,7 @@ import {
   EmptyState,
   IconFrame,
   Table,
+  Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ClustersRowFragment, useClustersQuery } from 'generated/graphql'
@@ -33,6 +34,8 @@ import {
 } from '../../../utils/kubernetes'
 
 import { UsageBar } from '../../cluster/nodes/UsageBar'
+
+import { TableText } from '../../cluster/TableElements'
 
 import ClusterCreate from './ClusterCreate'
 import ClusterUpgrade from './ClusterUpgrade'
@@ -132,24 +135,29 @@ export const columns = [
       )
       const capacity = cluster?.nodes?.reduce(
         (acc, current) =>
-          // TODO
           // @ts-ignore
           acc + (cpuParser(current?.status?.capacity?.cpu) ?? 0),
         0
       )
+      const display = `${usage ? cpuFormat(usage) : '-'} / ${
+        capacity ? cpuFormat(capacity) : '-'
+      }`
 
-      return (
-        <div>
-          {!!usage && !!capacity && (
+      return usage !== undefined && !!capacity ? (
+        <Tooltip
+          label={display}
+          placement="top"
+        >
+          <TableText>
             <UsageBar
               usage={usage / capacity}
               width={120}
+              height={6}
             />
-          )}
-          {usage ? cpuFormat(usage) : '-'}
-          {' / '}
-          {capacity ? cpuFormat(capacity) : '-'}
-        </div>
+          </TableText>
+        </Tooltip>
+      ) : (
+        display
       )
     },
   }),
@@ -164,24 +172,30 @@ export const columns = [
       )
       const capacity = cluster?.nodes?.reduce(
         (acc, current) =>
-          // TODO
           // @ts-ignore
           acc + (memoryParser(current?.status?.capacity?.memory) ?? 0),
         0
       )
 
-      return (
-        <div>
-          {!!usage && !!capacity && (
+      const display = `${usage ? memoryFormat(usage) : '-'} / ${
+        capacity ? memoryFormat(capacity) : '-'
+      }`
+
+      return usage !== undefined && !!capacity ? (
+        <Tooltip
+          label={display}
+          placement="top"
+        >
+          <TableText>
             <UsageBar
               usage={usage / capacity}
               width={120}
+              height={6}
             />
-          )}
-          {usage ? memoryFormat(usage) : '-'}
-          {' / '}
-          {capacity ? memoryFormat(capacity) : '-'}
-        </div>
+          </TableText>
+        </Tooltip>
+      ) : (
+        display
       )
     },
   }),
