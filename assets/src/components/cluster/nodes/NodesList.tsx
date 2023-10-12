@@ -9,7 +9,7 @@ import {
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 import { ColumnDef, Row, createColumnHelper } from '@tanstack/react-table'
-import { Node, NodeMetric } from 'generated/graphql'
+import { Container, Node, NodeMetric } from 'generated/graphql'
 import {
   ReadinessT,
   nodeStatusToReadiness,
@@ -226,8 +226,8 @@ export function NodesList({
   nodeMetrics,
   refetch,
 }: {
-  nodes: Node[]
-  nodeMetrics: NodeMetric[]
+  nodes: (Node | null)[]
+  nodeMetrics: (NodeMetric | null)[]
   refetch: any
 }) {
   const navigate = useNavigate()
@@ -237,40 +237,44 @@ export function NodesList({
         return {}
       }
 
-      return nodeMetrics.reduce(
-        (prev, { metadata: { name }, usage }) => ({
-          ...prev,
-          [name]: {
-            cpu: cpuParser(usage?.cpu ?? ''),
-            memory: memoryParser(usage?.memory ?? ''),
-          },
-        }),
-        {}
-      )
+      return nodeMetrics
+        .filter((metric): metric is NodeMetric => !!metric)
+        .reduce(
+          (prev, { metadata: { name }, usage }) => ({
+            ...prev,
+            [name]: {
+              cpu: cpuParser(usage?.cpu ?? ''),
+              memory: memoryParser(usage?.memory ?? ''),
+            },
+          }),
+          {}
+        )
     }, [nodeMetrics])
 
   const tableData: TableData[] = useMemo(
     () =>
-      (nodes || []).map((node) => {
-        const thisMetrics = metrics[node.metadata.name]
-        const labelsMap = mapify(node.metadata.labels)
-        const capacity: Capacity = (node?.status?.capacity as Capacity) ?? {}
+      (nodes || [])
+        .filter((node): node is Node => !!node)
+        .map((node) => {
+          const thisMetrics = metrics[node.metadata.name]
+          const labelsMap = mapify(node?.metadata.labels)
+          const capacity: Capacity = (node?.status?.capacity as Capacity) ?? {}
 
-        return {
-          name: node?.metadata?.name,
-          memory: {
-            used: thisMetrics?.memory,
-            total: memoryParser(capacity?.memory),
-          },
-          cpu: {
-            used: thisMetrics?.cpu,
-            total: cpuParser(capacity?.cpu),
-          },
-          region: labelsMap[regionKey],
-          zone: labelsMap[zoneKey],
-          readiness: nodeStatusToReadiness(node?.status),
-        }
-      }),
+          return {
+            name: node?.metadata?.name,
+            memory: {
+              used: thisMetrics?.memory,
+              total: memoryParser(capacity?.memory),
+            },
+            cpu: {
+              used: thisMetrics?.cpu,
+              total: cpuParser(capacity?.cpu),
+            },
+            region: labelsMap[regionKey],
+            zone: labelsMap[zoneKey],
+            readiness: nodeStatusToReadiness(node.status),
+          }
+        }),
     [metrics, nodes]
   )
 

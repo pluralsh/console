@@ -1,13 +1,16 @@
 import { useOutletContext } from 'react-router-dom'
 
 import { Cluster } from '../../../generated/graphql'
+import { NodesList } from '../../cluster/nodes/NodesList'
 
 export default function ClusterNodes() {
-  const { cluster } = useOutletContext() as {
-    cluster: Cluster
-  }
+  const { cluster } = useOutletContext() as { cluster: Cluster }
 
-  console.log(cluster?.nodes)
-
-  return <>Nodes of {cluster?.name} cluster</>
+  return (
+    <NodesList
+      nodes={cluster?.nodes || []}
+      nodeMetrics={cluster?.nodeMetrics || []}
+      refetch={undefined}
+    />
+  )
 }
