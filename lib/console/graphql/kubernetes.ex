@@ -180,7 +180,7 @@ defmodule Console.GraphQl.Kubernetes do
       middleware Authenticated
       arg :namespace, non_null(:string)
       arg :name, non_null(:string)
-      service_authorized :read
+      hybrid_authorized :read
 
       safe_resolve &Kubernetes.resolve_pod/2
     end
@@ -188,6 +188,7 @@ defmodule Console.GraphQl.Kubernetes do
     connection field :pods, node_type: :pod do
       middleware Authenticated
       arg :namespaces, list_of(:string)
+      cluster_authorized :read
 
       safe_resolve &Kubernetes.list_all_pods/2
     end
@@ -235,6 +236,7 @@ defmodule Console.GraphQl.Kubernetes do
 
     field :node_metrics, list_of(:node_metric) do
       middleware Authenticated
+      cluster_authorized :read
 
       safe_resolve &Kubernetes.list_node_metrics/2
     end
@@ -242,6 +244,7 @@ defmodule Console.GraphQl.Kubernetes do
     field :node_metric, :node_metric do
       middleware Authenticated
       arg :name, non_null(:string)
+      cluster_authorized :read
 
       safe_resolve &Kubernetes.resolve_node_metrics/2
     end

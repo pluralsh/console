@@ -15,6 +15,17 @@ defmodule Console.Middleware.CdAuthenticated do
     end
   end
 
+  def call(%{arguments: %{cluster_id: cluster_id}, context: %{current_user: %User{} = user}} = res, _config) when is_binary(cluster_id) do
+    with {:ok, cluster} <- Clusters.authorized(cluster_id, user),
+         %Kazan.Server{} = server <- Clusters.control_plane(cluster) do
+       Kube.Utils.save_kubeconfig(server)
+       put_in(res.context[:cluster], cluster)
+    else
+      :error -> Absinthe.Resolution.put_result(res, {:error, "could not fetch kubeconfig for cluster"})
+      _ -> Absinthe.Resolution.put_result(res, {:error, "unauthenticated"})
+    end
+  end
+
   def call(res, opts) do
     perm = Keyword.get(opts, :perm) || :read
     Console.Middleware.Rbac.call(res, perm: perm, arg: :namespace)
