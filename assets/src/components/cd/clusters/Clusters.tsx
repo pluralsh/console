@@ -36,7 +36,7 @@ import ClusterCreate from './ClusterCreate'
 import ClusterUpgrade from './ClusterUpgrade'
 import ClusterHealthChip from './ClusterHealthChip'
 
-export const POLL_INTERVAL = 10 * 1000
+const POLL_INTERVAL = 10 * 1000
 
 const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -263,11 +263,10 @@ export default function Clusters() {
     return <LoadingIndicator />
   }
 
-  console.log(data)
-
   return !isEmpty(data?.clusters?.edges) ? (
     <FullHeightTableWrap>
       <Table
+        loose
         data={data?.clusters?.edges || []}
         columns={columns}
         css={{

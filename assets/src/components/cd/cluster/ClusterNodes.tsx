@@ -1,7 +1,13 @@
-import { useParams } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
+
+import { Cluster } from '../../../generated/graphql'
 
 export default function ClusterNodes() {
-  const { clusterId } = useParams()
+  const { cluster } = useOutletContext() as {
+    cluster: Cluster
+  }
 
-  return <>Nodes of {clusterId} cluster</>
+  console.log(cluster?.nodes)
+
+  return <>Nodes of {cluster?.name} cluster</>
 }

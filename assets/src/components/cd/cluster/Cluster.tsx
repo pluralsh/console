@@ -152,7 +152,7 @@ export default function Cluster() {
         css={{ height: '100%' }}
         stateRef={tabStateRef}
       >
-        <Outlet />
+        <Outlet context={{ cluster: data?.cluster }} />
       </TabPanel>
     </ResponsivePageFullWidth>
   )

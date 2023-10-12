@@ -1,7 +1,11 @@
-import { useParams } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
+
+import { ClustersRowFragment } from '../../../generated/graphql'
 
 export default function ClusterPods() {
-  const { clusterId } = useParams()
+  const { cluster } = useOutletContext() as {
+    cluster: ClustersRowFragment
+  }
 
-  return <>Pods of {clusterId} cluster</>
+  return <>Pods of {cluster?.name} cluster</>
 }
