@@ -15,7 +15,9 @@ const ProviderNames = {
 }
 
 export function providerName(provider?: string | null) {
-  return provider && ProviderNames[provider] ? ProviderNames[provider] : 'BYOK'
+  const p = provider?.toLowerCase()
+
+  return p && ProviderNames[p] ? ProviderNames[p] : 'BYOK'
 }
 
 export const ProviderIcons = {
