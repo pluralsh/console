@@ -109,10 +109,9 @@ export default function ServiceComponents() {
           setUrl={(c) => {
             const params = new URLSearchParams()
 
-            if (c.version) params.set('version', c.version)
-            if (c.group) params.set('group', c.group)
-            if (c.id) params.set('id', c.id)
-            if (c.namespace) params.set('namespace', c.namespace)
+            // if (c.group) params.set('group', c.group)
+            // if (c.id) params.set('id', c.id)
+            // if (c.namespace) params.set('namespace', c.namespace)
 
             return c?.name && c?.kind
               ? `${getServiceComponentPath({
@@ -120,6 +119,7 @@ export default function ServiceComponents() {
                   serviceId,
                   componentKind: c.kind.toLocaleLowerCase(),
                   componentName: c.name.toLowerCase(),
+                  componentVersion: c.version,
                 })}?${params.toString()}`
               : undefined
           }}

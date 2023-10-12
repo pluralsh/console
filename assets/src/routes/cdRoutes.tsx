@@ -26,6 +26,7 @@ import {
   CLUSTER_SERVICES_PATH,
   COMPONENT_PARAM_KIND,
   COMPONENT_PARAM_NAME,
+  COMPONENT_PARAM_VERSION,
   SERVICE_BASE_PATH,
   SERVICE_COMPONENTS_PATH,
   SERVICE_PARAM_CLUSTER,
@@ -41,6 +42,7 @@ export const componentRoutes = [
       serviceId: `:${SERVICE_PARAM_ID}`,
       componentKind: `:${COMPONENT_PARAM_KIND}`,
       componentName: `:${COMPONENT_PARAM_NAME}`,
+      componentVersion: `:${COMPONENT_PARAM_VERSION}?`,
     })}
     element={<ServiceComponent />}
   />,

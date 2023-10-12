@@ -45,6 +45,7 @@ import {
 } from 'components/apps/app/components/component/Component'
 
 import {
+  ServiceDeploymentComponentFragment,
   useServiceDeploymentComponentsQuery,
   useUnstructuredResourceQuery,
 } from 'generated/graphql'
@@ -194,28 +195,28 @@ function V1Component({ query, ...props }: any) {
   )
 }
 
-function UnstructuredComponent() {
-  console.log('v1 props', props)
+function UnstructuredComponent({
+  component,
+  serviceId,
+  ...props
+}: {
+  serviceId: string
+  component: ServiceDeploymentComponentFragment
+}) {
+  console.log('UnstructuredComponent props', props)
   const tabStateRef = useRef<any>(null)
-  const { me } = useContext<any>(LoginContext)
   const params = useParams()
   const [searchParams] = useSearchParams()
 
   console.log('params', params)
   console.log('searchParams', searchParams)
-
-  const componentKind = params[COMPONENT_PARAM_KIND]
-  const componentName = params[COMPONENT_PARAM_NAME]
-  const clusterName = params[SERVICE_PARAM_CLUSTER]
-  const serviceId = params[SERVICE_PARAM_ID]
+  const { kind, name, version } = component
 
   const variables = {
-    //   namespace: 'hello',
-    //   serviceId: 'hello',
-    kind: componentKind || '',
-    name: componentName || '',
+    name,
     version,
-    ...(group ? { group } : {}),
+    kind,
+    serviceId,
   }
 
   console.log('variables', variables)
@@ -227,56 +228,78 @@ function UnstructuredComponent() {
 
   console.log('unstructuredResource', data?.unstructuredResource)
 
+  if (error) {
+    return <GqlError error={error} />
+  }
+
   return <div>Unstructured</div>
 }
 
 export default function Component() {
-  const tabStateRef = useRef<any>(null)
-  const { me } = useContext<any>(LoginContext)
   const params = useParams()
-  const [searchParams] = useSearchParams()
-
-  console.log('params', params)
-  console.log('searchParams', searchParams)
-
   const componentKind = params[COMPONENT_PARAM_KIND]
   const componentName = params[COMPONENT_PARAM_NAME]
-  const version = params[COMPONENT_PARAM_VERSION]
   const clusterName = params[SERVICE_PARAM_CLUSTER]
+  const componentVersion = params[COMPONENT_PARAM_VERSION]
   const serviceId = params[SERVICE_PARAM_ID]
 
-  const namespace = searchParams.get('namespace')
-
-  const { applications } = useContext<any>(InstallationContext)
-  const currentApp = applications.find((app) => app.name === serviceId)
-
-  const {
-    data: serviceData,
-    loading: serviceLoading,
-    error: serviceError,
-  } = useServiceDeploymentComponentsQuery({
+  const { data, loading, error } = useServiceDeploymentComponentsQuery({
     variables: {
-      serviceId: serviceId || '',
+      id: serviceId || '',
     },
   })
 
-  const v1ComponentQuery = kindToQuery[componentKind ?? '']
+  const components = data?.serviceDeployment?.components
 
-  const breadcrumbs: Breadcrumb[] = useMemo(
-    () =>
-      getServiceComponentBreadcrumbs({
-        clusterName,
-        serviceId,
-        componentKind,
-        componentName,
-      }),
-    [clusterName, serviceId, componentKind, componentName]
+  console.log('components', components)
+  console.log('componentName', componentName)
+  console.log('componentKind', componentKind)
+
+  const component = components?.find(
+    (component) =>
+      component?.name?.toLowerCase() === componentName?.toLowerCase() &&
+      component?.kind?.toLowerCase() === componentKind?.toLowerCase() &&
+      // (component?.version ?? undefined === componentVersion ?? undefined) &&
+      true
   )
 
-  useSetBreadcrumbs(breadcrumbs)
-  if (v1ComponentQuery) {
-    return <V1Component query={v1ComponentQuery} />
+  console.log('component', component)
+
+  const v1ComponentQuery = kindToQuery[componentKind ?? '']
+
+  useSetBreadcrumbs(
+    useMemo(
+      () =>
+        getServiceComponentBreadcrumbs({
+          clusterName,
+          serviceId,
+          componentKind,
+          componentName,
+        }),
+      [clusterName, serviceId, componentKind, componentName]
+    )
+  )
+
+  if (error) {
+    return <GqlError error={error} />
+  }
+  if (!component) {
+    return <LoadingIndicator />
   }
 
-  return <UnstructuredComponent />
+  if (v1ComponentQuery) {
+    return (
+      <V1Component
+        query={v1ComponentQuery}
+        component={component}
+      />
+    )
+  }
+
+  return (
+    <UnstructuredComponent
+      component={component}
+      serviceId={serviceId}
+    />
+  )
 }
