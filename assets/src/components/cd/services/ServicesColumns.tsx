@@ -30,8 +30,6 @@ export const ColCluster = columnHelper.accessor(
     enableSorting: true,
     enableGlobalFilter: true,
     enableColumnFilter: true,
-    filterFn: (row, columnId, filterValue) =>
-      row.original.node?.cluster?.id === filterValue,
     cell: ({ getValue }) => (
       <ColWithIcon icon={<ClusterIcon />}>{getValue()}</ColWithIcon>
     ),

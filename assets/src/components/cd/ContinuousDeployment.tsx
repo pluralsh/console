@@ -1,9 +1,4 @@
-import {
-  SubTab,
-  TabList,
-  TabPanel,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { Breadcrumb, SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import {
   ReactNode,
   createContext,
@@ -18,7 +13,7 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 
 import { Outlet, useMatch } from 'react-router-dom'
 import { LinkTabWrap } from 'components/utils/Tabs'
-import { CD_BASE_PATH } from 'routes/cdRoutes'
+import { CD_BASE_PATH } from 'routes/cdRoutesConsts'
 
 const CDContext = createContext<
   | {
@@ -44,10 +39,13 @@ export const useSetCDHeaderContent = (headerContent?: ReactNode) => {
   }, [setHeaderContent, headerContent])
 }
 
+export const CD_BASE_CRUMBS = [
+  { label: 'cd', url: '/cd' },
+] as const satisfies readonly Breadcrumb[]
+
 const directory = [
   { path: 'clusters', label: 'Clusters' },
   { path: 'services', label: 'Services' },
-  // { path: 'pipelines', label: 'Pipelines' },
   { path: 'git', label: 'Git repositories' },
   { path: 'providers', label: 'Providers' },
 ] as const
@@ -64,14 +62,7 @@ export default function ContinuousDeployment() {
   const pathMatch = useMatch(`/${CD_BASE_PATH}/:tab*`)
   // @ts-expect-error
   const tab = pathMatch?.params?.tab || ''
-  const path = `/${CD_BASE_PATH}/${tab}`
   const currentTab = directory.find(({ path }) => path === tab)
-  const crumbs = useMemo(
-    () => (path ? [{ label: tab, path }] : []),
-    [path, tab]
-  )
-
-  useSetBreadcrumbs(crumbs)
 
   return (
     <ResponsivePageFullWidth

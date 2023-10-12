@@ -29,7 +29,7 @@ import { updateCache } from 'utils/graphql'
 import styled from 'styled-components'
 import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 
-import { CD_BASE_PATH as CD_PATH } from 'routes/cdRoutes'
+import { CD_BASE_PATH as CD_PATH } from 'routes/cdRoutesConsts'
 
 import { LoginContext } from '../contexts'
 

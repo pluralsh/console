@@ -6,7 +6,12 @@ import {
 import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { CD_BASE_PATH, SERVICE_PARAM_NAME } from 'routes/cdRoutes'
+import {
+  SERVICE_PARAM_CLUSTER,
+  SERVICE_PARAM_ID,
+  getServiceComponentPath,
+  getServiceDetailsPath,
+} from 'routes/cdRoutesConsts'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useComponentKindSelect } from 'components/apps/app/components/Components'
 import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
@@ -14,22 +19,33 @@ import { ComponentList } from 'components/apps/app/components/ComponentList'
 
 import { useTheme } from 'styled-components'
 
+import { isNonNullable } from 'utils/isNonNullable'
+
 import { getServiceDetailsBreadcrumbs } from './ServiceDetails'
 import { countDeprecations } from './countDeprecations'
 
+export const getServiceComponentsBreadcrumbs = ({
+  serviceId,
+  clusterName,
+}: Parameters<typeof getServiceDetailsBreadcrumbs>[0]) => [
+  ...getServiceDetailsBreadcrumbs({ clusterName, serviceId }),
+  {
+    label: 'components',
+    url: `${getServiceDetailsPath({
+      clusterName,
+      serviceId,
+    })}/components`,
+  },
+]
+
 export default function ServiceComponents() {
   const theme = useTheme()
-  const serviceId = useParams()[SERVICE_PARAM_NAME]
+  const serviceId = useParams()[SERVICE_PARAM_ID]
+  const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
 
   const breadcrumbs: Breadcrumb[] = useMemo(
-    () => [
-      ...getServiceDetailsBreadcrumbs({ serviceId }),
-      {
-        label: 'components',
-        url: `${CD_BASE_PATH}/services/${serviceId}/components`,
-      },
-    ],
-    [serviceId]
+    () => getServiceComponentsBreadcrumbs({ clusterName, serviceId }),
+    [clusterName, serviceId]
   )
 
   const { data, error } = useServiceDeploymentComponentsQuery({
@@ -38,10 +54,15 @@ export default function ServiceComponents() {
 
   useSetBreadcrumbs(breadcrumbs)
   const { kindSelector, selectedKinds } = useComponentKindSelect(
-    data?.serviceDeployment?.components
+    data?.serviceDeployment?.components,
+    { width: 320 }
   )
   const deprecationCount = useMemo(
     () => countDeprecations(data?.serviceDeployment?.components),
+    [data?.serviceDeployment?.components]
+  )
+  const components = useMemo(
+    () => data?.serviceDeployment?.components?.filter(isNonNullable) || [],
     [data?.serviceDeployment?.components]
   )
 
@@ -85,14 +106,24 @@ export default function ServiceComponents() {
           </Callout>
         )}
         <ComponentList
-          setUrl={(c) =>
-            c?.name && c?.kind
-              ? `${CD_BASE_PATH}/services/${serviceId}/components/${c.kind.toLowerCase()}/${
-                  c.name
-                }`
+          setUrl={(c) => {
+            const params = new URLSearchParams()
+
+            // if (c.group) params.set('group', c.group)
+            // if (c.id) params.set('id', c.id)
+            // if (c.namespace) params.set('namespace', c.namespace)
+
+            return c?.name && c?.kind
+              ? `${getServiceComponentPath({
+                  clusterName,
+                  serviceId,
+                  componentKind: c.kind.toLocaleLowerCase(),
+                  componentName: c.name.toLowerCase(),
+                  componentVersion: c.version,
+                })}?${params.toString()}`
               : undefined
-          }
-          components={data.serviceDeployment?.components || []}
+          }}
+          components={components}
           selectedKinds={selectedKinds}
         />
       </div>

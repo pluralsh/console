@@ -88,7 +88,7 @@ export function ModalForm({
   const theme = useTheme()
   const [revisionId, setRevisionId] = useState('')
 
-  const { data, loading, error } = useServiceDeploymentRevisionsQuery({
+  const { data, error } = useServiceDeploymentRevisionsQuery({
     variables: { id: serviceDeployment.id },
   })
   const [mutation, { loading: mutationLoading, error: mutationError }] =
@@ -125,9 +125,6 @@ export function ModalForm({
   useEffect(() => {
     inputRef.current?.focus?.()
   }, [])
-
-  console.log('data', data)
-  console.log('data', loading)
 
   const actions = useMemo(
     () => (

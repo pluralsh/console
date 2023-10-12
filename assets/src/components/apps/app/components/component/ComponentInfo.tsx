@@ -1,6 +1,7 @@
 import { useOutletContext, useParams } from 'react-router-dom'
-import { Flex } from 'honorable'
 import { useMemo } from 'react'
+
+import { useTheme } from 'styled-components'
 
 import Pods from './info/Pods'
 import Job from './info/Job'
@@ -47,6 +48,7 @@ function getInfo(kind: string): JSX.Element | undefined {
 }
 
 export default function ComponentInfo() {
+  const theme = useTheme()
   const { componentKind = '' } = useParams()
   const { data } = useOutletContext<any>()
 
@@ -59,27 +61,36 @@ export default function ComponentInfo() {
   )
 
   return (
-    <Flex
-      direction="column"
-      gap="large"
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.large,
+      }}
     >
       {hasPods(componentKind) && <Pods pods={value?.pods} />}
-      <Flex gap="large">
-        <Flex
-          direction="row"
-          basis="50%"
-          grow={1}
+      <div css={{ display: 'flex', gap: theme.spacing.large }}>
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexBasis: '50%',
+            flexGrow: 1,
+          }}
         >
           {getInfo(componentKind)}
-        </Flex>
-        <Flex
-          direction="row"
-          basis="50%"
-          grow={1}
+        </div>
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexBasis: '50%',
+            flexGrow: 1,
+          }}
         >
           <Metadata />
-        </Flex>
-      </Flex>
-    </Flex>
+        </div>
+      </div>
+    </div>
   )
 }

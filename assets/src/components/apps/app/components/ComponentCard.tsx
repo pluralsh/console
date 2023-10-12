@@ -13,7 +13,7 @@ const ComponentCardSC = styled(Card)(({ theme }) => ({
     alignItems: 'center',
     overflow: 'hidden',
     padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
-    gap: theme.spacing.small,
+    gap: theme.spacing.xsmall,
     textDecoration: 'none',
     '&:any-link': {
       textDecoration: 'none',
@@ -36,7 +36,7 @@ const ComponentCardSC = styled(Card)(({ theme }) => ({
       ...TRUNCATE,
       color: theme.colors['text-xlight'],
       marginRight: theme.spacing.xsmall,
-      flexShrink: 0,
+      flexShrink: 1,
       flexGrow: 1,
     },
   },
@@ -45,24 +45,23 @@ const ComponentCardSC = styled(Card)(({ theme }) => ({
   },
 }))
 
-export default function ComponentCard({
+export type Component = {
+  name: string
+  group?: string | null | undefined
+  kind: string
+  status?: string | null | undefined
+  state?: ComponentState | null | undefined
+}
+
+export default function ComponentCard<C extends Component>({
   component,
   url,
 }: {
-  component: {
-    name: string
-    group?: string
-    kind: string
-    status?: string
-    state?: ComponentState | null | undefined
-  }
+  component: C
   url?: string
 }) {
   const { name, group, kind, status, state } = component
-
   const kindString = `${group || 'v1'}/${kind.toLowerCase()}`
-
-  console.log('status', status)
 
   return (
     <ComponentCardSC
@@ -79,17 +78,22 @@ export default function ComponentCard({
         size="medium"
         textValue={name}
         type="tertiary"
+        css={{ flexShrink: 0 }}
       />
       <div className="content">
-        <Tooltip
-          label={name}
-          placement="bottom"
-        >
-          <p className="name">{name}</p>
-        </Tooltip>
-        <Tooltip label={kindString}>
-          <p className="kind">{kindString}</p>
-        </Tooltip>
+        <p className="name">
+          <Tooltip
+            label={name}
+            placement="bottom"
+          >
+            <span>{name}</span>
+          </Tooltip>
+        </p>
+        <p className="kind">
+          <Tooltip label={kindString}>
+            <span>{kindString}</span>
+          </Tooltip>
+        </p>
       </div>
       {state || state === null ? (
         <ComponentStateChip

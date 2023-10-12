@@ -1,31 +1,44 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
-import { useCallback } from 'react'
+import { Key, useCallback } from 'react'
 import { ServiceDeployment } from 'generated/graphql'
 import {
-  CD_BASE_PATH,
-  SERVICES_PATH,
   SERVICE_BASE_PATH,
-  SERVICE_PARAM_NAME,
-} from 'routes/cdRoutes'
+  SERVICE_PARAM_ID,
+  getServiceDetailsPath,
+} from 'routes/cdRoutesConsts'
 import { useMatch, useNavigate } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
 export default function ServiceSelector({
   serviceDeployments,
 }: {
-  serviceDeployments: Pick<ServiceDeployment, 'id' | 'name'>[]
+  serviceDeployments: Pick<ServiceDeployment, 'id' | 'name' | 'cluster'>[]
 }) {
+  const theme = useTheme()
   const navigate = useNavigate()
   const pathMatch = useMatch(`/${SERVICE_BASE_PATH}*`)
   const urlSuffix = pathMatch?.params['*'] ? `/${pathMatch?.params['*']}` : ''
-  const currentServiceId = pathMatch?.params[SERVICE_PARAM_NAME]
+  const currentServiceId = pathMatch?.params[SERVICE_PARAM_ID]
+  const selectedKey = currentServiceId
 
   const switchService = useCallback(
-    (serviceId) => {
-      if (serviceId !== currentServiceId) {
-        navigate(`/${CD_BASE_PATH}/${SERVICES_PATH}/${serviceId}${urlSuffix}`)
+    (newKey: Key) => {
+      if (typeof newKey === 'string' && newKey !== selectedKey) {
+        const service = serviceDeployments.find(
+          (deployment) => deployment.id === newKey
+        )
+
+        console.log('service', service)
+
+        navigate(
+          `${getServiceDetailsPath({
+            clusterName: service?.cluster?.name,
+            serviceId: service?.id,
+          })}${urlSuffix}`
+        )
       }
     },
-    [currentServiceId, navigate, urlSuffix]
+    [navigate, selectedKey, serviceDeployments, urlSuffix]
   )
 
   return (
@@ -37,8 +50,20 @@ export default function ServiceSelector({
       {serviceDeployments.map((serviceDeployment) => (
         <ListBoxItem
           key={serviceDeployment.id}
-          label={serviceDeployment.name}
-          textValue={serviceDeployment.name}
+          label={
+            <>
+              {serviceDeployment.name}{' '}
+              <span
+                css={{
+                  ...theme.partials.text.caption,
+                  color: theme.colors['text-xlight'],
+                }}
+              >
+                ({serviceDeployment.cluster?.name})
+              </span>
+            </>
+          }
+          textValue={`${serviceDeployment.name} (${serviceDeployment.cluster?.name})`}
         />
       ))}
     </Select>

@@ -55,6 +55,7 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
 fragment ServiceDeploymentComponent on ServiceComponent {
   id
   name
+  group
   kind
   namespace
   state
@@ -100,6 +101,10 @@ query ServiceDeploymentsTiny {
       node {
         id
         name
+        cluster {
+          id
+          name
+        }
       }
     }
   }

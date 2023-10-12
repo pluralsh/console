@@ -1,5 +1,10 @@
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { Chip, EmptyState, Table } from '@pluralsh/design-system'
+import {
+  Chip,
+  EmptyState,
+  Table,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import {
   AuthMethod,
   GitRepositoriesDocument,
@@ -17,7 +22,9 @@ import { createMapperWithFallback } from 'utils/mapping'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { removeConnection, updateCache } from 'utils/graphql'
 
-import { useSetCDHeaderContent } from '../ContinuousDeployment'
+import { CD_BASE_PATH } from 'routes/cdRoutesConsts'
+
+import { CD_BASE_CRUMBS, useSetCDHeaderContent } from '../ContinuousDeployment'
 
 import {
   ColAuthMethod,
@@ -33,6 +40,10 @@ import { ImportGit } from './GitRepositoriesImportGit'
 import { GitRepositoriesFilters } from './GitRepositoriesFilters'
 
 const POLL_INTERVAL = 10 * 1000
+const crumbs = [
+  ...CD_BASE_CRUMBS,
+  { label: 'git', url: `/${CD_BASE_PATH}/git` },
+]
 
 // Will need to update once delete mutation exists in API
 export function DeleteGitRepository({
@@ -44,6 +55,7 @@ export function DeleteGitRepository({
 }) {
   const theme = useTheme()
   const [confirm, setConfirm] = useState(false)
+
   const [mutation, { loading, error }] = useDeleteGitRepositoryMutation({
     variables: { id: repo.id ?? '' },
     update: (cache, { data }) =>
@@ -110,6 +122,8 @@ export default function GitRepositories() {
   const { data, error, refetch } = useGitRepositoriesQuery({
     pollInterval: POLL_INTERVAL,
   })
+
+  useSetBreadcrumbs(crumbs)
   const columns = useMemo(
     () => [
       ColRepo,

@@ -12,8 +12,10 @@ function ComponentProgress({
   suffix,
   componentsReady,
 }: ComponentProgressProps) {
-  const split = componentsReady?.split('/') || []
-  const ready = split?.length > 1 && Number(split[0]) === Number(split[1])
+  const split = componentsReady?.split('/') || [0, 0]
+  const numReady = Number(split[0]) ?? 0
+  const numTotal = Number(split[1]) ?? 0
+  const ready = numTotal > 0 && numReady >= numTotal
   const severity = ready ? 'success' : 'warning'
 
   return (
@@ -23,7 +25,7 @@ function ComponentProgress({
         size="small"
         severity={severity}
       >
-        {componentsReady} {suffix}
+        {numReady} / {numTotal} {suffix}
       </Chip>
     </Flex>
   )

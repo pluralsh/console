@@ -1,4 +1,5 @@
 import {
+  Breadcrumb,
   ClusterIcon,
   ListBoxItem,
   Select,
@@ -11,7 +12,11 @@ import { useMemo, useRef, useState } from 'react'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import { Outlet, useMatch, useParams } from 'react-router-dom'
 import { LinkTabWrap } from 'components/utils/Tabs'
-import { CLUSTER_BASE_PATH } from 'routes/cdRoutes'
+import {
+  CD_BASE_PATH,
+  CLUSTERS_PATH,
+  CLUSTER_BASE_PATH,
+} from 'routes/cdRoutesConsts'
 import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
 
@@ -19,6 +24,8 @@ import {
   useClusterQuery,
   useClustersTinyQuery,
 } from '../../../generated/graphql'
+
+import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
 import ClusterPermissions from './ClusterPermissions'
 import ClusterMetadataPanel from './ClusterMetadataPanel'
@@ -34,16 +41,31 @@ const POLL_INTERVAL = 10 * 1000
 export default function Cluster() {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
-  const tab = useMatch(`/${CLUSTER_BASE_PATH}/:tab`)?.params?.tab || ''
-  const path = `/${CLUSTER_BASE_PATH}/${tab}`
   const { clusterId }: { clusterId?: string } = useParams()
+  const tab = useMatch(`/${CLUSTER_BASE_PATH}/:tab`)?.params?.tab || ''
+
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
   const [selectedClusterId, setSelectedClusterId] = useState(clusterId)
   const currentTab = directory.find(({ path }) => path === tab)
-  const crumbs = useMemo(
-    () => (path ? [{ label: tab, path }] : []),
-    [path, tab]
-  )
+  const crumbs: Breadcrumb[] = useMemo(() => {
+    const clustersPath = `/${CD_BASE_PATH}/${CLUSTERS_PATH}`
+    const clusterPath = `${clustersPath}/${clusterId}`
+    const tabPath = `${clusterPath}/${tab}`
+
+    return [
+      ...CD_BASE_CRUMBS,
+      { label: 'clusters', url: clustersPath },
+      ...(clusterId
+        ? [
+            {
+              label: clusterId,
+              url: clusterPath,
+            },
+            { label: tab, url: tabPath },
+          ]
+        : []),
+    ]
+  }, [clusterId, tab])
 
   useSetBreadcrumbs(crumbs)
 
