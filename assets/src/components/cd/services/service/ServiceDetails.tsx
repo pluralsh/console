@@ -40,6 +40,8 @@ import ComponentProgress from 'components/apps/app/components/ComponentProgress'
 
 import { mapExistingNodes } from 'utils/graphql'
 
+import { CD_BASE_CRUMBS } from 'components/cd/ContinuousDeployment'
+
 import ServiceSelector from '../ServiceSelector'
 
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
@@ -51,6 +53,7 @@ export const getServiceDetailsBreadcrumbs = ({
   clusterName: string | null | undefined
   serviceId: string | null | undefined
 }) => [
+  ...CD_BASE_CRUMBS,
   { label: 'services', url: `${CD_BASE_PATH}/services` },
   ...(clusterName && serviceId
     ? [
