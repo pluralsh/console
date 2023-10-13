@@ -4,16 +4,12 @@ import { useParams } from 'react-router-dom'
 
 import { InstallationContext } from 'components/Installations'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-
-import { kindToQuery } from 'components/component/kindToQuery'
 import { ComponentDetails } from 'components/component/ComponentDetails'
 
-export default function Component() {
+export default function AppComponent() {
   const { appName, componentKind = '', componentName } = useParams()
   const { applications } = useContext<any>(InstallationContext)
   const currentApp = applications.find((app) => app.name === appName)
-
-  const componentQuery = kindToQuery[componentKind]
 
   useSetBreadcrumbs(
     useMemo(
@@ -44,7 +40,6 @@ export default function Component() {
 
   return (
     <ComponentDetails
-      query={componentQuery}
       component={component}
       pathMatchString="/apps/:appName/components/:componentKind/:componentName"
     />

@@ -14,19 +14,34 @@ import { ScalingRecommenderModal } from 'components/cluster/ScalingRecommender'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ViewLogsButton } from 'components/component/ViewLogsButton'
 import { directory } from 'components/component/directory'
-import { UnstructuredResourceDocument } from 'generated/graphql'
+import {
+  CertificateDocument,
+  CronJobDocument,
+  DeploymentDocument,
+  IngressDocument,
+  JobDocument,
+  ServiceDocument,
+  StatefulSetDocument,
+  UnstructuredResourceDocument,
+} from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
 import { useTheme } from 'styled-components'
 
+export const kindToQuery = {
+  certificate: CertificateDocument,
+  cronjob: CronJobDocument,
+  deployment: DeploymentDocument,
+  ingress: IngressDocument,
+  job: JobDocument,
+  service: ServiceDocument,
+  statefulset: StatefulSetDocument,
+} as const
+
 export function ComponentDetails({
-  query,
   component,
   pathMatchString,
   serviceId,
 }: {
-  query: any
-  serviceId?: string
-  pathMatchString: string
   component: {
     name: string
     namespace: string
@@ -34,12 +49,18 @@ export function ComponentDetails({
     version?: string | null | undefined
     group?: string | null | undefined
   }
+  pathMatchString: string
+  serviceId?: string
 }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const { me } = useContext<any>(LoginContext)
   const componentKind = component.kind
   const componentName = component.name
+
+  const query =
+    kindToQuery[componentKind.toLowerCase() ?? ''] ||
+    UnstructuredResourceDocument
 
   const vars = {
     name: component.name,

@@ -2,11 +2,7 @@ import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 
-import {
-  UnstructuredResourceDocument,
-  useServiceDeploymentComponentsQuery,
-} from 'generated/graphql'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
 
 import {
   COMPONENT_PARAM_KIND,
@@ -18,11 +14,11 @@ import {
   getServiceComponentPath,
 } from 'routes/cdRoutesConsts'
 
-import { ComponentDetails } from 'components/component/ComponentDetails'
-import { kindToQuery } from 'components/component/kindToQuery'
-import { GqlError } from 'components/utils/Alert'
-
 import { hasDefined } from 'utils/hasDefined'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { ComponentDetails } from 'components/component/ComponentDetails'
+import { GqlError } from 'components/utils/Alert'
 
 import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
 
@@ -73,9 +69,6 @@ export default function ServiceComponent() {
       (component?.version || '') === (componentVersion || '')
   )
 
-  const componentQuery =
-    kindToQuery[componentKind ?? ''] || UnstructuredResourceDocument
-
   useSetBreadcrumbs(
     useMemo(
       () =>
@@ -102,7 +95,6 @@ export default function ServiceComponent() {
 
   return (
     <ComponentDetails
-      query={componentQuery}
       component={component}
       serviceId={serviceId}
       pathMatchString={SERVICE_COMPONENT_PATH_MATCHER_ABS}
