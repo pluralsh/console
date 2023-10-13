@@ -3480,17 +3480,19 @@ export type UpdateClusterMutationVariables = Exact<{
 
 export type UpdateClusterMutation = { __typename?: 'RootMutationType', updateCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, pingedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Map<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', repository?: { __typename?: 'GitRepository', url: string } | null } | null } | null };
 
-export type UnstructuredResourceQueryVariables = Exact<{
-  group?: InputMaybe<Scalars['String']['input']>;
-  kind: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-  namespace?: InputMaybe<Scalars['String']['input']>;
-  serviceId?: InputMaybe<Scalars['ID']['input']>;
-  version: Scalars['String']['input'];
+export type MetricResponseFragment = { __typename?: 'MetricResponse', metric?: Map<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null };
+
+export type UsageQueryVariables = Exact<{
+  cpu: Scalars['String']['input'];
+  mem: Scalars['String']['input'];
+  podCpu: Scalars['String']['input'];
+  podMem: Scalars['String']['input'];
+  step: Scalars['String']['input'];
+  offset: Scalars['Int']['input'];
 }>;
 
 
-export type UnstructuredResourceQuery = { __typename?: 'RootQueryType', unstructuredResource?: { __typename?: 'KubernetesUnstructured', raw?: Map<string, unknown> | null, events?: Array<{ __typename?: 'Event', action?: string | null, count?: number | null, eventTime?: string | null, lastTimestamp?: string | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null };
+export type UsageQuery = { __typename?: 'RootQueryType', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Map<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Map<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Map<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Map<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null };
 
 export type NodePoolFragment = { __typename?: 'NodePool', id: string, name: string };
 
@@ -3618,10 +3620,6 @@ export type ClusterServiceDeploymentsQueryVariables = Exact<{
 
 export type ClusterServiceDeploymentsQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null } | null } | null> | null } | null };
 
-export type ResourceSpecFragment = { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null };
-
-export type ResourcesFragment = { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null };
-
 export type DatabaseTableRowFragment = { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Map<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null };
 
 export type RestorePostgresMutationVariables = Exact<{
@@ -3712,6 +3710,113 @@ export type DeleteGroupMutationVariables = Exact<{
 
 
 export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type CertificateFragment = { __typename?: 'Certificate', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CertificateStatus', renewalTime?: string | null, notBefore?: string | null, notAfter?: string | null }, spec: { __typename?: 'CertificateSpec', dnsNames?: Array<string | null> | null, secretName: string, issuerRef?: { __typename?: 'IssuerRef', group?: string | null, kind?: string | null, name?: string | null } | null } };
+
+export type CertificateQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CertificateQuery = { __typename?: 'RootQueryType', certificate?: { __typename?: 'Certificate', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CertificateStatus', renewalTime?: string | null, notBefore?: string | null, notAfter?: string | null }, spec: { __typename?: 'CertificateSpec', dnsNames?: Array<string | null> | null, secretName: string, issuerRef?: { __typename?: 'IssuerRef', group?: string | null, kind?: string | null, name?: string | null } | null } } | null };
+
+export type CronJobFragment = { __typename?: 'CronJob', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CronStatus', lastScheduleTime?: string | null }, spec: { __typename?: 'CronSpec', schedule: string, suspend?: boolean | null, concurrencyPolicy?: string | null } };
+
+export type CronJobQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CronJobQuery = { __typename?: 'RootQueryType', cronJob?: { __typename?: 'CronJob', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, jobs?: Array<{ __typename?: 'Job', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null } } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'CronStatus', lastScheduleTime?: string | null }, spec: { __typename?: 'CronSpec', schedule: string, suspend?: boolean | null, concurrencyPolicy?: string | null } } | null };
+
+export type DeploymentFragment = { __typename?: 'Deployment', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'DeploymentStatus', availableReplicas?: number | null, replicas?: number | null, unavailableReplicas?: number | null }, spec: { __typename?: 'DeploymentSpec', replicas?: number | null, strategy?: { __typename?: 'DeploymentStrategy', type?: string | null } | null } };
+
+export type DeploymentQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type DeploymentQuery = { __typename?: 'RootQueryType', deployment?: { __typename?: 'Deployment', raw: string, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'DeploymentStatus', availableReplicas?: number | null, replicas?: number | null, unavailableReplicas?: number | null }, spec: { __typename?: 'DeploymentSpec', replicas?: number | null, strategy?: { __typename?: 'DeploymentStrategy', type?: string | null } | null } } | null };
+
+export type IngressFragment = { __typename?: 'Ingress', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null, hostname?: string | null } | null> | null } | null }, spec: { __typename?: 'IngressSpec', tls?: Array<{ __typename?: 'IngressTls', hosts?: Array<string | null> | null } | null> | null, rules?: Array<{ __typename?: 'IngressRule', host?: string | null, http?: { __typename?: 'HttpIngressRule', paths?: Array<{ __typename?: 'IngressPath', path?: string | null, backend?: { __typename?: 'IngressBackend', serviceName?: string | null, servicePort?: string | null } | null } | null> | null } | null } | null> | null } };
+
+export type IngressQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type IngressQuery = { __typename?: 'RootQueryType', ingress?: { __typename?: 'Ingress', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null, hostname?: string | null } | null> | null } | null }, spec: { __typename?: 'IngressSpec', tls?: Array<{ __typename?: 'IngressTls', hosts?: Array<string | null> | null } | null> | null, rules?: Array<{ __typename?: 'IngressRule', host?: string | null, http?: { __typename?: 'HttpIngressRule', paths?: Array<{ __typename?: 'IngressPath', path?: string | null, backend?: { __typename?: 'IngressBackend', serviceName?: string | null, servicePort?: string | null } | null } | null> | null } | null } | null> | null } } | null };
+
+export type JobFragment = { __typename?: 'Job', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null };
+
+export type JobQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type JobQuery = { __typename?: 'RootQueryType', job?: { __typename?: 'Job', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null } | null };
+
+export type MetadataFragment = { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null };
+
+export type EventFragment = { __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null };
+
+export type ResourceSpecFragment = { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null };
+
+export type ResourcesFragment = { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null };
+
+export type ContainerFragment = { __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null };
+
+export type ContainerStatusFragment = { __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null };
+
+export type PodFragment = { __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } };
+
+export type JobStatusFragment = { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null };
+
+export type ServiceFragment = { __typename?: 'Service', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null } | null> | null } | null }, spec: { __typename?: 'ServiceSpec', type?: string | null, clusterIp?: string | null, ports?: Array<{ __typename?: 'ServicePort', name?: string | null, protocol?: string | null, port?: number | null, targetPort?: string | null } | null> | null } };
+
+export type ServiceQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ServiceQuery = { __typename?: 'RootQueryType', service?: { __typename?: 'Service', raw: string, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null } | null> | null } | null }, spec: { __typename?: 'ServiceSpec', type?: string | null, clusterIp?: string | null, ports?: Array<{ __typename?: 'ServicePort', name?: string | null, protocol?: string | null, port?: number | null, targetPort?: string | null } | null> | null } } | null };
+
+export type StatefulSetFragment = { __typename?: 'StatefulSet', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'StatefulSetStatus', replicas?: number | null, currentReplicas?: number | null, readyReplicas?: number | null, updatedReplicas?: number | null }, spec: { __typename?: 'StatefulSetSpec', replicas?: number | null, serviceName?: string | null } };
+
+export type StatefulSetQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type StatefulSetQuery = { __typename?: 'RootQueryType', statefulSet?: { __typename?: 'StatefulSet', raw: string, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'StatefulSetStatus', replicas?: number | null, currentReplicas?: number | null, readyReplicas?: number | null, updatedReplicas?: number | null }, spec: { __typename?: 'StatefulSetSpec', replicas?: number | null, serviceName?: string | null } } | null };
+
+export type UnstructuredResourceFragment = { __typename?: 'KubernetesUnstructured', raw?: Map<string, unknown> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null };
+
+export type UnstructuredResourceQueryVariables = Exact<{
+  group?: InputMaybe<Scalars['String']['input']>;
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  serviceId: Scalars['ID']['input'];
+  version: Scalars['String']['input'];
+}>;
+
+
+export type UnstructuredResourceQuery = { __typename?: 'RootQueryType', unstructuredResource?: { __typename?: 'KubernetesUnstructured', raw?: Map<string, unknown> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null } | null };
 
 export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, token?: string | null, updatedAt?: string | null };
 
@@ -4008,6 +4113,15 @@ export const ClusterFragmentDoc = gql`
     ${ApiDeprecationFragmentDoc}
 ${NodeFragmentFragmentDoc}
 ${NodeMetricFragmentFragmentDoc}`;
+export const MetricResponseFragmentDoc = gql`
+    fragment MetricResponse on MetricResponse {
+  metric
+  values {
+    timestamp
+    value
+  }
+}
+    `;
 export const NodePoolFragmentDoc = gql`
     fragment NodePool on NodePool {
   id
@@ -4192,6 +4306,274 @@ export const GroupMemberFragmentDoc = gql`
 }
     ${UserFragmentDoc}
 ${GroupFragmentDoc}`;
+export const MetadataFragmentDoc = gql`
+    fragment Metadata on Metadata {
+  name
+  namespace
+  labels {
+    name
+    value
+  }
+  annotations {
+    name
+    value
+  }
+}
+    `;
+export const CertificateFragmentDoc = gql`
+    fragment Certificate on Certificate {
+  metadata {
+    ...Metadata
+  }
+  status {
+    renewalTime
+    notBefore
+    notAfter
+  }
+  spec {
+    dnsNames
+    secretName
+    issuerRef {
+      group
+      kind
+      name
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const CronJobFragmentDoc = gql`
+    fragment CronJob on CronJob {
+  metadata {
+    ...MetadataFragment
+  }
+  status {
+    lastScheduleTime
+  }
+  spec {
+    schedule
+    suspend
+    concurrencyPolicy
+  }
+  raw
+}
+    ${MetadataFragmentFragmentDoc}`;
+export const DeploymentFragmentDoc = gql`
+    fragment Deployment on Deployment {
+  metadata {
+    ...Metadata
+  }
+  status {
+    availableReplicas
+    replicas
+    unavailableReplicas
+  }
+  spec {
+    replicas
+    strategy {
+      type
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const IngressFragmentDoc = gql`
+    fragment Ingress on Ingress {
+  metadata {
+    ...Metadata
+  }
+  status {
+    loadBalancer {
+      ingress {
+        ip
+        hostname
+      }
+    }
+  }
+  spec {
+    tls {
+      hosts
+    }
+    rules {
+      host
+      http {
+        paths {
+          path
+          backend {
+            serviceName
+            servicePort
+          }
+        }
+      }
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const JobStatusFragmentDoc = gql`
+    fragment JobStatus on JobStatus {
+  active
+  completionTime
+  succeeded
+  failed
+  startTime
+}
+    `;
+export const ContainerStatusFragmentDoc = gql`
+    fragment ContainerStatus on ContainerStatus {
+  restartCount
+  ready
+  name
+  state {
+    running {
+      startedAt
+    }
+    terminated {
+      exitCode
+      message
+      reason
+    }
+    waiting {
+      message
+      reason
+    }
+  }
+}
+    `;
+export const ContainerFragmentDoc = gql`
+    fragment Container on Container {
+  name
+  image
+  ports {
+    containerPort
+    protocol
+  }
+  resources {
+    ...Resources
+  }
+}
+    ${ResourcesFragmentDoc}`;
+export const PodFragmentDoc = gql`
+    fragment Pod on Pod {
+  metadata {
+    ...Metadata
+  }
+  status {
+    phase
+    podIp
+    reason
+    containerStatuses {
+      ...ContainerStatus
+    }
+    initContainerStatuses {
+      ...ContainerStatus
+    }
+    conditions {
+      lastProbeTime
+      lastTransitionTime
+      message
+      reason
+      status
+      type
+    }
+  }
+  spec {
+    nodeName
+    serviceAccountName
+    containers {
+      ...Container
+    }
+    initContainers {
+      ...Container
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}
+${ContainerStatusFragmentDoc}
+${ContainerFragmentDoc}`;
+export const JobFragmentDoc = gql`
+    fragment Job on Job {
+  metadata {
+    ...Metadata
+  }
+  status {
+    ...JobStatus
+  }
+  spec {
+    backoffLimit
+    parallelism
+    activeDeadlineSeconds
+  }
+  pods {
+    ...Pod
+  }
+  raw
+}
+    ${MetadataFragmentDoc}
+${JobStatusFragmentDoc}
+${PodFragmentDoc}`;
+export const ServiceFragmentDoc = gql`
+    fragment Service on Service {
+  metadata {
+    ...Metadata
+  }
+  status {
+    loadBalancer {
+      ingress {
+        ip
+      }
+    }
+  }
+  spec {
+    type
+    clusterIp
+    ports {
+      name
+      protocol
+      port
+      targetPort
+    }
+  }
+  raw
+}
+    ${MetadataFragmentDoc}`;
+export const StatefulSetFragmentDoc = gql`
+    fragment StatefulSet on StatefulSet {
+  metadata {
+    ...MetadataFragment
+  }
+  status {
+    replicas
+    currentReplicas
+    readyReplicas
+    updatedReplicas
+  }
+  spec {
+    replicas
+    serviceName
+  }
+  raw
+}
+    ${MetadataFragmentFragmentDoc}`;
+export const EventFragmentDoc = gql`
+    fragment Event on Event {
+  action
+  lastTimestamp
+  count
+  message
+  reason
+  type
+}
+    `;
+export const UnstructuredResourceFragmentDoc = gql`
+    fragment UnstructuredResource on KubernetesUnstructured {
+  raw
+  events {
+    ...Event
+  }
+}
+    ${EventFragmentDoc}`;
 export const AccessTokenFragmentDoc = gql`
     fragment AccessToken on AccessToken {
   id
@@ -4589,62 +4971,55 @@ export function useUpdateClusterMutation(baseOptions?: Apollo.MutationHookOption
 export type UpdateClusterMutationHookResult = ReturnType<typeof useUpdateClusterMutation>;
 export type UpdateClusterMutationResult = Apollo.MutationResult<UpdateClusterMutation>;
 export type UpdateClusterMutationOptions = Apollo.BaseMutationOptions<UpdateClusterMutation, UpdateClusterMutationVariables>;
-export const UnstructuredResourceDocument = gql`
-    query UnstructuredResource($group: String, $kind: String!, $name: String!, $namespace: String, $serviceId: ID, $version: String!) {
-  unstructuredResource(
-    group: $group
-    kind: $kind
-    name: $name
-    namespace: $namespace
-    serviceId: $serviceId
-    version: $version
-  ) {
-    raw
-    events {
-      action
-      count
-      eventTime
-      lastTimestamp
-      message
-      reason
-      type
-    }
+export const UsageDocument = gql`
+    query Usage($cpu: String!, $mem: String!, $podCpu: String!, $podMem: String!, $step: String!, $offset: Int!) {
+  cpu: metric(query: $cpu, offset: $offset, step: $step) {
+    ...MetricResponse
+  }
+  mem: metric(query: $mem, offset: $offset, step: $step) {
+    ...MetricResponse
+  }
+  podCpu: metric(query: $podCpu, offset: $offset, step: $step) {
+    ...MetricResponse
+  }
+  podMem: metric(query: $podMem, offset: $offset, step: $step) {
+    ...MetricResponse
   }
 }
-    `;
+    ${MetricResponseFragmentDoc}`;
 
 /**
- * __useUnstructuredResourceQuery__
+ * __useUsageQuery__
  *
- * To run a query within a React component, call `useUnstructuredResourceQuery` and pass it any options that fit your needs.
- * When your component renders, `useUnstructuredResourceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useUsageQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUsageQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useUnstructuredResourceQuery({
+ * const { data, loading, error } = useUsageQuery({
  *   variables: {
- *      group: // value for 'group'
- *      kind: // value for 'kind'
- *      name: // value for 'name'
- *      namespace: // value for 'namespace'
- *      serviceId: // value for 'serviceId'
- *      version: // value for 'version'
+ *      cpu: // value for 'cpu'
+ *      mem: // value for 'mem'
+ *      podCpu: // value for 'podCpu'
+ *      podMem: // value for 'podMem'
+ *      step: // value for 'step'
+ *      offset: // value for 'offset'
  *   },
  * });
  */
-export function useUnstructuredResourceQuery(baseOptions: Apollo.QueryHookOptions<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>) {
+export function useUsageQuery(baseOptions: Apollo.QueryHookOptions<UsageQuery, UsageQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>(UnstructuredResourceDocument, options);
+        return Apollo.useQuery<UsageQuery, UsageQueryVariables>(UsageDocument, options);
       }
-export function useUnstructuredResourceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>) {
+export function useUsageLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UsageQuery, UsageQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>(UnstructuredResourceDocument, options);
+          return Apollo.useLazyQuery<UsageQuery, UsageQueryVariables>(UsageDocument, options);
         }
-export type UnstructuredResourceQueryHookResult = ReturnType<typeof useUnstructuredResourceQuery>;
-export type UnstructuredResourceLazyQueryHookResult = ReturnType<typeof useUnstructuredResourceLazyQuery>;
-export type UnstructuredResourceQueryResult = Apollo.QueryResult<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>;
+export type UsageQueryHookResult = ReturnType<typeof useUsageQuery>;
+export type UsageLazyQueryHookResult = ReturnType<typeof useUsageLazyQuery>;
+export type UsageQueryResult = Apollo.QueryResult<UsageQuery, UsageQueryVariables>;
 export const GitRepositoriesDocument = gql`
     query GitRepositories {
   gitRepositories(first: 100) {
@@ -5669,6 +6044,362 @@ export function useDeleteGroupMutation(baseOptions?: Apollo.MutationHookOptions<
 export type DeleteGroupMutationHookResult = ReturnType<typeof useDeleteGroupMutation>;
 export type DeleteGroupMutationResult = Apollo.MutationResult<DeleteGroupMutation>;
 export type DeleteGroupMutationOptions = Apollo.BaseMutationOptions<DeleteGroupMutation, DeleteGroupMutationVariables>;
+export const CertificateDocument = gql`
+    query Certificate($name: String!, $namespace: String!, $serviceId: ID) {
+  certificate(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Certificate
+    events {
+      ...Event
+    }
+  }
+}
+    ${CertificateFragmentDoc}
+${EventFragmentDoc}`;
+
+/**
+ * __useCertificateQuery__
+ *
+ * To run a query within a React component, call `useCertificateQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCertificateQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCertificateQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useCertificateQuery(baseOptions: Apollo.QueryHookOptions<CertificateQuery, CertificateQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CertificateQuery, CertificateQueryVariables>(CertificateDocument, options);
+      }
+export function useCertificateLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CertificateQuery, CertificateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CertificateQuery, CertificateQueryVariables>(CertificateDocument, options);
+        }
+export type CertificateQueryHookResult = ReturnType<typeof useCertificateQuery>;
+export type CertificateLazyQueryHookResult = ReturnType<typeof useCertificateLazyQuery>;
+export type CertificateQueryResult = Apollo.QueryResult<CertificateQuery, CertificateQueryVariables>;
+export const CronJobDocument = gql`
+    query CronJob($name: String!, $namespace: String!, $serviceId: ID) {
+  cronJob(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...CronJob
+    events {
+      ...Event
+    }
+    jobs {
+      metadata {
+        name
+        namespace
+      }
+      status {
+        ...JobStatus
+      }
+    }
+  }
+}
+    ${CronJobFragmentDoc}
+${EventFragmentDoc}
+${JobStatusFragmentDoc}`;
+
+/**
+ * __useCronJobQuery__
+ *
+ * To run a query within a React component, call `useCronJobQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCronJobQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCronJobQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useCronJobQuery(baseOptions: Apollo.QueryHookOptions<CronJobQuery, CronJobQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CronJobQuery, CronJobQueryVariables>(CronJobDocument, options);
+      }
+export function useCronJobLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CronJobQuery, CronJobQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CronJobQuery, CronJobQueryVariables>(CronJobDocument, options);
+        }
+export type CronJobQueryHookResult = ReturnType<typeof useCronJobQuery>;
+export type CronJobLazyQueryHookResult = ReturnType<typeof useCronJobLazyQuery>;
+export type CronJobQueryResult = Apollo.QueryResult<CronJobQuery, CronJobQueryVariables>;
+export const DeploymentDocument = gql`
+    query Deployment($name: String!, $namespace: String!, $serviceId: ID) {
+  deployment(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Deployment
+    pods {
+      ...Pod
+    }
+    events {
+      ...Event
+    }
+  }
+}
+    ${DeploymentFragmentDoc}
+${PodFragmentDoc}
+${EventFragmentDoc}`;
+
+/**
+ * __useDeploymentQuery__
+ *
+ * To run a query within a React component, call `useDeploymentQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeploymentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeploymentQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useDeploymentQuery(baseOptions: Apollo.QueryHookOptions<DeploymentQuery, DeploymentQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DeploymentQuery, DeploymentQueryVariables>(DeploymentDocument, options);
+      }
+export function useDeploymentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeploymentQuery, DeploymentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DeploymentQuery, DeploymentQueryVariables>(DeploymentDocument, options);
+        }
+export type DeploymentQueryHookResult = ReturnType<typeof useDeploymentQuery>;
+export type DeploymentLazyQueryHookResult = ReturnType<typeof useDeploymentLazyQuery>;
+export type DeploymentQueryResult = Apollo.QueryResult<DeploymentQuery, DeploymentQueryVariables>;
+export const IngressDocument = gql`
+    query Ingress($name: String!, $namespace: String!, $serviceId: ID) {
+  ingress(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Ingress
+    events {
+      ...Event
+    }
+  }
+}
+    ${IngressFragmentDoc}
+${EventFragmentDoc}`;
+
+/**
+ * __useIngressQuery__
+ *
+ * To run a query within a React component, call `useIngressQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIngressQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIngressQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useIngressQuery(baseOptions: Apollo.QueryHookOptions<IngressQuery, IngressQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<IngressQuery, IngressQueryVariables>(IngressDocument, options);
+      }
+export function useIngressLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IngressQuery, IngressQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<IngressQuery, IngressQueryVariables>(IngressDocument, options);
+        }
+export type IngressQueryHookResult = ReturnType<typeof useIngressQuery>;
+export type IngressLazyQueryHookResult = ReturnType<typeof useIngressLazyQuery>;
+export type IngressQueryResult = Apollo.QueryResult<IngressQuery, IngressQueryVariables>;
+export const JobDocument = gql`
+    query Job($name: String!, $namespace: String!, $serviceId: ID) {
+  job(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Job
+    events {
+      ...Event
+    }
+  }
+}
+    ${JobFragmentDoc}
+${EventFragmentDoc}`;
+
+/**
+ * __useJobQuery__
+ *
+ * To run a query within a React component, call `useJobQuery` and pass it any options that fit your needs.
+ * When your component renders, `useJobQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useJobQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useJobQuery(baseOptions: Apollo.QueryHookOptions<JobQuery, JobQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<JobQuery, JobQueryVariables>(JobDocument, options);
+      }
+export function useJobLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<JobQuery, JobQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<JobQuery, JobQueryVariables>(JobDocument, options);
+        }
+export type JobQueryHookResult = ReturnType<typeof useJobQuery>;
+export type JobLazyQueryHookResult = ReturnType<typeof useJobLazyQuery>;
+export type JobQueryResult = Apollo.QueryResult<JobQuery, JobQueryVariables>;
+export const ServiceDocument = gql`
+    query Service($name: String!, $namespace: String!, $serviceId: ID) {
+  service(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Service
+    pods {
+      ...Pod
+    }
+    events {
+      ...Event
+    }
+  }
+}
+    ${ServiceFragmentDoc}
+${PodFragmentDoc}
+${EventFragmentDoc}`;
+
+/**
+ * __useServiceQuery__
+ *
+ * To run a query within a React component, call `useServiceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useServiceQuery(baseOptions: Apollo.QueryHookOptions<ServiceQuery, ServiceQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceQuery, ServiceQueryVariables>(ServiceDocument, options);
+      }
+export function useServiceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceQuery, ServiceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceQuery, ServiceQueryVariables>(ServiceDocument, options);
+        }
+export type ServiceQueryHookResult = ReturnType<typeof useServiceQuery>;
+export type ServiceLazyQueryHookResult = ReturnType<typeof useServiceLazyQuery>;
+export type ServiceQueryResult = Apollo.QueryResult<ServiceQuery, ServiceQueryVariables>;
+export const StatefulSetDocument = gql`
+    query StatefulSet($name: String!, $namespace: String!, $serviceId: ID) {
+  statefulSet(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...StatefulSet
+    pods {
+      ...Pod
+    }
+    events {
+      ...Event
+    }
+  }
+}
+    ${StatefulSetFragmentDoc}
+${PodFragmentDoc}
+${EventFragmentDoc}`;
+
+/**
+ * __useStatefulSetQuery__
+ *
+ * To run a query within a React component, call `useStatefulSetQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStatefulSetQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStatefulSetQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useStatefulSetQuery(baseOptions: Apollo.QueryHookOptions<StatefulSetQuery, StatefulSetQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StatefulSetQuery, StatefulSetQueryVariables>(StatefulSetDocument, options);
+      }
+export function useStatefulSetLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StatefulSetQuery, StatefulSetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StatefulSetQuery, StatefulSetQueryVariables>(StatefulSetDocument, options);
+        }
+export type StatefulSetQueryHookResult = ReturnType<typeof useStatefulSetQuery>;
+export type StatefulSetLazyQueryHookResult = ReturnType<typeof useStatefulSetLazyQuery>;
+export type StatefulSetQueryResult = Apollo.QueryResult<StatefulSetQuery, StatefulSetQueryVariables>;
+export const UnstructuredResourceDocument = gql`
+    query UnstructuredResource($group: String, $kind: String!, $name: String!, $namespace: String, $serviceId: ID!, $version: String!) {
+  unstructuredResource(
+    group: $group
+    kind: $kind
+    name: $name
+    namespace: $namespace
+    serviceId: $serviceId
+    version: $version
+  ) {
+    ...UnstructuredResource
+  }
+}
+    ${UnstructuredResourceFragmentDoc}`;
+
+/**
+ * __useUnstructuredResourceQuery__
+ *
+ * To run a query within a React component, call `useUnstructuredResourceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUnstructuredResourceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUnstructuredResourceQuery({
+ *   variables: {
+ *      group: // value for 'group'
+ *      kind: // value for 'kind'
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *      version: // value for 'version'
+ *   },
+ * });
+ */
+export function useUnstructuredResourceQuery(baseOptions: Apollo.QueryHookOptions<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>(UnstructuredResourceDocument, options);
+      }
+export function useUnstructuredResourceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>(UnstructuredResourceDocument, options);
+        }
+export type UnstructuredResourceQueryHookResult = ReturnType<typeof useUnstructuredResourceQuery>;
+export type UnstructuredResourceLazyQueryHookResult = ReturnType<typeof useUnstructuredResourceLazyQuery>;
+export type UnstructuredResourceQueryResult = Apollo.QueryResult<UnstructuredResourceQuery, UnstructuredResourceQueryVariables>;
 export const AccessTokensDocument = gql`
     query AccessTokens {
   accessTokens(first: 500) {
@@ -5892,7 +6623,7 @@ export const namedOperations = {
     Clusters: 'Clusters',
     ClustersTiny: 'ClustersTiny',
     Cluster: 'Cluster',
-    UnstructuredResource: 'UnstructuredResource',
+    Usage: 'Usage',
     GitRepositories: 'GitRepositories',
     ServiceDeployments: 'ServiceDeployments',
     ServiceDeploymentsTiny: 'ServiceDeploymentsTiny',
@@ -5906,6 +6637,14 @@ export const namedOperations = {
     Groups: 'Groups',
     SearchGroups: 'SearchGroups',
     GroupMembers: 'GroupMembers',
+    Certificate: 'Certificate',
+    CronJob: 'CronJob',
+    Deployment: 'Deployment',
+    Ingress: 'Ingress',
+    Job: 'Job',
+    Service: 'Service',
+    StatefulSet: 'StatefulSet',
+    UnstructuredResource: 'UnstructuredResource',
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
     Me: 'Me'
@@ -5946,6 +6685,7 @@ export const namedOperations = {
     ApiDeprecation: 'ApiDeprecation',
     ClustersRow: 'ClustersRow',
     Cluster: 'Cluster',
+    MetricResponse: 'MetricResponse',
     NodePool: 'NodePool',
     GitRepositoriesRow: 'GitRepositoriesRow',
     ServiceDeploymentRevision: 'ServiceDeploymentRevision',
@@ -5953,11 +6693,25 @@ export const namedOperations = {
     ServiceDeploymentDetails: 'ServiceDeploymentDetails',
     ServiceDeploymentComponent: 'ServiceDeploymentComponent',
     ServiceDeploymentRevisions: 'ServiceDeploymentRevisions',
-    ResourceSpec: 'ResourceSpec',
-    Resources: 'Resources',
     DatabaseTableRow: 'DatabaseTableRow',
     GroupMember: 'GroupMember',
     Group: 'Group',
+    Certificate: 'Certificate',
+    CronJob: 'CronJob',
+    Deployment: 'Deployment',
+    Ingress: 'Ingress',
+    Job: 'Job',
+    Metadata: 'Metadata',
+    Event: 'Event',
+    ResourceSpec: 'ResourceSpec',
+    Resources: 'Resources',
+    Container: 'Container',
+    ContainerStatus: 'ContainerStatus',
+    Pod: 'Pod',
+    JobStatus: 'JobStatus',
+    Service: 'Service',
+    StatefulSet: 'StatefulSet',
+    UnstructuredResource: 'UnstructuredResource',
     AccessToken: 'AccessToken',
     AccessTokenAudit: 'AccessTokenAudit',
     User: 'User',

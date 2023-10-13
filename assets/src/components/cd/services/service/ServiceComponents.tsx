@@ -109,10 +109,6 @@ export default function ServiceComponents() {
           setUrl={(c) => {
             const params = new URLSearchParams()
 
-            // if (c.group) params.set('group', c.group)
-            // if (c.id) params.set('id', c.id)
-            // if (c.namespace) params.set('namespace', c.namespace)
-
             return c?.name && c?.kind
               ? `${getServiceComponentPath({
                   clusterName,

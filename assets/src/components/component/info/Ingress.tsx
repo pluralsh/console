@@ -1,9 +1,17 @@
-import { Card, PropWide, Table } from '@pluralsh/design-system'
+import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { Flex, H2, H3 } from 'honorable'
 import isEmpty from 'lodash/isEmpty'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
+
+import { useTheme } from 'styled-components'
+
+import {
+  InfoSectionH2,
+  InfoSectionH3,
+  PaddedCard,
+  PropWideBold,
+} from './common'
 
 const COLUMN_HELPER = createColumnHelper<any>()
 
@@ -26,6 +34,7 @@ const columns = [
 ]
 
 function Routes({ rules }) {
+  const theme = useTheme()
   const data = useMemo(
     () =>
       rules.reduce((accumulator, rule) => {
@@ -44,12 +53,14 @@ function Routes({ rules }) {
 
   return (
     <>
-      <H3
-        marginBottom="medium"
-        marginTop="large"
+      <InfoSectionH3
+        css={{
+          marginBottom: theme.spacing.medium,
+          marginTop: theme.spacing.large,
+        }}
       >
         Routes
-      </H3>
+      </InfoSectionH3>
       <Table
         data={data}
         columns={columns}
@@ -59,6 +70,7 @@ function Routes({ rules }) {
 }
 
 export default function Ingress() {
+  const theme = useTheme()
   const { data } = useOutletContext<any>()
 
   if (!data?.ingress) return null
@@ -69,32 +81,42 @@ export default function Ingress() {
   const rules = ingress.spec?.rules || []
 
   return (
-    <Flex
-      direction="column"
-      grow={1}
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        flexGrow: 1,
+      }}
     >
       {hasIngress && (
         <>
-          <H2 marginBottom="medium">Status</H2>
-          <Card padding="large">
-            <PropWide
+          <InfoSectionH2
+            css={{
+              marginBottom: theme.spacing.medium,
+            }}
+          >
+            Status
+          </InfoSectionH2>
+          <PaddedCard>
+            <PropWideBold
               title={loadBalancer.ingress[0].ip ? 'IP' : 'Hostname'}
-              fontWeight={600}
             >
               {loadBalancer.ingress[0].ip ||
                 loadBalancer.ingress[0].hostname ||
                 '-'}
-            </PropWide>
-          </Card>
+            </PropWideBold>
+          </PaddedCard>
         </>
       )}
-      <H2
-        marginBottom="medium"
-        marginTop="large"
+      <InfoSectionH2
+        css={{
+          marginBottom: theme.spacing.medium,
+          marginTop: theme.spacing.large,
+        }}
       >
         Spec
-      </H2>
+      </InfoSectionH2>
       <Routes rules={rules} />
-    </Flex>
+    </div>
   )
 }

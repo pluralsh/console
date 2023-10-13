@@ -60,6 +60,8 @@ export default function ComponentInfo() {
     [data]
   )
 
+  const info = useMemo(() => getInfo(componentKind), [componentKind])
+
   return (
     <div
       css={{
@@ -70,16 +72,18 @@ export default function ComponentInfo() {
     >
       {hasPods(componentKind) && <Pods pods={value?.pods} />}
       <div css={{ display: 'flex', gap: theme.spacing.large }}>
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'row',
-            flexBasis: '50%',
-            flexGrow: 1,
-          }}
-        >
-          {getInfo(componentKind)}
-        </div>
+        {info && (
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'row',
+              flexBasis: '50%',
+              flexGrow: 1,
+            }}
+          >
+            info
+          </div>
+        )}
         <div
           css={{
             display: 'flex',

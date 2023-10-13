@@ -1,4 +1,3 @@
-import { Flex } from 'honorable'
 import {
   Breadcrumb,
   SubTab,
@@ -6,73 +5,45 @@ import {
   TabPanel,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-
 import { useContext, useMemo, useRef } from 'react'
 import { Outlet, useMatch, useParams } from 'react-router-dom'
+import { useQuery } from '@apollo/client'
+import { useTheme } from 'styled-components'
 
 import { InstallationContext } from 'components/Installations'
-import { useQuery } from '@apollo/client'
 import {
   POLL_INTERVAL,
   ScalingType,
   ScalingTypes,
 } from 'components/cluster/constants'
-
-import {
-  CERTIFICATE_Q,
-  CRON_JOB_Q,
-  DEPLOYMENT_Q,
-  INGRESS_Q,
-  JOB_Q,
-  SERVICE_Q,
-  STATEFUL_SET_Q,
-} from 'components/cluster/queries'
-
 import { LoginContext } from 'components/contexts'
-
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-
 import { LinkTabWrap } from 'components/utils/Tabs'
-
 import { ScalingRecommenderModal } from 'components/cluster/ScalingRecommender'
-
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { GqlError } from 'components/utils/Alert'
 
-import { ViewLogsButton } from './ViewLogsButton'
-
-export const directory: { label: string; path: string; onlyFor?: string[] }[] =
-  [
-    { label: 'Info', path: 'info' },
-    {
-      label: 'Metrics',
-      path: 'metrics',
-      onlyFor: ['deployment', 'statefulset'],
-    },
-    { label: 'Events', path: 'events' },
-    { label: 'Raw', path: 'raw' },
-  ]
-
-export const kindToQuery = {
-  certificate: CERTIFICATE_Q,
-  cronjob: CRON_JOB_Q,
-  deployment: DEPLOYMENT_Q,
-  ingress: INGRESS_Q,
-  job: JOB_Q,
-  service: SERVICE_Q,
-  statefulset: STATEFUL_SET_Q,
-} as const
+import { ViewLogsButton } from '../../../../component/ViewLogsButton'
+import { kindToQuery } from '../../../../component/kindToQuery'
+import { directory } from '../../../../component/directory'
 
 export default function Component() {
+  const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const { me } = useContext<any>(LoginContext)
   const { appName, componentKind = '', componentName } = useParams()
   const { applications } = useContext<any>(InstallationContext)
   const currentApp = applications.find((app) => app.name === appName)
-  const { data, loading, refetch } = useQuery(kindToQuery[componentKind], {
-    variables: { name: componentName, namespace: appName },
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
+  const { data, loading, refetch, error } = useQuery(
+    kindToQuery[componentKind],
+    {
+      variables: { name: componentName, namespace: appName },
+      pollInterval: POLL_INTERVAL,
+      fetchPolicy: 'cache-and-network',
+    }
+  )
+
+  console.log('currentApp', currentApp)
 
   const breadcrumbs: Breadcrumb[] = useMemo(
     () => [
@@ -103,6 +74,9 @@ export default function Component() {
     useMatch('/apps/:appName/components/:componentKind/:componentName/:subpath')
       ?.params?.subpath || ''
 
+  if (error) {
+    return <GqlError error={error} />
+  }
   if (!me || !currentApp || !data) return <LoadingIndicator />
 
   const component = currentApp.status.components.find(
@@ -123,10 +97,12 @@ export default function Component() {
       }
       heading={componentName}
       headingContent={
-        <Flex
-          gap="medium"
-          className="DELETE"
-          marginVertical={1}
+        <div
+          css={{
+            display: 'flex',
+            gap: theme.spacing.medium,
+            margin: `${theme.spacing.medium}px 0`,
+          }}
         >
           <TabList
             gap="xxsmall"
@@ -156,7 +132,7 @@ export default function Component() {
             metadata={value?.metadata}
             kind={componentKind}
           />
-        </Flex>
+        </div>
       }
     >
       <TabPanel

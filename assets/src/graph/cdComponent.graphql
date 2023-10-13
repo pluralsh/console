@@ -1,28 +1,29 @@
-query UnstructuredResource(
-  $group: String
-  $kind: String!
-  $name: String!
-  $namespace: String
-  $serviceId: ID
-  $version: String!
+fragment MetricResponse on MetricResponse {
+  metric
+  values {
+    timestamp
+    value
+  }
+}
+
+query Usage(
+  $cpu: String!
+  $mem: String!
+  $podCpu: String!
+  $podMem: String!
+  $step: String!
+  $offset: Int!
 ) {
-  unstructuredResource(
-    group: $group
-    kind: $kind
-    name: $name
-    namespace: $namespace
-    serviceId: $serviceId
-    version: $version
-  ) {
-    raw
-    events {
-      action
-      count
-      eventTime
-      lastTimestamp
-      message
-      reason
-      type
-    }
+  cpu: metric(query: $cpu, offset: $offset, step: $step) {
+    ...MetricResponse
+  }
+  mem: metric(query: $mem, offset: $offset, step: $step) {
+    ...MetricResponse
+  }
+  podCpu: metric(query: $podCpu, offset: $offset, step: $step) {
+    ...MetricResponse
+  }
+  podMem: metric(query: $podMem, offset: $offset, step: $step) {
+    ...MetricResponse
   }
 }

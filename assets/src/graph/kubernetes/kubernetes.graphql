@@ -1,0 +1,111 @@
+fragment Metadata on Metadata {
+  name
+  namespace
+  labels {
+    name
+    value
+  }
+  annotations {
+    name
+    value
+  }
+}
+
+fragment Event on Event {
+  action
+  lastTimestamp
+  count
+  message
+  reason
+  type
+}
+
+fragment ResourceSpec on ResourceSpec {
+  cpu
+  memory
+}
+
+fragment Resources on Resources {
+  limits {
+    ...ResourceSpec
+  }
+  requests {
+    ...ResourceSpec
+  }
+}
+
+fragment Container on Container {
+  name
+  image
+  ports {
+    containerPort
+    protocol
+  }
+  resources {
+    ...Resources
+  }
+}
+
+fragment ContainerStatus on ContainerStatus {
+  restartCount
+  ready
+  name
+  state {
+    running {
+      startedAt
+    }
+    terminated {
+      exitCode
+      message
+      reason
+    }
+    waiting {
+      message
+      reason
+    }
+  }
+}
+
+fragment Pod on Pod {
+  metadata {
+    ...Metadata
+  }
+  status {
+    phase
+    podIp
+    reason
+    containerStatuses {
+      ...ContainerStatus
+    }
+    initContainerStatuses {
+      ...ContainerStatus
+    }
+    conditions {
+      lastProbeTime
+      lastTransitionTime
+      message
+      reason
+      status
+      type
+    }
+  }
+  spec {
+    nodeName
+    serviceAccountName
+    containers {
+      ...Container
+    }
+    initContainers {
+      ...Container
+    }
+  }
+  raw
+}
+
+fragment JobStatus on JobStatus {
+  active
+  completionTime
+  succeeded
+  failed
+  startTime
+}

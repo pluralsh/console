@@ -1,0 +1,40 @@
+fragment Ingress on Ingress {
+  metadata {
+    ...Metadata
+  }
+  status {
+    loadBalancer {
+      ingress {
+        ip
+        hostname
+      }
+    }
+  }
+  spec {
+    tls {
+      hosts
+    }
+    rules {
+      host
+      http {
+        paths {
+          path
+          backend {
+            serviceName
+            servicePort
+          }
+        }
+      }
+    }
+  }
+  raw
+}
+
+query Ingress($name: String!, $namespace: String!, $serviceId: ID) {
+  ingress(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Ingress
+    events {
+      ...Event
+    }
+  }
+}

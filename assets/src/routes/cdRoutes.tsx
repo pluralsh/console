@@ -14,10 +14,10 @@ import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
 
 import ServiceComponent from 'components/cd/services/component/ServiceComponent'
 
-import ComponentInfo from 'components/apps/app/components/component/ComponentInfo'
-import ComponentEvents from 'components/apps/app/components/component/ComponentEvents'
-import ComponentRaw from 'components/apps/app/components/component/ComponentRaw'
-import ComponentMetrics from 'components/apps/app/components/component/ComponentMetrics'
+import ComponentInfo from 'components/component/ComponentInfo'
+import ComponentEvents from 'components/component/ComponentEvents'
+import ComponentRaw from 'components/component/ComponentRaw'
+import ComponentMetrics from 'components/component/ComponentMetrics'
 
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
@@ -47,11 +47,10 @@ export const componentRoutes = [
       serviceId: `:${SERVICE_PARAM_ID}`,
       componentKind: `:${COMPONENT_PARAM_KIND}`,
       componentName: `:${COMPONENT_PARAM_NAME}`,
-      componentVersion: `:${COMPONENT_PARAM_VERSION}?`,
+      componentVersion: `:${COMPONENT_PARAM_VERSION}`,
     })}
     element={<ServiceComponent />}
   >
-    {' '}
     <Route
       index
       element={

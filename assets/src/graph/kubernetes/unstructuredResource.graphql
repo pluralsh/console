@@ -1,0 +1,26 @@
+fragment UnstructuredResource on KubernetesUnstructured {
+  raw
+  events {
+    ...Event
+  }
+}
+
+query UnstructuredResource(
+  $group: String
+  $kind: String!
+  $name: String!
+  $namespace: String
+  $serviceId: ID!
+  $version: String!
+) {
+  unstructuredResource(
+    group: $group
+    kind: $kind
+    name: $name
+    namespace: $namespace
+    serviceId: $serviceId
+    version: $version
+  ) {
+    ...UnstructuredResource
+  }
+}

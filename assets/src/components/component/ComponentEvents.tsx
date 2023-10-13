@@ -3,7 +3,7 @@ import { Event as EventT } from 'generated/graphql'
 
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
-import EventsTable from '../../../../utils/EventsTable'
+import EventsTable from '../utils/EventsTable'
 
 export default function ComponentEvents() {
   const outletContext = useOutletContext<object>() ?? {}
