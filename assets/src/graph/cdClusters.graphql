@@ -110,6 +110,7 @@ fragment Cluster on Cluster {
   }
   self
   service {
+    id
     repository {
       url
     }
