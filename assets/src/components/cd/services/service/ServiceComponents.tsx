@@ -12,7 +12,6 @@ import isEmpty from 'lodash/isEmpty'
 import { useTheme } from 'styled-components'
 
 import {
-  ApiDeprecationFragment,
   ServiceDeploymentComponentFragment,
   useServiceDeploymentComponentsQuery,
 } from 'generated/graphql'

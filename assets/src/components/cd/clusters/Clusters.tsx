@@ -18,7 +18,7 @@ import { A } from 'honorable'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-import { providerName, providerToURL } from 'components/utils/Provider'
+import { getProviderIconURL, getProviderName } from 'components/utils/Provider'
 import { Edge } from 'utils/graphql'
 import { CD_BASE_PATH, CLUSTERS_PATH } from 'routes/cdRoutesConsts'
 
@@ -70,9 +70,12 @@ export const columns = [
 
       return (
         <ColWithIcon
-          icon={providerToURL(provider?.cloud ?? '', theme.mode === 'dark')}
+          icon={getProviderIconURL(
+            provider?.cloud ?? '',
+            theme.mode === 'dark'
+          )}
         >
-          {providerName(provider?.name)}
+          {getProviderName(provider?.name)}
         </ColWithIcon>
       )
     },

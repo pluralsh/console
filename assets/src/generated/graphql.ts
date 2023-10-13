@@ -3545,6 +3545,28 @@ export type UpdateGitRepositoryMutationVariables = Exact<{
 
 export type UpdateGitRepositoryMutation = { __typename?: 'RootMutationType', updateGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null } | null };
 
+export type ClusterProviderFragment = { __typename?: 'ClusterProvider', id: string, name: string, namespace: string, cloud: string, editable?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string } | null };
+
+export type ClusterProvidersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ClusterProvidersQuery = { __typename?: 'RootQueryType', clusterProviders?: { __typename?: 'ClusterProviderConnection', edges?: Array<{ __typename?: 'ClusterProviderEdge', node?: { __typename?: 'ClusterProvider', id: string, name: string, namespace: string, cloud: string, editable?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string } | null } | null } | null> | null } | null };
+
+export type CreateClusterProviderMutationVariables = Exact<{
+  attributes: ClusterProviderAttributes;
+}>;
+
+
+export type CreateClusterProviderMutation = { __typename?: 'RootMutationType', createClusterProvider?: { __typename?: 'ClusterProvider', id: string, name: string, namespace: string, cloud: string, editable?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string } | null } | null };
+
+export type UpdateClusterProviderMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: ClusterProviderUpdateAttributes;
+}>;
+
+
+export type UpdateClusterProviderMutation = { __typename?: 'RootMutationType', updateClusterProvider?: { __typename?: 'ClusterProvider', id: string, name: string, namespace: string, cloud: string, editable?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string } | null } | null };
+
 export type ServiceDeploymentRevisionFragment = { __typename?: 'Revision', id: string, version: string, updatedAt?: string | null, insertedAt?: string | null, git: { __typename?: 'GitRef', folder: string, ref: string } };
 
 export type ServiceDeploymentsRowFragment = { __typename?: 'ServiceDeployment', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null };
@@ -4174,6 +4196,30 @@ export const GitRepositoriesRowFragmentDoc = gql`
   error
   insertedAt
   pulledAt
+  updatedAt
+}
+    `;
+export const ClusterProviderFragmentDoc = gql`
+    fragment ClusterProvider on ClusterProvider {
+  id
+  name
+  namespace
+  cloud
+  editable
+  git {
+    folder
+    ref
+  }
+  repository {
+    id
+    url
+  }
+  service {
+    id
+    name
+    namespace
+  }
+  insertedAt
   updatedAt
 }
     `;
@@ -5264,6 +5310,111 @@ export function useUpdateGitRepositoryMutation(baseOptions?: Apollo.MutationHook
 export type UpdateGitRepositoryMutationHookResult = ReturnType<typeof useUpdateGitRepositoryMutation>;
 export type UpdateGitRepositoryMutationResult = Apollo.MutationResult<UpdateGitRepositoryMutation>;
 export type UpdateGitRepositoryMutationOptions = Apollo.BaseMutationOptions<UpdateGitRepositoryMutation, UpdateGitRepositoryMutationVariables>;
+export const ClusterProvidersDocument = gql`
+    query ClusterProviders {
+  clusterProviders(first: 100) {
+    edges {
+      node {
+        ...ClusterProvider
+      }
+    }
+  }
+}
+    ${ClusterProviderFragmentDoc}`;
+
+/**
+ * __useClusterProvidersQuery__
+ *
+ * To run a query within a React component, call `useClusterProvidersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterProvidersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterProvidersQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useClusterProvidersQuery(baseOptions?: Apollo.QueryHookOptions<ClusterProvidersQuery, ClusterProvidersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterProvidersQuery, ClusterProvidersQueryVariables>(ClusterProvidersDocument, options);
+      }
+export function useClusterProvidersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterProvidersQuery, ClusterProvidersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterProvidersQuery, ClusterProvidersQueryVariables>(ClusterProvidersDocument, options);
+        }
+export type ClusterProvidersQueryHookResult = ReturnType<typeof useClusterProvidersQuery>;
+export type ClusterProvidersLazyQueryHookResult = ReturnType<typeof useClusterProvidersLazyQuery>;
+export type ClusterProvidersQueryResult = Apollo.QueryResult<ClusterProvidersQuery, ClusterProvidersQueryVariables>;
+export const CreateClusterProviderDocument = gql`
+    mutation CreateClusterProvider($attributes: ClusterProviderAttributes!) {
+  createClusterProvider(attributes: $attributes) {
+    ...ClusterProvider
+  }
+}
+    ${ClusterProviderFragmentDoc}`;
+export type CreateClusterProviderMutationFn = Apollo.MutationFunction<CreateClusterProviderMutation, CreateClusterProviderMutationVariables>;
+
+/**
+ * __useCreateClusterProviderMutation__
+ *
+ * To run a mutation, you first call `useCreateClusterProviderMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateClusterProviderMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createClusterProviderMutation, { data, loading, error }] = useCreateClusterProviderMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateClusterProviderMutation(baseOptions?: Apollo.MutationHookOptions<CreateClusterProviderMutation, CreateClusterProviderMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateClusterProviderMutation, CreateClusterProviderMutationVariables>(CreateClusterProviderDocument, options);
+      }
+export type CreateClusterProviderMutationHookResult = ReturnType<typeof useCreateClusterProviderMutation>;
+export type CreateClusterProviderMutationResult = Apollo.MutationResult<CreateClusterProviderMutation>;
+export type CreateClusterProviderMutationOptions = Apollo.BaseMutationOptions<CreateClusterProviderMutation, CreateClusterProviderMutationVariables>;
+export const UpdateClusterProviderDocument = gql`
+    mutation UpdateClusterProvider($id: ID!, $attributes: ClusterProviderUpdateAttributes!) {
+  updateClusterProvider(id: $id, attributes: $attributes) {
+    ...ClusterProvider
+  }
+}
+    ${ClusterProviderFragmentDoc}`;
+export type UpdateClusterProviderMutationFn = Apollo.MutationFunction<UpdateClusterProviderMutation, UpdateClusterProviderMutationVariables>;
+
+/**
+ * __useUpdateClusterProviderMutation__
+ *
+ * To run a mutation, you first call `useUpdateClusterProviderMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateClusterProviderMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateClusterProviderMutation, { data, loading, error }] = useUpdateClusterProviderMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateClusterProviderMutation(baseOptions?: Apollo.MutationHookOptions<UpdateClusterProviderMutation, UpdateClusterProviderMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateClusterProviderMutation, UpdateClusterProviderMutationVariables>(UpdateClusterProviderDocument, options);
+      }
+export type UpdateClusterProviderMutationHookResult = ReturnType<typeof useUpdateClusterProviderMutation>;
+export type UpdateClusterProviderMutationResult = Apollo.MutationResult<UpdateClusterProviderMutation>;
+export type UpdateClusterProviderMutationOptions = Apollo.BaseMutationOptions<UpdateClusterProviderMutation, UpdateClusterProviderMutationVariables>;
 export const ServiceDeploymentsDocument = gql`
     query ServiceDeployments {
   serviceDeployments(first: 100) {
@@ -6729,6 +6880,7 @@ export const namedOperations = {
     ClusterNamespaces: 'ClusterNamespaces',
     Usage: 'Usage',
     GitRepositories: 'GitRepositories',
+    ClusterProviders: 'ClusterProviders',
     ServiceDeployments: 'ServiceDeployments',
     ServiceDeploymentsTiny: 'ServiceDeploymentsTiny',
     ServiceDeployment: 'ServiceDeployment',
@@ -6759,6 +6911,8 @@ export const namedOperations = {
     CreateGitRepository: 'CreateGitRepository',
     DeleteGitRepository: 'DeleteGitRepository',
     UpdateGitRepository: 'UpdateGitRepository',
+    CreateClusterProvider: 'CreateClusterProvider',
+    UpdateClusterProvider: 'UpdateClusterProvider',
     CreateServiceDeployment: 'CreateServiceDeployment',
     UpdateServiceDeployment: 'UpdateServiceDeployment',
     MergeService: 'MergeService',
@@ -6792,6 +6946,7 @@ export const namedOperations = {
     MetricResponse: 'MetricResponse',
     NodePool: 'NodePool',
     GitRepositoriesRow: 'GitRepositoriesRow',
+    ClusterProvider: 'ClusterProvider',
     ServiceDeploymentRevision: 'ServiceDeploymentRevision',
     ServiceDeploymentsRow: 'ServiceDeploymentsRow',
     ServiceDeploymentDetails: 'ServiceDeploymentDetails',
