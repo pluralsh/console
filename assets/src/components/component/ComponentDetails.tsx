@@ -1,16 +1,7 @@
-import {
-  Breadcrumb,
-  SubTab,
-  TabList,
-  TabPanel,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import { useContext, useMemo, useRef } from 'react'
-import { Outlet, useMatch, useParams } from 'react-router-dom'
+import { Outlet, useMatch } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
-import { useTheme } from 'styled-components'
-
-import { InstallationContext } from 'components/Installations'
 import {
   POLL_INTERVAL,
   ScalingType,
@@ -21,47 +12,55 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 import { LinkTabWrap } from 'components/utils/Tabs'
 import { ScalingRecommenderModal } from 'components/cluster/ScalingRecommender'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { GqlError } from 'components/utils/Alert'
-
+import { getServiceComponentPath } from 'routes/cdRoutesConsts'
 import { ViewLogsButton } from 'components/component/ViewLogsButton'
-import { kindToQuery } from 'components/component/kindToQuery'
 import { directory } from 'components/component/directory'
+import {
+  ServiceDeploymentComponentFragment,
+  UnstructuredResourceDocument,
+} from 'generated/graphql'
+import { GqlError } from 'components/utils/Alert'
+import { useTheme } from 'styled-components'
 
-export default function Component() {
+export function ComponentDetails({
+  query,
+  component,
+  serviceId,
+}: {
+  query: any
+  serviceId?: string
+  component: ServiceDeploymentComponentFragment
+}) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const { me } = useContext<any>(LoginContext)
-  const { appName, componentKind = '', componentName } = useParams()
-  const { applications } = useContext<any>(InstallationContext)
-  const currentApp = applications.find((app) => app.name === appName)
-  const { data, loading, refetch, error } = useQuery(
-    kindToQuery[componentKind],
-    {
-      variables: { name: componentName, namespace: appName },
-      pollInterval: POLL_INTERVAL,
-      fetchPolicy: 'cache-and-network',
-    }
-  )
+  const componentKind = component.kind
+  const componentName = component.name
 
-  console.log('currentApp', currentApp)
+  const vars = {
+    name: component.name,
+    namespace: component.namespace,
+    ...(serviceId ? { serviceId } : {}),
+    ...(query === UnstructuredResourceDocument
+      ? {
+          kind: component.kind,
+          version: component.version,
+          namespace: component.namespace,
+          group: component.group,
+          name: component.name,
+        }
+      : {}),
+  }
 
-  const breadcrumbs: Breadcrumb[] = useMemo(
-    () => [
-      { label: 'apps', url: '/' },
-      { label: appName ?? '', url: `/apps/${appName}` },
-      { label: 'components', url: `/apps/${appName}/components` },
-      {
-        label: componentName ?? '',
-        url: `/apps/${appName}/components/${componentKind}/${componentName}`,
-      },
-    ],
-    [appName, componentKind, componentName]
-  )
-
-  useSetBreadcrumbs(breadcrumbs)
+  const { data, loading, refetch, error } = useQuery(query, {
+    variables: vars,
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
+  })
 
   const kind: ScalingType =
-    ScalingTypes[componentKind.toUpperCase()] ?? ScalingTypes.DEPLOYMENT
+    ScalingTypes[(componentKind ?? '')?.toUpperCase()] ??
+    ScalingTypes.DEPLOYMENT
 
   // To avoid mapping between component types and fields of data returned by API
   // we are picking first available value from API object for now.
@@ -71,20 +70,24 @@ export default function Component() {
     [data]
   )
   const subpath =
-    useMatch('/apps/:appName/components/:componentKind/:componentName/:subpath')
-      ?.params?.subpath || ''
+    useMatch(
+      `${getServiceComponentPath({
+        serviceId: ':serviceId',
+        clusterName: ':clusterName',
+        componentKind: ':componentKind',
+        componentName: ':componentName',
+        componentVersion: ':componentVersion',
+      })}/:subpath`
+    )?.params?.subpath || ''
 
   if (error) {
     return <GqlError error={error} />
   }
-  if (!me || !currentApp || !data) return <LoadingIndicator />
+  if (!me || !data) return <LoadingIndicator />
 
-  const component = currentApp.status.components.find(
-    ({ name, kind }) =>
-      name === componentName && kind.toLowerCase() === componentKind
-  )
   const filteredDirectory = directory.filter(
-    ({ onlyFor }) => !onlyFor || onlyFor.includes(componentKind)
+    ({ onlyFor }) =>
+      !onlyFor || (componentKind && onlyFor.includes(componentKind))
   )
   const currentTab = filteredDirectory.find(({ path }) => path === subpath)
 
@@ -101,6 +104,7 @@ export default function Component() {
           css={{
             display: 'flex',
             gap: theme.spacing.medium,
+            className: 'DELETE',
             margin: `${theme.spacing.medium}px 0`,
           }}
         >
@@ -126,7 +130,7 @@ export default function Component() {
           <ScalingRecommenderModal
             kind={kind}
             componentName={componentName}
-            namespace={appName}
+            namespace={serviceId}
           />
           <ViewLogsButton
             metadata={value?.metadata}
