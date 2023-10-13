@@ -3457,14 +3457,14 @@ export type NodeMetricFragmentFragment = { __typename?: 'NodeMetric', timestamp?
 
 export type ApiDeprecationFragment = { __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null };
 
-export type ClustersRowFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, pingedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Map<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', repository?: { __typename?: 'GitRepository', url: string } | null } | null };
+export type ClustersRowFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, pingedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Map<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null };
 
 export type ClusterFragment = { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, pingedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Map<string, unknown> | null, capacity?: Map<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', repository?: { __typename?: 'GitRepository', url: string } | null } | null };
 
 export type ClustersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, pingedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Map<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', repository?: { __typename?: 'GitRepository', url: string } | null } | null } | null } | null> | null } | null };
+export type ClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, pingedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Map<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null } | null } | null> | null } | null };
 
 export type ClustersTinyQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3478,13 +3478,27 @@ export type ClusterQueryVariables = Exact<{
 
 export type ClusterQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, pingedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Map<string, unknown> | null, capacity?: Map<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', timestamp?: string | null, window?: string | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', repository?: { __typename?: 'GitRepository', url: string } | null } | null } | null };
 
+export type ClusterPodsQueryVariables = Exact<{
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ClusterPodsQuery = { __typename?: 'RootQueryType', pods?: { __typename?: 'PodConnection', edges?: Array<{ __typename?: 'PodEdge', node?: { __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null } | null> | null } | null };
+
+export type ClusterNamespacesQueryVariables = Exact<{
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ClusterNamespacesQuery = { __typename?: 'RootQueryType', namespaces?: Array<{ __typename?: 'Namespace', metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null };
+
 export type UpdateClusterMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   attributes: ClusterUpdateAttributes;
 }>;
 
 
-export type UpdateClusterMutation = { __typename?: 'RootMutationType', updateCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, pingedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Map<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', repository?: { __typename?: 'GitRepository', url: string } | null } | null } | null };
+export type UpdateClusterMutation = { __typename?: 'RootMutationType', updateCluster?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, name: string, pingedAt?: string | null, self?: boolean | null, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, kind: string, name: string, service?: { __typename?: 'ServiceDeployment', git: { __typename?: 'GitRef', ref: string, folder: string }, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Map<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null } | null };
 
 export type MetricResponseFragment = { __typename?: 'MetricResponse', metric?: Map<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null };
 
@@ -4046,6 +4060,7 @@ export const ClustersRowFragmentDoc = gql`
   }
   self
   service {
+    id
     repository {
       url
     }
@@ -4053,10 +4068,24 @@ export const ClustersRowFragmentDoc = gql`
   version
 }
     ${ApiDeprecationFragmentDoc}`;
+export const MetadataFragmentDoc = gql`
+    fragment Metadata on Metadata {
+  name
+  namespace
+  labels {
+    name
+    value
+  }
+  annotations {
+    name
+    value
+  }
+}
+    `;
 export const NodeFragmentFragmentDoc = gql`
     fragment NodeFragment on Node {
   metadata {
-    ...MetadataFragment
+    ...Metadata
   }
   status {
     phase
@@ -4073,11 +4102,11 @@ export const NodeFragmentFragmentDoc = gql`
     providerId
   }
 }
-    ${MetadataFragmentFragmentDoc}`;
+    ${MetadataFragmentDoc}`;
 export const NodeMetricFragmentFragmentDoc = gql`
     fragment NodeMetricFragment on NodeMetric {
   metadata {
-    ...MetadataFragment
+    ...Metadata
   }
   usage {
     cpu
@@ -4086,7 +4115,7 @@ export const NodeMetricFragmentFragmentDoc = gql`
   timestamp
   window
 }
-    ${MetadataFragmentFragmentDoc}`;
+    ${MetadataFragmentDoc}`;
 export const ClusterFragmentDoc = gql`
     fragment Cluster on Cluster {
   apiDeprecations {
@@ -4312,20 +4341,6 @@ export const GroupMemberFragmentDoc = gql`
 }
     ${UserFragmentDoc}
 ${GroupFragmentDoc}`;
-export const MetadataFragmentDoc = gql`
-    fragment Metadata on Metadata {
-  name
-  namespace
-  labels {
-    name
-    value
-  }
-  annotations {
-    name
-    value
-  }
-}
-    `;
 export const CertificateFragmentDoc = gql`
     fragment Certificate on Certificate {
   metadata {
@@ -4943,6 +4958,82 @@ export function useClusterLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Cl
 export type ClusterQueryHookResult = ReturnType<typeof useClusterQuery>;
 export type ClusterLazyQueryHookResult = ReturnType<typeof useClusterLazyQuery>;
 export type ClusterQueryResult = Apollo.QueryResult<ClusterQuery, ClusterQueryVariables>;
+export const ClusterPodsDocument = gql`
+    query ClusterPods($clusterId: ID) {
+  pods(first: 100, clusterId: $clusterId) {
+    edges {
+      node {
+        ...Pod
+      }
+    }
+  }
+}
+    ${PodFragmentDoc}`;
+
+/**
+ * __useClusterPodsQuery__
+ *
+ * To run a query within a React component, call `useClusterPodsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterPodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterPodsQuery({
+ *   variables: {
+ *      clusterId: // value for 'clusterId'
+ *   },
+ * });
+ */
+export function useClusterPodsQuery(baseOptions?: Apollo.QueryHookOptions<ClusterPodsQuery, ClusterPodsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterPodsQuery, ClusterPodsQueryVariables>(ClusterPodsDocument, options);
+      }
+export function useClusterPodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterPodsQuery, ClusterPodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterPodsQuery, ClusterPodsQueryVariables>(ClusterPodsDocument, options);
+        }
+export type ClusterPodsQueryHookResult = ReturnType<typeof useClusterPodsQuery>;
+export type ClusterPodsLazyQueryHookResult = ReturnType<typeof useClusterPodsLazyQuery>;
+export type ClusterPodsQueryResult = Apollo.QueryResult<ClusterPodsQuery, ClusterPodsQueryVariables>;
+export const ClusterNamespacesDocument = gql`
+    query ClusterNamespaces($clusterId: ID) {
+  namespaces(clusterId: $clusterId) {
+    metadata {
+      ...Metadata
+    }
+  }
+}
+    ${MetadataFragmentDoc}`;
+
+/**
+ * __useClusterNamespacesQuery__
+ *
+ * To run a query within a React component, call `useClusterNamespacesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterNamespacesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterNamespacesQuery({
+ *   variables: {
+ *      clusterId: // value for 'clusterId'
+ *   },
+ * });
+ */
+export function useClusterNamespacesQuery(baseOptions?: Apollo.QueryHookOptions<ClusterNamespacesQuery, ClusterNamespacesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterNamespacesQuery, ClusterNamespacesQueryVariables>(ClusterNamespacesDocument, options);
+      }
+export function useClusterNamespacesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterNamespacesQuery, ClusterNamespacesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterNamespacesQuery, ClusterNamespacesQueryVariables>(ClusterNamespacesDocument, options);
+        }
+export type ClusterNamespacesQueryHookResult = ReturnType<typeof useClusterNamespacesQuery>;
+export type ClusterNamespacesLazyQueryHookResult = ReturnType<typeof useClusterNamespacesLazyQuery>;
+export type ClusterNamespacesQueryResult = Apollo.QueryResult<ClusterNamespacesQuery, ClusterNamespacesQueryVariables>;
 export const UpdateClusterDocument = gql`
     mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
   updateCluster(id: $id, attributes: $attributes) {
@@ -6629,6 +6720,8 @@ export const namedOperations = {
     Clusters: 'Clusters',
     ClustersTiny: 'ClustersTiny',
     Cluster: 'Cluster',
+    ClusterPods: 'ClusterPods',
+    ClusterNamespaces: 'ClusterNamespaces',
     Usage: 'Usage',
     GitRepositories: 'GitRepositories',
     ServiceDeployments: 'ServiceDeployments',

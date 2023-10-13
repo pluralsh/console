@@ -14,7 +14,7 @@ import { useTheme } from 'styled-components'
 
 import isEmpty from 'lodash/isEmpty'
 
-import { ClustersRowFragment } from '../../../generated/graphql'
+import { Cluster } from '../../../generated/graphql'
 import CopyButton from '../../utils/CopyButton'
 import ProviderIcon from '../../utils/Provider'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
@@ -22,7 +22,7 @@ import ClusterUpgrade from '../clusters/ClusterUpgrade'
 export default function ClusterMetadataPanel({
   cluster,
 }: {
-  cluster?: ClustersRowFragment | null
+  cluster?: Cluster | null
 }): ReactElement | null {
   const theme = useTheme()
   const [open, setOpen] = useState(false)

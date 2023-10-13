@@ -136,8 +136,8 @@ export const columns = [
           acc + (cpuParser(current?.status?.capacity?.cpu) ?? 0),
         0
       )
-      const display = `${usage ? cpuFormat(usage) : '-'} / ${
-        capacity ? cpuFormat(capacity) : '-'
+      const display = `${usage ? cpuFormat(usage) : '—'} / ${
+        capacity ? cpuFormat(capacity) : '—'
       }`
 
       return usage !== undefined && !!capacity ? (
@@ -173,8 +173,8 @@ export const columns = [
         0
       )
 
-      const display = `${usage ? memoryFormat(usage) : '-'} / ${
-        capacity ? memoryFormat(capacity) : '-'
+      const display = `${usage ? memoryFormat(usage) : '—'} / ${
+        capacity ? memoryFormat(capacity) : '—'
       }`
 
       return usage !== undefined && !!capacity ? (

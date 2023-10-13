@@ -78,12 +78,14 @@ export default function ClusterNodes() {
         gap: theme.spacing.medium,
       }}
     >
-      <Card padding="xlarge">
-        <ClusterMetrics
-          nodes={cluster?.nodes?.filter((node): node is Node => !!node) || []}
-          usage={usage}
-        />
-      </Card>
+      {cluster?.self && (
+        <Card padding="xlarge">
+          <ClusterMetrics
+            nodes={cluster?.nodes?.filter((node): node is Node => !!node) || []}
+            usage={usage}
+          />
+        </Card>
+      )}
       {/* TODO: Replace row link. */}
       <NodesList
         nodes={cluster?.nodes || []}

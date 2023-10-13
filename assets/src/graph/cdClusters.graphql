@@ -1,19 +1,6 @@
-fragment MetadataFragment on Metadata {
-  name
-  namespace
-  labels {
-    name
-    value
-  }
-  annotations {
-    name
-    value
-  }
-}
-
 fragment NodeFragment on Node {
   metadata {
-    ...MetadataFragment
+    ...Metadata
   }
   status {
     phase
@@ -33,7 +20,7 @@ fragment NodeFragment on Node {
 
 fragment NodeMetricFragment on NodeMetric {
   metadata {
-    ...MetadataFragment
+    ...Metadata
   }
   usage {
     cpu
@@ -93,6 +80,7 @@ fragment ClustersRow on Cluster {
   }
   self
   service {
+    id
     repository {
       url
     }
@@ -159,6 +147,25 @@ query ClustersTiny {
 query Cluster($id: ID!) {
   cluster(id: $id) {
     ...Cluster
+  }
+}
+
+# TODO: Add PageInfo.
+query ClusterPods($clusterId: ID) {
+  pods(first: 100, clusterId: $clusterId) {
+    edges {
+      node {
+        ...Pod
+      }
+    }
+  }
+}
+
+query ClusterNamespaces($clusterId: ID) {
+  namespaces(clusterId: $clusterId) {
+    metadata {
+      ...Metadata
+    }
   }
 }
 
