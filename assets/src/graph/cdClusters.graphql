@@ -150,9 +150,9 @@ query Cluster($id: ID!) {
   }
 }
 
-# TODO: Add PageInfo. Change 5 to 100.
+# TODO: Add PageInfo.
 query ClusterPods($clusterId: ID) {
-  pods(first: 5, clusterId: $clusterId) {
+  pods(first: 100, clusterId: $clusterId) {
     edges {
       node {
         ...Pod

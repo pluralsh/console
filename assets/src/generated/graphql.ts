@@ -4960,7 +4960,7 @@ export type ClusterLazyQueryHookResult = ReturnType<typeof useClusterLazyQuery>;
 export type ClusterQueryResult = Apollo.QueryResult<ClusterQuery, ClusterQueryVariables>;
 export const ClusterPodsDocument = gql`
     query ClusterPods($clusterId: ID) {
-  pods(first: 5, clusterId: $clusterId) {
+  pods(first: 100, clusterId: $clusterId) {
     edges {
       node {
         ...Pod

@@ -43,7 +43,7 @@ const searchOptions = {
 export default function ClusterPods() {
   const { clusterId } = useParams()
   const { data, error, refetch } = useClusterPodsQuery({
-    variables: { clusterId },
+    variables: { clusterId }, // TODO: Set namespace as param.
     pollInterval: POLL_INTERVAL,
   })
   const { data: namespacesData } = useClusterNamespacesQuery({
