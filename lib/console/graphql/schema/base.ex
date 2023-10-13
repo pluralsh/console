@@ -72,7 +72,7 @@ defmodule Console.GraphQl.Schema.Base do
 
   defmacro cluster_authorized(perm) do
     quote do
-      arg :service_id, :id
+      arg :cluster_id, :id
       middleware Console.Middleware.CdAuthenticated, perm: unquote(perm)
     end
   end
