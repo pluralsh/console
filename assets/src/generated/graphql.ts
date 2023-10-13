@@ -2608,6 +2608,7 @@ export type RootQueryTypePodsArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
   namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 

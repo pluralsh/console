@@ -199,6 +199,13 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> items_response()
   end
 
+  def list_all_pods(%{namespace: ns} = args, _) do
+    ns
+    |> Core.list_namespaced_pod!(page_params(args))
+    |> Kube.Utils.run()
+    |> items_connection()
+  end
+
   def list_all_pods(args, _) do
     (page_params(args) ++ namespace_params(args))
     |> Core.list_pod_for_all_namespaces!()
