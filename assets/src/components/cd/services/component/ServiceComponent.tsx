@@ -76,7 +76,7 @@ export const getServiceComponentBreadcrumbs = ({
   },
 ]
 
-function V1Component({
+function ComponentView({
   query,
   component,
   serviceId,
@@ -114,7 +114,7 @@ function V1Component({
     fetchPolicy: 'cache-and-network',
   })
 
-  console.log('v1 component', { data, loading, error })
+  console.log('Component query result', { data, loading, error })
 
   const kind: ScalingType =
     ScalingTypes[(componentKind ?? '')?.toUpperCase()] ??
@@ -214,48 +214,7 @@ function V1Component({
   )
 }
 
-function UnstructuredComponent({
-  component,
-  serviceId,
-  ...props
-}: {
-  serviceId: string
-  component: ServiceDeploymentComponentFragment
-}) {
-  console.log('UnstructuredComponent props', props)
-  const params = useParams()
-  const [searchParams] = useSearchParams()
-
-  console.log('params', params)
-  console.log('searchParams', searchParams)
-  const { kind, name, version, namespace, group } = component
-
-  const variables = {
-    name,
-    version: version || '',
-    kind,
-    serviceId,
-    namespace,
-    group,
-  }
-
-  console.log('variables', variables)
-  const { data, loading, refetch, error } = useUnstructuredResourceQuery({
-    variables,
-  })
-
-  console.log({ data, loading, refetch, error })
-
-  console.log('unstructuredResource', data?.unstructuredResource)
-
-  if (error) {
-    return <GqlError error={error} />
-  }
-
-  return <div>Unstructured</div>
-}
-
-export default function Component() {
+export default function ServiceComponent() {
   const params = useParams()
   const componentKind = params[COMPONENT_PARAM_KIND]!
   const componentName = params[COMPONENT_PARAM_NAME]!
@@ -280,13 +239,13 @@ export default function Component() {
   const component = components?.find(
     (component) =>
       component?.name?.toLowerCase() === componentName?.toLowerCase() &&
-      component?.kind?.toLowerCase() === componentKind?.toLowerCase()
-    // (component?.version || '') === (componentVersion || '')
+      component?.kind?.toLowerCase() === componentKind?.toLowerCase() &&
+      (component?.version || '') === (componentVersion || '')
   )
 
   console.log('component', component)
 
-  const v1ComponentQuery =
+  const componentQuery =
     kindToQuery[componentKind ?? ''] || UnstructuredResourceDocument
 
   useSetBreadcrumbs(
@@ -310,18 +269,9 @@ export default function Component() {
     return <LoadingIndicator />
   }
 
-  if (v1ComponentQuery) {
-    return (
-      <V1Component
-        query={v1ComponentQuery}
-        component={component}
-        serviceId={serviceId}
-      />
-    )
-  }
-
   return (
-    <UnstructuredComponent
+    <ComponentView
+      query={componentQuery}
       component={component}
       serviceId={serviceId}
     />
