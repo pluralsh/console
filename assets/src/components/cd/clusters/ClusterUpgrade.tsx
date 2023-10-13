@@ -196,7 +196,7 @@ const upgradeColumns = [
 export default function ClusterUpgrade({
   cluster,
 }: {
-  cluster?: ClustersRowFragment | null
+  cluster?: ClustersRowFragment | null | undefined
 }) {
   const theme = useTheme()
   const [isOpen, setIsOpen] = useState(false)

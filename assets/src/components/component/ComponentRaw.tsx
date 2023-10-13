@@ -15,8 +15,6 @@ export default function ComponentRaw() {
     [data]
   )
 
-  console.log('rawData.value', value)
-
   return (
     <Code
       language="yaml"

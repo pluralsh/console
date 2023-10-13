@@ -21,7 +21,17 @@ import { ComponentDetails } from 'components/component/ComponentDetails'
 import { kindToQuery } from 'components/component/kindToQuery'
 import { GqlError } from 'components/utils/Alert'
 
+import { hasDefined } from 'utils/hasDefined'
+
 import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
+
+const pathMatchString = getServiceComponentPath({
+  serviceId: ':serviceId',
+  clusterName: ':clusterName',
+  componentKind: ':componentKind',
+  componentName: ':componentName',
+  componentVersion: ':componentVersion',
+})
 
 export const getServiceComponentBreadcrumbs = ({
   serviceId,
@@ -93,12 +103,16 @@ export default function ServiceComponent() {
   if (!component) {
     return <LoadingIndicator />
   }
+  if (!hasDefined(component, ['name', 'namespace'])) {
+    return <GqlError error="Missing component name or namespace" />
+  }
 
   return (
     <ComponentDetails
       query={componentQuery}
       component={component}
       serviceId={serviceId}
+      pathMatchString={pathMatchString}
     />
   )
 }

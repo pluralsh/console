@@ -12,24 +12,28 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 import { LinkTabWrap } from 'components/utils/Tabs'
 import { ScalingRecommenderModal } from 'components/cluster/ScalingRecommender'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { getServiceComponentPath } from 'routes/cdRoutesConsts'
 import { ViewLogsButton } from 'components/component/ViewLogsButton'
 import { directory } from 'components/component/directory'
-import {
-  ServiceDeploymentComponentFragment,
-  UnstructuredResourceDocument,
-} from 'generated/graphql'
+import { UnstructuredResourceDocument } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
 import { useTheme } from 'styled-components'
 
 export function ComponentDetails({
   query,
   component,
+  pathMatchString,
   serviceId,
 }: {
   query: any
   serviceId?: string
-  component: ServiceDeploymentComponentFragment
+  pathMatchString: string
+  component: {
+    name: string
+    namespace: string
+    kind: string
+    version?: string | null | undefined
+    group?: string | null | undefined
+  }
 }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
@@ -45,9 +49,7 @@ export function ComponentDetails({
       ? {
           kind: component.kind,
           version: component.version,
-          namespace: component.namespace,
           group: component.group,
-          name: component.name,
         }
       : {}),
   }
@@ -69,16 +71,7 @@ export function ComponentDetails({
       data ? Object.values(data).find((value) => value !== undefined) : null,
     [data]
   )
-  const subpath =
-    useMatch(
-      `${getServiceComponentPath({
-        serviceId: ':serviceId',
-        clusterName: ':clusterName',
-        componentKind: ':componentKind',
-        componentName: ':componentName',
-        componentVersion: ':componentVersion',
-      })}/:subpath`
-    )?.params?.subpath || ''
+  const subpath = useMatch(`${pathMatchString}/:subpath`)?.params?.subpath || ''
 
   if (error) {
     return <GqlError error={error} />
@@ -130,7 +123,7 @@ export function ComponentDetails({
           <ScalingRecommenderModal
             kind={kind}
             componentName={componentName}
-            namespace={serviceId}
+            namespace={component.namespace || ''}
           />
           <ViewLogsButton
             metadata={value?.metadata}
