@@ -21,18 +21,22 @@ const ComponentCardSC = styled(Card)(({ theme }) => ({
   },
   '.content': {
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'baseline',
-    gap: theme.spacing.small,
+    columnGap: theme.spacing.small,
+    rowGap: theme.spacing.xxxsmall,
     flexShrink: 1,
     flexGrow: 1,
     overflow: 'hidden',
     '.name': {
       ...theme.partials.text.body2Bold,
+      maxWidth: '100%',
       ...TRUNCATE,
       flexShrink: 1,
     },
     '.kind': {
       ...theme.partials.text.caption,
+      maxWidth: '100%',
       ...TRUNCATE,
       color: theme.colors['text-xlight'],
       marginRight: theme.spacing.xsmall,
