@@ -111,6 +111,7 @@ function FormFieldRef(
               fontWeight="600"
               flexShrink={0}
               flexGrow={1}
+              margin={0}
               {...labelProps}
             >
               {label}

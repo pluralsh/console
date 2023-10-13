@@ -142,12 +142,15 @@ export const Caption = AllSizesTemplate.bind({})
 
 Caption.args = {
   label: 'Password',
+  caption: 'A short caption',
 }
 
 export const LongCaption = AllSizesTemplate.bind({})
 
 LongCaption.args = {
   label: 'Label',
+  caption:
+    'This will probably truncate, because it is ever so so longer than usual.',
 }
 
 export const HintText = AllSizesTemplate.bind({})
