@@ -1,5 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { ClusterIcon } from '@pluralsh/design-system'
+import { GitHubLogoIcon } from '@pluralsh/design-system'
 import { type GitRepositoriesRowFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { useTheme } from 'styled-components'
@@ -21,7 +21,7 @@ export const ColRepo = columnHelper.accessor(({ node }) => node?.url, {
   cell: ({ getValue }) => (
     <ColWithIcon
       truncateLeft
-      icon={<ClusterIcon />}
+      icon={<GitHubLogoIcon />}
     >
       {getValue()}
     </ColWithIcon>

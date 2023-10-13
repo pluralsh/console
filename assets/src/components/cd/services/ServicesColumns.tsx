@@ -1,10 +1,12 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { ClusterIcon } from '@pluralsh/design-system'
+import { GitHubLogoIcon } from '@pluralsh/design-system'
 import { ServiceDeploymentsRowFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { useTheme } from 'styled-components'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
+
+import ProviderIcon, { providerToURL } from 'components/utils/Provider'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
@@ -22,19 +24,28 @@ export const ColServiceDeployment = columnHelper.accessor(
   }
 )
 
-export const ColCluster = columnHelper.accessor(
-  ({ node }) => node?.cluster?.name,
-  {
-    id: 'cluster',
-    header: 'Cluster',
-    enableSorting: true,
-    enableGlobalFilter: true,
-    enableColumnFilter: true,
-    cell: ({ getValue }) => (
-      <ColWithIcon icon={<ClusterIcon />}>{getValue()}</ColWithIcon>
-    ),
-  }
-)
+export const ColCluster = columnHelper.accessor(({ node }) => node?.cluster, {
+  id: 'cluster',
+  header: 'Cluster',
+  enableSorting: true,
+  enableGlobalFilter: true,
+  enableColumnFilter: true,
+  cell: ({ getValue }) => {
+    const theme = useTheme()
+    const cluster = getValue()
+
+    return (
+      <ColWithIcon
+        icon={providerToURL(
+          cluster?.provider?.cloud ?? '',
+          theme.mode === 'dark'
+        )}
+      >
+        {cluster?.name}
+      </ColWithIcon>
+    )
+  },
+})
 
 export const ColRepo = columnHelper.accessor(
   ({ node }) => node?.repository?.url,
@@ -47,7 +58,7 @@ export const ColRepo = columnHelper.accessor(
     cell: ({ getValue }) => (
       <ColWithIcon
         truncateLeft
-        icon={<ClusterIcon />}
+        icon={<GitHubLogoIcon />}
       >
         {getValue()}
       </ColWithIcon>

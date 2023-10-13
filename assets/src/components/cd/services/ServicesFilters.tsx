@@ -23,6 +23,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { SERVICE_PARAM_CLUSTER } from 'routes/cdRoutesConsts'
 
+import ProviderIcon from 'components/utils/Provider'
+
 import {
   serviceStatusToLabel,
   serviceStatusToSeverity,
@@ -77,6 +79,11 @@ export function ServicesFilters({
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 100)
   const [statusFilterKey, setStatusTabKey] = useState<Key>('ALL')
+  const cluster = useMemo(
+    () => clusters && clusters.find(({ name }) => name === clusterName),
+    [clusters, clusterName]
+  )
+
   const counts = useMemo(() => {
     const c: Record<string, number | undefined> = {
       ALL: data?.serviceDeployments?.edges?.length,
@@ -135,6 +142,14 @@ export function ServicesFilters({
             isOpen={clusterSelectIsOpen}
             onOpenChange={setClusterSelectIsOpen}
             label="Filter by cluster"
+            leftContent={
+              cluster && (
+                <ProviderIcon
+                  provider={cluster.provider?.cloud || ''}
+                  width={16}
+                />
+              )
+            }
             titleContent={
               <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
                 <ClusterIcon />
@@ -166,6 +181,12 @@ export function ServicesFilters({
                 key={cluster.name}
                 label={cluster.name}
                 textValue={cluster.name}
+                leftContent={
+                  <ProviderIcon
+                    provider={cluster.provider?.cloud || ''}
+                    width={16}
+                  />
+                }
               />
             ))}
           </Select>

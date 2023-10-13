@@ -15,6 +15,10 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
   cluster {
     id
     name
+    provider {
+      name
+      cloud
+    }
   }
   repository {
     id
