@@ -265,7 +265,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   defp items_connection({:ok, %{items: items, metadata: %{continue: cursor}}}) do
     edges = Enum.map(items, &%{node: &1})
-    {:ok, %{edges: edges, page_info: %{end_cursor: cursor}}}
+    {:ok, %{edges: edges, page_info: %{end_cursor: cursor, has_next_page: byte_size(cursor) != 0}}}
   end
   defp items_connection(err), do: err
 
