@@ -13,7 +13,8 @@ defmodule Console.Deployments.Git.Agent do
 
   require Logger
 
-  @poll :timer.seconds(60)
+  @poll :timer.seconds(120)
+  @jitter 15
 
   defmodule State, do: defstruct [:git, :cache]
 
@@ -114,5 +115,10 @@ defmodule Console.Deployments.Git.Agent do
   defp save_status({:ok, _}, git), do: Git.status(git, %{health: :pullable, pulled_at: Timex.now(), error: nil})
   defp save_status({:error, err}, git), do: Git.status(git, %{health: :failed, error: err})
 
-  defp schedule_pull(), do: Process.send_after(self(), :pull, @poll)
+  defp schedule_pull(), do: Process.send_after(self(), :pull, @poll + jitter())
+
+  defp jitter() do
+    :rand.uniform(@jitter)
+    |> :timer.seconds()
+  end
 end
