@@ -1,19 +1,20 @@
 import {
   Button,
-  EyeClosedIcon,
-  EyeIcon,
   FormField,
   Input,
   ListBoxItem,
   Select,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
+import { produce } from 'immer'
+import { merge } from 'lodash'
+import { PartialDeep } from 'type-fest'
+
 import {
   CloudProviderSettingsAttributes,
   useCreateClusterProviderMutation,
 } from 'generated/graphql'
 import {
-  ComponentProps,
   FormEvent,
   ReactNode,
   useCallback,
@@ -29,30 +30,9 @@ import ProviderIcon, { getProviderName } from 'components/utils/Provider'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
-import { produce } from 'immer'
-
-import { merge } from 'lodash'
-
-import { PartialDeep } from 'type-fest'
-
 import ModalAlt from '../ModalAlt'
 
-function ShowHideInput({ inputProps, ...props }: ComponentProps<typeof Input>) {
-  const [showInput, setShowInput] = useState(false)
-
-  return (
-    <Input
-      inputProps={{ ...inputProps }}
-      type={showInput ? 'text' : 'password'}
-      rightIcon={
-        <div onClick={() => setShowInput((last) => !last)}>
-          {showInput ? <EyeIcon /> : <EyeClosedIcon />}
-        </div>
-      }
-      {...props}
-    />
-  )
-}
+import { InputRevealer } from './InputRevealer'
 
 const updateSettings = produce(
   (
@@ -82,7 +62,7 @@ function AwsSettings({
   return (
     <>
       <FormField label="Access key ID">
-        <ShowHideInput
+        <InputRevealer
           value={settings?.accessKeyId}
           onChange={(e) => {
             updateSettings({ accessKeyId: e.currentTarget.value })
@@ -90,7 +70,7 @@ function AwsSettings({
         />
       </FormField>
       <FormField label="Secret access key">
-        <ShowHideInput
+        <InputRevealer
           value={settings?.secretAccessKey}
           onChange={(e) => {
             updateSettings({ secretAccessKey: e.currentTarget.value })
@@ -112,7 +92,7 @@ function GcpSettings({
 }) {
   return (
     <FormField label="Access key ID">
-      <ShowHideInput
+      <InputRevealer
         value={settings?.applicationCredentials}
         onChange={(e) => {
           updateSettings({ applicationCredentials: e.currentTarget.value })
@@ -255,6 +235,14 @@ export function CreateProviderModal({
         <FormField label="Cloud provider">
           <Select
             label="Select cloud provider"
+            leftContent={
+              selectedProvider && (
+                <ProviderIcon
+                  provider={selectedProvider}
+                  width={16}
+                />
+              )
+            }
             selectedKey={selectedProvider}
             onSelectionChange={(key) => setSelectedProvider(key as any)}
           >
@@ -265,7 +253,7 @@ export function CreateProviderModal({
                 leftContent={
                   <ProviderIcon
                     provider={provider}
-                    width={12}
+                    width={16}
                   />
                 }
               />

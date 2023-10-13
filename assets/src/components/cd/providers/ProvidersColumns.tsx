@@ -14,7 +14,6 @@ export const ColProvider = columnHelper.accessor(({ node }) => node?.cloud, {
   header: 'Provider',
   enableSorting: true,
   enableGlobalFilter: true,
-  //   meta: { truncate: true },
   cell: ({ getValue }) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const theme = useTheme()
