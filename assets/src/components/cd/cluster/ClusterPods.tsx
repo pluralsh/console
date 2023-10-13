@@ -42,7 +42,6 @@ const searchOptions = {
 
 export default function ClusterPods() {
   const { clusterId } = useParams()
-  const navigate = useNavigate()
   const { data, error, refetch } = useClusterPodsQuery({
     variables: { clusterId },
     pollInterval: POLL_INTERVAL,
@@ -67,7 +66,7 @@ export default function ClusterPods() {
   )
   const theme = useTheme()
   const namespace = useParams().namespace || null // TODO
-  // const navigate = useNavigate()
+  const navigate = useNavigate()
   const [inputValue, setInputValue] = useState<string>(namespace || '')
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 300)
@@ -142,7 +141,7 @@ export default function ClusterPods() {
             onSelectionChange={(ns) => {
               if (ns) {
                 setInputValue(`${ns}`)
-                navigate(`/pods/${ns}`)
+                navigate(`/cd/clusters/${clusterId}/pods/${ns}`) // TODO
               }
             }}
             // Close combobox panel once footer is clicked.
@@ -151,7 +150,7 @@ export default function ClusterPods() {
               <NamespaceListFooter
                 onClick={() => {
                   setInputValue('')
-                  navigate('/pods')
+                  navigate(`/cd/clusters/${clusterId}/pods`)
                 }}
               />
             }
