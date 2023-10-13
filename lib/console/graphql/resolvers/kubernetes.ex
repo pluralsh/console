@@ -199,6 +199,13 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     |> items_response()
   end
 
+  def list_all_pods(%{namespace: ns} = args, _) do
+    ns
+    |> Core.list_namespaced_pod!(page_params(args))
+    |> Kube.Utils.run()
+    |> items_connection()
+  end
+
   def list_all_pods(args, _) do
     (page_params(args) ++ namespace_params(args))
     |> Core.list_pod_for_all_namespaces!()
@@ -226,6 +233,12 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   end
   defp maybe_filter_pods(pods, _), do: {:ok, pods}
 
+  def list_namespaces(%{cluster_id: _}, _) do
+    Core.list_namespace!()
+    |> Kube.Utils.run()
+    |> items_response()
+  end
+
   def list_namespaces(_, _), do: {:ok, Console.namespaces()}
 
 
@@ -252,7 +265,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   defp items_connection({:ok, %{items: items, metadata: %{continue: cursor}}}) do
     edges = Enum.map(items, &%{node: &1})
-    {:ok, %{edges: edges, page_info: %{end_cursor: cursor}}}
+    {:ok, %{edges: edges, page_info: %{end_cursor: cursor, has_next_page: byte_size(cursor) != 0}}}
   end
   defp items_connection(err), do: err
 

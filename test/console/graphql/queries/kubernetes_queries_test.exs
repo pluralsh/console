@@ -364,7 +364,6 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
 
   describe "namespaces" do
     test "it will fetch all namespaces" do
-      user = insert(:user)
       expect(Console, :namespaces, fn -> [namespace_scaffold("test")] end)
 
       {:ok, %{data: %{"namespaces" => [namespace]}}} = run_query("""
@@ -375,7 +374,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
             spec { finalizers }
           }
         }
-      """, %{}, %{current_user: user})
+      """, %{}, %{current_user: admin_user()})
 
       assert namespace["metadata"]["name"] == "test"
       assert namespace["status"]["phase"] == "Created"

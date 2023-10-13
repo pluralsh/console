@@ -187,6 +187,7 @@ defmodule Console.GraphQl.Kubernetes do
 
     connection field :pods, node_type: :pod do
       middleware Authenticated
+      arg :namespace,  :string
       arg :namespaces, list_of(:string)
       cluster_authorized :read
 
@@ -222,6 +223,7 @@ defmodule Console.GraphQl.Kubernetes do
 
     field :namespaces, list_of(:namespace) do
       middleware Authenticated
+      cluster_authorized :read
 
       safe_resolve &Kubernetes.list_namespaces/2
     end

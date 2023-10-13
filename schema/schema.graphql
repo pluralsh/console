@@ -81,7 +81,7 @@ type RootQueryType {
 
   pod(namespace: String!, name: String!, serviceId: ID, clusterId: ID): Pod
 
-  pods(after: String, first: Int, before: String, last: Int, namespaces: [String], clusterId: ID): PodConnection
+  pods(after: String, first: Int, before: String, last: Int, namespace: String, namespaces: [String], clusterId: ID): PodConnection
 
   wireguardPeers: [WireguardPeer]
 
@@ -91,7 +91,7 @@ type RootQueryType {
 
   cachedPods(namespaces: [String]): [Pod]
 
-  namespaces: [Namespace]
+  namespaces(clusterId: ID): [Namespace]
 
   logFilters(namespace: String!): [LogFilter]
 
