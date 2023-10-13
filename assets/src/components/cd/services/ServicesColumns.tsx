@@ -6,7 +6,7 @@ import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { useTheme } from 'styled-components'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
-import ProviderIcon, { providerToURL } from 'components/utils/Provider'
+import { getProviderIconURL } from 'components/utils/Provider'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
@@ -31,12 +31,13 @@ export const ColCluster = columnHelper.accessor(({ node }) => node?.cluster, {
   enableGlobalFilter: true,
   enableColumnFilter: true,
   cell: ({ getValue }) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const theme = useTheme()
     const cluster = getValue()
 
     return (
       <ColWithIcon
-        icon={providerToURL(
+        icon={getProviderIconURL(
           cluster?.provider?.cloud ?? '',
           theme.mode === 'dark'
         )}
