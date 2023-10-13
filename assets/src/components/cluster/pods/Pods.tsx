@@ -41,7 +41,8 @@ import {
 const ListBoxFooterPlusInner = styled(ListBoxFooter)(({ theme }) => ({
   color: theme.colors['text-primary-accent'],
 }))
-const NamespaceListFooter = forwardRef<
+
+export const NamespaceListFooter = forwardRef<
   HTMLDivElement,
   Omit<ListBoxFooterProps, 'children'>
 >(({ leftContent, ...props }, ref) => {
