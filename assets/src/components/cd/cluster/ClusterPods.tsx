@@ -65,9 +65,7 @@ export default function ClusterPods() {
     [refetch]
   )
   const theme = useTheme()
-  const namespace = useParams().namespace || null // TODO
-  const navigate = useNavigate()
-  const [inputValue, setInputValue] = useState<string>(namespace || '')
+  const [namespace, setNamespace] = useState<string>('')
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 300)
 
@@ -95,10 +93,10 @@ export default function ClusterPods() {
   const filteredNamespaces = useMemo(() => {
     const fuse = new Fuse(namespaces, searchOptions)
 
-    return inputValue
-      ? fuse.search(inputValue).map(({ item }) => item)
+    return !isEmpty(namespace)
+      ? fuse.search(namespace).map(({ item }) => item)
       : namespaces
-  }, [namespaces, inputValue])
+  }, [namespaces, namespace])
 
   const pods = useMemo(() => {
     if (isEmpty(data?.pods?.edges)) {
@@ -111,7 +109,7 @@ export default function ClusterPods() {
       )
       ?.filter((pod?: PodWithId): pod is PodWithId => !!pod) as PodWithId[]
 
-    if (namespace) {
+    if (!isEmpty(namespace)) {
       pods = pods?.filter((pod) => pod?.metadata?.namespace === namespace)
     }
 
@@ -129,74 +127,71 @@ export default function ClusterPods() {
     return <>Sorry, something went wrong</>
   }
 
-  return (
-    <>
-      {isEmpty(namespaces) ? null : (
-        <Div width={320}>
-          <ComboBox
-            inputProps={{ placeholder: 'Filter by namespace' }}
-            inputValue={inputValue}
-            onInputChange={setInputValue}
-            selectedKey={namespace}
-            onSelectionChange={(ns) => {
-              if (ns) {
-                setInputValue(`${ns}`)
-                navigate(`/cd/clusters/${clusterId}/pods/${ns}`) // TODO
+  return !data ? (
+    <LoadingIndicator />
+  ) : (
+    <Flex
+      direction="column"
+      height="100%"
+    >
+      <div css={{ display: 'flex', gap: theme.spacing.large }}>
+        <Input
+          startIcon={<SearchIcon />}
+          placeholder="Filter pods"
+          value={filterString}
+          onChange={(e) => setFilterString(e.currentTarget.value)}
+          marginBottom={theme.spacing.medium}
+          flexGrow={1}
+        />
+        {isEmpty(namespaces) ? null : (
+          <Div width={320}>
+            <ComboBox
+              inputProps={{ placeholder: 'Filter by namespace' }}
+              inputValue={namespace}
+              onInputChange={setNamespace}
+              selectedKey={namespace}
+              onSelectionChange={(ns) => {
+                if (ns) {
+                  setNamespace(`${ns}`)
+                }
+              }}
+              // Close combobox panel once footer is clicked.
+              // It does not work with isOpen and onOpenChange at the moment.
+              dropdownFooterFixed={
+                <NamespaceListFooter
+                  onClick={() => {
+                    setNamespace('')
+                  }}
+                />
               }
-            }}
-            // Close combobox panel once footer is clicked.
-            // It does not work with isOpen and onOpenChange at the moment.
-            dropdownFooterFixed={
-              <NamespaceListFooter
-                onClick={() => {
-                  setInputValue('')
-                  navigate(`/cd/clusters/${clusterId}/pods`)
-                }}
-              />
-            }
-            aria-label="namespace"
-            width={320}
-          >
-            {filteredNamespaces?.map((namespace, i) => (
-              <ListBoxItem
-                key={`${namespace?.metadata?.name || i}`}
-                textValue={`${namespace?.metadata?.name}`}
-                label={`${namespace?.metadata?.name}`}
-              />
-            )) || []}
-          </ComboBox>
-        </Div>
-      )}
-      {!data ? (
-        <LoadingIndicator />
+              aria-label="namespace"
+              width={320}
+            >
+              {filteredNamespaces?.map((namespace, i) => (
+                <ListBoxItem
+                  key={`${namespace?.metadata?.name || i}`}
+                  textValue={`${namespace?.metadata?.name}`}
+                  label={`${namespace?.metadata?.name}`}
+                />
+              )) || []}
+            </ComboBox>
+          </Div>
+        )}
+      </div>
+      {!pods || pods.length === 0 ? (
+        <EmptyState message="No pods match your selection" />
       ) : (
-        <Flex
-          direction="column"
-          height="100%"
-        >
-          <Input
-            startIcon={<SearchIcon />}
-            placeholder="Filter pods"
-            value={filterString}
-            onChange={(e) => setFilterString(e.currentTarget.value)}
-            marginBottom={theme.spacing.medium}
+        <FullHeightTableWrap>
+          <PodsList
+            pods={pods}
+            // applications={data?.applications}
+            columns={columns}
+            reactTableOptions={reactTableOptions}
+            maxHeight="unset"
+            height="100%"
           />
-          {!pods || pods.length === 0 ? (
-            <EmptyState message="No pods match your selection" />
-          ) : (
-            <FullHeightTableWrap>
-              <PodsList
-                pods={pods}
-                // applications={data?.applications}
-                columns={columns}
-                reactTableOptions={reactTableOptions}
-                maxHeight="unset"
-                height="100%"
-              />
-            </FullHeightTableWrap>
-          )}
-        </Flex>
+        </FullHeightTableWrap>
       )}
-    </>
+    </Flex>
   )
 }
