@@ -81,7 +81,7 @@ export default function ComponentInfo() {
               flexGrow: 1,
             }}
           >
-            info
+            {info}
           </div>
         )}
         <div
