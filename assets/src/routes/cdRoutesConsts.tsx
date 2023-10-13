@@ -17,6 +17,15 @@ export const SERVICE_COMPONENTS_PATH = 'components'
 export const COMPONENT_PARAM_KIND = `componentKind` as const
 export const COMPONENT_PARAM_NAME = `componentName` as const
 export const COMPONENT_PARAM_VERSION = `componentVersion` as const
+export const SERVICE_COMPONENT_PATH_MATCHER_REL = getServiceComponentPath({
+  isRelative: true,
+  clusterName: `:${SERVICE_PARAM_CLUSTER}`,
+  serviceId: `:${SERVICE_PARAM_ID}`,
+  componentKind: `:${COMPONENT_PARAM_KIND}`,
+  componentName: `:${COMPONENT_PARAM_NAME}`,
+  componentVersion: `:${COMPONENT_PARAM_VERSION}`,
+})
+export const SERVICE_COMPONENT_PATH_MATCHER_ABS = `/${SERVICE_COMPONENT_PATH_MATCHER_REL}`
 
 export function getServiceDetailsPath({
   clusterName,

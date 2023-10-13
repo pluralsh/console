@@ -12,6 +12,7 @@ import {
   COMPONENT_PARAM_KIND,
   COMPONENT_PARAM_NAME,
   COMPONENT_PARAM_VERSION,
+  SERVICE_COMPONENT_PATH_MATCHER_ABS,
   SERVICE_PARAM_CLUSTER,
   SERVICE_PARAM_ID,
   getServiceComponentPath,
@@ -24,14 +25,6 @@ import { GqlError } from 'components/utils/Alert'
 import { hasDefined } from 'utils/hasDefined'
 
 import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
-
-const pathMatchString = getServiceComponentPath({
-  serviceId: ':serviceId',
-  clusterName: ':clusterName',
-  componentKind: ':componentKind',
-  componentName: ':componentName',
-  componentVersion: ':componentVersion',
-})
 
 export const getServiceComponentBreadcrumbs = ({
   serviceId,
@@ -112,7 +105,7 @@ export default function ServiceComponent() {
       query={componentQuery}
       component={component}
       serviceId={serviceId}
-      pathMatchString={pathMatchString}
+      pathMatchString={SERVICE_COMPONENT_PATH_MATCHER_ABS}
     />
   )
 }
