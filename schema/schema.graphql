@@ -91,7 +91,7 @@ type RootQueryType {
 
   cachedPods(namespaces: [String]): [Pod]
 
-  namespaces: [Namespace]
+  namespaces(clusterId: ID): [Namespace]
 
   logFilters(namespace: String!): [LogFilter]
 

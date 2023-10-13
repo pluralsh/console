@@ -233,6 +233,12 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   end
   defp maybe_filter_pods(pods, _), do: {:ok, pods}
 
+  def list_namespaces(%{cluster_id: _}, _) do
+    Core.list_namespace!()
+    |> Kube.Utils.run()
+    |> items_response()
+  end
+
   def list_namespaces(_, _), do: {:ok, Console.namespaces()}
 
 

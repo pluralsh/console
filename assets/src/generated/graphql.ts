@@ -2569,6 +2569,11 @@ export type RootQueryTypeMetricArgs = {
 };
 
 
+export type RootQueryTypeNamespacesArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type RootQueryTypeNodeArgs = {
   name: Scalars['String']['input'];
 };

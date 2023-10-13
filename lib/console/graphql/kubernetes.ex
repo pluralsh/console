@@ -223,6 +223,7 @@ defmodule Console.GraphQl.Kubernetes do
 
     field :namespaces, list_of(:namespace) do
       middleware Authenticated
+      cluster_authorized :read
 
       safe_resolve &Kubernetes.list_namespaces/2
     end
