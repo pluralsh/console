@@ -52,10 +52,16 @@ brew link --overwrite autoconf@2.69 && \
 autoconf -V
 ```
 
-For Mac Machines, if unable to download Erlang via `asdf` then run:
+For Mac Machines, if unable to download Erlang via `asdf` (this is very common, and it might be worthwhile to just get erlang from homebrew) then run:
 
 ```sh
 brew install erlang@23
 cp -r /opt/homebrew/opt/erlang@23/lib/erlang ~/.asdf/installs/erlang/23.3
 asdf reshim erlang 23.3
+```
+
+You can also use the make target in our root Makefile to automate this, eg:
+
+```sh
+make reshim
 ```

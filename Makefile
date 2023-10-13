@@ -9,6 +9,7 @@ PLRL_WWW ?= ../plural/www/src
 dep ?= forge-core
 GIT_COMMIT ?= abd123
 TARGETARCH ?= amd64
+ERLANG_VERSION ?= `grep erlang .tool-versions | cut -d' ' -f2`
 
 help:
 	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -24,6 +25,10 @@ build: ## Build the Docker image
 push: ## push to gcr
 	docker push gcr.io/$(GCP_PROJECT)/$(APP_NAME):$(APP_VSN)
 	docker push $(DKR_HOST)/console/$(APP_NAME):$(APP_VSN)
+
+reshim: ## reshims erlang into asdf
+	cp -r /opt/homebrew/opt/erlang@24/lib/erlang ~/.asdf/installs/erlang/$(ERLANG_VERSION)
+	asdf reshim erlang $(ERLANG_VERSION)
 
 deploy: ## deploy artifacts to plural
 	cd plural && plural apply
