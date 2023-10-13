@@ -60,7 +60,7 @@ export default function ClusterPods() {
       ColRestarts,
       ColContainers,
       ColImages,
-      ColActions(refetch),
+      ColActions(refetch), // TODO: Update delete and details page.
     ],
     [refetch]
   )
