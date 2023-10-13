@@ -1,5 +1,9 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { ClusterIcon, GearTrainIcon, IconFrame } from '@pluralsh/design-system'
+import {
+  GearTrainIcon,
+  GitHubLogoIcon,
+  IconFrame,
+} from '@pluralsh/design-system'
 import { ClusterProviderFragment } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
@@ -46,14 +50,15 @@ export const ColRepo = columnHelper.accessor(
     enableSorting: true,
     enableGlobalFilter: true,
     meta: { truncate: true },
-    cell: ({ getValue }) => (
-      <ColWithIcon
-        truncateLeft
-        icon={<ClusterIcon />}
-      >
-        {getValue()}
-      </ColWithIcon>
-    ),
+    cell: ({ getValue }) =>
+      getValue() && (
+        <ColWithIcon
+          truncateLeft
+          icon={<GitHubLogoIcon />}
+        >
+          {getValue()}
+        </ColWithIcon>
+      ),
   }
 )
 
