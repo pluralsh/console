@@ -1,28 +1,39 @@
 import {
   type Breadcrumb,
   Callout,
+  EmptyState,
+  Modal,
+  Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useMemo } from 'react'
+import { ComponentProps, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import isEmpty from 'lodash/isEmpty'
+import { useTheme } from 'styled-components'
+
+import {
+  ServiceDeploymentComponentFragment,
+  useServiceDeploymentComponentsQuery,
+} from 'generated/graphql'
+
 import {
   SERVICE_PARAM_CLUSTER,
   SERVICE_PARAM_ID,
   getServiceComponentPath,
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { useComponentKindSelect } from 'components/apps/app/components/Components'
-import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
-import { ComponentList } from 'components/apps/app/components/ComponentList'
-
-import { useTheme } from 'styled-components'
-
 import { isNonNullable } from 'utils/isNonNullable'
 
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useComponentKindSelect } from 'components/apps/app/components/Components'
+
+import { ComponentList } from 'components/apps/app/components/ComponentList'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { deprecationsColumns } from 'components/cd/clusters/deprecationsColumns'
+
 import { getServiceDetailsBreadcrumbs } from './ServiceDetails'
-import { countDeprecations } from './countDeprecations'
+import { collectDeprecations, countDeprecations } from './deprecationUtils'
 
 export const getServiceComponentsBreadcrumbs = ({
   serviceId,
@@ -38,10 +49,44 @@ export const getServiceComponentsBreadcrumbs = ({
   },
 ]
 
+function DeprecationsModal({
+  components,
+  ...props
+}: {
+  components: ServiceDeploymentComponentFragment[]
+} & ComponentProps<typeof Modal>) {
+  const deprecations =
+    useMemo(() => collectDeprecations(components), [components]) || []
+
+  return (
+    <Modal
+      header="Deprecated Resources"
+      size="large"
+      maxWidth={1024}
+      portal
+      {...props}
+    >
+      {isEmpty(deprecations) ? (
+        <EmptyState message="No deprecated resources" />
+      ) : (
+        <Table
+          data={deprecations || []}
+          columns={deprecationsColumns}
+          css={{
+            maxHeight: 500,
+            height: '100%',
+          }}
+        />
+      )}
+    </Modal>
+  )
+}
+
 export default function ServiceComponents() {
   const theme = useTheme()
   const serviceId = useParams()[SERVICE_PARAM_ID]
   const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
+  const [showDeprecations, setShowDeprecations] = useState(false)
 
   const breadcrumbs: Breadcrumb[] = useMemo(
     () => getServiceComponentsBreadcrumbs({ clusterName, serviceId }),
@@ -79,6 +124,13 @@ export default function ServiceComponents() {
       heading="Components"
       headingContent={kindSelector}
     >
+      <ModalMountTransition open>
+        <DeprecationsModal
+          open={showDeprecations}
+          onClose={() => setShowDeprecations(false)}
+          components={components}
+        />
+      </ModalMountTransition>
       <div
         css={{
           display: 'flex',
@@ -92,12 +144,10 @@ export default function ServiceComponents() {
             title={`Using ${
               deprecationCount > 1 ? '' : 'an '
             } outdated k8s version${deprecationCount > 1 ? 's' : ''}`}
-            // TODO: Add link to review deprecations once the url scheme is known
-            // buttonProps={{
-            //   as: Link,
-            //   to: '{{deprecations-link}}',
-            //   children: 'Review deprecations',
-            // }}
+            buttonProps={{
+              onClick: () => setShowDeprecations(true),
+              children: 'Review deprecations',
+            }}
           >
             This service is using {deprecationCount > 1 ? '' : 'a '}deprecated
             k8s resource{deprecationCount > 1 ? 's' : ''}.{' '}

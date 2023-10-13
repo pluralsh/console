@@ -9,7 +9,7 @@ import { Chip, ErrorIcon, Prop, PropsContainer } from '@pluralsh/design-system'
 
 import { ServiceStatusChip } from '../ServiceStatusChip'
 
-import { countDeprecations } from './countDeprecations'
+import { countDeprecations } from './deprecationUtils'
 
 export function ServiceDetailsSidecar({
   serviceDeployment,

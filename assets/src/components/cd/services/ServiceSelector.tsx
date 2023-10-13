@@ -28,8 +28,6 @@ export default function ServiceSelector({
           (deployment) => deployment.id === newKey
         )
 
-        console.log('service', service)
-
         navigate(
           `${getServiceDetailsPath({
             clusterName: service?.cluster?.name,

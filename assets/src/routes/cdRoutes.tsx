@@ -29,26 +29,15 @@ import {
   CLUSTERS_PATH,
   CLUSTER_BASE_PATH,
   CLUSTER_SERVICES_PATH,
-  COMPONENT_PARAM_KIND,
-  COMPONENT_PARAM_NAME,
-  COMPONENT_PARAM_VERSION,
   SERVICE_BASE_PATH,
   SERVICE_COMPONENTS_PATH,
+  SERVICE_COMPONENT_PATH_MATCHER_REL,
   SERVICE_PARAM_CLUSTER,
-  SERVICE_PARAM_ID,
-  getServiceComponentPath,
 } from './cdRoutesConsts'
 
 export const componentRoutes = [
   <Route
-    path={getServiceComponentPath({
-      isRelative: true,
-      clusterName: `:${SERVICE_PARAM_CLUSTER}`,
-      serviceId: `:${SERVICE_PARAM_ID}`,
-      componentKind: `:${COMPONENT_PARAM_KIND}`,
-      componentName: `:${COMPONENT_PARAM_NAME}`,
-      componentVersion: `:${COMPONENT_PARAM_VERSION}`,
-    })}
+    path={SERVICE_COMPONENT_PATH_MATCHER_REL}
     element={<ServiceComponent />}
   >
     <Route

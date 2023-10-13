@@ -71,8 +71,6 @@ export function ServicesFilters({
   ) => void
 }) {
   const clusterName = useParams()[SERVICE_PARAM_CLUSTER]
-
-  console.log('clusterName', clusterName)
   const navigate = useNavigate()
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)

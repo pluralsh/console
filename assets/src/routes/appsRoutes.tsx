@@ -20,7 +20,7 @@ import Runbook from '../components/apps/app/runbooks/runbook/Runbook'
 import Logs from '../components/apps/app/logs/Logs'
 import UserManagement from '../components/apps/app/oidc/UserManagement'
 import Configuration from '../components/apps/app/config/Configuration'
-import Component from '../components/apps/app/components/component/AppComponent'
+import AppComponent from '../components/apps/app/components/component/AppComponent'
 import ComponentInfo from '../components/component/ComponentInfo'
 import ComponentEvents from '../components/component/ComponentEvents'
 import ComponentRaw from '../components/component/ComponentRaw'
@@ -101,7 +101,7 @@ export const appsRoutes = [
   /* COMPONENTS */
   <Route
     path="apps/:appName/components/:componentKind/:componentName"
-    element={<Component />}
+    element={<AppComponent />}
   >
     <Route
       index
