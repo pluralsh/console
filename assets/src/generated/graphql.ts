@@ -2575,13 +2575,13 @@ export type RootQueryTypeNodeArgs = {
 
 
 export type RootQueryTypeNodeMetricArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
-  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type RootQueryTypeNodeMetricsArgs = {
-  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2605,10 +2605,10 @@ export type RootQueryTypePodArgs = {
 export type RootQueryTypePodsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
-  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
