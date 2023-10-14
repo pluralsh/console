@@ -13,7 +13,7 @@ defmodule Console.Deployments.Clusters do
   @cache_adapter Console.conf(:cache_adapter)
   @local_adapter Console.conf(:local_cache)
   @ttl :timer.minutes(45)
-  @node_ttl :timer.minutes(5)
+  @node_ttl :timer.minutes(2)
 
   @type cluster_resp :: {:ok, Cluster.t} | Console.error
   @type cluster_provider_resp :: {:ok, ClusterProvider.t} | Console.error
@@ -98,6 +98,15 @@ defmodule Console.Deployments.Clusters do
     end
   end
 
+  @doc """
+  the duration for the node cache to live
+  """
+  @spec node_ttl() :: integer
+  def node_ttl(), do: @node_ttl
+
+  @doc """
+  removes all cache entries for this cluster
+  """
   @spec flush_cache(Cluster.t) :: :ok
   def flush_cache(%Cluster{id: id}) do
     @local_adapter.delete({:node_metrics, id})
