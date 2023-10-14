@@ -22,7 +22,7 @@ defmodule Console.Deployments.Git.Cmd do
 
   def msg(%GitRepository{} = repo), do: git(repo, "--no-pager", ["log", "-n", "1", "--format=%B"])
 
-  def clone(%GitRepository{dir: dir} = git) when is_binary(dir), do: git(git, "clone", [url(git), git.dir])
+  def clone(%GitRepository{dir: dir} = git) when is_binary(dir), do: git(git, "clone", ["--filter=blob:none", url(git), git.dir])
 
   def git(%GitRepository{} = git, cmd, args \\ []) do
     case System.cmd("git", [cmd | args], opts(git)) do
