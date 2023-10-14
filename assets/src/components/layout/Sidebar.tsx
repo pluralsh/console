@@ -52,6 +52,11 @@ const MENU_ITEMS: MenuItem[] = [
     pathRegexp: /^\/(apps)/,
   },
   {
+    text: 'Continuous deployment',
+    icon: <GitPullIcon />,
+    path: `/${CD_PATH}`,
+  },
+  {
     text: 'Builds',
     icon: <BuildIcon />,
     path: '/builds',
@@ -65,11 +70,6 @@ const MENU_ITEMS: MenuItem[] = [
     text: 'Pods',
     icon: <ApiIcon />,
     path: '/pods',
-  },
-  {
-    text: 'Continuous deployment',
-    icon: <GitPullIcon />,
-    path: `/${CD_PATH}`,
   },
   {
     text: 'Database management',

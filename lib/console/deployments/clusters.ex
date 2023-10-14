@@ -206,6 +206,7 @@ defmodule Console.Deployments.Clusters do
     end)
     |> add_operation(:cluster_service, fn %{cluster: cluster} ->
       case Console.Repo.preload(cluster, [:provider, :credential]) do
+        %{self: true} -> {:ok, cluster}
         %{provider: %ClusterProvider{}} = cluster -> cluster_service(cluster, tmp_admin(user))
         _ -> {:ok, cluster}
       end
@@ -237,6 +238,7 @@ defmodule Console.Deployments.Clusters do
     end)
     |> add_revision()
     |> add_operation(:svc, fn
+      %{cluster: %{self: true} = cluster} -> {:ok, cluster}
       %{cluster: %{service_id: id} = cluster} when is_binary(id) ->
         cluster_service(cluster, user)
       %{cluster: cluster} -> {:ok, cluster}

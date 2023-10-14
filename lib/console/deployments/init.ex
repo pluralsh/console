@@ -31,6 +31,10 @@ defmodule Console.Deployments.Init do
         cloud: "#{Console.conf(:provider)}"
       }, bot)
     end)
+    |> add_operation(:rebind, fn %{provider: provider, cluster: cluster} ->
+      Ecto.Changeset.change(cluster, %{provider_id: provider.id})
+      |> Repo.update()
+    end)
     |> add_operation(:settings, fn %{deploy_repo: drepo, artifacts_repo: arepo} ->
       Settings.create(%{
         name: "global",

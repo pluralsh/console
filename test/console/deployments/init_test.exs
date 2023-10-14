@@ -17,6 +17,9 @@ defmodule Console.Deployments.InitTest do
       assert res.cluster.name == Console.conf(:cluster_name)
       assert res.cluster.self
 
+      assert res.rebind.id == res.cluster.id
+      assert res.rebind.provider_id == res.provider.id
+
       assert res.settings.name == "global"
       assert res.settings.deployer_repository_id == res.deploy_repo.id
       assert res.settings.artifact_repository_id == res.artifacts_repo.id
