@@ -10,9 +10,16 @@ defmodule Console.Deployments.Git.Cmd do
   def save_private_key(git), do: {:ok, git}
 
   def fetch(%GitRepository{} = repo) do
-    with {:ok, _} <- git(repo, "fetch", ["--all"]),
-         {:ok, _} <- git(repo, "remote", ~w(prune origin)),
-      do: git(repo, "pull", ~w(--all --rebase))
+    with {:ok, _} = res <- git(repo, "fetch", ["--all", "--force", "--prune"]),
+         :ok <- branches(repo),
+      do: possibly_pull(repo)
+  end
+
+  def possibly_pull(repo) do
+    case git(repo, "symbolic-ref", ["--short", "HEAD"]) do
+      {:ok, _} -> git(repo, ["pull", "--all", "--rebase"])
+      _ -> {:ok, :ignore}
+    end
   end
 
   def sha(%GitRepository{} = repo) do
@@ -20,9 +27,43 @@ defmodule Console.Deployments.Git.Cmd do
       do: {:ok, String.trim(sha)}
   end
 
+  def branches(%GitRepository{} = repo) do
+    with {:ok, res} <- git(repo, "branch", ["-r"]) do
+      split_and_trim(res)
+      |> Enum.filter(fn
+        "origin/HEAD" <> _ -> false
+        "origin/" <> _ -> true
+        _ -> false
+      end)
+      |> Enum.each(fn "origin/" <> branch = origin ->
+        git(repo, "branch", ["-f", "--track", branch, origin])
+      end)
+    end
+  end
+
+  defp split_and_trim(result) do
+    String.split(result, ~r/\R/)
+    |> Enum.map(&String.trim/1)
+  end
+
+  def heads(%GitRepository{} = repo) do
+    {:ok, res} = git(repo, "show-ref", ["--heads", "--tags"])
+    String.split(res, ~r/\R/)
+    |> Enum.map(&String.split(&1, " "))
+    |> Enum.filter(fn
+      [_, _] -> true
+      _ -> false
+    end)
+    |> Map.new(fn [sha, head] -> {head, sha} end)
+  end
+
   def msg(%GitRepository{} = repo), do: git(repo, "--no-pager", ["log", "-n", "1", "--format=%B"])
 
-  def clone(%GitRepository{dir: dir} = git) when is_binary(dir), do: git(git, "clone", ["--filter=blob:none", url(git), git.dir])
+  def clone(%GitRepository{dir: dir} = git) when is_binary(dir) do
+    with {:ok, _} = res <- git(git, "clone", ["--filter=blob:none", url(git), git.dir]),
+         :ok <- branches(git),
+      do: res
+  end
 
   def git(%GitRepository{} = git, cmd, args \\ []) do
     case System.cmd("git", [cmd | args], opts(git)) do
