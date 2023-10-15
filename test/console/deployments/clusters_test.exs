@@ -403,6 +403,25 @@ defmodule Console.Deployments.ClustersTest do
     end
   end
 
+  describe "#refresh_kubeconfig/2" do
+    test "it will refresh for base capi clusters" do
+      provider = insert(:cluster_provider)
+      %{id: id} = cluster = insert(:cluster, provider: provider)
+      expect(Clusters, :refresh_kubeconfig, fn %{id: ^id} -> :ok end)
+
+      :ok = Clusters.refresh_kubeconfig(provider.namespace, cluster.name)
+    end
+
+    test "it will refresh for clusters created with credentials" do
+      provider = insert(:cluster_provider)
+      credential = insert(:provider_credential)
+      %{id: id} = cluster = insert(:cluster, provider: provider, credential: credential)
+      expect(Clusters, :refresh_kubeconfig, fn %{id: ^id} -> :ok end)
+
+      :ok = Clusters.refresh_kubeconfig(credential.namespace, cluster.name)
+    end
+  end
+
   describe "#install/1" do
     test "it can install the operator in a ready cluster" do
       %{name: n, provider: %{namespace: ns}, deploy_token: t} = cluster =

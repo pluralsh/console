@@ -114,6 +114,26 @@ defmodule Console.Deployments.Clusters do
   end
 
   @doc """
+  Refreshes the kubeconfig cache for all clusters matching a given ns/name pair
+  """
+  @spec refresh_kubeconfig(binary, binary) :: :ok
+  def refresh_kubeconfig(ns, name) do
+    Cluster.for_namespace(ns)
+    |> Cluster.for_name(name)
+    |> Repo.all()
+    |> Enum.each(&__MODULE__.refresh_kubeconfig/1) # call on self module to allow for mocking
+  end
+
+  @doc """
+  Regenerates and caches kubeconfig for a cluster
+  """
+  @spec refresh_kubeconfig(Cluster.t) :: term
+  def refresh_kubeconfig(%Cluster{id: id} = cluster) do
+    @cache_adapter.delete({:control_plane, id})
+    control_plane(cluster)
+  end
+
+  @doc """
   Installs the operator on this cluster using the plural cd command
   """
   @spec install(Cluster.t) :: cluster_resp

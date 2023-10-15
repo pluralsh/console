@@ -257,7 +257,7 @@ defmodule Console.Factory do
   def provider_credential_factory do
     %Schema.ProviderCredential{
       name: sequence(:credential, & "cred-#{&1}"),
-      namespace: sequence(:credential_ns, & "plrl-capi-#{&1}"),
+      namespace: sequence(:credential_ns, & "plrl-capi-cred-#{&1}"),
       kind: "Secret",
       provider: build(:cluster_provider)
     }
