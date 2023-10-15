@@ -10,7 +10,7 @@ defmodule Console.Watchers.Secret do
     request = %Kazan.Request{
       method: "get",
       path: "/api/v1/secrets",
-      query_params: %{"labelSelector" => @cluster_label},
+      query_params: %{},
       response_model: CoreV1.Secret
     }
     {:ok, pid} = Watcher.start_link(request, send_to: self(), recv_timeout: 15_000)
@@ -25,9 +25,14 @@ defmodule Console.Watchers.Secret do
     {:noreply, state}
   end
 
-  def handle_info(%Watcher.Event{object: %CoreV1.Secret{metadata: %{namespace: ns, name: name, labels: %{@cluster_label => name}}}}, state) do
-    Logger.info "secret event for #{ns}/#{name}, attempting to refresh cluster kubeconfigs"
+  def handle_info(%Watcher.Event{object: %CoreV1.Secret{metadata: %{namespace: ns, name: n, labels: %{@cluster_label => name}}}}, state) do
+    Logger.info "secret event for #{ns}/#{n}, attempting to refresh cluster kubeconfigs"
     Clusters.refresh_kubeconfig(ns, name)
+    {:noreply, state}
+  end
+
+  def handle_info(%Watcher.Event{object: %CoreV1.Secret{metadata: %{namespace: ns, name: n}}}, state) do
+    Logger.info "ignoring secret update #{ns}/#{n}"
     {:noreply, state}
   end
 
