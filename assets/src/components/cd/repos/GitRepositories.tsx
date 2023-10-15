@@ -121,6 +121,7 @@ export default function GitRepositories() {
   const theme = useTheme()
   const { data, error, refetch } = useGitRepositoriesQuery({
     pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
   })
 
   useSetBreadcrumbs(crumbs)

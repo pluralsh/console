@@ -45,6 +45,7 @@ defmodule Console.Deployments.Cron do
       Clusters.nodes(cluster)
       Clusters.node_metrics(cluster)
     end)
+    |> Stream.run()
   end
 
   def install_clusters() do

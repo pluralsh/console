@@ -163,4 +163,14 @@ defmodule Console.Deployments.CronTest do
       assert refetch(cluster).installed
     end
   end
+
+  describe "#cache_warm/0" do
+    test "it can warm the cache for all registered clusters" do
+      insert_list(3, :cluster)
+      expect(Clusters, :nodes, 3, fn _ -> :ok end)
+      expect(Clusters, :node_metrics, 3, fn _ -> :ok end)
+
+      :ok = Cron.cache_warm()
+    end
+  end
 end
