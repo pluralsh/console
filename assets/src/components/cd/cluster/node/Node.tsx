@@ -82,9 +82,9 @@ export default function Node() {
   const clusterId = params[NODE_PARAM_CLUSTER] as string
 
   const tabStateRef = useRef<any>()
-  const subpath = useMatch(NODE_BASE_PATH)?.params?.subpath || ''
+  const tab = useMatch(`${NODE_BASE_PATH}/:tab`)?.params?.tab || ''
 
-  const currentTab = DIRECTORY.find(({ path }) => path === subpath)
+  const currentTab = DIRECTORY.find(({ path }) => path === tab)
   const { setBreadcrumbs } = useBreadcrumbs()
 
   const breadcrumbs: Breadcrumb[] = useMemo(
