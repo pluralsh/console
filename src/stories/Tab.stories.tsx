@@ -146,7 +146,7 @@ Vertical.args = {
   vertical: true,
 }
 
-function SubTabs({ args }: any) {
+function SubTabs(args: any) {
   const [active, setActive] = useState(0)
 
   return (
@@ -198,4 +198,6 @@ function SubTabTemplate(args: any) {
 
 export const Subtab = SubTabTemplate.bind({})
 
-Subtab.args = {}
+Subtab.args = {
+  disabled: false,
+}

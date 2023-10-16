@@ -29,15 +29,21 @@ const parentFillLevelToHoverBG = {
 const SubTabBase = styled.div<{
   size: SubTabSize
   active: boolean
+  disabled: boolean
   parentFillLevel: FillLevel
-}>(({ theme, active, size, parentFillLevel }) => ({
+}>(({ theme, active, disabled, size, parentFillLevel }) => ({
   ...(size === 'small'
     ? theme.partials.text.buttonSmall
     : theme.partials.text.buttonMedium),
   tabIndex: 0,
   userSelect: 'none',
-  cursor: active ? 'default' : 'pointer',
-  color: active ? theme.colors.text : theme.colors['text-xlight'],
+  cursor: disabled ? 'default' : active ? 'default' : 'pointer',
+  pointerEvents: disabled ? 'none' : 'all',
+  color: disabled
+    ? theme.colors['text-disabled']
+    : active
+    ? theme.colors.text
+    : theme.colors['text-xlight'],
   backgroundColor: active
     ? theme.colors[parentFillLevelToActiveBG[parentFillLevel]]
     : 'transparent',
@@ -51,9 +57,10 @@ const SubTabBase = styled.div<{
   }px ${theme.spacing.medium}px`,
   align: 'center',
   ':hover': {
-    backgroundColor: !active
-      ? theme.colors[parentFillLevelToHoverBG[parentFillLevel]]
-      : undefined,
+    backgroundColor:
+      !active && !disabled
+        ? theme.colors[parentFillLevelToHoverBG[parentFillLevel]]
+        : undefined,
   },
   transition:
     'background-color 150ms ease, border-color 150ms ease, color 150ms ease',
@@ -63,6 +70,7 @@ const SubTabBase = styled.div<{
 function SubTabRef(
   {
     active,
+    disabled,
     children,
     textValue: _textValue,
     size = 'medium',
@@ -76,6 +84,7 @@ function SubTabRef(
     <SubTabBase
       parentFillLevel={parentFillLevel}
       active={active}
+      disabled={disabled}
       ref={ref}
       size={size}
       {...props}
