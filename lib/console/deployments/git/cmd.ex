@@ -10,7 +10,7 @@ defmodule Console.Deployments.Git.Cmd do
   def save_private_key(git), do: {:ok, git}
 
   def fetch(%GitRepository{} = repo) do
-    with {:ok, _} = res <- git(repo, "fetch", ["--all", "--force", "--prune"]),
+    with {:ok, _} <- git(repo, "fetch", ["--all", "--force", "--prune"]),
          :ok <- branches(repo),
       do: possibly_pull(repo)
   end

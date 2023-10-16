@@ -42,7 +42,7 @@ defmodule Console.Deployments.Git.Cache do
 
   def refresh(%__MODULE__{git: git, cache: cache} = c) do
     {expired, keep} = Enum.split_with(cache, fn {_, line} -> Line.expired?(line) end)
-    Enum.each(expired, & File.rm!(&1.file))
+    Enum.each(expired, fn {_, %Line{file: f}} -> File.rm!(f) end)
     %{c | heads: heads(git), cache: Map.new(keep)}
   end
 
