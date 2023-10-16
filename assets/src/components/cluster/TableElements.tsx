@@ -115,6 +115,7 @@ function TableCaretLinkUnstyled({
       <IconFrame
         clickable
         textValue={textValue}
+        tooltip={textValue}
         size="medium"
         icon={<CaretRightIcon />}
       />

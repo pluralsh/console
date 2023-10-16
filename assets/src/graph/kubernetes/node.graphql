@@ -1,0 +1,50 @@
+fragment Node on Node {
+  metadata {
+    ...Metadata
+  }
+  status {
+    phase
+    allocatable
+    capacity
+    conditions {
+      type
+      status
+      message
+    }
+  }
+  spec {
+    podCidr
+    providerId
+  }
+  raw
+  pods {
+    ...Pod
+  }
+  events {
+    ...Event
+  }
+}
+
+fragment NodeMetric on NodeMetric {
+  metadata {
+    ...Metadata
+  }
+  usage {
+    cpu
+    memory
+  }
+  timestamp
+  window
+}
+
+query Node($name: String!, $clusterId: ID) {
+  node(name: $name, clusterId: $clusterId) {
+    ...Node
+  }
+}
+
+query NodeMetric($name: String!, $clusterId: ID) {
+  nodeMetric(name: $name, clusterId: $clusterId) {
+    ...NodeMetric
+  }
+}
