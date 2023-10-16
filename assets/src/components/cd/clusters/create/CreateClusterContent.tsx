@@ -1,4 +1,12 @@
-import { Key, ReactElement, useMemo, useRef, useState } from 'react'
+import {
+  Key,
+  MutableRefObject,
+  ReactElement,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {
   SubTab,
   TabList,
@@ -6,6 +14,12 @@ import {
   TabPanel,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
+
+import {
+  ClusterProvider,
+  useClusterProvidersQuery,
+} from '../../../../generated/graphql'
+import LoadingIndicator from '../../../utils/LoadingIndicator'
 
 import { AWS } from './provider/AWS'
 import { ProviderToDisplayName, ProviderToLogo } from './helpers'
@@ -15,9 +29,23 @@ import { Azure } from './provider/Azure'
 
 export function CreateClusterContent(): ReactElement {
   const theme = useTheme()
-  const [provider, setProvider] = useState<Key>(Provider.AWS)
+  const [provider, setProvider] = useState<Key>(Provider.GCP)
 
-  const tabStateRef = useRef()
+  const { data, loading } = useClusterProvidersQuery()
+  // TODO: remove once other providers are supported
+  const isDisabled = useCallback(
+    (p: Provider) => [Provider.AWS, Provider.Azure].includes(p),
+    []
+  )
+  const clusterProviders: Array<ClusterProvider> = useMemo(
+    () =>
+      data?.clusterProviders?.edges
+        ?.map((e) => e!.node as ClusterProvider)
+        .filter((p) => p?.cloud === provider) ?? [],
+    [data?.clusterProviders?.edges, provider]
+  )
+
+  const tabStateRef: MutableRefObject<any> = useRef()
   const orientation = 'horizontal'
   const tabListStateProps: TabListStateProps = {
     keyboardActivation: 'manual',
@@ -31,7 +59,7 @@ export function CreateClusterContent(): ReactElement {
       case Provider.AWS:
         return <AWS />
       case Provider.GCP:
-        return <GCP />
+        return <GCP clusterProviders={clusterProviders} />
       case Provider.Azure:
         return <Azure />
     }
@@ -63,6 +91,7 @@ export function CreateClusterContent(): ReactElement {
                 display: 'flex',
                 gap: theme.spacing.xsmall,
               }}
+              disabled={isDisabled(p)}
               key={p}
               textValue={ProviderToDisplayName[p]}
             >
@@ -83,7 +112,8 @@ export function CreateClusterContent(): ReactElement {
           paddingTop: theme.spacing.large,
         }}
       >
-        {providerEl}
+        {loading && <LoadingIndicator />}
+        {!loading && providerEl}
       </TabPanel>
     </div>
   )

@@ -51,6 +51,22 @@ defmodule Console.Schema.Cluster do
     end
   end
 
+  defmodule ClusterConfiguration do
+    use Piazza.Ecto.Schema
+
+    embedded_schema do
+      field :name,  :string
+      field :value, :string
+    end
+
+    @valid ~w(key value)a
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, @valid)
+    end
+  end
+
   schema "clusters" do
     field :handle,          :string
     field :name,            :string
@@ -79,6 +95,7 @@ defmodule Console.Schema.Cluster do
     has_many :service_errors, ServiceError, on_replace: :delete
     has_many :services, Service
     has_many :tags, Tag
+    has_many :config_attributes, ClusterConfiguration
     has_many :api_deprecations, through: [:services, :api_deprecations]
 
     has_many :read_bindings, PolicyBinding,
@@ -189,6 +206,7 @@ defmodule Console.Schema.Cluster do
     |> cast_assoc(:service_errors)
     |> cast_assoc(:tags)
     |> cast_assoc(:service)
+    |> cast_assoc(:config_attributes)
     |> foreign_key_constraint(:provider_id)
     |> foreign_key_constraint(:credential_id)
     |> unique_constraint(:handle)

@@ -1,7 +1,7 @@
 enum Provider {
   AWS = 'aws',
-  GCP = 'gcp',
   Azure = 'azure',
+  GCP = 'gcp',
 }
 
 interface NodeGroup {
