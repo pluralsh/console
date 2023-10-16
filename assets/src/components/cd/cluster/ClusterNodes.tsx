@@ -23,17 +23,22 @@ import { TableCaretLink } from '../../cluster/TableElements'
 import { ClusterMetrics } from '../../cluster/nodes/ClusterMetrics'
 import { cpuParser, memoryParser } from '../../../utils/kubernetes'
 import { ResourceUsage } from '../../cluster/nodes/Nodes'
+import { getNodeDetailsPath } from '../../../routes/cdRoutesConsts'
 
-export const ColActions = columnHelper.accessor(() => null, {
-  id: 'actions',
-  cell: ({ row: { original } }) => (
-    <TableCaretLink
-      to="/" // TODO
-      textValue={`View node ${original?.name}`}
-    />
-  ),
-  header: '',
-})
+export const ColActions = (clusterId) =>
+  columnHelper.accessor(() => null, {
+    id: 'actions',
+    cell: ({ row: { original } }) => (
+      <TableCaretLink
+        to={getNodeDetailsPath({
+          clusterId,
+          nodeName: original?.name,
+        })}
+        textValue={`View node ${original?.name}`}
+      />
+    ),
+    header: '',
+  })
 
 export default function ClusterNodes() {
   const theme = useTheme()
@@ -49,9 +54,9 @@ export default function ClusterNodes() {
       ColCpuTotal,
       ColMemoryTotal,
       ColStatus,
-      ColActions,
+      ColActions(cluster?.id),
     ],
-    []
+    [cluster]
   )
 
   const usage: ResourceUsage = useMemo(() => {
@@ -86,11 +91,15 @@ export default function ClusterNodes() {
           />
         </Card>
       )}
-      {/* TODO: Replace row link. */}
       <NodesList
         nodes={cluster?.nodes || []}
         nodeMetrics={cluster?.nodeMetrics || []}
         columns={columns}
+        linkBasePath={getNodeDetailsPath({
+          clusterId: cluster?.id,
+          nodeName: '',
+          isRelative: false,
+        })}
       />
     </div>
   )
