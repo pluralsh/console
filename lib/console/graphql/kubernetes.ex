@@ -145,6 +145,7 @@ defmodule Console.GraphQl.Kubernetes do
     field :node, :node do
       middleware Authenticated
       arg :name, non_null(:string)
+      cluster_authorized :read
 
       safe_resolve &Kubernetes.resolve_node/2
     end
