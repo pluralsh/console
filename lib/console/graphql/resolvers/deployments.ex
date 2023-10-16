@@ -38,6 +38,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     Cluster.ordered()
     |> Cluster.for_user(user)
     |> Cluster.preloaded()
+    |> maybe_search(Cluster, args)
     |> paginate(args)
   end
 
@@ -50,6 +51,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def list_services(args, %{context: %{current_user: user}}) do
     Service.for_user(user)
     |> service_filters(args)
+    |> maybe_search(Cluster, args)
     |> Service.ordered()
     |> paginate(args)
   end
@@ -65,6 +67,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     |> Console.Repo.all()
     |> ok()
   end
+
+  defp maybe_search(query, module, %{q: q}) when is_binary(q), do: module.search(query, q)
+  defp maybe_search(query, _, _), do: query
 
   defp service_filters(query, args) do
     Enum.reduce(args, query, fn

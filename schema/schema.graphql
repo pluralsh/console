@@ -146,7 +146,7 @@ type RootQueryType {
   gitRepositories(after: String, first: Int, before: String, last: Int): GitRepositoryConnection
 
   "a relay connection of all clusters visible to the current user"
-  clusters(after: String, first: Int, before: String, last: Int): ClusterConnection
+  clusters(after: String, first: Int, before: String, last: Int, q: String): ClusterConnection
 
   "a relay connection of all providers visible to the current user"
   clusterProviders(after: String, first: Int, before: String, last: Int): ClusterProviderConnection
@@ -167,6 +167,8 @@ type RootQueryType {
     last: Int
 
     clusterId: ID
+
+    q: String
 
     "the handle of the cluster for this service"
     cluster: String

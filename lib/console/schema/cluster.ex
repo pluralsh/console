@@ -93,6 +93,10 @@ defmodule Console.Schema.Cluster do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, sq) do
+    from(c in query, where: ilike(c.name, ^"#{sq}%"))
+  end
+
   def ignore_ids(query \\ __MODULE__, ids) do
     from(c in query, where: c.id not in ^ids)
   end
