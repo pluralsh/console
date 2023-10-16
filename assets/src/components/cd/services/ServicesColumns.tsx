@@ -19,34 +19,30 @@ export const ColServiceDeployment = columnHelper.accessor(
     id: 'deployment',
     header: 'Deployment',
     enableSorting: true,
-    enableGlobalFilter: true,
     cell: ({ getValue }) => getValue(),
   }
 )
 
-export const ColCluster = columnHelper.accessor(({ node }) => node?.cluster, {
-  id: 'cluster',
-  header: 'Cluster',
-  enableSorting: true,
-  enableGlobalFilter: true,
-  enableColumnFilter: true,
-  cell: ({ getValue }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const theme = useTheme()
-    const cluster = getValue()
+export const ColCluster = columnHelper.accessor(
+  ({ node }) => node?.cluster?.name,
+  {
+    id: 'clusterName',
+    header: 'Cluster',
+    enableSorting: true,
+    cell: ({ getValue, row: { original } }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const theme = useTheme()
+      const cloud = original?.node?.cluster?.provider?.cloud || ''
+      const clusterName = getValue()
 
-    return (
-      <ColWithIcon
-        icon={getProviderIconURL(
-          cluster?.provider?.cloud ?? '',
-          theme.mode === 'dark'
-        )}
-      >
-        {cluster?.name}
-      </ColWithIcon>
-    )
-  },
-})
+      return (
+        <ColWithIcon icon={getProviderIconURL(cloud, theme.mode === 'dark')}>
+          {clusterName}
+        </ColWithIcon>
+      )
+    },
+  }
+)
 
 export const ColRepo = columnHelper.accessor(
   ({ node }) => node?.repository?.url,
@@ -54,7 +50,6 @@ export const ColRepo = columnHelper.accessor(
     id: 'repository',
     header: 'Repository',
     enableSorting: true,
-    enableGlobalFilter: true,
     meta: { truncate: true },
     cell: ({ getValue }) => (
       <ColWithIcon

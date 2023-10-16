@@ -83,8 +83,13 @@ fragment ServiceDeploymentRevisions on ServiceDeployment {
   }
 }
 
-query ServiceDeployments {
-  serviceDeployments(first: 100) {
+query ServiceDeployments(
+  $first: Int = 100
+  $after: String
+  $q: String
+  $cluster: String
+) {
+  serviceDeployments(first: $first, after: $after, q: $q, cluster: $cluster) {
     pageInfo {
       ...PageInfo
     }

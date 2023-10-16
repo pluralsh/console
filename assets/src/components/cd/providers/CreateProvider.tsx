@@ -11,7 +11,7 @@ import { merge } from 'lodash'
 import { PartialDeep } from 'type-fest'
 
 import {
-  CloudProviderSettingsAttributes,
+  CloudProviderSettingsAttributes as SettingsTemp,
   useCreateClusterProviderMutation,
 } from 'generated/graphql'
 import {
@@ -34,6 +34,11 @@ import ModalAlt from '../ModalAlt'
 
 import { InputRevealer } from './InputRevealer'
 
+// TODO: Replace when api updated
+type CloudProviderSettingsAttributes = SettingsTemp & {
+  azure?: Record<string, string> | null | undefined
+}
+
 const updateSettings = produce(
   (
     original: CloudProviderSettingsAttributes,
@@ -45,12 +50,13 @@ const updateSettings = produce(
   }
 )
 
-const providerKeys = [
+const PROVIDER_KEYS = [
   'aws',
   'gcp',
+  'azure',
 ] as const satisfies readonly Lowercase<Provider>[]
 
-function AwsSettings({
+export function AwsSettings({
   settings,
   updateSettings,
 }: {
@@ -81,13 +87,34 @@ function AwsSettings({
   )
 }
 
-function GcpSettings({
+export function GcpSettings({
   settings,
   updateSettings,
 }: {
   settings: CloudProviderSettingsAttributes['gcp']
   updateSettings: (
     update: NonNullable<Partial<CloudProviderSettingsAttributes['gcp']>>
+  ) => void
+}) {
+  return (
+    <FormField label="Access key ID">
+      <InputRevealer
+        value={settings?.applicationCredentials}
+        onChange={(e) => {
+          updateSettings({ applicationCredentials: e.currentTarget.value })
+        }}
+      />
+    </FormField>
+  )
+}
+
+export function AzureSettings({
+  settings,
+  updateSettings,
+}: {
+  settings: CloudProviderSettingsAttributes['azure']
+  updateSettings: (
+    update: NonNullable<Partial<CloudProviderSettingsAttributes['azure']>>
   ) => void
 }) {
   return (
@@ -116,7 +143,9 @@ export function CreateProviderModal({
 
   const [name, setName] = useState('')
 
-  const [selectedProvider, setSelectedProvider] = useState('')
+  const [selectedProvider, setSelectedProvider] = useState<
+    (typeof PROVIDER_KEYS)[number] | ''
+  >('')
   const [providerSettings, updateProviderSettings] = useReducer(
     updateSettings,
     {}
@@ -167,20 +196,37 @@ export function CreateProviderModal({
 
   const inputRef = useRef<HTMLInputElement>()
 
-  if (selectedProvider === 'aws') {
-    settings = (
-      <AwsSettings
-        settings={providerSettings.aws}
-        updateSettings={(settings) => updateProviderSettings({ aws: settings })}
-      />
-    )
-  } else if (selectedProvider === 'gcp') {
-    settings = (
-      <GcpSettings
-        settings={providerSettings.gcp}
-        updateSettings={(settings) => updateProviderSettings({ gcp: settings })}
-      />
-    )
+  switch (selectedProvider) {
+    case 'aws':
+      settings = (
+        <AwsSettings
+          settings={providerSettings.aws}
+          updateSettings={(settings) =>
+            updateProviderSettings({ aws: settings })
+          }
+        />
+      )
+      break
+    case 'gcp':
+      settings = (
+        <GcpSettings
+          settings={providerSettings.gcp}
+          updateSettings={(settings) =>
+            updateProviderSettings({ gcp: settings })
+          }
+        />
+      )
+      break
+    case 'azure':
+      settings = (
+        <AzureSettings
+          settings={providerSettings.azure}
+          updateSettings={(settings) =>
+            updateProviderSettings({ azure: settings })
+          }
+        />
+      )
+      break
   }
 
   useEffect(() => {
@@ -246,7 +292,7 @@ export function CreateProviderModal({
             selectedKey={selectedProvider}
             onSelectionChange={(key) => setSelectedProvider(key as any)}
           >
-            {providerKeys.map((provider) => (
+            {PROVIDER_KEYS.map((provider) => (
               <ListBoxItem
                 key={provider}
                 label={getProviderName(provider)}

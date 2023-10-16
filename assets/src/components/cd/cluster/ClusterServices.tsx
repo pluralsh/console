@@ -89,7 +89,7 @@ export default function ClusterServices() {
         }}
       >
         <ServicesFilters
-          data={data}
+          serviceDeploymentsData={data}
           setTableFilters={setTableFilters}
         />
         <DeployService refetch={refetch} />
