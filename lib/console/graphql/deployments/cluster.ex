@@ -109,6 +109,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :service,     :service_deployment, resolve: dataloader(Deployments), description: "the service of the CAPI controller itself"
     field :credentials, list_of(:provider_credential), resolve: dataloader(ProviderCredential), description: "a list of credentials eligible for this provider"
 
+    field :supported_versions, list_of(:string), description: "the kubernetes versions this provider currently supports",
+      resolve: fn provider, _, _ -> {:ok, Console.Schema.ClusterProvider.supported_versions(provider)} end
+
     field :editable,    :boolean, resolve: &Deployments.editable/3, description: "whether the current user can edit this resource"
 
     timestamps()

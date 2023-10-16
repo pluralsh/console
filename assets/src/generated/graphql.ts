@@ -518,6 +518,8 @@ export type ClusterProvider = {
   repository?: Maybe<GitRepository>;
   /** the service of the CAPI controller itself */
   service?: Maybe<ServiceDeployment>;
+  /** the kubernetes versions this provider currently supports */
+  supportedVersions?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 

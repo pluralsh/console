@@ -382,16 +382,18 @@ defmodule Console.GraphQl.DeploymentQueriesTest do
   describe "clusterProviders" do
     test "it will list cluster providers" do
       user = admin_user()
-      providers = insert_list(3, :cluster_provider)
+      providers = insert_list(3, :cluster_provider, cloud: "aws")
 
       {:ok, %{data: %{"clusterProviders" => found}}} = run_query("""
         query {
-          clusterProviders(first: 5) { edges { node { id } } }
+          clusterProviders(first: 5) { edges { node { id supportedVersions } } }
         }
       """, %{}, %{current_user: user})
 
       assert from_connection(found)
              |> ids_equal(providers)
+      refute from_connection(found)
+             |> Enum.any?(&Enum.empty?(&1["supportedVersions"]))
     end
 
     test "it will respect rbac" do
