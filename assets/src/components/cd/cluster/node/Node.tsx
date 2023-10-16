@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Outlet, useMatch, useParams } from 'react-router-dom'
 import {
+  Breadcrumb,
   SubTab,
   TabList,
   TabPanel,
@@ -29,7 +30,7 @@ export const getNodeDetailsBreadcrumbs = ({
 }) => [
   ...CD_BASE_CRUMBS,
   { label: 'clusters', url: `${CD_BASE_PATH}/clusters` },
-  { label: clusterId, url: `${CD_BASE_PATH}/clusters/${clusterId}` },
+  { label: clusterId || '', url: `${CD_BASE_PATH}/clusters/${clusterId}` },
   { label: 'nodes', url: `${CD_BASE_PATH}/clusters/${clusterId}/nodes` },
   ...(clusterId && nodeName
     ? [
@@ -84,11 +85,12 @@ export default function Node() {
   const currentTab = DIRECTORY.find(({ path }) => path === subpath)
   const { setBreadcrumbs } = useBreadcrumbs()
 
-  useEffect(() => {
-    if (name) {
-      setBreadcrumbs([...getNodeDetailsBreadcrumbs({ clusterId, nodeName })])
-    }
-  }, [name, setBreadcrumbs])
+  const breadcrumbs: Breadcrumb[] = useMemo(
+    () => [...getNodeDetailsBreadcrumbs({ clusterId, nodeName })],
+    [clusterId, nodeName]
+  )
+
+  useEffect(() => setBreadcrumbs(breadcrumbs), [setBreadcrumbs, breadcrumbs])
 
   return (
     <TabPanel
