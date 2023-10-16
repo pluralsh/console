@@ -1,18 +1,13 @@
-import {
-  Button,
-  FormField,
-  Input,
-  ListBoxItem,
-  Select,
-} from '@pluralsh/design-system'
+import { Button, GearTrainIcon, IconFrame } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { produce } from 'immer'
 import { merge } from 'lodash'
 import { PartialDeep } from 'type-fest'
 
 import {
+  ClusterProviderFragment,
   CloudProviderSettingsAttributes as SettingsTemp,
-  useCreateClusterProviderMutation,
+  useUpdateClusterProviderMutation,
 } from 'generated/graphql'
 import {
   FormEvent,
@@ -25,21 +20,16 @@ import {
 } from 'react'
 import { GqlError } from 'components/utils/Alert'
 
-import ProviderIcon, { getProviderName } from 'components/utils/Provider'
-
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+
+import { getProviderName } from 'components/utils/Provider'
 
 import ModalAlt from '../ModalAlt'
 
-import {
-  AwsSettings,
-  AzureSettings,
-  GcpSettings,
-  PROVIDER_KEYS,
-} from './PROVIDER_KEYS'
+import { AwsSettings, AzureSettings, GcpSettings } from './PROVIDER_KEYS'
 
 // TODO: Replace when api updated
-export type CloudProviderSettingsAttributes = SettingsTemp & {
+type CloudProviderSettingsAttributes = SettingsTemp & {
   azure?: Record<string, string> | null | undefined
 }
 
@@ -54,31 +44,29 @@ const updateSettings = produce(
   }
 )
 
-export function CreateProviderModal({
+export function UpdateProviderModal({
+  provider,
   open,
   onClose,
   refetch,
 }: {
+  provider: ClusterProviderFragment
   open: boolean
   onClose: () => void
   refetch: () => void
 }) {
   const theme = useTheme()
   const closeModal = useCallback(() => onClose(), [onClose])
+  const { id, cloud } = provider
 
-  const [name, setName] = useState('')
-
-  const [selectedProvider, setSelectedProvider] = useState<
-    (typeof PROVIDER_KEYS)[number] | ''
-  >('')
   const [providerSettings, updateProviderSettings] = useReducer(
     updateSettings,
     {}
   )
 
-  let disabled = !name || !selectedProvider
+  let disabled = false
 
-  switch (selectedProvider) {
+  switch (cloud) {
     case 'aws':
       disabled =
         disabled ||
@@ -96,13 +84,12 @@ export function CreateProviderModal({
       break
   }
 
-  const [mutation, { loading, error }] = useCreateClusterProviderMutation({
+  const [mutation, { loading, error }] = useUpdateClusterProviderMutation({
     variables: {
+      id,
       attributes: {
-        name,
-        cloud: selectedProvider,
         cloudSettings: {
-          [selectedProvider]: providerSettings[selectedProvider],
+          [cloud]: providerSettings[cloud],
         },
       },
     },
@@ -125,7 +112,7 @@ export function CreateProviderModal({
 
   const inputRef = useRef<HTMLInputElement>()
 
-  switch (selectedProvider) {
+  switch (cloud) {
     case 'aws':
       settings = (
         <AwsSettings
@@ -166,7 +153,7 @@ export function CreateProviderModal({
 
   return (
     <ModalAlt
-      header="Create provider"
+      header={`Update ${getProviderName(cloud)} provider: ${provider.name}`}
       open={open}
       portal
       onClose={closeModal}
@@ -180,7 +167,7 @@ export function CreateProviderModal({
             loading={loading}
             primary
           >
-            Create
+            Update
           </Button>
           <Button
             type="button"
@@ -199,42 +186,6 @@ export function CreateProviderModal({
           rowGap: theme.spacing.medium,
         }}
       >
-        <FormField label="Name">
-          <Input
-            value={name}
-            onChange={(e) => {
-              setName(e.currentTarget.value)
-            }}
-          />
-        </FormField>
-        <FormField label="Cloud provider">
-          <Select
-            label="Select cloud provider"
-            leftContent={
-              selectedProvider && (
-                <ProviderIcon
-                  provider={selectedProvider}
-                  width={16}
-                />
-              )
-            }
-            selectedKey={selectedProvider}
-            onSelectionChange={(key) => setSelectedProvider(key as any)}
-          >
-            {PROVIDER_KEYS.map((provider) => (
-              <ListBoxItem
-                key={provider}
-                label={getProviderName(provider)}
-                leftContent={
-                  <ProviderIcon
-                    provider={provider}
-                    width={16}
-                  />
-                }
-              />
-            ))}
-          </Select>
-        </FormField>
         {settings}
       </div>
       {error && (
@@ -247,21 +198,28 @@ export function CreateProviderModal({
   )
 }
 
-export function CreateProvider({ refetch }: { refetch: () => void }) {
+export function UpdateProvider({
+  provider,
+  refetch,
+}: {
+  provider: ClusterProviderFragment
+  refetch: () => void
+}) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
     <>
-      <Button
-        primary
+      <IconFrame
+        clickable
+        tooltip="Configure provider"
+        icon={<GearTrainIcon />}
         onClick={() => {
           setIsOpen(true)
         }}
-      >
-        Create provider
-      </Button>
+      />
       <ModalMountTransition open={isOpen}>
-        <CreateProviderModal
+        <UpdateProviderModal
+          provider={provider}
           refetch={refetch}
           open={isOpen}
           onClose={() => setIsOpen(false)}
